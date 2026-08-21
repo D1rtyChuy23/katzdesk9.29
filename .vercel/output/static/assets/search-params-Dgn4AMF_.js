@@ -1,0 +1,1 @@
+import{i as e,t}from"./react-SIfiwpqq.js";var n=e(t(),1);function r(e){let t=e.open;return typeof t==`number`&&Number.isFinite(t)?{open:t}:typeof t==`string`&&t&&!Number.isNaN(Number(t))?{open:Number(t)}:{}}function i(e){let[t,r]=(0,n.useState)(e??null);return(0,n.useEffect)(()=>{e!=null&&Number.isFinite(e)&&r(e)},[e]),[t,r]}export{i as n,r as t};

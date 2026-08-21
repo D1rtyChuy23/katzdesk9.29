@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  --color-background: #f3efe6;
+  --color-foreground: #1c1917;
+  --color-card: #faf7f1;
+  --color-card-foreground: #1c1917;
+  --color-popover: #fffcf7;
+  --color-popover-foreground: #1c1917;
+  --color-primary: #2f5d50;
+  --color-primary-foreground: #f4f0e8;
+  --color-secondary: #e7e0d4;
+  --color-secondary-foreground: #1c1917;
+  --color-muted: #ece6da;
+  --color-muted-foreground: #6f675e;
+  --color-accent: #2f5d50;
+  --color-accent-foreground: #f4f0e8;
+  --color-destructive: #9f2d20;
+  --color-destructive-foreground: #faf7f1;
+  --color-warning: #9a5b12;
+  --color-warning-foreground: #faf7f1;
+  --color-border: #ddd4c6;
+  --color-input: #ddd4c6;
+  --color-ring: #2f5d50;
+  --color-ink: #1a1612;
+  --color-ink-foreground: #e8e0d4;
+  --color-cream: #e8e0d4;
+  --color-paper: #f3efe6;
+  --color-catering: #b8612a;
+  --color-catering-fg: #faf7f1;
+  --color-dispense: #5c5368;
+  --color-dispense-fg: #faf7f1;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius: 12px;
+
+  --shadow-soft: 0 1px 2px rgb(28 25 23 / 0.04), 0 8px 24px rgb(28 25 23 / 0.05);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    min-height: 100%;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

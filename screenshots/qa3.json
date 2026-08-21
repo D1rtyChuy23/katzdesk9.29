@@ -1,0 +1,54 @@
+{
+  "user": "chuy.opsxhw6",
+  "pages": {
+    "/service": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/tlc": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/pms": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/pipeline": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/installs": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/handoff": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/warehouse": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/locations": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/modules": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/recipes": {
+      "ok": true,
+      "newErrors": []
+    },
+    "/access": {
+      "ok": true,
+      "newErrors": []
+    }
+  },
+  "bugs": [],
+  "errors": [],
+  "clock": true,
+  "waiting": false,
+  "crash": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('dialog').locator('[role=\"combobox\"]').nth(1)\n"
+}

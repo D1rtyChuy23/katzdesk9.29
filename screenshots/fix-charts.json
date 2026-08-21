@@ -1,0 +1,41 @@
+{
+  "pages": {
+    "/": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/service": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/pms": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/pipeline": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/installs": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/handoff": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/warehouse": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/locations": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    },
+    "/modules": {
+      "ok": true,
+      "sample": "Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes ADMIN Acces"
+    }
+  },
+  "errors": []
+}

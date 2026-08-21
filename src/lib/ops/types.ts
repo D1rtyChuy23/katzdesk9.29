@@ -1,0 +1,264 @@
+import type { ClockFlag } from "./clock";
+
+export type JobKind = "service" | "tlc";
+
+export type ServiceJob = {
+  id: number;
+  kind: JobKind;
+  callId: string;
+  contact: string | null;
+  phone: string | null;
+  received: string | null;
+  customer: string | null;
+  equipment: string | null;
+  issue: string | null;
+  callType: string | null;
+  phoneResolved: boolean;
+  status: string;
+  technician: string | null;
+  wo: string | null;
+  scheduled: string | null;
+  notes: string | null;
+  done: boolean;
+  updatedAt: string;
+  flag: ClockFlag | null;
+  ageDays: number | null;
+  urgency: string;
+};
+
+export type PmJob = {
+  id: number;
+  customer: string;
+  received: string | null;
+  equipment: string | null;
+  style: string | null;
+  projected: string | null;
+  partsStatus: string | null;
+  status: string;
+  technician: string | null;
+  notes: string | null;
+  done: boolean;
+  updatedAt: string;
+  flag: ClockFlag | null;
+};
+
+export type ModuleRow = {
+  id: number;
+  moduleId: string;
+  platform: string | null;
+  moduleType: string | null;
+  status: string;
+  wo: string | null;
+  location: string | null;
+  dateIn: string | null;
+  dateReady: string | null;
+  technician: string | null;
+  notes: string | null;
+  updatedAt: string;
+};
+
+export type Deal = {
+  id: number;
+  customer: string;
+  producer: string | null;
+  accountType: string | null;
+  dateOfDeal: string | null;
+  equipment: string | null;
+  amount: number | null;
+  goodToOrder: boolean;
+  ordered: boolean;
+  eta: string | null;
+  terms: string | null;
+  invoice: string | null;
+  completion: string | null;
+  notes: string | null;
+  updatedAt: string;
+};
+
+export type Install = {
+  id: number;
+  received: string | null;
+  customer: string;
+  equipment: string | null;
+  equipStatus: string | null;
+  installDate: string | null;
+  technician: string | null;
+  wo: string | null;
+  reqsReady: string | null;
+  notes: string | null;
+  accountRep: string | null;
+  paymentStatus: string | null;
+  serial: string | null;
+  powerVoltage: string | null;
+  machines: { equipment: string; serial: string; powerVoltage: string }[];
+  complete: boolean;
+  dealId: number | null;
+  updatedAt: string;
+  flag: ClockFlag | null;
+  daysOut: number | null;
+};
+
+export type Comment = {
+  id: number;
+  entityType: string;
+  entityId: number;
+  authorId: string | null;
+  authorName: string | null;
+  body: string;
+  askTeam: string | null;
+  resolved: boolean;
+  createdAt: string;
+};
+
+export type Activity = {
+  id: number;
+  entityType: string;
+  entityId: number;
+  actorName: string | null;
+  action: string;
+  detail: string | null;
+  createdAt: string;
+};
+
+export type FlaggedRow = {
+  id: number;
+  entityType: string;
+  customer: string;
+  flag: ClockFlag;
+  status: string;
+  received: string | null;
+  scheduled: string | null;
+  technician: string | null;
+  detail: string | null;
+  kind?: string;
+};
+
+export type ComingDueRow = {
+  daysOut: number;
+  source: string;
+  customer: string;
+  equipment: string | null;
+  status: string;
+  scheduled: string;
+  technician: string | null;
+  detail: string | null;
+  entityType: string;
+  id: number;
+};
+
+export type Dashboard = {
+  today: string;
+  weekLabel: string;
+  nextWeekLabel: string;
+  kpis: {
+    svcFlags: number;
+    tlcFlags: number;
+    pmFlags: number;
+    activeCalls: number;
+    pmsActive: number;
+    comingDue: number;
+    installQueue: number;
+    installAtRisk: number;
+    openAsks: number;
+    barnReady: number;
+    barnOpen: number;
+    modulesReady: number;
+    installReady: number;
+  };
+  statusBreakdown: { status: string; service: number; tlc: number }[];
+  techLoad: { tech: string; active: number; completed: number }[];
+  flagged: { service: FlaggedRow[]; tlc: FlaggedRow[]; pm: FlaggedRow[] };
+  comingDue: ComingDueRow[];
+  comingDueBuckets: { label: string; day: number; count: number }[];
+  recentHandoff: CommentPreview[];
+  pendingHandoffs: { dealId: number; customer: string; equipment: string | null; producer: string | null }[];
+  barnReadyByModel: { name: string; count: number }[];
+  modulesReadyByType: { name: string; count: number }[];
+  installReadyByEquip: { name: string; count: number }[];
+  installStatus: { name: string; count: number }[];
+  pipelineSnap: {
+    openCount: number;
+    openValue: number;
+    goodToOrder: number;
+    ordered: number;
+    completeCount: number;
+    completeValue: number;
+  };
+};
+
+export type CommentPreview = Comment & {
+  customer: string | null;
+};
+
+export type SearchHit = {
+  entityType: string;
+  id: number;
+  title: string;
+  subtitle: string;
+  status: string | null;
+};
+
+export type HandoffOwners = {
+  technician: string | null;
+  producer: string | null;
+  accountRep: string | null;
+};
+
+export type HandoffFeed = {
+  asks: (CommentPreview & { status: string | null } & HandoffOwners)[];
+  recent: (CommentPreview & HandoffOwners)[];
+  pendingHandoffs: Dashboard["pendingHandoffs"];
+};
+
+export type Asset = {
+  id: number;
+  kind: "equip" | "dispenser" | "module";
+  model: string;
+  serial: string | null;
+  qty: number;
+  customerOwned: string | null;
+  site: string;
+  pallet: string | null;
+  level: number | null;
+  lineNo: number | null;
+  purpose: string | null;
+  status: string;
+  soldTo: string | null;
+  soldAt: string | null;
+  installId: number | null;
+  notes: string | null;
+  updatedAt: string;
+  bay: "catering" | "dispenser" | "general";
+  slotLabel: string;
+  missingSerial: boolean;
+};
+
+export type Recipe = {
+  id: number;
+  equipmentModel: string;
+  customer: string | null;
+  installId: number | null;
+  copiedFrom: number | null;
+  isTemplate: boolean;
+  coffee1: string | null;
+  coffee2: string | null;
+  coffee3: string | null;
+  powder1: string | null;
+  powder2: string | null;
+  powder3: string | null;
+  americano1: string | null;
+  americano2: string | null;
+  americano3: string | null;
+  tea1: string | null;
+  tea2: string | null;
+  milk: string | null;
+  notes: string | null;
+  updatedAt: string;
+};
+
+export type DirectoryKind = "customer" | "equipment";
+
+export type DirectoryEntry = {
+  id: number;
+  name: string;
+};

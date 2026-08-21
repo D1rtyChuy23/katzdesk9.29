@@ -1,0 +1,25 @@
+{
+  "user": "chuy.opsxhw6",
+  "pages": {
+    "clock": true,
+    "/service": true,
+    "/tlc": true,
+    "/pms": true,
+    "/pipeline": true,
+    "/installs": true,
+    "/handoff": true,
+    "/warehouse": true,
+    "/locations": true,
+    "/modules": true,
+    "/recipes": true,
+    "/access": true
+  },
+  "pending": true,
+  "access": true,
+  "errors": [],
+  "clockApproved": true,
+  "waiting": false,
+  "console": [
+    "console: %o\n\n%s\n\n%s\n Error: The `style` prop expects a mapping from style properties to values, not a string. For example, style={{marginRight: spacing + 'em'}} when using JSX.\n    at setValueForStyles (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:1810:60)\n    at setProp (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:9548:6)\n    at setInitialProperties (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:9924:119)\n    at completeWork (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:6382:19)\n    at runWithFiberInDEV (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:851:66)\n    at completeUnitOfWork (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:8492:15)\n    at performUnitOfWork (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:8431:23)\n    at workLoopSync (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:8325:37)\n    at renderRootSync (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:8309:6)\n    at performWorkOnRoot (http://127.0.0.1:8080/node_modules/.vite/deps/react-dom_client.js?v=b4c16906:7994:27) The above error occurred in the <path> component. React will try to recreate this component tree from scratch using the error boundary you provided, CatchBoundary."
+  ]
+}

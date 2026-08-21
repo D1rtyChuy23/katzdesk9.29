@@ -1,0 +1,1 @@
+import{r as e}from"./preload-helper-Cit0hpR5.js";import{n as t}from"./index-sPRCUhqC.js";import{t as n}from"./jobs-page-BSTbIHQu.js";var r=e();function i(){let{open:e}=t.useSearch();return(0,r.jsx)(n,{kind:`tlc`,title:`TLC + Factor`,lede:`Contract TLC and Factor visits. Anything still open past two weeks is flagged automatically.`,initialOpen:e})}export{i as component};
