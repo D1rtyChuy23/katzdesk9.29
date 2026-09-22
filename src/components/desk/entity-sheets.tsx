@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  archiveDeal,
+  archiveInstall,
   assignAssetToInstall,
   copyRecipe,
   createDeal,
@@ -27,27 +29,32 @@ import {
   PAYMENT_TERMS,
   PM_STATUSES,
   PM_STYLES,
-  PRODUCERS,
   REQS_READY,
-  TECHNICIANS,
 } from "@/lib/ops/lookups";
+
 import { catalogModels, listedEquipment, piecesForInstall } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import type { Asset, Deal, Install, ModuleRow, PmJob } from "@/lib/ops/types";
 import { moneyExact } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Textarea } from "@/components/ui/input";
+import { Input, Label, Textarea, AutoGrowTextarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { FlagBadge, StatusBadge } from "./flag-badge";
+import { Badge } from "@/components/ui/badge";
 import { Thread } from "./thread";
 import { RecipeForm, type RecipeDraft } from "./recipe-form";
 import { InstallRecipeList } from "./recipe-sheet";
 import { CustomerCombo, EquipmentCombo, EquipmentMultiCombo } from "./directory-fields";
+import { TechSelect } from "./tech-select";
+import { RepSelect } from "./rep-select";
+import { AkBadge } from "./ak-badge";
+
 import { MachineFields } from "./machine-fields";
+import { SerialNoticeBanner } from "./serial-notice";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { ChevronsUpDown, Trash2, X } from "lucide-react";
 
 function Field({
   label,
@@ -114,17 +121,31 @@ function BoundEquipment({
 
 export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void }) {
   const qc = useQueryClient();
+  const formRef = useRef<HTMLFormElement>(null);
+  const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updatePm>[0]["data"]) => updatePm({ data: d }),
     onSuccess: () => {
-      toast.success("Saved");
+      if (!skipToast.current) toast.success("Saved");
+      skipToast.current = false;
       void qc.invalidateQueries({ queryKey: ["pms"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
   return (
-    <Sheet open={!!pm} onOpenChange={(o) => !o && onClose()}>
+    <Sheet
+      open={!!pm}
+      onOpenChange={(o) => {
+        if (!o) {
+          skipToast.current = true;
+          formRef.current?.requestSubmit();
+          onClose();
+        }
+      }}
+    >
       <SheetContent>
         {pm ? (
           <>
@@ -136,7 +157,9 @@ export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void
                 <FlagBadge flag={pm.flag} />
               </div>
             </SheetHeader>
+            <SheetBody>
             <form
+              ref={formRef}
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -151,6 +174,9 @@ export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void
                   status: String(fd.get("status")),
                   technician: String(fd.get("technician") || "") || null,
                   notes: String(fd.get("notes") || "") || null,
+                  wo: String(fd.get("wo") || "") || null,
+                  workDone: String(fd.get("workDone") || "") || null,
+                  completedAt: String(fd.get("completedAt") || "") || null,
                 });
               }}
             >
@@ -183,11 +209,19 @@ export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void
               </div>
               <div>
                 <Label>Tech</Label>
-                <SelectField name="technician" className="mt-1" defaultValue={pm.technician ?? ""} allowEmpty>
-                  {TECHNICIANS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
+                <TechSelect name="technician" defaultValue={pm.technician ?? ""} />
+              </div>
+              <Field label="WO #" name="wo" defaultValue={pm.wo ?? ""} />
+              <Field label="Date completed" name="completedAt" type="date" defaultValue={pm.completedAt ?? ""} />
+              <div className="sm:col-span-2">
+                <Label htmlFor={`pm-work-${pm.id}`}>Description of work</Label>
+                <AutoGrowTextarea
+                  id={`pm-work-${pm.id}`}
+                  name="workDone"
+                  className="mt-1"
+                  defaultValue={pm.workDone ?? ""}
+                  placeholder="What was done on site…"
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Notes</Label>
@@ -198,6 +232,7 @@ export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void
               </div>
             </form>
             <Thread entityType="pm" entityId={pm.id} />
+            </SheetBody>
           </>
         ) : null}
       </SheetContent>
@@ -208,9 +243,11 @@ export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void
 export function InstallSheet({
   row,
   onClose,
+  onOpenRelated,
 }: {
   row: Install | null;
   onClose: () => void;
+  onOpenRelated?: (id: number) => void;
 }) {
   const qc = useQueryClient();
   const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });
@@ -225,6 +262,8 @@ export function InstallSheet({
   const [equipPieces, setEquipPieces] = useState<string[]>([]);
   const [specs, setSpecs] = useState<MachineSpec[]>([]);
   const [hydratedId, setHydratedId] = useState<number | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const skipToast = useRef(false);
   const catalog = catalogModels([
     ...(directoryEquip.data ?? []).map((e) => e.name),
     ...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
@@ -234,20 +273,21 @@ export function InstallSheet({
     setRecipeDraft(null);
     setCustomer(row?.customer ?? "");
     const saved = row?.machines ?? [];
-    const names = saved.length
-      ? saved.map((s) => s.equipment)
-      : listedEquipment(row?.equipment, catalog);
+    const fromSaved = saved.map((s) => s.equipment).filter(Boolean);
+    const names = catalog.length
+      ? listedEquipment(fromSaved.join("\n") || row?.equipment, catalog)
+      : fromSaved.length
+        ? fromSaved
+        : (row?.equipment ?? "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
     setEquipPieces(names);
     setSpecs(
-      saved.length
-        ? saved
-        : mergeMachineSpecs(names, [], {
-            serial: row?.serial,
-            powerVoltage: row?.powerVoltage,
-          }),
+      mergeMachineSpecs(names, saved, {
+        serial: row?.serial,
+        powerVoltage: row?.powerVoltage,
+      }),
     );
     setHydratedId(row?.id ?? null);
-  }, [row?.id]);
+  }, [row?.id, catalog.join("\n")]);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
@@ -255,11 +295,25 @@ export function InstallSheet({
       const machineOnly = keys.every((k) =>
         ["equipment", "serial", "powerVoltage", "machines"].includes(k),
       );
-      if (!machineOnly) toast.success("Saved");
+      if (!machineOnly && !skipToast.current) toast.success("Saved");
+      skipToast.current = false;
       void qc.invalidateQueries({ queryKey: ["installs"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  const dropInstall = useMutation({
+    mutationFn: () => archiveInstall({ data: { id: row!.id } }),
+    onSuccess: () => {
+      toast.success(`Removed ${row?.customer} from the list`);
+      void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
+      onClose();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
   const saveRecipe = useMutation({
     mutationFn: (d: Parameters<typeof upsertRecipe>[0]["data"]) => upsertRecipe({ data: d }),
@@ -305,16 +359,8 @@ export function InstallSheet({
       open={!!row}
       onOpenChange={(o) => {
         if (!o) {
-          if (row && hydratedId === row.id) {
-            const packed = serializeMachines(specs);
-            save.mutate({
-              id: row.id,
-              equipment: packed.equipment,
-              serial: packed.serial,
-              powerVoltage: packed.powerVoltage,
-              machines: packed.machines,
-            });
-          }
+          skipToast.current = true;
+          formRef.current?.requestSubmit();
           setRecipeDraft(null);
           onClose();
         }
@@ -329,8 +375,34 @@ export function InstallSheet({
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <StatusBadge status={row.equipStatus} />
                 <FlagBadge flag={row.flag} />
+                {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
               </div>
             </SheetHeader>
+            <SheetBody>
+            <SerialNoticeBanner notice={row.serialNotice} />
+            {row.duplicateOf ? (
+              <div className="border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm">
+                <p className="font-medium">This account already had an install request.</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Check the earlier one before treating this as a second job — or clear the flag if it’s a new request.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {onOpenRelated ? (
+                    <Button type="button" size="sm" variant="outline" onClick={() => onOpenRelated(row.duplicateOf!)}>
+                      Open earlier request
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => save.mutate({ id: row.id, duplicateOf: null })}
+                  >
+                    Not a duplicate
+                  </Button>
+                </div>
+              </div>
+            ) : null}
             <InstallAssets installId={row.id} />
             {recipeDraft ? (
               <div className="border-b border-border p-5">
@@ -361,6 +433,7 @@ export function InstallSheet({
               />
             )}
             <form
+              ref={formRef}
               key={row.id}
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
@@ -377,7 +450,10 @@ export function InstallSheet({
                   wo: String(fd.get("wo") || "") || null,
                   reqsReady: String(fd.get("reqsReady") || "") || null,
                   notes: String(fd.get("notes") || "") || null,
+                  workDone: String(fd.get("workDone") || "") || null,
+                  completedAt: String(fd.get("completedAt") || "") || null,
                   accountRep: String(fd.get("accountRep") || "") || null,
+                  aviKatz: fd.get("aviKatz") === "on",
                   paymentStatus: String(fd.get("paymentStatus") || "") || null,
                   serial: packed.serial,
                   powerVoltage: packed.powerVoltage,
@@ -385,19 +461,42 @@ export function InstallSheet({
                 });
               }}
             >
-              <CustomerCombo name="customer" value={customer} onChange={setCustomer} required />
+              <CustomerCombo
+                name="customer"
+                value={customer}
+                onChange={(v) => {
+                  try {
+                    setCustomer(v);
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : "Could not set customer");
+                  }
+                }}
+                required
+              />
               <div className="sm:col-span-2">
                 <EquipmentMultiCombo
                   values={equipPieces}
                   placeholder="Search the full equipment list…"
-                  onChange={(next) => persistMachines(mergeMachineSpecs(next, specs))}
+                  menuInFlow
+                  onChange={(next) => {
+                    try {
+                      persistMachines(mergeMachineSpecs(next, specs));
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Could not update equipment");
+                    }
+                  }}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
                   Scroll the full list, pick a model, or type a new one to add it.
                 </p>
               </div>
               <div className="sm:col-span-2">
-                <MachineFields specs={specs} onChange={setSpecs} />
+                <MachineFields
+                  specs={specs}
+                  installId={row.id}
+                  onChange={setSpecs}
+                  onPulled={(next) => persistMachines(next)}
+                />
               </div>
               <div>
                 <Label>Equipment status</Label>
@@ -410,11 +509,7 @@ export function InstallSheet({
               <Field label="Install date" name="installDate" type="date" defaultValue={row.installDate ?? ""} />
               <div>
                 <Label>Tech</Label>
-                <SelectField name="technician" className="mt-1" defaultValue={row.technician ?? ""} allowEmpty>
-                  {TECHNICIANS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
+                <TechSelect name="technician" defaultValue={row.technician ?? ""} />
               </div>
               <Field label="WO #" name="wo" defaultValue={row.wo ?? ""} />
               <div>
@@ -425,7 +520,18 @@ export function InstallSheet({
                   ))}
                 </SelectField>
               </div>
-              <Field label="Account rep" name="accountRep" defaultValue={row.accountRep ?? ""} />
+              <RepSelect name="accountRep" label="Account rep" defaultValue={row.accountRep ?? ""} />
+              <label className="flex items-center gap-2 text-sm sm:mt-7">
+                <input
+                  type="checkbox"
+                  name="aviKatz"
+                  className="size-4 accent-primary"
+                  defaultChecked={row.aviKatz}
+                />
+                Avi Katz account (AK)
+                <AkBadge on={row.aviKatz} />
+              </label>
+
               <div>
                 <Label>Payment</Label>
                 <SelectField name="paymentStatus" className="mt-1" defaultValue={row.paymentStatus ?? ""} allowEmpty>
@@ -434,15 +540,39 @@ export function InstallSheet({
                   ))}
                 </SelectField>
               </div>
+              <Field label="Date completed" name="completedAt" type="date" defaultValue={row.completedAt ?? ""} />
+              <div className="sm:col-span-2">
+                <Label htmlFor={`install-work-${row.id}`}>Description of work</Label>
+                <AutoGrowTextarea
+                  id={`install-work-${row.id}`}
+                  name="workDone"
+                  className="mt-1"
+                  defaultValue={row.workDone ?? ""}
+                  placeholder="What was done on site…"
+                />
+              </div>
               <div className="sm:col-span-2">
                 <Label>Notes</Label>
                 <Textarea name="notes" className="mt-1" defaultValue={row.notes ?? ""} />
               </div>
-              <div className="flex justify-end sm:col-span-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={dropInstall.isPending}
+                  onClick={() => {
+                    if (window.confirm(`Remove “${row.customer}” from the install list?`)) dropInstall.mutate();
+                  }}
+                >
+                  <Trash2 className="size-3.5" />
+                  Remove from list
+                </Button>
                 <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
               </div>
             </form>
             <Thread entityType="install" entityId={row.id} />
+            </SheetBody>
           </>
         ) : null}
       </SheetContent>
@@ -452,19 +582,44 @@ export function InstallSheet({
 
 export function DealSheet({ deal, onClose }: { deal: Deal | null; onClose: () => void }) {
   const qc = useQueryClient();
+  const formRef = useRef<HTMLFormElement>(null);
+  const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateDeal>[0]["data"]) => updateDeal({ data: d }),
     onSuccess: () => {
-      toast.success("Saved");
+      if (!skipToast.current) toast.success("Saved");
+      skipToast.current = false;
       void qc.invalidateQueries({ queryKey: ["deals"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["handoff"] });
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  const dropDeal = useMutation({
+    mutationFn: () => archiveDeal({ data: { id: deal!.id } }),
+    onSuccess: () => {
+      toast.success(`Removed ${deal?.customer} from the list`);
+      void qc.invalidateQueries({ queryKey: ["deals"] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["handoff"] });
+      onClose();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
+  });
   return (
-    <Sheet open={!!deal} onOpenChange={(o) => !o && onClose()}>
+    <Sheet
+      open={!!deal}
+      onOpenChange={(o) => {
+        if (!o) {
+          skipToast.current = true;
+          formRef.current?.requestSubmit();
+          onClose();
+        }
+      }}
+    >
       <SheetContent>
         {deal ? (
           <>
@@ -485,7 +640,9 @@ export function DealSheet({ deal, onClose }: { deal: Deal | null; onClose: () =>
                 />
               </div>
             </SheetHeader>
+            <SheetBody>
             <form
+              ref={formRef}
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -496,9 +653,10 @@ export function DealSheet({ deal, onClose }: { deal: Deal | null; onClose: () =>
                   id: deal.id,
                   customer: String(fd.get("customer")),
                   producer: String(fd.get("producer") || "") || null,
+                  aviKatz: fd.get("aviKatz") === "on",
                   equipment: String(fd.get("equipment") || "") || null,
                   amount: Number.isFinite(amountNum) ? amountNum : null,
-                  goodToOrder: fd.get("goodToOrder") === "on",
+                  goodToOrder: fd.get("goodToOrder") === "on" || fd.get("ordered") === "on",
                   ordered: fd.get("ordered") === "on",
                   eta: String(fd.get("eta") || "") || null,
                   terms: String(fd.get("terms") || "") || null,
@@ -509,17 +667,18 @@ export function DealSheet({ deal, onClose }: { deal: Deal | null; onClose: () =>
               }}
             >
               <BoundCustomer recordKey={deal.id} defaultValue={deal.customer} required />
-              <div>
-                <Label>Producer</Label>
-                <SelectField name="producer" className="mt-1" defaultValue={deal.producer ?? ""} allowEmpty>
-                  {deal.producer && !PRODUCERS.includes(deal.producer as (typeof PRODUCERS)[number]) ? (
-                    <option key={deal.producer}>{deal.producer}</option>
-                  ) : null}
-                  {PRODUCERS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
+              <RepSelect name="producer" label="Rep" defaultValue={deal.producer ?? ""} />
+              <label className="flex items-center gap-2 text-sm sm:col-span-2">
+                <input
+                  type="checkbox"
+                  name="aviKatz"
+                  className="size-4 accent-primary"
+                  defaultChecked={deal.aviKatz}
+                />
+                Avi Katz account (AK)
+                <AkBadge on={deal.aviKatz} />
+              </label>
+
               <div className="sm:col-span-2">
                 <BoundEquipment recordKey={deal.id} defaultValue={deal.equipment ?? ""} />
               </div>
@@ -541,23 +700,44 @@ export function DealSheet({ deal, onClose }: { deal: Deal | null; onClose: () =>
                   <option value="fell">Fell through</option>
                 </SelectField>
               </div>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="goodToOrder" defaultChecked={deal.goodToOrder} />
-                Good to order
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="ordered" defaultChecked={deal.ordered} />
-                Equipment ordered
-              </label>
+              <div className="sm:col-span-2 rounded-lg border border-border bg-muted/40 p-3">
+                <p className="text-sm font-medium">Order steps</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Reps mark Good to order. Confirm Ordered and it leaves the Good to order list.
+                </p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <label className="flex min-h-11 items-center gap-2 text-sm">
+                    <input type="checkbox" name="goodToOrder" defaultChecked={deal.goodToOrder || deal.ordered} />
+                    1. Good to order
+                  </label>
+                  <label className="flex min-h-11 items-center gap-2 text-sm">
+                    <input type="checkbox" name="ordered" defaultChecked={deal.ordered} />
+                    2. Ordered
+                  </label>
+                </div>
+              </div>
               <div className="sm:col-span-2">
                 <Label>Notes</Label>
                 <Textarea name="notes" className="mt-1" defaultValue={deal.notes ?? ""} />
               </div>
-              <div className="flex justify-end sm:col-span-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={dropDeal.isPending}
+                  onClick={() => {
+                    if (window.confirm(`Remove “${deal.customer}” from the pipeline list?`)) dropDeal.mutate();
+                  }}
+                >
+                  <Trash2 className="size-3.5" />
+                  Remove from list
+                </Button>
                 <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
               </div>
             </form>
             <Thread entityType="deal" entityId={deal.id} />
+            </SheetBody>
           </>
         ) : null}
       </SheetContent>
@@ -593,6 +773,7 @@ export function ModuleSheet({
                 <StatusBadge status={row.status} />
               </div>
             </SheetHeader>
+            <SheetBody>
             <form
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
@@ -640,11 +821,7 @@ export function ModuleSheet({
               <Field label="WO #" name="wo" defaultValue={row.wo ?? ""} />
               <div>
                 <Label>Tech</Label>
-                <SelectField name="technician" className="mt-1" defaultValue={row.technician ?? ""} allowEmpty>
-                  {TECHNICIANS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
+                <TechSelect name="technician" defaultValue={row.technician ?? ""} />
               </div>
               <Field label="Date in" name="dateIn" type="date" defaultValue={row.dateIn ?? ""} />
               <Field label="Date ready" name="dateReady" type="date" defaultValue={row.dateReady ?? ""} />
@@ -657,6 +834,7 @@ export function ModuleSheet({
               </div>
             </form>
             <Thread entityType="module" entityId={row.id} />
+            </SheetBody>
           </>
         ) : null}
       </SheetContent>
@@ -668,10 +846,8 @@ function InstallAssets({ installId }: { installId: number }) {
   const qc = useQueryClient();
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const [pick, setPick] = useState("");
-  const [q, setQ] = useState("");
   const assigned = (assets.data ?? []).filter((a) => a.installId === installId);
   const ready = (assets.data ?? []).filter((a) => a.status === "ready" && a.site.startsWith("barn"));
-  const pool = filterReadyUnits(ready, q);
   const assign = useMutation({
     mutationFn: (assetId: number) => assignAssetToInstall({ data: { assetId, installId } }),
     onSuccess: () => {
@@ -697,7 +873,7 @@ function InstallAssets({ installId }: { installId: number }) {
     <div id="warehouse-units" className="border-b border-border bg-muted/40 p-5">
       <p className="text-xs tracking-wide text-muted-foreground uppercase">Warehouse units</p>
       <p className="mt-0.5 text-xs text-muted-foreground">
-        Assigning a unit takes it off the rack. Serial and voltage on this install stay blank until you type them.
+        Type a warehouse serial on the machine below to pull it in one step — or assign from the rack here.
       </p>
       {assets.isLoading ? (
         <p className="mt-2 text-sm text-muted-foreground">Loading the barn…</p>
@@ -727,30 +903,11 @@ function InstallAssets({ installId }: { installId: number }) {
           None pulled yet. Assigning a unit removes it from the barn rack.
         </p>
       )}
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Filter by model or serial…"
-        className="mt-3"
-        aria-label="Filter warehouse units"
-      />
-      <p className="mt-1.5 text-xs text-muted-foreground">{pool.length} ready on the rack</p>
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-        <SelectField
-          className="flex-1"
-          value={pick}
-          onChange={(e) => setPick(e.target.value)}
-          allowEmpty
-          emptyLabel="Ready unit on the rack…"
-          aria-label="Ready unit on the rack"
-        >
-          {pool.slice(0, 120).map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.model} · {a.slotLabel}
-              {a.serial ? ` · ${a.serial}` : ""}
-            </option>
-          ))}
-        </SelectField>
+      <p className="mt-3 text-xs text-muted-foreground">{ready.length} ready on the rack</p>
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1">
+          <ReadyUnitPicker units={ready} value={pick} onChange={setPick} />
+        </div>
         <Button
           size="sm"
           type="button"
@@ -772,6 +929,129 @@ function filterReadyUnits(ready: Asset[], filter: string) {
   return [...list].sort((a, b) => a.model.localeCompare(b.model) || a.slotLabel.localeCompare(b.slotLabel));
 }
 
+function unitLabel(a: Asset) {
+  return `${a.model} · ${a.slotLabel}${a.serial ? ` · ${a.serial}` : ""}`;
+}
+
+function ReadyUnitPicker({
+  units,
+  value,
+  onChange,
+}: {
+  units: Asset[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const box = useRef<HTMLDivElement>(null);
+  const query = open ? q : "";
+  const matches = useMemo(() => filterReadyUnits(units, query), [units, query]);
+  const selected = units.find((a) => String(a.id) === value) ?? null;
+  const notFound = query.trim().length >= 2 && matches.length === 0;
+
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e: MouseEvent) {
+      if (!box.current?.contains(e.target as Node)) {
+        setOpen(false);
+        setQ("");
+      }
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  function pick(id: string) {
+    onChange(id);
+    setQ("");
+    setOpen(false);
+  }
+
+  return (
+    <div ref={box} className="relative">
+      <div className="flex min-h-11 w-full items-center gap-2 rounded-full border border-input bg-background px-3 text-sm focus-within:ring-2 focus-within:ring-ring">
+        <input
+          value={open ? q : selected ? unitLabel(selected) : ""}
+          placeholder="Ready unit on the rack…"
+          autoComplete="off"
+          aria-label="Ready unit on the rack"
+          aria-expanded={open}
+          role="combobox"
+          className="min-w-0 flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
+          onChange={(e) => {
+            setQ(e.target.value);
+            if (!open) setOpen(true);
+          }}
+          onFocus={() => {
+            setOpen(true);
+            setQ("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setOpen(false);
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (matches[0]) pick(String(matches[0].id));
+            }
+          }}
+        />
+        {selected && !open ? (
+          <button
+            type="button"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+            aria-label="Clear"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onChange("");
+            }}
+          >
+            <X className="size-3.5" />
+          </button>
+        ) : null}
+        <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+      </div>
+      {open ? (
+        <div
+          data-combo-popover=""
+          className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-soft"
+        >
+          {notFound ? (
+            <p className="px-2 py-1.5 text-xs text-muted-foreground">No unit on the rack matches that search.</p>
+          ) : null}
+          <ul className="max-h-80 overflow-y-auto py-1" role="listbox">
+            {matches.map((a) => {
+              const active = String(a.id) === value;
+              return (
+                <li key={a.id}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={active}
+                    className={
+                      active
+                        ? "flex min-h-10 w-full items-center px-2 py-1.5 text-left text-sm bg-muted"
+                        : "flex min-h-10 w-full items-center px-2 py-1.5 text-left text-sm hover:bg-muted"
+                    }
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      pick(String(a.id));
+                    }}
+                  >
+                    <span className="min-w-0 truncate">{unitLabel(a)}</span>
+                  </button>
+                </li>
+              );
+            })}
+            {!matches.length && !notFound ? (
+              <li className="px-2 py-2 text-xs text-muted-foreground">Nothing ready on the rack.</li>
+            ) : null}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function SimpleCreateDialog({
   title,
   open,
@@ -782,7 +1062,7 @@ export function SimpleCreateDialog({
   title: string;
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  fields: { name: string; label: string; required?: boolean; kind?: "text" | "customer" | "equipment" }[];
+  fields: { name: string; label: string; required?: boolean; kind?: "text" | "customer" | "equipment" | "rep" }[];
   onSubmit: (values: Record<string, string>) => Promise<void>;
 }) {
   const [pending, setPending] = useState(false);
@@ -829,6 +1109,17 @@ export function SimpleCreateDialog({
             if (f.kind === "equipment") {
               return (
                 <EquipmentCombo
+                  key={f.name}
+                  name={f.name}
+                  label={f.label}
+                  value={val}
+                  onChange={(v) => setValues((cur) => ({ ...cur, [f.name]: v }))}
+                />
+              );
+            }
+            if (f.kind === "rep") {
+              return (
+                <RepSelect
                   key={f.name}
                   name={f.name}
                   label={f.label}

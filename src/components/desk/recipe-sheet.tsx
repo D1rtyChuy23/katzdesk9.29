@@ -4,7 +4,7 @@ import { previewSetting } from "@/lib/ops/recipe-fields";
 import { findRecipeFor, shortEquipLabel, type EquipPiece } from "@/lib/ops/equipment";
 import type { Recipe } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { BookOpen, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ export function RecipeEditorSheet({
       toast.success(row.customer ? `Saved for ${row.customer}` : "House recipe saved");
       void qc.invalidateQueries({ queryKey: ["recipes"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
       onClose();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
@@ -38,6 +39,7 @@ export function RecipeEditorSheet({
       toast.success(`Copied onto ${row.customer}`);
       void qc.invalidateQueries({ queryKey: ["recipes"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
       onClose();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
@@ -63,7 +65,7 @@ export function RecipeEditorSheet({
                 {draft.equipmentModel || draft.recipe?.equipmentModel || "Pick equipment"}
               </p>
             </SheetHeader>
-            <div className="p-5">
+            <SheetBody className="p-5">
               <RecipeForm
                 key={`${draft.recipe?.id ?? "new"}-${draft.equipmentModel}-${draft.customer}`}
                 draft={draft}
@@ -74,7 +76,7 @@ export function RecipeEditorSheet({
                 onSave={(d) => save.mutate(d)}
                 onCopy={draft.recipe ? (d) => copy.mutate(d) : undefined}
               />
-            </div>
+            </SheetBody>
           </>
         ) : null}
       </SheetContent>

@@ -1,0 +1,59 @@
+{
+  "filename": "KatzDesk-Install-readiness-2026-09-14.xlsx",
+  "sheets": [
+    "Not ready",
+    "Ready"
+  ],
+  "notReady": 10,
+  "ready": 3,
+  "sample": [
+    {
+      "account": "Brews & Books",
+      "equipment": "Eversys Cameo c'2s",
+      "configuration": "Eversys Cameo c'2s",
+      "blocking": "Paid in Full",
+      "tech": "LO",
+      "updated": "2026-08-25"
+    },
+    {
+      "account": "Coco Crepes Bellaire",
+      "equipment": "La Marzocco Linea Classic S 2 Group AV/ La Marzocco Swift Dual-Hopper Espresso Grinder/ Bunn Axiom-APS",
+      "configuration": "La Marzocco Linea Classic S 2 Group AV/ La Marzocco Swift Dual-Hopper Espresso Grinder/ Bunn Axiom-APS",
+      "blocking": "Not Ready · Paid in Full",
+      "tech": "LR",
+      "updated": "2026-08-25"
+    },
+    {
+      "account": "Doug's Diner",
+      "equipment": "Fetco MBS x 2 / Powder Machine",
+      "configuration": "Fetco MBS x 2 / Powder Machine",
+      "blocking": "Not Ready · No Purchased Equipment",
+      "tech": "3rd Party",
+      "updated": "2026-08-25"
+    },
+    {
+      "account": "Jonathan's The Rub - Bridgeland",
+      "equipment": "Cameo c'2s",
+      "configuration": "Cameo c'2s",
+      "blocking": "Payment Plan",
+      "tech": "AL",
+      "updated": "2026-08-25"
+    },
+    {
+      "account": "kol fac 118",
+      "equipment": "cameo, itcb",
+      "configuration": "cameo, itcb",
+      "blocking": "Not Ready · 50% Down / 50% at Install or Net 30",
+      "tech": "al",
+      "updated": "2026-08-25"
+    },
+    {
+      "account": "Scrambles Breakfast & Lunch",
+      "equipment": "BUNN ITCB & BUNN G9 GRINDER",
+      "configuration": "BUNN ITCB & BUNN G9 GRINDER",
+      "blocking": "",
+      "tech": "",
+      "updated": "2026-08-25"
+    }
+  ]
+}

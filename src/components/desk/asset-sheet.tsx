@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
   assignAssetToInstall,
+  assignAssetToService,
   listInstalls,
   markAssetSold,
   returnAssetToWarehouse,
@@ -15,10 +16,11 @@ import {
   bayFor,
 } from "@/lib/ops/warehouse";
 import type { Asset } from "@/lib/ops/types";
+import { isOpenInstall } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { CustomerCombo, EquipmentCombo } from "./directory-fields";
@@ -41,14 +43,17 @@ export function AssetSheet({
   const [model, setModel] = useState(asset?.model ?? "");
   const [owned, setOwned] = useState(asset?.customerOwned ?? "");
   const [retSite, setRetSite] = useState<"barn-back" | "barn-front">("barn-back");
-  const [retPallet, setRetPallet] = useState("H");
+  const [retPallet, setRetPallet] = useState("A");
   const [retLevel, setRetLevel] = useState(1);
   const [installId, setInstallId] = useState<string>("");
+  const [serviceCustomer, setServiceCustomer] = useState("");
 
   useEffect(() => {
     setModel(asset?.model ?? "");
     setOwned(asset?.customerOwned ?? "");
     setSoldTo(asset?.soldTo ?? "");
+    setInstallId("");
+    setServiceCustomer("");
   }, [asset?.id]);
 
   const save = useMutation({
@@ -69,6 +74,7 @@ export function AssetSheet({
       void qc.invalidateQueries({ queryKey: ["assets"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["jobs"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not return"),
   });
@@ -86,14 +92,27 @@ export function AssetSheet({
       assignAssetToInstall({ data: { assetId: asset!.id, installId: Number(installId) } }),
     onSuccess: () => {
       toast.success("Pulled for install — off the warehouse board");
+      setInstallId("");
       void qc.invalidateQueries({ queryKey: ["assets"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not assign"),
   });
+  const assignService = useMutation({
+    mutationFn: () =>
+      assignAssetToService({ data: { assetId: asset!.id, customer: serviceCustomer } }),
+    onSuccess: () => {
+      toast.success("Pulled for service — off the warehouse board");
+      setServiceCustomer("");
+      void qc.invalidateQueries({ queryKey: ["assets"] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["jobs"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not assign"),
+  });
 
-  const queue = (installs.data ?? []).filter((i) => !i.complete && i.equipStatus !== "Installed");
+  const queue = (installs.data ?? []).filter((i) => isOpenInstall(i));
   const pallets = retSite === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
   const bay = asset ? bayFor(asset.site, asset.pallet) : "general";
 
@@ -109,12 +128,14 @@ export function AssetSheet({
               </p>
               <SheetTitle>{asset.model}</SheetTitle>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                <StatusBadge status={statusLabel(asset.status)} />
+                <StatusBadge status={statusLabel(asset)} />
+                {asset.needsBay ? <StatusBadge status="Needs bay" /> : null}
                 {bay === "catering" ? <StatusBadge status="Catering" /> : null}
                 {bay === "dispenser" ? <StatusBadge status="Dispenser" /> : null}
                 {asset.missingSerial ? <StatusBadge status="Serial missing" /> : null}
               </div>
             </SheetHeader>
+            <SheetBody>
             <form
               key={asset.id}
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
@@ -165,30 +186,108 @@ export function AssetSheet({
               </div>
             </form>
 
-            {asset.status === "ready" ? (
+            {asset.needsBay ? (
               <div className="space-y-3 border-b border-border p-5">
-                <p className="text-xs tracking-wide text-muted-foreground uppercase">Pull for an install</p>
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <p className="text-xs tracking-wide text-muted-foreground uppercase">Needs a bay</p>
+                <p className="text-sm text-muted-foreground">
+                  This unit’s letter is Q or after P. Put it on A–P so it sits on the map. It stays in
+                  the warehouse list until you do.
+                </p>
+                <div className="grid grid-cols-3 gap-2">
                   <SelectField
-                    className="flex-1"
-                    value={installId}
-                    onChange={(e) => setInstallId(e.target.value)}
-                    allowEmpty
-                    emptyLabel="Choose account"
+                    value={retSite}
+                    onChange={(e) => {
+                      const s = e.target.value as "barn-back" | "barn-front";
+                      setRetSite(s);
+                      setRetPallet(s === "barn-front" ? FRONT_PALLETS[0]! : "A");
+                    }}
                   >
-                    {queue.map((i) => (
-                      <option key={i.id} value={i.id}>
-                        {i.customer} · {i.equipment ?? "no model"}
+                    <option value="barn-back">Back rack</option>
+                    <option value="barn-front">Front rack</option>
+                  </SelectField>
+                  <SelectField value={retPallet} onChange={(e) => setRetPallet(e.target.value)}>
+                    {pallets.map((p) => (
+                      <option key={p}>{p}</option>
+                    ))}
+                  </SelectField>
+                  <SelectField
+                    value={String(retLevel)}
+                    onChange={(e) => setRetLevel(Number(e.target.value))}
+                  >
+                    {LEVELS.map((l) => (
+                      <option key={l} value={l}>
+                        L{l}
                       </option>
                     ))}
                   </SelectField>
-                  <Button
-                    size="sm"
-                    disabled={!installId || assign.isPending}
-                    onClick={() => assign.mutate()}
-                  >
-                    Assign & remove from barn
-                  </Button>
+                </div>
+                <Button
+                  size="sm"
+                  disabled={save.isPending}
+                  onClick={() =>
+                    save.mutate({
+                      id: asset.id,
+                      site: retSite,
+                      pallet: retPallet,
+                      level: retLevel,
+                    })
+                  }
+                >
+                  Put on {retPallet}
+                </Button>
+              </div>
+            ) : null}
+
+            {asset.status === "ready" ? (
+              <div className="space-y-5 border-b border-border p-5">
+                <div className="space-y-3">
+                  <p className="text-xs tracking-wide text-muted-foreground uppercase">Pull for install</p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <SelectField
+                      className="flex-1"
+                      value={installId}
+                      onChange={(e) => setInstallId(e.target.value)}
+                      allowEmpty
+                      emptyLabel="Choose account"
+                    >
+                      {queue.map((i) => (
+                        <option key={i.id} value={i.id}>
+                          {i.customer} · {i.equipment ?? "no model"}
+                        </option>
+                      ))}
+                    </SelectField>
+                    <Button
+                      size="sm"
+                      disabled={!installId || assign.isPending}
+                      onClick={() => assign.mutate()}
+                    >
+                      Assign & remove from barn
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs tracking-wide text-muted-foreground uppercase">Pull for service</p>
+                  <p className="text-xs text-muted-foreground">
+                    Pick an account already on the customer list. The unit leaves the rack.
+                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <div className="flex-1">
+                      <CustomerCombo
+                        label="Customer"
+                        value={serviceCustomer}
+                        onChange={setServiceCustomer}
+                        allowCreate={false}
+                        placeholder="Search accounts…"
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={!serviceCustomer.trim() || assignService.isPending}
+                      onClick={() => assignService.mutate()}
+                    >
+                      Assign & remove from barn
+                    </Button>
+                  </div>
                 </div>
                 {!asset.customerOwned ? (
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -218,7 +317,9 @@ export function AssetSheet({
                 <p className="text-xs tracking-wide text-muted-foreground uppercase">Return to barn</p>
                 <p className="text-sm text-muted-foreground">
                   {asset.status === "assigned"
-                    ? `Out on ${asset.soldTo ?? "an install"}. Put it back on a slot to free the account.`
+                    ? asset.installId
+                      ? `Out on ${asset.soldTo ?? "an install"}. Put it back on a slot to free the account.`
+                      : `Out on service for ${asset.soldTo ?? "an account"}. Put it back on a slot when it returns.`
                     : `Currently at ${SITE_LABEL[asset.site] ?? asset.site}.`}
                 </p>
                 <div className="grid grid-cols-3 gap-2">
@@ -227,7 +328,7 @@ export function AssetSheet({
                     onChange={(e) => {
                       const s = e.target.value as "barn-back" | "barn-front";
                       setRetSite(s);
-                      setRetPallet(s === "barn-front" ? "J" : "H");
+                      setRetPallet(s === "barn-front" ? FRONT_PALLETS[0]! : "A");
                     }}
                   >
                     <option value="barn-back">Back rack</option>
@@ -278,6 +379,7 @@ export function AssetSheet({
               </p>
             )}
             <Thread entityType="asset" entityId={asset.id} />
+            </SheetBody>
           </>
         ) : null}
       </SheetContent>
@@ -285,10 +387,14 @@ export function AssetSheet({
   );
 }
 
-function statusLabel(s: string) {
-  if (s === "ready") return "Ready";
-  if (s === "deployed") return "In use";
-  if (s === "assigned") return "On an install";
-  if (s === "sold") return "Sold";
-  return s;
+function statusLabel(asset: { status: string; installId: number | null; purpose: string | null }) {
+  if (asset.status === "ready") return "Ready";
+  if (asset.status === "deployed") return "In use";
+  if (asset.status === "assigned") {
+    if (asset.installId) return "On an install";
+    if (asset.purpose?.toLowerCase().includes("service")) return "On service";
+    return "Pulled";
+  }
+  if (asset.status === "sold") return "Sold";
+  return asset.status;
 }

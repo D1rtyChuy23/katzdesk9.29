@@ -1,0 +1,16 @@
+Corrigo Service Report,,,,,,,,
+ST#,Primary Service Tech,Date/Time Completed,Work Done,Operational Status,Problem Description,Customer Name,Total Invoice,P.O. #
+WO-0550,Ryan,9/8/2026 15:15,Replaced group gasket and leak-tested.,completed,Gaskets leaking when pulling shots.,Uptown Catering,120.00,PO-441
+WO-0888,Oliver,,Reset boiler and verified recovery.,work started,No heat on the bar.,New Cafe Corrigo,,
+,Elias,9/8/2026,,completed,This row has no ST# and must be skipped.,Nobody,,
+WO-0777,Josh,,Checked steam wand.,mystery status,Odd noise on steam.,Grace Church,,
+WO-0666,Lance,9/9/2026,Picked up and en route to shop.,en route,Needs a loaner.,Latte Café - La Grange,,
+9391,Ryan,9/8/2026,Adjusted grind and verified shot time.,completed,shots pulling slow,El Rey- Katy,,
+WO9505,Oliver,9/8/2026,TLC visit completed.,work started,TLC on site,Tejas Choco & BBQ - Spring,,TLC
+#0406,Josh,,Site ready check.,en route,Installation follow-up,Southern Ice CO,,Install
+  5440  ,Ryan,9/8/2026,Boiler cleaned.,completed,No heat.,Match Cafe,,
+WO-8881,Lance,,Filter change.,work started,Preventative maintenance visit,Epicure Café,,PM-12
+9376,Ryan,,Conflict row must not merge.,completed,Duplicate WO test,Kolache 360,,
+WO-1999,Ryan,,Should not import when unchecked.,work started,Unchecked skip test.,Skip Cafe,,
+WO-2001,Oliver,,Walk-in boiler check.,work started,No steam at the counter.,Walk - In,,
+0003,Ryan,,New cycle after wrap.,work started,No heat.,Match Cafe,,

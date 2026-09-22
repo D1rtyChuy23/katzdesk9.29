@@ -45,6 +45,10 @@ export interface Sql {
 const globalRef = globalThis as typeof globalThis & {
   __pgSqlPromise__?: Promise<Sql>;
   __pgliteInstance__?: Promise<import("@electric-sql/pglite").PGlite>;
+  __pgliteFileInstance__?: Promise<import("@electric-sql/pglite").PGlite>;
+  __pgliteKatz__?: Promise<import("@electric-sql/pglite").PGlite>;
+  __pgliteRestored__?: Promise<import("@electric-sql/pglite").PGlite>;
+  __pgliteDesk__?: Promise<import("@electric-sql/pglite").PGlite>;
   __pgliteMigrateChain__?: Promise<void>;
 };
 
@@ -104,35 +108,47 @@ function createNeonSql(): Promise<Sql> {
 }
 
 async function createPgliteSql(): Promise<Sql> {
-  // Embedded Postgres, imported on demand so it never loads on the Neon path.
-  // One in-memory instance per process, shared across HMR module instances, so
-  // data survives source edits (it resets on dev-server restart).
-  globalRef.__pgliteInstance__ ??= (async () => {
+  // Embedded Postgres. Persist to disk in the sandbox so edits survive Vite
+  // restarts. Serverless (Vercel) is read-only except /tmp — never mkdir under
+  // cwd there or the function 503s on boot.
+  globalRef.__pgliteDesk__ ??= (async () => {
     const { PGlite } = await import("@electric-sql/pglite");
-    const pg = new PGlite({
-      parsers: {
-        [OID_INT8]: Number,
-        [OID_DATE]: identity,
-        [OID_INTERVAL]: identity,
-      },
-    });
+    const parsers = {
+      [OID_INT8]: Number,
+      [OID_DATE]: identity,
+      [OID_INTERVAL]: identity,
+    };
+    const serverless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    let dataDir: string | undefined;
+    if (!serverless) {
+      try {
+        const { mkdirSync } = await import("node:fs");
+        const { resolve } = await import("node:path");
+        dataDir = resolve(process.cwd(), "data/desk");
+        mkdirSync(dataDir, { recursive: true });
+      } catch (err) {
+        console.error("[db] could not persist PGLite to disk, using memory", err);
+        dataDir = undefined;
+      }
+    }
+    const pg = dataDir ? new PGlite(dataDir, { parsers }) : new PGlite({ parsers });
     await pg.waitReady;
     await pg.exec(
       "create table if not exists _migrations (name text primary key, applied_at timestamptz not null default now())",
     );
     return pg;
   })().catch((err) => {
-    globalRef.__pgliteInstance__ = undefined;
+    globalRef.__pgliteDesk__ = undefined;
     throw err;
   });
-  const pg = await globalRef.__pgliteInstance__;
+  const pg = await globalRef.__pgliteDesk__;
 
   // Apply migrations/ (the single schema source) so preview matches production.
   // SQL is inlined by the bundler via import.meta.glob (no runtime fs); applied
   // files are tracked in _migrations. Runs once per module instance — so an HMR
   // reload after adding a migration file applies it live — with passes
   // serialized on a global chain so concurrent callers never double-apply.
-  // (0009 notifications; clock/pipeline charts + pings.)
+  // (0009 notifications; 0012–0015 ops; 0016–0017 provider locations/people; 0018 ping once.)
   const migrate = async (): Promise<void> => {
     const migrations = import.meta.glob("/migrations/*.sql", {
       query: "?raw",
@@ -205,7 +221,7 @@ export async function getPglite(): Promise<import("@electric-sql/pglite").PGlite
     throw new Error("getPglite() is only available on the PGLite fallback (no DATABASE_URL)");
   }
   await getSql();
-  const pg = await globalRef.__pgliteInstance__;
+  const pg = await globalRef.__pgliteDesk__;
   if (!pg) throw new Error("PGLite instance failed to initialize");
   return pg;
 }
@@ -234,6 +250,7 @@ if (typeof window === "undefined" && dbSource === "pglite") {
   globalBoot.__pgBootstrapPromise__ ??= ensureDbReady().catch((err) => {
     globalBoot.__pgBootstrapPromise__ = undefined;
     console.error("[db] PGLite bootstrap failed:", err);
-    throw err;
+    // Do not rethrow — an unhandled rejection here takes down the whole
+    // serverless isolate (HTTP 503 on every request).
   });
 }

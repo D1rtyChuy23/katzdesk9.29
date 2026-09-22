@@ -1,0 +1,43 @@
+{
+  "errors": [],
+  "warehouse": {
+    "headers": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P"
+    ],
+    "pFilter": false
+  },
+  "service": {
+    "completePressed": true,
+    "sample": [
+      "Clock",
+      "Planner",
+      "Service",
+      "TLC + Factor",
+      "PMs",
+      "Rebuilds",
+      "Pipeline",
+      "Installs"
+    ],
+    "cleared": true
+  },
+  "ticket": {
+    "chipCount": 6,
+    "chipsAboveSearch": true,
+    "chipOverlap": []
+  }
+}

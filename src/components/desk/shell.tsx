@@ -1,37 +1,50 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen,
   CalendarClock,
+  CalendarRange,
   Coffee,
+  Globe,
+  Hammer,
   Handshake,
   MapPin,
   Menu,
   MessageSquare,
   Package,
   Settings2,
+  SlidersHorizontal,
+  Store,
   Truck,
   Users,
   Warehouse,
   Wrench,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { LAST_PATH_KEY, RESUMED_KEY, readPrefs } from "@/lib/ops/prefs";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { GlobalSearch } from "./search";
 import { NotifyBell } from "./notify-bell";
+import { ThemeToggle } from "./theme-toggle";
+import { ShortcutsDialog } from "./shortcuts";
 import { Skeleton } from "@/components/ui/separator";
+import { ExportButton } from "./export-dialog";
+import { MyViewBar } from "./my-view-bar";
+
 
 const NAV = [
   {
     label: "Floor",
     items: [
       { to: "/", label: "Clock", icon: CalendarClock, exact: true },
+      { to: "/planner", label: "Planner", icon: CalendarRange },
       { to: "/service", label: "Service", icon: Wrench },
       { to: "/tlc", label: "TLC + Factor", icon: Coffee },
       { to: "/pms", label: "PMs", icon: Settings2 },
+      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
     ],
   },
   {
@@ -49,7 +62,13 @@ const NAV = [
       { to: "/locations", label: "Locations", icon: MapPin },
       { to: "/modules", label: "Modules", icon: Package },
       { to: "/recipes", label: "Recipes", icon: BookOpen },
+      { to: "/customers", label: "Customers", icon: Store },
+      { to: "/network", label: "Out of Network", icon: Globe },
     ],
+  },
+  {
+    label: "Team",
+    items: [{ to: "/settings", label: "Settings", icon: SlidersHorizontal }],
   },
 ] as const;
 
@@ -126,6 +145,25 @@ function Brand() {
 export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?: boolean }) {
   const { user, isPending } = useCurrentUserState();
   const [open, setOpen] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) return;
+    if (sessionStorage.getItem(RESUMED_KEY)) return;
+    sessionStorage.setItem(RESUMED_KEY, "1");
+    if (!readPrefs().resumeLast) return;
+    const last = window.localStorage.getItem(LAST_PATH_KEY);
+    if (last && last !== pathname && last !== "/login") {
+      router.history.push(last);
+    }
+  }, [user, pathname, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (pathname === "/login") return;
+    window.localStorage.setItem(LAST_PATH_KEY, pathname);
+  }, [user, pathname]);
 
   if (isPending) {
     return (
@@ -145,6 +183,12 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
 
   return (
     <div className="flex min-h-svh bg-background">
+      <a
+        href="#desk-main"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       <aside className="hidden w-60 shrink-0 flex-col bg-ink text-ink-foreground md:flex">
         <div className="px-2 py-5">
           <Brand />
@@ -176,7 +220,13 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
             <span className="font-display text-lg">Katz Desk</span>
           </div>
           <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 md:ml-0">
+            <div className="hidden lg:block">
+              <MyViewBar />
+            </div>
             <GlobalSearch />
+
+            <ExportButton />
+            <ThemeToggle />
             <NotifyBell />
             <div className="hidden sm:block md:hidden">
               <SignedIn>
@@ -190,18 +240,20 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
             </div>
           </div>
         </header>
-        <main className="flex-1 px-3 py-5 md:px-8 md:py-7">{children}</main>
+        <main id="desk-main" className="min-w-0 flex-1 overflow-x-hidden px-3 py-5 md:px-8 md:py-7">
+          {children}
+        </main>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="flex w-64 flex-col bg-ink p-0 text-ink-foreground sm:max-w-64">
-          <div className="px-2 py-5">
+        <SheetContent side="left" className="flex w-64 flex-col overflow-hidden bg-ink p-0 text-ink-foreground sm:max-w-64">
+          <div className="shrink-0 px-2 py-5">
             <Brand />
           </div>
-          <div className="px-2">
+          <div className="sheet-scroll min-h-0 flex-1 overflow-y-auto px-2">
             <NavLinks onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
           </div>
-          <div className="mt-auto border-t border-cream/10 p-3">
+          <div className="shrink-0 border-t border-cream/10 p-3">
             <p className="px-1 text-[11px] text-cream/40">Signed in</p>
             <div className="mt-1 text-cream [&_button]:text-cream/70 [&_span]:text-cream">
               <UserButton />
@@ -209,6 +261,7 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
           </div>
         </SheetContent>
       </Sheet>
+      <ShortcutsDialog />
     </div>
   );
 }

@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "navSettings": true,
+  "darkClass": true,
+  "largeText": true,
+  "highContrast": true,
+  "compact": true,
+  "steps": [
+    "signed in",
+    "{\"text\":\"large\",\"contrast\":\"high\",\"density\":\"compact\",\"font\":\"18px\"}"
+  ],
+  "errors": []
+}

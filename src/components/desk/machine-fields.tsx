@@ -1,14 +1,25 @@
 import { Input, Label } from "@/components/ui/input";
 import type { MachineSpec } from "@/lib/ops/machines";
+import type { SerialPullResult } from "@/lib/ops/serial-pull";
+import { SerialPullField } from "./serial-notice";
 
 export function MachineFields({
   specs,
   onChange,
+  installId,
+  onPulled,
 }: {
   specs: MachineSpec[];
   onChange: (next: MachineSpec[]) => void;
+  installId?: number;
+  onPulled?: (next: MachineSpec[], result: SerialPullResult) => void;
 }) {
   if (!specs.length) return null;
+
+  function patch(index: number, part: Partial<MachineSpec>): MachineSpec[] {
+    return specs.map((s, i) => (i === index ? { ...s, ...part } : s));
+  }
+
   return (
     <div className="space-y-3">
       {specs.map((spec, index) => (
@@ -18,23 +29,24 @@ export function MachineFields({
         >
           <legend className="px-1 text-sm font-medium">{spec.equipment}</legend>
           <p className="text-xs text-muted-foreground">
-            Serial and power for this machine only — not shared with the others on this install.
+            Type a warehouse serial to pull the unit onto this account in one step.
           </p>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
-            <div>
-              <Label htmlFor={`sn-${index}`}>Serial number — {spec.equipment}</Label>
-              <Input
-                id={`sn-${index}`}
-                className="mt-1"
-                value={spec.serial}
-                autoComplete="off"
-                placeholder="Type the serial"
-                onChange={(e) => {
-                  const next = specs.map((s, i) => (i === index ? { ...s, serial: e.target.value } : s));
-                  onChange(next);
-                }}
-              />
-            </div>
+            <SerialPullField
+              label={`Serial number — ${spec.equipment}`}
+              value={spec.serial}
+              installId={installId}
+              machineIndex={index}
+              onValue={(serial) => onChange(patch(index, { serial }))}
+              onPulled={(result) => {
+                const next = patch(index, {
+                  serial: result.serial,
+                  powerVoltage: spec.powerVoltage || result.powerVoltage || "",
+                });
+                onChange(next);
+                onPulled?.(next, result);
+              }}
+            />
             <div>
               <Label htmlFor={`pwr-${index}`}>Power / voltage — {spec.equipment}</Label>
               <Input
@@ -43,12 +55,7 @@ export function MachineFields({
                 value={spec.powerVoltage}
                 autoComplete="off"
                 placeholder="e.g. 208V / 1-phase / 30A"
-                onChange={(e) => {
-                  const next = specs.map((s, i) =>
-                    i === index ? { ...s, powerVoltage: e.target.value } : s,
-                  );
-                  onChange(next);
-                }}
+                onChange={(e) => onChange(patch(index, { powerVoltage: e.target.value }))}
               />
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { r as getSql } from "./popup.server.mjs";
+import { A as normalizeZip, D as normalizeCity, M as parseCoverageLocations, h as retargetCustomer, j as parseContactBlob, k as normalizeState, n as reconcileServiceDuplicates, x as findDuplicateLocation } from "./wo-duplicates.mjs";
 var seed_data_default = {
 	service: [
 		{
@@ -19389,6 +19390,12 @@ var directory_equipment_default = [
 	"Vitrifrigo FG20 2 Gallon Stand Alone Fridge"
 ];
 //#endregion
+//#region src/lib/ops/seed-network-providers.json
+var seed_network_providers_default = /*#__PURE__*/ JSON.parse("[{\"name\":\"A-1 Restuarant Service\",\"status\":null,\"dispatchPhone\":null,\"dispatchEmail\":null,\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"TX\",\"contacts\":\"1407 Tulip Ln.\\nOdessa, TX 79761\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"A-Tech Espresso & Coffee Service Inc.\",\"status\":null,\"dispatchPhone\":\"866.333.7350\",\"dispatchEmail\":\"servicerequest@Atech-service.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"CA\",\"contacts\":\"Contact: Paul   \\nPhone: 866.333.7350   \\nservicerequest@Atech-service.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"ABS Coffee Repair\",\"status\":null,\"dispatchPhone\":\"314.389.2866\",\"dispatchEmail\":null,\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"MO\",\"contacts\":\"Contact: John Meese \\nPhone: 314.389.2866\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"All Espresso Service\",\"status\":\"Active\",\"dispatchPhone\":\"754.205.5076\",\"dispatchEmail\":\"service@allespressoservice.com\",\"secondaryPhone\":\"954.263.9530\",\"secondaryEmail\":\"miguel@allespressoservice.com\",\"responseTime\":null,\"standardRate\":\"Labor $100\\nTravel $100 hr\",\"afterHoursRate\":\"Labor OT $150\\nTrip OT $150\",\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"FL\",\"contacts\":\"Contact: Lillie Morton\\nservice@allespressoservice.com\\n(866) 237-7782\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"All Star Coffee Service\",\"status\":\"Active\",\"dispatchPhone\":\"626-315-8498\",\"dispatchEmail\":\"allstarcoffeeservice@gmail.com\",\"secondaryPhone\":\"626-627-9369\",\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":\"Labor $135 hr\\nTravel $135 hr\",\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"CA\",\"contacts\":\"Contact: Fernando                                           Phone: 626-315-8498  \\nCell: 626-627-9369\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Anytime Beverage Service\",\"status\":\"Active\",\"dispatchPhone\":\"Contact: Cynthia                                         Phone: 714-335-9964\\nCell: 714-395-8108\",\"dispatchEmail\":\"anytimebeverageservice@gmail.com\",\"secondaryPhone\":\"Emergency Service Calls\\n714-335-9964\",\"secondaryEmail\":\"absdispatch@gmail.com\",\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"CA, CO\",\"contacts\":\"Contact: Cynthia                                         \\nPhone: 714-335-9964\\nCell: 714-395-8108\\nServi23275 Lawson Rd Corona, \\nCA 92883 US\\n\\nwww.anytimebeverageservice.com\\n  \\nAccounting, Installation and Preventative Maintenance\\n714-395-8108\\nanytimebeverageservice@gmail.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"B & B Coffee Service\",\"status\":null,\"dispatchPhone\":\"361.855.3066\",\"dispatchEmail\":null,\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"TX\",\"contacts\":\"Phone: 361.855.3066\\n4307 S Port Ave Ste 128 \\nCorpus Christi, TX 78415  \\nNote: 78 miles away. Closest Bunn Certified Company.\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":\"Note: 78 miles away. Closest Bunn Certified Company.\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Bar 9 Coffee Services LLC\",\"status\":\"Active\",\"dispatchPhone\":\"443-460-4303\",\"dispatchEmail\":\"chuck@bar9coffee.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"DC\",\"contacts\":\"Jeremy Lattimer \\nOwner \\nPhone: 443-460-4303\\nChuck - Service Coordinator\\nchuck@bar9coffee.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Best Beverage Equipment Service\",\"status\":\"Active\",\"dispatchPhone\":\"866-966-5799 ext 1\",\"dispatchEmail\":\"service@bestbeverage.net\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"AR, TN\",\"contacts\":\"service@bestbeverage.net\\nPhone: 866-966-5799\\nContact: Dustin or Melissa.\\n\\nContact: Dustin Smith\\nPhone: 866-966-5799 ext 1\\nservice@bestbeverage.net\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Bev Pro Services\",\"status\":null,\"dispatchPhone\":\"410-571-4902 ext. 501 (Office)\",\"dispatchEmail\":null,\"secondaryPhone\":\"410-693-7591 (Mobile)\",\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"MD, VA\",\"contacts\":\"Contact: Thomas Erber\\n410-571-4902 ext. 501 Office/\\n410-693-7591 Mobile\\n2100 Concord Blvd. Suite K\\nCrofton, MD 21114\\n\\nContact: Thomas Erber\\n410-571-4902 ext. 501 Office\\n410-693-7591 Mobile\\n2100 Concord Blvd. Suite K\\nCrofton, MD 21114\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Beverage Equipment Service Inc.\",\"status\":\"Active\",\"dispatchPhone\":\"(515) 494-0849\",\"dispatchEmail\":\"bevequip@outlook.com (best - copied on all comms)\",\"secondaryPhone\":null,\"secondaryEmail\":\"rdachenbach@beverageequipmentservice.net\",\"responseTime\":\"Same-day / Next-day\",\"standardRate\":\"$105/hr (labor + travel included)\",\"afterHoursRate\":\"$157.50/hr (1.5x)\",\"travelPolicy\":\"$105/hr both directions; no separate truck/mileage charge; can batch/split calls to reduce cost\",\"equipmentServiced\":\"Wilbur Curtis (full service); Schaerer espresso incl. super-automatic; Coffee Art Pro & bean-to-cup (extremely experienced); recently trained on WMF 5000 and Soul C\",\"coverage\":\"IA\\nIA ZIPs: 50158, 50248, 50401, 50421, 50447, 50468, 50525, 50590, 50595, 50703, 51446, 51454, 51531, 51537, 51546, 52501, 52544\",\"contacts\":\"Ryan Dachenbach (President)\\nPhone: (515) 494-0849\\nEmail: rdachenbach@beverageequipmentservice.net\\nFax: (641) 774-8749\",\"pmPricing\":\"$176 per machine + parts (SCA1 bean-to-cup example, incl. O-rings; negotiable on volume)\",\"partsStocking\":\"Wide parts variety stocked on vehicles + warehouse for one-trip fixes; large stock of 3M HF-40S filters\",\"notes\":\"Covers all listed Iowa ZIPs. Cedar Rapids area: tech visits at least weekly. North Central / NE Iowa: some sites 2-3 hrs one-way; calls batched to control travel cost.\\nConfirmed OK with paying travel both ways when needed. Ready to set up as client. High priority on minimizing downtime.\",\"lastUpdated\":\"2026-06-24\"},{\"name\":\"Carolina Beverage Solutions\",\"status\":\"Active\",\"dispatchPhone\":\"803-280-5234\",\"dispatchEmail\":\"chris.powers@hotmail.com\",\"secondaryPhone\":null,\"secondaryEmail\":\"billing@carolinabev.com\",\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"NC, SC\",\"contacts\":\"117 Kanawha Street  \\nFort Mill, SC 29715  Phone: \\n803-280-5234  \\nContact: Chris / Val  \\nchris.powers@hotmail.com  \\nbilling@carolinabev.com  \\nservice@carolinabev.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Commercial Kitchen\",\"status\":null,\"dispatchPhone\":\"956.664.8267\",\"dispatchEmail\":null,\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"TX\",\"contacts\":\"Phone: 956.664.8267\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Duke Services\",\"status\":null,\"dispatchPhone\":\"714.525.2866\",\"dispatchEmail\":null,\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"CA\",\"contacts\":\"Phone: 714.525.2866\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Espresso Enterprises\",\"status\":\"Active\",\"dispatchPhone\":\"317-876-9031\",\"dispatchEmail\":\"carey@espressoenterprises.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"IN\",\"contacts\":\"Contact: Troy Smith/Carey  \\nPhone: 317-876-9031  \\ncarey@espressoenterprises.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":\"1-hour minimum. After first hour billed in 15-min increments.\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Espresso Southeast\",\"status\":\"Active\",\"dispatchPhone\":\"770-867-3111\",\"dispatchEmail\":\"service@espressosoutheast.com\",\"secondaryPhone\":null,\"secondaryEmail\":\"priscila@espressosoutheast.com\",\"responseTime\":\"Same day when possible; most calls completed the next day\",\"standardRate\":\"Labor $100 / hour\\nTravel $100 / hour\",\"afterHoursRate\":\"Labor $150 / hour\\nTravel $150 / hour\\nTime-and-a-half on labor and travel.\",\"travelPolicy\":\"One-way billing (standard). 1-hour minimum.\\nExtended travel may be billed\\nround-trip case-by-case\",\"equipmentServiced\":\"• Espresso: Most major brands — La Marzocco, Nuova Simonelli, Rancilio, Cimbali, Faema, and others\\n• Coffee & Tea: Fetco, Curtis (Wilbur Curtis), Bunn\",\"coverage\":\"– I-85N Greenville, SC\\n– I-20E Augusta, GA\\n– I-16E Swainsboro, GA\\n– I-75S Cordele, GA\\n– I-85S Auburn, AL\\n– I-20W Oxford, AL\\n– I-75N Chattanooga, TN\",\"contacts\":\"Owner:  Mario Scoccimaro  \\nService Manager: Andrew Kane  \\nMario Jr.\\nPriscila (priscila@espressosoutheast.com)\\nPhone: 770-867-3111  \\nservice@espressosoutheast.com\",\"pmPricing\":\"N/A (no formal PM pricing program mentioned).\",\"partsStocking\":\"Extensive inventory for many espresso machines. Fetco inventory is also extensive. Curtis and Bunn have many common parts (somewhat less depth).\\n• If a part is not in stock they can order quickly, or they are happy to use parts you supply from your inventory.\",\"notes\":\"– I-85N Greenville, SC\\n– I-20E Augusta, GA\\n– I-16E Swainsboro, GA\\n– I-75S Cordele, GA\\n– I-85S Auburn, AL\\n– I-20W Oxford, AL\\n– I-75N Chattanooga, TN\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"ETSC (EspressoTech Service Company)\",\"status\":\"Active\",\"dispatchPhone\":\"(888) 523-1684\",\"dispatchEmail\":\"service@etsc.coffee\",\"secondaryPhone\":null,\"secondaryEmail\":\"Jess@etsc.coffee\",\"responseTime\":\"Standard 24-48 hrs (priority & tech availability); same-day when possible\",\"standardRate\":\"$195 first hour | $125 each additional hour\\n$70/hr travel\",\"afterHoursRate\":\"1.5x standard rates (after-hours / weekend)\",\"travelPolicy\":\"$70/hr travel for locations outside tech's local service area\",\"equipmentServiced\":\"Wilbur Curtis - supported; Schaerer espresso - supported (carries Schaerer parts to maximize first-time fix)\",\"coverage\":\"KS, IA, IL, MO, NE, CO, OK, MN, WI, TN + more\\nKS ZIPs: 67456, 67460, 67501, 67502, 67554\\nMO ZIPs: 64804, 64850\",\"contacts\":\"Jessica Peacock\\nPhone: (888) 523-1684\\nEmail: Jess@etsc.coffee\\n\\nRegional contacts (merged from Espresso Tech / ETSC STL):\\n[Illinois] service @ espressotechsc.com | 816-523-1684Technical Support Center             | 11614 W 90th Street                             | Overland Park, KS 66214\\n[Kansas] Contact: Mark Robey | Phone: 816.523.1684 | service.espressotech@gmail.com\\n[Missouri] Contact: Liz | Phone: 314-939-7159 | liz@etsc.coffee)  | 1500 South 1st Capitol Drive Unit 344 | Saint Charles Missouri 63303 | 1500 South 1st Capitol Drive Unit 344 Saint Charles Missouri 63303\",\"pmPricing\":\"PM billed at standard service rates ($195 first hr / $125 add'l)\",\"partsStocking\":\"Techs carry van stock of common Wilbur Curtis and Schaerer parts\",\"notes\":\"Tech hubs: Overland Park & Wichita KS | Des Moines & Quad Cities IA | Chicago | St. Louis | Elkhorn NE | Denver | Tulsa (OKC coming soon) | Bloomington MN | Milwaukee | Nashville (Knoxville coming soon). KS ZIPs covered: 67456, 67460, 67501, 67502, 67554.\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"FASTCILITY CORP\",\"status\":\"Active\",\"dispatchPhone\":\"Office: (833) 203-2285\",\"dispatchEmail\":\"Service@FASTCILITYCORP.COM\\nhttps://app.servicefusion.com/fastcility\\nUsername: Jesus@katzcoffee.com\\nF!xmy5!t03\",\"secondaryPhone\":\"714) 520-1486\",\"secondaryEmail\":\"ddavenport@fastcilitycorp.com\",\"responseTime\":null,\"standardRate\":\"Labor $115 / hour 1-hour minimum\\nTravel $115 flat fee Flat fee (not hourly)\\nFuel Surcharge $25 flat fee Applied per call\\nParts 25% markup from cost For any parts used during repair\",\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":\"• Bunn • Fetco • Wilbur Curtis • Schaerer\\n• Eversys • La Marzocco • Mazzer • Everpure\",\"coverage\":\"• Primary service region: Southwest U.S. (CA, AZ, NV, NM, TX)\",\"contacts\":\"Dalton Davenport\\nBusiness Development Manager\\nMobile: (714) 520-1486\\nEmail: ddavenport@fastcilitycorp.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":\"• Confirmed coverage: All ZIP codes provided in the Excel list for Arizona, California, New Mexico, Nevada, and Texas\\n• Excluded: Illinois locations (Chicago / Rosemont) — not covered\\n• Primary service region: Southwest U.S. (CA, AZ, NV, NM, TX)\\n• Note: San Antonio / Austin area coverage requested for near-term expansion\",\"lastUpdated\":null},{\"name\":\"First Coast Espresso\",\"status\":\"Pending Setup\",\"dispatchPhone\":\"904-654-5662\",\"dispatchEmail\":\"jose@firstcoastespresso.com\",\"secondaryPhone\":\"904-379-1455\",\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"GA\",\"contacts\":\"Jose Parada\\njose@firstcoastespresso.com \\n3653 Regent Blvd\\nSuite 203\\nJacksonville, Fl 32224\\n904-654-5662 cell\\n904-379-1455 office\\n$95 per hr labor and $95 per hr trip. 4 hr round trip.\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Iconik Coffee\",\"status\":\"Inactive\",\"dispatchPhone\":\"(505) 428-0669\",\"dispatchEmail\":\"sean@iconikcoffee.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"NM\",\"contacts\":\"Sean Ham \\nsean@iconikcoffee.com\\nPhone: (505) 428-0669\\n1366 Cerrillos Rd\\nSanta Fe, NM 87505\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Intergrated Coffee Solutions\",\"status\":\"Active\",\"dispatchPhone\":\"Phone / Text: (864) 606-4418\",\"dispatchEmail\":\"integratedcoffeesolutions@gmail.com\",\"secondaryPhone\":\"Phone / Text: (864) 606-4418\",\"secondaryEmail\":\"integratedcoffeesolutions@gmail.com\",\"responseTime\":\"Within 72 hours (depends on dispatch schedule)\",\"standardRate\":\"Standard Labor $115 / hour Standard hourly rate\\nStandard Travel $115 / hour 1-hour minimum after 15 minutes of travel. No return rate charged.\",\"afterHoursRate\":\"Emergency Labor $175 / hour Emergency / after-hours rate\\nEmergency Travel $175 / hour Same 1-hour minimum after 15 min. No return rate charged.\",\"travelPolicy\":\"Will travel up to 3 hours from Spartanburg, SC before return travel rates apply. Coverage area is variable beyond that.\",\"equipmentServiced\":\"• Traditional Espresso: La Marzocco, Astoria, Rocket Espresso, Nuova Simonelli, Synesso, Victoria Arduino, Wega, and more major brands\\n• Superautomatic: Most brands of superautomatic coffee machines\\n• Tea Equipment: Most tea equipment supported\",\"coverage\":\"SC\",\"contacts\":\"Julia Richardson\\nDirector of Communications\\nSame phone: (864) 606-4418 (text OK)\\nEmail: integratedcoffeesolutions@gmail.com\\nWebsite: integratedcoffeesolutions.com\",\"pmPricing\":\"• PM Programs: Yes — monthly installment plans available. Pricing generally ranges from $75–$150 per month depending on the machine. Happy to discuss specifics for\\nyour locations.\",\"partsStocking\":\"• Parts: Stock common parts for major brands on trucks. Specialty parts or less-common brands are ordered as needed.\",\"notes\":\"• Emergency Response: Typically within 24 hours\\n• Primary Coverage: Upstate South Carolina (including Powdersville)\\n• Travel Radius: Will travel up to 3 hours from Spartanburg, SC before return travel rates apply. Coverage area is variable beyond that.\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Izzy's Espresso Services Inc.\",\"status\":null,\"dispatchPhone\":\"816-373-7011\",\"dispatchEmail\":\"chris@izzysespresso.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"KS\",\"contacts\":\"Owner: Chris Isariotis    \\nPhone: 816-373-7011\\nchris@izzysespresso.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Jaguar Coffee Co.\",\"status\":null,\"dispatchPhone\":\"352 442 2506\",\"dispatchEmail\":\"sam.mendez@jaguarcoffee.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"FL\",\"contacts\":\"Contact: Samantha Mendez\\nPhone: 352 442 2506\\nsam.mendez@jaguarcoffee.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"JVG Coffee Mechanics\",\"status\":\"Active\",\"dispatchPhone\":\"919-240-8083\",\"dispatchEmail\":\"hayes@jvgcoffeemechanics.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"VA\",\"contacts\":\"505 Meadowlands Dr Unit 101\\nHillsborough, NC 27278\\nhayes@jvgcoffeemechanics.com\\n919-240-8083\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Katz Coffee\",\"status\":\"Active\",\"dispatchPhone\":\"713.864.3338\",\"dispatchEmail\":\"service@katzcoffee.com\",\"secondaryPhone\":\"832.517.9773\",\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":null,\"contacts\":null,\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-16\"},{\"name\":\"Ken's Beverage\",\"status\":null,\"dispatchPhone\":\"317.888.6400\",\"dispatchEmail\":\"awhitlock@kensbeverage.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"IN\",\"contacts\":\"Contact: Alan Whitlock\\nPhone: 317.888.6400\\nawhitlock@kensbeverage.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"LIQUISERVE LLC\",\"status\":\"Active\",\"dispatchPhone\":\"Toll Free: 800-528-6625\\nMain: 505-247-3707\",\"dispatchEmail\":\"Service@LiquiServe.com\",\"secondaryPhone\":\"Office: 505-247-3707 Ext. 1227\\nMobile: 505-977-8066\\n\\n505-308-8682\",\"secondaryEmail\":\"Matthew.Baca@LiquiServe.com\",\"responseTime\":\"Response Time: Next business day (standard). Same-day possible depending on priority/availability.\",\"standardRate\":\"Labor (Service/Repair/Install) $95/hr\\nTravel $95/hr\",\"afterHoursRate\":\"Labor (Service/Repair/Install) $142.50/hr\\nTravel$142.50/hr\\nBilled in 15-min increments after first hour. OT for calls\\noutside normal business hours.\\nFuel surcharge $5\",\"travelPolicy\":\"Round trip from nearest warehouse. Local zone = one-way\\n30-min charge.\",\"equipmentServiced\":\"• Wilbur Curtis — Supported (stocked parts)\\n• Schaerer — Supported (stocked parts)\\n• Other: Bunn, Eversys also supported with stocked parts. Rancilio serviced but limited stock.\",\"coverage\":\"SD ZIPs: 57501, 57532, 57543, 57551, 57701, 57703, 57717, 57719, 57730, 57735, 57747, 57783, 57785\",\"contacts\":\"Matthew Baca\\nCFO / Primary Contact\\n\\nDirk Brunson\\nField Service Supervisor\\nPhone: Office: 505-247-3707 Ext. 1227\\nMobile: 505-977-8066\\n\\n505-308-8682\\nEmail: Matthew.Baca@LiquiServe.com\",\"pmPricing\":\"Preventive Maintenance (PM) $95/hr (or agreed flat)\",\"partsStocking\":\"• Wilbur Curtis — Supported (stocked parts)\\n• Schaerer — Supported (stocked parts)\\n• Other: Bunn, Eversys also supported with stocked parts. Rancilio serviced but limited stock.\",\"notes\":\"Coverage: Broad multi-state territory. For the latest inquiry, most ZIPs in NM, TX, OK, NE are covered.\\nWarehouses: Multiple regional warehouses (travel billed from nearest one). Strong presence in Southwest & Plains states.\",\"lastUpdated\":\"2026-07-09\"},{\"name\":\"Masket Services\",\"status\":\"Active\",\"dispatchPhone\":\"866-803-8088\",\"dispatchEmail\":\"service@masketservices.com\",\"secondaryPhone\":\"866-803-8088\",\"secondaryEmail\":\"shane@masketservices.com\",\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":\"Eversys, Franke, Schaerer , Nuova,  Cimbali , Rancilio , Unic , La Marzocco,  Synesso, Wega, WMF, Gaggia\\nCurtis, Fetco, Bunn after warranty work\",\"coverage\":\"PA\",\"contacts\":\"Shane Stroman \\nService / Sales\\nshane@masketservices.com     /   866-803-8088\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-20\"},{\"name\":\"MB Coffee Services\",\"status\":null,\"dispatchPhone\":\"509.302.7071\",\"dispatchEmail\":null,\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"CA\",\"contacts\":\"Contact: Mathew                                          Phone: 509.302.7071\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Midwest Equipment & Espresso Specialists, Inc.\",\"status\":null,\"dispatchPhone\":\"402-293-7490\",\"dispatchEmail\":\"Paul@meesi.omhcoxmail.com\",\"secondaryPhone\":\"402-293-7503\",\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"KS, NE\",\"contacts\":\"Contact: Jen\\nPhone: 402-293-7490\\nFax: 402-293-7503\\nPaul@meesi.omhcoxmail.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Orleans Coffee / Perfect Shot Espresso Service\",\"status\":\"Active\",\"dispatchPhone\":\"504-827-0878 (Office)\",\"dispatchEmail\":\"robbie@orleanscoffee.com\",\"secondaryPhone\":\"504-258-6881 (Cell - Robbie Mahner)\",\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"LA\",\"contacts\":\"Orleans Coffee / Perfect Shot Espresso Service\\nRobbie Mahner\\nService Manager \\nPerfect Shot Espresso Service\\n504-258-6881 cell\\n504-827-0878 office\\nrobbie@orleanscoffee.com\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Prestige Technical Services\",\"status\":\"Active\",\"dispatchPhone\":\"636-583-5788\",\"dispatchEmail\":\"prestigetech@prestigetech.us\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"KS, OK\",\"contacts\":\"Phone: 636-583-5788\\nprestigetech@prestigetech.us\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"PriorityOne Group\",\"status\":\"Active\",\"dispatchPhone\":\"(800) 226-7146\",\"dispatchEmail\":\"service@priorityone247.com\",\"secondaryPhone\":\"(800) 226-7146 | (303) 577-1285 CO | (505) 234-1831 NM/TX\",\"secondaryEmail\":null,\"responseTime\":\"Zone 1: 24/7/365 | Zone 2: standard + on-call | Zone 3: clustered/scheduled | Zone 4: limited/out-of-area\",\"standardRate\":\"Beverage $90/hr | Espresso $105/hr | Cooking/Refrig $125-135/hr (valid 11/1/2025 - 12/31/2026)\",\"afterHoursRate\":\"1.5x (5pm-10pm) | 2x overnight (10pm-7:30am) | 2x holidays (24 hr)\",\"travelPolicy\":\"Travel billed in 15-min increments from last call location (GPS tracked); efficient routing by dispatch\",\"equipmentServiced\":\"Full beverage equipment service: beverage, espresso, cooking, refrigeration/HVAC\",\"coverage\":\"CO, NM, TX + surrounding\\nNM ZIPs: 87002, 87004, 87013, 87020, 87021, 87031, 87104, 87105, 87114, 87121, 87124, 87301, 87401, 87501, 87505, 87507, 87508, 87532, 87571, 87701, 87732, 88007, 88012, 88081, 88201, 88301, 88310, 88317, 88336, 88345, 88353, 88401, 88435\",\"contacts\":\"Customer Service Team\\nPhone: (800) 226-7146 | (303) 577-1285 CO | (505) 234-1831 NM/TX\\nEmail: service@priorityone247.com\\nFax: N/A (use main numbers)\",\"pmPricing\":\"PM contracts available with discounted emergency rates\",\"partsStocking\":\"Parts & equipment support via dedicated Parts team\",\"notes\":\"Strong coverage in CO Front Range, NM, and TX (see zone assignments on Stores tab).\\nLabor & travel billed in quarter-hour increments via mobile/GPS. Fastest service: call Customer Service or email service@priorityone247.com. QR code available for quick requests.\",\"lastUpdated\":\"2026-06-24\"},{\"name\":\"Remolinos Group\",\"status\":null,\"dispatchPhone\":\"479.647.6800\",\"dispatchEmail\":\"tech@fidel.coffee\",\"secondaryPhone\":\"479.647.6800\",\"secondaryEmail\":\"fidel@remolinosgroup.com\",\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"AR\",\"contacts\":\"Fidel Samour\\n479.647.6800\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Shepspresso Solutions\",\"status\":null,\"dispatchPhone\":\"833.377.7370\",\"dispatchEmail\":\"info@shepspresso.com\",\"secondaryPhone\":\"970.432.4250\",\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"GA\",\"contacts\":\"Shepspresso Solutions\\nJaime Palmer\\nBusiness: 833.377.7370\\nText for Service: 970.432.4250\\ninfo@shepspresso.com\\n730 Main St PMB358, \\nNorth Myrtle Beach, SC 29582\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"STCS\",\"status\":\"Active\",\"dispatchPhone\":\"956-536-7846\",\"dispatchEmail\":\"alanmcgee@msn.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"TX\",\"contacts\":\"Contact:Alan McGee  \\nPhone: 956-536-7846\\nEmail: alanmcgee@msn.com  \\n200 North Business 77  \\nCombes, TX 78535\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Stephen's Service Techician\",\"status\":null,\"dispatchPhone\":\"806.789.0810\",\"dispatchEmail\":null,\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"TX\",\"contacts\":\"Contact: Don\\nPhone: 806.789.0810\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Swanson Service\",\"status\":\"Active\",\"dispatchPhone\":\"(515) 993-2272\",\"dispatchEmail\":\"swansonservice@msn.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":\"Usually completes calls within 24 hrs\",\"standardRate\":\"Labor $90/hr\\nTravel $115/hr\",\"afterHoursRate\":\"OT: $135/hr labor + $172.50/hr travel (round trip)\",\"travelPolicy\":\"Travel $115/hr, round trip, billed hourly\",\"equipmentServiced\":\"Wilbur Curtis (full service confirmed). Does NOT service Schaerer espresso machines.\",\"coverage\":\"IA\\nIA ZIPs: 50158, 50248, 50421, 50468, 50525, 50590, 50595, 50703, 51446, 51531, 51537, 51546, 52501, 52544\",\"contacts\":\"Scott Swanson / Lisa\\nPhone: (515) 993-2272\\nEmail: swansonservice@msn.com\",\"pmPricing\":\"Not provided - follow up\",\"partsStocking\":\"Carries parts on vehicle (details not provided)\",\"notes\":\"Main office in Adel, IA. Serves North Central / NE Iowa; confirmed they can service all listed locations. Same 15 IA ZIPs as Beverage Equipment Service.\\nResponse was brief - no details on PM pricing, parts stocking, dispatch process, or W-9. Follow-up recommended.\",\"lastUpdated\":\"2026-06-25\"},{\"name\":\"Thunderbird Equipment Service\",\"status\":\"Active\",\"dispatchPhone\":\"480-294-2434\",\"dispatchEmail\":\"service@thunderbirdequipment.com\",\"secondaryPhone\":\"C| 480-294-2434 \\nO| 602-675-2420\",\"secondaryEmail\":\"brian@thunderbirdequipment.com\",\"responseTime\":\"Same day or Next day\",\"standardRate\":\"Labor $120/hr\\nTravel $85 hourly\",\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":\"Eversys, Fetco\",\"coverage\":\"AZ\",\"contacts\":\"Thunderbird Equipment\\nBrian Koren\\nPresident and Founder\\nThunderbird Equipment Service\\n480-294-2434 C\\n602-675-2420 O\\nThunderbirdequipment.com\\n10439 N Cave Creek Rd Suite 10. \\nPhoenix, AZ 85020\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Ultimate Espresso Services\",\"status\":\"Active\",\"dispatchPhone\":\"314.541.5256\",\"dispatchEmail\":\"ultimateespressoservices@gmail.com\",\"secondaryPhone\":null,\"secondaryEmail\":null,\"responseTime\":null,\"standardRate\":null,\"afterHoursRate\":null,\"travelPolicy\":null,\"equipmentServiced\":null,\"coverage\":\"MO\",\"contacts\":\"Ultimate Espresso Services\\nContact: Azmir\\nPhone: 314.541.5256\\nultimateespressoservices@gmail.com\\n\\nShipping Address:\\n5608 Wickershire Ln\\nSt Louis, MO 63129\\n \\nLiftgate is needed\",\"pmPricing\":null,\"partsStocking\":null,\"notes\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"WHITEHEAD FOOD EQUIPMENT\",\"status\":\"Active\",\"dispatchPhone\":\"Office: 405-528-5117\",\"dispatchEmail\":\"Nate@wfeokc.com\",\"secondaryPhone\":\"Mobile: 405-887-0047\",\"secondaryEmail\":\"Juan@wfeokc.com\",\"responseTime\":\"Generally same day or within 24 hours (varies with workload)\",\"standardRate\":\"Service Calls / Repairs $110 per hour\",\"afterHoursRate\":\"Labor (Service/Repair/Install) $142.50/hr\\nTravel$142.50/hr\\nBilled in 15-min increments after first hour. OT for calls\\noutside normal business hours.\\nFuel surcharge $5\",\"travelPolicy\":\"Travel — OKC Metro (Local) $65 flat Within Oklahoma City Metro\\nTravel — Outside OKC Metro $110 per hour Round trip\",\"equipmentServiced\":\"• Wilbur Curtis — Supported (stocked parts)\\n• Schaerer — Supported (stocked parts)\",\"coverage\":\"Oklahoma ZIP codes confirmed covered (73010, 73030, 73036, 73401, 73446, 73459, 73521, 73542, 73644, 73942, 74432, 74467, 74525, 74553,\\n74554, 74820\\nOK ZIPs: 74728\",\"contacts\":\"Juan Herrera\\nDirector of Operationsr\\nPhone: Mobile: 405-887-0047\\nEmail: Juan@wfeokc.com\",\"pmPricing\":\"Preventive Maintenance (PM) $110 per hour\",\"partsStocking\":\"• Wilbur Curtis — Supported (stocked parts)\\n• Schaerer — Supported (stocked parts)\",\"notes\":\"Entire state of Oklahoma + surrounding states (if travel costs approved)\\nWarehouses: Multiple regional warehouses (travel billed from nearest one). Strong presence in Southwest & Plains states.\",\"lastUpdated\":\"2026-07-09\"}]");
+//#endregion
+//#region src/lib/ops/seed-network-accounts.json
+var seed_network_accounts_default = /*#__PURE__*/ JSON.parse("[{\"name\":\"MTA Engineers, INC\",\"email\":\"lajean@mtaengineers.com\",\"contact\":\"Claudia Bremer\",\"phone\":\"501.753.2526\",\"address\":\"8001 National Drive\",\"city\":\"Little Rock\",\"state\":\"AR\",\"zip\":\"72209\",\"equipment\":\"Virtu 9236A\",\"ownership\":\"Lease\",\"primary\":\"Remolinos Group\",\"secondary\":\"Best Beverage Equipment Service\",\"region\":\"Arkansas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Porsche Little Rock\",\"email\":\"aravi@indigoautogroup.com\",\"contact\":\"Ashley Ravi\",\"phone\":\"501.497.5656\",\"address\":\"516 Colonel Glenn Plaza Loop\",\"city\":\"Little Rock\",\"state\":\"AR\",\"zip\":\"72210\",\"equipment\":\"De Jong Duke Virtua93; La Marzocco Linea PB 2AV; La Marzocco Swift Grinder\",\"ownership\":\"Lease; Owned - Purchased from Katz\",\"primary\":\"Remolinos Group\",\"secondary\":\"Best Beverage Equipment Service\",\"region\":\"Arkansas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Dominick's Steakhouse\",\"email\":\"joel@domsteak.com\",\"contact\":null,\"phone\":\"480-272-7271\",\"address\":\"15169 N Scottsdale Rd\",\"city\":\"Scottsdale\",\"state\":\"AZ\",\"zip\":\"85254\",\"equipment\":\"Cameo c'2s (Downstairs); Cameo c'2s (Upstairs); Wilbur Curtis G4TP1S63A3100 Coffee Brewer; Wilbur Curtis ILGD-10\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Thunderbird Equipment Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"Arizona Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Durant's Steakhouse\",\"email\":\"andria@primesteakconcepts.com\",\"contact\":\"Paul Morris\",\"phone\":\"6022645967\",\"address\":\"2611 N Central Ave\",\"city\":\"Phoenix\",\"state\":\"AZ\",\"zip\":\"85004\",\"equipment\":\"Fetco 1231 Plus; Eversys Cameo c'2s\",\"ownership\":\"Loaned; Owned - Purchased from 3rd Party\",\"primary\":\"Thunderbird Equipment Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"Arizona Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Ocean 44 Scottsdale\",\"email\":\"craig@ocean44.com\",\"contact\":null,\"phone\":\"480.867.0044\",\"address\":\"4748 N Goldwater Blvd\",\"city\":\"Scottsdale\",\"state\":\"AZ\",\"zip\":\"85251\",\"equipment\":\"Cameo c'2s; Wilbur Curtis G4TP1S63A3100 Coffee Brewer; Wilbur Curtis ILGD-10 Grinder\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Thunderbird Equipment Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"Arizona Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Steak 44 Phoenix\",\"email\":\"jonathan@steak44.com\",\"contact\":null,\"phone\":\"602.271.4400\",\"address\":\"5101 N 44th St\",\"city\":\"Phoenix\",\"state\":\"AZ\",\"zip\":\"85018\",\"equipment\":\"Wilbur Curtis G4TP1S63A100 Coffee Brewer; Bunn MHG Grinder; Cameo c'2s\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Thunderbird Equipment Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"Arizona Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"iPEC\",\"email\":\"mbaker@indigoautogroup.com\",\"contact\":\"Patrick Stam\",\"phone\":\"760.393.4400\",\"address\":\"6 Jasper Way\",\"city\":\"Thermal\",\"state\":\"CA\",\"zip\":\"92274\",\"equipment\":\"Eversys Cameo c'2m; c'Fridge Beside\",\"ownership\":\"Lease\",\"primary\":\"Anytime Beverage Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #070CF - Tustin, CA\",\"email\":\"tkskaff@kolfac.com\",\"contact\":\"Kathy/Destiny\",\"phone\":\"714.730.2253\",\"address\":\"14091 Newport Avenue\",\"city\":\"Tustin\",\"state\":\"CA\",\"zip\":\"92780\",\"equipment\":\"ITCB Combo Brewer; Cameo c'2s\",\"ownership\":\"Loaned; Owned - Purchased from Katz\",\"primary\":\"All Star Coffee Service\",\"secondary\":\"Anytime Beverage Service\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #071CF - Huntington Beach, CA\",\"email\":\"skaffkathy@yahoo.com\",\"contact\":\"Kathy Skaff\",\"phone\":\"949.235.6782\",\"address\":\"6502 Bolsa Avenue, Unit 102\",\"city\":\"Huntington Beach\",\"state\":\"CA\",\"zip\":\"92647\",\"equipment\":\"Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned\",\"primary\":\"All Star Coffee Service\",\"secondary\":\"Anytime Beverage Service\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Ocean 48 Newport Beach\",\"email\":\"brent@ocean48.com\",\"contact\":null,\"phone\":\"949.989.0048\",\"address\":\"151 Newport Center Drive\",\"city\":\"Newport Beach\",\"state\":\"CA\",\"zip\":\"92660\",\"equipment\":\"Cameo c'2s; Wilbur Curtis G4TP1S63A3100 Coffee Brewer; Wilbur Curtis ILGD-10 Grinder\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Anytime Beverage Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Porsche Marin\",\"email\":\"marinvendors@indigoautogroup.com\",\"contact\":null,\"phone\":\"(415) 944-1610\",\"address\":\"900 Redwood Hwy\",\"city\":\"Mill Valley\",\"state\":\"CA\",\"zip\":\"94941\",\"equipment\":\"La Marzocco Linea PB 2AV; La Marzocco Swift Grinder; BWS100/10\",\"ownership\":\"Owned - Purchased from Katz\",\"primary\":\"MB Coffee Services\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Rolls Royce - Rancho Mirage\",\"email\":\"lmccurley@indigoautogroup.com\",\"contact\":\"Lesley McCurley\",\"phone\":\"760.773.5000\",\"address\":\"71-387 Highway 111\",\"city\":\"Rancho Mirage\",\"state\":\"CA\",\"zip\":\"92270\",\"equipment\":\"Eversys Cameo c'2m; c'Fridge Beside\",\"ownership\":\"Lease\",\"primary\":\"Anytime Beverage Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Steak 48 Beverly Hills\",\"email\":\"leila@steak48.com\",\"contact\":null,\"phone\":\"310.388.0048\",\"address\":\"9680 Wilshire Blvd.\",\"city\":\"Beverly Hills\",\"state\":\"CA\",\"zip\":\"90212\",\"equipment\":\"Cameo c'2s; Wilbur Curtis G4TPX2S63A3100 Coffee Brewer; Wilbur Curtis ILGD-10 Grinder\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Anytime Beverage Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Steak 48 Del Mar\",\"email\":\"jacob@steak48.com\",\"contact\":null,\"phone\":\"619.901.0048\",\"address\":\"12995 El Camino Real\",\"city\":\"Del Mar Heights\",\"state\":\"CA\",\"zip\":\"92130\",\"equipment\":\"Cameo c'2s; Wilbur Curtis G4TP1S63A3100 Coffee Brewer; Wilbur Curtis ILGD-10 Grinder\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Anytime Beverage Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"California Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Rare Italian\",\"email\":\"collinm@rareitalian.com\",\"contact\":\"Collin McDowell\",\"phone\":\"970.294.4544\",\"address\":\"101 South College Avenue\",\"city\":\"Fort Collins\",\"state\":\"CO\",\"zip\":\"80524\",\"equipment\":\"Cameo c'2s\",\"ownership\":\"Lease\",\"primary\":\"PriorityOne Group\",\"secondary\":null,\"region\":\"Colorado Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Rio Grande Mexican Restaurant - Boulder\",\"email\":\"boulder@riograndemexican.com\",\"contact\":\"Julio Vasquez\",\"phone\":\"303.444.3690\",\"address\":\"1101 Walnut St\",\"city\":\"Boulder\",\"state\":\"CO\",\"zip\":\"80302\",\"equipment\":\"ITCB w/Shelf (New Style)\",\"ownership\":\"Loaned\",\"primary\":\"PriorityOne Group\",\"secondary\":null,\"region\":\"Colorado Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Rio Grande Mexican Restaurant - Denver\",\"email\":\"denver@riograndemexican.com\",\"contact\":\"Matt Ciani\",\"phone\":\"303.623.5432\",\"address\":\"1745 Wazee St\",\"city\":\"Denver\",\"state\":\"CO\",\"zip\":\"80202\",\"equipment\":\"ITCB w/Shelf (New Style)\",\"ownership\":\"Loaned\",\"primary\":\"PriorityOne Group\",\"secondary\":null,\"region\":\"Colorado Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Rio Grande Mexican Restaurant - Greeley\",\"email\":\"apgreeley@riograndemexican.com\",\"contact\":\"Eric Lozano\",\"phone\":\"970.304.9292\",\"address\":\"825 9th Street\",\"city\":\"Greeley\",\"state\":\"CO\",\"zip\":\"80631\",\"equipment\":\"ITCB w/Shelf (New Style)\",\"ownership\":\"Loaned\",\"primary\":\"PriorityOne Group\",\"secondary\":null,\"region\":\"Colorado Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Rio Grande Mexican Restaurant - Lone Tree\",\"email\":\"lonetree@riograndemexican.com\",\"contact\":\"Matt Ciani\",\"phone\":\"303.799.4999\",\"address\":\"9535 Park Meadows Drive\",\"city\":\"Lone Tree\",\"state\":\"CO\",\"zip\":\"80124\",\"equipment\":\"ITCB w/Shelf (New Style)\",\"ownership\":\"Loaned\",\"primary\":\"PriorityOne Group\",\"secondary\":null,\"region\":\"Colorado Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Rio Grande Mexican Restaurant- Ft Collins\",\"email\":\"apfortcollins@riograndemexican.com\",\"contact\":\"Paul Sisson\",\"phone\":\"970.224.3049\",\"address\":\"143 W Mountain Ave\",\"city\":\"Fort Collins\",\"state\":\"CO\",\"zip\":\"80524\",\"equipment\":\"ITCB w/ Shelf (New Style)\",\"ownership\":\"Loaned\",\"primary\":\"PriorityOne Group\",\"secondary\":null,\"region\":\"Colorado Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Truluck's - Washington DC\",\"email\":\"trulucks-washingtondc@trulucks.com\",\"contact\":null,\"phone\":\"202.898.0680\",\"address\":\"700 K Street NW, Suite 70\",\"city\":\"Washington\",\"state\":\"DC\",\"zip\":\"20001\",\"equipment\":\"Eversys Cameo c'2s; ITCB w/Shelf (NS); H5X Hot Water Tower; FPG-2E\",\"ownership\":\"Lease; Loaned\",\"primary\":\"PriorityOne Group\",\"secondary\":null,\"region\":\"Washington DC\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Delray Beach, FL\",\"email\":\"APdelray107@eathawkers.com\",\"contact\":\"James Gnehm\",\"phone\":\"561.485.4111\",\"address\":\"640 E. Atlantic Ave.\",\"city\":\"Delray Beach\",\"state\":\"FL\",\"zip\":\"33483\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"All Espresso Service\",\"secondary\":\"Jaguar Coffee Co.\",\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Jacksonville, FL (Five Points)\",\"email\":\"bkamarat@eathawkers.com\",\"contact\":\"Randy McCauley\",\"phone\":\"904.508.0342\",\"address\":\"1001 Park St.\",\"city\":\"Jacksonville\",\"state\":\"FL\",\"zip\":\"32204\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Jaguar Coffee Co.\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Neptune Beach, FL\",\"email\":\"mtumminia@eathawkers.com\",\"contact\":\"Marie Tumminia\",\"phone\":\"904.425.1025\",\"address\":\"241 N. Atlantic Blvd., Suite 101\",\"city\":\"Neptune Beach\",\"state\":\"FL\",\"zip\":\"32266\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Jaguar Coffee Co.\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Orlando, FL (Mills)\",\"email\":\"APmills101@eathawkers.com\",\"contact\":\"Robert Wolfe\",\"phone\":\"407.237.0606\",\"address\":\"1103 N. Mills Ave.\",\"city\":\"Orlando\",\"state\":\"FL\",\"zip\":\"32803\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Jaguar Coffee Co.\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - St. Petersburg, FL\",\"email\":\"sgolden@eathawkers.com\",\"contact\":\"Stephen Golden\",\"phone\":\"727.521.7253\",\"address\":\"1235 Central Ave.\",\"city\":\"St. Petersburg\",\"state\":\"FL\",\"zip\":\"33705\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Jaguar Coffee Co.\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Windermere, FL\",\"email\":\"gvavalides@eathawkers.com\",\"contact\":\"George Vavalides\",\"phone\":\"407.583.6334\",\"address\":\"9100 Conroy Windermere Rd.\",\"city\":\"Windermere\",\"state\":\"FL\",\"zip\":\"34786\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Jaguar Coffee Co.\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Truluck's - Ft. Lauderdale\",\"email\":\"trulucks-ftlauderdale@trulucks.com\",\"contact\":null,\"phone\":\"954.395.8175\",\"address\":\"701 N Ft. Lauderdale Beach Blvd.\",\"city\":\"Ft. Lauderdale\",\"state\":\"FL\",\"zip\":\"33304\",\"equipment\":\"Eversys Cameo c'2s; Bunn ITCB Combo Brewer; Bunn H5X; Bunn FPG-2E; Everpure OPS175\",\"ownership\":\"Lease; Loaned; Owned - Purchased from Katz\",\"primary\":\"All Espresso Service\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Truluck's - Miami\",\"email\":\"trulucks-miami@trulucks.com\",\"contact\":null,\"phone\":\"305.579.0035\",\"address\":\"777 Brickell Ave., Suite 100\",\"city\":\"Miami\",\"state\":\"FL\",\"zip\":\"33131\",\"equipment\":\"Eversys Cameo c'2s; Bunn ITCB Combo Brewer; Bunn H5X Hot Water Tower; Bunn FPG Grinder\",\"ownership\":\"Lease; Loaned\",\"primary\":\"All Espresso Service\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Truluck's - Naples\",\"email\":\"trulucks-naples@trulucks.com\",\"contact\":null,\"phone\":\"239.530.3131\",\"address\":\"698 4th Avenue South\",\"city\":\"Naples\",\"state\":\"FL\",\"zip\":\"34102\",\"equipment\":\"Eversys Cameo c'2s; Bunn ITCB Combo Brewer; Bunn FPG-2E Grinder; Bunn H5X Hot Water Tower\",\"ownership\":\"Lease; Loaned\",\"primary\":\"All Espresso Service\",\"secondary\":null,\"region\":\"Florida Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Atlanta, GA (Ashford)\",\"email\":\"sbenson@eathawkers.com\",\"contact\":\"Sam Benson\",\"phone\":\"407.255.2200\",\"address\":\"1230 Ashford Crossing, Suite 300B\",\"city\":\"Atlanta\",\"state\":\"GA\",\"zip\":\"30346\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Espresso Southeast\",\"secondary\":null,\"region\":\"Georgia Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Atlanta, GA (Beltline)\",\"email\":\"dwitherspoon@eathawkers.com\",\"contact\":\"Derrick Witherspoon\",\"phone\":\"407.255.2200\",\"address\":\"661 Auburn Ave., Suite 180\",\"city\":\"Atlanta\",\"state\":\"GA\",\"zip\":\"30312\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Espresso Southeast\",\"secondary\":null,\"region\":\"Georgia Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Two Chicks And A Cup of Joe\",\"email\":\"angelalonestarstucco@gmail.com\",\"contact\":\"Angela Morgan\",\"phone\":\"9366621218\",\"address\":\"130 Haley Ave\",\"city\":\"Savannah\",\"state\":\"GA\",\"zip\":\"31409\",\"equipment\":\"ITCB Combo Brewer; G3 Retail Grinder; Eversys Cameo c'2s\",\"ownership\":\"Lease; Loaned\",\"primary\":\"First Coast Espresso\",\"secondary\":null,\"region\":\"Georgia Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Steak 48 Chicago\",\"email\":\"david@steak48.com\",\"contact\":null,\"phone\":\"312.266.4848\",\"address\":\"615 N Wabash Ave\",\"city\":\"Chicago\",\"state\":\"IL\",\"zip\":\"60611\",\"equipment\":\"Cameo c'2s #1; Cameo c'2s #2; Wilbur Curtis TP2T19A3100 Coffee Brewer; Wilbur Curtis ILGD-10\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"ETSC (EspressoTech Service Company)\",\"secondary\":null,\"region\":\"Illinois Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Truluck's - Rosemont\",\"email\":\"trulucks-rosemont@trulucks.com\",\"contact\":null,\"phone\":\"312.982.0050\",\"address\":\"9860 Berwyn Ave.\",\"city\":\"Rosemont\",\"state\":\"IL\",\"zip\":\"60018\",\"equipment\":\"Bunn ITCB Combo Brewer #1; Cameo c'2s (Downstairs); Bunn ITCB Combo Brewer #2; Bunn H5X Hot Water Tower 1; Bunn H5X Hot Water Tower 2 (+3 more)\",\"ownership\":\"Lease; Loaned\",\"primary\":\"ETSC (EspressoTech Service Company)\",\"secondary\":null,\"region\":\"Illinois Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #020 - Castleton, IN\",\"email\":\"alicia@kolfac.com\",\"contact\":\"Jason Lineberry\",\"phone\":\"317.842.7200\",\"address\":\"9650 Allisonville Rd.\",\"city\":\"Indianapolis\",\"state\":\"IN\",\"zip\":\"46250\",\"equipment\":\"Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned\",\"primary\":\"Espresso Enterprises\",\"secondary\":null,\"region\":\"Indiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #074C - Carmel, IN\",\"email\":\"alicia@kolfac.com\",\"contact\":\"Tyler Johnson\",\"phone\":\"317.816.2253\",\"address\":\"DELIVER BEFORE 2\",\"city\":\"Carmel\",\"state\":\"IN\",\"zip\":\"46032\",\"equipment\":\"Cameo c'2s; Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned; Owned\",\"primary\":\"Espresso Enterprises\",\"secondary\":null,\"region\":\"Indiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #107F - Carmel, IN\",\"email\":\"Lanhaywood@kolfac.com\",\"contact\":\"Lan Haywood\",\"phone\":\"317.983.3048\",\"address\":\"10460 North Michigan Rd., Suite 110\",\"city\":\"Carmel\",\"state\":\"IN\",\"zip\":\"46032\",\"equipment\":\"Bunn Axiom-APS\",\"ownership\":\"Loaned\",\"primary\":\"ETSC (EspressoTech Service Company)\",\"secondary\":\"Espresso Enterprises\",\"region\":\"Indiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Twin Peaks- Greenwood, IN\",\"email\":\"accounting@avalanchefoodgroup.com\",\"contact\":\"EMILIO GONZALES\",\"phone\":\"317-743-0038\",\"address\":\"600 Greenwood Park Dr N\",\"city\":\"Greenwood\",\"state\":\"IN\",\"zip\":\"46142\",\"equipment\":\"ITCB Combo Brewer (Expo Line Kitchen); ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Espresso Enterprises\",\"secondary\":null,\"region\":\"Indiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Twin Peaks- Indianapolis, IN\",\"email\":\"accounting@avalanchefoodgroup.com\",\"contact\":\"CHRIS DINGES\",\"phone\":\"317-913-0992\",\"address\":\"6880 East 82nd Street\",\"city\":\"Indianapolis\",\"state\":\"IN\",\"zip\":\"46250\",\"equipment\":\"ITCB Combo Brewer #1; ITCB Combo Brewer #2\",\"ownership\":\"Loaned\",\"primary\":\"ETSC (EspressoTech Service Company)\",\"secondary\":null,\"region\":\"Indiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #037F - Deer Creek, KS\",\"email\":\"Alicia@kolfac.com\",\"contact\":\"Gary\",\"phone\":\"620.340.0785\",\"address\":\"7112 W. 135th St.\",\"city\":\"Overland Park\",\"state\":\"KS\",\"zip\":\"66223\",\"equipment\":\"Bunn Axiom-APS; Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned\",\"primary\":\"Espresso Enterprises\",\"secondary\":null,\"region\":\"Kansas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #087C - Shawnee, KS\",\"email\":\"alicia@kolfac.com\",\"contact\":\"Gary Goyer\",\"phone\":\"913-631-6000\",\"address\":\"13103 Shawnee Mission Pkwy\",\"city\":\"Shawnee\",\"state\":\"KS\",\"zip\":\"66216\",\"equipment\":\"Eversys Cameo c'2s; Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned; Owned - Purchased from Katz\",\"primary\":\"Espresso Enterprises\",\"secondary\":null,\"region\":\"Kansas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Coffee 30 - Ryan St.\",\"email\":\"purchasing@coffee30co.com\",\"contact\":\"Taylor Smith\",\"phone\":\"337.309.0584\",\"address\":\"3420 Ryan St.\",\"city\":\"Lake Charles\",\"state\":\"LA\",\"zip\":\"70605\",\"equipment\":\"Enigma e'4s Super Traditional\",\"ownership\":\"Lease\",\"primary\":\"Katz Coffee\",\"secondary\":null,\"region\":\"Lousiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Doris Metropolitan - New Orleans\",\"email\":\"admin@dorismet.com\",\"contact\":\"Chris Dulaney\",\"phone\":\"504.267.3500\",\"address\":\"620 Chartres St.\",\"city\":\"New Orleans\",\"state\":\"LA\",\"zip\":\"70130\",\"equipment\":\"Faema X20\",\"ownership\":\"Loaned\",\"primary\":\"Orleans Coffee / Perfect Shot Espresso Service\",\"secondary\":null,\"region\":\"Lousiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Southlake Theater\",\"email\":\"finance@porcheinc.com\",\"contact\":\"Jacob Ryan Porche\",\"phone\":\"337-426-1794\",\"address\":\"4720 Nelson Rd Suite #100\",\"city\":\"Lake Charles\",\"state\":\"LA\",\"zip\":\"70605\",\"equipment\":\"Eversys e'4s ST; 1152 V+ Coffee Brewer; BWS100/10; GR2.3 Dual Portion Grinder; G3 (Flavor) (+1 more)\",\"ownership\":\"Lease; Owned - Purchased from Katz\",\"primary\":\"Katz Coffee\",\"secondary\":null,\"region\":\"Lousiana Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Bethesda, MD\",\"email\":\"DSELLERS@EATHAWKERS.COM\",\"contact\":\"Jeremy George\",\"phone\":\"240.203.8135\",\"address\":\"7117 Bethesda Lane\",\"city\":\"Bethesda\",\"state\":\"MD\",\"zip\":\"20814\",\"equipment\":\"Bunn ITB Tea Brewer\",\"ownership\":\"Loaned\",\"primary\":null,\"secondary\":null,\"region\":\"Maryland Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #021F - Brentwood, MO\",\"email\":\"jsmith@kolfac.com\",\"contact\":null,\"phone\":\"314.968.2253\",\"address\":\"2604 S. Brentwood\",\"city\":\"Brentwood\",\"state\":\"MO\",\"zip\":\"63144\",\"equipment\":\"Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned\",\"primary\":\"ETSC (EspressoTech Service Company)\",\"secondary\":\"Ultimate Espresso Services\",\"region\":\"Missouri Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Porsche Chesterfield\",\"email\":\"STLvendors@porschestlouis.com\",\"contact\":null,\"phone\":null,\"address\":\"17455 N OUTER 40 RD\",\"city\":\"CHESTERFIELD\",\"state\":\"MO\",\"zip\":\"63005\",\"equipment\":\"La Marzocco Linea PB 2AV; La Marzocco Swift Grinder; Everpure BWS100/10\",\"ownership\":\"Owned - Purchased from Katz\",\"primary\":\"Ultimate Espresso Services\",\"secondary\":\"ETSC (EspressoTech Service Company)\",\"region\":\"Missouri Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"GM Performance Power Units\",\"email\":\"accountspayable@gmppu.com\",\"contact\":null,\"phone\":\"845-206-2949\",\"address\":\"4540 Fortune Ave NW\",\"city\":\"Concord\",\"state\":\"NC\",\"zip\":\"28027\",\"equipment\":\"Bunn Sure Immersion 312; Bunn Axiom-APS Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Carolina Beverage Solutions\",\"secondary\":null,\"region\":\"North and South Carolina Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Chapel Hill, NC\",\"email\":\"eathawkers@documents.restaurant365.com\",\"contact\":\"Rob Walker\",\"phone\":\"407.255.2200\",\"address\":\"201 S. Estes Drive, Suite 400A\",\"city\":\"Chapel Hill\",\"state\":\"NC\",\"zip\":\"27514\",\"equipment\":\"Bunn ITB Tea Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Carolina Beverage Solutions\",\"secondary\":null,\"region\":\"North and South Carolina Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Charlotte, NC\",\"email\":\"eathawkers@documents.restaurant365.com\",\"contact\":\"Robert Field\",\"phone\":\"(704) 464-0770\",\"address\":\"1930 Camden Rd., Suite 260\",\"city\":\"Charlotte\",\"state\":\"NC\",\"zip\":\"28203\",\"equipment\":\"Bunn ITB Tea Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Carolina Beverage Solutions\",\"secondary\":null,\"region\":\"North and South Carolina Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Spire Motorsports\",\"email\":\"rachael@katzcoffee.com\",\"contact\":\"Paul Horner\",\"phone\":\"704.662.0000\",\"address\":\"351 Mazeppa Rd.\",\"city\":\"Mooresville\",\"state\":\"NC\",\"zip\":\"28115\",\"equipment\":\"Bunn Axiom-APS (Break Room); Bunn Axiom-APS (Conference Room); Bunn Axiom-TC (War Room); Bunn LPG Grinder (Employee Break Room); Bunn LPG Grinder (Conference Room) (+4 more)\",\"ownership\":\"Loaned\",\"primary\":\"Carolina Beverage Solutions\",\"secondary\":null,\"region\":\"North and South Carolina Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Steak 48 Charlotte\",\"email\":\"ed@steak48.com\",\"contact\":null,\"phone\":\"980.580.4848\",\"address\":\"4425 Sharon Rd\",\"city\":\"Charlotte\",\"state\":\"NC\",\"zip\":\"28211\",\"equipment\":\"Cameo c'2s; Bunn Axiom-APS; Bunn MHG\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Carolina Beverage Solutions\",\"secondary\":null,\"region\":\"North and South Carolina Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #085F - Omaha, NE\",\"email\":\"wilber.enterprises@gmail.com\",\"contact\":\"Andy Wilber\",\"phone\":\"402.218.1698\",\"address\":\"4105 S. 84th\",\"city\":\"Omaha\",\"state\":\"NE\",\"zip\":\"68127\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"ETSC (EspressoTech Service Company)\",\"secondary\":null,\"region\":\"Nebraska Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"The Mystic at Santa Fe, LLC\",\"email\":\"rick@rickmgoldberg.com\",\"contact\":\"Rick Goldberg\",\"phone\":null,\"address\":\"2810 Cerrillos Rd\",\"city\":\"Santa Fe\",\"state\":\"NM\",\"zip\":\"87507\",\"equipment\":\"Bunn Axiom-APS; Eversys Cameo c'2s\",\"ownership\":\"Lease; Loaned\",\"primary\":\"PriorityOne Group\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"New Mexico Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Emilio's\",\"email\":\"sorellina01@refinedhq.com\",\"contact\":\"Michael Santos\",\"phone\":null,\"address\":\"9742 West Maule Ave\",\"city\":\"Las Vegas\",\"state\":\"NV\",\"zip\":\"89148\",\"equipment\":\"Enigma e'4s Classic\",\"ownership\":\"Owned - Purchased from Katz\",\"primary\":\"Anytime Beverage Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Sorellina's\",\"email\":\"sorellina01@refinedhq.com\",\"contact\":\"courtney\",\"phone\":null,\"address\":\"9742 West Maule Ave\",\"city\":\"Las Vegas\",\"state\":\"NV\",\"zip\":\"89148\",\"equipment\":\"Enigma e'4s Classic\",\"ownership\":\"Owned - Purchased from Katz\",\"primary\":\"Anytime Beverage Service\",\"secondary\":\"FASTCILITY CORP\",\"region\":null,\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #08 - Oklahoma City, OK\",\"email\":\"invoices@lmmm.net\",\"contact\":null,\"phone\":null,\"address\":\"2701 Southwest 29th St.\",\"city\":\"Oklahoma City\",\"state\":\"OK\",\"zip\":\"73119\",\"equipment\":\"Bunn ITCB no Shelf\",\"ownership\":\"Loaned\",\"primary\":\"Prestige Technical Services\",\"secondary\":null,\"region\":\"Oklahoma Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #10 - Oklahoma City, OK\",\"email\":\"invoices@lmmm.net\",\"contact\":null,\"phone\":\"405.632.5552\",\"address\":\"415 SW 59th St.\",\"city\":\"Oklahoma City\",\"state\":\"OK\",\"zip\":\"73109\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Prestige Technical Services\",\"secondary\":null,\"region\":\"Oklahoma Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #11 - Oklahoma City, OK\",\"email\":\"invoices@lmmm.net\",\"contact\":null,\"phone\":null,\"address\":\"1104 Southeast 44th St.\",\"city\":\"Oklahoma City\",\"state\":\"OK\",\"zip\":\"73129\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Prestige Technical Services\",\"secondary\":null,\"region\":\"Oklahoma Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana - Oklahoma City, OK\",\"email\":\"maximocruz@lmmm.net\",\"contact\":\"Yesenia Gomez\",\"phone\":\"405.635.1130\",\"address\":\"1125 SW 29th St.\",\"city\":\"Oklahoma City\",\"state\":\"OK\",\"zip\":\"73109\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Prestige Technical Services\",\"secondary\":null,\"region\":\"Oklahoma Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Steak 48 Philadelphia\",\"email\":\"william@steak48.com\",\"contact\":null,\"phone\":\"215.552.4848\",\"address\":\"260 South Broad St\",\"city\":\"Philadelphia\",\"state\":\"PA\",\"zip\":\"19102\",\"equipment\":\"Fetco GR2.2 Grinder; Cameo c'2s; Fetco 2131-XTS\",\"ownership\":\"Owned - Purchased from 3rd Party\",\"primary\":\"Masket Services\",\"secondary\":null,\"region\":\"Philadelphia Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #098 - Powdersville, SC\",\"email\":\"alicia@kolfac.com\",\"contact\":null,\"phone\":\"607.760.0216\",\"address\":\"3609 Highway 153\",\"city\":\"Powdersville\",\"state\":\"SC\",\"zip\":\"29611\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"Intergrated Coffee Solutions\",\"secondary\":null,\"region\":\"North and South Carolina Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Nashville, TN\",\"email\":\"APnashville110@eathawkers.com\",\"contact\":\"Linda Hurd\",\"phone\":\"615-600-4762\",\"address\":\"626-A Main Street\",\"city\":\"Nashville\",\"state\":\"TN\",\"zip\":\"37206\",\"equipment\":\"Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned\",\"primary\":\"ETSC (EspressoTech Service Company)\",\"secondary\":\"Best Beverage Equipment Service\",\"region\":\"Tennessee Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Cotton Court Hotel\",\"email\":\"corpacct@valenciagroup.com\",\"contact\":null,\"phone\":\"806.758.5800\",\"address\":\"1610 Broadway\",\"city\":\"Lubbock\",\"state\":\"TX\",\"zip\":\"79401\",\"equipment\":\"Eversys Cameo c'2s; ITCB no shelf 220V; ITCB no Shelf 120V #2\",\"ownership\":\"Owned - Purchased from Katz\",\"primary\":\"LIQUISERVE LLC\",\"secondary\":\"FASTCILITY CORP\",\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #028 - Trentonview\",\"email\":\"alicia@kolfac.com\",\"contact\":\"Jason Schneider\",\"phone\":\"956.686.2578\",\"address\":\"7017-U N 10th\",\"city\":\"McAllen\",\"state\":\"TX\",\"zip\":\"78504\",\"equipment\":\"Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned\",\"primary\":\"STCS\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #01 - McAllen, TX\",\"email\":\"invoices@lmmm.net\",\"contact\":\"Ruben Aranda\",\"phone\":\"956.630.2330\",\"address\":\"2200 N. 10th St., Suite C\",\"city\":\"McAllen\",\"state\":\"TX\",\"zip\":\"78505\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"STCS\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #02 - Pharr, TX\",\"email\":\"invoices@lmmm.net\",\"contact\":\"Antonio Aranda\",\"phone\":\"956.283.0995\",\"address\":\"806 S. Cage Blvd.\",\"city\":\"Pharr\",\"state\":\"TX\",\"zip\":\"78577\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"STCS\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #03 - Harlingen, TX\",\"email\":\"invoices@lmmm.net\",\"contact\":\"Jose Melendez\",\"phone\":\"956.425.7018\",\"address\":\"902 W. Harrison Ave.\",\"city\":\"Harlingen\",\"state\":\"TX\",\"zip\":\"78550\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"STCS\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #04 - Weslaco, TX\",\"email\":\"lmval04@lmmm.net\",\"contact\":\"Esther Sanchez\",\"phone\":\"956.968.8685\",\"address\":\"3001 E. Expressway 83\",\"city\":\"Weslaco\",\"state\":\"TX\",\"zip\":\"78596\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"STCS\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #06 - Harlingen, TX\",\"email\":\"invoices@lmmm.net\",\"contact\":\"Mario Vasquez\",\"phone\":\"956.440.8702\",\"address\":\"1221 N. 7th St.\",\"city\":\"Harlingen\",\"state\":\"TX\",\"zip\":\"78550\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"STCS\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"La Michoacana #08 - Brownsville, TX\",\"email\":\"invoices@lmmm.net\",\"contact\":\"Alejandra Robertson\",\"phone\":\"956.544.4806\",\"address\":\"770 W. Elizabeth\",\"city\":\"Brownsville\",\"state\":\"TX\",\"zip\":\"78520\",\"equipment\":\"Bunn ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"STCS\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Twin Peaks- Corpus Christi, TX\",\"email\":\"accounting@avalanchefoodgroup.com\",\"contact\":\"BRIAN CONNELLY\",\"phone\":\"361-992-7325\",\"address\":\"5425 South Padre Island Drive\",\"city\":\"Corpus Christi\",\"state\":\"TX\",\"zip\":\"78411\",\"equipment\":\"ITCB Combo Brewer\",\"ownership\":\"Loaned\",\"primary\":\"B & B Coffee Service\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Twin Peaks- McAllen, TX\",\"email\":\"clint.hurry@avalanchefoodgroup.com\",\"contact\":\"CLINT HURRY\",\"phone\":\"956-215-8002\",\"address\":\"901 Interstate Hwy 2, W Expy 83\",\"city\":\"McAllen\",\"state\":\"TX\",\"zip\":\"78503\",\"equipment\":\"ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned\",\"primary\":\"B & B Coffee Service\",\"secondary\":null,\"region\":\"Texas Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Hawkers - Arlington, VA (Ballston)\",\"email\":\"eathawkers@documents.restaurant365.com\",\"contact\":\"Simon Brown\",\"phone\":\"(703) 828-8287\",\"address\":\"4201 Wilson Blvd., Suite 0170\",\"city\":\"Arlington\",\"state\":\"VA\",\"zip\":\"22203\",\"equipment\":\"Bunn ITB Tea Brewer\",\"ownership\":\"Loaned\",\"primary\":null,\"secondary\":null,\"region\":\"Virginia Area\",\"lastUpdated\":\"2026-07-15\"},{\"name\":\"Kol Fac #081C - Virginia Beach\",\"email\":\"store81@kolfac.com\",\"contact\":null,\"phone\":\"757.340.5732\",\"address\":\"460 S Independence Blvd.\",\"city\":\"Virginia Beach\",\"state\":\"VA\",\"zip\":\"23452\",\"equipment\":\"Cameo c'2s; Bunn ITCB Combo Brewer (NS)\",\"ownership\":\"Loaned; Owned - Purchased from Katz\",\"primary\":\"JVG Coffee Mechanics\",\"secondary\":null,\"region\":\"Virginia Area\",\"lastUpdated\":\"2026-07-15\"}]");
+//#endregion
 //#region src/lib/ops/seed.server.ts
 var seed = seed_data_default;
 var assetSeed = (() => {
@@ -19427,168 +19434,191 @@ async function insertMany(sql, table, cols, rows) {
 		await sql.query(`insert into ${table} (${cols.join(",")}) values ${placeholders.join(",")}`, values);
 	}
 }
-var seeding = null;
+var globalSeed = globalThis;
+async function runPatch(name, fn) {
+	try {
+		await fn();
+	} catch (err) {
+		console.error(`[katz-desk] ${name} failed`, err);
+	}
+}
 /** Directory prune to the provided equipment list runs inside ensureSeeded (v3). */
 async function ensureSeeded() {
-	if (seeding) return seeding;
-	seeding = (async () => {
+	if (globalSeed.__deskSeedLive2__) return globalSeed.__deskSeedLive2__;
+	globalSeed.__deskSeedLive2__ = (async () => {
 		const sql = await getSql();
 		if ((await sql`select v from seed_meta where k = 'ops'`)[0]?.v !== "v2") {
-			await sql.query(`truncate table comments, activity, service_jobs, pm_jobs, modules, deals, installs restart identity cascade`);
-			const jobCols = [
-				"kind",
-				"call_id",
-				"contact",
-				"phone",
-				"received",
-				"customer",
-				"equipment",
-				"issue",
-				"call_type",
-				"phone_resolved",
-				"status",
-				"technician",
-				"wo",
-				"scheduled",
-				"notes",
-				"done"
-			];
-			const jobRow = (j) => [
-				j.kind,
-				j.callId,
-				j.contact,
-				j.phone,
-				j.received,
-				j.customer,
-				j.equipment,
-				j.issue,
-				j.type,
-				j.phoneRes,
-				j.status,
-				j.tech,
-				j.wo,
-				j.scheduled,
-				j.notes,
-				j.done
-			];
-			await insertMany(sql, "service_jobs", jobCols, [...seed.service.map(jobRow), ...seed.tlc.map(jobRow)]);
-			await insertMany(sql, "pm_jobs", [
-				"customer",
-				"received",
-				"equipment",
-				"style",
-				"projected",
-				"parts_status",
-				"status",
-				"technician",
-				"notes",
-				"done"
-			], seed.pms.map((p) => [
-				p.customer,
-				p.received,
-				p.equipment,
-				p.style,
-				p.projected,
-				p.parts,
-				p.status,
-				p.tech,
-				p.notes,
-				p.done
-			]));
-			await insertMany(sql, "modules", [
-				"module_id",
-				"platform",
-				"module_type",
-				"status",
-				"wo",
-				"location",
-				"date_in",
-				"date_ready",
-				"technician",
-				"notes"
-			], seed.modules.map((m) => [
-				m.moduleId,
-				m.platform,
-				m.moduleType,
-				m.status,
-				m.wo,
-				m.location,
-				m.dateIn,
-				m.dateReady,
-				m.tech,
-				m.notes
-			]));
-			await insertMany(sql, "deals", [
-				"customer",
-				"producer",
-				"account_type",
-				"date_of_deal",
-				"equipment",
-				"amount",
-				"good_to_order",
-				"ordered",
-				"eta",
-				"terms",
-				"invoice",
-				"completion",
-				"notes"
-			], seed.deals.map((d) => [
-				d.customer,
-				d.producer,
-				d.accountType,
-				d.dateOfDeal,
-				d.equipment,
-				d.amount,
-				d.goodToOrder,
-				d.ordered,
-				d.eta,
-				d.terms,
-				d.invoice,
-				d.completion === "✔" ? "complete" : d.completion === "X" ? "fell" : null,
-				d.notes
-			]));
-			await insertMany(sql, "installs", [
-				"received",
-				"customer",
-				"equipment",
-				"equip_status",
-				"install_date",
-				"technician",
-				"wo",
-				"reqs_ready",
-				"notes",
-				"account_rep",
-				"payment_status",
-				"complete"
-			], seed.installs.map((i) => [
-				i.received,
-				i.customer,
-				i.equipment,
-				i.equipStatus,
-				i.installDate,
-				i.tech,
-				i.wo,
-				i.reqsReady,
-				i.notes,
-				i.rep,
-				i.payment,
-				i.complete
-			]));
-			await seedStarterComments(sql);
-			await sql`insert into seed_meta (k, v) values ('ops', 'v2') on conflict (k) do update set v = 'v2'`;
+			if ((await sql`select id from service_jobs limit 1`)[0]) await sql`insert into seed_meta (k, v) values ('ops', 'v2') on conflict (k) do update set v = 'v2'`;
+			else {
+				await sql.query(`truncate table comments, activity, service_jobs, pm_jobs, modules, deals, installs restart identity cascade`);
+				const jobCols = [
+					"kind",
+					"call_id",
+					"contact",
+					"phone",
+					"received",
+					"customer",
+					"equipment",
+					"issue",
+					"call_type",
+					"phone_resolved",
+					"status",
+					"technician",
+					"wo",
+					"scheduled",
+					"notes",
+					"done"
+				];
+				const jobRow = (j) => [
+					j.kind,
+					j.callId,
+					j.contact,
+					j.phone,
+					j.received,
+					j.customer,
+					j.equipment,
+					j.issue,
+					j.type,
+					j.phoneRes,
+					j.status,
+					j.tech,
+					j.wo,
+					j.scheduled,
+					j.notes,
+					j.done
+				];
+				await insertMany(sql, "service_jobs", jobCols, [...seed.service.map(jobRow), ...seed.tlc.map(jobRow)]);
+				await insertMany(sql, "pm_jobs", [
+					"customer",
+					"received",
+					"equipment",
+					"style",
+					"projected",
+					"parts_status",
+					"status",
+					"technician",
+					"notes",
+					"done"
+				], seed.pms.map((p) => [
+					p.customer,
+					p.received,
+					p.equipment,
+					p.style,
+					p.projected,
+					p.parts,
+					p.status,
+					p.tech,
+					p.notes,
+					p.done
+				]));
+				await insertMany(sql, "modules", [
+					"module_id",
+					"platform",
+					"module_type",
+					"status",
+					"wo",
+					"location",
+					"date_in",
+					"date_ready",
+					"technician",
+					"notes"
+				], seed.modules.map((m) => [
+					m.moduleId,
+					m.platform,
+					m.moduleType,
+					m.status,
+					m.wo,
+					m.location,
+					m.dateIn,
+					m.dateReady,
+					m.tech,
+					m.notes
+				]));
+				await insertMany(sql, "deals", [
+					"customer",
+					"producer",
+					"account_type",
+					"date_of_deal",
+					"equipment",
+					"amount",
+					"good_to_order",
+					"ordered",
+					"eta",
+					"terms",
+					"invoice",
+					"completion",
+					"notes"
+				], seed.deals.map((d) => [
+					d.customer,
+					d.producer,
+					d.accountType,
+					d.dateOfDeal,
+					d.equipment,
+					d.amount,
+					d.goodToOrder,
+					d.ordered,
+					d.eta,
+					d.terms,
+					d.invoice,
+					d.completion === "✔" ? "complete" : d.completion === "X" ? "fell" : null,
+					d.notes
+				]));
+				await insertMany(sql, "installs", [
+					"received",
+					"customer",
+					"equipment",
+					"equip_status",
+					"install_date",
+					"technician",
+					"wo",
+					"reqs_ready",
+					"notes",
+					"account_rep",
+					"payment_status",
+					"complete"
+				], seed.installs.map((i) => [
+					i.received,
+					i.customer,
+					i.equipment,
+					i.equipStatus,
+					i.installDate,
+					i.tech,
+					i.wo,
+					i.reqsReady,
+					i.notes,
+					i.rep,
+					i.payment,
+					i.complete
+				]));
+				await seedStarterComments(sql);
+				await sql`insert into seed_meta (k, v) values ('ops', 'v2') on conflict (k) do update set v = 'v2'`;
+			}
 		}
-		await seedAssets(sql);
-		await patchRecipeTeaAndUrgency(sql);
-		await patchRecipeCustomers(sql);
-		await patchInstallFields(sql);
-		await patchDirectory(sql);
-		await patchNotifications(sql);
+		await runPatch("assets", () => seedAssets(sql));
+		await runPatch("tea", () => patchRecipeTeaAndUrgency(sql));
+		await runPatch("recipes", () => patchRecipeCustomers(sql));
+		await runPatch("installs", () => patchInstallFields(sql));
+		await runPatch("directory", () => patchDirectory(sql));
+		await runPatch("notifications", () => patchNotifications(sql));
+		await runPatch("handoff", () => patchHandoffOwners(sql));
+		await runPatch("network", () => patchNetwork(sql));
+		await runPatch("network-locations", () => patchNetworkLocations(sql));
+		await runPatch("network-people", () => patchNetworkPeople(sql));
+		await runPatch("customer-identity", () => patchCustomerIdentity(sql));
+		await runPatch("wo-duplicates", () => patchWoDuplicates(sql));
+		await runPatch("roster", () => patchRoster(sql));
+		await runPatch("serial-notice", () => patchSerialNotice(sql));
+		await runPatch("roles-reps-ak", () => patchRolesRepsAk(sql));
+		await runPatch("rebuilds", () => patchRebuilds(sql));
+		const n = await sql`select count(*)::int as n from service_jobs`;
+		const c = await sql`select count(*)::int as n from directory_customers where archived = false`;
+		console.info("[katz-desk] ready", n[0]?.n ?? 0, "jobs", c[0]?.n ?? 0, "customers");
 	})().catch((err) => {
 		console.error("[katz-desk] seed failed", err);
-		seeding = null;
+		globalSeed.__deskSeedLive2__ = void 0;
 		throw err;
 	});
-	return seeding;
+	return globalSeed.__deskSeedLive2__;
 }
 async function seedAssets(sql) {
 	if ((await sql`select v from seed_meta where k = 'assets'`)[0]?.v === "v1") return;
@@ -19657,6 +19687,14 @@ async function patchRecipeTeaAndUrgency(sql) {
 	await sql.query("alter table recipes add column if not exists tea_1 text");
 	await sql.query("alter table recipes add column if not exists tea_2 text");
 	await sql.query("alter table service_jobs add column if not exists urgency text not null default 'Normal'");
+	await sql.query("alter table service_jobs add column if not exists work_done text");
+	await sql.query("alter table service_jobs add column if not exists completed_at date");
+	await sql.query("alter table service_jobs add column if not exists duplicate_of int");
+	await sql.query("alter table pm_jobs add column if not exists wo text");
+	await sql.query("alter table pm_jobs add column if not exists work_done text");
+	await sql.query("alter table pm_jobs add column if not exists completed_at date");
+	await sql.query("alter table installs add column if not exists work_done text");
+	await sql.query("alter table installs add column if not exists completed_at date");
 	if ((await sql`select v from seed_meta where k = 'tea_urgency'`)[0]?.v === "v1") return;
 	await sql`
     update recipes
@@ -19909,6 +19947,317 @@ async function patchNotifications(sql) {
     )`);
 	await sql.query("create index if not exists desk_notifications_inbox_idx on desk_notifications (user_id, read, created_at desc)");
 }
+async function patchHandoffOwners(sql) {
+	await sql.query(`
+    alter table deals add column if not exists handed_off boolean not null default false
+  `);
+	await sql.query(`
+    update deals d
+    set handed_off = true
+    where d.handed_off = false
+      and (
+        exists (select 1 from installs i where i.deal_id = d.id)
+        or (
+          d.completion = 'complete'
+          and exists (
+            select 1 from installs i
+            where i.archived = false
+              and lower(i.customer) = lower(d.customer)
+          )
+        )
+      )
+  `);
+	await sql.query(`
+    update comments
+    set author_name = null
+    where author_id is null
+      and author_name is not null
+  `);
+}
+async function patchNetwork(sql) {
+	if ((await sql`select v from seed_meta where k = 'network'`)[0]?.v === "v1") return;
+	await sql.query(`
+    create table if not exists network_providers (
+      id                 serial primary key,
+      name               text not null,
+      status             text,
+      dispatch_phone     text,
+      dispatch_email     text,
+      secondary_phone    text,
+      secondary_email    text,
+      response_time      text,
+      standard_rate      text,
+      after_hours_rate   text,
+      travel_policy      text,
+      equipment_serviced text,
+      coverage           text,
+      contacts           text,
+      pm_pricing         text,
+      parts_stocking     text,
+      notes              text,
+      last_updated       date,
+      archived           boolean not null default false,
+      updated_at         timestamptz not null default now()
+    )`);
+	await sql.query("create unique index if not exists network_providers_name_uidx on network_providers (lower(name))");
+	await sql.query(`
+    create table if not exists network_accounts (
+      id          serial primary key,
+      customer    text not null,
+      email       text,
+      contact     text,
+      phone       text,
+      address     text,
+      city        text,
+      state       text,
+      zip         text,
+      equipment   text,
+      ownership   text,
+      region      text,
+      updated_at  timestamptz not null default now()
+    )`);
+	await sql.query("create unique index if not exists network_accounts_customer_uidx on network_accounts (lower(customer))");
+	await sql.query(`
+    create table if not exists customer_providers (
+      id          serial primary key,
+      customer    text not null,
+      provider_id int not null references network_providers(id),
+      role        text not null default 'additional',
+      updated_at  timestamptz not null default now()
+    )`);
+	await sql.query("create unique index if not exists customer_providers_pair_uidx on customer_providers (provider_id, lower(customer))");
+	const providers = seed_network_providers_default;
+	const accounts = seed_network_accounts_default;
+	for (const p of providers) await sql.query(`insert into network_providers (
+         name, status, dispatch_phone, dispatch_email, secondary_phone, secondary_email,
+         response_time, standard_rate, after_hours_rate, travel_policy, equipment_serviced,
+         coverage, contacts, pm_pricing, parts_stocking, notes, last_updated
+       )
+       select $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17
+       where not exists (select 1 from network_providers where lower(name) = lower($1))`, [
+		p.name,
+		p.status,
+		p.dispatchPhone,
+		p.dispatchEmail,
+		p.secondaryPhone,
+		p.secondaryEmail,
+		p.responseTime,
+		p.standardRate,
+		p.afterHoursRate,
+		p.travelPolicy,
+		p.equipmentServiced,
+		p.coverage,
+		p.contacts,
+		p.pmPricing,
+		p.partsStocking,
+		p.notes,
+		p.lastUpdated
+	]);
+	const ids = await sql.query(`select id, name from network_providers`);
+	const byName = new Map(ids.map((r) => [r.name.trim().toLowerCase(), r.id]));
+	for (const a of accounts) {
+		await sql.query(`insert into directory_customers (name)
+       select $1
+       where not exists (select 1 from directory_customers where lower(name) = lower($1))`, [a.name]);
+		await sql.query(`insert into network_accounts (customer, email, contact, phone, address, city, state, zip, equipment, ownership, region)
+       select $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+       where not exists (select 1 from network_accounts where lower(customer) = lower($1))`, [
+			a.name,
+			a.email,
+			a.contact,
+			a.phone,
+			a.address,
+			a.city,
+			a.state,
+			a.zip,
+			a.equipment,
+			a.ownership,
+			a.region
+		]);
+		const pairs = [{
+			name: a.primary,
+			role: "primary"
+		}, {
+			name: a.secondary,
+			role: "secondary"
+		}];
+		for (const pair of pairs) {
+			if (!pair.name) continue;
+			const pid = byName.get(pair.name.trim().toLowerCase());
+			if (!pid) continue;
+			await sql.query(`insert into customer_providers (customer, provider_id, role)
+         select $1, $2, $3
+         where not exists (
+           select 1 from customer_providers
+           where provider_id = $2 and lower(customer) = lower($1)
+         )`, [
+				a.name,
+				pid,
+				pair.role
+			]);
+		}
+	}
+	await sql`insert into seed_meta (k, v) values ('network', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+async function patchNetworkLocations(sql) {
+	if ((await sql`select v from seed_meta where k = 'network-locations'`)[0]?.v === "v3") return;
+	await sql.query(`
+    create table if not exists provider_locations (
+      id          serial primary key,
+      provider_id int not null references network_providers(id) on delete cascade,
+      state       text not null,
+      city        text,
+      zip         text,
+      created_at  timestamptz not null default now()
+    )`);
+	await sql.query(`
+    create unique index if not exists provider_locations_uniq
+    on provider_locations (provider_id, state, coalesce(lower(city), ''), coalesce(zip, ''))
+  `);
+	await sql.query(`truncate table provider_locations restart identity`);
+	const providers = await sql.query(`select id, coverage from network_providers where archived = false`);
+	const existing = await sql.query(`select provider_id, state, city, zip from provider_locations`);
+	const byProv = /* @__PURE__ */ new Map();
+	for (const e of existing) {
+		const list = byProv.get(e.provider_id) ?? [];
+		list.push(e);
+		byProv.set(e.provider_id, list);
+	}
+	const insert = async (providerId, state, city, zip) => {
+		const st = normalizeState(state);
+		if (!st) return;
+		const c = normalizeCity(city);
+		const z = normalizeZip(zip);
+		const list = byProv.get(providerId) ?? [];
+		if (findDuplicateLocation(list, {
+			state: st,
+			city: c,
+			zip: z
+		})) return;
+		await sql.query(`insert into provider_locations (provider_id, state, city, zip) values ($1,$2,$3,$4)`, [
+			providerId,
+			st,
+			c,
+			z
+		]);
+		list.push({
+			state: st,
+			city: c,
+			zip: z
+		});
+		byProv.set(providerId, list);
+	};
+	for (const p of providers) for (const loc of parseCoverageLocations(p.coverage)) await insert(p.id, loc.state, loc.city, loc.zip);
+	const assigned = await sql.query(`
+    select cp.provider_id, a.city, a.state, a.zip
+    from customer_providers cp
+    join network_accounts a on lower(a.customer) = lower(cp.customer)
+    where a.state is not null
+  `);
+	for (const a of assigned) await insert(a.provider_id, a.state ?? "", a.city, a.zip);
+	await sql`insert into seed_meta (k, v) values ('network-locations', 'v3') on conflict (k) do update set v = 'v3'`;
+}
+async function patchNetworkPeople(sql) {
+	if ((await sql`select v from seed_meta where k = 'network-people'`)[0]?.v === "v1") return;
+	await sql.query(`
+    create table if not exists provider_contacts (
+      id          serial primary key,
+      provider_id int not null references network_providers(id) on delete cascade,
+      name        text,
+      role        text,
+      phone       text,
+      email       text,
+      created_at  timestamptz not null default now()
+    )`);
+	await sql.query(`
+    create table if not exists provider_addresses (
+      id          serial primary key,
+      provider_id int not null references network_providers(id) on delete cascade,
+      label       text,
+      line1       text,
+      line2       text,
+      city        text,
+      state       text,
+      zip         text,
+      created_at  timestamptz not null default now()
+    )`);
+	const rows = await sql.query(`select id, name, contacts from network_providers where archived = false`);
+	for (const p of rows) {
+		const parsed = parseContactBlob(p.contacts, p.name);
+		for (const c of parsed.people) await sql.query(`insert into provider_contacts (provider_id, name, role, phone, email) values ($1,$2,$3,$4,$5)`, [
+			p.id,
+			c.name,
+			c.role,
+			c.phone,
+			c.email
+		]);
+		for (const a of parsed.addresses) await sql.query(`insert into provider_addresses (provider_id, label, line1, line2, city, state, zip) values ($1,$2,$3,$4,$5,$6,$7)`, [
+			p.id,
+			a.label,
+			a.line1,
+			a.line2,
+			a.city,
+			a.state,
+			a.zip
+		]);
+	}
+	await sql`insert into seed_meta (k, v) values ('network-people', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+async function patchCustomerIdentity(sql) {
+	if ((await sql`select v from seed_meta where k = 'customer-identity'`)[0]?.v === "v1") return;
+	const dups = await sql.query(`select lower(name) as k, array_agg(id order by id) as ids
+     from directory_customers
+     group by lower(name)
+     having count(*) > 1`).catch(() => []);
+	for (const d of dups) {
+		const raw = d.ids;
+		const ids = Array.isArray(raw) ? raw.map(Number) : String(raw ?? "").replace(/[{}]/g, "").split(",").map((n) => Number(n.trim())).filter((n) => Number.isFinite(n));
+		if (ids.length < 2) continue;
+		const keepName = (await sql.query(`select id, name from directory_customers where id = $1`, [ids[0]]))[0]?.name;
+		if (!keepName) continue;
+		for (const extraId of ids.slice(1)) {
+			const extra = await sql.query(`select name from directory_customers where id = $1`, [extraId]);
+			if (extra[0] && extra[0].name !== keepName) await retargetCustomer(sql, extra[0].name, keepName);
+			await sql.query(`update directory_customers set archived = true, updated_at = now() where id = $1`, [extraId]);
+		}
+	}
+	await sql.query(`drop index if exists directory_customers_name_uidx`);
+	try {
+		await sql.query(`create unique index if not exists directory_customers_name_lower_uidx on directory_customers (lower(name))`);
+	} catch (err) {
+		console.error("[katz-desk] customer unique index skipped", err);
+	}
+	await sql`insert into seed_meta (k, v) values ('customer-identity', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+async function patchWoDuplicates(sql) {
+	await sql.query("alter table service_jobs add column if not exists duplicate_of int");
+	await sql.query("create index if not exists service_jobs_duplicate_of_idx on service_jobs (duplicate_of)");
+	if ((await sql`select v from seed_meta where k = 'wo_duplicates'`)[0]?.v === "v1") return;
+	const result = await reconcileServiceDuplicates(sql, "KatzDesk");
+	console.info("[katz-desk] wo duplicates", result.merged, "merged", result.flagged, "flagged");
+	await sql`insert into seed_meta (k, v) values ('wo_duplicates', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+async function patchRoster(sql) {
+	const { ensureRoster } = await import("./roster.mjs").then((n) => n.a);
+	await ensureRoster(sql);
+}
+async function patchSerialNotice(sql) {
+	const { ensureSerialNotice } = await import("./serial-pull.mjs").then((n) => n.r);
+	await ensureSerialNotice(sql);
+}
+async function patchRolesRepsAk(sql) {
+	await sql.query("alter table desk_accounts add column if not exists desk_role text");
+	await sql.query("alter table desk_notifications add column if not exists customer text");
+	const { ensureReps, remapStoredReps, ensureAccountMarks } = await import("./reps.mjs").then((n) => n.s);
+	await ensureReps(sql);
+	await ensureAccountMarks(sql);
+	const mapped = await remapStoredReps(sql);
+	console.info("[katz-desk] remapped reps", mapped.deals, "deals", mapped.installs, "installs", mapped.customers, "customers");
+}
+async function patchRebuilds(sql) {
+	const { seedRebuilds } = await import("./rebuilds.mjs").then((n) => n.s);
+	await seedRebuilds(sql);
+}
 async function seedStarterComments(sql) {
 	const findJob = async (kind, customer) => {
 		return (await sql`
@@ -20008,7 +20357,7 @@ async function seedStarterComments(sql) {
 		if (!id) continue;
 		await sql`
       insert into comments (entity_type, entity_id, author_name, body, ask_team)
-      values (${n.type}, ${id}, ${n.author}, ${n.body}, ${n.ask})`;
+      values (${n.type}, ${id}, ${null}, ${n.body}, ${n.ask})`;
 	}
 }
 //#endregion

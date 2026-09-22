@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useState, type FormEvent } from "react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { checkUsername, getMyAccess, lookupSignIn, registerAccount } from "@/lib/ops/access";
+import { checkUsername, getMyAccess, lookupSignIn, peekInvite, registerAccount } from "@/lib/ops/access";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 
@@ -49,6 +49,16 @@ function Login() {
     void (async () => {
       try {
         const access = await getMyAccess();
+        if (access.needsUsername) {
+          writePending(false);
+          void navigate({ to: "/" });
+          return;
+        }
+        if (access.denied) {
+          writePending(false);
+          void navigate({ to: "/" });
+          return;
+        }
         if (!access.approved) {
           writePending(true);
           setMode("pending");
@@ -62,14 +72,6 @@ function Login() {
     })();
   }, [isPending, user, navigate, mode]);
 
-  async function dropSession() {
-    try {
-      await authClient.signOut();
-    } catch {
-      /* already signed out */
-    }
-  }
-
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -82,30 +84,51 @@ function Login() {
         }
         const available = await checkUsername({ data: { username: name } });
         if (!available.available) throw new Error("That username is already taken.");
+        const mail = email.trim();
+        let signedIn = false;
         const res = await authClient.signUp.email({
-          email: email.trim(),
+          email: mail,
           password,
           name,
         });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) {
+          const msg = res.error.message ?? "";
+          if (/already|exist|registered/i.test(msg)) {
+            const existing = await authClient.signIn.email({ email: mail, password });
+            if (existing.error) {
+              throw new Error(
+                "That email already has an account. Sign in with the password you used before.",
+              );
+            }
+            signedIn = true;
+          } else {
+            throw new Error(res.error.message);
+          }
+        }
         await authClient.getSession();
-        const access = await registerAccount({ data: { username: name, email: email.trim() } });
+        const access = await registerAccount({ data: { username: name, email: mail } });
         await router.invalidate();
-        if (!access.approved) {
-          writePending(true);
-          await dropSession();
-          setMode("pending");
+        writePending(!access.approved);
+        void navigate({ to: "/" });
+        void signedIn;
+      } else {
+        const identity = username.trim();
+        const looked = await lookupSignIn({ data: { username: identity } });
+        if (looked.invited) {
+          const peek = await peekInvite({ data: { identity } });
+          setMode("up");
+          if (peek.username) setUsername(peek.username);
+          if (peek.email) setEmail(peek.email);
+          else if (identity.includes("@")) setEmail(identity);
+          setError("You’re invited — create an account with this email to get in.");
           return;
         }
-        writePending(false);
-        void navigate({ to: "/" });
-      } else {
-        const looked = await lookupSignIn({ data: { username: username.trim() } });
+        if (!looked.email) throw new Error("Unknown username");
         const res = await authClient.signIn.email({ email: looked.email, password });
         if (res.error) throw new Error(res.error.message);
         await authClient.getSession();
         await router.invalidate();
-        writePending(false);
+        writePending(!!looked.waiting);
         void navigate({ to: "/" });
       }
     } catch (err) {
@@ -114,6 +137,20 @@ function Login() {
         writePending(true);
         setMode("pending");
         return;
+      }
+      if (/denied access/i.test(msg)) {
+        setError("This account was denied access. Ask an admin to invite you again.");
+        return;
+      }
+      if (/unknown username/i.test(msg)) {
+        const peek = await peekInvite({ data: { identity: username.trim() } }).catch(() => null);
+        if (peek?.invited) {
+          setMode("up");
+          if (peek.username) setUsername(peek.username);
+          if (peek.email) setEmail(peek.email);
+          setError("You’re invited — create an account to get in.");
+          return;
+        }
       }
       setError(msg);
     } finally {
@@ -140,7 +177,7 @@ function Login() {
               <h2 className="font-display text-2xl">Waiting for approval</h2>
               <p className="mt-2 text-sm text-cream/60">
                 Your account was created. A desk admin will review it before you can open Katz Desk.
-                Sign in with your username after you’re approved.
+                Stay signed in and tap check again after they approve you.
               </p>
               <div className="mt-6 flex flex-col gap-2">
                 <Button
@@ -171,6 +208,7 @@ function Login() {
                     writePending(false);
                     setMode("in");
                     setPassword("");
+                    void authClient.signOut().catch(() => undefined);
                   }}
                 >
                   Back to sign in
@@ -182,13 +220,13 @@ function Login() {
               <h2 className="font-display text-2xl">{mode === "up" ? "Create an account" : "Sign in"}</h2>
               <p className="mt-1 text-sm text-cream/60">
                 {mode === "up"
-                  ? "Pick a username and any email. New accounts wait for an admin to approve them."
-                  : "Sign in with your username. New accounts need approval before they can open the desk."}
+                  ? "Use the email you were invited with (or Google / X). Invited people skip the wait."
+                  : "Username or the email on your account. Invited people should create an account first."}
               </p>
               <form onSubmit={onSubmit} className="mt-5 space-y-3">
                 <div>
                   <Label htmlFor="username" className="text-cream/60">
-                    Username
+                    {mode === "up" ? "Username" : "Username or email"}
                   </Label>
                   <Input
                     id="username"
@@ -197,7 +235,7 @@ function Login() {
                     className="mt-1 border-cream/15 bg-ink text-cream"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="e.g. amanda.s"
+                    placeholder={mode === "up" ? "e.g. amanda.s" : "username or email"}
                   />
                 </div>
                 {mode === "up" ? (
@@ -213,7 +251,7 @@ function Login() {
                       className="mt-1 border-cream/15 bg-ink text-cream"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Any email you use"
+                      placeholder="The email you were invited with"
                     />
                   </div>
                 ) : null}
@@ -274,7 +312,8 @@ function Login() {
                 </>
               ) : null}
               <p className="mt-5 text-xs leading-relaxed text-cream/40">
-                Google and X still work if you already use them. New username accounts wait for approval.
+                Google and X still work. Use the same email you were invited with and you’ll be in as
+                soon as you pick a username. Everyone else waits for approval.
               </p>
             </>
           )}

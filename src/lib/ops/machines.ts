@@ -99,7 +99,10 @@ export function specsFromInstall(
   catalog: string[] = [],
 ): MachineSpec[] {
   const fromJson = parseMachinesJson(machines);
-  if (fromJson.length) return fromJson;
+  if (fromJson.length) {
+    const names = listedEquipment(fromJson.map((s) => s.equipment).join("\n"), catalog);
+    return mergeMachineSpecs(names, fromJson, { serial, powerVoltage });
+  }
   const names = listedEquipment(equipment, catalog);
   return mergeMachineSpecs(names, [], { serial, powerVoltage });
 }

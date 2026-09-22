@@ -1,16 +1,10 @@
-import { o as __toESM, r as __exportAll } from "../_runtime.mjs";
+import { o as __toESM } from "../_runtime.mjs";
 import { u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
-import { s as __exportAll$1 } from "./ssr.mjs";
-import { en as capitalizeFirstLetter, in as isSafeUrlScheme, rn as createFetch, tn as toKebabCase } from "../_libs/@better-auth/core+[...].mjs";
+import { s as __exportAll } from "./ssr.mjs";
+import { an as isSafeUrlScheme, in as createFetch, nn as toKebabCase, tn as capitalizeFirstLetter } from "../_libs/@better-auth/core+[...].mjs";
 import { n as PACKAGE_VERSION, r as getBaseURL, t as GENERIC_OAUTH_ERROR_CODES } from "./url-DwGxbmbA.mjs";
 import { _ as onMount, g as STORE_UNMOUNT_DELAY, h as listenKeys, m as defu, v as onSet, y as atom } from "../_libs/better-auth+[...].mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/client-sGid3STf.js
-var client_sGid3STf_exports = /* @__PURE__ */ __exportAll({
-	i: () => signOut,
-	n: () => client_exports,
-	r: () => signIn,
-	t: () => authClient
-});
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var genericOAuthClient = () => {
 	return {
@@ -747,7 +741,7 @@ function createAuthClient(options) {
 		$store
 	}, $fetch, pluginPathMethods, pluginsAtoms, atomListeners);
 }
-var client_exports = /* @__PURE__ */ __exportAll$1({
+var client_exports = /* @__PURE__ */ __exportAll({
 	authClient: () => authClient,
 	authEnabled: () => true,
 	getBearerToken: () => getBearerToken,
@@ -900,4 +894,4 @@ async function signOut(redirectTo = "/") {
 	window.location.href = redirectTo;
 }
 //#endregion
-export { signOut as i, client_sGid3STf_exports as n, signIn as r, authClient as t };
+export { signOut as i, client_exports as n, signIn as r, authClient as t };

@@ -13,14 +13,19 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccessRouteImport } from './routes/_app/access'
+import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppModulesRouteImport } from './routes/_app/modules'
+import { Route as AppNetworkRouteImport } from './routes/_app/network'
 import { Route as AppPipelineRouteImport } from './routes/_app/pipeline'
+import { Route as AppPlannerRouteImport } from './routes/_app/planner'
 import { Route as AppPmsRouteImport } from './routes/_app/pms'
+import { Route as AppRebuildsRouteImport } from './routes/_app/rebuilds'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
 import { Route as AppServiceRouteImport } from './routes/_app/service'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
 import { Route as AppWarehouseRouteImport } from './routes/_app/warehouse'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -44,6 +49,11 @@ const AppAccessRoute = AppAccessRouteImport.update({
   path: '/access',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCustomersRoute = AppCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppHandoffRoute = AppHandoffRouteImport.update({
   id: '/handoff',
   path: '/handoff',
@@ -64,14 +74,29 @@ const AppModulesRoute = AppModulesRouteImport.update({
   path: '/modules',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNetworkRoute = AppNetworkRouteImport.update({
+  id: '/network',
+  path: '/network',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPipelineRoute = AppPipelineRouteImport.update({
   id: '/pipeline',
   path: '/pipeline',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPlannerRoute = AppPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPmsRoute = AppPmsRouteImport.update({
   id: '/pms',
   path: '/pms',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRebuildsRoute = AppRebuildsRouteImport.update({
+  id: '/rebuilds',
+  path: '/rebuilds',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRecipesRoute = AppRecipesRouteImport.update({
@@ -82,6 +107,11 @@ const AppRecipesRoute = AppRecipesRouteImport.update({
 const AppServiceRoute = AppServiceRouteImport.update({
   id: '/service',
   path: '/service',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTlcRoute = AppTlcRouteImport.update({
@@ -104,14 +134,19 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
   '/locations': typeof AppLocationsRoute
   '/modules': typeof AppModulesRoute
+  '/network': typeof AppNetworkRoute
   '/pipeline': typeof AppPipelineRoute
+  '/planner': typeof AppPlannerRoute
   '/pms': typeof AppPmsRoute
+  '/rebuilds': typeof AppRebuildsRoute
   '/recipes': typeof AppRecipesRoute
   '/service': typeof AppServiceRoute
+  '/settings': typeof AppSettingsRoute
   '/tlc': typeof AppTlcRoute
   '/warehouse': typeof AppWarehouseRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -119,14 +154,19 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
   '/locations': typeof AppLocationsRoute
   '/modules': typeof AppModulesRoute
+  '/network': typeof AppNetworkRoute
   '/pipeline': typeof AppPipelineRoute
+  '/planner': typeof AppPlannerRoute
   '/pms': typeof AppPmsRoute
+  '/rebuilds': typeof AppRebuildsRoute
   '/recipes': typeof AppRecipesRoute
   '/service': typeof AppServiceRoute
+  '/settings': typeof AppSettingsRoute
   '/tlc': typeof AppTlcRoute
   '/warehouse': typeof AppWarehouseRoute
   '/': typeof AppIndexRoute
@@ -137,14 +177,19 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/access': typeof AppAccessRoute
+  '/_app/customers': typeof AppCustomersRoute
   '/_app/handoff': typeof AppHandoffRoute
   '/_app/installs': typeof AppInstallsRoute
   '/_app/locations': typeof AppLocationsRoute
   '/_app/modules': typeof AppModulesRoute
+  '/_app/network': typeof AppNetworkRoute
   '/_app/pipeline': typeof AppPipelineRoute
+  '/_app/planner': typeof AppPlannerRoute
   '/_app/pms': typeof AppPmsRoute
+  '/_app/rebuilds': typeof AppRebuildsRoute
   '/_app/recipes': typeof AppRecipesRoute
   '/_app/service': typeof AppServiceRoute
+  '/_app/settings': typeof AppSettingsRoute
   '/_app/tlc': typeof AppTlcRoute
   '/_app/warehouse': typeof AppWarehouseRoute
   '/_app/': typeof AppIndexRoute
@@ -156,14 +201,19 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/access'
+    | '/customers'
     | '/handoff'
     | '/installs'
     | '/locations'
     | '/modules'
+    | '/network'
     | '/pipeline'
+    | '/planner'
     | '/pms'
+    | '/rebuilds'
     | '/recipes'
     | '/service'
+    | '/settings'
     | '/tlc'
     | '/warehouse'
     | '/api/auth/$'
@@ -171,14 +221,19 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/access'
+    | '/customers'
     | '/handoff'
     | '/installs'
     | '/locations'
     | '/modules'
+    | '/network'
     | '/pipeline'
+    | '/planner'
     | '/pms'
+    | '/rebuilds'
     | '/recipes'
     | '/service'
+    | '/settings'
     | '/tlc'
     | '/warehouse'
     | '/'
@@ -188,14 +243,19 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/_app/access'
+    | '/_app/customers'
     | '/_app/handoff'
     | '/_app/installs'
     | '/_app/locations'
     | '/_app/modules'
+    | '/_app/network'
     | '/_app/pipeline'
+    | '/_app/planner'
     | '/_app/pms'
+    | '/_app/rebuilds'
     | '/_app/recipes'
     | '/_app/service'
+    | '/_app/settings'
     | '/_app/tlc'
     | '/_app/warehouse'
     | '/_app/'
@@ -238,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccessRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/customers': {
+      id: '/_app/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AppCustomersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/handoff': {
       id: '/_app/handoff'
       path: '/handoff'
@@ -266,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppModulesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/network': {
+      id: '/_app/network'
+      path: '/network'
+      fullPath: '/network'
+      preLoaderRoute: typeof AppNetworkRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/pipeline': {
       id: '/_app/pipeline'
       path: '/pipeline'
@@ -273,11 +347,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPipelineRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/planner': {
+      id: '/_app/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof AppPlannerRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/pms': {
       id: '/_app/pms'
       path: '/pms'
       fullPath: '/pms'
       preLoaderRoute: typeof AppPmsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/rebuilds': {
+      id: '/_app/rebuilds'
+      path: '/rebuilds'
+      fullPath: '/rebuilds'
+      preLoaderRoute: typeof AppRebuildsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/recipes': {
@@ -292,6 +380,13 @@ declare module '@tanstack/react-router' {
       path: '/service'
       fullPath: '/service'
       preLoaderRoute: typeof AppServiceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/tlc': {
@@ -320,14 +415,19 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAccessRoute: typeof AppAccessRoute
+  AppCustomersRoute: typeof AppCustomersRoute
   AppHandoffRoute: typeof AppHandoffRoute
   AppInstallsRoute: typeof AppInstallsRoute
   AppLocationsRoute: typeof AppLocationsRoute
   AppModulesRoute: typeof AppModulesRoute
+  AppNetworkRoute: typeof AppNetworkRoute
   AppPipelineRoute: typeof AppPipelineRoute
+  AppPlannerRoute: typeof AppPlannerRoute
   AppPmsRoute: typeof AppPmsRoute
+  AppRebuildsRoute: typeof AppRebuildsRoute
   AppRecipesRoute: typeof AppRecipesRoute
   AppServiceRoute: typeof AppServiceRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppTlcRoute: typeof AppTlcRoute
   AppWarehouseRoute: typeof AppWarehouseRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -335,14 +435,19 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccessRoute: AppAccessRoute,
+  AppCustomersRoute: AppCustomersRoute,
   AppHandoffRoute: AppHandoffRoute,
   AppInstallsRoute: AppInstallsRoute,
   AppLocationsRoute: AppLocationsRoute,
   AppModulesRoute: AppModulesRoute,
+  AppNetworkRoute: AppNetworkRoute,
   AppPipelineRoute: AppPipelineRoute,
+  AppPlannerRoute: AppPlannerRoute,
   AppPmsRoute: AppPmsRoute,
+  AppRebuildsRoute: AppRebuildsRoute,
   AppRecipesRoute: AppRecipesRoute,
   AppServiceRoute: AppServiceRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppTlcRoute: AppTlcRoute,
   AppWarehouseRoute: AppWarehouseRoute,
   AppIndexRoute: AppIndexRoute,

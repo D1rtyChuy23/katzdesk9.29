@@ -1,0 +1,17 @@
+{
+  "user": "chuy.fixib5o",
+  "hasBoardMix": true,
+  "hasReadyMachines": true,
+  "hasSlugAxiom": false,
+  "hasSlugItcb": true,
+  "hasCatalogAxiom": true,
+  "hasCatalogItcb": true,
+  "hasCatalogTb3": true,
+  "errors": [],
+  "afterCreate": {
+    "url": "http://127.0.0.1:8080/installs",
+    "sample": "Katz\nDesk\n\nService and sales, one clock.\n\nFLOOR\n\nClock\nService\nTLC + Factor\nPMs\n\nSALES → SERVICE\n\nPipeline\nInstalls\nHandoff\n\nSHOP\n\nWarehouse\nLocations\nModules\nRecipes\n\nADMIN\n\nAccess\n\nSigned in\n\nC\nchuy.fixib5o\nSign out\n⌘K\nInstall clock\n\nPrep queue for",
+    "dialogOpen": 0
+  },
+  "finalSample": "Katz\nDesk\n\nService and sales, one clock.\n\nFLOOR\n\nClock\nService\nTLC + Factor\nPMs\n\nSALES → SERVICE\n\nPipeline\nInstalls\nHandoff\n\nSHOP\n\nWarehouse\nLocations\nModules\nRecipes\n\nADMIN\n\nAccess\n\nSigned in\n\nC\nchuy.fixib5o\nSign out\n⌘K\nInstall clock\n\nPrep queue for every account not yet installed. Each machine on the row carries its own recipe — linked to that customer, shared with techs and sales.\n\nNew install\n"
+}

@@ -1,0 +1,110 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "ok": true,
+      "msg": "owner landed (desk)"
+    },
+    {
+      "ok": true,
+      "msg": "Access shows role picker"
+    },
+    {
+      "ok": true,
+      "msg": "role pickers visible (52)"
+    },
+    {
+      "ok": true,
+      "msg": "owner role is sales (sales)"
+    },
+    {
+      "ok": true,
+      "msg": "clock header shows Sales view"
+    },
+    {
+      "ok": true,
+      "msg": "Sales My View clock shows pipeline + coming due"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline lists Amanda Logg"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline lists Lizbeth Romero"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline lists Sean Marshall"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline lists Lance Oden"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline lists Bill McKinley"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline lists Shannon Cafourek"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline lists Jesus Garcia"
+    },
+    {
+      "ok": true,
+      "msg": "pipeline flags no-rep"
+    },
+    {
+      "ok": true,
+      "msg": "new deal rep dropdown shows Name (IN)"
+    },
+    {
+      "ok": true,
+      "msg": "all seven reps in dropdown"
+    },
+    {
+      "ok": true,
+      "msg": "clock header shows Service view"
+    },
+    {
+      "ok": true,
+      "msg": "Service My View clock shows coming due + planner"
+    },
+    {
+      "ok": true,
+      "msg": "coming due panel on clock"
+    },
+    {
+      "ok": true,
+      "msg": "coming due has overdue/today/this week counts"
+    },
+    {
+      "ok": true,
+      "msg": "planner page loaded"
+    },
+    {
+      "ok": true,
+      "msg": "planner timeline visible"
+    },
+    {
+      "ok": true,
+      "msg": "ping shows message preview"
+    },
+    {
+      "ok": true,
+      "msg": "ping shows who sent it"
+    },
+    {
+      "ok": true,
+      "msg": "owner can edit rep list"
+    },
+    {
+      "ok": true,
+      "msg": "seven-name list on settings"
+    }
+  ],
+  "errors": []
+}

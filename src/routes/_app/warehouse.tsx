@@ -23,7 +23,7 @@ import { AssetSheet } from "@/components/desk/asset-sheet";
 import { CustomerCombo, EquipmentCombo } from "@/components/desk/directory-fields";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
-import { ChartCard, SimpleBars, StatCard } from "@/components/desk/desk-charts";
+import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -46,6 +46,8 @@ function Page() {
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("warehouse", "alpha-asc");
+  const [bubble, setBubble] = useState<"ready" | "fill" | "dispensers" | "missing" | "needs-bay" | null>(null);
+  const [bayLetter, setBayLetter] = useState<string | null>(null);
 
   const all = data.data ?? [];
   const barn = useMemo(
@@ -73,13 +75,27 @@ function Page() {
   }, [onRack, slot]);
 
   const needle = q.trim().toLowerCase();
+  const stranded = useMemo(() => barn.filter((a) => a.needsBay), [barn]);
   const list = useMemo(() => {
     let rows = slot
       ? slotUnits
       : onRack.filter((a) => a.kind === "equip" || a.kind === "dispenser");
+    if (!slot) {
+      const ids = new Set(rows.map((a) => a.id));
+      for (const a of stranded) {
+        if (!ids.has(a.id)) rows = [...rows, a];
+      }
+    }
+    if (bubble === "dispensers") rows = rows.filter((a) => a.kind === "dispenser");
+    if (bubble === "missing") rows = rows.filter((a) => a.missingSerial);
+    if (bubble === "needs-bay") rows = stranded;
+    if (bubble === "ready") rows = rows.filter((a) => a.kind === "equip" && a.status === "ready");
+    if (bayLetter) {
+      rows = barn.filter((a) => (a.pallet ?? "").toUpperCase() === bayLetter);
+    }
     if (needle) {
       rows = barn.filter((a) =>
-        [a.model, a.serial, a.slotLabel, a.customerOwned].filter(Boolean).some((v) =>
+        [a.model, a.serial, a.slotLabel, a.customerOwned, a.pallet].filter(Boolean).some((v) =>
           String(v).toLowerCase().includes(needle),
         ),
       );
@@ -90,7 +106,7 @@ function Page() {
       status: (a) => a.status,
       date: (a) => a.updatedAt,
     });
-  }, [slot, slotUnits, onRack, barn, needle, sort]);
+  }, [slot, slotUnits, onRack, barn, needle, sort, bubble, bayLetter, stranded, rack]);
 
   const equipReady = barn.filter((a) => a.kind === "equip").reduce((n, a) => n + a.qty, 0);
   const equipLines = barn.filter((a) => a.kind === "equip").length;
@@ -118,7 +134,7 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Barn warehouse</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Ready-to-deploy units at HQ. Slot ID is pallet + level — B-L3 is pallet B, third shelf. Pull a unit onto an install and it leaves this board.
+            Ready-to-deploy units at HQ. Slot ID is pallet + level — A-L3 is pallet A, third shelf. Pull a unit for an install or a service account and it leaves this board. Bays run A through P.
           </p>
         </div>
         <Button onClick={() => setCreate(true)}>
@@ -127,22 +143,68 @@ function Page() {
         </Button>
       </header>
 
-      <section className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-4">
+      <StatRow>
         <StatCard
           label="Ready"
           value={equipReady}
           hint={`${models} models · ${Math.max(0, BARN_EQUIP_CAPACITY - equipLines)} open slots`}
           breakdown={readyByModel}
+          selected={bubble === "ready" && !bayLetter}
+          onClick={() => {
+            setBayLetter(null);
+            setSlot(null);
+            setBubble((v) => toggleChip(v, "ready", null));
+          }}
         />
-        <StatCard label="Fill" value={`${Math.round((equipLines / BARN_EQUIP_CAPACITY) * 100)}%`} hint={`${equipLines} lines on the rack`} />
-        <StatCard label="Dispensers" value={dispQty} hint="Not counted in Ready" />
+        <StatCard
+          label="Fill"
+          value={`${Math.round((equipLines / BARN_EQUIP_CAPACITY) * 100)}%`}
+          hint={`${equipLines} lines on the rack`}
+          selected={bubble === "fill" && !bayLetter}
+          onClick={() => {
+            setBayLetter(null);
+            setSlot(null);
+            setBubble((v) => toggleChip(v, "fill", null));
+          }}
+        />
+        <StatCard
+          label="Dispensers"
+          value={dispQty}
+          hint="Not counted in Ready"
+          selected={bubble === "dispensers" && !bayLetter}
+          onClick={() => {
+            setBayLetter(null);
+            setSlot(null);
+            setBubble((v) => toggleChip(v, "dispensers", null));
+          }}
+        />
         <StatCard
           label="Missing serial"
           value={missing}
           tone={missing ? "warn" : undefined}
           hint={`${owned} customer-owned · ${catering} catering`}
+          selected={bubble === "missing" && !bayLetter}
+          onClick={() => {
+            setBayLetter(null);
+            setSlot(null);
+            setBubble((v) => toggleChip(v, "missing", null));
+          }}
         />
-      </section>
+        {stranded.length ? (
+          <StatCard
+            label="Needs bay"
+            value={stranded.length}
+            tone="warn"
+            hint="Letter Q or after P — assign A–P"
+            selected={bubble === "needs-bay"}
+            onClick={() => {
+              setBayLetter(null);
+              setSlot(null);
+              setBubble((v) => toggleChip(v, "needs-bay", null));
+            }}
+          />
+        ) : null}
+      </StatRow>
 
       {readyByModel.length ? (
         <section className="mt-5">
@@ -159,32 +221,24 @@ function Page() {
       ) : null}
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <button
-          type="button"
+        <FilterChip
+          selected={rack === "barn-back"}
           onClick={() => {
             setRack("barn-back");
             setSlot(null);
           }}
-          className={cn(
-            "h-9 rounded-full px-3 text-sm font-medium",
-            rack === "barn-back" ? "bg-ink text-ink-foreground" : "bg-secondary",
-          )}
         >
           Back rack
-        </button>
-        <button
-          type="button"
+        </FilterChip>
+        <FilterChip
+          selected={rack === "barn-front"}
           onClick={() => {
             setRack("barn-front");
             setSlot(null);
           }}
-          className={cn(
-            "h-9 rounded-full px-3 text-sm font-medium",
-            rack === "barn-front" ? "bg-ink text-ink-foreground" : "bg-secondary",
-          )}
         >
           Front rack
-        </button>
+        </FilterChip>
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -195,8 +249,8 @@ function Page() {
       </div>
 
       <p className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-        <span><span className="mr-1 inline-block size-2 rounded-sm bg-catering" />Catering B–E</span>
-        <span><span className="mr-1 inline-block size-2 rounded-sm bg-dispense" />Dispenser F–G</span>
+        <span><span className="mr-1 inline-block size-2 rounded-sm bg-catering" />Catering A–D</span>
+        <span><span className="mr-1 inline-block size-2 rounded-sm bg-dispense" />Dispenser E–F</span>
         <span>Number in a cell is lines used of 12. Capacity this rack: {capacity}.</span>
       </p>
 
@@ -209,6 +263,7 @@ function Page() {
               </th>
               {pallets.map((p) => {
                 const bay = bayFor(rack, p);
+                const picked = bayLetter === p;
                 return (
                   <th
                     key={p}
@@ -218,7 +273,17 @@ function Page() {
                       bay === "dispenser" && "text-dispense",
                     )}
                   >
-                    {p}
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline-flex min-w-8 items-center justify-center rounded-full px-1.5 py-0.5",
+                        picked && "bg-primary text-primary-foreground",
+                      )}
+                      onClick={() => setBayLetter((cur) => (cur === p ? null : p))}
+                      aria-pressed={picked}
+                    >
+                      {p}
+                    </button>
                   </th>
                 );
               })}
@@ -300,6 +365,7 @@ function Page() {
               </span>
             </span>
             <span className="flex flex-wrap gap-1">
+              {a.needsBay ? <StatusBadge status="Needs bay" /> : null}
               {a.missingSerial ? <StatusBadge status="Serial missing" /> : null}
               {a.customerOwned ? <StatusBadge status="Customer-owned" /> : null}
               {a.kind === "dispenser" ? <StatusBadge status="Accessory" /> : null}

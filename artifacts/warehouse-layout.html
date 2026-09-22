@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Warehouse layout template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* —— Tokens (swap these to rebrand) ——————————————————————— */
+    :root {
+      --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+      --font-display: "Fraunces", ui-serif, Georgia, serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+      --bg: #f3efe6;
+      --fg: #1c1917;
+      --card: #faf7f1;
+      --muted: #ece6da;
+      --muted-fg: #6f675e;
+      --primary: #2f5d50;
+      --primary-fg: #f4f0e8;
+      --secondary: #e7e0d4;
+      --border: #ddd4c6;
+      --ink: #1a1612;
+      --ink-fg: #e8e0d4;
+      --cream: #e8e0d4;
+      --warning: #9a5b12;
+      --catering: #b8612a;
+      --dispense: #5c5368;
+      --ring: #2f5d50;
+
+      --radius-sm: 8px;
+      --radius: 12px;
+      --radius-lg: 18px;
+      --shadow: 0 1px 2px rgb(28 25 23 / 0.04), 0 8px 24px rgb(28 25 23 / 0.05);
+      --sidebar: 15.5rem;
+    }
+
+    * { box-sizing: border-box; border-color: var(--border); }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font-sans); }
+    button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+    button { font: inherit; color: inherit; }
+    h1, h2, .display { font-family: var(--font-display); font-weight: 500; }
+
+    /* —— App shell ———————————————————————————————————————————— */
+    .app {
+      display: grid;
+      min-height: 100vh;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    }
+    .sidebar {
+      background: var(--ink);
+      color: var(--ink-fg);
+      padding: 1.25rem 0.85rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+    .brand { display: flex; align-items: baseline; gap: 0.4rem; padding: 0 0.65rem; text-decoration: none; color: inherit; }
+    .brand strong { font-family: var(--font-display); font-size: 1.55rem; font-weight: 500; }
+    .brand em { font-family: var(--font-display); font-size: 1.55rem; font-style: italic; color: rgb(232 224 212 / 0.6); }
+    .nav-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .nav-label {
+      padding: 0 0.75rem;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgb(232 224 212 / 0.5);
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.75rem; border-radius: 8px;
+      color: rgb(232 224 212 / 0.7); text-decoration: none; font-size: 0.9rem;
+    }
+    .nav-link:hover { background: rgb(232 224 212 / 0.08); color: var(--cream); }
+    .nav-link.is-active { background: rgb(232 224 212 / 0.12); color: var(--cream); }
+    .nav-link svg { width: 16px; height: 16px; flex: 0 0 auto; }
+
+    .main { padding: 1.5rem 1.75rem 3rem; max-width: 72rem; }
+
+    /* —— Page header ————————————————————————————————————————— */
+    .page-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; justify-content: space-between; }
+    .page-head h1 { margin: 0; font-size: 1.85rem; letter-spacing: -0.02em; }
+    .lede { margin: 0.4rem 0 0; max-width: 36rem; font-size: 0.9rem; color: var(--muted-fg); line-height: 1.5; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      height: 2.5rem; padding: 0 1rem; border: 0; border-radius: 999px;
+      background: var(--primary); color: var(--primary-fg); font-size: 0.9rem; font-weight: 500;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .btn svg { width: 16px; height: 16px; }
+
+    /* —— Stat bubbles (one-at-a-time filters) ———————————————— */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); gap: 0.75rem; margin-top: 1.25rem; }
+    .stat {
+      text-align: left; background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 0.9rem 1rem; box-shadow: var(--shadow);
+    }
+    .stat:hover { border-color: var(--primary); }
+    .stat.is-on { outline: 2px solid var(--ring); outline-offset: 1px; }
+    .stat .k { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-fg); }
+    .stat .v { margin-top: 0.2rem; font-family: var(--font-display); font-size: 1.7rem; line-height: 1.1; }
+    .stat .h { margin-top: 0.25rem; font-size: 0.75rem; color: var(--muted-fg); }
+    .stat.warn .v { color: var(--warning); }
+
+    /* —— Chart ————————————————————————————————————————————— */
+    .chart { margin-top: 1.25rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
+    .chart h2 { margin: 0; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-fg); font-weight: 500; font-family: var(--font-sans); }
+    .chart p { margin: 0.25rem 0 0.85rem; font-size: 0.8rem; color: var(--muted-fg); }
+    .bar { display: grid; grid-template-columns: minmax(0, 1fr) 2.2rem; gap: 0.5rem; align-items: center; margin-top: 0.55rem; }
+    .bar .name { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar .n { font-variant-numeric: tabular-nums; font-size: 0.85rem; font-weight: 500; text-align: right; }
+    .track { height: 10px; background: var(--secondary); border-radius: 999px; overflow: hidden; grid-column: 1 / -1; }
+    .track > i { display: block; height: 100%; background: var(--primary); border-radius: inherit; }
+
+    /* —— Toolbar ———————————————————————————————————————————— */
+    .tools { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; align-items: center; }
+    .pill {
+      height: 2.25rem; padding: 0 0.9rem; border: 0; border-radius: 999px;
+      background: var(--secondary); font-size: 0.875rem; font-weight: 500;
+    }
+    .pill.is-on { background: var(--ink); color: var(--ink-fg); }
+    .search, .sort {
+      height: 2.25rem; padding: 0 0.8rem; border: 1px solid var(--input, var(--border));
+      border-radius: 999px; background: var(--card); font: inherit; color: inherit;
+    }
+    .search { min-width: 14rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 0.75rem 0 0; font-size: 0.75rem; color: var(--muted-fg); }
+    .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 0.3rem; vertical-align: middle; }
+    .swatch.catering { background: var(--catering); }
+    .swatch.dispense { background: var(--dispense); }
+
+    /* —— Bay grid ——————————————————————————————————————————— */
+    .grid-wrap { margin-top: 0.75rem; overflow-x: auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; }
+    table.bays { width: 100%; min-width: 40rem; border-collapse: collapse; text-align: center; }
+    table.bays th { font-size: 11px; font-weight: 500; color: var(--muted-fg); padding: 0 2px 8px; }
+    table.bays th.lvl { text-align: left; padding-right: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    table.bays td { padding: 2px; }
+    table.bays tbody th { text-align: left; font-size: 0.75rem; font-weight: 500; color: var(--muted-fg); padding-right: 0.5rem; white-space: nowrap; }
+    .bay-h {
+      min-width: 2rem; height: 1.4rem; padding: 0 0.4rem; border: 0; border-radius: 999px;
+      background: transparent; font-size: 11px; font-weight: 500;
+    }
+    .bay-h.is-on { background: var(--primary); color: var(--primary-fg); }
+    .bay-h.catering { color: var(--catering); }
+    .bay-h.dispense { color: var(--dispense); }
+    .cell {
+      width: 100%; min-width: 2rem; height: 2.25rem; border: 0; border-radius: 4px;
+      font-size: 0.75rem; font-variant-numeric: tabular-nums;
+    }
+    .cell.empty { background: var(--muted); color: var(--muted-fg); }
+    .cell.used { background: rgb(47 93 80 / 0.15); }
+    .cell.full { background: var(--primary); color: var(--primary-fg); }
+    .cell.catering.empty { background: rgb(184 97 42 / 0.15); }
+    .cell.dispense.empty { background: rgb(92 83 104 / 0.15); }
+    .cell.is-on { box-shadow: 0 0 0 2px var(--ring); }
+
+    /* —— Unit list —————————————————————————————————————————— */
+    .list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-top: 1.1rem; }
+    .list-head h2 { margin: 0; font-size: 1.25rem; }
+    .list-head button { background: none; border: 0; font-size: 0.75rem; color: var(--muted-fg); }
+    .list { margin-top: 0.75rem; overflow: hidden; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+    .row {
+      display: grid; gap: 0.25rem; width: 100%; text-align: left;
+      padding: 0.75rem 1rem; border: 0; border-bottom: 1px solid var(--border); background: transparent;
+    }
+    .row:last-child { border-bottom: 0; }
+    .row:hover { background: rgb(236 230 218 / 0.6); }
+    .row .slot { font-family: var(--font-mono); font-size: 0.75rem; }
+    .row .model { font-weight: 500; }
+    .row .sub { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--muted-fg); }
+    .badges { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+    .badge { font-size: 11px; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--muted); color: var(--muted-fg); }
+    .badge.warn { background: rgb(154 91 18 / 0.15); color: var(--warning); }
+    .empty { padding: 2rem 1rem; font-size: 0.9rem; color: var(--muted-fg); }
+    @media (min-width: 768px) {
+      .row { grid-template-columns: 7rem 1.4fr 8rem 5.5rem; align-items: center; }
+    }
+
+    /* —— Sheet / dialog ————————————————————————————————————— */
+    .overlay { position: fixed; inset: 0; background: rgb(28 25 23 / 0.35); display: none; z-index: 40; }
+    .overlay.open { display: block; }
+    .sheet {
+      position: fixed; top: 0; right: 0; bottom: 0; width: min(26rem, 100%);
+      background: var(--card); border-left: 1px solid var(--border);
+      padding: 1.25rem 1.35rem; overflow: auto; z-index: 50;
+      transform: translateX(100%); transition: transform 180ms ease;
+    }
+    .sheet.open { transform: none; }
+    .dialog {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(28rem, calc(100% - 2rem)); background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem;
+      box-shadow: var(--shadow); z-index: 50; display: none;
+    }
+    .dialog.open { display: block; }
+    .field { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.75rem; font-size: 0.85rem; }
+    .field label { font-size: 0.8rem; color: var(--muted-fg); }
+    .field input, .field select {
+      height: 2.5rem; padding: 0 0.75rem; border: 1px solid var(--border);
+      border-radius: 999px; background: var(--bg); font: inherit; color: inherit;
+    }
+    .actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+
+    .note {
+      margin-top: 2rem; padding: 0.9rem 1rem; border: 1px dashed var(--border);
+      border-radius: var(--radius); font-size: 0.8rem; color: var(--muted-fg); line-height: 1.5;
+    }
+    .note strong { color: var(--fg); }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    LAYOUT MAP
+    1. App shell     ink sidebar + paper main
+    2. Page header   display title, lede, one primary action
+    3. Stat bubbles  clickable, one at a time (click again to clear)
+    4. Chart         Ready by model (qty, not line count)
+    5. Toolbar       Back/Front rack pills, search, sort
+    6. Bay grid      letters across, levels L4 (top) → L1 (floor)
+    7. Unit list     slot · model · serial · flags
+    8. Detail sheet  / add dialog
+  -->
+  <div class="app">
+    <aside class="sidebar" aria-label="Shop">
+      <a class="brand" href="#"><strong>Barn</strong><em>rack</em></a>
+      <div class="nav-group">
+        <p class="nav-label">Shop</p>
+        <a class="nav-link is-active" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"/><path d="M9 21v-8h6v8"/></svg>
+          Warehouse
+        </a>
+        <a class="nav-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>Locations</a>
+        <a class="nav-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>Customers</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="page-head">
+        <div>
+          <h1>Barn warehouse</h1>
+          <p class="lede">Ready-to-deploy units at HQ. Slot ID is pallet + level — A-L3 is pallet A, third shelf. Bays run A through P. Pull a unit and it leaves this board.</p>
+        </div>
+        <button class="btn" type="button" id="addBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Add to rack
+        </button>
+      </header>
+
+      <div class="stats" id="stats"></div>
+
+      <section class="chart">
+        <h2>Ready by model</h2>
+        <p>The Ready bubble, unpacked — qty on the rack, not line count.</p>
+        <div id="bars"></div>
+      </section>
+
+      <div class="tools">
+        <button type="button" class="pill is-on" data-rack="back">Back rack</button>
+        <button type="button" class="pill" data-rack="front">Front rack</button>
+        <input class="search" id="q" type="search" placeholder="Find model or serial…" aria-label="Search" />
+        <select class="sort" id="sort" aria-label="Sort">
+          <option value="alpha">A–Z</option>
+          <option value="slot">Slot</option>
+          <option value="status">Status</option>
+        </select>
+      </div>
+      <p class="legend">
+        <span><i class="swatch catering"></i>Catering A–D</span>
+        <span><i class="swatch dispense"></i>Dispenser E–F</span>
+        <span>Number in a cell is lines used of 12.</span>
+      </p>
+
+      <div class="grid-wrap">
+        <table class="bays" id="grid"></table>
+      </div>
+
+      <div class="list-head">
+        <h2 id="listTitle">Back rack units</h2>
+        <button type="button" id="clearSlot" hidden>Clear slot</button>
+      </div>
+      <div class="list" id="list"></div>
+
+      <p class="note">
+        <strong>Template only.</strong> Swap the <code>UNITS</code> array for your inventory.
+        Keep the regions above — header, bubbles, chart, rack toggle, bay grid, list —
+        and the layout will stay familiar. Grid rules: back rack A–P, front rack I–P,
+        levels L4 (top) → L1 (floor), 12 lines per cell. Click a bubble, a bay letter,
+        or a cell to filter (one at a time).
+      </p>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="sheet" id="sheet" aria-label="Unit"></aside>
+  <div class="dialog" id="dialog" role="dialog" aria-labelledby="dialogTitle">
+    <h2 class="display" id="dialogTitle" style="margin:0;font-size:1.25rem">Add to the barn</h2>
+    <form id="addForm">
+      <div class="field"><label>Model</label><input name="model" required placeholder="Search equipment…" /></div>
+      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <div class="field" style="margin:0"><label>Serial</label><input name="serial" /></div>
+        <div class="field" style="margin:0"><label>Qty</label><input name="qty" type="number" min="1" value="1" /></div>
+      </div>
+      <div class="field"><label>Kind</label>
+        <select name="kind"><option value="equip">Equipment</option><option value="dispenser">Dispenser / accessory</option></select>
+      </div>
+      <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem">
+        <div class="field" style="margin:0"><label>Rack</label>
+          <select name="rack"><option value="back">Back</option><option value="front">Front</option></select>
+        </div>
+        <div class="field" style="margin:0"><label>Pallet</label><select name="pallet" id="addPallet"></select></div>
+        <div class="field" style="margin:0"><label>Level</label>
+          <select name="level"><option>4</option><option>3</option><option>2</option selected>1</select>
+        </div>
+      </div>
+      <p class="lede" style="margin-top:0.75rem">Puts the unit on the next open line of that slot (1–12).</p>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="cancelAdd">Cancel</button>
+        <button class="btn" type="submit">Add</button>
+      </div>
+    </form>
+  </div>
+
+<script>
+/* —— Sample inventory. Replace with your data. ——————————————— */
+const BACK = [..."ABCDEFGHIJKLMNOP"];
+const FRONT = [..."IJKLMNOP"];
+const LEVELS = [4, 3, 2, 1];
+const UNITS = [
+  { id: 1,  model: "Batch brewer, dual",     serial: "BR-4412", pallet: "A", level: 2, line: 1,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 2,  model: "Batch brewer, dual",     serial: "BR-4418", pallet: "A", level: 2, line: 2,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 3,  model: "Espresso 2-group",       serial: "EX-2201", pallet: "G", level: 3, line: 1,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 4,  model: "Espresso 2-group",       serial: "EX-2208", pallet: "G", level: 3, line: 2,  rack: "back",  kind: "equip",     qty: 1, owned: "Loaned — Cafe Rio" },
+  { id: 5,  model: "Espresso 3-group",       serial: "EX-3104", pallet: "H", level: 4, line: 1,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 6,  model: "On-demand grinder",      serial: "GR-118",  pallet: "K", level: 1, line: 1,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 7,  model: "On-demand grinder",      serial: null,      pallet: "K", level: 1, line: 2,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 8,  model: "Tea brewer",             serial: "TB-90",   pallet: "C", level: 1, line: 1,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 9,  model: "Hot water tower",        serial: "HW-12",   pallet: "D", level: 2, line: 1,  rack: "back",  kind: "equip",     qty: 1, owned: null },
+  { id: 10, model: "Powder dispenser",       serial: "PD-4",    pallet: "E", level: 3, line: 1,  rack: "back",  kind: "dispenser", qty: 2, owned: null },
+  { id: 11, model: "Powder dispenser",       serial: "PD-5",    pallet: "F", level: 2, line: 1,  rack: "back",  kind: "dispenser", qty: 1, owned: null },
+  { id: 12, model: "Espresso 2-group",       serial: "EX-2290", pallet: "I", level: 2, line: 1,  rack: "front", kind: "equip",     qty: 1, owned: null },
+  { id: 13, model: "Batch brewer, single",   serial: "BR-1102", pallet: "L", level: 4, line: 1,  rack: "front", kind: "equip",     qty: 1, owned: null },
+  { id: 14, model: "Fridge, undercounter",   serial: "FR-77",   pallet: "N", level: 1, line: 1,  rack: "front", kind: "equip",     qty: 1, owned: null },
+  { id: 15, model: "Espresso 2-group",       serial: "EX-1999", pallet: null,level: 1, line: null,rack: "back",  kind: "equip",     qty: 1, owned: null },
+];
+
+const state = { rack: "back", bubble: null, bay: null, slot: null, q: "", sort: "alpha" };
+
+function bayKind(rack, pallet) {
+  if (rack === "back" && "ABCD".includes(pallet)) return "catering";
+  if (rack === "back" && "EF".includes(pallet)) return "dispense";
+  return "general";
+}
+function slotId(u) {
+  if (!u.pallet) return "Needs bay";
+  return u.line ? `${u.pallet}-L${u.level} · ${u.line}` : `${u.pallet}-L${u.level}`;
+}
+function needsBay(u) { return !u.pallet; }
+function pallets() { return state.rack === "front" ? FRONT : BACK; }
+
+function fillMap() {
+  const map = new Map();
+  for (const u of UNITS) {
+    if (u.rack !== state.rack || !u.pallet) continue;
+    const k = `${u.pallet}-${u.level}`;
+    map.set(k, (map.get(k) ?? 0) + 1);
+  }
+  return map;
+}
+
+function filtered() {
+  const barn = UNITS.filter((u) => u.rack === "back" || u.rack === "front");
+  let rows = UNITS.filter((u) => u.rack === state.rack);
+  if (state.slot) rows = rows.filter((u) => u.pallet === state.slot.p && u.level === state.slot.l);
+  if (state.bubble === "dispensers") rows = rows.filter((u) => u.kind === "dispenser");
+  if (state.bubble === "missing") rows = rows.filter((u) => !u.serial);
+  if (state.bubble === "needs-bay") rows = barn.filter(needsBay);
+  if (state.bubble === "ready") rows = rows.filter((u) => u.kind === "equip");
+  if (state.bay) rows = barn.filter((u) => u.pallet === state.bay);
+  const needle = state.q.trim().toLowerCase();
+  if (needle) {
+    rows = barn.filter((u) => [u.model, u.serial, slotId(u), u.owned, u.pallet].filter(Boolean).join(" ").toLowerCase().includes(needle));
+  }
+  const key = {
+    alpha: (u) => u.model,
+    slot: (u) => slotId(u),
+    status: (u) => (needsBay(u) ? "0" : u.serial ? "2" : "1"),
+  }[state.sort];
+  return rows.slice().sort((a, b) => String(key(a)).localeCompare(String(key(b))));
+}
+
+function renderStats() {
+  const barn = UNITS.filter((u) => u.rack === "back" || u.rack === "front");
+  const equip = barn.filter((u) => u.kind === "equip");
+  const ready = equip.reduce((n, u) => n + u.qty, 0);
+  const models = new Set(equip.map((u) => u.model)).size;
+  const lines = equip.length;
+  const cap = 14 * 4 * 12 + 8 * 4 * 12;
+  const disp = barn.filter((u) => u.kind === "dispenser").reduce((n, u) => n + u.qty, 0);
+  const missing = barn.filter((u) => !u.serial).length;
+  const stranded = barn.filter(needsBay).length;
+  const owned = barn.filter((u) => u.owned).length;
+  const cards = [
+    { id: "ready", label: "Ready", value: ready, hint: `${models} models · ${Math.max(0, cap - lines)} open slots` },
+    { id: "fill", label: "Fill", value: `${Math.round((lines / cap) * 100)}%`, hint: `${lines} lines on the rack` },
+    { id: "dispensers", label: "Dispensers", value: disp, hint: "Not counted in Ready" },
+    { id: "missing", label: "Missing serial", value: missing, hint: `${owned} customer-owned`, warn: missing > 0 },
+  ];
+  if (stranded) cards.push({ id: "needs-bay", label: "Needs bay", value: stranded, hint: "Assign A–P", warn: true });
+  document.getElementById("stats").innerHTML = cards.map((c) => `
+    <button type="button" class="stat${c.warn ? " warn" : ""}${state.bubble === c.id ? " is-on" : ""}" data-bubble="${c.id}">
+      <span class="k">${c.label}</span>
+      <div class="v">${c.value}</div>
+      <div class="h">${c.hint}</div>
+    </button>`).join("");
+}
+
+function renderBars() {
+  const counts = new Map();
+  for (const u of UNITS) {
+    if (u.kind !== "equip") continue;
+    counts.set(u.model, (counts.get(u.model) ?? 0) + u.qty);
+  }
+  const rows = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const max = Math.max(...rows.map((r) => r[1]), 1);
+  document.getElementById("bars").innerHTML = rows.map(([name, n]) => `
+    <div class="bar">
+      <span class="name" title="${name}">${name}</span>
+      <span class="n">${n}</span>
+      <span class="track"><i style="width:${Math.max(6, Math.round((n / max) * 100))}%"></i></span>
+    </div>`).join("");
+}
+
+function renderGrid() {
+  const cols = pallets();
+  const fill = fillMap();
+  const head = cols.map((p) => {
+    const k = bayKind(state.rack, p);
+    return `<th><button type="button" class="bay-h ${k}${state.bay === p ? " is-on" : ""}" data-bay="${p}">${p}</button></th>`;
+  }).join("");
+  const body = LEVELS.map((level) => {
+    const cells = cols.map((p) => {
+      const n = fill.get(`${p}-${level}`) ?? 0;
+      const k = bayKind(state.rack, p);
+      const on = state.slot && state.slot.p === p && state.slot.l === level;
+      const fillClass = n === 0 ? "empty" : n >= 12 ? "full" : "used";
+      return `<td><button type="button" class="cell ${fillClass} ${k}${on ? " is-on" : ""}" data-p="${p}" data-l="${level}" aria-label="${p}-L${level} ${n} of 12">${n}</button></td>`;
+    }).join("");
+    const tag = level === 4 ? " <span style='font-weight:400'>top</span>" : level === 1 ? " <span style='font-weight:400'>floor</span>" : "";
+    return `<tr><th>L${level}${tag}</th>${cells}</tr>`;
+  }).join("");
+  document.getElementById("grid").innerHTML = `<thead><tr><th class="lvl">Level</th>${head}</tr></thead><tbody>${body}</tbody>`;
+}
+
+function renderList() {
+  const rows = filtered();
+  const title = state.q.trim() ? "Search" : state.slot ? `${state.slot.p}-L${state.slot.l}` : state.rack === "back" ? "Back rack units" : "Front rack units";
+  document.getElementById("listTitle").textContent = title;
+  document.getElementById("clearSlot").hidden = !state.slot;
+  document.getElementById("list").innerHTML = rows.length ? rows.map((u) => `
+    <button type="button" class="row" data-id="${u.id}">
+      <span class="slot">${slotId(u)}</span>
+      <span><span class="model">${u.model}</span><span class="sub">${u.serial ?? "No serial"}${u.qty > 1 ? " · qty " + u.qty : ""}${u.owned ? " · " + u.owned : ""}</span></span>
+      <span class="badges">
+        ${needsBay(u) ? '<span class="badge warn">Needs bay</span>' : ""}
+        ${!u.serial ? '<span class="badge warn">Serial missing</span>' : ""}
+        ${u.owned ? '<span class="badge">Customer-owned</span>' : ""}
+        ${u.kind === "dispenser" ? '<span class="badge">Accessory</span>' : ""}
+      </span>
+      <span class="sub">${u.kind === "dispenser" ? u.qty + " pcs" : "1 unit"}</span>
+    </button>`).join("") : `<p class="empty">${state.slot ? "Empty slot — add a unit here." : "Nothing on this rack matches."}</p>`;
+}
+
+function render() { renderStats(); renderBars(); renderGrid(); renderList(); }
+
+function toggleBubble(id) {
+  state.bubble = state.bubble === id ? null : id;
+  state.bay = null; state.slot = null;
+  render();
+}
+
+document.getElementById("stats").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-bubble]");
+  if (b) toggleBubble(b.dataset.bubble);
+});
+document.querySelectorAll("[data-rack]").forEach((el) => el.addEventListener("click", () => {
+  state.rack = el.dataset.rack; state.slot = null;
+  document.querySelectorAll("[data-rack]").forEach((x) => x.classList.toggle("is-on", x === el));
+  render();
+}));
+document.getElementById("grid").addEventListener("click", (e) => {
+  const bay = e.target.closest("[data-bay]");
+  if (bay) {
+    state.bay = state.bay === bay.dataset.bay ? null : bay.dataset.bay;
+    state.slot = null; state.bubble = null;
+    render(); return;
+  }
+  const cell = e.target.closest("[data-p]");
+  if (cell) {
+    const next = { p: cell.dataset.p, l: Number(cell.dataset.l) };
+    const same = state.slot && state.slot.p === next.p && state.slot.l === next.l;
+    state.slot = same ? null : next;
+    state.bay = null; state.bubble = null;
+    render();
+  }
+});
+document.getElementById("q").addEventListener("input", (e) => { state.q = e.target.value; renderList(); });
+document.getElementById("sort").addEventListener("change", (e) => { state.sort = e.target.value; renderList(); });
+document.getElementById("clearSlot").addEventListener("click", () => { state.slot = null; render(); });
+
+function openSheet(u) {
+  document.getElementById("sheet").innerHTML = `
+    <p class="nav-label" style="padding:0;color:var(--muted-fg)">Unit</p>
+    <h2 class="display" style="margin:0.2rem 0 0.6rem;font-size:1.4rem">${u.model}</h2>
+    <p class="lede">${slotId(u)} · ${u.serial ?? "No serial"}</p>
+    <p class="lede">${u.kind === "dispenser" ? "Dispenser / accessory" : "Equipment"}${u.owned ? " · " + u.owned : ""}</p>
+    <div class="actions"><button class="btn ghost" type="button" id="closeSheet">Close</button></div>`;
+  document.getElementById("sheet").classList.add("open");
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("closeSheet").onclick = closeOverlays;
+}
+document.getElementById("list").addEventListener("click", (e) => {
+  const row = e.target.closest("[data-id]");
+  if (!row) return;
+  const u = UNITS.find((x) => x.id === Number(row.dataset.id));
+  if (u) openSheet(u);
+});
+
+function fillPallets() {
+  const sel = document.getElementById("addPallet");
+  const rack = document.querySelector("#addForm [name=rack]").value;
+  const cols = rack === "front" ? FRONT : BACK;
+  sel.innerHTML = cols.map((p) => `<option>${p}</option>`).join("");
+}
+function openAdd() {
+  fillPallets();
+  document.getElementById("dialog").classList.add("open");
+  document.getElementById("overlay").classList.add("open");
+}
+function closeOverlays() {
+  document.getElementById("dialog").classList.remove("open");
+  document.getElementById("sheet").classList.remove("open");
+  document.getElementById("overlay").classList.remove("open");
+}
+document.getElementById("addBtn").onclick = openAdd;
+document.getElementById("cancelAdd").onclick = closeOverlays;
+document.getElementById("overlay").onclick = closeOverlays;
+document.querySelector("#addForm [name=rack]").addEventListener("change", fillPallets);
+document.getElementById("addForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.currentTarget);
+  UNITS.push({
+    id: Date.now(),
+    model: String(fd.get("model")),
+    serial: String(fd.get("serial") || "") || null,
+    pallet: String(fd.get("pallet")),
+    level: Number(fd.get("level")),
+    line: 1,
+    rack: String(fd.get("rack")),
+    kind: String(fd.get("kind")),
+    qty: Number(fd.get("qty")) || 1,
+    owned: null,
+  });
+  closeOverlays();
+  e.currentTarget.reset();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

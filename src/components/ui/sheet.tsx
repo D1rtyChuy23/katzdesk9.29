@@ -22,10 +22,10 @@ export function SheetContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed z-50 flex h-full w-full flex-col overflow-y-auto border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out sm:max-w-xl",
+          "sheet-panel fixed inset-y-0 top-0 z-50 flex h-dvh max-h-dvh w-full flex-col overflow-hidden overscroll-none border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out sm:max-w-xl",
           side === "right"
-            ? "top-0 right-0 border-l data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right"
-            : "top-0 left-0 border-r data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left",
+            ? "right-0 border-l data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right"
+            : "left-0 border-r data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left",
           className,
         )}
         onPointerDownOutside={(e) => {
@@ -43,7 +43,7 @@ export function SheetContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute top-3 right-3 rounded-sm p-1 text-muted-foreground hover:bg-muted">
+        <DialogPrimitive.Close className="absolute top-3 right-3 z-10 rounded-sm p-1 text-muted-foreground hover:bg-muted">
           <X className="size-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -53,7 +53,19 @@ export function SheetContent({
 }
 
 export function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("border-b border-border px-5 py-4 pr-12", className)} {...props} />;
+  return <div className={cn("shrink-0 border-b border-border px-5 py-4 pr-12", className)} {...props} />;
+}
+
+export function SheetBody({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn(
+        "sheet-scroll min-h-0 flex-1 overflow-y-scroll overscroll-contain",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {

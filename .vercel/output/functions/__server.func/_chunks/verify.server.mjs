@@ -46,7 +46,10 @@ async function getSessionUser(bearerToken) {
 		headers = new Headers(request.headers);
 		headers.set("Authorization", `Bearer ${bearerToken}`);
 	}
-	const session = await auth.api.getSession({ headers });
+	const session = await auth.api.getSession({ headers }).catch((err) => {
+		console.error("[auth] getSession failed", err);
+		return null;
+	});
 	if (!session?.user) return null;
 	return {
 		id: session.user.id,

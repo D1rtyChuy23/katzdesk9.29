@@ -5,6 +5,7 @@ import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { signOut } from "@/lib/auth/client";
 import { getMyAccess } from "@/lib/ops/access";
 import { AppShell } from "@/components/desk/shell";
+import { UsernameSetup } from "@/components/desk/username-setup";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_app")({
@@ -29,7 +30,12 @@ function DeskLayout() {
     queryKey: ["access", "me"],
     queryFn: () => getMyAccess(),
     enabled: !!user,
-    refetchInterval: (q) => (q.state.data && !q.state.data.approved ? 3000 : false),
+    refetchInterval: (q) => {
+      const d = q.state.data;
+      if (d && !d.approved && d.usernameChosen) return 3000;
+      if (d?.approved) return 12000;
+      return false;
+    },
     retry: 1,
   });
 
@@ -49,6 +55,36 @@ function DeskLayout() {
           <div className="mt-6 flex flex-col gap-2">
             <Button type="button" className="w-full" onClick={() => void access.refetch()}>
               Try again
+            </Button>
+            <Button type="button" className="w-full" variant="secondary" onClick={() => void signOut()}>
+              Sign out
+            </Button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+  if (access.data?.needsUsername) {
+    return (
+      <UsernameSetup
+        email={access.data.email ?? user.primaryEmail}
+        onDone={() => void access.refetch()}
+      />
+    );
+  }
+  if (access.data?.denied) {
+    return (
+      <main className="flex min-h-svh items-center justify-center bg-ink px-6 text-ink-foreground">
+        <div className="max-w-md rounded-xl border border-cream/12 bg-cream/6 p-6">
+          <p className="text-xs tracking-[0.18em] text-cream/50 uppercase">Katz Desk</p>
+          <h1 className="mt-3 font-display text-3xl">Access denied</h1>
+          <p className="mt-2 text-sm text-cream/70">
+            Signed in as {access.data.username}. An admin declined this account. Ask them to invite
+            you again if you should be on the desk.
+          </p>
+          <div className="mt-6 flex flex-col gap-2">
+            <Button type="button" className="w-full" onClick={() => void access.refetch()}>
+              Check again
             </Button>
             <Button type="button" className="w-full" variant="secondary" onClick={() => void signOut()}>
               Sign out

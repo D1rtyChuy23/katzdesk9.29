@@ -1,0 +1,26 @@
+{
+  "admin": "chuy.ops9iu4z",
+  "teammate": "invited.9iu4z",
+  "invitedJoinsDesk": true,
+  "uninvitedWaits": true,
+  "accessHasInvite": true,
+  "pendingInviteShows": true,
+  "usernameSetupSkippedWhenChosen": true,
+  "loginMentionsUsername": false,
+  "mobileSheetScrolls": true,
+  "mobileSheetOverflow": "scroll",
+  "mobileSheetHeights": {
+    "overflowY": "scroll",
+    "touchAction": "pan-y",
+    "clientHeight": 739,
+    "scrollHeight": 1612,
+    "windowHeight": 844,
+    "parentOverflow": "hidden",
+    "parentHeight": 844,
+    "scrolledTo": 180
+  },
+  "errors": [
+    "admin did not land on desk: Katz\nDesk\n\nService and sales, one clock.\n\nFLOOR\n\nClock\nService\nTLC + Factor\nPMs\n\nSALES → SERVICE\n\nPipeline\nInstalls\nHandoff\n\nSHOP\n\nWarehouse\nLocations\nModules\nRecipes\n\nADMIN\n\nAccess\n\nSigned in\n\nC\nchuy.ops9iu4z\nSign out\n⌘K"
+  ],
+  "teammateSawWait": false
+}

@@ -7,8 +7,10 @@ export const PopoverTrigger = PopoverPrimitive.Trigger;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
 export function isInsideCombo(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null;
-  return !!el?.closest?.("[data-combo-popover]");
+  const node = target as Node | null;
+  const el = node instanceof Element ? node : node?.parentElement;
+  if (!el || typeof el.closest !== "function") return false;
+  return !!el.closest("[data-combo-popover]");
 }
 
 export function preventIfCombo(event: { target: EventTarget | null; preventDefault: () => void }) {
@@ -21,8 +23,13 @@ export function PopoverContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+  const [container, setContainer] = React.useState<HTMLElement | undefined>(undefined);
+  React.useLayoutEffect(() => {
+    const sheet = document.querySelector(".sheet-panel") as HTMLElement | null;
+    setContainer(sheet ?? undefined);
+  }, []);
   return (
-    <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Portal container={container}>
       <PopoverPrimitive.Content
         align={align}
         sideOffset={sideOffset}

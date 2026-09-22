@@ -44,9 +44,7 @@ export function equipmentCount(raw: string | null | undefined, extra = 0): numbe
   if (extra > 0) return extra;
   if (!raw?.trim()) return 0;
   const lines = raw.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-  if (lines.length > 1) return lines.length;
-  const bits = lines[0]!.split(/\s*(?:,|&|\+|\/)\s*/).map((s) => s.trim()).filter(Boolean);
-  return Math.max(bits.length, 1);
+  return lines.length;
 }
 
 export type SortAccessors<T> = {

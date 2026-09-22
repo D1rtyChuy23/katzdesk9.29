@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "emailOnlyInviteGetsIn": true,
+  "usernameMismatchGetsIn": true,
+  "waiterShowsOnAccess": true,
+  "waiterStaysOnWaiting": true,
+  "copyInviteVisible": true,
+  "signInByEmail": true,
+  "steps": [
+    "admin signed up",
+    "saved two invites",
+    "email-only invite in=true",
+    "username mismatch in=true",
+    "waiter waiting=true",
+    "sign-in by email=true"
+  ],
+  "errors": []
+}

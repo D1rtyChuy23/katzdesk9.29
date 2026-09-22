@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "oneSearchField": true,
+  "plusAddAtTop": true,
+  "disclaimerOnMiss": true,
+  "noInnerSearch": true,
+  "rackShowsAll": true,
+  "rackCount": 236,
+  "optionCount": 236,
+  "recipesSection": true,
+  "steps": [
+    "signed in",
+    "combo checked",
+    "rack count=236 options=236",
+    "recipesSection=true"
+  ],
+  "errors": []
+}

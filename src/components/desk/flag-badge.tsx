@@ -17,6 +17,18 @@ export function UrgencyBadge({ urgency }: { urgency: string | null | undefined }
   return <Badge>{urgency}</Badge>;
 }
 
+export function DuplicateBadge({
+  duplicateOf,
+  siblingCount,
+}: {
+  duplicateOf?: number | null;
+  siblingCount?: number;
+}) {
+  if (duplicateOf) return <Badge variant="warn">Merged duplicate</Badge>;
+  if (siblingCount && siblingCount > 0) return <Badge variant="warn">Possible duplicate</Badge>;
+  return null;
+}
+
 export function StatusBadge({ status }: { status: string | null | undefined }) {
   if (!status) return <Badge variant="outline">Unset</Badge>;
   const s = status.toLowerCase();
@@ -25,6 +37,9 @@ export function StatusBadge({ status }: { status: string | null | undefined }) {
   }
   if (s.includes("cancel") || s.includes("fell") || s.includes("overdue") || s.includes("not ready")) {
     return <Badge variant="danger">{status}</Badge>;
+  }
+  if (s.includes("needs bay") || s.includes("serial missing")) {
+    return <Badge variant="warn">{status}</Badge>;
   }
   if (s.includes("progress") || s.includes("dispatch") || s.includes("await") || s.includes("follow")) {
     return <Badge variant="warn">{status}</Badge>;

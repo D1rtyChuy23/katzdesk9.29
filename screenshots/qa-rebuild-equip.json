@@ -1,0 +1,59 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "ok": true,
+      "msg": "landed on rebuilds (desk)"
+    },
+    {
+      "ok": true,
+      "msg": "Rebuilds page heading"
+    },
+    {
+      "ok": true,
+      "msg": "Drag hint visible"
+    },
+    {
+      "ok": true,
+      "msg": "Status columns present"
+    },
+    {
+      "ok": true,
+      "msg": "Remove buttons on rebuild cards"
+    },
+    {
+      "ok": true,
+      "msg": "Drag moved a card or asked for missing fields"
+    },
+    {
+      "ok": true,
+      "msg": "Removed a rebuild from the board"
+    },
+    {
+      "ok": true,
+      "msg": "New call dialog open"
+    },
+    {
+      "ok": true,
+      "msg": "Equipment chip sits above the search"
+    },
+    {
+      "ok": true,
+      "msg": "Equipment label in create dialog"
+    },
+    {
+      "ok": true,
+      "msg": "Chip layout note"
+    },
+    {
+      "ok": true,
+      "msg": "Urgency still below equipment"
+    }
+  ],
+  "errors": [],
+  "queuedTitle": "Cameo steam block — stock",
+  "beforeQueued": 1,
+  "afterQueued": 0,
+  "beforeProgress": 3,
+  "afterProgress": 4
+}

@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "nav": true,
+  "providerCount": 3,
+  "unassigned": true,
+  "dispatchOnCustomer": true,
+  "dispatchOnTicket": true,
+  "addProvider": true,
+  "steps": [
+    "signed in",
+    "nav=true unassigned=true providersVisible=3"
+  ],
+  "errors": []
+}

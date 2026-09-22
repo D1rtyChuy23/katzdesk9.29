@@ -40,6 +40,51 @@ var _0008_machines_and_access_default = "-- Per-machine serial / power on instal
 //#region migrations/0009_notifications.sql?raw
 var _0009_notifications_default = "-- Per-user pings / reminders. Scoped by recipient user_id.\n\ncreate table if not exists desk_notifications (\n  id            serial primary key,\n  user_id       text not null,\n  from_user_id  text,\n  from_name     text,\n  body          text not null,\n  entity_type   text,\n  entity_id     int,\n  read          boolean not null default false,\n  created_at    timestamptz not null default now()\n);\ncreate index if not exists desk_notifications_inbox_idx\n  on desk_notifications (user_id, read, created_at desc);\n";
 //#endregion
+//#region migrations/0010_invites.sql?raw
+var _0010_invites_default = "-- Invites + first-login username choice. Existing accounts already picked a name.\n\nalter table desk_accounts\n  add column if not exists username_chosen boolean not null default false;\nalter table desk_accounts\n  add column if not exists denied boolean not null default false;\n\nupdate desk_accounts\n   set username_chosen = true\n where username_chosen = false\n   and username is not null\n   and length(trim(username)) >= 3;\n\ncreate table if not exists desk_invites (\n  id               serial primary key,\n  email            text,\n  username         text,\n  invited_by       text not null,\n  status           text not null default 'pending',\n  accepted_user_id text,\n  created_at       timestamptz not null default now(),\n  updated_at       timestamptz not null default now()\n);\ncreate index if not exists desk_invites_status_idx on desk_invites (status, created_at desc);\ncreate index if not exists desk_invites_email_idx on desk_invites (lower(email));\ncreate index if not exists desk_invites_username_idx on desk_invites (lower(username));\n";
+//#endregion
+//#region migrations/0011_archive_and_duplicate.sql?raw
+var _0011_archive_and_duplicate_default = "-- Soft-remove deals/installs from their lists, and flag same-account install dupes.\n\nalter table deals add column if not exists archived boolean not null default false;\nalter table installs add column if not exists archived boolean not null default false;\nalter table installs add column if not exists duplicate_of int;\n\ncreate index if not exists deals_archived_idx on deals (archived);\ncreate index if not exists installs_archived_idx on installs (archived);\n";
+//#endregion
+//#region migrations/0012_asset_job.sql?raw
+var _0012_asset_job_default = "-- Warehouse units pulled for a service call (loaner / swap)\nalter table assets add column if not exists job_id int;\ncreate index if not exists assets_job_idx on assets (job_id);\n";
+//#endregion
+//#region migrations/0013_handoff_owners.sql?raw
+var _0013_handoff_owners_default = "-- Note ownership: unsourced names are not real posters.\n-- Deal handoff: once sent to installs, stay off the handoff board even if the install is later removed.\n\nalter table deals add column if not exists handed_off boolean not null default false;\n\nupdate deals d\nset handed_off = true\nwhere d.handed_off = false\n  and (\n    exists (select 1 from installs i where i.deal_id = d.id)\n    or (\n      d.completion = 'complete'\n      and exists (\n        select 1 from installs i\n        where i.archived = false\n          and lower(i.customer) = lower(d.customer)\n      )\n    )\n  );\n\nupdate comments\nset author_name = null\nwhere author_id is null\n  and author_name is not null;\n";
+//#endregion
+//#region migrations/0014_network.sql?raw
+var _0014_network_default = "-- Out-of-network 3rd-party service providers + customer assignments.\n\ncreate table if not exists network_providers (\n  id                 serial primary key,\n  name               text not null,\n  status             text,\n  dispatch_phone     text,\n  dispatch_email     text,\n  secondary_phone    text,\n  secondary_email    text,\n  response_time      text,\n  standard_rate      text,\n  after_hours_rate   text,\n  travel_policy      text,\n  equipment_serviced text,\n  coverage           text,\n  contacts           text,\n  pm_pricing         text,\n  parts_stocking     text,\n  notes              text,\n  last_updated       date,\n  archived           boolean not null default false,\n  updated_at         timestamptz not null default now()\n);\ncreate unique index if not exists network_providers_name_uidx\n  on network_providers (lower(name));\ncreate index if not exists network_providers_status_idx on network_providers (status);\n\ncreate table if not exists network_accounts (\n  id          serial primary key,\n  customer    text not null,\n  email       text,\n  contact     text,\n  phone       text,\n  address     text,\n  city        text,\n  state       text,\n  zip         text,\n  equipment   text,\n  ownership   text,\n  region      text,\n  updated_at  timestamptz not null default now()\n);\ncreate unique index if not exists network_accounts_customer_uidx\n  on network_accounts (lower(customer));\ncreate index if not exists network_accounts_state_idx on network_accounts (state);\n\ncreate table if not exists customer_providers (\n  id          serial primary key,\n  customer    text not null,\n  provider_id int not null references network_providers(id),\n  role        text not null default 'additional'\n                check (role in ('primary', 'secondary', 'additional')),\n  updated_at  timestamptz not null default now()\n);\ncreate unique index if not exists customer_providers_pair_uidx\n  on customer_providers (provider_id, lower(customer));\ncreate index if not exists customer_providers_customer_idx\n  on customer_providers (lower(customer));\ncreate index if not exists customer_providers_role_idx\n  on customer_providers (provider_id, role);\n";
+//#endregion
+//#region migrations/0015_network_archive.sql?raw
+var _0015_network_archive_default = "-- Allow re-adding a provider after it is removed, and drop assignments with it.\n\ndrop index if exists network_providers_name_uidx;\ncreate unique index if not exists network_providers_name_uidx\n  on network_providers (lower(name))\n  where archived = false;\n";
+//#endregion
+//#region migrations/0016_provider_locations.sql?raw
+var _0016_provider_locations_default = "-- Structured coverage: multiple states, cities, and ZIP codes per provider.\n\ncreate table if not exists provider_locations (\n  id          serial primary key,\n  provider_id int not null references network_providers(id) on delete cascade,\n  state       text not null,\n  city        text,\n  zip         text,\n  created_at  timestamptz not null default now()\n);\n\ncreate unique index if not exists provider_locations_uniq\n  on provider_locations (\n    provider_id,\n    state,\n    coalesce(lower(city), ''),\n    coalesce(zip, '')\n  );\n\ncreate index if not exists provider_locations_provider_idx\n  on provider_locations (provider_id, state);\n";
+//#endregion
+//#region migrations/0017_provider_people.sql?raw
+var _0017_provider_people_default = "-- Structured people and addresses on 3rd-party providers.\n\ncreate table if not exists provider_contacts (\n  id          serial primary key,\n  provider_id int not null references network_providers(id) on delete cascade,\n  name        text,\n  role        text,\n  phone       text,\n  email       text,\n  created_at  timestamptz not null default now()\n);\ncreate index if not exists provider_contacts_provider_idx on provider_contacts (provider_id);\n\ncreate table if not exists provider_addresses (\n  id          serial primary key,\n  provider_id int not null references network_providers(id) on delete cascade,\n  label       text,\n  line1       text,\n  line2       text,\n  city        text,\n  state       text,\n  zip         text,\n  created_at  timestamptz not null default now()\n);\ncreate index if not exists provider_addresses_provider_idx on provider_addresses (provider_id);\n";
+//#endregion
+//#region migrations/0018_ping_once.sql?raw
+var _0018_ping_once_default = "-- One ping per note. Timestamp lives on the comment and on the notification.\n\nalter table comments add column if not exists pinged_at timestamptz;\nalter table comments add column if not exists pinged_by text;\n\nalter table desk_notifications add column if not exists comment_id int;\n\n-- Drop extra pings so the unique index can apply on a live database.\ndelete from desk_notifications\nwhere id in (\n  select id from (\n    select id,\n           row_number() over (partition by user_id, comment_id order by id) as rn\n    from desk_notifications\n    where comment_id is not null\n  ) ranked\n  where rn > 1\n);\n\ncreate unique index if not exists desk_notifications_comment_once_idx\n  on desk_notifications (user_id, comment_id)\n  where comment_id is not null;\n";
+//#endregion
+//#region migrations/0019_corrigo.sql?raw
+var _0019_corrigo_default = "-- Corrigo service import: description of work + date completed on tickets.\nalter table service_jobs add column if not exists work_done text;\nalter table service_jobs add column if not exists completed_at date;\ncreate index if not exists service_jobs_wo_idx on service_jobs (wo);\n";
+//#endregion
+//#region migrations/0020_corrigo_boards.sql?raw
+var _0020_corrigo_boards_default = "-- WO + description of work on PMs and installs so Corrigo can update those boards.\nalter table pm_jobs add column if not exists wo text;\nalter table pm_jobs add column if not exists work_done text;\nalter table pm_jobs add column if not exists completed_at date;\ncreate index if not exists pm_jobs_wo_idx on pm_jobs (wo);\n\nalter table installs add column if not exists work_done text;\nalter table installs add column if not exists completed_at date;\n";
+//#endregion
+//#region migrations/0021_wo_duplicates.sql?raw
+var _0021_wo_duplicates_default = "-- Same ST# on more than one service/TLC ticket: extras point at the original.\nalter table service_jobs add column if not exists duplicate_of int;\ncreate index if not exists service_jobs_duplicate_of_idx on service_jobs (duplicate_of);\n";
+//#endregion
+//#region migrations/0022_serial_notice.sql?raw
+var _0022_serial_notice_default = "-- Last warehouse serial-pull notice on installs and service tickets.\nalter table installs add column if not exists serial_notice text;\nalter table service_jobs add column if not exists serial_notice text;\n";
+//#endregion
+//#region migrations/0023_roles_reps_ak.sql?raw
+var _0023_roles_reps_ak_default = "-- User roles, locked sales-rep list, Avi Katz account flag, ping customer preview.\n\nalter table desk_accounts add column if not exists desk_role text;\n\ncreate table if not exists desk_reps (\n  id serial primary key,\n  name text not null,\n  initials text not null,\n  active boolean not null default true,\n  sort_order int not null default 0,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()\n);\n\nalter table directory_customers add column if not exists account_rep text;\nalter table directory_customers add column if not exists avi_katz boolean not null default false;\n\nalter table desk_notifications add column if not exists customer text;\n";
+//#endregion
+//#region migrations/0024_rebuilds.sql?raw
+var _0024_rebuilds_default = "-- In-house rebuilds: shop projects, not field tickets.\n\ncreate table if not exists rebuilds (\n  id serial primary key,\n  title text not null,\n  account text not null,\n  equipment text,\n  serial text,\n  asset_id int,\n  owner text,\n  status text not null default 'Queued',\n  reason_code text,\n  reason_detail text,\n  planned_start date,\n  target_complete date,\n  actual_start date,\n  actual_complete date,\n  priority text not null default 'normal',\n  notes text,\n  install_id int,\n  job_id int,\n  serial_notice text,\n  status_changed_at timestamptz not null default now(),\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()\n);\n\ncreate index if not exists rebuilds_status_idx on rebuilds (status);\ncreate index if not exists rebuilds_owner_idx on rebuilds (owner);\ncreate index if not exists rebuilds_account_idx on rebuilds (lower(account));\ncreate index if not exists rebuilds_target_idx on rebuilds (target_complete);\n";
+//#endregion
 //#region src/lib/db.ts
 var rawDatabaseUrl = typeof process !== "undefined" ? process.env.DATABASE_URL : void 0;
 var databaseUrl$1 = rawDatabaseUrl && rawDatabaseUrl.trim() ? rawDatabaseUrl : void 0;
@@ -101,21 +146,33 @@ function createNeonSql() {
 	return globalRef.__pgSqlPromise__;
 }
 async function createPgliteSql() {
-	globalRef.__pgliteInstance__ ??= (async () => {
+	globalRef.__pgliteDesk__ ??= (async () => {
 		const { PGlite } = await import("../_libs/electric-sql__pglite.mjs").then((n) => n.t);
-		const pg = new PGlite({ parsers: {
+		const parsers = {
 			[OID_INT8]: Number,
 			[OID_DATE]: identity,
 			[OID_INTERVAL]: identity
-		} });
+		};
+		const serverless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+		let dataDir;
+		if (!serverless) try {
+			const { mkdirSync } = await import("node:fs");
+			const { resolve } = await import("node:path");
+			dataDir = resolve(process.cwd(), "data/desk");
+			mkdirSync(dataDir, { recursive: true });
+		} catch (err) {
+			console.error("[db] could not persist PGLite to disk, using memory", err);
+			dataDir = void 0;
+		}
+		const pg = dataDir ? new PGlite(dataDir, { parsers }) : new PGlite({ parsers });
 		await pg.waitReady;
 		await pg.exec("create table if not exists _migrations (name text primary key, applied_at timestamptz not null default now())");
 		return pg;
 	})().catch((err) => {
-		globalRef.__pgliteInstance__ = void 0;
+		globalRef.__pgliteDesk__ = void 0;
 		throw err;
 	});
-	const pg = await globalRef.__pgliteInstance__;
+	const pg = await globalRef.__pgliteDesk__;
 	const migrate = async () => {
 		const migrations = /* #__PURE__ */ Object.assign({
 			"/migrations/0001_auth.sql": _0001_auth_default,
@@ -126,7 +183,22 @@ async function createPgliteSql() {
 			"/migrations/0006_install_fields.sql": _0006_install_fields_default,
 			"/migrations/0007_directory.sql": _0007_directory_default,
 			"/migrations/0008_machines_and_access.sql": _0008_machines_and_access_default,
-			"/migrations/0009_notifications.sql": _0009_notifications_default
+			"/migrations/0009_notifications.sql": _0009_notifications_default,
+			"/migrations/0010_invites.sql": _0010_invites_default,
+			"/migrations/0011_archive_and_duplicate.sql": _0011_archive_and_duplicate_default,
+			"/migrations/0012_asset_job.sql": _0012_asset_job_default,
+			"/migrations/0013_handoff_owners.sql": _0013_handoff_owners_default,
+			"/migrations/0014_network.sql": _0014_network_default,
+			"/migrations/0015_network_archive.sql": _0015_network_archive_default,
+			"/migrations/0016_provider_locations.sql": _0016_provider_locations_default,
+			"/migrations/0017_provider_people.sql": _0017_provider_people_default,
+			"/migrations/0018_ping_once.sql": _0018_ping_once_default,
+			"/migrations/0019_corrigo.sql": _0019_corrigo_default,
+			"/migrations/0020_corrigo_boards.sql": _0020_corrigo_boards_default,
+			"/migrations/0021_wo_duplicates.sql": _0021_wo_duplicates_default,
+			"/migrations/0022_serial_notice.sql": _0022_serial_notice_default,
+			"/migrations/0023_roles_reps_ak.sql": _0023_roles_reps_ak_default,
+			"/migrations/0024_rebuilds.sql": _0024_rebuilds_default
 		});
 		const doneRows = await pg.query("select name from _migrations");
 		const done = new Set(doneRows.rows.map((r) => r.name));
@@ -173,7 +245,7 @@ function getSql() {
 async function getPglite() {
 	if (dbSource !== "pglite") throw new Error("getPglite() is only available on the PGLite fallback (no DATABASE_URL)");
 	await getSql();
-	const pg = await globalRef.__pgliteInstance__;
+	const pg = await globalRef.__pgliteDesk__;
 	if (!pg) throw new Error("PGLite instance failed to initialize");
 	return pg;
 }
@@ -195,7 +267,6 @@ var globalBoot = globalThis;
 if (typeof window === "undefined" && dbSource === "pglite") globalBoot.__pgBootstrapPromise__ ??= ensureDbReady().catch((err) => {
 	globalBoot.__pgBootstrapPromise__ = void 0;
 	console.error("[db] PGLite bootstrap failed:", err);
-	throw err;
 });
 //#endregion
 //#region src/lib/auth/pglite-dialect.ts
@@ -311,7 +382,9 @@ var PREVIEW_ALLOWED_HOSTS = ["*.grok-sandbox.com"];
 * components read the user via `@/lib/auth/use-current-user`; server functions get
 * a verified id via `@/lib/auth/middleware`.
 */
-ensureDbReady();
+ensureDbReady().catch((err) => {
+	console.error("[auth] DB bootstrap failed:", err);
+});
 /**
 * Preview secret must outlive module reloads: PGLite (and its session rows) is
 * stored on `globalThis`, so an HMR re-eval of this file must NOT mint a new

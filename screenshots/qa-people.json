@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "address": false,
+  "contact": true,
+  "noBigBubble": true,
+  "expanded": true,
+  "dup": true,
+  "errors": [],
+  "steps": [
+    "addr=false contact=true noBubble=true expanded=true dup=true"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "unsourcedGone": true,
+  "servicePlaceholder": true,
+  "claimVisible": true,
+  "claimed": true,
+  "pendingBefore": 0,
+  "pendingAfterRemove": 0,
+  "bouncedBack": false,
+  "steps": [
+    "signed in",
+    "notes unsourcedGone=true service=true claim=true",
+    "no pending deals — creating one to test bounce-back",
+    "bounce cafe=Bounce Cafe pc0xa bounced=false"
+  ],
+  "errors": []
+}

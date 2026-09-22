@@ -2,6 +2,15 @@ import type { ClockFlag } from "./clock";
 
 export type JobKind = "service" | "tlc";
 
+export type JobSibling = {
+  id: number;
+  callId: string;
+  customer: string | null;
+  kind: JobKind;
+  status: string;
+  wo: string | null;
+};
+
 export type ServiceJob = {
   id: number;
   kind: JobKind;
@@ -19,12 +28,19 @@ export type ServiceJob = {
   wo: string | null;
   scheduled: string | null;
   notes: string | null;
+  workDone: string | null;
+  completedAt: string | null;
   done: boolean;
   updatedAt: string;
   flag: ClockFlag | null;
   ageDays: number | null;
   urgency: string;
+  duplicateOf: number | null;
+  siblings: JobSibling[];
+  serialNotice: string | null;
+  aviKatz: boolean;
 };
+
 
 export type PmJob = {
   id: number;
@@ -37,10 +53,15 @@ export type PmJob = {
   status: string;
   technician: string | null;
   notes: string | null;
+  wo: string | null;
+  workDone: string | null;
+  completedAt: string | null;
   done: boolean;
   updatedAt: string;
   flag: ClockFlag | null;
+  aviKatz: boolean;
 };
+
 
 export type ModuleRow = {
   id: number;
@@ -72,8 +93,12 @@ export type Deal = {
   invoice: string | null;
   completion: string | null;
   notes: string | null;
+  handedOff: boolean;
   updatedAt: string;
+  aviKatz: boolean;
+  noRep: boolean;
 };
+
 
 export type Install = {
   id: number;
@@ -86,17 +111,24 @@ export type Install = {
   wo: string | null;
   reqsReady: string | null;
   notes: string | null;
+  workDone: string | null;
+  completedAt: string | null;
   accountRep: string | null;
   paymentStatus: string | null;
   serial: string | null;
   powerVoltage: string | null;
   machines: { equipment: string; serial: string; powerVoltage: string }[];
+  serialNotice: string | null;
   complete: boolean;
   dealId: number | null;
+  duplicateOf: number | null;
   updatedAt: string;
   flag: ClockFlag | null;
   daysOut: number | null;
+  aviKatz: boolean;
+  noRep: boolean;
 };
+
 
 export type Comment = {
   id: number;
@@ -108,6 +140,9 @@ export type Comment = {
   askTeam: string | null;
   resolved: boolean;
   createdAt: string;
+  pingedAt: string | null;
+  ownerLabel: string;
+  canClaim: boolean;
 };
 
 export type Activity = {
@@ -136,15 +171,28 @@ export type FlaggedRow = {
 export type ComingDueRow = {
   daysOut: number;
   source: string;
+  kind: "service" | "tlc" | "pm" | "install";
   customer: string;
   equipment: string | null;
   status: string;
   scheduled: string;
   technician: string | null;
+  accountRep: string | null;
   detail: string | null;
+  wo: string | null;
   entityType: string;
   id: number;
+  aviKatz: boolean;
+  noRep: boolean;
 };
+
+export type ComingDueCounts = {
+  overdue: number;
+  today: number;
+  thisWeek: number;
+  later: number;
+};
+
 
 export type Dashboard = {
   today: string;
@@ -164,13 +212,18 @@ export type Dashboard = {
     barnOpen: number;
     modulesReady: number;
     installReady: number;
+    rebuildOverdue: number;
+    rebuildWaiting: number;
   };
   statusBreakdown: { status: string; service: number; tlc: number }[];
   techLoad: { tech: string; active: number; completed: number }[];
   flagged: { service: FlaggedRow[]; tlc: FlaggedRow[]; pm: FlaggedRow[] };
   comingDue: ComingDueRow[];
   comingDueBuckets: { label: string; day: number; count: number }[];
+  comingDueCounts: ComingDueCounts;
+  rebuildAlerts: FlaggedRow[];
   recentHandoff: CommentPreview[];
+
   pendingHandoffs: { dealId: number; customer: string; equipment: string | null; producer: string | null }[];
   barnReadyByModel: { name: string; count: number }[];
   modulesReadyByType: { name: string; count: number }[];
@@ -226,11 +279,13 @@ export type Asset = {
   soldTo: string | null;
   soldAt: string | null;
   installId: number | null;
+  jobId: number | null;
   notes: string | null;
   updatedAt: string;
   bay: "catering" | "dispenser" | "general";
   slotLabel: string;
   missingSerial: boolean;
+  needsBay: boolean;
 };
 
 export type Recipe = {
@@ -262,3 +317,46 @@ export type DirectoryEntry = {
   id: number;
   name: string;
 };
+
+export type CustomerRecord = DirectoryEntry & {
+  calls: number;
+  tlcs: number;
+  installs: number;
+  pms: number;
+  deals: number;
+  recipes: number;
+  pendingCalls: number;
+  pendingTlcs: number;
+  pendingPms: number;
+  pendingInstalls: number;
+  aviKatz: boolean;
+  accountRep: string | null;
+  noRep: boolean;
+};
+
+
+export type CustomerHistory = {
+  id: number;
+  name: string;
+  aviKatz: boolean;
+  accountRep: string | null;
+  jobs: ServiceJob[];
+  pms: PmJob[];
+  installs: Install[];
+  deals: Deal[];
+  recipes: Recipe[];
+};
+
+export type AccountEquipment = {
+  id: number;
+  customer: string;
+  catalogModel: string;
+  equipmentName: string;
+  serial: string | null;
+  serialKey: string | null;
+  installDate: string | null;
+  electrical: string | null;
+  ownership: string | null;
+  updatedAt: string;
+};
+

@@ -1,4 +1,9 @@
-import { CLOSED_CALL, CLOSED_PM } from "./lookups";
+import { isClosedCall, isClosedPm } from "./ticket-status";
+import { isInstalled } from "./install-status";
+import { diffDays } from "./iso";
+
+export { isInstalled, isOpenInstall, installedPatch } from "./install-status";
+export { diffDays } from "./iso";
 
 export function todayChicago(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(
@@ -10,12 +15,6 @@ export function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d + days));
   return dt.toISOString().slice(0, 10);
-}
-
-export function diffDays(fromIso: string, toIso: string): number {
-  const a = Date.parse(`${fromIso}T00:00:00Z`);
-  const b = Date.parse(`${toIso}T00:00:00Z`);
-  return Math.round((b - a) / 86400000);
 }
 
 export function weekBounds(today: string): { start: string; end: string; nextStart: string; nextEnd: string } {
@@ -30,6 +29,28 @@ export function weekBounds(today: string): { start: string; end: string; nextSta
   return { start, end, nextStart, nextEnd };
 }
 
+export function monthBounds(iso: string): { start: string; end: string; year: number; month: number } {
+  const [y, m] = iso.split("-").map(Number);
+  const year = y || 1970;
+  const month = m || 1;
+  const start = `${year}-${String(month).padStart(2, "0")}-01`;
+  const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const end = `${year}-${String(month).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+  return { start, end, year, month };
+}
+
+export function addMonths(iso: string, delta: number): string {
+  const [y, m] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y || 1970, (m || 1) - 1 + delta, 1));
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-01`;
+}
+
+export function formatMonthLabel(iso: string): string {
+  const { year, month } = monthBounds(iso);
+  const dt = new Date(Date.UTC(year, month - 1, 1));
+  return dt.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
 export function formatWeekLabel(start: string, end: string): string {
   const a = new Date(`${start}T00:00:00`);
   const b = new Date(`${end}T00:00:00`);
@@ -37,6 +58,8 @@ export function formatWeekLabel(start: string, end: string): string {
     `${dt.getMonth() + 1}/${dt.getDate()}`;
   return `${fmt(a)} – ${fmt(b)}`;
 }
+
+export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 export type FlagLevel = "danger" | "warn" | "info";
 
@@ -47,10 +70,6 @@ export type ClockFlag = {
   rank: number;
 };
 
-function closedCall(status: string | null | undefined, done: boolean): boolean {
-  return done || CLOSED_CALL.has(status ?? "");
-}
-
 export function serviceFlag(input: {
   kind: "service" | "tlc";
   status: string;
@@ -58,7 +77,7 @@ export function serviceFlag(input: {
   received: string | null;
   scheduled: string | null;
 }, today: string): ClockFlag | null {
-  if (closedCall(input.status, input.done)) return null;
+  if (isClosedCall(input)) return null;
   if (input.scheduled && input.scheduled < today) {
     return { code: "past_due", label: "Past due — scheduled", level: "danger", rank: 10 };
   }
@@ -80,7 +99,7 @@ export function pmFlag(input: {
   done: boolean;
   projected: string | null;
 }, today: string): ClockFlag | null {
-  if (input.done || CLOSED_PM.has(input.status)) return null;
+  if (isClosedPm(input)) return null;
   if (!input.projected) {
     return { code: "needs_date", label: "Needs PM date", level: "warn", rank: 15 };
   }
@@ -100,7 +119,7 @@ export function installFlag(input: {
   reqsReady: string | null;
   complete: boolean;
 }, today: string, week: ReturnType<typeof weekBounds>): ClockFlag | null {
-  if (input.complete || input.equipStatus === "Installed") return null;
+  if (isInstalled(input)) return null;
   const date = input.installDate;
   const inWindow =
     !!date && date >= week.start && date <= week.nextEnd;
@@ -115,6 +134,19 @@ export function installFlag(input: {
     return { code: "cust_not_ready", label: "Customer not ready", level: "warn", rank: 18 };
   }
   return null;
+}
+
+export function formatPingTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const dt = new Date(iso);
+  if (!Number.isFinite(dt.getTime())) return "";
+  return dt.toLocaleString("en-US", {
+    timeZone: "America/Chicago",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 export function formatShortDate(iso: string | null | undefined): string {
@@ -132,6 +164,16 @@ export function formatLongDate(iso: string | null | undefined): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+export function formatNowChicago(): { date: string; time: string; stamp: string } {
+  const date = todayChicago();
+  const time = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date());
+  return { date, time, stamp: `${date} ${time} CT` };
 }
 
 export function money(n: number | string | null | undefined): string {

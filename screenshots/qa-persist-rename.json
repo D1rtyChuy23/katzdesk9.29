@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "renamed": false,
+  "afterReload": false,
+  "autoSave": false,
+  "errors": [
+    "TimeoutError: locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  - waiting for getByText(/[1-9]\\d* accounts/) to be visible\n"
+  ],
+  "steps": [
+    "url=http://127.0.0.1:8080/customers body=Skip to content Katz Desk Service and sales, one clock. FLOOR Clock Service TLC + Factor PMs SALES → SERVICE Pipeline Installs Handoff SHOP Warehouse Locations Modules Recipes Customers Out of Network TEAM Settings ADMIN Access Signed in C chuy.rent08xg Sign out ⌘K Customers Search the account list. Open a name to review every call, install, and record on that account — then update the one you pick. Add or remove names here — only admins can change the master list. SORT Name · A →"
+  ]
+}

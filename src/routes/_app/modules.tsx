@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { ModuleSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
-import { ChartCard, SimpleBars, StatCard, StatusDonut } from "@/components/desk/desk-charts";
+import { ChartCard, SimpleBars, StatCard, StatRow, StatusDonut, toggleChip } from "@/components/desk/desk-charts";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, SORT_TECH, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { ExportButton } from "@/components/desk/export-dialog";
+import { TechName } from "@/components/desk/tech-select";
 
 export const Route = createFileRoute("/_app/modules")({
   validateSearch: parseOpenSearch,
@@ -27,6 +29,7 @@ function Page() {
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("modules", "status");
+  const [bubble, setBubble] = useState<"tracked" | "ready" | "shop" | null>("tracked");
   const all = data.data ?? [];
   const readyRows = all.filter((m) => m.status === "Ready");
   const notReady = all.filter((m) => m.status !== "Ready" && m.status !== "Installed at Account" && m.status !== "Retired / Scrapped");
@@ -44,6 +47,10 @@ function Page() {
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
     let list = all;
+    if (bubble === "ready") list = list.filter((m) => m.status === "Ready");
+    if (bubble === "shop") {
+      list = list.filter((m) => m.status !== "Ready" && m.status !== "Installed at Account" && m.status !== "Retired / Scrapped");
+    }
     if (needle) {
       list = list.filter((m) =>
         [m.moduleId, m.location, m.moduleType, m.status, m.wo].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
@@ -56,7 +63,7 @@ function Page() {
       status: (m) => m.status,
       tech: (m) => m.technician,
     });
-  }, [all, q, sort]);
+  }, [all, q, sort, bubble]);
   const selectedRow = all.find((m) => m.id === selected) ?? null;
 
   return (
@@ -68,22 +75,39 @@ function Page() {
             One row per physical module. The Ready count splits by type so you can see what can actually ship.
           </p>
         </div>
-        <Button onClick={() => setCreate(true)}>
-          <Plus className="size-4" />
-          New module
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <ExportButton defaultType="modules" />
+          <Button onClick={() => setCreate(true)}>
+            <Plus className="size-4" />
+            New module
+          </Button>
+        </div>
       </header>
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
-        <StatCard label="Tracked" value={all.length} hint="Every module on the board" />
+      <StatRow>
+        <StatCard
+          label="Tracked"
+          value={all.length}
+          hint="Every module on the board"
+          selected={bubble === "tracked"}
+          onClick={() => setBubble((v) => toggleChip(v, "tracked", null))}
+        />
         <StatCard
           label="Ready"
           value={readyRows.length}
           hint={readyByPlatform.map((p) => `${p.count} ${p.name}`).join(" · ") || "Nothing ready"}
           breakdown={readyByType}
+          selected={bubble === "ready"}
+          onClick={() => setBubble((v) => toggleChip(v, "ready", null))}
         />
-        <StatCard label="In shop" value={notReady.length} hint="Not ready, not installed, not retired" />
-      </div>
-      <section className="mt-5 grid gap-4 lg:grid-cols-2">
+        <StatCard
+          label="In shop"
+          value={notReady.length}
+          hint="Not ready, not installed, not retired"
+          selected={bubble === "shop"}
+          onClick={() => setBubble((v) => toggleChip(v, "shop", null))}
+        />
+      </StatRow>
+      <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2">
         <ChartCard title="By status" lede="Where the shop floor actually sits.">
           {statusMix.length ? <StatusDonut data={statusMix} unit="modules" /> : <p className="text-sm text-muted-foreground">No modules yet.</p>}
         </ChartCard>
@@ -125,7 +149,9 @@ function Page() {
               </span>
             </span>
             <StatusBadge status={m.status} />
-            <span className="text-sm text-muted-foreground">{m.technician ?? "—"}</span>
+            <span className="text-sm">
+              <TechName name={m.technician} />
+            </span>
           </button>
         ))}
         {rows.length === 0 ? <p className="px-4 py-8 text-sm text-muted-foreground">No modules in this view.</p> : null}

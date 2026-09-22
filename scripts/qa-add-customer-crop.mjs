@@ -1,0 +1,42 @@
+import { chromium } from "playwright";
+
+const BASE = "http://127.0.0.1:8080";
+const csvPath = "/workspace/scripts/fixtures/corrigo-sample.csv";
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+page.setDefaultTimeout(25000);
+const stamp = Date.now().toString(36).slice(-4);
+await page.goto(`${BASE}/login`, { waitUntil: "networkidle" });
+const createToggle = page.getByRole("button", { name: /Need an account|Create one/i });
+if (await createToggle.count()) await createToggle.click();
+await page.locator("#username").fill(`chuy.crop${stamp}`);
+await page.locator("#email").fill(`chuy.crop${stamp}@katz.test`);
+await page.locator("#password").fill("DeskOps99!");
+await page.getByRole("button", { name: "Create account" }).click();
+await page.waitForTimeout(2500);
+await page.goto(`${BASE}/service`, { waitUntil: "networkidle" });
+if (page.url().includes("/login")) {
+  await page.waitForTimeout(4000);
+  await page.goto(`${BASE}/service`, { waitUntil: "networkidle" });
+}
+await page.waitForTimeout(800);
+const chooser = page.waitForEvent("filechooser");
+await page.getByRole("button", { name: /Import Corrigo report/i }).click();
+await (await chooser).setFiles(csvPath);
+const preview = page.getByRole("heading", { name: /Corrigo import/i });
+await preview.waitFor({ state: "visible" });
+const dialog = page.getByRole("dialog").filter({ has: preview });
+const walkRow = dialog.locator("tr").filter({ hasText: /Walk-In/i }).last();
+await walkRow.scrollIntoViewIfNeeded();
+await walkRow.getByTestId("add-customer").click();
+const form = dialog.getByTestId("add-customer-form");
+await form.waitFor({ state: "visible" });
+await form.getByLabel("New customer name").fill("Walk-In Cafe Ops");
+await form.screenshot({ path: "/workspace/screenshots/qa-ops-add-customer.png" });
+await walkRow.screenshot({ path: "/workspace/screenshots/qa-ops-add-customer-row.png" });
+await form.getByRole("button", { name: /^Add$/ }).click();
+await form.waitFor({ state: "hidden", timeout: 15000 });
+await walkRow.scrollIntoViewIfNeeded();
+await walkRow.screenshot({ path: "/workspace/screenshots/qa-ops-add-customer-selected.png" });
+console.log("cropped add-customer shots ok");
+await browser.close();

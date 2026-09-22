@@ -1,0 +1,12 @@
+[
+  "qa-role-picker",
+  "deal sheet: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('main').getByRole('button').filter({ hasText: /Needs good to order|Step / }).first()\n",
+  "qa-ak-field",
+  "qa-coming-due",
+  "qa-myview-sales",
+  "qa-myview-service",
+  "planner url http://127.0.0.1:8080/planner",
+  "date inputs 15",
+  "qa-install-planner",
+  "qa-ping-inbox"
+]

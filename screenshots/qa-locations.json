@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "grouped": true,
+  "duplicateNote": true,
+  "added": true,
+  "errors": [],
+  "steps": [
+    "sheetHasKS=true hasCoverage=true hasStatewide=true",
+    "grouped=true",
+    "added=true dup=true"
+  ]
+}

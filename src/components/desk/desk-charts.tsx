@@ -1,16 +1,5 @@
-import { useId, type ReactNode } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { useEffect, useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
 
 const ink = "#1A1612";
@@ -19,9 +8,20 @@ const warning = "#9A5B12";
 const muted = "#6F675E";
 const cream = "#E7E0D4";
 const card = "#FAF7F1";
-const border = "#DDD4C6";
 
 export const CHART_PALETTE = [primary, ink, warning, muted, cream];
+
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const sync = () => setNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return narrow;
+}
 
 function useMotion(): boolean {
   if (typeof window === "undefined") return false;
@@ -54,6 +54,57 @@ function Tip({
         </p>
       ))}
     </div>
+  );
+}
+
+function barWidth(n: number, max: number): number {
+  if (n <= 0 || max <= 0) return 0;
+  return Math.min(100, Math.max(Math.round((n / max) * 100), 6));
+}
+
+function BarTrack({
+  pct,
+  color = primary,
+  className,
+}: {
+  pct: number;
+  color?: string;
+  className?: string;
+}) {
+  return (
+    <span className={cn("block h-2.5 min-w-0 overflow-hidden rounded-full bg-secondary", className)} aria-hidden>
+      <span
+        className="block h-full max-w-full rounded-full"
+        style={{ width: `${Math.min(Math.max(pct, 0), 100)}%`, background: color }}
+      />
+    </span>
+  );
+}
+
+function BarRow({
+  name,
+  n,
+  pct,
+  color,
+  label,
+}: {
+  name: string;
+  n: number | string;
+  pct: number;
+  color?: string;
+  label?: string;
+}) {
+  return (
+    <li className="min-w-0">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="min-w-0 truncate text-sm leading-snug" title={name}>
+          {name}
+        </span>
+        <span className="shrink-0 tabular text-sm font-medium">{n}</span>
+      </div>
+      {label ? <p className="text-[11px] text-muted-foreground">{label}</p> : null}
+      <BarTrack pct={pct} color={color} className="mt-1" />
+    </li>
   );
 }
 
@@ -90,28 +141,26 @@ export function GroupedBars({
     1,
   );
   return (
-    <div>
+    <div className="min-w-0">
       <ChartKey
         items={[
           { label: aLabel, color: primary },
           { label: bLabel, color: ink },
         ]}
       />
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {data.map((row, i) => {
           const name = String(row[xKey] ?? "—");
           const a = Number(row[aKey]) || 0;
           const b = Number(row[bKey]) || 0;
-          const aPct = Math.round((a / max) * 100);
-          const bPct = Math.round((b / max) * 100);
           return (
-            <li key={`${name}-${i}`}>
-              <p className="mb-1 truncate text-sm font-medium" title={name}>
+            <li key={`${name}-${i}`} className="min-w-0">
+              <p className="mb-1.5 truncate text-sm font-medium" title={name}>
                 {name}
               </p>
-              <div className="space-y-1">
-                <GroupedTrack label={aLabel} n={a} pct={aPct} color={primary} />
-                <GroupedTrack label={bLabel} n={b} pct={bPct} color={ink} />
+              <div className="space-y-1.5">
+                <GroupedTrack label={aLabel} n={a} pct={barWidth(a, max)} color={primary} />
+                <GroupedTrack label={bLabel} n={b} pct={barWidth(b, max)} color={ink} />
               </div>
             </li>
           );
@@ -133,14 +182,9 @@ function GroupedTrack({
   color: string;
 }) {
   return (
-    <div className="grid grid-cols-[4.5rem_minmax(0,1fr)_1.75rem] items-center gap-2">
+    <div className="grid min-w-0 grid-cols-[4.25rem_minmax(0,1fr)_1.75rem] items-center gap-2">
       <span className="truncate text-[11px] text-muted-foreground">{label}</span>
-      <span className="h-2 min-w-0 overflow-hidden rounded-full bg-secondary" aria-hidden>
-        <span
-          className="block h-full rounded-full"
-          style={{ width: `${n === 0 ? 0 : Math.max(pct, 6)}%`, background: color }}
-        />
-      </span>
+      <BarTrack pct={pct} color={color} className="h-2" />
       <span className="tabular text-right text-xs font-medium">{n}</span>
     </div>
   );
@@ -161,56 +205,56 @@ export function SimpleBars({
   color?: string;
   horizontal?: boolean;
 }) {
-  const reduce = useMotion();
-  if (horizontal) {
-    const max = Math.max(...data.map((d) => Number(d[yKey]) || 0), 1);
+  const narrow = useNarrow();
+  const max = Math.max(...data.map((d) => Number(d[yKey]) || 0), 1);
+  const rows = (
+    <ul className="space-y-2.5">
+      {data.map((row, i) => {
+        const name = String(row[xKey] ?? "—");
+        const n = Number(row[yKey]) || 0;
+        return <BarRow key={`${name}-${i}`} name={name} n={n} pct={barWidth(n, max)} color={color} />;
+      })}
+    </ul>
+  );
+
+  if (horizontal || narrow || data.length > 8) {
     return (
-      <div>
+      <div className="min-w-0">
         {yLabel ? (
           <p className="mb-2 text-right text-xs tracking-wide text-muted-foreground uppercase">{yLabel}</p>
         ) : null}
-        <ul className="space-y-2.5">
-          {data.map((row, i) => {
-            const name = String(row[xKey] ?? "—");
-            const n = Number(row[yKey]) || 0;
-            const pct = Math.round((n / max) * 100);
-            return (
-              <li key={`${name}-${i}`} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_2.5rem] items-center gap-3">
-                <span className="truncate text-sm" title={name}>
-                  {name}
-                </span>
-                <span className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-secondary" aria-hidden>
-                  <span
-                    className="block h-full rounded-full"
-                    style={{ width: `${n === 0 ? 0 : Math.max(pct, 4)}%`, background: color }}
-                  />
-                </span>
-                <span className="tabular text-right text-sm font-medium">{n}</span>
-              </li>
-            );
-          })}
-        </ul>
+        {rows}
       </div>
     );
   }
+
   return (
-    <div className="h-52 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 12, left: 4, bottom: 4 }}>
-          <CartesianGrid stroke={border} vertical={false} />
-          <XAxis dataKey={xKey} tick={{ fill: muted, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} />
-          <YAxis allowDecimals={false} tick={{ fill: muted, fontSize: 11 }} axisLine={false} tickLine={false} width={32} />
-          <Tooltip content={<Tip />} cursor={{ fill: cream }} />
-          <Bar
-            dataKey={yKey}
-            name={yLabel ?? yKey}
-            fill={color}
-            radius={[4, 4, 0, 0]}
-            maxBarSize={22}
-            isAnimationActive={!reduce}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="min-w-0">
+      {yLabel ? (
+        <p className="mb-2 text-right text-xs tracking-wide text-muted-foreground uppercase">{yLabel}</p>
+      ) : null}
+      <div className="flex h-48 min-w-0 items-end gap-1 sm:gap-2">
+        {data.map((row, i) => {
+          const name = String(row[xKey] ?? "—");
+          const n = Number(row[yKey]) || 0;
+          const pct = barWidth(n, max);
+          return (
+            <div key={`${name}-${i}`} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+              <span className="tabular text-[11px] font-medium">{n}</span>
+              <div className="flex h-36 w-full max-w-8 items-end justify-center">
+                <span
+                  className="block w-full max-w-5 overflow-hidden rounded-t-md"
+                  style={{ height: `${pct}%`, background: color, minHeight: n ? "4px" : 0 }}
+                  title={`${name}: ${n}`}
+                />
+              </div>
+              <span className="w-full truncate text-center text-[10px] leading-tight text-muted-foreground" title={name}>
+                {name}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -226,27 +270,46 @@ export function StackedMoneyBars({
   openKey: string;
   doneKey: string;
 }) {
-  const reduce = useMotion();
+  const max = Math.max(
+    ...data.map((d) => (Number(d[openKey]) || 0) + (Number(d[doneKey]) || 0)),
+    1,
+  );
   return (
-    <div>
+    <div className="min-w-0">
       <ChartKey
         items={[
           { label: "Open $", color: primary },
           { label: "Completed $", color: ink },
         ]}
       />
-      <div className="h-56 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 8, left: 4, bottom: 0 }}>
-            <CartesianGrid stroke={border} vertical={false} />
-            <XAxis dataKey={xKey} tick={{ fill: muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: muted, fontSize: 11 }} axisLine={false} tickLine={false} width={56} />
-            <Tooltip content={<Tip money />} cursor={{ fill: cream }} />
-            <Bar dataKey={openKey} name="Open $" stackId="a" fill={primary} radius={[0, 0, 0, 0]} maxBarSize={28} isAnimationActive={!reduce} />
-            <Bar dataKey={doneKey} name="Completed $" stackId="a" fill={ink} radius={[4, 4, 0, 0]} maxBarSize={28} isAnimationActive={!reduce} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <ul className="space-y-3">
+        {data.map((row, i) => {
+          const name = String(row[xKey] ?? "—");
+          const open = Number(row[openKey]) || 0;
+          const done = Number(row[doneKey]) || 0;
+          const total = open + done;
+          return (
+            <li key={`${name}-${i}`} className="min-w-0">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="min-w-0 truncate text-sm font-medium" title={name}>
+                  {name}
+                </span>
+                <span className="shrink-0 tabular text-xs font-medium">{usd(total)}</span>
+              </div>
+              <span className="mt-1 flex h-2.5 min-w-0 overflow-hidden rounded-full bg-secondary" aria-hidden>
+                <span
+                  className="h-full max-w-full shrink-0"
+                  style={{ width: `${(open / max) * 100}%`, background: primary }}
+                />
+                <span
+                  className="h-full max-w-full shrink-0"
+                  style={{ width: `${(done / max) * 100}%`, background: ink }}
+                />
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
@@ -262,18 +325,19 @@ export function StatusDonut({
   const id = useId();
   const total = data.reduce((n, d) => n + d.count, 0);
   return (
-    <div className="grid gap-3 sm:grid-cols-[9rem_1fr] sm:items-center">
-      <div className="relative mx-auto h-44 w-44">
-        <ResponsiveContainer width="100%" height="100%">
+    <div className="flex min-w-0 flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+      <div className="relative size-36 shrink-0 sm:size-40">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <PieChart>
             <Pie
               data={data}
               dataKey="count"
               nameKey="name"
-              innerRadius={48}
-              outerRadius={70}
+              innerRadius={40}
+              outerRadius={62}
               paddingAngle={2}
               isAnimationActive={!reduce}
+              label={false}
             >
               {data.map((entry, i) => (
                 <Cell key={`${id}-${entry.name}`} fill={CHART_PALETTE[i % CHART_PALETTE.length]} stroke={card} />
@@ -287,15 +351,15 @@ export function StatusDonut({
           <p className="text-xs text-muted-foreground">{unit}</p>
         </div>
       </div>
-      <ul className="space-y-1.5">
+      <ul className="w-full min-w-0 space-y-1.5 sm:flex-1">
         {data.map((row, i) => (
-          <li key={row.name} className="flex items-center gap-2 text-sm">
+          <li key={row.name} className="flex min-w-0 items-center gap-2 text-sm">
             <span
               className="size-2 shrink-0 rounded-sm"
               style={{ background: CHART_PALETTE[i % CHART_PALETTE.length] }}
             />
-            <span className="min-w-0 flex-1 truncate">{row.name}</span>
-            <span className="tabular text-xs text-muted-foreground">{row.count}</span>
+            <span className="min-w-0 flex-1 truncate leading-snug">{row.name}</span>
+            <span className="shrink-0 tabular text-xs text-muted-foreground">{row.count}</span>
           </li>
         ))}
       </ul>
@@ -313,20 +377,52 @@ export function BreakdownList({
   if (!items.length) return <p className="mt-2 text-xs text-muted-foreground">{empty}</p>;
   const max = Math.max(...items.map((i) => i.count), 1);
   return (
-    <ul className="mt-3 space-y-1.5">
+    <ul className="mt-3 min-w-0 space-y-2">
       {items.slice(0, 8).map((item) => (
-        <li key={item.name} className="grid grid-cols-[minmax(0,1fr)_2.5rem_4.5rem] items-center gap-2 text-sm">
-          <span className="min-w-0 truncate">{item.name}</span>
-          <span className="tabular text-right text-xs text-muted-foreground">{item.count}</span>
-          <span className="h-1.5 overflow-hidden rounded-full bg-secondary">
-            <span
-              className="block h-full rounded-full bg-primary"
-              style={{ width: `${Math.round((item.count / max) * 100)}%` }}
-            />
-          </span>
-        </li>
+        <BarRow key={item.name} name={item.name} n={item.count} pct={barWidth(item.count, max)} />
       ))}
     </ul>
+  );
+}
+
+export function toggleChip<T>(current: T, next: T, off: T): T {
+  return current === next ? off : next;
+}
+
+export function FilterChip({
+  selected,
+  className,
+  children,
+  type = "button",
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { selected?: boolean }) {
+  return (
+    <button
+      type={type}
+      className={cn(
+        "h-9 rounded-full px-3 text-sm font-medium",
+        selected ? "bg-ink text-ink-foreground" : "bg-secondary text-foreground",
+        className,
+      )}
+      aria-pressed={selected}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function StatRow({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("mt-5 flex w-full min-w-0 flex-wrap gap-2", className)} data-stat-row="">
+      {children}
+    </div>
   );
 }
 
@@ -336,16 +432,20 @@ export function StatCard({
   hint,
   tone,
   breakdown,
+  selected,
+  onClick,
 }: {
   label: string;
   value: string | number;
   hint?: string;
   tone?: "danger" | "warn" | "ok";
   breakdown?: { name: string; count: number }[];
+  selected?: boolean;
+  onClick?: () => void;
 }) {
-  return (
-    <div className="rounded-xl border border-border bg-card px-4 py-3">
-      <p className="text-xs tracking-wide text-muted-foreground uppercase">{label}</p>
+  const inner = (
+    <>
+      <p className="truncate text-xs tracking-wide text-muted-foreground uppercase">{label}</p>
       <p
         className={cn(
           "mt-1 font-display text-3xl tabular leading-none",
@@ -355,10 +455,27 @@ export function StatCard({
       >
         {value}
       </p>
-      {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
-      {breakdown?.length ? <BreakdownList items={breakdown} /> : null}
-    </div>
+      {hint ? <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{hint}</p> : null}
+      {breakdown?.length ? (
+        <div className="mt-1 hidden min-w-0 overflow-hidden @[11rem]:block">
+          <BreakdownList items={breakdown} />
+        </div>
+      ) : null}
+    </>
   );
+  const cls = cn(
+    "@container min-w-[10rem] flex-1 overflow-hidden rounded-xl border px-3 py-3 text-left sm:px-4",
+    selected ? "border-primary bg-primary/10 ring-2 ring-primary/30" : "border-border bg-card",
+    onClick && "cursor-pointer transition-colors hover:border-primary/50",
+  );
+  if (onClick) {
+    return (
+      <button type="button" className={cls} onClick={onClick} aria-pressed={!!selected}>
+        {inner}
+      </button>
+    );
+  }
+  return <div className={cls}>{inner}</div>;
 }
 
 export function ChartCard({
@@ -371,20 +488,20 @@ export function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card p-4 sm:p-5">
       <h2 className="font-display text-xl">{title}</h2>
       {lede ? <p className="mt-0.5 text-xs text-muted-foreground">{lede}</p> : null}
-      <div className="mt-3">{children}</div>
+      <div className="mt-3 min-w-0 overflow-hidden">{children}</div>
     </div>
   );
 }
 
 export function MiniStat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="rounded-lg bg-muted/70 px-3 py-2">
-      <p className="text-[11px] tracking-wide text-muted-foreground uppercase">{label}</p>
+    <div className="min-w-0 overflow-hidden rounded-lg bg-muted/70 px-3 py-2">
+      <p className="truncate text-[11px] tracking-wide text-muted-foreground uppercase">{label}</p>
       <p className="font-display text-xl tabular leading-tight">{value}</p>
-      {hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="truncate text-[11px] text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

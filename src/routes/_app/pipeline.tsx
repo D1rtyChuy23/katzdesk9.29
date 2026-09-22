@@ -1,18 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createDeal, listDeals } from "@/lib/ops/api";
+import { useMemo, useState, type ReactNode } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { archiveDeal, createDeal, listDeals } from "@/lib/ops/api";
 import { money } from "@/lib/ops/clock";
-import { PRODUCERS } from "@/lib/ops/lookups";
+import { PRODUCERS, isNoRep } from "@/lib/ops/lookups";
+import { sameRep } from "@/lib/ops/reps";
+import { RepFilter, RepName } from "@/components/desk/rep-select";
+import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
+import { MyViewBar, useMyView } from "@/components/desk/my-view-bar";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { DealSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
-import { ChartCard, SimpleBars, StackedMoneyBars, StatCard } from "@/components/desk/desk-charts";
+import { ChartCard, SimpleBars, StackedMoneyBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_DEALS, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Deal } from "@/lib/ops/types";
 
@@ -20,6 +25,8 @@ export const Route = createFileRoute("/_app/pipeline")({
   validateSearch: parseOpenSearch,
   component: Page,
 });
+
+type DealView = "open" | "complete" | "all" | "gto" | "ordered";
 
 function sum(rows: Deal[]) {
   return rows.reduce((n, d) => n + (d.amount ?? 0), 0);
@@ -39,26 +46,54 @@ function completionLabel(d: Deal) {
   return "Open";
 }
 
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`h-9 shrink-0 rounded-full px-3 text-sm font-medium ${
+        active ? "bg-ink text-ink-foreground" : "bg-secondary"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function Page() {
   const { open } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["deals"], queryFn: () => listDeals() });
   const [q, setQ] = useState("");
-  const [view, setView] = useState<"open" | "complete" | "all">("open");
+  const [view, setView] = useState<DealView>("gto");
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
-  const [sort, setSort] = useDeskSort("pipeline", "value-desc");
+  const { filterMine, matchMine } = useMyView();
+  const [repFilter, setRepFilter] = useState("");
+  const [sort, setSort] = useDeskSort("pipeline", "date-desc");
+
 
   const all = data.data ?? [];
   const live = all.filter((d) => d.completion !== "fell");
   const active = live.filter((d) => d.completion !== "complete");
   const completed = live.filter((d) => d.completion === "complete");
-  const fell = all.filter((d) => d.completion === "fell");
-  const listed = new Set<string>(PRODUCERS);
-  const unlisted = live.filter((d) => !d.producer || !listed.has(d.producer));
+  const unlisted = live.filter((d) => isNoRep(d.producer));
+
+  const gtoN = active.filter((d) => d.goodToOrder && !d.ordered).length;
+  const orderedN = active.filter((d) => d.ordered).length;
 
   const producerChart = PRODUCERS.map((p) => {
-    const mine = live.filter((d) => d.producer === p);
+    const mine = live.filter((d) => sameRep(d.producer, p));
+
     return {
       producer: p,
       open: Math.round(sum(mine.filter((d) => d.completion !== "complete"))),
@@ -67,9 +102,8 @@ function Page() {
   }).filter((p) => p.open + p.done > 0);
 
   const funnel = [
-    { stage: "Open", count: active.length },
-    { stage: "Good to order", count: active.filter((d) => d.goodToOrder).length },
-    { stage: "Ordered", count: active.filter((d) => d.ordered).length },
+    { stage: "Good to order", count: gtoN },
+    { stage: "Ordered", count: orderedN },
     { stage: "Complete", count: completed.length },
   ];
 
@@ -83,7 +117,13 @@ function Page() {
     let list = all;
     if (view === "open") list = list.filter((d) => d.completion !== "complete" && d.completion !== "fell");
     if (view === "complete") list = list.filter((d) => d.completion === "complete");
+    if (view === "gto") list = list.filter((d) => d.completion !== "complete" && d.completion !== "fell" && d.goodToOrder && !d.ordered);
+    if (view === "ordered") list = list.filter((d) => d.completion !== "complete" && d.completion !== "fell" && d.ordered);
+    if (filterMine) list = list.filter((d) => matchMine(d.producer) || d.aviKatz);
+    if (repFilter === "__none__") list = list.filter((d) => d.noRep);
+    else if (repFilter) list = list.filter((d) => sameRep(d.producer, repFilter));
     const needle = q.trim().toLowerCase();
+
     if (needle) {
       list = list.filter((d) =>
         [d.customer, d.producer, d.equipment, d.invoice, d.terms]
@@ -98,7 +138,7 @@ function Page() {
       value: (d) => d.amount,
       status: (d) => completionLabel(d),
     });
-  }, [all, q, view, sort]);
+  }, [all, q, view, sort, filterMine, matchMine, repFilter]);
 
   const selectedRow = all.find((d) => d.id === selected) ?? null;
 
@@ -108,29 +148,62 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Sales pipeline</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            One row per equipment deal. Charts show who is carrying the book and how far deals have moved.
+            One row per equipment deal. Step 1 is Good to order (rep). Step 2 is Ordered
+            (you confirm it) — confirmed orders leave the Good to order list.
           </p>
         </div>
-        <Button onClick={() => setCreate(true)}>
-          <Plus className="size-4" />
-          New deal
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <MyViewBar />
+          <Button onClick={() => setCreate(true)}>
+            <Plus className="size-4" />
+            New deal
+          </Button>
+        </div>
       </header>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <StatCard label="Active deals" value={active.length} />
-        <StatCard label="Active pipeline" value={money(sum(active))} />
-        <StatCard label="Completed" value={completed.length} hint={money(sum(completed))} />
-        <StatCard label="Total booked" value={money(sum(live))} />
-        <StatCard label="Good to order" value={active.filter((d) => d.goodToOrder).length} hint="Open deals cleared to order" />
+      <StatRow>
         <StatCard
-          label="Fell through"
-          value={fell.length}
-          tone={fell.length ? "danger" : undefined}
+          label="Active deals"
+          value={active.length}
+          selected={view === "open"}
+          onClick={() => setView((v) => toggleChip(v, "open", "all"))}
         />
-      </div>
+        <StatCard
+          label="Active pipeline"
+          value={money(sum(active))}
+          selected={view === "open"}
+          onClick={() => setView((v) => toggleChip(v, "open", "all"))}
+        />
+        <StatCard
+          label="Completed"
+          value={completed.length}
+          hint={money(sum(completed))}
+          selected={view === "complete"}
+          onClick={() => setView((v) => toggleChip(v, "complete", "all"))}
+        />
+        <StatCard
+          label="Total booked"
+          value={money(sum(live))}
+          selected={view === "all"}
+          onClick={() => setView("all")}
+        />
+        <StatCard
+          label="Good to order"
+          value={gtoN}
+          hint="Step 1 — waiting to be ordered"
+          selected={view === "gto"}
+          onClick={() => setView((v) => toggleChip(v, "gto", "all"))}
+        />
+        <StatCard
+          label="Ordered"
+          value={orderedN}
+          hint="Step 2 — confirmed ordered"
+          selected={view === "ordered"}
+          onClick={() => setView((v) => toggleChip(v, "ordered", "all"))}
+        />
+      </StatRow>
 
-      <section className="mt-5 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+      <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         <ChartCard title="By producer" lede="Open dollars stacked under completed. Fell-through deals are left out.">
           {producerChart.length ? (
             <StackedMoneyBars data={producerChart} xKey="producer" openKey="open" doneKey="done" />
@@ -138,7 +211,7 @@ function Page() {
             <p className="text-sm text-muted-foreground">No live deals yet.</p>
           )}
         </ChartCard>
-        <ChartCard title="How deals move" lede="Same open book, four gates. A deal can sit in more than one bar.">
+        <ChartCard title="How deals move" lede="Good to order first, then Ordered. Ordered deals drop off step 1.">
           <SimpleBars data={funnel} xKey="stage" yKey="count" yLabel="Deals" horizontal />
         </ChartCard>
         <ChartCard title="Deal size" lede="Live book by amount, so a few large jobs don’t hide the rest.">
@@ -168,7 +241,8 @@ function Page() {
             </thead>
             <tbody>
               {PRODUCERS.map((p) => {
-                const mine = live.filter((d) => d.producer === p);
+                const mine = live.filter((d) => sameRep(d.producer, p));
+
                 const c = mine.filter((d) => d.completion === "complete");
                 const o = mine.filter((d) => d.completion !== "complete");
                 return (
@@ -185,7 +259,7 @@ function Page() {
               })}
               {unlisted.length ? (
                 <tr className="border-t border-border text-muted-foreground">
-                  <td className="py-2 pr-4">(No producer / not on list)</td>
+                  <td className="py-2 pr-4">No rep assigned</td>
                   <td className="tabular py-2 pr-4">{unlisted.length}</td>
                   <td className="tabular py-2 pr-4">{money(sum(unlisted))}</td>
                   <td className="tabular py-2 pr-4">
@@ -212,54 +286,40 @@ function Page() {
       </section>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setView("open")}
-          className={`h-9 rounded-full px-3 text-sm font-medium ${view === "open" ? "bg-ink text-ink-foreground" : "bg-secondary"}`}
-        >
+        <Chip active={view === "gto"} onClick={() => setView("gto")}>
+          Good to order ({gtoN})
+        </Chip>
+        <Chip active={view === "ordered"} onClick={() => setView("ordered")}>
+          Ordered ({orderedN})
+        </Chip>
+        <Chip active={view === "open"} onClick={() => setView("open")}>
           Open ({active.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("complete")}
-          className={`h-9 rounded-full px-3 text-sm font-medium ${view === "complete" ? "bg-ink text-ink-foreground" : "bg-secondary"}`}
-        >
+        </Chip>
+        <Chip active={view === "complete"} onClick={() => setView("complete")}>
           Complete ({completed.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("all")}
-          className={`h-9 rounded-full px-3 text-sm font-medium ${view === "all" ? "bg-ink text-ink-foreground" : "bg-secondary"}`}
-        >
+        </Chip>
+        <Chip active={view === "all"} onClick={() => setView("all")}>
           All deals
-        </button>
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="max-w-xs" />
+        </Chip>
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="w-full max-w-xs min-w-0" />
+        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={all.map((d) => d.producer)} />
         <SortSelect value={sort} onChange={setSort} options={SORT_DEALS} />
+
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         {rows.map((d) => (
-          <button
-            key={d.id}
-            type="button"
-            onClick={() => setSelected(d.id)}
-            className="grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.4fr_7rem_7rem_8rem] md:items-center"
-          >
-            <span>
-              <span className="font-medium">{d.customer}</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
-                {d.producer ?? "Unassigned"} · {d.equipment || "No equipment listed"}
-              </span>
-            </span>
-            <span className="tabular text-sm font-medium">{money(d.amount)}</span>
-            <StatusBadge status={completionLabel(d)} />
-            <span className="text-xs text-muted-foreground">
-              {d.goodToOrder ? "Good to order" : "Needs approval"}
-              {d.ordered ? " · Ordered" : ""}
-            </span>
-          </button>
+          <DealRow key={d.id} deal={d} onOpen={() => setSelected(d.id)} />
         ))}
-        {rows.length === 0 ? <p className="px-4 py-8 text-sm text-muted-foreground">No deals in this view.</p> : null}
+        {rows.length === 0 ? (
+          <p className="px-4 py-8 text-sm text-muted-foreground">
+            {view === "gto"
+              ? "No deals waiting on Good to order. Reps mark step 1; confirmed Ordered deals leave this list."
+              : view === "ordered"
+                ? "No open deals confirmed as Ordered."
+                : "No deals in this view."}
+          </p>
+        ) : null}
       </div>
 
       <DealSheet deal={selectedRow} onClose={() => setSelected(null)} />
@@ -269,7 +329,7 @@ function Page() {
         onOpenChange={setCreate}
         fields={[
           { name: "customer", label: "Customer", required: true, kind: "customer" },
-          { name: "producer", label: "Producer" },
+          { name: "producer", label: "Rep", kind: "rep" },
           { name: "equipment", label: "Equipment", kind: "equipment" },
           { name: "amount", label: "Deal amount ($)" },
         ]}
@@ -290,6 +350,65 @@ function Page() {
           setSelected(row.id);
         }}
       />
+    </div>
+  );
+}
+
+function DealRow({ deal: d, onOpen }: { deal: Deal; onOpen: () => void }) {
+  const qc = useQueryClient();
+  const remove = useMutation({
+    mutationFn: () => archiveDeal({ data: { id: d.id } }),
+    onSuccess: () => {
+      toast.success(`Removed ${d.customer} from the list`);
+      void qc.invalidateQueries({ queryKey: ["deals"] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["handoff"] });
+    },
+    onError: (e) => {
+      console.error("archiveDeal failed", e);
+      toast.error(e instanceof Error ? e.message : "Could not remove");
+    },
+  });
+  return (
+    <div className="flex items-center gap-2 border-b border-border px-3 py-2 last:border-b-0 hover:bg-muted/60 md:px-4">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="grid min-w-0 flex-1 gap-1 py-1 text-left md:grid-cols-[1.4fr_7rem_7rem_8rem] md:items-center"
+      >
+        <span>
+          <span className="font-medium">{d.customer}</span>
+          <AkBadge on={d.aviKatz} className="ml-1.5 align-middle" />
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            {d.producer ? <RepName name={d.producer} /> : <NoRepFlag show />} · {d.equipment || "No equipment listed"}
+          </span>
+
+        </span>
+        <span className="tabular text-sm font-medium">{money(d.amount)}</span>
+        <StatusBadge status={completionLabel(d)} />
+        <span className="text-xs text-muted-foreground">
+          {d.ordered
+            ? "Step 2 · Ordered"
+            : d.goodToOrder
+              ? "Step 1 · Good to order"
+              : "Needs good to order"}
+        </span>
+      </button>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="shrink-0"
+        aria-label={`Remove ${d.customer} from the list`}
+        data-testid="archive-row"
+        disabled={remove.isPending}
+        onClick={() => {
+          if (window.confirm(`Remove “${d.customer}” from the pipeline list?`)) remove.mutate();
+        }}
+      >
+        <Trash2 className="size-3.5" />
+        <span className="hidden sm:inline">Remove</span>
+      </Button>
     </div>
   );
 }

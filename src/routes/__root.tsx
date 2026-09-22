@@ -7,9 +7,14 @@ import appCss from "../styles.css?url";
 const APP_NAME = "Katz Desk";
 
 const fetchSessionUser = createServerFn({ method: "GET" }).handler(async () => {
-  const { getSessionUser } = await import("@/lib/auth/verify.server");
-  const u = await getSessionUser();
-  return u ? { id: u.id, email: u.email } : null;
+  try {
+    const { getSessionUser } = await import("@/lib/auth/verify.server");
+    const u = await getSessionUser();
+    return u ? { id: u.id, email: u.email } : null;
+  } catch (err) {
+    console.error("[auth] session lookup failed", err);
+    return null;
+  }
 });
 
 /** Same guard the injector uses for og:image — only emit on a public app host. */
@@ -64,6 +69,11 @@ export const Route = createRootRoute({
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var p=JSON.parse(localStorage.getItem("katz-desk-prefs")||"{}");var a=p.appearance||"system";var dark=a==="dark"||(a!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);var h=document.documentElement;h.classList.toggle("dark",dark);h.dataset.appearance=a;h.dataset.text=p.text==="large"?"large":"default";h.dataset.density=p.density==="compact"?"compact":"comfortable";h.dataset.contrast=p.contrast==="high"?"high":"standard";h.dataset.motion=p.motion==="reduced"?"reduced":"full";h.style.colorScheme=dark?"dark":"light";}catch(e){}})();`,
+          }}
+        />
       </head>
       <body>
         <PreviewHostBridge />

@@ -1,0 +1,37 @@
+{
+  "errors": [],
+  "shots": [
+    "qa-rebuild-board",
+    "qa-rebuild-waiting",
+    "qa-rebuild-timeline",
+    "qa-rebuild-export",
+    "qa-rebuild-clock"
+  ],
+  "exportFile": "KatzDesk-Rebuilds-2026-09-16.xlsx",
+  "statuses": [
+    "Queued",
+    "In progress",
+    "Waiting",
+    "Testing",
+    "Ready",
+    "Completed",
+    "Cancelled"
+  ],
+  "waitingReason": true,
+  "health": [],
+  "columns": [
+    "Project",
+    "Account",
+    "Equipment",
+    "Serial",
+    "Owner",
+    "Status",
+    "Reason delayed",
+    "Target complete",
+    "Days open",
+    "Days to target",
+    "Health",
+    "Last update"
+  ],
+  "pageErrors": []
+}

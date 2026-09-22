@@ -13,8 +13,7 @@ import { StatusBadge } from "@/components/desk/flag-badge";
 import { AssetSheet } from "@/components/desk/asset-sheet";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
-import { ChartCard, SimpleBars, StatCard } from "@/components/desk/desk-charts";
-import { cn } from "@/lib/utils";
+import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,7 +26,7 @@ function Page() {
   const { open } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
-  const [tab, setTab] = useState<"deployed" | "field" | "sold">("deployed");
+  const [tab, setTab] = useState<"deployed" | "field" | "sold" | "all">("deployed");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
@@ -49,6 +48,16 @@ function Page() {
         status: (a) => a.status,
         date: (a) => a.soldAt ?? a.updatedAt,
       });
+    if (tab === "all") {
+      return [
+        ...LOCATION_SITES.map((site) => ({
+          site,
+          rows: sortRows(all.filter((a) => a.site === site && a.status === "deployed" && match(a))),
+        })),
+        { site: "field", rows: sortRows(all.filter((a) => a.status === "assigned" && match(a))) },
+        { site: "sold", rows: sortRows(all.filter((a) => a.status === "sold" && match(a))) },
+      ];
+    }
     if (tab === "sold") return [{ site: "sold", rows: sortRows(all.filter((a) => a.status === "sold" && match(a))) }];
     if (tab === "field") return [{ site: "field", rows: sortRows(all.filter((a) => a.status === "assigned" && match(a))) }];
     return LOCATION_SITES.map((site) => ({
@@ -72,7 +81,7 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Equipment by location</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Units not on the barn racks — lobby, service room, training, SATX, and anything currently pulled for an install. Return a unit to free the slot for the next job.
+            Units not on the barn racks — lobby, service room, training, SATX, and anything currently pulled for an install or a service call. Return a unit to free the slot for the next job.
           </p>
         </div>
         <Button onClick={() => setCreate(true)}>
@@ -81,11 +90,26 @@ function Page() {
         </Button>
       </header>
 
-      <div className="mt-5 grid grid-cols-3 gap-3">
-        <StatCard label="On site" value={deployedCount} />
-        <StatCard label="On an install" value={fieldCount} />
-        <StatCard label="Sold" value={soldCount} />
-      </div>
+      <StatRow>
+        <StatCard
+          label="On site"
+          value={deployedCount}
+          selected={tab === "deployed"}
+          onClick={() => setTab((t) => toggleChip(t, "deployed", "all"))}
+        />
+        <StatCard
+          label="On an install"
+          value={fieldCount}
+          selected={tab === "field"}
+          onClick={() => setTab((t) => toggleChip(t, "field", "all"))}
+        />
+        <StatCard
+          label="Sold"
+          value={soldCount}
+          selected={tab === "sold"}
+          onClick={() => setTab((t) => toggleChip(t, "sold", "all"))}
+        />
+      </StatRow>
       {bySite.length ? (
         <section className="mt-5">
           <ChartCard title="Deployed by location" lede="Units sitting at HQ rooms and SATX — not the barn racks.">
@@ -104,21 +128,13 @@ function Page() {
         {(
           [
             ["deployed", `On site (${deployedCount})`],
-            ["field", `On an install (${fieldCount})`],
+            ["field", `Pulled (${fieldCount})`],
             ["sold", `Sold (${soldCount})`],
           ] as const
         ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            className={cn(
-              "h-9 rounded-full px-3 text-sm font-medium",
-              tab === id ? "bg-ink text-ink-foreground" : "bg-secondary",
-            )}
-          >
+          <FilterChip key={id} selected={tab === id} onClick={() => setTab(id)}>
             {label}
-          </button>
+          </FilterChip>
         ))}
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="max-w-xs" />
         <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_STATUS]} />
@@ -152,7 +168,13 @@ function Page() {
                   </span>
                   <StatusBadge
                     status={
-                      a.status === "sold" ? "Sold" : a.status === "assigned" ? "On an install" : "In use"
+                      a.status === "sold"
+                        ? "Sold"
+                        : a.status === "assigned"
+                          ? a.installId
+                            ? "On an install"
+                            : "On service"
+                          : "In use"
                     }
                   />
                 </button>

@@ -5,6 +5,7 @@ import { listNotifications, markNotificationRead } from "@/lib/ops/notify";
 import { OpenLink } from "./open-link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { formatPingTime } from "@/lib/ops/clock";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -33,8 +34,11 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
     if (unread > prevUnread.current) {
       const newest = rows.find((n) => !n.read);
       toast.message(`${newest?.fromName ?? "Teammate"} pinged you`, {
-        description: newest?.body ?? "Open the bell for the reminder.",
+        description: [newest?.customer, newest?.body, newest?.createdAt ? formatPingTime(newest.createdAt) : null]
+          .filter(Boolean)
+          .join(" · "),
       });
+
     }
     prevUnread.current = unread;
   }, [unread, rows]);
@@ -93,7 +97,14 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                       <span className="font-medium">{n.fromName ?? "Teammate"}</span>
                       <span className="text-muted-foreground"> pinged you</span>
                     </p>
+                    {n.customer ? (
+                      <p className="mt-0.5 truncate text-xs font-medium">{n.customer}</p>
+                    ) : null}
                     <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
+
+                    <time className="mt-1 block text-[11px] text-muted-foreground" dateTime={n.createdAt}>
+                      {formatPingTime(n.createdAt)}
+                    </time>
                   </span>
                 </OpenLink>
               </li>

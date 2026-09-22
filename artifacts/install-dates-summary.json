@@ -1,0 +1,83 @@
+{
+  "filename": "KatzDesk-Install-readiness-2026-09-15.xlsx",
+  "notReadyHeader": [
+    "Account",
+    "Install / scheduled date",
+    "Equipment",
+    "Configuration",
+    "Blocking / not ready",
+    "Tech / owner",
+    "Last updated"
+  ],
+  "readyHeader": [
+    "Account",
+    "Install / scheduled date",
+    "Equipment",
+    "Configuration",
+    "Tech / owner"
+  ],
+  "sampleNotReady": [
+    {
+      "account": "Brews & Books",
+      "date": "",
+      "equipment": "Eversys Cameo c'2s",
+      "configuration": "Eversys Cameo c'2s"
+    },
+    {
+      "account": "Coco Crepes Bellaire",
+      "date": "",
+      "equipment": "La Marzocco Linea Classic S 2 Group AV/ La Marzocco Swift Dual-Hopper Espresso Grinder/ Bunn Axiom-APS",
+      "configuration": "La Marzocco Linea Classic S 2 Group AV/ La Marzocco Swift Dual-Hopper Espresso Grinder/ Bunn Axiom-APS"
+    },
+    {
+      "account": "Doug's Diner",
+      "date": "",
+      "equipment": "Fetco MBS x 2 / Powder Machine",
+      "configuration": "Fetco MBS x 2 / Powder Machine"
+    },
+    {
+      "account": "Jonathan's The Rub - Bridgeland",
+      "date": "",
+      "equipment": "Cameo c'2s",
+      "configuration": "Cameo c'2s"
+    },
+    {
+      "account": "kol fac 118",
+      "date": "",
+      "equipment": "cameo, itcb",
+      "configuration": "cameo, itcb"
+    },
+    {
+      "account": "Scrambles Breakfast & Lunch",
+      "date": "",
+      "equipment": "BUNN ITCB & BUNN G9 GRINDER",
+      "configuration": "BUNN ITCB & BUNN G9 GRINDER"
+    }
+  ],
+  "sampleReady": [
+    {
+      "account": "13 rows",
+      "date": "",
+      "equipment": "",
+      "configuration": ""
+    },
+    {
+      "account": "10 not ready",
+      "date": "3 ready",
+      "equipment": "",
+      "configuration": ""
+    },
+    {
+      "account": "Ninfa's - Navigation",
+      "date": "2026-08-13",
+      "equipment": "TB3",
+      "configuration": "TB3"
+    },
+    {
+      "account": "Southern Ice CO",
+      "date": "2026-08-20",
+      "equipment": "Bunn ITCB",
+      "configuration": "Bunn ITCB"
+    }
+  ]
+}

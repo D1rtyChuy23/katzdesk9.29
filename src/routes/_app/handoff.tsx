@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getHandoff, handoffDeal, resolveComment } from "@/lib/ops/api";
+import { getHandoff, handoffDeal, resolveComment, claimComment } from "@/lib/ops/api";
 import { namesMatchUser } from "@/lib/ops/lookups";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { getMyAccess } from "@/lib/ops/access";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OpenLink } from "@/components/desk/open-link";
 import { PingButton } from "@/components/desk/ping-button";
+import { HandoffReply } from "@/components/desk/handoff-reply";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, sortDesk } from "@/lib/ops/sort";
 import { toast } from "sonner";
@@ -39,6 +40,16 @@ function Page() {
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
+  const claim = useMutation({
+    mutationFn: (id: number) => claimComment({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Note is under your name");
+      void qc.invalidateQueries({ queryKey: ["handoff"] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["comments"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not claim"),
+  });
   const promote = useMutation({
     mutationFn: (dealId: number) => handoffDeal({ data: { dealId } }),
     onSuccess: () => {
@@ -57,7 +68,7 @@ function Page() {
     () =>
       sortDesk(filtered.asks, sort, {
         date: (c) => c.createdAt,
-        name: (c) => c.customer ?? c.authorName,
+        name: (c) => c.customer ?? c.ownerLabel,
       }),
     [filtered.asks, sort],
   );
@@ -65,7 +76,7 @@ function Page() {
     () =>
       sortDesk(filtered.recent, sort, {
         date: (c) => c.createdAt,
-        name: (c) => c.customer ?? c.authorName,
+        name: (c) => c.customer ?? c.ownerLabel,
       }),
     [filtered.recent, sort],
   );
@@ -101,7 +112,7 @@ function Page() {
         <h1 className="font-display text-3xl font-medium tracking-tight">Handoff</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           The conversation between sales and service. Mine shows asks, notes, and completed deals that
-          belong to you.
+          belong to you. Notes without a poster show as Service until someone claims them.
         </p>
       </header>
 
@@ -149,23 +160,28 @@ function Page() {
           <h2 className="font-display text-xl">Completed deals not yet on the install board</h2>
           <ul className="mt-3 divide-y divide-border">
             {filtered.pendingHandoffs.map((p) => (
-              <li key={p.dealId} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div>
-                  <p className="font-medium">{p.customer}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {p.producer ?? "—"} · {p.equipment}
-                  </p>
+              <li key={p.dealId} className="py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{p.customer}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.producer ?? "—"} · {p.equipment}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <PingButton
+                      size="xs"
+                      entityType="deal"
+                      entityId={p.dealId}
+                      contextLabel={`${p.customer} deal is complete but not on the install board`}
+                    />
+                    <Button size="sm" onClick={() => promote.mutate(p.dealId)} disabled={promote.isPending}>
+                      Send to installs
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <PingButton
-                    size="xs"
-                    entityType="deal"
-                    entityId={p.dealId}
-                    contextLabel={`${p.customer} deal is complete but not on the install board`}
-                  />
-                  <Button size="sm" onClick={() => promote.mutate(p.dealId)} disabled={promote.isPending}>
-                    Send to installs
-                  </Button>
+                <div className="mt-2">
+                  <HandoffReply entityType="deal" entityId={p.dealId} />
                 </div>
               </li>
             ))}
@@ -196,13 +212,26 @@ function Page() {
                   </div>
                   <p className="mt-2 text-sm leading-relaxed">{c.body}</p>
                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-xs text-muted-foreground">{c.authorName}</p>
+                    <p className="text-xs text-muted-foreground">{c.ownerLabel}</p>
                     <div className="flex items-center gap-2">
+                      {c.canClaim ? (
+                        <button
+                          type="button"
+                          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                          disabled={claim.isPending}
+                          onClick={() => claim.mutate(c.id)}
+                        >
+                          Claim
+                        </button>
+                      ) : null}
                       <PingButton
                         size="xs"
                         entityType={c.entityType}
                         entityId={c.entityId}
+                        commentId={c.id}
+                        pingedAt={c.pingedAt}
                         contextLabel={`${c.customer ?? c.entityType} · ${c.body.slice(0, 80)}`}
+                        defaultNote={c.body}
                       />
                       <button
                         type="button"
@@ -212,6 +241,9 @@ function Page() {
                         Mark answered
                       </button>
                     </div>
+                  </div>
+                  <div className="mt-2">
+                    <HandoffReply entityType={c.entityType} entityId={c.entityId} />
                   </div>
                 </li>
               ))}
@@ -230,17 +262,35 @@ function Page() {
                 <li key={c.id}>
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm">
-                      <span className="font-medium">{c.authorName}</span>
+                      <span className="font-medium">{c.ownerLabel}</span>
                       <span className="text-muted-foreground"> · {c.customer ?? c.entityType}</span>
                     </p>
-                    <PingButton
-                      size="xs"
-                      entityType={c.entityType}
-                      entityId={c.entityId}
-                      contextLabel={`${c.customer ?? c.entityType} · ${c.body.slice(0, 80)}`}
-                    />
+                    <div className="flex items-center gap-1">
+                      {c.canClaim ? (
+                        <button
+                          type="button"
+                          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                          disabled={claim.isPending}
+                          onClick={() => claim.mutate(c.id)}
+                        >
+                          Claim
+                        </button>
+                      ) : null}
+                      <PingButton
+                        size="xs"
+                        entityType={c.entityType}
+                        entityId={c.entityId}
+                        commentId={c.id}
+                        pingedAt={c.pingedAt}
+                        contextLabel={`${c.customer ?? c.entityType} · ${c.body.slice(0, 80)}`}
+                        defaultNote={c.body}
+                      />
+                    </div>
                   </div>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
+                  <div className="mt-2">
+                    <HandoffReply entityType={c.entityType} entityId={c.entityId} />
+                  </div>
                 </li>
               ))}
             </ul>

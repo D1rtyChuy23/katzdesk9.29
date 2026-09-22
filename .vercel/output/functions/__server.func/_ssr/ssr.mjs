@@ -118,7 +118,7 @@ var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 * the dev styles URL for route-scoped CSS collection.
 */
 async function getStartManifest(matchedRoutes) {
-	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-Bkh_kQXN.mjs");
+	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-D0snF1-G.mjs");
 	const startManifest = tsrStartManifest();
 	let routes = startManifest.routes;
 	routes[rootRouteId];
@@ -140,195 +140,415 @@ async function getStartManifest(matchedRoutes) {
 var manifest = {
 	"0163adac47649a0570c9a81c5541f36005e39618df4a4497c23d2dc78ffaa868": {
 		functionName: "listDirectory_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"01a5a11fc715677325945efd317365c2105db9f8ba9b5d8045dcf90b9a0432cf": {
 		functionName: "setAccountApproved_createServerFn_handler",
-		importer: () => import("./access-P18NaTdQ.mjs")
+		importer: () => import("./access-M9KfPJKD.mjs")
 	},
 	"06fd80b5feb6d5cb8bbb9344a113508ac20a8fed29dbd5fc5c5cdab3f4ce7890": {
 		functionName: "listCustomers_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"0aa2a8634edcbca3e8e386b99d9ca448fc1a1d0e54845323e6025f5ce6f5300f": {
+		functionName: "pullRebuildSerial_createServerFn_handler",
+		importer: () => import("./rebuilds-Bjhimag_.mjs")
+	},
+	"0e70cec8a743027415d0460951e6e2bb501309027c1759c4c98cfd78df7764d5": {
+		functionName: "listNetwork_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"0f1616336d82cdb378bdbca41e5fcf8cd1928d9b9bea529fac33b217f9d4777b": {
+		functionName: "assignAssetToService_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"111aeb03d57088e20114c3b91137111583695de7837bf7cd602c0b77a80b8751": {
+		functionName: "previewExport_createServerFn_handler",
+		importer: () => import("./export-reports-DN4TOtBU.mjs")
 	},
 	"1200b5be72004e85f0bfcee1ed7fc4b89f856bb6c2e04dedd35aa46ed4833b05": {
 		functionName: "listRecipes_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"12a794f25eedc091fcc01b69c8afc2fa2556f959485701d3426296bd1de6f841": {
+		functionName: "setAccountRole_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
+	},
+	"17e1ebba74c445a1c0bae46dabb84f892f047cc2924e56c1221b2dad8e1a8c7a": {
+		functionName: "applySerialPull_createServerFn_handler",
+		importer: () => import("./serial-pull-BKRKvThK.mjs")
 	},
 	"1ae4b4e6892721617dfc78392d46516266eb655551d1a355b50347de340f48e6": {
 		functionName: "updatePm_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"1e76910bf98a3daeaebec03779f138bb00c8e750fd47ea60c7b94abbc3536e90": {
 		functionName: "getMyAccess_createServerFn_handler",
-		importer: () => import("./access-P18NaTdQ.mjs")
+		importer: () => import("./access-M9KfPJKD.mjs")
 	},
 	"2582de1bfe6e7c6be8f3d00276438723a358e32a85e78329b73b0d7d21e9d1d2": {
 		functionName: "updateAsset_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"2808eee236ac8a01d9b5df827bec7737d82a7b482025f6f1765ce51c74d36ecf": {
+		functionName: "assignCustomerProvider_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"2b27f3c2732afa1ab10aff6dc4a21d97370572f26b12f33d9ea9293891c3d5a6": {
+		functionName: "listRebuildLinks_createServerFn_handler",
+		importer: () => import("./rebuilds-Bjhimag_.mjs")
 	},
 	"2c4985e96c199268f7f639534cb5e8e31d6b19d43286bf77416413db60ffde26": {
 		functionName: "fetchSessionUser_createServerFn_handler",
-		importer: () => import("../__root-DDdC-mZd.mjs")
+		importer: () => import("../__root-3KgFAtUd.mjs")
+	},
+	"312d37f1589d16ecdcbdf5b204dbcbdc26d40c2ab5050689f9e097526c238a7f": {
+		functionName: "setAccountCanAddCustomers_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
 	},
 	"33d624b110f3c458dc2c4420e1a7861c9781d7f6cfc29f1e17303ebbdacf5185": {
 		functionName: "createJob_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"382dd0efa33ba73974579c8835f506ae0d04e33a2a6b5c2df3a7598f86087361": {
+		functionName: "addProviderAddress_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"385f3e726aaef9adefa16c47f3a60e82af199dfba07c3b4c42b00ed68805f8b3": {
+		functionName: "archiveInstall_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"39b0743581a7bf62de46488cabcf15c68c717461b0afaefa731f4fdda4a5b323": {
 		functionName: "updateInstall_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"39bf7186ae5c8496b5fd07dadc19af7625bf4a0d78ac5dc625fb334957dd2da2": {
 		functionName: "createDeal_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"3a3478acf53044fe7eab5aad067abd8b33c0b8558aad929a0d2b4ee08b583d71": {
+		functionName: "renameEquipment_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"3b18cb7c79b3d2a3708e94af1b95e011080a0bb6c37961f6996b2819e381e376": {
 		functionName: "getDashboard_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"3d6bd5686c9e2c59523c130a203368a03778b0e5137ce97d8af4fe9986cf09c9": {
+		functionName: "unassignAssetFromService_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"3fa4ef685c6d3d148750b135b296ab3ac3416c337f4659f76d71f0268e425439": {
 		functionName: "markNotificationRead_createServerFn_handler",
-		importer: () => import("./notify-0fPVk0IN.mjs")
+		importer: () => import("./notify-Bxr-hwo5.mjs")
+	},
+	"44e26914aa398f4aa37a17dfb87e8a7fb1db5fc93245c5a631ba44a5e8146a05": {
+		functionName: "updateRebuild_createServerFn_handler",
+		importer: () => import("./rebuilds-Bjhimag_.mjs")
+	},
+	"459028e7e9941b4f9e5d3cb9f2219c189d90cc6b094ae31d8cfcbce57606b7ed": {
+		functionName: "unassignCustomerProvider_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
 	},
 	"4635ba032aed43ecf7bcf6ce29de400b651517a7fee7111213c11ac3740d7c53": {
 		functionName: "listComments_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"471944d55e1c65b4213049ee898d032a581f48ae35180995f970ee884a74ec4a": {
+		functionName: "archiveProvider_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"4eb4da6169db850b7984b635fca811e56b64d5fbeac765cd327e779c83c83dec": {
+		functionName: "listRebuilds_createServerFn_handler",
+		importer: () => import("./rebuilds-Bjhimag_.mjs")
+	},
+	"4fb622c34d0f8a4c8000a6cacbcea16f8be53607038a90fb258d4781f34aeae0": {
+		functionName: "listRosterCandidates_createServerFn_handler",
+		importer: () => import("./roster-C9AH6PuI.mjs")
+	},
+	"5185381881205a8fef6ae18a40613e887010ff017f2d63e1a073bbc7aeb44afb": {
+		functionName: "mergeServiceTickets_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"526601698722a8a88c929ec2b2bd22f0d7d0eb21efd3f1ee9090ef220a7ef449": {
 		functionName: "assignAssetToInstall_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"5272252cb350fffbd8b8d56c4ef404ee93249ca615f69b19500c65e08ca968d3": {
+		functionName: "renameProvider_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
 	},
 	"56e061229f5d68c835c12340d4d78410c3592f0cc65d60e8b992d2ee67e6bed5": {
 		functionName: "createPm_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"5d3ec062dccd2364f8eadd0069f1e26d01565b58d8975d81fd41d7eb9fb5942a": {
 		functionName: "updateDeal_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"5d5dd28faae9fab46aaaf3d96465e9b2b1524240b1cdfcf1959debccb5bceea6": {
+		functionName: "grantAllCanAddCustomers_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
 	},
 	"66d5f7130499f8b38df7162a2bc0d7acafb0c172702bd2241f68b2c76bf81dd5": {
 		functionName: "handoffDeal_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"683ce4e118843b9882fa4d3ef4aae93e7c9911c090294ea307f851a3f443ba3b": {
+		functionName: "getCustomerProviders_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"6a7975fdb5f66f49fa83d2d5d69689ac2584794af314076f3731b68a6ffe713c": {
+		functionName: "listTechs_createServerFn_handler",
+		importer: () => import("./roster-C9AH6PuI.mjs")
+	},
+	"6e67d51c0c64562bbed03eea6fbb1e7c689b83ef33496797ea9f1a8a23c70aa9": {
+		functionName: "getProvider_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
 	},
 	"6f738980065bf83aabf85ff9c0bb4c1676ebab4840efd9eab8bac748961d6812": {
 		functionName: "addComment_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"700b799cf439db04647221adfa8f61295144daa74c6da21aec2fae852db466e2": {
 		functionName: "lookupSignIn_createServerFn_handler",
-		importer: () => import("./access-P18NaTdQ.mjs")
+		importer: () => import("./access-M9KfPJKD.mjs")
+	},
+	"76d7b51b3118ce3c755ac90dd0aa6c2d698a01daf5246936cb2098cdebafa7f2": {
+		functionName: "listCustomerRecords_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"7c7f50c54b853be302ab8dadb93d606276a3163565accc501df10cc4604d24fe": {
 		functionName: "getJob_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"7d30dfaa7a40d51c27cd0ce998e25cfeded40af2ff16826301ad1363906ce978": {
+		functionName: "addProviderLocation_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
 	},
 	"7f22f350550d2ff3b78203194b7c195944e4345e647c9bf227847d8e91ac717c": {
 		functionName: "registerAccount_createServerFn_handler",
-		importer: () => import("./access-P18NaTdQ.mjs")
+		importer: () => import("./access-M9KfPJKD.mjs")
+	},
+	"83cefe8461678b9a0f02a18d7b2aafb95f7e5ee20ca52438886169976cc838f8": {
+		functionName: "applyCorrigoImport_createServerFn_handler",
+		importer: () => import("./corrigo-import-FiF7oyMV.mjs")
+	},
+	"87ac9452e7d2cfc8ff048a7f556a4cb201fe948dfb3c427d26b54fb0668828a5": {
+		functionName: "setRepActive_createServerFn_handler",
+		importer: () => import("./reps-BxQKKipI.mjs")
+	},
+	"8a09d9d7b24a86f0c775dbbaf1147644bdfffcbc6057d140eb48ee8ba6dc8a35": {
+		functionName: "updateCustomerAccount_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"8a73f2c9525ecba2938f9d480d18743e0dd450638e5c52e2aef7b2e574bfafed": {
 		functionName: "createModule_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"8b50c2d8a8f85716a978d9f8629d110029ab352f813c0d0b69c28e2a1151b0f3": {
 		functionName: "returnAssetToWarehouse_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"8c8f06038c8723897ebcecc99628566e6111d4f176e232f91206b26908879e6e": {
 		functionName: "checkUsername_createServerFn_handler",
-		importer: () => import("./access-P18NaTdQ.mjs")
+		importer: () => import("./access-M9KfPJKD.mjs")
+	},
+	"8dc5f4484e42250633d38357b1e51e8f9a79cf8765bdb03de157067e5e570a90": {
+		functionName: "addRep_createServerFn_handler",
+		importer: () => import("./reps-BxQKKipI.mjs")
 	},
 	"8dea21981ac1b7bcdcc5dba0c9279774b461bd56790f061f6b87e9fe846b8a1f": {
 		functionName: "listModules_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"918e6d7f4bace1f6c78033b9037d1c6c24ab3094b0be582a97b47c01d0246dc3": {
 		functionName: "upsertRecipe_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"91a2ebe1261556f11fcc6a931cb07fb974490d2efb9a57f84f4b4edd6b44fd73": {
+		functionName: "removeProviderAddress_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"91cf4a3d18addcef695415dfa07f0323e2ba222a842baa7b1cc9a5e27e896991": {
+		functionName: "addTech_createServerFn_handler",
+		importer: () => import("./roster-C9AH6PuI.mjs")
 	},
 	"96afcaa3f0fed3b3115ee12547f530fd6e737399bfaeee48b5989e79d4732a7f": {
 		functionName: "markAssetSold_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"96b964ccada664131e89643fc6b11b1706175dac83156dd8dca0563b06a07e5c": {
+		functionName: "listDeskInvites_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
+	},
+	"9ab91de92323e50691c871ac4b1abdfc2406ecc69f8898bfc8570b2f3601a8f9": {
+		functionName: "setTechActive_createServerFn_handler",
+		importer: () => import("./roster-C9AH6PuI.mjs")
 	},
 	"9c7c27f89aa4613cba7b0cc60709986234616c8f59c62126c823a868928946ec": {
 		functionName: "updateJob_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"a2740b848ef9c54b6428a57334fbbd0f61d274e6551140fc955d08887c16be68": {
 		functionName: "listTeammates_createServerFn_handler",
-		importer: () => import("./notify-0fPVk0IN.mjs")
+		importer: () => import("./notify-Bxr-hwo5.mjs")
+	},
+	"a2be120d24b496c9ca826bddbada5f554f8e954eb24b11175e7e0eec6edf6dd7": {
+		functionName: "lookupSerial_createServerFn_handler",
+		importer: () => import("./serial-pull-BKRKvThK.mjs")
+	},
+	"a534ea58c5fe888eb5efb486c3893ae8da4fdc6fa69c93aee3dab0efe6f088fa": {
+		functionName: "removeProviderContact_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"a604085f737e13d9d322b581973ce524189981a7225ef787326d594c0df45acf": {
+		functionName: "revokeInvite_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
 	},
 	"a76f381d2caeca51254a208b811ee3a7058d68c1c43e253969f96eca6ae00fb0": {
 		functionName: "listAssets_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"a78a25b878a8eeb0571581d491679ee6d326c39db15f3f0853db09968b6e53d2": {
 		functionName: "updateModule_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"a9beaf65084fe0c4d1a91b561db0f7dfe13c0479920eca4f2cac3d82af365079": {
 		functionName: "listDeskAccounts_createServerFn_handler",
-		importer: () => import("./access-P18NaTdQ.mjs")
+		importer: () => import("./access-M9KfPJKD.mjs")
 	},
 	"af2770ffc7230f6441c2c90211140e8767fbb7f8fbe129f5b054493e873c7436": {
 		functionName: "copyRecipe_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"b77061ca68bf02683e5808aff14e21ac7f7f4324c20c77e18ff63950e0f4c940": {
 		functionName: "listPms_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"bbf684dab4be294977c8a135852746b46c064b5fe849356229cfe61bb158aad2": {
 		functionName: "archiveDirectoryEntry_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"bc07a2afcfdda5f33354b75fd397103613496c0ae0a38a79614caec91ba569d1": {
 		functionName: "searchAll_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"bcbd53d274f00bf8475319f64be83a5f2836af89d7875c42409365ad7d02d632": {
+		functionName: "denyAccount_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
 	},
 	"bd649af093753888caad62829610101a98a97fcfd3ebda7f1134c10f6803a31f": {
 		functionName: "resolveComment_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"be65e2e7f569d7642b6ee04880eb13cfb0d2dd5bb1a1d5bc7aa804dee30b2280": {
+		functionName: "getCustomerHistory_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"c02f4706c9c4fc709f0a0203fd50998028247f073559d9aa02e96d8112314336": {
+		functionName: "createRebuild_createServerFn_handler",
+		importer: () => import("./rebuilds-Bjhimag_.mjs")
 	},
 	"c456a9cfefe23283df58ac4a6dc5cfa41978e3b8e360d899120bd94e5c2beec0": {
 		functionName: "sendPing_createServerFn_handler",
-		importer: () => import("./notify-0fPVk0IN.mjs")
+		importer: () => import("./notify-Bxr-hwo5.mjs")
+	},
+	"c4a7418688fc4b7cb7af59b7f9d2eff9d3caace06de75ab3a03f4a37b3217a06": {
+		functionName: "downloadExport_createServerFn_handler",
+		importer: () => import("./export-reports-DN4TOtBU.mjs")
 	},
 	"c8fc4fe3d98eafc8771376a0d2ebec3bda02ebe075aeae0672deab4f6afdc960": {
 		functionName: "listDeals_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"cb407fb7ef362f72a49afa1c56076478d9a7ed1b36aa226ad00fcb269aa999af": {
+		functionName: "previewCorrigoImport_createServerFn_handler",
+		importer: () => import("./corrigo-import-FiF7oyMV.mjs")
 	},
 	"cea062fe70e665c1d6153b5ed394cf90f7ed3f3b8e5ba2a80f14ffc114231996": {
 		functionName: "createAsset_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"d0a57fc171437e25225eb204997c8dfd57ffe636970a048a22ff3ac09d0ecf93": {
+		functionName: "createInvite_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
+	},
+	"d2f0c01fa586ab0280a9d2571d6e36996bd105984cf8317054ca9844291a521a": {
+		functionName: "listReps_createServerFn_handler",
+		importer: () => import("./reps-BxQKKipI.mjs")
+	},
+	"d4f3a4453af79228779d10db5c4c867e0d5772bb5e93b9b07018aa2b92416401": {
+		functionName: "setRosterAdmin_createServerFn_handler",
+		importer: () => import("./roster-C9AH6PuI.mjs")
+	},
+	"d542ae756f2e6694dce801180f201b4d169c51d7a4538e3133a8696e2e25728c": {
+		functionName: "removeProviderLocation_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
 	},
 	"dd497d0a20bc74fd3516a43287eaf1f59ba8ff78889d055ec0134cb3b8100557": {
 		functionName: "listJobs_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"ded79099149d28ceb2e0ac0581c7618a59799ce73cd3dabba2d833d972fc964c": {
 		functionName: "listNotifications_createServerFn_handler",
-		importer: () => import("./notify-0fPVk0IN.mjs")
+		importer: () => import("./notify-Bxr-hwo5.mjs")
+	},
+	"e05fae23059afc9524cd7006566d3660d6e4e2f8e952866a6a0056267e182f6a": {
+		functionName: "peekInvite_createServerFn_handler",
+		importer: () => import("./access-M9KfPJKD.mjs")
+	},
+	"e1f6b5e1ee21f932bd78b1ddbf8e596c45e7296aac8591d390fcd0ce141b2d8c": {
+		functionName: "setProviderRole_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"e62d56561a7cdcb00f526b0789df917594449c611f745739262dca774fcffed5": {
+		functionName: "archiveDeal_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"e864dd8c9b80dad5f2c776a83f842418fb498cb3e65c666915bc181d9ae09617": {
 		functionName: "listInstalls_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"eeedbe6b03930fae6ba3c3db70a2afb562a9769026dd2db72fcf16a5dcbf9dac": {
+		functionName: "renameCustomer_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"f15851b69a3e7b42b4e445c440d3feb4faef6714c2f17ed71907c717ceb1d406": {
+		functionName: "listRebuildOwners_createServerFn_handler",
+		importer: () => import("./rebuilds-Bjhimag_.mjs")
+	},
+	"f2825516656623b695881938cec0b6cf9876e9c7c29a937a8cdcbfa5be64c879": {
+		functionName: "addProviderContact_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
 	},
 	"f3719f92ebca0f7fba68c57e4e6f1cfb9114315855feb08a7202f3310b8897b8": {
 		functionName: "unassignAssetFromInstall_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"f3d500b4701c16e140b486b0f00720767b652e6dd3e1353b7c2367dbcc44d86a": {
 		functionName: "createInstall_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"f4edefbbe0a28284e851744c3220811add825e959937d13bcb55136bdffafb5c": {
 		functionName: "getHandoff_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"f62afaeae21ab0e89d7d27769b2f5064cb3e75f64a9ea65009068831d0434921": {
+		functionName: "upsertProvider_createServerFn_handler",
+		importer: () => import("./network-api-5FCzjdhb.mjs")
+	},
+	"f818c883ef291f66d478761b3eb1ba6b94f06c954b7e2b79a760dee774ec3b53": {
+		functionName: "claimComment_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	},
 	"f92a32e6bcb066079e1169e5037175021271e828adda251fc4bd6c7eceab34f8": {
 		functionName: "addDirectoryEntry_createServerFn_handler",
-		importer: () => import("./api-DrSSaKsm.mjs")
+		importer: () => import("./api-CVZ1snyg.mjs")
+	},
+	"fba13400f8c6e321ea705395de93864c9cc6795aeb9df4a67cfe7be7204c7886": {
+		functionName: "listActivity_createServerFn_handler",
+		importer: () => import("./api-CVZ1snyg.mjs")
 	}
 };
 async function getServerFnById(id, access) {
@@ -1598,7 +1818,7 @@ var getBaseManifest = getProdBaseManifest;
 var createEarlyHintsForRequest = createEarlyHintsCollector;
 async function loadEntries() {
 	const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-		import("./router-BpVsA2Dc.mjs").then((n) => n.t),
+		import("./router-1NWxggZt.mjs").then((n) => n.t),
 		import("./start-5Z2QO8AU.mjs"),
 		import("./empty-plugin-adapters-D9UWiqvJ.mjs")
 	]);

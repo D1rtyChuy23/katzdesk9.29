@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Warehouse board — layout template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+      --font-display: "Fraunces", ui-serif, Georgia, serif;
+      --bg: #f3efe6;
+      --fg: #1c1917;
+      --card: #faf7f1;
+      --muted: #ece6da;
+      --muted-fg: #6f675e;
+      --primary: #2f5d50;
+      --primary-fg: #f4f0e8;
+      --secondary: #e7e0d4;
+      --border: #ddd4c6;
+      --ink: #1a1612;
+      --ink-fg: #e8e0d4;
+      --cream: #e8e0d4;
+      --catering: #b8612a;
+      --dispense: #5c5368;
+      --warn: #9a5b12;
+      --radius: 12px;
+      --shadow: 0 1px 2px rgb(28 25 23 / 0.04), 0 8px 24px rgb(28 25 23 / 0.05);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+    }
+    button, [role="button"] { cursor: pointer; font: inherit; }
+    button:disabled { cursor: default; }
+    h1, h2, .brand { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.02em; }
+    .app { display: grid; min-height: 100vh; grid-template-columns: 15.5rem minmax(0, 1fr); }
+    .sidebar {
+      background: var(--ink);
+      color: var(--ink-fg);
+      padding: 1.25rem 0.75rem 1.5rem;
+    }
+    .brand { display: flex; gap: 0.5rem; align-items: baseline; padding: 0 0.75rem; font-size: 1.5rem; }
+    .brand em { font-style: italic; color: rgb(232 224 212 / 0.55); font-weight: 500; }
+    .nav-group { margin-top: 1.5rem; }
+    .nav-label {
+      padding: 0 0.75rem;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgb(232 224 212 / 0.45);
+    }
+    .nav-group ul { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+    .nav-group a {
+      display: flex; align-items: center; gap: 0.6rem;
+      border-radius: 8px; padding: 0.5rem 0.75rem;
+      color: rgb(232 224 212 / 0.7); text-decoration: none; font-size: 0.9rem;
+    }
+    .nav-group a:hover { background: rgb(232 224 212 / 0.08); color: var(--cream); }
+    .nav-group a.active { background: rgb(232 224 212 / 0.12); color: var(--cream); }
+    .main { padding: 1.5rem 1.75rem 3rem; max-width: 72rem; }
+    header.page { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: flex-end; }
+    h1 { margin: 0; font-size: 1.875rem; }
+    .lede { margin: 0.35rem 0 0; max-width: 36rem; color: var(--muted-fg); font-size: 0.9rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      height: 2.5rem; padding: 0 0.9rem; border: 0; border-radius: 999px;
+      background: var(--primary); color: var(--primary-fg); font-weight: 500; font-size: 0.9rem;
+    }
+    .btn.ghost { background: transparent; color: var(--muted-fg); }
+    .btn.pill {
+      height: 2.25rem; background: var(--secondary); color: var(--fg);
+    }
+    .btn.pill.on { background: var(--ink); color: var(--ink-fg); }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin-top: 1.25rem; }
+    .stat {
+      text-align: left; border: 1px solid var(--border); background: var(--card);
+      border-radius: var(--radius); padding: 0.9rem 1rem; box-shadow: var(--shadow);
+    }
+    .stat:hover { background: #fff; }
+    .stat.on { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .stat.warn .value { color: var(--warn); }
+    .stat .label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-fg); }
+    .stat .value { margin-top: 0.15rem; font-size: 1.6rem; font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.15; }
+    .stat .hint { margin: 0.25rem 0 0; font-size: 0.75rem; color: var(--muted-fg); }
+    .chart {
+      margin-top: 1.25rem; border: 1px solid var(--border); background: var(--card);
+      border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow);
+    }
+    .chart h2 { margin: 0; font-size: 1.05rem; }
+    .chart p { margin: 0.2rem 0 0.8rem; font-size: 0.8rem; color: var(--muted-fg); }
+    .bar { display: grid; grid-template-columns: minmax(0, 1fr) 2.2rem; gap: 0.5rem; align-items: center; margin: 0.45rem 0; }
+    .bar span.name { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar span.n { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.85rem; font-weight: 500; }
+    .track { grid-column: 1 / -1; height: 0.55rem; background: var(--secondary); border-radius: 999px; overflow: hidden; }
+    .track i { display: block; height: 100%; background: var(--primary); border-radius: 999px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; align-items: center; }
+    input[type="search"], select {
+      height: 2.5rem; border: 1px solid var(--border); background: var(--card);
+      border-radius: 999px; padding: 0 0.9rem; color: var(--fg); min-width: 12rem;
+    }
+    .legend { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 0.75rem 0 0; font-size: 0.75rem; color: var(--muted-fg); }
+    .swatch { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 2px; margin-right: 0.3rem; vertical-align: middle; }
+    .grid-wrap {
+      margin-top: 0.75rem; overflow-x: auto; border: 1px solid var(--border);
+      background: var(--card); border-radius: var(--radius); padding: 0.75rem; box-shadow: var(--shadow);
+    }
+    table.rack { width: 100%; min-width: 40rem; border-collapse: collapse; text-align: center; }
+    table.rack th, table.rack td { padding: 0.15rem; }
+    table.rack th.level { text-align: left; font-size: 0.75rem; font-weight: 500; color: var(--muted-fg); padding-right: 0.5rem; width: 3.4rem; }
+    table.rack thead th { font-size: 11px; font-weight: 500; color: var(--muted-fg); padding-bottom: 0.45rem; }
+    .bay {
+      display: inline-flex; min-width: 2rem; justify-content: center; align-items: center;
+      border: 0; background: transparent; color: inherit; border-radius: 999px; padding: 0.15rem 0.4rem;
+    }
+    .bay.on { background: var(--primary); color: var(--primary-fg); }
+    .bay.catering { color: var(--catering); }
+    .bay.dispense { color: var(--dispense); }
+    .cell {
+      display: flex; width: 100%; min-width: 2rem; height: 2.25rem;
+      align-items: center; justify-content: center; border: 0; border-radius: 4px;
+      font-size: 0.75rem; font-variant-numeric: tabular-nums; background: var(--muted); color: var(--muted-fg);
+    }
+    .cell.used { background: rgb(47 93 80 / 0.15); color: var(--fg); }
+    .cell.full { background: var(--primary); color: var(--primary-fg); }
+    .cell.catering.empty { background: rgb(184 97 42 / 0.15); }
+    .cell.dispense.empty { background: rgb(92 83 104 / 0.15); }
+    .cell.on { box-shadow: 0 0 0 2px var(--primary); }
+    .list-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; }
+    .list-head h2 { margin: 0; font-size: 1.25rem; }
+    .list {
+      margin-top: 0.75rem; overflow: hidden; border: 1px solid var(--border);
+      background: var(--card); border-radius: var(--radius);
+    }
+    .row {
+      display: grid; gap: 0.25rem; width: 100%; text-align: left;
+      border: 0; background: transparent; border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem; color: inherit;
+    }
+    .row:last-child { border-bottom: 0; }
+    .row:hover { background: rgb(236 230 218 / 0.6); }
+    .slot { font-family: ui-monospace, Menlo, monospace; font-size: 0.75rem; }
+    .model { font-weight: 500; }
+    .meta { display: block; margin-top: 0.1rem; font-size: 0.75rem; color: var(--muted-fg); }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+    .chip {
+      display: inline-flex; align-items: center; border-radius: 999px;
+      background: var(--muted); color: var(--muted-fg); font-size: 11px; padding: 0.1rem 0.5rem;
+    }
+    .chip.warn { background: rgb(154 91 18 / 0.15); color: var(--warn); }
+    .notes {
+      margin: 0 0 1.25rem; border: 1px dashed var(--border); background: var(--card);
+      border-radius: var(--radius); padding: 1rem 1.1rem;
+    }
+    .notes h2 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .notes ul { margin: 0.4rem 0 0; padding-left: 1.1rem; color: var(--muted-fg); font-size: 0.85rem; }
+    .notes code { font-size: 0.8em; background: var(--muted); padding: 0.05rem 0.3rem; border-radius: 4px; }
+    .print-hide { }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .row { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 768px) {
+      .row { grid-template-columns: 7rem 1.4fr 8rem 5.5rem; align-items: center; }
+    }
+    @media print {
+      .sidebar, .print-hide, .toolbar, .btn { display: none !important; }
+      .app { display: block; }
+      .main { max-width: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="App navigation">
+      <div class="brand">Ops <em>Desk</em></div>
+      <nav>
+        <div class="nav-group">
+          <p class="nav-label">Floor</p>
+          <ul>
+            <li><a href="#">Clock</a></li>
+            <li><a href="#">Service</a></li>
+            <li><a href="#">PMs</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <p class="nav-label">Shop</p>
+          <ul>
+            <li><a class="active" href="#">Warehouse</a></li>
+            <li><a href="#">Locations</a></li>
+            <li><a href="#">Customers</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section class="notes print-hide" id="handoff">
+        <h2>Handoff for the builder</h2>
+        <p class="lede" style="max-width:none">Single-file layout template of a barn warehouse board. Swap sample units for your inventory. Keep the structure; restyle tokens if needed.</p>
+        <ul>
+          <li><strong>Shell:</strong> dark ink sidebar (~248px) + cream paper canvas. Display serif for titles, Figtree for UI.</li>
+          <li><strong>Page stack:</strong> title + lede + primary action → stat bubbles → “ready by model” bars → rack pills + search → color legend → bay grid → unit list.</li>
+          <li><strong>Bays:</strong> back rack columns <code>A–P</code>, front rack <code>I–P</code>. Rows <code>L4</code> (top) to <code>L1</code> (floor). Slot ID = <code>PALLET-L#</code>, e.g. <code>A-L3</code>.</li>
+          <li><strong>Cell number</strong> = lines used of 12. Empty / partial / full = muted / tint / solid primary. Catering A–D rust tint; dispensers E–F slate tint (back rack only).</li>
+          <li><strong>Bubbles are filters</strong> (one at a time). Click again to clear. Counts stay unfiltered totals. Bay letters in the header also filter.</li>
+          <li><strong>List row:</strong> slot · model + serial · status chips · qty. Opening a row would be a side sheet (not in this file).</li>
+        </ul>
+      </section>
+
+      <header class="page">
+        <div>
+          <h1>Barn warehouse</h1>
+          <p class="lede">Ready-to-deploy units at HQ. Slot ID is pallet + level — A-L3 is pallet A, third shelf. Pull a unit for an install or a service account and it leaves this board. Bays run A through P.</p>
+        </div>
+        <button class="btn" type="button" onclick="alert('Add-to-rack dialog goes here.')">+ Add to rack</button>
+      </header>
+
+      <div class="stats" id="stats"></div>
+
+      <section class="chart">
+        <h2>Ready by model</h2>
+        <p>The Ready bubble, unpacked — qty on the rack, not line count.</p>
+        <div id="bars"></div>
+      </section>
+
+      <div class="toolbar">
+        <button class="btn pill on" type="button" data-rack="back" id="btn-back">Back rack</button>
+        <button class="btn pill" type="button" data-rack="front" id="btn-front">Front rack</button>
+        <input id="q" type="search" placeholder="Find model or serial…" autocomplete="off" />
+        <select id="sort" aria-label="Sort">
+          <option value="alpha">A–Z</option>
+          <option value="slot">Slot</option>
+          <option value="status">Status</option>
+        </select>
+      </div>
+      <p class="legend">
+        <span><i class="swatch" style="background:var(--catering)"></i>Catering A–D</span>
+        <span><i class="swatch" style="background:var(--dispense)"></i>Dispenser E–F</span>
+        <span>Number in a cell is lines used of 12.</span>
+      </p>
+
+      <div class="grid-wrap">
+        <table class="rack" id="grid"></table>
+      </div>
+
+      <div class="list-head">
+        <h2 id="list-title">Back rack units</h2>
+        <button class="btn ghost" type="button" id="clear-slot" hidden>Clear slot</button>
+      </div>
+      <div class="list" id="list"></div>
+    </main>
+  </div>
+
+  <script>
+    const BACK = "ABCDEFGHIJKLMNOP".split("");
+    const FRONT = "IJKLMNOP".split("");
+    const LEVELS = [4, 3, 2, 1];
+    const SAMPLE = [
+      { id: 1, rack: "back", pallet: "A", level: 4, line: 1, model: "Cameo c'2s", serial: "EV-10482", kind: "equip", qty: 1 },
+      { id: 2, rack: "back", pallet: "A", level: 3, line: 1, model: "Cameo c'2s", serial: "EV-11017", kind: "equip", qty: 1 },
+      { id: 3, rack: "back", pallet: "B", level: 4, line: 1, model: "ITCB-DV", serial: "BN-8821", kind: "equip", qty: 1 },
+      { id: 4, rack: "back", pallet: "B", level: 4, line: 2, model: "ITCB-DV", serial: "BN-8822", kind: "equip", qty: 1 },
+      { id: 5, rack: "back", pallet: "C", level: 2, line: 1, model: "TB3", serial: null, kind: "equip", qty: 1, missing: true },
+      { id: 6, rack: "back", pallet: "E", level: 4, line: 1, model: "iMIX-3", serial: "DX-19", kind: "dispenser", qty: 4 },
+      { id: 7, rack: "back", pallet: "F", level: 3, line: 1, model: "FMD-1", serial: "DX-22", kind: "dispenser", qty: 2 },
+      { id: 8, rack: "back", pallet: "G", level: 4, line: 1, model: "Classe 9 USB 2GR", serial: "RC-4401", kind: "equip", qty: 1 },
+      { id: 9, rack: "back", pallet: "H", level: 1, line: 1, model: "Linea Classic S 2AV", serial: "LM-2210", kind: "equip", qty: 1, owned: "Sample Cafe" },
+      { id: 10, rack: "back", pallet: "K", level: 3, line: 1, model: "GR2.2 Grinder", serial: "FT-901", kind: "equip", qty: 1 },
+      { id: 11, rack: "back", pallet: "P", level: 4, line: 1, model: "Enigma e'4s", serial: "EV-3308", kind: "equip", qty: 1 },
+      { id: 12, rack: "front", pallet: "I", level: 4, line: 1, model: "Linea PB 2AV", serial: "LM-1188", kind: "equip", qty: 1 },
+      { id: 13, rack: "front", pallet: "J", level: 2, line: 1, model: "Swift Dual-Hopper", serial: "LM-550", kind: "equip", qty: 1 },
+      { id: 14, rack: "front", pallet: "O", level: 1, line: 1, model: "H5X 240V", serial: null, kind: "equip", qty: 1, missing: true },
+    ];
+    for (let i = 0; i < 9; i++) {
+      SAMPLE.push({
+        id: 20 + i, rack: "back", pallet: "G", level: 3, line: i + 1,
+        model: "Classe 5 Compact", serial: "RC-5" + String(100 + i), kind: "equip", qty: 1,
+      });
+    }
+
+    const state = { rack: "back", bubble: null, bay: null, slot: null, q: "", sort: "alpha" };
+
+    function bayKind(rack, p) {
+      if (rack !== "back") return "general";
+      if ("ABCD".includes(p)) return "catering";
+      if ("EF".includes(p)) return "dispense";
+      return "general";
+    }
+    function slotId(u) { return u.pallet + "-L" + u.level + (u.line ? " · " + u.line : ""); }
+    function pallets() { return state.rack === "front" ? FRONT : BACK; }
+    function onRack() { return SAMPLE.filter((u) => u.rack === state.rack); }
+    function fillMap() {
+      const map = {};
+      for (const u of onRack()) {
+        const k = u.pallet + "-" + u.level;
+        map[k] = (map[k] || 0) + 1;
+      }
+      return map;
+    }
+    function readyEquip() { return SAMPLE.filter((u) => u.kind === "equip"); }
+    function byModel() {
+      const map = {};
+      for (const u of readyEquip()) map[u.model] = (map[u.model] || 0) + u.qty;
+      return Object.entries(map).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    }
+
+    function filtered() {
+      let rows = onRack();
+      if (state.slot) {
+        rows = rows.filter((u) => u.pallet === state.slot.pallet && u.level === state.slot.level);
+      }
+      if (state.bubble === "dispensers") rows = rows.filter((u) => u.kind === "dispenser");
+      if (state.bubble === "missing") rows = SAMPLE.filter((u) => u.missing);
+      if (state.bubble === "ready") rows = readyEquip();
+      if (state.bay) rows = SAMPLE.filter((u) => u.pallet === state.bay);
+      const needle = state.q.trim().toLowerCase();
+      if (needle) {
+        rows = SAMPLE.filter((u) =>
+          [u.model, u.serial, slotId(u), u.owned, u.pallet].filter(Boolean).join(" ").toLowerCase().includes(needle)
+        );
+      }
+      if (state.sort === "slot") rows = [...rows].sort((a, b) => slotId(a).localeCompare(slotId(b)));
+      else if (state.sort === "status") rows = [...rows].sort((a, b) => Number(!!b.missing) - Number(!!a.missing));
+      else rows = [...rows].sort((a, b) => a.model.localeCompare(b.model));
+      return rows;
+    }
+
+    function toggleBubble(id) {
+      state.bubble = state.bubble === id ? null : id;
+      state.bay = null;
+      state.slot = null;
+      render();
+    }
+
+    function renderStats() {
+      const equip = readyEquip();
+      const models = new Set(equip.map((u) => u.model)).size;
+      const lines = equip.length;
+      const cap = 14 * 4 * 12 + 8 * 4 * 12;
+      const disp = SAMPLE.filter((u) => u.kind === "dispenser").reduce((n, u) => n + u.qty, 0);
+      const missing = SAMPLE.filter((u) => u.missing).length;
+      const cards = [
+        { id: "ready", label: "Ready", value: equip.reduce((n, u) => n + u.qty, 0), hint: models + " models · " + Math.max(0, cap - lines) + " open slots" },
+        { id: "fill", label: "Fill", value: Math.round((lines / cap) * 100) + "%", hint: lines + " lines on the rack" },
+        { id: "dispensers", label: "Dispensers", value: disp, hint: "Not counted in Ready" },
+        { id: "missing", label: "Missing serial", value: missing, hint: "Customer-owned flagged on the row", warn: missing > 0 },
+      ];
+      document.getElementById("stats").innerHTML = cards.map((c) => `
+        <button type="button" class="stat${state.bubble === c.id ? " on" : ""}${c.warn ? " warn" : ""}" data-bubble="${c.id}">
+          <div class="label">${c.label}</div>
+          <div class="value">${c.value}</div>
+          <p class="hint">${c.hint}</p>
+        </button>
+      `).join("");
+      document.querySelectorAll("[data-bubble]").forEach((el) => {
+        el.addEventListener("click", () => toggleBubble(el.getAttribute("data-bubble")));
+      });
+    }
+
+    function renderBars() {
+      const rows = byModel().slice(0, 8);
+      const max = Math.max(...rows.map((r) => r[1]), 1);
+      document.getElementById("bars").innerHTML = rows.map(([name, n]) => `
+        <div class="bar">
+          <span class="name">${name}</span>
+          <span class="n">${n}</span>
+          <span class="track"><i style="width:${Math.max(6, Math.round((n / max) * 100))}%"></i></span>
+        </div>
+      `).join("");
+    }
+
+    function renderGrid() {
+      const cols = pallets();
+      const fill = fillMap();
+      const head = cols.map((p) => {
+        const kind = bayKind(state.rack, p);
+        const on = state.bay === p ? " on" : "";
+        return `<th><button type="button" class="bay ${kind}${on}" data-bay="${p}">${p}</button></th>`;
+      }).join("");
+      const body = LEVELS.map((level) => {
+        const cells = cols.map((p) => {
+          const n = fill[p + "-" + level] || 0;
+          const kind = bayKind(state.rack, p);
+          const cls = [
+            "cell",
+            n === 0 ? "empty" : n >= 12 ? "full" : "used",
+            kind,
+            state.slot && state.slot.pallet === p && state.slot.level === level ? "on" : "",
+          ].join(" ");
+          return `<td><button type="button" class="${cls}" data-p="${p}" data-l="${level}" aria-label="${p}-L${level} ${n} of 12">${n}</button></td>`;
+        }).join("");
+        const tag = level === 4 ? ' <span style="font-weight:400">top</span>' : level === 1 ? ' <span style="font-weight:400">floor</span>' : "";
+        return `<tr><th class="level">L${level}${tag}</th>${cells}</tr>`;
+      }).join("");
+      document.getElementById("grid").innerHTML = `<thead><tr><th class="level">Level</th>${head}</tr></thead><tbody>${body}</tbody>`;
+      document.querySelectorAll("[data-bay]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const p = el.getAttribute("data-bay");
+          state.bay = state.bay === p ? null : p;
+          state.slot = null;
+          state.bubble = null;
+          render();
+        });
+      });
+      document.querySelectorAll("[data-p]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const pallet = el.getAttribute("data-p");
+          const level = Number(el.getAttribute("data-l"));
+          const same = state.slot && state.slot.pallet === pallet && state.slot.level === level;
+          state.slot = same ? null : { pallet, level };
+          state.bay = null;
+          render();
+        });
+      });
+    }
+
+    function renderList() {
+      const rows = filtered();
+      const title = state.q.trim()
+        ? "Search"
+        : state.slot
+          ? state.slot.pallet + "-L" + state.slot.level
+          : state.rack === "front" ? "Front rack units" : "Back rack units";
+      document.getElementById("list-title").textContent = title;
+      const clear = document.getElementById("clear-slot");
+      clear.hidden = !state.slot;
+      document.getElementById("list").innerHTML = rows.length
+        ? rows.map((u) => `
+          <button type="button" class="row">
+            <span class="slot">${slotId(u)}</span>
+            <span>
+              <span class="model">${u.model}</span>
+              <span class="meta">${u.serial || "No serial"}${u.qty > 1 ? " · qty " + u.qty : ""}${u.owned ? " · " + u.owned : ""}</span>
+            </span>
+            <span class="chips">
+              ${u.missing ? '<span class="chip warn">Serial missing</span>' : ""}
+              ${u.owned ? '<span class="chip">Customer-owned</span>' : ""}
+              ${u.kind === "dispenser" ? '<span class="chip">Accessory</span>' : ""}
+            </span>
+            <span class="meta">${u.kind === "dispenser" ? u.qty + " pcs" : "1 unit"}</span>
+          </button>
+        `).join("")
+        : `<p class="meta" style="padding:2rem 1rem">Nothing on this rack matches.</p>`;
+    }
+
+    function render() {
+      document.getElementById("btn-back").classList.toggle("on", state.rack === "back");
+      document.getElementById("btn-front").classList.toggle("on", state.rack === "front");
+      renderStats();
+      renderBars();
+      renderGrid();
+      renderList();
+    }
+
+    document.getElementById("btn-back").onclick = () => { state.rack = "back"; state.slot = null; render(); };
+    document.getElementById("btn-front").onclick = () => { state.rack = "front"; state.slot = null; render(); };
+    document.getElementById("q").oninput = (e) => { state.q = e.target.value; render(); };
+    document.getElementById("sort").onchange = (e) => { state.sort = e.target.value; render(); };
+    document.getElementById("clear-slot").onclick = () => { state.slot = null; render(); };
+    render();
+  </script>
+</body>
+</html>

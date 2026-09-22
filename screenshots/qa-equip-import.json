@@ -1,0 +1,28 @@
+{
+  "errors": [],
+  "preview": {
+    "hasAccountCol": true,
+    "hasModelCol": true,
+    "hasEquipCol": true,
+    "hasSerialCol": true,
+    "hasDateCol": true,
+    "hasOwnCol": true,
+    "hasStatusCol": true,
+    "hasFirstMarket": true,
+    "hasWalkIn": true,
+    "hasNeedsReview": true,
+    "hasMatched": true,
+    "snippet": "Import equipment list\n\nEquipment List.xlsx · This writes machines onto existing accounts. It does not create accounts, tickets, or overwrite notes. Unchecked rows are skipped. Walk-In and unmatched rows stay off until you pick an account and a catalog model.\n\n1817 selected to add\n2 selected to update\n1183 need review\n1183 skipped\nSelect ready\nDeselect all\nAll\nReady\nNeeds review\n\tACCOUNT\tCATALOG MODEL\tEQUIPMENT NAME\tSERIAL\tINSTALL DATE\tOWNERSHIP\tSTATUS\n\tFirst Market\tBunn ITCB-DV, 29\" w/Flip Tray\tITCB Combo Brewer\t—\t2018-12-01\t\n—\nLoaned\nOwned - Purchased from Katz\nOwned - Purchased from 3rd Party\nOwned\nLease\n\t\nUPDATE EXISTING\n\n\tFirst Market\tFetco GR2.2 Dual Portion Grinder (4 Batch Buttons)\tGR2.2 Dual Portion Grinder\t—\t2018-12-01\t\n—\nLoaned\nOwned - Purchased from Katz\nOwned - Purchased from 3",
+    "firstMarketChecked": true,
+    "firstMarketStatus": "UPDATE EXISTING",
+    "firstMarketCatalog": "Bunn ITCB-DV, 29\" w/Flip Tray",
+    "walkChecked": false,
+    "walkStatus": "NEEDS REVIEW\nWalk-In — pick a KatzDesk account",
+    "confirming": 2
+  },
+  "account": {
+    "hasSection": true,
+    "hasItcb": true,
+    "hasGrinder": true
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "title": true,
+  "nav": true,
+  "removed": false,
+  "stillGone": true,
+  "errors": [],
+  "steps": [
+    "title=true nav=true",
+    "removed=false stillGone=true"
+  ]
+}

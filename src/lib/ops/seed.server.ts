@@ -4,6 +4,11 @@ import seedJson from "./seed-data.json";
 import assetsJson from "./seed-assets.json";
 import directoryCustomersJson from "./directory-customers.json";
 import directoryEquipmentJson from "./directory-equipment.json";
+import networkProvidersJson from "./seed-network-providers.json";
+import networkAccountsJson from "./seed-network-accounts.json";
+import { findDuplicateLocation, normalizeCity, normalizeState, normalizeZip, parseContactBlob, parseCoverageLocations } from "./network";
+import { retargetCustomer } from "./customer-identity";
+import { reconcileServiceDuplicates } from "./wo-duplicates";
 
 type SeedJob = {
   callId: string;
@@ -165,16 +170,28 @@ async function insertMany(
   }
 }
 
-let seeding: Promise<void> | null = null;
+const globalSeed = globalThis as typeof globalThis & { __deskSeedLive2__?: Promise<void> };
+
+async function runPatch(name: string, fn: () => Promise<void>) {
+  try {
+    await fn();
+  } catch (err) {
+    console.error(`[katz-desk] ${name} failed`, err);
+  }
+}
 
 /** Directory prune to the provided equipment list runs inside ensureSeeded (v3). */
 
 export async function ensureSeeded(): Promise<void> {
-  if (seeding) return seeding;
-  seeding = (async () => {
+  if (globalSeed.__deskSeedLive2__) return globalSeed.__deskSeedLive2__;
+  globalSeed.__deskSeedLive2__ = (async () => {
     const sql = await getSql();
     const meta = await sql<{ v: string }>`select v from seed_meta where k = 'ops'`;
     if (meta[0]?.v !== "v2") {
+    const already = await sql<{ id: number }>`select id from service_jobs limit 1`;
+    if (already[0]) {
+      await sql`insert into seed_meta (k, v) values ('ops', 'v2') on conflict (k) do update set v = 'v2'`;
+    } else {
 
     await sql.query(
       `truncate table comments, activity, service_jobs, pm_jobs, modules, deals, installs restart identity cascade`,
@@ -350,19 +367,35 @@ export async function ensureSeeded(): Promise<void> {
     await seedStarterComments(sql);
     await sql`insert into seed_meta (k, v) values ('ops', 'v2') on conflict (k) do update set v = 'v2'`;
     }
+    }
 
-    await seedAssets(sql);
-    await patchRecipeTeaAndUrgency(sql);
-    await patchRecipeCustomers(sql);
-    await patchInstallFields(sql);
-    await patchDirectory(sql);
-    await patchNotifications(sql);
+    await runPatch("assets", () => seedAssets(sql));
+    await runPatch("tea", () => patchRecipeTeaAndUrgency(sql));
+    await runPatch("recipes", () => patchRecipeCustomers(sql));
+    await runPatch("installs", () => patchInstallFields(sql));
+    await runPatch("directory", () => patchDirectory(sql));
+    await runPatch("notifications", () => patchNotifications(sql));
+    await runPatch("handoff", () => patchHandoffOwners(sql));
+    await runPatch("network", () => patchNetwork(sql));
+    await runPatch("network-locations", () => patchNetworkLocations(sql));
+    await runPatch("network-people", () => patchNetworkPeople(sql));
+    await runPatch("customer-identity", () => patchCustomerIdentity(sql));
+    await runPatch("wo-duplicates", () => patchWoDuplicates(sql));
+    await runPatch("roster", () => patchRoster(sql));
+    await runPatch("serial-notice", () => patchSerialNotice(sql));
+    await runPatch("roles-reps-ak", () => patchRolesRepsAk(sql));
+    await runPatch("rebuilds", () => patchRebuilds(sql));
+    await runPatch("warehouse-bays-ap", () => patchWarehouseBays(sql));
+
+    const n = await sql<{ n: number }>`select count(*)::int as n from service_jobs`;
+    const c = await sql<{ n: number }>`select count(*)::int as n from directory_customers where archived = false`;
+    console.info("[katz-desk] ready", n[0]?.n ?? 0, "jobs", c[0]?.n ?? 0, "customers");
   })().catch((err) => {
     console.error("[katz-desk] seed failed", err);
-    seeding = null;
+    globalSeed.__deskSeedLive2__ = undefined;
     throw err;
   });
-  return seeding;
+  return globalSeed.__deskSeedLive2__;
 }
 
 async function seedAssets(sql: Sql) {
@@ -448,6 +481,14 @@ async function patchRecipeTeaAndUrgency(sql: Sql) {
   await sql.query(
     "alter table service_jobs add column if not exists urgency text not null default 'Normal'",
   );
+  await sql.query("alter table service_jobs add column if not exists work_done text");
+  await sql.query("alter table service_jobs add column if not exists completed_at date");
+  await sql.query("alter table service_jobs add column if not exists duplicate_of int");
+  await sql.query("alter table pm_jobs add column if not exists wo text");
+  await sql.query("alter table pm_jobs add column if not exists work_done text");
+  await sql.query("alter table pm_jobs add column if not exists completed_at date");
+  await sql.query("alter table installs add column if not exists work_done text");
+  await sql.query("alter table installs add column if not exists completed_at date");
   const meta = await sql<{ v: string }>`select v from seed_meta where k = 'tea_urgency'`;
   if (meta[0]?.v === "v1") return;
   await sql`
@@ -713,6 +754,463 @@ async function patchNotifications(sql: Sql) {
   );
 }
 
+async function patchHandoffOwners(sql: Sql) {
+  await sql.query(`
+    alter table deals add column if not exists handed_off boolean not null default false
+  `);
+  await sql.query(`
+    update deals d
+    set handed_off = true
+    where d.handed_off = false
+      and (
+        exists (select 1 from installs i where i.deal_id = d.id)
+        or (
+          d.completion = 'complete'
+          and exists (
+            select 1 from installs i
+            where i.archived = false
+              and lower(i.customer) = lower(d.customer)
+          )
+        )
+      )
+  `);
+  await sql.query(`
+    update comments
+    set author_name = null
+    where author_id is null
+      and author_name is not null
+  `);
+}
+
+async function patchNetwork(sql: Sql) {
+  const meta = await sql<{ v: string }>`select v from seed_meta where k = 'network'`;
+  if (meta[0]?.v === "v1") return;
+
+  await sql.query(`
+    create table if not exists network_providers (
+      id                 serial primary key,
+      name               text not null,
+      status             text,
+      dispatch_phone     text,
+      dispatch_email     text,
+      secondary_phone    text,
+      secondary_email    text,
+      response_time      text,
+      standard_rate      text,
+      after_hours_rate   text,
+      travel_policy      text,
+      equipment_serviced text,
+      coverage           text,
+      contacts           text,
+      pm_pricing         text,
+      parts_stocking     text,
+      notes              text,
+      last_updated       date,
+      archived           boolean not null default false,
+      updated_at         timestamptz not null default now()
+    )`);
+  await sql.query(
+    "create unique index if not exists network_providers_name_uidx on network_providers (lower(name))",
+  );
+  await sql.query(`
+    create table if not exists network_accounts (
+      id          serial primary key,
+      customer    text not null,
+      email       text,
+      contact     text,
+      phone       text,
+      address     text,
+      city        text,
+      state       text,
+      zip         text,
+      equipment   text,
+      ownership   text,
+      region      text,
+      updated_at  timestamptz not null default now()
+    )`);
+  await sql.query(
+    "create unique index if not exists network_accounts_customer_uidx on network_accounts (lower(customer))",
+  );
+  await sql.query(`
+    create table if not exists customer_providers (
+      id          serial primary key,
+      customer    text not null,
+      provider_id int not null references network_providers(id),
+      role        text not null default 'additional',
+      updated_at  timestamptz not null default now()
+    )`);
+  await sql.query(
+    "create unique index if not exists customer_providers_pair_uidx on customer_providers (provider_id, lower(customer))",
+  );
+
+  type SeedProvider = {
+    name: string;
+    status: string | null;
+    dispatchPhone: string | null;
+    dispatchEmail: string | null;
+    secondaryPhone: string | null;
+    secondaryEmail: string | null;
+    responseTime: string | null;
+    standardRate: string | null;
+    afterHoursRate: string | null;
+    travelPolicy: string | null;
+    equipmentServiced: string | null;
+    coverage: string | null;
+    contacts: string | null;
+    pmPricing: string | null;
+    partsStocking: string | null;
+    notes: string | null;
+    lastUpdated: string | null;
+  };
+  type SeedAccount = {
+    name: string;
+    email: string | null;
+    contact: string | null;
+    phone: string | null;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    zip: string | null;
+    equipment: string | null;
+    ownership: string | null;
+    primary: string | null;
+    secondary: string | null;
+    region: string | null;
+  };
+
+  const providers = networkProvidersJson as SeedProvider[];
+  const accounts = networkAccountsJson as SeedAccount[];
+
+  for (const p of providers) {
+    await sql.query(
+      `insert into network_providers (
+         name, status, dispatch_phone, dispatch_email, secondary_phone, secondary_email,
+         response_time, standard_rate, after_hours_rate, travel_policy, equipment_serviced,
+         coverage, contacts, pm_pricing, parts_stocking, notes, last_updated
+       )
+       select $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17
+       where not exists (select 1 from network_providers where lower(name) = lower($1))`,
+      [
+        p.name,
+        p.status,
+        p.dispatchPhone,
+        p.dispatchEmail,
+        p.secondaryPhone,
+        p.secondaryEmail,
+        p.responseTime,
+        p.standardRate,
+        p.afterHoursRate,
+        p.travelPolicy,
+        p.equipmentServiced,
+        p.coverage,
+        p.contacts,
+        p.pmPricing,
+        p.partsStocking,
+        p.notes,
+        p.lastUpdated,
+      ],
+    );
+  }
+
+  const ids = await sql.query<{ id: number; name: string }>(`select id, name from network_providers`);
+  const byName = new Map(ids.map((r) => [r.name.trim().toLowerCase(), r.id]));
+
+  for (const a of accounts) {
+    await sql.query(
+      `insert into directory_customers (name)
+       select $1
+       where not exists (select 1 from directory_customers where lower(name) = lower($1))`,
+      [a.name],
+    );
+    await sql.query(
+      `insert into network_accounts (customer, email, contact, phone, address, city, state, zip, equipment, ownership, region)
+       select $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+       where not exists (select 1 from network_accounts where lower(customer) = lower($1))`,
+      [
+        a.name,
+        a.email,
+        a.contact,
+        a.phone,
+        a.address,
+        a.city,
+        a.state,
+        a.zip,
+        a.equipment,
+        a.ownership,
+        a.region,
+      ],
+    );
+    const pairs: { name: string | null; role: string }[] = [
+      { name: a.primary, role: "primary" },
+      { name: a.secondary, role: "secondary" },
+    ];
+    for (const pair of pairs) {
+      if (!pair.name) continue;
+      const pid = byName.get(pair.name.trim().toLowerCase());
+      if (!pid) continue;
+      await sql.query(
+        `insert into customer_providers (customer, provider_id, role)
+         select $1, $2, $3
+         where not exists (
+           select 1 from customer_providers
+           where provider_id = $2 and lower(customer) = lower($1)
+         )`,
+        [a.name, pid, pair.role],
+      );
+    }
+  }
+
+  await sql`insert into seed_meta (k, v) values ('network', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+
+async function patchNetworkLocations(sql: Sql) {
+  const meta = await sql<{ v: string }>`select v from seed_meta where k = 'network-locations'`;
+  if (meta[0]?.v === "v3") return;
+
+  await sql.query(`
+    create table if not exists provider_locations (
+      id          serial primary key,
+      provider_id int not null references network_providers(id) on delete cascade,
+      state       text not null,
+      city        text,
+      zip         text,
+      created_at  timestamptz not null default now()
+    )`);
+  await sql.query(`
+    create unique index if not exists provider_locations_uniq
+    on provider_locations (provider_id, state, coalesce(lower(city), ''), coalesce(zip, ''))
+  `);
+
+  await sql.query(`truncate table provider_locations restart identity`);
+  const providers = await sql.query<{ id: number; coverage: string | null }>(
+    `select id, coverage from network_providers where archived = false`,
+  );
+  const existing = await sql.query<{
+    provider_id: number;
+    state: string;
+    city: string | null;
+    zip: string | null;
+  }>(`select provider_id, state, city, zip from provider_locations`);
+  const byProv = new Map<number, { state: string; city: string | null; zip: string | null }[]>();
+  for (const e of existing) {
+    const list = byProv.get(e.provider_id) ?? [];
+    list.push(e);
+    byProv.set(e.provider_id, list);
+  }
+
+  const insert = async (
+    providerId: number,
+    state: string,
+    city: string | null,
+    zip: string | null,
+  ) => {
+    const st = normalizeState(state);
+    if (!st) return;
+    const c = normalizeCity(city);
+    const z = normalizeZip(zip);
+    const list = byProv.get(providerId) ?? [];
+    if (findDuplicateLocation(list, { state: st, city: c, zip: z })) return;
+    await sql.query(
+      `insert into provider_locations (provider_id, state, city, zip) values ($1,$2,$3,$4)`,
+      [providerId, st, c, z],
+    );
+    list.push({ state: st, city: c, zip: z });
+    byProv.set(providerId, list);
+  };
+
+  for (const p of providers) {
+    for (const loc of parseCoverageLocations(p.coverage)) {
+      await insert(p.id, loc.state, loc.city, loc.zip);
+    }
+  }
+
+  const assigned = await sql.query<{
+    provider_id: number;
+    city: string | null;
+    state: string | null;
+    zip: string | null;
+  }>(`
+    select cp.provider_id, a.city, a.state, a.zip
+    from customer_providers cp
+    join network_accounts a on lower(a.customer) = lower(cp.customer)
+    where a.state is not null
+  `);
+  for (const a of assigned) {
+    await insert(a.provider_id, a.state ?? "", a.city, a.zip);
+  }
+
+  await sql`insert into seed_meta (k, v) values ('network-locations', 'v3') on conflict (k) do update set v = 'v3'`;
+}
+
+async function patchNetworkPeople(sql: Sql) {
+  const meta = await sql<{ v: string }>`select v from seed_meta where k = 'network-people'`;
+  if (meta[0]?.v === "v1") return;
+
+  await sql.query(`
+    create table if not exists provider_contacts (
+      id          serial primary key,
+      provider_id int not null references network_providers(id) on delete cascade,
+      name        text,
+      role        text,
+      phone       text,
+      email       text,
+      created_at  timestamptz not null default now()
+    )`);
+  await sql.query(`
+    create table if not exists provider_addresses (
+      id          serial primary key,
+      provider_id int not null references network_providers(id) on delete cascade,
+      label       text,
+      line1       text,
+      line2       text,
+      city        text,
+      state       text,
+      zip         text,
+      created_at  timestamptz not null default now()
+    )`);
+
+  const rows = await sql.query<{ id: number; name: string; contacts: string | null }>(
+    `select id, name, contacts from network_providers where archived = false`,
+  );
+  for (const p of rows) {
+    const parsed = parseContactBlob(p.contacts, p.name);
+    for (const c of parsed.people) {
+      await sql.query(
+        `insert into provider_contacts (provider_id, name, role, phone, email) values ($1,$2,$3,$4,$5)`,
+        [p.id, c.name, c.role, c.phone, c.email],
+      );
+    }
+    for (const a of parsed.addresses) {
+      await sql.query(
+        `insert into provider_addresses (provider_id, label, line1, line2, city, state, zip) values ($1,$2,$3,$4,$5,$6,$7)`,
+        [p.id, a.label, a.line1, a.line2, a.city, a.state, a.zip],
+      );
+    }
+  }
+
+  await sql`insert into seed_meta (k, v) values ('network-people', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+
+async function patchCustomerIdentity(sql: Sql) {
+  const meta = await sql<{ v: string }>`select v from seed_meta where k = 'customer-identity'`;
+  if (meta[0]?.v === "v1") return;
+
+  const dups = await sql.query<{ k: string; ids: number[] }>(
+    `select lower(name) as k, array_agg(id order by id) as ids
+     from directory_customers
+     group by lower(name)
+     having count(*) > 1`,
+  ).catch(() => [] as { k: string; ids: number[] }[]);
+  for (const d of dups) {
+    const raw = d.ids as unknown;
+    const ids = Array.isArray(raw)
+      ? raw.map(Number)
+      : String(raw ?? "")
+          .replace(/[{}]/g, "")
+          .split(",")
+          .map((n) => Number(n.trim()))
+          .filter((n) => Number.isFinite(n));
+    if (ids.length < 2) continue;
+    const keep = await sql.query<{ id: number; name: string }>(
+      `select id, name from directory_customers where id = $1`,
+      [ids[0]],
+    );
+    const keepName = keep[0]?.name;
+    if (!keepName) continue;
+    for (const extraId of ids.slice(1)) {
+      const extra = await sql.query<{ name: string }>(`select name from directory_customers where id = $1`, [extraId]);
+      if (extra[0] && extra[0].name !== keepName) {
+        await retargetCustomer(sql, extra[0].name, keepName);
+      }
+      await sql.query(`update directory_customers set archived = true, updated_at = now() where id = $1`, [extraId]);
+    }
+  }
+
+  await sql.query(`drop index if exists directory_customers_name_uidx`);
+  try {
+    await sql.query(
+      `create unique index if not exists directory_customers_name_lower_uidx on directory_customers (lower(name))`,
+    );
+  } catch (err) {
+    console.error("[katz-desk] customer unique index skipped", err);
+  }
+
+  await sql`insert into seed_meta (k, v) values ('customer-identity', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+
+async function patchWoDuplicates(sql: Sql) {
+  await sql.query("alter table service_jobs add column if not exists duplicate_of int");
+  await sql.query(
+    "create index if not exists service_jobs_duplicate_of_idx on service_jobs (duplicate_of)",
+  );
+  const meta = await sql<{ v: string }>`select v from seed_meta where k = 'wo_duplicates'`;
+  if (meta[0]?.v === "v1") return;
+  const result = await reconcileServiceDuplicates(sql, "KatzDesk");
+  console.info("[katz-desk] wo duplicates", result.merged, "merged", result.flagged, "flagged");
+  await sql`insert into seed_meta (k, v) values ('wo_duplicates', 'v1') on conflict (k) do update set v = 'v1'`;
+}
+
+async function patchRoster(sql: Sql) {
+  const { ensureRoster } = await import("./roster");
+  await ensureRoster(sql);
+}
+
+async function patchSerialNotice(sql: Sql) {
+  const { ensureSerialNotice } = await import("./serial-pull");
+  await ensureSerialNotice(sql);
+}
+
+async function patchRolesRepsAk(sql: Sql) {
+  await sql.query("alter table desk_accounts add column if not exists desk_role text");
+  await sql.query("alter table desk_notifications add column if not exists customer text");
+  const { ensureReps, remapStoredReps, ensureAccountMarks } = await import("./reps");
+  await ensureReps(sql);
+  await ensureAccountMarks(sql);
+  const mapped = await remapStoredReps(sql);
+  console.info("[katz-desk] remapped reps", mapped.deals, "deals", mapped.installs, "installs", mapped.customers, "customers");
+}
+
+async function patchRebuilds(sql: Sql) {
+  const { seedRebuilds } = await import("./rebuilds");
+  await seedRebuilds(sql);
+}
+
+async function patchWarehouseBays(sql: Sql) {
+  const meta = await sql.query<{ v: string }>("select v from seed_meta where k = 'warehouse-bays-ap'");
+  if (meta[0]?.v === "v1") return;
+  const leftover = await sql.query<{ n: number }>(`
+    select count(*)::int as n from assets
+    where (pallet is not null and length(btrim(pallet)) = 1 and upper(btrim(pallet)) = 'Q')
+       or (origin_pallet is not null and length(btrim(origin_pallet)) = 1 and upper(btrim(origin_pallet)) = 'Q')
+  `);
+  const migrated = await sql.query<{ name: string }>(
+    "select name from _migrations where name = '0026_warehouse_bays_ap.sql'",
+  );
+  // Shift when Q still exists (fresh seed from old labels) or 0026 has not run yet.
+  // Skip when 0026 already shifted live B–Q and no Q remains — running again would
+  // walk D–P down another letter.
+  if ((leftover[0]?.n ?? 0) > 0 || !migrated[0]) {
+    await sql.query(`
+      update assets
+        set pallet = chr(ascii(upper(btrim(pallet))) - 1)
+        where pallet is not null
+          and length(btrim(pallet)) = 1
+          and upper(btrim(pallet)) ~ '^[B-Q]$'
+    `);
+    await sql.query(`
+      update assets
+        set origin_pallet = chr(ascii(upper(btrim(origin_pallet))) - 1)
+        where origin_pallet is not null
+          and length(btrim(origin_pallet)) = 1
+          and upper(btrim(origin_pallet)) ~ '^[B-Q]$'
+    `);
+  }
+  await sql.query(
+    `insert into seed_meta (k, v) values ('warehouse-bays-ap', 'v1') on conflict (k) do update set v = 'v1'`,
+  );
+}
+
+
 async function seedStarterComments(sql: Sql) {
   const findJob = async (kind: string, customer: string) => {
     const rows = await sql<{ id: number }>`
@@ -825,6 +1323,6 @@ async function seedStarterComments(sql: Sql) {
     if (!id) continue;
     await sql`
       insert into comments (entity_type, entity_id, author_name, body, ask_team)
-      values (${n.type}, ${id}, ${n.author}, ${n.body}, ${n.ask})`;
+      values (${n.type}, ${id}, ${null}, ${n.body}, ${n.ask})`;
   }
 }
