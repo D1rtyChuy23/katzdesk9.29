@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { OwnerFilter } from "./owner-select";
+import { sameTech } from "@/lib/ops/tech-match";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -49,7 +50,7 @@ export function RebuildPlanner({
 
   const list = useMemo(() => {
     let next = rows.filter((r) => r.status !== "Cancelled");
-    if (owner) next = next.filter((r) => (r.owner ?? "").toLowerCase() === owner.toLowerCase());
+    if (owner) next = next.filter((r) => sameTech(r.owner, owner) || (r.owner ?? "").trim() === owner);
     if (health) next = next.filter((r) => r.health === health);
     if (account.trim()) {
       const n = account.trim().toLowerCase();

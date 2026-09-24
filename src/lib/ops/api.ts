@@ -19,6 +19,8 @@ import {
   isOpenInstall,
 } from "./clock";
 import { isoDayOrNull as isoDate } from "./iso";
+import { canMarkInstalled, loadInspectionSummaries, withInspections } from "./inspection-api";
+import { emptyInspection } from "./pre-inspection";
 import type {
   Asset,
   ComingDueRow,
@@ -359,7 +361,13 @@ function mapAsset(r: any) {
 		bay: bayFor(r.site, pallet),
 		slotLabel: bayNeeded ? "Needs bay" : pallet && level ? slotId(pallet, level, lineNo) : siteLabel(r.site),
 		missingSerial: r.kind === "equip" && !r.serial,
-		needsBay: bayNeeded
+		needsBay: bayNeeded,
+		reviewStatus: r.review_status === "pending" || r.review_status === "approved" || r.review_status === "rejected" ? r.review_status : null,
+		reviewNote: r.review_note ?? null,
+		shopTest: r.shop_test === "tested" || r.shop_test === "needs-test" ? r.shop_test : null,
+		shopTestNote: r.shop_test_note ?? null,
+		shopTestBy: r.shop_test_by ?? null,
+		shopTestAt: r.shop_test_at ? String(r.shop_test_at) : null
 	};
 }
 function mapRecipe(r: any) {
@@ -394,7 +402,7 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 	const marks = await loadAccountMarks(sql);
 	const jobs = applyMarks(attachJobSiblings((await sql`select * from service_jobs`).map((r: any) => mapJob(r, today))).filter((j: any) => !j.duplicateOf), marks);
 	const pms = applyMarks((await sql`select * from pm_jobs`).map((r: any) => mapPm(r, today)), marks);
-	const installs = applyMarks((await sql`select * from installs where archived = false`).map((r: any) => mapInstall(r, today, week, catalog)), marks);
+	const installs = await withInspections(sql, applyMarks((await sql`select * from installs where archived = false`).map((r: any) => mapInstall(r, today, week, catalog)), marks));
 	const deals = (await sql`select * from deals where archived = false`).map((r: any) => mapDeal(r, marks));
 	const svc = jobs.filter((j: any) => j.kind === "service");
 	const tlc = jobs.filter((j: any) => j.kind === "tlc");
@@ -483,7 +491,9 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 			entityType: "install",
 			id: i.id,
 			aviKatz: i.aviKatz,
-			noRep: i.noRep
+			noRep: i.noRep,
+			inspectionStatus: i.inspection?.overall ?? "Not started",
+			failedItems: i.inspection?.failedItems?.length ? i.inspection.failedItems.join(", ") : null
 		});
 	}
 	comingDue.sort((a, b) => a.daysOut - b.daysOut || a.customer.localeCompare(b.customer));
@@ -534,7 +544,7 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 	const pendingHandoffs = uniquePendingHandoffs(deals);
 	const installQueue = installs.filter((i) => isOpenInstall(i));
 	const installAtRisk = installQueue.filter((i) => i.flag).length;
-	const installReadyRows = installQueue.filter((i) => i.equipStatus === "Ready");
+	const installReadyRows = installQueue.filter((i) => i.equipStatus === "Ready" && i.inspection?.overall === "Passed");
 	const installReadyByEquip = (() => {
 		const map = new Map();
 		for (const i of installReadyRows) {
@@ -1059,7 +1069,7 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 	const week = weekBounds(today);
 	const catalog = await loadEquipCatalog(sql);
 	const marks = await loadAccountMarks(sql);
-	return applyMarks((await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog)), marks);
+	return withInspections(sql, applyMarks((await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog)), marks));
 });
 export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
@@ -1068,6 +1078,14 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 	const c = cur[0];
 	const equipStatus = data.equipStatus === undefined ? c.equip_status : data.equipStatus;
 	const complete = data.complete === undefined ? data.equipStatus === undefined ? c.complete : isInstalled({ equipStatus }) : data.complete;
+	const wasInstalled = isInstalled({ complete: c.complete, equipStatus: c.equip_status });
+	const nowInstalled = isInstalled({ complete, equipStatus });
+	if (!wasInstalled && nowInstalled) {
+		const summary = (await loadInspectionSummaries(sql, [data.id])).get(data.id) ?? emptyInspection();
+		if (!canMarkInstalled(summary)) {
+			throw new Error("Pre-inspection must be Passed, or add an override reason, before marking this installed.");
+		}
+	}
 	const catalog = await loadEquipCatalog(sql);
 	const machinesJson = data.machines === undefined ? c.machines : data.machines == null ? null : (() => {
 		const raw = typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
@@ -1116,7 +1134,7 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);
-	return applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks)[0];
+	return (await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks)))[0];
 });
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; technician?: string; serial?: string; powerVoltage?: string; machines?: MachineSpec[] | string | null }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
@@ -1418,7 +1436,7 @@ async function findOpenBarnSlot(sql: any, preferred: any) {
 export const listAssets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Asset[]> => {
 	return (await (await ready())`select * from assets order by id`).map(mapAsset);
 });
-export const createAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind?: "equip" | "dispenser" | "module"; model: string; serial?: string | null; qty?: number; customerOwned?: string | null; site: string; pallet?: string | null; level?: number | null; purpose?: string | null; notes?: string | null }) => d).handler(async ({ data }: any): Promise<Asset> => {
+export const createAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind?: "equip" | "dispenser" | "module"; model: string; serial?: string | null; qty?: number; customerOwned?: string | null; site: string; pallet?: string | null; level?: number | null; purpose?: string | null; notes?: string | null }) => d).handler(async ({ data, context }: any): Promise<Asset> => {
 	const sql = await ready();
 	const kind = data.kind ?? "equip";
 	const site = data.site;
@@ -1432,17 +1450,47 @@ export const createAsset = createServerFn({ method: "POST" }).middleware([deskMi
 		line = await nextLine(sql, site, pallet, level);
 		if (line == null) throw new Error("That slot is full (12 lines)");
 	}
+	const role = await (await import("@/lib/ops/rack-stock")).requireStock(sql, context.userId);
+	const serialRaw = String(data.serial || "").trim();
+	if (serialRaw) {
+		const { serialKey } = await import("@/lib/ops/account-equip");
+		const key = serialKey(serialRaw);
+		if (key) {
+			const rows = await sql.query("select id, serial, status, sold_to from assets where serial is not null");
+			const hit = rows.find((r) => serialKey(r.serial) === key);
+			if (hit) {
+				if (hit.status === "sold" || hit.sold_to) {
+					throw new Error(`That serial is already allocated${hit.sold_to ? ` to ${hit.sold_to}` : ""}.`);
+				}
+				throw new Error(`${serialRaw} is already on the desk. Select the slot and confirm the move — one serial stays one record.`);
+			}
+		}
+	}
 	const status = barn ? "ready" : "deployed";
-	return mapAsset((await sql`
-      insert into assets (kind, model, serial, qty, customer_owned, site, pallet, level, line_no, purpose, status, notes)
+	const pending = barn && role.warehouse && !role.admin;
+	const shop = barn ? "needs-test" : null;
+	const row = mapAsset((await sql`
+      insert into assets (kind, model, serial, qty, customer_owned, site, pallet, level, line_no, purpose, status, notes, shop_test, review_status, review_actor, review_origin)
       values (
-        ${kind}, ${data.model}, ${data.serial || null}, ${data.qty ?? 1},
+        ${kind}, ${data.model}, ${serialRaw || null}, ${data.qty ?? 1},
         ${data.customerOwned || null}, ${site}, ${pallet}, ${level}, ${line},
-        ${data.purpose || null}, ${status}, ${data.notes || null}
+        ${data.purpose || null}, ${status}, ${data.notes || null},
+        ${shop}, ${pending ? "pending" : null}, ${pending ? context.userId : null}, ${pending ? "created" : null}
       )
       returning *`)[0]);
+	if (pending && pallet && level) {
+		const { notifyAdminsRackReview } = await import("@/lib/ops/notify");
+		const { slotId } = await import("@/lib/ops/warehouse");
+		await notifyAdminsRackReview(sql, context.userId, {
+			id: row.id,
+			model: row.model,
+			serial: row.serial,
+			slot: slotId(String(pallet).toUpperCase(), Number(level)),
+		});
+	}
+	return row;
 });
-export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; model?: string; serial?: string | null; qty?: number; customerOwned?: string | null; purpose?: string | null; notes?: string | null; pallet?: string | null; level?: number | null; site?: string }) => d).handler(async ({ data }: any): Promise<Asset> => {
+export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; model?: string; serial?: string | null; qty?: number; customerOwned?: string | null; purpose?: string | null; notes?: string | null; pallet?: string | null; level?: number | null; site?: string }) => d).handler(async ({ data, context }: any): Promise<Asset> => {
 	const sql = await ready();
 	const cur = await sql`select * from assets where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Asset not found");
@@ -1454,10 +1502,11 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	if (isBarn(site) && pallet && (!isValidBay(pallet) || !palletsFor(site).includes(pallet))) {
 		throw new Error("Pick a bay A through P on this rack");
 	}
-	if (isBarn(site) && (pallet !== c.pallet || level !== c.level || site !== c.site) && pallet && level) {
+	if (isBarn(site) && (pallet !== c.pallet || Number(level) !== Number(c.level) || site !== c.site) && pallet && level) {
 		line = await nextLine(sql, site, pallet, level);
 		if (line == null) throw new Error("That slot is full");
 	}
+	const movedToRack = isBarn(site) && pallet && level && (String(pallet) !== String(c.pallet ?? "") || Number(level) !== Number(c.level) || site !== c.site);
 	await sql`
       update assets set
         model = ${data.model ?? c.model},
@@ -1472,6 +1521,16 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
         line_no = ${line},
         updated_at = now()
       where id = ${data.id}`;
+	if (movedToRack && context?.userId) {
+		const { flagRackArrival } = await import("@/lib/ops/rack-stock");
+		await flagRackArrival(sql, context.userId, data.id, {
+			site: c.site,
+			pallet: c.pallet,
+			level: c.level,
+			line_no: c.line_no,
+			status: c.status,
+		});
+	}
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 });
 export const assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => {
@@ -1609,7 +1668,8 @@ export const unassignAssetFromService = createServerFn({ method: "POST" }).middl
 });
 export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; site: "barn-back" | "barn-front"; pallet: string; level: number }) => d).handler(async ({ data, context }: any): Promise<Asset> => {
 	const sql = await ready();
-	if (!(await sql`select * from assets where id = ${data.id}`)[0]) throw new Error("Asset not found");
+	const prev = (await sql`select * from assets where id = ${data.id}`)[0];
+	if (!prev) throw new Error("Asset not found");
 	if (!palletsFor(data.site).includes(data.pallet) || !isValidBay(data.pallet)) throw new Error("Pick a bay A through P on this rack");
 	const line = await nextLine(sql, data.site, data.pallet, data.level);
 	if (line == null) throw new Error("That slot is full");
@@ -1628,6 +1688,14 @@ export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middlew
         updated_at = now()
       where id = ${data.id}`;
 	await logActivity(sql, context.userId, "asset", data.id, "returned", `${data.pallet}-L${data.level}`);
+	const { flagRackArrival } = await import("@/lib/ops/rack-stock");
+	await flagRackArrival(sql, context.userId, data.id, {
+		site: prev.site,
+		pallet: prev.pallet,
+		level: prev.level,
+		line_no: prev.line_no,
+		status: prev.status,
+	});
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 });
 export const markAssetSold = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; soldTo: string }) => d).handler(async ({ data, context }: any) => {
@@ -1788,7 +1856,7 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		accountRep: account.account_rep ?? null,
 		jobs: applyMarks(attachJobSiblings(jobs.map((r) => mapJob(r, today))).filter((j) => !j.duplicateOf), marks),
 		pms: applyMarks(pms.map((r) => mapPm(r, today)), marks),
-		installs: applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks),
+		installs: await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks)),
 		deals: deals.map((r) => mapDeal(r, marks)),
 		recipes: recipes.map(mapRecipe)
 	};

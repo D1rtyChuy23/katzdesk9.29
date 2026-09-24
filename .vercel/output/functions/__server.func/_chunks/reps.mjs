@@ -1,9 +1,103 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { F as object, R as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, vn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
 import { r as getSql } from "./popup.server.mjs";
-import { i as deskMiddleware } from "./access.mjs";
-import { i as canonicalRepName, t as DEFAULT_REPS } from "./rep-match.mjs";
+import { a as deskMiddleware, b as flagOn } from "./access.mjs";
+import { t as normalizeName } from "./norm.mjs";
+//#region src/lib/ops/rep-match.ts
+/** Locked sales-rep list. Display as Name (IN). */
+var DEFAULT_REPS = [
+	{
+		name: "Amanda Logg",
+		initials: "AL",
+		first: "Amanda"
+	},
+	{
+		name: "Lizbeth Romero",
+		initials: "LR",
+		first: "Lizbeth"
+	},
+	{
+		name: "Sean Marshall",
+		initials: "SM",
+		first: "Sean"
+	},
+	{
+		name: "Lance Oden",
+		initials: "LO",
+		first: "Lance"
+	},
+	{
+		name: "Bill McKinley",
+		initials: "BM",
+		first: "Bill"
+	},
+	{
+		name: "Shannon Cafourek",
+		initials: "SC",
+		first: "Shannon"
+	},
+	{
+		name: "Jesus Garcia",
+		initials: "JG",
+		first: "Jesus"
+	},
+	{
+		name: "Melinda Warden",
+		initials: "MW",
+		first: "Melinda"
+	}
+];
+var PRODUCERS = DEFAULT_REPS.map((r) => r.name);
+var PRODUCER_INITIALS = Object.fromEntries(DEFAULT_REPS.map((r) => [r.name, r.initials]));
+var ALIASES = {};
+function addAlias(raw, canonical) {
+	const k = normalizeName(raw);
+	if (k) ALIASES[k] = canonical;
+}
+for (const r of DEFAULT_REPS) {
+	addAlias(r.name, r.name);
+	addAlias(r.first, r.name);
+	addAlias(r.initials, r.name);
+	addAlias(`${r.first} ${r.initials}`, r.name);
+	addAlias(`${r.name} (${r.initials})`, r.name);
+}
+addAlias("McKinley", "Bill McKinley");
+addAlias("McKinsley", "Bill McKinley");
+addAlias("Bill McKinsley", "Bill McKinley");
+addAlias("Bill McKinley", "Bill McKinley");
+addAlias("Warden", "Melinda Warden");
+function findRep(raw) {
+	const n = normalizeName(raw);
+	if (!n) return null;
+	const mapped = ALIASES[n];
+	if (mapped) return DEFAULT_REPS.find((r) => r.name === mapped) ?? null;
+	const stripped = n.replace(/\s*\([a-z]{2}\)\s*$/, "").trim();
+	if (stripped && stripped !== n) {
+		const again = ALIASES[stripped];
+		if (again) return DEFAULT_REPS.find((r) => r.name === again) ?? null;
+	}
+	for (const r of DEFAULT_REPS) if (normalizeName(r.name) === n || normalizeName(r.first) === n || r.initials.toLowerCase() === n) return r;
+	return null;
+}
+function canonicalRepName(raw) {
+	return findRep(raw)?.name ?? null;
+}
+function isNoRep(raw) {
+	return !findRep(raw);
+}
+function formatRep(raw) {
+	const r = findRep(raw);
+	if (r) return `${r.name} (${r.initials})`;
+	return (raw ?? "").trim() || "";
+}
+function sameRep(a, b) {
+	const left = canonicalRepName(a);
+	const right = canonicalRepName(b);
+	if (left && right) return left === right;
+	return normalizeName(a) !== "" && normalizeName(a) === normalizeName(b);
+}
+//#endregion
 //#region src/lib/ops/reps.ts
 var reps_exports = /* @__PURE__ */ __exportAll({
 	addRep: () => addRep,
@@ -18,12 +112,6 @@ var reps_exports = /* @__PURE__ */ __exportAll({
 	setRepActive: () => setRepActive,
 	upsertAccountMarks: () => upsertAccountMarks
 });
-function flagOn(value) {
-	return value === true || value === 1 || value === "t" || value === "true" || value === "1";
-}
-function norm(raw) {
-	return (raw ?? "").trim().toLowerCase().replace(/['’]/g, "").replace(/\s+/g, " ");
-}
 async function ensureReps(sql) {
 	await sql.query(`
     create table if not exists desk_reps (
@@ -51,7 +139,7 @@ async function ensureReps(sql) {
 		}
 		return;
 	}
-	for (const r of DEFAULT_REPS) if (!existing.find((e) => norm(e.name) === norm(r.name) || norm(e.initials) === norm(r.initials))) {
+	for (const r of DEFAULT_REPS) if (!existing.find((e) => normalizeName(e.name) === normalizeName(r.name) || normalizeName(e.initials) === normalizeName(r.initials))) {
 		const max = await sql.query("select coalesce(max(sort_order), 0)::int as n from desk_reps");
 		await sql.query(`insert into desk_reps (name, initials, active, sort_order) values ($1, $2, true, $3)`, [
 			r.name,
@@ -213,4 +301,4 @@ var setRepActive = createServerFn({ method: "POST" }).middleware([deskMiddleware
 	};
 });
 //#endregion
-export { loadAccountMarks as a, setRepActive as c, listReps as i, upsertAccountMarks as l, customerKey as n, loadReps as o, isAviKatz as r, reps_exports as s, addRep as t };
+export { loadAccountMarks as a, upsertAccountMarks as c, PRODUCER_INITIALS as d, canonicalRepName as f, sameRep as h, listReps as i, DEFAULT_REPS as l, isNoRep as m, customerKey as n, reps_exports as o, formatRep as p, isAviKatz as r, setRepActive as s, addRep as t, PRODUCERS as u };

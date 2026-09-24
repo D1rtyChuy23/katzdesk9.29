@@ -15,20 +15,23 @@ import {
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { Thread } from "./thread";
-import { CustomerCombo, EquipmentMultiCombo, useDirectory } from "./directory-fields";
+import { CustomerCombo, EquipmentMultiCombo, LockedCustomer, useDirectory } from "./directory-fields";
 import { ProviderDispatchBlock } from "./provider-dispatch";
 import { listedEquipment } from "@/lib/ops/equipment";
 import type { ServiceJob } from "@/lib/ops/types";
 import { toast } from "sonner";
 import { TechSelect } from "./tech-select";
 import { SerialNoticeBanner, SerialPullField } from "./serial-notice";
+import { UnitPlaceField } from "./unit-place-field";
 
 export function JobSheet({
   id,
   onClose,
+  lockCustomer = false,
 }: {
   id: number | null;
   onClose: () => void;
+  lockCustomer?: boolean;
 }) {
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
@@ -137,14 +140,12 @@ export function JobSheet({
                   });
                 }}
               >
-                <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} />
+                <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockCustomer} />
                 {j.customer ? (
                   <div className="sm:col-span-2">
                     <ProviderDispatchBlock customer={j.customer} />
                   </div>
                 ) : null}
-                <Field label="Contact" name="contact" defaultValue={j.contact ?? ""} />
-                <Field label="Phone" name="phone" defaultValue={j.phone ?? ""} />
                 <div className="sm:col-span-2">
                   <BoundEquipment defaultValue={j.equipment ?? ""} recordKey={j.id} />
                 </div>
@@ -158,6 +159,9 @@ export function JobSheet({
                   <p className="mt-1 text-xs text-muted-foreground">
                     Type a warehouse serial to pull that unit onto this ticket without opening Warehouse.
                   </p>
+                  <div className="mt-3">
+                    <UnitPlaceField serial={pulledSerial} model={j.equipment} />
+                  </div>
                 </div>
                 <div className="sm:col-span-2">
                   <Label htmlFor="issue">Issue</Label>
@@ -169,6 +173,42 @@ export function JobSheet({
                     placeholder="What’s going on…"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="urgency">Urgency</Label>
+                  <SelectField id="urgency" name="urgency" className="mt-1" defaultValue={j.urgency || "Normal"}>
+                    {URGENCIES.map((s) => (
+                      <option key={s}>{s}</option>
+                    ))}
+                  </SelectField>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Assignment</p>
+                </div>
+                <div>
+                  <Label>Technician</Label>
+                  <TechSelect name="technician" defaultValue={j.technician ?? ""} />
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <SelectField name="status" className="mt-1" defaultValue={j.status}>
+                    {CALL_STATUSES.map((s) => (
+                      <option key={s}>{s}</option>
+                    ))}
+                  </SelectField>
+                </div>
+                <Field label="Scheduled" name="scheduled" type="date" defaultValue={j.scheduled ?? ""} />
+                <div>
+                  <Label>Type</Label>
+                  <SelectField name="callType" className="mt-1" defaultValue={j.callType ?? ""} allowEmpty>
+                    {CALL_TYPES.map((s) => (
+                      <option key={s}>{s}</option>
+                    ))}
+                  </SelectField>
+                </div>
+                <Field label="WO #" name="wo" defaultValue={j.wo ?? ""} />
+                <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
+                <Field label="Contact" name="contact" defaultValue={j.contact ?? ""} />
+                <Field label="Phone" name="phone" defaultValue={j.phone ?? ""} />
                 <div className="sm:col-span-2">
                   <Label htmlFor="workDone">Description of work</Label>
                   <AutoGrowTextarea
@@ -179,37 +219,6 @@ export function JobSheet({
                     placeholder="What was done on site…"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="urgency">Urgency</Label>
-                  <SelectField id="urgency" name="urgency" className="mt-1" defaultValue={j.urgency || "Normal"}>
-                    {URGENCIES.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </SelectField>
-                </div>
-                <div>
-                  <Label>Status</Label>
-                  <SelectField name="status" className="mt-1" defaultValue={j.status}>
-                    {CALL_STATUSES.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </SelectField>
-                </div>
-                <div>
-                  <Label>Type</Label>
-                  <SelectField name="callType" className="mt-1" defaultValue={j.callType ?? ""} allowEmpty>
-                    {CALL_TYPES.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </SelectField>
-                </div>
-                <div>
-                  <Label>Technician</Label>
-                  <TechSelect name="technician" defaultValue={j.technician ?? ""} />
-                </div>
-                <Field label="WO #" name="wo" defaultValue={j.wo ?? ""} />
-                <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
-                <Field label="Scheduled" name="scheduled" type="date" defaultValue={j.scheduled ?? ""} />
                 <Field
                   label="Date completed"
                   name="completedAt"
@@ -388,25 +397,33 @@ export function NewJobDialog({
   open,
   onOpenChange,
   onCreated,
+  lockedCustomer,
 }: {
   kind: "service" | "tlc";
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onCreated: (id: number) => void;
+  lockedCustomer?: string | null;
 }) {
   const qc = useQueryClient();
-  const [customer, setCustomer] = useState("");
+  const [customer, setCustomer] = useState(lockedCustomer ?? "");
   const [issue, setIssue] = useState("");
   const [equipment, setEquipment] = useState<string[]>([]);
   const [urgency, setUrgency] = useState("Normal");
+  const [technician, setTechnician] = useState("");
+  const account = lockedCustomer || customer;
+  useEffect(() => {
+    if (open && lockedCustomer) setCustomer(lockedCustomer);
+  }, [open, lockedCustomer]);
   const create = useMutation({
     mutationFn: () =>
       createJob({
         data: {
           kind,
-          customer,
+          customer: account,
           issue,
           urgency,
+          technician: technician || undefined,
           equipment: equipment.length ? equipment.join("\n") : undefined,
           received: undefined,
         },
@@ -416,40 +433,49 @@ export function NewJobDialog({
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       onOpenChange(false);
-      setCustomer("");
+      setCustomer(lockedCustomer ?? "");
       setIssue("");
       setEquipment([]);
       setUrgency("Normal");
+      setTechnician("");
       if (job?.id) onCreated(job.id);
     },
     onError: (e: Error) => toast.error(e.message),
   });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-xl"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogTitle>New {kind === "tlc" ? "TLC + Factor" : "service"} call</DialogTitle>
         <DialogDescription>Opens on today’s clock. Fill the rest in the drawer.</DialogDescription>
         <form
           className="mt-4 space-y-4"
+          data-testid="new-call-form"
           onSubmit={(e) => {
             e.preventDefault();
-            if (customer.trim()) create.mutate();
+            if (account.trim()) create.mutate();
           }}
         >
           <div className="min-w-0">
             <Label htmlFor="new-cust">Account / customer</Label>
             <div className="mt-1 min-w-0">
-              <CustomerCombo
-                label=""
-                name="new-cust"
-                value={customer}
-                onChange={setCustomer}
-                required
-                menuInFlow
-              />
+              {lockedCustomer ? (
+                <LockedCustomer name={lockedCustomer} label="" inputName="" />
+              ) : (
+                <CustomerCombo
+                  label=""
+                  name="new-cust"
+                  value={customer}
+                  onChange={setCustomer}
+                  required
+                  menuInFlow
+                />
+              )}
             </div>
           </div>
-          {customer.trim() ? <ProviderDispatchBlock customer={customer} /> : null}
+          {account.trim() ? <ProviderDispatchBlock customer={account} /> : null}
           <div className="min-w-0">
             <EquipmentMultiCombo
               label="Equipment"
@@ -485,8 +511,16 @@ export function NewJobDialog({
               ))}
             </SelectField>
           </div>
+          <div>
+            <Label htmlFor="new-tech">Technician</Label>
+            <TechSelect
+              id="new-tech"
+              value={technician}
+              onChange={(e) => setTechnician(e.target.value)}
+            />
+          </div>
           <div className="flex justify-end">
-            <Button type="submit" disabled={create.isPending || !customer.trim()}>
+            <Button type="submit" disabled={create.isPending || !account.trim()}>
               Open call
             </Button>
           </div>
@@ -499,15 +533,18 @@ export function NewJobDialog({
 function BoundCustomer({
   recordKey,
   defaultValue,
+  locked,
 }: {
   recordKey: number;
   defaultValue: string;
+  locked?: boolean;
 }) {
   const [value, setValue] = useState(defaultValue);
   useEffect(() => {
     setValue(defaultValue);
   }, [recordKey, defaultValue]);
-  return <CustomerCombo name="customer" value={value} onChange={setValue} />;
+  if (locked) return <LockedCustomer name={defaultValue || "—"} />;
+  return <CustomerCombo name="customer" value={value} onChange={setValue} menuInFlow />;
 }
 
 function BoundEquipment({

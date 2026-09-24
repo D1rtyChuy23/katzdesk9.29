@@ -285,7 +285,8 @@ function Page() {
         </div>
       </section>
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="h-9 w-56 shrink-0" aria-label="Filter deals" />
         <Chip active={view === "gto"} onClick={() => setView("gto")}>
           Good to order ({gtoN})
         </Chip>
@@ -301,9 +302,8 @@ function Page() {
         <Chip active={view === "all"} onClick={() => setView("all")}>
           All deals
         </Chip>
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="w-full max-w-xs min-w-0" />
-        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={all.map((d) => d.producer)} />
-        <SortSelect value={sort} onChange={setSort} options={SORT_DEALS} />
+        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={all.map((d) => d.producer)} className="h-9 w-44 shrink-0" />
+        <SortSelect value={sort} onChange={setSort} options={SORT_DEALS} className="shrink-0" />
 
       </div>
 

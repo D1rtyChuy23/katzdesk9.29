@@ -8,15 +8,15 @@ export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string)
   const to = toRaw.trim();
   if (!from || !to || from.toLowerCase() === to.toLowerCase()) {
     if (from && to && from !== to) {
-      await sql.query(`update directory_customers set name = $1, updated_at = now() where lower(name) = lower($2)`, [
-        to,
-        from,
-      ]);
+      // Same customer, different capitalization. Do not rewrite
+      // directory_customers.name — both rows match lower(name), and the
+      // exact-name unique index rejects collapsing them onto the row that
+      // already has `to`. The seed patch archives the extra row.
       await sql.query(`update service_jobs set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
       await sql.query(`update pm_jobs set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
       await sql.query(`update installs set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
       await sql.query(`update deals set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
-      await sql.query(`update recipes set customer = $1 where lower(customer) = lower($2)`, [to, from]);
+      await sql.query(`update recipes set customer = $1 where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
       await sql.query(`update network_accounts set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
       await sql.query(`update customer_providers set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
       await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(customer_owned) = lower($2)`, [to, from]).catch(() => undefined);

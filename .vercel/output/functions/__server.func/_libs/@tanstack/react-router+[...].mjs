@@ -146,14 +146,6 @@ function deepEqual(a, b, opts) {
 	return false;
 }
 /**
-* Heuristically detect dynamic import "module not found" errors
-* across major browsers for lazy route component handling.
-*/
-function isModuleNotFoundError(error) {
-	if (typeof error?.message !== "string") return false;
-	return error.message.startsWith("Failed to fetch dynamically imported module") || error.message.startsWith("error loading dynamically imported module") || error.message.startsWith("Importing a module script failed");
-}
-/**
 * Re-encode characters that are unsafe in URL paths.
 * Includes ASCII control characters (0x00-0x1F, 0x7F) and a subset of the
 * WHATWG URL "path percent-encode set" (", <, >, `, {, }).
@@ -3626,11 +3618,6 @@ async function loadServerRoute(router, opts) {
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/utils.js
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
-/**
-* React.use if available (React 19+), undefined otherwise.
-* Use dynamic lookup to avoid Webpack compilation errors with React 18.
-*/
-var reactUse = import_react.use;
 var useLayoutEffect = import_react.useEffect;
 /**
 * React hook to take a `React.ForwardedRef` and returns a `ref` that can be used on a DOM element.
@@ -4803,45 +4790,6 @@ function createFileRoute(path) {
 		route.isRoot = false;
 		return route;
 	};
-}
-//#endregion
-//#region node_modules/@tanstack/react-router/dist/esm/lazyRouteComponent.js
-/**
-* Wrap a dynamic import to create a route component that supports
-* `.preload()` and friendly reload-on-module-missing behavior.
-*
-* @param importer Function returning a module promise
-* @param exportName Named export to use (default: `default`)
-* @returns A lazy route component compatible with TanStack Router
-* @link https://tanstack.com/router/latest/docs/framework/react/api/router/lazyRouteComponentFunction
-*/
-function lazyRouteComponent(importer, exportName) {
-	let loadPromise;
-	let comp;
-	let error;
-	const load = () => {
-		if (!loadPromise) {
-			error = void 0;
-			loadPromise = importer().then((res) => {
-				comp = res[exportName ?? "default"];
-			}).catch((err) => {
-				loadPromise = void 0;
-				error = err;
-			});
-		}
-		return loadPromise;
-	};
-	const lazyComp = function Lazy(props) {
-		if (error) {
-			if (isModuleNotFoundError(error) && false);
-			throw error;
-		}
-		if (!comp) if (reactUse) reactUse(load());
-		else throw load();
-		return import_react.createElement(comp, props);
-	};
-	lazyComp.preload = load;
-	return lazyComp;
 }
 //#endregion
 //#region node_modules/@tanstack/react-router/dist/esm/not-found.js
@@ -14595,4 +14543,4 @@ var renderRouterToStream = async ({ request, router, responseHeaders, children }
 	throw new Error("No renderToReadableStream or renderToPipeableStream found in react-dom/server. Ensure you are using a version of react-dom that supports streaming.");
 };
 //#endregion
-export { _getRenderedMatches as A, isNotFound as B, TSR_SCRIPT_BARRIER_ID as C, getStylesheetHref as D, getScriptPreloadAttrs as E, dehydrateSsrMatchId as F, isRedirect as I, isResolvedRedirect as L, invariant as M, createLRUCache as N, resolveManifestAssetLink as O, decodePath as P, parseRedirect as R, GLOBAL_TSR as S, createInlineCssStyleAsset as T, createRootRoute as _, isSsrResponse as a, useNavigate as b, stripSsrResponseBody as c, useRouterState as d, RouterProvider as f, createFileRoute as g, lazyRouteComponent as h, disposeSsrResponseDetached as i, executeRewriteInput as j, resolveManifestCssLink as k, Scripts as l, Outlet as m, bindSsrResponseToRequest as n, normalizeSsrResponse as o, createRouter as p, defineHandlerCallback as r, replaceSsrResponse as s, renderRouterToStream as t, HeadContent as u, Link as v, createInlineCssPlaceholderAsset as w, useRouter as x, Navigate as y, rootRouteId as z };
+export { executeRewriteInput as A, createInlineCssPlaceholderAsset as C, resolveManifestAssetLink as D, getStylesheetHref as E, isRedirect as F, isResolvedRedirect as I, parseRedirect as L, createLRUCache as M, decodePath as N, resolveManifestCssLink as O, dehydrateSsrMatchId as P, rootRouteId as R, TSR_SCRIPT_BARRIER_ID as S, getScriptPreloadAttrs as T, Link as _, isSsrResponse as a, useRouter as b, stripSsrResponseBody as c, useRouterState as d, RouterProvider as f, createRootRoute as g, createFileRoute as h, disposeSsrResponseDetached as i, invariant as j, _getRenderedMatches as k, Scripts as l, Outlet as m, bindSsrResponseToRequest as n, normalizeSsrResponse as o, createRouter as p, defineHandlerCallback as r, replaceSsrResponse as s, renderRouterToStream as t, HeadContent as u, Navigate as v, createInlineCssStyleAsset as w, GLOBAL_TSR as x, useNavigate as y, isNotFound as z };

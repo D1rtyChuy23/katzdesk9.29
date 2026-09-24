@@ -626,6 +626,19 @@ async function patchInstallFields(sql: Sql) {
   await sql.query("alter table assets add column if not exists origin_site text");
   await sql.query("alter table assets add column if not exists origin_pallet text");
   await sql.query("alter table assets add column if not exists origin_level int");
+  await sql.query("alter table assets add column if not exists review_status text");
+  await sql.query("alter table assets add column if not exists review_note text");
+  await sql.query("alter table assets add column if not exists review_actor text");
+  await sql.query("alter table assets add column if not exists review_origin text");
+  await sql.query("alter table assets add column if not exists review_from_site text");
+  await sql.query("alter table assets add column if not exists review_from_pallet text");
+  await sql.query("alter table assets add column if not exists review_from_level int");
+  await sql.query("alter table assets add column if not exists review_from_line int");
+  await sql.query("alter table assets add column if not exists review_from_status text");
+  await sql.query("alter table assets add column if not exists shop_test text");
+  await sql.query("alter table assets add column if not exists shop_test_note text");
+  await sql.query("alter table assets add column if not exists shop_test_by text");
+  await sql.query("alter table assets add column if not exists shop_test_at timestamptz");
 }
 
 async function insertNames(sql: Sql, table: string, names: string[]) {
@@ -1119,10 +1132,20 @@ async function patchCustomerIdentity(sql: Sql) {
     if (!keepName) continue;
     for (const extraId of ids.slice(1)) {
       const extra = await sql.query<{ name: string }>(`select name from directory_customers where id = $1`, [extraId]);
-      if (extra[0] && extra[0].name !== keepName) {
-        await retargetCustomer(sql, extra[0].name, keepName);
+      try {
+        if (extra[0] && extra[0].name !== keepName) {
+          await retargetCustomer(sql, extra[0].name, keepName);
+        }
+      } catch (err) {
+        console.error("[katz-desk] customer merge skipped", extraId, err);
       }
-      await sql.query(`update directory_customers set archived = true, updated_at = now() where id = $1`, [extraId]);
+      // A case-only twin cannot keep its name: lower(name) would still collide
+      // after archive. Park it under a unique archived label.
+      const parked = `${(extra[0]?.name || "customer").slice(0, 140)} · merged ${extraId}`;
+      await sql.query(
+        `update directory_customers set name = $2, archived = true, updated_at = now() where id = $1`,
+        [extraId, parked],
+      );
     }
   }
 

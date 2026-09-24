@@ -13,9 +13,12 @@ import {
 } from "@/lib/ops/api";
 import { catalogModels, dropEquipment, listedEquipment, matchModel, piecesForInstall } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, parseMachinesJson, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { formatShortDate, todayChicago, weekBounds, isInstalled, isOpenInstall, installedPatch } from "@/lib/ops/clock";
+import { formatShortDate, todayChicago, isInstalled, isOpenInstall, installedPatch } from "@/lib/ops/clock";
+import { canMarkInstalled, saveInspectionMeta } from "@/lib/ops/inspection-api";
+import { siteIsReady } from "@/lib/ops/pre-inspection";
+import { InspectionBadge, PreInspectionPanel } from "@/components/desk/pre-inspection-panel";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, Label, Textarea } from "@/components/ui/input";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { InstallSheet } from "@/components/desk/entity-sheets";
@@ -27,7 +30,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
-import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, StatusDonut, toggleChip } from "@/components/desk/desk-charts";
+import { ActionMenu, FilterChip, StatCard, StatRow } from "@/components/desk/desk-charts";
 import { CheckCircle2, Clock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Install, Recipe } from "@/lib/ops/types";
@@ -35,7 +38,7 @@ import { ExportButton } from "@/components/desk/export-dialog";
 import { TechName } from "@/components/desk/tech-select";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { RepFilter, RepName } from "@/components/desk/rep-select";
-import { MyViewBar, useMyView } from "@/components/desk/my-view-bar";
+import { useMyView } from "@/components/desk/my-view-bar";
 import { sameRep } from "@/lib/ops/reps";
 
 export const Route = createFileRoute("/_app/installs")({
@@ -55,16 +58,20 @@ function Page() {
     queryFn: () => listDirectory({ data: { kind: "equipment" } }),
   });
   const [q, setQ] = useState("");
-  const { filterMine, matchMine, board } = useMyView();
+  const { filterMine, matchMine } = useMyView();
   const [repFilter, setRepFilter] = useState("");
   const [akOnly, setAkOnly] = useState(false);
-  const [view, setView] = useState<"queue" | "board" | "all" | "ready" | "not-ready" | "installed">(board ? "board" : "queue");
+  const [lane, setLane] = useState<"prep" | "installed">("prep");
+  const [slice, setSlice] = useState<"all" | "ready" | "not-ready">("all");
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
   const [recipeDraft, setRecipeDraft] = useState<RecipeDraft | null>(null);
   const [sort, setSort] = useDeskSort("installs", "date-asc");
   const [picked, setPicked] = useState<number[]>([]);
   const [confirmIds, setConfirmIds] = useState<number[] | null>(null);
+  const [gate, setGate] = useState<{ ids: number[]; names: string[] } | null>(null);
+  const [overrideReason, setOverrideReason] = useState("");
+  const [inspectId, setInspectId] = useState<number | null>(null);
   const catalog = useMemo(
     () =>
       catalogModels([
@@ -76,10 +83,10 @@ function Page() {
   );
   const rows = useMemo(() => {
     let list = data.data ?? [];
-    if (view === "queue") list = list.filter((i) => isOpenInstall(i));
-    if (view === "ready") list = list.filter((i) => isOpenInstall(i) && i.equipStatus === "Ready");
-    if (view === "not-ready") list = list.filter((i) => isOpenInstall(i) && i.equipStatus !== "Ready");
-    if (view === "installed") list = list.filter((i) => isInstalled(i));
+    if (lane === "installed") list = list.filter((i) => isInstalled(i));
+    else if (slice === "ready") list = list.filter((i) => isOpenInstall(i) && siteIsReady(i.equipStatus, i.inspection?.overall));
+    else if (slice === "not-ready") list = list.filter((i) => isOpenInstall(i) && !siteIsReady(i.equipStatus, i.inspection?.overall));
+    else list = list.filter((i) => isOpenInstall(i));
     if (filterMine) list = list.filter((i) => matchMine(i.accountRep, i.technician) || i.aviKatz);
     if (repFilter === "__none__") list = list.filter((i) => i.noRep);
     else if (repFilter) list = list.filter((i) => sameRep(i.accountRep, repFilter));
@@ -98,24 +105,18 @@ function Page() {
       flagRank: (i) => i.flag?.rank ?? 99,
       tech: (i) => i.technician,
     });
-  }, [data.data, q, view, sort, filterMine, matchMine, repFilter, akOnly]);
+  }, [data.data, q, lane, slice, sort, filterMine, matchMine, repFilter, akOnly]);
   const selectedRow = (data.data ?? []).find((i) => i.id === selected) ?? null;
   const allInstalls = data.data ?? [];
-  const atRisk = allInstalls.filter((i) => i.flag).length;
+  const atRisk = allInstalls.filter((i) => isOpenInstall(i) && i.flag).length;
   const recipes = recs.data ?? [];
-  const readyN = allInstalls.filter((i) => isOpenInstall(i) && i.equipStatus === "Ready").length;
-  const notReadyN = allInstalls.filter((i) => isOpenInstall(i) && i.equipStatus !== "Ready").length;
+  const readyN = allInstalls.filter((i) => isOpenInstall(i) && siteIsReady(i.equipStatus, i.inspection?.overall)).length;
+  const notReadyN = allInstalls.filter((i) => isOpenInstall(i) && !siteIsReady(i.equipStatus, i.inspection?.overall)).length;
   const installedN = allInstalls.filter((i) => isInstalled(i)).length;
-  const week = weekBounds(todayChicago());
-  const openInstalls = allInstalls.filter((i) => isOpenInstall(i));
-  const readyOpen = openInstalls.filter((i) => i.equipStatus === "Ready");
-  const notReadyOpen = openInstalls.filter((i) => i.equipStatus !== "Ready");
-  const datedThisWeek = (list: typeof openInstalls) =>
-    list.filter((i) => i.installDate && i.installDate >= week.start && i.installDate <= week.end).length;
-  const noDate = (list: typeof openInstalls) => list.filter((i) => !i.installDate).length;
+  const prepN = allInstalls.filter((i) => isOpenInstall(i)).length;
   const readyByEquip = tally(
     allInstalls
-      .filter((i) => isOpenInstall(i) && i.equipStatus === "Ready")
+      .filter((i) => isOpenInstall(i) && siteIsReady(i.equipStatus, i.inspection?.overall))
       .flatMap((i) => {
         const listed = listedEquipment(
           (i.machines ?? []).map((m) => m.equipment).join("\n") || i.equipment,
@@ -125,11 +126,6 @@ function Page() {
       }),
     (n) => n,
   );
-  const statusMix = [
-    { name: "Not Ready", count: notReadyN },
-    { name: "Ready", count: readyN },
-    { name: "Installed", count: installedN },
-  ].filter((s) => s.count > 0);
 
   function openRecipe(d: RecipeDraft) {
     setSelected(null);
@@ -194,11 +190,37 @@ function Page() {
       return !!row && isOpenInstall(row);
     });
     if (!unique.length) return;
+    const blocked = unique
+      .map((id) => (data.data ?? []).find((i) => i.id === id))
+      .filter((row): row is Install => !!row && !canMarkInstalled(row.inspection));
+    if (blocked.length) {
+      setOverrideReason("");
+      setGate({ ids: unique, names: blocked.map((r) => r.customer) });
+      return;
+    }
     if (unique.length > 1) {
       setConfirmIds(unique);
       return;
     }
     markInstalled.mutate(unique);
+  }
+
+  async function confirmOverride() {
+    const reason = overrideReason.trim();
+    if (!reason || !gate) return;
+    const blocked = gate.ids.filter((id) => {
+      const row = (data.data ?? []).find((i) => i.id === id);
+      return !!row && !canMarkInstalled(row.inspection);
+    });
+    try {
+      await Promise.all(
+        blocked.map((id) => saveInspectionMeta({ data: { installId: id, overrideReason: reason } })),
+      );
+      setGate(null);
+      markInstalled.mutate(gate.ids);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save the override");
+    }
   }
 
   return (
@@ -207,104 +229,53 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Install clock</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Prep queue for every account not yet installed. Each machine on the row carries its own recipe —
-            linked to that customer, shared with techs and sales.
+            Prep is what still needs to go out. Installed is the finished list.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <MyViewBar />
-          <ExportButton defaultType="installs" label="Export readiness" />
+          <ActionMenu label="Export">
+            <ExportButton defaultType="installs" label="Export readiness" />
+          </ActionMenu>
           <Button onClick={() => setCreate(true)}>
             <Plus className="size-4" />
             New install
           </Button>
         </div>
       </header>
-      <div className="mt-4 rounded-xl border border-border bg-card px-4 py-3">
-        <p className="flex items-start gap-2 text-sm">
-          <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
-          <span>
-            <span className="font-medium">New install requests — </span>
-            There is a 2-week lead-time to allow time to prep equipment, including in-between
-            service calls and PMs.
-          </span>
-        </p>
-      </div>
-      <p className="mt-3 text-sm text-muted-foreground">{atRisk} at risk this week or next.</p>
-      <p className="mt-1 text-sm">
-        <span className="font-medium">{notReadyN}</span> not ready
-        <span className="text-muted-foreground">
-          {" "}
-          ({datedThisWeek(notReadyOpen)} this week · {noDate(notReadyOpen)} no date)
-        </span>
-        {" · "}
-        <span className="font-medium">{readyN}</span> ready
-        <span className="text-muted-foreground">
-          {" "}
-          ({datedThisWeek(readyOpen)} this week · {noDate(readyOpen)} no date)
-        </span>
-        <span className="text-muted-foreground"> — weekly team update</span>
-      </p>
-      <StatRow>
-        <StatCard
-          label="Ready"
-          value={readyN}
-          hint="Cleared to go on site"
-          breakdown={readyByEquip}
-          selected={view === "ready"}
-          onClick={() => setView((v) => toggleChip(v, "ready", "all"))}
-        />
-        <StatCard
-          label="Not ready"
-          value={notReadyN}
-          hint="Still in prep"
-          selected={view === "not-ready"}
-          onClick={() => setView((v) => toggleChip(v, "not-ready", "all"))}
-        />
-        <StatCard
-          label="Installed"
-          value={installedN}
-          selected={view === "installed"}
-          onClick={() => setView((v) => toggleChip(v, "installed", "all"))}
-        />
-      </StatRow>
-      {statusMix.length ? (
-        <section className="mt-4 grid min-w-0 gap-4 lg:grid-cols-2">
-          <ChartCard title="Board mix" lede="Every install, including completed.">
-            <StatusDonut data={statusMix} unit="installs" />
-          </ChartCard>
-          <ChartCard title="Ready machines" lede="What’s actually cleared — one bar per model.">
-            {readyByEquip.length ? (
-              <SimpleBars
-                data={readyByEquip.slice(0, 8).map((r) => ({ model: r.name, count: r.count }))}
-                xKey="model"
-                yKey="count"
-                yLabel="Machines"
-                horizontal
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">Nothing marked Ready.</p>
-            )}
-          </ChartCard>
-        </section>
+      {atRisk ? <p className="mt-3 text-sm text-muted-foreground">{atRisk} at risk in prep.</p> : null}
+      {lane === "prep" ? (
+        <StatRow>
+          <StatCard
+            label="Ready"
+            value={readyN}
+            hint="Equipment ready and pre-inspection passed"
+            breakdown={readyByEquip}
+            selected={slice === "ready"}
+            onClick={() => setSlice((v) => (v === "ready" ? "all" : "ready"))}
+          />
+          <StatCard
+            label="Not ready"
+            value={notReadyN}
+            hint="Prep, failed check, or not inspected"
+            selected={slice === "not-ready"}
+            onClick={() => setSlice((v) => (v === "not-ready" ? "all" : "not-ready"))}
+          />
+        </StatRow>
       ) : null}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <FilterChip selected={view === "queue"} onClick={() => setView("queue")}>
-          Queue ({(data.data ?? []).filter((i) => isOpenInstall(i)).length})
+      <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="prep-installed-toggle">
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search installs…" className="h-9 w-56 shrink-0" aria-label="Search installs" />
+        <FilterChip selected={lane === "prep"} onClick={() => setLane("prep")}>
+          Prep ({prepN})
         </FilterChip>
-        <FilterChip selected={view === "board"} onClick={() => setView("board")}>
-          Board
+        <FilterChip selected={lane === "installed"} onClick={() => setLane("installed")}>
+          Installed ({installedN})
         </FilterChip>
-        <FilterChip selected={view === "all"} onClick={() => setView("all")}>
-          All installs
-        </FilterChip>
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="max-w-xs" />
-        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={(data.data ?? []).map((i) => i.accountRep)} />
-        <label className="flex h-9 items-center gap-2 rounded-full bg-secondary px-3 text-sm">
+        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={(data.data ?? []).map((i) => i.accountRep)} className="h-9 w-44 shrink-0" />
+        <label className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-secondary px-3 text-sm">
           <input type="checkbox" className="size-4 accent-primary" checked={akOnly} onChange={(e) => setAkOnly(e.target.checked)} />
           AK
         </label>
-        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} />
+        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
       </div>
       {pickedOpen.length ? (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
@@ -326,60 +297,37 @@ function Page() {
           </Button>
         </div>
       ) : null}
-      {view === "board" ? (
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {(["Not Ready", "Ready", "Installed"] as const).map((col) => {
-            const colRows = rows.filter((i) =>
-              col === "Installed" ? isInstalled(i) : (i.equipStatus ?? "Not Ready") === col && isOpenInstall(i),
-            );
-            return (
-              <div key={col} className="rounded-xl border border-border bg-card p-3">
-                <p className="px-1 text-[11px] tracking-wide text-muted-foreground uppercase">
-                  {col} · {colRows.length}
-                </p>
-                <ul className="mt-2 space-y-2">
-                  {colRows.map((i) => (
-                    <li key={i.id}>
-                      <InstallCard
-                        install={i}
-                        catalog={catalog}
-                        recipes={recipes}
-                        onOpen={() => setSelected(i.id)}
-                        onRecipe={openRecipe}
-                        selected={picked.includes(i.id)}
-                        onToggleSelect={(on) => togglePicked(i.id, on)}
-                        onMarkInstalled={() => requestMark([i.id])}
-                        marking={markInstalled.isPending}
-                      />
-                    </li>
-                  ))}
-                  {colRows.length === 0 ? (
-                    <li className="px-1 py-4 text-xs text-muted-foreground">Empty</li>
-                  ) : null}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
-          {rows.map((i) => (
-            <InstallRow
-              key={i.id}
-              install={i}
-              catalog={catalog}
-              recipes={recipes}
-              onOpen={() => setSelected(i.id)}
-              onRecipe={openRecipe}
-              selected={picked.includes(i.id)}
-              onToggleSelect={(on) => togglePicked(i.id, on)}
-              onMarkInstalled={() => requestMark([i.id])}
-              marking={markInstalled.isPending}
-            />
-          ))}
-          {rows.length === 0 ? <p className="px-4 py-8 text-sm text-muted-foreground">Queue is empty.</p> : null}
-        </div>
-      )}
+      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
+        {rows.map((i) => (
+          <InstallRow
+            key={i.id}
+            install={i}
+            catalog={catalog}
+            recipes={recipes}
+            onOpen={() => setSelected(i.id)}
+            onRecipe={openRecipe}
+            selected={picked.includes(i.id)}
+            onToggleSelect={(on) => togglePicked(i.id, on)}
+            onMarkInstalled={() => requestMark([i.id])}
+            marking={markInstalled.isPending}
+            inspecting={inspectId === i.id}
+            onToggleInspect={() => setInspectId((cur) => (cur === i.id ? null : i.id))}
+          />
+        ))}
+        {rows.length === 0 ? (
+          <div className="px-4 py-8">
+            <p className="text-sm text-muted-foreground">
+              {lane === "installed" ? "No installs marked installed." : "No installs in prep."}
+            </p>
+            {lane === "prep" && !q.trim() ? (
+              <Button type="button" size="sm" className="mt-3" onClick={() => setCreate(true)}>
+                <Plus className="size-4" />
+                New install
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
       <InstallSheet row={selectedRow} onClose={() => setSelected(null)} onOpenRelated={(id) => setSelected(id)} />
       <RecipeEditorSheet
         draft={recipeDraft}
@@ -416,6 +364,30 @@ function Page() {
               onClick={() => confirmIds && markInstalled.mutate(confirmIds)}
             >
               {markInstalled.isPending ? "Saving…" : "Mark installed"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!gate} onOpenChange={(v) => (!v ? setGate(null) : null)}>
+        <DialogContent className="max-w-md">
+          <DialogTitle>Pre-inspection not passed</DialogTitle>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {gate?.names.join(", ")} still need a passed site check. Add a reason to mark installed anyway.
+          </p>
+          <Label htmlFor="install-override" className="mt-3 block">Override reason</Label>
+          <Textarea
+            id="install-override"
+            className="mt-1"
+            value={overrideReason}
+            onChange={(e) => setOverrideReason(e.target.value)}
+            placeholder="Why this can go out before the site check passes"
+          />
+          <div className="mt-4 flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setGate(null)}>
+              Cancel
+            </Button>
+            <Button type="button" disabled={!overrideReason.trim() || markInstalled.isPending} onClick={() => void confirmOverride()}>
+              {markInstalled.isPending ? "Saving…" : "Override and mark installed"}
             </Button>
           </div>
         </DialogContent>
@@ -684,14 +656,33 @@ function InstallActions({
   open,
   onMark,
   marking,
+  inspecting,
+  onToggleInspect,
 }: {
   install: Install;
   open: boolean;
   onMark?: () => void;
   marking?: boolean;
+  inspecting?: boolean;
+  onToggleInspect?: () => void;
 }) {
   return (
     <div className="flex shrink-0 flex-col items-end gap-1">
+      {open && onToggleInspect ? (
+        <Button
+          type="button"
+          size="sm"
+          variant={inspecting ? "default" : "outline"}
+          data-testid="open-pre-inspection"
+          aria-expanded={!!inspecting}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleInspect();
+          }}
+        >
+          Pre-inspection
+        </Button>
+      ) : null}
       {open ? (
         <MarkInstalledButton customer={install.customer} onMark={onMark} marking={marking} />
       ) : null}
@@ -710,6 +701,8 @@ type InstallItemProps = {
   onToggleSelect?: (on: boolean) => void;
   onMarkInstalled?: () => void;
   marking?: boolean;
+  inspecting?: boolean;
+  onToggleInspect?: () => void;
 };
 
 function InstallEquipChips({
@@ -779,6 +772,8 @@ function InstallRow({
   onToggleSelect,
   onMarkInstalled,
   marking,
+  inspecting,
+  onToggleInspect,
 }: InstallItemProps) {
   const open = isOpenInstall(i);
   return (
@@ -801,7 +796,14 @@ function InstallRow({
             </button>
             <div className="flex flex-wrap gap-1">
               <FlagBadge flag={i.flag} />
-              <StatusBadge status={i.equipStatus} />
+              <StatusBadge status={i.equipStatus} tight />
+              {open ? (
+                <InspectionBadge
+                  overall={i.inspection?.overall}
+                  passed={i.inspection?.passedCount}
+                  total={i.inspection?.machineCount}
+                />
+              ) : null}
               <DuplicateBadge install={i} />
             </div>
           </div>
@@ -825,8 +827,20 @@ function InstallRow({
             />
           </div>
         </div>
-        <InstallActions install={i} open={open} onMark={onMarkInstalled} marking={marking} />
+        <InstallActions
+          install={i}
+          open={open}
+          onMark={onMarkInstalled}
+          marking={marking}
+          inspecting={inspecting}
+          onToggleInspect={onToggleInspect}
+        />
       </div>
+      {inspecting ? (
+        <div className="mt-3 overflow-hidden rounded-xl border border-border bg-background" data-testid="pre-inspection-inline">
+          <PreInspectionPanel installId={i.id} />
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -860,6 +874,13 @@ function InstallCard({
       {machineNotes(i, false)}
       <div className="mt-1 flex flex-wrap gap-1">
         <FlagBadge flag={i.flag} />
+        {open ? (
+          <InspectionBadge
+            overall={i.inspection?.overall}
+            passed={i.inspection?.passedCount}
+            total={i.inspection?.machineCount}
+          />
+        ) : null}
         <DuplicateBadge install={i} />
         {i.noRep ? <NoRepFlag show /> : null}
       </div>

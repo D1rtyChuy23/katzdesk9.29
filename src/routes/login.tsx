@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useState, type FormEvent } from "react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { checkUsername, getMyAccess, lookupSignIn, peekInvite, registerAccount } from "@/lib/ops/access";
+import { checkUsername, claimInvite, getMyAccess, lookupSignIn, peekInvite, registerAccount } from "@/lib/ops/access";
+import { clearInviteToken, readInviteToken, rememberInviteToken } from "@/lib/ops/invite-client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 
@@ -41,14 +42,21 @@ function Login() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (readPending()) setMode("pending");
+    rememberInviteToken(new URLSearchParams(window.location.search).get("invite"));
+    if (readInviteToken()) setMode("up");
+    else if (readPending()) setMode("pending");
   }, []);
 
   useEffect(() => {
-    if (isPending || !user || mode === "pending" || mode === "up") return;
+    if (isPending || !user || mode === "pending") return;
     void (async () => {
       try {
-        const access = await getMyAccess();
+        const token = readInviteToken();
+        if (!token && mode === "up") return;
+        const access = token
+          ? await claimInvite({ data: { token } })
+          : await getMyAccess();
+        if (access.approved) clearInviteToken();
         if (access.needsUsername) {
           writePending(false);
           void navigate({ to: "/" });
@@ -106,8 +114,11 @@ function Login() {
           }
         }
         await authClient.getSession();
-        const access = await registerAccount({ data: { username: name, email: mail } });
+        const access = await registerAccount({
+          data: { username: name, email: mail, token: readInviteToken() },
+        });
         await router.invalidate();
+        if (access.approved) clearInviteToken();
         writePending(!access.approved);
         void navigate({ to: "/" });
         void signedIn;
@@ -187,8 +198,12 @@ function Login() {
                     void (async () => {
                       try {
                         await authClient.getSession();
-                        const access = await getMyAccess();
+                        const token = readInviteToken();
+                        const access = token
+                          ? await claimInvite({ data: { token } })
+                          : await getMyAccess();
                         if (access.approved) {
+                          clearInviteToken();
                           writePending(false);
                           void navigate({ to: "/" });
                         }
@@ -220,8 +235,10 @@ function Login() {
               <h2 className="font-display text-2xl">{mode === "up" ? "Create an account" : "Sign in"}</h2>
               <p className="mt-1 text-sm text-cream/60">
                 {mode === "up"
-                  ? "Use the email you were invited with (or Google / X). Invited people skip the wait."
-                  : "Username or the email on your account. Invited people should create an account first."}
+                  ? readInviteToken()
+                    ? "This invite lets you in. Create a password, or continue with Google or X."
+                    : "Use the email you were invited with (or Google / X). Invited people skip the wait."
+                  : "Username or the email on your account. Open the invite link if you have one."}
               </p>
               <form onSubmit={onSubmit} className="mt-5 space-y-3">
                 <div>
@@ -299,11 +316,18 @@ function Login() {
                         type="button"
                         variant="secondary"
                         className="w-full"
-                        onClick={() =>
-                          void signIn(p.providerId, { callbackURL: "/", errorCallbackURL: "/login" }).catch(
-                            (err) => setError(err instanceof Error ? err.message : "Sign-in failed"),
-                          )
-                        }
+                        onClick={() => {
+                          const token = readInviteToken();
+                          const back = token
+                            ? `/login?invite=${encodeURIComponent(token)}`
+                            : "/login";
+                          void signIn(p.providerId, {
+                            callbackURL: token ? `/?invite=${encodeURIComponent(token)}` : "/",
+                            errorCallbackURL: back,
+                          }).catch((err) =>
+                            setError(err instanceof Error ? err.message : "Sign-in failed"),
+                          );
+                        }}
                       >
                         Continue with {p.label}
                       </Button>
@@ -312,8 +336,8 @@ function Login() {
                 </>
               ) : null}
               <p className="mt-5 text-xs leading-relaxed text-cream/40">
-                Google and X still work. Use the same email you were invited with and you’ll be in as
-                soon as you pick a username. Everyone else waits for approval.
+                Open the invite link from your admin, then create an account or use Google / X.
+                That link approves you. Anyone without an invite still waits for approval.
               </p>
             </>
           )}

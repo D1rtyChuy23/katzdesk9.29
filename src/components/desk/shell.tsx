@@ -23,6 +23,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { LAST_PATH_KEY, RESUMED_KEY, readPrefs } from "@/lib/ops/prefs";
+import type { DeskRole } from "@/lib/ops/access";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -31,104 +32,169 @@ import { NotifyBell } from "./notify-bell";
 import { ThemeToggle } from "./theme-toggle";
 import { ShortcutsDialog } from "./shortcuts";
 import { Skeleton } from "@/components/ui/separator";
-import { ExportButton } from "./export-dialog";
 import { MyViewBar } from "./my-view-bar";
+import { CalendarDock, PendingCalendarPop } from "./pending-calendar";
 
 
-const NAV = [
+type DeskTo =
+  | "/"
+  | "/service"
+  | "/planner"
+  | "/tlc"
+  | "/pms"
+  | "/handoff"
+  | "/installs"
+  | "/recipes"
+  | "/pipeline"
+  | "/warehouse"
+  | "/rebuilds"
+  | "/locations"
+  | "/modules"
+  | "/customers"
+  | "/network"
+  | "/settings"
+  | "/access";
+
+type NavItem = {
+  to: DeskTo;
+  label: string;
+  icon: typeof CalendarClock;
+  exact?: boolean;
+};
+
+const NAV: { label: string; items: NavItem[] }[] = [
   {
-    label: "Floor",
+    label: "Work",
     items: [
-      { to: "/", label: "Clock", icon: CalendarClock, exact: true },
+      { to: "/", label: "Coming due", icon: CalendarClock, exact: true },
       { to: "/planner", label: "Planner", icon: CalendarRange },
-      { to: "/service", label: "Service", icon: Wrench },
+      { to: "/service", label: "Tickets", icon: Wrench },
       { to: "/tlc", label: "TLC + Factor", icon: Coffee },
       { to: "/pms", label: "PMs", icon: Settings2 },
-      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
+      { to: "/handoff", label: "Handoff", icon: MessageSquare },
     ],
   },
   {
-    label: "Sales → service",
+    label: "Installs",
     items: [
+      { to: "/installs", label: "Board", icon: Truck },
+      { to: "/recipes", label: "Recipes", icon: BookOpen },
       { to: "/pipeline", label: "Pipeline", icon: Handshake },
-      { to: "/installs", label: "Installs", icon: Truck },
-      { to: "/handoff", label: "Handoff", icon: MessageSquare },
     ],
   },
   {
     label: "Shop",
     items: [
       { to: "/warehouse", label: "Warehouse", icon: Warehouse },
+      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
       { to: "/locations", label: "Locations", icon: MapPin },
       { to: "/modules", label: "Modules", icon: Package },
-      { to: "/recipes", label: "Recipes", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Accounts",
+    items: [
       { to: "/customers", label: "Customers", icon: Store },
       { to: "/network", label: "Out of Network", icon: Globe },
     ],
   },
   {
-    label: "Team",
+    label: "Admin",
     items: [{ to: "/settings", label: "Settings", icon: SlidersHorizontal }],
   },
-] as const;
+];
 
-function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin?: boolean }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+function itemActive(pathname: string, item: NavItem) {
+  if (item.exact) return pathname === item.to;
+  return pathname === item.to || pathname.startsWith(`${item.to}/`);
+}
+
+function NavItemLink({
+  item,
+  pathname,
+  onNavigate,
+}: {
+  item: NavItem;
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  const active = itemActive(pathname, item);
+  const Icon = item.icon;
   return (
-    <nav className="flex flex-col gap-6">
-      {NAV.map((group) => (
-        <div key={group.label}>
-          <p className="px-3 text-[11px] font-medium tracking-[0.16em] text-cream/50 uppercase">
-            {group.label}
-          </p>
-          <ul className="mt-2 space-y-0.5">
-            {group.items.map((item) => {
-              const exact = "exact" in item && item.exact;
-              const active = exact ? pathname === item.to : pathname === item.to || pathname.startsWith(`${item.to}/`);
-              const Icon = item.icon;
-              return (
-                <li key={item.to}>
-                  <Link
-                    to={item.to}
-                    onClick={onNavigate}
-                    className={cn(
-                      "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-                      active
-                        ? "bg-cream/12 text-cream"
-                        : "text-cream/70 hover:bg-cream/8 hover:text-cream",
-                    )}
-                  >
-                    <Icon className="size-4" />
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+    <li>
+      <Link
+        to={item.to}
+        onClick={onNavigate}
+        className={cn(
+          "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
+          active ? "bg-cream/12 text-cream" : "text-cream/70 hover:bg-cream/8 hover:text-cream",
+        )}
+      >
+        <Icon className="size-4" />
+        {item.label}
+      </Link>
+    </li>
+  );
+}
+
+function NavGroup({
+  group,
+  pathname,
+  onNavigate,
+}: {
+  group: (typeof NAV)[number];
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <div>
+      <p className="px-3 text-[11px] font-medium tracking-[0.16em] text-cream/50 uppercase">{group.label}</p>
+      <ul className="mt-2 space-y-0.5">
+        {group.items.map((item) => (
+          <NavItemLink key={item.to} item={item} pathname={pathname} onNavigate={onNavigate} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+const WAREHOUSE_OK = ["/warehouse", "/locations"];
+
+function navForRole(role: DeskRole | null | undefined, isAdmin?: boolean) {
+  if (role !== "warehouse") return NAV;
+  return [
+    {
+      label: "Shop",
+      items: NAV.find((g) => g.label === "Shop")!.items.filter((item) => item.to === "/warehouse" || item.to === "/locations"),
+    },
+  ];
+}
+
+function NavLinks({
+  onNavigate,
+  isAdmin,
+  role,
+}: {
+  onNavigate?: () => void;
+  isAdmin?: boolean;
+  role?: DeskRole | null;
+}) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const groups = navForRole(role, isAdmin);
+  return (
+    <nav className="flex flex-col gap-5" data-testid="side-nav">
+      {groups.map((group) => (
+        <NavGroup
+          key={group.label}
+          group={
+            group.label === "Admin" && isAdmin && role !== "warehouse"
+              ? { ...group, items: [...group.items, { to: "/access", label: "Access", icon: Users }] }
+              : group
+          }
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
       ))}
-      {isAdmin ? (
-        <div>
-          <p className="px-3 text-[11px] font-medium tracking-[0.16em] text-cream/50 uppercase">Admin</p>
-          <ul className="mt-2 space-y-0.5">
-            <li>
-              <Link
-                to="/access"
-                onClick={onNavigate}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-                  pathname === "/access" || pathname.startsWith("/access/")
-                    ? "bg-cream/12 text-cream"
-                    : "text-cream/70 hover:bg-cream/8 hover:text-cream",
-                )}
-              >
-                <Users className="size-4" />
-                Access
-              </Link>
-            </li>
-          </ul>
-        </div>
-      ) : null}
     </nav>
   );
 }
@@ -142,7 +208,15 @@ function Brand() {
   );
 }
 
-export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?: boolean }) {
+export function AppShell({
+  children,
+  isAdmin,
+  role = null,
+}: {
+  children: ReactNode;
+  isAdmin?: boolean;
+  role?: DeskRole;
+}) {
   const { user, isPending } = useCurrentUserState();
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -152,12 +226,27 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
     if (!user) return;
     if (sessionStorage.getItem(RESUMED_KEY)) return;
     sessionStorage.setItem(RESUMED_KEY, "1");
-    if (!readPrefs().resumeLast) return;
+    if (!readPrefs().resumeLast) {
+      if (role === "warehouse") {
+        router.history.push("/warehouse");
+        return;
+      }
+      if (role === "sales" && (pathname === "/" || pathname === "")) {
+        router.history.push("/customers");
+      }
+      return;
+    }
     const last = window.localStorage.getItem(LAST_PATH_KEY);
     if (last && last !== pathname && last !== "/login") {
       router.history.push(last);
     }
-  }, [user, pathname, router]);
+  }, [user, pathname, router, role]);
+
+  useEffect(() => {
+    if (!user || role !== "warehouse") return;
+    const allowed = WAREHOUSE_OK.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+    if (!allowed) router.history.push("/warehouse");
+  }, [user, role, pathname, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -182,6 +271,7 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
   }
 
   return (
+    <CalendarDock>
     <div className="flex min-h-svh bg-background">
       <a
         href="#desk-main"
@@ -195,7 +285,7 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
           <p className="mt-1 px-3 text-xs text-cream/45">Service and sales, one clock.</p>
         </div>
         <div className="flex-1 overflow-y-auto px-2 pb-4">
-          <NavLinks isAdmin={isAdmin} />
+          <NavLinks isAdmin={isAdmin} role={role} />
         </div>
         <div className="border-t border-cream/10 p-3">
           <p className="px-1 text-[11px] text-cream/40">Signed in</p>
@@ -206,7 +296,12 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-2 border-b border-border bg-card/70 px-3 py-2 backdrop-blur md:px-6">
+        <header
+          className="relative flex min-h-[4.75rem] flex-wrap items-center gap-2 overflow-hidden border-b border-border bg-cover bg-center px-3 py-3 md:px-6"
+          style={{ backgroundImage: "url(/desk-header.jpg)" }}
+        >
+          <div className="absolute inset-0 bg-background/55" />
+          <div className="relative z-10 flex w-full flex-wrap items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -219,13 +314,9 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
           <div className="md:hidden">
             <span className="font-display text-lg">Katz Desk</span>
           </div>
-          <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-2 md:ml-0">
-            <div className="hidden lg:block">
-              <MyViewBar />
-            </div>
-            <GlobalSearch />
-
-            <ExportButton />
+          <div className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 md:ml-0">
+            {role === "warehouse" ? null : <MyViewBar />}
+            {role === "warehouse" ? null : <GlobalSearch />}
             <ThemeToggle />
             <NotifyBell />
             <div className="hidden sm:block md:hidden">
@@ -239,6 +330,7 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
               </SignedOut>
             </div>
           </div>
+          </div>
         </header>
         <main id="desk-main" className="min-w-0 flex-1 overflow-x-hidden px-3 py-5 md:px-8 md:py-7">
           {children}
@@ -251,7 +343,7 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
             <Brand />
           </div>
           <div className="sheet-scroll min-h-0 flex-1 overflow-y-auto px-2">
-            <NavLinks onNavigate={() => setOpen(false)} isAdmin={isAdmin} />
+            <NavLinks onNavigate={() => setOpen(false)} isAdmin={isAdmin} role={role} />
           </div>
           <div className="shrink-0 border-t border-cream/10 p-3">
             <p className="px-1 text-[11px] text-cream/40">Signed in</p>
@@ -263,5 +355,7 @@ export function AppShell({ children, isAdmin }: { children: ReactNode; isAdmin?:
       </Sheet>
       <ShortcutsDialog />
     </div>
+    {role === "warehouse" ? null : <PendingCalendarPop />}
+    </CalendarDock>
   );
 }

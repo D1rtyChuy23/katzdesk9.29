@@ -37,10 +37,11 @@ export const LOCATION_SITES = [
 export const SITE_LABEL: Record<string, string> = {
   "barn-back": "Barn · back rack",
   "barn-front": "Barn · front rack",
-  "front-lobby": "Front Lobby",
+  "front-lobby": "Lobby",
   "service-room": "Service Room",
   production: "Production",
-  training: "Training Room",
+  training: "Training",
+  staging: "Staging area",
   "out-of-state": "Out of State",
   "san-antonio": "San Antonio",
   dallas: "Dallas",
@@ -49,10 +50,11 @@ export const SITE_LABEL: Record<string, string> = {
 };
 
 export const SITE_PURPOSE: Record<string, string> = {
-  "front-lobby": "Front Lobby",
+  "front-lobby": "Lobby",
   "service-room": "Service bench",
   production: "Production",
   training: "Training",
+  staging: "Staging area",
   "out-of-state": "Out of state",
   "san-antonio": "SA warehouse",
   dallas: "Dallas warehouse",

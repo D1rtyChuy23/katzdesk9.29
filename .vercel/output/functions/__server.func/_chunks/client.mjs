@@ -20,6 +20,7 @@ var client_exports = /* @__PURE__ */ __exportAll({
 */
 var authClient = createAuthClient({
 	plugins: [genericOAuthClient()],
+	sessionOptions: { refetchOnWindowFocus: false },
 	fetchOptions: { onRequest(ctx) {
 		const token = getBearerToken();
 		if (token) ctx.headers.set("Authorization", `Bearer ${token}`);

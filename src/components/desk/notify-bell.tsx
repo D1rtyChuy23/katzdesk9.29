@@ -33,7 +33,8 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
     }
     if (unread > prevUnread.current) {
       const newest = rows.find((n) => !n.read);
-      toast.message(`${newest?.fromName ?? "Teammate"} pinged you`, {
+      const review = newest?.body?.includes("Needs review");
+      toast.message(review ? "Rack needs review" : `${newest?.fromName ?? "Teammate"} pinged you`, {
         description: [newest?.customer, newest?.body, newest?.createdAt ? formatPingTime(newest.createdAt) : null]
           .filter(Boolean)
           .join(" · "),
@@ -95,7 +96,9 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                   >
                     <p className="text-sm">
                       <span className="font-medium">{n.fromName ?? "Teammate"}</span>
-                      <span className="text-muted-foreground"> pinged you</span>
+                      <span className="text-muted-foreground">
+                        {n.body.includes("Needs review") ? " · Needs review" : " pinged you"}
+                      </span>
                     </p>
                     {n.customer ? (
                       <p className="mt-0.5 truncate text-xs font-medium">{n.customer}</p>

@@ -127,6 +127,14 @@ export type Install = {
   daysOut: number | null;
   aviKatz: boolean;
   noRep: boolean;
+  inspection?: {
+    overall: "Not started" | "In progress" | "Failed" | "Passed";
+    failedItems: string[];
+    photoCount: number;
+    overrideReason: string | null;
+    machineCount: number;
+    passedCount: number;
+  };
 };
 
 
@@ -184,6 +192,8 @@ export type ComingDueRow = {
   id: number;
   aviKatz: boolean;
   noRep: boolean;
+  inspectionStatus?: string | null;
+  failedItems?: string | null;
 };
 
 export type ComingDueCounts = {
@@ -286,6 +296,12 @@ export type Asset = {
   slotLabel: string;
   missingSerial: boolean;
   needsBay: boolean;
+  reviewStatus: "pending" | "approved" | "rejected" | null;
+  reviewNote: string | null;
+  shopTest: "needs-test" | "tested" | null;
+  shopTestNote: string | null;
+  shopTestBy: string | null;
+  shopTestAt: string | null;
 };
 
 export type Recipe = {

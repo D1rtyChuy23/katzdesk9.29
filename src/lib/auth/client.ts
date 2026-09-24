@@ -14,6 +14,10 @@ import { GROK_PROVIDERS } from "./providers";
  */
 export const authClient = createAuthClient({
   plugins: [genericOAuthClient()],
+  // The preview frame fires visibility changes that abort an in-flight
+  // get-session. That abort leaves the session pending forever, so the desk
+  // stays on the loading clock. A finished sign-in still refreshes the session.
+  sessionOptions: { refetchOnWindowFocus: false },
   fetchOptions: {
     onRequest(ctx) {
       const token = getBearerToken();

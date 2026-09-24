@@ -1,3 +1,4 @@
+import { n as normalizeCustomerKey, t as isWalkIn } from "./customer-key.mjs";
 import { a as catalogModels, c as listedEquipment, d as rewriteEquipmentName, f as samePiece, n as parseMachinesJson, r as serializeMachines } from "./machines.mjs";
 //#region src/lib/ops/network.ts
 var PROVIDER_STATUSES = [
@@ -557,16 +558,16 @@ async function retargetCustomer(sql, fromRaw, toRaw) {
 	const to = toRaw.trim();
 	if (!from || !to || from.toLowerCase() === to.toLowerCase()) {
 		if (from && to && from !== to) {
-			await sql.query(`update directory_customers set name = $1, updated_at = now() where lower(name) = lower($2)`, [to, from]);
 			await sql.query(`update service_jobs set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
 			await sql.query(`update pm_jobs set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
 			await sql.query(`update installs set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
 			await sql.query(`update deals set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]);
-			await sql.query(`update recipes set customer = $1 where lower(customer) = lower($2)`, [to, from]);
+			await sql.query(`update recipes set customer = $1 where lower(customer) = lower($2)`, [to, from]).catch(() => void 0);
 			await sql.query(`update network_accounts set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => void 0);
 			await sql.query(`update customer_providers set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => void 0);
 			await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(customer_owned) = lower($2)`, [to, from]).catch(() => void 0);
 			await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(sold_to) = lower($2)`, [to, from]).catch(() => void 0);
+			await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => void 0);
 		}
 		return;
 	}
@@ -597,6 +598,7 @@ async function retargetCustomer(sql, fromRaw, toRaw) {
 	await sql.query(`update network_accounts set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => void 0);
 	await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(coalesce(customer_owned,'')) = lower($2)`, [to, from]).catch(() => void 0);
 	await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(coalesce(sold_to,'')) = lower($2)`, [to, from]).catch(() => void 0);
+	await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => void 0);
 }
 async function renameOrMergeCustomer(sql, id, nextRaw) {
 	const next = nextRaw.trim();
@@ -656,6 +658,7 @@ async function retargetEquipment(sql, fromRaw, toRaw) {
 	}
 	await sql.query(`update recipes set equipment_model = $1 where lower(equipment_model) = lower($2)`, [to, from]).catch(() => void 0);
 	await sql.query(`update assets set model = $1, updated_at = now() where lower(model) = lower($2)`, [to, from]).catch(() => void 0);
+	await sql.query(`update account_equipment set catalog_model = $1, updated_at = now() where lower(catalog_model) = lower($2)`, [to, from]).catch(() => void 0);
 	const machineRows = await sql.query(`select id, machines, equipment from installs where machines is not null and machines <> ''`);
 	for (const row of machineRows) {
 		const specs = parseMachinesJson(row.machines);
@@ -928,13 +931,6 @@ function boardLabel(board) {
 	if (board === "pm") return "PM";
 	if (board === "install") return "Install";
 	return null;
-}
-/** Corrigo walk-up / counter work — not a real KatzDesk account. */
-function isWalkIn(name) {
-	return String(name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "") === "walkin";
-}
-function normalizeCustomerKey(name) {
-	return String(name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 /** Same account, empty, or Walk-In — safe to fold onto one ticket. */
 function customersCompatible(a, b) {
@@ -1297,4 +1293,4 @@ async function reconcileServiceDuplicates(sql, actor) {
 	};
 }
 //#endregion
-export { normalizeZip as A, formatContact as C, normalizeCity as D, locationKey as E, roleRank as F, splitZips as I, statusTone as L, parseCoverageLocations as M, providerStates as N, normalizeEmail as O, roleLabel as P, formatAddress as S, groupLocations as T, US_STATE_OPTIONS as _, indexHits as a, findDuplicateContact as b, pickKeeper as c, woMatchKey as d, renameOrMergeCustomer as f, PROVIDER_STATUSES as g, retargetCustomer as h, deskHasWrapped as i, parseContactBlob as j, normalizeState as k, resolvePreviewRow as l, renameOrMergeProvider as m, reconcileServiceDuplicates as n, isWalkIn as o, renameOrMergeEquipment as p, tryMergeServiceDuplicate as r, parseCorrigoMatrix as s, mergeServiceJobs as t, shouldAttachToHit as u, duplicateNote as v, formatLocation as w, findDuplicateLocation as x, findDuplicateAddress as y };
+export { normalizeZip as A, formatContact as C, normalizeCity as D, locationKey as E, roleRank as F, splitZips as I, statusTone as L, parseCoverageLocations as M, providerStates as N, normalizeEmail as O, roleLabel as P, formatAddress as S, groupLocations as T, US_STATE_OPTIONS as _, indexHits as a, findDuplicateContact as b, pickKeeper as c, woMatchKey as d, renameOrMergeCustomer as f, PROVIDER_STATUSES as g, retargetCustomer as h, deskHasWrapped as i, parseContactBlob as j, normalizeState as k, resolvePreviewRow as l, renameOrMergeProvider as m, reconcileServiceDuplicates as n, normalizeHeader as o, renameOrMergeEquipment as p, tryMergeServiceDuplicate as r, parseCorrigoMatrix as s, mergeServiceJobs as t, shouldAttachToHit as u, duplicateNote as v, formatLocation as w, findDuplicateLocation as x, findDuplicateAddress as y };

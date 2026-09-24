@@ -1,11 +1,19 @@
 import { o as __toESM, r as __exportAll } from "../_runtime.mjs";
 import { u as require_react } from "./@floating-ui/react-dom+[...].mjs";
-import { $ as validateAlgorithms, $t as generateId, A as boolean$1, At as checkCryptoKey, B as _coercedBoolean, Bt as ATTR_CONTEXT, C as serializeSignedCookie, Ct as JWEInvalid, Dt as JWTExpired, E as ZodString, Et as JWTClaimValidationFailed, F as object, Ft as encode, G as decodeProtectedHeader, Gt as getAuthTables, Ht as ATTR_OPERATION_ID, I as optional, It as uint32be, J as validateClaimsSet, Jt as runWithAdapter, K as jwtVerify, Kt as getCurrentAdapter, L as record, Lt as uint64be, Mt as checkUsage, N as looseObject, Nt as concat, O as any, Ot as JWTInvalid, P as number, Pt as decoder, Q as JWS_RECOGNIZED, Qt as initGetFieldName, R as string$1, S as serializeCookie, St as JWEDecryptionFailed, T as ZodBoolean, Tt as JWSInvalid, U as base64Url, Ut as import_src, V as _coercedString, Vt as ATTR_HOOK_TYPE, W as decodeJwt, Wt as safeJSONParse, X as sign, Xt as getBetterAuthVersion, Y as jwsAlgorithm, Yt as runWithTransaction, Z as JWE_RECOGNIZED, Zt as initGetModelName, _ as runWithRequestState, _n as APIError, _t as isCryptoKey, a as createAuthorizationURL, an as isSafeUrlScheme, at as jwkToKey, b as createRouter$1, bn as BASE_ERROR_CODES, bt as JOSEAlgNotAllowed, c as createRateLimitKey, cn as logger, ct as digest, d as deprecate, dn as env, dt as unprotected, en as createRandomStringGenerator, et as validateCrit, f as createAuthEndpoint, ft as isDisjoint, g as hasRequestState, gn as isTest, gt as assertCryptoKey, h as defineRequestState, hn as isProduction, ht as encode$1, i as refreshAccessToken, in as createFetch, it as prepareKey, j as email, jt as checkModulusLength, k as array, kt as invalidKeyInput, l as findInvalidTrustedProxies, ln as shouldPublishLog, lt as encodeBase64url, m as isAPIError, mn as isDevelopment, mt as isObject, n as socialProviders, nn as toKebabCase, nt as jweAlgorithm, o as applyDefaultAccessTokenExpiry, on as normalizePathname, ot as assertNotSet, p as createAuthMiddleware, pt as isJWK, q as JWTClaimsBuilder, qt as queueAfterTransactionHook, r as validateAuthorizationCode, rn as betterFetch, rt as jweEncryption, s as isLoopbackHost, sn as createLogger, st as decodeBase64url, t as SocialProviderListEnum, tn as capitalizeFirstLetter, tt as validateCritDuplicates, u as getIp, ut as parseJoseHeader, v as getCurrentAuthContext, vn as BetterAuthError, vt as isKeyLike, w as filterOutputFields, wt as JWKInvalid, x as toResponse, xn as defineErrorCodes, xt as JOSENotSupported, y as runWithEndpointContext, yn as kAPIErrorHeaderSymbol, yt as isKeyObject, zt as withSpan } from "./@better-auth/core+[...].mjs";
+import { $ as assertCryptoKey, $t as isTest, A as JWTClaimsBuilder, At as queueAfterTransactionHook, B as jweEncryption, Bt as betterFetch, C as serializeSignedCookie, Ct as ATTR_CONTEXT, D as decodeJwt, Dt as safeJSONParse, E as base64Url, Et as import_src, F as JWS_RECOGNIZED, Ft as initGetFieldName, G as digest, Gt as logger, H as jwkToKey, Ht as isSafeUrlScheme, I as validateAlgorithms, It as generateId, J as unprotected, Jt as env, K as encodeBase64url, Kt as shouldPublishLog, L as validateCrit, Lt as createRandomStringGenerator, M as jwsAlgorithm, Mt as runWithTransaction, N as sign, Nt as getBetterAuthVersion, O as decodeProtectedHeader, Ot as getAuthTables, P as JWE_RECOGNIZED, Pt as initGetModelName, Q as encode$1, Qt as isProduction, R as validateCritDuplicates, Rt as capitalizeFirstLetter, S as serializeCookie, St as withSpan, Tt as ATTR_OPERATION_ID, U as assertNotSet, Ut as normalizePathname, V as prepareKey, Vt as createFetch, W as decodeBase64url, Wt as createLogger, X as isJWK, Y as isDisjoint, Z as isObject, Zt as isDevelopment, _ as runWithRequestState, _n as record, _t as decoder, a as createAuthorizationURL, an as ZodBoolean, at as JWEDecryptionFailed, b as createRouter$1, bn as _coercedBoolean, bt as uint64be, c as createRateLimitKey, cn as any, ct as JWSInvalid, d as deprecate, dn as email, dt as JWTInvalid, en as APIError, et as isCryptoKey, f as createAuthEndpoint, ft as invalidKeyInput, g as hasRequestState, gn as optional, gt as concat, h as defineRequestState, hn as object, ht as checkUsage, i as refreshAccessToken, in as defineErrorCodes, it as JOSENotSupported, j as validateClaimsSet, jt as runWithAdapter, k as jwtVerify, kt as getCurrentAdapter, l as findInvalidTrustedProxies, ln as array, lt as JWTClaimValidationFailed, m as isAPIError, mn as number, mt as checkModulusLength, n as socialProviders, nn as kAPIErrorHeaderSymbol, nt as isKeyObject, o as applyDefaultAccessTokenExpiry, on as ZodString, ot as JWEInvalid, p as createAuthMiddleware, pn as looseObject, pt as checkCryptoKey, q as parseJoseHeader, r as validateAuthorizationCode, rn as BASE_ERROR_CODES, rt as JOSEAlgNotAllowed, s as isLoopbackHost, st as JWKInvalid, t as SocialProviderListEnum, tn as BetterAuthError, tt as isKeyLike, u as getIp, un as boolean$1, ut as JWTExpired, v as getCurrentAuthContext, vn as string$1, vt as encode, w as filterOutputFields, wt as ATTR_HOOK_TYPE, x as toResponse, xn as _coercedString, y as runWithEndpointContext, yt as uint32be, z as jweAlgorithm, zt as toKebabCase } from "./@better-auth/core+[...].mjs";
 import { c as sql, n as getKyselyDatabaseType, r as kyselyAdapter, t as createKyselyAdapter } from "./@better-auth/kysely-adapter+[...].mjs";
 import { n as hkdf, t as sha256 } from "./noble__hashes.mjs";
 import { i as verifyPassword$2, n as binary, r as hashPassword, t as createHMAC } from "./better-auth__utils.mjs";
 import { n as createHash, t as createTelemetry } from "./@better-auth/telemetry+[...].mjs";
 import { a as utf8ToBytes, i as managedNonce, n as bytesToHex, r as hexToBytes, t as xchacha20poly1305 } from "./noble__ciphers.mjs";
+//#region node_modules/zod/v4/classic/coerce.js
+function string(params) {
+	return _coercedString(ZodString, params);
+}
+function boolean(params) {
+	return _coercedBoolean(ZodBoolean, params);
+}
+//#endregion
 //#region node_modules/nanostores/atom/index.js
 var listenerQueue = [];
 var lqIndex = 0;
@@ -1205,14 +1213,6 @@ async function calculateJwkThumbprint(key, digestAlgorithm) {
 	}
 	const data = encode(JSON.stringify(components));
 	return encode$1(await digest(digestAlgorithm, data));
-}
-//#endregion
-//#region node_modules/zod/v4/classic/coerce.js
-function string(params) {
-	return _coercedString(ZodString, params);
-}
-function boolean(params) {
-	return _coercedBoolean(ZodBoolean, params);
 }
 //#endregion
 //#region node_modules/better-auth/dist/adapters/kysely-adapter/index.mjs
@@ -10828,4 +10828,4 @@ var tanstackStartCookies = () => {
 	};
 };
 //#endregion
-export { onMount as _, createAuthClient as a, string as c, SignJWT as d, jwtDecrypt as f, STORE_UNMOUNT_DELAY as g, listenKeys as h, betterAuth as i, calculateJwkThumbprint as l, defu as m, genericOAuth as n, genericOAuthClient as o, createDefu as p, bearer as r, boolean as s, tanstackStartCookies as t, EncryptJWT as u, onSet as v, atom as y };
+export { atom as _, createAuthClient as a, EncryptJWT as c, createDefu as d, defu as f, onSet as g, onMount as h, betterAuth as i, SignJWT as l, STORE_UNMOUNT_DELAY as m, genericOAuth as n, genericOAuthClient as o, listenKeys as p, bearer as r, calculateJwkThumbprint as s, tanstackStartCookies as t, jwtDecrypt as u, boolean as v, string as y };

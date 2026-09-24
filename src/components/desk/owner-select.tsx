@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { listRebuildOwners } from "@/lib/ops/rebuilds";
+import { sameTech } from "@/lib/ops/tech-match";
 import { SelectField } from "@/components/ui/select-field";
 import { Label } from "@/components/ui/input";
 
@@ -10,7 +11,9 @@ export function OwnerSelect({
   id,
   name,
   allowEmpty = true,
+  emptyLabel = "—",
   className,
+  testId = "rebuild-owner",
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -18,23 +21,28 @@ export function OwnerSelect({
   id?: string;
   name?: string;
   allowEmpty?: boolean;
+  emptyLabel?: string;
   className?: string;
+  testId?: string;
 }) {
   const q = useQuery({ queryKey: ["rebuild-owners"], queryFn: () => listRebuildOwners() });
   const names = q.data ?? [];
   const current = value.trim();
-  const extra = current && !names.some((n) => n.toLowerCase() === current.toLowerCase()) ? [current] : [];
+  const rosterHit = current ? names.find((n) => sameTech(n, current)) : undefined;
+  const extra = current && !rosterHit ? [current] : [];
+  const shown = rosterHit ?? current;
   return (
     <div className={className}>
       {label ? <Label htmlFor={id}>{label}</Label> : null}
       <SelectField
         id={id}
         name={name}
+        data-testid={testId}
         className={label ? "mt-1" : undefined}
-        value={value}
+        value={shown}
         onChange={(e) => onChange(e.target.value)}
         allowEmpty={allowEmpty}
-        emptyLabel="—"
+        emptyLabel={emptyLabel}
       >
         {extra.map((n) => (
           <option key={`extra-${n}`} value={n}>
@@ -55,10 +63,12 @@ export function OwnerFilter({
   value,
   onChange,
   className,
+  emptyLabel = "All techs",
 }: {
   value: string;
   onChange: (v: string) => void;
   className?: string;
+  emptyLabel?: string;
 }) {
   return (
     <OwnerSelect
@@ -66,7 +76,9 @@ export function OwnerFilter({
       value={value}
       onChange={onChange}
       allowEmpty
+      emptyLabel={emptyLabel}
       className={className}
+      testId="rebuild-owner-filter"
     />
   );
 }

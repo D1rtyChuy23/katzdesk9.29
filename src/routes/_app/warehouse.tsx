@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAsset, listAssets } from "@/lib/ops/api";
+import { getMyAccess } from "@/lib/ops/access";
+import { addToRackSlot, setShopTest } from "@/lib/ops/rack-stock";
 import {
   BACK_EQUIP_CAPACITY,
   BACK_PALLETS,
@@ -20,6 +22,9 @@ import { SelectField } from "@/components/ui/select-field";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { AssetSheet } from "@/components/desk/asset-sheet";
+import { PlacePicker, emptyPlaceDraft, type PlaceDraft } from "@/components/desk/unit-place-field";
+import { setAssetPlace } from "@/lib/ops/unit-place";
+import { placeDraftError } from "@/lib/ops/unit-place-rules";
 import { CustomerCombo, EquipmentCombo } from "@/components/desk/directory-fields";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
@@ -40,13 +45,17 @@ function Page() {
   const { open } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const canStock = !!me.data?.isAdmin || me.data?.role === "warehouse";
   const [rack, setRack] = useState<Rack>("barn-back");
   const [q, setQ] = useState("");
   const [slot, setSlot] = useState<SlotKey | null>(null);
   const [selected, setSelected] = useOpenRecord(open);
+  const [movingId, setMovingId] = useState<number | null>(null);
+  const [moveDraft, setMoveDraft] = useState<PlaceDraft>(emptyPlaceDraft());
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("warehouse", "alpha-asc");
-  const [bubble, setBubble] = useState<"ready" | "fill" | "dispensers" | "missing" | "needs-bay" | null>(null);
+  const [bubble, setBubble] = useState<"ready" | "fill" | "dispensers" | "missing" | "needs-bay" | "needs-test" | "tested" | "review" | null>(null);
   const [bayLetter, setBayLetter] = useState<string | null>(null);
 
   const all = data.data ?? [];
@@ -89,6 +98,9 @@ function Page() {
     if (bubble === "dispensers") rows = rows.filter((a) => a.kind === "dispenser");
     if (bubble === "missing") rows = rows.filter((a) => a.missingSerial);
     if (bubble === "needs-bay") rows = stranded;
+    if (bubble === "needs-test") rows = rows.filter((a) => a.shopTest === "needs-test");
+    if (bubble === "tested") rows = rows.filter((a) => a.shopTest === "tested");
+    if (bubble === "review") rows = rows.filter((a) => a.reviewStatus === "pending");
     if (bubble === "ready") rows = rows.filter((a) => a.kind === "equip" && a.status === "ready");
     if (bayLetter) {
       rows = barn.filter((a) => (a.pallet ?? "").toUpperCase() === bayLetter);
@@ -137,10 +149,12 @@ function Page() {
             Ready-to-deploy units at HQ. Slot ID is pallet + level — A-L3 is pallet A, third shelf. Pull a unit for an install or a service account and it leaves this board. Bays run A through P.
           </p>
         </div>
-        <Button onClick={() => setCreate(true)}>
-          <Plus className="size-4" />
-          Add to rack
-        </Button>
+        {canStock ? (
+          <Button onClick={() => setCreate(true)}>
+            <Plus className="size-4" />
+            Add to rack
+          </Button>
+        ) : null}
       </header>
 
       <StatRow>
@@ -220,7 +234,14 @@ function Page() {
         </section>
       ) : null}
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Find model or serial…"
+          className="h-9 w-56 shrink-0"
+          aria-label="Find model or serial"
+        />
         <FilterChip
           selected={rack === "barn-back"}
           onClick={() => {
@@ -239,13 +260,27 @@ function Page() {
         >
           Front rack
         </FilterChip>
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Find model or serial…"
-          className="max-w-xs"
-        />
-        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_STATUS]} />
+        <FilterChip
+          selected={bubble === "needs-test"}
+          onClick={() => setBubble((v) => toggleChip(v, "needs-test", null))}
+        >
+          Needs test
+        </FilterChip>
+        <FilterChip
+          selected={bubble === "tested"}
+          onClick={() => setBubble((v) => toggleChip(v, "tested", null))}
+        >
+          Tested
+        </FilterChip>
+        {canStock ? (
+          <FilterChip
+            selected={bubble === "review"}
+            onClick={() => setBubble((v) => toggleChip(v, "review", null))}
+          >
+            Pending review
+          </FilterChip>
+        ) : null}
+        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_STATUS]} className="shrink-0" />
       </div>
 
       <p className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
@@ -317,9 +352,10 @@ function Page() {
                           bay === "dispenser" && n === 0 && "bg-dispense/15",
                           active && "ring-2 ring-ring",
                         )}
-                        aria-label={`${p}-L${level} ${n} of 12`}
+                        data-testid={n === 0 ? `slot-${p}-L${level}` : undefined}
+                        aria-label={n === 0 && canStock ? `Add to ${p}-L${level}` : `${p}-L${level} ${n} of 12`}
                       >
-                        {n}
+                        {n === 0 ? (canStock ? "Add" : "·") : n}
                       </button>
                     </td>
                   );
@@ -349,34 +385,153 @@ function Page() {
 
       <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card">
         {list.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => setSelected(a.id)}
-            className="grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[7rem_1.4fr_8rem_7rem] md:items-center"
-          >
-            <span className="font-mono text-xs">{a.slotLabel}</span>
-            <span>
-              <span className="font-medium">{a.model}</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
-                {a.serial ?? "No serial"}
-                {a.qty > 1 ? ` · qty ${a.qty}` : ""}
-                {a.customerOwned ? ` · ${a.customerOwned}` : ""}
+          <div key={a.id} className="border-b border-border last:border-b-0">
+            <div className="px-4 py-3" data-testid={a.serial ? `rack-row-${a.serial}` : undefined}>
+              <div className="flex flex-wrap items-start gap-3">
+              <button type="button" onClick={() => setSelected(a.id)} className="w-28 shrink-0 text-left font-mono text-xs">
+                {a.slotLabel}
+              </button>
+              <button type="button" onClick={() => setSelected(a.id)} className="min-w-0 flex-1 text-left">
+                <span className="font-medium">{a.model}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {a.serial ?? "No serial"}
+                  {a.qty > 1 ? ` · qty ${a.qty}` : ""}
+                  {a.customerOwned ? ` · ${a.customerOwned}` : ""}
+                </span>
+              </button>
+              <span className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-36" data-testid="shop-col">
+                <span className="flex flex-wrap gap-1">
+                {a.needsBay ? <StatusBadge status="Needs bay" /> : null}
+                {a.reviewStatus === "pending" ? <StatusBadge status="Pending review" /> : null}
+                {a.shopTest === "tested" ? <StatusBadge status="Tested" /> : null}
+                {a.shopTest === "needs-test" ? <StatusBadge status="Needs test" /> : null}
+                {a.missingSerial ? <StatusBadge status="Serial missing" /> : null}
+                {a.customerOwned ? <StatusBadge status="Customer-owned" /> : null}
+                {a.kind === "dispenser" ? <StatusBadge status="Accessory" /> : null}
+                </span>
+                {a.shopTest === "tested" && (a.shopTestBy || a.shopTestNote) ? (
+                  <span className="text-[11px] text-muted-foreground">
+                    {a.shopTestBy ? `Tested by ${a.shopTestBy}` : "Tested"}
+                    {a.shopTestAt ? ` · ${a.shopTestAt.slice(0, 16).replace("T", " ")}` : ""}
+                    {a.shopTestNote ? ` · ${a.shopTestNote}` : ""}
+                  </span>
+                ) : a.shopTestNote ? (
+                  <span className="text-[11px] text-muted-foreground">{a.shopTestNote}</span>
+                ) : null}
               </span>
-            </span>
-            <span className="flex flex-wrap gap-1">
-              {a.needsBay ? <StatusBadge status="Needs bay" /> : null}
-              {a.missingSerial ? <StatusBadge status="Serial missing" /> : null}
-              {a.customerOwned ? <StatusBadge status="Customer-owned" /> : null}
-              {a.kind === "dispenser" ? <StatusBadge status="Accessory" /> : null}
-            </span>
-            <span className="text-sm text-muted-foreground">{a.kind === "dispenser" ? `${a.qty} pcs` : "1 unit"}</span>
-          </button>
+              </div>
+              <span className="mt-2 flex flex-wrap items-center gap-2">
+                {canStock ? (
+                  <>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={a.shopTest === "needs-test" ? "default" : "outline"}
+                      data-testid={a.serial ? `needs-test-${a.serial}` : undefined}
+                      onClick={() =>
+                        void setShopTest({ data: { id: a.id, shopTest: "needs-test" } })
+                          .then(() => {
+                            toast.success("Needs test");
+                            void qc.invalidateQueries({ queryKey: ["assets"] });
+                          })
+                          .catch((e) => toast.error(e instanceof Error ? e.message : "Could not update"))
+                      }
+                    >
+                      Needs test
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={a.shopTest === "tested" ? "default" : "outline"}
+                      data-testid={a.serial ? `mark-tested-${a.serial}` : undefined}
+                      onClick={() =>
+                        void setShopTest({ data: { id: a.id, shopTest: "tested" } })
+                          .then(() => {
+                            toast.success("Tested");
+                            void qc.invalidateQueries({ queryKey: ["assets"] });
+                          })
+                          .catch((e) => toast.error(e instanceof Error ? e.message : "Could not update"))
+                      }
+                    >
+                      Tested
+                    </Button>
+                  </>
+                ) : a.shopTest === "tested" ? (
+                  <span className="text-xs text-muted-foreground">
+                    Tested{a.shopTestBy ? ` · ${a.shopTestBy}` : ""}
+                  </span>
+                ) : null}
+                <span className="text-sm text-muted-foreground">
+                  {a.pallet && a.level ? `Barn · ${slotId(a.pallet, a.level)}` : a.slotLabel}
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={movingId === a.id ? "default" : "outline"}
+                  data-testid={a.serial ? `move-${a.serial}` : undefined}
+                  onClick={() => {
+                    setMoveDraft(emptyPlaceDraft());
+                    setMovingId((cur) => (cur === a.id ? null : a.id));
+                  }}
+                >
+                  Move
+                </Button>
+              </span>
+            </div>
+            {movingId === a.id ? (
+              <div className="flex flex-wrap items-end gap-2 px-4 pb-3" data-testid="warehouse-move">
+                <PlacePicker value={moveDraft} onChange={setMoveDraft} />
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={!!placeDraftError(moveDraft)}
+                  onClick={async () => {
+                    const err = placeDraftError(moveDraft);
+                    if (err) {
+                      toast.error(err);
+                      return;
+                    }
+                    try {
+                      const place = await setAssetPlace({
+                        data: {
+                          id: a.id,
+                          site: moveDraft.site,
+                          pallet: moveDraft.pallet || null,
+                          level: moveDraft.level ? Number(moveDraft.level) : null,
+                          otherLabel: moveDraft.otherLabel || null,
+                        },
+                      });
+                      toast.success(place.place ? `Now at ${place.place}` : "Moved");
+                      setMovingId(null);
+                      void qc.invalidateQueries({ queryKey: ["assets"] });
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : "Could not move");
+                    }
+                  }}
+                >
+                  Confirm
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => setMovingId(null)}>
+                  Cancel
+                </Button>
+              </div>
+            ) : null}
+          </div>
         ))}
-        {list.length === 0 ? (
-          <p className="px-4 py-8 text-sm text-muted-foreground">
-            {slot ? "Empty slot — add a unit here." : "Nothing on this rack matches."}
-          </p>
+        {canStock && slot ? (
+          <SlotAdd
+            slot={slot}
+            onPlaced={(id) => {
+              void qc.invalidateQueries({ queryKey: ["assets"] });
+              void qc.invalidateQueries({ queryKey: ["notifications"] });
+              if (id) setSelected(id);
+            }}
+          />
+        ) : null}
+        {slot && slotUnits.length === 0 && !needle && !canStock ? (
+          <p className="px-4 py-8 text-sm text-muted-foreground">This slot is empty.</p>
+        ) : list.length === 0 && !(canStock && slot) ? (
+          <p className="px-4 py-8 text-sm text-muted-foreground">Nothing on this rack matches.</p>
         ) : null}
       </div>
 
@@ -389,10 +544,105 @@ function Page() {
         onCreated={async (row) => {
           void qc.invalidateQueries({ queryKey: ["assets"] });
           void qc.invalidateQueries({ queryKey: ["dashboard"] });
-          toast.success("On the rack");
+          toast.success(row.reviewStatus === "pending" ? "On the rack · Needs review" : "On the rack");
           setSelected(row.id);
         }}
       />
+    </div>
+  );
+}
+
+function SlotAdd({
+  slot,
+  onPlaced,
+}: {
+  slot: SlotKey;
+  onPlaced: (id?: number) => void;
+}) {
+  const [model, setModel] = useState("");
+  const [serial, setSerial] = useState("");
+  const [electrical, setElectrical] = useState("");
+  const [pending, setPending] = useState(false);
+  const [confirm, setConfirm] = useState<{ id: number; place: string } | null>(null);
+  const label = slotId(slot.pallet, slot.level);
+
+  async function save(force: boolean) {
+    if (!model.trim()) {
+      toast.error("Pick a model");
+      return;
+    }
+    setPending(true);
+    try {
+      const res = await addToRackSlot({
+        data: {
+          site: slot.rack,
+          pallet: slot.pallet,
+          level: slot.level,
+          model: model.trim(),
+          serial: serial.trim() || null,
+          electrical: electrical.trim() || null,
+          confirm: force,
+        },
+      });
+      if (res.needsConfirm) {
+        setConfirm({ id: res.id, place: res.currentPlace ?? "another place" });
+        return;
+      }
+      toast.success(
+        res.moved
+          ? `Moved into ${label}${res.pendingReview ? " · Needs review" : ""}`
+          : `Added to ${label}${res.pendingReview ? " · Needs review" : ""}`,
+      );
+      setModel("");
+      setSerial("");
+      setElectrical("");
+      setConfirm(null);
+      onPlaced(res.id);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not add");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="border-b border-border px-4 py-4" data-testid="slot-add">
+      <p className="text-sm font-medium">Add to {label}</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Model and serial go in this slot. One serial stays one record. A serial already on the desk moves here after you confirm.
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <EquipmentCombo name="slot-model" label="Model" value={model} onChange={setModel} required />
+        <div>
+          <Label htmlFor="slot-serial">Serial</Label>
+          <Input id="slot-serial" className="mt-1" value={serial} onChange={(e) => setSerial(e.target.value)} data-testid="slot-serial" />
+        </div>
+        <div>
+          <Label htmlFor="slot-electrical">Electrical</Label>
+          <Input
+            id="slot-electrical"
+            className="mt-1"
+            value={electrical}
+            placeholder="Optional, e.g. 120V"
+            onChange={(e) => setElectrical(e.target.value)}
+          />
+        </div>
+      </div>
+      {confirm ? (
+        <p className="mt-3 text-sm">
+          {serial || "That serial"} is already at {confirm.place}. Move it to {label}?
+        </p>
+      ) : null}
+      <div className="mt-3 flex gap-2">
+        <Button type="button" size="sm" disabled={pending} data-testid="slot-save" onClick={() => void save(!!confirm)}>
+          {confirm ? "Confirm move" : pending ? "Saving…" : "Add"}
+        </Button>
+        {confirm ? (
+          <Button type="button" size="sm" variant="outline" onClick={() => setConfirm(null)}>
+            Cancel
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
 }

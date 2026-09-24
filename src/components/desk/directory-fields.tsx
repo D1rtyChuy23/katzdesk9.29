@@ -10,6 +10,7 @@ import {
 } from "@/lib/ops/api";
 import { getMyAccess } from "@/lib/ops/access";
 import { ComboField, MultiComboField, type ComboItem } from "@/components/ui/combo-field";
+import { Label } from "@/components/ui/input";
 import { RenameDialog } from "./rename-dialog";
 import { toast } from "sonner";
 
@@ -87,6 +88,24 @@ export function useDirectory(kind: DirectoryKind) {
     canManage,
     isAdmin,
   };
+}
+
+export function LockedCustomer({
+  name,
+  label = "Customer",
+  inputName = "customer",
+}: {
+  name: string;
+  label?: string;
+  inputName?: string;
+}) {
+  return (
+    <div className="min-w-0" data-testid="locked-customer">
+      {label ? <Label>{label}</Label> : null}
+      <p className="mt-1 rounded-md border border-input bg-muted/50 px-3 py-2 text-sm">{name || "—"}</p>
+      {inputName ? <input type="hidden" name={inputName} value={name} /> : null}
+    </div>
+  );
 }
 
 export function CustomerCombo({

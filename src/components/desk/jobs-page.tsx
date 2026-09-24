@@ -12,15 +12,15 @@ import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-bad
 import { JobSheet, NewJobDialog } from "./job-sheet";
 import { CorrigoImportButton, CorrigoReviewList, type CorrigoReviewItem } from "./corrigo-import";
 import { SortSelect, useDeskSort } from "./sort-bar";
-import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, StatusDonut, toggleChip } from "./desk-charts";
-import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
+import { ActionMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
+import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { Plus } from "lucide-react";
 import { ExportButton } from "./export-dialog";
 import { TechFilter, TechName } from "./tech-select";
 import { sameTech } from "@/lib/ops/tech-match";
 import { mineByTechnician } from "@/lib/ops/my-view";
 import { AkBadge } from "./ak-badge";
-import { MyViewBar, useMyView } from "./my-view-bar";
+import { useMyView } from "./my-view-bar";
 
 
 export function JobsPage({
@@ -97,11 +97,6 @@ export function JobsPage({
   const activeJobs = allJobs.filter((j) => isOpenCall(j));
   const unassignedCount = activeJobs.filter((j) => !j.technician).length;
   const completeCount = liveJobs.filter((j) => isClosedCall(j)).length;
-  const statusMix = tally(activeJobs, (j) => j.status);
-  const techMix = tally(
-    activeJobs.filter((j) => j.technician),
-    (j) => j.technician,
-  );
 
   return (
     <div>
@@ -111,11 +106,10 @@ export function JobsPage({
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">{lede}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <MyViewBar />
-          {kind === "service" ? (
-            <CorrigoImportButton onImported={setReview} />
-          ) : null}
-          <ExportButton defaultType={kind === "tlc" ? "tlc" : "pending"} />
+          <ActionMenu label="Import / Export">
+            {kind === "service" ? <CorrigoImportButton onImported={setReview} /> : null}
+            <ExportButton defaultType={kind === "tlc" ? "tlc" : "pending"} />
+          </ActionMenu>
           <Button onClick={() => setCreate(true)}>
             <Plus className="size-4" />
             New call
@@ -154,24 +148,6 @@ export function JobsPage({
           onClick={() => setView((v) => toggleChip(v, "complete", "all"))}
         />
       </StatRow>
-      <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2">
-        <ChartCard title="Active by status" lede="Where this board sits right now.">
-          {statusMix.length ? <StatusDonut data={statusMix} unit="active" /> : <p className="text-sm text-muted-foreground">No active calls.</p>}
-        </ChartCard>
-        <ChartCard title="On the truck" lede="Active calls per technician.">
-          {techMix.length ? (
-            <SimpleBars
-              data={techMix.map((t) => ({ tech: t.name, count: t.count }))}
-              xKey="tech"
-              yKey="count"
-              yLabel="Calls"
-              horizontal
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">Nobody assigned yet.</p>
-          )}
-        </ChartCard>
-      </section>
 
       {kind === "service" ? (
         <CorrigoReviewList
@@ -180,44 +156,33 @@ export function JobsPage({
         />
       ) : null}
 
-      <div className="mt-5 flex flex-wrap items-center gap-2">
-        {(["active", "flagged", "unassigned", "complete", "all"] as const).map((v) => (
-          <FilterChip key={v} selected={view === v} onClick={() => setView(v)}>
-            {v === "active"
-              ? `Active (${activeCount})`
-              : v === "flagged"
-                ? `Flagged (${flagCount})`
-                : v === "unassigned"
-                  ? `Unassigned (${unassignedCount})`
-                  : v === "complete"
-                    ? `Complete (${completeCount})`
-                    : "All history"}
-          </FilterChip>
-        ))}
+      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Filter this list…"
-          className="max-w-xs"
+          placeholder="Search tickets…"
+          className="h-9 w-56 shrink-0"
+          aria-label="Search tickets"
         />
         <TechFilter
           value={tech}
           onChange={setTech}
           extraNames={(jobs.data ?? []).map((j) => j.technician)}
+          className="h-9 w-40 shrink-0"
         />
         <SelectField
           value={urgency}
           onChange={(e) => setUrgency(e.target.value)}
           allowEmpty
           emptyLabel="All urgency"
-          className="w-40"
           aria-label="Filter by urgency"
+          className="h-9 w-40 shrink-0"
         >
           {URGENCIES.map((u) => (
             <option key={u}>{u}</option>
           ))}
         </SelectField>
-        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} />
+        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
       </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
@@ -234,7 +199,21 @@ export function JobsPage({
         {jobs.isLoading ? (
           <p className="px-4 py-8 text-sm text-muted-foreground">Loading calls…</p>
         ) : rows.length === 0 ? (
-          <p className="px-4 py-8 text-sm text-muted-foreground">Nothing in this view.</p>
+          <div className="px-4 py-8">
+            <p className="text-sm text-muted-foreground">
+              {q.trim() || tech || urgency
+                ? "Nothing matches this search."
+                : view === "active"
+                  ? "No open tickets."
+                  : "Nothing in this view."}
+            </p>
+            {!q.trim() && !tech && !urgency && view === "active" ? (
+              <Button type="button" size="sm" className="mt-3" onClick={() => setCreate(true)}>
+                <Plus className="size-4" />
+                New call
+              </Button>
+            ) : null}
+          </div>
         ) : (
           <ul>
             {rows.map((j) => (
@@ -262,7 +241,7 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
       <button
         type="button"
         onClick={onOpen}
-        className="grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.4fr_1fr_6rem_7rem_7rem_7rem_6rem] md:items-center md:gap-3"
+        className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.4fr_1fr_6rem_7rem_7rem_7rem_6rem] md:items-center md:gap-3"
       >
         <span>
           <span className="block font-medium">

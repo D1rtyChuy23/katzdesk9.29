@@ -130,18 +130,18 @@ function Page() {
         />
       </header>
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="relative min-w-0 flex-1">
+      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <div className="relative w-56 shrink-0">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search customers…"
-            className="pl-9"
+            className="h-9 pl-9"
             aria-label="Search customers"
           />
         </div>
-        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA]} />
+        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA]} className="shrink-0" />
       </div>
 
       {canAdd ? (
@@ -179,7 +179,7 @@ function Page() {
             <button
               type="button"
               onClick={() => openCustomer(c.id)}
-              className="flex min-w-0 items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-muted/60"
+              className="desk-lift flex min-w-0 items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-muted/60"
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">

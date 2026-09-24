@@ -412,6 +412,26 @@ export function FilterChip({
   );
 }
 
+/** Secondary page actions. Same button styles, one click behind the primary. */
+export function ActionMenu({
+  label = "More",
+  children,
+}: {
+  label?: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="group relative">
+      <summary className="inline-flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
+        {label}
+      </summary>
+      <div className="absolute right-0 z-30 mt-1 flex min-w-48 flex-col gap-1 rounded-md border border-border bg-card p-1.5 shadow-sm [&_button]:w-full [&_button]:justify-start">
+        {children}
+      </div>
+    </details>
+  );
+}
+
 export function StatRow({
   children,
   className,
@@ -464,7 +484,7 @@ export function StatCard({
     </>
   );
   const cls = cn(
-    "@container min-w-[10rem] flex-1 overflow-hidden rounded-xl border px-3 py-3 text-left sm:px-4",
+    "@container desk-lift min-w-[10rem] flex-1 overflow-hidden rounded-xl border px-3 py-3 text-left sm:px-4",
     selected ? "border-primary bg-primary/10 ring-2 ring-primary/30" : "border-border bg-card",
     onClick && "cursor-pointer transition-colors hover:border-primary/50",
   );

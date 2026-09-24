@@ -5,7 +5,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { todayChicago } from "@/lib/ops/clock";
 import { serialKey } from "@/lib/ops/serial-pull";
 import { loadTechs } from "@/lib/ops/roster";
-import { loadAccountMarks, isAviKatz, customerKey, loadReps } from "@/lib/ops/reps";
+import { loadAccountMarks, isAviKatz, customerKey } from "@/lib/ops/reps";
 import {
   CLOSED_REBUILD,
   HEALTH_RANK,
@@ -300,18 +300,15 @@ export const listRebuildOwners = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .handler(async (): Promise<string[]> => {
     const sql = await readySql();
-    const techs = (await loadTechs(sql)).filter((t) => t.active).map((t) => t.name);
-    const reps = (await loadReps(sql)).filter((r) => r.active).map((r) => r.name);
-    const users = await sql.query<{ username: string }>(
-      "select username from desk_accounts where approved = true and coalesce(username, '') <> '' order by lower(username)",
-    );
+    const techs = (await loadTechs(sql)).filter((t) => t.active);
     const seen = new Set<string>();
     const out: string[] = [];
-    for (const n of [...techs, ...reps, ...users.map((u) => u.username)]) {
-      const key = n.trim().toLowerCase();
+    for (const t of techs) {
+      const name = t.name.trim();
+      const key = name.toLowerCase();
       if (!key || seen.has(key)) continue;
       seen.add(key);
-      out.push(n.trim());
+      out.push(name);
     }
     return out;
   });

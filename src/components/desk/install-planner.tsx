@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Printer } from "lucide-react";
 import { addDays, formatShortDate, todayChicago, weekBounds, WEEKDAYS, isOpenInstall } from "@/lib/ops/clock";
+import { siteIsReady } from "@/lib/ops/pre-inspection";
+import { InspectionBadge } from "./pre-inspection-panel";
 import { updateInstall } from "@/lib/ops/api";
 import { listedEquipment, findRecipeFor } from "@/lib/ops/equipment";
 import { previewSetting, settingsFrom } from "@/lib/ops/recipe-fields";
@@ -68,8 +70,8 @@ export function InstallPlanner({
     let list = open;
     if (rep === "__none__") list = list.filter((i) => i.noRep);
     else if (rep) list = list.filter((i) => sameRep(i.accountRep, rep));
-    if (ready === "ready") list = list.filter((i) => i.equipStatus === "Ready");
-    if (ready === "not") list = list.filter((i) => i.equipStatus !== "Ready");
+    if (ready === "ready") list = list.filter((i) => siteIsReady(i.equipStatus, i.inspection?.overall));
+    if (ready === "not") list = list.filter((i) => !siteIsReady(i.equipStatus, i.inspection?.overall));
     if (akOnly) list = list.filter((i) => i.aviKatz);
     if (from) list = list.filter((i) => (i.installDate ?? "") >= from);
     if (to) list = list.filter((i) => (i.installDate ?? "") <= to);
@@ -220,7 +222,12 @@ export function InstallPlanner({
                     <p className="truncate text-[11px] text-muted-foreground">{models}</p>
                     {cfg ? <p className="truncate text-[11px] text-muted-foreground">{cfg}</p> : null}
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                      <StatusBadge status={i.equipStatus === "Ready" ? "Ready" : "Not Ready"} />
+                      <StatusBadge tight status={i.equipStatus === "Ready" ? "Ready" : "Not Ready"} />
+                      <InspectionBadge
+                        overall={i.inspection?.overall}
+                        passed={i.inspection?.passedCount}
+                        total={i.inspection?.machineCount}
+                      />
                       <RepName name={i.accountRep} />
                       <NoRepFlag show={i.noRep} />
                     </div>

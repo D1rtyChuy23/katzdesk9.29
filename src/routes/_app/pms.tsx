@@ -8,16 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { PmSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
-import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, StatusDonut, toggleChip } from "@/components/desk/desk-charts";
+import { ActionMenu, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
-import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
+import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ExportButton } from "@/components/desk/export-dialog";
 import { TechName } from "@/components/desk/tech-select";
 import { AkBadge } from "@/components/desk/ak-badge";
-import { MyViewBar, useMyView } from "@/components/desk/my-view-bar";
+import { useMyView } from "@/components/desk/my-view-bar";
 import { mineByTechnician } from "@/lib/ops/my-view";
 
 export const Route = createFileRoute("/_app/pms")({
@@ -61,8 +61,6 @@ function Page() {
   const all = pms.data ?? [];
   const active = all.filter((p) => isOpenPm(p));
   const flagged = all.filter((p) => p.flag);
-  const statusMix = tally(active, (p) => p.status);
-  const styleMix = tally(active, (p) => p.style);
   const needDate = active.filter((p) => !p.projected).length;
 
   return (
@@ -75,8 +73,9 @@ function Page() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <MyViewBar />
-          <ExportButton defaultType="pms" />
+          <ActionMenu label="Export">
+            <ExportButton defaultType="pms" />
+          </ActionMenu>
           <Button onClick={() => setCreate(true)}>
             <Plus className="size-4" />
             New PM
@@ -108,33 +107,9 @@ function Page() {
           onClick={() => setView((v) => toggleChip(v, "need-date", "all"))}
         />
       </StatRow>
-      <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2">
-        <ChartCard title="Active by status">
-          {statusMix.length ? <StatusDonut data={statusMix} unit="active" /> : <p className="text-sm text-muted-foreground">No active PMs.</p>}
-        </ChartCard>
-        <ChartCard title="By style" lede="How the remaining book is split.">
-          {styleMix.length ? (
-            <SimpleBars
-              data={styleMix.map((s) => ({ label: s.name, count: s.count }))}
-              xKey="label"
-              yKey="count"
-              yLabel="PMs"
-              horizontal
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">No styles on active PMs.</p>
-          )}
-        </ChartCard>
-      </section>
-      <div className="mt-5 flex flex-wrap gap-2">
-        <FilterChip selected={view === "active"} onClick={() => setView("active")}>
-          Active
-        </FilterChip>
-        <FilterChip selected={view === "all"} onClick={() => setView("all")}>
-          All
-        </FilterChip>
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="max-w-xs" />
-        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} />
+      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search PMs…" className="h-9 w-56 shrink-0" aria-label="Search PMs" />
+        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
       </div>
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         {rows.map((p) => (
@@ -142,7 +117,7 @@ function Page() {
             key={p.id}
             type="button"
             onClick={() => setSelected(p.id)}
-            className="grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.3fr_1fr_8rem_8rem_7rem] md:items-center"
+            className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.3fr_1fr_8rem_8rem_7rem] md:items-center"
           >
             <span>
               <span className="font-medium">{p.customer}</span>
@@ -159,7 +134,19 @@ function Page() {
             </span>
           </button>
         ))}
-        {rows.length === 0 ? <p className="px-4 py-8 text-sm text-muted-foreground">No PMs in this view.</p> : null}
+        {rows.length === 0 ? (
+          <div className="px-4 py-8">
+            <p className="text-sm text-muted-foreground">
+              {q.trim() ? "Nothing matches this search." : "No PMs in this view."}
+            </p>
+            {!q.trim() && view === "active" ? (
+              <Button type="button" size="sm" className="mt-3" onClick={() => setCreate(true)}>
+                <Plus className="size-4" />
+                New PM
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       <PmSheet pm={selectedRow} onClose={() => setSelected(null)} />
       <SimpleCreateDialog

@@ -253,6 +253,21 @@ var ChevronsUpDown = createLucideIcon("chevrons-up-down", [["path", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var CircleCheck = createLucideIcon("circle-check", [["circle", {
+	cx: "12",
+	cy: "12",
+	r: "10",
+	key: "1mglay"
+}], ["path", {
+	d: "m9 12 2 2 4-4",
+	key: "dzmm74"
+}]]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Clock = createLucideIcon("clock", [["circle", {
 	cx: "12",
 	cy: "12",
@@ -344,6 +359,50 @@ var Globe = createLucideIcon("globe", [
 	["path", {
 		d: "M2 12h20",
 		key: "9i4pu4"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var GripVertical = createLucideIcon("grip-vertical", [
+	["circle", {
+		cx: "9",
+		cy: "12",
+		r: "1",
+		key: "1vctgf"
+	}],
+	["circle", {
+		cx: "9",
+		cy: "5",
+		r: "1",
+		key: "hp0tcf"
+	}],
+	["circle", {
+		cx: "9",
+		cy: "19",
+		r: "1",
+		key: "fkjjf6"
+	}],
+	["circle", {
+		cx: "15",
+		cy: "12",
+		r: "1",
+		key: "1tmaij"
+	}],
+	["circle", {
+		cx: "15",
+		cy: "5",
+		r: "1",
+		key: "19l28e"
+	}],
+	["circle", {
+		cx: "15",
+		cy: "19",
+		r: "1",
+		key: "f4zoj3"
 	}]
 ]);
 /**
@@ -1179,4 +1238,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { List as A, ChevronsUpDown as B, Package as C, Menu as D, MessageSquare as E, Globe as F, CalendarClock as G, ChevronLeft as H, Download as I, BellRing as J, BookOpen as K, Contrast as L, Keyboard as M, Handshake as N, MapPin as O, Hammer as P, Coffee as R, Pencil as S, Monitor as T, Check as U, ChevronRight as V, CalendarRange as W, Search as _, Users as a, Plus as b, Truck as c, Table2 as d, Sun as f, Settings2 as g, SlidersHorizontal as h, Vibrate as i, LayoutGrid as j, Mail as k, TriangleAlert as l, Store as m, Wrench as n, Upload as o, StretchHorizontal as p, Bell as q, Warehouse as r, Type as s, X as t, Trash2 as u, Rows3 as v, Moon as w, Phone as x, Printer as y, Clock as z };
+export { List as A, Clock as B, Package as C, Menu as D, MessageSquare as E, GripVertical as F, Check as G, ChevronsUpDown as H, Globe as I, BookOpen as J, CalendarRange as K, Download as L, Keyboard as M, Handshake as N, MapPin as O, Hammer as P, Contrast as R, Pencil as S, Monitor as T, ChevronRight as U, CircleCheck as V, ChevronLeft as W, BellRing as X, Bell as Y, Search as _, Users as a, Plus as b, Truck as c, Table2 as d, Sun as f, Settings2 as g, SlidersHorizontal as h, Vibrate as i, LayoutGrid as j, Mail as k, TriangleAlert as l, Store as m, Wrench as n, Upload as o, StretchHorizontal as p, CalendarClock as q, Warehouse as r, Type as s, X as t, Trash2 as u, Rows3 as v, Moon as w, Phone as x, Printer as y, Coffee as z };

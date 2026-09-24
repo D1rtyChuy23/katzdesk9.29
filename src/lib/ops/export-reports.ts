@@ -17,6 +17,8 @@ import { loadRebuilds, sortRebuildsForExport } from "@/lib/ops/rebuilds";
 import type { Recipe } from "@/lib/ops/types";
 import { sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
 import { isoDay } from "@/lib/ops/iso";
+import { loadInspectionSummaries, loadInspectionUnits } from "@/lib/ops/inspection-api";
+import { emptyInspection, photosCell, siteIsReady } from "@/lib/ops/pre-inspection";
 
 
 export const REPORT_TYPES = ["pending", "pms", "modules", "tlc", "installs", "rebuilds"] as const;
@@ -107,6 +109,14 @@ const INSTALL_CORE_COLS = [
   "Serial number",
   "Electrical configuration",
   "Configuration",
+];
+
+const INSTALL_INSPECT_COLS = [
+  "Pre-inspection status",
+  "Failed items",
+  "Photos",
+  "Core hole needed",
+  "Core hole status",
 ];
 
 function inDateRange(value: string | null | undefined, from?: string | null, to?: string | null): boolean {
@@ -626,6 +636,14 @@ async function buildInstalls(
     )
     .catch(() => []);
   const usedSerials = new Set<string>();
+  const summaries = await loadInspectionSummaries(
+    sql,
+    installs.map((i) => i.id),
+  );
+  const unitRows = await loadInspectionUnits(
+    sql,
+    installs.map((i) => i.id),
+  );
 
   const readyRows: string[][] = [];
   const notReadyRows: string[][] = [];
@@ -639,7 +657,15 @@ async function buildInstalls(
     }
     if (!matchCustomer(i.customer, filters.customer)) continue;
     if (!matchAk(marks, i.customer, filters.ak)) continue;
-    const isReady = i.equip_status === "Ready";
+    const summary = summaries.get(i.id) ?? emptyInspection();
+    const isReady = siteIsReady(i.equip_status, summary.overall);
+    const mine = unitRows.filter((u) => u.installId === i.id);
+    const blockBits = [blockingFor(i)];
+    if (summary.overall !== "Passed") {
+      const failed = summary.failedItems.join(", ");
+      blockBits.push(failed ? `Pre-inspection ${summary.overall}: ${failed}` : `Pre-inspection ${summary.overall}`);
+    }
+    const blocking = blockBits.filter(Boolean).join(" · ");
     if (filters.status) {
       const wantReady = filters.status.toLowerCase() === "ready";
       const wantNot = /not\s*ready/i.test(filters.status);
@@ -650,22 +676,40 @@ async function buildInstalls(
 
     const machines = parseMachinesJson(i.machines);
     const names = listedEquipment(i.equipment, catalog);
-    const pieces =
-      machines.length > 0
-        ? machines
-        : names.length
-          ? names.map((equipment) => ({
-              equipment,
-              serial: names.length === 1 ? str(i.serial) : "",
-              powerVoltage: names.length === 1 ? str(i.power_voltage) : "",
-            }))
-          : [
-              {
-                equipment: str(i.equipment),
-                serial: str(i.serial),
-                powerVoltage: str(i.power_voltage),
-              },
-            ];
+    const pieces = mine.length
+      ? mine.map((u) => ({
+          equipment: u.model,
+          serial: u.serial ?? "",
+          powerVoltage: u.electrical ?? "",
+          inspectStatus: u.overall,
+          failedCell: u.failedItems.join(", "),
+          photoCell: photosCell(u.photoCount),
+          coreNeededCell: u.coreNeeded === "yes" ? "Yes" : u.coreNeeded === "no" ? "No" : "",
+          coreStatusCell: u.coreNeeded === "yes" ? (u.coreStatus || "Not inspected") : "",
+        }))
+      : (machines.length > 0
+          ? machines
+          : names.length
+            ? names.map((equipment) => ({
+                equipment,
+                serial: names.length === 1 ? str(i.serial) : "",
+                powerVoltage: names.length === 1 ? str(i.power_voltage) : "",
+              }))
+            : [
+                {
+                  equipment: str(i.equipment),
+                  serial: str(i.serial),
+                  powerVoltage: str(i.power_voltage),
+                },
+              ]
+        ).map((piece) => ({
+          ...piece,
+          inspectStatus: summary.overall,
+          failedCell: summary.failedItems.join(", "),
+          photoCell: photosCell(summary.photoCount),
+          coreNeededCell: "",
+          coreStatusCell: "",
+        }));
 
     const owner = techCell(str(i.technician) || str(i.account_rep), inactive);
     const updated = isoDay(i.updated_at);
@@ -697,6 +741,11 @@ async function buildInstalls(
           serialCell,
           electricalCell,
           cfg.missing ? "missing" : cfg.text,
+          piece.inspectStatus,
+          piece.failedCell,
+          piece.photoCell,
+          piece.coreNeededCell,
+          piece.coreStatusCell,
           owner,
           akCell(marks, i.customer),
         ]);
@@ -708,7 +757,12 @@ async function buildInstalls(
           serialCell,
           electricalCell,
           cfg.missing ? "missing" : cfg.text,
-          blockingFor(i),
+          piece.inspectStatus,
+          piece.failedCell,
+          piece.photoCell,
+          piece.coreNeededCell,
+          piece.coreStatusCell,
+          blocking,
           owner,
           updated,
           akCell(marks, i.customer),
@@ -722,22 +776,30 @@ async function buildInstalls(
   return {
     notReady: {
       name: "Not ready",
-      columns: [...INSTALL_CORE_COLS, "Blocking / not ready", "Tech / owner", "Last updated", "AK"],
+      columns: [...INSTALL_CORE_COLS, ...INSTALL_INSPECT_COLS, "Blocking / not ready", "Tech / owner", "Last updated", "AK"],
       rows: groupByAccount(notReadySorted, 0),
     },
     ready: {
       name: "Ready",
-      columns: [...INSTALL_CORE_COLS, "Tech / owner", "AK"],
+      columns: [...INSTALL_CORE_COLS, ...INSTALL_INSPECT_COLS, "Tech / owner", "AK"],
       rows: groupByAccount(readySorted, 0),
     },
     counts: { notReady: notReadySorted.length, ready: readySorted.length },
   };
 }
 
+function rosterOwner(name: string | null | undefined, active: { name: string }[]): string {
+  const raw = (name ?? "").trim();
+  if (!raw) return "";
+  const hit = active.find((t) => sameTech(t.name, raw));
+  return hit ? hit.name : raw;
+}
+
 async function buildRebuilds(
   sql: Awaited<ReturnType<typeof getSql>>,
   filters: ExportFilters,
 ): Promise<ExportSheet> {
+  const active = (await loadTechs(sql)).filter((t) => t.active);
   const rows = sortRebuildsForExport(await loadRebuilds(sql));
   const body: string[][] = [];
   for (const r of rows) {
@@ -752,7 +814,7 @@ async function buildRebuilds(
       r.account,
       r.equipment ?? "",
       r.serial ?? "",
-      r.owner ?? "",
+      rosterOwner(r.owner, active),
       r.status,
       r.status === "Waiting" ? r.reasonCode ?? "" : "",
       r.targetComplete ?? "",
@@ -859,32 +921,17 @@ function toCsv(report: BuiltReport): string {
   }
   lines.push("");
   if (report.type === "installs") {
-    const cols = [
-      "Ready",
-      "Account",
-      "Install / scheduled date",
-      "Equipment",
-      "Configuration",
-      "Blocking / not ready",
-      "Tech / owner",
-      "Last updated",
-    ];
-    lines.push(cols.map(esc).join(","));
-    const notReady = report.sheets.find((s) => s.name === "Not ready");
-    const ready = report.sheets.find((s) => s.name === "Ready");
-    for (const r of notReady?.rows ?? []) {
-      if (isBlankRow(r)) {
-        lines.push("");
-        continue;
+    for (const sheet of report.sheets) {
+      lines.push(esc(sheet.name));
+      lines.push(sheet.columns.map(esc).join(","));
+      for (const r of sheet.rows) {
+        if (isBlankRow(r)) {
+          lines.push("");
+          continue;
+        }
+        lines.push(r.map((c) => esc(c ?? "")).join(","));
       }
-      lines.push(["No", r[0], r[1], r[2], r[3], r[4], r[5], r[6]].map((c) => esc(c ?? "")).join(","));
-    }
-    for (const r of ready?.rows ?? []) {
-      if (isBlankRow(r)) {
-        lines.push("");
-        continue;
-      }
-      lines.push(["Yes", r[0], r[1], r[2], r[3], "", r[4], ""].map((c) => esc(c ?? "")).join(","));
+      lines.push("");
     }
     return lines.join("\n");
   }

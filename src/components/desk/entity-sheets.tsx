@@ -36,6 +36,7 @@ import { catalogModels, listedEquipment, piecesForInstall } from "@/lib/ops/equi
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import type { Asset, Deal, Install, ModuleRow, PmJob } from "@/lib/ops/types";
 import { moneyExact } from "@/lib/ops/clock";
+import { PreInspectionPanel, InspectionBadge } from "./pre-inspection-panel";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea, AutoGrowTextarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
@@ -46,7 +47,7 @@ import { Badge } from "@/components/ui/badge";
 import { Thread } from "./thread";
 import { RecipeForm, type RecipeDraft } from "./recipe-form";
 import { InstallRecipeList } from "./recipe-sheet";
-import { CustomerCombo, EquipmentCombo, EquipmentMultiCombo } from "./directory-fields";
+import { CustomerCombo, EquipmentCombo, EquipmentMultiCombo, LockedCustomer } from "./directory-fields";
 import { TechSelect } from "./tech-select";
 import { RepSelect } from "./rep-select";
 import { AkBadge } from "./ak-badge";
@@ -90,16 +91,19 @@ function BoundCustomer({
   defaultValue,
   name = "customer",
   required,
+  locked,
 }: {
   recordKey: number | string;
   defaultValue: string;
   name?: string;
   required?: boolean;
+  locked?: boolean;
 }) {
   const [value, setValue] = useState(defaultValue);
   useEffect(() => {
     setValue(defaultValue);
   }, [recordKey, defaultValue]);
+  if (locked) return <LockedCustomer name={defaultValue} inputName={name} />;
   return <CustomerCombo name={name} value={value} onChange={setValue} required={required} />;
 }
 
@@ -119,7 +123,15 @@ function BoundEquipment({
   return <EquipmentCombo name={name} value={value} onChange={setValue} />;
 }
 
-export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void }) {
+export function PmSheet({
+  pm,
+  onClose,
+  lockCustomer = false,
+}: {
+  pm: PmJob | null;
+  onClose: () => void;
+  lockCustomer?: boolean;
+}) {
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
@@ -180,7 +192,7 @@ export function PmSheet({ pm, onClose }: { pm: PmJob | null; onClose: () => void
                 });
               }}
             >
-              <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required />
+              <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockCustomer} />
               <BoundEquipment recordKey={pm.id} defaultValue={pm.equipment ?? ""} />
               <div>
                 <Label>PM style</Label>
@@ -244,10 +256,12 @@ export function InstallSheet({
   row,
   onClose,
   onOpenRelated,
+  lockCustomer = false,
 }: {
   row: Install | null;
   onClose: () => void;
   onOpenRelated?: (id: number) => void;
+  lockCustomer?: boolean;
 }) {
   const qc = useQueryClient();
   const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });
@@ -373,12 +387,18 @@ export function InstallSheet({
               <p className="text-xs tracking-wide text-muted-foreground uppercase">Install</p>
               <SheetTitle>{row.customer}</SheetTitle>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                <StatusBadge status={row.equipStatus} />
+                <InspectionBadge
+                  overall={row.inspection?.overall}
+                  passed={row.inspection?.passedCount}
+                  total={row.inspection?.machineCount}
+                />
+                <StatusBadge tight status={row.equipStatus} />
                 <FlagBadge flag={row.flag} />
                 {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
               </div>
             </SheetHeader>
             <SheetBody>
+            <PreInspectionPanel installId={row.id} />
             <SerialNoticeBanner notice={row.serialNotice} />
             {row.duplicateOf ? (
               <div className="border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm">
@@ -461,18 +481,22 @@ export function InstallSheet({
                 });
               }}
             >
-              <CustomerCombo
-                name="customer"
-                value={customer}
-                onChange={(v) => {
-                  try {
-                    setCustomer(v);
-                  } catch (err) {
-                    toast.error(err instanceof Error ? err.message : "Could not set customer");
-                  }
-                }}
-                required
-              />
+              {lockCustomer ? (
+                <LockedCustomer name={row.customer} />
+              ) : (
+                <CustomerCombo
+                  name="customer"
+                  value={customer}
+                  onChange={(v) => {
+                    try {
+                      setCustomer(v);
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Could not set customer");
+                    }
+                  }}
+                  required
+                />
+              )}
               <div className="sm:col-span-2">
                 <EquipmentMultiCombo
                   values={equipPieces}
@@ -580,7 +604,15 @@ export function InstallSheet({
   );
 }
 
-export function DealSheet({ deal, onClose }: { deal: Deal | null; onClose: () => void }) {
+export function DealSheet({
+  deal,
+  onClose,
+  lockCustomer = false,
+}: {
+  deal: Deal | null;
+  onClose: () => void;
+  lockCustomer?: boolean;
+}) {
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
@@ -666,7 +698,7 @@ export function DealSheet({ deal, onClose }: { deal: Deal | null; onClose: () =>
                 });
               }}
             >
-              <BoundCustomer recordKey={deal.id} defaultValue={deal.customer} required />
+              <BoundCustomer recordKey={deal.id} defaultValue={deal.customer} required locked={lockCustomer} />
               <RepSelect name="producer" label="Rep" defaultValue={deal.producer ?? ""} />
               <label className="flex items-center gap-2 text-sm sm:col-span-2">
                 <input

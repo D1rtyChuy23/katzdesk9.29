@@ -6,11 +6,8 @@ import { catalogModels } from "@/lib/ops/equipment";
 import { parseOpenSearch } from "@/lib/ops/search-params";
 import type { Recipe } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ComboField } from "@/components/ui/combo-field";
 import { RecipeForm } from "@/components/desk/recipe-form";
-import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
-import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, sortDesk } from "@/lib/ops/sort";
-import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,36 +26,42 @@ function Page() {
   });
   const customers = useQuery({ queryKey: ["customers"], queryFn: () => listCustomers() });
   const [selected, setSelected] = useState<number | "new" | null>(open ?? null);
+  const [housePick, setHousePick] = useState("");
+  const [customerPick, setCustomerPick] = useState("");
   useEffect(() => {
     if (open != null) setSelected(open);
   }, [open]);
-  const [filter, setFilter] = useState("");
-  const [sort, setSort] = useDeskSort("recipes", "alpha-asc");
 
   const rows = recs.data ?? [];
-  const needle = filter.trim().toLowerCase();
-  const shown = useMemo(() => {
-    const list = needle
-      ? rows.filter((r) =>
-          [r.equipmentModel, r.customer ?? "house", r.notes ?? ""].some((v) =>
-            v.toLowerCase().includes(needle),
-          ),
-        )
-      : rows;
-    return sortDesk(list, sort, {
-      date: (r) => r.updatedAt,
-      name: (r) => r.customer ?? r.equipmentModel,
-      equipment: (r) => r.equipmentModel,
-    });
-  }, [rows, needle, sort]);
   const current = typeof selected === "number" ? rows.find((r) => r.id === selected) ?? null : null;
+  const house = useMemo(() => rows.filter((r) => !r.customer), [rows]);
+  const customerRecipes = useMemo(() => rows.filter((r) => !!r.customer), [rows]);
+
+  function houseLabel(r: Recipe) {
+    const dup = house.filter((x) => x.equipmentModel === r.equipmentModel).length > 1;
+    return dup ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
+  }
+  function customerLabel(r: Recipe) {
+    return `${r.customer} · ${r.equipmentModel}`;
+  }
+
+  useEffect(() => {
+    if (!current) return;
+    if (!current.customer) {
+      setHousePick(houseLabel(current));
+      setCustomerPick("");
+    } else {
+      setCustomerPick(customerLabel(current));
+      setHousePick("");
+    }
+    // Labels depend on the current row set; re-sync when the selected recipe changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current?.id, rows.length]);
 
   const models = useMemo(
     () => catalogModels([...(directoryEquip.data ?? []).map((e) => e.name), ...rows.map((r) => r.equipmentModel)]),
     [directoryEquip.data, rows],
   );
-
-  const grouped = useMemo(() => groupRecipes(shown), [shown]);
 
   const save = useMutation({
     mutationFn: (d: Parameters<typeof upsertRecipe>[0]["data"]) => upsertRecipe({ data: d }),
@@ -91,150 +94,75 @@ function Page() {
             customer. Fields start blank — nothing is filled in automatically.
           </p>
         </div>
-        <Button onClick={() => setSelected("new")}>
+        <Button
+          onClick={() => {
+            setSelected("new");
+            setHousePick("");
+            setCustomerPick("");
+          }}
+        >
           <Plus className="size-4" />
           New recipe
         </Button>
       </header>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[20rem_1fr]">
-        <aside className={cn("rounded-xl border border-border bg-card", selected != null && "hidden lg:block")}>
-          <div className="border-b border-border p-3">
-            <Input
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              placeholder="Filter customers or models…"
-            />
-            <div className="mt-2">
-              <SortSelect
-                value={sort}
-                onChange={setSort}
-                options={[...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP]}
-                className="w-full max-w-none sm:w-full"
-              />
-            </div>
-          </div>
-          <ul className="max-h-[60vh] overflow-y-auto">
-            {grouped.house.length ? (
-              <li>
-                <p className="px-4 pt-3 pb-1 text-[11px] tracking-wide text-muted-foreground uppercase">
-                  House templates
-                </p>
-                <ul>
-                  {grouped.house.map((r) => (
-                    <RecipeNavItem
-                      key={r.id}
-                      recipe={r}
-                      active={current?.id === r.id}
-                      onClick={() => setSelected(r.id)}
-                    />
-                  ))}
-                </ul>
-              </li>
-            ) : null}
-            {grouped.customers.map(([name, list]) => (
-              <li key={name}>
-                <p className="px-4 pt-3 pb-1 text-[11px] tracking-wide text-muted-foreground uppercase">
-                  {name}
-                </p>
-                <ul>
-                  {list.map((r) => (
-                    <RecipeNavItem
-                      key={r.id}
-                      recipe={r}
-                      active={current?.id === r.id}
-                      onClick={() => setSelected(r.id)}
-                      hideCustomer
-                    />
-                  ))}
-                </ul>
-              </li>
-            ))}
-            {shown.length === 0 ? (
-              <li className="px-4 py-6 text-sm text-muted-foreground">No recipes yet.</li>
-            ) : null}
-          </ul>
-        </aside>
-
-        <section className={cn("rounded-xl border border-border bg-card p-5", selected == null && "hidden lg:block")}>
-          {selected != null ? (
-            <button
-              type="button"
-              className="mb-4 text-sm text-muted-foreground hover:text-foreground lg:hidden"
-              onClick={() => setSelected(null)}
-            >
-              ← All recipes
-            </button>
-          ) : null}
-          {selected == null ? (
-            <p className="text-sm text-muted-foreground">
-              Select a customer recipe, a house template, or add a new one. New cards start empty — pick
-              the fields you need. House templates can be edited and assigned to a customer from here.
-            </p>
-          ) : (
-            <RecipeForm
-              key={current?.id ?? "new"}
-              draft={{
-                recipe: current,
-                customer: current?.customer ?? null,
-                equipmentModel: current?.equipmentModel ?? "",
-                installId: current?.installId ?? null,
-                copiedFrom: current?.copiedFrom ?? null,
-              }}
-              models={models}
-              customers={customers.data ?? []}
-              pending={save.isPending}
-              copyPending={copy.isPending}
-              onSave={(d) => save.mutate(d)}
-              onCopy={(d) => copy.mutate(d)}
-            />
-          )}
-        </section>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2" data-testid="recipe-pickers">
+        <ComboField
+          label="House template"
+          value={housePick}
+          allowCreate={false}
+          noun="template"
+          placeholder="Search house templates…"
+          emptyHint="No house templates"
+          items={house.map((r) => ({ id: r.id, name: houseLabel(r) }))}
+          onChange={(name) => {
+            setHousePick(name);
+            setCustomerPick("");
+            const hit = house.find((r) => houseLabel(r) === name);
+            setSelected(hit ? hit.id : null);
+          }}
+        />
+        <ComboField
+          label="Customer template"
+          value={customerPick}
+          allowCreate={false}
+          noun="template"
+          placeholder={customerRecipes.length ? "Search customer templates…" : "No customer templates"}
+          emptyHint="No customer templates"
+          items={customerRecipes.map((r) => ({ id: r.id, name: customerLabel(r) }))}
+          onChange={(name) => {
+            setCustomerPick(name);
+            setHousePick("");
+            const hit = customerRecipes.find((r) => customerLabel(r) === name);
+            setSelected(hit ? hit.id : null);
+          }}
+        />
       </div>
+
+      <section className="mt-4 rounded-xl border border-border bg-card p-5">
+        {selected == null ? (
+          <p className="text-sm text-muted-foreground">
+            Pick a house template or a customer template. The recipe opens here — no second page.
+          </p>
+        ) : (
+          <RecipeForm
+            key={current?.id ?? "new"}
+            draft={{
+              recipe: current,
+              customer: current?.customer ?? null,
+              equipmentModel: current?.equipmentModel ?? "",
+              installId: current?.installId ?? null,
+              copiedFrom: current?.copiedFrom ?? null,
+            }}
+            models={models}
+            customers={customers.data ?? []}
+            pending={save.isPending}
+            copyPending={copy.isPending}
+            onSave={(d) => save.mutate(d)}
+            onCopy={(d) => copy.mutate(d)}
+          />
+        )}
+      </section>
     </div>
   );
-}
-
-function RecipeNavItem({
-  recipe: r,
-  active,
-  onClick,
-  hideCustomer,
-}: {
-  recipe: Recipe;
-  active: boolean;
-  onClick: () => void;
-  hideCustomer?: boolean;
-}) {
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onClick}
-        className={cn("w-full px-4 py-2.5 text-left text-sm hover:bg-muted/60", active && "bg-muted")}
-      >
-        <span className="block font-medium">{r.equipmentModel}</span>
-        {hideCustomer ? null : (
-          <span className="block text-xs text-muted-foreground">
-            {r.customer ?? "Shared house recipe"}
-          </span>
-        )}
-      </button>
-    </li>
-  );
-}
-
-function groupRecipes(rows: Recipe[]) {
-  const house = rows.filter((r) => !r.customer);
-  const byCust = new Map<string, Recipe[]>();
-  for (const r of rows) {
-    if (!r.customer) continue;
-    const list = byCust.get(r.customer) ?? [];
-    list.push(r);
-    byCust.set(r.customer, list);
-  }
-  return {
-    house,
-    customers: [...byCust.entries()].sort((a, b) => a[0].localeCompare(b[0])),
-  };
 }

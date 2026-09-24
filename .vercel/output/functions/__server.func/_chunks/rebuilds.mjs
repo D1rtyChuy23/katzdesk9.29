@@ -1,131 +1,69 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { A as boolean, F as object, P as number, R as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, mn as number, un as boolean, vn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
 import { r as getSql } from "./popup.server.mjs";
-import { i as deskMiddleware } from "./access.mjs";
-import { d as CLOSED_CALL, f as CLOSED_PM, i as loadTechs } from "./roster.mjs";
+import { a as deskMiddleware } from "./access.mjs";
 import { n as serialKey } from "./serial-pull.mjs";
-import { a as loadAccountMarks, n as customerKey, o as loadReps, r as isAviKatz } from "./reps.mjs";
-//#region src/lib/ops/rebuild-model.ts
-/** Pure rebuild project rules — no server imports. */
-var REBUILD_STATUSES = [
-	"Queued",
-	"In progress",
-	"Waiting",
-	"Testing",
-	"Ready",
+import { i as loadTechs } from "./roster.mjs";
+import { a as loadAccountMarks, n as customerKey, r as isAviKatz } from "./reps.mjs";
+//#region src/lib/ops/ticket-status.ts
+/** Terminal service / TLC statuses. */
+var CLOSED_CALL = /* @__PURE__ */ new Set([
 	"Completed",
-	"Cancelled"
-];
-var WAITING_REASONS = [
-	"Parts on order",
-	"Parts not available",
-	"Waiting on decision",
-	"Waiting on customer",
-	"Tech / bench unavailable",
-	"Scope changed",
-	"Found additional failure",
-	"Other"
-];
-var REBUILD_PRIORITIES = [
-	"normal",
-	"high",
-	"committed-to-customer"
-];
-var SHOP_ACCOUNT = "Katz shop / stock";
-var HEALTH_RANK = {
-	overdue: 0,
-	"at-risk": 1,
-	"no-date": 2,
-	"on-track": 3,
-	done: 4
-};
-var HEALTH_LABEL = {
-	overdue: "Overdue",
-	"at-risk": "At risk",
-	"no-date": "No date",
-	"on-track": "On track",
-	done: "Done"
-};
-var CLOSED_REBUILD = /* @__PURE__ */ new Set(["Completed", "Cancelled"]);
-var NEEDS_TARGET = /* @__PURE__ */ new Set([
-	"In progress",
-	"Waiting",
-	"Testing"
+	"Cancelled",
+	"Phone Resolved"
 ]);
-function isoDay$1(v) {
-	if (!v) return "";
-	const m = String(v).trim().match(/^(\d{4}-\d{2}-\d{2})/);
-	return m ? m[1] : "";
+/** Terminal PM statuses. */
+var CLOSED_PM = /* @__PURE__ */ new Set(["Completed", "Cancelled"]);
+function isClosedCall(row) {
+	return !!row.done || CLOSED_CALL.has(row.status ?? "");
 }
-function isRebuildStatus(v) {
-	return !!v && REBUILD_STATUSES.includes(v);
+function isOpenCall(row) {
+	return !isClosedCall(row);
 }
-function isWaitingReason(v) {
-	return !!v && WAITING_REASONS.includes(v);
+function isClosedPm(row) {
+	return !!row.done || CLOSED_PM.has(row.status ?? "");
 }
-function isRebuildPriority(v) {
-	return !!v && REBUILD_PRIORITIES.includes(v);
+function isOpenPm(row) {
+	return !isClosedPm(row);
 }
-function daysBetween(fromIso, toIso) {
+//#endregion
+//#region src/lib/ops/install-status.ts
+/** Single source of truth for prep vs installed. */
+function isInstalled(row) {
+	return !!row.complete || row.equipStatus === "Installed";
+}
+function isOpenInstall(row) {
+	return !isInstalled(row);
+}
+function installedPatch(row, today) {
+	return {
+		equipStatus: "Installed",
+		complete: true,
+		completedAt: today,
+		installDate: row?.installDate || today
+	};
+}
+//#endregion
+//#region src/lib/ops/iso.ts
+/** YYYY-MM-DD from a date-like value. Empty string when missing or unparseable. */
+function isoDay(v) {
+	if (v == null || v === "") return "";
+	if (v instanceof Date && !Number.isNaN(v.getTime())) return v.toISOString().slice(0, 10);
+	const s = String(v).trim();
+	const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+	if (m) return m[1];
+	const t = Date.parse(s);
+	if (Number.isFinite(t)) return new Date(t).toISOString().slice(0, 10);
+	return "";
+}
+function isoDayOrNull(v) {
+	return isoDay(v) || null;
+}
+function diffDays(fromIso, toIso) {
 	const a = Date.parse(`${fromIso}T00:00:00Z`);
 	const b = Date.parse(`${toIso}T00:00:00Z`);
 	return Math.round((b - a) / 864e5);
-}
-function computeRebuildMetrics(row, today) {
-	const status = isRebuildStatus(row.status) ? row.status : "Queued";
-	const created = isoDay$1(row.createdAt) || today;
-	const started = isoDay$1(row.actualStart) || created;
-	const target = isoDay$1(row.targetComplete);
-	const doneOn = isoDay$1(row.actualComplete);
-	const changed = isoDay$1(row.statusChangedAt) || created;
-	const daysOpen = daysBetween(started, today);
-	const daysToTarget = target ? daysBetween(today, target) : null;
-	const daysInStatus = daysBetween(changed, today);
-	const daysLateEarly = doneOn && target ? daysBetween(target, doneOn) : null;
-	let health = "on-track";
-	if (CLOSED_REBUILD.has(status)) health = "done";
-	else if (NEEDS_TARGET.has(status) && !target) health = "no-date";
-	else if (target && target < today) health = "overdue";
-	else if (status === "Waiting") health = "at-risk";
-	else if (target && daysToTarget != null && daysToTarget <= 3) health = "at-risk";
-	else if (target) health = "on-track";
-	else health = "on-track";
-	let clockFlag = null;
-	if (!CLOSED_REBUILD.has(status)) {
-		if (health === "overdue") clockFlag = "overdue";
-		else if (status === "Waiting" && daysInStatus > 5) clockFlag = "waiting-long";
-	}
-	return {
-		health,
-		daysOpen,
-		daysToTarget,
-		daysInStatus,
-		daysLateEarly,
-		clockFlag
-	};
-}
-function validateRebuild(draft) {
-	if (!draft.title.trim()) return "Give the rebuild a project name.";
-	if (!draft.account.trim()) return "Pick an account, or Katz shop / stock.";
-	if (!isRebuildStatus(draft.status)) return "Pick a status.";
-	const status = draft.status;
-	if (status === "Waiting") {
-		if (!isWaitingReason(draft.reasonCode)) return "Waiting needs a reason delayed before save.";
-		if (draft.reasonCode === "Other" && !draft.reasonDetail?.trim()) return "Spell out the other reason.";
-	}
-	if ((draft.prevStatus ?? "Queued") === "Queued" && status !== "Queued") {
-		if (!draft.owner?.trim()) return "Assign an owner before leaving Queued.";
-		if (!isoDay$1(draft.targetComplete)) return "Set a target complete date before leaving Queued.";
-	}
-	if (NEEDS_TARGET.has(status) && !isoDay$1(draft.targetComplete)) return "In progress, Waiting, and Testing need a target complete date.";
-	if (NEEDS_TARGET.has(status) && !draft.owner?.trim() && status === "In progress") return "In progress needs an owner and a target date.";
-	return null;
-}
-function priorityLabel(p) {
-	if (p === "high") return "High";
-	if (p === "committed-to-customer") return "Committed to customer";
-	return "Normal";
 }
 //#endregion
 //#region src/lib/ops/clock.ts
@@ -135,11 +73,6 @@ function todayChicago() {
 function addDays(iso, days) {
 	const [y, m, d] = iso.split("-").map(Number);
 	return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
-}
-function diffDays(fromIso, toIso) {
-	const a = Date.parse(`${fromIso}T00:00:00Z`);
-	const b = Date.parse(`${toIso}T00:00:00Z`);
-	return Math.round((b - a) / 864e5);
 }
 function weekBounds(today) {
 	const [y, m, d] = today.split("-").map(Number);
@@ -154,17 +87,49 @@ function weekBounds(today) {
 		nextEnd: addDays(nextStart, 6)
 	};
 }
+function monthBounds(iso) {
+	const [y, m] = iso.split("-").map(Number);
+	const year = y || 1970;
+	const month = m || 1;
+	const start = `${year}-${String(month).padStart(2, "0")}-01`;
+	const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+	return {
+		start,
+		end: `${year}-${String(month).padStart(2, "0")}-${String(last).padStart(2, "0")}`,
+		year,
+		month
+	};
+}
+function addMonths(iso, delta) {
+	const [y, m] = iso.split("-").map(Number);
+	const dt = new Date(Date.UTC(y || 1970, (m || 1) - 1 + delta, 1));
+	return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-01`;
+}
+function formatMonthLabel(iso) {
+	const { year, month } = monthBounds(iso);
+	return new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString("en-US", {
+		month: "long",
+		year: "numeric",
+		timeZone: "UTC"
+	});
+}
 function formatWeekLabel(start, end) {
 	const a = /* @__PURE__ */ new Date(`${start}T00:00:00`);
 	const b = /* @__PURE__ */ new Date(`${end}T00:00:00`);
 	const fmt = (dt) => `${dt.getMonth() + 1}/${dt.getDate()}`;
 	return `${fmt(a)} – ${fmt(b)}`;
 }
-function closedCall(status, done) {
-	return done || CLOSED_CALL.has(status ?? "");
-}
+var WEEKDAYS = [
+	"Mon",
+	"Tue",
+	"Wed",
+	"Thu",
+	"Fri",
+	"Sat",
+	"Sun"
+];
 function serviceFlag(input, today) {
-	if (closedCall(input.status, input.done)) return null;
+	if (isClosedCall(input)) return null;
 	if (input.scheduled && input.scheduled < today) return {
 		code: "past_due",
 		label: "Past due — scheduled",
@@ -204,7 +169,7 @@ function serviceFlag(input, today) {
 	return null;
 }
 function pmFlag(input, today) {
-	if (input.done || CLOSED_PM.has(input.status)) return null;
+	if (isClosedPm(input)) return null;
 	if (!input.projected) return {
 		code: "needs_date",
 		label: "Needs PM date",
@@ -235,7 +200,7 @@ function pmFlag(input, today) {
 	return null;
 }
 function installFlag(input, today, week) {
-	if (input.complete || input.equipStatus === "Installed") return null;
+	if (isInstalled(input)) return null;
 	const date = input.installDate;
 	const inWindow = !!date && date >= week.start && date <= week.nextEnd;
 	const past = !!date && date < today;
@@ -318,9 +283,122 @@ function moneyExact(n) {
 	}).format(v);
 }
 //#endregion
+//#region src/lib/ops/rebuild-model.ts
+/** Pure rebuild project rules — no server imports. */
+var REBUILD_STATUSES = [
+	"Queued",
+	"In progress",
+	"Waiting",
+	"Testing",
+	"Ready",
+	"Completed",
+	"Cancelled"
+];
+var WAITING_REASONS = [
+	"Parts on order",
+	"Parts not available",
+	"Waiting on decision",
+	"Waiting on customer",
+	"Tech / bench unavailable",
+	"Scope changed",
+	"Found additional failure",
+	"Other"
+];
+var REBUILD_PRIORITIES = [
+	"normal",
+	"high",
+	"committed-to-customer"
+];
+var SHOP_ACCOUNT = "Katz shop / stock";
+var HEALTH_RANK = {
+	overdue: 0,
+	"at-risk": 1,
+	"no-date": 2,
+	"on-track": 3,
+	done: 4
+};
+var HEALTH_LABEL = {
+	overdue: "Overdue",
+	"at-risk": "At risk",
+	"no-date": "No date",
+	"on-track": "On track",
+	done: "Done"
+};
+var CLOSED_REBUILD = /* @__PURE__ */ new Set(["Completed", "Cancelled"]);
+var NEEDS_TARGET = /* @__PURE__ */ new Set([
+	"In progress",
+	"Waiting",
+	"Testing"
+]);
+function isRebuildStatus(v) {
+	return !!v && REBUILD_STATUSES.includes(v);
+}
+function isWaitingReason(v) {
+	return !!v && WAITING_REASONS.includes(v);
+}
+function isRebuildPriority(v) {
+	return !!v && REBUILD_PRIORITIES.includes(v);
+}
+function computeRebuildMetrics(row, today) {
+	const status = isRebuildStatus(row.status) ? row.status : "Queued";
+	const created = isoDay(row.createdAt) || today;
+	const started = isoDay(row.actualStart) || created;
+	const target = isoDay(row.targetComplete);
+	const doneOn = isoDay(row.actualComplete);
+	const changed = isoDay(row.statusChangedAt) || created;
+	const daysOpen = diffDays(started, today);
+	const daysToTarget = target ? diffDays(today, target) : null;
+	const daysInStatus = diffDays(changed, today);
+	const daysLateEarly = doneOn && target ? diffDays(target, doneOn) : null;
+	let health = "on-track";
+	if (CLOSED_REBUILD.has(status)) health = "done";
+	else if (NEEDS_TARGET.has(status) && !target) health = "no-date";
+	else if (target && target < today) health = "overdue";
+	else if (status === "Waiting") health = "at-risk";
+	else if (target && daysToTarget != null && daysToTarget <= 3) health = "at-risk";
+	else if (target) health = "on-track";
+	else health = "on-track";
+	let clockFlag = null;
+	if (!CLOSED_REBUILD.has(status)) {
+		if (health === "overdue") clockFlag = "overdue";
+		else if (status === "Waiting" && daysInStatus > 5) clockFlag = "waiting-long";
+	}
+	return {
+		health,
+		daysOpen,
+		daysToTarget,
+		daysInStatus,
+		daysLateEarly,
+		clockFlag
+	};
+}
+function validateRebuild(draft) {
+	if (!draft.title.trim()) return "Give the rebuild a project name.";
+	if (!draft.account.trim()) return "Pick an account, or Katz shop / stock.";
+	if (!isRebuildStatus(draft.status)) return "Pick a status.";
+	const status = draft.status;
+	if (status === "Waiting") {
+		if (!isWaitingReason(draft.reasonCode)) return "Waiting needs a reason delayed before save.";
+		if (draft.reasonCode === "Other" && !draft.reasonDetail?.trim()) return "Spell out the other reason.";
+	}
+	if ((draft.prevStatus ?? "Queued") === "Queued" && status !== "Queued") {
+		if (!draft.owner?.trim()) return "Assign an owner before leaving Queued.";
+		if (!isoDay(draft.targetComplete)) return "Set a target complete date before leaving Queued.";
+	}
+	if (NEEDS_TARGET.has(status) && !isoDay(draft.targetComplete)) return "In progress, Waiting, and Testing need a target complete date.";
+	if (NEEDS_TARGET.has(status) && !draft.owner?.trim() && status === "In progress") return "In progress needs an owner and a target date.";
+	return null;
+}
+function priorityLabel(p) {
+	if (p === "high") return "High";
+	if (p === "committed-to-customer") return "Committed to customer";
+	return "Normal";
+}
+//#endregion
 //#region src/lib/ops/rebuilds.ts
 var rebuilds_exports = /* @__PURE__ */ __exportAll({
 	SHOP_ACCOUNT: () => SHOP_ACCOUNT,
+	archiveRebuild: () => archiveRebuild,
 	createRebuild: () => createRebuild,
 	ensureRebuilds: () => ensureRebuilds,
 	listRebuildLinks: () => listRebuildLinks,
@@ -337,12 +415,6 @@ async function readySql() {
 	const { ensureSeeded } = await import("./seed.server.mjs");
 	await ensureSeeded();
 	return getSql();
-}
-function isoDay(v) {
-	if (v == null || v === "") return null;
-	if (v instanceof Date && !Number.isNaN(v.getTime())) return v.toISOString().slice(0, 10);
-	const m = String(v).trim().match(/^(\d{4}-\d{2}-\d{2})/);
-	return m ? m[1] : null;
 }
 function stamp(v) {
 	if (v == null) return "";
@@ -383,6 +455,8 @@ async function ensureRebuilds(sql) {
 	await sql.query("create index if not exists rebuilds_status_idx on rebuilds (status)");
 	await sql.query("create index if not exists rebuilds_owner_idx on rebuilds (owner)");
 	await sql.query("create index if not exists rebuilds_account_idx on rebuilds (lower(account))");
+	await sql.query("alter table rebuilds add column if not exists archived boolean not null default false");
+	await sql.query("create index if not exists rebuilds_archived_idx on rebuilds (archived)");
 }
 function mapRebuild(r, today, accountRep = null, aviKatz = false) {
 	const status = isRebuildStatus(r.status) ? r.status : "Queued";
@@ -390,9 +464,9 @@ function mapRebuild(r, today, accountRep = null, aviKatz = false) {
 	const metrics = computeRebuildMetrics({
 		status,
 		owner: r.owner,
-		targetComplete: isoDay(r.target_complete),
-		actualStart: isoDay(r.actual_start),
-		actualComplete: isoDay(r.actual_complete),
+		targetComplete: isoDayOrNull(r.target_complete),
+		actualStart: isoDayOrNull(r.actual_start),
+		actualComplete: isoDayOrNull(r.actual_complete),
 		createdAt: stamp(r.created_at),
 		statusChangedAt: stamp(r.status_changed_at),
 		reasonCode: r.reason_code
@@ -408,10 +482,10 @@ function mapRebuild(r, today, accountRep = null, aviKatz = false) {
 		status,
 		reasonCode: r.reason_code,
 		reasonDetail: r.reason_detail,
-		plannedStart: isoDay(r.planned_start),
-		targetComplete: isoDay(r.target_complete),
-		actualStart: isoDay(r.actual_start),
-		actualComplete: isoDay(r.actual_complete),
+		plannedStart: isoDayOrNull(r.planned_start),
+		targetComplete: isoDayOrNull(r.target_complete),
+		actualStart: isoDayOrNull(r.actual_start),
+		actualComplete: isoDayOrNull(r.actual_complete),
 		priority,
 		notes: r.notes,
 		installId: num(r.install_id),
@@ -428,7 +502,7 @@ function mapRebuild(r, today, accountRep = null, aviKatz = false) {
 async function loadRebuilds(sql, today = todayChicago()) {
 	await ensureRebuilds(sql);
 	await seedRebuilds(sql);
-	const rows = await sql.query("select * from rebuilds order by id desc");
+	const rows = await sql.query("select * from rebuilds where coalesce(archived, false) = false order by id desc");
 	const marks = await loadAccountMarks(sql).catch(() => ({
 		rep: /* @__PURE__ */ new Map(),
 		ak: /* @__PURE__ */ new Set()
@@ -497,20 +571,15 @@ var listRebuilds = createServerFn({ method: "GET" }).middleware([deskMiddleware]
 });
 var listRebuildOwners = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
 	const sql = await readySql();
-	const techs = (await loadTechs(sql)).filter((t) => t.active).map((t) => t.name);
-	const reps = (await loadReps(sql)).filter((r) => r.active).map((r) => r.name);
-	const users = await sql.query("select username from desk_accounts where approved = true and coalesce(username, '') <> '' order by lower(username)");
+	const techs = (await loadTechs(sql)).filter((t) => t.active);
 	const seen = /* @__PURE__ */ new Set();
 	const out = [];
-	for (const n of [
-		...techs,
-		...reps,
-		...users.map((u) => u.username)
-	]) {
-		const key = n.trim().toLowerCase();
+	for (const t of techs) {
+		const name = t.name.trim();
+		const key = name.toLowerCase();
 		if (!key || seen.has(key)) continue;
 		seen.add(key);
-		out.push(n.trim());
+		out.push(name);
 	}
 	return out;
 });
@@ -594,9 +663,9 @@ var createRebuild = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 		status,
 		waiting ? emptyToNull(data.reasonCode) : null,
 		waiting ? emptyToNull(data.reasonDetail) : null,
-		isoDay(data.plannedStart),
-		isoDay(data.targetComplete),
-		isoDay(data.actualStart) || (status === "In progress" ? todayChicago() : null),
+		isoDayOrNull(data.plannedStart),
+		isoDayOrNull(data.targetComplete),
+		isoDayOrNull(data.actualStart) || (status === "In progress" ? todayChicago() : null),
 		isRebuildPriority(data.priority) ? data.priority : "normal",
 		emptyToNull(data.notes),
 		data.installId ?? null,
@@ -622,7 +691,7 @@ var updateRebuild = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 	if (!cur) throw new Error("Rebuild not found");
 	const nextStatus = data.status != null ? data.status : cur.status;
 	const nextOwner = data.owner !== void 0 ? emptyToNull(data.owner) : cur.owner;
-	const nextTarget = data.targetComplete !== void 0 ? isoDay(data.targetComplete) : isoDay(cur.target_complete);
+	const nextTarget = data.targetComplete !== void 0 ? isoDayOrNull(data.targetComplete) : isoDayOrNull(cur.target_complete);
 	const nextReason = data.reasonCode !== void 0 ? emptyToNull(data.reasonCode) : cur.reason_code;
 	const nextDetail = data.reasonDetail !== void 0 ? emptyToNull(data.reasonDetail) : cur.reason_detail;
 	const nextTitle = data.title != null ? data.title.trim() : cur.title;
@@ -641,9 +710,9 @@ var updateRebuild = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 	const leavingWaiting = cur.status === "Waiting" && nextStatus !== "Waiting";
 	const reasonCode = nextStatus === "Waiting" ? nextReason : leavingWaiting ? null : nextReason;
 	const reasonDetail = nextStatus === "Waiting" ? nextDetail : leavingWaiting ? null : nextDetail;
-	let actualStart = data.actualStart !== void 0 ? isoDay(data.actualStart) : isoDay(cur.actual_start);
+	let actualStart = data.actualStart !== void 0 ? isoDayOrNull(data.actualStart) : isoDayOrNull(cur.actual_start);
 	if (!actualStart && nextStatus === "In progress" && cur.status !== "In progress") actualStart = todayChicago();
-	let actualComplete = data.actualComplete !== void 0 ? isoDay(data.actualComplete) : isoDay(cur.actual_complete);
+	let actualComplete = data.actualComplete !== void 0 ? isoDayOrNull(data.actualComplete) : isoDayOrNull(cur.actual_complete);
 	if (nextStatus === "Completed" && cur.status !== "Completed" && !actualComplete) actualComplete = todayChicago();
 	if (CLOSED_REBUILD.has(nextStatus) === false && nextStatus !== "Completed") {
 		if (data.actualComplete === null) actualComplete = null;
@@ -680,7 +749,7 @@ var updateRebuild = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 		nextStatus,
 		reasonCode,
 		reasonDetail,
-		data.plannedStart !== void 0 ? isoDay(data.plannedStart) : isoDay(cur.planned_start),
+		data.plannedStart !== void 0 ? isoDayOrNull(data.plannedStart) : isoDayOrNull(cur.planned_start),
 		nextTarget,
 		actualStart,
 		actualComplete,
@@ -695,16 +764,26 @@ var updateRebuild = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 		leavingWaiting && cur.reason_code ? `kept last reason in history · ${cur.reason_code}` : null,
 		changed("reason", cur.reason_code, reasonCode),
 		changed("owner", cur.owner, nextOwner),
-		changed("target", isoDay(cur.target_complete), nextTarget),
-		changed("planned start", isoDay(cur.planned_start), data.plannedStart !== void 0 ? isoDay(data.plannedStart) : isoDay(cur.planned_start)),
-		changed("actual start", isoDay(cur.actual_start), actualStart),
-		changed("actual complete", isoDay(cur.actual_complete), actualComplete)
+		changed("target", isoDayOrNull(cur.target_complete), nextTarget),
+		changed("planned start", isoDayOrNull(cur.planned_start), data.plannedStart !== void 0 ? isoDayOrNull(data.plannedStart) : isoDayOrNull(cur.planned_start)),
+		changed("actual start", isoDayOrNull(cur.actual_start), actualStart),
+		changed("actual complete", isoDayOrNull(cur.actual_complete), actualComplete)
 	].filter((x) => !!x);
 	if (parts.length) {
 		const action = statusChanged ? "status" : parts.some((p) => p.startsWith("reason") || p.startsWith("kept")) ? "reason" : "updated";
 		await logActivity(sql, context.userId, data.id, action, parts.slice(0, 4).join(" · "));
 	}
 	return mapRebuild(row, todayChicago());
+});
+var archiveRebuild = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ id: number() }).parse(d)).handler(async ({ data, context }) => {
+	const sql = await readySql();
+	await requireEditor(sql, context.userId);
+	await ensureRebuilds(sql);
+	const cur = (await sql.query("select * from rebuilds where id = $1", [data.id]))[0];
+	if (!cur) throw new Error("Rebuild not found");
+	await sql.query(`update rebuilds set archived = true, updated_at = now() where id = $1`, [data.id]);
+	await logActivity(sql, context.userId, data.id, "removed", cur.title);
+	return { ok: true };
 });
 async function findWarehouse(sql, serial) {
 	const key = serialKey(serial);
@@ -1018,4 +1097,4 @@ function sortRebuildsForExport(rows) {
 	});
 }
 //#endregion
-export { weekBounds as C, SHOP_ACCOUNT as D, REBUILD_STATUSES as E, WAITING_REASONS as O, todayChicago as S, REBUILD_PRIORITIES as T, installFlag as _, loadRebuilds as a, pmFlag as b, sortRebuildsForExport as c, diffDays as d, formatLongDate as f, formatWeekLabel as g, formatShortDate as h, listRebuilds as i, priorityLabel as k, updateRebuild as l, formatPingTime as m, listRebuildLinks as n, pullRebuildSerial as o, formatNowChicago as p, listRebuildOwners as r, rebuilds_exports as s, createRebuild as t, addDays as u, money as v, HEALTH_LABEL as w, serviceFlag as x, moneyExact as y };
+export { pmFlag as A, CLOSED_CALL as B, formatPingTime as C, money as D, installFlag as E, isoDay as F, isOpenPm as G, isClosedCall as H, isoDayOrNull as I, installedPatch as L, todayChicago as M, weekBounds as N, moneyExact as O, diffDays as P, isInstalled as R, formatNowChicago as S, formatWeekLabel as T, isClosedPm as U, CLOSED_PM as V, isOpenCall as W, WEEKDAYS as _, listRebuilds as a, formatLongDate as b, rebuilds_exports as c, HEALTH_LABEL as d, REBUILD_PRIORITIES as f, priorityLabel as g, WAITING_REASONS as h, listRebuildOwners as i, serviceFlag as j, monthBounds as k, sortRebuildsForExport as l, SHOP_ACCOUNT as m, createRebuild as n, loadRebuilds as o, REBUILD_STATUSES as p, listRebuildLinks as r, pullRebuildSerial as s, archiveRebuild as t, updateRebuild as u, addDays as v, formatShortDate as w, formatMonthLabel as x, addMonths as y, isOpenInstall as z };

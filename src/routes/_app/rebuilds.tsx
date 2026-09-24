@@ -130,22 +130,22 @@ function Page() {
         />
       </StatRow>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Input className="max-w-xs" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search project, account, serial…" />
+      <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <Input className="h-9 w-64 shrink-0" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search project, account, serial…" aria-label="Search rebuilds" />
         {FILTERS.map((f) => (
           <button
             key={f.id}
             type="button"
             onClick={() => setChip(f.id)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs",
+              "inline-flex h-9 shrink-0 items-center rounded-full border px-3 text-sm",
               chip === f.id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
             )}
           >
             {f.label}
           </button>
         ))}
-        <div className="ml-auto flex gap-1">
+        <div className="flex shrink-0 gap-1">
           <Button type="button" size="sm" variant={view === "board" ? "default" : "outline"} onClick={() => setView("board")}>
             Board
           </Button>

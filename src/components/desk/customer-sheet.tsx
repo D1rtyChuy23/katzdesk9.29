@@ -9,11 +9,14 @@ import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
 import { formatShortDate, money, isOpenInstall } from "@/lib/ops/clock";
 import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, Recipe, ServiceJob } from "@/lib/ops/types";
+import { ComboField } from "@/components/ui/combo-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/separator";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
+import { InspectionBadge, PreInspectionPanel } from "./pre-inspection-panel";
+import { UnitPlaceField } from "./unit-place-field";
 import { JobSheet } from "./job-sheet";
 import { DealSheet, InstallSheet, PmSheet } from "./entity-sheets";
 import { RecipeEditorSheet } from "./recipe-sheet";
@@ -163,6 +166,7 @@ export function CustomerHistorySheet({
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [recipeDraft, setRecipeDraft] = useState<RecipeDraft | null>(null);
+  const [inspectId, setInspectId] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess(), enabled: customerId != null });
 
@@ -173,6 +177,7 @@ export function CustomerHistorySheet({
     setFilter("all");
     setQ("");
     setEditing(false);
+    setInspectId(null);
   }, [customerId, history.data?.name]);
 
   const rename = useMutation({
@@ -309,6 +314,12 @@ export function CustomerHistorySheet({
 
                 <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
 
+                <PreInspectionList
+                  installs={(data.installs ?? []).filter((i) => isOpenInstall(i))}
+                  openId={inspectId}
+                  onOpen={(id) => setInspectId((cur) => (cur === id ? null : id))}
+                />
+
                 <div className="mt-4">
                   <ProviderDispatchBlock customer={data.name} assignable />
                 </div>
@@ -401,10 +412,11 @@ export function CustomerHistorySheet({
       <JobSheet
         id={reviewing && selectedJob ? selectedJob.id : null}
         onClose={() => setReviewing(false)}
+        lockCustomer
       />
-      <PmSheet pm={reviewing ? selectedPm : null} onClose={() => setReviewing(false)} />
-      <InstallSheet row={reviewing ? selectedInstall : null} onClose={() => setReviewing(false)} />
-      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} />
+      <PmSheet pm={reviewing ? selectedPm : null} onClose={() => setReviewing(false)} lockCustomer />
+      <InstallSheet row={reviewing ? selectedInstall : null} onClose={() => setReviewing(false)} lockCustomer />
+      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} lockCustomer />
       <RecipeEditorSheet
         draft={recipeDraft}
         models={(directoryEquip.data ?? []).map((e) => e.name)}
@@ -421,6 +433,51 @@ export function CustomerHistorySheet({
         onSave={(n) => rename.mutate(n)}
       />
     </>
+  );
+}
+
+function PreInspectionList({
+  installs,
+  openId,
+  onOpen,
+}: {
+  installs: Install[];
+  openId: number | null;
+  onOpen: (id: number) => void;
+}) {
+  if (!installs.length) return null;
+  return (
+    <section className="mt-4" data-testid="account-pre-inspection">
+      <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+        Pre-inspection
+      </h2>
+      <ul className="mt-2 space-y-2">
+        {installs.map((i) => (
+          <li key={i.id} className="overflow-hidden rounded-xl border border-border">
+            <button
+              type="button"
+              onClick={() => onOpen(i.id)}
+              className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left hover:bg-muted/60"
+              aria-expanded={openId === i.id}
+            >
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{i.wo || i.equipment || "Install"}</span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {formatShortDate(i.installDate ?? i.received)}
+                  {i.inspection?.failedItems?.length ? ` · ${i.inspection.failedItems.join(", ")}` : ""}
+                </span>
+              </span>
+              <InspectionBadge
+                overall={i.inspection?.overall}
+                passed={i.inspection?.passedCount}
+                total={i.inspection?.machineCount}
+              />
+            </button>
+            {openId === i.id ? <PreInspectionPanel installId={i.id} /> : null}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -459,6 +516,11 @@ function AccountEquipmentList({
                   .filter(Boolean)
                   .join(" · ")}
               </p>
+              {row.serial ? (
+                <div className="mt-2">
+                  <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} />
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -475,7 +537,7 @@ function HistoryRow({ item, onOpen }: { item: HistoryItem; onOpen: () => void })
       <button
         type="button"
         onClick={onOpen}
-        className="flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
+        className="desk-lift flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
       >
         <span className="mt-0.5 w-16 shrink-0 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
           {KIND_LABEL[item.kind]}
@@ -520,8 +582,19 @@ function CustomerRecipes({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not copy"),
   });
+  const [housePick, setHousePick] = useState("");
+  const [customerPick, setCustomerPick] = useState("");
+  const [shown, setShown] = useState<Recipe | null>(null);
   const templates = house.filter((r) => r.isTemplate || !r.customer);
   const others = house.filter((r) => r.customer && r.customer.toLowerCase() !== customer.toLowerCase());
+
+  function ownLabel(r: Recipe) {
+    const dup = recipes.filter((x) => x.equipmentModel === r.equipmentModel).length > 1;
+    return dup ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
+  }
+  function otherLabel(r: Recipe) {
+    return `${r.customer} · ${r.equipmentModel}`;
+  }
 
   return (
     <section className="mt-6">
@@ -546,73 +619,86 @@ function CustomerRecipes({
           Add
         </Button>
       </div>
-      <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
-        {recipes.map((r) => (
-          <li key={r.id}>
-            <button
-              type="button"
-              className="flex w-full items-start justify-between gap-2 px-3 py-2.5 text-left hover:bg-muted/60"
-              onClick={() =>
-                onOpen({
-                  recipe: r,
-                  customer,
-                  equipmentModel: r.equipmentModel,
-                  installId: r.installId,
-                  copiedFrom: r.copiedFrom,
-                  lockCustomer: true,
-                })
-              }
-            >
-              <span>
-                <span className="block font-medium">{r.equipmentModel}</span>
-                <span className="block text-xs text-muted-foreground">
-                  {previewSetting(r) || r.notes || "No settings yet"}
-                </span>
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      {!recipes.length ? <p className="mt-2 text-sm text-muted-foreground">No recipes on this account yet.</p> : null}
-
-      {templates.length ? (
-        <div className="mt-3">
-          <p className="text-xs text-muted-foreground">Copy a house template</p>
-          <ul className="mt-1 flex flex-wrap gap-1.5">
-            {templates.map((r) => (
-              <li key={r.id}>
-                <button
-                  type="button"
-                  className="rounded-full border border-border px-2.5 py-1 text-xs hover:bg-muted"
-                  disabled={copy.isPending}
-                  onClick={() => copy.mutate(r.id)}
-                >
-                  {r.equipmentModel}
-                </button>
-              </li>
-            ))}
-          </ul>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2" data-testid="account-recipe-pickers">
+        <ComboField
+          label="House template"
+          value={housePick}
+          allowCreate={false}
+          noun="template"
+          placeholder="Search house templates…"
+          emptyHint="No house templates"
+          menuInFlow
+          items={templates.map((r) => ({ id: r.id, name: r.equipmentModel }))}
+          disabled={copy.isPending}
+          onChange={(name) => {
+            setHousePick(name);
+            setCustomerPick("");
+            setShown(null);
+            const hit = templates.find((r) => r.equipmentModel === name);
+            if (hit) copy.mutate(hit.id);
+          }}
+        />
+        <ComboField
+          label="Customer template"
+          value={customerPick}
+          allowCreate={false}
+          noun="template"
+          placeholder={recipes.length ? "Search customer templates…" : "No customer templates"}
+          emptyHint="No customer templates"
+          menuInFlow
+          items={[
+            ...recipes.map((r) => ({ id: r.id, name: ownLabel(r) })),
+            ...others.map((r) => ({ id: -r.id, name: otherLabel(r) })),
+          ]}
+          disabled={copy.isPending}
+          onChange={(name) => {
+            setCustomerPick(name);
+            setHousePick("");
+            const own = recipes.find((r) => ownLabel(r) === name);
+            if (own) {
+              setShown(own);
+              return;
+            }
+            const hit = others.find((r) => otherLabel(r) === name);
+            if (hit) {
+              setShown(null);
+              copy.mutate(hit.id);
+            }
+          }}
+        />
+      </div>
+      {shown ? (
+        <div className="mt-3 rounded-xl border border-border bg-card p-4">
+          <p className="font-medium">{shown.equipmentModel}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {previewSetting(shown) || shown.notes || "No settings yet"}
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="mt-3"
+            onClick={() =>
+              onOpen({
+                recipe: shown,
+                customer,
+                equipmentModel: shown.equipmentModel,
+                installId: shown.installId,
+                copiedFrom: shown.copiedFrom,
+                lockCustomer: true,
+              })
+            }
+          >
+            Edit
+          </Button>
         </div>
-      ) : null}
-      {others.length ? (
-        <div className="mt-3">
-          <p className="text-xs text-muted-foreground">Reuse from another account</p>
-          <ul className="mt-1 flex flex-wrap gap-1.5">
-            {others.slice(0, 12).map((r) => (
-              <li key={r.id}>
-                <button
-                  type="button"
-                  className="rounded-full border border-border px-2.5 py-1 text-xs hover:bg-muted"
-                  disabled={copy.isPending}
-                  onClick={() => copy.mutate(r.id)}
-                >
-                  {r.customer} · {r.equipmentModel}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground">
+          {recipes.length
+            ? "Pick a template. The settings stay on this account."
+            : "No customer templates."}
+        </p>
+      )}
     </section>
   );
 }

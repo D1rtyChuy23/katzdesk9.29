@@ -1,4 +1,4 @@
-export type DeskRole = "sales" | "service" | null;
+export type DeskRole = "sales" | "service" | "warehouse" | null;
 export type ViewLayout = "list" | "board" | "compact";
 
 export type MyViewPrefs = {

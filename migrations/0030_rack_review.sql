@@ -1,0 +1,14 @@
+-- Shop-only rack review and test status. Not install status.
+alter table assets add column if not exists review_status text;
+alter table assets add column if not exists review_note text;
+alter table assets add column if not exists review_actor text;
+alter table assets add column if not exists review_origin text;
+alter table assets add column if not exists review_from_site text;
+alter table assets add column if not exists review_from_pallet text;
+alter table assets add column if not exists review_from_level int;
+alter table assets add column if not exists review_from_line int;
+alter table assets add column if not exists review_from_status text;
+alter table assets add column if not exists shop_test text;
+alter table assets add column if not exists shop_test_note text;
+alter table assets add column if not exists shop_test_by text;
+alter table assets add column if not exists shop_test_at timestamptz;

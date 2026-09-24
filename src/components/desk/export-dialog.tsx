@@ -16,6 +16,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { TechFilter } from "./tech-select";
+import { OwnerFilter } from "./owner-select";
 
 const PREFS_KEY = "katz-desk-export";
 
@@ -255,7 +256,11 @@ export function ExportDialog({
           <div className="min-w-0 sm:col-span-2">
             <Label>{type === "rebuilds" ? "Owner" : "Tech"}</Label>
             <div className="mt-1 max-w-xs">
-              <TechFilter value={tech} onChange={setTech} className="w-full" />
+              {type === "rebuilds" ? (
+                <OwnerFilter value={tech} onChange={setTech} className="w-full" emptyLabel="Any owner" />
+              ) : (
+                <TechFilter value={tech} onChange={setTech} className="w-full" />
+              )}
             </div>
           </div>
           <div className="min-w-0 sm:col-span-2">

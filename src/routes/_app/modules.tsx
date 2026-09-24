@@ -125,12 +125,13 @@ function Page() {
           )}
         </ChartCard>
       </section>
-      <div className="mt-5 flex flex-wrap items-center gap-2">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter modules…" className="max-w-xs" />
+      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter modules…" className="h-9 w-56 shrink-0" aria-label="Filter modules" />
         <SortSelect
           value={sort}
           onChange={setSort}
           options={[...SORT_STATUS, ...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_TECH]}
+          className="shrink-0"
         />
       </div>
       <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card">
@@ -139,7 +140,7 @@ function Page() {
             key={m.id}
             type="button"
             onClick={() => setSelected(m.id)}
-            className="grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[8rem_1fr_8rem_8rem] md:items-center"
+            className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[8rem_1fr_8rem_8rem] md:items-center"
           >
             <span className="font-mono text-xs">{m.moduleId}</span>
             <span>

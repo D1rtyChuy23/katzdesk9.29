@@ -1,96 +1,11 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { A as boolean, F as object, P as number, R as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, mn as number, un as boolean, vn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
 import { r as getSql } from "./popup.server.mjs";
-import { i as deskMiddleware } from "./access.mjs";
+import { n as normalizeCustomerKey } from "./customer-key.mjs";
+import { a as deskMiddleware } from "./access.mjs";
+import { l as isBarn, m as slotId, p as siteLabel } from "./warehouse.mjs";
 import { a as catalogModels, c as listedEquipment, n as parseMachinesJson, r as serializeMachines } from "./machines.mjs";
-//#region src/lib/ops/warehouse.ts
-var BACK_PALLETS = [
-	"B",
-	"C",
-	"D",
-	"E",
-	"F",
-	"G",
-	"H",
-	"I",
-	"J",
-	"K",
-	"L",
-	"M",
-	"N",
-	"O",
-	"P",
-	"Q"
-];
-var FRONT_PALLETS = [
-	"J",
-	"K",
-	"L",
-	"M",
-	"N",
-	"O",
-	"P",
-	"Q"
-];
-var LEVELS = [
-	4,
-	3,
-	2,
-	1
-];
-var LOCATION_SITES = [
-	"front-lobby",
-	"service-room",
-	"production",
-	"training",
-	"out-of-state",
-	"san-antonio",
-	"dallas"
-];
-var SITE_LABEL = {
-	"barn-back": "Barn · back rack",
-	"barn-front": "Barn · front rack",
-	"front-lobby": "Front Lobby",
-	"service-room": "Service Room",
-	"production": "Production",
-	"training": "Training Room",
-	"out-of-state": "Out of State",
-	"san-antonio": "San Antonio",
-	dallas: "Dallas",
-	field: "Pulled from the barn",
-	sold: "Sold"
-};
-var SITE_PURPOSE = {
-	"front-lobby": "Front Lobby",
-	"service-room": "Service bench",
-	production: "Production",
-	training: "Training",
-	"out-of-state": "Out of state",
-	"san-antonio": "SA warehouse",
-	dallas: "Dallas warehouse"
-};
-var BARN_EQUIP_CAPACITY = 1056;
-function bayFor(site, pallet) {
-	if (site === "barn-back" && pallet) {
-		if ("BCDE".includes(pallet)) return "catering";
-		if ("FG".includes(pallet)) return "dispenser";
-	}
-	return "general";
-}
-function palletsFor(site) {
-	return site === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
-}
-function slotId(pallet, level, line) {
-	return line ? `${pallet}-L${level} · ${line}` : `${pallet}-L${level}`;
-}
-function siteLabel(site) {
-	return SITE_LABEL[site] ?? site;
-}
-function isBarn(site) {
-	return site === "barn-back" || site === "barn-front";
-}
-//#endregion
 //#region src/lib/ops/serial-pull.ts
 var serial_pull_exports = /* @__PURE__ */ __exportAll({
 	applySerialPull: () => applySerialPull,
@@ -162,6 +77,21 @@ async function logActivity(sql, userId, entityType, entityId, action, detail) {
 		action,
 		detail ?? null
 	]);
+}
+async function loadAccountSerial(sql, raw) {
+	const key = serialKey(raw);
+	if (!key) return null;
+	const matches = (await sql.query(`select customer, catalog_model, serial, electrical, serial_key
+         from account_equipment
+        where serial_key is not null and serial_key <> ''`).catch(() => [])).filter((r) => (r.serial_key || serialKey(r.serial)) === key);
+	if (!matches.length) return null;
+	const row = matches[0];
+	return {
+		customer: row.customer,
+		catalogModel: row.catalog_model,
+		serial: row.serial,
+		electrical: row.electrical
+	};
 }
 async function loadBySerial(sql, raw) {
 	const key = serialKey(raw);
@@ -313,6 +243,69 @@ var applySerialPull = createServerFn({ method: "POST" }).middleware([deskMiddlew
 	const serial = data.serial.trim();
 	if (!serialKey(serial)) return notFoundResult(serial);
 	if (!data.installId && !data.jobId) throw new Error("Pick an install or ticket to attach this serial.");
+	let customer = "";
+	if (data.installId) {
+		const inst = (await sql.query("select customer from installs where id = $1", [data.installId]))[0];
+		if (!inst) throw new Error("Install not found");
+		customer = inst.customer;
+	} else if (data.jobId) {
+		const job = (await sql.query("select customer from service_jobs where id = $1", [data.jobId]))[0];
+		if (!job) throw new Error("Ticket not found");
+		customer = job.customer ?? "";
+	}
+	const accountHit = await loadAccountSerial(sql, serial);
+	if (accountHit) {
+		if (!!customer && normalizeCustomerKey(accountHit.customer) === normalizeCustomerKey(customer)) {
+			const notice = `Serial ${accountHit.serial ?? serial} is already on this account · ${accountHit.catalogModel}`;
+			if (data.installId) {
+				await writeInstallSerial(sql, data.installId, accountHit.serial ?? serial, data.machineIndex ?? null, {
+					model: accountHit.catalogModel,
+					powerVoltage: accountHit.electrical
+				});
+				await setInstallNotice(sql, data.installId, notice);
+			}
+			if (data.jobId) {
+				const job = (await sql.query("select kind, equipment from service_jobs where id = $1", [data.jobId]))[0];
+				if (job && !job.equipment && accountHit.catalogModel) await sql.query("update service_jobs set equipment = $2, updated_at = now() where id = $1", [data.jobId, accountHit.catalogModel]);
+				await setJobNotice(sql, data.jobId, notice);
+			}
+			return {
+				serial: accountHit.serial ?? serial,
+				found: true,
+				pulled: false,
+				needsConfirm: false,
+				alreadyHere: true,
+				allocatedTo: null,
+				notice,
+				model: accountHit.catalogModel,
+				powerVoltage: accountHit.electrical,
+				location: accountHit.customer,
+				assetId: null
+			};
+		}
+		const notice = `Serial ${accountHit.serial ?? serial} is on ${accountHit.customer}'s inventory — not moved.`;
+		if (data.installId) {
+			await writeInstallSerial(sql, data.installId, serial, data.machineIndex ?? null, {
+				model: accountHit.catalogModel,
+				powerVoltage: null
+			});
+			await setInstallNotice(sql, data.installId, notice);
+		}
+		if (data.jobId) await setJobNotice(sql, data.jobId, notice);
+		return {
+			serial: accountHit.serial ?? serial,
+			found: true,
+			pulled: false,
+			needsConfirm: false,
+			alreadyHere: false,
+			allocatedTo: accountHit.customer,
+			notice,
+			model: accountHit.catalogModel,
+			powerVoltage: null,
+			location: accountHit.customer,
+			assetId: null
+		};
+	}
 	const asset = await loadBySerial(sql, serial);
 	if (!asset) {
 		const result = notFoundResult(serial);
@@ -373,16 +366,9 @@ var applySerialPull = createServerFn({ method: "POST" }).middleware([deskMiddlew
 			assetId: hit.assetId
 		};
 	}
-	let customer = "";
-	if (data.installId) {
-		const inst = (await sql.query("select customer from installs where id = $1", [data.installId]))[0];
-		if (!inst) throw new Error("Install not found");
-		customer = inst.customer;
-	} else if (data.jobId) {
-		const job = (await sql.query("select customer, equipment from service_jobs where id = $1", [data.jobId]))[0];
-		if (!job) throw new Error("Ticket not found");
-		customer = job.customer ?? "";
-		if (!job.equipment && hit.model) await sql.query("update service_jobs set equipment = $2, updated_at = now() where id = $1", [data.jobId, hit.model]);
+	if (data.jobId) {
+		const job = (await sql.query("select equipment from service_jobs where id = $1", [data.jobId]))[0];
+		if (job && !job.equipment && hit.model) await sql.query("update service_jobs set equipment = $2, updated_at = now() where id = $1", [data.jobId, hit.model]);
 	}
 	const extra = !hit.available && hit.allocatedTo ? `was assigned to ${hit.allocatedTo}` : void 0;
 	await attachAsset(sql, context.userId, asset, {
@@ -414,4 +400,4 @@ var applySerialPull = createServerFn({ method: "POST" }).middleware([deskMiddlew
 	};
 });
 //#endregion
-export { BARN_EQUIP_CAPACITY as a, LOCATION_SITES as c, bayFor as d, isBarn as f, slotId as h, BACK_PALLETS as i, SITE_LABEL as l, siteLabel as m, serialKey as n, FRONT_PALLETS as o, palletsFor as p, serial_pull_exports as r, LEVELS as s, applySerialPull as t, SITE_PURPOSE as u };
+export { serialKey as n, serial_pull_exports as r, applySerialPull as t };

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
+import { flagOn } from "@/lib/ops/flag";
 import { parseMentions } from "@/lib/ops/mentions";
 
 export type Teammate = {
@@ -115,6 +116,36 @@ async function resolveCustomer(
     return null;
   }
   return null;
+}
+
+/** Tell every admin that Warehouse put a unit on a rack slot. Admins are not notified about their own adds. */
+export async function notifyAdminsRackReview(
+  sql: Sql,
+  fromUserId: string,
+  asset: { id: number; model: string; serial: string | null; slot: string },
+): Promise<void> {
+  await ensureTable(sql);
+  const me = await sql.query<{ is_admin: boolean; desk_role: string | null; username: string | null }>(
+    "select is_admin, desk_role, username from desk_accounts where user_id = $1",
+    [fromUserId],
+  );
+  const row = me[0];
+  if (!row || flagOn(row.is_admin) || row.desk_role !== "warehouse") return;
+  const who = row.username || "Warehouse";
+  const serial = asset.serial?.trim() ? ` SN ${asset.serial.trim()}` : "";
+  const body = `Needs review. ${who} added ${asset.model}${serial} to ${asset.slot}.`;
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean }>(
+    "select user_id, is_admin, approved from desk_accounts where user_id <> $1",
+    [fromUserId],
+  );
+  for (const admin of admins) {
+    if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
+    await sql.query(
+      `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
+       values ($1, $2, $3, $4, $5, 'asset', $6)`,
+      [admin.user_id, fromUserId, who, body, asset.slot, asset.id],
+    );
+  }
 }
 
 function previewLine(body: string): string {

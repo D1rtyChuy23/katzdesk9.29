@@ -24,6 +24,11 @@ import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/compo
 import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { CustomerCombo, EquipmentCombo } from "./directory-fields";
+import { UnitPlaceField, emptyPlaceDraft, type PlaceDraft } from "./unit-place-field";
+import { setAssetPlace } from "@/lib/ops/unit-place";
+import { lastMoveLine, placeDraftError, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
+import { getMyAccess } from "@/lib/ops/access";
+import { reviewRackUnit, setShopTest } from "@/lib/ops/rack-stock";
 import { toast } from "sonner";
 
 export function AssetSheet({
@@ -47,6 +52,12 @@ export function AssetSheet({
   const [retLevel, setRetLevel] = useState(1);
   const [installId, setInstallId] = useState<string>("");
   const [serviceCustomer, setServiceCustomer] = useState("");
+  const [place, setPlace] = useState<PlaceDraft>(emptyPlaceDraft());
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const warehouseOnly = me.data?.role === "warehouse";
+  const canStock = !!me.data?.isAdmin || warehouseOnly;
+  const [testNote, setTestNote] = useState("");
+  const [rejectNote, setRejectNote] = useState("");
 
   useEffect(() => {
     setModel(asset?.model ?? "");
@@ -54,6 +65,7 @@ export function AssetSheet({
     setSoldTo(asset?.soldTo ?? "");
     setInstallId("");
     setServiceCustomer("");
+    setPlace(emptyPlaceDraft());
   }, [asset?.id]);
 
   const save = useMutation({
@@ -132,25 +144,156 @@ export function AssetSheet({
                 {asset.needsBay ? <StatusBadge status="Needs bay" /> : null}
                 {bay === "catering" ? <StatusBadge status="Catering" /> : null}
                 {bay === "dispenser" ? <StatusBadge status="Dispenser" /> : null}
+                {asset.reviewStatus === "pending" ? <StatusBadge status="Pending review" /> : null}
+                {asset.shopTest === "tested" ? <StatusBadge status="Tested" /> : null}
+                {asset.shopTest === "needs-test" ? <StatusBadge status="Needs test" /> : null}
                 {asset.missingSerial ? <StatusBadge status="Serial missing" /> : null}
               </div>
             </SheetHeader>
             <SheetBody>
+            {canStock ? (
+              <div className="space-y-3 border-b border-border p-5">
+                <p className="text-xs tracking-wide text-muted-foreground uppercase">Shop test</p>
+                <p className="text-sm text-muted-foreground">
+                  Shop status only. Tested does not mean installed or left for a job.
+                  {asset.shopTest === "tested" && asset.shopTestBy
+                    ? ` Marked by ${asset.shopTestBy}${asset.shopTestAt ? ` · ${asset.shopTestAt.slice(0, 16).replace("T", " ")}` : ""}.`
+                    : ""}
+                </p>
+                <Input
+                  value={testNote}
+                  onChange={(e) => setTestNote(e.target.value)}
+                  placeholder="Optional note"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={asset.shopTest === "needs-test" ? "default" : "outline"}
+                    onClick={() =>
+                      void setShopTest({ data: { id: asset.id, shopTest: "needs-test", note: testNote || null } })
+                        .then(() => {
+                          toast.success("Needs test");
+                          void qc.invalidateQueries({ queryKey: ["assets"] });
+                        })
+                        .catch((e) => toast.error(e instanceof Error ? e.message : "Could not update"))
+                    }
+                  >
+                    Needs test
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={asset.shopTest === "tested" ? "default" : "outline"}
+                    onClick={() =>
+                      void setShopTest({ data: { id: asset.id, shopTest: "tested", note: testNote || null } })
+                        .then(() => {
+                          toast.success("Tested");
+                          void qc.invalidateQueries({ queryKey: ["assets"] });
+                        })
+                        .catch((e) => toast.error(e instanceof Error ? e.message : "Could not update"))
+                    }
+                  >
+                    Tested
+                  </Button>
+                </div>
+                {asset.shopTestNote ? <p className="text-xs text-muted-foreground">{asset.shopTestNote}</p> : null}
+              </div>
+            ) : null}
+            {me.data?.isAdmin && asset.reviewStatus === "pending" ? (
+              <div className="space-y-3 border-b border-border p-5" data-testid="rack-review">
+                <p className="text-xs tracking-wide text-muted-foreground uppercase">Needs review</p>
+                <p className="text-sm text-muted-foreground">
+                  Warehouse put this unit on the rack. Approve it, or reject with a note. Reject does not leave a second copy.
+                </p>
+                <Input
+                  value={rejectNote}
+                  onChange={(e) => setRejectNote(e.target.value)}
+                  placeholder="Note if you reject"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() =>
+                      void reviewRackUnit({ data: { id: asset.id, decision: "approve" } })
+                        .then(() => {
+                          toast.success("Approved");
+                          void qc.invalidateQueries({ queryKey: ["assets"] });
+                        })
+                        .catch((e) => toast.error(e instanceof Error ? e.message : "Could not approve"))
+                    }
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      void reviewRackUnit({ data: { id: asset.id, decision: "reject", note: rejectNote } })
+                        .then(() => {
+                          toast.success("Rejected");
+                          setRejectNote("");
+                          onClose();
+                          void qc.invalidateQueries({ queryKey: ["assets"] });
+                        })
+                        .catch((e) => toast.error(e instanceof Error ? e.message : "Could not reject"))
+                    }
+                  >
+                    Reject
+                  </Button>
+                </div>
+              </div>
+            ) : asset.reviewStatus === "rejected" && asset.reviewNote ? (
+              <div className="border-b border-border p-5">
+                <p className="text-xs tracking-wide text-muted-foreground uppercase">Rejected</p>
+                <p className="mt-1 text-sm">{asset.reviewNote}</p>
+              </div>
+            ) : null}
             <form
               key={asset.id}
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
-                save.mutate({
-                  id: asset.id,
-                  model,
-                  serial: String(fd.get("serial") || "") || null,
-                  qty: Number(fd.get("qty") || 1),
-                  customerOwned: owned || null,
-                  purpose: String(fd.get("purpose") || "") || null,
-                  notes: String(fd.get("notes") || "") || null,
-                });
+                const err = place.site ? placeDraftError(place) : null;
+                if (err) {
+                  toast.error(err);
+                  return;
+                }
+                save.mutate(
+                  {
+                    id: asset.id,
+                    model,
+                    serial: String(fd.get("serial") || "") || null,
+                    qty: Number(fd.get("qty") || 1),
+                    customerOwned: owned || null,
+                    purpose: String(fd.get("purpose") || "") || null,
+                    notes: String(fd.get("notes") || "") || null,
+                  },
+                  {
+                    onSuccess: async () => {
+                      if (!place.site) return;
+                      try {
+                        const next = await setAssetPlace({
+                          data: {
+                            id: asset.id,
+                            site: place.site,
+                            pallet: place.pallet || null,
+                            level: place.level ? Number(place.level) : null,
+                            otherLabel: place.otherLabel || null,
+                          },
+                        });
+                        toast.success(next.place ? `Now at ${next.place}` : "Location saved");
+                        setPlace(emptyPlaceDraft());
+                        void qc.invalidateQueries({ queryKey: ["assets"] });
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : "Could not set location");
+                      }
+                    },
+                  },
+                );
               }}
             >
               <div className="sm:col-span-2">
@@ -180,6 +323,31 @@ export function AssetSheet({
               <div className="sm:col-span-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea id="notes" name="notes" className="mt-1" defaultValue={asset.notes ?? ""} />
+              </div>
+              <div className="sm:col-span-2">
+                <p className="text-xs text-muted-foreground">
+                  Now:{" "}
+                  {unitPlaceLabel({
+                    site: asset.site,
+                    pallet: asset.pallet,
+                    level: asset.level,
+                    status: asset.status,
+                    soldTo: asset.soldTo,
+                    purpose: asset.purpose,
+                  })}
+                </p>
+                {lastMoveLine(asset.notes) ? (
+                  <p className="mt-1 text-xs text-muted-foreground">{lastMoveLine(asset.notes)}</p>
+                ) : null}
+                <div className="mt-2">
+                  <UnitPlaceField
+                    assetId={asset.id}
+                    serial={asset.serial ?? ""}
+                    model={asset.model}
+                    draft={place}
+                    onDraft={setPlace}
+                  />
+                </div>
               </div>
               <div className="flex justify-end sm:col-span-2">
                 <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
@@ -238,7 +406,7 @@ export function AssetSheet({
               </div>
             ) : null}
 
-            {asset.status === "ready" ? (
+            {asset.status === "ready" && !warehouseOnly ? (
               <div className="space-y-5 border-b border-border p-5">
                 <div className="space-y-3">
                   <p className="text-xs tracking-wide text-muted-foreground uppercase">Pull for install</p>
@@ -387,7 +555,8 @@ export function AssetSheet({
   );
 }
 
-function statusLabel(asset: { status: string; installId: number | null; purpose: string | null }) {
+function statusLabel(asset: { status: string; site?: string; installId: number | null; purpose: string | null }) {
+  if (asset.site === "staging") return "Staging";
   if (asset.status === "ready") return "Ready";
   if (asset.status === "deployed") return "In use";
   if (asset.status === "assigned") {

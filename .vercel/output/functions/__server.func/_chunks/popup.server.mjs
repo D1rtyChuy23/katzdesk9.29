@@ -85,6 +85,27 @@ var _0023_roles_reps_ak_default = "-- User roles, locked sales-rep list, Avi Kat
 //#region migrations/0024_rebuilds.sql?raw
 var _0024_rebuilds_default = "-- In-house rebuilds: shop projects, not field tickets.\n\ncreate table if not exists rebuilds (\n  id serial primary key,\n  title text not null,\n  account text not null,\n  equipment text,\n  serial text,\n  asset_id int,\n  owner text,\n  status text not null default 'Queued',\n  reason_code text,\n  reason_detail text,\n  planned_start date,\n  target_complete date,\n  actual_start date,\n  actual_complete date,\n  priority text not null default 'normal',\n  notes text,\n  install_id int,\n  job_id int,\n  serial_notice text,\n  status_changed_at timestamptz not null default now(),\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()\n);\n\ncreate index if not exists rebuilds_status_idx on rebuilds (status);\ncreate index if not exists rebuilds_owner_idx on rebuilds (owner);\ncreate index if not exists rebuilds_account_idx on rebuilds (lower(account));\ncreate index if not exists rebuilds_target_idx on rebuilds (target_complete);\n";
 //#endregion
+//#region migrations/0025_rebuilds_archive.sql?raw
+var _0025_rebuilds_archive_default = "-- Soft-remove rebuild projects from the board without deleting history.\nalter table rebuilds add column if not exists archived boolean not null default false;\ncreate index if not exists rebuilds_archived_idx on rebuilds (archived);\n";
+//#endregion
+//#region migrations/0026_warehouse_bays_ap.sql?raw
+var _0026_warehouse_bays_ap_default = "-- Relabel warehouse bays B–Q → A–P (shift one letter down).\nupdate assets\n  set pallet = chr(ascii(upper(btrim(pallet))) - 1)\n  where pallet is not null and length(btrim(pallet)) = 1 and upper(btrim(pallet)) ~ '^[B-Q]$';\nupdate assets\n  set origin_pallet = chr(ascii(upper(btrim(origin_pallet))) - 1)\n  where origin_pallet is not null and length(btrim(origin_pallet)) = 1 and upper(btrim(origin_pallet)) ~ '^[B-Q]$';\n";
+//#endregion
+//#region migrations/0027_account_equipment.sql?raw
+var _0027_account_equipment_default = "-- Equipment sitting at customer accounts (import list). Does not create tickets.\n\ncreate table if not exists account_equipment (\n  id              serial primary key,\n  customer        text not null,\n  catalog_model   text not null,\n  equipment_name  text not null,\n  serial          text,\n  serial_key      text,\n  install_date    date,\n  electrical      text,\n  ownership       text,\n  created_at      timestamptz not null default now(),\n  updated_at      timestamptz not null default now()\n);\ncreate index if not exists account_equipment_customer_idx\n  on account_equipment (lower(customer));\ncreate index if not exists account_equipment_serial_idx\n  on account_equipment (serial_key)\n  where serial_key is not null and serial_key <> '';\ncreate index if not exists account_equipment_model_idx\n  on account_equipment (lower(catalog_model));\n";
+//#endregion
+//#region migrations/0028_pre_inspection.sql?raw
+var _0028_pre_inspection_default = "-- One site pre-inspection per install. Photos stay on the inspection, not loose account files.\n\ncreate table if not exists install_inspections (\n  install_id       int primary key references installs(id) on delete cascade,\n  inspector        text,\n  inspected_on     date,\n  site_contact     text,\n  notes            text,\n  override_reason  text,\n  override_by      text,\n  updated_at       timestamptz not null default now()\n);\n\ncreate table if not exists install_inspection_items (\n  id           serial primary key,\n  install_id   int not null references installs(id) on delete cascade,\n  category     text not null,\n  status       text not null default 'Not inspected',\n  notes        text,\n  updated_at   timestamptz not null default now(),\n  unique (install_id, category)\n);\n\ncreate table if not exists install_inspection_photos (\n  id           serial primary key,\n  install_id   int not null references installs(id) on delete cascade,\n  category     text not null,\n  caption      text,\n  mime         text not null default 'image/jpeg',\n  data_url     text not null,\n  uploaded_by  text,\n  uploaded_at  timestamptz not null default now()\n);\n\ncreate index if not exists install_inspection_photos_cat_idx\n  on install_inspection_photos (install_id, category);\n";
+//#endregion
+//#region migrations/0029_inspection_units.sql?raw
+var _0029_inspection_units_default = "-- Pre-inspection checks and photos belong to one account equipment line, not the whole café.\n\nalter table install_inspection_items\n  add column if not exists equipment_id int references account_equipment(id) on delete cascade;\n\nalter table install_inspection_photos\n  add column if not exists equipment_id int references account_equipment(id) on delete cascade;\n\nalter table install_inspection_items\n  drop constraint if exists install_inspection_items_install_id_category_key;\n\ncreate unique index if not exists install_inspection_items_unit_cat_idx\n  on install_inspection_items (install_id, equipment_id, category);\n\ncreate table if not exists install_inspection_units (\n  install_id    int not null references installs(id) on delete cascade,\n  equipment_id  int not null references account_equipment(id) on delete cascade,\n  primary key (install_id, equipment_id)\n);\n\ncreate index if not exists install_inspection_photos_unit_idx\n  on install_inspection_photos (install_id, equipment_id, category);\n";
+//#endregion
+//#region migrations/0030_rack_review.sql?raw
+var _0030_rack_review_default = "-- Shop-only rack review and test status. Not install status.\nalter table assets add column if not exists review_status text;\nalter table assets add column if not exists review_note text;\nalter table assets add column if not exists review_actor text;\nalter table assets add column if not exists review_origin text;\nalter table assets add column if not exists review_from_site text;\nalter table assets add column if not exists review_from_pallet text;\nalter table assets add column if not exists review_from_level int;\nalter table assets add column if not exists review_from_line int;\nalter table assets add column if not exists review_from_status text;\nalter table assets add column if not exists shop_test text;\nalter table assets add column if not exists shop_test_note text;\nalter table assets add column if not exists shop_test_by text;\nalter table assets add column if not exists shop_test_at timestamptz;\n";
+//#endregion
+//#region migrations/0031_core_hole.sql?raw
+var _0031_core_hole_default = "-- Per-machine answer: does this unit need a counter core for utility lines?\nalter table install_inspection_units\n  add column if not exists core_needed text;\n";
+//#endregion
 //#region src/lib/db.ts
 var rawDatabaseUrl = typeof process !== "undefined" ? process.env.DATABASE_URL : void 0;
 var databaseUrl$1 = rawDatabaseUrl && rawDatabaseUrl.trim() ? rawDatabaseUrl : void 0;
@@ -198,7 +219,14 @@ async function createPgliteSql() {
 			"/migrations/0021_wo_duplicates.sql": _0021_wo_duplicates_default,
 			"/migrations/0022_serial_notice.sql": _0022_serial_notice_default,
 			"/migrations/0023_roles_reps_ak.sql": _0023_roles_reps_ak_default,
-			"/migrations/0024_rebuilds.sql": _0024_rebuilds_default
+			"/migrations/0024_rebuilds.sql": _0024_rebuilds_default,
+			"/migrations/0025_rebuilds_archive.sql": _0025_rebuilds_archive_default,
+			"/migrations/0026_warehouse_bays_ap.sql": _0026_warehouse_bays_ap_default,
+			"/migrations/0027_account_equipment.sql": _0027_account_equipment_default,
+			"/migrations/0028_pre_inspection.sql": _0028_pre_inspection_default,
+			"/migrations/0029_inspection_units.sql": _0029_inspection_units_default,
+			"/migrations/0030_rack_review.sql": _0030_rack_review_default,
+			"/migrations/0031_core_hole.sql": _0031_core_hole_default
 		});
 		const doneRows = await pg.query("select name from _migrations");
 		const done = new Set(doneRows.rows.map((r) => r.name));

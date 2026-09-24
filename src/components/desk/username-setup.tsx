@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { signOut } from "@/lib/auth/client";
 import { checkUsername, registerAccount } from "@/lib/ops/access";
+import { clearInviteToken, readInviteToken } from "@/lib/ops/invite-client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -18,8 +19,10 @@ export function UsernameSetup({
   const [username, setUsername] = useState("");
   const [hint, setHint] = useState<string | null>(null);
   const save = useMutation({
-    mutationFn: (name: string) => registerAccount({ data: { username: name, email } }),
+    mutationFn: (name: string) =>
+      registerAccount({ data: { username: name, email, token: readInviteToken() } }),
     onSuccess: (row) => {
+      if (row.approved) clearInviteToken();
       toast.success(
         row.approved ? `Welcome, ${row.username}` : `Username saved as ${row.username}`,
       );

@@ -192,24 +192,24 @@ function ProvidersPane({
 
   return (
     <div>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="relative min-w-0 flex-1">
+      <div className="flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <div className="relative w-56 shrink-0">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search providers…" className="pl-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search providers…" className="h-9 pl-9" aria-label="Search providers" />
         </div>
-        <SelectField className="sm:w-44" value={status} onChange={(e) => setStatus(e.target.value)} allowEmpty emptyLabel="Any status">
+        <SelectField className="h-9 w-44 shrink-0" value={status} onChange={(e) => setStatus(e.target.value)} allowEmpty emptyLabel="Any status" aria-label="Filter by status">
           <option value="Active">Active</option>
           <option value="Pending Setup">Pending Setup</option>
           <option value="Prospect">Prospect</option>
           <option value="Inactive">Inactive</option>
           <option value="unconfirmed">Unconfirmed</option>
         </SelectField>
-        <SelectField className="sm:w-28" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State">
+        <SelectField className="h-9 w-28 shrink-0" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State" aria-label="Filter by state">
           {states.map((s) => (
             <option key={s}>{s}</option>
           ))}
         </SelectField>
-        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA]} />
+        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA]} className="shrink-0" />
       </div>
       <ul className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         {rows.map((p) => (
@@ -220,7 +220,7 @@ function ProvidersPane({
             <button
               type="button"
               onClick={() => onOpen(p.id)}
-              className="grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center"
+              className="desk-lift grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center"
             >
               <span>
                 <span className="flex flex-wrap items-center gap-1.5">
@@ -313,12 +313,12 @@ function AccountsPane({
 
   return (
     <div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <div className="relative min-w-0 flex-1">
+      <div className="flex flex-wrap items-center gap-2" data-testid="list-toolbar">
+        <div className="relative w-56 shrink-0">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search accounts…" className="pl-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search accounts…" className="h-9 pl-9" aria-label="Search accounts" />
         </div>
-        <SelectField className="sm:w-28" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State">
+        <SelectField className="h-9 w-28 shrink-0" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State" aria-label="Filter by state">
           {states.map((s) => (
             <option key={s}>{s}</option>
           ))}

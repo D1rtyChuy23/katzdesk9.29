@@ -148,7 +148,15 @@ export default defineConfig(({ command, isPreview }) => ({
     // PWA head + ?install=1 tutorial page; runs before Start/Nitro.
     grokPwaPlugin(),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      router: {
+        // One script for the whole desk. Split route files 404 after publish
+        // ("Failed to fetch dynamically imported module") and every page
+        // dies on the loading clock. Empty groupings are kept (a nullish
+        // default would fall back to splitting each page).
+        codeSplittingOptions: { defaultBehavior: [] },
+      },
+    }),
     ...(command === "build" || isPreview
       ? [
           nitro({

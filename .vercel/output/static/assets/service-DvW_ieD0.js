@@ -1,1 +1,0 @@
-import{b as e}from"./utils-BsHacS-x.js";import{t}from"./jobs-page-bdib0kYW.js";import{r as n}from"./index-BmAz1PCq.js";var r=e();function i(){let{open:e}=n.useSearch();return(0,r.jsx)(t,{kind:`service`,title:`Service tracker`,lede:`Field calls on a 48-hour clock. Active work stays on top; completed history is one toggle away.`,initialOpen:e})}export{i as component};

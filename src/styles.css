@@ -169,3 +169,75 @@ html[data-contrast="high"] :focus-visible {
 .sheet-panel {
   overscroll-behavior: none;
 }
+
+@layer components {
+  @media (hover: hover) and (pointer: fine) {
+    /* Lift only the control under the pointer. A parent does not scale when a child control is hovered. */
+    html:not([data-motion="reduced"]) :is(
+      a[href],
+      button,
+      input:not([type="hidden"]):not([type="file"]),
+      textarea,
+      select,
+      summary,
+      [role="button"],
+      [role="menuitem"],
+      [role="option"],
+      [role="tab"],
+      [role="checkbox"],
+      [role="radio"],
+      [role="switch"],
+      label:has(> input[type="file"]),
+      label:has(> input[type="checkbox"]),
+      label:has(> input[type="radio"]),
+      .desk-lift
+    ) {
+      transition-property: transform, box-shadow;
+      transition-duration: 160ms;
+      transition-timing-function: ease-out;
+    }
+    html:not([data-motion="reduced"]) :is(
+      a[href],
+      button,
+      input:not([type="hidden"]):not([type="file"]),
+      textarea,
+      select,
+      summary,
+      [role="button"],
+      [role="menuitem"],
+      [role="option"],
+      [role="tab"],
+      [role="checkbox"],
+      [role="radio"],
+      [role="switch"],
+      label:has(> input[type="file"]),
+      label:has(> input[type="checkbox"]),
+      label:has(> input[type="radio"]),
+      .desk-lift
+    ):hover:not(:has(
+      :is(
+        a[href],
+        button,
+        input:not([type="hidden"]):not([type="file"]),
+        textarea,
+        select,
+        summary,
+        [role="button"],
+        [role="menuitem"],
+        [role="option"],
+        [role="tab"],
+        [role="checkbox"],
+        [role="radio"],
+        [role="switch"],
+        label:has(> input[type="file"]),
+        label:has(> input[type="checkbox"]),
+        label:has(> input[type="radio"])
+      ):hover
+    )) {
+      position: relative;
+      z-index: 1;
+      transform: translateY(-1px) scale(1.012);
+      box-shadow: 0 6px 14px rgb(28 25 23 / 0.12);
+    }
+  }
+}

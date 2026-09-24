@@ -9,6 +9,7 @@ import {
   listDeskAccounts,
   listDeskInvites,
   revokeInvite,
+  resendInvite,
   setAccountApproved,
   setAccountCanAddCustomers,
   setAccountRole,
@@ -27,20 +28,21 @@ export const Route = createFileRoute("/_app/access")({
   component: Page,
 });
 
-function inviteBody(inv: { email: string | null; username: string | null }, origin: string) {
+function inviteBody(inv: { email: string | null; username: string | null; token: string }, origin: string) {
   const bits = [
     inv.username ? `username ${inv.username}` : null,
     inv.email ? `email ${inv.email}` : null,
   ].filter(Boolean);
-  const who = bits.join(" or ") || "the username you were given";
+  const who = bits.join(" or ") || "any username";
+  const link = inv.token ? `${origin}/login?invite=${encodeURIComponent(inv.token)}` : `${origin}/login`;
+  const home = origin.includes("grok.me") ? origin : "https://katzdesk.grok.me";
   return `You're invited to Katz Desk.
 
-Open this link and create an account:
-${origin}/login
+Open this link. It lets you in for 14 days — you do not need a second approval:
+${link}
 
-Use ${who}. Invited accounts skip the wait.
-
-If you already use Google or X, sign in with that, pick a username, and you'll be in.`;
+Create an account (${who}), or continue with Google or X on that same page.
+After you are in, use ${home} next time. You do not need this link again.`;
 }
 
 function copyText(text: string) {
@@ -103,11 +105,10 @@ function Page() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
   });
   const setRole = useMutation({
-    mutationFn: (d: { userId: string; role: "sales" | "service" | null }) => setAccountRole({ data: d }),
+    mutationFn: (d: { userId: string; role: "sales" | "service" | "warehouse" | null }) => setAccountRole({ data: d }),
     onSuccess: (row) => {
-      toast.success(
-        row.role ? `${row.username} is ${row.role === "sales" ? "Sales" : "Service"}` : `${row.username} has no role yet`,
-      );
+      const name = row.role === "sales" ? "Sales" : row.role === "service" ? "Service" : row.role === "warehouse" ? "Warehouse" : "";
+      toast.success(name ? `${row.username} is ${name}` : `${row.username} has no role yet`);
       void qc.invalidateQueries({ queryKey: ["access"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not set role"),
@@ -143,6 +144,14 @@ function Page() {
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
   });
+  const resend = useMutation({
+    mutationFn: (id: number) => resendInvite({ data: { id } }),
+    onSuccess: (inv) => {
+      toast.success(`New link for ${inv.displayName || inv.username || inv.email || "them"}. Copy invite and send it.`);
+      void qc.invalidateQueries({ queryKey: ["access"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not resend"),
+  });
 
   const [sort, setSort] = useDeskSort("access", "date-desc");
   const signingUp = (list.data ?? []).filter((a) => !a.usernameChosen && !a.denied);
@@ -157,7 +166,7 @@ function Page() {
     [list.data, sort],
   );
   const canAssignRoles = !!me.data?.canAssignRoles;
-  const needsRole = active.filter((a) => !a.role);
+  const needsRole = active.filter((a) => !a.isAdmin && !a.role);
   const pendingInvites = invites.data ?? [];
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -184,12 +193,16 @@ function Page() {
       <header>
         <h1 className="font-display text-3xl font-medium tracking-tight">Access</h1>
         <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          Save an invite, then send them the login link. They get in as soon as they create an
-          account with that email or username — no extra approval click. Grant “add customers” so
-          they can put new account names on the list.
+          Save an invite, then send them the link. Opening that link lets them in — Google, X, or a
+          new password. They do not wait for a second approval.
           {canAssignRoles
-            ? " Assign Sales or Service so My View lands on the right boards. Unassigned people stay flagged until you pick a role."
+            ? " Assign Sales, Service, or Warehouse to other people. Your admin login does not need a role. Only you can set Warehouse. New invites land on Service unless you pick another role."
             : ""}
+        </p>
+        <p className="mt-3 max-w-xl rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-foreground">
+          If someone sees “katzdesk.grok.me is private”, Grok has not shared the published site with
+          them yet. Desk invites cannot open that lock. In Grok, set this app to Public, or share it
+          with their Grok account. That does not require a rebuild.
         </p>
 
         <div className="mt-3">
@@ -222,7 +235,7 @@ function Page() {
               id="invite-username"
               autoComplete="off"
               className="mt-1"
-              placeholder="optional, e.g. amanda.s"
+              placeholder="optional, e.g. Pedro Jr"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -250,8 +263,12 @@ function Page() {
 
       <section className="mt-8">
         <h2 className="text-xs tracking-wide text-muted-foreground uppercase">
-          Pending invites ({pendingInvites.length})
+          Invites ({pendingInvites.length})
         </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Invited means the link still works. Expired means resend. After they sign in they show as
+          Active below and can use the main KatzDesk URL.
+        </p>
         <ul className="mt-2 overflow-hidden rounded-xl border border-border bg-card">
           {pendingInvites.map((inv) => (
             <InviteRow
@@ -260,6 +277,8 @@ function Page() {
               origin={origin}
               onRevoke={() => revoke.mutate(inv.id)}
               revoking={revoke.isPending}
+              onResend={() => resend.mutate(inv.id)}
+              resending={resend.isPending}
             />
           ))}
           {pendingInvites.length === 0 ? (
@@ -388,7 +407,7 @@ function Page() {
             Needs a role ({needsRole.length})
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Existing logins stay unassigned until you pick Sales or Service. Role only changes My View defaults — it does not hide tickets.
+            Existing logins stay unassigned until you pick Sales, Service, or Warehouse. Admins do not need a role.
           </p>
           <ul className="mt-2 overflow-hidden rounded-xl border border-warning/40 bg-card">
             {needsRole.map((a) => (
@@ -438,20 +457,20 @@ function Page() {
                 <p className="font-medium">
                   {a.username}
                   {a.isAdmin ? (
-                    <span className="ml-2 text-xs text-muted-foreground">admin</span>
-                  ) : a.canAddCustomers ? (
-                    <span className="ml-2 text-xs text-muted-foreground">can add customers</span>
-                  ) : null}
-                  {canAssignRoles && a.role ? (
+                    <span className="ml-2 text-xs text-muted-foreground">admin · Active</span>
+                  ) : (
+                    <span className="ml-2 text-xs text-muted-foreground">Active</span>
+                  )}
+                  {canAssignRoles && a.role && !a.isAdmin ? (
                     <span className="ml-2 text-xs text-muted-foreground">{a.role}</span>
-                  ) : canAssignRoles && !a.role ? (
+                  ) : canAssignRoles && !a.role && !a.isAdmin ? (
                     <span className="ml-2 text-xs text-warning">needs role</span>
                   ) : null}
                 </p>
                 <p className="truncate text-sm text-muted-foreground">{a.email ?? "No email"}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {canAssignRoles ? (
+                {canAssignRoles && !a.isAdmin ? (
                   <RolePicker
                     value={a.role}
                     disabled={setRole.isPending}
@@ -495,18 +514,18 @@ function RolePicker({
   onChange,
   disabled,
 }: {
-  value: "sales" | "service" | null;
-  onChange: (role: "sales" | "service" | null) => void;
+  value: "sales" | "service" | "warehouse" | null;
+  onChange: (role: "sales" | "service" | "warehouse" | null) => void;
   disabled?: boolean;
 }) {
   return (
     <SelectField
-      className="h-9 w-36"
+      className="h-9 w-40"
       value={value ?? ""}
       disabled={disabled}
       onChange={(e) => {
         const v = e.target.value;
-        onChange(v === "sales" || v === "service" ? v : null);
+        onChange(v === "sales" || v === "service" || v === "warehouse" ? v : null);
       }}
       allowEmpty
       emptyLabel="Needs role"
@@ -514,6 +533,7 @@ function RolePicker({
     >
       <option value="sales">Sales</option>
       <option value="service">Service</option>
+      <option value="warehouse">Warehouse</option>
     </SelectField>
   );
 }
@@ -523,22 +543,32 @@ function InviteRow({
   origin,
   onRevoke,
   revoking,
+  onResend,
+  resending,
 }: {
   inv: DeskInvite;
   origin: string;
   onRevoke: () => void;
   revoking: boolean;
+  onResend: () => void;
+  resending: boolean;
 }) {
   const body = inviteBody(inv, origin);
   const mailto = inv.email
     ? `mailto:${encodeURIComponent(inv.email)}?subject=${encodeURIComponent("You're invited to Katz Desk")}&body=${encodeURIComponent(body)}`
     : null;
+  const label = inv.state === "expired" ? "Expired" : "Invited";
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 last:border-b-0">
       <div className="min-w-0">
-        <p className="font-medium">{inv.username || inv.email || "Invite"}</p>
+        <p className="font-medium">
+          {inv.displayName || inv.username || inv.email || "Invite"}
+          <span className={`ml-2 text-xs ${inv.state === "expired" ? "text-warning" : "text-muted-foreground"}`}>
+            {label}
+          </span>
+        </p>
         <p className="truncate text-sm text-muted-foreground">
-          {[inv.email, inv.username && inv.email ? `@${inv.username}` : null]
+          {[inv.email, inv.username ? `@${inv.username}` : null]
             .filter(Boolean)
             .join(" · ") || "No email"}
           {` · from ${inv.invitedBy}`}
@@ -546,6 +576,9 @@ function InviteRow({
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" disabled={resending} onClick={onResend}>
+          Resend invite
+        </Button>
         <Button size="sm" variant="outline" onClick={() => void copyText(body)}>
           Copy invite
         </Button>

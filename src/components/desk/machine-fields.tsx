@@ -2,6 +2,7 @@ import { Input, Label } from "@/components/ui/input";
 import type { MachineSpec } from "@/lib/ops/machines";
 import type { SerialPullResult } from "@/lib/ops/serial-pull";
 import { SerialPullField } from "./serial-notice";
+import { UnitPlaceField } from "./unit-place-field";
 
 export function MachineFields({
   specs,
@@ -58,6 +59,9 @@ export function MachineFields({
                 onChange={(e) => onChange(patch(index, { powerVoltage: e.target.value }))}
               />
             </div>
+          </div>
+          <div className="mt-3">
+            <UnitPlaceField serial={spec.serial} model={spec.equipment} />
           </div>
         </fieldset>
       ))}

@@ -1,215 +1,97 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { A as boolean, F as object, P as number, R as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, mn as number, un as boolean, vn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
 import { r as getSql } from "./popup.server.mjs";
-import { i as deskMiddleware, s as isLiveDeskOwner } from "./access.mjs";
-import { r as PRODUCER_INITIALS, t as DEFAULT_REPS } from "./rep-match.mjs";
-//#region src/lib/ops/lookups.ts
-var TECHNICIANS = [
-	"Ryan",
-	"Oliver",
-	"Josh",
-	"Charles",
-	"Bill",
-	"Lance",
-	"Jesus",
+import { a as deskMiddleware, b as flagOn, c as isLiveDeskOwner } from "./access.mjs";
+import { t as normalizeName } from "./norm.mjs";
+//#region src/lib/ops/tech-match.ts
+/** Corrigo-spelled service techs. Display names on the roster dropdown. */
+var DEFAULT_TECHS = [
+	"Ryan Gloria",
+	"Charles Foster",
+	"Oliver Garcia",
+	"Joshua Harper",
+	"Lance Oden",
+	"Jesus Garcia",
+	"Bill McKinley",
+	"Brandon Chappell",
 	"3rd Party"
 ];
-var CALL_STATUSES = [
-	"Open",
-	"Dispatched",
-	"In Progress",
-	"Follow-up Needed",
-	"Phone Resolved",
-	"Completed",
-	"Cancelled"
-];
-var CALL_TYPES = [
-	"Field Service",
-	"In-House Rebuild",
-	"Installation"
-];
-var PM_STATUSES = [
-	"Pending Scheduling",
-	"Scheduled",
-	"Awaiting Parts",
-	"Ready to Dispatch",
-	"In Progress",
-	"Completed",
-	"Cancelled"
-];
-var PM_STYLES = [
-	"6 month PM",
-	"12 month PM",
-	"36 month PM",
-	"Grinder PM"
-];
-var PARTS_STATUSES = [
-	"Yes - All Available",
-	"Partial",
-	"No - Awaiting Parts",
-	"On Order",
-	"TBD / Check Inventory"
-];
-var EQUIP_STATUSES = [
-	"Ready",
-	"Not Ready",
-	"Installed"
-];
-var REQS_READY = ["Ready", "Not Ready"];
-var PAYMENT_TERMS = [
-	"Payment Plan",
-	"50% Down + 50% upon install/30 days after",
-	"50% Down / 50% at Install or Net 30",
-	"Lease",
-	"Paid in Full",
-	"No Purchased Equipment"
-];
-var MODULE_PLATFORMS = [
-	"Cameo",
-	"Enigma / e'Line",
-	"Legacy"
-];
-var MODULE_TYPES = [
-	"Brew Module",
-	"Medium Brew Module",
-	"Large Brew Module",
-	"Steam S Module",
-	"Steam M Module",
-	"Hydraulic Module",
-	"Grinder Module",
-	"Milk Module",
-	"Pump Module",
-	"Powder Module"
-];
-var MODULE_STATUSES = [
-	"Not Started",
-	"In Progress",
-	"Waiting on Parts",
-	"Ready",
-	"Ship to Eversys (Core Swap)",
-	"At Eversys - Awaiting Return",
-	"Installed at Account",
-	"Retired / Scrapped"
-];
-var URGENCIES = [
-	"Emergency",
-	"High",
-	"Normal",
-	"Low"
-];
-var URGENCY_RANK = {
-	Emergency: 0,
-	High: 1,
-	Normal: 2,
-	Low: 3
-};
-var CLOSED_CALL = /* @__PURE__ */ new Set([
-	"Completed",
-	"Cancelled",
-	"Phone Resolved"
-]);
-var CLOSED_PM = /* @__PURE__ */ new Set(["Completed", "Cancelled"]);
-var PRODUCER_INITIAL_VALUES = new Set(Object.values(PRODUCER_INITIALS).map((s) => s.toLowerCase()));
-function normalizeName(s) {
-	return s.trim().toLowerCase().replace(/['’]/g, "");
+var ALIASES = {};
+function addAlias(raw, canonical) {
+	const k = normalizeName(raw);
+	if (k) ALIASES[k] = canonical;
 }
-function nameTokens(raw) {
-	if (!raw) return [];
-	const n = normalizeName(raw);
-	if (!n) return [];
-	return [n, ...n.split(/[\s@._+\-]+/).filter(Boolean)];
+var firstCounts = /* @__PURE__ */ new Map();
+var lastCounts = /* @__PURE__ */ new Map();
+for (const name of DEFAULT_TECHS) {
+	if (name === "3rd Party") continue;
+	const parts = name.split(/\s+/);
+	const first = parts[0].toLowerCase();
+	const last = parts[parts.length - 1].toLowerCase();
+	firstCounts.set(first, (firstCounts.get(first) ?? 0) + 1);
+	lastCounts.set(last, (lastCounts.get(last) ?? 0) + 1);
 }
-/** Keys used to decide whether a handoff item belongs to the signed-in person. */
-function userMatchKeys(user) {
-	const keys = /* @__PURE__ */ new Set();
-	if (!user) return keys;
-	const add = (raw) => {
-		for (const t of nameTokens(raw)) if (t.length >= 3 || t.length === 2 && PRODUCER_INITIAL_VALUES.has(t)) keys.add(t);
-	};
-	add(user.displayName);
-	add(user.primaryEmail);
-	add(user.username);
-	const parts = (user.displayName ?? "").trim().split(/\s+/).filter(Boolean);
-	if (parts.length >= 2) {
-		const initials = (parts[0][0] + parts[1][0]).toLowerCase();
-		if (PRODUCER_INITIAL_VALUES.has(initials)) keys.add(initials);
-	}
-	for (const rep of DEFAULT_REPS) {
-		const first = rep.first.toLowerCase();
-		const full = rep.name.toLowerCase();
-		const ini = rep.initials.toLowerCase();
-		if (keys.has(first) || keys.has(full) || keys.has(ini) || keys.has(rep.name.split(" ")[1]?.toLowerCase() ?? "")) {
-			keys.add(first);
-			keys.add(full);
-			keys.add(ini);
-			for (const t of nameTokens(rep.name)) keys.add(t);
-		}
-	}
-	return keys;
+for (const name of DEFAULT_TECHS) {
+	addAlias(name, name);
+	if (name === "3rd Party") continue;
+	const parts = name.split(/\s+/);
+	const first = parts[0];
+	const last = parts[parts.length - 1];
+	if ((firstCounts.get(first.toLowerCase()) ?? 0) === 1) addAlias(first, name);
+	if (last !== first && (lastCounts.get(last.toLowerCase()) ?? 0) === 1) addAlias(last, name);
 }
-function namesMatchUser(user, ...names) {
-	const keys = userMatchKeys(user);
-	if (!keys.size) return false;
-	for (const name of names) for (const t of nameTokens(name)) if (keys.has(t)) return true;
+addAlias("Josh", "Joshua Harper");
+addAlias("Joshua", "Joshua Harper");
+addAlias("McKinsley", "Bill McKinley");
+addAlias("Bill McKinsley", "Bill McKinley");
+addAlias("third party", "3rd Party");
+addAlias("3rd", "3rd Party");
+addAlias("3rd-party", "3rd Party");
+/** Map a stored/typed spelling to the Corrigo roster name when unique. */
+function canonicalTechName(raw) {
+	const k = normalizeName(raw);
+	if (!k) return null;
+	return ALIASES[k] ?? null;
+}
+/** True when two technician strings are the same person (aliases included). */
+function sameTech(a, b) {
+	const na = normalizeName(a);
+	const nb = normalizeName(b);
+	if (!na || !nb) return false;
+	if (na === nb) return true;
+	const ca = canonicalTechName(a);
+	const cb = canonicalTechName(b);
+	if (ca && cb) return ca === cb;
+	if (ca && normalizeName(ca) === nb) return true;
+	if (cb && normalizeName(cb) === na) return true;
 	return false;
 }
 //#endregion
 //#region src/lib/ops/roster.ts
 var roster_exports = /* @__PURE__ */ __exportAll({
+	DEFAULT_TECHS: () => DEFAULT_TECHS,
 	addTech: () => addTech,
 	canUserEditRoster: () => canUserEditRoster,
+	canonicalTechName: () => canonicalTechName,
 	ensureRoster: () => ensureRoster,
 	listRosterCandidates: () => listRosterCandidates,
 	listTechs: () => listTechs,
 	loadTechs: () => loadTechs,
 	requireRosterEditor: () => requireRosterEditor,
 	rosterAdminUserId: () => rosterAdminUserId,
+	sameTech: () => sameTech,
 	setRosterAdmin: () => setRosterAdmin,
 	setTechActive: () => setTechActive,
 	techLabel: () => techLabel
 });
-var DEFAULT_ROSTER = [
-	{
-		name: "Ryan",
-		active: true
-	},
-	{
-		name: "Oliver",
-		active: true
-	},
-	{
-		name: "Josh",
-		active: true
-	},
-	{
-		name: "Charles",
-		active: true
-	},
-	{
-		name: "Bill",
-		active: true
-	},
-	{
-		name: "Lance",
-		active: true
-	},
-	{
-		name: "Jesus",
-		active: true
-	},
-	{
-		name: "3rd Party",
-		active: true
-	},
-	{
-		name: "Elias",
-		active: false
-	}
-];
-function flagOn(value) {
-	return value === true || value === 1 || value === "t" || value === "true" || value === "1";
-}
+var DEFAULT_ROSTER = [...DEFAULT_TECHS.map((name) => ({
+	name,
+	active: true
+})), {
+	name: "Elias",
+	active: false
+}];
 async function ensureRoster(sql) {
 	await sql.query(`
     create table if not exists desk_settings (
@@ -229,8 +111,7 @@ async function ensureRoster(sql) {
 	try {
 		await sql.query("create unique index if not exists desk_techs_name_lower_uidx on desk_techs (lower(name))");
 	} catch {}
-	const existing = await sql.query("select name, active from desk_techs");
-	if (!existing.length) {
+	if (!(await sql.query("select name, active from desk_techs")).length) {
 		let order = 10;
 		for (const row of DEFAULT_ROSTER) {
 			await sql.query(`insert into desk_techs (name, active, sort_order) values ($1, $2, $3)`, [
@@ -242,17 +123,35 @@ async function ensureRoster(sql) {
 		}
 		return;
 	}
+	const rows = await sql.query("select id, name, active from desk_techs");
+	for (const row of rows) {
+		const canon = canonicalTechName(row.name);
+		if (!canon || canon === row.name) continue;
+		if ((await sql.query("select id from desk_techs where lower(name) = lower($1) and id <> $2 limit 1", [canon, row.id]))[0]) await sql.query("delete from desk_techs where id = $1", [row.id]);
+		else await sql.query("update desk_techs set name = $2, active = true, updated_at = now() where id = $1", [row.id, canon]);
+	}
+	const after = await sql.query("select name from desk_techs");
+	const have = new Set(after.map((r) => r.name.trim().toLowerCase()));
+	let maxOrder = (await sql.query("select coalesce(max(sort_order), 0)::int as n from desk_techs"))[0]?.n ?? 0;
+	for (const name of DEFAULT_TECHS) if (have.has(name.toLowerCase())) await sql.query("update desk_techs set active = true, name = $2, updated_at = now() where lower(name) = lower($1)", [name, name]);
+	else {
+		maxOrder += 10;
+		await sql.query(`insert into desk_techs (name, active, sort_order) values ($1, true, $2)`, [name, maxOrder]);
+		have.add(name.toLowerCase());
+	}
 	await sql.query(`update desk_techs set active = false, updated_at = now()
       where lower(name) = 'elias' and active = true`);
-	if (!existing.some((r) => r.name.trim().toLowerCase() === "jesus")) {
-		const max = await sql.query("select coalesce(max(sort_order), 0)::int as n from desk_techs");
-		await sql.query(`insert into desk_techs (name, active, sort_order) values ($1, true, $2)`, ["Jesus", (max[0]?.n ?? 0) + 10]);
+	let order = 10;
+	for (const name of DEFAULT_TECHS) {
+		await sql.query("update desk_techs set sort_order = $2 where lower(name) = lower($1)", [name, order]);
+		order += 10;
 	}
+	await sql.query("update desk_techs set sort_order = $1 where lower(name) = 'elias'", [order + 40]);
 }
 async function loadTechs(sql) {
 	await ensureRoster(sql);
 	const rows = await sql.query("select id, name, active, sort_order from desk_techs order by sort_order, id");
-	if (!rows.length) return TECHNICIANS.map((name, i) => ({
+	if (!rows.length) return DEFAULT_TECHS.map((name, i) => ({
 		id: i + 1,
 		name,
 		active: true,
@@ -368,10 +267,7 @@ var setRosterAdmin = createServerFn({ method: "POST" }).middleware([deskMiddlewa
 });
 function techLabel(name, activeNames) {
 	if (!name) return "";
-	if (activeNames.has(name)) return name;
-	const hit = [...activeNames].find((n) => n.toLowerCase() === name.toLowerCase());
-	if (hit) return hit;
-	return `${name} (inactive)`;
+	return [...activeNames].find((n) => sameTech(n, name)) ?? `${name} (inactive)`;
 }
 //#endregion
-export { URGENCIES as C, TECHNICIANS as S, namesMatchUser as T, PARTS_STATUSES as _, roster_exports as a, PM_STYLES as b, techLabel as c, CLOSED_CALL as d, CLOSED_PM as f, MODULE_TYPES as g, MODULE_STATUSES as h, loadTechs as i, CALL_STATUSES as l, MODULE_PLATFORMS as m, listRosterCandidates as n, setRosterAdmin as o, EQUIP_STATUSES as p, listTechs as r, setTechActive as s, addTech as t, CALL_TYPES as u, PAYMENT_TERMS as v, URGENCY_RANK as w, REQS_READY as x, PM_STATUSES as y };
+export { roster_exports as a, techLabel as c, loadTechs as i, DEFAULT_TECHS as l, listRosterCandidates as n, setRosterAdmin as o, listTechs as r, setTechActive as s, addTech as t, sameTech as u };

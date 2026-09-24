@@ -14,15 +14,21 @@ const badgeVariants = cva(
         outline: "border border-border text-foreground",
         ink: "bg-ink text-ink-foreground",
       },
+      size: {
+        default: "",
+        tight:
+          "h-[1.125rem] shrink-0 whitespace-nowrap px-1.5 py-0 text-[11px] leading-none",
+      },
     },
-    defaultVariants: { variant: "default" },
+    defaultVariants: { variant: "default", size: "default" },
   },
 );
 
 export function Badge({
   className,
   variant,
+  size,
   ...props
 }: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
-  return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return <span className={cn(badgeVariants({ variant, size }), className)} {...props} />;
 }

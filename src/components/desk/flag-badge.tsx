@@ -29,20 +29,29 @@ export function DuplicateBadge({
   return null;
 }
 
-export function StatusBadge({ status }: { status: string | null | undefined }) {
-  if (!status) return <Badge variant="outline">Unset</Badge>;
+export function StatusBadge({
+  status,
+  tight = false,
+  className,
+}: {
+  status: string | null | undefined;
+  tight?: boolean;
+  className?: string;
+}) {
+  const size = tight ? "tight" : "default";
+  if (!status) return <Badge variant="outline" size={size} className={className}>Unset</Badge>;
   const s = status.toLowerCase();
-  if (s.includes("complete") || s === "installed" || s === "ready" || s === "phone resolved") {
-    return <Badge variant="success">{status}</Badge>;
-  }
-  if (s.includes("cancel") || s.includes("fell") || s.includes("overdue") || s.includes("not ready")) {
-    return <Badge variant="danger">{status}</Badge>;
-  }
-  if (s.includes("needs bay") || s.includes("serial missing")) {
-    return <Badge variant="warn">{status}</Badge>;
-  }
-  if (s.includes("progress") || s.includes("dispatch") || s.includes("await") || s.includes("follow")) {
-    return <Badge variant="warn">{status}</Badge>;
-  }
-  return <Badge>{status}</Badge>;
+  let variant: "default" | "primary" | "danger" | "warn" | "success" | "outline" | "ink" = "default";
+  if (s.includes("complete") || s === "installed" || s === "ready" || s === "phone resolved") variant = "success";
+  else if (s.includes("cancel") || s.includes("fell") || s.includes("overdue") || s.includes("not ready")) variant = "danger";
+  else if (s.includes("needs bay") || s.includes("serial missing")) variant = "warn";
+  else if (s.includes("progress") || s.includes("dispatch") || s.includes("await") || s.includes("follow")) variant = "warn";
+  else if (s === "pending review") variant = "warn";
+  else if (s === "needs test") variant = "outline";
+  else if (s === "tested") variant = "primary";
+  return (
+    <Badge variant={variant} size={size} className={className}>
+      {status}
+    </Badge>
+  );
 }
