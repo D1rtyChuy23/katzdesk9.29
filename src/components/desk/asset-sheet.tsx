@@ -420,7 +420,7 @@ export function AssetSheet({
                   <p className="text-xs tracking-wide text-muted-foreground uppercase">Pull for install</p>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <SelectField
-                      className="flex-1"
+                      className="sm:flex-1"
                       value={installId}
                       onChange={(e) => setInstallId(e.target.value)}
                       allowEmpty

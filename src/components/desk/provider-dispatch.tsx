@@ -7,7 +7,7 @@ import {
   setProviderRole,
   unassignCustomerProvider,
 } from "@/lib/ops/network-api";
-import { providerStates, roleLabel, statusTone, type ProviderRole } from "@/lib/ops/network";
+import { roleLabel, statusTone, type ProviderRole } from "@/lib/ops/network";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";

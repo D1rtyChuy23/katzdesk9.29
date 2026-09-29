@@ -165,7 +165,7 @@ function isQa(username: string) {
 async function ownerAccount(sql: Sql): Promise<AccountLite | null> {
   const rows = await loadAccounts(sql);
   return (
-    rows.find((a) => isLiveDeskOwner(a.username, null, a.email)) ??
+    rows.find((a) => flagOn(a.is_admin) && isLiveDeskOwner(a.username, null, a.email)) ??
     null
   );
 }
@@ -210,11 +210,14 @@ export async function rosterAdminUserId(sql: Sql): Promise<string | null> {
 
 export async function canUserEditRoster(sql: Sql, userId: string): Promise<boolean> {
   await ensureRoster(sql);
-  const me = await sql.query<{ username: string; email: string | null }>(
-    "select username, email from desk_accounts where user_id = $1",
+  const me = await sql.query<{ username: string; email: string | null; is_admin: boolean; approved: boolean }>(
+    "select username, email, is_admin, approved from desk_accounts where user_id = $1",
     [userId],
   );
-  if (me[0] && isLiveDeskOwner(me[0].username, null, me[0].email)) return true;
+  // Name matching is only trusted for an approved admin — anyone can sign up as "chuy.x".
+  if (me[0] && flagOn(me[0].approved) && flagOn(me[0].is_admin) && isLiveDeskOwner(me[0].username, null, me[0].email)) {
+    return true;
+  }
   const owner = await ownerAccount(sql);
   if (owner) return owner.user_id === userId;
   const admin = await rosterAdminUserId(sql);

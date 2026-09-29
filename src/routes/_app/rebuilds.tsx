@@ -15,7 +15,7 @@ import { RebuildSheet } from "@/components/desk/rebuild-sheet";
 import { CustomerCombo, EquipmentCombo } from "@/components/desk/directory-fields";
 import { OwnerSelect } from "@/components/desk/owner-select";
 import { ExportButton } from "@/components/desk/export-dialog";
-import { MyViewBar, useMyView } from "@/components/desk/my-view-bar";
+import { useMyView } from "@/components/desk/my-view-bar";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { Skeleton } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -39,10 +39,10 @@ function Page() {
   const { open } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["rebuilds"], queryFn: () => listRebuilds() });
-  const { filterMine, matchMine, board, role } = useMyView();
+  const { filterMine, matchMine, role } = useMyView();
   const [q, setQ] = useState("");
   const [chip, setChip] = useState<(typeof FILTERS)[number]["id"]>("all");
-  const [view, setView] = useState<"board" | "timeline">(board || role !== "sales" ? "board" : "timeline");
+  const [view, setView] = useState<"board" | "timeline">(role !== "sales" ? "board" : "timeline");
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
   const rows = data.data?.rows ?? [];
@@ -85,7 +85,6 @@ function Page() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <MyViewBar />
           <ExportButton defaultType="rebuilds" />
           {canEdit ? (
             <Button onClick={() => setCreate(true)}>

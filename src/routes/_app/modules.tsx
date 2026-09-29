@@ -41,7 +41,6 @@ function Page() {
     (r) => !MODULE_TYPES.includes(r.name as (typeof MODULE_TYPES)[number]),
   );
   const readyByTypeChart = [...readyByTypeAll, ...extraTypes];
-  const readyByType = readyByTypeChart.filter((r) => r.count > 0);
   const readyByPlatform = tally(readyRows, (m) => m.platform);
   const statusMix = tally(all, (m) => m.status);
   const rows = useMemo(() => {
@@ -95,7 +94,6 @@ function Page() {
           label="Ready"
           value={readyRows.length}
           hint={readyByPlatform.map((p) => `${p.count} ${p.name}`).join(" · ") || "Nothing ready"}
-          breakdown={readyByType}
           selected={bubble === "ready"}
           onClick={() => setBubble((v) => toggleChip(v, "ready", null))}
         />

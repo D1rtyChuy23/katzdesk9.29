@@ -91,7 +91,7 @@ export function ComingDuePanel({
                           entityType={row.entityType}
                           id={row.id}
                           title={`${row.customer} · ${kindLabel(row)} · ${formatShortDate(row.scheduled)} · ${row.status}${row.wo ? ` · ${row.wo}` : ""}${row.technician || row.accountRep ? ` · ${row.technician || row.accountRep}` : ""}`}
-                          className="desk-lift grid gap-0.5 px-2.5 py-1.5 hover:bg-muted/60 sm:grid-cols-[minmax(0,1.4fr)_5.5rem_4.5rem_auto] sm:items-center sm:gap-2"
+                          className="desk-lift grid gap-0.5 px-2.5 py-1.5 hover:bg-muted/60 sm:grid-cols-[minmax(0,1.4fr)_4.5rem_7.5rem_minmax(0,9rem)] sm:items-center sm:gap-2"
                         >
                           <span className="min-w-0">
                             <span className="flex min-w-0 items-center gap-1.5">
@@ -113,7 +113,7 @@ export function ComingDuePanel({
                             <span className="mt-0.5 block tabular">{formatShortDate(row.scheduled)}</span>
                           </span>
                           <StatusBadge status={row.status} />
-                          <span className="text-[11px] text-muted-foreground">
+                          <span className="min-w-0 truncate text-[11px] text-muted-foreground">
                             {row.technician || (row.accountRep ? row.accountRep.split(" ")[0] : "unassigned")}
                             <NoRepFlag show={row.noRep} className="ml-1" />
                           </span>

@@ -112,12 +112,19 @@ function Page() {
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
       </div>
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase md:grid">
+          <span>Account</span>
+          <span>Why it matters</span>
+          <span>Status</span>
+          <span>Projected</span>
+          <span>Tech</span>
+        </div>
         {rows.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setSelected(p.id)}
-            className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.3fr_1fr_8rem_8rem_7rem] md:items-center"
+            className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3"
           >
             <span>
               <span className="font-medium">{p.customer}</span>
@@ -128,8 +135,12 @@ function Page() {
               <FlagBadge flag={p.flag} />
             </span>
             <StatusBadge status={p.status} />
-            <span className="tabular text-sm text-muted-foreground">{formatShortDate(p.projected)}</span>
-            <span className="text-sm">
+            <span className="tabular text-sm text-muted-foreground">
+              <span className="md:hidden">Projected </span>
+              {formatShortDate(p.projected)}
+            </span>
+            <span className="min-w-0 truncate text-sm">
+              <span className="text-muted-foreground md:hidden">Tech </span>
               <TechName name={p.technician} />
             </span>
           </button>

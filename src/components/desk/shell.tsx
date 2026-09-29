@@ -55,6 +55,9 @@ type DeskTo =
   | "/settings"
   | "/access";
 
+/** Pages whose lists actually narrow when My View is on — the toggle is noise elsewhere. */
+const MY_VIEW_ROUTES: string[] = ["/", "/planner", "/service", "/tlc", "/pms", "/installs", "/pipeline", "/rebuilds", "/customers"];
+
 type NavItem = {
   to: DeskTo;
   label: string;
@@ -315,8 +318,12 @@ export function AppShell({
             <span className="font-display text-lg">Katz Desk</span>
           </div>
           <div className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 md:ml-0">
-            {role === "warehouse" ? null : <MyViewBar />}
-            {role === "warehouse" ? null : <GlobalSearch />}
+            {role === "warehouse" || !MY_VIEW_ROUTES.includes(pathname) ? null : <MyViewBar />}
+            {role === "warehouse" ? null : (
+              <div className="order-last flex w-full min-w-0 justify-end sm:order-none sm:w-auto sm:flex-1">
+                <GlobalSearch />
+              </div>
+            )}
             <ThemeToggle />
             <NotifyBell />
             <div className="hidden sm:block md:hidden">

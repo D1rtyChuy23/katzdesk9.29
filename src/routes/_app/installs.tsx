@@ -435,7 +435,7 @@ function NewInstallDialog({
       }}
     >
       <DialogContent className="max-w-4xl">
-        <div className="sticky top-0 z-20 -mx-5 -mt-5 mb-2 border-b border-border bg-card px-4 pt-3 pr-12 pb-2">
+        <div className="sticky -top-5 z-20 -mx-5 -mt-5 mb-2 border-b border-border bg-card px-4 pt-3 pr-12 pb-2">
           <DialogTitle>New install</DialogTitle>
           <div className="mt-2 grid min-w-0 gap-2">
             <CustomerCombo
@@ -846,56 +846,6 @@ function InstallRow({
         </div>
       ) : null}
     </article>
-  );
-}
-
-function InstallCard({
-  install: i,
-  catalog,
-  recipes,
-  onOpen,
-  onRecipe,
-  selected,
-  onToggleSelect,
-  onMarkInstalled,
-  marking,
-}: InstallItemProps) {
-  const open = isOpenInstall(i);
-  return (
-    <div className="rounded-lg border border-border bg-background px-3 py-2.5">
-      <div className="flex items-start justify-between gap-1">
-        {open ? (
-          <OpenInstallSelect customer={i.customer} selected={selected} onToggle={onToggleSelect} />
-        ) : null}
-        <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left hover:underline">
-          <p className="font-medium">
-            {i.customer} <AkBadge on={i.aviKatz} className="ml-1 align-middle" />
-          </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{formatShortDate(i.installDate)}</p>
-        </button>
-        <InstallActions install={i} open={open} onMark={onMarkInstalled} marking={marking} />
-      </div>
-      {machineNotes(i, false)}
-      <div className="mt-1 flex flex-wrap gap-1">
-        <FlagBadge flag={i.flag} />
-        {open ? (
-          <InspectionBadge
-            overall={i.inspection?.overall}
-            passed={i.inspection?.passedCount}
-            total={i.inspection?.machineCount}
-          />
-        ) : null}
-        <DuplicateBadge install={i} />
-        {i.noRep ? <NoRepFlag show /> : null}
-      </div>
-      <InstallEquipChips
-        install={i}
-        catalog={catalog}
-        recipes={recipes}
-        onRecipe={onRecipe}
-        empty={i.equipment ? <p className="mt-1 text-xs text-muted-foreground">{i.equipment}</p> : null}
-      />
-    </div>
   );
 }
 

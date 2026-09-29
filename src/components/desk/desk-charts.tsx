@@ -478,7 +478,7 @@ export function StatCard({
       {hint ? <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{hint}</p> : null}
       {breakdown?.length ? (
         <div className="mt-1 hidden min-w-0 overflow-hidden @[11rem]:block">
-          <BreakdownList items={breakdown} />
+          <BreakdownList items={breakdown.slice(0, 3)} />
         </div>
       ) : null}
     </>
@@ -521,7 +521,7 @@ export function MiniStat({ label, value, hint }: { label: string; value: string 
     <div className="min-w-0 overflow-hidden rounded-lg bg-muted/70 px-3 py-2">
       <p className="truncate text-[11px] tracking-wide text-muted-foreground uppercase">{label}</p>
       <p className="font-display text-xl tabular leading-tight">{value}</p>
-      {hint ? <p className="truncate text-[11px] text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="line-clamp-2 text-[11px] text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

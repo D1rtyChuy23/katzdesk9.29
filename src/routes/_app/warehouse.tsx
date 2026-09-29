@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAsset, listAssets } from "@/lib/ops/api";
@@ -124,6 +125,8 @@ function Page() {
     });
   }, [slot, slotUnits, onRack, barn, needle, sort, bubble, bayLetter, stranded, rack]);
 
+  const pagedList = useShowMore(list, `${rack}|${slot?.pallet}-${slot?.level}|${needle}|${sort}|${bubble}|${bayLetter}`, 40);
+
   const equipReady = barn.filter((a) => a.kind === "equip").reduce((n, a) => n + a.qty, 0);
   const equipLines = barn.filter((a) => a.kind === "equip").length;
   const dispQty = barn.filter((a) => a.kind === "dispenser").reduce((n, a) => n + a.qty, 0);
@@ -166,7 +169,6 @@ function Page() {
           label="Ready"
           value={equipReady}
           hint={`${models} models · ${Math.max(0, BARN_EQUIP_CAPACITY - equipLines)} open slots`}
-          breakdown={readyByModel}
           selected={bubble === "ready" && !bayLetter}
           onClick={() => {
             setBayLetter(null);
@@ -420,7 +422,7 @@ function Page() {
       </div>
 
       <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid={slot && !needle ? "section-units" : undefined}>
-        {list.map((a) => (
+        {pagedList.visible.map((a) => (
           <div key={a.id} className="border-b border-border last:border-b-0">
             <div className="px-4 py-3" data-testid={a.serial ? `rack-row-${a.serial}` : undefined}>
               <div className="flex flex-wrap items-start gap-3">
@@ -611,6 +613,7 @@ function Page() {
             ) : null}
           </div>
         ))}
+        <ShowMoreButton remaining={pagedList.remaining} onClick={pagedList.showMore} label="units" />
         {canStock && slot ? (
           <SlotAdd
             key={`${slot.rack}-${slot.pallet}-${slot.level}`}
