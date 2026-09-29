@@ -46,6 +46,8 @@ export function RepSelect({
     <div className={className}>
       {label ? <Label htmlFor={id}>{label}</Label> : null}
       <SelectField
+        // Remount once the rep list arrives: an uncontrolled select can't pick a default whose option wasn't there yet.
+        key={value == null ? `${q.data ? "ready" : "loading"}:${defaultValue ?? ""}` : undefined}
         id={id}
         name={name}
         className={label ? "mt-1" : undefined}

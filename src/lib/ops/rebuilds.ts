@@ -5,7 +5,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { todayChicago } from "@/lib/ops/clock";
 import { serialKey } from "@/lib/ops/serial-pull";
 import { loadTechs } from "@/lib/ops/roster";
-import { loadAccountMarks, isAviKatz, customerKey } from "@/lib/ops/reps";
+import { loadAccountMarks, isAviKatz, accountRepFor } from "@/lib/ops/reps";
 import {
   CLOSED_REBUILD,
   HEALTH_RANK,
@@ -204,9 +204,9 @@ export async function loadRebuilds(sql: Sql, today = todayChicago()): Promise<Re
   const rows = await sql.query<RebuildRow>(
     "select * from rebuilds where coalesce(archived, false) = false order by id desc",
   );
-  const marks = await loadAccountMarks(sql).catch(() => ({ rep: new Map<string, string>(), ak: new Set<string>() }));
+  const marks = await loadAccountMarks(sql).catch(() => ({ rep: new Map<string, string>(), repLoose: new Map<string, string>(), ak: new Set<string>() }));
   return rows.map((r) =>
-    mapRebuild(r, today, marks.rep.get(customerKey(r.account)) ?? null, isAviKatz(marks, r.account)),
+    mapRebuild(r, today, accountRepFor(marks, r.account), isAviKatz(marks, r.account)),
   );
 }
 

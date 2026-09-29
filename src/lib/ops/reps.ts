@@ -9,6 +9,7 @@ import {
 } from "./rep-match";
 import { flagOn } from "./flag";
 import { normalizeName } from "./norm";
+import { normalizeCustomerKey } from "./customer-key";
 
 export type DeskRep = {
   id: number;
@@ -148,6 +149,8 @@ export async function remapStoredReps(sql: Sql): Promise<{ deals: number; instal
 export type AccountMarks = {
   ak: Set<string>;
   rep: Map<string, string>;
+  /** Same reps keyed without punctuation/spaces, so "Coco's - Kingwood" finds "Coco's Kingwood". */
+  repLoose: Map<string, string>;
 };
 
 export async function ensureAccountMarks(sql: Sql): Promise<void> {
@@ -166,17 +169,27 @@ export async function loadAccountMarks(sql: Sql): Promise<AccountMarks> {
   );
   const ak = new Set<string>();
   const rep = new Map<string, string>();
+  const repLoose = new Map<string, string>();
   for (const r of rows) {
     const k = (r.name ?? "").trim().toLowerCase();
     if (!k) continue;
     if (flagOn(r.avi_katz)) ak.add(k);
-    if (r.account_rep) rep.set(k, r.account_rep);
+    if (r.account_rep) {
+      rep.set(k, r.account_rep);
+      const loose = normalizeCustomerKey(r.name);
+      if (loose && !repLoose.has(loose)) repLoose.set(loose, r.account_rep);
+    }
   }
-  return { ak, rep };
+  return { ak, rep, repLoose };
 }
 
 export function customerKey(name: string | null | undefined): string {
   return (name ?? "").trim().toLowerCase();
+}
+
+/** The sales rep saved on a customer account, matching the name loosely. */
+export function accountRepFor(marks: AccountMarks, customer: string | null | undefined): string | null {
+  return marks.rep.get(customerKey(customer)) ?? marks.repLoose.get(normalizeCustomerKey(customer)) ?? null;
 }
 
 export function isAviKatz(marks: AccountMarks, customer: string | null | undefined): boolean {

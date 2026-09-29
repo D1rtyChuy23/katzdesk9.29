@@ -55,7 +55,7 @@ import {
 } from "./warehouse";
 import { renameOrMergeEquipment, renameOrMergeCustomer } from "./customer-identity";
 import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
-import { loadAccountMarks, upsertAccountMarks, customerKey, isAviKatz } from "./reps";
+import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor } from "./reps";
 import { woMatchKey } from "./corrigo";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { parseMentions } from "./mentions";
@@ -270,7 +270,8 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 }
 function mapDeal(r: any, marks: any) {
 	const customer = String(r.customer);
-	const producer = r.producer ?? null;
+	// A deal with no rep of its own shows the rep saved on the customer account.
+	const producer = (String(r.producer ?? "").trim() ? r.producer : null) ?? (marks ? accountRepFor(marks, customer) : null);
 	return {
 		id: r.id,
 		customer,
@@ -293,7 +294,17 @@ function mapDeal(r: any, marks: any) {
 	};
 }
 function applyMarks(rows: any, marks: any) {
-	for (const r of rows) r.aviKatz = isAviKatz(marks, r.customer ?? null);
+	for (const r of rows) {
+		r.aviKatz = isAviKatz(marks, r.customer ?? null);
+		// Installs without their own rep show the rep saved on the customer account.
+		if ("accountRep" in r && !String(r.accountRep ?? "").trim()) {
+			const rep = accountRepFor(marks, r.customer ?? null);
+			if (rep) {
+				r.accountRep = rep;
+				r.noRep = isNoRep(rep);
+			}
+		}
+	}
 	return rows;
 }
 function mapModule(r: any) {
@@ -435,7 +446,7 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 	for (const j of jobs) {
 		if (isClosedCall(j) || !j.scheduled) continue;
 		if (j.scheduled > laterHorizon) continue;
-		const accountRep = marks.rep.get(customerKey(j.customer)) ?? null;
+		const accountRep = accountRepFor(marks, j.customer);
 		pushDue({
 			daysOut: diffDays(today, j.scheduled),
 			source: j.kind === "tlc" ? "TLC + Factor" : "Service Tracker",
@@ -457,7 +468,7 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 	for (const p of pms) {
 		if (isClosedPm(p) || !p.projected) continue;
 		if (p.projected > laterHorizon) continue;
-		const accountRep = marks.rep.get(customerKey(p.customer)) ?? null;
+		const accountRep = accountRepFor(marks, p.customer);
 		pushDue({
 			daysOut: diffDays(today, p.projected),
 			source: "PM Tracker",
@@ -1919,7 +1930,7 @@ export const updateCustomerAccount = createServerFn({ method: "POST" }).middlewa
 		id: dir[0].id,
 		name: dir[0].name,
 		aviKatz: isAviKatz(marks, dir[0].name),
-		accountRep: marks.rep.get(dir[0].name.trim().toLowerCase()) ?? null
+		accountRep: accountRepFor(marks, dir[0].name)
 	};
 });
 export const addDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind: DirectoryKind; name: string }) => d).handler(async ({ data }: any): Promise<DirectoryEntry> => {

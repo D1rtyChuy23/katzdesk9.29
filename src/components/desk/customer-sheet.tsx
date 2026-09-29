@@ -711,11 +711,22 @@ function AccountMarksForm({
   accountRep: string | null;
 }) {
   const qc = useQueryClient();
+  // Controlled, so the saved rep always shows — including after a save or reopening the account.
+  const [rep, setRep] = useState(accountRep ?? "");
+  useEffect(() => {
+    setRep(accountRep ?? "");
+  }, [id, accountRep]);
   const save = useMutation({
     mutationFn: (d: { aviKatz?: boolean; accountRep?: string | null }) =>
       updateCustomerAccount({ data: { id, ...d } }),
-    onSuccess: () => {
-      toast.success("Account updated");
+    onSuccess: (_row, vars) => {
+      toast.success(
+        vars.accountRep !== undefined
+          ? vars.accountRep
+            ? `${vars.accountRep} saved as the rep on this account`
+            : "Rep cleared on this account"
+          : "Account updated",
+      );
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
@@ -727,11 +738,21 @@ function AccountMarksForm({
   });
   return (
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      <RepSelect
-        label="Rep"
-        defaultValue={accountRep ?? ""}
-        onChange={(v) => save.mutate({ accountRep: v || null })}
-      />
+      <div>
+        <RepSelect
+          label="Rep"
+          value={rep}
+          onChange={(v) => {
+            setRep(v);
+            save.mutate({ accountRep: v || null });
+          }}
+        />
+        {rep ? (
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Shows on this account's calls, PMs, installs, and deals that don't have their own rep.
+          </p>
+        ) : null}
+      </div>
       <label className="flex items-center gap-2 text-sm sm:mt-7">
         <input
           type="checkbox"
