@@ -4,6 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAsset, listAssets } from "@/lib/ops/api";
 import { getMyAccess } from "@/lib/ops/access";
 import { addToRackSlot, setShopTest } from "@/lib/ops/rack-stock";
+import { addUnitToLocation, setAssetPlace, setUnitPlace } from "@/lib/ops/unit-place";
+import { placeDraftError, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
 import {
   BACK_EQUIP_CAPACITY,
   BACK_PALLETS,
@@ -22,9 +24,8 @@ import { SelectField } from "@/components/ui/select-field";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { AssetSheet } from "@/components/desk/asset-sheet";
+import { StockActions } from "@/components/desk/stock-actions";
 import { PlacePicker, emptyPlaceDraft, type PlaceDraft } from "@/components/desk/unit-place-field";
-import { setAssetPlace } from "@/lib/ops/unit-place";
-import { placeDraftError } from "@/lib/ops/unit-place-rules";
 import { CustomerCombo, EquipmentCombo } from "@/components/desk/directory-fields";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
@@ -53,6 +54,8 @@ function Page() {
   const [selected, setSelected] = useOpenRecord(open);
   const [movingId, setMovingId] = useState<number | null>(null);
   const [moveDraft, setMoveDraft] = useState<PlaceDraft>(emptyPlaceDraft());
+  const [moveBlock, setMoveBlock] = useState<string | null>(null);
+  const [swapWith, setSwapWith] = useState("");
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("warehouse", "alpha-asc");
   const [bubble, setBubble] = useState<"ready" | "fill" | "dispensers" | "missing" | "needs-bay" | "needs-test" | "tested" | "review" | null>(null);
@@ -66,22 +69,23 @@ function Page() {
   const onRack = barn.filter((a) => a.site === rack);
   const pallets = rack === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
 
-  const fill = useMemo(() => {
-    const map = new Map<string, number>();
+  const bySlot = useMemo(() => {
+    const map = new Map<string, Asset[]>();
     for (const a of onRack) {
       if (!a.pallet || !a.level) continue;
-      const k = `${a.pallet}-${a.level}`;
-      map.set(k, (map.get(k) ?? 0) + 1);
+      const k = `${String(a.pallet).toUpperCase()}-${a.level}`;
+      const list = map.get(k) ?? [];
+      list.push(a);
+      map.set(k, list);
     }
+    for (const list of map.values()) list.sort((a, b) => (a.lineNo ?? 99) - (b.lineNo ?? 99) || a.id - b.id);
     return map;
   }, [onRack]);
 
   const slotUnits = useMemo(() => {
-    if (!slot) return [];
-    return onRack
-      .filter((a) => a.pallet === slot.pallet && a.level === slot.level)
-      .sort((a, b) => (a.lineNo ?? 99) - (b.lineNo ?? 99));
-  }, [onRack, slot]);
+    if (!slot || slot.rack !== rack) return [];
+    return bySlot.get(`${slot.pallet}-${slot.level}`) ?? [];
+  }, [bySlot, slot, rack]);
 
   const needle = q.trim().toLowerCase();
   const stranded = useMemo(() => barn.filter((a) => a.needsBay), [barn]);
@@ -286,7 +290,7 @@ function Page() {
       <p className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
         <span><span className="mr-1 inline-block size-2 rounded-sm bg-catering" />Catering A–D</span>
         <span><span className="mr-1 inline-block size-2 rounded-sm bg-dispense" />Dispenser E–F</span>
-        <span>Number in a cell is lines used of 12. Capacity this rack: {capacity}.</span>
+        <span>Number in a cell is how many units share that section, up to 12. Add stays available when a section already has units. Capacity this rack: {capacity}.</span>
       </p>
 
       <div className="mt-3 w-full max-w-full overflow-x-auto rounded-xl border border-border bg-card p-3">
@@ -333,18 +337,21 @@ function Page() {
                   {level === 1 ? <span className="ml-1 font-normal">floor</span> : null}
                 </th>
                 {pallets.map((p) => {
-                  const n = fill.get(`${p}-${level}`) ?? 0;
+                  const units = bySlot.get(`${p}-${level}`) ?? [];
+                  const n = units.length;
                   const bay = bayFor(rack, p);
                   const active = slot?.pallet === p && slot.level === level && slot.rack === rack;
+                  const names = units.map((u) => `${u.model}${u.serial ? ` ${u.serial}` : ""}`).join(", ");
                   return (
-                    <td key={p} className="p-0.5">
+                    <td key={p} className="p-0.5 align-top">
                       <button
                         type="button"
                         onClick={() =>
                           setSlot(active ? null : { rack, pallet: p, level })
                         }
                         className={cn(
-                          "flex h-9 w-full min-w-8 items-center justify-center rounded-sm text-xs tabular transition-colors",
+                          "flex w-full min-w-14 flex-col items-center justify-center gap-0.5 rounded-sm px-0.5 py-1 text-[10px] leading-tight transition-colors",
+                          n === 0 ? "h-9" : "min-h-16",
                           n === 0 && "bg-muted text-muted-foreground",
                           n > 0 && n < 12 && "bg-primary/15 text-foreground",
                           n >= 12 && "bg-primary text-primary-foreground",
@@ -352,10 +359,30 @@ function Page() {
                           bay === "dispenser" && n === 0 && "bg-dispense/15",
                           active && "ring-2 ring-ring",
                         )}
-                        data-testid={n === 0 ? `slot-${p}-L${level}` : undefined}
-                        aria-label={n === 0 && canStock ? `Add to ${p}-L${level}` : `${p}-L${level} ${n} of 12`}
+                        data-testid={`slot-${p}-L${level}`}
+                        title={n === 0 ? undefined : names}
+                        aria-label={
+                          n === 0
+                            ? canStock
+                              ? `Add to ${p}-L${level}`
+                              : `${p}-L${level} empty`
+                            : `${p}-L${level}, ${n} ${n === 1 ? "unit" : "units"}: ${names}.${canStock ? " Add another." : ""}`
+                        }
                       >
-                        {n === 0 ? (canStock ? "Add" : "·") : n}
+                        {n === 0 ? (
+                          canStock ? "Add" : "·"
+                        ) : (
+                          <>
+                            <span className="text-xs font-medium tabular-nums">{n}</span>
+                            {units.slice(0, 2).map((u) => (
+                              <span key={u.id} className="max-w-full truncate">
+                                {u.serial ?? u.model}
+                              </span>
+                            ))}
+                            {n > 2 ? <span>+{n - 2}</span> : null}
+                            {canStock ? <span>Add</span> : null}
+                          </>
+                        )}
                       </button>
                     </td>
                   );
@@ -367,15 +394,24 @@ function Page() {
       </div>
 
       <div className="mt-4 flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-xl">
-          {needle
-            ? "Search"
-            : slot
-              ? slotId(slot.pallet, slot.level)
-              : rack === "barn-back"
-                ? "Back rack units"
-                : "Front rack units"}
-        </h2>
+        <div>
+          <h2 className="font-display text-xl">
+            {needle
+              ? "Search"
+              : slot
+                ? `${slot.rack === "barn-front" ? "Front" : "Back"} · ${slotId(slot.pallet, slot.level)}`
+                : rack === "barn-back"
+                  ? "Back rack units"
+                  : "Front rack units"}
+          </h2>
+          {slot && !needle ? (
+            <p className="text-sm text-muted-foreground" data-testid="section-count">
+              {slotUnits.length === 0
+                ? "Empty section"
+                : `${slotUnits.length} ${slotUnits.length === 1 ? "unit" : "units"} in this section`}
+            </p>
+          ) : null}
+        </div>
         {slot ? (
           <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setSlot(null)}>
             Clear slot
@@ -383,13 +419,15 @@ function Page() {
         ) : null}
       </div>
 
-      <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card">
+      <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid={slot && !needle ? "section-units" : undefined}>
         {list.map((a) => (
           <div key={a.id} className="border-b border-border last:border-b-0">
             <div className="px-4 py-3" data-testid={a.serial ? `rack-row-${a.serial}` : undefined}>
               <div className="flex flex-wrap items-start gap-3">
-              <button type="button" onClick={() => setSelected(a.id)} className="w-28 shrink-0 text-left font-mono text-xs">
-                {a.slotLabel}
+              <button type="button" onClick={() => setSelected(a.id)} className="w-36 shrink-0 text-left font-mono text-xs">
+                {a.pallet && a.level && (a.site === "barn-back" || a.site === "barn-front")
+                  ? unitPlaceLabel({ site: a.site, pallet: a.pallet, level: a.level, status: a.status })
+                  : a.slotLabel}
               </button>
               <button type="button" onClick={() => setSelected(a.id)} className="min-w-0 flex-1 text-left">
                 <span className="font-medium">{a.model}</span>
@@ -461,26 +499,67 @@ function Page() {
                     Tested{a.shopTestBy ? ` · ${a.shopTestBy}` : ""}
                   </span>
                 ) : null}
-                <span className="text-sm text-muted-foreground">
-                  {a.pallet && a.level ? `Barn · ${slotId(a.pallet, a.level)}` : a.slotLabel}
-                </span>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={movingId === a.id ? "default" : "outline"}
-                  data-testid={a.serial ? `move-${a.serial}` : undefined}
-                  onClick={() => {
-                    setMoveDraft(emptyPlaceDraft());
-                    setMovingId((cur) => (cur === a.id ? null : a.id));
-                  }}
-                >
-                  Move
-                </Button>
+                {canStock && !a.stockHold ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={movingId === a.id ? "default" : "outline"}
+                    data-testid={a.serial ? `move-${a.serial}` : undefined}
+                    onClick={() => {
+                      setMoveDraft(emptyPlaceDraft());
+                      setMoveBlock(null);
+                      setSwapWith("");
+                      setMovingId((cur) => (cur === a.id ? null : a.id));
+                    }}
+                  >
+                    Move
+                  </Button>
+                ) : null}
               </span>
+              {canStock || a.stockHold ? (
+                <div className="mt-2">
+                  <StockActions asset={a} canStock={canStock} isAdmin={!!me.data?.isAdmin} />
+                </div>
+              ) : null}
             </div>
-            {movingId === a.id ? (
+            {movingId === a.id && canStock ? (
               <div className="flex flex-wrap items-end gap-2 px-4 pb-3" data-testid="warehouse-move">
-                <PlacePicker value={moveDraft} onChange={setMoveDraft} />
+                <PlacePicker value={moveDraft} onChange={(next) => { setMoveDraft(next); setMoveBlock(null); setSwapWith(""); }} />
+                {(() => {
+                  const destRack = moveDraft.site === "barn-front" || moveDraft.site === "barn-back";
+                  const mates =
+                    destRack && moveDraft.pallet && moveDraft.level
+                      ? barn.filter(
+                          (u) =>
+                            u.id !== a.id &&
+                            !u.stockHold &&
+                            u.site === moveDraft.site &&
+                            (u.pallet ?? "").toUpperCase() === moveDraft.pallet.toUpperCase() &&
+                            Number(u.level) === Number(moveDraft.level),
+                        )
+                      : [];
+                  if (!mates.length) return null;
+                  return (
+                    <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                      Replace/Swap
+                      <SelectField
+                        aria-label="Replace or swap"
+                        data-testid={a.serial ? `swap-${a.serial}` : "swap-unit"}
+                        className="min-w-56 normal-case"
+                        value={swapWith}
+                        onChange={(e) => setSwapWith(e.target.value)}
+                      >
+                        <option value="">Add beside them</option>
+                        {mates.map((u) => (
+                          <option key={u.id} value={String(u.id)}>
+                            {u.model}
+                            {u.serial ? ` · ${u.serial}` : ""}
+                          </option>
+                        ))}
+                      </SelectField>
+                    </label>
+                  );
+                })()}
                 <Button
                   type="button"
                   size="sm"
@@ -499,28 +578,45 @@ function Page() {
                           pallet: moveDraft.pallet || null,
                           level: moveDraft.level ? Number(moveDraft.level) : null,
                           otherLabel: moveDraft.otherLabel || null,
+                          swapWithId: swapWith ? Number(swapWith) : null,
                         },
                       });
-                      toast.success(place.place ? `Now at ${place.place}` : "Moved");
+                      toast.success(
+                        swapWith
+                          ? place.place
+                            ? `Swapped · now at ${place.place}`
+                            : "Swapped"
+                          : place.place
+                            ? `Now at ${place.place}`
+                            : "Moved",
+                      );
                       setMovingId(null);
+                      setMoveBlock(null);
+                      setSwapWith("");
                       void qc.invalidateQueries({ queryKey: ["assets"] });
                     } catch (e) {
-                      toast.error(e instanceof Error ? e.message : "Could not move");
+                      const msg = e instanceof Error ? e.message : "Could not move";
+                      if (/is full/i.test(msg)) setMoveBlock(msg);
+                      toast.error(msg);
                     }
                   }}
                 >
                   Confirm
                 </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => setMovingId(null)}>
+                <Button type="button" size="sm" variant="outline" onClick={() => { setMovingId(null); setMoveBlock(null); setSwapWith(""); }}>
                   Cancel
                 </Button>
+                {moveBlock ? <p className="w-full text-sm text-destructive">{moveBlock}</p> : null}
               </div>
             ) : null}
           </div>
         ))}
         {canStock && slot ? (
           <SlotAdd
+            key={`${slot.rack}-${slot.pallet}-${slot.level}`}
             slot={slot}
+            occupied={slotUnits.length > 0}
+            occupants={barn}
             onPlaced={(id) => {
               void qc.invalidateQueries({ queryKey: ["assets"] });
               void qc.invalidateQueries({ queryKey: ["notifications"] });
@@ -554,9 +650,13 @@ function Page() {
 
 function SlotAdd({
   slot,
+  occupied,
+  occupants,
   onPlaced,
 }: {
   slot: SlotKey;
+  occupied: boolean;
+  occupants: Asset[];
   onPlaced: (id?: number) => void;
 }) {
   const [model, setModel] = useState("");
@@ -564,20 +664,100 @@ function SlotAdd({
   const [electrical, setElectrical] = useState("");
   const [pending, setPending] = useState(false);
   const [confirm, setConfirm] = useState<{ id: number; place: string } | null>(null);
-  const label = slotId(slot.pallet, slot.level);
+  const [swapWith, setSwapWith] = useState("");
+  const [block, setBlock] = useState<string | null>(null);
+  const [draft, setDraft] = useState<PlaceDraft>({
+    site: slot.rack,
+    pallet: slot.pallet,
+    level: String(slot.level),
+    otherLabel: "",
+  });
+  const rackSlot = draft.site === "barn-front" || draft.site === "barn-back";
+  const label =
+    rackSlot && draft.pallet && draft.level
+      ? unitPlaceLabel({ site: draft.site, pallet: draft.pallet, level: Number(draft.level), status: "ready" })
+      : slotId(slot.pallet, slot.level);
+  const mates =
+    confirm && rackSlot && draft.pallet && draft.level
+      ? occupants.filter(
+          (u) =>
+            u.id !== confirm.id &&
+            !u.stockHold &&
+            u.site === draft.site &&
+            (u.pallet ?? "").toUpperCase() === draft.pallet.toUpperCase() &&
+            Number(u.level) === Number(draft.level),
+        )
+      : [];
 
   async function save(force: boolean) {
     if (!model.trim()) {
       toast.error("Pick a model");
       return;
     }
+    const err = placeDraftError(draft);
+    if (err) {
+      toast.error(err);
+      return;
+    }
     setPending(true);
     try {
+      if (!rackSlot) {
+        if (serial.trim()) {
+          const place = await setUnitPlace({
+            data: {
+              serial: serial.trim(),
+              model: model.trim(),
+              site: draft.site,
+              otherLabel: draft.otherLabel || null,
+            },
+          });
+          toast.success(place.place ? `Now at ${place.place}` : "Moved");
+        } else {
+          await addUnitToLocation({
+            data: {
+              site: draft.site,
+              model: model.trim(),
+              serial: null,
+              electrical: electrical.trim() || null,
+              otherLabel: draft.otherLabel || null,
+            },
+          });
+          toast.success("Added");
+        }
+        setModel("");
+        setSerial("");
+        setElectrical("");
+        setConfirm(null);
+        setSwapWith("");
+        setBlock(null);
+        onPlaced();
+        return;
+      }
+      if (confirm && swapWith) {
+        const place = await setAssetPlace({
+          data: {
+            id: confirm.id,
+            site: draft.site,
+            pallet: draft.pallet,
+            level: Number(draft.level),
+            swapWithId: Number(swapWith),
+          },
+        });
+        toast.success(place.place ? `Swapped · now at ${place.place}` : "Swapped");
+        setModel("");
+        setSerial("");
+        setElectrical("");
+        setConfirm(null);
+        setSwapWith("");
+        setBlock(null);
+        onPlaced(confirm.id);
+        return;
+      }
       const res = await addToRackSlot({
         data: {
-          site: slot.rack,
-          pallet: slot.pallet,
-          level: slot.level,
+          site: draft.site,
+          pallet: draft.pallet,
+          level: Number(draft.level),
           model: model.trim(),
           serial: serial.trim() || null,
           electrical: electrical.trim() || null,
@@ -586,6 +766,7 @@ function SlotAdd({
       });
       if (res.needsConfirm) {
         setConfirm({ id: res.id, place: res.currentPlace ?? "another place" });
+        setSwapWith("");
         return;
       }
       toast.success(
@@ -597,9 +778,13 @@ function SlotAdd({
       setSerial("");
       setElectrical("");
       setConfirm(null);
+      setSwapWith("");
+      setBlock(null);
       onPlaced(res.id);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not add");
+      const msg = e instanceof Error ? e.message : "Could not add";
+      if (/is full/i.test(msg)) setBlock(msg);
+      toast.error(msg);
     } finally {
       setPending(false);
     }
@@ -607,10 +792,22 @@ function SlotAdd({
 
   return (
     <div className="border-b border-border px-4 py-4" data-testid="slot-add">
-      <p className="text-sm font-medium">Add to {label}</p>
+      <p className="text-sm font-medium">{occupied ? "Add another" : "Add to this section"}</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Model and serial go in this slot. One serial stays one record. A serial already on the desk moves here after you confirm.
+        Pick the rack, then the bay, then the level. Adding puts another serial in that section. One serial stays one record. Replace/Swap only if you choose it.
       </p>
+      <div className="mt-3">
+        <PlacePicker
+          value={draft}
+          onChange={(next) => {
+            setDraft(next);
+            setBlock(null);
+            setConfirm(null);
+            setSwapWith("");
+          }}
+          testId="slot-place"
+        />
+      </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <EquipmentCombo name="slot-model" label="Model" value={model} onChange={setModel} required />
         <div>
@@ -630,15 +827,45 @@ function SlotAdd({
       </div>
       {confirm ? (
         <p className="mt-3 text-sm">
-          {serial || "That serial"} is already at {confirm.place}. Move it to {label}?
+          {serial || "That serial"} is already at {confirm.place}. Move it into {label}? It is added beside the units already there unless you choose Replace/Swap.
         </p>
       ) : null}
+      {confirm && mates.length > 0 ? (
+        <label className="mt-3 grid max-w-sm gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+          Replace/Swap
+          <SelectField
+            aria-label="Replace or swap"
+            data-testid="slot-swap"
+            className="normal-case"
+            value={swapWith}
+            onChange={(e) => setSwapWith(e.target.value)}
+          >
+            <option value="">Add beside them</option>
+            {mates.map((u) => (
+              <option key={u.id} value={String(u.id)}>
+                {u.model}
+                {u.serial ? ` · ${u.serial}` : ""}
+              </option>
+            ))}
+          </SelectField>
+        </label>
+      ) : null}
+      {block ? <p className="mt-3 text-sm text-destructive">{block}</p> : null}
       <div className="mt-3 flex gap-2">
-        <Button type="button" size="sm" disabled={pending} data-testid="slot-save" onClick={() => void save(!!confirm)}>
-          {confirm ? "Confirm move" : pending ? "Saving…" : "Add"}
+        <Button type="button" size="sm" disabled={pending || !!placeDraftError(draft)} data-testid="slot-save" onClick={() => void save(!!confirm)}>
+          {confirm ? (swapWith ? "Confirm swap" : "Confirm move") : pending ? "Saving…" : occupied ? "Add another" : "Add"}
         </Button>
-        {confirm ? (
-          <Button type="button" size="sm" variant="outline" onClick={() => setConfirm(null)}>
+        {confirm || block ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setConfirm(null);
+              setSwapWith("");
+              setBlock(null);
+            }}
+          >
             Cancel
           </Button>
         ) : null}
@@ -660,7 +887,7 @@ function AddDialog({
   slot: SlotKey | null;
   onCreated: (row: Asset) => Promise<void>;
 }) {
-  const pallets = (slot?.rack ?? rack) === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
+  const pallets = BACK_PALLETS;
   const [pending, setPending] = useState(false);
   const [model, setModel] = useState("");
   const [owned, setOwned] = useState("");
@@ -731,12 +958,12 @@ function AddDialog({
             <div>
               <Label>Rack</Label>
               <SelectField name="site" className="mt-1" defaultValue={slot?.rack ?? rack}>
-                <option value="barn-back">Back</option>
-                <option value="barn-front">Front</option>
+                <option value="barn-back">Back rack</option>
+                <option value="barn-front">Front rack</option>
               </SelectField>
             </div>
             <div>
-              <Label>Pallet</Label>
+              <Label>Bay</Label>
               <SelectField name="pallet" className="mt-1" defaultValue={slot?.pallet ?? pallets[0]}>
                 {pallets.map((p) => (
                   <option key={p}>{p}</option>
@@ -761,7 +988,7 @@ function AddDialog({
             onChange={setOwned}
             placeholder="Search customers…"
           />
-          <p className="text-xs text-muted-foreground">Puts the unit on the next open line of that slot (1–12).</p>
+          <p className="text-xs text-muted-foreground">One serial stays one record. Adding to a section that already has units puts this one beside them.</p>
           <div className="flex justify-end">
             <Button type="submit" disabled={pending}>Add</Button>
           </div>

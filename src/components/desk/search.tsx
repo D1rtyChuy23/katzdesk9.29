@@ -1,8 +1,9 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchAll } from "@/lib/ops/api";
+import { AnchoredList } from "@/components/ui/anchored-list";
 import { pathFor } from "./open-link";
 
 export function GlobalSearch() {
@@ -24,14 +25,22 @@ export function GlobalSearch() {
         document.getElementById("desk-search")?.focus();
       }
     }
+    function onCloseList() {
+      setOpen(false);
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.addEventListener("desk-close-combo", onCloseList);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("desk-close-combo", onCloseList);
+    };
   }, []);
 
   const hits = results.data ?? [];
+  const anchor = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="relative w-full max-w-md">
+    <div ref={anchor} className="relative w-full max-w-md">
       <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
       <input
         id="desk-search"
@@ -42,6 +51,12 @@ export function GlobalSearch() {
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 180)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            setOpen(false);
+          }
+        }}
         placeholder="Search accounts, serials, WO…"
         className="h-10 w-full rounded-md border border-border bg-background pr-12 pl-9 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       />
@@ -49,7 +64,8 @@ export function GlobalSearch() {
         ⌘K
       </kbd>
       {open && delayed.trim().length >= 2 ? (
-        <div className="absolute top-[calc(100%+6px)] z-40 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-soft">
+        <AnchoredList anchor={anchor} className="rounded-lg" >
+          <div data-testid="desk-search-results">
           {hits.length === 0 ? (
             <p className="px-3 py-3 text-sm text-muted-foreground">No matches</p>
           ) : (
@@ -83,7 +99,8 @@ export function GlobalSearch() {
               ))}
             </ul>
           )}
-        </div>
+          </div>
+        </AnchoredList>
       ) : null}
     </div>
   );

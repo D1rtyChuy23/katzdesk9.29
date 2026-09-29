@@ -148,7 +148,7 @@ async function createPgliteSql(): Promise<Sql> {
   // files are tracked in _migrations. Runs once per module instance — so an HMR
   // reload after adding a migration file applies it live — with passes
   // serialized on a global chain so concurrent callers never double-apply.
-  // (0009 notifications; 0012–0015 ops; 0016–0017 provider locations/people; 0018 ping once; 0028 pre-inspection; 0029 per machine.)
+  // (0009 notifications; 0012–0015 ops; 0016–0017 provider locations/people; 0018 ping once; 0028 pre-inspection; 0029 per machine; 0032 stock actions.)
   const migrate = async (): Promise<void> => {
     const migrations = import.meta.glob("/migrations/*.sql", {
       query: "?raw",

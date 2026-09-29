@@ -302,6 +302,10 @@ export type Asset = {
   shopTestNote: string | null;
   shopTestBy: string | null;
   shopTestAt: string | null;
+  stockHold: "remove" | "assign" | null;
+  stockHoldCustomer: string | null;
+  stockHoldReason: string | null;
+  stockHoldBy: string | null;
 };
 
 export type Recipe = {

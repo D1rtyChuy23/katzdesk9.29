@@ -1,6 +1,8 @@
 import { AutoGrowTextarea, Input } from "@/components/ui/input";
+import { AnchoredList } from "@/components/ui/anchored-list";
 import { applyMention, mentionFragment } from "@/lib/ops/mentions";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
 
 export function MentionField({
   value,
@@ -20,8 +22,19 @@ export function MentionField({
   id?: string;
 }) {
   const fragment = mentionFragment(value);
+  const [held, setHeld] = useState(false);
+  useEffect(() => {
+    setHeld(false);
+  }, [value]);
+  useEffect(() => {
+    function onCloseList() {
+      setHeld(true);
+    }
+    document.addEventListener("desk-close-combo", onCloseList);
+    return () => document.removeEventListener("desk-close-combo", onCloseList);
+  }, []);
   const suggestions =
-    fragment != null
+    fragment != null && !held
       ? teammates
           .filter((t) => t.username.toLowerCase().includes(fragment.toLowerCase()))
           .slice(0, 8)
@@ -31,8 +44,10 @@ export function MentionField({
     onChange(applyMention(value, username));
   }
 
+  const anchor = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="relative">
+    <div ref={anchor} className="relative">
       {multiline ? (
         <AutoGrowTextarea
           id={id}
@@ -52,24 +67,26 @@ export function MentionField({
         />
       )}
       {suggestions.length ? (
-        <ul className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover py-1 shadow-soft">
-          {suggestions.map((t) => (
-            <li key={t.username}>
-              <button
-                type="button"
-                className={cn(
-                  "flex w-full items-center px-3 py-2 text-left text-sm hover:bg-muted",
-                )}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  pick(t.username);
-                }}
-              >
-                <span className="font-medium">@{t.username}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <AnchoredList anchor={anchor}>
+          <ul className="py-1">
+            {suggestions.map((t) => (
+              <li key={t.username}>
+                <button
+                  type="button"
+                  className={cn(
+                    "flex w-full items-center px-3 py-2 text-left text-sm hover:bg-muted",
+                  )}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    pick(t.username);
+                  }}
+                >
+                  <span className="font-medium">@{t.username}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </AnchoredList>
       ) : null}
     </div>
   );

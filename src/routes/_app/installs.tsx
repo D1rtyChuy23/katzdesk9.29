@@ -416,6 +416,7 @@ function NewInstallDialog({
   onOpenExisting: (id: number) => void;
 }) {
   const qc = useQueryClient();
+  const recipes = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });
   const [customer, setCustomer] = useState("");
   const [equipment, setEquipment] = useState<string[]>([]);
   const [specs, setSpecs] = useState<MachineSpec[]>([]);
@@ -433,14 +434,35 @@ function NewInstallDialog({
         }
       }}
     >
-      <DialogContent className="max-w-2xl">
-        <DialogTitle>New install</DialogTitle>
-        <div className="mt-3 rounded-lg border border-border bg-muted/50 px-3 py-2.5 text-sm">
-          <p className="flex items-start gap-2">
-            <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
-            <span>There is a 2-week lead-time to allow time to prep equipment, including in-between service calls and PMs.</span>
-          </p>
+      <DialogContent className="max-w-4xl">
+        <div className="sticky top-0 z-20 -mx-5 -mt-5 mb-2 border-b border-border bg-card px-4 pt-3 pr-12 pb-2">
+          <DialogTitle>New install</DialogTitle>
+          <div className="mt-2 grid min-w-0 gap-2">
+            <CustomerCombo
+              value={customer}
+              onChange={(v) => {
+                try {
+                  setCustomer(v);
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Could not set customer");
+                }
+              }}
+              required
+            />
+            <EquipmentMultiCombo
+              values={equipment}
+              onChange={(next) => {
+                setEquipment(next);
+                setSpecs(mergeMachineSpecs(next, specs));
+              }}
+              placeholder="Add another…"
+            />
+          </div>
         </div>
+        <p className="flex items-start gap-2 text-xs text-muted-foreground">
+          <Clock className="mt-0.5 size-3.5 shrink-0 text-primary" />
+          <span>2-week lead time to prep equipment between service calls and PMs.</span>
+        </p>
         <form
           className="mt-4 space-y-3"
           onSubmit={async (e) => {
@@ -471,32 +493,6 @@ function NewInstallDialog({
             }
           }}
         >
-          <div className="grid min-w-0 gap-3">
-            <CustomerCombo
-              value={customer}
-              onChange={(v) => {
-                try {
-                  setCustomer(v);
-                } catch (err) {
-                  toast.error(err instanceof Error ? err.message : "Could not set customer");
-                }
-              }}
-              required
-              menuInFlow
-            />
-            <EquipmentMultiCombo
-              values={equipment}
-              onChange={(next) => {
-                setEquipment(next);
-                setSpecs(mergeMachineSpecs(next, specs));
-              }}
-              placeholder="Search the full equipment list…"
-              menuInFlow
-            />
-          </div>
-          <p className="-mt-1 text-xs text-muted-foreground">
-            Open the equipment field to scroll the full list, or type a model and add it if it isn’t there.
-          </p>
           {matches.length ? (
             <div className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2.5 text-sm">
               <p className="font-medium text-warning">
@@ -518,7 +514,14 @@ function NewInstallDialog({
               {matches.length > 4 ? <p className="mt-1 text-xs text-muted-foreground">+{matches.length - 4} more</p> : null}
             </div>
           ) : null}
-          {customer && specs.length ? <MachineFields specs={specs} onChange={setSpecs} /> : null}
+          {customer && specs.length ? (
+            <MachineFields
+              specs={specs}
+              customer={customer}
+              recipes={recipes.data ?? []}
+              onChange={setSpecs}
+            />
+          ) : null}
           <div className="flex justify-end">
             <Button type="submit" disabled={pending || !customer.trim()}>
               {matches.length ? "Create new request" : "Create"}
@@ -574,6 +577,7 @@ function useRemoveEquip(install: Install, catalog: string[]) {
     },
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["inspection", install.id] });
     },
   });
 }

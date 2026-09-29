@@ -19,16 +19,20 @@ import { formatPingTime } from "@/lib/ops/clock";
 import {
   CORE_HOLE_QUESTION,
   INSPECTION_ITEM_STATUSES,
+  inspectorChoices,
   itemSaveError,
   showCoreHoleQuestion,
   spacePassError,
   type CoreHoleAnswer,
   type InspectionOverall,
 } from "@/lib/ops/pre-inspection";
+import { listReps } from "@/lib/ops/reps";
+import { listTechs } from "@/lib/ops/roster";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
+import { SelectField } from "@/components/ui/select-field";
 import { EquipmentCombo } from "./directory-fields";
 import { UnitPlaceField } from "./unit-place-field";
 import { toast } from "sonner";
@@ -282,6 +286,9 @@ function MetaForm({ view, onSaved }: { view: InspectionView; onSaved: (v: Inspec
   const [siteContact, setSiteContact] = useState(view.siteContact ?? "");
   const [notes, setNotes] = useState(view.notes ?? "");
   const [overrideReason, setOverrideReason] = useState(view.overrideReason ?? "");
+  const reps = useQuery({ queryKey: ["reps"], queryFn: () => listReps() });
+  const techs = useQuery({ queryKey: ["roster"], queryFn: () => listTechs() });
+  const choices = inspectorChoices(reps.data?.reps ?? [], techs.data?.techs ?? [], inspector);
   const save = useMutation({
     mutationFn: () =>
       saveInspectionMeta({
@@ -311,7 +318,21 @@ function MetaForm({ view, onSaved }: { view: InspectionView; onSaved: (v: Inspec
     >
       <div>
         <Label htmlFor={`insp-${view.installId}`}>Inspector</Label>
-        <Input id={`insp-${view.installId}`} className="mt-1" value={inspector} onChange={(e) => setInspector(e.target.value)} />
+        <SelectField
+          id={`insp-${view.installId}`}
+          className="mt-1"
+          data-testid="inspector"
+          allowEmpty
+          emptyLabel="Choose"
+          value={choices.value}
+          onChange={(e) => setInspector(e.target.value)}
+        >
+          {choices.options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </SelectField>
       </div>
       <div>
         <Label htmlFor={`insp-date-${view.installId}`}>Inspection date</Label>

@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Check, ChevronsUpDown, Pencil, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/input";
 import { toast } from "sonner";
+import { AnchoredList } from "@/components/ui/anchored-list";
 
 export type ComboItem = { id: number; name: string };
 
@@ -37,42 +38,48 @@ const searchClass =
   "flex min-h-11 w-full min-w-0 items-center gap-2 rounded-md border border-input bg-background px-3 text-left text-sm focus-within:ring-2 focus-within:ring-ring";
 
 function useDismiss(open: boolean, onClose: () => void) {
-  const ref = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
     function onDoc(e: MouseEvent) {
-      if (!ref.current?.contains(e.target as Node)) onClose();
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      onClose();
+    }
+    function onCloseList() {
+      onClose();
     }
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    document.addEventListener("desk-close-combo", onCloseList);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("desk-close-combo", onCloseList);
+    };
   }, [open, onClose]);
-  return ref;
+  return { rootRef, menuRef };
 }
 
 function Menu({
+  anchor,
+  menuRef,
   children,
   notFound,
   notFoundText,
-  inFlow,
 }: {
+  anchor: RefObject<HTMLDivElement | null>;
+  menuRef: RefObject<HTMLDivElement | null>;
   children: ReactNode;
   notFound: boolean;
   notFoundText: string;
-  inFlow?: boolean;
 }) {
   return (
-    <div
-      data-combo-popover=""
-      className={cn(
-        "z-50 w-full overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-soft",
-        inFlow ? "relative mt-1" : "absolute mt-1",
-      )}
-    >
+    <AnchoredList anchor={anchor} menuRef={menuRef}>
       {notFound ? <p className="px-2 py-1.5 text-xs text-muted-foreground">{notFoundText}</p> : null}
-      <ul className="max-h-56 overflow-y-auto py-1" role="listbox">
+      <ul className="py-1" role="listbox">
         {children}
       </ul>
-    </div>
+    </AnchoredList>
   );
 }
 
@@ -160,7 +167,7 @@ export function ComboField({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const rootRef = useDismiss(open, () => {
+  const { rootRef, menuRef } = useDismiss(open, () => {
     setOpen(false);
     setQ("");
   });
@@ -250,7 +257,8 @@ export function ComboField({
         </div>
         {open ? (
           <Menu
-            inFlow={menuInFlow}
+            anchor={rootRef}
+            menuRef={menuRef}
             notFound={notFound}
             notFoundText={
               allowCreate ? `This ${noun} isn’t on the list. Use + to add it.` : emptyHint
@@ -339,7 +347,7 @@ export function MultiComboField({
 }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
-  const rootRef = useDismiss(open, () => {
+  const { rootRef, menuRef } = useDismiss(open, () => {
     setOpen(false);
     setQ("");
   });
@@ -442,7 +450,8 @@ export function MultiComboField({
           </div>
         {open ? (
           <Menu
-            inFlow={menuInFlow}
+            anchor={rootRef}
+            menuRef={menuRef}
             notFound={notFound}
             notFoundText={allowCreate ? `This ${noun} isn’t on the list. Use + to add it.` : "No matches."}
           >

@@ -4,13 +4,11 @@ import {
   archiveDeal,
   archiveInstall,
   assignAssetToInstall,
-  copyRecipe,
   createDeal,
   createInstall,
   createModule,
   createPm,
   listAssets,
-  listCustomers,
   listDirectory,
   listRecipes,
   unassignAssetFromInstall,
@@ -18,8 +16,8 @@ import {
   updateInstall,
   updateModule,
   updatePm,
-  upsertRecipe,
 } from "@/lib/ops/api";
+import { AnchoredList } from "@/components/ui/anchored-list";
 import {
   EQUIP_STATUSES,
   MODULE_PLATFORMS,
@@ -32,7 +30,7 @@ import {
   REQS_READY,
 } from "@/lib/ops/lookups";
 
-import { catalogModels, listedEquipment, piecesForInstall } from "@/lib/ops/equipment";
+import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import type { Asset, Deal, Install, ModuleRow, PmJob } from "@/lib/ops/types";
 import { moneyExact } from "@/lib/ops/clock";
@@ -45,8 +43,6 @@ import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/compo
 import { FlagBadge, StatusBadge } from "./flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { Thread } from "./thread";
-import { RecipeForm, type RecipeDraft } from "./recipe-form";
-import { InstallRecipeList } from "./recipe-sheet";
 import { CustomerCombo, EquipmentCombo, EquipmentMultiCombo, LockedCustomer } from "./directory-fields";
 import { TechSelect } from "./tech-select";
 import { RepSelect } from "./rep-select";
@@ -266,12 +262,10 @@ export function InstallSheet({
   const qc = useQueryClient();
   const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
-  const customers = useQuery({ queryKey: ["customers"], queryFn: () => listCustomers() });
   const directoryEquip = useQuery({
     queryKey: ["directory", "equipment"],
     queryFn: () => listDirectory({ data: { kind: "equipment" } }),
   });
-  const [recipeDraft, setRecipeDraft] = useState<RecipeDraft | null>(null);
   const [customer, setCustomer] = useState(row?.customer ?? "");
   const [equipPieces, setEquipPieces] = useState<string[]>([]);
   const [specs, setSpecs] = useState<MachineSpec[]>([]);
@@ -284,7 +278,6 @@ export function InstallSheet({
     ...(recs.data ?? []).map((r) => r.equipmentModel),
   ]);
   useEffect(() => {
-    setRecipeDraft(null);
     setCustomer(row?.customer ?? "");
     const saved = row?.machines ?? [];
     const fromSaved = saved.map((s) => s.equipment).filter(Boolean);
@@ -315,6 +308,7 @@ export function InstallSheet({
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
@@ -329,30 +323,6 @@ export function InstallSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
-  const saveRecipe = useMutation({
-    mutationFn: (d: Parameters<typeof upsertRecipe>[0]["data"]) => upsertRecipe({ data: d }),
-    onSuccess: (saved) => {
-      toast.success(saved.customer ? `Recipe saved for ${saved.customer}` : "House recipe saved");
-      void qc.invalidateQueries({ queryKey: ["recipes"] });
-      void qc.invalidateQueries({ queryKey: ["customers"] });
-      setRecipeDraft(null);
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
-  });
-  const copy = useMutation({
-    mutationFn: (d: Parameters<typeof copyRecipe>[0]["data"]) => copyRecipe({ data: d }),
-    onSuccess: (saved) => {
-      toast.success(`Copied onto ${saved.customer}`);
-      void qc.invalidateQueries({ queryKey: ["recipes"] });
-      void qc.invalidateQueries({ queryKey: ["customers"] });
-      setRecipeDraft(null);
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
-  });
-  const pieces = row
-    ? piecesForInstall(row.equipment, row.customer, row.id, catalog, recs.data ?? [])
-    : [];
-  const models = catalog;
 
   function persistMachines(next: MachineSpec[]) {
     setSpecs(next);
@@ -375,12 +345,11 @@ export function InstallSheet({
         if (!o) {
           skipToast.current = true;
           formRef.current?.requestSubmit();
-          setRecipeDraft(null);
           onClose();
         }
       }}
     >
-      <SheetContent>
+      <SheetContent className="sm:max-w-4xl">
         {row ? (
           <>
             <SheetHeader>
@@ -424,45 +393,17 @@ export function InstallSheet({
               </div>
             ) : null}
             <InstallAssets installId={row.id} />
-            {recipeDraft ? (
-              <div className="border-b border-border p-5">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <p className="text-xs tracking-wide text-muted-foreground uppercase">Recipe</p>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => setRecipeDraft(null)}>
-                    Back to machines
-                  </Button>
-                </div>
-                <RecipeForm
-                  key={`${recipeDraft.recipe?.id ?? "new"}-${recipeDraft.equipmentModel}`}
-                  draft={recipeDraft}
-                  models={models}
-                  customers={customers.data ?? []}
-                  pending={saveRecipe.isPending}
-                  copyPending={copy.isPending}
-                  onSave={(d) => saveRecipe.mutate(d)}
-                  onCopy={recipeDraft.recipe ? (d) => copy.mutate(d) : undefined}
-                />
-              </div>
-            ) : (
-              <InstallRecipeList
-                customer={row.customer}
-                installId={row.id}
-                pieces={pieces}
-                recipes={recs.data ?? []}
-                onOpen={setRecipeDraft}
-              />
-            )}
             <form
               ref={formRef}
               key={row.id}
-              className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
+              className="grid gap-3 border-b border-border px-4 py-3 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
                 const packed = serializeMachines(specs);
                 save.mutate({
                   id: row.id,
-                  customer: String(fd.get("customer")),
+                  customer: String(fd.get("customer") || row.customer),
                   equipment: packed.equipment,
                   equipStatus: String(fd.get("equipStatus") || "") || null,
                   installDate: String(fd.get("installDate") || "") || null,
@@ -481,27 +422,11 @@ export function InstallSheet({
                 });
               }}
             >
-              {lockCustomer ? (
-                <LockedCustomer name={row.customer} />
-              ) : (
-                <CustomerCombo
-                  name="customer"
-                  value={customer}
-                  onChange={(v) => {
-                    try {
-                      setCustomer(v);
-                    } catch (err) {
-                      toast.error(err instanceof Error ? err.message : "Could not set customer");
-                    }
-                  }}
-                  required
-                />
-              )}
+              <input type="hidden" name="customer" value={customer || row.customer} />
               <div className="sm:col-span-2">
                 <EquipmentMultiCombo
                   values={equipPieces}
-                  placeholder="Search the full equipment list…"
-                  menuInFlow
+                  placeholder="Add another…"
                   onChange={(next) => {
                     try {
                       persistMachines(mergeMachineSpecs(next, specs));
@@ -510,14 +435,13 @@ export function InstallSheet({
                     }
                   }}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Scroll the full list, pick a model, or type a new one to add it.
-                </p>
               </div>
               <div className="sm:col-span-2">
                 <MachineFields
                   specs={specs}
                   installId={row.id}
+                  customer={row.customer}
+                  recipes={recs.data ?? []}
                   onChange={setSpecs}
                   onPulled={(next) => persistMachines(next)}
                 />
@@ -902,11 +826,8 @@ function InstallAssets({ installId }: { installId: number }) {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
   });
   return (
-    <div id="warehouse-units" className="border-b border-border bg-muted/40 p-5">
+    <div id="warehouse-units" className="border-b border-border bg-muted/40 px-4 py-3">
       <p className="text-xs tracking-wide text-muted-foreground uppercase">Warehouse units</p>
-      <p className="mt-0.5 text-xs text-muted-foreground">
-        Type a warehouse serial on the machine below to pull it in one step — or assign from the rack here.
-      </p>
       {assets.isLoading ? (
         <p className="mt-2 text-sm text-muted-foreground">Loading the barn…</p>
       ) : assigned.length ? (
@@ -977,6 +898,7 @@ function ReadyUnitPicker({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const box = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const query = open ? q : "";
   const matches = useMemo(() => filterReadyUnits(units, query), [units, query]);
   const selected = units.find((a) => String(a.id) === value) ?? null;
@@ -985,13 +907,21 @@ function ReadyUnitPicker({
   useEffect(() => {
     if (!open) return;
     function onDoc(e: MouseEvent) {
-      if (!box.current?.contains(e.target as Node)) {
-        setOpen(false);
-        setQ("");
-      }
+      const target = e.target as Node;
+      if (box.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+      setQ("");
     }
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    function onCloseList() {
+      setOpen(false);
+      setQ("");
+    }
+    document.addEventListener("desk-close-combo", onCloseList);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("desk-close-combo", onCloseList);
+    };
   }, [open]);
 
   function pick(id: string) {
@@ -1043,14 +973,11 @@ function ReadyUnitPicker({
         <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
       </div>
       {open ? (
-        <div
-          data-combo-popover=""
-          className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-soft"
-        >
+        <AnchoredList anchor={box} menuRef={menuRef}>
           {notFound ? (
             <p className="px-2 py-1.5 text-xs text-muted-foreground">No unit on the rack matches that search.</p>
           ) : null}
-          <ul className="max-h-80 overflow-y-auto py-1" role="listbox">
+          <ul className="py-1" role="listbox">
             {matches.map((a) => {
               const active = String(a.id) === value;
               return (
@@ -1078,7 +1005,7 @@ function ReadyUnitPicker({
               <li className="px-2 py-2 text-xs text-muted-foreground">Nothing ready on the rack.</li>
             ) : null}
           </ul>
-        </div>
+        </AnchoredList>
       ) : null}
     </div>
   );

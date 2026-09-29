@@ -28,6 +28,8 @@ import { Input, Label } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { AssetSheet } from "@/components/desk/asset-sheet";
+import { StockActions } from "@/components/desk/stock-actions";
+import { getMyAccess } from "@/lib/ops/access";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
 import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
@@ -43,6 +45,8 @@ function Page() {
   const { open } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const canStock = !!me.data?.isAdmin || me.data?.role === "warehouse";
   const [tab, setTab] = useState<"deployed" | "field" | "sold" | "all">("deployed");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useOpenRecord(open);
@@ -249,7 +253,7 @@ function Page() {
                       {a.purpose ?? a.soldTo ?? "—"}
                       {a.soldAt ? ` · ${a.soldAt}` : ""}
                     </span>
-                    <span className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge
                         status={
                           a.site === HOUSE_STAGING
@@ -263,7 +267,7 @@ function Page() {
                                 : "In use"
                         }
                       />
-                      {onSite ? (
+                      {onSite && !a.stockHold ? (
                         movingId === a.id ? (
                           <span className="flex flex-wrap items-end gap-2">
                             <PlacePicker value={moveDraft} onChange={setMoveDraft} testId="location-move" />
@@ -315,7 +319,10 @@ function Page() {
                           </Button>
                         )
                       ) : null}
-                    </span>
+                      {(a.site === HOUSE_STAGING || a.site === HOUSE_TRAINING || a.site === HOUSE_LOBBY) && (canStock || a.stockHold) ? (
+                        <StockActions asset={a} canStock={canStock} isAdmin={!!me.data?.isAdmin} />
+                      ) : null}
+                    </div>
                   </div>
                 );
               })}

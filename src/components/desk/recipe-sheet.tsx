@@ -104,24 +104,18 @@ export function RecipeChip({
     model: piece.model,
     installId,
   });
-  const preview = previewSetting(linked ?? undefined);
+  const preview = previewSetting(linked ?? house ?? undefined);
   let tone: "saved" | "house" | "empty" = "empty";
-  let status = "Add recipe";
-  if (linked) {
-    tone = "saved";
-    status = "Recipe";
-  } else if (house) {
-    tone = "house";
-    status = "House";
-  }
+  if (linked) tone = "saved";
+  else if (house) tone = "house";
 
   return (
     <div
       className={cn(
-        "inline-flex h-9 max-w-[16rem] items-center rounded-md border",
+        "inline-flex h-8 max-w-[16rem] items-center rounded-full border",
         tone === "saved" && "border-primary/30 bg-primary/8",
         tone === "house" && "border-border bg-card",
-        tone === "empty" && "border-dashed border-border bg-background text-muted-foreground",
+        tone === "empty" && "border-border bg-background",
       )}
     >
       <button
@@ -139,19 +133,18 @@ export function RecipeChip({
             source: null,
           });
         }}
-        className="inline-flex min-w-0 flex-1 items-center gap-1.5 px-2 text-left"
-        title={preview ?? `${piece.model} recipe`}
+        className="inline-flex min-w-0 flex-1 items-center gap-1 px-2.5 text-left"
+        title={preview ?? piece.label}
       >
-        {tone === "empty" ? <Plus className="size-3.5 shrink-0" /> : <BookOpen className="size-3.5 shrink-0" />}
-        <span className="min-w-0 truncate text-xs font-medium text-foreground">
-          {shortEquipLabel(piece.label)}
-        </span>
-        <span className="shrink-0 text-[11px] text-muted-foreground">{status}</span>
+        <span className="min-w-0 truncate text-xs font-medium text-foreground">{shortEquipLabel(piece.label, 28)}</span>
+        {tone === "empty" ? null : (
+          <BookOpen className="size-3 shrink-0 text-muted-foreground" aria-label={tone === "saved" ? "Account recipe" : "House recipe"} />
+        )}
       </button>
       {onRemove ? (
         <button
           type="button"
-          className="flex size-10 shrink-0 items-center justify-center rounded-r-md border-l border-border/70 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="flex size-8 shrink-0 items-center justify-center rounded-r-full text-muted-foreground hover:bg-muted hover:text-foreground"
           aria-label={`Remove ${piece.label}`}
           title="Remove this equipment from the install"
           onClick={(e) => {

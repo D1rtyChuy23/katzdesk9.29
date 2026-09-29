@@ -46,7 +46,7 @@ export function StatusBadge({
   else if (s.includes("cancel") || s.includes("fell") || s.includes("overdue") || s.includes("not ready")) variant = "danger";
   else if (s.includes("needs bay") || s.includes("serial missing")) variant = "warn";
   else if (s.includes("progress") || s.includes("dispatch") || s.includes("await") || s.includes("follow")) variant = "warn";
-  else if (s === "pending review") variant = "warn";
+  else if (s === "pending review" || s === "pending removal" || s === "pending outbound") variant = "warn";
   else if (s === "needs test") variant = "outline";
   else if (s === "tested") variant = "primary";
   return (

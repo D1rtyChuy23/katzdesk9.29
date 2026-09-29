@@ -47,6 +47,8 @@ export const SITE_LABEL: Record<string, string> = {
   dallas: "Dallas",
   field: "Pulled from the barn",
   sold: "Sold",
+  account: "On the account",
+  removed: "Removed from stock",
 };
 
 export const SITE_PURPOSE: Record<string, string> = {
@@ -109,6 +111,12 @@ export function palletsFor(site: string): readonly string[] {
 
 export function slotId(pallet: string, level: number, line?: number | null): string {
   return line ? `${pallet}-L${level} · ${line}` : `${pallet}-L${level}`;
+}
+
+export function sectionFullMessage(site: string, pallet: string, level: number): string {
+  const rack = site === "barn-front" ? "Front" : site === "barn-back" ? "Back" : "";
+  const where = rack ? `${rack} · ${slotId(pallet, level)}` : slotId(pallet, level);
+  return `${where} is full (12). Move one out, or choose Replace/Swap.`;
 }
 
 export function siteLabel(site: string): string {

@@ -297,7 +297,7 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header
-          className="relative flex min-h-[4.75rem] flex-wrap items-center gap-2 overflow-hidden border-b border-border bg-cover bg-center px-3 py-3 md:px-6"
+          className="relative z-20 flex min-h-[4.75rem] flex-wrap items-center gap-2 overflow-hidden border-b border-border bg-cover bg-center px-3 py-3 md:px-6"
           style={{ backgroundImage: "url(/desk-header.jpg)" }}
         >
           <div className="absolute inset-0 bg-background/55" />

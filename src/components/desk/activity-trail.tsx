@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { listActivity } from "@/lib/ops/api";
+import { cn } from "@/lib/utils";
 
 function actionLine(action: string, detail: string | null): string {
   if (action === "opened") return detail ? `opened this · ${detail}` : "opened this";
@@ -32,28 +35,45 @@ export function ActivityTrail({
   entityType: string;
   entityId: number;
 }) {
+  const [open, setOpen] = useState(false);
   const log = useQuery({
     queryKey: ["activity", entityType, entityId],
     queryFn: () => listActivity({ data: { entityType, entityId } }),
-    refetchInterval: 8_000,
+    refetchInterval: open ? 8_000 : false,
+    enabled: open,
   });
   const rows = log.data ?? [];
-  if (!rows.length) return null;
   return (
-    <div className="border-t border-border px-5 py-4">
-      <h3 className="font-display text-lg font-medium">Who changed this</h3>
-      <p className="text-xs text-muted-foreground">Every save and assignment is tagged to a username.</p>
-      <ol className="mt-3 space-y-2">
-        {rows.map((a) => (
-          <li key={a.id} className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
-            <p className="min-w-0">
-              <span className="font-medium">@{a.actorName ?? "teammate"}</span>
-              <span className="text-muted-foreground"> {actionLine(a.action, a.detail)}</span>
-            </p>
-            <time className="shrink-0 text-xs text-muted-foreground">{when(a.createdAt)}</time>
-          </li>
-        ))}
-      </ol>
+    <div className="border-t border-border px-5 py-3">
+      <button
+        type="button"
+        className="flex min-h-11 w-full items-center justify-between gap-2 text-left"
+        aria-expanded={open}
+        data-testid="who-changed"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="font-display text-base font-medium">Who changed this</span>
+        <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+      {open ? (
+        log.isLoading ? (
+          <p className="mt-2 text-sm text-muted-foreground">Loading…</p>
+        ) : rows.length ? (
+          <ol className="mt-2 space-y-2">
+            {rows.map((a) => (
+              <li key={a.id} className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                <p className="min-w-0">
+                  <span className="font-medium">@{a.actorName ?? "teammate"}</span>
+                  <span className="text-muted-foreground"> {actionLine(a.action, a.detail)}</span>
+                </p>
+                <time className="shrink-0 text-xs text-muted-foreground">{when(a.createdAt)}</time>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">No changes yet.</p>
+        )
+      ) : null}
     </div>
   );
 }

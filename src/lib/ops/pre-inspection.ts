@@ -1,5 +1,7 @@
 /** Site check before an install. One record per install. */
 
+import { normalizeName } from "./norm.ts";
+
 export const INSPECTION_CATEGORIES = [
   {
     key: "power",
@@ -237,4 +239,43 @@ export function inspectionGlance(summary: InspectionSummary | null | undefined):
   const count = s.machineCount > 0 ? ` ${s.passedCount}/${s.machineCount}` : "";
   if (s.overall === "Failed" && s.failedItems.length) return `Failed: ${s.failedItems.join(", ")}${count}`;
   return `${s.overall}${count}`;
+}
+
+export type InspectorOption = { value: string; label: string };
+
+function personKey(raw: string): string {
+  return normalizeName(raw.replace(/\s*\([^)]{1,8}\)\s*$/, ""));
+}
+
+/** Active sales reps plus active service techs. One row per person, name order. */
+export function inspectorChoices(
+  reps: { name: string; initials?: string | null; active?: boolean }[],
+  techs: { name: string; active?: boolean }[],
+  current?: string | null,
+): { options: InspectorOption[]; value: string } {
+  const byKey = new Map<string, InspectorOption>();
+  for (const rep of reps) {
+    if (rep.active === false) continue;
+    const name = rep.name.trim().replace(/\s+/g, " ");
+    if (!name) continue;
+    const initials = (rep.initials ?? "").trim();
+    byKey.set(personKey(name), {
+      value: name,
+      label: initials ? `${name} (${initials})` : name,
+    });
+  }
+  for (const tech of techs) {
+    if (tech.active === false) continue;
+    const name = tech.name.trim().replace(/\s+/g, " ");
+    if (!name || byKey.has(personKey(name))) continue;
+    byKey.set(personKey(name), { value: name, label: name });
+  }
+  const options = [...byKey.values()].sort((a, b) =>
+    a.value.localeCompare(b.value, undefined, { sensitivity: "base" }),
+  );
+  const cur = (current ?? "").trim();
+  if (!cur) return { options, value: "" };
+  const hit = options.find((o) => personKey(o.value) === personKey(cur) || normalizeName(o.label) === normalizeName(cur));
+  if (hit) return { options, value: hit.value };
+  return { options: [{ value: cur, label: cur }, ...options], value: cur };
 }

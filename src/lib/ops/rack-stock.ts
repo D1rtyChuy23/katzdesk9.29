@@ -5,7 +5,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { serialKey } from "@/lib/ops/account-equip";
 import { notifyAdminsRackReview } from "@/lib/ops/notify";
-import { BACK_PALLETS, FRONT_PALLETS, LEVELS, isValidBay, slotId } from "@/lib/ops/warehouse";
+import { LEVELS, isValidBay, sectionFullMessage, slotId } from "@/lib/ops/warehouse";
 
 type Rack = "barn-back" | "barn-front";
 
@@ -35,6 +35,19 @@ export async function requireStock(sql: Sql, userId: string) {
   return role;
 }
 
+async function nextLine(sql: Sql, site: string, pallet: string, level: number, exceptId?: number): Promise<number> {
+  const taken = await sql.query<{ id: number; line_no: number }>(
+    `select id, line_no from assets
+      where site = $1 and upper(pallet) = $2 and level = $3
+        and status in ('ready', 'deployed')
+        and line_no is not null`,
+    [site, pallet, level],
+  );
+  const used = new Set(taken.filter((t) => t.id !== exceptId).map((t) => t.line_no));
+  for (let line = 1; line <= 12; line++) if (!used.has(line)) return line;
+  throw new Error(sectionFullMessage(site, pallet, level));
+}
+
 function rackOf(site: string): Rack {
   if (site === "barn-front") return "barn-front";
   if (site === "barn-back" || site === "barn") return "barn-back";
@@ -44,19 +57,6 @@ function rackOf(site: string): Rack {
 function levelOf(level: number): number {
   if (!LEVELS.includes(level as (typeof LEVELS)[number])) throw new Error("Pick a level");
   return level;
-}
-
-async function nextLine(sql: Sql, site: string, pallet: string, level: number, exceptId?: number): Promise<number> {
-  const taken = await sql.query<{ id: number; line_no: number }>(
-    `select id, line_no from assets
-      where site = $1 and pallet = $2 and level = $3
-        and status in ('ready', 'deployed')
-        and line_no is not null`,
-    [site, pallet, level],
-  );
-  const used = new Set(taken.filter((t) => t.id !== exceptId).map((t) => t.line_no));
-  for (let line = 1; line <= 12; line++) if (!used.has(line)) return line;
-  throw new Error(`${slotId(pallet, level)} is full`);
 }
 
 async function findSerial(sql: Sql, serial: string) {
@@ -157,9 +157,8 @@ export const addToRackSlot = createServerFn({ method: "POST" })
     const site = rackOf(data.site);
     const pallet = data.pallet.trim().toUpperCase();
     const level = levelOf(data.level);
-    const allowed = site === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
-    if (!isValidBay(pallet) || !(allowed as readonly string[]).includes(pallet)) {
-      throw new Error("Pick a bay A through P on this rack");
+    if (!isValidBay(pallet)) {
+      throw new Error("Pick a bay A through P");
     }
     const slot = slotId(pallet, level);
     const serial = data.serial?.trim() || "";
@@ -174,11 +173,15 @@ export const addToRackSlot = createServerFn({ method: "POST" })
         (existing.pallet ?? "").toUpperCase() === pallet &&
         Number(existing.level) === level &&
         existing.status === "ready";
-      if (same) throw new Error(`${serial} is already in ${slot}.`);
+      if (same) throw new Error(`${serial} is already in ${site === "barn-front" ? "Front" : "Back"} · ${slot}.`);
+      const { assertNotHeld } = await import("@/lib/ops/stock-actions");
+      await assertNotHeld(sql, existing.id);
       const current =
-        existing.pallet && existing.level
-          ? slotId(String(existing.pallet).toUpperCase(), Number(existing.level))
-          : existing.site;
+        existing.pallet && existing.level && (existing.site === "barn-front" || existing.site === "barn-back")
+          ? `${existing.site === "barn-front" ? "Front" : "Back"} · ${slotId(String(existing.pallet).toUpperCase(), Number(existing.level))}`
+          : existing.pallet && existing.level
+            ? slotId(String(existing.pallet).toUpperCase(), Number(existing.level))
+            : existing.site;
       if (!data.confirm) {
         return { id: existing.id, moved: false, needsConfirm: true, currentPlace: current, pendingReview: false };
       }

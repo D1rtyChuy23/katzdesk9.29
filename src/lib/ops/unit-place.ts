@@ -4,21 +4,20 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { serialKey } from "@/lib/ops/account-equip";
 import { electricalFrom, placeMove, resolvePlaceSite, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
+import { requireStock } from "@/lib/ops/rack-stock";
 import {
-  BACK_PALLETS,
-  FRONT_PALLETS,
   LEVELS,
   LOCATION_SITES,
   SITE_PURPOSE,
   isBarn,
   isValidBay,
-  slotId,
+  sectionFullMessage,
 } from "@/lib/ops/warehouse";
 
 export { electricalFrom, lastMoveLine, placeMove, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
 
 function barnRack(site: string): "barn-back" | "barn-front" | null {
-  if (site === "barn" || site === "barn-back") return "barn-back";
+  if (site === "barn-back") return "barn-back";
   if (site === "barn-front") return "barn-front";
   return null;
 }
@@ -157,7 +156,7 @@ function toPlace(row: AssetRow | null): UnitPlace {
 async function openLine(sql: Sql, site: string, pallet: string, level: number, exceptId?: number): Promise<number> {
   const taken = await sql.query<{ id: number; line_no: number }>(
     `select id, line_no from assets
-      where site = $1 and pallet = $2 and level = $3
+      where site = $1 and upper(pallet) = $2 and level = $3
         and status in ('ready', 'deployed')
         and line_no is not null`,
     [site, pallet, level],
@@ -166,7 +165,7 @@ async function openLine(sql: Sql, site: string, pallet: string, level: number, e
   for (let line = 1; line <= 12; line++) {
     if (!used.has(line)) return line;
   }
-  throw new Error(`${slotId(pallet, level)} is full`);
+  throw new Error(sectionFullMessage(site, pallet, level));
 }
 
 async function parkInBarn(
@@ -182,13 +181,22 @@ async function parkInBarn(
     throw new Error(`That serial is already allocated${row.sold_to ? ` to ${row.sold_to}` : ""}.`);
   }
   const letter = pallet.trim().toUpperCase();
-  const allowed = rack === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
-  if (!isValidBay(letter) || !(allowed as readonly string[]).includes(letter)) {
-    throw new Error("Pick a bay A through P");
-  }
+  if (!isValidBay(letter)) throw new Error("Pick a bay A through P");
   if (!LEVELS.includes(level as (typeof LEVELS)[number])) throw new Error("Pick a level");
+  const same =
+    row.site === rack &&
+    (row.pallet ?? "").toUpperCase() === letter &&
+    Number(row.level) === level &&
+    row.status === "ready";
+  if (same) {
+    throw new Error(`Already at ${unitPlaceLabel({ site: rack, pallet: letter, level, status: "ready" })}.`);
+  }
+  const { assertNotHeld } = await import("@/lib/ops/stock-actions");
+  await assertNotHeld(sql, row.id);
+  await requireStock(sql, userId);
   const line = await openLine(sql, rack, letter, level, row.id);
-  const notice = await moveNotice(sql, userId, fromLabel, `Barn · ${slotId(letter, level)}`);
+  const to = unitPlaceLabel({ site: rack, pallet: letter, level, status: "ready" });
+  const notice = await moveNotice(sql, userId, fromLabel, to);
   const notes = withNote(row.notes, notice);
   await sql.query(
     `update assets set
@@ -229,6 +237,8 @@ async function parkAtLocation(
   }
   const label = (otherLabel ?? "").trim();
   if (dest === "other" && !label) throw new Error("Other needs a short label.");
+  const { assertNotHeld } = await import("@/lib/ops/stock-actions");
+  await assertNotHeld(sql, row.id);
   const from = unitPlaceLabel({
     site: row.site,
     pallet: row.pallet,
@@ -280,6 +290,7 @@ export const listBarnAvailable = createServerFn({ method: "GET" })
           and install_id is null
           and job_id is null
           and coalesce(sold_to, '') = ''
+          and coalesce(stock_hold, '') <> 'assign'
         order by lower(model), serial nulls last, id`,
     );
     return rows.map((r) => ({
@@ -389,7 +400,10 @@ export const moveUnitToBarn = createServerFn({ method: "POST" })
     });
     const level = requireLevel(data.level);
     const notice = await parkInBarn(sql, context.userId, row, data.pallet, level, from);
-    return { place: `Barn · ${slotId(data.pallet.trim().toUpperCase(), level)}`, notice };
+    return {
+      place: unitPlaceLabel({ site: "barn-back", pallet: data.pallet.trim().toUpperCase(), level, status: "ready" }),
+      notice,
+    };
   });
 
 const lookupInput = z.object({ serial: z.string() });
@@ -423,6 +437,7 @@ export const setUnitPlace = createServerFn({ method: "POST" })
     if (action === "blocked" && existing) {
       throw new Error(`That serial is already allocated${existing.sold_to ? ` to ${existing.sold_to}` : ""}.`);
     }
+    if (data.site === "barn") throw new Error("Pick a rack.");
     const rack = barnRack(data.site);
     if (rack) {
       if (!data.pallet?.trim()) throw new Error("Pick a bay A through P");
@@ -447,6 +462,8 @@ export const setUnitPlace = createServerFn({ method: "POST" })
         return toPlace(await byId(sql, existing.id));
       }
       const letter = data.pallet.trim().toUpperCase();
+      if (!isValidBay(letter)) throw new Error("Pick a bay A through P");
+      await requireStock(sql, context.userId);
       const line = await openLine(sql, rack, letter, level);
       const inserted = await sql.query<{ id: number }>(
         `insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status)
@@ -483,7 +500,107 @@ const assetPlaceInput = z.object({
   pallet: z.string().nullable().optional(),
   level: z.number().int().nullable().optional(),
   otherLabel: z.string().nullable().optional(),
+  swapWithId: z.number().int().positive().nullable().optional(),
 });
+
+function statusAt(site: string, previous: string): string {
+  if (site === "barn-back" || site === "barn-front") return "ready";
+  if (previous === "ready") return "deployed";
+  return previous;
+}
+
+/** Exchange two units' places. Each serial stays its own record. */
+async function swapAssetPlaces(
+  sql: Sql,
+  userId: string,
+  mover: AssetRow,
+  otherId: number,
+  rack: "barn-back" | "barn-front",
+  pallet: string,
+  level: number,
+): Promise<void> {
+  if (mover.id === otherId) throw new Error("Pick a different unit to swap.");
+  const other = await byId(sql, otherId);
+  const letter = pallet.trim().toUpperCase();
+  if (
+    !other ||
+    other.site !== rack ||
+    (other.pallet ?? "").toUpperCase() !== letter ||
+    Number(other.level) !== level
+  ) {
+    throw new Error("That unit is not in this section.");
+  }
+  if (placeMove(mover) === "blocked") {
+    throw new Error(`That serial is already allocated${mover.sold_to ? ` to ${mover.sold_to}` : ""}.`);
+  }
+  if (placeMove(other) === "blocked") {
+    throw new Error(`That serial is already allocated${other.sold_to ? ` to ${other.sold_to}` : ""}.`);
+  }
+  const { assertNotHeld } = await import("@/lib/ops/stock-actions");
+  await assertNotHeld(sql, mover.id);
+  await assertNotHeld(sql, other.id);
+  await requireStock(sql, userId);
+  const moverStatus = statusAt(other.site, other.status);
+  const otherStatus = statusAt(mover.site, mover.status);
+  await sql.query(
+    `update assets set status = $2, site = $3, pallet = $4, level = $5, line_no = $6, updated_at = now() where id = $1`,
+    [mover.id, moverStatus, other.site, other.pallet, other.level, other.line_no],
+  );
+  await sql.query(
+    `update assets set status = $2, site = $3, pallet = $4, level = $5, line_no = $6, updated_at = now() where id = $1`,
+    [other.id, otherStatus, mover.site, mover.pallet, mover.level, mover.line_no],
+  );
+  const moverFrom = unitPlaceLabel({
+    site: mover.site,
+    pallet: mover.pallet,
+    level: mover.level,
+    status: mover.status,
+    soldTo: mover.sold_to,
+    purpose: mover.purpose,
+  });
+  const moverTo = unitPlaceLabel({
+    site: other.site,
+    pallet: other.pallet,
+    level: other.level,
+    status: moverStatus,
+    soldTo: other.sold_to,
+    purpose: other.purpose,
+  });
+  const otherFrom = moverTo;
+  const otherTo = unitPlaceLabel({
+    site: mover.site,
+    pallet: mover.pallet,
+    level: mover.level,
+    status: otherStatus,
+    soldTo: mover.sold_to,
+    purpose: mover.purpose,
+  });
+  const moverNotice = await moveNotice(sql, userId, moverFrom, `${moverTo} (swapped with ${other.serial || other.model})`);
+  const otherNotice = await moveNotice(sql, userId, otherFrom, `${otherTo} (swapped with ${mover.serial || mover.model})`);
+  await sql.query("update assets set notes = $2 where id = $1", [mover.id, withNote(mover.notes, moverNotice)]);
+  await sql.query("update assets set notes = $2 where id = $1", [other.id, withNote(other.notes, otherNotice)]);
+  await logMove(sql, userId, mover.id, moverNotice);
+  await logMove(sql, userId, other.id, otherNotice);
+  const { flagRackArrival } = await import("@/lib/ops/rack-stock");
+  if (isBarn(other.site)) {
+    await flagRackArrival(sql, userId, mover.id, {
+      site: mover.site,
+      pallet: mover.pallet,
+      level: mover.level,
+      line_no: mover.line_no,
+      status: mover.status,
+    });
+  }
+  if (isBarn(mover.site)) {
+    await flagRackArrival(sql, userId, other.id, {
+      site: other.site,
+      pallet: other.pallet,
+      level: other.level,
+      line_no: other.line_no,
+      status: other.status,
+    });
+  }
+}
 
 export const setAssetPlace = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -492,10 +609,15 @@ export const setAssetPlace = createServerFn({ method: "POST" })
     const sql = await ready();
     const row = await byId(sql, data.id);
     if (!row) throw new Error("Unit not found");
+    if (data.site === "barn") throw new Error("Pick a rack.");
     const rack = barnRack(data.site);
     if (rack) {
       if (!data.pallet?.trim()) throw new Error("Pick a bay A through P");
       const level = requireLevel(data.level);
+      if (data.swapWithId) {
+        await swapAssetPlaces(sql, context.userId, row, data.swapWithId, rack, data.pallet, level);
+        return toPlace(await byId(sql, row.id));
+      }
       await parkInBarn(
         sql,
         context.userId,
@@ -514,6 +636,7 @@ export const setAssetPlace = createServerFn({ method: "POST" })
       );
       return toPlace(await byId(sql, row.id));
     }
+    if (data.swapWithId) throw new Error("Replace/Swap is only for a rack section.");
     await parkAtLocation(sql, context.userId, row, data.site, null, data.otherLabel ?? null);
     return toPlace(await byId(sql, row.id));
   });

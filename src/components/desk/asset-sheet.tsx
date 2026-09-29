@@ -10,7 +10,6 @@ import {
 } from "@/lib/ops/api";
 import {
   BACK_PALLETS,
-  FRONT_PALLETS,
   LEVELS,
   SITE_LABEL,
   bayFor,
@@ -25,6 +24,8 @@ import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { CustomerCombo, EquipmentCombo } from "./directory-fields";
 import { UnitPlaceField, emptyPlaceDraft, type PlaceDraft } from "./unit-place-field";
+import { StockActions } from "./stock-actions";
+import { isWarehouseStockPlace } from "@/lib/ops/stock-action-rules";
 import { setAssetPlace } from "@/lib/ops/unit-place";
 import { lastMoveLine, placeDraftError, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
 import { getMyAccess } from "@/lib/ops/access";
@@ -125,7 +126,7 @@ export function AssetSheet({
   });
 
   const queue = (installs.data ?? []).filter((i) => isOpenInstall(i));
-  const pallets = retSite === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
+  const pallets = BACK_PALLETS;
   const bay = asset ? bayFor(asset.site, asset.pallet) : "general";
 
   return (
@@ -145,6 +146,8 @@ export function AssetSheet({
                 {bay === "catering" ? <StatusBadge status="Catering" /> : null}
                 {bay === "dispenser" ? <StatusBadge status="Dispenser" /> : null}
                 {asset.reviewStatus === "pending" ? <StatusBadge status="Pending review" /> : null}
+                {asset.stockHold === "remove" ? <StatusBadge status="Pending removal" /> : null}
+                {asset.stockHold === "assign" ? <StatusBadge status="Pending outbound" /> : null}
                 {asset.shopTest === "tested" ? <StatusBadge status="Tested" /> : null}
                 {asset.shopTest === "needs-test" ? <StatusBadge status="Needs test" /> : null}
                 {asset.missingSerial ? <StatusBadge status="Serial missing" /> : null}
@@ -251,6 +254,11 @@ export function AssetSheet({
                 <p className="mt-1 text-sm">{asset.reviewNote}</p>
               </div>
             ) : null}
+            {((canStock && isWarehouseStockPlace(asset.site) && (asset.status === "ready" || asset.status === "deployed")) || asset.stockHold) ? (
+              <div className="border-b border-border p-5">
+                <StockActions asset={asset} canStock={canStock} isAdmin={!!me.data?.isAdmin} />
+              </div>
+            ) : null}
             <form
               key={asset.id}
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
@@ -339,6 +347,7 @@ export function AssetSheet({
                 {lastMoveLine(asset.notes) ? (
                   <p className="mt-1 text-xs text-muted-foreground">{lastMoveLine(asset.notes)}</p>
                 ) : null}
+                {canStock && !asset.stockHold ? (
                 <div className="mt-2">
                   <UnitPlaceField
                     assetId={asset.id}
@@ -348,6 +357,9 @@ export function AssetSheet({
                     onDraft={setPlace}
                   />
                 </div>
+                ) : asset.stockHold ? (
+                  <p className="mt-2 text-xs text-muted-foreground">This slot stays until an admin approves or rejects.</p>
+                ) : null}
               </div>
               <div className="flex justify-end sm:col-span-2">
                 <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
@@ -364,11 +376,7 @@ export function AssetSheet({
                 <div className="grid grid-cols-3 gap-2">
                   <SelectField
                     value={retSite}
-                    onChange={(e) => {
-                      const s = e.target.value as "barn-back" | "barn-front";
-                      setRetSite(s);
-                      setRetPallet(s === "barn-front" ? FRONT_PALLETS[0]! : "A");
-                    }}
+                    onChange={(e) => setRetSite(e.target.value as "barn-back" | "barn-front")}
                   >
                     <option value="barn-back">Back rack</option>
                     <option value="barn-front">Front rack</option>
@@ -493,11 +501,7 @@ export function AssetSheet({
                 <div className="grid grid-cols-3 gap-2">
                   <SelectField
                     value={retSite}
-                    onChange={(e) => {
-                      const s = e.target.value as "barn-back" | "barn-front";
-                      setRetSite(s);
-                      setRetPallet(s === "barn-front" ? FRONT_PALLETS[0]! : "A");
-                    }}
+                    onChange={(e) => setRetSite(e.target.value as "barn-back" | "barn-front")}
                   >
                     <option value="barn-back">Back rack</option>
                     <option value="barn-front">Front rack</option>

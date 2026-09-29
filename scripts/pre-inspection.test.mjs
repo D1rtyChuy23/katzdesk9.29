@@ -11,6 +11,7 @@ import {
   showCoreHoleQuestion,
   siteIsReady,
   spacePassError,
+  inspectorChoices,
 } from "../src/lib/ops/pre-inspection.ts";
 
 const all = ["power", "water", "drain", "ethernet", "space"];
@@ -149,5 +150,61 @@ assert.match(exportSrc, /Core hole status/);
 assert.match(exportSrc, /siteIsReady/);
 assert.match(exportSrc, /"Serial number"/);
 assert.match(exportSrc, /"Electrical configuration"/);
+
+const reps = [
+  { name: "Amanda Logg", initials: "AL", active: true },
+  { name: "Lizbeth Romero", initials: "LR", active: true },
+  { name: "Sean Marshall", initials: "SM", active: true },
+  { name: "Lance Oden", initials: "LO", active: true },
+  { name: "Bill McKinley", initials: "BM", active: true },
+  { name: "Shannon Cafourek", initials: "SC", active: true },
+  { name: "Jesus Garcia", initials: "JG", active: true },
+  { name: "Melinda Warden", initials: "MW", active: true },
+  { name: "Pat Sales", initials: "PS", active: true },
+  { name: "Gone Rep", initials: "GR", active: false },
+];
+const techs = [
+  { name: "Ryan Gloria", active: true },
+  { name: "Charles Foster", active: true },
+  { name: "Oliver Garcia", active: true },
+  { name: "Joshua Harper", active: true },
+  { name: "Lance Oden", active: true },
+  { name: "Jesus Garcia", active: true },
+  { name: "Bill McKinley", active: true },
+  { name: "Brandon Chappell", active: true },
+  { name: "3rd Party", active: true },
+  { name: "New Tech", active: true },
+  { name: "Elias", active: false },
+];
+const picked = inspectorChoices(reps, techs, "");
+const labels = picked.options.map((o) => o.label);
+assert.deepEqual(
+  labels,
+  [...labels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })),
+);
+assert.ok(labels.includes("Amanda Logg (AL)"));
+assert.ok(labels.includes("Pat Sales (PS)"));
+assert.ok(labels.includes("Ryan Gloria"));
+assert.ok(labels.includes("Brandon Chappell"));
+assert.ok(labels.includes("3rd Party"));
+assert.ok(labels.includes("New Tech"));
+assert.equal(labels.filter((l) => l.startsWith("Lance Oden")).length, 1);
+assert.equal(labels.find((l) => l.startsWith("Lance Oden")), "Lance Oden (LO)");
+assert.equal(labels.find((l) => l.startsWith("Jesus Garcia")), "Jesus Garcia (JG)");
+assert.equal(labels.find((l) => l.startsWith("Bill McKinley")), "Bill McKinley (BM)");
+assert.equal(picked.options.find((o) => o.value === "Ryan Gloria")?.label, "Ryan Gloria");
+assert.equal(labels.includes("Elias"), false);
+assert.equal(labels.includes("Gone Rep (GR)"), false);
+assert.equal(labels.some((l) => /pedro/i.test(l)), false);
+assert.equal(labels.some((l) => /warehouse|wh\./i.test(l)), false);
+
+const kept = inspectorChoices(reps, techs, "Walk-through guy");
+assert.equal(kept.value, "Walk-through guy");
+assert.equal(kept.options[0]?.label, "Walk-through guy");
+assert.ok(kept.options.some((o) => o.label === "Amanda Logg (AL)"));
+
+const matched = inspectorChoices(reps, techs, "Amanda Logg (AL)");
+assert.equal(matched.value, "Amanda Logg");
+assert.equal(matched.options.some((o) => o.value === "Amanda Logg (AL)"), false);
 
 console.log("pre-inspection rules ok");

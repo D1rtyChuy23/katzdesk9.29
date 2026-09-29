@@ -174,25 +174,6 @@ type AcctUnit = {
   electrical: string | null;
 };
 
-function matchExisting(account: AcctUnit[], piece: Piece, used: Set<number>): AcctUnit | undefined {
-  const key = serialKey(piece.serial);
-  if (key) {
-    const byBoth = account.find(
-      (a) => !used.has(a.id) && a.serial_key === key && sameCatalogModel(a.catalog_model, piece.equipment),
-    );
-    if (byBoth) return byBoth;
-    const bySerial = account.find((a) => !used.has(a.id) && a.serial_key === key);
-    if (bySerial) return bySerial;
-  }
-  return account.find(
-    (a) =>
-      !used.has(a.id) &&
-      sameCatalogModel(a.catalog_model, piece.equipment) &&
-      !serialKey(a.serial) &&
-      !key,
-  );
-}
-
 async function catalogNames(sql: Sql): Promise<string[]> {
   const rows = await sql
     .query<{ name: string }>(
@@ -231,12 +212,70 @@ async function linkUnit(sql: Sql, installId: number, equipmentId: number): Promi
   );
 }
 
-async function ensureUnits(sql: Sql, installId: number): Promise<void> {
-  const linked = await sql.query<{ equipment_id: number }>(
-    "select equipment_id from install_inspection_units where install_id = $1",
-    [installId],
+async function writePieceFields(sql: Sql, hit: AcctUnit, piece: Piece): Promise<void> {
+  const serial = piece.serial.trim();
+  const power = piece.powerVoltage.trim();
+  let nextSerial = hit.serial;
+  let nextKey = hit.serial_key;
+  if (serial && !serialKey(hit.serial)) {
+    const key = serialKey(serial);
+    const clash = key
+      ? await sql.query<{ id: number }>(
+          "select id from account_equipment where serial_key = $1 and id <> $2 limit 1",
+          [key, hit.id],
+        )
+      : [];
+    if (key && !clash[0]) {
+      nextSerial = serial;
+      nextKey = key;
+    }
+  }
+  const nextPower = power || hit.electrical;
+  const serialChanged = (nextSerial ?? null) !== (hit.serial ?? null);
+  const powerChanged = !!power && power !== (hit.electrical ?? "");
+  if (!serialChanged && !powerChanged) return;
+  await sql.query(
+    "update account_equipment set serial = $2, serial_key = $3, electrical = $4 where id = $1",
+    [hit.id, nextSerial, nextKey, nextPower],
   );
-  if (linked.length) return;
+  hit.serial = nextSerial;
+  hit.serial_key = nextKey;
+  hit.electrical = nextPower;
+}
+
+function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>): AcctUnit | undefined {
+  const key = serialKey(piece.serial);
+  if (key) {
+    for (const pool of pools) {
+      const hit = pool.find((a) => !used.has(a.id) && a.serial_key === key);
+      if (hit) return hit;
+    }
+  }
+  for (const pool of pools) {
+    const hit = pool.find(
+      (a) => !used.has(a.id) && sameCatalogModel(a.catalog_model, piece.equipment) && !serialKey(a.serial),
+    );
+    if (hit) return hit;
+  }
+  return undefined;
+}
+
+async function unitPassed(sql: Sql, installId: number, equipmentId: number): Promise<boolean> {
+  const [items, unit] = await Promise.all([
+    sql.query<{ category: string; status: string }>(
+      "select category, status from install_inspection_items where install_id = $1 and equipment_id = $2",
+      [installId, equipmentId],
+    ),
+    sql.query<{ core_needed: string | null }>(
+      "select core_needed from install_inspection_units where install_id = $1 and equipment_id = $2",
+      [installId, equipmentId],
+    ),
+  ]);
+  return inspectionOverall(items, unit[0]?.core_needed) === "Passed";
+}
+
+/** Add install machines to pre-inspection. Prune only when the install equipment list was saved. */
+export async function syncInstallUnits(sql: Sql, installId: number, opts?: { prune?: boolean }): Promise<void> {
   const install = await sql.query<{
     customer: string;
     equipment: string | null;
@@ -247,29 +286,39 @@ async function ensureUnits(sql: Sql, installId: number): Promise<void> {
   const row = install[0];
   if (!row) return;
   const pieces = piecesFrom(row);
-  if (!pieces.length) return;
   const account = await sql.query<AcctUnit>(
     `select id, catalog_model, equipment_name, serial, serial_key, electrical
        from account_equipment where lower(customer) = lower($1) order by id`,
     [row.customer],
   );
+  const links = await sql.query<{ equipment_id: number }>(
+    "select equipment_id from install_inspection_units where install_id = $1",
+    [installId],
+  );
+  const linkedIds = new Set(links.map((l) => l.equipment_id));
+  const linkedRows = account.filter((a) => linkedIds.has(a.id));
   const used = new Set<number>();
+  const keep = new Set<number>();
   let first: number | null = null;
   for (const piece of pieces) {
-    let hit = matchExisting(account, piece, used);
+    let hit = claimUnit(piece, [linkedRows, account], used);
     let id = hit?.id;
     if (!id) {
       id = await insertEquipment(sql, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
-      account.push({
+      hit = {
         id,
         catalog_model: piece.equipment,
         equipment_name: piece.equipment,
         serial: piece.serial || null,
         serial_key: serialKey(piece.serial) || null,
         electrical: piece.powerVoltage || null,
-      });
+      };
+      account.push(hit);
+    } else if (hit) {
+      await writePieceFields(sql, hit, piece);
     }
     used.add(id);
+    keep.add(id);
     if (!first) first = id;
     await linkUnit(sql, installId, id);
   }
@@ -283,6 +332,18 @@ async function ensureUnits(sql: Sql, installId: number): Promise<void> {
       [first, installId],
     );
   }
+  if (!opts?.prune) return;
+  for (const id of linkedIds) {
+    if (keep.has(id)) continue;
+    if (await unitPassed(sql, installId, id)) continue;
+    await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
+    await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
+    await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
+  }
+}
+
+async function ensureUnits(sql: Sql, installId: number): Promise<void> {
+  await syncInstallUnits(sql, installId);
 }
 
 type ItemRow = { install_id: number; equipment_id: number | null; category: string; status: string; notes?: string | null };

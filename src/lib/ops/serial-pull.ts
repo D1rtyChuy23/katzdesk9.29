@@ -54,6 +54,8 @@ type AssetLite = {
   origin_pallet: string | null;
   origin_level: number | null;
   customer_owned: string | null;
+  stock_hold: string | null;
+  stock_hold_customer: string | null;
 };
 
 export function serialKey(raw: string | null | undefined): string {
@@ -72,6 +74,9 @@ function locationOf(a: AssetLite): string {
 }
 
 function allocatedLabel(a: AssetLite): string | null {
+  if (a.stock_hold === "assign") {
+    return a.stock_hold_customer ? `Pending outbound · ${a.stock_hold_customer}` : "Pending outbound";
+  }
   if (a.sold_to?.trim()) return a.sold_to.trim();
   if (a.status === "sold") return "sold";
   if (a.status === "assigned" || a.install_id || a.job_id) {
@@ -84,6 +89,7 @@ function allocatedLabel(a: AssetLite): string | null {
 }
 
 function isAvailable(a: AssetLite): boolean {
+  if (a.stock_hold === "assign") return false;
   if (a.status === "sold") return false;
   if (a.status === "assigned") return false;
   if (a.install_id || a.job_id) return false;
@@ -183,7 +189,8 @@ async function loadBySerial(sql: Sql, raw: string): Promise<AssetLite | null> {
   if (!key) return null;
   const rows = await sql.query<AssetLite>(
     `select id, model, serial, status, site, pallet, level, line_no, sold_to, install_id, job_id,
-            notes, purpose, origin_site, origin_pallet, origin_level, customer_owned
+            notes, purpose, origin_site, origin_pallet, origin_level, customer_owned,
+            stock_hold, stock_hold_customer
        from assets
       where serial is not null and btrim(serial) <> ''`,
   );
@@ -451,6 +458,26 @@ export const applySerialPull = createServerFn({ method: "POST" })
     }
 
     const asset = await loadBySerial(sql, serial);
+    if (asset?.stock_hold) {
+      const where = asset.stock_hold === "assign" ? asset.stock_hold_customer || "an account" : "this slot";
+      const notice =
+        asset.stock_hold === "assign"
+          ? `Serial ${asset.serial ?? serial} is pending outbound to ${where}. It is not on that account until an admin approves.`
+          : `Serial ${asset.serial ?? serial} is pending removal and stays in ${where} until an admin approves.`;
+      return {
+        serial: asset.serial ?? serial,
+        found: true,
+        pulled: false,
+        needsConfirm: false,
+        alreadyHere: false,
+        allocatedTo: asset.stock_hold === "assign" ? asset.stock_hold_customer : null,
+        notice,
+        model: asset.model,
+        powerVoltage: voltageFrom(asset.notes) || voltageFrom(asset.purpose) || null,
+        location: locationOf(asset),
+        assetId: asset.id,
+      };
+    }
     if (!asset) {
       const result = notFoundResult(serial);
       if (data.installId) {

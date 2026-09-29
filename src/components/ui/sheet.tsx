@@ -2,7 +2,8 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { preventIfCombo } from "@/components/ui/popover";
+import { closeComboOnEscape, preventIfCombo } from "@/components/ui/popover";
+import { PageScrollLock } from "@/components/ui/dialog";
 
 export const Sheet = DialogPrimitive.Root;
 export const SheetTrigger = DialogPrimitive.Trigger;
@@ -19,15 +20,16 @@ export function SheetContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & { side?: "right" | "left" }) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+      <div className="fixed inset-0 z-50 bg-ink/40" style={{ pointerEvents: "auto" }} />
       <DialogPrimitive.Content
         className={cn(
-          "sheet-panel fixed inset-y-0 top-0 z-50 flex h-dvh max-h-dvh w-full flex-col overflow-hidden overscroll-none border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out sm:max-w-xl",
+          "sheet-panel fixed inset-y-0 top-0 z-[70] flex h-dvh max-h-dvh w-full flex-col overflow-hidden overscroll-none border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out sm:max-w-xl",
           side === "right"
             ? "right-0 border-l data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right"
             : "left-0 border-r data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left",
           className,
         )}
+        style={{ pointerEvents: "auto" }}
         onPointerDownOutside={(e) => {
           preventIfCombo(e);
           onPointerDownOutside?.(e);
@@ -40,8 +42,12 @@ export function SheetContent({
           preventIfCombo(e);
           onInteractOutside?.(e);
         }}
+        onEscapeKeyDown={(e) => {
+          closeComboOnEscape(e);
+        }}
         {...props}
       >
+        <PageScrollLock />
         {children}
         <DialogPrimitive.Close className="absolute top-3 right-3 z-10 rounded-sm p-1 text-muted-foreground hover:bg-muted">
           <X className="size-4" />
@@ -56,13 +62,14 @@ export function SheetHeader({ className, ...props }: React.ComponentProps<"div">
   return <div className={cn("shrink-0 border-b border-border px-5 py-4 pr-12", className)} {...props} />;
 }
 
-export function SheetBody({ className, ...props }: React.ComponentProps<"div">) {
+export function SheetBody({ className, style, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       className={cn(
         "sheet-scroll min-h-0 flex-1 overflow-y-scroll overscroll-contain",
         className,
       )}
+      style={{ touchAction: "pan-y", ...style }}
       {...props}
     />
   );

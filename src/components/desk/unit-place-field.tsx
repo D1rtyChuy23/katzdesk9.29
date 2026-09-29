@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { lookupUnitPlace, setAssetPlace, setUnitPlace } from "@/lib/ops/unit-place";
 import { BACK_PALLETS, LEVELS } from "@/lib/ops/warehouse";
-import { PLACE_CHOICES, placeDraftError } from "@/lib/ops/unit-place-rules";
+import { PLACE_CHOICES, isRackPlace, placeDraftError } from "@/lib/ops/unit-place-rules";
 import { serialKey } from "@/lib/ops/account-equip";
 import { Input, Label } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
@@ -17,57 +17,81 @@ export function PlacePicker({
   value,
   onChange,
   testId = "unit-place",
+  compact = false,
 }: {
   value: PlaceDraft;
   onChange: (next: PlaceDraft) => void;
   testId?: string;
+  compact?: boolean;
 }) {
+  const rack = isRackPlace(value.site);
+  const rackClass = compact ? "w-[5.75rem] px-2" : "min-w-40";
   return (
-    <div data-testid={testId} className="flex flex-wrap items-end gap-2">
-      <SelectField
-        aria-label="Location"
-        className="min-w-40"
-        value={value.site}
-        onChange={(e) => onChange({ site: e.target.value, pallet: "", level: "", otherLabel: "" })}
-      >
-        <option value="">Location</option>
-        {PLACE_CHOICES.map((c) => (
-          <option key={c.value} value={c.value}>
-            {c.label}
-          </option>
-        ))}
-      </SelectField>
-      {value.site === "barn" ? (
+    <div data-testid={testId} className={compact ? "flex flex-wrap items-end gap-1 lg:flex-nowrap" : "flex flex-wrap items-end gap-2"}>
+      <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        Rack
+        <SelectField
+          aria-label="Rack"
+          data-testid={`${testId}-rack`}
+          className={rackClass}
+          value={value.site}
+          onChange={(e) => {
+            const site = e.target.value;
+            const nextRack = isRackPlace(site);
+            const keepSlot = rack && nextRack;
+            onChange({
+              site,
+              pallet: keepSlot ? value.pallet : "",
+              level: keepSlot ? value.level : "",
+              otherLabel: "",
+            });
+          }}
+        >
+          <option value="">Choose</option>
+          {PLACE_CHOICES.map((c) => (
+            <option key={c.value} value={c.value}>
+              {c.label}
+            </option>
+          ))}
+        </SelectField>
+      </label>
+      {rack ? (
         <>
-        <SelectField
-          aria-label="Barn bay"
-          data-testid="unit-place-bay"
-          className="w-24"
-          value={value.pallet}
-          onChange={(e) => onChange({ ...value, pallet: e.target.value })}
-        >
-          <option value="">Bay</option>
-          {BACK_PALLETS.map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
-        </SelectField>
-        <SelectField
-          aria-label="Barn level"
-          data-testid="unit-place-level"
-          className="w-28"
-          value={value.level}
-          onChange={(e) => onChange({ ...value, level: e.target.value })}
-        >
-          <option value="">Level</option>
-          {LEVELS.map((level) => (
-            <option key={level} value={String(level)}>
-              L{level}
-              {level === 4 ? " top" : level === 1 ? " floor" : ""}
-            </option>
-          ))}
-        </SelectField>
+          <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Bay
+            <SelectField
+              aria-label="Bay"
+              data-testid={`${testId}-bay`}
+              className={compact ? "w-[3.25rem] px-1.5" : "w-24"}
+              value={value.pallet}
+              onChange={(e) => onChange({ ...value, pallet: e.target.value })}
+            >
+              <option value="">Bay</option>
+              {BACK_PALLETS.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </SelectField>
+          </label>
+          <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Level
+            <SelectField
+              aria-label="Level"
+              data-testid={`${testId}-level`}
+              className={compact ? "w-[4.5rem] px-1.5" : "w-28"}
+              value={value.level}
+              onChange={(e) => onChange({ ...value, level: e.target.value })}
+            >
+              <option value="">Level</option>
+              {LEVELS.map((level) => (
+                <option key={level} value={String(level)}>
+                  L{level}
+                  {level === 4 ? " top" : level === 1 ? " floor" : ""}
+                </option>
+              ))}
+            </SelectField>
+          </label>
         </>
       ) : null}
       {value.site === "other" ? (
@@ -90,12 +114,14 @@ export function UnitPlaceField({
   assetId,
   draft,
   onDraft,
+  compact = false,
 }: {
   serial?: string;
   model?: string | null;
   assetId?: number;
   draft?: PlaceDraft;
   onDraft?: (next: PlaceDraft) => void;
+  compact?: boolean;
 }) {
   const qc = useQueryClient();
   const key = serialKey(serial ?? "");
@@ -130,8 +156,8 @@ export function UnitPlaceField({
           serial: serial ?? "",
           model: model ?? null,
           site: value.site,
-          pallet: value.site === "barn" ? value.pallet : null,
-          level: value.site === "barn" && value.level ? Number(value.level) : null,
+          pallet: value.site === "barn-front" || value.site === "barn-back" ? value.pallet : null,
+          level: (value.site === "barn-front" || value.site === "barn-back") && value.level ? Number(value.level) : null,
           otherLabel: value.site === "other" ? value.otherLabel : null,
         },
       });
@@ -145,6 +171,27 @@ export function UnitPlaceField({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not set location"),
   });
   const bound = !!onDraft;
+  if (compact) {
+    return (
+      <div className="col-span-2 min-w-0 lg:col-span-1">
+        <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Location</p>
+        <div className="mt-1 flex flex-wrap items-end gap-2">
+          <PlacePicker value={value} onChange={setValue} compact />
+          {bound ? null : (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!!placeDraftError(value) || (!key && !assetId) || save.isPending}
+              onClick={() => save.mutate()}
+            >
+              {save.isPending ? "Saving…" : "Set"}
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

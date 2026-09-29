@@ -19,7 +19,7 @@ import {
   isOpenInstall,
 } from "./clock";
 import { isoDayOrNull as isoDate } from "./iso";
-import { canMarkInstalled, loadInspectionSummaries, withInspections } from "./inspection-api";
+import { canMarkInstalled, loadInspectionSummaries, syncInstallUnits, withInspections } from "./inspection-api";
 import { emptyInspection } from "./pre-inspection";
 import type {
   Asset,
@@ -367,7 +367,11 @@ function mapAsset(r: any) {
 		shopTest: r.shop_test === "tested" || r.shop_test === "needs-test" ? r.shop_test : null,
 		shopTestNote: r.shop_test_note ?? null,
 		shopTestBy: r.shop_test_by ?? null,
-		shopTestAt: r.shop_test_at ? String(r.shop_test_at) : null
+		shopTestAt: r.shop_test_at ? String(r.shop_test_at) : null,
+		stockHold: r.stock_hold === "remove" || r.stock_hold === "assign" ? r.stock_hold : null,
+		stockHoldCustomer: r.stock_hold_customer ?? null,
+		stockHoldReason: r.stock_hold_reason ?? null,
+		stockHoldBy: r.stock_hold_by ?? null
 	};
 }
 function mapRecipe(r: any) {
@@ -1131,6 +1135,9 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 		aviKatz: data.aviKatz,
 		accountRep: data.accountRep === undefined ? undefined : canonicalRepName(data.accountRep) ?? (data.accountRep || null)
 	});
+	if (data.equipment !== undefined || data.machines !== undefined || data.serial !== undefined || data.powerVoltage !== undefined) {
+		await syncInstallUnits(sql, data.id, { prune: true });
+	}
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);
@@ -1165,6 +1172,7 @@ export const createInstall = createServerFn({ method: "POST" }).middleware([desk
       )
       returning *`;
 	await logActivity(sql, context.userId, "install", rows[0].id, "opened", duplicateOf ? `${name} · possible duplicate of #${duplicateOf}` : name);
+	await syncInstallUnits(sql, rows[0].id);
 	return mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog);
 });
 export const archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
@@ -1383,12 +1391,13 @@ export const handoffDeal = createServerFn({ method: "POST" }).middleware([deskMi
 	await maybeHandoffInstall(await ready(), data.dealId);
 	return { ok: true };
 });
-async function nextLine(sql: any, site: any, pallet: any, level: any) {
+async function nextLine(sql: any, site: any, pallet: any, level: any, exceptId?: number) {
+	const letter = String(pallet).toUpperCase();
 	const taken = await sql`
-    select line_no from assets
-    where site = ${site} and pallet = ${pallet} and level = ${level}
+    select id, line_no from assets
+    where site = ${site} and upper(pallet) = ${letter} and level = ${level}
       and status in ('ready', 'deployed') and line_no is not null`;
-	const used = new Set(taken.map((t) => t.line_no));
+	const used = new Set(taken.filter((t: { id: number }) => t.id !== exceptId).map((t: { line_no: number }) => t.line_no));
 	for (let n = 1; n <= 12; n++) if (!used.has(n)) return n;
 	return null;
 }
@@ -1445,10 +1454,15 @@ export const createAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	let line = null;
 	const barn = isBarn(site);
 	if (barn) {
-		if (!pallet || !level) throw new Error("Pick a pallet and level");
-		if (!isValidBay(pallet) || !palletsFor(site).includes(pallet)) throw new Error("Pick a bay A through P on this rack");
-		line = await nextLine(sql, site, pallet, level);
-		if (line == null) throw new Error("That slot is full (12 lines)");
+		if (!pallet || !level) throw new Error("Pick a bay and a level");
+		const letter = String(pallet).trim().toUpperCase();
+		if (!isValidBay(letter)) throw new Error("Pick a bay A through P");
+		pallet = letter;
+		line = await nextLine(sql, site, letter, Number(level));
+		if (line == null) {
+			const { sectionFullMessage } = await import("@/lib/ops/warehouse");
+			throw new Error(sectionFullMessage(site, letter, Number(level)));
+		}
 	}
 	const role = await (await import("@/lib/ops/rack-stock")).requireStock(sql, context.userId);
 	const serialRaw = String(data.serial || "").trim();
@@ -1499,12 +1513,22 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	let level = data.level === undefined ? c.level : data.level;
 	let line = c.line_no;
 	const site = data.site === undefined ? c.site : data.site;
-	if (isBarn(site) && pallet && (!isValidBay(pallet) || !palletsFor(site).includes(pallet))) {
-		throw new Error("Pick a bay A through P on this rack");
+	if (isBarn(site) && pallet && !isValidBay(String(pallet))) {
+		throw new Error("Pick a bay A through P");
 	}
 	if (isBarn(site) && (pallet !== c.pallet || Number(level) !== Number(c.level) || site !== c.site) && pallet && level) {
-		line = await nextLine(sql, site, pallet, level);
-		if (line == null) throw new Error("That slot is full");
+		const letter = String(pallet).trim().toUpperCase();
+		const { requireStock } = await import("@/lib/ops/rack-stock");
+		const { assertNotHeld } = await import("@/lib/ops/stock-actions");
+		if (context?.userId) await requireStock(sql, context.userId);
+		await assertNotHeld(sql, data.id);
+		const next = await nextLine(sql, site, letter, Number(level), data.id);
+		if (next == null) {
+			const { sectionFullMessage } = await import("@/lib/ops/warehouse");
+			throw new Error(sectionFullMessage(site, letter, Number(level)));
+		}
+		pallet = letter;
+		line = next;
 	}
 	const movedToRack = isBarn(site) && pallet && level && (String(pallet) !== String(c.pallet ?? "") || Number(level) !== Number(c.level) || site !== c.site);
 	await sql`
@@ -1537,6 +1561,7 @@ export const assignAssetToInstall = createServerFn({ method: "POST" }).middlewar
 	const sql = await ready();
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
+	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	if (asset.status === "sold") throw new Error("Already sold");
 	const inst = (await sql`
       select id, customer from installs where id = ${data.installId}`)[0];
@@ -1597,6 +1622,7 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
 	if (!customer) throw new Error("Pick a customer");
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
+	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	if (asset.status === "sold") throw new Error("Already sold");
 	if (asset.status !== "ready") throw new Error("That unit is already off the rack");
 	const acct = (await sql`
@@ -1670,14 +1696,21 @@ export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middlew
 	const sql = await ready();
 	const prev = (await sql`select * from assets where id = ${data.id}`)[0];
 	if (!prev) throw new Error("Asset not found");
-	if (!palletsFor(data.site).includes(data.pallet) || !isValidBay(data.pallet)) throw new Error("Pick a bay A through P on this rack");
-	const line = await nextLine(sql, data.site, data.pallet, data.level);
-	if (line == null) throw new Error("That slot is full");
+	if (prev.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
+	const pallet = String(data.pallet || "").trim().toUpperCase();
+	if (data.site !== "barn-back" && data.site !== "barn-front") throw new Error("Pick a rack");
+	if (!isValidBay(pallet)) throw new Error("Pick a bay A through P");
+	if (!LEVELS.includes(data.level)) throw new Error("Pick a level");
+	const line = await nextLine(sql, data.site, pallet, data.level, data.id);
+	if (line == null) {
+		const { sectionFullMessage } = await import("@/lib/ops/warehouse");
+		throw new Error(sectionFullMessage(data.site, pallet, data.level));
+	}
 	await sql`
       update assets set
         status = 'ready',
         site = ${data.site},
-        pallet = ${data.pallet},
+        pallet = ${pallet},
         level = ${data.level},
         line_no = ${line},
         install_id = null,
