@@ -1,69 +1,233 @@
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { copyRecipe } from "@/lib/ops/api";
-import { findRecipeFor } from "@/lib/ops/equipment";
+import { upsertRecipe } from "@/lib/ops/api";
+import { findRecipeFor, recipeLabel } from "@/lib/ops/equipment";
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import type { MachineSpec } from "@/lib/ops/machines";
 import type { SerialPullResult } from "@/lib/ops/serial-pull";
 import type { Recipe } from "@/lib/ops/types";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { toast } from "sonner";
 import { SerialPullField } from "./serial-notice";
 import { UnitPlaceField } from "./unit-place-field";
 
-function shortPreview(recipe: Recipe | null): string {
-  const line = previewSetting(recipe);
-  if (!line) return "";
-  return line.length > 28 ? `${line.slice(0, 27)}…` : line;
+const ADD = "__add__";
+
+function byModelFirst(model: string) {
+  const key = model.toLowerCase();
+  return (a: Recipe, b: Recipe) =>
+    Number(b.equipmentModel.toLowerCase() === key) - Number(a.equipmentModel.toLowerCase() === key) ||
+    a.equipmentModel.localeCompare(b.equipmentModel) ||
+    Number(!!a.name) - Number(!!b.name) ||
+    recipeLabel(a).localeCompare(recipeLabel(b));
 }
 
+/**
+ * One recipe per unit, picked right on the equipment row: house templates plus this
+ * customer's recipes, with "Add recipe" in the same list.
+ */
 function MachineRecipeSelect({
   customer,
   model,
   installId,
   recipes,
+  value,
+  onPick,
 }: {
   customer: string;
   model: string;
   installId?: number;
   recipes: Recipe[];
+  value: number | null | undefined;
+  onPick: (recipeId: number | null) => void;
+}) {
+  const [adding, setAdding] = useState(false);
+  const custKey = customer.trim().toLowerCase();
+  const modelKey = model.toLowerCase();
+  const house = recipes.filter((r) => !r.customer).sort(byModelFirst(model));
+  const mine = recipes.filter((r) => r.customer?.toLowerCase() === custKey).sort(byModelFirst(model));
+  // Before anyone picks, show the recipe this unit already used (account first, then house).
+  const fallback = findRecipeFor(recipes, { customer, model, installId: installId ?? null });
+  const selectedId = value ?? fallback.linked?.id ?? fallback.house?.id ?? null;
+  const selected = recipes.find((r) => r.id === selectedId) ?? null;
+  const label = (r: Recipe) =>
+    r.equipmentModel.toLowerCase() === modelKey ? recipeLabel(r) : recipeLabel(r, true);
+  const preview = previewSetting(selected);
+
+  return (
+    <>
+    <div className="col-span-2 grid min-w-0 gap-1 lg:col-span-1">
+      <label className="grid min-w-0 gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        Recipe
+        <SelectField
+          aria-label={`Recipe for ${model}`}
+          data-testid="machine-recipe"
+          value={adding ? ADD : selectedId ? String(selectedId) : ""}
+          disabled={!customer.trim()}
+          className="normal-case"
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === ADD) {
+              setAdding(true);
+              return;
+            }
+            setAdding(false);
+            onPick(v ? Number(v) : null);
+          }}
+        >
+          <option value="">No recipe</option>
+          {mine.length ? (
+            <optgroup label={customer}>
+              {mine.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {label(r)}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
+          {house.length ? (
+            <optgroup label="House templates">
+              {house.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {label(r)}
+                </option>
+              ))}
+            </optgroup>
+          ) : null}
+          <option value={ADD}>＋ Add recipe…</option>
+        </SelectField>
+      </label>
+      {preview && !adding ? (
+        <p className="truncate text-[11px] text-muted-foreground" title={preview}>
+          {selected?.customer ? "Account" : "House"} · {preview}
+        </p>
+      ) : null}
+    </div>
+      {/* Full row width under the unit, so the form never squeezes into the recipe column. */}
+      {adding ? (
+        <AddRecipePanel
+          customer={customer}
+          model={model}
+          installId={installId}
+          onCancel={() => setAdding(false)}
+          onSaved={(r) => {
+            setAdding(false);
+            onPick(r.id);
+          }}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function AddRecipePanel({
+  customer,
+  model,
+  installId,
+  onCancel,
+  onSaved,
+}: {
+  customer: string;
+  model: string;
+  installId?: number;
+  onCancel: () => void;
+  onSaved: (r: Recipe) => void;
 }) {
   const qc = useQueryClient();
-  const { linked, house } = findRecipeFor(recipes, {
-    customer,
-    model,
-    installId: installId ?? null,
-  });
-  const copy = useMutation({
-    mutationFn: (sourceId: number) =>
-      copyRecipe({ data: { sourceId, customer, installId: installId ?? null } }),
-    onSuccess: () => {
-      toast.success("Recipe on this account");
+  const [name, setName] = useState("");
+  const [scope, setScope] = useState<"customer" | "house">("customer");
+  const [coffee1, setCoffee1] = useState("");
+  const [milk, setMilk] = useState("");
+  const [notes, setNotes] = useState("");
+  const save = useMutation({
+    mutationFn: () =>
+      upsertRecipe({
+        data: {
+          name: name.trim() || null,
+          equipmentModel: model,
+          customer: scope === "customer" ? customer : null,
+          installId: scope === "customer" ? (installId ?? null) : null,
+          coffee1: coffee1.trim() || null,
+          milk: milk.trim() || null,
+          notes: notes.trim() || null,
+        },
+      }),
+    onSuccess: (row) => {
+      const saved = row as Recipe;
+      // Show it in every unit's dropdown right away, then refresh from the server.
+      qc.setQueryData<Recipe[]>(["recipes"], (old) => [...(old ?? []).filter((r) => r.id !== saved.id), saved]);
       void qc.invalidateQueries({ queryKey: ["recipes"] });
+      toast.success(scope === "customer" ? `Recipe saved to ${customer}` : "House recipe saved");
+      onSaved(saved);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not use that recipe"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save that recipe"),
   });
-  const houseLabel = house ? `House${shortPreview(house) ? ` · ${shortPreview(house)}` : ""}` : "";
-  const accountLabel = linked ? `Account${shortPreview(linked) ? ` · ${shortPreview(linked)}` : ""}` : "";
+
+  // Plain div, not a <form>: this row can sit inside the install sheet's own form.
   return (
-    <label className="col-span-2 grid min-w-0 gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase lg:col-span-1">
-      Recipe
-      <SelectField
-        aria-label={`Recipe for ${model}`}
-        data-testid="machine-recipe"
-        value={linked ? `id:${linked.id}` : ""}
-        disabled={copy.isPending || !customer.trim()}
-        onChange={(e) => {
-          const v = e.target.value;
-          if (!v.startsWith("house:") || !house || linked) return;
-          copy.mutate(house.id);
-        }}
-      >
-        <option value="">Choose</option>
-        {house && !linked ? <option value={`house:${house.id}`}>{houseLabel}</option> : null}
-        {linked ? <option value={`id:${linked.id}`}>{accountLabel}</option> : null}
-      </SelectField>
-    </label>
+    <div
+      className="col-span-full grid gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 sm:grid-cols-2"
+      data-testid="add-recipe-panel"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onCancel();
+        if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") {
+          e.preventDefault();
+          save.mutate();
+        }
+      }}
+    >
+      <p className="text-xs font-medium sm:col-span-2">New recipe · {model}</p>
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name, e.g. Morning blend"
+        aria-label="Recipe name"
+        autoFocus
+      />
+      <div className="flex flex-wrap items-center gap-1.5 text-xs" role="radiogroup" aria-label="Save to">
+        {(
+          [
+            ["customer", customer],
+            ["house", "House template"],
+          ] as const
+        ).map(([id, text]) => (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={scope === id}
+            onClick={() => setScope(id)}
+            className={
+              scope === id
+                ? "max-w-full truncate rounded-full bg-primary px-2.5 py-1 text-primary-foreground"
+                : "max-w-full truncate rounded-full border border-border bg-card px-2.5 py-1 text-muted-foreground"
+            }
+          >
+            {id === "customer" ? `Save to ${text}` : text}
+          </button>
+        ))}
+      </div>
+      <Input value={coffee1} onChange={(e) => setCoffee1(e.target.value)} placeholder="Coffee 1 setting" aria-label="Coffee 1" />
+      <Input value={milk} onChange={(e) => setMilk(e.target.value)} placeholder="Milk settings" aria-label="Milk settings" />
+      <Textarea
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Notes"
+        aria-label="Recipe notes"
+        rows={2}
+        className="sm:col-span-2"
+      />
+      <div className="flex justify-end gap-2 sm:col-span-2">
+        <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="button" size="sm" disabled={save.isPending} onClick={() => save.mutate()}>
+          Save & use
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -72,6 +236,7 @@ export function MachineFields({
   onChange,
   installId,
   onPulled,
+  onRecipe,
   customer = "",
   recipes = [],
 }: {
@@ -79,6 +244,8 @@ export function MachineFields({
   onChange: (next: MachineSpec[]) => void;
   installId?: number;
   onPulled?: (next: MachineSpec[], result: SerialPullResult) => void;
+  /** Save right away when a recipe is picked (existing installs). */
+  onRecipe?: (next: MachineSpec[]) => void;
   customer?: string;
   recipes?: Recipe[];
 }) {
@@ -94,7 +261,7 @@ export function MachineFields({
         <div
           key={`${spec.equipment}-${index}`}
           data-testid="machine-row"
-          className="grid grid-cols-1 gap-2 py-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.05fr)_minmax(6.5rem,0.85fr)_minmax(5rem,0.7fr)_minmax(18rem,1.45fr)_minmax(7rem,0.8fr)] lg:items-end"
+          className="grid grid-cols-1 gap-2 py-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(6.5rem,0.8fr)_minmax(5rem,0.6fr)_minmax(14rem,1.25fr)_minmax(10rem,1fr)] lg:items-start"
         >
           <div className="col-span-2 min-w-0 lg:col-span-1">
             <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
@@ -135,6 +302,12 @@ export function MachineFields({
             model={spec.equipment}
             installId={installId}
             recipes={recipes}
+            value={spec.recipeId}
+            onPick={(recipeId) => {
+              const next = patch(index, { recipeId });
+              onChange(next);
+              onRecipe?.(next);
+            }}
           />
         </div>
       ))}

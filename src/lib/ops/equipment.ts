@@ -371,30 +371,27 @@ export function catalogModels(models: Iterable<string>): string[] {
 
 export function findRecipeFor(
   recipes: Recipe[],
-  opts: { customer: string; model: string; installId?: number | null },
+  opts: { customer: string; model: string; installId?: number | null; recipeId?: number | null },
 ): { linked: Recipe | null; house: Recipe | null } {
   const modelKey = opts.model.toLowerCase();
   const custKey = opts.customer.trim().toLowerCase();
-  const house =
-    recipes.find(
-      (r) => !r.customer && r.equipmentModel.toLowerCase() === modelKey,
-    ) ?? null;
+  // Unnamed recipes are the defaults; named ones are extra choices picked on the equipment row.
+  const byDefault = (a: Recipe, b: Recipe) => Number(!!a.name) - Number(!!b.name);
+  const sameModel = recipes.filter((r) => r.equipmentModel.toLowerCase() === modelKey).sort(byDefault);
+  const picked = opts.recipeId ? recipes.find((r) => r.id === opts.recipeId) ?? null : null;
+  const house = (picked && !picked.customer ? picked : null) ?? sameModel.find((r) => !r.customer) ?? null;
   const linked =
-    (opts.installId
-      ? recipes.find(
-          (r) =>
-            r.installId === opts.installId &&
-            r.equipmentModel.toLowerCase() === modelKey,
-        )
-      : undefined) ??
-    recipes.find(
-      (r) =>
-        !!r.customer &&
-        r.customer.toLowerCase() === custKey &&
-        r.equipmentModel.toLowerCase() === modelKey,
-    ) ??
+    (picked && picked.customer ? picked : null) ??
+    (opts.installId ? sameModel.find((r) => r.installId === opts.installId) : undefined) ??
+    sameModel.find((r) => !!r.customer && r.customer.toLowerCase() === custKey) ??
     null;
   return { linked, house };
+}
+
+/** "Morning blend", or the model when the recipe has no name of its own. */
+export function recipeLabel(r: Recipe, withModel = false): string {
+  const base = r.name?.trim() || "Standard";
+  return withModel ? `${base} · ${r.equipmentModel}` : base;
 }
 
 export function piecesForInstall(

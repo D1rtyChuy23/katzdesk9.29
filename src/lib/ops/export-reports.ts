@@ -271,6 +271,7 @@ function tlcBlob(
 function mapRecipeRow(r: Record<string, unknown>): Recipe {
   return {
     id: Number(r.id),
+    name: (r.name as string) ?? null,
     equipmentModel: String(r.equipment_model ?? ""),
     customer: (r.customer as string) ?? null,
     installId: r.install_id == null ? null : Number(r.install_id),
@@ -300,12 +301,13 @@ function configForMachine(
   serial: string,
   voltage: string,
   recipes: Recipe[],
+  recipeId?: number | null,
 ): { text: string; missing: boolean } {
   const bits: string[] = [];
   if (model) bits.push(model);
   if (serial) bits.push(`SN ${serial}`);
   if (voltage) bits.push(voltage);
-  const { linked, house } = findRecipeFor(recipes, { customer, model, installId });
+  const { linked, house } = findRecipeFor(recipes, { customer, model, installId, recipeId });
   const rec = linked ?? house;
   if (rec) {
     const settings = settingsFrom(rec);
@@ -730,7 +732,15 @@ async function buildInstalls(
           if (key) usedSerials.add(key);
         }
       }
-      const cfg = configForMachine(i.customer, i.id, model, serial, piece.powerVoltage, recipes);
+      const cfg = configForMachine(
+        i.customer,
+        i.id,
+        model,
+        serial,
+        piece.powerVoltage,
+        recipes,
+        (piece as { recipeId?: number | null }).recipeId ?? null,
+      );
       const serialCell = cellOrMissing(serial);
       const electricalCell = cellOrMissing(piece.powerVoltage);
       if (isReady) {

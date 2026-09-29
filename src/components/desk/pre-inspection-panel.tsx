@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Trash2 } from "lucide-react";
+import { Camera, ChevronLeft, ImagePlus, Images, Trash2 } from "lucide-react";
 import {
   addInspectionEquipment,
   addInspectionPhoto,
@@ -702,36 +702,12 @@ function ItemRow({
         />
       </div>
       {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
-      <div className="mt-3 grid gap-2">
-        <label className="flex h-14 cursor-pointer items-center justify-center rounded-md bg-primary text-base font-medium text-primary-foreground">
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="sr-only"
-            data-testid={`inspect-photo-${item.category}`}
-            disabled={uploading}
-            onChange={(e) => {
-              void upload(e.target.files?.[0]);
-              e.target.value = "";
-            }}
-          />
-          {uploading ? "Uploading…" : "Add photo"}
-        </label>
-        <label className="flex h-12 cursor-pointer items-center justify-center rounded-md border border-border text-base font-medium">
-          <input
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            disabled={uploading}
-            onChange={(e) => {
-              void upload(e.target.files?.[0]);
-              e.target.value = "";
-            }}
-          />
-          Library
-        </label>
-      </div>
+      <AddPhotoButton
+        category={item.category}
+        label={item.label}
+        uploading={uploading}
+        onFile={(file) => void upload(file)}
+      />
       {item.photos.length ? (
         <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {item.photos.map((photo) => (
@@ -767,5 +743,122 @@ function PhotoTile({
         </button>
       </div>
     </li>
+  );
+}
+
+/**
+ * One "Add photo" control per inspection item. Tapping it asks Camera or Library,
+ * and the picked photo attaches to this utility on this machine.
+ */
+function AddPhotoButton({
+  category,
+  label,
+  uploading,
+  onFile,
+}: {
+  category: string;
+  label: string;
+  uploading: boolean;
+  onFile: (file: File | undefined) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function away(e: PointerEvent) {
+      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function esc(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+
+  function pick(input: HTMLInputElement | null) {
+    setOpen(false);
+    input?.click();
+  }
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFile(e.target.files?.[0]);
+    e.target.value = "";
+  };
+
+  return (
+    <div ref={boxRef} className="relative mt-3">
+      <button
+        type="button"
+        disabled={uploading}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        data-testid={`inspect-add-photo-${category}`}
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-base font-medium text-primary-foreground disabled:opacity-60"
+      >
+        <ImagePlus className="size-5" />
+        {uploading ? "Uploading…" : "Add photo"}
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          aria-label={`Add a ${label} photo`}
+          className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-popover shadow-[var(--shadow-lift)]"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-muted"
+            onClick={() => pick(cameraRef.current)}
+          >
+            <Camera className="size-4 text-primary" />
+            <span>
+              <span className="block font-medium">Camera</span>
+              <span className="text-xs text-muted-foreground">Take a photo now</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="flex w-full items-center gap-3 border-t border-border px-4 py-3 text-left text-sm hover:bg-muted"
+            onClick={() => pick(libraryRef.current)}
+          >
+            <Images className="size-4 text-primary" />
+            <span>
+              <span className="block font-medium">Choose from library</span>
+              <span className="text-xs text-muted-foreground">Use a photo you already took</span>
+            </span>
+          </button>
+        </div>
+      ) : null}
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        data-testid={`inspect-photo-${category}`}
+        onChange={onChange}
+      />
+      <input
+        ref={libraryRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        data-testid={`inspect-library-${category}`}
+        onChange={onChange}
+      />
+    </div>
   );
 }

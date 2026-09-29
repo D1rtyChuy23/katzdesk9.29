@@ -6,6 +6,7 @@ import { checkUsername, claimInvite, getMyAccess, lookupSignIn, peekInvite, regi
 import { clearInviteToken, readInviteToken, rememberInviteToken } from "@/lib/ops/invite-client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { MIN_PASSWORD, passwordProblem, peekPasswordReset, resetPasswordWithToken } from "@/lib/ops/password-reset";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -34,7 +35,13 @@ function Login() {
   const { user, isPending } = useCurrentUserState();
   const navigate = useNavigate();
   const router = useRouter();
-  const [mode, setMode] = useState<"in" | "up" | "pending">("in");
+  const [mode, setMode] = useState<"in" | "up" | "pending" | "reset">("in");
+  const [resetToken, setResetToken] = useState<string | null>(null);
+  const [resetFor, setResetFor] = useState<string | null>(null);
+  const [resetBad, setResetBad] = useState(false);
+  const [confirm, setConfirm] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [showForgot, setShowForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -42,13 +49,50 @@ function Login() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    rememberInviteToken(new URLSearchParams(window.location.search).get("invite"));
+    const params = new URLSearchParams(window.location.search);
+    const reset = params.get("reset");
+    if (reset) {
+      setResetToken(reset);
+      setMode("reset");
+      void peekPasswordReset({ data: { token: reset } })
+        .then((r) => {
+          setResetBad(!r.ok);
+          setResetFor(r.username);
+        })
+        .catch(() => setResetBad(true));
+      return;
+    }
+    rememberInviteToken(params.get("invite"));
     if (readInviteToken()) setMode("up");
     else if (readPending()) setMode("pending");
   }, []);
 
+  async function onReset(e: FormEvent) {
+    e.preventDefault();
+    if (!resetToken) return;
+    const problem = passwordProblem(password);
+    if (problem) return setError(problem);
+    if (password !== confirm) return setError("The two passwords don't match.");
+    setBusy(true);
+    setError(null);
+    try {
+      const done = await resetPasswordWithToken({ data: { token: resetToken, password } });
+      window.history.replaceState(null, "", "/login");
+      setResetToken(null);
+      setUsername(done.username ?? done.email ?? "");
+      setPassword("");
+      setConfirm("");
+      setMode("in");
+      setNotice("Password updated. Sign in with your new password.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reset the password");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   useEffect(() => {
-    if (isPending || !user || mode === "pending") return;
+    if (isPending || !user || mode === "pending" || mode === "reset") return;
     void (async () => {
       try {
         const token = readInviteToken();
@@ -170,11 +214,20 @@ function Login() {
   }
 
   return (
-    <main className="min-h-svh bg-ink text-ink-foreground">
-      <div className="mx-auto grid min-h-svh max-w-5xl items-center gap-10 px-6 py-12 lg:grid-cols-2">
+    <main className="relative min-h-svh overflow-hidden bg-gradient-to-br from-ink via-ink to-[#2a2018] text-ink-foreground">
+      <span aria-hidden className="katz-cloud -bottom-16 -left-24 w-[34rem] opacity-[0.07]" />
+      <span aria-hidden className="katz-cloud -top-12 right-[-6rem] w-[26rem] -scale-x-100 opacity-[0.05]" />
+      <div className="relative mx-auto grid min-h-svh max-w-5xl items-center gap-10 px-6 py-12 lg:grid-cols-2">
         <div>
-          <p className="text-xs tracking-[0.22em] text-cream/50 uppercase">Katz Coffee · Houston</p>
-          <h1 className="mt-4 font-display text-5xl leading-[1.05] font-medium tracking-tight">
+          <img
+            src="/brand/katz-coffee-logo.svg"
+            alt="Katz Coffee"
+            width={360}
+            height={216}
+            className="h-auto w-48 drop-shadow-[0_10px_24px_rgb(0_0_0/0.5)] sm:w-60"
+          />
+          <p className="mt-5 text-xs font-semibold tracking-[0.3em] text-katz-gold uppercase">Houston · Service desk</p>
+          <h1 className="mt-2 font-display text-5xl leading-[1.05] font-medium tracking-tight">
             Katz <span className="italic text-cream/70">Desk</span>
           </h1>
           <p className="mt-4 max-w-md text-base leading-relaxed text-cream/70">
@@ -183,7 +236,67 @@ function Login() {
           </p>
         </div>
         <div className="rounded-xl border border-cream/12 bg-cream/6 p-6">
-          {mode === "pending" ? (
+          {mode === "reset" ? (
+            <>
+              <h2 className="font-display text-2xl">Set a new password</h2>
+              <p className="mt-1 text-sm text-cream/60">
+                {resetBad
+                  ? "This reset link has expired or was already used. Ask a desk admin for a new one."
+                  : resetFor
+                    ? `For ${resetFor}. You'll be signed out of other devices.`
+                    : "Choose a new password for your KatzDesk account."}
+              </p>
+              {resetBad ? (
+                <Button
+                  type="button"
+                  className="mt-5 w-full"
+                  onClick={() => {
+                    window.history.replaceState(null, "", "/login");
+                    setMode("in");
+                  }}
+                >
+                  Back to sign in
+                </Button>
+              ) : (
+                <form onSubmit={onReset} className="mt-5 space-y-3" data-testid="reset-form">
+                  <div>
+                    <Label htmlFor="new-password" className="text-cream/60">
+                      New password
+                    </Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      required
+                      minLength={MIN_PASSWORD}
+                      autoComplete="new-password"
+                      className="mt-1 border-cream/15 bg-ink text-cream"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirm-password" className="text-cream/60">
+                      Type it again
+                    </Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      required
+                      minLength={MIN_PASSWORD}
+                      autoComplete="new-password"
+                      className="mt-1 border-cream/15 bg-ink text-cream"
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                    />
+                  </div>
+                  {error ? <p className="text-sm text-destructive">{error}</p> : null}
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    Save new password
+                  </Button>
+                </form>
+              )}
+            </>
+          ) : mode === "pending" ? (
             <>
               <h2 className="font-display text-2xl">Waiting for approval</h2>
               <p className="mt-2 text-sm text-cream/60">
@@ -288,10 +401,29 @@ function Login() {
                   />
                 </div>
                 {error ? <p className="text-sm text-destructive">{error}</p> : null}
+                {notice && mode === "in" ? <p className="text-sm text-emerald-300">{notice}</p> : null}
                 <Button type="submit" className="w-full" disabled={busy}>
                   {mode === "up" ? "Create account" : "Sign in"}
                 </Button>
               </form>
+              {mode === "in" ? (
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="text-sm text-cream/60 underline-offset-2 hover:underline"
+                    aria-expanded={showForgot}
+                    onClick={() => setShowForgot((v) => !v)}
+                  >
+                    Forgot password?
+                  </button>
+                  {showForgot ? (
+                    <p className="mt-2 rounded-md border border-cream/12 bg-cream/6 px-3 py-2 text-xs leading-relaxed text-cream/70">
+                      Ask a desk admin to send you a reset link (Access → Reset password). Open it, choose a new
+                      password, then sign in here. Signed in already? Change it under Settings → Password.
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               <button
                 type="button"
                 className="mt-4 text-sm text-cream/60 underline-offset-2 hover:underline"

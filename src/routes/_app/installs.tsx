@@ -736,6 +736,10 @@ function InstallEquipChips({
           customer={install.customer}
           installId={install.id}
           recipes={recipes}
+          recipeId={
+            (install.machines ?? []).find((m) => m.equipment.toLowerCase() === p.model.toLowerCase() && m.recipeId)
+              ?.recipeId ?? null
+          }
           onOpen={onRecipe}
           onRemove={() => remove.mutate(p.label)}
         />

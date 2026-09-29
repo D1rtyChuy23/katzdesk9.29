@@ -589,11 +589,12 @@ function CustomerRecipes({
   const others = house.filter((r) => r.customer && r.customer.toLowerCase() !== customer.toLowerCase());
 
   function ownLabel(r: Recipe) {
-    const dup = recipes.filter((x) => x.equipmentModel === r.equipmentModel).length > 1;
+    if (r.name) return `${r.equipmentModel} · ${r.name}`;
+    const dup = recipes.filter((x) => x.equipmentModel === r.equipmentModel && !x.name).length > 1;
     return dup ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
   }
   function otherLabel(r: Recipe) {
-    return `${r.customer} · ${r.equipmentModel}`;
+    return `${r.customer} · ${r.equipmentModel}${r.name ? ` · ${r.name}` : ""}`;
   }
 
   return (

@@ -117,7 +117,7 @@ export type Install = {
   paymentStatus: string | null;
   serial: string | null;
   powerVoltage: string | null;
-  machines: { equipment: string; serial: string; powerVoltage: string }[];
+  machines: { equipment: string; serial: string; powerVoltage: string; recipeId?: number | null }[];
   serialNotice: string | null;
   complete: boolean;
   dealId: number | null;
@@ -310,6 +310,8 @@ export type Asset = {
 
 export type Recipe = {
   id: number;
+  /** Optional label so one account can keep several recipes for the same model. */
+  name: string | null;
   equipmentModel: string;
   customer: string | null;
   installId: number | null;

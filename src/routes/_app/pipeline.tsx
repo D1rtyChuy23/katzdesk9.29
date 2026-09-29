@@ -5,7 +5,9 @@ import { archiveDeal, createDeal, listDeals } from "@/lib/ops/api";
 import { money } from "@/lib/ops/clock";
 import { PRODUCERS, isNoRep } from "@/lib/ops/lookups";
 import { sameRep } from "@/lib/ops/reps";
-import { RepFilter, RepName } from "@/components/desk/rep-select";
+import { RepFilter } from "@/components/desk/rep-select";
+import { RepDealsPanel, RepLink } from "@/components/desk/rep-deals-panel";
+import { formatRep } from "@/lib/ops/rep-match";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { useMyView } from "@/components/desk/my-view-bar";
 
@@ -79,6 +81,7 @@ function Page() {
   const [create, setCreate] = useState(false);
   const { filterMine, matchMine } = useMyView();
   const [repFilter, setRepFilter] = useState("");
+  const [repPanel, setRepPanel] = useState<string | null>(null);
   const [sort, setSort] = useDeskSort("pipeline", "date-desc");
 
 
@@ -205,7 +208,13 @@ function Page() {
       <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         <ChartCard title="By producer" lede="Open dollars stacked under completed. Fell-through deals are left out.">
           {producerChart.length ? (
-            <StackedMoneyBars data={producerChart} xKey="producer" openKey="open" doneKey="done" />
+            <StackedMoneyBars
+              data={producerChart}
+              xKey="producer"
+              openKey="open"
+              doneKey="done"
+              renderLabel={(name) => <RepLink name={name} onPick={setRepPanel} />}
+            />
           ) : (
             <p className="text-sm text-muted-foreground">No live deals yet.</p>
           )}
@@ -225,7 +234,7 @@ function Page() {
       <section className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
         <div className="border-b border-border px-4 py-3">
           <h2 className="font-display text-xl">By producer</h2>
-          <p className="text-xs text-muted-foreground">Fell-through deals are excluded, matching the old dashboard.</p>
+          <p className="text-xs text-muted-foreground">Fell-through deals are excluded. Click a rep to see only their deals.</p>
         </div>
         <div className="overflow-x-auto px-4 py-3">
           <table className="w-full min-w-[36rem] text-sm">
@@ -246,7 +255,11 @@ function Page() {
                 const o = mine.filter((d) => d.completion !== "complete");
                 return (
                   <tr key={p} className="border-t border-border">
-                    <td className="py-2 pr-4">{p}</td>
+                    <td className="py-2 pr-4">
+                      <RepLink name={p} onPick={setRepPanel} className="font-medium">
+                        {formatRep(p)}
+                      </RepLink>
+                    </td>
                     <td className="tabular py-2 pr-4">{mine.length}</td>
                     <td className="tabular py-2 pr-4">{money(sum(mine))}</td>
                     <td className="tabular py-2 pr-4">
@@ -308,7 +321,7 @@ function Page() {
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         {rows.map((d) => (
-          <DealRow key={d.id} deal={d} onOpen={() => setSelected(d.id)} />
+          <DealRow key={d.id} deal={d} onOpen={() => setSelected(d.id)} onRep={setRepPanel} />
         ))}
         {rows.length === 0 ? (
           <p className="px-4 py-8 text-sm text-muted-foreground">
@@ -321,6 +334,15 @@ function Page() {
         ) : null}
       </div>
 
+      <RepDealsPanel
+        rep={repPanel}
+        deals={all}
+        onClose={() => setRepPanel(null)}
+        onOpenDeal={(id) => {
+          setRepPanel(null);
+          setSelected(id);
+        }}
+      />
       <DealSheet deal={selectedRow} onClose={() => setSelected(null)} />
       <SimpleCreateDialog
         title="New deal"
@@ -353,7 +375,7 @@ function Page() {
   );
 }
 
-function DealRow({ deal: d, onOpen }: { deal: Deal; onOpen: () => void }) {
+function DealRow({ deal: d, onOpen, onRep }: { deal: Deal; onOpen: () => void; onRep: (rep: string) => void }) {
   const qc = useQueryClient();
   const remove = useMutation({
     mutationFn: () => archiveDeal({ data: { id: d.id } }),
@@ -370,16 +392,26 @@ function DealRow({ deal: d, onOpen }: { deal: Deal; onOpen: () => void }) {
   });
   return (
     <div className="flex items-center gap-2 border-b border-border px-3 py-2 last:border-b-0 hover:bg-muted/60 md:px-4">
-      <button
-        type="button"
+      {/* A div, not a button, so the rep name inside can be its own control. */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onOpen}
-        className="grid min-w-0 flex-1 gap-1 py-1 text-left md:grid-cols-[1.4fr_7rem_7rem_8rem] md:items-center"
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen();
+          }
+        }}
+        className="grid min-w-0 flex-1 cursor-pointer gap-1 py-1 text-left md:grid-cols-[1.4fr_7rem_7rem_8rem] md:items-center"
       >
         <span>
           <span className="font-medium">{d.customer}</span>
           <AkBadge on={d.aviKatz} className="ml-1.5 align-middle" />
           <span className="mt-0.5 block text-xs text-muted-foreground">
-            {d.producer ? <RepName name={d.producer} /> : <NoRepFlag show />} · {d.equipment || "No equipment listed"}
+            {d.producer && !d.noRep ? <RepLink name={d.producer} onPick={onRep} /> : <NoRepFlag show />} ·{" "}
+            {d.equipment || "No equipment listed"}
           </span>
 
         </span>
@@ -392,7 +424,7 @@ function DealRow({ deal: d, onOpen }: { deal: Deal; onOpen: () => void }) {
               ? "Step 1 · Good to order"
               : "Needs good to order"}
         </span>
-      </button>
+      </div>
       <Button
         type="button"
         size="sm"

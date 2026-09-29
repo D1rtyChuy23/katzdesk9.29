@@ -38,11 +38,12 @@ function Page() {
   const customerRecipes = useMemo(() => rows.filter((r) => !!r.customer), [rows]);
 
   function houseLabel(r: Recipe) {
-    const dup = house.filter((x) => x.equipmentModel === r.equipmentModel).length > 1;
+    if (r.name) return `${r.equipmentModel} · ${r.name}`;
+    const dup = house.filter((x) => x.equipmentModel === r.equipmentModel && !x.name).length > 1;
     return dup ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
   }
   function customerLabel(r: Recipe) {
-    return `${r.customer} · ${r.equipmentModel}`;
+    return `${r.customer} · ${r.equipmentModel}${r.name ? ` · ${r.name}` : ""}`;
   }
 
   useEffect(() => {

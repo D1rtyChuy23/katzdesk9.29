@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Contrast, Keyboard, StretchHorizontal, Type, Vibrate } from "lucide-react";
-import type { ReactNode } from "react";
+import { Check, Contrast, KeyRound, Keyboard, StretchHorizontal, Type, Vibrate } from "lucide-react";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth/client";
+import { passwordProblem } from "@/lib/ops/password-reset";
+import { Button } from "@/components/ui/button";
+import { Input, Label } from "@/components/ui/input";
 import { usePrefs } from "@/components/desk/prefs-provider";
 import { AppearanceIcon } from "@/components/desk/theme-toggle";
 import { RosterEditor } from "@/components/desk/roster-editor";
@@ -27,6 +32,7 @@ function Page() {
       </header>
 
       <div className="mt-6 grid gap-4 lg:max-w-2xl">
+        <PasswordSection />
         <RosterEditor />
         <RepsEditor />
 
@@ -229,5 +235,100 @@ function Preview({ appearance }: { appearance: Appearance }) {
         </p>
       </div>
     </div>
+  );
+}
+
+function PasswordSection() {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [again, setAgain] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    const problem = passwordProblem(next);
+    if (problem) return setError(problem);
+    if (next !== again) return setError("The two new passwords don't match.");
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await authClient.changePassword({
+        currentPassword: current,
+        newPassword: next,
+        revokeOtherSessions: true,
+      });
+      if (res.error) {
+        const msg = res.error.message ?? "";
+        throw new Error(
+          /invalid|incorrect|password/i.test(msg) && !/credential/i.test(msg)
+            ? "Your current password isn't right."
+            : /credential|not found/i.test(msg)
+              ? "You sign in with Google or X, so there's no password to change. Ask an admin for a reset link to add one."
+              : msg || "Could not change the password",
+        );
+      }
+      setCurrent("");
+      setNext("");
+      setAgain("");
+      toast.success("Password changed. Other devices were signed out.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not change the password");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Section
+      title="Password"
+      hint="Change the password you use with your username. Forgot it? An admin can send you a reset link from Access."
+      icon={<KeyRound className="size-4" />}
+    >
+      <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-3" data-testid="change-password">
+        <div>
+          <Label htmlFor="pw-current">Current</Label>
+          <Input
+            id="pw-current"
+            type="password"
+            autoComplete="current-password"
+            required
+            className="mt-1"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="pw-new">New</Label>
+          <Input
+            id="pw-new"
+            type="password"
+            autoComplete="new-password"
+            required
+            className="mt-1"
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="pw-again">New, again</Label>
+          <Input
+            id="pw-again"
+            type="password"
+            autoComplete="new-password"
+            required
+            className="mt-1"
+            value={again}
+            onChange={(e) => setAgain(e.target.value)}
+          />
+        </div>
+        {error ? <p className="text-sm text-destructive sm:col-span-3">{error}</p> : null}
+        <div className="sm:col-span-3">
+          <Button type="submit" disabled={busy}>
+            Change password
+          </Button>
+        </div>
+      </form>
+    </Section>
   );
 }
