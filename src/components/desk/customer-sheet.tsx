@@ -409,14 +409,11 @@ export function CustomerHistorySheet({
         </SheetContent>
       </Sheet>
 
-      <JobSheet
-        id={reviewing && selectedJob ? selectedJob.id : null}
-        onClose={() => setReviewing(false)}
-        lockCustomer
-      />
-      <PmSheet pm={reviewing ? selectedPm : null} onClose={() => setReviewing(false)} lockCustomer />
-      <InstallSheet row={reviewing ? selectedInstall : null} onClose={() => setReviewing(false)} lockCustomer />
-      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} lockCustomer />
+      {/* The customer stays editable here too, so a ticket logged under the wrong name can be moved. */}
+      <JobSheet id={reviewing && selectedJob ? selectedJob.id : null} onClose={() => setReviewing(false)} />
+      <PmSheet pm={reviewing ? selectedPm : null} onClose={() => setReviewing(false)} />
+      <InstallSheet row={reviewing ? selectedInstall : null} onClose={() => setReviewing(false)} />
+      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} />
       <RecipeEditorSheet
         draft={recipeDraft}
         models={(directoryEquip.data ?? []).map((e) => e.name)}
