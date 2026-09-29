@@ -89,6 +89,7 @@ export function RecipeChip({
   customer,
   installId,
   recipes,
+  recipeId,
   onOpen,
   onRemove,
 }: {
@@ -96,6 +97,8 @@ export function RecipeChip({
   customer: string;
   installId: number;
   recipes: Recipe[];
+  /** The recipe picked for this unit on the equipment row, if any. */
+  recipeId?: number | null;
   onOpen: (draft: RecipeDraft) => void;
   onRemove?: () => void;
 }) {
@@ -103,6 +106,7 @@ export function RecipeChip({
     customer,
     model: piece.model,
     installId,
+    recipeId,
   });
   const preview = previewSetting(linked ?? house ?? undefined);
   let tone: "saved" | "house" | "empty" = "empty";

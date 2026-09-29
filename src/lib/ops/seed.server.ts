@@ -537,14 +537,13 @@ async function patchRecipeCustomers(sql: Sql) {
   await sql.query(
     "create index if not exists recipes_model_idx on recipes (lower(equipment_model))",
   );
+  // One unnamed recipe per scope + model (as before); named recipes can sit beside it.
+  await sql.query("alter table recipes add column if not exists name text");
+  await sql.query("drop index if exists recipes_house_model_uidx");
+  await sql.query("drop index if exists recipes_customer_model_uidx");
   await sql.query(`
-    create unique index if not exists recipes_house_model_uidx
-      on recipes (lower(equipment_model))
-      where customer is null`);
-  await sql.query(`
-    create unique index if not exists recipes_customer_model_uidx
-      on recipes (lower(customer), lower(equipment_model))
-      where customer is not null`);
+    create unique index if not exists recipes_scope_model_name_uidx
+      on recipes (lower(coalesce(customer, '')), lower(equipment_model), lower(coalesce(name, '')))`);
   await sql`update recipes set is_template = true where customer is null`;
 
   const meta = await sql<{ v: string }>`select v from seed_meta where k = 'recipes_customers'`;
@@ -579,7 +578,8 @@ async function patchRecipeCustomers(sql: Sql) {
     const exists = await sql<{ id: number }>`
       select id from recipes
       where lower(equipment_model) = ${c.model.toLowerCase()}
-        and lower(customer) = ${c.customer.toLowerCase()}`;
+        and lower(customer) = ${c.customer.toLowerCase()}
+        and name is null`;
     if (exists[0]) continue;
     const ins = await sql<{ id: number }>`
       select id from installs where lower(customer) = ${c.customer.toLowerCase()} limit 1`;

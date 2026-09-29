@@ -22,6 +22,9 @@ import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, sortDesk } from "@/lib/ops/sort";
 import { toast } from "sonner";
 import { SelectField } from "@/components/ui/select-field";
+import { createPasswordResetLink } from "@/lib/ops/password-reset";
+import { KeyRound } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 
 export const Route = createFileRoute("/_app/access")({
@@ -470,6 +473,7 @@ function Page() {
                 <p className="truncate text-sm text-muted-foreground">{a.email ?? "No email"}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <ResetPasswordButton userId={a.userId} username={a.username} />
                 {canAssignRoles && !a.isAdmin ? (
                   <RolePicker
                     value={a.role}
@@ -506,6 +510,53 @@ function Page() {
         </ul>
       </section>
     </div>
+  );
+}
+
+function ResetPasswordButton({ userId, username }: { userId: string; username: string }) {
+  const [link, setLink] = useState<string | null>(null);
+  const make = useMutation({
+    mutationFn: () => createPasswordResetLink({ data: { userId } }),
+    onSuccess: (r) => setLink(`${window.location.origin}/login?reset=${encodeURIComponent(r.token)}`),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not make a reset link"),
+  });
+  const message = link
+    ? `Hi ${username} — here's your KatzDesk password reset link. It works once and expires in 48 hours:\n${link}`
+    : "";
+  return (
+    <>
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={make.isPending}
+        data-testid={`reset-password-${username}`}
+        onClick={() => make.mutate()}
+      >
+        <KeyRound className="size-3.5" />
+        Reset password
+      </Button>
+      <Dialog open={!!link} onOpenChange={(v) => (v ? null : setLink(null))}>
+        <DialogContent>
+          <DialogTitle>Reset link for {username}</DialogTitle>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Send this to them yourself. It works once, expires in 48 hours, and signs them out of other devices.
+          </p>
+          <p
+            className="mt-3 truncate rounded-md border border-border bg-muted px-2.5 py-2 font-mono text-xs"
+            title={link ?? ""}
+            data-testid="reset-link"
+          >
+            {link}
+          </p>
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <Button variant="outline" onClick={() => link && void copyText(link)}>
+              Copy link only
+            </Button>
+            <Button onClick={() => void copyText(message)}>Copy message</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

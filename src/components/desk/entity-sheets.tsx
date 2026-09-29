@@ -444,6 +444,7 @@ export function InstallSheet({
                   recipes={recs.data ?? []}
                   onChange={setSpecs}
                   onPulled={(next) => persistMachines(next)}
+                  onRecipe={(next) => persistMachines(next)}
                 />
               </div>
               <div>
@@ -945,11 +946,11 @@ function ReadyUnitPicker({
             setQ(e.target.value);
             if (!open) setOpen(true);
           }}
-          onFocus={() => {
-            setOpen(true);
-            setQ("");
-          }}
+          // Open on click or typing only — the drawer focuses this field when it opens.
+          onFocus={() => setQ("")}
+          onClick={() => setOpen(true)}
           onKeyDown={(e) => {
+            if (e.key === "ArrowDown" && !open) setOpen(true);
             if (e.key === "Escape") setOpen(false);
             if (e.key === "Enter") {
               e.preventDefault();

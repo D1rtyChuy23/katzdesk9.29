@@ -37,9 +37,11 @@
   --color-catering-fg: #faf7f1;
   --color-dispense: #5c5368;
   --color-dispense-fg: #faf7f1;
-  /* Katz copper — brand accent for active nav, eyebrows, and key numbers. */
-  --color-copper: #c0682c;
-  --color-copper-soft: #f6e6d8;
+  /* Brand accent, pulled from the Katz Coffee badge: brass for text on light surfaces,
+     the badge's cream-gold for marks on the dark sidebar and banners. */
+  --color-copper: #8f6a22;
+  --color-copper-soft: #f4ecd6;
+  --color-katz-gold: #f0e6a3;
 
   --radius-xs: 4px;
   --radius-sm: 8px;
@@ -56,8 +58,8 @@ html.dark {
   --color-background: #1c1814;
   --color-foreground: #ece6da;
   --color-card: #231e19;
-  --color-copper: #e08a4f;
-  --color-copper-soft: #3a2a1f;
+  --color-copper: #e0c577;
+  --color-copper-soft: #3a3220;
   --color-card-foreground: #ece6da;
   --color-popover: #2a241e;
   --color-popover-foreground: #ece6da;
@@ -272,4 +274,14 @@ html[data-contrast="high"] :focus-visible {
   .bg-card.rounded-2xl.border {
     box-shadow: var(--shadow-soft);
   }
+}
+
+/* Katz Coffee cloud swirl, used as a tinted watermark (the artwork is a transparent mask). */
+.katz-cloud {
+  pointer-events: none;
+  position: absolute;
+  background-color: var(--color-katz-gold);
+  -webkit-mask: url(/brand/cloud.png) center / contain no-repeat;
+  mask: url(/brand/cloud.png) center / contain no-repeat;
+  aspect-ratio: 640 / 515;
 }

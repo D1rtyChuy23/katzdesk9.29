@@ -264,11 +264,14 @@ export function StackedMoneyBars({
   xKey,
   openKey,
   doneKey,
+  renderLabel,
 }: {
   data: Record<string, string | number>[];
   xKey: string;
   openKey: string;
   doneKey: string;
+  /** Optional: make each bar's label a control (e.g. open a rep's deals). */
+  renderLabel?: (name: string) => ReactNode;
 }) {
   const max = Math.max(
     ...data.map((d) => (Number(d[openKey]) || 0) + (Number(d[doneKey]) || 0)),
@@ -292,7 +295,7 @@ export function StackedMoneyBars({
             <li key={`${name}-${i}`} className="min-w-0">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="min-w-0 truncate text-sm font-medium" title={name}>
-                  {name}
+                  {renderLabel ? renderLabel(name) : name}
                 </span>
                 <span className="shrink-0 tabular text-xs font-medium">{usd(total)}</span>
               </div>

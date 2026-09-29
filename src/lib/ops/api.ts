@@ -375,6 +375,7 @@ function mapAsset(r: any) {
 function mapRecipe(r: any) {
 	return {
 		id: r.id,
+		name: r.name ?? null,
 		equipmentModel: String(r.equipment_model),
 		customer: r.customer ?? null,
 		installId: num(r.install_id),
@@ -1952,19 +1953,23 @@ export const renameEquipment = createServerFn({ method: "POST" }).middleware([de
 	const sql = await ready();
 	return renameOrMergeEquipment(sql, data.id, data.name);
 });
-async function findRecipeDup(sql: any, model: any, customer: any, exceptId: any = null) {
+async function findRecipeDup(sql: any, model: any, customer: any, exceptId: any = null, name: any = null) {
+	const nameKey = (name ?? "").trim().toLowerCase();
 	const hit = (customer ? await sql`
         select id from recipes
         where lower(equipment_model) = ${model.toLowerCase()}
-          and lower(customer) = ${customer.toLowerCase()}` : await sql`
+          and lower(customer) = ${customer.toLowerCase()}
+          and lower(coalesce(name, '')) = ${nameKey}` : await sql`
         select id from recipes
         where lower(equipment_model) = ${model.toLowerCase()}
-          and customer is null`)[0];
+          and customer is null
+          and lower(coalesce(name, '')) = ${nameKey}`)[0];
 	if (hit && hit.id !== exceptId) return hit;
 	return null;
 }
 type RecipeInput = {
 	id?: number;
+	name?: string | null;
 	equipmentModel: string;
 	customer?: string | null;
 	installId?: number | null;
@@ -1989,16 +1994,24 @@ export const upsertRecipe = createServerFn({ method: "POST" }).middleware([deskM
 	if (!model) throw new Error("Pick an equipment model");
 	const customer = data.customer?.trim() || null;
 	const isTemplate = !customer;
+	// Editors that don't know about names (the Recipes page) keep whatever name the recipe has.
+	const name = data.name === undefined
+		? (data.id ? ((await sql`select name from recipes where id = ${data.id}`)[0]?.name ?? null) : null)
+		: data.name?.trim() || null;
 	let installId = data.installId ?? null;
 	if (customer && installId == null) {
 		const ins = await sql`
         select id from installs where lower(customer) = ${customer.toLowerCase()} limit 2`;
 		if (ins.length === 1) installId = ins[0].id;
 	}
-	if (await findRecipeDup(sql, model, customer, data.id)) throw new Error(customer ? `A recipe for ${model} already exists on ${customer}` : "A house recipe for that model already exists — open it from the list");
+	if (await findRecipeDup(sql, model, customer, data.id, name)) {
+		const label = name ? `“${name}” ` : "";
+		throw new Error(customer ? `A ${label}recipe for ${model} already exists on ${customer}${name ? "" : " — give this one a name"}` : `A ${label}house recipe for that model already exists${name ? "" : " — give this one a name"}`);
+	}
 	if (data.id) {
 		await sql`
         update recipes set
+          name = ${name},
           equipment_model = ${model},
           customer = ${customer},
           install_id = ${installId},
@@ -2023,12 +2036,12 @@ export const upsertRecipe = createServerFn({ method: "POST" }).middleware([deskM
 	}
 	return mapRecipe((await sql`
       insert into recipes (
-        equipment_model, customer, install_id, copied_from, is_template,
+        name, equipment_model, customer, install_id, copied_from, is_template,
         coffee_1, coffee_2, coffee_3,
         powder_1, powder_2, powder_3, americano_1, americano_2, americano_3,
         tea_1, tea_2, milk, notes
       ) values (
-        ${model}, ${customer}, ${installId}, ${data.copiedFrom ?? null}, ${isTemplate},
+        ${name}, ${model}, ${customer}, ${installId}, ${data.copiedFrom ?? null}, ${isTemplate},
         ${data.coffee1 ?? null}, ${data.coffee2 ?? null}, ${data.coffee3 ?? null},
         ${data.powder1 ?? null}, ${data.powder2 ?? null}, ${data.powder3 ?? null},
         ${data.americano1 ?? null}, ${data.americano2 ?? null}, ${data.americano3 ?? null},

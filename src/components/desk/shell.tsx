@@ -131,11 +131,11 @@ function NavItemLink({
         className={cn(
           "relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
           active
-            ? "bg-cream/10 font-medium text-white before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-copper"
+            ? "bg-cream/10 font-medium text-white before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-katz-gold"
             : "text-cream/65 hover:bg-cream/6 hover:text-cream",
         )}
       >
-        <Icon className={cn("size-4", active ? "text-copper" : "text-cream/50")} />
+        <Icon className={cn("size-4", active ? "text-katz-gold" : "text-cream/50")} />
         {item.label}
       </Link>
     </li>
@@ -206,15 +206,29 @@ function NavLinks({
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2.5 px-3">
-      <span className="grid size-9 place-items-center rounded-lg bg-copper font-display text-lg font-semibold text-white shadow-[0_4px_14px_rgb(192_104_44/0.35)]">
-        K
-      </span>
-      <span className="flex items-baseline gap-1.5">
-        <span className="font-display text-2xl font-medium tracking-tight text-cream">Katz</span>
-        <span className="font-display text-2xl font-medium tracking-tight text-cream/55 italic">Desk</span>
+    <Link to="/" className="group block px-3" aria-label="Katz Desk home">
+      <img
+        src="/brand/katz-coffee-logo.svg"
+        alt="Katz Coffee"
+        width={360}
+        height={216}
+        className="h-auto w-[9.5rem] drop-shadow-[0_6px_16px_rgb(0_0_0/0.45)] transition-transform group-hover:-rotate-1"
+      />
+      <span className="mt-1 flex items-center gap-2 pl-1">
+        <span className="h-px w-5 bg-katz-gold/50" />
+        <span className="text-[11px] font-semibold tracking-[0.34em] text-katz-gold uppercase">Desk</span>
       </span>
     </Link>
+  );
+}
+
+/** Two cloud swirls from the Katz artwork, faint enough to sit behind the menu. */
+function SidebarClouds() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <span className="katz-cloud -right-16 top-40 w-56 -scale-x-100 opacity-[0.05]" />
+      <span className="katz-cloud -bottom-6 -left-14 w-72 opacity-[0.08]" />
+    </div>
   );
 }
 
@@ -289,15 +303,15 @@ export function AppShell({
       >
         Skip to content
       </a>
-      <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col bg-gradient-to-b from-ink to-[#241c15] text-ink-foreground md:flex">
-        <div className="px-2 py-5">
+      <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col overflow-hidden bg-gradient-to-b from-ink to-[#241c15] text-ink-foreground md:flex">
+        <SidebarClouds />
+        <div className="relative px-2 pt-5 pb-4">
           <Brand />
-          <p className="mt-2 px-3 text-xs text-cream/40">Service and sales, one clock.</p>
         </div>
-        <div className="flex-1 overflow-y-auto px-2 pb-4">
+        <div className="relative flex-1 overflow-y-auto px-2 pb-4">
           <NavLinks isAdmin={isAdmin} role={role} />
         </div>
-        <div className="border-t border-cream/10 p-3">
+        <div className="relative border-t border-cream/10 p-3">
           <p className="px-1 text-[11px] text-cream/40">Signed in</p>
           <div className="mt-1 text-cream [&_button]:text-cream/70 [&_span]:text-cream">
             <UserButton />
@@ -320,8 +334,8 @@ export function AppShell({
             <Menu className="size-5" />
           </Button>
           <Link to="/" className="flex items-center gap-2 md:hidden">
-            <span className="grid size-7 place-items-center rounded-md bg-copper font-display text-sm font-semibold text-white">K</span>
-            <span className="font-display text-lg">Katz Desk</span>
+            <img src="/brand/katz-coffee-logo.svg" alt="Katz Coffee" width={360} height={216} className="h-8 w-auto" />
+            <span className="text-[11px] font-semibold tracking-[0.3em] text-copper uppercase">Desk</span>
           </Link>
           {role === "warehouse" ? null : (
             <div className="order-last w-full min-w-0 md:order-none md:flex md:w-auto md:flex-1 md:justify-end">
@@ -351,14 +365,15 @@ export function AppShell({
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="flex w-64 flex-col overflow-hidden bg-ink p-0 text-ink-foreground sm:max-w-64">
-          <div className="shrink-0 px-2 py-5">
+        <SheetContent side="left" className="flex w-64 flex-col overflow-hidden bg-gradient-to-b from-ink to-[#241c15] p-0 text-ink-foreground sm:max-w-64">
+          <SidebarClouds />
+          <div className="relative shrink-0 px-2 py-5">
             <Brand />
           </div>
-          <div className="sheet-scroll min-h-0 flex-1 overflow-y-auto px-2">
+          <div className="sheet-scroll relative min-h-0 flex-1 overflow-y-auto px-2">
             <NavLinks onNavigate={() => setOpen(false)} isAdmin={isAdmin} role={role} />
           </div>
-          <div className="shrink-0 border-t border-cream/10 p-3">
+          <div className="relative shrink-0 border-t border-cream/10 p-3">
             <p className="px-1 text-[11px] text-cream/40">Signed in</p>
             <div className="mt-1 text-cream [&_button]:text-cream/70 [&_span]:text-cream">
               <UserButton />

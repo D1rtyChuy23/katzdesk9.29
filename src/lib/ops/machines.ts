@@ -4,6 +4,8 @@ export type MachineSpec = {
   equipment: string;
   serial: string;
   powerVoltage: string;
+  /** Recipe chosen for this unit on the equipment row (house or customer). */
+  recipeId?: number | null;
 };
 
 export function parseMachinesJson(raw: string | null | undefined): MachineSpec[] {
@@ -17,10 +19,12 @@ export function parseMachinesJson(raw: string | null | undefined): MachineSpec[]
       const rec = row as Record<string, unknown>;
       const equipment = String(rec.equipment ?? "").trim();
       if (!equipment) continue;
+      const rid = Number(rec.recipeId);
       out.push({
         equipment,
         serial: String(rec.serial ?? "").trim(),
         powerVoltage: String(rec.powerVoltage ?? "").trim(),
+        recipeId: Number.isFinite(rid) && rid > 0 ? rid : null,
       });
     }
     return out;
@@ -50,6 +54,7 @@ export function mergeMachineSpecs(
       equipment,
       serial: hit?.serial ?? "",
       powerVoltage: hit?.powerVoltage ?? "",
+      recipeId: hit?.recipeId ?? null,
     };
   });
   const jsonHad = fromJson.length > 0;
@@ -76,6 +81,7 @@ export function serializeMachines(specs: MachineSpec[]): {
       equipment: s.equipment.trim(),
       serial: s.serial.trim(),
       powerVoltage: s.powerVoltage.trim(),
+      ...(s.recipeId ? { recipeId: s.recipeId } : {}),
     }))
     .filter((s) => s.equipment);
   if (!clean.length) {
