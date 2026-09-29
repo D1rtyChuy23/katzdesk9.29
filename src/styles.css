@@ -8,27 +8,27 @@
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
-  --color-background: #f3efe6;
+  --color-background: #f3f0ea;
   --color-foreground: #1c1917;
-  --color-card: #faf7f1;
+  --color-card: #ffffff;
   --color-card-foreground: #1c1917;
-  --color-popover: #fffcf7;
+  --color-popover: #ffffff;
   --color-popover-foreground: #1c1917;
-  --color-primary: #2f5d50;
+  --color-primary: #1f5a47;
   --color-primary-foreground: #f4f0e8;
-  --color-secondary: #e7e0d4;
+  --color-secondary: #efeae1;
   --color-secondary-foreground: #1c1917;
-  --color-muted: #ece6da;
-  --color-muted-foreground: #6f675e;
-  --color-accent: #2f5d50;
+  --color-muted: #f4f0e9;
+  --color-muted-foreground: #6b645b;
+  --color-accent: #1f5a47;
   --color-accent-foreground: #f4f0e8;
-  --color-destructive: #9f2d20;
+  --color-destructive: #b3261e;
   --color-destructive-foreground: #faf7f1;
-  --color-warning: #9a5b12;
+  --color-warning: #a3580b;
   --color-warning-foreground: #faf7f1;
-  --color-border: #ddd4c6;
-  --color-input: #ddd4c6;
-  --color-ring: #2f5d50;
+  --color-border: #e5ded2;
+  --color-input: #dcd4c7;
+  --color-ring: #1f5a47;
   --color-ink: #1a1612;
   --color-ink-foreground: #e8e0d4;
   --color-cream: #e8e0d4;
@@ -37,6 +37,9 @@
   --color-catering-fg: #faf7f1;
   --color-dispense: #5c5368;
   --color-dispense-fg: #faf7f1;
+  /* Katz copper — brand accent for active nav, eyebrows, and key numbers. */
+  --color-copper: #c0682c;
+  --color-copper-soft: #f6e6d8;
 
   --radius-xs: 4px;
   --radius-sm: 8px;
@@ -45,13 +48,16 @@
   --radius-xl: 24px;
   --radius: 12px;
 
-  --shadow-soft: 0 1px 2px rgb(28 25 23 / 0.04), 0 8px 24px rgb(28 25 23 / 0.05);
+  --shadow-soft: 0 1px 2px rgb(28 25 23 / 0.05), 0 4px 18px rgb(28 25 23 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(28 25 23 / 0.06), 0 14px 32px rgb(28 25 23 / 0.10);
 }
 
 html.dark {
   --color-background: #1c1814;
   --color-foreground: #ece6da;
-  --color-card: #241f1a;
+  --color-card: #231e19;
+  --color-copper: #e08a4f;
+  --color-copper-soft: #3a2a1f;
   --color-card-foreground: #ece6da;
   --color-popover: #2a241e;
   --color-popover-foreground: #ece6da;
@@ -258,4 +264,12 @@ html[data-contrast="high"] :focus-visible {
   overflow: visible !important;
   pointer-events: none !important;
   color: inherit;
+}
+
+/* Panels read as raised cards on the canvas instead of beige-on-beige. */
+@layer components {
+  .bg-card.rounded-xl.border,
+  .bg-card.rounded-2xl.border {
+    box-shadow: var(--shadow-soft);
+  }
 }

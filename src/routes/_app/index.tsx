@@ -5,7 +5,7 @@ import { getDashboard } from "@/lib/ops/api";
 import { formatLongDate, formatShortDate, weekBounds } from "@/lib/ops/clock";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { Skeleton } from "@/components/ui/separator";
-import { MiniStat } from "@/components/desk/desk-charts";
+import { cn } from "@/lib/utils";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_DATE, SORT_ALPHA, SORT_FLAG, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
 import type { FlaggedRow } from "@/lib/ops/types";
@@ -62,33 +62,46 @@ function ClockHome() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs tracking-[0.18em] text-muted-foreground uppercase">Operations clock</p>
-        <h1 className="font-display text-4xl font-medium tracking-tight">Today, {formatLongDate(d.today)}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Week {d.weekLabel} · Next {d.nextWeekLabel}
-          {role ? ` · ${role === "sales" ? "Sales" : "Service"} view` : ""}
-        </p>
-      </header>
-
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        <Link to="/service" className="min-w-0">
-          <MiniStat label="Active calls" value={d.kpis.activeCalls} hint="Open tickets" />
-        </Link>
-        <MiniStat label="Coming due" value={d.kpis.comingDue} hint="Overdue, today, this week" />
-        <Link to="/installs" className="min-w-0">
-          <MiniStat label="Install queue" value={d.kpis.installQueue} hint={`${d.kpis.installAtRisk} at risk`} />
-        </Link>
-        <Link to="/pms" className="min-w-0">
-          <MiniStat label="PMs active" value={d.kpis.pmsActive} hint="Open the PM board" />
-        </Link>
-        <Link to="/rebuilds" className="min-w-0">
-          <MiniStat
-            label="Rebuilds"
-            value={(d.kpis.rebuildOverdue ?? 0) + (d.kpis.rebuildWaiting ?? 0)}
-            hint={`${d.kpis.rebuildOverdue ?? 0} overdue · ${d.kpis.rebuildWaiting ?? 0} waiting`}
-          />
-        </Link>
+      <section
+        className="relative overflow-hidden rounded-2xl bg-ink bg-cover bg-center text-cream shadow-[var(--shadow-lift)]"
+        style={{ backgroundImage: "url(/desk-header.jpg)" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/40" />
+        <div className="relative px-5 pt-6 pb-5 sm:px-7 sm:pt-8">
+          <p className="text-[11px] font-semibold tracking-[0.22em] text-copper uppercase">Operations clock</p>
+          <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-white sm:text-5xl">
+            Today, {formatLongDate(d.today)}
+          </h1>
+          <p className="mt-2 text-sm text-cream/70">
+            Week {d.weekLabel} · Next {d.nextWeekLabel}
+            {role ? ` · ${role === "sales" ? "Sales" : "Service"} view` : ""}
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+            <HeroStat to="/service" label="Active calls" value={d.kpis.activeCalls} hint="Open tickets" />
+            <HeroStat
+              label="Coming due"
+              value={d.kpis.comingDue}
+              hint="Overdue, today, this week"
+              tone={d.kpis.comingDue ? "warn" : undefined}
+            />
+            <HeroStat
+              to="/installs"
+              label="Install queue"
+              value={d.kpis.installQueue}
+              hint={`${d.kpis.installAtRisk} at risk`}
+              tone={d.kpis.installAtRisk ? "warn" : undefined}
+            />
+            <HeroStat to="/pms" label="PMs active" value={d.kpis.pmsActive} hint="Open the PM board" />
+            <HeroStat
+              className="col-span-2 sm:col-span-1"
+              to="/rebuilds"
+              label="Rebuilds"
+              value={(d.kpis.rebuildOverdue ?? 0) + (d.kpis.rebuildWaiting ?? 0)}
+              hint={`${d.kpis.rebuildOverdue ?? 0} overdue · ${d.kpis.rebuildWaiting ?? 0} waiting`}
+              tone={d.kpis.rebuildOverdue ? "danger" : undefined}
+            />
+          </div>
+        </div>
       </section>
 
       <ComingDuePanel rows={dueRows} counts={d.comingDueCounts} weekEnd={weekEnd} compact={compact} />
@@ -193,3 +206,44 @@ function FlagList({
   );
 }
 
+
+function HeroStat({
+  className,
+  to,
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  className?: string;
+  to?: "/service" | "/installs" | "/pms" | "/rebuilds";
+  label: string;
+  value: number;
+  hint: string;
+  tone?: "warn" | "danger";
+}) {
+  const body = (
+    <div className="h-full rounded-xl border border-white/12 bg-white/8 px-3.5 py-3 backdrop-blur-sm transition-colors hover:bg-white/14">
+      <p className="flex items-center gap-1.5 truncate text-[10px] font-semibold tracking-[0.16em] text-cream/60 uppercase">
+        <span
+          aria-hidden
+          className={cn(
+            "size-1.5 shrink-0 rounded-full bg-emerald-300/80",
+            tone === "warn" && "bg-amber-300",
+            tone === "danger" && "bg-red-400",
+          )}
+        />
+        {label}
+      </p>
+      <p className="mt-1.5 font-display text-3xl font-medium tabular leading-none text-white">{value}</p>
+      <p className="mt-1.5 line-clamp-2 text-[11px] text-cream/60">{hint}</p>
+    </div>
+  );
+  return to ? (
+    <Link to={to} className={cn("block min-w-0", className)}>
+      {body}
+    </Link>
+  ) : (
+    <div className={cn("min-w-0", className)}>{body}</div>
+  );
+}
