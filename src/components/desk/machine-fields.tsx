@@ -2,7 +2,15 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { upsertRecipe } from "@/lib/ops/api";
 import { findRecipeFor, recipeLabel } from "@/lib/ops/equipment";
-import { previewSetting } from "@/lib/ops/recipe-fields";
+import {
+  CUSTOM_SUGGESTIONS,
+  SETTING_FIELDS,
+  defaultCustomFor,
+  defaultSettingsFor,
+  previewSetting,
+  type SettingName,
+} from "@/lib/ops/recipe-fields";
+import { Plus, X } from "lucide-react";
 import type { MachineSpec } from "@/lib/ops/machines";
 import type { SerialPullResult } from "@/lib/ops/serial-pull";
 import type { Recipe } from "@/lib/ops/types";
@@ -54,7 +62,8 @@ function MachineRecipeSelect({
   const selected = recipes.find((r) => r.id === selectedId) ?? null;
   const label = (r: Recipe) =>
     r.equipmentModel.toLowerCase() === modelKey ? recipeLabel(r) : recipeLabel(r, true);
-  const preview = previewSetting(selected);
+  // Grinders often carry only custom settings (kept in notes), so fall back to the first note line.
+  const preview = previewSetting(selected) ?? (selected?.notes?.split("\n")[0]?.slice(0, 72) || null);
 
   return (
     <>
@@ -122,6 +131,8 @@ function MachineRecipeSelect({
   );
 }
 
+type CustomRow = { key: number; label: string; value: string };
+
 function AddRecipePanel({
   customer,
   model,
@@ -138,22 +149,53 @@ function AddRecipePanel({
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [scope, setScope] = useState<"customer" | "house">("customer");
-  const [coffee1, setCoffee1] = useState("");
-  const [milk, setMilk] = useState("");
+  // Only the settings that apply to this machine are shown; the rest sit behind "+ Add setting".
+  const [shown, setShown] = useState<SettingName[]>(() => defaultSettingsFor(model));
+  const [values, setValues] = useState<Partial<Record<SettingName, string>>>({});
+  const [custom, setCustom] = useState<CustomRow[]>(() =>
+    defaultCustomFor(model).map((label, i) => ({ key: i, label, value: "" })),
+  );
+  const [nextKey, setNextKey] = useState(100);
   const [notes, setNotes] = useState("");
+  const [picking, setPicking] = useState(false);
+  const [customLabel, setCustomLabel] = useState("");
+
+  const standardLeft = SETTING_FIELDS.filter((f) => !shown.includes(f.name));
+  const customTaken = new Set(custom.map((c) => c.label.trim().toLowerCase()));
+  const suggestionsLeft = CUSTOM_SUGGESTIONS.filter((l) => !customTaken.has(l.toLowerCase()));
+
+  function addCustom(label: string) {
+    const clean = label.trim();
+    if (!clean) return;
+    if (customTaken.has(clean.toLowerCase())) return;
+    setCustom((rows) => [...rows, { key: nextKey, label: clean, value: "" }]);
+    setNextKey((k) => k + 1);
+    setCustomLabel("");
+    setPicking(false);
+  }
+
   const save = useMutation({
-    mutationFn: () =>
-      upsertRecipe({
+    mutationFn: () => {
+      const settings: Partial<Record<SettingName, string | null>> = {};
+      for (const f of SETTING_FIELDS) {
+        settings[f.name] = shown.includes(f.name) ? values[f.name]?.trim() || null : null;
+      }
+      // Custom settings (grind, dose, …) live at the top of notes as "Label: value" lines.
+      const customLines = custom
+        .filter((c) => c.label.trim() && c.value.trim())
+        .map((c) => `${c.label.trim()}: ${c.value.trim()}`);
+      const allNotes = [...customLines, notes.trim()].filter(Boolean).join("\n");
+      return upsertRecipe({
         data: {
           name: name.trim() || null,
           equipmentModel: model,
           customer: scope === "customer" ? customer : null,
           installId: scope === "customer" ? (installId ?? null) : null,
-          coffee1: coffee1.trim() || null,
-          milk: milk.trim() || null,
-          notes: notes.trim() || null,
+          ...settings,
+          notes: allNotes || null,
         },
-      }),
+      });
+    },
     onSuccess: (row) => {
       const saved = row as Recipe;
       // Show it in every unit's dropdown right away, then refresh from the server.
@@ -171,8 +213,11 @@ function AddRecipePanel({
       className="col-span-full grid gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 sm:grid-cols-2"
       data-testid="add-recipe-panel"
       onKeyDown={(e) => {
-        if (e.key === "Escape") onCancel();
-        if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") {
+        if (e.key === "Escape") {
+          if (picking) setPicking(false);
+          else onCancel();
+        }
+        if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT" && !picking) {
           e.preventDefault();
           save.mutate();
         }
@@ -209,8 +254,107 @@ function AddRecipePanel({
           </button>
         ))}
       </div>
-      <Input value={coffee1} onChange={(e) => setCoffee1(e.target.value)} placeholder="Coffee 1 setting" aria-label="Coffee 1" />
-      <Input value={milk} onChange={(e) => setMilk(e.target.value)} placeholder="Milk settings" aria-label="Milk settings" />
+
+      {shown.map((n) => {
+        const f = SETTING_FIELDS.find((x) => x.name === n)!;
+        return (
+          <SettingInput
+            key={n}
+            label={f.label}
+            value={values[n] ?? ""}
+            onChange={(v) => setValues((cur) => ({ ...cur, [n]: v }))}
+            onRemove={() => setShown((cur) => cur.filter((x) => x !== n))}
+          />
+        );
+      })}
+      {custom.map((c) => (
+        <SettingInput
+          key={c.key}
+          label={c.label}
+          value={c.value}
+          onChange={(v) => setCustom((rows) => rows.map((r) => (r.key === c.key ? { ...r, value: v } : r)))}
+          onRemove={() => setCustom((rows) => rows.filter((r) => r.key !== c.key))}
+        />
+      ))}
+
+      <div className="relative sm:col-span-2">
+        <button
+          type="button"
+          aria-expanded={picking}
+          data-testid="add-setting"
+          onClick={() => setPicking((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-full border border-dashed border-primary/50 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+        >
+          <Plus className="size-3.5" />
+          Add setting
+        </button>
+        {!shown.length && !custom.length ? (
+          <span className="ml-2 text-xs text-muted-foreground">No settings yet — add the ones this machine uses.</span>
+        ) : null}
+        {picking ? (
+          <div
+            className="mt-2 grid gap-2 rounded-lg border border-border bg-card p-2.5 shadow-[var(--shadow-soft)]"
+            data-testid="add-setting-menu"
+          >
+            {standardLeft.length ? (
+              <div>
+                <p className="mb-1 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">Recipe settings</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {standardLeft.map((f) => (
+                    <button
+                      key={f.name}
+                      type="button"
+                      onClick={() => {
+                        setShown((cur) => SETTING_FIELDS.map((x) => x.name).filter((x) => cur.includes(x) || x === f.name));
+                        setPicking(false);
+                      }}
+                      className="rounded-full bg-secondary px-2.5 py-1 text-xs hover:bg-primary/15"
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {suggestionsLeft.length ? (
+              <div>
+                <p className="mb-1 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">Machine settings</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {suggestionsLeft.map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => addCustom(l)}
+                      className="rounded-full bg-secondary px-2.5 py-1 text-xs hover:bg-primary/15"
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <div className="flex gap-2">
+              <Input
+                value={customLabel}
+                onChange={(e) => setCustomLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addCustom(customLabel);
+                  }
+                }}
+                placeholder="Your own setting, e.g. Hopper 2 blend"
+                aria-label="Custom setting name"
+                className="h-9"
+              />
+              <Button type="button" size="sm" variant="outline" disabled={!customLabel.trim()} onClick={() => addCustom(customLabel)}>
+                Add
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
       <Textarea
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
@@ -227,6 +371,41 @@ function AddRecipePanel({
           Save & use
         </Button>
       </div>
+    </div>
+  );
+}
+
+function SettingInput({
+  label,
+  value,
+  onChange,
+  onRemove,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="relative min-w-0">
+      <span className="pointer-events-none absolute top-1.5 left-3 text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        {label}
+      </span>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={label}
+        className="h-12 pt-4 pr-9"
+      />
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${label}`}
+        title="Doesn't apply to this machine"
+        className="absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+      >
+        <X className="size-3.5" />
+      </button>
     </div>
   );
 }

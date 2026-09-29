@@ -65,3 +65,50 @@ export function previewSetting(row: Partial<RecipeSettings> | null | undefined):
   }
   return null;
 }
+
+export type EquipKind = "grinder" | "espresso" | "brewer" | "powder" | "other";
+
+/** Rough machine type from the model name, used to pick sensible starting settings. */
+export function equipKind(model: string): EquipKind {
+  const m = model.toLowerCase();
+  if (/grinder|mahl|mazzer|ditting|\bek ?43\b|\bg9|\bg3\b|\bmdxs?\b|\bsuper jolly/.test(m)) return "grinder";
+  if (/powder|imix|i-mix|cappuccino|cappu|frappe|hot choc/.test(m)) return "powder";
+  if (/eversys|cameo|e'?4|e'?2|la marzocco|linea|strada|gb5|nuova simonelli|appia|aurelia|faema|e61|franke|schaerer|thermoplan|jura|legacy|kb90/.test(m)) return "espresso";
+  if (/bunn|fetco|itcb|tb3|axiom|cbs|brewer|urn|dispenser|curtis/.test(m)) return "brewer";
+  return "other";
+}
+
+/** Standard settings a new recipe starts with, by machine type. */
+export function defaultSettingsFor(model: string): SettingName[] {
+  switch (equipKind(model)) {
+    case "grinder":
+      return [];
+    case "espresso":
+      return ["coffee1", "americano1", "milk"];
+    case "brewer":
+      return ["coffee1", "tea1"];
+    case "powder":
+      return ["powder1", "powder2"];
+    default:
+      return ["coffee1"];
+  }
+}
+
+/** Custom settings a new recipe starts with, by machine type (saved into notes as "Label: value"). */
+export function defaultCustomFor(model: string): string[] {
+  return equipKind(model) === "grinder" ? ["Grind setting", "Dose"] : [];
+}
+
+/** Common extras offered in "+ Add setting", beyond the standard recipe fields. */
+export const CUSTOM_SUGGESTIONS = [
+  "Grind setting",
+  "Dose",
+  "Yield",
+  "Shot time",
+  "Water temp",
+  "Brew volume",
+  "Batch size",
+  "Bypass",
+  "Pre-infusion",
+  "Steam pressure",
+] as const;
