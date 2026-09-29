@@ -55,6 +55,9 @@ type DeskTo =
   | "/settings"
   | "/access";
 
+/** Pages whose lists actually narrow when My View is on — the toggle is noise elsewhere. */
+const MY_VIEW_ROUTES: string[] = ["/", "/planner", "/service", "/tlc", "/pms", "/installs", "/pipeline", "/rebuilds", "/customers"];
+
 type NavItem = {
   to: DeskTo;
   label: string;
@@ -126,11 +129,13 @@ function NavItemLink({
         to={item.to}
         onClick={onNavigate}
         className={cn(
-          "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-          active ? "bg-cream/12 text-cream" : "text-cream/70 hover:bg-cream/8 hover:text-cream",
+          "relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
+          active
+            ? "bg-cream/10 font-medium text-white before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-copper"
+            : "text-cream/65 hover:bg-cream/6 hover:text-cream",
         )}
       >
-        <Icon className="size-4" />
+        <Icon className={cn("size-4", active ? "text-copper" : "text-cream/50")} />
         {item.label}
       </Link>
     </li>
@@ -148,7 +153,7 @@ function NavGroup({
 }) {
   return (
     <div>
-      <p className="px-3 text-[11px] font-medium tracking-[0.16em] text-cream/50 uppercase">{group.label}</p>
+      <p className="px-3 text-[10px] font-semibold tracking-[0.2em] text-cream/40 uppercase">{group.label}</p>
       <ul className="mt-2 space-y-0.5">
         {group.items.map((item) => (
           <NavItemLink key={item.to} item={item} pathname={pathname} onNavigate={onNavigate} />
@@ -201,9 +206,14 @@ function NavLinks({
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-baseline gap-2 px-3">
-      <span className="font-display text-2xl font-medium tracking-tight text-cream">Katz</span>
-      <span className="font-display text-2xl font-medium tracking-tight text-cream/60 italic">Desk</span>
+    <Link to="/" className="flex items-center gap-2.5 px-3">
+      <span className="grid size-9 place-items-center rounded-lg bg-copper font-display text-lg font-semibold text-white shadow-[0_4px_14px_rgb(192_104_44/0.35)]">
+        K
+      </span>
+      <span className="flex items-baseline gap-1.5">
+        <span className="font-display text-2xl font-medium tracking-tight text-cream">Katz</span>
+        <span className="font-display text-2xl font-medium tracking-tight text-cream/55 italic">Desk</span>
+      </span>
     </Link>
   );
 }
@@ -279,10 +289,10 @@ export function AppShell({
       >
         Skip to content
       </a>
-      <aside className="hidden w-60 shrink-0 flex-col bg-ink text-ink-foreground md:flex">
+      <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col bg-gradient-to-b from-ink to-[#241c15] text-ink-foreground md:flex">
         <div className="px-2 py-5">
           <Brand />
-          <p className="mt-1 px-3 text-xs text-cream/45">Service and sales, one clock.</p>
+          <p className="mt-2 px-3 text-xs text-cream/40">Service and sales, one clock.</p>
         </div>
         <div className="flex-1 overflow-y-auto px-2 pb-4">
           <NavLinks isAdmin={isAdmin} role={role} />
@@ -297,10 +307,8 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header
-          className="relative z-20 flex min-h-[4.75rem] flex-wrap items-center gap-2 overflow-hidden border-b border-border bg-cover bg-center px-3 py-3 md:px-6"
-          style={{ backgroundImage: "url(/desk-header.jpg)" }}
+          className="sticky top-0 z-20 flex min-h-16 flex-wrap items-center gap-2 border-b border-border/70 bg-background/85 px-3 py-2.5 backdrop-blur-md md:px-8"
         >
-          <div className="absolute inset-0 bg-background/55" />
           <div className="relative z-10 flex w-full flex-wrap items-center gap-2">
           <Button
             variant="ghost"
@@ -311,12 +319,17 @@ export function AppShell({
           >
             <Menu className="size-5" />
           </Button>
-          <div className="md:hidden">
+          <Link to="/" className="flex items-center gap-2 md:hidden">
+            <span className="grid size-7 place-items-center rounded-md bg-copper font-display text-sm font-semibold text-white">K</span>
             <span className="font-display text-lg">Katz Desk</span>
-          </div>
-          <div className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 md:ml-0">
-            {role === "warehouse" ? null : <MyViewBar />}
-            {role === "warehouse" ? null : <GlobalSearch />}
+          </Link>
+          {role === "warehouse" ? null : (
+            <div className="order-last w-full min-w-0 md:order-none md:flex md:w-auto md:flex-1 md:justify-end">
+              <GlobalSearch />
+            </div>
+          )}
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            {role === "warehouse" || !MY_VIEW_ROUTES.includes(pathname) ? null : <MyViewBar />}
             <ThemeToggle />
             <NotifyBell />
             <div className="hidden sm:block md:hidden">

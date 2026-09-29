@@ -222,11 +222,12 @@ export function ComboField({
               setQ(e.target.value);
               if (!open) setOpen(true);
             }}
-            onFocus={() => {
-              setOpen(true);
-              setQ("");
-            }}
+            // Open on a click or typing, not on focus alone — dialogs auto-focus their first field,
+            // and a list that pops open by itself covers the rest of the form.
+            onFocus={() => setQ("")}
+            onClick={() => setOpen(true)}
             onKeyDown={(e) => {
+              if (e.key === "ArrowDown" && !open) setOpen(true);
               if (e.key === "Escape") {
                 setOpen(false);
                 inputRef.current?.blur();
@@ -433,8 +434,9 @@ export function MultiComboField({
                 setQ(e.target.value);
                 if (!open) setOpen(true);
               }}
-              onFocus={() => setOpen(true)}
+              onClick={() => setOpen(true)}
               onKeyDown={(e) => {
+                if (e.key === "ArrowDown" && !open) setOpen(true);
                 if (e.key === "Escape") setOpen(false);
                 if (e.key === "Enter") {
                   e.preventDefault();

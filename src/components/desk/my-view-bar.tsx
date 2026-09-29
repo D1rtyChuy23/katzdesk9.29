@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { LayoutGrid, List, Rows3 } from "lucide-react";
 import { getMyAccess } from "@/lib/ops/access";
 import { namesMatchUser } from "@/lib/ops/lookups";
 import {
@@ -16,6 +15,7 @@ import { useCurrentUser } from "@/lib/auth/use-current-user";
 
 import { cn } from "@/lib/utils";
 import { writePrefs, readPrefs } from "@/lib/ops/prefs";
+import { usePrefs } from "./prefs-provider";
 import { FilterChip } from "./desk-charts";
 
 type Ctx = {
@@ -51,6 +51,7 @@ export function MyViewProvider({ children }: { children: ReactNode }) {
   });
 
   const [prefs, setPrefs] = useState<MyViewPrefs>(readMyView);
+  const density = usePrefs().prefs.density;
   const role = access.data?.role ?? null;
 
   useEffect(() => {
@@ -103,10 +104,10 @@ export function MyViewProvider({ children }: { children: ReactNode }) {
       setLayout,
       matchMine,
       filterMine: prefs.on && !!role,
-      compact: prefs.layout === "compact",
+      compact: density === "compact",
       board: prefs.layout === "board",
     }),
-    [role, prefs, setOn, setLayout, matchMine],
+    [role, prefs, setOn, setLayout, matchMine, density],
   );
 
   return <MyViewCtx.Provider value={value}>{children}</MyViewCtx.Provider>;
@@ -117,40 +118,13 @@ export function useMyView() {
 }
 
 export function MyViewBar({ className }: { className?: string }) {
-  const { role, on, layout, setOn, setLayout } = useMyView();
+  const { role, on, setOn } = useMyView();
+  // Row density (List vs Compact) lives in Settings → Density; rebuilds keep their own Board/Timeline switch.
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div className={cn("flex items-center", className)}>
       <FilterChip selected={on} onClick={() => setOn(!on)}>
         My View{role ? ` · ${role === "sales" ? "Sales" : "Service"}` : ""}
       </FilterChip>
-      <div className="flex overflow-hidden rounded-full border border-border">
-        {(
-          [
-            { id: "list" as const, label: "List", icon: List },
-            { id: "board" as const, label: "Board", icon: LayoutGrid },
-            { id: "compact" as const, label: "Compact", icon: Rows3 },
-          ] as const
-        ).map((opt) => {
-          const Icon = opt.icon;
-          const active = layout === opt.id;
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              aria-pressed={active}
-              title={opt.label}
-              onClick={() => setLayout(opt.id)}
-              className={cn(
-                "inline-flex h-9 items-center gap-1.5 px-2.5 text-xs font-medium",
-                active ? "bg-ink text-ink-foreground" : "bg-card text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Icon className="size-3.5" />
-              <span className="hidden sm:inline">{opt.label}</span>
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }

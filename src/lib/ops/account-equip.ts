@@ -173,8 +173,8 @@ export function compactEquip(raw: string): string {
     .replace(/['’]/g, "")
     .replace(/\([^)]*\)/g, " ")
     .replace(/#\s*\d+\b/g, " ")
-    .replace(/(\d)[.\-](?=\d)/g, "$1")
-    .replace(/([a-z])[.\-](?=\d)/g, "$1")
+    .replace(/(\d)[.-](?=\d)/g, "$1")
+    .replace(/([a-z])[.-](?=\d)/g, "$1")
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -402,7 +402,7 @@ export function parseInstallDate(raw: string | null | undefined): string | null 
   if (!s || EMPTY_SERIAL.test(s)) return null;
   const iso = s.match(/^(\d{4}-\d{2}-\d{2})/);
   if (iso) return iso[1]!;
-  const us = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  const us = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$/);
   if (us) {
     const month = Number(us[1]);
     const day = Number(us[2]);

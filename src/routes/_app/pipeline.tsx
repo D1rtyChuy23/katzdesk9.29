@@ -7,7 +7,7 @@ import { PRODUCERS, isNoRep } from "@/lib/ops/lookups";
 import { sameRep } from "@/lib/ops/reps";
 import { RepFilter, RepName } from "@/components/desk/rep-select";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
-import { MyViewBar, useMyView } from "@/components/desk/my-view-bar";
+import { useMyView } from "@/components/desk/my-view-bar";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,7 +153,6 @@ function Page() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <MyViewBar />
           <Button onClick={() => setCreate(true)}>
             <Plus className="size-4" />
             New deal

@@ -186,8 +186,8 @@ export function JobsPage({
       </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
-        <div className="min-w-0 md:min-w-[52rem]">
-        <div className="hidden grid-cols-[1.4fr_1fr_6rem_7rem_7rem_7rem_6rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase md:grid">
+        <div className="min-w-0">
+        <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase xl:grid">
           <span>Account</span>
           <span>Why it matters</span>
           <span>Urgency</span>
@@ -241,7 +241,7 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
       <button
         type="button"
         onClick={onOpen}
-        className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.4fr_1fr_6rem_7rem_7rem_7rem_6rem] md:items-center md:gap-3"
+        className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] xl:items-center xl:gap-3"
       >
         <span>
           <span className="block font-medium">
@@ -262,17 +262,25 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
         <span className="flex flex-wrap gap-1">
           <DuplicateBadge duplicateOf={job.duplicateOf} siblingCount={job.siblings?.length ?? 0} />
           <FlagBadge flag={job.flag} />
-          <span className="md:hidden">
+          <span className="xl:hidden">
             <UrgencyBadge urgency={job.urgency} />
           </span>
         </span>
-        <span className="hidden md:block">
+        <span className="hidden xl:block">
           <UrgencyBadge urgency={job.urgency} />
         </span>
         <StatusBadge status={job.status} />
-        <span className="tabular text-sm text-muted-foreground">{formatShortDate(job.received)}</span>
-        <span className="tabular text-sm text-muted-foreground">{formatShortDate(job.scheduled)}</span>
-        <span className="text-sm">
+        {/* Below xl the columns stack, so the bare dates need their labels. */}
+        <span className="tabular text-sm text-muted-foreground">
+          <span className="xl:hidden">Received </span>
+          {formatShortDate(job.received)}
+        </span>
+        <span className="tabular text-sm text-muted-foreground">
+          <span className="xl:hidden">Scheduled </span>
+          {formatShortDate(job.scheduled)}
+        </span>
+        <span className="min-w-0 truncate text-sm">
+          <span className="text-muted-foreground xl:hidden">Tech </span>
           <TechName name={job.technician} />
         </span>
       </button>

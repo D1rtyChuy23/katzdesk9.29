@@ -8,7 +8,7 @@ import {
 } from "@/lib/ops/recipe-fields";
 import type { Recipe } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Textarea } from "@/components/ui/input";
+import { Label, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Plus, X } from "lucide-react";
 import { CustomerCombo, EquipmentCombo } from "./directory-fields";

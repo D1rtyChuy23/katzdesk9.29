@@ -81,10 +81,6 @@ export function isLiveDeskOwner(username: string, name?: string | null, email?: 
   return false;
 }
 
-/** @deprecated use isLiveDeskOwner */
-function isDeskOwner(username: string, name?: string | null, email?: string | null): boolean {
-  return isLiveDeskOwner(username, name, email);
-}
 
 async function ensureTable(sql: Sql) {
   await sql.query(`
@@ -197,13 +193,10 @@ async function realAdminCount(sql: Sql): Promise<number> {
   return rows.filter((r) => !isSandboxQa(r.username)).length;
 }
 
-async function shouldBootstrapAdmin(
-  sql: Sql,
-  username: string,
-  name?: string | null,
-  email?: string | null,
-): Promise<boolean> {
-  if (isDeskOwner(username, name, email)) return true;
+async function shouldBootstrapAdmin(sql: Sql, username: string): Promise<boolean> {
+  // The owner's name alone never grants admin: usernames and emails are self-chosen at sign-up,
+  // so "chuy.anything" would otherwise walk straight in as an approved admin. The owner is
+  // covered by the first-real-admin rule below (QA probe admins don't count against it).
   if (isSandboxQa(username)) return (await adminCount(sql)) === 0;
   return (await realAdminCount(sql)) === 0;
 }
@@ -496,7 +489,7 @@ async function ensureDeskAccount(sql: Sql, userId: string): Promise<AccessRow> {
   const invite = await findPendingInvite(sql, email, null);
   const base = invite?.username || email?.split("@")[0] || profile.name || "user";
   const username = await uniqueStubUsername(sql, base);
-  const first = await shouldBootstrapAdmin(sql, username, profile.name, email);
+  const first = await shouldBootstrapAdmin(sql, username);
   const invited = !!invite;
   const canAdd = true;
   const rows = await sql.query<AccessRow>(
@@ -687,12 +680,7 @@ export const getMyAccess = createServerFn({ method: "GET" })
     await ensureTable(sql);
     const fresh = await ensureDeskAccount(sql, context.userId);
     const profile = await loadUser(sql, context.userId);
-    const admin = await shouldBootstrapAdmin(
-      sql,
-      fresh.username,
-      profile.name,
-      profile.email ?? fresh.email,
-    );
+    const admin = await shouldBootstrapAdmin(sql, fresh.username);
     if (admin && (!fresh.approved || !fresh.is_admin)) {
       const promoted = await promoteAdmin(sql, context.userId, profile.email);
       const { canUserEditRoster } = await import("@/lib/ops/roster");
@@ -743,7 +731,7 @@ export const registerAccount = createServerFn({ method: "POST" })
       (token ? await findInviteByToken(sql, token) : undefined) ??
       (await findPendingInvite(sql, email, username));
     const invited = !!invite;
-    const first = await shouldBootstrapAdmin(sql, username, profile.name, email);
+    const first = await shouldBootstrapAdmin(sql, username);
     const approved = first || invited;
     const canAdd = true;
     const existing = await loadAccess(sql, context.userId);

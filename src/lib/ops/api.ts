@@ -24,7 +24,6 @@ import { emptyInspection } from "./pre-inspection";
 import type {
   Asset,
   ComingDueRow,
-  Comment,
   CustomerHistory,
   CustomerRecord,
   Dashboard,
@@ -51,7 +50,6 @@ import {
   isBarn,
   isValidBay,
   needsBay,
-  palletsFor,
   siteLabel,
   slotId,
 } from "./warehouse";
@@ -1229,7 +1227,9 @@ export const addComment = createServerFn({ method: "POST" }).middleware([deskMid
 			commentId,
 			usernames: parseMentions(body)
 		});
-	} catch {}
+	} catch {
+		/* mention notices are best-effort; the comment itself is already saved */
+	}
 	return mapComment((await sql`select * from comments where id = ${commentId}`)[0] ?? rows[0], await entityContext(sql, data.entityType, data.entityId));
 });
 export const claimComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
@@ -1450,7 +1450,7 @@ export const createAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	const kind = data.kind ?? "equip";
 	const site = data.site;
 	let pallet = data.pallet ?? null;
-	let level = data.level ?? null;
+	const level = data.level ?? null;
 	let line = null;
 	const barn = isBarn(site);
 	if (barn) {
@@ -1510,7 +1510,7 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	if (!cur[0]) throw new Error("Asset not found");
 	const c = cur[0];
 	let pallet = data.pallet === undefined ? c.pallet : data.pallet;
-	let level = data.level === undefined ? c.level : data.level;
+	const level = data.level === undefined ? c.level : data.level;
 	let line = c.line_no;
 	const site = data.site === undefined ? c.site : data.site;
 	if (isBarn(site) && pallet && !isValidBay(String(pallet))) {

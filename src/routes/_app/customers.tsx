@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, type FormEvent } from "react";
+import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { getMyAccess } from "@/lib/ops/access";
@@ -89,6 +90,7 @@ function Page() {
         : filtered;
     return sortDesk(scoped, sort, { name: (c) => c.name, date: () => "" });
   }, [list.data, needle, sort, filterMine, matchMine, role]);
+  const paged = useShowMore(rows, `${needle}|${sort}|${filterMine}`);
 
 
   function onAdd(e: FormEvent) {
@@ -150,7 +152,7 @@ function Page() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Add a customer name"
-            className="min-w-0 flex-1"
+            className="min-w-0 sm:flex-1"
             aria-label="New customer name"
           />
           <Button type="submit" disabled={add.isPending || name.trim().length < 2}>
@@ -169,7 +171,7 @@ function Page() {
       </p>
 
       <ul className="mt-2 overflow-hidden rounded-xl border border-border bg-card">
-        {rows.map((c) => {
+        {paged.visible.map((c) => {
           const pending = pendingLine(c);
           return (
           <li
@@ -215,13 +217,14 @@ function Page() {
                   onClick={() => setRenaming({ id: c.id, name: c.name })}
                 >
                   <Pencil className="size-3.5" />
-                  Edit
+                  <span className="hidden sm:inline">Edit</span>
                 </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   disabled={remove.isPending}
+                  aria-label={`Remove ${c.name}`}
                   onClick={() => {
                     if (window.confirm(`Remove “${c.name}” from the customer list?`)) {
                       remove.mutate({ id: c.id, name: c.name });
@@ -229,13 +232,14 @@ function Page() {
                   }}
                 >
                   <Trash2 className="size-3.5" />
-                  Remove
+                  <span className="hidden sm:inline">Remove</span>
                 </Button>
               </div>
             ) : null}
           </li>
           );
         })}
+        <ShowMoreButton as="li" remaining={paged.remaining} onClick={paged.showMore} label="accounts" />
         {list.isLoading ? (
           <li className="px-4 py-8 text-sm text-muted-foreground">Loading accounts…</li>
         ) : rows.length === 0 ? (

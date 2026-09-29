@@ -126,7 +126,7 @@ function nameTokens(raw: string | null | undefined): string[] {
   if (!raw) return [];
   const n = normalizeName(raw);
   if (!n) return [];
-  const parts = n.split(/[\s@._+\-]+/).filter(Boolean);
+  const parts = n.split(/[\s@._+-]+/).filter(Boolean);
   return [n, ...parts];
 }
 

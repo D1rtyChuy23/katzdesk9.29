@@ -465,10 +465,20 @@ export function StatCard({
 }) {
   const inner = (
     <>
-      <p className="truncate text-xs tracking-wide text-muted-foreground uppercase">{label}</p>
+      <p className="flex items-center gap-1.5 truncate text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+        <span
+          aria-hidden
+          className={cn(
+            "size-1.5 shrink-0 rounded-full bg-primary/50",
+            tone === "danger" && "bg-destructive",
+            tone === "warn" && "bg-warning",
+          )}
+        />
+        {label}
+      </p>
       <p
         className={cn(
-          "mt-1 font-display text-3xl tabular leading-none",
+          "mt-2 font-display text-[2rem] font-medium tabular leading-none tracking-tight",
           tone === "danger" && "text-destructive",
           tone === "warn" && "text-warning",
         )}
@@ -478,14 +488,16 @@ export function StatCard({
       {hint ? <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{hint}</p> : null}
       {breakdown?.length ? (
         <div className="mt-1 hidden min-w-0 overflow-hidden @[11rem]:block">
-          <BreakdownList items={breakdown} />
+          <BreakdownList items={breakdown.slice(0, 3)} />
         </div>
       ) : null}
     </>
   );
   const cls = cn(
-    "@container desk-lift min-w-[10rem] flex-1 overflow-hidden rounded-xl border px-3 py-3 text-left sm:px-4",
-    selected ? "border-primary bg-primary/10 ring-2 ring-primary/30" : "border-border bg-card",
+    "@container desk-lift relative min-w-[10rem] flex-1 overflow-hidden rounded-xl border bg-card px-3.5 py-3.5 text-left shadow-[var(--shadow-soft)] sm:px-4",
+    selected
+      ? "border-primary/60 ring-2 ring-primary/20 before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-primary"
+      : "border-border",
     onClick && "cursor-pointer transition-colors hover:border-primary/50",
   );
   if (onClick) {
@@ -518,10 +530,10 @@ export function ChartCard({
 
 export function MiniStat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="min-w-0 overflow-hidden rounded-lg bg-muted/70 px-3 py-2">
-      <p className="truncate text-[11px] tracking-wide text-muted-foreground uppercase">{label}</p>
-      <p className="font-display text-xl tabular leading-tight">{value}</p>
-      {hint ? <p className="truncate text-[11px] text-muted-foreground">{hint}</p> : null}
+    <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card px-3 py-2.5 shadow-[var(--shadow-soft)]">
+      <p className="truncate text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">{label}</p>
+      <p className="mt-0.5 font-display text-2xl tabular leading-tight">{value}</p>
+      {hint ? <p className="line-clamp-2 text-[11px] text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

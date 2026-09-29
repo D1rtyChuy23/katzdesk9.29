@@ -152,7 +152,7 @@ export function listedEquipment(
   const lines = raw.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
   const out: string[] = [];
   for (const line of lines) {
-    const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9\-]+/gi, " ").replace(/\s+/g, " ").trim();
+    const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9-]+/gi, " ").replace(/\s+/g, " ").trim();
     const pieces = extractLine(stripped || line, catalog, catalogKey, patterns);
     if (pieces.length) out.push(...pieces);
     else out.push(matchModel(line, catalog));
@@ -165,7 +165,7 @@ export function splitEquipment(raw: string | null | undefined): string[] {
   if (!raw?.trim()) return [];
   const pieces: string[] = [];
   for (const line of raw.split(/\r?\n/)) {
-    const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9\-]+/gi, " ").trim();
+    const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9-]+/gi, " ").trim();
     if (!stripped) continue;
     for (const part of stripped.split(BETWEEN_MACHINES)) {
       const cleaned = cleanPiece(part);
@@ -181,41 +181,6 @@ export function joinEquipment(pieces: string[]): string | null {
   return next.length ? next.join("\n") : null;
 }
 
-/** If splitting on ", " broke a catalog name, glue the pieces back together. */
-function rejoinCatalogSegments(
-  parts: string[],
-  catalogKey: Map<string, string>,
-  catalog: string[],
-): string[] {
-  const out: string[] = [];
-  let i = 0;
-  while (i < parts.length) {
-    let hit: { name: string; end: number } | null = null;
-    for (let j = parts.length; j > i + 1; j--) {
-      const joinedComma = parts.slice(i, j).join(", ");
-      const joinedSlash = parts.slice(i, j).join(" / ");
-      const joinedSpace = parts.slice(i, j).join(" ");
-      const match =
-        catalogKey.get(normalize(joinedComma)) ??
-        catalogKey.get(normalize(joinedSlash)) ??
-        catalogKey.get(normalize(joinedSpace));
-      if (match) {
-        hit = { name: match, end: j };
-        break;
-      }
-    }
-    if (hit) {
-      out.push(hit.name);
-      i = hit.end;
-    } else {
-      out.push(matchModel(parts[i]!, catalog));
-      i += 1;
-    }
-  }
-  return out;
-}
-
-/** Repair names that were split on a model slash (GB/5, A/2, 1L/2U). */
 function rejoinSplitModels(pieces: string[], catalogKey: Map<string, string>): string[] {
   if (pieces.length < 2) return pieces;
   const out: string[] = [];
@@ -385,7 +350,7 @@ export function rewriteEquipmentName(
   const lines = raw.split(/\r?\n/);
   let lineHit = false;
   const mapped = lines.map((line) => {
-    const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9\-]+/gi, " ").replace(/\s+/g, " ").trim();
+    const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9-]+/gi, " ").replace(/\s+/g, " ").trim();
     if (samePiece(line, src) || samePiece(stripped, src)) {
       lineHit = true;
       return dest;

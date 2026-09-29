@@ -25,14 +25,14 @@ import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import type { Asset } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
-import { SelectField } from "@/components/ui/select-field";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { AssetSheet } from "@/components/desk/asset-sheet";
 import { StockActions } from "@/components/desk/stock-actions";
 import { getMyAccess } from "@/lib/ops/access";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
-import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
+import { StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
+import { cn } from "@/lib/utils";
 import { EquipmentCombo } from "@/components/desk/directory-fields";
 import { toast } from "sonner";
 
@@ -105,16 +105,6 @@ function Page() {
   const deployedCount = all.filter((a) => a.status === "deployed").length;
   const fieldCount = all.filter((a) => a.status === "assigned").length;
   const soldCount = all.filter((a) => a.status === "sold").length;
-  const bySite = [
-    { name: "Training", count: all.filter((a) => a.status === "deployed" && a.site === HOUSE_TRAINING).length },
-    { name: "Lobby", count: all.filter((a) => a.status === "deployed" && a.site === HOUSE_LOBBY).length },
-    { name: "Staging area", count: all.filter((a) => a.status === "deployed" && a.site === HOUSE_STAGING).length },
-    ...CUSTOMER_SITES.map((site) => ({
-      name: SITE_LABEL[site] ?? site,
-      count: all.filter((a) => a.status === "deployed" && a.site === site).length,
-    })),
-  ];
-
   return (
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -130,36 +120,25 @@ function Page() {
         <StatCard
           label="On site"
           value={deployedCount}
+          hint="HQ rooms and SATX"
           selected={tab === "deployed"}
           onClick={() => setTab((t) => toggleChip(t, "deployed", "all"))}
         />
         <StatCard
-          label="On an install"
+          label="Pulled"
           value={fieldCount}
+          hint="Out on an install"
           selected={tab === "field"}
           onClick={() => setTab((t) => toggleChip(t, "field", "all"))}
         />
         <StatCard
           label="Sold"
           value={soldCount}
+          hint="Left the Katz fleet"
           selected={tab === "sold"}
           onClick={() => setTab((t) => toggleChip(t, "sold", "all"))}
         />
       </StatRow>
-      {bySite.length ? (
-        <section className="mt-5">
-          <ChartCard title="Deployed by location" lede="Units sitting at HQ rooms and SATX — not the barn racks.">
-            <SimpleBars
-              data={bySite.map((s) => ({ site: s.name, count: s.count }))}
-              xKey="site"
-              yKey="count"
-              yLabel="Units"
-              horizontal
-            />
-          </ChartCard>
-        </section>
-      ) : null}
-
       <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
         <Input
           value={q}
@@ -168,23 +147,32 @@ function Page() {
           className="h-9 w-56 shrink-0"
           aria-label="Filter equipment"
         />
-        {(
-          [
-            ["deployed", `On site (${deployedCount})`],
-            ["field", `Pulled (${fieldCount})`],
-            ["sold", `Sold (${soldCount})`],
-          ] as const
-        ).map(([id, label]) => (
-          <FilterChip key={id} selected={tab === id} onClick={() => setTab(id)}>
-            {label}
-          </FilterChip>
-        ))}
         <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_STATUS]} className="shrink-0" />
       </div>
 
+      {groups.length > 1 ? (
+        <nav aria-label="Jump to location" className="mt-3 flex flex-wrap gap-1.5">
+          {groups.map((g) => {
+            const units = g.rows.reduce((n, a) => n + a.qty, 0);
+            return (
+              <a
+                key={g.key}
+                href={`#loc-${g.key}`}
+                className={cn(
+                  "rounded-full border border-border px-2.5 py-1 text-xs tabular hover:border-primary/50",
+                  units === 0 ? "text-muted-foreground" : "bg-card text-foreground",
+                )}
+              >
+                {g.label} <span className="text-muted-foreground">{units}</span>
+              </a>
+            );
+          })}
+        </nav>
+      ) : null}
+
       <div className="mt-5 space-y-6">
         {groups.map((g) => (
-          <section key={g.key}>
+          <section key={g.key} id={`loc-${g.key}`} className="scroll-mt-4">
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="font-display text-xl">{g.label}</h2>
               <div className="flex items-center gap-2">
