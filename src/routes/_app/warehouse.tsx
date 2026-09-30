@@ -5,7 +5,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAsset, listAssets } from "@/lib/ops/api";
 import { getMyAccess } from "@/lib/ops/access";
 import { addToRackSlot, setShopTest } from "@/lib/ops/rack-stock";
-import { addUnitToLocation, setAssetPlace, setUnitPlace } from "@/lib/ops/unit-place";
+import { addUnitToLocation, setAssetsPlace, setUnitPlace } from "@/lib/ops/unit-place";
+import { MovePanel } from "@/components/desk/multi-move";
 import { placeDraftError, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
 import {
   BACK_EQUIP_CAPACITY,
@@ -26,7 +27,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { AssetSheet } from "@/components/desk/asset-sheet";
 import { StockActions } from "@/components/desk/stock-actions";
-import { PlacePicker, emptyPlaceDraft, type PlaceDraft } from "@/components/desk/unit-place-field";
+import { PlacePicker, type PlaceDraft } from "@/components/desk/unit-place-field";
 import { CustomerCombo, EquipmentCombo } from "@/components/desk/directory-fields";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
@@ -54,9 +55,12 @@ function Page() {
   const [slot, setSlot] = useState<SlotKey | null>(null);
   const [selected, setSelected] = useOpenRecord(open);
   const [movingId, setMovingId] = useState<number | null>(null);
-  const [moveDraft, setMoveDraft] = useState<PlaceDraft>(emptyPlaceDraft());
-  const [moveBlock, setMoveBlock] = useState<string | null>(null);
-  const [swapWith, setSwapWith] = useState("");
+  // Units ticked for a group move (warehouse / admin).
+  const [picked, setPicked] = useState<number[]>([]);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  function togglePick(id: number) {
+    setPicked((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+  }
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("warehouse", "alpha-asc");
   const [bubble, setBubble] = useState<"ready" | "fill" | "dispensers" | "missing" | "needs-bay" | "needs-test" | "tested" | "review" | null>(null);
@@ -440,6 +444,16 @@ function Page() {
           <div key={a.id} className="border-b border-border last:border-b-0">
             <div className="px-4 py-3" data-testid={a.serial ? `rack-row-${a.serial}` : undefined}>
               <div className="flex flex-wrap items-start gap-3">
+              {canStock && !a.stockHold ? (
+                <input
+                  type="checkbox"
+                  className="mt-0.5 size-5 shrink-0 accent-primary"
+                  aria-label={`Select ${a.model}${a.serial ? ` ${a.serial}` : ""} to move`}
+                  data-testid={a.serial ? `pick-${a.serial}` : undefined}
+                  checked={picked.includes(a.id)}
+                  onChange={() => togglePick(a.id)}
+                />
+              ) : null}
               <button type="button" onClick={() => setSelected(a.id)} className="w-36 shrink-0 text-left font-mono text-xs">
                 {a.pallet && a.level && (a.site === "barn-back" || a.site === "barn-front")
                   ? unitPlaceLabel({ site: a.site, pallet: a.pallet, level: a.level, status: a.status })
@@ -522,9 +536,6 @@ function Page() {
                     variant={movingId === a.id ? "default" : "outline"}
                     data-testid={a.serial ? `move-${a.serial}` : undefined}
                     onClick={() => {
-                      setMoveDraft(emptyPlaceDraft());
-                      setMoveBlock(null);
-                      setSwapWith("");
                       setMovingId((cur) => (cur === a.id ? null : a.id));
                     }}
                   >
@@ -539,95 +550,58 @@ function Page() {
               ) : null}
             </div>
             {movingId === a.id && canStock ? (
-              <div className="flex flex-wrap items-end gap-2 px-4 pb-3" data-testid="warehouse-move">
-                <PlacePicker value={moveDraft} onChange={(next) => { setMoveDraft(next); setMoveBlock(null); setSwapWith(""); }} />
-                {(() => {
-                  const destRack = moveDraft.site === "barn-front" || moveDraft.site === "barn-back";
-                  const mates =
-                    destRack && moveDraft.pallet && moveDraft.level
-                      ? barn.filter(
-                          (u) =>
-                            u.id !== a.id &&
-                            !u.stockHold &&
-                            u.site === moveDraft.site &&
-                            (u.pallet ?? "").toUpperCase() === moveDraft.pallet.toUpperCase() &&
-                            Number(u.level) === Number(moveDraft.level),
-                        )
-                      : [];
-                  if (!mates.length) return null;
-                  return (
-                    <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                      Replace/Swap
-                      <SelectField
-                        aria-label="Replace or swap"
-                        data-testid={a.serial ? `swap-${a.serial}` : "swap-unit"}
-                        className="min-w-56 normal-case"
-                        value={swapWith}
-                        onChange={(e) => setSwapWith(e.target.value)}
-                      >
-                        <option value="">Add beside them</option>
-                        {mates.map((u) => (
-                          <option key={u.id} value={String(u.id)}>
-                            {u.model}
-                            {u.serial ? ` · ${u.serial}` : ""}
-                          </option>
-                        ))}
-                      </SelectField>
-                    </label>
-                  );
-                })()}
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={!!placeDraftError(moveDraft)}
-                  onClick={async () => {
-                    const err = placeDraftError(moveDraft);
-                    if (err) {
-                      toast.error(err);
-                      return;
-                    }
-                    try {
-                      const place = await setAssetPlace({
-                        data: {
-                          id: a.id,
-                          site: moveDraft.site,
-                          pallet: moveDraft.pallet || null,
-                          level: moveDraft.level ? Number(moveDraft.level) : null,
-                          otherLabel: moveDraft.otherLabel || null,
-                          swapWithId: swapWith ? Number(swapWith) : null,
-                        },
-                      });
-                      toast.success(
-                        swapWith
-                          ? place.place
-                            ? `Swapped · now at ${place.place}`
-                            : "Swapped"
-                          : place.place
-                            ? `Now at ${place.place}`
-                            : "Moved",
-                      );
-                      setMovingId(null);
-                      setMoveBlock(null);
-                      setSwapWith("");
-                      void qc.invalidateQueries({ queryKey: ["assets"] });
-                    } catch (e) {
-                      const msg = e instanceof Error ? e.message : "Could not move";
-                      if (/is full/i.test(msg)) setMoveBlock(msg);
-                      toast.error(msg);
-                    }
-                  }}
-                >
-                  Confirm
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => { setMovingId(null); setMoveBlock(null); setSwapWith(""); }}>
-                  Cancel
-                </Button>
-                {moveBlock ? <p className="w-full text-sm text-destructive">{moveBlock}</p> : null}
-              </div>
+              <MovePanel
+                className="px-4 pb-3"
+                movers={[a]}
+                barn={barn}
+                onDone={() => setMovingId(null)}
+                onCancel={() => setMovingId(null)}
+              />
             ) : null}
           </div>
         ))}
         <ShowMoreButton remaining={pagedList.remaining} onClick={pagedList.showMore} label="units" />
+        {canStock && picked.length ? (
+          <div
+            // Pinned to the bottom of the screen so it's reachable wherever the ticked units are.
+            className="fixed inset-x-3 bottom-3 z-30 max-h-[70dvh] overflow-y-auto rounded-xl border border-primary/40 bg-card p-3 shadow-[var(--shadow-lift)] md:right-8 md:left-[17rem]"
+            data-testid="bulk-move-bar"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-medium">
+                {picked.length} {picked.length === 1 ? "unit" : "units"} selected
+              </p>
+              <div className="flex gap-2">
+                <Button type="button" size="sm" onClick={() => setBulkOpen((v) => !v)} aria-expanded={bulkOpen}>
+                  {bulkOpen ? "Hide" : "Move together"}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setPicked([]);
+                    setBulkOpen(false);
+                  }}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+            {bulkOpen ? (
+              <MovePanel
+                className="mt-3"
+                movers={barn.filter((u) => picked.includes(u.id))}
+                barn={barn}
+                onDone={() => {
+                  setPicked([]);
+                  setBulkOpen(false);
+                }}
+                onCancel={() => setBulkOpen(false)}
+              />
+            ) : null}
+          </div>
+        ) : null}
         {canStock && slot ? (
           <SlotAdd
             key={`${slot.rack}-${slot.pallet}-${slot.level}`}
@@ -681,7 +655,7 @@ function SlotAdd({
   const [electrical, setElectrical] = useState("");
   const [pending, setPending] = useState(false);
   const [confirm, setConfirm] = useState<{ id: number; place: string } | null>(null);
-  const [swapWith, setSwapWith] = useState("");
+  const [swapPick, setSwapPick] = useState<number[]>([]);
   const [block, setBlock] = useState<string | null>(null);
   const [draft, setDraft] = useState<PlaceDraft>({
     site: slot.rack,
@@ -745,27 +719,28 @@ function SlotAdd({
         setSerial("");
         setElectrical("");
         setConfirm(null);
-        setSwapWith("");
+        setSwapPick([]);
         setBlock(null);
         onPlaced();
         return;
       }
-      if (confirm && swapWith) {
-        const place = await setAssetPlace({
+      if (confirm && swapPick.length) {
+        const res = await setAssetsPlace({
           data: {
-            id: confirm.id,
+            ids: [confirm.id],
             site: draft.site,
             pallet: draft.pallet,
             level: Number(draft.level),
-            swapWithId: Number(swapWith),
+            swapIds: swapPick,
           },
         });
-        toast.success(place.place ? `Swapped · now at ${place.place}` : "Swapped");
+        if (res.failed.length) throw new Error(res.failed.join("; "));
+        toast.success(`Swapped · now at ${res.place ?? label} · ${res.swapped} sent back`);
         setModel("");
         setSerial("");
         setElectrical("");
         setConfirm(null);
-        setSwapWith("");
+        setSwapPick([]);
         setBlock(null);
         onPlaced(confirm.id);
         return;
@@ -783,7 +758,7 @@ function SlotAdd({
       });
       if (res.needsConfirm) {
         setConfirm({ id: res.id, place: res.currentPlace ?? "another place" });
-        setSwapWith("");
+        setSwapPick([]);
         return;
       }
       toast.success(
@@ -795,7 +770,7 @@ function SlotAdd({
       setSerial("");
       setElectrical("");
       setConfirm(null);
-      setSwapWith("");
+      setSwapPick([]);
       setBlock(null);
       onPlaced(res.id);
     } catch (e) {
@@ -820,7 +795,7 @@ function SlotAdd({
             setDraft(next);
             setBlock(null);
             setConfirm(null);
-            setSwapWith("");
+            setSwapPick([]);
           }}
           testId="slot-place"
         />
@@ -848,29 +823,46 @@ function SlotAdd({
         </p>
       ) : null}
       {confirm && mates.length > 0 ? (
-        <label className="mt-3 grid max-w-sm gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-          Replace/Swap
-          <SelectField
-            aria-label="Replace or swap"
-            data-testid="slot-swap"
-            className="normal-case"
-            value={swapWith}
-            onChange={(e) => setSwapWith(e.target.value)}
-          >
-            <option value="">Add beside them</option>
-            {mates.map((u) => (
-              <option key={u.id} value={String(u.id)}>
-                {u.model}
-                {u.serial ? ` · ${u.serial}` : ""}
-              </option>
-            ))}
-          </SelectField>
-        </label>
+        <fieldset className="mt-3 grid gap-1.5" data-testid="slot-swap">
+          <legend className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Replace/Swap — tick any units already here
+          </legend>
+          <div className="flex flex-wrap gap-1.5">
+            {mates.map((u) => {
+              const on = swapPick.includes(u.id);
+              return (
+                <label
+                  key={u.id}
+                  className={cn(
+                    "inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm",
+                    on ? "border-primary bg-primary/15" : "border-border bg-card text-muted-foreground",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary"
+                    checked={on}
+                    onChange={() =>
+                      setSwapPick((cur) => (cur.includes(u.id) ? cur.filter((x) => x !== u.id) : [...cur, u.id]))
+                    }
+                  />
+                  {u.model}
+                  {u.serial ? ` · ${u.serial}` : ""}
+                </label>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {swapPick.length
+              ? `${swapPick.length} ticked ${swapPick.length === 1 ? "unit goes" : "units go"} to ${confirm.place}.`
+              : "Nothing ticked: it goes in beside them."}
+          </p>
+        </fieldset>
       ) : null}
       {block ? <p className="mt-3 text-sm text-destructive">{block}</p> : null}
       <div className="mt-3 flex gap-2">
         <Button type="button" size="sm" disabled={pending || !!placeDraftError(draft)} data-testid="slot-save" onClick={() => void save(!!confirm)}>
-          {confirm ? (swapWith ? "Confirm swap" : "Confirm move") : pending ? "Saving…" : occupied ? "Add another" : "Add"}
+          {confirm ? (swapPick.length ? `Confirm swap (${swapPick.length})` : "Confirm move") : pending ? "Saving…" : occupied ? "Add another" : "Add"}
         </Button>
         {confirm || block ? (
           <Button
@@ -879,7 +871,7 @@ function SlotAdd({
             variant="outline"
             onClick={() => {
               setConfirm(null);
-              setSwapWith("");
+              setSwapPick([]);
               setBlock(null);
             }}
           >

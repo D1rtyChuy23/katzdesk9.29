@@ -640,3 +640,147 @@ export const setAssetPlace = createServerFn({ method: "POST" })
     await parkAtLocation(sql, context.userId, row, data.site, null, data.otherLabel ?? null);
     return toPlace(await byId(sql, row.id));
   });
+
+const assetsPlaceInput = z.object({
+  ids: z.array(z.number().int().positive()).min(1).max(60),
+  site: z.string(),
+  pallet: z.string().nullable().optional(),
+  level: z.number().int().nullable().optional(),
+  otherLabel: z.string().nullable().optional(),
+  /** Units already in the destination section that trade places with the moved units. */
+  swapIds: z.array(z.number().int().positive()).max(60).optional(),
+});
+
+export type MultiPlaceResult = { moved: number; swapped: number; place: string | null; failed: string[] };
+
+function placeLabelOf(row: AssetRow): string {
+  return unitPlaceLabel({
+    site: row.site,
+    pallet: row.pallet,
+    level: row.level,
+    status: row.status,
+    soldTo: row.sold_to,
+    purpose: row.purpose,
+  });
+}
+
+/**
+ * Move several units at once. With swapIds, the chosen units in the destination section
+ * go back to where the moved units came from: exact position trades first, then any
+ * extras park in the other section.
+ */
+export const setAssetsPlace = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof assetsPlaceInput>) => assetsPlaceInput.parse(d))
+  .handler(async ({ data, context }): Promise<MultiPlaceResult> => {
+    const sql = await ready();
+    const ids = [...new Set(data.ids)];
+    const swapIds = [...new Set(data.swapIds ?? [])].filter((id) => !ids.includes(id));
+    const movers: AssetRow[] = [];
+    for (const id of ids) {
+      const row = await byId(sql, id);
+      if (!row) throw new Error("One of the units was not found — refresh and try again.");
+      movers.push(row);
+    }
+    if (data.site === "barn") throw new Error("Pick a rack.");
+    const rack = barnRack(data.site);
+    const failed: string[] = [];
+    const name = (r: AssetRow) => r.serial || r.model;
+
+    if (!rack) {
+      if (swapIds.length) throw new Error("Replace/Swap is only for a rack section.");
+      let moved = 0;
+      for (const row of movers) {
+        try {
+          await parkAtLocation(sql, context.userId, row, data.site, null, data.otherLabel ?? null);
+          moved += 1;
+        } catch (e) {
+          failed.push(`${name(row)}: ${e instanceof Error ? e.message : "could not move"}`);
+        }
+      }
+      return { moved, swapped: 0, place: null, failed };
+    }
+
+    if (!data.pallet?.trim()) throw new Error("Pick a bay A through P");
+    const level = requireLevel(data.level);
+    const letter = data.pallet.trim().toUpperCase();
+    const others: AssetRow[] = [];
+    for (const id of swapIds) {
+      const row = await byId(sql, id);
+      if (
+        !row ||
+        row.site !== rack ||
+        (row.pallet ?? "").toUpperCase() !== letter ||
+        Number(row.level) !== level
+      ) {
+        throw new Error("A unit picked to swap is no longer in that section — refresh and try again.");
+      }
+      others.push(row);
+    }
+    if (others.length && !movers.some((m) => m.site === "barn-back" || m.site === "barn-front")) {
+      throw new Error("Swapped units need a rack to go back to. Move without Replace/Swap, or pick units that are on a rack.");
+    }
+
+    let moved = 0;
+    let swapped = 0;
+    // 1) Pair up: each moved unit trades exact places with one chosen unit.
+    const pairs = Math.min(movers.length, others.length);
+    for (let i = 0; i < pairs; i += 1) {
+      const mover = movers[i]!;
+      const other = others[i]!;
+      try {
+        if (mover.site !== "barn-back" && mover.site !== "barn-front") {
+          // Coming from off the rack: it takes the rack spot, and the other unit goes to the first rack origin below.
+          throw new Error("skip-pair");
+        }
+        await swapAssetPlaces(sql, context.userId, mover, other.id, rack, letter, level);
+        moved += 1;
+        swapped += 1;
+      } catch (e) {
+        if (e instanceof Error && e.message === "skip-pair") continue;
+        failed.push(`${name(mover)} ↔ ${name(other)}: ${e instanceof Error ? e.message : "could not swap"}`);
+      }
+    }
+    // 2) Extra moved units park in the destination section. If it's full, retry after step 3 frees room.
+    const retry: number[] = [];
+    const parkMover = async (id: number, lastTry: boolean) => {
+      const fresh = await byId(sql, id);
+      if (!fresh) return;
+      const arrived = fresh.site === rack && (fresh.pallet ?? "").toUpperCase() === letter && Number(fresh.level) === level;
+      if (arrived) return;
+      try {
+        await parkInBarn(sql, context.userId, fresh, letter, level, placeLabelOf(fresh), rack);
+        moved += 1;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "could not move";
+        if (!lastTry && /full/i.test(msg)) retry.push(id);
+        else failed.push(`${name(fresh)}: ${msg}`);
+      }
+    };
+    for (const mover of movers) await parkMover(mover.id, false);
+    // 3) Extra chosen units go to the first moved unit's original rack section.
+    const home = movers.find((m) => m.site === "barn-back" || m.site === "barn-front");
+    for (const other of others) {
+      const fresh = await byId(sql, other.id);
+      if (!fresh) continue;
+      const stillHere = fresh.site === rack && (fresh.pallet ?? "").toUpperCase() === letter && Number(fresh.level) === level;
+      if (!stillHere || !home) continue;
+      try {
+        await parkInBarn(
+          sql,
+          context.userId,
+          fresh,
+          home.pallet ?? "",
+          Number(home.level),
+          placeLabelOf(fresh),
+          home.site as "barn-back" | "barn-front",
+        );
+        swapped += 1;
+      } catch (e) {
+        failed.push(`${name(fresh)}: ${e instanceof Error ? e.message : "could not swap back"}`);
+      }
+    }
+    for (const id of retry) await parkMover(id, true);
+    const place = unitPlaceLabel({ site: rack, pallet: letter, level, status: "ready" });
+    return { moved, swapped, place, failed };
+  });
