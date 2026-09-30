@@ -625,18 +625,31 @@ export const checkUsername = createServerFn({ method: "POST" })
 
 export const lookupSignIn = createServerFn({ method: "POST" })
   .validator((d: { username: string }) => d)
-  .handler(async ({ data }): Promise<{ email: string; waiting?: boolean; invited?: boolean }> => {
+  .handler(
+    async ({
+      data,
+    }): Promise<{ email: string; waiting?: boolean; invited?: boolean; methods?: string[] }> => {
     const raw = data.username.trim();
     if (!raw) throw new Error("Enter your username or email");
     const sql = await getSql();
     await ensureTable(sql);
     const emailNorm = raw.includes("@") ? normEmail(raw) : null;
     const userNorm = emailNorm ? null : cleanUsername(raw).toLowerCase();
-    const rows = await sql.query<{ email: string | null; approved: boolean; denied: boolean }>(
-      `select email, approved, denied from desk_accounts
+    const rows = await sql.query<{
+      user_id: string;
+      email: string | null;
+      auth_email: string | null;
+      approved: boolean;
+      denied: boolean;
+    }>(
+      `select d.user_id, d.email, u.email as auth_email, d.approved, d.denied
+         from desk_accounts d
+         left join "user" u on u.id = d.user_id
        where (
-           ($1::text is not null and email is not null and lower(email) = $1)
-           or ($2::text is not null and lower(username) = $2)
+           ($1::text is not null and (
+             (d.email is not null and lower(d.email) = $1) or (u.email is not null and lower(u.email) = $1)
+           ))
+           or ($2::text is not null and lower(d.username) = $2)
          )
        limit 1`,
       [emailNorm, userNorm],
@@ -647,8 +660,16 @@ export const lookupSignIn = createServerFn({ method: "POST" })
         const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
         if (!invite) throw new Error("This account was denied access.");
       }
-      if (!row.email) throw new Error("This account has no email on file. Ask an admin to invite you again.");
-      return { email: row.email, waiting: !row.approved && !row.denied };
+      // Sign in against the email Better Auth actually holds for this user.
+      const email = row.auth_email ?? row.email;
+      if (!email) throw new Error("This account has no email on file. Ask an admin to invite you again.");
+      // Which ways this person can sign in: "credential" (password), "google", "x".
+      const linked = await sql.query<{ providerId: string }>(
+        `select distinct "providerId" from "account" where "userId" = $1`,
+        [row.user_id],
+      );
+      const methods = linked.map((l) => (l.providerId === "credential" ? "password" : l.providerId.toLowerCase()));
+      return { email, waiting: !row.approved && !row.denied, methods };
     }
     const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
     if (invite) {

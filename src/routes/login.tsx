@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { checkUsername, claimInvite, getMyAccess, lookupSignIn, peekInvite, registerAccount } from "@/lib/ops/access";
@@ -11,6 +12,35 @@ import { MIN_PASSWORD, passwordProblem, peekPasswordReset, resetPasswordWithToke
 export const Route = createFileRoute("/login")({ component: Login });
 
 const PENDING_KEY = "katz-desk-pending";
+const LAST_LOGIN_KEY = "katz-desk-last-login";
+
+function readLastLogin(): string {
+  try {
+    return window.localStorage.getItem(LAST_LOGIN_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeLastLogin(v: string) {
+  try {
+    window.localStorage.setItem(LAST_LOGIN_KEY, v);
+  } catch {
+    /* private mode */
+  }
+}
+
+/** Better Auth's wording is terse; say what to do next instead. */
+function friendlySignInError(msg: string): string {
+  if (/invalid (email or )?password|invalid credentials|incorrect/i.test(msg)) {
+    return "That password didn't match. Check Caps Lock and try again, or tap Forgot password below.";
+  }
+  if (/too many|rate limit/i.test(msg)) return "Too many tries in a row. Wait a minute, then try again.";
+  if (/network|failed to fetch|load failed/i.test(msg)) {
+    return "Couldn't reach Katz Desk. Check your connection and try again.";
+  }
+  return msg;
+}
 
 function readPending(): boolean {
   if (typeof window === "undefined") return false;
@@ -47,6 +77,11 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  // Set when the account exists but signs in with Google or X, not a password.
+  const [socialOnly, setSocialOnly] = useState<string[] | null>(null);
+  // Set when nobody has that email yet, so we can offer "create one" in one tap.
+  const [noAccount, setNoAccount] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -65,6 +100,10 @@ function Login() {
     rememberInviteToken(params.get("invite"));
     if (readInviteToken()) setMode("up");
     else if (readPending()) setMode("pending");
+    else {
+      const last = readLastLogin();
+      if (last) setUsername(last);
+    }
   }, []);
 
   async function onReset(e: FormEvent) {
@@ -128,6 +167,8 @@ function Login() {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setSocialOnly(null);
+    setNoAccount(null);
     try {
       if (mode === "up") {
         const name = username.trim();
@@ -136,7 +177,7 @@ function Login() {
         }
         const available = await checkUsername({ data: { username: name } });
         if (!available.available) throw new Error("That username is already taken.");
-        const mail = email.trim();
+        const mail = email.trim().toLowerCase();
         let signedIn = false;
         const res = await authClient.signUp.email({
           email: mail,
@@ -179,8 +220,18 @@ function Login() {
           return;
         }
         if (!looked.email) throw new Error("Unknown username");
+        const methods = looked.methods ?? [];
+        if (methods.length && !methods.includes("password")) {
+          // Google/X account with no password: send them to the right button instead of "wrong password".
+          setSocialOnly(methods);
+          return;
+        }
         const res = await authClient.signIn.email({ email: looked.email, password });
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) {
+          const msg = res.error.message ?? "Sign-in failed";
+          throw new Error(friendlySignInError(msg));
+        }
+        writeLastLogin(identity);
         await authClient.getSession();
         await router.invalidate();
         writePending(!!looked.waiting);
@@ -198,7 +249,8 @@ function Login() {
         return;
       }
       if (/unknown username/i.test(msg)) {
-        const peek = await peekInvite({ data: { identity: username.trim() } }).catch(() => null);
+        const who = username.trim();
+        const peek = await peekInvite({ data: { identity: who } }).catch(() => null);
         if (peek?.invited) {
           setMode("up");
           if (peek.username) setUsername(peek.username);
@@ -206,8 +258,10 @@ function Login() {
           setError("You’re invited — create an account to get in.");
           return;
         }
+        setNoAccount(who);
+        return;
       }
-      setError(msg);
+      setError(friendlySignInError(msg));
     } finally {
       setBusy(false);
     }
@@ -217,25 +271,25 @@ function Login() {
     <main className="relative min-h-svh overflow-hidden bg-gradient-to-br from-ink via-ink to-[#2a2018] text-ink-foreground">
       <span aria-hidden className="katz-cloud -bottom-16 -left-24 w-[34rem] opacity-[0.07]" />
       <span aria-hidden className="katz-cloud katz-cloud-slow -top-12 right-[-6rem] w-[26rem] -scale-x-100 opacity-[0.05]" />
-      <div className="relative mx-auto grid min-h-svh max-w-5xl items-center gap-10 px-6 py-12 lg:grid-cols-2">
+      <div className="relative mx-auto grid min-h-svh max-w-5xl content-center items-center gap-6 px-5 py-8 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-2">
         <div>
           <img
             src="/brand/katz-coffee-logo.svg"
             alt="Katz Coffee"
             width={360}
             height={216}
-            className="h-auto w-48 drop-shadow-[0_10px_24px_rgb(0_0_0/0.5)] sm:w-60"
+            className="h-auto w-32 drop-shadow-[0_10px_24px_rgb(0_0_0/0.5)] sm:w-60"
           />
-          <p className="mt-5 text-xs font-semibold tracking-[0.3em] text-katz-gold uppercase">Houston · Service desk</p>
-          <h1 className="mt-2 font-display text-5xl leading-[1.05] font-medium tracking-tight">
+          <p className="mt-3 text-xs font-semibold sm:mt-5 tracking-[0.3em] text-katz-gold uppercase">Houston · Service desk</p>
+          <h1 className="mt-2 font-display text-4xl sm:text-5xl leading-[1.05] font-medium tracking-tight">
             Katz <span className="italic text-cream/70">Desk</span>
           </h1>
-          <p className="mt-4 max-w-md text-base leading-relaxed text-cream/70">
+          <p className="mt-4 hidden max-w-md text-base leading-relaxed text-cream/70 sm:block">
             One desk for sales and service. Past due, coming due, recipes, and the
             handoff between the two teams — without the spreadsheet pile-up.
           </p>
         </div>
-        <div className="rounded-xl border border-cream/12 bg-cream/6 p-6">
+        <div className="rounded-xl border border-cream/12 bg-cream/6 p-5 sm:p-6">
           {mode === "reset" ? (
             <>
               <h2 className="font-display text-2xl">Set a new password</h2>
@@ -389,18 +443,69 @@ function Login() {
                   <Label htmlFor="password" className="text-cream/60">
                     Password
                   </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    minLength={8}
-                    autoComplete={mode === "up" ? "new-password" : "current-password"}
-                    className="mt-1 border-cream/15 bg-ink text-cream"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <div className="relative mt-1">
+                    <Input
+                      id="password"
+                      type={showPw ? "text" : "password"}
+                      required
+                      minLength={mode === "up" ? MIN_PASSWORD : undefined}
+                      autoComplete={mode === "up" ? "new-password" : "current-password"}
+                      className="border-cream/15 bg-ink pr-11 text-cream"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 grid w-11 place-items-center text-cream/60 hover:text-cream"
+                      aria-label={showPw ? "Hide password" : "Show password"}
+                      aria-pressed={showPw}
+                      onClick={() => setShowPw((v) => !v)}
+                    >
+                      {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
                 </div>
-                {error ? <p className="text-sm text-destructive">{error}</p> : null}
+                {error ? (
+                  <p className="text-sm text-destructive" role="alert" data-testid="login-error">
+                    {error}
+                  </p>
+                ) : null}
+                {socialOnly ? (
+                  <p
+                    className="rounded-md border border-katz-gold/40 bg-katz-gold/10 px-3 py-2 text-sm text-cream"
+                    role="alert"
+                    data-testid="login-social"
+                  >
+                    This account signs in with{" "}
+                    {socialOnly
+                      .map((m) => GROK_PROVIDERS.find((p) => p.providerId === m)?.label ?? m)
+                      .join(" or ")}
+                    , not a password. Tap the button below.
+                  </p>
+                ) : null}
+                {noAccount ? (
+                  <div
+                    className="rounded-md border border-cream/15 bg-cream/6 px-3 py-2 text-sm text-cream/80"
+                    role="alert"
+                    data-testid="login-no-account"
+                  >
+                    <p>No Katz Desk account for “{noAccount}” yet.</p>
+                    <button
+                      type="button"
+                      className="mt-1 font-medium text-katz-gold underline-offset-2 hover:underline"
+                      onClick={() => {
+                        setMode("up");
+                        if (noAccount.includes("@")) {
+                          setEmail(noAccount.toLowerCase());
+                          setUsername(noAccount.split("@")[0]!.replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase());
+                        }
+                        setNoAccount(null);
+                      }}
+                    >
+                      Create an account with this {noAccount.includes("@") ? "email" : "name"}
+                    </button>
+                  </div>
+                ) : null}
                 {notice && mode === "in" ? <p className="text-sm text-emerald-300">{notice}</p> : null}
                 <Button type="submit" className="w-full" disabled={busy}>
                   {mode === "up" ? "Create account" : "Sign in"}
@@ -430,6 +535,8 @@ function Login() {
                 onClick={() => {
                   setMode(mode === "in" ? "up" : "in");
                   setError(null);
+                  setSocialOnly(null);
+                  setNoAccount(null);
                 }}
               >
                 {mode === "in" ? "Need an account? Create one" : "Already have an account? Sign in"}
@@ -446,7 +553,7 @@ function Login() {
                       <Button
                         key={p.providerId}
                         type="button"
-                        variant="secondary"
+                        variant={socialOnly?.includes(p.providerId) ? "default" : "secondary"}
                         className="w-full"
                         onClick={() => {
                           const token = readInviteToken();

@@ -203,9 +203,11 @@ function Page() {
             : ""}
         </p>
         <p className="mt-3 max-w-xl rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-foreground">
-          If someone sees “katzdesk.grok.me is private”, Grok has not shared the published site with
-          them yet. Desk invites cannot open that lock. In Grok, set this app to Public, or share it
-          with their Grok account. That does not require a rebuild.
+          <span className="font-medium">Seeing “this website is private”?</span> That screen comes from
+          Grok hosting, before the desk sign-in. Invites here can’t open it. In Grok, open this app’s
+          project settings and make the published site visible to anyone with the link (or share it
+          with that person). The desk login still keeps everyone out until you approve them. No rebuild
+          needed.
         </p>
 
         <div className="mt-3">
