@@ -216,7 +216,7 @@ function Login() {
   return (
     <main className="relative min-h-svh overflow-hidden bg-gradient-to-br from-ink via-ink to-[#2a2018] text-ink-foreground">
       <span aria-hidden className="katz-cloud -bottom-16 -left-24 w-[34rem] opacity-[0.07]" />
-      <span aria-hidden className="katz-cloud -top-12 right-[-6rem] w-[26rem] -scale-x-100 opacity-[0.05]" />
+      <span aria-hidden className="katz-cloud katz-cloud-slow -top-12 right-[-6rem] w-[26rem] -scale-x-100 opacity-[0.05]" />
       <div className="relative mx-auto grid min-h-svh max-w-5xl items-center gap-10 px-6 py-12 lg:grid-cols-2">
         <div>
           <img

@@ -284,4 +284,43 @@ html[data-contrast="high"] :focus-visible {
   -webkit-mask: url(/brand/cloud.png) center / contain no-repeat;
   mask: url(/brand/cloud.png) center / contain no-repeat;
   aspect-ratio: 640 / 515;
+  /* Aroma drift: rise, sway, and swell slowly, like steam off a cup. Uses transform only,
+     so Tailwind's flip (scale) and opacity classes on each cloud still apply. */
+  animation: katz-aroma 18s ease-in-out infinite;
+  will-change: transform;
+}
+.katz-cloud.katz-cloud-slow {
+  animation-duration: 26s;
+  animation-direction: reverse;
+  animation-delay: -9s;
+}
+.katz-cloud.katz-cloud-fast {
+  animation-duration: 13s;
+  animation-delay: -4s;
+}
+@keyframes katz-aroma {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translate3d(10px, -8px, 0) rotate(-1.5deg) scale(1.02);
+  }
+  50% {
+    transform: translate3d(4px, -20px, 0) rotate(1deg) scale(1.05);
+  }
+  75% {
+    transform: translate3d(-8px, -10px, 0) rotate(2deg) scale(1.02);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+/* Still clouds for anyone who asked for less motion (device setting or Settings → Motion). */
+@media (prefers-reduced-motion: reduce) {
+  .katz-cloud {
+    animation: none;
+  }
+}
+html[data-motion="reduced"] .katz-cloud {
+  animation: none;
 }

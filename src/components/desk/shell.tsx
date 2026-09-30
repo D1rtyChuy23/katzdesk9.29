@@ -226,7 +226,7 @@ function Brand() {
 function SidebarClouds() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <span className="katz-cloud -right-16 top-40 w-56 -scale-x-100 opacity-[0.05]" />
+      <span className="katz-cloud katz-cloud-slow -right-16 top-40 w-56 -scale-x-100 opacity-[0.05]" />
       <span className="katz-cloud -bottom-6 -left-14 w-72 opacity-[0.08]" />
     </div>
   );

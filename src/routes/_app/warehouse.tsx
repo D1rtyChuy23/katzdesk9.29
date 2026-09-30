@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createAsset, listAssets } from "@/lib/ops/api";
 import { getMyAccess } from "@/lib/ops/access";
@@ -61,6 +61,20 @@ function Page() {
   const [sort, setSort] = useDeskSort("warehouse", "alpha-asc");
   const [bubble, setBubble] = useState<"ready" | "fill" | "dispensers" | "missing" | "needs-bay" | "needs-test" | "tested" | "review" | null>(null);
   const [bayLetter, setBayLetter] = useState<string | null>(null);
+  // Opened from a ping (?open=<unit>): jump to that unit's rack and slot so it's highlighted on the grid.
+  const focusUnit = useMemo(
+    () => (open != null ? (data.data ?? []).find((a) => a.id === open) ?? null : null),
+    [open, data.data],
+  );
+  useEffect(() => {
+    if (!focusUnit) return;
+    if ((focusUnit.site === "barn-back" || focusUnit.site === "barn-front") && focusUnit.pallet && focusUnit.level) {
+      setRack(focusUnit.site);
+      setSlot({ rack: focusUnit.site, pallet: focusUnit.pallet, level: focusUnit.level });
+      setBubble(null);
+      setBayLetter(null);
+    }
+  }, [focusUnit]);
 
   const all = data.data ?? [];
   const barn = useMemo(

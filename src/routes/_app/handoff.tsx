@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { parseOpenSearch } from "@/lib/ops/search-params";
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getHandoff, handoffDeal, resolveComment, claimComment } from "@/lib/ops/api";
@@ -15,7 +17,7 @@ import { SORT_ALPHA, SORT_DATE, sortDesk } from "@/lib/ops/sort";
 import { toast } from "sonner";
 import type { HandoffFeed } from "@/lib/ops/types";
 
-export const Route = createFileRoute("/_app/handoff")({ component: Page });
+export const Route = createFileRoute("/_app/handoff")({ validateSearch: parseOpenSearch, component: Page });
 
 type Scope = "mine" | "all";
 
@@ -33,6 +35,32 @@ function Page() {
     }
   }, []);
   const [sort, setSort] = useDeskSort("handoff", "date-desc");
+  // ?open=<note id> from a ping: show everyone's notes, scroll to that thread, and flash it.
+  const { open } = Route.useSearch();
+  const navigate = useNavigate();
+  const [flash, setFlash] = useState<number | null>(null);
+  useEffect(() => {
+    if (open != null) setScope("all");
+  }, [open]);
+  useEffect(() => {
+    if (open == null || !feed.data) return;
+    const all = [...feed.data.asks, ...feed.data.recent];
+    const hit = all.find((c) => c.id === open);
+    if (!hit) {
+      toast.message("That note isn't on the board anymore — nothing left to answer here.");
+      void navigate({ to: "/handoff", search: {}, replace: true });
+      return;
+    }
+    const t = window.setTimeout(() => {
+      document.getElementById(`handoff-note-${open}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setFlash(open);
+    }, 60);
+    const clear = window.setTimeout(() => setFlash(null), 3200);
+    return () => {
+      window.clearTimeout(t);
+      window.clearTimeout(clear);
+    };
+  }, [open, feed.data, navigate]);
   const resolve = useMutation({
     mutationFn: (id: number) => resolveComment({ data: { id, resolved: true } }),
     onSuccess: () => {
@@ -199,7 +227,14 @@ function Page() {
           ) : (
             <ul className="mt-3 space-y-4">
               {sortedAsks.map((c) => (
-                <li key={c.id} className="rounded-lg border border-border bg-background p-3">
+                <li
+                  key={c.id}
+                  id={`handoff-note-${c.id}`}
+                  className={cn(
+                    "scroll-mt-24 rounded-lg border border-border bg-background p-3 transition-shadow",
+                    flash === c.id && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                  )}
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="warn">Ask {c.askTeam}</Badge>
                     <OpenLink
@@ -259,7 +294,14 @@ function Page() {
           ) : (
             <ul className="mt-3 space-y-4">
               {sortedRecent.map((c) => (
-                <li key={c.id}>
+                <li
+                  key={c.id}
+                  id={`handoff-note-${c.id}`}
+                  className={cn(
+                    "scroll-mt-24 rounded-md transition-shadow",
+                    flash === c.id && "ring-2 ring-primary ring-offset-4 ring-offset-card",
+                  )}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm">
                       <span className="font-medium">{c.ownerLabel}</span>

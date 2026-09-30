@@ -67,7 +67,7 @@ function ClockHome() {
         style={{ backgroundImage: "url(/desk-header.jpg)" }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/40" />
-        <span aria-hidden className="katz-cloud -top-10 right-6 hidden w-64 -scale-x-100 opacity-[0.12] sm:block" />
+        <span aria-hidden className="katz-cloud katz-cloud-fast -top-10 right-6 hidden w-64 -scale-x-100 opacity-[0.12] sm:block" />
         <div className="relative px-5 pt-6 pb-5 sm:px-7 sm:pt-8">
           <p className="text-[11px] font-semibold tracking-[0.22em] text-katz-gold uppercase">Operations clock</p>
           <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-white sm:text-5xl">

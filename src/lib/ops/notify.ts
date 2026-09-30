@@ -20,8 +20,113 @@ export type DeskNotice = {
   commentId: number | null;
   read: boolean;
   createdAt: string;
+  /** Where a click goes, checked against the database so it never lands on a dead screen. */
+  target: PingTarget | null;
+  /** Filter group shown on the Pings chips. */
+  kind: PingKind;
 };
 
+export type PingKind = "ticket" | "install" | "handoff" | "warehouse" | "customer" | "deal" | "rebuild" | "other";
+
+export type PingTarget = {
+  /** Route key for OpenLink (service, tlc, pm, install, deal, rebuild, asset, location, customer, handoff). */
+  type: string;
+  id: number | null;
+  /** Only when the original record is gone and we fell back to the account. */
+  fallback?: boolean;
+};
+
+function kindFor(type: string | null | undefined): PingKind {
+  switch (type) {
+    case "service":
+    case "tlc":
+    case "pm":
+      return "ticket";
+    case "install":
+      return "install";
+    case "handoff":
+      return "handoff";
+    case "asset":
+    case "location":
+      return "warehouse";
+    case "customer":
+      return "customer";
+    case "deal":
+      return "deal";
+    case "rebuild":
+      return "rebuild";
+    default:
+      return "other";
+  }
+}
+
+type RawPing = { entity_type: string | null; entity_id: number | null; customer: string | null };
+
+/**
+ * Resolve every ping to a record that still exists — the record itself, else its account,
+ * else the board it came from. One query per record type, so the 8-second refresh stays cheap.
+ */
+async function resolveTargets(sql: Sql, rows: RawPing[]): Promise<(PingTarget | null)[]> {
+  const idsOf = (...types: string[]) => [
+    ...new Set(rows.filter((r) => r.entity_type && types.includes(r.entity_type) && r.entity_id).map((r) => Number(r.entity_id))),
+  ];
+  async function lookup<T extends { id: number }>(q: string, ids: number[]): Promise<Map<number, T>> {
+    if (!ids.length) return new Map();
+    try {
+      const found = await sql.query<T>(q, [ids]);
+      return new Map(found.map((f) => [Number(f.id), f]));
+    } catch {
+      return new Map();
+    }
+  }
+  const jobs = await lookup<{ id: number; kind: string }>("select id, kind from service_jobs where id = any($1)", idsOf("service", "tlc"));
+  const pms = await lookup<{ id: number }>("select id from pm_jobs where id = any($1)", idsOf("pm"));
+  const installs = await lookup<{ id: number }>("select id from installs where id = any($1) and archived = false", idsOf("install"));
+  const deals = await lookup<{ id: number }>("select id from deals where id = any($1) and archived = false", idsOf("deal"));
+  const rebuilds = await lookup<{ id: number }>("select id from rebuilds where id = any($1) and archived = false", idsOf("rebuild"));
+  const assets = await lookup<{ id: number; site: string }>("select id, site from assets where id = any($1)", idsOf("asset"));
+  const custIds = await lookup<{ id: number }>(
+    "select id from directory_customers where id = any($1) and archived = false",
+    idsOf("customer"),
+  );
+  const names = [...new Set(rows.map((r) => (r.customer ?? "").trim().toLowerCase()).filter(Boolean))];
+  const byName = new Map<string, number>();
+  if (names.length) {
+    try {
+      const found = await sql.query<{ id: number; key: string }>(
+        "select id, lower(name) as key from directory_customers where lower(name) = any($1) and archived = false",
+        [names],
+      );
+      for (const f of found) byName.set(f.key, Number(f.id));
+    } catch {
+      /* no account fallback */
+    }
+  }
+
+  return rows.map((r) => {
+    const id = r.entity_id ? Number(r.entity_id) : null;
+    const t = r.entity_type;
+    if (id) {
+      if ((t === "service" || t === "tlc") && jobs.has(id)) return { type: jobs.get(id)!.kind === "tlc" ? "tlc" : "service", id };
+      if (t === "pm" && pms.has(id)) return { type: "pm", id };
+      if (t === "install" && installs.has(id)) return { type: "install", id };
+      if (t === "deal" && deals.has(id)) return { type: "deal", id };
+      if (t === "rebuild" && rebuilds.has(id)) return { type: "rebuild", id };
+      if (t === "customer" && custIds.has(id)) return { type: "customer", id };
+      if (t === "asset" && assets.has(id)) {
+        // Units still on a barn rack open in Warehouse on their slot; units out at a site open in Locations.
+        const site = assets.get(id)!.site;
+        return { type: site === "barn-back" || site === "barn-front" ? "asset" : "location", id };
+      }
+    }
+    if (t === "handoff") return { type: "handoff", id: null };
+    const acct = byName.get((r.customer ?? "").trim().toLowerCase());
+    if (acct) return { type: "customer", id: acct, fallback: !!t && t !== "customer" };
+    if (t === "asset") return { type: "asset", id: null, fallback: true };
+    if (!t) return { type: "handoff", id: null };
+    return null;
+  });
+}
 
 async function ensureTable(sql: Sql) {
   await sql.query(`
@@ -330,24 +435,39 @@ export const listNotifications = createServerFn({ method: "GET" })
       read: boolean;
       created_at: string;
     }>(
-      `select id, from_name, body, customer, entity_type, entity_id, comment_id, read, created_at
-       from desk_notifications
-       where user_id = $1
-       order by created_at desc
-       limit 40`,
+      // Every unread ping (so none hide past the cutoff) plus the most recent read ones.
+      `(select id, from_name, body, customer, entity_type, entity_id, comment_id, read, created_at
+          from desk_notifications
+         where user_id = $1 and read = false
+         order by created_at desc
+         limit 300)
+       union all
+       (select id, from_name, body, customer, entity_type, entity_id, comment_id, read, created_at
+          from desk_notifications
+         where user_id = $1 and read = true
+         order by created_at desc
+         limit 80)
+       order by created_at desc`,
       [context.userId],
     );
-    return rows.map((r) => ({
-      id: r.id,
-      fromName: r.from_name,
-      body: r.body,
-      customer: r.customer,
-      entityType: r.entity_type,
-      entityId: r.entity_id,
-      commentId: r.comment_id,
-      read: !!r.read,
-      createdAt: String(r.created_at),
-    }));
+    const targets = await resolveTargets(sql, rows);
+    const out: DeskNotice[] = rows.map((r, i) => {
+      const target = targets[i] ?? null;
+      return {
+        id: r.id,
+        fromName: r.from_name,
+        body: r.body,
+        customer: r.customer,
+        entityType: r.entity_type,
+        entityId: r.entity_id,
+        commentId: r.comment_id,
+        read: !!r.read,
+        createdAt: String(r.created_at),
+        target,
+        kind: kindFor(target && !target.fallback ? target.type : (r.entity_type ?? target?.type)),
+      };
+    });
+    return out;
   });
 
 export const sendPing = createServerFn({ method: "POST" })
