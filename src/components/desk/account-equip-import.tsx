@@ -109,7 +109,7 @@ export function AccountEquipImportButton({
 
       <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : cancel())}>
         <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
-          <DialogTitle>Import equipment list</DialogTitle>
+          <DialogTitle>Import Equipment List</DialogTitle>
           <DialogDescription>
             {fileName ? `${fileName} · ` : ""}
             This writes machines onto existing accounts. It does not create accounts, tickets, or

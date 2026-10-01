@@ -54,7 +54,7 @@ function Page() {
         </Section>
 
         <Section
-          title="Text size"
+          title="Text Size"
           hint="Large type helps when you’re standing back from a tablet or reading serials."
           icon={<Type className="size-4" />}
         >
@@ -114,7 +114,7 @@ function Page() {
         </Section>
 
         <Section
-          title="When I sign in"
+          title="When I Sign In"
           hint="Resume opens the last page you were on — useful if you bounce between service and installs."
         >
           <Segmented

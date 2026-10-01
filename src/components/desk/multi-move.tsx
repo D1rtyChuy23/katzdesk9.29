@@ -122,7 +122,7 @@ export function MovePanel({
       {mates.length ? (
         <fieldset className="grid gap-1.5" data-testid="swap-list">
           <legend className="flex w-full flex-wrap items-baseline justify-between gap-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-            <span>Replace/Swap — tick any units already here</span>
+            <span>Replace/Swap — Tick Any Units Already Here</span>
             <button
               type="button"
               className="normal-case text-primary underline-offset-2 hover:underline"

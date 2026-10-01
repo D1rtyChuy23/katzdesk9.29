@@ -243,7 +243,7 @@ export function ProviderAccountList({
 
   return (
     <div>
-      <h3 className="font-display text-lg">Assigned accounts</h3>
+      <h3 className="font-display text-lg">Assigned Accounts</h3>
       <p className="text-xs text-muted-foreground">Pick from the customer list. Primary is who we call first.</p>
       <form
         className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end"

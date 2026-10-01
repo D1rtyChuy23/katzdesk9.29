@@ -109,7 +109,7 @@ function Page() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Equipment by location</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Equipment By Location</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Units at a site, not on a barn bay. Add from the barn, or add a unit that is not in the barn. Moving back asks for a bay first.
           </p>
@@ -118,7 +118,7 @@ function Page() {
 
       <StatRow>
         <StatCard
-          label="On site"
+          label="On Site"
           value={deployedCount}
           hint="HQ rooms and SATX"
           selected={tab === "deployed"}

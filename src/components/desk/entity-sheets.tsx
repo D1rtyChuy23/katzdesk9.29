@@ -50,6 +50,8 @@ import { AkBadge } from "./ak-badge";
 
 import { MachineFields } from "./machine-fields";
 import { SerialNoticeBanner } from "./serial-notice";
+import { AssignedLine, ModuleReturnActions } from "./module-assign";
+import { moduleAvailability } from "@/lib/ops/eversys";
 import { toast } from "sonner";
 import { ChevronsUpDown, Trash2, X } from "lucide-react";
 
@@ -705,9 +707,11 @@ export function DealSheet({
 export function ModuleSheet({
   row,
   onClose,
+  onAssign,
 }: {
   row: ModuleRow | null;
   onClose: () => void;
+  onAssign?: (row: ModuleRow) => void;
 }) {
   const qc = useQueryClient();
   const save = useMutation({
@@ -724,13 +728,32 @@ export function ModuleSheet({
         {row ? (
           <>
             <SheetHeader>
-              <p className="text-xs tracking-wide text-muted-foreground uppercase">Eversys module</p>
+              <p className="text-xs tracking-wide text-muted-foreground uppercase">Eversys Module</p>
               <SheetTitle>{row.moduleId}</SheetTitle>
               <div className="mt-2">
                 <StatusBadge status={row.status} />
               </div>
             </SheetHeader>
             <SheetBody>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-5 py-3" data-testid="module-where">
+              {moduleAvailability(row) === "assigned" ? (
+                <>
+                  <AssignedLine row={row} />
+                  <ModuleReturnActions row={row} />
+                </>
+              ) : moduleAvailability(row) === "hq" ? (
+                <>
+                  <span className="text-sm font-medium">At HQ · Available</span>
+                  {onAssign ? (
+                    <Button type="button" size="sm" variant="outline" onClick={() => onAssign(row)}>
+                      Assign To Account
+                    </Button>
+                  ) : null}
+                </>
+              ) : (
+                <span className="text-sm text-muted-foreground">Not at HQ · {row.status}</span>
+              )}
+            </div>
             <form
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
@@ -766,15 +789,25 @@ export function ModuleSheet({
                   ))}
                 </SelectField>
               </div>
-              <div>
-                <Label>Status</Label>
-                <SelectField name="status" className="mt-1" defaultValue={row.status}>
-                  {MODULE_STATUSES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
-              <Field label="Location / account" name="location" defaultValue={row.location ?? ""} />
+              {row.assignedCustomer ? (
+                <>
+                  {/* Assigned modules move through Assign / Return so HQ stock stays right. */}
+                  <LockedCustomer name={row.status} label="Status" inputName="status" />
+                  <LockedCustomer name={row.location ?? ""} label="Account" inputName="location" />
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label>Status</Label>
+                    <SelectField name="status" className="mt-1" defaultValue={row.status}>
+                      {MODULE_STATUSES.map((s) => (
+                        <option key={s}>{s}</option>
+                      ))}
+                    </SelectField>
+                  </div>
+                  <Field label="Location / account" name="location" defaultValue={row.location ?? ""} />
+                </>
+              )}
               <Field label="WO #" name="wo" defaultValue={row.wo ?? ""} />
               <div>
                 <Label>Tech</Label>

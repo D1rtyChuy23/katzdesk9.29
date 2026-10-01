@@ -65,7 +65,7 @@ export function UsernameSetup({
     <main className="flex min-h-svh items-center justify-center bg-ink px-6 text-ink-foreground">
       <div className="w-full max-w-md rounded-xl border border-cream/12 bg-cream/6 p-6">
         <p className="text-xs tracking-[0.18em] text-cream/50 uppercase">Katz Desk</p>
-        <h1 className="mt-3 font-display text-3xl">Choose a username</h1>
+        <h1 className="mt-3 font-display text-3xl">Choose A Username</h1>
         <p className="mt-2 text-sm leading-relaxed text-cream/70">
           Use the same sign-in you just used — Google, X, or your existing password. You only
           need a username for the desk. No new password.

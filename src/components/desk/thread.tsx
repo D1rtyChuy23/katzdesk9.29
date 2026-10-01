@@ -67,7 +67,7 @@ export function Thread({
   return (
     <div className="flex flex-col">
       <ActivityTrail entityType={entityType} entityId={entityId} />
-      <h3 className="px-5 pt-4 font-display text-lg font-medium">Handoff notes</h3>
+      <h3 className="px-5 pt-4 font-display text-lg font-medium">Handoff Notes</h3>
       <p className="px-5 text-xs text-muted-foreground">
         Tag a teammate with @username. Ping sends them a bell notification.
       </p>

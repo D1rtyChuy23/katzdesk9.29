@@ -272,19 +272,23 @@ function Login() {
       <span aria-hidden className="katz-cloud -bottom-16 -left-24 w-[34rem] opacity-[0.07]" />
       <span aria-hidden className="katz-cloud katz-cloud-slow -top-12 right-[-6rem] w-[26rem] -scale-x-100 opacity-[0.05]" />
       <div className="relative mx-auto grid min-h-svh max-w-5xl content-center items-center gap-6 px-5 py-8 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-2">
-        <div>
+        <div className="flex flex-col items-start" data-testid="brand-block">
+          {/* One mark, one name: the Katz Coffee mark, the Katz Desk wordmark, one line under it — same left edge. */}
           <img
-            src="/brand/katz-coffee-logo.svg"
+            src="/brand/katz-coffee-mark.svg"
             alt="Katz Coffee"
-            width={360}
-            height={216}
-            className="h-auto w-32 drop-shadow-[0_10px_24px_rgb(0_0_0/0.5)] sm:w-60"
+            width={334}
+            height={177}
+            className="h-auto w-32 drop-shadow-[0_10px_24px_rgb(0_0_0/0.5)] sm:w-56"
           />
-          <p className="mt-3 text-xs font-semibold sm:mt-5 tracking-[0.3em] text-katz-gold uppercase">Houston · Service desk</p>
-          <h1 className="mt-2 font-display text-4xl sm:text-5xl leading-[1.05] font-medium tracking-tight">
+          <h1 className="mt-4 font-display text-4xl leading-none font-medium tracking-tight sm:mt-6 sm:text-5xl">
             Katz <span className="italic text-cream/70">Desk</span>
           </h1>
-          <p className="mt-4 hidden max-w-md text-base leading-relaxed text-cream/70 sm:block">
+          <p className="mt-3 flex items-center gap-3 text-xs font-semibold tracking-[0.24em] text-katz-gold uppercase">
+            <span aria-hidden className="h-px w-8 bg-katz-gold/60" />
+            Service And Sales, One Clock
+          </p>
+          <p className="mt-5 hidden max-w-md text-base leading-relaxed text-cream/70 sm:block">
             One desk for sales and service. Past due, coming due, recipes, and the
             handoff between the two teams — without the spreadsheet pile-up.
           </p>
@@ -292,7 +296,7 @@ function Login() {
         <div className="rounded-xl border border-cream/12 bg-cream/6 p-5 sm:p-6">
           {mode === "reset" ? (
             <>
-              <h2 className="font-display text-2xl">Set a new password</h2>
+              <h2 className="font-display text-2xl">Set A New Password</h2>
               <p className="mt-1 text-sm text-cream/60">
                 {resetBad
                   ? "This reset link has expired or was already used. Ask a desk admin for a new one."
@@ -352,7 +356,7 @@ function Login() {
             </>
           ) : mode === "pending" ? (
             <>
-              <h2 className="font-display text-2xl">Waiting for approval</h2>
+              <h2 className="font-display text-2xl">Waiting For Approval</h2>
               <p className="mt-2 text-sm text-cream/60">
                 Your account was created. A desk admin will review it before you can open Katz Desk.
                 Stay signed in and tap check again after they approve you.
@@ -399,7 +403,7 @@ function Login() {
             </>
           ) : (
             <>
-              <h2 className="font-display text-2xl">{mode === "up" ? "Create an account" : "Sign in"}</h2>
+              <h2 className="font-display text-2xl">{mode === "up" ? "Create An Account" : "Sign In"}</h2>
               <p className="mt-1 text-sm text-cream/60">
                 {mode === "up"
                   ? readInviteToken()

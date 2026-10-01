@@ -149,7 +149,7 @@ function Page() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Sales pipeline</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Sales Pipeline</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             One row per equipment deal. Step 1 is Good to order (rep). Step 2 is Ordered
             (you confirm it) — confirmed orders leave the Good to order list.
@@ -165,13 +165,13 @@ function Page() {
 
       <StatRow>
         <StatCard
-          label="Active deals"
+          label="Active Deals"
           value={active.length}
           selected={view === "open"}
           onClick={() => setView((v) => toggleChip(v, "open", "all"))}
         />
         <StatCard
-          label="Active pipeline"
+          label="Active Pipeline"
           value={money(sum(active))}
           selected={view === "open"}
           onClick={() => setView((v) => toggleChip(v, "open", "all"))}
@@ -184,13 +184,13 @@ function Page() {
           onClick={() => setView((v) => toggleChip(v, "complete", "all"))}
         />
         <StatCard
-          label="Total booked"
+          label="Total Booked"
           value={money(sum(live))}
           selected={view === "all"}
           onClick={() => setView("all")}
         />
         <StatCard
-          label="Good to order"
+          label="Good To Order"
           value={gtoN}
           hint="Step 1 — waiting to be ordered"
           selected={view === "gto"}
@@ -206,7 +206,7 @@ function Page() {
       </StatRow>
 
       <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        <ChartCard title="By producer" lede="Open dollars stacked under completed. Fell-through deals are left out.">
+        <ChartCard title="By Producer" lede="Open dollars stacked under completed. Fell-through deals are left out.">
           {producerChart.length ? (
             <StackedMoneyBars
               data={producerChart}
@@ -219,10 +219,10 @@ function Page() {
             <p className="text-sm text-muted-foreground">No live deals yet.</p>
           )}
         </ChartCard>
-        <ChartCard title="How deals move" lede="Good to order first, then Ordered. Ordered deals drop off step 1.">
+        <ChartCard title="How Deals Move" lede="Good to order first, then Ordered. Ordered deals drop off step 1.">
           <SimpleBars data={funnel} xKey="stage" yKey="count" yLabel="Deals" horizontal />
         </ChartCard>
-        <ChartCard title="Deal size" lede="Live book by amount, so a few large jobs don’t hide the rest.">
+        <ChartCard title="Deal Size" lede="Live book by amount, so a few large jobs don’t hide the rest.">
           {sizeChart.length ? (
             <SimpleBars data={sizeChart} xKey="size" yKey="count" yLabel="Deals" horizontal />
           ) : (
@@ -233,7 +233,7 @@ function Page() {
 
       <section className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
         <div className="border-b border-border px-4 py-3">
-          <h2 className="font-display text-xl">By producer</h2>
+          <h2 className="font-display text-xl">By Producer</h2>
           <p className="text-xs text-muted-foreground">Fell-through deals are excluded. Click a rep to see only their deals.</p>
         </div>
         <div className="overflow-x-auto px-4 py-3">
@@ -345,7 +345,7 @@ function Page() {
       />
       <DealSheet deal={selectedRow} onClose={() => setSelected(null)} />
       <SimpleCreateDialog
-        title="New deal"
+        title="New Deal"
         open={create}
         onOpenChange={setCreate}
         fields={[

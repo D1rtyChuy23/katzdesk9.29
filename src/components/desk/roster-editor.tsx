@@ -56,7 +56,7 @@ export function RosterEditor() {
 
   return (
     <section className="rounded-xl border border-border bg-card p-5">
-      <h2 className="font-display text-lg font-medium tracking-tight">Service tech roster</h2>
+      <h2 className="font-display text-lg font-medium tracking-tight">Service Tech Roster</h2>
       <p className="mt-0.5 text-xs text-muted-foreground">
         Only you can add or remove names. Tickets keep their current tech until you reassign them.
         Inactive names stay on history as “(inactive)” — they are not in assign lists.

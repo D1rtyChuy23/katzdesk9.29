@@ -169,7 +169,7 @@ function Page() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Barn warehouse</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Barn Warehouse</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Ready-to-deploy units at HQ. Slot ID is pallet + level — A-L3 is pallet A, third shelf. Pull a unit for an install or a service account and it leaves this board. Bays run A through P.
           </p>
@@ -217,7 +217,7 @@ function Page() {
           }}
         />
         <StatCard
-          label="Missing serial"
+          label="Missing Serial"
           value={missing}
           tone={missing ? "warn" : undefined}
           hint={`${owned} customer-owned · ${catering} catering`}
@@ -230,7 +230,7 @@ function Page() {
         />
         {stranded.length ? (
           <StatCard
-            label="Needs bay"
+            label="Needs Bay"
             value={stranded.length}
             tone="warn"
             hint="Letter Q or after P — assign A–P"
@@ -246,7 +246,7 @@ function Page() {
 
       {readyByModel.length ? (
         <section className="mt-5">
-          <ChartCard title="Ready by model" lede="The Ready bubble, unpacked — qty on the rack, not line count.">
+          <ChartCard title="Ready By Model" lede="The Ready bubble, unpacked — qty on the rack, not line count.">
             <SimpleBars
               data={readyByModel.slice(0, 10).map((r) => ({ model: r.name, count: r.count }))}
               xKey="model"
@@ -421,8 +421,8 @@ function Page() {
               : slot
                 ? `${slot.rack === "barn-front" ? "Front" : "Back"} · ${slotId(slot.pallet, slot.level)}`
                 : rack === "barn-back"
-                  ? "Back rack units"
-                  : "Front rack units"}
+                  ? "Back Rack Units"
+                  : "Front Rack Units"}
           </h2>
           {slot && !needle ? (
             <p className="text-sm text-muted-foreground" data-testid="section-count">
@@ -825,7 +825,7 @@ function SlotAdd({
       {confirm && mates.length > 0 ? (
         <fieldset className="mt-3 grid gap-1.5" data-testid="slot-swap">
           <legend className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-            Replace/Swap — tick any units already here
+            Replace/Swap — Tick Any Units Already Here
           </legend>
           <div className="flex flex-wrap gap-1.5">
             {mates.map((u) => {
@@ -912,7 +912,7 @@ function AddDialog({
       }}
     >
       <DialogContent>
-        <DialogTitle>Add to the barn</DialogTitle>
+        <DialogTitle>Add To The Barn</DialogTitle>
         <form
           className="mt-4 space-y-3"
           onSubmit={async (e) => {

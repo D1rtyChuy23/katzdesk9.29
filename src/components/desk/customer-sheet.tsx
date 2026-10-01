@@ -376,7 +376,7 @@ export function CustomerHistorySheet({
                 </section>
 
                 <h2 className="mt-5 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-                  Account history
+                  Account History
                 </h2>
                 <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
                   {visible.map((it) => (
@@ -422,7 +422,7 @@ export function CustomerHistorySheet({
       />
       <RenameDialog
         open={editing}
-        title="Rename customer"
+        title="Rename Customer"
         noun="customer"
         current={data?.name ?? ""}
         pending={rename.isPending}
@@ -446,7 +446,7 @@ function PreInspectionList({
   return (
     <section className="mt-4" data-testid="account-pre-inspection">
       <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-        Pre-inspection
+        Pre-Inspection
       </h2>
       <ul className="mt-2 space-y-2">
         {installs.map((i) => (
@@ -494,7 +494,7 @@ function AccountEquipmentList({
   return (
     <section className="mt-4">
       <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-        Equipment on this account
+        Equipment On This Account
       </h2>
       {loading ? (
         <p className="mt-2 text-sm text-muted-foreground">Loading equipment…</p>

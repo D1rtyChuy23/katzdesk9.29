@@ -320,7 +320,14 @@ function mapModule(r: any) {
 		dateReady: isoDate(r.date_ready),
 		technician: r.technician ?? null,
 		notes: r.notes ?? null,
-		updatedAt: String(r.updated_at)
+		updatedAt: String(r.updated_at),
+		assignedCustomer: r.assigned_customer ?? null,
+		assignedUnitId: r.assigned_unit_id ?? null,
+		assignedUnitLabel: r.assigned_unit_label ?? null,
+		assignedAt: r.assigned_at ? String(r.assigned_at) : null,
+		returnPending: !!r.return_pending,
+		returnBy: r.return_by ?? null,
+		returnByName: r.return_by_name ?? null
 	};
 }
 function mapComment(r: any, owners: any) {
@@ -933,12 +940,20 @@ export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddl
 	return mapPm((await sql`select * from pm_jobs where id = ${rows[0].id}`)[0], todayChicago());
 });
 export const listModules = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<ModuleRow[]> => {
-	return (await (await ready())`select * from modules order by module_id`).map(mapModule);
+	const sql = await ready();
+	const { ensureModuleSchema } = await import("./module-assign");
+	await ensureModuleSchema(sql);
+	return (await sql`select * from modules order by module_id`).map(mapModule);
 });
 export const updateModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; status?: string; wo?: string | null; location?: string | null; dateIn?: string | null; dateReady?: string | null; technician?: string | null; notes?: string | null; platform?: string | null; moduleType?: string | null }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`select * from modules where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Module not found");
+	if (cur[0].assigned_customer) {
+		// Assigned modules leave a café only through Return to warehouse (admin approval for Warehouse).
+		const moving = (data.status !== undefined && data.status !== cur[0].status) || (data.location !== undefined && (data.location ?? null) !== (cur[0].location ?? null));
+		if (moving) throw new Error(`This module is assigned to ${cur[0].assigned_customer}. Use Return To Warehouse to bring it back.`);
+	}
 	const c = cur[0];
 	await sql`
       update modules set
@@ -963,11 +978,16 @@ export const updateModule = createServerFn({ method: "POST" }).middleware([deskM
 });
 export const createModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { moduleId: string; platform?: string; moduleType?: string }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
+	// One module serial = one record: ignore case and stray spaces when checking.
+	const moduleId = String(data.moduleId ?? "").trim().replace(/\s+/g, "").toUpperCase();
+	if (!moduleId) throw new Error("Enter the module serial.");
+	const dup = await sql.query("select id, module_id from modules where upper(regexp_replace(module_id, '\\s', '', 'g')) = $1 limit 1", [moduleId]);
+	if (dup[0]) throw new Error(`Module ${dup[0].module_id} is already on the list. Open it instead of adding a second record.`);
 	const rows = await sql`
       insert into modules (module_id, platform, module_type, status, location)
-      values (${data.moduleId}, ${data.platform ?? "Cameo"}, ${data.moduleType ?? "Brew Module"}, ${"Not Started"}, ${"SHELF"})
+      values (${moduleId}, ${data.platform ?? "Cameo"}, ${data.moduleType ?? "Brew Module"}, ${"Not Started"}, ${"SHELF"})
       returning *`;
-	await logActivity(sql, context.userId, "module", rows[0].id, "opened", data.moduleId);
+	await logActivity(sql, context.userId, "module", rows[0].id, "opened", moduleId);
 	return mapModule(rows[0]);
 });
 export const listDeals = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Deal[]> => {

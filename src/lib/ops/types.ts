@@ -76,6 +76,15 @@ export type ModuleRow = {
   technician: string | null;
   notes: string | null;
   updatedAt: string;
+  /** Account the module is attached to (via an Eversys unit). Null = not assigned. */
+  assignedCustomer: string | null;
+  assignedUnitId: number | null;
+  assignedUnitLabel: string | null;
+  assignedAt: string | null;
+  /** Warehouse asked to bring it back; an admin has to approve. */
+  returnPending: boolean;
+  returnBy: string | null;
+  returnByName: string | null;
 };
 
 export type Deal = {

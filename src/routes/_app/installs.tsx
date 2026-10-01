@@ -227,7 +227,7 @@ function Page() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Install clock</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Install Clock</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Prep is what still needs to go out. Installed is the finished list.
           </p>
@@ -254,7 +254,7 @@ function Page() {
             onClick={() => setSlice((v) => (v === "ready" ? "all" : "ready"))}
           />
           <StatCard
-            label="Not ready"
+            label="Not Ready"
             value={notReadyN}
             hint="Prep, failed check, or not inspected"
             selected={slice === "not-ready"}
@@ -347,7 +347,7 @@ function Page() {
       />
       <Dialog open={!!confirmIds?.length} onOpenChange={(v) => (!v ? setConfirmIds(null) : null)}>
         <DialogContent className="max-w-md">
-          <DialogTitle>Mark installed</DialogTitle>
+          <DialogTitle>Mark Installed</DialogTitle>
           <p className="mt-2 text-sm text-muted-foreground">
             Mark {confirmIds?.length ?? 0} install{(confirmIds?.length ?? 0) === 1 ? "" : "s"} as
             installed? They leave the prep queue and show on the Installed list. Serial, configuration,
@@ -370,7 +370,7 @@ function Page() {
       </Dialog>
       <Dialog open={!!gate} onOpenChange={(v) => (!v ? setGate(null) : null)}>
         <DialogContent className="max-w-md">
-          <DialogTitle>Pre-inspection not passed</DialogTitle>
+          <DialogTitle>Pre-Inspection Not Passed</DialogTitle>
           <p className="mt-2 text-sm text-muted-foreground">
             {gate?.names.join(", ")} still need a passed site check. Add a reason to mark installed anyway.
           </p>
@@ -436,7 +436,7 @@ function NewInstallDialog({
     >
       <DialogContent className="max-w-4xl">
         <div className="sticky -top-5 z-20 -mx-5 -mt-5 mb-2 border-b border-border bg-card px-4 pt-3 pr-12 pb-2">
-          <DialogTitle>New install</DialogTitle>
+          <DialogTitle>New Install</DialogTitle>
           <div className="mt-2 grid min-w-0 gap-2">
             <CustomerCombo
               value={customer}

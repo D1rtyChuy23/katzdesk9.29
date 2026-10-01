@@ -48,7 +48,7 @@ function Page() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Out of Network</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Out Of Network</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Third-party techs we dispatch for accounts outside the Katz floor. Add a company with
             rates and notes, then assign customers. Primary is who we call first.
@@ -276,7 +276,7 @@ function ProvidersPane({
       {!rows.length ? <p className="mt-4 text-sm text-muted-foreground">No providers match.</p> : null}
       <RenameDialog
         open={!!renaming}
-        title="Rename provider"
+        title="Rename Provider"
         noun="provider"
         current={renaming?.name ?? ""}
         pending={rename.isPending}
@@ -384,7 +384,7 @@ function CoveragePane({
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <section className="rounded-xl border border-border bg-card p-5">
-        <h2 className="font-display text-xl">Coverage by state</h2>
+        <h2 className="font-display text-xl">Coverage By State</h2>
         <p className="mt-0.5 text-xs text-muted-foreground">From the Accounts tab. Yellow means no primary tech.</p>
         <table className="mt-3 w-full text-sm">
           <thead>
@@ -408,7 +408,7 @@ function CoveragePane({
         </table>
       </section>
       <section className="rounded-xl border border-border bg-card p-5">
-        <h2 className="font-display text-xl">Accounts by provider</h2>
+        <h2 className="font-display text-xl">Accounts By Provider</h2>
         <ul className="mt-3 divide-y divide-border">
           {ranked
             .filter((p) => p.primaryFor + p.secondaryFor > 0)

@@ -119,7 +119,7 @@ export function CorrigoImportButton({
             if (document.querySelector("[data-testid=add-customer-form]")) e.preventDefault();
           }}
         >
-          <DialogTitle>Corrigo import</DialogTitle>
+          <DialogTitle>Corrigo Import</DialogTitle>
           <DialogDescription>
             {fileName ? `${fileName} · ` : ""}
             Corrigo is the source of truth for service. Confirm before anything is written.
@@ -646,7 +646,7 @@ export function CorrigoReviewList({
     <section className="mt-5 rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For review</h2>
+          <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For Review</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999.
           </p>

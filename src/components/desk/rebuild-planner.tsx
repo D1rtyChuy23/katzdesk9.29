@@ -88,7 +88,7 @@ export function RebuildPlanner({
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl">Rebuild timeline</h2>
+          <h2 className="font-display text-xl">Rebuild Timeline</h2>
           <p className="text-xs text-muted-foreground">
             {formatShortDate(anchor)} – {formatShortDate(windowEnd)}. Overdue bars read as overdue. Same records as the board.
           </p>

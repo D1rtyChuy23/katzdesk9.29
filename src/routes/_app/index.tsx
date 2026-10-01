@@ -29,7 +29,7 @@ function ClockHome() {
   if (dash.isError) {
     return (
       <div className="rounded-xl border border-border bg-card p-6">
-        <h1 className="font-display text-2xl">Couldn’t load the clock</h1>
+        <h1 className="font-display text-2xl">Couldn’t Load The Clock</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {dash.error instanceof Error ? dash.error.message : "Try again in a moment."}
         </p>
@@ -78,21 +78,21 @@ function ClockHome() {
             {role ? ` · ${role === "sales" ? "Sales" : "Service"} view` : ""}
           </p>
           <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-            <HeroStat to="/service" label="Active calls" value={d.kpis.activeCalls} hint="Open tickets" />
+            <HeroStat to="/service" label="Active Calls" value={d.kpis.activeCalls} hint="Open tickets" />
             <HeroStat
-              label="Coming due"
+              label="Coming Due"
               value={d.kpis.comingDue}
               hint="Overdue, today, this week"
               tone={d.kpis.comingDue ? "warn" : undefined}
             />
             <HeroStat
               to="/installs"
-              label="Install queue"
+              label="Install Queue"
               value={d.kpis.installQueue}
               hint={`${d.kpis.installAtRisk} at risk`}
               tone={d.kpis.installAtRisk ? "warn" : undefined}
             />
-            <HeroStat to="/pms" label="PMs active" value={d.kpis.pmsActive} hint="Open the PM board" />
+            <HeroStat to="/pms" label="PMs Active" value={d.kpis.pmsActive} hint="Open the PM board" />
             <HeroStat
               className="col-span-2 sm:col-span-1"
               to="/rebuilds"
@@ -110,19 +110,19 @@ function ClockHome() {
 
       <section className="grid min-w-0 gap-4 lg:grid-cols-3">
         <FlagList
-          title="Service — 48-hour clock"
+          title="Service — 48-Hour Clock"
           href="/service"
           rows={d.flagged.service}
           empty="No service flags. The 48-hour clock is clear."
         />
         <FlagList
-          title="TLC + Factor — 2-week clock"
+          title="TLC + Factor — 2-Week Clock"
           href="/tlc"
           rows={d.flagged.tlc}
           empty="No TLC flags."
         />
         <FlagList
-          title="PM tracker"
+          title="PM Tracker"
           href="/pms"
           rows={d.flagged.pm}
           empty="No PM flags."

@@ -29,6 +29,7 @@ function headline(n: DeskNotice): string {
   if (n.body.startsWith("Needs review")) return "Needs review";
   if (n.body.startsWith("Pending removal")) return "Pending removal";
   if (n.body.startsWith("Pending customer assign")) return "Pending assign";
+  if (n.body.startsWith("Pending module return")) return "Pending return";
   return "pinged you";
 }
 

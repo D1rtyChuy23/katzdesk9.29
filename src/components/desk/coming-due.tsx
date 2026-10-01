@@ -54,7 +54,7 @@ export function ComingDuePanel({
     <div className="min-w-0 rounded-xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h2 className="font-display text-xl leading-tight">Coming due</h2>
+          <h2 className="font-display text-xl leading-tight">Coming Due</h2>
           <p className="text-[11px] text-muted-foreground">Click a row to open the ticket or install.</p>
         </div>
         <ul className="flex flex-wrap gap-1.5 text-[11px]">

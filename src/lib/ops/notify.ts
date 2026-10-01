@@ -48,6 +48,7 @@ function kindFor(type: string | null | undefined): PingKind {
       return "handoff";
     case "asset":
     case "location":
+    case "module":
       return "warehouse";
     case "customer":
       return "customer";
@@ -85,6 +86,7 @@ async function resolveTargets(sql: Sql, rows: RawPing[]): Promise<(PingTarget | 
   const deals = await lookup<{ id: number }>("select id from deals where id = any($1) and archived = false", idsOf("deal"));
   const rebuilds = await lookup<{ id: number }>("select id from rebuilds where id = any($1) and archived = false", idsOf("rebuild"));
   const assets = await lookup<{ id: number; site: string }>("select id, site from assets where id = any($1)", idsOf("asset"));
+  const mods = await lookup<{ id: number }>("select id from modules where id = any($1)", idsOf("module"));
   const custIds = await lookup<{ id: number }>(
     "select id from directory_customers where id = any($1) and archived = false",
     idsOf("customer"),
@@ -113,6 +115,7 @@ async function resolveTargets(sql: Sql, rows: RawPing[]): Promise<(PingTarget | 
       if (t === "deal" && deals.has(id)) return { type: "deal", id };
       if (t === "rebuild" && rebuilds.has(id)) return { type: "rebuild", id };
       if (t === "customer" && custIds.has(id)) return { type: "customer", id };
+      if (t === "module" && mods.has(id)) return { type: "module", id };
       if (t === "asset" && assets.has(id)) {
         // Units still on a barn rack open in Warehouse on their slot; units out at a site open in Locations.
         const site = assets.get(id)!.site;
@@ -249,6 +252,30 @@ export async function notifyAdminsRackReview(
       `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
        values ($1, $2, $3, $4, $5, 'asset', $6)`,
       [admin.user_id, fromUserId, who, body, asset.slot, asset.id],
+    );
+  }
+}
+
+/** Tell every admin that Warehouse asked to bring an assigned Eversys module back to HQ. */
+export async function notifyAdminsModuleReturn(
+  sql: Sql,
+  fromUserId: string,
+  mod: { id: number; moduleId: string; moduleType: string | null; customer: string | null },
+): Promise<void> {
+  await ensureTable(sql);
+  const me = await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [fromUserId]);
+  const who = me[0]?.username || "Warehouse";
+  const body = `Pending module return. ${who} wants ${mod.moduleType ?? "module"} ${mod.moduleId} back at HQ from ${mod.customer || "an account"}.`;
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean }>(
+    "select user_id, is_admin, approved from desk_accounts where user_id <> $1",
+    [fromUserId],
+  );
+  for (const admin of admins) {
+    if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
+    await sql.query(
+      `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
+       values ($1, $2, $3, $4, $5, 'module', $6)`,
+      [admin.user_id, fromUserId, who, body, mod.customer, mod.id],
     );
   }
 }

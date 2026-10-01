@@ -69,7 +69,7 @@ const NAV: { label: string; items: NavItem[] }[] = [
   {
     label: "Work",
     items: [
-      { to: "/", label: "Coming due", icon: CalendarClock, exact: true },
+      { to: "/", label: "Coming Due", icon: CalendarClock, exact: true },
       { to: "/planner", label: "Planner", icon: CalendarRange },
       { to: "/service", label: "Tickets", icon: Wrench },
       { to: "/tlc", label: "TLC + Factor", icon: Coffee },
@@ -98,7 +98,7 @@ const NAV: { label: string; items: NavItem[] }[] = [
     label: "Accounts",
     items: [
       { to: "/customers", label: "Customers", icon: Store },
-      { to: "/network", label: "Out of Network", icon: Globe },
+      { to: "/network", label: "Out Of Network", icon: Globe },
     ],
   },
   {
@@ -163,14 +163,14 @@ function NavGroup({
   );
 }
 
-const WAREHOUSE_OK = ["/warehouse", "/locations"];
+const WAREHOUSE_OK = ["/warehouse", "/locations", "/modules"];
 
 function navForRole(role: DeskRole | null | undefined, isAdmin?: boolean) {
   if (role !== "warehouse") return NAV;
   return [
     {
       label: "Shop",
-      items: NAV.find((g) => g.label === "Shop")!.items.filter((item) => item.to === "/warehouse" || item.to === "/locations"),
+      items: NAV.find((g) => g.label === "Shop")!.items.filter((item) => WAREHOUSE_OK.includes(item.to)),
     },
   ];
 }
@@ -206,17 +206,20 @@ function NavLinks({
 
 function Brand() {
   return (
-    <Link to="/" className="group block px-3" aria-label="Katz Desk home">
+    <Link to="/" className="group flex flex-col items-start px-4" aria-label="Katz Desk home" data-testid="brand-block">
       <img
-        src="/brand/katz-coffee-logo.svg"
+        src="/brand/katz-coffee-mark.svg"
         alt="Katz Coffee"
-        width={360}
-        height={216}
-        className="h-auto w-[9.5rem] drop-shadow-[0_6px_16px_rgb(0_0_0/0.45)] transition-transform group-hover:-rotate-1"
+        width={334}
+        height={177}
+        className="h-auto w-[8.5rem] drop-shadow-[0_6px_16px_rgb(0_0_0/0.45)] transition-transform group-hover:-rotate-1"
       />
-      <span className="mt-1 flex items-center gap-2 pl-1">
-        <span className="h-px w-5 bg-katz-gold/50" />
-        <span className="text-[11px] font-semibold tracking-[0.34em] text-katz-gold uppercase">Desk</span>
+      <span className="mt-3 font-display text-2xl leading-none font-medium tracking-tight text-cream">
+        Katz <span className="italic text-cream/70">Desk</span>
+      </span>
+      <span className="mt-2 flex items-center gap-2 text-[10px] font-semibold tracking-[0.22em] text-katz-gold uppercase">
+        <span aria-hidden className="h-px w-5 bg-katz-gold/60" />
+        Service And Sales
       </span>
     </Link>
   );
@@ -334,8 +337,10 @@ export function AppShell({
             <Menu className="size-5" />
           </Button>
           <Link to="/" className="flex items-center gap-2 md:hidden">
-            <img src="/brand/katz-coffee-logo.svg" alt="Katz Coffee" width={360} height={216} className="h-8 w-auto" />
-            <span className="text-[11px] font-semibold tracking-[0.3em] text-copper uppercase">Desk</span>
+            <img src="/brand/katz-coffee-mark.svg" alt="Katz Coffee" width={334} height={177} className="h-7 w-auto" />
+            <span className="font-display text-lg leading-none font-medium tracking-tight">
+              Katz <span className="italic text-muted-foreground">Desk</span>
+            </span>
           </Link>
           {role === "warehouse" ? null : (
             <div className="order-last w-full min-w-0 md:order-none md:flex md:w-auto md:flex-1 md:justify-end">

@@ -122,7 +122,7 @@ export function SerialPullField({
       ) : null}
       <Dialog open={!!pending?.needsConfirm} onOpenChange={(o) => !o && setPending(null)}>
         <DialogContent>
-          <DialogTitle>Serial already assigned</DialogTitle>
+          <DialogTitle>Serial Already Assigned</DialogTitle>
           <DialogDescription>
             {pending?.notice} Reuse it on this {installId ? "install" : "ticket"}, or cancel and leave it where it is.
           </DialogDescription>

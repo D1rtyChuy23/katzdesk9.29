@@ -132,7 +132,7 @@ export function InstallPlanner({
     <div className="min-w-0 rounded-xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl leading-tight">Install planner</h2>
+          <h2 className="font-display text-xl leading-tight">Install Planner</h2>
           <p className="text-[11px] text-muted-foreground">
             One bar per project. Overlaps in the same week light up. Changing a date here updates the install date used on exports.
           </p>

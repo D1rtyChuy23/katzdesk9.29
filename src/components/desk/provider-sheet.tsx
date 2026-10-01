@@ -140,7 +140,7 @@ export function ProviderSheet({
         <SheetHeader>
           <p className="text-xs tracking-wide text-muted-foreground uppercase">3rd-party provider</p>
           <div className="flex items-start justify-between gap-2">
-            <SheetTitle>{creating ? "New provider" : p?.name ?? "Provider"}</SheetTitle>
+            <SheetTitle>{creating ? "New Provider" : p?.name ?? "Provider"}</SheetTitle>
             {!creating && p ? (
               <Button type="button" size="sm" variant="outline" onClick={() => setEditingName(true)}>
                 <Pencil className="size-3.5" />
@@ -221,7 +221,7 @@ export function ProviderSheet({
 
               <fieldset className="grid gap-3 sm:grid-cols-2">
                 <legend className="mb-1 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-                  Rates & response
+                  Rates & Response
                 </legend>
                 <div>
                   <Label htmlFor="standardRate">Standard rate</Label>
@@ -247,7 +247,7 @@ export function ProviderSheet({
 
               <fieldset className="grid gap-3">
                 <legend className="mb-1 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-                  Coverage notes
+                  Coverage Notes
                 </legend>
                 <div>
                   <Label htmlFor="equipmentServiced">Equipment serviced</Label>
@@ -301,7 +301,7 @@ export function ProviderSheet({
     </Sheet>
     <RenameDialog
       open={editingName}
-      title="Rename provider"
+      title="Rename Provider"
       noun="provider"
       current={p?.name ?? ""}
       pending={rename.isPending}

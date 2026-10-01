@@ -137,7 +137,7 @@ function DeskLayout() {
   if (!user && sessionSlow) {
     return (
       <AccountProblem
-        title="Couldn’t load your account"
+        title="Couldn’t Load Your Account"
         message="The sign-in check didn’t finish. Try again, or sign out and come back in."
         onRetry={() => window.location.reload()}
       />
@@ -151,7 +151,7 @@ function DeskLayout() {
     const err = access.error ?? claim.error;
     return (
       <AccountProblem
-        title="Couldn’t load your account"
+        title="Couldn’t Load Your Account"
         message={err instanceof Error ? err.message : "Loading your account took too long."}
         onRetry={() => {
           setGateSlow(false);
@@ -174,7 +174,7 @@ function DeskLayout() {
       <main className="flex min-h-svh items-center justify-center bg-ink px-6 text-ink-foreground">
         <div className="max-w-md rounded-xl border border-cream/12 bg-cream/6 p-6">
           <p className="text-xs tracking-[0.18em] text-cream/50 uppercase">Katz Desk</p>
-          <h1 className="mt-3 font-display text-3xl">Access denied</h1>
+          <h1 className="mt-3 font-display text-3xl">Access Denied</h1>
           <p className="mt-2 text-sm text-cream/70">
             Signed in as {gate.username}. An admin declined this account. Ask them to send a new
             invite link — opening that link signs you in.
@@ -196,7 +196,7 @@ function DeskLayout() {
       <main className="flex min-h-svh items-center justify-center bg-ink px-6 text-ink-foreground">
         <div className="max-w-md rounded-xl border border-cream/12 bg-cream/6 p-6">
           <p className="text-xs tracking-[0.18em] text-cream/50 uppercase">Katz Desk</p>
-          <h1 className="mt-3 font-display text-3xl">Waiting for approval</h1>
+          <h1 className="mt-3 font-display text-3xl">Waiting For Approval</h1>
           <p className="mt-2 text-sm text-cream/70">
             Signed in as {gate?.username ?? "this account"}. Open the invite link from your admin
             while signed in, or ask them to send a new one. Without that link, an admin still needs

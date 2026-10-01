@@ -12,7 +12,7 @@ function Page() {
   return (
     <JobsPage
       kind="service"
-      title="Service tracker"
+      title="Service Tracker"
       lede="Field calls on a 48-hour clock. Active work stays on top; completed history is one toggle away."
       initialOpen={open}
     />

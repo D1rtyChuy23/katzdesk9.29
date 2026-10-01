@@ -185,7 +185,7 @@ function Page() {
         <>
       {filtered.pendingHandoffs.length ? (
         <section className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-display text-xl">Completed deals not yet on the install board</h2>
+          <h2 className="font-display text-xl">Completed Deals Not Yet On The Install Board</h2>
           <ul className="mt-3 divide-y divide-border">
             {filtered.pendingHandoffs.map((p) => (
               <li key={p.dealId} className="py-3">
@@ -219,7 +219,7 @@ function Page() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-display text-xl">Open asks</h2>
+          <h2 className="font-display text-xl">Open Asks</h2>
           {!filtered.asks.length ? (
             <p className="mt-3 text-sm text-muted-foreground">
               {scope === "mine" ? "No open asks on your work." : "No unanswered asks. Nice."}
@@ -286,7 +286,7 @@ function Page() {
           )}
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-display text-xl">Recent notes</h2>
+          <h2 className="font-display text-xl">Recent Notes</h2>
           {!filtered.recent.length ? (
             <p className="mt-3 text-sm text-muted-foreground">
               {scope === "mine" ? "No recent notes on your work." : "No notes yet."}

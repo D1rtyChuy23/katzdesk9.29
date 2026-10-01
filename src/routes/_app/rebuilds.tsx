@@ -79,7 +79,7 @@ function Page() {
     <div>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">In-house rebuilds</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">In-House Rebuilds</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Shop projects, not field tickets. One owner, planned vs actual, a current blocker, and aging you cannot ignore.
           </p>
@@ -105,7 +105,7 @@ function Page() {
           onClick={() => setChip((c) => toggleChip(c, "overdue", "all"))}
         />
         <StatCard
-          label="At risk"
+          label="At Risk"
           value={atRisk}
           tone={atRisk ? "warn" : "ok"}
           hint="Waiting, or target within 3 days"
@@ -120,7 +120,7 @@ function Page() {
           onClick={() => setChip((c) => toggleChip(c, "waiting", "all"))}
         />
         <StatCard
-          label="No date"
+          label="No Date"
           value={noDate}
           tone={noDate ? "warn" : "ok"}
           hint="In progress / waiting / testing with no target"
@@ -229,7 +229,7 @@ function CreateRebuildDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogTitle>New rebuild</DialogTitle>
+        <DialogTitle>New Rebuild</DialogTitle>
         <form
           className="mt-4 space-y-3"
           onSubmit={(e) => {

@@ -34,7 +34,7 @@ export function RepsEditor() {
 
   return (
     <section className="rounded-xl border border-border bg-card p-5">
-      <h2 className="font-display text-xl">Sales reps</h2>
+      <h2 className="font-display text-xl">Sales Reps</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Dropdown-only list. Same lock as the service-tech roster — only you can add or remove names.
       </p>

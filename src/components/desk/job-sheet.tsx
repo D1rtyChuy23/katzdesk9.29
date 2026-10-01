@@ -96,7 +96,7 @@ export function JobSheet({
               <p className="text-xs tracking-wide text-muted-foreground uppercase">
                 {j.kind === "tlc" ? "TLC + Factor" : "Service call"} · {j.callId}
               </p>
-              <SheetTitle>{j.customer ?? "Untitled account"}</SheetTitle>
+              <SheetTitle>{j.customer ?? "Untitled Account"}</SheetTitle>
               <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5">
                 <UrgencyBadge urgency={j.urgency} />
                 <StatusBadge status={j.status} />
@@ -448,7 +448,7 @@ export function NewJobDialog({
         className="max-h-[90vh] overflow-y-auto sm:max-w-xl"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogTitle>New {kind === "tlc" ? "TLC + Factor" : "service"} call</DialogTitle>
+        <DialogTitle>New {kind === "tlc" ? "TLC + Factor" : "Service"} Call</DialogTitle>
         <DialogDescription>Opens on today’s clock. Fill the rest in the drawer.</DialogDescription>
         <form
           className="mt-4 space-y-4"

@@ -2,7 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createModule, listModules } from "@/lib/ops/api";
-import { MODULE_TYPES } from "@/lib/ops/lookups";
+import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
+import { moduleAccount, moduleAvailability, type ModuleAvailability } from "@/lib/ops/eversys";
+import { AssignModuleDialog, AssignedLine, ModuleReturnActions } from "@/components/desk/module-assign";
+import { SelectField } from "@/components/ui/select-field";
+import { cn } from "@/lib/utils";
+import type { ModuleRow } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/desk/flag-badge";
@@ -29,10 +34,31 @@ function Page() {
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("modules", "status");
-  const [bubble, setBubble] = useState<"tracked" | "ready" | "shop" | null>("tracked");
+  const [bubble, setBubble] = useState<"ready" | "shop" | null>(null);
+  // Default view is HQ stock: what is here and can go out.
+  const [avail, setAvail] = useState<ModuleAvailability | "all">("hq");
+  const [platform, setPlatform] = useState("");
+  const [account, setAccount] = useState("");
+  const [mtype, setMtype] = useState("");
+  const [assignFor, setAssignFor] = useState<ModuleRow | null>(null);
   const all = data.data ?? [];
-  const readyRows = all.filter((m) => m.status === "Ready");
-  const notReady = all.filter((m) => m.status !== "Ready" && m.status !== "Installed at Account" && m.status !== "Retired / Scrapped");
+  const hqRows = all.filter((m) => moduleAvailability(m) === "hq");
+  const assignedRows = all.filter((m) => moduleAvailability(m) === "assigned");
+  const readyRows = hqRows.filter((m) => m.status === "Ready");
+  const notReady = hqRows.filter((m) => m.status !== "Ready");
+  const availCount = { hq: hqRows.length, assigned: assignedRows.length, all: all.length, away: all.length - hqRows.length - assignedRows.length };
+  const accounts = useMemo(
+    () => [...new Set(assignedRows.map((m) => moduleAccount(m)).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b)),
+    [assignedRows],
+  );
+  const platforms = useMemo(
+    () => [...new Set([...MODULE_PLATFORMS, ...(all.map((m) => m.platform).filter(Boolean) as string[])])],
+    [all],
+  );
+  const types = useMemo(
+    () => [...new Set([...MODULE_TYPES, ...(all.map((m) => m.moduleType).filter(Boolean) as string[])])],
+    [all],
+  );
   const readyByTypeAll = MODULE_TYPES.map((type) => ({
     name: type,
     count: readyRows.filter((m) => m.moduleType === type).length,
@@ -41,18 +67,21 @@ function Page() {
     (r) => !MODULE_TYPES.includes(r.name as (typeof MODULE_TYPES)[number]),
   );
   const readyByTypeChart = [...readyByTypeAll, ...extraTypes];
-  const readyByPlatform = tally(readyRows, (m) => m.platform);
   const statusMix = tally(all, (m) => m.status);
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
     let list = all;
-    if (bubble === "ready") list = list.filter((m) => m.status === "Ready");
-    if (bubble === "shop") {
-      list = list.filter((m) => m.status !== "Ready" && m.status !== "Installed at Account" && m.status !== "Retired / Scrapped");
-    }
+    if (avail !== "all") list = list.filter((m) => moduleAvailability(m) === avail);
+    if (bubble === "ready") list = list.filter((m) => moduleAvailability(m) === "hq" && m.status === "Ready");
+    if (bubble === "shop") list = list.filter((m) => moduleAvailability(m) === "hq" && m.status !== "Ready");
+    if (platform) list = list.filter((m) => (m.platform ?? "") === platform);
+    if (account) list = list.filter((m) => moduleAccount(m) === account);
+    if (mtype) list = list.filter((m) => (m.moduleType ?? "") === mtype);
     if (needle) {
       list = list.filter((m) =>
-        [m.moduleId, m.location, m.moduleType, m.status, m.wo].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
+        [m.moduleId, m.location, m.moduleType, m.status, m.wo, m.assignedCustomer, m.assignedUnitLabel]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
     return sortDesk(list, sort, {
@@ -62,54 +91,74 @@ function Page() {
       status: (m) => m.status,
       tech: (m) => m.technician,
     });
-  }, [all, q, sort, bubble]);
+  }, [all, q, sort, bubble, avail, platform, account, mtype]);
   const selectedRow = all.find((m) => m.id === selected) ?? null;
 
   return (
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Eversys modules</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Eversys Modules</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            One row per physical module. The Ready count splits by type so you can see what can actually ship.
+            One row per module serial. A module is part of an Eversys machine: assign it to the unit on a café, and it
+            leaves HQ stock until it comes back.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <ExportButton defaultType="modules" />
           <Button onClick={() => setCreate(true)}>
             <Plus className="size-4" />
-            New module
+            New Module
           </Button>
         </div>
       </header>
       <StatRow>
         <StatCard
-          label="Tracked"
-          value={all.length}
-          hint="Every module on the board"
-          selected={bubble === "tracked"}
-          onClick={() => setBubble((v) => toggleChip(v, "tracked", null))}
+          label="At HQ"
+          value={hqRows.length}
+          hint="Here and not on a café"
+          selected={avail === "hq" && !bubble}
+          onClick={() => {
+            setAvail("hq");
+            setBubble(null);
+          }}
         />
         <StatCard
-          label="Ready"
+          label="Ready At HQ"
           value={readyRows.length}
-          hint={readyByPlatform.map((p) => `${p.count} ${p.name}`).join(" · ") || "Nothing ready"}
+          hint={tally(readyRows, (m) => m.platform).map((p) => `${p.count} ${p.name}`).join(" · ") || "Nothing ready"}
           selected={bubble === "ready"}
-          onClick={() => setBubble((v) => toggleChip(v, "ready", null))}
+          onClick={() => {
+            setAvail("hq");
+            setBubble((v) => toggleChip(v, "ready", null));
+          }}
         />
         <StatCard
-          label="In shop"
+          label="In Shop"
           value={notReady.length}
-          hint="Not ready, not installed, not retired"
+          hint="At HQ, not ready yet"
           selected={bubble === "shop"}
-          onClick={() => setBubble((v) => toggleChip(v, "shop", null))}
+          onClick={() => {
+            setAvail("hq");
+            setBubble((v) => toggleChip(v, "shop", null));
+          }}
+        />
+        <StatCard
+          label="Assigned"
+          value={assignedRows.length}
+          hint="On a café machine"
+          selected={avail === "assigned"}
+          onClick={() => {
+            setAvail("assigned");
+            setBubble(null);
+          }}
         />
       </StatRow>
       <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2">
-        <ChartCard title="By status" lede="Where the shop floor actually sits.">
+        <ChartCard title="By Status" lede="Where every module sits.">
           {statusMix.length ? <StatusDonut data={statusMix} unit="modules" /> : <p className="text-sm text-muted-foreground">No modules yet.</p>}
         </ChartCard>
-        <ChartCard title="Ready by type" lede="The Ready bubble, unpacked.">
+        <ChartCard title="Ready At HQ By Type" lede="What can actually ship.">
           {readyRows.length ? (
             <SimpleBars
               data={readyByTypeChart.map((r) => ({ type: r.name.replace(" Module", ""), count: r.count }))}
@@ -119,12 +168,62 @@ function Page() {
               horizontal
             />
           ) : (
-            <p className="text-sm text-muted-foreground">Nothing marked Ready.</p>
+            <p className="text-sm text-muted-foreground">Nothing marked Ready at HQ.</p>
           )}
         </ChartCard>
       </section>
       <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter modules…" className="h-9 w-56 shrink-0" aria-label="Filter modules" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search serial, account…" className="h-9 w-56 shrink-0" aria-label="Search modules" />
+        <div className="flex shrink-0 overflow-hidden rounded-full border border-border bg-card" role="tablist" aria-label="Where modules are">
+          {(
+            [
+              ["hq", "Available (HQ)"],
+              ["assigned", "Assigned"],
+              ["all", "All"],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={avail === id}
+              data-testid={`avail-${id}`}
+              onClick={() => {
+                setAvail(id);
+                setBubble(null);
+              }}
+              className={cn(
+                "h-9 px-3 text-xs font-medium tabular",
+                avail === id ? "bg-ink text-ink-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {label} {availCount[id]}
+            </button>
+          ))}
+        </div>
+        <SelectField value={platform} onChange={(e) => setPlatform(e.target.value)} allowEmpty emptyLabel="All Models" className="h-9 w-auto shrink-0" aria-label="Filter by Eversys model">
+          {platforms.map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField value={mtype} onChange={(e) => setMtype(e.target.value)} allowEmpty emptyLabel="All Types" className="h-9 w-auto shrink-0" aria-label="Filter by module type">
+          {types.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </SelectField>
+        {accounts.length ? (
+          <SelectField value={account} onChange={(e) => setAccount(e.target.value)} allowEmpty emptyLabel="All Accounts" className="h-9 w-auto max-w-56 shrink-0" aria-label="Filter by account">
+            {accounts.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </SelectField>
+        ) : null}
         <SortSelect
           value={sort}
           onChange={setSort}
@@ -132,35 +231,66 @@ function Page() {
           className="shrink-0"
         />
       </div>
-      <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card">
-        {rows.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => setSelected(m.id)}
-            className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[8rem_1fr_8rem_8rem] md:items-center"
-          >
-            <span className="font-mono text-xs">{m.moduleId}</span>
-            <span>
-              <span className="font-medium">{m.moduleType}</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
-                {m.platform} · {m.location ?? "—"}
-              </span>
-            </span>
-            <StatusBadge status={m.status} />
-            <span className="text-sm">
-              <TechName name={m.technician} />
-            </span>
-          </button>
-        ))}
-        {rows.length === 0 ? <p className="px-4 py-8 text-sm text-muted-foreground">No modules in this view.</p> : null}
+      <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid="module-list">
+        {rows.map((m) => {
+          const where = moduleAvailability(m);
+          return (
+            <div
+              key={m.id}
+              data-testid={`module-row-${m.moduleId}`}
+              data-avail={where}
+              className={cn(
+                "grid gap-2 border-b border-border px-4 py-3 last:border-b-0 md:grid-cols-[1fr_auto] md:items-center",
+                where !== "hq" && "bg-muted/30",
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setSelected(m.id)}
+                className={cn(
+                  "desk-lift grid min-w-0 gap-1 text-left md:grid-cols-[8rem_1fr_9rem_7rem] md:items-center",
+                  where !== "hq" && "opacity-55 hover:opacity-80",
+                )}
+              >
+                <span className="font-mono text-xs">{m.moduleId}</span>
+                <span className="min-w-0">
+                  <span className="font-medium">{m.moduleType}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    {m.platform}
+                    {where === "hq" ? ` · ${m.location && m.location.toUpperCase() !== "SHELF" ? m.location : "At HQ"}` : ""}
+                  </span>
+                  {where === "assigned" ? <AssignedLine row={m} /> : null}
+                </span>
+                <StatusBadge status={m.status} />
+                <span className="text-sm">
+                  <TechName name={m.technician} />
+                </span>
+              </button>
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                {where === "hq" ? (
+                  <Button type="button" size="sm" variant="outline" onClick={() => setAssignFor(m)} data-testid={`assign-${m.moduleId}`}>
+                    Assign To Account
+                  </Button>
+                ) : where === "assigned" ? (
+                  <ModuleReturnActions row={m} compact />
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+        {rows.length === 0 ? (
+          <p className="px-4 py-8 text-sm text-muted-foreground">
+            {avail === "hq" ? "No modules at HQ match these filters." : "No modules in this view."}
+          </p>
+        ) : null}
       </div>
-      <ModuleSheet row={selectedRow} onClose={() => setSelected(null)} />
+      <ModuleSheet row={selectedRow} onClose={() => setSelected(null)} onAssign={(m) => setAssignFor(m)} />
+      <AssignModuleDialog module={assignFor} onOpenChange={(o) => !o && setAssignFor(null)} />
       <SimpleCreateDialog
-        title="New module"
+        title="New Module"
         open={create}
         onOpenChange={setCreate}
-        fields={[{ name: "moduleId", label: "Module ID", required: true }]}
+        fields={[{ name: "moduleId", label: "Module Serial", required: true }]}
         onSubmit={async (v) => {
           const row = await createModule({ data: { moduleId: v.moduleId } });
           void qc.invalidateQueries({ queryKey: ["modules"] });

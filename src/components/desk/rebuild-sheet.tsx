@@ -386,7 +386,7 @@ export function RebuildSheet({
       </Sheet>
       <Dialog open={!!reuseNotice} onOpenChange={(v) => !v && setReuseNotice(null)}>
         <DialogContent>
-          <DialogTitle>Serial already assigned</DialogTitle>
+          <DialogTitle>Serial Already Assigned</DialogTitle>
           <DialogDescription>{reuseNotice}</DialogDescription>
           <div className="mt-4 flex gap-2">
             <Button

@@ -252,7 +252,7 @@ function Page() {
       <CustomerHistorySheet customerId={selected} onClose={closeCustomer} />
       <RenameDialog
         open={!!renaming}
-        title="Rename customer"
+        title="Rename Customer"
         noun="customer"
         current={renaming?.name ?? ""}
         pending={rename.isPending}

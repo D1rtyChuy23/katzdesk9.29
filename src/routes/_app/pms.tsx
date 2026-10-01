@@ -67,7 +67,7 @@ function Page() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Preventative maintenance</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Preventative Maintenance</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Projected dates go amber inside 14 days and red once they slip. Need-a-date PMs sit at the top.
           </p>
@@ -99,7 +99,7 @@ function Page() {
           onClick={() => setView((v) => toggleChip(v, "flagged", "all"))}
         />
         <StatCard
-          label="Need a date"
+          label="Need A Date"
           value={needDate}
           tone={needDate ? "warn" : undefined}
           hint="Active PMs with no projected date"

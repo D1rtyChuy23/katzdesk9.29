@@ -216,7 +216,7 @@ function Page() {
       </header>
 
       <section className="mt-6 rounded-xl border border-border bg-card p-4 sm:p-5">
-        <h2 className="text-xs tracking-wide text-muted-foreground uppercase">Invite people</h2>
+        <h2 className="text-xs tracking-wide text-muted-foreground uppercase">Invite People</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Email, username, or both. The desk does not send the email for you — copy the invite
           after saving and send it yourself. If they already signed up, inviting them approves them now.
@@ -295,7 +295,7 @@ function Page() {
       {signingUp.length > 0 ? (
         <section className="mt-8">
           <h2 className="text-xs tracking-wide text-muted-foreground uppercase">
-            Signing up ({signingUp.length})
+            Signing Up ({signingUp.length})
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             They reached the desk but haven’t picked a username yet. They’ll show as approved or
@@ -341,7 +341,7 @@ function Page() {
 
       <section className="mt-8">
         <h2 className="text-xs tracking-wide text-muted-foreground uppercase">
-          Waiting for approval ({pending.length})
+          Waiting For Approval ({pending.length})
         </h2>
         <ul className="mt-2 overflow-hidden rounded-xl border border-border bg-card">
           {pending.map((a) => (
@@ -409,7 +409,7 @@ function Page() {
       {canAssignRoles && needsRole.length > 0 ? (
         <section className="mt-8">
           <h2 className="text-xs tracking-wide text-warning uppercase">
-            Needs a role ({needsRole.length})
+            Needs A Role ({needsRole.length})
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Existing logins stay unassigned until you pick Sales, Service, or Warehouse. Admins do not need a role.
@@ -539,7 +539,7 @@ function ResetPasswordButton({ userId, username }: { userId: string; username: s
       </Button>
       <Dialog open={!!link} onOpenChange={(v) => (v ? null : setLink(null))}>
         <DialogContent>
-          <DialogTitle>Reset link for {username}</DialogTitle>
+          <DialogTitle>Reset Link For {username}</DialogTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             Send this to them yourself. It works once, expires in 48 hours, and signs them out of other devices.
           </p>
