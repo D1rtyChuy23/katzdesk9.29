@@ -1,6 +1,7 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   BookOpen,
+  Library,
   CalendarClock,
   CalendarRange,
   Coffee,
@@ -45,6 +46,7 @@ type DeskTo =
   | "/handoff"
   | "/installs"
   | "/recipes"
+  | "/library"
   | "/pipeline"
   | "/warehouse"
   | "/rebuilds"
@@ -90,6 +92,7 @@ const NAV: { label: string; items: NavItem[] }[] = [
     items: [
       { to: "/warehouse", label: "Warehouse", icon: Warehouse },
       { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
+      { to: "/library", label: "The Library", icon: Library },
       { to: "/locations", label: "Locations", icon: MapPin },
       { to: "/modules", label: "Modules", icon: Package },
     ],
@@ -163,14 +166,14 @@ function NavGroup({
   );
 }
 
-const WAREHOUSE_OK = ["/warehouse", "/locations", "/modules"];
+const WAREHOUSE_OK = ["/warehouse", "/locations", "/modules", "/library"];
 
 function navForRole(role: DeskRole | null | undefined, isAdmin?: boolean) {
   if (role !== "warehouse") return NAV;
   return [
     {
       label: "Shop",
-      items: NAV.find((g) => g.label === "Shop")!.items.filter((item) => WAREHOUSE_OK.includes(item.to)),
+      items: NAV.flatMap((g) => g.items).filter((item) => WAREHOUSE_OK.includes(item.to)),
     },
   ];
 }

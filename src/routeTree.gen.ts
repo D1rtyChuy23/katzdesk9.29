@@ -16,6 +16,7 @@ import { Route as AppAccessRouteImport } from './routes/_app/access'
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
+import { Route as AppLibraryRouteImport } from './routes/_app/library'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppModulesRouteImport } from './routes/_app/modules'
 import { Route as AppNetworkRouteImport } from './routes/_app/network'
@@ -62,6 +63,11 @@ const AppHandoffRoute = AppHandoffRouteImport.update({
 const AppInstallsRoute = AppInstallsRouteImport.update({
   id: '/installs',
   path: '/installs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLibraryRoute = AppLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLocationsRoute = AppLocationsRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
+  '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/modules': typeof AppModulesRoute
   '/network': typeof AppNetworkRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
+  '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/modules': typeof AppModulesRoute
   '/network': typeof AppNetworkRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/_app/customers': typeof AppCustomersRoute
   '/_app/handoff': typeof AppHandoffRoute
   '/_app/installs': typeof AppInstallsRoute
+  '/_app/library': typeof AppLibraryRoute
   '/_app/locations': typeof AppLocationsRoute
   '/_app/modules': typeof AppModulesRoute
   '/_app/network': typeof AppNetworkRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
+    | '/library'
     | '/locations'
     | '/modules'
     | '/network'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
+    | '/library'
     | '/locations'
     | '/modules'
     | '/network'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/_app/customers'
     | '/_app/handoff'
     | '/_app/installs'
+    | '/_app/library'
     | '/_app/locations'
     | '/_app/modules'
     | '/_app/network'
@@ -317,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/installs'
       fullPath: '/installs'
       preLoaderRoute: typeof AppInstallsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/library': {
+      id: '/_app/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AppLibraryRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/locations': {
@@ -418,6 +437,7 @@ interface AppRouteChildren {
   AppCustomersRoute: typeof AppCustomersRoute
   AppHandoffRoute: typeof AppHandoffRoute
   AppInstallsRoute: typeof AppInstallsRoute
+  AppLibraryRoute: typeof AppLibraryRoute
   AppLocationsRoute: typeof AppLocationsRoute
   AppModulesRoute: typeof AppModulesRoute
   AppNetworkRoute: typeof AppNetworkRoute
@@ -438,6 +458,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCustomersRoute: AppCustomersRoute,
   AppHandoffRoute: AppHandoffRoute,
   AppInstallsRoute: AppInstallsRoute,
+  AppLibraryRoute: AppLibraryRoute,
   AppLocationsRoute: AppLocationsRoute,
   AppModulesRoute: AppModulesRoute,
   AppNetworkRoute: AppNetworkRoute,
