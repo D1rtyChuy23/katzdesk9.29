@@ -111,8 +111,8 @@ export function coreHoleLines(core: { required: boolean; diameter: string | null
   if (!core.required) return ["Utility lines pass through the counter: No", `Note: ${CORE_HOLE_NOTE}`];
   return [
     "Utility lines pass through the counter: Yes",
+    // The size is stated once.
     `Hole diameter: ${core.diameter ?? "needed"}`,
-    ...(core.diameter && core.label ? [core.label] : []),
     `Note: ${CORE_HOLE_NOTE}`,
   ];
 }

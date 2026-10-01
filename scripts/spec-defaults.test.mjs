@@ -177,7 +177,6 @@ test("copy text carries the plug and breaker", () => {
       'Water: 3/8" compression valve',
       "Utility lines pass through the counter: Yes",
       'Hole diameter: 3"',
-      'Counter core hole: 3" diameter',
       "Note: Primarily needed when utility lines are below the counter.",
     ].join("\n"),
   );
@@ -188,7 +187,8 @@ test("core hole travels with the copied configuration: 1.5\" set, and No copies 
   const text = copyConfig(sheet, { label: "Standard", requirements: { water: { inlet: DEFAULT_INLET } } });
   assert.ok(text.includes("Utility lines pass through the counter: Yes"));
   assert.ok(text.includes('Hole diameter: 1.5"'));
-  assert.ok(text.includes('Counter core hole: 1.5" diameter'));
+  assert.equal(text.match(/1\.5"/g).length, 1, "the size is stated once");
+  assert.ok(!text.includes("Counter core hole:"));
   assert.ok(text.includes("Primarily needed when utility lines are below the counter."));
   const no = copyConfig({ ...sheet, coreHole: "no", coreDiameter: undefined }, { label: "Standard", requirements: {} });
   assert.ok(no.includes("Utility lines pass through the counter: No"));

@@ -238,7 +238,6 @@ export function CoreHoleLine({ core }: { core?: CoreHoleInfo | null }) {
               <span className="text-muted-foreground">Hole diameter: </span>
               <span className="font-semibold">{core.diameter}</span>
             </p>
-            <p className="font-semibold">{core.label}</p>
           </>
         )
       ) : null}

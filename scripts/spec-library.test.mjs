@@ -176,7 +176,6 @@ test("copyConfig matches the Outlook/Teams format", () => {
       'Size: 31.5"W x 23.6"D x 20.5"H, 143 lb',
       "Utility lines pass through the counter: Yes",
       'Hole diameter: 3"',
-      'Counter core hole: 3" diameter',
       "Note: Primarily needed when utility lines are below the counter.",
     ].join("\n"),
   );
@@ -191,7 +190,7 @@ test("copy text has short plain lines and no markdown", () => {
   assert.ok(all.includes("Warranty: 2 years parts"));
   assert.equal(
     copyConfig(sheet, { label: "Standard", requirements: {} }),
-    'La Marzocco Linea PB\nUtility lines pass through the counter: Yes\nHole diameter: 3"\nCounter core hole: 3" diameter\nNote: Primarily needed when utility lines are below the counter.',
+    'La Marzocco Linea PB\nUtility lines pass through the counter: Yes\nHole diameter: 3"\nNote: Primarily needed when utility lines are below the counter.',
   );
   assert.equal(
     copyConfig({ manufacturer: "Bunn", model: "TB3", category: "Brewer" }, { label: "Standard", requirements: {} }),
