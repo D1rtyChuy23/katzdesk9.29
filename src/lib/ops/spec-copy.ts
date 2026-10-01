@@ -34,7 +34,7 @@ export function powerLine(p: Power | undefined): string | null {
   if (!p) return null;
   const breaker = p.breaker?.trim() ? `${p.breaker.trim()} breaker` : "";
   const ampsText = p.amps ? (breaker ? `${amps(p.amps)} (${breaker})` : amps(p.amps)) : breaker;
-  const text = join([p.voltage && volts(p.voltage), ampsText, p.phase && phase(p.phase), p.hz && hz(p.hz), p.plug, p.circuit]);
+  const text = join([p.voltage && volts(p.voltage), p.wires, ampsText, p.phase && phase(p.phase), p.hz && hz(p.hz), p.plug, p.circuit]);
   return text ? `Power: ${text}` : null;
 }
 
@@ -88,7 +88,7 @@ export function copyConfig(sheet: SheetLike, config: SpecConfig): string {
     coreHole: sheet.coreHole,
     coreDiameter: sheet.coreDiameter,
   });
-  if (core.label) lines.push(core.label);
+  lines.push(...coreHoleLines(core));
   return [head, ...(lines.length ? lines : ["No requirements listed"])].join("\n");
 }
 
@@ -102,4 +102,17 @@ export function copyAll(sheet: SheetLike): string {
   if (has(sheet.mfrNotes?.warranty)) tail.push(`Warranty: ${sheet.mfrNotes!.warranty!.trim()}`);
   if (has(sheet.mfrNotes?.usContact)) tail.push(`US contact: ${sheet.mfrNotes!.usContact!.trim()}`);
   return [...blocks, ...(tail.length ? [tail.join("\n")] : [])].join("\n\n");
+}
+
+export const CORE_HOLE_NOTE = "Primarily needed when utility lines are below the counter.";
+
+/** Core-hole fields travel with every copied configuration. No → "No" and no diameter. */
+export function coreHoleLines(core: { required: boolean; diameter: string | null; label: string | null }): string[] {
+  if (!core.required) return ["Utility lines pass through the counter: No", `Note: ${CORE_HOLE_NOTE}`];
+  return [
+    "Utility lines pass through the counter: Yes",
+    `Hole diameter: ${core.diameter ?? "needed"}`,
+    ...(core.diameter && core.label ? [core.label] : []),
+    `Note: ${CORE_HOLE_NOTE}`,
+  ];
 }

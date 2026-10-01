@@ -4,7 +4,14 @@
  */
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
-export type PdfText = { text: string; pages: number; image: string | null };
+export type PdfText = {
+  text: string;
+  pages: number;
+  /** The machine photo (primary image). */
+  image: string | null;
+  /** A dimension drawing (front/side views with measurements), shown second under "Dimensions". */
+  dimsImage: string | null;
+};
 
 export async function pdfToText(file: File): Promise<PdfText> {
   if (file.size > MAX_PDF_BYTES) throw new Error("That PDF is over 10 MB.");
@@ -39,8 +46,8 @@ export async function pdfToText(file: File): Promise<PdfText> {
       out.push(lines.map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n"));
       page.cleanup();
     }
-    const image = await largestImage(pdfjs, doc).catch(() => null);
-    return { text: out.join("\n\n").trim(), pages: doc.numPages, image };
+    const pics = await sheetImages(pdfjs, doc).catch(() => ({ image: null, dimsImage: null }));
+    return { text: out.join("\n\n").trim(), pages: doc.numPages, ...pics };
   } finally {
     void doc.destroy();
   }
@@ -50,12 +57,78 @@ type PdfJs = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
 type PdfDoc = Awaited<ReturnType<PdfJs["getDocument"]>["promise"]>;
 type PdfImage = { width: number; height: number; bitmap?: ImageBitmap; data?: Uint8ClampedArray | Uint8Array; kind?: number };
 
+/** Draw a pdf.js image object onto a canvas (bitmap or raw pixel data). */
+function toCanvas(img: PdfImage): HTMLCanvasElement | null {
+  const src = document.createElement("canvas");
+  src.width = img.width;
+  src.height = img.height;
+  const ctx = src.getContext("2d");
+  if (!ctx) return null;
+  if (img.bitmap) {
+    ctx.drawImage(img.bitmap, 0, 0);
+    return src;
+  }
+  if (!img.data) return null;
+  const px = img.width * img.height;
+  const d = img.data;
+  const rgba = new Uint8ClampedArray(px * 4);
+  if (d.length === px * 4) rgba.set(d);
+  else if (d.length === px * 3) {
+    for (let p = 0; p < px; p++) {
+      rgba[p * 4] = d[p * 3]!;
+      rgba[p * 4 + 1] = d[p * 3 + 1]!;
+      rgba[p * 4 + 2] = d[p * 3 + 2]!;
+      rgba[p * 4 + 3] = 255;
+    }
+  } else if (d.length === px) {
+    for (let p = 0; p < px; p++) {
+      rgba[p * 4] = rgba[p * 4 + 1] = rgba[p * 4 + 2] = d[p]!;
+      rgba[p * 4 + 3] = 255;
+    }
+  } else return null;
+  ctx.putImageData(new ImageData(rgba, img.width, img.height), 0, 0);
+  return src;
+}
+
 /**
- * The equipment picture from the sheet: the largest embedded image on the first two pages
- * (logos and icons are smaller). Resized to 640 px JPEG so it stores small. Null if none.
+ * Photo or line drawing? Dimension drawings are mostly white paper with thin dark lines;
+ * photos (even on a white background) are full of mid-tones.
  */
-async function largestImage(pdfjs: PdfJs, doc: PdfDoc): Promise<string | null> {
-  let best: PdfImage | null = null;
+export function looksLikeDiagram(pixels: Uint8ClampedArray): boolean {
+  let white = 0;
+  let mid = 0;
+  let colorful = 0;
+  const n = pixels.length / 4;
+  for (let i = 0; i < pixels.length; i += 4) {
+    const r = pixels[i]!;
+    const g = pixels[i + 1]!;
+    const b = pixels[i + 2]!;
+    if (r > 235 && g > 235 && b > 235) white++;
+    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+    if (lum > 40 && lum < 215) mid++;
+    if (Math.max(r, g, b) - Math.min(r, g, b) > 40) colorful++;
+  }
+  // Line drawings: mostly paper, thin dark lines, almost no mid-tones. Photos (even on white) are full of mid-tones.
+  return white / n > 0.75 && mid / n < 0.15 && colorful / n < 0.05;
+}
+
+function classify(canvas: HTMLCanvasElement): "photo" | "diagram" {
+  const small = document.createElement("canvas");
+  small.width = 96;
+  small.height = 96;
+  const ctx = small.getContext("2d");
+  if (!ctx) return "photo";
+  ctx.drawImage(canvas, 0, 0, 96, 96);
+  return looksLikeDiagram(ctx.getImageData(0, 0, 96, 96).data) ? "diagram" : "photo";
+}
+
+/**
+ * Images from the first two pages: the largest photo is the machine (primary); the largest
+ * line drawing is the dimension diagram (secondary). A diagram is never used as the main image.
+ */
+async function sheetImages(pdfjs: PdfJs, doc: PdfDoc): Promise<{ image: string | null; dimsImage: string | null }> {
+  let photo: { area: number; canvas: HTMLCanvasElement } | null = null;
+  let diagram: { area: number; canvas: HTMLCanvasElement } | null = null;
   for (let n = 1; n <= Math.min(2, doc.numPages); n++) {
     const page = await doc.getPage(n);
     const ops = await page.getOperatorList();
@@ -74,28 +147,18 @@ async function largestImage(pdfjs: PdfJs, doc: PdfDoc): Promise<string | null> {
       if (!img?.width || !img.height || img.width < 160 || img.height < 160) continue;
       const ratio = img.width / img.height;
       if (ratio > 4 || ratio < 0.25) continue; // banners and strips
-      if (!best || img.width * img.height > best.width * best.height) best = img;
+      const canvas = toCanvas(img);
+      if (!canvas) continue;
+      const area = img.width * img.height;
+      if (classify(canvas) === "diagram") {
+        if (!diagram || area > diagram.area) diagram = { area, canvas };
+      } else if (!photo || area > photo.area) photo = { area, canvas };
     }
   }
-  if (!best) return null;
-  const src = document.createElement("canvas");
-  src.width = best.width;
-  src.height = best.height;
-  const sctx = src.getContext("2d");
-  if (!sctx) return null;
-  if (best.bitmap) {
-    sctx.drawImage(best.bitmap, 0, 0);
-  } else if (best.data) {
-    const rgba = new Uint8ClampedArray(best.width * best.height * 4);
-    const d = best.data;
-    const px = best.width * best.height;
-    if (d.length === px * 4) rgba.set(d);
-    else if (d.length === px * 3) for (let p = 0; p < px; p++) { rgba[p * 4] = d[p * 3]!; rgba[p * 4 + 1] = d[p * 3 + 1]!; rgba[p * 4 + 2] = d[p * 3 + 2]!; rgba[p * 4 + 3] = 255; }
-    else if (d.length === px) for (let p = 0; p < px; p++) { rgba[p * 4] = rgba[p * 4 + 1] = rgba[p * 4 + 2] = d[p]!; rgba[p * 4 + 3] = 255; }
-    else return null;
-    sctx.putImageData(new ImageData(rgba, best.width, best.height), 0, 0);
-  } else return null;
-  return shrinkCanvas(src);
+  return {
+    image: photo ? shrinkCanvas(photo.canvas) : null,
+    dimsImage: diagram ? shrinkCanvas(diagram.canvas, 900) : null,
+  };
 }
 
 /** White background (JPEG has no alpha), longest side 640 px. */
@@ -112,11 +175,11 @@ export function shrinkCanvas(src: HTMLCanvasElement | HTMLImageElement, max = 64
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, out.width, out.height);
   ctx.drawImage(src, 0, 0, out.width, out.height);
-  return out.toDataURL("image/jpeg", 0.82);
+  return out.toDataURL("image/jpeg", 0.85);
 }
 
 /** A photo the user picks for the spec sheet (Admin/Sales), resized the same way. */
-export async function imageFileToDataUrl(file: File): Promise<string> {
+export async function imageFileToDataUrl(file: File, max = 640): Promise<string> {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error("Use a JPG, PNG or WebP image.");
   if (file.size > 15 * 1024 * 1024) throw new Error("That image is over 15 MB.");
   const url = URL.createObjectURL(file);
@@ -124,7 +187,7 @@ export async function imageFileToDataUrl(file: File): Promise<string> {
     const img = new Image();
     img.src = url;
     await img.decode();
-    const out = shrinkCanvas(img);
+    const out = shrinkCanvas(img, max);
     if (!out) throw new Error("Couldn't read that image.");
     return out;
   } finally {

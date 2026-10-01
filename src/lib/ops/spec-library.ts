@@ -9,7 +9,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { filterNonUsa, type RemovedItem } from "@/lib/ops/spec-filter";
-import { applySpecDefaults, coreHoleInfo, coreHoleSaveError, espressoCoreDefaults, isEspresso } from "@/lib/ops/spec-defaults";
+import { applySpecDefaults, coreHoleInfo, coreHoleSaveError, espressoCoreDefaults, isEspresso, plugWireError } from "@/lib/ops/spec-defaults";
 import {
   compactDraft,
   parseExtraction,
@@ -72,10 +72,11 @@ type SheetRow = {
   core_hole: string | null;
   core_diameter: string | null;
   has_image: boolean;
+  has_dims: boolean;
 };
 /** Everything but the image itself — images load one at a time with getSpecImage. */
 const SHEET_COLS =
-  "id, manufacturer, model, category, summary, specs, mfr_notes, created_by, created_at, updated_at, core_hole, core_diameter, (image is not null) as has_image";
+  "id, manufacturer, model, category, summary, specs, mfr_notes, created_by, created_at, updated_at, core_hole, core_diameter, (image is not null) as has_image, (dims_image is not null) as has_dims";
 type ConfigRow = { id: number; sheet_id: number; label: string; position: number; requirements: unknown };
 
 const asJson = (v: unknown) => (typeof v === "string" ? JSON.parse(v) : v);
@@ -104,6 +105,7 @@ function mapSheet(row: SheetRow, configs: ConfigRow[]): SavedSpecSheet {
     ...applySpecDefaults(base, "fill"),
     id: row.id,
     hasImage: !!row.has_image,
+    hasDims: !!row.has_dims,
     createdBy: row.created_by,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
@@ -150,7 +152,7 @@ Return ONE JSON object and nothing else, exactly this shape (omit or use null fo
   "configs": [                          // one per sold configuration (e.g. "2 Group", "3 Group", "Hot water tap")
     {"label": string,
      "requirements": {
-       "power": {"voltage": string|null, "amps": string|null, "phase": string|null, "hz": string|null, "plug": string|null, "circuit": string|null},
+       "power": {"voltage": string|null, "wires": string|null /* e.g. "4-wire" (2 hots + neutral + ground) or "3-wire" (2 hots + ground), only if stated */, "amps": string|null, "phase": string|null, "hz": string|null, "plug": string|null, "circuit": string|null},
        "water": {"inlet": string|null, "pressure": string|null, "filtration": string|null, "notes": string|null},
        "drain": {"size": string|null, "notes": string|null},
        "dimensions": {"width": string|null, "depth": string|null, "height": string|null, "weight": string|null, "clearance": string|null},
@@ -296,6 +298,11 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
     if (!d.model) throw new Error("Add the model.");
     const coreErr = coreHoleSaveError(d);
     if (coreErr) throw new Error(coreErr);
+    // Plug must match volts + wire count (+ model exceptions) before it's saved.
+    for (const c of d.configs) {
+      const err = plugWireError(c.requirements.power, d);
+      if (err) throw new Error(`${c.label}: ${err}`);
+    }
     if (!d.configs.length) d.configs.push({ label: "Standard", requirements: {} });
     const labels = d.configs.map((c) => c.label.toLowerCase());
     if (new Set(labels).size !== labels.length) throw new Error("Two configurations have the same name. Rename one.");
@@ -325,6 +332,8 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
       // Image: undefined keeps the stored one, null removes it, a string replaces it.
       d.image === undefined ? "keep" : d.image === null ? "clear" : "set",
       typeof d.image === "string" ? d.image : null,
+      d.dimsImage === undefined ? "keep" : d.dimsImage === null ? "clear" : "set",
+      typeof d.dimsImage === "string" ? d.dimsImage : null,
     ];
     const configCtes = `
       d as (delete from spec_configs where sheet_id in (select id from s)),
@@ -341,20 +350,23 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
              update spec_sheets set manufacturer = $1, model = $2, category = $3, summary = $4,
                     specs = $5::jsonb, mfr_notes = $6::jsonb, core_hole = $9, core_diameter = $10,
                     image = case $11::text when 'set' then $12::text when 'clear' then null else image end,
+                    dims_image = case $13::text when 'set' then $14::text when 'clear' then null else dims_image end,
                     updated_at = now()
-              where id = $13 and $7::text is not null
+              where id = $15 and $7::text is not null
               returning id
            ), ${configCtes}`,
           [...params, targetId],
         )
       : await sql.query<{ id: number }>(
           `with s as (
-             insert into spec_sheets (manufacturer, model, category, summary, specs, mfr_notes, created_by, core_hole, core_diameter, image)
-             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $9, $10, case when $11::text = 'set' then $12::text end)
+             insert into spec_sheets (manufacturer, model, category, summary, specs, mfr_notes, created_by, core_hole, core_diameter, image, dims_image)
+             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $9, $10,
+                     case when $11::text = 'set' then $12::text end, case when $13::text = 'set' then $14::text end)
              on conflict (manufacturer, model) do update set
                category = excluded.category, summary = excluded.summary, specs = excluded.specs,
                mfr_notes = excluded.mfr_notes, core_hole = excluded.core_hole, core_diameter = excluded.core_diameter,
                image = case $11::text when 'set' then excluded.image when 'clear' then null else spec_sheets.image end,
+               dims_image = case $13::text when 'set' then excluded.dims_image when 'clear' then null else spec_sheets.dims_image end,
                updated_at = now()
              returning id
            ), ${configCtes}`,
@@ -428,10 +440,13 @@ export const refreshSpecDefaults = createServerFn({ method: "POST" })
 export const getSpecImage = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }): Promise<{ image: string | null }> => {
+  .handler(async ({ data }): Promise<{ image: string | null; dimsImage: string | null }> => {
     const sql = await ready();
-    const rows = await sql.query<{ image: string | null }>("select image from spec_sheets where id = $1", [data.id]);
-    return { image: rows[0]?.image ?? null };
+    const rows = await sql.query<{ image: string | null; dims_image: string | null }>(
+      "select image, dims_image from spec_sheets where id = $1",
+      [data.id],
+    );
+    return { image: rows[0]?.image ?? null, dimsImage: rows[0]?.dims_image ?? null };
   });
 
 const norm = (v: string) =>

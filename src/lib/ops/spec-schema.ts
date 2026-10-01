@@ -28,6 +28,8 @@ export const powerSchema = z.object({
   amps: text,
   /** Breaker size recommendation, shown under Amps (e.g. "30A 2-pole"). */
   breaker: text,
+  /** 208–240 V wiring: "4-wire (2 hots, neutral, ground)" → L14, "3-wire (2 hots, ground)" → L6. */
+  wires: text,
   phase: text,
   hz: text,
   plug: text,
@@ -63,6 +65,13 @@ export const configSchema = z.object({
   requirements: z.preprocess((v) => v ?? {}, requirementsSchema),
 });
 
+const imageField = z
+  .string()
+  .max(900_000)
+  .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Not an image")
+  .nullable()
+  .optional();
+
 /** What the AI must return, and what the review form edits. */
 export const specSheetSchema = z.object({
   manufacturer: z.string().trim().max(200),
@@ -84,12 +93,9 @@ export const specSheetSchema = z.object({
    * Equipment image from the spec sheet (data URL). On save: undefined keeps the stored one,
    * null removes it, a string replaces it.
    */
-  image: z
-    .string()
-    .max(600_000)
-    .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Not an image")
-    .nullable()
-    .optional(),
+  image: imageField,
+  /** Dimension diagram (secondary image). Same keep / remove / replace rules as image. */
+  dimsImage: imageField,
 });
 
 export type Kv = z.infer<typeof kvSchema>;
@@ -105,6 +111,7 @@ export type SpecSheetDraft = z.infer<typeof specSheetSchema>;
 export type SavedSpecSheet = SpecSheetDraft & {
   id: number;
   hasImage: boolean;
+  hasDims: boolean;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
@@ -165,6 +172,7 @@ export function compactDraft(d: SpecSheetDraft): SpecSheetDraft {
     coreHole: d.coreHole,
     coreDiameter: d.coreDiameter?.trim() || undefined,
     image: d.image,
+    dimsImage: d.dimsImage,
     summary: d.summary?.trim() || undefined,
     specs: kvs(d.specs),
     mfrNotes: {
