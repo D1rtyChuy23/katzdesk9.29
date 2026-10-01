@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ClipboardCopy, Droplets, Pencil, Plug, RefreshCw, Ruler, Trash2 } from "lucide-react";
+import { Check, ClipboardCopy, Droplets, ImageIcon, Pencil, Plug, RefreshCw, Ruler, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { amps, copyAll, copyConfig, hz, phase, volts } from "@/lib/ops/spec-copy";
 import type { Requirements, SavedSpecSheet, SpecConfig, SpecSheetDraft } from "@/lib/ops/spec-schema";
-import { decidePlug, defaultPlugNote, nemaCode } from "@/lib/ops/spec-defaults";
+import { coreHoleInfo, decidePlug, defaultPlugNote, nemaCode, type CoreHoleInfo } from "@/lib/ops/spec-defaults";
+import { getSpecImage } from "@/lib/ops/spec-library";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { PlugPicture } from "./plug-face";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -177,7 +179,7 @@ function Block({ icon: Icon, title, children }: { icon: typeof Plug; title: stri
 }
 
 /** Power / Water And Drain / Dimensions for one configuration. Empty sections are hidden. */
-export function RequirementsCard({ req }: { req: Requirements }) {
+export function RequirementsCard({ req, core }: { req: Requirements; core?: CoreHoleInfo | null }) {
   // Same units as the copy text: 30 → 30A, 1 → 1-phase, 60 → 60 Hz.
   const fmt: Record<string, (v: string) => string> = { voltage: volts, amps, phase, hz };
   const power = POWER_FIELDS.map(([k, l]) => {
@@ -199,11 +201,68 @@ export function RequirementsCard({ req }: { req: Requirements }) {
       </Block>
     ) : null,
     any(water) ? <Block key="w" icon={Droplets} title="Water And Drain"><Rows rows={water} /></Block> : null,
-    any(dims) ? <Block key="d" icon={Ruler} title="Dimensions"><Rows rows={dims} /></Block> : null,
+    any(dims) || core?.required ? (
+      <Block key="d" icon={Ruler} title="Space / Core Hole">
+        <Rows rows={dims} />
+        <CoreHoleLine core={core} />
+      </Block>
+    ) : null,
     any(other) ? <Block key="o" icon={ClipboardCopy} title="Other"><Rows rows={other} /></Block> : null,
   ].filter(Boolean);
   if (!sections.length) return <p className="text-sm text-muted-foreground">No requirements listed for this configuration.</p>;
   return <div className="grid gap-3 sm:grid-cols-2" data-testid="requirements-card">{sections}</div>;
+}
+
+/** "Counter core hole: 3" diameter" next to Space. Blank-and-needed when the diameter is missing. */
+export function CoreHoleLine({ core }: { core?: CoreHoleInfo | null }) {
+  if (!core?.required) return null;
+  return (
+    <p
+      className={cn(
+        "mt-2 rounded-md border px-2.5 py-1.5 text-sm font-semibold",
+        core.missingDiameter ? "border-warning/50 bg-warning/10 text-warning" : "border-primary/30 bg-primary/5 text-foreground",
+      )}
+      data-testid="core-hole-line"
+    >
+      {core.missingDiameter ? "Counter core hole: diameter needed before this spec is complete" : core.label}
+    </p>
+  );
+}
+
+/** Equipment picture from the spec sheet, or a blank slot with the model name. No app branding in it. */
+export function EquipmentImage({
+  image,
+  loading,
+  manufacturer,
+  model,
+  className,
+}: {
+  image: string | null | undefined;
+  loading?: boolean;
+  manufacturer?: string;
+  model: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-lg border border-border bg-white",
+        className,
+      )}
+      data-testid="equipment-image"
+      data-empty={image ? "0" : "1"}
+    >
+      {image ? (
+        <img src={image} alt={`${manufacturer ?? ""} ${model}`.trim()} className="size-full object-contain p-2" />
+      ) : (
+        <div className="flex size-full flex-col items-center justify-center gap-1 border-2 border-dashed border-border/70 bg-muted/30 p-4 text-center">
+          <ImageIcon className="size-6 text-muted-foreground/70" />
+          <span className="text-sm font-semibold text-foreground">{model || "Model"}</span>
+          <span className="text-xs text-muted-foreground">{loading ? "Loading image…" : "No image on the spec sheet yet"}</span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function SheetHeading({ sheet }: { sheet: Pick<SpecSheetDraft, "manufacturer" | "model" | "category" | "summary"> }) {
@@ -254,6 +313,13 @@ export function SpecSheetView({
 }) {
   const [sel, setSel] = useState(0);
   const { copy, copied, dialog } = useCopy();
+  const imageQ = useQuery({
+    queryKey: ["spec-image", sheet.id, sheet.updatedAt],
+    queryFn: () => getSpecImage({ data: { id: sheet.id } }),
+    enabled: sheet.hasImage,
+    staleTime: 5 * 60_000,
+  });
+  const core = coreHoleInfo(sheet);
   useEffect(() => setSel(0), [sheet.id]);
   const config: SpecConfig | undefined = sheet.configs[Math.min(sel, sheet.configs.length - 1)];
   const certs = sheet.mfrNotes.certifications ?? [];
@@ -326,12 +392,17 @@ export function SpecSheetView({
 
       <section className="mt-6">
         <h3 className="mb-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">Configurations</h3>
-        <ConfigChips configs={sheet.configs} selected={sel} onSelect={setSel} />
-        {config ? (
-          <div className="mt-4">
-            <RequirementsCard req={config.requirements} />
+        <div className="grid gap-4 md:grid-cols-[minmax(0,15rem)_1fr]" data-testid="configuration">
+          <EquipmentImage image={imageQ.data?.image} loading={sheet.hasImage && imageQ.isLoading} manufacturer={sheet.manufacturer} model={sheet.model} />
+          <div className="min-w-0">
+            <ConfigChips configs={sheet.configs} selected={sel} onSelect={setSel} />
+            {config ? (
+              <div className="mt-4">
+                <RequirementsCard req={config.requirements} core={core} />
+              </div>
+            ) : null}
           </div>
-        ) : null}
+        </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
             type="button"

@@ -2,6 +2,7 @@
  * The Library — plain-text copy for Outlook/Teams. Pure: no DOM, safe for node --test.
  * Short lines, no markdown tables, so it pastes cleanly into an email or chat.
  */
+import { coreHoleInfo } from "./spec-defaults.ts";
 import type { Dimensions, Drain, Power, Requirements, SpecConfig, SpecSheetDraft, Water } from "./spec-schema.ts";
 
 const has = (v: string | undefined | null): v is string => !!v && !!v.trim();
@@ -68,7 +69,8 @@ export function requirementLines(r: Requirements): string[] {
   return lines;
 }
 
-type SheetLike = Pick<SpecSheetDraft, "manufacturer" | "model"> & Partial<Pick<SpecSheetDraft, "mfrNotes" | "configs">>;
+type SheetLike = Pick<SpecSheetDraft, "manufacturer" | "model"> &
+  Partial<Pick<SpecSheetDraft, "mfrNotes" | "configs" | "category" | "coreHole" | "coreDiameter">>;
 
 function title(sheet: SheetLike): string {
   return [sheet.manufacturer, sheet.model].filter(has).map((s) => s.trim()).join(" ");
@@ -79,6 +81,14 @@ export function copyConfig(sheet: SheetLike, config: SpecConfig): string {
   const label = config.label?.trim();
   const head = label && !/^standard$/i.test(label) ? `${title(sheet)} - ${label}` : title(sheet);
   const lines = requirementLines(config.requirements);
+  const core = coreHoleInfo({
+    manufacturer: sheet.manufacturer,
+    model: sheet.model,
+    category: sheet.category,
+    coreHole: sheet.coreHole,
+    coreDiameter: sheet.coreDiameter,
+  });
+  if (core.label) lines.push(core.label);
   return [head, ...(lines.length ? lines : ["No requirements listed"])].join("\n");
 }
 

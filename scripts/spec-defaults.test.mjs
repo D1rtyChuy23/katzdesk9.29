@@ -3,6 +3,10 @@ import { test } from "node:test";
 import {
   applySpecDefaults,
   breakerFor,
+  coreHoleInfo,
+  coreHoleSaveError,
+  isEspresso,
+  normalizeDiameter,
   defaultPlugNote,
   decidePlug,
   DEFAULT_INLET,
@@ -129,6 +133,42 @@ test("copy text carries the plug and breaker", () => {
   );
   assert.equal(
     copyConfig(g, g.configs[0]),
-    'La Marzocco Linea PB - 2 Group\nPower: 208-240V, 30A (30A 2-pole breaker), 1-phase, NEMA L6-30 twist-lock\nWater: 3/8" compression valve',
+    'La Marzocco Linea PB - 2 Group\nPower: 208-240V, 30A (30A 2-pole breaker), 1-phase, NEMA L6-30 twist-lock\nWater: 3/8" compression valve\nCounter core hole: 3" diameter',
   );
+});
+
+test("espresso machines default to a 3\" counter core hole", () => {
+  assert.ok(isEspresso({ manufacturer: "La Marzocco", model: "Linea PB" }));
+  assert.ok(isEspresso({ manufacturer: "Eversys", model: "Cameo C'2s" }));
+  assert.ok(isEspresso({ manufacturer: "Rancilio", model: "Classe 11" }));
+  assert.ok(isEspresso({ manufacturer: "Faema", model: "E71" }));
+  assert.ok(isEspresso({ manufacturer: "Acme", model: "X1", category: "Espresso Machine" }));
+  assert.ok(!isEspresso({ manufacturer: "Mahlkönig", model: "E65S", category: "Grinder" }));
+  assert.ok(!isEspresso({ manufacturer: "Bunn", model: "ITCB-DV", category: "Brewer" }));
+  assert.ok(!isEspresso({ manufacturer: "Eversys", model: "E'Fridge" }));
+  const lm = coreHoleInfo({ manufacturer: "La Marzocco", model: "Linea PB" });
+  assert.deepEqual(lm, { required: true, diameter: '3"', label: 'Counter core hole: 3" diameter', missingDiameter: false });
+  assert.equal(coreHoleInfo({ manufacturer: "La Marzocco", model: "Linea PB", coreDiameter: "2.5" }).label, 'Counter core hole: 2.5" diameter');
+  assert.equal(coreHoleInfo({ manufacturer: "La Marzocco", model: "Linea PB", coreHole: "no" }).required, false);
+  const g = applySpecDefaults({ manufacturer: "Eversys", model: "Enigma e'4s", specs: [], mfrNotes: {}, configs: [] }, "generate");
+  assert.equal(g.coreHole, "yes");
+  assert.equal(g.coreDiameter, '3"');
+});
+
+test("non-espresso: no invented 3\", diameter required when Yes", () => {
+  const brewer = { manufacturer: "Bunn", model: "ITCB-DV", category: "Brewer" };
+  assert.equal(coreHoleInfo(brewer).required, false);
+  const g = applySpecDefaults({ ...brewer, specs: [], mfrNotes: {}, configs: [] }, "generate");
+  assert.equal(g.coreHole, undefined);
+  assert.equal(g.coreDiameter, undefined);
+  const yes = coreHoleInfo({ ...brewer, coreHole: "yes" });
+  assert.equal(yes.missingDiameter, true);
+  assert.equal(yes.diameter, null);
+  assert.match(coreHoleSaveError({ ...brewer, coreHole: "yes" }), /diameter/);
+  assert.equal(coreHoleSaveError({ ...brewer, coreHole: "yes", coreDiameter: "2" }), null);
+  assert.equal(coreHoleInfo({ ...brewer, coreHole: "yes", coreDiameter: "2" }).label, 'Counter core hole: 2" diameter');
+  // Pre-inspection said Yes on a brewer with nothing stored: blank, needed.
+  assert.equal(coreHoleInfo(brewer, true).label, "Counter core hole: diameter needed");
+  assert.equal(normalizeDiameter("3 in"), '3"');
+  assert.equal(normalizeDiameter("76 mm"), "76 mm");
 });

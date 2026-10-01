@@ -174,6 +174,7 @@ test("copyConfig matches the Outlook/Teams format", () => {
       'Water: 3/8" inlet, 30-60 psi, filtered',
       'Drain: 1.5"',
       'Size: 31.5"W x 23.6"D x 20.5"H, 143 lb',
+      'Counter core hole: 3" diameter',
     ].join("\n"),
   );
 });
@@ -185,7 +186,8 @@ test("copy text has short plain lines and no markdown", () => {
   assert.ok(all.split("\n").every((l) => l.length <= 120), "short lines");
   assert.ok(all.includes("\n\nLa Marzocco Linea PB - 2 Group 230V 50Hz (CE)"), "configs separated by a blank line");
   assert.ok(all.includes("Warranty: 2 years parts"));
-  assert.equal(copyConfig(sheet, { label: "Standard", requirements: {} }), "La Marzocco Linea PB\nNo requirements listed");
+  assert.equal(copyConfig(sheet, { label: "Standard", requirements: {} }), 'La Marzocco Linea PB\nCounter core hole: 3" diameter');
+  assert.equal(copyConfig({ manufacturer: "Bunn", model: "TB3", category: "Brewer" }, { label: "Standard", requirements: {} }), "Bunn TB3\nNo requirements listed");
 });
 
 test("bare numbers get units", () => {

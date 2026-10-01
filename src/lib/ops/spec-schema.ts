@@ -72,6 +72,24 @@ export const specSheetSchema = z.object({
   specs: list(kvSchema),
   mfrNotes: z.preprocess((v) => v ?? {}, mfrNotesSchema),
   configs: list(configSchema),
+  /** Counter core hole for utility lines: "yes" | "no"; undefined = not stated. */
+  coreHole: z.preprocess((v) => {
+    if (v === true) return "yes";
+    if (v === false) return "no";
+    const t = typeof v === "string" ? v.trim().toLowerCase() : "";
+    return t === "yes" || t === "no" ? t : undefined;
+  }, z.enum(["yes", "no"]).optional()),
+  coreDiameter: text,
+  /**
+   * Equipment image from the spec sheet (data URL). On save: undefined keeps the stored one,
+   * null removes it, a string replaces it.
+   */
+  image: z
+    .string()
+    .max(600_000)
+    .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Not an image")
+    .nullable()
+    .optional(),
 });
 
 export type Kv = z.infer<typeof kvSchema>;
@@ -86,6 +104,7 @@ export type SpecSheetDraft = z.infer<typeof specSheetSchema>;
 
 export type SavedSpecSheet = SpecSheetDraft & {
   id: number;
+  hasImage: boolean;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
@@ -143,6 +162,9 @@ export function compactDraft(d: SpecSheetDraft): SpecSheetDraft {
     manufacturer: d.manufacturer.trim(),
     model: d.model.trim(),
     category: d.category?.trim() || undefined,
+    coreHole: d.coreHole,
+    coreDiameter: d.coreDiameter?.trim() || undefined,
+    image: d.image,
     summary: d.summary?.trim() || undefined,
     specs: kvs(d.specs),
     mfrNotes: {

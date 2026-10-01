@@ -26,6 +26,7 @@ import {
   type CoreHoleAnswer,
   type InspectionOverall,
 } from "@/lib/ops/pre-inspection";
+import { coreHoleForModels } from "@/lib/ops/spec-library";
 import { listReps } from "@/lib/ops/reps";
 import { listTechs } from "@/lib/ops/roster";
 import { cn } from "@/lib/utils";
@@ -491,6 +492,7 @@ function SpaceSection({
           onSaved={onSaved}
         />
       ) : null}
+      {show && machine.coreNeeded === "yes" ? <CoreDiameterHint model={machine.model || machine.name} /> : null}
       {show && machine.coreNeeded === "yes" ? (
         <ItemRow
           key={`${machine.equipmentId}-core`}
@@ -501,6 +503,32 @@ function SpaceSection({
         />
       ) : null}
     </div>
+  );
+}
+
+/** The hole size to core, from the Library spec sheet (espresso default 3"). Blank when nothing is stored. */
+function CoreDiameterHint({ model }: { model: string }) {
+  const q = useQuery({
+    queryKey: ["core-hole", model],
+    queryFn: () => coreHoleForModels({ data: { models: [model] } }),
+    staleTime: 60_000,
+  });
+  const hint = q.data?.[model];
+  if (q.isLoading) return null;
+  const missing = !hint?.diameter;
+  return (
+    <p
+      className={
+        missing
+          ? "rounded-lg border border-warning/50 bg-warning/10 px-3 py-2 text-sm font-semibold text-warning"
+          : "rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-base font-semibold"
+      }
+      data-testid="core-diameter-hint"
+    >
+      {missing ? "Counter core hole: diameter not set — add it on the spec sheet in The Library" : hint!.label}
+      {hint?.sheet ? <span className="block text-xs font-normal text-muted-foreground">From the {hint.sheet} spec sheet</span> : null}
+      {hint?.source === "espresso" ? <span className="block text-xs font-normal text-muted-foreground">Espresso default</span> : null}
+    </p>
   );
 }
 

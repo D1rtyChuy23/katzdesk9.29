@@ -9,7 +9,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { filterNonUsa, type RemovedItem } from "@/lib/ops/spec-filter";
-import { applySpecDefaults } from "@/lib/ops/spec-defaults";
+import { applySpecDefaults, coreHoleInfo, coreHoleSaveError, espressoCoreDefaults, isEspresso } from "@/lib/ops/spec-defaults";
 import {
   compactDraft,
   parseExtraction,
@@ -69,7 +69,13 @@ type SheetRow = {
   created_by: string | null;
   created_at: string | Date;
   updated_at: string | Date;
+  core_hole: string | null;
+  core_diameter: string | null;
+  has_image: boolean;
 };
+/** Everything but the image itself — images load one at a time with getSpecImage. */
+const SHEET_COLS =
+  "id, manufacturer, model, category, summary, specs, mfr_notes, created_by, created_at, updated_at, core_hole, core_diameter, (image is not null) as has_image";
 type ConfigRow = { id: number; sheet_id: number; label: string; position: number; requirements: unknown };
 
 const asJson = (v: unknown) => (typeof v === "string" ? JSON.parse(v) : v);
@@ -83,6 +89,8 @@ function mapSheet(row: SheetRow, configs: ConfigRow[]): SavedSpecSheet {
     summary: row.summary,
     specs: asJson(row.specs) ?? [],
     mfrNotes: asJson(row.mfr_notes) ?? {},
+    coreHole: row.core_hole,
+    coreDiameter: row.core_diameter,
     configs: configs
       .filter((c) => c.sheet_id === row.id)
       .sort((a, b) => a.position - b.position)
@@ -95,6 +103,7 @@ function mapSheet(row: SheetRow, configs: ConfigRow[]): SavedSpecSheet {
     // Older sheets: fill a blank inlet / plug / breaker for display (Refresh writes them).
     ...applySpecDefaults(base, "fill"),
     id: row.id,
+    hasImage: !!row.has_image,
     createdBy: row.created_by,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
@@ -106,7 +115,7 @@ export const listSpecSheets = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .handler(async ({ context }): Promise<{ sheets: SavedSpecSheet[]; canEdit: boolean; aiReady: boolean }> => {
     const sql = await ready();
-    const sheets = await sql.query<SheetRow>("select * from spec_sheets order by lower(manufacturer), lower(model)");
+    const sheets = await sql.query<SheetRow>(`select ${SHEET_COLS} from spec_sheets order by lower(manufacturer), lower(model)`);
     const configs = sheets.length
       ? await sql.query<ConfigRow>("select * from spec_configs where sheet_id = any($1) order by sheet_id, position", [
           sheets.map((s) => s.id),
@@ -136,6 +145,8 @@ Return ONE JSON object and nothing else, exactly this shape (omit or use null fo
     "warranty": string|null,            // US warranty terms
     "certifications": [string]          // US listings only: UL, cUL, ETL, NSF, CSA, ENERGY STAR
   },
+  "coreHole": "yes"|"no"|null,          // only if the sheet says utility lines pass through a counter hole
+  "coreDiameter": string|null,          // counter hole diameter in inches, e.g. "3\"" — only if stated
   "configs": [                          // one per sold configuration (e.g. "2 Group", "3 Group", "Hot water tap")
     {"label": string,
      "requirements": {
@@ -283,6 +294,8 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
     const d = applySpecDefaults(compactDraft(data.draft), "fill");
     if (!d.manufacturer) throw new Error("Add the manufacturer.");
     if (!d.model) throw new Error("Add the model.");
+    const coreErr = coreHoleSaveError(d);
+    if (coreErr) throw new Error(coreErr);
     if (!d.configs.length) d.configs.push({ label: "Standard", requirements: {} });
     const labels = d.configs.map((c) => c.label.toLowerCase());
     if (new Set(labels).size !== labels.length) throw new Error("Two configurations have the same name. Rename one.");
@@ -307,6 +320,11 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
       JSON.stringify(d.mfrNotes),
       role.name,
       JSON.stringify(d.configs.map((c) => ({ label: c.label, requirements: c.requirements }))),
+      d.coreHole ?? null,
+      d.coreDiameter ?? null,
+      // Image: undefined keeps the stored one, null removes it, a string replaces it.
+      d.image === undefined ? "keep" : d.image === null ? "clear" : "set",
+      typeof d.image === "string" ? d.image : null,
     ];
     const configCtes = `
       d as (delete from spec_configs where sheet_id in (select id from s)),
@@ -321,19 +339,23 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
       ? await sql.query<{ id: number }>(
           `with s as (
              update spec_sheets set manufacturer = $1, model = $2, category = $3, summary = $4,
-                    specs = $5::jsonb, mfr_notes = $6::jsonb, updated_at = now()
-              where id = $9 and $7::text is not null
+                    specs = $5::jsonb, mfr_notes = $6::jsonb, core_hole = $9, core_diameter = $10,
+                    image = case $11::text when 'set' then $12::text when 'clear' then null else image end,
+                    updated_at = now()
+              where id = $13 and $7::text is not null
               returning id
            ), ${configCtes}`,
           [...params, targetId],
         )
       : await sql.query<{ id: number }>(
           `with s as (
-             insert into spec_sheets (manufacturer, model, category, summary, specs, mfr_notes, created_by)
-             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7)
+             insert into spec_sheets (manufacturer, model, category, summary, specs, mfr_notes, created_by, core_hole, core_diameter, image)
+             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $9, $10, case when $11::text = 'set' then $12::text end)
              on conflict (manufacturer, model) do update set
                category = excluded.category, summary = excluded.summary, specs = excluded.specs,
-               mfr_notes = excluded.mfr_notes, updated_at = now()
+               mfr_notes = excluded.mfr_notes, core_hole = excluded.core_hole, core_diameter = excluded.core_diameter,
+               image = case $11::text when 'set' then excluded.image when 'clear' then null else spec_sheets.image end,
+               updated_at = now()
              returning id
            ), ${configCtes}`,
           params,
@@ -374,6 +396,93 @@ export const refreshSpecDefaults = createServerFn({ method: "POST" })
       changed++;
       await sql.query("update spec_configs set requirements = $2::jsonb where id = $1", [rows[i]!.id, next]);
     }
+    // Espresso sheets: counter core hole Yes, 3" unless the sheet has its own diameter.
+    const sheet = (
+      await sql.query<{ manufacturer: string; model: string; category: string | null; core_hole: string | null; core_diameter: string | null }>(
+        "select manufacturer, model, category, core_hole, core_diameter from spec_sheets where id = $1",
+        [data.id],
+      )
+    )[0];
+    if (sheet) {
+      const core = espressoCoreDefaults({
+        manufacturer: sheet.manufacturer,
+        model: sheet.model,
+        category: sheet.category ?? undefined,
+        coreHole: sheet.core_hole === "yes" || sheet.core_hole === "no" ? sheet.core_hole : undefined,
+        coreDiameter: sheet.core_diameter ?? undefined,
+      });
+      if ((core.coreHole ?? null) !== sheet.core_hole || (core.coreDiameter ?? null) !== sheet.core_diameter) {
+        changed++;
+        await sql.query("update spec_sheets set core_hole = $2, core_diameter = $3 where id = $1", [
+          data.id,
+          core.coreHole ?? null,
+          core.coreDiameter ?? null,
+        ]);
+      }
+    }
     if (changed) await sql.query("update spec_sheets set updated_at = now() where id = $1", [data.id]);
     return { ok: true, changed };
+  });
+
+/** The equipment image saved with one spec sheet (loaded only when that sheet is open). */
+export const getSpecImage = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data }): Promise<{ image: string | null }> => {
+    const sql = await ready();
+    const rows = await sql.query<{ image: string | null }>("select image from spec_sheets where id = $1", [data.id]);
+    return { image: rows[0]?.image ?? null };
+  });
+
+const norm = (v: string) =>
+  v
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+export type CoreHoleHint = { diameter: string | null; label: string | null; source: "spec" | "espresso" | "none"; sheet: string | null };
+
+/**
+ * Counter core hole size for pre-inspection units: the matching Library sheet first
+ * (manufacturer + model words found in the unit name), else the espresso default, else blank.
+ */
+export const coreHoleForModels = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { models: string[] }) => z.object({ models: z.array(z.string().max(300)).max(60) }).parse(d))
+  .handler(async ({ data }): Promise<Record<string, CoreHoleHint>> => {
+    const sql = await ready();
+    const sheets = await sql.query<{ manufacturer: string; model: string; category: string | null; core_hole: string | null; core_diameter: string | null }>(
+      "select manufacturer, model, category, core_hole, core_diameter from spec_sheets",
+    );
+    const out: Record<string, CoreHoleHint> = {};
+    for (const unit of data.models) {
+      const u = norm(unit);
+      const hit = sheets
+        .filter((s) => {
+          const model = norm(s.model);
+          return !!model && u.includes(model) && (u.includes(norm(s.manufacturer)) || model.length >= 5);
+        })
+        .sort((a, b) => b.model.length - a.model.length)[0];
+      if (hit) {
+        const info = coreHoleInfo(
+          {
+            manufacturer: hit.manufacturer,
+            model: hit.model,
+            category: hit.category ?? undefined,
+            coreHole: hit.core_hole === "yes" || hit.core_hole === "no" ? hit.core_hole : undefined,
+            coreDiameter: hit.core_diameter ?? undefined,
+          },
+          true,
+        );
+        out[unit] = { diameter: info.diameter, label: info.label, source: "spec", sheet: `${hit.manufacturer} ${hit.model}` };
+      } else if (isEspresso({ model: unit })) {
+        const info = coreHoleInfo({ manufacturer: "", model: unit, category: undefined, coreHole: undefined, coreDiameter: undefined }, true);
+        out[unit] = { diameter: info.diameter, label: info.label, source: "espresso", sheet: null };
+      } else {
+        out[unit] = { diameter: null, label: "Counter core hole: diameter needed", source: "none", sheet: null };
+      }
+    }
+    return out;
   });

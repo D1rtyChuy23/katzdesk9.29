@@ -9,6 +9,7 @@
  * - Breaker size recommendation sits under Amps.
  */
 import type { Power, SpecConfig, SpecSheetDraft } from "./spec-schema.ts";
+import { isEversysMachine } from "./eversys.ts";
 
 export const DEFAULT_INLET = '3/8" compression valve';
 export const HARDWIRE_ONLY = "Hardwire only";
@@ -171,5 +172,74 @@ export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode): SpecConf
 
 export function applySpecDefaults<T extends SpecSheetDraft>(draft: T, mode: DefaultsMode): T {
   const configs = draft.configs.length ? draft.configs : [{ label: "Standard", requirements: {} }];
-  return { ...draft, configs: configs.map((c) => applyConfigDefaults(c, mode)) };
+  const core = espressoCoreDefaults(draft);
+  return { ...draft, ...core, configs: configs.map((c) => applyConfigDefaults(c, mode)) };
+}
+
+// ---------------- counter core hole ----------------
+
+export const DEFAULT_CORE_DIAMETER = '3"';
+const ESPRESSO_MAKERS = /\b(la\s*marzocco|eversys|rancilio|faema|slayer|synesso|nuova\s*simonelli|victoria\s*arduino|franke|schaerer|thermoplan|wmf|cimbali)\b/i;
+
+/** Espresso machine: La Marzocco, Eversys, Rancilio, Faema… or a catalog/category marked espresso. Grinders don't count. */
+export function isEspresso(sheet: { manufacturer?: string | null; model?: string | null; category?: string | null }): boolean {
+  const text = `${sheet.manufacturer ?? ""} ${sheet.model ?? ""}`;
+  const cat = sheet.category ?? "";
+  if (/grinder|brewer|water|filtration|fridge|refrigerat|blender|dispenser/i.test(cat)) return false;
+  if (/espresso/i.test(cat) || /espresso\s*(machine)?\b/i.test(text) && !/grinder/i.test(text)) return true;
+  if (/grinder|fridge/i.test(text)) return false;
+  return ESPRESSO_MAKERS.test(text) || isEversysMachine(sheet.model) || isEversysMachine(text);
+}
+
+/** 3 → 3"; 3 in → 3"; 76 mm stays as typed. */
+export function normalizeDiameter(v: string | null | undefined): string | undefined {
+  const t = (v ?? "").trim();
+  if (!t) return undefined;
+  if (/^\d+(\.\d+)?$/.test(t)) return `${t}"`;
+  const inch = t.match(/^(\d+(?:\.\d+)?)\s*(in|inch|inches|”|")\.?$/i);
+  return inch ? `${inch[1]}"` : t;
+}
+
+/** Espresso sheets get core hole Yes and 3" unless the sheet already says otherwise. Never invents 3" for others. */
+export function espressoCoreDefaults(sheet: Pick<SpecSheetDraft, "manufacturer" | "model" | "category" | "coreHole" | "coreDiameter">): {
+  coreHole: SpecSheetDraft["coreHole"];
+  coreDiameter: string | undefined;
+} {
+  const diameter = normalizeDiameter(sheet.coreDiameter);
+  if (isEspresso(sheet)) {
+    const hole = sheet.coreHole ?? "yes";
+    return { coreHole: hole, coreDiameter: hole === "yes" ? diameter ?? DEFAULT_CORE_DIAMETER : diameter };
+  }
+  return { coreHole: sheet.coreHole, coreDiameter: diameter };
+}
+
+export type CoreHoleInfo = {
+  required: boolean;
+  diameter: string | null;
+  /** "Counter core hole: 3" diameter" — null when no hole is needed. */
+  label: string | null;
+  /** Required but no diameter stored: the spec isn't complete. */
+  missingDiameter: boolean;
+};
+
+export function coreHoleInfo(
+  sheet: Pick<SpecSheetDraft, "manufacturer" | "model" | "category" | "coreHole" | "coreDiameter">,
+  preInspectionSaysYes = false,
+): CoreHoleInfo {
+  const d = espressoCoreDefaults(sheet);
+  const required = d.coreHole === "yes" || preInspectionSaysYes;
+  if (!required) return { required: false, diameter: null, label: null, missingDiameter: false };
+  const diameter = d.coreDiameter ?? null;
+  return {
+    required: true,
+    diameter,
+    label: diameter ? `Counter core hole: ${diameter} diameter` : "Counter core hole: diameter needed",
+    missingDiameter: !diameter,
+  };
+}
+
+/** Blocks saving a spec that needs a core hole but has no diameter. */
+export function coreHoleSaveError(sheet: Pick<SpecSheetDraft, "manufacturer" | "model" | "category" | "coreHole" | "coreDiameter">): string | null {
+  const info = coreHoleInfo(sheet);
+  return info.missingDiameter ? "Counter core hole is Yes — add the hole diameter before saving." : null;
 }

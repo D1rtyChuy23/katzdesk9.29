@@ -1,18 +1,18 @@
 import { useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { FileUp, Loader2, Plus, RotateCcw, ShieldAlert, Trash2, X } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { FileUp, ImagePlus, Loader2, Plus, RotateCcw, ShieldAlert, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-import { pdfToText, MAX_PDF_BYTES } from "@/lib/pdf-text";
+import { imageFileToDataUrl, pdfToText, MAX_PDF_BYTES } from "@/lib/pdf-text";
 import { restoreRemoved, type RemovedItem } from "@/lib/ops/spec-filter";
 import { emptyDraft, type Kv, type SpecSheetDraft } from "@/lib/ops/spec-schema";
-import { extractSpecSheet, saveSpecSheet } from "@/lib/ops/spec-library";
+import { extractSpecSheet, getSpecImage, saveSpecSheet } from "@/lib/ops/spec-library";
 import type { SavedSpecSheet } from "@/lib/ops/spec-schema";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ConfigChips, PlugSection, REQUIREMENT_GROUPS } from "./spec-sheet";
-import { applyConfigDefaults } from "@/lib/ops/spec-defaults";
+import { ConfigChips, EquipmentImage, PlugSection, REQUIREMENT_GROUPS } from "./spec-sheet";
+import { applyConfigDefaults, coreHoleInfo, isEspresso } from "@/lib/ops/spec-defaults";
 
 type Stage = "drop" | "reading" | "review";
 
@@ -43,22 +43,23 @@ export function SpecImport({
     setStage("reading");
     try {
       setStep("Reading the PDF in your browser…");
-      const { text } = await pdfToText(file);
+      const { text, image } = await pdfToText(file);
       if (text.replace(/\s/g, "").length < 40) {
-        manual("This PDF has no readable text (it looks scanned). Fill in the form by hand instead.");
+        manual("This PDF has no readable text (it looks scanned). Fill in the form by hand instead.", image);
         return;
       }
       if (!aiReady) {
-        manual("AI reading isn't available here yet. Fill in the form by hand instead.");
+        manual("AI reading isn't available here yet. Fill in the form by hand instead.", image);
         return;
       }
       setStep("Pulling out the specs…");
+      // Only the text goes to the server; the equipment image stays in the browser until you save.
       const res = await extractSpecSheet({ data: { text, fileName: file.name } });
       if (!res.ok) {
-        manual(res.message);
+        manual(res.message, image);
         return;
       }
-      setDraft(res.draft);
+      setDraft({ ...res.draft, image: image ?? undefined });
       setRemoved(res.removed);
       setStage("review");
       toast.success(
@@ -71,9 +72,9 @@ export function SpecImport({
     }
   }
 
-  function manual(message: string) {
-    setNotice(message);
-    setDraft(emptyDraft());
+  function manual(message: string, image?: string | null) {
+    setNotice(message || null);
+    setDraft({ ...emptyDraft(), image: image ?? undefined });
     setRemoved([]);
     setStage("review");
   }
@@ -121,11 +122,16 @@ export function SpecImport({
           }}
         />
       ) : null}
-      <SpecEditor draft={draft} onChange={setDraft} title={editing ? "Edit Spec Sheet" : fileName ? `Review · ${fileName}` : "New Spec Sheet"} />
+      <SpecEditor
+        draft={draft}
+        onChange={setDraft}
+        title={editing ? "Edit Spec Sheet" : fileName ? `Review · ${fileName}` : "New Spec Sheet"}
+        savedImageId={editing?.hasImage ? editing.id : null}
+      />
       <div className="sticky bottom-3 z-10 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/95 p-3 shadow-[var(--shadow-lift)] backdrop-blur">
         <Button
           type="button"
-          disabled={save.isPending || !draft.manufacturer.trim() || !draft.model.trim()}
+          disabled={save.isPending || !draft.manufacturer.trim() || !draft.model.trim() || coreHoleInfo(draft).missingDiameter}
           onClick={() => save.mutate(false)}
           data-testid="spec-save"
         >
@@ -136,6 +142,8 @@ export function SpecImport({
         </Button>
         {!draft.manufacturer.trim() || !draft.model.trim() ? (
           <span className="text-xs text-muted-foreground">Manufacturer and model are required.</span>
+        ) : coreHoleInfo(draft).missingDiameter ? (
+          <span className="text-xs text-warning">Counter core hole is Yes — add the hole diameter.</span>
         ) : removed.length ? (
           <span className="text-xs text-muted-foreground">{removed.length} removed item(s) stay out unless you restore them.</span>
         ) : null}
@@ -167,6 +175,8 @@ function strip(s: SavedSpecSheet): SpecSheetDraft {
     model: s.model,
     category: s.category,
     summary: s.summary,
+    coreHole: s.coreHole,
+    coreDiameter: s.coreDiameter,
     specs: s.specs,
     mfrNotes: { ...s.mfrNotes, certifications: s.mfrNotes.certifications ?? [] },
     configs: s.configs.length ? s.configs : [{ label: "Standard", requirements: {} }],
@@ -330,8 +340,28 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-export function SpecEditor({ draft, onChange, title }: { draft: SpecSheetDraft; onChange: (d: SpecSheetDraft) => void; title: string }) {
+export function SpecEditor({
+  draft,
+  onChange,
+  title,
+  savedImageId,
+}: {
+  draft: SpecSheetDraft;
+  onChange: (d: SpecSheetDraft) => void;
+  title: string;
+  /** Editing a saved sheet that already has an image. */
+  savedImageId?: number | null;
+}) {
   const [sel, setSel] = useState(0);
+  const saved = useQuery({
+    queryKey: ["spec-image", "edit", savedImageId],
+    queryFn: () => getSpecImage({ data: { id: savedImageId! } }),
+    enabled: !!savedImageId && draft.image === undefined,
+  });
+  const shownImage = draft.image === undefined ? saved.data?.image ?? null : draft.image;
+  const fileRef = useRef<HTMLInputElement>(null);
+  const core = coreHoleInfo(draft);
+  const espresso = isEspresso(draft);
   const idx = Math.min(sel, Math.max(0, draft.configs.length - 1));
   const config = draft.configs[idx];
   const set = (patch: Partial<SpecSheetDraft>) => onChange({ ...draft, ...patch });
@@ -357,6 +387,80 @@ export function SpecEditor({ draft, onChange, title }: { draft: SpecSheetDraft; 
           <Textarea id="ed-summary" className="mt-1" rows={2} value={draft.summary ?? ""} onChange={(e) => set({ summary: e.target.value })} />
         </div>
       </div>
+
+      <section className="mt-5 grid gap-4 md:grid-cols-[minmax(0,15rem)_1fr]">
+        <div>
+          <EquipmentImage image={shownImage} loading={saved.isLoading && !!savedImageId} manufacturer={draft.manufacturer} model={draft.model} />
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()} data-testid="ed-image-pick">
+              <ImagePlus className="size-3.5" /> {shownImage ? "Replace Image" : "Add Image"}
+            </Button>
+            {shownImage ? (
+              <Button type="button" size="sm" variant="ghost" onClick={() => set({ image: null })}>
+                Remove
+              </Button>
+            ) : null}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              data-testid="ed-image-file"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (!f) return;
+                void imageFileToDataUrl(f)
+                  .then((url) => set({ image: url }))
+                  .catch((err) => toast.error(err instanceof Error ? err.message : "Couldn't use that image"));
+              }}
+            />
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Taken from the spec sheet PDF when it has one.</p>
+        </div>
+        <fieldset className="rounded-lg border border-border bg-background/60 p-4" data-testid="ed-core">
+          <legend className="px-1 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">Space / Core Hole</legend>
+          <p className="text-sm text-muted-foreground">Utility lines pass through the counter?</p>
+          <div className="mt-2 flex flex-wrap items-end gap-3">
+            <div>
+              <Label htmlFor="ed-core-hole" className="text-xs text-muted-foreground">
+                Counter Core Hole
+              </Label>
+              <select
+                id="ed-core-hole"
+                className="mt-1 h-9 rounded-md border border-input bg-card px-3 text-sm"
+                value={draft.coreHole ?? ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  set({ coreHole: v === "yes" || v === "no" ? v : undefined });
+                }}
+              >
+                <option value="">{espresso ? "Yes (espresso default)" : "Not stated"}</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <Field
+              label="Hole Diameter"
+              value={draft.coreDiameter}
+              onChange={(v) => set({ coreDiameter: v })}
+              placeholder={espresso ? '3" (default)' : 'e.g. 2"'}
+              className="w-40"
+              testId="ed-core-diameter"
+            />
+          </div>
+          {core.required ? (
+            <p
+              className={cn("mt-3 text-sm font-semibold", core.missingDiameter ? "text-warning" : "text-foreground")}
+              data-testid="ed-core-label"
+            >
+              {core.missingDiameter ? "Add the hole diameter — required before this spec is complete." : core.label}
+            </p>
+          ) : (
+            <p className="mt-3 text-xs text-muted-foreground">No counter core hole on this spec.</p>
+          )}
+        </fieldset>
+      </section>
 
       <section className="mt-5 grid gap-3 lg:grid-cols-[2fr_1fr]">
         <div className="rounded-lg border border-border bg-background/60 p-4">
