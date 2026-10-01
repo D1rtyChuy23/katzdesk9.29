@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FileUp } from "lucide-react";
+import { ArrowLeft, BookText, FileUp, Wrench, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { deleteSpecSheet, listSpecSheets, refreshSpecDefaults } from "@/lib/ops/spec-library";
 import { parseOpenSearch } from "@/lib/ops/search-params";
@@ -56,23 +56,43 @@ function Page() {
 
   return (
     <div ref={top} className="scroll-mt-24">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
-          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Spec sheets for the equipment we sell and service: power, water, drain and size for every configuration,
-            ready to copy into an email or Teams.
-          </p>
-        </div>
-        {canEdit && mode === "browse" ? (
-          <Button onClick={() => setMode("import")} data-testid="library-import">
-            <FileUp className="size-4" />
-            Import Spec Sheet
-          </Button>
-        ) : null}
+      <header>
+        <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
+        <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+          Shop reference in one place: equipment spec sheets now, manuals and parts diagrams as they're added.
+        </p>
+        <nav className="mt-4 flex flex-wrap gap-2" aria-label="Library sections" data-testid="library-sections">
+          {SECTIONS.map((sec) => (
+            <a
+              key={sec.id}
+              href={`#${sec.id}`}
+              className="rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground"
+            >
+              {sec.title}
+              <span className="ml-1.5 text-xs tabular text-muted-foreground">{sec.id === "spec-sheets" ? sheets.length : 0}</span>
+            </a>
+          ))}
+        </nav>
       </header>
 
-      <div className="mt-6 grid gap-6">
+      <section id="spec-sheets" className="mt-8 scroll-mt-24" aria-labelledby="spec-sheets-title" data-testid="section-spec-sheets">
+        <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 id="spec-sheets-title" className="font-display text-2xl font-medium tracking-tight">
+              Spec Sheets
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Power, water inlet, drain, plug and size for every configuration, ready to copy into an email or Teams.
+            </p>
+          </div>
+          {canEdit && mode === "browse" ? (
+            <Button onClick={() => setMode("import")} data-testid="library-import">
+              <FileUp className="size-4" />
+              Import Spec Sheet
+            </Button>
+          ) : null}
+        </div>
+      <div className="mt-4 grid gap-6">
         {mode === "import" || (mode === "edit" && selected) ? (
           <SpecImport
             key={mode === "edit" ? `edit-${selected?.id}` : "import"}
@@ -109,6 +129,20 @@ function Page() {
           )
         ) : null}
       </div>
+      </section>
+
+      <EmptySection
+        id="manuals"
+        title="Manuals"
+        icon={BookText}
+        text="Owner and service manuals will live here. Nothing has been added yet."
+      />
+      <EmptySection
+        id="parts-diagrams"
+        title="Parts Diagrams"
+        icon={Wrench}
+        text="Exploded views and parts breakdowns will live here. Nothing has been added yet."
+      />
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent>
@@ -127,5 +161,28 @@ function Page() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+const SECTIONS = [
+  { id: "spec-sheets", title: "Spec Sheets" },
+  { id: "manuals", title: "Manuals" },
+  { id: "parts-diagrams", title: "Parts Diagrams" },
+] as const;
+
+/** A Library section with nothing in it yet — always shown, ready for uploads later. */
+function EmptySection({ id, title, icon: Icon, text }: { id: string; title: string; icon: LucideIcon; text: string }) {
+  return (
+    <section id={id} className="mt-10 scroll-mt-24" aria-labelledby={`${id}-title`} data-testid={`section-${id}`}>
+      <div className="border-b border-border pb-3">
+        <h2 id={`${id}-title`} className="font-display text-2xl font-medium tracking-tight">
+          {title}
+        </h2>
+      </div>
+      <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6">
+        <Icon className="size-5 shrink-0 text-copper" />
+        <p className="text-sm text-muted-foreground">{text}</p>
+      </div>
+    </section>
   );
 }
