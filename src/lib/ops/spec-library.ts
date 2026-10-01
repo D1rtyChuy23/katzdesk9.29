@@ -146,7 +146,7 @@ Return ONE JSON object and nothing else, exactly this shape (omit or use null fo
     "certifications": [string]          // US listings only: UL, cUL, ETL, NSF, CSA, ENERGY STAR
   },
   "coreHole": "yes"|"no"|null,          // only if the sheet says utility lines pass through a counter hole
-  "coreDiameter": string|null,          // counter hole diameter in inches, e.g. "3\"" — only if stated
+  "coreDiameter": string|null,          // counter hole diameter in inches, e.g. 3 inches — only if stated
   "configs": [                          // one per sold configuration (e.g. "2 Group", "3 Group", "Hot water tap")
     {"label": string,
      "requirements": {
