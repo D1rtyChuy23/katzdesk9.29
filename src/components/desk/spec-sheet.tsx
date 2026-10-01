@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ClipboardCopy, Droplets, Pencil, Plug, Ruler, Trash2 } from "lucide-react";
+import { Check, ClipboardCopy, Droplets, Pencil, Plug, RefreshCw, Ruler, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { amps, copyAll, copyConfig, hz, phase, volts } from "@/lib/ops/spec-copy";
 import type { Requirements, SavedSpecSheet, SpecConfig, SpecSheetDraft } from "@/lib/ops/spec-schema";
+import { decidePlug, defaultPlugNote, nemaCode } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
+import { PlugPicture } from "./plug-face";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -121,6 +123,7 @@ export function ConfigChips({
 const POWER_FIELDS = [
   ["voltage", "Voltage"],
   ["amps", "Amps"],
+  ["breaker", "Breaker"],
   ["phase", "Phase"],
   ["hz", "Hz"],
   ["plug", "Plug"],
@@ -189,7 +192,12 @@ export function RequirementsCard({ req }: { req: Requirements }) {
   const other = (req.other ?? []).map((o) => [o.label, o.value] as [string, string]);
   const any = (rows: [string, string | undefined][]) => rows.some(([, v]) => v && v.trim());
   const sections = [
-    any(power) ? <Block key="p" icon={Plug} title="Power"><Rows rows={power} /></Block> : null,
+    any(power) ? (
+      <Block key="p" icon={Plug} title="Power">
+        <Rows rows={power} />
+        <PlugSection power={req.power} />
+      </Block>
+    ) : null,
     any(water) ? <Block key="w" icon={Droplets} title="Water And Drain"><Rows rows={water} /></Block> : null,
     any(dims) ? <Block key="d" icon={Ruler} title="Dimensions"><Rows rows={dims} /></Block> : null,
     any(other) ? <Block key="o" icon={ClipboardCopy} title="Other"><Rows rows={other} /></Block> : null,
@@ -211,6 +219,21 @@ export function SheetHeading({ sheet }: { sheet: Pick<SpecSheetDraft, "manufactu
   );
 }
 
+/** The plug picture under the Power rows: NEMA plugs only — hardwire gets none. */
+export function PlugSection({ power }: { power: Requirements["power"] }) {
+  const plug = power?.plug?.trim();
+  if (!plug) return null;
+  const nema = nemaCode(plug);
+  if (!nema) return null;
+  const d = decidePlug(power);
+  const note = defaultPlugNote(power) ?? (d.note && d.plug === plug ? d.note : null);
+  return (
+    <div className="mt-3">
+      <PlugPicture nema={nema} label={plug} note={note} />
+    </div>
+  );
+}
+
 // ---------------- the saved machine page ----------------
 
 export function SpecSheetView({
@@ -218,10 +241,15 @@ export function SpecSheetView({
   canEdit,
   onEdit,
   onDelete,
+  onRefresh,
+  refreshing,
 }: {
   sheet: SavedSpecSheet;
   canEdit: boolean;
   onEdit: () => void;
+  /** Re-apply inlet / plug / breaker defaults (Admin and Sales). */
+  onRefresh?: () => void;
+  refreshing?: boolean;
   onDelete: () => void;
 }) {
   const [sel, setSel] = useState(0);
@@ -237,6 +265,11 @@ export function SpecSheetView({
         <SheetHeading sheet={sheet} />
         {canEdit ? (
           <div className="flex shrink-0 gap-2">
+            {onRefresh ? (
+              <Button type="button" size="sm" variant="outline" onClick={onRefresh} disabled={refreshing} data-testid="spec-refresh">
+                <RefreshCw className={cn("size-3.5", refreshing && "animate-spin")} /> Refresh Defaults
+              </Button>
+            ) : null}
             <Button type="button" size="sm" variant="outline" onClick={onEdit}>
               <Pencil className="size-3.5" /> Edit
             </Button>

@@ -26,6 +26,8 @@ export const kvSchema = z.object({ label: str(200).pipe(z.string().min(1)), valu
 export const powerSchema = z.object({
   voltage: text,
   amps: text,
+  /** Breaker size recommendation, shown under Amps (e.g. "30A 2-pole"). */
+  breaker: text,
   phase: text,
   hz: text,
   plug: text,
@@ -97,7 +99,7 @@ export function emptyDraft(): SpecSheetDraft {
     summary: undefined,
     specs: [],
     mfrNotes: { certifications: [] },
-    configs: [{ label: "Standard", requirements: {} }],
+    configs: [{ label: "Standard", requirements: { water: { inlet: '3/8" compression valve' } } }],
   };
 }
 

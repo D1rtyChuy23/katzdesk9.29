@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, FileUp } from "lucide-react";
 import { toast } from "sonner";
-import { deleteSpecSheet, listSpecSheets } from "@/lib/ops/spec-library";
+import { deleteSpecSheet, listSpecSheets, refreshSpecDefaults } from "@/lib/ops/spec-library";
 import { parseOpenSearch } from "@/lib/ops/search-params";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -35,6 +35,14 @@ function Page() {
     if (selected) top.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const refresh = useMutation({
+    mutationFn: (id: number) => refreshSpecDefaults({ data: { id } }),
+    onSuccess: (r) => {
+      toast.success(r.changed ? `Updated ${r.changed} configuration${r.changed === 1 ? "" : "s"}: inlet, plug and breaker` : "Already up to date");
+      void qc.invalidateQueries({ queryKey: ["spec-library"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not refresh"),
+  });
   const remove = useMutation({
     mutationFn: (id: number) => deleteSpecSheet({ data: { id } }),
     onSuccess: () => {
@@ -86,7 +94,10 @@ function Page() {
             >
               <ArrowLeft className="size-4" /> All spec sheets
             </button>
-            <SpecSheetView sheet={selected} canEdit={canEdit} onEdit={() => setMode("edit")} onDelete={() => setConfirmDelete(true)} />
+            <SpecSheetView sheet={selected} canEdit={canEdit} onEdit={() => setMode("edit")} onDelete={() => setConfirmDelete(true)}
+              onRefresh={canEdit ? () => refresh.mutate(selected.id) : undefined}
+              refreshing={refresh.isPending}
+            />
           </div>
         ) : null}
 

@@ -9,6 +9,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { filterNonUsa, type RemovedItem } from "@/lib/ops/spec-filter";
+import { applySpecDefaults } from "@/lib/ops/spec-defaults";
 import {
   compactDraft,
   parseExtraction,
@@ -91,7 +92,8 @@ function mapSheet(row: SheetRow, configs: ConfigRow[]): SavedSpecSheet {
     ? parsed.data
     : { manufacturer: row.manufacturer, model: row.model, specs: [], mfrNotes: {}, configs: [] };
   return {
-    ...base,
+    // Older sheets: fill a blank inlet / plug / breaker for display (Refresh writes them).
+    ...applySpecDefaults(base, "fill"),
     id: row.id,
     createdBy: row.created_by,
     createdAt: String(row.created_at),
@@ -247,9 +249,11 @@ export const extractSpecSheet = createServerFn({ method: "POST" })
       if (!parsed.ok) {
         return { ok: false, reason: "failed", message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.` };
       }
-      const { draft, removed } = filterNonUsa(parsed.data);
-      if (!draft.configs.length) draft.configs.push({ label: "Standard", requirements: {} });
-      return { ok: true, draft, removed, usedRetry };
+      const filtered = filterNonUsa(parsed.data);
+      if (!filtered.draft.configs.length) filtered.draft.configs.push({ label: "Standard", requirements: {} });
+      // Katz defaults: 3/8" compression valve inlet, plug + breaker from the electrical configuration.
+      const draft = applySpecDefaults(filtered.draft, "generate");
+      return { ok: true, draft, removed: filtered.removed, usedRetry };
     } catch (e) {
       const msg = e instanceof Error ? (e.name === "AbortError" ? "the AI took too long" : e.message) : "unknown error";
       return { ok: false, reason: "failed", message: `Reading the sheet failed (${msg}). Fill in the form by hand instead.` };
@@ -275,7 +279,8 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<SaveResult> => {
     const sql = await ready();
     const role = await requireEditor(sql, context.userId);
-    const d = compactDraft(data.draft);
+    // Fill (never overwrite) so a deliberate edit to the plug or inlet sticks.
+    const d = applySpecDefaults(compactDraft(data.draft), "fill");
     if (!d.manufacturer) throw new Error("Add the manufacturer.");
     if (!d.model) throw new Error("Add the model.");
     if (!d.configs.length) d.configs.push({ label: "Standard", requirements: {} });
@@ -346,4 +351,29 @@ export const deleteSpecSheet = createServerFn({ method: "POST" })
     await requireEditor(sql, context.userId);
     await sql.query("delete from spec_sheets where id = $1", [data.id]);
     return { ok: true };
+  });
+
+/** Re-apply the Katz defaults to a saved sheet: inlet, plug and breaker from the electrical. */
+export const refreshSpecDefaults = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true; changed: number }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const rows = await sql.query<ConfigRow>("select * from spec_configs where sheet_id = $1 order by position", [data.id]);
+    if (!rows.length) throw new Error("That spec sheet has no configurations.");
+    const before = rows.map((r) => ({ label: r.label, requirements: specSheetSchema.shape.configs.parse([{ label: r.label, requirements: asJson(r.requirements) ?? {} }])[0]!.requirements }));
+    const after = applySpecDefaults(
+      { manufacturer: "", model: "", specs: [], mfrNotes: {}, configs: before },
+      "generate",
+    ).configs;
+    let changed = 0;
+    for (let i = 0; i < rows.length; i++) {
+      const next = JSON.stringify(after[i]!.requirements);
+      if (next === JSON.stringify(before[i]!.requirements)) continue;
+      changed++;
+      await sql.query("update spec_configs set requirements = $2::jsonb where id = $1", [rows[i]!.id, next]);
+    }
+    if (changed) await sql.query("update spec_sheets set updated_at = now() where id = $1", [data.id]);
+    return { ok: true, changed };
   });

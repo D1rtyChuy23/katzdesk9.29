@@ -31,13 +31,15 @@ function dim(v: string, axis: "W" | "D" | "H"): string {
 
 export function powerLine(p: Power | undefined): string | null {
   if (!p) return null;
-  const text = join([p.voltage && volts(p.voltage), p.amps && amps(p.amps), p.phase && phase(p.phase), p.hz && hz(p.hz), p.plug, p.circuit]);
+  const breaker = p.breaker?.trim() ? `${p.breaker.trim()} breaker` : "";
+  const ampsText = p.amps ? (breaker ? `${amps(p.amps)} (${breaker})` : amps(p.amps)) : breaker;
+  const text = join([p.voltage && volts(p.voltage), ampsText, p.phase && phase(p.phase), p.hz && hz(p.hz), p.plug, p.circuit]);
   return text ? `Power: ${text}` : null;
 }
 
 export function waterLine(w: Water | undefined): string | null {
   if (!w) return null;
-  const inlet = w.inlet && !/inlet|connection|line|fitting/i.test(w.inlet) ? `${w.inlet.trim()} inlet` : w.inlet;
+  const inlet = w.inlet && !/inlet|connection|line|fitting|valve|compression/i.test(w.inlet) ? `${w.inlet.trim()} inlet` : w.inlet;
   const text = join([inlet, w.pressure, w.filtration, w.notes]);
   return text ? `Water: ${text}` : null;
 }

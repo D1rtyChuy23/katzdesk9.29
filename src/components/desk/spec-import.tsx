@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ConfigChips, REQUIREMENT_GROUPS } from "./spec-sheet";
+import { ConfigChips, PlugSection, REQUIREMENT_GROUPS } from "./spec-sheet";
+import { applyConfigDefaults } from "@/lib/ops/spec-defaults";
 
 type Stage = "drop" | "reading" | "review";
 
@@ -430,6 +431,17 @@ export function SpecEditor({ draft, onChange, title }: { draft: SpecSheetDraft; 
                 {POWER_FIELDS.map(([k, l]) => (
                   <Field key={k} label={l} value={config.requirements.power?.[k]} onChange={(v) => setReq("power", k, v)} testId={`ed-power-${k}`} />
                 ))}
+                <div className="sm:col-span-2">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                    onClick={() => set({ configs: draft.configs.map((c, i) => (i === idx ? applyConfigDefaults(c, "generate") : c)) })}
+                    data-testid="ed-plug-rules"
+                  >
+                    <RotateCcw className="size-3.5" /> Set Plug, Breaker And Inlet From The Electrical
+                  </button>
+                  <PlugSection power={config.requirements.power} />
+                </div>
               </Group>
               <Group title="Water And Drain">
                 {WATER_FIELDS.map(([k, l]) => (
