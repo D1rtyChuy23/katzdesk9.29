@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, fileError, mimeFor, sortByName, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, familyTitle, fileError, matchBook, mimeFor, shelfFileName, sortByName, type LibrarySection } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -16,6 +16,8 @@ export type LibraryFile = {
   mime: string;
   size: number;
   token: string;
+  /** The book (equipment family) this file sits in; null until someone files it. */
+  bookId: number | null;
   addedBy: string;
   createdAt: string;
 };
@@ -42,16 +44,58 @@ function newToken(): string {
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
-const section = z.enum(["manuals", "parts"]);
+const section = z.enum(["spec", "manuals", "parts"]);
+
+export type LibraryBook = { id: number; title: string };
+
+/**
+ * Every spec sheet belongs to a book. Sheets saved before books existed (or just imported) are
+ * placed in the book for their family, creating it if needed. Loose files are filed only when
+ * their name matches exactly one book.
+ */
+async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
+  const load = async () =>
+    (await sql.query<{ id: number; title: string }>("select id, title from library_books order by lower(title)")).map((b) => ({ id: Number(b.id), title: b.title }));
+  let books = await load();
+  const loose = await sql.query<{ id: number; manufacturer: string; model: string }>(
+    "select id, manufacturer, model from spec_sheets where book_id is null order by id",
+  );
+  for (const sheet of loose) {
+    let book = matchBook(`${sheet.manufacturer} ${sheet.model}`, books);
+    if (!book) {
+      const title = familyTitle(sheet.manufacturer, sheet.model);
+      if (!title) continue;
+      await sql.query("insert into library_books (title) values ($1) on conflict (lower(title)) do nothing", [title]);
+      books = await load();
+      book = books.find((b) => b.title.toLowerCase() === title.toLowerCase()) ?? null;
+    }
+    if (book) await sql.query("update spec_sheets set book_id = $2 where id = $1 and book_id is null", [sheet.id, book.id]);
+  }
+  const files = await sql.query<{ id: number; name: string; section: LibrarySection }>(
+    "select id, name, section from library_files where book_id is null and complete order by id",
+  );
+  for (const f of files) {
+    const book = matchBook(f.name, books);
+    if (!book) continue;
+    const taken = await sql.query<{ name: string }>("select name from library_files where book_id = $1 and section = $2", [book.id, f.section]);
+    await sql.query("update library_files set book_id = $2, original_name = coalesce(original_name, name), name = $3 where id = $1 and book_id is null", [
+      f.id,
+      book.id,
+      shelfFileName(book.title, f.section, f.name, taken.map((t) => t.name)),
+    ]);
+  }
+  return books;
+}
 
 export const listLibraryFiles = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ files: LibraryFile[]; canEdit: boolean }> => {
+  .handler(async ({ context }): Promise<{ books: LibraryBook[]; files: LibraryFile[]; sheetBooks: { sheetId: number; bookId: number | null }[]; canEdit: boolean }> => {
     const sql = await ready();
     const role = await roleOf(sql, context.userId);
+    const books = await ensureBooks(sql);
     const rows = await sql.query<{
-      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; added_by_name: string | null; created_at: string | Date;
-    }>("select id, section, name, mime, size, token, added_by_name, created_at from library_files where complete order by lower(name), id");
+      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; added_by_name: string | null; created_at: string | Date;
+    }>("select id, section, name, mime, size, token, book_id, added_by_name, created_at from library_files where complete order by lower(name), id");
     const files = rows.map((r) => ({
       id: Number(r.id),
       section: r.section,
@@ -59,30 +103,120 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
       mime: r.mime,
       size: Number(r.size),
       token: r.token,
+      bookId: r.book_id == null ? null : Number(r.book_id),
       addedBy: r.added_by_name || "Teammate",
       createdAt: new Date(r.created_at).toISOString(),
     }));
-    return { files: sortByName(files), canEdit: role.canEdit };
+    const sheets = await sql.query<{ id: number; book_id: number | null }>("select id, book_id from spec_sheets");
+    return {
+      books,
+      files: sortByName(files),
+      sheetBooks: sheets.map((r) => ({ sheetId: Number(r.id), bookId: r.book_id == null ? null : Number(r.book_id) })),
+      canEdit: role.canEdit,
+    };
   });
+
+const bookTitle = z.string().trim().min(2).max(80);
+
+/** Creates the book, or returns the one that already has that title. */
+export const createLibraryBook = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { title: string }) => z.object({ title: bookTitle }).parse(d))
+  .handler(async ({ data, context }): Promise<LibraryBook> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const title = data.title.replace(/\s+/g, " ");
+    await sql.query("insert into library_books (title, created_by) values ($1, $2) on conflict (lower(title)) do nothing", [title, context.userId]);
+    const rows = await sql.query<{ id: number; title: string }>("select id, title from library_books where lower(title) = lower($1)", [title]);
+    return { id: Number(rows[0]!.id), title: rows[0]!.title };
+  });
+
+export const renameLibraryBook = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; title: string }) => z.object({ id: z.number().int().positive(), title: bookTitle }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const title = data.title.replace(/\s+/g, " ");
+    const clash = await sql.query("select 1 from library_books where lower(title) = lower($1) and id <> $2", [title, data.id]);
+    if (clash.length) throw new Error(`There is already a book called ${title}.`);
+    await sql.query("update library_books set title = $2 where id = $1", [data.id, title]);
+    return { ok: true };
+  });
+
+/** Only an empty book can be removed. */
+export const deleteLibraryBook = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const rows = await sql.query(
+      `delete from library_books b where b.id = $1
+          and not exists (select 1 from library_files f where f.book_id = b.id)
+          and not exists (select 1 from spec_sheets s where s.book_id = b.id)
+        returning b.id`,
+      [data.id],
+    );
+    if (!rows.length) throw new Error("Move or delete everything in this book first.");
+    return { ok: true };
+  });
+
+async function nameInBook(sql: Sql, bookId: number, sec: LibrarySection, original: string, exceptId?: number) {
+  const book = await sql.query<{ title: string }>("select title from library_books where id = $1", [bookId]);
+  if (!book[0]) throw new Error("That book no longer exists. Pick another.");
+  const taken = await sql.query<{ name: string }>("select name from library_files where book_id = $1 and section = $2 and id <> $3", [bookId, sec, exceptId ?? 0]);
+  return shelfFileName(book[0].title, sec, original, taken.map((t) => t.name));
+}
 
 export const startLibraryFile = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { section: LibrarySection; name: string; size: number }) =>
-    z.object({ section, name: z.string().trim().min(1).max(200), size: z.number().int().positive() }).parse(d),
+  .validator((d: { section: LibrarySection; bookId: number; name: string; size: number }) =>
+    z.object({ section, bookId: z.number().int().positive(), name: z.string().trim().min(1).max(200), size: z.number().int().positive() }).parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ id: number }> => {
+  .handler(async ({ data, context }): Promise<{ id: number; name: string }> => {
     const sql = await ready();
     const role = await requireEditor(sql, context.userId);
     const problem = fileError(data.name, data.size);
     if (problem) throw new Error(problem);
     // Uploads that were abandoned part-way are swept here.
     await sql.query("delete from library_files where not complete and created_at < now() - interval '1 hour'");
+    // Stored as "Family - Type"; the name it arrived with is kept alongside.
+    const name = await nameInBook(sql, data.bookId, data.section, data.name);
     const rows = await sql.query<{ id: number }>(
-      `insert into library_files (section, name, mime, size, token, added_by, added_by_name)
-       values ($1, $2, $3, $4, $5, $6, $7) returning id`,
-      [data.section, data.name, mimeFor(data.name), data.size, newToken(), context.userId, role.name],
+      `insert into library_files (section, name, original_name, mime, size, token, added_by, added_by_name, book_id)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`,
+      [data.section, name, data.name, mimeFor(data.name), data.size, newToken(), context.userId, role.name, data.bookId],
     );
-    return { id: Number(rows[0]!.id) };
+    return { id: Number(rows[0]!.id), name };
+  });
+
+/** Put a file in a (different) book; it is renamed for that book. */
+export const moveLibraryFile = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; bookId: number }) => z.object({ id: z.number().int().positive(), bookId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true; name: string }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null }>(
+      "select section, name, original_name from library_files where id = $1",
+      [data.id],
+    );
+    if (!file[0]) throw new Error("That file no longer exists.");
+    const name = await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id);
+    await sql.query("update library_files set book_id = $2, name = $3, original_name = coalesce(original_name, $4) where id = $1", [data.id, data.bookId, name, file[0].name]);
+    return { ok: true, name };
+  });
+
+export const moveSpecSheet = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { sheetId: number; bookId: number }) => z.object({ sheetId: z.number().int().positive(), bookId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const rows = await sql.query("update spec_sheets set book_id = $2 where id = $1 and exists (select 1 from library_books where id = $2) returning id", [data.sheetId, data.bookId]);
+    if (!rows.length) throw new Error("That book or spec sheet no longer exists.");
+    return { ok: true };
   });
 
 export const appendLibraryChunk = createServerFn({ method: "POST" })

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FileUp, ImagePlus, Loader2, Plus, RotateCcw, ShieldAlert, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -21,15 +21,19 @@ type Stage = "drop" | "reading" | "review";
 export function SpecImport({
   editing,
   aiReady,
+  initialFile,
   onSaved,
   onCancel,
 }: {
   editing?: SavedSpecSheet | null;
   aiReady: boolean;
-  onSaved: (id: number) => void;
+  /** Start reading this PDF straight away (a spec sheet already stored in a book). */
+  initialFile?: File | null;
+  /** `pdf` is the original that was read, so the caller can keep it in the book. */
+  onSaved: (id: number, pdf: File | null) => void;
   onCancel: () => void;
 }) {
-  const [stage, setStage] = useState<Stage>(editing ? "review" : "drop");
+  const [stage, setStage] = useState<Stage>(editing ? "review" : initialFile ? "reading" : "drop");
   const [draft, setDraft] = useState<SpecSheetDraft>(() => (editing ? strip(editing) : emptyDraft()));
   const [removed, setRemoved] = useState<RemovedItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
@@ -37,7 +41,17 @@ export function SpecImport({
   const [step, setStep] = useState("");
   const [conflict, setConflict] = useState<{ manufacturer: string; model: string } | null>(null);
 
+  const pdf = useRef<File | null>(null);
+  const started = useRef(false);
+  useEffect(() => {
+    if (initialFile && !started.current) {
+      started.current = true;
+      void readFile(initialFile);
+    }
+  }, [initialFile]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function readFile(file: File) {
+    pdf.current = file;
     setFileName(file.name);
     setNotice(null);
     setRemoved([]);
@@ -92,7 +106,7 @@ export function SpecImport({
       }
       setConflict(null);
       toast.success(`${draft.manufacturer} ${draft.model} saved to The Library`);
-      onSaved(res.id);
+      onSaved(res.id, pdf.current);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });

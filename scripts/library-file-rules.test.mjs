@@ -37,3 +37,55 @@ test("links are full URLs; Email and Text carry the link, not the file", () => {
   assert.ok(sms.startsWith("sms:?&body="));
   assert.ok(decodeURIComponent(sms).includes(url));
 });
+
+import { familyTitle, matchBook, shelfFileName } from "../src/lib/ops/library-file-rules.ts";
+
+test("family names: variants collapse into one family", () => {
+  assert.equal(familyTitle("Bunn", "Axiom-DV-3"), "Bunn Axiom");
+  assert.equal(familyTitle("Bunn", "Axiom 15-3"), "Bunn Axiom");
+  assert.equal(familyTitle("Bunn", "Bunn Axiom"), "Bunn Axiom");
+  assert.equal(familyTitle("Fetco", "CBS-1252"), "Fetco CBS-1252");
+  assert.equal(familyTitle("Eversys", "Cameo C'2s"), "Eversys Cameo");
+  assert.equal(familyTitle("La Marzocco", "Linea PB"), "La Marzocco Linea");
+  assert.equal(familyTitle("Bunn", "ITCB-DV"), "Bunn ITCB");
+});
+
+const books = [
+  { id: 1, title: "Bunn Axiom" },
+  { id: 2, title: "Fetco CBS-1252" },
+  { id: 3, title: "La Marzocco Linea" },
+  { id: 4, title: "Eversys Cameo" },
+  { id: 5, title: "Bunn ITCB" },
+];
+
+test("Axiom and Bunn Axiom are the same book", () => {
+  assert.equal(matchBook("Axiom parts.pdf", books)?.id, 1);
+  assert.equal(matchBook("BUNN_AXIOM-DV-3 Service Manual.pdf", books)?.id, 1);
+  assert.equal(matchBook("axiom15-3_illustrated_parts.pdf", books)?.id, 1);
+});
+
+test("other families match on the model name, however it is punctuated", () => {
+  assert.equal(matchBook("CBS1252 manual.pdf", books)?.id, 2);
+  assert.equal(matchBook("fetco cbs 1252 exploded.png", books)?.id, 2);
+  assert.equal(matchBook("Linea PB 2 group.pdf", books)?.id, 3);
+  assert.equal(matchBook("cameo_c2s.docx", books)?.id, 4);
+});
+
+test("no match, or a tie, is never guessed", () => {
+  assert.equal(matchBook("scan0001.pdf", books), null);
+  assert.equal(matchBook("Bunn brewer manual.pdf", books), null, "maker alone is not a family");
+  assert.equal(matchBook("linear actuator.pdf", books), null, "linear is not Linea");
+  assert.equal(matchBook("Axiom and Cameo.pdf", books), null, "two families of equal weight");
+});
+
+test("files are renamed Family - Type, numbered when there is already one", () => {
+  assert.equal(shelfFileName("Bunn Axiom", "spec", "x.pdf", []), "Bunn Axiom - Spec Sheet.pdf");
+  assert.equal(shelfFileName("Bunn Axiom", "parts", "IPB.PDF", []), "Bunn Axiom - Parts Book.pdf");
+  assert.equal(shelfFileName("Bunn Axiom", "manuals", "m.docx", []), "Bunn Axiom - Manual.docx");
+  assert.equal(shelfFileName("Bunn Axiom", "manuals", "m.pdf", ["bunn axiom - manual.pdf", "Bunn Axiom - Manual 2.pdf"]), "Bunn Axiom - Manual 3.pdf");
+});
+
+test("a numbered file sorts after the first one", () => {
+  const names = sortByName([{ name: "Bunn Axiom - Manual 2.pdf" }, { name: "Bunn Axiom - Manual 10.pdf" }, { name: "Bunn Axiom - Manual.pdf" }]).map((f) => f.name);
+  assert.deepEqual(names, ["Bunn Axiom - Manual.pdf", "Bunn Axiom - Manual 2.pdf", "Bunn Axiom - Manual 10.pdf"]);
+});

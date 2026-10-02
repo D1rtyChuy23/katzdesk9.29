@@ -1,22 +1,10 @@
 import { useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, Image as ImageIcon, Loader2, Mail, MessageSquare, Trash2, Upload, type LucideIcon } from "lucide-react";
-import { toast } from "sonner";
-import { appendLibraryChunk, deleteLibraryFile, finishLibraryFile, startLibraryFile, type LibraryFile } from "@/lib/ops/library-files";
-import {
-  ACCEPT,
-  ALLOWED_TEXT,
-  CHUNK_BYTES,
-  MAX_FILE_BYTES,
-  emailHref,
-  fileError,
-  fileUrl,
-  sizeText,
-  textHref,
-  type LibrarySection,
-} from "@/lib/ops/library-file-rules";
+import { ArrowRightLeft, FileText, Image as ImageIcon, Loader2, Mail, MessageSquare, Plus, Trash2, Upload, type LucideIcon } from "lucide-react";
+import { appendLibraryChunk, finishLibraryFile, startLibraryFile, type LibraryBook, type LibraryFile } from "@/lib/ops/library-files";
+import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MAX_FILE_BYTES, emailHref, fileUrl, sizeText, textHref, type LibrarySection } from "@/lib/ops/library-file-rules";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 function toBase64(bytes: Uint8Array): string {
@@ -25,197 +13,222 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(s);
 }
 
-/** One Library section (Manuals or Parts Diagrams). Files dropped here are stored in this section only. */
-export function LibraryFileSection({
-  id,
-  section,
-  title,
-  blurb,
-  icon: Icon,
-  files,
+/** Store one file in a book's shelf. Sent in pieces; returns the name it was filed under. */
+export async function uploadLibraryFile(file: File, section: LibrarySection, bookId: number, onProgress?: (pct: number) => void): Promise<string> {
+  const { id, name } = await startLibraryFile({ data: { section, bookId, name: file.name, size: file.size } });
+  const parts = Math.ceil(file.size / CHUNK_BYTES);
+  for (let seq = 0; seq < parts; seq++) {
+    onProgress?.(Math.round((seq / parts) * 100));
+    const bytes = new Uint8Array(await file.slice(seq * CHUNK_BYTES, (seq + 1) * CHUNK_BYTES).arrayBuffer());
+    await appendLibraryChunk({ data: { id, seq, base64: toBase64(bytes) } });
+  }
+  await finishLibraryFile({ data: { id } });
+  return name;
+}
+
+export const originOf = () => (typeof window === "undefined" ? "" : window.location.origin);
+
+/** Email and Text: both carry a link to the original document, never a copy. */
+export function SendButtons({ name, url, className }: { name: string; url: string; className?: string }) {
+  return (
+    <span className={cn("flex items-center gap-2", className)}>
+      <Button asChild size="sm" variant="outline">
+        <a href={emailHref(name, url)} data-testid="library-file-email">
+          <Mail className="size-4" /> Email
+        </a>
+      </Button>
+      <Button asChild size="sm" variant="outline">
+        <a href={textHref(name, url)} data-testid="library-file-text">
+          <MessageSquare className="size-4" /> Text
+        </a>
+      </Button>
+    </span>
+  );
+}
+
+/** One stored file: the title opens the original in a new tab. */
+export function FileRow({
+  file,
   canEdit,
-  loading,
+  onMove,
+  onDelete,
+  extra,
+}: {
+  file: LibraryFile;
+  canEdit: boolean;
+  onMove: (f: LibraryFile) => void;
+  onDelete: (f: LibraryFile) => void;
+  extra?: React.ReactNode;
+}) {
+  const url = fileUrl(originOf(), file.token);
+  const TypeIcon = file.mime.startsWith("image/") ? ImageIcon : FileText;
+  return (
+    <li className="grid gap-2 px-3 py-3" data-testid="library-file">
+      <a href={url} target="_blank" rel="noopener" className="group flex min-w-0 items-start gap-2.5" data-testid="library-file-open">
+        <TypeIcon className="mt-0.5 size-4 shrink-0 text-copper" />
+        <span className="min-w-0">
+          <span className="block text-sm font-medium break-words group-hover:underline" data-testid="library-file-name">{file.name}</span>
+          <span className="block text-xs text-muted-foreground">
+            {sizeText(file.size)} · {file.addedBy} · {new Date(file.createdAt).toLocaleDateString()}
+          </span>
+        </span>
+      </a>
+      <div className="flex flex-wrap items-center gap-2">
+        <SendButtons name={file.name} url={url} />
+        {canEdit ? (
+          <>
+            <Button type="button" size="sm" variant="ghost" aria-label={`Move ${file.name} to another book`} title="Move to another book" onClick={() => onMove(file)} data-testid="library-file-move">
+              <ArrowRightLeft className="size-4" />
+            </Button>
+            <Button type="button" size="sm" variant="ghost" aria-label={`Delete ${file.name}`} title="Delete" onClick={() => onDelete(file)} data-testid="library-file-delete">
+              <Trash2 className="size-4" />
+            </Button>
+          </>
+        ) : null}
+      </div>
+      {extra}
+    </li>
+  );
+}
+
+/** A drop zone for one shelf type. Files dropped here go to that shelf only. */
+export function ShelfDropZone({
+  id,
+  title,
+  hint,
+  icon: Icon,
+  busy,
+  disabled,
+  onFiles,
+  children,
 }: {
   id: string;
-  section: LibrarySection;
   title: string;
-  blurb: string;
+  hint: string;
   icon: LucideIcon;
-  files: LibraryFile[];
-  canEdit: boolean;
-  loading: boolean;
+  busy: string | null;
+  disabled: boolean;
+  onFiles: (files: File[]) => void;
+  children?: React.ReactNode;
 }) {
-  const qc = useQueryClient();
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [problems, setProblems] = useState<string[]>([]);
-  const [toDelete, setToDelete] = useState<LibraryFile | null>(null);
-  const origin = typeof window === "undefined" ? "" : window.location.origin;
-
-  async function addFiles(list: File[]) {
-    if (!list.length || busy) return;
-    const errors: string[] = [];
-    let added = 0;
-    for (const file of list) {
-      const problem = fileError(file.name, file.size);
-      if (problem) {
-        errors.push(problem);
-        continue;
-      }
-      try {
-        const { id: fileId } = await startLibraryFile({ data: { section, name: file.name, size: file.size } });
-        const parts = Math.ceil(file.size / CHUNK_BYTES);
-        for (let seq = 0; seq < parts; seq++) {
-          setBusy(`Adding ${file.name}… ${Math.round((seq / parts) * 100)}%`);
-          const bytes = new Uint8Array(await file.slice(seq * CHUNK_BYTES, (seq + 1) * CHUNK_BYTES).arrayBuffer());
-          await appendLibraryChunk({ data: { id: fileId, seq, base64: toBase64(bytes) } });
-        }
-        await finishLibraryFile({ data: { id: fileId } });
-        added += 1;
-      } catch (e) {
-        errors.push(`${file.name}: ${e instanceof Error ? e.message : "could not be added"}`);
-      }
-    }
-    setBusy(null);
-    setProblems(errors);
-    if (added) toast.success(`${added} file${added === 1 ? "" : "s"} added to ${title}`);
-    if (errors.length) toast.error(errors.length === 1 ? errors[0]! : `${errors.length} files were not added — see ${title}`);
-    await qc.invalidateQueries({ queryKey: ["library-files"] });
-  }
-
-  const remove = useMutation({
-    mutationFn: (fileId: number) => deleteLibraryFile({ data: { id: fileId } }),
-    onSuccess: () => {
-      toast.success("File deleted");
-      setToDelete(null);
-      void qc.invalidateQueries({ queryKey: ["library-files"] });
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not delete"),
-  });
-
   return (
-    <section id={id} className="mt-10 scroll-mt-24" aria-labelledby={`${id}-title`} data-testid={`section-${id}`}>
-      <div className="border-b border-border pb-3">
-        <h2 id={`${id}-title`} className="font-display text-2xl font-medium tracking-tight">
-          {title}
-        </h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">{blurb}</p>
+    <div
+      className={cn(
+        "flex flex-col items-center gap-1.5 rounded-xl border-2 border-dashed px-4 py-5 text-center transition-colors",
+        over ? "border-primary bg-primary/10" : "border-border bg-card/60",
+      )}
+      data-testid={`drop-${id}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setOver(false);
+        if (!disabled) onFiles(Array.from(e.dataTransfer.files));
+      }}
+    >
+      {busy ? <Loader2 className="size-5 animate-spin text-copper" /> : <Icon className="size-5 text-copper" />}
+      <p className="font-display text-lg font-medium">{title}</p>
+      <p className="text-sm text-muted-foreground" data-testid={`busy-${id}`}>{busy ?? hint}</p>
+      <div className="mt-1 flex flex-wrap justify-center gap-2">
+        <Button type="button" size="sm" variant="outline" disabled={disabled} onClick={() => input.current?.click()}>
+          <Upload className="size-4" /> Choose Files
+        </Button>
+        {children}
       </div>
+      <input
+        ref={input}
+        type="file"
+        multiple
+        accept={ACCEPT}
+        className="hidden"
+        data-testid={`input-${id}`}
+        onChange={(e) => {
+          const picked = Array.from(e.target.files ?? []);
+          e.target.value = "";
+          onFiles(picked);
+        }}
+      />
+    </div>
+  );
+}
 
-      {canEdit ? (
-        <div
-          className={cn(
-            "mt-4 flex flex-col items-center gap-2 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors",
-            over ? "border-primary bg-primary/10" : "border-border bg-card/60",
-          )}
-          data-testid={`drop-${id}`}
-          onDragOver={(e) => {
+export const DROP_RULES = `${ALLOWED_TEXT}. Up to ${sizeText(MAX_FILE_BYTES)} each.`;
+
+/** "Which book?" — shown when a file's family can't be matched, and for moving things between books. */
+export function BookPicker({
+  open,
+  heading,
+  detail,
+  books,
+  currentId,
+  busy,
+  cancelLabel = "Cancel",
+  onPick,
+  onCreate,
+  onCancel,
+}: {
+  open: boolean;
+  heading: string;
+  detail: string;
+  books: LibraryBook[];
+  currentId?: number | null;
+  busy?: boolean;
+  cancelLabel?: string;
+  onPick: (book: LibraryBook) => void;
+  onCreate: (title: string) => void;
+  onCancel: () => void;
+}) {
+  const [q, setQ] = useState("");
+  const [title, setTitle] = useState("");
+  const shown = books.filter((b) => b.title.toLowerCase().includes(q.trim().toLowerCase()));
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
+      <DialogContent data-testid="book-picker">
+        <DialogTitle>{heading}</DialogTitle>
+        <DialogDescription>{detail}</DialogDescription>
+        {books.length > 6 ? <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search books" aria-label="Search books" className="mt-3" /> : null}
+        <ul className="mt-3 grid max-h-64 gap-1.5 overflow-y-auto" data-testid="book-picker-list">
+          {shown.map((b) => (
+            <li key={b.id}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onPick(b)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5 text-left text-sm font-medium hover:border-primary/60",
+                  b.id === currentId && "border-primary/60",
+                )}
+              >
+                {b.title}
+                {b.id === currentId ? <span className="text-xs font-normal text-muted-foreground">Open now</span> : null}
+              </button>
+            </li>
+          ))}
+          {!shown.length ? <li className="text-sm text-muted-foreground">No books yet. Create one below.</li> : null}
+        </ul>
+        <form
+          className="mt-4 flex gap-2 border-t border-border pt-4"
+          onSubmit={(e) => {
             e.preventDefault();
-            e.dataTransfer.dropEffect = "copy";
-            setOver(true);
-          }}
-          onDragLeave={() => setOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setOver(false);
-            void addFiles(Array.from(e.dataTransfer.files));
+            if (title.trim().length >= 2) onCreate(title.trim());
           }}
         >
-          {busy ? <Loader2 className="size-5 animate-spin text-copper" /> : <Icon className="size-5 text-copper" />}
-          <p className="text-sm font-medium" data-testid={`busy-${id}`}>{busy ?? `Drop files here to add them to ${title}`}</p>
-          <p className="text-xs text-muted-foreground">
-            {ALLOWED_TEXT}. Up to {sizeText(MAX_FILE_BYTES)} each.
-          </p>
-          <Button type="button" size="sm" variant="outline" disabled={!!busy} onClick={() => input.current?.click()}>
-            <Upload className="size-4" /> Choose Files
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="New book, e.g. Bunn Axiom" aria-label="New book title" data-testid="book-picker-new" />
+          <Button type="submit" disabled={busy || title.trim().length < 2} data-testid="book-picker-create">
+            <Plus className="size-4" /> Create Book
           </Button>
-          <input
-            ref={input}
-            type="file"
-            multiple
-            accept={ACCEPT}
-            className="hidden"
-            data-testid={`input-${id}`}
-            onChange={(e) => {
-              const picked = Array.from(e.target.files ?? []);
-              e.target.value = "";
-              void addFiles(picked);
-            }}
-          />
-        </div>
-      ) : null}
-
-      {problems.length ? (
-        <ul className="mt-3 grid gap-1 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm" role="alert" data-testid={`errors-${id}`}>
-          {problems.map((p) => (
-            <li key={p}>{p}</li>
-          ))}
-        </ul>
-      ) : null}
-
-      {loading ? (
-        <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
-      ) : files.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground" data-testid={`empty-${id}`}>
-          Nothing in {title} yet.
-        </p>
-      ) : (
-        <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-card" data-testid={`files-${id}`}>
-          {files.map((f) => {
-            const url = fileUrl(origin, f.token);
-            const TypeIcon = f.mime.startsWith("image/") ? ImageIcon : FileText;
-            return (
-              <li key={f.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-3" data-testid="library-file">
-                <a href={url} target="_blank" rel="noopener" className="group flex min-w-0 flex-1 items-center gap-3" data-testid="library-file-open">
-                  <TypeIcon className="size-5 shrink-0 text-copper" />
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium group-hover:underline">{f.name}</span>
-                    <span className="block text-xs text-muted-foreground">
-                      {sizeText(f.size)} · added by {f.addedBy} · {new Date(f.createdAt).toLocaleDateString()}
-                    </span>
-                  </span>
-                </a>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Button asChild size="sm" variant="outline">
-                    <a href={emailHref(f.name, url)} data-testid="library-file-email">
-                      <Mail className="size-4" /> Email
-                    </a>
-                  </Button>
-                  <Button asChild size="sm" variant="outline">
-                    <a href={textHref(f.name, url)} data-testid="library-file-text">
-                      <MessageSquare className="size-4" /> Text
-                    </a>
-                  </Button>
-                  {canEdit ? (
-                    <Button type="button" size="sm" variant="ghost" aria-label={`Delete ${f.name}`} onClick={() => setToDelete(f)} data-testid="library-file-delete">
-                      <Trash2 className="size-4" />
-                    </Button>
-                  ) : null}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      <Dialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
-        <DialogContent>
-          <DialogTitle>Delete This File?</DialogTitle>
-          <DialogDescription>
-            {toDelete?.name} will be removed from {title}. Links already sent for it will stop working.
-          </DialogDescription>
-          <div className="mt-4 flex gap-2">
-            <Button type="button" variant="destructive" disabled={remove.isPending} onClick={() => toDelete && remove.mutate(toDelete.id)}>
-              Delete
-            </Button>
-            <Button type="button" variant="outline" onClick={() => setToDelete(null)}>
-              Keep It
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </section>
+        </form>
+        <Button type="button" variant="ghost" className="mt-2 w-fit" onClick={onCancel}>
+          {cancelLabel}
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 }
