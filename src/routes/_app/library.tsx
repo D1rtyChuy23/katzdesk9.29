@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightLeft, BookOpen, BookText, FileSpreadsheet, FileUp, Loader2, Pencil, Search, Trash2, Wrench, X } from "lucide-react";
+import { ArrowRightLeft, ChevronDown, ChevronRight, FileUp, Loader2, Pencil, Plus, Search, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { deleteSpecSheet, getSpecImage, listSpecSheets, refreshSpecDefaults, setSpecImages, type SavedSpecSheet } from "@/lib/ops/spec-library";
 import {
@@ -15,12 +15,12 @@ import {
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { fileError, fileUrl, matchBook, SHELF, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { fileError, fileUrl, matchBook, modelLabel, SHELF, shortDocName, type LibrarySection } from "@/lib/ops/library-file-rules";
 import { pdfImages } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { BookPicker, DROP_RULES, FileRow, originOf, SendButtons, ShelfDropZone, uploadLibraryFile } from "@/components/desk/library-files";
+import { AddTarget, BookPicker, DocRow, DROP_RULES, originOf, uploadLibraryFile } from "@/components/desk/library-files";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import { SpecSheetView } from "@/components/desk/spec-sheet";
 import { SpecImport } from "@/components/desk/spec-import";
@@ -34,10 +34,10 @@ export const Route = createFileRoute("/_app/library")({
   component: Page,
 });
 
-const SHELVES: { section: LibrarySection; id: string; icon: typeof BookText; hint: string }[] = [
-  { section: "spec", id: "spec-sheet", icon: FileSpreadsheet, hint: "Drop the spec sheet here" },
-  { section: "manuals", id: "manuals", icon: BookText, hint: "Drop owner and service manuals here" },
-  { section: "parts", id: "parts-diagrams", icon: Wrench, hint: "Drop parts books and exploded views here" },
+const TYPES: { section: LibrarySection; id: string; add: string }[] = [
+  { section: "spec", id: "spec-sheet", add: "Spec Sheet" },
+  { section: "manuals", id: "manuals", add: "Manual" },
+  { section: "parts", id: "parts-diagrams", add: "Parts Diagram" },
 ];
 
 type Ask =
@@ -68,7 +68,10 @@ function Page() {
   const [ask, setAsk] = useState<Ask | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<LibraryFile | null>(null);
-  const [renaming, setRenaming] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState<{ manufacturer: string; model: string } | null>(null);
+  const [openMaker, setOpenMaker] = useState<string | null>(null);
+  const [manage, setManage] = useState(false);
+  const [adding, setAdding] = useState(false);
   const rereadInput = useRef<HTMLInputElement>(null);
   const [rereading, setRereading] = useState(false);
   const [found, setFound] = useState<{ image: string | null; dimsImage: string | null; note: string | null; file: string } | null>(null);
@@ -96,8 +99,8 @@ function Page() {
     };
   }, []);
 
-  /** Drop → matching book and shelf. No match → ask; never guess. */
-  async function addFiles(section: LibrarySection, list: File[]) {
+  /** Into the model that's open (`into`), else the model the file name matches. No match → ask; never guess. */
+  async function addFiles(section: LibrarySection, list: File[], into?: LibraryBook | null) {
     if (!list.length || busy) return;
     const errors: string[] = [];
     let known = books;
@@ -108,7 +111,7 @@ function Page() {
         errors.push(problem);
         continue;
       }
-      let target = matchBook(file.name, known);
+      let target = into ?? matchBook(file.name, known);
       if (!target) {
         target = await new Promise<LibraryBook | null>((resolve) => setAsk({ kind: "file", fileName: file.name, section, resolve }));
         setAsk(null);
@@ -128,9 +131,13 @@ function Page() {
     }
     setBusy(null);
     setProblems(errors);
-    if (errors.length) toast.error(errors.length === 1 ? errors[0]! : `${errors.length} files were not added — see the list under the drop zones`);
+    if (errors.length) toast.error(errors.length === 1 ? errors[0]! : `${errors.length} files were not added — see the list at the top`);
     await reload();
-    if (last) go({ book: last.id });
+    if (last) {
+      setAdding(false);
+      setOpenMaker(last.manufacturer);
+      go({ book: last.id });
+    }
   }
 
   async function pickForAsk(target: LibraryBook) {
@@ -141,15 +148,16 @@ function Page() {
       else await moveSpecSheet({ data: { sheetId: ask.sheet.id, bookId: target.id } });
       toast.success(`Moved to ${target.title}`);
       setAsk(null);
+      setOpenMaker(target.manufacturer);
       await reload();
       go(ask.kind === "move-sheet" && selected ? { book: target.id, open: selected.id } : { book: target.id });
     } catch (e) {
       fail(e, "Could not move it");
     }
   }
-  async function createForAsk(title: string) {
+  async function createForAsk(manufacturer: string, model: string) {
     try {
-      await pickForAsk(await createLibraryBook({ data: { title } }));
+      await pickForAsk(await createLibraryBook({ data: { manufacturer, model } }));
     } catch (e) {
       fail(e, "Could not create the book");
     }
@@ -169,6 +177,7 @@ function Page() {
   /** After the AI read is saved: the sheet joins its book and the original PDF is kept there. */
   async function afterImport(id: number, pdf: File | null) {
     const from = importFile;
+    setOpenMaker(null);
     setMode("browse");
     setImportFile(null);
     try {
@@ -239,9 +248,9 @@ function Page() {
     onError: (e) => fail(e, "Could not delete"),
   });
   const rename = useMutation({
-    mutationFn: (v: { id: number; title: string }) => renameLibraryBook({ data: v }),
+    mutationFn: (v: { id: number; manufacturer: string; model: string }) => renameLibraryBook({ data: v }),
     onSuccess: () => {
-      toast.success("Book renamed");
+      toast.success("Renamed");
       setRenaming(null);
       void reload();
     },
@@ -250,7 +259,7 @@ function Page() {
   const removeBook = useMutation({
     mutationFn: (id: number) => deleteLibraryBook({ data: { id } }),
     onSuccess: () => {
-      toast.success("Book removed");
+      toast.success("Model removed");
       go({});
       void reload();
     },
@@ -261,184 +270,39 @@ function Page() {
     sheets: sheets.filter((s) => sheetBook.get(s.id) === id),
     files: files.filter((f) => f.bookId === id),
   });
-  const shownBooks = books.filter((b) => b.title.toLowerCase().includes(q.trim().toLowerCase()));
+  const needle = q.trim().toLowerCase();
+  const shownBooks = books.filter((b) => b.title.toLowerCase().includes(needle));
+  const makers = [...new Set(shownBooks.map((b) => b.manufacturer))].sort((x, y) => x.localeCompare(y, "en", { sensitivity: "base" }));
   const unfiled = files.filter((f) => f.bookId == null);
-  const open_ = book ? inBook(book.id) : null;
-  const specPdf = open_?.files.find((f) => f.section === "spec") ?? null;
   const loading = data.isLoading || lib.isLoading;
+  // One maker open at a time: the one clicked, else the one holding the open model, else the only search hit.
+  const activeMaker = openMaker ?? book?.manufacturer ?? (needle && makers.length === 1 ? makers[0]! : null);
 
   return (
     <div>
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
-          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            One book per equipment family. Each book holds its spec sheet, manuals and parts diagrams.
-          </p>
-        </div>
-        <label className="relative block sm:w-64">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
+        <label className="relative block sm:ml-auto sm:w-64">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search books" aria-label="Search books" className="pl-9" data-testid="book-search" />
+          <Input value={q} onChange={(e) => { setQ(e.target.value); setOpenMaker(null); }} placeholder="Search maker or model" aria-label="Search maker or model" className="pl-9" data-testid="book-search" />
         </label>
+        {canEdit ? (
+          <Button type="button" onClick={() => setAdding(true)} data-testid="library-add">
+            <Plus className="size-4" /> Add Files
+          </Button>
+        ) : null}
       </header>
 
-      {/* The map: The Library → books */}
-      <section className="mt-6" aria-label="Books" data-testid="library-books">
-        <div className="flex flex-col items-center">
-          <span className="rounded-full bg-ink px-4 py-1.5 font-display text-sm font-medium text-cream">The Library</span>
-          <span className="h-5 w-px bg-border" aria-hidden="true" />
-        </div>
-        {loading ? (
-          <p className="text-center text-sm text-muted-foreground">Loading The Library…</p>
-        ) : shownBooks.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="books-empty">
-            {books.length ? "No book matches that search." : "No books yet. Drop a spec sheet, manual or parts diagram below to start the first one."}
-          </p>
-        ) : (
-          <ul className="grid grid-cols-2 gap-x-4 gap-y-9 pt-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {shownBooks.map((b) => {
-              const c = inBook(b.id);
-              return (
-                <BookCover
-                  key={b.id}
-                  book={b}
-                  cover={c.sheets.find((s) => s.hasImage) ?? null}
-                  counts={{
-                    spec: c.sheets.length + c.files.filter((f) => f.section === "spec").length,
-                    manuals: c.files.filter((f) => f.section === "manuals").length,
-                    parts: c.files.filter((f) => f.section === "parts").length,
-                  }}
-                  active={book?.id === b.id}
-                  onOpen={() => {
-                    setMode("browse");
-                    go(book?.id === b.id ? {} : { book: b.id });
-                  }}
-                />
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      {/* The open book: three shelves */}
-      {book && open_ ? (
-        <section ref={bookPanel} className="mt-8 scroll-mt-24 rounded-2xl border border-border bg-card/70 p-4 sm:p-6" aria-labelledby="open-book-title" data-testid="open-book">
-          <div className="flex flex-wrap items-center gap-2">
-            <BookOpen className="size-5 text-copper" />
-            <h2 id="open-book-title" className="font-display text-2xl font-medium tracking-tight" data-testid="open-book-title">
-              {book.title}
-            </h2>
-            <span className="ml-auto flex items-center gap-1">
-              {canEdit ? (
-                <Button type="button" size="sm" variant="ghost" onClick={() => setRenaming(book.title)} data-testid="book-rename">
-                  <Pencil className="size-4" /> Rename
-                </Button>
-              ) : null}
-              {canEdit && !open_.sheets.length && !open_.files.length ? (
-                <Button type="button" size="sm" variant="ghost" disabled={removeBook.isPending} onClick={() => removeBook.mutate(book.id)}>
-                  <Trash2 className="size-4" /> Remove Empty Book
-                </Button>
-              ) : null}
-              <Button type="button" size="sm" variant="ghost" onClick={() => go({})} aria-label="Close book">
-                <X className="size-4" /> Close
-              </Button>
-            </span>
-          </div>
-          <div className="mx-auto mt-3 h-4 w-px bg-border" aria-hidden="true" />
-          <div className="grid gap-4 border-t border-border pt-4 md:grid-cols-3">
-            {SHELVES.map((sh) => {
-              const shelfFiles = open_.files.filter((f) => f.section === sh.section);
-              const shelfSheets = sh.section === "spec" ? open_.sheets : [];
-              const Icon = sh.icon;
-              return (
-                <div key={sh.section} className="rounded-xl border border-border bg-background" data-testid={`shelf-${sh.id}`}>
-                  <h3 className="flex items-center gap-2 border-b border-border px-3 py-2.5 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-                    <Icon className="size-4 text-copper" /> {SHELF[sh.section].title}
-                    <span className="ml-auto tabular">{shelfFiles.length + shelfSheets.length}</span>
-                  </h3>
-                  <ul className="divide-y divide-border">
-                    {shelfSheets.map((s) => (
-                      <li key={`s${s.id}`} className="flex items-center gap-2 px-3 py-3" data-testid="shelf-specs">
-                        <button
-                          type="button"
-                          className={cn("group flex min-w-0 flex-1 items-start gap-2.5 text-left", selected?.id === s.id && "text-primary")}
-                          onClick={() => go({ book: book.id, open: selected?.id === s.id ? undefined : s.id })}
-                          data-testid="shelf-specs-open"
-                        >
-                          <FileSpreadsheet className="mt-0.5 size-4 shrink-0 text-copper" />
-                          <span className="min-w-0">
-                            <span className="block text-sm font-medium break-words group-hover:underline">
-                              {s.manufacturer} {s.model}
-                            </span>
-                            <span className="block text-xs text-muted-foreground">Power, water, plug and size · {s.configs.length} configuration{s.configs.length === 1 ? "" : "s"}</span>
-                          </span>
-                        </button>
-                        {canEdit ? (
-                          <Button type="button" size="sm" variant="ghost" title="Move to another book" aria-label="Move these specs to another book" onClick={() => setAsk({ kind: "move-sheet", sheet: s })}>
-                            <ArrowRightLeft className="size-4" />
-                          </Button>
-                        ) : null}
-                      </li>
-                    ))}
-                    {shelfFiles.map((f) => (
-                      <FileRow
-                        key={f.id}
-                        file={f}
-                        canEdit={canEdit}
-                        onMove={(file) => setAsk({ kind: "move-file", file })}
-                        onDelete={setFileToDelete}
-                        extra={
-                          sh.section === "spec" && canEdit && !open_.sheets.length && f.mime === "application/pdf" ? (
-                            <Button type="button" size="sm" variant="outline" className="w-fit" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
-                              <FileUp className="size-4" /> Read Specs From This PDF
-                            </Button>
-                          ) : null
-                        }
-                      />
-                    ))}
-                    {!shelfFiles.length && !shelfSheets.length ? (
-                      <li className="px-3 py-4 text-sm text-muted-foreground">Nothing here yet.</li>
-                    ) : sh.section === "spec" && !shelfFiles.length ? (
-                      <li className="px-3 py-3 text-xs text-muted-foreground" data-testid="spec-no-pdf">
-                        The original PDF isn't stored for this spec sheet yet. Drop it on Spec Sheet below to get Email and Text.
-                      </li>
-                    ) : null}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-
-          {mode === "edit" && selected ? (
-            <div className="mt-6">
-              <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => setMode("browse")} onSaved={(id) => { setMode("browse"); void reload(); go({ book: book.id, open: id }); }} />
-            </div>
-          ) : selected && mode === "browse" ? (
-            <div className="mt-6 grid gap-3" data-testid="book-spec-sheet">
-              {specPdf ? (
-                <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5" data-testid="spec-send">
-                  <a href={fileUrl(originOf(), specPdf.token)} target="_blank" rel="noopener" className="min-w-0 flex-1 text-sm font-medium break-words hover:underline" data-testid="spec-send-open">
-                    {specPdf.name}
-                  </a>
-                  <SendButtons name={specPdf.name} url={fileUrl(originOf(), specPdf.token)} />
-                </div>
-              ) : null}
-              <SpecSheetView
-                sheet={selected}
-                canEdit={canEdit}
-                onEdit={() => setMode("edit")}
-                onDelete={() => setConfirmDelete(true)}
-                onRefresh={canEdit ? () => refresh.mutate(selected.id) : undefined}
-                refreshing={refresh.isPending}
-                onReread={canEdit ? () => rereadInput.current?.click() : undefined}
-              />
-            </div>
-          ) : null}
-        </section>
+      {problems.length ? (
+        <ul className="mt-3 grid gap-1 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm" role="alert" data-testid="library-errors">
+          {problems.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
       ) : null}
 
       {mode === "import" ? (
-        <section className="mt-8" data-testid="spec-import-panel">
+        <section className="mt-5" data-testid="spec-import-panel">
           <SpecImport
             key={importFile ? `file-${importFile.file.name}` : "import"}
             aiReady={!!data.data?.aiReady}
@@ -452,76 +316,218 @@ function Page() {
         </section>
       ) : null}
 
-      {/* Drop zones stay under the books */}
-      {canEdit ? (
-        <section className="mt-8" aria-labelledby="add-title" data-testid="library-drops">
-          <h2 id="add-title" className="font-display text-xl font-medium tracking-tight">
-            Add To The Library
-          </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Drop a file on its type. It goes to the matching book and is renamed Family - Type. {DROP_RULES}
+      <section className="mt-5 grid gap-2.5" aria-label="Manufacturers" data-testid="library-makers">
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading The Library…</p>
+        ) : makers.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="books-empty">
+            {books.length ? "Nothing matches that search." : "Nothing here yet. Use Add Files to add the first spec sheet, manual or parts diagram."}
           </p>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            {SHELVES.map((sh) => (
-              <ShelfDropZone
-                key={sh.section}
-                id={sh.id}
-                title={SHELF[sh.section].title}
-                hint={sh.hint}
-                icon={sh.icon}
-                busy={busy?.section === sh.section ? busy.text : null}
-                disabled={!!busy}
-                onFiles={(list) => void addFiles(sh.section, list)}
-              >
-                {sh.section === "spec" && mode === "browse" ? (
-                  <Button type="button" size="sm" onClick={() => { setImportFile(null); setMode("import"); }} data-testid="library-import">
-                    <FileUp className="size-4" /> Import And Read Specs
-                  </Button>
+        ) : (
+          makers.map((maker) => {
+            const models = shownBooks.filter((b) => b.manufacturer === maker);
+            const isOpen = activeMaker === maker;
+            const current = isOpen ? (book && book.manufacturer === maker ? book : models[0]!) : null;
+            const inside = current ? inBook(current.id) : null;
+            return (
+              <div key={maker} className="rounded-xl border border-border bg-card" data-testid="maker" data-maker={maker}>
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  className="flex min-h-13 w-full items-center gap-3 px-4 py-3 text-left"
+                  data-testid="maker-open"
+                  onClick={() => {
+                    setMode("browse");
+                    setOpenMaker(isOpen ? "" : maker);
+                    go(isOpen ? {} : { book: models[0]!.id });
+                  }}
+                >
+                  <span className="font-display text-xl font-medium">{maker}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {models.length} model{models.length === 1 ? "" : "s"}
+                  </span>
+                  {isOpen ? <ChevronDown className="ml-auto size-5 text-muted-foreground" /> : <ChevronRight className="ml-auto size-5 text-muted-foreground" />}
+                </button>
+
+                {isOpen && current && inside ? (
+                  <div ref={bookPanel} className="scroll-mt-24 border-t border-border px-4 pt-3 pb-4" data-testid="open-book">
+                    <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={`${maker} models`} data-testid="model-chips">
+                      {models.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={m.id === current.id}
+                          onClick={() => { setMode("browse"); setOpenMaker(maker); go({ book: m.id }); }}
+                          className={cn(
+                            "h-10 rounded-full border px-4 text-sm font-medium",
+                            m.id === current.id ? "border-ink bg-ink text-cream" : "border-border bg-background hover:border-primary/50",
+                          )}
+                          data-testid="model-chip"
+                        >
+                          {modelLabel(m.title, maker)}
+                        </button>
+                      ))}
+                      {canEdit ? (
+                        <Button type="button" size="sm" variant={manage ? "secondary" : "ghost"} className="ml-auto" aria-pressed={manage} onClick={() => setManage(!manage)} data-testid="manage">
+                          <Settings2 className="size-4" /> {manage ? "Done" : "Manage"}
+                        </Button>
+                      ) : null}
+                    </div>
+                    <span className="sr-only" data-testid="open-book-title">{current.title}</span>
+
+                    <div className="mt-3 flex flex-col gap-4 sm:flex-row">
+                      <ModelPhoto sheet={inside.sheets.find((s) => s.hasImage) ?? null} title={current.title} />
+                      <ul className="min-w-0 flex-1 divide-y divide-border" data-testid="docs">
+                        {inside.sheets.map((s) => (
+                          <li key={`s${s.id}`} className="flex min-h-12 items-center gap-2 py-1" data-testid="shelf-specs">
+                            <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.1em] text-copper uppercase">Specs</span>
+                            <button
+                              type="button"
+                              aria-expanded={selected?.id === s.id}
+                              className="min-w-0 flex-1 py-2 text-left text-sm font-medium break-words hover:underline"
+                              onClick={() => go({ book: current.id, open: selected?.id === s.id ? undefined : s.id })}
+                              data-testid="shelf-specs-open"
+                            >
+                              {inside.sheets.length > 1 ? `${s.model}: ` : ""}Power, Water, Plug, Size
+                            </button>
+                            {selected?.id === s.id ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
+                            {manage ? (
+                              <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" title="Move to another model" aria-label="Move these specs to another model" onClick={() => setAsk({ kind: "move-sheet", sheet: s })}>
+                                <ArrowRightLeft className="size-4" />
+                              </Button>
+                            ) : null}
+                          </li>
+                        ))}
+                        {TYPES.flatMap((t) => inside.files.filter((f) => f.section === t.section)).map((f) => (
+                          <DocRow
+                            key={f.id}
+                            file={f}
+                            label={shortDocName(f.name, current.title)}
+                            manage={manage}
+                            onMove={(file) => setAsk({ kind: "move-file", file })}
+                            onDelete={setFileToDelete}
+                            extra={
+                              f.section === "spec" && canEdit && !inside.sheets.length && f.mime === "application/pdf" ? (
+                                <Button type="button" size="sm" variant="outline" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
+                                  <FileUp className="size-4" /> Read Specs
+                                </Button>
+                              ) : null
+                            }
+                          />
+                        ))}
+                        {!inside.files.length && !inside.sheets.length ? <li className="py-3 text-sm text-muted-foreground">No documents yet.</li> : null}
+                      </ul>
+                    </div>
+
+                    {canEdit ? (
+                      <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="model-add">
+                        <span className="text-xs text-muted-foreground">Add to {modelLabel(current.title, maker)}:</span>
+                        {TYPES.map((t) => (
+                          <AddTarget
+                            key={t.section}
+                            id={`here-${t.id}`}
+                            label={t.add}
+                            busy={busy?.section === t.section ? busy.text : null}
+                            disabled={!!busy}
+                            onFiles={(list) => void addFiles(t.section, list, current)}
+                          />
+                        ))}
+                        {manage ? (
+                          <>
+                            <Button type="button" size="sm" variant="ghost" onClick={() => setRenaming({ manufacturer: maker, model: modelLabel(current.title, maker) })} data-testid="book-rename">
+                              <Pencil className="size-4" /> Rename
+                            </Button>
+                            {!inside.sheets.length && !inside.files.length ? (
+                              <Button type="button" size="sm" variant="ghost" disabled={removeBook.isPending} onClick={() => removeBook.mutate(current.id)}>
+                                <Trash2 className="size-4" /> Remove Model
+                              </Button>
+                            ) : null}
+                          </>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    {mode === "edit" && selected ? (
+                      <div className="mt-4">
+                        <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => setMode("browse")} onSaved={(id) => { setMode("browse"); void reload(); go({ book: current.id, open: id }); }} />
+                      </div>
+                    ) : selected && mode === "browse" && sheetBook.get(selected.id) === current.id ? (
+                      <div className="mt-4" data-testid="book-spec-sheet">
+                        <SpecSheetView
+                          sheet={selected}
+                          canEdit={canEdit}
+                          onEdit={() => setMode("edit")}
+                          onDelete={() => setConfirmDelete(true)}
+                          onRefresh={canEdit ? () => refresh.mutate(selected.id) : undefined}
+                          refreshing={refresh.isPending}
+                          onReread={canEdit ? () => rereadInput.current?.click() : undefined}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
-              </ShelfDropZone>
-            ))}
-          </div>
-          {problems.length ? (
-            <ul className="mt-3 grid gap-1 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm" role="alert" data-testid="library-errors">
-              {problems.map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
-      ) : null}
+              </div>
+            );
+          })
+        )}
+      </section>
 
       {unfiled.length ? (
-        <section className="mt-8" aria-labelledby="unfiled-title" data-testid="library-unfiled">
-          <h2 id="unfiled-title" className="font-display text-xl font-medium tracking-tight">
-            Not In A Book Yet
-          </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">These were added before books. {canEdit ? "Use the move button to choose a book for each." : ""}</p>
-          <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-card">
+        <section className="mt-6 rounded-xl border border-border bg-card px-4 py-3" aria-labelledby="unfiled-title" data-testid="library-unfiled">
+          <div className="flex items-center gap-2">
+            <h2 id="unfiled-title" className="font-display text-lg font-medium">
+              Not Filed Yet
+            </h2>
+            <span className="text-xs text-muted-foreground">{unfiled.length}</span>
+            {canEdit ? (
+              <Button type="button" size="sm" variant={manage ? "secondary" : "ghost"} className="ml-auto" onClick={() => setManage(!manage)}>
+                <Settings2 className="size-4" /> {manage ? "Done" : "Manage"}
+              </Button>
+            ) : null}
+          </div>
+          <ul className="divide-y divide-border">
             {unfiled.map((f) => (
-              <FileRow key={f.id} file={f} canEdit={canEdit} onMove={(file) => setAsk({ kind: "move-file", file })} onDelete={setFileToDelete} />
+              <DocRow key={f.id} file={f} label={f.name.replace(/\.[A-Za-z0-9]+$/, "")} manage={manage} onMove={(file) => setAsk({ kind: "move-file", file })} onDelete={setFileToDelete} />
             ))}
           </ul>
         </section>
       ) : null}
 
+      <Dialog open={adding && !ask} onOpenChange={(o) => !o && !busy && setAdding(false)}>
+        <DialogContent data-testid="add-dialog">
+          <DialogTitle>Add Files</DialogTitle>
+          <DialogDescription>
+            Drop a file on its type, or click to choose. It is filed under the maker and model in its name; if that isn't clear, you pick. {DROP_RULES}
+          </DialogDescription>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            {TYPES.map((t) => (
+              <AddTarget key={t.section} id={t.id} label={t.add} large busy={busy?.section === t.section ? busy.text : null} disabled={!!busy} onFiles={(list) => void addFiles(t.section, list)} />
+            ))}
+          </div>
+          <Button type="button" variant="outline" className="mt-3 w-fit" onClick={() => { setAdding(false); setImportFile(null); setMode("import"); }} data-testid="library-import">
+            <FileUp className="size-4" /> Import A Spec Sheet And Read Its Specs
+          </Button>
+        </DialogContent>
+      </Dialog>
+
       <BookPicker
         open={!!ask}
-        heading={ask?.kind === "file" ? "Which Book Is This For?" : "Move To Which Book?"}
+        heading={ask?.kind === "file" ? "Which Model Is This For?" : "Move To Which Model?"}
         detail={
           ask?.kind === "file"
-            ? `${ask.fileName} doesn't match a book. Pick the book for this ${SHELF[ask.section].type.toLowerCase()}, or create a new one.`
+            ? `${ask.fileName} doesn't match a model. Pick the model for this ${SHELF[ask.section].type.toLowerCase()}, or add a new one.`
             : ask?.kind === "move-file"
-              ? `${ask.file.name} will be renamed for the book you pick.`
+              ? `${ask.file.name} will be renamed for the model you pick.`
               : ask?.kind === "move-sheet"
-                ? `${ask.sheet.manufacturer} ${ask.sheet.model} specs will move to the book you pick.`
+                ? `${ask.sheet.manufacturer} ${ask.sheet.model} specs will move to the model you pick.`
                 : ""
         }
         books={books}
         currentId={book?.id ?? null}
         cancelLabel={ask?.kind === "file" ? "Skip This File" : "Cancel"}
         onPick={(b) => void pickForAsk(b)}
-        onCreate={(t) => void createForAsk(t)}
+        onCreate={(m, n) => void createForAsk(m, n)}
         onCancel={() => {
           if (ask?.kind === "file") ask.resolve(null);
           else setAsk(null);
@@ -576,16 +582,20 @@ function Page() {
 
       <Dialog open={renaming != null} onOpenChange={(o) => !o && setRenaming(null)}>
         <DialogContent>
-          <DialogTitle>Rename This Book</DialogTitle>
-          <DialogDescription>Files already in the book keep their names; new ones use the new title.</DialogDescription>
+          <DialogTitle>Rename</DialogTitle>
+          <DialogDescription>Files already stored keep their names; new ones use the new name.</DialogDescription>
           <form
-            className="mt-3 flex gap-2"
+            className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
             onSubmit={(e) => {
               e.preventDefault();
-              if (book && renaming && renaming.trim().length >= 2) rename.mutate({ id: book.id, title: renaming.trim() });
+              if (book && renaming && renaming.manufacturer.trim().length >= 2 && renaming.model.trim()) {
+                setOpenMaker(renaming.manufacturer.trim());
+                rename.mutate({ id: book.id, manufacturer: renaming.manufacturer.trim(), model: renaming.model.trim() });
+              }
             }}
           >
-            <Input value={renaming ?? ""} onChange={(e) => setRenaming(e.target.value)} aria-label="Book title" />
+            <Input value={renaming?.manufacturer ?? ""} onChange={(e) => renaming && setRenaming({ ...renaming, manufacturer: e.target.value })} aria-label="Manufacturer" placeholder="Manufacturer" />
+            <Input value={renaming?.model ?? ""} onChange={(e) => renaming && setRenaming({ ...renaming, model: e.target.value })} aria-label="Model" placeholder="Model" />
             <Button type="submit" disabled={rename.isPending}>
               Save
             </Button>
@@ -628,55 +638,19 @@ function Page() {
   );
 }
 
-/** A book on the map: spine, title, and the machine photo when the spec sheet has one. */
-function BookCover({
-  book,
-  cover,
-  counts,
-  active,
-  onOpen,
-}: {
-  book: LibraryBook;
-  cover: SavedSpecSheet | null;
-  counts: Record<LibrarySection, number>;
-  active: boolean;
-  onOpen: () => void;
-}) {
+/** The machine photo for the open model; click to enlarge. Nothing is shown when no photo is saved. */
+function ModelPhoto({ sheet, title }: { sheet: SavedSpecSheet | null; title: string }) {
   const image = useQuery({
-    queryKey: ["spec-image", cover?.id, cover?.updatedAt],
-    queryFn: () => getSpecImage({ data: { id: cover!.id } }),
-    enabled: !!cover,
+    queryKey: ["spec-image", sheet?.id, sheet?.updatedAt],
+    queryFn: () => getSpecImage({ data: { id: sheet!.id } }),
+    enabled: !!sheet,
     staleTime: 5 * 60_000,
   });
   const photo = image.data?.image ?? null;
+  if (!photo) return null;
   return (
-    <li className="relative" data-testid="book" data-book={book.title}>
-      {/* branch from The Library */}
-      <span className="absolute -top-4 left-1/2 h-4 w-px bg-border" aria-hidden="true" />
-      <span className="absolute -top-4 -right-2 -left-2 h-px bg-border" aria-hidden="true" />
-      <div
-        className={cn(
-          "flex h-full overflow-hidden rounded-r-xl rounded-l-sm border bg-card shadow-sm transition-shadow hover:shadow-md",
-          active ? "border-primary ring-2 ring-primary/30" : "border-border",
-        )}
-      >
-        <span className="w-2.5 shrink-0 bg-ink" aria-hidden="true" />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="grid aspect-[4/3] place-items-center border-b border-border bg-white">
-            {photo ? (
-              <ZoomableImage src={photo} alt={book.title} label={book.title} className="h-full" imgClassName="mx-auto h-full max-h-40 w-full object-contain p-2" testId="book-photo" />
-            ) : (
-              <BookText className="size-9 text-copper/50" aria-hidden="true" />
-            )}
-          </div>
-          <button type="button" onClick={onOpen} aria-expanded={active} className="flex flex-1 flex-col gap-1 px-3 py-2.5 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" data-testid="book-open">
-            <span className="font-display text-base leading-tight font-medium break-words">{book.title}</span>
-            <span className="text-xs text-muted-foreground">
-              {counts.spec} spec · {counts.manuals} manual{counts.manuals === 1 ? "" : "s"} · {counts.parts} parts
-            </span>
-          </button>
-        </div>
-      </div>
-    </li>
+    <div className="size-36 shrink-0 overflow-hidden rounded-lg border border-border bg-white">
+      <ZoomableImage src={photo} alt={title} label={title} className="h-full" imgClassName="h-full w-full object-contain p-1.5" testId="book-photo" />
+    </div>
   );
 }

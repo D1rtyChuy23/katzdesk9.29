@@ -89,3 +89,20 @@ test("a numbered file sorts after the first one", () => {
   const names = sortByName([{ name: "Bunn Axiom - Manual 2.pdf" }, { name: "Bunn Axiom - Manual 10.pdf" }, { name: "Bunn Axiom - Manual.pdf" }]).map((f) => f.name);
   assert.deepEqual(names, ["Bunn Axiom - Manual.pdf", "Bunn Axiom - Manual 2.pdf", "Bunn Axiom - Manual 10.pdf"]);
 });
+
+import { makerOf, modelLabel, shortDocName } from "../src/lib/ops/library-file-rules.ts";
+
+test("books group under their manufacturer", () => {
+  assert.equal(makerOf("Bunn Axiom"), "Bunn");
+  assert.equal(makerOf("La Marzocco Linea"), "La Marzocco");
+  assert.equal(makerOf("Acme Brewer 9", ["Acme Brewer"]), "Acme Brewer");
+  assert.equal(makerOf("Zojirushi X1"), "Zojirushi");
+  assert.equal(modelLabel("La Marzocco Linea", "La Marzocco"), "Linea");
+  assert.equal(modelLabel("Fetco CBS-1252", "Fetco"), "CBS-1252");
+});
+
+test("document names drop the family they already sit under", () => {
+  assert.equal(shortDocName("Bunn Axiom - Manual 2.pdf", "Bunn Axiom"), "Manual 2");
+  assert.equal(shortDocName("Bunn Axiom - Parts Book.pdf", "Bunn Axiom"), "Parts Book");
+  assert.equal(shortDocName("scan0001.pdf", "Bunn Axiom"), "scan0001");
+});

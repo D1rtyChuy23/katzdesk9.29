@@ -125,9 +125,9 @@ export type BookRef = { id: number; title: string };
  * Which book a file name (or maker + model) belongs to. Returns the book only when exactly one
  * fits best; otherwise null — the person picks. Never guesses.
  */
-export function matchBook(text: string, books: BookRef[]): BookRef | null {
+export function matchBook<T extends BookRef>(text: string, books: T[]): T | null {
   let best = 0;
-  let hits: BookRef[] = [];
+  let hits: T[] = [];
   for (const b of books) {
     const score = Math.max(0, ...bookKeys(b.title).map((k) => keyLength(text, k)));
     if (!score) continue;
@@ -148,4 +148,37 @@ export function shelfFileName(bookTitle: string, section: LibrarySection, origin
     const name = `${n === 1 ? base : `${base} ${n}`}${ext ? `.${ext}` : ""}`;
     if (!used.has(name.toLowerCase())) return name;
   }
+}
+
+// ---- Manufacturer → model ----
+
+/** Makers with more than one word, or that staff add by hand before any spec sheet exists. */
+const KNOWN_MAKERS = [
+  "La Marzocco", "Nuova Simonelli", "Victoria Arduino", "Wilbur Curtis", "La Cimbali", "La Spaziale", "Bunn", "Fetco", "Eversys",
+  "Curtis", "Rancilio", "Franke", "Schaerer", "Mahlkonig", "Mazzer", "Ditting", "Slayer", "Synesso", "Baratza", "Astoria", "Faema", "Thermoplan",
+];
+
+/** The maker a book title starts with: the longest known maker, else the first word. */
+export function makerOf(title: string, makers: string[] = []): string {
+  const t = clean(title);
+  const lower = t.toLowerCase();
+  const hit = [...makers, ...KNOWN_MAKERS]
+    .map(clean)
+    .filter((m) => m && (lower === m.toLowerCase() || lower.startsWith(m.toLowerCase() + " ")))
+    .sort((a, b) => b.length - a.length)[0];
+  return hit ?? t.split(" ")[0] ?? t;
+}
+
+/** "Bunn Axiom" under Bunn → "Axiom". */
+export function modelLabel(title: string, maker: string): string {
+  const t = clean(title);
+  const rest = t.toLowerCase().startsWith(maker.toLowerCase() + " ") ? t.slice(maker.length + 1) : t;
+  return rest || t;
+}
+
+/** Inside a model the family is already on screen: "Bunn Axiom - Manual 2.pdf" → "Manual 2". */
+export function shortDocName(name: string, bookTitle: string): string {
+  const stem = name.replace(/\.[A-Za-z0-9]+$/, "");
+  const prefix = `${clean(bookTitle)} - `;
+  return stem.toLowerCase().startsWith(prefix.toLowerCase()) ? stem.slice(prefix.length) : stem;
 }

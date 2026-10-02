@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, familyTitle, fileError, matchBook, mimeFor, shelfFileName, sortByName, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, familyTitle, fileError, makerOf, matchBook, mimeFor, shelfFileName, sortByName, type LibrarySection } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -46,7 +46,7 @@ function newToken(): string {
 }
 const section = z.enum(["spec", "manuals", "parts"]);
 
-export type LibraryBook = { id: number; title: string };
+export type LibraryBook = { id: number; title: string; manufacturer: string };
 
 /**
  * Every spec sheet belongs to a book. Sheets saved before books existed (or just imported) are
@@ -55,8 +55,20 @@ export type LibraryBook = { id: number; title: string };
  */
 async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
   const load = async () =>
-    (await sql.query<{ id: number; title: string }>("select id, title from library_books order by lower(title)")).map((b) => ({ id: Number(b.id), title: b.title }));
+    (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books order by lower(title)")).map((b) => ({
+      id: Number(b.id),
+      title: b.title,
+      manufacturer: b.manufacturer ?? "",
+    }));
   let books = await load();
+  // Books made before makers were recorded: take the maker from the spec sheets, else the title.
+  if (books.some((b) => !b.manufacturer)) {
+    const makers = (await sql.query<{ manufacturer: string }>("select distinct manufacturer from spec_sheets")).map((r) => r.manufacturer);
+    for (const b of books.filter((x) => !x.manufacturer)) {
+      await sql.query("update library_books set manufacturer = $2 where id = $1 and manufacturer is null", [b.id, makerOf(b.title, makers)]);
+    }
+    books = await load();
+  }
   const loose = await sql.query<{ id: number; manufacturer: string; model: string }>(
     "select id, manufacturer, model from spec_sheets where book_id is null order by id",
   );
@@ -65,7 +77,7 @@ async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
     if (!book) {
       const title = familyTitle(sheet.manufacturer, sheet.model);
       if (!title) continue;
-      await sql.query("insert into library_books (title) values ($1) on conflict (lower(title)) do nothing", [title]);
+      await sql.query("insert into library_books (title, manufacturer) values ($1, $2) on conflict (lower(title)) do nothing", [title, sheet.manufacturer.trim()]);
       books = await load();
       book = books.find((b) => b.title.toLowerCase() === title.toLowerCase()) ?? null;
     }
@@ -116,31 +128,38 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
     };
   });
 
-const bookTitle = z.string().trim().min(2).max(80);
+const bookParts = { manufacturer: z.string().trim().min(2).max(40), model: z.string().trim().min(1).max(60) };
+const tidy = (v: string) => v.replace(/\s+/g, " ").trim();
+/** "Bunn" + "Axiom" → "Bunn Axiom"; a model typed with the maker in front isn't doubled. */
+function titleOf(manufacturer: string, model: string) {
+  const maker = tidy(manufacturer);
+  const m = tidy(model);
+  return m.toLowerCase().startsWith(maker.toLowerCase() + " ") ? m : `${maker} ${m}`;
+}
 
-/** Creates the book, or returns the one that already has that title. */
+/** Creates the book, or returns the one that already has that maker and model. */
 export const createLibraryBook = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { title: string }) => z.object({ title: bookTitle }).parse(d))
+  .validator((d: { manufacturer: string; model: string }) => z.object(bookParts).parse(d))
   .handler(async ({ data, context }): Promise<LibraryBook> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const title = data.title.replace(/\s+/g, " ");
-    await sql.query("insert into library_books (title, created_by) values ($1, $2) on conflict (lower(title)) do nothing", [title, context.userId]);
-    const rows = await sql.query<{ id: number; title: string }>("select id, title from library_books where lower(title) = lower($1)", [title]);
-    return { id: Number(rows[0]!.id), title: rows[0]!.title };
+    const title = titleOf(data.manufacturer, data.model);
+    await sql.query("insert into library_books (title, manufacturer, created_by) values ($1, $2, $3) on conflict (lower(title)) do nothing", [title, tidy(data.manufacturer), context.userId]);
+    const rows = await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books where lower(title) = lower($1)", [title]);
+    return { id: Number(rows[0]!.id), title: rows[0]!.title, manufacturer: rows[0]!.manufacturer ?? tidy(data.manufacturer) };
   });
 
 export const renameLibraryBook = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number; title: string }) => z.object({ id: z.number().int().positive(), title: bookTitle }).parse(d))
+  .validator((d: { id: number; manufacturer: string; model: string }) => z.object({ id: z.number().int().positive(), ...bookParts }).parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const title = data.title.replace(/\s+/g, " ");
+    const title = titleOf(data.manufacturer, data.model);
     const clash = await sql.query("select 1 from library_books where lower(title) = lower($1) and id <> $2", [title, data.id]);
-    if (clash.length) throw new Error(`There is already a book called ${title}.`);
-    await sql.query("update library_books set title = $2 where id = $1", [data.id, title]);
+    if (clash.length) throw new Error(`${title} is already in The Library.`);
+    await sql.query("update library_books set title = $2, manufacturer = $3 where id = $1", [data.id, title, tidy(data.manufacturer)]);
     return { ok: true };
   });
 
