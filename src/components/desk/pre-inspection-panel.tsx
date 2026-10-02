@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, ChevronLeft, ImagePlus, Images, Trash2 } from "lucide-react";
+import { Camera, ChevronLeft, ImagePlus, Images, Trash2, Download } from "lucide-react";
+import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
   addInspectionPhoto,
@@ -749,6 +750,13 @@ function ItemRow({
   );
 }
 
+/** "water-photo-12.jpg" — the utility it was taken for, so saved photos sort themselves. */
+function photoFileName(photo: InspectionPhoto): string {
+  const ext = /^data:image\/(png|webp|gif)/.exec(photo.dataUrl)?.[1] ?? "jpg";
+  const what = (photo.category || "inspection").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `${what}-photo-${photo.id}.${ext}`;
+}
+
 function PhotoTile({
   photo,
   onRemove,
@@ -760,12 +768,29 @@ function PhotoTile({
 }) {
   return (
     <li className="overflow-hidden rounded-md border border-border">
-      <img src={photo.dataUrl} alt={photo.caption || photo.category} className="h-24 w-full object-cover" />
+      <ZoomableImage
+        src={photo.dataUrl}
+        alt={photo.caption || `${photo.category} photo`}
+        label={photo.caption || undefined}
+        imgClassName="h-24 w-full object-cover"
+        testId="inspect-photo-zoom"
+        download={photoFileName(photo)}
+      />
       <div className="flex items-start justify-between gap-1 px-2 py-1.5">
         <p className="min-w-0 text-[11px] text-muted-foreground">
           <span className="block truncate text-foreground">{photo.caption || "Photo"}</span>
           {[photo.uploadedBy, formatPingTime(photo.uploadedAt)].filter(Boolean).join(" · ")}
         </p>
+        <a
+          href={photo.dataUrl}
+          download={photoFileName(photo)}
+          className="grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          aria-label="Download photo"
+          title="Download"
+          data-testid="inspect-photo-download"
+        >
+          <Download className="size-3.5" />
+        </a>
         <button type="button" className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Remove photo" disabled={pending} onClick={onRemove}>
           <Trash2 className="size-3.5" />
         </button>

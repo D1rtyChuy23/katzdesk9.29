@@ -1,6 +1,6 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useState } from "react";
-import { X, ZoomIn } from "lucide-react";
+import { Download, X, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -14,6 +14,7 @@ export function ZoomableImage({
   className,
   imgClassName,
   testId,
+  download,
 }: {
   src: string;
   alt: string;
@@ -22,6 +23,8 @@ export function ZoomableImage({
   className?: string;
   imgClassName?: string;
   testId?: string;
+  /** File name to save as; adds a Download button to the enlarged view. */
+  download?: string;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -57,8 +60,18 @@ export function ZoomableImage({
             className="max-h-[calc(100dvh-7rem)] max-w-full rounded-lg bg-white object-contain shadow-2xl"
             data-testid="lightbox-image"
           />
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
             {label ? <span className="text-sm text-white/85">{label}</span> : null}
+            {download ? (
+              <a
+                href={src}
+                download={download}
+                className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+                data-testid="lightbox-download"
+              >
+                <Download className="size-4" /> Download
+              </a>
+            ) : null}
             <DialogPrimitive.Close
               className="inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
               data-testid="lightbox-close"
