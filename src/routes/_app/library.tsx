@@ -276,7 +276,18 @@ function Page() {
   const unfiled = files.filter((f) => f.bookId == null);
   const loading = data.isLoading || lib.isLoading;
   // One maker open at a time: the one clicked, else the one holding the open model, else the only search hit.
-  const activeMaker = openMaker ?? book?.manufacturer ?? (needle && makers.length === 1 ? makers[0]! : null);
+  const wanted = openMaker ?? book?.manufacturer ?? null;
+  const activeMaker = wanted && makers.includes(wanted) ? wanted : makers[0] ?? null;
+  const models = shownBooks.filter((b) => b.manufacturer === activeMaker);
+  const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : models[0] ?? null;
+  const inside = current ? inBook(current.id) : null;
+  // Phone: makers and models are rows of buttons above the documents. Desktop: three columns.
+  const pick = (on: boolean) =>
+    cn(
+      "inline-flex h-11 items-center justify-between gap-3 rounded-full border px-4 text-sm font-medium md:w-full md:rounded-none md:border-0 md:border-t md:border-border md:px-4",
+      on ? "border-ink bg-ink text-cream" : "border-border bg-background hover:bg-primary/5 md:bg-transparent",
+    );
+  const colHead = "px-1 pb-2 text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase md:px-4 md:py-3";
 
   return (
     <div>
@@ -316,67 +327,80 @@ function Page() {
         </section>
       ) : null}
 
-      <section className="mt-5 grid gap-2.5" aria-label="Manufacturers" data-testid="library-makers">
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Loading The Library…</p>
-        ) : makers.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="books-empty">
-            {books.length ? "Nothing matches that search." : "Nothing here yet. Use Add Files to add the first spec sheet, manual or parts diagram."}
-          </p>
-        ) : (
-          makers.map((maker) => {
-            const models = shownBooks.filter((b) => b.manufacturer === maker);
-            const isOpen = activeMaker === maker;
-            const current = isOpen ? (book && book.manufacturer === maker ? book : models[0]!) : null;
-            const inside = current ? inBook(current.id) : null;
-            return (
-              <div key={maker} className="rounded-xl border border-border bg-card" data-testid="maker" data-maker={maker}>
-                <button
-                  type="button"
-                  aria-expanded={isOpen}
-                  className="flex min-h-13 w-full items-center gap-3 px-4 py-3 text-left"
-                  data-testid="maker-open"
-                  onClick={() => {
-                    setMode("browse");
-                    setOpenMaker(isOpen ? "" : maker);
-                    go(isOpen ? {} : { book: models[0]!.id });
-                  }}
-                >
-                  <span className="font-display text-xl font-medium">{maker}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {models.length} model{models.length === 1 ? "" : "s"}
-                  </span>
-                  {isOpen ? <ChevronDown className="ml-auto size-5 text-muted-foreground" /> : <ChevronRight className="ml-auto size-5 text-muted-foreground" />}
-                </button>
+      {loading ? (
+        <p className="mt-5 text-sm text-muted-foreground">Loading The Library…</p>
+      ) : !current || !inside ? (
+        <p className="mt-5 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="books-empty">
+          {books.length ? "Nothing matches that search." : "Nothing here yet. Use Add Files to add the first spec sheet, manual or parts diagram."}
+        </p>
+      ) : (
+        <>
+          <section className="mt-5 grid gap-3 md:grid-cols-[200px_200px_minmax(0,1fr)] md:items-start" aria-label="Library" data-testid="library-makers">
+            <div className="rounded-xl md:overflow-hidden md:border md:border-border md:bg-card">
+              <h2 className={colHead}>Manufacturer</h2>
+              <div className="flex flex-wrap gap-2 md:block" role="radiogroup" aria-label="Manufacturer">
+                {makers.map((maker) => {
+                  const count = shownBooks.filter((b) => b.manufacturer === maker).length;
+                  return (
+                    <button
+                      key={maker}
+                      type="button"
+                      role="radio"
+                      aria-checked={maker === activeMaker}
+                      className={pick(maker === activeMaker)}
+                      data-testid="maker"
+                      data-maker={maker}
+                      onClick={() => {
+                        setMode("browse");
+                        setOpenMaker(maker);
+                        go({ book: shownBooks.find((b) => b.manufacturer === maker)!.id });
+                      }}
+                    >
+                      <span className="text-left break-words">{maker}</span>
+                      <span className="text-xs tabular opacity-70">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                {isOpen && current && inside ? (
-                  <div ref={bookPanel} className="scroll-mt-24 border-t border-border px-4 pt-3 pb-4" data-testid="open-book">
-                    <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={`${maker} models`} data-testid="model-chips">
-                      {models.map((m) => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={m.id === current.id}
-                          onClick={() => { setMode("browse"); setOpenMaker(maker); go({ book: m.id }); }}
-                          className={cn(
-                            "h-10 rounded-full border px-4 text-sm font-medium",
-                            m.id === current.id ? "border-ink bg-ink text-cream" : "border-border bg-background hover:border-primary/50",
-                          )}
-                          data-testid="model-chip"
-                        >
-                          {modelLabel(m.title, maker)}
-                        </button>
-                      ))}
-                      {canEdit ? (
-                        <Button type="button" size="sm" variant={manage ? "secondary" : "ghost"} className="ml-auto" aria-pressed={manage} onClick={() => setManage(!manage)} data-testid="manage">
-                          <Settings2 className="size-4" /> {manage ? "Done" : "Manage"}
-                        </Button>
-                      ) : null}
-                    </div>
-                    <span className="sr-only" data-testid="open-book-title">{current.title}</span>
+            <div className="rounded-xl md:overflow-hidden md:border md:border-border md:bg-card">
+              <h2 className={colHead}>Model</h2>
+              <div className="flex flex-wrap gap-2 md:block" role="radiogroup" aria-label={`${activeMaker} models`} data-testid="model-chips">
+                {models.map((m) => {
+                  const c = inBook(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={m.id === current.id}
+                      className={pick(m.id === current.id)}
+                      data-testid="model-chip"
+                      onClick={() => {
+                        setMode("browse");
+                        setOpenMaker(m.manufacturer);
+                        go({ book: m.id });
+                      }}
+                    >
+                      <span className="text-left break-words">{modelLabel(m.title, m.manufacturer)}</span>
+                      <span className="text-xs tabular opacity-70">{c.files.length + c.sheets.length}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                    <div className="mt-3 flex flex-col gap-4 sm:flex-row">
+            <div ref={bookPanel} className="scroll-mt-24 rounded-xl border border-border bg-card px-4 pb-4" data-testid="open-book">
+              <div className="flex items-center gap-2 pt-1">
+                <h2 className="py-2 text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase" data-testid="open-book-title">{current.title}</h2>
+                {canEdit ? (
+                  <Button type="button" size="sm" variant={manage ? "secondary" : "ghost"} className="ml-auto" aria-pressed={manage} onClick={() => setManage(!manage)} data-testid="manage">
+                    <Settings2 className="size-4" /> {manage ? "Done" : "Manage"}
+                  </Button>
+                ) : null}
+              </div>
+                    <div className="flex flex-col gap-4 lg:flex-row">
                       <ModelPhoto sheet={inside.sheets.find((s) => s.hasImage) ?? null} title={current.title} />
                       <ul className="min-w-0 flex-1 divide-y divide-border" data-testid="docs">
                         {inside.sheets.map((s) => (
@@ -422,7 +446,7 @@ function Page() {
 
                     {canEdit ? (
                       <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="model-add">
-                        <span className="text-xs text-muted-foreground">Add to {modelLabel(current.title, maker)}:</span>
+                        <span className="text-xs text-muted-foreground">Add to {modelLabel(current.title, current.manufacturer)}:</span>
                         {TYPES.map((t) => (
                           <AddTarget
                             key={t.section}
@@ -435,7 +459,7 @@ function Page() {
                         ))}
                         {manage ? (
                           <>
-                            <Button type="button" size="sm" variant="ghost" onClick={() => setRenaming({ manufacturer: maker, model: modelLabel(current.title, maker) })} data-testid="book-rename">
+                            <Button type="button" size="sm" variant="ghost" onClick={() => setRenaming({ manufacturer: current.manufacturer, model: modelLabel(current.title, current.manufacturer) })} data-testid="book-rename">
                               <Pencil className="size-4" /> Rename
                             </Button>
                             {!inside.sheets.length && !inside.files.length ? (
@@ -448,12 +472,15 @@ function Page() {
                       </div>
                     ) : null}
 
+            </div>
+          </section>
+
                     {mode === "edit" && selected ? (
-                      <div className="mt-4">
+                      <div className="mt-5">
                         <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => setMode("browse")} onSaved={(id) => { setMode("browse"); void reload(); go({ book: current.id, open: id }); }} />
                       </div>
                     ) : selected && mode === "browse" && sheetBook.get(selected.id) === current.id ? (
-                      <div className="mt-4" data-testid="book-spec-sheet">
+                      <div className="mt-5" data-testid="book-spec-sheet">
                         <SpecSheetView
                           sheet={selected}
                           canEdit={canEdit}
@@ -465,13 +492,8 @@ function Page() {
                         />
                       </div>
                     ) : null}
-                  </div>
-                ) : null}
-              </div>
-            );
-          })
-        )}
-      </section>
+        </>
+      )}
 
       {unfiled.length ? (
         <section className="mt-6 rounded-xl border border-border bg-card px-4 py-3" aria-labelledby="unfiled-title" data-testid="library-unfiled">
