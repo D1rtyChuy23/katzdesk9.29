@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, familyTitle, fileError, makerOf, matchBook, mimeFor, shelfFileName, sortByName, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, fileError, makerOf, matchBook, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -69,18 +69,72 @@ async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
     }
     books = await load();
   }
+  const bookFor = async (manufacturer: string, model: string): Promise<LibraryBook | null> => {
+    const title = variationTitle(manufacturer, model);
+    if (!title) return null;
+    const have = books.find((b) => b.title.toLowerCase() === title.toLowerCase());
+    if (have) return have;
+    await sql.query("insert into library_books (title, manufacturer, per_variation) values ($1, $2, true) on conflict (lower(title)) do nothing", [title, manufacturer.trim()]);
+    books = await load();
+    return books.find((b) => b.title.toLowerCase() === title.toLowerCase()) ?? null;
+  };
+  const renameFiles = async (bookId: number, title: string, only?: number[]) => {
+    const rows = await sql.query<{ id: number; name: string; original_name: string | null; section: LibrarySection }>(
+      "select id, name, original_name, section from library_files where book_id = $1 order by lower(name), id",
+      [bookId],
+    );
+    const done: Record<string, string[]> = {};
+    for (const f of rows) {
+      const taken = (done[f.section] ??= rows.filter((r) => r.section === f.section && only && !only.includes(r.id)).map((r) => r.name));
+      const name = only && !only.includes(f.id) ? f.name : shelfFileName(title, f.section, f.original_name || f.name, taken);
+      if (!only || only.includes(f.id)) taken.push(name);
+      if (name !== f.name) await sql.query("update library_files set name = $2, original_name = coalesce(original_name, $3) where id = $1", [f.id, name, f.name]);
+    }
+  };
+
+  // One-time: books made when every Axiom shared one book are split so each variation has its own.
+  const old = await sql.query<{ id: number; title: string }>("select id, title from library_books where not per_variation order by id");
+  for (const b of old) {
+    const sheets = await sql.query<{ id: number; manufacturer: string; model: string }>("select id, manufacturer, model from spec_sheets where book_id = $1 order by id", [b.id]);
+    if (sheets.length === 1) {
+      const title = variationTitle(sheets[0]!.manufacturer, sheets[0]!.model);
+      const clash = books.find((x) => x.id !== b.id && x.title.toLowerCase() === title.toLowerCase());
+      if (clash) await sql.query("update spec_sheets set book_id = $2 where id = $1", [sheets[0]!.id, clash.id]);
+      else if (title && title.toLowerCase() !== b.title.toLowerCase()) {
+        // The only variation in the book: the book takes its full name, and its files with it.
+        await sql.query("update library_books set title = $2 where id = $1", [b.id, title]);
+        await renameFiles(b.id, title);
+      }
+    } else if (sheets.length > 1) {
+      const made: LibraryBook[] = [];
+      for (const sheet of sheets) {
+        const target = await bookFor(sheet.manufacturer, sheet.model);
+        if (!target) continue;
+        if (target.id !== b.id) await sql.query("update spec_sheets set book_id = $2 where id = $1", [sheet.id, target.id]);
+        made.push(target);
+      }
+      // Files stay where they were filed unless their name spells out one variation.
+      const mine = await sql.query<{ id: number; name: string; original_name: string | null }>("select id, name, original_name from library_files where book_id = $1", [b.id]);
+      for (const f of mine) {
+        const target = matchBook(f.original_name || f.name, made.filter((m) => m.id !== b.id));
+        if (!target) continue;
+        await sql.query("update library_files set book_id = $2 where id = $1", [f.id, target.id]);
+        await renameFiles(target.id, target.title, [f.id]);
+      }
+      await sql.query(
+        "delete from library_books k where k.id = $1 and not exists (select 1 from library_files f where f.book_id = k.id) and not exists (select 1 from spec_sheets s where s.book_id = k.id)",
+        [b.id],
+      );
+    }
+    await sql.query("update library_books set per_variation = true where id = $1", [b.id]);
+    books = await load();
+  }
+
   const loose = await sql.query<{ id: number; manufacturer: string; model: string }>(
     "select id, manufacturer, model from spec_sheets where book_id is null order by id",
   );
   for (const sheet of loose) {
-    let book = matchBook(`${sheet.manufacturer} ${sheet.model}`, books);
-    if (!book) {
-      const title = familyTitle(sheet.manufacturer, sheet.model);
-      if (!title) continue;
-      await sql.query("insert into library_books (title, manufacturer) values ($1, $2) on conflict (lower(title)) do nothing", [title, sheet.manufacturer.trim()]);
-      books = await load();
-      book = books.find((b) => b.title.toLowerCase() === title.toLowerCase()) ?? null;
-    }
+    const book = await bookFor(sheet.manufacturer, sheet.model);
     if (book) await sql.query("update spec_sheets set book_id = $2 where id = $1 and book_id is null", [sheet.id, book.id]);
   }
   const files = await sql.query<{ id: number; name: string; section: LibrarySection }>(
@@ -145,7 +199,7 @@ export const createLibraryBook = createServerFn({ method: "POST" })
     const sql = await ready();
     await requireEditor(sql, context.userId);
     const title = titleOf(data.manufacturer, data.model);
-    await sql.query("insert into library_books (title, manufacturer, created_by) values ($1, $2, $3) on conflict (lower(title)) do nothing", [title, tidy(data.manufacturer), context.userId]);
+    await sql.query("insert into library_books (title, manufacturer, created_by, per_variation) values ($1, $2, $3, true) on conflict (lower(title)) do nothing", [title, tidy(data.manufacturer), context.userId]);
     const rows = await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books where lower(title) = lower($1)", [title]);
     return { id: Number(rows[0]!.id), title: rows[0]!.title, manufacturer: rows[0]!.manufacturer ?? tidy(data.manufacturer) };
   });

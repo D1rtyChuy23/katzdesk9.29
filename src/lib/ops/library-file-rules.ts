@@ -102,51 +102,81 @@ export function familyTitle(manufacturer: string, model: string): string {
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const tokens = (s: string) => s.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
 
-/** Ways a book can be named in a file name: "Bunn Axiom" and plain "Axiom" are the same book. */
-export function bookKeys(title: string): string[][] {
-  const t = tokens(title);
-  const keys: string[][] = [];
-  for (let i = 0; i < t.length; i++) {
-    const rest = t.slice(i);
-    if (rest.join("").length >= 4) keys.push(rest);
-  }
+/** The book for a spec sheet: maker + the full model name, variation included. Bunn + "Axiom DV-APS" → "Bunn Axiom DV-APS". */
+export function variationTitle(manufacturer: string, model: string): string {
+  const maker = clean(manufacturer);
+  const m = clean(model);
+  return maker && !m.toLowerCase().startsWith(maker.toLowerCase() + " ") && m.toLowerCase() !== maker.toLowerCase() ? clean(`${maker} ${m}`) : m;
+}
+
+export type BookRef = { id: number; title: string; manufacturer?: string };
+
+const modelTokens = (b: { title: string; manufacturer?: string }) => {
+  const maker = b.manufacturer || makerOf(b.title);
+  return tokens(modelLabel(b.title, maker));
+};
+
+/**
+ * Ways a book can be named in a file name: the whole title, or the whole model without the maker
+ * ("Bunn Axiom DV-APS" or "Axiom DV-APS"). Never part of the model — "Axiom" alone is not DV-APS.
+ */
+export function bookKeys(title: string, manufacturer?: string): string[][] {
+  const model = modelTokens({ title, manufacturer });
+  const keys = [tokens(title)];
+  if (model.join("").length >= 3 && model.length < keys[0]!.length) keys.push(model);
   return keys;
 }
 
 function keyLength(text: string, key: string[]): number {
   // Tokens may be joined or split by spaces, dashes, underscores ("CBS-1252", "cbs 1252", "CBS1252").
-  const re = new RegExp(`(^|[^a-z])${key.map(escapeRe).join("[^a-z0-9]*")}($|[^a-z])`, "i");
+  const re = new RegExp(`(^|[^a-z0-9])${key.map(escapeRe).join("[^a-z0-9]*")}($|[^a-z])`, "i");
   return re.test(text.toLowerCase()) ? key.join("").length : 0;
 }
 
-export type BookRef = { id: number; title: string };
+const startsWithTokens = (long: string[], short: string[]) => long.length > short.length && short.every((t, i) => long[i] === t);
 
 /**
- * Which book a file name (or maker + model) belongs to. Returns the book only when exactly one
- * fits best; otherwise null — the person picks. Never guesses.
+ * Which book a file name belongs to. Returns the book only when exactly one fits best AND no other
+ * variation of that same model exists that the name could also mean; otherwise null — the person picks.
  */
 export function matchBook<T extends BookRef>(text: string, books: T[]): T | null {
   let best = 0;
   let hits: T[] = [];
   for (const b of books) {
-    const score = Math.max(0, ...bookKeys(b.title).map((k) => keyLength(text, k)));
+    const score = Math.max(0, ...bookKeys(b.title, b.manufacturer).map((k) => keyLength(text, k)));
     if (!score) continue;
     if (score > best) {
       best = score;
       hits = [b];
     } else if (score === best) hits.push(b);
   }
-  return hits.length === 1 ? hits[0]! : null;
+  if (hits.length !== 1) return null;
+  const hit = hits[0]!;
+  // "Axiom manual.pdf" with Axiom, Axiom DV-APS and Axiom Twin on file: could be any of them.
+  const mine = modelTokens(hit);
+  if (books.some((b) => b.id !== hit.id && startsWithTokens(modelTokens(b), mine))) return null;
+  return hit;
+}
+
+/** Books worth showing first in the picker: same maker or same first model word as the file name. */
+export function likelyBooks<T extends BookRef>(text: string, books: T[]): T[] {
+  const words = new Set(tokens(text));
+  return books.filter((b) => {
+    const first = modelTokens(b)[0];
+    return !!first && first.length >= 3 && words.has(first);
+  });
 }
 
 /** "Bunn Axiom - Manual.pdf"; a second one becomes "Bunn Axiom - Manual 2.pdf". */
 export function shelfFileName(bookTitle: string, section: LibrarySection, originalName: string, taken: string[]): string {
   const ext = fileExt(originalName);
   const base = `${clean(bookTitle)} - ${SHELF[section].type}`;
-  const used = new Set(taken.map((n) => n.toLowerCase()));
+  // Compared without the extension, so a .png and a .pdf never share the name "Parts Book".
+  const stem = (n: string) => n.replace(/\.[A-Za-z0-9]+$/, "").toLowerCase();
+  const used = new Set(taken.map(stem));
   for (let n = 1; ; n++) {
-    const name = `${n === 1 ? base : `${base} ${n}`}${ext ? `.${ext}` : ""}`;
-    if (!used.has(name.toLowerCase())) return name;
+    const name = n === 1 ? base : `${base} ${n}`;
+    if (!used.has(name.toLowerCase())) return `${name}${ext ? `.${ext}` : ""}`;
   }
 }
 

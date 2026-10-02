@@ -167,6 +167,7 @@ export function BookPicker({
   detail,
   books,
   currentId,
+  likelyIds = [],
   busy,
   cancelLabel = "Cancel",
   onPick,
@@ -178,6 +179,8 @@ export function BookPicker({
   detail: string;
   books: LibraryBook[];
   currentId?: number | null;
+  /** Shown first: the variations this file most likely belongs to. */
+  likelyIds?: number[];
   busy?: boolean;
   cancelLabel?: string;
   onPick: (book: LibraryBook) => void;
@@ -189,7 +192,9 @@ export function BookPicker({
   const [model, setModel] = useState("");
   const makers = [...new Set(books.map((b) => b.manufacturer).filter(Boolean))];
   const ready = maker.trim().length >= 2 && model.trim().length >= 1;
-  const shown = books.filter((b) => b.title.toLowerCase().includes(q.trim().toLowerCase()));
+  const shown = books
+    .filter((b) => b.title.toLowerCase().includes(q.trim().toLowerCase()))
+    .sort((a, b) => Number(likelyIds.includes(b.id)) - Number(likelyIds.includes(a.id)));
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent data-testid="book-picker">

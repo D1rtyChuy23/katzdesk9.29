@@ -67,8 +67,8 @@ test("Axiom and Bunn Axiom are the same book", () => {
 test("other families match on the model name, however it is punctuated", () => {
   assert.equal(matchBook("CBS1252 manual.pdf", books)?.id, 2);
   assert.equal(matchBook("fetco cbs 1252 exploded.png", books)?.id, 2);
-  assert.equal(matchBook("Linea PB 2 group.pdf", books)?.id, 3);
-  assert.equal(matchBook("cameo_c2s.docx", books)?.id, 4);
+  assert.equal(matchBook("Linea 2 group.pdf", books)?.id, 3);
+  assert.equal(matchBook("cameo_manual.docx", books)?.id, 4);
 });
 
 test("no match, or a tie, is never guessed", () => {
@@ -105,4 +105,40 @@ test("document names drop the family they already sit under", () => {
   assert.equal(shortDocName("Bunn Axiom - Manual 2.pdf", "Bunn Axiom"), "Manual 2");
   assert.equal(shortDocName("Bunn Axiom - Parts Book.pdf", "Bunn Axiom"), "Parts Book");
   assert.equal(shortDocName("scan0001.pdf", "Bunn Axiom"), "scan0001");
+});
+
+import { likelyBooks, variationTitle } from "../src/lib/ops/library-file-rules.ts";
+
+const axioms = [
+  { id: 1, title: "Bunn Axiom DV-APS", manufacturer: "Bunn" },
+  { id: 2, title: "Bunn Axiom Twin", manufacturer: "Bunn" },
+  { id: 3, title: "Bunn Axiom", manufacturer: "Bunn" },
+  { id: 4, title: "Fetco CBS-2152 Twin", manufacturer: "Fetco" },
+];
+
+test("each variation is its own book title", () => {
+  assert.equal(variationTitle("Bunn", "Axiom DV-APS"), "Bunn Axiom DV-APS");
+  assert.equal(variationTitle("Bunn", "Bunn Axiom Twin"), "Bunn Axiom Twin");
+  assert.equal(variationTitle("La Marzocco", "Linea PB"), "La Marzocco Linea PB");
+});
+
+test("a file goes to the variation its name spells out", () => {
+  assert.equal(matchBook("Axiom DV-APS parts.pdf", axioms)?.id, 1);
+  assert.equal(matchBook("bunn_axiom_dv_aps_manual.pdf", axioms)?.id, 1);
+  assert.equal(matchBook("Axiom Twin manual.pdf", axioms)?.id, 2);
+});
+
+test("never guesses across variations", () => {
+  assert.equal(matchBook("Axiom manual.pdf", axioms), null, "Axiom alone could be any Axiom");
+  assert.equal(matchBook("Twin manual.pdf", axioms), null, "a variation word alone is not a model");
+  assert.equal(matchBook("DV-APS manual.pdf", axioms), null);
+  assert.equal(matchBook("Axiom manual.pdf", [axioms[2]])?.id, 3, "only one Axiom on file: that is the one");
+});
+
+test("the picker lists the same model's variations first", () => {
+  assert.deepEqual(likelyBooks("Axiom manual.pdf", axioms).map((b) => b.id), [1, 2, 3]);
+});
+
+test("a picture and a PDF on the same shelf get different names", () => {
+  assert.equal(shelfFileName("Bunn Axiom Twin", "parts", "view.png", ["Bunn Axiom Twin - Parts Book.pdf"]), "Bunn Axiom Twin - Parts Book 2.png");
 });

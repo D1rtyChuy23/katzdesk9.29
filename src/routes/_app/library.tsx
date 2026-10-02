@@ -15,7 +15,7 @@ import {
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { fileError, fileUrl, matchBook, modelLabel, SHELF, shortDocName, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { fileError, fileUrl, likelyBooks, matchBook, modelLabel, SHELF, shortDocName, type LibrarySection } from "@/lib/ops/library-file-rules";
 import { pdfImages } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -533,7 +533,7 @@ function Page() {
         heading={ask?.kind === "file" ? "Which Model Is This For?" : "Move To Which Model?"}
         detail={
           ask?.kind === "file"
-            ? `${ask.fileName} doesn't match a model. Pick the model for this ${SHELF[ask.section].type.toLowerCase()}, or add a new one.`
+            ? `${ask.fileName} doesn't name one model. Pick the model for this ${SHELF[ask.section].type.toLowerCase()}, or add a new one.`
             : ask?.kind === "move-file"
               ? `${ask.file.name} will be renamed for the model you pick.`
               : ask?.kind === "move-sheet"
@@ -542,6 +542,7 @@ function Page() {
         }
         books={books}
         currentId={book?.id ?? null}
+        likelyIds={ask?.kind === "file" ? likelyBooks(ask.fileName, books).map((b) => b.id) : []}
         cancelLabel={ask?.kind === "file" ? "Skip This File" : "Cancel"}
         onPick={(b) => void pickForAsk(b)}
         onCreate={(m, n) => void createForAsk(m, n)}
