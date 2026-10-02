@@ -67,7 +67,7 @@ export const configSchema = z.object({
 
 const imageField = z
   .string()
-  .max(900_000)
+  .max(1_400_000)
   .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Not an image")
   .nullable()
   .optional();

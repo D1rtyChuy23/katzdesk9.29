@@ -44,10 +44,10 @@ export function SpecImport({
     setStage("reading");
     try {
       setStep("Reading the PDF in your browser…");
-      const { text, image, dimsImage } = await pdfToText(file);
+      const { text, image, dimsImage, imageNote } = await pdfToText(file);
       const pics = { image: image ?? undefined, dimsImage: dimsImage ?? undefined };
       if (text.replace(/\s/g, "").length < 40) {
-        manual("This PDF has no readable text (it looks scanned). Fill in the form by hand instead.", pics);
+        manual(["This PDF has no readable text (it looks scanned). Fill in the form by hand instead.", !image ? imageNote : null].filter(Boolean).join(" "), pics);
         return;
       }
       if (!aiReady) {
@@ -62,6 +62,8 @@ export function SpecImport({
         return;
       }
       setDraft({ ...res.draft, ...pics });
+      // No machine photo found: say so, and leave the picture empty rather than show the wrong one.
+      if (!image && imageNote) setNotice(imageNote);
       setRemoved(res.removed);
       setStage("review");
       toast.success(
@@ -442,7 +444,7 @@ export function SpecEditor({
                   const f = e.target.files?.[0];
                   e.target.value = "";
                   if (!f) return;
-                  void imageFileToDataUrl(f, 900)
+                  void imageFileToDataUrl(f, 1400)
                     .then((url) => set({ dimsImage: url }))
                     .catch((err) => toast.error(err instanceof Error ? err.message : "Couldn't use that image"));
                 }}

@@ -30,6 +30,7 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
 import { Route as AppWarehouseRouteImport } from './routes/_app/warehouse'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiLibraryFileTokenRouteImport } from './routes/api/library-file/$token'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -135,6 +136,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLibraryFileTokenRoute = ApiLibraryFileTokenRouteImport.update({
+  id: '/api/library-file/$token',
+  path: '/api/library-file/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/tlc': typeof AppTlcRoute
   '/warehouse': typeof AppWarehouseRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/warehouse': typeof AppWarehouseRoute
   '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/_app/warehouse': typeof AppWarehouseRoute
   '/_app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/tlc'
     | '/warehouse'
     | '/api/auth/$'
+    | '/api/library-file/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/warehouse'
     | '/'
     | '/api/auth/$'
+    | '/api/library-file/$token'
   id:
     | '__root__'
     | '/_app'
@@ -272,12 +283,14 @@ export interface FileRouteTypes {
     | '/_app/warehouse'
     | '/_app/'
     | '/api/auth/$'
+    | '/api/library-file/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiLibraryFileTokenRoute: typeof ApiLibraryFileTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -429,6 +442,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/library-file/$token': {
+      id: '/api/library-file/$token'
+      path: '/api/library-file/$token'
+      fullPath: '/api/library-file/$token'
+      preLoaderRoute: typeof ApiLibraryFileTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -480,6 +500,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiLibraryFileTokenRoute: ApiLibraryFileTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

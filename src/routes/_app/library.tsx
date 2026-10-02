@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, BookText, FileUp, Wrench, type LucideIcon } from "lucide-react";
+import { ArrowLeft, BookText, FileUp, Loader2, Wrench } from "lucide-react";
 import { toast } from "sonner";
-import { deleteSpecSheet, listSpecSheets, refreshSpecDefaults } from "@/lib/ops/spec-library";
+import { deleteSpecSheet, listSpecSheets, refreshSpecDefaults, setSpecImages } from "@/lib/ops/spec-library";
+import { listLibraryFiles } from "@/lib/ops/library-files";
+import { pdfImages } from "@/lib/pdf-text";
+import { LibraryFileSection } from "@/components/desk/library-files";
 import { parseOpenSearch } from "@/lib/ops/search-params";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -24,6 +27,38 @@ function Page() {
   const [mode, setMode] = useState<"browse" | "import" | "edit">("browse");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const top = useRef<HTMLDivElement>(null);
+  const files = useQuery({ queryKey: ["library-files"], queryFn: () => listLibraryFiles() });
+  const manuals = (files.data?.files ?? []).filter((f) => f.section === "manuals");
+  const parts = (files.data?.files ?? []).filter((f) => f.section === "parts");
+  const filesEdit = !!files.data?.canEdit;
+  const rereadInput = useRef<HTMLInputElement>(null);
+  const [rereading, setRereading] = useState(false);
+  const [found, setFound] = useState<{ image: string | null; dimsImage: string | null; note: string | null; file: string } | null>(null);
+
+  // A file dropped beside a drop zone must not make the browser leave the page to open it.
+  useEffect(() => {
+    const stop = (e: DragEvent) => {
+      if (e.dataTransfer?.types?.includes("Files")) e.preventDefault();
+    };
+    window.addEventListener("dragover", stop);
+    window.addEventListener("drop", stop);
+    return () => {
+      window.removeEventListener("dragover", stop);
+      window.removeEventListener("drop", stop);
+    };
+  }, []);
+
+  async function reread(file: File) {
+    setRereading(true);
+    try {
+      const r = await pdfImages(file);
+      setFound({ image: r.image, dimsImage: r.dimsImage, note: r.imageNote, file: file.name });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't read that PDF.");
+    } finally {
+      setRereading(false);
+    }
+  }
   const sheets = data.data?.sheets ?? [];
   const canEdit = !!data.data?.canEdit;
   const selected = open != null ? sheets.find((s) => s.id === open) ?? null : null;
@@ -43,6 +78,18 @@ function Page() {
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not refresh"),
   });
+  const applyImages = useMutation({
+    mutationFn: (v: { id: number; image: string | null; dimsImage: string | null }) =>
+      // No machine photo found → the wrong picture is cleared, never kept. A diagram is only replaced when one was found.
+      setSpecImages({ data: { id: v.id, image: v.image, ...(v.dimsImage ? { dimsImage: v.dimsImage } : {}) } }),
+    onSuccess: (_r, v) => {
+      toast.success(v.image ? "Equipment image updated" : "Image cleared — use Edit to add a photo");
+      setFound(null);
+      void qc.invalidateQueries({ queryKey: ["spec-library"] });
+      void qc.invalidateQueries({ queryKey: ["spec-image"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the image"),
+  });
   const remove = useMutation({
     mutationFn: (id: number) => deleteSpecSheet({ data: { id } }),
     onSuccess: () => {
@@ -59,7 +106,7 @@ function Page() {
       <header>
         <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
         <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          Shop reference in one place: equipment spec sheets now, manuals and parts diagrams as they're added.
+          Shop reference in one place: equipment spec sheets, manuals and parts diagrams.
         </p>
         <nav className="mt-4 flex flex-wrap gap-2" aria-label="Library sections" data-testid="library-sections">
           {SECTIONS.map((sec) => (
@@ -69,7 +116,7 @@ function Page() {
               className="rounded-full border border-border bg-card px-3.5 py-1.5 text-sm font-medium text-muted-foreground hover:border-primary/50 hover:text-foreground"
             >
               {sec.title}
-              <span className="ml-1.5 text-xs tabular text-muted-foreground">{sec.id === "spec-sheets" ? sheets.length : 0}</span>
+              <span className="ml-1.5 text-xs tabular text-muted-foreground">{sec.id === "spec-sheets" ? sheets.length : sec.id === "manuals" ? manuals.length : parts.length}</span>
             </a>
           ))}
         </nav>
@@ -117,6 +164,7 @@ function Page() {
             <SpecSheetView sheet={selected} canEdit={canEdit} onEdit={() => setMode("edit")} onDelete={() => setConfirmDelete(true)}
               onRefresh={canEdit ? () => refresh.mutate(selected.id) : undefined}
               refreshing={refresh.isPending}
+              onReread={canEdit ? () => rereadInput.current?.click() : undefined}
             />
           </div>
         ) : null}
@@ -131,17 +179,78 @@ function Page() {
       </div>
       </section>
 
-      <EmptySection
-        id="manuals"
-        title="Manuals"
-        icon={BookText}
-        text="Owner and service manuals will live here. Nothing has been added yet."
+      <input
+        ref={rereadInput}
+        type="file"
+        accept="application/pdf,.pdf"
+        className="hidden"
+        data-testid="spec-reread-input"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (f) void reread(f);
+        }}
       />
-      <EmptySection
+      <Dialog open={rereading || !!found} onOpenChange={(o) => !o && !rereading && setFound(null)}>
+        <DialogContent data-testid="reread-dialog">
+          <DialogTitle>Re-Read Image From PDF</DialogTitle>
+          {rereading || !found ? (
+            <DialogDescription className="flex items-center gap-2">
+              <Loader2 className="size-4 animate-spin" /> Looking for the machine photo…
+            </DialogDescription>
+          ) : (
+            <>
+              <DialogDescription>
+                {found.image
+                  ? `This is the machine photo found in ${found.file}. Warning symbols, logos and barcodes were skipped.`
+                  : found.note ?? `No machine photo was found in ${found.file}.`}
+              </DialogDescription>
+              {found.image ? (
+                <img src={found.image} alt="Machine photo found" className="mx-auto mt-3 max-h-64 rounded-lg bg-white object-contain" data-testid="reread-image" />
+              ) : null}
+              {found.dimsImage ? (
+                <div className="mt-3">
+                  <p className="text-xs font-medium text-muted-foreground">Dimensions diagram found</p>
+                  <img src={found.dimsImage} alt="Dimensions diagram found" className="mx-auto mt-1 max-h-40 rounded-lg bg-white object-contain" />
+                </div>
+              ) : null}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  disabled={applyImages.isPending || !selected}
+                  data-testid="reread-apply"
+                  onClick={() => selected && applyImages.mutate({ id: selected.id, image: found.image, dimsImage: found.dimsImage })}
+                >
+                  {found.image ? "Use This Image" : "Clear The Current Image"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setFound(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <LibraryFileSection
+        id="manuals"
+        section="manuals"
+        title="Manuals"
+        blurb="Owner and service manuals. Open one, or send a link by email or text."
+        icon={BookText}
+        files={manuals}
+        canEdit={filesEdit}
+        loading={files.isLoading}
+      />
+      <LibraryFileSection
         id="parts-diagrams"
+        section="parts"
         title="Parts Diagrams"
+        blurb="Exploded views and parts breakdowns. Open one, or send a link by email or text."
         icon={Wrench}
-        text="Exploded views and parts breakdowns will live here. Nothing has been added yet."
+        files={parts}
+        canEdit={filesEdit}
+        loading={files.isLoading}
       />
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
@@ -169,20 +278,3 @@ const SECTIONS = [
   { id: "manuals", title: "Manuals" },
   { id: "parts-diagrams", title: "Parts Diagrams" },
 ] as const;
-
-/** A Library section with nothing in it yet — always shown, ready for uploads later. */
-function EmptySection({ id, title, icon: Icon, text }: { id: string; title: string; icon: LucideIcon; text: string }) {
-  return (
-    <section id={id} className="mt-10 scroll-mt-24" aria-labelledby={`${id}-title`} data-testid={`section-${id}`}>
-      <div className="border-b border-border pb-3">
-        <h2 id={`${id}-title`} className="font-display text-2xl font-medium tracking-tight">
-          {title}
-        </h2>
-      </div>
-      <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6">
-        <Icon className="size-5 shrink-0 text-copper" />
-        <p className="text-sm text-muted-foreground">{text}</p>
-      </div>
-    </section>
-  );
-}

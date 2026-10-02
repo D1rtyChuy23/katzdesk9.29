@@ -8,6 +8,7 @@ import { getSpecImage } from "@/lib/ops/spec-library";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { PlugPicture } from "./plug-face";
+import { ZoomableImage } from "./image-lightbox";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -272,7 +273,14 @@ export function EquipmentImage({
       data-empty={image ? "0" : "1"}
     >
       {image ? (
-        <img src={image} alt={`${manufacturer ?? ""} ${model}`.trim()} className="size-full object-contain p-2" />
+        <ZoomableImage
+          src={image}
+          alt={`${manufacturer ?? ""} ${model}`.trim()}
+          label={`${manufacturer ?? ""} ${model}`.trim()}
+          className="size-full"
+          imgClassName="size-full object-contain p-2"
+          testId="equipment-zoom"
+        />
       ) : (
         <div className="flex size-full flex-col items-center justify-center gap-1 border-2 border-dashed border-border/70 bg-muted/30 p-4 text-center">
           <ImageIcon className="size-6 text-muted-foreground/70" />
@@ -289,7 +297,7 @@ export function DimensionsImage({ image }: { image: string | null | undefined })
   if (!image) return null;
   return (
     <figure className="overflow-hidden rounded-lg border border-border bg-white" data-testid="dims-image">
-      <img src={image} alt="Dimensions" className="w-full object-contain p-2" />
+      <ZoomableImage src={image} alt="Dimensions diagram" label="Dimensions" imgClassName="w-full object-contain p-2" testId="dims-zoom" />
       <figcaption className="border-t border-border bg-card px-3 py-1.5 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
         Dimensions
       </figcaption>
@@ -340,6 +348,7 @@ export function SpecSheetView({
   onDelete,
   onRefresh,
   refreshing,
+  onReread,
 }: {
   sheet: SavedSpecSheet;
   canEdit: boolean;
@@ -347,6 +356,8 @@ export function SpecSheetView({
   /** Re-apply inlet / plug / breaker defaults (Admin and Sales). */
   onRefresh?: () => void;
   refreshing?: boolean;
+  /** Re-read the machine photo and dimensions diagram from the sheet's PDF (Admin and Sales). */
+  onReread?: () => void;
   onDelete: () => void;
 }) {
   const [sel, setSel] = useState(0);
@@ -368,10 +379,15 @@ export function SpecSheetView({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <SheetHeading sheet={sheet} />
         {canEdit ? (
-          <div className="flex shrink-0 gap-2">
+          <div className="flex shrink-0 flex-wrap justify-end gap-2">
             {onRefresh ? (
               <Button type="button" size="sm" variant="outline" onClick={onRefresh} disabled={refreshing} data-testid="spec-refresh">
                 <RefreshCw className={cn("size-3.5", refreshing && "animate-spin")} /> Refresh Defaults
+              </Button>
+            ) : null}
+            {onReread ? (
+              <Button type="button" size="sm" variant="outline" onClick={onReread} data-testid="spec-reread">
+                <ImageIcon className="size-3.5" /> Re-Read Image From PDF
               </Button>
             ) : null}
             <Button type="button" size="sm" variant="outline" onClick={onEdit}>

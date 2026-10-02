@@ -501,3 +501,34 @@ export const coreHoleForModels = createServerFn({ method: "POST" })
     }
     return out;
   });
+
+const dataImage = z
+  .string()
+  .max(1_400_000)
+  .regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Not an image");
+
+/**
+ * Replace a saved sheet's pictures after re-reading its PDF (or clearing a wrong one).
+ * undefined leaves that picture alone, null removes it, a data URL replaces it.
+ */
+export const setSpecImages = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; image?: string | null; dimsImage?: string | null }) =>
+    z.object({ id: z.number().int().positive(), image: dataImage.nullable().optional(), dimsImage: dataImage.nullable().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<{ ok: true; hasImage: boolean; hasDims: boolean }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const act = (v: string | null | undefined) => (v === undefined ? "keep" : v === null ? "clear" : "set");
+    const rows = await sql.query<{ has_image: boolean; has_dims: boolean }>(
+      `update spec_sheets set
+          image = case $2::text when 'set' then $3::text when 'clear' then null else image end,
+          dims_image = case $4::text when 'set' then $5::text when 'clear' then null else dims_image end,
+          updated_at = now()
+        where id = $1
+        returning (image is not null) as has_image, (dims_image is not null) as has_dims`,
+      [data.id, act(data.image), data.image ?? null, act(data.dimsImage), data.dimsImage ?? null],
+    );
+    if (!rows[0]) throw new Error("That spec sheet no longer exists.");
+    return { ok: true, hasImage: !!rows[0].has_image, hasDims: !!rows[0].has_dims };
+  });

@@ -2,6 +2,8 @@
  * Browser-only: pull the text out of a PDF with pdf.js. The file never leaves the browser —
  * only the text goes to the server. Loaded on demand so pdf.js stays out of the main bundle.
  */
+import { classifyImage, MIN_SIDE, pickImages, pixelStats, type ImageCandidate, type TitleAnchor } from "@/lib/ops/spec-image-pick";
+
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
 export type PdfText = {
@@ -11,6 +13,8 @@ export type PdfText = {
   image: string | null;
   /** A dimension drawing (front/side views with measurements), shown second under "Dimensions". */
   dimsImage: string | null;
+  /** Why there is no machine photo, when there isn't one. */
+  imageNote: string | null;
 };
 
 export async function pdfToText(file: File): Promise<PdfText> {
@@ -46,7 +50,7 @@ export async function pdfToText(file: File): Promise<PdfText> {
       out.push(lines.map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n"));
       page.cleanup();
     }
-    const pics = await sheetImages(pdfjs, doc).catch(() => ({ image: null, dimsImage: null }));
+    const pics = await sheetImages(pdfjs, doc).catch(() => ({ image: null, dimsImage: null, imageNote: null }));
     return { text: out.join("\n\n").trim(), pages: doc.numPages, ...pics };
   } finally {
     void doc.destroy();
@@ -90,79 +94,168 @@ function toCanvas(img: PdfImage): HTMLCanvasElement | null {
   return src;
 }
 
-/**
- * Photo or line drawing? Dimension drawings are mostly white paper with thin dark lines;
- * photos (even on a white background) are full of mid-tones.
- */
-export function looksLikeDiagram(pixels: Uint8ClampedArray): boolean {
-  let white = 0;
-  let mid = 0;
-  let colorful = 0;
-  const n = pixels.length / 4;
-  for (let i = 0; i < pixels.length; i += 4) {
-    const r = pixels[i]!;
-    const g = pixels[i + 1]!;
-    const b = pixels[i + 2]!;
-    if (r > 235 && g > 235 && b > 235) white++;
-    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-    if (lum > 40 && lum < 215) mid++;
-    if (Math.max(r, g, b) - Math.min(r, g, b) > 40) colorful++;
-  }
-  // Line drawings: mostly paper, thin dark lines, almost no mid-tones. Photos (even on white) are full of mid-tones.
-  return white / n > 0.75 && mid / n < 0.15 && colorful / n < 0.05;
+type Matrix = [number, number, number, number, number, number];
+const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
+/** m applied after n (PDF "cm" concatenation). */
+function concat(m: Matrix, n: Matrix): Matrix {
+  return [
+    n[0] * m[0] + n[1] * m[2],
+    n[0] * m[1] + n[1] * m[3],
+    n[2] * m[0] + n[3] * m[2],
+    n[2] * m[1] + n[3] * m[3],
+    n[4] * m[0] + n[5] * m[2] + m[4],
+    n[4] * m[1] + n[5] * m[3] + m[5],
+  ];
 }
 
-function classify(canvas: HTMLCanvasElement): "photo" | "diagram" {
+function statsOf(canvas: HTMLCanvasElement) {
   const small = document.createElement("canvas");
   small.width = 96;
   small.height = 96;
   const ctx = small.getContext("2d");
-  if (!ctx) return "photo";
+  if (!ctx) return null;
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, 96, 96);
   ctx.drawImage(canvas, 0, 0, 96, 96);
-  return looksLikeDiagram(ctx.getImageData(0, 0, 96, 96).data) ? "diagram" : "photo";
+  return pixelStats(ctx.getImageData(0, 0, 96, 96).data);
 }
 
+/** How many of the first pages to search for the machine photo. */
+const IMAGE_PAGES = 3;
+
 /**
- * Images from the first two pages: the largest photo is the machine (primary); the largest
- * line drawing is the dimension diagram (secondary). A diagram is never used as the main image.
+ * Every embedded image on the first pages, classified (icon / diagram / photo) with its size,
+ * page position and how many pages it repeats on — then the picker chooses. The primary is the
+ * machine photo or nothing; warning symbols, logos, barcodes and drawings can never be primary.
  */
-async function sheetImages(pdfjs: PdfJs, doc: PdfDoc): Promise<{ image: string | null; dimsImage: string | null }> {
-  let photo: { area: number; canvas: HTMLCanvasElement } | null = null;
-  let diagram: { area: number; canvas: HTMLCanvasElement } | null = null;
-  for (let n = 1; n <= Math.min(2, doc.numPages); n++) {
+async function sheetImages(pdfjs: PdfJs, doc: PdfDoc): Promise<{ image: string | null; dimsImage: string | null; imageNote: string | null }> {
+  const found = new Map<string, { cand: ImageCandidate; canvas: HTMLCanvasElement; seenPages: Set<number> }>();
+  let title: TitleAnchor | null = null;
+  const pages = Math.min(IMAGE_PAGES, doc.numPages);
+  for (let n = 1; n <= pages; n++) {
     const page = await doc.getPage(n);
+    if (n === 1) {
+      // The model name / title: the tallest text on page 1.
+      const text = await page.getTextContent();
+      let best = 0;
+      for (const item of text.items) {
+        if (!("str" in item) || item.str.trim().length < 3) continue;
+        const h = Math.abs(item.height || item.transform[3] || 0);
+        if (h > best) {
+          best = h;
+          title = { page: 1, x: item.transform[4], y: item.transform[5] };
+        }
+      }
+    }
     const ops = await page.getOperatorList();
+    let ctm: Matrix = IDENTITY;
+    const stack: Matrix[] = [];
     for (let i = 0; i < ops.fnArray.length; i++) {
-      if (ops.fnArray[i] !== pdfjs.OPS.paintImageXObject) continue;
-      const name = ops.argsArray[i]?.[0] as string | undefined;
-      if (!name) continue;
-      const img = await new Promise<PdfImage | null>((resolve) => {
-        const timer = setTimeout(() => resolve(null), 3000);
-        const objs = name.startsWith("g_") ? page.commonObjs : page.objs;
-        objs.get(name, (v: unknown) => {
-          clearTimeout(timer);
-          resolve((v as PdfImage) ?? null);
+      const fn = ops.fnArray[i];
+      const args = ops.argsArray[i] as unknown[] | undefined;
+      if (fn === pdfjs.OPS.save) stack.push(ctm);
+      else if (fn === pdfjs.OPS.restore) ctm = stack.pop() ?? IDENTITY;
+      else if (fn === pdfjs.OPS.transform && args && args.length >= 6) ctm = concat(ctm, args as unknown as Matrix);
+      else if (fn === pdfjs.OPS.paintFormXObjectBegin) {
+        stack.push(ctm);
+        const m = args?.[0] as Matrix | undefined;
+        if (Array.isArray(m) && m.length >= 6) ctm = concat(ctm, m);
+      } else if (fn === pdfjs.OPS.paintFormXObjectEnd) ctm = stack.pop() ?? IDENTITY;
+
+      const isObject = fn === pdfjs.OPS.paintImageXObject || fn === pdfjs.OPS.paintImageXObjectRepeat;
+      const isInline = fn === pdfjs.OPS.paintInlineImageXObject;
+      if (!isObject && !isInline) continue;
+
+      let key: string;
+      let img: PdfImage | null;
+      if (isInline) {
+        img = (args?.[0] as PdfImage) ?? null;
+        key = `inline-${n}-${i}`;
+      } else {
+        const name = args?.[0] as string | undefined;
+        if (!name) continue;
+        key = name;
+        const known = found.get(key);
+        if (known) {
+          known.seenPages.add(n);
+          continue;
+        }
+        img = await new Promise<PdfImage | null>((resolve) => {
+          const timer = setTimeout(() => resolve(null), 3000);
+          const objs = name.startsWith("g_") ? page.commonObjs : page.objs;
+          objs.get(name, (v: unknown) => {
+            clearTimeout(timer);
+            resolve((v as PdfImage) ?? null);
+          });
         });
-      });
-      if (!img?.width || !img.height || img.width < 160 || img.height < 160) continue;
-      const ratio = img.width / img.height;
-      if (ratio > 4 || ratio < 0.25) continue; // banners and strips
+      }
+      if (!img?.width || !img.height) continue;
+      // Too small to be the machine: skip before decoding (bullets, glyphs, small logos).
+      if (Math.min(img.width, img.height) < MIN_SIDE) continue;
       const canvas = toCanvas(img);
       if (!canvas) continue;
-      const area = img.width * img.height;
-      if (classify(canvas) === "diagram") {
-        if (!diagram || area > diagram.area) diagram = { area, canvas };
-      } else if (!photo || area > photo.area) photo = { area, canvas };
+      const stats = statsOf(canvas);
+      if (!stats) continue;
+      // Same picture embedded separately on each page (logos, footers) counts as one repeating image.
+      const sig = `${img.width}x${img.height}:${stats.bins}:${stats.top3.toFixed(3)}:${stats.white.toFixed(3)}:${stats.dark.toFixed(3)}`;
+      const twin = [...found.values()].find((f) => f.cand.id.endsWith(sig) && !f.seenPages.has(n));
+      if (twin) {
+        twin.seenPages.add(n);
+        continue;
+      }
+      found.set(key, {
+        canvas,
+        seenPages: new Set([n]),
+        cand: {
+          id: `${key}|${sig}`,
+          page: n,
+          width: img.width,
+          height: img.height,
+          kind: classifyImage(img.width, img.height, stats),
+          pages: 1,
+          // The image fills the unit square under the current transform; its centre is (0.5, 0.5).
+          cx: ctm[0] * 0.5 + ctm[2] * 0.5 + ctm[4],
+          cy: ctm[1] * 0.5 + ctm[3] * 0.5 + ctm[5],
+        },
+      });
     }
   }
+  const all = [...found.values()];
+  for (const f of all) f.cand.pages = f.seenPages.size;
+  const pick = pickImages(all.map((f) => f.cand), title);
+  const canvasOf = (c: ImageCandidate | null) => (c ? all.find((f) => f.cand === c)?.canvas ?? null : null);
+  const primary = canvasOf(pick.primary);
+  const diagram = canvasOf(pick.diagram);
   return {
-    image: photo ? shrinkCanvas(photo.canvas) : null,
-    dimsImage: diagram ? shrinkCanvas(diagram.canvas, 900) : null,
+    image: primary ? shrinkCanvas(primary) : null,
+    dimsImage: diagram ? shrinkCanvas(diagram, 1400) : null,
+    imageNote: primary
+      ? null
+      : all.length
+        ? "No machine photo found in this PDF (only symbols, logos or drawings). Use Add Image to set one."
+        : "This PDF has no embedded pictures. Use Add Image to set the machine photo.",
   };
 }
 
-/** White background (JPEG has no alpha), longest side 640 px. */
-export function shrinkCanvas(src: HTMLCanvasElement | HTMLImageElement, max = 640): string | null {
+/** Just the pictures from a spec sheet PDF — for re-reading the image of a sheet that's already saved. */
+export async function pdfImages(file: File): Promise<{ image: string | null; dimsImage: string | null; imageNote: string | null }> {
+  if (file.size > MAX_PDF_BYTES) throw new Error("That PDF is over 10 MB.");
+  if (!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))) throw new Error("Pick the spec sheet PDF.");
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const worker = await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url");
+  pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (new TextDecoder().decode(bytes.slice(0, 5)) !== "%PDF-") throw new Error("That file isn't a readable PDF.");
+  const doc = await pdfjs.getDocument({ data: bytes }).promise;
+  try {
+    return await sheetImages(pdfjs, doc);
+  } finally {
+    void doc.destroy();
+  }
+}
+
+/** White background (JPEG has no alpha), longest side 1200 px — large enough to enlarge. */
+export function shrinkCanvas(src: HTMLCanvasElement | HTMLImageElement, max = 1200): string | null {
   const w = "naturalWidth" in src ? src.naturalWidth : src.width;
   const h = "naturalHeight" in src ? src.naturalHeight : src.height;
   if (!w || !h) return null;
@@ -175,11 +268,11 @@ export function shrinkCanvas(src: HTMLCanvasElement | HTMLImageElement, max = 64
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, out.width, out.height);
   ctx.drawImage(src, 0, 0, out.width, out.height);
-  return out.toDataURL("image/jpeg", 0.85);
+  return out.toDataURL("image/jpeg", 0.82);
 }
 
 /** A photo the user picks for the spec sheet (Admin/Sales), resized the same way. */
-export async function imageFileToDataUrl(file: File, max = 640): Promise<string> {
+export async function imageFileToDataUrl(file: File, max = 1200): Promise<string> {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error("Use a JPG, PNG or WebP image.");
   if (file.size > 15 * 1024 * 1024) throw new Error("That image is over 15 MB.");
   const url = URL.createObjectURL(file);
