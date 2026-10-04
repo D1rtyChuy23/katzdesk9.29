@@ -220,7 +220,7 @@ function ProvidersPane({
             <button
               type="button"
               onClick={() => onOpen(p.id)}
-              className="desk-lift grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center"
+              className="desk-flat grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center"
             >
               <span>
                 <span className="flex flex-wrap items-center gap-1.5">

@@ -144,7 +144,7 @@ export function RebuildBoard({
                         }}
                         data-testid={`rebuild-card-${r.id}`}
                         className={cn(
-                          "desk-lift w-full select-none rounded-lg border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40",
+                          "desk-flat w-full select-none rounded-lg border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40",
                           canEdit && "cursor-grab active:cursor-grabbing",
                           r.health === "overdue" && "border-destructive/40",
                           r.health === "at-risk" && "border-warning/40",

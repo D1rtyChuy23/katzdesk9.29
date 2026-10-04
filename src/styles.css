@@ -180,7 +180,8 @@ html[data-contrast="high"] :focus-visible {
 
 @layer components {
   @media (hover: hover) and (pointer: fine) {
-    /* Lift only the control under the pointer. A parent does not scale when a child control is hovered. */
+    /* Lift only the control under the pointer. A parent does not scale when a child control is hovered.
+       Whole rows and cards that are one big button are marked .desk-flat: they highlight, they do not lift. */
     html:not([data-motion="reduced"]) :is(
       a[href],
       button,
@@ -241,7 +242,7 @@ html[data-contrast="high"] :focus-visible {
         label:has(> input[type="checkbox"]),
         label:has(> input[type="radio"])
       ):hover
-    )) {
+    )):not(.desk-flat) {
       position: relative;
       z-index: 1;
       transform: translateY(-1px) scale(1.012);

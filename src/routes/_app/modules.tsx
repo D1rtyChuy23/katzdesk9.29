@@ -248,7 +248,7 @@ function Page() {
                 type="button"
                 onClick={() => setSelected(m.id)}
                 className={cn(
-                  "desk-lift grid min-w-0 gap-1 text-left md:grid-cols-[8rem_1fr_9rem_7rem] md:items-center",
+                  "desk-flat grid min-w-0 gap-1 rounded-md text-left hover:bg-muted/50 md:grid-cols-[8rem_1fr_9rem_7rem] md:items-center",
                   where !== "hq" && "opacity-55 hover:opacity-80",
                 )}
               >

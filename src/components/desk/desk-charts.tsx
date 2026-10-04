@@ -497,7 +497,7 @@ export function StatCard({
     </>
   );
   const cls = cn(
-    "@container desk-lift relative min-w-[10rem] flex-1 overflow-hidden rounded-xl border bg-card px-3.5 py-3.5 text-left shadow-[var(--shadow-soft)] sm:px-4",
+    "@container desk-flat relative min-w-[10rem] flex-1 overflow-hidden rounded-xl border bg-card px-3.5 py-3.5 text-left shadow-[var(--shadow-soft)] sm:px-4",
     selected
       ? "border-primary/60 ring-2 ring-primary/20 before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-primary"
       : "border-border",

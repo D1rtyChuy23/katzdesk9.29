@@ -534,7 +534,7 @@ function HistoryRow({ item, onOpen }: { item: HistoryItem; onOpen: () => void })
       <button
         type="button"
         onClick={onOpen}
-        className="desk-lift flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
+        className="desk-flat flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
       >
         <span className="mt-0.5 w-16 shrink-0 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
           {KIND_LABEL[item.kind]}

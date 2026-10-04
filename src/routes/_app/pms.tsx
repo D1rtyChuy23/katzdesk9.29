@@ -124,7 +124,7 @@ function Page() {
             key={p.id}
             type="button"
             onClick={() => setSelected(p.id)}
-            className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3"
+            className="desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3"
           >
             <span>
               <span className="font-medium">{p.customer}</span>
