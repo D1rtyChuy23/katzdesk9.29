@@ -332,10 +332,13 @@ export function MultiComboField({
   onRenameItem,
   noun = "name",
   menuInFlow,
+  hideChips,
 }: {
   label?: string;
   name?: string;
   values: string[];
+  /** The picked values are already shown elsewhere (one block each): show only the add box. */
+  hideChips?: boolean;
   onChange: (next: string[]) => void;
   items: ComboItem[];
   placeholder?: string;
@@ -394,7 +397,7 @@ export function MultiComboField({
       {label ? <Label>{label}</Label> : null}
       {name ? <input type="hidden" name={name} value={values.join("\n")} /> : null}
       <div className={cn("min-w-0 space-y-2", label ? "mt-1.5" : "mt-0")}>
-        {values.length ? (
+        {values.length && !hideChips ? (
           <ul className="flex min-h-8 min-w-0 flex-wrap content-start gap-2" data-equip-chips="">
             {values.map((v, i) => (
               <li

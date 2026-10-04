@@ -212,6 +212,7 @@ export function EquipmentMultiCombo({
   onChange,
   placeholder = "Search equipment…",
   menuInFlow,
+  hideChips,
 }: {
   label?: string;
   name?: string;
@@ -219,6 +220,7 @@ export function EquipmentMultiCombo({
   onChange: (next: string[]) => void;
   placeholder?: string;
   menuInFlow?: boolean;
+  hideChips?: boolean;
 }) {
   const dir = useDirectory("equipment");
   const renameUi = useRename(dir, "equipment", (from, to) => {
@@ -241,6 +243,7 @@ export function EquipmentMultiCombo({
         onRenameItem={renameUi.open}
         noun="equipment"
         menuInFlow={menuInFlow}
+        hideChips={hideChips}
       />
       {renameUi.dialog}
     </>

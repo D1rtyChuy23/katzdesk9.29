@@ -428,6 +428,7 @@ export function InstallSheet({
               <div className="sm:col-span-2">
                 <EquipmentMultiCombo
                   values={equipPieces}
+                  hideChips
                   placeholder="Add another…"
                   onChange={(next) => {
                     try {
@@ -447,6 +448,13 @@ export function InstallSheet({
                   onChange={setSpecs}
                   onPulled={(next) => persistMachines(next)}
                   onRecipe={(next) => persistMachines(next)}
+                  onRemove={(index) => {
+                    try {
+                      persistMachines(specs.filter((_, i) => i !== index));
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Could not update equipment");
+                    }
+                  }}
                 />
               </div>
               <div>

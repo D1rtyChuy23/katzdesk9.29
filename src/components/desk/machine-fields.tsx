@@ -54,12 +54,15 @@ function MachineRecipeSelect({
   const [adding, setAdding] = useState(false);
   const custKey = customer.trim().toLowerCase();
   const modelKey = model.toLowerCase();
-  const house = recipes.filter((r) => !r.customer).sort(byModelFirst(model));
+  // House templates for this model only; a Linea is never offered a Bunn or Eversys template.
+  const house = recipes.filter((r) => !r.customer && r.equipmentModel.toLowerCase() === modelKey).sort(byModelFirst(model));
   const mine = recipes.filter((r) => r.customer?.toLowerCase() === custKey).sort(byModelFirst(model));
   // Before anyone picks, show the recipe this unit already used (account first, then house).
   const fallback = findRecipeFor(recipes, { customer, model, installId: installId ?? null });
   const selectedId = value ?? fallback.linked?.id ?? fallback.house?.id ?? null;
   const selected = recipes.find((r) => r.id === selectedId) ?? null;
+  // A recipe picked before this rule stays listed so it is not silently dropped.
+  const keep = selected && !house.includes(selected) && !mine.includes(selected) ? selected : null;
   const label = (r: Recipe) =>
     r.equipmentModel.toLowerCase() === modelKey ? recipeLabel(r) : recipeLabel(r, true);
   // Grinders often carry only custom settings (kept in notes), so fall back to the first note line.
@@ -87,6 +90,7 @@ function MachineRecipeSelect({
           }}
         >
           <option value="">No recipe</option>
+          {keep ? <option value={keep.id}>{recipeLabel(keep, true)}</option> : null}
           {mine.length ? (
             <optgroup label={customer}>
               {mine.map((r) => (
@@ -416,9 +420,12 @@ export function MachineFields({
   installId,
   onPulled,
   onRecipe,
+  onRemove,
   customer = "",
   recipes = [],
 }: {
+  /** Take this machine off the install. When given, each block is the one place the machine is listed. */
+  onRemove?: (index: number) => void;
   specs: MachineSpec[];
   onChange: (next: MachineSpec[]) => void;
   installId?: number;
@@ -444,8 +451,20 @@ export function MachineFields({
         >
           <div className="col-span-2 min-w-0 lg:col-span-1">
             <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
-            <p className="truncate text-sm font-medium" title={spec.equipment}>
-              {spec.equipment}
+            <p className="flex min-w-0 items-center gap-1 text-sm font-medium" title={spec.equipment}>
+              <span className="min-w-0 truncate">{spec.equipment}</span>
+              {onRemove ? (
+                <button
+                  type="button"
+                  onClick={() => onRemove(index)}
+                  aria-label={`Remove ${spec.equipment} from this install`}
+                  title="Remove from this install"
+                  data-testid="machine-remove"
+                  className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              ) : null}
             </p>
           </div>
           <SerialPullField
