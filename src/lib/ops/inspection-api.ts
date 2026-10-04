@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
+import { listedEquipment } from "@/lib/ops/equipment";
 import { parseMachinesJson } from "@/lib/ops/machines";
 import {
   CORE_HOLE_CATEGORY,
@@ -146,18 +147,22 @@ function text(v: unknown): string {
 
 type Piece = { equipment: string; serial: string; powerVoltage: string };
 
-function piecesFrom(row: {
-  equipment?: string | null;
-  serial?: string | null;
-  power_voltage?: string | null;
-  machines?: unknown;
-}): Piece[] {
+/**
+ * One piece per machine, split the same way the install's Equipment section splits it
+ * (catalog-aware), so "Linea / Swift / Axiom-APS" on one line is three machines, not one.
+ */
+function piecesFrom(
+  row: {
+    equipment?: string | null;
+    serial?: string | null;
+    power_voltage?: string | null;
+    machines?: unknown;
+  },
+  catalog: string[] = [],
+): Piece[] {
   const machines = parseMachinesJson(text(row.machines) || null);
   if (machines.length) return machines;
-  const named = text(row.equipment)
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const named = listedEquipment(text(row.equipment), catalog);
   return named.map((equipment) => ({
     equipment,
     serial: named.length === 1 ? text(row.serial) : "",
@@ -285,7 +290,10 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
   }>("select customer, equipment, serial, power_voltage, machines from installs where id = $1", [installId]);
   const row = install[0];
   if (!row) return;
-  const pieces = piecesFrom(row);
+  const catalog = await catalogNames(sql);
+  const pieces = piecesFrom(row, catalog);
+  /** A unit saved under the whole one-line list ("Linea / Swift / Axiom") before machines were split. */
+  const combined = (a: AcctUnit) => listedEquipment(a.equipment_name, catalog).length > 1;
   const account = await sql.query<AcctUnit>(
     `select id, catalog_model, equipment_name, serial, serial_key, electrical
        from account_equipment where lower(customer) = lower($1) order by id`,
@@ -302,6 +310,24 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
   let first: number | null = null;
   for (const piece of pieces) {
     let hit = claimUnit(piece, [linkedRows, account], used);
+    if (!hit) {
+      // An older combined unit that names this machine becomes this machine: its checks and photos stay with it.
+      const old = linkedRows.find(
+        (a) => !used.has(a.id) && combined(a) && listedEquipment(a.equipment_name, catalog).some((n) => sameCatalogModel(n, piece.equipment)),
+      );
+      if (old) {
+        const matched = matchCatalogModel(piece.equipment, piece.equipment, catalog);
+        old.catalog_model = matched.catalogModel || piece.equipment;
+        old.equipment_name = piece.equipment;
+        await sql.query("update account_equipment set catalog_model = $2, equipment_name = $3 where id = $1", [old.id, old.catalog_model, old.equipment_name]);
+        hit = old;
+      }
+    }
+    if (hit && combined(hit)) {
+      // Matched by model but still labelled with the whole list: show just this machine's name.
+      hit.equipment_name = piece.equipment;
+      await sql.query("update account_equipment set equipment_name = $2 where id = $1", [hit.id, piece.equipment]);
+    }
     let id = hit?.id;
     if (!id) {
       id = await insertEquipment(sql, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
@@ -331,6 +357,20 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
       `update install_inspection_photos set equipment_id = $1 where install_id = $2 and equipment_id is null`,
       [first, installId],
     );
+  }
+  // Leftover combined units nobody inspected are dropped; anything with a check, note or photo is kept.
+  for (const a of linkedRows) {
+    if (keep.has(a.id) || !combined(a) || serialKey(a.serial)) continue;
+    const touched = await sql.query(
+      `select 1 from install_inspection_items where install_id = $2 and equipment_id = $1 and (status <> 'Not inspected' or coalesce(notes, '') <> '')
+       union all select 1 from install_inspection_photos where install_id = $2 and equipment_id = $1 limit 1`,
+      [a.id, installId],
+    );
+    if (touched.length) continue;
+    // Taken off this install's inspection only; the account's equipment record is left alone.
+    await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, a.id]);
+    await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, a.id]);
+    linkedIds.delete(a.id);
   }
   if (!opts?.prune) return;
   for (const id of linkedIds) {
