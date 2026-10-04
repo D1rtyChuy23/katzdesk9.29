@@ -1389,7 +1389,8 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
       where model ilike ${like} or coalesce(serial,'') ilike ${like} or coalesce(sold_to,'') ilike ${like}
       limit 8`;
 	for (const a of assets) hits.push({
-		entityType: a.status === "deployed" || a.site === "field" ? "location" : "asset",
+		// Same rule as pings: a unit on a barn rack opens in Warehouse; anywhere else it opens in Locations.
+		entityType: a.site === "barn-back" || a.site === "barn-front" ? "asset" : "location",
 		id: a.id,
 		title: a.model,
 		subtitle: [a.serial, siteLabel(a.site)].filter(Boolean).join(" · "),
