@@ -222,7 +222,7 @@ function Preview({ appearance }: { appearance: Appearance }) {
       )}
     >
       <div className={cn("flex items-center justify-between px-3 py-2 text-xs", dark ? "bg-black/20" : "bg-muted/80")}>
-        <span className="font-display text-sm">Katz Desk</span>
+        <span className="font-display text-sm">Preview</span>
         <span className={dark ? "text-cream/60" : "text-muted-foreground"}>
           {prefs.text === "large" ? "Large type" : "Default type"}
           {prefs.density === "compact" ? " · Compact" : ""}

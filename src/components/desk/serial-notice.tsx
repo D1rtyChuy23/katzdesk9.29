@@ -33,7 +33,10 @@ export function SerialPullField({
   jobId,
   machineIndex,
   onPulled,
+  compact = false,
 }: {
+  /** On a one-line machine row: the small caps label the other fields on that row use. */
+  compact?: boolean;
   label: string;
   value: string;
   onValue: (serial: string) => void;
@@ -96,10 +99,15 @@ export function SerialPullField({
   }
 
   return (
-    <div>
-      <Label>{label}</Label>
+    <div className={compact ? "min-w-0" : undefined}>
+      {compact ? (
+        <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{label}</p>
+      ) : (
+        <Label>{label}</Label>
+      )}
       <Input
         className="mt-1"
+        aria-label={label}
         value={text}
         autoComplete="off"
         placeholder="Type the serial"

@@ -28,6 +28,7 @@ import {
   type InspectionOverall,
 } from "@/lib/ops/pre-inspection";
 import { coreHoleForModels } from "@/lib/ops/spec-library";
+import { CORE_HOLE_NOTE } from "@/lib/ops/spec-copy";
 import { listReps } from "@/lib/ops/reps";
 import { listTechs } from "@/lib/ops/roster";
 import { cn } from "@/lib/utils";
@@ -564,6 +565,9 @@ function CoreHoleQuestion({
   return (
     <div className="rounded-lg border border-border p-3" data-testid="core-hole-question">
       <p className="font-medium">{CORE_HOLE_QUESTION}</p>
+      <p className="mt-1 text-xs text-muted-foreground" data-testid="core-hole-note">
+        {CORE_HOLE_NOTE}
+      </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Button
           type="button"

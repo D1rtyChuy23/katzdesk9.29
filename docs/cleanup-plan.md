@@ -243,3 +243,35 @@ Answers received: the Front rack is bays **I–P**. A unit assigned to an accoun
 - Left as is: Rebuilds can reuse a serial assigned elsewhere after an explicit "confirm reuse". That is an existing, deliberate rule.
 
 After this change: all 18 routes load; typecheck, lint and build pass; tests are 156 passing, 9 failing (the same 9).
+
+## 7. Phase 3 Result
+
+Checked in the running app at 1440px and 390px (Playwright, real touch drag for scroll), with a second test teammate so pings could be sent to the test admin.
+
+### Fixed
+
+- **Result lists stranded over a field.** `AnchoredList` only moved on scroll or resize. Picking a machine adds a chip that moves the input, so the equipment list stayed over the field. It now follows its input every frame while open. This is the shared list behind every search and picker, so it applies on every page and in every bubble.
+- **New Install bubble.** Equipment was shown twice (chips and rows) and the rows stayed hidden until a customer was picked. Now one compact row per unit (model, serial, voltage, location, recipe, choose or add recipe on that row), shown as soon as a machine is added, with a remove on each row. The customer is picked once and never asked again. The existing-install sheet already had this layout.
+- **Row alignment.** Rows are two columns on a phone and one line at 1024px and up. Rack, Bay and Level name themselves in the list instead of repeating captions. Serial uses the same small label as the other fields.
+- **Pre-inspection core hole.** The "Primarily needed when utility lines are below the counter." note now shows under the core hole question on the walk, as well as on the spec sheet, the import and the copied configuration.
+- **Settings.** The appearance preview card repeated the "Katz Desk" wordmark; it now says "Preview", so each page has one wordmark.
+
+### Verified, no change needed
+
+- Install bubble: "Who changed this" is collapsed; the bubble scrolls by wheel and by touch without moving the page; equipment saved on the bubble shows on that account's pre-inspection (3 machines, serial and electrical carried over).
+- Pre-inspection: Add Photo offers Camera and Choose from library (desktop and 390px).
+- Spec plug: volts, wire count and model are read first. Axiom 220V 4-wire gives L14-20. A missing wire count leaves Plug unset with "Wire count missing". `spec-defaults.test.mjs` passes 16/16.
+- Warehouse: moves go rack, bay, level; Front and Back both work; Front A–H and a missing level are refused; three units were held in one Front section (J, level 2) and the board shows sections holding several serials. Assigned modules show at 55% while available HQ modules are full contrast.
+- Pings: the bell has Unread / Read / All with counts. Every type was clicked and lands on its record: ticket, PM, install, deal, rebuild, module, warehouse unit (on a rack), location unit (out at a site), customer, handoff. A ping whose record was removed opens the account with a note. If nothing is left to open (a removed ticket with no account), it says so and stays put. The list refreshes every 8 seconds, so a record removed in the last few seconds can still open once.
+- Search lists: the global search list renders on top of the page and banner on all 18 routes at both widths.
+- All 18 routes load with a heading and one wordmark and no horizontal overflow. The only console errors are blocked outside hosts in the test sandbox.
+
+### Left as is
+
+- Serial still appears in Warehouse Units and in the inspection list.
+- Rebuild "confirm reuse" is unchanged.
+- Plug coding above 30A (14-50 / 6-50) is untouched.
+- Units saved on Front A–H: none in the local data. Production was not looked at. Any found are to be listed here and not moved silently.
+- Hover was spot-checked, not exhaustively re-audited on every page.
+
+Gates: lint 0 errors, typecheck and build pass; tests 156 passing, 9 failing (the same 9 Grok share-card failures).

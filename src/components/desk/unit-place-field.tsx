@@ -26,11 +26,14 @@ export function PlacePicker({
   compact?: boolean;
 }) {
   const rack = isRackPlace(value.site);
-  const rackClass = compact ? "w-[5.75rem] px-2" : "min-w-40";
+  const rackClass = compact ? "w-[6.5rem] px-2" : "min-w-40";
+  // On a one-line machine row the picker sits under "Location"; each list names itself (Choose / Bay / Level).
+  const caption = compact ? "sr-only" : undefined;
+  const labelClass = "grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase";
   return (
     <div data-testid={testId} className={compact ? "flex flex-wrap items-end gap-1 lg:flex-nowrap" : "flex flex-wrap items-end gap-2"}>
-      <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-        Rack
+      <label className={labelClass}>
+        <span className={caption}>Rack</span>
         <SelectField
           aria-label="Rack"
           data-testid={`${testId}-rack`}
@@ -59,8 +62,8 @@ export function PlacePicker({
       </label>
       {rack ? (
         <>
-          <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-            Bay
+          <label className={labelClass}>
+            <span className={caption}>Bay</span>
             <SelectField
               aria-label="Bay"
               data-testid={`${testId}-bay`}
@@ -76,8 +79,8 @@ export function PlacePicker({
               ))}
             </SelectField>
           </label>
-          <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-            Level
+          <label className={labelClass}>
+            <span className={caption}>Level</span>
             <SelectField
               aria-label="Level"
               data-testid={`${testId}-level`}

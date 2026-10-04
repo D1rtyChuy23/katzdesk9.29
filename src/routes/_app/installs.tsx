@@ -437,8 +437,10 @@ function NewInstallDialog({
               }}
               required
             />
+            {/* Each machine is listed once, on its own row below; the row has the remove button. */}
             <EquipmentMultiCombo
               values={equipment}
+              hideChips
               onChange={(next) => {
                 setEquipment(next);
                 setSpecs(mergeMachineSpecs(next, specs));
@@ -502,12 +504,17 @@ function NewInstallDialog({
               {matches.length > 4 ? <p className="mt-1 text-xs text-muted-foreground">+{matches.length - 4} more</p> : null}
             </div>
           ) : null}
-          {customer && specs.length ? (
+          {specs.length ? (
             <MachineFields
               specs={specs}
               customer={customer}
               recipes={recipes.data ?? []}
               onChange={setSpecs}
+              onRemove={(index) => {
+                const next = specs.filter((_, i) => i !== index);
+                setSpecs(next);
+                setEquipment(next.map((s) => s.equipment));
+              }}
             />
           ) : null}
           <div className="flex justify-end">

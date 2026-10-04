@@ -447,7 +447,7 @@ export function MachineFields({
         <div
           key={`${spec.equipment}-${index}`}
           data-testid="machine-row"
-          className="grid grid-cols-1 gap-2 py-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(6.5rem,0.8fr)_minmax(5rem,0.6fr)_minmax(14rem,1.25fr)_minmax(10rem,1fr)] lg:items-start"
+          className="grid grid-cols-2 gap-2 py-2 lg:grid-cols-[minmax(7rem,1fr)_minmax(6.5rem,0.7fr)_minmax(4.5rem,0.45fr)_minmax(18.5rem,1.2fr)_minmax(9rem,0.9fr)] lg:items-start"
         >
           <div className="col-span-2 min-w-0 lg:col-span-1">
             <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
@@ -469,6 +469,7 @@ export function MachineFields({
           </div>
           <SerialPullField
             label="Serial"
+            compact
             value={spec.serial}
             installId={installId}
             machineIndex={index}
