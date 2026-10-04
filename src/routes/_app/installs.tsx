@@ -22,7 +22,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { InstallSheet } from "@/components/desk/entity-sheets";
-import { RecipeChip, RecipeEditorSheet } from "@/components/desk/recipe-sheet";
+import { RecipeChip } from "@/components/desk/recipe-sheet";
 import type { RecipeDraft } from "@/components/desk/recipe-form";
 import { CustomerCombo, EquipmentMultiCombo } from "@/components/desk/directory-fields";
 import { MachineFields } from "@/components/desk/machine-fields";
@@ -52,7 +52,6 @@ function Page() {
   const data = useQuery({ queryKey: ["installs"], queryFn: () => listInstalls() });
   const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
-  const customers = useQuery({ queryKey: ["customers"], queryFn: () => listCustomers() });
   const directoryEquip = useQuery({
     queryKey: ["directory", "equipment"],
     queryFn: () => listDirectory({ data: { kind: "equipment" } }),
@@ -65,7 +64,6 @@ function Page() {
   const [slice, setSlice] = useState<"all" | "ready" | "not-ready">("all");
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
-  const [recipeDraft, setRecipeDraft] = useState<RecipeDraft | null>(null);
   const [sort, setSort] = useDeskSort("installs", "date-asc");
   const [picked, setPicked] = useState<number[]>([]);
   const [confirmIds, setConfirmIds] = useState<number[] | null>(null);
@@ -127,10 +125,6 @@ function Page() {
     (n) => n,
   );
 
-  function openRecipe(d: RecipeDraft) {
-    setSelected(null);
-    setRecipeDraft(d);
-  }
 
   const openIds = useMemo(
     () => rows.filter((i) => isOpenInstall(i)).map((i) => i.id),
@@ -305,7 +299,8 @@ function Page() {
             catalog={catalog}
             recipes={recipes}
             onOpen={() => setSelected(i.id)}
-            onRecipe={openRecipe}
+            // The recipe is set in one place: on the machine's block inside the install.
+            onRecipe={() => setSelected(i.id)}
             selected={picked.includes(i.id)}
             onToggleSelect={(on) => togglePicked(i.id, on)}
             onMarkInstalled={() => requestMark([i.id])}
@@ -329,12 +324,6 @@ function Page() {
         ) : null}
       </div>
       <InstallSheet row={selectedRow} onClose={() => setSelected(null)} onOpenRelated={(id) => setSelected(id)} />
-      <RecipeEditorSheet
-        draft={recipeDraft}
-        models={catalog}
-        customers={customers.data ?? []}
-        onClose={() => setRecipeDraft(null)}
-      />
       <NewInstallDialog
         open={create}
         existing={allInstalls}
