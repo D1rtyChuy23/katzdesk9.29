@@ -1,5 +1,5 @@
 import { n as normalizeCustomerKey, t as isWalkIn } from "./customer-key.mjs";
-import { a as catalogModels, c as listedEquipment, d as rewriteEquipmentName, f as samePiece, n as parseMachinesJson, r as serializeMachines } from "./machines.mjs";
+import { a as catalogModels, c as listedEquipment, f as rewriteEquipmentName, n as parseMachinesJson, p as samePiece, r as serializeMachines } from "./machines.mjs";
 //#region src/lib/ops/network.ts
 var PROVIDER_STATUSES = [
 	"Active",

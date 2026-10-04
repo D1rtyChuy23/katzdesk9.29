@@ -1,11 +1,11 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { hn as object, mn as number, un as boolean, vn as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, mn as number, un as boolean, yn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 import { a as deskMiddleware } from "./access.mjs";
 import { n as serialKey } from "./serial-pull.mjs";
 import { i as loadTechs } from "./roster.mjs";
-import { a as loadAccountMarks, n as customerKey, r as isAviKatz } from "./reps.mjs";
+import { a as loadAccountMarks, r as isAviKatz, t as accountRepFor } from "./reps.mjs";
 //#region src/lib/ops/ticket-status.ts
 /** Terminal service / TLC statuses. */
 var CLOSED_CALL = /* @__PURE__ */ new Set([
@@ -505,9 +505,10 @@ async function loadRebuilds(sql, today = todayChicago()) {
 	const rows = await sql.query("select * from rebuilds where coalesce(archived, false) = false order by id desc");
 	const marks = await loadAccountMarks(sql).catch(() => ({
 		rep: /* @__PURE__ */ new Map(),
+		repLoose: /* @__PURE__ */ new Map(),
 		ak: /* @__PURE__ */ new Set()
 	}));
-	return rows.map((r) => mapRebuild(r, today, marks.rep.get(customerKey(r.account)) ?? null, isAviKatz(marks, r.account)));
+	return rows.map((r) => mapRebuild(r, today, accountRepFor(marks, r.account), isAviKatz(marks, r.account)));
 }
 async function deskUsername(sql, userId) {
 	return (await sql.query("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";

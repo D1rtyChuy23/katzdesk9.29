@@ -1,35 +1,8 @@
-import { F as isRedirect, L as parseRedirect } from "./react-router+[...].mjs";
-import { n as mergeHeaders } from "./router-core+[...].mjs";
+import { G as isRedirect, K as parseRedirect } from "./react-router+[...].mjs";
+import { t as mergeHeaders } from "./router-core+[...].mjs";
 import { AsyncLocalStorage } from "node:async_hooks";
 //#region node_modules/@tanstack/start-client-core/dist/esm/constants.js
 var TSS_SERVER_FUNCTION_FACTORY = Symbol.for("TSS_SERVER_FUNCTION_FACTORY");
-//#endregion
-//#region node_modules/@tanstack/start-client-core/dist/esm/safeObjectMerge.js
-function isSafeKey(key) {
-	return key !== "__proto__" && key !== "constructor" && key !== "prototype";
-}
-/**
-* Merge target and source into a new null-proto object, filtering dangerous keys.
-*/
-function safeObjectMerge(target, source) {
-	const result = Object.create(null);
-	if (target) {
-		for (const key of Object.keys(target)) if (isSafeKey(key)) result[key] = target[key];
-	}
-	if (source && typeof source === "object") {
-		for (const key of Object.keys(source)) if (isSafeKey(key)) result[key] = source[key];
-	}
-	return result;
-}
-/**
-* Create a null-prototype object, optionally copying from source.
-*/
-function createNullProtoObject(source) {
-	if (!source) return Object.create(null);
-	const obj = Object.create(null);
-	for (const key of Object.keys(source)) if (isSafeKey(key)) obj[key] = source[key];
-	return obj;
-}
 //#endregion
 //#region node_modules/@tanstack/start-fn-stubs/dist/esm/createIsomorphicFn.js
 function createIsomorphicFn() {
@@ -63,6 +36,33 @@ function getStartContext(opts) {
 //#region node_modules/@tanstack/start-client-core/dist/esm/getStartOptions.js
 var getStartOptions = createIsomorphicFn().client(() => window.__TSS_START_OPTIONS__).server(() => getStartContext().startOptions);
 //#endregion
+//#region node_modules/@tanstack/start-client-core/dist/esm/safeObjectMerge.js
+function isSafeKey(key) {
+	return key !== "__proto__" && key !== "constructor" && key !== "prototype";
+}
+/**
+* Merge target and source into a new null-proto object, filtering dangerous keys.
+*/
+function safeObjectMerge(target, source) {
+	const result = Object.create(null);
+	if (target) {
+		for (const key of Object.keys(target)) if (isSafeKey(key)) result[key] = target[key];
+	}
+	if (source && typeof source === "object") {
+		for (const key of Object.keys(source)) if (isSafeKey(key)) result[key] = source[key];
+	}
+	return result;
+}
+/**
+* Create a null-prototype object, optionally copying from source.
+*/
+function createNullProtoObject(source) {
+	if (!source) return Object.create(null);
+	const obj = Object.create(null);
+	for (const key of Object.keys(source)) if (isSafeKey(key)) obj[key] = source[key];
+	return obj;
+}
+//#endregion
 //#region node_modules/@tanstack/start-client-core/dist/esm/getStartContextServerOnly.js
 var getStartContextServerOnly = createServerOnlyFn(getStartContext);
 //#endregion
@@ -81,10 +81,10 @@ var createServerFn = (options, __opts) => {
 		options: resolvedOptions,
 		middleware: (middleware) => {
 			const newMiddleware = [...resolvedOptions.middleware || []];
-			middleware.map((m) => {
-				if (TSS_SERVER_FUNCTION_FACTORY in m) {
-					if (m.options.middleware) newMiddleware.push(...m.options.middleware);
-				} else newMiddleware.push(m);
+			middleware.forEach((item) => {
+				if (TSS_SERVER_FUNCTION_FACTORY in item) {
+					if (item.options.middleware) newMiddleware.push(...item.options.middleware);
+				} else newMiddleware.push(item);
 			});
 			const res = createServerFn(void 0, {
 				...resolvedOptions,
@@ -126,7 +126,8 @@ var createServerFn = (options, __opts) => {
 					const serverContextAfterGlobalMiddlewares = startContext.contextAfterGlobalMiddlewares;
 					return await executeMiddleware(resolvedMiddleware, "server", {
 						...extractedFn,
-						...opts,
+						data: opts.data,
+						method: opts.method ?? resolvedOptions.method,
 						serverFnMeta: extractedFn.serverFnMeta,
 						context: safeObjectMerge(opts.context, serverContextAfterGlobalMiddlewares),
 						request: startContext.request

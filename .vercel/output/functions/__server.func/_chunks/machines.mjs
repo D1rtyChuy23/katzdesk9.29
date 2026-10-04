@@ -177,7 +177,7 @@ function listedEquipment(raw, catalog = []) {
 	const lines = raw.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
 	const out = [];
 	for (const line of lines) {
-		const pieces = extractLine(line.replace(/\bSN\s*:?\s*[A-Z0-9\-]+/gi, " ").replace(/\s+/g, " ").trim() || line, catalog, catalogKey, patterns);
+		const pieces = extractLine(line.replace(/\bSN\s*:?\s*[A-Z0-9-]+/gi, " ").replace(/\s+/g, " ").trim() || line, catalog, catalogKey, patterns);
 		if (pieces.length) out.push(...pieces);
 		else out.push(matchModel(line, catalog));
 	}
@@ -188,7 +188,6 @@ function joinEquipment(pieces) {
 	const next = pieces.map((p) => p.trim()).filter(Boolean);
 	return next.length ? next.join("\n") : null;
 }
-/** Repair names that were split on a model slash (GB/5, A/2, 1L/2U). */
 function rejoinSplitModels(pieces, catalogKey) {
 	if (pieces.length < 2) return pieces;
 	const out = [];
@@ -325,7 +324,7 @@ function rewriteEquipmentName(raw, from, to, catalog = []) {
 	const lines = raw.split(/\r?\n/);
 	let lineHit = false;
 	const mapped = lines.map((line) => {
-		const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9\-]+/gi, " ").replace(/\s+/g, " ").trim();
+		const stripped = line.replace(/\bSN\s*:?\s*[A-Z0-9-]+/gi, " ").replace(/\s+/g, " ").trim();
 		if (samePiece(line, src) || samePiece(stripped, src)) {
 			lineHit = true;
 			return dest;
@@ -345,11 +344,19 @@ function catalogModels(models) {
 function findRecipeFor(recipes, opts) {
 	const modelKey = opts.model.toLowerCase();
 	const custKey = opts.customer.trim().toLowerCase();
-	const house = recipes.find((r) => !r.customer && r.equipmentModel.toLowerCase() === modelKey) ?? null;
+	const byDefault = (a, b) => Number(!!a.name) - Number(!!b.name);
+	const sameModel = recipes.filter((r) => r.equipmentModel.toLowerCase() === modelKey).sort(byDefault);
+	const picked = opts.recipeId ? recipes.find((r) => r.id === opts.recipeId) ?? null : null;
+	const house = (picked && !picked.customer ? picked : null) ?? sameModel.find((r) => !r.customer) ?? null;
 	return {
-		linked: (opts.installId ? recipes.find((r) => r.installId === opts.installId && r.equipmentModel.toLowerCase() === modelKey) : void 0) ?? recipes.find((r) => !!r.customer && r.customer.toLowerCase() === custKey && r.equipmentModel.toLowerCase() === modelKey) ?? null,
+		linked: (picked && picked.customer ? picked : null) ?? (opts.installId ? sameModel.find((r) => r.installId === opts.installId) : void 0) ?? sameModel.find((r) => !!r.customer && r.customer.toLowerCase() === custKey) ?? null,
 		house
 	};
+}
+/** "Morning blend", or the model when the recipe has no name of its own. */
+function recipeLabel(r, withModel = false) {
+	const base = r.name?.trim() || "Standard";
+	return withModel ? `${base} · ${r.equipmentModel}` : base;
 }
 function piecesForInstall(equipment, _customer, _installId, catalog, _recipes) {
 	return parseInstallEquipment(equipment, catalog);
@@ -372,10 +379,12 @@ function parseMachinesJson(raw) {
 			const rec = row;
 			const equipment = String(rec.equipment ?? "").trim();
 			if (!equipment) continue;
+			const rid = Number(rec.recipeId);
 			out.push({
 				equipment,
 				serial: String(rec.serial ?? "").trim(),
-				powerVoltage: String(rec.powerVoltage ?? "").trim()
+				powerVoltage: String(rec.powerVoltage ?? "").trim(),
+				recipeId: Number.isFinite(rid) && rid > 0 ? rid : null
 			});
 		}
 		return out;
@@ -398,7 +407,8 @@ function mergeMachineSpecs(names, previous = [], legacy) {
 		return {
 			equipment,
 			serial: hit?.serial ?? "",
-			powerVoltage: hit?.powerVoltage ?? ""
+			powerVoltage: hit?.powerVoltage ?? "",
+			recipeId: hit?.recipeId ?? null
 		};
 	});
 	if (!(fromJson.length > 0) && specs.length === 1) {
@@ -412,7 +422,8 @@ function serializeMachines(specs) {
 	const clean = specs.map((s) => ({
 		equipment: s.equipment.trim(),
 		serial: s.serial.trim(),
-		powerVoltage: s.powerVoltage.trim()
+		powerVoltage: s.powerVoltage.trim(),
+		...s.recipeId ? { recipeId: s.recipeId } : {}
 	})).filter((s) => s.equipment);
 	if (!clean.length) return {
 		equipment: null,
@@ -441,4 +452,4 @@ function specsFromInstall(equipment, serial, powerVoltage, machines, catalog = [
 	});
 }
 //#endregion
-export { catalogModels as a, listedEquipment as c, rewriteEquipmentName as d, samePiece as f, specsFromInstall as i, matchModel as l, parseMachinesJson as n, dropEquipment as o, shortEquipLabel as p, serializeMachines as r, findRecipeFor as s, mergeMachineSpecs as t, piecesForInstall as u };
+export { catalogModels as a, listedEquipment as c, recipeLabel as d, rewriteEquipmentName as f, specsFromInstall as i, matchModel as l, shortEquipLabel as m, parseMachinesJson as n, dropEquipment as o, samePiece as p, serializeMachines as r, findRecipeFor as s, mergeMachineSpecs as t, piecesForInstall as u };

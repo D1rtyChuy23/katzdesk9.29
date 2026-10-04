@@ -1,6 +1,6 @@
 import { r as __exportAll } from "../_runtime.mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 import { a as deskMiddleware, b as flagOn } from "./access.mjs";
 //#region src/lib/ops/mentions.ts
 /** @username tokens in a ping or handoff note. */
@@ -32,9 +32,118 @@ var notify_exports = /* @__PURE__ */ __exportAll({
 	listNotifications: () => listNotifications,
 	listTeammates: () => listTeammates,
 	markNotificationRead: () => markNotificationRead,
+	notifyAdminsModuleReturn: () => notifyAdminsModuleReturn,
 	notifyAdminsRackReview: () => notifyAdminsRackReview,
+	notifyAdminsStockRequest: () => notifyAdminsStockRequest,
 	sendPing: () => sendPing
 });
+function kindFor(type) {
+	switch (type) {
+		case "service":
+		case "tlc":
+		case "pm": return "ticket";
+		case "install": return "install";
+		case "handoff": return "handoff";
+		case "asset":
+		case "location":
+		case "module": return "warehouse";
+		case "customer": return "customer";
+		case "deal": return "deal";
+		case "rebuild": return "rebuild";
+		default: return "other";
+	}
+}
+/**
+* Resolve every ping to a record that still exists — the record itself, else its account,
+* else the board it came from. One query per record type, so the 8-second refresh stays cheap.
+*/
+async function resolveTargets(sql, rows) {
+	const idsOf = (...types) => [...new Set(rows.filter((r) => r.entity_type && types.includes(r.entity_type) && r.entity_id).map((r) => Number(r.entity_id)))];
+	async function lookup(q, ids) {
+		if (!ids.length) return /* @__PURE__ */ new Map();
+		try {
+			const found = await sql.query(q, [ids]);
+			return new Map(found.map((f) => [Number(f.id), f]));
+		} catch {
+			return /* @__PURE__ */ new Map();
+		}
+	}
+	const jobs = await lookup("select id, kind from service_jobs where id = any($1)", idsOf("service", "tlc"));
+	const pms = await lookup("select id from pm_jobs where id = any($1)", idsOf("pm"));
+	const installs = await lookup("select id from installs where id = any($1) and archived = false", idsOf("install"));
+	const deals = await lookup("select id from deals where id = any($1) and archived = false", idsOf("deal"));
+	const rebuilds = await lookup("select id from rebuilds where id = any($1) and archived = false", idsOf("rebuild"));
+	const assets = await lookup("select id, site from assets where id = any($1)", idsOf("asset"));
+	const mods = await lookup("select id from modules where id = any($1)", idsOf("module"));
+	const custIds = await lookup("select id from directory_customers where id = any($1) and archived = false", idsOf("customer"));
+	const names = [...new Set(rows.map((r) => (r.customer ?? "").trim().toLowerCase()).filter(Boolean))];
+	const byName = /* @__PURE__ */ new Map();
+	if (names.length) try {
+		const found = await sql.query("select id, lower(name) as key from directory_customers where lower(name) = any($1) and archived = false", [names]);
+		for (const f of found) byName.set(f.key, Number(f.id));
+	} catch {}
+	return rows.map((r) => {
+		const id = r.entity_id ? Number(r.entity_id) : null;
+		const t = r.entity_type;
+		if (id) {
+			if ((t === "service" || t === "tlc") && jobs.has(id)) return {
+				type: jobs.get(id).kind === "tlc" ? "tlc" : "service",
+				id
+			};
+			if (t === "pm" && pms.has(id)) return {
+				type: "pm",
+				id
+			};
+			if (t === "install" && installs.has(id)) return {
+				type: "install",
+				id
+			};
+			if (t === "deal" && deals.has(id)) return {
+				type: "deal",
+				id
+			};
+			if (t === "rebuild" && rebuilds.has(id)) return {
+				type: "rebuild",
+				id
+			};
+			if (t === "customer" && custIds.has(id)) return {
+				type: "customer",
+				id
+			};
+			if (t === "module" && mods.has(id)) return {
+				type: "module",
+				id
+			};
+			if (t === "asset" && assets.has(id)) {
+				const site = assets.get(id).site;
+				return {
+					type: site === "barn-back" || site === "barn-front" ? "asset" : "location",
+					id
+				};
+			}
+		}
+		if (t === "handoff") return {
+			type: "handoff",
+			id: null
+		};
+		const acct = byName.get((r.customer ?? "").trim().toLowerCase());
+		if (acct) return {
+			type: "customer",
+			id: acct,
+			fallback: !!t && t !== "customer"
+		};
+		if (t === "asset") return {
+			type: "asset",
+			id: null,
+			fallback: true
+		};
+		if (!t) return {
+			type: "handoff",
+			id: null
+		};
+		return null;
+	});
+}
 async function ensureTable(sql) {
 	await sql.query(`
     create table if not exists desk_notifications (
@@ -102,6 +211,47 @@ async function notifyAdminsRackReview(sql, fromUserId, asset) {
 			who,
 			body,
 			asset.slot,
+			asset.id
+		]);
+	}
+}
+/** Tell every admin that Warehouse asked to bring an assigned Eversys module back to HQ. */
+async function notifyAdminsModuleReturn(sql, fromUserId, mod) {
+	await ensureTable(sql);
+	const who = (await sql.query("select username from desk_accounts where user_id = $1", [fromUserId]))[0]?.username || "Warehouse";
+	const body = `Pending module return. ${who} wants ${mod.moduleType ?? "module"} ${mod.moduleId} back at HQ from ${mod.customer || "an account"}.`;
+	const admins = await sql.query("select user_id, is_admin, approved from desk_accounts where user_id <> $1", [fromUserId]);
+	for (const admin of admins) {
+		if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
+		await sql.query(`insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
+       values ($1, $2, $3, $4, $5, 'module', $6)`, [
+			admin.user_id,
+			fromUserId,
+			who,
+			body,
+			mod.customer,
+			mod.id
+		]);
+	}
+}
+/** Tell every admin that Warehouse asked to remove a unit or send it to a customer. */
+async function notifyAdminsStockRequest(sql, fromUserId, asset) {
+	await ensureTable(sql);
+	const row = (await sql.query("select is_admin, desk_role, username from desk_accounts where user_id = $1", [fromUserId]))[0];
+	if (!row || flagOn(row.is_admin) || row.desk_role !== "warehouse") return;
+	const who = row.username || "Warehouse";
+	const serial = asset.serial?.trim() ? ` SN ${asset.serial.trim()}` : "";
+	const body = asset.kind === "remove" ? `Pending removal. ${who} asked to remove ${asset.model}${serial} from ${asset.slot}. Reason: ${asset.reason || "—"}.` : `Pending customer assign. ${who} wants ${asset.model}${serial} from ${asset.slot} to go to ${asset.customer || "an account"}.`;
+	const admins = await sql.query("select user_id, is_admin, approved from desk_accounts where user_id <> $1", [fromUserId]);
+	for (const admin of admins) {
+		if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
+		await sql.query(`insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
+       values ($1, $2, $3, $4, $5, 'asset', $6)`, [
+			admin.user_id,
+			fromUserId,
+			who,
+			body,
+			asset.kind === "assign" ? asset.customer ?? asset.slot : asset.slot,
 			asset.id
 		]);
 	}
@@ -194,21 +344,35 @@ var listTeammates = createServerFn({ method: "GET" }).middleware([deskMiddleware
 var listNotifications = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }) => {
 	const sql = await getSql();
 	await ensureTable(sql);
-	return (await sql.query(`select id, from_name, body, customer, entity_type, entity_id, comment_id, read, created_at
-       from desk_notifications
-       where user_id = $1
-       order by created_at desc
-       limit 40`, [context.userId])).map((r) => ({
-		id: r.id,
-		fromName: r.from_name,
-		body: r.body,
-		customer: r.customer,
-		entityType: r.entity_type,
-		entityId: r.entity_id,
-		commentId: r.comment_id,
-		read: !!r.read,
-		createdAt: String(r.created_at)
-	}));
+	const rows = await sql.query(`(select id, from_name, body, customer, entity_type, entity_id, comment_id, read, created_at
+          from desk_notifications
+         where user_id = $1 and read = false
+         order by created_at desc
+         limit 300)
+       union all
+       (select id, from_name, body, customer, entity_type, entity_id, comment_id, read, created_at
+          from desk_notifications
+         where user_id = $1 and read = true
+         order by created_at desc
+         limit 80)
+       order by created_at desc`, [context.userId]);
+	const targets = await resolveTargets(sql, rows);
+	return rows.map((r, i) => {
+		const target = targets[i] ?? null;
+		return {
+			id: r.id,
+			fromName: r.from_name,
+			body: r.body,
+			customer: r.customer,
+			entityType: r.entity_type,
+			entityId: r.entity_id,
+			commentId: r.comment_id,
+			read: !!r.read,
+			createdAt: String(r.created_at),
+			target,
+			kind: kindFor(target && !target.fallback ? target.type : r.entity_type ?? target?.type)
+		};
+	});
 });
 var sendPing = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ context, data }) => {
 	return deliverPings(await getSql(), {
@@ -229,4 +393,4 @@ var markNotificationRead = createServerFn({ method: "POST" }).middleware([deskMi
 	return { ok: true };
 });
 //#endregion
-export { notifyAdminsRackReview as a, applyMention as c, markNotificationRead as i, mentionFragment as l, listNotifications as n, notify_exports as o, listTeammates as r, sendPing as s, deliverPings as t, parseMentions as u };
+export { notifyAdminsModuleReturn as a, notify_exports as c, mentionFragment as d, parseMentions as f, markNotificationRead as i, sendPing as l, listNotifications as n, notifyAdminsRackReview as o, listTeammates as r, notifyAdminsStockRequest as s, deliverPings as t, applyMention as u };
