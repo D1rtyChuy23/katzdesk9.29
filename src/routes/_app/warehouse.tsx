@@ -896,7 +896,8 @@ function AddDialog({
   slot: SlotKey | null;
   onCreated: (row: Asset) => Promise<void>;
 }) {
-  const pallets = BACK_PALLETS;
+  // The Front rack only has bays I–P.
+  const pallets = rack === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
   const [pending, setPending] = useState(false);
   const [model, setModel] = useState("");
   const [owned, setOwned] = useState("");

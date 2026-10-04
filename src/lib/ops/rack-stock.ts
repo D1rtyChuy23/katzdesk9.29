@@ -5,7 +5,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { serialKey } from "@/lib/ops/account-equip";
 import { notifyAdminsRackReview } from "@/lib/ops/notify";
-import { LEVELS, isValidBay, sectionFullMessage, slotId } from "@/lib/ops/warehouse";
+import { LEVELS, rackBayError, sectionFullMessage, slotId } from "@/lib/ops/warehouse";
 
 type Rack = "barn-back" | "barn-front";
 
@@ -157,9 +157,8 @@ export const addToRackSlot = createServerFn({ method: "POST" })
     const site = rackOf(data.site);
     const pallet = data.pallet.trim().toUpperCase();
     const level = levelOf(data.level);
-    if (!isValidBay(pallet)) {
-      throw new Error("Pick a bay A through P");
-    }
+    const bayErr = rackBayError(site, pallet);
+    if (bayErr) throw new Error(bayErr);
     const slot = slotId(pallet, level);
     const serial = data.serial?.trim() || "";
     const electrical = data.electrical?.trim() || null;

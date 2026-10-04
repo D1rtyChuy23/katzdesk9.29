@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { lookupUnitPlace, setAssetPlace, setUnitPlace } from "@/lib/ops/unit-place";
-import { BACK_PALLETS, LEVELS } from "@/lib/ops/warehouse";
-import { PLACE_CHOICES, isRackPlace, placeDraftError } from "@/lib/ops/unit-place-rules";
+import { LEVELS, palletsFor, rackBayError } from "@/lib/ops/warehouse";
+import { Lock } from "lucide-react";
+import { PLACE_CHOICES, isRackPlace, placeDraftError, placeMove } from "@/lib/ops/unit-place-rules";
 import { serialKey } from "@/lib/ops/account-equip";
 import { Input, Label } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
@@ -41,7 +42,8 @@ export function PlacePicker({
             const keepSlot = rack && nextRack;
             onChange({
               site,
-              pallet: keepSlot ? value.pallet : "",
+              // The Front rack only has bays I–P: a Back rack bay A–H doesn't carry over.
+              pallet: keepSlot && !rackBayError(site, value.pallet) ? value.pallet : "",
               level: keepSlot ? value.level : "",
               otherLabel: "",
             });
@@ -67,7 +69,7 @@ export function PlacePicker({
               onChange={(e) => onChange({ ...value, pallet: e.target.value })}
             >
               <option value="">Bay</option>
-              {BACK_PALLETS.map((p) => (
+              {palletsFor(value.site).map((p) => (
                 <option key={p} value={p}>
                   {p}
                 </option>
@@ -115,7 +117,12 @@ export function UnitPlaceField({
   draft,
   onDraft,
   compact = false,
+  status,
+  placeLabel,
 }: {
+  /** Known status and place of the unit, when the caller already has the record. */
+  status?: string | null;
+  placeLabel?: string | null;
   serial?: string;
   model?: string | null;
   assetId?: number;
@@ -171,6 +178,23 @@ export function UnitPlaceField({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not set location"),
   });
   const bound = !!onDraft;
+  // Assigned to an account or sold: it is an asset at that site or customer, so the place is locked.
+  const unitStatus = status ?? (lookup.data?.found ? lookup.data.status : null);
+  if (unitStatus && placeMove({ status: unitStatus }) === "blocked") {
+    const where = placeLabel ?? lookup.data?.place ?? "an account";
+    return (
+      <div className={compact ? "col-span-2 min-w-0 lg:col-span-1" : undefined} data-testid="unit-place-locked">
+        {compact ? <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Location</p> : <Label>Location</Label>}
+        <p className="mt-1 flex items-start gap-1.5 text-sm font-medium">
+          <Lock className="mt-0.5 size-3.5 shrink-0 text-copper" aria-hidden="true" />
+          <span className="min-w-0 break-words">{where}</span>
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          Locked. {unitStatus === "sold" ? "Sold" : "Assigned"} — an asset at that site or customer. Return it to the barn to move it.
+        </p>
+      </div>
+    );
+  }
   if (compact) {
     return (
       <div className="col-span-2 min-w-0 lg:col-span-1">

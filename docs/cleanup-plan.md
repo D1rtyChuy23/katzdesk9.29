@@ -221,3 +221,25 @@ Two findings in section 2 were wrong. They are left above as written and correct
 
 - **Warehouse Units and the inspection serial line on the install sheet.** Serial still appears there as well as on the machine block. Removing either changes how a unit is pulled or picked, which is a workflow rule, not a display one.
 - **Recipe matching is by exact model name.** A template saved under a slightly different spelling of the model will no longer be offered on that machine.
+
+---
+
+## 6. Follow-Up: Front Rack Bays And Locked Units
+
+Answers received: the Front rack is bays **I–P**. A unit assigned to an account is **locked**: it is an asset at that site or customer.
+
+### Front rack bays (plan item 7) — done
+
+- Every bay picker now offers I–P on the Front rack and A–P on the Back rack: the shared place picker, Return To Barn on a unit, and Add To Rack.
+- The server refuses a Front rack bay A–H on every path that places a unit (`rackBayError` in `warehouse.ts`).
+- Checked against the running app: adding to Front · A is refused; a unit moved Front · K → Back · B, was refused Back → Front · C, and moved Back → Front · K; a section held 9 units.
+- Not changed: any unit already saved on Front · A–H keeps its label but still has no cell on the Front board. None exist in the local data; production was not looked at.
+
+### Locked when assigned — done
+
+- Found: `assignAssetToInstall` let a unit that was already assigned to one account be assigned to another install. The other paths (service, serial pull, place moves) already refused. It now refuses with "already assigned to <account>. Return it to the barn before assigning it again."
+- Where a unit's Location is shown, an assigned or sold unit now shows its account with a lock and no picker, instead of a picker that failed on save.
+- Returning a unit (Return To Warehouse on the unit, or removing it from the install) still unlocks it. Mark Sold is unchanged.
+- Left as is: Rebuilds can reuse a serial assigned elsewhere after an explicit "confirm reuse". That is an existing, deliberate rule.
+
+After this change: all 18 routes load; typecheck, lint and build pass; tests are 156 passing, 9 failing (the same 9).

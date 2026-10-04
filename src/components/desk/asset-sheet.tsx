@@ -9,7 +9,7 @@ import {
   updateAsset,
 } from "@/lib/ops/api";
 import {
-  BACK_PALLETS,
+  palletsFor,
   LEVELS,
   SITE_LABEL,
   bayFor,
@@ -126,7 +126,8 @@ export function AssetSheet({
   });
 
   const queue = (installs.data ?? []).filter((i) => isOpenInstall(i));
-  const pallets = BACK_PALLETS;
+  // The Front rack only has bays I–P.
+  const pallets = palletsFor(retSite);
   const bay = asset ? bayFor(asset.site, asset.pallet) : "general";
 
   return (
@@ -355,6 +356,15 @@ export function AssetSheet({
                     model={asset.model}
                     draft={place}
                     onDraft={setPlace}
+                    status={asset.status}
+                    placeLabel={unitPlaceLabel({
+                      site: asset.site,
+                      pallet: asset.pallet,
+                      level: asset.level,
+                      status: asset.status,
+                      soldTo: asset.soldTo,
+                      purpose: asset.purpose,
+                    })}
                   />
                 </div>
                 ) : asset.stockHold ? (
@@ -376,7 +386,11 @@ export function AssetSheet({
                 <div className="grid grid-cols-3 gap-2">
                   <SelectField
                     value={retSite}
-                    onChange={(e) => setRetSite(e.target.value as "barn-back" | "barn-front")}
+                    onChange={(e) => {
+                      const next = e.target.value as "barn-back" | "barn-front";
+                      setRetSite(next);
+                      if (!(palletsFor(next) as readonly string[]).includes(retPallet)) setRetPallet(palletsFor(next)[0]!);
+                    }}
                   >
                     <option value="barn-back">Back rack</option>
                     <option value="barn-front">Front rack</option>
@@ -501,7 +515,11 @@ export function AssetSheet({
                 <div className="grid grid-cols-3 gap-2">
                   <SelectField
                     value={retSite}
-                    onChange={(e) => setRetSite(e.target.value as "barn-back" | "barn-front")}
+                    onChange={(e) => {
+                      const next = e.target.value as "barn-back" | "barn-front";
+                      setRetSite(next);
+                      if (!(palletsFor(next) as readonly string[]).includes(retPallet)) setRetPallet(palletsFor(next)[0]!);
+                    }}
                   >
                     <option value="barn-back">Back rack</option>
                     <option value="barn-front">Front rack</option>

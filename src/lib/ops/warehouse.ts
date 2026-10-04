@@ -77,6 +77,18 @@ export function isValidBay(pallet: string | null | undefined): boolean {
   return c.length === 1 && BAY_LETTERS.includes(c);
 }
 
+/**
+ * Why this bay can't be used on this rack, or null when it can.
+ * The Back rack has bays A–P. The Front rack is shorter: bays I–P only.
+ */
+export function rackBayError(site: string, pallet: string | null | undefined): string | null {
+  const c = (pallet ?? "").trim().toUpperCase();
+  const front = site === "barn-front";
+  if (!isValidBay(c)) return front ? "Pick a bay I through P" : "Pick a bay A through P";
+  if (front && !(FRONT_PALLETS as readonly string[]).includes(c)) return "The Front rack only has bays I through P.";
+  return null;
+}
+
 /** B–Q labels shift one letter down to A–P. Anything else is left as-is. */
 export function shiftLegacyPallet(letter: string | null | undefined): string | null {
   if (letter == null) return null;

@@ -50,6 +50,7 @@ import {
   bayFor,
   isBarn,
   isValidBay,
+  rackBayError,
   needsBay,
   siteLabel,
   slotId,
@@ -1490,7 +1491,8 @@ export const createAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	if (barn) {
 		if (!pallet || !level) throw new Error("Pick a bay and a level");
 		const letter = String(pallet).trim().toUpperCase();
-		if (!isValidBay(letter)) throw new Error("Pick a bay A through P");
+		const bayErr = rackBayError(site, letter);
+		if (bayErr) throw new Error(bayErr);
 		pallet = letter;
 		line = await nextLine(sql, site, letter, Number(level));
 		if (line == null) {
@@ -1600,6 +1602,11 @@ export const assignAssetToInstall = createServerFn({ method: "POST" }).middlewar
 	const inst = (await sql`
       select id, customer from installs where id = ${data.installId}`)[0];
 	if (!inst) throw new Error("Install not found");
+	// Locked: a unit already assigned to an account is an asset at that site until it is returned.
+	if (asset.status === "assigned") {
+		if (asset.install_id === inst.id) return mapAsset(asset);
+		throw new Error(`That unit is already assigned to ${asset.sold_to || "another account"}. Return it to the barn before assigning it again.`);
+	}
 	const originSite = asset.origin_site ?? asset.site;
 	const originPallet = asset.origin_pallet ?? asset.pallet;
 	const originLevel = asset.origin_level ?? asset.level;
@@ -1733,7 +1740,8 @@ export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middlew
 	if (prev.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	const pallet = String(data.pallet || "").trim().toUpperCase();
 	if (data.site !== "barn-back" && data.site !== "barn-front") throw new Error("Pick a rack");
-	if (!isValidBay(pallet)) throw new Error("Pick a bay A through P");
+	const bayErr = rackBayError(data.site, pallet);
+	if (bayErr) throw new Error(bayErr);
 	if (!LEVELS.includes(data.level)) throw new Error("Pick a level");
 	const line = await nextLine(sql, data.site, pallet, data.level, data.id);
 	if (line == null) {

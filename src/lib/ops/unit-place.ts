@@ -10,7 +10,7 @@ import {
   LOCATION_SITES,
   SITE_PURPOSE,
   isBarn,
-  isValidBay,
+  rackBayError,
   sectionFullMessage,
 } from "@/lib/ops/warehouse";
 
@@ -181,7 +181,8 @@ async function parkInBarn(
     throw new Error(`That serial is already allocated${row.sold_to ? ` to ${row.sold_to}` : ""}.`);
   }
   const letter = pallet.trim().toUpperCase();
-  if (!isValidBay(letter)) throw new Error("Pick a bay A through P");
+  const bayErr = rackBayError(rack, letter);
+  if (bayErr) throw new Error(bayErr);
   if (!LEVELS.includes(level as (typeof LEVELS)[number])) throw new Error("Pick a level");
   const same =
     row.site === rack &&
@@ -462,7 +463,8 @@ export const setUnitPlace = createServerFn({ method: "POST" })
         return toPlace(await byId(sql, existing.id));
       }
       const letter = data.pallet.trim().toUpperCase();
-      if (!isValidBay(letter)) throw new Error("Pick a bay A through P");
+      const bayErr = rackBayError(rack, letter);
+      if (bayErr) throw new Error(bayErr);
       await requireStock(sql, context.userId);
       const line = await openLine(sql, rack, letter, level);
       const inserted = await sql.query<{ id: number }>(
