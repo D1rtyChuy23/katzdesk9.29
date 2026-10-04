@@ -5,7 +5,6 @@ import {
   archiveInstall,
   createInstall,
   listAssets,
-  listCustomers,
   listDirectory,
   listInstalls,
   listRecipes,

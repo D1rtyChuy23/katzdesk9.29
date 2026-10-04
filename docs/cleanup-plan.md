@@ -184,3 +184,40 @@ Not planned: plug rules (F6) and pre-inspection photos (F11) already match.
 - **Q2 — Recipe list.** Should a machine only offer templates for its own model, plus that customer's recipes?
 - **Q3 — Plugs above 30A.** 220V 4-wire above 30A is coded as NEMA 14-50 and 3-wire above 30A as NEMA 6-50. Keep, or leave unset for the electrician?
 - **Q4 — Front rack bays.** Is the Front rack physically bays I–P (8 bays), or A–P like the Back rack? If I–P, the picker should stop offering A–H on Front. If A–P, the board and the capacity count need the other 8 bays.
+
+---
+
+## 5. Phase 2 Result
+
+Answers received: Q1 yes, Q2 yes, Q3 yes, Q4 yes. Q3 was read as "keep" (no change either way).
+Q4 was an either/or question, so "yes" does not settle it; item 7 was **not** done.
+
+After the last commit: all 18 routes load with their heading and no page errors; typecheck, lint and build pass; tests are 156 passing, 9 failing (the same 9 as before).
+
+### Corrections to the Phase 1 findings
+
+Two findings in section 2 were wrong. They are left above as written and corrected here.
+
+- **F7 (search list behind the banner) — withdrawn.** The Phase 1 check measured the list's inner content, which scrolls inside the list. Measuring the list box itself: it stays pinned under the search box and on top while the page scrolls. No change made.
+- **F10 (ping gaps) — mostly wrong.** Pings already resolve on the server (`notify.ts`): a unit opens in Warehouse or Locations by where it is now, and a removed record falls back to the account with a message. The same rule was missing from the banner **search**, which is what was fixed.
+
+### What was done, in plan order
+
+| # | Area | Result | Commit |
+| --- | --- | --- | --- |
+| 1 | Banner search list | No change. Not a bug (see correction). | — |
+| 2 | Center bubble scroll | No change. Could not reproduce: a bubble taller than the screen scrolled, the side sheet scrolled, and the page scrolled again after closing, at desktop and phone width. Mouse wheel only; touch drag was not tested. | — |
+| 3 | Hover lift | Whole rows and cards highlight instead of lifting; small controls still lift. Checked on a ticket row. | `b9e497c` |
+| 4 | Pings / search | Search: a unit off the rack opens in Locations. Pings were already correct. Not done: a "not found" message when a stale link names a record that is gone. | `45374f5` |
+| 5a | Pre-inspection machines (Q1) | One inspection machine per piece of equipment, split the same way as the install. The test install went from "0/2" with combined names to three named machines. Existing checks, notes and photos stay on the machine they were saved to; an old combined machine with none is taken off that install's inspection. Pass/fail rules untouched. | `9d123fc` |
+| 5b | Install bubble duplicates | The Equipment chips above the machine blocks are gone; the add box stays and each block has its own remove button. Left as is: the inspection list's serial line and the Warehouse Units list (see below). | `9825ff2` |
+| 6 | Recipes (Q2) | House templates are limited to the machine's model; the customer's own recipes are still offered; a recipe already picked stays listed. The row chip now opens the install instead of a second editor. | `9825ff2`, `24b0bfe` |
+| 7 | Warehouse Front rack bays | **Not done — Q4 unanswered.** | — |
+| 8 | Library split | Seeded an old-style family book holding two spec sheets and a manual; on load each sheet went to its own model and the manual followed its name. No code change. | — |
+| 9 | Modules, spec image | Modules: Available (HQ) / Assigned / All filters present. Assigned-row fading was not looked at in this pass. Spec image: not re-run; unchanged since it was built. | — |
+| 10 | Titles | All 18 headings are Title Case. One Katz Desk wordmark shows at a time (side menu on desktop, banner on phone). | — |
+
+### Left unchanged on purpose
+
+- **Warehouse Units and the inspection serial line on the install sheet.** Serial still appears there as well as on the machine block. Removing either changes how a unit is pulled or picked, which is a workflow rule, not a display one.
+- **Recipe matching is by exact model name.** A template saved under a slightly different spelling of the model will no longer be offered on that machine.
