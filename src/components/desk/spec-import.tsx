@@ -597,8 +597,9 @@ export function SpecEditor({
                         onChange={(e) => setReq("power", "wires", e.target.value)}
                       >
                         <option value="">Not stated</option>
-                        <option value={WIRES_3}>3-wire — 2 hots, ground (L6)</option>
-                        <option value={WIRES_4}>4-wire — 2 hots, neutral, ground (L14)</option>
+                        {/* Wire count only. The plug family (L6 / L14) is decided on the Plug field from wires and volts. */}
+                        <option value={WIRES_3}>3-wire — 2 hots, ground</option>
+                        <option value={WIRES_4}>4-wire — 2 hots, neutral, ground</option>
                       </select>
                     </div>
                   ) : (
