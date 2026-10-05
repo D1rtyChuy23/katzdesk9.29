@@ -16,8 +16,9 @@ import {
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { chipForDoc, docVariation, familyOf, fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { pdfImages } from "@/lib/pdf-text";
+import { isGrinder } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,8 @@ function Page() {
   const [busy, setBusy] = useState<{ section: LibrarySection; text: string } | null>(null);
   const [problems, setProblems] = useState<string[]>([]);
   const [ask, setAsk] = useState<Ask | null>(null);
+  // The document's first word names a model with no chip yet: confirm before a chip is made.
+  const [askNew, setAskNew] = useState<{ fileName: string; maker: string; word: string; open: LibraryBook | null; resolve: (r: "create" | "open" | "pick" | null) => void } | null>(null);
   const [askType, setAskType] = useState<{ fileName: string; resolve: (t: ManualType | null) => void } | null>(null);
   const [typing, setTyping] = useState<LibraryFile | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -125,7 +128,28 @@ function Page() {
         }
       }
       const shelf = section;
-      let target = into ?? matchBook(file.name, known);
+      // The first word of the document is the model variation. Same name → that chip, whichever model is open.
+      // A different name → a new chip (confirmed first), never merged into a nearby model.
+      const doc = docVariation(file.name, known.map((b) => b.manufacturer));
+      const maker = doc?.maker ?? into?.manufacturer ?? null;
+      let target: LibraryBook | null = chipForDoc(file.name, known, maker);
+      if (!target && doc?.word && maker) {
+        const answer = await new Promise<"create" | "open" | "pick" | null>((resolve) => setAskNew({ fileName: file.name, maker, word: doc.word, open: into ?? null, resolve }));
+        setAskNew(null);
+        if (answer === null) {
+          errors.push(`${file.name} was skipped — no model chosen.`);
+          continue;
+        }
+        if (answer === "create") {
+          try {
+            target = await createLibraryBook({ data: { manufacturer: maker, model: doc.word } });
+            if (!known.some((b) => b.id === target!.id)) known = [...known, target];
+          } catch (e) {
+            errors.push(`${file.name}: ${e instanceof Error ? e.message : "the model could not be added"}`);
+            continue;
+          }
+        } else if (answer === "open") target = into ?? null;
+      } else if (!target) target = into ?? matchBook(file.name, known);
       if (!target) {
         target = await new Promise<LibraryBook | null>((resolve) => setAsk({ kind: "file", fileName: file.name, section: shelf, resolve }));
         setAsk(null);
@@ -304,6 +328,12 @@ function Page() {
   const activeMaker = wanted && makers.includes(wanted) ? wanted : null;
   const models = shownBooks.filter((b) => b.manufacturer === activeMaker);
   const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : models[0] ?? null;
+  // Maker → family → variation. A family is the model's first word (Axiom, G9, ITCB); its chips never mix with another family's.
+  const familyKey = (b: LibraryBook) => nameKey(familyOf(b.title, b.manufacturer));
+  const families = [...new Map(models.map((m) => [familyKey(m), familyOf(m.title, m.manufacturer)])).entries()]
+    .map(([key, name]) => ({ key, name, books: models.filter((m) => familyKey(m) === key) }))
+    .sort((x, y) => x.name.localeCompare(y.name, "en", { sensitivity: "base", numeric: true }));
+  const family = current ? families.find((f) => f.key === familyKey(current)) ?? null : null;
   const inside = current ? inBook(current.id) : null;
   return (
     <div>
@@ -389,7 +419,10 @@ function Page() {
                   The Library
                 </button>
                 <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
-                <h2 className="font-display text-xl font-medium">{activeMaker}</h2>
+                <h2 className="font-display text-xl font-medium" data-testid="open-family-title">
+                  {activeMaker}
+                  {family ? ` · ${family.name}` : ""}
+                </h2>
                 <span className="sr-only" data-testid="open-book-title">{current.title}</span>
                 {canEdit ? (
                   <Button type="button" size="sm" variant={manage ? "secondary" : "ghost"} className="ml-auto" aria-pressed={manage} onClick={() => setManage(!manage)} data-testid="manage">
@@ -397,8 +430,33 @@ function Page() {
                   </Button>
                 ) : null}
               </div>
-              <div className="mt-2 mb-3 flex flex-wrap gap-2" role="radiogroup" aria-label={`${activeMaker} models`} data-testid="model-chips">
-                {models.map((m) => (
+              <p className="mt-2 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Family</p>
+              <div className="mt-1.5 flex flex-wrap gap-2" role="radiogroup" aria-label={`${activeMaker} families`} data-testid="family-chips">
+                {families.map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={f.key === family?.key}
+                    className={cn(
+                      "h-11 rounded-full border px-4 text-sm font-medium",
+                      f.key === family?.key ? "border-ink bg-ink text-cream" : "border-border bg-background hover:border-primary/50",
+                    )}
+                    data-testid="family-chip"
+                    data-family={f.name}
+                    onClick={() => {
+                      setMode("browse");
+                      go({ book: f.books[0]!.id });
+                    }}
+                  >
+                    {f.name}
+                    {f.books.length > 1 ? <span className="ml-1.5 text-xs opacity-60">{f.books.length}</span> : null}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">{family?.name} Variations</p>
+              <div className="mt-1.5 mb-3 flex flex-wrap gap-2" role="radiogroup" aria-label={`${family?.name ?? activeMaker} variations`} data-testid="model-chips">
+                {(family?.books ?? []).map((m) => (
                   <button
                     key={m.id}
                     type="button"
@@ -432,7 +490,8 @@ function Page() {
                               onClick={() => go({ book: current.id, open: selected?.id === s.id ? undefined : s.id })}
                               data-testid="shelf-specs-open"
                             >
-                              {inside.sheets.length > 1 ? `${s.model}: ` : ""}Power, Water, Plug, Size
+                              {inside.sheets.length > 1 ? `${s.model}: ` : ""}
+                              {isGrinder(s) ? "Power, Plug, Size" : "Power, Water, Plug, Size"}
                             </button>
                             {selected?.id === s.id ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
                             {manage ? (
@@ -535,11 +594,38 @@ function Page() {
         </section>
       ) : null}
 
-      <Dialog open={adding && !ask && !askType} onOpenChange={(o) => !o && !busy && setAdding(false)}>
+      <Dialog open={!!askNew} onOpenChange={(o) => !o && askNew?.resolve(null)}>
+        <DialogContent data-testid="new-chip-dialog">
+          <DialogTitle>
+            New Model: {askNew?.maker} · {askNew?.word}
+          </DialogTitle>
+          <DialogDescription>
+            {askNew?.fileName} starts with {askNew?.word}, and {askNew?.maker} has no model with that name. Add it as its own chip, or file this under a model that is already there.
+          </DialogDescription>
+          <div className="mt-4 grid gap-2">
+            <Button type="button" className="h-11 justify-start" onClick={() => askNew?.resolve("create")} data-testid="new-chip-create">
+              <Plus className="size-4" /> Add {askNew?.word} As A New Chip
+            </Button>
+            {askNew?.open ? (
+              <Button type="button" variant="outline" className="h-11 justify-start" onClick={() => askNew.resolve("open")} data-testid="new-chip-open">
+                File Under {modelLabel(askNew.open.title, askNew.open.manufacturer)} (Open Now)
+              </Button>
+            ) : null}
+            <Button type="button" variant="outline" className="h-11 justify-start" onClick={() => askNew?.resolve("pick")} data-testid="new-chip-pick">
+              Pick Another Model
+            </Button>
+            <Button type="button" variant="ghost" className="w-fit" onClick={() => askNew?.resolve(null)}>
+              Skip This File
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={adding && !ask && !askType && !askNew} onOpenChange={(o) => !o && !busy && setAdding(false)}>
         <DialogContent data-testid="add-dialog">
           <DialogTitle>Add Files</DialogTitle>
           <DialogDescription>
-            Drop a file on its type, or click to choose. It is filed under the maker and model in its name; if that isn't clear, you pick. {DROP_RULES}
+            Drop a file on its type, or click to choose. The first word of the file name is the model it is filed under; a new name makes a new chip, and if the name isn't clear, you pick. {DROP_RULES}
           </DialogDescription>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             {TYPES.map((t) => (

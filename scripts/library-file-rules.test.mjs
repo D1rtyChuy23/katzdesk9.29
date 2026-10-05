@@ -174,3 +174,49 @@ test("a manual is filed as Variation - Type and never as a parts book", () => {
   assert.equal(manualTypeFromName("Axiom Illustrated Parts Catalog.pdf"), null);
   assert.equal(shelfFileName("Bunn Axiom", "manuals", "x.pdf", [], "Parts Diagram"), "Bunn Axiom - Manual.pdf");
 });
+
+import { chipForDoc, docVariation, familyOf, nameKey } from "../src/lib/ops/library-file-rules.ts";
+
+const bunn = [
+  { id: 1, title: "BUNN Axiom", manufacturer: "BUNN" },
+  { id: 2, title: "BUNN Axiom-15-3", manufacturer: "BUNN" },
+  { id: 3, title: "BUNN Axiom-DV-APS", manufacturer: "BUNN" },
+  { id: 4, title: "BUNN Axiom-Twin-APS", manufacturer: "BUNN" },
+  { id: 5, title: "BUNN G9-2T HD Stainless", manufacturer: "BUNN" },
+  { id: 6, title: "BUNN ITCB", manufacturer: "BUNN" },
+  { id: 7, title: "BUNN Nitron", manufacturer: "BUNN" },
+];
+
+test("the family is the model's first word, up to the first dash or space", () => {
+  assert.equal(familyOf("BUNN Axiom-DV-APS", "BUNN"), "Axiom");
+  assert.equal(familyOf("BUNN Axiom", "BUNN"), "Axiom");
+  assert.equal(familyOf("BUNN G9-2T HD Stainless", "BUNN"), "G9");
+  assert.equal(familyOf("BUNN Nitron", "BUNN"), "Nitron");
+  assert.equal(familyOf("Bunn Axiom 15-3 DV", "Bunn"), "Axiom");
+  assert.equal(nameKey("Axiom DV APS"), nameKey("axiom-dv-aps"));
+});
+
+test("the first word of the document is the variation", () => {
+  assert.deepEqual(docVariation("Axiom-DV-APS cleaning guide.pdf"), { word: "Axiom-DV-APS", maker: null });
+  assert.deepEqual(docVariation("Bunn Axiom-35-3 manual.pdf", ["BUNN"]), { word: "Axiom-35-3", maker: "BUNN" });
+  assert.equal(docVariation("41234.0001 rev C.pdf"), null);
+  assert.equal(docVariation("Manual for the brewer.pdf"), null);
+  assert.equal(docVariation("2024-03 scan.pdf"), null);
+});
+
+test("same variation name → same chip; a different name → no chip (a new one is made)", () => {
+  assert.equal(chipForDoc("Axiom-DV-APS programming.pdf", bunn, "BUNN")?.id, 3);
+  assert.equal(chipForDoc("axiom dv aps spec sheet.pdf", bunn, "BUNN")?.id, 3);
+  assert.equal(chipForDoc("Axiom user guide.pdf", bunn, "BUNN")?.id, 1);
+  assert.equal(chipForDoc("Nitron user guide.pdf", bunn, "BUNN")?.id, 7);
+  assert.equal(chipForDoc("G9-2T HD Stainless spec.pdf", bunn, "BUNN")?.id, 5);
+  // Never merged into a nearby model.
+  assert.equal(chipForDoc("Axiom-35-3 cleaning guide.pdf", bunn, "BUNN"), null);
+  assert.equal(chipForDoc("Axiom-DV cleaning guide.pdf", bunn, "BUNN"), null);
+  assert.equal(chipForDoc("G9 parts.pdf", bunn, "BUNN"), null);
+  assert.equal(chipForDoc("FPG manual.pdf", bunn, "BUNN"), null);
+  // Maker in the name.
+  assert.equal(chipForDoc("Bunn Axiom-Twin-APS manual.pdf", bunn)?.id, 4);
+  // Not a model name.
+  assert.equal(chipForDoc("41234.0001 rev C.pdf", bunn, "BUNN"), null);
+});

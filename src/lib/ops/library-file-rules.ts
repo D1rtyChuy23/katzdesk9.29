@@ -237,3 +237,68 @@ export function shortDocName(name: string, bookTitle: string): string {
   const prefix = `${clean(bookTitle)} - `;
   return stem.toLowerCase().startsWith(prefix.toLowerCase()) ? stem.slice(prefix.length) : stem;
 }
+
+// ---- Family → variation, and filing by the document's first word ----
+
+/** "Axiom-DV-APS" and "axiom dv aps" are the same name. */
+export const nameKey = (v: string) => v.toLowerCase().replace(/[\s_\-–]+/g, "-").replace(/^-+|-+$/g, "");
+
+/**
+ * The family a model sits under: its first word, up to the first dash or space.
+ * "Axiom-DV-APS" → "Axiom"; "G9-2T HD Stainless" → "G9"; "ITCB-DV" → "ITCB"; "Nitron" → "Nitron".
+ */
+export function familyOf(title: string, maker: string): string {
+  const model = modelLabel(title, maker);
+  return model.split(/[\s\-–_]+/).filter(Boolean)[0] ?? model;
+}
+
+/** Words that open a file name without naming a model. */
+const NOT_A_MODEL = new Set([
+  "manual", "manuals", "spec", "specs", "specification", "specifications", "sheet", "parts", "part", "user", "users", "owner", "owners", "cleaning", "installation",
+  "install", "operating", "operation", "programming", "service", "repair", "guide", "the", "a", "an", "new", "copy", "scan", "scanned", "doc", "document", "final", "rev", "img", "image", "untitled",
+]);
+
+/**
+ * The model variation a document names: its first word. A leading maker ("Bunn Axiom-DV-APS manual.pdf") is skipped.
+ * Null when the first word is not a model name — a part number, a date, or a word like "Manual".
+ */
+export function docVariation(fileName: string, makers: string[] = []): { word: string; maker: string | null } | null {
+  const stem = clean(fileName.replace(/\.[A-Za-z0-9]+$/, "").replace(/_+/g, " "));
+  let rest = stem;
+  let maker: string | null = null;
+  const hit = [...makers, ...KNOWN_MAKERS]
+    .map(clean)
+    .filter((m) => m && (rest.toLowerCase() === m.toLowerCase() || rest.toLowerCase().startsWith(m.toLowerCase() + " ")))
+    .sort((a, b) => b.length - a.length)[0];
+  if (hit) {
+    maker = makers.find((m) => clean(m).toLowerCase() === hit.toLowerCase()) ?? hit;
+    rest = rest.slice(hit.length).trim();
+  }
+  const word = (rest.split(" ")[0] ?? "").replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, "");
+  if (word.length < 2 || !/[A-Za-z]/.test(word) || /^\d/.test(word) && !/[A-Za-z]{2}/.test(word)) return maker ? { word: "", maker } : null;
+  if (NOT_A_MODEL.has(word.toLowerCase())) return maker ? { word: "", maker } : null;
+  return { word, maker };
+}
+
+/**
+ * The chip a document belongs to. The longest existing variation whose whole name opens the file name wins
+ * ("G9-2T HD Stainless spec.pdf" → G9-2T HD Stainless); otherwise the variation named exactly by the first word.
+ * Never a nearby model: "Axiom-35-3" does not fall into "Axiom" or "Axiom-15-3". Null → a new chip.
+ */
+export function chipForDoc<T extends BookRef>(fileName: string, books: T[], maker?: string | null): T | null {
+  const doc = docVariation(fileName, books.map((b) => b.manufacturer ?? "").filter(Boolean));
+  if (!doc || !doc.word) return null;
+  const want = (maker ?? doc.maker ?? "").toLowerCase();
+  const pool = want ? books.filter((b) => (b.manufacturer ?? makerOf(b.title)).toLowerCase() === want) : books;
+  const stem = clean(fileName.replace(/\.[A-Za-z0-9]+$/, "").replace(/_+/g, " "));
+  const text = nameKey(doc.maker && stem.toLowerCase().startsWith(doc.maker.toLowerCase()) ? stem.slice(doc.maker.length) : stem);
+  const hits = pool
+    .map((b) => ({ b, key: nameKey(modelLabel(b.title, b.manufacturer ?? makerOf(b.title))) }))
+    // The whole chip name, ending where a word ends; and it must cover the whole first word.
+    .filter(({ key }) => key && (text === key || text.startsWith(key + "-")) && key.length >= nameKey(doc.word).length)
+    .sort((x, y) => y.key.length - x.key.length);
+  if (!hits.length) return null;
+  // Two makers with the same model name and no maker known: not decidable here.
+  if (hits.length > 1 && hits[0]!.key === hits[1]!.key) return null;
+  return hits[0]!.b;
+}
