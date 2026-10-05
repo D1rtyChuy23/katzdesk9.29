@@ -220,3 +220,15 @@ test("same variation name → same chip; a different name → no chip (a new one
   // Not a model name.
   assert.equal(chipForDoc("41234.0001 rev C.pdf", bunn, "BUNN"), null);
 });
+
+import { customFileName } from "../src/lib/ops/library-file-rules.ts";
+
+test("PM Guide is a manual type, and a typed file name keeps the file's extension", () => {
+  assert.equal(MANUAL_TYPES.includes("PM Guide"), true);
+  assert.equal(manualTypeFromName("Axiom-DV-APS PM checklist.pdf"), "PM Guide");
+  assert.equal(manualTypeFromName("Axiom preventive maintenance.pdf"), "PM Guide");
+  assert.deepEqual(customFileName("  Axiom-DV-APS - Annual PM  ", "old.pdf"), { name: "Axiom-DV-APS - Annual PM.pdf" });
+  assert.deepEqual(customFileName("My guide.pdf", "old.pdf"), { name: "My guide.pdf" });
+  assert.deepEqual(customFileName('Bad:"name"?', "old.docx"), { name: "Bad name.docx" });
+  assert.ok("error" in customFileName(" ", "old.pdf"));
+});

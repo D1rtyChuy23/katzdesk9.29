@@ -12,6 +12,7 @@ import {
   moveLibraryFile,
   moveSpecSheet,
   renameLibraryBook,
+  renameLibraryFile,
   setLibraryFileType,
   type LibraryBook,
   type LibraryFile,
@@ -26,6 +27,7 @@ import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, originOf, 
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import { SpecSheetView } from "@/components/desk/spec-sheet";
 import { SpecImport } from "@/components/desk/spec-import";
+import { TroubleshootPanel } from "@/components/desk/troubleshoot-panel";
 import { cn } from "@/lib/utils";
 
 type Search = { open?: number; book?: number };
@@ -70,7 +72,9 @@ function Page() {
   const [ask, setAsk] = useState<Ask | null>(null);
   // The document's first word names a model with no chip yet: confirm before a chip is made.
   const [askNew, setAskNew] = useState<{ fileName: string; maker: string; word: string; open: LibraryBook | null; resolve: (r: "create" | "open" | "pick" | null) => void } | null>(null);
-  const [askType, setAskType] = useState<{ fileName: string; resolve: (t: ManualType | null) => void } | null>(null);
+  const [askType, setAskType] = useState<{ fileName: string; hint: string; resolve: (t: { type: ManualType; name?: string } | null) => void } | null>(null);
+  const [fixOpen, setFixOpen] = useState(false);
+  const [fileRename, setFileRename] = useState<{ file: LibraryFile; name: string } | null>(null);
   const [typing, setTyping] = useState<LibraryFile | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<LibraryFile | null>(null);
@@ -119,8 +123,15 @@ function Page() {
       }
       // A manual is named by its type. An obvious file name decides; otherwise the list is shown and nothing is filed until one is picked.
       let type: ManualType | null = null;
+      let customName: string | undefined;
       if (section === "manuals") {
-        type = manualTypeFromName(file.name) ?? (await new Promise<ManualType | null>((resolve) => setAskType({ fileName: file.name, resolve })));
+        type = manualTypeFromName(file.name);
+        if (!type) {
+          const hint = into ? `${modelLabel(into.title, into.manufacturer)} - ` : "";
+          const picked = await new Promise<{ type: ManualType; name?: string } | null>((resolve) => setAskType({ fileName: file.name, hint, resolve }));
+          type = picked?.type ?? null;
+          customName = picked?.name;
+        }
         setAskType(null);
         if (!type) {
           errors.push(`${file.name} was skipped — no manual type chosen.`);
@@ -160,7 +171,7 @@ function Page() {
         if (!known.some((b) => b.id === target!.id)) known = [...known, target];
       }
       try {
-        const filed = await uploadLibraryFile(file, section, target.id, (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }), type ?? undefined);
+        const filed = await uploadLibraryFile(file, section, target.id, (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }), type ?? undefined, customName);
         toast.success(`Filed in ${target.title} → ${SHELF[filed.section].title} as ${filed.name}`);
         last = target;
       } catch (e) {
@@ -293,6 +304,15 @@ function Page() {
       void reload();
     },
     onError: (e) => fail(e, "Could not set the type"),
+  });
+  const renameFile = useMutation({
+    mutationFn: (v: { id: number; name: string }) => renameLibraryFile({ data: v }),
+    onSuccess: (r) => {
+      toast.success(`Renamed to ${r.name}`);
+      setFileRename(null);
+      void reload();
+    },
+    onError: (e) => fail(e, "Could not rename the file"),
   });
   const rename = useMutation({
     mutationFn: (v: { id: number; manufacturer: string; model: string }) => renameLibraryBook({ data: v }),
@@ -510,6 +530,7 @@ function Page() {
                             onMove={(file) => setAsk({ kind: "move-file", file })}
                             onDelete={setFileToDelete}
                             onType={setTyping}
+                            onRename={(file) => setFileRename({ file, name: file.name.replace(/\.[A-Za-z0-9]+$/, "") })}
                             extra={
                               f.section === "spec" && canEdit && !inside.sheets.length && f.mime === "application/pdf" ? (
                                 <Button type="button" size="sm" variant="outline" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
@@ -520,6 +541,19 @@ function Page() {
                           />
                         ))}
                         {!inside.files.length && !inside.sheets.length ? <li className="py-3 text-sm text-muted-foreground">No documents yet.</li> : null}
+                        <li className="flex min-h-12 items-center gap-2 py-1" data-testid="shelf-troubleshoot">
+                          <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.1em] text-copper uppercase">Fix</span>
+                          <button
+                            type="button"
+                            aria-expanded={fixOpen}
+                            className="min-w-0 flex-1 py-2 text-left text-sm font-semibold break-words hover:underline"
+                            onClick={() => setFixOpen(!fixOpen)}
+                            data-testid="troubleshoot-open"
+                          >
+                            Troubleshoot <span className="font-normal text-muted-foreground">· from this model's manuals and parts book</span>
+                          </button>
+                          {fixOpen ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
+                        </li>
                       </ul>
                     </div>
 
@@ -550,6 +584,8 @@ function Page() {
                         ) : null}
                       </div>
                     ) : null}
+
+                    {fixOpen ? <TroubleshootPanel key={current.id} bookId={current.id} model={modelLabel(current.title, current.manufacturer)} /> : null}
 
                     {mode === "edit" && selected ? (
                       <div className="mt-4">
@@ -638,7 +674,25 @@ function Page() {
         </DialogContent>
       </Dialog>
 
-      <ManualTypePicker open={!!askType} fileName={askType?.fileName ?? ""} onPick={(t) => askType?.resolve(t)} onCancel={() => askType?.resolve(null)} />
+      <ManualTypePicker open={!!askType} fileName={askType?.fileName ?? ""} nameHint={askType?.hint ?? ""} onPick={(t, name) => askType?.resolve({ type: t, name })} onCancel={() => askType?.resolve(null)} />
+      <Dialog open={!!fileRename} onOpenChange={(o) => !o && setFileRename(null)}>
+        <DialogContent data-testid="file-rename-dialog">
+          <DialogTitle>Rename This File</DialogTitle>
+          <DialogDescription>Only the name changes. The file itself and links already sent stay the same.</DialogDescription>
+          <form
+            className="mt-3 flex flex-col gap-2 sm:flex-row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (fileRename) renameFile.mutate({ id: fileRename.file.id, name: fileRename.name });
+            }}
+          >
+            <Input value={fileRename?.name ?? ""} onChange={(e) => fileRename && setFileRename({ ...fileRename, name: e.target.value })} aria-label="File name" autoFocus data-testid="file-rename-input" />
+            <Button type="submit" disabled={renameFile.isPending} data-testid="file-rename-save">
+              Save
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
       <ManualTypePicker
         open={!!typing}
         fileName={typing?.name ?? ""}

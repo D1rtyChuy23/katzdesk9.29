@@ -169,7 +169,7 @@ export function likelyBooks<T extends BookRef>(text: string, books: T[]): T[] {
 
 // ---- Manuals: named by what kind of manual they are ----
 
-export const MANUAL_TYPES = ["Operating / Installation Manual", "Cleaning Manual", "Programming Manual", "User Manual", "Service And Repair Manual"] as const;
+export const MANUAL_TYPES = ["Operating / Installation Manual", "Cleaning Manual", "Programming Manual", "User Manual", "Service And Repair Manual", "PM Guide"] as const;
 export type ManualType = (typeof MANUAL_TYPES)[number];
 export const isManualType = (v: unknown): v is ManualType => MANUAL_TYPES.includes(v as ManualType);
 // Parts files are not a manual type: they only go in the Parts drop zone. A manual is never filed as a parts book.
@@ -180,6 +180,7 @@ const TYPE_WORDS: [ManualType, RegExp][] = [
   ["Operating / Installation Manual", /\binstall(ation)?\b|\boperat(ing|ion|ions|or|ors)\b/],
   ["User Manual", /\busers?\b|\bowners?\b/],
   ["Service And Repair Manual", /\bservic(e|ing)\b|\brepairs?\b|\btroubleshoot(ing)?\b/],
+  ["PM Guide", /\bpm\b|\bpreventi?(ve|ative)\b|\bmaintenance\b/],
 ];
 
 /**
@@ -203,6 +204,21 @@ export function shelfFileName(bookTitle: string, section: LibrarySection, origin
     const name = n === 1 ? base : `${base} ${n}`;
     if (!used.has(name.toLowerCase())) return `${name}${ext ? `.${ext}` : ""}`;
   }
+}
+
+/**
+ * A name typed by a person for a stored file. The file keeps its own extension; a typed extension is dropped.
+ * Returns the full file name, or an error sentence.
+ */
+export function customFileName(typed: string, currentName: string): { name: string } | { error: string } {
+  const ext = fileExt(currentName);
+  // Characters a file name can't carry on Windows or in a download header become spaces.
+  const safe = [...typed].map((ch) => (ch.charCodeAt(0) < 32 || '\\<>:"|?*'.includes(ch) ? " " : ch)).join("");
+  let stem = clean(safe);
+  if (ext && stem.toLowerCase().endsWith(`.${ext}`)) stem = stem.slice(0, -(ext.length + 1)).trim();
+  if (stem.length < 2) return { error: "Type a name for the file." };
+  if (stem.length > 120) return { error: "That name is too long. Keep it under 120 characters." };
+  return { name: `${stem}${ext ? `.${ext}` : ""}` };
 }
 
 // ---- Manufacturer → model ----

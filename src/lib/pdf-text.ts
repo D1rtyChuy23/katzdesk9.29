@@ -287,3 +287,45 @@ export async function imageFileToDataUrl(file: File, max = 1200): Promise<string
     URL.revokeObjectURL(url);
   }
 }
+
+/** Troubleshoot reads manuals up to this size; bigger ones are opened by hand. */
+export const MAX_MANUAL_BYTES = 25 * 1024 * 1024;
+
+/**
+ * The text of every page of a PDF, in page order ("" for a page with no text layer).
+ * Used once per stored manual so Troubleshoot can find and cite the right page.
+ */
+export async function pdfPageTexts(bytes: Uint8Array, onPage?: (done: number, total: number) => void): Promise<string[]> {
+  const head = new TextDecoder().decode(bytes.slice(0, 5));
+  if (head !== "%PDF-") throw new Error("That file isn't a readable PDF.");
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const worker = await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url");
+  pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+  const doc = await pdfjs.getDocument({ data: bytes }).promise;
+  const out: string[] = [];
+  try {
+    for (let n = 1; n <= doc.numPages; n++) {
+      const page = await doc.getPage(n);
+      const content = await page.getTextContent();
+      let line = "";
+      const lines: string[] = [];
+      for (const item of content.items) {
+        if (!("str" in item)) continue;
+        line += item.str;
+        if (item.hasEOL) {
+          lines.push(line);
+          line = "";
+        } else if (item.str && !item.str.endsWith(" ")) {
+          line += " ";
+        }
+      }
+      if (line.trim()) lines.push(line);
+      out.push(lines.map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n"));
+      page.cleanup();
+      onPage?.(n, doc.numPages);
+    }
+    return out;
+  } finally {
+    void doc.destroy();
+  }
+}

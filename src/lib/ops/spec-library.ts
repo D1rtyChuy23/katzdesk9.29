@@ -172,7 +172,7 @@ type ExtractResult =
   | { ok: true; draft: SpecSheetDraft; removed: RemovedItem[]; usedRetry: boolean }
   | { ok: false; reason: "no-key" | "no-text" | "rate-limit" | "failed"; message: string };
 
-async function callXai(apiKey: string, messages: { role: string; content: string }[]): Promise<string> {
+export async function callXai(apiKey: string, messages: { role: string; content: string }[]): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 90_000);
   try {

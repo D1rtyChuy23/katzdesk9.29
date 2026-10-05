@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, fileError, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, customFileName, fileError, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -20,6 +20,8 @@ export type LibraryFile = {
   bookId: number | null;
   /** Manual type ("Cleaning Manual" …); null for spec sheets and files stored before types. */
   docType: string | null;
+  /** Pages of readable text kept for Troubleshoot: null = not read yet, 0 = no readable text. */
+  textPages: number | null;
   addedBy: string;
   createdAt: string;
 };
@@ -162,8 +164,8 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
     const role = await roleOf(sql, context.userId);
     const books = await ensureBooks(sql);
     const rows = await sql.query<{
-      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; doc_type: string | null; added_by_name: string | null; created_at: string | Date;
-    }>("select id, section, name, mime, size, token, book_id, doc_type, added_by_name, created_at from library_files where complete order by lower(name), id");
+      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; doc_type: string | null; text_pages: number | null; added_by_name: string | null; created_at: string | Date;
+    }>("select id, section, name, mime, size, token, book_id, doc_type, text_pages, added_by_name, created_at from library_files where complete order by lower(name), id");
     const files = rows.map((r) => ({
       id: Number(r.id),
       section: r.section,
@@ -173,6 +175,7 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
       token: r.token,
       bookId: r.book_id == null ? null : Number(r.book_id),
       docType: r.doc_type ?? null,
+      textPages: r.text_pages == null ? null : Number(r.text_pages),
       addedBy: r.added_by_name || "Teammate",
       createdAt: new Date(r.created_at).toISOString(),
     }));
@@ -247,8 +250,8 @@ async function nameInBook(sql: Sql, bookId: number, sec: LibrarySection, origina
 
 export const startLibraryFile = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { section: LibrarySection; bookId: number; name: string; size: number; docType?: ManualType }) =>
-    z.object({ section, bookId: z.number().int().positive(), name: z.string().trim().min(1).max(200), size: z.number().int().positive(), docType: z.enum(MANUAL_TYPES).optional() }).parse(d),
+  .validator((d: { section: LibrarySection; bookId: number; name: string; size: number; docType?: ManualType; customName?: string }) =>
+    z.object({ section, bookId: z.number().int().positive(), name: z.string().trim().min(1).max(200), size: z.number().int().positive(), docType: z.enum(MANUAL_TYPES).optional(), customName: z.string().max(200).optional() }).parse(d),
   )
   .handler(async ({ data, context }): Promise<{ id: number; name: string; section: LibrarySection }> => {
     const sql = await ready();
@@ -262,7 +265,13 @@ export const startLibraryFile = createServerFn({ method: "POST" })
     const type = data.section === "manuals" ? data.docType ?? manualTypeFromName(data.name) : null;
     if (data.section === "manuals" && !type) throw new Error(`Pick the manual type for ${data.name} first.`);
     const sec = data.section;
-    const name = await nameInBook(sql, data.bookId, sec, data.name, undefined, type);
+    // A name the person typed wins over "Variation - Type".
+    let name = await nameInBook(sql, data.bookId, sec, data.name, undefined, type);
+    if (data.customName?.trim()) {
+      const typed = customFileName(data.customName, data.name);
+      if ("error" in typed) throw new Error(typed.error);
+      name = typed.name;
+    }
     const rows = await sql.query<{ id: number }>(
       `insert into library_files (section, name, original_name, mime, size, token, added_by, added_by_name, book_id, doc_type)
        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning id`,
@@ -306,6 +315,21 @@ export const setLibraryFileType = createServerFn({ method: "POST" })
     const name = await nameInBook(sql, Number(file[0].book_id), sec, file[0].original_name || file[0].name, data.id, data.docType);
     await sql.query("update library_files set section = $2, name = $3, doc_type = $4, original_name = coalesce(original_name, $5) where id = $1", [data.id, sec, name, data.docType, file[0].name]);
     return { ok: true, name, section: sec };
+  });
+
+/** Give a stored file a name of your own. The original is untouched; links already sent keep working. */
+export const renameLibraryFile = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; name: string }) => z.object({ id: z.number().int().positive(), name: z.string().max(200) }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true; name: string }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const file = await sql.query<{ name: string }>("select name from library_files where id = $1", [data.id]);
+    if (!file[0]) throw new Error("That file no longer exists.");
+    const typed = customFileName(data.name, file[0].name);
+    if ("error" in typed) throw new Error(typed.error);
+    await sql.query("update library_files set name = $2, original_name = coalesce(original_name, $3) where id = $1", [data.id, typed.name, file[0].name]);
+    return { ok: true, name: typed.name };
   });
 
 export const moveSpecSheet = createServerFn({ method: "POST" })

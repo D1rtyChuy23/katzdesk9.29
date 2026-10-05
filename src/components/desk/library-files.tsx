@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowRightLeft, Loader2, Mail, MessageSquare, Plus, Tag, Trash2, Upload } from "lucide-react";
+import { ArrowRightLeft, Loader2, Mail, MessageSquare, Pencil, Plus, Tag, Trash2, Upload } from "lucide-react";
 import { appendLibraryChunk, finishLibraryFile, startLibraryFile, type LibraryBook, type LibraryFile } from "@/lib/ops/library-files";
 import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, fileUrl, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,11 @@ export async function uploadLibraryFile(
   bookId: number,
   onProgress?: (pct: number) => void,
   docType?: ManualType,
+  customName?: string,
 ): Promise<{ name: string; section: LibrarySection }> {
-  const { id, name, section: filed } = await startLibraryFile({ data: { section, bookId, name: file.name, size: file.size, ...(docType ? { docType } : {}) } });
+  const { id, name, section: filed } = await startLibraryFile({
+    data: { section, bookId, name: file.name, size: file.size, ...(docType ? { docType } : {}), ...(customName?.trim() ? { customName: customName.trim() } : {}) },
+  });
   const parts = Math.ceil(file.size / CHUNK_BYTES);
   for (let seq = 0; seq < parts; seq++) {
     onProgress?.(Math.round((seq / parts) * 100));
@@ -62,6 +65,7 @@ export function DocRow({
   onMove,
   onDelete,
   onType,
+  onRename,
   extra,
 }: {
   file: LibraryFile;
@@ -72,6 +76,7 @@ export function DocRow({
   onDelete: (f: LibraryFile) => void;
   /** Manuals and parts: name the file by its manual type. */
   onType?: (f: LibraryFile) => void;
+  onRename?: (f: LibraryFile) => void;
   extra?: React.ReactNode;
 }) {
   const url = fileUrl(originOf(), file.token);
@@ -95,6 +100,11 @@ export function DocRow({
           {onType && file.section === "manuals" && file.bookId != null ? (
             <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Set the manual type for ${file.name}`} title="Set the manual type" onClick={() => onType(file)} data-testid="library-file-type">
               <Tag className="size-4" />
+            </Button>
+          ) : null}
+          {onRename ? (
+            <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Rename ${file.name}`} title="Rename this file" onClick={() => onRename(file)} data-testid="library-file-rename">
+              <Pencil className="size-4" />
             </Button>
           ) : null}
           <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Move ${file.name}`} title="Move to another model" onClick={() => onMove(file)} data-testid="library-file-move">
@@ -267,6 +277,7 @@ export function ManualTypePicker({
   current,
   busy,
   cancelLabel = "Skip This File",
+  nameHint,
   onPick,
   onCancel,
 }: {
@@ -275,9 +286,12 @@ export function ManualTypePicker({
   current?: string | null;
   busy?: boolean;
   cancelLabel?: string;
-  onPick: (type: ManualType) => void;
+  /** Shown in the optional File Name field, e.g. "Axiom-DV-APS - ". When set, the person may type their own name. */
+  nameHint?: string;
+  onPick: (type: ManualType, customName?: string) => void;
   onCancel: () => void;
 }) {
+  const [typed, setTyped] = useState("");
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent data-testid="manual-type-picker">
@@ -289,7 +303,11 @@ export function ManualTypePicker({
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => onPick(t)}
+                onClick={() => {
+                  const name = typed.trim();
+                  setTyped("");
+                  onPick(t, name || undefined);
+                }}
                 className={cn(
                   "flex min-h-11 w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5 text-left text-sm font-medium hover:border-primary/60",
                   t === current && "border-primary/60",
@@ -302,6 +320,20 @@ export function ManualTypePicker({
             </li>
           ))}
         </ul>
+        {nameHint != null ? (
+          <label className="mt-4 block">
+            <span className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">File Name (Optional)</span>
+            <Input
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder={`${nameHint}type picked above, or type your own name`}
+              aria-label="File name (optional)"
+              className="mt-1"
+              data-testid="manual-custom-name"
+            />
+            <span className="mt-1 block text-xs text-muted-foreground">Type a name first, then pick the type. Leave it blank to use the type as the name.</span>
+          </label>
+        ) : null}
         <Button type="button" variant="ghost" className="mt-2 w-fit" onClick={onCancel}>
           {cancelLabel}
         </Button>
