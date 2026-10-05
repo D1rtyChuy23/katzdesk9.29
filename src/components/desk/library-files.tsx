@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { ArrowRightLeft, Loader2, Mail, MessageSquare, Plus, Trash2, Upload } from "lucide-react";
+import { ArrowRightLeft, Loader2, Mail, MessageSquare, Plus, Tag, Trash2, Upload } from "lucide-react";
 import { appendLibraryChunk, finishLibraryFile, startLibraryFile, type LibraryBook, type LibraryFile } from "@/lib/ops/library-files";
-import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MAX_FILE_BYTES, emailHref, fileUrl, sizeText, textHref, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, fileUrl, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,14 @@ function toBase64(bytes: Uint8Array): string {
 }
 
 /** Store one file in a book's shelf. Sent in pieces; returns the name it was filed under. */
-export async function uploadLibraryFile(file: File, section: LibrarySection, bookId: number, onProgress?: (pct: number) => void): Promise<string> {
-  const { id, name } = await startLibraryFile({ data: { section, bookId, name: file.name, size: file.size } });
+export async function uploadLibraryFile(
+  file: File,
+  section: LibrarySection,
+  bookId: number,
+  onProgress?: (pct: number) => void,
+  docType?: ManualType,
+): Promise<{ name: string; section: LibrarySection }> {
+  const { id, name, section: filed } = await startLibraryFile({ data: { section, bookId, name: file.name, size: file.size, ...(docType ? { docType } : {}) } });
   const parts = Math.ceil(file.size / CHUNK_BYTES);
   for (let seq = 0; seq < parts; seq++) {
     onProgress?.(Math.round((seq / parts) * 100));
@@ -23,7 +29,7 @@ export async function uploadLibraryFile(file: File, section: LibrarySection, boo
     await appendLibraryChunk({ data: { id, seq, base64: toBase64(bytes) } });
   }
   await finishLibraryFile({ data: { id } });
-  return name;
+  return { name, section: filed };
 }
 
 export const originOf = () => (typeof window === "undefined" ? "" : window.location.origin);
@@ -55,6 +61,7 @@ export function DocRow({
   manage,
   onMove,
   onDelete,
+  onType,
   extra,
 }: {
   file: LibraryFile;
@@ -63,6 +70,8 @@ export function DocRow({
   manage: boolean;
   onMove: (f: LibraryFile) => void;
   onDelete: (f: LibraryFile) => void;
+  /** Manuals and parts: name the file by its manual type. */
+  onType?: (f: LibraryFile) => void;
   extra?: React.ReactNode;
 }) {
   const url = fileUrl(originOf(), file.token);
@@ -83,6 +92,11 @@ export function DocRow({
       <SendButtons name={file.name} url={url} />
       {manage ? (
         <>
+          {onType && file.section !== "spec" && file.bookId != null ? (
+            <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Set the manual type for ${file.name}`} title="Set the manual type" onClick={() => onType(file)} data-testid="library-file-type">
+              <Tag className="size-4" />
+            </Button>
+          ) : null}
           <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Move ${file.name}`} title="Move to another model" onClick={() => onMove(file)} data-testid="library-file-move">
             <ArrowRightLeft className="size-4" />
           </Button>
@@ -238,6 +252,56 @@ export function BookPicker({
             <Plus className="size-4" /> Add Model
           </Button>
         </form>
+        <Button type="button" variant="ghost" className="mt-2 w-fit" onClick={onCancel}>
+          {cancelLabel}
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** "What kind of manual is this?" — shown when the file name doesn't say. Nothing is filed until one is picked. */
+export function ManualTypePicker({
+  open,
+  fileName,
+  current,
+  busy,
+  cancelLabel = "Skip This File",
+  onPick,
+  onCancel,
+}: {
+  open: boolean;
+  fileName: string;
+  current?: string | null;
+  busy?: boolean;
+  cancelLabel?: string;
+  onPick: (type: ManualType) => void;
+  onCancel: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
+      <DialogContent data-testid="manual-type-picker">
+        <DialogTitle>What Kind Of Manual Is This?</DialogTitle>
+        <DialogDescription>{fileName} doesn't say. Pick the type; it is not filed until you do.</DialogDescription>
+        <ul className="mt-3 grid gap-1.5" data-testid="manual-type-list">
+          {MANUAL_TYPES.map((t) => (
+            <li key={t}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onPick(t)}
+                className={cn(
+                  "flex min-h-11 w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5 text-left text-sm font-medium hover:border-primary/60",
+                  t === current && "border-primary/60",
+                )}
+                data-testid="manual-type"
+              >
+                {t}
+                <span className="text-xs font-normal text-muted-foreground">{t === "Parts Diagram" ? "Kept with Parts" : t === current ? "Now" : ""}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
         <Button type="button" variant="ghost" className="mt-2 w-fit" onClick={onCancel}>
           {cancelLabel}
         </Button>

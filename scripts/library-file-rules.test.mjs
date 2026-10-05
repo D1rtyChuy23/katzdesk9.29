@@ -142,3 +142,31 @@ test("the picker lists the same model's variations first", () => {
 test("a picture and a PDF on the same shelf get different names", () => {
   assert.equal(shelfFileName("Bunn Axiom Twin", "parts", "view.png", ["Bunn Axiom Twin - Parts Book.pdf"]), "Bunn Axiom Twin - Parts Book 2.png");
 });
+
+import { manualTypeFromName, sectionForType, MANUAL_TYPES } from "../src/lib/ops/library-file-rules.ts";
+
+test("manual type is read from the file name only when it is obvious", () => {
+  assert.equal(manualTypeFromName("Axiom-DV-APS cleaning guide.pdf"), "Cleaning Manual");
+  assert.equal(manualTypeFromName("AXIOM_Programming_Manual.pdf"), "Programming Manual");
+  assert.equal(manualTypeFromName("Axiom Installation & Operating Guide.pdf"), "Operating / Installation Manual");
+  assert.equal(manualTypeFromName("Axiom Operation Manual.pdf"), "Operating / Installation Manual");
+  assert.equal(manualTypeFromName("Axiom Owner's Manual.pdf"), "User Manual");
+  assert.equal(manualTypeFromName("axiom-user-guide.pdf"), "User Manual");
+  assert.equal(manualTypeFromName("Axiom Illustrated Parts Catalog.pdf"), "Parts Diagram");
+  assert.equal(manualTypeFromName("Axiom exploded view.pdf"), "Parts Diagram");
+});
+
+test("no type, or more than one, means the person picks", () => {
+  assert.equal(manualTypeFromName("Axiom manual.pdf"), null);
+  assert.equal(manualTypeFromName("41234.0001.pdf"), null);
+  assert.equal(manualTypeFromName("Axiom install and cleaning.pdf"), null);
+  assert.equal(manualTypeFromName("Axiom DV-APS reprogrammed.pdf"), null);
+});
+
+test("a manual is filed as Variation - Type; a parts diagram goes with the parts", () => {
+  assert.equal(shelfFileName("Bunn Axiom-DV-APS", "manuals", "x.pdf", [], "Cleaning Manual"), "Bunn Axiom-DV-APS - Cleaning Manual.pdf");
+  assert.equal(shelfFileName("Bunn Axiom-DV-APS", "manuals", "x.pdf", ["Bunn Axiom-DV-APS - Cleaning Manual.pdf"], "Cleaning Manual"), "Bunn Axiom-DV-APS - Cleaning Manual 2.pdf");
+  assert.equal(shelfFileName("Bunn Axiom", "manuals", "x.pdf", []), "Bunn Axiom - Manual.pdf");
+  assert.equal(sectionForType("Parts Diagram"), "parts");
+  for (const t of MANUAL_TYPES.filter((x) => x !== "Parts Diagram")) assert.equal(sectionForType(t), "manuals");
+});

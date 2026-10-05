@@ -167,10 +167,36 @@ export function likelyBooks<T extends BookRef>(text: string, books: T[]): T[] {
   });
 }
 
-/** "Bunn Axiom - Manual.pdf"; a second one becomes "Bunn Axiom - Manual 2.pdf". */
-export function shelfFileName(bookTitle: string, section: LibrarySection, originalName: string, taken: string[]): string {
+// ---- Manuals: named by what kind of manual they are ----
+
+export const MANUAL_TYPES = ["Parts Diagram", "Operating / Installation Manual", "Cleaning Manual", "Programming Manual", "User Manual"] as const;
+export type ManualType = (typeof MANUAL_TYPES)[number];
+export const isManualType = (v: unknown): v is ManualType => MANUAL_TYPES.includes(v as ManualType);
+/** A parts diagram is kept with the parts, whatever it was dropped on. */
+export const sectionForType = (type: ManualType): LibrarySection => (type === "Parts Diagram" ? "parts" : "manuals");
+
+const TYPE_WORDS: [ManualType, RegExp][] = [
+  ["Parts Diagram", /\bparts?\b|\bexploded\b|\bipb\b/],
+  ["Cleaning Manual", /\bclean(ing)?\b|\bsanitiz|\bdescal/],
+  ["Programming Manual", /\bprogram(ming)?\b/],
+  ["Operating / Installation Manual", /\binstall(ation)?\b|\boperat(ing|ion|ions|or|ors)\b/],
+  ["User Manual", /\busers?\b|\bowners?\b/],
+];
+
+/**
+ * The manual type a file name spells out, or null when it names none or more than one — then the person picks.
+ * "Axiom cleaning guide.pdf" → Cleaning Manual; "Axiom manual.pdf" → null; "Install and cleaning.pdf" → null.
+ */
+export function manualTypeFromName(name: string): ManualType | null {
+  const text = name.replace(/\.[A-Za-z0-9]+$/, "").replace(/[_\-.]+/g, " ").replace(/'s\b/g, "s").toLowerCase();
+  const hits = TYPE_WORDS.filter(([, re]) => re.test(text)).map(([t]) => t);
+  return hits.length === 1 ? hits[0]! : null;
+}
+
+/** "Bunn Axiom - Manual.pdf"; a second one becomes "Bunn Axiom - Manual 2.pdf". A manual type replaces the word "Manual". */
+export function shelfFileName(bookTitle: string, section: LibrarySection, originalName: string, taken: string[], type?: string | null): string {
   const ext = fileExt(originalName);
-  const base = `${clean(bookTitle)} - ${SHELF[section].type}`;
+  const base = `${clean(bookTitle)} - ${type && isManualType(type) ? type : SHELF[section].type}`;
   // Compared without the extension, so a .png and a .pdf never share the name "Parts Book".
   const stem = (n: string) => n.replace(/\.[A-Za-z0-9]+$/, "").toLowerCase();
   const used = new Set(taken.map(stem));

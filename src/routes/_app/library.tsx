@@ -12,15 +12,16 @@ import {
   moveLibraryFile,
   moveSpecSheet,
   renameLibraryBook,
+  setLibraryFileType,
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { fileError, fileUrl, likelyBooks, matchBook, modelLabel, SHELF, shortDocName, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, sectionForType, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { pdfImages } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { AddTarget, BookPicker, DocRow, DROP_RULES, originOf, uploadLibraryFile } from "@/components/desk/library-files";
+import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, originOf, uploadLibraryFile } from "@/components/desk/library-files";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import { SpecSheetView } from "@/components/desk/spec-sheet";
 import { SpecImport } from "@/components/desk/spec-import";
@@ -66,6 +67,8 @@ function Page() {
   const [busy, setBusy] = useState<{ section: LibrarySection; text: string } | null>(null);
   const [problems, setProblems] = useState<string[]>([]);
   const [ask, setAsk] = useState<Ask | null>(null);
+  const [askType, setAskType] = useState<{ fileName: string; resolve: (t: ManualType | null) => void } | null>(null);
+  const [typing, setTyping] = useState<LibraryFile | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<LibraryFile | null>(null);
   const [renaming, setRenaming] = useState<{ manufacturer: string; model: string } | null>(null);
@@ -111,9 +114,20 @@ function Page() {
         errors.push(problem);
         continue;
       }
+      // A manual is named by its type. An obvious file name decides; otherwise the list is shown and nothing is filed until one is picked.
+      let type: ManualType | null = null;
+      if (section === "manuals") {
+        type = manualTypeFromName(file.name) ?? (await new Promise<ManualType | null>((resolve) => setAskType({ fileName: file.name, resolve })));
+        setAskType(null);
+        if (!type) {
+          errors.push(`${file.name} was skipped — no manual type chosen.`);
+          continue;
+        }
+      }
+      const shelf = type ? sectionForType(type) : section;
       let target = into ?? matchBook(file.name, known);
       if (!target) {
-        target = await new Promise<LibraryBook | null>((resolve) => setAsk({ kind: "file", fileName: file.name, section, resolve }));
+        target = await new Promise<LibraryBook | null>((resolve) => setAsk({ kind: "file", fileName: file.name, section: shelf, resolve }));
         setAsk(null);
         if (!target) {
           errors.push(`${file.name} was skipped — no book chosen.`);
@@ -122,8 +136,8 @@ function Page() {
         if (!known.some((b) => b.id === target!.id)) known = [...known, target];
       }
       try {
-        const name = await uploadLibraryFile(file, section, target.id, (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }));
-        toast.success(`Filed in ${target.title} → ${SHELF[section].title} as ${name}`);
+        const filed = await uploadLibraryFile(file, section, target.id, (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }), type ?? undefined);
+        toast.success(`Filed in ${target.title} → ${SHELF[filed.section].title} as ${filed.name}`);
         last = target;
       } catch (e) {
         errors.push(`${file.name}: ${e instanceof Error ? e.message : "could not be added"}`);
@@ -246,6 +260,15 @@ function Page() {
       void reload();
     },
     onError: (e) => fail(e, "Could not delete"),
+  });
+  const retype = useMutation({
+    mutationFn: (v: { id: number; docType: ManualType }) => setLibraryFileType({ data: v }),
+    onSuccess: (r) => {
+      toast.success(`Now ${r.name}`);
+      setTyping(null);
+      void reload();
+    },
+    onError: (e) => fail(e, "Could not set the type"),
   });
   const rename = useMutation({
     mutationFn: (v: { id: number; manufacturer: string; model: string }) => renameLibraryBook({ data: v }),
@@ -427,6 +450,7 @@ function Page() {
                             manage={manage}
                             onMove={(file) => setAsk({ kind: "move-file", file })}
                             onDelete={setFileToDelete}
+                            onType={setTyping}
                             extra={
                               f.section === "spec" && canEdit && !inside.sheets.length && f.mime === "application/pdf" ? (
                                 <Button type="button" size="sm" variant="outline" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
@@ -511,7 +535,7 @@ function Page() {
         </section>
       ) : null}
 
-      <Dialog open={adding && !ask} onOpenChange={(o) => !o && !busy && setAdding(false)}>
+      <Dialog open={adding && !ask && !askType} onOpenChange={(o) => !o && !busy && setAdding(false)}>
         <DialogContent data-testid="add-dialog">
           <DialogTitle>Add Files</DialogTitle>
           <DialogDescription>
@@ -528,12 +552,22 @@ function Page() {
         </DialogContent>
       </Dialog>
 
+      <ManualTypePicker open={!!askType} fileName={askType?.fileName ?? ""} onPick={(t) => askType?.resolve(t)} onCancel={() => askType?.resolve(null)} />
+      <ManualTypePicker
+        open={!!typing}
+        fileName={typing?.name ?? ""}
+        current={typing?.docType}
+        busy={retype.isPending}
+        cancelLabel="Cancel"
+        onPick={(t) => typing && retype.mutate({ id: typing.id, docType: t })}
+        onCancel={() => setTyping(null)}
+      />
       <BookPicker
         open={!!ask}
         heading={ask?.kind === "file" ? "Which Model Is This For?" : "Move To Which Model?"}
         detail={
           ask?.kind === "file"
-            ? `${ask.fileName} doesn't name one model. Pick the model for this ${SHELF[ask.section].type.toLowerCase()}, or add a new one.`
+            ? `${ask.fileName} doesn't name one model. Pick the model, or add a new one.`
             : ask?.kind === "move-file"
               ? `${ask.file.name} will be renamed for the model you pick.`
               : ask?.kind === "move-sheet"

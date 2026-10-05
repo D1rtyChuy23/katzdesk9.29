@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, fileError, makerOf, matchBook, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, fileError, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, sectionForType, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -18,6 +18,8 @@ export type LibraryFile = {
   token: string;
   /** The book (equipment family) this file sits in; null until someone files it. */
   bookId: number | null;
+  /** Manual type ("Cleaning Manual" …); null for spec sheets and files stored before types. */
+  docType: string | null;
   addedBy: string;
   createdAt: string;
 };
@@ -79,14 +81,14 @@ async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
     return books.find((b) => b.title.toLowerCase() === title.toLowerCase()) ?? null;
   };
   const renameFiles = async (bookId: number, title: string, only?: number[]) => {
-    const rows = await sql.query<{ id: number; name: string; original_name: string | null; section: LibrarySection }>(
-      "select id, name, original_name, section from library_files where book_id = $1 order by lower(name), id",
+    const rows = await sql.query<{ id: number; name: string; original_name: string | null; section: LibrarySection; doc_type: string | null }>(
+      "select id, name, original_name, section, doc_type from library_files where book_id = $1 order by lower(name), id",
       [bookId],
     );
     const done: Record<string, string[]> = {};
     for (const f of rows) {
       const taken = (done[f.section] ??= rows.filter((r) => r.section === f.section && only && !only.includes(r.id)).map((r) => r.name));
-      const name = only && !only.includes(f.id) ? f.name : shelfFileName(title, f.section, f.original_name || f.name, taken);
+      const name = only && !only.includes(f.id) ? f.name : shelfFileName(title, f.section, f.original_name || f.name, taken, f.doc_type);
       if (!only || only.includes(f.id)) taken.push(name);
       if (name !== f.name) await sql.query("update library_files set name = $2, original_name = coalesce(original_name, $3) where id = $1", [f.id, name, f.name]);
     }
@@ -160,8 +162,8 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
     const role = await roleOf(sql, context.userId);
     const books = await ensureBooks(sql);
     const rows = await sql.query<{
-      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; added_by_name: string | null; created_at: string | Date;
-    }>("select id, section, name, mime, size, token, book_id, added_by_name, created_at from library_files where complete order by lower(name), id");
+      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; doc_type: string | null; added_by_name: string | null; created_at: string | Date;
+    }>("select id, section, name, mime, size, token, book_id, doc_type, added_by_name, created_at from library_files where complete order by lower(name), id");
     const files = rows.map((r) => ({
       id: Number(r.id),
       section: r.section,
@@ -170,6 +172,7 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
       size: Number(r.size),
       token: r.token,
       bookId: r.book_id == null ? null : Number(r.book_id),
+      docType: r.doc_type ?? null,
       addedBy: r.added_by_name || "Teammate",
       createdAt: new Date(r.created_at).toISOString(),
     }));
@@ -235,19 +238,19 @@ export const deleteLibraryBook = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-async function nameInBook(sql: Sql, bookId: number, sec: LibrarySection, original: string, exceptId?: number) {
+async function nameInBook(sql: Sql, bookId: number, sec: LibrarySection, original: string, exceptId?: number, type?: string | null) {
   const book = await sql.query<{ title: string }>("select title from library_books where id = $1", [bookId]);
   if (!book[0]) throw new Error("That book no longer exists. Pick another.");
   const taken = await sql.query<{ name: string }>("select name from library_files where book_id = $1 and section = $2 and id <> $3", [bookId, sec, exceptId ?? 0]);
-  return shelfFileName(book[0].title, sec, original, taken.map((t) => t.name));
+  return shelfFileName(book[0].title, sec, original, taken.map((t) => t.name), type);
 }
 
 export const startLibraryFile = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { section: LibrarySection; bookId: number; name: string; size: number }) =>
-    z.object({ section, bookId: z.number().int().positive(), name: z.string().trim().min(1).max(200), size: z.number().int().positive() }).parse(d),
+  .validator((d: { section: LibrarySection; bookId: number; name: string; size: number; docType?: ManualType }) =>
+    z.object({ section, bookId: z.number().int().positive(), name: z.string().trim().min(1).max(200), size: z.number().int().positive(), docType: z.enum(MANUAL_TYPES).optional() }).parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ id: number; name: string }> => {
+  .handler(async ({ data, context }): Promise<{ id: number; name: string; section: LibrarySection }> => {
     const sql = await ready();
     const role = await requireEditor(sql, context.userId);
     const problem = fileError(data.name, data.size);
@@ -255,13 +258,17 @@ export const startLibraryFile = createServerFn({ method: "POST" })
     // Uploads that were abandoned part-way are swept here.
     await sql.query("delete from library_files where not complete and created_at < now() - interval '1 hour'");
     // Stored as "Family - Type"; the name it arrived with is kept alongside.
-    const name = await nameInBook(sql, data.bookId, data.section, data.name);
+    // A manual is never filed as a plain "Manual": the type comes from the person, else from an obvious file name.
+    const type = data.section === "manuals" ? data.docType ?? manualTypeFromName(data.name) : null;
+    if (data.section === "manuals" && !type) throw new Error(`Pick the manual type for ${data.name} first.`);
+    const sec = type ? sectionForType(type) : data.section;
+    const name = await nameInBook(sql, data.bookId, sec, data.name, undefined, type);
     const rows = await sql.query<{ id: number }>(
-      `insert into library_files (section, name, original_name, mime, size, token, added_by, added_by_name, book_id)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`,
-      [data.section, name, data.name, mimeFor(data.name), data.size, newToken(), context.userId, role.name, data.bookId],
+      `insert into library_files (section, name, original_name, mime, size, token, added_by, added_by_name, book_id, doc_type)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning id`,
+      [sec, name, data.name, mimeFor(data.name), data.size, newToken(), context.userId, role.name, data.bookId, type],
     );
-    return { id: Number(rows[0]!.id), name };
+    return { id: Number(rows[0]!.id), name, section: sec };
   });
 
 /** Put a file in a (different) book; it is renamed for that book. */
@@ -271,14 +278,34 @@ export const moveLibraryFile = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true; name: string }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null }>(
-      "select section, name, original_name from library_files where id = $1",
+    const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null; doc_type: string | null }>(
+      "select section, name, original_name, doc_type from library_files where id = $1",
       [data.id],
     );
     if (!file[0]) throw new Error("That file no longer exists.");
-    const name = await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id);
+    const name = await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id, file[0].doc_type);
     await sql.query("update library_files set book_id = $2, name = $3, original_name = coalesce(original_name, $4) where id = $1", [data.id, data.bookId, name, file[0].name]);
     return { ok: true, name };
+  });
+
+/** Name a stored manual by its type. A parts diagram moves to the parts; any other type sits with the manuals. */
+export const setLibraryFileType = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; docType: ManualType }) => z.object({ id: z.number().int().positive(), docType: z.enum(MANUAL_TYPES) }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true; name: string; section: LibrarySection }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null; book_id: number | null }>(
+      "select section, name, original_name, book_id from library_files where id = $1",
+      [data.id],
+    );
+    if (!file[0]) throw new Error("That file no longer exists.");
+    if (file[0].section === "spec") throw new Error("A spec sheet is not a manual.");
+    if (file[0].book_id == null) throw new Error("File it under a model first.");
+    const sec = sectionForType(data.docType);
+    const name = await nameInBook(sql, Number(file[0].book_id), sec, file[0].original_name || file[0].name, data.id, data.docType);
+    await sql.query("update library_files set section = $2, name = $3, doc_type = $4, original_name = coalesce(original_name, $5) where id = $1", [data.id, sec, name, data.docType, file[0].name]);
+    return { ok: true, name, section: sec };
   });
 
 export const moveSpecSheet = createServerFn({ method: "POST" })
