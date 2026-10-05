@@ -208,3 +208,12 @@ assert.equal(matched.value, "Amanda Logg");
 assert.equal(matched.options.some((o) => o.value === "Amanda Logg (AL)"), false);
 
 console.log("pre-inspection rules ok");
+
+import { showChecklist } from "../src/lib/ops/pre-inspection.ts";
+
+// A replacement unit is asked about site requirements before the form opens.
+assert.equal(showChecklist("new", null), true);
+assert.equal(showChecklist(null, null), true);
+assert.equal(showChecklist("replace", null), false);
+assert.equal(showChecklist("replace", true), true);
+assert.equal(showChecklist("replace", false), true);

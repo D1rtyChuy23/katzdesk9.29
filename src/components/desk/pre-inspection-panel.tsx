@@ -5,12 +5,15 @@ import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
   addInspectionPhoto,
+  copyInspectionFromExisting,
   copyInspectionNa,
   getInstallInspection,
+  listReplaceSources,
   removeInspectionPhoto,
   saveInspectionCoreHole,
   saveInspectionItem,
   saveInspectionMeta,
+  setInspectionVisit,
   type InspectionItem,
   type InspectionMachine,
   type InspectionPhoto,
@@ -22,6 +25,7 @@ import {
   INSPECTION_ITEM_STATUSES,
   inspectorChoices,
   itemSaveError,
+  showChecklist,
   showCoreHoleQuestion,
   spacePassError,
   type CoreHoleAnswer,
@@ -397,6 +401,9 @@ function MachineDetail({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not copy"),
   });
+  // Bumped when results are copied in, so each line shows what was copied instead of what was typed before.
+  const [rev, setRev] = useState(0);
+  const form = showChecklist(machine.visitKind, machine.reqsSame);
 
   return (
     <div data-testid="machine-detail">
@@ -413,7 +420,16 @@ function MachineDetail({
         </div>
         <InspectionBadge overall={machine.overall} />
       </div>
-      {sources.length ? (
+      <VisitChoice
+        view={view}
+        machine={machine}
+        onSaved={onSaved}
+        onCopied={(next) => {
+          onSaved(next);
+          setRev((n) => n + 1);
+        }}
+      />
+      {form && sources.length ? (
         <div className="flex flex-wrap gap-2 px-4 pt-3">
           {sources.map((m) => (
             <Button
@@ -429,11 +445,12 @@ function MachineDetail({
           ))}
         </div>
       ) : null}
-      <div className="space-y-3 px-3 py-3 pb-24">
+      {form ? (
+      <div className="space-y-3 px-3 py-3 pb-24" data-testid="machine-checklist">
         {machine.items.map((item) =>
           item.category === "space" ? (
             <SpaceSection
-              key={`${machine.equipmentId}-space`}
+              key={`${machine.equipmentId}-space-${rev}`}
               view={view}
               machine={machine}
               item={item}
@@ -441,7 +458,7 @@ function MachineDetail({
             />
           ) : (
             <ItemRow
-              key={`${machine.equipmentId}-${item.category}`}
+              key={`${machine.equipmentId}-${item.category}-${rev}`}
               installId={view.installId}
               equipmentId={machine.equipmentId}
               item={item}
@@ -450,6 +467,9 @@ function MachineDetail({
           ),
         )}
       </div>
+      ) : (
+        <div className="pb-24" />
+      )}
       <div className="sticky bottom-0 z-10 flex gap-2 border-t border-border bg-card px-3 py-3">
         <Button type="button" className="h-12 flex-1 text-base" onClick={() => toast.success("Saved")}>
           Save
@@ -458,6 +478,139 @@ function MachineDetail({
           Next machine
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * New install, or replacing equipment already on the account. A replacement with the same site requirements
+ * takes the existing unit's results — nothing is re-shot — and any one item can still be changed.
+ */
+function VisitChoice({
+  view,
+  machine,
+  onSaved,
+  onCopied,
+}: {
+  view: InspectionView;
+  machine: InspectionMachine;
+  onSaved: (v: InspectionView) => void;
+  onCopied: (v: InspectionView) => void;
+}) {
+  const ids = { installId: view.installId, equipmentId: machine.equipmentId };
+  const replacing = machine.visitKind === "replace";
+  const [again, setAgain] = useState(false);
+  const asking = replacing && (machine.reqsSame == null || again);
+  const sources = useQuery({
+    queryKey: ["inspection-replace-sources", view.installId, machine.equipmentId],
+    queryFn: () => listReplaceSources({ data: ids }),
+    enabled: asking,
+  });
+  const fail = (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save");
+  const kind = useMutation({
+    mutationFn: (v: { kind: "new" | "replace"; reqsSame?: boolean | null }) => setInspectionVisit({ data: { ...ids, ...v } }),
+    onSuccess: (next) => {
+      setAgain(false);
+      onSaved(next);
+    },
+    onError: fail,
+  });
+  const copy = useMutation({
+    mutationFn: (from: { installId: number; equipmentId: number }) =>
+      copyInspectionFromExisting({ data: { ...ids, fromInstallId: from.installId, fromEquipmentId: from.equipmentId } }),
+    onSuccess: (next) => {
+      toast.success("Copied. Nothing to re-shoot; change any item if it differs.");
+      setAgain(false);
+      onCopied(next);
+    },
+    onError: fail,
+  });
+  const busy = kind.isPending || copy.isPending;
+  const list = sources.data ?? [];
+  return (
+    <div className="px-3 pt-3" data-testid="visit-choice">
+      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="What is this unit?">
+        <Button
+          type="button"
+          role="radio"
+          aria-checked={!replacing}
+          variant={!replacing ? "default" : "outline"}
+          className="h-12 text-sm"
+          disabled={busy}
+          onClick={() => replacing && kind.mutate({ kind: "new" })}
+          data-testid="visit-new"
+        >
+          New Install
+        </Button>
+        <Button
+          type="button"
+          role="radio"
+          aria-checked={replacing}
+          variant={replacing ? "default" : "outline"}
+          className="h-12 text-sm whitespace-normal"
+          disabled={busy}
+          onClick={() => !replacing && kind.mutate({ kind: "replace", reqsSame: null })}
+          data-testid="visit-replace"
+        >
+          Replacing Existing Equipment
+        </Button>
+      </div>
+      {asking ? (
+        <div className="mt-3 rounded-lg border border-border p-3" data-testid="replace-question">
+          <p className="font-medium">Are the site requirements the same as the unit it replaces?</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Same: pick the unit and its pass/fail, notes, photos and core hole are copied here. Nothing is re-shot, and you can still change any one item.
+          </p>
+          {sources.isLoading ? (
+            <p className="mt-3 text-sm text-muted-foreground">Looking for equipment on this account…</p>
+          ) : list.length ? (
+            <ul className="mt-3 grid gap-2" data-testid="replace-sources">
+              {list.map((s) => (
+                <li key={`${s.installId}-${s.equipmentId}`}>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => copy.mutate(s)}
+                    className="desk-flat flex min-h-14 w-full items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 text-left hover:border-primary/60 disabled:opacity-60"
+                    data-testid="replace-source"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium break-words">Same As {s.name}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {[s.serial ? `SN ${s.serial}` : "No serial", `${s.photoCount} photo${s.photoCount === 1 ? "" : "s"}`].join(" · ")}
+                      </span>
+                    </span>
+                    <InspectionBadge overall={s.overall} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground" data-testid="replace-none">
+              No equipment on this account has a pre-inspection to copy. Fill in this one.
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-3 h-12 w-full text-sm"
+            disabled={busy}
+            onClick={() => kind.mutate({ kind: "replace", reqsSame: false })}
+            data-testid="replace-differ"
+          >
+            {list.length ? "Requirements Differ: Open The Form" : "Open The Form"}
+          </Button>
+        </div>
+      ) : replacing ? (
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground" data-testid="replace-note">
+          {machine.reqsSame && machine.copiedFrom
+            ? `Copied from ${machine.copiedFrom}. Change any item below if it differs.`
+            : "Requirements differ from the unit it replaces: inspect each item below."}
+          <button type="button" className="underline" onClick={() => setAgain(true)} data-testid="replace-again">
+            Copy from another unit
+          </button>
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -494,7 +647,7 @@ function SpaceSection({
           onSaved={onSaved}
         />
       ) : null}
-      {show && machine.coreNeeded === "yes" ? <CoreDiameterHint model={machine.model || machine.name} /> : null}
+      {show && machine.coreNeeded === "yes" ? <CoreDiameterHint model={machine.coreModel || machine.model || machine.name} existing={!!machine.coreModel} /> : null}
       {show && machine.coreNeeded === "yes" ? (
         <ItemRow
           key={`${machine.equipmentId}-core`}
@@ -509,7 +662,7 @@ function SpaceSection({
 }
 
 /** The hole size to core, from the Library spec sheet (espresso default 3"). Blank when nothing is stored. */
-function CoreDiameterHint({ model }: { model: string }) {
+function CoreDiameterHint({ model, existing }: { model: string; existing?: boolean }) {
   const q = useQuery({
     queryKey: ["core-hole", model],
     queryFn: () => coreHoleForModels({ data: { models: [model] } }),
@@ -528,6 +681,7 @@ function CoreDiameterHint({ model }: { model: string }) {
       data-testid="core-diameter-hint"
     >
       {missing ? "Counter core hole: diameter not set — add it on the spec sheet in The Library" : hint!.label}
+      {existing ? <span className="block text-xs font-normal text-muted-foreground" data-testid="core-diameter-existing">Hole already in the counter, from the unit being replaced ({model})</span> : null}
       {hint?.sheet ? <span className="block text-xs font-normal text-muted-foreground">From the {hint.sheet} spec sheet</span> : null}
       {hint?.source === "espresso" ? <span className="block text-xs font-normal text-muted-foreground">Espresso default</span> : null}
     </p>

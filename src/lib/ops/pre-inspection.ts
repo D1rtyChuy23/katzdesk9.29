@@ -214,6 +214,18 @@ export function spacePassError(input: {
   return null;
 }
 
+export type VisitKind = "new" | "replace";
+export const isVisitKind = (v: unknown): v is VisitKind => v === "new" || v === "replace";
+
+/**
+ * A new install gets the full one-machine form. A unit replacing existing equipment is asked first whether
+ * the site requirements are the same: same → the existing results are copied and the form opens filled in
+ * (any one item can still be changed); different → the normal form.
+ */
+export function showChecklist(kind: VisitKind | null | undefined, reqsSame: boolean | null | undefined): boolean {
+  return kind !== "replace" || reqsSame != null;
+}
+
 export function canMarkInstalled(
   summary: Pick<InspectionSummary, "overall" | "overrideReason"> | null | undefined,
 ): boolean {

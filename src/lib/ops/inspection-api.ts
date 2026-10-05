@@ -18,6 +18,7 @@ import {
   isInspectionCategory,
   isInspectionItemStatus,
   isSavableCategory,
+  isVisitKind,
   itemSaveError,
   rollupSite,
   spacePassError,
@@ -26,6 +27,7 @@ import {
   type InspectionItemStatus,
   type InspectionOverall,
   type InspectionSummary,
+  type VisitKind,
 } from "@/lib/ops/pre-inspection";
 
 export type {
@@ -76,6 +78,24 @@ export type InspectionMachine = {
   items: InspectionItem[];
   coreNeeded: CoreHoleAnswer | null;
   core: InspectionItem;
+  /** New install, or replacing equipment already on the account. */
+  visitKind: VisitKind;
+  /** Replacing only: are the site requirements the same? Null until answered. */
+  reqsSame: boolean | null;
+  /** The existing unit whose results were copied here, e.g. "Bunn Axiom DV-APS · SN 123". */
+  copiedFrom: string | null;
+  /** The model whose core hole is already in the counter (the unit being replaced). */
+  coreModel: string | null;
+};
+
+/** An existing unit on the same account with pre-inspection results that can be copied. */
+export type ReplaceSource = {
+  installId: number;
+  equipmentId: number;
+  name: string;
+  serial: string | null;
+  overall: InspectionOverall;
+  photoCount: number;
 };
 
 export type InspectionView = InspectionSummary & {
@@ -576,10 +596,17 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
       serial: string | null;
       electrical: string | null;
       core_needed: string | null;
+      visit_kind: string | null;
+      reqs_same: boolean | null;
+      core_model: string | null;
+      from_name: string | null;
+      from_serial: string | null;
     }>(
-      `select u.equipment_id, a.catalog_model, a.equipment_name, a.serial, a.electrical, u.core_needed
+      `select u.equipment_id, a.catalog_model, a.equipment_name, a.serial, a.electrical, u.core_needed,
+              u.visit_kind, u.reqs_same, u.core_model, f.equipment_name as from_name, f.serial as from_serial
          from install_inspection_units u
          join account_equipment a on a.id = u.equipment_id
+         left join account_equipment f on f.id = u.copied_from_equipment
         where u.install_id = $1
         order by a.id`,
       [installId],
@@ -616,6 +643,10 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
       failedItems: failedItemLabels(inputs, coreNeeded),
       photoCount: unitPhotos.length,
       thumb: unitPhotos[0]?.dataUrl ?? null,
+      visitKind: isVisitKind(u.visit_kind) ? u.visit_kind : "new",
+      reqsSame: u.visit_kind === "replace" && u.reqs_same != null ? !!u.reqs_same : null,
+      copiedFrom: u.from_name ? [u.from_name, u.from_serial ? `SN ${u.from_serial}` : null].filter(Boolean).join(" · ") : null,
+      coreModel: u.core_model ?? null,
       coreNeeded,
       core: {
         category: CORE_HOLE_CATEGORY,
@@ -955,6 +986,137 @@ export const copyInspectionNa = createServerFn({ method: "POST" })
       [data.installId, data.toEquipmentId, row.category, row.notes],
       );
     }
+    const view = await readInspection(sql, data.installId);
+    if (!view) throw new Error("Install not found");
+    return view;
+  });
+
+const visitInput = z.object({
+  installId: z.number().int().positive(),
+  equipmentId: z.number().int().positive(),
+  kind: z.enum(["new", "replace"]),
+  /** Replacing only. false = requirements differ: the normal form opens and nothing is copied. */
+  reqsSame: z.boolean().nullable().optional(),
+});
+
+/** New install or replacing existing equipment. Results already saved on the unit are never removed. */
+export const setInspectionVisit = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof visitInput>) => visitInput.parse(d))
+  .handler(async ({ data }): Promise<InspectionView> => {
+    const sql = await ready();
+    await requireInstall(sql, data.installId);
+    await ensureUnits(sql, data.installId);
+    await requireUnit(sql, data.installId, data.equipmentId);
+    await sql.query(
+      `update install_inspection_units set visit_kind = $3, reqs_same = $4 where install_id = $1 and equipment_id = $2`,
+      [data.installId, data.equipmentId, data.kind, data.kind === "replace" ? data.reqsSame ?? null : null],
+    );
+    const view = await readInspection(sql, data.installId);
+    if (!view) throw new Error("Install not found");
+    return view;
+  });
+
+const unitInput = z.object({ installId: z.number().int().positive(), equipmentId: z.number().int().positive() });
+
+async function replaceSources(sql: Sql, installId: number, equipmentId: number, customer: string): Promise<ReplaceSource[]> {
+  const units = await sql.query<{ install_id: number; equipment_id: number; equipment_name: string; catalog_model: string; serial: string | null; core_needed: string | null }>(
+    `select u.install_id, u.equipment_id, a.equipment_name, a.catalog_model, a.serial, u.core_needed
+       from install_inspection_units u
+       join installs i on i.id = u.install_id
+       join account_equipment a on a.id = u.equipment_id
+      where lower(i.customer) = lower($3)
+        and not (u.install_id = $1 and u.equipment_id = $2)
+        and exists (select 1 from install_inspection_items t
+                     where t.install_id = u.install_id and t.equipment_id = u.equipment_id and t.status <> 'Not inspected')
+      order by u.install_id desc, a.id`,
+    [installId, equipmentId, customer],
+  );
+  const out: ReplaceSource[] = [];
+  for (const u of units) {
+    const items = await sql.query<{ category: string; status: string }>(
+      "select category, status from install_inspection_items where install_id = $1 and equipment_id = $2",
+      [u.install_id, u.equipment_id],
+    );
+    const photos = await sql.query<{ n: number }>(
+      "select count(*)::int as n from install_inspection_photos where install_id = $1 and equipment_id = $2",
+      [u.install_id, u.equipment_id],
+    );
+    out.push({
+      installId: Number(u.install_id),
+      equipmentId: Number(u.equipment_id),
+      name: u.equipment_name || u.catalog_model,
+      serial: u.serial,
+      overall: inspectionOverall(items, isCoreHoleAnswer(u.core_needed) ? u.core_needed : null),
+      photoCount: Number(photos[0]?.n) || 0,
+    });
+  }
+  return out;
+}
+
+/** Existing equipment on this account whose pre-inspection can be copied onto a replacement unit. */
+export const listReplaceSources = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof unitInput>) => unitInput.parse(d))
+  .handler(async ({ data }): Promise<ReplaceSource[]> => {
+    const sql = await ready();
+    const install = await requireInstall(sql, data.installId);
+    return replaceSources(sql, data.installId, data.equipmentId, install.customer);
+  });
+
+const copyFromInput = unitInput.extend({ fromInstallId: z.number().int().positive(), fromEquipmentId: z.number().int().positive() });
+
+/**
+ * Replacing existing equipment with the same site requirements: the existing unit's pass/fail, notes,
+ * photos and core hole (answer, check and the size already in the counter) are copied onto this unit.
+ * Nothing has to be re-shot; any one item can still be changed afterwards.
+ */
+export const copyInspectionFromExisting = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof copyFromInput>) => copyFromInput.parse(d))
+  .handler(async ({ data }): Promise<InspectionView> => {
+    const sql = await ready();
+    const install = await requireInstall(sql, data.installId);
+    await ensureUnits(sql, data.installId);
+    await requireUnit(sql, data.installId, data.equipmentId);
+    const sources = await replaceSources(sql, data.installId, data.equipmentId, install.customer);
+    if (!sources.some((s) => s.installId === data.fromInstallId && s.equipmentId === data.fromEquipmentId)) {
+      throw new Error("That unit has no pre-inspection on this account to copy.");
+    }
+    const from = await sql.query<{ core_needed: string | null; core_model: string | null; catalog_model: string; equipment_name: string }>(
+      `select u.core_needed, u.core_model, a.catalog_model, a.equipment_name
+         from install_inspection_units u join account_equipment a on a.id = u.equipment_id
+        where u.install_id = $1 and u.equipment_id = $2`,
+      [data.fromInstallId, data.fromEquipmentId],
+    );
+    await ensureHead(sql, data.installId);
+    await sql.query(
+      `insert into install_inspection_items (install_id, equipment_id, category, status, notes)
+       select $1, $2, category, status, notes from install_inspection_items
+        where install_id = $3 and equipment_id = $4 and status <> 'Not inspected'
+       on conflict (install_id, equipment_id, category)
+       do update set status = excluded.status, notes = excluded.notes, updated_at = now()`,
+      [data.installId, data.equipmentId, data.fromInstallId, data.fromEquipmentId],
+    );
+    // Photos are copied once per line: a line that already has its own photos keeps them.
+    await sql.query(
+      `insert into install_inspection_photos (install_id, equipment_id, category, caption, mime, data_url, uploaded_by)
+       select $1, $2, p.category, p.caption, p.mime, p.data_url, p.uploaded_by
+         from install_inspection_photos p
+        where p.install_id = $3 and p.equipment_id = $4
+          and not exists (select 1 from install_inspection_photos t
+                           where t.install_id = $1 and t.equipment_id = $2 and t.category = p.category)
+        order by p.uploaded_at, p.id`,
+      [data.installId, data.equipmentId, data.fromInstallId, data.fromEquipmentId],
+    );
+    const hole = from[0]?.core_needed === "yes" ? from[0].core_model || from[0].catalog_model || from[0].equipment_name : null;
+    await sql.query(
+      `update install_inspection_units
+          set visit_kind = 'replace', reqs_same = true, copied_from_install = $3, copied_from_equipment = $4,
+              core_needed = coalesce($5, core_needed), core_model = $6
+        where install_id = $1 and equipment_id = $2`,
+      [data.installId, data.equipmentId, data.fromInstallId, data.fromEquipmentId, isCoreHoleAnswer(from[0]?.core_needed) ? from[0]!.core_needed : null, hole],
+    );
     const view = await readInspection(sql, data.installId);
     if (!view) throw new Error("Install not found");
     return view;
