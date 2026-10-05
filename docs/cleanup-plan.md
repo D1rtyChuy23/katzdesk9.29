@@ -306,3 +306,23 @@ Gates: lint 0 errors, typecheck and build pass; tests 165 passing, 9 failing (th
 - The type button in Manage shows on manuals only.
 
 Checked in the running app: the picker shows the five types with no Parts Diagram, nothing is filed while it waits, and "Service And Repair Manual" files as `<Book> - Service And Repair Manual`. Gates as before.
+
+## 10. Library Families, First-Word Filing, Grinder Specs, Secondary Tech
+
+Checked in the running app at 1280px and 390px.
+
+### Changed
+
+- **Library pathway.** Manufacturer tile, then a Family row (one chip per family: Axiom, FPG, G9, ITCB, Nitron), then that family's variations only. The title reads `<Maker> · <Family>`. A family is the model's first word, up to the first dash or space. Selecting a variation still lists only that variation's spec, manuals and parts. Chip labels are unchanged. No data moved: a family is worked out from the model name.
+- **Filing by the first word.** The first word of a document's file name is its model variation (a leading maker name is skipped). The same name files under that chip, whichever model is open. A different name asks once, then makes a new chip; it is never merged into a nearby model. If an existing chip's whole name opens the file name ("G9-2T HD Stainless spec.pdf"), that chip wins. A first word that is not a model (a part number, a date, "Manual") files as before: into the open model, else the picker.
+- **Grinders.** `isGrinder`: G9 / G9-2T, Mazzer, Mahlkonig, Ditting, Baratza, EK43, or a category that says grinder. Water And Drain is hidden on the spec sheet, the edit form and the copied configuration; the 3/8" inlet default is not filled in and is removed where it was only ever the default. Power, plug and size are unchanged. Stored water or drain values are hidden, not deleted.
+- **Secondary tech.** Tickets and TLC have a Secondary Tech field (`service_jobs.technician2`, migration 0046). It shows in the list as "Primary + Secondary", in the tech filter, in My View, in the two ticket exports (same Tech column), and on the Planner Day board, where the ticket also shows on the secondary's row as a dashed copy that opens the ticket but is moved from the primary's row. The secondary cannot be the same person as the primary.
+
+### Left as is, on purpose
+
+- PMs and installs have no secondary tech.
+- The new-ticket form has no secondary tech; it is set on the ticket after it is opened.
+- Spec sheets read by AI are still filed by the maker and model the sheet states, not the file name.
+- A document added from the top-level Add Files with no maker in its name and no matching chip still opens the model picker.
+
+Gates: lint 0 errors, typecheck and build pass; tests 170 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load.
