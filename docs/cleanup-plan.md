@@ -275,3 +275,26 @@ Checked in the running app at 1440px and 390px (Playwright, real touch drag for 
 - Hover was spot-checked, not exhaustively re-audited on every page.
 
 Gates: lint 0 errors, typecheck and build pass; tests 156 passing, 9 failing (the same 9 Grok share-card failures).
+
+## 8. Manual Types, Menus, Wire Labels, Replace-Existing, Day Board
+
+Checked in the running app at 1280px and at 390px (touch drag on the phone width).
+
+### Changed
+
+- **Library manuals.** A file added under Manuals is named by its type: Parts Diagram, Operating / Installation Manual, Cleaning Manual, Programming Manual or User Manual. An obvious file name decides; otherwise the list is shown and nothing is filed until one is picked (the server refuses a manual with no type). Files are named `<Book> - <Type>`, where the book is maker + model, for example `Bunn Axiom-DV-APS - Cleaning Manual`. A Parts Diagram is filed on the Parts shelf. One book per variation is unchanged. In Manage, a tag button sets the type on a manual stored before this. New column `library_files.doc_type` (migration 0043).
+- **Second menus.** `ActionMenu` (Import / Export on Tickets and TLC, Export on Installs and PMs) closes on select, on a click outside and on Escape, and stays closed when the import or export finishes. It was a `<details>` that never closed.
+- **Wire field.** The options read "3-wire — 2 hots, ground" and "4-wire — 2 hots, neutral, ground". L6 / L14 stay on the Plug field. Plug rules are untouched.
+- **Pre-inspection.** Each unit is New Install (default) or Replacing Existing Equipment. Replacing asks whether the site requirements are the same: same → pick the existing unit on that account and its pass/fail, notes, photos, core hole answer and check are copied, with the hole size taken from the replaced model; any item can still be changed. Different → the normal one-machine form. Pass/fail rules are unchanged. New columns on `install_inspection_units` (migration 0045).
+- **Planner day board.** New Day tab: tech rows, hour columns 7a–9p plus No Time, blocks colored by type with the account name. Drag to another time (hour or half past) or another tech; the drop saves date, time and tech in one write. Day / Week toggle, previous / next / Today, click opens the record. Completed and cancelled work shows dimmed with a lock and does not drag; the server refuses it too. New column `sched_time` on `service_jobs`, `pm_jobs`, `installs` (migration 0044).
+
+### Left as is, on purpose
+
+- Manuals stored before this keep the name "Manual" until someone sets the type in Manage.
+- A file dropped straight on Parts Diagram is still named "Parts Book"; one typed as Parts Diagram from Manuals is named "Parts Diagram". Both sit on the Parts shelf.
+- The Plug note still reads "Wire count missing — confirm 3-wire L6 or 4-wire L14." That is the Plug field, not the wire field.
+- Blocks are one hour wide: tickets, PMs and installs have no duration field.
+- The month calendar and the Pending Calendar window are unchanged; they do not show the time of day.
+- "Equipment already on the account" is only skipped through the Replacing choice. No unit is skipped automatically.
+
+Gates: lint 0 errors, typecheck and build pass; tests 165 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load.
