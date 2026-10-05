@@ -2,7 +2,7 @@
  * The Library — plain-text copy for Outlook/Teams. Pure: no DOM, safe for node --test.
  * Short lines, no markdown tables, so it pastes cleanly into an email or chat.
  */
-import { coreHoleInfo } from "./spec-defaults.ts";
+import { coreHoleInfo, isGrinder } from "./spec-defaults.ts";
 import type { Dimensions, Drain, Power, Requirements, SpecConfig, SpecSheetDraft, Water } from "./spec-schema.ts";
 
 const has = (v: string | undefined | null): v is string => !!v && !!v.trim();
@@ -61,8 +61,9 @@ export function sizeLines(d: Dimensions | undefined): string[] {
   return out;
 }
 
-export function requirementLines(r: Requirements): string[] {
-  const lines = [powerLine(r.power), waterLine(r.water), drainLine(r.drain), ...sizeLines(r.dimensions)].filter(
+export function requirementLines(r: Requirements, opts?: { noWater?: boolean }): string[] {
+  const wet = opts?.noWater ? [] : [waterLine(r.water), drainLine(r.drain)];
+  const lines = [powerLine(r.power), ...wet, ...sizeLines(r.dimensions)].filter(
     (l): l is string => !!l,
   );
   for (const row of r.other ?? []) if (has(row.label) && has(row.value)) lines.push(`${row.label.trim()}: ${row.value.trim()}`);
@@ -80,7 +81,7 @@ function title(sheet: SheetLike): string {
 export function copyConfig(sheet: SheetLike, config: SpecConfig): string {
   const label = config.label?.trim();
   const head = label && !/^standard$/i.test(label) ? `${title(sheet)} - ${label}` : title(sheet);
-  const lines = requirementLines(config.requirements);
+  const lines = requirementLines(config.requirements, { noWater: isGrinder(sheet) });
   const core = coreHoleInfo({
     manufacturer: sheet.manufacturer,
     model: sheet.model,

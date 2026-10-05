@@ -66,7 +66,7 @@ function sheetSaysLocking(plug: string | undefined): string | null {
 }
 
 /** Sheet identity, for model exceptions (Bunn Axiom at 220 V is 4-wire). */
-export type PlugContext = { manufacturer?: string | null; model?: string | null };
+export type PlugContext = { manufacturer?: string | null; model?: string | null; category?: string | null };
 
 export type WireCount = 3 | 4;
 export const WIRES_4 = "4-wire (2 hots, neutral, ground)";
@@ -227,7 +227,11 @@ export type DefaultsMode =
 export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode, ctx?: PlugContext): SpecConfig {
   const req = c.requirements ?? {};
   const water = { ...(req.water ?? {}) };
-  if (mode === "generate" || !water.inlet?.trim()) water.inlet = DEFAULT_INLET;
+  // A grinder has no water line: no inlet is filled in, and one that was only ever our default is taken back out.
+  const dry = isGrinder(ctx);
+  if (dry) {
+    if (water.inlet?.trim() === DEFAULT_INLET) delete water.inlet;
+  } else if (mode === "generate" || !water.inlet?.trim()) water.inlet = DEFAULT_INLET;
   const power = { ...(req.power ?? {}) };
   const d = decidePlug(power, ctx);
   if (d.cls !== "unknown") {
@@ -243,7 +247,7 @@ export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode, ctx?: Plu
 export function applySpecDefaults<T extends SpecSheetDraft>(draft: T, mode: DefaultsMode): T {
   const configs = draft.configs.length ? draft.configs : [{ label: "Standard", requirements: {} }];
   const core = espressoCoreDefaults(draft);
-  const ctx = { manufacturer: draft.manufacturer, model: draft.model };
+  const ctx = { manufacturer: draft.manufacturer, model: draft.model, category: draft.category };
   return { ...draft, ...core, configs: configs.map((c) => applyConfigDefaults(c, mode, ctx)) };
 }
 
@@ -251,6 +255,20 @@ export function applySpecDefaults<T extends SpecSheetDraft>(draft: T, mode: Defa
 
 export const DEFAULT_CORE_DIAMETER = '3"';
 const ESPRESSO_MAKERS = /\b(la\s*marzocco|eversys|rancilio|faema|slayer|synesso|nuova\s*simonelli|victoria\s*arduino|franke|schaerer|thermoplan|wmf|cimbali)\b/i;
+
+const GRINDER_NAMES = /\bgrinders?\b|\bmazzer\b|\bmahlk[oö]e?nig\b|\bditting\b|\bbaratza\b|\bg9(?![a-z0-9])|\bek\s?43\b/i;
+
+/**
+ * Grinder: G9, G9-2T, Mazzer, Mahlkonig, or any sheet whose category says grinder. Grinders take no water and
+ * have no drain, so those sections are not shown, copied or defaulted. A category that names another kind wins.
+ */
+export function isGrinder(sheet: { manufacturer?: string | null; model?: string | null; category?: string | null } | null | undefined): boolean {
+  if (!sheet) return false;
+  const cat = sheet.category ?? "";
+  if (/grinder/i.test(cat)) return true;
+  if (/espresso|brewer|water|filtration|fridge|refrigerat|blender|dispenser/i.test(cat)) return false;
+  return GRINDER_NAMES.test(`${sheet.manufacturer ?? ""} ${sheet.model ?? ""}`);
+}
 
 /** Espresso machine: La Marzocco, Eversys, Rancilio, Faema… or a catalog/category marked espresso. Grinders don't count. */
 export function isEspresso(sheet: { manufacturer?: string | null; model?: string | null; category?: string | null }): boolean {

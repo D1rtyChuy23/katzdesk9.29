@@ -3,7 +3,7 @@ import { Check, ClipboardCopy, Droplets, ImageIcon, Pencil, Plug, RefreshCw, Rul
 import { toast } from "sonner";
 import { amps, copyAll, copyConfig, CORE_HOLE_NOTE, hz, phase, volts } from "@/lib/ops/spec-copy";
 import type { Requirements, SavedSpecSheet, SpecConfig, SpecSheetDraft } from "@/lib/ops/spec-schema";
-import { coreHoleInfo, defaultPlugNote, nemaCode, type CoreHoleInfo, type PlugContext } from "@/lib/ops/spec-defaults";
+import { coreHoleInfo, defaultPlugNote, isGrinder, nemaCode, type CoreHoleInfo, type PlugContext } from "@/lib/ops/spec-defaults";
 import { getSpecImage } from "@/lib/ops/spec-library";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -202,7 +202,8 @@ export function RequirementsCard({ req, core, ctx }: { req: Requirements; core?:
         <PlugSection power={req.power} ctx={ctx} />
       </Block>
     ) : null,
-    any(water) ? <Block key="w" icon={Droplets} title="Water And Drain"><Rows rows={water} /></Block> : null,
+    // Grinders take no water and have no drain: the section is never shown, even if an old value is stored.
+    any(water) && !isGrinder(ctx) ? <Block key="w" icon={Droplets} title="Water And Drain"><Rows rows={water} /></Block> : null,
     any(dims) || core ? (
       <Block key="d" icon={Ruler} title="Space / Core Hole">
         <Rows rows={dims} />

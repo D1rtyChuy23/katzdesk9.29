@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ConfigChips, DimensionsImage, EquipmentImage, PlugSection, REQUIREMENT_GROUPS } from "./spec-sheet";
-import { applyConfigDefaults, coreHoleInfo, isEspresso, WIRES_3, WIRES_4 } from "@/lib/ops/spec-defaults";
+import { applyConfigDefaults, coreHoleInfo, isEspresso, isGrinder, WIRES_3, WIRES_4 } from "@/lib/ops/spec-defaults";
 
 type Stage = "drop" | "reading" | "review";
 
@@ -382,6 +382,8 @@ export function SpecEditor({
   const dimsRef = useRef<HTMLInputElement>(null);
   const core = coreHoleInfo(draft);
   const espresso = isEspresso(draft);
+  // Grinders: no Water And Drain box. Power, plug and size stay.
+  const grinder = isGrinder(draft);
   const idx = Math.min(sel, Math.max(0, draft.configs.length - 1));
   const config = draft.configs[idx];
   const set = (patch: Partial<SpecSheetDraft>) => onChange({ ...draft, ...patch });
@@ -613,11 +615,12 @@ export function SpecEditor({
                     onClick={() => set({ configs: draft.configs.map((c, i) => (i === idx ? applyConfigDefaults(c, "generate", draft) : c)) })}
                     data-testid="ed-plug-rules"
                   >
-                    <RotateCcw className="size-3.5" /> Set Plug, Breaker And Inlet From The Electrical
+                    <RotateCcw className="size-3.5" /> {grinder ? "Set Plug And Breaker From The Electrical" : "Set Plug, Breaker And Inlet From The Electrical"}
                   </button>
                   <PlugSection power={config.requirements.power} ctx={draft} />
                 </div>
               </Group>
+              {grinder ? null : (
               <Group title="Water And Drain">
                 {WATER_FIELDS.map(([k, l]) => (
                   <Field key={k} label={l} value={config.requirements.water?.[k]} onChange={(v) => setReq("water", k, v)} testId={`ed-water-${k}`} />
@@ -626,6 +629,7 @@ export function SpecEditor({
                   <Field key={`d-${k}`} label={l} value={config.requirements.drain?.[k]} onChange={(v) => setReq("drain", k, v)} testId={`ed-drain-${k}`} />
                 ))}
               </Group>
+              )}
               <Group title="Dimensions">
                 {DIM_FIELDS.map(([k, l]) => (
                   <Field key={k} label={l} value={config.requirements.dimensions?.[k]} onChange={(v) => setReq("dimensions", k, v)} testId={`ed-dim-${k}`} />

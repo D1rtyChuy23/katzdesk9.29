@@ -230,3 +230,32 @@ test("non-espresso: no invented 3\", diameter required when Yes", () => {
   assert.equal(normalizeDiameter("3 in"), '3"');
   assert.equal(normalizeDiameter("76 mm"), "76 mm");
 });
+
+import { isGrinder, applySpecDefaults as applyAll, DEFAULT_INLET as INLET } from "../src/lib/ops/spec-defaults.ts";
+
+test("grinders are recognized by model, maker or category", () => {
+  assert.equal(isGrinder({ manufacturer: "BUNN", model: "G9-2T HD Stainless" }), true);
+  assert.equal(isGrinder({ manufacturer: "BUNN", model: "G9" }), true);
+  assert.equal(isGrinder({ manufacturer: "Mazzer", model: "Super Jolly" }), true);
+  assert.equal(isGrinder({ manufacturer: "Mahlkonig", model: "E65S" }), true);
+  assert.equal(isGrinder({ manufacturer: "Acme", model: "X1", category: "Grinder" }), true);
+  assert.equal(isGrinder({ manufacturer: "BUNN", model: "Axiom-DV-APS" }), false);
+  assert.equal(isGrinder({ manufacturer: "BUNN", model: "G95 Brewer" }), false);
+  assert.equal(isGrinder({ manufacturer: "La Marzocco", model: "Linea PB" }), false);
+});
+
+test("a grinder gets no water inlet, and its copy has no Water or Drain line", () => {
+  const g9 = { manufacturer: "BUNN", model: "G9-2T HD Stainless", specs: [], mfrNotes: {}, configs: [{ label: "Standard", requirements: { power: { voltage: "120", amps: "9" }, water: { inlet: INLET }, drain: { size: '1/2"' }, dimensions: { width: "16" } } }] };
+  const made = applyAll(g9, "generate");
+  assert.equal(made.configs[0].requirements.water?.inlet, undefined);
+  assert.equal(made.configs[0].requirements.power.plug, "NEMA 5-15");
+  const filled = applyAll({ ...g9, configs: [{ label: "Standard", requirements: { power: { voltage: "120" } } }] }, "fill");
+  assert.equal(filled.configs[0].requirements.water?.inlet, undefined);
+  const text = copyConfig(g9, g9.configs[0]);
+  assert.equal(/Water|Drain/.test(text), false);
+  assert.match(text, /Power: 120V/);
+  assert.match(text, /Size: 16"W/);
+  // A brewer is unchanged: the inlet default still applies.
+  const brewer = applyAll({ manufacturer: "BUNN", model: "Axiom-DV-APS", specs: [], mfrNotes: {}, configs: [{ label: "Standard", requirements: {} }] }, "generate");
+  assert.equal(brewer.configs[0].requirements.water.inlet, INLET);
+});
