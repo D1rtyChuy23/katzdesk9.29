@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
 
@@ -415,7 +415,11 @@ export function FilterChip({
   );
 }
 
-/** Secondary page actions. Same button styles, one click behind the primary. */
+/**
+ * Secondary page actions. Same button styles, one click behind the primary.
+ * The list closes when a choice is made, on a click outside it, and on Escape; it never covers or locks the page.
+ * What the choice opens (a dialog, a file chooser) stays mounted while the list is closed.
+ */
 export function ActionMenu({
   label = "More",
   children,
@@ -423,15 +427,50 @@ export function ActionMenu({
   label?: string;
   children: ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const panelId = useId();
+  useEffect(() => {
+    if (!open) return;
+    const outside = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", outside, true);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("pointerdown", outside, true);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
   return (
-    <details className="group relative">
-      <summary className="inline-flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted [&::-webkit-details-marker]:hidden">
+    <div ref={root} className="relative" data-testid="action-menu" data-open={open ? "true" : "false"}>
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted"
+        data-testid="action-menu-button"
+      >
         {label}
-      </summary>
-      <div className="absolute right-0 z-30 mt-1 flex min-w-48 flex-col gap-1 rounded-md border border-border bg-card p-1.5 shadow-sm [&_button]:w-full [&_button]:justify-start">
+      </button>
+      <div
+        id={panelId}
+        hidden={!open}
+        // Any choice in the list closes it; the choice itself still runs.
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest("button, a, [role=menuitem]")) setOpen(false);
+        }}
+        className="absolute right-0 z-30 mt-1 flex min-w-48 flex-col gap-1 rounded-md border border-border bg-card p-1.5 shadow-sm [&_button]:w-full [&_button]:justify-start [&[hidden]]:hidden"
+        data-testid="action-menu-list"
+      >
         {children}
       </div>
-    </details>
+    </div>
   );
 }
 
