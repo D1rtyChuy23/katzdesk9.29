@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, fileError, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, sectionForType, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, fileError, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -261,7 +261,7 @@ export const startLibraryFile = createServerFn({ method: "POST" })
     // A manual is never filed as a plain "Manual": the type comes from the person, else from an obvious file name.
     const type = data.section === "manuals" ? data.docType ?? manualTypeFromName(data.name) : null;
     if (data.section === "manuals" && !type) throw new Error(`Pick the manual type for ${data.name} first.`);
-    const sec = type ? sectionForType(type) : data.section;
+    const sec = data.section;
     const name = await nameInBook(sql, data.bookId, sec, data.name, undefined, type);
     const rows = await sql.query<{ id: number }>(
       `insert into library_files (section, name, original_name, mime, size, token, added_by, added_by_name, book_id, doc_type)
@@ -288,7 +288,7 @@ export const moveLibraryFile = createServerFn({ method: "POST" })
     return { ok: true, name };
   });
 
-/** Name a stored manual by its type. A parts diagram moves to the parts; any other type sits with the manuals. */
+/** Name a stored manual by its type. Manuals only: parts files stay parts files. */
 export const setLibraryFileType = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number; docType: ManualType }) => z.object({ id: z.number().int().positive(), docType: z.enum(MANUAL_TYPES) }).parse(d))
@@ -300,9 +300,9 @@ export const setLibraryFileType = createServerFn({ method: "POST" })
       [data.id],
     );
     if (!file[0]) throw new Error("That file no longer exists.");
-    if (file[0].section === "spec") throw new Error("A spec sheet is not a manual.");
+    if (file[0].section !== "manuals") throw new Error("Only a manual has a manual type.");
     if (file[0].book_id == null) throw new Error("File it under a model first.");
-    const sec = sectionForType(data.docType);
+    const sec: LibrarySection = "manuals";
     const name = await nameInBook(sql, Number(file[0].book_id), sec, file[0].original_name || file[0].name, data.id, data.docType);
     await sql.query("update library_files set section = $2, name = $3, doc_type = $4, original_name = coalesce(original_name, $5) where id = $1", [data.id, sec, name, data.docType, file[0].name]);
     return { ok: true, name, section: sec };

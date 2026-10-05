@@ -298,3 +298,11 @@ Checked in the running app at 1280px and at 390px (touch drag on the phone width
 - "Equipment already on the account" is only skipped through the Replacing choice. No unit is skipped automatically.
 
 Gates: lint 0 errors, typecheck and build pass; tests 165 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load.
+
+## 9. Manual Type List
+
+- The manual types are now: Operating / Installation Manual, Cleaning Manual, Programming Manual, User Manual, Service And Repair Manual.
+- Parts Diagram is no longer a manual type. Parts files go only in the Parts Diagram drop zone. A file dropped on Manuals is never filed on the Parts shelf; a parts-sounding name there shows the list instead of guessing. This replaces the Parts Diagram lines in section 8.
+- The type button in Manage shows on manuals only.
+
+Checked in the running app: the picker shows the five types with no Parts Diagram, nothing is filed while it waits, and "Service And Repair Manual" files as `<Book> - Service And Repair Manual`. Gates as before.

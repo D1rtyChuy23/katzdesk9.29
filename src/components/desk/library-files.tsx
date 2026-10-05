@@ -92,7 +92,7 @@ export function DocRow({
       <SendButtons name={file.name} url={url} />
       {manage ? (
         <>
-          {onType && file.section !== "spec" && file.bookId != null ? (
+          {onType && file.section === "manuals" && file.bookId != null ? (
             <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Set the manual type for ${file.name}`} title="Set the manual type" onClick={() => onType(file)} data-testid="library-file-type">
               <Tag className="size-4" />
             </Button>
@@ -282,7 +282,7 @@ export function ManualTypePicker({
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent data-testid="manual-type-picker">
         <DialogTitle>What Kind Of Manual Is This?</DialogTitle>
-        <DialogDescription>{fileName} doesn't say. Pick the type; it is not filed until you do.</DialogDescription>
+        <DialogDescription>{fileName} doesn't say. Pick the type; it is not filed until you do. Parts files go in the Parts Diagram drop zone.</DialogDescription>
         <ul className="mt-3 grid gap-1.5" data-testid="manual-type-list">
           {MANUAL_TYPES.map((t) => (
             <li key={t}>
@@ -297,7 +297,7 @@ export function ManualTypePicker({
                 data-testid="manual-type"
               >
                 {t}
-                <span className="text-xs font-normal text-muted-foreground">{t === "Parts Diagram" ? "Kept with Parts" : t === current ? "Now" : ""}</span>
+                <span className="text-xs font-normal text-muted-foreground">{t === current ? "Now" : ""}</span>
               </button>
             </li>
           ))}

@@ -16,7 +16,7 @@ import {
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, sectionForType, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { pdfImages } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -124,7 +124,7 @@ function Page() {
           continue;
         }
       }
-      const shelf = type ? sectionForType(type) : section;
+      const shelf = section;
       let target = into ?? matchBook(file.name, known);
       if (!target) {
         target = await new Promise<LibraryBook | null>((resolve) => setAsk({ kind: "file", fileName: file.name, section: shelf, resolve }));

@@ -169,18 +169,17 @@ export function likelyBooks<T extends BookRef>(text: string, books: T[]): T[] {
 
 // ---- Manuals: named by what kind of manual they are ----
 
-export const MANUAL_TYPES = ["Parts Diagram", "Operating / Installation Manual", "Cleaning Manual", "Programming Manual", "User Manual"] as const;
+export const MANUAL_TYPES = ["Operating / Installation Manual", "Cleaning Manual", "Programming Manual", "User Manual", "Service And Repair Manual"] as const;
 export type ManualType = (typeof MANUAL_TYPES)[number];
 export const isManualType = (v: unknown): v is ManualType => MANUAL_TYPES.includes(v as ManualType);
-/** A parts diagram is kept with the parts, whatever it was dropped on. */
-export const sectionForType = (type: ManualType): LibrarySection => (type === "Parts Diagram" ? "parts" : "manuals");
+// Parts files are not a manual type: they only go in the Parts drop zone. A manual is never filed as a parts book.
 
 const TYPE_WORDS: [ManualType, RegExp][] = [
-  ["Parts Diagram", /\bparts?\b|\bexploded\b|\bipb\b/],
   ["Cleaning Manual", /\bclean(ing)?\b|\bsanitiz|\bdescal/],
   ["Programming Manual", /\bprogram(ming)?\b/],
   ["Operating / Installation Manual", /\binstall(ation)?\b|\boperat(ing|ion|ions|or|ors)\b/],
   ["User Manual", /\busers?\b|\bowners?\b/],
+  ["Service And Repair Manual", /\bservic(e|ing)\b|\brepairs?\b|\btroubleshoot(ing)?\b/],
 ];
 
 /**

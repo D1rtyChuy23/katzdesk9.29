@@ -143,7 +143,7 @@ test("a picture and a PDF on the same shelf get different names", () => {
   assert.equal(shelfFileName("Bunn Axiom Twin", "parts", "view.png", ["Bunn Axiom Twin - Parts Book.pdf"]), "Bunn Axiom Twin - Parts Book 2.png");
 });
 
-import { manualTypeFromName, sectionForType, MANUAL_TYPES } from "../src/lib/ops/library-file-rules.ts";
+import { manualTypeFromName, MANUAL_TYPES } from "../src/lib/ops/library-file-rules.ts";
 
 test("manual type is read from the file name only when it is obvious", () => {
   assert.equal(manualTypeFromName("Axiom-DV-APS cleaning guide.pdf"), "Cleaning Manual");
@@ -152,8 +152,8 @@ test("manual type is read from the file name only when it is obvious", () => {
   assert.equal(manualTypeFromName("Axiom Operation Manual.pdf"), "Operating / Installation Manual");
   assert.equal(manualTypeFromName("Axiom Owner's Manual.pdf"), "User Manual");
   assert.equal(manualTypeFromName("axiom-user-guide.pdf"), "User Manual");
-  assert.equal(manualTypeFromName("Axiom Illustrated Parts Catalog.pdf"), "Parts Diagram");
-  assert.equal(manualTypeFromName("Axiom exploded view.pdf"), "Parts Diagram");
+  assert.equal(manualTypeFromName("Axiom Service Manual.pdf"), "Service And Repair Manual");
+  assert.equal(manualTypeFromName("Axiom-DV-APS repair & troubleshooting.pdf"), "Service And Repair Manual");
 });
 
 test("no type, or more than one, means the person picks", () => {
@@ -163,10 +163,14 @@ test("no type, or more than one, means the person picks", () => {
   assert.equal(manualTypeFromName("Axiom DV-APS reprogrammed.pdf"), null);
 });
 
-test("a manual is filed as Variation - Type; a parts diagram goes with the parts", () => {
+test("a manual is filed as Variation - Type and never as a parts book", () => {
   assert.equal(shelfFileName("Bunn Axiom-DV-APS", "manuals", "x.pdf", [], "Cleaning Manual"), "Bunn Axiom-DV-APS - Cleaning Manual.pdf");
   assert.equal(shelfFileName("Bunn Axiom-DV-APS", "manuals", "x.pdf", ["Bunn Axiom-DV-APS - Cleaning Manual.pdf"], "Cleaning Manual"), "Bunn Axiom-DV-APS - Cleaning Manual 2.pdf");
   assert.equal(shelfFileName("Bunn Axiom", "manuals", "x.pdf", []), "Bunn Axiom - Manual.pdf");
-  assert.equal(sectionForType("Parts Diagram"), "parts");
-  for (const t of MANUAL_TYPES.filter((x) => x !== "Parts Diagram")) assert.equal(sectionForType(t), "manuals");
+  assert.equal(shelfFileName("Bunn Axiom-DV-APS", "manuals", "x.pdf", [], "Service And Repair Manual"), "Bunn Axiom-DV-APS - Service And Repair Manual.pdf");
+  // Parts files are not a manual type, and a parts-sounding name on Manuals asks instead of guessing.
+  assert.equal(MANUAL_TYPES.includes("Parts Diagram"), false);
+  assert.equal(MANUAL_TYPES.includes("Service And Repair Manual"), true);
+  assert.equal(manualTypeFromName("Axiom Illustrated Parts Catalog.pdf"), null);
+  assert.equal(shelfFileName("Bunn Axiom", "manuals", "x.pdf", [], "Parts Diagram"), "Bunn Axiom - Manual.pdf");
 });
