@@ -1,5 +1,6 @@
 /**
- * The Library — Troubleshoot. One variation, its own manuals and parts book, nothing else.
+ * The Library — Troubleshoot. One variation, and only the files already stored on it: its spec sheet, its manuals,
+ * its parts book, and the fixes saved on it. Never another chip, another variation, or the web.
  * The AI is only handed pages from those files, and every line it returns is checked against the page it cites:
  * a step that is not on that page is dropped, and a part number that is not printed in the parts book is not shown.
  */
@@ -10,7 +11,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { modelLabel, shortDocName } from "@/lib/ops/library-file-rules";
 import { isGrinder } from "@/lib/ops/spec-defaults";
 import { callXai } from "@/lib/ops/spec-library";
-import { dropWetSteps, groundedIn, pageTag, partNumberOnPage, partSearchUrl, pickPages, similarIssue, type PageText } from "@/lib/ops/troubleshoot-rules";
+import { dropWetSteps, groundedIn, NO_FILE, pageTag, partNumberOnPage, pickPages, similarIssue, type PageText } from "@/lib/ops/troubleshoot-rules";
 
 export const TROUBLESHOOTS_PER_HOUR = 40;
 const MANUAL_BUDGET = 48_000;
@@ -20,7 +21,7 @@ export type TsSource = {
   id: number;
   /** "Service And Repair Manual", "Parts Book" … */
   label: string;
-  section: "manuals" | "parts";
+  section: "spec" | "manuals" | "parts";
   token: string;
   mime: string;
   /** null = not read yet; 0 = no readable text (scanned, Word or a picture). */
@@ -31,13 +32,11 @@ export type TsLine = { text: string; cite: TsCite };
 export type TsPart = {
   /** The part as the manual names it. */
   name: string;
-  /** From the parts book; null = not in the parts book. */
+  /** From this variation's parts book; null = not in this model's parts book. */
   number: string | null;
   /** The part's name as the parts book prints it. */
   bookName: string | null;
   cite: TsCite | null;
-  /** Web search for the part name and model, offered only when the book does not list it. */
-  searchUrl: string;
 };
 export type TsFix = { id: number; issue: string; cause: string; checks: string | null; partNumber: string | null; partName: string | null; by: string; at: string };
 export type TsResult = {
@@ -49,7 +48,7 @@ export type TsResult = {
   checks: TsLine[];
   howTo: TsLine[];
   parts: TsPart[];
-  /** True when this variation has no readable parts book: every part then reads "Not in the parts book". */
+  /** True when this variation has no readable parts book: every part then reads "Not in this model's parts book". */
   noPartsBook: boolean;
 };
 
@@ -73,14 +72,14 @@ async function loadBook(sql: Sql, bookId: number): Promise<Book> {
 
 /** This variation's manuals and parts files — never another model's. */
 async function loadSources(sql: Sql, book: Book): Promise<TsSource[]> {
-  const rows = await sql.query<{ id: number; section: "manuals" | "parts"; name: string; token: string; mime: string; text_pages: number | null; doc_type: string | null }>(
-    "select id, section, name, token, mime, text_pages, doc_type from library_files where book_id = $1 and complete and section in ('manuals', 'parts') order by section, lower(name), id",
+  const rows = await sql.query<{ id: number; section: "spec" | "manuals" | "parts"; name: string; token: string; mime: string; text_pages: number | null; doc_type: string | null }>(
+    "select id, section, name, token, mime, text_pages, doc_type from library_files where book_id = $1 and complete order by case section when 'spec' then 0 when 'manuals' then 1 else 2 end, lower(name), id",
     [book.id],
   );
   return rows.map((r) => ({
     id: Number(r.id),
     // A manual is named by its type (Service And Repair Manual …) even when the file itself was renamed.
-    label: r.section === "manuals" && r.doc_type ? r.doc_type : shortDocName(r.name, book.title),
+    label: r.section === "manuals" && r.doc_type ? r.doc_type : r.section === "spec" ? "Spec Sheet" : shortDocName(r.name, book.title),
     section: r.section,
     token: r.token,
     mime: r.mime,
@@ -136,7 +135,7 @@ export const saveLibraryFileText = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof textInput>) => textInput.parse(d))
   .handler(async ({ data }): Promise<{ ok: true; textPages: number | null }> => {
     const sql = await ready();
-    const file = await sql.query<{ id: number }>("select id from library_files where id = $1 and complete and section in ('manuals', 'parts')", [data.fileId]);
+    const file = await sql.query<{ id: number }>("select id from library_files where id = $1 and complete and book_id is not null", [data.fileId]);
     if (!file[0]) throw new Error("That file is no longer in The Library.");
     for (const p of data.pages) {
       const body = p.text.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
@@ -184,7 +183,7 @@ const block = (pages: PageText[]) => pages.map((p) => `[[${pageTag(p)}]]\n${p.te
 function manualPrompt(book: Book, labels: Map<number, string>): string {
   const list = [...labels].map(([id, label]) => `S${id} = ${label}`).join("; ");
   return `You help a service technician with ONE machine: ${book.manufacturer} ${book.model}.
-You are given pages from that machine's own manuals. Each page starts with a tag like [[S12 p3]] (source 12, page 3). Sources: ${list}.
+You are given pages from the files stored for that machine (its manuals and spec sheet). Each page starts with a tag like [[S12 p3]] (source 12, page 3). Sources: ${list}.
 
 Answer ONLY from those pages. Return one JSON object:
 {
@@ -199,7 +198,7 @@ Rules:
 - Every item must come from a page you were given, and must name that page's source and page number.
 - Use the manual's wording. Do not add a step, a test, a value or a part the pages do not state.
 - Do not give part numbers. They come from the parts book, separately.
-- If the pages do not cover the issue, return "covered": false with empty lists. Do not fall back on general knowledge or another model.${
+- If the pages do not cover the issue, return "covered": false with empty lists. Do not fall back on general knowledge, the web, or another model or variation.${
     book.grinder ? "\n- This machine is a grinder: it has no water line and no drain. Do not return water or drain steps." : ""
   }
 - JSON only. No markdown.`;
@@ -225,16 +224,17 @@ export const runTroubleshoot = createServerFn({ method: "POST" })
     const book = await loadBook(sql, data.bookId);
     const sources = await loadSources(sql, book);
     const fixes = await pastFixes(sql, book.id, data.issue);
-    const manuals = sources.filter((s) => s.section === "manuals" && (s.textPages ?? 0) > 0);
+    // Steps come from this variation's manuals and spec sheet; part numbers only from its parts book.
+    const manuals = sources.filter((s) => s.section !== "parts" && (s.textPages ?? 0) > 0);
     const partsBooks = sources.filter((s) => s.section === "parts" && (s.textPages ?? 0) > 0);
     const base: TsResult = { status: "ok", message: null, sources, pastFixes: fixes, causes: [], checks: [], howTo: [], parts: [], noPartsBook: !partsBooks.length };
     const stop = (status: TsResult["status"], message: string): TsResult => ({ ...base, status, message });
 
-    if (!sources.some((s) => s.section === "manuals")) {
-      return stop("no-sources", `${book.model} has no manual on file. Add its Service And Repair or Operating / Installation manual to troubleshoot. Nothing is taken from another model.`);
+    if (!sources.some((s) => s.section !== "parts")) {
+      return stop("no-sources", `${NO_FILE} ${book.model} has no manual or spec sheet stored. Nothing is taken from another model.`);
     }
     if (!manuals.length) {
-      return stop("no-sources", `The manuals on file for ${book.model} have no readable text (scanned pages, Word files or pictures). Add a PDF with selectable text.`);
+      return stop("no-sources", `${NO_FILE} The files stored on ${book.model} have no readable text (scanned pages, Word files or pictures).`);
     }
     const apiKey = process.env.XAI_API_KEY;
     if (!apiKey) return stop("no-ai", "Reading the manuals isn't available here yet. Open the manual from the list above.");
@@ -243,7 +243,7 @@ export const runTroubleshoot = createServerFn({ method: "POST" })
 
     const labels = new Map(sources.map((s) => [s.id, s.label]));
     const picked = pickPages(await loadPages(sql, manuals.map((m) => m.id)), data.issue, MANUAL_BUDGET);
-    if (!picked.length) return stop("not-covered", `The manuals on file for ${book.model} don't mention this issue. Try the words the manual uses, or the error code on the display.`);
+    if (!picked.length) return stop("not-covered", `${NO_FILE} The files stored on ${book.model} don't mention it. Try the words the manual uses, or the error code on the display.`);
     await sql.query("insert into troubleshoot_log (user_id) values ($1)", [context.userId]);
 
     const byTag = new Map(picked.map((p) => [pageTag(p), p]));
@@ -271,13 +271,13 @@ export const runTroubleshoot = createServerFn({ method: "POST" })
       const checks = keep(answer.checks);
       const howTo = keep(answer.howTo);
       if (!answer.covered || (!causes.length && !checks.length && !howTo.length)) {
-        return stop("not-covered", `The manuals on file for ${book.model} don't cover this issue. Nothing is guessed from another model.`);
+        return stop("not-covered", `${NO_FILE} Nothing is filled in from another model.`);
       }
 
       // Parts: only what the manual called for, and only numbers printed in this variation's parts book.
       const manualText = picked.map((p) => p.text).join("\n");
       const called = [...new Map(answer.parts.filter((p) => groundedIn(p.name, manualText, 0.75)).map((p) => [p.name.toLowerCase(), p.name])).values()].slice(0, 8);
-      const parts: TsPart[] = called.map((name) => ({ name, number: null, bookName: null, cite: null, searchUrl: partSearchUrl(book.manufacturer, book.model, name) }));
+      const parts: TsPart[] = called.map((name) => ({ name, number: null, bookName: null, cite: null }));
       if (parts.length && partsBooks.length) {
         const partPages = pickPages(await loadPages(sql, partsBooks.map((b) => b.id)), called.join(" "), PARTS_BUDGET);
         if (partPages.length) {
@@ -292,7 +292,7 @@ export const runTroubleshoot = createServerFn({ method: "POST" })
           for (const hit of found?.parts ?? []) {
             const part = parts.find((p) => p.name.toLowerCase() === hit.name.trim().toLowerCase());
             const page = hit.source && hit.page != null ? partTags.get(`${hit.source.trim().toUpperCase().replace(/^S?/, "S")} p${hit.page}`) : undefined;
-            // The number must be printed on the page it cites. Anything else stays "Not in the parts book".
+            // The number must be printed on the page it cites. Anything else stays "Not in this model's parts book".
             if (!part || !page || !hit.number || !partNumberOnPage(hit.number, page.text)) continue;
             part.number = hit.number.trim();
             part.bookName = hit.partName?.trim().slice(0, 120) || null;
@@ -330,7 +330,7 @@ export const explainTroubleshoot = createServerFn({ method: "POST" })
     const wanted = data.cites.filter((c) => mine.has(c.fileId));
     const all = await loadPages(sql, [...new Set(wanted.map((c) => c.fileId))]);
     const pages = all.filter((p) => wanted.some((c) => c.fileId === p.fileId && c.page === p.page)).map((p) => ({ ...p, text: p.text.slice(0, 6000) }));
-    if (!pages.length) return { status: "not-covered", message: "The stored files don't cover this issue.", lines: [] };
+    if (!pages.length) return { status: "not-covered", message: NO_FILE, lines: [] };
     const byTag = new Map(pages.map((p) => [pageTag(p), p]));
     try {
       const raw = await callXai(apiKey, [
@@ -357,7 +357,7 @@ Each page starts with a tag like [[S12 p3]]. Return one JSON object: {"covered":
         lines.push({ text: item.text, cite: { fileId: page.fileId, label: src?.label ?? "Manual", page: page.page, token: src?.token ?? "" } });
       }
       const kept = dropWetSteps(lines, book.grinder);
-      if (!answer.covered || !kept.length) return { status: "not-covered", message: "The stored files don't cover this issue.", lines: [] };
+      if (!answer.covered || !kept.length) return { status: "not-covered", message: NO_FILE, lines: [] };
       return { status: "ok", message: null, lines: kept };
     } catch (e) {
       return { status: "failed", message: `The explanation failed (${e instanceof Error ? e.message : "unknown error"}).`, lines: [] };

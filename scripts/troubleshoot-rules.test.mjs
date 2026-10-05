@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { dropWetSteps, groundedIn, issueTerms, pageScore, partNumberOnPage, partSearchUrl, pickPages, similarIssue } from "../src/lib/ops/troubleshoot-rules.ts";
+import { dropWetSteps, groundedIn, issueTerms, pageScore, partNumberOnPage, pickPages, similarIssue } from "../src/lib/ops/troubleshoot-rules.ts";
 
 const pages = [
   { fileId: 1, page: 1, text: "Axiom service manual. Table of contents. Warranty. Safety notices." },
@@ -51,10 +51,8 @@ test("past fixes match a similar issue", () => {
   assert.equal(similarIssue("", "no heat"), false);
 });
 
-test("grinders get no water or drain steps; the search link names the model", () => {
+test("grinders get no water or drain steps", () => {
   const steps = [{ text: "Check the water inlet valve" }, { text: "Check the burr motor capacitor" }, { text: "Clear the drain line" }];
   assert.deepEqual(dropWetSteps(steps, true).map((s) => s.text), ["Check the burr motor capacitor"]);
   assert.equal(dropWetSteps(steps, false).length, 3);
-  const url = partSearchUrl("BUNN", "Axiom-DV-APS", "Control board");
-  assert.match(url, /^https:\/\/www\.google\.com\/search\?q=BUNN%20Axiom-DV-APS%20Control%20board%20part%20number$/);
 });

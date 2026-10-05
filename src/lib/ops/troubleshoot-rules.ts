@@ -116,11 +116,10 @@ export function similarIssue(a: string, b: string): boolean {
   return shared >= 1 && shared / Math.min(x.length, y.length) >= 0.5;
 }
 
-/** Search link for a part the parts book does not list. The model is always in the search. */
-export function partSearchUrl(maker: string, model: string, part: string): string {
-  const q = [maker, model, part, "part number"].map((s) => s.trim()).filter(Boolean).join(" ");
-  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-}
+/** Said when the files stored on this model do not answer the issue. Nothing fills the gap. */
+export const NO_FILE = "No file on this model for this issue.";
+/** Said for a part the manual calls for that this variation's parts book does not list. No number is offered from anywhere else. */
+export const NOT_IN_PARTS_BOOK = "Not in this model's parts book";
 
 const WET = /\bwater\b|\bdrain(s|age|ing)?\b|\binlet\b|\bfill valve\b|\bplumb/i;
 /** Grinders take no water and have no drain: such steps are never shown for them. */

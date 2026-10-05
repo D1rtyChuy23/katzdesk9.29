@@ -550,7 +550,7 @@ function Page() {
                             onClick={() => setFixOpen(!fixOpen)}
                             data-testid="troubleshoot-open"
                           >
-                            Troubleshoot <span className="font-normal text-muted-foreground">· from this model's manuals and parts book</span>
+                            Troubleshoot <span className="font-normal text-muted-foreground">· only from files stored on this model</span>
                           </button>
                           {fixOpen ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
                         </li>

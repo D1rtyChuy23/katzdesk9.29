@@ -353,3 +353,12 @@ Checked in the running app at 1280px and 390px with a stand-in manual and parts 
 - Past fixes cannot be edited or deleted from the screen yet.
 
 Gates: lint 0 errors, typecheck and build pass; tests 178 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load. Migration 0047.
+
+## 12. Troubleshoot Uses Only Files Stored On That Model
+
+- A fix may use only the variation's spec sheet, its manuals, its parts book, and past fixes saved on it. The spec sheet file is now read alongside the manuals. Nothing comes from another chip, another variation, or the web.
+- Each line reads "From <file> · p. <n>" and links to that page of the file stored on the same chip.
+- When the stored files don't answer the issue, it says "No file on this model for this issue." and stops.
+- A part the parts book doesn't list reads "Not in this model's parts book". The web search link added in section 11 is removed.
+
+Checked in the running app with the stand-in files: every cited link pointed to a file stored on the open variation; no outside links in the panel.

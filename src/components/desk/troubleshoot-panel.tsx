@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ExternalLink, Loader2, Wrench } from "lucide-react";
+import { Check, Loader2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import {
   explainTroubleshoot,
@@ -16,6 +16,7 @@ import {
   type TsSource,
 } from "@/lib/ops/troubleshoot";
 import { fileUrl } from "@/lib/ops/library-file-rules";
+import { NOT_IN_PARTS_BOOK } from "@/lib/ops/troubleshoot-rules";
 import { MAX_MANUAL_BYTES, pdfPageTexts } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,7 +71,7 @@ function Cite({ cite }: { cite: TsCite }) {
       title={`Open ${cite.label} at page ${cite.page}`}
       data-testid="ts-cite"
     >
-      {cite.label} · p. {cite.page}
+      From {cite.label} · p. {cite.page}
     </a>
   );
 }
@@ -153,7 +154,8 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
   const [saved, setSaved] = useState(false);
 
   const sources = result?.sources ?? info.data?.sources ?? [];
-  const manuals = sources.filter((s) => s.section === "manuals");
+  // Steps may come from this variation's manuals and spec sheet; part numbers only from its parts book.
+  const manuals = sources.filter((s) => s.section !== "parts");
   const parts = sources.filter((s) => s.section === "parts");
 
   const run = useMutation({
@@ -221,13 +223,13 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
           {info.isLoading
             ? "Checking the files…"
             : manuals.length
-              ? `Reads only: ${[...manuals, ...parts].map(sourceText).join(" · ")}`
-              : `No manual on file for ${model}. Add its manual above to troubleshoot. Nothing is taken from another model.`}
+              ? `Uses only files stored on ${model}: ${[...manuals, ...parts].map(sourceText).join(" · ")}`
+              : `No manual or spec sheet stored on ${model}. Add its manual above to troubleshoot. Nothing is taken from another model.`}
         </p>
       </div>
       {manuals.length && !parts.length && !info.isLoading ? (
         <p className="mt-1 text-xs text-warning" data-testid="ts-no-parts-book">
-          No parts book on file for {model}: parts will read "Not in the parts book".
+          No parts book stored on {model}: parts will read "{NOT_IN_PARTS_BOOK}".
         </p>
       ) : null}
 
@@ -266,7 +268,7 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
             </p>
           ) : (
             <>
-              <Heading n={1} title="Possible Causes" note="from the uploaded manual" />
+              <Heading n={1} title="Possible Causes" note="from files stored on this model" />
               <Lines lines={result.causes} testId="ts-causes" />
 
               <Heading n={2} title="What To Check" note="in the manual's order" />
@@ -293,15 +295,9 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
                 <ul className="divide-y divide-border" data-testid="ts-parts">
                   {result.parts.map((p) => (
                     <li key={p.name} className="grid gap-x-3 gap-y-0.5 py-2 text-sm sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:items-baseline" data-testid="ts-part" data-found={p.number ? "true" : "false"}>
-                      {p.number ? <span className="tabular font-semibold">{p.number}</span> : <span className="font-semibold text-warning">Not in the parts book</span>}
+                      {p.number ? <span className="tabular font-semibold">{p.number}</span> : <span className="font-semibold text-warning">{NOT_IN_PARTS_BOOK}</span>}
                       <span>{p.bookName ?? p.name}</span>
-                      {p.cite ? (
-                        <Cite cite={p.cite} />
-                      ) : (
-                        <a href={p.searchUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary underline" data-testid="ts-part-search">
-                          Search the web for this part <ExternalLink className="size-3" />
-                        </a>
-                      )}
+                      {p.cite ? <Cite cite={p.cite} /> : <span className="text-[11px] text-muted-foreground">No number is taken from anywhere else</span>}
                     </li>
                   ))}
                 </ul>
