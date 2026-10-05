@@ -326,3 +326,30 @@ Checked in the running app at 1280px and 390px.
 - A document added from the top-level Add Files with no maker in its name and no matching chip still opens the model picker.
 
 Gates: lint 0 errors, typecheck and build pass; tests 170 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load.
+
+## 11. Troubleshoot, PM Guide, File Rename
+
+Checked in the running app at 1280px and 390px with a stand-in manual and parts book written for the test, and a stand-in for the AI service. The real AI and real manufacturer manuals were not exercised here.
+
+### Changed
+
+- **Troubleshoot** on each variation, under its spec, manuals and parts. One field for the issue. It reads only that variation's manuals and parts files.
+  - The text of each stored PDF is read once in the browser, page by page, and kept (`library_file_text`). Scans, Word files and pictures are marked "can't be read" and are not guessed around.
+  - The pages that hold the issue's words are sent to the AI with a page tag. The answer comes back as causes, checks (manual order), the manual's test, and the parts the manual calls for, each naming its page.
+  - Every line is checked against the page it cites. A line whose words are not on that page is dropped. A part number is shown only when it is printed on the cited parts-book page; otherwise the part reads "Not in the parts book" with a web search link for the part name and model.
+  - No manual, or none with readable text: it says so and stops. The files don't mention the issue: it says so. Nothing comes from another model.
+  - Grinders: water and drain steps are removed.
+  - **Explain In Plain Language**: an assist pass over the cited pages. Each line cites its page; a line that is not about its page is dropped.
+  - **Mark Fixed** saves the variation, issue, cause, checks that worked, part number, who and when (`library_fixes`). **Past Fixes** show above the next result when the issue is similar, on the same variation only.
+  - Limit: 40 lookups per person per hour.
+- **PM Guide** added to the manual types.
+- **File names.** The manual type picker has an optional File Name field. In Manage, every file has a rename button. The stored file and links already sent are unchanged.
+
+### Left as is, on purpose
+
+- A manual over 25 MB is not read for Troubleshoot.
+- "Similar issue" is a word match (half the shorter issue's words in common), not an AI judgment.
+- Everyone with Desk access can troubleshoot and mark fixed. Adding and renaming files stays with Admin and Sales.
+- Past fixes cannot be edited or deleted from the screen yet.
+
+Gates: lint 0 errors, typecheck and build pass; tests 178 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load. Migration 0047.
