@@ -131,6 +131,7 @@ export function JobSheet({
                     callType: String(fd.get("callType") || "") || null,
                     status: String(fd.get("status")),
                     technician: String(fd.get("technician") || "") || null,
+                    secondaryTech: String(fd.get("secondaryTech") || "") || null,
                     wo: String(fd.get("wo") || "") || null,
                     scheduled: String(fd.get("scheduled") || "") || null,
                     received: String(fd.get("received") || "") || null,
@@ -187,6 +188,10 @@ export function JobSheet({
                 <div>
                   <Label>Technician</Label>
                   <TechSelect name="technician" defaultValue={j.technician ?? ""} />
+                </div>
+                <div>
+                  <Label htmlFor="job-secondary-tech">Secondary Tech</Label>
+                  <TechSelect id="job-secondary-tech" name="secondaryTech" defaultValue={j.secondaryTech ?? ""} />
                 </div>
                 <div>
                   <Label>Status</Label>

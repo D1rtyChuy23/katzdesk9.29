@@ -66,14 +66,14 @@ export function JobsPage({
     if (view === "complete") {
       list = list.filter((j) => !j.duplicateOf && isClosedCall(j));
     }
-    if (tech) list = list.filter((j) => sameTech(j.technician, tech));
+    if (tech) list = list.filter((j) => sameTech(j.technician, tech) || sameTech(j.secondaryTech, tech));
     list = mineByTechnician(list, { filterMine, role, matchMine });
     if (urgency) list = list.filter((j) => j.urgency === urgency);
 
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((j) =>
-        [j.customer, j.callId, j.wo, j.issue, j.equipment, j.technician]
+        [j.customer, j.callId, j.wo, j.issue, j.equipment, j.technician, j.secondaryTech]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(needle)),
       );
@@ -282,6 +282,12 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
         <span className="min-w-0 truncate text-sm">
           <span className="text-muted-foreground xl:hidden">Tech </span>
           <TechName name={job.technician} />
+          {job.secondaryTech ? (
+            <span className="text-muted-foreground" data-testid="job-secondary-tech">
+              {" + "}
+              <TechName name={job.secondaryTech} />
+            </span>
+          ) : null}
         </span>
       </button>
     </li>

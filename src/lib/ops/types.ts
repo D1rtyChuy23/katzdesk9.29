@@ -25,6 +25,8 @@ export type ServiceJob = {
   phoneResolved: boolean;
   status: string;
   technician: string | null;
+  /** A second tech on the same ticket; null when there is only one. */
+  secondaryTech: string | null;
   wo: string | null;
   scheduled: string | null;
   /** Time of day on the scheduled date, "HH:MM"; null until someone sets one on the day board. */

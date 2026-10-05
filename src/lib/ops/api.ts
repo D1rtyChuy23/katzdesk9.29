@@ -187,6 +187,7 @@ function mapJob(r: any, today: any) {
 		phoneResolved: !!r.phone_resolved,
 		status: r.status,
 		technician: r.technician,
+		secondaryTech: r.technician2 ?? null,
 		wo: r.wo,
 		scheduled,
 		scheduledTime: cleanTime(r.sched_time),
@@ -801,6 +802,7 @@ const jobPatch = z.object({
 	phoneResolved: z.boolean().optional(),
 	status: z.string().optional(),
 	technician: z.string().nullable().optional(),
+	secondaryTech: z.string().nullable().optional(),
 	wo: z.string().nullable().optional(),
 	scheduled: z.string().nullable().optional(),
 	notes: z.string().nullable().optional(),
@@ -824,6 +826,7 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 		phone_resolved: data.phoneResolved === undefined ? cur[0].phone_resolved : data.phoneResolved,
 		status: data.status ?? cur[0].status,
 		technician: data.technician === undefined ? cur[0].technician : data.technician,
+		technician2: data.secondaryTech === undefined ? cur[0].technician2 ?? null : data.secondaryTech || null,
 		wo: data.wo === undefined ? cur[0].wo : data.wo,
 		scheduled: data.scheduled === undefined ? cur[0].scheduled : data.scheduled,
 		notes: data.notes === undefined ? cur[0].notes : data.notes,
@@ -834,6 +837,12 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	};
 	if (CLOSED_CALL.has(next.status)) next.done = true;
 	else if (data.status) next.done = false;
+	// The secondary is a different person from the primary; with no primary, the secondary becomes the primary.
+	if (next.technician2 && sameTech(next.technician2, next.technician)) next.technician2 = null;
+	if (next.technician2 && !next.technician) {
+		next.technician = next.technician2;
+		next.technician2 = null;
+	}
 	if (next.status === "Phone Resolved") next.phone_resolved = true;
 	else if (data.status && next.status !== "Phone Resolved") next.phone_resolved = false;
 	await sql`
@@ -848,6 +857,7 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
         phone_resolved = ${next.phone_resolved},
         status = ${next.status},
         technician = ${next.technician},
+        technician2 = ${next.technician2},
         wo = ${next.wo},
         scheduled = ${next.scheduled},
         notes = ${next.notes},
@@ -861,6 +871,7 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	const extra = summarize([
 		changed("customer", cur[0].customer, next.customer),
 		changed("technician", cur[0].technician, next.technician),
+		changed("secondary tech", cur[0].technician2 ?? null, next.technician2),
 		changed("equipment", cur[0].equipment, next.equipment),
 		changed("issue", cur[0].issue, next.issue),
 		changed("urgency", cur[0].urgency, next.urgency),
@@ -921,6 +932,8 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	const locked = data.type === "install" ? isInstalled({ complete: cur.complete, equipStatus: cur.equip_status }) : boardLocked({ status: cur.status, done: cur.done });
 	if (locked) throw new Error("Completed and cancelled work does not move.");
 	await sql.query(`update ${table} set ${dateCol} = $2, sched_time = $3, technician = $4, updated_at = now() where id = $1`, [data.id, data.date, time, tech]);
+	// The new primary cannot also be the ticket's secondary.
+	if (table === "service_jobs" && tech && sameTech(cur.technician2, tech)) await sql.query("update service_jobs set technician2 = null where id = $1", [data.id]);
 	const was = isoDate(cur[dateCol]);
 	const extra = summarize([
 		changed("scheduled", [was, cleanTime(cur.sched_time)].filter(Boolean).join(" ") || null, [data.date, time].filter(Boolean).join(" ")),

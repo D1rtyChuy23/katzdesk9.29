@@ -26,6 +26,10 @@ type Block = {
   tech: string | null;
   locked: boolean;
   state: string;
+  /** Second tech on a ticket. The block is also shown on that tech's row. */
+  second?: string | null;
+  /** This block is the copy on the secondary tech's row: it opens the ticket but is moved from the primary's row. */
+  shadow?: boolean;
 };
 
 const TYPES: BoardType[] = ["service", "pm", "tlc", "install"];
@@ -54,6 +58,7 @@ function collect(input: { installs: Install[]; pms: PmJob[]; services: ServiceJo
       tech: j.technician,
       locked: isClosedCall(j),
       state: j.status,
+      second: j.secondaryTech,
     });
   };
   for (const j of input.services) job(j, "service");
@@ -147,7 +152,7 @@ export function DayBoard({
   // Rows: no tech yet, then the active roster in its own order, then anyone else who has work in view.
   const rows = useMemo(() => {
     const names = (roster.data?.techs ?? []).filter((t) => t.active).map((t) => t.name);
-    const extra = [...new Set(shown.map((b) => techKey(b.tech)))].filter((n) => n !== NO_TECH && !names.includes(n)).sort();
+    const extra = [...new Set(shown.flatMap((b) => [techKey(b.tech), techKey(b.second)]))].filter((n) => n !== NO_TECH && !names.includes(n)).sort();
     return [NO_TECH, ...names, ...extra];
   }, [roster.data, shown]);
 
@@ -158,6 +163,12 @@ export function DayBoard({
       const col = span === "day" ? String(hourColumn(b.time) ?? "none") : b.date;
       const key = cellKey(techKey(b.tech), col);
       map.set(key, [...(map.get(key) ?? []), b]);
+      // A ticket with a secondary tech shows on both rows.
+      const second = techKey(b.second);
+      if (second !== NO_TECH && second !== techKey(b.tech)) {
+        const k2 = cellKey(second, col);
+        map.set(k2, [...(map.get(k2) ?? []), { ...b, key: `${b.key}-2nd`, shadow: true }]);
+      }
     }
     for (const list of map.values()) list.sort((a, b) => (a.time ?? "").localeCompare(b.time ?? "") || a.account.localeCompare(b.account));
     return map;
@@ -313,15 +324,17 @@ export function DayBoard({
                         title={[b.account, META[b.type].label, b.ticket, timeLabel(b.time), b.state].filter(Boolean).join(" · ")}
                         data-testid={`board-block-${b.key}`}
                         data-locked={b.locked ? "true" : "false"}
+                        data-shadow={b.shadow ? "true" : "false"}
                         data-time={b.time ?? ""}
                         className={cn(
                           "desk-flat min-w-0 rounded-md border-l-[3px] px-1.5 py-1 text-left select-none",
                           META[b.type].block,
-                          b.locked ? "cursor-pointer opacity-55" : "cursor-grab touch-none active:cursor-grabbing",
+                          b.shadow && "border border-dashed border-border",
+                          b.locked ? "cursor-pointer opacity-55" : b.shadow ? "cursor-pointer" : "cursor-grab touch-none active:cursor-grabbing",
                           ghost?.block.key === b.key && "opacity-40",
                         )}
                         onPointerDown={(e) => {
-                          if (b.locked || e.button !== 0) return;
+                          if (b.locked || b.shadow || e.button !== 0) return;
                           drag.current = { block: b, x: e.clientX, y: e.clientY, active: false };
                           e.currentTarget.setPointerCapture(e.pointerId);
                         }}
@@ -360,7 +373,7 @@ export function DayBoard({
                         <span className="line-clamp-2 text-xs leading-tight font-medium break-words">{b.account}</span>
                         <span className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-muted-foreground">
                           {b.locked ? <Lock className="size-3 shrink-0" aria-hidden /> : null}
-                          {(b.locked ? [b.state, timeLabel(b.time)] : [timeLabel(b.time), META[b.type].label, b.ticket]).filter(Boolean).join(" · ")}
+                          {(b.locked ? [b.state, timeLabel(b.time)] : b.shadow ? [timeLabel(b.time), `2nd with ${b.tech ?? "no primary"}`] : [timeLabel(b.time), META[b.type].label, b.second ? `+ ${b.second}` : b.ticket]).filter(Boolean).join(" · ")}
                         </span>
                       </div>
                     ))}

@@ -46,7 +46,7 @@ export function defaultLayoutFor(role: DeskRole): ViewLayout {
 }
 
 /** Service My View: keep unassigned plus rows whose technician matches the signed-in person. */
-export function mineByTechnician<T extends { technician?: string | null }>(
+export function mineByTechnician<T extends { technician?: string | null; secondaryTech?: string | null }>(
   list: T[],
   opts: {
     filterMine: boolean;
@@ -55,6 +55,7 @@ export function mineByTechnician<T extends { technician?: string | null }>(
   },
 ): T[] {
   if (!opts.filterMine || opts.role !== "service") return list;
-  return list.filter((row) => opts.matchMine(row.technician) || !row.technician);
+  // A ticket is mine when I am its primary or its secondary tech.
+  return list.filter((row) => opts.matchMine(row.technician, row.secondaryTech) || !row.technician);
 }
 
