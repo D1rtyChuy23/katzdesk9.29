@@ -5,6 +5,7 @@ import { listRecipes } from "@/lib/ops/api";
 import { catalogModels } from "@/lib/ops/equipment";
 import { InstallPlanner } from "@/components/desk/install-planner";
 import { PlannerCalendar, usePlannerWork } from "@/components/desk/planner-calendar";
+import { DayBoard } from "@/components/desk/day-board";
 import { CalendarDockButton } from "@/components/desk/pending-calendar";
 import { useMyView } from "@/components/desk/my-view-bar";
 import { FilterChip } from "@/components/desk/desk-charts";
@@ -31,7 +32,7 @@ function Page() {
     [installs],
   );
 
-  const [tab, setTab] = useState<"calendar" | "timeline">("calendar");
+  const [tab, setTab] = useState<"day" | "calendar" | "timeline">("calendar");
 
   return (
     <div>
@@ -39,12 +40,15 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Planner</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Month calendar of pending work. Drag a job to another day. Timeline is the second tab.
+            Day is the dispatch board: techs down the side, hours across. Calendar is the month. Drag a job to move it.
           </p>
         </div>
         <CalendarDockButton />
       </header>
       <div className="mt-4 flex flex-wrap gap-2" data-testid="planner-tabs">
+        <FilterChip selected={tab === "day"} onClick={() => setTab("day")} data-testid="planner-tab-day">
+          Day
+        </FilterChip>
         <FilterChip selected={tab === "calendar"} onClick={() => setTab("calendar")}>
           Calendar
         </FilterChip>
@@ -55,6 +59,8 @@ function Page() {
       <div className="mt-4">
         {work.loading ? (
           <Skeleton className="h-64 w-full" />
+        ) : tab === "day" ? (
+          <DayBoard installs={work.installs} pms={work.pms} services={work.services} tlcs={work.tlcs} />
         ) : tab === "calendar" ? (
           <PlannerCalendar
             installs={work.installs}

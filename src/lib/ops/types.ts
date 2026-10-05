@@ -27,6 +27,8 @@ export type ServiceJob = {
   technician: string | null;
   wo: string | null;
   scheduled: string | null;
+  /** Time of day on the scheduled date, "HH:MM"; null until someone sets one on the day board. */
+  scheduledTime: string | null;
   notes: string | null;
   workDone: string | null;
   completedAt: string | null;
@@ -49,6 +51,7 @@ export type PmJob = {
   equipment: string | null;
   style: string | null;
   projected: string | null;
+  scheduledTime: string | null;
   partsStatus: string | null;
   status: string;
   technician: string | null;
@@ -116,6 +119,8 @@ export type Install = {
   equipment: string | null;
   equipStatus: string | null;
   installDate: string | null;
+  /** Time of day on the install date, "HH:MM"; null until someone sets one on the day board. */
+  scheduledTime: string | null;
   technician: string | null;
   wo: string | null;
   reqsReady: string | null;

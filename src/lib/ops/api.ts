@@ -6,7 +6,8 @@ import { getSql } from "@/lib/db";
 import { deskMiddleware, requireAdmin } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
-import { sameTech } from "./tech-match";
+import { canonicalTechName, sameTech } from "./tech-match";
+import { boardLocked, cleanTime, type BoardType } from "./day-board";
 import {
   addDays,
   diffDays,
@@ -188,6 +189,7 @@ function mapJob(r: any, today: any) {
 		technician: r.technician,
 		wo: r.wo,
 		scheduled,
+		scheduledTime: cleanTime(r.sched_time),
 		notes: r.notes,
 		workDone: r.work_done ?? null,
 		completedAt: isoDate(r.completed_at),
@@ -217,6 +219,7 @@ function mapPm(r: any, today: any) {
 		equipment: r.equipment,
 		style: r.style,
 		projected,
+		scheduledTime: cleanTime(r.sched_time),
 		partsStatus: r.parts_status,
 		status: r.status,
 		technician: r.technician,
@@ -243,6 +246,7 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		equipment: r.equipment,
 		equipStatus: r.equip_status,
 		installDate,
+		scheduledTime: cleanTime(r.sched_time),
 		technician: r.technician,
 		wo: r.wo,
 		reqsReady: r.reqs_ready,
@@ -894,6 +898,36 @@ export const createJob = createServerFn({ method: "POST" }).middleware([deskMidd
       returning id`;
 	await logActivity(sql, context.userId, data.kind, rows[0].id, "opened", [data.customer, data.issue].filter(Boolean).join(" · ") || null);
 	return getJob({ data: { id: rows[0].id } });
+});
+/**
+ * Planner day board: a block dropped on another time or another tech. Sets the day, the time of day and the
+ * assigned tech in one write. Completed and cancelled work is refused — it stays where it was done.
+ */
+export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { type: BoardType; id: number; date: string; time: string | null; technician: string | null }) => z.object({
+	type: z.enum(["service", "tlc", "pm", "install"]),
+	id: z.number().int().positive(),
+	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+	time: z.string().nullable(),
+	technician: z.string().trim().max(80).nullable()
+}).parse(d)).handler(async ({ data, context }: any): Promise<{ ok: true; date: string; time: string | null; technician: string | null }> => {
+	const sql = await ready();
+	const time = data.time == null ? null : cleanTime(data.time);
+	if (data.time != null && !time) throw new Error("That is not a time of day.");
+	const tech = data.technician ? canonicalTechName(data.technician) ?? data.technician : null;
+	const table = data.type === "pm" ? "pm_jobs" : data.type === "install" ? "installs" : "service_jobs";
+	const dateCol = data.type === "pm" ? "projected" : data.type === "install" ? "install_date" : "scheduled";
+	const cur = (await sql.query(`select * from ${table} where id = $1`, [data.id]))[0] as any;
+	if (!cur) throw new Error("That work is no longer on the Desk.");
+	const locked = data.type === "install" ? isInstalled({ complete: cur.complete, equipStatus: cur.equip_status }) : boardLocked({ status: cur.status, done: cur.done });
+	if (locked) throw new Error("Completed and cancelled work does not move.");
+	await sql.query(`update ${table} set ${dateCol} = $2, sched_time = $3, technician = $4, updated_at = now() where id = $1`, [data.id, data.date, time, tech]);
+	const was = isoDate(cur[dateCol]);
+	const extra = summarize([
+		changed("scheduled", [was, cleanTime(cur.sched_time)].filter(Boolean).join(" ") || null, [data.date, time].filter(Boolean).join(" ")),
+		changed("technician", cur.technician, tech)
+	]);
+	if (extra) await logActivity(sql, context.userId, data.type === "service" || data.type === "tlc" ? cur.kind : data.type, data.id, "updated", extra);
+	return { ok: true, date: data.date, time, technician: tech };
 });
 export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<PmJob[]> => {
 	const sql = await ready();
