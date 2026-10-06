@@ -374,3 +374,25 @@ Checked in the running app with the stand-in files: every cited link pointed to 
 - Applies to every parent already in The Library: the rule is worked out from the chip names, so nothing was moved, merged or renamed. A parent with no chip named like it (for example G9 with only G9-2T) has no main chip, so nothing copies there.
 
 Checked in the running app: a manual added on the Axiom main chip showed on all six other Axiom variations; removed from Axiom-DV-APS it stayed on the main chip and the other five; the stored file still opened.
+
+## 14. Customer Window Blocks, Optional Notes, Existing Equipment, Faster Fix
+
+Checked in the running app at 1280px with stand-in files and a stand-in AI.
+
+### Changed
+
+- **Customer window.** Pre-Inspection and Equipment On This Account are each one collapsed row with a unit count ("4 units"). Clicking expands. With one open install, expanding Pre-Inspection shows its units straight away.
+- **Notes are optional.** N/A no longer needs a note. Pass and Fail still need a photo. This changes one pass/fail rule on request: `itemSaveError`.
+- **Existing equipment.** A unit can be New Install, Replacing Existing Equipment, or Existing Equipment. Existing Equipment is marked Pre-Inspected and highlighted, counts as passed, shows no utilities to re-shoot, and has an optional note (`install_inspection_units.note`, migration 0049). New Install and Replacing are unchanged.
+  - A unit is treated as existing on its own only when the account already holds that exact unit: a serial and an install date on its account equipment line. A unit with no serial is never assumed to be existing; someone picks Existing Equipment for it. Any choice made by a person wins.
+- **Faster Fix.** Troubleshoot now answers in two steps. First, a plain search of the files stored on that variation returns the matching lines, each with its file and page, and that variation's past fixes. No AI is used for this step. If nothing matches it says "No file on this model for this issue." at once and stops. Second, only when lines were found, the matched pages are read for causes, checks, the manual's test and parts, as before.
+  - Files not read before are read at the same time, not one after another.
+  - Fewer pages are sent for the second step (20,000 characters of manual text, 10,000 of parts), down from 48,000 and 24,000.
+
+### Measured on the test copy
+
+- First search on a variation, three small PDFs not read before: matching lines in about 4 seconds.
+- Later searches: matching lines in under a second. No match: under a second.
+- The second step's time depends on the real AI and was not measured here.
+
+Gates: lint 0 errors, typecheck and build pass; tests 182 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load.
