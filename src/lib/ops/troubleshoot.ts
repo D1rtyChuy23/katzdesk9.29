@@ -8,7 +8,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { modelLabel, shortDocName } from "@/lib/ops/library-file-rules";
+import { copiedManuals, mainChipFor, modelLabel, shortDocName } from "@/lib/ops/library-file-rules";
 import { isGrinder } from "@/lib/ops/spec-defaults";
 import { callXai } from "@/lib/ops/spec-library";
 import { dropWetSteps, groundedIn, NO_FILE, pageTag, partNumberOnPage, pickPages, similarIssue, type PageText } from "@/lib/ops/troubleshoot-rules";
@@ -70,16 +70,29 @@ async function loadBook(sql: Sql, bookId: number): Promise<Book> {
   return { id: Number(rows[0].id), title: rows[0].title, manufacturer, model, grinder };
 }
 
-/** This variation's manuals and parts files — never another model's. */
+/**
+ * The files on this variation's chip — never another model's. That is what was added on the variation, plus the
+ * manuals copied onto it from its parent's main chip (less any copy this variation removed).
+ */
 async function loadSources(sql: Sql, book: Book): Promise<TsSource[]> {
-  const rows = await sql.query<{ id: number; section: "spec" | "manuals" | "parts"; name: string; token: string; mime: string; text_pages: number | null; doc_type: string | null }>(
-    "select id, section, name, token, mime, text_pages, doc_type from library_files where book_id = $1 and complete order by case section when 'spec' then 0 when 'manuals' then 1 else 2 end, lower(name), id",
-    [book.id],
+  type Row = { id: number; section: "spec" | "manuals" | "parts"; name: string; token: string; mime: string; text_pages: number | null; doc_type: string | null; book_id: number };
+  const books = (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books")).map((b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "" }));
+  const self = { id: book.id, title: book.title, manufacturer: book.manufacturer };
+  const main = mainChipFor(self, books);
+  const all = await sql.query<Row>(
+    `select id, section, name, token, mime, text_pages, doc_type, book_id from library_files
+      where book_id in (${[book.id, ...(main ? [main.id] : [])].join(",")}) and complete
+      order by case section when 'spec' then 0 when 'manuals' then 1 else 2 end, lower(name), id`,
   );
+  const hidden = (await sql.query<{ file_id: number; book_id: number }>("select file_id, book_id from library_file_hidden where book_id = $1", [book.id])).map((h) => ({ fileId: Number(h.file_id), bookId: Number(h.book_id) }));
+  const shaped = all.map((r) => ({ ...r, id: Number(r.id), bookId: Number(r.book_id) }));
+  const copies = new Set(copiedManuals(self, books, shaped, hidden).map((f) => f.id));
+  const rows = shaped.filter((r) => r.bookId === book.id || copies.has(r.id)).sort((a, b) => ["spec", "manuals", "parts"].indexOf(a.section) - ["spec", "manuals", "parts"].indexOf(b.section));
+  const titleOf = (r: (typeof rows)[number]) => (r.bookId === book.id ? book.title : main?.title ?? book.title);
   return rows.map((r) => ({
     id: Number(r.id),
     // A manual is named by its type (Service And Repair Manual …) even when the file itself was renamed.
-    label: r.section === "manuals" && r.doc_type ? r.doc_type : r.section === "spec" ? "Spec Sheet" : shortDocName(r.name, book.title),
+    label: r.section === "manuals" && r.doc_type ? r.doc_type : r.section === "spec" ? "Spec Sheet" : shortDocName(r.name, titleOf(r)),
     section: r.section,
     token: r.token,
     mime: r.mime,

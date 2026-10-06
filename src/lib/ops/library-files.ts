@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, customFileName, fileError, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, customFileName, fileError, mainChipFor, type HiddenCopy, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -159,7 +159,7 @@ async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
 
 export const listLibraryFiles = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ books: LibraryBook[]; files: LibraryFile[]; sheetBooks: { sheetId: number; bookId: number | null }[]; canEdit: boolean }> => {
+  .handler(async ({ context }): Promise<{ books: LibraryBook[]; files: LibraryFile[]; sheetBooks: { sheetId: number; bookId: number | null }[]; hidden: HiddenCopy[]; canEdit: boolean }> => {
     const sql = await ready();
     const role = await roleOf(sql, context.userId);
     const books = await ensureBooks(sql);
@@ -184,6 +184,8 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
       books,
       files: sortByName(files),
       sheetBooks: sheets.map((r) => ({ sheetId: Number(r.id), bookId: r.book_id == null ? null : Number(r.book_id) })),
+      // Main-chip manuals a variation removed its copy of.
+      hidden: (await sql.query<{ file_id: number; book_id: number }>("select file_id, book_id from library_file_hidden")).map((r) => ({ fileId: Number(r.file_id), bookId: Number(r.book_id) })),
       canEdit: role.canEdit,
     };
   });
@@ -330,6 +332,32 @@ export const renameLibraryFile = createServerFn({ method: "POST" })
     if ("error" in typed) throw new Error(typed.error);
     await sql.query("update library_files set name = $2, original_name = coalesce(original_name, $3) where id = $1", [data.id, typed.name, file[0].name]);
     return { ok: true, name: typed.name };
+  });
+
+const copyInput = z.object({ fileId: z.number().int().positive(), bookId: z.number().int().positive(), show: z.boolean() });
+
+/**
+ * A manual on the main chip is shown on every variation of its parent. This removes that copy from ONE variation
+ * (or puts it back). The main file is never deleted here, and the other variations keep theirs.
+ */
+export const setManualCopy = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof copyInput>) => copyInput.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const file = await sql.query<{ section: LibrarySection; book_id: number | null }>("select section, book_id from library_files where id = $1 and complete", [data.fileId]);
+    if (!file[0]) throw new Error("That file no longer exists.");
+    const books = (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books")).map((b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "" }));
+    const book = books.find((b) => b.id === data.bookId);
+    if (!book) throw new Error("That model is no longer in The Library.");
+    const main = mainChipFor(book, books);
+    if (file[0].section !== "manuals" || !main || Number(file[0].book_id) !== main.id) {
+      throw new Error("Only a manual copied from the main chip can be removed from one variation. Use Delete on a file added here.");
+    }
+    if (data.show) await sql.query("delete from library_file_hidden where file_id = $1 and book_id = $2", [data.fileId, data.bookId]);
+    else await sql.query("insert into library_file_hidden (file_id, book_id, hidden_by) values ($1, $2, $3) on conflict (file_id, book_id) do nothing", [data.fileId, data.bookId, context.userId]);
+    return { ok: true };
   });
 
 export const moveSpecSheet = createServerFn({ method: "POST" })

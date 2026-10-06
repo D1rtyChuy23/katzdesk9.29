@@ -362,3 +362,15 @@ Gates: lint 0 errors, typecheck and build pass; tests 178 passing, 9 failing (th
 - A part the parts book doesn't list reads "Not in this model's parts book". The web search link added in section 11 is removed.
 
 Checked in the running app with the stand-in files: every cited link pointed to a file stored on the open variation; no outside links in the panel.
+
+## 13. Main Chip Manuals Copy To Every Variation
+
+- The main chip is the variation named like its parent (AXIOM under Axiom). It leads the variation row.
+- A manual on the main chip shows on every variation of that parent, with its type, marked "from <main chip>". It is one stored file, not duplicates, so a later variation gets it too and a rename or new upload is the same everywhere.
+- Spec sheets and parts diagrams do not copy. A manual added on a variation stays on that variation.
+- On a variation, Manage shows Remove Here on a copied manual. That hides it on that variation only (`library_file_hidden`, migration 0048). The main file and the other variations keep it. Put Back restores it.
+- Deleting the manual on the main chip removes it everywhere; the confirmation says so.
+- Troubleshoot on a variation reads the copied manuals too, and not one that variation removed.
+- Applies to every parent already in The Library: the rule is worked out from the chip names, so nothing was moved, merged or renamed. A parent with no chip named like it (for example G9 with only G9-2T) has no main chip, so nothing copies there.
+
+Checked in the running app: a manual added on the Axiom main chip showed on all six other Axiom variations; removed from Axiom-DV-APS it stayed on the main chip and the other five; the stored file still opened.

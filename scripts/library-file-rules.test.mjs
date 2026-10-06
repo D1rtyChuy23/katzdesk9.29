@@ -232,3 +232,54 @@ test("PM Guide is a manual type, and a typed file name keeps the file's extensio
   assert.deepEqual(customFileName('Bad:"name"?', "old.docx"), { name: "Bad name.docx" });
   assert.ok("error" in customFileName(" ", "old.pdf"));
 });
+
+import { copiedManuals, isMainChip, mainChipFor, removedCopies, variationsOf } from "../src/lib/ops/library-file-rules.ts";
+
+const fam = [
+  { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
+  { id: 2, title: "BUNN AXIOM-15-3 (2U/1L Warmer)", manufacturer: "BUNN" },
+  { id: 3, title: "BUNN AXIOM-DV-APS", manufacturer: "BUNN" },
+  { id: 4, title: "BUNN Axiom-DV-TC", manufacturer: "BUNN" },
+  { id: 5, title: "BUNN G9-2T HD Stainless", manufacturer: "BUNN" },
+  { id: 6, title: "BUNN ITCB", manufacturer: "BUNN" },
+  { id: 7, title: "BUNN ITCB-DV", manufacturer: "BUNN" },
+  { id: 8, title: "Fetco AXIOM", manufacturer: "Fetco" },
+];
+const famFiles = [
+  { id: 10, section: "manuals", bookId: 1 },
+  { id: 11, section: "spec", bookId: 1 },
+  { id: 12, section: "parts", bookId: 1 },
+  { id: 13, section: "manuals", bookId: 3 },
+  { id: 14, section: "manuals", bookId: 6 },
+];
+
+test("the main chip is the variation named like its parent", () => {
+  assert.equal(isMainChip(fam[0]), true);
+  assert.equal(isMainChip(fam[2]), false);
+  assert.equal(mainChipFor(fam[2], fam)?.id, 1);
+  assert.equal(mainChipFor(fam[3], fam)?.id, 1);
+  assert.equal(mainChipFor(fam[0], fam), null);
+  // G9 has no chip named G9: nothing to copy from. ITCB has its own main chip. Another maker's Axiom is not ours.
+  assert.equal(mainChipFor(fam[4], fam), null);
+  assert.equal(mainChipFor(fam[6], fam)?.id, 6);
+  assert.deepEqual(variationsOf(fam[0], fam).map((b) => b.id), [2, 3, 4]);
+  assert.deepEqual(variationsOf(fam[2], fam), []);
+});
+
+test("a main-chip manual shows on every variation; spec sheets and parts do not copy", () => {
+  for (const v of [fam[1], fam[2], fam[3]]) assert.deepEqual(copiedManuals(v, fam, famFiles, []).map((f) => f.id), [10]);
+  assert.deepEqual(copiedManuals(fam[0], fam, famFiles, []), []);
+  assert.deepEqual(copiedManuals(fam[6], fam, famFiles, []).map((f) => f.id), [14]);
+  assert.deepEqual(copiedManuals(fam[4], fam, famFiles, []), []);
+  // A manual added on a variation stays on that variation only.
+  assert.equal(copiedManuals(fam[1], fam, famFiles, []).some((f) => f.id === 13), false);
+});
+
+test("removing a copy from one variation leaves the main chip and the others alone", () => {
+  const hidden = [{ fileId: 10, bookId: 3 }];
+  assert.deepEqual(copiedManuals(fam[2], fam, famFiles, hidden), []);
+  assert.deepEqual(removedCopies(fam[2], fam, famFiles, hidden).map((f) => f.id), [10]);
+  assert.deepEqual(copiedManuals(fam[1], fam, famFiles, hidden).map((f) => f.id), [10]);
+  assert.deepEqual(copiedManuals(fam[3], fam, famFiles, hidden).map((f) => f.id), [10]);
+  assert.equal(famFiles.some((f) => f.id === 10 && f.bookId === 1), true);
+});

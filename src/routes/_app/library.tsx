@@ -14,10 +14,11 @@ import {
   renameLibraryBook,
   renameLibraryFile,
   setLibraryFileType,
+  setManualCopy,
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { chipForDoc, docVariation, familyOf, fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { chipForDoc, copiedManuals, docVariation, familyOf, isMainChip, mainChipFor, removedCopies, variationsOf, fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { pdfImages } from "@/lib/pdf-text";
 import { isGrinder } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,7 @@ function Page() {
   const sheets = data.data?.sheets ?? [];
   const books = lib.data?.books ?? [];
   const files = lib.data?.files ?? [];
+  const hidden = lib.data?.hidden ?? [];
   const sheetBook = new Map((lib.data?.sheetBooks ?? []).map((r) => [r.sheetId, r.bookId]));
   const canEdit = !!data.data?.canEdit;
   const selected = open != null ? sheets.find((s) => s.id === open) ?? null : null;
@@ -305,6 +307,14 @@ function Page() {
     },
     onError: (e) => fail(e, "Could not set the type"),
   });
+  const copy = useMutation({
+    mutationFn: (v: { fileId: number; bookId: number; show: boolean }) => setManualCopy({ data: v }),
+    onSuccess: (_r, v) => {
+      toast.success(v.show ? "Put back on this variation" : "Removed from this variation only. It is still on the main chip and the other variations.");
+      void reload();
+    },
+    onError: (e) => fail(e, "Could not change that copy"),
+  });
   const renameFile = useMutation({
     mutationFn: (v: { id: number; name: string }) => renameLibraryFile({ data: v }),
     onSuccess: (r) => {
@@ -351,10 +361,17 @@ function Page() {
   // Maker → family → variation. A family is the model's first word (Axiom, G9, ITCB); its chips never mix with another family's.
   const familyKey = (b: LibraryBook) => nameKey(familyOf(b.title, b.manufacturer));
   const families = [...new Map(models.map((m) => [familyKey(m), familyOf(m.title, m.manufacturer)])).entries()]
-    .map(([key, name]) => ({ key, name, books: models.filter((m) => familyKey(m) === key) }))
+    // The main chip (named like the parent) leads its row.
+    .map(([key, name]) => ({ key, name, books: models.filter((m) => familyKey(m) === key).sort((x, y) => Number(isMainChip(y)) - Number(isMainChip(x))) }))
     .sort((x, y) => x.name.localeCompare(y.name, "en", { sensitivity: "base", numeric: true }));
   const family = current ? families.find((f) => f.key === familyKey(current)) ?? null : null;
   const inside = current ? inBook(current.id) : null;
+  // Manuals on the parent's main chip are copied onto every variation; a variation can drop its own copy.
+  const mainChip = current ? mainChipFor(current, books) : null;
+  const copies = current ? copiedManuals(current, books, files, hidden) : [];
+  const dropped = current ? removedCopies(current, books, files, hidden) : [];
+  const copyTargets = current && isMainChip(current) ? variationsOf(current, books) : [];
+  const mainName = mainChip ? modelLabel(mainChip.title, mainChip.manufacturer) : "";
   return (
     <div>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -521,11 +538,13 @@ function Page() {
                             ) : null}
                           </li>
                         ))}
-                        {TYPES.flatMap((t) => inside.files.filter((f) => f.section === t.section)).map((f) => (
+                        {TYPES.flatMap((t) => [...inside.files, ...copies].filter((f) => f.section === t.section)).map((f) => (
                           <DocRow
                             key={f.id}
                             file={f}
-                            label={shortDocName(f.name, current.title)}
+                            label={shortDocName(f.name, f.bookId === current.id ? current.title : mainChip?.title ?? current.title)}
+                            copyFrom={f.bookId === current.id ? undefined : mainName}
+                            onRemoveCopy={canEdit ? (file) => copy.mutate({ fileId: file.id, bookId: current.id, show: false }) : undefined}
                             manage={manage}
                             onMove={(file) => setAsk({ kind: "move-file", file })}
                             onDelete={setFileToDelete}
@@ -540,7 +559,20 @@ function Page() {
                             }
                           />
                         ))}
-                        {!inside.files.length && !inside.sheets.length ? <li className="py-3 text-sm text-muted-foreground">No documents yet.</li> : null}
+                        {!inside.files.length && !inside.sheets.length && !copies.length ? <li className="py-3 text-sm text-muted-foreground">No documents yet.</li> : null}
+                        {manage && dropped.length
+                          ? dropped.map((f) => (
+                              <li key={`gone-${f.id}`} className="flex min-h-12 items-center gap-2 py-1 text-muted-foreground" data-testid="library-copy-removed">
+                                <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] uppercase">Off</span>
+                                <span className="min-w-0 flex-1 text-sm break-words">
+                                  {shortDocName(f.name, mainChip?.title ?? "")} <span className="text-xs">from {mainName}, removed from this variation</span>
+                                </span>
+                                <Button type="button" size="sm" variant="outline" disabled={copy.isPending} onClick={() => copy.mutate({ fileId: f.id, bookId: current.id, show: true })} data-testid="library-copy-restore">
+                                  Put Back
+                                </Button>
+                              </li>
+                            ))
+                          : null}
                         <li className="flex min-h-12 items-center gap-2 py-1" data-testid="shelf-troubleshoot">
                           <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.1em] text-copper uppercase">Fix</span>
                           <button
@@ -557,6 +589,11 @@ function Page() {
                       </ul>
                     </div>
 
+                    {copyTargets.length ? (
+                      <p className="mt-2 text-xs text-muted-foreground" data-testid="main-chip-note">
+                        Main chip: a manual added here is copied to every {family?.name} variation ({copyTargets.length}). Spec sheets and parts diagrams stay here.
+                      </p>
+                    ) : null}
                     {canEdit ? (
                       <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="model-add">
                         <span className="text-xs text-muted-foreground">Add to {modelLabel(current.title, current.manufacturer)}:</span>
@@ -798,7 +835,12 @@ function Page() {
       <Dialog open={!!fileToDelete} onOpenChange={(o) => !o && setFileToDelete(null)}>
         <DialogContent>
           <DialogTitle>Delete This File?</DialogTitle>
-          <DialogDescription>{fileToDelete?.name} will be removed from The Library. Links already sent for it will stop working.</DialogDescription>
+          <DialogDescription>
+            {fileToDelete?.name} will be removed from The Library. Links already sent for it will stop working.
+            {fileToDelete && fileToDelete.section === "manuals" && current && fileToDelete.bookId === current.id && copyTargets.length
+              ? ` This is the main chip's file: it will also disappear from all ${copyTargets.length} ${family?.name} variations. To take it off one variation only, open that variation and use Remove Here.`
+              : ""}
+          </DialogDescription>
           <div className="mt-4 flex gap-2">
             <Button type="button" variant="destructive" disabled={removeFile.isPending} onClick={() => fileToDelete && removeFile.mutate(fileToDelete.id)}>
               Delete

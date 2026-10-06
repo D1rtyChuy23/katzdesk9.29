@@ -66,6 +66,8 @@ export function DocRow({
   onDelete,
   onType,
   onRename,
+  copyFrom,
+  onRemoveCopy,
   extra,
 }: {
   file: LibraryFile;
@@ -77,11 +79,15 @@ export function DocRow({
   /** Manuals and parts: name the file by its manual type. */
   onType?: (f: LibraryFile) => void;
   onRename?: (f: LibraryFile) => void;
+  /** Set when this row is a manual copied from the parent's main chip: the chip's name, e.g. "AXIOM". */
+  copyFrom?: string;
+  /** Remove the copy from this variation only. The main file and the other variations keep it. */
+  onRemoveCopy?: (f: LibraryFile) => void;
   extra?: React.ReactNode;
 }) {
   const url = fileUrl(originOf(), file.token);
   return (
-    <li className="flex min-h-12 items-center gap-2 py-1" data-testid="library-file" data-section={file.section}>
+    <li className="flex min-h-12 items-center gap-2 py-1" data-testid="library-file" data-section={file.section} data-copy={copyFrom ? "true" : "false"}>
       <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.1em] text-copper uppercase">{DOC_TAG[file.section]}</span>
       <a
         href={url}
@@ -92,10 +98,21 @@ export function DocRow({
         data-testid="library-file-open"
       >
         <span data-testid="library-file-name">{label}</span>
+        {copyFrom ? (
+          <span className="ml-2 text-xs font-normal whitespace-nowrap text-muted-foreground" data-testid="library-file-copy">
+            from {copyFrom}
+          </span>
+        ) : null}
       </a>
       {extra}
       <SendButtons name={file.name} url={url} />
-      {manage ? (
+      {manage && copyFrom ? (
+        onRemoveCopy ? (
+          <Button type="button" size="sm" variant="ghost" className="h-11 shrink-0 px-2 text-xs" title="Remove from this variation only. It stays on the main chip and the other variations." onClick={() => onRemoveCopy(file)} data-testid="library-copy-remove">
+            <Trash2 className="size-4" /> Remove Here
+          </Button>
+        ) : null
+      ) : manage ? (
         <>
           {onType && file.section === "manuals" && file.bookId != null ? (
             <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Set the manual type for ${file.name}`} title="Set the manual type" onClick={() => onType(file)} data-testid="library-file-type">
