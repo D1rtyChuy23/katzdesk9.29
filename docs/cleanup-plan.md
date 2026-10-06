@@ -396,3 +396,12 @@ Checked in the running app at 1280px with stand-in files and a stand-in AI.
 - The second step's time depends on the real AI and was not measured here.
 
 Gates: lint 0 errors, typecheck and build pass; tests 182 passing, 9 failing (the same 9 Grok share-card failures). All 18 routes load.
+
+## 15. Parts Files Keep Their Name And Copy From The Main Chip
+
+- A parts file is stored under the name it was dropped with. It is no longer renamed "<Model> - Parts Book". The row shows that name with the PARTS tag. Moving it to another model keeps the name. The rename button still works.
+- Parts files that were already given a generated "- Parts Book" or "- Parts Diagram" title get their original name back (migration 0050). A name someone typed is left alone.
+- Parts files on the main chip now copy to every variation, the same as manuals: one stored file, same name, on each variation; Remove Here takes it off one variation only; a parts file added on a variation stays there. Spec sheets still do not copy. This replaces "parts stay on the variation" in section 13.
+- Troubleshoot on a variation reads the copied parts file for part numbers.
+
+Checked in the running app: a parts PDF dropped on the Axiom main chip showed under the same file name on Axiom and all six other variations after a refresh; removed from Axiom-DV-APS it stayed on the rest.

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { CHUNK_BYTES, customFileName, fileError, mainChipFor, type HiddenCopy, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, copiesToVariations, customFileName, fileError, mainChipFor, type HiddenCopy, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -294,7 +294,8 @@ export const moveLibraryFile = createServerFn({ method: "POST" })
       [data.id],
     );
     if (!file[0]) throw new Error("That file no longer exists.");
-    const name = await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id, file[0].doc_type);
+    // A parts file keeps its name wherever it goes; manuals and spec sheets are named for the model they land on.
+    const name = file[0].section === "parts" ? file[0].name : await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id, file[0].doc_type);
     await sql.query("update library_files set book_id = $2, name = $3, original_name = coalesce(original_name, $4) where id = $1", [data.id, data.bookId, name, file[0].name]);
     return { ok: true, name };
   });
@@ -337,7 +338,7 @@ export const renameLibraryFile = createServerFn({ method: "POST" })
 const copyInput = z.object({ fileId: z.number().int().positive(), bookId: z.number().int().positive(), show: z.boolean() });
 
 /**
- * A manual on the main chip is shown on every variation of its parent. This removes that copy from ONE variation
+ * A manual or parts file on the main chip is shown on every variation of its parent. This removes that copy from ONE variation
  * (or puts it back). The main file is never deleted here, and the other variations keep theirs.
  */
 export const setManualCopy = createServerFn({ method: "POST" })
@@ -352,8 +353,8 @@ export const setManualCopy = createServerFn({ method: "POST" })
     const book = books.find((b) => b.id === data.bookId);
     if (!book) throw new Error("That model is no longer in The Library.");
     const main = mainChipFor(book, books);
-    if (file[0].section !== "manuals" || !main || Number(file[0].book_id) !== main.id) {
-      throw new Error("Only a manual copied from the main chip can be removed from one variation. Use Delete on a file added here.");
+    if (!copiesToVariations(file[0].section) || !main || Number(file[0].book_id) !== main.id) {
+      throw new Error("Only a manual or parts file copied from the main chip can be removed from one variation. Use Delete on a file added here.");
     }
     if (data.show) await sql.query("delete from library_file_hidden where file_id = $1 and book_id = $2", [data.fileId, data.bookId]);
     else await sql.query("insert into library_file_hidden (file_id, book_id, hidden_by) values ($1, $2, $3) on conflict (file_id, book_id) do nothing", [data.fileId, data.bookId, context.userId]);

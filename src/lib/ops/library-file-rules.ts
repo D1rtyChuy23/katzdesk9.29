@@ -195,6 +195,8 @@ export function manualTypeFromName(name: string): ManualType | null {
 
 /** "Bunn Axiom - Manual.pdf"; a second one becomes "Bunn Axiom - Manual 2.pdf". A manual type replaces the word "Manual". */
 export function shelfFileName(bookTitle: string, section: LibrarySection, originalName: string, taken: string[], type?: string | null): string {
+  // A parts file keeps the name it was dropped with. It is never given a generated title.
+  if (section === "parts") return clean(originalName);
   const ext = fileExt(originalName);
   const base = `${clean(bookTitle)} - ${type && isManualType(type) ? type : SHELF[section].type}`;
   // Compared without the extension, so a .png and a .pdf never share the name "Parts Book".
@@ -342,18 +344,21 @@ export function variationsOf<T extends FamilyBook>(main: T, books: T[]): T[] {
 }
 
 type FamilyFile = { id: number; section: LibrarySection; bookId: number | null };
+/** What the main chip hands to every variation: manuals and parts files. A spec sheet stays on its own chip. */
+const COPIED = new Set<LibrarySection>(["manuals", "parts"]);
+export const copiesToVariations = (section: LibrarySection) => COPIED.has(section);
 export type HiddenCopy = { fileId: number; bookId: number };
 
 /**
- * Manuals a variation shows because they sit on its parent's main chip. Only manuals copy — spec sheets and
- * parts stay on the variation they were added to. A copy removed from this variation is left out; the main
+ * Manuals and parts files a variation shows because they sit on its parent's main chip. Spec sheets do not copy:
+ * they stay on the variation they were added to. A copy removed from this variation is left out; the main
  * file and the other variations are not touched.
  */
 export function copiedManuals<F extends FamilyFile, T extends FamilyBook>(book: T, books: T[], files: F[], hidden: HiddenCopy[]): F[] {
   const main = mainChipFor(book, books);
   if (!main) return [];
   const gone = new Set(hidden.filter((h) => h.bookId === book.id).map((h) => h.fileId));
-  return files.filter((f) => f.bookId === main.id && f.section === "manuals" && !gone.has(f.id));
+  return files.filter((f) => f.bookId === main.id && COPIED.has(f.section) && !gone.has(f.id));
 }
 
 /** Copies this variation removed, so they can be put back. */
@@ -361,5 +366,5 @@ export function removedCopies<F extends FamilyFile, T extends FamilyBook>(book: 
   const main = mainChipFor(book, books);
   if (!main) return [];
   const gone = new Set(hidden.filter((h) => h.bookId === book.id).map((h) => h.fileId));
-  return files.filter((f) => f.bookId === main.id && f.section === "manuals" && gone.has(f.id));
+  return files.filter((f) => f.bookId === main.id && COPIED.has(f.section) && gone.has(f.id));
 }

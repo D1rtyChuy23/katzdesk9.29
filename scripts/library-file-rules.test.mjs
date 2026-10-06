@@ -80,7 +80,8 @@ test("no match, or a tie, is never guessed", () => {
 
 test("files are renamed Family - Type, numbered when there is already one", () => {
   assert.equal(shelfFileName("Bunn Axiom", "spec", "x.pdf", []), "Bunn Axiom - Spec Sheet.pdf");
-  assert.equal(shelfFileName("Bunn Axiom", "parts", "IPB.PDF", []), "Bunn Axiom - Parts Book.pdf");
+  // A parts file keeps the name it was dropped with.
+  assert.equal(shelfFileName("Bunn Axiom", "parts", "IPB.PDF", []), "IPB.PDF");
   assert.equal(shelfFileName("Bunn Axiom", "manuals", "m.docx", []), "Bunn Axiom - Manual.docx");
   assert.equal(shelfFileName("Bunn Axiom", "manuals", "m.pdf", ["bunn axiom - manual.pdf", "Bunn Axiom - Manual 2.pdf"]), "Bunn Axiom - Manual 3.pdf");
 });
@@ -139,8 +140,11 @@ test("the picker lists the same model's variations first", () => {
   assert.deepEqual(likelyBooks("Axiom manual.pdf", axioms).map((b) => b.id), [1, 2, 3]);
 });
 
-test("a picture and a PDF on the same shelf get different names", () => {
-  assert.equal(shelfFileName("Bunn Axiom Twin", "parts", "view.png", ["Bunn Axiom Twin - Parts Book.pdf"]), "Bunn Axiom Twin - Parts Book 2.png");
+test("a parts file keeps its original name, whatever else is on the shelf", () => {
+  assert.equal(shelfFileName("Bunn Axiom Twin", "parts", "view.png", ["Bunn Axiom Twin - Parts Book.pdf"]), "view.png");
+  assert.equal(shelfFileName("Bunn Axiom", "parts", "  Axiom  IPB 55012.pdf ", ["Axiom IPB 55012.pdf"]), "Axiom IPB 55012.pdf");
+  // A picture and a PDF manual on the same shelf still get different generated names.
+  assert.equal(shelfFileName("Bunn Axiom Twin", "manuals", "view.png", ["Bunn Axiom Twin - Manual.pdf"]), "Bunn Axiom Twin - Manual 2.png");
 });
 
 import { manualTypeFromName, MANUAL_TYPES } from "../src/lib/ops/library-file-rules.ts";
@@ -266,8 +270,12 @@ test("the main chip is the variation named like its parent", () => {
   assert.deepEqual(variationsOf(fam[2], fam), []);
 });
 
-test("a main-chip manual shows on every variation; spec sheets and parts do not copy", () => {
-  for (const v of [fam[1], fam[2], fam[3]]) assert.deepEqual(copiedManuals(v, fam, famFiles, []).map((f) => f.id), [10]);
+test("main-chip manuals and parts show on every variation; spec sheets do not copy", () => {
+  for (const v of [fam[1], fam[2], fam[3]]) assert.deepEqual(copiedManuals(v, fam, famFiles, []).map((f) => f.id), [10, 12]);
+  assert.equal(copiedManuals(fam[2], fam, famFiles, []).some((f) => f.id === 11), false);
+  // A parts file added on one variation stays on that variation only.
+  const own = [...famFiles, { id: 20, section: "parts", bookId: 3 }];
+  assert.equal(copiedManuals(fam[1], fam, own, []).some((f) => f.id === 20), false);
   assert.deepEqual(copiedManuals(fam[0], fam, famFiles, []), []);
   assert.deepEqual(copiedManuals(fam[6], fam, famFiles, []).map((f) => f.id), [14]);
   assert.deepEqual(copiedManuals(fam[4], fam, famFiles, []), []);
@@ -277,9 +285,14 @@ test("a main-chip manual shows on every variation; spec sheets and parts do not 
 
 test("removing a copy from one variation leaves the main chip and the others alone", () => {
   const hidden = [{ fileId: 10, bookId: 3 }];
-  assert.deepEqual(copiedManuals(fam[2], fam, famFiles, hidden), []);
+  assert.deepEqual(copiedManuals(fam[2], fam, famFiles, hidden).map((f) => f.id), [12]);
   assert.deepEqual(removedCopies(fam[2], fam, famFiles, hidden).map((f) => f.id), [10]);
-  assert.deepEqual(copiedManuals(fam[1], fam, famFiles, hidden).map((f) => f.id), [10]);
-  assert.deepEqual(copiedManuals(fam[3], fam, famFiles, hidden).map((f) => f.id), [10]);
+  assert.deepEqual(copiedManuals(fam[1], fam, famFiles, hidden).map((f) => f.id), [10, 12]);
+  assert.deepEqual(copiedManuals(fam[3], fam, famFiles, hidden).map((f) => f.id), [10, 12]);
+  // The same for a parts file: gone from one variation, still on the main chip and the others.
+  const partGone = [{ fileId: 12, bookId: 4 }];
+  assert.deepEqual(copiedManuals(fam[3], fam, famFiles, partGone).map((f) => f.id), [10]);
+  assert.deepEqual(copiedManuals(fam[1], fam, famFiles, partGone).map((f) => f.id), [10, 12]);
+  assert.equal(famFiles.some((f) => f.id === 12 && f.bookId === 1), true);
   assert.equal(famFiles.some((f) => f.id === 10 && f.bookId === 1), true);
 });

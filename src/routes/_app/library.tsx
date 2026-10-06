@@ -542,7 +542,8 @@ function Page() {
                           <DocRow
                             key={f.id}
                             file={f}
-                            label={shortDocName(f.name, f.bookId === current.id ? current.title : mainChip?.title ?? current.title)}
+                            // A parts file shows the name it was dropped with, extension and all.
+                            label={f.section === "parts" ? f.name : shortDocName(f.name, f.bookId === current.id ? current.title : mainChip?.title ?? current.title)}
                             copyFrom={f.bookId === current.id ? undefined : mainName}
                             onRemoveCopy={canEdit ? (file) => copy.mutate({ fileId: file.id, bookId: current.id, show: false }) : undefined}
                             manage={manage}
@@ -565,7 +566,7 @@ function Page() {
                               <li key={`gone-${f.id}`} className="flex min-h-12 items-center gap-2 py-1 text-muted-foreground" data-testid="library-copy-removed">
                                 <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.06em] uppercase">Off</span>
                                 <span className="min-w-0 flex-1 text-sm break-words">
-                                  {shortDocName(f.name, mainChip?.title ?? "")} <span className="text-xs">from {mainName}, removed from this variation</span>
+                                  {f.section === "parts" ? f.name : shortDocName(f.name, mainChip?.title ?? "")} <span className="text-xs">from {mainName}, removed from this variation</span>
                                 </span>
                                 <Button type="button" size="sm" variant="outline" disabled={copy.isPending} onClick={() => copy.mutate({ fileId: f.id, bookId: current.id, show: true })} data-testid="library-copy-restore">
                                   Put Back
@@ -591,7 +592,7 @@ function Page() {
 
                     {copyTargets.length ? (
                       <p className="mt-2 text-xs text-muted-foreground" data-testid="main-chip-note">
-                        Main chip: a manual added here is copied to every {family?.name} variation ({copyTargets.length}). Spec sheets and parts diagrams stay here.
+                        Main chip: a manual or parts file added here is copied to every {family?.name} variation ({copyTargets.length}). Spec sheets stay here.
                       </p>
                     ) : null}
                     {canEdit ? (
@@ -837,7 +838,7 @@ function Page() {
           <DialogTitle>Delete This File?</DialogTitle>
           <DialogDescription>
             {fileToDelete?.name} will be removed from The Library. Links already sent for it will stop working.
-            {fileToDelete && fileToDelete.section === "manuals" && current && fileToDelete.bookId === current.id && copyTargets.length
+            {fileToDelete && fileToDelete.section !== "spec" && current && fileToDelete.bookId === current.id && copyTargets.length
               ? ` This is the main chip's file: it will also disappear from all ${copyTargets.length} ${family?.name} variations. To take it off one variation only, open that variation and use Remove Here.`
               : ""}
           </DialogDescription>
