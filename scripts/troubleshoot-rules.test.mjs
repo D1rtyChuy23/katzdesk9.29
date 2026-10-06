@@ -56,3 +56,18 @@ test("grinders get no water or drain steps", () => {
   assert.deepEqual(dropWetSteps(steps, true).map((s) => s.text), ["Check the burr motor capacitor"]);
   assert.equal(dropWetSteps(steps, false).length, 3);
 });
+
+import { matchingLines } from "../src/lib/ops/troubleshoot-rules.ts";
+
+test("matching lines are found without AI, best first, and none when nothing matches", () => {
+  const pg = [
+    { fileId: 1, page: 3, text: "Troubleshooting\nProblem: Water is not hot (no heat)\nProbable cause: Tank heater has failed.\nProbable cause: Start switch is defective." },
+    { fileId: 2, page: 1, text: "Electrical: 120V\nTank heater rating: 1800 watts." },
+  ];
+  const lines = matchingLines(pg, "no heat, water not hot");
+  assert.equal(lines[0].text, "Problem: Water is not hot (no heat)");
+  assert.ok(lines.some((l) => l.fileId === 2 && /Tank heater rating/.test(l.text)));
+  assert.equal(lines.some((l) => /Start switch/.test(l.text)), false);
+  assert.deepEqual(matchingLines(pg, "steam wand hissing"), []);
+  assert.equal(matchingLines(pg, "heat", 1).length, 1);
+});

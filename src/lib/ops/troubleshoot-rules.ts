@@ -129,3 +129,28 @@ export function dropWetSteps<T extends { text: string }>(items: T[], grinder: bo
 
 /** Tag used in the prompt and in the model's answer to say where a line came from: "S12 p3". */
 export const pageTag = (p: { fileId: number; page: number }) => `S${p.fileId} p${p.page}`;
+
+/**
+ * The lines in the stored files that hold the issue's words — found with no AI, so they can be shown at once.
+ * Best line first; a line that names more of the issue's words ranks higher. Nothing here is rewritten.
+ */
+export function matchingLines(pages: PageText[], issue: string, limit = 8): PageText[] {
+  const terms = issueTerms(issue);
+  if (!terms.length) return [];
+  const hits: { line: PageText; score: number }[] = [];
+  const seen = new Set<string>();
+  for (const p of pages) {
+    for (const raw of p.text.split(/\n+/)) {
+      const text = raw.replace(/\s+/g, " ").trim();
+      if (text.length < 8 || text.length > 400) continue;
+      const have = pageStems(text);
+      const found = terms.filter((t) => have.has(t)).length;
+      if (!found) continue;
+      const key = text.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      hits.push({ line: { fileId: p.fileId, page: p.page, text }, score: found * 10 + (TROUBLE_WORDS.test(text) ? 2 : 0) + (found === terms.length ? 5 : 0) });
+    }
+  }
+  return hits.sort((a, b) => b.score - a.score || a.line.fileId - b.line.fileId || a.line.page - b.line.page).slice(0, limit).map((h) => h.line);
+}

@@ -11,11 +11,12 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { copiedManuals, mainChipFor, modelLabel, shortDocName } from "@/lib/ops/library-file-rules";
 import { isGrinder } from "@/lib/ops/spec-defaults";
 import { callXai } from "@/lib/ops/spec-library";
-import { dropWetSteps, groundedIn, NO_FILE, pageTag, partNumberOnPage, pickPages, similarIssue, type PageText } from "@/lib/ops/troubleshoot-rules";
+import { dropWetSteps, groundedIn, matchingLines, NO_FILE, pageTag, partNumberOnPage, pickPages, similarIssue, type PageText } from "@/lib/ops/troubleshoot-rules";
 
 export const TROUBLESHOOTS_PER_HOUR = 40;
-const MANUAL_BUDGET = 48_000;
-const PARTS_BUDGET = 24_000;
+// Kept small on purpose: fewer pages to read means a faster answer. Only the best-matching pages go.
+const MANUAL_BUDGET = 20_000;
+const PARTS_BUDGET = 10_000;
 
 export type TsSource = {
   id: number;
@@ -228,6 +229,44 @@ For each part named by the technician's manual, find it in these pages. Return o
 }
 
 const runInput = z.object({ bookId: z.number().int().positive(), issue: z.string().trim().min(3).max(300) });
+
+export type TsQuick = {
+  status: "ok" | "not-covered" | "no-sources";
+  message: string | null;
+  sources: TsSource[];
+  pastFixes: TsFix[];
+  /** Lines from this variation's own files that hold the issue's words, as written there. */
+  lines: TsLine[];
+  aiReady: boolean;
+};
+
+/**
+ * The fast first answer: a plain search of the files stored on this variation — no AI, no other model.
+ * Returns the matching lines with their file and page, and this variation's past fixes. When nothing matches,
+ * it says so at once and the slower reading step is never started.
+ */
+export const findTroubleshootLines = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof runInput>) => runInput.parse(d))
+  .handler(async ({ data }): Promise<TsQuick> => {
+    const sql = await ready();
+    const book = await loadBook(sql, data.bookId);
+    const sources = await loadSources(sql, book);
+    const fixes = await pastFixes(sql, book.id, data.issue);
+    const aiReady = !!process.env.XAI_API_KEY;
+    const base = { sources, pastFixes: fixes, lines: [] as TsLine[], aiReady };
+    if (!sources.some((s) => s.section !== "parts")) return { ...base, status: "no-sources", message: `${NO_FILE} ${book.model} has no manual or spec sheet stored. Nothing is taken from another model.` };
+    const readable = sources.filter((s) => (s.textPages ?? 0) > 0);
+    if (!readable.some((s) => s.section !== "parts")) return { ...base, status: "no-sources", message: `${NO_FILE} The files stored on ${book.model} have no readable text (scanned pages, Word files or pictures).` };
+    const byId = new Map(sources.map((s) => [s.id, s]));
+    const found = matchingLines(await loadPages(sql, readable.map((s) => s.id)), data.issue, 8);
+    const lines = dropWetSteps(
+      found.map((l) => ({ text: l.text, cite: { fileId: l.fileId, label: byId.get(l.fileId)?.label ?? "File", page: l.page, token: byId.get(l.fileId)?.token ?? "" } })),
+      book.grinder,
+    );
+    if (!lines.length) return { ...base, status: "not-covered", message: `${NO_FILE} The files stored on ${book.model} don't mention it. Try the words the manual uses, or the error code on the display.` };
+    return { ...base, status: "ok", message: null, lines };
+  });
 
 export const runTroubleshoot = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])

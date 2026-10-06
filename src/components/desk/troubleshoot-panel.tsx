@@ -4,6 +4,7 @@ import { Check, Loader2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import {
   explainTroubleshoot,
+  findTroubleshootLines,
   runTroubleshoot,
   saveLibraryFileText,
   saveTroubleshootFix,
@@ -12,6 +13,7 @@ import {
   type TsExplain,
   type TsFix,
   type TsLine,
+  type TsQuick,
   type TsResult,
   type TsSource,
 } from "@/lib/ops/troubleshoot";
@@ -145,6 +147,8 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
   const [asked, setAsked] = useState("");
   const [step, setStep] = useState<string | null>(null);
   const [result, setResult] = useState<TsResult | null>(null);
+  // The fast first answer: matching lines straight from this variation's files, shown before anything is read by AI.
+  const [quick, setQuick] = useState<TsQuick | null>(null);
   const [explain, setExplain] = useState<TsExplain | null>(null);
   const [fixing, setFixing] = useState(false);
   const [cause, setCause] = useState("");
@@ -153,24 +157,35 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
   const [part, setPart] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const sources = result?.sources ?? info.data?.sources ?? [];
+  const sources = result?.sources ?? quick?.sources ?? info.data?.sources ?? [];
   // Steps may come from this variation's manuals and spec sheet; part numbers only from its parts book.
   const manuals = sources.filter((s) => s.section !== "parts");
   const parts = sources.filter((s) => s.section === "parts");
 
+  // Step 2, slower: the matched pages are read for causes, checks, the manual's test and parts.
+  const full = useMutation({
+    mutationFn: (text: string) => runTroubleshoot({ data: { bookId, issue: text } }),
+    onSuccess: (r) => setResult(r),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not read the pages"),
+  });
+
+  // Step 1, fast: search only the files stored on this variation and show the matching lines.
   const run = useMutation({
     mutationFn: async (text: string) => {
-      const list = (await troubleshootSources({ data: { bookId } })).sources;
-      for (const src of list.filter((s) => s.textPages == null)) {
-        setStep(`Reading ${src.label}…`);
-        await readSource(src, setStep);
+      const list = info.data?.sources ?? (await troubleshootSources({ data: { bookId } })).sources;
+      const unread = list.filter((s) => s.textPages == null);
+      // Files not read before are read once, all at the same time.
+      if (unread.length) {
+        setStep(`Reading ${unread.map((s) => s.label).join(", ")} for the first time…`);
+        await Promise.all(unread.map((src) => readSource(src, unread.length === 1 ? setStep : () => undefined)));
       }
-      setStep("Looking through the manuals…");
-      return runTroubleshoot({ data: { bookId, issue: text } });
+      return findTroubleshootLines({ data: { bookId, issue: text } });
     },
-    onSuccess: (r, text) => {
-      setResult(r);
+    onSuccess: (q, text) => {
+      setQuick(q);
+      setResult(null);
       setAsked(text);
+      if (q.status === "ok" && q.aiReady) full.mutate(text);
       setExplain(null);
       setFixing(false);
       setSaved(false);
@@ -259,9 +274,33 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
         </p>
       ) : null}
 
-      {result && !run.isPending ? (
+      {quick && !run.isPending ? (
+        <div data-testid="ts-quick" data-status={quick.status}>
+          <PastFixes fixes={quick.pastFixes} model={model} />
+          {quick.status !== "ok" ? (
+            <p className="mt-4 rounded-lg border border-warning/50 bg-warning/10 px-3 py-2 text-sm" role="status" data-testid="ts-message">
+              {quick.message}
+            </p>
+          ) : (
+            <>
+              <div className="mt-4 mb-1.5 flex items-baseline gap-2.5">
+                <h4 className="font-display text-[17px] font-medium">Matching Lines</h4>
+                <span className="ml-auto text-right text-[11px] text-muted-foreground">as written in files stored on this model</span>
+              </div>
+              <Lines lines={quick.lines} testId="ts-quick-lines" />
+              {full.isPending ? (
+                <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground" role="status" data-testid="ts-reading">
+                  <Loader2 className="size-4 animate-spin" /> Reading those pages for causes, checks and parts…
+                </p>
+              ) : null}
+              {!quick.aiReady ? <p className="mt-3 text-sm text-muted-foreground">Open a line's page to read the manual's steps.</p> : null}
+            </>
+          )}
+        </div>
+      ) : null}
+
+      {result && quick?.status === "ok" && !run.isPending && !full.isPending ? (
         <div data-testid="ts-result" data-status={result.status}>
-          <PastFixes fixes={result.pastFixes} model={model} />
           {!ok ? (
             <p className="mt-4 rounded-lg border border-warning/50 bg-warning/10 px-3 py-2 text-sm" role="status" data-testid="ts-message">
               {result.message}
