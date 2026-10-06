@@ -124,11 +124,13 @@ export function summarizeInspection(
   photoCount: number,
   overrideReason: string | null | undefined,
   coreNeeded?: string | null,
+  preInspected?: boolean,
 ): InspectionSummary {
-  const overall = inspectionOverall(items, coreNeeded);
+  // Existing equipment on the account is already pre-inspected: nothing to re-shoot, nothing can fail.
+  const overall = preInspected ? "Passed" : inspectionOverall(items, coreNeeded);
   return {
     overall,
-    failedItems: failedItemLabels(items, coreNeeded),
+    failedItems: preInspected ? [] : failedItemLabels(items, coreNeeded),
     photoCount,
     overrideReason: (overrideReason ?? "").trim() || null,
     machineCount: 1,
@@ -138,11 +140,11 @@ export function summarizeInspection(
 
 /** Site rollup. Passed only when every machine is Passed. Any Fail fails the site. */
 export function rollupSite(
-  machines: { items: InspectionItemInput[]; photoCount: number; coreNeeded?: string | null }[],
+  machines: { items: InspectionItemInput[]; photoCount: number; coreNeeded?: string | null; preInspected?: boolean }[],
   overrideReason: string | null | undefined,
 ): InspectionSummary {
   if (!machines.length) return { ...emptyInspection(), overrideReason: (overrideReason ?? "").trim() || null };
-  const each = machines.map((m) => summarizeInspection(m.items, m.photoCount, null, m.coreNeeded));
+  const each = machines.map((m) => summarizeInspection(m.items, m.photoCount, null, m.coreNeeded, m.preInspected));
   const failedLabels = [...INSPECTION_CATEGORIES.map((c) => c.label), CORE_HOLE_LABEL];
   const failedItems = failedLabels.filter((label) => each.some((m) => m.failedItems.includes(label)));
   let overall: InspectionOverall = "In progress";
@@ -185,14 +187,13 @@ export function categoryHint(
   return base;
 }
 
-/** N/A needs a note. Pass and Fail need a photo. */
+/** Pass and Fail need a photo. Notes are optional on every status, N/A included. */
 export function itemSaveError(input: {
   status: string;
   notes?: string | null;
   photoCount: number;
 }): string | null {
   if (!isInspectionItemStatus(input.status)) return "Pick a status.";
-  if (input.status === "N/A" && !(input.notes ?? "").trim()) return "N/A needs a short note.";
   if ((input.status === "Pass" || input.status === "Fail") && input.photoCount < 1) {
     return "Add at least one photo before Pass or Fail.";
   }
@@ -214,8 +215,20 @@ export function spacePassError(input: {
   return null;
 }
 
-export type VisitKind = "new" | "replace";
-export const isVisitKind = (v: unknown): v is VisitKind => v === "new" || v === "replace";
+export type VisitKind = "new" | "replace" | "existing";
+export const isVisitKind = (v: unknown): v is VisitKind => v === "new" || v === "replace" || v === "existing";
+
+/**
+ * What a unit on a visit is. Someone's own choice always wins. With no choice made, a unit that already has an
+ * install date on the account is existing equipment; anything else is a new install.
+ */
+export function unitKind(chosen: string | null | undefined, alreadyInstalled: boolean): VisitKind {
+  if (isVisitKind(chosen)) return chosen;
+  return alreadyInstalled ? "existing" : "new";
+}
+
+/** Existing equipment is already pre-inspected: no Power, Water, Drain, Ethernet or Space to re-shoot. */
+export const isPreInspected = (kind: VisitKind | null | undefined) => kind === "existing";
 
 /**
  * A new install gets the full one-machine form. A unit replacing existing equipment is asked first whether
@@ -223,6 +236,7 @@ export const isVisitKind = (v: unknown): v is VisitKind => v === "new" || v === 
  * (any one item can still be changed); different → the normal form.
  */
 export function showChecklist(kind: VisitKind | null | undefined, reqsSame: boolean | null | undefined): boolean {
+  if (kind === "existing") return false;
   return kind !== "replace" || reqsSame != null;
 }
 

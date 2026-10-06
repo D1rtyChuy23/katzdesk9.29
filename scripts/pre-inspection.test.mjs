@@ -37,7 +37,9 @@ assert.equal(
   "Passed",
 );
 
-assert.equal(itemSaveError({ status: "N/A", notes: "", photoCount: 0 }), "N/A needs a short note.");
+// N/A needs no note. Notes are optional on every status.
+assert.equal(itemSaveError({ status: "N/A", notes: "", photoCount: 0 }), null);
+assert.equal(itemSaveError({ status: "N/A", photoCount: 0 }), null);
 assert.equal(itemSaveError({ status: "N/A", notes: "no ethernet required", photoCount: 0 }), null);
 assert.equal(itemSaveError({ status: "Pass", notes: "", photoCount: 0 }), "Add at least one photo before Pass or Fail.");
 assert.equal(itemSaveError({ status: "Fail", notes: "no drain", photoCount: 1 }), null);
@@ -217,3 +219,24 @@ assert.equal(showChecklist(null, null), true);
 assert.equal(showChecklist("replace", null), false);
 assert.equal(showChecklist("replace", true), true);
 assert.equal(showChecklist("replace", false), true);
+
+import { isPreInspected, rollupSite as roll, summarizeInspection as sumOne, unitKind } from "../src/lib/ops/pre-inspection.ts";
+
+// Existing equipment on the account is already pre-inspected.
+assert.equal(unitKind(null, true), "existing");
+assert.equal(unitKind(null, false), "new");
+assert.equal(unitKind("new", true), "new");
+assert.equal(unitKind("replace", true), "replace");
+assert.equal(unitKind("existing", false), "existing");
+assert.equal(isPreInspected("existing"), true);
+assert.equal(isPreInspected("new"), false);
+assert.equal(showChecklist("existing", null), false);
+assert.equal(sumOne([], 0, null, null, true).overall, "Passed");
+assert.equal(sumOne([{ category: "power", status: "Fail" }], 0, null, null, true).failedItems.length, 0);
+// A new install is unchanged: nothing inspected is Not started.
+assert.equal(sumOne([], 0, null, null, false).overall, "Not started");
+// One existing unit and one untouched new install: the site is in progress, 1 of 2 passed.
+const mixed = roll([{ items: [], photoCount: 0, preInspected: true }, { items: [], photoCount: 0 }], null);
+assert.equal(mixed.overall, "In progress");
+assert.equal(mixed.passedCount, 1);
+assert.equal(roll([{ items: [], photoCount: 0, preInspected: true }], null).overall, "Passed");

@@ -17,8 +17,9 @@ import {
   isCoreHoleAnswer,
   isInspectionCategory,
   isInspectionItemStatus,
+  isPreInspected,
   isSavableCategory,
-  isVisitKind,
+  unitKind,
   itemSaveError,
   rollupSite,
   spacePassError,
@@ -78,8 +79,12 @@ export type InspectionMachine = {
   items: InspectionItem[];
   coreNeeded: CoreHoleAnswer | null;
   core: InspectionItem;
-  /** New install, or replacing equipment already on the account. */
+  /** New install, replacing equipment already on the account, or existing equipment that is staying. */
   visitKind: VisitKind;
+  /** Existing equipment on the account: already pre-inspected, nothing to re-shoot. */
+  preInspected: boolean;
+  /** A note on the unit itself; optional. */
+  note: string | null;
   /** Replacing only: are the site requirements the same? Null until answered. */
   reqsSame: boolean | null;
   /** The existing unit whose results were copied here, e.g. "Bunn Axiom DV-APS · SN 123". */
@@ -120,6 +125,7 @@ export type InspectionUnitRow = {
   photoCount: number;
   coreNeeded: CoreHoleAnswer | null;
   coreStatus: string | null;
+  preInspected: boolean;
 };
 
 const MAX_PHOTO = 1_800_000;
@@ -291,11 +297,13 @@ async function unitPassed(sql: Sql, installId: number, equipmentId: number): Pro
       "select category, status from install_inspection_items where install_id = $1 and equipment_id = $2",
       [installId, equipmentId],
     ),
-    sql.query<{ core_needed: string | null }>(
-      "select core_needed from install_inspection_units where install_id = $1 and equipment_id = $2",
+    sql.query<{ core_needed: string | null; visit_kind: string | null; install_date: unknown }>(
+      `select u.core_needed, u.visit_kind, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date from install_inspection_units u
+         join account_equipment a on a.id = u.equipment_id where u.install_id = $1 and u.equipment_id = $2`,
       [installId, equipmentId],
     ),
   ]);
+  if (unit[0] && isPreInspected(unitKind(unit[0].visit_kind, !!unit[0].install_date))) return true;
   return inspectionOverall(items, unit[0]?.core_needed) === "Passed";
 }
 
@@ -447,8 +455,10 @@ export async function loadInspectionSummaries(
     if (!have.has(id)) await ensureUnits(sql, id).catch(() => undefined);
   }
   const [units, items, photos, heads] = await Promise.all([
-    sql.query<{ install_id: number; equipment_id: number; core_needed: string | null }>(
-      `select install_id, equipment_id, core_needed from install_inspection_units where install_id in (${list})`,
+    sql.query<{ install_id: number; equipment_id: number; core_needed: string | null; visit_kind: string | null; install_date: unknown }>(
+      `select u.install_id, u.equipment_id, u.core_needed, u.visit_kind, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date
+         from install_inspection_units u join account_equipment a on a.id = u.equipment_id
+        where u.install_id in (${list})`,
     ),
     sql.query<ItemRow>(
       `select install_id, equipment_id, category, status from install_inspection_items where install_id in (${list})`,
@@ -465,7 +475,7 @@ export async function loadInspectionSummaries(
   const grouped = machineGroups(items);
   const photoByUnit = new Map(photos.map((p) => [`${p.install_id}:${p.equipment_id}`, Number(p.n) || 0]));
   const overrides = new Map(heads.map((h) => [h.install_id, h.override_reason]));
-  const byInstall = new Map<number, { items: { category: string; status: string }[]; photoCount: number; coreNeeded: string | null }[]>();
+  const byInstall = new Map<number, { items: { category: string; status: string }[]; photoCount: number; coreNeeded: string | null; preInspected: boolean }[]>();
   for (const unit of units) {
     const key = `${unit.install_id}:${unit.equipment_id}`;
     const listItems = (grouped.get(key) ?? []).map((i) => ({ category: i.category, status: i.status }));
@@ -474,6 +484,7 @@ export async function loadInspectionSummaries(
       items: listItems,
       photoCount: photoByUnit.get(key) ?? 0,
       coreNeeded: isCoreHoleAnswer(unit.core_needed) ? unit.core_needed : null,
+      preInspected: isPreInspected(unitKind(unit.visit_kind, !!unit.install_date)),
     });
     byInstall.set(unit.install_id, machines);
   }
@@ -497,7 +508,7 @@ export async function loadInspectionUnits(sql: Sql, ids: number[]): Promise<Insp
       electrical: string | null;
       core_needed: string | null;
     }>(
-      `select u.install_id, u.equipment_id, a.catalog_model, a.equipment_name, a.serial, a.electrical, u.core_needed
+      `select u.install_id, u.equipment_id, a.catalog_model, a.equipment_name, a.serial, a.electrical, u.core_needed, u.visit_kind, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date
          from install_inspection_units u
          join account_equipment a on a.id = u.equipment_id
         where u.install_id in (${list})
@@ -519,8 +530,9 @@ export async function loadInspectionUnits(sql: Sql, ids: number[]): Promise<Insp
     const rows = grouped.get(key) ?? [];
     const unitItems = rows.map((i) => ({ category: i.category, status: i.status }));
     const coreNeeded = isCoreHoleAnswer(u.core_needed) ? u.core_needed : null;
-    const summary = rollupSite([{ items: unitItems, photoCount: photoByUnit.get(key) ?? 0, coreNeeded }], null);
-    const one = summary.machineCount ? inspectionOverall(unitItems, coreNeeded) : "Not started";
+    const preInspected = isPreInspected(unitKind((u as { visit_kind?: string | null }).visit_kind, !!(u as { install_date?: unknown }).install_date));
+    const summary = rollupSite([{ items: unitItems, photoCount: photoByUnit.get(key) ?? 0, coreNeeded, preInspected }], null);
+    const one = preInspected ? "Passed" : summary.machineCount ? inspectionOverall(unitItems, coreNeeded) : "Not started";
     const coreRow = rows.find((i) => i.category === CORE_HOLE_CATEGORY);
     return {
       installId: u.install_id,
@@ -533,6 +545,7 @@ export async function loadInspectionUnits(sql: Sql, ids: number[]): Promise<Insp
       photoCount: photoByUnit.get(key) ?? 0,
       coreNeeded,
       coreStatus: coreNeeded === "yes" ? (isInspectionItemStatus(coreRow?.status) ? coreRow.status : "Not inspected") : null,
+      preInspected,
     };
   });
 }
@@ -601,8 +614,10 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
       core_model: string | null;
       from_name: string | null;
       from_serial: string | null;
+      note: string | null;
+      install_date: unknown;
     }>(
-      `select u.equipment_id, a.catalog_model, a.equipment_name, a.serial, a.electrical, u.core_needed,
+      `select u.equipment_id, a.catalog_model, a.equipment_name, a.serial, a.electrical, u.core_needed, u.note, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date,
               u.visit_kind, u.reqs_same, u.core_model, f.equipment_name as from_name, f.serial as from_serial
          from install_inspection_units u
          join account_equipment a on a.id = u.equipment_id
@@ -629,7 +644,9 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
     const unitPhotos = mapped.filter((p) => p.equipmentId === u.equipment_id);
     const inputs = unitItems.map((i) => ({ category: i.category, status: i.status }));
     const coreNeeded = isCoreHoleAnswer(u.core_needed) ? u.core_needed : null;
-    const overall = inspectionOverall(inputs, coreNeeded);
+    const visitKind = unitKind(u.visit_kind, !!u.install_date);
+    const preInspected = isPreInspected(visitKind);
+    const overall = preInspected ? "Passed" : inspectionOverall(inputs, coreNeeded);
     const model = u.equipment_name || u.catalog_model;
     const coreRow = unitItems.find((i) => i.category === CORE_HOLE_CATEGORY);
     const coreStatus = isInspectionItemStatus(coreRow?.status) ? coreRow.status : "Not inspected";
@@ -640,10 +657,12 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
       serial: u.serial,
       electrical: u.electrical,
       overall,
-      failedItems: failedItemLabels(inputs, coreNeeded),
+      failedItems: preInspected ? [] : failedItemLabels(inputs, coreNeeded),
       photoCount: unitPhotos.length,
       thumb: unitPhotos[0]?.dataUrl ?? null,
-      visitKind: isVisitKind(u.visit_kind) ? u.visit_kind : "new",
+      visitKind,
+      preInspected,
+      note: u.note ?? null,
       reqsSame: u.visit_kind === "replace" && u.reqs_same != null ? !!u.reqs_same : null,
       copiedFrom: u.from_name ? [u.from_name, u.from_serial ? `SN ${u.from_serial}` : null].filter(Boolean).join(" · ") : null,
       coreModel: u.core_model ?? null,
@@ -677,6 +696,7 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
         .map((i) => ({ category: i.category, status: i.status })),
       photoCount: m.photoCount,
       coreNeeded: m.coreNeeded,
+      preInspected: m.preInspected,
     })),
     h?.override_reason,
   );
@@ -994,7 +1014,7 @@ export const copyInspectionNa = createServerFn({ method: "POST" })
 const visitInput = z.object({
   installId: z.number().int().positive(),
   equipmentId: z.number().int().positive(),
-  kind: z.enum(["new", "replace"]),
+  kind: z.enum(["new", "replace", "existing"]),
   /** Replacing only. false = requirements differ: the normal form opens and nothing is copied. */
   reqsSame: z.boolean().nullable().optional(),
 });
@@ -1018,6 +1038,25 @@ export const setInspectionVisit = createServerFn({ method: "POST" })
   });
 
 const unitInput = z.object({ installId: z.number().int().positive(), equipmentId: z.number().int().positive() });
+
+const noteInput = z.object({ installId: z.number().int().positive(), equipmentId: z.number().int().positive(), note: z.string().max(2000).nullable() });
+
+// Existing equipment is recognised on its own only when the account already holds that exact unit: a serial and an
+// install date. A unit with no serial is never assumed to be existing — someone picks Existing Equipment for it.
+
+/** An optional note on the unit itself — the only thing to fill in for existing equipment. */
+export const saveInspectionUnitNote = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof noteInput>) => noteInput.parse(d))
+  .handler(async ({ data }): Promise<InspectionView> => {
+    const sql = await ready();
+    await requireInstall(sql, data.installId);
+    await requireUnit(sql, data.installId, data.equipmentId);
+    await sql.query("update install_inspection_units set note = $3 where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId, data.note?.trim() || null]);
+    const view = await readInspection(sql, data.installId);
+    if (!view) throw new Error("Install not found");
+    return view;
+  });
 
 async function replaceSources(sql: Sql, installId: number, equipmentId: number, customer: string): Promise<ReplaceSource[]> {
   const units = await sql.query<{ install_id: number; equipment_id: number; equipment_name: string; catalog_model: string; serial: string | null; core_needed: string | null }>(

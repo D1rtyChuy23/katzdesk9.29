@@ -13,6 +13,7 @@ import {
   saveInspectionCoreHole,
   saveInspectionItem,
   saveInspectionMeta,
+  saveInspectionUnitNote,
   setInspectionVisit,
   type InspectionItem,
   type InspectionMachine,
@@ -49,12 +50,22 @@ export function InspectionBadge({
   passed,
   total,
   className,
+  pre,
 }: {
   overall: InspectionOverall | null | undefined;
   passed?: number;
   total?: number;
   className?: string;
+  /** Existing equipment on the account: already pre-inspected. */
+  pre?: boolean;
 }) {
+  if (pre) {
+    return (
+      <Badge variant="success" size="tight" className={cn("ring-2 ring-primary/40", className)} data-testid="inspection-badge" data-pre="true">
+        Pre-Inspected
+      </Badge>
+    );
+  }
   const label = overall ?? "Not started";
   const count = total && total > 0 ? ` ${passed ?? 0}/${total}` : "";
   const variant =
@@ -183,7 +194,12 @@ function MachineList({
                 type="button"
                 data-testid={`inspect-machine-${m.equipmentId}`}
                 onClick={() => onOpen(m.equipmentId)}
-                className="flex min-h-[4.5rem] w-full items-center gap-3 px-4 py-4 text-left active:bg-muted"
+                data-pre={m.preInspected ? "true" : "false"}
+                className={cn(
+                  "desk-flat flex min-h-[4.5rem] w-full items-center gap-3 px-4 py-4 text-left active:bg-muted",
+                  // Existing equipment: already pre-inspected, shown highlighted.
+                  m.preInspected && "border-l-4 border-primary bg-primary/10",
+                )}
               >
                 {m.thumb ? (
                   <img src={m.thumb} alt="" className="size-12 shrink-0 rounded-md object-cover" />
@@ -195,10 +211,10 @@ function MachineList({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-base font-medium">{m.name}</span>
                   <span className="block truncate text-xs text-muted-foreground">
-                    {[m.serial ? `SN ${m.serial}` : "No serial", m.electrical || "Electrical missing"].join(" · ")}
+                    {[m.preInspected ? "Existing equipment" : null, m.serial ? `SN ${m.serial}` : "No serial", m.electrical || "Electrical missing"].filter(Boolean).join(" · ")}
                   </span>
                 </span>
-                <InspectionBadge overall={m.overall} />
+                <InspectionBadge overall={m.overall} pre={m.preInspected} />
               </button>
             </li>
           ))}
@@ -418,7 +434,7 @@ function MachineDetail({
             {[machine.serial ? `SN ${machine.serial}` : "No serial", machine.electrical || "Electrical missing"].join(" · ")}
           </p>
         </div>
-        <InspectionBadge overall={machine.overall} />
+        <InspectionBadge overall={machine.overall} pre={machine.preInspected} />
       </div>
       <VisitChoice
         view={view}
@@ -499,6 +515,16 @@ function VisitChoice({
 }) {
   const ids = { installId: view.installId, equipmentId: machine.equipmentId };
   const replacing = machine.visitKind === "replace";
+  const existing = machine.visitKind === "existing";
+  const [note, setNote] = useState(machine.note ?? "");
+  const saveNote = useMutation({
+    mutationFn: (text: string) => saveInspectionUnitNote({ data: { ...ids, note: text.trim() || null } }),
+    onSuccess: (next) => {
+      toast.success("Note saved");
+      onSaved(next);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the note"),
+  });
   const [again, setAgain] = useState(false);
   const asking = replacing && (machine.reqsSame == null || again);
   const sources = useQuery({
@@ -508,7 +534,7 @@ function VisitChoice({
   });
   const fail = (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save");
   const kind = useMutation({
-    mutationFn: (v: { kind: "new" | "replace"; reqsSame?: boolean | null }) => setInspectionVisit({ data: { ...ids, ...v } }),
+    mutationFn: (v: { kind: "new" | "replace" | "existing"; reqsSame?: boolean | null }) => setInspectionVisit({ data: { ...ids, ...v } }),
     onSuccess: (next) => {
       setAgain(false);
       onSaved(next);
@@ -529,15 +555,15 @@ function VisitChoice({
   const list = sources.data ?? [];
   return (
     <div className="px-3 pt-3" data-testid="visit-choice">
-      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="What is this unit?">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="radiogroup" aria-label="What is this unit?">
         <Button
           type="button"
           role="radio"
-          aria-checked={!replacing}
-          variant={!replacing ? "default" : "outline"}
+          aria-checked={!replacing && !existing}
+          variant={!replacing && !existing ? "default" : "outline"}
           className="h-12 text-sm"
           disabled={busy}
-          onClick={() => replacing && kind.mutate({ kind: "new" })}
+          onClick={() => (replacing || existing) && kind.mutate({ kind: "new" })}
           data-testid="visit-new"
         >
           New Install
@@ -554,7 +580,42 @@ function VisitChoice({
         >
           Replacing Existing Equipment
         </Button>
+        <Button
+          type="button"
+          role="radio"
+          aria-checked={existing}
+          variant={existing ? "default" : "outline"}
+          className="h-12 text-sm whitespace-normal"
+          disabled={busy}
+          onClick={() => !existing && kind.mutate({ kind: "existing" })}
+          data-testid="visit-existing"
+        >
+          Existing Equipment
+        </Button>
       </div>
+      {existing ? (
+        <div className="mt-3 rounded-lg border-l-4 border-primary bg-primary/10 px-3 py-3" data-testid="pre-inspected-panel">
+          <p className="font-medium">Pre-Inspected</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            This unit is existing equipment on the account. Power, Water, Drain, Ethernet and Space are not re-shot. Pick New Install if it is being installed fresh.
+          </p>
+          <Label htmlFor={`unit-note-${machine.equipmentId}`} className="mt-3 block">
+            Notes (Optional)
+          </Label>
+          <Textarea
+            id={`unit-note-${machine.equipmentId}`}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Anything worth knowing about this unit"
+            className="mt-1 min-h-20 text-base"
+            maxLength={2000}
+            data-testid="unit-note"
+          />
+          <Button type="button" variant="outline" className="mt-2" disabled={saveNote.isPending || note.trim() === (machine.note ?? "")} onClick={() => saveNote.mutate(note)} data-testid="unit-note-save">
+            Save Note
+          </Button>
+        </div>
+      ) : null}
       {asking ? (
         <div className="mt-3 rounded-lg border border-border p-3" data-testid="replace-question">
           <p className="font-medium">Are the site requirements the same as the unit it replaces?</p>
@@ -884,7 +945,7 @@ function ItemRow({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           onBlur={() => persist(status, notes)}
-          placeholder={status === "N/A" ? "Why N/A — e.g. no drain on this grinder" : "Notes"}
+          placeholder="Notes (optional)"
           className="min-h-24 text-base"
         />
       </div>

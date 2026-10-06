@@ -24,7 +24,7 @@ import { ProviderDispatchBlock } from "./provider-dispatch";
 import { RenameDialog } from "./rename-dialog";
 import type { RecipeDraft } from "./recipe-form";
 import { cn } from "@/lib/utils";
-import { Pencil, Plus, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Plus, Search } from "lucide-react";
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import { toast } from "sonner";
 import { RepSelect } from "./rep-select";
@@ -442,12 +442,36 @@ function PreInspectionList({
   openId: number | null;
   onOpen: (id: number) => void;
 }) {
+  // Collapsed until asked for, so the customer window stays short. The count is every unit on the open installs.
+  const [shown, setShown] = useState(false);
   if (!installs.length) return null;
+  const units = installs.reduce((n, i) => n + (i.inspection?.machineCount ?? 0), 0);
+  const passed = installs.reduce((n, i) => n + (i.inspection?.passedCount ?? 0), 0);
+  const toggle = () => {
+    const next = !shown;
+    setShown(next);
+    // One install: opening the block shows its units straight away.
+    if (next && installs.length === 1 && openId !== installs[0]!.id) onOpen(installs[0]!.id);
+  };
   return (
-    <section className="mt-4" data-testid="account-pre-inspection">
-      <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-        Pre-Inspection
-      </h2>
+    <section className="mt-4" data-testid="account-pre-inspection" data-open={shown ? "true" : "false"}>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={shown}
+        className="desk-flat flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted/60"
+        data-testid="account-pre-inspection-toggle"
+      >
+        {shown ? <ChevronDown className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" />}
+        <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pre-Inspection</span>
+        <span className="text-sm font-medium" data-testid="account-pre-inspection-count">
+          {units} unit{units === 1 ? "" : "s"}
+        </span>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {passed}/{units} passed
+        </span>
+      </button>
+      {shown ? (
       <ul className="mt-2 space-y-2">
         {installs.map((i) => (
           <li key={i.id} className="overflow-hidden rounded-xl border border-border">
@@ -474,6 +498,7 @@ function PreInspectionList({
           </li>
         ))}
       </ul>
+      ) : null}
     </section>
   );
 }
@@ -491,12 +516,24 @@ function AccountEquipmentList({
   }[];
   loading: boolean;
 }) {
+  // Collapsed until asked for: a long equipment list no longer pushes the rest of the window down.
+  const [shown, setShown] = useState(false);
   return (
-    <section className="mt-4">
-      <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-        Equipment On This Account
-      </h2>
-      {loading ? (
+    <section className="mt-4" data-testid="account-equipment" data-open={shown ? "true" : "false"}>
+      <button
+        type="button"
+        onClick={() => setShown(!shown)}
+        aria-expanded={shown}
+        className="desk-flat flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted/60"
+        data-testid="account-equipment-toggle"
+      >
+        {shown ? <ChevronDown className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" />}
+        <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Equipment On This Account</span>
+        <span className="text-sm font-medium" data-testid="account-equipment-count">
+          {loading ? "…" : `${rows.length} unit${rows.length === 1 ? "" : "s"}`}
+        </span>
+      </button>
+      {!shown ? null : loading ? (
         <p className="mt-2 text-sm text-muted-foreground">Loading equipment…</p>
       ) : rows.length ? (
         <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
