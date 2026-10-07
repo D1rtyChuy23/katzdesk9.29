@@ -8,6 +8,8 @@ import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
 import { boardLocked, cleanTime, type BoardType } from "./day-board";
+import { namesMatchUser } from "./lookups";
+import { techRequestPing } from "./tech-request";
 import {
   addDays,
   diffDays,
@@ -261,6 +263,7 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		machines: specsFromInstall(r.equipment, r.serial, r.power_voltage, r.machines, catalog),
 		serialNotice: r.serial_notice ?? null,
 		complete: !!r.complete,
+		trfIssued: !!r.trf_issued,
 		dealId: r.deal_id,
 		duplicateOf: r.duplicate_of ?? null,
 		updatedAt: String(r.updated_at),
@@ -911,6 +914,27 @@ export const createJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	return getJob({ data: { id: rows[0].id } });
 });
 /**
+ * A tech was assigned to an install: tell the rep on the account they are good to issue the Tech Request Form.
+ * The ping opens that install. The Tech Request Form box is never ticked here — Sales ticks it.
+ */
+async function pingRepTechAssigned(sql: any, fromUserId: string, v: { id: number; customer: string; before: string | null; after: string | null; rep: string | null }) {
+	const tech = (v.after ?? "").trim();
+	if (!tech || sameTech(v.before, tech)) return;
+	try {
+		const marks = await loadAccountMarks(sql);
+		const rep = (v.rep ?? "").trim() || accountRepFor(marks, v.customer);
+		if (!rep || isNoRep(rep)) return;
+		// The rep's own Desk sign-in: matched on their name, the way My View matches it.
+		const accounts = (await sql.query("select user_id, username, approved from desk_accounts")) as any[];
+		const to = accounts.filter((a) => (a.approved === true || a.approved === "true" || a.approved === 1) && namesMatchUser({ displayName: null, primaryEmail: null, username: a.username }, rep)).map((a) => String(a.user_id));
+		if (!to.length) return;
+		const body = techRequestPing(canonicalTechName(tech) ?? tech, v.customer);
+		await deliverPings(sql, { fromUserId, body, entityType: "install", entityId: v.id, toUserIds: to });
+	} catch {
+		// A ping that cannot be sent never blocks assigning the tech.
+	}
+}
+/**
  * Planner day board: a block dropped on another time or another tech. Sets the day, the time of day and the
  * assigned tech in one write. Completed and cancelled work is refused — it stays where it was done.
  */
@@ -932,6 +956,7 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	const locked = data.type === "install" ? isInstalled({ complete: cur.complete, equipStatus: cur.equip_status }) : boardLocked({ status: cur.status, done: cur.done });
 	if (locked) throw new Error("Completed and cancelled work does not move.");
 	await sql.query(`update ${table} set ${dateCol} = $2, sched_time = $3, technician = $4, updated_at = now() where id = $1`, [data.id, data.date, time, tech]);
+	if (data.type === "install") await pingRepTechAssigned(sql, context.userId, { id: data.id, customer: String(cur.customer), before: cur.technician, after: tech, rep: cur.account_rep });
 	// The new primary cannot also be the ticket's secondary.
 	if (table === "service_jobs" && tech && sameTech(cur.technician2, tech)) await sql.query("update service_jobs set technician2 = null where id = $1", [data.id]);
 	const was = isoDate(cur[dateCol]);
@@ -1154,11 +1179,18 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 	const marks = await loadAccountMarks(sql);
 	return withInspections(sql, applyMarks((await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog)), marks));
 });
-export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean }) => d).handler(async ({ data, context }: any) => {
+export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`select * from installs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Install not found");
 	const c = cur[0];
+	// Tech Request Form issued: a person ticks it, and only Sales or an admin may.
+	if (data.trfIssued !== undefined && !!data.trfIssued !== !!c.trf_issued) {
+		const me = (await sql.query("select is_admin, desk_role, username from desk_accounts where user_id = $1", [context.userId]))[0] as any;
+		if (!me || !(me.is_admin === true || me.is_admin === "true" || me.is_admin === 1 || me.desk_role === "sales")) throw new Error("Only Sales can mark the Tech Request Form as issued.");
+		await sql.query("update installs set trf_issued = $2, trf_issued_by = $3, trf_issued_at = case when $2 then now() else null end where id = $1", [data.id, !!data.trfIssued, data.trfIssued ? me.username || null : null]);
+		await logActivity(sql, context.userId, "install", data.id, "updated", data.trfIssued ? "Tech Request Form issued" : "Tech Request Form unmarked");
+	}
 	const equipStatus = data.equipStatus === undefined ? c.equip_status : data.equipStatus;
 	const complete = data.complete === undefined ? data.equipStatus === undefined ? c.complete : isInstalled({ equipStatus }) : data.complete;
 	const wasInstalled = isInstalled({ complete: c.complete, equipStatus: c.equip_status });
@@ -1210,6 +1242,7 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 	]);
 	if (extra) await logActivity(sql, context.userId, "install", data.id, "updated", extra);
 	const customerName = String(data.customer ?? c.customer);
+	if (data.technician !== undefined) await pingRepTechAssigned(sql, context.userId, { id: data.id, customer: customerName, before: c.technician, after: data.technician, rep: data.accountRep === undefined ? c.account_rep : data.accountRep });
 	if (data.aviKatz !== undefined || data.accountRep !== undefined) await upsertAccountMarks(sql, customerName, {
 		aviKatz: data.aviKatz,
 		accountRep: data.accountRep === undefined ? undefined : canonicalRepName(data.accountRep) ?? (data.accountRep || null)

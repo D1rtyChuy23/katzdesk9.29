@@ -160,8 +160,10 @@ test("generate sets the inlet and plug on every configuration; fill keeps edits"
   assert.equal(applySpecDefaults(blank, "fill").configs[0].requirements.water.inlet, DEFAULT_INLET);
 });
 
-test("blank manual form starts with the inlet filled", () => {
-  assert.equal(emptyDraft().configs[0].requirements.water.inlet, DEFAULT_INLET);
+test("blank manual form starts with no inlet: one is listed only once the unit takes water", () => {
+  assert.equal(emptyDraft().configs[0].requirements.water, undefined);
+  const brewer = applySpecDefaults({ ...emptyDraft(), manufacturer: "Bunn", model: "Axiom-DV-APS" }, "fill");
+  assert.equal(brewer.configs[0].requirements.water.inlet, DEFAULT_INLET);
 });
 
 test("copy text carries the plug and breaker", () => {
@@ -258,4 +260,40 @@ test("a grinder gets no water inlet, and its copy has no Water or Drain line", (
   // A brewer is unchanged: the inlet default still applies.
   const brewer = applyAll({ manufacturer: "BUNN", model: "Axiom-DV-APS", specs: [], mfrNotes: {}, configs: [{ label: "Standard", requirements: {} }] }, "generate");
   assert.equal(brewer.configs[0].requirements.water.inlet, INLET);
+});
+
+import { needsWater } from "../src/lib/ops/spec-defaults.ts";
+
+const one = (sheet, requirements = {}) => applyAll({ specs: [], mfrNotes: {}, ...sheet, configs: [{ label: "Standard", requirements }] }, "fill").configs[0].requirements;
+
+test("water is listed only when the unit takes water", () => {
+  // Brewer, espresso, tea: by category or by name.
+  assert.equal(needsWater({ manufacturer: "Bunn", model: "Axiom-DV-APS" }), true);
+  assert.equal(needsWater({ manufacturer: "Bunn", model: "ITCB-DV" }), true);
+  assert.equal(needsWater({ manufacturer: "Fetco", model: "CBS-1151V+" }), true);
+  assert.equal(needsWater({ manufacturer: "Bunn", model: "TB3Q" }), true);
+  assert.equal(needsWater({ manufacturer: "La Marzocco", model: "Linea PB" }), true);
+  assert.equal(needsWater({ manufacturer: "Acme", model: "X9", category: "Iced Tea Brewer" }), true);
+  // Grinders never.
+  assert.equal(needsWater({ manufacturer: "Bunn", model: "G9-2T HD" }), false);
+  assert.equal(needsWater({ manufacturer: "Mazzer", model: "Major" }, { water: { pressure: "30 psi" } }), false);
+  // Nothing says water: no inlet. Our own default inlet is not the sheet calling for water.
+  assert.equal(needsWater({ manufacturer: "Acme", model: "Warmer 2" }), false);
+  assert.equal(needsWater({ manufacturer: "Acme", model: "Warmer 2" }, { water: { inlet: INLET } }), false);
+  // The uploaded sheet names a water line or a drain.
+  assert.equal(needsWater({ manufacturer: "Acme", model: "Warmer 2" }, { water: { pressure: "20-90 psi" } }), true);
+  assert.equal(needsWater({ manufacturer: "Acme", model: "Warmer 2" }, { water: { inlet: '1/4" flare' } }), true);
+  assert.equal(needsWater({ manufacturer: "Acme", model: "Warmer 2" }, { drain: { size: '1"' } }), true);
+  assert.equal(needsWater({ manufacturer: "Acme", model: "Warmer 2", specs: [{ label: "Water supply", value: "3/8 in line" }] }), true);
+});
+
+test("already-uploaded sheets follow the same rule when they are read", () => {
+  // A unit that does not call for water loses the inlet that was only ever our default.
+  assert.equal(one({ manufacturer: "Acme", model: "Warmer 2" }, { water: { inlet: INLET } }).water?.inlet, undefined);
+  assert.equal(one({ manufacturer: "Bunn", model: "G9-2T HD" }, { water: { inlet: INLET } }).water?.inlet, undefined);
+  // A brewer keeps 3/8" compression, and gets it when blank.
+  assert.equal(one({ manufacturer: "Bunn", model: "Axiom-DV-APS" }, { water: { inlet: INLET } }).water.inlet, INLET);
+  assert.equal(one({ manufacturer: "Fetco", model: "CBS-1151V+" }).water.inlet, INLET);
+  // A unit whose sheet names water gets the inlet too.
+  assert.equal(one({ manufacturer: "Acme", model: "Warmer 2" }, { water: { pressure: "20-90 psi" } }).water.inlet, INLET);
 });

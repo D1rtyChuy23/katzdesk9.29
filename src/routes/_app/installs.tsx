@@ -819,6 +819,7 @@ function InstallRow({
             {" · "}
             {i.accountRep ? <RepName name={i.accountRep} /> : <NoRepFlag show />}
           </button>
+          {open ? <TrfCheck install={i} /> : null}
           {machineNotes(i)}
           <div className="sm:pl-20">
             <InstallEquipChips
@@ -845,6 +846,31 @@ function InstallRow({
         </div>
       ) : null}
     </article>
+  );
+}
+
+/** Sales ticks this once the Tech Request Form has gone out. Never ticked for them. */
+function TrfCheck({ install }: { install: Install }) {
+  const qc = useQueryClient();
+  const save = useMutation({
+    mutationFn: (trfIssued: boolean) => updateInstall({ data: { id: install.id, trfIssued } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["installs"] }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  return (
+    <label
+      className="mt-1 flex w-fit items-center gap-2 text-sm text-muted-foreground sm:pl-20"
+      data-testid="trf-check"
+    >
+      <input
+        type="checkbox"
+        className="size-4 accent-primary"
+        checked={install.trfIssued}
+        disabled={save.isPending}
+        onChange={(e) => save.mutate(e.target.checked)}
+      />
+      Tech Request Form issued
+    </label>
   );
 }
 

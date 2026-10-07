@@ -66,7 +66,7 @@ function sheetSaysLocking(plug: string | undefined): string | null {
 }
 
 /** Sheet identity, for model exceptions (Bunn Axiom at 220 V is 4-wire). */
-export type PlugContext = { manufacturer?: string | null; model?: string | null; category?: string | null };
+export type PlugContext = { manufacturer?: string | null; model?: string | null; category?: string | null; specs?: { label: string; value: string }[] | null };
 
 export type WireCount = 3 | 4;
 export const WIRES_4 = "4-wire (2 hots, neutral, ground)";
@@ -227,9 +227,9 @@ export type DefaultsMode =
 export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode, ctx?: PlugContext): SpecConfig {
   const req = c.requirements ?? {};
   const water = { ...(req.water ?? {}) };
-  // A grinder has no water line: no inlet is filled in, and one that was only ever our default is taken back out.
-  const dry = isGrinder(ctx);
-  if (dry) {
+  // An inlet is listed only when the unit takes water. Adding a unit is not a reason to list one: a grinder, or a
+  // unit whose sheet does not call for water, gets none — and one that was only ever our default is taken back out.
+  if (!needsWater(ctx, req)) {
     if (water.inlet?.trim() === DEFAULT_INLET) delete water.inlet;
   } else if (mode === "generate" || !water.inlet?.trim()) water.inlet = DEFAULT_INLET;
   const power = { ...(req.power ?? {}) };
@@ -247,7 +247,7 @@ export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode, ctx?: Plu
 export function applySpecDefaults<T extends SpecSheetDraft>(draft: T, mode: DefaultsMode): T {
   const configs = draft.configs.length ? draft.configs : [{ label: "Standard", requirements: {} }];
   const core = espressoCoreDefaults(draft);
-  const ctx = { manufacturer: draft.manufacturer, model: draft.model, category: draft.category };
+  const ctx = { manufacturer: draft.manufacturer, model: draft.model, category: draft.category, specs: draft.specs };
   return { ...draft, ...core, configs: configs.map((c) => applyConfigDefaults(c, mode, ctx)) };
 }
 
@@ -268,6 +268,32 @@ export function isGrinder(sheet: { manufacturer?: string | null; model?: string 
   if (/grinder/i.test(cat)) return true;
   if (/espresso|brewer|water|filtration|fridge|refrigerat|blender|dispenser/i.test(cat)) return false;
   return GRINDER_NAMES.test(`${sheet.manufacturer ?? ""} ${sheet.model ?? ""}`);
+}
+
+const WATER_CATEGORY = /brewer|espresso|\btea\b|coffee\s*(maker|machine)|\burn\b|water|hot\s*beverage|super\s*-?automatic|dispenser/i;
+// Model names that are brewers or tea brewers even when the sheet has no category.
+const WATER_MODELS = /\bbrew(er|ers|ing)?\b|\btea\b|\burn\b|\baxiom\b|\bitcb\b|\bitb\b|\bicb\b|\bcwtf?\b|\bcbs\b|\bxts\b|\btb[36]q?\b|\binfusion\b|\bnitron\b|\bthermofresh\b|\bsoft\s*heat\b/i;
+const WATER_SPEC = /water\s*(line|supply|inlet|connection|pressure|hook-?up)|plumb(ed|ing)|\binlet\b|\bdrain\b/i;
+
+/**
+ * Does this unit take water? Yes for a brewer, an espresso machine or a tea brewer, and whenever the uploaded
+ * sheet itself names a water line or a drain. Never for a grinder. Our own default inlet does not count as
+ * the sheet calling for water.
+ */
+export function needsWater(
+  sheet: PlugContext | null | undefined,
+  req?: { water?: { inlet?: string; pressure?: string; filtration?: string; notes?: string }; drain?: { size?: string; notes?: string } } | null,
+): boolean {
+  if (isGrinder(sheet)) return false;
+  const cat = sheet?.category ?? "";
+  if (WATER_CATEGORY.test(cat)) return true;
+  if (isEspresso(sheet ?? {})) return true;
+  const said = (v: string | undefined) => !!v && !!v.trim();
+  const w = req?.water;
+  if (w && (said(w.pressure) || said(w.filtration) || said(w.notes) || (said(w.inlet) && w.inlet!.trim() !== DEFAULT_INLET))) return true;
+  if (req?.drain && (said(req.drain.size) || said(req.drain.notes))) return true;
+  if ((sheet?.specs ?? []).some((s) => WATER_SPEC.test(`${s.label} ${s.value}`))) return true;
+  return WATER_MODELS.test(`${sheet?.manufacturer ?? ""} ${sheet?.model ?? ""}`);
 }
 
 /** Espresso machine: La Marzocco, Eversys, Rancilio, Faema… or a catalog/category marked espresso. Grinders don't count. */

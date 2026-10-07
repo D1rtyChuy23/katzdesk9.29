@@ -20,7 +20,7 @@ import {
 } from "@/lib/ops/library-files";
 import { chipForDoc, copiedManuals, docVariation, familyOf, isMainChip, mainChipFor, removedCopies, variationsOf, fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { pdfImages } from "@/lib/pdf-text";
-import { isGrinder } from "@/lib/ops/spec-defaults";
+import { needsWater } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -528,7 +528,7 @@ function Page() {
                               data-testid="shelf-specs-open"
                             >
                               {inside.sheets.length > 1 ? `${s.model}: ` : ""}
-                              {isGrinder(s) ? "Power, Plug, Size" : "Power, Water, Plug, Size"}
+                              {s.configs.some((c) => needsWater(s, c.requirements)) ? "Power, Water, Plug, Size" : "Power, Plug, Size"}
                             </button>
                             {selected?.id === s.id ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
                             {manage ? (

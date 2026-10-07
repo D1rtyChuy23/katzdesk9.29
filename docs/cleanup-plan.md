@@ -413,3 +413,28 @@ Checked in the running app: a parts PDF dropped on the Axiom main chip showed un
 - The "same site requirements? copy from the old unit" step is removed from the screen. Nothing needs copying when nothing is re-shot.
 - A unit saved earlier as Replacing is now treated as existing and reads Pre-Inspected. Results already stored on it are kept in the data.
 - New Install is unchanged.
+
+## 17. Water Only When The Unit Needs It, And The Tech Request Form
+
+### Water and drain
+
+- A water inlet is no longer added just because a unit was added. A blank new sheet starts with no inlet.
+- Grinders (G9, G9-2T, Mazzer, Mahlkonig, any catalog grinder): no water inlet, no drain.
+- No water called for on the sheet: Water and Drain is left off.
+- Water is indicated (brewer, espresso, tea, or the sheet names a water line, pressure, or drain): Water and Drain shows, inlet 3/8" compression valve.
+- Sheets already uploaded follow the same rule when they are opened. A 3/8" inlet that was only our default is dropped from a unit that does not need water. An inlet the sheet itself states is kept.
+- The Specs row reads "Power, Plug, Size" when there is no water, "Power, Water, Plug, Size" when there is.
+
+### Tech Request Form
+
+- Each open install row has a checkbox: Tech Request Form issued. It starts unchecked and is never checked automatically (migration 0051).
+- When a tech is assigned to an install (row, install window, or Planner Day board), the rep on the account gets a ping: "<tech> is assigned to the <account> install. You are good to issue the Tech Request Form." Clicking it opens that install.
+- No ping when the tech did not change, when the install has no rep, or when the rep is the person who assigned the tech.
+
+### Left as is, to confirm
+
+- Only Sales and admins can check the box. Others see an error.
+- The ping reaches a rep only if their Desk username contains their name (for example sean.marshall for Sean Marshall). A rep with no Desk sign-in gets nothing.
+- A unit that is not a grinder, has no category, and whose name and sheet say nothing about water gets no inlet. Add the inlet on the sheet if it needs one.
+
+Checked in the running app: G9-2T shows no Water and Drain; ITCB-DV keeps 3/8" compression valve; a tech assigned by one user pinged the rep once, the ping opened the install, the box stayed unchecked until the rep checked it.

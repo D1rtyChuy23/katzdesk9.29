@@ -116,6 +116,8 @@ export type Deal = {
 
 export type Install = {
   id: number;
+  /** Sales ticks this once the Tech Request Form has been sent. Never ticked automatically. */
+  trfIssued: boolean;
   received: string | null;
   customer: string;
   equipment: string | null;

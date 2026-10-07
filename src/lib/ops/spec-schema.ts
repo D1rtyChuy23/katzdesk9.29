@@ -125,7 +125,8 @@ export function emptyDraft(): SpecSheetDraft {
     summary: undefined,
     specs: [],
     mfrNotes: { certifications: [] },
-    configs: [{ label: "Standard", requirements: { water: { inlet: '3/8" compression valve' } } }],
+    // No inlet up front: one is listed only once the unit is known to take water.
+    configs: [{ label: "Standard", requirements: {} }],
   };
 }
 
