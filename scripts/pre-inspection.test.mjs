@@ -226,7 +226,10 @@ import { isPreInspected, rollupSite as roll, summarizeInspection as sumOne, unit
 assert.equal(unitKind(null, true), "existing");
 assert.equal(unitKind(null, false), "new");
 assert.equal(unitKind("new", true), "new");
-assert.equal(unitKind("replace", true), "replace");
+// Replacing and existing are one choice: a unit saved as "replace" is existing, and Pre-Inspected.
+assert.equal(unitKind("replace", true), "existing");
+assert.equal(unitKind("replace", false), "existing");
+assert.equal(isPreInspected(unitKind("replace", false)), true);
 assert.equal(unitKind("existing", false), "existing");
 assert.equal(isPreInspected("existing"), true);
 assert.equal(isPreInspected("new"), false);

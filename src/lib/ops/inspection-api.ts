@@ -1030,7 +1030,8 @@ export const setInspectionVisit = createServerFn({ method: "POST" })
     await requireUnit(sql, data.installId, data.equipmentId);
     await sql.query(
       `update install_inspection_units set visit_kind = $3, reqs_same = $4 where install_id = $1 and equipment_id = $2`,
-      [data.installId, data.equipmentId, data.kind, data.kind === "replace" ? data.reqsSame ?? null : null],
+      // "replace" from an older screen is saved as existing: the two are one choice.
+      [data.installId, data.equipmentId, data.kind === "replace" ? "existing" : data.kind, null],
     );
     const view = await readInspection(sql, data.installId);
     if (!view) throw new Error("Install not found");

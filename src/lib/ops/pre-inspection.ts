@@ -223,6 +223,8 @@ export const isVisitKind = (v: unknown): v is VisitKind => v === "new" || v === 
  * install date on the account is existing equipment; anything else is a new install.
  */
 export function unitKind(chosen: string | null | undefined, alreadyInstalled: boolean): VisitKind {
+  // Replacing existing equipment and existing equipment are one choice now: both are Pre-Inspected.
+  if (chosen === "replace") return "existing";
   if (isVisitKind(chosen)) return chosen;
   return alreadyInstalled ? "existing" : "new";
 }

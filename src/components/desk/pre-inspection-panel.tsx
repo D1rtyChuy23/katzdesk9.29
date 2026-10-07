@@ -5,10 +5,8 @@ import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
   addInspectionPhoto,
-  copyInspectionFromExisting,
   copyInspectionNa,
   getInstallInspection,
-  listReplaceSources,
   removeInspectionPhoto,
   saveInspectionCoreHole,
   saveInspectionItem,
@@ -499,23 +497,21 @@ function MachineDetail({
 }
 
 /**
- * New install, or replacing equipment already on the account. A replacement with the same site requirements
- * takes the existing unit's results — nothing is re-shot — and any one item can still be changed.
+ * New install, or existing equipment. "Existing" covers a unit that is already on the account and a unit that
+ * replaces one that was: either way the site is already set up, so the unit is Pre-Inspected and nothing is re-shot.
  */
 function VisitChoice({
   view,
   machine,
   onSaved,
-  onCopied,
 }: {
   view: InspectionView;
   machine: InspectionMachine;
   onSaved: (v: InspectionView) => void;
-  onCopied: (v: InspectionView) => void;
+  onCopied?: (v: InspectionView) => void;
 }) {
   const ids = { installId: view.installId, equipmentId: machine.equipmentId };
-  const replacing = machine.visitKind === "replace";
-  const existing = machine.visitKind === "existing";
+  const existing = machine.preInspected;
   const [note, setNote] = useState(machine.note ?? "");
   const saveNote = useMutation({
     mutationFn: (text: string) => saveInspectionUnitNote({ data: { ...ids, note: text.trim() || null } }),
@@ -525,60 +521,26 @@ function VisitChoice({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the note"),
   });
-  const [again, setAgain] = useState(false);
-  const asking = replacing && (machine.reqsSame == null || again);
-  const sources = useQuery({
-    queryKey: ["inspection-replace-sources", view.installId, machine.equipmentId],
-    queryFn: () => listReplaceSources({ data: ids }),
-    enabled: asking,
-  });
-  const fail = (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save");
   const kind = useMutation({
-    mutationFn: (v: { kind: "new" | "replace" | "existing"; reqsSame?: boolean | null }) => setInspectionVisit({ data: { ...ids, ...v } }),
-    onSuccess: (next) => {
-      setAgain(false);
-      onSaved(next);
-    },
-    onError: fail,
+    mutationFn: (v: { kind: "new" | "existing" }) => setInspectionVisit({ data: { ...ids, ...v } }),
+    onSuccess: (next) => onSaved(next),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
-  const copy = useMutation({
-    mutationFn: (from: { installId: number; equipmentId: number }) =>
-      copyInspectionFromExisting({ data: { ...ids, fromInstallId: from.installId, fromEquipmentId: from.equipmentId } }),
-    onSuccess: (next) => {
-      toast.success("Copied. Nothing to re-shoot; change any item if it differs.");
-      setAgain(false);
-      onCopied(next);
-    },
-    onError: fail,
-  });
-  const busy = kind.isPending || copy.isPending;
-  const list = sources.data ?? [];
+  const busy = kind.isPending;
   return (
     <div className="px-3 pt-3" data-testid="visit-choice">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="radiogroup" aria-label="What is this unit?">
+      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="What is this unit?">
         <Button
           type="button"
           role="radio"
-          aria-checked={!replacing && !existing}
-          variant={!replacing && !existing ? "default" : "outline"}
+          aria-checked={!existing}
+          variant={!existing ? "default" : "outline"}
           className="h-12 text-sm"
           disabled={busy}
-          onClick={() => (replacing || existing) && kind.mutate({ kind: "new" })}
+          onClick={() => existing && kind.mutate({ kind: "new" })}
           data-testid="visit-new"
         >
           New Install
-        </Button>
-        <Button
-          type="button"
-          role="radio"
-          aria-checked={replacing}
-          variant={replacing ? "default" : "outline"}
-          className="h-12 text-sm whitespace-normal"
-          disabled={busy}
-          onClick={() => !replacing && kind.mutate({ kind: "replace", reqsSame: null })}
-          data-testid="visit-replace"
-        >
-          Replacing Existing Equipment
         </Button>
         <Button
           type="button"
@@ -590,14 +552,14 @@ function VisitChoice({
           onClick={() => !existing && kind.mutate({ kind: "existing" })}
           data-testid="visit-existing"
         >
-          Existing Equipment
+          Existing Or Replacing Equipment
         </Button>
       </div>
       {existing ? (
         <div className="mt-3 rounded-lg border-l-4 border-primary bg-primary/10 px-3 py-3" data-testid="pre-inspected-panel">
           <p className="font-medium">Pre-Inspected</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            This unit is existing equipment on the account. Power, Water, Drain, Ethernet and Space are not re-shot. Pick New Install if it is being installed fresh.
+            This unit is existing equipment on the account, or replaces a unit that was. Power, Water, Drain, Ethernet and Space are not re-shot. Pick New Install if it is being installed fresh.
           </p>
           <Label htmlFor={`unit-note-${machine.equipmentId}`} className="mt-3 block">
             Notes (Optional)
@@ -615,62 +577,6 @@ function VisitChoice({
             Save Note
           </Button>
         </div>
-      ) : null}
-      {asking ? (
-        <div className="mt-3 rounded-lg border border-border p-3" data-testid="replace-question">
-          <p className="font-medium">Are the site requirements the same as the unit it replaces?</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Same: pick the unit and its pass/fail, notes, photos and core hole are copied here. Nothing is re-shot, and you can still change any one item.
-          </p>
-          {sources.isLoading ? (
-            <p className="mt-3 text-sm text-muted-foreground">Looking for equipment on this account…</p>
-          ) : list.length ? (
-            <ul className="mt-3 grid gap-2" data-testid="replace-sources">
-              {list.map((s) => (
-                <li key={`${s.installId}-${s.equipmentId}`}>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => copy.mutate(s)}
-                    className="desk-flat flex min-h-14 w-full items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 text-left hover:border-primary/60 disabled:opacity-60"
-                    data-testid="replace-source"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium break-words">Same As {s.name}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {[s.serial ? `SN ${s.serial}` : "No serial", `${s.photoCount} photo${s.photoCount === 1 ? "" : "s"}`].join(" · ")}
-                      </span>
-                    </span>
-                    <InspectionBadge overall={s.overall} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground" data-testid="replace-none">
-              No equipment on this account has a pre-inspection to copy. Fill in this one.
-            </p>
-          )}
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-3 h-12 w-full text-sm"
-            disabled={busy}
-            onClick={() => kind.mutate({ kind: "replace", reqsSame: false })}
-            data-testid="replace-differ"
-          >
-            {list.length ? "Requirements Differ: Open The Form" : "Open The Form"}
-          </Button>
-        </div>
-      ) : replacing ? (
-        <p className="mt-2 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground" data-testid="replace-note">
-          {machine.reqsSame && machine.copiedFrom
-            ? `Copied from ${machine.copiedFrom}. Change any item below if it differs.`
-            : "Requirements differ from the unit it replaces: inspect each item below."}
-          <button type="button" className="underline" onClick={() => setAgain(true)} data-testid="replace-again">
-            Copy from another unit
-          </button>
-        </p>
       ) : null}
     </div>
   );

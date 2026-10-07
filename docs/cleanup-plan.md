@@ -405,3 +405,11 @@ Gates: lint 0 errors, typecheck and build pass; tests 182 passing, 9 failing (th
 - Troubleshoot on a variation reads the copied parts file for part numbers.
 
 Checked in the running app: a parts PDF dropped on the Axiom main chip showed under the same file name on Axiom and all six other variations after a refresh; removed from Axiom-DV-APS it stayed on the rest.
+
+## 16. Existing And Replacing Are One Choice
+
+- A unit is New Install or Existing Or Replacing Equipment. The separate Replacing Existing Equipment button is gone.
+- The combined choice behaves as Existing did: Pre-Inspected, highlighted, counted as passed, no utilities to re-shoot, optional note.
+- The "same site requirements? copy from the old unit" step is removed from the screen. Nothing needs copying when nothing is re-shot.
+- A unit saved earlier as Replacing is now treated as existing and reads Pre-Inspected. Results already stored on it are kept in the data.
+- New Install is unchanged.
