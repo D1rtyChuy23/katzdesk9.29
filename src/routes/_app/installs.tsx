@@ -859,7 +859,7 @@ function TrfCheck({ install }: { install: Install }) {
   });
   return (
     <label
-      className="mt-1 flex w-fit items-center gap-2 text-sm text-muted-foreground sm:pl-20"
+      className="mt-1.5 flex w-fit items-center gap-2 text-sm font-medium text-foreground sm:pl-20"
       data-testid="trf-check"
     >
       <input

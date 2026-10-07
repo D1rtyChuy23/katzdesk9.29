@@ -367,6 +367,16 @@ export function InstallSheet({
                 <FlagBadge flag={row.flag} />
                 {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
               </div>
+              <label className="mt-3 flex w-fit items-center gap-2 text-sm font-medium" data-testid="trf-check-window">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary"
+                  checked={row.trfIssued}
+                  disabled={save.isPending}
+                  onChange={(e) => save.mutate({ id: row.id, trfIssued: e.target.checked })}
+                />
+                Tech Request Form issued
+              </label>
             </SheetHeader>
             <SheetBody>
             <PreInspectionPanel installId={row.id} />

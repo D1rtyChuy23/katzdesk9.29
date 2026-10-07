@@ -438,3 +438,9 @@ Checked in the running app: a parts PDF dropped on the Axiom main chip showed un
 - A unit that is not a grinder, has no category, and whose name and sheet say nothing about water gets no inlet. Add the inlet on the sheet if it needs one.
 
 Checked in the running app: G9-2T shows no Water and Drain; ITCB-DV keeps 3/8" compression valve; a tech assigned by one user pinged the rep once, the ping opened the install, the box stayed unchecked until the rep checked it.
+
+### Follow-up: checkbox also in the install window
+
+- "Tech Request Form issued" now also sits at the top of the install window, under the badges, so it is there when a rep arrives from the ping. Same box, same rule.
+- On the board row the label is darker so it is easier to see.
+- It shows on Prep rows only. Installed rows do not show it.
