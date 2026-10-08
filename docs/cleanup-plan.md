@@ -480,3 +480,19 @@ Checked in the running app: G9-2T shows no Water and Drain; ITCB-DV keeps 3/8" c
 - Old account rows that list several machines in one name (for example "BUNN ITCB & BUNN G9 GRINDER") take the first type that matches, which is grinder. These rows are split into separate units when the install's equipment is saved.
 - The core hole question still shows under Space for every type, as before.
 - A copied unit that someone already touched is left on the visit; remove it by hand.
+
+## 19. Deal Window: Package Amount, Invoice Or Sales Order, Every Machine In One Section
+
+- New Deal: "Deal amount ($)" is now "Equipment Package Amount ($)". Same field, same number. The deal window's "Amount" reads Equipment Package Amount too.
+- Deal window: "Invoice #" is now "Sale Invoice # Or Sales Order #". One field; either number goes in it.
+- Equipment on a deal is one section of rows: model, serial, voltage, location. Add Equipment picks a model and adds a row in the same section; the X takes a row off. Adding or removing a row saves right away; serial and voltage save with Save or when the window closes (migration 0052, deals.machines).
+- More than three machines: the section folds to one line with the count and the models; click Equipment to open it. A new row opens it.
+- A deal opened from the customer window keeps the account: no second customer picker. From the Pipeline page the customer can still be changed.
+- Older deals that only had an equipment line are split into rows the first time they open.
+- When a deal is marked Complete and a new install is made from it, every row goes to the install with its serial and voltage, so pre-inspection gets each unit (and its checks by model). Existing equipment with a serial and install date still marks Pre-Inspected.
+
+### Left as is, to confirm
+
+- When the account already has an open install, completing the deal links to that install and does not add the deal's machines to it (unchanged). Rows added to a deal after it was handed off do not reach the install. Add them on the install.
+- The New Deal window still takes one model; the rest are added as rows in the deal window that opens right after Create.
+- The window title stays "New Deal".

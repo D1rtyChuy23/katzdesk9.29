@@ -413,7 +413,8 @@ export function CustomerHistorySheet({
       <JobSheet id={reviewing && selectedJob ? selectedJob.id : null} onClose={() => setReviewing(false)} />
       <PmSheet pm={reviewing ? selectedPm : null} onClose={() => setReviewing(false)} />
       <InstallSheet row={reviewing ? selectedInstall : null} onClose={() => setReviewing(false)} />
-      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} />
+      {/* The account is already open: a deal here keeps its customer, so no second customer picker. */}
+      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} lockCustomer />
       <RecipeEditorSheet
         draft={recipeDraft}
         models={(directoryEquip.data ?? []).map((e) => e.name)}

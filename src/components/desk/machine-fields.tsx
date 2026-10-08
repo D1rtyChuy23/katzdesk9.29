@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { upsertRecipe } from "@/lib/ops/api";
@@ -423,7 +424,13 @@ export function MachineFields({
   onRemove,
   customer = "",
   recipes = [],
+  showRecipe = true,
+  where = "install",
 }: {
+  /** Deals have no recipe column. */
+  showRecipe?: boolean;
+  /** "install" or "deal", for the remove button's label. */
+  where?: string;
   /** Take this machine off the install. When given, each block is the one place the machine is listed. */
   onRemove?: (index: number) => void;
   specs: MachineSpec[];
@@ -447,9 +454,15 @@ export function MachineFields({
         <div
           key={`${spec.equipment}-${index}`}
           data-testid="machine-row"
-          className="grid grid-cols-2 gap-2 py-2 lg:grid-cols-[minmax(7rem,1fr)_minmax(6.5rem,0.7fr)_minmax(4.5rem,0.45fr)_minmax(18.5rem,1.2fr)_minmax(9rem,0.9fr)] lg:items-start"
+          className={cn(
+            "grid grid-cols-2 gap-2 py-2 lg:items-start",
+            showRecipe
+              ? "lg:grid-cols-[minmax(7rem,1fr)_minmax(6.5rem,0.7fr)_minmax(4.5rem,0.45fr)_minmax(18.5rem,1.2fr)_minmax(9rem,0.9fr)]"
+              : // Deal rows: model on one line, then serial, voltage and location side by side.
+                "sm:grid-cols-[minmax(0,1fr)_5.5rem_minmax(0,1.1fr)] sm:items-end",
+          )}
         >
-          <div className="col-span-2 min-w-0 lg:col-span-1">
+          <div className={cn("col-span-2 min-w-0", showRecipe ? "lg:col-span-1" : "sm:col-span-3")}>
             <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
             <p className="flex min-w-0 items-center gap-1 text-sm font-medium" title={spec.equipment}>
               <span className="min-w-0 truncate">{spec.equipment}</span>
@@ -457,8 +470,8 @@ export function MachineFields({
                 <button
                   type="button"
                   onClick={() => onRemove(index)}
-                  aria-label={`Remove ${spec.equipment} from this install`}
-                  title="Remove from this install"
+                  aria-label={`Remove ${spec.equipment} from this ${where}`}
+                  title={`Remove from this ${where}`}
                   data-testid="machine-remove"
                   className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
@@ -495,8 +508,10 @@ export function MachineFields({
               />
             </label>
           </div>
-          <UnitPlaceField serial={spec.serial} model={spec.equipment} compact />
-          <MachineRecipeSelect
+          <div className={showRecipe ? undefined : "col-span-2 sm:col-span-1"}>
+            <UnitPlaceField serial={spec.serial} model={spec.equipment} compact />
+          </div>
+          {showRecipe ? <MachineRecipeSelect
             customer={customer}
             model={spec.equipment}
             installId={installId}
@@ -507,7 +522,7 @@ export function MachineFields({
               onChange(next);
               onRecipe?.(next);
             }}
-          />
+          /> : null}
         </div>
       ))}
     </div>

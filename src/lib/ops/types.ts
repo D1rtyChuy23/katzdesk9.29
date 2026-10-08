@@ -1,3 +1,4 @@
+import type { MachineSpec } from "./machines";
 import type { ClockFlag } from "./clock";
 
 export type JobKind = "service" | "tlc";
@@ -99,6 +100,8 @@ export type Deal = {
   accountType: string | null;
   dateOfDeal: string | null;
   equipment: string | null;
+  /** Every machine on the deal (model, serial, voltage). Empty on older deals: read equipment instead. */
+  machines: MachineSpec[];
   amount: number | null;
   goodToOrder: boolean;
   ordered: boolean;

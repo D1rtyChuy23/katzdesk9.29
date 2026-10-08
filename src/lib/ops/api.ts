@@ -43,7 +43,7 @@ import type {
   ServiceJob,
 } from "./types";
 export type { DirectoryKind };
-import { specsFromInstall, parseMachinesJson, type MachineSpec } from "./machines";
+import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
 import { listedEquipment, matchModel, catalogModels } from "./equipment";
 import {
   BACK_PALLETS,
@@ -289,6 +289,7 @@ function mapDeal(r: any, marks: any) {
 		accountType: r.account_type ?? null,
 		dateOfDeal: isoDate(r.date_of_deal),
 		equipment: r.equipment ?? null,
+		machines: parseMachinesJson(r.machines ?? null),
 		amount: num(r.amount),
 		goodToOrder: !!r.good_to_order,
 		ordered: !!r.ordered,
@@ -1069,15 +1070,23 @@ export const listDeals = createServerFn({ method: "GET" }).middleware([deskMiddl
 	const marks = await loadAccountMarks(sql);
 	return (await sql`select * from deals where archived = false order by id`).map((r) => mapDeal(r, marks));
 });
-export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean }) => d).handler(async ({ data, context }: any) => {
+export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; machines?: MachineSpec[] | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
 	const c = cur[0];
 	const producer = data.producer === undefined ? c.producer : canonicalRepName(data.producer);
 	const completion = data.completion === undefined ? c.completion : data.completion;
+	// The machine rows are the equipment list: equipment is kept as the joined models so lists and search still read it.
+	let machinesJson = c.machines ?? null;
+	if (data.machines !== undefined) {
+		const packed = serializeMachines(Array.isArray(data.machines) ? data.machines : []);
+		machinesJson = packed.machines;
+		data.equipment = packed.equipment;
+	}
 	await sql`
       update deals set
+        machines = ${machinesJson},
         customer = ${data.customer ?? c.customer},
         producer = ${producer},
         account_type = ${data.accountType === undefined ? c.account_type : data.accountType},
@@ -1160,15 +1169,20 @@ async function maybeHandoffInstall(sql: any, dealId: any) {
 		return;
 	}
 	const initials = canonicalRepName(String(deal.producer ?? "")) ?? null;
+	// Every machine row on the deal goes to the install, so pre-inspection gets each unit with its serial and voltage.
+	const packed = serializeMachines(parseMachinesJson(deal.machines ?? null));
 	await sql`
-    insert into installs (received, customer, equipment, account_rep, payment_status, deal_id)
+    insert into installs (received, customer, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage)
     values (
       ${todayChicago()},
       ${deal.customer},
-      ${deal.equipment ?? null},
+      ${packed.equipment ?? deal.equipment ?? null},
       ${initials},
       ${deal.terms ?? null},
-      ${dealId}
+      ${dealId},
+      ${packed.machines},
+      ${packed.serial},
+      ${packed.powerVoltage}
     )`;
 }
 export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Install[]> => {

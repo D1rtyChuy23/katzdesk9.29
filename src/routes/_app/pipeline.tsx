@@ -352,7 +352,7 @@ function Page() {
           { name: "customer", label: "Customer", required: true, kind: "customer" },
           { name: "producer", label: "Rep", kind: "rep" },
           { name: "equipment", label: "Equipment", kind: "equipment" },
-          { name: "amount", label: "Deal amount ($)" },
+          { name: "amount", label: "Equipment Package Amount ($)" },
         ]}
         onSubmit={async (v) => {
           const amountRaw = v.amount?.replace(/[$,]/g, "").trim();

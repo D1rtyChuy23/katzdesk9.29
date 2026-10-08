@@ -53,7 +53,7 @@ import { SerialNoticeBanner } from "./serial-notice";
 import { AssignedLine, ModuleReturnActions } from "./module-assign";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { toast } from "sonner";
-import { ChevronsUpDown, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsUpDown, Trash2, X } from "lucide-react";
 
 function Field({
   label,
@@ -549,6 +549,81 @@ export function InstallSheet({
   );
 }
 
+/** More than this many machines and the rows fold into one line with a count. */
+const DEAL_ROWS_OPEN = 3;
+
+/**
+ * Every machine on the deal in one section: Add Equipment puts another row here (model, serial, voltage,
+ * location). The account is already open, so no customer is asked for again.
+ */
+function DealMachines({
+  specs,
+  onChange,
+  onPersist,
+}: {
+  specs: MachineSpec[];
+  onChange: (next: MachineSpec[]) => void;
+  onPersist: (next: MachineSpec[]) => void;
+}) {
+  const [open, setOpen] = useState(specs.length <= DEAL_ROWS_OPEN);
+  const [seen, setSeen] = useState(specs.length);
+  useEffect(() => {
+    // A new row opens the list so it can be filled in; a long list loaded later starts folded.
+    if (specs.length > seen) setOpen(true);
+    else if (seen === 0 && specs.length > DEAL_ROWS_OPEN) setOpen(false);
+    setSeen(specs.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [specs.length]);
+  const many = specs.length > DEAL_ROWS_OPEN;
+  const count = `${specs.length} machine${specs.length === 1 ? "" : "s"}`;
+  return (
+    <section className="rounded-lg border border-border p-3 sm:col-span-2" data-testid="deal-machines" data-open={open ? "true" : "false"}>
+      <div className="flex items-center gap-2">
+        {many ? (
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}
+            className="flex min-h-9 items-center gap-1.5 text-left"
+            data-testid="deal-machines-toggle"
+          >
+            {open ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
+            <span className="text-sm font-medium">Equipment</span>
+          </button>
+        ) : (
+          <span className="text-sm font-medium">Equipment</span>
+        )}
+        <span className="text-xs text-muted-foreground" data-testid="deal-machines-count">{specs.length ? count : "None yet"}</span>
+      </div>
+      {many && !open ? (
+        <p className="mt-1 truncate text-xs text-muted-foreground" data-testid="deal-machines-folded">
+          {specs.map((s) => s.equipment).join(" · ")}
+        </p>
+      ) : (
+        <MachineFields
+          specs={specs}
+          onChange={onChange}
+          showRecipe={false}
+          where="deal"
+          onRemove={(index) => onPersist(specs.filter((_, i) => i !== index))}
+        />
+      )}
+      <div className="mt-2" data-testid="deal-add-equipment">
+        <div>
+          <EquipmentMultiCombo
+            label="Add Equipment"
+            name="dealAddModel"
+            values={specs.map((s) => s.equipment)}
+            hideChips
+            placeholder="Pick a model to add a row…"
+            onChange={(next) => onPersist(mergeMachineSpecs(next, specs))}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function DealSheet({
   deal,
   onClose,
@@ -560,6 +635,25 @@ export function DealSheet({
 }) {
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
+  const directoryEquip = useQuery({
+    queryKey: ["directory", "equipment"],
+    queryFn: () => listDirectory({ data: { kind: "equipment" } }),
+    enabled: !!deal,
+  });
+  const catalogNames = (directoryEquip.data ?? []).map((e) => e.name);
+  // One row per machine. Older deals kept only the equipment text: split it into rows the first time.
+  const [specs, setSpecs] = useState<MachineSpec[]>([]);
+  const [specsFor, setSpecsFor] = useState<number | null>(null);
+  useEffect(() => {
+    if (!deal) {
+      setSpecsFor(null);
+      return;
+    }
+    if (specsFor === deal.id && specs.length) return;
+    setSpecs(deal.machines.length ? deal.machines : mergeMachineSpecs(listedEquipment(deal.equipment, catalogNames), []));
+    setSpecsFor(deal.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deal?.id, deal?.machines.length, catalogNames.length]);
   const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateDeal>[0]["data"]) => updateDeal({ data: d }),
@@ -631,7 +725,7 @@ export function DealSheet({
                   customer: String(fd.get("customer")),
                   producer: String(fd.get("producer") || "") || null,
                   aviKatz: fd.get("aviKatz") === "on",
-                  equipment: String(fd.get("equipment") || "") || null,
+                  machines: specs,
                   amount: Number.isFinite(amountNum) ? amountNum : null,
                   goodToOrder: fd.get("goodToOrder") === "on" || fd.get("ordered") === "on",
                   ordered: fd.get("ordered") === "on",
@@ -656,10 +750,16 @@ export function DealSheet({
                 <AkBadge on={deal.aviKatz} />
               </label>
 
-              <div className="sm:col-span-2">
-                <BoundEquipment recordKey={deal.id} defaultValue={deal.equipment ?? ""} />
-              </div>
-              <Field label="Amount" name="amount" defaultValue={deal.amount != null ? String(deal.amount) : ""} />
+              <DealMachines
+                specs={specs}
+                onChange={setSpecs}
+                onPersist={(next) => {
+                  setSpecs(next);
+                  skipToast.current = true;
+                  save.mutate({ id: deal.id, machines: next });
+                }}
+              />
+              <Field label="Equipment Package Amount" name="amount" defaultValue={deal.amount != null ? String(deal.amount) : ""} />
               <div>
                 <Label>Payment terms</Label>
                 <SelectField name="terms" className="mt-1" defaultValue={deal.terms ?? ""} allowEmpty>
@@ -669,7 +769,7 @@ export function DealSheet({
                 </SelectField>
               </div>
               <Field label="ETA" name="eta" defaultValue={deal.eta ?? ""} />
-              <Field label="Invoice #" name="invoice" defaultValue={deal.invoice ?? ""} />
+              <Field label="Sale Invoice # Or Sales Order #" name="invoice" defaultValue={deal.invoice ?? ""} />
               <div>
                 <Label>Deal completion</Label>
                 <SelectField name="completion" className="mt-1" defaultValue={deal.completion ?? ""} allowEmpty emptyLabel="Still open">
