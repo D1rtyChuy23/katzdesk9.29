@@ -444,3 +444,39 @@ Checked in the running app: G9-2T shows no Water and Drain; ITCB-DV keeps 3/8" c
 - "Tech Request Form issued" now also sits at the top of the install window, under the badges, so it is there when a rep arrives from the ping. Same box, same rule.
 - On the board row the label is darker so it is easier to see.
 - It shows on Prep rows only. Installed rows do not show it.
+
+## 18. Pre-Inspection: Checks By Model, Drop Photos, Auto Pass, Next Machine
+
+### Checks by model type (read from the model on the account)
+
+- Grinder (G9, G9-2T, Mazzer, Mahlkonig, LPG, Swift, Robur, any catalog grinder): Power and Space.
+- Brewer (Fetco, Bunn Axiom, ITCB, ITB, ICB, CWTF, TB3, Nitron, Curtis, Bravilor Sego, tea brewers): Power, Water and Space.
+- Espresso (La Marzocco, Linea, Strada, GS3, Rancilio, Classe, Nuova Simonelli, Eversys…): Power, Water, Drain and Space. The core hole question stays under Space.
+- Ethernet only on Eversys (Cameo, Enigma, e4 / e4s, Legacy, Shotmaster).
+- A hidden check is not shown, not counted and never waited on. A result saved earlier on a now-hidden line is kept in the data but ignored.
+- The Pre-Inspected text names only that unit's checks.
+
+### Drop photos
+
+- Each Add Photo button takes an image dragged from the computer, as well as Camera and Library. Several dropped at once all attach. The photo goes to that machine and that utility. Click still enlarges; Download still works.
+
+### Passed as soon as the checks that model uses are done
+
+- A unit is Passed once every check it uses is Pass or N/A. Photos stay required on Pass and Fail; N/A needs no note.
+- The account count (2/3) and the install-board badge update in the same save. Existing equipment still counts as Passed. Any Fail → Failed; any open unit → In Progress.
+
+### Next Machine
+
+- Opens the next unit with the pre-inspection section at the top of the window and the first check selected.
+
+### Two bugs found while checking this, fixed
+
+- Opening a pre-inspection added another copy of a machine whose typed name differs from the catalog name (for example "Bunn ITCB-DV" stored as "Bunn ITCB"). Every load added one, so counts like 4/37 kept growing. The unit is now matched on either name. Copies it already made are taken off the visit when nothing was entered on them (no check, photo, note or New/Existing choice); the stray account row is removed only when no other visit, photo or Eversys module uses it.
+- Closing the install window could split "Bunn ITCB-DV" into "Bunn ITCB" and a machine named "-DV". A bare suffix now stays with its machine, and a saved "-DV" machine is dropped.
+
+### Left as is, to confirm
+
+- Units that are not a grinder, brewer or espresso machine (for example EZRO200-10, or a unit saved only as a serial number) get Power and Space. Tell me if any of these need Water or Drain.
+- Old account rows that list several machines in one name (for example "BUNN ITCB & BUNN G9 GRINDER") take the first type that matches, which is grinder. These rows are split into separate units when the install's equipment is saved.
+- The core hole question still shows under Space for every type, as before.
+- A copied unit that someone already touched is left on the visit; remove it by hand.

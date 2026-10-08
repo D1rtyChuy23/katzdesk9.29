@@ -256,7 +256,7 @@ export function applySpecDefaults<T extends SpecSheetDraft>(draft: T, mode: Defa
 export const DEFAULT_CORE_DIAMETER = '3"';
 const ESPRESSO_MAKERS = /\b(la\s*marzocco|eversys|rancilio|faema|slayer|synesso|nuova\s*simonelli|victoria\s*arduino|franke|schaerer|thermoplan|wmf|cimbali)\b/i;
 
-const GRINDER_NAMES = /\bgrinders?\b|\bmazzer\b|\bmahlk[oö]e?nig\b|\bditting\b|\bbaratza\b|\bg9(?![a-z0-9])|\bek\s?43\b/i;
+const GRINDER_NAMES = /\bgrinders?\b|\bmazzer\b|\bmahlk[oö]e?nig\b|\bditting\b|\bbaratza\b|\bg9(?![a-z0-9])|\bek\s?43\b|\blpg\b|\bswift\b|\brobur\b/i;
 
 /**
  * Grinder: G9, G9-2T, Mazzer, Mahlkonig, or any sheet whose category says grinder. Grinders take no water and

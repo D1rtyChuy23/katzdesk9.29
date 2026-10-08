@@ -1,6 +1,8 @@
 /** Site check before an install. One record per install. */
 
 import { normalizeName } from "./norm.ts";
+import { isEspresso, isGrinder } from "./spec-defaults.ts";
+import { isEversysMachine } from "./eversys.ts";
 
 export const INSPECTION_CATEGORIES = [
   {
@@ -31,6 +33,48 @@ export const INSPECTION_CATEGORIES = [
 ] as const;
 
 export type InspectionCategory = (typeof INSPECTION_CATEGORIES)[number]["key"];
+
+/** What kind of unit this is, for which site checks it gets. */
+export type UnitType = "grinder" | "brewer" | "espresso" | "other";
+
+// Brewers and tea brewers by maker or model name, when nothing else says otherwise.
+const BREWER_NAMES = /\bfetco\b|\bbravilor\b|\bsego\b|\bsn\s*:?\s*(itcb|axap|itb|cwtf|icb)|\bcurtis\b|\bbrew(er|ers|ing)?\b|\btea\b|\burn\b|\baxiom\b|\bitcb\b|\bitb\b|\bicb\b|\bcwtf?\b|\bcbs\b|\bxts\b|\btb[36]q?\b|\binfusion\b|\bnitron\b|\bthermofresh\b|\bsoft\s*heat\b|\bsh\s*dbc\b|\bcrtf\b|\bvpr\b|\bvp17\b/i;
+
+/**
+ * Grinder (G9, Mazzer, Mahlkonig…), brewer (Fetco, Bunn Axiom, ITCB, TB3…), espresso (La Marzocco, Rancilio,
+ * Eversys…), or other. Read from the model name on the account; grinder is checked first so a Bunn G9 is a grinder.
+ */
+// Espresso models written without the maker: Linea, Strada, GS3, Classe 9, LM…; Eversys e4 / e4s without the apostrophe.
+const ESPRESSO_MODELS = /\blinea\b|\bstrada\b|\bgs3\b|\bclasse\s*\d|\blm\b|\bappia\b|\baurelia\b|\bmirage\b|\bkb90\b/i;
+const EVERSYS_SHORT = /\be[2468][ms]?\b/i;
+
+export function unitType(name: string | null | undefined): UnitType {
+  const model = (name ?? "").trim();
+  if (!model) return "other";
+  if (isGrinder({ model })) return "grinder";
+  if (isEversysMachine(model) || EVERSYS_SHORT.test(model) || isEspresso({ model }) || ESPRESSO_MODELS.test(model)) return "espresso";
+  if (BREWER_NAMES.test(model)) return "brewer";
+  return "other";
+}
+
+/** Ethernet is only for Eversys. */
+export const needsEthernet = (name: string | null | undefined) =>
+  unitType(name) === "espresso" && (isEversysMachine(name) || EVERSYS_SHORT.test(name ?? "") || /\beversys\b/i.test(name ?? ""));
+
+/**
+ * The site checks this model uses, in form order. Grinder: Power and Space. Brewer: Power, Water and Space.
+ * Espresso: Power, Water, Drain and Space, plus Ethernet on Eversys only. Anything else: Power and Space.
+ */
+export function unitCategories(name: string | null | undefined): InspectionCategory[] {
+  const type = unitType(name);
+  const keys: InspectionCategory[] =
+    type === "espresso" ? ["power", "water", "drain", "space"] : type === "brewer" ? ["power", "water", "space"] : ["power", "space"];
+  if (needsEthernet(name)) keys.splice(keys.indexOf("space"), 0, "ethernet");
+  return keys;
+}
+
+const ALL_KEYS = INSPECTION_CATEGORIES.map((c) => c.key) as InspectionCategory[];
+const keysFor = (cats?: readonly string[] | null) => (cats && cats.length ? ALL_KEYS.filter((k) => cats.includes(k)) : ALL_KEYS);
 
 /** Not one of the five lines. Counted only when this machine answered Yes. */
 export const CORE_HOLE_CATEGORY = "core" as const;
@@ -93,8 +137,9 @@ export function emptyInspection(): InspectionSummary {
   };
 }
 
-export function failedItemLabels(items: InspectionItemInput[], coreNeeded?: string | null): string[] {
-  const labels: string[] = INSPECTION_CATEGORIES.filter((c) =>
+export function failedItemLabels(items: InspectionItemInput[], coreNeeded?: string | null, cats?: readonly string[] | null): string[] {
+  const used = keysFor(cats);
+  const labels: string[] = INSPECTION_CATEGORIES.filter((c) => used.includes(c.key)).filter((c) =>
     items.some((i) => i.category === c.key && i.status === "Fail"),
   ).map((c) => c.label);
   if (coreNeeded === "yes" && items.some((i) => i.category === CORE_HOLE_CATEGORY && i.status === "Fail")) {
@@ -103,10 +148,13 @@ export function failedItemLabels(items: InspectionItemInput[], coreNeeded?: stri
   return labels;
 }
 
-/** Not started / in progress / failed / passed. Fail wins. Pass or N/A on every counted line passes. */
-export function inspectionOverall(items: InspectionItemInput[], coreNeeded?: string | null): InspectionOverall {
-  const statuses = INSPECTION_CATEGORIES.map((c) => {
-    const hit = items.find((i) => i.category === c.key);
+/**
+ * Not started / in progress / failed / passed. Fail wins. Pass or N/A on every counted line passes.
+ * Only the checks this model uses count (cats); a hidden check is never waited on. No cats: all five.
+ */
+export function inspectionOverall(items: InspectionItemInput[], coreNeeded?: string | null, cats?: readonly string[] | null): InspectionOverall {
+  const statuses = keysFor(cats).map((key) => {
+    const hit = items.find((i) => i.category === key);
     return hit?.status ?? "Not inspected";
   });
   if (coreNeeded === "yes") {
@@ -125,12 +173,13 @@ export function summarizeInspection(
   overrideReason: string | null | undefined,
   coreNeeded?: string | null,
   preInspected?: boolean,
+  cats?: readonly string[] | null,
 ): InspectionSummary {
   // Existing equipment on the account is already pre-inspected: nothing to re-shoot, nothing can fail.
-  const overall = preInspected ? "Passed" : inspectionOverall(items, coreNeeded);
+  const overall = preInspected ? "Passed" : inspectionOverall(items, coreNeeded, cats);
   return {
     overall,
-    failedItems: preInspected ? [] : failedItemLabels(items, coreNeeded),
+    failedItems: preInspected ? [] : failedItemLabels(items, coreNeeded, cats),
     photoCount,
     overrideReason: (overrideReason ?? "").trim() || null,
     machineCount: 1,
@@ -140,11 +189,11 @@ export function summarizeInspection(
 
 /** Site rollup. Passed only when every machine is Passed. Any Fail fails the site. */
 export function rollupSite(
-  machines: { items: InspectionItemInput[]; photoCount: number; coreNeeded?: string | null; preInspected?: boolean }[],
+  machines: { items: InspectionItemInput[]; photoCount: number; coreNeeded?: string | null; preInspected?: boolean; categories?: readonly string[] | null }[],
   overrideReason: string | null | undefined,
 ): InspectionSummary {
   if (!machines.length) return { ...emptyInspection(), overrideReason: (overrideReason ?? "").trim() || null };
-  const each = machines.map((m) => summarizeInspection(m.items, m.photoCount, null, m.coreNeeded, m.preInspected));
+  const each = machines.map((m) => summarizeInspection(m.items, m.photoCount, null, m.coreNeeded, m.preInspected, m.categories));
   const failedLabels = [...INSPECTION_CATEGORIES.map((c) => c.label), CORE_HOLE_LABEL];
   const failedItems = failedLabels.filter((label) => each.some((m) => m.failedItems.includes(label)));
   let overall: InspectionOverall = "In progress";

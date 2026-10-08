@@ -113,6 +113,24 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
     queryFn: () => getInstallInspection({ data: { installId } }),
   });
   const [equipmentId, setEquipmentId] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  // Set by Next machine: once the next unit renders, bring the section top into view and focus its first field.
+  const [jump, setJump] = useState(0);
+  useEffect(() => {
+    if (!jump) return;
+    const el = sectionRef.current;
+    if (!el) return;
+    el.scrollIntoView({ block: "start" });
+    // First required field: the first check's status, else the New / Existing choice, else the first machine.
+    const first = [
+      "[data-testid=machine-checklist] [data-testid^=inspect-choice-]",
+      "[data-testid=visit-choice] [role=radio]",
+      "[data-testid^=inspect-machine-]",
+    ]
+      .map((sel) => el.querySelector<HTMLElement>(sel))
+      .find(Boolean);
+    first?.focus({ preventScroll: true });
+  }, [jump]);
 
   function refresh(view?: InspectionView) {
     if (view) qc.setQueryData(["inspection", installId], view);
@@ -138,7 +156,7 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
   const machine = view.machines.find((m) => m.equipmentId === equipmentId) ?? null;
 
   return (
-    <section data-testid="pre-inspection" className="relative">
+    <section ref={sectionRef} data-testid="pre-inspection" className="relative scroll-mt-2">
       <p
         className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3 text-base font-medium"
         data-testid="machine-progress"
@@ -154,6 +172,7 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
             const i = view.machines.findIndex((m) => m.equipmentId === machine.equipmentId);
             const next = view.machines[i + 1];
             setEquipmentId(next ? next.equipmentId : null);
+            setJump((n) => n + 1);
           }}
           onSaved={refresh}
         />
@@ -559,7 +578,7 @@ function VisitChoice({
         <div className="mt-3 rounded-lg border-l-4 border-primary bg-primary/10 px-3 py-3" data-testid="pre-inspected-panel">
           <p className="font-medium">Pre-Inspected</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            This unit is existing equipment on the account, or replaces a unit that was. Power, Water, Drain, Ethernet and Space are not re-shot. Pick New Install if it is being installed fresh.
+            This unit is existing equipment on the account, or replaces a unit that was. {machine.items.map((i) => i.label).join(", ").replace(/, ([^,]*)$/, " and $1")} {machine.items.length === 1 ? "is" : "are"} not re-shot. Pick New Install if it is being installed fresh.
           </p>
           <Label htmlFor={`unit-note-${machine.equipmentId}`} className="mt-3 block">
             Notes (Optional)
@@ -786,14 +805,22 @@ function ItemRow({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove photo"),
   });
 
-  async function upload(file: File | undefined) {
-    if (!file) return;
+  async function upload(files: File[]) {
+    const images = files.filter((f) => f.type.startsWith("image/"));
+    if (!images.length) {
+      if (files.length) toast.error("Drop an image file (JPG, PNG, HEIC…).");
+      return;
+    }
     setUploading(true);
     try {
-      const dataUrl = await fileToDataUrl(file);
-      const view = await addInspectionPhoto({
-        data: { installId, equipmentId, category: item.category, dataUrl, caption: caption || null },
-      });
+      let view: InspectionView | null = null;
+      for (const file of images) {
+        const dataUrl = await fileToDataUrl(file);
+        view = await addInspectionPhoto({
+          data: { installId, equipmentId, category: item.category, dataUrl, caption: caption || null },
+        });
+      }
+      if (!view) return;
       setCaption("");
       onSaved(view);
       const updated = view.machines
@@ -860,7 +887,7 @@ function ItemRow({
         category={item.category}
         label={item.label}
         uploading={uploading}
-        onFile={(file) => void upload(file)}
+        onFiles={(files) => void upload(files)}
       />
       {item.photos.length ? (
         <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -932,14 +959,15 @@ function AddPhotoButton({
   category,
   label,
   uploading,
-  onFile,
+  onFiles,
 }: {
   category: string;
   label: string;
   uploading: boolean;
-  onFile: (file: File | undefined) => void;
+  onFiles: (files: File[]) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [over, setOver] = useState(false);
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -966,12 +994,37 @@ function AddPhotoButton({
   }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFile(e.target.files?.[0]);
+    onFiles(Array.from(e.target.files ?? []));
     e.target.value = "";
   };
+  const hasFiles = (e: React.DragEvent) => Array.from(e.dataTransfer.types).includes("Files");
 
   return (
-    <div ref={boxRef} className="relative mt-3">
+    <div
+      ref={boxRef}
+      className={cn("relative mt-3 rounded-md", over && "ring-2 ring-primary ring-offset-2 ring-offset-card")}
+      data-testid={`inspect-drop-${category}`}
+      onDragEnter={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        setOver(true);
+      }}
+      onDragOver={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+        if (!over) setOver(true);
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver(false);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        if (uploading) return;
+        onFiles(Array.from(e.dataTransfer.files ?? []));
+      }}
+    >
       <button
         type="button"
         disabled={uploading}
@@ -982,8 +1035,9 @@ function AddPhotoButton({
         className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-base font-medium text-primary-foreground disabled:opacity-60"
       >
         <ImagePlus className="size-5" />
-        {uploading ? "Uploading…" : "Add photo"}
+        {uploading ? "Uploading…" : over ? `Drop to add to ${label}` : "Add photo"}
       </button>
+      <p className="mt-1 hidden text-center text-[11px] text-muted-foreground sm:block">or drag a photo from your computer onto this button</p>
       {open ? (
         <div
           role="menu"
@@ -1035,6 +1089,7 @@ function AddPhotoButton({
         tabIndex={-1}
         aria-hidden
         data-testid={`inspect-library-${category}`}
+        multiple
         onChange={onChange}
       />
     </div>

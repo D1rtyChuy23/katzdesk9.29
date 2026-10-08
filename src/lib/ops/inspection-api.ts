@@ -23,6 +23,8 @@ import {
   itemSaveError,
   rollupSite,
   spacePassError,
+  unitCategories,
+  unitType,
   type CoreHoleAnswer,
   type InspectionCategory,
   type InspectionItemStatus,
@@ -46,6 +48,13 @@ export {
   photosCell,
   siteIsReady,
 } from "@/lib/ops/pre-inspection";
+
+/** The checks this unit uses, read from its catalog model, then its name on the account. */
+export function unitChecks(u: { catalog_model?: string | null; equipment_name?: string | null }): InspectionCategory[] {
+  const catalog = (u.catalog_model ?? "").trim();
+  if (catalog && unitType(catalog) !== "other") return unitCategories(catalog);
+  return unitCategories(u.equipment_name || catalog);
+}
 
 export type InspectionPhoto = {
   id: number;
@@ -172,6 +181,7 @@ function text(v: unknown): string {
 }
 
 type Piece = { equipment: string; serial: string; powerVoltage: string };
+const SUFFIX_ONLY = /^[-\u2013][A-Za-z0-9]{1,8}$/;
 
 /**
  * One piece per machine, split the same way the install's Equipment section splits it
@@ -186,7 +196,8 @@ function piecesFrom(
   },
   catalog: string[] = [],
 ): Piece[] {
-  const machines = parseMachinesJson(text(row.machines) || null);
+  // A bare suffix ("-DV") saved as its own machine is part of the one before it, not a machine.
+  const machines = parseMachinesJson(text(row.machines) || null).filter((m) => !SUFFIX_ONLY.test(m.equipment.trim()));
   if (machines.length) return machines;
   const named = listedEquipment(text(row.equipment), catalog);
   return named.map((equipment) => ({
@@ -284,7 +295,12 @@ function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>): AcctUn
   }
   for (const pool of pools) {
     const hit = pool.find(
-      (a) => !used.has(a.id) && sameCatalogModel(a.catalog_model, piece.equipment) && !serialKey(a.serial),
+      // The account row keeps the catalog name ("Bunn ITCB-DV, 29\" w/Flip Tray") and the name from the install
+      // ("Bunn ITCB"). Either one is the same machine; matching only the catalog name added a new unit on every load.
+      (a) =>
+        !used.has(a.id) &&
+        (sameCatalogModel(a.catalog_model, piece.equipment) || sameCatalogModel(a.equipment_name, piece.equipment)) &&
+        !serialKey(a.serial),
     );
     if (hit) return hit;
   }
@@ -297,14 +313,14 @@ async function unitPassed(sql: Sql, installId: number, equipmentId: number): Pro
       "select category, status from install_inspection_items where install_id = $1 and equipment_id = $2",
       [installId, equipmentId],
     ),
-    sql.query<{ core_needed: string | null; visit_kind: string | null; install_date: unknown }>(
-      `select u.core_needed, u.visit_kind, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date from install_inspection_units u
+    sql.query<{ core_needed: string | null; visit_kind: string | null; install_date: unknown; catalog_model: string | null; equipment_name: string | null }>(
+      `select u.core_needed, u.visit_kind, a.catalog_model, a.equipment_name, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date from install_inspection_units u
          join account_equipment a on a.id = u.equipment_id where u.install_id = $1 and u.equipment_id = $2`,
       [installId, equipmentId],
     ),
   ]);
   if (unit[0] && isPreInspected(unitKind(unit[0].visit_kind, !!unit[0].install_date))) return true;
-  return inspectionOverall(items, unit[0]?.core_needed) === "Passed";
+  return inspectionOverall(items, unit[0]?.core_needed, unit[0] ? unitChecks(unit[0]) : null) === "Passed";
 }
 
 /** Add install machines to pre-inspection. Prune only when the install equipment list was saved. */
@@ -400,6 +416,37 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, a.id]);
     linkedIds.delete(a.id);
   }
+  // Copies of a machine already on this visit, made by the old matching: no serial, no check, no photo, no note.
+  // Unlinked here; the account row goes too when nothing else uses it.
+  const keptModels = account.filter((a) => keep.has(a.id));
+  for (const a of linkedRows) {
+    if (keep.has(a.id) || serialKey(a.serial)) continue;
+    const twin =
+      SUFFIX_ONLY.test((a.equipment_name ?? "").trim()) ||
+      keptModels.some(
+        (k) => sameCatalogModel(k.catalog_model, a.catalog_model) || sameCatalogModel(k.equipment_name, a.equipment_name),
+      );
+    if (!twin) continue;
+    const touched = await sql.query(
+      `select 1 from install_inspection_items where install_id = $2 and equipment_id = $1 and (status <> 'Not inspected' or coalesce(notes, '') <> '')
+       union all select 1 from install_inspection_photos where install_id = $2 and equipment_id = $1
+       union all select 1 from install_inspection_units where install_id = $2 and equipment_id = $1 and (coalesce(note, '') <> '' or coalesce(visit_kind, '') <> '') limit 1`,
+      [a.id, installId],
+    );
+    if (touched.length) continue;
+    await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, a.id]);
+    await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, a.id]);
+    linkedIds.delete(a.id);
+    await sql
+      .query(
+        `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
+            and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)
+            and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)
+            and not exists (select 1 from modules m where m.assigned_unit_id = a.id)`,
+        [a.id],
+      )
+      .catch(() => undefined);
+  }
   if (!opts?.prune) return;
   for (const id of linkedIds) {
     if (keep.has(id)) continue;
@@ -455,8 +502,8 @@ export async function loadInspectionSummaries(
     if (!have.has(id)) await ensureUnits(sql, id).catch(() => undefined);
   }
   const [units, items, photos, heads] = await Promise.all([
-    sql.query<{ install_id: number; equipment_id: number; core_needed: string | null; visit_kind: string | null; install_date: unknown }>(
-      `select u.install_id, u.equipment_id, u.core_needed, u.visit_kind, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date
+    sql.query<{ install_id: number; equipment_id: number; core_needed: string | null; visit_kind: string | null; install_date: unknown; catalog_model: string | null; equipment_name: string | null }>(
+      `select u.install_id, u.equipment_id, u.core_needed, u.visit_kind, a.catalog_model, a.equipment_name, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as install_date
          from install_inspection_units u join account_equipment a on a.id = u.equipment_id
         where u.install_id in (${list})`,
     ),
@@ -475,7 +522,7 @@ export async function loadInspectionSummaries(
   const grouped = machineGroups(items);
   const photoByUnit = new Map(photos.map((p) => [`${p.install_id}:${p.equipment_id}`, Number(p.n) || 0]));
   const overrides = new Map(heads.map((h) => [h.install_id, h.override_reason]));
-  const byInstall = new Map<number, { items: { category: string; status: string }[]; photoCount: number; coreNeeded: string | null; preInspected: boolean }[]>();
+  const byInstall = new Map<number, { items: { category: string; status: string }[]; photoCount: number; coreNeeded: string | null; preInspected: boolean; categories: string[] }[]>();
   for (const unit of units) {
     const key = `${unit.install_id}:${unit.equipment_id}`;
     const listItems = (grouped.get(key) ?? []).map((i) => ({ category: i.category, status: i.status }));
@@ -485,6 +532,7 @@ export async function loadInspectionSummaries(
       photoCount: photoByUnit.get(key) ?? 0,
       coreNeeded: isCoreHoleAnswer(unit.core_needed) ? unit.core_needed : null,
       preInspected: isPreInspected(unitKind(unit.visit_kind, !!unit.install_date)),
+      categories: unitChecks(unit),
     });
     byInstall.set(unit.install_id, machines);
   }
@@ -531,8 +579,9 @@ export async function loadInspectionUnits(sql: Sql, ids: number[]): Promise<Insp
     const unitItems = rows.map((i) => ({ category: i.category, status: i.status }));
     const coreNeeded = isCoreHoleAnswer(u.core_needed) ? u.core_needed : null;
     const preInspected = isPreInspected(unitKind((u as { visit_kind?: string | null }).visit_kind, !!(u as { install_date?: unknown }).install_date));
-    const summary = rollupSite([{ items: unitItems, photoCount: photoByUnit.get(key) ?? 0, coreNeeded, preInspected }], null);
-    const one = preInspected ? "Passed" : summary.machineCount ? inspectionOverall(unitItems, coreNeeded) : "Not started";
+    const categories = unitChecks(u);
+    const summary = rollupSite([{ items: unitItems, photoCount: photoByUnit.get(key) ?? 0, coreNeeded, preInspected, categories }], null);
+    const one = preInspected ? "Passed" : summary.machineCount ? inspectionOverall(unitItems, coreNeeded, categories) : "Not started";
     const coreRow = rows.find((i) => i.category === CORE_HOLE_CATEGORY);
     return {
       installId: u.install_id,
@@ -646,7 +695,8 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
     const coreNeeded = isCoreHoleAnswer(u.core_needed) ? u.core_needed : null;
     const visitKind = unitKind(u.visit_kind, !!u.install_date);
     const preInspected = isPreInspected(visitKind);
-    const overall = preInspected ? "Passed" : inspectionOverall(inputs, coreNeeded);
+    const checks = unitChecks(u);
+    const overall = preInspected ? "Passed" : inspectionOverall(inputs, coreNeeded, checks);
     const model = u.equipment_name || u.catalog_model;
     const coreRow = unitItems.find((i) => i.category === CORE_HOLE_CATEGORY);
     const coreStatus = isInspectionItemStatus(coreRow?.status) ? coreRow.status : "Not inspected";
@@ -657,7 +707,7 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
       serial: u.serial,
       electrical: u.electrical,
       overall,
-      failedItems: preInspected ? [] : failedItemLabels(inputs, coreNeeded),
+      failedItems: preInspected ? [] : failedItemLabels(inputs, coreNeeded, checks),
       photoCount: unitPhotos.length,
       thumb: unitPhotos[0]?.dataUrl ?? null,
       visitKind,
@@ -675,7 +725,8 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
         notes: coreRow?.notes ?? null,
         photos: unitPhotos.filter((p) => p.category === CORE_HOLE_CATEGORY),
       },
-      items: INSPECTION_CATEGORIES.map((c) => {
+      // Only the checks this model uses. A check saved earlier on a now-hidden line is kept but not shown or counted.
+      items: INSPECTION_CATEGORIES.filter((c) => checks.includes(c.key)).map((c) => {
         const row = unitItems.find((i) => i.category === c.key);
         const status = isInspectionItemStatus(row?.status) ? row.status : "Not inspected";
         return {
@@ -697,6 +748,7 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
       photoCount: m.photoCount,
       coreNeeded: m.coreNeeded,
       preInspected: m.preInspected,
+      categories: m.items.map((i) => i.category),
     })),
     h?.override_reason,
   );
@@ -1087,7 +1139,7 @@ async function replaceSources(sql: Sql, installId: number, equipmentId: number, 
       equipmentId: Number(u.equipment_id),
       name: u.equipment_name || u.catalog_model,
       serial: u.serial,
-      overall: inspectionOverall(items, isCoreHoleAnswer(u.core_needed) ? u.core_needed : null),
+      overall: inspectionOverall(items, isCoreHoleAnswer(u.core_needed) ? u.core_needed : null, unitChecks(u)),
       photoCount: Number(photos[0]?.n) || 0,
     });
   }

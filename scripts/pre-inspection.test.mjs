@@ -243,3 +243,58 @@ const mixed = roll([{ items: [], photoCount: 0, preInspected: true }, { items: [
 assert.equal(mixed.overall, "In progress");
 assert.equal(mixed.passedCount, 1);
 assert.equal(roll([{ items: [], photoCount: 0, preInspected: true }], null).overall, "Passed");
+
+// ---- checks by model type ----
+import { unitCategories as checksFor, unitType as typeOf, inspectionOverall as overallOf, rollupSite as rollAll } from "../src/lib/ops/pre-inspection.ts";
+for (const g of ["Bunn G9", "Bunn G9-2T HD Stainless", "Mazzer Super Jolly", "Mahlkonig E65S", "Mahlkonig EK43"]) {
+  assert.equal(typeOf(g), "grinder", g);
+  assert.deepEqual(checksFor(g), ["power", "space"], g);
+}
+for (const b of ["Fetco CBS-1151V+", "Bunn Axiom 15-3 DV", "Bunn ITCB-DV", "Bunn TB3", "Curtis G4", "Bunn Nitron"]) {
+  assert.equal(typeOf(b), "brewer", b);
+  assert.deepEqual(checksFor(b), ["power", "water", "space"], b);
+}
+for (const e of ["La Marzocco Linea PB", "Rancilio Classe 9", "Nuova Simonelli Appia"]) {
+  assert.equal(typeOf(e), "espresso", e);
+  assert.deepEqual(checksFor(e), ["power", "water", "drain", "space"], e);
+}
+// Ethernet on Eversys only.
+for (const v of ["Eversys Cameo C'2", "Eversys Enigma E'4", "Cameo C'2ms"]) assert.deepEqual(checksFor(v), ["power", "water", "drain", "ethernet", "space"], v);
+for (const n of ["La Marzocco Linea PB", "Fetco CBS-1151V+", "Bunn G9"]) assert.ok(!checksFor(n).includes("ethernet"), n);
+// A grinder passes on Power and Space alone; a hidden check is never waited on, and an old saved Fail on it is ignored.
+const grinderDone = [{ category: "power", status: "Pass" }, { category: "space", status: "N/A" }];
+assert.equal(overallOf(grinderDone, "no", checksFor("Bunn G9")), "Passed");
+assert.equal(overallOf([...grinderDone, { category: "water", status: "Fail" }], "no", checksFor("Bunn G9")), "Passed");
+assert.equal(overallOf([{ category: "power", status: "Pass" }], null, checksFor("Bunn G9")), "In progress");
+// A brewer waits on Water but not Drain or Ethernet.
+const brewer = checksFor("Bunn ITCB-DV");
+assert.equal(overallOf([{ category: "power", status: "Pass" }, { category: "space", status: "Pass" }], "no", brewer), "In progress");
+assert.equal(overallOf([{ category: "power", status: "Pass" }, { category: "space", status: "Pass" }, { category: "water", status: "N/A" }], "no", brewer), "Passed");
+// Site: 2/2 when both units pass their own checks; existing equipment still counts as passed; any Fail fails.
+const two = rollAll([
+  { items: grinderDone, photoCount: 1, coreNeeded: "no", categories: checksFor("Bunn G9") },
+  { items: [], photoCount: 0, preInspected: true, categories: brewer },
+], null);
+assert.equal(two.overall, "Passed"); assert.equal(two.passedCount, 2); assert.equal(two.machineCount, 2);
+const oneOpen = rollAll([
+  { items: grinderDone, photoCount: 1, coreNeeded: "no", categories: checksFor("Bunn G9") },
+  { items: [{ category: "power", status: "Pass" }], photoCount: 1, categories: brewer },
+], null);
+assert.equal(oneOpen.overall, "In progress"); assert.equal(oneOpen.passedCount, 1);
+const oneFail = rollAll([
+  { items: grinderDone, photoCount: 1, coreNeeded: "no", categories: checksFor("Bunn G9") },
+  { items: [{ category: "water", status: "Fail" }], photoCount: 1, categories: brewer },
+], null);
+assert.equal(oneFail.overall, "Failed");
+console.log("pre-inspection by model type: ok");
+// Names as they are written on accounts.
+assert.equal(typeOf("Bunn LPG-2E, 120V"), "grinder");
+assert.equal(typeOf("La Marzocco Swift Dual-Hopper Espresso Grinder"), "grinder");
+assert.equal(typeOf("Bravilor Sego 12 120V"), "brewer");
+assert.equal(typeOf("SN:AXAP028340"), "brewer");
+assert.deepEqual(checksFor("LM Linea S 2AV SN:LS028751"), ["power", "water", "drain", "space"]);
+assert.deepEqual(checksFor("Classe 9"), ["power", "water", "drain", "space"]);
+assert.deepEqual(checksFor("E4s"), ["power", "water", "drain", "ethernet", "space"]);
+assert.deepEqual(checksFor("Bunn ITCB-DV, 29\" w/Flip Tray"), ["power", "water", "space"]);
+assert.deepEqual(checksFor("EZRO200-10"), ["power", "space"]);
+console.log("account names: ok");

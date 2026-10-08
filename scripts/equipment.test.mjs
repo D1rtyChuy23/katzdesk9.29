@@ -117,3 +117,10 @@ assert.equal(
 );
 
 console.log("equipment names ok");
+
+// A model suffix stays with its machine: "Bunn ITCB-DV" is one machine, never "Bunn ITCB" + "-DV".
+{
+  const cat = ["Bunn ITCB", "Bunn ITCB NS", "Bunn G9-2T", "Eversys Cameo c'2s"];
+  assert.deepEqual(listedEquipment("Bunn G9-2T\nBunn ITCB-DV\nEversys Cameo C'2s", cat), ["Bunn G9-2T", "Bunn ITCB", "Eversys Cameo c'2s"]);
+  assert.deepEqual(listedEquipment("Bunn ITCB\n-DV", cat), ["Bunn ITCB"]);
+}
