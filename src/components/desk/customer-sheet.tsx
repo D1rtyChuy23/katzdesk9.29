@@ -24,7 +24,7 @@ import { ProviderDispatchBlock } from "./provider-dispatch";
 import { RenameDialog } from "./rename-dialog";
 import type { RecipeDraft } from "./recipe-form";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, Pencil, Plus, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, Lock, Pencil, Plus, Search } from "lucide-react";
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import { toast } from "sonner";
 import { RepSelect } from "./rep-select";
@@ -284,7 +284,7 @@ export function CustomerHistorySheet({
                 <AkBadge on={data?.aviKatz} />
               </SheetTitle>
 
-              {canRename && data ? (
+              {canRename && data && !data.nameLocked ? (
                 <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
                   <Pencil className="size-3.5" />
                   Edit
@@ -300,17 +300,26 @@ export function CustomerHistorySheet({
               </div>
             ) : data ? (
               <div className="p-5">
-                <p className="text-xs text-muted-foreground">
-                  {canRename
-                    ? "Edit the name to move every call, install, PM, deal, recipe, and network link onto it."
-                    : "Ask an admin to rename this account — history follows the new name."}
-                </p>
+                {data.nameLocked ? (
+                  <CleanListBlock name={data.name} cleanList={data.cleanList ?? null} />
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {canRename
+                      ? "Edit the name to move every call, install, PM, deal, recipe, and network link onto it."
+                      : "Ask an admin to rename this account — history follows the new name."}
+                  </p>
+                )}
 
                 <AccountMarksForm
                   id={data.id}
                   aviKatz={data.aviKatz}
                   accountRep={data.accountRep}
                 />
+                {!data.accountRep && data.repFlag ? (
+                  <p className="mt-1 text-xs font-medium text-warning" data-testid="rep-flag">
+                    Rep left blank: {data.repFlag}.
+                  </p>
+                ) : null}
 
                 <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
 
@@ -736,6 +745,28 @@ function CustomerRecipes({
         </p>
       )}
     </section>
+  );
+}
+
+/** An account approved from the clean customer list: locked name, and for an Admin the list's ID and address. */
+function CleanListBlock({ name, cleanList }: { name: string; cleanList: { netsuiteId: string | null; address: string | null } | null }) {
+  return (
+    <dl className="grid gap-x-4 gap-y-1 rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-sm sm:grid-cols-[auto_minmax(0,1fr)]" data-testid="clean-list-block">
+      <dt className="text-xs text-muted-foreground">Display Name</dt>
+      <dd className="flex items-center gap-1.5 font-medium" data-testid="clean-display">
+        {name}
+        <Lock className="size-3.5 text-primary" aria-label="Locked" />
+        <span className="text-xs font-normal text-muted-foreground">Locked from the clean list</span>
+      </dd>
+      {cleanList ? (
+        <>
+          <dt className="text-xs text-muted-foreground">ID</dt>
+          <dd className="font-medium tabular" data-testid="clean-account-id">{cleanList.netsuiteId ?? "—"}</dd>
+          <dt className="text-xs text-muted-foreground">Address</dt>
+          <dd data-testid="clean-account-address">{cleanList.address || <span className="text-warning">No address on the clean list</span>}</dd>
+        </>
+      ) : null}
+    </dl>
   );
 }
 

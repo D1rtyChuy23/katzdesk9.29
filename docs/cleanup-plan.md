@@ -521,3 +521,28 @@ On the test copy with the attached list (2,409 names, 2,650 KatzDesk accounts): 
 - Punctuation-only differences ("H.E.B" vs "HEB", "Porsche St. Louis*") count as exact. Two clean-list rows with the same name go to Needs Approval to pick one.
 - Clean-list rows that match no KatzDesk account (other than Walk-In and Cimbali) are not added.
 - Approving a parent-prefixed name sets the full name as written on the list ("Eversys Service:Black Rifle Coffee").
+
+## 21. Admin Role, And ID, Address And Rep On Approved Accounts
+
+### Admin role
+
+- Access: the role picker has Admin, Sales, Service, Warehouse. Only the desk owner sets roles; more than one person can be Admin.
+- Admin opens Clean Names (it shows in the menu only for Admin and the desk owner), reads the list, approves, skips, flags removal, unlocks, and sees ID and address.
+- Sales and Service: no Clean Names in the menu, the page says only an Admin can open it, approving is refused, and a locked name cannot be changed (renaming is refused). Warehouse is unchanged.
+- An Admin's other screens look like Service's (My View and dashboard read "Admin").
+
+### ID, address and rep, approved accounts only
+
+- Approved (locked from the list: exact matches, and lines you approve) carry onto the account: Display Name (locked), ID (the list's Internal ID), Address (ship-to address 1 and 2, city, state, zip), and the account rep from the list's Sales Rep (migration 0054).
+- Needs Approval, No Match, Walk-In and Cimbali lines show no ID or address and write nothing onto the account until approved. Keeping a No Match account locks its name only.
+- Rep: matched to the KatzDesk rep list by name or initials; a one- or two-letter slip still matches ("Bill McKinsley" is Bill McKinley). No sales rep on the list: rep blank, flagged "No sales rep on the clean list". A rep KatzDesk does not have: rep blank, flagged with the name. The flag shows under Rep on the account and on the report line. A rep is never made up.
+- On the account: the ID and address block shows to an Admin; Sales and Service see the locked display name only.
+- Reading the list again keeps what was decided (skips, removal flags, kept, unlocks, approvals) and never unlocks a locked name. It also fills ID, address and rep onto accounts approved before this change.
+
+On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with no sales rep on the list, 198 blank because the rep is not on the KatzDesk rep list (Karla Zapata 188, Avi Katz 6, Rachael Gaytan 2, Wil Benitez 2). Re-reading unlocked nothing.
+
+### Left as is, to confirm
+
+- Karla Zapata, Avi Katz, Rachael Gaytan and Wil Benitez are not on the KatzDesk rep list, so their accounts have a blank, flagged rep. Add them as reps (or tell me to map "Avi Katz" to the AK mark) and read the list again to fill them.
+- The list's rep replaces the KatzDesk rep on approved accounts, including blanking it when the list has none.
+- An Admin can open Clean Names but cannot approve desk logins or rename unlocked customers; those stay with the desk owner.

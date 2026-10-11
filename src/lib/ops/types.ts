@@ -385,6 +385,12 @@ export type CustomerHistory = {
   name: string;
   aviKatz: boolean;
   accountRep: string | null;
+  /** Name applied from the clean customer list and locked. */
+  nameLocked?: boolean;
+  /** Why the rep is blank after the clean list: no sales rep on it, or one KatzDesk does not have. */
+  repFlag?: string | null;
+  /** ID number and address from the clean list. Null for anyone who is not an Admin. */
+  cleanList?: { netsuiteId: string | null; address: string | null } | null;
   jobs: ServiceJob[];
   pms: PmJob[];
   installs: Install[];

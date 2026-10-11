@@ -166,7 +166,12 @@ function Page() {
       </header>
 
       {report.isLoading ? <p className="mt-6 text-sm text-muted-foreground">Loading the report…</p> : null}
-      {data && !data.run ? (
+      {data?.forbidden ? (
+        <p className="mt-6 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="clean-forbidden">
+          Only an Admin can open the clean customer list review. Ask the desk owner to give you the Admin role.
+        </p>
+      ) : null}
+      {data && !data.run && !data.forbidden ? (
         <p className="mt-6 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground">
           {data.canEdit ? "Read the clean customer list (the NetSuite export) to build the report." : "No clean list has been read yet. An admin reads it here."}
         </p>
@@ -245,9 +250,20 @@ function ReportRow({
           {it.locked ? <Lock className="size-3.5 shrink-0 text-primary" aria-label="Name locked" /> : null}
           <Badge variant={st.variant} size="tight" data-testid="clean-status">{st.label}</Badge>
         </div>
+        {it.approved ? (
+          <dl className="mt-1 grid gap-x-4 gap-y-0.5 text-xs sm:grid-cols-[auto_minmax(0,1fr)]" data-testid="clean-details">
+            <dt className="text-muted-foreground">ID</dt>
+            <dd className="font-medium tabular" data-testid="clean-id">{it.netsuiteId ?? "—"}</dd>
+            <dt className="text-muted-foreground">Address</dt>
+            <dd data-testid="clean-address">{it.address || <span className="text-warning">No address on the clean list</span>}</dd>
+            <dt className="text-muted-foreground">Rep</dt>
+            <dd data-testid="clean-rep">
+              {it.accountRep ? it.accountRep : <span className="font-medium text-warning">Blank · {it.repFlag ?? "No sales rep on the clean list"}</span>}
+            </dd>
+          </dl>
+        ) : null}
         <p className="mt-0.5 text-xs text-muted-foreground">
           {it.reason}
-          {it.netsuiteId ? ` · NetSuite ${it.netsuiteId}` : ""}
           {it.note ? ` · ${it.note}` : ""}
           {it.mergesInto ? <span className="font-medium text-warning"> · Approving merges into “{it.mergesInto}”</span> : null}
           {it.decidedBy && it.status !== "pending" ? ` · ${it.decidedBy}` : ""}

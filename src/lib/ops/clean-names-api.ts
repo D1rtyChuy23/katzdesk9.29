@@ -2,10 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware, requireAdmin } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware, requireNameReviewer } from "@/lib/ops/access";
+import { loadReps } from "@/lib/ops/reps";
 import { renameOrMergeCustomer } from "@/lib/ops/customer-identity";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
-import { matchCleanList, rowsFromMatrix, tidy, type CleanKind } from "@/lib/ops/clean-names";
+import { matchCleanList, resolveSalesRep, rowsFromMatrix, tidy, type CleanKind } from "@/lib/ops/clean-names";
 
 export type CleanStatus = "pending" | "apply" | "locked" | "kept" | "skipped" | "removal" | "unlocked";
 export type CleanSection = "locked" | "similar" | "no_match" | "walk_in" | "cimbali";
@@ -22,7 +23,15 @@ export type CleanReportItem = {
   /** Another KatzDesk account already has the clean-list name: approving merges this account into it. */
   mergesInto: string | null;
   cleanName: string | null;
+  /** ID, address and rep show only once the account is approved (locked from the list). */
   netsuiteId: string | null;
+  address: string | null;
+  accountRep: string | null;
+  /** Why the rep is blank: no sales rep on the list, or one KatzDesk does not have. */
+  repFlag: string | null;
+  /** The list's Sales Rep column as written (shown on approved lines). */
+  salesRep: string | null;
+  approved: boolean;
   reason: string;
   status: CleanStatus;
   note: string | null;
@@ -37,6 +46,8 @@ export type CleanReport = {
   /** Exact matches still waiting to be applied (applied in batches so a long list never times out). */
   pendingApply: number;
   canEdit: boolean;
+  /** Not an Admin: the review is not shown. */
+  forbidden: boolean;
 };
 
 async function ready() {
@@ -50,11 +61,6 @@ async function actorName(sql: Sql, userId: string): Promise<string> {
   return rows[0]?.username || "Admin";
 }
 
-async function isAdmin(sql: Sql, userId: string): Promise<boolean> {
-  const rows = await sql.query<{ is_admin: unknown }>("select is_admin from desk_accounts where user_id = $1", [userId]);
-  const v = rows[0]?.is_admin;
-  return v === true || v === "true" || v === 1 || v === "t";
-}
 
 /** The locked account a typed or imported name belongs to (same name, ignoring case, spacing and punctuation). */
 export async function lockedNameFor(sql: Sql, raw: string | null | undefined): Promise<string | null> {
@@ -86,7 +92,7 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       "select id, filename, created_by, created_at, row_count from customer_clean_runs order by id desc limit 1",
     )
   )[0];
-  if (!run) return { run: null, items: [], pendingApply: 0, canEdit };
+  if (!run) return { run: null, items: [], pendingApply: 0, canEdit, forbidden: false };
   const rows = await sql.query<{
     id: number;
     kind: string;
@@ -98,11 +104,17 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
     status: string;
     note: string | null;
     decided_by: string | null;
+    sales_rep: string | null;
     cur_name: string | null;
     name_locked: unknown;
     removal_flag: unknown;
+    acct_netsuite: string | null;
+    acct_address: string | null;
+    acct_rep: string | null;
+    acct_rep_flag: string | null;
   }>(
-    `select i.*, d.name as cur_name, d.name_locked, d.removal_flag
+    `select i.*, d.name as cur_name, d.name_locked, d.removal_flag,
+            d.netsuite_id as acct_netsuite, d.address as acct_address, d.account_rep as acct_rep, d.rep_flag as acct_rep_flag
        from customer_clean_items i
        left join directory_customers d on d.id = i.customer_id
       where i.run_id = $1
@@ -127,7 +139,9 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       createdAt: run.created_at instanceof Date ? run.created_at.toISOString() : String(run.created_at),
       rowCount: Number(run.row_count) || 0,
     },
-    items: rows.map((r) => ({
+    items: rows.map((r) => {
+      const approved = (r.status === "locked" && !!r.clean_name) && on(r.name_locked);
+      return {
       id: r.id,
       kind: r.kind as CleanKind,
       section: sectionOf(r.kind, r.status),
@@ -136,16 +150,23 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       mergesInto: mergeTarget(r.customer_id, r.clean_name, r.status),
       currentName: r.cur_name && r.cur_name !== r.katz_name && r.cur_name !== tidy(r.clean_name) ? r.cur_name : null,
       cleanName: r.clean_name,
-      netsuiteId: r.netsuite_id,
+      approved,
+      netsuiteId: approved ? r.acct_netsuite : null,
+      address: approved ? r.acct_address : null,
+      accountRep: approved ? r.acct_rep : null,
+      repFlag: approved ? r.acct_rep_flag : null,
+      salesRep: approved ? r.sales_rep : null,
       reason: r.reason ?? "",
       status: r.status as CleanStatus,
       note: r.note,
       locked: on(r.name_locked),
       removalFlag: on(r.removal_flag),
       decidedBy: r.decided_by,
-    })),
+    };
+    }),
     pendingApply: rows.filter((r) => r.status === "apply").length,
     canEdit,
+    forbidden: false,
   };
 }
 
@@ -153,7 +174,10 @@ export const getCleanReport = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .handler(async ({ context }): Promise<CleanReport> => {
     const sql = await ready();
-    return readReport(sql, await isAdmin(sql, context.userId));
+    if (!(await canReviewNames(sql, context.userId))) {
+      return { run: null, items: [], pendingApply: 0, canEdit: false, forbidden: true };
+    }
+    return readReport(sql, true);
   });
 
 function matrixFrom(base64: string): unknown[][] {
@@ -175,7 +199,7 @@ export const startCleanList = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof fileInput>) => fileInput.parse(d))
   .handler(async ({ data, context }): Promise<CleanReport> => {
     const sql = await ready();
-    await requireAdmin(sql, context.userId, "Only an admin can apply the clean customer list.");
+    await requireNameReviewer(sql, context.userId, "Only an Admin can apply the clean customer list.");
     if (data.base64.length > 20_000_000) throw new Error("That file is too large.");
     const rows = rowsFromMatrix(matrixFrom(data.base64));
     if (!rows.length) throw new Error("No customers on that sheet.");
@@ -183,7 +207,9 @@ export const startCleanList = createServerFn({ method: "POST" })
       "select id, name from directory_customers where archived = false and coalesce(name, '') <> '' order by id",
     );
     const items = matchCleanList(accounts, rows);
+    const roster = await loadReps(sql);
     const who = await actorName(sql, context.userId);
+    const prior = (await sql.query<{ id: number }>("select id from customer_clean_runs order by id desc limit 1"))[0];
     const run = (
       await sql.query<{ id: number }>(
         "insert into customer_clean_runs (filename, created_by, row_count) values ($1, $2, $3) returning id",
@@ -195,21 +221,48 @@ export const startCleanList = createServerFn({ method: "POST" })
       const chunk = items.slice(i, i + 200);
       const params: unknown[] = [];
       const values = chunk.map((it, j) => {
-        const b = j * 8;
-        params.push(run.id, it.kind, it.accountId, it.katzName, it.cleanName, it.internalId, it.reason, it.kind === "exact" ? "apply" : "pending");
-        return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}, $${b + 7}, $${b + 8})`;
+        const b = j * 12;
+        const rep = it.cleanName ? resolveSalesRep(it.salesRep, roster) : { rep: null, flag: null };
+        params.push(
+          run.id, it.kind, it.accountId, it.katzName, it.cleanName, it.internalId, it.reason, it.kind === "exact" ? "apply" : "pending",
+          it.address, it.salesRep, rep.rep, rep.flag,
+        );
+        return `(${Array.from({ length: 12 }, (_, k) => `$${b + k + 1}`).join(", ")})`;
       });
       await sql.query(
-        `insert into customer_clean_items (run_id, kind, customer_id, katz_name, clean_name, netsuite_id, reason, status) values ${values.join(", ")}`,
+        `insert into customer_clean_items (run_id, kind, customer_id, katz_name, clean_name, netsuite_id, reason, status, address, sales_rep, rep_name, rep_flag)
+         values ${values.join(", ")}`,
         params,
       );
     }
-    // Exact matches whose name is already the clean name: lock them all at once.
+    // Reading the list again keeps what was already decided: skips, removal flags, kept accounts, unlocks, and
+    // approvals of similar / Walk-In / Cimbali lines. Locked names stay locked.
+    if (prior) {
+      await sql.query(
+        `update customer_clean_items n
+            set status = o.status, note = o.note, decided_by = o.decided_by, decided_at = o.decided_at
+           from customer_clean_items o
+          where n.run_id = $1 and o.run_id = $2
+            and n.customer_id = o.customer_id and coalesce(n.clean_name, '') = coalesce(o.clean_name, '')
+            and n.status in ('pending', 'apply')
+            and (o.status in ('skipped', 'removal', 'kept', 'unlocked') or (o.status = 'locked' and n.kind <> 'exact'))`,
+        [run.id, prior.id],
+      );
+    }
+    // Exact matches whose name is already the clean name: lock them all at once, with the list's ID, address and rep.
     await sql.query(
-      `update directory_customers d set name_locked = true, locked_at = now(), locked_by = $2, netsuite_id = i.netsuite_id, updated_at = now()
+      `update directory_customers d set name_locked = true, locked_at = now(), locked_by = $2, removal_flag = false,
+              netsuite_id = i.netsuite_id, address = i.address, account_rep = i.rep_name, rep_flag = i.rep_flag, updated_at = now()
          from customer_clean_items i
         where i.run_id = $1 and i.status = 'apply' and i.customer_id = d.id and d.name = i.clean_name`,
       [run.id, who],
+    );
+    // Lines approved on an earlier read: the account carries the list's details too.
+    await sql.query(
+      `update directory_customers d set netsuite_id = i.netsuite_id, address = i.address, account_rep = i.rep_name, rep_flag = i.rep_flag, updated_at = now()
+         from customer_clean_items i
+        where i.run_id = $1 and i.status = 'locked' and i.clean_name is not null and i.customer_id = d.id and d.name_locked = true`,
+      [run.id],
     );
     await sql.query(
       `update customer_clean_items i set status = 'locked', decided_by = $2, decided_at = now()
@@ -225,12 +278,12 @@ export const continueCleanList = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .handler(async ({ context }): Promise<CleanReport> => {
     const sql = await ready();
-    await requireAdmin(sql, context.userId, "Only an admin can apply the clean customer list.");
+    await requireNameReviewer(sql, context.userId, "Only an Admin can apply the clean customer list.");
     const who = await actorName(sql, context.userId);
     const run = (await sql.query<{ id: number }>("select id from customer_clean_runs order by id desc limit 1"))[0];
     if (!run) return readReport(sql, true);
-    const batch = await sql.query<{ id: number; customer_id: number; clean_name: string; netsuite_id: string | null }>(
-      "select id, customer_id, clean_name, netsuite_id from customer_clean_items where run_id = $1 and status = 'apply' order by id limit 40",
+    const batch = await sql.query<LineDetails & { id: number; customer_id: number; clean_name: string }>(
+      "select id, customer_id, clean_name, netsuite_id, address, rep_name, rep_flag from customer_clean_items where run_id = $1 and status = 'apply' order by id limit 40",
       [run.id],
     );
     for (const it of batch) {
@@ -262,7 +315,7 @@ export const continueCleanList = createServerFn({ method: "POST" })
       }
       try {
         await renameOrMergeCustomer(sql, cur.id, next, { force: true });
-        await lockAccount(sql, cur.id, who, it.netsuite_id);
+        await lockAccount(sql, cur.id, who, it);
         await sql.query("update customer_clean_items set status = 'locked', decided_by = $2, decided_at = now() where id = $1", [it.id, who]);
       } catch (e) {
         await hold(`Could not apply: ${e instanceof Error ? e.message : "error"}`);
@@ -271,13 +324,24 @@ export const continueCleanList = createServerFn({ method: "POST" })
     return readReport(sql, true);
   });
 
-async function lockAccount(sql: Sql, id: number, who: string, netsuiteId?: string | null) {
+type LineDetails = { netsuite_id: string | null; address: string | null; rep_name: string | null; rep_flag: string | null };
+
+/**
+ * Lock the name. With a clean-list line (an approved match), also write the list's ID, address and sales rep onto
+ * the account; a blank rep carries its flag. Without one (No Match kept, a Walk-In with no list name), only lock.
+ */
+async function lockAccount(sql: Sql, id: number, who: string, line?: LineDetails | null) {
   await sql.query(
-    `update directory_customers set name_locked = true, locked_at = now(), locked_by = $2,
-            netsuite_id = coalesce($3, netsuite_id), removal_flag = false, updated_at = now()
+    `update directory_customers set name_locked = true, locked_at = now(), locked_by = $2, removal_flag = false, updated_at = now()
       where id = $1`,
-    [id, who, netsuiteId ?? null],
+    [id, who],
   );
+  if (line) {
+    await sql.query(
+      "update directory_customers set netsuite_id = $2, address = $3, account_rep = $4, rep_flag = $5 where id = $1",
+      [id, line.netsuite_id, line.address, line.rep_name, line.rep_flag],
+    );
+  }
 }
 
 const decideInput = z.object({
@@ -294,7 +358,7 @@ export const decideCleanItem = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof decideInput>) => decideInput.parse(d))
   .handler(async ({ data, context }): Promise<CleanReport> => {
     const sql = await ready();
-    await requireAdmin(sql, context.userId, "Only an admin can approve clean-list names.");
+    await requireNameReviewer(sql, context.userId, "Only an Admin can approve or change clean-list names.");
     const who = await actorName(sql, context.userId);
     const it = (
       await sql.query<{
@@ -305,9 +369,16 @@ export const decideCleanItem = createServerFn({ method: "POST" })
         clean_name: string | null;
         netsuite_id: string | null;
         status: string;
-      }>("select id, run_id, kind, customer_id, clean_name, netsuite_id, status from customer_clean_items where id = $1", [data.id])
+        address: string | null;
+        sales_rep: string | null;
+        rep_name: string | null;
+        rep_flag: string | null;
+      }>("select id, run_id, kind, customer_id, clean_name, netsuite_id, status, address, sales_rep, rep_name, rep_flag from customer_clean_items where id = $1", [data.id])
     )[0];
     if (!it) throw new Error("That line is no longer on the report.");
+    // A line read before ID, address and rep were carried has none of them: lock only, never blank a rep.
+    const line: LineDetails | null =
+      it.clean_name && (it.address != null || it.sales_rep != null || it.rep_name != null || it.rep_flag != null) ? it : null;
     const mark = (status: CleanStatus, note: string | null = null) =>
       sql.query("update customer_clean_items set status = $2, note = $3, decided_by = $4, decided_at = now() where id = $1", [
         it.id,
@@ -331,7 +402,7 @@ export const decideCleanItem = createServerFn({ method: "POST" })
       await mark("unlocked", "Unlocked: the name can be edited again.");
     } else if (data.action === "lock") {
       if (!it.customer_id) throw new Error("There is no KatzDesk account on this line.");
-      await lockAccount(sql, it.customer_id, who, it.netsuite_id);
+      await lockAccount(sql, it.customer_id, who, line);
       await mark("locked");
     } else {
       // approve
@@ -348,7 +419,7 @@ export const decideCleanItem = createServerFn({ method: "POST" })
           found[0]?.id ??
           (await sql.query<{ id: number }>("insert into directory_customers (name) values ($1) returning id", [name]))[0]!.id;
         await sql.query("update directory_customers set archived = false where id = $1", [id]);
-        await lockAccount(sql, id, who, it.netsuite_id);
+        await lockAccount(sql, id, who, line);
         await sql.query("update customer_clean_items set customer_id = $2 where id = $1", [it.id, id]);
         await mark("locked", "Added from the clean list and locked.");
       } else {
@@ -364,7 +435,7 @@ export const decideCleanItem = createServerFn({ method: "POST" })
         } else {
           await mark("locked", "Kept with its KatzDesk name, now locked.");
         }
-        await lockAccount(sql, id, who, it.netsuite_id);
+        await lockAccount(sql, id, who, name ? line : null);
         // Other names offered for the same account are settled by this approval.
         await sql.query(
           `update customer_clean_items set status = 'skipped', note = 'Another clean-list name was approved for this account.', decided_by = $3, decided_at = now()

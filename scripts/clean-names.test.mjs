@@ -51,5 +51,32 @@ test("Walk-In and Cimbali are always held, matched or not; leftovers are No Matc
 
 test("reads the NetSuite export's Customers sheet", () => {
   const rows = rowsFromMatrix([["Internal ID", "Entity ID", "Customer Name", "Status"], [1520, "Common Bond Tanglewood", "Common Bond Tanglewood", "x"], [null, null, null]]);
-  assert.deepEqual(rows, [{ internalId: "1520", entityId: "Common Bond Tanglewood", name: "Common Bond Tanglewood" }]);
+  assert.deepEqual(rows, [{ internalId: "1520", entityId: "Common Bond Tanglewood", name: "Common Bond Tanglewood", address: "", salesRep: "" }]);
+});
+
+import { resolveSalesRep, shipToAddress } from "../src/lib/ops/clean-names.ts";
+const roster = [
+  { name: "Amanda Logg", initials: "AL" }, { name: "Lizbeth Romero", initials: "LR" }, { name: "Sean Marshall", initials: "SM" },
+  { name: "Lance Oden", initials: "LO" }, { name: "Bill McKinley", initials: "BM" }, { name: "Shannon Cafourek", initials: "SC" },
+  { name: "Jesus Garcia", initials: "JG" },
+];
+
+test("sales rep from the list: by name, initials or a small slip; never invented", () => {
+  assert.deepEqual(resolveSalesRep("Amanda Logg", roster), { rep: "Amanda Logg", flag: null });
+  assert.deepEqual(resolveSalesRep("SC", roster), { rep: "Shannon Cafourek", flag: null });
+  assert.deepEqual(resolveSalesRep("Bill McKinsley", roster), { rep: "Bill McKinley", flag: null });
+  assert.deepEqual(resolveSalesRep("", roster), { rep: null, flag: "No sales rep on the clean list" });
+  assert.deepEqual(resolveSalesRep("Karla Zapata", roster), { rep: null, flag: "Sales rep “Karla Zapata” is not on the KatzDesk rep list" });
+});
+
+test("ship-to address from the list columns", () => {
+  assert.equal(shipToAddress({ line1: "5740 San Felipe, Unit 130", line2: null, city: "Houston", state: "TX", zip: "77057" }), "5740 San Felipe, Unit 130, Houston, TX 77057");
+  assert.equal(shipToAddress({ line1: "17455 N Outer 40 Rd,", city: "Chesterfield", state: "MO", zip: 63005 }), "17455 N Outer 40 Rd, Chesterfield, MO 63005");
+  assert.equal(shipToAddress({}), "");
+});
+
+test("details ride along on each line", () => {
+  const items = matchCleanList([{ id: 1, name: "Common Bond Tanglewood" }], [{ internalId: "1520", entityId: "x", name: "Common Bond Tanglewood", address: "5740 San Felipe, Houston, TX 77057", salesRep: "Amanda Logg" }]);
+  assert.equal(items[0].address, "5740 San Felipe, Houston, TX 77057");
+  assert.equal(items[0].salesRep, "Amanda Logg");
 });

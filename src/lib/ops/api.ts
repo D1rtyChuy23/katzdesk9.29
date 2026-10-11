@@ -3,7 +3,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql } from "@/lib/db";
-import { deskMiddleware, requireAdmin } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware, requireAdmin } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
@@ -1993,11 +1993,11 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		removalFlag: r.removal_flag === true
 	}));
 });
-export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data }: any): Promise<CustomerHistory | null> => {
+export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any): Promise<CustomerHistory | null> => {
 	const sql = await ready();
 	const marks = await loadAccountMarks(sql);
 	const account = (await sql`
-      select id, name, avi_katz, account_rep from directory_customers where id = ${data.id} and archived = false`)[0];
+      select * from directory_customers where id = ${data.id} and archived = false`)[0];
 	if (!account) return null;
 	const name = account.name;
 	const today = todayChicago();
@@ -2028,6 +2028,12 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		name,
 		aviKatz: !!account.avi_katz,
 		accountRep: account.account_rep ?? null,
+		// The clean customer list: the name is locked; ID and address show to an Admin.
+		nameLocked: account.name_locked === true,
+		repFlag: account.rep_flag ?? null,
+		cleanList: (await canReviewNames(sql, context.userId))
+			? { netsuiteId: account.name_locked === true ? account.netsuite_id ?? null : null, address: account.name_locked === true ? account.address ?? null : null }
+			: null,
 		jobs: applyMarks(attachJobSiblings(jobs.map((r) => mapJob(r, today))).filter((j) => !j.duplicateOf), marks),
 		pms: applyMarks(pms.map((r) => mapPm(r, today)), marks),
 		installs: await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks)),

@@ -9,7 +9,7 @@
  */
 import { normalizeCustomerKey } from "./customer-key.ts";
 
-export type CleanRow = { internalId: string; entityId: string; name: string };
+export type CleanRow = { internalId: string; entityId: string; name: string; address?: string; salesRep?: string };
 export type KatzAccount = { id: number; name: string };
 export type CleanKind = "exact" | "similar" | "no_match" | "walk_in" | "cimbali";
 
@@ -20,6 +20,9 @@ export type CleanItem = {
   cleanName: string | null;
   internalId: string | null;
   reason: string;
+  /** Ship-to address and sales rep from the list row. Written onto the account only when it is approved. */
+  address: string | null;
+  salesRep: string | null;
 };
 
 /** The name to apply from a row: Customer Name, else Entity ID. */
@@ -80,6 +83,17 @@ function editDistance(a: string, b: string): number {
     }
   }
   return prev[b.length]!;
+}
+
+function details(row: CleanRow | undefined): { address: string | null; salesRep: string | null } {
+  return { address: tidy(row?.address) || null, salesRep: tidy(row?.salesRep) || null };
+}
+
+/** "5740 San Felipe, Unit 130, Houston, TX 77057" from the ship-to columns. */
+export function shipToAddress(parts: { line1?: unknown; line2?: unknown; city?: unknown; state?: unknown; zip?: unknown }): string {
+  const t = (v: unknown) => tidy(v == null ? "" : String(v)).replace(/,+$/, "");
+  const cityLine = [t(parts.city), [t(parts.state), t(parts.zip)].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  return [t(parts.line1), t(parts.line2), cityLine].filter(Boolean).join(", ");
 }
 
 type Prepared = { row: CleanRow; clean: string; key: string; leafKey: string; parent: string | null; core: string[]; coreKey: string };
@@ -189,11 +203,12 @@ export function matchCleanList(accounts: KatzAccount[], rows: CleanRow[], maxCan
         cleanName: best?.p.clean ?? null,
         internalId: best?.p.row.internalId ?? null,
         reason: best ? best.reason : "No clean-list match",
+        ...details(best?.p.row),
       });
       continue;
     }
     if (!candidates.length) {
-      items.push({ kind: "no_match", accountId: acct.id, katzName: acct.name, cleanName: null, internalId: null, reason: "No clean-list match" });
+      items.push({ kind: "no_match", accountId: acct.id, katzName: acct.name, cleanName: null, internalId: null, reason: "No clean-list match", ...details(undefined) });
       continue;
     }
     if (exact.length === 1) {
@@ -201,10 +216,10 @@ export function matchCleanList(accounts: KatzAccount[], rows: CleanRow[], maxCan
       const first = claimedExact.get(p);
       usedRows.add(p);
       if (first) {
-        items.push({ kind: "similar", accountId: acct.id, katzName: acct.name, cleanName: p.clean, internalId: p.row.internalId, reason: `Same clean name as the KatzDesk account “${first}”; approving merges the two` });
+        items.push({ kind: "similar", accountId: acct.id, katzName: acct.name, cleanName: p.clean, internalId: p.row.internalId, reason: `Same clean name as the KatzDesk account “${first}”; approving merges the two`, ...details(p.row) });
       } else {
         claimedExact.set(p, acct.name);
-        items.push({ kind: "exact", accountId: acct.id, katzName: acct.name, cleanName: p.clean, internalId: p.row.internalId, reason: candidates[0]!.reason });
+        items.push({ kind: "exact", accountId: acct.id, katzName: acct.name, cleanName: p.clean, internalId: p.row.internalId, reason: candidates[0]!.reason, ...details(p.row) });
       }
       continue;
     }
@@ -217,6 +232,7 @@ export function matchCleanList(accounts: KatzAccount[], rows: CleanRow[], maxCan
         cleanName: c.p.clean,
         internalId: c.p.row.internalId,
         reason: exact.length > 1 ? `${exact.length} clean-list rows have this name; pick one` : c.reason,
+        ...details(c.p.row),
       });
     }
   }
@@ -225,7 +241,7 @@ export function matchCleanList(accounts: KatzAccount[], rows: CleanRow[], maxCan
     if (usedRows.has(p)) continue;
     const kind = isWalkInName(p.clean) ? "walk_in" : isCimbaliName(p.clean) ? "cimbali" : null;
     if (!kind) continue;
-    items.push({ kind, accountId: null, katzName: null, cleanName: p.clean, internalId: p.row.internalId, reason: "On the clean list; no KatzDesk account" });
+    items.push({ kind, accountId: null, katzName: null, cleanName: p.clean, internalId: p.row.internalId, reason: "On the clean list; no KatzDesk account", ...details(p.row) });
   }
   return items;
 }
@@ -239,12 +255,49 @@ export function rowsFromMatrix(matrix: unknown[][]): CleanRow[] {
   const nameCol = col(/^(customer name|company name)$/);
   const entityCol = col(/^(entity id|name)$/);
   const idCol = col(/^internal id$/);
+  const repCol = col(/^sales rep$/);
+  const a1 = col(/^ship-?to address 1$/);
+  const a2 = col(/^ship-?to address 2$/);
+  const city = col(/^ship-?to city$/);
+  const state = col(/^ship-?to state$/);
+  const zip = col(/^ship-?to zip$/);
+  const at = (r: unknown[], i: number) => (i >= 0 ? r[i] : "");
   const out: CleanRow[] = [];
   for (const r of matrix.slice(headerAt + 1)) {
     const name = String(r[nameCol] ?? "").trim();
     const entityId = entityCol >= 0 ? String(r[entityCol] ?? "").trim() : "";
     if (!name && !entityId) continue;
-    out.push({ internalId: idCol >= 0 ? String(r[idCol] ?? "").trim() : "", entityId, name });
+    out.push({
+      internalId: idCol >= 0 ? String(r[idCol] ?? "").trim() : "",
+      entityId,
+      name,
+      address: shipToAddress({ line1: at(r, a1), line2: at(r, a2), city: at(r, city), state: at(r, state), zip: at(r, zip) }),
+      salesRep: tidy(String(at(r, repCol) ?? "")),
+    });
   }
   return out;
+}
+
+export type RosterRep = { name: string; initials?: string | null; active?: boolean };
+
+/**
+ * The clean list's Sales Rep → a rep on the KatzDesk rep list, by name or initials (a one- or two-letter slip in the
+ * name still matches: "Bill McKinsley" is Bill McKinley). No rep on the list, or a rep KatzDesk does not have: blank,
+ * with the reason as a flag. A rep is never made up.
+ */
+export function resolveSalesRep(raw: string | null | undefined, roster: RosterRep[]): { rep: string | null; flag: string | null } {
+  const name = tidy(raw);
+  if (!name) return { rep: null, flag: "No sales rep on the clean list" };
+  const key = (v: string) => v.toLowerCase().replace(/[^a-z]/g, "");
+  const active = roster.filter((r) => r.active !== false && tidy(r.name));
+  const k = key(name);
+  const hit =
+    active.find((r) => key(r.name) === k) ??
+    active.find((r) => !!r.initials && key(r.initials) === k) ??
+    active.find((r) => {
+      const a = key(r.name);
+      return a[0] === k[0] && Math.abs(a.length - k.length) <= 2 && editDistance(a, k) <= 2;
+    });
+  if (hit) return { rep: tidy(hit.name), flag: null };
+  return { rep: null, flag: `Sales rep “${name}” is not on the KatzDesk rep list` };
 }

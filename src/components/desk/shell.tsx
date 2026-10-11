@@ -200,7 +200,10 @@ function NavLinks({
           group={
             group.label === "Admin" && isAdmin && role !== "warehouse"
               ? { ...group, items: [...group.items, { to: "/access", label: "Access", icon: Users }] }
-              : group
+              : group.label === "Accounts" && !isAdmin && role !== "admin"
+                ? // Clean Names is the Admin role's review.
+                  { ...group, items: group.items.filter((item) => item.to !== "/customer-names") }
+                : group
           }
           pathname={pathname}
           onNavigate={onNavigate}

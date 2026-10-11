@@ -108,9 +108,9 @@ function Page() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
   });
   const setRole = useMutation({
-    mutationFn: (d: { userId: string; role: "sales" | "service" | "warehouse" | null }) => setAccountRole({ data: d }),
+    mutationFn: (d: { userId: string; role: "admin" | "sales" | "service" | "warehouse" | null }) => setAccountRole({ data: d }),
     onSuccess: (row) => {
-      const name = row.role === "sales" ? "Sales" : row.role === "service" ? "Service" : row.role === "warehouse" ? "Warehouse" : "";
+      const name = row.role === "admin" ? "Admin" : row.role === "sales" ? "Sales" : row.role === "service" ? "Service" : row.role === "warehouse" ? "Warehouse" : "";
       toast.success(name ? `${row.username} is ${name}` : `${row.username} has no role yet`);
       void qc.invalidateQueries({ queryKey: ["access"] });
     },
@@ -199,7 +199,7 @@ function Page() {
           Save an invite, then send them the link. Opening that link lets them in — Google, X, or a
           new password. They do not wait for a second approval.
           {canAssignRoles
-            ? " Assign Sales, Service, or Warehouse to other people. Your admin login does not need a role. Only you can set Warehouse. New invites land on Service unless you pick another role."
+            ? " Assign Admin, Sales, Service, or Warehouse to other people. Admin reviews the clean customer list (approve, skip, unlock) and sees list ID and address; more than one person can be Admin. Your own login does not need a role. Only you can set roles. New invites land on Service unless you pick another role."
             : ""}
         </p>
         <p className="mt-3 max-w-xl rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-foreground">
@@ -567,8 +567,8 @@ function RolePicker({
   onChange,
   disabled,
 }: {
-  value: "sales" | "service" | "warehouse" | null;
-  onChange: (role: "sales" | "service" | "warehouse" | null) => void;
+  value: "admin" | "sales" | "service" | "warehouse" | null;
+  onChange: (role: "admin" | "sales" | "service" | "warehouse" | null) => void;
   disabled?: boolean;
 }) {
   return (
@@ -578,12 +578,13 @@ function RolePicker({
       disabled={disabled}
       onChange={(e) => {
         const v = e.target.value;
-        onChange(v === "sales" || v === "service" || v === "warehouse" ? v : null);
+        onChange(v === "admin" || v === "sales" || v === "service" || v === "warehouse" ? v : null);
       }}
       allowEmpty
       emptyLabel="Needs role"
       aria-label="Role"
     >
+      <option value="admin">Admin</option>
       <option value="sales">Sales</option>
       <option value="service">Service</option>
       <option value="warehouse">Warehouse</option>
