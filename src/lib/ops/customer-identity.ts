@@ -79,16 +79,22 @@ export async function renameOrMergeCustomer(
   sql: Sql,
   id: number,
   nextRaw: string,
+  opts?: { force?: boolean },
 ): Promise<{ id: number; name: string; merged: boolean }> {
   const next = nextRaw.trim();
   if (!next) throw new Error("Customer name is empty");
-  const cur = await sql.query<{ id: number; name: string; archived: boolean }>(
-    `select id, name, archived from directory_customers where id = $1`,
+  const cur = await sql.query<{ id: number; name: string; archived: boolean; name_locked?: unknown }>(
+    `select * from directory_customers where id = $1`,
     [id],
   );
   const row = cur[0];
   if (!row) throw new Error("Customer not found");
   if (row.name === next) return { id: row.id, name: row.name, merged: false };
+  // A name applied from the clean customer list stays as it is until it is unlocked on the Clean Names review.
+  const locked = row.name_locked === true || row.name_locked === "t" || row.name_locked === "true";
+  if (locked && !opts?.force) {
+    throw new Error(`“${row.name}” is locked from the clean customer list. Unlock it on the Clean Names review to change it.`);
+  }
 
   const other = await sql.query<{ id: number; name: string; archived: boolean }>(
     `select id, name, archived from directory_customers where lower(name) = lower($1) and id <> $2 limit 1`,

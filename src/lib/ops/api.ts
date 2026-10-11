@@ -59,6 +59,7 @@ import {
   slotId,
 } from "./warehouse";
 import { renameOrMergeEquipment, renameOrMergeCustomer } from "./customer-identity";
+import { lockedNameFor } from "./clean-names-api";
 import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
 import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor } from "./reps";
 import { woMatchKey } from "./corrigo";
@@ -1906,6 +1907,8 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
          d.name,
          d.avi_katz,
          d.account_rep,
+         d.name_locked,
+         d.removal_flag,
          coalesce(svc.n, 0)::int as calls,
          coalesce(svc.p, 0)::int as pending_calls,
          coalesce(tlc.n, 0)::int as tlcs,
@@ -1985,7 +1988,9 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		pendingInstalls: r.pending_installs,
 		aviKatz: !!r.avi_katz,
 		accountRep: r.account_rep,
-		noRep: isNoRep(r.account_rep)
+		noRep: isNoRep(r.account_rep),
+		nameLocked: r.name_locked === true,
+		removalFlag: r.removal_flag === true
 	}));
 });
 export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data }: any): Promise<CustomerHistory | null> => {
@@ -2062,6 +2067,14 @@ export const addDirectoryEntry = createServerFn({ method: "POST" }).middleware([
 	const name = data.name.trim();
 	if (!name) throw new Error("Name is empty");
 	const table = directoryTable(data.kind);
+	if (data.kind === "customer") {
+		// A new spelling of a locked clean-list name is that account, not a new one.
+		const lockedName = await lockedNameFor(sql, name);
+		if (lockedName) {
+			const hit = (await sql.query(`select id, name from directory_customers where name = $1 limit 1`, [lockedName]))[0];
+			if (hit) return { id: hit.id, name: hit.name };
+		}
+	}
 	const existing = await sql.query(`select id, name, archived from ${table} where lower(name) = $1 limit 1`, [name.toLowerCase()]);
 	if (existing[0]) {
 		if (existing[0].archived) await sql.query(`update ${table} set archived = false, updated_at = now() where id = $1`, [existing[0].id]);

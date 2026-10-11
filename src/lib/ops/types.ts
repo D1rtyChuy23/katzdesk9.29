@@ -375,6 +375,8 @@ export type CustomerRecord = DirectoryEntry & {
   aviKatz: boolean;
   accountRep: string | null;
   noRep: boolean;
+  nameLocked?: boolean;
+  removalFlag?: boolean;
 };
 
 

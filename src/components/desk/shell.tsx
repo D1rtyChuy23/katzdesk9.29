@@ -19,6 +19,7 @@ import {
   Users,
   Warehouse,
   Wrench,
+  ListChecks,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
@@ -39,6 +40,7 @@ import { CalendarDock, PendingCalendarPop } from "./pending-calendar";
 
 type DeskTo =
   | "/"
+  | "/customer-names"
   | "/service"
   | "/planner"
   | "/tlc"
@@ -102,6 +104,7 @@ const NAV: { label: string; items: NavItem[] }[] = [
     items: [
       { to: "/customers", label: "Customers", icon: Store },
       { to: "/network", label: "Out Of Network", icon: Globe },
+      { to: "/customer-names", label: "Clean Names", icon: ListChecks },
     ],
   },
   {

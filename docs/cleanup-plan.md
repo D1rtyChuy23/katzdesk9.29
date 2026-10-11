@@ -496,3 +496,28 @@ Checked in the running app: G9-2T shows no Water and Drain; ITCB-DV keeps 3/8" c
 - When the account already has an open install, completing the deal links to that install and does not add the deal's machines to it (unchanged). Rows added to a deal after it was handed off do not reach the install. Add them on the install.
 - The New Deal window still takes one model; the rest are added as rows in the deal window that opens right after Create.
 - The window title stays "New Deal".
+
+## 20. Clean Names: Apply The Clean Customer List, Lock, Review
+
+New page: Accounts > Clean Names (/customer-names). An admin presses Read Clean List and picks the NetSuite export (the Customers sheet is read; the Duplicates and Summary sheets are ignored, so no separate duplicate cleanup runs). Migration 0053.
+
+### What it does
+
+- Name on a row: Customer Name (the Entity ID is the same on every row but one, where it is cut off). Invisible characters from the export (zero-width spaces) are dropped.
+- Exact match (same name once case, spacing and punctuation are ignored): the KatzDesk name is set to the clean-list name and locked. Most already match; the few that change are renamed in batches so a long list never times out.
+- A locked name is not changed by Corrigo import (a Corrigo spelling of a locked name is written as the locked name) or by typing over it (rename is refused; typing a new spelling in a customer field picks the locked account). Only Unlock on Clean Names opens it. New customers can still be added.
+- Similar (Needs Approval): same words with Inc / LLC / Co, the same name under a NetSuite parent ("Eversys Service:…"), extra words such as a location, words in another order, or a spelling difference. Up to three clean-list names are offered per account. Nothing changes until Approve. Approve renames and locks; the other names offered for that account are skipped.
+- When the clean-list name is already held by another KatzDesk account, the line says "Approving merges into …". Nothing merges unless approved.
+- No Match: KatzDesk accounts with nothing like them on the list. Keep locks the KatzDesk name; Mark Removal only flags it (shown on Customers as "Flagged for removal").
+- Walk-In and Cimbali: every account with Walk-In or Cimbali in its name or its match, matched or not, plus list rows with no KatzDesk account. Not locked until approved. Approving a list-only row adds the account with the clean name, locked.
+- One report, five sections: Approved And Locked, Needs Approval, No Match, Walk-In, Cimbali. Each account is in one section. Search and Waiting Only filter it.
+- Nothing is deleted. Reading a new clean list starts a new report; names locked earlier stay locked.
+
+On the test copy with the attached list (2,409 names, 2,650 KatzDesk accounts): 2,028 locked as exact (2 renamed: "waller county court house" → "Waller County Courthouse", "Scrambles Breakfast & Lunch" had a hidden character), 340 need approval, 235 no match, 67 Walk-In, 47 Cimbali. 321 of the Needs Approval lines would merge into an account already locked.
+
+### Left as is, to confirm
+
+- Confirming a removal is not built yet: flagged accounts stay until you say how removal should work (archive like Remove on Customers, or delete).
+- Punctuation-only differences ("H.E.B" vs "HEB", "Porsche St. Louis*") count as exact. Two clean-list rows with the same name go to Needs Approval to pick one.
+- Clean-list rows that match no KatzDesk account (other than Walk-In and Cimbali) are not added.
+- Approving a parent-prefixed name sets the full name as written on the list ("Eversys Service:Black Rifle Coffee").

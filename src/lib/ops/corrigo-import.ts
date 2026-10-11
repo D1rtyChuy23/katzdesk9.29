@@ -19,6 +19,7 @@ import {
   type CorrigoPreviewRow,
 } from "@/lib/ops/corrigo";
 import { reconcileServiceDuplicates, tryMergeServiceDuplicate } from "@/lib/ops/wo-duplicates";
+import { lockedNameFor } from "@/lib/ops/clean-names-api";
 
 export type CorrigoPreview = {
   updateCount: number;
@@ -352,7 +353,9 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
           board = hit.board;
         }
       }
-      const chosen = (row.customer ?? "").trim() || null;
+      // A locked clean-list name wins over the spelling in the Corrigo file.
+      const typed = (row.customer ?? "").trim() || null;
+      const chosen = typed ? (await lockedNameFor(sql, typed)) ?? typed : null;
       if (chosen) await ensureCustomer(sql, chosen);
 
       if (action === "update" && jobId) {

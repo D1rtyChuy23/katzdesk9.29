@@ -13,7 +13,7 @@ import { CustomerHistorySheet } from "@/components/desk/customer-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { AccountEquipImportButton } from "@/components/desk/account-equip-import";
 import { toast } from "sonner";
-import { ChevronRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronRight, Lock, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { RepName } from "@/components/desk/rep-select";
 import { useMyView } from "@/components/desk/my-view-bar";
@@ -186,6 +186,12 @@ function Page() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">
                   {c.name} <AkBadge on={c.aviKatz} className="ml-1 align-middle" />
+                  {c.nameLocked ? (
+                    <Lock className="ml-1.5 inline size-3.5 align-middle text-primary" aria-label="Name locked from the clean list" data-testid="name-locked" />
+                  ) : null}
+                  {c.removalFlag ? (
+                    <span className="ml-1.5 align-middle text-xs font-medium text-destructive">Flagged for removal</span>
+                  ) : null}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
                   {c.accountRep ? <RepName name={c.accountRep} /> : <NoRepFlag show />}
@@ -214,6 +220,8 @@ function Page() {
                   size="sm"
                   variant="outline"
                   aria-label={`Rename ${c.name}`}
+                  disabled={c.nameLocked}
+                  title={c.nameLocked ? "Locked from the clean list. Unlock it on Clean Names to change it." : undefined}
                   onClick={() => setRenaming({ id: c.id, name: c.name })}
                 >
                   <Pencil className="size-3.5" />
