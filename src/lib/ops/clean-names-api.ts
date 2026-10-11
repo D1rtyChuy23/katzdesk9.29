@@ -6,7 +6,7 @@ import { canReviewNames, deskMiddleware, requireNameReviewer } from "@/lib/ops/a
 import { loadReps } from "@/lib/ops/reps";
 import { renameOrMergeCustomer } from "@/lib/ops/customer-identity";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
-import { matchCleanList, resolveSalesRep, rowsFromMatrix, tidy, type CleanKind } from "@/lib/ops/clean-names";
+import { cleanNameOf, matchCleanList, resolveSalesRep, rowsFromMatrix, tidy, wordsOf, type CleanKind } from "@/lib/ops/clean-names";
 
 export type CleanStatus = "pending" | "apply" | "locked" | "kept" | "skipped" | "removal" | "unlocked";
 export type CleanSection = "locked" | "similar" | "no_match" | "walk_in" | "cimbali";
@@ -55,6 +55,8 @@ export type CleanReport = {
   needsReRead: boolean;
   /** Approved accounts on this report still missing the list's ID. */
   missingDetails: number;
+  /** The whole list is kept with this report, so any list name can be chosen. False for a list read before that. */
+  canSearchList: boolean;
 };
 
 async function ready() {
@@ -99,7 +101,7 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       "select id, filename, created_by, created_at, row_count from customer_clean_runs order by id desc limit 1",
     )
   )[0];
-  if (!run) return { run: null, items: [], pendingApply: 0, canEdit, forbidden: false, needsReRead: false, missingDetails: 0 };
+  if (!run) return { run: null, items: [], pendingApply: 0, canEdit, forbidden: false, needsReRead: false, missingDetails: 0, canSearchList: false };
   const rows = await sql.query<{
     id: number;
     kind: string;
@@ -181,6 +183,7 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       rows.some((r) => !!r.clean_name) &&
       !rows.some((r) => r.clean_name && (r.address != null || r.sales_rep != null || r.rep_name != null || r.rep_flag != null)),
     missingDetails: rows.filter((r) => r.status === "locked" && !!r.clean_name && on(r.name_locked) && !r.acct_netsuite).length,
+    canSearchList: !!(await sql.query("select 1 from customer_clean_rows where run_id = $1 limit 1", [run.id]))[0],
   };
 }
 
@@ -189,7 +192,7 @@ export const getCleanReport = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<CleanReport> => {
     const sql = await ready();
     if (!(await canReviewNames(sql, context.userId))) {
-      return { run: null, items: [], pendingApply: 0, canEdit: false, forbidden: true, needsReRead: false, missingDetails: 0 };
+      return { run: null, items: [], pendingApply: 0, canEdit: false, forbidden: true, needsReRead: false, missingDetails: 0, canSearchList: false };
     }
     return readReport(sql, true);
   });
@@ -231,6 +234,21 @@ export const startCleanList = createServerFn({ method: "POST" })
       )
     )[0]!;
     // Insert in chunks: one statement per 200 lines.
+    // Keep every list row, so any name on the list can be chosen on the review.
+    for (let i = 0; i < rows.length; i += 200) {
+      const chunk = rows.slice(i, i + 200);
+      const params: unknown[] = [];
+      const values = chunk.map((row, j) => {
+        const b = j * 7;
+        const rep = resolveSalesRep(row.salesRep, roster);
+        params.push(run.id, row.internalId || null, cleanNameOf(row), tidy(row.address) || null, tidy(row.salesRep) || null, rep.rep, rep.flag);
+        return `(${Array.from({ length: 7 }, (_, k) => `$${b + k + 1}`).join(", ")})`;
+      });
+      await sql.query(
+        `insert into customer_clean_rows (run_id, internal_id, name, address, sales_rep, rep_name, rep_flag) values ${values.join(", ")}`,
+        params,
+      );
+    }
     for (let i = 0; i < items.length; i += 200) {
       const chunk = items.slice(i, i + 200);
       const params: unknown[] = [];
@@ -361,7 +379,48 @@ async function lockAccount(sql: Sql, id: number, who: string, line?: LineDetails
 const decideInput = z.object({
   id: z.number().int().positive(),
   action: z.enum(["approve", "skip", "removal", "unlock", "lock"]),
+  /** Approve with a name you chose: a row picked from the whole clean list. */
+  rowId: z.number().int().positive().optional(),
+  /** Approve keeping the KatzDesk name as it is (locked; no list ID or address). */
+  keepName: z.boolean().optional(),
 });
+
+export type CleanListRow = {
+  id: number;
+  name: string;
+  internalId: string | null;
+  address: string | null;
+  salesRep: string | null;
+  /** Another KatzDesk account already has this name: choosing it merges into that account. */
+  heldBy: string | null;
+};
+
+/** Search the last clean list read, by any words in the name. For Choose Name on the review. */
+export const searchCleanRows = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .validator((d: { q: string }) => z.object({ q: z.string().max(120) }).parse(d))
+  .handler(async ({ data, context }): Promise<CleanListRow[]> => {
+    const sql = await ready();
+    await requireNameReviewer(sql, context.userId, "Only an Admin can search the clean list.");
+    const run = (await sql.query<{ id: number }>("select id from customer_clean_runs order by id desc limit 1"))[0];
+    const words = wordsOf(data.q).filter((w) => w.length >= 2).slice(0, 6);
+    if (!run || !words.length) return [];
+    const params: unknown[] = [run.id];
+    const conds = words.map((w) => {
+      params.push(`%${w}%`);
+      return `regexp_replace(lower(r.name), '[^a-z0-9#]+', ' ', 'g') like $${params.length}`;
+    });
+    const rows = await sql.query<{ id: number; name: string; internal_id: string | null; address: string | null; sales_rep: string | null; held: string | null }>(
+      `select r.id, r.name, r.internal_id, r.address, r.sales_rep,
+              (select d.name from directory_customers d where lower(d.name) = lower(r.name) and d.archived = false limit 1) as held
+         from customer_clean_rows r
+        where r.run_id = $1 and ${conds.join(" and ")}
+        order by length(r.name), r.name
+        limit 20`,
+      params,
+    );
+    return rows.map((r) => ({ id: r.id, name: r.name, internalId: r.internal_id, address: r.address, salesRep: r.sales_rep, heldBy: r.held }));
+  });
 
 /**
  * Approve: apply the clean-list name (similar, Walk-In, Cimbali) and lock it; on No Match, keep the account and
@@ -390,6 +449,45 @@ export const decideCleanItem = createServerFn({ method: "POST" })
       }>("select id, run_id, kind, customer_id, clean_name, netsuite_id, status, address, sales_rep, rep_name, rep_flag from customer_clean_items where id = $1", [data.id])
     )[0];
     if (!it) throw new Error("That line is no longer on the report.");
+    if (data.action === "approve" && data.rowId) {
+      // The name you chose from the clean list replaces the suggested one on this line, with that row's details.
+      const row = (
+        await sql.query<{ name: string; internal_id: string | null; address: string | null; sales_rep: string | null; rep_name: string | null; rep_flag: string | null }>(
+          "select name, internal_id, address, sales_rep, rep_name, rep_flag from customer_clean_rows where id = $1",
+          [data.rowId],
+        )
+      )[0];
+      if (!row) throw new Error("That name is no longer on the clean list. Read the list again.");
+      await sql.query(
+        `update customer_clean_items set clean_name = $2, netsuite_id = $3, address = $4, sales_rep = $5, rep_name = $6, rep_flag = $7,
+                kind = case when kind in ('no_match', 'exact') then 'similar' else kind end, reason = $8
+          where id = $1`,
+        [it.id, row.name, row.internal_id, row.address, row.sales_rep, row.rep_name, row.rep_flag, `Name chosen from the clean list by ${who}`],
+      );
+      Object.assign(it, {
+        clean_name: row.name,
+        netsuite_id: row.internal_id,
+        address: row.address,
+        sales_rep: row.sales_rep,
+        rep_name: row.rep_name,
+        rep_flag: row.rep_flag,
+        kind: it.kind === "no_match" || it.kind === "exact" ? "similar" : it.kind,
+      });
+    }
+    if (data.action === "approve" && data.keepName) {
+      if (!it.customer_id) throw new Error("There is no KatzDesk account on this line.");
+      await lockAccount(sql, it.customer_id, who, null);
+      await sql.query(
+        "update customer_clean_items set status = 'kept', note = 'Kept the KatzDesk name, now locked.', decided_by = $2, decided_at = now() where id = $1",
+        [it.id, who],
+      );
+      await sql.query(
+        `update customer_clean_items set status = 'skipped', note = 'The KatzDesk name was kept for this account.', decided_by = $3, decided_at = now()
+          where run_id = $1 and customer_id = $2 and id <> $4 and status = 'pending'`,
+        [it.run_id, it.customer_id, who, it.id],
+      );
+      return readReport(sql, true);
+    }
     // A line read before ID, address and rep were carried has none of them: lock only, never blank a rep.
     const line: LineDetails | null =
       it.clean_name && (it.address != null || it.sales_rep != null || it.rep_name != null || it.rep_flag != null) ? it : null;

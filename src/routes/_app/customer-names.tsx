@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, FileUp, Lock, LockOpen, Search } from "lucide-react";
+import { ArrowRight, FileUp, ListFilter, Lock, LockOpen, Search } from "lucide-react";
 import { toast } from "sonner";
 import {
   continueCleanList,
   decideCleanItem,
   getCleanReport,
+  searchCleanRows,
   startCleanList,
   type CleanReport,
   type CleanReportItem,
@@ -88,7 +89,8 @@ function Page() {
   }, [data?.pendingApply, data?.canEdit, step.isPending]);
 
   const decide = useMutation({
-    mutationFn: (d: { id: number; action: "approve" | "skip" | "removal" | "unlock" | "lock" }) => decideCleanItem({ data: d }),
+    mutationFn: (d: { id: number; action: "approve" | "skip" | "removal" | "unlock" | "lock"; rowId?: number; keepName?: boolean }) =>
+      decideCleanItem({ data: d }),
     onSuccess: (next, d) => {
       settle(next);
       const done = { approve: "Approved and locked", skip: "Skipped", removal: "Flagged for removal", unlock: "Unlocked", lock: "Locked" }[d.action];
@@ -226,7 +228,24 @@ function Page() {
           </div>
           <ul className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid="clean-rows">
             {paged.visible.map((it) => (
-              <ReportRow key={it.id} item={it} canEdit={!!data.canEdit} busy={decide.isPending} onAct={(action) => decide.mutate({ id: it.id, action })} />
+              <ReportRow
+                key={it.id}
+                item={it}
+                canEdit={!!data.canEdit}
+                busy={decide.isPending}
+                onAct={(action) => decide.mutate({ id: it.id, action })}
+                siblings={it.customerId ? (data.items ?? []).filter((x) => x.customerId === it.customerId && x.id !== it.id && !!x.cleanName) : []}
+                canSearchList={data.canSearchList}
+                onChoose={(c) =>
+                  decide.mutate(
+                    c.kind === "item"
+                      ? { id: c.itemId, action: "approve" }
+                      : c.kind === "keep"
+                        ? { id: it.id, action: "approve", keepName: true }
+                        : { id: it.id, action: "approve", rowId: c.rowId },
+                  )
+                }
+              />
             ))}
             {!rows.length ? <li className="px-4 py-6 text-sm text-muted-foreground">Nothing in this section.</li> : null}
             <ShowMoreButton remaining={paged.remaining} onClick={paged.showMore} label="names" as="li" />
@@ -237,17 +256,26 @@ function Page() {
   );
 }
 
+type Choice = { kind: "item"; itemId: number } | { kind: "keep" } | { kind: "row"; rowId: number };
+
 function ReportRow({
   item: it,
   canEdit,
   busy,
   onAct,
+  siblings,
+  canSearchList,
+  onChoose,
 }: {
   item: CleanReportItem;
   canEdit: boolean;
   busy: boolean;
   onAct: (a: "approve" | "skip" | "removal" | "unlock" | "lock") => void;
+  siblings: CleanReportItem[];
+  canSearchList: boolean;
+  onChoose: (c: Choice) => void;
 }) {
+  const [choosing, setChoosing] = useState(false);
   const st = STATUS[it.status] ?? STATUS.pending!;
   const open = it.status === "pending" || it.status === "skipped" || it.status === "removal";
   const done = it.status === "locked" || it.status === "kept";
@@ -319,8 +347,135 @@ function ReportRow({
               Lock Again
             </Button>
           ) : null}
+          <Button
+            type="button"
+            size="sm"
+            variant={choosing ? "secondary" : "outline"}
+            aria-expanded={choosing}
+            onClick={() => setChoosing(!choosing)}
+            data-testid="clean-choose"
+          >
+            <ListFilter className="size-3.5" />
+            Choose Name
+          </Button>
         </div>
       ) : null}
+      {canEdit && choosing ? (
+        <ChooseName
+          item={it}
+          siblings={siblings}
+          canSearchList={canSearchList}
+          busy={busy}
+          onCancel={() => setChoosing(false)}
+          onChoose={(c) => {
+            onChoose(c);
+            setChoosing(false);
+          }}
+        />
+      ) : null}
     </li>
+  );
+}
+
+/**
+ * Pick the name for this account: one of the suggested clean-list names, the KatzDesk name as it is, or any name
+ * on the clean list (searched). The chosen list row brings its own ID, address and sales rep. Locks on use.
+ */
+function ChooseName({
+  item: it,
+  siblings,
+  canSearchList,
+  busy,
+  onCancel,
+  onChoose,
+}: {
+  item: CleanReportItem;
+  siblings: CleanReportItem[];
+  canSearchList: boolean;
+  busy: boolean;
+  onCancel: () => void;
+  onChoose: (c: Choice) => void;
+}) {
+  const suggested = [it, ...siblings].filter(
+    (x, i, all) => !!x.cleanName && all.findIndex((y) => y.cleanName === x.cleanName) === i,
+  );
+  const [pick, setPick] = useState<string>(suggested[0] ? `item:${suggested[0].id}` : it.customerId ? "keep" : "");
+  const [q, setQ] = useState("");
+  const [term, setTerm] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setTerm(q.trim()), 250);
+    return () => clearTimeout(t);
+  }, [q]);
+  const found = useQuery({
+    queryKey: ["clean-rows", term],
+    queryFn: () => searchCleanRows({ data: { q: term } }),
+    enabled: canSearchList && term.length >= 2,
+  });
+  const choice = (): Choice | null => {
+    if (pick === "keep") return { kind: "keep" };
+    const [k, v] = pick.split(":");
+    if (k === "item") return { kind: "item", itemId: Number(v) };
+    if (k === "row") return { kind: "row", rowId: Number(v) };
+    return null;
+  };
+  const Option = ({ value, children }: { value: string; children: React.ReactNode }) => (
+    <label className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/60">
+      <input type="radio" name={`choose-${it.id}`} className="mt-1 size-4 accent-primary" checked={pick === value} onChange={() => setPick(value)} />
+      <span className="min-w-0 text-sm">{children}</span>
+    </label>
+  );
+  return (
+    <div className="rounded-xl border border-border bg-background p-3 sm:col-span-2" data-testid="choose-name">
+      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Choose the name for {it.katzName ?? "this account"}</p>
+      <div className="mt-2 grid gap-0.5">
+        {suggested.map((x) => (
+          <Option key={`s${x.id}`} value={`item:${x.id}`}>
+            <span className="font-medium text-primary">{x.cleanName}</span>
+            <span className="block text-xs text-muted-foreground">
+              Suggested · {x.reason}
+              {x.mergesInto ? <span className="font-medium text-warning"> · merges into “{x.mergesInto}”</span> : null}
+            </span>
+          </Option>
+        ))}
+        {it.customerId && it.katzName ? (
+          <Option value="keep">
+            <span className="font-medium">{it.katzName}</span>
+            <span className="block text-xs text-muted-foreground">Keep the KatzDesk name as it is · locked, no list ID or address</span>
+          </Option>
+        ) : null}
+      </div>
+      <div className="mt-2 border-t border-border pt-2">
+        {canSearchList ? (
+          <>
+            <div className="relative">
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the whole clean list…" className="pl-9" aria-label="Search the clean list" data-testid="choose-search" />
+            </div>
+            <div className="mt-1 grid max-h-64 gap-0.5 overflow-y-auto" data-testid="choose-results">
+              {term.length >= 2 && found.data?.length === 0 ? <p className="px-2 py-1.5 text-xs text-muted-foreground">No name on the clean list matches.</p> : null}
+              {(found.data ?? []).map((r) => (
+                <Option key={`r${r.id}`} value={`row:${r.id}`}>
+                  <span className="font-medium">{r.name}</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {[r.internalId ? `ID ${r.internalId}` : null, r.address, r.salesRep ? `Rep ${r.salesRep}` : null].filter(Boolean).join(" · ")}
+                    {r.heldBy && r.heldBy !== it.katzName ? <span className="font-medium text-warning"> · merges into “{r.heldBy}”</span> : null}
+                  </span>
+                </Option>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="text-xs text-warning">To pick any name on the clean list, read the clean list again first.</p>
+        )}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button type="button" size="sm" disabled={busy || !choice()} onClick={() => { const c = choice(); if (c) onChoose(c); }} data-testid="choose-use">
+          Use This Name And Lock
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </div>
   );
 }

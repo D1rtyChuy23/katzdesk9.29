@@ -552,3 +552,14 @@ On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with 
 - Cause: ID, address and rep come from the list file and are written when the list is read. A list read before section 21 has none of them, so accounts approved from it stay blank until the list is read again.
 - Clean Names now says so at the top ("ID, address and rep are not on the approved accounts yet", or how many approved accounts are missing them) with a Read Clean List Again button. The account window says "ID and address are not filled yet" instead of a blank.
 - Reading the list again fills every approved account, keeps every lock and decision, and unlocks nothing (checked on the test copy: 2,030 accounts filled, 0 unlocked).
+
+## 22. Clean Names: Choose The Name
+
+- Every line on the report (any section, approved or not) has Choose Name. It opens a short list:
+  - the suggested clean-list names for that account (all of them, when more than one was found),
+  - Keep the KatzDesk name as it is (locked; no list ID or address),
+  - a search of the whole clean list, showing each name's ID, address and sales rep.
+- Use This Name And Lock applies the name you picked, locks it, and writes that list row's ID, address and rep onto the account. Other names offered for the same account are marked skipped.
+- If another KatzDesk account already has the chosen name, the option says "merges into …" and choosing it merges, as with Approve.
+- A No Match account can be given any name from the list this way; it then shows under Approved And Locked.
+- Searching the whole list needs the list read once after this update (migration 0055 keeps the list's rows with the report). Until then the panel says so and the suggested names and Keep still work.
