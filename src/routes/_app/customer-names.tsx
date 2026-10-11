@@ -184,6 +184,25 @@ function Page() {
             {data.pendingApply ? ` · applying exact matches, ${data.pendingApply} left` : ""}
             {!data.canEdit ? " · only an admin can approve" : ""}
           </p>
+          {data.needsReRead || data.missingDetails > 0 ? (
+            <div className="mt-3 flex flex-col gap-2 rounded-xl border border-warning/50 bg-warning/10 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between" data-testid="clean-reread">
+              <p>
+                <span className="font-medium">
+                  {data.needsReRead
+                    ? "ID, address and rep are not on the approved accounts yet."
+                    : `${data.missingDetails} approved account${data.missingDetails === 1 ? " is" : "s are"} missing the list's ID and address.`}
+                </span>{" "}
+                They come from the clean list file. Read the clean list again to fill them. Locked names stay locked and
+                your approvals, skips and removal flags are kept.
+              </p>
+              {data.canEdit ? (
+                <Button type="button" size="sm" onClick={() => fileRef.current?.click()} disabled={start.isPending}>
+                  <FileUp className="size-4" />
+                  Read Clean List Again
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
           <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Report sections" data-testid="clean-sections">
             {SECTIONS.map((s) => (
               <FilterChip key={s.id} selected={section === s.id} onClick={() => setSection(s.id)} data-testid={`clean-section-${s.id}`}>

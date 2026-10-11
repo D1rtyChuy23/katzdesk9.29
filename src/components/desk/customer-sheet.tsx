@@ -760,10 +760,18 @@ function CleanListBlock({ name, cleanList }: { name: string; cleanList: { netsui
       </dd>
       {cleanList ? (
         <>
-          <dt className="text-xs text-muted-foreground">ID</dt>
-          <dd className="font-medium tabular" data-testid="clean-account-id">{cleanList.netsuiteId ?? "—"}</dd>
-          <dt className="text-xs text-muted-foreground">Address</dt>
-          <dd data-testid="clean-account-address">{cleanList.address || <span className="text-warning">No address on the clean list</span>}</dd>
+          {cleanList.netsuiteId ? (
+            <>
+              <dt className="text-xs text-muted-foreground">ID</dt>
+              <dd className="font-medium tabular" data-testid="clean-account-id">{cleanList.netsuiteId}</dd>
+              <dt className="text-xs text-muted-foreground">Address</dt>
+              <dd data-testid="clean-account-address">{cleanList.address || <span className="text-warning">No address on the clean list</span>}</dd>
+            </>
+          ) : (
+            <dd className="text-xs text-warning sm:col-span-2" data-testid="clean-account-missing">
+              ID and address are not filled yet. Read the clean list again on Clean Names to fill them.
+            </dd>
+          )}
         </>
       ) : null}
     </dl>

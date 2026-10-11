@@ -546,3 +546,9 @@ On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with 
 - Karla Zapata, Avi Katz, Rachael Gaytan and Wil Benitez are not on the KatzDesk rep list, so their accounts have a blank, flagged rep. Add them as reps (or tell me to map "Avi Katz" to the AK mark) and read the list again to fill them.
 - The list's rep replaces the KatzDesk rep on approved accounts, including blanking it when the list has none.
 - An Admin can open Clean Names but cannot approve desk logins or rename unlocked customers; those stay with the desk owner.
+
+### Follow-up: ID and address missing on the live site
+
+- Cause: ID, address and rep come from the list file and are written when the list is read. A list read before section 21 has none of them, so accounts approved from it stay blank until the list is read again.
+- Clean Names now says so at the top ("ID, address and rep are not on the approved accounts yet", or how many approved accounts are missing them) with a Read Clean List Again button. The account window says "ID and address are not filled yet" instead of a blank.
+- Reading the list again fills every approved account, keeps every lock and decision, and unlocks nothing (checked on the test copy: 2,030 accounts filled, 0 unlocked).

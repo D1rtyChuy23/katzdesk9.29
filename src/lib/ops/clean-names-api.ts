@@ -48,6 +48,13 @@ export type CleanReport = {
   canEdit: boolean;
   /** Not an Admin: the review is not shown. */
   forbidden: boolean;
+  /**
+   * The report was read before ID, address and rep were carried, so approved accounts have none yet. Reading the
+   * clean list again fills them (and keeps every lock and decision).
+   */
+  needsReRead: boolean;
+  /** Approved accounts on this report still missing the list's ID. */
+  missingDetails: number;
 };
 
 async function ready() {
@@ -92,7 +99,7 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       "select id, filename, created_by, created_at, row_count from customer_clean_runs order by id desc limit 1",
     )
   )[0];
-  if (!run) return { run: null, items: [], pendingApply: 0, canEdit, forbidden: false };
+  if (!run) return { run: null, items: [], pendingApply: 0, canEdit, forbidden: false, needsReRead: false, missingDetails: 0 };
   const rows = await sql.query<{
     id: number;
     kind: string;
@@ -105,6 +112,9 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
     note: string | null;
     decided_by: string | null;
     sales_rep: string | null;
+    address: string | null;
+    rep_name: string | null;
+    rep_flag: string | null;
     cur_name: string | null;
     name_locked: unknown;
     removal_flag: unknown;
@@ -167,6 +177,10 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
     pendingApply: rows.filter((r) => r.status === "apply").length,
     canEdit,
     forbidden: false,
+    needsReRead:
+      rows.some((r) => !!r.clean_name) &&
+      !rows.some((r) => r.clean_name && (r.address != null || r.sales_rep != null || r.rep_name != null || r.rep_flag != null)),
+    missingDetails: rows.filter((r) => r.status === "locked" && !!r.clean_name && on(r.name_locked) && !r.acct_netsuite).length,
   };
 }
 
@@ -175,7 +189,7 @@ export const getCleanReport = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<CleanReport> => {
     const sql = await ready();
     if (!(await canReviewNames(sql, context.userId))) {
-      return { run: null, items: [], pendingApply: 0, canEdit: false, forbidden: true };
+      return { run: null, items: [], pendingApply: 0, canEdit: false, forbidden: true, needsReRead: false, missingDetails: 0 };
     }
     return readReport(sql, true);
   });
