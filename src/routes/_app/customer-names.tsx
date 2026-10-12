@@ -7,12 +7,16 @@ import {
   continueCleanList,
   decideCleanItem,
   getCleanReport,
-  searchCleanRows,
+  historyForNames,
   startCleanList,
   type CleanReport,
   type CleanReportItem,
   type CleanSection,
+  type NameHistory,
 } from "@/lib/ops/clean-names-api";
+import { listCustomerRecords } from "@/lib/ops/api";
+import { wordsOf } from "@/lib/ops/clean-names";
+import type { CustomerRecord } from "@/lib/ops/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +25,9 @@ import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { formatPingTime } from "@/lib/ops/clock";
 
 export const Route = createFileRoute("/_app/customer-names")({ component: Page });
+
+/** Shown on the page so it is clear whether the live site has the latest Clean Names. */
+const CLEAN_NAMES_VERSION = "Oct 12 · Choose Name from all customers + history";
 
 const SECTIONS: { id: CleanSection; label: string; hint: string }[] = [
   { id: "locked", label: "Approved And Locked", hint: "Exact matches applied from the clean list, and names you approved. Locked: Corrigo import and typing over the name do not change them. Unlock here to change one." },
@@ -89,7 +96,7 @@ function Page() {
   }, [data?.pendingApply, data?.canEdit, step.isPending]);
 
   const decide = useMutation({
-    mutationFn: (d: { id: number; action: "approve" | "skip" | "removal" | "unlock" | "lock"; rowId?: number; keepName?: boolean }) =>
+    mutationFn: (d: { id: number; action: "approve" | "skip" | "removal" | "unlock" | "lock"; rowId?: number; keepName?: boolean; accountId?: number }) =>
       decideCleanItem({ data: d }),
     onSuccess: (next, d) => {
       settle(next);
@@ -126,6 +133,19 @@ function Page() {
     [data, section, needle, waitingOnly],
   );
   const paged = useShowMore(rows, `${section}|${needle}|${waitingOnly}`);
+  // History under each unlocked row, for the rows on screen.
+  const historyNames = useMemo(
+    () => [...new Set(paged.visible.filter((it) => !isLocked(it)).map(nameInQuestion).filter((n): n is string => !!n))].sort(),
+    [paged.visible],
+  );
+  const history = useQuery({
+    queryKey: ["clean-history", historyNames],
+    queryFn: () => historyForNames({ data: { names: historyNames } }),
+    enabled: !!data?.canEdit && historyNames.length > 0,
+    staleTime: 30_000,
+  });
+  // The full KatzDesk customer list for Choose Name.
+  const accounts = useQuery({ queryKey: ["customers", "records"], queryFn: () => listCustomerRecords(), enabled: !!data?.canEdit });
   const current = SECTIONS.find((s) => s.id === section)!;
 
   return (
@@ -167,6 +187,9 @@ function Page() {
         </div>
       </header>
 
+      <p className="mt-2 text-[11px] text-muted-foreground" data-testid="clean-version">
+        Page version {CLEAN_NAMES_VERSION}. If this is older, the live site has not been updated yet.
+      </p>
       {report.isLoading ? <p className="mt-6 text-sm text-muted-foreground">Loading the report…</p> : null}
       {data?.forbidden ? (
         <p className="mt-6 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="clean-forbidden">
@@ -234,17 +257,11 @@ function Page() {
                 canEdit={!!data.canEdit}
                 busy={decide.isPending}
                 onAct={(action) => decide.mutate({ id: it.id, action })}
-                siblings={it.customerId ? (data.items ?? []).filter((x) => x.customerId === it.customerId && x.id !== it.id && !!x.cleanName) : []}
-                canSearchList={data.canSearchList}
-                onChoose={(c) =>
-                  decide.mutate(
-                    c.kind === "item"
-                      ? { id: c.itemId, action: "approve" }
-                      : c.kind === "keep"
-                        ? { id: it.id, action: "approve", keepName: true }
-                        : { id: it.id, action: "approve", rowId: c.rowId },
-                  )
-                }
+                accounts={accounts.data ?? []}
+                accountsLoading={accounts.isLoading}
+                history={history.data?.[(nameInQuestion(it) ?? "").toLowerCase()] ?? null}
+                historyLoading={history.isLoading}
+                onChoose={(accountId) => decide.mutate({ id: it.id, action: "approve", accountId })}
               />
             ))}
             {!rows.length ? <li className="px-4 py-6 text-sm text-muted-foreground">Nothing in this section.</li> : null}
@@ -256,32 +273,39 @@ function Page() {
   );
 }
 
-type Choice = { kind: "item"; itemId: number } | { kind: "keep" } | { kind: "row"; rowId: number };
+const isLocked = (it: CleanReportItem) => it.status === "locked" || it.status === "kept" || it.status === "apply";
+/** The name the row is about: the KatzDesk account on it, else the clean-list name. */
+const nameInQuestion = (it: CleanReportItem) => it.currentName ?? it.katzName ?? it.cleanName;
 
 function ReportRow({
   item: it,
   canEdit,
   busy,
   onAct,
-  siblings,
-  canSearchList,
+  accounts,
+  accountsLoading,
+  history,
+  historyLoading,
   onChoose,
 }: {
   item: CleanReportItem;
   canEdit: boolean;
   busy: boolean;
   onAct: (a: "approve" | "skip" | "removal" | "unlock" | "lock") => void;
-  siblings: CleanReportItem[];
-  canSearchList: boolean;
-  onChoose: (c: Choice) => void;
+  accounts: CustomerRecord[];
+  accountsLoading: boolean;
+  history: NameHistory | null;
+  historyLoading: boolean;
+  onChoose: (accountId: number) => void;
 }) {
   const [choosing, setChoosing] = useState(false);
   const st = STATUS[it.status] ?? STATUS.pending!;
   const open = it.status === "pending" || it.status === "skipped" || it.status === "removal";
   const done = it.status === "locked" || it.status === "kept";
+  const unlocked = !isLocked(it);
   const approveLabel = it.kind === "no_match" ? "Keep" : !it.customerId ? "Add And Lock" : it.cleanName ? "Approve" : "Lock Name";
   return (
-    <li className="grid gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center md:px-4" data-testid="clean-row" data-status={it.status}>
+    <li className="grid gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start md:px-4" data-testid="clean-row" data-status={it.status}>
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <span className="min-w-0 font-medium" data-testid="clean-katz">
@@ -315,12 +339,26 @@ function ReportRow({
           {it.mergesInto ? <span className="font-medium text-warning"> · Approving merges into “{it.mergesInto}”</span> : null}
           {it.decidedBy && it.status !== "pending" ? ` · ${it.decidedBy}` : ""}
         </p>
+        {canEdit && unlocked ? <HistoryBlock name={nameInQuestion(it)} history={history} loading={historyLoading} /> : null}
       </div>
       {canEdit ? (
         <div className="flex flex-wrap gap-1.5 sm:justify-end">
+          {unlocked ? (
+            <Button
+              type="button"
+              size="sm"
+              variant={choosing ? "secondary" : "default"}
+              aria-expanded={choosing}
+              onClick={() => setChoosing(!choosing)}
+              data-testid="clean-choose"
+            >
+              <ListFilter className="size-3.5" />
+              Choose Name
+            </Button>
+          ) : null}
           {open ? (
             <>
-              <Button type="button" size="sm" disabled={busy} onClick={() => onAct("approve")} data-testid="clean-approve">
+              <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onAct("approve")} data-testid="clean-approve">
                 {approveLabel}
               </Button>
               {it.status !== "skipped" ? (
@@ -347,28 +385,17 @@ function ReportRow({
               Lock Again
             </Button>
           ) : null}
-          <Button
-            type="button"
-            size="sm"
-            variant={choosing ? "secondary" : "outline"}
-            aria-expanded={choosing}
-            onClick={() => setChoosing(!choosing)}
-            data-testid="clean-choose"
-          >
-            <ListFilter className="size-3.5" />
-            Choose Name
-          </Button>
         </div>
       ) : null}
-      {canEdit && choosing ? (
+      {canEdit && unlocked && choosing ? (
         <ChooseName
           item={it}
-          siblings={siblings}
-          canSearchList={canSearchList}
+          accounts={accounts}
+          loading={accountsLoading}
           busy={busy}
           onCancel={() => setChoosing(false)}
-          onChoose={(c) => {
-            onChoose(c);
+          onChoose={(id) => {
+            onChoose(id);
             setChoosing(false);
           }}
         />
@@ -377,100 +404,133 @@ function ReportRow({
   );
 }
 
+/** Work already tied to the name on this row: tickets, PMs, installs. Never blank. */
+function HistoryBlock({ name, history, loading }: { name: string | null; history: NameHistory | null; loading: boolean }) {
+  return (
+    <div className="mt-2 rounded-lg border border-border bg-background/60 px-3 py-2" data-testid="clean-history">
+      <p className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
+        History on “{name ?? "this name"}”{history?.total ? ` · ${history.total}` : ""}
+      </p>
+      {loading && !history ? (
+        <p className="mt-1 text-xs text-muted-foreground">Loading history…</p>
+      ) : !history || history.total === 0 ? (
+        <p className="mt-1 text-xs text-muted-foreground" data-testid="clean-history-empty">No history on this name.</p>
+      ) : (
+        <ul className="mt-1 divide-y divide-border/60" data-testid="clean-history-items">
+          {history.items.map((h, i) => (
+            <li key={i} className="grid gap-x-3 py-1 text-xs sm:grid-cols-[3.5rem_minmax(0,13rem)_5.5rem_minmax(0,7rem)_minmax(0,1fr)]">
+              <span className="font-medium">{h.type}</span>
+              <span className="truncate tabular" title={[h.wo ? `WO ${h.wo}` : null, h.ref].filter(Boolean).join(" · ")}>
+                {[h.wo ? `WO ${h.wo}` : null, h.ref].filter(Boolean).join(" · ") || "No WO / ST #"}
+              </span>
+              <span className="tabular text-muted-foreground">{h.date ?? "No date"}</span>
+              <span className="truncate">{h.status ?? "—"}</span>
+              <span className="truncate text-muted-foreground" title={h.notes ?? ""}>{h.notes || "No notes"}</span>
+            </li>
+          ))}
+          {history.total > history.items.length ? (
+            <li className="py-1 text-xs text-muted-foreground">{history.total - history.items.length} older on this account</li>
+          ) : null}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function score(target: string[], name: string): number {
+  const w = new Set(wordsOf(name));
+  return target.filter((t) => t.length >= 3 && w.has(t)).length;
+}
+
 /**
- * Pick the name for this account: one of the suggested clean-list names, the KatzDesk name as it is, or any name
- * on the clean list (searched). The chosen list row brings its own ID, address and sales rep. Locks on use.
+ * The full KatzDesk customer list, searchable. Names like this row's are pinned at the top, then every account
+ * A–Z. Picking one ties this row to that account: it takes the clean-list name on Use; on a row with no list
+ * name, this account becomes the one picked (merged into it).
  */
 function ChooseName({
   item: it,
-  siblings,
-  canSearchList,
+  accounts,
+  loading,
   busy,
   onCancel,
   onChoose,
 }: {
   item: CleanReportItem;
-  siblings: CleanReportItem[];
-  canSearchList: boolean;
+  accounts: CustomerRecord[];
+  loading: boolean;
   busy: boolean;
   onCancel: () => void;
-  onChoose: (c: Choice) => void;
+  onChoose: (accountId: number) => void;
 }) {
-  const suggested = [it, ...siblings].filter(
-    (x, i, all) => !!x.cleanName && all.findIndex((y) => y.cleanName === x.cleanName) === i,
-  );
-  const [pick, setPick] = useState<string>(suggested[0] ? `item:${suggested[0].id}` : it.customerId ? "keep" : "");
   const [q, setQ] = useState("");
-  const [term, setTerm] = useState("");
-  useEffect(() => {
-    const t = setTimeout(() => setTerm(q.trim()), 250);
-    return () => clearTimeout(t);
-  }, [q]);
-  const found = useQuery({
-    queryKey: ["clean-rows", term],
-    queryFn: () => searchCleanRows({ data: { q: term } }),
-    enabled: canSearchList && term.length >= 2,
-  });
-  const choice = (): Choice | null => {
-    if (pick === "keep") return { kind: "keep" };
-    const [k, v] = pick.split(":");
-    if (k === "item") return { kind: "item", itemId: Number(v) };
-    if (k === "row") return { kind: "row", rowId: Number(v) };
-    return null;
-  };
-  const Option = ({ value, children }: { value: string; children: React.ReactNode }) => (
-    <label className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/60">
-      <input type="radio" name={`choose-${it.id}`} className="mt-1 size-4 accent-primary" checked={pick === value} onChange={() => setPick(value)} />
-      <span className="min-w-0 text-sm">{children}</span>
+  const [pick, setPick] = useState<number | null>(it.customerId);
+  const target = useMemo(() => [...new Set([...wordsOf(it.cleanName ?? ""), ...wordsOf(it.katzName ?? "")])], [it.cleanName, it.katzName]);
+  const needle = q.trim().toLowerCase();
+  const { pinned, rest } = useMemo(() => {
+    const list = needle ? accounts.filter((a) => a.name.toLowerCase().includes(needle)) : accounts;
+    const scored = list.map((a) => ({ a, s: score(target, a.name) }));
+    const pinned = scored
+      .filter((x) => x.s > 0)
+      .sort((x, y) => y.s - x.s || x.a.name.localeCompare(y.a.name))
+      .slice(0, 8)
+      .map((x) => x.a);
+    const pinnedIds = new Set(pinned.map((a) => a.id));
+    const rest = list.filter((a) => !pinnedIds.has(a.id)).sort((x, y) => x.name.localeCompare(y.name, undefined, { sensitivity: "base" }));
+    return { pinned, rest };
+  }, [accounts, needle, target]);
+  const chosen = accounts.find((a) => a.id === pick) ?? null;
+  const Row = ({ a }: { a: CustomerRecord }) => (
+    <label
+      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/60"
+      data-testid="choose-account"
+    >
+      <input type="radio" name={`choose-${it.id}`} className="size-4 shrink-0 accent-primary" checked={pick === a.id} onChange={() => setPick(a.id)} />
+      <span className="min-w-0 flex-1 truncate text-sm">{a.name}</span>
+      {a.nameLocked ? <Lock className="size-3.5 shrink-0 text-primary" aria-label="Locked" /> : null}
+      {a.id === it.customerId ? <span className="shrink-0 text-[11px] text-muted-foreground">on this row now</span> : null}
+      <span className="shrink-0 text-[11px] text-muted-foreground tabular">
+        {a.calls + a.tlcs + a.pms + a.installs} records
+      </span>
     </label>
   );
   return (
     <div className="rounded-xl border border-border bg-background p-3 sm:col-span-2" data-testid="choose-name">
-      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Choose the name for {it.katzName ?? "this account"}</p>
-      <div className="mt-2 grid gap-0.5">
-        {suggested.map((x) => (
-          <Option key={`s${x.id}`} value={`item:${x.id}`}>
-            <span className="font-medium text-primary">{x.cleanName}</span>
-            <span className="block text-xs text-muted-foreground">
-              Suggested · {x.reason}
-              {x.mergesInto ? <span className="font-medium text-warning"> · merges into “{x.mergesInto}”</span> : null}
-            </span>
-          </Option>
-        ))}
-        {it.customerId && it.katzName ? (
-          <Option value="keep">
-            <span className="font-medium">{it.katzName}</span>
-            <span className="block text-xs text-muted-foreground">Keep the KatzDesk name as it is · locked, no list ID or address</span>
-          </Option>
-        ) : null}
+      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        Choose the KatzDesk account for {it.cleanName ? `“${it.cleanName}”` : `“${it.katzName ?? "this row"}”`}
+      </p>
+      <div className="relative mt-2">
+        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search every KatzDesk customer…" className="pl-9" aria-label="Search KatzDesk customers" data-testid="choose-search" autoFocus />
       </div>
-      <div className="mt-2 border-t border-border pt-2">
-        {canSearchList ? (
+      <div className="mt-2 max-h-80 overflow-y-auto rounded-lg border border-border" data-testid="choose-list">
+        {loading ? <p className="px-3 py-2 text-xs text-muted-foreground">Loading every KatzDesk customer…</p> : null}
+        {pinned.length ? (
           <>
-            <div className="relative">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the whole clean list…" className="pl-9" aria-label="Search the clean list" data-testid="choose-search" />
-            </div>
-            <div className="mt-1 grid max-h-64 gap-0.5 overflow-y-auto" data-testid="choose-results">
-              {term.length >= 2 && found.data?.length === 0 ? <p className="px-2 py-1.5 text-xs text-muted-foreground">No name on the clean list matches.</p> : null}
-              {(found.data ?? []).map((r) => (
-                <Option key={`r${r.id}`} value={`row:${r.id}`}>
-                  <span className="font-medium">{r.name}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {[r.internalId ? `ID ${r.internalId}` : null, r.address, r.salesRep ? `Rep ${r.salesRep}` : null].filter(Boolean).join(" · ")}
-                    {r.heldBy && r.heldBy !== it.katzName ? <span className="font-medium text-warning"> · merges into “{r.heldBy}”</span> : null}
-                  </span>
-                </Option>
-              ))}
-            </div>
+            <p className="sticky top-0 z-10 bg-card px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Similar names</p>
+            {pinned.map((a) => <Row key={`p${a.id}`} a={a} />)}
           </>
-        ) : (
-          <p className="text-xs text-warning">To pick any name on the clean list, read the clean list again first.</p>
-        )}
+        ) : null}
+        <p className="sticky top-0 z-10 bg-card px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase" data-testid="choose-all-label">
+          All KatzDesk customers · {rest.length + pinned.length}
+        </p>
+        {rest.map((a) => <Row key={a.id} a={a} />)}
+        {!loading && !rest.length && !pinned.length ? <p className="px-3 py-2 text-xs text-muted-foreground">No KatzDesk customer matches.</p> : null}
       </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button type="button" size="sm" disabled={busy || !choice()} onClick={() => { const c = choice(); if (c) onChoose(c); }} data-testid="choose-use">
-          Use This Name And Lock
+      <p className="mt-2 text-xs text-muted-foreground" data-testid="choose-effect">
+        {!chosen
+          ? "Pick an account."
+          : it.cleanName
+            ? `“${chosen.name}” takes the clean-list name “${it.cleanName}” and is locked, with the list's ID and address.`
+            : chosen.id === it.customerId
+              ? `Keeps “${chosen.name}” and locks it.`
+              : `“${it.katzName}” becomes “${chosen.name}” (merged into it) and is locked.`}
+        {chosen?.nameLocked && it.cleanName && chosen.name !== it.cleanName ? (
+          <span className="font-medium text-warning"> That account is locked; unlock it on its own row first.</span>
+        ) : null}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button type="button" size="sm" disabled={busy || !chosen} onClick={() => chosen && onChoose(chosen.id)} data-testid="choose-use">
+          Use This Account
         </Button>
         <Button type="button" size="sm" variant="outline" onClick={onCancel}>
           Cancel

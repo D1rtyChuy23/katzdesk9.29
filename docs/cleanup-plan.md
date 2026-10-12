@@ -563,3 +563,14 @@ On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with 
 - If another KatzDesk account already has the chosen name, the option says "merges into …" and choosing it merges, as with Approve.
 - A No Match account can be given any name from the list this way; it then shows under Approved And Locked.
 - Searching the whole list needs the list read once after this update (migration 0055 keeps the list's rows with the report). Until then the panel says so and the suggested names and Keep still work.
+
+## 23. Clean Names: Choose Name From Every Customer, And History On Each Row
+
+- Every row that is not locked shows Choose Name (a filled button) next to Approve. It opens the full KatzDesk customer list (every account, searchable), with similar names pinned at the top and then all accounts A–Z, each with its record count and a lock mark if locked.
+- Use This Account ties the row to the account you picked:
+  - a row with a clean-list name: that account takes the clean-list name, is locked, and gets the list's ID, address and rep. If the row had another account on it, that account stays on the report as its own line (No Match, Walk-In or Cimbali), so nothing drops off. A locked account cannot take another name until it is unlocked on its own row.
+  - a row with no clean-list name (No Match, Walk-In with no match): the row's account becomes the one picked (merged into it) and is locked. Picking the same account keeps and locks its name.
+- History shows under the name on every unlocked row: service and TLC tickets, PMs and installs on that name, newest first (type, WO / ST #, date, status, notes; up to 6, with a count of older ones). "No history on this name" when there is none.
+- Locked rows have no Choose Name and no history. Walk-In and Cimbali lines are never removed by choosing.
+- The page shows its version at the top ("Oct 12 · Choose Name from all customers + history"). If the live page shows anything older, or no version line, the live site has not been updated yet.
+- The clean-list search from section 22 is replaced by the full KatzDesk list on the row; the list's own names still come in as each row's suggested name.

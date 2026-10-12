@@ -6,7 +6,7 @@ import { canReviewNames, deskMiddleware, requireNameReviewer } from "@/lib/ops/a
 import { loadReps } from "@/lib/ops/reps";
 import { renameOrMergeCustomer } from "@/lib/ops/customer-identity";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
-import { cleanNameOf, matchCleanList, resolveSalesRep, rowsFromMatrix, tidy, wordsOf, type CleanKind } from "@/lib/ops/clean-names";
+import { cleanNameOf, isCimbaliName, isWalkInName, matchCleanList, resolveSalesRep, rowsFromMatrix, tidy, wordsOf, type CleanKind } from "@/lib/ops/clean-names";
 
 export type CleanStatus = "pending" | "apply" | "locked" | "kept" | "skipped" | "removal" | "unlocked";
 export type CleanSection = "locked" | "similar" | "no_match" | "walk_in" | "cimbali";
@@ -381,9 +381,61 @@ const decideInput = z.object({
   action: z.enum(["approve", "skip", "removal", "unlock", "lock"]),
   /** Approve with a name you chose: a row picked from the whole clean list. */
   rowId: z.number().int().positive().optional(),
+  /** Approve tied to a KatzDesk account picked from the full customer list. */
+  accountId: z.number().int().positive().optional(),
   /** Approve keeping the KatzDesk name as it is (locked; no list ID or address). */
   keepName: z.boolean().optional(),
 });
+
+export type NameHistoryItem = {
+  type: "Service" | "TLC" | "PM" | "Install";
+  /** Call ID (SC-…) for tickets. */
+  ref: string | null;
+  wo: string | null;
+  date: string | null;
+  status: string | null;
+  notes: string | null;
+};
+export type NameHistory = { total: number; items: NameHistoryItem[] };
+
+const dayOf = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : v ? String(v).slice(0, 10) : null);
+
+/**
+ * Work already on these names: service and TLC tickets, PMs and installs, newest first (up to 6 per name),
+ * matched on the customer name the way the account window matches it.
+ */
+export const historyForNames = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { names: string[] }) => z.object({ names: z.array(z.string().max(300)).max(120) }).parse(d))
+  .handler(async ({ data, context }): Promise<Record<string, NameHistory>> => {
+    const sql = await ready();
+    await requireNameReviewer(sql, context.userId, "Only an Admin can open the clean-list review.");
+    const keys = [...new Set(data.names.map((n) => n.trim().toLowerCase()).filter(Boolean))];
+    const out: Record<string, NameHistory> = Object.fromEntries(keys.map((k) => [k, { total: 0, items: [] }]));
+    if (!keys.length) return out;
+    const rows = await sql.query<{ k: string; type: string; ref: string | null; wo: string | null; day: unknown; status: string | null; notes: string | null }>(
+      `select lower(customer) as k, case when kind = 'tlc' then 'TLC' else 'Service' end as type, call_id as ref, wo,
+              coalesce(scheduled, received) as day, status, coalesce(nullif(notes, ''), issue) as notes
+         from service_jobs where lower(customer) = any($1)
+       union all
+       select lower(customer), 'PM', null, wo, coalesce(projected, received), status, notes
+         from pm_jobs where lower(customer) = any($1)
+       union all
+       select lower(customer), 'Install', null, wo, coalesce(install_date, received), equip_status, notes
+         from installs where archived = false and lower(customer) = any($1)
+       order by 5 desc nulls last`,
+      [keys],
+    );
+    for (const r of rows) {
+      const h = out[r.k];
+      if (!h) continue;
+      h.total += 1;
+      if (h.items.length < 6) {
+        h.items.push({ type: r.type as NameHistoryItem["type"], ref: r.ref, wo: r.wo, date: dayOf(r.day), status: r.status, notes: r.notes });
+      }
+    }
+    return out;
+  });
 
 export type CleanListRow = {
   id: number;
@@ -449,6 +501,52 @@ export const decideCleanItem = createServerFn({ method: "POST" })
       }>("select id, run_id, kind, customer_id, clean_name, netsuite_id, status, address, sales_rep, rep_name, rep_flag from customer_clean_items where id = $1", [data.id])
     )[0];
     if (!it) throw new Error("That line is no longer on the report.");
+    if (data.action === "approve" && data.accountId && data.accountId !== it.customer_id) {
+      const target = (
+        await sql.query<{ id: number; name: string; name_locked: unknown; archived: boolean }>(
+          "select id, name, name_locked, archived from directory_customers where id = $1",
+          [data.accountId],
+        )
+      )[0];
+      if (!target || target.archived) throw new Error("That KatzDesk account is no longer on the list.");
+      const targetLocked = target.name_locked === true || target.name_locked === "t" || target.name_locked === "true";
+      if (it.clean_name) {
+        // This clean-list name belongs to the account you picked: that account takes the name.
+        if (targetLocked && target.name !== tidy(it.clean_name)) {
+          throw new Error(`“${target.name}” is locked from the clean list. Unlock it on its own line first.`);
+        }
+        const before = it.customer_id;
+        await sql.query("update customer_clean_items set customer_id = $2, katz_name = $3 where id = $1", [it.id, target.id, target.name]);
+        it.customer_id = target.id;
+        // The account that was on this line stays on the report, so nothing drops off.
+        if (before) {
+          const still = await sql.query("select 1 from customer_clean_items where run_id = $1 and customer_id = $2 and id <> $3 limit 1", [
+            it.run_id,
+            before,
+            it.id,
+          ]);
+          const acct = (await sql.query<{ name: string }>("select name from directory_customers where id = $1", [before]))[0];
+          if (!still[0] && acct) {
+            const kind = isWalkInName(acct.name) ? "walk_in" : isCimbaliName(acct.name) ? "cimbali" : "no_match";
+            const why = `Was on the line for “${it.clean_name}” until ${target.name} was chosen`;
+            await sql.query(
+              "insert into customer_clean_items (run_id, kind, customer_id, katz_name, reason, status) values ($1, $2, $3, $4, $5, 'pending')",
+              [it.run_id, kind, before, acct.name, why],
+            );
+          }
+        }
+      } else {
+        // A KatzDesk name with no list name (No Match, a Walk-In with no match): it is the account you picked.
+        if (!it.customer_id) throw new Error("There is no KatzDesk account on this line.");
+        const res = await renameOrMergeCustomer(sql, it.customer_id, target.name, { force: true });
+        await lockAccount(sql, res.id, who, null);
+        await sql.query(
+          "update customer_clean_items set status = 'kept', customer_id = $2, note = $3, decided_by = $4, decided_at = now() where id = $1",
+          [it.id, res.id, res.merged ? `Merged into “${res.name}”, locked.` : `Named “${res.name}”, locked.`, who],
+        );
+        return readReport(sql, true);
+      }
+    }
     if (data.action === "approve" && data.rowId) {
       // The name you chose from the clean list replaces the suggested one on this line, with that row's details.
       const row = (
