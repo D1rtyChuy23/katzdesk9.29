@@ -55,8 +55,12 @@ function Page() {
   const remove = useMutation({
     mutationFn: (d: { id: number; name: string }) =>
       archiveDirectoryEntry({ data: { kind: "customer", id: d.id } }),
-    onSuccess: (_ok, d) => {
-      toast.success(`Removed “${d.name}”. Existing calls keep the name.`);
+    onSuccess: (res, d) => {
+      toast.success(
+        res.flagged
+          ? `“${d.name}” has no Account Number, so it was flagged for review, not removed.`
+          : `Removed “${d.name}”. Existing calls keep the name.`,
+      );
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["directory", "customer"] });
     },
@@ -207,7 +211,7 @@ function Page() {
                     <Lock className="ml-1.5 inline size-3.5 align-middle text-primary" aria-label="Name locked from the clean list" data-testid="name-locked" />
                   ) : null}
                   {c.removalFlag ? (
-                    <span className="ml-1.5 align-middle text-xs font-medium text-destructive">Flagged for removal</span>
+                    <span className="ml-1.5 align-middle text-xs font-medium text-destructive" data-testid="flagged-review">Flagged For Review</span>
                   ) : null}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
@@ -258,16 +262,21 @@ function Page() {
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={remove.isPending}
-                  aria-label={`Remove ${c.name}`}
+                  disabled={remove.isPending || (!c.accountNumber && c.removalFlag)}
+                  aria-label={c.accountNumber ? `Remove ${c.name}` : `Flag ${c.name} for review`}
+                  title={c.accountNumber ? undefined : "No Account Number: this flags the account for review. It is not removed."}
+                  data-testid="customer-remove"
                   onClick={() => {
-                    if (window.confirm(`Remove “${c.name}” from the customer list?`)) {
+                    const ask = c.accountNumber
+                      ? `Remove “${c.name}” from the customer list?`
+                      : `“${c.name}” has no Account Number. Flag it for review? It will not be removed.`;
+                    if (window.confirm(ask)) {
                       remove.mutate({ id: c.id, name: c.name });
                     }
                   }}
                 >
                   <Trash2 className="size-3.5" />
-                  <span className="hidden sm:inline">Remove</span>
+                  <span className="hidden sm:inline">{c.accountNumber ? "Remove" : c.removalFlag ? "Flagged" : "Flag For Review"}</span>
                 </Button>
               </div>
             ) : null}

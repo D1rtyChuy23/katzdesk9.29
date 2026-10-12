@@ -2109,8 +2109,16 @@ export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middlewa
 	const sql = await ready();
 	if (data.kind === "customer") await requireAdmin(sql, context.userId, "Only an admin can add or remove customers.");
 	const table = directoryTable(data.kind);
+	if (data.kind === "customer") {
+		// An account with no Account Number is never removed: it is flagged for review instead.
+		const row = (await sql.query(`select account_number from directory_customers where id = $1`, [data.id]))[0];
+		if (row && !String(row.account_number ?? "").trim()) {
+			await sql.query(`update directory_customers set removal_flag = true, updated_at = now() where id = $1`, [data.id]);
+			return { ok: true, flagged: true };
+		}
+	}
 	await sql.query(`update ${table} set archived = true, updated_at = now() where id = $1`, [data.id]);
-	return { ok: true };
+	return { ok: true, flagged: false };
 });
 export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();

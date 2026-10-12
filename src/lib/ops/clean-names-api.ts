@@ -634,6 +634,15 @@ export const decideCleanItem = createServerFn({ method: "POST" })
         );
         if (used[0]) throw new Error(`“${name}” has tickets, installs or deals on it, so it stays on the review.`);
       }
+      if (it.customer_id) {
+        // An account with no Account Number is never removed: flag it for review and keep the line.
+        const acct = (await sql.query<{ account_number: string | null }>("select account_number from directory_customers where id = $1", [it.customer_id]))[0];
+        if (acct && !String(acct.account_number ?? "").trim()) {
+          await sql.query("update directory_customers set removal_flag = true, updated_at = now() where id = $1", [it.customer_id]);
+          await mark("removal", "No Account Number: flagged for review, not removed.");
+          return readReport(sql, true);
+        }
+      }
       await mark("removed", "Removed from the review: no history on this name.");
       return readReport(sql, true);
     }

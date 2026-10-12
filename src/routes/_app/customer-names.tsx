@@ -27,7 +27,7 @@ import { formatPingTime } from "@/lib/ops/clock";
 export const Route = createFileRoute("/_app/customer-names")({ component: Page });
 
 /** Shown on the page so it is clear whether the live site has the latest Clean Names. */
-const CLEAN_NAMES_VERSION = "Oct 12 (2) · Choose Name, clickable history, Remove Name";
+const CLEAN_NAMES_VERSION = "Oct 12 (3) · No Account Number = Flag For Review";
 
 const SECTIONS: { id: CleanSection; label: string; hint: string }[] = [
   { id: "locked", label: "Approved And Locked", hint: "Exact matches applied from the clean list, and names you approved. Locked: Corrigo import and typing over the name do not change them. Unlock here to change one." },
@@ -43,7 +43,7 @@ const STATUS: Record<string, { label: string; variant: "default" | "primary" | "
   locked: { label: "Locked", variant: "success" },
   kept: { label: "Kept · Locked", variant: "success" },
   skipped: { label: "Skipped", variant: "outline" },
-  removal: { label: "Flagged For Removal", variant: "danger" },
+  removal: { label: "Flagged For Review", variant: "danger" },
   unlocked: { label: "Unlocked", variant: "outline" },
 };
 
@@ -101,7 +101,8 @@ function Page() {
     onSuccess: (next, d) => {
       settle(next);
       const done = { approve: "Approved and locked", skip: "Skipped", removal: "Flagged for removal", unlock: "Unlocked", lock: "Locked", drop: "Removed from the review" }[d.action];
-      toast.success(done);
+      const flagged = d.action === "drop" && next?.items?.some((i) => i.id === d.id && i.status === "removal");
+      toast.success(flagged ? "No Account Number: flagged for review, not removed" : done);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
@@ -304,6 +305,8 @@ function ReportRow({
   const [choosing, setChoosing] = useState(false);
   const st = STATUS[it.status] ?? STATUS.pending!;
   const open = it.status === "pending" || it.status === "skipped" || it.status === "removal";
+  // No Account Number: Remove Name only flags the account for review.
+  const flagOnly = Boolean(it.customerId) && !it.accountNumber;
   const done = it.status === "locked" || it.status === "kept";
   const unlocked = !isLocked(it);
   const approveLabel = it.kind === "no_match" ? "Keep" : !it.customerId ? "Add And Lock" : it.cleanName ? "Approve" : "Lock Name";
@@ -364,7 +367,7 @@ function ReportRow({
               Choose Name
             </Button>
           ) : null}
-          {unlocked && history && history.total === 0 ? (
+          {unlocked && history && history.total === 0 && !(flagOnly && it.status === "removal") ? (
             <Button
               type="button"
               size="sm"
@@ -372,11 +375,15 @@ function ReportRow({
               className="border-destructive/50 text-destructive"
               disabled={busy}
               onClick={() => onAct("drop")}
-              title="Takes this name off the review list. The account is not deleted."
+              title={
+                flagOnly
+                  ? "No Account Number: the account is flagged for review, not removed."
+                  : "Takes this name off the review list. The account is not deleted."
+              }
               data-testid="clean-remove-name"
             >
               <Trash2 className="size-3.5" />
-              Remove Name
+              {flagOnly ? "Flag For Review" : "Remove Name"}
             </Button>
           ) : null}
           {open ? (

@@ -604,3 +604,15 @@ On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with 
 
 - The import never replaces a number an account already has; change those one at a time in the customer window.
 - Account numbers are matched case-insensitively for uniqueness ("A-7" and "a-7" are the same number).
+
+## 27. No Account Number = Flag For Review, Never Remove
+
+Rule: an account with no Account Number is never removed. The remove action flags it for review instead.
+
+- Customers page: the Remove button reads **Flag For Review** on accounts with no Account Number. It sets the review flag (the account stays on the list, shown as "Flagged For Review"); once flagged the button shows **Flagged** and is disabled. Accounts that have an Account Number keep the normal **Remove**.
+- Server (`archiveDirectoryEntry`, customers): checks the Account Number itself, so no screen can remove a no-number account. It returns `flagged: true` instead of archiving. Customer pickers that use the same call keep the account in the list and say it was flagged.
+- Clean Names: **Remove Name** reads **Flag For Review** when the line's account has no Account Number. It flags the account and keeps the line on the report (chip "Flagged For Review", note "No Account Number: flagged for review, not removed."). Lines with no KatzDesk account behind them are unchanged.
+- The "Flagged For Removal" chip now reads "Flagged For Review" (same flag as Mark Removal).
+- Nothing is deleted. Existing flags, names, locks, merges and numbers are unchanged.
+
+Left as is, to confirm: once an account gets an Account Number, Remove works as before (archives it). Say if accounts with a number should also only be flagged.

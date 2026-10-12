@@ -41,10 +41,14 @@ export function useDirectory(kind: DirectoryKind) {
   });
   const archive = useMutation({
     mutationFn: (id: number) => archiveDirectoryEntry({ data: { kind, id } }),
-    onSuccess: (_ok, id) => {
-      qc.setQueryData<ComboItem[]>(["directory", kind], (old) =>
-        (old ?? []).filter((i) => i.id !== id),
-      );
+    onSuccess: (res, id) => {
+      if (res.flagged) {
+        toast.success("No Account Number, so this account was flagged for review, not removed.");
+      } else {
+        qc.setQueryData<ComboItem[]>(["directory", kind], (old) =>
+          (old ?? []).filter((i) => i.id !== id),
+        );
+      }
       void qc.invalidateQueries({ queryKey: ["directory", kind] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
     },
