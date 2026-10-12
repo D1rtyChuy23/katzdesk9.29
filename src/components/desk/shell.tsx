@@ -84,9 +84,8 @@ const NAV: { label: string; items: NavItem[] }[] = [
   {
     label: "Installs",
     items: [
-      { to: "/installs", label: "Board", icon: Truck },
-      { to: "/recipes", label: "Recipes", icon: BookOpen },
       { to: "/pipeline", label: "Pipeline", icon: Handshake },
+      { to: "/installs", label: "Board", icon: Truck },
     ],
   },
   {
@@ -103,6 +102,7 @@ const NAV: { label: string; items: NavItem[] }[] = [
     label: "Accounts",
     items: [
       { to: "/customers", label: "Customers", icon: Store },
+      { to: "/recipes", label: "Recipes", icon: BookOpen },
       { to: "/network", label: "Out Of Network", icon: Globe },
       { to: "/customer-names", label: "Clean Names", icon: ListChecks },
     ],

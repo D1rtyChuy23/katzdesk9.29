@@ -8,7 +8,7 @@ import { renameOrMergeCustomer } from "@/lib/ops/customer-identity";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { cleanNameOf, isCimbaliName, isWalkInName, matchCleanList, resolveSalesRep, rowsFromMatrix, tidy, wordsOf, type CleanKind } from "@/lib/ops/clean-names";
 
-export type CleanStatus = "pending" | "apply" | "locked" | "kept" | "skipped" | "removal" | "unlocked";
+export type CleanStatus = "pending" | "apply" | "locked" | "kept" | "skipped" | "removal" | "unlocked" | "removed";
 export type CleanSection = "locked" | "similar" | "no_match" | "walk_in" | "cimbali";
 
 export type CleanReportItem = {
@@ -129,7 +129,7 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
             d.netsuite_id as acct_netsuite, d.address as acct_address, d.account_rep as acct_rep, d.rep_flag as acct_rep_flag
        from customer_clean_items i
        left join directory_customers d on d.id = i.customer_id
-      where i.run_id = $1
+      where i.run_id = $1 and i.status <> 'removed'
       order by i.id`,
     [run.id],
   );
@@ -277,7 +277,7 @@ export const startCleanList = createServerFn({ method: "POST" })
           where n.run_id = $1 and o.run_id = $2
             and n.customer_id = o.customer_id and coalesce(n.clean_name, '') = coalesce(o.clean_name, '')
             and n.status in ('pending', 'apply')
-            and (o.status in ('skipped', 'removal', 'kept', 'unlocked') or (o.status = 'locked' and n.kind <> 'exact'))`,
+            and (o.status in ('skipped', 'removal', 'kept', 'unlocked', 'removed') or (o.status = 'locked' and n.kind <> 'exact'))`,
         [run.id, prior.id],
       );
     }
@@ -378,7 +378,7 @@ async function lockAccount(sql: Sql, id: number, who: string, line?: LineDetails
 
 const decideInput = z.object({
   id: z.number().int().positive(),
-  action: z.enum(["approve", "skip", "removal", "unlock", "lock"]),
+  action: z.enum(["approve", "skip", "removal", "unlock", "lock", "drop"]),
   /** Approve with a name you chose: a row picked from the whole clean list. */
   rowId: z.number().int().positive().optional(),
   /** Approve tied to a KatzDesk account picked from the full customer list. */
@@ -389,6 +389,9 @@ const decideInput = z.object({
 
 export type NameHistoryItem = {
   type: "Service" | "TLC" | "PM" | "Install";
+  /** The record, to open it: service | tlc | pm | install and its id. */
+  entityType: "service" | "tlc" | "pm" | "install";
+  id: number;
   /** Call ID (SC-…) for tickets. */
   ref: string | null;
   wo: string | null;
@@ -413,15 +416,16 @@ export const historyForNames = createServerFn({ method: "POST" })
     const keys = [...new Set(data.names.map((n) => n.trim().toLowerCase()).filter(Boolean))];
     const out: Record<string, NameHistory> = Object.fromEntries(keys.map((k) => [k, { total: 0, items: [] }]));
     if (!keys.length) return out;
-    const rows = await sql.query<{ k: string; type: string; ref: string | null; wo: string | null; day: unknown; status: string | null; notes: string | null }>(
+    const rows = await sql.query<{ k: string; type: string; ref: string | null; wo: string | null; day: unknown; status: string | null; notes: string | null; et: string; id: number }>(
       `select lower(customer) as k, case when kind = 'tlc' then 'TLC' else 'Service' end as type, call_id as ref, wo,
-              coalesce(scheduled, received) as day, status, coalesce(nullif(notes, ''), issue) as notes
+              coalesce(scheduled, received) as day, status, coalesce(nullif(notes, ''), issue) as notes,
+              case when kind = 'tlc' then 'tlc' else 'service' end as et, id
          from service_jobs where lower(customer) = any($1)
        union all
-       select lower(customer), 'PM', null, wo, coalesce(projected, received), status, notes
+       select lower(customer), 'PM', null, wo, coalesce(projected, received), status, notes, 'pm', id
          from pm_jobs where lower(customer) = any($1)
        union all
-       select lower(customer), 'Install', null, wo, coalesce(install_date, received), equip_status, notes
+       select lower(customer), 'Install', null, wo, coalesce(install_date, received), equip_status, notes, 'install', id
          from installs where archived = false and lower(customer) = any($1)
        order by 5 desc nulls last`,
       [keys],
@@ -431,7 +435,16 @@ export const historyForNames = createServerFn({ method: "POST" })
       if (!h) continue;
       h.total += 1;
       if (h.items.length < 6) {
-        h.items.push({ type: r.type as NameHistoryItem["type"], ref: r.ref, wo: r.wo, date: dayOf(r.day), status: r.status, notes: r.notes });
+        h.items.push({
+          type: r.type as NameHistoryItem["type"],
+          entityType: r.et as NameHistoryItem["entityType"],
+          id: Number(r.id),
+          ref: r.ref,
+          wo: r.wo,
+          date: dayOf(r.day),
+          status: r.status,
+          notes: r.notes,
+        });
       }
     }
     return out;
@@ -597,6 +610,28 @@ export const decideCleanItem = createServerFn({ method: "POST" })
         who,
       ]);
 
+    if (data.action === "drop") {
+      // Remove Name: takes an unmatched name with nothing on it off the review list. The account itself is untouched.
+      if (it.status === "locked" || it.status === "kept" || it.status === "apply") {
+        throw new Error("A locked match stays on the review. Unlock it first if it is wrong.");
+      }
+      const name = it.customer_id
+        ? (await sql.query<{ name: string }>("select name from directory_customers where id = $1", [it.customer_id]))[0]?.name
+        : it.clean_name;
+      if (name) {
+        const used = await sql.query(
+          `select 1 from service_jobs where lower(customer) = lower($1)
+           union all select 1 from pm_jobs where lower(customer) = lower($1)
+           union all select 1 from installs where archived = false and lower(customer) = lower($1)
+           union all select 1 from deals where archived = false and lower(customer) = lower($1)
+           limit 1`,
+          [name],
+        );
+        if (used[0]) throw new Error(`“${name}” has tickets, installs or deals on it, so it stays on the review.`);
+      }
+      await mark("removed", "Removed from the review: no history on this name.");
+      return readReport(sql, true);
+    }
     if (data.action === "skip") {
       if (it.customer_id && it.status === "removal") {
         await sql.query("update directory_customers set removal_flag = false where id = $1", [it.customer_id]);

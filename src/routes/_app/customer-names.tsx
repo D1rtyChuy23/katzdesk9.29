@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, FileUp, ListFilter, Lock, LockOpen, Search } from "lucide-react";
+import { ArrowRight, ExternalLink, FileUp, ListFilter, Lock, LockOpen, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   continueCleanList,
@@ -27,7 +27,7 @@ import { formatPingTime } from "@/lib/ops/clock";
 export const Route = createFileRoute("/_app/customer-names")({ component: Page });
 
 /** Shown on the page so it is clear whether the live site has the latest Clean Names. */
-const CLEAN_NAMES_VERSION = "Oct 12 · Choose Name from all customers + history";
+const CLEAN_NAMES_VERSION = "Oct 12 (2) · Choose Name, clickable history, Remove Name";
 
 const SECTIONS: { id: CleanSection; label: string; hint: string }[] = [
   { id: "locked", label: "Approved And Locked", hint: "Exact matches applied from the clean list, and names you approved. Locked: Corrigo import and typing over the name do not change them. Unlock here to change one." },
@@ -96,11 +96,11 @@ function Page() {
   }, [data?.pendingApply, data?.canEdit, step.isPending]);
 
   const decide = useMutation({
-    mutationFn: (d: { id: number; action: "approve" | "skip" | "removal" | "unlock" | "lock"; rowId?: number; keepName?: boolean; accountId?: number }) =>
+    mutationFn: (d: { id: number; action: "approve" | "skip" | "removal" | "unlock" | "lock" | "drop"; rowId?: number; keepName?: boolean; accountId?: number }) =>
       decideCleanItem({ data: d }),
     onSuccess: (next, d) => {
       settle(next);
-      const done = { approve: "Approved and locked", skip: "Skipped", removal: "Flagged for removal", unlock: "Unlocked", lock: "Locked" }[d.action];
+      const done = { approve: "Approved and locked", skip: "Skipped", removal: "Flagged for removal", unlock: "Unlocked", lock: "Locked", drop: "Removed from the review" }[d.action];
       toast.success(done);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
@@ -273,6 +273,9 @@ function Page() {
   );
 }
 
+/** Where each history line opens. */
+const RECORD_PATH = { service: "/service", tlc: "/tlc", pm: "/pms", install: "/installs" } as const;
+
 const isLocked = (it: CleanReportItem) => it.status === "locked" || it.status === "kept" || it.status === "apply";
 /** The name the row is about: the KatzDesk account on it, else the clean-list name. */
 const nameInQuestion = (it: CleanReportItem) => it.currentName ?? it.katzName ?? it.cleanName;
@@ -291,7 +294,7 @@ function ReportRow({
   item: CleanReportItem;
   canEdit: boolean;
   busy: boolean;
-  onAct: (a: "approve" | "skip" | "removal" | "unlock" | "lock") => void;
+  onAct: (a: "approve" | "skip" | "removal" | "unlock" | "lock" | "drop") => void;
   accounts: CustomerRecord[];
   accountsLoading: boolean;
   history: NameHistory | null;
@@ -356,6 +359,21 @@ function ReportRow({
               Choose Name
             </Button>
           ) : null}
+          {unlocked && history && history.total === 0 ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="border-destructive/50 text-destructive"
+              disabled={busy}
+              onClick={() => onAct("drop")}
+              title="Takes this name off the review list. The account is not deleted."
+              data-testid="clean-remove-name"
+            >
+              <Trash2 className="size-3.5" />
+              Remove Name
+            </Button>
+          ) : null}
           {open ? (
             <>
               <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onAct("approve")} data-testid="clean-approve">
@@ -418,14 +436,24 @@ function HistoryBlock({ name, history, loading }: { name: string | null; history
       ) : (
         <ul className="mt-1 divide-y divide-border/60" data-testid="clean-history-items">
           {history.items.map((h, i) => (
-            <li key={i} className="grid gap-x-3 py-1 text-xs sm:grid-cols-[3.5rem_minmax(0,13rem)_5.5rem_minmax(0,7rem)_minmax(0,1fr)]">
-              <span className="font-medium">{h.type}</span>
+            <li key={i}>
+              <a
+                href={`${RECORD_PATH[h.entityType]}?open=${h.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="grid gap-x-3 rounded-md py-1 text-xs hover:bg-muted/60 hover:underline sm:grid-cols-[3.5rem_minmax(0,13rem)_5.5rem_minmax(0,7rem)_minmax(0,1fr)_1rem]"
+                title={`Open this ${h.type === "Install" ? "install" : h.type === "PM" ? "PM" : "ticket"} in a new tab`}
+                data-testid="clean-history-link"
+              >
+              <span className="font-medium text-primary">{h.type}</span>
               <span className="truncate tabular" title={[h.wo ? `WO ${h.wo}` : null, h.ref].filter(Boolean).join(" · ")}>
                 {[h.wo ? `WO ${h.wo}` : null, h.ref].filter(Boolean).join(" · ") || "No WO / ST #"}
               </span>
               <span className="tabular text-muted-foreground">{h.date ?? "No date"}</span>
               <span className="truncate">{h.status ?? "—"}</span>
               <span className="truncate text-muted-foreground" title={h.notes ?? ""}>{h.notes || "No notes"}</span>
+              <ExternalLink className="hidden size-3 self-center text-muted-foreground sm:block" aria-hidden />
+              </a>
             </li>
           ))}
           {history.total > history.items.length ? (

@@ -574,3 +574,10 @@ On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with 
 - Locked rows have no Choose Name and no history. Walk-In and Cimbali lines are never removed by choosing.
 - The page shows its version at the top ("Oct 12 · Choose Name from all customers + history"). If the live page shows anything older, or no version line, the live site has not been updated yet.
 - The clean-list search from section 22 is replaced by the full KatzDesk list on the row; the list's own names still come in as each row's suggested name.
+
+## 24. Clean Names: Remove Name, Clickable History; Menu Order
+
+- Remove Name shows on an unlocked row only when its history says "No history on this name". It takes that name off the review list; the KatzDesk account is not deleted or changed. The server refuses it on a name with tickets, PMs, installs or deals, and on a locked match. Reading the list again keeps removed names off.
+- Each history line (Service, TLC, PM, Install with WO / ST #, date, status, notes) is a link that opens that record in a new tab, so the review stays where it was.
+- Side menu: Installs is Pipeline, then Board. Recipes moved under Accounts, right after Customers. Coming Due and Planner unchanged.
+- Page version: "Oct 12 (2) · Choose Name, clickable history, Remove Name".
