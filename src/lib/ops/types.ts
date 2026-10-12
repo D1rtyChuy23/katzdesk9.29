@@ -102,6 +102,8 @@ export type Deal = {
   equipment: string | null;
   /** Every machine on the deal (model, serial, voltage). Empty on older deals: read equipment instead. */
   machines: MachineSpec[];
+  /** The customer's Account Number, when it has one. */
+  accountNumber?: string | null;
   amount: number | null;
   goodToOrder: boolean;
   ordered: boolean;
@@ -121,6 +123,8 @@ export type Install = {
   id: number;
   /** Sales ticks this once the Tech Request Form has been sent. Never ticked automatically. */
   trfIssued: boolean;
+  /** The customer's Account Number, when it has one. */
+  accountNumber?: string | null;
   received: string | null;
   customer: string;
   equipment: string | null;
@@ -377,6 +381,8 @@ export type CustomerRecord = DirectoryEntry & {
   noRep: boolean;
   nameLocked?: boolean;
   removalFlag?: boolean;
+  /** Account Number (text; leading zeros and dashes kept). Unique when filled in. */
+  accountNumber?: string | null;
 };
 
 
@@ -391,6 +397,9 @@ export type CustomerHistory = {
   repFlag?: string | null;
   /** ID number and address from the clean list. Null for anyone who is not an Admin. */
   cleanList?: { netsuiteId: string | null; address: string | null } | null;
+  accountNumber?: string | null;
+  /** The viewer may set the account number (Admin role or desk admin). */
+  canEditAccountNumber?: boolean;
   jobs: ServiceJob[];
   pms: PmJob[];
   installs: Install[];

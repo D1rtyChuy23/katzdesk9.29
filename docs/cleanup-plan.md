@@ -588,3 +588,19 @@ On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with 
 - The address is the one written onto the account from the clean list (section 21), so it shows for approved accounts once the clean list has been read after that update. Anything else shows "No address on this account yet. It fills in when the account is approved on Clean Names."
 - On tickets the address shows to everyone (techs need it). The list ID still shows to Admins only, on the account.
 - The ticket's customer must be the account's name (as it is when picked from the customer list). CoCo's - Sugar Land is on the clean list as 13533 University Blvd #200, Sugar Land, TX 77479.
+
+## 26. Account Number On Customers
+
+- Data (migration 0056): directory_customers.account_number, text, nullable. Kept exactly as typed apart from trimming outside spaces, so "00042" and "A-0099" stay as they are. Unique when filled in, ignoring case and outside spaces (a partial unique index); blank on any number of accounts. Removed (archived) accounts do not hold a number.
+- Customer window: Account Number box under the clean-list block, above Rep. An Admin (the Admin role or a desk admin) can set or clear it; Save checks no other customer has it ("Account number 00042 is already on “Texican Court”."). Everyone else sees it read-only. Each change is logged on the account's activity.
+- Customers list: Account # on each row, sort "Account # · Low → High / High → Low" (blank last, numbers compared as numbers), and the search box finds account numbers.
+- Clean Names: each row shows "Account # …" read-only.
+- Installs Board rows and Pipeline rows: "Account # …" under the account name when there is one.
+- Exports: every report with an Account column (Pending services, PMs, TLC, Installs) gets "Account #" right after it. Customer, install, deal and ticket JSON from the app carry accountNumber.
+- Import Account Numbers (Customers page, Admin only): a CSV (or sheet) with a customer column (name or clean-list ID) and account_number. The preview sorts every row into Will Save, Already Set, Conflicts (number on another account, number or account twice in the file, account already has a different number, no number) and Unmatched (no account, or more than one look-alike). Nothing saves until Save; only Will Save rows are saved, checked again at save time, and only onto accounts that have no number yet.
+- Names, merges, locks, reps, IDs and addresses are not touched by any of this.
+
+### Left as is, to confirm
+
+- The import never replaces a number an account already has; change those one at a time in the customer window.
+- Account numbers are matched case-insensitively for uniqueness ("A-7" and "a-7" are the same number).

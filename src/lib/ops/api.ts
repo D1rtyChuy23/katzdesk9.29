@@ -61,7 +61,7 @@ import {
 import { renameOrMergeEquipment, renameOrMergeCustomer } from "./customer-identity";
 import { lockedNameFor } from "./clean-names-api";
 import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
-import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor } from "./reps";
+import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, accountNumberFor } from "./reps";
 import { woMatchKey } from "./corrigo";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { parseMentions } from "./mentions";
@@ -290,6 +290,7 @@ function mapDeal(r: any, marks: any) {
 		accountType: r.account_type ?? null,
 		dateOfDeal: isoDate(r.date_of_deal),
 		equipment: r.equipment ?? null,
+		accountNumber: marks ? accountNumberFor(marks, customer) : null,
 		machines: parseMachinesJson(r.machines ?? null),
 		amount: num(r.amount),
 		goodToOrder: !!r.good_to_order,
@@ -308,6 +309,7 @@ function mapDeal(r: any, marks: any) {
 function applyMarks(rows: any, marks: any) {
 	for (const r of rows) {
 		r.aviKatz = isAviKatz(marks, r.customer ?? null);
+		r.accountNumber = accountNumberFor(marks, r.customer ?? null);
 		// Installs without their own rep show the rep saved on the customer account.
 		if ("accountRep" in r && !String(r.accountRep ?? "").trim()) {
 			const rep = accountRepFor(marks, r.customer ?? null);
@@ -1909,6 +1911,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
          d.account_rep,
          d.name_locked,
          d.removal_flag,
+         d.account_number,
          coalesce(svc.n, 0)::int as calls,
          coalesce(svc.p, 0)::int as pending_calls,
          coalesce(tlc.n, 0)::int as tlcs,
@@ -1990,7 +1993,8 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		accountRep: r.account_rep,
 		noRep: isNoRep(r.account_rep),
 		nameLocked: r.name_locked === true,
-		removalFlag: r.removal_flag === true
+		removalFlag: r.removal_flag === true,
+		accountNumber: r.account_number ?? null
 	}));
 });
 export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any): Promise<CustomerHistory | null> => {
@@ -2031,6 +2035,8 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		// The clean customer list: the name is locked; ID and address show to an Admin.
 		nameLocked: account.name_locked === true,
 		repFlag: account.rep_flag ?? null,
+		accountNumber: account.account_number ?? null,
+		canEditAccountNumber: await canReviewNames(sql, context.userId),
 		cleanList: (await canReviewNames(sql, context.userId))
 			? { netsuiteId: account.name_locked === true ? account.netsuite_id ?? null : null, address: account.name_locked === true ? account.address ?? null : null }
 			: null,

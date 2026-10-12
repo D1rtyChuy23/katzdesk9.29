@@ -9,7 +9,9 @@ export type DeskSortId =
   | "value-asc"
   | "status"
   | "flag"
-  | "tech";
+  | "tech"
+  | "acct-asc"
+  | "acct-desc";
 
 export type DeskSortOption = { id: DeskSortId; label: string };
 
@@ -21,6 +23,11 @@ export const SORT_DATE: DeskSortOption[] = [
 export const SORT_ALPHA: DeskSortOption[] = [
   { id: "alpha-asc", label: "Name · A → Z" },
   { id: "alpha-desc", label: "Name · Z → A" },
+];
+
+export const SORT_ACCOUNT_NUMBER: DeskSortOption[] = [
+  { id: "acct-asc", label: "Account # · Low → High" },
+  { id: "acct-desc", label: "Account # · High → Low" },
 ];
 
 export const SORT_EQUIP: DeskSortOption[] = [

@@ -409,6 +409,11 @@ function DealRow({ deal: d, onOpen, onRep }: { deal: Deal; onOpen: () => void; o
         <span>
           <span className="font-medium">{d.customer}</span>
           <AkBadge on={d.aviKatz} className="ml-1.5 align-middle" />
+          {d.accountNumber ? (
+            <span className="block text-xs text-muted-foreground tabular" data-testid="deal-account-number">
+              Account # {d.accountNumber}
+            </span>
+          ) : null}
           <span className="mt-0.5 block text-xs text-muted-foreground">
             {d.producer && !d.noRep ? <RepLink name={d.producer} onPick={onRep} /> : <NoRepFlag show />} ·{" "}
             {d.equipment || "No equipment listed"}

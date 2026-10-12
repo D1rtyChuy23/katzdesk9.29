@@ -8,7 +8,8 @@ import { addDirectoryEntry, archiveDirectoryEntry, listCustomerRecords, renameCu
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
-import { SORT_ALPHA, sortDesk } from "@/lib/ops/sort";
+import { SORT_ACCOUNT_NUMBER, SORT_ALPHA, sortDesk } from "@/lib/ops/sort";
+import { AccountNumberImportButton } from "@/components/desk/account-number-import";
 import { CustomerHistorySheet } from "@/components/desk/customer-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { AccountEquipImportButton } from "@/components/desk/account-equip-import";
@@ -36,6 +37,8 @@ function Page() {
   const { filterMine, matchMine, role } = useMyView();
   const [sort, setSort] = useDeskSort("customers", "alpha-asc");
   const isAdmin = !!me.data?.isAdmin;
+  // Account numbers are set by the Admin role or a desk admin.
+  const isAdminOrRole = isAdmin || me.data?.role === "admin";
   const canAdd = isAdmin || me.data?.canAddCustomers !== false;
   const [renaming, setRenaming] = useState<{ id: number; name: string } | null>(null);
 
@@ -81,13 +84,24 @@ function Page() {
   const needle = q.trim().toLowerCase();
   const rows = useMemo(() => {
     const raw = list.data ?? [];
+    // Search by name or Account Number.
     const filtered = needle
-      ? raw.filter((c) => c.name.toLowerCase().includes(needle))
+      ? raw.filter((c) => c.name.toLowerCase().includes(needle) || (c.accountNumber ?? "").toLowerCase().includes(needle))
       : raw;
     const scoped =
       filterMine && role === "sales"
         ? filtered.filter((c) => c.aviKatz || matchMine(c.accountRep))
         : filtered;
+    if (sort === "acct-asc" || sort === "acct-desc") {
+      // Blank account numbers last; numbers compare as numbers when they are numbers ("00042" < "123").
+      const dir = sort === "acct-asc" ? 1 : -1;
+      return [...scoped].sort((a, b) => {
+        const x = a.accountNumber ?? "";
+        const y = b.accountNumber ?? "";
+        if (!x || !y) return x === y ? a.name.localeCompare(b.name) : x ? -1 : 1;
+        return dir * x.localeCompare(y, undefined, { numeric: true, sensitivity: "base" }) || a.name.localeCompare(b.name);
+      });
+    }
     return sortDesk(scoped, sort, { name: (c) => c.name, date: () => "" });
   }, [list.data, needle, sort, filterMine, matchMine, role]);
   const paged = useShowMore(rows, `${needle}|${sort}|${filterMine}`);
@@ -123,6 +137,8 @@ function Page() {
               : " Ask an admin if a name is missing."}
           </p>
         </div>
+        <div className="flex flex-wrap items-start gap-2">
+        {isAdminOrRole ? <AccountNumberImportButton /> : null}
         <AccountEquipImportButton
           onImported={(name) => {
             if (!name) return;
@@ -130,6 +146,7 @@ function Page() {
             if (row) openCustomer(row.id);
           }}
         />
+        </div>
       </header>
 
       <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
@@ -143,7 +160,7 @@ function Page() {
             aria-label="Search customers"
           />
         </div>
-        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA]} className="shrink-0" />
+        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_ACCOUNT_NUMBER]} className="shrink-0" />
       </div>
 
       {canAdd ? (
@@ -211,6 +228,16 @@ function Page() {
                   <p className="truncate text-xs text-amber-800 dark:text-amber-300">{pending}</p>
                 ) : null}
               </div>
+              <span className="w-28 shrink-0 text-right text-sm tabular" data-testid="customer-account-number" title="Account Number">
+                {c.accountNumber ? (
+                  <>
+                    <span className="block text-[10px] tracking-wide text-muted-foreground uppercase">Account #</span>
+                    {c.accountNumber}
+                  </>
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
+              </span>
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </button>
             {isAdmin ? (

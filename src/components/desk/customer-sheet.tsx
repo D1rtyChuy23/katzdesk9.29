@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { setAccountNumber } from "@/lib/ops/account-numbers-api";
 import { copyRecipe, getCustomerHistory, listDirectory, listRecipes, renameCustomer, updateCustomerAccount } from "@/lib/ops/api";
 import { listAccountEquipment } from "@/lib/ops/account-equip-import";
 
@@ -11,7 +12,7 @@ import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, Recipe, ServiceJob } from "@/lib/ops/types";
 import { ComboField } from "@/components/ui/combo-field";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, Label } from "@/components/ui/input";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/separator";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
@@ -309,6 +310,12 @@ export function CustomerHistorySheet({
                       : "Ask an admin to rename this account — history follows the new name."}
                   </p>
                 )}
+
+                <AccountNumberField
+                  id={data.id}
+                  value={data.accountNumber ?? null}
+                  canEdit={!!data.canEditAccountNumber}
+                />
 
                 <AccountMarksForm
                   id={data.id}
@@ -745,6 +752,58 @@ function CustomerRecipes({
         </p>
       )}
     </section>
+  );
+}
+
+/**
+ * Account Number: shown to everyone; an Admin can set or clear it. Kept exactly as typed (leading zeros, dashes).
+ * Saving checks it is not already on another customer.
+ */
+function AccountNumberField({ id, value, canEdit }: { id: number; value: string | null; canEdit: boolean }) {
+  const qc = useQueryClient();
+  const [draft, setDraft] = useState(value ?? "");
+  useEffect(() => setDraft(value ?? ""), [id, value]);
+  const save = useMutation({
+    mutationFn: () => setAccountNumber({ data: { id, accountNumber: draft.trim() || null } }),
+    onSuccess: (r) => {
+      toast.success(r.accountNumber ? `Account number ${r.accountNumber} saved` : "Account number cleared");
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["deals"] });
+      void qc.invalidateQueries({ queryKey: ["clean-names"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the account number"),
+  });
+  const changed = (draft.trim() || null) !== (value ?? null);
+  return (
+    <div className="mt-3 rounded-xl border border-border px-3 py-2.5" data-testid="account-number">
+      <Label htmlFor={`acct-${id}`} className="text-xs text-muted-foreground">Account Number</Label>
+      {canEdit ? (
+        <form
+          className="mt-1 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (changed) save.mutate();
+          }}
+        >
+          <Input
+            id={`acct-${id}`}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="None yet"
+            autoComplete="off"
+            className="tabular"
+            data-testid="account-number-input"
+          />
+          <Button type="submit" size="sm" variant="outline" disabled={!changed || save.isPending} data-testid="account-number-save">
+            {save.isPending ? "Saving…" : "Save"}
+          </Button>
+        </form>
+      ) : (
+        <p className="mt-0.5 font-medium tabular" data-testid="account-number-value">{value ?? <span className="font-normal text-muted-foreground">None</span>}</p>
+      )}
+    </div>
   );
 }
 

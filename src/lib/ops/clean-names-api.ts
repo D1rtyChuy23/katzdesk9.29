@@ -18,6 +18,8 @@ export type CleanReportItem = {
   customerId: number | null;
   /** The KatzDesk name when the list was read. */
   katzName: string | null;
+  /** The account's Account Number, read-only here. */
+  accountNumber: string | null;
   /** The account's name today, when it differs from both names on the line (a merge, or an edit after unlock). */
   currentName: string | null;
   /** Another KatzDesk account already has the clean-list name: approving merges this account into it. */
@@ -124,9 +126,11 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
     acct_address: string | null;
     acct_rep: string | null;
     acct_rep_flag: string | null;
+    acct_number: string | null;
   }>(
     `select i.*, d.name as cur_name, d.name_locked, d.removal_flag,
-            d.netsuite_id as acct_netsuite, d.address as acct_address, d.account_rep as acct_rep, d.rep_flag as acct_rep_flag
+            d.netsuite_id as acct_netsuite, d.address as acct_address, d.account_rep as acct_rep, d.rep_flag as acct_rep_flag,
+            d.account_number as acct_number
        from customer_clean_items i
        left join directory_customers d on d.id = i.customer_id
       where i.run_id = $1 and i.status <> 'removed'
@@ -159,6 +163,7 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       section: sectionOf(r.kind, r.status),
       customerId: r.customer_id,
       katzName: r.katz_name ?? r.cur_name,
+      accountNumber: r.acct_number ?? null,
       mergesInto: mergeTarget(r.customer_id, r.clean_name, r.status),
       currentName: r.cur_name && r.cur_name !== r.katz_name && r.cur_name !== tidy(r.clean_name) ? r.cur_name : null,
       cleanName: r.clean_name,

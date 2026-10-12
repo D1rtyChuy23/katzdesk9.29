@@ -204,7 +204,7 @@ export async function loadRebuilds(sql: Sql, today = todayChicago()): Promise<Re
   const rows = await sql.query<RebuildRow>(
     "select * from rebuilds where coalesce(archived, false) = false order by id desc",
   );
-  const marks = await loadAccountMarks(sql).catch(() => ({ rep: new Map<string, string>(), repLoose: new Map<string, string>(), ak: new Set<string>() }));
+  const marks = await loadAccountMarks(sql).catch(() => ({ rep: new Map<string, string>(), repLoose: new Map<string, string>(), ak: new Set<string>(), acct: new Map<string, string>() }));
   return rows.map((r) =>
     mapRebuild(r, today, accountRepFor(marks, r.account), isAviKatz(marks, r.account)),
   );

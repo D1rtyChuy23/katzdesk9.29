@@ -794,8 +794,15 @@ function InstallRow({
             >
               {i.daysOut == null ? "needs date" : i.daysOut < 0 ? `${i.daysOut}d` : i.daysOut === 0 ? "today" : `${i.daysOut}d`}
             </button>
-            <button type="button" onClick={onOpen} className="min-w-0 truncate text-left font-medium hover:underline">
-              {i.customer} <AkBadge on={i.aviKatz} className="ml-1 align-middle" />
+            <button type="button" onClick={onOpen} className="min-w-0 text-left font-medium hover:underline">
+              <span className="block truncate">
+                {i.customer} <AkBadge on={i.aviKatz} className="ml-1 align-middle" />
+              </span>
+              {i.accountNumber ? (
+                <span className="block text-xs font-normal text-muted-foreground tabular" data-testid="install-account-number">
+                  Account # {i.accountNumber}
+                </span>
+              ) : null}
             </button>
             <div className="flex flex-wrap gap-1">
               <FlagBadge flag={i.flag} />

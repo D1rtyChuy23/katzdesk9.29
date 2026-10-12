@@ -11,7 +11,7 @@ import { parseMachinesJson } from "@/lib/ops/machines";
 import { SETTING_FIELDS, settingsFrom } from "@/lib/ops/recipe-fields";
 import { loadTechs } from "@/lib/ops/roster";
 import { sameTech } from "@/lib/ops/tech-match";
-import { isAviKatz, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
+import { accountNumberFor, isAviKatz, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
 import { HEALTH_LABEL } from "@/lib/ops/rebuild-model";
 import { loadRebuilds, sortRebuildsForExport } from "@/lib/ops/rebuilds";
 import type { Recipe } from "@/lib/ops/types";
@@ -865,6 +865,20 @@ export function fileNameFor(type: ReportType, date: string, format: "xlsx" | "cs
   return `KatzDesk-${REPORT_SLUG[type]}-${date}.${format}`;
 }
 
+/** Every sheet with an Account column gets "Account #" right after it, from the customer's Account Number. */
+async function withAccountNumbers(sql: Awaited<ReturnType<typeof getSql>>, sheets: ExportSheet[]): Promise<ExportSheet[]> {
+  const marks = await loadAccountMarks(sql);
+  return sheets.map((sheet) => {
+    const at = sheet.columns.indexOf("Account");
+    if (at < 0 || sheet.columns.includes("Account #")) return sheet;
+    const columns = [...sheet.columns.slice(0, at + 1), "Account #", ...sheet.columns.slice(at + 1)];
+    const rows = sheet.rows.map((r) =>
+      isBlankRow(r) ? [...r.slice(0, at + 1), "", ...r.slice(at + 1)] : [...r.slice(0, at + 1), accountNumberFor(marks, r[at]) ?? "", ...r.slice(at + 1)],
+    );
+    return { ...sheet, columns, rows };
+  });
+}
+
 async function buildReport(type: ReportType, filters: ExportFilters): Promise<BuiltReport> {
   const sql = await readySql();
   const generated = formatNowChicago();
@@ -881,6 +895,7 @@ async function buildReport(type: ReportType, filters: ExportFilters): Promise<Bu
     sheets = [inst.notReady, inst.ready];
     counts = inst.counts;
   }
+  sheets = await withAccountNumbers(sql, sheets);
   const rowCount =
     counts != null
       ? counts.notReady + counts.ready

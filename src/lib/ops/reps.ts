@@ -151,6 +151,8 @@ export type AccountMarks = {
   rep: Map<string, string>;
   /** Same reps keyed without punctuation/spaces, so "Coco's - Kingwood" finds "Coco's Kingwood". */
   repLoose: Map<string, string>;
+  /** Account Number by lowercase customer name. */
+  acct: Map<string, string>;
 };
 
 export async function ensureAccountMarks(sql: Sql): Promise<void> {
@@ -164,15 +166,17 @@ export async function ensureAccountMarks(sql: Sql): Promise<void> {
 
 export async function loadAccountMarks(sql: Sql): Promise<AccountMarks> {
   await ensureAccountMarks(sql);
-  const rows = await sql.query<{ name: string; avi_katz: boolean; account_rep: string | null }>(
-    `select name, avi_katz, account_rep from directory_customers where archived = false`,
+  const rows = await sql.query<{ name: string; avi_katz: boolean; account_rep: string | null; account_number?: string | null }>(
+    `select * from directory_customers where archived = false`,
   );
   const ak = new Set<string>();
   const rep = new Map<string, string>();
   const repLoose = new Map<string, string>();
+  const acct = new Map<string, string>();
   for (const r of rows) {
     const k = (r.name ?? "").trim().toLowerCase();
     if (!k) continue;
+    if (r.account_number && String(r.account_number).trim()) acct.set(k, String(r.account_number).trim());
     if (flagOn(r.avi_katz)) ak.add(k);
     if (r.account_rep) {
       rep.set(k, r.account_rep);
@@ -180,7 +184,7 @@ export async function loadAccountMarks(sql: Sql): Promise<AccountMarks> {
       if (loose && !repLoose.has(loose)) repLoose.set(loose, r.account_rep);
     }
   }
-  return { ak, rep, repLoose };
+  return { ak, rep, repLoose, acct };
 }
 
 export function customerKey(name: string | null | undefined): string {
@@ -190,6 +194,11 @@ export function customerKey(name: string | null | undefined): string {
 /** The sales rep saved on a customer account, matching the name loosely. */
 export function accountRepFor(marks: AccountMarks, customer: string | null | undefined): string | null {
   return marks.rep.get(customerKey(customer)) ?? marks.repLoose.get(normalizeCustomerKey(customer)) ?? null;
+}
+
+/** The Account Number saved on a customer account, by exact name. */
+export function accountNumberFor(marks: AccountMarks, customer: string | null | undefined): string | null {
+  return marks.acct?.get(customerKey(customer)) ?? null;
 }
 
 export function isAviKatz(marks: AccountMarks, customer: string | null | undefined): boolean {

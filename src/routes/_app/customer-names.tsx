@@ -321,6 +321,11 @@ function ReportRow({
             </>
           ) : null}
           {it.currentName ? <span className="text-xs text-muted-foreground">now “{it.currentName}”</span> : null}
+          {it.accountNumber ? (
+            <span className="rounded-full border border-border px-2 text-[11px] text-muted-foreground tabular" data-testid="clean-account-number" title="Account Number (read-only here)">
+              Account # {it.accountNumber}
+            </span>
+          ) : null}
           {it.locked ? <Lock className="size-3.5 shrink-0 text-primary" aria-label="Name locked" /> : null}
           <Badge variant={st.variant} size="tight" data-testid="clean-status">{st.label}</Badge>
         </div>
