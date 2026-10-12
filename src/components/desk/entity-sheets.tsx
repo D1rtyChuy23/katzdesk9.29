@@ -49,6 +49,7 @@ import { RepSelect } from "./rep-select";
 import { AkBadge } from "./ak-badge";
 
 import { MachineFields } from "./machine-fields";
+import { CustomerAddress } from "./customer-address";
 import { SerialNoticeBanner } from "./serial-notice";
 import { AssignedLine, ModuleReturnActions } from "./module-assign";
 import { moduleAvailability } from "@/lib/ops/eversys";
@@ -101,8 +102,12 @@ function BoundCustomer({
   useEffect(() => {
     setValue(defaultValue);
   }, [recordKey, defaultValue]);
-  if (locked) return <LockedCustomer name={defaultValue} inputName={name} />;
-  return <CustomerCombo name={name} value={value} onChange={setValue} required={required} />;
+  return (
+    <div>
+      {locked ? <LockedCustomer name={defaultValue} inputName={name} /> : <CustomerCombo name={name} value={value} onChange={setValue} required={required} />}
+      <CustomerAddress customer={locked ? defaultValue : value} />
+    </div>
+  );
 }
 
 function BoundEquipment({
@@ -367,6 +372,7 @@ export function InstallSheet({
                 <FlagBadge flag={row.flag} />
                 {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
               </div>
+              <CustomerAddress customer={row.customer} className="mt-2" />
               <label className="mt-3 flex w-fit items-center gap-2 text-sm font-medium" data-testid="trf-check-window">
                 <input
                   type="checkbox"

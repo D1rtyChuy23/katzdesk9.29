@@ -581,3 +581,10 @@ On the test copy (2,029 approved): 1,542 reps set from the list, 289 blank with 
 - Each history line (Service, TLC, PM, Install with WO / ST #, date, status, notes) is a link that opens that record in a new tab, so the review stays where it was.
 - Side menu: Installs is Pipeline, then Board. Recipes moved under Accounts, right after Customers. Coming Due and Planner unchanged.
 - Page version: "Oct 12 (2) · Choose Name, clickable history, Remove Name".
+
+## 25. Address And Map Pin On Tickets, PMs, Installs And Deals
+
+- Under Customer on a service ticket, TLC, PM and deal, and at the top of the install window, the account's address shows with a map pin. Clicking it opens the address in Google Maps in a new tab. It follows the customer if the customer is changed on the ticket.
+- The address is the one written onto the account from the clean list (section 21), so it shows for approved accounts once the clean list has been read after that update. Anything else shows "No address on this account yet. It fills in when the account is approved on Clean Names."
+- On tickets the address shows to everyone (techs need it). The list ID still shows to Admins only, on the account.
+- The ticket's customer must be the account's name (as it is when picked from the customer list). CoCo's - Sugar Land is on the clean list as 13533 University Blvd #200, Sugar Land, TX 77479.

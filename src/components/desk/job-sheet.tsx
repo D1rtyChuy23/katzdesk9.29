@@ -1,3 +1,4 @@
+import { CustomerAddress } from "./customer-address";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { createJob, getJob, listAssets, mergeServiceTickets, unassignAssetFromService, updateJob } from "@/lib/ops/api";
@@ -548,8 +549,12 @@ function BoundCustomer({
   useEffect(() => {
     setValue(defaultValue);
   }, [recordKey, defaultValue]);
-  if (locked) return <LockedCustomer name={defaultValue || "—"} />;
-  return <CustomerCombo name="customer" value={value} onChange={setValue} menuInFlow />;
+  return (
+    <div>
+      {locked ? <LockedCustomer name={defaultValue || "—"} /> : <CustomerCombo name="customer" value={value} onChange={setValue} menuInFlow />}
+      <CustomerAddress customer={locked ? defaultValue : value} />
+    </div>
+  );
 }
 
 function BoundEquipment({

@@ -2051,6 +2051,14 @@ export const listDirectory = createServerFn({ method: "GET" }).middleware([deskM
 	const table = directoryTable(data.kind);
 	return await sql.query(`select id, name from ${table} where archived = false order by lower(name)`);
 });
+/** The account's address (from the clean customer list), for tickets, PMs and installs. */
+export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { name: string }) => d).handler(async ({ data }: any): Promise<{ address: string | null }> => {
+	const sql = await ready();
+	const name = String(data.name ?? "").trim();
+	if (!name) return { address: null };
+	const row = (await sql.query("select address from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc limit 1", [name]))[0];
+	return { address: row?.address ? String(row.address) : null };
+});
 export const updateCustomerAccount = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; aviKatz?: boolean; accountRep?: string | null }) => d).handler(async ({ data }: any) => {
 	const sql = await ready();
 	const dir = await sql`
