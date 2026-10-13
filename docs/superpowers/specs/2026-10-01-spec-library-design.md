@@ -168,3 +168,36 @@ Code: `src/components/desk/machine-fields.tsx`, `new-deal-dialog.tsx`,
 Acceptance: Sold / Loan / Lease shows as one selection; no coffee bubble;
 recipe items add and remove in place; a newly added machine shows blank
 requirement fields.
+
+## Change request: install equipment fields and warehouse serial (2026-10-13)
+
+Scope: the install equipment section and the warehouse-to-install assignment
+only. Do not rebuild the app. Do not autofill volts, plug, or water.
+
+1. **Clear placeholder text.** On the install equipment section, Plug and Water
+   show text in the field (`placeholder="L6-30P"` and `placeholder='3/8" line'`
+   in `src/components/desk/machine-fields.tsx`). Remove those placeholders. The
+   field stays visibly empty until someone enters a value. A placeholder is not
+   a value, and no plug or water inlet is written by default.
+2. **Grinders have no Water field.** `waterNeed()` in
+   `src/lib/ops/deal-board.ts` already returns "none" for grinders, but the row
+   still shows the "No water or drain" note where the Water field was. Remove
+   the Water field entirely for grinders (G9, G9-2T, Mazzer, Mahlkonig, any
+   catalog grinder): no input and no note. Power and Space stay. Plug stays
+   blank until filled. The install ticket (`install-ticket.tsx`) also stops
+   showing a Water line for grinders. `cleanMachine` already drops a stored
+   water value for grinders; keep that.
+3. **Serial transfers from the warehouse.** `assignAssetToInstall` in
+   `src/lib/ops/api.ts` links the asset to the install (`install_id`, `sold_to`)
+   but does not write the unit's serial onto the install's machine row
+   (`installs.machines`, same shape as `deals.machines`). When a warehouse unit
+   with a serial is assigned, set that serial on the matching install machine
+   row (match by model; if a row with that model has no serial, fill it; if all
+   matching rows have serials, add or leave per the existing add-machine rules).
+   The install section must show the serial that was on the warehouse unit. If
+   the warehouse unit has a serial, never leave the install serial blank.
+   Unassigning clears only a serial that came from that unit.
+
+Acceptance: a grinder row has no Water field; a brewer's Plug and Water are
+empty with no ghost text; an install row's serial matches the warehouse unit
+just assigned.
