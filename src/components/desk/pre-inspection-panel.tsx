@@ -4,6 +4,7 @@ import { Camera, ChevronLeft, ImagePlus, Images, Trash2, Download } from "lucide
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
+  removeInspectionEquipment,
   addInspectionPhoto,
   copyInspectionNa,
   getInstallInspection,
@@ -37,6 +38,7 @@ import { listTechs } from "@/lib/ops/roster";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { EquipmentCombo } from "./directory-fields";
@@ -192,6 +194,16 @@ function MachineList({
   onOpen: (id: number) => void;
   onSaved: (v: InspectionView) => void;
 }) {
+  const [removing, setRemoving] = useState<InspectionView["machines"][number] | null>(null);
+  const remove = useMutation({
+    mutationFn: (equipmentId: number) => removeInspectionEquipment({ data: { installId: view.installId, equipmentId } }),
+    onSuccess: (next) => {
+      toast.success(`${next.removed} removed from the pre-inspection${next.fromList ? " and the equipment list" : ""}`);
+      setRemoving(null);
+      onSaved(next);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove it"),
+  });
   return (
     <div data-testid="machine-list">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
@@ -206,7 +218,7 @@ function MachineList({
       {view.machines.length ? (
         <ul className="mt-3 divide-y divide-border border-y border-border">
           {view.machines.map((m) => (
-            <li key={m.equipmentId}>
+            <li key={m.equipmentId} className="flex items-stretch">
               <button
                 type="button"
                 data-testid={`inspect-machine-${m.equipmentId}`}
@@ -233,6 +245,16 @@ function MachineList({
                 </span>
                 <InspectionBadge overall={m.overall} pre={m.preInspected} />
               </button>
+              <button
+                type="button"
+                className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label={`Remove ${m.name} from the pre-inspection`}
+                title="Remove from the pre-inspection"
+                onClick={() => setRemoving(m)}
+                data-testid={`remove-machine-${m.equipmentId}`}
+              >
+                <Trash2 className="size-4" />
+              </button>
             </li>
           ))}
         </ul>
@@ -241,6 +263,24 @@ function MachineList({
       )}
       <AddMachine installId={view.installId} onSaved={onSaved} />
       <MetaForm view={view} onSaved={onSaved} />
+      <Dialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
+        <DialogContent className="max-w-md" data-testid="remove-machine-dialog">
+          <DialogTitle>Remove This Machine?</DialogTitle>
+          <DialogDescription>
+            {removing?.name}
+            {removing?.serial ? ` · SN ${removing.serial}` : ""} comes off this pre-inspection, with its checks{removing?.photoCount ? ` and ${removing.photoCount} photo${removing.photoCount === 1 ? "" : "s"}` : ""} for this visit.
+            If it is on this install's equipment list it comes off that list too. Other installs and the account's history are not changed.
+          </DialogDescription>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setRemoving(null)} disabled={remove.isPending}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => removing && remove.mutate(removing.equipmentId)} disabled={remove.isPending} data-testid="remove-machine-confirm">
+              {remove.isPending ? "Removing…" : "Remove"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

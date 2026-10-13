@@ -4,7 +4,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
 import { listedEquipment } from "@/lib/ops/equipment";
-import { parseMachinesJson } from "@/lib/ops/machines";
+import { parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -1016,6 +1016,84 @@ export const addInspectionEquipment = createServerFn({ method: "POST" })
     const view = await readInspection(sql, data.installId);
     if (!view) throw new Error("Install not found");
     return view;
+  });
+
+const removeInput = z.object({ installId: z.number().int().positive(), equipmentId: z.number().int().positive() });
+
+/**
+ * Take a machine off this install's pre-inspection: its checks, photos and note on this visit go with it. When the
+ * machine is on the install's equipment list it comes off that list too, or the next load would put it back. The
+ * account's equipment record stays unless nothing else uses it. An installed project is left as it is.
+ */
+export const removeInspectionEquipment = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof removeInput>) => removeInput.parse(d))
+  .handler(async ({ data, context }): Promise<InspectionView & { removed: string; fromList: boolean }> => {
+    const sql = await ready();
+    await requireInstall(sql, data.installId);
+    await requireUnit(sql, data.installId, data.equipmentId);
+    const row = (
+      await sql.query<{ customer: string; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; complete: boolean }>(
+        "select customer, equipment, serial, power_voltage, machines, complete from installs where id = $1",
+        [data.installId],
+      )
+    )[0]!;
+    if (row.complete === true || String(row.complete) === "true") throw new Error("This install is marked installed. Its pre-inspection is kept as it was.");
+    const unit = (
+      await sql.query<AcctUnit>("select id, catalog_model, equipment_name, serial, serial_key, electrical from account_equipment where id = $1", [data.equipmentId])
+    )[0];
+    const name = unit?.equipment_name || unit?.catalog_model || "Machine";
+
+    // Which machine on the install's list is this unit: the same matching the load uses.
+    const catalog = await catalogNames(sql);
+    const pieces = piecesFrom(row, catalog);
+    const linked = await sql.query<AcctUnit>(
+      `select a.id, a.catalog_model, a.equipment_name, a.serial, a.serial_key, a.electrical
+         from install_inspection_units u join account_equipment a on a.id = u.equipment_id
+        where u.install_id = $1 order by a.id`,
+      [data.installId],
+    );
+    const used = new Set<number>();
+    let at = -1;
+    pieces.forEach((piece, i) => {
+      const hit = claimUnit(piece, [linked], used);
+      if (!hit) return;
+      used.add(hit.id);
+      if (hit.id === data.equipmentId && at < 0) at = i;
+    });
+    if (at >= 0) {
+      const packed = serializeMachines(pieces.filter((_, i) => i !== at));
+      await sql.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1", [
+        data.installId,
+        packed.equipment,
+        packed.machines,
+        packed.serial,
+        packed.powerVoltage,
+      ]);
+    }
+    await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
+    await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
+    await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
+    // The account's record goes only when it was made for this visit and nothing else uses it.
+    await sql
+      .query(
+        `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
+            and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)
+            and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)
+            and not exists (select 1 from modules m where m.assigned_unit_id = a.id)`,
+        [data.equipmentId],
+      )
+      .catch(() => undefined);
+    await sql
+      .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+        data.installId,
+        await deskUsername(sql, context.userId),
+        `removed ${name}${unit?.serial ? ` (SN ${unit.serial})` : ""} from the pre-inspection${at >= 0 ? " and the equipment list" : ""}`,
+      ])
+      .catch(() => undefined);
+    const view = await readInspection(sql, data.installId);
+    if (!view) throw new Error("Install not found");
+    return { ...view, removed: name, fromList: at >= 0 };
   });
 
 const copyInput = z.object({

@@ -862,3 +862,14 @@ Checked with clicks: 10% off $450.00 → $405.00, saved twice and reloaded, stil
 - **To confirm:** Parts Profit is Admin only because it shows cost and margin; the Records report stays open to everyone.
 
 Checked with clicks: parts file (3 rows + a repeated MPN) → window Add 3, Cancel wrote nothing, Approve added 3, the same file again changes nothing. Price file: 104120 $15.75 → $16.50, MZ-BURR-64 $96.60 → $101.40, NOPE-777 No Match, Cancel left prices as they were. Rule 35%: ticket with 2 × 104120 and the 10% ticket discount → Cost $20.48, Sell $48.00, Discount $11.02, Ticket discount $4.80, Margin $22.72; stored at invoicing; Parts Profit shows both MPNs and exports in all three formats.
+
+## 42. Remove Equipment From A Pre-Inspection
+
+Each machine on an install's pre-inspection has a trash button. It asks first, then takes the machine off that pre-inspection with its checks, photos and note for that visit.
+- A machine added at the site (Add equipment) just comes off.
+- A machine that is on the install's equipment list comes off that list too (and the board card), or the next load would put it back. A machine confirmed from a deal reads as not on the Board again on the deal.
+- The account's equipment record is removed only when it was made for this visit and nothing else uses it (no serial, no install date, no other visit, no photos, no module). Other installs and the account's history are not changed.
+- An install already marked installed is left as it was.
+- Each removal is written to the install's activity.
+
+Checked with clicks: install with Mythos and Bunn Axiom-APS, Puqpress added at the site; removed Puqpress (pre-inspection only), then the Axiom (pre-inspection and equipment list); after a reload only Mythos is left, and the install's equipment reads Mythos.
