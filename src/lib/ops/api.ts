@@ -44,7 +44,7 @@ import type {
 } from "./types";
 export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
-import { boardRow, cleanMachine, confirmError, continuable, keepTies, placeRows, projectLabel, projectStatus } from "./deal-board";
+import { boardRow, cleanMachine, confirmError, continuable, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus } from "./deal-board";
 import { listedEquipment, matchModel, catalogModels } from "./equipment";
 import {
   BACK_PALLETS,
@@ -1204,7 +1204,10 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 	// The machine rows are the equipment list: equipment is kept as the joined models so lists and search still read it.
 	let machinesJson = c.machines ?? null;
 	if (data.machines !== undefined) {
-		const packed = serializeMachines(keepTies(Array.isArray(data.machines) ? data.machines : [], parseMachinesJson(c.machines ?? null)));
+		const stored = parseMachinesJson(c.machines ?? null);
+		// Confirmed machines are changed on the Board: the deal keeps them as stored.
+		const onBoard = new Set<string>((await loadBoardProjects(sql)).flatMap((p: any) => p.machines.map((m: any) => m.uid)).filter(Boolean));
+		const packed = serializeMachines(lockConfirmed(keepTies(Array.isArray(data.machines) ? data.machines : [], stored), stored, onBoard));
 		machinesJson = packed.machines;
 		data.equipment = packed.equipment;
 	}

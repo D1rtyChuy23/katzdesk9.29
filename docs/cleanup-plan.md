@@ -807,3 +807,19 @@ Migration 0062 (`repair_quotes`, `repair_quote_lines`). Rules in `repair-quote.t
 - If a rebuild and a ticket each already have their own quote and are then linked, each keeps its own. Nothing is merged.
 
 Gates after sections 34 to 38: typecheck and the production build pass, lint has 0 errors, tests are 274 passing and 9 failing (the same 9 Grok share-card failures). Migrations 0061 to 0063 applied on the local database.
+
+## 39. Branch Check: Training, Menu, Analytics, Deal To Board, Repair Quote
+
+Pulled `desk-oct12-charges-library-analytics` (66a8816 + 3dedef1) and clicked through each feature. What was already right was left alone. Fixed:
+
+- **Training, who can add:** Admin meant the desk admin flag only. Now the Admin role counts too (Library and Education And Training): Admin and Sales add and delete.
+- **Training stays out of model-book tools:** rename, delete, copy-to-variation and MPN tie in the model-book code now skip section 'training' (Move and Set Manual Type already did).
+- **Analytics:** the on-screen table now has its own Account # column, same as the exports.
+- **Grinders with no "grinder" in the name** (Mythos, Bunn G1 / G2 / G3 HD) showed a Water field on the deal. They now read "No water or drain". Pre-inspection checks for them are unchanged (Power and Space either way).
+- **Confirmed machines are read-only on the server too:** saving a deal can no longer change or drop a machine that is on the Board.
+- **Repair Quote with no item list:** a line can be typed and marked Part or Labor ("Or type a line"). No part number is made up. A listed item keeps its own kind.
+- **Rebuild cost:** the timeline row and the window header now say "No quote" when there is none, and show Parts and Labor on hover (the board card already did).
+
+Checked with clicks: five topics, "Axiom Cleaning Deck.pptx" dropped twice (second became "(2)"), still in Importance Of Cleaning after reload and not in any model book; a .txt refused by name; delete behind Manage asks first. Menu order and Handoff under Installs. Analytics Excel, Word and PDF: Word rows equal Excel rows cell for cell (848 rows), every cell found in the PDF (37 pages, header on each, page numbers). New deal with Mythos (Sold) and a Linea; Linea refused until marked; Mythos confirmed (started Project); Linea asked Add To The Board, Start A New Project (Project 2 of 2); board cards carry everything set; install ticket opens once Ready with Not set on the blank recipe. Repair quote on a rebuild linked to a ticket: labor hour + typed part + typed labor = $466.00, Approved locks lines, same quote shows on the ticket, "Cost $466.00 · Approved" on card, timeline and header.
+
+Left as is, to confirm: the local test desk has no NetSuite item list, so picking a part from the list was not clicked here; it uses the same picker as Charges.

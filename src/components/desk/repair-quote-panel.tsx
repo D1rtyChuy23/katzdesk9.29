@@ -4,7 +4,7 @@ import { ClipboardList, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { getRepairQuote, saveRepairQuote, type RepairQuote } from "@/lib/ops/repair-quote-api";
 import { QUOTE_STATUSES, isLaborKind, lineKind, money, quoteLocked, quoteTotals, type QuoteStatus } from "@/lib/ops/repair-quote";
-import { LABOR_ITEM, lineAmount, type PartRef } from "@/lib/ops/charges";
+import { LABOR_ITEM, lineAmount, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
@@ -13,9 +13,18 @@ import { PartPicker } from "./charges-panel";
 import { OpenLink } from "./open-link";
 import { PartThumb } from "./part-thumb";
 
-type DraftLine = { item: string; description: string; qty: string; rate: string; part: PartRef | null };
+type DraftLine = { item: string; description: string; qty: string; rate: string; part: PartRef | null; kind: ChargeKind; typed?: boolean };
 
-const toDraft = (l: RepairQuote["lines"][number]): DraftLine => ({ item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), part: l.part });
+const toDraft = (l: RepairQuote["lines"][number]): DraftLine => ({
+  item: l.item,
+  description: l.description,
+  qty: String(l.qty),
+  rate: l.rate.toFixed(2),
+  part: l.part,
+  kind: l.kind,
+  // Not on the item list: a line typed by hand keeps the Part or Labor it was saved as.
+  typed: !l.part,
+});
 
 const statusTone = (s: QuoteStatus) => (s === "Approved" ? "success" : s === "Declined" ? "danger" : s === "Sent" ? "warn" : "outline");
 
@@ -45,7 +54,15 @@ export function RepairQuotePanel({ jobId, rebuildId }: { jobId?: number; rebuild
   }, [q]);
 
   const save = useMutation({
-    mutationFn: () => saveRepairQuote({ data: { ...target, status, note, lines } }),
+    mutationFn: () =>
+      saveRepairQuote({
+        data: {
+          ...target,
+          status,
+          note,
+          lines: lines.map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.typed ? (isLaborKind(l.kind) ? "labor" : "part") : undefined })),
+        },
+      }),
     onSuccess: (next) => {
       qc.setQueryData(key, next);
       // The same quote may be open on the linked ticket or rebuild, and the rebuild row shows its total.
@@ -61,7 +78,7 @@ export function RepairQuotePanel({ jobId, rebuildId }: { jobId?: number; rebuild
   const exists = q.id != null;
   // Lines follow the saved status: an Approved or Declined quote is changed by setting it back first.
   const locked = exists && quoteLocked(q.status);
-  const totals = quoteTotals(lines.map((l) => ({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0, kind: lineKind(l.item) })));
+  const totals = quoteTotals(lines.map((l) => ({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0, kind: l.kind })));
   const edit = (i: number, patch: Partial<DraftLine>) => {
     setLines((cur) => cur.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
     setDirty(true);
@@ -109,7 +126,7 @@ export function RepairQuotePanel({ jobId, rebuildId }: { jobId?: number; rebuild
       {lines.length ? (
         <ul className="mt-3 space-y-2">
           {lines.map((l, i) => {
-            const labor = isLaborKind(lineKind(l.item));
+            const labor = isLaborKind(l.kind);
             return (
               <li key={i} className="rounded-lg border border-border p-2" data-testid="quote-line" data-kind={labor ? "labor" : "part"}>
                 <div className="flex items-start gap-2">
@@ -162,14 +179,15 @@ export function RepairQuotePanel({ jobId, rebuildId }: { jobId?: number; rebuild
         </p>
       ) : (
         <div className="mt-3 space-y-3">
-          <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", part: null })} data-testid="quote-add-labor">
+          <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", part: null, kind: "labor" })} data-testid="quote-add-labor">
             <Plus className="size-4" />
             Labor Hour
           </Button>
           <PartPicker
             id={`quote-part-${uid}`}
-            onPick={(it) => add({ item: it.item, description: it.description ?? "", qty: "1", rate: it.rate != null ? it.rate.toFixed(2) : "0.00", part: it.part ?? null })}
+            onPick={(it) => add({ item: it.item, description: it.description ?? "", qty: "1", rate: it.rate != null ? it.rate.toFixed(2) : "0.00", part: it.part ?? null, kind: lineKind(it.item) })}
           />
+          <TypedLine onAdd={(item, kind) => add({ item, description: "", qty: "1", rate: kind === "labor" ? "150.00" : "0.00", part: null, kind, typed: true })} uid={uid} />
         </div>
       )}
 
@@ -240,5 +258,42 @@ export function RepairQuotePanel({ jobId, rebuildId }: { jobId?: number; rebuild
         </Button>
       </div>
     </section>
+  );
+}
+
+/**
+ * A line typed by hand, for a part that is not on the item list (or before the list is imported). It is marked
+ * Part or Labor. No part number is made up: the line is the words typed.
+ */
+function TypedLine({ onAdd, uid }: { onAdd: (item: string, kind: "part" | "labor") => void; uid: string }) {
+  const [text, setText] = useState("");
+  const words = text.replace(/\s+/g, " ").trim();
+  const go = (kind: "part" | "labor") => {
+    if (!words) return;
+    onAdd(words, kind);
+    setText("");
+  };
+  return (
+    <div data-testid="quote-typed">
+      <Label htmlFor={`quote-typed-${uid}`}>Or type a line</Label>
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        <Input
+          id={`quote-typed-${uid}`}
+          value={text}
+          maxLength={200}
+          autoComplete="off"
+          placeholder="What the line is, e.g. Group head gasket"
+          className="min-w-0 flex-1"
+          onChange={(e) => setText(e.target.value)}
+          data-testid="quote-typed-text"
+        />
+        <Button type="button" size="sm" variant="outline" disabled={!words} onClick={() => go("part")} data-testid="quote-typed-part">
+          Add As Part
+        </Button>
+        <Button type="button" size="sm" variant="outline" disabled={!words} onClick={() => go("labor")} data-testid="quote-typed-labor">
+          Add As Labor
+        </Button>
+      </div>
+    </div>
   );
 }

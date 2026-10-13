@@ -202,11 +202,12 @@ function Page() {
           <Skeleton className="h-64 w-full" />
         ) : rows.length ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[56rem] text-sm">
+            <table className="w-full min-w-[62rem] text-sm">
               <thead className="text-left text-xs tracking-wide text-muted-foreground uppercase">
                 <tr className="border-b border-border">
                   <th className="px-4 py-2.5 font-medium">Type</th>
                   <th className="px-2 py-2.5 font-medium">Account</th>
+                  <th className="px-2 py-2.5 font-medium">Account #</th>
                   <th className="px-2 py-2.5 font-medium">Date</th>
                   <th className="px-2 py-2.5 font-medium">Status</th>
                   <th className="px-2 py-2.5 font-medium">Rep</th>
@@ -248,7 +249,9 @@ function RecordRow({ row: r }: { row: AnalyticsRow }) {
         <OpenLink entityType={OPEN_AS[r.type]} id={r.id} className="font-medium hover:underline" title="Open this record">
           {r.account || "No account"}
         </OpenLink>
-        {r.accountNumber ? <span className="block text-xs text-muted-foreground tabular">Account # {r.accountNumber}</span> : null}
+      </td>
+      <td className="tabular px-2 py-2 whitespace-nowrap" data-testid="analytics-account-number">
+        {r.accountNumber || <span className="text-muted-foreground">—</span>}
       </td>
       <td className="tabular px-2 py-2 whitespace-nowrap">{r.date || "—"}</td>
       <td className="px-2 py-2">

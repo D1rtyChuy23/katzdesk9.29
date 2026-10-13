@@ -27,7 +27,7 @@ import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { PingButton } from "./ping-button";
 import { RepairQuotePanel } from "./repair-quote-panel";
-import { costGlance } from "@/lib/ops/repair-quote";
+import { costGlance, money } from "@/lib/ops/repair-quote";
 import { OpenLink } from "./open-link";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -172,11 +172,11 @@ export function RebuildSheet({
               <StatusBadge status={row.status} />
               <HealthBadge health={row.health} />
               {row.priority !== "normal" ? <Badge variant="warn">{priorityLabel(row.priority)}</Badge> : null}
-              {row.quote ? (
+              <span title={row.quote ? `Parts ${money(row.quote.parts)} · Labor ${money(row.quote.labor)}` : "No repair quote on this project yet"}>
                 <Badge variant="outline" data-testid="rebuild-sheet-cost">
-                  Cost {costGlance(row.quote)}
+                  {row.quote ? `Cost ${costGlance(row.quote)}` : "No quote"}
                 </Badge>
-              ) : null}
+              </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {row.daysOpen} days open

@@ -39,6 +39,16 @@ export function quoteError(lines: { item: string; qty: unknown; rate: unknown }[
 
 export const lineKind = (item: string): ChargeKind => kindForItem(item);
 
+/**
+ * The kind a quote line is saved as. An item on the NetSuite list keeps its own kind. A line typed by hand (no
+ * item list, or the part is not on it) is Part or Labor as marked. Anything else is read from the item name.
+ */
+export function quoteLineKind(item: string, marked: string | null | undefined, listed: ChargeKind | null | undefined): ChargeKind {
+  if (listed) return listed;
+  if (marked === "labor" || marked === "part") return marked;
+  return lineKind(item);
+}
+
 export type QuoteRef = { id: number; jobId: number | null; rebuildId: number | null };
 
 /**

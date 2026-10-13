@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { cleanQty, cleanRate, type ChargeKind, type PartRef } from "@/lib/ops/charges";
-import { QUOTE_STATUSES, lineKind, quoteError, quoteForJob, quoteForRebuild, quoteLocked, quoteTotals, type QuoteCost, type QuoteLine, type QuoteStatus } from "@/lib/ops/repair-quote";
+import { QUOTE_STATUSES, quoteError, quoteLineKind, quoteForJob, quoteForRebuild, quoteLocked, quoteTotals, type QuoteCost, type QuoteLine, type QuoteStatus } from "@/lib/ops/repair-quote";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("./seed.server");
@@ -141,6 +141,8 @@ const lineSchema = z.object({
   description: z.string().max(500),
   qty: z.union([z.number(), z.string()]),
   rate: z.union([z.number(), z.string()]),
+  /** Typed lines only: marked Part or Labor by hand. Items from the list keep their own kind. */
+  kind: z.enum(["part", "labor"]).optional(),
 });
 
 /**
@@ -184,7 +186,7 @@ export const saveRepairQuote = createServerFn({ method: "POST" })
     }
 
     if (!staysLocked) {
-      const lines = data.lines.map((l) => ({ item: l.item.trim(), description: l.description.trim(), qty: cleanQty(l.qty)!, rate: cleanRate(l.rate)!, kind: lineKind(l.item.trim()) }));
+      const lines = data.lines.map((l) => ({ item: l.item.trim(), description: l.description.trim(), qty: cleanQty(l.qty)!, rate: cleanRate(l.rate)!, marked: l.kind ?? null }));
       const known = lines.length
         ? await sql.query<{ item: string; kind: ChargeKind }>("select item, kind from billing_items where lower(btrim(item)) = any($1::text[])", [lines.map((l) => l.item.toLowerCase())])
         : [];
@@ -196,7 +198,7 @@ export const saveRepairQuote = createServerFn({ method: "POST" })
          select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
            from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
                 as t(item, description, qty, rate, kind, ord)`,
-        [quoteId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => kinds.get(l.item.toLowerCase()) ?? l.kind)],
+        [quoteId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => quoteLineKind(l.item, l.marked, kinds.get(l.item.toLowerCase())))],
       );
     }
 

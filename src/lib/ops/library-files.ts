@@ -42,7 +42,7 @@ async function roleOf(sql: Sql, userId: string) {
     "select is_admin, desk_role, username from desk_accounts where user_id = $1",
     [userId],
   );
-  return { canEdit: flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
+  return { canEdit: flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "admin" || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
 }
 async function requireEditor(sql: Sql, userId: string) {
   const role = await roleOf(sql, userId);
@@ -373,7 +373,8 @@ export const renameLibraryFile = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true; name: string }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const file = await sql.query<{ name: string }>("select name from library_files where id = $1", [data.id]);
+    // Training files keep the name they were dropped with.
+    const file = await sql.query<{ name: string }>("select name from library_files where id = $1 and section <> 'training'", [data.id]);
     if (!file[0]) throw new Error("That file no longer exists.");
     const typed = customFileName(data.name, file[0].name);
     if ("error" in typed) throw new Error(typed.error);
@@ -393,7 +394,7 @@ export const setManualCopy = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const file = await sql.query<{ section: LibrarySection; book_id: number | null; mpn: string | null }>("select section, book_id, mpn from library_files where id = $1 and complete", [data.fileId]);
+    const file = await sql.query<{ section: LibrarySection; book_id: number | null; mpn: string | null }>("select section, book_id, mpn from library_files where id = $1 and complete and section <> 'training'", [data.fileId]);
     if (!file[0]) throw new Error("That file no longer exists.");
     if ((file[0].mpn ?? "").trim()) throw new Error("A file tied to one MPN is not copied to other variations.");
     const books = (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books")).map((b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "" }));
@@ -471,7 +472,7 @@ export const tieOfficialFile = createServerFn({ method: "POST" })
     const sql = await ready();
     await requireEditor(sql, context.userId);
     const file = (await sql.query<{ book_id: number | null; mpn: string | null; section: LibrarySection }>(
-      "select book_id, mpn, section from library_files where id = $1 and complete",
+      "select book_id, mpn, section from library_files where id = $1 and complete and section <> 'training'",
       [data.fileId],
     ))[0];
     if (!file) throw new Error("That file no longer exists.");
@@ -627,6 +628,7 @@ export const deleteLibraryFile = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    await sql.query("delete from library_files where id = $1", [data.id]);
+    // Training files are deleted from Education And Training (Admin and Sales), not from a model book.
+    await sql.query("delete from library_files where id = $1 and section <> 'training'", [data.id]);
     return { ok: true };
   });

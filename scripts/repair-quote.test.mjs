@@ -72,3 +72,12 @@ test("the rebuild row shows the total and the status", () => {
   assert.equal(costGlance(null), "No quote");
   assert.equal(costGlance({ parts: 890, labor: 350, total: 1240, status: "Approved", lines: 4 }), "$1,240.00 · Approved");
 });
+
+test("a typed line keeps the Part or Labor it was marked; a listed item keeps its own kind", async () => {
+  const { quoteLineKind } = await import("../src/lib/ops/repair-quote.ts");
+  assert.equal(quoteLineKind("Group head gasket", "part", null), "part");
+  assert.equal(quoteLineKind("Descale and rebuild boiler", "labor", null), "labor");
+  assert.equal(quoteLineKind("Some listed part", "labor", "part"), "part");
+  assert.equal(quoteLineKind("Service : SERVICELABOR", null, null), "labor");
+  assert.equal(quoteLineKind("Group head gasket", null, null), "part");
+});

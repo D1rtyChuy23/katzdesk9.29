@@ -38,6 +38,11 @@ test("a machine is not confirmed until it is marked Sold or Loaned", () => {
 test("a grinder has no water or drain; a brewer and an espresso machine need water", () => {
   assert.equal(waterNeed("BUNN G9-2T HD"), "none");
   assert.equal(waterNeed("Mazzer Robur"), "none");
+  // Grinders whose names do not say "grinder".
+  assert.equal(waterNeed("Mythos"), "none");
+  assert.equal(waterNeed("Bunn G2 HD, BLK"), "none");
+  assert.equal(waterNeed("Bunn G9-2 HD Dual Portion Grinder"), "none");
+  assert.equal(waterNeed("Bunn H5X Element 120V 1800W"), "optional");
   assert.equal(waterNeed("BUNN Axiom DV-APS"), "required");
   assert.equal(waterNeed("La Marzocco Linea PB"), "required");
   assert.equal(waterNeed("Milk Fridge"), "optional");
@@ -168,4 +173,19 @@ test("a window opened before a machine was confirmed does not drop its tie when 
   assert.equal(kept[0].serial, "A");
   // Nothing stored, nothing invented.
   assert.deepEqual(keepTies([{ equipment: "X" }], []), [{ equipment: "X" }]);
+});
+
+test("a confirmed machine is read-only on the deal: the stored row wins and is never dropped", async () => {
+  const { lockConfirmed } = await import("../src/lib/ops/deal-board.ts");
+  const stored = [
+    { equipment: "Mythos", serial: "A1", powerVoltage: "120V", uid: "u1" },
+    { equipment: "Linea", serial: "", powerVoltage: "", uid: "" },
+  ];
+  const onBoard = new Set(["u1"]);
+  const sent = [{ equipment: "Mythos", serial: "CHANGED", powerVoltage: "208V", uid: "u1" }, { equipment: "Linea", serial: "L9", powerVoltage: "208V", uid: "" }];
+  assert.deepEqual(lockConfirmed(sent, stored, onBoard).map((m) => m.serial), ["A1", "L9"]);
+  // a window that left the confirmed row out keeps it
+  assert.deepEqual(lockConfirmed([sent[1]], stored, onBoard).map((m) => m.equipment), ["Linea", "Mythos"]);
+  // a tie whose board row is gone is not held
+  assert.equal(lockConfirmed(sent, stored, new Set())[0].serial, "CHANGED");
 });

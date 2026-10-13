@@ -47,11 +47,13 @@ const BREWER_NAMES = /\bfetco\b|\bbravilor\b|\bsego\b|\bsn\s*:?\s*(itcb|axap|itb
 // Espresso models written without the maker: Linea, Strada, GS3, Classe 9, LM…; Eversys e4 / e4s without the apostrophe.
 const ESPRESSO_MODELS = /\blinea\b|\bstrada\b|\bgs3\b|\bclasse\s*\d|\blm\b|\bappia\b|\baurelia\b|\bmirage\b|\bkb90\b/i;
 const EVERSYS_SHORT = /\be[2468][ms]?\b/i;
+// Grinders on the equipment list whose names do not say "grinder": Mythos, and the Bunn G1 / G2 / G3 HD.
+const GRINDER_MODELS = /\bmythos\b|\bbunn\s+g[1-3]\b/i;
 
 export function unitType(name: string | null | undefined): UnitType {
   const model = (name ?? "").trim();
   if (!model) return "other";
-  if (isGrinder({ model })) return "grinder";
+  if (isGrinder({ model }) || GRINDER_MODELS.test(model)) return "grinder";
   if (isEversysMachine(model) || EVERSYS_SHORT.test(model) || isEspresso({ model }) || ESPRESSO_MODELS.test(model)) return "espresso";
   if (BREWER_NAMES.test(model)) return "brewer";
   return "other";

@@ -33,7 +33,7 @@ async function roleOf(sql: Sql, userId: string) {
     "select is_admin, desk_role, username from desk_accounts where user_id = $1",
     [userId],
   );
-  return { canEdit: flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
+  return { canEdit: flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "admin" || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
 }
 
 function newToken(): string {

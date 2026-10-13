@@ -145,6 +145,17 @@ export function keepTies<T extends Pick<BoardMachine, "equipment" | "uid" | "con
   });
 }
 
+/**
+ * A confirmed machine is changed on the Board, not on the deal. Rows the Board holds (by their tie) are saved as
+ * they are stored, whatever a window sends, and a window that leaves one out does not take it off the deal.
+ */
+export function lockConfirmed<T extends Pick<BoardMachine, "uid">>(incoming: T[], stored: T[], onBoard: Set<string>): T[] {
+  const held = (m: T) => !!m.uid && onBoard.has(m.uid);
+  const out = incoming.map((m) => (held(m) ? (stored.find((s) => s.uid === m.uid) ?? m) : m));
+  for (const s of stored) if (held(s) && !out.some((m) => m.uid === s.uid)) out.push(s);
+  return out;
+}
+
 export type ProjectStatus = "In Prep" | "Ready" | "Installed";
 
 export function projectStatus(p: { installed: boolean; equipStatus: string | null | undefined; overall: InspectionOverall | null | undefined }): ProjectStatus {
