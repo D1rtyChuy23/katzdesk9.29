@@ -179,6 +179,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
                   </p>
                 </div>
               </div>
+              {/* Admin: cost and margin on a part line, from Our Discount Rule. Shown for the saved lines. */}
+              {!dirty && c.profit?.[i] ? <LineProfitRow p={c.profit[i]!} /> : null}
             </li>
           ))}
         </ul>
@@ -362,5 +364,34 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
         </ul>
       ) : null}
     </div>
+  );
+}
+
+function LineProfitRow({ p }: { p: NonNullable<NonNullable<TicketCharges["profit"]>[number]> }) {
+  const source = p.source === "rule" ? "Our Discount Rule" : p.source === "purchase" ? "NetSuite Purchase Price" : "no cost on file";
+  return (
+    <p
+      className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 rounded-md bg-muted/50 px-2 py-1.5 text-xs text-muted-foreground tabular"
+      title={`Cost from ${source}${p.stored ? ", stored when invoiced" : ""}`}
+      data-testid="charge-profit"
+    >
+      <span>
+        Cost <span className="font-medium text-foreground">{p.cost == null ? "Not set" : money(p.cost)}</span>
+      </span>
+      <span>
+        Sell <span className="font-medium text-foreground">{money(p.sell)}</span>
+      </span>
+      <span>
+        Discount <span className="font-medium text-foreground">{p.ourDiscount == null ? "—" : money(p.ourDiscount)}</span>
+      </span>
+      {p.ticketDiscount ? <span>Ticket discount −{money(p.ticketDiscount)}</span> : null}
+      <span>
+        Margin{" "}
+        <span className={cn("font-medium", p.margin != null && p.margin < 0 ? "text-destructive" : "text-foreground")}>
+          {p.margin == null ? "—" : `${money(p.margin)}${p.marginPct != null ? ` · ${p.marginPct}%` : ""}`}
+        </span>
+      </span>
+      {p.stored ? <span className="text-success">Stored at invoicing</span> : null}
+    </p>
   );
 }

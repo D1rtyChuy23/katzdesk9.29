@@ -1,4 +1,6 @@
 import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withDiscountRows, type Discount } from "./discount";
+import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
+import { loadDiscountRule } from "./part-pricing-api";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -16,6 +18,7 @@ import {
   kindForItem,
   normalizePartNo,
   priceChange,
+  round2,
   searchItems,
   type ItemImportColumns,
   type PriceChange,
@@ -112,29 +115,49 @@ export type TicketCharges = {
   /** The total after the discount. */
   total: number;
   state: BillingState;
+  /**
+   * Admin only: cost, sell, discount and margin on each line that has a part (same order as lines; null for trip,
+   * labor and lines with no part). Stored when the ticket is invoiced; worked out live before that.
+   */
+  profit: (LineProfitView | null)[] | null;
+  /** Our Discount Rule as it reads now, for the Admin's view. */
+  ruleLabel: string | null;
 };
 
-async function loadCharges(sql: Sql, jobId: number): Promise<TicketCharges> {
-  const job = (await sql.query<{ po: string | null; ns_so: string | null; billed_at: string | null; discount_kind: string | null; discount_value: string | null }>(
-    "select po, ns_so, billed_at, discount_kind, discount_value from service_jobs where id = $1",
-    [jobId],
-  ))[0];
-  if (!job) throw new Error("That ticket is no longer on the list.");
-  const rows = await sql.query<{
-    item: string;
-    description: string | null;
-    qty: string;
-    rate: string;
-    kind: ChargeKind;
-    pid: number | null;
-    sku: string | null;
-    mfr_part: string | null;
-    has_image: boolean | null;
-    image_version: string | null;
-  }>(
-    `select c.item, c.description, c.qty, c.rate, c.kind,
+export type LineProfitView = LineProfit & { mpn: string | null; listPrice: number | null; stored: boolean };
+
+type ChargeRow = {
+  id: number;
+  item: string;
+  description: string | null;
+  qty: string;
+  rate: string;
+  kind: ChargeKind;
+  pid: number | null;
+  sku: string | null;
+  mfr_part: string | null;
+  has_image: boolean | null;
+  image_version: string | null;
+  p_list: string | null;
+  p_cost: string | null;
+  s_mpn: string | null;
+  s_list: string | null;
+  s_unit_cost: string | null;
+  s_source: string | null;
+  s_our: string | null;
+  s_ticket: string | null;
+  s_margin: string | null;
+  priced_at: string | null;
+};
+
+async function chargeRows(sql: Sql, jobId: number): Promise<ChargeRow[]> {
+  return sql.query<ChargeRow>(
+    `select c.id, c.item, c.description, c.qty, c.rate, c.kind,
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
-            case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version
+            case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version,
+            p.list_price as p_list, p.cost as p_cost,
+            c.mpn as s_mpn, c.list_price as s_list, c.unit_cost as s_unit_cost, c.cost_source as s_source,
+            c.our_discount as s_our, c.ticket_discount as s_ticket, c.margin as s_margin, c.priced_at
        from ticket_charges c
        left join lateral (
          select * from billing_items b
@@ -146,6 +169,51 @@ async function loadCharges(sql: Sql, jobId: number): Promise<TicketCharges> {
       order by c.sort, c.id`,
     [jobId],
   );
+}
+
+const num = (v: string | null) => (v == null ? null : Number(v));
+/** A ticket line "has a part" when its item is on the parts list and it is not trip or labor. */
+const isPartLine = (r: Pick<ChargeRow, "pid" | "kind">) => r.pid != null && r.kind !== "trip" && r.kind !== "labor";
+
+/** Cost, sell, discount and margin per part line: stored when invoiced, else worked out from the part and the rule. */
+function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null): (LineProfitView | null)[] {
+  const shares = discountShares(rows.map((r) => round2(Number(r.qty) * Number(r.rate))), off);
+  return rows.map((r, i) => {
+    if (!isPartLine(r)) return null;
+    const qty = Number(r.qty);
+    if (r.priced_at) {
+      const sell = round2(qty * Number(r.rate));
+      const unit = num(r.s_unit_cost);
+      const ticketDiscount = num(r.s_ticket) ?? 0;
+      const margin = num(r.s_margin);
+      const net = sell - ticketDiscount;
+      return {
+        qty,
+        unitCost: unit,
+        cost: unit == null ? null : round2(qty * unit),
+        sell,
+        ourDiscount: num(r.s_our),
+        ticketDiscount,
+        margin,
+        marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100),
+        source: (r.s_source as LineProfit["source"]) ?? "none",
+        mpn: r.s_mpn,
+        listPrice: num(r.s_list),
+        stored: true,
+      };
+    }
+    const p = lineProfit({ qty, rate: Number(r.rate) }, { listPrice: num(r.p_list), cost: num(r.p_cost) }, rule, shares[i] ?? 0);
+    return { ...p, mpn: r.mfr_part, listPrice: num(r.p_list), stored: false };
+  });
+}
+
+async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<TicketCharges> {
+  const job = (await sql.query<{ po: string | null; ns_so: string | null; billed_at: string | null; discount_kind: string | null; discount_value: string | null }>(
+    "select po, ns_so, billed_at, discount_kind, discount_value from service_jobs where id = $1",
+    [jobId],
+  ))[0];
+  if (!job) throw new Error("That ticket is no longer on the list.");
+  const rows = await chargeRows(sql, jobId);
   const lines = rows.map((r) => ({
     item: r.item,
     description: r.description ?? "",
@@ -157,6 +225,7 @@ async function loadCharges(sql: Sql, jobId: number): Promise<TicketCharges> {
   const discount: Discount | null =
     isDiscountKind(job.discount_kind) && Number(job.discount_value) > 0 ? { kind: job.discount_kind, value: Number(job.discount_value) } : null;
   const totals = applyDiscount(chargesTotal(lines), discount);
+  const rule = showCost ? await loadDiscountRule(sql) : null;
   return {
     jobId,
     po: job.po ?? "",
@@ -166,13 +235,89 @@ async function loadCharges(sql: Sql, jobId: number): Promise<TicketCharges> {
     discount,
     ...totals,
     state: billingState({ lineCount: lines.length, nsSo: job.ns_so }),
+    profit: showCost ? profitFor(rows, totals.off, rule) : null,
+    ruleLabel: showCost ? ruleLabel(rule) : null,
   };
+}
+
+/**
+ * Every part line on invoiced tickets (a Sales Order number entered) billed in the range, with its cost, sell,
+ * discount and margin. Lines invoiced before costs were stored are worked out from the part and the rule as they are
+ * now, and counted as live.
+ */
+export async function invoicedPartLines(sql: Sql, range: { from: string | null; to: string | null }): Promise<{ lines: (ProfitLine & { live: boolean })[] }> {
+  const jobs = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
+    `select j.id, j.discount_kind, j.discount_value from service_jobs j
+      where j.ns_so is not null and j.duplicate_of is null
+        and ($1::date is null or coalesce(j.billed_at::date, j.completed_at::date) >= $1::date)
+        and ($2::date is null or coalesce(j.billed_at::date, j.completed_at::date) <= $2::date)
+        and exists (select 1 from ticket_charges c where c.job_id = j.id)
+      order by j.id`,
+    [range.from || null, range.to || null],
+  );
+  const rule = await loadDiscountRule(sql);
+  const out: (ProfitLine & { live: boolean })[] = [];
+  for (const j of jobs) {
+    const rows = await chargeRows(sql, Number(j.id));
+    const lines = rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate) }));
+    const discount: Discount | null = isDiscountKind(j.discount_kind) && Number(j.discount_value) > 0 ? { kind: j.discount_kind, value: Number(j.discount_value) } : null;
+    const off = applyDiscount(chargesTotal(lines), discount).off;
+    const profit = profitFor(rows, off, rule);
+    rows.forEach((r, i) => {
+      const p = profit[i];
+      if (!p) return;
+      out.push({
+        mpn: p.mpn ?? r.mfr_part ?? "",
+        sku: r.sku ?? r.item,
+        description: r.description ?? "",
+        qty: p.qty,
+        cost: p.cost,
+        sell: p.sell,
+        ourDiscount: p.ourDiscount,
+        ticketDiscount: p.ticketDiscount,
+        margin: p.margin,
+        live: !p.stored,
+      });
+    });
+  }
+  return { lines: out };
+}
+
+/**
+ * When a ticket is invoiced, store on each part line its MPN, manufacturer price, cost, our discount, its share of
+ * the ticket discount and its margin, from the part and Our Discount Rule as they are now. Clearing the Sales
+ * Order clears them, so a re-bill stores fresh ones.
+ */
+async function storeInvoicedProfit(sql: Sql, jobId: number, invoiced: boolean) {
+  if (!invoiced) {
+    await sql.query(
+      "update ticket_charges set mpn = null, list_price = null, unit_cost = null, cost_source = null, our_discount = null, ticket_discount = null, margin = null, priced_at = null where job_id = $1",
+      [jobId],
+    );
+    return;
+  }
+  const cur = await loadCharges(sql, jobId);
+  const rows = await chargeRows(sql, jobId);
+  const fresh = rows.map((r) => ({ ...r, priced_at: null }));
+  const profit = profitFor(fresh, cur.off, await loadDiscountRule(sql));
+  for (let i = 0; i < rows.length; i++) {
+    const p = profit[i];
+    if (!p) continue;
+    await sql.query(
+      `update ticket_charges set mpn = $2, list_price = $3, unit_cost = $4, cost_source = $5, our_discount = $6, ticket_discount = $7, margin = $8, priced_at = now()
+        where id = $1`,
+      [rows[i].id, p.mpn, p.listPrice, p.unitCost, p.source, p.ourDiscount, p.ticketDiscount, p.margin],
+    );
+  }
 }
 
 export const getTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { jobId: number }) => z.object({ jobId: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }): Promise<TicketCharges> => loadCharges(await ready(), data.jobId));
+  .handler(async ({ data, context }): Promise<TicketCharges> => {
+    const sql = await ready();
+    return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
+  });
 
 const lineSchema = z.object({
   item: z.string().max(200),
@@ -243,7 +388,7 @@ export const saveTicketCharges = createServerFn({ method: "POST" })
       context.userId,
       `charges: ${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountLabel(typed.discount)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`,
     );
-    return loadCharges(sql, data.jobId);
+    return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
   });
 
 /** Record the NetSuite Sales Order the billing script made for this ticket. Blank clears it. */
@@ -260,7 +405,8 @@ export const setTicketSalesOrder = createServerFn({ method: "POST" })
       so,
     ]);
     await logJob(sql, data.jobId, context.userId, so ? `billed on ${so}` : "cleared Sales Order number");
-    return loadCharges(sql, data.jobId);
+    await storeInvoicedProfit(sql, data.jobId, !!so);
+    return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
   });
 
 // ---- Item list and price import (Admin) ----------------------------------------------------------------

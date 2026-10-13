@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { FileSpreadsheet, FileText, FileType } from "lucide-react";
 import { toast } from "sonner";
 import { downloadAnalytics, getAnalytics } from "@/lib/ops/analytics-api";
+import { downloadPartsProfit, getPartsProfit } from "@/lib/ops/parts-profit-api";
+import { getMyAccess } from "@/lib/ops/access";
 import { ANALYTICS_LABEL, ANALYTICS_TYPES, NO_REP, type AnalyticsFilters, type AnalyticsRow, type AnalyticsType, type ExportFormat } from "@/lib/ops/analytics";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { formatRep } from "@/lib/ops/rep-match";
@@ -40,7 +42,27 @@ const OPEN_AS: Record<AnalyticsType, string> = { installs: "install", service: "
 
 const PAGE = 100;
 
+type ReportView = "records" | "profit";
+
 function Page() {
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const isAdmin = !!me.data?.isAdmin || me.data?.role === "admin";
+  const [view, setView] = useState<ReportView>("records");
+  // Parts Profit shows cost and margin, so it is Admin only; everyone else sees the records report.
+  const switcher = isAdmin ? (
+    <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Report" data-testid="analytics-report-switch">
+      <FilterChip selected={view === "records"} onClick={() => setView("records")} data-testid="analytics-view-records">
+        Records
+      </FilterChip>
+      <FilterChip selected={view === "profit"} onClick={() => setView("profit")} data-testid="analytics-view-profit">
+        Parts Profit
+      </FilterChip>
+    </div>
+  ) : null;
+  return view === "profit" && isAdmin ? <PartsProfitView switcher={switcher} /> : <RecordsView switcher={switcher} />;
+}
+
+function RecordsView({ switcher }: { switcher: ReactNode }) {
   const today = todayChicago();
   const [range, setRange] = useState<RangeId>("year");
   const [dates, setDates] = useState(() => rangeDates("year", today));
@@ -85,6 +107,7 @@ function Page() {
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Installs, service, PMs, TLC and rebuilds in one list, with account, date, status and rep. An export holds the same records shown here.
           </p>
+          {switcher}
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <ActionMenu label="Export" testId="analytics-export">
@@ -266,5 +289,159 @@ function RecordRow({ row: r }: { row: AnalyticsRow }) {
         </span>
       </td>
     </tr>
+  );
+}
+
+const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+/** Parts Profit: invoiced part lines per MPN, with qty, cost, sell, discount and margin. Same three exports. */
+function PartsProfitView({ switcher }: { switcher: ReactNode }) {
+  const today = todayChicago();
+  const [range, setRange] = useState<RangeId>("year");
+  const [dates, setDates] = useState(() => rangeDates("year", today));
+  const [q, setQ] = useState("");
+  const [term, setTerm] = useState("");
+  const [shown, setShown] = useState(PAGE);
+  useEffect(() => {
+    const t = setTimeout(() => setTerm(q.trim()), 250);
+    return () => clearTimeout(t);
+  }, [q]);
+  const filters = { from: dates.from || null, to: dates.to || null, q: term || null };
+  const view = useQuery({ queryKey: ["parts-profit", filters], queryFn: () => getPartsProfit({ data: filters }), placeholderData: keepPreviousData });
+  const file = useMutation({
+    mutationFn: (format: ExportFormat) => downloadPartsProfit({ data: { filters, format } }),
+    onSuccess: (f) => {
+      downloadBase64(f.filename, f.mime, f.base64);
+      toast.success(`${f.filename} · ${f.records} MPN${f.records === 1 ? "" : "s"}`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not build the file"),
+  });
+  const building = (format: ExportFormat) => file.isPending && file.variables === format;
+  const d = view.data;
+  const rows = d?.rows ?? [];
+  const t = d?.totals;
+  return (
+    <div data-testid="parts-profit">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Analytics</h1>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            Parts Profit: every part on an invoiced ticket, by MPN. Cost comes from Our Discount Rule (or the NetSuite Purchase Price), and is stored when the
+            ticket is invoiced. Margin is sell, less the ticket discount, less cost.
+          </p>
+          {switcher}
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <ActionMenu label="Export" testId="profit-export">
+            <ActionButton icon={FileText} busy={building("pdf")} busyLabel="Building…" onClick={() => file.mutate("pdf")} data-testid="profit-export-pdf">
+              PDF
+            </ActionButton>
+            <ActionButton icon={FileSpreadsheet} busy={building("xlsx")} busyLabel="Building…" onClick={() => file.mutate("xlsx")} data-testid="profit-export-xlsx">
+              Excel
+            </ActionButton>
+            <ActionButton icon={FileType} busy={building("docx")} busyLabel="Building…" onClick={() => file.mutate("docx")} data-testid="profit-export-docx">
+              Word
+            </ActionButton>
+          </ActionMenu>
+        </div>
+      </header>
+
+      <StatRow>
+        <StatCard label="Sell" value={t ? money(t.sell) : "…"} hint={t ? `${t.qty} invoiced · ${t.lines} line${t.lines === 1 ? "" : "s"}` : ""} />
+        <StatCard label="Cost" value={t ? money(t.cost) : "…"} hint={t?.noCost ? `${t.noCost} line${t.noCost === 1 ? "" : "s"} with no cost` : "Every line has a cost"} />
+        <StatCard label="Discount" value={t ? money(t.ourDiscount) : "…"} hint={d ? d.rule : ""} />
+        <StatCard label="Ticket Discount" value={t ? money(t.ticketDiscount) : "…"} hint="Given to the customer" />
+        <StatCard label="Margin" value={t ? money(t.margin) : "…"} hint={t?.marginPct != null ? `${t.marginPct}% of net sell` : "—"} tone={t && t.margin < 0 ? "danger" : undefined} />
+      </StatRow>
+
+      <ListToolbar data-testid="profit-toolbar">
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search MPN, SKU or part…" label="Search parts" testId="profit-search" />
+        {RANGES.map((r) => (
+          <FilterChip
+            key={r.id}
+            selected={range === r.id}
+            onClick={() => {
+              setRange(r.id);
+              setDates(rangeDates(r.id, today));
+            }}
+          >
+            {r.label}
+          </FilterChip>
+        ))}
+        <span className="flex shrink-0 items-center gap-2">
+          <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+            From
+            <Input type="date" value={dates.from} max={dates.to || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, from: e.target.value })); }} className="h-9 w-[9.5rem] rounded-full" aria-label="From date" />
+          </label>
+          <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+            To
+            <Input type="date" value={dates.to} min={dates.from || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, to: e.target.value })); }} className="h-9 w-[9.5rem] rounded-full" aria-label="To date" />
+          </label>
+        </span>
+        <ToolbarNote>{rows.length} MPN{rows.length === 1 ? "" : "s"}</ToolbarNote>
+      </ListToolbar>
+      {d ? (
+        <p className="mt-2 text-xs text-muted-foreground" data-testid="profit-scope">
+          {d.scope}
+        </p>
+      ) : null}
+
+      <section className="mt-4 overflow-hidden rounded-xl border border-border bg-card" data-testid="profit-records">
+        {view.isLoading ? (
+          <Skeleton className="h-64 w-full" />
+        ) : rows.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[56rem] text-sm">
+              <thead className="text-left text-xs tracking-wide text-muted-foreground uppercase">
+                <tr className="border-b border-border">
+                  <th className="px-4 py-2.5 font-medium">MPN</th>
+                  <th className="px-2 py-2.5 font-medium">Part</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Qty Invoiced</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Cost</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Sell</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Discount</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Ticket Discount</th>
+                  <th className="px-2 py-2.5 text-right font-medium">Margin</th>
+                  <th className="px-2 py-2.5 pr-4 text-right font-medium">Margin %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.slice(0, shown).map((r) => (
+                  <tr key={`${r.mpn}-${r.sku}`} className="border-b border-border align-top last:border-b-0" data-testid="profit-row">
+                    <td className="px-4 py-2 font-medium">{r.mpn}</td>
+                    <td className="max-w-[16rem] px-2 py-2 text-xs text-muted-foreground">
+                      <span className="block font-medium text-foreground">{r.sku}</span>
+                      <span className="line-clamp-1">{r.description}</span>
+                    </td>
+                    <td className="tabular px-2 py-2 text-right">{r.qty}</td>
+                    <td className="tabular px-2 py-2 text-right">
+                      {money(r.cost)}
+                      {r.noCost ? <span className="block text-[11px] text-warning">{r.noCost} with no cost</span> : null}
+                    </td>
+                    <td className="tabular px-2 py-2 text-right">{money(r.sell)}</td>
+                    <td className="tabular px-2 py-2 text-right">{money(r.ourDiscount)}</td>
+                    <td className="tabular px-2 py-2 text-right">{money(r.ticketDiscount)}</td>
+                    <td className={`tabular px-2 py-2 text-right font-medium ${r.margin < 0 ? "text-destructive" : ""}`}>{money(r.margin)}</td>
+                    <td className="tabular px-2 py-2 pr-4 text-right">{r.marginPct == null ? "—" : `${r.marginPct}%`}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="px-4 py-8 text-sm text-muted-foreground">No parts on invoiced tickets in this range. A ticket counts once its Sales Order number is entered.</p>
+        )}
+        {rows.length > shown ? (
+          <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">
+            <span>
+              Showing {shown} of {rows.length}. An export has all {rows.length}.
+            </span>
+            <Button type="button" size="sm" variant="outline" onClick={() => setShown((n) => n + PAGE)}>
+              Show More
+            </Button>
+          </div>
+        ) : null}
+      </section>
+    </div>
   );
 }

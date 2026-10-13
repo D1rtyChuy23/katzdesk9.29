@@ -844,3 +844,21 @@ Left as is, to confirm: the local test desk has no NetSuite item list, so pickin
 **Order pings.** When a deal changes to Good To Order, every Admin is pinged ("Good To Order · account"); when it is marked Ordered, the deal's sales rep is pinged ("Ordered · account"). The person who clicked is not pinged about their own change. Clicking the ping opens the deal.
 
 Checked with clicks: 10% off $450.00 → $405.00, saved twice and reloaded, still $405.00; 120% refused. Address under Mod Coffeehouse on its service row; pin opens directions, row stays closed. Module QA-BM-OUT swapped for QA-BM-IN on Mod Coffeehouse's Cameo: both trails show the account, unit and the other serial; 2 parts and 1.5 h labor logged. New Module with an existing serial offered Open It and no Add. Lance (sales) marked a deal Good To Order → the Admin got the ping and its click opened the deal; the Admin marked Ordered → Lance got the ping. Lance's Service list showed only his accounts.
+
+## 41. NetSuite Parts Import, Part Pricing, Our Discount Rule, Parts Profit
+
+**Import Parts (NetSuite) (Import menu on Tickets and on Parts, Admin).** Excel with an MPN column (Name, Description, Base Price, Purchase Price, Class read when present). Matched on MPN (case, spaces and dashes ignored). An MPN already on a part updates it; a new MPN adds a part (SKU from Name, else the MPN). Never a second part for one MPN: the same MPN twice in the file keeps the first; an MPN two parts already share, or a new part whose SKU another part has, is shown as Not applied. Blank cells change nothing.
+
+**Update Part Pricing (same menu, Admin).** Excel with MPN and Price (a New Price column wins). Matched on MPN only. The preview lists every row: MPN, part, old price, new price, % change. No Match and shared-MPN rows stay in the preview and are never written.
+- The window asks which price the file holds: **Manufacturer Price** (default; new column `billing_items.list_price`) or **Our Sell Price** (the NetSuite Base Price). **To confirm:** manufacturer price is the right default for a price increase file.
+
+**Approval before it runs.** Both imports open one window: file name, row count, what will change (counts and the line list). Approve runs it; Cancel closes and writes nothing. Reading a file never writes. Each approved run is logged in `part_import_runs` (0067).
+
+**Our Discount Rule (Settings, Admin edits).** Percent off the manufacturer price, or a fixed dollar amount off it per unit, with a note. Cost of a part = manufacturer price less the rule; a part with no manufacturer price uses its NetSuite Purchase Price.
+- On ticket lines that have a part (Admin sees it): Cost, Sell, Discount (ours, off the manufacturer price), the line's share of the ticket discount, and Margin (sell − ticket discount − cost) with %.
+- Stored on the line when the ticket is invoiced (Sales Order number entered), so later price changes do not rewrite it. Clearing the Sales Order clears it.
+
+**Analytics → Parts Profit (Admin).** Invoiced part lines per MPN: MPN, part, Qty Invoiced, Cost, Sell, Discount, Ticket Discount, Margin, Margin %, with date range and search. Export PDF, Excel or Word from one report (same writer as the records report): Word rows equal Excel rows; every cell is in the PDF. Lines invoiced before costs were stored are priced from today's part and rule, and the scope line says how many.
+- **To confirm:** Parts Profit is Admin only because it shows cost and margin; the Records report stays open to everyone.
+
+Checked with clicks: parts file (3 rows + a repeated MPN) → window Add 3, Cancel wrote nothing, Approve added 3, the same file again changes nothing. Price file: 104120 $15.75 → $16.50, MZ-BURR-64 $96.60 → $101.40, NOPE-777 No Match, Cancel left prices as they were. Rule 35%: ticket with 2 × 104120 and the 10% ticket discount → Cost $20.48, Sell $48.00, Discount $11.02, Ticket discount $4.80, Margin $22.72; stored at invoicing; Parts Profit shows both MPNs and exports in all three formats.

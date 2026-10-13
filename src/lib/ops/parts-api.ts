@@ -29,6 +29,8 @@ export type PartRow = {
   description: string | null;
   mpn: string | null;
   rate: number | null;
+  /** Manufacturer price, from Update Part Pricing. */
+  listPrice: number | null;
   kind: ChargeKind;
   hasImage: boolean;
   /** Changes when the photo does; part of the photo's address so a replaced photo is not stale. */
@@ -42,12 +44,13 @@ type Raw = {
   description: string | null;
   mfr_part: string | null;
   rate: string | null;
+  list_price: string | null;
   kind: ChargeKind;
   has_image: boolean;
   image_version: string | null;
 };
 
-const COLS = `id, sku, item, description, mfr_part, rate, kind,
+const COLS = `id, sku, item, description, mfr_part, rate, list_price, kind,
   (image is not null) as has_image,
   case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version`;
 
@@ -58,6 +61,7 @@ const toRow = (r: Raw): PartRow => ({
   description: r.description,
   mpn: r.mfr_part,
   rate: r.rate == null ? null : Number(r.rate),
+  listPrice: r.list_price == null ? null : Number(r.list_price),
   kind: r.kind,
   hasImage: !!r.has_image,
   imageVersion: r.image_version,

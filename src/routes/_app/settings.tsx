@@ -10,6 +10,7 @@ import { usePrefs } from "@/components/desk/prefs-provider";
 import { AppearanceIcon } from "@/components/desk/theme-toggle";
 import { RosterEditor } from "@/components/desk/roster-editor";
 import { RepsEditor } from "@/components/desk/reps-editor";
+import { DiscountRuleEditor } from "@/components/desk/discount-rule-editor";
 
 import { cn } from "@/lib/utils";
 import type { Appearance } from "@/lib/ops/prefs";
@@ -35,6 +36,7 @@ function Page() {
         <PasswordSection />
         <RosterEditor />
         <RepsEditor />
+        <DiscountRuleEditor />
 
 
         <Section

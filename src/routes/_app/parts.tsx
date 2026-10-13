@@ -8,7 +8,9 @@ import { resizeImageToBase64 } from "@/lib/image-resize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PartThumb } from "@/components/desk/part-thumb";
-import { FilterChip } from "@/components/desk/desk-charts";
+import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
+import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
+import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
 
 export const Route = createFileRoute("/_app/parts")({ component: Page });
@@ -17,6 +19,8 @@ const money = (n: number) => n.toLocaleString("en-US", { style: "currency", curr
 
 function Page() {
   const qc = useQueryClient();
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const isAdmin = !!me.data?.isAdmin || me.data?.role === "admin";
   const [q, setQ] = useState("");
   const [term, setTerm] = useState("");
   const [noPhoto, setNoPhoto] = useState(false);
@@ -49,11 +53,21 @@ function Page() {
 
   return (
     <div>
-      <header>
-        <h1 className="font-display text-3xl font-medium tracking-tight">Parts</h1>
-        <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          The NetSuite item list with each part's photo and MPN. The photo you add here is the one the invoice picker shows.
-        </p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Parts</h1>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            The NetSuite item list with each part's photo and MPN. The photo you add here is the one the invoice picker shows.
+          </p>
+        </div>
+        {isAdmin ? (
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <ImportMenu>
+              <ImportPartsButton />
+              <UpdatePricingButton />
+            </ImportMenu>
+          </div>
+        ) : null}
       </header>
 
       <ListToolbar>
@@ -140,6 +154,7 @@ function PartRowView({ row, canEditMpn, onChanged }: { row: PartRow; canEditMpn:
         <p className="text-sm text-muted-foreground" data-testid="part-mpn">
           MPN {row.mpn ? <span className="font-medium text-foreground">{row.mpn}</span> : <span>not set</span>}
           {row.rate != null ? ` · ${money(row.rate)}` : ""}
+          {row.listPrice != null ? <span data-testid="part-list-price"> · Mfr {money(row.listPrice)}</span> : null}
         </p>
         {row.description ? <p className="mt-0.5 text-sm break-words text-muted-foreground">{row.description}</p> : null}
 

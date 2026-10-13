@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useQuery } from "@tanstack/react-query";
@@ -114,6 +115,8 @@ export function JobsPage({
           <ImportMenu>
             {kind === "service" ? <CorrigoImportButton onImported={setReview} /> : null}
             {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ItemListImportButton /> : null}
+            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ImportPartsButton /> : null}
+            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <UpdatePricingButton /> : null}
           </ImportMenu>
           <ActionMenu label="Export">
             <BillingExportButton />
