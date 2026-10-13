@@ -23,8 +23,8 @@ body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(-
 h1 { font-size: 34px; color: var(--brand); margin: 6px 0 4px; line-height: 1.1 }
 h2 { font-size: 24px; color: var(--brand); margin: 4px 0 12px }
 .sub { color: var(--muted); font-size: 14px; max-width: 700px }
-.tiles { display: flex; gap: 12px; margin: 22px 0 18px }
-.tile { flex: 1; background: var(--brand); color: #fff; border-radius: 8px; padding: 14px 12px }
+.tiles { display: flex; gap: 12px; margin: 14px 0 10px }
+.tile { flex: 1; background: var(--brand); color: #fff; border-radius: 8px; padding: 9px 12px }
 .tile b { display: block; font-size: 24px; line-height: 1.1 }
 .tile span { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; opacity: .8 }
 table { border-collapse: collapse; width: 100%; font-size: 12px }
@@ -56,9 +56,11 @@ table.tight { font-size: 10.5px } table.tight td { padding: 3px 6px } table.tigh
 .right { display: flex; flex-direction: column; gap: 10px; flex: 1.1; min-width: 0 }
 .right > .card { flex: none }
 .card.disc td { padding: 4px 6px } .card.disc table { font-size: 10.5px }
+.visit-line { font-size: 12px; font-weight: 700; color: var(--brand); margin: 0 0 8px }
+ul.work { margin: 0 0 0 16px; font-size: 10.5px; line-height: 1.4 }
 .big { font-size: 28px; font-weight: 700; color: var(--brand) }
 .save { color: var(--labor); font-weight: 700; font-size: 13px; margin-top: 8px }
-.note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5 }
+.note { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.4 }
 ul.good { margin: 8px 0 0 18px; font-size: 13px; line-height: 1.7 }
 .foot span:last-child { white-space: nowrap }
 .foot { position: absolute; left: 44px; right: 44px; bottom: 14px; display: flex; justify-content: space-between; gap: 20px; font-size: 9px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 6px }
@@ -78,7 +80,7 @@ function planMonths(machine) {
 
 function intervalText(machine, part) {
   const months = part.visits.map((id) => machine.visits.find((v) => v.id === id).month);
-  return machine.visits.length === 1 ? `Every ${months[0]} months` : `Months ${months.join(", ")}`;
+  return machine.visits.length === 1 ? `${months[0]} months` : `Months ${months.join(", ")}`;
 }
 
 function aggregate(result) {
@@ -152,6 +154,13 @@ export function renderGuideHtml(machine, rates) {
         `<tr><td>Month ${v.month}</td><td>${esc(v.label)}</td><td>${esc(v.services ?? "")}</td><td class="r">${v.hours} hrs</td></tr>`,
     )
     .join("");
+  const workCards = (machine.workPerformed ?? [])
+    .map(
+      (g, i) =>
+        `<div class="card" style="flex:${i === 0 ? 1.6 : 1}"><h3>${esc(g.group)}</h3><ul class="work">${g.items.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>`,
+    )
+    .join("");
+  const visitSummary = machine.visits.map((v) => `${esc(v.label)} · Month ${v.month} · ${v.hours} hrs program labor`).join("  |  ");
   pages.push(
     pageShell(
       machine,
@@ -159,7 +168,7 @@ export function renderGuideHtml(machine, rates) {
       total,
       "Preventive Maintenance Program",
       `<h1>${esc(machine.name)}</h1>
-<p class="sub">${esc(machine.subtitle)} with ${pct}% off PM labor and trip charge for program participants.</p>
+<p class="sub">${esc(machine.subtitle)} · ${pct}% off PM labor and trip.</p>
 <div class="tiles">
 <div class="tile"><b>${planMonths(machine)}</b><span>Month plan</span></div>
 <div class="tile"><b>${machine.visits.length}</b><span>Scheduled PM visit${machine.visits.length > 1 ? "s" : ""}</span></div>
@@ -167,16 +176,21 @@ export function renderGuideHtml(machine, rates) {
 <div class="tile"><b>${$(progLabor)}/hr</b><span>Program labor rate</span></div>
 <div class="tile"><b>${$(progTrip)}</b><span>Program trip charge</span></div>
 </div>
-<table><tr><th>When</th><th>Visit</th><th>Services performed</th><th class="r">Labor</th></tr>${visitRows}</table>
+${
+  workCards
+    ? `<p class="visit-line">${visitSummary}</p><div class="cols">${workCards}</div>`
+    : `<table><tr><th>When</th><th>Visit</th><th>Services performed</th><th class="r">Labor</th></tr>${visitRows}</table>`
+}
 <p class="note">Standard rates: ${$(rates.laborRateCents)}/hr labor and ${$(rates.tripRateCents)} trip. Program rates: ${$(progLabor)}/hr labor and ${$(progTrip)} per visit. The trip charge is included in every total in this guide.</p>`,
     ),
   );
 
   // 2. Parts table + inspect-only
+  const hasWork = machine.parts.some((p) => p.work);
   const partRows = machine.parts
     .map(
       (p) =>
-        `<tr><td>${esc(p.name)}${p.optional ? " <em>(MP models)</em>" : ""}</td><td class="pn">${esc(p.partNo)}</td><td>${esc(intervalText(machine, p))}</td><td class="r">${$(p.unitCents)}${p.qty.perUnit ? ` / ${esc(unit)}` : ""}</td></tr>`,
+        `<tr><td>${esc(p.name)}${p.optional ? " <em>(optional)</em>" : ""}</td><td class="pn">${esc(p.partNo)}</td>${hasWork ? `<td>${esc(p.work ?? "")}</td>` : ""}<td>${esc(intervalText(machine, p))}</td><td class="r">${$(p.unitCents)}${p.qty.perUnit ? ` / ${esc(unit)}` : ""}</td></tr>`,
     )
     .join("");
   const inspectRows = (machine.inspectOnly ?? [])
@@ -189,10 +203,10 @@ export function renderGuideHtml(machine, rates) {
       total,
       "Parts",
       `<h2>PM Kit Contents</h2>
-<div class="cols"><div style="flex:1.7"><table><tr><th>Part</th><th>Part #</th><th>Replaced</th><th class="r">Unit cost</th></tr>${partRows}</table></div>
+<div class="cols"><div style="flex:2.1"><table><tr><th>Part</th><th>Part #</th>${hasWork ? "<th>Work performed</th>" : ""}<th>Replaced every</th><th class="r">Unit cost</th></tr>${partRows}</table></div>
 ${
   inspectRows
-    ? `<div class="card"><h3>Inspected, not included</h3><table><tr><th>Part</th><th>Part #</th><th class="r">Price</th></tr>${inspectRows}</table><p class="note">Not included in the totals. Quoted only if replacement is needed.</p></div>`
+    ? `<div class="card"><h3>Inspected, not included</h3><table><tr><th>Part</th><th>Part #</th><th class="r">Price</th></tr>${inspectRows}</table><p class="note">Checked on every visit (the auto-fill probe is also cleaned and tested). Not included in the totals. Replaced and quoted only if a part fails inspection.</p></div>`
     : ""
 }</div>`,
     ),
@@ -251,8 +265,8 @@ ${
         3 + i,
         total,
         `Configuration ${i + 1} of ${machine.configurations.length}`,
-        `<div class="head"><div><h2>${esc(cfg.label)}</h2><p class="sub">${cfg.units} ${esc(unit)}${cfg.units > 1 ? "s" : ""}${results.length > 1 ? " · " + results.map((x) => esc(x.v.label)).join(" or ") : ""}</p></div><div class="stats">${tiles}</div></div>
-<div class="cols"><div class="card"><h3>Cost by ${multiVisit ? "contract year" : "version"}</h3>${chartSvg(columns)}
+        `<div class="head"><div><h2>${esc(cfg.label)}</h2><p class="sub">${cfg.units} ${esc(unit)}${cfg.units > 1 ? "s" : ""}${results.some((x) => x.v.label !== "Standard") ? " · " + results.map((x) => esc(x.v.label)).join(" or ") : ""}</p></div><div class="stats">${tiles}</div></div>
+<div class="cols"><div class="card"><h3>${multiVisit ? "Cost by contract year" : results.length > 1 ? "Cost by version" : "Annual cost breakdown"}</h3>${chartSvg(columns)}
 <div class="legend"><span><s style="background:var(--parts)"></s>Parts</span><span><s style="background:var(--labor)"></s>Program labor</span><span><s style="background:var(--trip)"></s>Program trip</span></div>
 <table class="tight"><tr><th></th><th class="r">Parts</th><th class="r">Labor</th><th class="r">Trip</th><th class="r">Total</th></tr>${colRows}</table></div>
 <div class="right"><div class="card"><h3>Parts list</h3><table class="tight"><tr><th>Part</th><th>Part #</th>${multiVisit ? "<th>Replaced</th>" : ""}<th class="r">Qty</th><th class="r">Unit</th><th class="r">Ext.</th></tr>${lineRows.join("")}</table></div>${discount}</div></div>`,

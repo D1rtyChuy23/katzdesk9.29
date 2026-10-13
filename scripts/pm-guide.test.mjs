@@ -12,33 +12,29 @@ test("discounted rounds half-up to the cent", () => {
   assert.equal(discounted(12510, 75), 3128);
 });
 
-test("linea totals match the spec table", () => {
-  const std = ["g1", "g2", "g3", "g4"].map((c) => calcConfig(linea, rates, c, "standard").totalCents);
-  const mp = ["g1", "g2", "g3", "g4"].map((c) => calcConfig(linea, rates, c, "mp").totalCents);
-  assert.deepEqual(std, [43191, 45593, 47995, 50397]);
-  assert.deepEqual(mp, [68246, 95703, 123160, 150617]);
+test("linea AV totals match the spec table", () => {
+  const av = ["g1", "g2", "g3", "g4"].map((c) => calcConfig(linea, rates, c, "av").totalCents);
+  assert.deepEqual(av, [43191, 45593, 47995, 50397]);
+});
+
+test("linea guide has no MP content in its data", () => {
+  assert.equal(JSON.stringify(linea).match(/\bMP\b|mpValve|SA600/i), null);
+  assert.ok(linea.configurations.every((c) => c.variants.length === 1 && c.variants[0].id === "av"));
 });
 
 test("linea savings are $337.50 per visit", () => {
-  assert.equal(calcConfig(linea, rates, "g1", "standard").savingsCents, 33750);
+  assert.equal(calcConfig(linea, rates, "g1", "av").savingsCents, 33750);
 });
 
 test("linea labor is 2 hrs at $37.50 and trip is $37.50", () => {
-  const r = calcConfig(linea, rates, "g1", "standard");
+  const r = calcConfig(linea, rates, "g1", "av");
   assert.equal(r.laborCents, 7500);
   assert.equal(r.tripCents, 3750);
 });
 
 test("fixed parts are $295.39", () => {
-  const r = calcConfig(linea, rates, "g1", "standard");
+  const r = calcConfig(linea, rates, "g1", "av");
   assert.equal(r.partsCents - 2402, 29539);
-});
-
-test("mp does not change the standard total", () => {
-  const before = calcConfig(linea, rates, "g2", "standard").totalCents;
-  const noMp = structuredClone(linea);
-  noMp.configurations.forEach((c) => (c.variants = c.variants.filter((v) => v.id === "standard")));
-  assert.equal(calcConfig(noMp, rates, "g2", "standard").totalCents, before);
 });
 
 const mini = (visits) => ({
@@ -54,11 +50,11 @@ test("missing hours throws naming the machine and visit", () => {
 });
 
 test("unknown config, variant or part id throws naming the id", () => {
-  assert.throws(() => calcConfig(linea, rates, "g9", "standard"), /g9/);
+  assert.throws(() => calcConfig(linea, rates, "g9", "av"), /g9/);
   assert.throws(() => calcConfig(linea, rates, "g1", "gold"), /gold/);
   const bad = structuredClone(linea);
-  bad.configurations[0].variants[1].addParts = ["nope"];
-  assert.throws(() => calcConfig(bad, rates, "g1", "mp"), /nope/);
+  bad.configurations[0].variants[0].addParts = ["nope"];
+  assert.throws(() => calcConfig(bad, rates, "g1", "av"), /nope/);
 });
 
 test("trip is charged once per visit", () => {
@@ -93,7 +89,7 @@ test("html has cover + parts + 4 config pages + summary", () => {
 
 test("html shows every expected annual total", () => {
   const html = renderGuideHtml(linea, rates);
-  for (const t of ["$431.91", "$455.93", "$479.95", "$503.97", "$682.46", "$957.03", "$1,231.60", "$1,506.17"]) {
+  for (const t of ["$431.91", "$455.93", "$479.95", "$503.97"]) {
     assert.ok(html.includes(t), `missing ${t}`);
   }
 });
@@ -138,7 +134,7 @@ test("cli builds a 7-page pdf for linea", () => {
 
 test("pdf text contains each annual total", () => {
   const text = execFileSync("pdftotext", ["-layout", pdfOut, "-"], { encoding: "utf8" });
-  for (const t of ["$431.91", "$455.93", "$479.95", "$503.97", "$682.46", "$957.03", "$1,231.60", "$1,506.17"]) {
+  for (const t of ["$431.91", "$455.93", "$479.95", "$503.97"]) {
     assert.ok(text.includes(t), `missing ${t}`);
   }
 });
@@ -165,8 +161,8 @@ const configPage = (html, n) => html.split('<section class="page">')[2 + n]; // 
 test("config page has a cost chart with an axis and a total on every bar", () => {
   const page = configPage(renderGuideHtml(linea, rates), 1);
   const svg = page.slice(page.indexOf("<svg"), page.indexOf("</svg>"));
-  assert.ok(svg.includes("$0") && svg.includes("$1,000"));
-  assert.ok(svg.includes("$431.91") && svg.includes("$682.46"));
+  assert.ok(svg.includes("$0") && svg.includes("$500"));
+  assert.ok(svg.includes("$431.91"));
 });
 
 test("config page shows how labor and trip are discounted on the right", () => {
@@ -191,4 +187,28 @@ test("multi-visit machines chart one column per visit", () => {
   const page = configPage(renderGuideHtml(ev, rates), 1);
   const svg = page.slice(page.indexOf("<svg"), page.indexOf("</svg>"));
   assert.ok(svg.includes("Month 12") && svg.includes("Month 24") && svg.includes("Month 36"));
+});
+
+test("the rendered guide has no MP content anywhere", () => {
+  const html = renderGuideHtml(linea, rates);
+  assert.equal(html.match(/\bMP\b|SA600|paddle/i), null);
+});
+
+test("cover lists the work performed, including the AV model tests", () => {
+  const cover = renderGuideHtml(linea, rates).split('<section class="page">')[1];
+  for (const t of ["Clean and backflush", "Replace group gaskets", "Test shot volumes", "Test DC voltage", "Test flow meter resistance", "AV"]) {
+    assert.ok(cover.includes(t), `cover missing ${t}`);
+  }
+});
+
+test("each priced part says what work is done with it", () => {
+  const parts = renderGuideHtml(linea, rates).split('<section class="page">')[2];
+  for (const t of ["Work performed", "Replace diffuser screens", "Rebuild steam valves", "Replace pressure safety valve"]) {
+    assert.ok(parts.includes(t), `parts page missing ${t}`);
+  }
+});
+
+test("every priced part in the linea data has a work description", () => {
+  assert.ok(linea.parts.every((p) => typeof p.work === "string" && p.work.length > 0));
+  assert.ok(linea.workPerformed.length >= 2);
 });
