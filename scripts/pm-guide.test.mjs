@@ -76,3 +76,46 @@ test("eversys data reproduces the original sample (parts + program labor), with 
   assert.ok(rs.every((r) => r.tripCents === 3 * 3750));
   assert.ok(rs.every((r) => r.totalCents === r.partsCents + r.laborCents + 11250));
 });
+
+import { renderGuideHtml, formatMoney } from "./pm-guide/render.mjs";
+const DISCLAIMER =
+  "Parts pricing is subject to change. Parts costs may be updated at any time, and any price update can affect the final price.";
+
+test("formatMoney", () => {
+  assert.equal(formatMoney(0), "$0.00");
+  assert.equal(formatMoney(150617), "$1,506.17");
+});
+
+test("html has cover + parts + 4 config pages + summary", () => {
+  const html = renderGuideHtml(linea, rates);
+  assert.equal((html.match(/class="page"/g) ?? []).length, 7);
+});
+
+test("html shows every expected annual total", () => {
+  const html = renderGuideHtml(linea, rates);
+  for (const t of ["$431.91", "$455.93", "$479.95", "$503.97", "$682.46", "$957.03", "$1,231.60", "$1,506.17"]) {
+    assert.ok(html.includes(t), `missing ${t}`);
+  }
+});
+
+test("html shows 75% off, $37.50 labor and $37.50 trip", () => {
+  const html = renderGuideHtml(linea, rates);
+  assert.ok(html.includes("75%"));
+  assert.ok(html.includes("$37.50/hr"));
+  assert.ok(html.includes("$37.50 per visit"));
+});
+
+test("every page carries the pricing disclaimer", () => {
+  const html = renderGuideHtml(linea, rates);
+  assert.equal(html.split(DISCLAIMER).length - 1, 7);
+});
+
+test("inspect-only items are listed with prices and marked not included", () => {
+  const html = renderGuideHtml(linea, rates);
+  assert.ok(html.includes("L270/UL") && html.includes("$358.74"));
+  assert.ok(/not included/i.test(html));
+});
+
+test("table cells wrap long text instead of overflowing", () => {
+  assert.ok(renderGuideHtml(linea, rates).includes("overflow-wrap:anywhere"));
+});
