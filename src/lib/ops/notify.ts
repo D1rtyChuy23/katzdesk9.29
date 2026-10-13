@@ -540,3 +540,48 @@ export const markNotificationRead = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+/** The ping text for an order step on a deal: the account and the status. */
+export function dealOrderPingBody(step: "gto" | "ordered", customer: string, who: string): string {
+  return step === "gto"
+    ? `Good To Order · ${customer}. ${who} marked this deal good to order.`
+    : `Ordered · ${customer}. ${who} marked the equipment ordered.`;
+}
+
+/**
+ * Pipeline order pings. Good To Order: every Admin hears it. Ordered: the sales rep assigned to the deal hears it.
+ * The ping carries the account and the status, and a click opens the deal. The person who made the change is
+ * not pinged about their own click.
+ */
+export async function notifyDealOrderStep(
+  sql: Sql,
+  fromUserId: string,
+  deal: { id: number; customer: string; rep: string | null },
+  step: "gto" | "ordered",
+): Promise<string[]> {
+  await ensureTable(sql);
+  const who = await loadFromName(sql, fromUserId);
+  const body = dealOrderPingBody(step, deal.customer, who);
+  const people = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean; desk_role: string | null; username: string | null; email: string | null; name: string | null }>(
+    `select a.user_id, a.is_admin, a.approved, a.desk_role, a.username, a.email, u.name
+       from desk_accounts a left join "user" u on u.id = a.user_id
+      where a.user_id <> $1`,
+    [fromUserId],
+  );
+  const { namesMatchUser } = await import("./lookups");
+  const to = people.filter((p) => {
+    if (!flagOn(p.approved)) return false;
+    if (step === "gto") return flagOn(p.is_admin) || p.desk_role === "admin";
+    // Ordered: the rep on the deal (matched by their name, username or email), not every admin.
+    const rep = (deal.rep ?? "").trim();
+    return !!rep && namesMatchUser({ displayName: p.name, primaryEmail: p.email, username: p.username }, rep);
+  });
+  for (const p of to) {
+    await sql.query(
+      `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
+       values ($1, $2, $3, $4, $5, 'deal', $6)`,
+      [p.user_id, fromUserId, who, body, deal.customer, deal.id],
+    );
+  }
+  return to.map((p) => p.username ?? p.user_id);
+}

@@ -1,3 +1,4 @@
+import { CustomerAddress } from "./customer-address";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { createJob, getJob, listAssets, mergeServiceTickets, unassignAssetFromService, updateJob } from "@/lib/ops/api";
@@ -15,6 +16,8 @@ import {
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { Thread } from "./thread";
+import { ChargesPanel } from "./charges-panel";
+import { RepairQuotePanel } from "./repair-quote-panel";
 import { CustomerCombo, EquipmentMultiCombo, LockedCustomer, useDirectory } from "./directory-fields";
 import { ProviderDispatchBlock } from "./provider-dispatch";
 import { listedEquipment } from "@/lib/ops/equipment";
@@ -131,6 +134,7 @@ export function JobSheet({
                     callType: String(fd.get("callType") || "") || null,
                     status: String(fd.get("status")),
                     technician: String(fd.get("technician") || "") || null,
+                    secondaryTech: String(fd.get("secondaryTech") || "") || null,
                     wo: String(fd.get("wo") || "") || null,
                     scheduled: String(fd.get("scheduled") || "") || null,
                     received: String(fd.get("received") || "") || null,
@@ -189,6 +193,10 @@ export function JobSheet({
                   <TechSelect name="technician" defaultValue={j.technician ?? ""} />
                 </div>
                 <div>
+                  <Label htmlFor="job-secondary-tech">Secondary Tech</Label>
+                  <TechSelect id="job-secondary-tech" name="secondaryTech" defaultValue={j.secondaryTech ?? ""} />
+                </div>
+                <div>
                   <Label>Status</Label>
                   <SelectField name="status" className="mt-1" defaultValue={j.status}>
                     {CALL_STATUSES.map((s) => (
@@ -239,6 +247,8 @@ export function JobSheet({
                   </Button>
                 </div>
               </form>
+              <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+              <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
               <JobPulledUnits jobId={j.id} />
               <Thread entityType={j.kind} entityId={j.id} />
             </SheetBody>
@@ -543,8 +553,12 @@ function BoundCustomer({
   useEffect(() => {
     setValue(defaultValue);
   }, [recordKey, defaultValue]);
-  if (locked) return <LockedCustomer name={defaultValue || "—"} />;
-  return <CustomerCombo name="customer" value={value} onChange={setValue} menuInFlow />;
+  return (
+    <div>
+      {locked ? <LockedCustomer name={defaultValue || "—"} /> : <CustomerCombo name="customer" value={value} onChange={setValue} menuInFlow />}
+      <CustomerAddress customer={locked ? defaultValue : value} />
+    </div>
+  );
 }
 
 function BoundEquipment({

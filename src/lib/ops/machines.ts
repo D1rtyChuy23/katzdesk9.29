@@ -6,7 +6,39 @@ export type MachineSpec = {
   powerVoltage: string;
   /** Recipe chosen for this unit on the equipment row (house or customer). */
   recipeId?: number | null;
+  /** "Sold" or "Loaned". Blank until someone marks it. */
+  ownership?: string;
+  /** Configuration beside the voltage: the plug, and the water line when the unit takes water. */
+  plug?: string;
+  water?: string;
+  /** Coffee selection for this unit. */
+  coffee?: string;
+  /** Ties a deal row to the board row it became when it was confirmed. */
+  uid?: string;
+  /** Deal rows: the day the machine was confirmed. */
+  confirmedAt?: string | null;
+  /** Deal rows: the board project holding the machine now. Worked out on read, never stored. */
+  boardId?: number | null;
 };
+
+/**
+ * The fields beyond model, serial, voltage and recipe. Kept on every read, merge and save so none is dropped.
+ * boardId is the exception on save: it is worked out when a deal is read, so it is carried through a merge in the
+ * window (a confirmed row stays confirmed when another machine is added) but never written.
+ */
+function extras(rec: Record<string, unknown>, keepBoard = false): Partial<MachineSpec> {
+  const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  const out: Partial<MachineSpec> = {};
+  const ownership = text(rec.ownership);
+  if (ownership === "Sold" || ownership === "Loaned") out.ownership = ownership;
+  if (text(rec.plug)) out.plug = text(rec.plug);
+  if (text(rec.water)) out.water = text(rec.water);
+  if (text(rec.coffee)) out.coffee = text(rec.coffee);
+  if (text(rec.uid)) out.uid = text(rec.uid);
+  if (/^\d{4}-\d{2}-\d{2}/.test(text(rec.confirmedAt))) out.confirmedAt = text(rec.confirmedAt).slice(0, 10);
+  if (keepBoard && typeof rec.boardId === "number" && Number.isFinite(rec.boardId)) out.boardId = rec.boardId;
+  return out;
+}
 
 export function parseMachinesJson(raw: string | null | undefined): MachineSpec[] {
   if (!raw?.trim()) return [];
@@ -25,6 +57,7 @@ export function parseMachinesJson(raw: string | null | undefined): MachineSpec[]
         serial: String(rec.serial ?? "").trim(),
         powerVoltage: String(rec.powerVoltage ?? "").trim(),
         recipeId: Number.isFinite(rid) && rid > 0 ? rid : null,
+        ...extras(rec),
       });
     }
     return out;
@@ -55,6 +88,7 @@ export function mergeMachineSpecs(
       serial: hit?.serial ?? "",
       powerVoltage: hit?.powerVoltage ?? "",
       recipeId: hit?.recipeId ?? null,
+      ...(hit ? extras(hit as Record<string, unknown>, true) : {}),
     };
   });
   const jsonHad = fromJson.length > 0;
@@ -82,6 +116,7 @@ export function serializeMachines(specs: MachineSpec[]): {
       serial: s.serial.trim(),
       powerVoltage: s.powerVoltage.trim(),
       ...(s.recipeId ? { recipeId: s.recipeId } : {}),
+      ...extras(s as Record<string, unknown>),
     }))
     .filter((s) => s.equipment);
   if (!clean.length) {

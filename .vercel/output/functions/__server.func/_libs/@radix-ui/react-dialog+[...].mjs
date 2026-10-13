@@ -1826,6 +1826,22 @@ var Dialog = /* @__PURE__ */ __name((props) => {
 		children
 	});
 }, "Dialog");
+var TRIGGER_NAME = "DialogTrigger";
+var DialogTrigger = /* @__PURE__ */ import_react.forwardRef(/* @__PURE__ */ __name(function DialogTrigger2(props, forwardedRef) {
+	const { __scopeDialog, ...triggerProps } = props;
+	const context = useDialogContext(TRIGGER_NAME, __scopeDialog);
+	const composedTriggerRef = useComposedRefs(forwardedRef, context.triggerRef);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.button, {
+		type: "button",
+		"aria-haspopup": "dialog",
+		"aria-expanded": context.open,
+		"aria-controls": context.open ? context.contentId : void 0,
+		"data-state": getState(context.open),
+		...triggerProps,
+		ref: composedTriggerRef,
+		onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
+	});
+}, "DialogTrigger"));
 var PORTAL_NAME = "DialogPortal";
 var [PortalProvider, usePortalContext] = createDialogContext(PORTAL_NAME, { forceMount: void 0 });
 var DialogPortal = /* @__PURE__ */ __name((props) => {
@@ -2018,4 +2034,4 @@ function getState(open) {
 }
 __name(getState, "getState");
 //#endregion
-export { useControllableState as _, DialogOverlay as a, Slot$1 as b, hideOthers as c, Presence as d, Portal as f, Primitive as g, useCallbackRef$1 as h, DialogDescription as i, ReactRemoveScroll as l, DismissableLayer as m, DialogClose as n, DialogPortal as o, FocusScope as p, DialogContent as r, DialogTitle as s, Dialog as t, useFocusGuards as u, useId as v, createSlot as x, useLayoutEffect2 as y };
+export { createSlot as S, Primitive as _, DialogOverlay as a, useLayoutEffect2 as b, DialogTrigger as c, useFocusGuards as d, Presence as f, useCallbackRef$1 as g, DismissableLayer as h, DialogDescription as i, hideOthers as l, FocusScope as m, DialogClose as n, DialogPortal as o, Portal as p, DialogContent as r, DialogTitle as s, Dialog as t, ReactRemoveScroll as u, useControllableState as v, Slot$1 as x, useId as y };

@@ -26,6 +26,8 @@ import { SerialNoticeBanner } from "./serial-notice";
 import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { PingButton } from "./ping-button";
+import { RepairQuotePanel } from "./repair-quote-panel";
+import { costGlance, money } from "@/lib/ops/repair-quote";
 import { OpenLink } from "./open-link";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -118,6 +120,8 @@ export function RebuildSheet({
     onSuccess: () => {
       toast.success("Rebuild saved");
       void qc.invalidateQueries({ queryKey: ["rebuilds"] });
+      // Linking or unlinking a ticket changes which quote this project shares.
+      void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
     },
@@ -168,6 +172,11 @@ export function RebuildSheet({
               <StatusBadge status={row.status} />
               <HealthBadge health={row.health} />
               {row.priority !== "normal" ? <Badge variant="warn">{priorityLabel(row.priority)}</Badge> : null}
+              <span title={row.quote ? `Parts ${money(row.quote.parts)} · Labor ${money(row.quote.labor)}` : "No repair quote on this project yet"}>
+                <Badge variant="outline" data-testid="rebuild-sheet-cost">
+                  {row.quote ? `Cost ${costGlance(row.quote)}` : "No quote"}
+                </Badge>
+              </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {row.daysOpen} days open
@@ -380,6 +389,9 @@ export function RebuildSheet({
               </div>
               <p className="text-xs text-muted-foreground">Updated {formatShortDate(row.updatedAt.slice(0, 10))}</p>
             </form>
+            <div className="border-t border-border">
+              <RepairQuotePanel rebuildId={row.id} key={`quote-${row.id}`} />
+            </div>
             <Thread entityType="rebuild" entityId={row.id} />
           </SheetBody>
         </SheetContent>

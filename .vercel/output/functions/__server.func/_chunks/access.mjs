@@ -1,5 +1,5 @@
 import { n as createServerFn, t as createMiddleware } from "../_libs/@tanstack/start-client-core+[...].mjs";
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 //#region src/lib/auth/middleware.ts
 /**
 * Auth middleware for server functions — the standard way to get the caller's
@@ -69,10 +69,6 @@ function isLiveDeskOwner(username, name, email) {
 	if (/^chuy([._-]|$)/.test(u)) return true;
 	return false;
 }
-/** @deprecated use isLiveDeskOwner */
-function isDeskOwner(username, name, email) {
-	return isLiveDeskOwner(username, name, email);
-}
 async function ensureTable(sql) {
 	await sql.query(`
     create table if not exists desk_accounts (
@@ -139,8 +135,7 @@ async function adminCount(sql) {
 async function realAdminCount(sql) {
 	return (await sql.query("select username from desk_accounts where approved = true and is_admin = true")).filter((r) => !isSandboxQa(r.username)).length;
 }
-async function shouldBootstrapAdmin(sql, username, name, email) {
-	if (isDeskOwner(username, name, email)) return true;
+async function shouldBootstrapAdmin(sql, username) {
 	if (isSandboxQa(username)) return await adminCount(sql) === 0;
 	return await realAdminCount(sql) === 0;
 }
@@ -321,7 +316,7 @@ async function ensureDeskAccount(sql, userId) {
 	}
 	const invite = await findPendingInvite(sql, email, null);
 	const username = await uniqueStubUsername(sql, invite?.username || email?.split("@")[0] || profile.name || "user");
-	const first = await shouldBootstrapAdmin(sql, username, profile.name, email);
+	const first = await shouldBootstrapAdmin(sql, username);
 	const invited = !!invite;
 	const rows = await sql.query(`insert into desk_accounts (user_id, username, email, approved, is_admin, can_add_customers, username_chosen, denied)
      values ($1, $2, $3, $4, $5, $6, false, false)
@@ -405,20 +400,27 @@ var lookupSignIn = createServerFn({ method: "POST" }).validator((d) => d).handle
 	await ensureTable(sql);
 	const emailNorm = raw.includes("@") ? normEmail(raw) : null;
 	const userNorm = emailNorm ? null : cleanUsername(raw).toLowerCase();
-	const row = (await sql.query(`select email, approved, denied from desk_accounts
+	const row = (await sql.query(`select d.user_id, d.email, u.email as auth_email, d.approved, d.denied
+         from desk_accounts d
+         left join "user" u on u.id = d.user_id
        where (
-           ($1::text is not null and email is not null and lower(email) = $1)
-           or ($2::text is not null and lower(username) = $2)
+           ($1::text is not null and (
+             (d.email is not null and lower(d.email) = $1) or (u.email is not null and lower(u.email) = $1)
+           ))
+           or ($2::text is not null and lower(d.username) = $2)
          )
        limit 1`, [emailNorm, userNorm]))[0];
 	if (row) {
 		if (row.denied) {
 			if (!await findPendingInvite(sql, emailNorm ?? raw, userNorm)) throw new Error("This account was denied access.");
 		}
-		if (!row.email) throw new Error("This account has no email on file. Ask an admin to invite you again.");
+		const email = row.auth_email ?? row.email;
+		if (!email) throw new Error("This account has no email on file. Ask an admin to invite you again.");
+		const methods = (await sql.query(`select distinct "providerId" from "account" where "userId" = $1`, [row.user_id])).map((l) => l.providerId === "credential" ? "password" : l.providerId.toLowerCase());
 		return {
-			email: row.email,
-			waiting: !row.approved && !row.denied
+			email,
+			waiting: !row.approved && !row.denied,
+			methods
 		};
 	}
 	const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
@@ -451,7 +453,7 @@ var getMyAccess = createServerFn({ method: "GET" }).middleware([authMiddleware])
 	await ensureTable(sql);
 	const fresh = await ensureDeskAccount(sql, context.userId);
 	const profile = await loadUser(sql, context.userId);
-	if (await shouldBootstrapAdmin(sql, fresh.username, profile.name, profile.email ?? fresh.email) && (!fresh.approved || !fresh.is_admin)) {
+	if (await shouldBootstrapAdmin(sql, fresh.username) && (!fresh.approved || !fresh.is_admin)) {
 		const promoted = await promoteAdmin(sql, context.userId, profile.email);
 		const { canUserEditRoster } = await import("./roster.mjs").then((n) => n.a);
 		const canEdit = await canUserEditRoster(sql, context.userId);
@@ -492,7 +494,7 @@ var registerAccount = createServerFn({ method: "POST" }).middleware([authMiddlew
 	const token = data.token?.trim() || "";
 	const invite = (token ? await findInviteByToken(sql, token) : void 0) ?? await findPendingInvite(sql, email, username);
 	const invited = !!invite;
-	const first = await shouldBootstrapAdmin(sql, username, profile.name, email);
+	const first = await shouldBootstrapAdmin(sql, username);
 	const approved = first || invited;
 	const canAdd = true;
 	const existing = await loadAccess(sql, context.userId);
@@ -772,4 +774,4 @@ var revokeInvite = createServerFn({ method: "POST" }).middleware([authMiddleware
 	return { ok: true };
 });
 //#endregion
-export { setAccountApproved as _, deskMiddleware as a, flagOn as b, isLiveDeskOwner as c, lookupSignIn as d, peekInvite as f, revokeInvite as g, resendInvite as h, denyAccount as i, listDeskAccounts as l, requireAdmin as m, claimInvite as n, getMyAccess as o, registerAccount as p, createInvite as r, grantAllCanAddCustomers as s, checkUsername as t, listDeskInvites as u, setAccountCanAddCustomers as v, setAccountRole as y };
+export { setAccountApproved as _, deskMiddleware as a, flagOn as b, isLiveDeskOwner as c, lookupSignIn as d, peekInvite as f, revokeInvite as g, resendInvite as h, denyAccount as i, listDeskAccounts as l, requireAdmin as m, claimInvite as n, getMyAccess as o, registerAccount as p, createInvite as r, grantAllCanAddCustomers as s, checkUsername as t, listDeskInvites as u, setAccountCanAddCustomers as v, authMiddleware as x, setAccountRole as y };

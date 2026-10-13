@@ -1,3 +1,4 @@
+import type { MachineSpec } from "./machines";
 import type { ClockFlag } from "./clock";
 
 export type JobKind = "service" | "tlc";
@@ -25,8 +26,12 @@ export type ServiceJob = {
   phoneResolved: boolean;
   status: string;
   technician: string | null;
+  /** A second tech on the same ticket; null when there is only one. */
+  secondaryTech: string | null;
   wo: string | null;
   scheduled: string | null;
+  /** Time of day on the scheduled date, "HH:MM"; null until someone sets one on the day board. */
+  scheduledTime: string | null;
   notes: string | null;
   workDone: string | null;
   completedAt: string | null;
@@ -49,6 +54,7 @@ export type PmJob = {
   equipment: string | null;
   style: string | null;
   projected: string | null;
+  scheduledTime: string | null;
   partsStatus: string | null;
   status: string;
   technician: string | null;
@@ -87,6 +93,19 @@ export type ModuleRow = {
   returnByName: string | null;
 };
 
+/** A board card (one install row) a deal's machines sit on, or an open card on the same account they could join. */
+export type DealProject = {
+  id: number;
+  /** "Project", "Project 2 of 3", or "Open install on this account" for a card no deal owns yet. */
+  label: string;
+  status: "In Prep" | "Ready" | "Installed";
+  machineCount: number;
+  equipment: string | null;
+  /** Still in prep or ready: a newly confirmed machine can continue under it. */
+  open: boolean;
+  ownDeal: boolean;
+};
+
 export type Deal = {
   id: number;
   customer: string;
@@ -94,6 +113,12 @@ export type Deal = {
   accountType: string | null;
   dateOfDeal: string | null;
   equipment: string | null;
+  /** Every machine on the deal (model, serial, voltage, Sold or Loaned, configuration). Empty on older deals: read equipment instead. */
+  machines: MachineSpec[];
+  /** The board projects this deal's confirmed machines are on, plus open cards on the account a machine could join. */
+  projects: DealProject[];
+  /** The customer's Account Number, when it has one. */
+  accountNumber?: string | null;
   amount: number | null;
   goodToOrder: boolean;
   ordered: boolean;
@@ -111,11 +136,17 @@ export type Deal = {
 
 export type Install = {
   id: number;
+  /** Sales ticks this once the Tech Request Form has been sent. Never ticked automatically. */
+  trfIssued: boolean;
+  /** The customer's Account Number, when it has one. */
+  accountNumber?: string | null;
   received: string | null;
   customer: string;
   equipment: string | null;
   equipStatus: string | null;
   installDate: string | null;
+  /** Time of day on the install date, "HH:MM"; null until someone sets one on the day board. */
+  scheduledTime: string | null;
   technician: string | null;
   wo: string | null;
   reqsReady: string | null;
@@ -126,10 +157,12 @@ export type Install = {
   paymentStatus: string | null;
   serial: string | null;
   powerVoltage: string | null;
-  machines: { equipment: string; serial: string; powerVoltage: string; recipeId?: number | null }[];
+  machines: MachineSpec[];
   serialNotice: string | null;
   complete: boolean;
   dealId: number | null;
+  /** Set when the card came from a deal: which of that deal's board projects this is. */
+  project?: { n: number; of: number } | null;
   duplicateOf: number | null;
   updatedAt: string;
   flag: ClockFlag | null;
@@ -363,6 +396,10 @@ export type CustomerRecord = DirectoryEntry & {
   aviKatz: boolean;
   accountRep: string | null;
   noRep: boolean;
+  nameLocked?: boolean;
+  removalFlag?: boolean;
+  /** Account Number (text; leading zeros and dashes kept). Unique when filled in. */
+  accountNumber?: string | null;
 };
 
 
@@ -371,6 +408,15 @@ export type CustomerHistory = {
   name: string;
   aviKatz: boolean;
   accountRep: string | null;
+  /** Name applied from the clean customer list and locked. */
+  nameLocked?: boolean;
+  /** Why the rep is blank after the clean list: no sales rep on it, or one KatzDesk does not have. */
+  repFlag?: string | null;
+  /** ID number and address from the clean list. Null for anyone who is not an Admin. */
+  cleanList?: { netsuiteId: string | null; address: string | null } | null;
+  accountNumber?: string | null;
+  /** The viewer may set the account number (Admin role or desk admin). */
+  canEditAccountNumber?: boolean;
   jobs: ServiceJob[];
   pms: PmJob[];
   installs: Install[];

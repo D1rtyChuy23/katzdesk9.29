@@ -13,6 +13,8 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccessRouteImport } from './routes/_app/access'
+import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
+import { Route as AppCustomerNamesRouteImport } from './routes/_app/customer-names'
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
@@ -20,6 +22,7 @@ import { Route as AppLibraryRouteImport } from './routes/_app/library'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppModulesRouteImport } from './routes/_app/modules'
 import { Route as AppNetworkRouteImport } from './routes/_app/network'
+import { Route as AppPartsRouteImport } from './routes/_app/parts'
 import { Route as AppPipelineRouteImport } from './routes/_app/pipeline'
 import { Route as AppPlannerRouteImport } from './routes/_app/planner'
 import { Route as AppPmsRouteImport } from './routes/_app/pms'
@@ -30,6 +33,8 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
 import { Route as AppWarehouseRouteImport } from './routes/_app/warehouse'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiLibraryFileTokenRouteImport } from './routes/api/library-file/$token'
+import { Route as ApiPartImageIdRouteImport } from './routes/api/part-image/$id'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -48,6 +53,16 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppAccessRoute = AppAccessRouteImport.update({
   id: '/access',
   path: '/access',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCustomerNamesRoute = AppCustomerNamesRouteImport.update({
+  id: '/customer-names',
+  path: '/customer-names',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCustomersRoute = AppCustomersRouteImport.update({
@@ -83,6 +98,11 @@ const AppModulesRoute = AppModulesRouteImport.update({
 const AppNetworkRoute = AppNetworkRouteImport.update({
   id: '/network',
   path: '/network',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPartsRoute = AppPartsRouteImport.update({
+  id: '/parts',
+  path: '/parts',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPipelineRoute = AppPipelineRouteImport.update({
@@ -135,11 +155,23 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLibraryFileTokenRoute = ApiLibraryFileTokenRouteImport.update({
+  id: '/api/library-file/$token',
+  path: '/api/library-file/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPartImageIdRoute = ApiPartImageIdRouteImport.update({
+  id: '/api/part-image/$id',
+  path: '/api/part-image/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/customer-names': typeof AppCustomerNamesRoute
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
@@ -147,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/locations': typeof AppLocationsRoute
   '/modules': typeof AppModulesRoute
   '/network': typeof AppNetworkRoute
+  '/parts': typeof AppPartsRoute
   '/pipeline': typeof AppPipelineRoute
   '/planner': typeof AppPlannerRoute
   '/pms': typeof AppPmsRoute
@@ -157,10 +190,14 @@ export interface FileRoutesByFullPath {
   '/tlc': typeof AppTlcRoute
   '/warehouse': typeof AppWarehouseRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
+  '/api/part-image/$id': typeof ApiPartImageIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/customer-names': typeof AppCustomerNamesRoute
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
@@ -168,6 +205,7 @@ export interface FileRoutesByTo {
   '/locations': typeof AppLocationsRoute
   '/modules': typeof AppModulesRoute
   '/network': typeof AppNetworkRoute
+  '/parts': typeof AppPartsRoute
   '/pipeline': typeof AppPipelineRoute
   '/planner': typeof AppPlannerRoute
   '/pms': typeof AppPmsRoute
@@ -179,12 +217,16 @@ export interface FileRoutesByTo {
   '/warehouse': typeof AppWarehouseRoute
   '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
+  '/api/part-image/$id': typeof ApiPartImageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/access': typeof AppAccessRoute
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/customer-names': typeof AppCustomerNamesRoute
   '/_app/customers': typeof AppCustomersRoute
   '/_app/handoff': typeof AppHandoffRoute
   '/_app/installs': typeof AppInstallsRoute
@@ -192,6 +234,7 @@ export interface FileRoutesById {
   '/_app/locations': typeof AppLocationsRoute
   '/_app/modules': typeof AppModulesRoute
   '/_app/network': typeof AppNetworkRoute
+  '/_app/parts': typeof AppPartsRoute
   '/_app/pipeline': typeof AppPipelineRoute
   '/_app/planner': typeof AppPlannerRoute
   '/_app/pms': typeof AppPmsRoute
@@ -203,6 +246,8 @@ export interface FileRoutesById {
   '/_app/warehouse': typeof AppWarehouseRoute
   '/_app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
+  '/api/part-image/$id': typeof ApiPartImageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -210,6 +255,8 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/access'
+    | '/analytics'
+    | '/customer-names'
     | '/customers'
     | '/handoff'
     | '/installs'
@@ -217,6 +264,7 @@ export interface FileRouteTypes {
     | '/locations'
     | '/modules'
     | '/network'
+    | '/parts'
     | '/pipeline'
     | '/planner'
     | '/pms'
@@ -227,10 +275,14 @@ export interface FileRouteTypes {
     | '/tlc'
     | '/warehouse'
     | '/api/auth/$'
+    | '/api/library-file/$token'
+    | '/api/part-image/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/access'
+    | '/analytics'
+    | '/customer-names'
     | '/customers'
     | '/handoff'
     | '/installs'
@@ -238,6 +290,7 @@ export interface FileRouteTypes {
     | '/locations'
     | '/modules'
     | '/network'
+    | '/parts'
     | '/pipeline'
     | '/planner'
     | '/pms'
@@ -249,11 +302,15 @@ export interface FileRouteTypes {
     | '/warehouse'
     | '/'
     | '/api/auth/$'
+    | '/api/library-file/$token'
+    | '/api/part-image/$id'
   id:
     | '__root__'
     | '/_app'
     | '/login'
     | '/_app/access'
+    | '/_app/analytics'
+    | '/_app/customer-names'
     | '/_app/customers'
     | '/_app/handoff'
     | '/_app/installs'
@@ -261,6 +318,7 @@ export interface FileRouteTypes {
     | '/_app/locations'
     | '/_app/modules'
     | '/_app/network'
+    | '/_app/parts'
     | '/_app/pipeline'
     | '/_app/planner'
     | '/_app/pms'
@@ -272,12 +330,16 @@ export interface FileRouteTypes {
     | '/_app/warehouse'
     | '/_app/'
     | '/api/auth/$'
+    | '/api/library-file/$token'
+    | '/api/part-image/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiLibraryFileTokenRoute: typeof ApiLibraryFileTokenRoute
+  ApiPartImageIdRoute: typeof ApiPartImageIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -308,6 +370,20 @@ declare module '@tanstack/react-router' {
       path: '/access'
       fullPath: '/access'
       preLoaderRoute: typeof AppAccessRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/customer-names': {
+      id: '/_app/customer-names'
+      path: '/customer-names'
+      fullPath: '/customer-names'
+      preLoaderRoute: typeof AppCustomerNamesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/customers': {
@@ -357,6 +433,13 @@ declare module '@tanstack/react-router' {
       path: '/network'
       fullPath: '/network'
       preLoaderRoute: typeof AppNetworkRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/parts': {
+      id: '/_app/parts'
+      path: '/parts'
+      fullPath: '/parts'
+      preLoaderRoute: typeof AppPartsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/pipeline': {
@@ -429,11 +512,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/library-file/$token': {
+      id: '/api/library-file/$token'
+      path: '/api/library-file/$token'
+      fullPath: '/api/library-file/$token'
+      preLoaderRoute: typeof ApiLibraryFileTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/part-image/$id': {
+      id: '/api/part-image/$id'
+      path: '/api/part-image/$id'
+      fullPath: '/api/part-image/$id'
+      preLoaderRoute: typeof ApiPartImageIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AppRouteChildren {
   AppAccessRoute: typeof AppAccessRoute
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppCustomerNamesRoute: typeof AppCustomerNamesRoute
   AppCustomersRoute: typeof AppCustomersRoute
   AppHandoffRoute: typeof AppHandoffRoute
   AppInstallsRoute: typeof AppInstallsRoute
@@ -441,6 +540,7 @@ interface AppRouteChildren {
   AppLocationsRoute: typeof AppLocationsRoute
   AppModulesRoute: typeof AppModulesRoute
   AppNetworkRoute: typeof AppNetworkRoute
+  AppPartsRoute: typeof AppPartsRoute
   AppPipelineRoute: typeof AppPipelineRoute
   AppPlannerRoute: typeof AppPlannerRoute
   AppPmsRoute: typeof AppPmsRoute
@@ -455,6 +555,8 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccessRoute: AppAccessRoute,
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppCustomerNamesRoute: AppCustomerNamesRoute,
   AppCustomersRoute: AppCustomersRoute,
   AppHandoffRoute: AppHandoffRoute,
   AppInstallsRoute: AppInstallsRoute,
@@ -462,6 +564,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLocationsRoute: AppLocationsRoute,
   AppModulesRoute: AppModulesRoute,
   AppNetworkRoute: AppNetworkRoute,
+  AppPartsRoute: AppPartsRoute,
   AppPipelineRoute: AppPipelineRoute,
   AppPlannerRoute: AppPlannerRoute,
   AppPmsRoute: AppPmsRoute,
@@ -480,6 +583,8 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiLibraryFileTokenRoute: ApiLibraryFileTokenRoute,
+  ApiPartImageIdRoute: ApiPartImageIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

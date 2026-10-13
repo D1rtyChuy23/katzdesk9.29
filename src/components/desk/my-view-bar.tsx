@@ -123,7 +123,7 @@ export function MyViewBar({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center", className)}>
       <FilterChip selected={on} onClick={() => setOn(!on)}>
-        My View{role ? ` · ${role === "sales" ? "Sales" : "Service"}` : ""}
+        My View{role ? ` · ${role === "sales" ? "Sales" : role === "admin" ? "Admin" : role === "warehouse" ? "Warehouse" : "Service"}` : ""}
       </FilterChip>
     </div>
   );

@@ -1,0 +1,63 @@
+# Dimensions are the judgments Jev makes about each text.
+#   type: score  -> graded position on an ordered rubric (levels[0] is score 0, ...)
+#   type: noul   -> probability that a condition holds (0..1)
+#   type: choice -> one label out of `options`
+# Question names are only for this tool; Jev never sees them, so every
+# instruction must be self-contained. Edit freely.
+dimensions:
+  - name: sentiment
+    type: score
+    instructions: How does the customer feel about the product or service in this feedback?
+    levels:
+      - Very negative: angry, hostile, or explicitly says they are leaving.
+      - Negative: clearly dissatisfied or frustrated.
+      - Neutral or mixed: no clear lean, or praise and criticism balance out.
+      - Positive: satisfied, with appreciation expressed.
+      - Very positive: enthusiastic, delighted, or recommends it to others.
+
+  - name: urgency
+    type: score
+    instructions: How quickly does the company need to act on this feedback?
+    levels:
+      - No action needed; purely informational or praise.
+      - Low; can be handled in the normal backlog.
+      - Moderate; should be handled within a few days.
+      - High; the customer is blocked or losing money and needs a response today.
+      - Critical; safety, legal, security, or outage issue needing immediate escalation.
+
+  - name: is_complaint
+    type: noul
+    instructions: The customer is complaining about something that went wrong.
+
+  - name: churn_risk
+    type: noul
+    instructions: The customer signals they may stop using the product or cancel, or are comparing alternatives.
+
+  - name: asks_for_refund
+    type: noul
+    instructions: The customer asks for a refund, credit, or money back.
+
+  - name: contains_pii
+    type: noul
+    instructions: The text contains personal data such as a full name with contact details, phone number, email address, street address, or payment details.
+
+  - name: topic
+    type: choice
+    instructions: What is the main topic of this customer feedback?
+    options:
+      billing: Charges, invoices, pricing, refunds, or subscriptions.
+      product_quality: Defects, bugs, performance, or missing features.
+      support_experience: Interactions with support staff, response times, resolution quality.
+      shipping_delivery: Delivery speed, lost or damaged packages.
+      usability: Confusing design, onboarding, or hard-to-find functionality.
+      other: None of the above.
+
+  - name: tone
+    type: choice
+    instructions: What is the dominant tone of the customer's writing?
+    options:
+      angry: Hostile, shouting, or aggressive.
+      frustrated: Annoyed or exasperated but still civil.
+      neutral: Matter-of-fact.
+      appreciative: Grateful or complimentary.
+      enthusiastic: Excited and highly positive.

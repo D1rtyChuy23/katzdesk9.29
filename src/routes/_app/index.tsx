@@ -75,7 +75,7 @@ function ClockHome() {
           </h1>
           <p className="mt-2 text-sm text-cream/70">
             Week {d.weekLabel} · Next {d.nextWeekLabel}
-            {role ? ` · ${role === "sales" ? "Sales" : "Service"} view` : ""}
+            {role ? ` · ${role === "sales" ? "Sales" : role === "admin" ? "Admin" : role === "warehouse" ? "Warehouse" : "Service"} view` : ""}
           </p>
           <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
             <HeroStat to="/service" label="Active Calls" value={d.kpis.activeCalls} hint="Open tickets" />

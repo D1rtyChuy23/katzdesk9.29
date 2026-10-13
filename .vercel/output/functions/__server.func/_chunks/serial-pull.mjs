@@ -1,10 +1,10 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { hn as object, mn as number, un as boolean, vn as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, mn as number, un as boolean, yn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 import { n as normalizeCustomerKey } from "./customer-key.mjs";
 import { a as deskMiddleware } from "./access.mjs";
-import { l as isBarn, m as slotId, p as siteLabel } from "./warehouse.mjs";
+import { g as slotId, h as siteLabel, l as isBarn } from "./warehouse.mjs";
 import { a as catalogModels, c as listedEquipment, n as parseMachinesJson, r as serializeMachines } from "./machines.mjs";
 //#region src/lib/ops/serial-pull.ts
 var serial_pull_exports = /* @__PURE__ */ __exportAll({
@@ -25,6 +25,7 @@ function locationOf(a) {
 	return siteLabel(a.site);
 }
 function allocatedLabel(a) {
+	if (a.stock_hold === "assign") return a.stock_hold_customer ? `Pending outbound · ${a.stock_hold_customer}` : "Pending outbound";
 	if (a.sold_to?.trim()) return a.sold_to.trim();
 	if (a.status === "sold") return "sold";
 	if (a.status === "assigned" || a.install_id || a.job_id) return a.sold_to?.trim() || "another account";
@@ -32,6 +33,7 @@ function allocatedLabel(a) {
 	return null;
 }
 function isAvailable(a) {
+	if (a.stock_hold === "assign") return false;
 	if (a.status === "sold") return false;
 	if (a.status === "assigned") return false;
 	if (a.install_id || a.job_id) return false;
@@ -97,7 +99,8 @@ async function loadBySerial(sql, raw) {
 	const key = serialKey(raw);
 	if (!key) return null;
 	const matches = (await sql.query(`select id, model, serial, status, site, pallet, level, line_no, sold_to, install_id, job_id,
-            notes, purpose, origin_site, origin_pallet, origin_level, customer_owned
+            notes, purpose, origin_site, origin_pallet, origin_level, customer_owned,
+            stock_hold, stock_hold_customer
        from assets
       where serial is not null and btrim(serial) <> ''`)).filter((r) => serialKey(r.serial) === key);
 	if (!matches.length) return null;
@@ -307,6 +310,23 @@ var applySerialPull = createServerFn({ method: "POST" }).middleware([deskMiddlew
 		};
 	}
 	const asset = await loadBySerial(sql, serial);
+	if (asset?.stock_hold) {
+		const where = asset.stock_hold === "assign" ? asset.stock_hold_customer || "an account" : "this slot";
+		const notice = asset.stock_hold === "assign" ? `Serial ${asset.serial ?? serial} is pending outbound to ${where}. It is not on that account until an admin approves.` : `Serial ${asset.serial ?? serial} is pending removal and stays in ${where} until an admin approves.`;
+		return {
+			serial: asset.serial ?? serial,
+			found: true,
+			pulled: false,
+			needsConfirm: false,
+			alreadyHere: false,
+			allocatedTo: asset.stock_hold === "assign" ? asset.stock_hold_customer : null,
+			notice,
+			model: asset.model,
+			powerVoltage: voltageFrom(asset.notes) || voltageFrom(asset.purpose) || null,
+			location: locationOf(asset),
+			assetId: asset.id
+		};
+	}
 	if (!asset) {
 		const result = notFoundResult(serial);
 		if (data.installId) {

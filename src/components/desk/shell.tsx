@@ -1,6 +1,8 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
+  BarChart3,
   BookOpen,
+  Boxes,
   Library,
   CalendarClock,
   CalendarRange,
@@ -19,6 +21,7 @@ import {
   Users,
   Warehouse,
   Wrench,
+  ListChecks,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
@@ -39,6 +42,7 @@ import { CalendarDock, PendingCalendarPop } from "./pending-calendar";
 
 type DeskTo =
   | "/"
+  | "/customer-names"
   | "/service"
   | "/planner"
   | "/tlc"
@@ -47,6 +51,7 @@ type DeskTo =
   | "/installs"
   | "/recipes"
   | "/library"
+  | "/parts"
   | "/pipeline"
   | "/warehouse"
   | "/rebuilds"
@@ -54,6 +59,7 @@ type DeskTo =
   | "/modules"
   | "/customers"
   | "/network"
+  | "/analytics"
   | "/settings"
   | "/access";
 
@@ -67,42 +73,55 @@ type NavItem = {
   exact?: boolean;
 };
 
+/**
+ * The side menu, by department, in the order the work flows. Coming Due sits on its own at the top.
+ * Every page stays on the menu; a group with no label shows no heading.
+ */
 const NAV: { label: string; items: NavItem[] }[] = [
   {
-    label: "Work",
+    label: "",
+    items: [{ to: "/", label: "Coming Due", icon: CalendarClock, exact: true }],
+  },
+  {
+    label: "Accounts",
     items: [
-      { to: "/", label: "Coming Due", icon: CalendarClock, exact: true },
-      { to: "/planner", label: "Planner", icon: CalendarRange },
-      { to: "/service", label: "Tickets", icon: Wrench },
-      { to: "/tlc", label: "TLC + Factor", icon: Coffee },
-      { to: "/pms", label: "PMs", icon: Settings2 },
-      { to: "/handoff", label: "Handoff", icon: MessageSquare },
+      { to: "/customers", label: "Customers", icon: Store },
+      { to: "/recipes", label: "Recipes", icon: BookOpen },
+      { to: "/network", label: "Out Of Network", icon: Globe },
+      { to: "/customer-names", label: "Clean Names", icon: ListChecks },
     ],
   },
   {
     label: "Installs",
     items: [
-      { to: "/installs", label: "Board", icon: Truck },
-      { to: "/recipes", label: "Recipes", icon: BookOpen },
       { to: "/pipeline", label: "Pipeline", icon: Handshake },
+      { to: "/installs", label: "Board", icon: Truck },
+      { to: "/handoff", label: "Handoff", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Service",
+    items: [
+      { to: "/service", label: "Tickets", icon: Wrench },
+      { to: "/pms", label: "PMs", icon: Settings2 },
+      { to: "/tlc", label: "TLC + Factor", icon: Coffee },
+      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
+      { to: "/planner", label: "Planner", icon: CalendarRange },
     ],
   },
   {
     label: "Shop",
     items: [
       { to: "/warehouse", label: "Warehouse", icon: Warehouse },
-      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
-      { to: "/library", label: "The Library", icon: Library },
-      { to: "/locations", label: "Locations", icon: MapPin },
       { to: "/modules", label: "Modules", icon: Package },
+      { to: "/library", label: "The Library", icon: Library },
+      { to: "/parts", label: "Parts", icon: Boxes },
+      { to: "/locations", label: "Locations", icon: MapPin },
     ],
   },
   {
-    label: "Accounts",
-    items: [
-      { to: "/customers", label: "Customers", icon: Store },
-      { to: "/network", label: "Out Of Network", icon: Globe },
-    ],
+    label: "Reports",
+    items: [{ to: "/analytics", label: "Analytics", icon: BarChart3 }],
   },
   {
     label: "Admin",
@@ -155,9 +174,9 @@ function NavGroup({
   onNavigate?: () => void;
 }) {
   return (
-    <div>
-      <p className="px-3 text-[10px] font-semibold tracking-[0.2em] text-cream/40 uppercase">{group.label}</p>
-      <ul className="mt-2 space-y-0.5">
+    <div data-testid="nav-group" data-group={group.label || "top"}>
+      {group.label ? <p className="px-3 text-[10px] font-semibold tracking-[0.2em] text-cream/40 uppercase">{group.label}</p> : null}
+      <ul className={group.label ? "mt-2 space-y-0.5" : "space-y-0.5"}>
         {group.items.map((item) => (
           <NavItemLink key={item.to} item={item} pathname={pathname} onNavigate={onNavigate} />
         ))}
@@ -168,7 +187,13 @@ function NavGroup({
 
 const WAREHOUSE_OK = ["/warehouse", "/locations", "/modules", "/library"];
 
+// A sales rep sees Service for awareness only (their own accounts): the lists, not the shop's rebuild bench or planner.
+const SALES_SERVICE = ["/service", "/pms", "/tlc"];
+
 function navForRole(role: DeskRole | null | undefined, isAdmin?: boolean) {
+  if (role === "sales" && !isAdmin) {
+    return NAV.map((g) => (g.label === "Service" ? { ...g, items: g.items.filter((item) => SALES_SERVICE.includes(item.to)) } : g));
+  }
   if (role !== "warehouse") return NAV;
   return [
     {
@@ -197,7 +222,10 @@ function NavLinks({
           group={
             group.label === "Admin" && isAdmin && role !== "warehouse"
               ? { ...group, items: [...group.items, { to: "/access", label: "Access", icon: Users }] }
-              : group
+              : group.label === "Accounts" && !isAdmin && role !== "admin"
+                ? // Clean Names is the Admin role's review.
+                  { ...group, items: group.items.filter((item) => item.to !== "/customer-names") }
+                : group
           }
           pathname={pathname}
           onNavigate={onNavigate}

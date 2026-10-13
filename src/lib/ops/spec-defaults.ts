@@ -24,6 +24,8 @@ export type PlugDecision = {
   /** Shown next to the plug so a guessed value is obvious and can be changed. */
   note: string | null;
   cls: PlugClass;
+  /** Wires value to write on the sheet ("4-wire (2 hots, neutral, ground)"), when known. */
+  wires: string | null;
 };
 
 /** 3-phase from the phase field, or from voltage/plug text ("3ph", "3-phase", "3Ø", "3N~"). */
@@ -63,52 +65,108 @@ function sheetSaysLocking(plug: string | undefined): string | null {
   return m ? `L${m[1]}-${m[2]}` : null;
 }
 
-/** Decide plug + breaker for one configuration's power block. */
-export function decidePlug(p: Power | undefined): PlugDecision {
+/** Sheet identity, for model exceptions (Bunn Axiom at 220 V is 4-wire). */
+export type PlugContext = { manufacturer?: string | null; model?: string | null; category?: string | null; specs?: { label: string; value: string }[] | null };
+
+export type WireCount = 3 | 4;
+export const WIRES_4 = "4-wire (2 hots, neutral, ground)";
+export const WIRES_3 = "3-wire (2 hots, ground)";
+export const WIRE_MISSING_NOTE = "Wire count missing — confirm 3-wire L6 or 4-wire L14.";
+
+/** Model exceptions: units known to be 4-wire at 208–240 V. */
+const FOUR_WIRE_MODELS: RegExp[] = [/\bbunn\b.*\baxiom\b|\baxiom\b.*\bbunn\b|^axiom\b/i];
+
+/** Plug text we wrote ourselves ("NEMA L6-30 twist-lock") is not evidence of the wiring. */
+function isOurPlug(plug: string | undefined): boolean {
+  return /^NEMA (L?\d+-\d+)( twist-lock)?$/.test((plug ?? "").trim());
+}
+
+/**
+ * How many wires the 208–240 V supply uses: 4 = two hots + neutral + ground (L14), 3 = two hots + ground (L6).
+ * Checked in order: the Wires field, the electrical text, model exceptions, the manufacturer's own plug.
+ */
+export function wireCount(
+  p: Power | undefined,
+  ctx?: PlugContext,
+): { count: WireCount | null; source: "field" | "text" | "model" | "plug" | null } {
+  const field = (p?.wires ?? "").toLowerCase();
+  if (/\b4\b|four/.test(field)) return { count: 4, source: "field" };
+  if (/\b3\b|three/.test(field)) return { count: 3, source: "field" };
+  const text = `${p?.voltage ?? ""} ${p?.circuit ?? ""}`.toLowerCase();
+  const plus = text.match(/\b(\d)\s*-?\s*(?:wire|w)\s*(?:\+|plus|&|and|w\/|with)\s*(?:gnd|ground)/);
+  if (plus) {
+    const n = Number(plus[1]) + 1;
+    if (n === 3 || n === 4) return { count: n, source: "text" };
+  }
+  const bare = text.match(/\b([34])\s*-?\s*(?:wire|conductor)s?\b/);
+  if (bare) return { count: Number(bare[1]) as WireCount, source: "text" };
+  if (/neutral/.test(text) || /\b(115|120)\s*\/\s*(208|220|230|240)\b/.test(text)) return { count: 4, source: "text" };
+  const who = `${ctx?.manufacturer ?? ""} ${ctx?.model ?? ""}`.trim();
+  if (who && FOUR_WIRE_MODELS.some((re) => re.test(who))) return { count: 4, source: "model" };
+  const plug = p?.plug ?? "";
+  if (plug && !isOurPlug(plug)) {
+    const code = nemaCode(plug);
+    if (code && /^L?14-/.test(code)) return { count: 4, source: "plug" };
+    if (code && /^L?6-/.test(code)) return { count: 3, source: "plug" };
+  }
+  return { count: null, source: null };
+}
+
+const DEFAULT_NOTE = "Default — amps aren't on the sheet. Change it if the nameplate says otherwise.";
+
+function over50(amps: number) {
+  return `Draws ${amps}A — above a 50A plug. Confirm with the electrician; it may need to be hardwired.`;
+}
+
+/** Decide plug + breaker for one configuration's power block: volts, then wire count, then amps. */
+export function decidePlug(p: Power | undefined, ctx?: PlugContext): PlugDecision {
   const cls = voltageClass(p);
   const amps = specAmps(p);
   if (cls === "three-phase") {
     const breaker = amps ? `${breakerFor(amps)}A 3-pole` : "3-pole, size from the nameplate";
-    return { plug: HARDWIRE_ONLY, nema: null, breaker, note: null, cls };
+    return { plug: HARDWIRE_ONLY, nema: null, breaker, note: null, cls, wires: null };
   }
   if (cls === "240") {
-    const already = sheetSaysLocking(p?.plug);
-    // Dual-voltage 120/208–240 V units with a neutral already call out L14; keep the sheet's locking plug.
-    if (already && (already.startsWith("L14") || already.startsWith("L6"))) {
-      const rating = Number(already.split("-")[1]);
+    const w = wireCount(p, ctx);
+    if (w.count == null) {
+      // Don't guess L6: leave the plug unset until someone confirms 3-wire or 4-wire.
+      const breaker = amps == null ? null : amps <= 20 ? "20A 2-pole" : amps <= 30 ? "30A 2-pole" : "50A 2-pole";
+      return { plug: null, nema: null, breaker, note: WIRE_MISSING_NOTE, cls, wires: null };
+    }
+    if (w.count === 4) {
+      const why = w.source === "model" ? "4-wire unit (model exception: 4-wire at 220V)." : "4-wire unit.";
+      if (amps == null) {
+        return { plug: "NEMA L14-20 twist-lock", nema: "L14-20", breaker: "20A 2-pole", note: `${why} ${DEFAULT_NOTE}`, cls, wires: WIRES_4 };
+      }
+      if (amps <= 20) return { plug: "NEMA L14-20 twist-lock", nema: "L14-20", breaker: "20A 2-pole", note: why, cls, wires: WIRES_4 };
+      if (amps <= 30) return { plug: "NEMA L14-30 twist-lock", nema: "L14-30", breaker: "30A 2-pole", note: why, cls, wires: WIRES_4 };
       return {
-        plug: `NEMA ${already} twist-lock`,
-        nema: already,
-        breaker: `${rating}A 2-pole`,
-        note: null,
+        plug: "NEMA 14-50",
+        nema: "14-50",
+        breaker: "50A 2-pole",
+        note: amps > 50 ? over50(amps) : "4-wire above 30A: no L14 twist-lock face; 14-50 straight blade.",
         cls,
+        wires: WIRES_4,
       };
     }
-    if (amps == null) {
-      return {
-        plug: "NEMA L6-30 twist-lock",
-        nema: "L6-30",
-        breaker: "30A 2-pole",
-        note: "Default — amps aren't on the sheet. Change it if the nameplate says otherwise.",
-        cls,
-      };
-    }
-    if (amps <= 20) return { plug: "NEMA L6-20 twist-lock", nema: "L6-20", breaker: "20A 2-pole", note: null, cls };
-    if (amps <= 30) return { plug: "NEMA L6-30 twist-lock", nema: "L6-30", breaker: "30A 2-pole", note: null, cls };
+    if (amps == null) return { plug: "NEMA L6-30 twist-lock", nema: "L6-30", breaker: "30A 2-pole", note: DEFAULT_NOTE, cls, wires: WIRES_3 };
+    if (amps <= 20) return { plug: "NEMA L6-20 twist-lock", nema: "L6-20", breaker: "20A 2-pole", note: null, cls, wires: WIRES_3 };
+    if (amps <= 30) return { plug: "NEMA L6-30 twist-lock", nema: "L6-30", breaker: "30A 2-pole", note: null, cls, wires: WIRES_3 };
     // No standard L6 locking face above 30 A (see the NEMA chart): straight 6-50.
     return {
       plug: "NEMA 6-50",
       nema: "6-50",
       breaker: "50A 2-pole",
-      note: amps > 50 ? `Draws ${amps}A — above a 50A plug. Confirm with the electrician; it may need to be hardwired.` : "Above 30A there is no L6 twist-lock; 6-50 straight blade.",
+      note: amps > 50 ? over50(amps) : "Above 30A there is no L6 twist-lock; 6-50 straight blade.",
       cls,
+      wires: WIRES_3,
     };
   }
   if (cls === "120") {
     const already = sheetSaysLocking(p?.plug);
-    if (already?.startsWith("L5")) {
+    if (already?.startsWith("L5") && !isOurPlug(p?.plug)) {
       const rating = Number(already.split("-")[1]);
-      return { plug: `NEMA ${already} twist-lock`, nema: already, breaker: `${rating}A 1-pole`, note: null, cls };
+      return { plug: `NEMA ${already} twist-lock`, nema: already, breaker: `${rating}A 1-pole`, note: null, cls, wires: null };
     }
     if (amps != null && amps > 15) {
       return {
@@ -117,28 +175,38 @@ export function decidePlug(p: Power | undefined): PlugDecision {
         breaker: "20A 1-pole",
         note: amps > 20 ? `Draws ${amps}A — above a 20A plug. Confirm the circuit with the electrician.` : null,
         cls,
+        wires: null,
       };
     }
-    return {
-      plug: "NEMA 5-15",
-      nema: "5-15",
-      breaker: amps == null ? "15A 1-pole" : "15A 1-pole",
-      note: amps == null ? "Default — amps aren't on the sheet. Change it if the nameplate says otherwise." : null,
-      cls,
-    };
+    return { plug: "NEMA 5-15", nema: "5-15", breaker: "15A 1-pole", note: amps == null ? DEFAULT_NOTE : null, cls, wires: null };
   }
-  return { plug: p?.plug ?? null, nema: nemaCode(p?.plug), breaker: null, note: null, cls };
+  return { plug: p?.plug ?? null, nema: nemaCode(p?.plug), breaker: null, note: null, cls, wires: null };
 }
 
-const DEFAULT_NOTE = "Default — amps aren't on the sheet. Change it if the nameplate says otherwise.";
-
-/** Note to show beside the plug when it's the no-amps default (L6-30 at 220 V, 5-15 at 120 V). */
-export function defaultPlugNote(p: Power | undefined): string | null {
-  if (!p?.plug || specAmps(p) != null) return null;
+/** Note beside the plug: the 4-wire reason, the no-amps default, or the missing wire count. */
+export function defaultPlugNote(p: Power | undefined, ctx?: PlugContext): string | null {
   const cls = voltageClass(p);
+  // 220 V with no confirmed wire count: flag it, even if an older default plug is still filled in.
+  if (cls === "240" && wireCount(p, ctx).count == null) return WIRE_MISSING_NOTE;
+  if (!p?.plug) return null;
   const code = nemaCode(p.plug);
-  if (cls === "240" && code === "L6-30") return DEFAULT_NOTE;
-  if (cls === "120" && code === "5-15") return DEFAULT_NOTE;
+  const d = decidePlug(p, ctx);
+  if (code && d.nema === code) return d.note;
+  if (cls === "240" && code && /^L?14-/.test(code)) return "4-wire unit.";
+  return null;
+}
+
+/** Save-time check: the plug must match volts and wire count (no L6 on 4-wire, no L14 on 3-wire, no L6/L14 on 120 V). */
+export function plugWireError(p: Power | undefined, ctx?: PlugContext): string | null {
+  const code = nemaCode(p?.plug);
+  if (!code) return null;
+  const cls = voltageClass(p);
+  if (cls === "120" && /^L?(6|14)-/.test(code)) return `NEMA ${code} is a 208–240V plug; this configuration is 120V.`;
+  if (cls === "240" && /^L?5-/.test(code)) return `NEMA ${code} is a 120V plug; this configuration is 208–240V.`;
+  if (cls !== "240") return null;
+  const w = wireCount({ ...p, plug: undefined }, ctx).count;
+  if (w === 4 && /^L?6-/.test(code)) return `NEMA ${code} is 3-wire; this unit is 4-wire (needs L14).`;
+  if (w === 3 && /^L?14-/.test(code)) return `NEMA ${code} is 4-wire; this unit is 3-wire (needs L6).`;
   return null;
 }
 
@@ -156,13 +224,19 @@ export type DefaultsMode =
   /** Saving an edited sheet: only fill blanks, so a deliberate change sticks. */
   | "fill";
 
-export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode): SpecConfig {
+export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode, ctx?: PlugContext): SpecConfig {
   const req = c.requirements ?? {};
   const water = { ...(req.water ?? {}) };
-  if (mode === "generate" || !water.inlet?.trim()) water.inlet = DEFAULT_INLET;
+  // An inlet is listed only when the unit takes water. Adding a unit is not a reason to list one: a grinder, or a
+  // unit whose sheet does not call for water, gets none — and one that was only ever our default is taken back out.
+  if (!needsWater(ctx, req)) {
+    if (water.inlet?.trim() === DEFAULT_INLET) delete water.inlet;
+  } else if (mode === "generate" || !water.inlet?.trim()) water.inlet = DEFAULT_INLET;
   const power = { ...(req.power ?? {}) };
-  const d = decidePlug(power);
+  const d = decidePlug(power, ctx);
   if (d.cls !== "unknown") {
+    if (d.wires && (mode === "generate" || !power.wires?.trim())) power.wires = d.wires;
+    // Generate writes the decision; when the wire count is missing on 220 V the plug is left unset (flagged).
     if (mode === "generate" || !power.plug?.trim()) power.plug = d.plug ?? undefined;
     if (mode === "generate" || !power.breaker?.trim()) power.breaker = d.breaker ?? undefined;
   }
@@ -173,13 +247,54 @@ export function applyConfigDefaults(c: SpecConfig, mode: DefaultsMode): SpecConf
 export function applySpecDefaults<T extends SpecSheetDraft>(draft: T, mode: DefaultsMode): T {
   const configs = draft.configs.length ? draft.configs : [{ label: "Standard", requirements: {} }];
   const core = espressoCoreDefaults(draft);
-  return { ...draft, ...core, configs: configs.map((c) => applyConfigDefaults(c, mode)) };
+  const ctx = { manufacturer: draft.manufacturer, model: draft.model, category: draft.category, specs: draft.specs };
+  return { ...draft, ...core, configs: configs.map((c) => applyConfigDefaults(c, mode, ctx)) };
 }
 
 // ---------------- counter core hole ----------------
 
 export const DEFAULT_CORE_DIAMETER = '3"';
 const ESPRESSO_MAKERS = /\b(la\s*marzocco|eversys|rancilio|faema|slayer|synesso|nuova\s*simonelli|victoria\s*arduino|franke|schaerer|thermoplan|wmf|cimbali)\b/i;
+
+const GRINDER_NAMES = /\bgrinders?\b|\bmazzer\b|\bmahlk[oö]e?nig\b|\bditting\b|\bbaratza\b|\bg9(?![a-z0-9])|\bek\s?43\b|\blpg\b|\bswift\b|\brobur\b/i;
+
+/**
+ * Grinder: G9, G9-2T, Mazzer, Mahlkonig, or any sheet whose category says grinder. Grinders take no water and
+ * have no drain, so those sections are not shown, copied or defaulted. A category that names another kind wins.
+ */
+export function isGrinder(sheet: { manufacturer?: string | null; model?: string | null; category?: string | null } | null | undefined): boolean {
+  if (!sheet) return false;
+  const cat = sheet.category ?? "";
+  if (/grinder/i.test(cat)) return true;
+  if (/espresso|brewer|water|filtration|fridge|refrigerat|blender|dispenser/i.test(cat)) return false;
+  return GRINDER_NAMES.test(`${sheet.manufacturer ?? ""} ${sheet.model ?? ""}`);
+}
+
+const WATER_CATEGORY = /brewer|espresso|\btea\b|coffee\s*(maker|machine)|\burn\b|water|hot\s*beverage|super\s*-?automatic|dispenser/i;
+// Model names that are brewers or tea brewers even when the sheet has no category.
+const WATER_MODELS = /\bbrew(er|ers|ing)?\b|\btea\b|\burn\b|\baxiom\b|\bitcb\b|\bitb\b|\bicb\b|\bcwtf?\b|\bcbs\b|\bxts\b|\btb[36]q?\b|\binfusion\b|\bnitron\b|\bthermofresh\b|\bsoft\s*heat\b/i;
+const WATER_SPEC = /water\s*(line|supply|inlet|connection|pressure|hook-?up)|plumb(ed|ing)|\binlet\b|\bdrain\b/i;
+
+/**
+ * Does this unit take water? Yes for a brewer, an espresso machine or a tea brewer, and whenever the uploaded
+ * sheet itself names a water line or a drain. Never for a grinder. Our own default inlet does not count as
+ * the sheet calling for water.
+ */
+export function needsWater(
+  sheet: PlugContext | null | undefined,
+  req?: { water?: { inlet?: string; pressure?: string; filtration?: string; notes?: string }; drain?: { size?: string; notes?: string } } | null,
+): boolean {
+  if (isGrinder(sheet)) return false;
+  const cat = sheet?.category ?? "";
+  if (WATER_CATEGORY.test(cat)) return true;
+  if (isEspresso(sheet ?? {})) return true;
+  const said = (v: string | undefined) => !!v && !!v.trim();
+  const w = req?.water;
+  if (w && (said(w.pressure) || said(w.filtration) || said(w.notes) || (said(w.inlet) && w.inlet!.trim() !== DEFAULT_INLET))) return true;
+  if (req?.drain && (said(req.drain.size) || said(req.drain.notes))) return true;
+  if ((sheet?.specs ?? []).some((s) => WATER_SPEC.test(`${s.label} ${s.value}`))) return true;
+  return WATER_MODELS.test(`${sheet?.manufacturer ?? ""} ${sheet?.model ?? ""}`);
+}
 
 /** Espresso machine: La Marzocco, Eversys, Rancilio, Faema… or a catalog/category marked espresso. Grinders don't count. */
 export function isEspresso(sheet: { manufacturer?: string | null; model?: string | null; category?: string | null }): boolean {

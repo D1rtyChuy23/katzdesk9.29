@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { upsertRecipe } from "@/lib/ops/api";
 import { findRecipeFor, recipeLabel } from "@/lib/ops/equipment";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/ops/recipe-fields";
 import { Plus, X } from "lucide-react";
 import type { MachineSpec } from "@/lib/ops/machines";
+import { NO_WATER_NOTE, OWNERSHIPS, machineGlance, waterNeed } from "@/lib/ops/deal-board";
 import type { SerialPullResult } from "@/lib/ops/serial-pull";
 import type { Recipe } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,7 @@ function MachineRecipeSelect({
   recipes,
   value,
   onPick,
+  className = "col-span-2 grid min-w-0 gap-1 lg:col-span-1",
 }: {
   customer: string;
   model: string;
@@ -50,16 +53,20 @@ function MachineRecipeSelect({
   recipes: Recipe[];
   value: number | null | undefined;
   onPick: (recipeId: number | null) => void;
+  className?: string;
 }) {
   const [adding, setAdding] = useState(false);
   const custKey = customer.trim().toLowerCase();
   const modelKey = model.toLowerCase();
-  const house = recipes.filter((r) => !r.customer).sort(byModelFirst(model));
+  // House templates for this model only; a Linea is never offered a Bunn or Eversys template.
+  const house = recipes.filter((r) => !r.customer && r.equipmentModel.toLowerCase() === modelKey).sort(byModelFirst(model));
   const mine = recipes.filter((r) => r.customer?.toLowerCase() === custKey).sort(byModelFirst(model));
   // Before anyone picks, show the recipe this unit already used (account first, then house).
   const fallback = findRecipeFor(recipes, { customer, model, installId: installId ?? null });
   const selectedId = value ?? fallback.linked?.id ?? fallback.house?.id ?? null;
   const selected = recipes.find((r) => r.id === selectedId) ?? null;
+  // A recipe picked before this rule stays listed so it is not silently dropped.
+  const keep = selected && !house.includes(selected) && !mine.includes(selected) ? selected : null;
   const label = (r: Recipe) =>
     r.equipmentModel.toLowerCase() === modelKey ? recipeLabel(r) : recipeLabel(r, true);
   // Grinders often carry only custom settings (kept in notes), so fall back to the first note line.
@@ -67,7 +74,7 @@ function MachineRecipeSelect({
 
   return (
     <>
-    <div className="col-span-2 grid min-w-0 gap-1 lg:col-span-1">
+    <div className={className}>
       <label className="grid min-w-0 gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
         Recipe
         <SelectField
@@ -87,6 +94,7 @@ function MachineRecipeSelect({
           }}
         >
           <option value="">No recipe</option>
+          {keep ? <option value={keep.id}>{recipeLabel(keep, true)}</option> : null}
           {mine.length ? (
             <optgroup label={customer}>
               {mine.map((r) => (
@@ -416,80 +424,201 @@ export function MachineFields({
   installId,
   onPulled,
   onRecipe,
+  onCommit,
+  onRemove,
   customer = "",
   recipes = [],
+  showRecipe = true,
+  recipeInConfig = false,
+  where = "install",
+  rowLocked,
+  rowFooter,
 }: {
+  /** The recipe column of the install layout. Deals show the recipe on the configuration line instead. */
+  showRecipe?: boolean;
+  /** Deal rows: the recipe picker sits with Sold or Loaned, plug, water and coffee. */
+  recipeInConfig?: boolean;
+  /** "install" or "deal", for the remove button's label. */
+  where?: string;
+  /** Take this machine off the install. When given, each block is the one place the machine is listed. */
+  onRemove?: (index: number) => void;
   specs: MachineSpec[];
   onChange: (next: MachineSpec[]) => void;
   installId?: number;
   onPulled?: (next: MachineSpec[], result: SerialPullResult) => void;
   /** Save right away when a recipe is picked (existing installs). */
   onRecipe?: (next: MachineSpec[]) => void;
+  /** Save right away when Sold or Loaned is clicked (existing installs). Typed fields save with the form. */
+  onCommit?: (next: MachineSpec[]) => void;
   customer?: string;
   recipes?: Recipe[];
+  /** Deal rows: a machine already on the Board reads as it was sent. From then on it is changed on the Board. */
+  rowLocked?: (spec: MachineSpec, index: number) => boolean;
+  /** A line under a machine: the deal's Confirm button, or where the machine is on the Board. */
+  rowFooter?: (spec: MachineSpec, index: number) => ReactNode;
 }) {
   if (!specs.length) return null;
 
   function patch(index: number, part: Partial<MachineSpec>): MachineSpec[] {
     return specs.map((s, i) => (i === index ? { ...s, ...part } : s));
   }
+  const fieldLabel = "grid min-w-0 gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase";
 
   return (
     <div className="divide-y divide-border" data-testid="machine-rows">
-      {specs.map((spec, index) => (
-        <div
-          key={`${spec.equipment}-${index}`}
-          data-testid="machine-row"
-          className="grid grid-cols-1 gap-2 py-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(6.5rem,0.8fr)_minmax(5rem,0.6fr)_minmax(14rem,1.25fr)_minmax(10rem,1fr)] lg:items-start"
-        >
-          <div className="col-span-2 min-w-0 lg:col-span-1">
-            <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
-            <p className="truncate text-sm font-medium" title={spec.equipment}>
-              {spec.equipment}
-            </p>
-          </div>
-          <SerialPullField
-            label="Serial"
-            value={spec.serial}
-            installId={installId}
-            machineIndex={index}
-            onValue={(serial) => onChange(patch(index, { serial }))}
-            onPulled={(result) => {
-              const next = patch(index, {
-                serial: result.serial,
-                powerVoltage: spec.powerVoltage || result.powerVoltage || "",
-              });
-              onChange(next);
-              onPulled?.(next, result);
-            }}
-          />
-          <div className="min-w-0">
-            <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase" htmlFor={`pwr-${index}`}>
-              Voltage
-              <Input
-                id={`pwr-${index}`}
-                value={spec.powerVoltage}
-                autoComplete="off"
-                placeholder="208V"
-                onChange={(e) => onChange(patch(index, { powerVoltage: e.target.value }))}
+      {specs.map((spec, index) => {
+        if (rowLocked?.(spec, index)) {
+          return (
+            <div key={`${spec.equipment}-${index}`} data-testid="machine-row" data-locked="true" className="py-2">
+              <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
+              <p className="text-sm font-medium">{spec.equipment}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground" data-testid="machine-glance">
+                {machineGlance(spec) || "No details were set"}
+              </p>
+              {rowFooter?.(spec, index)}
+            </div>
+          );
+        }
+        const need = waterNeed(spec.equipment);
+        return (
+          <div
+            key={`${spec.equipment}-${index}`}
+            data-testid="machine-row"
+            className={cn(
+              "grid grid-cols-2 gap-2 py-2 lg:items-start",
+              showRecipe
+                ? "lg:grid-cols-[minmax(7rem,1fr)_minmax(6.5rem,0.7fr)_minmax(4.5rem,0.45fr)_minmax(18.5rem,1.2fr)_minmax(9rem,0.9fr)]"
+                : // Deal rows: model on one line, then serial, voltage and location side by side.
+                  "sm:grid-cols-[minmax(0,1fr)_5.5rem_minmax(0,1.1fr)] sm:items-end",
+            )}
+          >
+            <div className={cn("col-span-2 min-w-0", showRecipe ? "lg:col-span-1" : "sm:col-span-3")}>
+              <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
+              <p className="flex min-w-0 items-center gap-1 text-sm font-medium" title={spec.equipment}>
+                <span className="min-w-0 truncate">{spec.equipment}</span>
+                {onRemove ? (
+                  <button
+                    type="button"
+                    onClick={() => onRemove(index)}
+                    aria-label={`Remove ${spec.equipment} from this ${where}`}
+                    title={`Remove from this ${where}`}
+                    data-testid="machine-remove"
+                    className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                ) : null}
+              </p>
+            </div>
+            <SerialPullField
+              label="Serial"
+              compact
+              value={spec.serial}
+              installId={installId}
+              machineIndex={index}
+              onValue={(serial) => onChange(patch(index, { serial }))}
+              onPulled={(result) => {
+                const next = patch(index, {
+                  serial: result.serial,
+                  powerVoltage: spec.powerVoltage || result.powerVoltage || "",
+                });
+                onChange(next);
+                onPulled?.(next, result);
+              }}
+            />
+            <div className="min-w-0">
+              <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase" htmlFor={`pwr-${index}`}>
+                Voltage
+                <Input
+                  id={`pwr-${index}`}
+                  value={spec.powerVoltage}
+                  autoComplete="off"
+                  placeholder="208V"
+                  onChange={(e) => onChange(patch(index, { powerVoltage: e.target.value }))}
+                />
+              </label>
+            </div>
+            <div className={showRecipe ? undefined : "col-span-2 sm:col-span-1"}>
+              <UnitPlaceField serial={spec.serial} model={spec.equipment} compact />
+            </div>
+            {showRecipe ? (
+              <MachineRecipeSelect
+                customer={customer}
+                model={spec.equipment}
+                installId={installId}
+                recipes={recipes}
+                value={spec.recipeId}
+                onPick={(recipeId) => {
+                  const next = patch(index, { recipeId });
+                  onChange(next);
+                  onRecipe?.(next);
+                }}
               />
-            </label>
+            ) : null}
+            {/* Sold or Loaned, then the rest of the configuration: plug, water when the unit takes it, and the coffee. */}
+            <div className="col-span-full grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="machine-config">
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Sold Or Loaned</p>
+                <div className="mt-1 flex gap-1.5" role="group" aria-label={`Sold or loaned: ${spec.equipment}`}>
+                  {OWNERSHIPS.map((o) => (
+                    <button
+                      key={o}
+                      type="button"
+                      aria-pressed={spec.ownership === o}
+                      data-testid={`machine-${o.toLowerCase()}`}
+                      onClick={() => {
+                        const next = patch(index, { ownership: spec.ownership === o ? "" : o });
+                        onChange(next);
+                        onCommit?.(next);
+                      }}
+                      className={cn("h-9 rounded-full px-3 text-sm font-medium", spec.ownership === o ? "bg-ink text-ink-foreground" : "bg-secondary text-foreground")}
+                    >
+                      {o}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <label className={fieldLabel}>
+                Plug
+                <Input value={spec.plug ?? ""} autoComplete="off" placeholder="L6-30P" className="normal-case" data-testid="machine-plug" onChange={(e) => onChange(patch(index, { plug: e.target.value }))} />
+              </label>
+              {need === "none" ? (
+                <div className="min-w-0">
+                  <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Water</p>
+                  <p className="mt-1 flex h-10 items-center text-sm text-muted-foreground" data-testid="machine-no-water">
+                    {NO_WATER_NOTE}
+                  </p>
+                </div>
+              ) : (
+                <label className={fieldLabel}>
+                  {need === "required" ? "Water" : "Water (If Required)"}
+                  <Input value={spec.water ?? ""} autoComplete="off" placeholder={'3/8" line'} className="normal-case" data-testid="machine-water" onChange={(e) => onChange(patch(index, { water: e.target.value }))} />
+                </label>
+              )}
+              <label className={fieldLabel}>
+                Coffee
+                <Input value={spec.coffee ?? ""} autoComplete="off" placeholder="Coffee for this unit" className="normal-case" data-testid="machine-coffee" onChange={(e) => onChange(patch(index, { coffee: e.target.value }))} />
+              </label>
+              {recipeInConfig ? (
+                <MachineRecipeSelect
+                  className="col-span-full grid min-w-0 gap-1"
+                  customer={customer}
+                  model={spec.equipment}
+                  installId={installId}
+                  recipes={recipes}
+                  value={spec.recipeId}
+                  onPick={(recipeId) => {
+                    const next = patch(index, { recipeId });
+                    onChange(next);
+                    onRecipe?.(next);
+                  }}
+                />
+              ) : null}
+            </div>
+            {rowFooter ? <div className="col-span-full">{rowFooter(spec, index)}</div> : null}
           </div>
-          <UnitPlaceField serial={spec.serial} model={spec.equipment} compact />
-          <MachineRecipeSelect
-            customer={customer}
-            model={spec.equipment}
-            installId={installId}
-            recipes={recipes}
-            value={spec.recipeId}
-            onPick={(recipeId) => {
-              const next = patch(index, { recipeId });
-              onChange(next);
-              onRecipe?.(next);
-            }}
-          />
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

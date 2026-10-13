@@ -5,6 +5,7 @@ import { archiveRebuild, HEALTH_LABEL, REBUILD_STATUSES, updateRebuild, type Reb
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "./flag-badge";
 import { formatShortDate } from "@/lib/ops/clock";
+import { costGlance, money } from "@/lib/ops/repair-quote";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -144,7 +145,7 @@ export function RebuildBoard({
                         }}
                         data-testid={`rebuild-card-${r.id}`}
                         className={cn(
-                          "desk-lift w-full select-none rounded-lg border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40",
+                          "desk-flat w-full select-none rounded-lg border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40",
                           canEdit && "cursor-grab active:cursor-grabbing",
                           r.health === "overdue" && "border-destructive/40",
                           r.health === "at-risk" && "border-warning/40",
@@ -192,6 +193,14 @@ export function RebuildBoard({
                         <p className="mt-2 text-xs text-muted-foreground">
                           {r.owner || "No owner"}
                           {r.targetComplete ? ` · target ${formatShortDate(r.targetComplete)}` : " · no target"}
+                        </p>
+                        {/* Cost comes from the project's one repair quote: parts + labor, and where the quote stands. */}
+                        <p
+                          className={cn("mt-1 text-xs tabular", r.quote ? "font-medium text-foreground" : "text-muted-foreground")}
+                          title={r.quote ? `Parts ${money(r.quote.parts)} · Labor ${money(r.quote.labor)}` : "No repair quote on this project yet"}
+                          data-testid="rebuild-cost"
+                        >
+                          {r.quote ? `Cost ${costGlance(r.quote)}` : "No quote"}
                         </p>
                       </article>
                     </li>

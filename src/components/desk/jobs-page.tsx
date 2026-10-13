@@ -1,21 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
+import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
+import { SalesScopeNote } from "@/components/desk/sales-scope-note";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useQuery } from "@tanstack/react-query";
 import { listJobs } from "@/lib/ops/api";
+import { getMyAccess } from "@/lib/ops/access";
+import { BillingExportButton, ItemListImportButton } from "./billing-tools";
 import { URGENCIES, URGENCY_RANK } from "@/lib/ops/lookups";
 import { isClosedCall, isOpenCall } from "@/lib/ops/ticket-status";
 import { formatShortDate } from "@/lib/ops/clock";
 import type { ServiceJob } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SelectField } from "@/components/ui/select-field";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { JobSheet, NewJobDialog } from "./job-sheet";
 import { CorrigoImportButton, CorrigoReviewList, type CorrigoReviewItem } from "./corrigo-import";
 import { SortSelect, useDeskSort } from "./sort-bar";
-import { ActionMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
+import { ActionMenu, ImportMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
 import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { Plus } from "lucide-react";
 import { ExportButton } from "./export-dialog";
+import { ListToolbar, ToolbarSearch, ToolbarSelect, TOOLBAR_SELECT } from "./list-toolbar";
 import { TechFilter, TechName } from "./tech-select";
 import { sameTech } from "@/lib/ops/tech-match";
 import { mineByTechnician } from "@/lib/ops/my-view";
@@ -39,6 +43,7 @@ export function JobsPage({
     queryFn: () => listJobs({ data: { kind } }),
   });
   const { filterMine, matchMine, role } = useMyView();
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const [q, setQ] = useState("");
 
   const [tech, setTech] = useState("");
@@ -66,14 +71,14 @@ export function JobsPage({
     if (view === "complete") {
       list = list.filter((j) => !j.duplicateOf && isClosedCall(j));
     }
-    if (tech) list = list.filter((j) => sameTech(j.technician, tech));
+    if (tech) list = list.filter((j) => sameTech(j.technician, tech) || sameTech(j.secondaryTech, tech));
     list = mineByTechnician(list, { filterMine, role, matchMine });
     if (urgency) list = list.filter((j) => j.urgency === urgency);
 
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((j) =>
-        [j.customer, j.callId, j.wo, j.issue, j.equipment, j.technician]
+        [j.customer, j.callId, j.wo, j.issue, j.equipment, j.technician, j.secondaryTech]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(needle)),
       );
@@ -105,9 +110,16 @@ export function JobsPage({
           <h1 className="font-display text-3xl font-medium tracking-tight">{title}</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">{lede}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <ActionMenu label="Import / Export">
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {/* Imports live on Tickets only. More than one: the Import list. One: its own button. */}
+          <ImportMenu>
             {kind === "service" ? <CorrigoImportButton onImported={setReview} /> : null}
+            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ItemListImportButton /> : null}
+            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ImportPartsButton /> : null}
+            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <UpdatePricingButton /> : null}
+          </ImportMenu>
+          <ActionMenu label="Export">
+            <BillingExportButton />
             <ExportButton defaultType={kind === "tlc" ? "tlc" : "pending"} />
           </ActionMenu>
           <Button onClick={() => setCreate(true)}>
@@ -116,6 +128,7 @@ export function JobsPage({
           </Button>
         </div>
       </header>
+      <SalesScopeNote />
 
       <StatRow>
         <StatCard
@@ -156,34 +169,21 @@ export function JobsPage({
         />
       ) : null}
 
-      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search tickets…"
-          className="h-9 w-56 shrink-0"
-          aria-label="Search tickets"
-        />
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search tickets…" />
         <TechFilter
           value={tech}
           onChange={setTech}
           extraNames={(jobs.data ?? []).map((j) => j.technician)}
-          className="h-9 w-40 shrink-0"
+          className={`${TOOLBAR_SELECT} w-40`}
         />
-        <SelectField
-          value={urgency}
-          onChange={(e) => setUrgency(e.target.value)}
-          allowEmpty
-          emptyLabel="All urgency"
-          aria-label="Filter by urgency"
-          className="h-9 w-40 shrink-0"
-        >
+        <ToolbarSelect value={urgency} onChange={(e) => setUrgency(e.target.value)} allowEmpty emptyLabel="All urgency" aria-label="Filter by urgency" className="w-40">
           {URGENCIES.map((u) => (
             <option key={u}>{u}</option>
           ))}
-        </SelectField>
+        </ToolbarSelect>
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
-      </div>
+      </ListToolbar>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
         <div className="min-w-0">
@@ -241,12 +241,13 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
       <button
         type="button"
         onClick={onOpen}
-        className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] xl:items-center xl:gap-3"
+        className="desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] xl:items-center xl:gap-3"
       >
         <span>
           <span className="block font-medium">
             {job.customer ?? "Untitled"} <AkBadge on={job.aviKatz} className="ml-1 align-middle" />
           </span>
+          <AddressLine customer={job.customer} />
 
           <span className="text-xs text-muted-foreground">
             {job.callId}
@@ -282,6 +283,12 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
         <span className="min-w-0 truncate text-sm">
           <span className="text-muted-foreground xl:hidden">Tech </span>
           <TechName name={job.technician} />
+          {job.secondaryTech ? (
+            <span className="text-muted-foreground" data-testid="job-secondary-tech">
+              {" + "}
+              <TechName name={job.secondaryTech} />
+            </span>
+          ) : null}
         </span>
       </button>
     </li>

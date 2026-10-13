@@ -19,6 +19,7 @@ import { OpenLink } from "@/components/desk/open-link";
 import { useDirectory } from "@/components/desk/directory-fields";
 import { RepSelect } from "@/components/desk/rep-select";
 import { AkBadge } from "@/components/desk/ak-badge";
+import { ActionButton } from "@/components/desk/desk-charts";
 
 export type CorrigoReviewItem = CorrigoApplyResult["review"][number];
 
@@ -93,21 +94,17 @@ export function CorrigoImportButton({
         type="file"
         accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
         className="sr-only"
+        tabIndex={-1}
+        aria-hidden
         onChange={(e) => {
           const file = e.target.files?.[0];
           e.target.value = "";
           if (file) load.mutate(file);
         }}
       />
-      <Button
-        type="button"
-        variant="outline"
-        disabled={load.isPending}
-        onClick={() => inputRef.current?.click()}
-      >
-        <Upload className="size-4" />
-        {load.isPending ? "Reading…" : "Import Corrigo report"}
-      </Button>
+      <ActionButton icon={Upload} menuLabel="Corrigo Report" busy={load.isPending} onClick={() => inputRef.current?.click()} data-testid="corrigo-import-open">
+        Import Corrigo Report
+      </ActionButton>
 
       <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : cancel())}>
         <DialogContent

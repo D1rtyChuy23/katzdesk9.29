@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   archiveInstall,
   createInstall,
   listAssets,
-  listCustomers,
   listDirectory,
   listInstalls,
   listRecipes,
@@ -16,13 +16,15 @@ import { mergeMachineSpecs, parseMachinesJson, serializeMachines, type MachineSp
 import { formatShortDate, todayChicago, isInstalled, isOpenInstall, installedPatch } from "@/lib/ops/clock";
 import { canMarkInstalled, saveInspectionMeta } from "@/lib/ops/inspection-api";
 import { siteIsReady } from "@/lib/ops/pre-inspection";
+import { isOwnership, machineGlance, projectLabel } from "@/lib/ops/deal-board";
+import { OpenLink } from "@/components/desk/open-link";
 import { InspectionBadge, PreInspectionPanel } from "@/components/desk/pre-inspection-panel";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Textarea } from "@/components/ui/input";
+import { Label, Textarea } from "@/components/ui/input";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { InstallSheet } from "@/components/desk/entity-sheets";
-import { RecipeChip, RecipeEditorSheet } from "@/components/desk/recipe-sheet";
+import { RecipeChip } from "@/components/desk/recipe-sheet";
 import type { RecipeDraft } from "@/components/desk/recipe-form";
 import { CustomerCombo, EquipmentMultiCombo } from "@/components/desk/directory-fields";
 import { MachineFields } from "@/components/desk/machine-fields";
@@ -31,10 +33,11 @@ import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
 import { ActionMenu, FilterChip, StatCard, StatRow } from "@/components/desk/desk-charts";
-import { CheckCircle2, Clock, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Clock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Install, Recipe } from "@/lib/ops/types";
 import { ExportButton } from "@/components/desk/export-dialog";
+import { ListToolbar, ToolbarSearch, TOOLBAR_SELECT } from "@/components/desk/list-toolbar";
 import { TechName } from "@/components/desk/tech-select";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { RepFilter, RepName } from "@/components/desk/rep-select";
@@ -52,7 +55,6 @@ function Page() {
   const data = useQuery({ queryKey: ["installs"], queryFn: () => listInstalls() });
   const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
-  const customers = useQuery({ queryKey: ["customers"], queryFn: () => listCustomers() });
   const directoryEquip = useQuery({
     queryKey: ["directory", "equipment"],
     queryFn: () => listDirectory({ data: { kind: "equipment" } }),
@@ -65,7 +67,6 @@ function Page() {
   const [slice, setSlice] = useState<"all" | "ready" | "not-ready">("all");
   const [selected, setSelected] = useOpenRecord(open);
   const [create, setCreate] = useState(false);
-  const [recipeDraft, setRecipeDraft] = useState<RecipeDraft | null>(null);
   const [sort, setSort] = useDeskSort("installs", "date-asc");
   const [picked, setPicked] = useState<number[]>([]);
   const [confirmIds, setConfirmIds] = useState<number[] | null>(null);
@@ -127,10 +128,6 @@ function Page() {
     (n) => n,
   );
 
-  function openRecipe(d: RecipeDraft) {
-    setSelected(null);
-    setRecipeDraft(d);
-  }
 
   const openIds = useMemo(
     () => rows.filter((i) => isOpenInstall(i)).map((i) => i.id),
@@ -262,21 +259,21 @@ function Page() {
           />
         </StatRow>
       ) : null}
-      <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="prep-installed-toggle">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search installs…" className="h-9 w-56 shrink-0" aria-label="Search installs" />
+      <ListToolbar data-testid="prep-installed-toggle">
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search installs…" />
         <FilterChip selected={lane === "prep"} onClick={() => setLane("prep")}>
           Prep ({prepN})
         </FilterChip>
         <FilterChip selected={lane === "installed"} onClick={() => setLane("installed")}>
           Installed ({installedN})
         </FilterChip>
-        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={(data.data ?? []).map((i) => i.accountRep)} className="h-9 w-44 shrink-0" />
+        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={(data.data ?? []).map((i) => i.accountRep)} className={`${TOOLBAR_SELECT} w-44`} />
         <label className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-secondary px-3 text-sm">
           <input type="checkbox" className="size-4 accent-primary" checked={akOnly} onChange={(e) => setAkOnly(e.target.checked)} />
           AK
         </label>
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
-      </div>
+      </ListToolbar>
       {pickedOpen.length ? (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
           <p className="text-sm">
@@ -305,7 +302,8 @@ function Page() {
             catalog={catalog}
             recipes={recipes}
             onOpen={() => setSelected(i.id)}
-            onRecipe={openRecipe}
+            // The recipe is set in one place: on the machine's block inside the install.
+            onRecipe={() => setSelected(i.id)}
             selected={picked.includes(i.id)}
             onToggleSelect={(on) => togglePicked(i.id, on)}
             onMarkInstalled={() => requestMark([i.id])}
@@ -329,12 +327,6 @@ function Page() {
         ) : null}
       </div>
       <InstallSheet row={selectedRow} onClose={() => setSelected(null)} onOpenRelated={(id) => setSelected(id)} />
-      <RecipeEditorSheet
-        draft={recipeDraft}
-        models={catalog}
-        customers={customers.data ?? []}
-        onClose={() => setRecipeDraft(null)}
-      />
       <NewInstallDialog
         open={create}
         existing={allInstalls}
@@ -449,8 +441,10 @@ function NewInstallDialog({
               }}
               required
             />
+            {/* Each machine is listed once, on its own row below; the row has the remove button. */}
             <EquipmentMultiCombo
               values={equipment}
+              hideChips
               onChange={(next) => {
                 setEquipment(next);
                 setSpecs(mergeMachineSpecs(next, specs));
@@ -514,12 +508,17 @@ function NewInstallDialog({
               {matches.length > 4 ? <p className="mt-1 text-xs text-muted-foreground">+{matches.length - 4} more</p> : null}
             </div>
           ) : null}
-          {customer && specs.length ? (
+          {specs.length ? (
             <MachineFields
               specs={specs}
               customer={customer}
               recipes={recipes.data ?? []}
               onChange={setSpecs}
+              onRemove={(index) => {
+                const next = specs.filter((_, i) => i !== index);
+                setSpecs(next);
+                setEquipment(next.map((s) => s.equipment));
+              }}
             />
           ) : null}
           <div className="flex justify-end">
@@ -659,6 +658,7 @@ function InstallActions({
   install,
   open,
   onMark,
+  onTicket,
   marking,
   inspecting,
   onToggleInspect,
@@ -666,12 +666,28 @@ function InstallActions({
   install: Install;
   open: boolean;
   onMark?: () => void;
+  /** Opens the install window, where the ticket sits on top. Shown only when the project is Ready. */
+  onTicket?: () => void;
   marking?: boolean;
   inspecting?: boolean;
   onToggleInspect?: () => void;
 }) {
   return (
     <div className="flex shrink-0 flex-col items-end gap-1">
+      {open && onTicket && siteIsReady(install.equipStatus, install.inspection?.overall) ? (
+        <Button
+          type="button"
+          size="sm"
+          data-testid="open-install-ticket"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTicket();
+          }}
+        >
+          <ClipboardCheck className="size-3.5" />
+          Install Ticket
+        </Button>
+      ) : null}
       {open && onToggleInspect ? (
         <Button
           type="button"
@@ -799,8 +815,16 @@ function InstallRow({
             >
               {i.daysOut == null ? "needs date" : i.daysOut < 0 ? `${i.daysOut}d` : i.daysOut === 0 ? "today" : `${i.daysOut}d`}
             </button>
-            <button type="button" onClick={onOpen} className="min-w-0 truncate text-left font-medium hover:underline">
-              {i.customer} <AkBadge on={i.aviKatz} className="ml-1 align-middle" />
+            <button type="button" onClick={onOpen} className="min-w-0 text-left font-medium hover:underline">
+              <span className="block truncate">
+                {i.customer} <AkBadge on={i.aviKatz} className="ml-1 align-middle" />
+              </span>
+              {i.accountNumber ? (
+                <span className="block text-xs font-normal text-muted-foreground tabular" data-testid="install-account-number">
+                  Account # {i.accountNumber}
+                </span>
+              ) : null}
+              <AddressLine customer={i.customer} className="font-normal" />
             </button>
             <div className="flex flex-wrap gap-1">
               <FlagBadge flag={i.flag} />
@@ -811,6 +835,11 @@ function InstallRow({
                   passed={i.inspection?.passedCount}
                   total={i.inspection?.machineCount}
                 />
+              ) : null}
+              {i.project && i.project.of > 1 ? (
+                <Badge variant="outline" size="tight" data-testid="board-project">
+                  {projectLabel(i.project.n, i.project.of)}
+                </Badge>
               ) : null}
               <DuplicateBadge install={i} />
             </div>
@@ -824,6 +853,12 @@ function InstallRow({
             {" · "}
             {i.accountRep ? <RepName name={i.accountRep} /> : <NoRepFlag show />}
           </button>
+          {i.dealId ? (
+            <OpenLink entityType="deal" id={i.dealId} className="mt-0.5 block w-fit text-xs text-copper hover:underline sm:pl-20" title="Open the deal these machines came from">
+              From the deal
+            </OpenLink>
+          ) : null}
+          {open ? <TrfCheck install={i} /> : null}
           {machineNotes(i)}
           <div className="sm:pl-20">
             <InstallEquipChips
@@ -839,6 +874,7 @@ function InstallRow({
           install={i}
           open={open}
           onMark={onMarkInstalled}
+          onTicket={onOpen}
           marking={marking}
           inspecting={inspecting}
           onToggleInspect={onToggleInspect}
@@ -853,8 +889,33 @@ function InstallRow({
   );
 }
 
+/** Sales ticks this once the Tech Request Form has gone out. Never ticked for them. */
+function TrfCheck({ install }: { install: Install }) {
+  const qc = useQueryClient();
+  const save = useMutation({
+    mutationFn: (trfIssued: boolean) => updateInstall({ data: { id: install.id, trfIssued } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["installs"] }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  return (
+    <label
+      className="mt-1.5 flex w-fit items-center gap-2 text-sm font-medium text-foreground sm:pl-20"
+      data-testid="trf-check"
+    >
+      <input
+        type="checkbox"
+        className="size-4 accent-primary"
+        checked={install.trfIssued}
+        disabled={save.isPending}
+        onChange={(e) => save.mutate(e.target.checked)}
+      />
+      Tech Request Form issued
+    </label>
+  );
+}
+
 function machineNotes(i: Install, indent = true) {
-  const rows = (i.machines ?? []).filter((m) => m.serial || m.powerVoltage);
+  const rows = (i.machines ?? []).filter((m) => machineGlance(m));
   if (!rows.length && (i.serial || i.powerVoltage)) {
     return (
       <p className={`mt-1 text-xs text-muted-foreground ${indent ? "md:pl-20" : ""}`}>
@@ -864,14 +925,23 @@ function machineNotes(i: Install, indent = true) {
   }
   if (!rows.length) return null;
   return (
-    <ul className={`mt-1 space-y-0.5 text-xs text-muted-foreground ${indent ? "md:pl-20" : ""}`}>
-      {rows.map((m, idx) => (
-        <li key={`${m.equipment}-${idx}`}>
-          <span className="font-medium text-foreground/80">{m.equipment}</span>
-          {m.serial ? ` · SN ${m.serial}` : ""}
-          {m.powerVoltage ? ` · ${m.powerVoltage}` : ""}
-        </li>
-      ))}
+    <ul className={`mt-1 space-y-0.5 text-xs text-muted-foreground ${indent ? "md:pl-20" : ""}`} data-testid="board-machines">
+      {rows.map((m, idx) => {
+        // Sold or Loaned reads as a badge; the rest of the line is what was set for the unit.
+        const rest = machineGlance({ ...m, ownership: "" });
+        return (
+          <li key={`${m.equipment}-${idx}`} data-testid="board-machine" data-confirmed={m.uid ? "true" : "false"}>
+            <span className="font-medium text-foreground/80">{m.equipment}</span>
+            {isOwnership(m.ownership) ? (
+              <Badge size="tight" variant={m.ownership === "Sold" ? "primary" : "outline"} className="ml-1.5 align-middle" data-testid="board-ownership">
+                {m.ownership}
+              </Badge>
+            ) : null}
+            {m.uid ? <span className="ml-1.5 text-[11px] font-medium text-success" data-testid="board-confirmed">Confirmed</span> : null}
+            {rest ? ` · ${rest}` : ""}
+          </li>
+        );
+      })}
     </ul>
   );
 }

@@ -1,16 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SalesScopeNote } from "@/components/desk/sales-scope-note";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createPm, listPms } from "@/lib/ops/api";
 import { isOpenPm } from "@/lib/ops/ticket-status";
 import { formatShortDate } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { PmSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
 import { ActionMenu, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
+import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -82,6 +84,7 @@ function Page() {
           </Button>
         </div>
       </header>
+      <SalesScopeNote />
       <StatRow>
         <StatCard
           label="Active"
@@ -107,10 +110,10 @@ function Page() {
           onClick={() => setView((v) => toggleChip(v, "need-date", "all"))}
         />
       </StatRow>
-      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search PMs…" className="h-9 w-56 shrink-0" aria-label="Search PMs" />
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search PMs…" />
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
-      </div>
+      </ListToolbar>
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase md:grid">
           <span>Account</span>
@@ -124,11 +127,12 @@ function Page() {
             key={p.id}
             type="button"
             onClick={() => setSelected(p.id)}
-            className="desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3"
+            className="desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3"
           >
             <span>
               <span className="font-medium">{p.customer}</span>
               <AkBadge on={p.aviKatz} className="ml-1 align-middle" />
+              <AddressLine customer={p.customer} />
               <span className="mt-0.5 block text-xs text-muted-foreground">{p.equipment}</span>
             </span>
             <span className="flex flex-wrap gap-1">

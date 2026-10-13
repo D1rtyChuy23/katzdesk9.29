@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { CustomerAddress } from "@/components/desk/customer-address";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { setAccountNumber } from "@/lib/ops/account-numbers-api";
 import { copyRecipe, getCustomerHistory, listDirectory, listRecipes, renameCustomer, updateCustomerAccount } from "@/lib/ops/api";
 import { listAccountEquipment } from "@/lib/ops/account-equip-import";
 
@@ -11,7 +13,7 @@ import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, Recipe, ServiceJob } from "@/lib/ops/types";
 import { ComboField } from "@/components/ui/combo-field";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, Label } from "@/components/ui/input";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/separator";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
@@ -24,7 +26,7 @@ import { ProviderDispatchBlock } from "./provider-dispatch";
 import { RenameDialog } from "./rename-dialog";
 import type { RecipeDraft } from "./recipe-form";
 import { cn } from "@/lib/utils";
-import { Pencil, Plus, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, Lock, Pencil, Plus, Search } from "lucide-react";
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import { toast } from "sonner";
 import { RepSelect } from "./rep-select";
@@ -284,13 +286,14 @@ export function CustomerHistorySheet({
                 <AkBadge on={data?.aviKatz} />
               </SheetTitle>
 
-              {canRename && data ? (
+              {canRename && data && !data.nameLocked ? (
                 <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
                   <Pencil className="size-3.5" />
                   Edit
                 </Button>
               ) : null}
             </div>
+            {data?.name ? <CustomerAddress customer={data.name} className="mt-0.5" /> : null}
           </SheetHeader>
           <SheetBody>
             {history.isLoading ? (
@@ -300,17 +303,32 @@ export function CustomerHistorySheet({
               </div>
             ) : data ? (
               <div className="p-5">
-                <p className="text-xs text-muted-foreground">
-                  {canRename
-                    ? "Edit the name to move every call, install, PM, deal, recipe, and network link onto it."
-                    : "Ask an admin to rename this account — history follows the new name."}
-                </p>
+                {data.nameLocked ? (
+                  <CleanListBlock name={data.name} cleanList={data.cleanList ?? null} />
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {canRename
+                      ? "Edit the name to move every call, install, PM, deal, recipe, and network link onto it."
+                      : "Ask an admin to rename this account — history follows the new name."}
+                  </p>
+                )}
+
+                <AccountNumberField
+                  id={data.id}
+                  value={data.accountNumber ?? null}
+                  canEdit={!!data.canEditAccountNumber}
+                />
 
                 <AccountMarksForm
                   id={data.id}
                   aviKatz={data.aviKatz}
                   accountRep={data.accountRep}
                 />
+                {!data.accountRep && data.repFlag ? (
+                  <p className="mt-1 text-xs font-medium text-warning" data-testid="rep-flag">
+                    Rep left blank: {data.repFlag}.
+                  </p>
+                ) : null}
 
                 <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
 
@@ -413,7 +431,8 @@ export function CustomerHistorySheet({
       <JobSheet id={reviewing && selectedJob ? selectedJob.id : null} onClose={() => setReviewing(false)} />
       <PmSheet pm={reviewing ? selectedPm : null} onClose={() => setReviewing(false)} />
       <InstallSheet row={reviewing ? selectedInstall : null} onClose={() => setReviewing(false)} />
-      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} />
+      {/* The account is already open: a deal here keeps its customer, so no second customer picker. */}
+      <DealSheet deal={reviewing ? selectedDeal : null} onClose={() => setReviewing(false)} lockCustomer />
       <RecipeEditorSheet
         draft={recipeDraft}
         models={(directoryEquip.data ?? []).map((e) => e.name)}
@@ -442,12 +461,36 @@ function PreInspectionList({
   openId: number | null;
   onOpen: (id: number) => void;
 }) {
+  // Collapsed until asked for, so the customer window stays short. The count is every unit on the open installs.
+  const [shown, setShown] = useState(false);
   if (!installs.length) return null;
+  const units = installs.reduce((n, i) => n + (i.inspection?.machineCount ?? 0), 0);
+  const passed = installs.reduce((n, i) => n + (i.inspection?.passedCount ?? 0), 0);
+  const toggle = () => {
+    const next = !shown;
+    setShown(next);
+    // One install: opening the block shows its units straight away.
+    if (next && installs.length === 1 && openId !== installs[0]!.id) onOpen(installs[0]!.id);
+  };
   return (
-    <section className="mt-4" data-testid="account-pre-inspection">
-      <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-        Pre-Inspection
-      </h2>
+    <section className="mt-4" data-testid="account-pre-inspection" data-open={shown ? "true" : "false"}>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={shown}
+        className="desk-flat flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted/60"
+        data-testid="account-pre-inspection-toggle"
+      >
+        {shown ? <ChevronDown className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" />}
+        <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pre-Inspection</span>
+        <span className="text-sm font-medium" data-testid="account-pre-inspection-count">
+          {units} unit{units === 1 ? "" : "s"}
+        </span>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {passed}/{units} passed
+        </span>
+      </button>
+      {shown ? (
       <ul className="mt-2 space-y-2">
         {installs.map((i) => (
           <li key={i.id} className="overflow-hidden rounded-xl border border-border">
@@ -474,6 +517,7 @@ function PreInspectionList({
           </li>
         ))}
       </ul>
+      ) : null}
     </section>
   );
 }
@@ -491,12 +535,24 @@ function AccountEquipmentList({
   }[];
   loading: boolean;
 }) {
+  // Collapsed until asked for: a long equipment list no longer pushes the rest of the window down.
+  const [shown, setShown] = useState(false);
   return (
-    <section className="mt-4">
-      <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-        Equipment On This Account
-      </h2>
-      {loading ? (
+    <section className="mt-4" data-testid="account-equipment" data-open={shown ? "true" : "false"}>
+      <button
+        type="button"
+        onClick={() => setShown(!shown)}
+        aria-expanded={shown}
+        className="desk-flat flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted/60"
+        data-testid="account-equipment-toggle"
+      >
+        {shown ? <ChevronDown className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" />}
+        <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Equipment On This Account</span>
+        <span className="text-sm font-medium" data-testid="account-equipment-count">
+          {loading ? "…" : `${rows.length} unit${rows.length === 1 ? "" : "s"}`}
+        </span>
+      </button>
+      {!shown ? null : loading ? (
         <p className="mt-2 text-sm text-muted-foreground">Loading equipment…</p>
       ) : rows.length ? (
         <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
@@ -534,7 +590,7 @@ function HistoryRow({ item, onOpen }: { item: HistoryItem; onOpen: () => void })
       <button
         type="button"
         onClick={onOpen}
-        className="desk-lift flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
+        className="desk-flat flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
       >
         <span className="mt-0.5 w-16 shrink-0 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
           {KIND_LABEL[item.kind]}
@@ -698,6 +754,88 @@ function CustomerRecipes({
         </p>
       )}
     </section>
+  );
+}
+
+/**
+ * Account Number: shown to everyone; an Admin can set or clear it. Kept exactly as typed (leading zeros, dashes).
+ * Saving checks it is not already on another customer.
+ */
+function AccountNumberField({ id, value, canEdit }: { id: number; value: string | null; canEdit: boolean }) {
+  const qc = useQueryClient();
+  const [draft, setDraft] = useState(value ?? "");
+  useEffect(() => setDraft(value ?? ""), [id, value]);
+  const save = useMutation({
+    mutationFn: () => setAccountNumber({ data: { id, accountNumber: draft.trim() || null } }),
+    onSuccess: (r) => {
+      toast.success(r.accountNumber ? `Account number ${r.accountNumber} saved` : "Account number cleared");
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["deals"] });
+      void qc.invalidateQueries({ queryKey: ["clean-names"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the account number"),
+  });
+  const changed = (draft.trim() || null) !== (value ?? null);
+  return (
+    <div className="mt-3 rounded-xl border border-border px-3 py-2.5" data-testid="account-number">
+      <Label htmlFor={`acct-${id}`} className="text-xs text-muted-foreground">Account Number</Label>
+      {canEdit ? (
+        <form
+          className="mt-1 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (changed) save.mutate();
+          }}
+        >
+          <Input
+            id={`acct-${id}`}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="None yet"
+            autoComplete="off"
+            className="tabular"
+            data-testid="account-number-input"
+          />
+          <Button type="submit" size="sm" variant="outline" disabled={!changed || save.isPending} data-testid="account-number-save">
+            {save.isPending ? "Saving…" : "Save"}
+          </Button>
+        </form>
+      ) : (
+        <p className="mt-0.5 font-medium tabular" data-testid="account-number-value">{value ?? <span className="font-normal text-muted-foreground">None</span>}</p>
+      )}
+    </div>
+  );
+}
+
+/** An account approved from the clean customer list: locked name, and for an Admin the list's ID and address. */
+function CleanListBlock({ name, cleanList }: { name: string; cleanList: { netsuiteId: string | null; address: string | null } | null }) {
+  return (
+    <dl className="grid gap-x-4 gap-y-1 rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-sm sm:grid-cols-[auto_minmax(0,1fr)]" data-testid="clean-list-block">
+      <dt className="text-xs text-muted-foreground">Display Name</dt>
+      <dd className="flex items-center gap-1.5 font-medium" data-testid="clean-display">
+        {name}
+        <Lock className="size-3.5 text-primary" aria-label="Locked" />
+        <span className="text-xs font-normal text-muted-foreground">Locked from the clean list</span>
+      </dd>
+      {cleanList ? (
+        <>
+          {cleanList.netsuiteId ? (
+            <>
+              <dt className="text-xs text-muted-foreground">ID</dt>
+              <dd className="font-medium tabular" data-testid="clean-account-id">{cleanList.netsuiteId}</dd>
+              <dt className="text-xs text-muted-foreground">Address</dt>
+              <dd data-testid="clean-account-address">{cleanList.address || <span className="text-warning">No address on the clean list</span>}</dd>
+            </>
+          ) : (
+            <dd className="text-xs text-warning sm:col-span-2" data-testid="clean-account-missing">
+              ID and address are not filled yet. Read the clean list again on Clean Names to fill them.
+            </dd>
+          )}
+        </>
+      ) : null}
+    </dl>
   );
 }
 

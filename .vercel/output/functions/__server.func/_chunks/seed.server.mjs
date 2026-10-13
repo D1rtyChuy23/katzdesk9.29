@@ -1,4 +1,4 @@
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 import { A as normalizeZip, D as normalizeCity, M as parseCoverageLocations, h as retargetCustomer, j as parseContactBlob, k as normalizeState, n as reconcileServiceDuplicates, x as findDuplicateLocation } from "./wo-duplicates.mjs";
 var seed_data_default = {
 	service: [
@@ -19732,14 +19732,12 @@ async function patchRecipeCustomers(sql) {
 	await sql.query("create index if not exists recipes_customer_idx on recipes (lower(customer))");
 	await sql.query("create index if not exists recipes_install_idx on recipes (install_id)");
 	await sql.query("create index if not exists recipes_model_idx on recipes (lower(equipment_model))");
+	await sql.query("alter table recipes add column if not exists name text");
+	await sql.query("drop index if exists recipes_house_model_uidx");
+	await sql.query("drop index if exists recipes_customer_model_uidx");
 	await sql.query(`
-    create unique index if not exists recipes_house_model_uidx
-      on recipes (lower(equipment_model))
-      where customer is null`);
-	await sql.query(`
-    create unique index if not exists recipes_customer_model_uidx
-      on recipes (lower(customer), lower(equipment_model))
-      where customer is not null`);
+    create unique index if not exists recipes_scope_model_name_uidx
+      on recipes (lower(coalesce(customer, '')), lower(equipment_model), lower(coalesce(name, '')))`);
 	await sql`update recipes set is_template = true where customer is null`;
 	if ((await sql`select v from seed_meta where k = 'recipes_customers'`)[0]?.v === "v1") return;
 	for (const c of [
@@ -19816,7 +19814,8 @@ async function patchRecipeCustomers(sql) {
 		if ((await sql`
       select id from recipes
       where lower(equipment_model) = ${c.model.toLowerCase()}
-        and lower(customer) = ${c.customer.toLowerCase()}`)[0]) continue;
+        and lower(customer) = ${c.customer.toLowerCase()}
+        and name is null`)[0]) continue;
 		const ins = await sql`
       select id from installs where lower(customer) = ${c.customer.toLowerCase()} limit 1`;
 		try {

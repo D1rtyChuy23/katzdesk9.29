@@ -187,6 +187,13 @@ function rejoinSplitModels(pieces: string[], catalogKey: Map<string, string>): s
   for (let i = 0; i < pieces.length; i++) {
     const a = pieces[i]!;
     const b = pieces[i + 1];
+    if (b && /^[-\u2013][A-Za-z0-9]{1,8}$/.test(b.trim())) {
+      // "Bunn ITCB-DV" read as "Bunn ITCB" + "-DV": the suffix is part of the same machine, never a machine of
+      // its own. Keep the catalog name ("Bunn ITCB"), or the longer one when the catalog has it.
+      out.push(catalogKey.get(normalize(`${a}${b.trim()}`)) ?? a);
+      i += 1;
+      continue;
+    }
     if (b) {
       const slash = catalogKey.get(normalize(`${a}/${b}`));
       const spaced = catalogKey.get(normalize(`${a} ${b}`));

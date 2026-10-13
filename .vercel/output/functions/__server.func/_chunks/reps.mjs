@@ -1,7 +1,8 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { hn as object, vn as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, yn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
+import { n as normalizeCustomerKey } from "./customer-key.mjs";
 import { a as deskMiddleware, b as flagOn } from "./access.mjs";
 import { t as normalizeName } from "./norm.mjs";
 //#region src/lib/ops/rep-match.ts
@@ -100,6 +101,7 @@ function sameRep(a, b) {
 //#endregion
 //#region src/lib/ops/reps.ts
 var reps_exports = /* @__PURE__ */ __exportAll({
+	accountRepFor: () => accountRepFor,
 	addRep: () => addRep,
 	customerKey: () => customerKey,
 	ensureAccountMarks: () => ensureAccountMarks,
@@ -210,19 +212,29 @@ async function loadAccountMarks(sql) {
 	const rows = await sql.query(`select name, avi_katz, account_rep from directory_customers where archived = false`);
 	const ak = /* @__PURE__ */ new Set();
 	const rep = /* @__PURE__ */ new Map();
+	const repLoose = /* @__PURE__ */ new Map();
 	for (const r of rows) {
 		const k = (r.name ?? "").trim().toLowerCase();
 		if (!k) continue;
 		if (flagOn(r.avi_katz)) ak.add(k);
-		if (r.account_rep) rep.set(k, r.account_rep);
+		if (r.account_rep) {
+			rep.set(k, r.account_rep);
+			const loose = normalizeCustomerKey(r.name);
+			if (loose && !repLoose.has(loose)) repLoose.set(loose, r.account_rep);
+		}
 	}
 	return {
 		ak,
-		rep
+		rep,
+		repLoose
 	};
 }
 function customerKey(name) {
 	return (name ?? "").trim().toLowerCase();
+}
+/** The sales rep saved on a customer account, matching the name loosely. */
+function accountRepFor(marks, customer) {
+	return marks.rep.get(customerKey(customer)) ?? marks.repLoose.get(normalizeCustomerKey(customer)) ?? null;
 }
 function isAviKatz(marks, customer) {
 	return marks.ak.has(customerKey(customer));
@@ -301,4 +313,4 @@ var setRepActive = createServerFn({ method: "POST" }).middleware([deskMiddleware
 	};
 });
 //#endregion
-export { loadAccountMarks as a, upsertAccountMarks as c, PRODUCER_INITIALS as d, canonicalRepName as f, sameRep as h, listReps as i, DEFAULT_REPS as l, isNoRep as m, customerKey as n, reps_exports as o, formatRep as p, isAviKatz as r, setRepActive as s, addRep as t, PRODUCERS as u };
+export { loadAccountMarks as a, upsertAccountMarks as c, PRODUCER_INITIALS as d, canonicalRepName as f, sameRep as g, isNoRep as h, listReps as i, DEFAULT_REPS as l, formatRep as m, addRep as n, reps_exports as o, findRep as p, isAviKatz as r, setRepActive as s, accountRepFor as t, PRODUCERS as u };

@@ -1,4 +1,4 @@
-import { LOCATION_SITES, SITE_LABEL, siteLabel, slotId } from "./warehouse.ts";
+import { LOCATION_SITES, SITE_LABEL, rackBayError, siteLabel, slotId } from "./warehouse.ts";
 
 export const HOUSE_TRAINING = "training";
 export const HOUSE_LOBBY = "front-lobby";
@@ -67,6 +67,10 @@ export function lastMoveLine(notes: string | null | undefined): string | null {
   return lines.length ? lines[lines.length - 1]! : null;
 }
 
+/**
+ * A unit assigned to an account, or sold, is locked: it is an asset at that site or customer.
+ * It can't be put on a rack, moved to another place, or given to another account until it is returned.
+ */
 export function placeMove(existing: { status: string } | null): "create" | "move" | "blocked" {
   if (!existing) return "create";
   if (existing.status === "sold" || existing.status === "assigned") return "blocked";
@@ -75,7 +79,10 @@ export function placeMove(existing: { status: string } | null): "create" | "move
 
 export function placeDraftError(draft: { site: string; pallet?: string | null; level?: string | null; otherLabel?: string | null }): string | null {
   if (!draft.site || draft.site === "barn") return "Pick a rack.";
-  if (isRackPlace(draft.site) && !(draft.pallet ?? "").trim()) return "Pick a bay A through P.";
+  if (isRackPlace(draft.site)) {
+    const bay = rackBayError(draft.site, draft.pallet);
+    if (bay) return bay.endsWith(".") ? bay : `${bay}.`;
+  }
   if (isRackPlace(draft.site) && !draft.level) return "Pick a level.";
   if (draft.site === HOUSE_OTHER && !(draft.otherLabel ?? "").trim()) return "Other needs a short label.";
   return null;

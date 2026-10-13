@@ -1,34 +1,37 @@
 import { o as __toESM } from "../_runtime.mjs";
-import { u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
-import { _ as Link, b as useRouter, d as useRouterState, g as createRootRoute, h as createFileRoute, l as Scripts, m as Outlet, p as createRouter, u as HeadContent, v as Navigate, y as useNavigate } from "../_libs/@tanstack/react-router+[...].mjs";
+import { l as require_react_dom, u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
+import { S as useRouter, _ as createFileRoute, b as Navigate, d as Scripts, f as HeadContent, g as Outlet, h as createRouter, p as useRouterState, v as createRootRoute, x as useNavigate, y as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { n as require_jsx_runtime } from "../_libs/radix-ui__react-context+react.mjs";
-import { fn as literal, hn as object, ln as array, mn as number, sn as _enum, un as boolean, vn as string, yn as union } from "../_libs/@better-auth/core+[...].mjs";
+import { _n as preprocess, bn as union, fn as literal, hn as object, ln as array, mn as number, sn as _enum, un as boolean, yn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as utils, r as writeSync, t as readSync } from "../_libs/xlsx.mjs";
-import { A as List, B as Clock, C as Package, D as Menu$1, E as MessageSquare, F as GripVertical, G as Check, H as ChevronsUpDown, I as Globe, J as BookOpen, K as CalendarRange, L as Download, M as Keyboard, N as Handshake, O as MapPin, P as Hammer, R as Contrast, S as Pencil, T as Monitor, U as ChevronRight, V as CircleCheck, W as ChevronLeft, X as BellRing, Y as Bell, _ as Search, a as Users, b as Plus, c as Truck, d as Table2, f as Sun, g as Settings2, h as SlidersHorizontal, i as Vibrate, j as LayoutGrid, k as Mail, l as TriangleAlert, m as Store, n as Wrench, o as Upload, p as StretchHorizontal, q as CalendarClock, r as Warehouse, s as Type, t as X, u as Trash2, v as Rows3, w as Moon, x as Phone, y as Printer, z as Coffee } from "../_libs/lucide-react.mjs";
+import { $ as Coffee, A as Monitor, B as Images, C as Printer, D as Pencil, E as Phone, F as Lock, G as GripVertical, H as ImagePlus, I as LoaderCircle, J as Eye, K as Globe, L as Library, M as Menu$1, N as MapPin, O as Package, P as Mail, Q as Contrast, R as Keyboard, S as RefreshCw, T as Plus, U as Handshake, V as Image$1, W as Hammer, X as Droplets, Y as EyeOff, Z as Download, _ as ShieldAlert, a as Vibrate, at as ChevronLeft, b as Ruler, c as Type, ct as Camera, d as Trash2, dt as BookOpen, et as Clock, f as Table2, ft as Bell, g as SlidersHorizontal, h as Store, i as Warehouse, it as ChevronRight, j as MessageSquare, k as Moon, l as Truck, lt as CalendarRange, m as StretchHorizontal, mt as ArrowRightLeft, n as X, nt as CircleCheck, o as Users, ot as ChevronDown, p as Sun, pt as BellRing, q as FileUp, r as Wrench, rt as ChevronsUpDown, s as Upload, st as Check, t as ZoomIn, tt as ClipboardCopy, u as TriangleAlert, ut as CalendarClock, v as Settings2, w as Plug, x as RotateCcw, y as Search, z as KeyRound } from "../_libs/lucide-react.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { i as useQueryClient, n as useQuery, r as QueryClientProvider, t as useMutation } from "../_libs/tanstack__react-query.mjs";
 import { n as clsx, t as cva } from "../_libs/class-variance-authority+clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { a as Tooltip, i as ResponsiveContainer, n as Pie, r as Cell, t as PieChart } from "../_libs/recharts+[...].mjs";
 import { n as toast, t as Toaster } from "../_libs/sonner.mjs";
-import { a as DialogOverlay, b as Slot, i as DialogDescription$1, n as DialogClose, o as DialogPortal, r as DialogContent$1, s as DialogTitle$1, t as Dialog$1 } from "../_libs/@radix-ui/react-dialog+[...].mjs";
+import { a as DialogOverlay, c as DialogTrigger, i as DialogDescription$1, n as DialogClose, o as DialogPortal, r as DialogContent$1, s as DialogTitle$1, t as Dialog$1, x as Slot } from "../_libs/@radix-ui/react-dialog+[...].mjs";
 import { i as Trigger, n as Portal, r as Root2, t as Content2 } from "../_libs/@radix-ui/react-popover+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
+import { i as GROK_PROVIDERS, n as auth } from "./server.mjs";
 import { i as signOut, r as signIn, t as authClient } from "./client.mjs";
-import { i as GROK_PROVIDERS, r as getSql, t as auth } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 import { t as isWalkIn } from "./customer-key.mjs";
 import { a as matchCatalogModel, c as parseSerial, i as matchAccount, l as sameCatalogModel, o as matchExistingUnit, r as mapOwnership, s as parseInstallDate, t as OWNERSHIP_VALUES, u as serialKey } from "./account-equip.mjs";
-import { _ as setAccountApproved, a as deskMiddleware, d as lookupSignIn, f as peekInvite, g as revokeInvite, h as resendInvite, i as denyAccount, l as listDeskAccounts, m as requireAdmin, n as claimInvite, o as getMyAccess, p as registerAccount, r as createInvite, s as grantAllCanAddCustomers, t as checkUsername, u as listDeskInvites, v as setAccountCanAddCustomers, y as setAccountRole } from "./access.mjs";
-import { c as applyMention, i as markNotificationRead, l as mentionFragment, n as listNotifications, r as listTeammates, s as sendPing, t as deliverPings, u as parseMentions } from "./notify.mjs";
-import { a as LOCATION_SITES, c as bayFor, d as needsBay, f as palletsFor, i as LEVELS, l as isBarn, m as slotId, n as BARN_EQUIP_CAPACITY, o as SITE_LABEL, p as siteLabel, r as FRONT_PALLETS, s as SITE_PURPOSE, t as BACK_PALLETS, u as isValidBay } from "./warehouse.mjs";
-import { i as setShopTest, r as reviewRackUnit, t as addToRackSlot } from "./rack-stock.mjs";
+import { _ as setAccountApproved, a as deskMiddleware, b as flagOn, d as lookupSignIn, f as peekInvite, g as revokeInvite, h as resendInvite, i as denyAccount, l as listDeskAccounts, m as requireAdmin, n as claimInvite, o as getMyAccess, p as registerAccount, r as createInvite, s as grantAllCanAddCustomers, t as checkUsername, u as listDeskInvites, v as setAccountCanAddCustomers, x as authMiddleware, y as setAccountRole } from "./access.mjs";
+import { a as listEversysUnits, c as eversysFamily, d as moduleAvailability, i as listEversysModels, l as isEversysMachine, n as assignModule, r as decideModuleReturn, s as returnModule, t as addEversysUnit, u as moduleAccount } from "./module-assign.mjs";
+import { d as mentionFragment, f as parseMentions, i as markNotificationRead, l as sendPing, n as listNotifications, r as listTeammates, t as deliverPings, u as applyMention } from "./notify.mjs";
+import { a as LOCATION_SITES, c as bayFor, d as needsBay, f as palletsFor, g as slotId, h as siteLabel, i as LEVELS, l as isBarn, m as sectionFullMessage, n as BARN_EQUIP_CAPACITY, o as SITE_LABEL, p as rackBayError, r as FRONT_PALLETS, s as SITE_PURPOSE, t as BACK_PALLETS, u as isValidBay } from "./warehouse.mjs";
+import { a as setShopTest, i as reviewRackUnit, r as requireStock, t as addToRackSlot } from "./rack-stock.mjs";
 import { A as pmFlag, B as CLOSED_CALL, C as formatPingTime, D as money, E as installFlag, F as isoDay, G as isOpenPm, H as isClosedCall, I as isoDayOrNull, L as installedPatch, M as todayChicago, N as weekBounds, O as moneyExact, P as diffDays, R as isInstalled, S as formatNowChicago, T as formatWeekLabel, U as isClosedPm, V as CLOSED_PM, W as isOpenCall, _ as WEEKDAYS, a as listRebuilds, b as formatLongDate, d as HEALTH_LABEL, f as REBUILD_PRIORITIES, g as priorityLabel, h as WAITING_REASONS, i as listRebuildOwners, j as serviceFlag, k as monthBounds, l as sortRebuildsForExport, m as SHOP_ACCOUNT, n as createRebuild, o as loadRebuilds, p as REBUILD_STATUSES, r as listRebuildLinks, s as pullRebuildSerial, t as archiveRebuild, u as updateRebuild, v as addDays, w as formatShortDate, x as formatMonthLabel, y as addMonths, z as isOpenInstall } from "./rebuilds.mjs";
-import { a as catalogModels, c as listedEquipment, i as specsFromInstall, l as matchModel, n as parseMachinesJson, o as dropEquipment, p as shortEquipLabel, r as serializeMachines, s as findRecipeFor, t as mergeMachineSpecs, u as piecesForInstall } from "./machines.mjs";
+import { a as catalogModels, c as listedEquipment, d as recipeLabel, i as specsFromInstall, l as matchModel, m as shortEquipLabel, n as parseMachinesJson, o as dropEquipment, r as serializeMachines, s as findRecipeFor, t as mergeMachineSpecs, u as piecesForInstall } from "./machines.mjs";
 import { t as applySerialPull } from "./serial-pull.mjs";
 import { t as normalizeName } from "./norm.mjs";
 import { c as techLabel, i as loadTechs, l as DEFAULT_TECHS, n as listRosterCandidates, o as setRosterAdmin, r as listTechs, s as setTechActive, t as addTech, u as sameTech } from "./roster.mjs";
-import { a as loadAccountMarks, c as upsertAccountMarks, d as PRODUCER_INITIALS, f as canonicalRepName, h as sameRep, i as listReps, l as DEFAULT_REPS, m as isNoRep, n as customerKey, p as formatRep, r as isAviKatz, s as setRepActive, t as addRep, u as PRODUCERS } from "./reps.mjs";
+import { a as loadAccountMarks, c as upsertAccountMarks, d as PRODUCER_INITIALS, f as canonicalRepName, g as sameRep, h as isNoRep, i as listReps, l as DEFAULT_REPS, m as formatRep, n as addRep, p as findRep, r as isAviKatz, s as setRepActive, t as accountRepFor, u as PRODUCERS } from "./reps.mjs";
 import { A as normalizeZip, C as formatContact, D as normalizeCity, E as locationKey, F as roleRank, I as splitZips, L as statusTone, N as providerStates, O as normalizeEmail, P as roleLabel, S as formatAddress, T as groupLocations, _ as US_STATE_OPTIONS, a as indexHits, b as findDuplicateContact, c as pickKeeper, d as woMatchKey, f as renameOrMergeCustomer, g as PROVIDER_STATUSES, i as deskHasWrapped, k as normalizeState, l as resolvePreviewRow, m as renameOrMergeProvider, n as reconcileServiceDuplicates, o as normalizeHeader, p as renameOrMergeEquipment, r as tryMergeServiceDuplicate, s as parseCorrigoMatrix, t as mergeServiceJobs, u as shouldAttachToHit, v as duplicateNote, w as formatLocation, x as findDuplicateLocation, y as findDuplicateAddress } from "./wo-duplicates.mjs";
+import { _ as unitPlaceLabel, a as CUSTOMER_SITES, b as removeReasonError, c as HOUSE_STAGING, d as electricalFrom, f as isRackPlace, g as resolvePlaceSite, h as placeMove, l as HOUSE_TRAINING, m as placeDraftError, n as requestStockAssign, o as HOUSE_LOBBY, p as lastMoveLine, r as requestStockRemove, s as HOUSE_OTHER, t as decideStockAction, u as PLACE_CHOICES, v as REMOVE_REASONS, y as isWarehouseStockPlace } from "./stock-actions.mjs";
 //#region src/lib/error-component.tsx
 var import_jsx_runtime = require_jsx_runtime();
 function AppErrorComponent({ error }) {
@@ -45,11 +48,11 @@ function AppErrorComponent({ error }) {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-lg font-medium",
-				children: "Something went wrong"
+				children: "Something Went Wrong"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "max-w-md text-sm break-words text-muted-foreground",
-				children: error.message || "An unexpected error occurred. Try reloading the page."
+				children: (error instanceof Error ? error.message : "") || "An unexpected error occurred. Try reloading the page."
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				type: "button",
@@ -512,7 +515,7 @@ function nameTokens(raw) {
 	if (!raw) return [];
 	const n = normalizeName(raw);
 	if (!n) return [];
-	return [n, ...n.split(/[\s@._+\-]+/).filter(Boolean)];
+	return [n, ...n.split(/[\s@._+-]+/).filter(Boolean)];
 }
 /** Keys used to decide whether a handoff item belongs to the signed-in person. */
 function userMatchKeys(user) {
@@ -813,7 +816,7 @@ function SimpleBars({ data, xKey, yKey, yLabel, color = primary, horizontal }) {
 		})]
 	});
 }
-function StackedMoneyBars({ data, xKey, openKey, doneKey }) {
+function StackedMoneyBars({ data, xKey, openKey, doneKey, renderLabel }) {
 	const max = Math.max(...data.map((d) => (Number(d[openKey]) || 0) + (Number(d[doneKey]) || 0)), 1);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-w-0",
@@ -837,7 +840,7 @@ function StackedMoneyBars({ data, xKey, openKey, doneKey }) {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "min-w-0 truncate text-sm font-medium",
 							title: name,
-							children: name
+							children: renderLabel ? renderLabel(name) : name
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "shrink-0 tabular text-xs font-medium",
 							children: usd(total)
@@ -972,12 +975,15 @@ function StatRow({ children, className }) {
 }
 function StatCard({ label, value, hint, tone, breakdown, selected, onClick }) {
 	const inner = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "truncate text-xs tracking-wide text-muted-foreground uppercase",
-			children: label
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+			className: "flex items-center gap-1.5 truncate text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				"aria-hidden": true,
+				className: cn("size-1.5 shrink-0 rounded-full bg-primary/50", tone === "danger" && "bg-destructive", tone === "warn" && "bg-warning")
+			}), label]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: cn("mt-1 font-display text-3xl tabular leading-none", tone === "danger" && "text-destructive", tone === "warn" && "text-warning"),
+			className: cn("mt-2 font-display text-[2rem] font-medium tabular leading-none tracking-tight", tone === "danger" && "text-destructive", tone === "warn" && "text-warning"),
 			children: value
 		}),
 		hint ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -986,10 +992,10 @@ function StatCard({ label, value, hint, tone, breakdown, selected, onClick }) {
 		}) : null,
 		breakdown?.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "mt-1 hidden min-w-0 overflow-hidden @[11rem]:block",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BreakdownList, { items: breakdown })
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BreakdownList, { items: breakdown.slice(0, 3) })
 		}) : null
 	] });
-	const cls = cn("@container desk-lift min-w-[10rem] flex-1 overflow-hidden rounded-xl border px-3 py-3 text-left sm:px-4", selected ? "border-primary bg-primary/10 ring-2 ring-primary/30" : "border-border bg-card", onClick && "cursor-pointer transition-colors hover:border-primary/50");
+	const cls = cn("@container desk-flat relative min-w-[10rem] flex-1 overflow-hidden rounded-xl border bg-card px-3.5 py-3.5 text-left shadow-[var(--shadow-soft)] sm:px-4", selected ? "border-primary/60 ring-2 ring-primary/20 before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-primary" : "border-border", onClick && "cursor-pointer transition-colors hover:border-primary/50");
 	if (onClick) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 		type: "button",
 		className: cls,
@@ -1021,25 +1027,6 @@ function ChartCard({ title, lede, children }) {
 		]
 	});
 }
-function MiniStat({ label, value, hint }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-w-0 overflow-hidden rounded-lg bg-muted/70 px-3 py-2",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "truncate text-[11px] tracking-wide text-muted-foreground uppercase",
-				children: label
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "font-display text-xl tabular leading-tight",
-				children: value
-			}),
-			hint ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "truncate text-[11px] text-muted-foreground",
-				children: hint
-			}) : null
-		]
-	});
-}
 //#endregion
 //#region src/components/desk/my-view-bar.tsx
 var MyViewCtx = (0, import_react.createContext)({
@@ -1061,6 +1048,7 @@ function MyViewProvider({ children }) {
 		enabled: !!user
 	});
 	const [prefs, setPrefs] = (0, import_react.useState)(readMyView);
+	const density = usePrefs().prefs.density;
 	const role = access.data?.role ?? null;
 	(0, import_react.useEffect)(() => {
 		function sync() {
@@ -1103,14 +1091,15 @@ function MyViewProvider({ children }) {
 		setLayout,
 		matchMine,
 		filterMine: prefs.on && !!role,
-		compact: prefs.layout === "compact",
+		compact: density === "compact",
 		board: prefs.layout === "board"
 	}), [
 		role,
 		prefs,
 		setOn,
 		setLayout,
-		matchMine
+		matchMine,
+		density
 	]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MyViewCtx.Provider, {
 		value,
@@ -1121,47 +1110,14 @@ function useMyView() {
 	return (0, import_react.useContext)(MyViewCtx);
 }
 function MyViewBar({ className }) {
-	const { role, on, layout, setOn, setLayout } = useMyView();
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: cn("flex flex-wrap items-center gap-2", className),
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(FilterChip, {
+	const { role, on, setOn } = useMyView();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: cn("flex items-center", className),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(FilterChip, {
 			selected: on,
 			onClick: () => setOn(!on),
 			children: ["My View", role ? ` · ${role === "sales" ? "Sales" : "Service"}` : ""]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "flex overflow-hidden rounded-full border border-border",
-			children: [
-				{
-					id: "list",
-					label: "List",
-					icon: List
-				},
-				{
-					id: "board",
-					label: "Board",
-					icon: LayoutGrid
-				},
-				{
-					id: "compact",
-					label: "Compact",
-					icon: Rows3
-				}
-			].map((opt) => {
-				const Icon = opt.icon;
-				const active = layout === opt.id;
-				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					type: "button",
-					"aria-pressed": active,
-					title: opt.label,
-					onClick: () => setLayout(opt.id),
-					className: cn("inline-flex h-9 items-center gap-1.5 px-2.5 text-xs font-medium", active ? "bg-ink text-ink-foreground" : "bg-card text-muted-foreground hover:text-foreground"),
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "hidden sm:inline",
-						children: opt.label
-					})]
-				}, opt.id);
-			})
-		})]
+		})
 	});
 }
 //#endregion
@@ -1187,7 +1143,7 @@ function ThemedToaster() {
 }
 //#endregion
 //#region src/styles.css?url
-var styles_default = "/assets/styles-B-xx9jXZ.css";
+var styles_default = "/assets/styles-dutN6ER7.css";
 //#endregion
 //#region src/routes/__root.tsx
 var APP_NAME = "Katz Desk";
@@ -1212,7 +1168,7 @@ function publicShareHost() {
 	if (host === "vercel.app" || host.endsWith(".vercel.app") || host === "vercel.com" || host.endsWith(".vercel.com")) return "";
 	return host;
 }
-var Route$20 = createRootRoute({
+var Route$22 = createRootRoute({
 	beforeLoad: async () => ({ sessionUser: await fetchSessionUser() }),
 	head: () => {
 		const host = publicShareHost();
@@ -1427,29 +1383,58 @@ function isInsideCombo(target) {
 function preventIfCombo(event) {
 	if (isInsideCombo(event.target)) event.preventDefault();
 }
-function PopoverContent({ className, align = "start", sideOffset = 4, ...props }) {
-	const [container, setContainer] = import_react.useState(void 0);
-	import_react.useLayoutEffect(() => {
-		const sheet = document.querySelector(".sheet-panel");
-		setContainer(sheet ?? void 0);
-	}, []);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Portal, {
-		container,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Content2, {
-			align,
-			sideOffset,
-			"data-combo-popover": "",
-			className: cn("z-[80] w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-soft outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95", className),
-			...props
-		})
-	});
+/** Escape closes the open picker first. The dialog or sheet stays up. */
+function closeComboOnEscape(event) {
+	if (typeof document === "undefined") return;
+	if (!document.querySelector("[data-combo-popover]")) return;
+	event.preventDefault();
+	document.dispatchEvent(new Event("desk-close-combo"));
+}
+function PopoverContent({ className, align = "start", sideOffset = 4, style, ...props }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Portal, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Content2, {
+		align,
+		sideOffset,
+		"data-combo-popover": "",
+		style: {
+			pointerEvents: "auto",
+			zIndex: 500,
+			...style
+		},
+		className: cn("z-[500] max-h-[70vh] w-[var(--radix-popover-trigger-width)] overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-soft outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95", className),
+		...props
+	}) });
 }
 //#endregion
-//#region src/components/ui/sheet.tsx
-var Sheet = Dialog$1;
-function SheetContent({ className, children, side = "right", onPointerDownOutside, onFocusOutside, onInteractOutside, ...props }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogPortal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogOverlay, { className: "fixed inset-0 z-50 bg-ink/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent$1, {
-		className: cn("sheet-panel fixed inset-y-0 top-0 z-50 flex h-dvh max-h-dvh w-full flex-col overflow-hidden overscroll-none border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out sm:max-w-xl", side === "right" ? "right-0 border-l data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right" : "left-0 border-r data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left", className),
+//#region src/components/ui/dialog.tsx
+var Dialog = Dialog$1;
+var pageLocks = 0;
+var pageOverflow = "";
+/** Lock the page behind a bubble without blocking wheel events on portaled lists. */
+function PageScrollLock() {
+	import_react.useEffect(() => {
+		const root = document.documentElement;
+		if (pageLocks === 0) pageOverflow = root.style.overflow;
+		pageLocks += 1;
+		root.style.overflow = "hidden";
+		return () => {
+			pageLocks -= 1;
+			if (pageLocks === 0) root.style.overflow = pageOverflow;
+		};
+	}, []);
+	return null;
+}
+function DialogContent({ className, children, style, onPointerDownOutside, onFocusOutside, onInteractOutside, ...props }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogPortal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "fixed inset-0 z-50 bg-ink/40",
+		style: { pointerEvents: "auto" }
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent$1, {
+		className: cn("fixed top-20 left-1/2 z-[70] flex w-[calc(100%-1.5rem)] max-w-lg -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95", className),
+		style: {
+			pointerEvents: "auto",
+			maxHeight: "calc(100dvh - 5.75rem)",
+			overflow: "hidden",
+			...style
+		},
 		onPointerDownOutside: (e) => {
 			preventIfCombo(e);
 			onPointerDownOutside?.(e);
@@ -1462,14 +1447,80 @@ function SheetContent({ className, children, side = "right", onPointerDownOutsid
 			preventIfCombo(e);
 			onInteractOutside?.(e);
 		},
+		onEscapeKeyDown: (e) => {
+			closeComboOnEscape(e);
+		},
 		...props,
-		children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogClose, {
-			className: "absolute top-3 right-3 z-10 rounded-sm p-1 text-muted-foreground hover:bg-muted",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "sr-only",
-				children: "Close"
-			})]
-		})]
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageScrollLock, {}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				"data-dialog-scroll": true,
+				className: "min-h-0 overflow-y-auto overscroll-contain p-5",
+				style: {
+					maxHeight: "calc(100dvh - 5.75rem)",
+					touchAction: "pan-y"
+				},
+				children
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogClose, {
+				className: "absolute top-3 right-3 z-30 rounded-sm bg-card/80 p-1 text-muted-foreground hover:bg-muted",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "sr-only",
+					children: "Close"
+				})]
+			})
+		]
+	})] });
+}
+function DialogTitle({ className, ...props }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle$1, {
+		className: cn("font-display text-xl font-medium tracking-tight", className),
+		...props
+	});
+}
+function DialogDescription({ className, ...props }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription$1, {
+		className: cn("mt-1 text-sm text-muted-foreground", className),
+		...props
+	});
+}
+//#endregion
+//#region src/components/ui/sheet.tsx
+var Sheet = Dialog$1;
+function SheetContent({ className, children, side = "right", onPointerDownOutside, onFocusOutside, onInteractOutside, ...props }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogPortal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "fixed inset-0 z-50 bg-ink/40",
+		style: { pointerEvents: "auto" }
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent$1, {
+		className: cn("sheet-panel fixed inset-y-0 top-0 z-[70] flex h-dvh max-h-dvh w-full flex-col overflow-hidden overscroll-none border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out sm:max-w-xl", side === "right" ? "right-0 border-l data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right" : "left-0 border-r data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left", className),
+		style: { pointerEvents: "auto" },
+		onPointerDownOutside: (e) => {
+			preventIfCombo(e);
+			onPointerDownOutside?.(e);
+		},
+		onFocusOutside: (e) => {
+			preventIfCombo(e);
+			onFocusOutside?.(e);
+		},
+		onInteractOutside: (e) => {
+			preventIfCombo(e);
+			onInteractOutside?.(e);
+		},
+		onEscapeKeyDown: (e) => {
+			closeComboOnEscape(e);
+		},
+		...props,
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageScrollLock, {}),
+			children,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogClose, {
+				className: "absolute top-3 right-3 z-10 rounded-sm p-1 text-muted-foreground hover:bg-muted",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "sr-only",
+					children: "Close"
+				})]
+			})
+		]
 	})] });
 }
 function SheetHeader({ className, ...props }) {
@@ -1478,9 +1529,13 @@ function SheetHeader({ className, ...props }) {
 		...props
 	});
 }
-function SheetBody({ className, ...props }) {
+function SheetBody({ className, style, ...props }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: cn("sheet-scroll min-h-0 flex-1 overflow-y-scroll overscroll-contain", className),
+		style: {
+			touchAction: "pan-y",
+			...style
+		},
 		...props
 	});
 }
@@ -1661,10 +1716,54 @@ function inspectionGlance(summary) {
 	if (s.overall === "Failed" && s.failedItems.length) return `Failed: ${s.failedItems.join(", ")}${count}`;
 	return `${s.overall}${count}`;
 }
+function personKey(raw) {
+	return normalizeName(raw.replace(/\s*\([^)]{1,8}\)\s*$/, ""));
+}
+/** Active sales reps plus active service techs. One row per person, name order. */
+function inspectorChoices(reps, techs, current) {
+	const byKey = /* @__PURE__ */ new Map();
+	for (const rep of reps) {
+		if (rep.active === false) continue;
+		const name = rep.name.trim().replace(/\s+/g, " ");
+		if (!name) continue;
+		const initials = (rep.initials ?? "").trim();
+		byKey.set(personKey(name), {
+			value: name,
+			label: initials ? `${name} (${initials})` : name
+		});
+	}
+	for (const tech of techs) {
+		if (tech.active === false) continue;
+		const name = tech.name.trim().replace(/\s+/g, " ");
+		if (!name || byKey.has(personKey(name))) continue;
+		byKey.set(personKey(name), {
+			value: name,
+			label: name
+		});
+	}
+	const options = [...byKey.values()].sort((a, b) => a.value.localeCompare(b.value, void 0, { sensitivity: "base" }));
+	const cur = (current ?? "").trim();
+	if (!cur) return {
+		options,
+		value: ""
+	};
+	const hit = options.find((o) => personKey(o.value) === personKey(cur) || normalizeName(o.label) === normalizeName(cur));
+	if (hit) return {
+		options,
+		value: hit.value
+	};
+	return {
+		options: [{
+			value: cur,
+			label: cur
+		}, ...options],
+		value: cur
+	};
+}
 //#endregion
 //#region src/lib/ops/inspection-api.ts
 var MAX_PHOTO = 18e5;
-async function ready$5() {
+async function ready$7() {
 	const { ensureSeeded } = await import("./seed.server.mjs");
 	await ensureSeeded();
 	return getSql();
@@ -1685,7 +1784,7 @@ function day(v) {
 	const m = String(v).trim().match(/^(\d{4}-\d{2}-\d{2})/);
 	return m ? m[1] : null;
 }
-function text(v) {
+function text$1(v) {
 	if (v == null) return "";
 	if (typeof v === "string") return v;
 	try {
@@ -1694,25 +1793,19 @@ function text(v) {
 		return "";
 	}
 }
-function piecesFrom(row) {
-	const machines = parseMachinesJson(text(row.machines) || null);
+/**
+* One piece per machine, split the same way the install's Equipment section splits it
+* (catalog-aware), so "Linea / Swift / Axiom-APS" on one line is three machines, not one.
+*/
+function piecesFrom(row, catalog = []) {
+	const machines = parseMachinesJson(text$1(row.machines) || null);
 	if (machines.length) return machines;
-	const named = text(row.equipment).split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+	const named = listedEquipment(text$1(row.equipment), catalog);
 	return named.map((equipment) => ({
 		equipment,
-		serial: named.length === 1 ? text(row.serial) : "",
-		powerVoltage: named.length === 1 ? text(row.power_voltage) : ""
+		serial: named.length === 1 ? text$1(row.serial) : "",
+		powerVoltage: named.length === 1 ? text$1(row.power_voltage) : ""
 	}));
-}
-function matchExisting(account, piece, used) {
-	const key = serialKey(piece.serial);
-	if (key) {
-		const byBoth = account.find((a) => !used.has(a.id) && a.serial_key === key && sameCatalogModel(a.catalog_model, piece.equipment));
-		if (byBoth) return byBoth;
-		const bySerial = account.find((a) => !used.has(a.id) && a.serial_key === key);
-		if (bySerial) return bySerial;
-	}
-	return account.find((a) => !used.has(a.id) && sameCatalogModel(a.catalog_model, piece.equipment) && !serialKey(a.serial) && !key);
 }
 async function catalogNames(sql) {
 	return (await sql.query(`select name from directory_equipment where archived = false and coalesce(name, '') <> ''`).catch(() => [])).map((r) => r.name);
@@ -1737,30 +1830,98 @@ async function insertEquipment(sql, customer, model, serial, electrical) {
 async function linkUnit(sql, installId, equipmentId) {
 	await sql.query(`insert into install_inspection_units (install_id, equipment_id) values ($1, $2) on conflict do nothing`, [installId, equipmentId]);
 }
-async function ensureUnits(sql, installId) {
-	if ((await sql.query("select equipment_id from install_inspection_units where install_id = $1", [installId])).length) return;
+async function writePieceFields(sql, hit, piece) {
+	const serial = piece.serial.trim();
+	const power = piece.powerVoltage.trim();
+	let nextSerial = hit.serial;
+	let nextKey = hit.serial_key;
+	if (serial && !serialKey(hit.serial)) {
+		const key = serialKey(serial);
+		const clash = key ? await sql.query("select id from account_equipment where serial_key = $1 and id <> $2 limit 1", [key, hit.id]) : [];
+		if (key && !clash[0]) {
+			nextSerial = serial;
+			nextKey = key;
+		}
+	}
+	const nextPower = power || hit.electrical;
+	const serialChanged = (nextSerial ?? null) !== (hit.serial ?? null);
+	const powerChanged = !!power && power !== (hit.electrical ?? "");
+	if (!serialChanged && !powerChanged) return;
+	await sql.query("update account_equipment set serial = $2, serial_key = $3, electrical = $4 where id = $1", [
+		hit.id,
+		nextSerial,
+		nextKey,
+		nextPower
+	]);
+	hit.serial = nextSerial;
+	hit.serial_key = nextKey;
+	hit.electrical = nextPower;
+}
+function claimUnit(piece, pools, used) {
+	const key = serialKey(piece.serial);
+	if (key) for (const pool of pools) {
+		const hit = pool.find((a) => !used.has(a.id) && a.serial_key === key);
+		if (hit) return hit;
+	}
+	for (const pool of pools) {
+		const hit = pool.find((a) => !used.has(a.id) && sameCatalogModel(a.catalog_model, piece.equipment) && !serialKey(a.serial));
+		if (hit) return hit;
+	}
+}
+async function unitPassed(sql, installId, equipmentId) {
+	const [items, unit] = await Promise.all([sql.query("select category, status from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, equipmentId]), sql.query("select core_needed from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, equipmentId])]);
+	return inspectionOverall(items, unit[0]?.core_needed) === "Passed";
+}
+/** Add install machines to pre-inspection. Prune only when the install equipment list was saved. */
+async function syncInstallUnits(sql, installId, opts) {
 	const row = (await sql.query("select customer, equipment, serial, power_voltage, machines from installs where id = $1", [installId]))[0];
 	if (!row) return;
-	const pieces = piecesFrom(row);
-	if (!pieces.length) return;
+	const catalog = await catalogNames(sql);
+	const pieces = piecesFrom(row, catalog);
+	/** A unit saved under the whole one-line list ("Linea / Swift / Axiom") before machines were split. */
+	const combined = (a) => listedEquipment(a.equipment_name, catalog).length > 1;
 	const account = await sql.query(`select id, catalog_model, equipment_name, serial, serial_key, electrical
        from account_equipment where lower(customer) = lower($1) order by id`, [row.customer]);
+	const links = await sql.query("select equipment_id from install_inspection_units where install_id = $1", [installId]);
+	const linkedIds = new Set(links.map((l) => l.equipment_id));
+	const linkedRows = account.filter((a) => linkedIds.has(a.id));
 	const used = /* @__PURE__ */ new Set();
+	const keep = /* @__PURE__ */ new Set();
 	let first = null;
 	for (const piece of pieces) {
-		let id = matchExisting(account, piece, used)?.id;
+		let hit = claimUnit(piece, [linkedRows, account], used);
+		if (!hit) {
+			const old = linkedRows.find((a) => !used.has(a.id) && combined(a) && listedEquipment(a.equipment_name, catalog).some((n) => sameCatalogModel(n, piece.equipment)));
+			if (old) {
+				old.catalog_model = matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel || piece.equipment;
+				old.equipment_name = piece.equipment;
+				await sql.query("update account_equipment set catalog_model = $2, equipment_name = $3 where id = $1", [
+					old.id,
+					old.catalog_model,
+					old.equipment_name
+				]);
+				hit = old;
+			}
+		}
+		if (hit && combined(hit)) {
+			hit.equipment_name = piece.equipment;
+			await sql.query("update account_equipment set equipment_name = $2 where id = $1", [hit.id, piece.equipment]);
+		}
+		let id = hit?.id;
 		if (!id) {
 			id = await insertEquipment(sql, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
-			account.push({
+			hit = {
 				id,
 				catalog_model: piece.equipment,
 				equipment_name: piece.equipment,
 				serial: piece.serial || null,
 				serial_key: serialKey(piece.serial) || null,
 				electrical: piece.powerVoltage || null
-			});
-		}
+			};
+			account.push(hit);
+		} else if (hit) await writePieceFields(sql, hit, piece);
 		used.add(id);
+		keep.add(id);
 		if (!first) first = id;
 		await linkUnit(sql, installId, id);
 	}
@@ -1768,6 +1929,25 @@ async function ensureUnits(sql, installId) {
 		await sql.query(`update install_inspection_items set equipment_id = $1 where install_id = $2 and equipment_id is null`, [first, installId]);
 		await sql.query(`update install_inspection_photos set equipment_id = $1 where install_id = $2 and equipment_id is null`, [first, installId]);
 	}
+	for (const a of linkedRows) {
+		if (keep.has(a.id) || !combined(a) || serialKey(a.serial)) continue;
+		if ((await sql.query(`select 1 from install_inspection_items where install_id = $2 and equipment_id = $1 and (status <> 'Not inspected' or coalesce(notes, '') <> '')
+       union all select 1 from install_inspection_photos where install_id = $2 and equipment_id = $1 limit 1`, [a.id, installId])).length) continue;
+		await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, a.id]);
+		await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, a.id]);
+		linkedIds.delete(a.id);
+	}
+	if (!opts?.prune) return;
+	for (const id of linkedIds) {
+		if (keep.has(id)) continue;
+		if (await unitPassed(sql, installId, id)) continue;
+		await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
+		await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
+		await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
+	}
+}
+async function ensureUnits(sql, installId) {
+	await syncInstallUnits(sql, installId);
 }
 function machineGroups(items) {
 	const map = /* @__PURE__ */ new Map();
@@ -1985,7 +2165,7 @@ async function requireUnit(sql, installId, equipmentId) {
 }
 var idInput = object({ installId: number().int().positive() });
 var getInstallInspection = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => idInput.parse(d)).handler(async ({ data }) => {
-	const view = await readInspection(await ready$5(), data.installId);
+	const view = await readInspection(await ready$7(), data.installId);
 	if (!view) throw new Error("Install not found");
 	return view;
 });
@@ -1999,7 +2179,7 @@ var itemInput = object({
 var saveInspectionItem = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => itemInput.parse(d)).handler(async ({ data }) => {
 	if (!isSavableCategory(data.category)) throw new Error("Unknown checklist item.");
 	if (!isInspectionItemStatus(data.status)) throw new Error("Pick a status.");
-	const sql = await ready$5();
+	const sql = await ready$7();
 	await requireInstall(sql, data.installId);
 	await ensureUnits(sql, data.installId);
 	await requireUnit(sql, data.installId, data.equipmentId);
@@ -2049,7 +2229,7 @@ var coreInput = object({
 	answer: _enum(["yes", "no"])
 });
 var saveInspectionCoreHole = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => coreInput.parse(d)).handler(async ({ data }) => {
-	const sql = await ready$5();
+	const sql = await ready$7();
 	await requireInstall(sql, data.installId);
 	await ensureUnits(sql, data.installId);
 	await requireUnit(sql, data.installId, data.equipmentId);
@@ -2071,7 +2251,7 @@ var metaInput = object({
 	overrideReason: string().nullable().optional()
 });
 var saveInspectionMeta = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => metaInput.parse(d)).handler(async ({ data, context }) => {
-	const sql = await ready$5();
+	const sql = await ready$7();
 	await requireInstall(sql, data.installId);
 	await ensureHead(sql, data.installId);
 	const sets = [];
@@ -2108,7 +2288,7 @@ var addInspectionPhoto = createServerFn({ method: "POST" }).middleware([deskMidd
 	if (!isSavableCategory(data.category)) throw new Error("Unknown checklist item.");
 	if (!data.dataUrl.startsWith("data:image/")) throw new Error("Upload a photo.");
 	if (data.dataUrl.length > MAX_PHOTO) throw new Error("Photo is too large. Try a smaller image.");
-	const sql = await ready$5();
+	const sql = await ready$7();
 	await requireInstall(sql, data.installId);
 	await ensureUnits(sql, data.installId);
 	await requireUnit(sql, data.installId, data.equipmentId);
@@ -2141,7 +2321,7 @@ var removePhotoInput = object({
 	photoId: number().int().positive()
 });
 var removeInspectionPhoto = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => removePhotoInput.parse(d)).handler(async ({ data }) => {
-	const sql = await ready$5();
+	const sql = await ready$7();
 	await sql.query("delete from install_inspection_photos where id = $1 and install_id = $2", [data.photoId, data.installId]);
 	const view = await readInspection(sql, data.installId);
 	if (!view) throw new Error("Install not found");
@@ -2154,7 +2334,7 @@ var addEquipInput = object({
 	electrical: string().nullable().optional()
 });
 var addInspectionEquipment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => addEquipInput.parse(d)).handler(async ({ data }) => {
-	const sql = await ready$5();
+	const sql = await ready$7();
 	const install = await requireInstall(sql, data.installId);
 	await ensureUnits(sql, data.installId);
 	const key = serialKey(data.serial);
@@ -2181,7 +2361,7 @@ var copyInput = object({
 });
 var copyInspectionNa = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => copyInput.parse(d)).handler(async ({ data }) => {
 	if (data.fromEquipmentId === data.toEquipmentId) throw new Error("Pick a different machine.");
-	const sql = await ready$5();
+	const sql = await ready$7();
 	await requireInstall(sql, data.installId);
 	await requireUnit(sql, data.installId, data.fromEquipmentId);
 	await requireUnit(sql, data.installId, data.toEquipmentId);
@@ -2250,7 +2430,7 @@ function noteOwner(c, owners) {
 		kind: "unclaimed"
 	};
 }
-async function ready$4() {
+async function ready$6() {
 	const { ensureSeeded } = await import("./seed.server.mjs");
 	await ensureSeeded();
 	return getSql();
@@ -2283,7 +2463,7 @@ async function loadEquipCatalog(sql) {
     select distinct model from assets where kind = 'equip' and coalesce(model, '') <> ''`;
 	return catalogModels([...dir.map((r) => r.name), ...assets.map((r) => r.model)]);
 }
-function num(v) {
+function num$1(v) {
 	if (v === null || v === void 0 || v === "") return null;
 	const n = typeof v === "number" ? v : Number(v);
 	return Number.isFinite(n) ? n : null;
@@ -2420,7 +2600,7 @@ function mapInstall(r, today, week, catalog = []) {
 }
 function mapDeal(r, marks) {
 	const customer = String(r.customer);
-	const producer = r.producer ?? null;
+	const producer = (String(r.producer ?? "").trim() ? r.producer : null) ?? (marks ? accountRepFor(marks, customer) : null);
 	return {
 		id: r.id,
 		customer,
@@ -2428,7 +2608,7 @@ function mapDeal(r, marks) {
 		accountType: r.account_type ?? null,
 		dateOfDeal: isoDayOrNull(r.date_of_deal),
 		equipment: r.equipment ?? null,
-		amount: num(r.amount),
+		amount: num$1(r.amount),
 		goodToOrder: !!r.good_to_order,
 		ordered: !!r.ordered,
 		eta: r.eta ?? null,
@@ -2443,7 +2623,16 @@ function mapDeal(r, marks) {
 	};
 }
 function applyMarks(rows, marks) {
-	for (const r of rows) r.aviKatz = isAviKatz(marks, r.customer ?? null);
+	for (const r of rows) {
+		r.aviKatz = isAviKatz(marks, r.customer ?? null);
+		if ("accountRep" in r && !String(r.accountRep ?? "").trim()) {
+			const rep = accountRepFor(marks, r.customer ?? null);
+			if (rep) {
+				r.accountRep = rep;
+				r.noRep = isNoRep(rep);
+			}
+		}
+	}
 	return rows;
 }
 function mapModule(r) {
@@ -2459,7 +2648,14 @@ function mapModule(r) {
 		dateReady: isoDayOrNull(r.date_ready),
 		technician: r.technician ?? null,
 		notes: r.notes ?? null,
-		updatedAt: String(r.updated_at)
+		updatedAt: String(r.updated_at),
+		assignedCustomer: r.assigned_customer ?? null,
+		assignedUnitId: r.assigned_unit_id ?? null,
+		assignedUnitLabel: r.assigned_unit_label ?? null,
+		assignedAt: r.assigned_at ? String(r.assigned_at) : null,
+		returnPending: !!r.return_pending,
+		returnBy: r.return_by ?? null,
+		returnByName: r.return_by_name ?? null
 	};
 }
 function mapComment(r, owners) {
@@ -2484,15 +2680,15 @@ function mapComment(r, owners) {
 }
 function mapAsset(r) {
 	const pallet = r.pallet;
-	const level = num(r.level);
-	const lineNo = num(r.line_no);
+	const level = num$1(r.level);
+	const lineNo = num$1(r.line_no);
 	const bayNeeded = needsBay(r.site, pallet);
 	return {
 		id: r.id,
 		kind: r.kind,
 		model: r.model,
 		serial: r.serial,
-		qty: num(r.qty) ?? 1,
+		qty: num$1(r.qty) ?? 1,
 		customerOwned: r.customer_owned,
 		site: r.site,
 		pallet,
@@ -2515,16 +2711,21 @@ function mapAsset(r) {
 		shopTest: r.shop_test === "tested" || r.shop_test === "needs-test" ? r.shop_test : null,
 		shopTestNote: r.shop_test_note ?? null,
 		shopTestBy: r.shop_test_by ?? null,
-		shopTestAt: r.shop_test_at ? String(r.shop_test_at) : null
+		shopTestAt: r.shop_test_at ? String(r.shop_test_at) : null,
+		stockHold: r.stock_hold === "remove" || r.stock_hold === "assign" ? r.stock_hold : null,
+		stockHoldCustomer: r.stock_hold_customer ?? null,
+		stockHoldReason: r.stock_hold_reason ?? null,
+		stockHoldBy: r.stock_hold_by ?? null
 	};
 }
 function mapRecipe(r) {
 	return {
 		id: r.id,
+		name: r.name ?? null,
 		equipmentModel: String(r.equipment_model),
 		customer: r.customer ?? null,
-		installId: num(r.install_id),
-		copiedFrom: num(r.copied_from),
+		installId: num$1(r.install_id),
+		copiedFrom: num$1(r.copied_from),
 		isTemplate: Boolean(r.is_template),
 		coffee1: r.coffee_1 ?? null,
 		coffee2: r.coffee_2 ?? null,
@@ -2543,7 +2744,7 @@ function mapRecipe(r) {
 	};
 }
 var getDashboard = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const catalog = await loadEquipCatalog(sql);
@@ -2580,7 +2781,7 @@ var getDashboard = createServerFn({ method: "GET" }).middleware([deskMiddleware]
 	for (const j of jobs) {
 		if (isClosedCall(j) || !j.scheduled) continue;
 		if (j.scheduled > laterHorizon) continue;
-		const accountRep = marks.rep.get(customerKey(j.customer)) ?? null;
+		const accountRep = accountRepFor(marks, j.customer);
 		pushDue({
 			daysOut: diffDays(today, j.scheduled),
 			source: j.kind === "tlc" ? "TLC + Factor" : "Service Tracker",
@@ -2602,7 +2803,7 @@ var getDashboard = createServerFn({ method: "GET" }).middleware([deskMiddleware]
 	for (const p of pms) {
 		if (isClosedPm(p) || !p.projected) continue;
 		if (p.projected > laterHorizon) continue;
-		const accountRep = marks.rep.get(customerKey(p.customer)) ?? null;
+		const accountRep = accountRepFor(marks, p.customer);
 		pushDue({
 			daysOut: diffDays(today, p.projected),
 			source: "PM Tracker",
@@ -2895,13 +3096,13 @@ async function entityContext(sql, type, id) {
 	return empty;
 }
 var listJobs = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const today = todayChicago();
 	const marks = await loadAccountMarks(sql);
 	return applyMarks(attachJobSiblings((await sql`select * from service_jobs order by received desc nulls last, id desc`).map((r) => mapJob(r, today))), marks).filter((j) => j.kind === data.kind);
 });
 var getJob = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const today = todayChicago();
 	const marks = await loadAccountMarks(sql);
 	const rows = await sql`select * from service_jobs where id = ${data.id}`;
@@ -2931,7 +3132,7 @@ var jobPatch = object({
 	urgency: string().optional()
 });
 var updateJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => jobPatch.parse(d)).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`select * from service_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Job not found");
 	const next = {
@@ -2991,7 +3192,7 @@ var updateJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).
 	return getJob({ data: { id: data.id } });
 });
 var mergeServiceTickets = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	if (data.keeperId === data.extraId) throw new Error("Pick a different ticket to merge into.");
 	const actor = await deskUsername$1(sql, context.userId);
 	const result = await mergeServiceJobs(sql, data.keeperId, data.extraId, actor);
@@ -2999,7 +3200,7 @@ var mergeServiceTickets = createServerFn({ method: "POST" }).middleware([deskMid
 	return getJob({ data: { id: result.keeperId } });
 });
 var createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const received = data.received || todayChicago();
 	const prefix = `SC-${received.replace(/-/g, "").slice(0, 6)}-`;
 	const last = await sql`
@@ -3021,12 +3222,12 @@ var createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).
 	return getJob({ data: { id: rows[0].id } });
 });
 var listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const marks = await loadAccountMarks(sql);
 	return applyMarks((await sql`select * from pm_jobs order by received desc nulls last, id desc`).map((r) => mapPm(r, todayChicago())), marks);
 });
 var updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`select * from pm_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("PM not found");
 	const c = cur[0];
@@ -3058,7 +3259,7 @@ var updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).v
 	return mapPm((await sql`select * from pm_jobs where id = ${data.id}`)[0], todayChicago());
 });
 var createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
       values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? "12 month PM"}, ${todayChicago()}, ${"Pending Scheduling"})
@@ -3067,12 +3268,18 @@ var createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).v
 	return mapPm((await sql`select * from pm_jobs where id = ${rows[0].id}`)[0], todayChicago());
 });
 var listModules = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	return (await (await ready$4())`select * from modules order by module_id`).map(mapModule);
+	const sql = await ready$6();
+	const { ensureModuleSchema } = await import("./module-assign.mjs").then((n) => n.o);
+	await ensureModuleSchema(sql);
+	return (await sql`select * from modules order by module_id`).map(mapModule);
 });
 var updateModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`select * from modules where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Module not found");
+	if (cur[0].assigned_customer) {
+		if (data.status !== void 0 && data.status !== cur[0].status || data.location !== void 0 && (data.location ?? null) !== (cur[0].location ?? null)) throw new Error(`This module is assigned to ${cur[0].assigned_customer}. Use Return To Warehouse to bring it back.`);
+	}
 	const c = cur[0];
 	await sql`
       update modules set
@@ -3096,21 +3303,25 @@ var updateModule = createServerFn({ method: "POST" }).middleware([deskMiddleware
 	return mapModule((await sql`select * from modules where id = ${data.id}`)[0]);
 });
 var createModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
+	const moduleId = String(data.moduleId ?? "").trim().replace(/\s+/g, "").toUpperCase();
+	if (!moduleId) throw new Error("Enter the module serial.");
+	const dup = await sql.query("select id, module_id from modules where upper(regexp_replace(module_id, '\\s', '', 'g')) = $1 limit 1", [moduleId]);
+	if (dup[0]) throw new Error(`Module ${dup[0].module_id} is already on the list. Open it instead of adding a second record.`);
 	const rows = await sql`
       insert into modules (module_id, platform, module_type, status, location)
-      values (${data.moduleId}, ${data.platform ?? "Cameo"}, ${data.moduleType ?? "Brew Module"}, ${"Not Started"}, ${"SHELF"})
+      values (${moduleId}, ${data.platform ?? "Cameo"}, ${data.moduleType ?? "Brew Module"}, ${"Not Started"}, ${"SHELF"})
       returning *`;
-	await logActivity(sql, context.userId, "module", rows[0].id, "opened", data.moduleId);
+	await logActivity(sql, context.userId, "module", rows[0].id, "opened", moduleId);
 	return mapModule(rows[0]);
 });
 var listDeals = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const marks = await loadAccountMarks(sql);
 	return (await sql`select * from deals where archived = false order by id`).map((r) => mapDeal(r, marks));
 });
 var updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
 	const c = cur[0];
@@ -3149,7 +3360,7 @@ var updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware])
 	return mapDeal((await sql`select * from deals where id = ${data.id}`)[0], marks);
 });
 var createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const producer = canonicalRepName(data.producer);
 	const rows = await sql`
       insert into deals (customer, producer, equipment, amount, date_of_deal)
@@ -3161,7 +3372,7 @@ var createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware])
 	return mapDeal(rows[0], marks);
 });
 var archiveDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`
       select id, customer from deals where id = ${data.id} and archived = false`;
 	if (!cur[0]) throw new Error("Deal not found");
@@ -3212,7 +3423,7 @@ async function maybeHandoffInstall(sql, dealId) {
     )`;
 }
 var listInstalls = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const catalog = await loadEquipCatalog(sql);
@@ -3220,7 +3431,7 @@ var listInstalls = createServerFn({ method: "GET" }).middleware([deskMiddleware]
 	return withInspections(sql, applyMarks((await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog)), marks));
 });
 var updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`select * from installs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Install not found");
 	const c = cur[0];
@@ -3282,13 +3493,14 @@ var updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 		aviKatz: data.aviKatz,
 		accountRep: data.accountRep === void 0 ? void 0 : canonicalRepName(data.accountRep) ?? (data.accountRep || null)
 	});
+	if (data.equipment !== void 0 || data.machines !== void 0 || data.serial !== void 0 || data.powerVoltage !== void 0) await syncInstallUnits(sql, data.id, { prune: true });
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);
 	return (await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks)))[0];
 });
 var createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const catalog = await loadEquipCatalog(sql);
 	const machinesJsonRaw = data.machines == null ? null : typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
 	const parsed = parseMachinesJson(machinesJsonRaw);
@@ -3316,10 +3528,11 @@ var createInstall = createServerFn({ method: "POST" }).middleware([deskMiddlewar
       )
       returning *`;
 	await logActivity(sql, context.userId, "install", rows[0].id, "opened", duplicateOf ? `${name} · possible duplicate of #${duplicateOf}` : name);
+	await syncInstallUnits(sql, rows[0].id);
 	return mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog);
 });
 var archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`
       select id, customer from installs where id = ${data.id} and archived = false`;
 	if (!cur[0]) throw new Error("Install not found");
@@ -3328,7 +3541,7 @@ var archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddlewa
 	return { ok: true };
 });
 var listComments = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const rows = await sql`
       select * from comments
       where entity_type = ${data.entityType} and entity_id = ${data.entityId}
@@ -3337,7 +3550,7 @@ var listComments = createServerFn({ method: "GET" }).middleware([deskMiddleware]
 	return rows.map((r) => mapComment(r, ctx));
 });
 var listActivity = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	return (await (await ready$4())`
+	return (await (await ready$6())`
       select id, entity_type, entity_id, actor_name, action, detail, created_at
       from activity
       where entity_type = ${data.entityType} and entity_id = ${data.entityId}
@@ -3353,7 +3566,7 @@ var listActivity = createServerFn({ method: "GET" }).middleware([deskMiddleware]
 	}));
 });
 var addComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const body = data.body.trim();
 	if (!body) throw new Error("Message is empty");
 	const authorName = (await sql.query("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Teammate";
@@ -3376,7 +3589,7 @@ var addComment = createServerFn({ method: "POST" }).middleware([deskMiddleware])
 	return mapComment((await sql`select * from comments where id = ${commentId}`)[0] ?? rows[0], await entityContext(sql, data.entityType, data.entityId));
 });
 var claimComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`
       select id, author_id, entity_type, entity_id from comments where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Note not found");
@@ -3392,11 +3605,11 @@ var claimComment = createServerFn({ method: "POST" }).middleware([deskMiddleware
 	return mapComment(row, await entityContext(sql, cur[0].entity_type, cur[0].entity_id));
 });
 var resolveComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	await (await ready$4())`update comments set resolved = ${data.resolved} where id = ${data.id}`;
+	await (await ready$6())`update comments set resolved = ${data.resolved} where id = ${data.id}`;
 	return { ok: true };
 });
 var getHandoff = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const askRows = await sql`
       select * from comments
       where ask_team is not null and resolved = false
@@ -3436,7 +3649,7 @@ var getHandoff = createServerFn({ method: "GET" }).middleware([deskMiddleware]).
 	};
 });
 var searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const q = data.q.trim();
 	if (q.length < 2) return [];
 	const like = `%${q.replace(/%/g, "")}%`;
@@ -3498,7 +3711,7 @@ var searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).v
       where model ilike ${like} or coalesce(serial,'') ilike ${like} or coalesce(sold_to,'') ilike ${like}
       limit 8`;
 	for (const a of assets) hits.push({
-		entityType: a.status === "deployed" || a.site === "field" ? "location" : "asset",
+		entityType: a.site === "barn-back" || a.site === "barn-front" ? "asset" : "location",
 		id: a.id,
 		title: a.model,
 		subtitle: [a.serial, siteLabel(a.site)].filter(Boolean).join(" · "),
@@ -3530,15 +3743,15 @@ var searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).v
 	return hits.slice(0, 28);
 });
 var handoffDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	await maybeHandoffInstall(await ready$4(), data.dealId);
+	await maybeHandoffInstall(await ready$6(), data.dealId);
 	return { ok: true };
 });
-async function nextLine(sql, site, pallet, level) {
+async function nextLine(sql, site, pallet, level, exceptId) {
 	const taken = await sql`
-    select line_no from assets
-    where site = ${site} and pallet = ${pallet} and level = ${level}
+    select id, line_no from assets
+    where site = ${site} and upper(pallet) = ${String(pallet).toUpperCase()} and level = ${level}
       and status in ('ready', 'deployed') and line_no is not null`;
-	const used = new Set(taken.map((t) => t.line_no));
+	const used = new Set(taken.filter((t) => t.id !== exceptId).map((t) => t.line_no));
 	for (let n = 1; n <= 12; n++) if (!used.has(n)) return n;
 	return null;
 }
@@ -3584,21 +3797,27 @@ async function findOpenBarnSlot(sql, preferred) {
 	throw new Error("Barn is full — return this unit from the warehouse page");
 }
 var listAssets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	return (await (await ready$4())`select * from assets order by id`).map(mapAsset);
+	return (await (await ready$6())`select * from assets order by id`).map(mapAsset);
 });
 var createAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const kind = data.kind ?? "equip";
 	const site = data.site;
 	let pallet = data.pallet ?? null;
-	let level = data.level ?? null;
+	const level = data.level ?? null;
 	let line = null;
 	const barn = isBarn(site);
 	if (barn) {
-		if (!pallet || !level) throw new Error("Pick a pallet and level");
-		if (!isValidBay(pallet) || !palletsFor(site).includes(pallet)) throw new Error("Pick a bay A through P on this rack");
-		line = await nextLine(sql, site, pallet, level);
-		if (line == null) throw new Error("That slot is full (12 lines)");
+		if (!pallet || !level) throw new Error("Pick a bay and a level");
+		const letter = String(pallet).trim().toUpperCase();
+		const bayErr = rackBayError(site, letter);
+		if (bayErr) throw new Error(bayErr);
+		pallet = letter;
+		line = await nextLine(sql, site, letter, Number(level));
+		if (line == null) {
+			const { sectionFullMessage } = await import("./warehouse.mjs").then((n) => n._);
+			throw new Error(sectionFullMessage(site, letter, Number(level)));
+		}
 	}
 	const role = await (await import("./rack-stock.mjs").then((n) => n.n)).requireStock(sql, context.userId);
 	const serialRaw = String(data.serial || "").trim();
@@ -3626,8 +3845,8 @@ var createAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]
       )
       returning *`)[0]);
 	if (pending && pallet && level) {
-		const { notifyAdminsRackReview } = await import("./notify.mjs").then((n) => n.o);
-		const { slotId } = await import("./warehouse.mjs").then((n) => n.h);
+		const { notifyAdminsRackReview } = await import("./notify.mjs").then((n) => n.c);
+		const { slotId } = await import("./warehouse.mjs").then((n) => n._);
 		await notifyAdminsRackReview(sql, context.userId, {
 			id: row.id,
 			model: row.model,
@@ -3638,18 +3857,28 @@ var createAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]
 	return row;
 });
 var updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = await sql`select * from assets where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Asset not found");
 	const c = cur[0];
 	let pallet = data.pallet === void 0 ? c.pallet : data.pallet;
-	let level = data.level === void 0 ? c.level : data.level;
+	const level = data.level === void 0 ? c.level : data.level;
 	let line = c.line_no;
 	const site = data.site === void 0 ? c.site : data.site;
-	if (isBarn(site) && pallet && (!isValidBay(pallet) || !palletsFor(site).includes(pallet))) throw new Error("Pick a bay A through P on this rack");
+	if (isBarn(site) && pallet && !isValidBay(String(pallet))) throw new Error("Pick a bay A through P");
 	if (isBarn(site) && (pallet !== c.pallet || Number(level) !== Number(c.level) || site !== c.site) && pallet && level) {
-		line = await nextLine(sql, site, pallet, level);
-		if (line == null) throw new Error("That slot is full");
+		const letter = String(pallet).trim().toUpperCase();
+		const { requireStock } = await import("./rack-stock.mjs").then((n) => n.n);
+		const { assertNotHeld } = await import("./stock-actions.mjs").then((n) => n.i);
+		if (context?.userId) await requireStock(sql, context.userId);
+		await assertNotHeld(sql, data.id);
+		const next = await nextLine(sql, site, letter, Number(level), data.id);
+		if (next == null) {
+			const { sectionFullMessage } = await import("./warehouse.mjs").then((n) => n._);
+			throw new Error(sectionFullMessage(site, letter, Number(level)));
+		}
+		pallet = letter;
+		line = next;
 	}
 	const movedToRack = isBarn(site) && pallet && level && (String(pallet) !== String(c.pallet ?? "") || Number(level) !== Number(c.level) || site !== c.site);
 	await sql`
@@ -3679,13 +3908,18 @@ var updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 });
 var assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
+	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	if (asset.status === "sold") throw new Error("Already sold");
 	const inst = (await sql`
       select id, customer from installs where id = ${data.installId}`)[0];
 	if (!inst) throw new Error("Install not found");
+	if (asset.status === "assigned") {
+		if (asset.install_id === inst.id) return mapAsset(asset);
+		throw new Error(`That unit is already assigned to ${asset.sold_to || "another account"}. Return it to the barn before assigning it again.`);
+	}
 	const originSite = asset.origin_site ?? asset.site;
 	const originPallet = asset.origin_pallet ?? asset.pallet;
 	const originLevel = asset.origin_level ?? asset.level;
@@ -3710,14 +3944,14 @@ var assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMi
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 });
 var unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
 	if (asset.install_id !== data.installId) throw new Error("That unit is not on this install");
 	const slot = await findOpenBarnSlot(sql, {
 		site: asset.origin_site ?? null,
 		pallet: asset.origin_pallet ?? null,
-		level: num(asset.origin_level)
+		level: num$1(asset.origin_level)
 	});
 	await sql`
       update assets set
@@ -3737,11 +3971,12 @@ var unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([de
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 });
 var assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const customer = data.customer.trim();
 	if (!customer) throw new Error("Pick a customer");
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
+	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	if (asset.status === "sold") throw new Error("Already sold");
 	if (asset.status !== "ready") throw new Error("That unit is already off the rack");
 	const acct = (await sql`
@@ -3782,14 +4017,14 @@ var assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMi
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 });
 var unassignAssetFromService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
 	if (asset.status !== "assigned" || asset.install_id) throw new Error("That unit is not pulled for service");
 	const slot = await findOpenBarnSlot(sql, {
 		site: asset.origin_site ?? null,
 		pallet: asset.origin_pallet ?? null,
-		level: num(asset.origin_level)
+		level: num$1(asset.origin_level)
 	});
 	const jobId = asset.job_id;
 	const jobKind = jobId ? (await sql`select kind from service_jobs where id = ${jobId}`)[0]?.kind : null;
@@ -3812,17 +4047,25 @@ var unassignAssetFromService = createServerFn({ method: "POST" }).middleware([de
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 });
 var returnAssetToWarehouse = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const prev = (await sql`select * from assets where id = ${data.id}`)[0];
 	if (!prev) throw new Error("Asset not found");
-	if (!palletsFor(data.site).includes(data.pallet) || !isValidBay(data.pallet)) throw new Error("Pick a bay A through P on this rack");
-	const line = await nextLine(sql, data.site, data.pallet, data.level);
-	if (line == null) throw new Error("That slot is full");
+	if (prev.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
+	const pallet = String(data.pallet || "").trim().toUpperCase();
+	if (data.site !== "barn-back" && data.site !== "barn-front") throw new Error("Pick a rack");
+	const bayErr = rackBayError(data.site, pallet);
+	if (bayErr) throw new Error(bayErr);
+	if (!LEVELS.includes(data.level)) throw new Error("Pick a level");
+	const line = await nextLine(sql, data.site, pallet, data.level, data.id);
+	if (line == null) {
+		const { sectionFullMessage } = await import("./warehouse.mjs").then((n) => n._);
+		throw new Error(sectionFullMessage(data.site, pallet, data.level));
+	}
 	await sql`
       update assets set
         status = 'ready',
         site = ${data.site},
-        pallet = ${data.pallet},
+        pallet = ${pallet},
         level = ${data.level},
         line_no = ${line},
         install_id = null,
@@ -3844,7 +4087,7 @@ var returnAssetToWarehouse = createServerFn({ method: "POST" }).middleware([desk
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 });
 var markAssetSold = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const cur = (await sql`select * from assets where id = ${data.id}`)[0];
 	if (!cur) throw new Error("Asset not found");
 	if (cur.customer_owned) throw new Error("Customer-owned unit — return it, don’t sell it");
@@ -3863,18 +4106,18 @@ var markAssetSold = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 });
 var listRecipes = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	return (await (await ready$4())`
+	return (await (await ready$6())`
       select * from recipes
       order by (customer is null) desc, customer, equipment_model`).map(mapRecipe);
 });
 var listCustomers = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	return (await (await ready$4())`
+	return (await (await ready$6())`
       select name as customer from directory_customers
       where archived = false and coalesce(name, '') <> ''
       order by lower(name)`).map((r) => r.customer);
 });
 var listCustomerRecords = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const { ensureAccountMarks } = await import("./reps.mjs").then((n) => n.o);
 	await ensureAccountMarks(sql);
 	return (await sql.query(`select
@@ -3965,7 +4208,7 @@ var listCustomerRecords = createServerFn({ method: "GET" }).middleware([deskMidd
 	}));
 });
 var getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const marks = await loadAccountMarks(sql);
 	const account = (await sql`
       select id, name, avi_katz, account_rep from directory_customers where id = ${data.id} and archived = false`)[0];
@@ -4012,12 +4255,12 @@ function directoryTable(kind) {
 	throw new Error("Unknown directory");
 }
 var listDirectory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const table = directoryTable(data.kind);
 	return await sql.query(`select id, name from ${table} where archived = false order by lower(name)`);
 });
 var updateCustomerAccount = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const dir = await sql`
       select id, name from directory_customers where id = ${data.id} and archived = false`;
 	if (!dir[0]) throw new Error("Account not found");
@@ -4030,11 +4273,11 @@ var updateCustomerAccount = createServerFn({ method: "POST" }).middleware([deskM
 		id: dir[0].id,
 		name: dir[0].name,
 		aviKatz: isAviKatz(marks, dir[0].name),
-		accountRep: marks.rep.get(dir[0].name.trim().toLowerCase()) ?? null
+		accountRep: accountRepFor(marks, dir[0].name)
 	};
 });
 var addDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const name = data.name.trim();
 	if (!name) throw new Error("Name is empty");
 	const table = directoryTable(data.kind);
@@ -4049,48 +4292,56 @@ var addDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddl
 	return (await sql.query(`insert into ${table} (name) values ($1) returning id, name`, [name]))[0];
 });
 var archiveDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	if (data.kind === "customer") await requireAdmin(sql, context.userId, "Only an admin can add or remove customers.");
 	const table = directoryTable(data.kind);
 	await sql.query(`update ${table} set archived = true, updated_at = now() where id = $1`, [data.id]);
 	return { ok: true };
 });
 var renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data, context }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	await requireAdmin(sql, context.userId, "Only an admin can rename or merge customers.");
 	return renameOrMergeCustomer(sql, data.id, data.name);
 });
 var renameEquipment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	return renameOrMergeEquipment(sql, data.id, data.name);
 });
-async function findRecipeDup(sql, model, customer, exceptId = null) {
+async function findRecipeDup(sql, model, customer, exceptId = null, name = null) {
+	const nameKey = (name ?? "").trim().toLowerCase();
 	const hit = (customer ? await sql`
         select id from recipes
         where lower(equipment_model) = ${model.toLowerCase()}
-          and lower(customer) = ${customer.toLowerCase()}` : await sql`
+          and lower(customer) = ${customer.toLowerCase()}
+          and lower(coalesce(name, '')) = ${nameKey}` : await sql`
         select id from recipes
         where lower(equipment_model) = ${model.toLowerCase()}
-          and customer is null`)[0];
+          and customer is null
+          and lower(coalesce(name, '')) = ${nameKey}`)[0];
 	if (hit && hit.id !== exceptId) return hit;
 	return null;
 }
 var upsertRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const model = data.equipmentModel.trim();
 	if (!model) throw new Error("Pick an equipment model");
 	const customer = data.customer?.trim() || null;
 	const isTemplate = !customer;
+	const name = data.name === void 0 ? data.id ? (await sql`select name from recipes where id = ${data.id}`)[0]?.name ?? null : null : data.name?.trim() || null;
 	let installId = data.installId ?? null;
 	if (customer && installId == null) {
 		const ins = await sql`
         select id from installs where lower(customer) = ${customer.toLowerCase()} limit 2`;
 		if (ins.length === 1) installId = ins[0].id;
 	}
-	if (await findRecipeDup(sql, model, customer, data.id)) throw new Error(customer ? `A recipe for ${model} already exists on ${customer}` : "A house recipe for that model already exists — open it from the list");
+	if (await findRecipeDup(sql, model, customer, data.id, name)) {
+		const label = name ? `“${name}” ` : "";
+		throw new Error(customer ? `A ${label}recipe for ${model} already exists on ${customer}${name ? "" : " — give this one a name"}` : `A ${label}house recipe for that model already exists${name ? "" : " — give this one a name"}`);
+	}
 	if (data.id) {
 		await sql`
         update recipes set
+          name = ${name},
           equipment_model = ${model},
           customer = ${customer},
           install_id = ${installId},
@@ -4115,12 +4366,12 @@ var upsertRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware
 	}
 	return mapRecipe((await sql`
       insert into recipes (
-        equipment_model, customer, install_id, copied_from, is_template,
+        name, equipment_model, customer, install_id, copied_from, is_template,
         coffee_1, coffee_2, coffee_3,
         powder_1, powder_2, powder_3, americano_1, americano_2, americano_3,
         tea_1, tea_2, milk, notes
       ) values (
-        ${model}, ${customer}, ${installId}, ${data.copiedFrom ?? null}, ${isTemplate},
+        ${name}, ${model}, ${customer}, ${installId}, ${data.copiedFrom ?? null}, ${isTemplate},
         ${data.coffee1 ?? null}, ${data.coffee2 ?? null}, ${data.coffee3 ?? null},
         ${data.powder1 ?? null}, ${data.powder2 ?? null}, ${data.powder3 ?? null},
         ${data.americano1 ?? null}, ${data.americano2 ?? null}, ${data.americano3 ?? null},
@@ -4130,7 +4381,7 @@ var upsertRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware
       returning *`)[0]);
 });
 var copyRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$4();
+	const sql = await ready$6();
 	const customer = data.customer.trim();
 	if (!customer) throw new Error("Pick a customer to copy onto");
 	const src = (await sql`select * from recipes where id = ${data.sourceId}`)[0];
@@ -4159,6 +4410,148 @@ var copyRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware])
       )
       returning *`)[0]);
 });
+//#endregion
+//#region src/components/ui/anchored-list.tsx
+var import_react_dom = /* @__PURE__ */ __toESM(require_react_dom(), 1);
+var LAYER_ID = "desk-float-layer";
+function stripHidden(el) {
+	el.removeAttribute("aria-hidden");
+	el.removeAttribute("data-aria-hidden");
+	el.removeAttribute("inert");
+}
+/**
+* One persistent layer, promoted with the Popover API so it paints above the
+* banner, the side menu, and every dialog. showPopover is only called on this
+* node — never on a React child, which the browser would reparent and React
+* would then fail to unmount.
+*/
+function floatLayer() {
+	let el = document.getElementById(LAYER_ID);
+	if (!el) {
+		el = document.createElement("div");
+		el.id = LAYER_ID;
+		el.setAttribute("data-desk-float-layer", "");
+		document.body.appendChild(el);
+		const node = el;
+		new MutationObserver(() => stripHidden(node)).observe(node, {
+			attributes: true,
+			attributeFilter: [
+				"aria-hidden",
+				"data-aria-hidden",
+				"inert"
+			]
+		});
+	}
+	stripHidden(el);
+	if (!el.hasAttribute("popover")) el.setAttribute("popover", "manual");
+	if (typeof el.showPopover === "function" && !el.matches(":popover-open")) try {
+		el.showPopover();
+	} catch {}
+	stripHidden(el);
+	return el;
+}
+function measure(node) {
+	const r = node.getBoundingClientRect();
+	const width = Math.min(Math.max(r.width, 260), window.innerWidth - 16);
+	let left = r.left;
+	if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 8 - width);
+	const gap = 4;
+	const below = window.innerHeight - r.bottom - gap - 8;
+	const above = r.top - gap - 8;
+	const openUp = below < 220 && above > below;
+	const room = Math.max(openUp ? above : below, 160);
+	const maxHeight = Math.min(Math.round(window.innerHeight * .7), room);
+	let top = openUp ? r.top - gap - maxHeight : r.bottom + gap;
+	if (top < 8) top = 8;
+	if (top + maxHeight > window.innerHeight - 8) {
+		const fit = Math.max(120, window.innerHeight - 16 - top);
+		return {
+			top,
+			left: Math.max(8, left),
+			width,
+			maxHeight: Math.min(maxHeight, fit)
+		};
+	}
+	return {
+		top,
+		left: Math.max(8, left),
+		width,
+		maxHeight
+	};
+}
+function placeNode(node, box) {
+	node.style.setProperty("position", "absolute", "important");
+	node.style.setProperty("top", `${box.top}px`, "important");
+	node.style.setProperty("left", `${box.left}px`, "important");
+	node.style.setProperty("width", `${box.width}px`, "important");
+	node.style.setProperty("max-height", `${box.maxHeight}px`, "important");
+	node.style.setProperty("margin", "0", "important");
+	node.style.setProperty("right", "auto", "important");
+	node.style.setProperty("bottom", "auto", "important");
+	node.style.setProperty("z-index", "1", "important");
+	node.style.setProperty("pointer-events", "auto", "important");
+}
+/** Result list painted on top of the page, lined up under its search box. */
+function AnchoredList({ anchor, menuRef, children, className }) {
+	const [box, setBox] = (0, import_react.useState)(null);
+	const localRef = (0, import_react.useRef)(null);
+	(0, import_react.useLayoutEffect)(() => {
+		if (!anchor.current) return;
+		let last = "";
+		function place() {
+			const el = anchor.current;
+			if (!el) return;
+			const next = measure(el);
+			const key = `${next.top}|${next.left}|${next.width}|${next.maxHeight}`;
+			if (key === last) return;
+			last = key;
+			setBox(next);
+		}
+		place();
+		window.addEventListener("resize", place);
+		window.addEventListener("scroll", place, true);
+		let frame = requestAnimationFrame(function follow() {
+			place();
+			frame = requestAnimationFrame(follow);
+		});
+		return () => {
+			cancelAnimationFrame(frame);
+			window.removeEventListener("resize", place);
+			window.removeEventListener("scroll", place, true);
+		};
+	}, [anchor]);
+	(0, import_react.useLayoutEffect)(() => {
+		const layer = document.getElementById(LAYER_ID);
+		if (layer) stripHidden(layer);
+		if (localRef.current && box) placeNode(localRef.current, box);
+	});
+	if (!box || typeof document === "undefined") return null;
+	return (0, import_react_dom.createPortal)(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		ref: (node) => {
+			localRef.current = node;
+			if (menuRef && "current" in menuRef) menuRef.current = node;
+			if (node) placeNode(node, box);
+		},
+		"data-combo-popover": "",
+		style: {
+			position: "absolute",
+			top: box.top,
+			left: box.left,
+			width: box.width,
+			maxHeight: box.maxHeight,
+			margin: 0,
+			zIndex: 1,
+			pointerEvents: "auto",
+			touchAction: "pan-y"
+		},
+		className: cn("overflow-y-auto overscroll-contain rounded-md border border-border bg-popover text-popover-foreground shadow-soft", className),
+		onMouseDown: (e) => {
+			if (e.target === e.currentTarget) return;
+			e.preventDefault();
+		},
+		children
+	}), floatLayer());
+}
 //#endregion
 //#region src/components/desk/open-link.tsx
 var ROUTES = {
@@ -4223,12 +4616,21 @@ function GlobalSearch() {
 				document.getElementById("desk-search")?.focus();
 			}
 		}
+		function onCloseList() {
+			setOpen(false);
+		}
 		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
+		document.addEventListener("desk-close-combo", onCloseList);
+		return () => {
+			window.removeEventListener("keydown", onKey);
+			document.removeEventListener("desk-close-combo", onCloseList);
+		};
 	}, []);
 	const hits = results.data ?? [];
+	const anchor = (0, import_react.useRef)(null);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "relative w-full max-w-md",
+		ref: anchor,
+		className: "relative w-full md:max-w-md",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
@@ -4240,6 +4642,12 @@ function GlobalSearch() {
 				},
 				onFocus: () => setOpen(true),
 				onBlur: () => setTimeout(() => setOpen(false), 180),
+				onKeyDown: (e) => {
+					if (e.key === "Escape") {
+						e.stopPropagation();
+						setOpen(false);
+					}
+				},
 				placeholder: "Search accounts, serials, WO…",
 				className: "h-10 w-full rounded-md border border-border bg-background pr-12 pl-9 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
 			}),
@@ -4247,36 +4655,40 @@ function GlobalSearch() {
 				className: "pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded-sm border border-border px-1.5 text-[10px] text-muted-foreground sm:block",
 				children: "⌘K"
 			}),
-			open && delayed.trim().length >= 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute top-[calc(100%+6px)] z-40 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-soft",
-				children: hits.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "px-3 py-3 text-sm text-muted-foreground",
-					children: "No matches"
-				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { children: hits.map((h) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					type: "button",
-					className: "flex w-full items-start justify-between gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted",
-					onMouseDown: (e) => e.preventDefault(),
-					onClick: () => {
-						const to = pathFor(h.entityType);
-						if (to === "/") navigate({ to: "/" });
-						else navigate({
-							to,
-							search: { open: h.id }
-						});
-						setOpen(false);
-						setQ("");
-					},
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "block font-medium",
-						children: h.title
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs text-muted-foreground",
-						children: h.subtitle
-					})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "shrink-0 text-[11px] text-muted-foreground uppercase",
-						children: h.entityType
-					})]
-				}) }, `${h.entityType}-${h.id}`)) })
+			open && delayed.trim().length >= 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnchoredList, {
+				anchor,
+				className: "rounded-lg",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					"data-testid": "desk-search-results",
+					children: hits.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "px-3 py-3 text-sm text-muted-foreground",
+						children: "No matches"
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", { children: hits.map((h) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						className: "flex w-full items-start justify-between gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted",
+						onMouseDown: (e) => e.preventDefault(),
+						onClick: () => {
+							const to = pathFor(h.entityType);
+							if (to === "/") navigate({ to: "/" });
+							else navigate({
+								to,
+								search: { open: h.id }
+							});
+							setOpen(false);
+							setQ("");
+						},
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "block font-medium",
+							children: h.title
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs text-muted-foreground",
+							children: h.subtitle
+						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "shrink-0 text-[11px] text-muted-foreground uppercase",
+							children: h.entityType
+						})]
+					}) }, `${h.entityType}-${h.id}`)) })
+				})
 			}) : null
 		]
 	});
@@ -4291,8 +4703,50 @@ function useDebounced(value, ms) {
 }
 //#endregion
 //#region src/components/desk/notify-bell.tsx
+var KIND_LABEL$1 = {
+	ticket: "Tickets",
+	install: "Installs",
+	handoff: "Handoff",
+	warehouse: "Warehouse",
+	customer: "Customers",
+	deal: "Deals",
+	rebuild: "Rebuilds",
+	other: "Other"
+};
+var READ_KEY = "katz-pings-filter";
+function headline(n) {
+	if (n.body.startsWith("Needs review")) return "Needs review";
+	if (n.body.startsWith("Pending removal")) return "Pending removal";
+	if (n.body.startsWith("Pending customer assign")) return "Pending assign";
+	if (n.body.startsWith("Pending module return")) return "Pending return";
+	return "pinged you";
+}
+/** Label for the bold line: the account, or the rack slot for warehouse pings. */
+function subject(n) {
+	if (!n.customer) return null;
+	if (n.kind === "warehouse" && /^[A-P]-L\d/i.test(n.customer)) return `Warehouse · ${n.customer}`;
+	return n.customer;
+}
 function NotifyBell({ ink }) {
 	const qc = useQueryClient();
+	const navigate = useNavigate();
+	const [open, setOpen] = (0, import_react.useState)(false);
+	const [readFilter, setReadFilter] = (0, import_react.useState)("all");
+	const [kind, setKind] = (0, import_react.useState)("");
+	const [account, setAccount] = (0, import_react.useState)("");
+	const [q, setQ] = (0, import_react.useState)("");
+	(0, import_react.useEffect)(() => {
+		try {
+			const saved = window.localStorage.getItem(READ_KEY);
+			if (saved === "unread" || saved === "read" || saved === "all") setReadFilter(saved);
+		} catch {}
+	}, []);
+	function pickRead(v) {
+		setReadFilter(v);
+		try {
+			window.localStorage.setItem(READ_KEY, v);
+		} catch {}
+	}
 	const inbox = useQuery({
 		queryKey: ["notifications"],
 		queryFn: () => listNotifications(),
@@ -4300,7 +4754,14 @@ function NotifyBell({ ink }) {
 	});
 	const mark = useMutation({
 		mutationFn: (d) => markNotificationRead({ data: d }),
-		onSuccess: () => void qc.invalidateQueries({ queryKey: ["notifications"] })
+		onMutate: async (d) => {
+			await qc.cancelQueries({ queryKey: ["notifications"] });
+			qc.setQueryData(["notifications"], (old) => (old ?? []).map((n) => d.all || n.id === d.id ? {
+				...n,
+				read: true
+			} : n));
+		},
+		onSettled: () => void qc.invalidateQueries({ queryKey: ["notifications"] })
 	});
 	const rows = inbox.data ?? [];
 	const unread = rows.filter((n) => !n.read).length;
@@ -4323,79 +4784,214 @@ function NotifyBell({ ink }) {
 		}
 		prevUnread.current = unread;
 	}, [unread, rows]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Popover, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PopoverTrigger, {
-		asChild: true,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-			type: "button",
-			variant: "ghost",
-			size: "icon",
-			className: cn("relative", ink && "text-cream hover:bg-cream/10 hover:text-cream"),
-			"aria-label": unread ? `${unread} notifications` : "Notifications",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "size-5" }), unread ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground",
-				children: unread > 9 ? "9+" : unread
-			}) : null]
-		})
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(PopoverContent, {
-		className: "w-80 p-0",
-		align: "end",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex items-center justify-between border-b border-border px-3 py-2",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-sm font-medium",
-				children: "Pings"
-			}), unread ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+	const scoped = (0, import_react.useMemo)(() => {
+		const needle = q.trim().toLowerCase();
+		return rows.filter((n) => {
+			if (kind && n.kind !== kind) return false;
+			if (account && (n.customer ?? "") !== account) return false;
+			if (needle) {
+				if (![
+					n.fromName,
+					n.customer,
+					n.body
+				].filter(Boolean).join(" ").toLowerCase().includes(needle)) return false;
+			}
+			return true;
+		});
+	}, [
+		rows,
+		kind,
+		account,
+		q
+	]);
+	const counts = {
+		unread: scoped.filter((n) => !n.read).length,
+		read: scoped.filter((n) => n.read).length,
+		all: scoped.length
+	};
+	const shown = scoped.filter((n) => readFilter === "all" ? true : readFilter === "unread" ? !n.read : n.read);
+	const kinds = (0, import_react.useMemo)(() => {
+		const m = /* @__PURE__ */ new Map();
+		for (const n of rows) m.set(n.kind, (m.get(n.kind) ?? 0) + (n.read ? 0 : 1));
+		return [...m.entries()];
+	}, [rows]);
+	const accounts = (0, import_react.useMemo)(() => [...new Set(rows.filter((n) => n.kind !== "warehouse").map((n) => n.customer).filter(Boolean))].sort((a, b) => a.localeCompare(b)), [rows]);
+	function openPing(n) {
+		if (!n.read) mark.mutate({ id: n.id });
+		const t = n.target;
+		if (!t) {
+			toast.error("That record was removed, so there's nothing to open.");
+			return;
+		}
+		setOpen(false);
+		if (t.fallback) toast.message(t.type === "customer" ? "That record was removed — opened the account instead." : "That record was removed.");
+		const to = pathFor(t.type);
+		if (t.id && to !== "/" && t.type !== "handoff") navigate({
+			to,
+			search: { open: t.id }
+		});
+		else if (t.type === "handoff" && n.commentId) navigate({
+			to: "/handoff",
+			search: { open: n.commentId }
+		});
+		else navigate({ to });
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Popover, {
+		open,
+		onOpenChange: setOpen,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PopoverTrigger, {
+			asChild: true,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 				type: "button",
-				className: "text-xs text-muted-foreground underline-offset-2 hover:underline",
-				onClick: () => mark.mutate({ all: true }),
-				children: "Mark all read"
-			}) : null]
-		}), rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "px-3 py-6 text-sm text-muted-foreground",
-			children: "No pings yet. Teammates can remind you from Handoff or any job note."
-		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-			className: "max-h-80 overflow-y-auto",
-			children: rows.map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
-				className: cn("border-b border-border last:border-b-0", !n.read && "bg-primary/6"),
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OpenLink, {
-					entityType: n.entityType ?? "handoff",
-					id: n.entityId ?? 0,
-					className: "block px-3 py-2.5 text-left hover:bg-muted/60",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						role: "presentation",
-						onClick: () => {
-							if (!n.read) mark.mutate({ id: n.id });
-						},
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-sm",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "font-medium",
-									children: n.fromName ?? "Teammate"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-muted-foreground",
-									children: n.body.includes("Needs review") ? " · Needs review" : " pinged you"
-								})]
-							}),
-							n.customer ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-0.5 truncate text-xs font-medium",
-								children: n.customer
-							}) : null,
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-0.5 line-clamp-2 text-xs text-muted-foreground",
-								children: n.body
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", {
-								className: "mt-1 block text-[11px] text-muted-foreground",
-								dateTime: n.createdAt,
-								children: formatPingTime(n.createdAt)
-							})
-						]
-					})
+				variant: "ghost",
+				size: "icon",
+				className: cn("relative", ink && "text-cream hover:bg-cream/10 hover:text-cream"),
+				"aria-label": unread ? `${unread} notifications` : "Notifications",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "size-5" }), unread ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground",
+					children: unread > 9 ? "9+" : unread
+				}) : null]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(PopoverContent, {
+			className: "w-[min(26rem,calc(100vw-1.5rem))] p-0",
+			align: "end",
+			"data-testid": "pings-panel",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-between border-b border-border px-3 py-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm font-medium",
+						children: "Pings"
+					}), unread ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						className: "text-xs text-muted-foreground underline-offset-2 hover:underline",
+						onClick: () => mark.mutate({ all: true }),
+						children: "Mark all read"
+					}) : null]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "space-y-2 border-b border-border px-3 py-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "flex shrink-0 overflow-hidden rounded-full border border-border",
+							role: "tablist",
+							"aria-label": "Show pings",
+							children: [
+								["unread", "Unread"],
+								["read", "Read"],
+								["all", "All"]
+							].map(([id, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								role: "tab",
+								"aria-selected": readFilter === id,
+								"data-testid": `pings-${id}`,
+								onClick: () => pickRead(id),
+								className: cn("px-2.5 py-1 text-xs font-medium tabular", readFilter === id ? "bg-ink text-ink-foreground" : "text-muted-foreground hover:text-foreground"),
+								children: [
+									label,
+									" ",
+									counts[id]
+								]
+							}, id))
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+							className: "relative min-w-0 flex-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								value: q,
+								onChange: (e) => setQ(e.target.value),
+								placeholder: "Search pings",
+								"aria-label": "Search pings",
+								className: "h-7 w-full rounded-full border border-border bg-background pr-2 pl-7 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							})]
+						})]
+					}), kinds.length > 1 || accounts.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2",
+						children: [kinds.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+							value: kind,
+							onChange: (e) => setKind(e.target.value),
+							"aria-label": "Filter pings by type",
+							className: "h-7 min-w-0 flex-1 rounded-full border border-border bg-background px-2 text-xs",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "",
+								children: "All types"
+							}), kinds.map(([k, n]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
+								value: k,
+								children: [KIND_LABEL$1[k], n ? ` (${n} unread)` : ""]
+							}, k))]
+						}) : null, accounts.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+							value: account,
+							onChange: (e) => setAccount(e.target.value),
+							"aria-label": "Filter pings by account",
+							className: "h-7 min-w-0 flex-1 rounded-full border border-border bg-background px-2 text-xs",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "",
+								children: "All accounts"
+							}), accounts.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: a,
+								children: a
+							}, a))]
+						}) : null]
+					}) : null]
+				}),
+				rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "px-3 py-6 text-sm text-muted-foreground",
+					children: "No pings yet. Teammates can remind you from Handoff or any job note."
+				}) : shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "px-3 py-6 text-sm text-muted-foreground",
+					"data-testid": "pings-empty",
+					children: readFilter === "unread" ? "You're all caught up — no unread pings here." : "No pings match these filters."
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+					className: "max-h-[min(24rem,60vh)] overflow-y-auto",
+					"data-testid": "pings-list",
+					children: shown.map((n) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+						className: cn("border-b border-border last:border-b-0", !n.read && "bg-primary/6"),
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							onClick: () => openPing(n),
+							"data-testid": "ping-row",
+							"data-read": n.read ? "1" : "0",
+							className: "relative block w-full px-3 py-2.5 text-left hover:bg-muted/60",
+							children: [
+								!n.read ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									"aria-label": "Unread",
+									className: "absolute top-3.5 left-1 size-1.5 rounded-full bg-primary"
+								}) : null,
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "flex items-baseline justify-between gap-2 text-sm",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "min-w-0 truncate",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: cn(!n.read && "font-semibold", n.read && "font-medium"),
+											children: n.fromName ?? "Teammate"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "text-muted-foreground",
+											children: [" · ", headline(n)]
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground",
+										children: KIND_LABEL$1[n.kind]
+									})]
+								}),
+								subject(n) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "mt-0.5 truncate text-xs font-medium",
+									children: subject(n)
+								}) : null,
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "mt-0.5 line-clamp-2 text-xs text-muted-foreground",
+									children: n.body
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("time", {
+									className: "mt-1 block text-[11px] text-muted-foreground",
+									dateTime: n.createdAt,
+									children: [formatPingTime(n.createdAt), n.target?.fallback ? " · record removed, opens the account" : ""]
+								})
+							]
+						})
+					}, n.id))
 				})
-			}, n.id))
+			]
 		})]
-	})] });
+	});
 }
 //#endregion
 //#region src/components/desk/theme-toggle.tsx
@@ -4416,46 +5012,6 @@ function AppearanceIcon({ value }) {
 	if (value === "dark") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Moon, { className: "size-4" });
 	if (value === "light") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sun, { className: "size-4" });
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Monitor, { className: "size-4" });
-}
-//#endregion
-//#region src/components/ui/dialog.tsx
-var Dialog = Dialog$1;
-function DialogContent({ className, children, onPointerDownOutside, onFocusOutside, onInteractOutside, ...props }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogPortal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogOverlay, { className: "fixed inset-0 z-50 bg-ink/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent$1, {
-		className: cn("fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-5 shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95", className),
-		onPointerDownOutside: (e) => {
-			preventIfCombo(e);
-			onPointerDownOutside?.(e);
-		},
-		onFocusOutside: (e) => {
-			preventIfCombo(e);
-			onFocusOutside?.(e);
-		},
-		onInteractOutside: (e) => {
-			preventIfCombo(e);
-			onInteractOutside?.(e);
-		},
-		...props,
-		children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogClose, {
-			className: "absolute top-3 right-3 rounded-sm p-1 text-muted-foreground hover:bg-muted",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "sr-only",
-				children: "Close"
-			})]
-		})]
-	})] });
-}
-function DialogTitle({ className, ...props }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle$1, {
-		className: cn("font-display text-xl font-medium tracking-tight", className),
-		...props
-	});
-}
-function DialogDescription({ className, ...props }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription$1, {
-		className: cn("mt-1 text-sm text-muted-foreground", className),
-		...props
-	});
 }
 //#endregion
 //#region src/components/desk/shortcuts.tsx
@@ -5180,13 +5736,25 @@ function PopBody() {
 }
 //#endregion
 //#region src/components/desk/shell.tsx
+/** Pages whose lists actually narrow when My View is on — the toggle is noise elsewhere. */
+var MY_VIEW_ROUTES = [
+	"/",
+	"/planner",
+	"/service",
+	"/tlc",
+	"/pms",
+	"/installs",
+	"/pipeline",
+	"/rebuilds",
+	"/customers"
+];
 var NAV = [
 	{
 		label: "Work",
 		items: [
 			{
 				to: "/",
-				label: "Coming due",
+				label: "Coming Due",
 				icon: CalendarClock,
 				exact: true
 			},
@@ -5251,6 +5819,11 @@ var NAV = [
 				icon: Hammer
 			},
 			{
+				to: "/library",
+				label: "The Library",
+				icon: Library
+			},
+			{
 				to: "/locations",
 				label: "Locations",
 				icon: MapPin
@@ -5270,7 +5843,7 @@ var NAV = [
 			icon: Store
 		}, {
 			to: "/network",
-			label: "Out of Network",
+			label: "Out Of Network",
 			icon: Globe
 		}]
 	},
@@ -5293,13 +5866,13 @@ function NavItemLink({ item, pathname, onNavigate }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 		to: item.to,
 		onClick: onNavigate,
-		className: cn("flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors", active ? "bg-cream/12 text-cream" : "text-cream/70 hover:bg-cream/8 hover:text-cream"),
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "size-4" }), item.label]
+		className: cn("relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors", active ? "bg-cream/10 font-medium text-white before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-katz-gold" : "text-cream/65 hover:bg-cream/6 hover:text-cream"),
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: cn("size-4", active ? "text-katz-gold" : "text-cream/50") }), item.label]
 	}) });
 }
 function NavGroup({ group, pathname, onNavigate }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-		className: "px-3 text-[11px] font-medium tracking-[0.16em] text-cream/50 uppercase",
+		className: "px-3 text-[10px] font-semibold tracking-[0.2em] text-cream/40 uppercase",
 		children: group.label
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 		className: "mt-2 space-y-0.5",
@@ -5310,12 +5883,17 @@ function NavGroup({ group, pathname, onNavigate }) {
 		}, item.to))
 	})] });
 }
-var WAREHOUSE_OK = ["/warehouse", "/locations"];
+var WAREHOUSE_OK = [
+	"/warehouse",
+	"/locations",
+	"/modules",
+	"/library"
+];
 function navForRole(role, isAdmin) {
 	if (role !== "warehouse") return NAV;
 	return [{
 		label: "Shop",
-		items: NAV.find((g) => g.label === "Shop").items.filter((item) => item.to === "/warehouse" || item.to === "/locations")
+		items: NAV.flatMap((g) => g.items).filter((item) => WAREHOUSE_OK.includes(item.to))
 	}];
 }
 function NavLinks({ onNavigate, isAdmin, role }) {
@@ -5341,14 +5919,40 @@ function NavLinks({ onNavigate, isAdmin, role }) {
 function Brand() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 		to: "/",
-		className: "flex items-baseline gap-2 px-3",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "font-display text-2xl font-medium tracking-tight text-cream",
-			children: "Katz"
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "font-display text-2xl font-medium tracking-tight text-cream/60 italic",
-			children: "Desk"
-		})]
+		className: "group flex flex-col items-start px-4",
+		"aria-label": "Katz Desk home",
+		"data-testid": "brand-block",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+				src: "/brand/katz-coffee-mark.svg",
+				alt: "Katz Coffee",
+				width: 334,
+				height: 177,
+				className: "h-auto w-[8.5rem] drop-shadow-[0_6px_16px_rgb(0_0_0/0.45)] transition-transform group-hover:-rotate-1"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				className: "mt-3 font-display text-2xl leading-none font-medium tracking-tight text-cream",
+				children: ["Katz ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "italic text-cream/70",
+					children: "Desk"
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				className: "mt-2 flex items-center gap-2 text-[10px] font-semibold tracking-[0.22em] text-katz-gold uppercase",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					"aria-hidden": true,
+					className: "h-px w-5 bg-katz-gold/60"
+				}), "Service And Sales"]
+			})
+		]
+	});
+}
+/** Two cloud swirls from the Katz artwork, faint enough to sit behind the menu. */
+function SidebarClouds() {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		"aria-hidden": true,
+		className: "pointer-events-none absolute inset-0 overflow-hidden",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "katz-cloud katz-cloud-slow -right-16 top-40 w-56 -scale-x-100 opacity-[0.05]" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "katz-cloud -bottom-6 -left-14 w-72 opacity-[0.08]" })]
 	});
 }
 function AppShell({ children, isAdmin, role = null }) {
@@ -5407,24 +6011,22 @@ function AppShell({ children, isAdmin, role = null }) {
 				children: "Skip to content"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("aside", {
-				className: "hidden w-60 shrink-0 flex-col bg-ink text-ink-foreground md:flex",
+				className: "sticky top-0 hidden h-svh w-60 shrink-0 flex-col overflow-hidden bg-gradient-to-b from-ink to-[#241c15] text-ink-foreground md:flex",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "px-2 py-5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Brand, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-1 px-3 text-xs text-cream/45",
-							children: "Service and sales, one clock."
-						})]
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarClouds, {}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "relative px-2 pt-5 pb-4",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Brand, {})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "flex-1 overflow-y-auto px-2 pb-4",
+						className: "relative flex-1 overflow-y-auto px-2 pb-4",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NavLinks, {
 							isAdmin,
 							role
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "border-t border-cream/10 p-3",
+						className: "relative border-t border-cream/10 p-3",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "px-1 text-[11px] text-cream/40",
 							children: "Signed in"
@@ -5437,10 +6039,9 @@ function AppShell({ children, isAdmin, role = null }) {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex min-w-0 flex-1 flex-col",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-					className: "relative flex min-h-[4.75rem] flex-wrap items-center gap-2 overflow-hidden border-b border-border bg-cover bg-center px-3 py-3 md:px-6",
-					style: { backgroundImage: "url(/desk-header.jpg)" },
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-background/55" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+					className: "sticky top-0 z-20 flex min-h-16 flex-wrap items-center gap-2 border-b border-border/70 bg-background/85 px-3 py-2.5 backdrop-blur-md md:px-8",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "relative z-10 flex w-full flex-wrap items-center gap-2",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
@@ -5451,18 +6052,31 @@ function AppShell({ children, isAdmin, role = null }) {
 								"aria-label": "Open menu",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Menu$1, { className: "size-5" })
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "md:hidden",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "font-display text-lg",
-									children: "Katz Desk"
-								})
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+								to: "/",
+								className: "flex items-center gap-2 md:hidden",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+									src: "/brand/katz-coffee-mark.svg",
+									alt: "Katz Coffee",
+									width: 334,
+									height: 177,
+									className: "h-7 w-auto"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+									className: "font-display text-lg leading-none font-medium tracking-tight",
+									children: ["Katz ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "italic text-muted-foreground",
+										children: "Desk"
+									})]
+								})]
+							}),
+							role === "warehouse" ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "order-last w-full min-w-0 md:order-none md:flex md:w-auto md:flex-1 md:justify-end",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GlobalSearch, {})
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 md:ml-0",
+								className: "ml-auto flex shrink-0 items-center gap-2",
 								children: [
-									role === "warehouse" ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MyViewBar, {}),
-									role === "warehouse" ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GlobalSearch, {}),
+									role === "warehouse" || !MY_VIEW_ROUTES.includes(pathname) ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MyViewBar, {}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThemeToggle, {}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NotifyBell, {}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -5476,7 +6090,7 @@ function AppShell({ children, isAdmin, role = null }) {
 								]
 							})
 						]
-					})]
+					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 					id: "desk-main",
 					className: "min-w-0 flex-1 overflow-x-hidden px-3 py-5 md:px-8 md:py-7",
@@ -5488,14 +6102,15 @@ function AppShell({ children, isAdmin, role = null }) {
 				onOpenChange: setOpen,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetContent, {
 					side: "left",
-					className: "flex w-64 flex-col overflow-hidden bg-ink p-0 text-ink-foreground sm:max-w-64",
+					className: "flex w-64 flex-col overflow-hidden bg-gradient-to-b from-ink to-[#241c15] p-0 text-ink-foreground sm:max-w-64",
 					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SidebarClouds, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "shrink-0 px-2 py-5",
+							className: "relative shrink-0 px-2 py-5",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Brand, {})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "sheet-scroll min-h-0 flex-1 overflow-y-auto px-2",
+							className: "sheet-scroll relative min-h-0 flex-1 overflow-y-auto px-2",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NavLinks, {
 								onNavigate: () => setOpen(false),
 								isAdmin,
@@ -5503,7 +6118,7 @@ function AppShell({ children, isAdmin, role = null }) {
 							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "shrink-0 border-t border-cream/10 p-3",
+							className: "relative shrink-0 border-t border-cream/10 p-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "px-1 text-[11px] text-cream/40",
 								children: "Signed in"
@@ -5625,7 +6240,7 @@ function UsernameSetup({ email, onDone }) {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 					className: "mt-3 font-display text-3xl",
-					children: "Choose a username"
+					children: "Choose A Username"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "mt-2 text-sm leading-relaxed text-cream/70",
@@ -5678,7 +6293,7 @@ function UsernameSetup({ email, onDone }) {
 }
 //#endregion
 //#region src/routes/_app.tsx
-var Route$19 = createFileRoute("/_app")({ component: DeskLayout });
+var Route$21 = createFileRoute("/_app")({ component: DeskLayout });
 function LoadingClock() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "flex min-h-svh bg-ink text-cream",
@@ -5804,7 +6419,7 @@ function DeskLayout() {
 	}, [gateBlocked]);
 	if (!user && !isPending) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RedirectToSignIn, {});
 	if (!user && sessionSlow) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccountProblem, {
-		title: "Couldn’t load your account",
+		title: "Couldn’t Load Your Account",
 		message: "The sign-in check didn’t finish. Try again, or sign out and come back in.",
 		onRetry: () => window.location.reload()
 	});
@@ -5820,7 +6435,7 @@ function DeskLayout() {
 	if (gateSlow || access.isError || inviteToken && claim.isError && !access.data) {
 		const err = access.error ?? claim.error;
 		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccountProblem, {
-			title: "Couldn’t load your account",
+			title: "Couldn’t Load Your Account",
 			message: err instanceof Error ? err.message : "Loading your account took too long.",
 			onRetry: () => {
 				setGateSlow(false);
@@ -5844,7 +6459,7 @@ function DeskLayout() {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 					className: "mt-3 font-display text-3xl",
-					children: "Access denied"
+					children: "Access Denied"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 					className: "mt-2 text-sm text-cream/70",
@@ -5883,7 +6498,7 @@ function DeskLayout() {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 					className: "mt-3 font-display text-3xl",
-					children: "Waiting for approval"
+					children: "Waiting For Approval"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 					className: "mt-2 text-sm text-cream/70",
@@ -5918,9 +6533,116 @@ function DeskLayout() {
 	});
 }
 //#endregion
+//#region src/lib/ops/password-reset.ts
+/** Links stay good for two days and work once. */
+var RESET_HOURS = 48;
+function randomToken() {
+	const bytes = /* @__PURE__ */ new Uint8Array(32);
+	crypto.getRandomValues(bytes);
+	return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+/** Only a hash of the token is stored, so a copied database can't be used to reset anyone. */
+async function sha256(text) {
+	const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+	return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function passwordProblem(pw) {
+	if (pw.length < 8) return `Use at least 8 characters.`;
+	if (pw.length > 128) return "That password is too long.";
+	return null;
+}
+/** Admin makes a one-time reset link for a teammate and sends it themselves. */
+var createPasswordResetLink = createServerFn({ method: "POST" }).middleware([authMiddleware]).validator((d) => d).handler(async ({ context, data }) => {
+	const sql = await getSql();
+	await requireAdmin(sql, context.userId, "Only an admin can reset someone's password.");
+	const who = await sql.query("select username from desk_accounts where user_id = $1", [data.userId]);
+	if (!who[0]) throw new Error("Account not found");
+	await sql.query("delete from desk_password_resets where user_id = $1 and used_at is null", [data.userId]);
+	const token = randomToken();
+	const rows = await sql.query(`insert into desk_password_resets (user_id, token_hash, created_by, expires_at)
+       values ($1, $2, $3, now() + ($4 || ' hours')::interval)
+       returning expires_at`, [
+		data.userId,
+		await sha256(token),
+		context.userId,
+		String(RESET_HOURS)
+	]);
+	return {
+		token,
+		username: who[0].username,
+		expiresAt: String(rows[0]?.expires_at ?? "")
+	};
+});
+/** Checks a link before showing the new-password form. No sign-in needed. */
+var peekPasswordReset = createServerFn({ method: "POST" }).validator((d) => d).handler(async ({ data }) => {
+	const token = data.token?.trim();
+	if (!token) return {
+		ok: false,
+		username: null
+	};
+	const rows = await (await getSql()).query(`select a.username
+       from desk_password_resets r
+       left join desk_accounts a on a.user_id = r.user_id
+       where r.token_hash = $1 and r.used_at is null and r.expires_at > now()`, [await sha256(token)]);
+	return rows[0] ? {
+		ok: true,
+		username: rows[0].username ?? null
+	} : {
+		ok: false,
+		username: null
+	};
+});
+/** Sets the new password from a reset link, then signs that person out everywhere. */
+var resetPasswordWithToken = createServerFn({ method: "POST" }).validator((d) => d).handler(async ({ data }) => {
+	const problem = passwordProblem(data.password ?? "");
+	if (problem) throw new Error(problem);
+	const sql = await getSql();
+	const tokenHash = await sha256((data.token ?? "").trim());
+	const hit = (await sql.query(`select id, user_id from desk_password_resets
+       where token_hash = $1 and used_at is null and expires_at > now()`, [tokenHash]))[0];
+	if (!hit) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
+	const { hashPassword } = await import("../_libs/better-auth+[...].mjs").then((n) => n.s);
+	const hashed = await hashPassword(data.password);
+	if (!(await sql.query(`update "account" set "password" = $2, "updatedAt" = now()
+       where "userId" = $1 and "providerId" = 'credential'
+       returning "id"`, [hit.user_id, hashed]))[0]) await sql.query(`insert into "account" ("id", "accountId", "providerId", "userId", "password", "createdAt", "updatedAt")
+         values ($1, $2, 'credential', $2, $3, now(), now())`, [
+		randomToken().slice(0, 32),
+		hit.user_id,
+		hashed
+	]);
+	await sql.query("update desk_password_resets set used_at = now() where id = $1", [hit.id]);
+	await sql.query(`delete from "session" where "userId" = $1`, [hit.user_id]);
+	const who = await sql.query(`select d.username, u.email from "user" u left join desk_accounts d on d.user_id = u.id where u.id = $1`, [hit.user_id]);
+	return {
+		username: who[0]?.username ?? null,
+		email: who[0]?.email ?? null
+	};
+});
+//#endregion
 //#region src/routes/login.tsx
-var Route$18 = createFileRoute("/login")({ component: Login });
+var Route$20 = createFileRoute("/login")({ component: Login });
 var PENDING_KEY = "katz-desk-pending";
+var LAST_LOGIN_KEY = "katz-desk-last-login";
+function readLastLogin() {
+	try {
+		return window.localStorage.getItem(LAST_LOGIN_KEY) ?? "";
+	} catch {
+		return "";
+	}
+}
+function writeLastLogin(v) {
+	try {
+		window.localStorage.setItem(LAST_LOGIN_KEY, v);
+	} catch {}
+}
+/** Better Auth's wording is terse; say what to do next instead. */
+function friendlySignInError(msg) {
+	if (/invalid (email or )?password|invalid credentials|incorrect/i.test(msg)) return "That password didn't match. Check Caps Lock and try again, or tap Forgot password below.";
+	if (/too many|rate limit/i.test(msg)) return "Too many tries in a row. Wait a minute, then try again.";
+	if (/network|failed to fetch|load failed/i.test(msg)) return "Couldn't reach Katz Desk. Check your connection and try again.";
+	return msg;
+}
 function readPending() {
 	if (typeof window === "undefined") return false;
 	try {
@@ -5941,18 +6663,68 @@ function Login() {
 	const navigate = useNavigate();
 	const router = useRouter();
 	const [mode, setMode] = (0, import_react.useState)("in");
+	const [resetToken, setResetToken] = (0, import_react.useState)(null);
+	const [resetFor, setResetFor] = (0, import_react.useState)(null);
+	const [resetBad, setResetBad] = (0, import_react.useState)(false);
+	const [confirm, setConfirm] = (0, import_react.useState)("");
+	const [notice, setNotice] = (0, import_react.useState)(null);
+	const [showForgot, setShowForgot] = (0, import_react.useState)(false);
 	const [email, setEmail] = (0, import_react.useState)("");
 	const [username, setUsername] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
 	const [error, setError] = (0, import_react.useState)(null);
 	const [busy, setBusy] = (0, import_react.useState)(false);
+	const [showPw, setShowPw] = (0, import_react.useState)(false);
+	const [socialOnly, setSocialOnly] = (0, import_react.useState)(null);
+	const [noAccount, setNoAccount] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
-		rememberInviteToken(new URLSearchParams(window.location.search).get("invite"));
+		const params = new URLSearchParams(window.location.search);
+		const reset = params.get("reset");
+		if (reset) {
+			setResetToken(reset);
+			setMode("reset");
+			peekPasswordReset({ data: { token: reset } }).then((r) => {
+				setResetBad(!r.ok);
+				setResetFor(r.username);
+			}).catch(() => setResetBad(true));
+			return;
+		}
+		rememberInviteToken(params.get("invite"));
 		if (readInviteToken()) setMode("up");
 		else if (readPending()) setMode("pending");
+		else {
+			const last = readLastLogin();
+			if (last) setUsername(last);
+		}
 	}, []);
+	async function onReset(e) {
+		e.preventDefault();
+		if (!resetToken) return;
+		const problem = passwordProblem(password);
+		if (problem) return setError(problem);
+		if (password !== confirm) return setError("The two passwords don't match.");
+		setBusy(true);
+		setError(null);
+		try {
+			const done = await resetPasswordWithToken({ data: {
+				token: resetToken,
+				password
+			} });
+			window.history.replaceState(null, "", "/login");
+			setResetToken(null);
+			setUsername(done.username ?? done.email ?? "");
+			setPassword("");
+			setConfirm("");
+			setMode("in");
+			setNotice("Password updated. Sign in with your new password.");
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Could not reset the password");
+		} finally {
+			setBusy(false);
+		}
+	}
 	(0, import_react.useEffect)(() => {
-		if (isPending || !user || mode === "pending") return;
+		if (isPending || !user || mode === "pending" || mode === "reset") return;
 		(async () => {
 			try {
 				const token = readInviteToken();
@@ -5988,12 +6760,14 @@ function Login() {
 		e.preventDefault();
 		setBusy(true);
 		setError(null);
+		setSocialOnly(null);
+		setNoAccount(null);
 		try {
 			if (mode === "up") {
 				const name = username.trim();
 				if (!/^[a-zA-Z0-9._-]{3,32}$/.test(name)) throw new Error("Username must be 3–32 letters, numbers, dots, hyphens, or underscores.");
 				if (!(await checkUsername({ data: { username: name } })).available) throw new Error("That username is already taken.");
-				const mail = email.trim();
+				const mail = email.trim().toLowerCase();
 				const res = await authClient.signUp.email({
 					email: mail,
 					password,
@@ -6031,11 +6805,20 @@ function Login() {
 					return;
 				}
 				if (!looked.email) throw new Error("Unknown username");
+				const methods = looked.methods ?? [];
+				if (methods.length && !methods.includes("password")) {
+					setSocialOnly(methods);
+					return;
+				}
 				const res = await authClient.signIn.email({
 					email: looked.email,
 					password
 				});
-				if (res.error) throw new Error(res.error.message);
+				if (res.error) {
+					const msg = res.error.message ?? "Sign-in failed";
+					throw new Error(friendlySignInError(msg));
+				}
+				writeLastLogin(identity);
 				await authClient.getSession();
 				await router.invalidate();
 				writePending(!!looked.waiting);
@@ -6053,7 +6836,8 @@ function Login() {
 				return;
 			}
 			if (/unknown username/i.test(msg)) {
-				const peek = await peekInvite({ data: { identity: username.trim() } }).catch(() => null);
+				const who = username.trim();
+				const peek = await peekInvite({ data: { identity: who } }).catch(() => null);
 				if (peek?.invited) {
 					setMode("up");
 					if (peek.username) setUsername(peek.username);
@@ -6061,186 +6845,338 @@ function Login() {
 					setError("You’re invited — create an account to get in.");
 					return;
 				}
+				setNoAccount(who);
+				return;
 			}
-			setError(msg);
+			setError(friendlySignInError(msg));
 		} finally {
 			setBusy(false);
 		}
 	}
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-		className: "min-h-svh bg-ink text-ink-foreground",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "mx-auto grid min-h-svh max-w-5xl items-center gap-10 px-6 py-12 lg:grid-cols-2",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs tracking-[0.22em] text-cream/50 uppercase",
-					children: "Katz Coffee · Houston"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-					className: "mt-4 font-display text-5xl leading-[1.05] font-medium tracking-tight",
-					children: ["Katz ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "italic text-cream/70",
-						children: "Desk"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "mt-4 max-w-md text-base leading-relaxed text-cream/70",
-					children: "One desk for sales and service. Past due, coming due, recipes, and the handoff between the two teams — without the spreadsheet pile-up."
-				})
-			] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "rounded-xl border border-cream/12 bg-cream/6 p-6",
-				children: mode === "pending" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "font-display text-2xl",
-						children: "Waiting for approval"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "mt-2 text-sm text-cream/60",
-						children: "Your account was created. A desk admin will review it before you can open Katz Desk. Stay signed in and tap check again after they approve you."
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "mt-6 flex flex-col gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+		className: "relative min-h-svh overflow-hidden bg-gradient-to-br from-ink via-ink to-[#2a2018] text-ink-foreground",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				"aria-hidden": true,
+				className: "katz-cloud -bottom-16 -left-24 w-[34rem] opacity-[0.07]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				"aria-hidden": true,
+				className: "katz-cloud katz-cloud-slow -top-12 right-[-6rem] w-[26rem] -scale-x-100 opacity-[0.05]"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative mx-auto grid min-h-svh max-w-5xl content-center items-center gap-6 px-5 py-8 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex flex-col items-start",
+					"data-testid": "brand-block",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+							src: "/brand/katz-coffee-mark.svg",
+							alt: "Katz Coffee",
+							width: 334,
+							height: 177,
+							className: "h-auto w-32 drop-shadow-[0_10px_24px_rgb(0_0_0/0.5)] sm:w-56"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
+							className: "mt-4 font-display text-4xl leading-none font-medium tracking-tight sm:mt-6 sm:text-5xl",
+							children: ["Katz ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "italic text-cream/70",
+								children: "Desk"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "mt-3 flex items-center gap-3 text-xs font-semibold tracking-[0.24em] text-katz-gold uppercase",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								"aria-hidden": true,
+								className: "h-px w-8 bg-katz-gold/60"
+							}), "Service And Sales, One Clock"]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-5 hidden max-w-md text-base leading-relaxed text-cream/70 sm:block",
+							children: "One desk for sales and service. Past due, coming due, recipes, and the handoff between the two teams — without the spreadsheet pile-up."
+						})
+					]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "rounded-xl border border-cream/12 bg-cream/6 p-5 sm:p-6",
+					children: mode === "reset" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "font-display text-2xl",
+							children: "Set A New Password"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-1 text-sm text-cream/60",
+							children: resetBad ? "This reset link has expired or was already used. Ask a desk admin for a new one." : resetFor ? `For ${resetFor}. You'll be signed out of other devices.` : "Choose a new password for your KatzDesk account."
+						}),
+						resetBad ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 							type: "button",
-							className: "w-full",
+							className: "mt-5 w-full",
 							onClick: () => {
-								(async () => {
-									try {
-										await authClient.getSession();
-										const token = readInviteToken();
-										if ((token ? await claimInvite({ data: { token } }) : await getMyAccess()).approved) {
-											clearInviteToken();
-											writePending(false);
-											navigate({ to: "/" });
-										}
-									} catch {}
-								})();
-							},
-							children: "Check again"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "button",
-							className: "w-full",
-							variant: "secondary",
-							onClick: () => {
-								writePending(false);
+								window.history.replaceState(null, "", "/login");
 								setMode("in");
-								setPassword("");
-								authClient.signOut().catch(() => void 0);
 							},
 							children: "Back to sign in"
-						})]
-					})
-				] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "font-display text-2xl",
-						children: mode === "up" ? "Create an account" : "Sign in"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "mt-1 text-sm text-cream/60",
-						children: mode === "up" ? readInviteToken() ? "This invite lets you in. Create a password, or continue with Google or X." : "Use the email you were invited with (or Google / X). Invited people skip the wait." : "Username or the email on your account. Open the invite link if you have one."
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-						onSubmit,
-						className: "mt-5 space-y-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-								htmlFor: "username",
-								className: "text-cream/60",
-								children: mode === "up" ? "Username" : "Username or email"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								id: "username",
-								required: true,
-								autoComplete: "username",
-								className: "mt-1 border-cream/15 bg-ink text-cream",
-								value: username,
-								onChange: (e) => setUsername(e.target.value),
-								placeholder: mode === "up" ? "e.g. amanda.s" : "username or email"
-							})] }),
-							mode === "up" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-								htmlFor: "email",
-								className: "text-cream/60",
-								children: "Email"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								id: "email",
-								type: "email",
-								required: true,
-								autoComplete: "email",
-								className: "mt-1 border-cream/15 bg-ink text-cream",
-								value: email,
-								onChange: (e) => setEmail(e.target.value),
-								placeholder: "The email you were invited with"
-							})] }) : null,
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-								htmlFor: "password",
-								className: "text-cream/60",
-								children: "Password"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								id: "password",
-								type: "password",
-								required: true,
-								minLength: 8,
-								autoComplete: mode === "up" ? "new-password" : "current-password",
-								className: "mt-1 border-cream/15 bg-ink text-cream",
-								value: password,
-								onChange: (e) => setPassword(e.target.value)
-							})] }),
-							error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-sm text-destructive",
-								children: error
-							}) : null,
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								type: "submit",
+						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+							onSubmit: onReset,
+							className: "mt-5 space-y-3",
+							"data-testid": "reset-form",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+									htmlFor: "new-password",
+									className: "text-cream/60",
+									children: "New password"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									id: "new-password",
+									type: "password",
+									required: true,
+									minLength: 8,
+									autoComplete: "new-password",
+									className: "mt-1 border-cream/15 bg-ink text-cream",
+									value: password,
+									onChange: (e) => setPassword(e.target.value)
+								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+									htmlFor: "confirm-password",
+									className: "text-cream/60",
+									children: "Type it again"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									id: "confirm-password",
+									type: "password",
+									required: true,
+									minLength: 8,
+									autoComplete: "new-password",
+									className: "mt-1 border-cream/15 bg-ink text-cream",
+									value: confirm,
+									onChange: (e) => setConfirm(e.target.value)
+								})] }),
+								error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-sm text-destructive",
+									children: error
+								}) : null,
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+									type: "submit",
+									className: "w-full",
+									disabled: busy,
+									children: "Save new password"
+								})
+							]
+						})
+					] }) : mode === "pending" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "font-display text-2xl",
+							children: "Waiting For Approval"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-2 text-sm text-cream/60",
+							children: "Your account was created. A desk admin will review it before you can open Katz Desk. Stay signed in and tap check again after they approve you."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-6 flex flex-col gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
 								className: "w-full",
-								disabled: busy,
-								children: mode === "up" ? "Create account" : "Sign in"
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						type: "button",
-						className: "mt-4 text-sm text-cream/60 underline-offset-2 hover:underline",
-						onClick: () => {
-							setMode(mode === "in" ? "up" : "in");
-							setError(null);
-						},
-						children: mode === "in" ? "Need an account? Create one" : "Already have an account? Sign in"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "my-5 flex items-center gap-3 text-xs text-cream/40",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px flex-1 bg-cream/15" }),
-							"or",
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px flex-1 bg-cream/15" })
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "space-y-2",
-						children: GROK_PROVIDERS.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								onClick: () => {
+									(async () => {
+										try {
+											await authClient.getSession();
+											const token = readInviteToken();
+											if ((token ? await claimInvite({ data: { token } }) : await getMyAccess()).approved) {
+												clearInviteToken();
+												writePending(false);
+												navigate({ to: "/" });
+											}
+										} catch {}
+									})();
+								},
+								children: "Check again"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								className: "w-full",
+								variant: "secondary",
+								onClick: () => {
+									writePending(false);
+									setMode("in");
+									setPassword("");
+									authClient.signOut().catch(() => void 0);
+								},
+								children: "Back to sign in"
+							})]
+						})
+					] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "font-display text-2xl",
+							children: mode === "up" ? "Create An Account" : "Sign In"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-1 text-sm text-cream/60",
+							children: mode === "up" ? readInviteToken() ? "This invite lets you in. Create a password, or continue with Google or X." : "Use the email you were invited with (or Google / X). Invited people skip the wait." : "Username or the email on your account. Open the invite link if you have one."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+							onSubmit,
+							className: "mt-5 space-y-3",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+									htmlFor: "username",
+									className: "text-cream/60",
+									children: mode === "up" ? "Username" : "Username or email"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									id: "username",
+									required: true,
+									autoComplete: "username",
+									className: "mt-1 border-cream/15 bg-ink text-cream",
+									value: username,
+									onChange: (e) => setUsername(e.target.value),
+									placeholder: mode === "up" ? "e.g. amanda.s" : "username or email"
+								})] }),
+								mode === "up" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+									htmlFor: "email",
+									className: "text-cream/60",
+									children: "Email"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									id: "email",
+									type: "email",
+									required: true,
+									autoComplete: "email",
+									className: "mt-1 border-cream/15 bg-ink text-cream",
+									value: email,
+									onChange: (e) => setEmail(e.target.value),
+									placeholder: "The email you were invited with"
+								})] }) : null,
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+									htmlFor: "password",
+									className: "text-cream/60",
+									children: "Password"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "relative mt-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+										id: "password",
+										type: showPw ? "text" : "password",
+										required: true,
+										minLength: mode === "up" ? 8 : void 0,
+										autoComplete: mode === "up" ? "new-password" : "current-password",
+										className: "border-cream/15 bg-ink pr-11 text-cream",
+										value: password,
+										onChange: (e) => setPassword(e.target.value)
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										className: "absolute inset-y-0 right-0 grid w-11 place-items-center text-cream/60 hover:text-cream",
+										"aria-label": showPw ? "Hide password" : "Show password",
+										"aria-pressed": showPw,
+										onClick: () => setShowPw((v) => !v),
+										children: showPw ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "size-4" })
+									})]
+								})] }),
+								error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-sm text-destructive",
+									role: "alert",
+									"data-testid": "login-error",
+									children: error
+								}) : null,
+								socialOnly ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "rounded-md border border-katz-gold/40 bg-katz-gold/10 px-3 py-2 text-sm text-cream",
+									role: "alert",
+									"data-testid": "login-social",
+									children: [
+										"This account signs in with",
+										" ",
+										socialOnly.map((m) => GROK_PROVIDERS.find((p) => p.providerId === m)?.label ?? m).join(" or "),
+										", not a password. Tap the button below."
+									]
+								}) : null,
+								noAccount ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "rounded-md border border-cream/15 bg-cream/6 px-3 py-2 text-sm text-cream/80",
+									role: "alert",
+									"data-testid": "login-no-account",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [
+										"No Katz Desk account for “",
+										noAccount,
+										"” yet."
+									] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										className: "mt-1 font-medium text-katz-gold underline-offset-2 hover:underline",
+										onClick: () => {
+											setMode("up");
+											if (noAccount.includes("@")) {
+												setEmail(noAccount.toLowerCase());
+												setUsername(noAccount.split("@")[0].replace(/[^a-zA-Z0-9._-]/g, "").toLowerCase());
+											}
+											setNoAccount(null);
+										},
+										children: ["Create an account with this ", noAccount.includes("@") ? "email" : "name"]
+									})]
+								}) : null,
+								notice && mode === "in" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-sm text-emerald-300",
+									children: notice
+								}) : null,
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+									type: "submit",
+									className: "w-full",
+									disabled: busy,
+									children: mode === "up" ? "Create account" : "Sign in"
+								})
+							]
+						}),
+						mode === "in" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: "text-sm text-cream/60 underline-offset-2 hover:underline",
+								"aria-expanded": showForgot,
+								onClick: () => setShowForgot((v) => !v),
+								children: "Forgot password?"
+							}), showForgot ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "mt-2 rounded-md border border-cream/12 bg-cream/6 px-3 py-2 text-xs leading-relaxed text-cream/70",
+								children: "Ask a desk admin to send you a reset link (Access → Reset password). Open it, choose a new password, then sign in here. Signed in already? Change it under Settings → Password."
+							}) : null]
+						}) : null,
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							type: "button",
-							variant: "secondary",
-							className: "w-full",
+							className: "mt-4 text-sm text-cream/60 underline-offset-2 hover:underline",
 							onClick: () => {
-								const token = readInviteToken();
-								const back = token ? `/login?invite=${encodeURIComponent(token)}` : "/login";
-								signIn(p.providerId, {
-									callbackURL: token ? `/?invite=${encodeURIComponent(token)}` : "/",
-									errorCallbackURL: back
-								}).catch((err) => setError(err instanceof Error ? err.message : "Sign-in failed"));
+								setMode(mode === "in" ? "up" : "in");
+								setError(null);
+								setSocialOnly(null);
+								setNoAccount(null);
 							},
-							children: ["Continue with ", p.label]
-						}, p.providerId))
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "mt-5 text-xs leading-relaxed text-cream/40",
-						children: "Open the invite link from your admin, then create an account or use Google / X. That link approves you. Anyone without an invite still waits for approval."
-					})
-				] })
-			})]
-		})
+							children: mode === "in" ? "Need an account? Create one" : "Already have an account? Sign in"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "my-5 flex items-center gap-3 text-xs text-cream/40",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px flex-1 bg-cream/15" }),
+								"or",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "h-px flex-1 bg-cream/15" })
+							]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "space-y-2",
+							children: GROK_PROVIDERS.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								type: "button",
+								variant: socialOnly?.includes(p.providerId) ? "default" : "secondary",
+								className: "w-full",
+								onClick: () => {
+									const token = readInviteToken();
+									const back = token ? `/login?invite=${encodeURIComponent(token)}` : "/login";
+									signIn(p.providerId, {
+										callbackURL: token ? `/?invite=${encodeURIComponent(token)}` : "/",
+										errorCallbackURL: back
+									}).catch((err) => setError(err instanceof Error ? err.message : "Sign-in failed"));
+								},
+								children: ["Continue with ", p.label]
+							}, p.providerId))
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-5 text-xs leading-relaxed text-cream/40",
+							children: "Open the invite link from your admin, then create an account or use Google / X. That link approves you. Anyone without an invite still waits for approval."
+						})
+					] })
+				})]
+			})
+		]
 	});
 }
 //#endregion
 //#region src/components/ui/badge.tsx
-var badgeVariants = cva("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium tracking-tight", {
+var badgeVariants = cva("inline-flex w-fit max-w-full shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium tracking-tight", {
 	variants: {
 		variant: {
 			default: "bg-secondary text-secondary-foreground",
@@ -6326,7 +7262,7 @@ function StatusBadge({ status, tight = false, className }) {
 	else if (s.includes("cancel") || s.includes("fell") || s.includes("overdue") || s.includes("not ready")) variant = "danger";
 	else if (s.includes("needs bay") || s.includes("serial missing")) variant = "warn";
 	else if (s.includes("progress") || s.includes("dispatch") || s.includes("await") || s.includes("follow")) variant = "warn";
-	else if (s === "pending review") variant = "warn";
+	else if (s === "pending review" || s === "pending removal" || s === "pending outbound") variant = "warn";
 	else if (s === "needs test") variant = "outline";
 	else if (s === "tested") variant = "primary";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
@@ -6453,12 +7389,12 @@ function equipmentCount(raw, extra = 0) {
 	if (!raw?.trim()) return 0;
 	return raw.split(/\r?\n/).map((s) => s.trim()).filter(Boolean).length;
 }
-function str$1(v) {
+function str$2(v) {
 	return (v ?? "").trim().toLowerCase();
 }
 function compareEquip(a, b, desc) {
 	if (typeof a === "string" || typeof b === "string") {
-		const n = str$1(typeof a === "string" ? a : "").localeCompare(str$1(typeof b === "string" ? b : ""));
+		const n = str$2(typeof a === "string" ? a : "").localeCompare(str$2(typeof b === "string" ? b : ""));
 		return desc ? -n : n;
 	}
 	const na = typeof a === "number" ? a : 0;
@@ -6466,22 +7402,22 @@ function compareEquip(a, b, desc) {
 	return desc ? nb - na : na - nb;
 }
 function compareDesk(a, b, sort, get) {
-	const dateA = str$1(get.date?.(a));
-	const dateB = str$1(get.date?.(b));
-	const nameA = str$1(get.name?.(a));
-	const nameB = str$1(get.name?.(b));
+	const dateA = str$2(get.date?.(a));
+	const dateB = str$2(get.date?.(b));
+	const nameA = str$2(get.name?.(a));
+	const nameB = str$2(get.name?.(b));
 	const eqRawA = get.equipment?.(a);
 	const eqRawB = get.equipment?.(b);
 	const nameASafe = nameA;
 	const nameBSafe = nameB;
 	const valA = get.value?.(a) ?? 0;
 	const valB = get.value?.(b) ?? 0;
-	const stA = str$1(get.status?.(a));
-	const stB = str$1(get.status?.(b));
+	const stA = str$2(get.status?.(a));
+	const stB = str$2(get.status?.(b));
 	const flA = get.flagRank?.(a) ?? 99;
 	const flB = get.flagRank?.(b) ?? 99;
-	const techA = str$1(get.tech?.(a));
-	const techB = str$1(get.tech?.(b));
+	const techA = str$2(get.tech?.(a));
+	const techB = str$2(get.tech?.(b));
 	let n = 0;
 	switch (sort) {
 		case "date-desc":
@@ -6539,11 +7475,24 @@ function tally(rows, key) {
 //#region src/components/desk/mention-field.tsx
 function MentionField({ value, onChange, teammates, multiline, placeholder, className, id }) {
 	const fragment = mentionFragment(value);
-	const suggestions = fragment != null ? teammates.filter((t) => t.username.toLowerCase().includes(fragment.toLowerCase())).slice(0, 8) : [];
+	const [held, setHeld] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		setHeld(false);
+	}, [value]);
+	(0, import_react.useEffect)(() => {
+		function onCloseList() {
+			setHeld(true);
+		}
+		document.addEventListener("desk-close-combo", onCloseList);
+		return () => document.removeEventListener("desk-close-combo", onCloseList);
+	}, []);
+	const suggestions = fragment != null && !held ? teammates.filter((t) => t.username.toLowerCase().includes(fragment.toLowerCase())).slice(0, 8) : [];
 	function pick(username) {
 		onChange(applyMention(value, username));
 	}
+	const anchor = (0, import_react.useRef)(null);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref: anchor,
 		className: "relative",
 		children: [multiline ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoGrowTextarea, {
 			id,
@@ -6558,20 +7507,23 @@ function MentionField({ value, onChange, teammates, multiline, placeholder, clas
 			placeholder,
 			className,
 			autoComplete: "off"
-		}), suggestions.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-			className: "absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover py-1 shadow-soft",
-			children: suggestions.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-				type: "button",
-				className: cn("flex w-full items-center px-3 py-2 text-left text-sm hover:bg-muted"),
-				onMouseDown: (e) => {
-					e.preventDefault();
-					pick(t.username);
-				},
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "font-medium",
-					children: ["@", t.username]
-				})
-			}) }, t.username))
+		}), suggestions.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnchoredList, {
+			anchor,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+				className: "py-1",
+				children: suggestions.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					className: cn("flex w-full items-center px-3 py-2 text-left text-sm hover:bg-muted"),
+					onMouseDown: (e) => {
+						e.preventDefault();
+						pick(t.username);
+					},
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "font-medium",
+						children: ["@", t.username]
+					})
+				}) }, t.username))
+			})
 		}) : null]
 	});
 }
@@ -6807,7 +7759,7 @@ function ComingDuePanel({ rows, counts, weekEnd, compact }) {
 			className: "flex flex-wrap items-baseline justify-between gap-2",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 				className: "font-display text-xl leading-tight",
-				children: "Coming due"
+				children: "Coming Due"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "text-[11px] text-muted-foreground",
 				children: "Click a row to open the ticket or install."
@@ -6856,7 +7808,7 @@ function ComingDuePanel({ rows, counts, weekEnd, compact }) {
 						entityType: row.entityType,
 						id: row.id,
 						title: `${row.customer} · ${kindLabel(row)} · ${formatShortDate(row.scheduled)} · ${row.status}${row.wo ? ` · ${row.wo}` : ""}${row.technician || row.accountRep ? ` · ${row.technician || row.accountRep}` : ""}`,
-						className: "desk-lift grid gap-0.5 px-2.5 py-1.5 hover:bg-muted/60 sm:grid-cols-[minmax(0,1.4fr)_5.5rem_4.5rem_auto] sm:items-center sm:gap-2",
+						className: "desk-flat grid gap-0.5 px-2.5 py-1.5 hover:bg-muted/60 sm:grid-cols-[minmax(0,1.4fr)_4.5rem_7.5rem_minmax(0,9rem)] sm:items-center sm:gap-2",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 								className: "min-w-0",
@@ -6891,7 +7843,7 @@ function ComingDuePanel({ rows, counts, weekEnd, compact }) {
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: row.status }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-[11px] text-muted-foreground",
+								className: "min-w-0 truncate text-[11px] text-muted-foreground",
 								children: [row.technician || (row.accountRep ? row.accountRep.split(" ")[0] : "unassigned"), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, {
 									show: row.noRep,
 									className: "ml-1"
@@ -6972,7 +7924,7 @@ function RebuildAlerts({ rows }) {
 }
 //#endregion
 //#region src/routes/_app/index.tsx
-var Route$17 = createFileRoute("/_app/")({ component: ClockHome });
+var Route$19 = createFileRoute("/_app/")({ component: ClockHome });
 function ClockHome() {
 	const dash = useQuery({
 		queryKey: ["dashboard"],
@@ -6985,7 +7937,7 @@ function ClockHome() {
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-2xl",
-				children: "Couldn’t load the clock"
+				children: "Couldn’t Load The Clock"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-2 text-sm text-muted-foreground",
@@ -7012,69 +7964,75 @@ function ClockHome() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-6",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs tracking-[0.18em] text-muted-foreground uppercase",
-					children: "Operations clock"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-					className: "font-display text-4xl font-medium tracking-tight",
-					children: ["Today, ", formatLongDate(d.today)]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-					className: "mt-1 text-sm text-muted-foreground",
-					children: [
-						"Week ",
-						d.weekLabel,
-						" · Next ",
-						d.nextWeekLabel,
-						role ? ` · ${role === "sales" ? "Sales" : "Service"} view` : ""
-					]
-				})
-			] }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-				className: "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5",
+				className: "relative overflow-hidden rounded-2xl bg-ink bg-cover bg-center text-cream shadow-[var(--shadow-lift)]",
+				style: { backgroundImage: "url(/desk-header.jpg)" },
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-						to: "/service",
-						className: "min-w-0",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MiniStat, {
-							label: "Active calls",
-							value: d.kpis.activeCalls,
-							hint: "Open tickets"
-						})
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/40" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						"aria-hidden": true,
+						className: "katz-cloud katz-cloud-fast -top-10 right-6 hidden w-64 -scale-x-100 opacity-[0.12] sm:block"
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MiniStat, {
-						label: "Coming due",
-						value: d.kpis.comingDue,
-						hint: "Overdue, today, this week"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-						to: "/installs",
-						className: "min-w-0",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MiniStat, {
-							label: "Install queue",
-							value: d.kpis.installQueue,
-							hint: `${d.kpis.installAtRisk} at risk`
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-						to: "/pms",
-						className: "min-w-0",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MiniStat, {
-							label: "PMs active",
-							value: d.kpis.pmsActive,
-							hint: "Open the PM board"
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
-						to: "/rebuilds",
-						className: "min-w-0",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MiniStat, {
-							label: "Rebuilds",
-							value: (d.kpis.rebuildOverdue ?? 0) + (d.kpis.rebuildWaiting ?? 0),
-							hint: `${d.kpis.rebuildOverdue ?? 0} overdue · ${d.kpis.rebuildWaiting ?? 0} waiting`
-						})
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "relative px-5 pt-6 pb-5 sm:px-7 sm:pt-8",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11px] font-semibold tracking-[0.22em] text-katz-gold uppercase",
+								children: "Operations clock"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
+								className: "mt-2 font-display text-4xl font-medium tracking-tight text-white sm:text-5xl",
+								children: ["Today, ", formatLongDate(d.today)]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "mt-2 text-sm text-cream/70",
+								children: [
+									"Week ",
+									d.weekLabel,
+									" · Next ",
+									d.nextWeekLabel,
+									role ? ` · ${role === "sales" ? "Sales" : "Service"} view` : ""
+								]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeroStat, {
+										to: "/service",
+										label: "Active Calls",
+										value: d.kpis.activeCalls,
+										hint: "Open tickets"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeroStat, {
+										label: "Coming Due",
+										value: d.kpis.comingDue,
+										hint: "Overdue, today, this week",
+										tone: d.kpis.comingDue ? "warn" : void 0
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeroStat, {
+										to: "/installs",
+										label: "Install Queue",
+										value: d.kpis.installQueue,
+										hint: `${d.kpis.installAtRisk} at risk`,
+										tone: d.kpis.installAtRisk ? "warn" : void 0
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeroStat, {
+										to: "/pms",
+										label: "PMs Active",
+										value: d.kpis.pmsActive,
+										hint: "Open the PM board"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HeroStat, {
+										className: "col-span-2 sm:col-span-1",
+										to: "/rebuilds",
+										label: "Rebuilds",
+										value: (d.kpis.rebuildOverdue ?? 0) + (d.kpis.rebuildWaiting ?? 0),
+										hint: `${d.kpis.rebuildOverdue ?? 0} overdue · ${d.kpis.rebuildWaiting ?? 0} waiting`,
+										tone: d.kpis.rebuildOverdue ? "danger" : void 0
+									})
+								]
+							})
+						]
 					})
 				]
 			}),
@@ -7089,19 +8047,19 @@ function ClockHome() {
 				className: "grid min-w-0 gap-4 lg:grid-cols-3",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagList, {
-						title: "Service — 48-hour clock",
+						title: "Service — 48-Hour Clock",
 						href: "/service",
 						rows: d.flagged.service,
 						empty: "No service flags. The 48-hour clock is clear."
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagList, {
-						title: "TLC + Factor — 2-week clock",
+						title: "TLC + Factor — 2-Week Clock",
 						href: "/tlc",
 						rows: d.flagged.tlc,
 						empty: "No TLC flags."
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagList, {
-						title: "PM tracker",
+						title: "PM Tracker",
 						href: "/pms",
 						rows: d.flagged.pm,
 						empty: "No PM flags."
@@ -7191,9 +8149,39 @@ function FlagList({ title, href, rows, empty }) {
 		]
 	});
 }
+function HeroStat({ className, to, label, value, hint, tone }) {
+	const body = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "h-full rounded-xl border border-white/12 bg-white/8 px-3.5 py-3 backdrop-blur-sm transition-colors hover:bg-white/14",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				className: "flex items-center gap-1.5 truncate text-[10px] font-semibold tracking-[0.16em] text-cream/60 uppercase",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					"aria-hidden": true,
+					className: cn("size-1.5 shrink-0 rounded-full bg-emerald-300/80", tone === "warn" && "bg-amber-300", tone === "danger" && "bg-red-400")
+				}), label]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1.5 font-display text-3xl font-medium tabular leading-none text-white",
+				children: value
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1.5 line-clamp-2 text-[11px] text-cream/60",
+				children: hint
+			})
+		]
+	});
+	return to ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, {
+		to,
+		className: cn("block min-w-0", className),
+		children: body
+	}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: cn("min-w-0", className),
+		children: body
+	});
+}
 //#endregion
 //#region src/routes/_app/access.tsx
-var Route$16 = createFileRoute("/_app/access")({ component: Page$15 });
+var Route$18 = createFileRoute("/_app/access")({ component: Page$16 });
 function inviteBody(inv, origin) {
 	const who = [inv.username ? `username ${inv.username}` : null, inv.email ? `email ${inv.email}` : null].filter(Boolean).join(" or ") || "any username";
 	return `You're invited to Katz Desk.
@@ -7207,7 +8195,7 @@ After you are in, use ${origin.includes("grok.me") ? origin : "https://katzdesk.
 function copyText(text) {
 	return navigator.clipboard.writeText(text).then(() => toast.success("Copied"), () => toast.error("Could not copy"));
 }
-function Page$15() {
+function Page$16() {
 	const qc = useQueryClient();
 	const me = useQuery({
 		queryKey: ["access", "me"],
@@ -7333,9 +8321,12 @@ function Page$15() {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
 				children: ["Save an invite, then send them the link. Opening that link lets them in — Google, X, or a new password. They do not wait for a second approval.", canAssignRoles ? " Assign Sales, Service, or Warehouse to other people. Your admin login does not need a role. Only you can set Warehouse. New invites land on Service unless you pick another role." : ""]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 				className: "mt-3 max-w-xl rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-foreground",
-				children: "If someone sees “katzdesk.grok.me is private”, Grok has not shared the published site with them yet. Desk invites cannot open that lock. In Grok, set this app to Public, or share it with their Grok account. That does not require a rebuild."
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "font-medium",
+					children: "Seeing “this website is private”?"
+				}), " That screen comes from Grok hosting, before the desk sign-in. Invites here can’t open it. In Grok, open this app’s project settings and make the published site visible to anyone with the link (or share it with that person). The desk login still keeps everyone out until you approve them. No rebuild needed."]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "mt-3",
@@ -7351,7 +8342,7 @@ function Page$15() {
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "text-xs tracking-wide text-muted-foreground uppercase",
-					children: "Invite people"
+					children: "Invite People"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "mt-1 text-sm text-muted-foreground",
@@ -7443,7 +8434,7 @@ function Page$15() {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
 					className: "text-xs tracking-wide text-muted-foreground uppercase",
 					children: [
-						"Signing up (",
+						"Signing Up (",
 						signingUp.length,
 						")"
 					]
@@ -7492,7 +8483,7 @@ function Page$15() {
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
 				className: "text-xs tracking-wide text-muted-foreground uppercase",
 				children: [
-					"Waiting for approval (",
+					"Waiting For Approval (",
 					pending.length,
 					")"
 				]
@@ -7573,7 +8564,7 @@ function Page$15() {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
 					className: "text-xs tracking-wide text-warning uppercase",
 					children: [
-						"Needs a role (",
+						"Needs A Role (",
 						needsRole.length,
 						")"
 					]
@@ -7656,37 +8647,88 @@ function Page$15() {
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex flex-wrap items-center gap-2",
-						children: [canAssignRoles && !a.isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RolePicker, {
-							value: a.role,
-							disabled: setRole.isPending,
-							onChange: (role) => setRole.mutate({
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ResetPasswordButton, {
 								userId: a.userId,
-								role
-							})
-						}) : null, !a.isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							size: "sm",
-							variant: a.canAddCustomers ? "ink" : "outline",
-							disabled: setPerm.isPending,
-							onClick: () => setPerm.mutate({
-								userId: a.userId,
-								canAddCustomers: !a.canAddCustomers
+								username: a.username
 							}),
-							children: a.canAddCustomers ? "Can add customers" : "Allow add customers"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							size: "sm",
-							variant: "outline",
-							disabled: setApproved.isPending,
-							onClick: () => setApproved.mutate({
-								userId: a.userId,
-								approved: false
-							}),
-							children: "Revoke"
-						})] }) : null]
+							canAssignRoles && !a.isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RolePicker, {
+								value: a.role,
+								disabled: setRole.isPending,
+								onChange: (role) => setRole.mutate({
+									userId: a.userId,
+									role
+								})
+							}) : null,
+							!a.isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								size: "sm",
+								variant: a.canAddCustomers ? "ink" : "outline",
+								disabled: setPerm.isPending,
+								onClick: () => setPerm.mutate({
+									userId: a.userId,
+									canAddCustomers: !a.canAddCustomers
+								}),
+								children: a.canAddCustomers ? "Can add customers" : "Allow add customers"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								size: "sm",
+								variant: "outline",
+								disabled: setApproved.isPending,
+								onClick: () => setApproved.mutate({
+									userId: a.userId,
+									approved: false
+								}),
+								children: "Revoke"
+							})] }) : null
+						]
 					})]
 				}, a.userId))
 			})]
 		})
 	] });
+}
+function ResetPasswordButton({ userId, username }) {
+	const [link, setLink] = (0, import_react.useState)(null);
+	const make = useMutation({
+		mutationFn: () => createPasswordResetLink({ data: { userId } }),
+		onSuccess: (r) => setLink(`${window.location.origin}/login?reset=${encodeURIComponent(r.token)}`),
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not make a reset link")
+	});
+	const message = link ? `Hi ${username} — here's your KatzDesk password reset link. It works once and expires in 48 hours:\n${link}` : "";
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+		size: "sm",
+		variant: "outline",
+		disabled: make.isPending,
+		"data-testid": `reset-password-${username}`,
+		onClick: () => make.mutate(),
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "size-3.5" }), "Reset password"]
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+		open: !!link,
+		onOpenChange: (v) => v ? null : setLink(null),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogTitle, { children: ["Reset Link For ", username] }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1 text-sm text-muted-foreground",
+				children: "Send this to them yourself. It works once, expires in 48 hours, and signs them out of other devices."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 truncate rounded-md border border-border bg-muted px-2.5 py-2 font-mono text-xs",
+				title: link ?? "",
+				"data-testid": "reset-link",
+				children: link
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-4 flex flex-wrap justify-end gap-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					variant: "outline",
+					onClick: () => link && void copyText(link),
+					children: "Copy link only"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					onClick: () => void copyText(message),
+					children: "Copy message"
+				})]
+			})
+		] })
+	})] });
 }
 function RolePicker({ value, onChange, disabled }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
@@ -7775,6 +8817,42 @@ function InviteRow({ inv, origin, onRevoke, revoking, onResend, resending }) {
 	});
 }
 //#endregion
+//#region src/components/desk/show-more.tsx
+/**
+* Render long lists in pages instead of all at once (Customers had 2,600+ rows in one pass).
+* The window resets to the first page whenever `resetKey` changes (new search, filter, or sort).
+*/
+function useShowMore(list, resetKey, step = 60) {
+	const [limit, setLimit] = (0, import_react.useState)(step);
+	(0, import_react.useEffect)(() => {
+		setLimit(step);
+	}, [resetKey, step]);
+	return {
+		visible: list.length > limit ? list.slice(0, limit) : list,
+		remaining: Math.max(0, list.length - limit),
+		showMore: () => setLimit((n) => n + step * 2),
+		step
+	};
+}
+function ShowMoreButton({ remaining, onClick, label = "rows", as: Tag = "div" }) {
+	if (remaining <= 0) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tag, {
+		className: "flex justify-center border-t border-border px-4 py-3",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+			type: "button",
+			variant: "outline",
+			size: "sm",
+			onClick,
+			children: [
+				"Show ",
+				remaining,
+				" more ",
+				label
+			]
+		})
+	});
+}
+//#endregion
 //#region src/lib/ops/search-params.ts
 function parseOpenSearch(s) {
 	const raw = s.open;
@@ -7820,7 +8898,7 @@ var HEADER_KEYS = {
 	owned: "ownership",
 	owner: "ownership"
 };
-var ready$3 = async () => {
+var ready$5 = async () => {
 	const { ensureSeeded } = await import("./seed.server.mjs");
 	await ensureSeeded();
 	return getSql();
@@ -7988,7 +9066,7 @@ var fileInput$1 = object({
 var previewAccountEquipImport = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => fileInput$1.parse(d)).handler(async ({ data }) => {
 	if (data.base64.length > 16e6) throw new Error("That file is too large.");
 	const parsed = parseMatrix(fileToMatrix$1(data.base64));
-	const sql = await ready$3();
+	const sql = await ready$5();
 	const [accounts, catalog, existing] = await Promise.all([
 		loadAccounts(sql),
 		loadCatalog(sql),
@@ -8057,7 +9135,7 @@ async function ensureCatalogModel(sql, name) {
 	};
 }
 var applyAccountEquipImport = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => applyInput$1.parse(d)).handler(async ({ data }) => {
-	const sql = await ready$3();
+	const sql = await ready$5();
 	const accounts = await loadAccounts(sql);
 	const accountByKey = new Map(accounts.map((a) => [a.name.toLowerCase(), a]));
 	const catalog = await loadCatalog(sql);
@@ -8212,7 +9290,7 @@ var applyAccountEquipImport = createServerFn({ method: "POST" }).middleware([des
 });
 var listInput = object({ customer: string().optional() });
 var listAccountEquipment = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => listInput.parse(d ?? {})).handler(async ({ data }) => {
-	const sql = await ready$3();
+	const sql = await ready$5();
 	const customer = data.customer?.trim();
 	return (customer ? await sql.query(`select id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, updated_at
              from account_equipment
@@ -8248,26 +9326,39 @@ function createdName(result, fallback) {
 var fieldClass = "flex min-h-11 w-full min-w-0 items-center gap-2 rounded-full border border-input bg-background px-3 text-left text-sm focus-within:ring-2 focus-within:ring-ring";
 var searchClass = "flex min-h-11 w-full min-w-0 items-center gap-2 rounded-md border border-input bg-background px-3 text-left text-sm focus-within:ring-2 focus-within:ring-ring";
 function useDismiss(open, onClose) {
-	const ref = (0, import_react.useRef)(null);
+	const rootRef = (0, import_react.useRef)(null);
+	const menuRef = (0, import_react.useRef)(null);
 	(0, import_react.useEffect)(() => {
 		if (!open) return;
 		function onDoc(e) {
-			if (!ref.current?.contains(e.target)) onClose();
+			const target = e.target;
+			if (rootRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+			onClose();
+		}
+		function onCloseList() {
+			onClose();
 		}
 		document.addEventListener("mousedown", onDoc);
-		return () => document.removeEventListener("mousedown", onDoc);
+		document.addEventListener("desk-close-combo", onCloseList);
+		return () => {
+			document.removeEventListener("mousedown", onDoc);
+			document.removeEventListener("desk-close-combo", onCloseList);
+		};
 	}, [open, onClose]);
-	return ref;
+	return {
+		rootRef,
+		menuRef
+	};
 }
-function Menu({ children, notFound, notFoundText, inFlow }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		"data-combo-popover": "",
-		className: cn("z-50 w-full overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-soft", inFlow ? "relative mt-1" : "absolute mt-1"),
+function Menu({ anchor, menuRef, children, notFound, notFoundText }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(AnchoredList, {
+		anchor,
+		menuRef,
 		children: [notFound ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 			className: "px-2 py-1.5 text-xs text-muted-foreground",
 			children: notFoundText
 		}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-			className: "max-h-56 overflow-y-auto py-1",
+			className: "py-1",
 			role: "listbox",
 			children
 		})]
@@ -8306,7 +9397,7 @@ function ComboField({ label, name, value, onChange, items, placeholder = "Search
 	const [open, setOpen] = (0, import_react.useState)(false);
 	const [q, setQ] = (0, import_react.useState)("");
 	const inputRef = (0, import_react.useRef)(null);
-	const rootRef = useDismiss(open, () => {
+	const { rootRef, menuRef } = useDismiss(open, () => {
 		setOpen(false);
 		setQ("");
 	});
@@ -8366,11 +9457,10 @@ function ComboField({ label, name, value, onChange, items, placeholder = "Search
 								setQ(e.target.value);
 								if (!open) setOpen(true);
 							},
-							onFocus: () => {
-								setOpen(true);
-								setQ("");
-							},
+							onFocus: () => setQ(""),
+							onClick: () => setOpen(true),
 							onKeyDown: (e) => {
+								if (e.key === "ArrowDown" && !open) setOpen(true);
 								if (e.key === "Escape") {
 									setOpen(false);
 									inputRef.current?.blur();
@@ -8397,7 +9487,8 @@ function ComboField({ label, name, value, onChange, items, placeholder = "Search
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronsUpDown, { className: "size-4 shrink-0 text-muted-foreground" })
 					]
 				}), open ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Menu, {
-					inFlow: menuInFlow,
+					anchor: rootRef,
+					menuRef,
 					notFound,
 					notFoundText: allowCreate ? `This ${noun} isn’t on the list. Use + to add it.` : emptyHint,
 					children: [
@@ -8445,10 +9536,10 @@ function ComboField({ label, name, value, onChange, items, placeholder = "Search
 		]
 	});
 }
-function MultiComboField({ label, name, values, onChange, items, placeholder = "Add…", allowCreate = true, onCreate, onRemoveItem, onRenameItem, noun = "name", menuInFlow }) {
+function MultiComboField({ label, name, values, onChange, items, placeholder = "Add…", allowCreate = true, onCreate, onRemoveItem, onRenameItem, noun = "name", menuInFlow, hideChips }) {
 	const [open, setOpen] = (0, import_react.useState)(false);
 	const [q, setQ] = (0, import_react.useState)("");
-	const rootRef = useDismiss(open, () => {
+	const { rootRef, menuRef } = useDismiss(open, () => {
 		setOpen(false);
 		setQ("");
 	});
@@ -8495,7 +9586,7 @@ function MultiComboField({ label, name, values, onChange, items, placeholder = "
 			}) : null,
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: cn("min-w-0 space-y-2", label ? "mt-1.5" : "mt-0"),
-				children: [values.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+				children: [values.length && !hideChips ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 					className: "flex min-h-8 min-w-0 flex-wrap content-start gap-2",
 					"data-equip-chips": "",
 					children: values.map((v, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
@@ -8534,8 +9625,9 @@ function MultiComboField({ label, name, values, onChange, items, placeholder = "
 								setQ(e.target.value);
 								if (!open) setOpen(true);
 							},
-							onFocus: () => setOpen(true),
+							onClick: () => setOpen(true),
 							onKeyDown: (e) => {
+								if (e.key === "ArrowDown" && !open) setOpen(true);
 								if (e.key === "Escape") setOpen(false);
 								if (e.key === "Enter") {
 									e.preventDefault();
@@ -8546,7 +9638,8 @@ function MultiComboField({ label, name, values, onChange, items, placeholder = "
 							}
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronsUpDown, { className: "size-4 shrink-0 text-muted-foreground" })]
 					}), open ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Menu, {
-						inFlow: menuInFlow,
+						anchor: rootRef,
+						menuRef,
 						notFound,
 						notFoundText: allowCreate ? `This ${noun} isn’t on the list. Use + to add it.` : "No matches.",
 						children: [
@@ -8601,6 +9694,1643 @@ function MultiComboField({ label, name, values, onChange, items, placeholder = "
 			})
 		]
 	});
+}
+//#endregion
+//#region src/components/desk/image-lightbox.tsx
+/**
+* Click or tap an image to see it large. Close with the Close button, Esc, or a tap outside the picture.
+* Wraps the thumbnail in a button so it works with keyboard and touch.
+*/
+function ZoomableImage({ src, alt, label, className, imgClassName, testId, download }) {
+	const [open, setOpen] = (0, import_react.useState)(false);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Dialog$1, {
+		open,
+		onOpenChange: setOpen,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTrigger, {
+			asChild: true,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				type: "button",
+				className: cn("group relative block w-full cursor-zoom-in focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none", className),
+				"aria-label": `Enlarge ${alt}`,
+				"data-testid": testId,
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+					src,
+					alt,
+					className: imgClassName
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "pointer-events-none absolute right-2 bottom-2 grid size-7 place-items-center rounded-full bg-ink/70 text-cream opacity-80 transition-opacity group-hover:opacity-100",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZoomIn, { className: "size-4" })
+				})]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogPortal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogOverlay, { className: "fixed inset-0 z-[80] bg-black/85 data-[state=open]:animate-in data-[state=open]:fade-in-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent$1, {
+			className: "fixed inset-0 z-[90] flex flex-col items-center justify-center p-3 focus:outline-none sm:p-8",
+			"data-testid": "lightbox",
+			"aria-describedby": void 0,
+			onClick: (e) => {
+				if (e.target === e.currentTarget) setOpen(false);
+			},
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle$1, {
+					className: "sr-only",
+					children: alt
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+					src,
+					alt,
+					className: "max-h-[calc(100dvh-7rem)] max-w-full rounded-lg bg-white object-contain shadow-2xl",
+					"data-testid": "lightbox-image"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-3 flex flex-wrap items-center justify-center gap-3",
+					children: [
+						label ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-sm text-white/85",
+							children: label
+						}) : null,
+						download ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: src,
+							download,
+							className: "inline-flex h-11 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-medium text-black hover:bg-white/90",
+							"data-testid": "lightbox-download",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "size-4" }), " Download"]
+						}) : null,
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogClose, {
+							className: "inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-medium text-black hover:bg-white/90",
+							"data-testid": "lightbox-close",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" }), " Close"]
+						})
+					]
+				})
+			]
+		})] })]
+	});
+}
+//#endregion
+//#region src/lib/ops/spec-filter.ts
+var US_MARKS = /\b(c?UL|cULus|ETL|c?ETLus|NSF|CSA|ENERGY\s*STAR|Intertek|FCC|NEMA)\b/i;
+var NON_US_MARKS = /\b(CE|UKCA|RoHS|WEEE|EAC|CCC|KC|VDE|GS|TÜV|TUV|SAA|RCM|PSE|DVGW|WRAS|KIWA|ÖVGW|SVGW|ACS)\b/i;
+var NON_US_MARK_TOKENS = /^(CE|UKCA|RoHS(\s*\d+)?|WEEE|EAC|CCC|KC|VDE|GS|TÜV|TUV|SAA|RCM|PSE|DVGW|WRAS|KIWA|ÖVGW|SVGW|ACS|EN\s?\d[\d\-:. ]*|IEC\s?\d[\d\-:. ]*|2014\/\d+\/EU|20\d\d\/\d+\/EU)( marking| mark| compliant| certified)?$/i;
+/** 220–240 V class and European 3-phase (380–415 V, 400 V 3N). 208–240 V and 240 V stay (US). */
+var EURO_VOLT = /\b(2[23]0|380|400|415)\s*(?:[-–/]\s*(?:2[34]0|415|400))?\s*V(?:AC|olts?)?\b|\b3\s*N\s*~?\s*400\b/i;
+/** A US supply voltage that starts the expression (so the "240" inside "220-240V" doesn't count). */
+var US_VOLT = /(?<![\d\-–/]\s?)\b(100|110|115|120|125|200|208|240|277|440|460|480)\s*(?:[-–/]\s*\d{3})?\s*V/i;
+var FIFTY_ONLY = /\b50\s*Hz\b/i;
+var SIXTY = /\b60\s*Hz\b/i;
+var FIFTY_SIXTY = /\b50\s*[/-]\s*60\s*Hz\b/i;
+var NON_US_PLUG = /\b(schuko|cee\s*7\/?\d*|bs\s*1363|bs\s*546|type\s*[cefgijklm]\b|iec\s*60309|cee\s*form|uk\s*plug|eu(ro)?\s*plug|european\s*plug|as\/nzs\s*3112|si\s*32|gb\s*1002|sev\s*1011|cei\s*23-50|16\s*a\s*cee|32\s*a\s*cee)/i;
+var US_PLUG = /\b(nema|l\d+-\d+|\d+-\d+[pr]\b|hardwire|hard-?wired|direct\s*wire|cord\s*and\s*plug)/i;
+/** Non-US water standards and fittings — removed even when an inch size is quoted (BSP is not NPT). */
+var METRIC_WATER = /(\bbsp[pt]?\b|\bg\s?[1-9]\/[1-9]\b|\bg\s?[1-9]"|\bdin\s?\d+|\ben\s?\d{3,5}\b|\bwras\b|\bkiwa\b|\bdvgw\b|\bacs\b|°\s?[df]h\b)/i;
+/** Metric units — only removed when no imperial value sits next to them. */
+var METRIC_ONLY_UNIT = /\d(?:[.,]\d+)?\s*(bar|mm|cm|kpa|mpa|l\/min|l\/h|litres?|liters?)\b/i;
+var IMPERIAL = /(psi|"|”|\binch|\bin\.?\b|\bnpt\b|\bgpm\b|\bgph\b|\bgal|\bft\b|\blb|\bfl\.?\s?oz)/i;
+var NON_US_PHONE = /\+\s?(?!1\b|1[\s\-(])\d{1,3}[\s\-(]/;
+var US_PHONE = /(\+\s?1[\s\-(]|\(\d{3}\)\s?\d{3}|\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b|\b1-8\d{2}-)/;
+var NON_US_PLACE = /\b(italy|italia|germany|deutschland|united kingdom|\buk\b|england|switzerland|schweiz|suisse|france|netherlands|nederland|spain|españa|sweden|denmark|norway|austria|belgium|portugal|australia|new zealand|china|japan|korea|\.it\b|\.de\b|\.co\.uk\b|\.ch\b|\.fr\b|\.nl\b|\.com\.au\b)/i;
+var US_STATE_ZIP = /\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY),?\s\d{5}(-\d{4})?\b/;
+function splitParts(v) {
+	return v.split(/\s*(?:;|,|\bor\b|\s\/\s|(?<=\d\s?V)\s*\/\s*(?=\d)|\|)\s*/i).map((p) => p.trim()).filter(Boolean);
+}
+/** Frequency: "50 Hz" goes; "50/60 Hz" becomes "60 Hz". */
+function filterHz(v) {
+	if (FIFTY_SIXTY.test(v)) return {
+		kept: v.replace(FIFTY_SIXTY, "60 Hz"),
+		removed: ["50 Hz"]
+	};
+	if (FIFTY_ONLY.test(v) && !SIXTY.test(v)) {
+		const parts = splitParts(v);
+		const removed = parts.filter((p) => FIFTY_ONLY.test(p));
+		return {
+			kept: parts.filter((p) => !FIFTY_ONLY.test(p)).join(", "),
+			removed: removed.length ? removed : [v]
+		};
+	}
+	if (FIFTY_ONLY.test(v) && SIXTY.test(v)) {
+		const parts = splitParts(v);
+		const removed = parts.filter((p) => FIFTY_ONLY.test(p) && !SIXTY.test(p));
+		if (removed.length) return {
+			kept: parts.filter((p) => !removed.includes(p)).join(", "),
+			removed
+		};
+	}
+	return {
+		kept: v,
+		removed: []
+	};
+}
+/** An electrical line like "230V 50Hz 1ph" or "120V/60Hz, 230V/50Hz". */
+function filterElectrical(v) {
+	const parts = v.split(/\s*(?:;|,|\bor\b|\|)\s*/i).map((c) => c.trim()).filter(Boolean).flatMap((c) => /hz/i.test(c) ? [c] : splitParts(c));
+	const removed = [];
+	const kept = [];
+	for (const p of parts) {
+		const euroV = EURO_VOLT.test(p) && !US_VOLT.test(p);
+		const fifty = FIFTY_ONLY.test(p) && !SIXTY.test(p) && !FIFTY_SIXTY.test(p);
+		if (euroV || fifty) removed.push(p);
+		else kept.push(FIFTY_SIXTY.test(p) ? p.replace(FIFTY_SIXTY, "60 Hz") : p);
+	}
+	if (!removed.length && !FIFTY_SIXTY.test(v)) return {
+		kept: v,
+		removed: []
+	};
+	if (!removed.length) return {
+		kept: kept.join(", "),
+		removed: ["50 Hz"]
+	};
+	return {
+		kept: kept.join(", "),
+		removed
+	};
+}
+function filterPlug(v) {
+	const parts = splitParts(v);
+	const removed = parts.filter((p) => NON_US_PLUG.test(p) && !US_PLUG.test(p));
+	if (!removed.length) return {
+		kept: v,
+		removed: []
+	};
+	return {
+		kept: parts.filter((p) => !removed.includes(p)).join(", "),
+		removed
+	};
+}
+/** Certifications line: drop CE/UKCA/RoHS-type marks, keep UL/NSF/ETL/CSA. */
+function filterCertLine(v) {
+	const parts = v.split(/\s*(?:,|;|\s\/\s|\band\b|&|\+)\s*/i).map((p) => p.trim()).filter(Boolean);
+	const removed = parts.filter((p) => !US_MARKS.test(p) && (NON_US_MARK_TOKENS.test(p) || NON_US_MARKS.test(p)));
+	if (!removed.length) return {
+		kept: v,
+		removed: []
+	};
+	return {
+		kept: parts.filter((p) => !removed.includes(p)).join(", "),
+		removed
+	};
+}
+/** Water/drain: metric-only standards and fittings (BSP/G threads, DIN/EN, °dH, bar-only, mm-only). */
+function filterWater(v) {
+	const parts = splitParts(v);
+	const removed = parts.filter((p) => METRIC_WATER.test(p) || METRIC_ONLY_UNIT.test(p) && !IMPERIAL.test(p));
+	if (!removed.length) return {
+		kept: v,
+		removed: []
+	};
+	return {
+		kept: parts.filter((p) => !removed.includes(p)).join(", "),
+		removed
+	};
+}
+/** Contact: drop non-US phone numbers / addresses; keep US ones. */
+function filterContact(v) {
+	const lines = v.split(/\s*(?:\n|;|\s\|\s)\s*/).map((l) => l.trim()).filter(Boolean);
+	const removed = lines.filter((l) => {
+		const foreignPhone = NON_US_PHONE.test(l);
+		const foreign = foreignPhone || NON_US_PLACE.test(l);
+		const us = /\+\s?1[\s\-(]/.test(l) || US_STATE_ZIP.test(l) || /\b(usa|united states|america)\b/i.test(l) || !foreignPhone && US_PHONE.test(l);
+		return foreign && !us;
+	});
+	if (!removed.length) return {
+		kept: v,
+		removed: []
+	};
+	return {
+		kept: lines.filter((l) => !removed.includes(l)).join("; "),
+		removed
+	};
+}
+var NOTE = {
+	voltage: "220–240 V / 400 V is not a US supply",
+	frequency: "50 Hz is not used in the US",
+	certification: "CE/UKCA/RoHS-type mark — not a US listing",
+	plug: "Non-US plug type",
+	water: "Metric-only water standard or fitting",
+	contact: "Non-US manufacturer contact",
+	config: "Configuration is for a non-US supply"
+};
+/** Which rule applies to a spec row, by its label. */
+function ruleForLabel(label) {
+	const l = label.toLowerCase();
+	if (/certif|approval|listing|standard|compliance|marking/.test(l)) return {
+		rule: filterCertLine,
+		reason: "certification"
+	};
+	if (/plug|cord|connector/.test(l)) return {
+		rule: filterPlug,
+		reason: "plug"
+	};
+	if (/frequen|\bhz\b/.test(l)) return {
+		rule: filterHz,
+		reason: "frequency"
+	};
+	if (/volt|electr|power supply|supply|mains|power/.test(l)) return {
+		rule: filterElectrical,
+		reason: "voltage"
+	};
+	if (/water|drain|inlet|pressure|hardness|fitting|filtration/.test(l)) return {
+		rule: filterWater,
+		reason: "water"
+	};
+	if (/contact|phone|distribut|address|headquart|office|manufacturer/.test(l)) return {
+		rule: filterContact,
+		reason: "contact"
+	};
+	return null;
+}
+var FIELD_RULES = {
+	power: {
+		voltage: {
+			rule: filterElectrical,
+			reason: "voltage"
+		},
+		hz: {
+			rule: filterHz,
+			reason: "frequency"
+		},
+		plug: {
+			rule: filterPlug,
+			reason: "plug"
+		},
+		circuit: {
+			rule: filterElectrical,
+			reason: "voltage"
+		},
+		amps: {
+			rule: filterElectrical,
+			reason: "voltage"
+		}
+	},
+	water: {
+		inlet: {
+			rule: filterWater,
+			reason: "water"
+		},
+		pressure: {
+			rule: filterWater,
+			reason: "water"
+		},
+		filtration: {
+			rule: filterWater,
+			reason: "water"
+		},
+		notes: {
+			rule: filterWater,
+			reason: "water"
+		}
+	},
+	drain: {
+		size: {
+			rule: filterWater,
+			reason: "water"
+		},
+		notes: {
+			rule: filterWater,
+			reason: "water"
+		}
+	}
+};
+var SECTION_NAME = {
+	power: "Power",
+	water: "Water",
+	drain: "Drain",
+	dimensions: "Size"
+};
+var FIELD_NAME = {
+	voltage: "Voltage",
+	amps: "Amps",
+	phase: "Phase",
+	hz: "Hz",
+	plug: "Plug",
+	circuit: "Circuit",
+	inlet: "Inlet",
+	pressure: "Pressure",
+	filtration: "Filtration",
+	notes: "Notes",
+	size: "Size"
+};
+/** A configuration whose label says it is a European build ("230V 50Hz", "CE version"). */
+function nonUsConfigLabel(label) {
+	const l = label.trim();
+	if (!l) return false;
+	if (US_VOLT.test(l) || SIXTY.test(l) || /\b(us|usa|ul|nsf|north america)\b/i.test(l)) return false;
+	return (EURO_VOLT.test(l) || FIFTY_ONLY.test(l) && !FIFTY_SIXTY.test(l) || /\b(ce|uk|eu|europe(an)?|export)\s*(version|model|spec)?\b/i.test(l)) && true;
+}
+/**
+* Run every rule over a draft. Returns the trimmed draft and the list of removals
+* (in display order). Never throws; values it can't judge are left alone.
+*/
+function filterNonUsa(input) {
+	const draft = structuredClone(input);
+	const removed = [];
+	let seq = 0;
+	const add = (item) => removed.push({
+		...item,
+		id: `r${++seq}`,
+		note: NOTE[item.reason]
+	});
+	const keptConfigs = [];
+	draft.configs.forEach((c, i) => {
+		if (draft.configs.length > 1 && nonUsConfigLabel(c.label)) add({
+			where: `Configuration · ${c.label}`,
+			removed: c.label,
+			original: c,
+			kept: "",
+			reason: "config",
+			path: {
+				kind: "config",
+				index: i
+			}
+		});
+		else keptConfigs.push(c);
+	});
+	draft.configs = keptConfigs;
+	draft.configs.forEach((c) => {
+		for (const [section, fields] of Object.entries(FIELD_RULES)) {
+			const sec = c.requirements[section];
+			if (!sec) continue;
+			for (const [key, { rule, reason }] of Object.entries(fields)) {
+				const value = sec[key];
+				if (!value) continue;
+				const res = rule(value);
+				if (!res.removed.length) continue;
+				sec[key] = res.kept || void 0;
+				add({
+					where: `${c.label} · ${SECTION_NAME[section]} · ${FIELD_NAME[key] ?? key}`,
+					removed: res.removed.join(", "),
+					original: value,
+					kept: res.kept,
+					reason,
+					path: {
+						kind: "field",
+						section,
+						key,
+						config: c.label
+					}
+				});
+			}
+		}
+		const other = c.requirements.other ?? [];
+		const keepOther = [];
+		other.forEach((row, oi) => {
+			const r = ruleForLabel(row.label);
+			const res = r ? r.rule(row.value) : {
+				kept: row.value,
+				removed: []
+			};
+			if (r && res.removed.length) {
+				add({
+					where: `${c.label} · ${row.label}`,
+					removed: res.removed.join(", "),
+					original: row,
+					kept: res.kept,
+					reason: r.reason,
+					path: {
+						kind: "other",
+						config: c.label,
+						index: oi
+					}
+				});
+				if (res.kept) keepOther.push({
+					...row,
+					value: res.kept
+				});
+			} else keepOther.push(row);
+		});
+		if (c.requirements.other) c.requirements.other = keepOther;
+	});
+	const keepSpecs = [];
+	draft.specs.forEach((row, i) => {
+		const r = ruleForLabel(row.label);
+		const res = r ? r.rule(row.value) : {
+			kept: row.value,
+			removed: []
+		};
+		if (r && res.removed.length) {
+			add({
+				where: `Specs · ${row.label}`,
+				removed: res.removed.join(", "),
+				original: row,
+				kept: res.kept,
+				reason: r.reason,
+				path: {
+					kind: "spec",
+					index: i
+				}
+			});
+			if (res.kept) keepSpecs.push({
+				...row,
+				value: res.kept
+			});
+		} else keepSpecs.push(row);
+	});
+	draft.specs = keepSpecs;
+	const certs = draft.mfrNotes.certifications ?? [];
+	const keepCerts = [];
+	certs.forEach((cert, i) => {
+		const res = filterCertLine(cert);
+		if (res.removed.length) {
+			add({
+				where: "Certifications",
+				removed: res.removed.join(", "),
+				original: cert,
+				kept: res.kept,
+				reason: "certification",
+				path: {
+					kind: "cert",
+					index: i
+				}
+			});
+			if (res.kept) keepCerts.push(res.kept);
+		} else keepCerts.push(cert);
+	});
+	draft.mfrNotes.certifications = keepCerts;
+	if (draft.mfrNotes.usContact) {
+		const value = draft.mfrNotes.usContact;
+		const res = filterContact(value);
+		if (res.removed.length) {
+			draft.mfrNotes.usContact = res.kept || void 0;
+			add({
+				where: "US Contact",
+				removed: res.removed.join("; "),
+				original: value,
+				kept: res.kept,
+				reason: "contact",
+				path: {
+					kind: "mfr",
+					key: "usContact"
+				}
+			});
+		}
+	}
+	return {
+		draft,
+		removed
+	};
+}
+/** Put one removed value back into a draft (the review screen's Restore button). */
+function restoreRemoved(draft, item) {
+	const next = structuredClone(draft);
+	const p = item.path;
+	const at = (arr, index, value, replaceWhere) => {
+		const hit = replaceWhere ? arr.findIndex(replaceWhere) : -1;
+		if (hit >= 0) arr[hit] = value;
+		else arr.splice(Math.min(index, arr.length), 0, value);
+	};
+	if (p.kind === "config") at(next.configs, p.index, item.original);
+	else if (p.kind === "field") {
+		const cfg = next.configs.find((c) => c.label === p.config);
+		if (cfg) {
+			const reqs = cfg.requirements;
+			reqs[p.section] = {
+				...reqs[p.section] ?? {},
+				[p.key]: item.original
+			};
+		}
+	} else if (p.kind === "other") {
+		const cfg = next.configs.find((c) => c.label === p.config);
+		if (cfg) {
+			const row = item.original;
+			cfg.requirements.other = cfg.requirements.other ?? [];
+			at(cfg.requirements.other, p.index, row, (x) => x.label === row.label);
+		}
+	} else if (p.kind === "spec") {
+		const row = item.original;
+		at(next.specs, p.index, row, (x) => x.label === row.label);
+	} else if (p.kind === "cert") {
+		const certs = next.mfrNotes.certifications = next.mfrNotes.certifications ?? [];
+		const hit = item.kept ? certs.indexOf(item.kept) : -1;
+		if (hit >= 0) certs[hit] = item.original;
+		else at(certs, p.index, item.original);
+	} else if (p.kind === "mfr") next.mfrNotes[p.key] = item.original;
+	return next;
+}
+//#endregion
+//#region src/lib/ops/spec-defaults.ts
+var DEFAULT_INLET = "3/8\" compression valve";
+var HARDWIRE_ONLY = "Hardwire only";
+/** 3-phase from the phase field, or from voltage/plug text ("3ph", "3-phase", "3Ø", "3N~"). */
+function isThreePhase(p) {
+	if (!p) return false;
+	const phase = (p.phase ?? "").trim().toLowerCase();
+	if (/^(3|three)\b|3\s*-?\s*(ph|phase)|three[\s-]*phase|3\s*ø/.test(phase)) return true;
+	const text = `${p.voltage ?? ""} ${p.circuit ?? ""} ${p.plug ?? ""}`.toLowerCase();
+	return /\b3\s*-?\s*(ph|phase)\b|three[\s-]*phase|3\s*ø|\b3\s*n\s*~|\b3n\b|\bl15-|\bl21-|\b15-\d\dp?\b/.test(text);
+}
+function voltageClass(p) {
+	if (isThreePhase(p)) return "three-phase";
+	const nums = ((p?.voltage ?? "").toLowerCase().match(/\d{3}/g) ?? []).map(Number);
+	if (nums.some((n) => n >= 200 && n <= 250)) return "240";
+	if (nums.some((n) => n >= 100 && n <= 130)) return "120";
+	return "unknown";
+}
+/** Largest amp figure on the spec ("20A / 30A" → 30). Null when there isn't one. */
+function specAmps(p) {
+	const nums = ((p?.amps ?? "").match(/\d+(?:\.\d+)?/g) ?? []).map(Number).filter((n) => n > 0 && n < 1e3);
+	return nums.length ? Math.max(...nums) : null;
+}
+var STANDARD_BREAKERS = [
+	15,
+	20,
+	25,
+	30,
+	35,
+	40,
+	45,
+	50,
+	60,
+	70,
+	80,
+	90,
+	100,
+	110,
+	125,
+	150,
+	175,
+	200
+];
+/** Next standard breaker at or above 125% of the load (NEC continuous-load sizing). */
+function breakerFor(amps) {
+	const need = amps * 1.25;
+	return STANDARD_BREAKERS.find((b) => b >= need - 1e-9) ?? Math.ceil(need / 10) * 10;
+}
+function sheetSaysLocking(plug) {
+	const m = (plug ?? "").toUpperCase().match(/\bL(5|6|14)-(15|20|30)P?\b/);
+	return m ? `L${m[1]}-${m[2]}` : null;
+}
+var WIRES_4 = "4-wire (2 hots, neutral, ground)";
+var WIRES_3 = "3-wire (2 hots, ground)";
+var WIRE_MISSING_NOTE = "Wire count missing — confirm 3-wire L6 or 4-wire L14.";
+/** Model exceptions: units known to be 4-wire at 208–240 V. */
+var FOUR_WIRE_MODELS = [/\bbunn\b.*\baxiom\b|\baxiom\b.*\bbunn\b|^axiom\b/i];
+/** Plug text we wrote ourselves ("NEMA L6-30 twist-lock") is not evidence of the wiring. */
+function isOurPlug(plug) {
+	return /^NEMA (L?\d+-\d+)( twist-lock)?$/.test((plug ?? "").trim());
+}
+/**
+* How many wires the 208–240 V supply uses: 4 = two hots + neutral + ground (L14), 3 = two hots + ground (L6).
+* Checked in order: the Wires field, the electrical text, model exceptions, the manufacturer's own plug.
+*/
+function wireCount(p, ctx) {
+	const field = (p?.wires ?? "").toLowerCase();
+	if (/\b4\b|four/.test(field)) return {
+		count: 4,
+		source: "field"
+	};
+	if (/\b3\b|three/.test(field)) return {
+		count: 3,
+		source: "field"
+	};
+	const text = `${p?.voltage ?? ""} ${p?.circuit ?? ""}`.toLowerCase();
+	const plus = text.match(/\b(\d)\s*-?\s*(?:wire|w)\s*(?:\+|plus|&|and|w\/|with)\s*(?:gnd|ground)/);
+	if (plus) {
+		const n = Number(plus[1]) + 1;
+		if (n === 3 || n === 4) return {
+			count: n,
+			source: "text"
+		};
+	}
+	const bare = text.match(/\b([34])\s*-?\s*(?:wire|conductor)s?\b/);
+	if (bare) return {
+		count: Number(bare[1]),
+		source: "text"
+	};
+	if (/neutral/.test(text) || /\b(115|120)\s*\/\s*(208|220|230|240)\b/.test(text)) return {
+		count: 4,
+		source: "text"
+	};
+	const who = `${ctx?.manufacturer ?? ""} ${ctx?.model ?? ""}`.trim();
+	if (who && FOUR_WIRE_MODELS.some((re) => re.test(who))) return {
+		count: 4,
+		source: "model"
+	};
+	const plug = p?.plug ?? "";
+	if (plug && !isOurPlug(plug)) {
+		const code = nemaCode(plug);
+		if (code && /^L?14-/.test(code)) return {
+			count: 4,
+			source: "plug"
+		};
+		if (code && /^L?6-/.test(code)) return {
+			count: 3,
+			source: "plug"
+		};
+	}
+	return {
+		count: null,
+		source: null
+	};
+}
+var DEFAULT_NOTE = "Default — amps aren't on the sheet. Change it if the nameplate says otherwise.";
+function over50(amps) {
+	return `Draws ${amps}A — above a 50A plug. Confirm with the electrician; it may need to be hardwired.`;
+}
+/** Decide plug + breaker for one configuration's power block: volts, then wire count, then amps. */
+function decidePlug(p, ctx) {
+	const cls = voltageClass(p);
+	const amps = specAmps(p);
+	if (cls === "three-phase") return {
+		plug: HARDWIRE_ONLY,
+		nema: null,
+		breaker: amps ? `${breakerFor(amps)}A 3-pole` : "3-pole, size from the nameplate",
+		note: null,
+		cls,
+		wires: null
+	};
+	if (cls === "240") {
+		const w = wireCount(p, ctx);
+		if (w.count == null) return {
+			plug: null,
+			nema: null,
+			breaker: amps == null ? null : amps <= 20 ? "20A 2-pole" : amps <= 30 ? "30A 2-pole" : "50A 2-pole",
+			note: WIRE_MISSING_NOTE,
+			cls,
+			wires: null
+		};
+		if (w.count === 4) {
+			const why = w.source === "model" ? "4-wire unit (model exception: 4-wire at 220V)." : "4-wire unit.";
+			if (amps == null) return {
+				plug: "NEMA L14-20 twist-lock",
+				nema: "L14-20",
+				breaker: "20A 2-pole",
+				note: `${why} ${DEFAULT_NOTE}`,
+				cls,
+				wires: WIRES_4
+			};
+			if (amps <= 20) return {
+				plug: "NEMA L14-20 twist-lock",
+				nema: "L14-20",
+				breaker: "20A 2-pole",
+				note: why,
+				cls,
+				wires: WIRES_4
+			};
+			if (amps <= 30) return {
+				plug: "NEMA L14-30 twist-lock",
+				nema: "L14-30",
+				breaker: "30A 2-pole",
+				note: why,
+				cls,
+				wires: WIRES_4
+			};
+			return {
+				plug: "NEMA 14-50",
+				nema: "14-50",
+				breaker: "50A 2-pole",
+				note: amps > 50 ? over50(amps) : "4-wire above 30A: no L14 twist-lock face; 14-50 straight blade.",
+				cls,
+				wires: WIRES_4
+			};
+		}
+		if (amps == null) return {
+			plug: "NEMA L6-30 twist-lock",
+			nema: "L6-30",
+			breaker: "30A 2-pole",
+			note: DEFAULT_NOTE,
+			cls,
+			wires: WIRES_3
+		};
+		if (amps <= 20) return {
+			plug: "NEMA L6-20 twist-lock",
+			nema: "L6-20",
+			breaker: "20A 2-pole",
+			note: null,
+			cls,
+			wires: WIRES_3
+		};
+		if (amps <= 30) return {
+			plug: "NEMA L6-30 twist-lock",
+			nema: "L6-30",
+			breaker: "30A 2-pole",
+			note: null,
+			cls,
+			wires: WIRES_3
+		};
+		return {
+			plug: "NEMA 6-50",
+			nema: "6-50",
+			breaker: "50A 2-pole",
+			note: amps > 50 ? over50(amps) : "Above 30A there is no L6 twist-lock; 6-50 straight blade.",
+			cls,
+			wires: WIRES_3
+		};
+	}
+	if (cls === "120") {
+		const already = sheetSaysLocking(p?.plug);
+		if (already?.startsWith("L5") && !isOurPlug(p?.plug)) {
+			const rating = Number(already.split("-")[1]);
+			return {
+				plug: `NEMA ${already} twist-lock`,
+				nema: already,
+				breaker: `${rating}A 1-pole`,
+				note: null,
+				cls,
+				wires: null
+			};
+		}
+		if (amps != null && amps > 15) return {
+			plug: "NEMA 5-20",
+			nema: "5-20",
+			breaker: "20A 1-pole",
+			note: amps > 20 ? `Draws ${amps}A — above a 20A plug. Confirm the circuit with the electrician.` : null,
+			cls,
+			wires: null
+		};
+		return {
+			plug: "NEMA 5-15",
+			nema: "5-15",
+			breaker: "15A 1-pole",
+			note: amps == null ? DEFAULT_NOTE : null,
+			cls,
+			wires: null
+		};
+	}
+	return {
+		plug: p?.plug ?? null,
+		nema: nemaCode(p?.plug),
+		breaker: null,
+		note: null,
+		cls,
+		wires: null
+	};
+}
+/** Note beside the plug: the 4-wire reason, the no-amps default, or the missing wire count. */
+function defaultPlugNote(p, ctx) {
+	const cls = voltageClass(p);
+	if (cls === "240" && wireCount(p, ctx).count == null) return WIRE_MISSING_NOTE;
+	if (!p?.plug) return null;
+	const code = nemaCode(p.plug);
+	const d = decidePlug(p, ctx);
+	if (code && d.nema === code) return d.note;
+	if (cls === "240" && code && /^L?14-/.test(code)) return "4-wire unit.";
+	return null;
+}
+/** Save-time check: the plug must match volts and wire count (no L6 on 4-wire, no L14 on 3-wire, no L6/L14 on 120 V). */
+function plugWireError(p, ctx) {
+	const code = nemaCode(p?.plug);
+	if (!code) return null;
+	const cls = voltageClass(p);
+	if (cls === "120" && /^L?(6|14)-/.test(code)) return `NEMA ${code} is a 208–240V plug; this configuration is 120V.`;
+	if (cls === "240" && /^L?5-/.test(code)) return `NEMA ${code} is a 120V plug; this configuration is 208–240V.`;
+	if (cls !== "240") return null;
+	const w = wireCount({
+		...p,
+		plug: void 0
+	}, ctx).count;
+	if (w === 4 && /^L?6-/.test(code)) return `NEMA ${code} is 3-wire; this unit is 4-wire (needs L14).`;
+	if (w === 3 && /^L?14-/.test(code)) return `NEMA ${code} is 4-wire; this unit is 3-wire (needs L6).`;
+	return null;
+}
+/** "NEMA L6-30 twist-lock" → "L6-30"; "NEMA 5-15P" → "5-15". Null for hardwire or non-NEMA text. */
+function nemaCode(plug) {
+	const t = (plug ?? "").toUpperCase();
+	if (!t || /HARD\s*-?\s*WIRE/.test(t)) return null;
+	const m = t.match(/\b(L?)(5|6|14|15)-(15|20|30|50)P?\b/);
+	return m ? `${m[1]}${m[2]}-${m[3]}` : null;
+}
+function applyConfigDefaults(c, mode, ctx) {
+	const req = c.requirements ?? {};
+	const water = { ...req.water ?? {} };
+	if (mode === "generate" || !water.inlet?.trim()) water.inlet = DEFAULT_INLET;
+	const power = { ...req.power ?? {} };
+	const d = decidePlug(power, ctx);
+	if (d.cls !== "unknown") {
+		if (d.wires && (mode === "generate" || !power.wires?.trim())) power.wires = d.wires;
+		if (mode === "generate" || !power.plug?.trim()) power.plug = d.plug ?? void 0;
+		if (mode === "generate" || !power.breaker?.trim()) power.breaker = d.breaker ?? void 0;
+	}
+	const hasPower = Object.values(power).some((v) => typeof v === "string" && v.trim());
+	return {
+		...c,
+		requirements: {
+			...req,
+			water,
+			...hasPower ? { power } : {}
+		}
+	};
+}
+function applySpecDefaults(draft, mode) {
+	const configs = draft.configs.length ? draft.configs : [{
+		label: "Standard",
+		requirements: {}
+	}];
+	const core = espressoCoreDefaults(draft);
+	const ctx = {
+		manufacturer: draft.manufacturer,
+		model: draft.model
+	};
+	return {
+		...draft,
+		...core,
+		configs: configs.map((c) => applyConfigDefaults(c, mode, ctx))
+	};
+}
+var ESPRESSO_MAKERS = /\b(la\s*marzocco|eversys|rancilio|faema|slayer|synesso|nuova\s*simonelli|victoria\s*arduino|franke|schaerer|thermoplan|wmf|cimbali)\b/i;
+/** Espresso machine: La Marzocco, Eversys, Rancilio, Faema… or a catalog/category marked espresso. Grinders don't count. */
+function isEspresso(sheet) {
+	const text = `${sheet.manufacturer ?? ""} ${sheet.model ?? ""}`;
+	const cat = sheet.category ?? "";
+	if (/grinder|brewer|water|filtration|fridge|refrigerat|blender|dispenser/i.test(cat)) return false;
+	if (/espresso/i.test(cat) || /espresso\s*(machine)?\b/i.test(text) && !/grinder/i.test(text)) return true;
+	if (/grinder|fridge/i.test(text)) return false;
+	return ESPRESSO_MAKERS.test(text) || isEversysMachine(sheet.model) || isEversysMachine(text);
+}
+/** 3 → 3"; 3 in → 3"; 76 mm stays as typed. */
+function normalizeDiameter(v) {
+	const t = (v ?? "").trim();
+	if (!t) return void 0;
+	if (/^\d+(\.\d+)?$/.test(t)) return `${t}"`;
+	const inch = t.match(/^(\d+(?:\.\d+)?)\s*(in|inch|inches|”|")\.?$/i);
+	return inch ? `${inch[1]}"` : t;
+}
+/** Espresso sheets get core hole Yes and 3" unless the sheet already says otherwise. Never invents 3" for others. */
+function espressoCoreDefaults(sheet) {
+	const diameter = normalizeDiameter(sheet.coreDiameter);
+	if (isEspresso(sheet)) {
+		const hole = sheet.coreHole ?? "yes";
+		return {
+			coreHole: hole,
+			coreDiameter: hole === "yes" ? diameter ?? "3\"" : diameter
+		};
+	}
+	return {
+		coreHole: sheet.coreHole,
+		coreDiameter: diameter
+	};
+}
+function coreHoleInfo(sheet, preInspectionSaysYes = false) {
+	const d = espressoCoreDefaults(sheet);
+	if (!(d.coreHole === "yes" || preInspectionSaysYes)) return {
+		required: false,
+		diameter: null,
+		label: null,
+		missingDiameter: false
+	};
+	const diameter = d.coreDiameter ?? null;
+	return {
+		required: true,
+		diameter,
+		label: diameter ? `Counter core hole: ${diameter} diameter` : "Counter core hole: diameter needed",
+		missingDiameter: !diameter
+	};
+}
+/** Blocks saving a spec that needs a core hole but has no diameter. */
+function coreHoleSaveError(sheet) {
+	return coreHoleInfo(sheet).missingDiameter ? "Counter core hole is Yes — add the hole diameter before saving." : null;
+}
+//#endregion
+//#region src/lib/ops/spec-schema.ts
+/**
+* The Library — data shapes for spec sheets. Pure (zod only) so node --test can import it.
+* Every field is optional except the machine identity; the UI hides empty ones.
+*/
+/** Accept what an LLM tends to send: null/"" → missing, numbers → strings. */
+var text = preprocess((v) => {
+	if (v === null || v === void 0) return void 0;
+	if (typeof v === "number" || typeof v === "boolean") return String(v);
+	if (typeof v === "string") {
+		const t = v.trim();
+		return t ? t : void 0;
+	}
+	return v;
+}, string().max(2e3).optional());
+var list = (item) => preprocess((v) => v === null || v === void 0 ? [] : v, array(item).max(200));
+var str$1 = (max) => preprocess((v) => typeof v === "number" || typeof v === "boolean" ? String(v) : v ?? "", string().trim().max(max));
+var kvSchema = object({
+	label: str$1(200).pipe(string().min(1)),
+	value: str$1(2e3)
+});
+var powerSchema = object({
+	voltage: text,
+	amps: text,
+	/** Breaker size recommendation, shown under Amps (e.g. "30A 2-pole"). */
+	breaker: text,
+	/** 208–240 V wiring: "4-wire (2 hots, neutral, ground)" → L14, "3-wire (2 hots, ground)" → L6. */
+	wires: text,
+	phase: text,
+	hz: text,
+	plug: text,
+	circuit: text
+});
+var waterSchema = object({
+	inlet: text,
+	pressure: text,
+	filtration: text,
+	notes: text
+});
+var drainSchema = object({
+	size: text,
+	notes: text
+});
+var dimensionsSchema = object({
+	width: text,
+	depth: text,
+	height: text,
+	weight: text,
+	clearance: text
+});
+var section$1 = (s) => preprocess((v) => v === null ? void 0 : v, s.optional());
+var requirementsSchema = object({
+	power: section$1(powerSchema),
+	water: section$1(waterSchema),
+	drain: section$1(drainSchema),
+	dimensions: section$1(dimensionsSchema),
+	other: list(kvSchema).optional()
+});
+var mfrNotesSchema = object({
+	usContact: text,
+	warranty: text,
+	certifications: preprocess((v) => typeof v === "string" ? v.split(/[,;]/).map((x) => x.trim()).filter(Boolean) : v ?? [], array(string().trim().min(1).max(200)).max(50)).optional()
+});
+var configSchema = object({
+	label: preprocess((v) => typeof v === "string" && v.trim() ? v : "Standard", string().trim().max(200)),
+	requirements: preprocess((v) => v ?? {}, requirementsSchema)
+});
+var imageField = string().max(14e5).regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Not an image").nullable().optional();
+/** What the AI must return, and what the review form edits. */
+var specSheetSchema = object({
+	manufacturer: string().trim().max(200),
+	model: string().trim().max(200),
+	category: text,
+	summary: text,
+	specs: list(kvSchema),
+	mfrNotes: preprocess((v) => v ?? {}, mfrNotesSchema),
+	configs: list(configSchema),
+	/** Counter core hole for utility lines: "yes" | "no"; undefined = not stated. */
+	coreHole: preprocess((v) => {
+		if (v === true) return "yes";
+		if (v === false) return "no";
+		const t = typeof v === "string" ? v.trim().toLowerCase() : "";
+		return t === "yes" || t === "no" ? t : void 0;
+	}, _enum(["yes", "no"]).optional()),
+	coreDiameter: text,
+	/**
+	* Equipment image from the spec sheet (data URL). On save: undefined keeps the stored one,
+	* null removes it, a string replaces it.
+	*/
+	image: imageField,
+	/** Dimension diagram (secondary image). Same keep / remove / replace rules as image. */
+	dimsImage: imageField
+});
+function emptyDraft() {
+	return {
+		manufacturer: "",
+		model: "",
+		category: void 0,
+		summary: void 0,
+		specs: [],
+		mfrNotes: { certifications: [] },
+		configs: [{
+			label: "Standard",
+			requirements: { water: { inlet: "3/8\" compression valve" } }
+		}]
+	};
+}
+/**
+* Pull the JSON object out of a model reply (it may wrap it in ```json fences or add a sentence)
+* and validate it. Returns a readable error instead of throwing.
+*/
+function parseExtraction(raw) {
+	let body = raw.trim();
+	const fence = body.match(/```(?:json)?\s*([\s\S]*?)```/i);
+	if (fence) body = fence[1].trim();
+	const start = body.indexOf("{");
+	const end = body.lastIndexOf("}");
+	if (start < 0 || end <= start) return {
+		ok: false,
+		error: "No JSON object in the reply."
+	};
+	let json;
+	try {
+		json = JSON.parse(body.slice(start, end + 1));
+	} catch (e) {
+		return {
+			ok: false,
+			error: `Invalid JSON: ${e instanceof Error ? e.message : String(e)}`
+		};
+	}
+	const parsed = specSheetSchema.safeParse(json);
+	if (!parsed.success) {
+		const first = parsed.error.issues[0];
+		return {
+			ok: false,
+			error: `Schema mismatch at ${first?.path.join(".") || "root"}: ${first?.message ?? "invalid"}`
+		};
+	}
+	return {
+		ok: true,
+		data: parsed.data
+	};
+}
+/** Drop empty strings/sections so saved JSON stays small and the UI can hide blanks. */
+function compactDraft(d) {
+	const clean = (o) => {
+		if (!o) return void 0;
+		const out = {};
+		for (const [k, v] of Object.entries(o)) if (typeof v === "string" ? v.trim() : v !== void 0 && v !== null) out[k] = typeof v === "string" ? v.trim() : v;
+		return Object.keys(out).length ? out : void 0;
+	};
+	const kvs = (l) => (l ?? []).filter((k) => k.label.trim() && k.value.trim());
+	return {
+		manufacturer: d.manufacturer.trim(),
+		model: d.model.trim(),
+		category: d.category?.trim() || void 0,
+		coreHole: d.coreHole,
+		coreDiameter: d.coreDiameter?.trim() || void 0,
+		image: d.image,
+		dimsImage: d.dimsImage,
+		summary: d.summary?.trim() || void 0,
+		specs: kvs(d.specs),
+		mfrNotes: {
+			usContact: d.mfrNotes.usContact?.trim() || void 0,
+			warranty: d.mfrNotes.warranty?.trim() || void 0,
+			certifications: (d.mfrNotes.certifications ?? []).map((c) => c.trim()).filter(Boolean)
+		},
+		configs: d.configs.map((c, i) => ({
+			label: c.label.trim() || `Configuration ${i + 1}`,
+			requirements: {
+				power: clean(c.requirements.power),
+				water: clean(c.requirements.water),
+				drain: clean(c.requirements.drain),
+				dimensions: clean(c.requirements.dimensions),
+				other: kvs(c.requirements.other)
+			}
+		}))
+	};
+}
+//#endregion
+//#region src/lib/ops/spec-library.ts
+/**
+* The Library — spec sheet queries and server functions.
+* Staff drop a manufacturer PDF; the browser extracts its text, the server asks xAI for structured
+* JSON, the review screen edits it, and only the structured data is saved. The PDF is never stored.
+*/
+/** Server-only; XAI_BASE_URL exists only so the import flow can be tested without spending credits. */
+var xaiUrl = () => `${(process.env.XAI_BASE_URL || "https://api.x.ai/v1").replace(/\/$/, "")}/chat/completions`;
+var XAI_MODEL = "grok-4.5";
+/** Enough for a long multi-page sheet; keeps the prompt (and cost) bounded. */
+var MAX_PDF_TEXT = 6e4;
+async function ready$4() {
+	const { ensureSeeded } = await import("./seed.server.mjs");
+	await ensureSeeded();
+	return getSql();
+}
+async function roleOf$1(sql, userId) {
+	const rows = await sql.query("select is_admin, desk_role, username from desk_accounts where user_id = $1", [userId]);
+	const admin = flagOn(rows[0]?.is_admin);
+	const sales = rows[0]?.desk_role === "sales";
+	return {
+		canEdit: admin || sales,
+		name: rows[0]?.username || "Teammate"
+	};
+}
+async function requireEditor$1(sql, userId) {
+	const role = await roleOf$1(sql, userId);
+	if (!role.canEdit) throw new Error("Only Admin and Sales can add, edit, or delete spec sheets.");
+	return role;
+}
+/** Everything but the image itself — images load one at a time with getSpecImage. */
+var SHEET_COLS = "id, manufacturer, model, category, summary, specs, mfr_notes, created_by, created_at, updated_at, core_hole, core_diameter, (image is not null) as has_image, (dims_image is not null) as has_dims";
+var asJson = (v) => typeof v === "string" ? JSON.parse(v) : v;
+function mapSheet(row, configs) {
+	const parsed = specSheetSchema.safeParse({
+		manufacturer: row.manufacturer,
+		model: row.model,
+		category: row.category,
+		summary: row.summary,
+		specs: asJson(row.specs) ?? [],
+		mfrNotes: asJson(row.mfr_notes) ?? {},
+		coreHole: row.core_hole,
+		coreDiameter: row.core_diameter,
+		configs: configs.filter((c) => c.sheet_id === row.id).sort((a, b) => a.position - b.position).map((c) => ({
+			label: c.label,
+			requirements: asJson(c.requirements) ?? {}
+		}))
+	});
+	return {
+		...applySpecDefaults(parsed.success ? parsed.data : {
+			manufacturer: row.manufacturer,
+			model: row.model,
+			specs: [],
+			mfrNotes: {},
+			configs: []
+		}, "fill"),
+		id: row.id,
+		hasImage: !!row.has_image,
+		hasDims: !!row.has_dims,
+		createdBy: row.created_by,
+		createdAt: String(row.created_at),
+		updatedAt: String(row.updated_at)
+	};
+}
+/** Everyone with Desk access can read and copy. */
+var listSpecSheets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }) => {
+	const sql = await ready$4();
+	const sheets = await sql.query(`select ${SHEET_COLS} from spec_sheets order by lower(manufacturer), lower(model)`);
+	const configs = sheets.length ? await sql.query("select * from spec_configs where sheet_id = any($1) order by sheet_id, position", [sheets.map((s) => s.id)]) : [];
+	const role = await roleOf$1(sql, context.userId);
+	return {
+		sheets: sheets.map((s) => mapSheet(s, configs)),
+		canEdit: role.canEdit,
+		aiReady: !!process.env.XAI_API_KEY
+	};
+});
+var SYSTEM_PROMPT = `You read manufacturer spec sheets for commercial coffee, espresso, tea, water and food-service equipment and return STRICT JSON for a US service company.
+
+Return ONE JSON object and nothing else, exactly this shape (omit or use null for anything not in the sheet; never invent values):
+{
+  "manufacturer": string,
+  "model": string,                      // model family/name without the manufacturer
+  "category": string|null,              // e.g. "Espresso Machine", "Grinder", "Brewer", "Water Filtration"
+  "summary": string|null,               // one or two plain sentences
+  "specs": [{"label": string, "value": string}],   // general specs: boilers, capacity, groups, hoppers, materials…
+  "mfrNotes": {
+    "usContact": string|null,           // US office/distributor name, phone, address, website only
+    "warranty": string|null,            // US warranty terms
+    "certifications": [string]          // US listings only: UL, cUL, ETL, NSF, CSA, ENERGY STAR
+  },
+  "coreHole": "yes"|"no"|null,          // only if the sheet says utility lines pass through a counter hole
+  "coreDiameter": string|null,          // counter hole diameter in inches, e.g. 3 inches — only if stated
+  "configs": [                          // one per sold configuration (e.g. "2 Group", "3 Group", "Hot water tap")
+    {"label": string,
+     "requirements": {
+       "power": {"voltage": string|null, "wires": string|null /* e.g. "4-wire" (2 hots + neutral + ground) or "3-wire" (2 hots + ground), only if stated */, "amps": string|null, "phase": string|null, "hz": string|null, "plug": string|null, "circuit": string|null},
+       "water": {"inlet": string|null, "pressure": string|null, "filtration": string|null, "notes": string|null},
+       "drain": {"size": string|null, "notes": string|null},
+       "dimensions": {"width": string|null, "depth": string|null, "height": string|null, "weight": string|null, "clearance": string|null},
+       "other": [{"label": string, "value": string}]
+     }}
+  ]
+}
+
+Rules:
+- Keep manufacturer information, but DROP anything not relevant to the USA: 220-240 V / 230 V / 400 V and 50 Hz ratings, CE/UKCA/RoHS/WEEE marks, Schuko/BS 1363/CEE plugs, BSP/DIN/EN water fittings, and non-US offices or phone numbers.
+- Prefer imperial units: inches ("), pounds (lb), psi, °F, gallons. Convert metric when the sheet gives only metric (e.g. 800 mm → 31.5"). Keep at most one decimal.
+- Use US electrical terms: voltage like "208-240V" or "120V", amps like "30A", phase "1-phase" or "3-phase", plug as a NEMA type (e.g. "NEMA 6-30P") or "Hardwired".
+- If the sheet has a single configuration, return one config labelled "Standard".
+- Values are short strings. No markdown, no comments in the JSON.`;
+async function callXai(apiKey, messages) {
+	const ctrl = new AbortController();
+	const timer = setTimeout(() => ctrl.abort(), 9e4);
+	try {
+		const res = await fetch(xaiUrl(), {
+			method: "POST",
+			signal: ctrl.signal,
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${apiKey}`
+			},
+			body: JSON.stringify({
+				model: XAI_MODEL,
+				messages,
+				temperature: 0,
+				max_tokens: 4e3,
+				response_format: { type: "json_object" }
+			})
+		});
+		if (!res.ok) {
+			const detail = await res.text().catch(() => "");
+			throw new Error(`xAI API error ${res.status}${detail ? `: ${detail.slice(0, 200)}` : ""}`);
+		}
+		return (await res.json()).choices?.[0]?.message?.content ?? "";
+	} finally {
+		clearTimeout(timer);
+	}
+}
+var extractInput = object({
+	text: string().max(61e3),
+	fileName: string().max(300).optional()
+});
+/** Text in, structured draft out. The PDF itself never reaches the server. */
+var extractSpecSheet = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => extractInput.parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$4();
+	await requireEditor$1(sql, context.userId);
+	const text = data.text.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, MAX_PDF_TEXT);
+	if (text.replace(/\s/g, "").length < 40) return {
+		ok: false,
+		reason: "no-text",
+		message: "This PDF has no readable text (it looks scanned). Fill in the form by hand instead."
+	};
+	const apiKey = process.env.XAI_API_KEY;
+	if (!apiKey) return {
+		ok: false,
+		reason: "no-key",
+		message: "AI reading isn't available here yet. Fill in the form by hand instead."
+	};
+	const used = await sql.query("select count(*)::int as n, min(created_at) as oldest from spec_import_log where user_id = $1 and created_at > now() - interval '1 hour'", [context.userId]);
+	if ((used[0]?.n ?? 0) >= 10) {
+		const oldest = used[0]?.oldest ? new Date(used[0].oldest).getTime() : Date.now();
+		return {
+			ok: false,
+			reason: "rate-limit",
+			message: `You've imported 10 sheets in the last hour. Try again in about ${Math.max(1, Math.ceil((oldest + 36e5 - Date.now()) / 6e4))} min, or fill the form by hand.`
+		};
+	}
+	await sql.query("insert into spec_import_log (user_id) values ($1)", [context.userId]);
+	const messages = [{
+		role: "system",
+		content: SYSTEM_PROMPT
+	}, {
+		role: "user",
+		content: `Spec sheet${data.fileName ? ` "${data.fileName}"` : ""} text:\n\n${text}`
+	}];
+	try {
+		const first = await callXai(apiKey, messages);
+		let parsed = parseExtraction(first);
+		let usedRetry = false;
+		if (!parsed.ok) {
+			usedRetry = true;
+			parsed = parseExtraction(await callXai(apiKey, [
+				...messages,
+				{
+					role: "assistant",
+					content: first.slice(0, 8e3)
+				},
+				{
+					role: "user",
+					content: `That was not valid for the schema (${parsed.error}). Reply with only the corrected JSON object.`
+				}
+			]));
+		}
+		if (!parsed.ok) return {
+			ok: false,
+			reason: "failed",
+			message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.`
+		};
+		const filtered = filterNonUsa(parsed.data);
+		if (!filtered.draft.configs.length) filtered.draft.configs.push({
+			label: "Standard",
+			requirements: {}
+		});
+		return {
+			ok: true,
+			draft: applySpecDefaults(filtered.draft, "generate"),
+			removed: filtered.removed,
+			usedRetry
+		};
+	} catch (e) {
+		return {
+			ok: false,
+			reason: "failed",
+			message: `Reading the sheet failed (${e instanceof Error ? e.name === "AbortError" ? "the AI took too long" : e.message : "unknown error"}). Fill in the form by hand instead.`
+		};
+	}
+});
+var saveInput = object({
+	draft: specSheetSchema,
+	/** Editing an existing sheet. */
+	id: number().int().positive().nullable().optional(),
+	/** The user confirmed replacing the sheet that already has this manufacturer + model. */
+	overwrite: boolean().optional()
+});
+/** Upsert the sheet and replace its configurations in ONE statement (atomic on Neon and PGLite). */
+var saveSpecSheet = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => saveInput.parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$4();
+	const role = await requireEditor$1(sql, context.userId);
+	const d = applySpecDefaults(compactDraft(data.draft), "fill");
+	if (!d.manufacturer) throw new Error("Add the manufacturer.");
+	if (!d.model) throw new Error("Add the model.");
+	const coreErr = coreHoleSaveError(d);
+	if (coreErr) throw new Error(coreErr);
+	for (const c of d.configs) {
+		const err = plugWireError(c.requirements.power, d);
+		if (err) throw new Error(`${c.label}: ${err}`);
+	}
+	if (!d.configs.length) d.configs.push({
+		label: "Standard",
+		requirements: {}
+	});
+	const labels = d.configs.map((c) => c.label.toLowerCase());
+	if (new Set(labels).size !== labels.length) throw new Error("Two configurations have the same name. Rename one.");
+	const clash = (await sql.query("select id, manufacturer, model from spec_sheets where lower(manufacturer) = lower($1) and lower(model) = lower($2) limit 1", [d.manufacturer, d.model]))[0];
+	let targetId = data.id ?? null;
+	if (clash && clash.id !== targetId) {
+		if (targetId) throw new Error(`${clash.manufacturer} ${clash.model} already has its own page. Open that one instead.`);
+		if (!data.overwrite) return {
+			ok: false,
+			conflict: clash
+		};
+		targetId = clash.id;
+	}
+	const params = [
+		d.manufacturer,
+		d.model,
+		d.category ?? null,
+		d.summary ?? null,
+		JSON.stringify(d.specs),
+		JSON.stringify(d.mfrNotes),
+		role.name,
+		JSON.stringify(d.configs.map((c) => ({
+			label: c.label,
+			requirements: c.requirements
+		}))),
+		d.coreHole ?? null,
+		d.coreDiameter ?? null,
+		d.image === void 0 ? "keep" : d.image === null ? "clear" : "set",
+		typeof d.image === "string" ? d.image : null,
+		d.dimsImage === void 0 ? "keep" : d.dimsImage === null ? "clear" : "set",
+		typeof d.dimsImage === "string" ? d.dimsImage : null
+	];
+	const configCtes = `
+      d as (delete from spec_configs where sheet_id in (select id from s)),
+      i as (
+        insert into spec_configs (sheet_id, label, position, requirements)
+        select s.id, t.c->>'label', (t.ord - 1)::int, coalesce(t.c->'requirements', '{}'::jsonb)
+          from s, jsonb_array_elements($8::jsonb) with ordinality as t(c, ord)
+        returning id
+      )
+      select id from s`;
+	const id = (targetId ? await sql.query(`with s as (
+             update spec_sheets set manufacturer = $1, model = $2, category = $3, summary = $4,
+                    specs = $5::jsonb, mfr_notes = $6::jsonb, core_hole = $9, core_diameter = $10,
+                    image = case $11::text when 'set' then $12::text when 'clear' then null else image end,
+                    dims_image = case $13::text when 'set' then $14::text when 'clear' then null else dims_image end,
+                    updated_at = now()
+              where id = $15 and $7::text is not null
+              returning id
+           ), ${configCtes}`, [...params, targetId]) : await sql.query(`with s as (
+             insert into spec_sheets (manufacturer, model, category, summary, specs, mfr_notes, created_by, core_hole, core_diameter, image, dims_image)
+             values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $9, $10,
+                     case when $11::text = 'set' then $12::text end, case when $13::text = 'set' then $14::text end)
+             on conflict (manufacturer, model) do update set
+               category = excluded.category, summary = excluded.summary, specs = excluded.specs,
+               mfr_notes = excluded.mfr_notes, core_hole = excluded.core_hole, core_diameter = excluded.core_diameter,
+               image = case $11::text when 'set' then excluded.image when 'clear' then null else spec_sheets.image end,
+               dims_image = case $13::text when 'set' then excluded.dims_image when 'clear' then null else spec_sheets.dims_image end,
+               updated_at = now()
+             returning id
+           ), ${configCtes}`, params))[0]?.id;
+	if (!id) throw new Error("That spec sheet no longer exists. Refresh and try again.");
+	return {
+		ok: true,
+		id
+	};
+});
+var deleteSpecSheet = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ id: number().int().positive() }).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$4();
+	await requireEditor$1(sql, context.userId);
+	await sql.query("delete from spec_sheets where id = $1", [data.id]);
+	return { ok: true };
+});
+/** Re-apply the Katz defaults to a saved sheet: inlet, plug and breaker from the electrical. */
+var refreshSpecDefaults = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ id: number().int().positive() }).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$4();
+	await requireEditor$1(sql, context.userId);
+	const rows = await sql.query("select * from spec_configs where sheet_id = $1 order by position", [data.id]);
+	if (!rows.length) throw new Error("That spec sheet has no configurations.");
+	const before = rows.map((r) => ({
+		label: r.label,
+		requirements: specSheetSchema.shape.configs.parse([{
+			label: r.label,
+			requirements: asJson(r.requirements) ?? {}
+		}])[0].requirements
+	}));
+	const after = applySpecDefaults({
+		manufacturer: "",
+		model: "",
+		specs: [],
+		mfrNotes: {},
+		configs: before
+	}, "generate").configs;
+	let changed = 0;
+	for (let i = 0; i < rows.length; i++) {
+		const next = JSON.stringify(after[i].requirements);
+		if (next === JSON.stringify(before[i].requirements)) continue;
+		changed++;
+		await sql.query("update spec_configs set requirements = $2::jsonb where id = $1", [rows[i].id, next]);
+	}
+	const sheet = (await sql.query("select manufacturer, model, category, core_hole, core_diameter from spec_sheets where id = $1", [data.id]))[0];
+	if (sheet) {
+		const core = espressoCoreDefaults({
+			manufacturer: sheet.manufacturer,
+			model: sheet.model,
+			category: sheet.category ?? void 0,
+			coreHole: sheet.core_hole === "yes" || sheet.core_hole === "no" ? sheet.core_hole : void 0,
+			coreDiameter: sheet.core_diameter ?? void 0
+		});
+		if ((core.coreHole ?? null) !== sheet.core_hole || (core.coreDiameter ?? null) !== sheet.core_diameter) {
+			changed++;
+			await sql.query("update spec_sheets set core_hole = $2, core_diameter = $3 where id = $1", [
+				data.id,
+				core.coreHole ?? null,
+				core.coreDiameter ?? null
+			]);
+		}
+	}
+	if (changed) await sql.query("update spec_sheets set updated_at = now() where id = $1", [data.id]);
+	return {
+		ok: true,
+		changed
+	};
+});
+/** The equipment image saved with one spec sheet (loaded only when that sheet is open). */
+var getSpecImage = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ id: number().int().positive() }).parse(d)).handler(async ({ data }) => {
+	const rows = await (await ready$4()).query("select image, dims_image from spec_sheets where id = $1", [data.id]);
+	return {
+		image: rows[0]?.image ?? null,
+		dimsImage: rows[0]?.dims_image ?? null
+	};
+});
+var norm = (v) => v.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+/**
+* Counter core hole size for pre-inspection units: the matching Library sheet first
+* (manufacturer + model words found in the unit name), else the espresso default, else blank.
+*/
+var coreHoleForModels = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ models: array(string().max(300)).max(60) }).parse(d)).handler(async ({ data }) => {
+	const sheets = await (await ready$4()).query("select manufacturer, model, category, core_hole, core_diameter from spec_sheets");
+	const out = {};
+	for (const unit of data.models) {
+		const u = norm(unit);
+		const hit = sheets.filter((s) => {
+			const model = norm(s.model);
+			return !!model && u.includes(model) && (u.includes(norm(s.manufacturer)) || model.length >= 5);
+		}).sort((a, b) => b.model.length - a.model.length)[0];
+		if (hit) {
+			const info = coreHoleInfo({
+				manufacturer: hit.manufacturer,
+				model: hit.model,
+				category: hit.category ?? void 0,
+				coreHole: hit.core_hole === "yes" || hit.core_hole === "no" ? hit.core_hole : void 0,
+				coreDiameter: hit.core_diameter ?? void 0
+			}, true);
+			out[unit] = {
+				diameter: info.diameter,
+				label: info.label,
+				source: "spec",
+				sheet: `${hit.manufacturer} ${hit.model}`
+			};
+		} else if (isEspresso({ model: unit })) {
+			const info = coreHoleInfo({
+				manufacturer: "",
+				model: unit,
+				category: void 0,
+				coreHole: void 0,
+				coreDiameter: void 0
+			}, true);
+			out[unit] = {
+				diameter: info.diameter,
+				label: info.label,
+				source: "espresso",
+				sheet: null
+			};
+		} else out[unit] = {
+			diameter: null,
+			label: "Counter core hole: diameter needed",
+			source: "none",
+			sheet: null
+		};
+	}
+	return out;
+});
+var dataImage = string().max(14e5).regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/, "Not an image");
+/**
+* Replace a saved sheet's pictures after re-reading its PDF (or clearing a wrong one).
+* undefined leaves that picture alone, null removes it, a data URL replaces it.
+*/
+var setSpecImages = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({
+	id: number().int().positive(),
+	image: dataImage.nullable().optional(),
+	dimsImage: dataImage.nullable().optional()
+}).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$4();
+	await requireEditor$1(sql, context.userId);
+	const act = (v) => v === void 0 ? "keep" : v === null ? "clear" : "set";
+	const rows = await sql.query(`update spec_sheets set
+          image = case $2::text when 'set' then $3::text when 'clear' then null else image end,
+          dims_image = case $4::text when 'set' then $5::text when 'clear' then null else dims_image end,
+          updated_at = now()
+        where id = $1
+        returning (image is not null) as has_image, (dims_image is not null) as has_dims`, [
+		data.id,
+		act(data.image),
+		data.image ?? null,
+		act(data.dimsImage),
+		data.dimsImage ?? null
+	]);
+	if (!rows[0]) throw new Error("That spec sheet no longer exists.");
+	return {
+		ok: true,
+		hasImage: !!rows[0].has_image,
+		hasDims: !!rows[0].has_dims
+	};
+});
+//#endregion
+//#region src/lib/ops/spec-copy.ts
+/**
+* The Library — plain-text copy for Outlook/Teams. Pure: no DOM, safe for node --test.
+* Short lines, no markdown tables, so it pastes cleanly into an email or chat.
+*/
+var has = (v) => !!v && !!v.trim();
+var join = (parts) => parts.filter(has).map((p) => p.trim()).join(", ");
+function amps(v) {
+	return /^\d+(\.\d+)?$/.test(v.trim()) ? `${v.trim()}A` : v;
+}
+function phase(v) {
+	const t = v.trim();
+	if (/^[13]$/.test(t)) return `${t}-phase`;
+	if (/^(single|1)\s*(ph|phase)?$/i.test(t)) return "1-phase";
+	if (/^(three|3)\s*(ph|phase)?$/i.test(t)) return "3-phase";
+	return t;
+}
+function hz(v) {
+	return /^\d+$/.test(v.trim()) ? `${v.trim()} Hz` : v;
+}
+function volts(v) {
+	return /^\d+(\s*[-–/]\s*\d+)?$/.test(v.trim()) ? `${v.trim()}V` : v;
+}
+/** 31.5" + W → 31.5"W; 31.5 → 31.5"W (bare numbers are read as inches). */
+function dim(v, axis) {
+	const t = v.trim();
+	return /^\d+(\.\d+)?$/.test(t) ? `${t}"${axis}` : `${t}${axis}`;
+}
+function powerLine(p) {
+	if (!p) return null;
+	const breaker = p.breaker?.trim() ? `${p.breaker.trim()} breaker` : "";
+	const ampsText = p.amps ? breaker ? `${amps(p.amps)} (${breaker})` : amps(p.amps) : breaker;
+	const text = join([
+		p.voltage && volts(p.voltage),
+		p.wires,
+		ampsText,
+		p.phase && phase(p.phase),
+		p.hz && hz(p.hz),
+		p.plug,
+		p.circuit
+	]);
+	return text ? `Power: ${text}` : null;
+}
+function waterLine(w) {
+	if (!w) return null;
+	const text = join([
+		w.inlet && !/inlet|connection|line|fitting|valve|compression/i.test(w.inlet) ? `${w.inlet.trim()} inlet` : w.inlet,
+		w.pressure,
+		w.filtration,
+		w.notes
+	]);
+	return text ? `Water: ${text}` : null;
+}
+function drainLine(d) {
+	if (!d) return null;
+	const text = join([d.size, d.notes]);
+	return text ? `Drain: ${text}` : null;
+}
+function sizeLines(d) {
+	if (!d) return [];
+	const size = join([[
+		d.width && dim(d.width, "W"),
+		d.depth && dim(d.depth, "D"),
+		d.height && dim(d.height, "H")
+	].filter(has).join(" x "), d.weight && (/^\d+(\.\d+)?$/.test(d.weight.trim()) ? `${d.weight.trim()} lb` : d.weight)]);
+	const out = [];
+	if (size) out.push(`Size: ${size}`);
+	if (has(d.clearance)) out.push(`Clearance: ${d.clearance.trim()}`);
+	return out;
+}
+function requirementLines(r) {
+	const lines = [
+		powerLine(r.power),
+		waterLine(r.water),
+		drainLine(r.drain),
+		...sizeLines(r.dimensions)
+	].filter((l) => !!l);
+	for (const row of r.other ?? []) if (has(row.label) && has(row.value)) lines.push(`${row.label.trim()}: ${row.value.trim()}`);
+	return lines;
+}
+function title(sheet) {
+	return [sheet.manufacturer, sheet.model].filter(has).map((s) => s.trim()).join(" ");
+}
+/** "Copy this configuration". */
+function copyConfig(sheet, config) {
+	const label = config.label?.trim();
+	const head = label && !/^standard$/i.test(label) ? `${title(sheet)} - ${label}` : title(sheet);
+	const lines = requirementLines(config.requirements);
+	const core = coreHoleInfo({
+		manufacturer: sheet.manufacturer,
+		model: sheet.model,
+		category: sheet.category,
+		coreHole: sheet.coreHole,
+		coreDiameter: sheet.coreDiameter
+	});
+	lines.push(...coreHoleLines(core));
+	return [head, ...lines.length ? lines : ["No requirements listed"]].join("\n");
+}
+/** "Copy all": every configuration, one blank line apart, then US listings and warranty. */
+function copyAll(sheet) {
+	const configs = sheet.configs ?? [];
+	const blocks = configs.length ? configs.map((c) => copyConfig(sheet, c)) : [title(sheet)];
+	const tail = [];
+	const certs = (sheet.mfrNotes?.certifications ?? []).filter(has);
+	if (certs.length) tail.push(`Certifications: ${certs.join(", ")}`);
+	if (has(sheet.mfrNotes?.warranty)) tail.push(`Warranty: ${sheet.mfrNotes.warranty.trim()}`);
+	if (has(sheet.mfrNotes?.usContact)) tail.push(`US contact: ${sheet.mfrNotes.usContact.trim()}`);
+	return [...blocks, ...tail.length ? [tail.join("\n")] : []].join("\n\n");
+}
+var CORE_HOLE_NOTE = "Primarily needed when utility lines are below the counter.";
+/** Core-hole fields travel with every copied configuration. No → "No" and no diameter. */
+function coreHoleLines(core) {
+	if (!core.required) return ["Utility lines pass through the counter: No", `Note: ${CORE_HOLE_NOTE}`];
+	return [
+		"Utility lines pass through the counter: Yes",
+		`Hole diameter: ${core.diameter ?? "needed"}`,
+		`Note: ${CORE_HOLE_NOTE}`
+	];
 }
 //#endregion
 //#region src/components/desk/rename-dialog.tsx
@@ -8800,7 +11530,7 @@ function EquipmentCombo({ label = "Equipment", name, value, onChange, required, 
 		emptyHint: "No equipment matches — use + to add a model."
 	}), renameUi.dialog] });
 }
-function EquipmentMultiCombo({ label = "Equipment", name = "equipment", values, onChange, placeholder = "Search equipment…", menuInFlow }) {
+function EquipmentMultiCombo({ label = "Equipment", name = "equipment", values, onChange, placeholder = "Search equipment…", menuInFlow, hideChips }) {
 	const dir = useDirectory("equipment");
 	const renameUi = useRename(dir, "equipment", (from, to) => {
 		onChange(values.map((v) => v.toLowerCase() === from.toLowerCase() ? to : v));
@@ -8819,7 +11549,8 @@ function EquipmentMultiCombo({ label = "Equipment", name = "equipment", values, 
 		onRemoveItem: dir.removeItem,
 		onRenameItem: renameUi.open,
 		noun: "equipment",
-		menuInFlow
+		menuInFlow,
+		hideChips
 	}), renameUi.dialog] });
 }
 function useRename(dir, noun, onMapped) {
@@ -8845,81 +11576,9 @@ function useRename(dir, noun, onMapped) {
 	};
 }
 //#endregion
-//#region src/lib/ops/unit-place-rules.ts
-var HOUSE_TRAINING = "training";
-var HOUSE_LOBBY = "front-lobby";
-var HOUSE_STAGING = "staging";
-var HOUSE_OTHER = "other";
-var CUSTOMER_SITES = LOCATION_SITES.filter((s) => s !== "training" && s !== "front-lobby");
-var PLACE_CHOICES = [
-	{
-		value: HOUSE_TRAINING,
-		label: "Training"
-	},
-	{
-		value: "lobby",
-		label: "Lobby"
-	},
-	{
-		value: HOUSE_STAGING,
-		label: "Staging area"
-	},
-	{
-		value: HOUSE_OTHER,
-		label: "Other"
-	},
-	{
-		value: "barn",
-		label: "Barn"
-	},
-	...CUSTOMER_SITES.map((s) => ({
-		value: s,
-		label: SITE_LABEL[s] ?? s
-	}))
-];
-function electricalFrom(text) {
-	if (!text) return null;
-	const m = text.match(/\b(\d{2,3}\s*V(?:\s*\/\s*[^\s,;]+)?(?:\s*\/\s*\d{1,3}A)?)\b/i);
-	return m ? m[1].replace(/\s+/g, " ") : null;
-}
-function resolvePlaceSite(value) {
-	if (value === "lobby") return HOUSE_LOBBY;
-	return value;
-}
-function unitPlaceLabel(row) {
-	const pallet = row.pallet?.trim().toUpperCase();
-	const level = row.level == null || Number.isNaN(Number(row.level)) ? null : Number(row.level);
-	if (isBarn(row.site) && pallet && level) return `Barn · ${slotId(pallet, level)}`;
-	if (isBarn(row.site) && pallet) return `Barn · ${pallet}`;
-	if (isBarn(row.site)) return "Barn";
-	if (row.site === "training") return "Training";
-	if (row.site === "front-lobby") return "Lobby";
-	if (row.site === "staging") return "Staging area";
-	if (row.site === "other") return (row.purpose ?? "").trim() || "Other";
-	const site = siteLabel(row.site);
-	if (row.soldTo?.trim() && (row.status === "assigned" || row.status === "sold")) return `${row.soldTo.trim()} / ${site}`;
-	return site || SITE_LABEL[row.site] || row.site;
-}
-function lastMoveLine(notes) {
-	const lines = (notes ?? "").split(/\n/).map((s) => s.trim()).filter((s) => /^Moved from /i.test(s));
-	return lines.length ? lines[lines.length - 1] : null;
-}
-function placeMove(existing) {
-	if (!existing) return "create";
-	if (existing.status === "sold" || existing.status === "assigned") return "blocked";
-	return "move";
-}
-function placeDraftError(draft) {
-	if (!draft.site) return "Pick a location.";
-	if (draft.site === "barn" && !(draft.pallet ?? "").trim()) return "Pick a bay A through P.";
-	if (draft.site === "barn" && !draft.level) return "Pick a level.";
-	if (draft.site === "other" && !(draft.otherLabel ?? "").trim()) return "Other needs a short label.";
-	return null;
-}
-//#endregion
 //#region src/lib/ops/unit-place.ts
 function barnRack(site) {
-	if (site === "barn" || site === "barn-back") return "barn-back";
+	if (site === "barn-back") return "barn-back";
 	if (site === "barn-front") return "barn-front";
 	return null;
 }
@@ -8940,7 +11599,7 @@ function withNote(notes, extra) {
 	if (base.toLowerCase().includes(add.toLowerCase())) return base;
 	return [base, add].filter(Boolean).join("\n");
 }
-async function ready$2() {
+async function ready$3() {
 	const { ensureSeeded } = await import("./seed.server.mjs");
 	await ensureSeeded();
 	return getSql();
@@ -8998,7 +11657,7 @@ function toPlace(row) {
 }
 async function openLine(sql, site, pallet, level, exceptId) {
 	const taken = await sql.query(`select id, line_no from assets
-      where site = $1 and pallet = $2 and level = $3
+      where site = $1 and upper(pallet) = $2 and level = $3
         and status in ('ready', 'deployed')
         and line_no is not null`, [
 		site,
@@ -9007,16 +11666,30 @@ async function openLine(sql, site, pallet, level, exceptId) {
 	]);
 	const used = new Set(taken.filter((t) => t.id !== exceptId).map((t) => t.line_no));
 	for (let line = 1; line <= 12; line++) if (!used.has(line)) return line;
-	throw new Error(`${slotId(pallet, level)} is full`);
+	throw new Error(sectionFullMessage(site, pallet, level));
 }
 async function parkInBarn(sql, userId, row, pallet, level, fromLabel, rack = "barn-back") {
 	if (placeMove(row) === "blocked") throw new Error(`That serial is already allocated${row.sold_to ? ` to ${row.sold_to}` : ""}.`);
 	const letter = pallet.trim().toUpperCase();
-	const allowed = rack === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
-	if (!isValidBay(letter) || !allowed.includes(letter)) throw new Error("Pick a bay A through P");
+	const bayErr = rackBayError(rack, letter);
+	if (bayErr) throw new Error(bayErr);
 	if (!LEVELS.includes(level)) throw new Error("Pick a level");
+	if (row.site === rack && (row.pallet ?? "").toUpperCase() === letter && Number(row.level) === level && row.status === "ready") throw new Error(`Already at ${unitPlaceLabel({
+		site: rack,
+		pallet: letter,
+		level,
+		status: "ready"
+	})}.`);
+	const { assertNotHeld } = await import("./stock-actions.mjs").then((n) => n.i);
+	await assertNotHeld(sql, row.id);
+	await requireStock(sql, userId);
 	const line = await openLine(sql, rack, letter, level, row.id);
-	const notice = await moveNotice(sql, userId, fromLabel, `Barn · ${slotId(letter, level)}`);
+	const notice = await moveNotice(sql, userId, fromLabel, unitPlaceLabel({
+		site: rack,
+		pallet: letter,
+		level,
+		status: "ready"
+	}));
 	const notes = withNote(row.notes, notice);
 	await sql.query(`update assets set
         status = 'ready',
@@ -9051,6 +11724,8 @@ async function parkAtLocation(sql, userId, row, site, electrical, otherLabel) {
 	if (placeMove(row) === "blocked") throw new Error(`That serial is already allocated${row.sold_to ? ` to ${row.sold_to}` : ""}.`);
 	const label = (otherLabel ?? "").trim();
 	if (dest === "other" && !label) throw new Error("Other needs a short label.");
+	const { assertNotHeld } = await import("./stock-actions.mjs").then((n) => n.i);
+	await assertNotHeld(sql, row.id);
 	const notice = await moveNotice(sql, userId, unitPlaceLabel({
 		site: row.site,
 		pallet: row.pallet,
@@ -9091,12 +11766,13 @@ async function moveNotice(sql, userId, from, to) {
 	}).format(/* @__PURE__ */ new Date())}`;
 }
 var listBarnAvailable = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	return (await (await ready$2()).query(`select ${ASSET_COLS} from assets
+	return (await (await ready$3()).query(`select ${ASSET_COLS} from assets
         where status = 'ready'
           and site in ('barn-back', 'barn-front')
           and install_id is null
           and job_id is null
           and coalesce(sold_to, '') = ''
+          and coalesce(stock_hold, '') <> 'assign'
         order by lower(model), serial nulls last, id`)).map((r) => ({
 		id: r.id,
 		model: r.model,
@@ -9120,7 +11796,7 @@ var placeIdsInput = object({
 });
 var placeAssetsAtLocation = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => placeIdsInput.parse(d)).handler(async ({ data, context }) => {
 	if (!isLocationSite(resolvePlaceSite(data.site))) throw new Error("Pick a location");
-	const sql = await ready$2();
+	const sql = await ready$3();
 	const rows = await Promise.all(data.ids.map((id) => byId(sql, id)));
 	for (const row of rows) {
 		if (!row) throw new Error("That unit is not in the barn");
@@ -9141,7 +11817,7 @@ var addInput = object({
 });
 var addUnitToLocation = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => addInput.parse(d)).handler(async ({ data, context }) => {
 	if (!isLocationSite(resolvePlaceSite(data.site))) throw new Error("Pick a location");
-	const sql = await ready$2();
+	const sql = await ready$3();
 	const serial = data.serial?.trim() || "";
 	const electrical = data.electrical?.trim() || null;
 	if (serial) {
@@ -9181,7 +11857,7 @@ var barnInput = object({
 	level: number().int()
 });
 createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => barnInput.parse(d)).handler(async ({ data, context }) => {
-	const sql = await ready$2();
+	const sql = await ready$3();
 	const row = await byId(sql, data.id);
 	if (!row) throw new Error("Unit not found");
 	if (isBarn(row.site) && row.status === "ready") throw new Error("That unit is already in the barn");
@@ -9196,13 +11872,18 @@ createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) =>
 	const level = requireLevel(data.level);
 	const notice = await parkInBarn(sql, context.userId, row, data.pallet, level, from);
 	return {
-		place: `Barn · ${slotId(data.pallet.trim().toUpperCase(), level)}`,
+		place: unitPlaceLabel({
+			site: "barn-back",
+			pallet: data.pallet.trim().toUpperCase(),
+			level,
+			status: "ready"
+		}),
 		notice
 	};
 });
 var lookupInput = object({ serial: string() });
 var lookupUnitPlace = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => lookupInput.parse(d)).handler(async ({ data }) => {
-	return toPlace(await bySerial(await ready$2(), data.serial));
+	return toPlace(await bySerial(await ready$3(), data.serial));
 });
 var setInput = object({
 	serial: string().min(1),
@@ -9213,11 +11894,12 @@ var setInput = object({
 	otherLabel: string().nullable().optional()
 });
 var setUnitPlace = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => setInput.parse(d)).handler(async ({ data, context }) => {
-	const sql = await ready$2();
+	const sql = await ready$3();
 	const serial = data.serial.trim();
 	if (!serialKey(serial)) throw new Error("Enter a serial so this stays one record.");
 	const existing = await bySerial(sql, serial);
 	if (placeMove(existing) === "blocked" && existing) throw new Error(`That serial is already allocated${existing.sold_to ? ` to ${existing.sold_to}` : ""}.`);
+	if (data.site === "barn") throw new Error("Pick a rack.");
 	const rack = barnRack(data.site);
 	if (rack) {
 		if (!data.pallet?.trim()) throw new Error("Pick a bay A through P");
@@ -9234,6 +11916,9 @@ var setUnitPlace = createServerFn({ method: "POST" }).middleware([deskMiddleware
 			return toPlace(await byId(sql, existing.id));
 		}
 		const letter = data.pallet.trim().toUpperCase();
+		const bayErr = rackBayError(rack, letter);
+		if (bayErr) throw new Error(bayErr);
+		await requireStock(sql, context.userId);
 		const line = await openLine(sql, rack, letter, level);
 		const id = (await sql.query(`insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status)
          values ('equip', $1, $2, 1, $3, $4, $5, $6, 'ready')
@@ -9272,16 +11957,104 @@ var assetPlaceInput = object({
 	site: string(),
 	pallet: string().nullable().optional(),
 	level: number().int().nullable().optional(),
-	otherLabel: string().nullable().optional()
+	otherLabel: string().nullable().optional(),
+	swapWithId: number().int().positive().nullable().optional()
 });
+function statusAt(site, previous) {
+	if (site === "barn-back" || site === "barn-front") return "ready";
+	if (previous === "ready") return "deployed";
+	return previous;
+}
+/** Exchange two units' places. Each serial stays its own record. */
+async function swapAssetPlaces(sql, userId, mover, otherId, rack, pallet, level) {
+	if (mover.id === otherId) throw new Error("Pick a different unit to swap.");
+	const other = await byId(sql, otherId);
+	const letter = pallet.trim().toUpperCase();
+	if (!other || other.site !== rack || (other.pallet ?? "").toUpperCase() !== letter || Number(other.level) !== level) throw new Error("That unit is not in this section.");
+	if (placeMove(mover) === "blocked") throw new Error(`That serial is already allocated${mover.sold_to ? ` to ${mover.sold_to}` : ""}.`);
+	if (placeMove(other) === "blocked") throw new Error(`That serial is already allocated${other.sold_to ? ` to ${other.sold_to}` : ""}.`);
+	const { assertNotHeld } = await import("./stock-actions.mjs").then((n) => n.i);
+	await assertNotHeld(sql, mover.id);
+	await assertNotHeld(sql, other.id);
+	await requireStock(sql, userId);
+	const moverStatus = statusAt(other.site, other.status);
+	const otherStatus = statusAt(mover.site, mover.status);
+	await sql.query(`update assets set status = $2, site = $3, pallet = $4, level = $5, line_no = $6, updated_at = now() where id = $1`, [
+		mover.id,
+		moverStatus,
+		other.site,
+		other.pallet,
+		other.level,
+		other.line_no
+	]);
+	await sql.query(`update assets set status = $2, site = $3, pallet = $4, level = $5, line_no = $6, updated_at = now() where id = $1`, [
+		other.id,
+		otherStatus,
+		mover.site,
+		mover.pallet,
+		mover.level,
+		mover.line_no
+	]);
+	const moverFrom = unitPlaceLabel({
+		site: mover.site,
+		pallet: mover.pallet,
+		level: mover.level,
+		status: mover.status,
+		soldTo: mover.sold_to,
+		purpose: mover.purpose
+	});
+	const moverTo = unitPlaceLabel({
+		site: other.site,
+		pallet: other.pallet,
+		level: other.level,
+		status: moverStatus,
+		soldTo: other.sold_to,
+		purpose: other.purpose
+	});
+	const otherFrom = moverTo;
+	const otherTo = unitPlaceLabel({
+		site: mover.site,
+		pallet: mover.pallet,
+		level: mover.level,
+		status: otherStatus,
+		soldTo: mover.sold_to,
+		purpose: mover.purpose
+	});
+	const moverNotice = await moveNotice(sql, userId, moverFrom, `${moverTo} (swapped with ${other.serial || other.model})`);
+	const otherNotice = await moveNotice(sql, userId, otherFrom, `${otherTo} (swapped with ${mover.serial || mover.model})`);
+	await sql.query("update assets set notes = $2 where id = $1", [mover.id, withNote(mover.notes, moverNotice)]);
+	await sql.query("update assets set notes = $2 where id = $1", [other.id, withNote(other.notes, otherNotice)]);
+	await logMove(sql, userId, mover.id, moverNotice);
+	await logMove(sql, userId, other.id, otherNotice);
+	const { flagRackArrival } = await import("./rack-stock.mjs").then((n) => n.n);
+	if (isBarn(other.site)) await flagRackArrival(sql, userId, mover.id, {
+		site: mover.site,
+		pallet: mover.pallet,
+		level: mover.level,
+		line_no: mover.line_no,
+		status: mover.status
+	});
+	if (isBarn(mover.site)) await flagRackArrival(sql, userId, other.id, {
+		site: other.site,
+		pallet: other.pallet,
+		level: other.level,
+		line_no: other.line_no,
+		status: other.status
+	});
+}
 var setAssetPlace = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => assetPlaceInput.parse(d)).handler(async ({ data, context }) => {
-	const sql = await ready$2();
+	const sql = await ready$3();
 	const row = await byId(sql, data.id);
 	if (!row) throw new Error("Unit not found");
+	if (data.site === "barn") throw new Error("Pick a rack.");
 	const rack = barnRack(data.site);
 	if (rack) {
 		if (!data.pallet?.trim()) throw new Error("Pick a bay A through P");
 		const level = requireLevel(data.level);
+		if (data.swapWithId) {
+			await swapAssetPlaces(sql, context.userId, row, data.swapWithId, rack, data.pallet, level);
+			return toPlace(await byId(sql, row.id));
+		}
 		await parkInBarn(sql, context.userId, row, data.pallet, level, unitPlaceLabel({
 			site: row.site,
 			pallet: row.pallet,
@@ -9292,8 +12065,130 @@ var setAssetPlace = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 		}), rack);
 		return toPlace(await byId(sql, row.id));
 	}
+	if (data.swapWithId) throw new Error("Replace/Swap is only for a rack section.");
 	await parkAtLocation(sql, context.userId, row, data.site, null, data.otherLabel ?? null);
 	return toPlace(await byId(sql, row.id));
+});
+var assetsPlaceInput = object({
+	ids: array(number().int().positive()).min(1).max(60),
+	site: string(),
+	pallet: string().nullable().optional(),
+	level: number().int().nullable().optional(),
+	otherLabel: string().nullable().optional(),
+	/** Units already in the destination section that trade places with the moved units. */
+	swapIds: array(number().int().positive()).max(60).optional()
+});
+function placeLabelOf(row) {
+	return unitPlaceLabel({
+		site: row.site,
+		pallet: row.pallet,
+		level: row.level,
+		status: row.status,
+		soldTo: row.sold_to,
+		purpose: row.purpose
+	});
+}
+/**
+* Move several units at once. With swapIds, the chosen units in the destination section
+* go back to where the moved units came from: exact position trades first, then any
+* extras park in the other section.
+*/
+var setAssetsPlace = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => assetsPlaceInput.parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$3();
+	const ids = [...new Set(data.ids)];
+	const swapIds = [...new Set(data.swapIds ?? [])].filter((id) => !ids.includes(id));
+	const movers = [];
+	for (const id of ids) {
+		const row = await byId(sql, id);
+		if (!row) throw new Error("One of the units was not found — refresh and try again.");
+		movers.push(row);
+	}
+	if (data.site === "barn") throw new Error("Pick a rack.");
+	const rack = barnRack(data.site);
+	const failed = [];
+	const name = (r) => r.serial || r.model;
+	if (!rack) {
+		if (swapIds.length) throw new Error("Replace/Swap is only for a rack section.");
+		let moved = 0;
+		for (const row of movers) try {
+			await parkAtLocation(sql, context.userId, row, data.site, null, data.otherLabel ?? null);
+			moved += 1;
+		} catch (e) {
+			failed.push(`${name(row)}: ${e instanceof Error ? e.message : "could not move"}`);
+		}
+		return {
+			moved,
+			swapped: 0,
+			place: null,
+			failed
+		};
+	}
+	if (!data.pallet?.trim()) throw new Error("Pick a bay A through P");
+	const level = requireLevel(data.level);
+	const letter = data.pallet.trim().toUpperCase();
+	const others = [];
+	for (const id of swapIds) {
+		const row = await byId(sql, id);
+		if (!row || row.site !== rack || (row.pallet ?? "").toUpperCase() !== letter || Number(row.level) !== level) throw new Error("A unit picked to swap is no longer in that section — refresh and try again.");
+		others.push(row);
+	}
+	if (others.length && !movers.some((m) => m.site === "barn-back" || m.site === "barn-front")) throw new Error("Swapped units need a rack to go back to. Move without Replace/Swap, or pick units that are on a rack.");
+	let moved = 0;
+	let swapped = 0;
+	const pairs = Math.min(movers.length, others.length);
+	for (let i = 0; i < pairs; i += 1) {
+		const mover = movers[i];
+		const other = others[i];
+		try {
+			if (mover.site !== "barn-back" && mover.site !== "barn-front") throw new Error("skip-pair");
+			await swapAssetPlaces(sql, context.userId, mover, other.id, rack, letter, level);
+			moved += 1;
+			swapped += 1;
+		} catch (e) {
+			if (e instanceof Error && e.message === "skip-pair") continue;
+			failed.push(`${name(mover)} ↔ ${name(other)}: ${e instanceof Error ? e.message : "could not swap"}`);
+		}
+	}
+	const retry = [];
+	const parkMover = async (id, lastTry) => {
+		const fresh = await byId(sql, id);
+		if (!fresh) return;
+		if (fresh.site === rack && (fresh.pallet ?? "").toUpperCase() === letter && Number(fresh.level) === level) return;
+		try {
+			await parkInBarn(sql, context.userId, fresh, letter, level, placeLabelOf(fresh), rack);
+			moved += 1;
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : "could not move";
+			if (!lastTry && /full/i.test(msg)) retry.push(id);
+			else failed.push(`${name(fresh)}: ${msg}`);
+		}
+	};
+	for (const mover of movers) await parkMover(mover.id, false);
+	const home = movers.find((m) => m.site === "barn-back" || m.site === "barn-front");
+	for (const other of others) {
+		const fresh = await byId(sql, other.id);
+		if (!fresh) continue;
+		if (!(fresh.site === rack && (fresh.pallet ?? "").toUpperCase() === letter && Number(fresh.level) === level) || !home) continue;
+		try {
+			await parkInBarn(sql, context.userId, fresh, home.pallet ?? "", Number(home.level), placeLabelOf(fresh), home.site);
+			swapped += 1;
+		} catch (e) {
+			failed.push(`${name(fresh)}: ${e instanceof Error ? e.message : "could not swap back"}`);
+		}
+	}
+	for (const id of retry) await parkMover(id, true);
+	const place = unitPlaceLabel({
+		site: rack,
+		pallet: letter,
+		level,
+		status: "ready"
+	});
+	return {
+		moved,
+		swapped,
+		place,
+		failed
+	};
 });
 //#endregion
 //#region src/components/desk/unit-place-field.tsx
@@ -9303,65 +12198,93 @@ var emptyPlaceDraft = () => ({
 	level: "",
 	otherLabel: ""
 });
-function PlacePicker({ value, onChange, testId = "unit-place" }) {
+function PlacePicker({ value, onChange, testId = "unit-place", compact = false }) {
+	const rack = isRackPlace(value.site);
+	const rackClass = compact ? "w-[6.5rem] px-2" : "min-w-40";
+	const caption = compact ? "sr-only" : void 0;
+	const labelClass = "grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		"data-testid": testId,
-		className: "flex flex-wrap items-end gap-2",
+		className: compact ? "flex flex-wrap items-end gap-1 lg:flex-nowrap" : "flex flex-wrap items-end gap-2",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
-				"aria-label": "Location",
-				className: "min-w-40",
-				value: value.site,
-				onChange: (e) => onChange({
-					site: e.target.value,
-					pallet: "",
-					level: "",
-					otherLabel: ""
-				}),
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-					value: "",
-					children: "Location"
-				}), PLACE_CHOICES.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-					value: c.value,
-					children: c.label
-				}, c.value))]
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+				className: labelClass,
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: caption,
+					children: "Rack"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+					"aria-label": "Rack",
+					"data-testid": `${testId}-rack`,
+					className: rackClass,
+					value: value.site,
+					onChange: (e) => {
+						const site = e.target.value;
+						const nextRack = isRackPlace(site);
+						const keepSlot = rack && nextRack;
+						onChange({
+							site,
+							pallet: keepSlot && !rackBayError(site, value.pallet) ? value.pallet : "",
+							level: keepSlot ? value.level : "",
+							otherLabel: ""
+						});
+					},
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: "",
+						children: "Choose"
+					}), PLACE_CHOICES.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: c.value,
+						children: c.label
+					}, c.value))]
+				})]
 			}),
-			value.site === "barn" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
-				"aria-label": "Barn bay",
-				"data-testid": "unit-place-bay",
-				className: "w-24",
-				value: value.pallet,
-				onChange: (e) => onChange({
-					...value,
-					pallet: e.target.value
-				}),
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-					value: "",
+			rack ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+				className: labelClass,
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: caption,
 					children: "Bay"
-				}), BACK_PALLETS.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-					value: p,
-					children: p
-				}, p))]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
-				"aria-label": "Barn level",
-				"data-testid": "unit-place-level",
-				className: "w-28",
-				value: value.level,
-				onChange: (e) => onChange({
-					...value,
-					level: e.target.value
-				}),
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-					value: "",
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+					"aria-label": "Bay",
+					"data-testid": `${testId}-bay`,
+					className: compact ? "w-[3.25rem] px-1.5" : "w-24",
+					value: value.pallet,
+					onChange: (e) => onChange({
+						...value,
+						pallet: e.target.value
+					}),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: "",
+						children: "Bay"
+					}), palletsFor(value.site).map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: p,
+						children: p
+					}, p))]
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+				className: labelClass,
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: caption,
 					children: "Level"
-				}), LEVELS.map((level) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
-					value: String(level),
-					children: [
-						"L",
-						level,
-						level === 4 ? " top" : level === 1 ? " floor" : ""
-					]
-				}, level))]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+					"aria-label": "Level",
+					"data-testid": `${testId}-level`,
+					className: compact ? "w-[4.5rem] px-1.5" : "w-28",
+					value: value.level,
+					onChange: (e) => onChange({
+						...value,
+						level: e.target.value
+					}),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: "",
+						children: "Level"
+					}), LEVELS.map((level) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
+						value: String(level),
+						children: [
+							"L",
+							level,
+							level === 4 ? " top" : level === 1 ? " floor" : ""
+						]
+					}, level))]
+				})]
 			})] }) : null,
 			value.site === "other" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 				"aria-label": "Other location",
@@ -9377,7 +12300,7 @@ function PlacePicker({ value, onChange, testId = "unit-place" }) {
 		]
 	});
 }
-function UnitPlaceField({ serial, model, assetId, draft, onDraft }) {
+function UnitPlaceField({ serial, model, assetId, draft, onDraft, compact = false, status, placeLabel }) {
 	const qc = useQueryClient();
 	const key = serialKey(serial ?? "");
 	const lookup = useQuery({
@@ -9406,8 +12329,8 @@ function UnitPlaceField({ serial, model, assetId, draft, onDraft }) {
 				serial: serial ?? "",
 				model: model ?? null,
 				site: value.site,
-				pallet: value.site === "barn" ? value.pallet : null,
-				level: value.site === "barn" && value.level ? Number(value.level) : null,
+				pallet: value.site === "barn-front" || value.site === "barn-back" ? value.pallet : null,
+				level: (value.site === "barn-front" || value.site === "barn-back") && value.level ? Number(value.level) : null,
 				otherLabel: value.site === "other" ? value.otherLabel : null
 			} });
 		},
@@ -9420,6 +12343,59 @@ function UnitPlaceField({ serial, model, assetId, draft, onDraft }) {
 		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not set location")
 	});
 	const bound = !!onDraft;
+	const unitStatus = status ?? (lookup.data?.found ? lookup.data.status : null);
+	if (unitStatus && placeMove({ status: unitStatus }) === "blocked") {
+		const where = placeLabel ?? lookup.data?.place ?? "an account";
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: compact ? "col-span-2 min-w-0 lg:col-span-1" : void 0,
+			"data-testid": "unit-place-locked",
+			children: [
+				compact ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+					children: "Location"
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Location" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+					className: "mt-1 flex items-start gap-1.5 text-sm font-medium",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, {
+						className: "mt-0.5 size-3.5 shrink-0 text-copper",
+						"aria-hidden": "true"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "min-w-0 break-words",
+						children: where
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+					className: "mt-0.5 text-xs text-muted-foreground",
+					children: [
+						"Locked. ",
+						unitStatus === "sold" ? "Sold" : "Assigned",
+						" — an asset at that site or customer. Return it to the barn to move it."
+					]
+				})
+			]
+		});
+	}
+	if (compact) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "col-span-2 min-w-0 lg:col-span-1",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+			children: "Location"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "mt-1 flex flex-wrap items-end gap-2",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlacePicker, {
+				value,
+				onChange: setValue,
+				compact: true
+			}), bound ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				type: "button",
+				size: "sm",
+				variant: "outline",
+				disabled: !!placeDraftError(value) || !key && !assetId || save.isPending,
+				onClick: () => save.mutate(),
+				children: save.isPending ? "Saving…" : "Set"
+			})]
+		})]
+	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Location" }),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -9704,6 +12680,15 @@ function MetaForm({ view, onSaved }) {
 	const [siteContact, setSiteContact] = (0, import_react.useState)(view.siteContact ?? "");
 	const [notes, setNotes] = (0, import_react.useState)(view.notes ?? "");
 	const [overrideReason, setOverrideReason] = (0, import_react.useState)(view.overrideReason ?? "");
+	const reps = useQuery({
+		queryKey: ["reps"],
+		queryFn: () => listReps()
+	});
+	const techs = useQuery({
+		queryKey: ["roster"],
+		queryFn: () => listTechs()
+	});
+	const choices = inspectorChoices(reps.data?.reps ?? [], techs.data?.techs ?? [], inspector);
 	const save = useMutation({
 		mutationFn: () => saveInspectionMeta({ data: {
 			installId: view.installId,
@@ -9729,11 +12714,18 @@ function MetaForm({ view, onSaved }) {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 				htmlFor: `insp-${view.installId}`,
 				children: "Inspector"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
 				id: `insp-${view.installId}`,
 				className: "mt-1",
-				value: inspector,
-				onChange: (e) => setInspector(e.target.value)
+				"data-testid": "inspector",
+				allowEmpty: true,
+				emptyLabel: "Choose",
+				value: choices.value,
+				onChange: (e) => setInspector(e.target.value),
+				children: choices.options.map((o) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+					value: o.value,
+					children: o.label
+				}, o.value))
 			})] }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 				htmlFor: `insp-date-${view.installId}`,
@@ -9901,12 +12893,43 @@ function SpaceSection({ view, machine, item, onSaved }) {
 				answer: machine.coreNeeded,
 				onSaved
 			}, `${machine.equipmentId}-${machine.coreNeeded ?? "unset"}`) : null,
+			show && machine.coreNeeded === "yes" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoreDiameterHint, { model: machine.model || machine.name }) : null,
 			show && machine.coreNeeded === "yes" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ItemRow, {
 				installId: view.installId,
 				equipmentId: machine.equipmentId,
 				item: machine.core,
 				onSaved
 			}, `${machine.equipmentId}-core`) : null
+		]
+	});
+}
+/** The hole size to core, from the Library spec sheet (espresso default 3"). Blank when nothing is stored. */
+function CoreDiameterHint({ model }) {
+	const q = useQuery({
+		queryKey: ["core-hole", model],
+		queryFn: () => coreHoleForModels({ data: { models: [model] } }),
+		staleTime: 6e4
+	});
+	const hint = q.data?.[model];
+	if (q.isLoading) return null;
+	const missing = !hint?.diameter;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+		className: missing ? "rounded-lg border border-warning/50 bg-warning/10 px-3 py-2 text-sm font-semibold text-warning" : "rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-base font-semibold",
+		"data-testid": "core-diameter-hint",
+		children: [
+			missing ? "Counter core hole: diameter not set — add it on the spec sheet in The Library" : hint.label,
+			hint?.sheet ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				className: "block text-xs font-normal text-muted-foreground",
+				children: [
+					"From the ",
+					hint.sheet,
+					" spec sheet"
+				]
+			}) : null,
+			hint?.source === "espresso" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "block text-xs font-normal text-muted-foreground",
+				children: "Espresso default"
+			}) : null
 		]
 	});
 }
@@ -9931,31 +12954,39 @@ function CoreHoleQuestion({ installId, equipmentId, answer, onSaved }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "rounded-lg border border-border p-3",
 		"data-testid": "core-hole-question",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "font-medium",
-			children: CORE_HOLE_QUESTION
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "mt-3 grid grid-cols-2 gap-2",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-				type: "button",
-				"data-testid": "core-hole-yes",
-				variant: picked === "yes" ? "default" : "outline",
-				className: "h-14 text-base",
-				"aria-pressed": picked === "yes",
-				disabled: save.isPending,
-				onClick: () => choose("yes"),
-				children: "Yes"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-				type: "button",
-				"data-testid": "core-hole-no",
-				variant: picked === "no" ? "default" : "outline",
-				className: "h-14 text-base",
-				"aria-pressed": picked === "no",
-				disabled: save.isPending,
-				onClick: () => choose("no"),
-				children: "No"
-			})]
-		})]
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "font-medium",
+				children: CORE_HOLE_QUESTION
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1 text-xs text-muted-foreground",
+				"data-testid": "core-hole-note",
+				children: CORE_HOLE_NOTE
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-3 grid grid-cols-2 gap-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					"data-testid": "core-hole-yes",
+					variant: picked === "yes" ? "default" : "outline",
+					className: "h-14 text-base",
+					"aria-pressed": picked === "yes",
+					disabled: save.isPending,
+					onClick: () => choose("yes"),
+					children: "Yes"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					"data-testid": "core-hole-no",
+					variant: picked === "no" ? "default" : "outline",
+					className: "h-14 text-base",
+					"aria-pressed": picked === "no",
+					disabled: save.isPending,
+					onClick: () => choose("no"),
+					children: "No"
+				})]
+			})
+		]
 	});
 }
 function ItemRow({ installId, equipmentId, item, onSaved, coreNeeded, onStatusChange }) {
@@ -10100,35 +13131,11 @@ function ItemRow({ installId, equipmentId, item, onSaved, coreNeeded, onStatusCh
 				className: "mt-2 text-sm text-destructive",
 				children: error
 			}) : null,
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "mt-3 grid gap-2",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-					className: "flex h-14 cursor-pointer items-center justify-center rounded-md bg-primary text-base font-medium text-primary-foreground",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "file",
-						accept: "image/*",
-						capture: "environment",
-						className: "sr-only",
-						"data-testid": `inspect-photo-${item.category}`,
-						disabled: uploading,
-						onChange: (e) => {
-							upload(e.target.files?.[0]);
-							e.target.value = "";
-						}
-					}), uploading ? "Uploading…" : "Add photo"]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-					className: "flex h-12 cursor-pointer items-center justify-center rounded-md border border-border text-base font-medium",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-						type: "file",
-						accept: "image/*",
-						className: "sr-only",
-						disabled: uploading,
-						onChange: (e) => {
-							upload(e.target.files?.[0]);
-							e.target.value = "";
-						}
-					}), "Library"]
-				})]
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AddPhotoButton, {
+				category: item.category,
+				label: item.label,
+				uploading,
+				onFile: (file) => void upload(file)
 			}),
 			item.photos.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 				className: "mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3",
@@ -10144,30 +13151,150 @@ function ItemRow({ installId, equipmentId, item, onSaved, coreNeeded, onStatusCh
 		]
 	});
 }
+/** "water-photo-12.jpg" — the utility it was taken for, so saved photos sort themselves. */
+function photoFileName(photo) {
+	const ext = /^data:image\/(png|webp|gif)/.exec(photo.dataUrl)?.[1] ?? "jpg";
+	return `${(photo.category || "inspection").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-photo-${photo.id}.${ext}`;
+}
 function PhotoTile({ photo, onRemove, pending }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
 		className: "overflow-hidden rounded-md border border-border",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZoomableImage, {
 			src: photo.dataUrl,
-			alt: photo.caption || photo.category,
-			className: "h-24 w-full object-cover"
+			alt: photo.caption || `${photo.category} photo`,
+			label: photo.caption || void 0,
+			imgClassName: "h-24 w-full object-cover",
+			testId: "inspect-photo-zoom",
+			download: photoFileName(photo)
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex items-start justify-between gap-1 px-2 py-1.5",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-				className: "min-w-0 text-[11px] text-muted-foreground",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "block truncate text-foreground",
-					children: photo.caption || "Photo"
-				}), [photo.uploadedBy, formatPingTime(photo.uploadedAt)].filter(Boolean).join(" · ")]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-				type: "button",
-				className: "shrink-0 text-muted-foreground hover:text-foreground",
-				"aria-label": "Remove photo",
-				disabled: pending,
-				onClick: onRemove,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" })
-			})]
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+					className: "min-w-0 text-[11px] text-muted-foreground",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "block truncate text-foreground",
+						children: photo.caption || "Photo"
+					}), [photo.uploadedBy, formatPingTime(photo.uploadedAt)].filter(Boolean).join(" · ")]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+					href: photo.dataUrl,
+					download: photoFileName(photo),
+					className: "grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground",
+					"aria-label": "Download photo",
+					title: "Download",
+					"data-testid": "inspect-photo-download",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "size-3.5" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					className: "shrink-0 text-muted-foreground hover:text-foreground",
+					"aria-label": "Remove photo",
+					disabled: pending,
+					onClick: onRemove,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" })
+				})
+			]
 		})]
+	});
+}
+/**
+* One "Add photo" control per inspection item. Tapping it asks Camera or Library,
+* and the picked photo attaches to this utility on this machine.
+*/
+function AddPhotoButton({ category, label, uploading, onFile }) {
+	const [open, setOpen] = (0, import_react.useState)(false);
+	const cameraRef = (0, import_react.useRef)(null);
+	const libraryRef = (0, import_react.useRef)(null);
+	const boxRef = (0, import_react.useRef)(null);
+	(0, import_react.useEffect)(() => {
+		if (!open) return;
+		function away(e) {
+			if (!boxRef.current?.contains(e.target)) setOpen(false);
+		}
+		function esc(e) {
+			if (e.key === "Escape") setOpen(false);
+		}
+		document.addEventListener("pointerdown", away);
+		document.addEventListener("keydown", esc);
+		return () => {
+			document.removeEventListener("pointerdown", away);
+			document.removeEventListener("keydown", esc);
+		};
+	}, [open]);
+	function pick(input) {
+		setOpen(false);
+		input?.click();
+	}
+	const onChange = (e) => {
+		onFile(e.target.files?.[0]);
+		e.target.value = "";
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref: boxRef,
+		className: "relative mt-3",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				type: "button",
+				disabled: uploading,
+				"aria-haspopup": "menu",
+				"aria-expanded": open,
+				"data-testid": `inspect-add-photo-${category}`,
+				onClick: () => setOpen((v) => !v),
+				className: "flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-base font-medium text-primary-foreground disabled:opacity-60",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ImagePlus, { className: "size-5" }), uploading ? "Uploading…" : "Add photo"]
+			}),
+			open ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				role: "menu",
+				"aria-label": `Add a ${label} photo`,
+				className: "absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-popover shadow-[var(--shadow-lift)]",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
+					role: "menuitem",
+					className: "flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-muted",
+					onClick: () => pick(cameraRef.current),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { className: "size-4 text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "block font-medium",
+						children: "Camera"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs text-muted-foreground",
+						children: "Take a photo now"
+					})] })]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
+					role: "menuitem",
+					className: "flex w-full items-center gap-3 border-t border-border px-4 py-3 text-left text-sm hover:bg-muted",
+					onClick: () => pick(libraryRef.current),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Images, { className: "size-4 text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "block font-medium",
+						children: "Choose from library"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs text-muted-foreground",
+						children: "Use a photo you already took"
+					})] })]
+				})]
+			}) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				ref: cameraRef,
+				type: "file",
+				accept: "image/*",
+				capture: "environment",
+				className: "sr-only",
+				tabIndex: -1,
+				"aria-hidden": true,
+				"data-testid": `inspect-photo-${category}`,
+				onChange
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				ref: libraryRef,
+				type: "file",
+				accept: "image/*",
+				className: "sr-only",
+				tabIndex: -1,
+				"aria-hidden": true,
+				"data-testid": `inspect-library-${category}`,
+				onChange
+			})
+		]
 	});
 }
 //#endregion
@@ -10195,7 +13322,8 @@ function when(iso) {
 	});
 }
 function ActivityTrail({ entityType, entityId }) {
-	const rows = useQuery({
+	const [open, setOpen] = (0, import_react.useState)(false);
+	const log = useQuery({
 		queryKey: [
 			"activity",
 			entityType,
@@ -10205,40 +13333,47 @@ function ActivityTrail({ entityType, entityId }) {
 			entityType,
 			entityId
 		} }),
-		refetchInterval: 8e3
-	}).data ?? [];
-	if (!rows.length) return null;
+		refetchInterval: open ? 8e3 : false,
+		enabled: open
+	});
+	const rows = log.data ?? [];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "border-t border-border px-5 py-4",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				className: "font-display text-lg font-medium",
+		className: "border-t border-border px-5 py-3",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+			type: "button",
+			className: "flex min-h-11 w-full items-center justify-between gap-2 text-left",
+			"aria-expanded": open,
+			"data-testid": "who-changed",
+			onClick: () => setOpen((v) => !v),
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "font-display text-base font-medium",
 				children: "Who changed this"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs text-muted-foreground",
-				children: "Every save and assignment is tagged to a username."
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", {
-				className: "mt-3 space-y-2",
-				children: rows.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
-					className: "flex flex-wrap items-baseline justify-between gap-2 text-sm",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-						className: "min-w-0",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "font-medium",
-							children: ["@", a.actorName ?? "teammate"]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-muted-foreground",
-							children: [" ", actionLine(a.action, a.detail)]
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", {
-						className: "shrink-0 text-xs text-muted-foreground",
-						children: when(a.createdAt)
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180") })]
+		}), open ? log.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-2 text-sm text-muted-foreground",
+			children: "Loading…"
+		}) : rows.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ol", {
+			className: "mt-2 space-y-2",
+			children: rows.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+				className: "flex flex-wrap items-baseline justify-between gap-2 text-sm",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+					className: "min-w-0",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "font-medium",
+						children: ["@", a.actorName ?? "teammate"]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-muted-foreground",
+						children: [" ", actionLine(a.action, a.detail)]
 					})]
-				}, a.id))
-			})
-		]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("time", {
+					className: "shrink-0 text-xs text-muted-foreground",
+					children: when(a.createdAt)
+				})]
+			}, a.id))
+		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-2 text-sm text-muted-foreground",
+			children: "No changes yet."
+		}) : null]
 	});
 }
 //#endregion
@@ -10326,7 +13461,7 @@ function Thread({ entityType, entityId }) {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 				className: "px-5 pt-4 font-display text-lg font-medium",
-				children: "Handoff notes"
+				children: "Handoff Notes"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "px-5 text-xs text-muted-foreground",
@@ -10438,7 +13573,7 @@ function Thread({ entityType, entityId }) {
 }
 //#endregion
 //#region src/lib/ops/network-api.ts
-async function ready$1() {
+async function ready$2() {
 	const { ensureSeeded } = await import("./seed.server.mjs");
 	await ensureSeeded();
 	return getSql();
@@ -10477,7 +13612,7 @@ var PROVIDER_SELECT = `
   from network_providers p
 `;
 var listNetwork = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async () => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const providerRows = await sql.query(`${PROVIDER_SELECT} where p.archived = false order by lower(p.name)`);
 	const locRows = await sql.query(`select distinct provider_id, state from provider_locations`).catch(() => []);
 	const statesBy = /* @__PURE__ */ new Map();
@@ -10586,7 +13721,7 @@ async function loadAddresses(sql, providerId) {
      order by id`, [providerId])).map(mapAddress);
 }
 var getProvider = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const rows = await sql.query(`${PROVIDER_SELECT} where p.id = $1`, [data.id]);
 	if (!rows[0] || rows[0].archived) return null;
 	const accounts = await sql.query(`select id as link_id, customer, role from customer_providers
@@ -10612,7 +13747,7 @@ var getProvider = createServerFn({ method: "GET" }).middleware([deskMiddleware])
 	};
 });
 var upsertProvider = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const name = data.name.trim();
 	if (!name) throw new Error("Provider name is required");
 	const today = todayChicago();
@@ -10668,7 +13803,7 @@ var upsertProvider = createServerFn({ method: "POST" }).middleware([deskMiddlewa
 	return withLocationSummary(sql, id);
 });
 var renameProvider = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	return renameOrMergeProvider(sql, data.id, data.name);
 });
 async function writeLocations(sql, providerId, drafts) {
@@ -10700,7 +13835,7 @@ async function withLocationSummary(sql, id) {
 	});
 }
 var addProviderLocation = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const state = normalizeState(data.state);
 	if (!state) throw new Error("Pick a state");
 	const city = normalizeCity(data.city);
@@ -10743,7 +13878,7 @@ var addProviderLocation = createServerFn({ method: "POST" }).middleware([deskMid
 	};
 });
 var removeProviderLocation = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	await (await ready$1())`delete from provider_locations where id = ${data.id}`;
+	await (await ready$2())`delete from provider_locations where id = ${data.id}`;
 	return { ok: true };
 });
 async function writePeople(sql, providerId, drafts) {
@@ -10785,7 +13920,7 @@ async function writeAddresses(sql, providerId, drafts) {
 	}
 }
 var addProviderContact = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const row = {
 		name: data.name?.trim() || null,
 		role: data.role?.trim() || null,
@@ -10812,11 +13947,11 @@ var addProviderContact = createServerFn({ method: "POST" }).middleware([deskMidd
 	};
 });
 var removeProviderContact = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	await (await ready$1())`delete from provider_contacts where id = ${data.id}`;
+	await (await ready$2())`delete from provider_contacts where id = ${data.id}`;
 	return { ok: true };
 });
 var addProviderAddress = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const row = {
 		label: data.label?.trim() || null,
 		line1: data.line1?.trim() || null,
@@ -10845,11 +13980,11 @@ var addProviderAddress = createServerFn({ method: "POST" }).middleware([deskMidd
 	};
 });
 var removeProviderAddress = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	await (await ready$1())`delete from provider_addresses where id = ${data.id}`;
+	await (await ready$2())`delete from provider_addresses where id = ${data.id}`;
 	return { ok: true };
 });
 var archiveProvider = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	await sql`delete from customer_providers where provider_id = ${data.id}`;
 	await sql`update network_providers set archived = true, updated_at = now() where id = ${data.id}`;
 	return { ok: true };
@@ -10857,7 +13992,7 @@ var archiveProvider = createServerFn({ method: "POST" }).middleware([deskMiddlew
 var getCustomerProviders = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
 	const customer = data.customer.trim();
 	if (!customer) return [];
-	return (await (await ready$1()).query(`select p.*,
+	return (await (await ready$2()).query(`select p.*,
               (select count(*)::int from customer_providers x where x.provider_id = p.id and x.role = 'primary') as primary_for,
               (select count(*)::int from customer_providers x where x.provider_id = p.id and x.role = 'secondary') as secondary_for,
               c.id as link_id, c.customer, c.role
@@ -10872,7 +14007,7 @@ var getCustomerProviders = createServerFn({ method: "GET" }).middleware([deskMid
 	}));
 });
 var assignCustomerProvider = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const customer = data.customer.trim();
 	if (!customer) throw new Error("Pick a customer");
 	const role = data.role ?? "additional";
@@ -10909,11 +14044,11 @@ var assignCustomerProvider = createServerFn({ method: "POST" }).middleware([desk
 	};
 });
 var unassignCustomerProvider = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	await (await ready$1())`delete from customer_providers where id = ${data.linkId}`;
+	await (await ready$2())`delete from customer_providers where id = ${data.linkId}`;
 	return { ok: true };
 });
 var setProviderRole = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => d).handler(async ({ data }) => {
-	const sql = await ready$1();
+	const sql = await ready$2();
 	const cur = await sql`
       select customer from customer_providers where id = ${data.linkId}`;
 	if (!cur[0]) throw new Error("Assignment not found");
@@ -11136,7 +14271,7 @@ function ProviderAccountList({ providerId, accounts }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 			className: "font-display text-lg",
-			children: "Assigned accounts"
+			children: "Assigned Accounts"
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 			className: "text-xs text-muted-foreground",
@@ -11319,7 +14454,7 @@ function SerialNoticeBanner({ notice }) {
 		})
 	});
 }
-function SerialPullField({ label, value, onValue, installId, jobId, machineIndex, onPulled }) {
+function SerialPullField({ label, value, onValue, installId, jobId, machineIndex, onPulled, compact = false }) {
 	const qc = useQueryClient();
 	const [text, setText] = (0, import_react.useState)(value);
 	const [pending, setPending] = (0, import_react.useState)(null);
@@ -11370,60 +14505,67 @@ function SerialPullField({ label, value, onValue, installId, jobId, machineIndex
 			confirmReuse
 		});
 	}
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: label }),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-			className: "mt-1",
-			value: text,
-			autoComplete: "off",
-			placeholder: "Type the serial",
-			onChange: (e) => {
-				setText(e.target.value);
-				onValue(e.target.value);
-			},
-			onBlur: () => {
-				if (text.trim()) commit(text);
-			},
-			onKeyDown: (e) => {
-				if (e.key === "Enter") {
-					e.preventDefault();
-					commit(text);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: compact ? "min-w-0" : void 0,
+		children: [
+			compact ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+				children: label
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: label }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+				className: "mt-1",
+				"aria-label": label,
+				value: text,
+				autoComplete: "off",
+				placeholder: "Type the serial",
+				onChange: (e) => {
+					setText(e.target.value);
+					onValue(e.target.value);
+				},
+				onBlur: () => {
+					if (text.trim()) commit(text);
+				},
+				onKeyDown: (e) => {
+					if (e.key === "Enter") {
+						e.preventDefault();
+						commit(text);
+					}
 				}
-			}
-		}),
-		pull.isPending ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "mt-1 text-xs text-muted-foreground",
-			children: "Checking warehouse…"
-		}) : null,
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
-			open: !!pending?.needsConfirm,
-			onOpenChange: (o) => !o && setPending(null),
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Serial already assigned" }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [
-					pending?.notice,
-					" Reuse it on this ",
-					installId ? "install" : "ticket",
-					", or cancel and leave it where it is."
-				] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mt-4 flex flex-wrap justify-end gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						type: "button",
-						variant: "outline",
-						onClick: () => setPending(null),
-						children: "Cancel"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						type: "button",
-						onClick: () => {
-							if (pending) commit(pending.serial, true);
-						},
-						children: "Reuse serial"
-					})]
-				})
-			] })
-		})
-	] });
+			}),
+			pull.isPending ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1 text-xs text-muted-foreground",
+				children: "Checking warehouse…"
+			}) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+				open: !!pending?.needsConfirm,
+				onOpenChange: (o) => !o && setPending(null),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Serial Already Assigned" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [
+						pending?.notice,
+						" Reuse it on this ",
+						installId ? "install" : "ticket",
+						", or cancel and leave it where it is."
+					] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4 flex flex-wrap justify-end gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							variant: "outline",
+							onClick: () => setPending(null),
+							children: "Cancel"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							onClick: () => {
+								if (pending) commit(pending.serial, true);
+							},
+							children: "Reuse serial"
+						})]
+					})
+				] })
+			})
+		]
+	});
 }
 //#endregion
 //#region src/components/desk/job-sheet.tsx
@@ -11492,7 +14634,7 @@ function JobSheet({ id, onClose, lockCustomer = false }) {
 					j.callId
 				]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: j.customer ?? "Untitled account" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: j.customer ?? "Untitled Account" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "mt-2 flex min-h-8 flex-wrap items-center gap-1.5",
 				children: [
@@ -11624,7 +14766,7 @@ function JobSheet({ id, onClose, lockCustomer = false }) {
 						defaultValue: j.status,
 						children: CALL_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
 					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$2, {
 						label: "Scheduled",
 						name: "scheduled",
 						type: "date",
@@ -11637,23 +14779,23 @@ function JobSheet({ id, onClose, lockCustomer = false }) {
 						allowEmpty: true,
 						children: CALL_TYPES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
 					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$2, {
 						label: "WO #",
 						name: "wo",
 						defaultValue: j.wo ?? ""
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$2, {
 						label: "Received",
 						name: "received",
 						type: "date",
 						defaultValue: j.received ?? ""
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$2, {
 						label: "Contact",
 						name: "contact",
 						defaultValue: j.contact ?? ""
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$2, {
 						label: "Phone",
 						name: "phone",
 						defaultValue: j.phone ?? ""
@@ -11671,7 +14813,7 @@ function JobSheet({ id, onClose, lockCustomer = false }) {
 							placeholder: "What was done on site…"
 						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$2, {
 						label: "Date completed",
 						name: "completedAt",
 						type: "date",
@@ -11806,7 +14948,7 @@ function DuplicateBanner({ job, pending, onOpen, onMergeIntoThis, onMergeThisInt
 		]
 	});
 }
-function Field$1({ label, name, defaultValue, type = "text" }) {
+function Field$2({ label, name, defaultValue, type = "text" }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 		htmlFor: name,
 		children: label
@@ -11907,8 +15049,8 @@ function NewJobDialog({ kind, open, onOpenChange, onCreated, lockedCustomer }) {
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogTitle, { children: [
 					"New ",
-					kind === "tlc" ? "TLC + Factor" : "service",
-					" call"
+					kind === "tlc" ? "TLC + Factor" : "Service",
+					" Call"
 				] }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, { children: "Opens on today’s clock. Fill the rest in the drawer." }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
@@ -12029,6 +15171,102 @@ function BoundEquipment$1({ recordKey, defaultValue }) {
 	});
 }
 //#endregion
+//#region src/components/desk/rep-select.tsx
+function useReps() {
+	return useQuery({
+		queryKey: ["reps"],
+		queryFn: () => listReps()
+	});
+}
+function activeReps(reps, current) {
+	const list = reps ?? [];
+	const active = list.filter((r) => r.active);
+	const cur = (current ?? "").trim();
+	if (cur && !active.some((r) => r.name === cur) && !list.some((r) => r.name === cur && r.active)) {
+		const leftover = list.find((r) => r.name === cur);
+		if (leftover) return [...active, leftover];
+	}
+	return active;
+}
+function RepSelect({ name = "producer", value, defaultValue, onChange, label = "Rep", id, className }) {
+	const q = useReps();
+	const current = value ?? defaultValue ?? "";
+	const reps = activeReps(q.data?.reps, current);
+	const unknown = !!current && isNoRep(current);
+	const selected = unknown ? current : current;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className,
+		children: [
+			label ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+				htmlFor: id,
+				children: label
+			}) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+				id,
+				name,
+				className: label ? "mt-1" : void 0,
+				value,
+				defaultValue: value == null ? defaultValue ?? "" : void 0,
+				onChange: onChange ? (e) => onChange(e.target.value) : void 0,
+				allowEmpty: true,
+				emptyLabel: "—",
+				children: [unknown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
+					value: current,
+					children: [current, " (unknown)"]
+				}) : null, reps.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
+					value: r.name,
+					children: [
+						r.name,
+						" (",
+						r.initials,
+						")"
+					]
+				}, r.id))]
+			}, value == null ? `${q.data ? "ready" : "loading"}:${defaultValue ?? ""}` : void 0),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, {
+				show: isNoRep(selected),
+				className: "mt-1 block"
+			})
+		]
+	});
+}
+function RepFilter({ value, onChange, extraNames, className, includeNone = true }) {
+	const q = useReps();
+	const names = /* @__PURE__ */ new Map();
+	for (const r of q.data?.reps ?? []) if (r.active) names.set(r.name, `${r.name} (${r.initials})`);
+	for (const n of extraNames ?? []) {
+		const s = (n ?? "").trim();
+		if (s && !names.has(s)) names.set(s, isNoRep(s) ? `${s} (unknown)` : formatRep(s));
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+		value,
+		onChange: (e) => onChange(e.target.value),
+		allowEmpty: true,
+		emptyLabel: "All reps",
+		className: cn("max-w-xs", className),
+		"aria-label": "Filter by rep",
+		children: [includeNone ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+			value: "__none__",
+			children: "No rep assigned"
+		}) : null, [...names.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([name, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+			value: name,
+			children: label
+		}, name))]
+	});
+}
+function RepName({ name }) {
+	if (!name?.trim()) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, { show: true });
+	if (isNoRep(name)) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+		name,
+		" ",
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, {
+			show: true,
+			className: "ml-1"
+		})
+	] });
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatRep(name) });
+}
+//#endregion
 //#region src/lib/ops/recipe-fields.ts
 var SETTING_FIELDS = [
 	{
@@ -12123,6 +15361,1938 @@ function previewSetting(row) {
 		if (v) return v.split("\n")[0].slice(0, 72);
 	}
 	return null;
+}
+/** Rough machine type from the model name, used to pick sensible starting settings. */
+function equipKind(model) {
+	const m = model.toLowerCase();
+	if (/grinder|mahl|mazzer|ditting|\bek ?43\b|\bg9|\bg3\b|\bmdxs?\b|\bsuper jolly/.test(m)) return "grinder";
+	if (/powder|imix|i-mix|cappuccino|cappu|frappe|hot choc/.test(m)) return "powder";
+	if (/eversys|cameo|e'?4|e'?2|la marzocco|linea|strada|gb5|nuova simonelli|appia|aurelia|faema|e61|franke|schaerer|thermoplan|jura|legacy|kb90/.test(m)) return "espresso";
+	if (/bunn|fetco|itcb|tb3|axiom|cbs|brewer|urn|dispenser|curtis/.test(m)) return "brewer";
+	return "other";
+}
+/** Standard settings a new recipe starts with, by machine type. */
+function defaultSettingsFor(model) {
+	switch (equipKind(model)) {
+		case "grinder": return [];
+		case "espresso": return [
+			"coffee1",
+			"americano1",
+			"milk"
+		];
+		case "brewer": return ["coffee1", "tea1"];
+		case "powder": return ["powder1", "powder2"];
+		default: return ["coffee1"];
+	}
+}
+/** Custom settings a new recipe starts with, by machine type (saved into notes as "Label: value"). */
+function defaultCustomFor(model) {
+	return equipKind(model) === "grinder" ? ["Grind setting", "Dose"] : [];
+}
+/** Common extras offered in "+ Add setting", beyond the standard recipe fields. */
+var CUSTOM_SUGGESTIONS = [
+	"Grind setting",
+	"Dose",
+	"Yield",
+	"Shot time",
+	"Water temp",
+	"Brew volume",
+	"Batch size",
+	"Bypass",
+	"Pre-infusion",
+	"Steam pressure"
+];
+//#endregion
+//#region src/components/desk/machine-fields.tsx
+var ADD = "__add__";
+function byModelFirst(model) {
+	const key = model.toLowerCase();
+	return (a, b) => Number(b.equipmentModel.toLowerCase() === key) - Number(a.equipmentModel.toLowerCase() === key) || a.equipmentModel.localeCompare(b.equipmentModel) || Number(!!a.name) - Number(!!b.name) || recipeLabel(a).localeCompare(recipeLabel(b));
+}
+/**
+* One recipe per unit, picked right on the equipment row: house templates plus this
+* customer's recipes, with "Add recipe" in the same list.
+*/
+function MachineRecipeSelect({ customer, model, installId, recipes, value, onPick }) {
+	const [adding, setAdding] = (0, import_react.useState)(false);
+	const custKey = customer.trim().toLowerCase();
+	const modelKey = model.toLowerCase();
+	const house = recipes.filter((r) => !r.customer && r.equipmentModel.toLowerCase() === modelKey).sort(byModelFirst(model));
+	const mine = recipes.filter((r) => r.customer?.toLowerCase() === custKey).sort(byModelFirst(model));
+	const fallback = findRecipeFor(recipes, {
+		customer,
+		model,
+		installId: installId ?? null
+	});
+	const selectedId = value ?? fallback.linked?.id ?? fallback.house?.id ?? null;
+	const selected = recipes.find((r) => r.id === selectedId) ?? null;
+	const keep = selected && !house.includes(selected) && !mine.includes(selected) ? selected : null;
+	const label = (r) => r.equipmentModel.toLowerCase() === modelKey ? recipeLabel(r) : recipeLabel(r, true);
+	const preview = previewSetting(selected) ?? (selected?.notes?.split("\n")[0]?.slice(0, 72) || null);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "col-span-2 grid min-w-0 gap-1 lg:col-span-1",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+			className: "grid min-w-0 gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+			children: ["Recipe", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+				"aria-label": `Recipe for ${model}`,
+				"data-testid": "machine-recipe",
+				value: adding ? ADD : selectedId ? String(selectedId) : "",
+				disabled: !customer.trim(),
+				className: "normal-case",
+				onChange: (e) => {
+					const v = e.target.value;
+					if (v === ADD) {
+						setAdding(true);
+						return;
+					}
+					setAdding(false);
+					onPick(v ? Number(v) : null);
+				},
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: "",
+						children: "No recipe"
+					}),
+					keep ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: keep.id,
+						children: recipeLabel(keep, true)
+					}) : null,
+					mine.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("optgroup", {
+						label: customer,
+						children: mine.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: r.id,
+							children: label(r)
+						}, r.id))
+					}) : null,
+					house.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("optgroup", {
+						label: "House templates",
+						children: house.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+							value: r.id,
+							children: label(r)
+						}, r.id))
+					}) : null,
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: ADD,
+						children: "＋ Add recipe…"
+					})
+				]
+			})]
+		}), preview && !adding ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+			className: "truncate text-[11px] text-muted-foreground",
+			title: preview,
+			children: [
+				selected?.customer ? "Account" : "House",
+				" · ",
+				preview
+			]
+		}) : null]
+	}), adding ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AddRecipePanel, {
+		customer,
+		model,
+		installId,
+		onCancel: () => setAdding(false),
+		onSaved: (r) => {
+			setAdding(false);
+			onPick(r.id);
+		}
+	}) : null] });
+}
+function AddRecipePanel({ customer, model, installId, onCancel, onSaved }) {
+	const qc = useQueryClient();
+	const [name, setName] = (0, import_react.useState)("");
+	const [scope, setScope] = (0, import_react.useState)("customer");
+	const [shown, setShown] = (0, import_react.useState)(() => defaultSettingsFor(model));
+	const [values, setValues] = (0, import_react.useState)({});
+	const [custom, setCustom] = (0, import_react.useState)(() => defaultCustomFor(model).map((label, i) => ({
+		key: i,
+		label,
+		value: ""
+	})));
+	const [nextKey, setNextKey] = (0, import_react.useState)(100);
+	const [notes, setNotes] = (0, import_react.useState)("");
+	const [picking, setPicking] = (0, import_react.useState)(false);
+	const [customLabel, setCustomLabel] = (0, import_react.useState)("");
+	const standardLeft = SETTING_FIELDS.filter((f) => !shown.includes(f.name));
+	const customTaken = new Set(custom.map((c) => c.label.trim().toLowerCase()));
+	const suggestionsLeft = CUSTOM_SUGGESTIONS.filter((l) => !customTaken.has(l.toLowerCase()));
+	function addCustom(label) {
+		const clean = label.trim();
+		if (!clean) return;
+		if (customTaken.has(clean.toLowerCase())) return;
+		setCustom((rows) => [...rows, {
+			key: nextKey,
+			label: clean,
+			value: ""
+		}]);
+		setNextKey((k) => k + 1);
+		setCustomLabel("");
+		setPicking(false);
+	}
+	const save = useMutation({
+		mutationFn: () => {
+			const settings = {};
+			for (const f of SETTING_FIELDS) settings[f.name] = shown.includes(f.name) ? values[f.name]?.trim() || null : null;
+			const allNotes = [...custom.filter((c) => c.label.trim() && c.value.trim()).map((c) => `${c.label.trim()}: ${c.value.trim()}`), notes.trim()].filter(Boolean).join("\n");
+			return upsertRecipe({ data: {
+				name: name.trim() || null,
+				equipmentModel: model,
+				customer: scope === "customer" ? customer : null,
+				installId: scope === "customer" ? installId ?? null : null,
+				...settings,
+				notes: allNotes || null
+			} });
+		},
+		onSuccess: (row) => {
+			const saved = row;
+			qc.setQueryData(["recipes"], (old) => [...(old ?? []).filter((r) => r.id !== saved.id), saved]);
+			qc.invalidateQueries({ queryKey: ["recipes"] });
+			toast.success(scope === "customer" ? `Recipe saved to ${customer}` : "House recipe saved");
+			onSaved(saved);
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save that recipe")
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "col-span-full grid gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 sm:grid-cols-2",
+		"data-testid": "add-recipe-panel",
+		onKeyDown: (e) => {
+			if (e.key === "Escape") {
+				if (picking) setPicking(false);
+				else onCancel();
+			}
+			if (e.key === "Enter" && e.target.tagName === "INPUT" && !picking) {
+				e.preventDefault();
+				save.mutate();
+			}
+		},
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				className: "text-xs font-medium sm:col-span-2",
+				children: ["New recipe · ", model]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+				value: name,
+				onChange: (e) => setName(e.target.value),
+				placeholder: "Name, e.g. Morning blend",
+				"aria-label": "Recipe name",
+				autoFocus: true
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex flex-wrap items-center gap-1.5 text-xs",
+				role: "radiogroup",
+				"aria-label": "Save to",
+				children: [["customer", customer], ["house", "House template"]].map(([id, text]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					role: "radio",
+					"aria-checked": scope === id,
+					onClick: () => setScope(id),
+					className: scope === id ? "max-w-full truncate rounded-full bg-primary px-2.5 py-1 text-primary-foreground" : "max-w-full truncate rounded-full border border-border bg-card px-2.5 py-1 text-muted-foreground",
+					children: id === "customer" ? `Save to ${text}` : text
+				}, id))
+			}),
+			shown.map((n) => {
+				const f = SETTING_FIELDS.find((x) => x.name === n);
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingInput, {
+					label: f.label,
+					value: values[n] ?? "",
+					onChange: (v) => setValues((cur) => ({
+						...cur,
+						[n]: v
+					})),
+					onRemove: () => setShown((cur) => cur.filter((x) => x !== n))
+				}, n);
+			}),
+			custom.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingInput, {
+				label: c.label,
+				value: c.value,
+				onChange: (v) => setCustom((rows) => rows.map((r) => r.key === c.key ? {
+					...r,
+					value: v
+				} : r)),
+				onRemove: () => setCustom((rows) => rows.filter((r) => r.key !== c.key))
+			}, c.key)),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative sm:col-span-2",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						"aria-expanded": picking,
+						"data-testid": "add-setting",
+						onClick: () => setPicking((v) => !v),
+						className: "inline-flex items-center gap-1 rounded-full border border-dashed border-primary/50 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-3.5" }), "Add setting"]
+					}),
+					!shown.length && !custom.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "ml-2 text-xs text-muted-foreground",
+						children: "No settings yet — add the ones this machine uses."
+					}) : null,
+					picking ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-2 grid gap-2 rounded-lg border border-border bg-card p-2.5 shadow-[var(--shadow-soft)]",
+						"data-testid": "add-setting-menu",
+						children: [
+							standardLeft.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "mb-1 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase",
+								children: "Recipe settings"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex flex-wrap gap-1.5",
+								children: standardLeft.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => {
+										setShown((cur) => SETTING_FIELDS.map((x) => x.name).filter((x) => cur.includes(x) || x === f.name));
+										setPicking(false);
+									},
+									className: "rounded-full bg-secondary px-2.5 py-1 text-xs hover:bg-primary/15",
+									children: f.label
+								}, f.name))
+							})] }) : null,
+							suggestionsLeft.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "mb-1 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase",
+								children: "Machine settings"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex flex-wrap gap-1.5",
+								children: suggestionsLeft.map((l) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => addCustom(l),
+									className: "rounded-full bg-secondary px-2.5 py-1 text-xs hover:bg-primary/15",
+									children: l
+								}, l))
+							})] }) : null,
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									value: customLabel,
+									onChange: (e) => setCustomLabel(e.target.value),
+									onKeyDown: (e) => {
+										if (e.key === "Enter") {
+											e.preventDefault();
+											addCustom(customLabel);
+										}
+									},
+									placeholder: "Your own setting, e.g. Hopper 2 blend",
+									"aria-label": "Custom setting name",
+									className: "h-9"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+									type: "button",
+									size: "sm",
+									variant: "outline",
+									disabled: !customLabel.trim(),
+									onClick: () => addCustom(customLabel),
+									children: "Add"
+								})]
+							})
+						]
+					}) : null
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
+				value: notes,
+				onChange: (e) => setNotes(e.target.value),
+				placeholder: "Notes",
+				"aria-label": "Recipe notes",
+				rows: 2,
+				className: "sm:col-span-2"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex justify-end gap-2 sm:col-span-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "sm",
+					variant: "ghost",
+					onClick: onCancel,
+					children: "Cancel"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "sm",
+					disabled: save.isPending,
+					onClick: () => save.mutate(),
+					children: "Save & use"
+				})]
+			})
+		]
+	});
+}
+function SettingInput({ label, value, onChange, onRemove }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "relative min-w-0",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "pointer-events-none absolute top-1.5 left-3 text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase",
+				children: label
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+				value,
+				onChange: (e) => onChange(e.target.value),
+				"aria-label": label,
+				className: "h-12 pt-4 pr-9"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				onClick: onRemove,
+				"aria-label": `Remove ${label}`,
+				title: "Doesn't apply to this machine",
+				className: "absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-3.5" })
+			})
+		]
+	});
+}
+function MachineFields({ specs, onChange, installId, onPulled, onRecipe, onRemove, customer = "", recipes = [] }) {
+	if (!specs.length) return null;
+	function patch(index, part) {
+		return specs.map((s, i) => i === index ? {
+			...s,
+			...part
+		} : s);
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "divide-y divide-border",
+		"data-testid": "machine-rows",
+		children: specs.map((spec, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			"data-testid": "machine-row",
+			className: "grid grid-cols-2 gap-2 py-2 lg:grid-cols-[minmax(7rem,1fr)_minmax(6.5rem,0.7fr)_minmax(4.5rem,0.45fr)_minmax(18.5rem,1.2fr)_minmax(9rem,0.9fr)] lg:items-start",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "col-span-2 min-w-0 lg:col-span-1",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+						children: "Model"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+						className: "flex min-w-0 items-center gap-1 text-sm font-medium",
+						title: spec.equipment,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "min-w-0 truncate",
+							children: spec.equipment
+						}), onRemove ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: () => onRemove(index),
+							"aria-label": `Remove ${spec.equipment} from this install`,
+							title: "Remove from this install",
+							"data-testid": "machine-remove",
+							className: "grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-3.5" })
+						}) : null]
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SerialPullField, {
+					label: "Serial",
+					compact: true,
+					value: spec.serial,
+					installId,
+					machineIndex: index,
+					onValue: (serial) => onChange(patch(index, { serial })),
+					onPulled: (result) => {
+						const next = patch(index, {
+							serial: result.serial,
+							powerVoltage: spec.powerVoltage || result.powerVoltage || ""
+						});
+						onChange(next);
+						onPulled?.(next, result);
+					}
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "min-w-0",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+						className: "grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+						htmlFor: `pwr-${index}`,
+						children: ["Voltage", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							id: `pwr-${index}`,
+							value: spec.powerVoltage,
+							autoComplete: "off",
+							placeholder: "208V",
+							onChange: (e) => onChange(patch(index, { powerVoltage: e.target.value }))
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UnitPlaceField, {
+					serial: spec.serial,
+					model: spec.equipment,
+					compact: true
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MachineRecipeSelect, {
+					customer,
+					model: spec.equipment,
+					installId,
+					recipes,
+					value: spec.recipeId,
+					onPick: (recipeId) => {
+						const next = patch(index, { recipeId });
+						onChange(next);
+						onRecipe?.(next);
+					}
+				})
+			]
+		}, `${spec.equipment}-${index}`))
+	});
+}
+//#endregion
+//#region src/components/desk/module-assign.tsx
+function useRefresh() {
+	const qc = useQueryClient();
+	return () => {
+		qc.invalidateQueries({ queryKey: ["modules"] });
+		qc.invalidateQueries({ queryKey: ["eversys-units"] });
+		qc.invalidateQueries({ queryKey: ["notifications"] });
+		qc.invalidateQueries({ queryKey: ["dashboard"] });
+	};
+}
+function useModuleRole() {
+	const me = useQuery({
+		queryKey: ["access", "me"],
+		queryFn: () => getMyAccess()
+	});
+	const admin = !!me.data?.isAdmin;
+	const warehouse = me.data?.role === "warehouse";
+	return {
+		admin,
+		warehouse,
+		canReturn: admin || warehouse
+	};
+}
+/** Account search → Eversys unit on that account → attach. Adds the Eversys unit first when the account has none. */
+function AssignModuleDialog({ module, onOpenChange }) {
+	const refresh = useRefresh();
+	const [customer, setCustomer] = (0, import_react.useState)("");
+	const [unitId, setUnitId] = (0, import_react.useState)(null);
+	const [adding, setAdding] = (0, import_react.useState)(false);
+	const [newModel, setNewModel] = (0, import_react.useState)("");
+	const [newSerial, setNewSerial] = (0, import_react.useState)("");
+	(0, import_react.useEffect)(() => {
+		setCustomer("");
+		setUnitId(null);
+		setAdding(false);
+		setNewModel("");
+		setNewSerial("");
+	}, [module?.id]);
+	const units = useQuery({
+		queryKey: ["eversys-units", customer.trim().toLowerCase()],
+		queryFn: () => listEversysUnits({ data: { customer: customer.trim() } }),
+		enabled: !!module && !!customer.trim()
+	});
+	const models = useQuery({
+		queryKey: ["eversys-models"],
+		queryFn: () => listEversysModels(),
+		enabled: !!module && adding
+	});
+	const list = units.data ?? [];
+	const family = module?.platform ?? null;
+	(0, import_react.useEffect)(() => {
+		if (list.length === 1 && unitId == null) setUnitId(list[0].id);
+	}, [list, unitId]);
+	const addUnit = useMutation({
+		mutationFn: () => addEversysUnit({ data: {
+			customer: customer.trim(),
+			model: newModel,
+			serial: newSerial.trim() || null
+		} }),
+		onSuccess: (unit) => {
+			toast.success(`Added ${unit.label} to ${unit.customer}`);
+			setAdding(false);
+			setNewModel("");
+			setNewSerial("");
+			setUnitId(unit.id);
+			units.refetch();
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add the unit")
+	});
+	const assign = useMutation({
+		mutationFn: () => assignModule({ data: {
+			id: module.id,
+			customer: customer.trim(),
+			unitId
+		} }),
+		onSuccess: (r) => {
+			toast.success(`${module.moduleId} attached to ${r.unit} · ${r.customer}`);
+			refresh();
+			onOpenChange(false);
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not assign")
+	});
+	const familyModels = (models.data ?? []).filter((m) => !family || eversysFamily(m) === family);
+	const otherModels = (models.data ?? []).filter((m) => family && eversysFamily(m) !== family);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+		open: !!module,
+		onOpenChange,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContent, {
+			"data-testid": "assign-module",
+			children: module ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Assign Module To An Account" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [
+					module.moduleType ?? "Module",
+					" ",
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "font-mono",
+						children: module.moduleId
+					}),
+					module.platform ? ` · ${module.platform}` : "",
+					". It attaches to an Eversys unit on that account and leaves HQ stock."
+				] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-4 grid gap-4",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
+							label: "Account",
+							value: customer,
+							onChange: (v) => {
+								setCustomer(v);
+								setUnitId(null);
+								setAdding(false);
+							},
+							allowCreate: false,
+							placeholder: "Search accounts…",
+							menuInFlow: true
+						}),
+						customer.trim() ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
+							className: "grid gap-2",
+							"data-testid": "eversys-units",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("legend", {
+									className: "mb-1 text-sm font-medium",
+									children: ["Eversys Unit On ", customer.trim()]
+								}),
+								units.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-sm text-muted-foreground",
+									children: "Looking up the account’s equipment…"
+								}) : null,
+								!units.isLoading && list.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm",
+									"data-testid": "no-eversys",
+									children: [customer.trim(), " has no Eversys unit yet. Add the Eversys equipment first, then assign the module."]
+								}) : null,
+								list.map((u) => {
+									const on = unitId === u.id;
+									const mismatch = !!family && !!u.family && u.family !== family;
+									return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										role: "radio",
+										"aria-checked": on,
+										"data-testid": `unit-${u.id}`,
+										onClick: () => setUnitId(u.id),
+										className: cn("flex items-start gap-3 rounded-lg border px-3 py-2.5 text-left text-sm", on ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-muted/60"),
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: cn("mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border", on ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50"),
+											children: on ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "size-3" }) : null
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "min-w-0",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+													className: "block font-medium",
+													children: u.model
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+													className: "block text-xs text-muted-foreground",
+													children: [u.serial ? `SN ${u.serial}` : "No serial on file", u.modules.length ? ` · ${u.modules.length} module${u.modules.length === 1 ? "" : "s"} on it: ${u.modules.map((m) => m.moduleId).join(", ")}` : ""]
+												}),
+												mismatch ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+													className: "mt-0.5 block text-xs text-warning",
+													children: [
+														"This unit is ",
+														u.family,
+														" — the module is listed as ",
+														family,
+														"."
+													]
+												}) : null
+											]
+										})]
+									}, u.id);
+								}),
+								adding ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "grid gap-2 rounded-lg border border-dashed border-border p-3",
+									"data-testid": "add-eversys",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+											htmlFor: "eversys-model",
+											children: "Eversys Model"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+											id: "eversys-model",
+											className: "mt-1",
+											value: newModel,
+											onChange: (e) => setNewModel(e.target.value),
+											allowEmpty: true,
+											emptyLabel: models.isLoading ? "Loading models…" : "Pick a model",
+											children: familyModels.length && otherModels.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("optgroup", {
+												label: family ?? "Eversys",
+												children: familyModels.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: m }, m))
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("optgroup", {
+												label: "Other Eversys",
+												children: otherModels.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: m }, m))
+											})] }) : (models.data ?? []).map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: m }, m))
+										})] }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+											htmlFor: "eversys-serial",
+											children: "Machine Serial (Optional)"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+											id: "eversys-serial",
+											className: "mt-1",
+											value: newSerial,
+											onChange: (e) => setNewSerial(e.target.value),
+											placeholder: "If you have it"
+										})] }),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex gap-2",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+												type: "button",
+												size: "sm",
+												disabled: !newModel || addUnit.isPending,
+												onClick: () => addUnit.mutate(),
+												children: addUnit.isPending ? "Adding…" : "Add Eversys Unit"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+												type: "button",
+												size: "sm",
+												variant: "outline",
+												onClick: () => setAdding(false),
+												children: "Cancel"
+											})]
+										})
+									]
+								}) : !units.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									type: "button",
+									className: "inline-flex w-fit items-center gap-1 text-sm font-medium text-primary underline-offset-2 hover:underline",
+									onClick: () => setAdding(true),
+									"data-testid": "add-eversys-open",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-3.5" }),
+										" Add an Eversys unit to ",
+										customer.trim()
+									]
+								}) : null
+							]
+						}) : null,
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex flex-wrap gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								disabled: !customer.trim() || unitId == null || assign.isPending,
+								onClick: () => assign.mutate(),
+								"data-testid": "assign-module-confirm",
+								children: assign.isPending ? "Assigning…" : "Attach Module"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								variant: "outline",
+								onClick: () => onOpenChange(false),
+								children: "Cancel"
+							})]
+						})
+					]
+				})
+			] }) : null
+		})
+	});
+}
+/** Return-to-warehouse and approval controls. Admin returns at once; Warehouse asks an admin. */
+function ModuleReturnActions({ row, compact }) {
+	const refresh = useRefresh();
+	const role = useModuleRole();
+	const back = useMutation({
+		mutationFn: () => returnModule({ data: { id: row.id } }),
+		onSuccess: (r) => {
+			toast.success(r.pending ? `Return requested for ${row.moduleId} — an admin approves it` : `${row.moduleId} is back at HQ`);
+			refresh();
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not return")
+	});
+	const decide = useMutation({
+		mutationFn: (decision) => decideModuleReturn({ data: {
+			id: row.id,
+			decision
+		} }),
+		onSuccess: (_r, decision) => {
+			toast.success(decision === "approve" ? `${row.moduleId} is back at HQ` : "Return rejected — it stays on the account");
+			refresh();
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
+	});
+	if (!moduleAccount(row) && row.status !== "Installed at Account") return null;
+	const size = compact ? "sm" : "sm";
+	if (row.returnPending) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "flex flex-wrap items-center gap-2",
+		"data-testid": "return-pending",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+			className: "rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning",
+			children: ["Return Pending", row.returnByName ? ` · ${row.returnByName}` : ""]
+		}), role.admin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+			type: "button",
+			size,
+			disabled: decide.isPending,
+			onClick: () => decide.mutate("approve"),
+			"data-testid": "return-approve",
+			children: "Approve"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+			type: "button",
+			size,
+			variant: "outline",
+			disabled: decide.isPending,
+			onClick: () => decide.mutate("reject"),
+			children: "Reject"
+		})] }) : null]
+	});
+	if (!role.canReturn) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+		type: "button",
+		size,
+		variant: "outline",
+		disabled: back.isPending,
+		onClick: () => back.mutate(),
+		"data-testid": `return-${row.moduleId}`,
+		children: role.admin ? "Return To Warehouse" : "Ask To Return"
+	});
+}
+function AssignedLine({ row }) {
+	const account = moduleAccount(row);
+	if (!account) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "inline-flex min-w-0 items-center gap-1 text-xs font-medium text-foreground",
+		"data-testid": "assigned-tag",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Coffee, { className: "size-3 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+			className: "truncate",
+			children: [
+				"Assigned · ",
+				account,
+				row.assignedUnitLabel ? ` · ${row.assignedUnitLabel}` : ""
+			]
+		})]
+	});
+}
+//#endregion
+//#region src/components/desk/entity-sheets.tsx
+function Field$1({ label, name, defaultValue, type = "text", placeholder }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+		htmlFor: name,
+		children: label
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+		id: name,
+		name,
+		type,
+		defaultValue,
+		placeholder,
+		autoComplete: "off",
+		className: "mt-1"
+	})] });
+}
+function BoundCustomer({ recordKey, defaultValue, name = "customer", required, locked }) {
+	const [value, setValue] = (0, import_react.useState)(defaultValue);
+	(0, import_react.useEffect)(() => {
+		setValue(defaultValue);
+	}, [recordKey, defaultValue]);
+	if (locked) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LockedCustomer, {
+		name: defaultValue,
+		inputName: name
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
+		name,
+		value,
+		onChange: setValue,
+		required
+	});
+}
+function BoundEquipment({ recordKey, defaultValue, name = "equipment" }) {
+	const [value, setValue] = (0, import_react.useState)(defaultValue);
+	(0, import_react.useEffect)(() => {
+		setValue(defaultValue);
+	}, [recordKey, defaultValue]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentCombo, {
+		name,
+		value,
+		onChange: setValue
+	});
+}
+function PmSheet({ pm, onClose, lockCustomer = false }) {
+	const qc = useQueryClient();
+	const formRef = (0, import_react.useRef)(null);
+	const skipToast = (0, import_react.useRef)(false);
+	const save = useMutation({
+		mutationFn: (d) => updatePm({ data: d }),
+		onSuccess: () => {
+			if (!skipToast.current) toast.success("Saved");
+			skipToast.current = false;
+			qc.invalidateQueries({ queryKey: ["pms"] });
+			qc.invalidateQueries({ queryKey: ["dashboard"] });
+			qc.invalidateQueries({ queryKey: ["customer-history"] });
+			qc.invalidateQueries({ queryKey: ["customers"] });
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
+		open: !!pm,
+		onOpenChange: (o) => {
+			if (!o) {
+				skipToast.current = true;
+				formRef.current?.requestSubmit();
+				onClose();
+			}
+		},
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, { children: pm ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-xs tracking-wide text-muted-foreground uppercase",
+				children: "Preventative maintenance"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: pm.customer }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-2 flex flex-wrap gap-1.5",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: pm.status }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagBadge, { flag: pm.flag })]
+			})
+		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+			ref: formRef,
+			className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
+			onSubmit: (e) => {
+				e.preventDefault();
+				const fd = new FormData(e.currentTarget);
+				save.mutate({
+					id: pm.id,
+					customer: String(fd.get("customer")),
+					equipment: String(fd.get("equipment") || "") || null,
+					style: String(fd.get("style") || "") || null,
+					projected: String(fd.get("projected") || "") || null,
+					partsStatus: String(fd.get("partsStatus") || "") || null,
+					status: String(fd.get("status")),
+					technician: String(fd.get("technician") || "") || null,
+					notes: String(fd.get("notes") || "") || null,
+					wo: String(fd.get("wo") || "") || null,
+					workDone: String(fd.get("workDone") || "") || null,
+					completedAt: String(fd.get("completedAt") || "") || null
+				});
+			},
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundCustomer, {
+					recordKey: pm.id,
+					defaultValue: pm.customer,
+					required: true,
+					locked: lockCustomer
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundEquipment, {
+					recordKey: pm.id,
+					defaultValue: pm.equipment ?? ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "PM style" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+					name: "style",
+					className: "mt-1",
+					defaultValue: pm.style ?? "",
+					allowEmpty: true,
+					children: PM_STYLES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Status" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+					name: "status",
+					className: "mt-1",
+					defaultValue: pm.status,
+					children: PM_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					label: "Projected date",
+					name: "projected",
+					type: "date",
+					defaultValue: pm.projected ?? ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Parts" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+					name: "partsStatus",
+					className: "mt-1",
+					defaultValue: pm.partsStatus ?? "",
+					allowEmpty: true,
+					children: PARTS_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Tech" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechSelect, {
+					name: "technician",
+					defaultValue: pm.technician ?? ""
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					label: "WO #",
+					name: "wo",
+					defaultValue: pm.wo ?? ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					label: "Date completed",
+					name: "completedAt",
+					type: "date",
+					defaultValue: pm.completedAt ?? ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "sm:col-span-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+						htmlFor: `pm-work-${pm.id}`,
+						children: "Description of work"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoGrowTextarea, {
+						id: `pm-work-${pm.id}`,
+						name: "workDone",
+						className: "mt-1",
+						defaultValue: pm.workDone ?? "",
+						placeholder: "What was done on site…"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "sm:col-span-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
+						name: "notes",
+						className: "mt-1",
+						defaultValue: pm.notes ?? ""
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-end sm:col-span-2",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "submit",
+						size: "sm",
+						disabled: save.isPending,
+						children: "Save"
+					})
+				})
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
+			entityType: "pm",
+			entityId: pm.id
+		})] })] }) : null })
+	});
+}
+function InstallSheet({ row, onClose, onOpenRelated, lockCustomer = false }) {
+	const qc = useQueryClient();
+	const recs = useQuery({
+		queryKey: ["recipes"],
+		queryFn: () => listRecipes()
+	});
+	const assets = useQuery({
+		queryKey: ["assets"],
+		queryFn: () => listAssets()
+	});
+	const directoryEquip = useQuery({
+		queryKey: ["directory", "equipment"],
+		queryFn: () => listDirectory({ data: { kind: "equipment" } })
+	});
+	const [customer, setCustomer] = (0, import_react.useState)(row?.customer ?? "");
+	const [equipPieces, setEquipPieces] = (0, import_react.useState)([]);
+	const [specs, setSpecs] = (0, import_react.useState)([]);
+	const [hydratedId, setHydratedId] = (0, import_react.useState)(null);
+	const formRef = (0, import_react.useRef)(null);
+	const skipToast = (0, import_react.useRef)(false);
+	const catalog = catalogModels([
+		...(directoryEquip.data ?? []).map((e) => e.name),
+		...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
+		...(recs.data ?? []).map((r) => r.equipmentModel)
+	]);
+	(0, import_react.useEffect)(() => {
+		setCustomer(row?.customer ?? "");
+		const saved = row?.machines ?? [];
+		const fromSaved = saved.map((s) => s.equipment).filter(Boolean);
+		const names = catalog.length ? listedEquipment(fromSaved.join("\n") || row?.equipment, catalog) : fromSaved.length ? fromSaved : (row?.equipment ?? "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+		setEquipPieces(names);
+		setSpecs(mergeMachineSpecs(names, saved, {
+			serial: row?.serial,
+			powerVoltage: row?.powerVoltage
+		}));
+		setHydratedId(row?.id ?? null);
+	}, [row?.id, catalog.join("\n")]);
+	const save = useMutation({
+		mutationFn: (d) => updateInstall({ data: d }),
+		onSuccess: (_row, vars) => {
+			if (!Object.keys(vars).filter((k) => k !== "id").every((k) => [
+				"equipment",
+				"serial",
+				"powerVoltage",
+				"machines"
+			].includes(k)) && !skipToast.current) toast.success("Saved");
+			skipToast.current = false;
+			qc.invalidateQueries({ queryKey: ["installs"] });
+			qc.invalidateQueries({ queryKey: ["dashboard"] });
+			qc.invalidateQueries({ queryKey: ["customer-history"] });
+			qc.invalidateQueries({ queryKey: ["customers"] });
+			qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
+	});
+	const dropInstall = useMutation({
+		mutationFn: () => archiveInstall({ data: { id: row.id } }),
+		onSuccess: () => {
+			toast.success(`Removed ${row?.customer} from the list`);
+			qc.invalidateQueries({ queryKey: ["installs"] });
+			qc.invalidateQueries({ queryKey: ["dashboard"] });
+			qc.invalidateQueries({ queryKey: ["customers"] });
+			onClose();
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove")
+	});
+	function persistMachines(next) {
+		setSpecs(next);
+		setEquipPieces(next.map((s) => s.equipment));
+		if (!row) return;
+		const packed = serializeMachines(next);
+		save.mutate({
+			id: row.id,
+			equipment: packed.equipment,
+			serial: packed.serial,
+			powerVoltage: packed.powerVoltage,
+			machines: packed.machines
+		});
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
+		open: !!row,
+		onOpenChange: (o) => {
+			if (!o) {
+				skipToast.current = true;
+				formRef.current?.requestSubmit();
+				onClose();
+			}
+		},
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, {
+			className: "sm:max-w-4xl",
+			children: row ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-xs tracking-wide text-muted-foreground uppercase",
+					children: "Install"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: row.customer }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-2 flex flex-wrap gap-1.5",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InspectionBadge, {
+							overall: row.inspection?.overall,
+							passed: row.inspection?.passedCount,
+							total: row.inspection?.machineCount
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, {
+							tight: true,
+							status: row.equipStatus
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagBadge, { flag: row.flag }),
+						row.duplicateOf ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
+							variant: "warn",
+							children: "Possible duplicate"
+						}) : null
+					]
+				})
+			] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PreInspectionPanel, { installId: row.id }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SerialNoticeBanner, { notice: row.serialNotice }),
+				row.duplicateOf ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "font-medium",
+							children: "This account already had an install request."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-1 text-xs text-muted-foreground",
+							children: "Check the earlier one before treating this as a second job — or clear the flag if it’s a new request."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-2 flex flex-wrap gap-2",
+							children: [onOpenRelated ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								size: "sm",
+								variant: "outline",
+								onClick: () => onOpenRelated(row.duplicateOf),
+								children: "Open earlier request"
+							}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								size: "sm",
+								variant: "ghost",
+								onClick: () => save.mutate({
+									id: row.id,
+									duplicateOf: null
+								}),
+								children: "Not a duplicate"
+							})]
+						})
+					]
+				}) : null,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InstallAssets, { installId: row.id }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+					ref: formRef,
+					className: "grid gap-3 border-b border-border px-4 py-3 sm:grid-cols-2",
+					onSubmit: (e) => {
+						e.preventDefault();
+						const fd = new FormData(e.currentTarget);
+						const packed = serializeMachines(specs);
+						save.mutate({
+							id: row.id,
+							customer: String(fd.get("customer") || row.customer),
+							equipment: packed.equipment,
+							equipStatus: String(fd.get("equipStatus") || "") || null,
+							installDate: String(fd.get("installDate") || "") || null,
+							technician: String(fd.get("technician") || "") || null,
+							wo: String(fd.get("wo") || "") || null,
+							reqsReady: String(fd.get("reqsReady") || "") || null,
+							notes: String(fd.get("notes") || "") || null,
+							workDone: String(fd.get("workDone") || "") || null,
+							completedAt: String(fd.get("completedAt") || "") || null,
+							accountRep: String(fd.get("accountRep") || "") || null,
+							aviKatz: fd.get("aviKatz") === "on",
+							paymentStatus: String(fd.get("paymentStatus") || "") || null,
+							serial: packed.serial,
+							powerVoltage: packed.powerVoltage,
+							machines: packed.machines
+						});
+					},
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "hidden",
+							name: "customer",
+							value: customer || row.customer
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "sm:col-span-2",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentMultiCombo, {
+								values: equipPieces,
+								hideChips: true,
+								placeholder: "Add another…",
+								onChange: (next) => {
+									try {
+										persistMachines(mergeMachineSpecs(next, specs));
+									} catch (err) {
+										toast.error(err instanceof Error ? err.message : "Could not update equipment");
+									}
+								}
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "sm:col-span-2",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MachineFields, {
+								specs,
+								installId: row.id,
+								customer: row.customer,
+								recipes: recs.data ?? [],
+								onChange: setSpecs,
+								onPulled: (next) => persistMachines(next),
+								onRecipe: (next) => persistMachines(next),
+								onRemove: (index) => {
+									try {
+										persistMachines(specs.filter((_, i) => i !== index));
+									} catch (err) {
+										toast.error(err instanceof Error ? err.message : "Could not update equipment");
+									}
+								}
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Equipment status" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+							name: "equipStatus",
+							className: "mt-1",
+							defaultValue: row.equipStatus ?? "",
+							allowEmpty: true,
+							children: EQUIP_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+							label: "Install date",
+							name: "installDate",
+							type: "date",
+							defaultValue: row.installDate ?? ""
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Tech" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechSelect, {
+							name: "technician",
+							defaultValue: row.technician ?? ""
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+							label: "WO #",
+							name: "wo",
+							defaultValue: row.wo ?? ""
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Site ready?" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+							name: "reqsReady",
+							className: "mt-1",
+							defaultValue: row.reqsReady ?? "",
+							allowEmpty: true,
+							children: REQS_READY.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
+							name: "accountRep",
+							label: "Account rep",
+							defaultValue: row.accountRep ?? ""
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+							className: "flex items-center gap-2 text-sm sm:mt-7",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "checkbox",
+									name: "aviKatz",
+									className: "size-4 accent-primary",
+									defaultChecked: row.aviKatz
+								}),
+								"Avi Katz account (AK)",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, { on: row.aviKatz })
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Payment" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+							name: "paymentStatus",
+							className: "mt-1",
+							defaultValue: row.paymentStatus ?? "",
+							allowEmpty: true,
+							children: PAYMENT_TERMS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+							label: "Date completed",
+							name: "completedAt",
+							type: "date",
+							defaultValue: row.completedAt ?? ""
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "sm:col-span-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+								htmlFor: `install-work-${row.id}`,
+								children: "Description of work"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoGrowTextarea, {
+								id: `install-work-${row.id}`,
+								name: "workDone",
+								className: "mt-1",
+								defaultValue: row.workDone ?? "",
+								placeholder: "What was done on site…"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "sm:col-span-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
+								name: "notes",
+								className: "mt-1",
+								defaultValue: row.notes ?? ""
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex flex-wrap items-center justify-between gap-2 sm:col-span-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								type: "button",
+								size: "sm",
+								variant: "outline",
+								disabled: dropInstall.isPending,
+								onClick: () => {
+									if (window.confirm(`Remove “${row.customer}” from the install list?`)) dropInstall.mutate();
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), "Remove from list"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "submit",
+								size: "sm",
+								disabled: save.isPending,
+								children: "Save"
+							})]
+						})
+					]
+				}, row.id),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
+					entityType: "install",
+					entityId: row.id
+				})
+			] })] }) : null
+		})
+	});
+}
+function DealSheet({ deal, onClose, lockCustomer = false }) {
+	const qc = useQueryClient();
+	const formRef = (0, import_react.useRef)(null);
+	const skipToast = (0, import_react.useRef)(false);
+	const save = useMutation({
+		mutationFn: (d) => updateDeal({ data: d }),
+		onSuccess: () => {
+			if (!skipToast.current) toast.success("Saved");
+			skipToast.current = false;
+			qc.invalidateQueries({ queryKey: ["deals"] });
+			qc.invalidateQueries({ queryKey: ["installs"] });
+			qc.invalidateQueries({ queryKey: ["dashboard"] });
+			qc.invalidateQueries({ queryKey: ["handoff"] });
+			qc.invalidateQueries({ queryKey: ["customer-history"] });
+			qc.invalidateQueries({ queryKey: ["customers"] });
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
+	});
+	const dropDeal = useMutation({
+		mutationFn: () => archiveDeal({ data: { id: deal.id } }),
+		onSuccess: () => {
+			toast.success(`Removed ${deal?.customer} from the list`);
+			qc.invalidateQueries({ queryKey: ["deals"] });
+			qc.invalidateQueries({ queryKey: ["dashboard"] });
+			qc.invalidateQueries({ queryKey: ["handoff"] });
+			onClose();
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove")
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
+		open: !!deal,
+		onOpenChange: (o) => {
+			if (!o) {
+				skipToast.current = true;
+				formRef.current?.requestSubmit();
+				onClose();
+			}
+		},
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, { children: deal ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				className: "text-xs tracking-wide text-muted-foreground uppercase",
+				children: ["Pipeline · ", moneyExact(deal.amount)]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: deal.customer }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "mt-2 flex flex-wrap gap-1.5",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: deal.completion === "complete" ? "Complete" : deal.completion === "fell" ? "Fell through" : "Open" })
+			})
+		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+			ref: formRef,
+			className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
+			onSubmit: (e) => {
+				e.preventDefault();
+				const fd = new FormData(e.currentTarget);
+				const amountRaw = String(fd.get("amount") || "").replace(/[$,]/g, "").trim();
+				const amountNum = amountRaw ? Number(amountRaw) : NaN;
+				save.mutate({
+					id: deal.id,
+					customer: String(fd.get("customer")),
+					producer: String(fd.get("producer") || "") || null,
+					aviKatz: fd.get("aviKatz") === "on",
+					equipment: String(fd.get("equipment") || "") || null,
+					amount: Number.isFinite(amountNum) ? amountNum : null,
+					goodToOrder: fd.get("goodToOrder") === "on" || fd.get("ordered") === "on",
+					ordered: fd.get("ordered") === "on",
+					eta: String(fd.get("eta") || "") || null,
+					terms: String(fd.get("terms") || "") || null,
+					invoice: String(fd.get("invoice") || "") || null,
+					completion: String(fd.get("completion") || "") || null,
+					notes: String(fd.get("notes") || "") || null
+				});
+			},
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundCustomer, {
+					recordKey: deal.id,
+					defaultValue: deal.customer,
+					required: true,
+					locked: lockCustomer
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
+					name: "producer",
+					label: "Rep",
+					defaultValue: deal.producer ?? ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+					className: "flex items-center gap-2 text-sm sm:col-span-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "checkbox",
+							name: "aviKatz",
+							className: "size-4 accent-primary",
+							defaultChecked: deal.aviKatz
+						}),
+						"Avi Katz account (AK)",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, { on: deal.aviKatz })
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "sm:col-span-2",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundEquipment, {
+						recordKey: deal.id,
+						defaultValue: deal.equipment ?? ""
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					label: "Amount",
+					name: "amount",
+					defaultValue: deal.amount != null ? String(deal.amount) : ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Payment terms" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+					name: "terms",
+					className: "mt-1",
+					defaultValue: deal.terms ?? "",
+					allowEmpty: true,
+					children: PAYMENT_TERMS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					label: "ETA",
+					name: "eta",
+					defaultValue: deal.eta ?? ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+					label: "Invoice #",
+					name: "invoice",
+					defaultValue: deal.invoice ?? ""
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Deal completion" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+					name: "completion",
+					className: "mt-1",
+					defaultValue: deal.completion ?? "",
+					allowEmpty: true,
+					emptyLabel: "Still open",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: "complete",
+						children: "Complete — hand off to service"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: "fell",
+						children: "Fell through"
+					})]
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "sm:col-span-2 rounded-lg border border-border bg-muted/40 p-3",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm font-medium",
+							children: "Order steps"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-1 text-xs text-muted-foreground",
+							children: "Reps mark Good to order. Confirm Ordered and it leaves the Good to order list."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-3 grid gap-2 sm:grid-cols-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+								className: "flex min-h-11 items-center gap-2 text-sm",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "checkbox",
+									name: "goodToOrder",
+									defaultChecked: deal.goodToOrder || deal.ordered
+								}), "1. Good to order"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+								className: "flex min-h-11 items-center gap-2 text-sm",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "checkbox",
+									name: "ordered",
+									defaultChecked: deal.ordered
+								}), "2. Ordered"]
+							})]
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "sm:col-span-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
+						name: "notes",
+						className: "mt-1",
+						defaultValue: deal.notes ?? ""
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex flex-wrap items-center justify-between gap-2 sm:col-span-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						type: "button",
+						size: "sm",
+						variant: "outline",
+						disabled: dropDeal.isPending,
+						onClick: () => {
+							if (window.confirm(`Remove “${deal.customer}” from the pipeline list?`)) dropDeal.mutate();
+						},
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), "Remove from list"]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "submit",
+						size: "sm",
+						disabled: save.isPending,
+						children: "Save"
+					})]
+				})
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
+			entityType: "deal",
+			entityId: deal.id
+		})] })] }) : null })
+	});
+}
+function ModuleSheet({ row, onClose, onAssign }) {
+	const qc = useQueryClient();
+	const save = useMutation({
+		mutationFn: (d) => updateModule({ data: d }),
+		onSuccess: () => {
+			toast.success("Saved");
+			qc.invalidateQueries({ queryKey: ["modules"] });
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
+		open: !!row,
+		onOpenChange: (o) => !o && onClose(),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, { children: row ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-xs tracking-wide text-muted-foreground uppercase",
+				children: "Eversys Module"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: row.moduleId }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "mt-2",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: row.status })
+			})
+		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 px-5 py-3",
+				"data-testid": "module-where",
+				children: moduleAvailability(row) === "assigned" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssignedLine, { row }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ModuleReturnActions, { row })] }) : moduleAvailability(row) === "hq" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm font-medium",
+					children: "At HQ · Available"
+				}), onAssign ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "sm",
+					variant: "outline",
+					onClick: () => onAssign(row),
+					children: "Assign To Account"
+				}) : null] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+					className: "text-sm text-muted-foreground",
+					children: ["Not at HQ · ", row.status]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+				className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
+				onSubmit: (e) => {
+					e.preventDefault();
+					const fd = new FormData(e.currentTarget);
+					save.mutate({
+						id: row.id,
+						platform: String(fd.get("platform") || "") || null,
+						moduleType: String(fd.get("moduleType") || "") || null,
+						status: String(fd.get("status")),
+						wo: String(fd.get("wo") || "") || null,
+						location: String(fd.get("location") || "") || null,
+						dateIn: String(fd.get("dateIn") || "") || null,
+						dateReady: String(fd.get("dateReady") || "") || null,
+						technician: String(fd.get("technician") || "") || null,
+						notes: String(fd.get("notes") || "") || null
+					});
+				},
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Platform" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+						name: "platform",
+						className: "mt-1",
+						defaultValue: row.platform ?? "",
+						children: MODULE_PLATFORMS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Type" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+						name: "moduleType",
+						className: "mt-1",
+						defaultValue: row.moduleType ?? "",
+						children: MODULE_TYPES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+					})] }),
+					row.assignedCustomer ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LockedCustomer, {
+						name: row.status,
+						label: "Status",
+						inputName: "status"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LockedCustomer, {
+						name: row.location ?? "",
+						label: "Account",
+						inputName: "location"
+					})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Status" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+						name: "status",
+						className: "mt-1",
+						defaultValue: row.status,
+						children: MODULE_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
+					})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+						label: "Location / account",
+						name: "location",
+						defaultValue: row.location ?? ""
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+						label: "WO #",
+						name: "wo",
+						defaultValue: row.wo ?? ""
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Tech" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechSelect, {
+						name: "technician",
+						defaultValue: row.technician ?? ""
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+						label: "Date in",
+						name: "dateIn",
+						type: "date",
+						defaultValue: row.dateIn ?? ""
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field$1, {
+						label: "Date ready",
+						name: "dateReady",
+						type: "date",
+						defaultValue: row.dateReady ?? ""
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "sm:col-span-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
+							name: "notes",
+							className: "mt-1",
+							defaultValue: row.notes ?? ""
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex justify-end sm:col-span-2",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "submit",
+							size: "sm",
+							disabled: save.isPending,
+							children: "Save"
+						})
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
+				entityType: "module",
+				entityId: row.id
+			})
+		] })] }) : null })
+	});
+}
+function InstallAssets({ installId }) {
+	const qc = useQueryClient();
+	const assets = useQuery({
+		queryKey: ["assets"],
+		queryFn: () => listAssets()
+	});
+	const [pick, setPick] = (0, import_react.useState)("");
+	const assigned = (assets.data ?? []).filter((a) => a.installId === installId);
+	const ready = (assets.data ?? []).filter((a) => a.status === "ready" && a.site.startsWith("barn"));
+	const assign = useMutation({
+		mutationFn: (assetId) => assignAssetToInstall({ data: {
+			assetId,
+			installId
+		} }),
+		onSuccess: () => {
+			toast.success("Pulled from the barn — off the warehouse board");
+			setPick("");
+			qc.invalidateQueries({ queryKey: ["assets"] });
+			qc.invalidateQueries({ queryKey: ["installs"] });
+			qc.invalidateQueries({ queryKey: ["dashboard"] });
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Failed")
+	});
+	const unassign = useMutation({
+		mutationFn: (assetId) => unassignAssetFromInstall({ data: {
+			assetId,
+			installId
+		} }),
+		onSuccess: () => {
+			toast.success("Removed — back on the barn rack");
+			qc.invalidateQueries({ queryKey: ["assets"] });
+			qc.invalidateQueries({ queryKey: ["installs"] });
+			qc.invalidateQueries({ queryKey: ["dashboard"] });
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Failed")
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		id: "warehouse-units",
+		className: "border-b border-border bg-muted/40 px-4 py-3",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-xs tracking-wide text-muted-foreground uppercase",
+				children: "Warehouse units"
+			}),
+			assets.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-2 text-sm text-muted-foreground",
+				children: "Loading the barn…"
+			}) : assigned.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+				className: "mt-2 space-y-1",
+				children: assigned.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+					className: "flex items-center justify-between gap-2 text-sm",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "min-w-0 truncate",
+						children: [
+							a.model,
+							" · ",
+							a.serial ?? "no serial",
+							a.customerOwned ? ` · ${a.customerOwned}` : ""
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						className: "inline-flex h-8 shrink-0 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-background hover:text-foreground",
+						"aria-label": `Remove ${a.model}`,
+						disabled: unassign.isPending,
+						onClick: () => unassign.mutate(a.id),
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-3.5" }), "Remove"]
+					})]
+				}, a.id))
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-2 text-sm text-muted-foreground",
+				children: "None pulled yet. Assigning a unit removes it from the barn rack."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				className: "mt-3 text-xs text-muted-foreground",
+				children: [ready.length, " ready on the rack"]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-2 flex flex-col gap-2 sm:flex-row sm:items-end",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "min-w-0 flex-1",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReadyUnitPicker, {
+						units: ready,
+						value: pick,
+						onChange: setPick
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					size: "sm",
+					type: "button",
+					disabled: !pick || assign.isPending,
+					onClick: () => assign.mutate(Number(pick)),
+					children: "Assign from barn"
+				})]
+			})
+		]
+	});
+}
+function filterReadyUnits(ready, filter) {
+	const q = filter.trim().toLowerCase();
+	return [...q ? ready.filter((a) => `${a.model} ${a.serial ?? ""} ${a.slotLabel}`.toLowerCase().includes(q)) : ready].sort((a, b) => a.model.localeCompare(b.model) || a.slotLabel.localeCompare(b.slotLabel));
+}
+function unitLabel(a) {
+	return `${a.model} · ${a.slotLabel}${a.serial ? ` · ${a.serial}` : ""}`;
+}
+function ReadyUnitPicker({ units, value, onChange }) {
+	const [open, setOpen] = (0, import_react.useState)(false);
+	const [q, setQ] = (0, import_react.useState)("");
+	const box = (0, import_react.useRef)(null);
+	const menuRef = (0, import_react.useRef)(null);
+	const query = open ? q : "";
+	const matches = (0, import_react.useMemo)(() => filterReadyUnits(units, query), [units, query]);
+	const selected = units.find((a) => String(a.id) === value) ?? null;
+	const notFound = query.trim().length >= 2 && matches.length === 0;
+	(0, import_react.useEffect)(() => {
+		if (!open) return;
+		function onDoc(e) {
+			const target = e.target;
+			if (box.current?.contains(target) || menuRef.current?.contains(target)) return;
+			setOpen(false);
+			setQ("");
+		}
+		document.addEventListener("mousedown", onDoc);
+		function onCloseList() {
+			setOpen(false);
+			setQ("");
+		}
+		document.addEventListener("desk-close-combo", onCloseList);
+		return () => {
+			document.removeEventListener("mousedown", onDoc);
+			document.removeEventListener("desk-close-combo", onCloseList);
+		};
+	}, [open]);
+	function pick(id) {
+		onChange(id);
+		setQ("");
+		setOpen(false);
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref: box,
+		className: "relative",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex min-h-11 w-full items-center gap-2 rounded-full border border-input bg-background px-3 text-sm focus-within:ring-2 focus-within:ring-ring",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+					value: open ? q : selected ? unitLabel(selected) : "",
+					placeholder: "Ready unit on the rack…",
+					autoComplete: "off",
+					"aria-label": "Ready unit on the rack",
+					"aria-expanded": open,
+					role: "combobox",
+					className: "min-w-0 flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground",
+					onChange: (e) => {
+						setQ(e.target.value);
+						if (!open) setOpen(true);
+					},
+					onFocus: () => setQ(""),
+					onClick: () => setOpen(true),
+					onKeyDown: (e) => {
+						if (e.key === "ArrowDown" && !open) setOpen(true);
+						if (e.key === "Escape") setOpen(false);
+						if (e.key === "Enter") {
+							e.preventDefault();
+							if (matches[0]) pick(String(matches[0].id));
+						}
+					}
+				}),
+				selected && !open ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					className: "flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted",
+					"aria-label": "Clear",
+					onMouseDown: (e) => {
+						e.preventDefault();
+						onChange("");
+					},
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-3.5" })
+				}) : null,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronsUpDown, { className: "size-4 shrink-0 text-muted-foreground" })
+			]
+		}), open ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(AnchoredList, {
+			anchor: box,
+			menuRef,
+			children: [notFound ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "px-2 py-1.5 text-xs text-muted-foreground",
+				children: "No unit on the rack matches that search."
+			}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+				className: "py-1",
+				role: "listbox",
+				children: [matches.map((a) => {
+					const active = String(a.id) === value;
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						role: "option",
+						"aria-selected": active,
+						className: active ? "flex min-h-10 w-full items-center px-2 py-1.5 text-left text-sm bg-muted" : "flex min-h-10 w-full items-center px-2 py-1.5 text-left text-sm hover:bg-muted",
+						onMouseDown: (e) => {
+							e.preventDefault();
+							pick(String(a.id));
+						},
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "min-w-0 truncate",
+							children: unitLabel(a)
+						})
+					}) }, a.id);
+				}), !matches.length && !notFound ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+					className: "px-2 py-2 text-xs text-muted-foreground",
+					children: "Nothing ready on the rack."
+				}) : null]
+			})]
+		}) : null]
+	});
+}
+function SimpleCreateDialog({ title, open, onOpenChange, fields, onSubmit }) {
+	const [pending, setPending] = (0, import_react.useState)(false);
+	const [values, setValues] = (0, import_react.useState)({});
+	(0, import_react.useEffect)(() => {
+		if (open) setValues({});
+	}, [open]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+		open,
+		onOpenChange,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: title }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+			className: "mt-4 space-y-3",
+			onSubmit: async (e) => {
+				e.preventDefault();
+				const fd = new FormData(e.currentTarget);
+				const next = { ...values };
+				for (const [k, v] of fd.entries()) next[k] = String(v);
+				setPending(true);
+				try {
+					await onSubmit(next);
+					onOpenChange(false);
+				} catch (err) {
+					toast.error(err instanceof Error ? err.message : "Failed");
+				} finally {
+					setPending(false);
+				}
+			},
+			children: [fields.map((f) => {
+				const val = values[f.name] ?? "";
+				if (f.kind === "customer") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
+					name: f.name,
+					label: f.label,
+					value: val,
+					onChange: (v) => setValues((cur) => ({
+						...cur,
+						[f.name]: v
+					})),
+					required: f.required
+				}, f.name);
+				if (f.kind === "equipment") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentCombo, {
+					name: f.name,
+					label: f.label,
+					value: val,
+					onChange: (v) => setValues((cur) => ({
+						...cur,
+						[f.name]: v
+					}))
+				}, f.name);
+				if (f.kind === "rep") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
+					name: f.name,
+					label: f.label,
+					value: val,
+					onChange: (v) => setValues((cur) => ({
+						...cur,
+						[f.name]: v
+					}))
+				}, f.name);
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+					htmlFor: f.name,
+					children: f.label
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					id: f.name,
+					name: f.name,
+					className: "mt-1",
+					required: f.required
+				})] }, f.name);
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex justify-end",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "submit",
+					disabled: pending,
+					children: "Create"
+				})
+			})]
+		})] })
+	});
 }
 //#endregion
 //#region src/components/desk/recipe-form.tsx
@@ -12375,24 +17545,19 @@ function RecipeEditorSheet({ draft, models, customers, onClose }) {
 		})] }) : null })
 	});
 }
-function RecipeChip({ piece, customer, installId, recipes, onOpen, onRemove }) {
+function RecipeChip({ piece, customer, installId, recipes, recipeId, onOpen, onRemove }) {
 	const { linked, house } = findRecipeFor(recipes, {
 		customer,
 		model: piece.model,
-		installId
+		installId,
+		recipeId
 	});
-	const preview = previewSetting(linked ?? void 0);
+	const preview = previewSetting(linked ?? house ?? void 0);
 	let tone = "empty";
-	let status = "Add recipe";
-	if (linked) {
-		tone = "saved";
-		status = "Recipe";
-	} else if (house) {
-		tone = "house";
-		status = "House";
-	}
+	if (linked) tone = "saved";
+	else if (house) tone = "house";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: cn("inline-flex h-9 max-w-[16rem] items-center rounded-md border", tone === "saved" && "border-primary/30 bg-primary/8", tone === "house" && "border-border bg-card", tone === "empty" && "border-dashed border-border bg-background text-muted-foreground"),
+		className: cn("inline-flex h-8 max-w-[16rem] items-center rounded-full border", tone === "saved" && "border-primary/30 bg-primary/8", tone === "house" && "border-border bg-card", tone === "empty" && "border-border bg-background"),
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 			type: "button",
 			onClick: (e) => {
@@ -12408,22 +17573,18 @@ function RecipeChip({ piece, customer, installId, recipes, onOpen, onRemove }) {
 					source: null
 				});
 			},
-			className: "inline-flex min-w-0 flex-1 items-center gap-1.5 px-2 text-left",
-			title: preview ?? `${piece.model} recipe`,
-			children: [
-				tone === "empty" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-3.5 shrink-0" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BookOpen, { className: "size-3.5 shrink-0" }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "min-w-0 truncate text-xs font-medium text-foreground",
-					children: shortEquipLabel(piece.label)
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "shrink-0 text-[11px] text-muted-foreground",
-					children: status
-				})
-			]
+			className: "inline-flex min-w-0 flex-1 items-center gap-1 px-2.5 text-left",
+			title: preview ?? piece.label,
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "min-w-0 truncate text-xs font-medium text-foreground",
+				children: shortEquipLabel(piece.label, 28)
+			}), tone === "empty" ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BookOpen, {
+				className: "size-3 shrink-0 text-muted-foreground",
+				"aria-label": tone === "saved" ? "Account recipe" : "House recipe"
+			})]
 		}), onRemove ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 			type: "button",
-			className: "flex size-10 shrink-0 items-center justify-center rounded-r-md border-l border-border/70 text-muted-foreground hover:bg-muted hover:text-foreground",
+			className: "flex size-8 shrink-0 items-center justify-center rounded-r-full text-muted-foreground hover:bg-muted hover:text-foreground",
 			"aria-label": `Remove ${piece.label}`,
 			title: "Remove this equipment from the install",
 			onClick: (e) => {
@@ -12433,1420 +17594,6 @@ function RecipeChip({ piece, customer, installId, recipes, onOpen, onRemove }) {
 			},
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-3.5" })
 		}) : null]
-	});
-}
-function InstallRecipeList({ customer, installId, pieces, recipes, onOpen }) {
-	if (pieces.length === 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "border-b border-border px-5 py-4",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: "Recipes"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "mt-2 text-sm text-muted-foreground",
-				children: "Add equipment on this install and a recipe slot will show up for each machine."
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-				type: "button",
-				size: "sm",
-				variant: "outline",
-				className: "mt-3",
-				onClick: () => onOpen({
-					recipe: null,
-					customer,
-					equipmentModel: "",
-					installId,
-					copiedFrom: null,
-					lockCustomer: true
-				}),
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-3.5" }),
-					"Add recipe for ",
-					customer
-				]
-			})
-		]
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "border-b border-border px-5 py-4",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: "Recipes by machine"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-				className: "mt-1 text-xs text-muted-foreground",
-				children: [
-					"Linked to ",
-					customer,
-					". Shared with techs and sales. Use a house recipe or start a new one."
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-				className: "mt-3 space-y-2",
-				children: pieces.map((p, idx) => {
-					const { linked, house } = findRecipeFor(recipes, {
-						customer,
-						model: p.model,
-						installId
-					});
-					const preview = previewSetting(linked ?? house ?? void 0);
-					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
-						className: "flex flex-col gap-2 rounded-lg border border-border bg-background px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "min-w-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "truncate text-sm font-medium",
-								children: p.model
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "truncate text-xs text-muted-foreground",
-								children: [linked ? "Saved for this account" : house ? "House recipe available" : "No recipe yet", preview ? ` · ${preview}` : ""]
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "button",
-							size: "sm",
-							variant: linked ? "secondary" : "outline",
-							onClick: () => onOpen({
-								recipe: linked,
-								customer,
-								equipmentModel: p.model,
-								installId,
-								copiedFrom: linked?.copiedFrom ?? house?.id ?? null,
-								lockCustomer: true,
-								lockEquipment: false,
-								source: null
-							}),
-							children: linked ? "Edit" : "Add recipe"
-						})]
-					}, `${p.model}-${idx}`);
-				})
-			})
-		]
-	});
-}
-//#endregion
-//#region src/components/desk/rep-select.tsx
-function useReps() {
-	return useQuery({
-		queryKey: ["reps"],
-		queryFn: () => listReps()
-	});
-}
-function activeReps(reps, current) {
-	const list = reps ?? [];
-	const active = list.filter((r) => r.active);
-	const cur = (current ?? "").trim();
-	if (cur && !active.some((r) => r.name === cur) && !list.some((r) => r.name === cur && r.active)) {
-		const leftover = list.find((r) => r.name === cur);
-		if (leftover) return [...active, leftover];
-	}
-	return active;
-}
-function RepSelect({ name = "producer", value, defaultValue, onChange, label = "Rep", id, className }) {
-	const q = useReps();
-	const current = value ?? defaultValue ?? "";
-	const reps = activeReps(q.data?.reps, current);
-	const unknown = !!current && isNoRep(current);
-	const selected = unknown ? current : current;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className,
-		children: [
-			label ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-				htmlFor: id,
-				children: label
-			}) : null,
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
-				id,
-				name,
-				className: label ? "mt-1" : void 0,
-				value,
-				defaultValue: value == null ? defaultValue ?? "" : void 0,
-				onChange: onChange ? (e) => onChange(e.target.value) : void 0,
-				allowEmpty: true,
-				emptyLabel: "—",
-				children: [unknown ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
-					value: current,
-					children: [current, " (unknown)"]
-				}) : null, reps.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("option", {
-					value: r.name,
-					children: [
-						r.name,
-						" (",
-						r.initials,
-						")"
-					]
-				}, r.id))]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, {
-				show: isNoRep(selected),
-				className: "mt-1 block"
-			})
-		]
-	});
-}
-function RepFilter({ value, onChange, extraNames, className, includeNone = true }) {
-	const q = useReps();
-	const names = /* @__PURE__ */ new Map();
-	for (const r of q.data?.reps ?? []) if (r.active) names.set(r.name, `${r.name} (${r.initials})`);
-	for (const n of extraNames ?? []) {
-		const s = (n ?? "").trim();
-		if (s && !names.has(s)) names.set(s, isNoRep(s) ? `${s} (unknown)` : formatRep(s));
-	}
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
-		value,
-		onChange: (e) => onChange(e.target.value),
-		allowEmpty: true,
-		emptyLabel: "All reps",
-		className: cn("max-w-xs", className),
-		"aria-label": "Filter by rep",
-		children: [includeNone ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-			value: "__none__",
-			children: "No rep assigned"
-		}) : null, [...names.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([name, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-			value: name,
-			children: label
-		}, name))]
-	});
-}
-function RepName({ name }) {
-	if (!name?.trim()) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, { show: true });
-	if (isNoRep(name)) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-		name,
-		" ",
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, {
-			show: true,
-			className: "ml-1"
-		})
-	] });
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatRep(name) });
-}
-//#endregion
-//#region src/components/desk/machine-fields.tsx
-function MachineFields({ specs, onChange, installId, onPulled }) {
-	if (!specs.length) return null;
-	function patch(index, part) {
-		return specs.map((s, i) => i === index ? {
-			...s,
-			...part
-		} : s);
-	}
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "space-y-3",
-		children: specs.map((spec, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
-			className: "rounded-xl border border-border bg-background px-3 py-3",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
-					className: "px-1 text-sm font-medium",
-					children: spec.equipment
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs text-muted-foreground",
-					children: "Type a warehouse serial to pull the unit onto this account in one step."
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mt-2 grid gap-3 sm:grid-cols-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SerialPullField, {
-						label: `Serial number — ${spec.equipment}`,
-						value: spec.serial,
-						installId,
-						machineIndex: index,
-						onValue: (serial) => onChange(patch(index, { serial })),
-						onPulled: (result) => {
-							const next = patch(index, {
-								serial: result.serial,
-								powerVoltage: spec.powerVoltage || result.powerVoltage || ""
-							});
-							onChange(next);
-							onPulled?.(next, result);
-						}
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Label, {
-						htmlFor: `pwr-${index}`,
-						children: ["Power / voltage — ", spec.equipment]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-						id: `pwr-${index}`,
-						className: "mt-1",
-						value: spec.powerVoltage,
-						autoComplete: "off",
-						placeholder: "e.g. 208V / 1-phase / 30A",
-						onChange: (e) => onChange(patch(index, { powerVoltage: e.target.value }))
-					})] })]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "mt-3",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UnitPlaceField, {
-						serial: spec.serial,
-						model: spec.equipment
-					})
-				})
-			]
-		}, `${spec.equipment}-${index}`))
-	});
-}
-//#endregion
-//#region src/components/desk/entity-sheets.tsx
-function Field({ label, name, defaultValue, type = "text", placeholder }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-		htmlFor: name,
-		children: label
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-		id: name,
-		name,
-		type,
-		defaultValue,
-		placeholder,
-		autoComplete: "off",
-		className: "mt-1"
-	})] });
-}
-function BoundCustomer({ recordKey, defaultValue, name = "customer", required, locked }) {
-	const [value, setValue] = (0, import_react.useState)(defaultValue);
-	(0, import_react.useEffect)(() => {
-		setValue(defaultValue);
-	}, [recordKey, defaultValue]);
-	if (locked) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LockedCustomer, {
-		name: defaultValue,
-		inputName: name
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
-		name,
-		value,
-		onChange: setValue,
-		required
-	});
-}
-function BoundEquipment({ recordKey, defaultValue, name = "equipment" }) {
-	const [value, setValue] = (0, import_react.useState)(defaultValue);
-	(0, import_react.useEffect)(() => {
-		setValue(defaultValue);
-	}, [recordKey, defaultValue]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentCombo, {
-		name,
-		value,
-		onChange: setValue
-	});
-}
-function PmSheet({ pm, onClose, lockCustomer = false }) {
-	const qc = useQueryClient();
-	const formRef = (0, import_react.useRef)(null);
-	const skipToast = (0, import_react.useRef)(false);
-	const save = useMutation({
-		mutationFn: (d) => updatePm({ data: d }),
-		onSuccess: () => {
-			if (!skipToast.current) toast.success("Saved");
-			skipToast.current = false;
-			qc.invalidateQueries({ queryKey: ["pms"] });
-			qc.invalidateQueries({ queryKey: ["dashboard"] });
-			qc.invalidateQueries({ queryKey: ["customer-history"] });
-			qc.invalidateQueries({ queryKey: ["customers"] });
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
-		open: !!pm,
-		onOpenChange: (o) => {
-			if (!o) {
-				skipToast.current = true;
-				formRef.current?.requestSubmit();
-				onClose();
-			}
-		},
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, { children: pm ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: "Preventative maintenance"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: pm.customer }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "mt-2 flex flex-wrap gap-1.5",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: pm.status }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagBadge, { flag: pm.flag })]
-			})
-		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-			ref: formRef,
-			className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
-			onSubmit: (e) => {
-				e.preventDefault();
-				const fd = new FormData(e.currentTarget);
-				save.mutate({
-					id: pm.id,
-					customer: String(fd.get("customer")),
-					equipment: String(fd.get("equipment") || "") || null,
-					style: String(fd.get("style") || "") || null,
-					projected: String(fd.get("projected") || "") || null,
-					partsStatus: String(fd.get("partsStatus") || "") || null,
-					status: String(fd.get("status")),
-					technician: String(fd.get("technician") || "") || null,
-					notes: String(fd.get("notes") || "") || null,
-					wo: String(fd.get("wo") || "") || null,
-					workDone: String(fd.get("workDone") || "") || null,
-					completedAt: String(fd.get("completedAt") || "") || null
-				});
-			},
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundCustomer, {
-					recordKey: pm.id,
-					defaultValue: pm.customer,
-					required: true,
-					locked: lockCustomer
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundEquipment, {
-					recordKey: pm.id,
-					defaultValue: pm.equipment ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "PM style" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-					name: "style",
-					className: "mt-1",
-					defaultValue: pm.style ?? "",
-					allowEmpty: true,
-					children: PM_STYLES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Status" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-					name: "status",
-					className: "mt-1",
-					defaultValue: pm.status,
-					children: PM_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "Projected date",
-					name: "projected",
-					type: "date",
-					defaultValue: pm.projected ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Parts" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-					name: "partsStatus",
-					className: "mt-1",
-					defaultValue: pm.partsStatus ?? "",
-					allowEmpty: true,
-					children: PARTS_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Tech" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechSelect, {
-					name: "technician",
-					defaultValue: pm.technician ?? ""
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "WO #",
-					name: "wo",
-					defaultValue: pm.wo ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "Date completed",
-					name: "completedAt",
-					type: "date",
-					defaultValue: pm.completedAt ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "sm:col-span-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-						htmlFor: `pm-work-${pm.id}`,
-						children: "Description of work"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoGrowTextarea, {
-						id: `pm-work-${pm.id}`,
-						name: "workDone",
-						className: "mt-1",
-						defaultValue: pm.workDone ?? "",
-						placeholder: "What was done on site…"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "sm:col-span-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
-						name: "notes",
-						className: "mt-1",
-						defaultValue: pm.notes ?? ""
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex justify-end sm:col-span-2",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						type: "submit",
-						size: "sm",
-						disabled: save.isPending,
-						children: "Save"
-					})
-				})
-			]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
-			entityType: "pm",
-			entityId: pm.id
-		})] })] }) : null })
-	});
-}
-function InstallSheet({ row, onClose, onOpenRelated, lockCustomer = false }) {
-	const qc = useQueryClient();
-	const recs = useQuery({
-		queryKey: ["recipes"],
-		queryFn: () => listRecipes()
-	});
-	const assets = useQuery({
-		queryKey: ["assets"],
-		queryFn: () => listAssets()
-	});
-	const customers = useQuery({
-		queryKey: ["customers"],
-		queryFn: () => listCustomers()
-	});
-	const directoryEquip = useQuery({
-		queryKey: ["directory", "equipment"],
-		queryFn: () => listDirectory({ data: { kind: "equipment" } })
-	});
-	const [recipeDraft, setRecipeDraft] = (0, import_react.useState)(null);
-	const [customer, setCustomer] = (0, import_react.useState)(row?.customer ?? "");
-	const [equipPieces, setEquipPieces] = (0, import_react.useState)([]);
-	const [specs, setSpecs] = (0, import_react.useState)([]);
-	const [hydratedId, setHydratedId] = (0, import_react.useState)(null);
-	const formRef = (0, import_react.useRef)(null);
-	const skipToast = (0, import_react.useRef)(false);
-	const catalog = catalogModels([
-		...(directoryEquip.data ?? []).map((e) => e.name),
-		...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
-		...(recs.data ?? []).map((r) => r.equipmentModel)
-	]);
-	(0, import_react.useEffect)(() => {
-		setRecipeDraft(null);
-		setCustomer(row?.customer ?? "");
-		const saved = row?.machines ?? [];
-		const fromSaved = saved.map((s) => s.equipment).filter(Boolean);
-		const names = catalog.length ? listedEquipment(fromSaved.join("\n") || row?.equipment, catalog) : fromSaved.length ? fromSaved : (row?.equipment ?? "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-		setEquipPieces(names);
-		setSpecs(mergeMachineSpecs(names, saved, {
-			serial: row?.serial,
-			powerVoltage: row?.powerVoltage
-		}));
-		setHydratedId(row?.id ?? null);
-	}, [row?.id, catalog.join("\n")]);
-	const save = useMutation({
-		mutationFn: (d) => updateInstall({ data: d }),
-		onSuccess: (_row, vars) => {
-			if (!Object.keys(vars).filter((k) => k !== "id").every((k) => [
-				"equipment",
-				"serial",
-				"powerVoltage",
-				"machines"
-			].includes(k)) && !skipToast.current) toast.success("Saved");
-			skipToast.current = false;
-			qc.invalidateQueries({ queryKey: ["installs"] });
-			qc.invalidateQueries({ queryKey: ["dashboard"] });
-			qc.invalidateQueries({ queryKey: ["customer-history"] });
-			qc.invalidateQueries({ queryKey: ["customers"] });
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
-	});
-	const dropInstall = useMutation({
-		mutationFn: () => archiveInstall({ data: { id: row.id } }),
-		onSuccess: () => {
-			toast.success(`Removed ${row?.customer} from the list`);
-			qc.invalidateQueries({ queryKey: ["installs"] });
-			qc.invalidateQueries({ queryKey: ["dashboard"] });
-			qc.invalidateQueries({ queryKey: ["customers"] });
-			onClose();
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove")
-	});
-	const saveRecipe = useMutation({
-		mutationFn: (d) => upsertRecipe({ data: d }),
-		onSuccess: (saved) => {
-			toast.success(saved.customer ? `Recipe saved for ${saved.customer}` : "House recipe saved");
-			qc.invalidateQueries({ queryKey: ["recipes"] });
-			qc.invalidateQueries({ queryKey: ["customers"] });
-			setRecipeDraft(null);
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Failed")
-	});
-	const copy = useMutation({
-		mutationFn: (d) => copyRecipe({ data: d }),
-		onSuccess: (saved) => {
-			toast.success(`Copied onto ${saved.customer}`);
-			qc.invalidateQueries({ queryKey: ["recipes"] });
-			qc.invalidateQueries({ queryKey: ["customers"] });
-			setRecipeDraft(null);
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Failed")
-	});
-	const pieces = row ? piecesForInstall(row.equipment, row.customer, row.id, catalog, recs.data ?? []) : [];
-	const models = catalog;
-	function persistMachines(next) {
-		setSpecs(next);
-		setEquipPieces(next.map((s) => s.equipment));
-		if (!row) return;
-		const packed = serializeMachines(next);
-		save.mutate({
-			id: row.id,
-			equipment: packed.equipment,
-			serial: packed.serial,
-			powerVoltage: packed.powerVoltage,
-			machines: packed.machines
-		});
-	}
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
-		open: !!row,
-		onOpenChange: (o) => {
-			if (!o) {
-				skipToast.current = true;
-				formRef.current?.requestSubmit();
-				setRecipeDraft(null);
-				onClose();
-			}
-		},
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, { children: row ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: "Install"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: row.customer }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "mt-2 flex flex-wrap gap-1.5",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InspectionBadge, {
-						overall: row.inspection?.overall,
-						passed: row.inspection?.passedCount,
-						total: row.inspection?.machineCount
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, {
-						tight: true,
-						status: row.equipStatus
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagBadge, { flag: row.flag }),
-					row.duplicateOf ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
-						variant: "warn",
-						children: "Possible duplicate"
-					}) : null
-				]
-			})
-		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PreInspectionPanel, { installId: row.id }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SerialNoticeBanner, { notice: row.serialNotice }),
-			row.duplicateOf ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "font-medium",
-						children: "This account already had an install request."
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "mt-1 text-xs text-muted-foreground",
-						children: "Check the earlier one before treating this as a second job — or clear the flag if it’s a new request."
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "mt-2 flex flex-wrap gap-2",
-						children: [onOpenRelated ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "button",
-							size: "sm",
-							variant: "outline",
-							onClick: () => onOpenRelated(row.duplicateOf),
-							children: "Open earlier request"
-						}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "button",
-							size: "sm",
-							variant: "ghost",
-							onClick: () => save.mutate({
-								id: row.id,
-								duplicateOf: null
-							}),
-							children: "Not a duplicate"
-						})]
-					})
-				]
-			}) : null,
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InstallAssets, { installId: row.id }),
-			recipeDraft ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "border-b border-border p-5",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mb-3 flex items-center justify-between gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs tracking-wide text-muted-foreground uppercase",
-						children: "Recipe"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						type: "button",
-						size: "sm",
-						variant: "ghost",
-						onClick: () => setRecipeDraft(null),
-						children: "Back to machines"
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RecipeForm, {
-					draft: recipeDraft,
-					models,
-					customers: customers.data ?? [],
-					pending: saveRecipe.isPending,
-					copyPending: copy.isPending,
-					onSave: (d) => saveRecipe.mutate(d),
-					onCopy: recipeDraft.recipe ? (d) => copy.mutate(d) : void 0
-				}, `${recipeDraft.recipe?.id ?? "new"}-${recipeDraft.equipmentModel}`)]
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InstallRecipeList, {
-				customer: row.customer,
-				installId: row.id,
-				pieces,
-				recipes: recs.data ?? [],
-				onOpen: setRecipeDraft
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-				ref: formRef,
-				className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
-				onSubmit: (e) => {
-					e.preventDefault();
-					const fd = new FormData(e.currentTarget);
-					const packed = serializeMachines(specs);
-					save.mutate({
-						id: row.id,
-						customer: String(fd.get("customer")),
-						equipment: packed.equipment,
-						equipStatus: String(fd.get("equipStatus") || "") || null,
-						installDate: String(fd.get("installDate") || "") || null,
-						technician: String(fd.get("technician") || "") || null,
-						wo: String(fd.get("wo") || "") || null,
-						reqsReady: String(fd.get("reqsReady") || "") || null,
-						notes: String(fd.get("notes") || "") || null,
-						workDone: String(fd.get("workDone") || "") || null,
-						completedAt: String(fd.get("completedAt") || "") || null,
-						accountRep: String(fd.get("accountRep") || "") || null,
-						aviKatz: fd.get("aviKatz") === "on",
-						paymentStatus: String(fd.get("paymentStatus") || "") || null,
-						serial: packed.serial,
-						powerVoltage: packed.powerVoltage,
-						machines: packed.machines
-					});
-				},
-				children: [
-					lockCustomer ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LockedCustomer, { name: row.customer }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
-						name: "customer",
-						value: customer,
-						onChange: (v) => {
-							try {
-								setCustomer(v);
-							} catch (err) {
-								toast.error(err instanceof Error ? err.message : "Could not set customer");
-							}
-						},
-						required: true
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "sm:col-span-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentMultiCombo, {
-							values: equipPieces,
-							placeholder: "Search the full equipment list…",
-							menuInFlow: true,
-							onChange: (next) => {
-								try {
-									persistMachines(mergeMachineSpecs(next, specs));
-								} catch (err) {
-									toast.error(err instanceof Error ? err.message : "Could not update equipment");
-								}
-							}
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-1 text-xs text-muted-foreground",
-							children: "Scroll the full list, pick a model, or type a new one to add it."
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "sm:col-span-2",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MachineFields, {
-							specs,
-							installId: row.id,
-							onChange: setSpecs,
-							onPulled: (next) => persistMachines(next)
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Equipment status" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-						name: "equipStatus",
-						className: "mt-1",
-						defaultValue: row.equipStatus ?? "",
-						allowEmpty: true,
-						children: EQUIP_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-						label: "Install date",
-						name: "installDate",
-						type: "date",
-						defaultValue: row.installDate ?? ""
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Tech" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechSelect, {
-						name: "technician",
-						defaultValue: row.technician ?? ""
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-						label: "WO #",
-						name: "wo",
-						defaultValue: row.wo ?? ""
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Site ready?" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-						name: "reqsReady",
-						className: "mt-1",
-						defaultValue: row.reqsReady ?? "",
-						allowEmpty: true,
-						children: REQS_READY.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
-						name: "accountRep",
-						label: "Account rep",
-						defaultValue: row.accountRep ?? ""
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-						className: "flex items-center gap-2 text-sm sm:mt-7",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "checkbox",
-								name: "aviKatz",
-								className: "size-4 accent-primary",
-								defaultChecked: row.aviKatz
-							}),
-							"Avi Katz account (AK)",
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, { on: row.aviKatz })
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Payment" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-						name: "paymentStatus",
-						className: "mt-1",
-						defaultValue: row.paymentStatus ?? "",
-						allowEmpty: true,
-						children: PAYMENT_TERMS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-						label: "Date completed",
-						name: "completedAt",
-						type: "date",
-						defaultValue: row.completedAt ?? ""
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "sm:col-span-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-							htmlFor: `install-work-${row.id}`,
-							children: "Description of work"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AutoGrowTextarea, {
-							id: `install-work-${row.id}`,
-							name: "workDone",
-							className: "mt-1",
-							defaultValue: row.workDone ?? "",
-							placeholder: "What was done on site…"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "sm:col-span-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
-							name: "notes",
-							className: "mt-1",
-							defaultValue: row.notes ?? ""
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex flex-wrap items-center justify-between gap-2 sm:col-span-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-							type: "button",
-							size: "sm",
-							variant: "outline",
-							disabled: dropInstall.isPending,
-							onClick: () => {
-								if (window.confirm(`Remove “${row.customer}” from the install list?`)) dropInstall.mutate();
-							},
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), "Remove from list"]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "submit",
-							size: "sm",
-							disabled: save.isPending,
-							children: "Save"
-						})]
-					})
-				]
-			}, row.id),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
-				entityType: "install",
-				entityId: row.id
-			})
-		] })] }) : null })
-	});
-}
-function DealSheet({ deal, onClose, lockCustomer = false }) {
-	const qc = useQueryClient();
-	const formRef = (0, import_react.useRef)(null);
-	const skipToast = (0, import_react.useRef)(false);
-	const save = useMutation({
-		mutationFn: (d) => updateDeal({ data: d }),
-		onSuccess: () => {
-			if (!skipToast.current) toast.success("Saved");
-			skipToast.current = false;
-			qc.invalidateQueries({ queryKey: ["deals"] });
-			qc.invalidateQueries({ queryKey: ["installs"] });
-			qc.invalidateQueries({ queryKey: ["dashboard"] });
-			qc.invalidateQueries({ queryKey: ["handoff"] });
-			qc.invalidateQueries({ queryKey: ["customer-history"] });
-			qc.invalidateQueries({ queryKey: ["customers"] });
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
-	});
-	const dropDeal = useMutation({
-		mutationFn: () => archiveDeal({ data: { id: deal.id } }),
-		onSuccess: () => {
-			toast.success(`Removed ${deal?.customer} from the list`);
-			qc.invalidateQueries({ queryKey: ["deals"] });
-			qc.invalidateQueries({ queryKey: ["dashboard"] });
-			qc.invalidateQueries({ queryKey: ["handoff"] });
-			onClose();
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove")
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
-		open: !!deal,
-		onOpenChange: (o) => {
-			if (!o) {
-				skipToast.current = true;
-				formRef.current?.requestSubmit();
-				onClose();
-			}
-		},
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, { children: deal ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: ["Pipeline · ", moneyExact(deal.amount)]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: deal.customer }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "mt-2 flex flex-wrap gap-1.5",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: deal.completion === "complete" ? "Complete" : deal.completion === "fell" ? "Fell through" : "Open" })
-			})
-		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-			ref: formRef,
-			className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
-			onSubmit: (e) => {
-				e.preventDefault();
-				const fd = new FormData(e.currentTarget);
-				const amountRaw = String(fd.get("amount") || "").replace(/[$,]/g, "").trim();
-				const amountNum = amountRaw ? Number(amountRaw) : NaN;
-				save.mutate({
-					id: deal.id,
-					customer: String(fd.get("customer")),
-					producer: String(fd.get("producer") || "") || null,
-					aviKatz: fd.get("aviKatz") === "on",
-					equipment: String(fd.get("equipment") || "") || null,
-					amount: Number.isFinite(amountNum) ? amountNum : null,
-					goodToOrder: fd.get("goodToOrder") === "on" || fd.get("ordered") === "on",
-					ordered: fd.get("ordered") === "on",
-					eta: String(fd.get("eta") || "") || null,
-					terms: String(fd.get("terms") || "") || null,
-					invoice: String(fd.get("invoice") || "") || null,
-					completion: String(fd.get("completion") || "") || null,
-					notes: String(fd.get("notes") || "") || null
-				});
-			},
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundCustomer, {
-					recordKey: deal.id,
-					defaultValue: deal.customer,
-					required: true,
-					locked: lockCustomer
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
-					name: "producer",
-					label: "Rep",
-					defaultValue: deal.producer ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-					className: "flex items-center gap-2 text-sm sm:col-span-2",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							type: "checkbox",
-							name: "aviKatz",
-							className: "size-4 accent-primary",
-							defaultChecked: deal.aviKatz
-						}),
-						"Avi Katz account (AK)",
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, { on: deal.aviKatz })
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "sm:col-span-2",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BoundEquipment, {
-						recordKey: deal.id,
-						defaultValue: deal.equipment ?? ""
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "Amount",
-					name: "amount",
-					defaultValue: deal.amount != null ? String(deal.amount) : ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Payment terms" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-					name: "terms",
-					className: "mt-1",
-					defaultValue: deal.terms ?? "",
-					allowEmpty: true,
-					children: PAYMENT_TERMS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "ETA",
-					name: "eta",
-					defaultValue: deal.eta ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "Invoice #",
-					name: "invoice",
-					defaultValue: deal.invoice ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Deal completion" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
-					name: "completion",
-					className: "mt-1",
-					defaultValue: deal.completion ?? "",
-					allowEmpty: true,
-					emptyLabel: "Still open",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-						value: "complete",
-						children: "Complete — hand off to service"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-						value: "fell",
-						children: "Fell through"
-					})]
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "sm:col-span-2 rounded-lg border border-border bg-muted/40 p-3",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm font-medium",
-							children: "Order steps"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-1 text-xs text-muted-foreground",
-							children: "Reps mark Good to order. Confirm Ordered and it leaves the Good to order list."
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mt-3 grid gap-2 sm:grid-cols-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-								className: "flex min-h-11 items-center gap-2 text-sm",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "checkbox",
-									name: "goodToOrder",
-									defaultChecked: deal.goodToOrder || deal.ordered
-								}), "1. Good to order"]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-								className: "flex min-h-11 items-center gap-2 text-sm",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "checkbox",
-									name: "ordered",
-									defaultChecked: deal.ordered
-								}), "2. Ordered"]
-							})]
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "sm:col-span-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
-						name: "notes",
-						className: "mt-1",
-						defaultValue: deal.notes ?? ""
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex flex-wrap items-center justify-between gap-2 sm:col-span-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						type: "button",
-						size: "sm",
-						variant: "outline",
-						disabled: dropDeal.isPending,
-						onClick: () => {
-							if (window.confirm(`Remove “${deal.customer}” from the pipeline list?`)) dropDeal.mutate();
-						},
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), "Remove from list"]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						type: "submit",
-						size: "sm",
-						disabled: save.isPending,
-						children: "Save"
-					})]
-				})
-			]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
-			entityType: "deal",
-			entityId: deal.id
-		})] })] }) : null })
-	});
-}
-function ModuleSheet({ row, onClose }) {
-	const qc = useQueryClient();
-	const save = useMutation({
-		mutationFn: (d) => updateModule({ data: d }),
-		onSuccess: () => {
-			toast.success("Saved");
-			qc.invalidateQueries({ queryKey: ["modules"] });
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
-		open: !!row,
-		onOpenChange: (o) => !o && onClose(),
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetContent, { children: row ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: "Eversys module"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: row.moduleId }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "mt-2",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: row.status })
-			})
-		] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetBody, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-			className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
-			onSubmit: (e) => {
-				e.preventDefault();
-				const fd = new FormData(e.currentTarget);
-				save.mutate({
-					id: row.id,
-					platform: String(fd.get("platform") || "") || null,
-					moduleType: String(fd.get("moduleType") || "") || null,
-					status: String(fd.get("status")),
-					wo: String(fd.get("wo") || "") || null,
-					location: String(fd.get("location") || "") || null,
-					dateIn: String(fd.get("dateIn") || "") || null,
-					dateReady: String(fd.get("dateReady") || "") || null,
-					technician: String(fd.get("technician") || "") || null,
-					notes: String(fd.get("notes") || "") || null
-				});
-			},
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Platform" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-					name: "platform",
-					className: "mt-1",
-					defaultValue: row.platform ?? "",
-					children: MODULE_PLATFORMS.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Type" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-					name: "moduleType",
-					className: "mt-1",
-					defaultValue: row.moduleType ?? "",
-					children: MODULE_TYPES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Status" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-					name: "status",
-					className: "mt-1",
-					defaultValue: row.status,
-					children: MODULE_STATUSES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { children: s }, s))
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "Location / account",
-					name: "location",
-					defaultValue: row.location ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "WO #",
-					name: "wo",
-					defaultValue: row.wo ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Tech" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechSelect, {
-					name: "technician",
-					defaultValue: row.technician ?? ""
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "Date in",
-					name: "dateIn",
-					type: "date",
-					defaultValue: row.dateIn ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
-					label: "Date ready",
-					name: "dateReady",
-					type: "date",
-					defaultValue: row.dateReady ?? ""
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "sm:col-span-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Notes" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
-						name: "notes",
-						className: "mt-1",
-						defaultValue: row.notes ?? ""
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex justify-end sm:col-span-2",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						type: "submit",
-						size: "sm",
-						disabled: save.isPending,
-						children: "Save"
-					})
-				})
-			]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Thread, {
-			entityType: "module",
-			entityId: row.id
-		})] })] }) : null })
-	});
-}
-function InstallAssets({ installId }) {
-	const qc = useQueryClient();
-	const assets = useQuery({
-		queryKey: ["assets"],
-		queryFn: () => listAssets()
-	});
-	const [pick, setPick] = (0, import_react.useState)("");
-	const assigned = (assets.data ?? []).filter((a) => a.installId === installId);
-	const ready = (assets.data ?? []).filter((a) => a.status === "ready" && a.site.startsWith("barn"));
-	const assign = useMutation({
-		mutationFn: (assetId) => assignAssetToInstall({ data: {
-			assetId,
-			installId
-		} }),
-		onSuccess: () => {
-			toast.success("Pulled from the barn — off the warehouse board");
-			setPick("");
-			qc.invalidateQueries({ queryKey: ["assets"] });
-			qc.invalidateQueries({ queryKey: ["installs"] });
-			qc.invalidateQueries({ queryKey: ["dashboard"] });
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Failed")
-	});
-	const unassign = useMutation({
-		mutationFn: (assetId) => unassignAssetFromInstall({ data: {
-			assetId,
-			installId
-		} }),
-		onSuccess: () => {
-			toast.success("Removed — back on the barn rack");
-			qc.invalidateQueries({ queryKey: ["assets"] });
-			qc.invalidateQueries({ queryKey: ["installs"] });
-			qc.invalidateQueries({ queryKey: ["dashboard"] });
-		},
-		onError: (e) => toast.error(e instanceof Error ? e.message : "Failed")
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		id: "warehouse-units",
-		className: "border-b border-border bg-muted/40 p-5",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: "Warehouse units"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "mt-0.5 text-xs text-muted-foreground",
-				children: "Type a warehouse serial on the machine below to pull it in one step — or assign from the rack here."
-			}),
-			assets.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "mt-2 text-sm text-muted-foreground",
-				children: "Loading the barn…"
-			}) : assigned.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-				className: "mt-2 space-y-1",
-				children: assigned.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
-					className: "flex items-center justify-between gap-2 text-sm",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "min-w-0 truncate",
-						children: [
-							a.model,
-							" · ",
-							a.serial ?? "no serial",
-							a.customerOwned ? ` · ${a.customerOwned}` : ""
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						className: "inline-flex h-8 shrink-0 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-background hover:text-foreground",
-						"aria-label": `Remove ${a.model}`,
-						disabled: unassign.isPending,
-						onClick: () => unassign.mutate(a.id),
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-3.5" }), "Remove"]
-					})]
-				}, a.id))
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "mt-2 text-sm text-muted-foreground",
-				children: "None pulled yet. Assigning a unit removes it from the barn rack."
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-				className: "mt-3 text-xs text-muted-foreground",
-				children: [ready.length, " ready on the rack"]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "mt-2 flex flex-col gap-2 sm:flex-row sm:items-end",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "min-w-0 flex-1",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReadyUnitPicker, {
-						units: ready,
-						value: pick,
-						onChange: setPick
-					})
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					size: "sm",
-					type: "button",
-					disabled: !pick || assign.isPending,
-					onClick: () => assign.mutate(Number(pick)),
-					children: "Assign from barn"
-				})]
-			})
-		]
-	});
-}
-function filterReadyUnits(ready, filter) {
-	const q = filter.trim().toLowerCase();
-	return [...q ? ready.filter((a) => `${a.model} ${a.serial ?? ""} ${a.slotLabel}`.toLowerCase().includes(q)) : ready].sort((a, b) => a.model.localeCompare(b.model) || a.slotLabel.localeCompare(b.slotLabel));
-}
-function unitLabel(a) {
-	return `${a.model} · ${a.slotLabel}${a.serial ? ` · ${a.serial}` : ""}`;
-}
-function ReadyUnitPicker({ units, value, onChange }) {
-	const [open, setOpen] = (0, import_react.useState)(false);
-	const [q, setQ] = (0, import_react.useState)("");
-	const box = (0, import_react.useRef)(null);
-	const query = open ? q : "";
-	const matches = (0, import_react.useMemo)(() => filterReadyUnits(units, query), [units, query]);
-	const selected = units.find((a) => String(a.id) === value) ?? null;
-	const notFound = query.trim().length >= 2 && matches.length === 0;
-	(0, import_react.useEffect)(() => {
-		if (!open) return;
-		function onDoc(e) {
-			if (!box.current?.contains(e.target)) {
-				setOpen(false);
-				setQ("");
-			}
-		}
-		document.addEventListener("mousedown", onDoc);
-		return () => document.removeEventListener("mousedown", onDoc);
-	}, [open]);
-	function pick(id) {
-		onChange(id);
-		setQ("");
-		setOpen(false);
-	}
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		ref: box,
-		className: "relative",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex min-h-11 w-full items-center gap-2 rounded-full border border-input bg-background px-3 text-sm focus-within:ring-2 focus-within:ring-ring",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-					value: open ? q : selected ? unitLabel(selected) : "",
-					placeholder: "Ready unit on the rack…",
-					autoComplete: "off",
-					"aria-label": "Ready unit on the rack",
-					"aria-expanded": open,
-					role: "combobox",
-					className: "min-w-0 flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground",
-					onChange: (e) => {
-						setQ(e.target.value);
-						if (!open) setOpen(true);
-					},
-					onFocus: () => {
-						setOpen(true);
-						setQ("");
-					},
-					onKeyDown: (e) => {
-						if (e.key === "Escape") setOpen(false);
-						if (e.key === "Enter") {
-							e.preventDefault();
-							if (matches[0]) pick(String(matches[0].id));
-						}
-					}
-				}),
-				selected && !open ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					type: "button",
-					className: "flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted",
-					"aria-label": "Clear",
-					onMouseDown: (e) => {
-						e.preventDefault();
-						onChange("");
-					},
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-3.5" })
-				}) : null,
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronsUpDown, { className: "size-4 shrink-0 text-muted-foreground" })
-			]
-		}), open ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			"data-combo-popover": "",
-			className: "absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-soft",
-			children: [notFound ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "px-2 py-1.5 text-xs text-muted-foreground",
-				children: "No unit on the rack matches that search."
-			}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
-				className: "max-h-80 overflow-y-auto py-1",
-				role: "listbox",
-				children: [matches.map((a) => {
-					const active = String(a.id) === value;
-					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						type: "button",
-						role: "option",
-						"aria-selected": active,
-						className: active ? "flex min-h-10 w-full items-center px-2 py-1.5 text-left text-sm bg-muted" : "flex min-h-10 w-full items-center px-2 py-1.5 text-left text-sm hover:bg-muted",
-						onMouseDown: (e) => {
-							e.preventDefault();
-							pick(String(a.id));
-						},
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "min-w-0 truncate",
-							children: unitLabel(a)
-						})
-					}) }, a.id);
-				}), !matches.length && !notFound ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
-					className: "px-2 py-2 text-xs text-muted-foreground",
-					children: "Nothing ready on the rack."
-				}) : null]
-			})]
-		}) : null]
-	});
-}
-function SimpleCreateDialog({ title, open, onOpenChange, fields, onSubmit }) {
-	const [pending, setPending] = (0, import_react.useState)(false);
-	const [values, setValues] = (0, import_react.useState)({});
-	(0, import_react.useEffect)(() => {
-		if (open) setValues({});
-	}, [open]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
-		open,
-		onOpenChange,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: title }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-			className: "mt-4 space-y-3",
-			onSubmit: async (e) => {
-				e.preventDefault();
-				const fd = new FormData(e.currentTarget);
-				const next = { ...values };
-				for (const [k, v] of fd.entries()) next[k] = String(v);
-				setPending(true);
-				try {
-					await onSubmit(next);
-					onOpenChange(false);
-				} catch (err) {
-					toast.error(err instanceof Error ? err.message : "Failed");
-				} finally {
-					setPending(false);
-				}
-			},
-			children: [fields.map((f) => {
-				const val = values[f.name] ?? "";
-				if (f.kind === "customer") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
-					name: f.name,
-					label: f.label,
-					value: val,
-					onChange: (v) => setValues((cur) => ({
-						...cur,
-						[f.name]: v
-					})),
-					required: f.required
-				}, f.name);
-				if (f.kind === "equipment") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentCombo, {
-					name: f.name,
-					label: f.label,
-					value: val,
-					onChange: (v) => setValues((cur) => ({
-						...cur,
-						[f.name]: v
-					}))
-				}, f.name);
-				if (f.kind === "rep") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
-					name: f.name,
-					label: f.label,
-					value: val,
-					onChange: (v) => setValues((cur) => ({
-						...cur,
-						[f.name]: v
-					}))
-				}, f.name);
-				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-					htmlFor: f.name,
-					children: f.label
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					id: f.name,
-					name: f.name,
-					className: "mt-1",
-					required: f.required
-				})] }, f.name);
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "flex justify-end",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					type: "submit",
-					disabled: pending,
-					children: "Create"
-				})
-			})]
-		})] })
 	});
 }
 //#endregion
@@ -14181,7 +17928,7 @@ function CustomerHistorySheet({ customerId, onClose }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 							className: "mt-5 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase",
-							children: "Account history"
+							children: "Account History"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 							className: "mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border",
@@ -14213,23 +17960,19 @@ function CustomerHistorySheet({ customerId, onClose }) {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(JobSheet, {
 			id: reviewing && selectedJob ? selectedJob.id : null,
-			onClose: () => setReviewing(false),
-			lockCustomer: true
+			onClose: () => setReviewing(false)
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PmSheet, {
 			pm: reviewing ? selectedPm : null,
-			onClose: () => setReviewing(false),
-			lockCustomer: true
+			onClose: () => setReviewing(false)
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InstallSheet, {
 			row: reviewing ? selectedInstall : null,
-			onClose: () => setReviewing(false),
-			lockCustomer: true
+			onClose: () => setReviewing(false)
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DealSheet, {
 			deal: reviewing ? selectedDeal : null,
-			onClose: () => setReviewing(false),
-			lockCustomer: true
+			onClose: () => setReviewing(false)
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RecipeEditorSheet, {
 			draft: recipeDraft,
@@ -14239,7 +17982,7 @@ function CustomerHistorySheet({ customerId, onClose }) {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RenameDialog, {
 			open: editing,
-			title: "Rename customer",
+			title: "Rename Customer",
 			noun: "customer",
 			current: data?.name ?? "",
 			pending: rename.isPending,
@@ -14255,7 +17998,7 @@ function PreInspectionList({ installs, openId, onOpen }) {
 		"data-testid": "account-pre-inspection",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 			className: "text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase",
-			children: "Pre-inspection"
+			children: "Pre-Inspection"
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 			className: "mt-2 space-y-2",
 			children: installs.map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
@@ -14289,7 +18032,7 @@ function AccountEquipmentList({ rows, loading }) {
 		className: "mt-4",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 			className: "text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase",
-			children: "Equipment on this account"
+			children: "Equipment On This Account"
 		}), loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 			className: "mt-2 text-sm text-muted-foreground",
 			children: "Loading equipment…"
@@ -14330,7 +18073,7 @@ function HistoryRow({ item, onOpen }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 		type: "button",
 		onClick: onOpen,
-		className: "desk-lift flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60",
+		className: "desk-flat flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 				className: "mt-0.5 w-16 shrink-0 text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
@@ -14382,10 +18125,11 @@ function CustomerRecipes({ customer, recipes, house, models, onOpen }) {
 	const templates = house.filter((r) => r.isTemplate || !r.customer);
 	const others = house.filter((r) => r.customer && r.customer.toLowerCase() !== customer.toLowerCase());
 	function ownLabel(r) {
-		return recipes.filter((x) => x.equipmentModel === r.equipmentModel).length > 1 ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
+		if (r.name) return `${r.equipmentModel} · ${r.name}`;
+		return recipes.filter((x) => x.equipmentModel === r.equipmentModel && !x.name).length > 1 ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
 	}
 	function otherLabel(r) {
-		return `${r.customer} · ${r.equipmentModel}`;
+		return `${r.customer} · ${r.equipmentModel}${r.name ? ` · ${r.name}` : ""}`;
 	}
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		className: "mt-6",
@@ -14501,13 +18245,17 @@ function CustomerRecipes({ customer, recipes, house, models, onOpen }) {
 }
 function AccountMarksForm({ id, aviKatz, accountRep }) {
 	const qc = useQueryClient();
+	const [rep, setRep] = (0, import_react.useState)(accountRep ?? "");
+	(0, import_react.useEffect)(() => {
+		setRep(accountRep ?? "");
+	}, [id, accountRep]);
 	const save = useMutation({
 		mutationFn: (d) => updateCustomerAccount({ data: {
 			id,
 			...d
 		} }),
-		onSuccess: () => {
-			toast.success("Account updated");
+		onSuccess: (_row, vars) => {
+			toast.success(vars.accountRep !== void 0 ? vars.accountRep ? `${vars.accountRep} saved as the rep on this account` : "Rep cleared on this account" : "Account updated");
 			qc.invalidateQueries({ queryKey: ["customer-history"] });
 			qc.invalidateQueries({ queryKey: ["customers"] });
 			qc.invalidateQueries({ queryKey: ["installs"] });
@@ -14519,11 +18267,17 @@ function AccountMarksForm({ id, aviKatz, accountRep }) {
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "mt-4 grid gap-3 sm:grid-cols-2",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepSelect, {
 			label: "Rep",
-			defaultValue: accountRep ?? "",
-			onChange: (v) => save.mutate({ accountRep: v || null })
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+			value: rep,
+			onChange: (v) => {
+				setRep(v);
+				save.mutate({ accountRep: v || null });
+			}
+		}), rep ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-1 text-[11px] text-muted-foreground",
+			children: "Shows on this account's calls, PMs, installs, and deals that don't have their own rep."
+		}) : null] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
 			className: "flex items-center gap-2 text-sm sm:mt-7",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
@@ -14619,7 +18373,7 @@ function AccountEquipImportButton({ onImported }) {
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
 				className: "max-h-[90vh] max-w-6xl overflow-y-auto",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Import equipment list" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Import Equipment List" }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [fileName ? `${fileName} · ` : "", "This writes machines onto existing accounts. It does not create accounts, tickets, or overwrite notes. Unchecked rows are skipped. Walk-In and unmatched rows stay off until you pick an account and a catalog model."] }),
 					preview ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PreviewBody$1, {
 						preview,
@@ -15113,14 +18867,14 @@ function PreviewBody$1({ preview, pending, onCancel, onConfirm }) {
 }
 //#endregion
 //#region src/routes/_app/customers.tsx
-var Route$15 = createFileRoute("/_app/customers")({
+var Route$17 = createFileRoute("/_app/customers")({
 	validateSearch: parseOpenSearch,
-	component: Page$14
+	component: Page$15
 });
-function Page$14() {
+function Page$15() {
 	const qc = useQueryClient();
 	const navigate = useNavigate();
-	const { open } = Route$15.useSearch();
+	const { open } = Route$17.useSearch();
 	const [selected, setSelected] = useOpenRecord(open);
 	const me = useQuery({
 		queryKey: ["access", "me"],
@@ -15196,6 +18950,7 @@ function Page$14() {
 		matchMine,
 		role
 	]);
+	const paged = useShowMore(rows, `${needle}|${sort}|${filterMine}`);
 	function onAdd(e) {
 		e.preventDefault();
 		const n = name.trim();
@@ -15259,7 +19014,7 @@ function Page$14() {
 				value: name,
 				onChange: (e) => setName(e.target.value),
 				placeholder: "Add a customer name",
-				className: "min-w-0 flex-1",
+				className: "min-w-0 sm:flex-1",
 				"aria-label": "New customer name"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 				type: "submit",
@@ -15273,84 +19028,100 @@ function Page$14() {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
 			className: "mt-2 overflow-hidden rounded-xl border border-border bg-card",
-			children: [rows.map((c) => {
-				const pending = pendingLine(c);
-				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
-					className: "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-2 py-1 last:border-b-0",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "button",
-						onClick: () => openCustomer(c.id),
-						className: "desk-lift flex min-w-0 items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-muted/60",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "min-w-0 flex-1",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "truncate font-medium",
-									children: [
-										c.name,
-										" ",
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, {
-											on: c.aviKatz,
-											className: "ml-1 align-middle"
-										})
-									]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "truncate text-xs text-muted-foreground",
-									children: [
-										c.accountRep ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepName, { name: c.accountRep }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, { show: true }),
-										" · ",
-										countLabel(c.calls, "call", "calls"),
-										" · ",
-										countLabel(c.tlcs, "TLC", "TLCs"),
-										" · ",
-										countLabel(c.pms, "PM", "PMs"),
-										" · ",
-										countLabel(c.installs, "install", "installs"),
-										c.deals ? ` · ${countLabel(c.deals, "deal", "deals")}` : "",
-										c.recipes ? ` · ${countLabel(c.recipes, "recipe", "recipes")}` : ""
-									]
-								}),
-								pending ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "truncate text-xs text-amber-800 dark:text-amber-300",
-									children: pending
-								}) : null
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "size-4 shrink-0 text-muted-foreground" })]
-					}), isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex shrink-0 items-center gap-1 pr-1",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+			children: [
+				paged.visible.map((c) => {
+					const pending = pendingLine(c);
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+						className: "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-2 py-1 last:border-b-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
-							size: "sm",
-							variant: "outline",
-							"aria-label": `Rename ${c.name}`,
-							onClick: () => setRenaming({
-								id: c.id,
-								name: c.name
-							}),
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "size-3.5" }), "Edit"]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-							type: "button",
-							size: "sm",
-							variant: "outline",
-							disabled: remove.isPending,
-							onClick: () => {
-								if (window.confirm(`Remove “${c.name}” from the customer list?`)) remove.mutate({
+							onClick: () => openCustomer(c.id),
+							className: "desk-flat flex min-w-0 items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-muted/60",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "min-w-0 flex-1",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+										className: "truncate font-medium",
+										children: [
+											c.name,
+											" ",
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, {
+												on: c.aviKatz,
+												className: "ml-1 align-middle"
+											})
+										]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+										className: "truncate text-xs text-muted-foreground",
+										children: [
+											c.accountRep ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepName, { name: c.accountRep }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, { show: true }),
+											" · ",
+											countLabel(c.calls, "call", "calls"),
+											" · ",
+											countLabel(c.tlcs, "TLC", "TLCs"),
+											" · ",
+											countLabel(c.pms, "PM", "PMs"),
+											" · ",
+											countLabel(c.installs, "install", "installs"),
+											c.deals ? ` · ${countLabel(c.deals, "deal", "deals")}` : "",
+											c.recipes ? ` · ${countLabel(c.recipes, "recipe", "recipes")}` : ""
+										]
+									}),
+									pending ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "truncate text-xs text-amber-800 dark:text-amber-300",
+										children: pending
+									}) : null
+								]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "size-4 shrink-0 text-muted-foreground" })]
+						}), isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex shrink-0 items-center gap-1 pr-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								type: "button",
+								size: "sm",
+								variant: "outline",
+								"aria-label": `Rename ${c.name}`,
+								onClick: () => setRenaming({
 									id: c.id,
 									name: c.name
-								});
-							},
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), "Remove"]
-						})]
-					}) : null]
-				}, c.id);
-			}), list.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
-				className: "px-4 py-8 text-sm text-muted-foreground",
-				children: "Loading accounts…"
-			}) : rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
-				className: "px-4 py-8 text-sm text-muted-foreground",
-				children: needle ? "No customers match that search." : "No customers in the list yet."
-			}) : null]
+								}),
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "hidden sm:inline",
+									children: "Edit"
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								type: "button",
+								size: "sm",
+								variant: "outline",
+								disabled: remove.isPending,
+								"aria-label": `Remove ${c.name}`,
+								onClick: () => {
+									if (window.confirm(`Remove “${c.name}” from the customer list?`)) remove.mutate({
+										id: c.id,
+										name: c.name
+									});
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "hidden sm:inline",
+									children: "Remove"
+								})]
+							})]
+						}) : null]
+					}, c.id);
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShowMoreButton, {
+					as: "li",
+					remaining: paged.remaining,
+					onClick: paged.showMore,
+					label: "accounts"
+				}),
+				list.isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+					className: "px-4 py-8 text-sm text-muted-foreground",
+					children: "Loading accounts…"
+				}) : rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+					className: "px-4 py-8 text-sm text-muted-foreground",
+					children: needle ? "No customers match that search." : "No customers in the list yet."
+				}) : null
+			]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerHistorySheet, {
 			customerId: selected,
@@ -15358,7 +19129,7 @@ function Page$14() {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RenameDialog, {
 			open: !!renaming,
-			title: "Rename customer",
+			title: "Rename Customer",
 			noun: "customer",
 			current: renaming?.name ?? "",
 			pending: rename.isPending,
@@ -15478,8 +19249,11 @@ function HandoffReply({ entityType, entityId }) {
 }
 //#endregion
 //#region src/routes/_app/handoff.tsx
-var Route$14 = createFileRoute("/_app/handoff")({ component: Page$13 });
-function Page$13() {
+var Route$16 = createFileRoute("/_app/handoff")({
+	validateSearch: parseOpenSearch,
+	component: Page$14
+});
+function Page$14() {
 	const qc = useQueryClient();
 	const user = useCurrentUser();
 	const access = useQuery({
@@ -15497,6 +19271,40 @@ function Page$13() {
 		} catch {}
 	}, []);
 	const [sort, setSort] = useDeskSort("handoff", "date-desc");
+	const { open } = Route$16.useSearch();
+	const navigate = useNavigate();
+	const [flash, setFlash] = (0, import_react.useState)(null);
+	(0, import_react.useEffect)(() => {
+		if (open != null) setScope("all");
+	}, [open]);
+	(0, import_react.useEffect)(() => {
+		if (open == null || !feed.data) return;
+		if (![...feed.data.asks, ...feed.data.recent].find((c) => c.id === open)) {
+			toast.message("That note isn't on the board anymore — nothing left to answer here.");
+			navigate({
+				to: "/handoff",
+				search: {},
+				replace: true
+			});
+			return;
+		}
+		const t = window.setTimeout(() => {
+			document.getElementById(`handoff-note-${open}`)?.scrollIntoView({
+				behavior: "smooth",
+				block: "center"
+			});
+			setFlash(open);
+		}, 60);
+		const clear = window.setTimeout(() => setFlash(null), 3200);
+		return () => {
+			window.clearTimeout(t);
+			window.clearTimeout(clear);
+		};
+	}, [
+		open,
+		feed.data,
+		navigate
+	]);
 	const resolve = useMutation({
 		mutationFn: (id) => resolveComment({ data: {
 			id,
@@ -15614,7 +19422,7 @@ function Page$13() {
 				className: "rounded-xl border border-border bg-card p-5",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "font-display text-xl",
-					children: "Completed deals not yet on the install board"
+					children: "Completed Deals Not Yet On The Install Board"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 					className: "mt-3 divide-y divide-border",
 					children: filtered.pendingHandoffs.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
@@ -15660,14 +19468,15 @@ function Page$13() {
 					className: "rounded-xl border border-border bg-card p-5",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 						className: "font-display text-xl",
-						children: "Open asks"
+						children: "Open Asks"
 					}), !filtered.asks.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "mt-3 text-sm text-muted-foreground",
 						children: scope === "mine" ? "No open asks on your work." : "No unanswered asks. Nice."
 					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 						className: "mt-3 space-y-4",
 						children: sortedAsks.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
-							className: "rounded-lg border border-border bg-background p-3",
+							id: `handoff-note-${c.id}`,
+							className: cn("scroll-mt-24 rounded-lg border border-border bg-background p-3 transition-shadow", flash === c.id && "ring-2 ring-primary ring-offset-2 ring-offset-background"),
 							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex flex-wrap items-center gap-2",
@@ -15732,55 +19541,59 @@ function Page$13() {
 					className: "rounded-xl border border-border bg-card p-5",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 						className: "font-display text-xl",
-						children: "Recent notes"
+						children: "Recent Notes"
 					}), !filtered.recent.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "mt-3 text-sm text-muted-foreground",
 						children: scope === "mine" ? "No recent notes on your work." : "No notes yet."
 					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 						className: "mt-3 space-y-4",
-						children: sortedRecent.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-start justify-between gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "text-sm",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-medium",
-										children: c.ownerLabel
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "text-muted-foreground",
-										children: [" · ", c.customer ?? c.entityType]
+						children: sortedRecent.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+							id: `handoff-note-${c.id}`,
+							className: cn("scroll-mt-24 rounded-md transition-shadow", flash === c.id && "ring-2 ring-primary ring-offset-4 ring-offset-card"),
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-start justify-between gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+										className: "text-sm",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "font-medium",
+											children: c.ownerLabel
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "text-muted-foreground",
+											children: [" · ", c.customer ?? c.entityType]
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1",
+										children: [c.canClaim ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+											type: "button",
+											className: "h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+											disabled: claim.isPending,
+											onClick: () => claim.mutate(c.id),
+											children: "Claim"
+										}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PingButton, {
+											size: "xs",
+											entityType: c.entityType,
+											entityId: c.entityId,
+											commentId: c.id,
+											pingedAt: c.pingedAt,
+											contextLabel: `${c.customer ?? c.entityType} · ${c.body.slice(0, 80)}`,
+											defaultNote: c.body
+										})]
 									})]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center gap-1",
-									children: [c.canClaim ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										type: "button",
-										className: "h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
-										disabled: claim.isPending,
-										onClick: () => claim.mutate(c.id),
-										children: "Claim"
-									}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PingButton, {
-										size: "xs",
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "mt-1 text-sm leading-relaxed text-muted-foreground",
+									children: c.body
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "mt-2",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HandoffReply, {
 										entityType: c.entityType,
-										entityId: c.entityId,
-										commentId: c.id,
-										pingedAt: c.pingedAt,
-										contextLabel: `${c.customer ?? c.entityType} · ${c.body.slice(0, 80)}`,
-										defaultNote: c.body
-									})]
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-1 text-sm leading-relaxed text-muted-foreground",
-								children: c.body
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "mt-2",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HandoffReply, {
-									entityType: c.entityType,
-									entityId: c.entityId
+										entityId: c.entityId
+									})
 								})
-							})
-						] }, c.id))
+							]
+						}, c.id))
 					})]
 				})]
 			})] })
@@ -15994,6 +19807,7 @@ function tlcBlob(issue, callType, notes, workDone) {
 function mapRecipeRow(r) {
 	return {
 		id: Number(r.id),
+		name: r.name ?? null,
 		equipmentModel: String(r.equipment_model ?? ""),
 		customer: r.customer ?? null,
 		installId: r.install_id == null ? null : Number(r.install_id),
@@ -16015,7 +19829,7 @@ function mapRecipeRow(r) {
 		updatedAt: String(r.updated_at ?? "")
 	};
 }
-function configForMachine(customer, installId, model, serial, voltage, recipes) {
+function configForMachine(customer, installId, model, serial, voltage, recipes, recipeId) {
 	const bits = [];
 	if (model) bits.push(model);
 	if (serial) bits.push(`SN ${serial}`);
@@ -16023,7 +19837,8 @@ function configForMachine(customer, installId, model, serial, voltage, recipes) 
 	const { linked, house } = findRecipeFor(recipes, {
 		customer,
 		model,
-		installId
+		installId,
+		recipeId
 	});
 	const rec = linked ?? house;
 	if (rec) {
@@ -16319,7 +20134,7 @@ async function buildInstalls(sql, filters, inactive) {
 					if (key) usedSerials.add(key);
 				}
 			}
-			const cfg = configForMachine(i.customer, i.id, model, serial, piece.powerVoltage, recipes);
+			const cfg = configForMachine(i.customer, i.id, model, serial, piece.powerVoltage, recipes, piece.recipeId ?? null);
 			const serialCell = cellOrMissing(serial);
 			const electricalCell = cellOrMissing(piece.powerVoltage);
 			if (isReady) readyRows.push([
@@ -17014,12 +20829,12 @@ function ExportDialog({ open, onOpenChange, defaultType }) {
 }
 //#endregion
 //#region src/routes/_app/installs.tsx
-var Route$13 = createFileRoute("/_app/installs")({
+var Route$15 = createFileRoute("/_app/installs")({
 	validateSearch: parseOpenSearch,
-	component: Page$12
+	component: Page$13
 });
-function Page$12() {
-	const { open } = Route$13.useSearch();
+function Page$13() {
+	const { open } = Route$15.useSearch();
 	const qc = useQueryClient();
 	const data = useQuery({
 		queryKey: ["installs"],
@@ -17033,10 +20848,6 @@ function Page$12() {
 		queryKey: ["assets"],
 		queryFn: () => listAssets()
 	});
-	const customers = useQuery({
-		queryKey: ["customers"],
-		queryFn: () => listCustomers()
-	});
 	const directoryEquip = useQuery({
 		queryKey: ["directory", "equipment"],
 		queryFn: () => listDirectory({ data: { kind: "equipment" } })
@@ -17049,7 +20860,6 @@ function Page$12() {
 	const [slice, setSlice] = (0, import_react.useState)("all");
 	const [selected, setSelected] = useOpenRecord(open);
 	const [create, setCreate] = (0, import_react.useState)(false);
-	const [recipeDraft, setRecipeDraft] = (0, import_react.useState)(null);
 	const [sort, setSort] = useDeskSort("installs", "date-asc");
 	const [picked, setPicked] = (0, import_react.useState)([]);
 	const [confirmIds, setConfirmIds] = (0, import_react.useState)(null);
@@ -17120,10 +20930,6 @@ function Page$12() {
 		const listed = listedEquipment((i.machines ?? []).map((m) => m.equipment).join("\n") || i.equipment, catalog);
 		return listed.length ? listed : [matchModel(i.equipment || "Unspecified", catalog)];
 	}), (n) => n);
-	function openRecipe(d) {
-		setSelected(null);
-		setRecipeDraft(d);
-	}
 	const openIds = (0, import_react.useMemo)(() => rows.filter((i) => isOpenInstall(i)).map((i) => i.id), [rows]);
 	const pickedOpen = picked.filter((id) => openIds.includes(id));
 	const markInstalled = useMutation({
@@ -17215,7 +21021,7 @@ function Page$12() {
 			className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "Install clock"
+				children: "Install Clock"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
 				children: "Prep is what still needs to go out. Installed is the finished list."
@@ -17245,7 +21051,7 @@ function Page$12() {
 			selected: slice === "ready",
 			onClick: () => setSlice((v) => v === "ready" ? "all" : "ready")
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-			label: "Not ready",
+			label: "Not Ready",
 			value: notReadyN,
 			hint: "Prep, failed check, or not inspected",
 			selected: slice === "not-ready",
@@ -17337,7 +21143,7 @@ function Page$12() {
 				catalog,
 				recipes,
 				onOpen: () => setSelected(i.id),
-				onRecipe: openRecipe,
+				onRecipe: () => setSelected(i.id),
 				selected: picked.includes(i.id),
 				onToggleSelect: (on) => togglePicked(i.id, on),
 				onMarkInstalled: () => requestMark([i.id]),
@@ -17363,12 +21169,6 @@ function Page$12() {
 			onClose: () => setSelected(null),
 			onOpenRelated: (id) => setSelected(id)
 		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RecipeEditorSheet, {
-			draft: recipeDraft,
-			models: catalog,
-			customers: customers.data ?? [],
-			onClose: () => setRecipeDraft(null)
-		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NewInstallDialog, {
 			open: create,
 			existing: allInstalls,
@@ -17385,7 +21185,7 @@ function Page$12() {
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
 				className: "max-w-md",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Mark installed" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Mark Installed" }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 						className: "mt-2 text-sm text-muted-foreground",
 						children: [
@@ -17420,7 +21220,7 @@ function Page$12() {
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
 				className: "max-w-md",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Pre-inspection not passed" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Pre-Inspection Not Passed" }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 						className: "mt-2 text-sm text-muted-foreground",
 						children: [gate?.names.join(", "), " still need a passed site check. Add a reason to mark installed anyway."]
@@ -17463,6 +21263,10 @@ function sameAccount(name, rows, exceptId) {
 }
 function NewInstallDialog({ open, existing, onOpenChange, onCreated, onOpenExisting }) {
 	const qc = useQueryClient();
+	const recipes = useQuery({
+		queryKey: ["recipes"],
+		queryFn: () => listRecipes()
+	});
 	const [customer, setCustomer] = (0, import_react.useState)("");
 	const [equipment, setEquipment] = (0, import_react.useState)([]);
 	const [specs, setSpecs] = (0, import_react.useState)([]);
@@ -17479,15 +21283,36 @@ function NewInstallDialog({ open, existing, onOpenChange, onCreated, onOpenExist
 			}
 		},
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
-			className: "max-w-2xl",
+			className: "max-w-4xl",
 			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "New install" }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "mt-3 rounded-lg border border-border bg-muted/50 px-3 py-2.5 text-sm",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-						className: "flex items-start gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "mt-0.5 size-4 shrink-0 text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "There is a 2-week lead-time to allow time to prep equipment, including in-between service calls and PMs." })]
-					})
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "sticky -top-5 z-20 -mx-5 -mt-5 mb-2 border-b border-border bg-card px-4 pt-3 pr-12 pb-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "New Install" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-2 grid min-w-0 gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
+							value: customer,
+							onChange: (v) => {
+								try {
+									setCustomer(v);
+								} catch (err) {
+									toast.error(err instanceof Error ? err.message : "Could not set customer");
+								}
+							},
+							required: true
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentMultiCombo, {
+							values: equipment,
+							hideChips: true,
+							onChange: (next) => {
+								setEquipment(next);
+								setSpecs(mergeMachineSpecs(next, specs));
+							},
+							placeholder: "Add another…"
+						})]
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+					className: "flex items-start gap-2 text-xs text-muted-foreground",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "mt-0.5 size-3.5 shrink-0 text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "2-week lead time to prep equipment between service calls and PMs." })]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 					className: "mt-4 space-y-3",
@@ -17517,33 +21342,6 @@ function NewInstallDialog({ open, existing, onOpenChange, onCreated, onOpenExist
 						}
 					},
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "grid min-w-0 gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
-								value: customer,
-								onChange: (v) => {
-									try {
-										setCustomer(v);
-									} catch (err) {
-										toast.error(err instanceof Error ? err.message : "Could not set customer");
-									}
-								},
-								required: true,
-								menuInFlow: true
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentMultiCombo, {
-								values: equipment,
-								onChange: (next) => {
-									setEquipment(next);
-									setSpecs(mergeMachineSpecs(next, specs));
-								},
-								placeholder: "Search the full equipment list…",
-								menuInFlow: true
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "-mt-1 text-xs text-muted-foreground",
-							children: "Open the equipment field to scroll the full list, or type a model and add it if it isn’t there."
-						}),
 						matches.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "rounded-lg border border-warning/40 bg-warning/10 px-3 py-2.5 text-sm",
 							children: [
@@ -17585,9 +21383,16 @@ function NewInstallDialog({ open, existing, onOpenChange, onCreated, onOpenExist
 								}) : null
 							]
 						}) : null,
-						customer && specs.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MachineFields, {
+						specs.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MachineFields, {
 							specs,
-							onChange: setSpecs
+							customer,
+							recipes: recipes.data ?? [],
+							onChange: setSpecs,
+							onRemove: (index) => {
+								const next = specs.filter((_, i) => i !== index);
+								setSpecs(next);
+								setEquipment(next.map((s) => s.equipment));
+							}
 						}) : null,
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "flex justify-end",
@@ -17639,6 +21444,7 @@ function useRemoveEquip(install, catalog) {
 		},
 		onSettled: () => {
 			qc.invalidateQueries({ queryKey: ["installs"] });
+			qc.invalidateQueries({ queryKey: ["inspection", install.id] });
 		}
 	});
 }
@@ -17731,6 +21537,7 @@ function InstallEquipChips({ install, catalog, recipes, onRecipe, empty, classNa
 			customer: install.customer,
 			installId: install.id,
 			recipes,
+			recipeId: (install.machines ?? []).find((m) => m.equipment.toLowerCase() === p.model.toLowerCase() && m.recipeId)?.recipeId ?? null,
 			onOpen: onRecipe,
 			onRemove: () => remove.mutate(p.label)
 		}, `${p.model}-${p.label}-${idx}`))
@@ -17875,6 +21682,3617 @@ function machineNotes(i, indent = true) {
 	});
 }
 //#endregion
+//#region src/lib/ops/library-file-rules.ts
+/** Biggest single file. */
+var MAX_FILE_BYTES = 20971520;
+/** Files travel in pieces this size so each request stays small. */
+var CHUNK_BYTES = 1048576;
+var TYPES$1 = {
+	pdf: "application/pdf",
+	png: "image/png",
+	jpg: "image/jpeg",
+	jpeg: "image/jpeg",
+	webp: "image/webp",
+	gif: "image/gif",
+	doc: "application/msword",
+	docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+};
+var ACCEPT = Object.keys(TYPES$1).map((e) => `.${e}`).join(",");
+var ALLOWED_TEXT = "PDF, images (PNG, JPG, WebP, GIF) and Word (DOC, DOCX)";
+function fileExt(name) {
+	const m = /\.([A-Za-z0-9]+)$/.exec(name.trim());
+	return m ? m[1].toLowerCase() : "";
+}
+/** Content type from the file name — the browser's own guess is often blank or wrong. */
+function mimeFor(name) {
+	return TYPES$1[fileExt(name)] ?? null;
+}
+/** PDFs and pictures open in the browser tab; Word files can only download. */
+function opensInline(mime) {
+	return mime === "application/pdf" || mime.startsWith("image/");
+}
+function sizeText(bytes) {
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1048576) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+	return `${(bytes / 1024 / 1024).toFixed(bytes < 10485760 ? 1 : 0)} MB`;
+}
+/** null when the file is fine, otherwise a sentence to show the person. */
+function fileError(name, size) {
+	const clean = name.trim();
+	if (!clean) return "That file has no name.";
+	if (!mimeFor(clean)) return `${clean} can't be added — only ${ALLOWED_TEXT} are accepted.`;
+	if (size <= 0) return `${clean} is empty.`;
+	if (size > 20971520) return `${clean} is too big (${sizeText(size)}). The limit is ${sizeText(MAX_FILE_BYTES)} per file.`;
+	return null;
+}
+/** A–Z by file name, ignoring case; "Manual 2" before "Manual 10". */
+function sortByName(files) {
+	const stem = (n) => n.replace(/\.[A-Za-z0-9]+$/, "");
+	const cmp = (a, b) => a.localeCompare(b, "en", {
+		sensitivity: "base",
+		numeric: true
+	});
+	return [...files].sort((a, b) => cmp(stem(a.name), stem(b.name)) || cmp(a.name, b.name) || a.name.localeCompare(b.name));
+}
+/** Full link on the app's own domain; opens the document for anyone who has it. */
+function fileUrl(origin, token) {
+	return `${origin.replace(/\/$/, "")}/api/library-file/${token}`;
+}
+function emailHref(name, url) {
+	return `mailto:?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(`${name}\n${url}`)}`;
+}
+/** "sms:?&body=" is the form both iPhone and Android accept. */
+function textHref(name, url) {
+	return `sms:?&body=${encodeURIComponent(`${name}: ${url}`)}`;
+}
+/** Shelf name inside a book, and the word used when a file is renamed "Family - Type". */
+var SHELF = {
+	spec: {
+		title: "Spec Sheet",
+		type: "Spec Sheet"
+	},
+	manuals: {
+		title: "Manuals",
+		type: "Manual"
+	},
+	parts: {
+		title: "Parts Diagrams",
+		type: "Parts Book"
+	}
+};
+var clean = (s) => s.replace(/\s+/g, " ").trim();
+var escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+var tokens = (s) => s.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+/** The book for a spec sheet: maker + the full model name, variation included. Bunn + "Axiom DV-APS" → "Bunn Axiom DV-APS". */
+function variationTitle(manufacturer, model) {
+	const maker = clean(manufacturer);
+	const m = clean(model);
+	return maker && !m.toLowerCase().startsWith(maker.toLowerCase() + " ") && m.toLowerCase() !== maker.toLowerCase() ? clean(`${maker} ${m}`) : m;
+}
+var modelTokens = (b) => {
+	const maker = b.manufacturer || makerOf(b.title);
+	return tokens(modelLabel(b.title, maker));
+};
+/**
+* Ways a book can be named in a file name: the whole title, or the whole model without the maker
+* ("Bunn Axiom DV-APS" or "Axiom DV-APS"). Never part of the model — "Axiom" alone is not DV-APS.
+*/
+function bookKeys(title, manufacturer) {
+	const model = modelTokens({
+		title,
+		manufacturer
+	});
+	const keys = [tokens(title)];
+	if (model.join("").length >= 3 && model.length < keys[0].length) keys.push(model);
+	return keys;
+}
+function keyLength(text, key) {
+	return new RegExp(`(^|[^a-z0-9])${key.map(escapeRe).join("[^a-z0-9]*")}($|[^a-z])`, "i").test(text.toLowerCase()) ? key.join("").length : 0;
+}
+var startsWithTokens = (long, short) => long.length > short.length && short.every((t, i) => long[i] === t);
+/**
+* Which book a file name belongs to. Returns the book only when exactly one fits best AND no other
+* variation of that same model exists that the name could also mean; otherwise null — the person picks.
+*/
+function matchBook(text, books) {
+	let best = 0;
+	let hits = [];
+	for (const b of books) {
+		const score = Math.max(0, ...bookKeys(b.title, b.manufacturer).map((k) => keyLength(text, k)));
+		if (!score) continue;
+		if (score > best) {
+			best = score;
+			hits = [b];
+		} else if (score === best) hits.push(b);
+	}
+	if (hits.length !== 1) return null;
+	const hit = hits[0];
+	const mine = modelTokens(hit);
+	if (books.some((b) => b.id !== hit.id && startsWithTokens(modelTokens(b), mine))) return null;
+	return hit;
+}
+/** Books worth showing first in the picker: same maker or same first model word as the file name. */
+function likelyBooks(text, books) {
+	const words = new Set(tokens(text));
+	return books.filter((b) => {
+		const first = modelTokens(b)[0];
+		return !!first && first.length >= 3 && words.has(first);
+	});
+}
+/** "Bunn Axiom - Manual.pdf"; a second one becomes "Bunn Axiom - Manual 2.pdf". */
+function shelfFileName(bookTitle, section, originalName, taken) {
+	const ext = fileExt(originalName);
+	const base = `${clean(bookTitle)} - ${SHELF[section].type}`;
+	const stem = (n) => n.replace(/\.[A-Za-z0-9]+$/, "").toLowerCase();
+	const used = new Set(taken.map(stem));
+	for (let n = 1;; n++) {
+		const name = n === 1 ? base : `${base} ${n}`;
+		if (!used.has(name.toLowerCase())) return `${name}${ext ? `.${ext}` : ""}`;
+	}
+}
+/** Makers with more than one word, or that staff add by hand before any spec sheet exists. */
+var KNOWN_MAKERS = [
+	"La Marzocco",
+	"Nuova Simonelli",
+	"Victoria Arduino",
+	"Wilbur Curtis",
+	"La Cimbali",
+	"La Spaziale",
+	"Bunn",
+	"Fetco",
+	"Eversys",
+	"Curtis",
+	"Rancilio",
+	"Franke",
+	"Schaerer",
+	"Mahlkonig",
+	"Mazzer",
+	"Ditting",
+	"Slayer",
+	"Synesso",
+	"Baratza",
+	"Astoria",
+	"Faema",
+	"Thermoplan"
+];
+/** The maker a book title starts with: the longest known maker, else the first word. */
+function makerOf(title, makers = []) {
+	const t = clean(title);
+	const lower = t.toLowerCase();
+	return [...makers, ...KNOWN_MAKERS].map(clean).filter((m) => m && (lower === m.toLowerCase() || lower.startsWith(m.toLowerCase() + " "))).sort((a, b) => b.length - a.length)[0] ?? t.split(" ")[0] ?? t;
+}
+/** "Bunn Axiom" under Bunn → "Axiom". */
+function modelLabel(title, maker) {
+	const t = clean(title);
+	return (t.toLowerCase().startsWith(maker.toLowerCase() + " ") ? t.slice(maker.length + 1) : t) || t;
+}
+/** Inside a model the family is already on screen: "Bunn Axiom - Manual 2.pdf" → "Manual 2". */
+function shortDocName(name, bookTitle) {
+	const stem = name.replace(/\.[A-Za-z0-9]+$/, "");
+	const prefix = `${clean(bookTitle)} - `;
+	return stem.toLowerCase().startsWith(prefix.toLowerCase()) ? stem.slice(prefix.length) : stem;
+}
+//#endregion
+//#region src/lib/ops/library-files.ts
+/**
+* The Library — Manuals and Parts Diagrams. Files are stored in Postgres (bytea) in ~1 MB pieces.
+* Everyone with Desk access can list, open and share links; only Admin and Sales add or delete.
+*/
+async function ready$1() {
+	const { ensureSeeded } = await import("./seed.server.mjs");
+	await ensureSeeded();
+	return getSql();
+}
+async function roleOf(sql, userId) {
+	const rows = await sql.query("select is_admin, desk_role, username from desk_accounts where user_id = $1", [userId]);
+	return {
+		canEdit: flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "sales",
+		name: rows[0]?.username || "Teammate"
+	};
+}
+async function requireEditor(sql, userId) {
+	const role = await roleOf(sql, userId);
+	if (!role.canEdit) throw new Error("Only Admin and Sales can add or delete Library files.");
+	return role;
+}
+function newToken() {
+	const bytes = /* @__PURE__ */ new Uint8Array(24);
+	crypto.getRandomValues(bytes);
+	return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+var section = _enum([
+	"spec",
+	"manuals",
+	"parts"
+]);
+/**
+* Every spec sheet belongs to a book. Sheets saved before books existed (or just imported) are
+* placed in the book for their family, creating it if needed. Loose files are filed only when
+* their name matches exactly one book.
+*/
+async function ensureBooks(sql) {
+	const load = async () => (await sql.query("select id, title, manufacturer from library_books order by lower(title)")).map((b) => ({
+		id: Number(b.id),
+		title: b.title,
+		manufacturer: b.manufacturer ?? ""
+	}));
+	let books = await load();
+	if (books.some((b) => !b.manufacturer)) {
+		const makers = (await sql.query("select distinct manufacturer from spec_sheets")).map((r) => r.manufacturer);
+		for (const b of books.filter((x) => !x.manufacturer)) await sql.query("update library_books set manufacturer = $2 where id = $1 and manufacturer is null", [b.id, makerOf(b.title, makers)]);
+		books = await load();
+	}
+	const bookFor = async (manufacturer, model) => {
+		const title = variationTitle(manufacturer, model);
+		if (!title) return null;
+		const have = books.find((b) => b.title.toLowerCase() === title.toLowerCase());
+		if (have) return have;
+		await sql.query("insert into library_books (title, manufacturer, per_variation) values ($1, $2, true) on conflict (lower(title)) do nothing", [title, manufacturer.trim()]);
+		books = await load();
+		return books.find((b) => b.title.toLowerCase() === title.toLowerCase()) ?? null;
+	};
+	const renameFiles = async (bookId, title, only) => {
+		const rows = await sql.query("select id, name, original_name, section from library_files where book_id = $1 order by lower(name), id", [bookId]);
+		const done = {};
+		for (const f of rows) {
+			const taken = done[f.section] ??= rows.filter((r) => r.section === f.section && only && !only.includes(r.id)).map((r) => r.name);
+			const name = only && !only.includes(f.id) ? f.name : shelfFileName(title, f.section, f.original_name || f.name, taken);
+			if (!only || only.includes(f.id)) taken.push(name);
+			if (name !== f.name) await sql.query("update library_files set name = $2, original_name = coalesce(original_name, $3) where id = $1", [
+				f.id,
+				name,
+				f.name
+			]);
+		}
+	};
+	const old = await sql.query("select id, title from library_books where not per_variation order by id");
+	for (const b of old) {
+		const sheets = await sql.query("select id, manufacturer, model from spec_sheets where book_id = $1 order by id", [b.id]);
+		if (sheets.length === 1) {
+			const title = variationTitle(sheets[0].manufacturer, sheets[0].model);
+			const clash = books.find((x) => x.id !== b.id && x.title.toLowerCase() === title.toLowerCase());
+			if (clash) await sql.query("update spec_sheets set book_id = $2 where id = $1", [sheets[0].id, clash.id]);
+			else if (title && title.toLowerCase() !== b.title.toLowerCase()) {
+				await sql.query("update library_books set title = $2 where id = $1", [b.id, title]);
+				await renameFiles(b.id, title);
+			}
+		} else if (sheets.length > 1) {
+			const made = [];
+			for (const sheet of sheets) {
+				const target = await bookFor(sheet.manufacturer, sheet.model);
+				if (!target) continue;
+				if (target.id !== b.id) await sql.query("update spec_sheets set book_id = $2 where id = $1", [sheet.id, target.id]);
+				made.push(target);
+			}
+			const mine = await sql.query("select id, name, original_name from library_files where book_id = $1", [b.id]);
+			for (const f of mine) {
+				const target = matchBook(f.original_name || f.name, made.filter((m) => m.id !== b.id));
+				if (!target) continue;
+				await sql.query("update library_files set book_id = $2 where id = $1", [f.id, target.id]);
+				await renameFiles(target.id, target.title, [f.id]);
+			}
+			await sql.query("delete from library_books k where k.id = $1 and not exists (select 1 from library_files f where f.book_id = k.id) and not exists (select 1 from spec_sheets s where s.book_id = k.id)", [b.id]);
+		}
+		await sql.query("update library_books set per_variation = true where id = $1", [b.id]);
+		books = await load();
+	}
+	const loose = await sql.query("select id, manufacturer, model from spec_sheets where book_id is null order by id");
+	for (const sheet of loose) {
+		const book = await bookFor(sheet.manufacturer, sheet.model);
+		if (book) await sql.query("update spec_sheets set book_id = $2 where id = $1 and book_id is null", [sheet.id, book.id]);
+	}
+	const files = await sql.query("select id, name, section from library_files where book_id is null and complete order by id");
+	for (const f of files) {
+		const book = matchBook(f.name, books);
+		if (!book) continue;
+		const taken = await sql.query("select name from library_files where book_id = $1 and section = $2", [book.id, f.section]);
+		await sql.query("update library_files set book_id = $2, original_name = coalesce(original_name, name), name = $3 where id = $1 and book_id is null", [
+			f.id,
+			book.id,
+			shelfFileName(book.title, f.section, f.name, taken.map((t) => t.name))
+		]);
+	}
+	return books;
+}
+var listLibraryFiles = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }) => {
+	const sql = await ready$1();
+	const role = await roleOf(sql, context.userId);
+	const books = await ensureBooks(sql);
+	const files = (await sql.query("select id, section, name, mime, size, token, book_id, added_by_name, created_at from library_files where complete order by lower(name), id")).map((r) => ({
+		id: Number(r.id),
+		section: r.section,
+		name: r.name,
+		mime: r.mime,
+		size: Number(r.size),
+		token: r.token,
+		bookId: r.book_id == null ? null : Number(r.book_id),
+		addedBy: r.added_by_name || "Teammate",
+		createdAt: new Date(r.created_at).toISOString()
+	}));
+	const sheets = await sql.query("select id, book_id from spec_sheets");
+	return {
+		books,
+		files: sortByName(files),
+		sheetBooks: sheets.map((r) => ({
+			sheetId: Number(r.id),
+			bookId: r.book_id == null ? null : Number(r.book_id)
+		})),
+		canEdit: role.canEdit
+	};
+});
+var bookParts = {
+	manufacturer: string().trim().min(2).max(40),
+	model: string().trim().min(1).max(60)
+};
+var tidy = (v) => v.replace(/\s+/g, " ").trim();
+/** "Bunn" + "Axiom" → "Bunn Axiom"; a model typed with the maker in front isn't doubled. */
+function titleOf(manufacturer, model) {
+	const maker = tidy(manufacturer);
+	const m = tidy(model);
+	return m.toLowerCase().startsWith(maker.toLowerCase() + " ") ? m : `${maker} ${m}`;
+}
+/** Creates the book, or returns the one that already has that maker and model. */
+var createLibraryBook = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object(bookParts).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	const title = titleOf(data.manufacturer, data.model);
+	await sql.query("insert into library_books (title, manufacturer, created_by, per_variation) values ($1, $2, $3, true) on conflict (lower(title)) do nothing", [
+		title,
+		tidy(data.manufacturer),
+		context.userId
+	]);
+	const rows = await sql.query("select id, title, manufacturer from library_books where lower(title) = lower($1)", [title]);
+	return {
+		id: Number(rows[0].id),
+		title: rows[0].title,
+		manufacturer: rows[0].manufacturer ?? tidy(data.manufacturer)
+	};
+});
+var renameLibraryBook = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({
+	id: number().int().positive(),
+	...bookParts
+}).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	const title = titleOf(data.manufacturer, data.model);
+	if ((await sql.query("select 1 from library_books where lower(title) = lower($1) and id <> $2", [title, data.id])).length) throw new Error(`${title} is already in The Library.`);
+	await sql.query("update library_books set title = $2, manufacturer = $3 where id = $1", [
+		data.id,
+		title,
+		tidy(data.manufacturer)
+	]);
+	return { ok: true };
+});
+/** Only an empty book can be removed. */
+var deleteLibraryBook = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ id: number().int().positive() }).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	if (!(await sql.query(`delete from library_books b where b.id = $1
+          and not exists (select 1 from library_files f where f.book_id = b.id)
+          and not exists (select 1 from spec_sheets s where s.book_id = b.id)
+        returning b.id`, [data.id])).length) throw new Error("Move or delete everything in this book first.");
+	return { ok: true };
+});
+async function nameInBook(sql, bookId, sec, original, exceptId) {
+	const book = await sql.query("select title from library_books where id = $1", [bookId]);
+	if (!book[0]) throw new Error("That book no longer exists. Pick another.");
+	const taken = await sql.query("select name from library_files where book_id = $1 and section = $2 and id <> $3", [
+		bookId,
+		sec,
+		exceptId ?? 0
+	]);
+	return shelfFileName(book[0].title, sec, original, taken.map((t) => t.name));
+}
+var startLibraryFile = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({
+	section,
+	bookId: number().int().positive(),
+	name: string().trim().min(1).max(200),
+	size: number().int().positive()
+}).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	const role = await requireEditor(sql, context.userId);
+	const problem = fileError(data.name, data.size);
+	if (problem) throw new Error(problem);
+	await sql.query("delete from library_files where not complete and created_at < now() - interval '1 hour'");
+	const name = await nameInBook(sql, data.bookId, data.section, data.name);
+	const rows = await sql.query(`insert into library_files (section, name, original_name, mime, size, token, added_by, added_by_name, book_id)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`, [
+		data.section,
+		name,
+		data.name,
+		mimeFor(data.name),
+		data.size,
+		newToken(),
+		context.userId,
+		role.name,
+		data.bookId
+	]);
+	return {
+		id: Number(rows[0].id),
+		name
+	};
+});
+/** Put a file in a (different) book; it is renamed for that book. */
+var moveLibraryFile = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({
+	id: number().int().positive(),
+	bookId: number().int().positive()
+}).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	const file = await sql.query("select section, name, original_name from library_files where id = $1", [data.id]);
+	if (!file[0]) throw new Error("That file no longer exists.");
+	const name = await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id);
+	await sql.query("update library_files set book_id = $2, name = $3, original_name = coalesce(original_name, $4) where id = $1", [
+		data.id,
+		data.bookId,
+		name,
+		file[0].name
+	]);
+	return {
+		ok: true,
+		name
+	};
+});
+var moveSpecSheet = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({
+	sheetId: number().int().positive(),
+	bookId: number().int().positive()
+}).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	if (!(await sql.query("update spec_sheets set book_id = $2 where id = $1 and exists (select 1 from library_books where id = $2) returning id", [data.sheetId, data.bookId])).length) throw new Error("That book or spec sheet no longer exists.");
+	return { ok: true };
+});
+var appendLibraryChunk = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({
+	id: number().int().positive(),
+	seq: number().int().min(0).max(100),
+	base64: string().min(1).max(Math.ceil(CHUNK_BYTES * 4 / 3) + 16).regex(/^[A-Za-z0-9+/]+=*$/)
+}).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	if (!(await sql.query(`insert into library_file_chunks (file_id, seq, data)
+       select f.id, $2, decode($3, 'base64') from library_files f
+        where f.id = $1 and f.added_by = $4 and not f.complete
+       on conflict (file_id, seq) do update set data = excluded.data
+       returning file_id`, [
+		data.id,
+		data.seq,
+		data.base64,
+		context.userId
+	]))[0]) throw new Error("That upload is no longer open. Drop the file again.");
+	return { ok: true };
+});
+var finishLibraryFile = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ id: number().int().positive() }).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	if (!(await sql.query(`update library_files f set complete = true
+        where f.id = $1 and f.added_by = $2 and not f.complete
+          and f.size = (select coalesce(sum(octet_length(c.data)), 0) from library_file_chunks c where c.file_id = f.id)
+        returning f.id`, [data.id, context.userId]))[0]) {
+		await sql.query("delete from library_files where id = $1 and added_by = $2 and not complete", [data.id, context.userId]);
+		throw new Error("The file didn't arrive in full. Drop it again.");
+	}
+	return { ok: true };
+});
+var deleteLibraryFile = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d) => object({ id: number().int().positive() }).parse(d)).handler(async ({ data, context }) => {
+	const sql = await ready$1();
+	await requireEditor(sql, context.userId);
+	await sql.query("delete from library_files where id = $1", [data.id]);
+	return { ok: true };
+});
+/** Stats from RGBA pixels (any size; the caller downsamples to ~96×96). */
+function pixelStats(pixels) {
+	const n = Math.floor(pixels.length / 4);
+	if (!n) return {
+		white: 0,
+		dark: 0,
+		mid: 0,
+		colorful: 0,
+		warning: 0,
+		bins: 0,
+		top3: 0,
+		tones: 0
+	};
+	const levels = new Array(32).fill(0);
+	const counts = /* @__PURE__ */ new Map();
+	let white = 0;
+	let dark = 0;
+	let mid = 0;
+	let colorful = 0;
+	let warning = 0;
+	for (let i = 0; i < n * 4; i += 4) {
+		const r = pixels[i];
+		const g = pixels[i + 1];
+		const b = pixels[i + 2];
+		const key = r >> 4 << 8 | g >> 4 << 4 | b >> 4;
+		counts.set(key, (counts.get(key) ?? 0) + 1);
+		if (r > 235 && g > 235 && b > 235) white++;
+		const lum = .299 * r + .587 * g + .114 * b;
+		levels[Math.min(31, Math.floor(lum / 8))]++;
+		if (lum < 60) dark++;
+		if (lum > 40 && lum < 215) mid++;
+		if (Math.max(r, g, b) - Math.min(r, g, b) > 40) colorful++;
+		if (r > 170 && b < 110 && r - b > 90 && (g > 120 || g < 90)) warning++;
+	}
+	const top = [...counts.values()].sort((a, b) => b - a);
+	const top3 = ((top[0] ?? 0) + (top[1] ?? 0) + (top[2] ?? 0)) / n;
+	const tones = levels.filter((c) => c / n >= .003).length;
+	return {
+		white: white / n,
+		dark: dark / n,
+		mid: mid / n,
+		colorful: colorful / n,
+		warning: warning / n,
+		bins: counts.size,
+		top3,
+		tones
+	};
+}
+/** Classify one embedded image from its pixel size and stats. */
+function classifyImage(width, height, s) {
+	if (!width || !height) return "icon";
+	if (Math.min(width, height) < 150) return "icon";
+	const ratio = width / height;
+	if (ratio > 4 || ratio < .25) return "icon";
+	if (s.warning >= .18 && s.bins < 90) return "icon";
+	const flat = s.top3 >= .9 || s.bins <= 14;
+	if (s.white >= .75 && s.dark <= .08 && s.colorful < .05 && s.mid < .15) return Math.min(width, height) >= 250 ? "diagram" : "icon";
+	if (flat) return "icon";
+	if (s.bins >= 24 || s.tones >= 12) return "photo";
+	return "icon";
+}
+/**
+* Primary = the largest photo that doesn't repeat across pages; when two are close in size,
+* the one nearest the model name / title. Diagram = the largest line drawing. Either can be null.
+*/
+function pickImages(candidates, title) {
+	const rejected = [];
+	const usable = [];
+	for (const c of candidates) if (c.pages >= 2) rejected.push({
+		id: c.id,
+		reason: "repeats across pages (logo or footer)"
+	});
+	else if (c.kind === "icon") rejected.push({
+		id: c.id,
+		reason: "icon, symbol, logo or barcode"
+	});
+	else usable.push(c);
+	const area = (c) => c.width * c.height;
+	const photos = usable.filter((c) => c.kind === "photo").sort((a, b) => area(b) - area(a) || a.page - b.page);
+	const diagrams = usable.filter((c) => c.kind === "diagram").sort((a, b) => area(b) - area(a) || a.page - b.page);
+	let primary = photos[0] ?? null;
+	if (primary && title) {
+		const close = photos.filter((p) => area(p) >= area(primary) * .6);
+		if (close.length > 1) {
+			const dist = (p) => {
+				const pagePenalty = Math.abs(p.page - title.page) * 2e3;
+				if (p.cx == null || p.cy == null) return pagePenalty + 1500;
+				return pagePenalty + Math.hypot(p.cx - title.x, p.cy - title.y);
+			};
+			primary = [...close].sort((a, b) => dist(a) - dist(b))[0] ?? primary;
+		}
+	}
+	for (const d of diagrams) rejected.push({
+		id: d.id,
+		reason: "line drawing (dimension diagram), not a photo"
+	});
+	return {
+		primary,
+		diagram: diagrams[0] ?? null,
+		rejected
+	};
+}
+async function pdfToText(file) {
+	if (file.size > 10485760) throw new Error("That PDF is over 10 MB.");
+	if (!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))) throw new Error("Only PDF files can be imported.");
+	const pdfjs = await import("../_libs/pdfjs-dist.mjs").then((n) => n.n);
+	const worker = await import("../_libs/pdfjs-dist.mjs").then((n) => n.t);
+	pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+	const bytes = new Uint8Array(await file.arrayBuffer());
+	if (new TextDecoder().decode(bytes.slice(0, 5)) !== "%PDF-") throw new Error("That file isn't a readable PDF.");
+	const doc = await pdfjs.getDocument({ data: bytes }).promise;
+	const out = [];
+	try {
+		for (let n = 1; n <= doc.numPages; n++) {
+			const page = await doc.getPage(n);
+			const content = await page.getTextContent();
+			let line = "";
+			const lines = [];
+			for (const item of content.items) {
+				if (!("str" in item)) continue;
+				line += item.str;
+				if (item.hasEOL) {
+					lines.push(line);
+					line = "";
+				} else if (item.str && !item.str.endsWith(" ")) line += " ";
+			}
+			if (line.trim()) lines.push(line);
+			out.push(lines.map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n"));
+			page.cleanup();
+		}
+		const pics = await sheetImages(pdfjs, doc).catch(() => ({
+			image: null,
+			dimsImage: null,
+			imageNote: null
+		}));
+		return {
+			text: out.join("\n\n").trim(),
+			pages: doc.numPages,
+			...pics
+		};
+	} finally {
+		doc.destroy();
+	}
+}
+/** Draw a pdf.js image object onto a canvas (bitmap or raw pixel data). */
+function toCanvas(img) {
+	const src = document.createElement("canvas");
+	src.width = img.width;
+	src.height = img.height;
+	const ctx = src.getContext("2d");
+	if (!ctx) return null;
+	if (img.bitmap) {
+		ctx.drawImage(img.bitmap, 0, 0);
+		return src;
+	}
+	if (!img.data) return null;
+	const px = img.width * img.height;
+	const d = img.data;
+	const rgba = new Uint8ClampedArray(px * 4);
+	if (d.length === px * 4) rgba.set(d);
+	else if (d.length === px * 3) for (let p = 0; p < px; p++) {
+		rgba[p * 4] = d[p * 3];
+		rgba[p * 4 + 1] = d[p * 3 + 1];
+		rgba[p * 4 + 2] = d[p * 3 + 2];
+		rgba[p * 4 + 3] = 255;
+	}
+	else if (d.length === px) for (let p = 0; p < px; p++) {
+		rgba[p * 4] = rgba[p * 4 + 1] = rgba[p * 4 + 2] = d[p];
+		rgba[p * 4 + 3] = 255;
+	}
+	else return null;
+	ctx.putImageData(new ImageData(rgba, img.width, img.height), 0, 0);
+	return src;
+}
+var IDENTITY = [
+	1,
+	0,
+	0,
+	1,
+	0,
+	0
+];
+/** m applied after n (PDF "cm" concatenation). */
+function concat(m, n) {
+	return [
+		n[0] * m[0] + n[1] * m[2],
+		n[0] * m[1] + n[1] * m[3],
+		n[2] * m[0] + n[3] * m[2],
+		n[2] * m[1] + n[3] * m[3],
+		n[4] * m[0] + n[5] * m[2] + m[4],
+		n[4] * m[1] + n[5] * m[3] + m[5]
+	];
+}
+function statsOf(canvas) {
+	const small = document.createElement("canvas");
+	small.width = 96;
+	small.height = 96;
+	const ctx = small.getContext("2d");
+	if (!ctx) return null;
+	ctx.fillStyle = "#fff";
+	ctx.fillRect(0, 0, 96, 96);
+	ctx.drawImage(canvas, 0, 0, 96, 96);
+	return pixelStats(ctx.getImageData(0, 0, 96, 96).data);
+}
+/** How many of the first pages to search for the machine photo. */
+var IMAGE_PAGES = 3;
+/**
+* Every embedded image on the first pages, classified (icon / diagram / photo) with its size,
+* page position and how many pages it repeats on — then the picker chooses. The primary is the
+* machine photo or nothing; warning symbols, logos, barcodes and drawings can never be primary.
+*/
+async function sheetImages(pdfjs, doc) {
+	const found = /* @__PURE__ */ new Map();
+	let title = null;
+	const pages = Math.min(IMAGE_PAGES, doc.numPages);
+	for (let n = 1; n <= pages; n++) {
+		const page = await doc.getPage(n);
+		if (n === 1) {
+			const text = await page.getTextContent();
+			let best = 0;
+			for (const item of text.items) {
+				if (!("str" in item) || item.str.trim().length < 3) continue;
+				const h = Math.abs(item.height || item.transform[3] || 0);
+				if (h > best) {
+					best = h;
+					title = {
+						page: 1,
+						x: item.transform[4],
+						y: item.transform[5]
+					};
+				}
+			}
+		}
+		const ops = await page.getOperatorList();
+		let ctm = IDENTITY;
+		const stack = [];
+		for (let i = 0; i < ops.fnArray.length; i++) {
+			const fn = ops.fnArray[i];
+			const args = ops.argsArray[i];
+			if (fn === pdfjs.OPS.save) stack.push(ctm);
+			else if (fn === pdfjs.OPS.restore) ctm = stack.pop() ?? IDENTITY;
+			else if (fn === pdfjs.OPS.transform && args && args.length >= 6) ctm = concat(ctm, args);
+			else if (fn === pdfjs.OPS.paintFormXObjectBegin) {
+				stack.push(ctm);
+				const m = args?.[0];
+				if (Array.isArray(m) && m.length >= 6) ctm = concat(ctm, m);
+			} else if (fn === pdfjs.OPS.paintFormXObjectEnd) ctm = stack.pop() ?? IDENTITY;
+			const isObject = fn === pdfjs.OPS.paintImageXObject || fn === pdfjs.OPS.paintImageXObjectRepeat;
+			const isInline = fn === pdfjs.OPS.paintInlineImageXObject;
+			if (!isObject && !isInline) continue;
+			let key;
+			let img;
+			if (isInline) {
+				img = args?.[0] ?? null;
+				key = `inline-${n}-${i}`;
+			} else {
+				const name = args?.[0];
+				if (!name) continue;
+				key = name;
+				const known = found.get(key);
+				if (known) {
+					known.seenPages.add(n);
+					continue;
+				}
+				img = await new Promise((resolve) => {
+					const timer = setTimeout(() => resolve(null), 3e3);
+					(name.startsWith("g_") ? page.commonObjs : page.objs).get(name, (v) => {
+						clearTimeout(timer);
+						resolve(v ?? null);
+					});
+				});
+			}
+			if (!img?.width || !img.height) continue;
+			if (Math.min(img.width, img.height) < 150) continue;
+			const canvas = toCanvas(img);
+			if (!canvas) continue;
+			const stats = statsOf(canvas);
+			if (!stats) continue;
+			const sig = `${img.width}x${img.height}:${stats.bins}:${stats.top3.toFixed(3)}:${stats.white.toFixed(3)}:${stats.dark.toFixed(3)}`;
+			const twin = [...found.values()].find((f) => f.cand.id.endsWith(sig) && !f.seenPages.has(n));
+			if (twin) {
+				twin.seenPages.add(n);
+				continue;
+			}
+			found.set(key, {
+				canvas,
+				seenPages: /* @__PURE__ */ new Set([n]),
+				cand: {
+					id: `${key}|${sig}`,
+					page: n,
+					width: img.width,
+					height: img.height,
+					kind: classifyImage(img.width, img.height, stats),
+					pages: 1,
+					cx: ctm[0] * .5 + ctm[2] * .5 + ctm[4],
+					cy: ctm[1] * .5 + ctm[3] * .5 + ctm[5]
+				}
+			});
+		}
+	}
+	const all = [...found.values()];
+	for (const f of all) f.cand.pages = f.seenPages.size;
+	const pick = pickImages(all.map((f) => f.cand), title);
+	const canvasOf = (c) => c ? all.find((f) => f.cand === c)?.canvas ?? null : null;
+	const primary = canvasOf(pick.primary);
+	const diagram = canvasOf(pick.diagram);
+	return {
+		image: primary ? shrinkCanvas(primary) : null,
+		dimsImage: diagram ? shrinkCanvas(diagram, 1400) : null,
+		imageNote: primary ? null : all.length ? "No machine photo found in this PDF (only symbols, logos or drawings). Use Add Image to set one." : "This PDF has no embedded pictures. Use Add Image to set the machine photo."
+	};
+}
+/** Just the pictures from a spec sheet PDF — for re-reading the image of a sheet that's already saved. */
+async function pdfImages(file) {
+	if (file.size > 10485760) throw new Error("That PDF is over 10 MB.");
+	if (!(file.type === "application/pdf" || /\.pdf$/i.test(file.name))) throw new Error("Pick the spec sheet PDF.");
+	const pdfjs = await import("../_libs/pdfjs-dist.mjs").then((n) => n.n);
+	const worker = await import("../_libs/pdfjs-dist.mjs").then((n) => n.t);
+	pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+	const bytes = new Uint8Array(await file.arrayBuffer());
+	if (new TextDecoder().decode(bytes.slice(0, 5)) !== "%PDF-") throw new Error("That file isn't a readable PDF.");
+	const doc = await pdfjs.getDocument({ data: bytes }).promise;
+	try {
+		return await sheetImages(pdfjs, doc);
+	} finally {
+		doc.destroy();
+	}
+}
+/** White background (JPEG has no alpha), longest side 1200 px — large enough to enlarge. */
+function shrinkCanvas(src, max = 1200) {
+	const w = "naturalWidth" in src ? src.naturalWidth : src.width;
+	const h = "naturalHeight" in src ? src.naturalHeight : src.height;
+	if (!w || !h) return null;
+	const scale = Math.min(1, max / Math.max(w, h));
+	const out = document.createElement("canvas");
+	out.width = Math.round(w * scale);
+	out.height = Math.round(h * scale);
+	const ctx = out.getContext("2d");
+	if (!ctx) return null;
+	ctx.fillStyle = "#fff";
+	ctx.fillRect(0, 0, out.width, out.height);
+	ctx.drawImage(src, 0, 0, out.width, out.height);
+	return out.toDataURL("image/jpeg", .82);
+}
+/** A photo the user picks for the spec sheet (Admin/Sales), resized the same way. */
+async function imageFileToDataUrl(file, max = 1200) {
+	if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error("Use a JPG, PNG or WebP image.");
+	if (file.size > 15728640) throw new Error("That image is over 15 MB.");
+	const url = URL.createObjectURL(file);
+	try {
+		const img = new Image();
+		img.src = url;
+		await img.decode();
+		const out = shrinkCanvas(img, max);
+		if (!out) throw new Error("Couldn't read that image.");
+		return out;
+	} finally {
+		URL.revokeObjectURL(url);
+	}
+}
+//#endregion
+//#region src/components/desk/library-files.tsx
+function toBase64(bytes) {
+	let s = "";
+	for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode(...bytes.subarray(i, i + 32768));
+	return btoa(s);
+}
+/** Store one file in a book's shelf. Sent in pieces; returns the name it was filed under. */
+async function uploadLibraryFile(file, section, bookId, onProgress) {
+	const { id, name } = await startLibraryFile({ data: {
+		section,
+		bookId,
+		name: file.name,
+		size: file.size
+	} });
+	const parts = Math.ceil(file.size / CHUNK_BYTES);
+	for (let seq = 0; seq < parts; seq++) {
+		onProgress?.(Math.round(seq / parts * 100));
+		const bytes = new Uint8Array(await file.slice(seq * CHUNK_BYTES, (seq + 1) * CHUNK_BYTES).arrayBuffer());
+		await appendLibraryChunk({ data: {
+			id,
+			seq,
+			base64: toBase64(bytes)
+		} });
+	}
+	await finishLibraryFile({ data: { id } });
+	return name;
+}
+var originOf = () => typeof window === "undefined" ? "" : window.location.origin;
+/** Email and Text: both carry a link to the original document, never a copy. Icon-sized to keep rows to one line. */
+function SendButtons({ name, url }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+		asChild: true,
+		size: "sm",
+		variant: "outline",
+		className: "size-11 shrink-0 p-0",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+			href: emailHref(name, url),
+			"aria-label": `Email ${name}`,
+			title: "Email a link",
+			"data-testid": "library-file-email",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "size-4" })
+		})
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+		asChild: true,
+		size: "sm",
+		variant: "outline",
+		className: "size-11 shrink-0 p-0",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+			href: textHref(name, url),
+			"aria-label": `Text ${name}`,
+			title: "Text a link",
+			"data-testid": "library-file-text",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageSquare, { className: "size-4" })
+		})
+	})] });
+}
+var DOC_TAG = {
+	spec: "Spec",
+	manuals: "Manual",
+	parts: "Parts"
+};
+/** One stored file on one line: type, name (opens the original in a new tab), Email, Text. */
+function DocRow({ file, label, manage, onMove, onDelete, extra }) {
+	const url = fileUrl(originOf(), file.token);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+		className: "flex min-h-12 items-center gap-2 py-1",
+		"data-testid": "library-file",
+		"data-section": file.section,
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "w-16 shrink-0 text-[11px] font-semibold tracking-[0.1em] text-copper uppercase",
+				children: DOC_TAG[file.section]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+				href: url,
+				target: "_blank",
+				rel: "noopener",
+				title: `${file.name} · ${sizeText(file.size)} · added by ${file.addedBy} ${new Date(file.createdAt).toLocaleDateString()}`,
+				className: "min-w-0 flex-1 py-2 text-sm font-medium break-words hover:underline",
+				"data-testid": "library-file-open",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					"data-testid": "library-file-name",
+					children: label
+				})
+			}),
+			extra,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SendButtons, {
+				name: file.name,
+				url
+			}),
+			manage ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				type: "button",
+				size: "sm",
+				variant: "ghost",
+				className: "size-11 shrink-0 p-0",
+				"aria-label": `Move ${file.name}`,
+				title: "Move to another model",
+				onClick: () => onMove(file),
+				"data-testid": "library-file-move",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRightLeft, { className: "size-4" })
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				type: "button",
+				size: "sm",
+				variant: "ghost",
+				className: "size-11 shrink-0 p-0",
+				"aria-label": `Delete ${file.name}`,
+				title: "Delete",
+				onClick: () => onDelete(file),
+				"data-testid": "library-file-delete",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-4" })
+			})] }) : null
+		]
+	});
+}
+/** "+ Manual" — click to choose, or drop files on it. One per document type. */
+function AddTarget({ id, label, busy, disabled, large, onFiles }) {
+	const input = (0, import_react.useRef)(null);
+	const [over, setOver] = (0, import_react.useState)(false);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+		type: "button",
+		disabled,
+		className: cn("inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-3 text-sm font-medium transition-colors disabled:opacity-60", large ? "min-h-20 flex-1 flex-col py-3" : "h-10", over ? "border-primary bg-primary/10" : "border-border bg-card/60 hover:border-primary/50"),
+		"data-testid": `drop-${id}`,
+		onClick: () => input.current?.click(),
+		onDragOver: (e) => {
+			e.preventDefault();
+			e.dataTransfer.dropEffect = "copy";
+			setOver(true);
+		},
+		onDragLeave: () => setOver(false),
+		onDrop: (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			setOver(false);
+			if (!disabled) onFiles(Array.from(e.dataTransfer.files));
+		},
+		children: [busy ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { className: "size-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			"data-testid": `busy-${id}`,
+			children: busy ?? label
+		})]
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+		ref: input,
+		type: "file",
+		multiple: true,
+		accept: ACCEPT,
+		className: "hidden",
+		"data-testid": `input-${id}`,
+		onChange: (e) => {
+			const picked = Array.from(e.target.files ?? []);
+			e.target.value = "";
+			onFiles(picked);
+		}
+	})] });
+}
+var DROP_RULES = `${ALLOWED_TEXT}. Up to ${sizeText(MAX_FILE_BYTES)} each.`;
+/** "Which book?" — shown when a file's family can't be matched, and for moving things between books. */
+function BookPicker({ open, heading, detail, books, currentId, likelyIds = [], busy, cancelLabel = "Cancel", onPick, onCreate, onCancel }) {
+	const [q, setQ] = (0, import_react.useState)("");
+	const [maker, setMaker] = (0, import_react.useState)("");
+	const [model, setModel] = (0, import_react.useState)("");
+	const makers = [...new Set(books.map((b) => b.manufacturer).filter(Boolean))];
+	const ready = maker.trim().length >= 2 && model.trim().length >= 1;
+	const shown = books.filter((b) => b.title.toLowerCase().includes(q.trim().toLowerCase())).sort((a, b) => Number(likelyIds.includes(b.id)) - Number(likelyIds.includes(a.id)));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+		open,
+		onOpenChange: (o) => !o && onCancel(),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
+			"data-testid": "book-picker",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: heading }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, { children: detail }),
+				books.length > 6 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					value: q,
+					onChange: (e) => setQ(e.target.value),
+					placeholder: "Search models",
+					"aria-label": "Search models",
+					className: "mt-3"
+				}) : null,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+					className: "mt-3 grid max-h-64 gap-1.5 overflow-y-auto",
+					"data-testid": "book-picker-list",
+					children: [shown.map((b) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						disabled: busy,
+						onClick: () => onPick(b),
+						className: cn("flex w-full items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5 text-left text-sm font-medium hover:border-primary/60", b.id === currentId && "border-primary/60"),
+						children: [b.title, b.id === currentId ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-normal text-muted-foreground",
+							children: "Open now"
+						}) : null]
+					}) }, b.id)), !shown.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+						className: "text-sm text-muted-foreground",
+						children: "No models yet. Add one below."
+					}) : null]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+					className: "mt-4 grid gap-2 border-t border-border pt-4 sm:grid-cols-[1fr_1fr_auto]",
+					onSubmit: (e) => {
+						e.preventDefault();
+						if (ready) onCreate(maker.trim(), model.trim());
+					},
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							value: maker,
+							onChange: (e) => setMaker(e.target.value),
+							placeholder: "Manufacturer",
+							"aria-label": "Manufacturer",
+							list: "library-makers",
+							"data-testid": "book-picker-maker"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", {
+							id: "library-makers",
+							children: makers.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: m }, m))
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							value: model,
+							onChange: (e) => setModel(e.target.value),
+							placeholder: "Model",
+							"aria-label": "Model",
+							"data-testid": "book-picker-new"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "submit",
+							disabled: busy || !ready,
+							"data-testid": "book-picker-create",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), " Add Model"]
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					variant: "ghost",
+					className: "mt-2 w-fit",
+					onClick: onCancel,
+					children: cancelLabel
+				})
+			]
+		})
+	});
+}
+//#endregion
+//#region src/components/desk/plug-face.tsx
+/**
+* Plug images for the Plug cell, cut from the provided NEMA configurations chart
+* (public/nema/<code>P.png). Only codes we have a real image for get one — no generated art,
+* and a 120 V plug never borrows the L6 twist-lock image.
+*/
+var NEMA_IMAGES = /* @__PURE__ */ new Set([
+	"5-15",
+	"5-20",
+	"6-20",
+	"6-30",
+	"6-50",
+	"14-20",
+	"14-30",
+	"L5-15",
+	"L5-20",
+	"L6-20",
+	"L6-30",
+	"L14-20",
+	"L14-30"
+]);
+function hasPlugFace(nema) {
+	return !!nema && NEMA_IMAGES.has(nema);
+}
+function plugImageSrc(nema) {
+	return `/nema/${nema}P.png`;
+}
+/** Image + NEMA label for the Plug cell. Nothing for hardwire or a code we have no image for. */
+function PlugPicture({ nema, label, note }) {
+	if (!hasPlugFace(nema)) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figure", {
+		className: "flex items-center gap-3 rounded-lg border border-border bg-card p-2.5",
+		"data-testid": "plug-image",
+		"data-nema": nema,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+			src: plugImageSrc(nema),
+			alt: `${label} plug face`,
+			width: 240,
+			height: 240,
+			loading: "lazy",
+			className: "size-24 shrink-0 rounded-md border border-border bg-white object-contain p-1"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figcaption", {
+			className: "min-w-0 text-sm",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "block font-semibold",
+				"data-testid": "plug-label",
+				children: label
+			}), note ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "mt-0.5 block text-xs text-warning",
+				children: note
+			}) : null]
+		})]
+	});
+}
+//#endregion
+//#region src/components/desk/spec-sheet.tsx
+/** Clipboard API first; if the browser blocks it, the caller shows a select-and-copy box. */
+async function writeClipboard(text) {
+	try {
+		if (navigator.clipboard?.writeText && window.isSecureContext) {
+			await navigator.clipboard.writeText(text);
+			return true;
+		}
+	} catch {}
+	try {
+		const area = document.createElement("textarea");
+		area.value = text;
+		area.setAttribute("readonly", "");
+		area.style.position = "fixed";
+		area.style.opacity = "0";
+		document.body.appendChild(area);
+		area.select();
+		const ok = document.execCommand("copy");
+		area.remove();
+		return ok;
+	} catch {
+		return false;
+	}
+}
+function useCopy() {
+	const [copied, setCopied] = (0, import_react.useState)(null);
+	const [manual, setManual] = (0, import_react.useState)(null);
+	const timer = (0, import_react.useRef)(void 0);
+	(0, import_react.useEffect)(() => () => window.clearTimeout(timer.current), []);
+	async function copy(key, text) {
+		if (!await writeClipboard(text)) {
+			setManual(text);
+			return;
+		}
+		setCopied(key);
+		toast.success("Copied");
+		window.clearTimeout(timer.current);
+		timer.current = window.setTimeout(() => setCopied(null), 2e3);
+	}
+	return {
+		copy,
+		copied,
+		dialog: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ManualCopyDialog, {
+			text: manual,
+			onClose: () => setManual(null)
+		})
+	};
+}
+function ManualCopyDialog({ text, onClose }) {
+	const ref = (0, import_react.useRef)(null);
+	(0, import_react.useEffect)(() => {
+		if (text) window.setTimeout(() => ref.current?.select(), 50);
+	}, [text]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+		open: !!text,
+		onOpenChange: (o) => !o && onClose(),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
+			"data-testid": "manual-copy",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Copy The Text" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, { children: "This browser blocked the copy button. The text is selected — press Ctrl+C (⌘C on Mac)." }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+					ref,
+					readOnly: true,
+					value: text ?? "",
+					rows: Math.min(14, (text ?? "").split("\n").length + 1),
+					className: "mt-3 w-full rounded-md border border-input bg-background p-3 font-mono text-xs",
+					onFocus: (e) => e.currentTarget.select()
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					className: "mt-3",
+					onClick: onClose,
+					children: "Done"
+				})
+			]
+		})
+	});
+}
+function ConfigChips({ configs, selected, onSelect, trailing }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex flex-wrap items-center gap-2",
+		role: "radiogroup",
+		"aria-label": "Configurations",
+		"data-testid": "config-chips",
+		children: [configs.map((c, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+			type: "button",
+			role: "radio",
+			"aria-checked": selected === i,
+			onClick: () => onSelect(i),
+			className: cn("rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors", selected === i ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground"),
+			children: c.label || `Configuration ${i + 1}`
+		}, `${c.label}-${i}`)), trailing]
+	});
+}
+var POWER_FIELDS = [
+	["voltage", "Voltage"],
+	["wires", "Wires"],
+	["amps", "Amps"],
+	["breaker", "Breaker"],
+	["phase", "Phase"],
+	["hz", "Hz"],
+	["plug", "Plug"],
+	["circuit", "Circuit"]
+];
+var WATER_FIELDS = [
+	["inlet", "Inlet"],
+	["pressure", "Pressure"],
+	["filtration", "Filtration"],
+	["notes", "Notes"]
+];
+var DRAIN_FIELDS = [["size", "Drain"], ["notes", "Drain Notes"]];
+var DIM_FIELDS = [
+	["width", "Width"],
+	["depth", "Depth"],
+	["height", "Height"],
+	["weight", "Weight"],
+	["clearance", "Clearance"]
+];
+var REQUIREMENT_GROUPS = {
+	POWER_FIELDS,
+	WATER_FIELDS,
+	DRAIN_FIELDS,
+	DIM_FIELDS
+};
+function Rows({ rows }) {
+	const shown = rows.filter(([, v]) => v && v.trim());
+	if (!shown.length) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dl", {
+		className: "grid grid-cols-[minmax(5.5rem,auto)_1fr] gap-x-4 gap-y-1.5 text-sm",
+		children: shown.map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "contents",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", {
+				className: "text-muted-foreground",
+				children: k
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
+				className: "font-medium break-words",
+				children: v
+			})]
+		}, k))
+	});
+}
+function Block({ icon: Icon, title, children }) {
+	if (!children) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "rounded-lg border border-border bg-background/60 p-4",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+			className: "mb-2 flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "size-3.5 text-copper" }), title]
+		}), children]
+	});
+}
+/** Power / Water And Drain / Dimensions for one configuration. Empty sections are hidden. */
+function RequirementsCard({ req, core, ctx }) {
+	const fmt = {
+		voltage: volts,
+		amps,
+		phase,
+		hz
+	};
+	const power = POWER_FIELDS.map(([k, l]) => {
+		const v = req.power?.[k];
+		return [l, v && fmt[k] ? fmt[k](v) : v];
+	});
+	const water = [...WATER_FIELDS.map(([k, l]) => [l, req.water?.[k]]), ...DRAIN_FIELDS.map(([k, l]) => [l, req.drain?.[k]])];
+	const dims = DIM_FIELDS.map(([k, l]) => [l, req.dimensions?.[k]]);
+	const other = (req.other ?? []).map((o) => [o.label, o.value]);
+	const any = (rows) => rows.some(([, v]) => v && v.trim());
+	const sections = [
+		any(power) ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Block, {
+			icon: Plug,
+			title: "Power",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Rows, { rows: power }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlugSection, {
+				power: req.power,
+				ctx
+			})]
+		}, "p") : null,
+		any(water) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Block, {
+			icon: Droplets,
+			title: "Water And Drain",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Rows, { rows: water })
+		}, "w") : null,
+		any(dims) || core ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Block, {
+			icon: Ruler,
+			title: "Space / Core Hole",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Rows, { rows: dims }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CoreHoleLine, { core })]
+		}, "d") : null,
+		any(other) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Block, {
+			icon: ClipboardCopy,
+			title: "Other",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Rows, { rows: other })
+		}, "o") : null
+	].filter(Boolean);
+	if (!sections.length) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+		className: "text-sm text-muted-foreground",
+		children: "No requirements listed for this configuration."
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "grid gap-3 sm:grid-cols-2",
+		"data-testid": "requirements-card",
+		children: sections
+	});
+}
+/** Core-hole status next to Space: Yes/No, the saved diameter, and the below-counter note. */
+function CoreHoleLine({ core }) {
+	if (!core) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: cn("mt-2 space-y-0.5 rounded-md border px-2.5 py-1.5 text-sm", core.missingDiameter ? "border-warning/50 bg-warning/10" : core.required ? "border-primary/30 bg-primary/5" : "border-border bg-background/60"),
+		"data-testid": "core-hole-line",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "text-muted-foreground",
+				children: "Utility lines pass through the counter: "
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "font-semibold",
+				children: core.required ? "Yes" : "No"
+			})] }),
+			core.required ? core.missingDiameter ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "font-semibold text-warning",
+				children: "Hole diameter needed before this spec is complete"
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "text-muted-foreground",
+				children: "Hole diameter: "
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "font-semibold",
+				children: core.diameter
+			})] }) }) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-xs text-muted-foreground",
+				"data-testid": "core-hole-note",
+				children: CORE_HOLE_NOTE
+			})
+		]
+	});
+}
+/** Equipment picture from the spec sheet, or a blank slot with the model name. No app branding in it. */
+function EquipmentImage({ image, loading, manufacturer, model, className }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: cn("flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-lg border border-border bg-white", className),
+		"data-testid": "equipment-image",
+		"data-empty": image ? "0" : "1",
+		children: image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZoomableImage, {
+			src: image,
+			alt: `${manufacturer ?? ""} ${model}`.trim(),
+			label: `${manufacturer ?? ""} ${model}`.trim(),
+			className: "size-full",
+			imgClassName: "size-full object-contain p-2",
+			testId: "equipment-zoom"
+		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex size-full flex-col items-center justify-center gap-1 border-2 border-dashed border-border/70 bg-muted/30 p-4 text-center",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Image$1, { className: "size-6 text-muted-foreground/70" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm font-semibold text-foreground",
+					children: model || "Model"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-xs text-muted-foreground",
+					children: loading ? "Loading image…" : "No image on the spec sheet yet"
+				})
+			]
+		})
+	});
+}
+/** Secondary image: the dimension drawing, under the machine photo. Hidden when the sheet has none. */
+function DimensionsImage({ image }) {
+	if (!image) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figure", {
+		className: "overflow-hidden rounded-lg border border-border bg-white",
+		"data-testid": "dims-image",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZoomableImage, {
+			src: image,
+			alt: "Dimensions diagram",
+			label: "Dimensions",
+			imgClassName: "w-full object-contain p-2",
+			testId: "dims-zoom"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("figcaption", {
+			className: "border-t border-border bg-card px-3 py-1.5 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+			children: "Dimensions"
+		})]
+	});
+}
+function SheetHeading({ sheet }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+			className: "text-xs font-semibold tracking-[0.18em] text-copper uppercase",
+			children: [sheet.manufacturer, sheet.category ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				className: "text-muted-foreground",
+				children: [" · ", sheet.category]
+			}) : null]
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+			className: "mt-1 font-display text-3xl font-medium tracking-tight",
+			children: sheet.model
+		}),
+		sheet.summary ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-2 max-w-2xl text-sm text-muted-foreground",
+			children: sheet.summary
+		}) : null
+	] });
+}
+/** The plug picture under the Power rows: NEMA plugs only — hardwire gets none. */
+function PlugSection({ power, ctx }) {
+	const plug = power?.plug?.trim();
+	const note = defaultPlugNote(power, ctx);
+	if (!plug) return note ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+		className: "mt-3 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-1.5 text-sm font-semibold text-warning",
+		"data-testid": "plug-flag",
+		children: note
+	}) : null;
+	const nema = nemaCode(plug);
+	if (!nema) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "mt-3",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlugPicture, {
+			nema,
+			label: plug,
+			note
+		})
+	});
+}
+function SpecSheetView({ sheet, canEdit, onEdit, onDelete, onRefresh, refreshing, onReread }) {
+	const [sel, setSel] = (0, import_react.useState)(0);
+	const { copy, copied, dialog } = useCopy();
+	const imageQ = useQuery({
+		queryKey: [
+			"spec-image",
+			sheet.id,
+			sheet.updatedAt
+		],
+		queryFn: () => getSpecImage({ data: { id: sheet.id } }),
+		enabled: sheet.hasImage || sheet.hasDims,
+		staleTime: 3e5
+	});
+	const core = coreHoleInfo(sheet);
+	(0, import_react.useEffect)(() => setSel(0), [sheet.id]);
+	const config = sheet.configs[Math.min(sel, sheet.configs.length - 1)];
+	const certs = sheet.mfrNotes.certifications ?? [];
+	const hasNotes = certs.length || sheet.mfrNotes.warranty || sheet.mfrNotes.usContact;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+		className: "rounded-xl border border-border bg-card p-5 sm:p-6",
+		"data-testid": "spec-sheet",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetHeading, { sheet }), canEdit ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex shrink-0 flex-wrap justify-end gap-2",
+					children: [
+						onRefresh ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "outline",
+							onClick: onRefresh,
+							disabled: refreshing,
+							"data-testid": "spec-refresh",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: cn("size-3.5", refreshing && "animate-spin") }), " Refresh Defaults"]
+						}) : null,
+						onReread ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "outline",
+							onClick: onReread,
+							"data-testid": "spec-reread",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Image$1, { className: "size-3.5" }), " Re-Read Image From PDF"]
+						}) : null,
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "outline",
+							onClick: onEdit,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "size-3.5" }), " Edit"]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "ghost",
+							onClick: onDelete,
+							"aria-label": "Delete spec sheet",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" })
+						})
+					]
+				}) : null]
+			}),
+			sheet.specs.length || hasNotes ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+				className: "mt-5 grid gap-3 lg:grid-cols-[2fr_1fr]",
+				children: [sheet.specs.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "rounded-lg border border-border bg-background/60 p-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "mb-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+						children: "Specs"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dl", {
+						className: "grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2",
+						"data-testid": "spec-rows",
+						children: sheet.specs.map((s, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "min-w-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("dt", {
+								className: "text-xs text-muted-foreground",
+								children: s.label
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dd", {
+								className: "font-medium break-words",
+								children: s.value
+							})]
+						}, `${s.label}-${i}`))
+					})]
+				}) : null, hasNotes ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "rounded-lg border border-border bg-background/60 p-4 text-sm",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "mb-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+							children: "Manufacturer (USA)"
+						}),
+						certs.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "mb-2 flex flex-wrap gap-1.5",
+							children: certs.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary",
+								children: c
+							}, c))
+						}) : null,
+						sheet.mfrNotes.warranty ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-muted-foreground",
+							children: "Warranty: "
+						}), sheet.mfrNotes.warranty] }) : null,
+						sheet.mfrNotes.usContact ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "mt-1 whitespace-pre-line",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-muted-foreground",
+								children: "US contact: "
+							}), sheet.mfrNotes.usContact]
+						}) : null
+					]
+				}) : null]
+			}) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+				className: "mt-6",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "mb-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+						children: "Configurations"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid gap-4 md:grid-cols-[minmax(0,15rem)_1fr]",
+						"data-testid": "configuration",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "grid content-start gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentImage, {
+								image: imageQ.data?.image,
+								loading: sheet.hasImage && imageQ.isLoading,
+								manufacturer: sheet.manufacturer,
+								model: sheet.model
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DimensionsImage, { image: imageQ.data?.dimsImage })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "min-w-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ConfigChips, {
+								configs: sheet.configs,
+								selected: sel,
+								onSelect: setSel
+							}), config ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "mt-4",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RequirementsCard, {
+									req: config.requirements,
+									core,
+									ctx: sheet
+								})
+							}) : null]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4 flex flex-wrap gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							disabled: !config,
+							onClick: () => config && void copy("one", copyConfig(sheet, config)),
+							"data-testid": "copy-config",
+							children: [copied === "one" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ClipboardCopy, { className: "size-4" }), copied === "one" ? "Copied" : "Copy this configuration"]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							variant: "outline",
+							onClick: () => void copy("all", copyAll(sheet)),
+							"data-testid": "copy-all",
+							children: [copied === "all" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ClipboardCopy, { className: "size-4" }), copied === "all" ? "Copied" : "Copy all"]
+						})]
+					})
+				]
+			}),
+			dialog
+		]
+	});
+}
+//#endregion
+//#region src/components/desk/spec-import.tsx
+/** Drop a PDF → AI reads it → review form → save. Also the blank manual form and the edit form. */
+function SpecImport({ editing, aiReady, initialFile, onSaved, onCancel }) {
+	const [stage, setStage] = (0, import_react.useState)(editing ? "review" : initialFile ? "reading" : "drop");
+	const [draft, setDraft] = (0, import_react.useState)(() => editing ? strip(editing) : emptyDraft());
+	const [removed, setRemoved] = (0, import_react.useState)([]);
+	const [notice, setNotice] = (0, import_react.useState)(null);
+	const [fileName, setFileName] = (0, import_react.useState)(null);
+	const [step, setStep] = (0, import_react.useState)("");
+	const [conflict, setConflict] = (0, import_react.useState)(null);
+	const pdf = (0, import_react.useRef)(null);
+	const started = (0, import_react.useRef)(false);
+	(0, import_react.useEffect)(() => {
+		if (initialFile && !started.current) {
+			started.current = true;
+			readFile(initialFile);
+		}
+	}, [initialFile]);
+	async function readFile(file) {
+		pdf.current = file;
+		setFileName(file.name);
+		setNotice(null);
+		setRemoved([]);
+		setStage("reading");
+		try {
+			setStep("Reading the PDF in your browser…");
+			const { text, image, dimsImage, imageNote } = await pdfToText(file);
+			const pics = {
+				image: image ?? void 0,
+				dimsImage: dimsImage ?? void 0
+			};
+			if (text.replace(/\s/g, "").length < 40) {
+				manual(["This PDF has no readable text (it looks scanned). Fill in the form by hand instead.", !image ? imageNote : null].filter(Boolean).join(" "), pics);
+				return;
+			}
+			if (!aiReady) {
+				manual("AI reading isn't available here yet. Fill in the form by hand instead.", pics);
+				return;
+			}
+			setStep("Pulling out the specs…");
+			const res = await extractSpecSheet({ data: {
+				text,
+				fileName: file.name
+			} });
+			if (!res.ok) {
+				manual(res.message, pics);
+				return;
+			}
+			setDraft({
+				...res.draft,
+				...pics
+			});
+			if (!image && imageNote) setNotice(imageNote);
+			setRemoved(res.removed);
+			setStage("review");
+			toast.success(res.removed.length ? `Read ${file.name}. ${res.removed.length} non-USA item${res.removed.length === 1 ? "" : "s"} removed — check the Removed panel.` : `Read ${file.name}. Check everything before saving.`);
+		} catch (e) {
+			manual(e instanceof Error ? `${e.message} Fill in the form by hand instead.` : "Couldn't read that PDF.");
+		}
+	}
+	function manual(message, pics) {
+		setNotice(message || null);
+		setDraft({
+			...emptyDraft(),
+			...pics ?? {}
+		});
+		setRemoved([]);
+		setStage("review");
+	}
+	const save = useMutation({
+		mutationFn: (overwrite) => saveSpecSheet({ data: {
+			draft,
+			id: editing?.id ?? null,
+			overwrite
+		} }),
+		onSuccess: (res) => {
+			if (!res.ok) {
+				setConflict(res.conflict);
+				return;
+			}
+			setConflict(null);
+			toast.success(`${draft.manufacturer} ${draft.model} saved to The Library`);
+			onSaved(res.id, pdf.current);
+		},
+		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save")
+	});
+	if (stage === "drop") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropZone, {
+		onFile: (f) => void readFile(f),
+		onManual: () => manual(""),
+		onCancel,
+		aiReady
+	});
+	if (stage === "reading") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+		className: "rounded-xl border border-border bg-card p-8 text-center",
+		"data-testid": "spec-reading",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "mx-auto size-6 animate-spin text-copper" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 font-medium",
+				children: fileName
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1 text-sm text-muted-foreground",
+				children: step
+			})
+		]
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+		className: "grid gap-4",
+		"data-testid": "spec-review",
+		children: [
+			notice ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm",
+				role: "status",
+				"data-testid": "spec-notice",
+				children: notice
+			}) : null,
+			removed.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RemovedPanel, {
+				items: removed,
+				onRestore: (item) => {
+					setDraft((d) => restoreRemoved(d, item));
+					setRemoved((list) => list.filter((r) => r.id !== item.id));
+				}
+			}) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpecEditor, {
+				draft,
+				onChange: setDraft,
+				title: editing ? "Edit Spec Sheet" : fileName ? `Review · ${fileName}` : "New Spec Sheet",
+				savedImageId: editing?.hasImage || editing?.hasDims ? editing.id : null
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "sticky bottom-3 z-10 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/95 p-3 shadow-[var(--shadow-lift)] backdrop-blur",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						disabled: save.isPending || !draft.manufacturer.trim() || !draft.model.trim() || coreHoleInfo(draft).missingDiameter,
+						onClick: () => save.mutate(false),
+						"data-testid": "spec-save",
+						children: save.isPending ? "Saving…" : editing ? "Save Changes" : "Confirm And Save"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						variant: "outline",
+						onClick: onCancel,
+						children: "Cancel"
+					}),
+					!draft.manufacturer.trim() || !draft.model.trim() ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs text-muted-foreground",
+						children: "Manufacturer and model are required."
+					}) : coreHoleInfo(draft).missingDiameter ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs text-warning",
+						children: "Counter core hole is Yes — add the hole diameter."
+					}) : removed.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-xs text-muted-foreground",
+						children: [removed.length, " removed item(s) stay out unless you restore them."]
+					}) : null
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+				open: !!conflict,
+				onOpenChange: (o) => !o && setConflict(null),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
+					"data-testid": "spec-overwrite",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Replace The Saved Sheet?" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [
+							conflict?.manufacturer,
+							" ",
+							conflict?.model,
+							" is already in The Library. Saving replaces its specs and all of its configurations with this version."
+						] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-4 flex gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								onClick: () => save.mutate(true),
+								disabled: save.isPending,
+								"data-testid": "spec-overwrite-yes",
+								children: "Replace It"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								variant: "outline",
+								onClick: () => setConflict(null),
+								children: "Keep The Saved One"
+							})]
+						})
+					]
+				})
+			})
+		]
+	});
+}
+function strip(s) {
+	return {
+		manufacturer: s.manufacturer,
+		model: s.model,
+		category: s.category,
+		summary: s.summary,
+		coreHole: s.coreHole,
+		coreDiameter: s.coreDiameter,
+		specs: s.specs,
+		mfrNotes: {
+			...s.mfrNotes,
+			certifications: s.mfrNotes.certifications ?? []
+		},
+		configs: s.configs.length ? s.configs : [{
+			label: "Standard",
+			requirements: {}
+		}]
+	};
+}
+function DropZone({ onFile, onManual, onCancel, aiReady }) {
+	const input = (0, import_react.useRef)(null);
+	const [over, setOver] = (0, import_react.useState)(false);
+	function pick(files) {
+		const f = files?.[0];
+		if (!f) return;
+		if (!(f.type === "application/pdf" || /\.pdf$/i.test(f.name))) {
+			toast.error("Only PDF files can be imported.");
+			return;
+		}
+		if (f.size > 10485760) {
+			toast.error("That PDF is over 10 MB.");
+			return;
+		}
+		onFile(f);
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+		className: "rounded-xl border border-border bg-card p-5",
+		"data-testid": "spec-drop",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+			onDragOver: (e) => {
+				e.preventDefault();
+				setOver(true);
+			},
+			onDragLeave: () => setOver(false),
+			onDrop: (e) => {
+				e.preventDefault();
+				setOver(false);
+				pick(e.dataTransfer.files);
+			},
+			className: cn("flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors", over ? "border-primary bg-primary/10" : "border-border hover:border-primary/60 hover:bg-muted/40"),
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileUp, { className: "size-7 text-copper" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "font-medium",
+					children: "Drop a manufacturer spec sheet here"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm text-muted-foreground",
+					children: "PDF only, up to 10 MB. Or tap to pick a file."
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+					className: "max-w-md text-xs text-muted-foreground",
+					children: ["The PDF is read in your browser and is not kept. ", aiReady ? "AI fills in the form; you check it before saving." : "AI reading isn't set up here, so you'll fill the form by hand."]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+					ref: input,
+					type: "file",
+					accept: "application/pdf,.pdf",
+					className: "sr-only",
+					"data-testid": "spec-file",
+					onChange: (e) => {
+						pick(e.target.files);
+						e.target.value = "";
+					}
+				})
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "mt-3 flex flex-wrap gap-2",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				type: "button",
+				variant: "outline",
+				size: "sm",
+				onClick: onManual,
+				children: "Fill In By Hand"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				type: "button",
+				variant: "ghost",
+				size: "sm",
+				onClick: onCancel,
+				children: "Cancel"
+			})]
+		})]
+	});
+}
+function RemovedPanel({ items, onRestore }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+		className: "rounded-xl border border-warning/40 bg-warning/5 p-4",
+		"data-testid": "removed-panel",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+				className: "flex items-center gap-2 text-sm font-semibold",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldAlert, { className: "size-4 text-warning" }),
+					"Removed — Not For The USA (",
+					items.length,
+					")"
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-0.5 text-xs text-muted-foreground",
+				children: "Nothing is dropped silently. Restore anything that does apply."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+				className: "mt-3 divide-y divide-border/70",
+				children: items.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+					className: "flex flex-wrap items-center justify-between gap-2 py-2 text-sm",
+					"data-testid": "removed-item",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "min-w-0",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block text-xs text-muted-foreground",
+								children: r.where
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-medium line-through decoration-warning/70",
+								children: r.removed
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-muted-foreground",
+								children: [" — ", r.note]
+							}),
+							r.kept ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "block text-xs text-muted-foreground",
+								children: ["Kept: ", r.kept]
+							}) : null
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						type: "button",
+						size: "sm",
+						variant: "outline",
+						onClick: () => onRestore(r),
+						"data-testid": `restore-${r.id}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RotateCcw, { className: "size-3.5" }), " Restore"]
+					})]
+				}, r.id))
+			})
+		]
+	});
+}
+function Field({ label, value, onChange, placeholder, className, testId }) {
+	const id = `f-${label.replace(/\W+/g, "-").toLowerCase()}-${testId ?? ""}`;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+			htmlFor: id,
+			className: "text-xs text-muted-foreground",
+			children: label
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+			id,
+			className: "mt-1 h-9",
+			value: value ?? "",
+			placeholder,
+			onChange: (e) => onChange(e.target.value),
+			"data-testid": testId
+		})]
+	});
+}
+function KvRows({ rows, onChange, addLabel, testId }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "grid gap-2",
+		"data-testid": testId,
+		children: [rows.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "grid grid-cols-[1fr_1.4fr_auto] gap-2",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					className: "h-9",
+					value: r.label,
+					placeholder: "Label",
+					"aria-label": "Label",
+					onChange: (e) => onChange(rows.map((x, j) => j === i ? {
+						...x,
+						label: e.target.value
+					} : x))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					className: "h-9",
+					value: r.value,
+					placeholder: "Value",
+					"aria-label": "Value",
+					onChange: (e) => onChange(rows.map((x, j) => j === i ? {
+						...x,
+						value: e.target.value
+					} : x))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "icon",
+					variant: "ghost",
+					"aria-label": "Remove row",
+					onClick: () => onChange(rows.filter((_, j) => j !== i)),
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" })
+				})
+			]
+		}, i)), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+			type: "button",
+			className: "inline-flex w-fit items-center gap-1 text-sm font-medium text-primary hover:underline",
+			onClick: () => onChange([...rows, {
+				label: "",
+				value: ""
+			}]),
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-3.5" }),
+				" ",
+				addLabel
+			]
+		})]
+	});
+}
+function Group({ title, children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
+		className: "rounded-lg border border-border bg-background/60 p-4",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
+			className: "px-1 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+			children: title
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "grid gap-3 sm:grid-cols-2",
+			children
+		})]
+	});
+}
+function SpecEditor({ draft, onChange, title, savedImageId }) {
+	const [sel, setSel] = (0, import_react.useState)(0);
+	const saved = useQuery({
+		queryKey: [
+			"spec-image",
+			"edit",
+			savedImageId
+		],
+		queryFn: () => getSpecImage({ data: { id: savedImageId } }),
+		enabled: !!savedImageId && (draft.image === void 0 || draft.dimsImage === void 0)
+	});
+	const shownImage = draft.image === void 0 ? saved.data?.image ?? null : draft.image;
+	const shownDims = draft.dimsImage === void 0 ? saved.data?.dimsImage ?? null : draft.dimsImage;
+	const fileRef = (0, import_react.useRef)(null);
+	const dimsRef = (0, import_react.useRef)(null);
+	const core = coreHoleInfo(draft);
+	const espresso = isEspresso(draft);
+	const idx = Math.min(sel, Math.max(0, draft.configs.length - 1));
+	const config = draft.configs[idx];
+	const set = (patch) => onChange({
+		...draft,
+		...patch
+	});
+	const setReq = (section, key, value) => {
+		const configs = draft.configs.map((c, i) => i === idx ? {
+			...c,
+			requirements: {
+				...c.requirements,
+				[section]: {
+					...c.requirements[section] ?? {},
+					[key]: value
+				}
+			}
+		} : c);
+		set({ configs });
+	};
+	const { POWER_FIELDS, WATER_FIELDS, DRAIN_FIELDS, DIM_FIELDS } = REQUIREMENT_GROUPS;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+		className: "rounded-xl border border-border bg-card p-5 sm:p-6",
+		"data-testid": "spec-editor",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-2xl font-medium tracking-tight",
+				children: title
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-4 grid gap-3 sm:grid-cols-3",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+						label: "Manufacturer",
+						value: draft.manufacturer,
+						onChange: (v) => set({ manufacturer: v }),
+						testId: "ed-manufacturer"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+						label: "Model",
+						value: draft.model,
+						onChange: (v) => set({ model: v }),
+						testId: "ed-model"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+						label: "Category",
+						value: draft.category,
+						onChange: (v) => set({ category: v }),
+						placeholder: "Espresso Machine, Grinder…",
+						testId: "ed-category"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "sm:col-span-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+							htmlFor: "ed-summary",
+							className: "text-xs text-muted-foreground",
+							children: "Summary"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
+							id: "ed-summary",
+							className: "mt-1",
+							rows: 2,
+							value: draft.summary ?? "",
+							onChange: (e) => set({ summary: e.target.value })
+						})]
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+				className: "mt-5 grid gap-4 md:grid-cols-[minmax(0,15rem)_1fr]",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EquipmentImage, {
+						image: shownImage,
+						loading: saved.isLoading && !!savedImageId,
+						manufacturer: draft.manufacturer,
+						model: draft.model
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-2 flex flex-wrap gap-2",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								type: "button",
+								size: "sm",
+								variant: "outline",
+								onClick: () => fileRef.current?.click(),
+								"data-testid": "ed-image-pick",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ImagePlus, { className: "size-3.5" }),
+									" ",
+									shownImage ? "Replace Image" : "Add Image"
+								]
+							}),
+							shownImage ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								size: "sm",
+								variant: "ghost",
+								onClick: () => set({ image: null }),
+								children: "Remove"
+							}) : null,
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								ref: fileRef,
+								type: "file",
+								accept: "image/jpeg,image/png,image/webp",
+								className: "sr-only",
+								"data-testid": "ed-image-file",
+								onChange: (e) => {
+									const f = e.target.files?.[0];
+									e.target.value = "";
+									if (!f) return;
+									imageFileToDataUrl(f).then((url) => set({ image: url })).catch((err) => toast.error(err instanceof Error ? err.message : "Couldn't use that image"));
+								}
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "mt-1 text-xs text-muted-foreground",
+						children: "Machine photo, taken from the spec sheet PDF when it has one."
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DimensionsImage, { image: shownDims }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-2 flex flex-wrap gap-2",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+									type: "button",
+									size: "sm",
+									variant: "outline",
+									onClick: () => dimsRef.current?.click(),
+									"data-testid": "ed-dims-pick",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ImagePlus, { className: "size-3.5" }),
+										" ",
+										shownDims ? "Replace Dimensions Diagram" : "Add Dimensions Diagram"
+									]
+								}),
+								shownDims ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+									type: "button",
+									size: "sm",
+									variant: "ghost",
+									onClick: () => set({ dimsImage: null }),
+									children: "Remove"
+								}) : null,
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									ref: dimsRef,
+									type: "file",
+									accept: "image/jpeg,image/png,image/webp",
+									className: "sr-only",
+									"data-testid": "ed-dims-file",
+									onChange: (e) => {
+										const f = e.target.files?.[0];
+										e.target.value = "";
+										if (!f) return;
+										imageFileToDataUrl(f, 1400).then((url) => set({ dimsImage: url })).catch((err) => toast.error(err instanceof Error ? err.message : "Couldn't use that image"));
+									}
+								})
+							]
+						})]
+					})
+				] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
+					className: "rounded-lg border border-border bg-background/60 p-4",
+					"data-testid": "ed-core",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
+							className: "px-1 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+							children: "Space / Core Hole"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-muted-foreground",
+							children: "Utility lines pass through the counter?"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-2 flex flex-wrap items-end gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+								htmlFor: "ed-core-hole",
+								className: "text-xs text-muted-foreground",
+								children: "Counter Core Hole"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+								id: "ed-core-hole",
+								className: "mt-1 h-9 rounded-md border border-input bg-card px-3 text-sm",
+								value: draft.coreHole ?? "",
+								onChange: (e) => {
+									const v = e.target.value;
+									set({ coreHole: v === "yes" || v === "no" ? v : void 0 });
+								},
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+										value: "",
+										children: espresso ? "Yes (espresso default)" : "Not stated"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+										value: "yes",
+										children: "Yes"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+										value: "no",
+										children: "No"
+									})
+								]
+							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+								label: "Hole Diameter",
+								value: draft.coreDiameter,
+								onChange: (v) => set({ coreDiameter: v }),
+								placeholder: espresso ? "3\" (default)" : "e.g. 2\"",
+								className: "w-40",
+								testId: "ed-core-diameter"
+							})]
+						}),
+						core.required ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: cn("mt-3 text-sm font-semibold", core.missingDiameter ? "text-warning" : "text-foreground"),
+							"data-testid": "ed-core-label",
+							children: core.missingDiameter ? "Add the hole diameter — required before this spec is complete." : core.label
+						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-3 text-xs text-muted-foreground",
+							children: "No counter core hole on this spec."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-1 text-xs text-muted-foreground",
+							"data-testid": "ed-core-note",
+							children: CORE_HOLE_NOTE
+						})
+					]
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+				className: "mt-5 grid gap-3 lg:grid-cols-[2fr_1fr]",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "rounded-lg border border-border bg-background/60 p-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "mb-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+						children: "Specs"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KvRows, {
+						rows: draft.specs,
+						onChange: (specs) => set({ specs }),
+						addLabel: "Add a spec",
+						testId: "ed-specs"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "grid content-start gap-3 rounded-lg border border-border bg-background/60 p-4",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+							children: "Manufacturer (USA)"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+							label: "Certifications (comma separated)",
+							value: (draft.mfrNotes.certifications ?? []).join(", "),
+							onChange: (v) => set({ mfrNotes: {
+								...draft.mfrNotes,
+								certifications: v.split(",").map((x) => x.trimStart())
+							} }),
+							placeholder: "UL, NSF, ETL",
+							testId: "ed-certs"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+							label: "Warranty",
+							value: draft.mfrNotes.warranty,
+							onChange: (v) => set({ mfrNotes: {
+								...draft.mfrNotes,
+								warranty: v
+							} }),
+							testId: "ed-warranty"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+							htmlFor: "ed-contact",
+							className: "text-xs text-muted-foreground",
+							children: "US Contact"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Textarea, {
+							id: "ed-contact",
+							className: "mt-1",
+							rows: 2,
+							value: draft.mfrNotes.usContact ?? "",
+							onChange: (e) => set({ mfrNotes: {
+								...draft.mfrNotes,
+								usContact: e.target.value
+							} })
+						})] })
+					]
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+				className: "mt-6",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "mb-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+						children: "Configurations"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ConfigChips, {
+						configs: draft.configs,
+						selected: idx,
+						onSelect: setSel,
+						trailing: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "button",
+							className: "inline-flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground",
+							onClick: () => {
+								set({ configs: [...draft.configs, {
+									label: `Configuration ${draft.configs.length + 1}`,
+									requirements: {}
+								}] });
+								setSel(draft.configs.length);
+							},
+							"data-testid": "ed-add-config",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-3.5" }), " Add"]
+						})
+					}),
+					config ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4 grid gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex flex-wrap items-end gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+								label: "Configuration Name",
+								value: config.label,
+								onChange: (v) => set({ configs: draft.configs.map((c, i) => i === idx ? {
+									...c,
+									label: v
+								} : c) }),
+								className: "min-w-56 flex-1",
+								testId: "ed-config-label"
+							}), draft.configs.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								type: "button",
+								variant: "outline",
+								size: "sm",
+								onClick: () => {
+									set({ configs: draft.configs.filter((_, i) => i !== idx) });
+									setSel(0);
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), " Remove This Configuration"]
+							}) : null]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "grid gap-3 lg:grid-cols-2",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Group, {
+									title: "Power",
+									children: [POWER_FIELDS.map(([k, l]) => k === "wires" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+										htmlFor: "ed-power-wires",
+										className: "text-xs text-muted-foreground",
+										children: "Wires (208–240V)"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+										id: "ed-power-wires",
+										"data-testid": "ed-power-wires",
+										className: "mt-1 h-9 w-full rounded-md border border-input bg-card px-3 text-sm",
+										value: /4/.test(config.requirements.power?.wires ?? "") ? WIRES_4 : /3/.test(config.requirements.power?.wires ?? "") ? WIRES_3 : "",
+										onChange: (e) => setReq("power", "wires", e.target.value),
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+												value: "",
+												children: "Not stated"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+												value: WIRES_3,
+												children: "3-wire — 2 hots, ground (L6)"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+												value: WIRES_4,
+												children: "4-wire — 2 hots, neutral, ground (L14)"
+											})
+										]
+									})] }, k) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: l,
+										value: config.requirements.power?.[k],
+										onChange: (v) => setReq("power", k, v),
+										testId: `ed-power-${k}`
+									}, k)), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "sm:col-span-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+											type: "button",
+											className: "inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline",
+											onClick: () => set({ configs: draft.configs.map((c, i) => i === idx ? applyConfigDefaults(c, "generate", draft) : c) }),
+											"data-testid": "ed-plug-rules",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RotateCcw, { className: "size-3.5" }), " Set Plug, Breaker And Inlet From The Electrical"]
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlugSection, {
+											power: config.requirements.power,
+											ctx: draft
+										})]
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Group, {
+									title: "Water And Drain",
+									children: [WATER_FIELDS.map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: l,
+										value: config.requirements.water?.[k],
+										onChange: (v) => setReq("water", k, v),
+										testId: `ed-water-${k}`
+									}, k)), DRAIN_FIELDS.map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: l,
+										value: config.requirements.drain?.[k],
+										onChange: (v) => setReq("drain", k, v),
+										testId: `ed-drain-${k}`
+									}, `d-${k}`))]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Group, {
+									title: "Dimensions",
+									children: DIM_FIELDS.map(([k, l]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+										label: l,
+										value: config.requirements.dimensions?.[k],
+										onChange: (v) => setReq("dimensions", k, v),
+										testId: `ed-dim-${k}`
+									}, k))
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
+									className: "rounded-lg border border-border bg-background/60 p-4",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
+										className: "px-1 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase",
+										children: "Other"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KvRows, {
+										rows: config.requirements.other ?? [],
+										onChange: (other) => set({ configs: draft.configs.map((c, i) => i === idx ? {
+											...c,
+											requirements: {
+												...c.requirements,
+												other
+											}
+										} : c) }),
+										addLabel: "Add a requirement",
+										testId: "ed-other"
+									})]
+								})
+							]
+						})]
+					}) : null
+				]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/routes/_app/library.tsx
+var num = (v) => typeof v === "number" && Number.isFinite(v) ? v : typeof v === "string" && v && !Number.isNaN(Number(v)) ? Number(v) : void 0;
+var Route$14 = createFileRoute("/_app/library")({
+	validateSearch: (s) => ({
+		open: num(s.open),
+		book: num(s.book)
+	}),
+	component: Page$12
+});
+var TYPES = [
+	{
+		section: "spec",
+		id: "spec-sheet",
+		add: "Spec Sheet"
+	},
+	{
+		section: "manuals",
+		id: "manuals",
+		add: "Manual"
+	},
+	{
+		section: "parts",
+		id: "parts-diagrams",
+		add: "Parts Diagram"
+	}
+];
+function Page$12() {
+	const { open, book: bookParam } = Route$14.useSearch();
+	const navigate = useNavigate();
+	const qc = useQueryClient();
+	const data = useQuery({
+		queryKey: ["spec-library"],
+		queryFn: () => listSpecSheets()
+	});
+	const lib = useQuery({
+		queryKey: ["library-files"],
+		queryFn: () => listLibraryFiles()
+	});
+	const sheets = data.data?.sheets ?? [];
+	const books = lib.data?.books ?? [];
+	const files = lib.data?.files ?? [];
+	const sheetBook = new Map((lib.data?.sheetBooks ?? []).map((r) => [r.sheetId, r.bookId]));
+	const canEdit = !!data.data?.canEdit;
+	const selected = open != null ? sheets.find((s) => s.id === open) ?? null : null;
+	const bookId = bookParam ?? (selected ? sheetBook.get(selected.id) ?? null : null);
+	const book = bookId != null ? books.find((b) => b.id === bookId) ?? null : null;
+	const [mode, setMode] = (0, import_react.useState)("browse");
+	const [importFile, setImportFile] = (0, import_react.useState)(null);
+	const [q, setQ] = (0, import_react.useState)("");
+	const [busy, setBusy] = (0, import_react.useState)(null);
+	const [problems, setProblems] = (0, import_react.useState)([]);
+	const [ask, setAsk] = (0, import_react.useState)(null);
+	const [confirmDelete, setConfirmDelete] = (0, import_react.useState)(false);
+	const [fileToDelete, setFileToDelete] = (0, import_react.useState)(null);
+	const [renaming, setRenaming] = (0, import_react.useState)(null);
+	const [openMaker, setOpenMaker] = (0, import_react.useState)(null);
+	const [manage, setManage] = (0, import_react.useState)(false);
+	const [adding, setAdding] = (0, import_react.useState)(false);
+	const rereadInput = (0, import_react.useRef)(null);
+	const [rereading, setRereading] = (0, import_react.useState)(false);
+	const [found, setFound] = (0, import_react.useState)(null);
+	const bookPanel = (0, import_react.useRef)(null);
+	const go = (s) => void navigate({
+		to: "/library",
+		search: s
+	});
+	const reload = () => Promise.all([qc.invalidateQueries({ queryKey: ["library-files"] }), qc.invalidateQueries({ queryKey: ["spec-library"] })]);
+	const fail = (e, fallback) => toast.error(e instanceof Error ? e.message : fallback);
+	(0, import_react.useEffect)(() => {
+		if (book) bookPanel.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "nearest"
+		});
+	}, [book?.id]);
+	(0, import_react.useEffect)(() => {
+		const stop = (e) => {
+			if (e.dataTransfer?.types?.includes("Files")) e.preventDefault();
+		};
+		window.addEventListener("dragover", stop);
+		window.addEventListener("drop", stop);
+		return () => {
+			window.removeEventListener("dragover", stop);
+			window.removeEventListener("drop", stop);
+		};
+	}, []);
+	/** Into the model that's open (`into`), else the model the file name matches. No match → ask; never guess. */
+	async function addFiles(section, list, into) {
+		if (!list.length || busy) return;
+		const errors = [];
+		let known = books;
+		let last = null;
+		for (const file of list) {
+			const problem = fileError(file.name, file.size);
+			if (problem) {
+				errors.push(problem);
+				continue;
+			}
+			let target = into ?? matchBook(file.name, known);
+			if (!target) {
+				target = await new Promise((resolve) => setAsk({
+					kind: "file",
+					fileName: file.name,
+					section,
+					resolve
+				}));
+				setAsk(null);
+				if (!target) {
+					errors.push(`${file.name} was skipped — no book chosen.`);
+					continue;
+				}
+				if (!known.some((b) => b.id === target.id)) known = [...known, target];
+			}
+			try {
+				const name = await uploadLibraryFile(file, section, target.id, (pct) => setBusy({
+					section,
+					text: `Adding ${file.name}… ${pct}%`
+				}));
+				toast.success(`Filed in ${target.title} → ${SHELF[section].title} as ${name}`);
+				last = target;
+			} catch (e) {
+				errors.push(`${file.name}: ${e instanceof Error ? e.message : "could not be added"}`);
+			}
+		}
+		setBusy(null);
+		setProblems(errors);
+		if (errors.length) toast.error(errors.length === 1 ? errors[0] : `${errors.length} files were not added — see the list at the top`);
+		await reload();
+		if (last) {
+			setAdding(false);
+			setOpenMaker(last.manufacturer);
+			go({ book: last.id });
+		}
+	}
+	async function pickForAsk(target) {
+		if (!ask) return;
+		if (ask.kind === "file") return ask.resolve(target);
+		try {
+			if (ask.kind === "move-file") await moveLibraryFile({ data: {
+				id: ask.file.id,
+				bookId: target.id
+			} });
+			else await moveSpecSheet({ data: {
+				sheetId: ask.sheet.id,
+				bookId: target.id
+			} });
+			toast.success(`Moved to ${target.title}`);
+			setAsk(null);
+			setOpenMaker(target.manufacturer);
+			await reload();
+			go(ask.kind === "move-sheet" && selected ? {
+				book: target.id,
+				open: selected.id
+			} : { book: target.id });
+		} catch (e) {
+			fail(e, "Could not move it");
+		}
+	}
+	async function createForAsk(manufacturer, model) {
+		try {
+			await pickForAsk(await createLibraryBook({ data: {
+				manufacturer,
+				model
+			} }));
+		} catch (e) {
+			fail(e, "Could not create the book");
+		}
+	}
+	async function readSpecsFrom(file) {
+		try {
+			const res = await fetch(fileUrl(originOf(), file.token));
+			if (!res.ok) throw new Error("Couldn't open that file.");
+			setImportFile({
+				file: new File([await res.blob()], file.name, { type: file.mime }),
+				bookId: file.bookId
+			});
+			setMode("import");
+		} catch (e) {
+			fail(e, "Couldn't open that file.");
+		}
+	}
+	/** After the AI read is saved: the sheet joins its book and the original PDF is kept there. */
+	async function afterImport(id, pdf) {
+		const from = importFile;
+		setOpenMaker(null);
+		setMode("browse");
+		setImportFile(null);
+		try {
+			if (from) await moveSpecSheet({ data: {
+				sheetId: id,
+				bookId: from.bookId
+			} });
+			await reload();
+			const target = (await qc.fetchQuery({
+				queryKey: ["library-files"],
+				queryFn: () => listLibraryFiles()
+			})).sheetBooks.find((r) => r.sheetId === id)?.bookId ?? null;
+			if (pdf && target && !from) {
+				await uploadLibraryFile(pdf, "spec", target);
+				await reload();
+			}
+			go(target ? {
+				book: target,
+				open: id
+			} : { open: id });
+		} catch (e) {
+			fail(e, "Saved, but the PDF could not be stored. Drop it on Spec Sheet.");
+			go({ open: id });
+		}
+	}
+	async function reread(file) {
+		setRereading(true);
+		try {
+			const r = await pdfImages(file);
+			setFound({
+				image: r.image,
+				dimsImage: r.dimsImage,
+				note: r.imageNote,
+				file: file.name
+			});
+		} catch (e) {
+			fail(e, "Couldn't read that PDF.");
+		} finally {
+			setRereading(false);
+		}
+	}
+	const refresh = useMutation({
+		mutationFn: (id) => refreshSpecDefaults({ data: { id } }),
+		onSuccess: (r) => {
+			toast.success(r.changed ? `Updated ${r.changed} configuration${r.changed === 1 ? "" : "s"}: inlet, plug and breaker` : "Already up to date");
+			reload();
+		},
+		onError: (e) => fail(e, "Could not refresh")
+	});
+	const applyImages = useMutation({
+		mutationFn: (v) => setSpecImages({ data: {
+			id: v.id,
+			image: v.image,
+			...v.dimsImage ? { dimsImage: v.dimsImage } : {}
+		} }),
+		onSuccess: (_r, v) => {
+			toast.success(v.image ? "Equipment image updated" : "Image cleared — use Edit to add a photo");
+			setFound(null);
+			reload();
+			qc.invalidateQueries({ queryKey: ["spec-image"] });
+		},
+		onError: (e) => fail(e, "Could not save the image")
+	});
+	const removeSheet = useMutation({
+		mutationFn: (id) => deleteSpecSheet({ data: { id } }),
+		onSuccess: () => {
+			toast.success("Spec sheet deleted");
+			setConfirmDelete(false);
+			go(book ? { book: book.id } : {});
+			reload();
+		},
+		onError: (e) => fail(e, "Could not delete")
+	});
+	const removeFile = useMutation({
+		mutationFn: (id) => deleteLibraryFile({ data: { id } }),
+		onSuccess: () => {
+			toast.success("File deleted");
+			setFileToDelete(null);
+			reload();
+		},
+		onError: (e) => fail(e, "Could not delete")
+	});
+	const rename = useMutation({
+		mutationFn: (v) => renameLibraryBook({ data: v }),
+		onSuccess: () => {
+			toast.success("Renamed");
+			setRenaming(null);
+			reload();
+		},
+		onError: (e) => fail(e, "Could not rename")
+	});
+	const removeBook = useMutation({
+		mutationFn: (id) => deleteLibraryBook({ data: { id } }),
+		onSuccess: () => {
+			toast.success("Model removed");
+			go({});
+			reload();
+		},
+		onError: (e) => fail(e, "Could not remove the book")
+	});
+	const inBook = (id) => ({
+		sheets: sheets.filter((s) => sheetBook.get(s.id) === id),
+		files: files.filter((f) => f.bookId === id)
+	});
+	const needle = q.trim().toLowerCase();
+	const shownBooks = books.filter((b) => b.title.toLowerCase().includes(needle));
+	const makers = [...new Set(shownBooks.map((b) => b.manufacturer))].sort((x, y) => x.localeCompare(y, "en", { sensitivity: "base" }));
+	const unfiled = files.filter((f) => f.bookId == null);
+	const loading = data.isLoading || lib.isLoading;
+	const wanted = openMaker ?? book?.manufacturer ?? (needle && makers.length === 1 ? makers[0] : null);
+	const activeMaker = wanted && makers.includes(wanted) ? wanted : null;
+	const models = shownBooks.filter((b) => b.manufacturer === activeMaker);
+	const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : models[0] ?? null;
+	const inside = current ? inBook(current.id) : null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+			className: "flex flex-col gap-3 sm:flex-row sm:items-center",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+					className: "font-display text-3xl font-medium tracking-tight",
+					children: "The Library"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+					className: "relative block sm:ml-auto sm:w-64",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+						value: q,
+						onChange: (e) => {
+							setQ(e.target.value);
+							setOpenMaker(null);
+						},
+						placeholder: "Search maker or model",
+						"aria-label": "Search maker or model",
+						className: "pl-9",
+						"data-testid": "book-search"
+					})]
+				}),
+				canEdit ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+					type: "button",
+					onClick: () => setAdding(true),
+					"data-testid": "library-add",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), " Add Files"]
+				}) : null
+			]
+		}),
+		problems.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+			className: "mt-3 grid gap-1 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm",
+			role: "alert",
+			"data-testid": "library-errors",
+			children: problems.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: p }, p))
+		}) : null,
+		mode === "import" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
+			className: "mt-5",
+			"data-testid": "spec-import-panel",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpecImport, {
+				aiReady: !!data.data?.aiReady,
+				initialFile: importFile?.file ?? null,
+				onCancel: () => {
+					setMode("browse");
+					setImportFile(null);
+				},
+				onSaved: (id, pdf) => void afterImport(id, pdf)
+			}, importFile ? `file-${importFile.file.name}` : "import")
+		}) : null,
+		loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-5 text-sm text-muted-foreground",
+			children: "Loading The Library…"
+		}) : makers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-5 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground",
+			"data-testid": "books-empty",
+			children: books.length ? "Nothing matches that search." : "Nothing here yet. Use Add Files to add the first spec sheet, manual or parts diagram."
+		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+			role: "radiogroup",
+			"aria-label": "Manufacturer",
+			"data-testid": "library-makers",
+			children: makers.map((maker) => {
+				const count = shownBooks.filter((b) => b.manufacturer === maker).length;
+				const on = maker === activeMaker;
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
+					role: "radio",
+					"aria-checked": on,
+					className: cn("flex min-h-18 flex-col justify-center rounded-xl border px-4 py-3 text-left transition-colors", on ? "border-ink bg-ink text-cream" : "border-border bg-card hover:border-primary/50"),
+					"data-testid": "maker",
+					"data-maker": maker,
+					onClick: () => {
+						setMode("browse");
+						setOpenMaker(on ? "" : maker);
+						go(on ? {} : { book: shownBooks.find((b) => b.manufacturer === maker).id });
+					},
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "font-display text-lg leading-tight font-medium break-words",
+						children: maker
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-xs opacity-70",
+						children: [
+							count,
+							" model",
+							count === 1 ? "" : "s"
+						]
+					})]
+				}, maker);
+			})
+		}), current && inside ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+			ref: bookPanel,
+			className: "mt-4 scroll-mt-24 rounded-xl border border-border bg-card px-4 pb-4",
+			"aria-label": current.title,
+			"data-testid": "open-book",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex flex-wrap items-center gap-x-2 gap-y-1 pt-3",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: "text-sm text-muted-foreground hover:text-foreground hover:underline",
+							onClick: () => {
+								setOpenMaker("");
+								go({});
+							},
+							children: "The Library"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, {
+							className: "size-4 text-muted-foreground",
+							"aria-hidden": "true"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "font-display text-xl font-medium",
+							children: activeMaker
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "sr-only",
+							"data-testid": "open-book-title",
+							children: current.title
+						}),
+						canEdit ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							size: "sm",
+							variant: manage ? "secondary" : "ghost",
+							className: "ml-auto",
+							"aria-pressed": manage,
+							onClick: () => setManage(!manage),
+							"data-testid": "manage",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings2, { className: "size-4" }),
+								" ",
+								manage ? "Done" : "Manage"
+							]
+						}) : null
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mt-2 mb-3 flex flex-wrap gap-2",
+					role: "radiogroup",
+					"aria-label": `${activeMaker} models`,
+					"data-testid": "model-chips",
+					children: models.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						role: "radio",
+						"aria-checked": m.id === current.id,
+						className: cn("h-11 rounded-full border px-4 text-sm font-medium", m.id === current.id ? "border-ink bg-ink text-cream" : "border-border bg-background hover:border-primary/50"),
+						"data-testid": "model-chip",
+						onClick: () => {
+							setMode("browse");
+							setOpenMaker(m.manufacturer);
+							go({ book: m.id });
+						},
+						children: modelLabel(m.title, m.manufacturer)
+					}, m.id))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex flex-col gap-4 sm:flex-row",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ModelPhoto, {
+						sheet: inside.sheets.find((s) => s.hasImage) ?? null,
+						title: current.title
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+						className: "min-w-0 flex-1 divide-y divide-border",
+						"data-testid": "docs",
+						children: [
+							inside.sheets.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+								className: "flex min-h-12 items-center gap-2 py-1",
+								"data-testid": "shelf-specs",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "w-16 shrink-0 text-[11px] font-semibold tracking-[0.1em] text-copper uppercase",
+										children: "Specs"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										"aria-expanded": selected?.id === s.id,
+										className: "min-w-0 flex-1 py-2 text-left text-sm font-medium break-words hover:underline",
+										onClick: () => go({
+											book: current.id,
+											open: selected?.id === s.id ? void 0 : s.id
+										}),
+										"data-testid": "shelf-specs-open",
+										children: [inside.sheets.length > 1 ? `${s.model}: ` : "", "Power, Water, Plug, Size"]
+									}),
+									selected?.id === s.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "size-4 text-muted-foreground" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "size-4 text-muted-foreground" }),
+									manage ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+										type: "button",
+										size: "sm",
+										variant: "ghost",
+										className: "size-11 shrink-0 p-0",
+										title: "Move to another model",
+										"aria-label": "Move these specs to another model",
+										onClick: () => setAsk({
+											kind: "move-sheet",
+											sheet: s
+										}),
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRightLeft, { className: "size-4" })
+									}) : null
+								]
+							}, `s${s.id}`)),
+							TYPES.flatMap((t) => inside.files.filter((f) => f.section === t.section)).map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DocRow, {
+								file: f,
+								label: shortDocName(f.name, current.title),
+								manage,
+								onMove: (file) => setAsk({
+									kind: "move-file",
+									file
+								}),
+								onDelete: setFileToDelete,
+								extra: f.section === "spec" && canEdit && !inside.sheets.length && f.mime === "application/pdf" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+									type: "button",
+									size: "sm",
+									variant: "outline",
+									onClick: () => void readSpecsFrom(f),
+									"data-testid": "read-specs",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileUp, { className: "size-4" }), " Read Specs"]
+								}) : null
+							}, f.id)),
+							!inside.files.length && !inside.sheets.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", {
+								className: "py-3 text-sm text-muted-foreground",
+								children: "No documents yet."
+							}) : null
+						]
+					})]
+				}),
+				canEdit ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-3 flex flex-wrap items-center gap-2",
+					"data-testid": "model-add",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-xs text-muted-foreground",
+							children: [
+								"Add to ",
+								modelLabel(current.title, current.manufacturer),
+								":"
+							]
+						}),
+						TYPES.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AddTarget, {
+							id: `here-${t.id}`,
+							label: t.add,
+							busy: busy?.section === t.section ? busy.text : null,
+							disabled: !!busy,
+							onFiles: (list) => void addFiles(t.section, list, current)
+						}, t.section)),
+						manage ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "ghost",
+							onClick: () => setRenaming({
+								manufacturer: current.manufacturer,
+								model: modelLabel(current.title, current.manufacturer)
+							}),
+							"data-testid": "book-rename",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "size-4" }), " Rename"]
+						}), !inside.sheets.length && !inside.files.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "ghost",
+							disabled: removeBook.isPending,
+							onClick: () => removeBook.mutate(current.id),
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-4" }), " Remove Model"]
+						}) : null] }) : null
+					]
+				}) : null,
+				mode === "edit" && selected ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mt-4",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpecImport, {
+						editing: selected,
+						aiReady: !!data.data?.aiReady,
+						onCancel: () => setMode("browse"),
+						onSaved: (id) => {
+							setMode("browse");
+							reload();
+							go({
+								book: current.id,
+								open: id
+							});
+						}
+					}, `edit-${selected.id}`)
+				}) : selected && mode === "browse" && sheetBook.get(selected.id) === current.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mt-4",
+					"data-testid": "book-spec-sheet",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpecSheetView, {
+						sheet: selected,
+						canEdit,
+						onEdit: () => setMode("edit"),
+						onDelete: () => setConfirmDelete(true),
+						onRefresh: canEdit ? () => refresh.mutate(selected.id) : void 0,
+						refreshing: refresh.isPending,
+						onReread: canEdit ? () => rereadInput.current?.click() : void 0
+					})
+				}) : null
+			]
+		}) : null] }),
+		unfiled.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+			className: "mt-6 rounded-xl border border-border bg-card px-4 py-3",
+			"aria-labelledby": "unfiled-title",
+			"data-testid": "library-unfiled",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-2",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						id: "unfiled-title",
+						className: "font-display text-lg font-medium",
+						children: "Not Filed Yet"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs text-muted-foreground",
+						children: unfiled.length
+					}),
+					canEdit ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						type: "button",
+						size: "sm",
+						variant: manage ? "secondary" : "ghost",
+						className: "ml-auto",
+						onClick: () => setManage(!manage),
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings2, { className: "size-4" }),
+							" ",
+							manage ? "Done" : "Manage"
+						]
+					}) : null
+				]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+				className: "divide-y divide-border",
+				children: unfiled.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DocRow, {
+					file: f,
+					label: f.name.replace(/\.[A-Za-z0-9]+$/, ""),
+					manage,
+					onMove: (file) => setAsk({
+						kind: "move-file",
+						file
+					}),
+					onDelete: setFileToDelete
+				}, f.id))
+			})]
+		}) : null,
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+			open: adding && !ask,
+			onOpenChange: (o) => !o && !busy && setAdding(false),
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
+				"data-testid": "add-dialog",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Add Files" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: ["Drop a file on its type, or click to choose. It is filed under the maker and model in its name; if that isn't clear, you pick. ", DROP_RULES] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mt-3 flex flex-col gap-2 sm:flex-row",
+						children: TYPES.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AddTarget, {
+							id: t.id,
+							label: t.add,
+							large: true,
+							busy: busy?.section === t.section ? busy.text : null,
+							disabled: !!busy,
+							onFiles: (list) => void addFiles(t.section, list)
+						}, t.section))
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						type: "button",
+						variant: "outline",
+						className: "mt-3 w-fit",
+						onClick: () => {
+							setAdding(false);
+							setImportFile(null);
+							setMode("import");
+						},
+						"data-testid": "library-import",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileUp, { className: "size-4" }), " Import A Spec Sheet And Read Its Specs"]
+					})
+				]
+			})
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BookPicker, {
+			open: !!ask,
+			heading: ask?.kind === "file" ? "Which Model Is This For?" : "Move To Which Model?",
+			detail: ask?.kind === "file" ? `${ask.fileName} doesn't name one model. Pick the model for this ${SHELF[ask.section].type.toLowerCase()}, or add a new one.` : ask?.kind === "move-file" ? `${ask.file.name} will be renamed for the model you pick.` : ask?.kind === "move-sheet" ? `${ask.sheet.manufacturer} ${ask.sheet.model} specs will move to the model you pick.` : "",
+			books,
+			currentId: book?.id ?? null,
+			likelyIds: ask?.kind === "file" ? likelyBooks(ask.fileName, books).map((b) => b.id) : [],
+			cancelLabel: ask?.kind === "file" ? "Skip This File" : "Cancel",
+			onPick: (b) => void pickForAsk(b),
+			onCreate: (m, n) => void createForAsk(m, n),
+			onCancel: () => {
+				if (ask?.kind === "file") ask.resolve(null);
+				else setAsk(null);
+			}
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+			ref: rereadInput,
+			type: "file",
+			accept: "application/pdf,.pdf",
+			className: "hidden",
+			"data-testid": "spec-reread-input",
+			onChange: (e) => {
+				const f = e.target.files?.[0];
+				e.target.value = "";
+				if (f) reread(f);
+			}
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+			open: rereading || !!found,
+			onOpenChange: (o) => !o && !rereading && setFound(null),
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
+				"data-testid": "reread-dialog",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Re-Read Image From PDF" }), rereading || !found ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, {
+					className: "flex items-center gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Looking for the machine photo…"]
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, { children: found.image ? `This is the machine photo found in ${found.file}. Warning symbols, logos and barcodes were skipped.` : found.note ?? `No machine photo was found in ${found.file}.` }),
+					found.image ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+						src: found.image,
+						alt: "Machine photo found",
+						className: "mx-auto mt-3 max-h-64 rounded-lg bg-white object-contain",
+						"data-testid": "reread-image"
+					}) : null,
+					found.dimsImage ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs font-medium text-muted-foreground",
+							children: "Dimensions diagram found"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+							src: found.dimsImage,
+							alt: "Dimensions diagram found",
+							className: "mx-auto mt-1 max-h-40 rounded-lg bg-white object-contain"
+						})]
+					}) : null,
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4 flex flex-wrap gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							disabled: applyImages.isPending || !selected,
+							"data-testid": "reread-apply",
+							onClick: () => selected && applyImages.mutate({
+								id: selected.id,
+								image: found.image,
+								dimsImage: found.dimsImage
+							}),
+							children: found.image ? "Use This Image" : "Clear The Current Image"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							variant: "outline",
+							onClick: () => setFound(null),
+							children: "Cancel"
+						})]
+					})
+				] })]
+			})
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+			open: renaming != null,
+			onOpenChange: (o) => !o && setRenaming(null),
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Rename" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, { children: "Files already stored keep their names; new ones use the new name." }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+					className: "mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]",
+					onSubmit: (e) => {
+						e.preventDefault();
+						if (book && renaming && renaming.manufacturer.trim().length >= 2 && renaming.model.trim()) {
+							setOpenMaker(renaming.manufacturer.trim());
+							rename.mutate({
+								id: book.id,
+								manufacturer: renaming.manufacturer.trim(),
+								model: renaming.model.trim()
+							});
+						}
+					},
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							value: renaming?.manufacturer ?? "",
+							onChange: (e) => renaming && setRenaming({
+								...renaming,
+								manufacturer: e.target.value
+							}),
+							"aria-label": "Manufacturer",
+							placeholder: "Manufacturer"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							value: renaming?.model ?? "",
+							onChange: (e) => renaming && setRenaming({
+								...renaming,
+								model: e.target.value
+							}),
+							"aria-label": "Model",
+							placeholder: "Model"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "submit",
+							disabled: rename.isPending,
+							children: "Save"
+						})
+					]
+				})
+			] })
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+			open: !!fileToDelete,
+			onOpenChange: (o) => !o && setFileToDelete(null),
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Delete This File?" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [fileToDelete?.name, " will be removed from The Library. Links already sent for it will stop working."] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-4 flex gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						variant: "destructive",
+						disabled: removeFile.isPending,
+						onClick: () => fileToDelete && removeFile.mutate(fileToDelete.id),
+						children: "Delete"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						variant: "outline",
+						onClick: () => setFileToDelete(null),
+						children: "Keep It"
+					})]
+				})
+			] })
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+			open: confirmDelete,
+			onOpenChange: setConfirmDelete,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Delete This Spec Sheet?" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [
+					selected?.manufacturer,
+					" ",
+					selected?.model,
+					" and all of its configurations will be removed from The Library."
+				] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "mt-4 flex gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						variant: "destructive",
+						disabled: removeSheet.isPending,
+						onClick: () => selected && removeSheet.mutate(selected.id),
+						children: "Delete"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						variant: "outline",
+						onClick: () => setConfirmDelete(false),
+						children: "Keep It"
+					})]
+				})
+			] })
+		})
+	] });
+}
+/** The machine photo for the open model; click to enlarge. Nothing is shown when no photo is saved. */
+function ModelPhoto({ sheet, title }) {
+	const photo = useQuery({
+		queryKey: [
+			"spec-image",
+			sheet?.id,
+			sheet?.updatedAt
+		],
+		queryFn: () => getSpecImage({ data: { id: sheet.id } }),
+		enabled: !!sheet,
+		staleTime: 3e5
+	}).data?.image ?? null;
+	if (!photo) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "size-36 shrink-0 overflow-hidden rounded-lg border border-border bg-white",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ZoomableImage, {
+			src: photo,
+			alt: title,
+			label: title,
+			className: "h-full",
+			imgClassName: "h-full w-full object-contain p-1.5",
+			testId: "book-photo"
+		})
+	});
+}
+//#endregion
+//#region src/components/desk/stock-actions.tsx
+function StockActions({ asset, canStock, isAdmin }) {
+	const qc = useQueryClient();
+	const [mode, setMode] = (0, import_react.useState)(null);
+	const [reason, setReason] = (0, import_react.useState)("");
+	const [note, setNote] = (0, import_react.useState)("");
+	const [customer, setCustomer] = (0, import_react.useState)("");
+	const [site, setSite] = (0, import_react.useState)("");
+	const [busy, setBusy] = (0, import_react.useState)(false);
+	const house = isWarehouseStockPlace(asset.site);
+	const hold = asset.stockHold;
+	if (!hold && (!canStock || !house)) return null;
+	if (!hold && asset.status !== "ready" && asset.status !== "deployed") return null;
+	const tag = asset.serial?.trim() || String(asset.id);
+	async function refresh() {
+		await qc.invalidateQueries({ queryKey: ["assets"] });
+		await qc.invalidateQueries({ queryKey: ["account-equipment"] });
+		await qc.invalidateQueries({ queryKey: ["notifications"] });
+		await qc.invalidateQueries({ queryKey: ["unit-place"] });
+	}
+	async function confirmRemove() {
+		const err = removeReasonError(reason, note);
+		if (err) {
+			toast.error(err);
+			return;
+		}
+		setBusy(true);
+		try {
+			const res = await requestStockRemove({ data: {
+				id: asset.id,
+				reason,
+				note: note.trim() || null
+			} });
+			toast.success(res.pending ? "Pending removal" : "Removed from stock");
+			setMode(null);
+			setReason("");
+			setNote("");
+			await refresh();
+		} catch (e) {
+			toast.error(e instanceof Error ? e.message : "Could not remove");
+		} finally {
+			setBusy(false);
+		}
+	}
+	async function confirmAssign() {
+		if (!customer.trim()) {
+			toast.error("Pick an account.");
+			return;
+		}
+		setBusy(true);
+		try {
+			const res = await requestStockAssign({ data: {
+				id: asset.id,
+				customer: customer.trim(),
+				site: site || null
+			} });
+			toast.success(res.pending ? `Pending customer assign · ${res.customer}` : `Assigned to ${res.customer}`);
+			setMode(null);
+			setCustomer("");
+			setSite("");
+			await refresh();
+		} catch (e) {
+			toast.error(e instanceof Error ? e.message : "Could not assign");
+		} finally {
+			setBusy(false);
+		}
+	}
+	async function decide(decision) {
+		setBusy(true);
+		try {
+			await decideStockAction({ data: {
+				id: asset.id,
+				decision
+			} });
+			toast.success(decision === "approve" ? "Approved" : "Rejected — it stays in the slot");
+			await refresh();
+		} catch (e) {
+			toast.error(e instanceof Error ? e.message : "Could not update");
+		} finally {
+			setBusy(false);
+		}
+	}
+	if (hold === "remove" || hold === "assign") {
+		const outbound = hold === "assign";
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex flex-wrap items-center gap-2",
+			"data-testid": "stock-pending",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: outbound ? "Pending outbound" : "Pending removal" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-xs text-muted-foreground",
+					children: outbound ? `Waiting to go to ${asset.stockHoldCustomer || "an account"}. Hidden there until approved.` : `Waiting to leave${asset.stockHoldReason ? ` · ${asset.stockHoldReason}` : ""}. Still in this slot.`
+				}),
+				isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "sm",
+					disabled: busy,
+					"data-testid": "stock-approve",
+					onClick: () => void decide("approve"),
+					children: "Approve"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "sm",
+					variant: "outline",
+					disabled: busy,
+					"data-testid": "stock-reject",
+					onClick: () => void decide("reject"),
+					children: "Reject"
+				})] }) : null
+			]
+		});
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex flex-wrap items-end gap-2",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				type: "button",
+				size: "sm",
+				variant: mode === "remove" ? "default" : "outline",
+				"data-testid": `remove-${tag}`,
+				onClick: () => setMode((cur) => cur === "remove" ? null : "remove"),
+				children: "Remove"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				type: "button",
+				size: "sm",
+				variant: mode === "assign" ? "default" : "outline",
+				"data-testid": `assign-${tag}`,
+				onClick: () => setMode((cur) => cur === "assign" ? null : "assign"),
+				children: "Assign to customer"
+			}),
+			mode === "remove" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex w-full flex-wrap items-end gap-2",
+				"data-testid": "remove-panel",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+						className: "grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+						children: ["Reason", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+							"aria-label": "Removal reason",
+							"data-testid": "remove-reason",
+							className: "min-w-52",
+							value: reason,
+							onChange: (e) => setReason(e.target.value),
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "",
+								children: "Choose"
+							}), REMOVE_REASONS.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: r,
+								children: r
+							}, r))]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+						"aria-label": "Removal note",
+						"data-testid": "remove-note",
+						className: "max-w-56",
+						value: note,
+						placeholder: reason === "Other" ? "Note required" : "Note, optional",
+						onChange: (e) => setNote(e.target.value)
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						size: "sm",
+						disabled: busy || !!removeReasonError(reason, note),
+						"data-testid": "remove-confirm",
+						onClick: () => void confirmRemove(),
+						children: busy ? "Saving…" : "Confirm remove"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "button",
+						size: "sm",
+						variant: "outline",
+						onClick: () => setMode(null),
+						children: "Cancel"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "w-full text-xs text-muted-foreground",
+						children: isAdmin ? "This takes it off the rack. The record stays." : "It stays in this slot until an admin approves. You can’t approve your own removal."
+					})
+				]
+			}) : null,
+			mode === "assign" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "grid w-full gap-2 sm:grid-cols-[minmax(0,1fr)_12rem_auto]",
+				"data-testid": "assign-panel",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomerCombo, {
+						label: "Account",
+						value: customer,
+						onChange: setCustomer,
+						placeholder: "Search accounts…",
+						allowCreate: isAdmin
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+						className: "grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+						children: ["Site", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
+							"aria-label": "Site",
+							"data-testid": "assign-site",
+							value: site,
+							onChange: (e) => setSite(e.target.value),
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: "",
+								children: "No site"
+							}), CUSTOMER_SITES.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: s,
+								children: SITE_LABEL[s] ?? s
+							}, s))]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex flex-wrap items-end gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							size: "sm",
+							disabled: busy || !customer.trim(),
+							"data-testid": "assign-confirm",
+							onClick: () => void confirmAssign(),
+							children: busy ? "Saving…" : "Confirm assign"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "outline",
+							onClick: () => setMode(null),
+							children: "Cancel"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-muted-foreground sm:col-span-3",
+						children: isAdmin ? "It leaves the rack and shows on that account. One serial stays one record. Walk-In needs a real café." : "It stays in this slot and stays off the account until an admin approves. You can’t approve your own assign."
+					})
+				]
+			}) : null
+		]
+	});
+}
+//#endregion
 //#region src/components/desk/asset-sheet.tsx
 function AssetSheet({ asset, onClose }) {
 	const qc = useQueryClient();
@@ -17973,7 +25391,7 @@ function AssetSheet({ asset, onClose }) {
 		onError: (e) => toast.error(e instanceof Error ? e.message : "Could not assign")
 	});
 	const queue = (installs.data ?? []).filter((i) => isOpenInstall(i));
-	const pallets = retSite === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
+	const pallets = palletsFor(retSite);
 	const bay = asset ? bayFor(asset.site, asset.pallet) : "general";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
 		open: !!asset,
@@ -17992,6 +25410,8 @@ function AssetSheet({ asset, onClose }) {
 					bay === "catering" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Catering" }) : null,
 					bay === "dispenser" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Dispenser" }) : null,
 					asset.reviewStatus === "pending" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Pending review" }) : null,
+					asset.stockHold === "remove" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Pending removal" }) : null,
+					asset.stockHold === "assign" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Pending outbound" }) : null,
 					asset.shopTest === "tested" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Tested" }) : null,
 					asset.shopTest === "needs-test" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Needs test" }) : null,
 					asset.missingSerial ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Serial missing" }) : null
@@ -18107,6 +25527,14 @@ function AssetSheet({ asset, onClose }) {
 					className: "mt-1 text-sm",
 					children: asset.reviewNote
 				})]
+			}) : null,
+			canStock && isWarehouseStockPlace(asset.site) && (asset.status === "ready" || asset.status === "deployed") || asset.stockHold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "border-b border-border p-5",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockActions, {
+					asset,
+					canStock,
+					isAdmin: !!me.data?.isAdmin
+				})
 			}) : null,
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 				className: "grid gap-3 border-b border-border p-5 sm:grid-cols-2",
@@ -18228,16 +25656,28 @@ function AssetSheet({ asset, onClose }) {
 								className: "mt-1 text-xs text-muted-foreground",
 								children: lastMoveLine(asset.notes)
 							}) : null,
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							canStock && !asset.stockHold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "mt-2",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UnitPlaceField, {
 									assetId: asset.id,
 									serial: asset.serial ?? "",
 									model: asset.model,
 									draft: place,
-									onDraft: setPlace
+									onDraft: setPlace,
+									status: asset.status,
+									placeLabel: unitPlaceLabel({
+										site: asset.site,
+										pallet: asset.pallet,
+										level: asset.level,
+										status: asset.status,
+										soldTo: asset.soldTo,
+										purpose: asset.purpose
+									})
 								})
-							})
+							}) : asset.stockHold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "mt-2 text-xs text-muted-foreground",
+								children: "This slot stays until an admin approves or rejects."
+							}) : null
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -18268,9 +25708,9 @@ function AssetSheet({ asset, onClose }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
 								value: retSite,
 								onChange: (e) => {
-									const s = e.target.value;
-									setRetSite(s);
-									setRetPallet(s === "barn-front" ? FRONT_PALLETS[0] : "A");
+									const next = e.target.value;
+									setRetSite(next);
+									if (!palletsFor(next).includes(retPallet)) setRetPallet(palletsFor(next)[0]);
 								},
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 									value: "barn-back",
@@ -18319,7 +25759,7 @@ function AssetSheet({ asset, onClose }) {
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex flex-col gap-2 sm:flex-row",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
-								className: "flex-1",
+								className: "sm:flex-1",
 								value: installId,
 								onChange: (e) => setInstallId(e.target.value),
 								allowEmpty: true,
@@ -18410,9 +25850,9 @@ function AssetSheet({ asset, onClose }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SelectField, {
 								value: retSite,
 								onChange: (e) => {
-									const s = e.target.value;
-									setRetSite(s);
-									setRetPallet(s === "barn-front" ? FRONT_PALLETS[0] : "A");
+									const next = e.target.value;
+									setRetSite(next);
+									if (!palletsFor(next).includes(retPallet)) setRetPallet(palletsFor(next)[0]);
 								},
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 									value: "barn-back",
@@ -18489,17 +25929,22 @@ function statusLabel(asset) {
 }
 //#endregion
 //#region src/routes/_app/locations.tsx
-var Route$12 = createFileRoute("/_app/locations")({
+var Route$13 = createFileRoute("/_app/locations")({
 	validateSearch: parseOpenSearch,
 	component: Page$11
 });
 function Page$11() {
-	const { open } = Route$12.useSearch();
+	const { open } = Route$13.useSearch();
 	const qc = useQueryClient();
 	const data = useQuery({
 		queryKey: ["assets"],
 		queryFn: () => listAssets()
 	});
+	const me = useQuery({
+		queryKey: ["access", "me"],
+		queryFn: () => getMyAccess()
+	});
+	const canStock = !!me.data?.isAdmin || me.data?.role === "warehouse";
 	const [tab, setTab] = (0, import_react.useState)("deployed");
 	const [q, setQ] = (0, import_react.useState)("");
 	const [selected, setSelected] = useOpenRecord(open);
@@ -18614,30 +26059,12 @@ function Page$11() {
 	const deployedCount = all.filter((a) => a.status === "deployed").length;
 	const fieldCount = all.filter((a) => a.status === "assigned").length;
 	const soldCount = all.filter((a) => a.status === "sold").length;
-	const bySite = [
-		{
-			name: "Training",
-			count: all.filter((a) => a.status === "deployed" && a.site === "training").length
-		},
-		{
-			name: "Lobby",
-			count: all.filter((a) => a.status === "deployed" && a.site === "front-lobby").length
-		},
-		{
-			name: "Staging area",
-			count: all.filter((a) => a.status === "deployed" && a.site === "staging").length
-		},
-		...CUSTOMER_SITES.map((site) => ({
-			name: SITE_LABEL[site] ?? site,
-			count: all.filter((a) => a.status === "deployed" && a.site === site).length
-		}))
-	];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
 			className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "Equipment by location"
+				children: "Equipment By Location"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
 				children: "Units at a site, not on a barn bay. Add from the barn, or add a unit that is not in the barn. Moving back asks for a bay first."
@@ -18645,225 +26072,230 @@ function Page$11() {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(StatRow, { children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "On site",
+				label: "On Site",
 				value: deployedCount,
+				hint: "HQ rooms and SATX",
 				selected: tab === "deployed",
 				onClick: () => setTab((t) => toggleChip(t, "deployed", "all"))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "On an install",
+				label: "Pulled",
 				value: fieldCount,
+				hint: "Out on an install",
 				selected: tab === "field",
 				onClick: () => setTab((t) => toggleChip(t, "field", "all"))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
 				label: "Sold",
 				value: soldCount,
+				hint: "Left the Katz fleet",
 				selected: tab === "sold",
 				onClick: () => setTab((t) => toggleChip(t, "sold", "all"))
 			})
 		] }),
-		bySite.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-			className: "mt-5",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartCard, {
-				title: "Deployed by location",
-				lede: "Units sitting at HQ rooms and SATX — not the barn racks.",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleBars, {
-					data: bySite.map((s) => ({
-						site: s.name,
-						count: s.count
-					})),
-					xKey: "site",
-					yKey: "count",
-					yLabel: "Units",
-					horizontal: true
-				})
-			})
-		}) : null,
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mt-5 flex flex-wrap items-center gap-2",
 			"data-testid": "list-toolbar",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					value: q,
-					onChange: (e) => setQ(e.target.value),
-					placeholder: "Filter…",
-					className: "h-9 w-56 shrink-0",
-					"aria-label": "Filter equipment"
-				}),
-				[
-					["deployed", `On site (${deployedCount})`],
-					["field", `Pulled (${fieldCount})`],
-					["sold", `Sold (${soldCount})`]
-				].map(([id, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FilterChip, {
-					selected: tab === id,
-					onClick: () => setTab(id),
-					children: label
-				}, id)),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SortSelect, {
-					value: sort,
-					onChange: setSort,
-					options: [
-						...SORT_ALPHA,
-						...SORT_DATE,
-						...SORT_EQUIP,
-						...SORT_STATUS
-					],
-					className: "shrink-0"
-				})
-			]
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+				value: q,
+				onChange: (e) => setQ(e.target.value),
+				placeholder: "Filter…",
+				className: "h-9 w-56 shrink-0",
+				"aria-label": "Filter equipment"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SortSelect, {
+				value: sort,
+				onChange: setSort,
+				options: [
+					...SORT_ALPHA,
+					...SORT_DATE,
+					...SORT_EQUIP,
+					...SORT_STATUS
+				],
+				className: "shrink-0"
+			})]
 		}),
+		groups.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("nav", {
+			"aria-label": "Jump to location",
+			className: "mt-3 flex flex-wrap gap-1.5",
+			children: groups.map((g) => {
+				const units = g.rows.reduce((n, a) => n + a.qty, 0);
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+					href: `#loc-${g.key}`,
+					className: cn("rounded-full border border-border px-2.5 py-1 text-xs tabular hover:border-primary/50", units === 0 ? "text-muted-foreground" : "bg-card text-foreground"),
+					children: [
+						g.label,
+						" ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-muted-foreground",
+							children: units
+						})
+					]
+				}, g.key);
+			})
+		}) : null,
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "mt-5 space-y-6",
-			children: groups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mb-2 flex flex-wrap items-baseline justify-between gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "font-display text-xl",
-						children: g.label
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "text-xs text-muted-foreground",
-							children: [g.rows.reduce((n, a) => n + a.qty, 0), " units"]
-						}), g.site !== "field" && g.site !== "sold" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "button",
-							size: "sm",
-							variant: panel?.site === g.key && panel.mode === "barn" ? "default" : "outline",
-							"data-testid": g.key === "training" ? "add-from-barn-training" : g.key === "lobby" ? "add-from-barn-lobby" : g.key === "staging" ? "add-from-barn-staging" : void 0,
-							onClick: () => setPanel((cur) => cur?.site === g.key && cur.mode === "barn" ? null : {
-								site: g.key,
-								mode: "barn"
-							}),
-							children: "Add from barn"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "button",
-							size: "sm",
-							variant: panel?.site === g.key && panel.mode === "list" ? "default" : "outline",
-							onClick: () => setPanel((cur) => cur?.site === g.key && cur.mode === "list" ? null : {
-								site: g.key,
-								mode: "list"
-							}),
-							children: "Add to list"
-						})] }) : null]
-					})]
-				}),
-				panel?.site === g.key ? panel.mode === "barn" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BarnPick, {
-					site: g.site,
-					otherLabel: g.otherLabel,
-					onDone: () => setPanel(null)
-				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ListAdd, {
-					site: g.site,
-					otherLabel: g.otherLabel,
-					onDone: () => setPanel(null)
-				}) : null,
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "overflow-hidden rounded-xl border border-border bg-card",
-					children: [g.rows.map((a) => {
-						const electrical = electricalFrom(a.notes) || electricalFrom(a.purpose);
-						const moved = lastMoveLine(a.notes);
-						const onSite = a.status === "deployed" && !isBarn(a.site);
-						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "grid gap-2 border-b border-border px-4 py-3 last:border-b-0 md:grid-cols-[1.4fr_1fr_auto] md:items-center",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									type: "button",
-									onClick: () => setSelected(a.id),
-									className: "text-left",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "font-medium",
-											children: a.model
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "mt-0.5 block text-xs text-muted-foreground",
-											children: [[
-												a.serial ? `SN ${a.serial}` : "No serial",
-												electrical,
-												unitPlaceLabel({
-													site: a.site,
-													pallet: a.pallet,
-													level: a.level,
-													status: a.status,
-													soldTo: a.soldTo,
-													purpose: a.purpose
-												})
-											].filter(Boolean).join(" · "), a.qty > 1 ? ` · qty ${a.qty}` : ""]
-										}),
-										moved ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "mt-0.5 block text-xs text-muted-foreground",
-											children: moved
-										}) : null
-									]
+			children: groups.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+				id: `loc-${g.key}`,
+				className: "scroll-mt-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mb-2 flex flex-wrap items-baseline justify-between gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "font-display text-xl",
+							children: g.label
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-xs text-muted-foreground",
+								children: [g.rows.reduce((n, a) => n + a.qty, 0), " units"]
+							}), g.site !== "field" && g.site !== "sold" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								size: "sm",
+								variant: panel?.site === g.key && panel.mode === "barn" ? "default" : "outline",
+								"data-testid": g.key === "training" ? "add-from-barn-training" : g.key === "lobby" ? "add-from-barn-lobby" : g.key === "staging" ? "add-from-barn-staging" : void 0,
+								onClick: () => setPanel((cur) => cur?.site === g.key && cur.mode === "barn" ? null : {
+									site: g.key,
+									mode: "barn"
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "text-sm text-muted-foreground",
-									children: [a.purpose ?? a.soldTo ?? "—", a.soldAt ? ` · ${a.soldAt}` : ""]
+								children: "Add from barn"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								type: "button",
+								size: "sm",
+								variant: panel?.site === g.key && panel.mode === "list" ? "default" : "outline",
+								onClick: () => setPanel((cur) => cur?.site === g.key && cur.mode === "list" ? null : {
+									site: g.key,
+									mode: "list"
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "flex flex-wrap items-center gap-2",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: a.site === "staging" ? "Staging" : a.status === "sold" ? "Sold" : a.status === "assigned" ? a.installId ? "On an install" : "On service" : "In use" }), onSite ? movingId === a.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "flex flex-wrap items-end gap-2",
+								children: "Add to list"
+							})] }) : null]
+						})]
+					}),
+					panel?.site === g.key ? panel.mode === "barn" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BarnPick, {
+						site: g.site,
+						otherLabel: g.otherLabel,
+						onDone: () => setPanel(null)
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ListAdd, {
+						site: g.site,
+						otherLabel: g.otherLabel,
+						onDone: () => setPanel(null)
+					}) : null,
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "overflow-hidden rounded-xl border border-border bg-card",
+						children: [g.rows.map((a) => {
+							const electrical = electricalFrom(a.notes) || electricalFrom(a.purpose);
+							const moved = lastMoveLine(a.notes);
+							const onSite = a.status === "deployed" && !isBarn(a.site);
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "grid gap-2 border-b border-border px-4 py-3 last:border-b-0 md:grid-cols-[1.4fr_1fr_auto] md:items-center",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => setSelected(a.id),
+										className: "text-left",
 										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlacePicker, {
-												value: moveDraft,
-												onChange: setMoveDraft,
-												testId: "location-move"
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "font-medium",
+												children: a.model
 											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-												type: "button",
-												size: "sm",
-												disabled: !!placeDraftError(moveDraft),
-												onClick: async () => {
-													const err = placeDraftError(moveDraft);
-													if (err) {
-														toast.error(err);
-														return;
-													}
-													try {
-														const place = await setAssetPlace({ data: {
-															id: a.id,
-															site: moveDraft.site,
-															pallet: moveDraft.pallet || null,
-															level: moveDraft.level ? Number(moveDraft.level) : null,
-															otherLabel: moveDraft.otherLabel || null
-														} });
-														toast.success(place.place ? `Now at ${place.place}` : "Moved");
-														setMovingId(null);
-														qc.invalidateQueries({ queryKey: ["assets"] });
-													} catch (e) {
-														toast.error(e instanceof Error ? e.message : "Could not move");
-													}
-												},
-												children: "Confirm"
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "mt-0.5 block text-xs text-muted-foreground",
+												children: [[
+													a.serial ? `SN ${a.serial}` : "No serial",
+													electrical,
+													unitPlaceLabel({
+														site: a.site,
+														pallet: a.pallet,
+														level: a.level,
+														status: a.status,
+														soldTo: a.soldTo,
+														purpose: a.purpose
+													})
+												].filter(Boolean).join(" · "), a.qty > 1 ? ` · qty ${a.qty}` : ""]
 											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+											moved ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "mt-0.5 block text-xs text-muted-foreground",
+												children: moved
+											}) : null
+										]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "text-sm text-muted-foreground",
+										children: [a.purpose ?? a.soldTo ?? "—", a.soldAt ? ` · ${a.soldAt}` : ""]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex flex-wrap items-center gap-2",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: a.site === "staging" ? "Staging" : a.status === "sold" ? "Sold" : a.status === "assigned" ? a.installId ? "On an install" : "On service" : "In use" }),
+											onSite && !a.stockHold ? movingId === a.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "flex flex-wrap items-end gap-2",
+												children: [
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlacePicker, {
+														value: moveDraft,
+														onChange: setMoveDraft,
+														testId: "location-move"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+														type: "button",
+														size: "sm",
+														disabled: !!placeDraftError(moveDraft),
+														onClick: async () => {
+															const err = placeDraftError(moveDraft);
+															if (err) {
+																toast.error(err);
+																return;
+															}
+															try {
+																const place = await setAssetPlace({ data: {
+																	id: a.id,
+																	site: moveDraft.site,
+																	pallet: moveDraft.pallet || null,
+																	level: moveDraft.level ? Number(moveDraft.level) : null,
+																	otherLabel: moveDraft.otherLabel || null
+																} });
+																toast.success(place.place ? `Now at ${place.place}` : "Moved");
+																setMovingId(null);
+																qc.invalidateQueries({ queryKey: ["assets"] });
+															} catch (e) {
+																toast.error(e instanceof Error ? e.message : "Could not move");
+															}
+														},
+														children: "Confirm"
+													}),
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+														type: "button",
+														size: "sm",
+														variant: "outline",
+														onClick: () => setMovingId(null),
+														children: "Cancel"
+													})
+												]
+											}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 												type: "button",
 												size: "sm",
 												variant: "outline",
-												onClick: () => setMovingId(null),
-												children: "Cancel"
-											})
+												onClick: () => {
+													setMoveDraft(emptyPlaceDraft());
+													setMovingId(a.id);
+												},
+												children: "Move"
+											}) : null,
+											(a.site === "staging" || a.site === "training" || a.site === "front-lobby") && (canStock || a.stockHold) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockActions, {
+												asset: a,
+												canStock,
+												isAdmin: !!me.data?.isAdmin
+											}) : null
 										]
-									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										type: "button",
-										size: "sm",
-										variant: "outline",
-										onClick: () => {
-											setMoveDraft(emptyPlaceDraft());
-											setMovingId(a.id);
-										},
-										children: "Move"
-									}) : null]
-								})
-							]
-						}, a.id);
-					}), g.rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "px-4 py-6 text-sm text-muted-foreground",
-						children: "Nothing logged here."
-					}) : null]
-				})
-			] }, g.key))
+									})
+								]
+							}, a.id);
+						}), g.rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "px-4 py-6 text-sm text-muted-foreground",
+							children: "Nothing logged here."
+						}) : null]
+					})
+				]
+			}, g.key))
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssetSheet, {
 			asset: selectedRow,
@@ -19031,12 +26463,12 @@ function ListAdd({ site, otherLabel, onDone }) {
 }
 //#endregion
 //#region src/routes/_app/modules.tsx
-var Route$11 = createFileRoute("/_app/modules")({
+var Route$12 = createFileRoute("/_app/modules")({
 	validateSearch: parseOpenSearch,
 	component: Page$10
 });
 function Page$10() {
-	const { open } = Route$11.useSearch();
+	const { open } = Route$12.useSearch();
 	const qc = useQueryClient();
 	const data = useQuery({
 		queryKey: ["modules"],
@@ -19046,30 +26478,50 @@ function Page$10() {
 	const [selected, setSelected] = useOpenRecord(open);
 	const [create, setCreate] = (0, import_react.useState)(false);
 	const [sort, setSort] = useDeskSort("modules", "status");
-	const [bubble, setBubble] = (0, import_react.useState)("tracked");
+	const [bubble, setBubble] = (0, import_react.useState)(null);
+	const [avail, setAvail] = (0, import_react.useState)("hq");
+	const [platform, setPlatform] = (0, import_react.useState)("");
+	const [account, setAccount] = (0, import_react.useState)("");
+	const [mtype, setMtype] = (0, import_react.useState)("");
+	const [assignFor, setAssignFor] = (0, import_react.useState)(null);
 	const all = data.data ?? [];
-	const readyRows = all.filter((m) => m.status === "Ready");
-	const notReady = all.filter((m) => m.status !== "Ready" && m.status !== "Installed at Account" && m.status !== "Retired / Scrapped");
+	const hqRows = all.filter((m) => moduleAvailability(m) === "hq");
+	const assignedRows = all.filter((m) => moduleAvailability(m) === "assigned");
+	const readyRows = hqRows.filter((m) => m.status === "Ready");
+	const notReady = hqRows.filter((m) => m.status !== "Ready");
+	const availCount = {
+		hq: hqRows.length,
+		assigned: assignedRows.length,
+		all: all.length,
+		away: all.length - hqRows.length - assignedRows.length
+	};
+	const accounts = (0, import_react.useMemo)(() => [...new Set(assignedRows.map((m) => moduleAccount(m)).filter(Boolean))].sort((a, b) => a.localeCompare(b)), [assignedRows]);
+	const platforms = (0, import_react.useMemo)(() => [.../* @__PURE__ */ new Set([...MODULE_PLATFORMS, ...all.map((m) => m.platform).filter(Boolean)])], [all]);
+	const types = (0, import_react.useMemo)(() => [.../* @__PURE__ */ new Set([...MODULE_TYPES, ...all.map((m) => m.moduleType).filter(Boolean)])], [all]);
 	const readyByTypeAll = MODULE_TYPES.map((type) => ({
 		name: type,
 		count: readyRows.filter((m) => m.moduleType === type).length
 	}));
 	const extraTypes = tally(readyRows, (m) => m.moduleType).filter((r) => !MODULE_TYPES.includes(r.name));
 	const readyByTypeChart = [...readyByTypeAll, ...extraTypes];
-	const readyByType = readyByTypeChart.filter((r) => r.count > 0);
-	const readyByPlatform = tally(readyRows, (m) => m.platform);
 	const statusMix = tally(all, (m) => m.status);
 	const rows = (0, import_react.useMemo)(() => {
 		const needle = q.trim().toLowerCase();
 		let list = all;
-		if (bubble === "ready") list = list.filter((m) => m.status === "Ready");
-		if (bubble === "shop") list = list.filter((m) => m.status !== "Ready" && m.status !== "Installed at Account" && m.status !== "Retired / Scrapped");
+		if (avail !== "all") list = list.filter((m) => moduleAvailability(m) === avail);
+		if (bubble === "ready") list = list.filter((m) => moduleAvailability(m) === "hq" && m.status === "Ready");
+		if (bubble === "shop") list = list.filter((m) => moduleAvailability(m) === "hq" && m.status !== "Ready");
+		if (platform) list = list.filter((m) => (m.platform ?? "") === platform);
+		if (account) list = list.filter((m) => moduleAccount(m) === account);
+		if (mtype) list = list.filter((m) => (m.moduleType ?? "") === mtype);
 		if (needle) list = list.filter((m) => [
 			m.moduleId,
 			m.location,
 			m.moduleType,
 			m.status,
-			m.wo
+			m.wo,
+			m.assignedCustomer,
+			m.assignedUnitLabel
 		].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)));
 		return sortDesk(list, sort, {
 			date: (m) => m.dateReady ?? m.dateIn ?? m.updatedAt,
@@ -19082,7 +26534,11 @@ function Page$10() {
 		all,
 		q,
 		sort,
-		bubble
+		bubble,
+		avail,
+		platform,
+		account,
+		mtype
 	]);
 	const selectedRow = all.find((m) => m.id === selected) ?? null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
@@ -19090,47 +26546,65 @@ function Page$10() {
 			className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "Eversys modules"
+				children: "Eversys Modules"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
-				children: "One row per physical module. The Ready count splits by type so you can see what can actually ship."
+				children: "One row per module serial. A module is part of an Eversys machine: assign it to the unit on a café, and it leaves HQ stock until it comes back."
 			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex flex-wrap gap-2",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExportButton, { defaultType: "modules" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 					onClick: () => setCreate(true),
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), "New module"]
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), "New Module"]
 				})]
 			})]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(StatRow, { children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Tracked",
-				value: all.length,
-				hint: "Every module on the board",
-				selected: bubble === "tracked",
-				onClick: () => setBubble((v) => toggleChip(v, "tracked", null))
+				label: "At HQ",
+				value: hqRows.length,
+				hint: "Here and not on a café",
+				selected: avail === "hq" && !bubble,
+				onClick: () => {
+					setAvail("hq");
+					setBubble(null);
+				}
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Ready",
+				label: "Ready At HQ",
 				value: readyRows.length,
-				hint: readyByPlatform.map((p) => `${p.count} ${p.name}`).join(" · ") || "Nothing ready",
-				breakdown: readyByType,
+				hint: tally(readyRows, (m) => m.platform).map((p) => `${p.count} ${p.name}`).join(" · ") || "Nothing ready",
 				selected: bubble === "ready",
-				onClick: () => setBubble((v) => toggleChip(v, "ready", null))
+				onClick: () => {
+					setAvail("hq");
+					setBubble((v) => toggleChip(v, "ready", null));
+				}
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "In shop",
+				label: "In Shop",
 				value: notReady.length,
-				hint: "Not ready, not installed, not retired",
+				hint: "At HQ, not ready yet",
 				selected: bubble === "shop",
-				onClick: () => setBubble((v) => toggleChip(v, "shop", null))
+				onClick: () => {
+					setAvail("hq");
+					setBubble((v) => toggleChip(v, "shop", null));
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
+				label: "Assigned",
+				value: assignedRows.length,
+				hint: "On a café machine",
+				selected: avail === "assigned",
+				onClick: () => {
+					setAvail("assigned");
+					setBubble(null);
+				}
 			})
 		] }),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 			className: "mt-5 grid min-w-0 gap-4 lg:grid-cols-2",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartCard, {
-				title: "By status",
-				lede: "Where the shop floor actually sits.",
+				title: "By Status",
+				lede: "Where every module sits.",
 				children: statusMix.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusDonut, {
 					data: statusMix,
 					unit: "modules"
@@ -19139,8 +26613,8 @@ function Page$10() {
 					children: "No modules yet."
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartCard, {
-				title: "Ready by type",
-				lede: "The Ready bubble, unpacked.",
+				title: "Ready At HQ By Type",
+				lede: "What can actually ship.",
 				children: readyRows.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleBars, {
 					data: readyByTypeChart.map((r) => ({
 						type: r.name.replace(" Module", ""),
@@ -19152,76 +26626,170 @@ function Page$10() {
 					horizontal: true
 				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-muted-foreground",
-					children: "Nothing marked Ready."
+					children: "Nothing marked Ready at HQ."
 				})
 			})]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mt-5 flex flex-wrap items-center gap-2",
 			"data-testid": "list-toolbar",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-				value: q,
-				onChange: (e) => setQ(e.target.value),
-				placeholder: "Filter modules…",
-				className: "h-9 w-56 shrink-0",
-				"aria-label": "Filter modules"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SortSelect, {
-				value: sort,
-				onChange: setSort,
-				options: [
-					...SORT_STATUS,
-					...SORT_ALPHA,
-					...SORT_DATE,
-					...SORT_EQUIP,
-					...SORT_TECH
-				],
-				className: "shrink-0"
-			})]
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					value: q,
+					onChange: (e) => setQ(e.target.value),
+					placeholder: "Search serial, account…",
+					className: "h-9 w-56 shrink-0",
+					"aria-label": "Search modules"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex shrink-0 overflow-hidden rounded-full border border-border bg-card",
+					role: "tablist",
+					"aria-label": "Where modules are",
+					children: [
+						["hq", "Available (HQ)"],
+						["assigned", "Assigned"],
+						["all", "All"]
+					].map(([id, label]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						role: "tab",
+						"aria-selected": avail === id,
+						"data-testid": `avail-${id}`,
+						onClick: () => {
+							setAvail(id);
+							setBubble(null);
+						},
+						className: cn("h-9 px-3 text-xs font-medium tabular", avail === id ? "bg-ink text-ink-foreground" : "text-muted-foreground hover:text-foreground"),
+						children: [
+							label,
+							" ",
+							availCount[id]
+						]
+					}, id))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+					value: platform,
+					onChange: (e) => setPlatform(e.target.value),
+					allowEmpty: true,
+					emptyLabel: "All Models",
+					className: "h-9 w-auto shrink-0",
+					"aria-label": "Filter by Eversys model",
+					children: platforms.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: p,
+						children: p
+					}, p))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+					value: mtype,
+					onChange: (e) => setMtype(e.target.value),
+					allowEmpty: true,
+					emptyLabel: "All Types",
+					className: "h-9 w-auto shrink-0",
+					"aria-label": "Filter by module type",
+					children: types.map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: t,
+						children: t
+					}, t))
+				}),
+				accounts.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+					value: account,
+					onChange: (e) => setAccount(e.target.value),
+					allowEmpty: true,
+					emptyLabel: "All Accounts",
+					className: "h-9 w-auto max-w-56 shrink-0",
+					"aria-label": "Filter by account",
+					children: accounts.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+						value: a,
+						children: a
+					}, a))
+				}) : null,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SortSelect, {
+					value: sort,
+					onChange: setSort,
+					options: [
+						...SORT_STATUS,
+						...SORT_ALPHA,
+						...SORT_DATE,
+						...SORT_EQUIP,
+						...SORT_TECH
+					],
+					className: "shrink-0"
+				})
+			]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mt-3 overflow-hidden rounded-xl border border-border bg-card",
-			children: [rows.map((m) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-				type: "button",
-				onClick: () => setSelected(m.id),
-				className: "desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[8rem_1fr_8rem_8rem] md:items-center",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "font-mono text-xs",
-						children: m.moduleId
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "font-medium",
-						children: m.moduleType
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "mt-0.5 block text-xs text-muted-foreground",
+			"data-testid": "module-list",
+			children: [rows.map((m) => {
+				const where = moduleAvailability(m);
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					"data-testid": `module-row-${m.moduleId}`,
+					"data-avail": where,
+					className: cn("grid gap-2 border-b border-border px-4 py-3 last:border-b-0 md:grid-cols-[1fr_auto] md:items-center", where !== "hq" && "bg-muted/30"),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: () => setSelected(m.id),
+						className: cn("desk-flat grid min-w-0 gap-1 rounded-md text-left hover:bg-muted/50 md:grid-cols-[8rem_1fr_9rem_7rem] md:items-center", where !== "hq" && "opacity-55 hover:opacity-80"),
 						children: [
-							m.platform,
-							" · ",
-							m.location ?? "—"
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-mono text-xs",
+								children: m.moduleId
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "min-w-0",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "font-medium",
+										children: m.moduleType
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "mt-0.5 block text-xs text-muted-foreground",
+										children: [m.platform, where === "hq" ? ` · ${m.location && m.location.toUpperCase() !== "SHELF" ? m.location : "At HQ"}` : ""]
+									}),
+									where === "assigned" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssignedLine, { row: m }) : null
+								]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: m.status }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechName, { name: m.technician })
+							})
 						]
-					})] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: m.status }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechName, { name: m.technician })
-					})
-				]
-			}, m.id)), rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex flex-wrap items-center gap-2 md:justify-end",
+						children: where === "hq" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "button",
+							size: "sm",
+							variant: "outline",
+							onClick: () => setAssignFor(m),
+							"data-testid": `assign-${m.moduleId}`,
+							children: "Assign To Account"
+						}) : where === "assigned" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ModuleReturnActions, {
+							row: m,
+							compact: true
+						}) : null
+					})]
+				}, m.id);
+			}), rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "px-4 py-8 text-sm text-muted-foreground",
-				children: "No modules in this view."
+				children: avail === "hq" ? "No modules at HQ match these filters." : "No modules in this view."
 			}) : null]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ModuleSheet, {
 			row: selectedRow,
-			onClose: () => setSelected(null)
+			onClose: () => setSelected(null),
+			onAssign: (m) => setAssignFor(m)
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AssignModuleDialog, {
+			module: assignFor,
+			onOpenChange: (o) => !o && setAssignFor(null)
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleCreateDialog, {
-			title: "New module",
+			title: "New Module",
 			open: create,
 			onOpenChange: setCreate,
 			fields: [{
 				name: "moduleId",
-				label: "Module ID",
+				label: "Module Serial",
 				required: true
 			}],
 			onSubmit: async (v) => {
@@ -19908,7 +27476,7 @@ function ProviderSheet({ id, creating, onClose, onCreated }) {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-start justify-between gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: creating ? "New provider" : p?.name ?? "Provider" }), !creating && p ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetTitle, { children: creating ? "New Provider" : p?.name ?? "Provider" }), !creating && p ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 						type: "button",
 						size: "sm",
 						variant: "outline",
@@ -20033,7 +27601,7 @@ function ProviderSheet({ id, creating, onClose, onCreated }) {
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
 								className: "mb-1 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase",
-								children: "Rates & response"
+								children: "Rates & Response"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 								htmlFor: "standardRate",
@@ -20090,7 +27658,7 @@ function ProviderSheet({ id, creating, onClose, onCreated }) {
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
 								className: "mb-1 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase",
-								children: "Coverage notes"
+								children: "Coverage Notes"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
 								htmlFor: "equipmentServiced",
@@ -20148,7 +27716,7 @@ function ProviderSheet({ id, creating, onClose, onCreated }) {
 		})
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RenameDialog, {
 		open: editingName,
-		title: "Rename provider",
+		title: "Rename Provider",
 		noun: "provider",
 		current: p?.name ?? "",
 		pending: rename.isPending,
@@ -20158,13 +27726,13 @@ function ProviderSheet({ id, creating, onClose, onCreated }) {
 }
 //#endregion
 //#region src/routes/_app/network.tsx
-var Route$10 = createFileRoute("/_app/network")({
+var Route$11 = createFileRoute("/_app/network")({
 	validateSearch: parseOpenSearch,
 	component: Page$9
 });
 function Page$9() {
 	const navigate = useNavigate();
-	const { open } = Route$10.useSearch();
+	const { open } = Route$11.useSearch();
 	const [selected, setSelected] = useOpenRecord(open);
 	const [creating, setCreating] = (0, import_react.useState)(false);
 	const [tab, setTab] = (0, import_react.useState)("providers");
@@ -20196,7 +27764,7 @@ function Page$9() {
 			className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "Out of Network"
+				children: "Out Of Network"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-2xl text-sm text-muted-foreground",
 				children: "Third-party techs we dispatch for accounts outside the Katz floor. Add a company with rates and notes, then assign customers. Primary is who we call first."
@@ -20406,7 +27974,7 @@ function ProvidersPane({ providers, onOpen }) {
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => onOpen(p.id),
-					className: "desk-lift grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center",
+					className: "desk-flat grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "flex flex-wrap items-center gap-1.5",
@@ -20469,7 +28037,7 @@ function ProvidersPane({ providers, onOpen }) {
 		}) : null,
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RenameDialog, {
 			open: !!renaming,
-			title: "Rename provider",
+			title: "Rename Provider",
 			noun: "provider",
 			current: renaming?.name ?? "",
 			pending: rename.isPending,
@@ -20596,7 +28164,7 @@ function CoveragePane({ byState, providers }) {
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "font-display text-xl",
-					children: "Coverage by state"
+					children: "Coverage By State"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "mt-0.5 text-xs text-muted-foreground",
@@ -20643,7 +28211,7 @@ function CoveragePane({ byState, providers }) {
 			className: "rounded-xl border border-border bg-card p-5",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 				className: "font-display text-xl",
-				children: "Accounts by provider"
+				children: "Accounts By Provider"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 				className: "mt-3 divide-y divide-border",
 				children: ranked.filter((p) => p.primaryFor + p.secondaryFor > 0).map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
@@ -20671,8 +28239,147 @@ function CoveragePane({ byState, providers }) {
 	});
 }
 //#endregion
+//#region src/components/desk/rep-deals-panel.tsx
+function stageLabel(d) {
+	if (d.completion === "complete") return "Complete";
+	if (d.completion === "fell") return "Fell through";
+	if (d.ordered) return "Ordered";
+	if (d.goodToOrder) return "Good to order";
+	return "Needs good to order";
+}
+function isOpen(d) {
+	return d.completion !== "complete" && d.completion !== "fell";
+}
+/** A clickable rep name. Looks like text, behaves like a control. */
+function RepLink({ name, onPick, className, children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+		type: "button",
+		onClick: (e) => {
+			e.stopPropagation();
+			onPick(name);
+		},
+		title: `Show ${formatRep(name) || name}'s deals`,
+		className: cn("cursor-pointer rounded-sm text-left underline decoration-border decoration-dotted underline-offset-4 transition-colors hover:text-primary hover:decoration-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none", className),
+		children: children ?? formatRep(name) ?? name
+	});
+}
+/**
+* One rep's deals in a side panel over the Pipeline page. Closing it drops you back on
+* the full pipeline exactly where you were.
+*/
+function RepDealsPanel({ rep, deals, onClose, onOpenDeal }) {
+	const [filter, setFilter] = (0, import_react.useState)("open");
+	const mine = (0, import_react.useMemo)(() => rep ? deals.filter((d) => sameRep(d.producer, rep)).sort((a, b) => (b.dateOfDeal ?? b.updatedAt).localeCompare(a.dateOfDeal ?? a.updatedAt)) : [], [deals, rep]);
+	const open = mine.filter(isOpen);
+	const done = mine.filter((d) => d.completion === "complete");
+	const shown = filter === "open" ? open : filter === "complete" ? done : mine;
+	const total = (rows) => rows.reduce((n, d) => n + (d.amount ?? 0), 0);
+	const info = findRep(rep);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sheet, {
+		open: !!rep,
+		onOpenChange: (v) => v ? null : onClose(),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetContent, {
+			"data-testid": "rep-deals-panel",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetHeader, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-[11px] font-semibold tracking-[0.16em] text-copper uppercase",
+					children: "Sales rep"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SheetTitle, {
+					className: "mt-1 flex items-center gap-2.5 font-display text-2xl",
+					children: [info ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "grid size-9 place-items-center rounded-full bg-primary/12 text-sm font-semibold text-primary",
+						children: info.initials
+					}) : null, info?.name ?? rep]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mt-3 grid grid-cols-3 gap-2",
+					children: [
+						[
+							"open",
+							"Open",
+							open.length,
+							total(open)
+						],
+						[
+							"complete",
+							"Complete",
+							done.length,
+							total(done)
+						],
+						[
+							"all",
+							"All deals",
+							mine.length,
+							total(mine)
+						]
+					].map(([id, label, n, dollars]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						"aria-pressed": filter === id,
+						onClick: () => setFilter(id),
+						className: cn("rounded-lg border px-3 py-2 text-left", filter === id ? "border-primary/60 bg-primary/8 ring-1 ring-primary/30" : "border-border bg-card"),
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase",
+								children: label
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block font-display text-xl tabular",
+								children: n
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block text-[11px] text-muted-foreground tabular",
+								children: money(dollars)
+							})
+						]
+					}, id))
+				})
+			] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SheetBody, { children: shown.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "px-5 py-8 text-sm text-muted-foreground",
+				children: "No deals in this view."
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+				className: "divide-y divide-border",
+				children: shown.map((d) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					type: "button",
+					onClick: () => onOpenDeal(d.id),
+					className: "grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 px-5 py-3 text-left hover:bg-muted/60",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "min-w-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block truncate font-medium",
+								children: d.customer
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block truncate text-xs text-muted-foreground",
+								children: d.equipment?.replace(/\r?\n/g, " · ") || "No equipment listed"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-right",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block text-sm font-medium tabular",
+								children: money(d.amount)
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block text-[11px] text-muted-foreground tabular",
+								children: d.dateOfDeal ? formatShortDate(d.dateOfDeal) : "No date"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "col-span-2",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, {
+								status: stageLabel(d),
+								tight: true
+							})
+						})
+					]
+				}) }, d.id))
+			}) })]
+		})
+	});
+}
+//#endregion
 //#region src/routes/_app/pipeline.tsx
-var Route$9 = createFileRoute("/_app/pipeline")({
+var Route$10 = createFileRoute("/_app/pipeline")({
 	validateSearch: parseOpenSearch,
 	component: Page$8
 });
@@ -20701,7 +28408,7 @@ function Chip({ active, onClick, children }) {
 	});
 }
 function Page$8() {
-	const { open } = Route$9.useSearch();
+	const { open } = Route$10.useSearch();
 	const qc = useQueryClient();
 	const data = useQuery({
 		queryKey: ["deals"],
@@ -20713,6 +28420,7 @@ function Page$8() {
 	const [create, setCreate] = (0, import_react.useState)(false);
 	const { filterMine, matchMine } = useMyView();
 	const [repFilter, setRepFilter] = (0, import_react.useState)("");
+	const [repPanel, setRepPanel] = (0, import_react.useState)(null);
 	const [sort, setSort] = useDeskSort("pipeline", "date-desc");
 	const all = data.data ?? [];
 	const live = all.filter((d) => d.completion !== "fell");
@@ -20792,27 +28500,27 @@ function Page$8() {
 			className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "Sales pipeline"
+				children: "Sales Pipeline"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
 				children: "One row per equipment deal. Step 1 is Good to order (rep). Step 2 is Ordered (you confirm it) — confirmed orders leave the Good to order list."
-			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "flex flex-wrap items-center gap-2",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MyViewBar, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 					onClick: () => setCreate(true),
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), "New deal"]
-				})]
+				})
 			})]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(StatRow, { children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Active deals",
+				label: "Active Deals",
 				value: active.length,
 				selected: view === "open",
 				onClick: () => setView((v) => toggleChip(v, "open", "all"))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Active pipeline",
+				label: "Active Pipeline",
 				value: money(sum(active)),
 				selected: view === "open",
 				onClick: () => setView((v) => toggleChip(v, "open", "all"))
@@ -20825,13 +28533,13 @@ function Page$8() {
 				onClick: () => setView((v) => toggleChip(v, "complete", "all"))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Total booked",
+				label: "Total Booked",
 				value: money(sum(live)),
 				selected: view === "all",
 				onClick: () => setView("all")
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Good to order",
+				label: "Good To Order",
 				value: gtoN,
 				hint: "Step 1 — waiting to be ordered",
 				selected: view === "gto",
@@ -20849,20 +28557,24 @@ function Page$8() {
 			className: "mt-5 grid min-w-0 gap-4 lg:grid-cols-2 xl:grid-cols-3",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartCard, {
-					title: "By producer",
+					title: "By Producer",
 					lede: "Open dollars stacked under completed. Fell-through deals are left out.",
 					children: producerChart.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StackedMoneyBars, {
 						data: producerChart,
 						xKey: "producer",
 						openKey: "open",
-						doneKey: "done"
+						doneKey: "done",
+						renderLabel: (name) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepLink, {
+							name,
+							onPick: setRepPanel
+						})
 					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "text-sm text-muted-foreground",
 						children: "No live deals yet."
 					})
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartCard, {
-					title: "How deals move",
+					title: "How Deals Move",
 					lede: "Good to order first, then Ordered. Ordered deals drop off step 1.",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleBars, {
 						data: funnel,
@@ -20873,7 +28585,7 @@ function Page$8() {
 					})
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartCard, {
-					title: "Deal size",
+					title: "Deal Size",
 					lede: "Live book by amount, so a few large jobs don’t hide the rest.",
 					children: sizeChart.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleBars, {
 						data: sizeChart,
@@ -20894,10 +28606,10 @@ function Page$8() {
 				className: "border-b border-border px-4 py-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "font-display text-xl",
-					children: "By producer"
+					children: "By Producer"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-xs text-muted-foreground",
-					children: "Fell-through deals are excluded, matching the old dashboard."
+					children: "Fell-through deals are excluded. Click a rep to see only their deals."
 				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "overflow-x-auto px-4 py-3",
@@ -20937,7 +28649,12 @@ function Page$8() {
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 										className: "py-2 pr-4",
-										children: p
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepLink, {
+											name: p,
+											onPick: setRepPanel,
+											className: "font-medium",
+											children: formatRep(p)
+										})
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 										className: "tabular py-2 pr-4",
@@ -21095,18 +28812,28 @@ function Page$8() {
 			className: "mt-4 overflow-hidden rounded-xl border border-border bg-card",
 			children: [rows.map((d) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DealRow, {
 				deal: d,
-				onOpen: () => setSelected(d.id)
+				onOpen: () => setSelected(d.id),
+				onRep: setRepPanel
 			}, d.id)), rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "px-4 py-8 text-sm text-muted-foreground",
 				children: view === "gto" ? "No deals waiting on Good to order. Reps mark step 1; confirmed Ordered deals leave this list." : view === "ordered" ? "No open deals confirmed as Ordered." : "No deals in this view."
 			}) : null]
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepDealsPanel, {
+			rep: repPanel,
+			deals: all,
+			onClose: () => setRepPanel(null),
+			onOpenDeal: (id) => {
+				setRepPanel(null);
+				setSelected(id);
+			}
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DealSheet, {
 			deal: selectedRow,
 			onClose: () => setSelected(null)
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleCreateDialog, {
-			title: "New deal",
+			title: "New Deal",
 			open: create,
 			onOpenChange: setCreate,
 			fields: [
@@ -21148,7 +28875,7 @@ function Page$8() {
 		})
 	] });
 }
-function DealRow({ deal: d, onOpen }) {
+function DealRow({ deal: d, onOpen, onRep }) {
 	const qc = useQueryClient();
 	const remove = useMutation({
 		mutationFn: () => archiveDeal({ data: { id: d.id } }),
@@ -21165,10 +28892,18 @@ function DealRow({ deal: d, onOpen }) {
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex items-center gap-2 border-b border-border px-3 py-2 last:border-b-0 hover:bg-muted/60 md:px-4",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-			type: "button",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			role: "button",
+			tabIndex: 0,
 			onClick: onOpen,
-			className: "grid min-w-0 flex-1 gap-1 py-1 text-left md:grid-cols-[1.4fr_7rem_7rem_8rem] md:items-center",
+			onKeyDown: (e) => {
+				if (e.target !== e.currentTarget) return;
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					onOpen();
+				}
+			},
+			className: "grid min-w-0 flex-1 cursor-pointer gap-1 py-1 text-left md:grid-cols-[1.4fr_7rem_7rem_8rem] md:items-center",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -21182,8 +28917,12 @@ function DealRow({ deal: d, onOpen }) {
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 						className: "mt-0.5 block text-xs text-muted-foreground",
 						children: [
-							d.producer ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepName, { name: d.producer }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, { show: true }),
-							" · ",
+							d.producer && !d.noRep ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepLink, {
+								name: d.producer,
+								onPick: onRep
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoRepFlag, { show: true }),
+							" ·",
+							" ",
 							d.equipment || "No equipment listed"
 						]
 					})
@@ -21320,7 +29059,7 @@ function InstallPlanner({ installs, recipes = [], myRep, catalog = [] }) {
 				className: "flex flex-wrap items-start justify-between gap-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "font-display text-xl leading-tight",
-					children: "Install planner"
+					children: "Install Planner"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-[11px] text-muted-foreground",
 					children: "One bar per project. Overlaps in the same week light up. Changing a date here updates the install date used on exports."
@@ -21527,7 +29266,7 @@ function esc(s) {
 }
 //#endregion
 //#region src/routes/_app/planner.tsx
-var Route$8 = createFileRoute("/_app/planner")({
+var Route$9 = createFileRoute("/_app/planner")({
 	codeSplitGroupings: [],
 	component: Page$7
 });
@@ -21584,12 +29323,12 @@ function Page$7() {
 }
 //#endregion
 //#region src/routes/_app/pms.tsx
-var Route$7 = createFileRoute("/_app/pms")({
+var Route$8 = createFileRoute("/_app/pms")({
 	validateSearch: parseOpenSearch,
 	component: Page$6
 });
 function Page$6() {
-	const { open } = Route$7.useSearch();
+	const { open } = Route$8.useSearch();
 	const qc = useQueryClient();
 	const pms = useQuery({
 		queryKey: ["pms"],
@@ -21645,7 +29384,7 @@ function Page$6() {
 			className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "Preventative maintenance"
+				children: "Preventative Maintenance"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
 				children: "Projected dates go amber inside 14 days and red once they slip. Need-a-date PMs sit at the top."
@@ -21677,7 +29416,7 @@ function Page$6() {
 				onClick: () => setView((v) => toggleChip(v, "flagged", "all"))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Need a date",
+				label: "Need A Date",
 				value: needDate,
 				tone: needDate ? "warn" : void 0,
 				hint: "Active PMs with no projected date",
@@ -21703,52 +29442,71 @@ function Page$6() {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mt-4 overflow-hidden rounded-xl border border-border bg-card",
-			children: [rows.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-				type: "button",
-				onClick: () => setSelected(p.id),
-				className: "desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.3fr_1fr_8rem_8rem_7rem] md:items-center",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "font-medium",
-							children: p.customer
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, {
-							on: p.aviKatz,
-							className: "ml-1 align-middle"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "mt-0.5 block text-xs text-muted-foreground",
-							children: p.equipment
-						})
-					] }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "flex flex-wrap gap-1",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagBadge, { flag: p.flag })
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: p.status }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "tabular text-sm text-muted-foreground",
-						children: formatShortDate(p.projected)
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechName, { name: p.technician })
-					})
-				]
-			}, p.id)), rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "px-4 py-8",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-sm text-muted-foreground",
-					children: q.trim() ? "Nothing matches this search." : "No PMs in this view."
-				}), !q.trim() && view === "active" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase md:grid",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Account" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Why it matters" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Status" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Projected" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tech" })
+					]
+				}),
+				rows.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
-					size: "sm",
-					className: "mt-3",
-					onClick: () => setCreate(true),
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), "New PM"]
-				}) : null]
-			}) : null]
+					onClick: () => setSelected(p.id),
+					className: "desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-medium",
+								children: p.customer
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AkBadge, {
+								on: p.aviKatz,
+								className: "ml-1 align-middle"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "mt-0.5 block text-xs text-muted-foreground",
+								children: p.equipment
+							})
+						] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "flex flex-wrap gap-1",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagBadge, { flag: p.flag })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: p.status }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "tabular text-sm text-muted-foreground",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "md:hidden",
+								children: "Projected "
+							}), formatShortDate(p.projected)]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "min-w-0 truncate text-sm",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-muted-foreground md:hidden",
+								children: "Tech "
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechName, { name: p.technician })]
+						})
+					]
+				}, p.id)),
+				rows.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "px-4 py-8",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm text-muted-foreground",
+						children: q.trim() ? "Nothing matches this search." : "No PMs in this view."
+					}), !q.trim() && view === "active" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						type: "button",
+						size: "sm",
+						className: "mt-3",
+						onClick: () => setCreate(true),
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), "New PM"]
+					}) : null]
+				}) : null
+			]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PmSheet, {
 			pm: selectedRow,
@@ -21892,7 +29650,7 @@ function RebuildBoard({ rows, canEdit, onOpen }) {
 							onOpen(r.id);
 						},
 						"data-testid": `rebuild-card-${r.id}`,
-						className: cn("desk-lift w-full select-none rounded-lg border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40", canEdit && "cursor-grab active:cursor-grabbing", r.health === "overdue" && "border-destructive/40", r.health === "at-risk" && "border-warning/40", r.health === "no-date" && "border-warning/30", dragId === r.id && "opacity-40"),
+						className: cn("desk-flat w-full select-none rounded-lg border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40", canEdit && "cursor-grab active:cursor-grabbing", r.health === "overdue" && "border-destructive/40", r.health === "at-risk" && "border-warning/40", r.health === "no-date" && "border-warning/30", dragId === r.id && "opacity-40"),
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-start gap-1.5",
@@ -22038,7 +29796,7 @@ function RebuildPlanner({ rows, canEdit, onOpen }) {
 				className: "flex flex-wrap items-end justify-between gap-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 					className: "font-display text-xl",
-					children: "Rebuild timeline"
+					children: "Rebuild Timeline"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 					className: "text-xs text-muted-foreground",
 					children: [
@@ -22646,7 +30404,7 @@ function RebuildSheet({ row, canEdit, onClose }) {
 		open: !!reuseNotice,
 		onOpenChange: (v) => !v && setReuseNotice(null),
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Serial already assigned" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Serial Already Assigned" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, { children: reuseNotice }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "mt-4 flex gap-2",
@@ -22668,7 +30426,7 @@ function RebuildSheet({ row, canEdit, onClose }) {
 }
 //#endregion
 //#region src/routes/_app/rebuilds.tsx
-var Route$6 = createFileRoute("/_app/rebuilds")({
+var Route$7 = createFileRoute("/_app/rebuilds")({
 	validateSearch: parseOpenSearch,
 	component: Page$5
 });
@@ -22699,16 +30457,16 @@ var FILTERS = [
 	}
 ];
 function Page$5() {
-	const { open } = Route$6.useSearch();
+	const { open } = Route$7.useSearch();
 	const qc = useQueryClient();
 	const data = useQuery({
 		queryKey: ["rebuilds"],
 		queryFn: () => listRebuilds()
 	});
-	const { filterMine, matchMine, board, role } = useMyView();
+	const { filterMine, matchMine, role } = useMyView();
 	const [q, setQ] = (0, import_react.useState)("");
 	const [chip, setChip] = (0, import_react.useState)("all");
-	const [view, setView] = (0, import_react.useState)(board || role !== "sales" ? "board" : "timeline");
+	const [view, setView] = (0, import_react.useState)(role !== "sales" ? "board" : "timeline");
 	const [selected, setSelected] = useOpenRecord(open);
 	const [create, setCreate] = (0, import_react.useState)(false);
 	const rows = data.data?.rows ?? [];
@@ -22750,20 +30508,16 @@ function Page$5() {
 			className: "flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "In-house rebuilds"
+				children: "In-House Rebuilds"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
 				children: "Shop projects, not field tickets. One owner, planned vs actual, a current blocker, and aging you cannot ignore."
 			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex flex-wrap gap-2",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MyViewBar, {}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExportButton, { defaultType: "rebuilds" }),
-					canEdit ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						onClick: () => setCreate(true),
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), "New rebuild"]
-					}) : null
-				]
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExportButton, { defaultType: "rebuilds" }), canEdit ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+					onClick: () => setCreate(true),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), "New rebuild"]
+				}) : null]
 			})]
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(StatRow, { children: [
@@ -22776,7 +30530,7 @@ function Page$5() {
 				onClick: () => setChip((c) => toggleChip(c, "overdue", "all"))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "At risk",
+				label: "At Risk",
 				value: atRisk,
 				tone: atRisk ? "warn" : "ok",
 				hint: "Waiting, or target within 3 days",
@@ -22791,7 +30545,7 @@ function Page$5() {
 				onClick: () => setChip((c) => toggleChip(c, "waiting", "all"))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "No date",
+				label: "No Date",
 				value: noDate,
 				tone: noDate ? "warn" : "ok",
 				hint: "In progress / waiting / testing with no target",
@@ -22903,7 +30657,7 @@ function CreateRebuildDialog({ open, onOpenChange, onCreated }) {
 		onOpenChange,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
 			className: "max-h-[90vh] overflow-y-auto sm:max-w-lg",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "New rebuild" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "New Rebuild" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 				className: "mt-4 space-y-3",
 				onSubmit: (e) => {
 					e.preventDefault();
@@ -23027,12 +30781,12 @@ function CreateRebuildDialog({ open, onOpenChange, onCreated }) {
 }
 //#endregion
 //#region src/routes/_app/recipes.tsx
-var Route$5 = createFileRoute("/_app/recipes")({
+var Route$6 = createFileRoute("/_app/recipes")({
 	validateSearch: parseOpenSearch,
 	component: Page$4
 });
 function Page$4() {
-	const { open } = Route$5.useSearch();
+	const { open } = Route$6.useSearch();
 	const qc = useQueryClient();
 	const recs = useQuery({
 		queryKey: ["recipes"],
@@ -23057,10 +30811,11 @@ function Page$4() {
 	const house = (0, import_react.useMemo)(() => rows.filter((r) => !r.customer), [rows]);
 	const customerRecipes = (0, import_react.useMemo)(() => rows.filter((r) => !!r.customer), [rows]);
 	function houseLabel(r) {
-		return house.filter((x) => x.equipmentModel === r.equipmentModel).length > 1 ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
+		if (r.name) return `${r.equipmentModel} · ${r.name}`;
+		return house.filter((x) => x.equipmentModel === r.equipmentModel && !x.name).length > 1 ? `${r.equipmentModel} · ${r.id}` : r.equipmentModel;
 	}
 	function customerLabel(r) {
-		return `${r.customer} · ${r.equipmentModel}`;
+		return `${r.customer} · ${r.equipmentModel}${r.name ? ` · ${r.name}` : ""}`;
 	}
 	(0, import_react.useEffect)(() => {
 		if (!current) return;
@@ -23676,7 +31431,7 @@ function CorrigoImportButton({ onImported }) {
 					if (document.querySelector("[data-testid=add-customer-form]")) e.preventDefault();
 				},
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Corrigo import" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Corrigo Import" }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogDescription, { children: [fileName ? `${fileName} · ` : "", "Corrigo is the source of truth for service. Confirm before anything is written. Notes and sales fields stay as they are. Unchecked rows are skipped."] }),
 					preview ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PreviewBody, {
 						preview,
@@ -24202,7 +31957,7 @@ function CorrigoReviewList({ items, onDismiss }) {
 			className: "flex flex-wrap items-start justify-between gap-2",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 				className: "text-xs tracking-wide text-muted-foreground uppercase",
-				children: "For review"
+				children: "For Review"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 text-sm text-muted-foreground",
 				children: "Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999."
@@ -24399,9 +32154,9 @@ function JobsPage({ kind, title, lede, initialOpen }) {
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "mt-4 overflow-x-auto rounded-xl border border-border bg-card",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "min-w-0 md:min-w-[52rem]",
+				className: "min-w-0",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "hidden grid-cols-[1.4fr_1fr_6rem_7rem_7rem_7rem_6rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase md:grid",
+					className: "hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase xl:grid",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Account" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Why it matters" }),
@@ -24448,7 +32203,7 @@ function JobRow({ job, onOpen }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 		type: "button",
 		onClick: onOpen,
-		className: "desk-lift grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[1.4fr_1fr_6rem_7rem_7rem_7rem_6rem] md:items-center md:gap-3",
+		className: "desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] xl:items-center xl:gap-3",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
@@ -24484,42 +32239,51 @@ function JobRow({ job, onOpen }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FlagBadge, { flag: job.flag }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "md:hidden",
+						className: "xl:hidden",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UrgencyBadge, { urgency: job.urgency })
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "hidden md:block",
+				className: "hidden xl:block",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UrgencyBadge, { urgency: job.urgency })
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: job.status }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 				className: "tabular text-sm text-muted-foreground",
-				children: formatShortDate(job.received)
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "xl:hidden",
+					children: "Received "
+				}), formatShortDate(job.received)]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 				className: "tabular text-sm text-muted-foreground",
-				children: formatShortDate(job.scheduled)
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "xl:hidden",
+					children: "Scheduled "
+				}), formatShortDate(job.scheduled)]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-sm",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechName, { name: job.technician })
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				className: "min-w-0 truncate text-sm",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-muted-foreground xl:hidden",
+					children: "Tech "
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TechName, { name: job.technician })]
 			})
 		]
 	}) });
 }
 //#endregion
 //#region src/routes/_app/service.tsx
-var Route$4 = createFileRoute("/_app/service")({
+var Route$5 = createFileRoute("/_app/service")({
 	validateSearch: parseOpenSearch,
 	component: Page$3
 });
 function Page$3() {
-	const { open } = Route$4.useSearch();
+	const { open } = Route$5.useSearch();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JobsPage, {
 		kind: "service",
-		title: "Service tracker",
+		title: "Service Tracker",
 		lede: "Field calls on a 48-hour clock. Active work stays on top; completed history is one toggle away.",
 		initialOpen: open
 	});
@@ -24575,7 +32339,7 @@ function RosterEditor() {
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 				className: "font-display text-lg font-medium tracking-tight",
-				children: "Service tech roster"
+				children: "Service Tech Roster"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 				className: "mt-0.5 text-xs text-muted-foreground",
@@ -24723,7 +32487,7 @@ function RepsEditor() {
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 				className: "font-display text-xl",
-				children: "Sales reps"
+				children: "Sales Reps"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 text-sm text-muted-foreground",
@@ -24788,7 +32552,7 @@ function RepsEditor() {
 }
 //#endregion
 //#region src/routes/_app/settings.tsx
-var Route$3 = createFileRoute("/_app/settings")({ component: Page$2 });
+var Route$4 = createFileRoute("/_app/settings")({ component: Page$2 });
 function Page$2() {
 	const { prefs, update } = usePrefs();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
@@ -24800,6 +32564,7 @@ function Page$2() {
 	})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "mt-6 grid gap-4 lg:max-w-2xl",
 		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PasswordSection, {}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RosterEditor, {}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RepsEditor, {}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
@@ -24828,7 +32593,7 @@ function Page$2() {
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Preview, { appearance: prefs.appearance })]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
-				title: "Text size",
+				title: "Text Size",
 				hint: "Large type helps when you’re standing back from a tablet or reading serials.",
 				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Type, { className: "size-4" }),
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Segmented, {
@@ -24892,7 +32657,7 @@ function Page$2() {
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
-				title: "When I sign in",
+				title: "When I Sign In",
 				hint: "Resume opens the last page you were on — useful if you bounce between service and installs.",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Segmented, {
 					value: prefs.resumeLast ? "resume" : "clock",
@@ -24990,7 +32755,7 @@ function Preview({ appearance }) {
 			className: cn("flex items-center justify-between px-3 py-2 text-xs", dark ? "bg-black/20" : "bg-muted/80"),
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 				className: "font-display text-sm",
-				children: "Katz Desk"
+				children: "Preview"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 				className: dark ? "text-cream/60" : "text-muted-foreground",
 				children: [prefs.text === "large" ? "Large type" : "Default type", prefs.density === "compact" ? " · Compact" : ""]
@@ -25011,14 +32776,108 @@ function Preview({ appearance }) {
 		})]
 	});
 }
+function PasswordSection() {
+	const [current, setCurrent] = (0, import_react.useState)("");
+	const [next, setNext] = (0, import_react.useState)("");
+	const [again, setAgain] = (0, import_react.useState)("");
+	const [busy, setBusy] = (0, import_react.useState)(false);
+	const [error, setError] = (0, import_react.useState)(null);
+	async function onSubmit(e) {
+		e.preventDefault();
+		const problem = passwordProblem(next);
+		if (problem) return setError(problem);
+		if (next !== again) return setError("The two new passwords don't match.");
+		setBusy(true);
+		setError(null);
+		try {
+			const res = await authClient.changePassword({
+				currentPassword: current,
+				newPassword: next,
+				revokeOtherSessions: true
+			});
+			if (res.error) {
+				const msg = res.error.message ?? "";
+				throw new Error(/invalid|incorrect|password/i.test(msg) && !/credential/i.test(msg) ? "Your current password isn't right." : /credential|not found/i.test(msg) ? "You sign in with Google or X, so there's no password to change. Ask an admin for a reset link to add one." : msg || "Could not change the password");
+			}
+			setCurrent("");
+			setNext("");
+			setAgain("");
+			toast.success("Password changed. Other devices were signed out.");
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Could not change the password");
+		} finally {
+			setBusy(false);
+		}
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
+		title: "Password",
+		hint: "Change the password you use with your username. Forgot it? An admin can send you a reset link from Access.",
+		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "size-4" }),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+			onSubmit,
+			className: "grid gap-3 sm:grid-cols-3",
+			"data-testid": "change-password",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+					htmlFor: "pw-current",
+					children: "Current"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					id: "pw-current",
+					type: "password",
+					autoComplete: "current-password",
+					required: true,
+					className: "mt-1",
+					value: current,
+					onChange: (e) => setCurrent(e.target.value)
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+					htmlFor: "pw-new",
+					children: "New"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					id: "pw-new",
+					type: "password",
+					autoComplete: "new-password",
+					required: true,
+					className: "mt-1",
+					value: next,
+					onChange: (e) => setNext(e.target.value)
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+					htmlFor: "pw-again",
+					children: "New, again"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					id: "pw-again",
+					type: "password",
+					autoComplete: "new-password",
+					required: true,
+					className: "mt-1",
+					value: again,
+					onChange: (e) => setAgain(e.target.value)
+				})] }),
+				error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-sm text-destructive sm:col-span-3",
+					children: error
+				}) : null,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "sm:col-span-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "submit",
+						disabled: busy,
+						children: "Change password"
+					})
+				})
+			]
+		})
+	});
+}
 //#endregion
 //#region src/routes/_app/tlc.tsx
-var Route$2 = createFileRoute("/_app/tlc")({
+var Route$3 = createFileRoute("/_app/tlc")({
 	validateSearch: parseOpenSearch,
 	component: Page$1
 });
 function Page$1() {
-	const { open } = Route$2.useSearch();
+	const { open } = Route$3.useSearch();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JobsPage, {
 		kind: "tlc",
 		title: "TLC + Factor",
@@ -25027,13 +32886,158 @@ function Page$1() {
 	});
 }
 //#endregion
+//#region src/components/desk/multi-move.tsx
+function unitName(u) {
+	return `${u.model}${u.serial ? ` · ${u.serial}` : ""}`;
+}
+/**
+* Move one or more units to a rack section or location. When the section already has units,
+* tick any number of them under Replace/Swap — they go back to where the moved units came from.
+*/
+function MovePanel({ movers, barn, onDone, onCancel, className }) {
+	const qc = useQueryClient();
+	const [draft, setDraft] = (0, import_react.useState)(emptyPlaceDraft());
+	const [swap, setSwap] = (0, import_react.useState)([]);
+	const [block, setBlock] = (0, import_react.useState)(null);
+	const [pending, setPending] = (0, import_react.useState)(false);
+	const moverIds = new Set(movers.map((m) => m.id));
+	const mates = (draft.site === "barn-front" || draft.site === "barn-back") && draft.pallet && draft.level ? barn.filter((u) => !moverIds.has(u.id) && !u.stockHold && u.site === draft.site && (u.pallet ?? "").toUpperCase() === draft.pallet.toUpperCase() && Number(u.level) === Number(draft.level)) : [];
+	const onRack = movers.filter((m) => m.site === "barn-back" || m.site === "barn-front");
+	const homes = [...new Set(onRack.map((m) => `${m.site}|${m.pallet}|${m.level}`))];
+	const swapHome = onRack[0] ? `${onRack[0].pallet}-L${onRack[0].level}${homes.length > 1 ? " and the other sections they came from" : ""}` : null;
+	const allPicked = mates.length > 0 && mates.every((m) => swap.includes(m.id));
+	function toggle(id) {
+		setSwap((cur) => cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]);
+	}
+	async function confirm() {
+		const err = placeDraftError(draft);
+		if (err) {
+			toast.error(err);
+			return;
+		}
+		setPending(true);
+		setBlock(null);
+		try {
+			const res = await setAssetsPlace({ data: {
+				ids: movers.map((m) => m.id),
+				site: draft.site,
+				pallet: draft.pallet || null,
+				level: draft.level ? Number(draft.level) : null,
+				otherLabel: draft.otherLabel || null,
+				swapIds: swap
+			} });
+			const where = res.place ? ` to ${res.place}` : "";
+			const parts = [`Moved ${res.moved} ${res.moved === 1 ? "unit" : "units"}${where}`, res.swapped ? `${res.swapped} swapped back` : null].filter(Boolean);
+			if (res.failed.length) {
+				toast.error(`${parts.join(" · ")}. ${res.failed.length} didn't move: ${res.failed.join("; ")}`);
+				if (res.failed.some((f) => /full/i.test(f))) setBlock(res.failed.join(" "));
+			} else toast.success(parts.join(" · "));
+			qc.invalidateQueries({ queryKey: ["assets"] });
+			qc.invalidateQueries({ queryKey: ["notifications"] });
+			if (!res.failed.length) onDone();
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : "Could not move";
+			if (/full/i.test(msg)) setBlock(msg);
+			toast.error(msg);
+		} finally {
+			setPending(false);
+		}
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: cn("grid gap-3", className),
+		"data-testid": "warehouse-move",
+		children: [
+			movers.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				className: "text-sm font-medium",
+				children: [
+					"Moving ",
+					movers.length,
+					" units: ",
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "font-normal text-muted-foreground",
+						children: movers.map(unitName).join(", ")
+					})
+				]
+			}) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex flex-wrap items-end gap-2",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlacePicker, {
+					value: draft,
+					onChange: (next) => {
+						setDraft(next);
+						setSwap([]);
+						setBlock(null);
+					}
+				})
+			}),
+			mates.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
+				className: "grid gap-1.5",
+				"data-testid": "swap-list",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("legend", {
+						className: "flex w-full flex-wrap items-baseline justify-between gap-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Replace/Swap — Tick Any Units Already Here" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							className: "normal-case text-primary underline-offset-2 hover:underline",
+							onClick: () => setSwap(allPicked ? [] : mates.map((m) => m.id)),
+							children: allPicked ? "Clear" : `Select all ${mates.length}`
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex flex-wrap gap-1.5",
+						children: mates.map((u) => {
+							const on = swap.includes(u.id);
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								role: "checkbox",
+								"aria-checked": on,
+								"data-testid": u.serial ? `swap-pick-${u.serial}` : void 0,
+								onClick: () => toggle(u.id),
+								className: cn("inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm", on ? "border-primary bg-primary/15 text-foreground" : "border-border bg-card text-muted-foreground"),
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: cn("grid size-4 place-items-center rounded-sm border", on ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50"),
+									children: on ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "size-3" }) : null
+								}), unitName(u)]
+							}, u.id);
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-muted-foreground",
+						children: swap.length === 0 ? "Nothing ticked: the moved units go in beside them." : swapHome ? `${swap.length} ticked ${swap.length === 1 ? "unit goes" : "units go"} to ${swapHome}.` : "Ticked units need a rack to go back to — the moved units aren't on a rack."
+					})
+				]
+			}) : null,
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-wrap gap-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "sm",
+					disabled: pending || !!placeDraftError(draft),
+					onClick: () => void confirm(),
+					children: pending ? "Moving…" : swap.length ? `Confirm swap (${movers.length} ↔ ${swap.length})` : movers.length > 1 ? `Move ${movers.length} units` : "Confirm"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					type: "button",
+					size: "sm",
+					variant: "outline",
+					onClick: onCancel,
+					children: "Cancel"
+				})]
+			}),
+			block ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-sm text-destructive",
+				children: block
+			}) : null
+		]
+	});
+}
+//#endregion
 //#region src/routes/_app/warehouse.tsx
-var Route$1 = createFileRoute("/_app/warehouse")({
+var Route$2 = createFileRoute("/_app/warehouse")({
 	validateSearch: parseOpenSearch,
 	component: Page
 });
 function Page() {
-	const { open } = Route$1.useSearch();
+	const { open } = Route$2.useSearch();
 	const qc = useQueryClient();
 	const data = useQuery({
 		queryKey: ["assets"],
@@ -25049,28 +33053,53 @@ function Page() {
 	const [slot, setSlot] = (0, import_react.useState)(null);
 	const [selected, setSelected] = useOpenRecord(open);
 	const [movingId, setMovingId] = (0, import_react.useState)(null);
-	const [moveDraft, setMoveDraft] = (0, import_react.useState)(emptyPlaceDraft());
+	const [picked, setPicked] = (0, import_react.useState)([]);
+	const [bulkOpen, setBulkOpen] = (0, import_react.useState)(false);
+	function togglePick(id) {
+		setPicked((cur) => cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]);
+	}
 	const [create, setCreate] = (0, import_react.useState)(false);
 	const [sort, setSort] = useDeskSort("warehouse", "alpha-asc");
 	const [bubble, setBubble] = (0, import_react.useState)(null);
 	const [bayLetter, setBayLetter] = (0, import_react.useState)(null);
+	const focusUnit = (0, import_react.useMemo)(() => open != null ? (data.data ?? []).find((a) => a.id === open) ?? null : null, [open, data.data]);
+	(0, import_react.useEffect)(() => {
+		if (!focusUnit) return;
+		if ((focusUnit.site === "barn-back" || focusUnit.site === "barn-front") && focusUnit.pallet && focusUnit.level) {
+			setRack(focusUnit.site);
+			setSlot({
+				rack: focusUnit.site,
+				pallet: focusUnit.pallet,
+				level: focusUnit.level
+			});
+			setBubble(null);
+			setBayLetter(null);
+		}
+	}, [focusUnit]);
 	const all = data.data ?? [];
 	const barn = (0, import_react.useMemo)(() => all.filter((a) => a.status === "ready" && (a.site === "barn-back" || a.site === "barn-front")), [all]);
 	const onRack = barn.filter((a) => a.site === rack);
 	const pallets = rack === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
-	const fill = (0, import_react.useMemo)(() => {
+	const bySlot = (0, import_react.useMemo)(() => {
 		const map = /* @__PURE__ */ new Map();
 		for (const a of onRack) {
 			if (!a.pallet || !a.level) continue;
-			const k = `${a.pallet}-${a.level}`;
-			map.set(k, (map.get(k) ?? 0) + 1);
+			const k = `${String(a.pallet).toUpperCase()}-${a.level}`;
+			const list = map.get(k) ?? [];
+			list.push(a);
+			map.set(k, list);
 		}
+		for (const list of map.values()) list.sort((a, b) => (a.lineNo ?? 99) - (b.lineNo ?? 99) || a.id - b.id);
 		return map;
 	}, [onRack]);
 	const slotUnits = (0, import_react.useMemo)(() => {
-		if (!slot) return [];
-		return onRack.filter((a) => a.pallet === slot.pallet && a.level === slot.level).sort((a, b) => (a.lineNo ?? 99) - (b.lineNo ?? 99));
-	}, [onRack, slot]);
+		if (!slot || slot.rack !== rack) return [];
+		return bySlot.get(`${slot.pallet}-${slot.level}`) ?? [];
+	}, [
+		bySlot,
+		slot,
+		rack
+	]);
 	const needle = q.trim().toLowerCase();
 	const stranded = (0, import_react.useMemo)(() => barn.filter((a) => a.needsBay), [barn]);
 	const list = (0, import_react.useMemo)(() => {
@@ -25112,6 +33141,7 @@ function Page() {
 		stranded,
 		rack
 	]);
+	const pagedList = useShowMore(list, `${rack}|${slot?.pallet}-${slot?.level}|${needle}|${sort}|${bubble}|${bayLetter}`, 40);
 	const equipReady = barn.filter((a) => a.kind === "equip").reduce((n, a) => n + a.qty, 0);
 	const equipLines = barn.filter((a) => a.kind === "equip").length;
 	const dispQty = barn.filter((a) => a.kind === "dispenser").reduce((n, a) => n + a.qty, 0);
@@ -25137,7 +33167,7 @@ function Page() {
 			className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 				className: "font-display text-3xl font-medium tracking-tight",
-				children: "Barn warehouse"
+				children: "Barn Warehouse"
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 max-w-xl text-sm text-muted-foreground",
 				children: "Ready-to-deploy units at HQ. Slot ID is pallet + level — A-L3 is pallet A, third shelf. Pull a unit for an install or a service account and it leaves this board. Bays run A through P."
@@ -25151,7 +33181,6 @@ function Page() {
 				label: "Ready",
 				value: equipReady,
 				hint: `${models} models · ${Math.max(0, BARN_EQUIP_CAPACITY - equipLines)} open slots`,
-				breakdown: readyByModel,
 				selected: bubble === "ready" && !bayLetter,
 				onClick: () => {
 					setBayLetter(null);
@@ -25182,7 +33211,7 @@ function Page() {
 				}
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Missing serial",
+				label: "Missing Serial",
 				value: missing,
 				tone: missing ? "warn" : void 0,
 				hint: `${owned} customer-owned · ${catering} catering`,
@@ -25194,7 +33223,7 @@ function Page() {
 				}
 			}),
 			stranded.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-				label: "Needs bay",
+				label: "Needs Bay",
 				value: stranded.length,
 				tone: "warn",
 				hint: "Letter Q or after P — assign A–P",
@@ -25209,7 +33238,7 @@ function Page() {
 		readyByModel.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
 			className: "mt-5",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartCard, {
-				title: "Ready by model",
+				title: "Ready By Model",
 				lede: "The Ready bubble, unpacked — qty on the rack, not line count.",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleBars, {
 					data: readyByModel.slice(0, 10).map((r) => ({
@@ -25284,7 +33313,7 @@ function Page() {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mr-1 inline-block size-2 rounded-sm bg-catering" }), "Catering A–D"] }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mr-1 inline-block size-2 rounded-sm bg-dispense" }), "Dispenser E–F"] }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-					"Number in a cell is lines used of 12. Capacity this rack: ",
+					"Number in a cell is how many units share that section, up to 12. Add stays available when a section already has units. Capacity this rack: ",
 					capacity,
 					"."
 				] })
@@ -25325,11 +33354,13 @@ function Page() {
 						}) : null
 					]
 				}), pallets.map((p) => {
-					const n = fill.get(`${p}-${level}`) ?? 0;
+					const units = bySlot.get(`${p}-${level}`) ?? [];
+					const n = units.length;
 					const bay = bayFor(rack, p);
 					const active = slot?.pallet === p && slot.level === level && slot.rack === rack;
+					const names = units.map((u) => `${u.model}${u.serial ? ` ${u.serial}` : ""}`).join(", ");
 					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-						className: "p-0.5",
+						className: "p-0.5 align-top",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							type: "button",
 							onClick: () => setSlot(active ? null : {
@@ -25337,10 +33368,22 @@ function Page() {
 								pallet: p,
 								level
 							}),
-							className: cn("flex h-9 w-full min-w-8 items-center justify-center rounded-sm text-xs tabular transition-colors", n === 0 && "bg-muted text-muted-foreground", n > 0 && n < 12 && "bg-primary/15 text-foreground", n >= 12 && "bg-primary text-primary-foreground", bay === "catering" && n === 0 && "bg-catering/15", bay === "dispenser" && n === 0 && "bg-dispense/15", active && "ring-2 ring-ring"),
-							"data-testid": n === 0 ? `slot-${p}-L${level}` : void 0,
-							"aria-label": n === 0 && canStock ? `Add to ${p}-L${level}` : `${p}-L${level} ${n} of 12`,
-							children: n === 0 ? canStock ? "Add" : "·" : n
+							className: cn("flex w-full min-w-14 flex-col items-center justify-center gap-0.5 rounded-sm px-0.5 py-1 text-[10px] leading-tight transition-colors", n === 0 ? "h-9" : "min-h-16", n === 0 && "bg-muted text-muted-foreground", n > 0 && n < 12 && "bg-primary/15 text-foreground", n >= 12 && "bg-primary text-primary-foreground", bay === "catering" && n === 0 && "bg-catering/15", bay === "dispenser" && n === 0 && "bg-dispense/15", active && "ring-2 ring-ring"),
+							"data-testid": `slot-${p}-L${level}`,
+							title: n === 0 ? void 0 : names,
+							"aria-label": n === 0 ? canStock ? `Add to ${p}-L${level}` : `${p}-L${level} empty` : `${p}-L${level}, ${n} ${n === 1 ? "unit" : "units"}: ${names}.${canStock ? " Add another." : ""}`,
+							children: n === 0 ? canStock ? "Add" : "·" : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-xs font-medium tabular-nums",
+									children: n
+								}),
+								units.slice(0, 2).map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "max-w-full truncate",
+									children: u.serial ?? u.model
+								}, u.id)),
+								n > 2 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["+", n - 2] }) : null,
+								canStock ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Add" }) : null
+							] })
 						})
 					}, p);
 				})] }, level)) })]
@@ -25348,10 +33391,14 @@ function Page() {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mt-4 flex items-baseline justify-between gap-3",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 				className: "font-display text-xl",
-				children: needle ? "Search" : slot ? slotId(slot.pallet, slot.level) : rack === "barn-back" ? "Back rack units" : "Front rack units"
-			}), slot ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				children: needle ? "Search" : slot ? `${slot.rack === "barn-front" ? "Front" : "Back"} · ${slotId(slot.pallet, slot.level)}` : rack === "barn-back" ? "Back Rack Units" : "Front Rack Units"
+			}), slot && !needle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-sm text-muted-foreground",
+				"data-testid": "section-count",
+				children: slotUnits.length === 0 ? "Empty section" : `${slotUnits.length} ${slotUnits.length === 1 ? "unit" : "units"} in this section`
+			}) : null] }), slot ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				type: "button",
 				className: "text-xs text-muted-foreground hover:text-foreground",
 				onClick: () => setSlot(null),
@@ -25360,68 +33407,83 @@ function Page() {
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "mt-3 overflow-hidden rounded-xl border border-border bg-card",
+			"data-testid": slot && !needle ? "section-units" : void 0,
 			children: [
-				list.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				pagedList.visible.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "border-b border-border last:border-b-0",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "px-4 py-3",
 						"data-testid": a.serial ? `rack-row-${a.serial}` : void 0,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex flex-wrap items-start gap-3",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									onClick: () => setSelected(a.id),
-									className: "w-28 shrink-0 text-left font-mono text-xs",
-									children: a.slotLabel
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									type: "button",
-									onClick: () => setSelected(a.id),
-									className: "min-w-0 flex-1 text-left",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-medium",
-										children: a.model
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "mt-0.5 block text-xs text-muted-foreground",
-										children: [
-											a.serial ?? "No serial",
-											a.qty > 1 ? ` · qty ${a.qty}` : "",
-											a.customerOwned ? ` · ${a.customerOwned}` : ""
-										]
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "flex w-full flex-col gap-1 sm:w-auto sm:min-w-36",
-									"data-testid": "shop-col",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "flex flex-wrap gap-1",
-										children: [
-											a.needsBay ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Needs bay" }) : null,
-											a.reviewStatus === "pending" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Pending review" }) : null,
-											a.shopTest === "tested" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Tested" }) : null,
-											a.shopTest === "needs-test" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Needs test" }) : null,
-											a.missingSerial ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Serial missing" }) : null,
-											a.customerOwned ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Customer-owned" }) : null,
-											a.kind === "dispenser" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Accessory" }) : null
-										]
-									}), a.shopTest === "tested" && (a.shopTestBy || a.shopTestNote) ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "text-[11px] text-muted-foreground",
-										children: [
-											a.shopTestBy ? `Tested by ${a.shopTestBy}` : "Tested",
-											a.shopTestAt ? ` · ${a.shopTestAt.slice(0, 16).replace("T", " ")}` : "",
-											a.shopTestNote ? ` · ${a.shopTestNote}` : ""
-										]
-									}) : a.shopTestNote ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-[11px] text-muted-foreground",
-										children: a.shopTestNote
-									}) : null]
-								})
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "mt-2 flex flex-wrap items-center gap-2",
-							children: [
-								canStock ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex flex-wrap items-start gap-3",
+								children: [
+									canStock && !a.stockHold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "checkbox",
+										className: "mt-0.5 size-5 shrink-0 accent-primary",
+										"aria-label": `Select ${a.model}${a.serial ? ` ${a.serial}` : ""} to move`,
+										"data-testid": a.serial ? `pick-${a.serial}` : void 0,
+										checked: picked.includes(a.id),
+										onChange: () => togglePick(a.id)
+									}) : null,
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: () => setSelected(a.id),
+										className: "w-36 shrink-0 text-left font-mono text-xs",
+										children: a.pallet && a.level && (a.site === "barn-back" || a.site === "barn-front") ? unitPlaceLabel({
+											site: a.site,
+											pallet: a.pallet,
+											level: a.level,
+											status: a.status
+										}) : a.slotLabel
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => setSelected(a.id),
+										className: "min-w-0 flex-1 text-left",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "font-medium",
+											children: a.model
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "mt-0.5 block text-xs text-muted-foreground",
+											children: [
+												a.serial ?? "No serial",
+												a.qty > 1 ? ` · qty ${a.qty}` : "",
+												a.customerOwned ? ` · ${a.customerOwned}` : ""
+											]
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "flex w-full flex-col gap-1 sm:w-auto sm:min-w-36",
+										"data-testid": "shop-col",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "flex flex-wrap gap-1",
+											children: [
+												a.needsBay ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Needs bay" }) : null,
+												a.reviewStatus === "pending" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Pending review" }) : null,
+												a.shopTest === "tested" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Tested" }) : null,
+												a.shopTest === "needs-test" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Needs test" }) : null,
+												a.missingSerial ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Serial missing" }) : null,
+												a.customerOwned ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Customer-owned" }) : null,
+												a.kind === "dispenser" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: "Accessory" }) : null
+											]
+										}), a.shopTest === "tested" && (a.shopTestBy || a.shopTestNote) ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "text-[11px] text-muted-foreground",
+											children: [
+												a.shopTestBy ? `Tested by ${a.shopTestBy}` : "Tested",
+												a.shopTestAt ? ` · ${a.shopTestAt.slice(0, 16).replace("T", " ")}` : "",
+												a.shopTestNote ? ` · ${a.shopTestNote}` : ""
+											]
+										}) : a.shopTestNote ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-[11px] text-muted-foreground",
+											children: a.shopTestNote
+										}) : null]
+									})
+								]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "mt-2 flex flex-wrap items-center gap-2",
+								children: [canStock ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 									type: "button",
 									size: "sm",
 									variant: a.shopTest === "needs-test" ? "default" : "outline",
@@ -25450,77 +33512,92 @@ function Page() {
 								})] }) : a.shopTest === "tested" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 									className: "text-xs text-muted-foreground",
 									children: ["Tested", a.shopTestBy ? ` · ${a.shopTestBy}` : ""]
-								}) : null,
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-sm text-muted-foreground",
-									children: a.pallet && a.level ? `Barn · ${slotId(a.pallet, a.level)}` : a.slotLabel
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								}) : null, canStock && !a.stockHold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 									type: "button",
 									size: "sm",
 									variant: movingId === a.id ? "default" : "outline",
 									"data-testid": a.serial ? `move-${a.serial}` : void 0,
 									onClick: () => {
-										setMoveDraft(emptyPlaceDraft());
 										setMovingId((cur) => cur === a.id ? null : a.id);
 									},
 									children: "Move"
-								})
-							]
-						})]
-					}), movingId === a.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex flex-wrap items-end gap-2 px-4 pb-3",
-						"data-testid": "warehouse-move",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlacePicker, {
-								value: moveDraft,
-								onChange: setMoveDraft
+								}) : null]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							canStock || a.stockHold ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "mt-2",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StockActions, {
+									asset: a,
+									canStock,
+									isAdmin: !!me.data?.isAdmin
+								})
+							}) : null
+						]
+					}), movingId === a.id && canStock ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MovePanel, {
+						className: "px-4 pb-3",
+						movers: [a],
+						barn,
+						onDone: () => setMovingId(null),
+						onCancel: () => setMovingId(null)
+					}) : null]
+				}, a.id)),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShowMoreButton, {
+					remaining: pagedList.remaining,
+					onClick: pagedList.showMore,
+					label: "units"
+				}),
+				canStock && picked.length ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "fixed inset-x-3 bottom-3 z-30 max-h-[70dvh] overflow-y-auto rounded-xl border border-primary/40 bg-card p-3 shadow-[var(--shadow-lift)] md:right-8 md:left-[17rem]",
+					"data-testid": "bulk-move-bar",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex flex-wrap items-center justify-between gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "text-sm font-medium",
+							children: [
+								picked.length,
+								" ",
+								picked.length === 1 ? "unit" : "units",
+								" selected"
+							]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 								type: "button",
 								size: "sm",
-								disabled: !!placeDraftError(moveDraft),
-								onClick: async () => {
-									const err = placeDraftError(moveDraft);
-									if (err) {
-										toast.error(err);
-										return;
-									}
-									try {
-										const place = await setAssetPlace({ data: {
-											id: a.id,
-											site: moveDraft.site,
-											pallet: moveDraft.pallet || null,
-											level: moveDraft.level ? Number(moveDraft.level) : null,
-											otherLabel: moveDraft.otherLabel || null
-										} });
-										toast.success(place.place ? `Now at ${place.place}` : "Moved");
-										setMovingId(null);
-										qc.invalidateQueries({ queryKey: ["assets"] });
-									} catch (e) {
-										toast.error(e instanceof Error ? e.message : "Could not move");
-									}
-								},
-								children: "Confirm"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								onClick: () => setBulkOpen((v) => !v),
+								"aria-expanded": bulkOpen,
+								children: bulkOpen ? "Hide" : "Move together"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 								type: "button",
 								size: "sm",
 								variant: "outline",
-								onClick: () => setMovingId(null),
-								children: "Cancel"
-							})
-						]
+								onClick: () => {
+									setPicked([]);
+									setBulkOpen(false);
+								},
+								children: "Clear"
+							})]
+						})]
+					}), bulkOpen ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MovePanel, {
+						className: "mt-3",
+						movers: barn.filter((u) => picked.includes(u.id)),
+						barn,
+						onDone: () => {
+							setPicked([]);
+							setBulkOpen(false);
+						},
+						onCancel: () => setBulkOpen(false)
 					}) : null]
-				}, a.id)),
+				}) : null,
 				canStock && slot ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotAdd, {
 					slot,
+					occupied: slotUnits.length > 0,
+					occupants: barn,
 					onPlaced: (id) => {
 						qc.invalidateQueries({ queryKey: ["assets"] });
 						qc.invalidateQueries({ queryKey: ["notifications"] });
 						if (id) setSelected(id);
 					}
-				}) : null,
+				}, `${slot.rack}-${slot.pallet}-${slot.level}`) : null,
 				slot && slotUnits.length === 0 && !needle && !canStock ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "px-4 py-8 text-sm text-muted-foreground",
 					children: "This slot is empty."
@@ -25548,24 +33625,91 @@ function Page() {
 		})
 	] });
 }
-function SlotAdd({ slot, onPlaced }) {
+function SlotAdd({ slot, occupied, occupants, onPlaced }) {
 	const [model, setModel] = (0, import_react.useState)("");
 	const [serial, setSerial] = (0, import_react.useState)("");
 	const [electrical, setElectrical] = (0, import_react.useState)("");
 	const [pending, setPending] = (0, import_react.useState)(false);
 	const [confirm, setConfirm] = (0, import_react.useState)(null);
-	const label = slotId(slot.pallet, slot.level);
+	const [swapPick, setSwapPick] = (0, import_react.useState)([]);
+	const [block, setBlock] = (0, import_react.useState)(null);
+	const [draft, setDraft] = (0, import_react.useState)({
+		site: slot.rack,
+		pallet: slot.pallet,
+		level: String(slot.level),
+		otherLabel: ""
+	});
+	const rackSlot = draft.site === "barn-front" || draft.site === "barn-back";
+	const label = rackSlot && draft.pallet && draft.level ? unitPlaceLabel({
+		site: draft.site,
+		pallet: draft.pallet,
+		level: Number(draft.level),
+		status: "ready"
+	}) : slotId(slot.pallet, slot.level);
+	const mates = confirm && rackSlot && draft.pallet && draft.level ? occupants.filter((u) => u.id !== confirm.id && !u.stockHold && u.site === draft.site && (u.pallet ?? "").toUpperCase() === draft.pallet.toUpperCase() && Number(u.level) === Number(draft.level)) : [];
 	async function save(force) {
 		if (!model.trim()) {
 			toast.error("Pick a model");
 			return;
 		}
+		const err = placeDraftError(draft);
+		if (err) {
+			toast.error(err);
+			return;
+		}
 		setPending(true);
 		try {
+			if (!rackSlot) {
+				if (serial.trim()) {
+					const place = await setUnitPlace({ data: {
+						serial: serial.trim(),
+						model: model.trim(),
+						site: draft.site,
+						otherLabel: draft.otherLabel || null
+					} });
+					toast.success(place.place ? `Now at ${place.place}` : "Moved");
+				} else {
+					await addUnitToLocation({ data: {
+						site: draft.site,
+						model: model.trim(),
+						serial: null,
+						electrical: electrical.trim() || null,
+						otherLabel: draft.otherLabel || null
+					} });
+					toast.success("Added");
+				}
+				setModel("");
+				setSerial("");
+				setElectrical("");
+				setConfirm(null);
+				setSwapPick([]);
+				setBlock(null);
+				onPlaced();
+				return;
+			}
+			if (confirm && swapPick.length) {
+				const res = await setAssetsPlace({ data: {
+					ids: [confirm.id],
+					site: draft.site,
+					pallet: draft.pallet,
+					level: Number(draft.level),
+					swapIds: swapPick
+				} });
+				if (res.failed.length) throw new Error(res.failed.join("; "));
+				toast.success(`Swapped · now at ${res.place ?? label} · ${res.swapped} sent back`);
+				setModel("");
+				setSerial("");
+				setElectrical("");
+				setConfirm(null);
+				setSwapPick([]);
+				setBlock(null);
+				onPlaced(confirm.id);
+				return;
+			}
 			const res = await addToRackSlot({ data: {
-				site: slot.rack,
-				pallet: slot.pallet,
-				level: slot.level,
+				site: draft.site,
+				pallet: draft.pallet,
+				level: Number(draft.level),
 				model: model.trim(),
 				serial: serial.trim() || null,
 				electrical: electrical.trim() || null,
@@ -25576,6 +33720,7 @@ function SlotAdd({ slot, onPlaced }) {
 					id: res.id,
 					place: res.currentPlace ?? "another place"
 				});
+				setSwapPick([]);
 				return;
 			}
 			toast.success(res.moved ? `Moved into ${label}${res.pendingReview ? " · Needs review" : ""}` : `Added to ${label}${res.pendingReview ? " · Needs review" : ""}`);
@@ -25583,9 +33728,13 @@ function SlotAdd({ slot, onPlaced }) {
 			setSerial("");
 			setElectrical("");
 			setConfirm(null);
+			setSwapPick([]);
+			setBlock(null);
 			onPlaced(res.id);
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : "Could not add");
+			const msg = e instanceof Error ? e.message : "Could not add";
+			if (/is full/i.test(msg)) setBlock(msg);
+			toast.error(msg);
 		} finally {
 			setPending(false);
 		}
@@ -25594,13 +33743,26 @@ function SlotAdd({ slot, onPlaced }) {
 		className: "border-b border-border px-4 py-4",
 		"data-testid": "slot-add",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "text-sm font-medium",
-				children: ["Add to ", label]
+				children: occupied ? "Add another" : "Add to this section"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-1 text-xs text-muted-foreground",
-				children: "Model and serial go in this slot. One serial stays one record. A serial already on the desk moves here after you confirm."
+				children: "Pick the rack, then the bay, then the level. Adding puts another serial in that section. One serial stays one record. Replace/Swap only if you choose it."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "mt-3",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PlacePicker, {
+					value: draft,
+					onChange: (next) => {
+						setDraft(next);
+						setBlock(null);
+						setConfirm(null);
+						setSwapPick([]);
+					},
+					testId: "slot-place"
+				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "mt-3 grid gap-3 sm:grid-cols-3",
@@ -25640,25 +33802,66 @@ function SlotAdd({ slot, onPlaced }) {
 					serial || "That serial",
 					" is already at ",
 					confirm.place,
-					". Move it to ",
+					". Move it into ",
 					label,
-					"?"
+					"? It is added beside the units already there unless you choose Replace/Swap."
 				]
+			}) : null,
+			confirm && mates.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
+				className: "mt-3 grid gap-1.5",
+				"data-testid": "slot-swap",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
+						className: "text-[11px] font-medium tracking-wide text-muted-foreground uppercase",
+						children: "Replace/Swap — Tick Any Units Already Here"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex flex-wrap gap-1.5",
+						children: mates.map((u) => {
+							const on = swapPick.includes(u.id);
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+								className: cn("inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm", on ? "border-primary bg-primary/15" : "border-border bg-card text-muted-foreground"),
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "checkbox",
+										className: "size-4 accent-primary",
+										checked: on,
+										onChange: () => setSwapPick((cur) => cur.includes(u.id) ? cur.filter((x) => x !== u.id) : [...cur, u.id])
+									}),
+									u.model,
+									u.serial ? ` · ${u.serial}` : ""
+								]
+							}, u.id);
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-muted-foreground",
+						children: swapPick.length ? `${swapPick.length} ticked ${swapPick.length === 1 ? "unit goes" : "units go"} to ${confirm.place}.` : "Nothing ticked: it goes in beside them."
+					})
+				]
+			}) : null,
+			block ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 text-sm text-destructive",
+				children: block
 			}) : null,
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "mt-3 flex gap-2",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 					type: "button",
 					size: "sm",
-					disabled: pending,
+					disabled: pending || !!placeDraftError(draft),
 					"data-testid": "slot-save",
 					onClick: () => void save(!!confirm),
-					children: confirm ? "Confirm move" : pending ? "Saving…" : "Add"
-				}), confirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					children: confirm ? swapPick.length ? `Confirm swap (${swapPick.length})` : "Confirm move" : pending ? "Saving…" : occupied ? "Add another" : "Add"
+				}), confirm || block ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 					type: "button",
 					size: "sm",
 					variant: "outline",
-					onClick: () => setConfirm(null),
+					onClick: () => {
+						setConfirm(null);
+						setSwapPick([]);
+						setBlock(null);
+					},
 					children: "Cancel"
 				}) : null]
 			})
@@ -25666,7 +33869,7 @@ function SlotAdd({ slot, onPlaced }) {
 	});
 }
 function AddDialog({ open, onOpenChange, rack, slot, onCreated }) {
-	const pallets = (slot?.rack ?? rack) === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
+	const pallets = rack === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
 	const [pending, setPending] = (0, import_react.useState)(false);
 	const [model, setModel] = (0, import_react.useState)("");
 	const [owned, setOwned] = (0, import_react.useState)("");
@@ -25679,7 +33882,7 @@ function AddDialog({ open, onOpenChange, rack, slot, onCreated }) {
 				setOwned("");
 			}
 		},
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Add to the barn" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, { children: "Add To The Barn" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 			className: "mt-4 space-y-3",
 			onSubmit: async (e) => {
 				e.preventDefault();
@@ -25750,13 +33953,13 @@ function AddDialog({ open, onOpenChange, rack, slot, onCreated }) {
 							defaultValue: slot?.rack ?? rack,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 								value: "barn-back",
-								children: "Back"
+								children: "Back rack"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 								value: "barn-front",
-								children: "Front"
+								children: "Front rack"
 							})]
 						})] }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Pallet" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, { children: "Bay" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
 							name: "pallet",
 							className: "mt-1",
 							defaultValue: slot?.pallet ?? pallets[0],
@@ -25782,7 +33985,7 @@ function AddDialog({ open, onOpenChange, rack, slot, onCreated }) {
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-xs text-muted-foreground",
-					children: "Puts the unit on the next open line of that slot (1–12)."
+					children: "One serial stays one record. Adding to a section that already has units puts this one beside them."
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex justify-end",
@@ -25798,116 +34001,156 @@ function AddDialog({ open, onOpenChange, rack, slot, onCreated }) {
 }
 //#endregion
 //#region src/routes/api/auth/$.ts
-var Route = createFileRoute("/api/auth/$")({ server: { handlers: {
+var Route$1 = createFileRoute("/api/auth/$")({ server: { handlers: {
 	GET: ({ request }) => auth.handler(request),
 	POST: ({ request }) => auth.handler(request)
 } } });
 //#endregion
+//#region src/routes/api/library-file/$token.ts
+/**
+* Opens a Library file (manual or parts diagram) for anyone who has the link — that is what lets
+* staff email or text it to a customer. The token is long and random; there is no listing.
+*/
+var Route = createFileRoute("/api/library-file/$token")({ server: { handlers: { GET: async ({ params }) => {
+	const token = String(params.token ?? "");
+	if (!/^[a-f0-9]{48}$/.test(token)) return new Response("Not found", { status: 404 });
+	const sql = await getSql();
+	const file = (await sql.query("select id, name, mime, size from library_files where token = $1 and complete", [token]))[0];
+	if (!file) return new Response("This file is no longer in The Library.", { status: 404 });
+	let seq = 0;
+	const body = new ReadableStream({ async pull(controller) {
+		const part = await sql.query("select encode(data, 'base64') as b64 from library_file_chunks where file_id = $1 and seq = $2", [file.id, seq]);
+		if (!part[0]) return controller.close();
+		controller.enqueue(new Uint8Array(Buffer.from(part[0].b64.replace(/\s/g, ""), "base64")));
+		seq += 1;
+	} });
+	const ascii = file.name.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "'");
+	return new Response(body, { headers: {
+		"Content-Type": file.mime,
+		"Content-Length": String(file.size),
+		"Content-Disposition": `${opensInline(file.mime) ? "inline" : "attachment"}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(file.name)}`,
+		"X-Content-Type-Options": "nosniff",
+		"Cache-Control": "private, max-age=300",
+		"X-Robots-Tag": "noindex"
+	} });
+} } } });
+//#endregion
 //#region src/routeTree.gen.ts
-var AppRoute = Route$19.update({
+var AppRoute = Route$21.update({
 	id: "/_app",
-	getParentRoute: () => Route$20
+	getParentRoute: () => Route$22
 });
-var LoginRoute = Route$18.update({
+var LoginRoute = Route$20.update({
 	id: "/login",
 	path: "/login",
-	getParentRoute: () => Route$20
+	getParentRoute: () => Route$22
 });
-var AppIndexRoute = Route$17.update({
+var AppIndexRoute = Route$19.update({
 	id: "/",
 	path: "/",
 	getParentRoute: () => AppRoute
 });
-var AppAccessRoute = Route$16.update({
+var AppAccessRoute = Route$18.update({
 	id: "/access",
 	path: "/access",
 	getParentRoute: () => AppRoute
 });
-var AppCustomersRoute = Route$15.update({
+var AppCustomersRoute = Route$17.update({
 	id: "/customers",
 	path: "/customers",
 	getParentRoute: () => AppRoute
 });
-var AppHandoffRoute = Route$14.update({
+var AppHandoffRoute = Route$16.update({
 	id: "/handoff",
 	path: "/handoff",
 	getParentRoute: () => AppRoute
 });
-var AppInstallsRoute = Route$13.update({
+var AppInstallsRoute = Route$15.update({
 	id: "/installs",
 	path: "/installs",
 	getParentRoute: () => AppRoute
 });
-var AppLocationsRoute = Route$12.update({
+var AppLibraryRoute = Route$14.update({
+	id: "/library",
+	path: "/library",
+	getParentRoute: () => AppRoute
+});
+var AppLocationsRoute = Route$13.update({
 	id: "/locations",
 	path: "/locations",
 	getParentRoute: () => AppRoute
 });
-var AppModulesRoute = Route$11.update({
+var AppModulesRoute = Route$12.update({
 	id: "/modules",
 	path: "/modules",
 	getParentRoute: () => AppRoute
 });
-var AppNetworkRoute = Route$10.update({
+var AppNetworkRoute = Route$11.update({
 	id: "/network",
 	path: "/network",
 	getParentRoute: () => AppRoute
 });
-var AppPipelineRoute = Route$9.update({
+var AppPipelineRoute = Route$10.update({
 	id: "/pipeline",
 	path: "/pipeline",
 	getParentRoute: () => AppRoute
 });
-var AppPlannerRoute = Route$8.update({
+var AppPlannerRoute = Route$9.update({
 	id: "/planner",
 	path: "/planner",
 	getParentRoute: () => AppRoute
 });
-var AppPmsRoute = Route$7.update({
+var AppPmsRoute = Route$8.update({
 	id: "/pms",
 	path: "/pms",
 	getParentRoute: () => AppRoute
 });
-var AppRebuildsRoute = Route$6.update({
+var AppRebuildsRoute = Route$7.update({
 	id: "/rebuilds",
 	path: "/rebuilds",
 	getParentRoute: () => AppRoute
 });
-var AppRecipesRoute = Route$5.update({
+var AppRecipesRoute = Route$6.update({
 	id: "/recipes",
 	path: "/recipes",
 	getParentRoute: () => AppRoute
 });
-var AppServiceRoute = Route$4.update({
+var AppServiceRoute = Route$5.update({
 	id: "/service",
 	path: "/service",
 	getParentRoute: () => AppRoute
 });
-var AppSettingsRoute = Route$3.update({
+var AppSettingsRoute = Route$4.update({
 	id: "/settings",
 	path: "/settings",
 	getParentRoute: () => AppRoute
 });
-var AppTlcRoute = Route$2.update({
+var AppTlcRoute = Route$3.update({
 	id: "/tlc",
 	path: "/tlc",
 	getParentRoute: () => AppRoute
 });
-var AppWarehouseRoute = Route$1.update({
+var AppWarehouseRoute = Route$2.update({
 	id: "/warehouse",
 	path: "/warehouse",
 	getParentRoute: () => AppRoute
 });
-var ApiAuthSplatRoute = Route.update({
+var ApiAuthSplatRoute = Route$1.update({
 	id: "/api/auth/$",
 	path: "/api/auth/$",
-	getParentRoute: () => Route$20
+	getParentRoute: () => Route$22
+});
+var ApiLibraryFileTokenRoute = Route.update({
+	id: "/api/library-file/$token",
+	path: "/api/library-file/$token",
+	getParentRoute: () => Route$22
 });
 var AppRouteChildren = {
 	AppAccessRoute,
 	AppCustomersRoute,
 	AppHandoffRoute,
 	AppInstallsRoute,
+	AppLibraryRoute,
 	AppLocationsRoute,
 	AppModulesRoute,
 	AppNetworkRoute,
@@ -25925,9 +34168,10 @@ var AppRouteChildren = {
 var rootRouteChildren = {
 	AppRoute: AppRoute._addFileChildren(AppRouteChildren),
 	LoginRoute,
-	ApiAuthSplatRoute
+	ApiAuthSplatRoute,
+	ApiLibraryFileTokenRoute
 };
-var routeTree = Route$20._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$22._addFileChildren(rootRouteChildren)._addFileTypes();
 //#endregion
 //#region src/router.tsx
 function getRouter() {

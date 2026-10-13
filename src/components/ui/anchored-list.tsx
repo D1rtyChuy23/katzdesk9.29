@@ -93,15 +93,27 @@ export function AnchoredList({
   useLayoutEffect(() => {
     const node = anchor.current;
     if (!node) return;
+    let last = "";
     function place() {
       const el = anchor.current;
       if (!el) return;
-      setBox(measure(el));
+      const next = measure(el);
+      const key = `${next.top}|${next.left}|${next.width}|${next.maxHeight}`;
+      if (key === last) return;
+      last = key;
+      setBox(next);
     }
     place();
     window.addEventListener("resize", place);
     window.addEventListener("scroll", place, true);
+    // The search box also moves without a scroll or resize: picking a machine adds a chip above it,
+    // a row grows, a sheet finishes sliding in. Follow it each frame while the list is open.
+    let frame = requestAnimationFrame(function follow() {
+      place();
+      frame = requestAnimationFrame(follow);
+    });
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", place);
       window.removeEventListener("scroll", place, true);
     };

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, ChevronLeft, ImagePlus, Images, Trash2 } from "lucide-react";
+import { Camera, ChevronLeft, ImagePlus, Images, Trash2, Download } from "lucide-react";
+import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
   addInspectionPhoto,
@@ -10,6 +11,8 @@ import {
   saveInspectionCoreHole,
   saveInspectionItem,
   saveInspectionMeta,
+  saveInspectionUnitNote,
+  setInspectionVisit,
   type InspectionItem,
   type InspectionMachine,
   type InspectionPhoto,
@@ -21,12 +24,14 @@ import {
   INSPECTION_ITEM_STATUSES,
   inspectorChoices,
   itemSaveError,
+  showChecklist,
   showCoreHoleQuestion,
   spacePassError,
   type CoreHoleAnswer,
   type InspectionOverall,
 } from "@/lib/ops/pre-inspection";
 import { coreHoleForModels } from "@/lib/ops/spec-library";
+import { CORE_HOLE_NOTE } from "@/lib/ops/spec-copy";
 import { listReps } from "@/lib/ops/reps";
 import { listTechs } from "@/lib/ops/roster";
 import { cn } from "@/lib/utils";
@@ -43,12 +48,22 @@ export function InspectionBadge({
   passed,
   total,
   className,
+  pre,
 }: {
   overall: InspectionOverall | null | undefined;
   passed?: number;
   total?: number;
   className?: string;
+  /** Existing equipment on the account: already pre-inspected. */
+  pre?: boolean;
 }) {
+  if (pre) {
+    return (
+      <Badge variant="success" size="tight" className={cn("ring-2 ring-primary/40", className)} data-testid="inspection-badge" data-pre="true">
+        Pre-Inspected
+      </Badge>
+    );
+  }
   const label = overall ?? "Not started";
   const count = total && total > 0 ? ` ${passed ?? 0}/${total}` : "";
   const variant =
@@ -98,6 +113,24 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
     queryFn: () => getInstallInspection({ data: { installId } }),
   });
   const [equipmentId, setEquipmentId] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  // Set by Next machine: once the next unit renders, bring the section top into view and focus its first field.
+  const [jump, setJump] = useState(0);
+  useEffect(() => {
+    if (!jump) return;
+    const el = sectionRef.current;
+    if (!el) return;
+    el.scrollIntoView({ block: "start" });
+    // First required field: the first check's status, else the New / Existing choice, else the first machine.
+    const first = [
+      "[data-testid=machine-checklist] [data-testid^=inspect-choice-]",
+      "[data-testid=visit-choice] [role=radio]",
+      "[data-testid^=inspect-machine-]",
+    ]
+      .map((sel) => el.querySelector<HTMLElement>(sel))
+      .find(Boolean);
+    first?.focus({ preventScroll: true });
+  }, [jump]);
 
   function refresh(view?: InspectionView) {
     if (view) qc.setQueryData(["inspection", installId], view);
@@ -123,7 +156,7 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
   const machine = view.machines.find((m) => m.equipmentId === equipmentId) ?? null;
 
   return (
-    <section data-testid="pre-inspection" className="relative">
+    <section ref={sectionRef} data-testid="pre-inspection" className="relative scroll-mt-2">
       <p
         className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3 text-base font-medium"
         data-testid="machine-progress"
@@ -139,6 +172,7 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
             const i = view.machines.findIndex((m) => m.equipmentId === machine.equipmentId);
             const next = view.machines[i + 1];
             setEquipmentId(next ? next.equipmentId : null);
+            setJump((n) => n + 1);
           }}
           onSaved={refresh}
         />
@@ -177,7 +211,12 @@ function MachineList({
                 type="button"
                 data-testid={`inspect-machine-${m.equipmentId}`}
                 onClick={() => onOpen(m.equipmentId)}
-                className="flex min-h-[4.5rem] w-full items-center gap-3 px-4 py-4 text-left active:bg-muted"
+                data-pre={m.preInspected ? "true" : "false"}
+                className={cn(
+                  "desk-flat flex min-h-[4.5rem] w-full items-center gap-3 px-4 py-4 text-left active:bg-muted",
+                  // Existing equipment: already pre-inspected, shown highlighted.
+                  m.preInspected && "border-l-4 border-primary bg-primary/10",
+                )}
               >
                 {m.thumb ? (
                   <img src={m.thumb} alt="" className="size-12 shrink-0 rounded-md object-cover" />
@@ -189,10 +228,10 @@ function MachineList({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-base font-medium">{m.name}</span>
                   <span className="block truncate text-xs text-muted-foreground">
-                    {[m.serial ? `SN ${m.serial}` : "No serial", m.electrical || "Electrical missing"].join(" · ")}
+                    {[m.preInspected ? "Existing equipment" : null, m.serial ? `SN ${m.serial}` : "No serial", m.electrical || "Electrical missing"].filter(Boolean).join(" · ")}
                   </span>
                 </span>
-                <InspectionBadge overall={m.overall} />
+                <InspectionBadge overall={m.overall} pre={m.preInspected} />
               </button>
             </li>
           ))}
@@ -395,6 +434,9 @@ function MachineDetail({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not copy"),
   });
+  // Bumped when results are copied in, so each line shows what was copied instead of what was typed before.
+  const [rev, setRev] = useState(0);
+  const form = showChecklist(machine.visitKind, machine.reqsSame);
 
   return (
     <div data-testid="machine-detail">
@@ -409,9 +451,18 @@ function MachineDetail({
             {[machine.serial ? `SN ${machine.serial}` : "No serial", machine.electrical || "Electrical missing"].join(" · ")}
           </p>
         </div>
-        <InspectionBadge overall={machine.overall} />
+        <InspectionBadge overall={machine.overall} pre={machine.preInspected} />
       </div>
-      {sources.length ? (
+      <VisitChoice
+        view={view}
+        machine={machine}
+        onSaved={onSaved}
+        onCopied={(next) => {
+          onSaved(next);
+          setRev((n) => n + 1);
+        }}
+      />
+      {form && sources.length ? (
         <div className="flex flex-wrap gap-2 px-4 pt-3">
           {sources.map((m) => (
             <Button
@@ -427,11 +478,12 @@ function MachineDetail({
           ))}
         </div>
       ) : null}
-      <div className="space-y-3 px-3 py-3 pb-24">
+      {form ? (
+      <div className="space-y-3 px-3 py-3 pb-24" data-testid="machine-checklist">
         {machine.items.map((item) =>
           item.category === "space" ? (
             <SpaceSection
-              key={`${machine.equipmentId}-space`}
+              key={`${machine.equipmentId}-space-${rev}`}
               view={view}
               machine={machine}
               item={item}
@@ -439,7 +491,7 @@ function MachineDetail({
             />
           ) : (
             <ItemRow
-              key={`${machine.equipmentId}-${item.category}`}
+              key={`${machine.equipmentId}-${item.category}-${rev}`}
               installId={view.installId}
               equipmentId={machine.equipmentId}
               item={item}
@@ -448,6 +500,9 @@ function MachineDetail({
           ),
         )}
       </div>
+      ) : (
+        <div className="pb-24" />
+      )}
       <div className="sticky bottom-0 z-10 flex gap-2 border-t border-border bg-card px-3 py-3">
         <Button type="button" className="h-12 flex-1 text-base" onClick={() => toast.success("Saved")}>
           Save
@@ -456,6 +511,92 @@ function MachineDetail({
           Next machine
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * New install, or existing equipment. "Existing" covers a unit that is already on the account and a unit that
+ * replaces one that was: either way the site is already set up, so the unit is Pre-Inspected and nothing is re-shot.
+ */
+function VisitChoice({
+  view,
+  machine,
+  onSaved,
+}: {
+  view: InspectionView;
+  machine: InspectionMachine;
+  onSaved: (v: InspectionView) => void;
+  onCopied?: (v: InspectionView) => void;
+}) {
+  const ids = { installId: view.installId, equipmentId: machine.equipmentId };
+  const existing = machine.preInspected;
+  const [note, setNote] = useState(machine.note ?? "");
+  const saveNote = useMutation({
+    mutationFn: (text: string) => saveInspectionUnitNote({ data: { ...ids, note: text.trim() || null } }),
+    onSuccess: (next) => {
+      toast.success("Note saved");
+      onSaved(next);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the note"),
+  });
+  const kind = useMutation({
+    mutationFn: (v: { kind: "new" | "existing" }) => setInspectionVisit({ data: { ...ids, ...v } }),
+    onSuccess: (next) => onSaved(next),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  const busy = kind.isPending;
+  return (
+    <div className="px-3 pt-3" data-testid="visit-choice">
+      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="What is this unit?">
+        <Button
+          type="button"
+          role="radio"
+          aria-checked={!existing}
+          variant={!existing ? "default" : "outline"}
+          className="h-12 text-sm"
+          disabled={busy}
+          onClick={() => existing && kind.mutate({ kind: "new" })}
+          data-testid="visit-new"
+        >
+          New Install
+        </Button>
+        <Button
+          type="button"
+          role="radio"
+          aria-checked={existing}
+          variant={existing ? "default" : "outline"}
+          className="h-12 text-sm whitespace-normal"
+          disabled={busy}
+          onClick={() => !existing && kind.mutate({ kind: "existing" })}
+          data-testid="visit-existing"
+        >
+          Existing Or Replacing Equipment
+        </Button>
+      </div>
+      {existing ? (
+        <div className="mt-3 rounded-lg border-l-4 border-primary bg-primary/10 px-3 py-3" data-testid="pre-inspected-panel">
+          <p className="font-medium">Pre-Inspected</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            This unit is existing equipment on the account, or replaces a unit that was. {machine.items.map((i) => i.label).join(", ").replace(/, ([^,]*)$/, " and $1")} {machine.items.length === 1 ? "is" : "are"} not re-shot. Pick New Install if it is being installed fresh.
+          </p>
+          <Label htmlFor={`unit-note-${machine.equipmentId}`} className="mt-3 block">
+            Notes (Optional)
+          </Label>
+          <Textarea
+            id={`unit-note-${machine.equipmentId}`}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Anything worth knowing about this unit"
+            className="mt-1 min-h-20 text-base"
+            maxLength={2000}
+            data-testid="unit-note"
+          />
+          <Button type="button" variant="outline" className="mt-2" disabled={saveNote.isPending || note.trim() === (machine.note ?? "")} onClick={() => saveNote.mutate(note)} data-testid="unit-note-save">
+            Save Note
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -492,7 +633,7 @@ function SpaceSection({
           onSaved={onSaved}
         />
       ) : null}
-      {show && machine.coreNeeded === "yes" ? <CoreDiameterHint model={machine.model || machine.name} /> : null}
+      {show && machine.coreNeeded === "yes" ? <CoreDiameterHint model={machine.coreModel || machine.model || machine.name} existing={!!machine.coreModel} /> : null}
       {show && machine.coreNeeded === "yes" ? (
         <ItemRow
           key={`${machine.equipmentId}-core`}
@@ -507,7 +648,7 @@ function SpaceSection({
 }
 
 /** The hole size to core, from the Library spec sheet (espresso default 3"). Blank when nothing is stored. */
-function CoreDiameterHint({ model }: { model: string }) {
+function CoreDiameterHint({ model, existing }: { model: string; existing?: boolean }) {
   const q = useQuery({
     queryKey: ["core-hole", model],
     queryFn: () => coreHoleForModels({ data: { models: [model] } }),
@@ -526,6 +667,7 @@ function CoreDiameterHint({ model }: { model: string }) {
       data-testid="core-diameter-hint"
     >
       {missing ? "Counter core hole: diameter not set — add it on the spec sheet in The Library" : hint!.label}
+      {existing ? <span className="block text-xs font-normal text-muted-foreground" data-testid="core-diameter-existing">Hole already in the counter, from the unit being replaced ({model})</span> : null}
       {hint?.sheet ? <span className="block text-xs font-normal text-muted-foreground">From the {hint.sheet} spec sheet</span> : null}
       {hint?.source === "espresso" ? <span className="block text-xs font-normal text-muted-foreground">Espresso default</span> : null}
     </p>
@@ -563,6 +705,9 @@ function CoreHoleQuestion({
   return (
     <div className="rounded-lg border border-border p-3" data-testid="core-hole-question">
       <p className="font-medium">{CORE_HOLE_QUESTION}</p>
+      <p className="mt-1 text-xs text-muted-foreground" data-testid="core-hole-note">
+        {CORE_HOLE_NOTE}
+      </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Button
           type="button"
@@ -660,14 +805,22 @@ function ItemRow({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove photo"),
   });
 
-  async function upload(file: File | undefined) {
-    if (!file) return;
+  async function upload(files: File[]) {
+    const images = files.filter((f) => f.type.startsWith("image/"));
+    if (!images.length) {
+      if (files.length) toast.error("Drop an image file (JPG, PNG, HEIC…).");
+      return;
+    }
     setUploading(true);
     try {
-      const dataUrl = await fileToDataUrl(file);
-      const view = await addInspectionPhoto({
-        data: { installId, equipmentId, category: item.category, dataUrl, caption: caption || null },
-      });
+      let view: InspectionView | null = null;
+      for (const file of images) {
+        const dataUrl = await fileToDataUrl(file);
+        view = await addInspectionPhoto({
+          data: { installId, equipmentId, category: item.category, dataUrl, caption: caption || null },
+        });
+      }
+      if (!view) return;
       setCaption("");
       onSaved(view);
       const updated = view.machines
@@ -725,7 +878,7 @@ function ItemRow({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           onBlur={() => persist(status, notes)}
-          placeholder={status === "N/A" ? "Why N/A — e.g. no drain on this grinder" : "Notes"}
+          placeholder="Notes (optional)"
           className="min-h-24 text-base"
         />
       </div>
@@ -734,7 +887,7 @@ function ItemRow({
         category={item.category}
         label={item.label}
         uploading={uploading}
-        onFile={(file) => void upload(file)}
+        onFiles={(files) => void upload(files)}
       />
       {item.photos.length ? (
         <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -749,6 +902,13 @@ function ItemRow({
   );
 }
 
+/** "water-photo-12.jpg" — the utility it was taken for, so saved photos sort themselves. */
+function photoFileName(photo: InspectionPhoto): string {
+  const ext = /^data:image\/(png|webp|gif)/.exec(photo.dataUrl)?.[1] ?? "jpg";
+  const what = (photo.category || "inspection").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `${what}-photo-${photo.id}.${ext}`;
+}
+
 function PhotoTile({
   photo,
   onRemove,
@@ -760,12 +920,29 @@ function PhotoTile({
 }) {
   return (
     <li className="overflow-hidden rounded-md border border-border">
-      <img src={photo.dataUrl} alt={photo.caption || photo.category} className="h-24 w-full object-cover" />
+      <ZoomableImage
+        src={photo.dataUrl}
+        alt={photo.caption || `${photo.category} photo`}
+        label={photo.caption || undefined}
+        imgClassName="h-24 w-full object-cover"
+        testId="inspect-photo-zoom"
+        download={photoFileName(photo)}
+      />
       <div className="flex items-start justify-between gap-1 px-2 py-1.5">
         <p className="min-w-0 text-[11px] text-muted-foreground">
           <span className="block truncate text-foreground">{photo.caption || "Photo"}</span>
           {[photo.uploadedBy, formatPingTime(photo.uploadedAt)].filter(Boolean).join(" · ")}
         </p>
+        <a
+          href={photo.dataUrl}
+          download={photoFileName(photo)}
+          className="grid size-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          aria-label="Download photo"
+          title="Download"
+          data-testid="inspect-photo-download"
+        >
+          <Download className="size-3.5" />
+        </a>
         <button type="button" className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Remove photo" disabled={pending} onClick={onRemove}>
           <Trash2 className="size-3.5" />
         </button>
@@ -782,14 +959,15 @@ function AddPhotoButton({
   category,
   label,
   uploading,
-  onFile,
+  onFiles,
 }: {
   category: string;
   label: string;
   uploading: boolean;
-  onFile: (file: File | undefined) => void;
+  onFiles: (files: File[]) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [over, setOver] = useState(false);
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -816,12 +994,37 @@ function AddPhotoButton({
   }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFile(e.target.files?.[0]);
+    onFiles(Array.from(e.target.files ?? []));
     e.target.value = "";
   };
+  const hasFiles = (e: React.DragEvent) => Array.from(e.dataTransfer.types).includes("Files");
 
   return (
-    <div ref={boxRef} className="relative mt-3">
+    <div
+      ref={boxRef}
+      className={cn("relative mt-3 rounded-md", over && "ring-2 ring-primary ring-offset-2 ring-offset-card")}
+      data-testid={`inspect-drop-${category}`}
+      onDragEnter={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        setOver(true);
+      }}
+      onDragOver={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+        if (!over) setOver(true);
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver(false);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        if (uploading) return;
+        onFiles(Array.from(e.dataTransfer.files ?? []));
+      }}
+    >
       <button
         type="button"
         disabled={uploading}
@@ -832,8 +1035,9 @@ function AddPhotoButton({
         className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-base font-medium text-primary-foreground disabled:opacity-60"
       >
         <ImagePlus className="size-5" />
-        {uploading ? "Uploading…" : "Add photo"}
+        {uploading ? "Uploading…" : over ? `Drop to add to ${label}` : "Add photo"}
       </button>
+      <p className="mt-1 hidden text-center text-[11px] text-muted-foreground sm:block">or drag a photo from your computer onto this button</p>
       {open ? (
         <div
           role="menu"
@@ -885,6 +1089,7 @@ function AddPhotoButton({
         tabIndex={-1}
         aria-hidden
         data-testid={`inspect-library-${category}`}
+        multiple
         onChange={onChange}
       />
     </div>

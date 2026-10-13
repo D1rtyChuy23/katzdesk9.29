@@ -11,7 +11,7 @@ import { parseMachinesJson } from "@/lib/ops/machines";
 import { SETTING_FIELDS, settingsFrom } from "@/lib/ops/recipe-fields";
 import { loadTechs } from "@/lib/ops/roster";
 import { sameTech } from "@/lib/ops/tech-match";
-import { isAviKatz, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
+import { accountNumberFor, isAviKatz, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
 import { HEALTH_LABEL } from "@/lib/ops/rebuild-model";
 import { loadRebuilds, sortRebuildsForExport } from "@/lib/ops/rebuilds";
 import type { Recipe } from "@/lib/ops/types";
@@ -208,6 +208,11 @@ function techCell(name: string | null | undefined, inactive: Set<string>): strin
   return n;
 }
 
+/** "Ryan Gloria + Charles Foster" when a ticket has a secondary tech. */
+function techPair(primary: string | null | undefined, secondary: string | null | undefined, inactive: Set<string>): string {
+  return [techCell(primary, inactive), techCell(secondary, inactive)].filter(Boolean).join(" + ");
+}
+
 async function inactiveNames(sql: Awaited<ReturnType<typeof getSql>>): Promise<Set<string>> {
   const techs = await loadTechs(sql);
   return new Set(techs.filter((t) => !t.active).map((t) => t.name.toLowerCase()));
@@ -348,6 +353,7 @@ async function buildPending(
     customer: string | null;
     status: string;
     technician: string | null;
+    technician2: string | null;
     completed_at: string | null;
     issue: string | null;
     work_done: string | null;
@@ -355,7 +361,7 @@ async function buildPending(
     scheduled: string | null;
     done: boolean;
   }>(
-    `select wo, customer, status, technician, completed_at, issue, work_done, received, scheduled, done
+    `select wo, customer, status, technician, technician2, completed_at, issue, work_done, received, scheduled, done
        from service_jobs
       where kind = 'service' and duplicate_of is null
       order by customer, wo`,
@@ -366,7 +372,7 @@ async function buildPending(
     if (j.status === "Cancelled" || j.status === "Completed") continue;
     const date = j.completed_at || j.scheduled || j.received;
     if (!inDateRange(date, filters.dateFrom, filters.dateTo)) continue;
-    if (!matchTech(j.technician, filters.tech)) continue;
+    if (!matchTech(j.technician, filters.tech) && !(filters.tech && matchTech(j.technician2, filters.tech))) continue;
     if (!matchCustomer(j.customer, filters.customer)) continue;
     if (!matchStatus(j.status, filters.status)) continue;
     if (!matchAk(marks, j.customer, filters.ak)) continue;
@@ -375,7 +381,7 @@ async function buildPending(
       str(j.customer),
       pickInstallScheduled({ scheduled: j.scheduled }),
       str(j.status),
-      techCell(j.technician, inactive),
+      techPair(j.technician, j.technician2, inactive),
       str(j.completed_at),
       str(j.issue),
       str(j.work_done),
@@ -535,6 +541,7 @@ async function buildTlc(
     customer: string | null;
     status: string;
     technician: string | null;
+    technician2: string | null;
     completed_at: string | null;
     issue: string | null;
     work_done: string | null;
@@ -545,7 +552,7 @@ async function buildTlc(
     done: boolean;
     notes: string | null;
   }>(
-    `select wo, customer, status, technician, completed_at, issue, work_done, call_type, kind, received, scheduled, done, notes
+    `select wo, customer, status, technician, technician2, completed_at, issue, work_done, call_type, kind, received, scheduled, done, notes
        from service_jobs
       where duplicate_of is null
       order by customer, wo`,
@@ -558,7 +565,7 @@ async function buildTlc(
     }
     const date = j.completed_at || j.scheduled || j.received;
     if (!inDateRange(date, filters.dateFrom, filters.dateTo)) continue;
-    if (!matchTech(j.technician, filters.tech)) continue;
+    if (!matchTech(j.technician, filters.tech) && !(filters.tech && matchTech(j.technician2, filters.tech))) continue;
     if (!matchCustomer(j.customer, filters.customer)) continue;
     if (!matchStatus(j.status, filters.status)) continue;
     if (!matchAk(marks, j.customer, filters.ak)) continue;
@@ -567,7 +574,7 @@ async function buildTlc(
       str(j.customer),
       pickInstallScheduled({ scheduled: j.scheduled }),
       str(j.status),
-      techCell(j.technician, inactive),
+      techPair(j.technician, j.technician2, inactive),
       str(j.completed_at),
       str(j.issue),
       str(j.work_done),
@@ -858,6 +865,20 @@ export function fileNameFor(type: ReportType, date: string, format: "xlsx" | "cs
   return `KatzDesk-${REPORT_SLUG[type]}-${date}.${format}`;
 }
 
+/** Every sheet with an Account column gets "Account #" right after it, from the customer's Account Number. */
+async function withAccountNumbers(sql: Awaited<ReturnType<typeof getSql>>, sheets: ExportSheet[]): Promise<ExportSheet[]> {
+  const marks = await loadAccountMarks(sql);
+  return sheets.map((sheet) => {
+    const at = sheet.columns.indexOf("Account");
+    if (at < 0 || sheet.columns.includes("Account #")) return sheet;
+    const columns = [...sheet.columns.slice(0, at + 1), "Account #", ...sheet.columns.slice(at + 1)];
+    const rows = sheet.rows.map((r) =>
+      isBlankRow(r) ? [...r.slice(0, at + 1), "", ...r.slice(at + 1)] : [...r.slice(0, at + 1), accountNumberFor(marks, r[at]) ?? "", ...r.slice(at + 1)],
+    );
+    return { ...sheet, columns, rows };
+  });
+}
+
 async function buildReport(type: ReportType, filters: ExportFilters): Promise<BuiltReport> {
   const sql = await readySql();
   const generated = formatNowChicago();
@@ -874,6 +895,7 @@ async function buildReport(type: ReportType, filters: ExportFilters): Promise<Bu
     sheets = [inst.notReady, inst.ready];
     counts = inst.counts;
   }
+  sheets = await withAccountNumbers(sql, sheets);
   const rowCount =
     counts != null
       ? counts.notReady + counts.ready

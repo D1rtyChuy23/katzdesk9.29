@@ -1,5 +1,5 @@
 import { n as getRequest } from "../_libs/@tanstack/react-start+[...].mjs";
-import { n as authConfigured, t as auth } from "./popup.server.mjs";
+import { n as auth, r as authConfigured } from "./server.mjs";
 //#region src/lib/auth/verify.server.ts
 /**
 * Server-side session resolution (server-only).

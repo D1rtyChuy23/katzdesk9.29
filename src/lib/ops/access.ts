@@ -3,7 +3,8 @@ import { getSql, type Sql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { flagOn } from "./flag";
 
-export type DeskRole = "sales" | "service" | "warehouse" | null;
+/** Admin: reviews the clean customer list (approve, skip, unlock) and sees list ID and address. Not the desk owner. */
+export type DeskRole = "admin" | "sales" | "service" | "warehouse" | null;
 
 export type DeskAccess = {
   userId: string;
@@ -223,7 +224,7 @@ type AccessRow = {
 
 function parseRole(value: unknown): DeskRole {
   const v = String(value ?? "").trim().toLowerCase();
-  if (v === "sales" || v === "service" || v === "warehouse") return v;
+  if (v === "admin" || v === "sales" || v === "service" || v === "warehouse") return v;
   return null;
 }
 
@@ -591,6 +592,23 @@ export async function requireCanAddCustomers(sql: Sql, userId: string): Promise<
 
 export { requireAdmin };
 
+/** Clean-list review: the Admin role, or a desk admin. Sales, Service and Warehouse cannot. */
+export async function canReviewNames(sql: Sql, userId: string): Promise<boolean> {
+  const me = await sql.query<{ is_admin: unknown; desk_role: string | null; approved: unknown }>(
+    "select is_admin, desk_role, approved from desk_accounts where user_id = $1",
+    [userId],
+  );
+  const row = me[0];
+  if (!row || !flagOn(row.approved)) return false;
+  return flagOn(row.is_admin) || String(row.desk_role ?? "").trim().toLowerCase() === "admin";
+}
+
+export async function requireNameReviewer(sql: Sql, userId: string, message?: string): Promise<void> {
+  if (!(await canReviewNames(sql, userId))) {
+    throw new Error(message ?? "Only an Admin can approve clean-list names.");
+  }
+}
+
 /** Reject unapproved sessions before any ops query. Used by deskMiddleware. */
 export async function assertApproved(userId: string): Promise<void> {
   const sql = await getSql();
@@ -887,7 +905,7 @@ export const setAccountCanAddCustomers = createServerFn({ method: "POST" })
 
 export const setAccountRole = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { userId: string; role: "sales" | "service" | "warehouse" | null }) => d)
+  .validator((d: { userId: string; role: "admin" | "sales" | "service" | "warehouse" | null }) => d)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -895,7 +913,7 @@ export const setAccountRole = createServerFn({ method: "POST" })
     if (!(await canUserEditRoster(sql, context.userId))) {
       throw new Error("Only the desk owner can set a user’s role.");
     }
-    const role = data.role === "sales" || data.role === "service" || data.role === "warehouse" ? data.role : null;
+    const role = data.role === "admin" || data.role === "sales" || data.role === "service" || data.role === "warehouse" ? data.role : null;
     const rows = await sql.query<AccessRow>(
       `update desk_accounts
           set desk_role = $2, updated_at = now()
@@ -1112,3 +1130,19 @@ export const revokeInvite = createServerFn({ method: "POST" })
     if (!rows[0]) throw new Error("Invite not found.");
     return { ok: true };
   });
+
+/**
+ * A sales rep (not an admin) sees Service for awareness only: the tickets, TLCs and PMs on accounts assigned to
+ * them. Returns a test for an account's rep, or null when this person sees the full service list.
+ */
+export async function salesRepScope(sql: Sql, userId: string): Promise<((rep: string | null | undefined) => boolean) | null> {
+  const row = (await sql.query<{ is_admin: boolean; desk_role: string | null; username: string | null; email: string | null }>(
+    "select is_admin, desk_role, username, email from desk_accounts where user_id = $1",
+    [userId],
+  ))[0];
+  if (!row || flagOn(row.is_admin) || row.desk_role !== "sales") return null;
+  const user = await loadUser(sql, userId);
+  const { namesMatchUser } = await import("./lookups");
+  const me = { displayName: user.name, primaryEmail: row.email ?? user.email, username: row.username };
+  return (rep) => !!String(rep ?? "").trim() && namesMatchUser(me, rep);
+}

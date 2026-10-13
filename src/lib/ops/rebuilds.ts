@@ -21,6 +21,8 @@ import {
   type WaitingReason,
 } from "@/lib/ops/rebuild-model";
 import { isoDayOrNull as isoDay } from "@/lib/ops/iso";
+import { loadRebuildCosts } from "@/lib/ops/repair-quote-api";
+import type { QuoteCost } from "@/lib/ops/repair-quote";
 
 export {
   REBUILD_STATUSES,
@@ -67,6 +69,8 @@ export type Rebuild = {
   clockFlag: RebuildMetrics["clockFlag"];
   accountRep: string | null;
   aviKatz: boolean;
+  /** Cost from the project's repair quote: parts, labor, total and status. Null when it has no quote. */
+  quote: QuoteCost | null;
 };
 
 export type RebuildLink = {
@@ -194,6 +198,7 @@ export function mapRebuild(r: RebuildRow, today: string, accountRep: string | nu
     updatedAt: stamp(r.updated_at),
     accountRep,
     aviKatz,
+    quote: null,
     ...metrics,
   };
 }
@@ -204,10 +209,14 @@ export async function loadRebuilds(sql: Sql, today = todayChicago()): Promise<Re
   const rows = await sql.query<RebuildRow>(
     "select * from rebuilds where coalesce(archived, false) = false order by id desc",
   );
-  const marks = await loadAccountMarks(sql).catch(() => ({ rep: new Map<string, string>(), repLoose: new Map<string, string>(), ak: new Set<string>() }));
-  return rows.map((r) =>
+  const marks = await loadAccountMarks(sql).catch(() => ({ rep: new Map<string, string>(), repLoose: new Map<string, string>(), ak: new Set<string>(), acct: new Map<string, string>() }));
+  const list = rows.map((r) =>
     mapRebuild(r, today, accountRepFor(marks, r.account), isAviKatz(marks, r.account)),
   );
+  // The cost on each row is read from the project's one repair quote. Never blocks the list.
+  const costs = await loadRebuildCosts(sql, list).catch(() => new Map<number, QuoteCost>());
+  for (const r of list) r.quote = costs.get(r.id) ?? null;
+  return list;
 }
 
 async function deskUsername(sql: Sql, userId: string): Promise<string> {

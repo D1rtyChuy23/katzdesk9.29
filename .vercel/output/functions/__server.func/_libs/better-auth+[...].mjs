@@ -1,11 +1,11 @@
 import { o as __toESM, r as __exportAll } from "../_runtime.mjs";
 import { u as require_react } from "./@floating-ui/react-dom+[...].mjs";
-import { $ as assertCryptoKey, $t as isTest, A as JWTClaimsBuilder, At as queueAfterTransactionHook, B as jweEncryption, Bt as betterFetch, C as serializeSignedCookie, Ct as ATTR_CONTEXT, D as decodeJwt, Dt as safeJSONParse, E as base64Url, Et as import_src, F as JWS_RECOGNIZED, Ft as initGetFieldName, G as digest, Gt as logger, H as jwkToKey, Ht as isSafeUrlScheme, I as validateAlgorithms, It as generateId, J as unprotected, Jt as env, K as encodeBase64url, Kt as shouldPublishLog, L as validateCrit, Lt as createRandomStringGenerator, M as jwsAlgorithm, Mt as runWithTransaction, N as sign, Nt as getBetterAuthVersion, O as decodeProtectedHeader, Ot as getAuthTables, P as JWE_RECOGNIZED, Pt as initGetModelName, Q as encode$1, Qt as isProduction, R as validateCritDuplicates, Rt as capitalizeFirstLetter, S as serializeCookie, St as withSpan, Tt as ATTR_OPERATION_ID, U as assertNotSet, Ut as normalizePathname, V as prepareKey, Vt as createFetch, W as decodeBase64url, Wt as createLogger, X as isJWK, Y as isDisjoint, Z as isObject, Zt as isDevelopment, _ as runWithRequestState, _n as record, _t as decoder, a as createAuthorizationURL, an as ZodBoolean, at as JWEDecryptionFailed, b as createRouter$1, bn as _coercedBoolean, bt as uint64be, c as createRateLimitKey, cn as any, ct as JWSInvalid, d as deprecate, dn as email, dt as JWTInvalid, en as APIError, et as isCryptoKey, f as createAuthEndpoint, ft as invalidKeyInput, g as hasRequestState, gn as optional, gt as concat, h as defineRequestState, hn as object, ht as checkUsage, i as refreshAccessToken, in as defineErrorCodes, it as JOSENotSupported, j as validateClaimsSet, jt as runWithAdapter, k as jwtVerify, kt as getCurrentAdapter, l as findInvalidTrustedProxies, ln as array, lt as JWTClaimValidationFailed, m as isAPIError, mn as number, mt as checkModulusLength, n as socialProviders, nn as kAPIErrorHeaderSymbol, nt as isKeyObject, o as applyDefaultAccessTokenExpiry, on as ZodString, ot as JWEInvalid, p as createAuthMiddleware, pn as looseObject, pt as checkCryptoKey, q as parseJoseHeader, r as validateAuthorizationCode, rn as BASE_ERROR_CODES, rt as JOSEAlgNotAllowed, s as isLoopbackHost, st as JWKInvalid, t as SocialProviderListEnum, tn as BetterAuthError, tt as isKeyLike, u as getIp, un as boolean$1, ut as JWTExpired, v as getCurrentAuthContext, vn as string$1, vt as encode, w as filterOutputFields, wt as ATTR_HOOK_TYPE, x as toResponse, xn as _coercedString, y as runWithEndpointContext, yt as uint32be, z as jweAlgorithm, zt as toKebabCase } from "./@better-auth/core+[...].mjs";
-import { c as sql, n as getKyselyDatabaseType, r as kyselyAdapter, t as createKyselyAdapter } from "./@better-auth/kysely-adapter+[...].mjs";
-import { n as hkdf, t as sha256 } from "./noble__hashes.mjs";
+import { $ as isKeyLike, $t as isTest, A as jwsAlgorithm, At as runWithTransaction, B as jwkToKey, Bt as betterFetch, C as serializeSignedCookie, Ct as ATTR_OPERATION_ID, D as jwtVerify, Dt as getCurrentAdapter, E as decodeProtectedHeader, Et as getAuthTables, F as validateCrit, Ft as createRandomStringGenerator, G as parseJoseHeader, Gt as logger, H as decodeBase64url, Ht as isSafeUrlScheme, I as validateCritDuplicates, J as isJWK, Jt as env, K as unprotected, Kt as shouldPublishLog, L as jweAlgorithm, Lt as base64Url, M as JWE_RECOGNIZED, Mt as initGetModelName, N as JWS_RECOGNIZED, Nt as initGetFieldName, O as JWTClaimsBuilder, Ot as queueAfterTransactionHook, P as validateAlgorithms, Pt as generateId, Q as isCryptoKey, Qt as isProduction, R as jweEncryption, Rt as capitalizeFirstLetter, S as serializeCookie, Sn as _coercedString, St as ATTR_HOOK_TYPE, T as decodeJwt, Tt as safeJSONParse, U as digest, Ut as normalizePathname, V as assertNotSet, Vt as createFetch, W as encodeBase64url, Wt as createLogger, X as encode$1, Y as isObject, Z as assertCryptoKey, Zt as isDevelopment, _ as runWithRequestState, _t as uint32be, a as createAuthorizationURL, an as ZodBoolean, at as JWKInvalid, b as createRouter$1, bt as withSpan, c as createRateLimitKey, cn as any, ct as JWTExpired, d as deprecate, dn as email, dt as checkCryptoKey, en as APIError, et as isKeyObject, f as createAuthEndpoint, ft as checkModulusLength, g as hasRequestState, gn as optional, gt as encode, h as defineRequestState, hn as object, ht as decoder, i as refreshAccessToken, in as defineErrorCodes, it as JWEInvalid, j as sign, jt as getBetterAuthVersion, k as validateClaimsSet, kt as runWithAdapter, l as findInvalidTrustedProxies, ln as array, lt as JWTInvalid, m as isAPIError, mn as number, mt as concat, n as socialProviders, nn as kAPIErrorHeaderSymbol, nt as JOSENotSupported, o as applyDefaultAccessTokenExpiry, on as ZodString, ot as JWSInvalid, p as createAuthMiddleware, pn as looseObject, pt as checkUsage, q as isDisjoint, r as validateAuthorizationCode, rn as BASE_ERROR_CODES, rt as JWEDecryptionFailed, s as isLoopbackHost, st as JWTClaimValidationFailed, t as SocialProviderListEnum, tn as BetterAuthError, tt as JOSEAlgNotAllowed, u as getIp, un as boolean$1, ut as invalidKeyInput, v as getCurrentAuthContext, vn as record, vt as uint64be, w as filterOutputFields, wt as import_src, x as toResponse, xn as _coercedBoolean, xt as ATTR_CONTEXT, y as runWithEndpointContext, yn as string$1, z as prepareKey, zt as toKebabCase } from "./@better-auth/core+[...].mjs";
 import { i as verifyPassword$2, n as binary, r as hashPassword, t as createHMAC } from "./better-auth__utils.mjs";
 import { n as createHash, t as createTelemetry } from "./@better-auth/telemetry+[...].mjs";
 import { a as utf8ToBytes, i as managedNonce, n as bytesToHex, r as hexToBytes, t as xchacha20poly1305 } from "./noble__ciphers.mjs";
+import { c as sql, n as getKyselyDatabaseType, r as kyselyAdapter, t as createKyselyAdapter } from "./@better-auth/kysely-adapter+[...].mjs";
+import { n as hkdf, t as sha256 } from "./noble__hashes.mjs";
 //#region node_modules/zod/v4/classic/coerce.js
 function string(params) {
 	return _coercedString(ZodString, params);
@@ -1222,6 +1222,213 @@ var kysely_adapter_exports = /* @__PURE__ */ __exportAll({
 	kyselyAdapter: () => kyselyAdapter
 });
 //#endregion
+//#region node_modules/better-auth/dist/crypto/jwt.mjs
+var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
+async function signJWT(payload, secret, expiresIn = 3600) {
+	return await new SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime(Math.floor(Date.now() / 1e3) + expiresIn).sign(new TextEncoder().encode(secret));
+}
+async function verifyJWT(token, secret) {
+	try {
+		return (await jwtVerify(token, new TextEncoder().encode(secret))).payload;
+	} catch {
+		return null;
+	}
+}
+var info = new Uint8Array([
+	66,
+	101,
+	116,
+	116,
+	101,
+	114,
+	65,
+	117,
+	116,
+	104,
+	46,
+	106,
+	115,
+	32,
+	71,
+	101,
+	110,
+	101,
+	114,
+	97,
+	116,
+	101,
+	100,
+	32,
+	69,
+	110,
+	99,
+	114,
+	121,
+	112,
+	116,
+	105,
+	111,
+	110,
+	32,
+	75,
+	101,
+	121
+]);
+var now$2 = () => Date.now() / 1e3 | 0;
+var alg = "dir";
+var enc = "A256CBC-HS512";
+function deriveEncryptionSecret(secret, salt) {
+	return hkdf(sha256, new TextEncoder().encode(secret), new TextEncoder().encode(salt), info, 64);
+}
+function getCurrentSecret(secret) {
+	if (typeof secret === "string") return secret;
+	const value = secret.keys.get(secret.currentVersion);
+	if (!value) throw new Error(`Secret version ${secret.currentVersion} not found in keys`);
+	return value;
+}
+function getAllSecrets(secret) {
+	if (typeof secret === "string") return [{
+		version: 0,
+		value: secret
+	}];
+	const result = [];
+	for (const [version, value] of secret.keys) result.push({
+		version,
+		value
+	});
+	if (secret.legacySecret && !result.some((s) => s.value === secret.legacySecret)) result.push({
+		version: -1,
+		value: secret.legacySecret
+	});
+	return result;
+}
+async function symmetricEncodeJWT(payload, secret, salt, expiresIn = 3600) {
+	const encryptionSecret = deriveEncryptionSecret(getCurrentSecret(secret), salt);
+	const thumbprint = await calculateJwkThumbprint({
+		kty: "oct",
+		k: encode$1(encryptionSecret)
+	}, "sha256");
+	return await new EncryptJWT(payload).setProtectedHeader({
+		alg,
+		enc,
+		kid: thumbprint
+	}).setIssuedAt().setExpirationTime(now$2() + expiresIn).setJti(crypto.randomUUID()).encrypt(encryptionSecret);
+}
+var jwtDecryptOpts = {
+	clockTolerance: 15,
+	keyManagementAlgorithms: [alg],
+	contentEncryptionAlgorithms: [enc, "A256GCM"]
+};
+async function symmetricDecodeJWT(token, secret, salt) {
+	if (!token) return null;
+	let hasKid = false;
+	try {
+		hasKid = decodeProtectedHeader(token).kid !== void 0;
+	} catch {
+		return null;
+	}
+	try {
+		const secrets = getAllSecrets(secret);
+		const { payload } = await jwtDecrypt(token, async (protectedHeader) => {
+			const kid = protectedHeader.kid;
+			if (kid !== void 0) {
+				for (const s of secrets) {
+					const encryptionSecret = deriveEncryptionSecret(s.value, salt);
+					if (kid === await calculateJwkThumbprint({
+						kty: "oct",
+						k: encode$1(encryptionSecret)
+					}, "sha256")) return encryptionSecret;
+				}
+				throw new Error("no matching decryption secret");
+			}
+			if (secrets.length === 1) return deriveEncryptionSecret(secrets[0].value, salt);
+			return deriveEncryptionSecret(secrets[0].value, salt);
+		}, jwtDecryptOpts);
+		return payload;
+	} catch {
+		if (hasKid) return null;
+		const secrets = getAllSecrets(secret);
+		if (secrets.length <= 1) return null;
+		for (let i = 1; i < secrets.length; i++) try {
+			const s = secrets[i];
+			const { payload } = await jwtDecrypt(token, deriveEncryptionSecret(s.value, salt), jwtDecryptOpts);
+			return payload;
+		} catch {
+			continue;
+		}
+		return null;
+	}
+}
+//#endregion
+//#region node_modules/better-auth/dist/crypto/password.mjs
+/**
+* `@better-auth/utils/password` uses the "node" export condition in package.json
+* to automatically pick the right implementation:
+*   - Node.js / Bun / Deno → `node:crypto scrypt` (libuv thread pool, non-blocking)
+*   - Unsupported runtimes → `@noble/hashes scrypt` (pure JS fallback)
+*/
+var hashPassword$1 = hashPassword;
+var verifyPassword$1 = async ({ hash, password }) => {
+	return verifyPassword$2(hash, password);
+};
+//#endregion
+//#region node_modules/better-auth/dist/crypto/random.mjs
+var generateRandomString = createRandomStringGenerator("a-z", "0-9", "A-Z", "-_");
+//#endregion
+//#region node_modules/better-auth/dist/crypto/index.mjs
+var crypto_exports = /* @__PURE__ */ __exportAll({
+	formatEnvelope: () => formatEnvelope,
+	hashPassword: () => hashPassword$1,
+	parseEnvelope: () => parseEnvelope,
+	symmetricDecrypt: () => symmetricDecrypt,
+	symmetricEncrypt: () => symmetricEncrypt
+});
+var ENVELOPE_PREFIX = "$ba$";
+function parseEnvelope(data) {
+	if (!data.startsWith(ENVELOPE_PREFIX)) return null;
+	const firstSep = 4;
+	const secondSep = data.indexOf("$", firstSep);
+	if (secondSep === -1) return null;
+	const version = parseInt(data.slice(firstSep, secondSep), 10);
+	if (!Number.isInteger(version) || version < 0) return null;
+	return {
+		version,
+		ciphertext: data.slice(secondSep + 1)
+	};
+}
+function formatEnvelope(version, ciphertext) {
+	return `${ENVELOPE_PREFIX}${version}$${ciphertext}`;
+}
+async function rawEncrypt(secret, data) {
+	const keyAsBytes = await createHash("SHA-256").digest(secret);
+	const dataAsBytes = utf8ToBytes(data);
+	return bytesToHex(managedNonce(xchacha20poly1305)(new Uint8Array(keyAsBytes)).encrypt(dataAsBytes));
+}
+async function rawDecrypt(secret, hex) {
+	const keyAsBytes = await createHash("SHA-256").digest(secret);
+	const dataAsBytes = hexToBytes(hex);
+	const chacha = managedNonce(xchacha20poly1305)(new Uint8Array(keyAsBytes));
+	return new TextDecoder().decode(chacha.decrypt(dataAsBytes));
+}
+var symmetricEncrypt = async ({ key, data }) => {
+	if (typeof key === "string") return rawEncrypt(key, data);
+	const secret = key.keys.get(key.currentVersion);
+	if (!secret) throw new Error(`Secret version ${key.currentVersion} not found in keys`);
+	const ciphertext = await rawEncrypt(secret, data);
+	return formatEnvelope(key.currentVersion, ciphertext);
+};
+var symmetricDecrypt = async ({ key, data }) => {
+	if (typeof key === "string") return rawDecrypt(key, data);
+	const envelope = parseEnvelope(data);
+	if (envelope) {
+		const secret = key.keys.get(envelope.version);
+		if (!secret) throw new Error(`Secret version ${envelope.version} not found in keys (key may have been retired)`);
+		return rawDecrypt(secret, envelope.ciphertext);
+	}
+	if (key.legacySecret) return rawDecrypt(key.legacySecret, data);
+	throw new Error("Cannot decrypt legacy bare-hex payload: no legacy secret available. Set BETTER_AUTH_SECRET for backwards compatibility.");
+};
+//#endregion
 //#region node_modules/better-auth/dist/version.mjs
 var PACKAGE_VERSION = "1.6.30";
 //#endregion
@@ -1248,7 +1455,6 @@ var genericOAuthClient = () => {
 };
 //#endregion
 //#region node_modules/better-auth/dist/cookies/cookie-utils.mjs
-var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 function tryDecode$1(str) {
 	if (str.indexOf("%") === -1) return str;
 	try {
@@ -1884,7 +2090,7 @@ var redirectPlugin = {
 //#endregion
 //#region node_modules/better-auth/dist/client/broadcast-channel.mjs
 var kBroadcastChannel = Symbol.for("better-auth:broadcast-channel");
-var now$2 = () => Math.floor(Date.now() / 1e3);
+var now$1 = () => Math.floor(Date.now() / 1e3);
 var WindowBroadcastChannel = class {
 	listeners = /* @__PURE__ */ new Set();
 	name;
@@ -1902,7 +2108,7 @@ var WindowBroadcastChannel = class {
 		try {
 			localStorage.setItem(this.name, JSON.stringify({
 				...message,
-				timestamp: now$2()
+				timestamp: now$1()
 			}));
 		} catch {}
 	}
@@ -1987,7 +2193,7 @@ function getGlobalOnlineManager() {
 }
 //#endregion
 //#region node_modules/better-auth/dist/client/session-refresh.mjs
-var now$1 = () => Math.floor(Date.now() / 1e3);
+var now = () => Math.floor(Date.now() / 1e3);
 /**
 * Rate limit: don't refetch on focus if a session request was made within this many seconds
 */
@@ -2011,13 +2217,13 @@ function createSessionRefreshManager(opts) {
 			return;
 		}
 		if (event?.event === "poll") {
-			state.lastSessionRequest = now$1();
+			state.lastSessionRequest = now();
 			fetchSession();
 			return;
 		}
 		if (event?.event === "visibilitychange") {
-			if (now$1() - state.lastSessionRequest < FOCUS_REFETCH_RATE_LIMIT_SECONDS) return;
-			state.lastSessionRequest = now$1();
+			if (now() - state.lastSessionRequest < FOCUS_REFETCH_RATE_LIMIT_SECONDS) return;
+			state.lastSessionRequest = now();
 			fetchSession();
 			return;
 		}
@@ -2510,205 +2716,6 @@ function createAuthClient(options) {
 		$store
 	}, $fetch, pluginPathMethods, pluginsAtoms, atomListeners);
 }
-//#endregion
-//#region node_modules/better-auth/dist/crypto/random.mjs
-var generateRandomString = createRandomStringGenerator("a-z", "0-9", "A-Z", "-_");
-//#endregion
-//#region node_modules/better-auth/dist/crypto/jwt.mjs
-async function signJWT(payload, secret, expiresIn = 3600) {
-	return await new SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime(Math.floor(Date.now() / 1e3) + expiresIn).sign(new TextEncoder().encode(secret));
-}
-async function verifyJWT(token, secret) {
-	try {
-		return (await jwtVerify(token, new TextEncoder().encode(secret))).payload;
-	} catch {
-		return null;
-	}
-}
-var info = new Uint8Array([
-	66,
-	101,
-	116,
-	116,
-	101,
-	114,
-	65,
-	117,
-	116,
-	104,
-	46,
-	106,
-	115,
-	32,
-	71,
-	101,
-	110,
-	101,
-	114,
-	97,
-	116,
-	101,
-	100,
-	32,
-	69,
-	110,
-	99,
-	114,
-	121,
-	112,
-	116,
-	105,
-	111,
-	110,
-	32,
-	75,
-	101,
-	121
-]);
-var now = () => Date.now() / 1e3 | 0;
-var alg = "dir";
-var enc = "A256CBC-HS512";
-function deriveEncryptionSecret(secret, salt) {
-	return hkdf(sha256, new TextEncoder().encode(secret), new TextEncoder().encode(salt), info, 64);
-}
-function getCurrentSecret(secret) {
-	if (typeof secret === "string") return secret;
-	const value = secret.keys.get(secret.currentVersion);
-	if (!value) throw new Error(`Secret version ${secret.currentVersion} not found in keys`);
-	return value;
-}
-function getAllSecrets(secret) {
-	if (typeof secret === "string") return [{
-		version: 0,
-		value: secret
-	}];
-	const result = [];
-	for (const [version, value] of secret.keys) result.push({
-		version,
-		value
-	});
-	if (secret.legacySecret && !result.some((s) => s.value === secret.legacySecret)) result.push({
-		version: -1,
-		value: secret.legacySecret
-	});
-	return result;
-}
-async function symmetricEncodeJWT(payload, secret, salt, expiresIn = 3600) {
-	const encryptionSecret = deriveEncryptionSecret(getCurrentSecret(secret), salt);
-	const thumbprint = await calculateJwkThumbprint({
-		kty: "oct",
-		k: encode$1(encryptionSecret)
-	}, "sha256");
-	return await new EncryptJWT(payload).setProtectedHeader({
-		alg,
-		enc,
-		kid: thumbprint
-	}).setIssuedAt().setExpirationTime(now() + expiresIn).setJti(crypto.randomUUID()).encrypt(encryptionSecret);
-}
-var jwtDecryptOpts = {
-	clockTolerance: 15,
-	keyManagementAlgorithms: [alg],
-	contentEncryptionAlgorithms: [enc, "A256GCM"]
-};
-async function symmetricDecodeJWT(token, secret, salt) {
-	if (!token) return null;
-	let hasKid = false;
-	try {
-		hasKid = decodeProtectedHeader(token).kid !== void 0;
-	} catch {
-		return null;
-	}
-	try {
-		const secrets = getAllSecrets(secret);
-		const { payload } = await jwtDecrypt(token, async (protectedHeader) => {
-			const kid = protectedHeader.kid;
-			if (kid !== void 0) {
-				for (const s of secrets) {
-					const encryptionSecret = deriveEncryptionSecret(s.value, salt);
-					if (kid === await calculateJwkThumbprint({
-						kty: "oct",
-						k: encode$1(encryptionSecret)
-					}, "sha256")) return encryptionSecret;
-				}
-				throw new Error("no matching decryption secret");
-			}
-			if (secrets.length === 1) return deriveEncryptionSecret(secrets[0].value, salt);
-			return deriveEncryptionSecret(secrets[0].value, salt);
-		}, jwtDecryptOpts);
-		return payload;
-	} catch {
-		if (hasKid) return null;
-		const secrets = getAllSecrets(secret);
-		if (secrets.length <= 1) return null;
-		for (let i = 1; i < secrets.length; i++) try {
-			const s = secrets[i];
-			const { payload } = await jwtDecrypt(token, deriveEncryptionSecret(s.value, salt), jwtDecryptOpts);
-			return payload;
-		} catch {
-			continue;
-		}
-		return null;
-	}
-}
-//#endregion
-//#region node_modules/better-auth/dist/crypto/password.mjs
-/**
-* `@better-auth/utils/password` uses the "node" export condition in package.json
-* to automatically pick the right implementation:
-*   - Node.js / Bun / Deno → `node:crypto scrypt` (libuv thread pool, non-blocking)
-*   - Unsupported runtimes → `@noble/hashes scrypt` (pure JS fallback)
-*/
-var hashPassword$1 = hashPassword;
-var verifyPassword$1 = async ({ hash, password }) => {
-	return verifyPassword$2(hash, password);
-};
-//#endregion
-//#region node_modules/better-auth/dist/crypto/index.mjs
-var ENVELOPE_PREFIX = "$ba$";
-function parseEnvelope(data) {
-	if (!data.startsWith(ENVELOPE_PREFIX)) return null;
-	const firstSep = 4;
-	const secondSep = data.indexOf("$", firstSep);
-	if (secondSep === -1) return null;
-	const version = parseInt(data.slice(firstSep, secondSep), 10);
-	if (!Number.isInteger(version) || version < 0) return null;
-	return {
-		version,
-		ciphertext: data.slice(secondSep + 1)
-	};
-}
-function formatEnvelope(version, ciphertext) {
-	return `${ENVELOPE_PREFIX}${version}$${ciphertext}`;
-}
-async function rawEncrypt(secret, data) {
-	const keyAsBytes = await createHash("SHA-256").digest(secret);
-	const dataAsBytes = utf8ToBytes(data);
-	return bytesToHex(managedNonce(xchacha20poly1305)(new Uint8Array(keyAsBytes)).encrypt(dataAsBytes));
-}
-async function rawDecrypt(secret, hex) {
-	const keyAsBytes = await createHash("SHA-256").digest(secret);
-	const dataAsBytes = hexToBytes(hex);
-	const chacha = managedNonce(xchacha20poly1305)(new Uint8Array(keyAsBytes));
-	return new TextDecoder().decode(chacha.decrypt(dataAsBytes));
-}
-var symmetricEncrypt = async ({ key, data }) => {
-	if (typeof key === "string") return rawEncrypt(key, data);
-	const secret = key.keys.get(key.currentVersion);
-	if (!secret) throw new Error(`Secret version ${key.currentVersion} not found in keys`);
-	const ciphertext = await rawEncrypt(secret, data);
-	return formatEnvelope(key.currentVersion, ciphertext);
-};
-var symmetricDecrypt = async ({ key, data }) => {
-	if (typeof key === "string") return rawDecrypt(key, data);
-	const envelope = parseEnvelope(data);
-	if (envelope) {
-		const secret = key.keys.get(envelope.version);
-		if (!secret) throw new Error(`Secret version ${envelope.version} not found in keys (key may have been retired)`);
-		return rawDecrypt(secret, envelope.ciphertext);
-	}
-	if (key.legacySecret) return rawDecrypt(key.legacySecret, data);
-	throw new Error("Cannot decrypt legacy bare-hex payload: no legacy secret available. Set BETTER_AUTH_SECRET for backwards compatibility.");
-};
 //#endregion
 //#region node_modules/better-auth/dist/context/store-capabilities.mjs
 function hasServerSessionStore(options) {
@@ -10828,4 +10835,4 @@ var tanstackStartCookies = () => {
 	};
 };
 //#endregion
-export { atom as _, createAuthClient as a, EncryptJWT as c, createDefu as d, defu as f, onSet as g, onMount as h, betterAuth as i, SignJWT as l, STORE_UNMOUNT_DELAY as m, genericOAuth as n, genericOAuthClient as o, listenKeys as p, bearer as r, calculateJwkThumbprint as s, tanstackStartCookies as t, jwtDecrypt as u, boolean as v, string as y };
+export { onSet as _, createAuthClient as a, string as b, calculateJwkThumbprint as c, jwtDecrypt as d, createDefu as f, onMount as g, STORE_UNMOUNT_DELAY as h, betterAuth as i, EncryptJWT as l, listenKeys as m, genericOAuth as n, genericOAuthClient as o, defu as p, bearer as r, crypto_exports as s, tanstackStartCookies as t, SignJWT as u, atom as v, boolean as y };

@@ -1,7 +1,7 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { hn as object, mn as number, un as boolean, vn as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, mn as number, un as boolean, yn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 import { a as deskMiddleware, b as flagOn, c as isLiveDeskOwner } from "./access.mjs";
 import { t as normalizeName } from "./norm.mjs";
 //#region src/lib/ops/tech-match.ts
@@ -173,7 +173,7 @@ function isQa(username) {
 	return /^qa[._-]/i.test(username);
 }
 async function ownerAccount(sql) {
-	return (await loadAccounts(sql)).find((a) => isLiveDeskOwner(a.username, null, a.email)) ?? null;
+	return (await loadAccounts(sql)).find((a) => flagOn(a.is_admin) && isLiveDeskOwner(a.username, null, a.email)) ?? null;
 }
 async function setting(sql, key) {
 	return (await sql.query("select value from desk_settings where key = $1", [key]))[0]?.value ?? null;
@@ -197,8 +197,8 @@ async function rosterAdminUserId(sql) {
 }
 async function canUserEditRoster(sql, userId) {
 	await ensureRoster(sql);
-	const me = await sql.query("select username, email from desk_accounts where user_id = $1", [userId]);
-	if (me[0] && isLiveDeskOwner(me[0].username, null, me[0].email)) return true;
+	const me = await sql.query("select username, email, is_admin, approved from desk_accounts where user_id = $1", [userId]);
+	if (me[0] && flagOn(me[0].approved) && flagOn(me[0].is_admin) && isLiveDeskOwner(me[0].username, null, me[0].email)) return true;
 	const owner = await ownerAccount(sql);
 	if (owner) return owner.user_id === userId;
 	const admin = await rosterAdminUserId(sql);

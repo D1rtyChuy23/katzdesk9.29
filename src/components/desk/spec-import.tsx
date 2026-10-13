@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FileUp, ImagePlus, Loader2, Plus, RotateCcw, ShieldAlert, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { imageFileToDataUrl, pdfToText, MAX_PDF_BYTES } from "@/lib/pdf-text";
 import { restoreRemoved, type RemovedItem } from "@/lib/ops/spec-filter";
+import { CORE_HOLE_NOTE } from "@/lib/ops/spec-copy";
 import { emptyDraft, type Kv, type SpecSheetDraft } from "@/lib/ops/spec-schema";
 import { extractSpecSheet, getSpecImage, saveSpecSheet } from "@/lib/ops/spec-library";
 import type { SavedSpecSheet } from "@/lib/ops/spec-schema";
@@ -11,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ConfigChips, EquipmentImage, PlugSection, REQUIREMENT_GROUPS } from "./spec-sheet";
-import { applyConfigDefaults, coreHoleInfo, isEspresso } from "@/lib/ops/spec-defaults";
+import { ConfigChips, DimensionsImage, EquipmentImage, PlugSection, REQUIREMENT_GROUPS } from "./spec-sheet";
+import { applyConfigDefaults, coreHoleInfo, isEspresso, isGrinder, WIRES_3, WIRES_4 } from "@/lib/ops/spec-defaults";
 
 type Stage = "drop" | "reading" | "review";
 
@@ -20,15 +21,19 @@ type Stage = "drop" | "reading" | "review";
 export function SpecImport({
   editing,
   aiReady,
+  initialFile,
   onSaved,
   onCancel,
 }: {
   editing?: SavedSpecSheet | null;
   aiReady: boolean;
-  onSaved: (id: number) => void;
+  /** Start reading this PDF straight away (a spec sheet already stored in a book). */
+  initialFile?: File | null;
+  /** `pdf` is the original that was read, so the caller can keep it in the book. */
+  onSaved: (id: number, pdf: File | null) => void;
   onCancel: () => void;
 }) {
-  const [stage, setStage] = useState<Stage>(editing ? "review" : "drop");
+  const [stage, setStage] = useState<Stage>(editing ? "review" : initialFile ? "reading" : "drop");
   const [draft, setDraft] = useState<SpecSheetDraft>(() => (editing ? strip(editing) : emptyDraft()));
   const [removed, setRemoved] = useState<RemovedItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
@@ -36,30 +41,43 @@ export function SpecImport({
   const [step, setStep] = useState("");
   const [conflict, setConflict] = useState<{ manufacturer: string; model: string } | null>(null);
 
+  const pdf = useRef<File | null>(null);
+  const started = useRef(false);
+  useEffect(() => {
+    if (initialFile && !started.current) {
+      started.current = true;
+      void readFile(initialFile);
+    }
+  }, [initialFile]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function readFile(file: File) {
+    pdf.current = file;
     setFileName(file.name);
     setNotice(null);
     setRemoved([]);
     setStage("reading");
     try {
       setStep("Reading the PDF in your browser…");
-      const { text, image } = await pdfToText(file);
+      const { text, image, dimsImage, imageNote } = await pdfToText(file);
+      const pics = { image: image ?? undefined, dimsImage: dimsImage ?? undefined };
       if (text.replace(/\s/g, "").length < 40) {
-        manual("This PDF has no readable text (it looks scanned). Fill in the form by hand instead.", image);
+        manual(["This PDF has no readable text (it looks scanned). Fill in the form by hand instead.", !image ? imageNote : null].filter(Boolean).join(" "), pics);
         return;
       }
       if (!aiReady) {
-        manual("AI reading isn't available here yet. Fill in the form by hand instead.", image);
+        manual("AI reading isn't available here yet. Fill in the form by hand instead.", pics);
         return;
       }
       setStep("Pulling out the specs…");
       // Only the text goes to the server; the equipment image stays in the browser until you save.
       const res = await extractSpecSheet({ data: { text, fileName: file.name } });
       if (!res.ok) {
-        manual(res.message, image);
+        manual(res.message, pics);
         return;
       }
-      setDraft({ ...res.draft, image: image ?? undefined });
+      setDraft({ ...res.draft, ...pics });
+      // No machine photo found: say so, and leave the picture empty rather than show the wrong one.
+      if (!image && imageNote) setNotice(imageNote);
       setRemoved(res.removed);
       setStage("review");
       toast.success(
@@ -72,9 +90,9 @@ export function SpecImport({
     }
   }
 
-  function manual(message: string, image?: string | null) {
+  function manual(message: string, pics?: { image?: string; dimsImage?: string }) {
     setNotice(message || null);
-    setDraft({ ...emptyDraft(), image: image ?? undefined });
+    setDraft({ ...emptyDraft(), ...(pics ?? {}) });
     setRemoved([]);
     setStage("review");
   }
@@ -88,7 +106,7 @@ export function SpecImport({
       }
       setConflict(null);
       toast.success(`${draft.manufacturer} ${draft.model} saved to The Library`);
-      onSaved(res.id);
+      onSaved(res.id, pdf.current);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
@@ -126,7 +144,7 @@ export function SpecImport({
         draft={draft}
         onChange={setDraft}
         title={editing ? "Edit Spec Sheet" : fileName ? `Review · ${fileName}` : "New Spec Sheet"}
-        savedImageId={editing?.hasImage ? editing.id : null}
+        savedImageId={editing?.hasImage || editing?.hasDims ? editing.id : null}
       />
       <div className="sticky bottom-3 z-10 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card/95 p-3 shadow-[var(--shadow-lift)] backdrop-blur">
         <Button
@@ -356,12 +374,16 @@ export function SpecEditor({
   const saved = useQuery({
     queryKey: ["spec-image", "edit", savedImageId],
     queryFn: () => getSpecImage({ data: { id: savedImageId! } }),
-    enabled: !!savedImageId && draft.image === undefined,
+    enabled: !!savedImageId && (draft.image === undefined || draft.dimsImage === undefined),
   });
   const shownImage = draft.image === undefined ? saved.data?.image ?? null : draft.image;
+  const shownDims = draft.dimsImage === undefined ? saved.data?.dimsImage ?? null : draft.dimsImage;
   const fileRef = useRef<HTMLInputElement>(null);
+  const dimsRef = useRef<HTMLInputElement>(null);
   const core = coreHoleInfo(draft);
   const espresso = isEspresso(draft);
+  // Grinders: no Water And Drain box. Power, plug and size stay.
+  const grinder = isGrinder(draft);
   const idx = Math.min(sel, Math.max(0, draft.configs.length - 1));
   const config = draft.configs[idx];
   const set = (patch: Partial<SpecSheetDraft>) => onChange({ ...draft, ...patch });
@@ -416,7 +438,35 @@ export function SpecEditor({
               }}
             />
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Taken from the spec sheet PDF when it has one.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Machine photo, taken from the spec sheet PDF when it has one.</p>
+          <div className="mt-3">
+            <DimensionsImage image={shownDims} />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => dimsRef.current?.click()} data-testid="ed-dims-pick">
+                <ImagePlus className="size-3.5" /> {shownDims ? "Replace Dimensions Diagram" : "Add Dimensions Diagram"}
+              </Button>
+              {shownDims ? (
+                <Button type="button" size="sm" variant="ghost" onClick={() => set({ dimsImage: null })}>
+                  Remove
+                </Button>
+              ) : null}
+              <input
+                ref={dimsRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                data-testid="ed-dims-file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!f) return;
+                  void imageFileToDataUrl(f, 1400)
+                    .then((url) => set({ dimsImage: url }))
+                    .catch((err) => toast.error(err instanceof Error ? err.message : "Couldn't use that image"));
+                }}
+              />
+            </div>
+          </div>
         </div>
         <fieldset className="rounded-lg border border-border bg-background/60 p-4" data-testid="ed-core">
           <legend className="px-1 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">Space / Core Hole</legend>
@@ -459,6 +509,9 @@ export function SpecEditor({
           ) : (
             <p className="mt-3 text-xs text-muted-foreground">No counter core hole on this spec.</p>
           )}
+          <p className="mt-1 text-xs text-muted-foreground" data-testid="ed-core-note">
+            {CORE_HOLE_NOTE}
+          </p>
         </fieldset>
       </section>
 
@@ -532,21 +585,42 @@ export function SpecEditor({
             </div>
             <div className="grid gap-3 lg:grid-cols-2">
               <Group title="Power">
-                {POWER_FIELDS.map(([k, l]) => (
-                  <Field key={k} label={l} value={config.requirements.power?.[k]} onChange={(v) => setReq("power", k, v)} testId={`ed-power-${k}`} />
-                ))}
+                {POWER_FIELDS.map(([k, l]) =>
+                  k === "wires" ? (
+                    <div key={k}>
+                      <Label htmlFor="ed-power-wires" className="text-xs text-muted-foreground">
+                        Wires (208–240V)
+                      </Label>
+                      <select
+                        id="ed-power-wires"
+                        data-testid="ed-power-wires"
+                        className="mt-1 h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
+                        value={/4/.test(config.requirements.power?.wires ?? "") ? WIRES_4 : /3/.test(config.requirements.power?.wires ?? "") ? WIRES_3 : ""}
+                        onChange={(e) => setReq("power", "wires", e.target.value)}
+                      >
+                        <option value="">Not stated</option>
+                        {/* Wire count only. The plug family (L6 / L14) is decided on the Plug field from wires and volts. */}
+                        <option value={WIRES_3}>3-wire — 2 hots, ground</option>
+                        <option value={WIRES_4}>4-wire — 2 hots, neutral, ground</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <Field key={k} label={l} value={config.requirements.power?.[k]} onChange={(v) => setReq("power", k, v)} testId={`ed-power-${k}`} />
+                  ),
+                )}
                 <div className="sm:col-span-2">
                   <button
                     type="button"
                     className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                    onClick={() => set({ configs: draft.configs.map((c, i) => (i === idx ? applyConfigDefaults(c, "generate") : c)) })}
+                    onClick={() => set({ configs: draft.configs.map((c, i) => (i === idx ? applyConfigDefaults(c, "generate", draft) : c)) })}
                     data-testid="ed-plug-rules"
                   >
-                    <RotateCcw className="size-3.5" /> Set Plug, Breaker And Inlet From The Electrical
+                    <RotateCcw className="size-3.5" /> {grinder ? "Set Plug And Breaker From The Electrical" : "Set Plug, Breaker And Inlet From The Electrical"}
                   </button>
-                  <PlugSection power={config.requirements.power} />
+                  <PlugSection power={config.requirements.power} ctx={draft} />
                 </div>
               </Group>
+              {grinder ? null : (
               <Group title="Water And Drain">
                 {WATER_FIELDS.map(([k, l]) => (
                   <Field key={k} label={l} value={config.requirements.water?.[k]} onChange={(v) => setReq("water", k, v)} testId={`ed-water-${k}`} />
@@ -555,6 +629,7 @@ export function SpecEditor({
                   <Field key={`d-${k}`} label={l} value={config.requirements.drain?.[k]} onChange={(v) => setReq("drain", k, v)} testId={`ed-drain-${k}`} />
                 ))}
               </Group>
+              )}
               <Group title="Dimensions">
                 {DIM_FIELDS.map(([k, l]) => (
                   <Field key={k} label={l} value={config.requirements.dimensions?.[k]} onChange={(v) => setReq("dimensions", k, v)} testId={`ed-dim-${k}`} />

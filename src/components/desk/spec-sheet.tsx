@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ClipboardCopy, Droplets, ImageIcon, Pencil, Plug, RefreshCw, Ruler, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { amps, copyAll, copyConfig, hz, phase, volts } from "@/lib/ops/spec-copy";
+import { amps, copyAll, copyConfig, CORE_HOLE_NOTE, hz, phase, volts } from "@/lib/ops/spec-copy";
 import type { Requirements, SavedSpecSheet, SpecConfig, SpecSheetDraft } from "@/lib/ops/spec-schema";
-import { coreHoleInfo, decidePlug, defaultPlugNote, nemaCode, type CoreHoleInfo } from "@/lib/ops/spec-defaults";
+import { coreHoleInfo, defaultPlugNote, isGrinder, nemaCode, type CoreHoleInfo, type PlugContext } from "@/lib/ops/spec-defaults";
 import { getSpecImage } from "@/lib/ops/spec-library";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { PlugPicture } from "./plug-face";
+import { ZoomableImage } from "./image-lightbox";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -124,6 +125,7 @@ export function ConfigChips({
 
 const POWER_FIELDS = [
   ["voltage", "Voltage"],
+  ["wires", "Wires"],
   ["amps", "Amps"],
   ["breaker", "Breaker"],
   ["phase", "Phase"],
@@ -179,7 +181,7 @@ function Block({ icon: Icon, title, children }: { icon: typeof Plug; title: stri
 }
 
 /** Power / Water And Drain / Dimensions for one configuration. Empty sections are hidden. */
-export function RequirementsCard({ req, core }: { req: Requirements; core?: CoreHoleInfo | null }) {
+export function RequirementsCard({ req, core, ctx }: { req: Requirements; core?: CoreHoleInfo | null; ctx?: PlugContext }) {
   // Same units as the copy text: 30 → 30A, 1 → 1-phase, 60 → 60 Hz.
   const fmt: Record<string, (v: string) => string> = { voltage: volts, amps, phase, hz };
   const power = POWER_FIELDS.map(([k, l]) => {
@@ -197,11 +199,12 @@ export function RequirementsCard({ req, core }: { req: Requirements; core?: Core
     any(power) ? (
       <Block key="p" icon={Plug} title="Power">
         <Rows rows={power} />
-        <PlugSection power={req.power} />
+        <PlugSection power={req.power} ctx={ctx} />
       </Block>
     ) : null,
-    any(water) ? <Block key="w" icon={Droplets} title="Water And Drain"><Rows rows={water} /></Block> : null,
-    any(dims) || core?.required ? (
+    // Grinders take no water and have no drain: the section is never shown, even if an old value is stored.
+    any(water) && !isGrinder(ctx) ? <Block key="w" icon={Droplets} title="Water And Drain"><Rows rows={water} /></Block> : null,
+    any(dims) || core ? (
       <Block key="d" icon={Ruler} title="Space / Core Hole">
         <Rows rows={dims} />
         <CoreHoleLine core={core} />
@@ -213,19 +216,37 @@ export function RequirementsCard({ req, core }: { req: Requirements; core?: Core
   return <div className="grid gap-3 sm:grid-cols-2" data-testid="requirements-card">{sections}</div>;
 }
 
-/** "Counter core hole: 3" diameter" next to Space. Blank-and-needed when the diameter is missing. */
+/** Core-hole status next to Space: Yes/No, the saved diameter, and the below-counter note. */
 export function CoreHoleLine({ core }: { core?: CoreHoleInfo | null }) {
-  if (!core?.required) return null;
+  if (!core) return null;
   return (
-    <p
+    <div
       className={cn(
-        "mt-2 rounded-md border px-2.5 py-1.5 text-sm font-semibold",
-        core.missingDiameter ? "border-warning/50 bg-warning/10 text-warning" : "border-primary/30 bg-primary/5 text-foreground",
+        "mt-2 space-y-0.5 rounded-md border px-2.5 py-1.5 text-sm",
+        core.missingDiameter ? "border-warning/50 bg-warning/10" : core.required ? "border-primary/30 bg-primary/5" : "border-border bg-background/60",
       )}
       data-testid="core-hole-line"
     >
-      {core.missingDiameter ? "Counter core hole: diameter needed before this spec is complete" : core.label}
-    </p>
+      <p>
+        <span className="text-muted-foreground">Utility lines pass through the counter: </span>
+        <span className="font-semibold">{core.required ? "Yes" : "No"}</span>
+      </p>
+      {core.required ? (
+        core.missingDiameter ? (
+          <p className="font-semibold text-warning">Hole diameter needed before this spec is complete</p>
+        ) : (
+          <>
+            <p>
+              <span className="text-muted-foreground">Hole diameter: </span>
+              <span className="font-semibold">{core.diameter}</span>
+            </p>
+          </>
+        )
+      ) : null}
+      <p className="text-xs text-muted-foreground" data-testid="core-hole-note">
+        {CORE_HOLE_NOTE}
+      </p>
+    </div>
   );
 }
 
@@ -253,7 +274,14 @@ export function EquipmentImage({
       data-empty={image ? "0" : "1"}
     >
       {image ? (
-        <img src={image} alt={`${manufacturer ?? ""} ${model}`.trim()} className="size-full object-contain p-2" />
+        <ZoomableImage
+          src={image}
+          alt={`${manufacturer ?? ""} ${model}`.trim()}
+          label={`${manufacturer ?? ""} ${model}`.trim()}
+          className="size-full"
+          imgClassName="size-full object-contain p-2"
+          testId="equipment-zoom"
+        />
       ) : (
         <div className="flex size-full flex-col items-center justify-center gap-1 border-2 border-dashed border-border/70 bg-muted/30 p-4 text-center">
           <ImageIcon className="size-6 text-muted-foreground/70" />
@@ -262,6 +290,19 @@ export function EquipmentImage({
         </div>
       )}
     </div>
+  );
+}
+
+/** Secondary image: the dimension drawing, under the machine photo. Hidden when the sheet has none. */
+export function DimensionsImage({ image }: { image: string | null | undefined }) {
+  if (!image) return null;
+  return (
+    <figure className="overflow-hidden rounded-lg border border-border bg-white" data-testid="dims-image">
+      <ZoomableImage src={image} alt="Dimensions diagram" label="Dimensions" imgClassName="w-full object-contain p-2" testId="dims-zoom" />
+      <figcaption className="border-t border-border bg-card px-3 py-1.5 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+        Dimensions
+      </figcaption>
+    </figure>
   );
 }
 
@@ -279,13 +320,19 @@ export function SheetHeading({ sheet }: { sheet: Pick<SpecSheetDraft, "manufactu
 }
 
 /** The plug picture under the Power rows: NEMA plugs only — hardwire gets none. */
-export function PlugSection({ power }: { power: Requirements["power"] }) {
+export function PlugSection({ power, ctx }: { power: Requirements["power"]; ctx?: PlugContext }) {
   const plug = power?.plug?.trim();
-  if (!plug) return null;
+  const note = defaultPlugNote(power, ctx);
+  if (!plug) {
+    // 220 V with no wire count: no plug, no image — just the flag.
+    return note ? (
+      <p className="mt-3 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-1.5 text-sm font-semibold text-warning" data-testid="plug-flag">
+        {note}
+      </p>
+    ) : null;
+  }
   const nema = nemaCode(plug);
   if (!nema) return null;
-  const d = decidePlug(power);
-  const note = defaultPlugNote(power) ?? (d.note && d.plug === plug ? d.note : null);
   return (
     <div className="mt-3">
       <PlugPicture nema={nema} label={plug} note={note} />
@@ -302,6 +349,7 @@ export function SpecSheetView({
   onDelete,
   onRefresh,
   refreshing,
+  onReread,
 }: {
   sheet: SavedSpecSheet;
   canEdit: boolean;
@@ -309,6 +357,8 @@ export function SpecSheetView({
   /** Re-apply inlet / plug / breaker defaults (Admin and Sales). */
   onRefresh?: () => void;
   refreshing?: boolean;
+  /** Re-read the machine photo and dimensions diagram from the sheet's PDF (Admin and Sales). */
+  onReread?: () => void;
   onDelete: () => void;
 }) {
   const [sel, setSel] = useState(0);
@@ -316,7 +366,7 @@ export function SpecSheetView({
   const imageQ = useQuery({
     queryKey: ["spec-image", sheet.id, sheet.updatedAt],
     queryFn: () => getSpecImage({ data: { id: sheet.id } }),
-    enabled: sheet.hasImage,
+    enabled: sheet.hasImage || sheet.hasDims,
     staleTime: 5 * 60_000,
   });
   const core = coreHoleInfo(sheet);
@@ -330,10 +380,15 @@ export function SpecSheetView({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <SheetHeading sheet={sheet} />
         {canEdit ? (
-          <div className="flex shrink-0 gap-2">
+          <div className="flex shrink-0 flex-wrap justify-end gap-2">
             {onRefresh ? (
               <Button type="button" size="sm" variant="outline" onClick={onRefresh} disabled={refreshing} data-testid="spec-refresh">
                 <RefreshCw className={cn("size-3.5", refreshing && "animate-spin")} /> Refresh Defaults
+              </Button>
+            ) : null}
+            {onReread ? (
+              <Button type="button" size="sm" variant="outline" onClick={onReread} data-testid="spec-reread">
+                <ImageIcon className="size-3.5" /> Re-Read Image From PDF
               </Button>
             ) : null}
             <Button type="button" size="sm" variant="outline" onClick={onEdit}>
@@ -393,12 +448,15 @@ export function SpecSheetView({
       <section className="mt-6">
         <h3 className="mb-2 text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">Configurations</h3>
         <div className="grid gap-4 md:grid-cols-[minmax(0,15rem)_1fr]" data-testid="configuration">
-          <EquipmentImage image={imageQ.data?.image} loading={sheet.hasImage && imageQ.isLoading} manufacturer={sheet.manufacturer} model={sheet.model} />
+          <div className="grid content-start gap-3">
+            <EquipmentImage image={imageQ.data?.image} loading={sheet.hasImage && imageQ.isLoading} manufacturer={sheet.manufacturer} model={sheet.model} />
+            <DimensionsImage image={imageQ.data?.dimsImage} />
+          </div>
           <div className="min-w-0">
             <ConfigChips configs={sheet.configs} selected={sel} onSelect={setSel} />
             {config ? (
               <div className="mt-4">
-                <RequirementsCard req={config.requirements} core={core} />
+                <RequirementsCard req={config.requirements} core={core} ctx={sheet} />
               </div>
             ) : null}
           </div>

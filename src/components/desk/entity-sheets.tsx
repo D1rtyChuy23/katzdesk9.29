@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ModuleRecord } from "@/components/desk/module-record";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   archiveDeal,
   archiveInstall,
   assignAssetToInstall,
+  confirmDealMachines,
   createDeal,
   createInstall,
   createModule,
@@ -32,13 +34,14 @@ import {
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import type { Asset, Deal, Install, ModuleRow, PmJob } from "@/lib/ops/types";
+import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
+import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
 import { PreInspectionPanel, InspectionBadge } from "./pre-inspection-panel";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea, AutoGrowTextarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { FlagBadge, StatusBadge } from "./flag-badge";
 import { Badge } from "@/components/ui/badge";
@@ -49,11 +52,14 @@ import { RepSelect } from "./rep-select";
 import { AkBadge } from "./ak-badge";
 
 import { MachineFields } from "./machine-fields";
+import { InstallTicket } from "./install-ticket";
+import { OpenLink } from "./open-link";
+import { CustomerAddress } from "./customer-address";
 import { SerialNoticeBanner } from "./serial-notice";
 import { AssignedLine, ModuleReturnActions } from "./module-assign";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { toast } from "sonner";
-import { ChevronsUpDown, Trash2, X } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronRight, ChevronsUpDown, Trash2, X } from "lucide-react";
 
 function Field({
   label,
@@ -101,8 +107,12 @@ function BoundCustomer({
   useEffect(() => {
     setValue(defaultValue);
   }, [recordKey, defaultValue]);
-  if (locked) return <LockedCustomer name={defaultValue} inputName={name} />;
-  return <CustomerCombo name={name} value={value} onChange={setValue} required={required} />;
+  return (
+    <div>
+      {locked ? <LockedCustomer name={defaultValue} inputName={name} /> : <CustomerCombo name={name} value={value} onChange={setValue} required={required} />}
+      <CustomerAddress customer={locked ? defaultValue : value} />
+    </div>
+  );
 }
 
 function BoundEquipment({
@@ -367,8 +377,20 @@ export function InstallSheet({
                 <FlagBadge flag={row.flag} />
                 {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
               </div>
+              <CustomerAddress customer={row.customer} className="mt-2" />
+              <label className="mt-3 flex w-fit items-center gap-2 text-sm font-medium" data-testid="trf-check-window">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary"
+                  checked={row.trfIssued}
+                  disabled={save.isPending}
+                  onChange={(e) => save.mutate({ id: row.id, trfIssued: e.target.checked })}
+                />
+                Tech Request Form issued
+              </label>
             </SheetHeader>
             <SheetBody>
+            <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
             <PreInspectionPanel installId={row.id} />
             <SerialNoticeBanner notice={row.serialNotice} />
             {row.duplicateOf ? (
@@ -428,6 +450,7 @@ export function InstallSheet({
               <div className="sm:col-span-2">
                 <EquipmentMultiCombo
                   values={equipPieces}
+                  hideChips
                   placeholder="Add another…"
                   onChange={(next) => {
                     try {
@@ -447,6 +470,14 @@ export function InstallSheet({
                   onChange={setSpecs}
                   onPulled={(next) => persistMachines(next)}
                   onRecipe={(next) => persistMachines(next)}
+                  onCommit={(next) => persistMachines(next)}
+                  onRemove={(index) => {
+                    try {
+                      persistMachines(specs.filter((_, i) => i !== index));
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Could not update equipment");
+                    }
+                  }}
                 />
               </div>
               <div>
@@ -531,6 +562,218 @@ export function InstallSheet({
   );
 }
 
+/** More than this many machines and the rows fold into one line with a count. */
+const DEAL_ROWS_OPEN = 3;
+
+/**
+ * Every machine on the deal in one section: Add Equipment puts another row here (model, serial, voltage,
+ * location, Sold or Loaned, configuration). The account is already open, so no customer is asked for again.
+ * Confirm sends a machine to the Board for prep. When a project is already open for this deal or account, it
+ * asks first: continue under that project (one board card) or start a new project (another card).
+ */
+function DealMachines({
+  deal,
+  specs,
+  recipes,
+  onChange,
+  onPersist,
+  onConfirmed,
+}: {
+  deal: Deal;
+  specs: MachineSpec[];
+  recipes: Recipe[];
+  onChange: (next: MachineSpec[]) => void;
+  onPersist: (next: MachineSpec[]) => void;
+  onConfirmed: (next: MachineSpec[]) => void;
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(specs.length <= DEAL_ROWS_OPEN);
+  const [seen, setSeen] = useState(specs.length);
+  const [asking, setAsking] = useState<number | null>(null);
+  useEffect(() => {
+    // A new row opens the list so it can be filled in; a long list loaded later starts folded.
+    if (specs.length > seen) setOpen(true);
+    else if (seen === 0 && specs.length > DEAL_ROWS_OPEN) setOpen(false);
+    setSeen(specs.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [specs.length]);
+  const many = specs.length > DEAL_ROWS_OPEN;
+  const count = `${specs.length} machine${specs.length === 1 ? "" : "s"}`;
+  const onBoard = specs.filter((s) => s.boardId != null).length;
+  const openProjects = deal.projects.filter((p) => p.open);
+
+  const confirm = useMutation({
+    mutationFn: (d: { index: number; project: { mode: "new" } | { mode: "continue"; installId: number } }) =>
+      confirmDealMachines({ data: { dealId: deal.id, machines: specs, indexes: [d.index], project: d.project } }),
+    onSuccess: (r, d) => {
+      setAsking(null);
+      onConfirmed(r.deal.machines);
+      toast.success(`${specs[d.index]?.equipment ?? "Machine"} is on the Board for prep`);
+      void qc.invalidateQueries({ queryKey: ["deals"] });
+      void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not confirm it"),
+  });
+
+  function requestConfirm(index: number) {
+    const problem = confirmError(specs[index] ?? { equipment: "", ownership: "" });
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
+    // Nothing open to continue under: the machine starts the project. Otherwise ask.
+    if (!openProjects.length) confirm.mutate({ index, project: { mode: "new" } });
+    else setAsking(index);
+  }
+
+  const projectFor = (id: number | null | undefined) => deal.projects.find((p) => p.id === id) ?? null;
+  const askedFor = asking != null ? specs[asking] : null;
+
+  return (
+    <section className="rounded-lg border border-border p-3 sm:col-span-2" data-testid="deal-machines" data-open={open ? "true" : "false"}>
+      <div className="flex flex-wrap items-center gap-2">
+        {many ? (
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}
+            className="flex min-h-9 items-center gap-1.5 text-left"
+            data-testid="deal-machines-toggle"
+          >
+            {open ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
+            <span className="text-sm font-medium">Equipment</span>
+          </button>
+        ) : (
+          <span className="text-sm font-medium">Equipment</span>
+        )}
+        <span className="text-xs text-muted-foreground" data-testid="deal-machines-count">{specs.length ? count : "None yet"}</span>
+        {specs.length ? (
+          <span className="text-xs text-muted-foreground" data-testid="deal-machines-on-board">
+            · {onBoard} on the Board
+          </span>
+        ) : null}
+      </div>
+      {specs.length ? (
+        <p className="mt-1 text-xs text-muted-foreground">Mark each machine Sold or Loaned. Confirm sends it to the Board for prep with everything set here.</p>
+      ) : null}
+      {many && !open ? (
+        <p className="mt-1 truncate text-xs text-muted-foreground" data-testid="deal-machines-folded">
+          {specs.map((s) => s.equipment).join(" · ")}
+        </p>
+      ) : (
+        <MachineFields
+          specs={specs}
+          onChange={onChange}
+          showRecipe={false}
+          recipeInConfig
+          customer={deal.customer}
+          recipes={recipes}
+          where="deal"
+          onRemove={(index) => onPersist(specs.filter((_, i) => i !== index))}
+          rowLocked={(s) => s.boardId != null}
+          rowFooter={(s, index) => {
+            const project = projectFor(s.boardId);
+            if (s.boardId != null) {
+              return (
+                <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs" data-testid="machine-on-board">
+                  <Badge size="tight" variant="success">
+                    <CheckCircle2 className="mr-1 size-3.5" />
+                    Confirmed · On The Board
+                  </Badge>
+                  <span className="text-muted-foreground">
+                    {project ? `${project.label} · ${project.status}` : "Board project"}
+                  </span>
+                  <OpenLink entityType="install" id={s.boardId} className="font-medium text-copper hover:underline">
+                    Open On The Board
+                  </OpenLink>
+                </p>
+              );
+            }
+            return (
+              <div className="mt-1 flex flex-wrap items-center gap-2" data-testid="machine-confirm-row">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={confirm.isPending}
+                  onClick={() => requestConfirm(index)}
+                  data-testid="machine-confirm"
+                >
+                  <CheckCircle2 className="size-4" />
+                  {confirm.isPending && confirm.variables?.index === index ? "Confirming…" : "Confirm"}
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  {isOwnership(s.ownership) ? "Not on the Board yet." : "Mark it Sold or Loaned, then confirm."}
+                </span>
+              </div>
+            );
+          }}
+        />
+      )}
+      <div className="mt-2" data-testid="deal-add-equipment">
+        <div>
+          <EquipmentMultiCombo
+            label="Add Equipment"
+            name="dealAddModel"
+            values={specs.map((s) => s.equipment)}
+            hideChips
+            placeholder="Pick a model to add a row…"
+            onChange={(next) => onPersist(mergeMachineSpecs(next, specs))}
+          />
+        </div>
+      </div>
+
+      <Dialog open={asking != null} onOpenChange={(o) => !o && setAsking(null)}>
+        <DialogContent className="max-w-md" data-testid="project-choice">
+          <DialogTitle>Add To The Board</DialogTitle>
+          <DialogDescription>
+            {askedFor?.equipment} goes to the Board for prep. This {openProjects.some((p) => p.ownDeal) ? "deal" : "account"} already has a project open there.
+            Continue under this project, or start a new project?
+          </DialogDescription>
+          <ul className="mt-3 grid gap-2">
+            {openProjects.map((p) => (
+              <li key={p.id}>
+                <button
+                  type="button"
+                  disabled={confirm.isPending}
+                  className="flex w-full flex-col items-start rounded-lg border border-border bg-card px-3 py-2.5 text-left hover:border-primary/60 disabled:opacity-60"
+                  onClick={() => asking != null && confirm.mutate({ index: asking, project: { mode: "continue", installId: p.id } })}
+                  data-testid="project-continue"
+                >
+                  <span className="text-sm font-medium">Continue Under This Project</span>
+                  <span className="text-xs text-muted-foreground">
+                    {p.label} · {p.status} · {p.machineCount} machine{p.machineCount === 1 ? "" : "s"}
+                    {p.equipment ? ` · ${p.equipment.split(/\r?\n/).filter(Boolean).join(", ")}` : ""}
+                  </span>
+                  <span className="text-xs text-muted-foreground">Same project keeps one board card.</span>
+                </button>
+              </li>
+            ))}
+            <li>
+              <button
+                type="button"
+                disabled={confirm.isPending}
+                className="flex w-full flex-col items-start rounded-lg border border-border bg-card px-3 py-2.5 text-left hover:border-primary/60 disabled:opacity-60"
+                onClick={() => asking != null && confirm.mutate({ index: asking, project: { mode: "new" } })}
+                data-testid="project-new"
+              >
+                <span className="text-sm font-medium">Start A New Project</span>
+                <span className="text-xs text-muted-foreground">Opens another board card for this machine.</span>
+              </button>
+            </li>
+          </ul>
+          <Button type="button" variant="ghost" className="mt-2 w-fit" onClick={() => setAsking(null)}>
+            Cancel
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
+
 export function DealSheet({
   deal,
   onClose,
@@ -542,6 +785,42 @@ export function DealSheet({
 }) {
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
+  const directoryEquip = useQuery({
+    queryKey: ["directory", "equipment"],
+    queryFn: () => listDirectory({ data: { kind: "equipment" } }),
+    enabled: !!deal,
+  });
+  const catalogNames = (directoryEquip.data ?? []).map((e) => e.name);
+  const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes(), enabled: !!deal });
+  // One row per machine. Older deals kept only the equipment text: split it into rows the first time.
+  const [specs, setSpecs] = useState<MachineSpec[]>([]);
+  const [specsFor, setSpecsFor] = useState<number | null>(null);
+  useEffect(() => {
+    if (!deal) {
+      setSpecsFor(null);
+      return;
+    }
+    if (specsFor === deal.id && specs.length) return;
+    setSpecs(deal.machines.length ? deal.machines : mergeMachineSpecs(listedEquipment(deal.equipment, catalogNames), []));
+    setSpecsFor(deal.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deal?.id, deal?.machines.length, catalogNames.length]);
+  const placed = (deal?.machines ?? []).map((m) => `${m.uid ?? m.equipment}:${m.boardId ?? ""}`).join("|");
+  useEffect(() => {
+    if (!deal) return;
+    setSpecs((cur) =>
+      cur.map((s, i) => {
+        // A confirmed row is found by its tie; a row not tied yet by its place and model (it may have been
+        // confirmed, or handed off with the deal, since this window opened).
+        const hit = s.uid ? deal.machines.find((m) => m.uid === s.uid) : deal.machines[i]?.equipment === s.equipment ? deal.machines[i] : undefined;
+        const boardId = hit ? (hit.boardId ?? null) : s.uid ? null : (s.boardId ?? null);
+        const uid = s.uid ?? hit?.uid;
+        if (boardId === (s.boardId ?? null) && uid === s.uid) return s;
+        return { ...s, boardId, ...(uid ? { uid, confirmedAt: s.confirmedAt ?? hit?.confirmedAt ?? null } : {}) };
+      }),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deal?.id, placed]);
   const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateDeal>[0]["data"]) => updateDeal({ data: d }),
@@ -613,7 +892,7 @@ export function DealSheet({
                   customer: String(fd.get("customer")),
                   producer: String(fd.get("producer") || "") || null,
                   aviKatz: fd.get("aviKatz") === "on",
-                  equipment: String(fd.get("equipment") || "") || null,
+                  machines: specs,
                   amount: Number.isFinite(amountNum) ? amountNum : null,
                   goodToOrder: fd.get("goodToOrder") === "on" || fd.get("ordered") === "on",
                   ordered: fd.get("ordered") === "on",
@@ -638,10 +917,19 @@ export function DealSheet({
                 <AkBadge on={deal.aviKatz} />
               </label>
 
-              <div className="sm:col-span-2">
-                <BoundEquipment recordKey={deal.id} defaultValue={deal.equipment ?? ""} />
-              </div>
-              <Field label="Amount" name="amount" defaultValue={deal.amount != null ? String(deal.amount) : ""} />
+              <DealMachines
+                deal={deal}
+                specs={specs}
+                recipes={recs.data ?? []}
+                onConfirmed={setSpecs}
+                onChange={setSpecs}
+                onPersist={(next) => {
+                  setSpecs(next);
+                  skipToast.current = true;
+                  save.mutate({ id: deal.id, machines: next });
+                }}
+              />
+              <Field label="Equipment Package Amount" name="amount" defaultValue={deal.amount != null ? String(deal.amount) : ""} />
               <div>
                 <Label>Payment terms</Label>
                 <SelectField name="terms" className="mt-1" defaultValue={deal.terms ?? ""} allowEmpty>
@@ -651,7 +939,7 @@ export function DealSheet({
                 </SelectField>
               </div>
               <Field label="ETA" name="eta" defaultValue={deal.eta ?? ""} />
-              <Field label="Invoice #" name="invoice" defaultValue={deal.invoice ?? ""} />
+              <Field label="Sale Invoice # Or Sales Order #" name="invoice" defaultValue={deal.invoice ?? ""} />
               <div>
                 <Label>Deal completion</Label>
                 <SelectField name="completion" className="mt-1" defaultValue={deal.completion ?? ""} allowEmpty emptyLabel="Still open">
@@ -754,6 +1042,7 @@ export function ModuleSheet({
                 <span className="text-sm text-muted-foreground">Not at HQ · {row.status}</span>
               )}
             </div>
+            <ModuleRecord row={row} />
             <form
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {

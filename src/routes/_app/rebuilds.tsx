@@ -8,18 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
+import { FilterChip, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { RebuildBoard } from "@/components/desk/rebuild-board";
 import { RebuildPlanner } from "@/components/desk/rebuild-planner";
 import { RebuildSheet } from "@/components/desk/rebuild-sheet";
 import { CustomerCombo, EquipmentCombo } from "@/components/desk/directory-fields";
 import { OwnerSelect } from "@/components/desk/owner-select";
 import { ExportButton } from "@/components/desk/export-dialog";
+import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { useMyView } from "@/components/desk/my-view-bar";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { Skeleton } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/rebuilds")({
   validateSearch: parseOpenSearch,
@@ -129,30 +129,23 @@ function Page() {
         />
       </StatRow>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input className="h-9 w-64 shrink-0" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search project, account, serial…" aria-label="Search rebuilds" />
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search rebuilds…" label="Search project, account or serial" />
         {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => setChip(f.id)}
-            className={cn(
-              "inline-flex h-9 shrink-0 items-center rounded-full border px-3 text-sm",
-              chip === f.id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
-            )}
-          >
+          <FilterChip key={f.id} selected={chip === f.id} onClick={() => setChip(f.id)}>
             {f.label}
-          </button>
+          </FilterChip>
         ))}
-        <div className="flex shrink-0 gap-1">
-          <Button type="button" size="sm" variant={view === "board" ? "default" : "outline"} onClick={() => setView("board")}>
+        {/* Board or Timeline: how the same rows are laid out. */}
+        <span className="ml-auto flex shrink-0 gap-2" role="group" aria-label="Layout">
+          <FilterChip selected={view === "board"} onClick={() => setView("board")}>
             Board
-          </Button>
-          <Button type="button" size="sm" variant={view === "timeline" ? "default" : "outline"} onClick={() => setView("timeline")}>
+          </FilterChip>
+          <FilterChip selected={view === "timeline"} onClick={() => setView("timeline")}>
             Timeline
-          </Button>
-        </div>
-      </div>
+          </FilterChip>
+        </span>
+      </ListToolbar>
 
       <div className="mt-5">
         {data.isLoading ? (

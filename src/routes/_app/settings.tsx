@@ -10,6 +10,7 @@ import { usePrefs } from "@/components/desk/prefs-provider";
 import { AppearanceIcon } from "@/components/desk/theme-toggle";
 import { RosterEditor } from "@/components/desk/roster-editor";
 import { RepsEditor } from "@/components/desk/reps-editor";
+import { DiscountRuleEditor } from "@/components/desk/discount-rule-editor";
 
 import { cn } from "@/lib/utils";
 import type { Appearance } from "@/lib/ops/prefs";
@@ -35,6 +36,7 @@ function Page() {
         <PasswordSection />
         <RosterEditor />
         <RepsEditor />
+        <DiscountRuleEditor />
 
 
         <Section
@@ -222,7 +224,7 @@ function Preview({ appearance }: { appearance: Appearance }) {
       )}
     >
       <div className={cn("flex items-center justify-between px-3 py-2 text-xs", dark ? "bg-black/20" : "bg-muted/80")}>
-        <span className="font-display text-sm">Katz Desk</span>
+        <span className="font-display text-sm">Preview</span>
         <span className={dark ? "text-cream/60" : "text-muted-foreground"}>
           {prefs.text === "large" ? "Large type" : "Default type"}
           {prefs.density === "compact" ? " · Compact" : ""}

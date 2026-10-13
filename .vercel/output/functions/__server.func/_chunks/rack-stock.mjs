@@ -1,11 +1,11 @@
 import { r as __exportAll } from "../_runtime.mjs";
-import { hn as object, mn as number, sn as _enum, un as boolean, vn as string } from "../_libs/@better-auth/core+[...].mjs";
+import { hn as object, mn as number, sn as _enum, un as boolean, yn as string } from "../_libs/@better-auth/core+[...].mjs";
 import { n as createServerFn } from "../_libs/@tanstack/start-client-core+[...].mjs";
-import { r as getSql } from "./popup.server.mjs";
+import { r as getSql } from "./db.mjs";
 import { u as serialKey } from "./account-equip.mjs";
 import { a as deskMiddleware, b as flagOn } from "./access.mjs";
-import { a as notifyAdminsRackReview } from "./notify.mjs";
-import { i as LEVELS, m as slotId, r as FRONT_PALLETS, t as BACK_PALLETS, u as isValidBay } from "./warehouse.mjs";
+import { o as notifyAdminsRackReview } from "./notify.mjs";
+import { g as slotId, i as LEVELS, m as sectionFullMessage, p as rackBayError } from "./warehouse.mjs";
 //#region src/lib/ops/rack-stock.ts
 var rack_stock_exports = /* @__PURE__ */ __exportAll({
 	addToRackSlot: () => addToRackSlot,
@@ -32,18 +32,9 @@ async function requireStock(sql, userId) {
 	if (!role.admin && !role.warehouse) throw new Error("Only Admin or Warehouse can change rack stock.");
 	return role;
 }
-function rackOf(site) {
-	if (site === "barn-front") return "barn-front";
-	if (site === "barn-back" || site === "barn") return "barn-back";
-	throw new Error("Pick a barn rack");
-}
-function levelOf(level) {
-	if (!LEVELS.includes(level)) throw new Error("Pick a level");
-	return level;
-}
 async function nextLine(sql, site, pallet, level, exceptId) {
 	const taken = await sql.query(`select id, line_no from assets
-      where site = $1 and pallet = $2 and level = $3
+      where site = $1 and upper(pallet) = $2 and level = $3
         and status in ('ready', 'deployed')
         and line_no is not null`, [
 		site,
@@ -52,7 +43,16 @@ async function nextLine(sql, site, pallet, level, exceptId) {
 	]);
 	const used = new Set(taken.filter((t) => t.id !== exceptId).map((t) => t.line_no));
 	for (let line = 1; line <= 12; line++) if (!used.has(line)) return line;
-	throw new Error(`${slotId(pallet, level)} is full`);
+	throw new Error(sectionFullMessage(site, pallet, level));
+}
+function rackOf(site) {
+	if (site === "barn-front") return "barn-front";
+	if (site === "barn-back" || site === "barn") return "barn-back";
+	throw new Error("Pick a barn rack");
+}
+function levelOf(level) {
+	if (!LEVELS.includes(level)) throw new Error("Pick a level");
+	return level;
 }
 async function findSerial(sql, serial) {
 	const key = serialKey(serial);
@@ -119,16 +119,18 @@ var addToRackSlot = createServerFn({ method: "POST" }).middleware([deskMiddlewar
 	const site = rackOf(data.site);
 	const pallet = data.pallet.trim().toUpperCase();
 	const level = levelOf(data.level);
-	const allowed = site === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
-	if (!isValidBay(pallet) || !allowed.includes(pallet)) throw new Error("Pick a bay A through P on this rack");
+	const bayErr = rackBayError(site, pallet);
+	if (bayErr) throw new Error(bayErr);
 	const slot = slotId(pallet, level);
 	const serial = data.serial?.trim() || "";
 	const electrical = data.electrical?.trim() || null;
 	const existing = serial ? await findSerial(sql, serial) : null;
 	if (existing && (existing.status === "sold" || existing.sold_to)) throw new Error(`That serial is already allocated${existing.sold_to ? ` to ${existing.sold_to}` : ""}.`);
 	if (existing) {
-		if (existing.site === site && (existing.pallet ?? "").toUpperCase() === pallet && Number(existing.level) === level && existing.status === "ready") throw new Error(`${serial} is already in ${slot}.`);
-		const current = existing.pallet && existing.level ? slotId(String(existing.pallet).toUpperCase(), Number(existing.level)) : existing.site;
+		if (existing.site === site && (existing.pallet ?? "").toUpperCase() === pallet && Number(existing.level) === level && existing.status === "ready") throw new Error(`${serial} is already in ${site === "barn-front" ? "Front" : "Back"} · ${slot}.`);
+		const { assertNotHeld } = await import("./stock-actions.mjs").then((n) => n.i);
+		await assertNotHeld(sql, existing.id);
+		const current = existing.pallet && existing.level && (existing.site === "barn-front" || existing.site === "barn-back") ? `${existing.site === "barn-front" ? "Front" : "Back"} · ${slotId(String(existing.pallet).toUpperCase(), Number(existing.level))}` : existing.pallet && existing.level ? slotId(String(existing.pallet).toUpperCase(), Number(existing.level)) : existing.site;
 		if (!data.confirm) return {
 			id: existing.id,
 			moved: false,
@@ -293,4 +295,4 @@ var setShopTest = createServerFn({ method: "POST" }).middleware([deskMiddleware]
 	return { ok: true };
 });
 //#endregion
-export { setShopTest as i, rack_stock_exports as n, reviewRackUnit as r, addToRackSlot as t };
+export { setShopTest as a, reviewRackUnit as i, rack_stock_exports as n, requireStock as r, addToRackSlot as t };

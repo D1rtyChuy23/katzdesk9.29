@@ -1,8 +1,8 @@
 import { o as __toESM } from "../_runtime.mjs";
+import { t as __exportAll } from "./rolldown-runtime-D7D4PA-g.mjs";
 import { u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
-import { c as __exportAll } from "./ssr.mjs";
 import { Ht as isSafeUrlScheme, Rt as capitalizeFirstLetter, Vt as createFetch, zt as toKebabCase } from "../_libs/@better-auth/core+[...].mjs";
-import { _ as atom, f as defu, g as onSet, h as onMount, m as STORE_UNMOUNT_DELAY, p as listenKeys } from "../_libs/better-auth+[...].mjs";
+import { _ as onSet, g as onMount, h as STORE_UNMOUNT_DELAY, m as listenKeys, p as defu, v as atom } from "../_libs/better-auth+[...].mjs";
 import { n as PACKAGE_VERSION, r as getBaseURL, t as GENERIC_OAUTH_ERROR_CODES } from "./url-DwGxbmbA.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/client-BBelINLf.js
 var import_react = /* @__PURE__ */ __toESM(require_react());

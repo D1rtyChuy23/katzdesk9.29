@@ -30,6 +30,7 @@ import { StockActions } from "@/components/desk/stock-actions";
 import { PlacePicker, type PlaceDraft } from "@/components/desk/unit-place-field";
 import { CustomerCombo, EquipmentCombo } from "@/components/desk/directory-fields";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
+import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
 import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { cn } from "@/lib/utils";
@@ -258,14 +259,8 @@ function Page() {
         </section>
       ) : null}
 
-      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Find model or serial…"
-          className="h-9 w-56 shrink-0"
-          aria-label="Find model or serial"
-        />
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Find model or serial…" />
         <FilterChip
           selected={rack === "barn-back"}
           onClick={() => {
@@ -305,7 +300,7 @@ function Page() {
           </FilterChip>
         ) : null}
         <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_STATUS]} className="shrink-0" />
-      </div>
+      </ListToolbar>
 
       <p className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
         <span><span className="mr-1 inline-block size-2 rounded-sm bg-catering" />Catering A–D</span>
@@ -896,7 +891,8 @@ function AddDialog({
   slot: SlotKey | null;
   onCreated: (row: Asset) => Promise<void>;
 }) {
-  const pallets = BACK_PALLETS;
+  // The Front rack only has bays I–P.
+  const pallets = rack === "barn-front" ? FRONT_PALLETS : BACK_PALLETS;
   const [pending, setPending] = useState(false);
   const [model, setModel] = useState("");
   const [owned, setOwned] = useState("");

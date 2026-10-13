@@ -2,7 +2,7 @@
  * The Library — plain-text copy for Outlook/Teams. Pure: no DOM, safe for node --test.
  * Short lines, no markdown tables, so it pastes cleanly into an email or chat.
  */
-import { coreHoleInfo } from "./spec-defaults.ts";
+import { coreHoleInfo, isGrinder } from "./spec-defaults.ts";
 import type { Dimensions, Drain, Power, Requirements, SpecConfig, SpecSheetDraft, Water } from "./spec-schema.ts";
 
 const has = (v: string | undefined | null): v is string => !!v && !!v.trim();
@@ -34,7 +34,7 @@ export function powerLine(p: Power | undefined): string | null {
   if (!p) return null;
   const breaker = p.breaker?.trim() ? `${p.breaker.trim()} breaker` : "";
   const ampsText = p.amps ? (breaker ? `${amps(p.amps)} (${breaker})` : amps(p.amps)) : breaker;
-  const text = join([p.voltage && volts(p.voltage), ampsText, p.phase && phase(p.phase), p.hz && hz(p.hz), p.plug, p.circuit]);
+  const text = join([p.voltage && volts(p.voltage), p.wires, ampsText, p.phase && phase(p.phase), p.hz && hz(p.hz), p.plug, p.circuit]);
   return text ? `Power: ${text}` : null;
 }
 
@@ -61,8 +61,9 @@ export function sizeLines(d: Dimensions | undefined): string[] {
   return out;
 }
 
-export function requirementLines(r: Requirements): string[] {
-  const lines = [powerLine(r.power), waterLine(r.water), drainLine(r.drain), ...sizeLines(r.dimensions)].filter(
+export function requirementLines(r: Requirements, opts?: { noWater?: boolean }): string[] {
+  const wet = opts?.noWater ? [] : [waterLine(r.water), drainLine(r.drain)];
+  const lines = [powerLine(r.power), ...wet, ...sizeLines(r.dimensions)].filter(
     (l): l is string => !!l,
   );
   for (const row of r.other ?? []) if (has(row.label) && has(row.value)) lines.push(`${row.label.trim()}: ${row.value.trim()}`);
@@ -80,7 +81,7 @@ function title(sheet: SheetLike): string {
 export function copyConfig(sheet: SheetLike, config: SpecConfig): string {
   const label = config.label?.trim();
   const head = label && !/^standard$/i.test(label) ? `${title(sheet)} - ${label}` : title(sheet);
-  const lines = requirementLines(config.requirements);
+  const lines = requirementLines(config.requirements, { noWater: isGrinder(sheet) });
   const core = coreHoleInfo({
     manufacturer: sheet.manufacturer,
     model: sheet.model,
@@ -88,7 +89,7 @@ export function copyConfig(sheet: SheetLike, config: SpecConfig): string {
     coreHole: sheet.coreHole,
     coreDiameter: sheet.coreDiameter,
   });
-  if (core.label) lines.push(core.label);
+  lines.push(...coreHoleLines(core));
   return [head, ...(lines.length ? lines : ["No requirements listed"])].join("\n");
 }
 
@@ -102,4 +103,17 @@ export function copyAll(sheet: SheetLike): string {
   if (has(sheet.mfrNotes?.warranty)) tail.push(`Warranty: ${sheet.mfrNotes!.warranty!.trim()}`);
   if (has(sheet.mfrNotes?.usContact)) tail.push(`US contact: ${sheet.mfrNotes!.usContact!.trim()}`);
   return [...blocks, ...(tail.length ? [tail.join("\n")] : [])].join("\n\n");
+}
+
+export const CORE_HOLE_NOTE = "Primarily needed when utility lines are below the counter.";
+
+/** Core-hole fields travel with every copied configuration. No → "No" and no diameter. */
+export function coreHoleLines(core: { required: boolean; diameter: string | null; label: string | null }): string[] {
+  if (!core.required) return ["Utility lines pass through the counter: No", `Note: ${CORE_HOLE_NOTE}`];
+  return [
+    "Utility lines pass through the counter: Yes",
+    // The size is stated once.
+    `Hole diameter: ${core.diameter ?? "needed"}`,
+    `Note: ${CORE_HOLE_NOTE}`,
+  ];
 }
