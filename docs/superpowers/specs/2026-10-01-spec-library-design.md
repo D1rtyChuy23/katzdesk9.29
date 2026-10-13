@@ -201,3 +201,34 @@ only. Do not rebuild the app. Do not autofill volts, plug, or water.
 Acceptance: a grinder row has no Water field; a brewer's Plug and Water are
 empty with no ghost text; an install row's serial matches the warehouse unit
 just assigned.
+
+## Change request: hide or remove obsolete parts (2026-10-13)
+
+Scope: the Parts page (`src/routes/_app/parts.tsx`), `src/lib/ops/parts-api.ts`
+and where parts are picked. Do not rebuild the app.
+
+- **Storage.** Parts are rows in `billing_items`. Add `hidden_at timestamptz`,
+  `hidden_by text` and `hidden_reason text` in a new migration. This is a
+  separate marker from `active`, because the item-list import
+  (`src/lib/ops/charges-api.ts`) writes `active` and could bring a hidden part
+  back; no import may clear `hidden_at`.
+- **Hide (default, reversible).** A "Hide" action on each part row, with an
+  optional reason (for example "Obsolete, replaced by SKU 123"). Hidden parts
+  disappear from the Parts list, the invoice picker, repair-quote pickers and
+  search. Existing invoice and quote lines that already used the part keep
+  showing it, so history is unchanged.
+- **Show hidden.** A "Show hidden" filter on the Parts page lists hidden parts
+  with who hid them, when and why, and a **Restore** button.
+- **Remove (permanent).** Admin only, and only for a part never used on any
+  charge or quote line. A part with history can only be hidden, and the app
+  says why. Removing asks for confirmation.
+- **Imports.** The NetSuite item import and Part Pricing import do not re-add or
+  un-hide a hidden part, and the import preview lists "hidden, skipped" counts.
+- **Who.** Admin and Sales can hide and restore. Everyone with Desk access
+  can see the Parts list.
+- **Bulk.** Select several parts and hide them in one action.
+
+Acceptance: hide a part and it is gone from the Parts list and invoice
+picker; Show hidden lists it with a Restore button; restoring brings it back;
+a re-import does not bring a hidden part back; an old invoice line that used
+the part still displays it.
