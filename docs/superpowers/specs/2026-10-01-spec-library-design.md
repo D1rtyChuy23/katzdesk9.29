@@ -232,3 +232,40 @@ Acceptance: hide a part and it is gone from the Parts list and invoice
 picker; Show hidden lists it with a Restore button; restoring brings it back;
 a re-import does not bring a hidden part back; an old invoice line that used
 the part still displays it.
+
+## QA pass: new functions (2026-10-13)
+
+A walk-through of the recent functions: fix what fails, no rebuild, no restyle,
+no change to a rule that already works, no unlocking, merging or deleting of
+customers. Checked against `main` at cf599c4 by reading the code (not by
+clicking through the app).
+
+### Not built yet on `main` (build these, they are not "broken")
+
+| Item | State in code |
+|---|---|
+| Sold, Loan, Lease as one selection | `OWNERSHIPS = ["Sold", "Loaned"]` in `deal-board.ts`; no Lease; confirm message says "Sold or Loaned" |
+| No coffee bubble | Coffee input still in `machine-fields.tsx`; Coffee column still on `install-ticket.tsx` |
+| Recipe add and remove in the same window | Add is in the row (`AddRecipePanel`); no remove action in the row |
+| Volts, plug, water blank; no placeholder text | Placeholders `208V`, `L6-30P`, `3/8" line` still set; serial pull still fills voltage |
+| Grinder has no Water field | Row shows the "No water or drain" note where the field was |
+| Warehouse serial shows on the install row | `assignAssetToInstall` links the unit but never writes the serial to `installs.machines` |
+| Hide or remove obsolete parts | No `hidden_at` and no Hide action (see the change request above) |
+
+### Present in code (verify by clicking)
+
+Clean Names page and Admin gate; menu groups (Installs: Pipeline, Board,
+Handoff; Accounts: Customers, Recipes, Out Of Network, Clean Names); sales rep
+service scope (`salesRepScope`); pre-inspection categories by unit type and
+Ethernet on Eversys only (`pre-inspection.ts`); Legacy rules; part import
+approval (`part_import_runs`); ticket discount; module swap; Parts Profit with
+PDF, Excel and Word export; Good To Order and Ordered pings; shared Import menu.
+
+### Decisions needed before the pass
+
+- **Analytics for everyone.** Today the warehouse role is limited to Warehouse,
+  Locations, Modules and The Library, so it cannot open Analytics. Parts Profit
+  is Admin only because it shows cost and margin. Decide whether "everyone"
+  includes the warehouse role, and confirm Parts Profit stays Admin only.
+- **Brewer field order.** Code order is Power, Water, Space. If Space must come
+  first, say so; otherwise leave the order alone.
