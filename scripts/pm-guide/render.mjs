@@ -1,4 +1,4 @@
-import { calcConfig, discounted } from "./calc.mjs";
+import { calcConfig, calcOptionalVisit, calcSchedule, discounted } from "./calc.mjs";
 
 const DISCLAIMER =
   "Parts pricing is subject to change. Parts costs may be updated at any time, and any price update can affect the final price.";
@@ -56,6 +56,17 @@ table.tight { font-size: 10.5px } table.tight td { padding: 3px 6px } table.tigh
 .right { display: flex; flex-direction: column; gap: 10px; flex: 1.1; min-width: 0 }
 .right > .card { flex: none }
 .card.disc td { padding: 4px 6px } .card.disc table { font-size: 10.5px }
+.rec { background: #fdf3e1; border-left: 3px solid var(--trip); padding: 6px 10px; font-size: 11.5px; margin: 0 0 8px; border-radius: 0 4px 4px 0 }
+.scheds { display: flex; gap: 10px; margin-bottom: 10px }
+.sched { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px }
+.sched b { font-size: 15px; color: var(--brand) }
+.sched.main { background: var(--brand); border-color: var(--brand) } .sched.main b { color: #fff } .sched.main .mut { color: #cfd9e3 }
+.badge2 { align-self: flex-start; font-size: 9px; letter-spacing: .06em; text-transform: uppercase; background: var(--trip); color: #16202c; border-radius: 9px; padding: 1px 8px; font-weight: 700 }
+th.c { text-align: center; border-bottom: 0; color: var(--brand) }
+.cov { display: flex; gap: 14px; margin-top: 10px }
+.cov > div { flex: 1; background: var(--soft); border-radius: 8px; padding: 8px 10px }
+.cov h4 { font-size: 11px; color: var(--brand); margin-bottom: 3px }
+.cov p { font-size: 10px; line-height: 1.4; color: var(--ink) }
 .visit-line { font-size: 12px; font-weight: 700; color: var(--brand); margin: 0 0 8px }
 ul.work { margin: 0 0 0 16px; font-size: 10.5px; line-height: 1.4 }
 .big { font-size: 28px; font-weight: 700; color: var(--brand) }
@@ -144,7 +155,9 @@ export function renderGuideHtml(machine, rates) {
   const variantIds = [...new Set(machine.configurations.flatMap((c) => c.variants.map((v) => v.id)))];
   const variantLabel = (id) => machine.configurations.flatMap((c) => c.variants).find((v) => v.id === id).label;
   const calc = (c, v) => calcConfig(machine, rates, c.id, v);
-  const total = 3 + machine.configurations.length;
+  const schedules = machine.schedules ?? [];
+  const hasSchedules = schedules.length > 0;
+  const total = 3 + machine.configurations.length + (hasSchedules ? 1 : 0);
   const pages = [];
 
   // 1. Cover
@@ -176,7 +189,7 @@ export function renderGuideHtml(machine, rates) {
 <div class="tile"><b>${$(progLabor)}/hr</b><span>Program labor rate</span></div>
 <div class="tile"><b>${$(progTrip)}</b><span>Program trip charge</span></div>
 </div>
-${
+${hasSchedules ? `<p class="rec"><b>12-month PM: highly recommended every year.</b> Add a 6-month visit if your machine sees high volume. See Service Intervals, page ${3 + machine.configurations.length}.</p>` : ""}${
   workCards
     ? `<p class="visit-line">${visitSummary}</p><div class="cols">${workCards}</div>`
     : `<table><tr><th>When</th><th>Visit</th><th>Services performed</th><th class="r">Labor</th></tr>${visitRows}</table>`
@@ -274,6 +287,55 @@ ${
     );
   });
 
+  // 3b. Service intervals
+  if (hasSchedules) {
+    const cards = schedules
+      .map(
+        (sc, i) =>
+          `<div class="sched${i === 0 ? " main" : ""}"><span class="badge2">${esc(sc.tag)}</span><b>${esc(sc.label)}</b><span class="mut">Visits at month ${esc(sc.months)}</span></div>`,
+      )
+      .join("");
+    const visitsById = Object.fromEntries((machine.optionalVisits ?? []).map((v) => [v.id, v]));
+    const optIds = (machine.optionalVisits ?? []).map((v) => v.id);
+    const vHead = [...optIds.slice().reverse(), machine.visits[0].id];
+    const vLabel = (id) => (id === machine.visits[0].id ? "12-month" : visitsById[id].label.replace(" PM", ""));
+    const rows = machine.configurations
+      .map((cfg) => {
+        const base = calcConfig(machine, rates, cfg.id, cfg.variants[0].id);
+        const perVisit = vHead
+          .map((id) => {
+            const v = id === machine.visits[0].id ? base.visits[0] : calcOptionalVisit(machine, rates, id, cfg.id);
+            const kit = id === machine.visits[0].id ? "" : `<div class="mut">kit ${esc(v.kit.partNo)}</div>`;
+            return `<td class="r"><b>${$(v.totalCents)}</b>${kit}</td>`;
+          })
+          .join("");
+        const perYear = schedules.map((sc) => `<td class="r"><b>${$(calcSchedule(machine, rates, sc.id, cfg.id).totalCents)}</b></td>`).join("");
+        return `<tr><td>${esc(cfg.label)}</td>${perVisit}${perYear}</tr>`;
+      })
+      .join("");
+    const coverage = [
+      { title: "12-month PM", text: machine.visits[0].services },
+      ...(machine.optionalVisits ?? []).map((v) => ({ title: v.label, text: v.summary })),
+    ]
+      .map((c) => `<div><h4>${esc(c.title)}</h4><p>${esc(c.text)}</p></div>`)
+      .join("");
+    const hrs = [...new Set((machine.optionalVisits ?? []).map((v) => v.hours))].join(" / ");
+    pages.push(
+      pageShell(
+        machine,
+        3 + machine.configurations.length,
+        total,
+        "Service intervals",
+        `<h2>Recommended Service Intervals</h2>
+<div class="scheds">${cards}</div>
+<table class="tight"><tr><th></th><th colspan="${vHead.length}" class="c">Cost per visit</th><th colspan="${schedules.length}" class="c">Cost per year</th></tr>
+<tr><th>Configuration</th>${vHead.map((id) => `<th class="r">${esc(vLabel(id))}</th>`).join("")}${schedules.map((sc) => `<th class="r">${esc(sc.label)}</th>`).join("")}</tr>${rows}</table>
+<div class="cov">${coverage}</div>
+<p class="note">Each visit is PM kit + ${hrs} hr${hrs === "1" ? "" : "s"} program labor (${$(progLabor)}/hr) + program trip (${$(progTrip)}), with ${pct}% off labor and trip. The 12-month price includes the full annual parts list.</p>`,
+      ),
+    );
+  }
+
   // 4. Summary
   const head = variantIds.map((id) => `<th class="r">${esc(variantLabel(id))} total</th>`).join("");
   const sumRows = machine.configurations
@@ -294,7 +356,7 @@ ${
       `<h2>${planMonths(machine)}-Month PM Cost by Configuration</h2>
 <table><tr><th>Configuration</th><th class="r">Parts</th><th class="r">Labor</th><th class="r">Trip</th>${head}</tr>${sumRows}</table>
 <div class="card" style="margin-top:16px"><h3>Good to know</h3><ul class="good">
-<li>At least one PM visit per year is recommended.</li>
+<li>${hasSchedules ? "A 12-month PM is highly recommended every year. For high-volume locations we recommend 6-month intervals." : "At least one PM visit per year is recommended."}</li>
 <li>Labor and trip are ${pct}% off standard rates and are included in every total.</li>
 <li>Parts are list price. Items that are only inspected are quoted if they need replacing.</li>
 <li>Installation is not included in PM pricing.</li></ul></div>`,

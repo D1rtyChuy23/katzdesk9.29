@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { calcConfig, discounted, loadRates } from "./pm-guide/calc.mjs";
+import { calcConfig, calcOptionalVisit, calcSchedule, discounted, loadRates } from "./pm-guide/calc.mjs";
 
 const load = (id) => JSON.parse(readFileSync(new URL(`../pm-guides/data/${id}.json`, import.meta.url), "utf8"));
 const rates = loadRates();
@@ -82,9 +82,9 @@ test("formatMoney", () => {
   assert.equal(formatMoney(150617), "$1,506.17");
 });
 
-test("html has cover + parts + 4 config pages + summary", () => {
+test("html has cover + parts + 4 config pages + service intervals + summary", () => {
   const html = renderGuideHtml(linea, rates);
-  assert.equal((html.match(/class="page"/g) ?? []).length, 7);
+  assert.equal((html.match(/class="page"/g) ?? []).length, 8);
 });
 
 test("html shows every expected annual total", () => {
@@ -103,7 +103,7 @@ test("html shows 75% off, $37.50 labor and $37.50 trip", () => {
 
 test("every page carries the pricing disclaimer", () => {
   const html = renderGuideHtml(linea, rates);
-  assert.equal(html.split(DISCLAIMER).length - 1, 7);
+  assert.equal(html.split(DISCLAIMER).length - 1, 8);
 });
 
 test("inspect-only items are listed with prices and marked not included", () => {
@@ -125,10 +125,10 @@ import { renderGuidePdf } from "./pm-guide/render.mjs";
 const cli = new URL("./pm-guide/cli.mjs", import.meta.url).pathname;
 const pdfOut = join(mkdtempSync(join(tmpdir(), "pmg-cli-")), "linea.pdf");
 
-test("cli builds a 7-page pdf for linea", () => {
+test("cli builds an 8-page pdf for linea", () => {
   execFileSync("node", [cli, "la-marzocco-linea-classic-s", pdfOut]);
   const info = execFileSync("pdfinfo", [pdfOut], { encoding: "utf8" });
-  assert.match(info, /Pages:\s+7/);
+  assert.match(info, /Pages:\s+8/);
   assert.match(info, /Page size:\s+720 x 40[45](\.\d+)? pts/);
 });
 
@@ -211,4 +211,65 @@ test("each priced part says what work is done with it", () => {
 test("every priced part in the linea data has a work description", () => {
   assert.ok(linea.parts.every((p) => typeof p.work === "string" && p.work.length > 0));
   assert.ok(linea.workPerformed.length >= 2);
+});
+
+// --- service intervals (3/9, 6 and 12 month) ---
+
+test("6-month and 3/9-month visits are 1 hr labor + trip + the LCS kit", () => {
+  const six = ["g1", "g2", "g3", "g4"].map((c) => calcOptionalVisit(linea, rates, "m6", c).totalCents);
+  const three = ["g1", "g2", "g3", "g4"].map((c) => calcOptionalVisit(linea, rates, "m3_9", c).totalCents);
+  assert.deepEqual(six, [21177, 22956, 25562, 28168]);
+  assert.deepEqual(three, [10106, 12712, 15318, 17924]);
+  const v = calcOptionalVisit(linea, rates, "m6", "g1");
+  assert.equal(v.laborCents, 3750);
+  assert.equal(v.tripCents, 3750);
+  assert.equal(v.kit.partNo, "LCS.6.1");
+  assert.equal(v.kit.unitCents, 13677);
+});
+
+test("schedules: annual, 6-month intervals and quarterly totals", () => {
+  const t = (s, c) => calcSchedule(linea, rates, s, c).totalCents;
+  assert.deepEqual(["annual", "semi", "quarterly"].map((s) => t(s, "g1")), [43191, 64368, 84580]);
+  assert.deepEqual(["annual", "semi", "quarterly"].map((s) => t(s, "g4")), [50397, 78565, 114413]);
+  assert.equal(calcSchedule(linea, rates, "quarterly", "g1").visitCount, 4);
+});
+
+test("the annual schedule is the 12-month total, unchanged", () => {
+  assert.equal(calcSchedule(linea, rates, "annual", "g2").totalCents, calcConfig(linea, rates, "g2", "av").totalCents);
+});
+
+test("an optional visit with no hours, or a missing kit, throws naming it", () => {
+  const bad = structuredClone(linea);
+  delete bad.optionalVisits[0].hours;
+  assert.throws(() => calcOptionalVisit(bad, rates, "m6", "g1"), /m6/);
+  const noKit = structuredClone(linea);
+  delete noKit.optionalVisits[0].kits.g3;
+  assert.throws(() => calcOptionalVisit(noKit, rates, "m6", "g3"), /g3/);
+  assert.throws(() => calcOptionalVisit(linea, rates, "m99", "g1"), /m99/);
+  assert.throws(() => calcSchedule(linea, rates, "nope", "g1"), /nope/);
+});
+
+const intervalsPage = (html) => html.split('<section class="page">')[7];
+
+test("service intervals page recommends 12-month and 6-month for high volume, with prices", () => {
+  const page = intervalsPage(renderGuideHtml(linea, rates));
+  for (const t of ["Highly recommended", "Recommended for high volume", "Suggested", "LCS.6.1", "LCS.3.4", "$211.77", "$643.68", "$845.80", "$431.91"]) {
+    assert.ok(page.includes(t), `intervals page missing ${t}`);
+  }
+});
+
+test("service intervals page describes the work for each visit", () => {
+  const page = intervalsPage(renderGuideHtml(linea, rates));
+  for (const t of ["rebuild", "diffuser screens", "flow meter", "auto-fill probe"]) {
+    assert.ok(page.toLowerCase().includes(t.toLowerCase()), `missing ${t}`);
+  }
+});
+
+test("cover and summary say 12-month is highly recommended and 6-month is for high volume", () => {
+  const html = renderGuideHtml(linea, rates);
+  const cover = html.split('<section class="page">')[1];
+  const summary = html.split('<section class="page">')[8];
+  for (const page of [cover, summary]) {
+    assert.ok(/highly recommended/i.test(page) && /high[- ]volume/i.test(page));
+  }
 });
