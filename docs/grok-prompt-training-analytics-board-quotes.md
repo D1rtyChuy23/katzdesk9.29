@@ -1,3 +1,8 @@
+Pull the code first. Repo: https://github.com/D1rtyChuy23/katzdesk9.29.git
+Branch: desk-oct12-charges-library-analytics (commit 66a8816, built on main at 722cb84)
+
+Check out that branch and work from it. It already holds the features below, along with the charges and billing export, part photos and MPN, the one Import menu, Legacy models, Unofficial Sources, and the shared search-and-filter row. Do not rebuild it from this description. The description says what each feature must do: where the branch already does it, leave it; where it does not, fix only that. Keep startup.sh, grokPwaPlugin and PreviewHostBridge as they are. Migrations 0057 to 0063 are new; apply them in order and do not renumber them. If the branch cannot be pulled, say so before building anything.
+
 Add training, analytics, deal-to-board flow, repair quotes, and a department menu. Do not rebuild the app. Do not restyle the desk. Do not move a working page off the menu. Do not change locked customer names. Do not change a business rule that already works. Do not add a library: write the PDF and Word files directly and use the xlsx library already installed.
 
 Put each feature's rules in a pure module with node tests in scripts/. Add migrations as new numbered files. Reuse what the desk already has: the filter chips, the one search-and-filter row, the Export list, the Library's file upload and its Email and Text buttons. If a shared piece named here is not in this app yet, use the closest thing the desk already has and say which one you used.
