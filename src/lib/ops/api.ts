@@ -3,7 +3,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql } from "@/lib/db";
-import { canReviewNames, deskMiddleware, requireAdmin } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
@@ -783,18 +783,22 @@ async function entityContext(sql: any, type: any, id: any) {
 	}
 	return empty;
 }
-export const listJobs = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { kind: "service" | "tlc" }) => d).handler(async ({ data }): Promise<ServiceJob[]> => {
+export const listJobs = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { kind: "service" | "tlc" }) => d).handler(async ({ data, context }: any): Promise<ServiceJob[]> => {
 	const sql = await ready();
 	const today = todayChicago();
 	const marks = await loadAccountMarks(sql);
-	return applyMarks(attachJobSiblings((await sql`select * from service_jobs order by received desc nulls last, id desc`).map((r) => mapJob(r, today))), marks).filter((j) => j.kind === data.kind);
+	// A sales rep sees only the accounts assigned to them.
+	const scope = await salesRepScope(sql, context.userId);
+	return applyMarks(attachJobSiblings((await sql`select * from service_jobs order by received desc nulls last, id desc`).map((r) => mapJob(r, today))), marks).filter((j) => j.kind === data.kind && (!scope || scope(accountRepFor(marks, j.customer ?? null))));
 });
-export const getJob = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data }): Promise<ServiceJob | null> => {
+export const getJob = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
 	const sql = await ready();
 	const today = todayChicago();
 	const marks = await loadAccountMarks(sql);
 	const rows = await sql`select * from service_jobs where id = ${data.id}`;
 	if (!rows[0]) return null;
+	const scope = await salesRepScope(sql, context.userId);
+	if (scope && !scope(accountRepFor(marks, rows[0].customer ?? null))) return null;
 	const others = await sql`
       select * from service_jobs where coalesce(wo, '') <> ''`;
 	return applyMarks(attachJobSiblings([rows[0], ...others.filter((r) => r.id !== rows[0].id)].map((r) => mapJob(r, today))), marks).find((j) => j.id === data.id) ?? null;
@@ -973,10 +977,12 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	if (extra) await logActivity(sql, context.userId, data.type === "service" || data.type === "tlc" ? cur.kind : data.type, data.id, "updated", extra);
 	return { ok: true, date: data.date, time, technician: tech };
 });
-export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<PmJob[]> => {
+export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }: any): Promise<PmJob[]> => {
 	const sql = await ready();
 	const marks = await loadAccountMarks(sql);
-	return applyMarks((await sql`select * from pm_jobs order by received desc nulls last, id desc`).map((r) => mapPm(r, todayChicago())), marks);
+	// A sales rep sees only the accounts assigned to them.
+	const scope = await salesRepScope(sql, context.userId);
+	return applyMarks((await sql`select * from pm_jobs order by received desc nulls last, id desc`).map((r) => mapPm(r, todayChicago())), marks).filter((p: any) => !scope || scope(accountRepFor(marks, p.customer ?? null)));
 });
 export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; style?: string | null; projected?: string | null; partsStatus?: string | null; status?: string; technician?: string | null; notes?: string | null; workDone?: string | null; completedAt?: string | null; done?: boolean; wo?: string | null }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
@@ -1054,6 +1060,11 @@ export const updateModule = createServerFn({ method: "POST" }).middleware([deskM
 		changed("location", c.location, data.location === undefined ? c.location : data.location)
 	]);
 	if (extra) await logActivity(sql, context.userId, "module", data.id, "updated", extra);
+	// A location typed on the record is a stop on the module's trail too; the earlier one stays.
+	const nextLocation = data.location === undefined ? c.location : data.location;
+	if ((c.location ?? "").trim() !== (nextLocation ?? "").trim()) {
+		await sql.query("insert into module_stops (module_id, kind, from_place, to_place, by_name) values ($1, 'moved', $2, $3, $4)", [data.id, c.location ?? null, nextLocation ?? null, await deskUsername(sql, context.userId)]);
+	}
 	return mapModule((await sql`select * from modules where id = ${data.id}`)[0]);
 });
 export const createModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { moduleId: string; platform?: string; moduleType?: string }) => d).handler(async ({ data, context }: any) => {
@@ -1229,6 +1240,13 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
         updated_at = now()
       where id = ${data.id}`;
 	if (completion === "complete") await maybeHandoffInstall(sql, data.id);
+	// Order pings: Good To Order tells the Admin; Ordered tells the deal's sales rep.
+	{
+		const { notifyDealOrderStep } = await import("@/lib/ops/notify");
+		const dealRef = { id: Number(c.id), customer: String(data.customer ?? c.customer), rep: producer ?? null };
+		if (data.goodToOrder === true && !c.good_to_order) await notifyDealOrderStep(sql, context.userId, dealRef, "gto");
+		if (data.ordered === true && !c.ordered) await notifyDealOrderStep(sql, context.userId, dealRef, "ordered");
+	}
 	const extra = summarize([
 		changed("status", c.completion, completion),
 		changed("customer", c.customer, data.customer ?? c.customer),
@@ -2202,6 +2220,17 @@ export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([
 	if (!name) return { address: null };
 	const row = (await sql.query("select address from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc limit 1", [name]))[0];
 	return { address: row?.address ? String(row.address) : null };
+});
+/** Every saved account address, keyed by lower-case account name, for the list rows (one call, not one per row). */
+export const listAccountAddresses = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Record<string, string>> => {
+	const sql = await ready();
+	const rows = await sql.query("select name, address from directory_customers where archived = false and coalesce(btrim(address), '') <> '' order by name_locked desc, id");
+	const out: Record<string, string> = {};
+	for (const r of rows) {
+		const key = String(r.name ?? "").trim().toLowerCase();
+		if (key && !out[key]) out[key] = String(r.address).trim();
+	}
+	return out;
 });
 export const updateCustomerAccount = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; aviKatz?: boolean; accountRep?: string | null }) => d).handler(async ({ data }: any) => {
 	const sql = await ready();

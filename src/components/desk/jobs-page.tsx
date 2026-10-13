@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { SalesScopeNote } from "@/components/desk/sales-scope-note";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useQuery } from "@tanstack/react-query";
 import { listJobs } from "@/lib/ops/api";
 import { getMyAccess } from "@/lib/ops/access";
@@ -123,6 +125,7 @@ export function JobsPage({
           </Button>
         </div>
       </header>
+      <SalesScopeNote />
 
       <StatRow>
         <StatCard
@@ -241,6 +244,7 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
           <span className="block font-medium">
             {job.customer ?? "Untitled"} <AkBadge on={job.aviKatz} className="ml-1 align-middle" />
           </span>
+          <AddressLine customer={job.customer} />
 
           <span className="text-xs text-muted-foreground">
             {job.callId}

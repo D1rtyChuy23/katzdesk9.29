@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SalesScopeNote } from "@/components/desk/sales-scope-note";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createPm, listPms } from "@/lib/ops/api";
@@ -82,6 +84,7 @@ function Page() {
           </Button>
         </div>
       </header>
+      <SalesScopeNote />
       <StatRow>
         <StatCard
           label="Active"
@@ -129,6 +132,7 @@ function Page() {
             <span>
               <span className="font-medium">{p.customer}</span>
               <AkBadge on={p.aviKatz} className="ml-1 align-middle" />
+              <AddressLine customer={p.customer} />
               <span className="mt-0.5 block text-xs text-muted-foreground">{p.equipment}</span>
             </span>
             <span className="flex flex-wrap gap-1">

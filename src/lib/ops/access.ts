@@ -1130,3 +1130,19 @@ export const revokeInvite = createServerFn({ method: "POST" })
     if (!rows[0]) throw new Error("Invite not found.");
     return { ok: true };
   });
+
+/**
+ * A sales rep (not an admin) sees Service for awareness only: the tickets, TLCs and PMs on accounts assigned to
+ * them. Returns a test for an account's rep, or null when this person sees the full service list.
+ */
+export async function salesRepScope(sql: Sql, userId: string): Promise<((rep: string | null | undefined) => boolean) | null> {
+  const row = (await sql.query<{ is_admin: boolean; desk_role: string | null; username: string | null; email: string | null }>(
+    "select is_admin, desk_role, username, email from desk_accounts where user_id = $1",
+    [userId],
+  ))[0];
+  if (!row || flagOn(row.is_admin) || row.desk_role !== "sales") return null;
+  const user = await loadUser(sql, userId);
+  const { namesMatchUser } = await import("./lookups");
+  const me = { displayName: user.name, primaryEmail: row.email ?? user.email, username: row.username };
+  return (rep) => !!String(rep ?? "").trim() && namesMatchUser(me, rep);
+}

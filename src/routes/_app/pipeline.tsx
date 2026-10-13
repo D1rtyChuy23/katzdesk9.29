@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { archiveDeal, listDeals } from "@/lib/ops/api";
@@ -364,6 +365,7 @@ function DealRow({ deal: d, onOpen, onRep }: { deal: Deal; onOpen: () => void; o
               Account # {d.accountNumber}
             </span>
           ) : null}
+          <AddressLine customer={d.customer} />
           <span className="mt-0.5 block text-xs text-muted-foreground">
             {d.producer && !d.noRep ? <RepLink name={d.producer} onPick={onRep} /> : <NoRepFlag show />} ·{" "}
             {d.equipment || "No equipment listed"}

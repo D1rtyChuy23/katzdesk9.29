@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -823,6 +824,7 @@ function InstallRow({
                   Account # {i.accountNumber}
                 </span>
               ) : null}
+              <AddressLine customer={i.customer} className="font-normal" />
             </button>
             <div className="flex flex-wrap gap-1">
               <FlagBadge flag={i.flag} />

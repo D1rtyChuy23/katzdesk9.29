@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ModuleRecord } from "@/components/desk/module-record";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   archiveDeal,
@@ -1041,6 +1042,7 @@ export function ModuleSheet({
                 <span className="text-sm text-muted-foreground">Not at HQ · {row.status}</span>
               )}
             </div>
+            <ModuleRecord row={row} />
             <form
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {

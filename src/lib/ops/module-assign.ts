@@ -4,9 +4,10 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { serialKey } from "@/lib/ops/account-equip";
 import { isWalkIn } from "@/lib/ops/customer-key";
-import { eversysFamily, isEversysMachine, moduleAccount } from "@/lib/ops/eversys";
+import { eversysFamily, isEversysMachine, moduleAccount, moduleAvailability } from "@/lib/ops/eversys";
 import { flagOn } from "@/lib/ops/flag";
 import { notifyAdminsModuleReturn } from "@/lib/ops/notify";
+import { swapError, trail, workError, workTotals, type ModuleStop, type ModuleWork, type StopKind } from "@/lib/ops/module-history";
 
 export type EversysUnit = {
   id: number;
@@ -226,6 +227,7 @@ export const assignModule = createServerFn({ method: "POST" })
       [mod.id, customer, unit.id, unit.label, who.name],
     );
     await log(sql, who.name, mod.id, "assigned", `${customer} · ${unit.label}`);
+    await addStop(sql, mod.id, { kind: "assigned", customer, unitId: unit.id, unitLabel: unit.label, fromPlace: "HQ", toPlace: customer, byName: who.name });
     return { customer, unit: unit.label };
   });
 
@@ -275,8 +277,10 @@ export const returnModule = createServerFn({ method: "POST" })
     if (!customer && mod.status !== "Installed at Account") throw new Error("This module is already at HQ.");
     if (flagOn(mod.return_pending)) throw new Error("This module is already waiting on approval.");
     if (who.admin) {
+      const unit = await unitOf(sql, mod.id);
       await finishReturn(sql, mod.id);
       await log(sql, who.name, mod.id, "returned", `Back at HQ from ${customer ?? "an account"}`);
+      await addStop(sql, mod.id, { kind: "returned", customer, unitId: unit.id, unitLabel: unit.label, fromPlace: customer, toPlace: "HQ", byName: who.name });
       return { pending: false };
     }
     await sql.query(
@@ -320,7 +324,211 @@ export const decideModuleReturn = createServerFn({ method: "POST" })
       await log(sql, who.name, mod.id, "return rejected", "Stays on the account");
       return { ok: true };
     }
+    const unit = await unitOf(sql, mod.id);
     await finishReturn(sql, mod.id);
     await log(sql, who.name, mod.id, "returned", `Approved · back at HQ from ${mod.assigned_customer ?? mod.location ?? "an account"}`);
+    const from = mod.assigned_customer ?? mod.location ?? null;
+    await addStop(sql, mod.id, { kind: "returned", customer: from, unitId: unit.id, unitLabel: unit.label, fromPlace: from, toPlace: "HQ", byName: who.name, note: "Return approved" });
     return { ok: true };
+  });
+
+/** The unit a module sits on right now, read before it is cleared. */
+async function unitOf(sql: Sql, id: number): Promise<{ id: number | null; label: string | null }> {
+  const r = (await sql.query<{ assigned_unit_id: number | null; assigned_unit_label: string | null }>("select assigned_unit_id, assigned_unit_label from modules where id = $1", [id]))[0];
+  return { id: r?.assigned_unit_id == null ? null : Number(r.assigned_unit_id), label: r?.assigned_unit_label ?? null };
+}
+
+type StopInput = {
+  kind: StopKind;
+  customer?: string | null;
+  unitId?: number | null;
+  unitLabel?: string | null;
+  otherModule?: string | null;
+  fromPlace?: string | null;
+  toPlace?: string | null;
+  byName?: string | null;
+  note?: string | null;
+};
+
+/** Add one stop to a module's trail. Stops are only ever added, so the last account is never overwritten. */
+export async function addStop(sql: Sql, moduleId: number, s: StopInput) {
+  await sql.query(
+    `insert into module_stops (module_id, kind, customer, unit_id, unit_label, other_module, from_place, to_place, by_name, note)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [moduleId, s.kind, s.customer ?? null, s.unitId ?? null, s.unitLabel ?? null, s.otherModule ?? null, s.fromPlace ?? null, s.toPlace ?? null, s.byName ?? null, s.note ?? null],
+  );
+}
+
+export type ModuleRecord = {
+  current: ModuleStop | null;
+  past: ModuleStop[];
+  work: ModuleWork[];
+  totals: { parts: number; laborHours: number };
+};
+
+async function readRecord(sql: Sql, id: number): Promise<ModuleRecord> {
+  const stops = (
+    await sql.query<{
+      id: number;
+      kind: StopKind;
+      customer: string | null;
+      unit_label: string | null;
+      other_module: string | null;
+      from_place: string | null;
+      to_place: string | null;
+      happened_at: string | Date;
+      by_name: string | null;
+      note: string | null;
+    }>("select id, kind, customer, unit_label, other_module, from_place, to_place, happened_at, by_name, note from module_stops where module_id = $1 order by happened_at, id", [id])
+  ).map((r) => ({
+    id: Number(r.id),
+    kind: r.kind,
+    customer: r.customer,
+    unitLabel: r.unit_label,
+    otherModule: r.other_module,
+    fromPlace: r.from_place,
+    toPlace: r.to_place,
+    happenedAt: new Date(r.happened_at).toISOString(),
+    byName: r.by_name,
+    note: r.note,
+  }));
+  const work = (
+    await sql.query<{
+      id: number;
+      worked_on: string | Date;
+      kind: "part" | "labor";
+      item: string;
+      description: string | null;
+      qty: string;
+      wo: string | null;
+      technician: string | null;
+      note: string | null;
+      by_name: string | null;
+    }>("select id, worked_on, kind, item, description, qty, wo, technician, note, by_name from module_work where module_id = $1 order by worked_on desc, id desc", [id])
+  ).map((r) => ({
+    id: Number(r.id),
+    workedOn: r.worked_on instanceof Date ? r.worked_on.toISOString().slice(0, 10) : String(r.worked_on).slice(0, 10),
+    kind: r.kind,
+    item: r.item,
+    description: r.description,
+    qty: Number(r.qty),
+    wo: r.wo,
+    technician: r.technician,
+    note: r.note,
+    byName: r.by_name,
+  }));
+  return { ...trail(stops), work, totals: workTotals(work) };
+}
+
+/** A module's own record: where it is now, every past stop, and the parts and labor logged on it. */
+export const getModuleRecord = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data }): Promise<ModuleRecord> => readRecord(await ready(), data.id));
+
+const workInput = z.object({
+  id: z.number().int().positive(),
+  kind: z.enum(["part", "labor"]),
+  item: z.string().max(200),
+  description: z.string().max(500).nullable().optional(),
+  qty: z.union([z.number(), z.string().max(20)]),
+  workedOn: z.string().max(10).nullable().optional(),
+  wo: z.string().max(60).nullable().optional(),
+  technician: z.string().max(120).nullable().optional(),
+  note: z.string().max(1000).nullable().optional(),
+});
+
+/** Log a part used or labor done on this module. Lines are added, never rewritten. */
+export const addModuleWork = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof workInput>) => workInput.parse(d))
+  .handler(async ({ data, context }): Promise<ModuleRecord> => {
+    const sql = await ready();
+    const problem = workError(data);
+    if (problem) throw new Error(problem);
+    const mod = (await sql.query<{ id: number; module_id: string }>("select id, module_id from modules where id = $1", [data.id]))[0];
+    if (!mod) throw new Error("Module not found");
+    const who = await actorOf(sql, context.userId);
+    const qty = Math.round(Number(String(data.qty).trim()) * 100) / 100;
+    await sql.query(
+      `insert into module_work (module_id, worked_on, kind, item, description, qty, wo, technician, note, by_name)
+       values ($1, coalesce($2::date, current_date), $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [mod.id, data.workedOn || null, data.kind, data.item.trim(), data.description?.trim() || null, qty, data.wo?.trim() || null, data.technician?.trim() || null, data.note?.trim() || null, who.name],
+    );
+    await log(sql, who.name, mod.id, "work logged", `${data.kind === "labor" ? `${qty} h labor` : `${qty} × part`}: ${data.item.trim()}`);
+    return readRecord(sql, mod.id);
+  });
+
+type ModRow = {
+  id: number;
+  module_id: string;
+  module_type: string | null;
+  platform: string | null;
+  status: string;
+  location: string | null;
+  assigned_customer: string | null;
+  assigned_unit_id: number | null;
+  assigned_unit_label: string | null;
+  return_pending: boolean;
+};
+
+const swapSide = (m: ModRow) => ({
+  id: Number(m.id),
+  moduleId: m.module_id,
+  moduleType: m.module_type,
+  platform: m.platform,
+  status: m.status,
+  assignedCustomer: m.assigned_customer,
+  assignedUnitId: m.assigned_unit_id == null ? null : Number(m.assigned_unit_id),
+  returnPending: flagOn(m.return_pending),
+});
+
+/**
+ * Swap the module on an account's unit for one of the same type from HQ. The incoming module goes on the same unit,
+ * the outgoing one comes back to HQ (to be rebuilt), and both records get the stop: account, date, which unit it
+ * left and which unit it went to, and the other module's serial.
+ */
+export const swapModule = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { outId: number; inId: number }) => z.object({ outId: z.number().int().positive(), inId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ customer: string; unit: string; out: string; in: string }> => {
+    const sql = await ready();
+    const who = await actorOf(sql, context.userId);
+    const pick = async (id: number) =>
+      (
+        await sql.query<ModRow>(
+          "select id, module_id, module_type, platform, status, location, assigned_customer, assigned_unit_id, assigned_unit_label, return_pending from modules where id = $1",
+          [id],
+        )
+      )[0];
+    const out = await pick(data.outId);
+    const incoming = await pick(data.inId);
+    if (!out || !incoming) throw new Error("Module not found");
+    const problem = swapError(swapSide(out), swapSide(incoming), moduleAvailability({ status: incoming.status, assignedCustomer: incoming.assigned_customer }) === "hq");
+    if (problem) throw new Error(problem);
+    const customer = out.assigned_customer!;
+    const unitId = Number(out.assigned_unit_id);
+    const unitLabel = out.assigned_unit_label ?? "Eversys unit";
+    // The incoming module takes the outgoing one's place on the unit.
+    await sql.query(
+      `update modules set
+          assigned_customer = $2, assigned_unit_id = $3, assigned_unit_label = $4, assigned_at = now(), assigned_by = $5,
+          return_pending = false, status = 'Installed at Account', location = $2, updated_at = now()
+        where id = $1`,
+      [incoming.id, customer, unitId, unitLabel, who.name],
+    );
+    // The outgoing module comes back to HQ for a rebuild.
+    await sql.query(
+      `update modules set
+          assigned_customer = null, assigned_unit_id = null, assigned_unit_label = null, assigned_at = null, assigned_by = null,
+          return_pending = false, return_by = null, return_by_name = null, return_at = null,
+          status = 'Not Started', location = 'SHELF', updated_at = now()
+        where id = $1`,
+      [out.id],
+    );
+    await addStop(sql, out.id, { kind: "swap_out", customer, unitId, unitLabel, otherModule: incoming.module_id, fromPlace: customer, toPlace: "HQ", byName: who.name });
+    await addStop(sql, incoming.id, { kind: "swap_in", customer, unitId, unitLabel, otherModule: out.module_id, fromPlace: "HQ", toPlace: customer, byName: who.name });
+    await log(sql, who.name, out.id, "swapped out", `${customer} · ${unitLabel} · replaced by ${incoming.module_id}`);
+    await log(sql, who.name, incoming.id, "swapped in", `${customer} · ${unitLabel} · replacing ${out.module_id}`);
+    return { customer, unit: unitLabel, out: out.module_id, in: incoming.module_id };
   });

@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 import type { ModuleRow } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/desk/flag-badge";
-import { ModuleSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
+import { ModuleSheet } from "@/components/desk/entity-sheets";
+import { NewModuleDialog } from "@/components/desk/module-record";
 import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, StatusDonut, toggleChip } from "@/components/desk/desk-charts";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
@@ -277,13 +278,13 @@ function Page() {
       </div>
       <ModuleSheet row={selectedRow} onClose={() => setSelected(null)} onAssign={(m) => setAssignFor(m)} />
       <AssignModuleDialog module={assignFor} onOpenChange={(o) => !o && setAssignFor(null)} />
-      <SimpleCreateDialog
-        title="New Module"
+      <NewModuleDialog
         open={create}
         onOpenChange={setCreate}
-        fields={[{ name: "moduleId", label: "Module Serial", required: true }]}
-        onSubmit={async (v) => {
-          const row = await createModule({ data: { moduleId: v.moduleId } });
+        modules={all}
+        onOpenExisting={(id) => setSelected(id)}
+        onAdd={async (serial) => {
+          const row = await createModule({ data: { moduleId: serial } });
           void qc.invalidateQueries({ queryKey: ["modules"] });
           toast.success("Module added");
           setSelected(row.id);

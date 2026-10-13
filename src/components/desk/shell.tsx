@@ -187,7 +187,13 @@ function NavGroup({
 
 const WAREHOUSE_OK = ["/warehouse", "/locations", "/modules", "/library"];
 
+// A sales rep sees Service for awareness only (their own accounts): the lists, not the shop's rebuild bench or planner.
+const SALES_SERVICE = ["/service", "/pms", "/tlc"];
+
 function navForRole(role: DeskRole | null | undefined, isAdmin?: boolean) {
+  if (role === "sales" && !isAdmin) {
+    return NAV.map((g) => (g.label === "Service" ? { ...g, items: g.items.filter((item) => SALES_SERVICE.includes(item.to)) } : g));
+  }
   if (role !== "warehouse") return NAV;
   return [
     {

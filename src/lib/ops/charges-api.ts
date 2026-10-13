@@ -1,3 +1,4 @@
+import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withDiscountRows, type Discount } from "./discount";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -102,13 +103,20 @@ export type TicketCharges = {
   billedAt: string | null;
   /** Each line carries its part's photo reference when the item is on the item list. */
   lines: (ChargeLine & { part: PartRef | null })[];
+  /** The one discount on this ticket, or null. */
+  discount: Discount | null;
+  /** The lines added up, before the discount. */
+  subtotal: number;
+  /** Dollars the discount takes off. */
+  off: number;
+  /** The total after the discount. */
   total: number;
   state: BillingState;
 };
 
 async function loadCharges(sql: Sql, jobId: number): Promise<TicketCharges> {
-  const job = (await sql.query<{ po: string | null; ns_so: string | null; billed_at: string | null }>(
-    "select po, ns_so, billed_at from service_jobs where id = $1",
+  const job = (await sql.query<{ po: string | null; ns_so: string | null; billed_at: string | null; discount_kind: string | null; discount_value: string | null }>(
+    "select po, ns_so, billed_at, discount_kind, discount_value from service_jobs where id = $1",
     [jobId],
   ))[0];
   if (!job) throw new Error("That ticket is no longer on the list.");
@@ -146,13 +154,17 @@ async function loadCharges(sql: Sql, jobId: number): Promise<TicketCharges> {
     kind: r.kind,
     part: r.pid == null ? null : { id: Number(r.pid), sku: r.sku ?? "", mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
   }));
+  const discount: Discount | null =
+    isDiscountKind(job.discount_kind) && Number(job.discount_value) > 0 ? { kind: job.discount_kind, value: Number(job.discount_value) } : null;
+  const totals = applyDiscount(chargesTotal(lines), discount);
   return {
     jobId,
     po: job.po ?? "",
     nsSo: job.ns_so,
     billedAt: job.billed_at,
     lines,
-    total: chargesTotal(lines),
+    discount,
+    ...totals,
     state: billingState({ lineCount: lines.length, nsSo: job.ns_so }),
   };
 }
@@ -172,8 +184,15 @@ const lineSchema = z.object({
 /** Replace the charge lines and P.O. on a ticket. A ticket that is already billed is not changed. */
 export const saveTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { jobId: number; po: string; lines: z.input<typeof lineSchema>[] }) =>
-    z.object({ jobId: z.number().int().positive(), po: z.string().max(120), lines: z.array(lineSchema).max(200) }).parse(d),
+  .validator((d: { jobId: number; po: string; lines: z.input<typeof lineSchema>[]; discount?: { kind: string; value: string | number } | null }) =>
+    z
+      .object({
+        jobId: z.number().int().positive(),
+        po: z.string().max(120),
+        lines: z.array(lineSchema).max(200),
+        discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<TicketCharges> => {
     const sql = await ready();
@@ -181,6 +200,9 @@ export const saveTicketCharges = createServerFn({ method: "POST" })
     if (cur.state === "billed") throw new Error(`This ticket is already billed on ${cur.nsSo}. Clear the Sales Order number to change the charges.`);
     const problems = checkCharges(data.lines);
     if (problems.length) throw new Error(`Line ${problems[0].index + 1}: ${problems[0].message}`);
+    // Left out = keep what is saved. Null or blank = no discount. Stored as the choice, never as a discounted total.
+    const typed = data.discount === undefined ? { discount: cur.discount } : data.discount === null ? { discount: null } : cleanDiscount(data.discount.kind, data.discount.value);
+    if ("error" in typed) throw new Error(typed.error);
 
     const items = data.lines.map((l) => l.item.trim());
     const kinds = new Map<string, ChargeKind>();
@@ -208,8 +230,19 @@ export const saveTicketCharges = createServerFn({ method: "POST" })
               as t(item, description, qty, rate, kind, ord)`,
       [data.jobId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
     );
-    await sql.query("update service_jobs set po = $2, updated_at = now() where id = $1", [data.jobId, data.po.trim() || null]);
-    await logJob(sql, data.jobId, context.userId, `charges: ${lines.length} line${lines.length === 1 ? "" : "s"}, $${chargesTotal(lines).toFixed(2)}`);
+    await sql.query("update service_jobs set po = $2, discount_kind = $3, discount_value = $4, updated_at = now() where id = $1", [
+      data.jobId,
+      data.po.trim() || null,
+      typed.discount?.kind ?? null,
+      typed.discount?.value ?? null,
+    ]);
+    const after = applyDiscount(chargesTotal(lines), typed.discount);
+    await logJob(
+      sql,
+      data.jobId,
+      context.userId,
+      `charges: ${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountLabel(typed.discount)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`,
+    );
     return loadCharges(sql, data.jobId);
   });
 
@@ -454,7 +487,19 @@ export const exportBilling = createServerFn({ method: "POST" })
         order by j.completed_at, j.id, c.sort, c.id`,
       [data.from, data.to],
     );
-    const lines: BillingExportLine[] = rows.map((r) => ({
+    const ids = [...new Set(rows.map((r) => Number(r.id)))];
+    const discounts = new Map<number, Discount>();
+    if (ids.length) {
+      for (const d of await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
+        "select id, discount_kind, discount_value from service_jobs where id = any($1::int[]) and discount_kind is not null",
+        [ids],
+      )) {
+        if (isDiscountKind(d.discount_kind) && Number(d.discount_value) > 0) discounts.set(Number(d.id), { kind: d.discount_kind, value: Number(d.discount_value) });
+      }
+    }
+    const lines: BillingExportLine[] = withDiscountRows(
+      rows.map((r) => ({
+      jobId: Number(r.id),
       wo: r.wo ?? "",
       po: r.po ?? "",
       customer: r.customer ?? "",
@@ -467,7 +512,9 @@ export const exportBilling = createServerFn({ method: "POST" })
       qty: Number(r.qty),
       rate: Number(r.rate),
       workDone: r.work_done ?? "",
-    }));
+      })),
+      discounts,
+    ).map(({ jobId: _job, ...l }) => l);
     const none = await sql.query<{ id: number; wo: string | null; customer: string | null }>(
       `select j.id, j.wo, j.customer
          from service_jobs j

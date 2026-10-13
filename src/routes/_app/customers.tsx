@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState, type FormEvent } from "react";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -210,6 +211,7 @@ function Page() {
                     <span className="ml-1.5 align-middle text-xs font-medium text-destructive" data-testid="flagged-review">Flagged For Review</span>
                   ) : null}
                 </p>
+                <AddressLine customer={c.name} />
                 <p className="truncate text-xs text-muted-foreground">
                   {c.accountRep ? <RepName name={c.accountRep} /> : <NoRepFlag show />}
                   {" · "}

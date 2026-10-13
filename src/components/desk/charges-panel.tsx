@@ -18,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { PartThumb } from "./part-thumb";
+import { applyDiscount, cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
+import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
@@ -54,6 +56,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   const [po, setPo] = useState("");
   const [so, setSo] = useState("");
   const [dirty, setDirty] = useState(false);
+  const [discKind, setDiscKind] = useState<DiscountKind>("percent");
+  const [discValue, setDiscValue] = useState("");
 
   const c = charges.data;
   useEffect(() => {
@@ -61,6 +65,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     setLines(c.lines.map(toDraft));
     setPo(c.po);
     setSo(c.nsSo ?? "");
+    setDiscKind(c.discount?.kind ?? "percent");
+    setDiscValue(c.discount ? String(c.discount.value) : "");
     setDirty(false);
   }, [c, jobId]);
 
@@ -71,7 +77,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     toast.success(message);
   };
   const save = useMutation({
-    mutationFn: () => saveTicketCharges({ data: { jobId, po, lines } }),
+    mutationFn: () => saveTicketCharges({ data: { jobId, po, lines, discount: discValue.trim() ? { kind: discKind, value: discValue } : null } }),
     onSuccess: (next) => after(next, "Charges saved"),
     onError: (e: Error) => toast.error(e.message),
   });
@@ -83,7 +89,11 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
 
   if (!c) return null;
   const billed = c.state === "billed";
-  const total = chargesTotal(draftLines(lines));
+  // The discount is always worked out from the lines, never from a total that already has it taken off.
+  const typedDiscount = cleanDiscount(discKind, discValue);
+  const discount = "error" in typedDiscount ? null : typedDiscount.discount;
+  const totals = applyDiscount(chargesTotal(draftLines(lines)), discount);
+  const total = totals.total;
   const edit = (i: number, patch: Partial<DraftLine>) => {
     setLines((cur) => cur.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
     setDirty(true);
@@ -101,7 +111,10 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
           {BILLING_LABEL[c.state]}
           {billed && c.nsSo ? ` · ${c.nsSo}` : ""}
         </Badge>
-        <span className="ml-auto text-sm font-medium tabular">{money(total)}</span>
+        <span className="ml-auto text-sm font-medium tabular" data-testid="charges-header-total">
+          {totals.off ? <span className="mr-1.5 text-xs font-normal text-muted-foreground line-through">{money(totals.subtotal)}</span> : null}
+          {money(total)}
+        </span>
       </div>
 
       {lines.length ? (
@@ -193,6 +206,64 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
         </div>
       ) : null}
 
+      <div className="mt-4 rounded-lg border border-border p-3" data-testid="charges-discount">
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Discount</p>
+            <div className="mt-1 flex gap-1.5" role="group" aria-label="Discount type">
+              {(["percent", "amount"] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  disabled={billed}
+                  aria-pressed={discKind === k}
+                  data-testid={`discount-${k}`}
+                  onClick={() => {
+                    setDiscKind(k);
+                    setDirty(true);
+                  }}
+                  className={cn("h-9 rounded-full px-3 text-sm font-medium disabled:opacity-60", discKind === k ? "bg-ink text-ink-foreground" : "bg-secondary text-foreground")}
+                >
+                  {k === "percent" ? "Percent" : "Amount"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="w-32">
+            <Label htmlFor={`charge-discount-${jobId}`}>{discKind === "percent" ? "Percent (%)" : "Amount ($)"}</Label>
+            <Input
+              id={`charge-discount-${jobId}`}
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder="None"
+              value={discValue}
+              disabled={billed}
+              onChange={(e) => {
+                setDiscValue(e.target.value);
+                setDirty(true);
+              }}
+              className="mt-1"
+              data-testid="discount-value"
+            />
+          </div>
+          {"error" in typedDiscount ? <p className="pb-2 text-xs text-destructive">{typedDiscount.error}</p> : null}
+        </div>
+        <dl className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-muted/50 p-3 text-sm" data-testid="charges-totals">
+          <div>
+            <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Original Total</dt>
+            <dd className="tabular font-medium" data-testid="charges-subtotal">{money(totals.subtotal)}</dd>
+          </div>
+          <div>
+            <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Discount{discount ? ` · ${discountLabel(discount)}` : ""}</dt>
+            <dd className="tabular font-medium" data-testid="charges-off">{totals.off ? `−${money(totals.off)}` : money(0)}</dd>
+          </div>
+          <div>
+            <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">New Total</dt>
+            <dd className="tabular font-semibold" data-testid="charges-total">{money(totals.total)}</dd>
+          </div>
+        </dl>
+      </div>
+
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="charge-po">P.O. #</Label>
@@ -221,7 +292,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
 
       <div className="mt-4 flex items-center justify-end gap-2">
         {!lines.length && !billed ? <span className="mr-auto text-xs text-muted-foreground">A finished ticket with no charges is flagged for review.</span> : null}
-        <Button type="button" size="sm" disabled={billed || !dirty || save.isPending} onClick={() => save.mutate()} data-testid="charges-save">
+        <Button type="button" size="sm" disabled={billed || !dirty || save.isPending || "error" in typedDiscount} onClick={() => save.mutate()} data-testid="charges-save">
           {save.isPending ? "Saving…" : "Save Charges"}
         </Button>
       </div>

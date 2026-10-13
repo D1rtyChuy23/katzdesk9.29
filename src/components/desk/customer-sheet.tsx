@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { CustomerAddress } from "@/components/desk/customer-address";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { setAccountNumber } from "@/lib/ops/account-numbers-api";
@@ -292,6 +293,7 @@ export function CustomerHistorySheet({
                 </Button>
               ) : null}
             </div>
+            {data?.name ? <CustomerAddress customer={data.name} className="mt-0.5" /> : null}
           </SheetHeader>
           <SheetBody>
             {history.isLoading ? (
