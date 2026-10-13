@@ -18,7 +18,7 @@ const CSS = `
 * { box-sizing: border-box; margin: 0; padding: 0 }
 :root { --ink:#16202c; --muted:#5d6b7a; --line:#dde3ea; --brand:#12344d; --accent:#c8553d; --soft:#f3f6f9; --parts:#12344d; --labor:#3d8f87; --trip:#e0a33a }
 body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); font-variant-numeric: tabular-nums }
-.page { width: 960px; height: 540px; padding: 34px 44px 44px; position: relative; overflow: hidden; page-break-after: always; background: #fff }
+.page { width: 960px; height: 540px; padding: 28px 44px 44px; position: relative; overflow: hidden; page-break-after: always; background: #fff }
 .kicker { font-size: 11px; letter-spacing: .16em; color: var(--accent); font-weight: 700; text-transform: uppercase }
 h1 { font-size: 34px; color: var(--brand); margin: 6px 0 4px; line-height: 1.1 }
 h2 { font-size: 24px; color: var(--brand); margin: 4px 0 12px }
@@ -33,14 +33,29 @@ td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top
 th.r, td.r { text-align: right; white-space: nowrap }
 td.pn { white-space: nowrap; overflow-wrap: normal }
 tr.total td { font-weight: 700; border-top: 2px solid var(--brand); border-bottom: 0; background: var(--soft) }
-.cols { display: flex; gap: 28px }
+.cols { display: flex; gap: 20px; align-items: flex-start }
 .cols > div { flex: 1; min-width: 0 }
-.card { background: var(--soft); border-radius: 8px; padding: 14px 16px }
+.card { background: var(--soft); border-radius: 8px; padding: 12px 14px }
 .card h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--brand); margin-bottom: 8px }
 .bar { display: flex; height: 22px; border-radius: 4px; overflow: hidden; margin: 6px 0 4px }
 .bar i { display: block; height: 100% }
-.legend { font-size: 11px; color: var(--muted); display: flex; gap: 14px; margin-top: 8px }
+.legend { font-size: 10px; color: var(--muted); display: flex; gap: 12px; margin: 2px 0 8px }
 .legend s { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; text-decoration: none; vertical-align: -1px }
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 8px }
+.head h2 { margin-bottom: 0 }
+.stats { display: flex; gap: 8px }
+.stat { border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; min-width: 104px }
+.stat span { display: block; font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.stat b { font-size: 17px; color: var(--ink) }
+.stat.dark { background: var(--brand); border-color: var(--brand) }
+.stat.dark span { color: #cfd9e3 } .stat.dark b { color: #fff }
+.good-n { color: var(--labor) !important; font-weight: 700 }
+.mut { color: var(--muted); font-size: 10px; font-weight: 400 }
+.badge { font-style: normal; background: var(--labor); color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 10px; margin-left: 6px; letter-spacing: .04em; text-transform: none }
+table.tight { font-size: 10.5px } table.tight td { padding: 3px 6px } table.tight th { padding: 4px 6px }
+.right { display: flex; flex-direction: column; gap: 10px; flex: 1.1; min-width: 0 }
+.right > .card { flex: none }
+.card.disc td { padding: 4px 6px } .card.disc table { font-size: 10.5px }
 .big { font-size: 28px; font-weight: 700; color: var(--brand) }
 .save { color: var(--labor); font-weight: 700; font-size: 13px; margin-top: 8px }
 .note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5 }
@@ -82,10 +97,41 @@ function aggregate(result) {
 
 const monthsText = (months) => (months.length === 1 ? `Month ${months[0]}` : `Months ${months.join(", ")}`);
 
-function bar(r) {
-  const t = r.totalCents;
-  const w = (c) => ((c / t) * 100).toFixed(1);
-  return `<div class="bar"><i style="width:${w(r.partsCents)}%;background:var(--parts)"></i><i style="width:${w(r.laborCents)}%;background:var(--labor)"></i><i style="width:${w(r.tripCents)}%;background:var(--trip)"></i></div>`;
+function niceStep(maxDollars) {
+  for (const step of [250, 500, 1000, 2000, 2500, 5000, 10000]) if (maxDollars / step <= 4) return step;
+  return 20000;
+}
+
+/** Stacked column chart (parts / labor / trip) as inline SVG. */
+function chartSvg(columns) {
+  const W = 430, H = 196, left = 50, right = 10, top = 24, bottom = 40;
+  const plotH = H - top - bottom;
+  const maxDollars = Math.max(...columns.map((c) => c.totalCents)) / 100;
+  const step = niceStep(maxDollars);
+  let topTick = Math.ceil(maxDollars / step) * step;
+  if (maxDollars / topTick > 0.85) topTick += step;
+  const y = (dollars) => top + plotH * (1 - dollars / topTick);
+  const slot = (W - left - right) / columns.length;
+  const barW = Math.min(76, slot * 0.5);
+  let out = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">`;
+  for (let t = 0; t <= topTick; t += step) {
+    out += `<line x1="${left}" x2="${W - right}" y1="${y(t)}" y2="${y(t)}" stroke="#dde3ea"/>`;
+    out += `<text x="${left - 6}" y="${y(t) + 3.5}" text-anchor="end" font-size="10" fill="#5d6b7a">$${t.toLocaleString("en-US")}</text>`;
+  }
+  columns.forEach((c, i) => {
+    const x = left + slot * i + (slot - barW) / 2;
+    let base = y(0);
+    for (const [cents, color] of [[c.partsCents, "#12344d"], [c.laborCents, "#3d8f87"], [c.tripCents, "#e0a33a"]]) {
+      const h = Math.max(3, (cents / 100 / topTick) * plotH);
+      base -= h;
+      out += `<rect x="${x.toFixed(1)}" y="${base.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${color}"/>`;
+    }
+    const cx = (x + barW / 2).toFixed(1);
+    out += `<text x="${cx}" y="${(base - 6).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#16202c">${$(c.totalCents)}</text>`;
+    out += `<text x="${cx}" y="${H - 22}" text-anchor="middle" font-size="11" font-weight="700" fill="#16202c">${esc(c.label)}</text>`;
+    out += `<text x="${cx}" y="${H - 9}" text-anchor="middle" font-size="10" fill="#5d6b7a">${esc(c.sub)}</text>`;
+  });
+  return out + "</svg>";
 }
 
 export function renderGuideHtml(machine, rates) {
@@ -156,33 +202,60 @@ ${
   machine.configurations.forEach((cfg, i) => {
     const results = cfg.variants.map((v) => ({ v, r: calc(cfg, v.id) }));
     const std = results[0].r;
+    const multiVisit = machine.visits.length > 1;
+
     const lineRows = [];
     const seen = new Set();
     for (const { v, r } of results) {
       for (const l of aggregate(r)) {
         if (seen.has(l.partId)) continue;
         seen.add(l.partId);
-        const tag = results.length > 1 && v !== results[0].v ? ` <em>(${esc(v.label)} only)</em>` : "";
+        const tag = v !== results[0].v && !l.name.includes(v.label) ? ` <em>(${esc(v.label)} only)</em>` : "";
         lineRows.push(
-          `<tr><td>${esc(l.name)}${tag}</td><td class="pn">${esc(l.partNo)}</td><td>${esc(monthsText(l.months))}</td><td class="r">${l.qty}</td><td class="r">${$(l.unitCents)}</td><td class="r">${$(l.extCents)}</td></tr>`,
+          `<tr><td>${esc(l.name)}${tag}</td><td class="pn">${esc(l.partNo)}</td>${multiVisit ? `<td>${esc(monthsText(l.months))}</td>` : ""}<td class="r">${l.qty}</td><td class="r">${$(l.unitCents)}</td><td class="r">${$(l.extCents)}</td></tr>`,
         );
       }
     }
-    const totals = results
+
+    // Chart columns: one per variant for a single-visit plan, otherwise one per visit.
+    const columns =
+      !multiVisit && results.length > 1
+        ? results.map(({ v, r }) => ({ ...r, label: v.label, sub: `Month ${r.visits[0].month}` }))
+        : std.visits.map((v) => ({ ...v, label: `Month ${v.month}`, sub: v.label }));
+    const colRows = columns
       .map(
-        ({ v, r }) =>
-          `<div style="margin-bottom:12px"><div class="kicker" style="color:var(--muted)">${esc(v.label)} · ${planMonths(machine)}-month total</div><div class="big">${$(r.totalCents)}</div>${bar(r)}<div class="note" style="margin-top:2px">Parts ${$(r.partsCents)} · Labor ${$(r.laborCents)} · Trip ${$(r.tripCents)}</div></div>`,
+        (c) =>
+          `<tr><td><b>${esc(c.label)}</b> <span class="mut">· ${esc(c.sub)}</span></td><td class="r">${$(c.partsCents)}</td><td class="r">${$(c.laborCents)}</td><td class="r">${$(c.tripCents)}</td><td class="r"><b>${$(c.totalCents)}</b></td></tr>`,
       )
       .join("");
+
+    const hours = std.visits.reduce((n, v) => n + v.hours, 0);
+    const nVisits = std.visits.length;
+    const tiles = [
+      ...results.map(({ v, r }, k) => `<div class="stat${k === 0 ? " dark" : ""}"><span>${esc(v.label)} ${planMonths(machine)}-mo total</span><b>${$(r.totalCents)}</b></div>`),
+      ...(results.length === 1 ? [`<div class="stat"><span>Parts</span><b>${$(std.partsCents)}</b></div>`] : []),
+      `<div class="stat"><span>Program labor + trip</span><b>${$(std.laborCents + std.tripCents)}</b></div>`,
+      `<div class="stat"><span>Labor + trip savings</span><b class="good-n">${$(std.savingsCents)}</b></div>`,
+    ].join("");
+
+    const discount = `<div class="card disc"><h3>Labor &amp; trip discount <em class="badge">${pct}% off</em></h3>
+<p class="mut" style="margin:-2px 0 4px">Labor ${$(rates.laborRateCents)} → ${$(progLabor)}/hr · Trip ${$(rates.tripRateCents)} → ${$(progTrip)} per visit</p>
+<table><tr><th></th><th class="r">Standard</th><th class="r">Program</th><th class="r">You save</th></tr>
+<tr><td>Labor · ${hours} hrs</td><td class="r">${$(std.standardLaborCents)}</td><td class="r">${$(std.laborCents)}</td><td class="r good-n">${$(std.standardLaborCents - std.laborCents)}</td></tr>
+<tr><td>Trip · ${nVisits} visit${nVisits > 1 ? "s" : ""}</td><td class="r">${$(std.standardTripCents)}</td><td class="r">${$(std.tripCents)}</td><td class="r good-n">${$(std.standardTripCents - std.tripCents)}</td></tr>
+<tr class="total"><td>Labor + trip</td><td class="r">${$(std.standardLaborCents + std.standardTripCents)}</td><td class="r">${$(std.laborCents + std.tripCents)}</td><td class="r good-n">${$(std.savingsCents)}</td></tr></table></div>`;
+
     pages.push(
       pageShell(
         machine,
         3 + i,
         total,
         `Configuration ${i + 1} of ${machine.configurations.length}`,
-        `<h2>${esc(cfg.label)}</h2>
-<div class="cols"><div style="flex:1.6"><table><tr><th>Part</th><th>Part #</th><th>Replaced</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Ext.</th></tr>${lineRows.join("")}</table></div>
-<div class="card" style="flex:1">${totals}<div class="legend"><span><s style="background:var(--parts)"></s>Parts</span><span><s style="background:var(--labor)"></s>Labor</span><span><s style="background:var(--trip)"></s>Trip</span></div><div class="save">You save ${$(std.savingsCents)} on labor and trip</div></div></div>`,
+        `<div class="head"><div><h2>${esc(cfg.label)}</h2><p class="sub">${cfg.units} ${esc(unit)}${cfg.units > 1 ? "s" : ""}${results.length > 1 ? " · " + results.map((x) => esc(x.v.label)).join(" or ") : ""}</p></div><div class="stats">${tiles}</div></div>
+<div class="cols"><div class="card"><h3>Cost by ${multiVisit ? "contract year" : "version"}</h3>${chartSvg(columns)}
+<div class="legend"><span><s style="background:var(--parts)"></s>Parts</span><span><s style="background:var(--labor)"></s>Program labor</span><span><s style="background:var(--trip)"></s>Program trip</span></div>
+<table class="tight"><tr><th></th><th class="r">Parts</th><th class="r">Labor</th><th class="r">Trip</th><th class="r">Total</th></tr>${colRows}</table></div>
+<div class="right"><div class="card"><h3>Parts list</h3><table class="tight"><tr><th>Part</th><th>Part #</th>${multiVisit ? "<th>Replaced</th>" : ""}<th class="r">Qty</th><th class="r">Unit</th><th class="r">Ext.</th></tr>${lineRows.join("")}</table></div>${discount}</div></div>`,
       ),
     );
   });

@@ -159,3 +159,36 @@ test("a 120-character part name is not clipped", async () => {
   assert.ok(text.includes("Extra long replacement part name Extra long replacement part name"));
   assert.ok(text.includes(long.slice(-20)));
 });
+
+const configPage = (html, n) => html.split('<section class="page">')[2 + n]; // 0 = preamble, 1 = cover, 2 = parts
+
+test("config page has a cost chart with an axis and a total on every bar", () => {
+  const page = configPage(renderGuideHtml(linea, rates), 1);
+  const svg = page.slice(page.indexOf("<svg"), page.indexOf("</svg>"));
+  assert.ok(svg.includes("$0") && svg.includes("$1,000"));
+  assert.ok(svg.includes("$431.91") && svg.includes("$682.46"));
+});
+
+test("config page shows how labor and trip are discounted on the right", () => {
+  const page = configPage(renderGuideHtml(linea, rates), 1);
+  const panel = page.slice(page.indexOf("Labor &amp; trip discount"));
+  assert.ok(page.includes("Labor &amp; trip discount"));
+  for (const t of ["$300.00", "$75.00", "$225.00", "$150.00", "$37.50", "$112.50", "$337.50", "75% off"]) {
+    assert.ok(panel.includes(t), `missing ${t}`);
+  }
+});
+
+test("every config page has a chart and the discount panel", () => {
+  const html = renderGuideHtml(linea, rates);
+  for (let n = 1; n <= 4; n++) {
+    const page = configPage(html, n);
+    assert.ok(page.includes("<svg") && page.includes("Labor &amp; trip discount"), `config ${n}`);
+  }
+});
+
+test("multi-visit machines chart one column per visit", () => {
+  const ev = load("eversys-legacy-l2");
+  const page = configPage(renderGuideHtml(ev, rates), 1);
+  const svg = page.slice(page.indexOf("<svg"), page.indexOf("</svg>"));
+  assert.ok(svg.includes("Month 12") && svg.includes("Month 24") && svg.includes("Month 36"));
+});
