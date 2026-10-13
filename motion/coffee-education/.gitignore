@@ -1,0 +1,4 @@
+node_modules
+renders/frames/
+renders/still-*.png
+renders/render.log

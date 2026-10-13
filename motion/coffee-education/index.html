@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Katz Coffee Education</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+@font-face{font-family:BC;font-weight:600;src:url(assets/fonts/barlow-condensed-latin-600-normal.woff2)}
+@font-face{font-family:BC;font-weight:700;src:url(assets/fonts/barlow-condensed-latin-700-normal.woff2)}
+@font-face{font-family:BC;font-weight:800;src:url(assets/fonts/barlow-condensed-latin-800-normal.woff2)}
+@font-face{font-family:PP;font-weight:400;src:url(assets/fonts/poppins-latin-400-normal.woff2)}
+@font-face{font-family:PP;font-weight:500;src:url(assets/fonts/poppins-latin-500-normal.woff2)}
+@font-face{font-family:PP;font-weight:600;src:url(assets/fonts/poppins-latin-600-normal.woff2)}
+:root{--green:#67BB2A;--green-d:#3F8A12;--ink:#100f0d;--cream:#FBF9EF;--sand:#F0E6B8;--red:#D6262B}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#1b1a17;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;background:var(--cream);overflow:hidden;transform-origin:0 0;font-family:PP,sans-serif;color:var(--ink)}
+.scene,.abs{position:absolute;inset:0}
+.abs{pointer-events:none}
+.kicker{position:absolute;left:100px;top:64px;font:600 24px PP;letter-spacing:.18em;color:var(--green-d);text-transform:uppercase}
+h1{position:absolute;left:100px;top:104px;font:800 150px/.92 BC;color:var(--green);text-transform:uppercase;letter-spacing:.005em}
+h1 .line{display:block;overflow:hidden;padding-bottom:6px}
+h1 .w{display:block}
+.card{position:absolute;overflow:hidden;border-radius:36px;background:#ddd;box-shadow:0 24px 60px rgba(16,15,13,.18)}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.stat{position:absolute;width:440px;height:170px;border-radius:28px;background:#fff;border:3px solid #E5EED9;padding:22px 28px;box-shadow:0 10px 30px rgba(16,15,13,.06)}
+.stat b{display:block;font:800 80px/1 BC;color:var(--green)}
+.stat span{display:block;margin-top:8px;font:500 24px/1.3 PP}
+.row{position:absolute;left:100px;width:900px;height:100px;border-radius:26px;background:#fff;border:3px solid #E5EED9;display:flex;align-items:center;padding:0 28px;gap:26px}
+.row b{font:800 46px/1 BC;color:var(--green);text-transform:uppercase;width:230px;flex:none}
+.row span{font:500 24px/1.35 PP}
+.pc{position:absolute;border-radius:30px;background:#fff;box-shadow:0 18px 44px rgba(16,15,13,.12);overflow:hidden}
+.pc .im{height:330px;overflow:hidden}.pc img{width:100%;height:100%;object-fit:cover;display:block}
+.pc h3{font:800 52px/1 BC;color:var(--green);text-transform:uppercase;margin:22px 28px 6px}
+.pc p{font:500 23px/1.35 PP;margin:0 28px}
+.bean{position:absolute;width:400px;height:270px;border-radius:26px;text-align:center;padding-top:8px}
+.bean img{width:170px;height:160px;object-fit:contain;display:block;margin:0 auto}
+.bean .n{font:800 36px/1.1 BC;text-transform:uppercase;margin-top:12px;color:var(--ink)}
+.bean .t{font:500 24px PP;color:#6b6a63;margin-top:4px}
+.fact{position:absolute;width:410px;height:430px;border-radius:32px;background:#fff;border:3px solid #E5EED9;padding:36px 32px}
+.fact h3{font:800 76px/1 BC;color:var(--green);text-transform:uppercase}
+.fact p{margin-top:20px;font:500 26px/1.4 PP}
+.fact.dark{background:var(--ink);border-color:var(--ink)}.fact.dark p{color:#fff}.fact.dark h3{color:var(--sand)}
+.ft{position:absolute;left:0;right:0;top:962px;height:80px}
+.ft i{position:absolute;top:38px;height:8px;border-radius:4px;background:var(--green)}
+.ft img{position:absolute;left:880px;top:0;width:160px;height:96px}
+#prog{position:absolute;left:0;bottom:0;height:10px;width:100%;background:var(--green);transform-origin:0 0}
+#wipes .w{position:absolute;inset:0;background:var(--green);display:flex;align-items:center;justify-content:center}
+#wipes .w:after{content:"";position:absolute;right:140px;top:0;bottom:0;width:36px;background:var(--sand)}
+#wipes img{width:420px;height:252px}
+#ui{position:fixed;left:0;right:0;bottom:0;display:flex;gap:12px;padding:10px 16px;background:#000a;color:#fff;font:14px sans-serif;align-items:center}
+#ui input{flex:1}
+body.render #ui{display:none}
+</style></head>
+<body>
+<div id="stage"></div>
+<div id="ui"><button id="pp">Pause</button><input id="sc" type="range" min="0" max="60" step="0.01" value="0"><span id="tt">0.00s</span></div>
+<script src="engine.js"></script>
+<script src="scenes/scenes.js"></script>
+<script src="player.js"></script>
+</body></html>
