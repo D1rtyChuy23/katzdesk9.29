@@ -12,6 +12,6 @@ if (!id || !existsSync(dataPath)) {
 }
 
 mkdirSync(new URL("out/", root), { recursive: true });
-const out = new URL(`out/${id}.pdf`, root);
-await renderGuidePdf(JSON.parse(readFileSync(dataPath, "utf8")), loadRates(), out.pathname);
-console.log(`Wrote pm-guides/out/${id}.pdf`);
+const out = process.argv[3] ?? new URL(`out/${id}.pdf`, root).pathname;
+await renderGuidePdf(JSON.parse(readFileSync(dataPath, "utf8")), loadRates(), out);
+console.log(`Wrote ${out}`);

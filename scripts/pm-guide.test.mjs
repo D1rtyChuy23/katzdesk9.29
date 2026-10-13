@@ -127,10 +127,10 @@ import { join } from "node:path";
 import { renderGuidePdf } from "./pm-guide/render.mjs";
 
 const cli = new URL("./pm-guide/cli.mjs", import.meta.url).pathname;
-const pdfOut = new URL("../pm-guides/out/la-marzocco-linea-classic-s.pdf", import.meta.url).pathname;
+const pdfOut = join(mkdtempSync(join(tmpdir(), "pmg-cli-")), "linea.pdf");
 
 test("cli builds a 7-page pdf for linea", () => {
-  execFileSync("node", [cli, "la-marzocco-linea-classic-s"]);
+  execFileSync("node", [cli, "la-marzocco-linea-classic-s", pdfOut]);
   const info = execFileSync("pdfinfo", [pdfOut], { encoding: "utf8" });
   assert.match(info, /Pages:\s+7/);
   assert.match(info, /Page size:\s+720 x 40[45](\.\d+)? pts/);
