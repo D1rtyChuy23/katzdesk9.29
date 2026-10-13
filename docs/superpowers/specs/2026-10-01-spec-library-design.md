@@ -137,3 +137,34 @@ uploads are not built yet; only the empty sections exist.
 - Extraction quality varies by PDF layout; the review step is the safety net.
 - xAI key may be absent or out of credits; the manual form is the fallback.
 - Images are stored in Postgres as data URLs; keep them resized (about 100 KB).
+
+## Change request: deal equipment block (2026-10-13)
+
+Scope: the equipment rows on a deal only. Do not rebuild the app.
+Code: `src/components/desk/machine-fields.tsx`, `new-deal-dialog.tsx`,
+`src/lib/ops/machines.ts` (`MachineSpec`), `install-ticket.tsx`.
+
+1. **Sold / Loan / Lease — one selection.** Replace the separate Sold and Loaned
+   controls with a single choice per machine: Sold, Loan, or Lease. It is one
+   compact control, not three bubbles. `MachineSpec.ownership` accepts
+   "Sold" | "Loaned" | "Leased"; existing "Sold" and "Loaned" rows keep working
+   and display as Sold and Loan. Update the New Deal dialog, the install ticket
+   (column and "not set" warning) and any text that says "Sold or Loaned".
+2. **Remove the coffee bubble.** Delete the Coffee input from the equipment row
+   and the Coffee column on the install ticket. Recipe is the only field for
+   what the customer is serving. Keep `coffee` readable on old data but never
+   shown or written.
+3. **Recipe in the same window.** Add and remove recipe items in the same
+   window as the Recipe field. No navigation to the Recipes page to edit the
+   list. Removing an item that is not needed is a first-class action next to
+   Add.
+4. **No autofill of requirements.** Voltage, plug, water, drain and the other
+   requirement fields stay blank until a person types them. Do not fill them
+   from the model, the Library spec sheets, the Katz install defaults, or a
+   serial-number pull (`onPulled` currently fills `powerVoltage`). A blank
+   field is correct. This applies to the deal equipment block only; the
+   Library's own spec sheet defaults are unchanged.
+
+Acceptance: Sold / Loan / Lease shows as one selection; no coffee bubble;
+recipe items add and remove in place; a newly added machine shows blank
+requirement fields.
