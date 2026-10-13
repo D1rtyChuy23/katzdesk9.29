@@ -1,0 +1,12 @@
+{
+  "name": "d1rtychuy23-skills",
+  "description": "Personal Claude Code skills by D1rtyChuy23.",
+  "owner": { "name": "D1rtyChuy23" },
+  "plugins": [
+    {
+      "name": "motion-design",
+      "description": "15-second motion-graphics workflow: Opus builds, Jev evaluates review notes, code renders and checks exports.",
+      "source": "./plugins/motion-design"
+    }
+  ]
+}
