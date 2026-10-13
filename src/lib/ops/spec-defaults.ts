@@ -303,6 +303,8 @@ export function isEspresso(sheet: { manufacturer?: string | null; model?: string
   if (/grinder|brewer|water|filtration|fridge|refrigerat|blender|dispenser/i.test(cat)) return false;
   if (/espresso/i.test(cat) || /espresso\s*(machine)?\b/i.test(text) && !/grinder/i.test(text)) return true;
   if (/grinder|fridge/i.test(text)) return false;
+  // "Bauhuas 2 Group" and "Linea 2 Group" are espresso machines even when the maker is not in the list.
+  if (/\b[1-4]\s*-?\s*groups?\b/i.test(text)) return true;
   return ESPRESSO_MAKERS.test(text) || isEversysMachine(sheet.model) || isEversysMachine(text);
 }
 

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { upsertRecipe } from "@/lib/ops/api";
+import { upsertRecipe, deleteRecipe } from "@/lib/ops/api";
 import { findRecipeFor, recipeLabel } from "@/lib/ops/equipment";
 import {
   CUSTOM_SUGGESTIONS,
@@ -13,7 +13,7 @@ import {
 } from "@/lib/ops/recipe-fields";
 import { Plus, X } from "lucide-react";
 import type { MachineSpec } from "@/lib/ops/machines";
-import { NO_WATER_NOTE, OWNERSHIPS, machineGlance, waterNeed } from "@/lib/ops/deal-board";
+import { OWNERSHIP_CHOICES, machineGlance, waterNeed } from "@/lib/ops/deal-board";
 import type { SerialPullResult } from "@/lib/ops/serial-pull";
 import type { Recipe } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,6 @@ import { SelectField } from "@/components/ui/select-field";
 import { toast } from "sonner";
 import { SerialPullField } from "./serial-notice";
 import { UnitPlaceField } from "./unit-place-field";
-
-const ADD = "__add__";
 
 function byModelFirst(model: string) {
   const key = model.toLowerCase();
@@ -45,6 +43,8 @@ function MachineRecipeSelect({
   recipes,
   value,
   onPick,
+  dealId,
+  machineIndex,
   className = "col-span-2 grid min-w-0 gap-1 lg:col-span-1",
 }: {
   customer: string;
@@ -53,8 +53,12 @@ function MachineRecipeSelect({
   recipes: Recipe[];
   value: number | null | undefined;
   onPick: (recipeId: number | null) => void;
+  /** This deal row does not count as "in use elsewhere" when its recipe is removed. */
+  dealId?: number;
+  machineIndex?: number;
   className?: string;
 }) {
+  const qc = useQueryClient();
   const [adding, setAdding] = useState(false);
   const custKey = customer.trim().toLowerCase();
   const modelKey = model.toLowerCase();
@@ -72,50 +76,83 @@ function MachineRecipeSelect({
   // Grinders often carry only custom settings (kept in notes), so fall back to the first note line.
   const preview = previewSetting(selected) ?? (selected?.notes?.split("\n")[0]?.slice(0, 72) || null);
 
+  const drop = useMutation({
+    mutationFn: (d: { id: number; force: boolean }) =>
+      deleteRecipe({
+        data: { id: d.id, force: d.force, exceptDealId: dealId ?? null, exceptIndex: machineIndex ?? null },
+      }),
+    onSuccess: (res, vars) => {
+      if (res.needsConfirm && !vars.force) {
+        const name = selected ? recipeLabel(selected) : "This recipe";
+        if (window.confirm(`${name} is in use elsewhere. Remove it anyway?`)) drop.mutate({ id: vars.id, force: true });
+        return;
+      }
+      if (!res.deleted) return;
+      qc.setQueryData<Recipe[]>(["recipes"], (old) => (old ?? []).filter((r) => r.id !== vars.id));
+      void qc.invalidateQueries({ queryKey: ["recipes"] });
+      if (selectedId === vars.id) onPick(null);
+      toast.success("Recipe removed");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that recipe"),
+  });
+
   return (
     <>
     <div className={className}>
-      <label className="grid min-w-0 gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-        Recipe
-        <SelectField
-          aria-label={`Recipe for ${model}`}
-          data-testid="machine-recipe"
-          value={adding ? ADD : selectedId ? String(selectedId) : ""}
-          disabled={!customer.trim()}
-          className="normal-case"
-          onChange={(e) => {
-            const v = e.target.value;
-            if (v === ADD) {
-              setAdding(true);
-              return;
-            }
-            setAdding(false);
-            onPick(v ? Number(v) : null);
-          }}
-        >
-          <option value="">No recipe</option>
-          {keep ? <option value={keep.id}>{recipeLabel(keep, true)}</option> : null}
-          {mine.length ? (
-            <optgroup label={customer}>
-              {mine.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {label(r)}
-                </option>
-              ))}
-            </optgroup>
-          ) : null}
-          {house.length ? (
-            <optgroup label="House templates">
-              {house.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {label(r)}
-                </option>
-              ))}
-            </optgroup>
-          ) : null}
-          <option value={ADD}>＋ Add recipe…</option>
-        </SelectField>
-      </label>
+      <div className="flex items-end gap-1.5">
+        <label className="grid min-w-0 flex-1 gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+          Recipe
+          <SelectField
+            aria-label={`Recipe for ${model}`}
+            data-testid="machine-recipe"
+            value={selectedId ? String(selectedId) : ""}
+            disabled={!customer.trim()}
+            className="normal-case"
+            onChange={(e) => onPick(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="">No recipe</option>
+            {keep ? <option value={keep.id}>{recipeLabel(keep, true)}</option> : null}
+            {mine.length ? (
+              <optgroup label={customer}>
+                {mine.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {label(r)}
+                  </option>
+                ))}
+              </optgroup>
+            ) : null}
+            {house.length ? (
+              <optgroup label="House templates">
+                {house.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {label(r)}
+                  </option>
+                ))}
+              </optgroup>
+            ) : null}
+          </SelectField>
+        </label>
+        <div className="flex shrink-0 gap-1">
+          <button
+            type="button"
+            data-testid="recipe-add"
+            disabled={!customer.trim()}
+            onClick={() => setAdding(true)}
+            className="h-10 rounded-md border border-border bg-card px-2.5 text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
+          >
+            Add
+          </button>
+          <button
+            type="button"
+            data-testid="recipe-remove"
+            disabled={!selected || drop.isPending}
+            onClick={() => selected && drop.mutate({ id: selected.id, force: false })}
+            className="h-10 rounded-md border border-border bg-card px-2.5 text-xs font-medium text-foreground hover:bg-muted disabled:opacity-50"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
       {preview && !adding ? (
         <p className="truncate text-[11px] text-muted-foreground" title={preview}>
           {selected?.customer ? "Account" : "House"} · {preview}
@@ -431,15 +468,18 @@ export function MachineFields({
   showRecipe = true,
   recipeInConfig = false,
   where = "install",
+  dealId,
   rowLocked,
   rowFooter,
 }: {
   /** The recipe column of the install layout. Deals show the recipe on the configuration line instead. */
   showRecipe?: boolean;
-  /** Deal rows: the recipe picker sits with Sold or Loaned, plug, water and coffee. */
+  /** Deal rows: the recipe picker sits with Sold, Loan or Lease, plug and water. */
   recipeInConfig?: boolean;
   /** "install" or "deal", for the remove button's label. */
   where?: string;
+  /** Deal whose open row should not count as another use when a recipe is removed. */
+  dealId?: number;
   /** Take this machine off the install. When given, each block is the one place the machine is listed. */
   onRemove?: (index: number) => void;
   specs: MachineSpec[];
@@ -448,7 +488,7 @@ export function MachineFields({
   onPulled?: (next: MachineSpec[], result: SerialPullResult) => void;
   /** Save right away when a recipe is picked (existing installs). */
   onRecipe?: (next: MachineSpec[]) => void;
-  /** Save right away when Sold or Loaned is clicked (existing installs). Typed fields save with the form. */
+  /** Save right away when Sold, Loan or Lease is chosen (existing installs). Typed fields save with the form. */
   onCommit?: (next: MachineSpec[]) => void;
   customer?: string;
   recipes?: Recipe[];
@@ -518,10 +558,8 @@ export function MachineFields({
               machineIndex={index}
               onValue={(serial) => onChange(patch(index, { serial }))}
               onPulled={(result) => {
-                const next = patch(index, {
-                  serial: result.serial,
-                  powerVoltage: spec.powerVoltage || result.powerVoltage || "",
-                });
+                // A serial pull never fills volts, plug, or water. The rep types those.
+                const next = patch(index, { serial: result.serial });
                 onChange(next);
                 onPulled?.(next, result);
               }}
@@ -533,7 +571,7 @@ export function MachineFields({
                   id={`pwr-${index}`}
                   value={spec.powerVoltage}
                   autoComplete="off"
-                  placeholder="208V"
+                  data-testid="machine-voltage"
                   onChange={(e) => onChange(patch(index, { powerVoltage: e.target.value }))}
                 />
               </label>
@@ -548,6 +586,8 @@ export function MachineFields({
                 installId={installId}
                 recipes={recipes}
                 value={spec.recipeId}
+                dealId={dealId}
+                machineIndex={index}
                 onPick={(recipeId) => {
                   const next = patch(index, { recipeId });
                   onChange(next);
@@ -555,50 +595,40 @@ export function MachineFields({
                 }}
               />
             ) : null}
-            {/* Sold or Loaned, then the rest of the configuration: plug, water when the unit takes it, and the coffee. */}
-            <div className="col-span-full grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="machine-config">
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Sold Or Loaned</p>
-                <div className="mt-1 flex gap-1.5" role="group" aria-label={`Sold or loaned: ${spec.equipment}`}>
-                  {OWNERSHIPS.map((o) => (
-                    <button
-                      key={o}
-                      type="button"
-                      aria-pressed={spec.ownership === o}
-                      data-testid={`machine-${o.toLowerCase()}`}
-                      onClick={() => {
-                        const next = patch(index, { ownership: spec.ownership === o ? "" : o });
-                        onChange(next);
-                        onCommit?.(next);
-                      }}
-                      className={cn("h-9 rounded-full px-3 text-sm font-medium", spec.ownership === o ? "bg-ink text-ink-foreground" : "bg-secondary text-foreground")}
-                    >
-                      {o}
-                    </button>
+            {/* One ownership choice, then plug and water. The rep types requirements. Coffee is not a field. */}
+            <div className={cn("col-span-full grid grid-cols-2 gap-2", need === "none" ? "sm:grid-cols-2" : "sm:grid-cols-3")} data-testid="machine-config" data-water={need}>
+              <label className={fieldLabel}>
+                Ownership
+                <SelectField
+                  aria-label={`Ownership for ${spec.equipment}`}
+                  data-testid="machine-ownership"
+                  value={spec.ownership === "Sold" || spec.ownership === "Loaned" || spec.ownership === "Leased" ? spec.ownership : ""}
+                  allowEmpty
+                  emptyLabel="Choose"
+                  className="normal-case"
+                  onChange={(e) => {
+                    const next = patch(index, { ownership: e.target.value });
+                    onChange(next);
+                    onCommit?.(next);
+                  }}
+                >
+                  {OWNERSHIP_CHOICES.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
-                </div>
-              </div>
+                </SelectField>
+              </label>
               <label className={fieldLabel}>
                 Plug
-                <Input value={spec.plug ?? ""} autoComplete="off" placeholder="L6-30P" className="normal-case" data-testid="machine-plug" onChange={(e) => onChange(patch(index, { plug: e.target.value }))} />
+                <Input value={spec.plug ?? ""} autoComplete="off" className="normal-case" data-testid="machine-plug" onChange={(e) => onChange(patch(index, { plug: e.target.value }))} />
               </label>
-              {need === "none" ? (
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Water</p>
-                  <p className="mt-1 flex h-10 items-center text-sm text-muted-foreground" data-testid="machine-no-water">
-                    {NO_WATER_NOTE}
-                  </p>
-                </div>
-              ) : (
+              {need === "none" ? null : (
                 <label className={fieldLabel}>
                   {need === "required" ? "Water" : "Water (If Required)"}
-                  <Input value={spec.water ?? ""} autoComplete="off" placeholder={'3/8" line'} className="normal-case" data-testid="machine-water" onChange={(e) => onChange(patch(index, { water: e.target.value }))} />
+                  <Input value={spec.water ?? ""} autoComplete="off" className="normal-case" data-testid="machine-water" onChange={(e) => onChange(patch(index, { water: e.target.value }))} />
                 </label>
               )}
-              <label className={fieldLabel}>
-                Coffee
-                <Input value={spec.coffee ?? ""} autoComplete="off" placeholder="Coffee for this unit" className="normal-case" data-testid="machine-coffee" onChange={(e) => onChange(patch(index, { coffee: e.target.value }))} />
-              </label>
               {recipeInConfig ? (
                 <MachineRecipeSelect
                   className="col-span-full grid min-w-0 gap-1"
@@ -607,6 +637,8 @@ export function MachineFields({
                   installId={installId}
                   recipes={recipes}
                   value={spec.recipeId}
+                  dealId={dealId}
+                  machineIndex={index}
                   onPick={(recipeId) => {
                     const next = patch(index, { recipeId });
                     onChange(next);

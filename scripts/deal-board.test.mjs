@@ -9,6 +9,7 @@ import {
   isOwnership,
   keepTies,
   machineGlance,
+  ownershipLabel,
   placeRows,
   projectLabel,
   projectStatus,
@@ -21,18 +22,24 @@ import {
 const linea = { equipment: "La Marzocco Linea PB", serial: "LM123", powerVoltage: "208V", ownership: "Sold", plug: "L6-30P", water: '3/8" line', coffee: "House Espresso", recipeId: 7 };
 const g9 = { equipment: "BUNN G9-2T HD", serial: "", powerVoltage: "120V", ownership: "Loaned", plug: "5-15P", water: "typed by mistake", coffee: "Breakfast Blend", recipeId: null };
 
-test("equipment is marked Sold or Loaned, nothing else", () => {
+test("equipment is Sold, Loan or Lease, and older Sold and Loaned rows still count", () => {
   assert.equal(isOwnership("Sold"), true);
   assert.equal(isOwnership("Loaned"), true);
+  assert.equal(isOwnership("Leased"), true);
   assert.equal(isOwnership("sold"), false);
   assert.equal(isOwnership(""), false);
-  assert.equal(cleanMachine({ ...linea, ownership: "Leased" }).ownership, "");
+  assert.equal(cleanMachine({ ...linea, ownership: "Leased" }).ownership, "Leased");
+  assert.equal(ownershipLabel("Sold"), "Sold");
+  assert.equal(ownershipLabel("Loaned"), "Loan");
+  assert.equal(ownershipLabel("Leased"), "Lease");
+  assert.equal(cleanMachine(linea).coffee, undefined);
 });
 
-test("a machine is not confirmed until it is marked Sold or Loaned", () => {
+test("a machine is not confirmed until it is marked Sold, Loan or Lease", () => {
   assert.match(confirmError({ equipment: "", ownership: "Sold" }), /model/);
-  assert.match(confirmError({ equipment: "Linea PB", ownership: "" }), /Sold or Loaned/);
+  assert.match(confirmError({ equipment: "Linea PB", ownership: "" }), /Sold, Loan or Lease/);
   assert.equal(confirmError({ equipment: "Linea PB", ownership: "Loaned" }), null);
+  assert.equal(confirmError({ equipment: "Linea PB", ownership: "Leased" }), null);
 });
 
 test("a grinder has no water or drain; a brewer and an espresso machine need water", () => {
@@ -62,7 +69,6 @@ test("a confirmed machine takes everything set on the deal to the Board", () => 
     ownership: "Sold",
     plug: "L6-30P",
     water: '3/8" line',
-    coffee: "House Espresso",
     uid: "u1",
   });
   // The deal's own stamps stay on the deal.
@@ -70,7 +76,7 @@ test("a confirmed machine takes everything set on the deal to the Board", () => 
   assert.equal("boardId" in row, false);
 });
 
-test("the install ticket is filled from the project: recipe, volts, plug, water, coffee", () => {
+test("the install ticket is filled from the project: recipe, volts, plug, water — not coffee", () => {
   const [a, b] = ticketLines([boardRow(linea, "u1"), boardRow(g9, "u2")], (id) => (id === 7 ? "Morning Espresso" : null));
   assert.deepEqual(a, {
     model: "La Marzocco Linea PB",
@@ -81,19 +87,18 @@ test("the install ticket is filled from the project: recipe, volts, plug, water,
     water: '3/8" line',
     waterNeed: "required",
     recipe: "Morning Espresso",
-    coffee: "House Espresso",
     missing: [],
   });
-  assert.equal(b.ownership, "Loaned");
+  assert.equal(b.ownership, "Loan");
   assert.equal(b.water, null);
   assert.equal(b.waterNeed, "none");
-  // A grinder is never asked for water; it is asked for the recipe it has none of.
   assert.deepEqual(b.missing, ["Recipe"]);
+  assert.equal("coffee" in a, false);
 });
 
-test("the ticket names what is still blank, and never asks a fridge for coffee", () => {
+test("the ticket names what is still blank, and never asks for coffee", () => {
   const bare = ticketLine({ equipment: "BUNN Axiom DV-APS", serial: "", powerVoltage: "" }, null);
-  assert.deepEqual(bare.missing, ["Sold or Loaned", "Volts", "Plug", "Water", "Recipe", "Coffee"]);
+  assert.deepEqual(bare.missing, ["Sold, Loan or Lease", "Volts", "Plug", "Water", "Recipe"]);
   const fridge = ticketLine({ equipment: "Milk Fridge", serial: "", powerVoltage: "120V", plug: "5-15P", ownership: "Sold" }, null);
   assert.deepEqual(fridge.missing, []);
   assert.equal(fridge.water, "");
@@ -150,8 +155,8 @@ test("a deal handed off before machines were tracked matches its own project by 
 test("project labels and the one-line glance on a board card", () => {
   assert.equal(projectLabel(1, 1), "Project");
   assert.equal(projectLabel(2, 3), "Project 2 of 3");
-  assert.equal(machineGlance(linea), 'Sold · SN LM123 · 208V · L6-30P · Water 3/8" line · Coffee: House Espresso');
-  assert.equal(machineGlance(g9), "Loaned · 120V · 5-15P · Coffee: Breakfast Blend");
+  assert.equal(machineGlance(linea), 'Sold · SN LM123 · 208V · L6-30P · Water 3/8" line');
+  assert.equal(machineGlance(g9), "Loan · 120V · 5-15P");
 });
 
 test("a window opened before a machine was confirmed does not drop its tie when it saves", () => {

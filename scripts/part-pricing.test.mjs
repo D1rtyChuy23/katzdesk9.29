@@ -57,6 +57,19 @@ test("parts plan: existing MPN updates, new MPN adds, never a second part for on
   assert.deepEqual(plan[0].changes, ["Description → Gasket kit", "Base Price $12.00 → $14.00"]);
 });
 
+test("hidden parts are skipped by the parts import and the price import", () => {
+  const hidden = stored.map((p, i) => (i === 0 ? { ...p, hidden: true } : p));
+  const rows = [
+    { line: 2, sheet: "S", mpn: "104120", sku: "EVER104120", parent: "PARTS", description: "Gasket kit", rate: 14, cost: null, kind: "part" },
+    { line: 3, sheet: "S", mpn: "NEW-9", sku: "EVER104120", parent: null, description: null, rate: null, cost: null, kind: "part" },
+  ];
+  const plan = planPartImport(rows, hidden);
+  assert.deepEqual(plan.map((p) => p.status), ["hidden", "hidden"]);
+  const prices = planPricing([{ line: 2, sheet: "S", mpn: "104120", price: 20 }], hidden, "list");
+  assert.equal(prices[0].status, "hidden");
+  assert.deepEqual(pricingToApply(prices), []);
+});
+
 test("price file: MPN and price, New Price wins, bad rows skipped", () => {
   const r = priceRowsFromSheets([{ name: "2027", matrix: [
     ["MPN", "Old Price", "New Price"],

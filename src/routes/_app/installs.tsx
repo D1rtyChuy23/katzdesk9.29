@@ -16,7 +16,7 @@ import { mergeMachineSpecs, parseMachinesJson, serializeMachines, type MachineSp
 import { formatShortDate, todayChicago, isInstalled, isOpenInstall, installedPatch } from "@/lib/ops/clock";
 import { canMarkInstalled, saveInspectionMeta } from "@/lib/ops/inspection-api";
 import { siteIsReady } from "@/lib/ops/pre-inspection";
-import { isOwnership, machineGlance, projectLabel } from "@/lib/ops/deal-board";
+import { isOwnership, machineGlance, ownershipLabel, projectLabel } from "@/lib/ops/deal-board";
 import { OpenLink } from "@/components/desk/open-link";
 import { InspectionBadge, PreInspectionPanel } from "@/components/desk/pre-inspection-panel";
 import { Button } from "@/components/ui/button";
@@ -927,14 +927,14 @@ function machineNotes(i: Install, indent = true) {
   return (
     <ul className={`mt-1 space-y-0.5 text-xs text-muted-foreground ${indent ? "md:pl-20" : ""}`} data-testid="board-machines">
       {rows.map((m, idx) => {
-        // Sold or Loaned reads as a badge; the rest of the line is what was set for the unit.
+        // Ownership reads as a badge (Sold, Loan or Lease); the rest of the line is what was set for the unit.
         const rest = machineGlance({ ...m, ownership: "" });
         return (
           <li key={`${m.equipment}-${idx}`} data-testid="board-machine" data-confirmed={m.uid ? "true" : "false"}>
             <span className="font-medium text-foreground/80">{m.equipment}</span>
             {isOwnership(m.ownership) ? (
               <Badge size="tight" variant={m.ownership === "Sold" ? "primary" : "outline"} className="ml-1.5 align-middle" data-testid="board-ownership">
-                {m.ownership}
+                {ownershipLabel(m.ownership)}
               </Badge>
             ) : null}
             {m.uid ? <span className="ml-1.5 text-[11px] font-medium text-success" data-testid="board-confirmed">Confirmed</span> : null}

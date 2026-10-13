@@ -113,7 +113,7 @@ export type Deal = {
   accountType: string | null;
   dateOfDeal: string | null;
   equipment: string | null;
-  /** Every machine on the deal (model, serial, voltage, Sold or Loaned, configuration). Empty on older deals: read equipment instead. */
+  /** Every machine on the deal (model, serial, voltage, Sold, Loan or Lease, configuration). Empty on older deals: read equipment instead. */
   machines: MachineSpec[];
   /** The board projects this deal's confirmed machines are on, plus open cards on the account a machine could join. */
   projects: DealProject[];

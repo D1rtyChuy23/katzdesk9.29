@@ -34,6 +34,7 @@ import {
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
+import { absorbWarehouseSerials } from "@/lib/ops/warehouse-serial";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -307,6 +308,13 @@ export function InstallSheet({
     );
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
+  const serialSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}`).join("\n");
+  useEffect(() => {
+    if (!row || hydratedId !== row.id) return;
+    setSpecs((cur) => absorbWarehouseSerials(cur, row.machines ?? []));
+    // A warehouse assignment writes the serial on the server. Pull it into the open row.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row?.id, hydratedId, serialSig]);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
@@ -567,7 +575,7 @@ const DEAL_ROWS_OPEN = 3;
 
 /**
  * Every machine on the deal in one section: Add Equipment puts another row here (model, serial, voltage,
- * location, Sold or Loaned, configuration). The account is already open, so no customer is asked for again.
+ * location, Sold, Loan or Lease, configuration). The account is already open, so no customer is asked for again.
  * Confirm sends a machine to the Board for prep. When a project is already open for this deal or account, it
  * asks first: continue under that project (one board card) or start a new project (another card).
  */
@@ -657,7 +665,7 @@ function DealMachines({
         ) : null}
       </div>
       {specs.length ? (
-        <p className="mt-1 text-xs text-muted-foreground">Mark each machine Sold or Loaned. Confirm sends it to the Board for prep with everything set here.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Mark each machine Sold, Loan or Lease. Confirm sends it to the Board for prep with everything set here.</p>
       ) : null}
       {many && !open ? (
         <p className="mt-1 truncate text-xs text-muted-foreground" data-testid="deal-machines-folded">
@@ -669,10 +677,13 @@ function DealMachines({
           onChange={onChange}
           showRecipe={false}
           recipeInConfig
+          dealId={deal.id}
           customer={deal.customer}
           recipes={recipes}
           where="deal"
           onRemove={(index) => onPersist(specs.filter((_, i) => i !== index))}
+          onCommit={onPersist}
+          onRecipe={onPersist}
           rowLocked={(s) => s.boardId != null}
           rowFooter={(s, index) => {
             const project = projectFor(s.boardId);
@@ -706,7 +717,7 @@ function DealMachines({
                   {confirm.isPending && confirm.variables?.index === index ? "Confirming…" : "Confirm"}
                 </Button>
                 <span className="text-xs text-muted-foreground">
-                  {isOwnership(s.ownership) ? "Not on the Board yet." : "Mark it Sold or Loaned, then confirm."}
+                  {isOwnership(s.ownership) ? "Not on the Board yet." : "Mark it Sold, Loan or Lease, then confirm."}
                 </span>
               </div>
             );

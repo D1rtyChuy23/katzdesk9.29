@@ -144,9 +144,11 @@ export type StoredPart = {
   rate: number | null;
   cost: number | null;
   listPrice: number | null;
+  /** Set when the part was hidden. Imports skip it and never clear the hide. */
+  hidden?: boolean;
 };
 
-export type PartPlanStatus = "new" | "update" | "same" | "shared_mpn" | "sku_taken";
+export type PartPlanStatus = "new" | "update" | "same" | "shared_mpn" | "sku_taken" | "hidden";
 
 export type PartPlanLine = {
   status: PartPlanStatus;
@@ -187,9 +189,11 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
     if (!hit) {
       const sku = row.sku ?? row.mpn;
       const taken = skus.get(sku.trim().toLowerCase());
+      if (taken?.hidden) return { status: "hidden", row, partId: taken.id, changes: [], reason: `SKU ${sku} is hidden. Hidden, skipped.` };
       if (taken) return { status: "sku_taken", row, partId: null, changes: [], reason: `SKU ${sku} is already a part${taken.mpn ? ` with MPN ${taken.mpn}` : " with no MPN"}.` };
       return { status: "new", row, partId: null, changes: [`New part ${itemFullName(sku, row.parent)}`], reason: null };
     }
+    if (hit.hidden) return { status: "hidden", row, partId: hit.id, changes: [], reason: "Hidden, skipped. This part stays hidden." };
     const changes: string[] = [];
     if (row.description != null && row.description !== (hit.description ?? "")) changes.push(`Description → ${row.description}`);
     if (row.rate != null && row.rate !== hit.rate) changes.push(`Base Price ${money(hit.rate)} → ${money(row.rate)}`);
@@ -257,7 +261,7 @@ export function priceRowsFromSheets(sheets: { name: string; matrix: unknown[][] 
 export type PriceTarget = "list" | "sell";
 export const PRICE_TARGET_LABEL: Record<PriceTarget, string> = { list: "Manufacturer Price", sell: "Our Sell Price (Base Price)" };
 
-export type PricePlanStatus = "change" | "same" | "no_match" | "shared_mpn";
+export type PricePlanStatus = "change" | "same" | "no_match" | "shared_mpn" | "hidden";
 export type PricePlanLine = { status: PricePlanStatus; mpn: string; partId: number | null; sku: string | null; description: string | null; oldPrice: number | null; newPrice: number; pct: number | null };
 
 /** Price file against the parts: matched on MPN only. No Match and shared MPNs stay in the preview and are never applied. */
@@ -270,6 +274,7 @@ export function planPricing(rows: PriceFileRow[], stored: StoredPart[], target: 
     if (hits.length > 1) return { ...base, status: "shared_mpn", partId: null, sku: hits.map((h) => h.sku).join(", "), description: null, oldPrice: null, pct: null };
     const p = hits[0]!;
     const old = target === "list" ? p.listPrice : p.rate;
+    if (p.hidden) return { ...base, status: "hidden", partId: p.id, sku: p.sku, description: p.description, oldPrice: old, pct: null };
     const pct = old != null && old > 0 ? round2(((r.price - old) / old) * 100) : null;
     return { ...base, status: old === r.price ? "same" : "change", partId: p.id, sku: p.sku, description: p.description, oldPrice: old, pct };
   });

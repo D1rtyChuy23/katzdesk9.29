@@ -296,5 +296,6 @@ assert.deepEqual(checksFor("LM Linea S 2AV SN:LS028751"), ["power", "water", "dr
 assert.deepEqual(checksFor("Classe 9"), ["power", "water", "drain", "space"]);
 assert.deepEqual(checksFor("E4s"), ["power", "water", "drain", "ethernet", "space"]);
 assert.deepEqual(checksFor("Bunn ITCB-DV, 29\" w/Flip Tray"), ["power", "water", "space"]);
+assert.deepEqual(checksFor("Bauhuas 2 Group"), ["power", "water", "drain", "space"]);
 assert.deepEqual(checksFor("EZRO200-10"), ["power", "space"]);
 console.log("account names: ok");

@@ -44,6 +44,8 @@ import type {
 } from "./types";
 export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
+import { backfillAssignedSerialsOnce } from "./serial-backfill";
+import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { boardRow, cleanMachine, confirmError, continuable, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus } from "./deal-board";
 import { listedEquipment, matchModel, catalogModels } from "./equipment";
 import {
@@ -1121,7 +1123,7 @@ function attachBoard(deal: any, projects: any[]) {
 }
 /**
  * Confirm machines on a deal: each one becomes a row on a board project (an install card) for prep, with
- * everything set on the deal: Sold or Loaned, serial, volts, plug, water, recipe, coffee. "continue" adds to an
+ * everything set on the deal: Sold, Loan or Lease, serial, volts, plug, water and recipe. "continue" adds to an
  * open project so it stays one card; "new" opens another card. The deal rows are saved as the window has them.
  */
 export const confirmDealMachines = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number; machines: MachineSpec[]; indexes: number[]; project: { mode: "new" } | { mode: "continue"; installId: number } }) => d).handler(async ({ data, context }: any) => {
@@ -1265,7 +1267,7 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; producer?: string; equipment?: string; machines?: MachineSpec[]; amount?: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const producer = canonicalRepName(data.producer);
-	// One row per machine, each marked Sold or Loaned; equipment stays the joined models so lists and search read it.
+	// One row per machine, each marked Sold, Loan or Lease; equipment stays the joined models so lists and search read it.
 	const packed = Array.isArray(data.machines) && data.machines.length ? serializeMachines(data.machines.map((m: any) => cleanMachine({ ...m, equipment: String(m?.equipment ?? ""), serial: String(m?.serial ?? ""), powerVoltage: String(m?.powerVoltage ?? "") }))) : null;
 	const rows = await sql`
       insert into deals (customer, producer, equipment, machines, amount, date_of_deal)
@@ -1337,6 +1339,7 @@ async function maybeHandoffInstall(sql: any, dealId: any) {
 }
 export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Install[]> => {
 	const sql = await ready();
+	await backfillAssignedSerialsOnce(sql);
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const catalog = await loadEquipCatalog(sql);
@@ -1843,8 +1846,46 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	}
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 });
+/** Copy or clear a warehouse serial on a record that stores machine rows. Service jobs have none, so that path no-ops. */
+async function stampWarehouseSerial(sql: any, table: "installs" | "deals" | "service_jobs", id: number, unit: { model: string; serial: string | null }, mode: "place" | "clear", addRow: boolean) {
+	if (table === "service_jobs") {
+		const has = await sql`select 1 as ok from information_schema.columns where table_name = 'service_jobs' and column_name = 'machines' limit 1`;
+		if (!has[0]) return null;
+	}
+	const row = table === "installs"
+		? (await sql`select id, deal_id, equipment, serial, power_voltage, machines from installs where id = ${id}`)[0]
+		: table === "deals"
+			? (await sql`select id, equipment, machines from deals where id = ${id}`)[0]
+			: (await sql`select id, equipment, machines from service_jobs where id = ${id}`)[0];
+	if (!row) return null;
+	const specs = table === "installs"
+		? specsFromInstall(row.equipment, row.serial, row.power_voltage, row.machines)
+		: parseMachinesJson(row.machines).length
+			? parseMachinesJson(row.machines)
+			: specsFromInstall(row.equipment, null, null, row.machines);
+	const result = mode === "place" ? placeWarehouseSerial(specs, unit, { addRow }) : clearWarehouseSerial(specs, unit);
+	if (result.changed) {
+		const packed = serializeMachines(result.rows);
+		if (table === "installs") {
+			await sql`
+        update installs set
+          equipment = ${packed.equipment},
+          machines = ${packed.machines},
+          serial = ${packed.serial},
+          power_voltage = ${packed.powerVoltage},
+          updated_at = now()
+        where id = ${id}`;
+		} else if (table === "deals") {
+			await sql`update deals set equipment = ${packed.equipment}, machines = ${packed.machines}, updated_at = now() where id = ${id}`;
+		} else {
+			await sql`update service_jobs set equipment = ${packed.equipment}, machines = ${packed.machines}, updated_at = now() where id = ${id}`;
+		}
+	}
+	return row.deal_id ?? null;
+}
 export const assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
+	await backfillAssignedSerialsOnce(sql);
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
 	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
@@ -1854,7 +1895,12 @@ export const assignAssetToInstall = createServerFn({ method: "POST" }).middlewar
 	if (!inst) throw new Error("Install not found");
 	// Locked: a unit already assigned to an account is an asset at that site until it is returned.
 	if (asset.status === "assigned") {
-		if (asset.install_id === inst.id) return mapAsset(asset);
+		if (asset.install_id === inst.id) {
+			const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
+			const dealId = await stampWarehouseSerial(sql, "installs", inst.id, unit, "place", true);
+			if (dealId) await stampWarehouseSerial(sql, "deals", Number(dealId), unit, "place", true);
+			return mapAsset(asset);
+		}
 		throw new Error(`That unit is already assigned to ${asset.sold_to || "another account"}. Return it to the barn before assigning it again.`);
 	}
 	const originSite = asset.origin_site ?? asset.site;
@@ -1876,6 +1922,9 @@ export const assignAssetToInstall = createServerFn({ method: "POST" }).middlewar
         purpose = ${asset.customer_owned ? "Customer-owned / loaner" : "Install"},
         updated_at = now()
       where id = ${data.assetId}`;
+	const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
+	const dealId = await stampWarehouseSerial(sql, "installs", inst.id, unit, "place", true);
+	if (dealId) await stampWarehouseSerial(sql, "deals", Number(dealId), unit, "place", true);
 	const detail = `Pulled ${asset.model}${asset.serial ? " · " + asset.serial : ""} from ${asset.pallet ? slotId(asset.pallet, asset.level ?? 0, asset.line_no) : siteLabel(asset.site)}.`;
 	await logActivity(sql, context.userId, "install", inst.id, "assigned-asset", detail);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
@@ -1885,6 +1934,9 @@ export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middl
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
 	if (asset.install_id !== data.installId) throw new Error("That unit is not on this install");
+	const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
+	const dealId = await stampWarehouseSerial(sql, "installs", data.installId, unit, "clear", false);
+	if (dealId) await stampWarehouseSerial(sql, "deals", Number(dealId), unit, "clear", false);
 	const slot = await findOpenBarnSlot(sql, {
 		site: asset.origin_site ?? null,
 		pallet: asset.origin_pallet ?? null,
@@ -1948,6 +2000,12 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
         purpose = ${asset.customer_owned ? "Customer-owned / service loaner" : "Service"},
         updated_at = now()
       where id = ${data.assetId}`;
+	const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
+	if (job?.id) await stampWarehouseSerial(sql, "service_jobs", job.id, unit, "place", true);
+	const openDeals = await sql`
+      select id from deals
+      where archived = false and lower(customer) = lower(${name}) and coalesce(completion, '') <> 'fell'`;
+	for (const d of openDeals) await stampWarehouseSerial(sql, "deals", d.id, unit, "place", false);
 	const detail = `Pulled ${asset.model}${asset.serial ? " · " + asset.serial : ""} from ${asset.pallet ? slotId(asset.pallet, asset.level ?? 0, asset.line_no) : siteLabel(asset.site)} for ${name}.`;
 	await logActivity(sql, context.userId, "asset", data.assetId, "assigned-service", detail);
 	if (job) await logActivity(sql, context.userId, job.kind, job.id, "assigned-asset", detail);
@@ -1965,6 +2023,14 @@ export const unassignAssetFromService = createServerFn({ method: "POST" }).middl
 	});
 	const jobId = asset.job_id;
 	const jobKind = jobId ? (await sql`select kind from service_jobs where id = ${jobId}`)[0]?.kind : null;
+	const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
+	if (jobId) await stampWarehouseSerial(sql, "service_jobs", jobId, unit, "clear", false);
+	if (asset.sold_to) {
+		const openDeals = await sql`
+        select id from deals
+        where archived = false and lower(customer) = lower(${asset.sold_to})`;
+		for (const d of openDeals) await stampWarehouseSerial(sql, "deals", d.id, unit, "clear", false);
+	}
 	await sql`
       update assets set
         status = 'ready',
@@ -1998,6 +2064,12 @@ export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middlew
 		const { sectionFullMessage } = await import("@/lib/ops/warehouse");
 		throw new Error(sectionFullMessage(data.site, pallet, data.level));
 	}
+	const unit = { model: String(prev.model ?? ""), serial: prev.serial ?? null };
+	if (prev.install_id) {
+		const dealId = await stampWarehouseSerial(sql, "installs", prev.install_id, unit, "clear", false);
+		if (dealId) await stampWarehouseSerial(sql, "deals", Number(dealId), unit, "clear", false);
+	}
+	if (prev.job_id) await stampWarehouseSerial(sql, "service_jobs", prev.job_id, unit, "clear", false);
 	await sql`
       update assets set
         status = 'ready',
@@ -2422,5 +2494,47 @@ export const copyRecipe = createServerFn({ method: "POST" }).middleware([deskMid
         ${src.milk ?? null}, ${src.notes ?? null}
       )
       returning *`)[0]);
+});
+
+/** How many other machine rows (and copies) still point at this recipe. The open deal row can be left out. */
+async function recipeUsedElsewhere(sql: any, id: number, exceptDealId: number | null, exceptIndex: number | null) {
+	const re = new RegExp(`"recipeId"\\s*:\\s*${id}(?!\\d)`, "g");
+	let n = 0;
+	const deals = await sql`select id, machines from deals where archived = false and machines is not null`;
+	for (const d of deals) {
+		const text = String(d.machines ?? "");
+		if (exceptDealId != null && Number(d.id) === Number(exceptDealId)) {
+			try {
+				const arr = JSON.parse(text);
+				if (Array.isArray(arr)) {
+					arr.forEach((m: any, i: number) => {
+						if (exceptIndex != null && i === exceptIndex) return;
+						if (Number(m?.recipeId) === id) n += 1;
+					});
+					continue;
+				}
+			} catch {
+				/* fall through and count the text */
+			}
+		}
+		n += (text.match(re) ?? []).length;
+	}
+	const installs = await sql`select machines from installs where archived = false and machines is not null`;
+	for (const r of installs) n += (String(r.machines ?? "").match(re) ?? []).length;
+	const copies = await sql`select count(*)::int as n from recipes where copied_from = ${id}`;
+	n += Number(copies[0]?.n ?? 0);
+	return n;
+}
+
+/** Remove a recipe from the list. Asks first only when some other machine still uses it. */
+export const deleteRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; force?: boolean; exceptDealId?: number | null; exceptIndex?: number | null }) => d).handler(async ({ data }: any) => {
+	const sql = await ready();
+	const id = Number(data.id);
+	const row = (await sql`select id from recipes where id = ${id}`)[0];
+	if (!row) throw new Error("Recipe not found");
+	const used = await recipeUsedElsewhere(sql, id, data.exceptDealId ?? null, data.exceptIndex ?? null);
+	if (used > 0 && !data.force) return { deleted: false, needsConfirm: true, used };
+	await sql`delete from recipes where id = ${id}`;
+	return { deleted: true, needsConfirm: false, used: 0 };
 });
 

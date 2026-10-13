@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { CheckCircle2, Printer } from "lucide-react";
 import { toast } from "sonner";
-import { NO_WATER_NOTE, projectLabel, ticketLines, ticketOpen, type TicketLine } from "@/lib/ops/deal-board";
+import { projectLabel, ticketLines, ticketOpen, type TicketLine } from "@/lib/ops/deal-board";
 import { findRecipeFor, recipeLabel } from "@/lib/ops/equipment";
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import type { MachineSpec } from "@/lib/ops/machines";
@@ -40,11 +40,11 @@ function printTicket(install: Install, lines: TicketLine[]) {
     toast.error("Allow pop-ups to print the install ticket.");
     return;
   }
-  const cell = (v: string | null) => (v == null ? NO_WATER_NOTE : v || "Not set");
+  const cell = (v: string | null) => (v == null ? "" : v || "Not set");
   const rows = lines
     .map(
       (l) =>
-        `<tr><td>${esc(l.model)}</td><td>${esc(cell(l.ownership))}</td><td>${esc(cell(l.serial))}</td><td>${esc(cell(l.volts))}</td><td>${esc(cell(l.plug))}</td><td>${esc(cell(l.water))}</td><td>${esc(cell(l.recipe))}</td><td>${esc(cell(l.coffee))}</td></tr>`,
+        `<tr><td>${esc(l.model)}</td><td>${esc(cell(l.ownership))}</td><td>${esc(cell(l.serial))}</td><td>${esc(cell(l.volts))}</td><td>${esc(cell(l.plug))}</td><td>${esc(cell(l.water))}</td><td>${esc(cell(l.recipe))}</td></tr>`,
     )
     .join("");
   w.document.write(`<!doctype html><html><head><title>Install Ticket · ${esc(install.customer)}</title>
@@ -58,7 +58,7 @@ function printTicket(install: Install, lines: TicketLine[]) {
     </style></head><body>
     <h1>Install Ticket · ${esc(install.customer)}</h1>
     <p>${meta(install).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(" · ")}</p>
-    <table><thead><tr><th>Model</th><th>Sold / Loaned</th><th>Serial</th><th>Volts</th><th>Plug</th><th>Water</th><th>Recipe</th><th>Coffee</th></tr></thead><tbody>${rows}</tbody></table>
+    <table><thead><tr><th>Model</th><th>Sold / Loan / Lease</th><th>Serial</th><th>Volts</th><th>Plug</th><th>Water</th><th>Recipe</th></tr></thead><tbody>${rows}</tbody></table>
     </body></html>`);
   w.document.close();
   w.focus();
@@ -67,8 +67,8 @@ function printTicket(install: Install, lines: TicketLine[]) {
 
 /**
  * The install ticket for a board project. It opens once the project is Ready (equipment Ready and the
- * pre-inspection passed) and is read from the project's own machine rows: Sold or Loaned, recipe,
- * configuration (volts, plug, water when the unit takes it) and coffee. Nothing is typed here twice.
+ * pre-inspection passed) and is read from the project's own machine rows: Sold, Loan or Lease, recipe,
+ * and configuration (volts, plug, water when the unit takes it). Nothing is typed here twice.
  */
 export function InstallTicket({ install, machines, recipes }: { install: Install; machines: MachineSpec[]; recipes: Recipe[] }) {
   const ready = ticketOpen(install.equipStatus, install.inspection?.overall) && !install.complete;
@@ -121,11 +121,11 @@ export function InstallTicket({ install, machines, recipes }: { install: Install
                   {l.ownership}
                 </Badge>
               ) : (
-                <span className="text-xs font-medium text-warning">Sold or Loaned not set</span>
+                <span className="text-xs font-medium text-warning">Sold, Loan or Lease not set</span>
               )}
               {l.serial ? <span className="text-xs font-normal text-muted-foreground">SN {l.serial}</span> : null}
             </p>
-            <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm sm:grid-cols-5">
+            <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm sm:grid-cols-4">
               <div>
                 <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Volts</dt>
                 <dd data-testid="ticket-volts">{blank(l.volts, true)}</dd>
@@ -134,17 +134,15 @@ export function InstallTicket({ install, machines, recipes }: { install: Install
                 <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Plug</dt>
                 <dd data-testid="ticket-plug">{blank(l.plug, true)}</dd>
               </div>
+              {l.water == null ? null : (
               <div>
                 <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Water</dt>
-                <dd data-testid="ticket-water">{l.water == null ? <span className="text-muted-foreground">{NO_WATER_NOTE}</span> : blank(l.water, l.waterNeed === "required")}</dd>
+                <dd data-testid="ticket-water">{blank(l.water, l.waterNeed === "required")}</dd>
               </div>
-              <div className="col-span-2 sm:col-span-1">
+              )}
+              <div>
                 <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Recipe</dt>
                 <dd data-testid="ticket-recipe">{blank(l.recipe, l.missing.includes("Recipe"))}</dd>
-              </div>
-              <div className="col-span-2 sm:col-span-1">
-                <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Coffee</dt>
-                <dd data-testid="ticket-coffee">{blank(l.coffee, l.missing.includes("Coffee"))}</dd>
               </div>
             </dl>
           </li>

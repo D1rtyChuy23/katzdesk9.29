@@ -6,6 +6,7 @@ import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
+import { flagOn } from "@/lib/ops/flag";
 import {
   billingCsv,
   billingState,
@@ -90,6 +91,7 @@ export const searchBillingItems = createServerFn({ method: "POST" })
                 case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version
          from billing_items
         where active
+          and hidden_at is null
           and (item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
                or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
                                  or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%')))
@@ -411,7 +413,7 @@ export const setTicketSalesOrder = createServerFn({ method: "POST" })
 
 // ---- Item list and price import (Admin) ----------------------------------------------------------------
 
-export type ItemImportStatus = "new" | "price" | "other" | "missing";
+export type ItemImportStatus = "new" | "price" | "other" | "missing" | "hidden";
 
 export type ItemImportPreview = {
   total: number;
@@ -424,6 +426,8 @@ export type ItemImportPreview = {
   same: number;
   /** In a price-only file: SKUs that are not loaded. They are not created, so a typo cannot add an item. */
   notFound: number;
+  /** Hidden parts in the file. They are not updated and not un-hidden. */
+  hiddenSkipped: number;
   /** Price moves of 50% or more, shown first for a second look. */
   checkCount: number;
   skipped: number;
@@ -463,6 +467,7 @@ type StoredItem = {
   cost: string | null;
   mfr_part: string | null;
   active: boolean;
+  hidden: boolean;
 };
 
 const UNNEST_ITEMS = `unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::numeric[], $6::numeric[], $7::text[], $8::text[], $9::boolean[])
@@ -485,14 +490,15 @@ export const importBillingItems = createServerFn({ method: "POST" })
     const { rows, skipped, ignoredSheets, columns } = await readItems(data.base64);
 
     const have = new Map<string, StoredItem>();
-    for (const r of await sql.query<StoredItem>("select sku, parent, description, rate, cost, mfr_part, active from billing_items")) {
-      have.set(r.sku.trim().toLowerCase(), r);
+    for (const r of await sql.query<StoredItem>("select sku, parent, description, rate, cost, mfr_part, active, (hidden_at is not null) as hidden from billing_items")) {
+      have.set(r.sku.trim().toLowerCase(), { ...r, hidden: flagOn(r.hidden) });
     }
 
     type Planned = { row: (typeof rows)[number]; status: ItemImportStatus | "same"; change: PriceChange | null };
     const planned: Planned[] = rows.map((row) => {
       const e = have.get(row.sku.toLowerCase());
       if (!e) return { row, status: columns.description ? "new" : "missing", change: priceChange(null, row.rate) };
+      if (e.hidden) return { row, status: "hidden", change: null };
       const change = priceChange(e.rate == null ? null : Number(e.rate), row.rate);
       if (change) return { row, status: "price", change };
       const other =
@@ -504,7 +510,7 @@ export const importBillingItems = createServerFn({ method: "POST" })
       return { row, status: other ? "other" : "same", change: null };
     });
     const n = (st: Planned["status"]) => planned.filter((p) => p.status === st).length;
-    const order: Record<string, number> = { price: 1, new: 2, other: 3, missing: 4, same: 9 };
+    const order: Record<string, number> = { price: 1, new: 2, other: 3, hidden: 4, missing: 5, same: 9 };
     const preview: ItemImportPreview = {
       total: rows.length,
       added: n("new"),
@@ -512,6 +518,7 @@ export const importBillingItems = createServerFn({ method: "POST" })
       otherChanged: n("other"),
       same: n("same"),
       notFound: n("missing"),
+      hiddenSkipped: n("hidden"),
       checkCount: planned.filter((p) => p.change?.check).length,
       skipped,
       ignoredSheets,
@@ -562,7 +569,7 @@ export const importBillingItems = createServerFn({ method: "POST" })
            active = coalesce(s.active, b.active),
            updated_at = now()
          from ${UNNEST_ITEMS}
-        where lower(btrim(b.sku)) = lower(btrim(s.sku))`,
+        where lower(btrim(b.sku)) = lower(btrim(s.sku)) and b.hidden_at is null`,
         arrays(toUpdate.slice(i, i + CHUNK), "file"),
       );
     }

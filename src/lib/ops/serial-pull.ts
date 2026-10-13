@@ -322,14 +322,14 @@ async function writeInstallSerial(
   let idx = machineIndex ?? specs.findIndex((s) => serialKey(s.serial) === serialKey(serial) || !s.serial.trim());
   if (idx < 0 || idx >= specs.length) idx = 0;
   if (!specs.length) {
-    specs = [{ equipment: fill.model ?? "", serial, powerVoltage: fill.powerVoltage ?? "" }];
+    specs = [{ equipment: fill.model ?? "", serial, powerVoltage: "" }];
     idx = 0;
   }
   const cur = specs[idx] ?? { equipment: "", serial: "", powerVoltage: "" };
   specs[idx] = {
+    ...cur,
     equipment: cur.equipment || fill.model || "",
     serial,
-    powerVoltage: cur.powerVoltage || fill.powerVoltage || "",
   };
   const packed = serializeMachines(specs);
   await sql.query(
@@ -400,7 +400,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
         if (data.installId) {
           await writeInstallSerial(sql, data.installId, accountHit.serial ?? serial, data.machineIndex ?? null, {
             model: accountHit.catalogModel,
-            powerVoltage: accountHit.electrical,
+            powerVoltage: null,
           });
           await setInstallNotice(sql, data.installId, notice);
         }
@@ -428,7 +428,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
           allocatedTo: null,
           notice,
           model: accountHit.catalogModel,
-          powerVoltage: accountHit.electrical,
+          powerVoltage: null,
           location: accountHit.customer,
           assetId: null,
         };
@@ -473,7 +473,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
         allocatedTo: asset.stock_hold === "assign" ? asset.stock_hold_customer : null,
         notice,
         model: asset.model,
-        powerVoltage: voltageFrom(asset.notes) || voltageFrom(asset.purpose) || null,
+        powerVoltage: null,
         location: locationOf(asset),
         assetId: asset.id,
       };
@@ -508,7 +508,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
       if (data.installId) {
         await writeInstallSerial(sql, data.installId, asset.serial ?? serial, data.machineIndex ?? null, {
           model: hit.model,
-          powerVoltage: hit.powerVoltage || null,
+          powerVoltage: null,
         });
         await setInstallNotice(sql, data.installId, notice);
       }
@@ -522,7 +522,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
         allocatedTo: null,
         notice,
         model: hit.model,
-        powerVoltage: hit.powerVoltage || null,
+        powerVoltage: null,
         location: hit.location,
         assetId: hit.assetId,
       };
@@ -540,7 +540,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
         allocatedTo: who,
         notice,
         model: hit.model,
-        powerVoltage: hit.powerVoltage || null,
+        powerVoltage: null,
         location: hit.location,
         assetId: hit.assetId,
       };
@@ -571,7 +571,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
     if (data.installId) {
       await writeInstallSerial(sql, data.installId, asset.serial ?? serial, data.machineIndex ?? null, {
         model: hit.model,
-        powerVoltage: hit.powerVoltage || null,
+        powerVoltage: null,
       });
       await setInstallNotice(sql, data.installId, notice);
     }
@@ -586,7 +586,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
       allocatedTo: extra ? hit.allocatedTo : null,
       notice,
       model: hit.model,
-      powerVoltage: hit.powerVoltage || null,
+      powerVoltage: null,
       location: hit.location,
       assetId: hit.assetId,
     };

@@ -102,6 +102,7 @@ const PART_STATUS: Record<PartsPreview["lines"][number]["status"], { label: stri
   same: { label: "No change", tone: "outline" },
   shared_mpn: { label: "Not applied", tone: "danger" },
   sku_taken: { label: "Not applied", tone: "danger" },
+  hidden: { label: "Hidden, skipped", tone: "outline" },
 };
 
 /** Import Parts (NetSuite): an Excel export matched on MPN. Opens the approval window; nothing is written before Approve. */
@@ -145,7 +146,7 @@ export function ImportPartsButton() {
           <DialogTitle>Import Parts (NetSuite)</DialogTitle>
           <DialogDescription>
             An Excel export with an <span className="font-medium">MPN</span> column (plus Name, Description, Base Price, Purchase Price if you have them). Matched on
-            MPN: an MPN already on a part updates it, a new MPN adds a part. Never a second part for one MPN. Blank cells change nothing.
+            MPN: an MPN already on a part updates it, a new MPN adds a part. Never a second part for one MPN. A hidden part is skipped and stays hidden. Blank cells change nothing.
           </DialogDescription>
           {!preview ? (
             <div>
@@ -158,6 +159,11 @@ export function ImportPartsButton() {
                 <Badge variant="warn">Update {preview.updated}</Badge>
                 <Badge variant="outline">No change {preview.same}</Badge>
                 {preview.notApplied ? <Badge variant="danger">Not applied {preview.notApplied}</Badge> : null}
+                {preview.hiddenSkipped ? (
+                  <Badge variant="outline" data-testid="import-hidden-skipped">
+                    Hidden, skipped {preview.hiddenSkipped}
+                  </Badge>
+                ) : null}
                 {preview.duplicatesInFile ? <Badge variant="outline">Same MPN twice in file {preview.duplicatesInFile}</Badge> : null}
                 {preview.skipped ? <Badge variant="outline">No MPN {preview.skipped}</Badge> : null}
               </ApprovalHead>
@@ -208,6 +214,7 @@ const PRICE_STATUS: Record<PricingPreview["lines"][number]["status"], { label: s
   same: { label: "No change", tone: "outline" },
   no_match: { label: "No Match", tone: "danger" },
   shared_mpn: { label: "Shared MPN", tone: "danger" },
+  hidden: { label: "Hidden, skipped", tone: "outline" },
 };
 
 /** Update Part Pricing: an Excel file of MPN and price. Preview MPN, old and new price; Approve writes the prices. */
@@ -256,7 +263,7 @@ export function UpdatePricingButton() {
           <DialogTitle>Update Part Pricing</DialogTitle>
           <DialogDescription>
             An Excel file with <span className="font-medium">MPN</span> and <span className="font-medium">Price</span> (a New Price column wins). Matched on MPN only.
-            Rows with no matching MPN stay in the preview as No Match and are not applied.
+            Rows with no matching MPN stay in the preview as No Match and are not applied. A hidden part is skipped: its price does not change and it stays hidden.
           </DialogDescription>
           <div>
             <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">This file's price is</p>
@@ -289,6 +296,11 @@ export function UpdatePricingButton() {
                 <Badge variant="outline">No change {preview.same}</Badge>
                 <Badge variant="danger">No Match {preview.noMatch}</Badge>
                 {preview.sharedMpn ? <Badge variant="danger">Shared MPN {preview.sharedMpn}</Badge> : null}
+                {preview.hiddenSkipped ? (
+                  <Badge variant="outline" data-testid="pricing-hidden-skipped">
+                    Hidden, skipped {preview.hiddenSkipped}
+                  </Badge>
+                ) : null}
                 {preview.duplicatesInFile ? <Badge variant="outline">Same MPN twice in file {preview.duplicatesInFile}</Badge> : null}
                 {preview.skipped ? <Badge variant="outline">No MPN or price {preview.skipped}</Badge> : null}
               </ApprovalHead>

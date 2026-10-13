@@ -1,13 +1,27 @@
 /**
- * Deal -> Board -> install ticket. A machine on a deal is marked Sold or Loaned; once Confirmed it becomes a row on
+ * Deal -> Board -> install ticket. A machine on a deal is Sold, Loan or Lease; once Confirmed it becomes a row on
  * a board project (one install card), and the install ticket is read from that project.
  * Pure: no server imports, safe for node --test.
  */
 import { siteIsReady, unitType, type InspectionOverall } from "./pre-inspection.ts";
 
-export const OWNERSHIPS = ["Sold", "Loaned"] as const;
+/** Stored values. "Loaned" is the older word for Loan and still loads. */
+export const OWNERSHIPS = ["Sold", "Loaned", "Leased"] as const;
 export type Ownership = (typeof OWNERSHIPS)[number];
-export const isOwnership = (v: unknown): v is Ownership => v === "Sold" || v === "Loaned";
+export const isOwnership = (v: unknown): v is Ownership => v === "Sold" || v === "Loaned" || v === "Leased";
+
+/** One choice. Labels are Sold, Loan and Lease. Stored values stay Sold, Loaned and Leased. */
+export const OWNERSHIP_CHOICES: { value: Ownership; label: string }[] = [
+  { value: "Sold", label: "Sold" },
+  { value: "Loaned", label: "Loan" },
+  { value: "Leased", label: "Lease" },
+];
+
+export function ownershipLabel(v: unknown): string {
+  return OWNERSHIP_CHOICES.find((c) => c.value === v)?.label ?? "";
+}
+
+export const OWNERSHIP_MARK = "Sold, Loan or Lease";
 
 /** The fields a machine row carries on the deal, on the board project and on the install ticket. */
 export type BoardMachine = {
@@ -15,10 +29,11 @@ export type BoardMachine = {
   serial: string;
   powerVoltage: string;
   recipeId?: number | null;
-  /** Sold to the account, or loaned (Katz keeps it). Blank until someone marks it. */
+  /** Sold, loaned (stored "Loaned") or leased (stored "Leased"). Blank until someone marks it. */
   ownership?: string;
   plug?: string;
   water?: string;
+  /** Old rows may still carry this. It is never shown and never written back. */
   coffee?: string;
   /** Ties the deal row to the board row it became. Set when the machine is confirmed. */
   uid?: string;
@@ -41,10 +56,10 @@ export const NO_WATER_NOTE = "No water or drain";
 
 const tidy = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 
-/** Trimmed fields; a grinder never keeps a water value, whatever was typed. */
+/** Trimmed fields. A grinder never keeps a water value. Coffee is dropped: recipe is the only serving field. */
 export function cleanMachine<T extends BoardMachine>(m: T): T {
   const equipment = tidy(m.equipment);
-  return {
+  const next = {
     ...m,
     equipment,
     serial: tidy(m.serial),
@@ -52,20 +67,21 @@ export function cleanMachine<T extends BoardMachine>(m: T): T {
     ownership: isOwnership(m.ownership) ? m.ownership : "",
     plug: tidy(m.plug),
     water: waterNeed(equipment) === "none" ? "" : tidy(m.water),
-    coffee: tidy(m.coffee),
   };
+  delete next.coffee;
+  return next;
 }
 
 /** Why this machine cannot be confirmed yet, or null. */
 export function confirmError(m: Pick<BoardMachine, "equipment" | "ownership">): string | null {
   if (!tidy(m.equipment)) return "Pick a model first.";
-  if (!isOwnership(m.ownership)) return `Mark ${tidy(m.equipment)} Sold or Loaned before confirming it.`;
+  if (!isOwnership(m.ownership)) return `Mark ${tidy(m.equipment)} ${OWNERSHIP_MARK} before confirming it.`;
   return null;
 }
 
 /**
- * The row a confirmed machine becomes on the board project. Everything set on the deal goes with it: Sold or
- * Loaned, serial, volts, plug, water, recipe and coffee. Only the deal's own stamps stay behind.
+ * The row a confirmed machine becomes on the board project. Everything set on the deal goes with it: Sold, Loan
+ * or Lease, serial, volts, plug, water and recipe. Coffee is not copied. The deal's own stamps stay behind.
  */
 export function boardRow(m: BoardMachine, uid: string): BoardMachine {
   const c = cleanMachine(m);
@@ -77,7 +93,6 @@ export function boardRow(m: BoardMachine, uid: string): BoardMachine {
     ownership: c.ownership,
     plug: c.plug,
     water: c.water,
-    coffee: c.coffee,
     uid,
   };
 }
@@ -178,7 +193,6 @@ export type TicketLine = {
   water: string | null;
   waterNeed: WaterNeed;
   recipe: string;
-  coffee: string;
   /** What is still blank and expected on this unit, by field name. */
   missing: string[];
 };
@@ -190,22 +204,20 @@ export function ticketLine(m: BoardMachine, recipeName: string | null | undefine
   const recipe = tidy(recipeName);
   const coffeeUnit = unitType(c.equipment) !== "other";
   const missing: string[] = [];
-  if (!c.ownership) missing.push("Sold or Loaned");
+  if (!c.ownership) missing.push(OWNERSHIP_MARK);
   if (!c.powerVoltage) missing.push("Volts");
   if (!c.plug) missing.push("Plug");
   if (need === "required" && !c.water) missing.push("Water");
   if (coffeeUnit && !recipe) missing.push("Recipe");
-  if (coffeeUnit && !c.coffee) missing.push("Coffee");
   return {
     model: c.equipment,
-    ownership: c.ownership ?? "",
+    ownership: ownershipLabel(c.ownership),
     serial: c.serial,
     volts: c.powerVoltage,
     plug: c.plug ?? "",
     water: need === "none" ? null : (c.water ?? ""),
     waterNeed: need,
     recipe,
-    coffee: c.coffee ?? "",
     missing,
   };
 }
@@ -220,7 +232,7 @@ export const ticketOpen = siteIsReady;
 /** One line per machine for a board card: "Linea PB · Sold · SN 123 · 208V · L6-30P". */
 export function machineGlance(m: BoardMachine): string {
   const c = cleanMachine(m);
-  return [c.ownership, c.serial ? `SN ${c.serial}` : "", c.powerVoltage, c.plug, c.water ? `Water ${c.water}` : "", c.coffee ? `Coffee: ${c.coffee}` : ""]
+  return [ownershipLabel(c.ownership), c.serial ? `SN ${c.serial}` : "", c.powerVoltage, c.plug, c.water ? `Water ${c.water}` : ""]
     .filter(Boolean)
     .join(" · ");
 }

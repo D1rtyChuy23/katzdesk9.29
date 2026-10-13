@@ -6,12 +6,15 @@ export type MachineSpec = {
   powerVoltage: string;
   /** Recipe chosen for this unit on the equipment row (house or customer). */
   recipeId?: number | null;
-  /** "Sold" or "Loaned". Blank until someone marks it. */
+  /** "Sold", "Loaned" or "Leased". Blank until someone marks it. "Loaned" shows as Loan. */
   ownership?: string;
   /** Configuration beside the voltage: the plug, and the water line when the unit takes water. */
   plug?: string;
   water?: string;
-  /** Coffee selection for this unit. */
+  /**
+   * Older rows stored a coffee selection. It still parses so the rest of the row loads, and it is never
+   * written back. Recipe is the only field for what they are serving.
+   */
   coffee?: string;
   /** Ties a deal row to the board row it became when it was confirmed. */
   uid?: string;
@@ -30,10 +33,10 @@ function extras(rec: Record<string, unknown>, keepBoard = false): Partial<Machin
   const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
   const out: Partial<MachineSpec> = {};
   const ownership = text(rec.ownership);
-  if (ownership === "Sold" || ownership === "Loaned") out.ownership = ownership;
+  if (ownership === "Sold" || ownership === "Loaned" || ownership === "Leased") out.ownership = ownership;
   if (text(rec.plug)) out.plug = text(rec.plug);
   if (text(rec.water)) out.water = text(rec.water);
-  if (text(rec.coffee)) out.coffee = text(rec.coffee);
+  // An old coffee value is left behind: the row still loads, and coffee is never written back.
   if (text(rec.uid)) out.uid = text(rec.uid);
   if (/^\d{4}-\d{2}-\d{2}/.test(text(rec.confirmedAt))) out.confirmedAt = text(rec.confirmedAt).slice(0, 10);
   if (keepBoard && typeof rec.boardId === "number" && Number.isFinite(rec.boardId)) out.boardId = rec.boardId;

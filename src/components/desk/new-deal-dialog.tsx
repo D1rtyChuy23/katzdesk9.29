@@ -3,18 +3,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { createDeal } from "@/lib/ops/api";
-import { OWNERSHIPS } from "@/lib/ops/deal-board";
+import { OWNERSHIP_CHOICES } from "@/lib/ops/deal-board";
 import { mergeMachineSpecs, type MachineSpec } from "@/lib/ops/machines";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label } from "@/components/ui/input";
 import { CustomerCombo, EquipmentMultiCombo } from "./directory-fields";
 import { RepSelect } from "./rep-select";
-import { cn } from "@/lib/utils";
+import { SelectField } from "@/components/ui/select-field";
 
 /**
- * Create A New Deal: one account, a rep, and as many machines as the deal has. Each machine is marked Sold or
- * Loaned here; serial, configuration and Confirm are on the deal once it is open.
+ * Create A New Deal: one account, a rep, and as many machines as the deal has. Each machine is marked Sold, Loan or
+ * Lease here; serial, configuration and Confirm are on the deal once it is open.
  */
 export function NewDealDialog({ open, onOpenChange, onCreated }: { open: boolean; onOpenChange: (v: boolean) => void; onCreated: (id: number) => void }) {
   const qc = useQueryClient();
@@ -41,7 +41,7 @@ export function NewDealDialog({ open, onOpenChange, onCreated }: { open: boolean
     >
       <DialogContent className="max-w-xl" data-testid="new-deal">
         <DialogTitle>Create A New Deal</DialogTitle>
-        <DialogDescription>Add every machine on the deal and mark each one Sold or Loaned.</DialogDescription>
+        <DialogDescription>Add every machine on the deal and mark each one Sold, Loan or Lease.</DialogDescription>
         <form
           className="mt-4 space-y-3"
           onSubmit={async (e) => {
@@ -89,20 +89,21 @@ export function NewDealDialog({ open, onOpenChange, onCreated }: { open: boolean
                   <span className="min-w-0 flex-1 truncate text-sm font-medium" title={s.equipment}>
                     {s.equipment}
                   </span>
-                  <span className="flex shrink-0 gap-1.5" role="group" aria-label={`Sold or loaned: ${s.equipment}`}>
-                    {OWNERSHIPS.map((o) => (
-                      <button
-                        key={o}
-                        type="button"
-                        aria-pressed={s.ownership === o}
-                        data-testid={`new-deal-${o.toLowerCase()}`}
-                        onClick={() => setSpecs(specs.map((x, i) => (i === index ? { ...x, ownership: x.ownership === o ? "" : o } : x)))}
-                        className={cn("h-9 rounded-full px-3 text-sm font-medium", s.ownership === o ? "bg-ink text-ink-foreground" : "bg-secondary text-foreground")}
-                      >
-                        {o}
-                      </button>
+                  <SelectField
+                    aria-label={`Ownership for ${s.equipment}`}
+                    data-testid="new-deal-ownership"
+                    className="h-9 w-[7.5rem] normal-case"
+                    value={s.ownership === "Sold" || s.ownership === "Loaned" || s.ownership === "Leased" ? s.ownership : ""}
+                    allowEmpty
+                    emptyLabel="Choose"
+                    onChange={(e) => setSpecs(specs.map((x, i) => (i === index ? { ...x, ownership: e.target.value } : x)))}
+                  >
+                    {OWNERSHIP_CHOICES.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
                     ))}
-                  </span>
+                  </SelectField>
                   <button
                     type="button"
                     aria-label={`Remove ${s.equipment}`}

@@ -3,6 +3,7 @@ import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
+import { flagOn } from "@/lib/ops/flag";
 import { itemFullName } from "@/lib/ops/charges";
 import {
   PRICE_TARGET_LABEL,
@@ -44,11 +45,11 @@ function readSheets(base64: string) {
 }
 
 async function storedParts(sql: Sql): Promise<StoredPart[]> {
-  const rows = await sql.query<{ id: number; sku: string; item: string; mfr_part: string | null; description: string | null; rate: string | null; cost: string | null; list_price: string | null }>(
-    "select id, sku, item, mfr_part, description, rate, cost, list_price from billing_items",
+  const rows = await sql.query<{ id: number; sku: string; item: string; mfr_part: string | null; description: string | null; rate: string | null; cost: string | null; list_price: string | null; hidden: boolean }>(
+    "select id, sku, item, mfr_part, description, rate, cost, list_price, (hidden_at is not null) as hidden from billing_items",
   );
   const n = (v: string | null) => (v == null ? null : Number(v));
-  return rows.map((r) => ({ id: Number(r.id), sku: r.sku, item: r.item, mpn: r.mfr_part, description: r.description, rate: n(r.rate), cost: n(r.cost), listPrice: n(r.list_price) }));
+  return rows.map((r) => ({ id: Number(r.id), sku: r.sku, item: r.item, mpn: r.mfr_part, description: r.description, rate: n(r.rate), cost: n(r.cost), listPrice: n(r.list_price), hidden: flagOn(r.hidden) }));
 }
 
 const fileInput = { filename: z.string().max(300), base64: z.string().min(4), apply: z.boolean() };
@@ -63,6 +64,8 @@ export type PartsPreview = {
   same: number;
   /** Lines shown and left out: an MPN two parts already share, or a new SKU another part already has. */
   notApplied: number;
+  /** Hidden parts in the file. They are not added, not updated, and not un-hidden. */
+  hiddenSkipped: number;
   duplicatesInFile: number;
   skipped: number;
   applied: boolean;
@@ -84,7 +87,7 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
     if (read.rows.length > 50_000) throw new Error("Up to 50,000 parts at a time.");
     const plan = planPartImport(read.rows, await storedParts(sql));
     const count = (s: PartPlanStatus) => plan.filter((p) => p.status === s).length;
-    const order: Record<PartPlanStatus, number> = { update: 1, new: 2, shared_mpn: 3, sku_taken: 4, same: 9 };
+    const order: Record<PartPlanStatus, number> = { update: 1, new: 2, hidden: 3, shared_mpn: 4, sku_taken: 5, same: 9 };
     const preview: PartsPreview = {
       filename: data.filename,
       rowCount: read.rows.length,
@@ -92,6 +95,7 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
       updated: count("update"),
       same: count("same"),
       notApplied: count("shared_mpn") + count("sku_taken"),
+      hiddenSkipped: count("hidden"),
       duplicatesInFile: read.duplicates,
       skipped: read.skipped,
       applied: false,
@@ -114,7 +118,7 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
              rate = coalesce($4, rate),
              cost = coalesce($5, cost),
              updated_at = now()
-           where id = $1`,
+           where id = $1 and hidden_at is null`,
           [p.partId, r.mpn, r.description, r.rate, r.cost],
         );
       } else if (p.status === "new") {
@@ -145,6 +149,8 @@ export type PricingPreview = {
   same: number;
   noMatch: number;
   sharedMpn: number;
+  /** Hidden parts in the file. Their price is not changed and they stay hidden. */
+  hiddenSkipped: number;
   duplicatesInFile: number;
   skipped: number;
   applied: boolean;
@@ -166,7 +172,7 @@ export const importPartPricing = createServerFn({ method: "POST" })
     if (read.rows.length > 50_000) throw new Error("Up to 50,000 prices at a time.");
     const plan = planPricing(read.rows, await storedParts(sql), data.target);
     const count = (s: PricePlanLine["status"]) => plan.filter((p) => p.status === s).length;
-    const order: Record<PricePlanLine["status"], number> = { change: 1, no_match: 2, shared_mpn: 3, same: 4 };
+    const order: Record<PricePlanLine["status"], number> = { change: 1, hidden: 2, no_match: 3, shared_mpn: 4, same: 5 };
     const preview: PricingPreview = {
       filename: data.filename,
       target: data.target,
@@ -176,6 +182,7 @@ export const importPartPricing = createServerFn({ method: "POST" })
       same: count("same"),
       noMatch: count("no_match"),
       sharedMpn: count("shared_mpn"),
+      hiddenSkipped: count("hidden"),
       duplicatesInFile: read.duplicates,
       skipped: read.skipped,
       applied: false,
@@ -190,7 +197,7 @@ export const importPartPricing = createServerFn({ method: "POST" })
       const ids = part.map((l) => l.partId!);
       const prices = part.map((l) => l.newPrice);
       const set = data.target === "list" ? "list_price = s.price, list_price_at = now()" : "rate = s.price";
-      await sql.query(`update billing_items b set ${set}, updated_at = now() from unnest($1::int[], $2::numeric[]) as s(id, price) where b.id = s.id`, [ids, prices]);
+      await sql.query(`update billing_items b set ${set}, updated_at = now() from unnest($1::int[], $2::numeric[]) as s(id, price) where b.id = s.id and b.hidden_at is null`, [ids, prices]);
     }
     await sql.query(
       "insert into part_import_runs (kind, filename, target, row_count, updated, not_applied, approved_by) values ('pricing', $1, $2, $3, $4, $5, $6)",

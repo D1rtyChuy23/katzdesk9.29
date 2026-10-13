@@ -60,7 +60,7 @@ export function ItemListImportButton() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
 
-  const statusLabel = { new: "New", price: "Price", other: "Other", missing: "Not found" } as const;
+  const statusLabel = { new: "New", price: "Price", other: "Other", missing: "Not found", hidden: "Hidden, skipped" } as const;
 
   return (
     <>
@@ -113,6 +113,11 @@ export function ItemListImportButton() {
                 <Badge variant="outline">Other changes {preview.otherChanged}</Badge>
                 <Badge variant="outline">No change {preview.same}</Badge>
                 {preview.notFound ? <Badge variant="danger">Not found {preview.notFound}</Badge> : null}
+                {preview.hiddenSkipped ? (
+                  <Badge variant="outline" data-testid="items-hidden-skipped">
+                    Hidden, skipped {preview.hiddenSkipped}
+                  </Badge>
+                ) : null}
                 {preview.skipped ? <Badge variant="outline">Skipped {preview.skipped}</Badge> : null}
               </div>
               {preview.checkCount ? (
