@@ -273,3 +273,64 @@ test("cover and summary say 12-month is highly recommended and 6-month is for hi
     assert.ok(/highly recommended/i.test(page) && /high[- ]volume/i.test(page));
   }
 });
+
+// --- 3/6/9-month PMs on every element ---
+
+const page = (html, n) => html.split('<section class="page">')[n]; // 1 = cover, 2 = parts, 3-6 = configs, 7 = intervals, 8 = summary
+
+test("each config page charts and prices the 3/9-month, 6-month and 12-month PMs", () => {
+  const html = renderGuideHtml(linea, rates);
+  const expected = {
+    1: ["LCS.6.1", "LCS.3.1", "$211.77", "$101.06", "$431.91", "$643.68", "$845.80"],
+    2: ["LCS.6.2", "LCS.3.2", "$229.56", "$127.12", "$455.93", "$685.49", "$939.73"],
+    3: ["LCS.6.3", "LCS.3.3", "$255.62", "$153.18", "$479.95", "$735.57", "$1,041.93"],
+    4: ["LCS.6.4", "LCS.3.4", "$281.68", "$179.24", "$503.97", "$785.65", "$1,144.13"],
+  };
+  for (const [n, texts] of Object.entries(expected)) {
+    const p = page(html, 2 + Number(n));
+    for (const t of texts) assert.ok(p.includes(t), `config ${n} missing ${t}`);
+    assert.ok(p.includes("6-month PM kit") && p.includes("3/9-month PM kit"), `config ${n} parts list`);
+  }
+});
+
+test("config page chart has a column for every service interval", () => {
+  const p = page(renderGuideHtml(linea, rates), 3);
+  const svg = p.slice(p.indexOf("<svg"), p.indexOf("</svg>"));
+  for (const t of ["$101.06", "$211.77", "$431.91", "3/9-month", "6-month", "12-month"]) {
+    assert.ok(svg.includes(t), `svg missing ${t}`);
+  }
+});
+
+test("config page discount panel shows labor and trip savings for each visit", () => {
+  const p = page(renderGuideHtml(linea, rates), 3);
+  const panel = p.slice(p.indexOf("Labor &amp; trip discount"));
+  for (const t of ["12-month PM", "6-month PM", "3/9-month PM", "$450.00", "$337.50", "$300.00", "$225.00", "$75.00", "$112.50", "75% off"]) {
+    assert.ok(panel.includes(t), `discount panel missing ${t}`);
+  }
+});
+
+test("parts page lists the 6-month and 3/9-month kits with part numbers, prices and intervals", () => {
+  const p = page(renderGuideHtml(linea, rates), 2);
+  for (const t of ["LCS.6.1", "LCS.6.4", "LCS.3.1", "LCS.3.4", "$136.77", "$206.68", "$26.06", "$104.24", "6 months", "3 and 9 months", "Rebuild steam valves"]) {
+    assert.ok(p.includes(t), `parts page missing ${t}`);
+  }
+});
+
+test("cover describes the work for the 6-month and 3/9-month PMs", () => {
+  const p = page(renderGuideHtml(linea, rates), 1);
+  for (const t of ["6-month PM", "3/9-month PM", "steam valves", "diffuser screens"]) {
+    assert.ok(p.includes(t), `cover missing ${t}`);
+  }
+});
+
+test("summary shows the 6-month and 3/9-month visit totals for every configuration", () => {
+  const p = page(renderGuideHtml(linea, rates), 8);
+  for (const t of ["6-month PM", "3/9-month PM", "$211.77", "$229.56", "$255.62", "$281.68", "$101.06", "$127.12", "$153.18", "$179.24"]) {
+    assert.ok(p.includes(t), `summary missing ${t}`);
+  }
+});
+
+test("the 3/9-month and 6-month kit text is in the generated pdf", () => {
+  const text = execFileSync("pdftotext", ["-layout", pdfOut, "-"], { encoding: "utf8" });
+  for (const t of ["LCS.6.2", "LCS.3.2", "$229.56", "$127.12"]) assert.ok(text.includes(t), `pdf missing ${t}`);
+});

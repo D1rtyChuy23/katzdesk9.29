@@ -52,10 +52,10 @@ tr.total td { font-weight: 700; border-top: 2px solid var(--brand); border-botto
 .good-n { color: var(--labor) !important; font-weight: 700 }
 .mut { color: var(--muted); font-size: 10px; font-weight: 400 }
 .badge { font-style: normal; background: var(--labor); color: #fff; border-radius: 10px; padding: 1px 8px; font-size: 10px; margin-left: 6px; letter-spacing: .04em; text-transform: none }
-table.tight { font-size: 10.5px } table.tight td { padding: 3px 6px } table.tight th { padding: 4px 6px }
+table.tight { font-size: 10.5px } table.tight td { padding: 2px 6px } table.tight th { padding: 4px 6px }
 .right { display: flex; flex-direction: column; gap: 10px; flex: 1.1; min-width: 0 }
 .right > .card { flex: none }
-.card.disc td { padding: 4px 6px } .card.disc table { font-size: 10.5px }
+.card.disc td { padding: 3px 6px } .card.disc table { font-size: 10.5px }
 .rec { background: #fdf3e1; border-left: 3px solid var(--trip); padding: 6px 10px; font-size: 11.5px; margin: 0 0 8px; border-radius: 0 4px 4px 0 }
 .scheds { display: flex; gap: 10px; margin-bottom: 10px }
 .sched { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px }
@@ -67,6 +67,15 @@ th.c { text-align: center; border-bottom: 0; color: var(--brand) }
 .cov > div { flex: 1; background: var(--soft); border-radius: 8px; padding: 8px 10px }
 .cov h4 { font-size: 11px; color: var(--brand); margin-bottom: 3px }
 .cov p { font-size: 10px; line-height: 1.4; color: var(--ink) }
+.stack { display: flex; flex-direction: column; gap: 8px }
+p.mini { font-size: 10.5px; line-height: 1.4 }
+h3.sec { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--brand); margin: 10px 0 4px }
+.card.strip { margin-top: 10px } .card.strip p { font-size: 11px; line-height: 1.6 } .card.strip h3 { margin-bottom: 4px }
+tr.kit td { background: #e8f1f0 }
+.sch3 { display: flex; gap: 8px; margin-top: 8px }
+.sch3 > div { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px }
+.sch3 span { display: block; font-size: 8.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.sch3 b { font-size: 14px; color: var(--brand) }
 .visit-line { font-size: 12px; font-weight: 700; color: var(--brand); margin: 0 0 8px }
 ul.work { margin: 0 0 0 16px; font-size: 10.5px; line-height: 1.4 }
 .big { font-size: 28px; font-weight: 700; color: var(--brand) }
@@ -116,8 +125,8 @@ function niceStep(maxDollars) {
 }
 
 /** Stacked column chart (parts / labor / trip) as inline SVG. */
-function chartSvg(columns) {
-  const W = 430, H = 196, left = 50, right = 10, top = 24, bottom = 40;
+function chartSvg(columns, H = 196) {
+  const W = 430, left = 50, right = 10, top = 24, bottom = 40;
   const plotH = H - top - bottom;
   const maxDollars = Math.max(...columns.map((c) => c.totalCents)) / 100;
   const step = niceStep(maxDollars);
@@ -160,6 +169,11 @@ export function renderGuideHtml(machine, rates) {
   const total = 3 + machine.configurations.length + (hasSchedules ? 1 : 0);
   const pages = [];
 
+  // Optional service visits (e.g. 3/9-month and 6-month PMs), shortest interval first.
+  const opt = [...(machine.optionalVisits ?? [])].sort((x, y) => x.months[0] - y.months[0]);
+  const hasOpt = opt.length > 0;
+  const optLabel = (v) => `${v.months.join("/")}-month`;
+
   // 1. Cover
   const visitRows = machine.visits
     .map(
@@ -167,13 +181,21 @@ export function renderGuideHtml(machine, rates) {
         `<tr><td>Month ${v.month}</td><td>${esc(v.label)}</td><td>${esc(v.services ?? "")}</td><td class="r">${v.hours} hrs</td></tr>`,
     )
     .join("");
-  const workCards = (machine.workPerformed ?? [])
-    .map(
-      (g, i) =>
-        `<div class="card" style="flex:${i === 0 ? 1.6 : 1}"><h3>${esc(g.group)}</h3><ul class="work">${g.items.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>`,
-    )
-    .join("");
-  const visitSummary = machine.visits.map((v) => `${esc(v.label)} · Month ${v.month} · ${v.hours} hrs program labor`).join("  |  ");
+  const groups = machine.workPerformed ?? [];
+  const mainHours = machine.visits.map((v) => v.hours).join(" + ");
+  const coverRight = [
+    ...groups.slice(1).map((g) => `<div class="card"><h3>${esc(g.group)}</h3><ul class="work">${g.items.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>`),
+    ...opt
+      .slice()
+      .reverse()
+      .map(
+        (v) =>
+          `<div class="card"><h3>${esc(v.label)} · ${v.hours} hr labor</h3><p class="mini">${esc(v.coverText ?? v.summary)}</p></div>`,
+      ),
+  ].join("");
+  const workCards = groups.length
+    ? `<div class="card" style="flex:1.5"><h3>Every annual visit · 12-month PM · ${mainHours} hrs labor</h3><ul class="work">${groups[0].items.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div><div class="stack" style="flex:1">${coverRight}</div>`
+    : "";
   pages.push(
     pageShell(
       machine,
@@ -191,14 +213,14 @@ export function renderGuideHtml(machine, rates) {
 </div>
 ${hasSchedules ? `<p class="rec"><b>12-month PM: highly recommended every year.</b> Add a 6-month visit if your machine sees high volume. See Service Intervals, page ${3 + machine.configurations.length}.</p>` : ""}${
   workCards
-    ? `<p class="visit-line">${visitSummary}</p><div class="cols">${workCards}</div>`
-    : `<table><tr><th>When</th><th>Visit</th><th>Services performed</th><th class="r">Labor</th></tr>${visitRows}</table>`
-}
-<p class="note">Standard rates: ${$(rates.laborRateCents)}/hr labor and ${$(rates.tripRateCents)} trip. Program rates: ${$(progLabor)}/hr labor and ${$(progTrip)} per visit. The trip charge is included in every total in this guide.</p>`,
+    ? `<div class="cols">${workCards}</div>`
+    : `<table><tr><th>When</th><th>Visit</th><th>Services performed</th><th class="r">Labor</th></tr>${visitRows}</table>
+<p class="note">Standard rates: ${$(rates.laborRateCents)}/hr labor and ${$(rates.tripRateCents)} trip. Program rates: ${$(progLabor)}/hr labor and ${$(progTrip)} per visit. The trip charge is included in every total in this guide.</p>`
+}`,
     ),
   );
 
-  // 2. Parts table + inspect-only
+  // 2. Parts table + kits + inspect-only
   const hasWork = machine.parts.some((p) => p.work);
   const partRows = machine.parts
     .map(
@@ -206,9 +228,24 @@ ${hasSchedules ? `<p class="rec"><b>12-month PM: highly recommended every year.<
         `<tr><td>${esc(p.name)}${p.optional ? " <em>(optional)</em>" : ""}</td><td class="pn">${esc(p.partNo)}</td>${hasWork ? `<td>${esc(p.work ?? "")}</td>` : ""}<td>${esc(intervalText(machine, p))}</td><td class="r">${$(p.unitCents)}${p.qty.perUnit ? ` / ${esc(unit)}` : ""}</td></tr>`,
     )
     .join("");
-  const inspectRows = (machine.inspectOnly ?? [])
-    .map((i) => `<tr><td>${esc(i.name)}</td><td class="pn">${esc(i.partNo)}</td><td class="r">${$(i.unitCents)}</td></tr>`)
+  const cfgIds = machine.configurations.map((c) => c.id);
+  const kitRows = opt
+    .slice()
+    .reverse()
+    .map((v) => {
+      const cells = machine.configurations
+        .map((c) => `<td class="r"><span class="pn">${esc(v.kits[c.id].partNo)}</span><div><b>${$(v.kits[c.id].unitCents)}</b></div></td>`)
+        .join("");
+      const every = v.months.length === 1 ? `${v.months[0]} months` : `${v.months.slice(0, -1).join(", ")} and ${v.months[v.months.length - 1]} months`;
+      return `<tr><td><b>${esc(v.label)} kit</b></td><td>${esc(v.kitWork ?? v.work.slice(0, 2).join("; "))}</td><td>${esc(every)}</td>${cells}</tr>`;
+    })
     .join("");
+  const kitTable = hasOpt
+    ? `<h3 class="sec">6-month and 3/9-month PM kits</h3><table class="tight"><tr><th>Kit</th><th>Work performed</th><th>Replaced every</th>${machine.configurations.map((c) => `<th class="r">${esc(c.label)}</th>`).join("")}</tr>${kitRows}</table>`
+    : "";
+  const inspectItems = (machine.inspectOnly ?? [])
+    .map((i) => `${esc(i.name)} <span class="pn">${esc(i.partNo)}</span> <b>${$(i.unitCents)}</b>`)
+    .join(" &nbsp;·&nbsp; ");
   pages.push(
     pageShell(
       machine,
@@ -216,12 +253,13 @@ ${hasSchedules ? `<p class="rec"><b>12-month PM: highly recommended every year.<
       total,
       "Parts",
       `<h2>PM Kit Contents</h2>
-<div class="cols"><div style="flex:2.1"><table><tr><th>Part</th><th>Part #</th>${hasWork ? "<th>Work performed</th>" : ""}<th>Replaced every</th><th class="r">Unit cost</th></tr>${partRows}</table></div>
+${hasOpt ? '<h3 class="sec">12-month PM · itemized parts</h3>' : ""}<table class="tight"><tr><th>Part</th><th>Part #</th>${hasWork ? "<th>Work performed</th>" : ""}<th>Replaced every</th><th class="r">Unit cost</th></tr>${partRows}</table>
+${kitTable}
 ${
-  inspectRows
-    ? `<div class="card"><h3>Inspected, not included</h3><table><tr><th>Part</th><th>Part #</th><th class="r">Price</th></tr>${inspectRows}</table><p class="note">Checked on every visit (the auto-fill probe is also cleaned and tested). Not included in the totals. Replaced and quoted only if a part fails inspection.</p></div>`
+  inspectItems
+    ? `<div class="card strip"><h3>Inspected, not included</h3><p>${inspectItems}</p><p class="mut">Checked on every visit (the auto-fill probe is also cleaned and tested). Not included in the totals. Replaced and quoted only if a part fails inspection.</p></div>`
     : ""
-}</div>`,
+}`,
     ),
   );
 
@@ -243,10 +281,20 @@ ${
         );
       }
     }
+    const optResults = opt.map((v) => ({ v, r: calcOptionalVisit(machine, rates, v.id, cfg.id) }));
+    for (const { v, r } of optResults.slice().reverse()) {
+      lineRows.push(
+        `<tr class="kit"><td>${esc(v.label)} kit <em>(per visit)</em></td><td class="pn">${esc(r.kit.partNo)}</td><td class="r">1</td><td class="r">${$(r.kit.unitCents)}</td><td class="r">${$(r.kit.unitCents)}</td></tr>`,
+      );
+    }
 
-    // Chart columns: one per variant for a single-visit plan, otherwise one per visit.
-    const columns =
-      !multiVisit && results.length > 1
+    // Chart columns: every service interval, else one per variant (single visit), else one per visit.
+    const columns = hasOpt
+      ? [
+          ...optResults.map(({ v, r }) => ({ ...r, label: optLabel(v), sub: r.kit.partNo })),
+          ...std.visits.map((v) => ({ ...v, label: `${v.month}-month`, sub: v.label })),
+        ]
+      : !multiVisit && results.length > 1
         ? results.map(({ v, r }) => ({ ...r, label: v.label, sub: `Month ${r.visits[0].month}` }))
         : std.visits.map((v) => ({ ...v, label: `Month ${v.month}`, sub: v.label }));
     const colRows = columns
@@ -258,19 +306,45 @@ ${
 
     const hours = std.visits.reduce((n, v) => n + v.hours, 0);
     const nVisits = std.visits.length;
-    const tiles = [
-      ...results.map(({ v, r }, k) => `<div class="stat${k === 0 ? " dark" : ""}"><span>${esc(v.label)} ${planMonths(machine)}-mo total</span><b>${$(r.totalCents)}</b></div>`),
-      ...(results.length === 1 ? [`<div class="stat"><span>Parts</span><b>${$(std.partsCents)}</b></div>`] : []),
-      `<div class="stat"><span>Program labor + trip</span><b>${$(std.laborCents + std.tripCents)}</b></div>`,
-      `<div class="stat"><span>Labor + trip savings</span><b class="good-n">${$(std.savingsCents)}</b></div>`,
-    ].join("");
+    const tiles = hasOpt
+      ? [
+          `<div class="stat dark"><span>12-month PM</span><b>${$(std.totalCents)}</b></div>`,
+          ...optResults.slice().reverse().map(({ v, r }) => `<div class="stat"><span>${esc(v.label)}</span><b>${$(r.totalCents)}</b></div>`),
+          `<div class="stat"><span>Savings, 12-mo visit</span><b class="good-n">${$(std.savingsCents)}</b></div>`,
+        ].join("")
+      : [
+          ...results.map(({ v, r }, k) => `<div class="stat${k === 0 ? " dark" : ""}"><span>${esc(v.label)} ${planMonths(machine)}-mo total</span><b>${$(r.totalCents)}</b></div>`),
+          ...(results.length === 1 ? [`<div class="stat"><span>Parts</span><b>${$(std.partsCents)}</b></div>`] : []),
+          `<div class="stat"><span>Program labor + trip</span><b>${$(std.laborCents + std.tripCents)}</b></div>`,
+          `<div class="stat"><span>Labor + trip savings</span><b class="good-n">${$(std.savingsCents)}</b></div>`,
+        ].join("");
 
-    const discount = `<div class="card disc"><h3>Labor &amp; trip discount <em class="badge">${pct}% off</em></h3>
-<p class="mut" style="margin:-2px 0 4px">Labor ${$(rates.laborRateCents)} → ${$(progLabor)}/hr · Trip ${$(rates.tripRateCents)} → ${$(progTrip)} per visit</p>
-<table><tr><th></th><th class="r">Standard</th><th class="r">Program</th><th class="r">You save</th></tr>
+    const perVisitRows = [
+      { name: "12-month PM", hrs: std.visits[0].hours, stdC: std.standardLaborCents + std.standardTripCents, prog: std.laborCents + std.tripCents },
+      ...optResults.slice().reverse().map(({ v, r }) => ({ name: v.label, hrs: r.hours, stdC: r.standardLaborCents + r.standardTripCents, prog: r.laborCents + r.tripCents })),
+    ];
+    const discountBody = hasOpt
+      ? `<table><tr><th>Per visit</th><th class="r">Standard</th><th class="r">Program</th><th class="r">You save</th></tr>${perVisitRows
+          .map(
+            (r) =>
+              `<tr><td>${esc(r.name)} <span class="mut">· ${r.hrs} hr${r.hrs === 1 ? "" : "s"} + trip</span></td><td class="r">${$(r.stdC)}</td><td class="r">${$(r.prog)}</td><td class="r good-n">${$(r.stdC - r.prog)}</td></tr>`,
+          )
+          .join("")}</table>`
+      : `<table><tr><th></th><th class="r">Standard</th><th class="r">Program</th><th class="r">You save</th></tr>
 <tr><td>Labor · ${hours} hrs</td><td class="r">${$(std.standardLaborCents)}</td><td class="r">${$(std.laborCents)}</td><td class="r good-n">${$(std.standardLaborCents - std.laborCents)}</td></tr>
 <tr><td>Trip · ${nVisits} visit${nVisits > 1 ? "s" : ""}</td><td class="r">${$(std.standardTripCents)}</td><td class="r">${$(std.tripCents)}</td><td class="r good-n">${$(std.standardTripCents - std.tripCents)}</td></tr>
-<tr class="total"><td>Labor + trip</td><td class="r">${$(std.standardLaborCents + std.standardTripCents)}</td><td class="r">${$(std.laborCents + std.tripCents)}</td><td class="r good-n">${$(std.savingsCents)}</td></tr></table></div>`;
+<tr class="total"><td>Labor + trip</td><td class="r">${$(std.standardLaborCents + std.standardTripCents)}</td><td class="r">${$(std.laborCents + std.tripCents)}</td><td class="r good-n">${$(std.savingsCents)}</td></tr></table>`;
+    const discount = `<div class="card disc"><h3>Labor &amp; trip discount <em class="badge">${pct}% off</em></h3>
+<p class="mut" style="margin:-2px 0 4px">Labor ${$(rates.laborRateCents)} → ${$(progLabor)}/hr · Trip ${$(rates.tripRateCents)} → ${$(progTrip)} per visit</p>
+${discountBody}</div>`;
+
+    const schedTiles = hasSchedules
+      ? `<div class="sch3">${schedules
+          .map((sc) => `<div><span>Yearly · ${esc(sc.label)}</span><b>${$(calcSchedule(machine, rates, sc.id, cfg.id).totalCents)}</b></div>`)
+          .join("")}</div>`
+      : "";
+    const chartH = hasOpt ? 170 : 196;
+    const chartTitle = hasOpt ? "Cost by service interval" : multiVisit ? "Cost by contract year" : results.length > 1 ? "Cost by version" : "Annual cost breakdown";
 
     pages.push(
       pageShell(
@@ -279,10 +353,10 @@ ${
         total,
         `Configuration ${i + 1} of ${machine.configurations.length}`,
         `<div class="head"><div><h2>${esc(cfg.label)}</h2><p class="sub">${cfg.units} ${esc(unit)}${cfg.units > 1 ? "s" : ""}${results.some((x) => x.v.label !== "Standard") ? " · " + results.map((x) => esc(x.v.label)).join(" or ") : ""}</p></div><div class="stats">${tiles}</div></div>
-<div class="cols"><div class="card"><h3>${multiVisit ? "Cost by contract year" : results.length > 1 ? "Cost by version" : "Annual cost breakdown"}</h3>${chartSvg(columns)}
+<div class="cols"><div class="card"><h3>${chartTitle}</h3>${chartSvg(columns, chartH)}
 <div class="legend"><span><s style="background:var(--parts)"></s>Parts</span><span><s style="background:var(--labor)"></s>Program labor</span><span><s style="background:var(--trip)"></s>Program trip</span></div>
-<table class="tight"><tr><th></th><th class="r">Parts</th><th class="r">Labor</th><th class="r">Trip</th><th class="r">Total</th></tr>${colRows}</table></div>
-<div class="right"><div class="card"><h3>Parts list</h3><table class="tight"><tr><th>Part</th><th>Part #</th>${multiVisit ? "<th>Replaced</th>" : ""}<th class="r">Qty</th><th class="r">Unit</th><th class="r">Ext.</th></tr>${lineRows.join("")}</table></div>${discount}</div></div>`,
+<table class="tight"><tr><th></th><th class="r">Parts</th><th class="r">Labor</th><th class="r">Trip</th><th class="r">Total</th></tr>${colRows}</table>${schedTiles}</div>
+<div class="right"><div class="card"><h3>Parts list${hasOpt ? " · 12-month PM and kits" : ""}</h3><table class="tight"><tr><th>Part</th><th>Part #</th>${multiVisit ? "<th>Replaced</th>" : ""}<th class="r">Qty</th><th class="r">Unit</th><th class="r">Ext.</th></tr>${lineRows.join("")}</table></div>${discount}</div></div>`,
       ),
     );
   });
@@ -337,14 +411,15 @@ ${
   }
 
   // 4. Summary
-  const head = variantIds.map((id) => `<th class="r">${esc(variantLabel(id))} total</th>`).join("");
+  const head = variantIds.map((id) => `<th class="r">${hasOpt ? "12-month PM" : esc(variantLabel(id))} total</th>`).join("") + opt.slice().reverse().map((v) => `<th class="r">${esc(v.label)} total</th>`).join("");
   const sumRows = machine.configurations
     .map((cfg) => {
       const cells = variantIds
         .map((id) => (cfg.variants.some((v) => v.id === id) ? `<td class="r"><b>${$(calc(cfg, id).totalCents)}</b></td>` : `<td class="r">—</td>`))
         .join("");
       const s = calc(cfg, cfg.variants[0].id);
-      return `<tr><td>${esc(cfg.label)}</td><td class="r">${$(s.partsCents)}</td><td class="r">${$(s.laborCents)}</td><td class="r">${$(s.tripCents)}</td>${cells}</tr>`;
+      const optCells = opt.slice().reverse().map((v) => `<td class="r"><b>${$(calcOptionalVisit(machine, rates, v.id, cfg.id).totalCents)}</b></td>`).join("");
+      return `<tr><td>${esc(cfg.label)}</td><td class="r">${$(s.partsCents)}</td><td class="r">${$(s.laborCents)}</td><td class="r">${$(s.tripCents)}</td>${cells}${optCells}</tr>`;
     })
     .join("");
   pages.push(
