@@ -119,3 +119,43 @@ test("inspect-only items are listed with prices and marked not included", () => 
 test("table cells wrap long text instead of overflowing", () => {
   assert.ok(renderGuideHtml(linea, rates).includes("overflow-wrap:anywhere"));
 });
+
+import { execFileSync, spawnSync } from "node:child_process";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { renderGuidePdf } from "./pm-guide/render.mjs";
+
+const cli = new URL("./pm-guide/cli.mjs", import.meta.url).pathname;
+const pdfOut = new URL("../pm-guides/out/la-marzocco-linea-classic-s.pdf", import.meta.url).pathname;
+
+test("cli builds a 7-page pdf for linea", () => {
+  execFileSync("node", [cli, "la-marzocco-linea-classic-s"]);
+  const info = execFileSync("pdfinfo", [pdfOut], { encoding: "utf8" });
+  assert.match(info, /Pages:\s+7/);
+  assert.match(info, /Page size:\s+720 x 40[45](\.\d+)? pts/);
+});
+
+test("pdf text contains each annual total", () => {
+  const text = execFileSync("pdftotext", ["-layout", pdfOut, "-"], { encoding: "utf8" });
+  for (const t of ["$431.91", "$455.93", "$479.95", "$503.97", "$682.46", "$957.03", "$1,231.60", "$1,506.17"]) {
+    assert.ok(text.includes(t), `missing ${t}`);
+  }
+});
+
+test("cli exits non-zero for an unknown machine id", () => {
+  const r = spawnSync("node", [cli, "no-such-machine"], { encoding: "utf8" });
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /no-such-machine/);
+});
+
+test("a 120-character part name is not clipped", async () => {
+  const m = structuredClone(linea);
+  const long = "Extra long replacement part name ".repeat(4).slice(0, 120).trim();
+  m.parts[0].name = long;
+  const out = join(mkdtempSync(join(tmpdir(), "pmg-")), "t.pdf");
+  await renderGuidePdf(m, rates, out);
+  const text = execFileSync("pdftotext", [out, "-"], { encoding: "utf8" }).replace(/\s+/g, " ");
+  assert.ok(text.includes("Extra long replacement part name Extra long replacement part name"));
+  assert.ok(text.includes(long.slice(-20)));
+});

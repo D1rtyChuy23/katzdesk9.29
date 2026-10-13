@@ -31,6 +31,7 @@ table { border-collapse: collapse; width: 100%; font-size: 12px }
 th { text-align: left; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--line); padding: 6px 8px }
 td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap:anywhere }
 th.r, td.r { text-align: right; white-space: nowrap }
+td.pn { white-space: nowrap; overflow-wrap: normal }
 tr.total td { font-weight: 700; border-top: 2px solid var(--brand); border-bottom: 0; background: var(--soft) }
 .cols { display: flex; gap: 28px }
 .cols > div { flex: 1; min-width: 0 }
@@ -44,14 +45,15 @@ tr.total td { font-weight: 700; border-top: 2px solid var(--brand); border-botto
 .save { color: var(--labor); font-weight: 700; font-size: 13px; margin-top: 8px }
 .note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5 }
 ul.good { margin: 8px 0 0 18px; font-size: 13px; line-height: 1.7 }
-.foot { position: absolute; left: 44px; right: 44px; bottom: 14px; display: flex; justify-content: space-between; gap: 20px; font-size: 9.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 6px }
+.foot span:last-child { white-space: nowrap }
+.foot { position: absolute; left: 44px; right: 44px; bottom: 14px; display: flex; justify-content: space-between; gap: 20px; font-size: 9px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 6px }
 `;
 
 function pageShell(machine, n, total, kicker, body) {
   return `<section class="page">
 <div class="kicker">${esc(kicker)}</div>
 ${body}
-<div class="foot"><span>${esc(DISCLAIMER)}</span><span>${esc(machine.name)} · Preventive Maintenance Program · ${n}/${total}</span></div>
+<div class="foot"><span>${esc(DISCLAIMER)}</span><span>${esc(machine.name)} · PM Program · ${n}/${total}</span></div>
 </section>`;
 }
 
@@ -128,11 +130,11 @@ export function renderGuideHtml(machine, rates) {
   const partRows = machine.parts
     .map(
       (p) =>
-        `<tr><td>${esc(p.name)}${p.optional ? " <em>(MP models)</em>" : ""}</td><td>${esc(p.partNo)}</td><td>${esc(intervalText(machine, p))}</td><td class="r">${$(p.unitCents)}${p.qty.perUnit ? ` / ${esc(unit)}` : ""}</td></tr>`,
+        `<tr><td>${esc(p.name)}${p.optional ? " <em>(MP models)</em>" : ""}</td><td class="pn">${esc(p.partNo)}</td><td>${esc(intervalText(machine, p))}</td><td class="r">${$(p.unitCents)}${p.qty.perUnit ? ` / ${esc(unit)}` : ""}</td></tr>`,
     )
     .join("");
   const inspectRows = (machine.inspectOnly ?? [])
-    .map((i) => `<tr><td>${esc(i.name)}</td><td>${esc(i.partNo)}</td><td class="r">${$(i.unitCents)}</td></tr>`)
+    .map((i) => `<tr><td>${esc(i.name)}</td><td class="pn">${esc(i.partNo)}</td><td class="r">${$(i.unitCents)}</td></tr>`)
     .join("");
   pages.push(
     pageShell(
@@ -162,7 +164,7 @@ ${
         seen.add(l.partId);
         const tag = results.length > 1 && v !== results[0].v ? ` <em>(${esc(v.label)} only)</em>` : "";
         lineRows.push(
-          `<tr><td>${esc(l.name)}${tag}</td><td>${esc(l.partNo)}</td><td>${esc(monthsText(l.months))}</td><td class="r">${l.qty}</td><td class="r">${$(l.unitCents)}</td><td class="r">${$(l.extCents)}</td></tr>`,
+          `<tr><td>${esc(l.name)}${tag}</td><td class="pn">${esc(l.partNo)}</td><td>${esc(monthsText(l.months))}</td><td class="r">${l.qty}</td><td class="r">${$(l.unitCents)}</td><td class="r">${$(l.extCents)}</td></tr>`,
         );
       }
     }
@@ -215,8 +217,20 @@ ${
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(machine.name)} PM Program</title><style>${CSS}</style></head><body>${pages.join("\n")}</body></html>`;
 }
 
+async function loadPlaywright() {
+  try {
+    return await import("playwright");
+  } catch {
+    // No local node_modules: fall back to a globally installed Playwright.
+    const { createRequire } = await import("node:module");
+    const { execFileSync } = await import("node:child_process");
+    const root = execFileSync("npm", ["root", "-g"], { encoding: "utf8" }).trim();
+    return createRequire(`${root}/`)("playwright");
+  }
+}
+
 export async function renderGuidePdf(machine, rates, outPath) {
-  const { chromium } = await import("playwright");
+  const { chromium } = await loadPlaywright();
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage();
