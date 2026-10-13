@@ -616,3 +616,194 @@ Rule: an account with no Account Number is never removed. The remove action flag
 - Nothing is deleted. Existing flags, names, locks, merges and numbers are unchanged.
 
 Left as is, to confirm: once an account gets an Account Number, Remove works as before (archives it). Say if accounts with a number should also only be flagged.
+
+## 28. Charges On Tickets, Billing Hand-Off, Items And Prices
+
+Goal: stop re-keying Corrigo invoices into NetSuite. Katz Desk collects the charges; the Sales Order is still made in NetSuite by the billing script. Nothing writes to NetSuite from here. Migration 0057.
+
+- Ticket window (service and TLC): a Charges section. Trip Charge and Labor Hour are one click each at $150, named exactly as NetSuite has them (`Service : TRIPCHARGE`, `Service : SERVICELABOR`). A part is picked from the item list by SKU, manufacturer number or words. Qty, rate and description can be edited. P.O. # and the NetSuite Sales Order number are kept on the ticket.
+- Billing state on the ticket: No Charges, Ready To Bill, or Billed with the SO number. A billed ticket's charges are locked until the SO number is cleared.
+- Export Billing (Tickets and TLC, under Export): one CSV row per charge line for tickets completed in a date range that have charges and no Sales Order yet (WO, PO, customer, account number, list ID, tech, item, SKU, qty, rate, amount, work done). It also lists completed tickets with no charges, which is usually a missed bill.
+- Items And Prices (Tickets, under Import, Admin only): drop the NetSuite item export or a price list, CSV or Excel, every sheet. Rows match on the SKU. A column the file does not have, or a blank cell, never changes what is saved, so a Name + Base Price file only moves prices. The preview shows old price, new price and percent, and lists moves of 50% or more first. A SKU that is not loaded is added only when the file has a Description. Nothing is deleted.
+
+Checked with the real export (3,977 items on four sheets): loaded once, loading it again changed nothing, and a price-only file moved two prices without touching descriptions or cost.
+
+### Left as is, to confirm
+
+- The export lists items by bare SKU (`EVER104120`); invoices show a parent group (`PARTS : EVER104120`). The export has no parent column, so the group is only known for parts that were named with one. The billing CSV carries both Item and SKU.
+- 34 items have no price and 48 are $0.00 in the export.
+
+## 29. Part Photos, The Parts Page, MPN On Library Variations, Equipment Codes
+
+Migration 0058.
+
+- Parts (Shop > Parts): the item list with each part's photo and MPN. Add Photo / Replace Photo is on the part here. Trip and labor are not listed. Admin and Sales can set a part's MPN.
+- The invoice picker and the saved charge line show that same photo next to the part name and MPN. Click or tap enlarges.
+- No photo: a blank slot labeled with the MPN. With no MPN recorded it reads "MPN not set" with the SKU under it; the SKU is never shown as the MPN, and another part's photo is never used.
+- Library variation: an MPN (two variations cannot share one), with a status. A stored file is tied to that MPN only with an https source, and only on the variation it sits on. A tied file cannot be moved and is not copied from a main chip; a shared manual with no MPN still copies as before (section 13).
+- "No Official File For This MPN" is a flag on the variation. A different model's sheet is never attached in its place.
+- Equipment Codes (The Library > Add Files > Import Equipment Codes): a worklist of Manufacturer, Model and MPN adds each model under its manufacturer. An MPN is recorded only when the row has one. Nothing is attached by it.
+
+### Left as is, to confirm
+
+- The NetSuite export has no MPN column, so nearly every part reads "MPN not set" until someone sets it.
+- Of the 304 equipment item codes, 1 MPN was confirmed on the manufacturer's page (BUNN 53100.0100), 1 has no manufacturer page for that exact number (52000.0305), 6 are only suggested by the item code, and 296 are Katz names with no manufacturer number.
+
+## 30. One Import Control, And A Run Back Through The App
+
+### Import
+
+- `ImportMenu` (in `desk-charts.tsx`): two or more imports show one **Import** button that opens a short list. Exactly one import shows that import's own button and no list. None shows nothing.
+- The lines are left-aligned, one width, one height and one type (`ActionButton`). The list closes on a choice, when that choice finishes, on a click outside, on Escape and when focus tabs away. It has no backdrop and does not lock the page. While a file is being read the button says "Reading…".
+- Customers: Import holds Account Numbers and Equipment List for an Admin; anyone else has one import and sees the single Import Equipment List button.
+- Tickets: Import holds Corrigo Report and Items & Prices for an Admin; anyone else sees the single Import Corrigo Report button. Exports moved to their own Export list (Export Billing, Export). TLC has no import, so it has no Import control.
+- Clean Names and The Library each have one import and keep one button. The Library's Equipment Codes import sits inside Add Files so the header is unchanged.
+
+### Found and fixed on the way
+
+- On a phone the list hung off the left edge of the screen (it always opened from the button's right edge). It now opens from the left edge when that is the side with room. This applied to the old Import / Export list and the Export lists too.
+- A click inside a window opened from the list reached the list's own handler (React passes events up from a portal). The list now ignores anything that is not one of its own lines.
+- Clean Names: the Customers button was shorter than Read Clean List beside it. Same height now.
+- The hidden file inputs for the equipment and Corrigo imports were keyboard tab stops, one of them between the two lines of the list. They are out of the tab order now; tabbing past the last line closes the list.
+
+### Walked and passed, no change needed
+
+Every route loads with its heading, no page errors and no sideways scroll (20 routes, with Parts).
+
+- Side menu: Installs is Pipeline, Board. Accounts is Customers, Recipes, Out Of Network, Clean Names. A non-Admin does not see Clean Names or Access.
+- Clean Names: Choose Name opens the full list (all 2,627 accounts, searchable, similar names first). History shows on a row that has it; each line opened its ticket (a service ticket and a TLC ticket were opened). The remove button shows only on a row with no history, and reads Flag For Review when the account has no Account Number (section 27).
+- Pre-inspection: grinder Power and Space; brewer Power, Water, Space; espresso Power, Water, Drain, Space; Ethernet only on the Eversys unit. A dropped photo attached. A grinder went to Passed when its two checks were done, and the Board badge moved to 1/3. Next Machine, pressed from the bottom of a unit, opened the next one at the top with the first check selected. The photo enlarged and offered Download.
+- Library: one chip per variation. A manual and a parts book on the main chip showed on both variations; the parts book kept the name it was dropped with; a manual added on a variation stayed there. Fix cited the stored files by name and page, and answered "No file on this model for this issue." for a word that only another variation's file has.
+- Banner search list stayed under the search box and on top of the banner after the page scrolled. A window taller than a short screen scrolled to its last button and the page behind did not move. Hover highlighted a ticket row without lifting it and lifted only the control under the pointer.
+- Pings: sent from a second login and opened from the bell for a ticket, TLC ticket, PM, install, deal, rebuild and module. Each opened the record it named.
+
+### Left as is, to confirm
+
+- Import Account Numbers also applies a row that gives the clean-list ID in place of the name, and a row whose name differs from the account only in punctuation or spacing when exactly one account matches (section 26). A previewed file put "4 Bros Bagel" on "4-Bros Bagel" and "9001" on the account with that ID under Will Save. Say if those should stay in review.
+- On the Board, after Next Machine the unit's "1/3 machines passed" line sits under the page banner. The unit name and the first check are visible.
+- The Export lists on PMs and the Board hold one export each. They were left as lists.
+
+## 31. Legacy Models
+
+Migrations 0059 (columns) and 0060 (the review). Rules in `legacy-rules.ts`.
+
+- Under each manufacturer there is a Legacy row for models the manufacturer lists as discontinued or obsolete. It is its own labeled row ("Legacy · discontinued or obsolete models"), not a family chip, because Eversys makes a machine line called Legacy.
+- A Legacy model keeps its spec sheet, manuals, parts and MPN, still opens, and is never deleted. Its family row loses the chip; a family with nothing left in it drops out of the Family row.
+- Move To Legacy (Manage, Admin and Sales) always asks for the manufacturer page. Without an https source the server refuses. Move Back To Current undoes it.
+- Confirm Legacy is a flag for a model that could not be confirmed either way. It stays in the main row, with what was found, until someone confirms it.
+- The Library row has two filters: Legacy and Confirm Legacy, each with its count.
+
+### Review of the 30 models in The Library (Oct 12, 2026)
+
+Checked against each manufacturer's own site. BUNN Product Manuals (manuals.bunn.com) sorts every part number into Current Models or Discontinued Models, which settled all ten BUNN models.
+
+- **Moved to Legacy: none.** No model in The Library is listed as discontinued or obsolete by its manufacturer.
+- **Flagged Confirm Legacy: three** (set by migration 0060, matched on the model's exact name):
+  - BUNN G9-2T HD Stainless: BUNN's sales page for 24250.0021 says it may no longer be available for purchase; BUNN Product Manuals still lists 24250.0021 as current.
+  - FETCO CBS-1250 Plus: not on FETCO's current brewer list; its user guide is still under the current Plus Series and it is not on FETCO's Legacy Models page.
+  - Eversys Enigma e'4 X-Wide: X-Wide is not shown on Eversys's Enigma page; no discontinued notice was found.
+- The other 27 are shown as current products.
+
+Checked in the running app with a model BUNN does list as discontinued (41400.0300, the old-style ITB dual dilution, which is not in The Library): it moved under Legacy with the source, still opened, and its MPN stayed with it.
+
+### Left as is, to confirm
+
+- A model's status is matched from its name. The BUNN chips do not carry a part number, so each was matched to the BUNN number its name describes (for example AXIOM-DV-APS to 38700.0010).
+- A newer version of a model existing (Linea PB X, Legacy+) is not treated as the older one being discontinued.
+
+## 32. Unofficial Sources Under Fix
+
+Migration 0059, table `library_unofficial_sources`.
+
+- Fix is unchanged: it reads only the files stored on that variation (spec sheet, manuals, parts book, past fixes), names the file and page on every line, and says "No file on this model for this issue." when nothing matches.
+- Under it, Unofficial Sources lists links and notes that are not the manufacturer's manual. The block and every line are labeled Unofficial, and the block says it is not a manufacturer procedure.
+- Anyone on the desk can add a note, a link or both, shown with their name and the date. The person who added it, or Admin and Sales, can remove it. A link has to be a web address; anything else is refused.
+- Troubleshoot never reads this table. Checked: a word that exists only in an unofficial note returned "No file on this model for this issue."
+
+## 33. One Search-And-Filter Row
+
+`ListToolbar`, `ToolbarSearch`, `ToolbarSelect` in `list-toolbar.tsx`; chips are `FilterChip`.
+
+- Search on the left (one width, with the search icon), filters in line with it, every control 36px tall, one chip shape, pick-lists in the same pill as the sort.
+- Applied on Tickets, TLC, PMs, Pipeline, Board, Warehouse, Rebuilds, The Library, Parts, Locations, Modules, Customers, Out Of Network and Clean Names. Measured on all fourteen at desktop width, and on Clean Names and The Library at phone width.
+- The Library: the search moved out of the header into this row, with the Legacy and Confirm Legacy filters. Family and variation chips are the shared chip (36px; they were 44px with a border).
+- Clean Names: the search leads the row and the five sections and Waiting Only sit in line with it.
+- Modules: the Available (HQ) / Assigned / All switch is three chips. Rebuilds: its bordered chips and the Board / Timeline buttons are the shared chip. Pipeline: its own copy of the chip is gone.
+
+Gates after sections 28 to 33: typecheck and the production build pass, lint has 0 errors, tests are 238 passing and 9 failing (the same 9 Grok share-card failures). All 20 routes load.
+
+## 34. Education And Training In The Library
+
+Migration 0061. Rules in `training.ts`, server in `training-api.ts`, screen in `training-section.tsx`.
+
+- The Library has an Education And Training section under the search row, apart from the model books. Five topics: Water Specs, Coffee 101, Barista 101, Latte Art, Importance Of Cleaning. Each topic shows its file count, and all five show even when empty.
+- A topic stores files. Drop them on the topic, or use Add Files. PDF, images, Word and PowerPoint, up to 20 MB each. A file keeps the name it was dropped with.
+- Click a file name and the file opens in a new tab. Email and Text send a link to the file, the same as a manual.
+- Admin and Sales add and delete (the Library's own rule). Everyone on the desk can open and send.
+- Training material is never filed under a machine. The files sit in the same table as Library files with section `training`, a topic and no book, and the database refuses a training row that has a book. The model-book list, the by-name auto-filing, Move and Set Manual Type all skip them. Troubleshoot reads by book, so it never reads them.
+
+Checked: a deck named "Axiom Cleaning Deck" dropped on a topic stayed in that topic after a reload and did not appear under any Axiom variation.
+
+## 35. Side Menu By Department
+
+`shell.tsx`. Coming Due sits alone at the top. Then:
+
+- Accounts: Customers, Recipes, Out Of Network, Clean Names.
+- Installs: Pipeline, Board, Handoff.
+- Service: Tickets, PMs, TLC + Factor, Rebuilds, Planner.
+- Shop: Warehouse, Modules, The Library, Parts, Locations.
+- Reports: Analytics.
+- Admin: Settings, Access.
+
+Nothing was taken off the menu. Parts and Locations were not in the new order, so they stay at the end of Shop. The page names are unchanged (Tickets, TLC + Factor, The Library). Who sees what is unchanged: Clean Names and Access are Admin only, and the warehouse role still sees its four pages.
+
+## 36. Analytics And Export
+
+Rules in `analytics.ts`, file writers in `report-files.ts`, server in `analytics-api.ts`, page at `/analytics`.
+
+- One list of installs, service tickets, PMs, TLC tickets and rebuilds. Columns: Type, Account, Account #, Date, Status, Rep, Tech / Owner, Reference, Detail.
+- Date is the install date, the completed or scheduled date, or the day the record came in, in that order. Rep is the rep on the record, else the rep saved on the account.
+- Filters: search, This Month / Last 90 Days / This Year / All Dates, From and To, rep, and the five type cards. The cards always count all five types for the range.
+- Export is PDF, Excel or Word. All three are written from one report built from the filters on screen: the same title, scope line, summary table and record rows. A long Detail is cut at 160 characters before any file is written, so no format holds more than another.
+- The PDF and Word files are written directly (no new library). Excel uses the SheetJS library already in the project.
+
+Checked with the local data (797 records): the Word table matched the Excel sheet cell for cell, and every cell was found in the PDF (32 pages, header row on each). Excel and Word each opened their file.
+
+## 37. Deal, Board, Install Ticket
+
+Rules in `deal-board.ts`. Machine rows carry the new fields (`machines.ts`). Migration 0063 is an index only.
+
+- Create A New Deal takes more than one machine. Each is marked Sold or Loaned there or on the deal.
+- A machine row on the deal has Sold or Loaned, serial, voltage, plug, water, coffee and recipe. A grinder has no water field: it reads "No water or drain".
+- Confirm sends one machine to the Board for prep. It must be marked Sold or Loaned first. Everything set on the row goes with it.
+- With no project open for the deal or the account, the machine starts one. Otherwise it asks: Continue Under This Project (same board card) or Start A New Project (another card). A machine added to the deal later follows the same path.
+- A confirmed row on the deal is read-only and says which project it is on and where that project stands, with a link to it. It is changed on the Board from then on.
+- The Board card lists each machine with a Sold or Loaned badge, Confirmed, and what was set. A deal with more than one card labels them Project 1 of 2, and each card links back to the deal.
+- Install Ticket: when the project is Ready (equipment status Ready and pre-inspection passed), the install window shows the ticket on top and the Board row gets an Install Ticket button. The ticket is read from the project's machine rows: Sold or Loaned, serial, volts, plug, water (or "No water or drain"), recipe and coffee. A blank that should be filled is marked Not set. Print makes a paper copy.
+- A deal row and its board row are tied by a hidden id, so renaming a model on the Board does not lose the link, and a machine taken off the Board reads as not confirmed again. Saving a deal from a window opened earlier does not drop a tie.
+
+### Left as is
+
+- "Deal completion: Complete" still hands the deal off the way it did: a deal with no install gets one holding every machine. Those machines now show as Confirmed on the deal.
+- An install opened before this has no Sold or Loaned on its machines until someone marks them.
+
+### To confirm
+
+- The install ticket is a view of the install record, not a separate ticket on the Tickets page. Say if it should also open a ticket there.
+- Confirm requires Sold or Loaned. Say if a machine should be allowed onto the Board unmarked.
+
+## 38. Repair Quote
+
+Migration 0062 (`repair_quotes`, `repair_quote_lines`). Rules in `repair-quote.ts`, server in `repair-quote-api.ts`, panel in `repair-quote-panel.tsx`.
+
+- Repair Quote is on the ticket window (service and TLC) under Charges, and on the rebuild window. Lines are parts from the item list and labor hours, with qty and rate. It shows Parts, Labor and Total, and a status: Draft, Sent, Approved or Declined.
+- A rebuild linked to a ticket uses that ticket's quote, and the ticket shows the rebuild's. It is one quote, shown in both places, and each says so. There is no second cost sheet.
+- The rebuild row shows the cost: total and status on the board card and the timeline row, parts and labor on hover, and in the rebuild window's header.
+- An Approved or Declined quote keeps its lines. Set it back to Draft or Sent to change one.
+- The quote is separate from Charges. Charges are what gets billed; nothing is copied between them.
+
+### To confirm
+
+- If a rebuild and a ticket each already have their own quote and are then linked, each keeps its own. Nothing is merged.
+
+Gates after sections 34 to 38: typecheck and the production build pass, lint has 0 errors, tests are 274 passing and 9 failing (the same 9 Grok share-card failures). Migrations 0061 to 0063 applied on the local database.

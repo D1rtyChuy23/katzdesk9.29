@@ -30,6 +30,7 @@ import { AssetSheet } from "@/components/desk/asset-sheet";
 import { StockActions } from "@/components/desk/stock-actions";
 import { getMyAccess } from "@/lib/ops/access";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
+import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, sortDesk } from "@/lib/ops/sort";
 import { StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { cn } from "@/lib/utils";
@@ -139,16 +140,10 @@ function Page() {
           onClick={() => setTab((t) => toggleChip(t, "sold", "all"))}
         />
       </StatRow>
-      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Filter…"
-          className="h-9 w-56 shrink-0"
-          aria-label="Filter equipment"
-        />
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search model, serial or account…" label="Search equipment" />
         <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_STATUS]} className="shrink-0" />
-      </div>
+      </ListToolbar>
 
       {groups.length > 1 ? (
         <nav aria-label="Jump to location" className="mt-3 flex flex-wrap gap-1.5">

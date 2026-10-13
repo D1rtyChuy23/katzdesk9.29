@@ -1,6 +1,8 @@
-import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { Children, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const ink = "#1A1612";
 const primary = "#2F5D50";
@@ -415,21 +417,41 @@ export function FilterChip({
   );
 }
 
+type ActionMenuState = { setBusy: (id: string, busy: boolean) => void };
+const ActionMenuContext = createContext<ActionMenuState | null>(null);
+
 /**
- * Secondary page actions. Same button styles, one click behind the primary.
- * The list closes when a choice is made, on a click outside it, and on Escape; it never covers or locks the page.
+ * Secondary page actions. One button, one click behind the primary, that opens a short list.
+ * The list closes when a choice is made, when that choice finishes, on a click outside it, on Escape and when
+ * focus moves elsewhere; it has no backdrop and never covers or locks the page.
  * What the choice opens (a dialog, a file chooser) stays mounted while the list is closed.
  */
 export function ActionMenu({
   label = "More",
+  testId = "action-menu",
   children,
 }: {
   label?: string;
+  testId?: string;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [busyIds, setBusyIds] = useState<string[]>([]);
+  // The list hangs from the button's right edge; on a narrow screen that would push it off the left side.
+  const [fromLeft, setFromLeft] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  const busy = busyIds.length > 0;
+
+  const menu = useMemo<ActionMenuState>(
+    () => ({
+      setBusy: (id, on) => setBusyIds((cur) => (on ? (cur.includes(id) ? cur : [...cur, id]) : cur.filter((x) => x !== id))),
+    }),
+    [],
+  );
+
   useEffect(() => {
     if (!open) return;
     const outside = (e: PointerEvent) => {
@@ -445,32 +467,133 @@ export function ActionMenu({
       document.removeEventListener("keydown", esc);
     };
   }, [open]);
+
+  // A choice that is still reading its file keeps the button saying so; when it finishes the list is closed.
+  useEffect(() => {
+    if (!busy) setOpen(false);
+  }, [busy]);
+
+  useLayoutEffect(() => {
+    if (!open || !button.current || !list.current) return;
+    setFromLeft(button.current.getBoundingClientRect().right - list.current.offsetWidth < 8);
+  }, [open]);
+
   return (
-    <div ref={root} className="relative" data-testid="action-menu" data-open={open ? "true" : "false"}>
+    <div
+      ref={root}
+      className="relative"
+      data-testid={testId}
+      data-open={open ? "true" : "false"}
+      onBlur={(e) => {
+        // Tabbing out of the list closes it. A file chooser taking focus reports no next element.
+        // Events from a dialog a choice opened also arrive here (React passes them up from the portal): ignore those.
+        if (!root.current?.contains(e.target as Node)) return;
+        if (e.relatedTarget && !root.current.contains(e.relatedTarget as Node)) setOpen(false);
+      }}
+    >
       <button
+        ref={button}
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
         aria-controls={panelId}
+        aria-busy={busy || undefined}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted"
-        data-testid="action-menu-button"
+        className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium whitespace-nowrap hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        data-testid={`${testId}-button`}
       >
-        {label}
+        {busy ? "Reading…" : label}
       </button>
       <div
+        ref={list}
         id={panelId}
         hidden={!open}
-        // Any choice in the list closes it; the choice itself still runs.
+        // Any choice in the list closes it; the choice itself still runs. Focus goes back to the button, so a
+        // dialog the choice opens hands focus back to something that is on screen.
         onClick={(e) => {
-          if ((e.target as HTMLElement).closest("button, a, [role=menuitem]")) setOpen(false);
+          // Only a click on one of the list's own lines. A click inside a dialog a choice opened also arrives
+          // here (React passes it up from the portal) and must not move focus out of that dialog.
+          if (!list.current?.contains(e.target as Node)) return;
+          if ((e.target as HTMLElement).closest("button, a")) {
+            setOpen(false);
+            button.current?.focus({ preventScroll: true });
+          }
         }}
-        className="absolute right-0 z-30 mt-1 flex min-w-48 flex-col gap-1 rounded-md border border-border bg-card p-1.5 shadow-sm [&_button]:w-full [&_button]:justify-start [&[hidden]]:hidden"
-        data-testid="action-menu-list"
+        className={cn(
+          "absolute z-30 mt-1 flex min-w-48 flex-col gap-1 rounded-md border border-border bg-card p-1.5 shadow-sm [&_button]:w-full [&_button]:justify-start [&[hidden]]:hidden",
+          fromLeft ? "left-0" : "right-0",
+        )}
+        data-testid={`${testId}-list`}
       >
-        {children}
+        <ActionMenuContext.Provider value={menu}>{children}</ActionMenuContext.Provider>
       </div>
     </div>
+  );
+}
+
+/**
+ * A page action that reads the same wherever it sits. On its own it is an outline button. Inside an ActionMenu it
+ * is one line of the list: left-aligned, full width, same height and type as the lines around it.
+ * `menuLabel` is the shorter wording for the list, where the menu button already says "Import" or "Export".
+ */
+export function ActionButton({
+  icon: Icon,
+  busy = false,
+  busyLabel = "Reading…",
+  menuLabel,
+  children,
+  disabled,
+  className,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  icon?: LucideIcon;
+  busy?: boolean;
+  busyLabel?: string;
+  menuLabel?: ReactNode;
+}) {
+  const menu = useContext(ActionMenuContext);
+  const id = useId();
+  useEffect(() => {
+    if (!menu) return;
+    menu.setBusy(id, busy);
+    return () => menu.setBusy(id, false);
+  }, [menu, id, busy]);
+
+  if (menu) {
+    return (
+      <button
+        type="button"
+        disabled={disabled || busy}
+        className="flex h-10 w-full items-center justify-start gap-2 rounded-sm px-3 text-left text-sm font-medium whitespace-nowrap hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0"
+        data-action-item=""
+        {...props}
+      >
+        {Icon ? <Icon /> : null}
+        {menuLabel ?? children}
+      </button>
+    );
+  }
+  return (
+    <Button type="button" variant="outline" disabled={disabled || busy} className={className} {...props}>
+      {Icon ? <Icon /> : null}
+      {busy ? busyLabel : children}
+    </Button>
+  );
+}
+
+/**
+ * The one Import control for a page. Two or more imports: a single Import button that opens a short list.
+ * Exactly one import: that import's own button and no list. None: nothing at all.
+ * Pass each import as a direct child, and leave out (null) the ones this person cannot use.
+ */
+export function ImportMenu({ children }: { children: ReactNode }) {
+  const items = Children.toArray(children);
+  if (items.length === 0) return null;
+  if (items.length === 1) return <>{items[0]}</>;
+  return (
+    <ActionMenu label="Import" testId="import-menu">
+      {items}
+    </ActionMenu>
   );
 }
 

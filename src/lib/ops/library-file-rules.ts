@@ -343,7 +343,10 @@ export function variationsOf<T extends FamilyBook>(main: T, books: T[]): T[] {
   return isMainChip(main) ? books.filter((b) => b.id !== main.id && sameFamily(b, main)) : [];
 }
 
-type FamilyFile = { id: number; section: LibrarySection; bookId: number | null };
+/** `mpn` is set when the file is the official file for one MPN: such a file stays on its own variation. */
+type FamilyFile = { id: number; section: LibrarySection; bookId: number | null; mpn?: string | null };
+/** A file tied to one MPN is never shared; a shared manual (no MPN) still copies from the main chip. */
+const isShared = (f: { section: LibrarySection; mpn?: string | null }) => COPIED.has(f.section) && !(f.mpn ?? "").trim();
 /** What the main chip hands to every variation: manuals and parts files. A spec sheet stays on its own chip. */
 const COPIED = new Set<LibrarySection>(["manuals", "parts"]);
 export const copiesToVariations = (section: LibrarySection) => COPIED.has(section);
@@ -358,7 +361,7 @@ export function copiedManuals<F extends FamilyFile, T extends FamilyBook>(book: 
   const main = mainChipFor(book, books);
   if (!main) return [];
   const gone = new Set(hidden.filter((h) => h.bookId === book.id).map((h) => h.fileId));
-  return files.filter((f) => f.bookId === main.id && COPIED.has(f.section) && !gone.has(f.id));
+  return files.filter((f) => f.bookId === main.id && isShared(f) && !gone.has(f.id));
 }
 
 /** Copies this variation removed, so they can be put back. */
@@ -366,5 +369,5 @@ export function removedCopies<F extends FamilyFile, T extends FamilyBook>(book: 
   const main = mainChipFor(book, books);
   if (!main) return [];
   const gone = new Set(hidden.filter((h) => h.bookId === book.id).map((h) => h.fileId));
-  return files.filter((f) => f.bookId === main.id && COPIED.has(f.section) && gone.has(f.id));
+  return files.filter((f) => f.bookId === main.id && isShared(f) && gone.has(f.id));
 }

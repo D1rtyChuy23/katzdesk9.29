@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { OwnerFilter } from "./owner-select";
 import { sameTech } from "@/lib/ops/tech-match";
+import { costGlance } from "@/lib/ops/repair-quote";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -148,7 +149,10 @@ export function RebuildPlanner({
                 <li key={r.id} className="grid grid-cols-[11rem_1fr] items-center gap-2">
                   <button type="button" className="min-w-0 truncate text-left text-xs hover:underline" onClick={() => onOpen(r.id)}>
                     <span className="font-medium">{r.account}</span>
-                    <span className="block truncate text-muted-foreground">{r.equipment || r.title}</span>
+                    <span className="block truncate text-muted-foreground" data-testid="rebuild-row-cost" title={r.quote ? `Cost ${costGlance(r.quote)}` : undefined}>
+                      {r.quote ? `${costGlance(r.quote)} · ` : ""}
+                      {r.equipment || r.title}
+                    </span>
                   </button>
                   <div className="relative h-8 rounded-md bg-muted/60">
                     <span className="absolute inset-y-0 w-px bg-foreground/40" style={{ left: `${todayLeft}%` }} />

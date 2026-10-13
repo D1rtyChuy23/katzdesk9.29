@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileUp } from "lucide-react";
+import { FileUp, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { applyAccountNumbers, previewAccountNumbers, type AccountNumberPreview } from "@/lib/ops/account-numbers-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { FilterChip } from "./desk-charts";
+import { ActionButton, FilterChip } from "./desk-charts";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -67,10 +67,9 @@ export function AccountNumberImportButton() {
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)} data-testid="acct-import-open">
-        <FileUp className="size-4" />
+      <ActionButton icon={Upload} menuLabel="Account Numbers" onClick={() => setOpen(true)} data-testid="acct-import-open">
         Import Account Numbers
-      </Button>
+      </ActionButton>
       <Dialog
         open={open}
         onOpenChange={(o) => {

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { archiveDeal, createDeal, listDeals } from "@/lib/ops/api";
+import { archiveDeal, listDeals } from "@/lib/ops/api";
 import { money } from "@/lib/ops/clock";
 import { PRODUCERS, isNoRep } from "@/lib/ops/lookups";
 import { sameRep } from "@/lib/ops/reps";
@@ -12,11 +12,12 @@ import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { useMyView } from "@/components/desk/my-view-bar";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/desk/flag-badge";
-import { DealSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
-import { ChartCard, SimpleBars, StackedMoneyBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
+import { DealSheet } from "@/components/desk/entity-sheets";
+import { NewDealDialog } from "@/components/desk/new-deal-dialog";
+import { ChartCard, FilterChip, SimpleBars, StackedMoneyBars, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
+import { ListToolbar, ToolbarSearch, TOOLBAR_SELECT } from "@/components/desk/list-toolbar";
 import { SORT_DEALS, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { Plus, Trash2 } from "lucide-react";
@@ -48,32 +49,8 @@ function completionLabel(d: Deal) {
   return "Open";
 }
 
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`h-9 shrink-0 rounded-full px-3 text-sm font-medium ${
-        active ? "bg-ink text-ink-foreground" : "bg-secondary"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
 function Page() {
   const { open } = Route.useSearch();
-  const qc = useQueryClient();
   const data = useQuery({ queryKey: ["deals"], queryFn: () => listDeals() });
   const [q, setQ] = useState("");
   const [view, setView] = useState<DealView>("gto");
@@ -297,27 +274,26 @@ function Page() {
         </div>
       </section>
 
-      <div className="mt-6 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter…" className="h-9 w-56 shrink-0" aria-label="Filter deals" />
-        <Chip active={view === "gto"} onClick={() => setView("gto")}>
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search deals…" label="Search deals" />
+        <FilterChip selected={view === "gto"} onClick={() => setView("gto")}>
           Good to order ({gtoN})
-        </Chip>
-        <Chip active={view === "ordered"} onClick={() => setView("ordered")}>
+        </FilterChip>
+        <FilterChip selected={view === "ordered"} onClick={() => setView("ordered")}>
           Ordered ({orderedN})
-        </Chip>
-        <Chip active={view === "open"} onClick={() => setView("open")}>
+        </FilterChip>
+        <FilterChip selected={view === "open"} onClick={() => setView("open")}>
           Open ({active.length})
-        </Chip>
-        <Chip active={view === "complete"} onClick={() => setView("complete")}>
+        </FilterChip>
+        <FilterChip selected={view === "complete"} onClick={() => setView("complete")}>
           Complete ({completed.length})
-        </Chip>
-        <Chip active={view === "all"} onClick={() => setView("all")}>
+        </FilterChip>
+        <FilterChip selected={view === "all"} onClick={() => setView("all")}>
           All deals
-        </Chip>
-        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={all.map((d) => d.producer)} className="h-9 w-44 shrink-0" />
+        </FilterChip>
+        <RepFilter value={repFilter} onChange={setRepFilter} extraNames={all.map((d) => d.producer)} className={`${TOOLBAR_SELECT} w-44`} />
         <SortSelect value={sort} onChange={setSort} options={SORT_DEALS} className="shrink-0" />
-
-      </div>
+      </ListToolbar>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         {rows.map((d) => (
@@ -344,33 +320,7 @@ function Page() {
         }}
       />
       <DealSheet deal={selectedRow} onClose={() => setSelected(null)} />
-      <SimpleCreateDialog
-        title="New Deal"
-        open={create}
-        onOpenChange={setCreate}
-        fields={[
-          { name: "customer", label: "Customer", required: true, kind: "customer" },
-          { name: "producer", label: "Rep", kind: "rep" },
-          { name: "equipment", label: "Equipment", kind: "equipment" },
-          { name: "amount", label: "Equipment Package Amount ($)" },
-        ]}
-        onSubmit={async (v) => {
-          const amountRaw = v.amount?.replace(/[$,]/g, "").trim();
-          const amountNum = amountRaw ? Number(amountRaw) : undefined;
-          const row = await createDeal({
-            data: {
-              customer: v.customer,
-              producer: v.producer || undefined,
-              equipment: v.equipment || undefined,
-              amount: amountNum != null && Number.isFinite(amountNum) ? amountNum : undefined,
-            },
-          });
-          void qc.invalidateQueries({ queryKey: ["deals"] });
-          void qc.invalidateQueries({ queryKey: ["dashboard"] });
-          toast.success("Deal added");
-          setSelected(row.id);
-        }}
-      />
+      <NewDealDialog open={create} onOpenChange={setCreate} onCreated={(id) => setSelected(id)} />
     </div>
   );
 }
@@ -418,6 +368,11 @@ function DealRow({ deal: d, onOpen, onRep }: { deal: Deal; onOpen: () => void; o
             {d.producer && !d.noRep ? <RepLink name={d.producer} onPick={onRep} /> : <NoRepFlag show />} ·{" "}
             {d.equipment || "No equipment listed"}
           </span>
+          {d.machines.some((m) => m.boardId != null) ? (
+            <span className="mt-0.5 block text-xs text-muted-foreground" data-testid="deal-on-board">
+              {d.machines.filter((m) => m.boardId != null).length} of {d.machines.length} on the Board
+            </span>
+          ) : null}
 
         </span>
         <span className="tabular text-sm font-medium">{money(d.amount)}</span>

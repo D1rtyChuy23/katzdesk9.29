@@ -1,6 +1,8 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
+  BarChart3,
   BookOpen,
+  Boxes,
   Library,
   CalendarClock,
   CalendarRange,
@@ -49,6 +51,7 @@ type DeskTo =
   | "/installs"
   | "/recipes"
   | "/library"
+  | "/parts"
   | "/pipeline"
   | "/warehouse"
   | "/rebuilds"
@@ -56,6 +59,7 @@ type DeskTo =
   | "/modules"
   | "/customers"
   | "/network"
+  | "/analytics"
   | "/settings"
   | "/access";
 
@@ -69,34 +73,14 @@ type NavItem = {
   exact?: boolean;
 };
 
+/**
+ * The side menu, by department, in the order the work flows. Coming Due sits on its own at the top.
+ * Every page stays on the menu; a group with no label shows no heading.
+ */
 const NAV: { label: string; items: NavItem[] }[] = [
   {
-    label: "Work",
-    items: [
-      { to: "/", label: "Coming Due", icon: CalendarClock, exact: true },
-      { to: "/planner", label: "Planner", icon: CalendarRange },
-      { to: "/service", label: "Tickets", icon: Wrench },
-      { to: "/tlc", label: "TLC + Factor", icon: Coffee },
-      { to: "/pms", label: "PMs", icon: Settings2 },
-      { to: "/handoff", label: "Handoff", icon: MessageSquare },
-    ],
-  },
-  {
-    label: "Installs",
-    items: [
-      { to: "/pipeline", label: "Pipeline", icon: Handshake },
-      { to: "/installs", label: "Board", icon: Truck },
-    ],
-  },
-  {
-    label: "Shop",
-    items: [
-      { to: "/warehouse", label: "Warehouse", icon: Warehouse },
-      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
-      { to: "/library", label: "The Library", icon: Library },
-      { to: "/locations", label: "Locations", icon: MapPin },
-      { to: "/modules", label: "Modules", icon: Package },
-    ],
+    label: "",
+    items: [{ to: "/", label: "Coming Due", icon: CalendarClock, exact: true }],
   },
   {
     label: "Accounts",
@@ -106,6 +90,38 @@ const NAV: { label: string; items: NavItem[] }[] = [
       { to: "/network", label: "Out Of Network", icon: Globe },
       { to: "/customer-names", label: "Clean Names", icon: ListChecks },
     ],
+  },
+  {
+    label: "Installs",
+    items: [
+      { to: "/pipeline", label: "Pipeline", icon: Handshake },
+      { to: "/installs", label: "Board", icon: Truck },
+      { to: "/handoff", label: "Handoff", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Service",
+    items: [
+      { to: "/service", label: "Tickets", icon: Wrench },
+      { to: "/pms", label: "PMs", icon: Settings2 },
+      { to: "/tlc", label: "TLC + Factor", icon: Coffee },
+      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
+      { to: "/planner", label: "Planner", icon: CalendarRange },
+    ],
+  },
+  {
+    label: "Shop",
+    items: [
+      { to: "/warehouse", label: "Warehouse", icon: Warehouse },
+      { to: "/modules", label: "Modules", icon: Package },
+      { to: "/library", label: "The Library", icon: Library },
+      { to: "/parts", label: "Parts", icon: Boxes },
+      { to: "/locations", label: "Locations", icon: MapPin },
+    ],
+  },
+  {
+    label: "Reports",
+    items: [{ to: "/analytics", label: "Analytics", icon: BarChart3 }],
   },
   {
     label: "Admin",
@@ -158,9 +174,9 @@ function NavGroup({
   onNavigate?: () => void;
 }) {
   return (
-    <div>
-      <p className="px-3 text-[10px] font-semibold tracking-[0.2em] text-cream/40 uppercase">{group.label}</p>
-      <ul className="mt-2 space-y-0.5">
+    <div data-testid="nav-group" data-group={group.label || "top"}>
+      {group.label ? <p className="px-3 text-[10px] font-semibold tracking-[0.2em] text-cream/40 uppercase">{group.label}</p> : null}
+      <ul className={group.label ? "mt-2 space-y-0.5" : "space-y-0.5"}>
         {group.items.map((item) => (
           <NavItemLink key={item.to} item={item} pathname={pathname} onNavigate={onNavigate} />
         ))}

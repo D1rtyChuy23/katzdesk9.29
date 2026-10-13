@@ -6,14 +6,13 @@ import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { providerStates, statusTone, type NetworkAccount, type NetworkOverview, type NetworkProvider } from "@/lib/ops/network";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SelectField } from "@/components/ui/select-field";
 import { ProviderSheet } from "@/components/desk/provider-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { DispatchCard } from "@/components/desk/provider-dispatch";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
+import { ListToolbar, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { SORT_ALPHA, sortDesk } from "@/lib/ops/sort";
-import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -192,25 +191,22 @@ function ProvidersPane({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <div className="relative w-56 shrink-0">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search providers…" className="h-9 pl-9" aria-label="Search providers" />
-        </div>
-        <SelectField className="h-9 w-44 shrink-0" value={status} onChange={(e) => setStatus(e.target.value)} allowEmpty emptyLabel="Any status" aria-label="Filter by status">
+      <ListToolbar className="mt-0">
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search providers…" />
+        <ToolbarSelect className="w-44" value={status} onChange={(e) => setStatus(e.target.value)} allowEmpty emptyLabel="Any status" aria-label="Filter by status">
           <option value="Active">Active</option>
           <option value="Pending Setup">Pending Setup</option>
           <option value="Prospect">Prospect</option>
           <option value="Inactive">Inactive</option>
           <option value="unconfirmed">Unconfirmed</option>
-        </SelectField>
-        <SelectField className="h-9 w-28 shrink-0" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State" aria-label="Filter by state">
+        </ToolbarSelect>
+        <ToolbarSelect className="w-28" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State" aria-label="Filter by state">
           {states.map((s) => (
             <option key={s}>{s}</option>
           ))}
-        </SelectField>
+        </ToolbarSelect>
         <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA]} className="shrink-0" />
-      </div>
+      </ListToolbar>
       <ul className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         {rows.map((p) => (
           <li
@@ -313,17 +309,14 @@ function AccountsPane({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <div className="relative w-56 shrink-0">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search accounts…" className="h-9 pl-9" aria-label="Search accounts" />
-        </div>
-        <SelectField className="h-9 w-28 shrink-0" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State" aria-label="Filter by state">
+      <ListToolbar className="mt-0">
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search accounts…" />
+        <ToolbarSelect className="w-28" value={state} onChange={(e) => setState(e.target.value)} allowEmpty emptyLabel="State" aria-label="Filter by state">
           {states.map((s) => (
             <option key={s}>{s}</option>
           ))}
-        </SelectField>
-      </div>
+        </ToolbarSelect>
+      </ListToolbar>
       <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">
         {rows.map((a) => (
           <li key={a.id} className="px-4 py-3">

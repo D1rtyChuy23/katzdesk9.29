@@ -5,15 +5,14 @@ import { createModule, listModules } from "@/lib/ops/api";
 import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
 import { moduleAccount, moduleAvailability, type ModuleAvailability } from "@/lib/ops/eversys";
 import { AssignModuleDialog, AssignedLine, ModuleReturnActions } from "@/components/desk/module-assign";
-import { SelectField } from "@/components/ui/select-field";
 import { cn } from "@/lib/utils";
 import type { ModuleRow } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { ModuleSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
-import { ChartCard, SimpleBars, StatCard, StatRow, StatusDonut, toggleChip } from "@/components/desk/desk-charts";
+import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, StatusDonut, toggleChip } from "@/components/desk/desk-charts";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
+import { ListToolbar, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, SORT_TECH, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { Plus } from "lucide-react";
@@ -172,57 +171,49 @@ function Page() {
           )}
         </ChartCard>
       </section>
-      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search serial, account…" className="h-9 w-56 shrink-0" aria-label="Search modules" />
-        <div className="flex shrink-0 overflow-hidden rounded-full border border-border bg-card" role="tablist" aria-label="Where modules are">
-          {(
-            [
-              ["hq", "Available (HQ)"],
-              ["assigned", "Assigned"],
-              ["all", "All"],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={avail === id}
-              data-testid={`avail-${id}`}
-              onClick={() => {
-                setAvail(id);
-                setBubble(null);
-              }}
-              className={cn(
-                "h-9 px-3 text-xs font-medium tabular",
-                avail === id ? "bg-ink text-ink-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {label} {availCount[id]}
-            </button>
-          ))}
-        </div>
-        <SelectField value={platform} onChange={(e) => setPlatform(e.target.value)} allowEmpty emptyLabel="All Models" className="h-9 w-auto shrink-0" aria-label="Filter by Eversys model">
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search serial, account…" label="Search modules" />
+        {(
+          [
+            ["hq", "Available (HQ)"],
+            ["assigned", "Assigned"],
+            ["all", "All"],
+          ] as const
+        ).map(([id, label]) => (
+          <FilterChip
+            key={id}
+            selected={avail === id}
+            data-testid={`avail-${id}`}
+            onClick={() => {
+              setAvail(id);
+              setBubble(null);
+            }}
+          >
+            {label} {availCount[id]}
+          </FilterChip>
+        ))}
+        <ToolbarSelect value={platform} onChange={(e) => setPlatform(e.target.value)} allowEmpty emptyLabel="All Models" aria-label="Filter by Eversys model">
           {platforms.map((p) => (
             <option key={p} value={p}>
               {p}
             </option>
           ))}
-        </SelectField>
-        <SelectField value={mtype} onChange={(e) => setMtype(e.target.value)} allowEmpty emptyLabel="All Types" className="h-9 w-auto shrink-0" aria-label="Filter by module type">
+        </ToolbarSelect>
+        <ToolbarSelect value={mtype} onChange={(e) => setMtype(e.target.value)} allowEmpty emptyLabel="All Types" aria-label="Filter by module type">
           {types.map((t) => (
             <option key={t} value={t}>
               {t}
             </option>
           ))}
-        </SelectField>
+        </ToolbarSelect>
         {accounts.length ? (
-          <SelectField value={account} onChange={(e) => setAccount(e.target.value)} allowEmpty emptyLabel="All Accounts" className="h-9 w-auto max-w-56 shrink-0" aria-label="Filter by account">
+          <ToolbarSelect value={account} onChange={(e) => setAccount(e.target.value)} allowEmpty emptyLabel="All Accounts" aria-label="Filter by account">
             {accounts.map((a) => (
               <option key={a} value={a}>
                 {a}
               </option>
             ))}
-          </SelectField>
+          </ToolbarSelect>
         ) : null}
         <SortSelect
           value={sort}
@@ -230,7 +221,7 @@ function Page() {
           options={[...SORT_STATUS, ...SORT_ALPHA, ...SORT_DATE, ...SORT_EQUIP, ...SORT_TECH]}
           className="shrink-0"
         />
-      </div>
+      </ListToolbar>
       <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid="module-list">
         {rows.map((m) => {
           const where = moduleAvailability(m);

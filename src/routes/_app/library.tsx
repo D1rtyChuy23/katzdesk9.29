@@ -26,6 +26,13 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Input } from "@/components/ui/input";
 import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, originOf, uploadLibraryFile } from "@/components/desk/library-files";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
+import { MpnPanel, OfficialTag } from "@/components/desk/mpn-panel";
+import { LegacyPanel } from "@/components/desk/legacy-panel";
+import { FilterChip } from "@/components/desk/desk-charts";
+import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
+import { CONFIRM_LEGACY, splitLegacy } from "@/lib/ops/legacy-rules";
+import { EquipmentCodesImport } from "@/components/desk/equipment-codes-import";
+import { TrainingSection } from "@/components/desk/training-section";
 import { SpecSheetView } from "@/components/desk/spec-sheet";
 import { SpecImport } from "@/components/desk/spec-import";
 import { TroubleshootPanel } from "@/components/desk/troubleshoot-panel";
@@ -84,6 +91,9 @@ function Page() {
   const [openMaker, setOpenMaker] = useState<string | null>(null);
   const [manage, setManage] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [codesOpen, setCodesOpen] = useState(false);
+  // The toolbar's filters: only Legacy models, or only models flagged Confirm Legacy.
+  const [only, setOnly] = useState<"legacy" | "confirm" | null>(null);
   const rereadInput = useRef<HTMLInputElement>(null);
   const [rereading, setRereading] = useState(false);
   const [found, setFound] = useState<{ image: string | null; dimsImage: string | null; note: string | null; file: string } | null>(null);
@@ -348,7 +358,11 @@ function Page() {
     files: files.filter((f) => f.bookId === id),
   });
   const needle = q.trim().toLowerCase();
-  const shownBooks = books.filter((b) => b.title.toLowerCase().includes(needle));
+  const shownBooks = books.filter(
+    (b) => b.title.toLowerCase().includes(needle) && (only === "legacy" ? b.legacy : only === "confirm" ? b.confirmLegacy && !b.legacy : true),
+  );
+  const legacyCount = books.filter((b) => b.legacy).length;
+  const confirmCount = books.filter((b) => b.confirmLegacy && !b.legacy).length;
   const makers = [...new Set(shownBooks.map((b) => b.manufacturer))].sort((x, y) => x.localeCompare(y, "en", { sensitivity: "base" }));
   const unfiled = files.filter((f) => f.bookId == null);
   const loading = data.isLoading || lib.isLoading;
@@ -357,14 +371,16 @@ function Page() {
   const wanted = openMaker ?? book?.manufacturer ?? (needle && makers.length === 1 ? makers[0]! : null);
   const activeMaker = wanted && makers.includes(wanted) ? wanted : null;
   const models = shownBooks.filter((b) => b.manufacturer === activeMaker);
-  const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : models[0] ?? null;
+  // Current models stay in the main row (family, then variation). Legacy models sit in their own row under the maker.
+  const { current: currentModels, legacy: legacyModels } = splitLegacy(models);
+  const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : currentModels[0] ?? models[0] ?? null;
   // Maker → family → variation. A family is the model's first word (Axiom, G9, ITCB); its chips never mix with another family's.
   const familyKey = (b: LibraryBook) => nameKey(familyOf(b.title, b.manufacturer));
-  const families = [...new Map(models.map((m) => [familyKey(m), familyOf(m.title, m.manufacturer)])).entries()]
+  const families = [...new Map(currentModels.map((m) => [familyKey(m), familyOf(m.title, m.manufacturer)])).entries()]
     // The main chip (named like the parent) leads its row.
-    .map(([key, name]) => ({ key, name, books: models.filter((m) => familyKey(m) === key).sort((x, y) => Number(isMainChip(y)) - Number(isMainChip(x))) }))
+    .map(([key, name]) => ({ key, name, books: currentModels.filter((m) => familyKey(m) === key).sort((x, y) => Number(isMainChip(y)) - Number(isMainChip(x))) }))
     .sort((x, y) => x.name.localeCompare(y.name, "en", { sensitivity: "base", numeric: true }));
-  const family = current ? families.find((f) => f.key === familyKey(current)) ?? null : null;
+  const family = current && !current.legacy ? families.find((f) => f.key === familyKey(current)) ?? null : null;
   const inside = current ? inBook(current.id) : null;
   // Manuals on the parent's main chip are copied onto every variation; a variation can drop its own copy.
   const mainChip = current ? mainChipFor(current, books) : null;
@@ -376,16 +392,50 @@ function Page() {
     <div>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
-        <label className="relative block sm:ml-auto sm:w-64">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => { setQ(e.target.value); setOpenMaker(null); }} placeholder="Search maker or model" aria-label="Search maker or model" className="pl-9" data-testid="book-search" />
-        </label>
         {canEdit ? (
-          <Button type="button" onClick={() => setAdding(true)} data-testid="library-add">
+          <Button type="button" className="sm:ml-auto" onClick={() => setAdding(true)} data-testid="library-add">
             <Plus className="size-4" /> Add Files
           </Button>
         ) : null}
       </header>
+
+      <ListToolbar data-testid="library-toolbar">
+        <ToolbarSearch
+          value={q}
+          onChange={(v) => {
+            setQ(v);
+            setOpenMaker(null);
+          }}
+          placeholder="Search maker or model…"
+          label="Search maker or model"
+          testId="book-search"
+        />
+        <FilterChip
+          selected={only === "legacy"}
+          onClick={() => {
+            setOnly(only === "legacy" ? null : "legacy");
+            setOpenMaker(null);
+          }}
+          data-testid="filter-legacy"
+        >
+          Legacy {legacyCount}
+        </FilterChip>
+        <FilterChip
+          selected={only === "confirm"}
+          onClick={() => {
+            setOnly(only === "confirm" ? null : "confirm");
+            setOpenMaker(null);
+          }}
+          data-testid="filter-confirm-legacy"
+        >
+          {CONFIRM_LEGACY} {confirmCount}
+        </FilterChip>
+        <ToolbarNote data-testid="library-count">
+          {shownBooks.length} model{shownBooks.length === 1 ? "" : "s"}
+        </ToolbarNote>
+      </ListToolbar>
+
+      <TrainingSection />
 
       {problems.length ? (
         <ul className="mt-3 grid gap-1 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm" role="alert" data-testid="library-errors">
@@ -414,7 +464,13 @@ function Page() {
         <p className="mt-5 text-sm text-muted-foreground">Loading The Library…</p>
       ) : makers.length === 0 ? (
         <p className="mt-5 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="books-empty">
-          {books.length ? "Nothing matches that search." : "Nothing here yet. Use Add Files to add the first spec sheet, manual or parts diagram."}
+          {!books.length
+            ? "Nothing here yet. Use Add Files to add the first spec sheet, manual or parts diagram."
+            : only === "legacy" && !needle
+              ? "No model is under Legacy. A model moves there only when its manufacturer lists it as discontinued or obsolete."
+              : only === "confirm" && !needle
+                ? "No model is flagged Confirm Legacy."
+                : "Nothing matches that search."}
         </p>
       ) : (
         <>
@@ -437,7 +493,7 @@ function Page() {
                   onClick={() => {
                     setMode("browse");
                     setOpenMaker(on ? "" : maker);
-                    go(on ? {} : { book: shownBooks.find((b) => b.manufacturer === maker)!.id });
+                    go(on ? {} : { book: (shownBooks.find((b) => b.manufacturer === maker && !b.legacy) ?? shownBooks.find((b) => b.manufacturer === maker))!.id });
                   }}
                 >
                   <span className="font-display text-lg leading-tight font-medium break-words">{maker}</span>
@@ -458,7 +514,7 @@ function Page() {
                 <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
                 <h2 className="font-display text-xl font-medium" data-testid="open-family-title">
                   {activeMaker}
-                  {family ? ` · ${family.name}` : ""}
+                  {family ? ` · ${family.name}` : current.legacy ? " · Legacy" : ""}
                 </h2>
                 <span className="sr-only" data-testid="open-book-title">{current.title}</span>
                 {canEdit ? (
@@ -467,53 +523,87 @@ function Page() {
                   </Button>
                 ) : null}
               </div>
-              <p className="mt-2 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Family</p>
-              <div className="mt-1.5 flex flex-wrap gap-2" role="radiogroup" aria-label={`${activeMaker} families`} data-testid="family-chips">
-                {families.map((f) => (
-                  <button
-                    key={f.key}
-                    type="button"
-                    role="radio"
-                    aria-checked={f.key === family?.key}
-                    className={cn(
-                      "h-11 rounded-full border px-4 text-sm font-medium",
-                      f.key === family?.key ? "border-ink bg-ink text-cream" : "border-border bg-background hover:border-primary/50",
-                    )}
-                    data-testid="family-chip"
-                    data-family={f.name}
-                    onClick={() => {
-                      setMode("browse");
-                      go({ book: f.books[0]!.id });
-                    }}
-                  >
-                    {f.name}
-                    {f.books.length > 1 ? <span className="ml-1.5 text-xs opacity-60">{f.books.length}</span> : null}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-3 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">{family?.name} Variations</p>
-              <div className="mt-1.5 mb-3 flex flex-wrap gap-2" role="radiogroup" aria-label={`${family?.name ?? activeMaker} variations`} data-testid="model-chips">
-                {(family?.books ?? []).map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={m.id === current.id}
-                    className={cn(
-                      "h-11 rounded-full border px-4 text-sm font-medium",
-                      m.id === current.id ? "border-ink bg-ink text-cream" : "border-border bg-background hover:border-primary/50",
-                    )}
-                    data-testid="model-chip"
-                    onClick={() => {
-                      setMode("browse");
-                      setOpenMaker(m.manufacturer);
-                      go({ book: m.id });
-                    }}
-                  >
-                    {modelLabel(m.title, m.manufacturer)}
-                  </button>
-                ))}
-              </div>
+              {families.length ? (
+                <>
+                  <p className="mt-2 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Family</p>
+                  <div className="mt-1.5 flex flex-wrap gap-2" role="radiogroup" aria-label={`${activeMaker} families`} data-testid="family-chips">
+                    {families.map((f) => (
+                      <FilterChip
+                        key={f.key}
+                        role="radio"
+                        aria-pressed={undefined}
+                        aria-checked={f.key === family?.key}
+                        selected={f.key === family?.key}
+                        data-testid="family-chip"
+                        data-family={f.name}
+                        onClick={() => {
+                          setMode("browse");
+                          go({ book: f.books[0]!.id });
+                        }}
+                      >
+                        {f.name}
+                        {f.books.length > 1 ? <span className="ml-1.5 text-xs opacity-60">{f.books.length}</span> : null}
+                      </FilterChip>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+              {family ? (
+                <>
+                  <p className="mt-3 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">{family.name} Variations</p>
+                  <div className="mt-1.5 flex flex-wrap gap-2" role="radiogroup" aria-label={`${family.name} variations`} data-testid="model-chips">
+                    {family.books.map((m) => (
+                      <FilterChip
+                        key={m.id}
+                        role="radio"
+                        aria-pressed={undefined}
+                        aria-checked={m.id === current.id}
+                        selected={m.id === current.id}
+                        data-testid="model-chip"
+                        data-confirm-legacy={m.confirmLegacy ? "true" : undefined}
+                        onClick={() => {
+                          setMode("browse");
+                          setOpenMaker(m.manufacturer);
+                          go({ book: m.id });
+                        }}
+                      >
+                        {modelLabel(m.title, m.manufacturer)}
+                        {m.confirmLegacy ? <span className="ml-1.5 text-[10px] font-semibold tracking-wide uppercase opacity-80">· {CONFIRM_LEGACY}</span> : null}
+                      </FilterChip>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+              {/* Its own row, named for what it holds, so it is never mistaken for a model family (Eversys makes a machine called Legacy). */}
+              {legacyModels.length ? (
+                <>
+                  <p className="mt-3 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase" data-testid="legacy-heading">
+                    Legacy <span className="font-normal tracking-normal normal-case">· discontinued or obsolete models · {legacyModels.length}</span>
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-2" role="radiogroup" aria-label={`${activeMaker} Legacy models`} data-testid="legacy-chips">
+                    {legacyModels.map((m) => (
+                      <FilterChip
+                        key={m.id}
+                        role="radio"
+                        aria-pressed={undefined}
+                        aria-checked={m.id === current.id}
+                        selected={m.id === current.id}
+                        data-testid="legacy-chip"
+                        onClick={() => {
+                          setMode("browse");
+                          setOpenMaker(m.manufacturer);
+                          go({ book: m.id });
+                        }}
+                      >
+                        {modelLabel(m.title, m.manufacturer)}
+                      </FilterChip>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+              <div className="mb-3" />
+                    <LegacyPanel book={current} canEdit={canEdit} manage={manage} onChanged={() => void reload()} />
+                    <MpnPanel book={current} files={inside.files} canEdit={canEdit} onChanged={() => void reload()} />
                     <div className="flex flex-col gap-4 sm:flex-row">
                       <ModelPhoto sheet={inside.sheets.find((s) => s.hasImage) ?? null} title={current.title} />
                       <ul className="min-w-0 flex-1 divide-y divide-border" data-testid="docs">
@@ -552,11 +642,14 @@ function Page() {
                             onType={setTyping}
                             onRename={(file) => setFileRename({ file, name: file.name.replace(/\.[A-Za-z0-9]+$/, "") })}
                             extra={
-                              f.section === "spec" && canEdit && !inside.sheets.length && f.mime === "application/pdf" ? (
-                                <Button type="button" size="sm" variant="outline" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
-                                  <FileUp className="size-4" /> Read Specs
-                                </Button>
-                              ) : null
+                              <>
+                                {f.section === "spec" && canEdit && !inside.sheets.length && f.mime === "application/pdf" ? (
+                                  <Button type="button" size="sm" variant="outline" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
+                                    <FileUp className="size-4" /> Read Specs
+                                  </Button>
+                                ) : null}
+                                <OfficialTag file={f} book={current} canEdit={canEdit} manage={manage} onChanged={() => void reload()} />
+                              </>
                             }
                           />
                         ))}
@@ -709,8 +802,12 @@ function Page() {
           <Button type="button" variant="outline" className="mt-3 w-fit" onClick={() => { setAdding(false); setImportFile(null); setMode("import"); }} data-testid="library-import">
             <FileUp className="size-4" /> Import A Spec Sheet And Read Its Specs
           </Button>
+          <Button type="button" variant="outline" className="mt-2 w-fit" onClick={() => { setAdding(false); setCodesOpen(true); }} data-testid="codes-import-open">
+            <FileUp className="size-4" /> Import Equipment Codes
+          </Button>
         </DialogContent>
       </Dialog>
+      <EquipmentCodesImport open={codesOpen} onOpenChange={setCodesOpen} onSaved={() => void reload()} />
 
       <ManualTypePicker open={!!askType} fileName={askType?.fileName ?? ""} nameHint={askType?.hint ?? ""} onPick={(t, name) => askType?.resolve({ type: t, name })} onCancel={() => askType?.resolve(null)} />
       <Dialog open={!!fileRename} onOpenChange={(o) => !o && setFileRename(null)}>

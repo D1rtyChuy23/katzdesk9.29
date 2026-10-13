@@ -23,6 +23,7 @@ import { MAX_MANUAL_BYTES, pdfPageTexts } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { UnofficialSources } from "./unofficial-sources";
 
 const origin = () => (typeof window === "undefined" ? "" : window.location.origin);
 /** Opens the stored PDF at the cited page. */
@@ -441,6 +442,8 @@ export function TroubleshootPanel({ bookId, model }: { bookId: number; model: st
           {info.data!.fixCount} past fix{info.data!.fixCount === 1 ? "" : "es"} saved for {model}. Similar ones show with your result.
         </p>
       ) : null}
+      {/* Below the official answer, and never part of it. */}
+      <UnofficialSources bookId={bookId} model={model} />
     </div>
   );
 }

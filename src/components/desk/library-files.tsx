@@ -143,6 +143,7 @@ export function AddTarget({
   busy,
   disabled,
   large,
+  accept = ACCEPT,
   onFiles,
 }: {
   id: string;
@@ -150,6 +151,8 @@ export function AddTarget({
   busy: string | null;
   disabled: boolean;
   large?: boolean;
+  /** File types the chooser offers. Model books keep the default. */
+  accept?: string;
   onFiles: (files: File[]) => void;
 }) {
   const input = useRef<HTMLInputElement>(null);
@@ -186,7 +189,7 @@ export function AddTarget({
         ref={input}
         type="file"
         multiple
-        accept={ACCEPT}
+        accept={accept}
         className="hidden"
         data-testid={`input-${id}`}
         onChange={(e) => {

@@ -44,6 +44,7 @@ import type {
 } from "./types";
 export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
+import { boardRow, cleanMachine, confirmError, continuable, keepTies, placeRows, projectLabel, projectStatus } from "./deal-board";
 import { listedEquipment, matchModel, catalogModels } from "./equipment";
 import {
   BACK_PALLETS,
@@ -301,6 +302,7 @@ function mapDeal(r: any, marks: any) {
 		completion: r.completion ?? null,
 		notes: r.notes ?? null,
 		handedOff: !!r.handed_off,
+		projects: [],
 		updatedAt: String(r.updated_at),
 		aviKatz: marks ? isAviKatz(marks, customer) : false,
 		noRep: isNoRep(producer)
@@ -1068,10 +1070,129 @@ export const createModule = createServerFn({ method: "POST" }).middleware([deskM
 	await logActivity(sql, context.userId, "module", rows[0].id, "opened", moduleId);
 	return mapModule(rows[0]);
 });
+/** Ties a deal row to the board row it becomes. Short, random, never shown. */
+function newMachineUid() {
+	return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+}
+/** Every board card that is still on the list, with the machine rows it holds and where it stands. */
+async function loadBoardProjects(sql: any, catalog: any[] = []) {
+	const rows = await sql`select id, deal_id, customer, equipment, equip_status, complete, serial, power_voltage, machines from installs where archived = false order by id`;
+	const summaries = await loadInspectionSummaries(sql, rows.map((r: any) => r.id));
+	return rows.map((r: any) => {
+		const installed = isInstalled({ complete: !!r.complete, equipStatus: r.equip_status });
+		return {
+			id: r.id,
+			dealId: r.deal_id ?? null,
+			customer: String(r.customer ?? ""),
+			installed,
+			equipment: r.equipment ?? null,
+			machines: specsFromInstall(r.equipment, r.serial, r.power_voltage, r.machines, catalog),
+			status: projectStatus({ installed, equipStatus: r.equip_status, overall: summaries.get(r.id)?.overall ?? null })
+		};
+	});
+}
+/** Says, for each machine on the deal, which board project holds it now, and lists the projects a new one can join. */
+function attachBoard(deal: any, projects: any[]) {
+	const placed = placeRows(deal.machines, projects, { id: deal.id, handedOff: deal.handedOff });
+	deal.machines = deal.machines.map((m: any, i: number) => ({ ...m, boardId: placed[i] }));
+	const mine = projects.filter((p) => p.dealId === deal.id);
+	const loose = continuable({ id: deal.id, customer: deal.customer }, projects).filter((p) => p.dealId == null);
+	deal.projects = [...mine, ...loose].map((p) => ({
+		id: p.id,
+		label: p.dealId === deal.id ? projectLabel(mine.indexOf(p) + 1, mine.length) : "Open install on this account",
+		status: p.status,
+		machineCount: p.machines.length,
+		equipment: p.equipment,
+		open: !p.installed,
+		ownDeal: p.dealId === deal.id
+	}));
+	return deal;
+}
+/**
+ * Confirm machines on a deal: each one becomes a row on a board project (an install card) for prep, with
+ * everything set on the deal: Sold or Loaned, serial, volts, plug, water, recipe, coffee. "continue" adds to an
+ * open project so it stays one card; "new" opens another card. The deal rows are saved as the window has them.
+ */
+export const confirmDealMachines = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number; machines: MachineSpec[]; indexes: number[]; project: { mode: "new" } | { mode: "continue"; installId: number } }) => d).handler(async ({ data, context }: any) => {
+	const sql = await ready();
+	const deal = (await sql`select * from deals where id = ${data.dealId} and archived = false`)[0];
+	if (!deal) throw new Error("Deal not found");
+	if (deal.completion === "fell") throw new Error("This deal fell through. Set it back to open before confirming a machine.");
+	const catalog = await loadEquipCatalog(sql);
+	const rows = (Array.isArray(data.machines) ? data.machines : []).map((m: any) => cleanMachine({
+		...m,
+		equipment: String(m?.equipment ?? ""),
+		serial: String(m?.serial ?? ""),
+		powerVoltage: String(m?.powerVoltage ?? "")
+	}));
+	const projects = await loadBoardProjects(sql, catalog);
+	const placed = placeRows(rows, projects, { id: deal.id, handedOff: !!deal.handed_off });
+	const picks = [...new Set((Array.isArray(data.indexes) ? data.indexes : []).map(Number))].filter((i) => Number.isInteger(i) && rows[i]);
+	if (!picks.length) throw new Error("Pick a machine to confirm.");
+	for (const i of picks) {
+		const problem = confirmError(rows[i]);
+		if (problem) throw new Error(problem);
+		if (placed[i] != null) throw new Error(`${rows[i].equipment} is already on the Board.`);
+	}
+	const today = todayChicago();
+	const stamped = picks.map((i) => ({ i, uid: newMachineUid() }));
+	// The Board keeps models under their catalog name, so the deal row and the board row are saved the same way.
+	for (const i of picks) rows[i] = { ...rows[i], equipment: matchModel(rows[i].equipment, catalog) };
+	const incoming = stamped.map(({ i, uid }) => boardRow(rows[i], uid));
+	const continuing = data.project?.mode === "continue";
+	let installId: number;
+	if (continuing) {
+		const target = continuable({ id: deal.id, customer: deal.customer }, projects).find((p) => p.id === Number(data.project.installId));
+		if (!target) throw new Error("That project is no longer open on the Board. Start a new project, or pick another.");
+		const packed = serializeMachines([...target.machines, ...incoming]);
+		await sql`
+      update installs set
+        equipment = ${packed.equipment},
+        machines = ${packed.machines},
+        serial = ${packed.serial},
+        power_voltage = ${packed.powerVoltage},
+        deal_id = coalesce(deal_id, ${deal.id}),
+        updated_at = now()
+      where id = ${target.id}`;
+		installId = target.id;
+		await syncInstallUnits(sql, installId, { prune: true });
+	} else {
+		const packed = serializeMachines(incoming);
+		const made = await sql`
+      insert into installs (received, customer, equipment, equip_status, account_rep, payment_status, deal_id, machines, serial, power_voltage)
+      values (
+        ${today},
+        ${deal.customer},
+        ${packed.equipment},
+        ${"Not Ready"},
+        ${canonicalRepName(String(deal.producer ?? "")) ?? null},
+        ${deal.terms ?? null},
+        ${deal.id},
+        ${packed.machines},
+        ${packed.serial},
+        ${packed.powerVoltage}
+      )
+      returning id`;
+		installId = made[0].id;
+		await syncInstallUnits(sql, installId);
+	}
+	for (const { i, uid } of stamped) rows[i] = { ...rows[i], uid, confirmedAt: today };
+	const packedDeal = serializeMachines(rows);
+	await sql`update deals set machines = ${packedDeal.machines}, equipment = ${packedDeal.equipment}, updated_at = now() where id = ${deal.id}`;
+	const names = incoming.map((m) => `${m.equipment} (${m.ownership})`).join(", ");
+	await logActivity(sql, context.userId, "deal", deal.id, "updated", `confirmed ${names}: on the Board`);
+	await logActivity(sql, context.userId, "install", installId, continuing ? "updated" : "opened", continuing ? `added ${names} from the deal` : `${deal.customer} · ${names} from the deal`);
+	const marks = await loadAccountMarks(sql);
+	return {
+		installId,
+		deal: attachBoard(mapDeal((await sql`select * from deals where id = ${deal.id}`)[0], marks), await loadBoardProjects(sql, catalog))
+	};
+});
 export const listDeals = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Deal[]> => {
 	const sql = await ready();
 	const marks = await loadAccountMarks(sql);
-	return (await sql`select * from deals where archived = false order by id`).map((r) => mapDeal(r, marks));
+	const projects = await loadBoardProjects(sql, await loadEquipCatalog(sql));
+	return (await sql`select * from deals where archived = false order by id`).map((r) => attachBoard(mapDeal(r, marks), projects));
 });
 export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; machines?: MachineSpec[] | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
@@ -1083,7 +1204,7 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 	// The machine rows are the equipment list: equipment is kept as the joined models so lists and search still read it.
 	let machinesJson = c.machines ?? null;
 	if (data.machines !== undefined) {
-		const packed = serializeMachines(Array.isArray(data.machines) ? data.machines : []);
+		const packed = serializeMachines(keepTies(Array.isArray(data.machines) ? data.machines : [], parseMachinesJson(c.machines ?? null)));
 		machinesJson = packed.machines;
 		data.equipment = packed.equipment;
 	}
@@ -1118,19 +1239,21 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 		accountRep: data.producer === undefined ? undefined : producer
 	});
 	const marks = await loadAccountMarks(sql);
-	return mapDeal((await sql`select * from deals where id = ${data.id}`)[0], marks);
+	return attachBoard(mapDeal((await sql`select * from deals where id = ${data.id}`)[0], marks), await loadBoardProjects(sql, await loadEquipCatalog(sql)));
 });
-export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; producer?: string; equipment?: string; amount?: number }) => d).handler(async ({ data, context }: any) => {
+export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; producer?: string; equipment?: string; machines?: MachineSpec[]; amount?: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const producer = canonicalRepName(data.producer);
+	// One row per machine, each marked Sold or Loaned; equipment stays the joined models so lists and search read it.
+	const packed = Array.isArray(data.machines) && data.machines.length ? serializeMachines(data.machines.map((m: any) => cleanMachine({ ...m, equipment: String(m?.equipment ?? ""), serial: String(m?.serial ?? ""), powerVoltage: String(m?.powerVoltage ?? "") }))) : null;
 	const rows = await sql`
-      insert into deals (customer, producer, equipment, amount, date_of_deal)
-      values (${data.customer}, ${producer}, ${data.equipment ?? null}, ${data.amount ?? null}, ${todayChicago()})
+      insert into deals (customer, producer, equipment, machines, amount, date_of_deal)
+      values (${data.customer}, ${producer}, ${packed?.equipment ?? data.equipment ?? null}, ${packed?.machines ?? null}, ${data.amount ?? null}, ${todayChicago()})
       returning *`;
 	await logActivity(sql, context.userId, "deal", rows[0].id, "opened", data.customer);
 	if (producer) await upsertAccountMarks(sql, data.customer, { accountRep: producer });
 	const marks = await loadAccountMarks(sql);
-	return mapDeal(rows[0], marks);
+	return attachBoard(mapDeal(rows[0], marks), await loadBoardProjects(sql, await loadEquipCatalog(sql)));
 });
 export const archiveDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
@@ -1173,7 +1296,10 @@ async function maybeHandoffInstall(sql: any, dealId: any) {
 	}
 	const initials = canonicalRepName(String(deal.producer ?? "")) ?? null;
 	// Every machine row on the deal goes to the install, so pre-inspection gets each unit with its serial and voltage.
-	const packed = serializeMachines(parseMachinesJson(deal.machines ?? null));
+	const today = todayChicago();
+	const tied = parseMachinesJson(deal.machines ?? null).map((m) => ({ ...m, uid: m.uid || newMachineUid(), confirmedAt: m.confirmedAt ?? today }));
+	const packed = serializeMachines(tied.map((m) => boardRow(m, m.uid)));
+	if (tied.length) await sql`update deals set machines = ${serializeMachines(tied).machines} where id = ${dealId}`;
 	await sql`
     insert into installs (received, customer, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage)
     values (
@@ -1194,7 +1320,13 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 	const week = weekBounds(today);
 	const catalog = await loadEquipCatalog(sql);
 	const marks = await loadAccountMarks(sql);
-	return withInspections(sql, applyMarks((await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog)), marks));
+	const installs = (await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog));
+	for (const i of installs) {
+		if (i.dealId == null) continue;
+		const same = installs.filter((x) => x.dealId === i.dealId);
+		i.project = { n: same.indexOf(i) + 1, of: same.length };
+	}
+	return withInspections(sql, applyMarks(installs, marks));
 });
 export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
@@ -2043,7 +2175,10 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		jobs: applyMarks(attachJobSiblings(jobs.map((r) => mapJob(r, today))).filter((j) => !j.duplicateOf), marks),
 		pms: applyMarks(pms.map((r) => mapPm(r, today)), marks),
 		installs: await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks)),
-		deals: deals.map((r) => mapDeal(r, marks)),
+		deals: await (async () => {
+			const projects = await loadBoardProjects(sql, catalog);
+			return deals.map((r) => attachBoard(mapDeal(r, marks), projects));
+		})(),
 		recipes: recipes.map(mapRecipe)
 	};
 });

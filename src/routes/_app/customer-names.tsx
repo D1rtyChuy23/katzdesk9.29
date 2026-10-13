@@ -21,13 +21,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FilterChip } from "@/components/desk/desk-charts";
+import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { formatPingTime } from "@/lib/ops/clock";
 
 export const Route = createFileRoute("/_app/customer-names")({ component: Page });
 
 /** Shown on the page so it is clear whether the live site has the latest Clean Names. */
-const CLEAN_NAMES_VERSION = "Oct 12 (3) · No Account Number = Flag For Review";
+const CLEAN_NAMES_VERSION = "Oct 12 (4) · Search and sections in one row";
 
 const SECTIONS: { id: CleanSection; label: string; hint: string }[] = [
   { id: "locked", label: "Approved And Locked", hint: "Exact matches applied from the clean list, and names you approved. Locked: Corrigo import and typing over the name do not change them. Unlock here to change one." },
@@ -160,7 +161,7 @@ function Page() {
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline">
             <Link to="/customers">Customers</Link>
           </Button>
           {data?.canEdit ? (
@@ -229,27 +230,25 @@ function Page() {
               ) : null}
             </div>
           ) : null}
-          <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Report sections" data-testid="clean-sections">
-            {SECTIONS.map((s) => (
-              <FilterChip key={s.id} selected={section === s.id} onClick={() => setSection(s.id)} data-testid={`clean-section-${s.id}`}>
-                {s.label} {counts[s.id].all}
-                {counts[s.id].waiting && s.id !== "locked" ? <span className="ml-1 opacity-70">· {counts[s.id].waiting} waiting</span> : null}
-              </FilterChip>
-            ))}
-          </div>
-          <p className="mt-3 max-w-3xl text-sm text-muted-foreground">{current.hint}</p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <div className="relative w-full sm:w-72">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search either name…" className="pl-9" aria-label="Search the report" />
+          <ListToolbar data-testid="clean-toolbar">
+            <ToolbarSearch value={q} onChange={setQ} placeholder="Search either name…" label="Search the report" />
+            {/* The sections sit in the same row as the search; the wrapper only groups them for screen readers. */}
+            <div className="contents" role="group" aria-label="Report sections" data-testid="clean-sections">
+              {SECTIONS.map((s) => (
+                <FilterChip key={s.id} selected={section === s.id} onClick={() => setSection(s.id)} data-testid={`clean-section-${s.id}`}>
+                  {s.label} {counts[s.id].all}
+                  {counts[s.id].waiting && s.id !== "locked" ? <span className="ml-1 opacity-70">· {counts[s.id].waiting} waiting</span> : null}
+                </FilterChip>
+              ))}
             </div>
             {section !== "locked" ? (
-              <FilterChip selected={waitingOnly} onClick={() => setWaitingOnly(!waitingOnly)}>
-                Waiting only
+              <FilterChip selected={waitingOnly} onClick={() => setWaitingOnly(!waitingOnly)} data-testid="clean-waiting-only">
+                Waiting Only
               </FilterChip>
             ) : null}
-            <span className="text-xs text-muted-foreground">{rows.length} shown</span>
-          </div>
+            <ToolbarNote>{rows.length} shown</ToolbarNote>
+          </ListToolbar>
+          <p className="mt-3 max-w-3xl text-sm text-muted-foreground">{current.hint}</p>
           <ul className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid="clean-rows">
             {paged.visible.map((it) => (
               <ReportRow

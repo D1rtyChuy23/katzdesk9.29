@@ -8,13 +8,15 @@ import { addDirectoryEntry, archiveDirectoryEntry, listCustomerRecords, renameCu
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
+import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { SORT_ACCOUNT_NUMBER, SORT_ALPHA, sortDesk } from "@/lib/ops/sort";
 import { AccountNumberImportButton } from "@/components/desk/account-number-import";
 import { CustomerHistorySheet } from "@/components/desk/customer-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { AccountEquipImportButton } from "@/components/desk/account-equip-import";
+import { ImportMenu } from "@/components/desk/desk-charts";
 import { toast } from "sonner";
-import { ChevronRight, Lock, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronRight, Lock, Pencil, Plus, Trash2 } from "lucide-react";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { RepName } from "@/components/desk/rep-select";
 import { useMyView } from "@/components/desk/my-view-bar";
@@ -141,31 +143,25 @@ function Page() {
               : " Ask an admin if a name is missing."}
           </p>
         </div>
-        <div className="flex flex-wrap items-start gap-2">
-        {isAdminOrRole ? <AccountNumberImportButton /> : null}
-        <AccountEquipImportButton
-          onImported={(name) => {
-            if (!name) return;
-            const row = (list.data ?? []).find((c) => c.name.toLowerCase() === name.toLowerCase());
-            if (row) openCustomer(row.id);
-          }}
-        />
+        <div className="flex shrink-0 flex-wrap items-start gap-2">
+          {/* One Import control: a list when there is more than one import, the single button otherwise. */}
+          <ImportMenu>
+            {isAdminOrRole ? <AccountNumberImportButton /> : null}
+            <AccountEquipImportButton
+              onImported={(name) => {
+                if (!name) return;
+                const row = (list.data ?? []).find((c) => c.name.toLowerCase() === name.toLowerCase());
+                if (row) openCustomer(row.id);
+              }}
+            />
+          </ImportMenu>
         </div>
       </header>
 
-      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <div className="relative w-56 shrink-0">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search customers…"
-            className="h-9 pl-9"
-            aria-label="Search customers"
-          />
-        </div>
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search customers…" />
         <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_ACCOUNT_NUMBER]} className="shrink-0" />
-      </div>
+      </ListToolbar>
 
       {canAdd ? (
         <form onSubmit={onAdd} className="mt-4 flex flex-col gap-2 sm:flex-row">

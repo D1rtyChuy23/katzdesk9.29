@@ -93,6 +93,19 @@ export type ModuleRow = {
   returnByName: string | null;
 };
 
+/** A board card (one install row) a deal's machines sit on, or an open card on the same account they could join. */
+export type DealProject = {
+  id: number;
+  /** "Project", "Project 2 of 3", or "Open install on this account" for a card no deal owns yet. */
+  label: string;
+  status: "In Prep" | "Ready" | "Installed";
+  machineCount: number;
+  equipment: string | null;
+  /** Still in prep or ready: a newly confirmed machine can continue under it. */
+  open: boolean;
+  ownDeal: boolean;
+};
+
 export type Deal = {
   id: number;
   customer: string;
@@ -100,8 +113,10 @@ export type Deal = {
   accountType: string | null;
   dateOfDeal: string | null;
   equipment: string | null;
-  /** Every machine on the deal (model, serial, voltage). Empty on older deals: read equipment instead. */
+  /** Every machine on the deal (model, serial, voltage, Sold or Loaned, configuration). Empty on older deals: read equipment instead. */
   machines: MachineSpec[];
+  /** The board projects this deal's confirmed machines are on, plus open cards on the account a machine could join. */
+  projects: DealProject[];
   /** The customer's Account Number, when it has one. */
   accountNumber?: string | null;
   amount: number | null;
@@ -142,10 +157,12 @@ export type Install = {
   paymentStatus: string | null;
   serial: string | null;
   powerVoltage: string | null;
-  machines: { equipment: string; serial: string; powerVoltage: string; recipeId?: number | null }[];
+  machines: MachineSpec[];
   serialNotice: string | null;
   complete: boolean;
   dealId: number | null;
+  /** Set when the card came from a deal: which of that deal's board projects this is. */
+  project?: { n: number; of: number } | null;
   duplicateOf: number | null;
   updatedAt: string;
   flag: ClockFlag | null;

@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { toast } from "sonner";
 import { TechFilter } from "./tech-select";
 import { OwnerFilter } from "./owner-select";
+import { ActionButton } from "./desk-charts";
 
 const PREFS_KEY = "katz-desk-export";
 
@@ -53,7 +54,7 @@ function statusesFor(type: ReportType): string[] {
   return [...CALL_STATUSES];
 }
 
-function downloadBase64(filename: string, mime: string, base64: string) {
+export function downloadBase64(filename: string, mime: string, base64: string) {
   const bin = atob(base64);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -131,10 +132,9 @@ export function ExportButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button type="button" variant="outline" onClick={() => setOpen(true)}>
-        <Download className="size-4" />
+      <ActionButton icon={Download} onClick={() => setOpen(true)} data-testid="export-open">
         {label ?? "Export"}
-      </Button>
+      </ActionButton>
       <ExportDialog open={open} onOpenChange={setOpen} defaultType={defaultType} />
     </>
   );

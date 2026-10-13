@@ -7,6 +7,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
+import { cleanMpn, cleanSourceUrl, mpnKey, sameMpn, tieError } from "@/lib/ops/mpn-rules";
+import { cleanLegacyNote, legacyMoveError } from "@/lib/ops/legacy-rules";
 import { CHUNK_BYTES, copiesToVariations, customFileName, fileError, mainChipFor, type HiddenCopy, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
@@ -20,6 +22,10 @@ export type LibraryFile = {
   bookId: number | null;
   /** Manual type ("Cleaning Manual" …); null for spec sheets and files stored before types. */
   docType: string | null;
+  /** Set when this is the manufacturer's official file for one MPN. Such a file stays on its own variation. */
+  mpn: string | null;
+  /** The manufacturer page or file the official file came from. */
+  sourceUrl: string | null;
   /** Pages of readable text kept for Troubleshoot: null = not read yet, 0 = no readable text. */
   textPages: number | null;
   addedBy: string;
@@ -50,7 +56,47 @@ function newToken(): string {
 }
 const section = z.enum(["spec", "manuals", "parts"]);
 
-export type LibraryBook = { id: number; title: string; manufacturer: string };
+export type LibraryBook = {
+  id: number;
+  title: string;
+  manufacturer: string;
+  /** The manufacturer part number official files are matched on. Null until someone confirms it. */
+  mpn: string | null;
+  /** Someone looked and the manufacturer has no file for this exact MPN. */
+  noOfficialFile: boolean;
+  /** The manufacturer lists this model as discontinued or obsolete: it sits under Legacy, and still opens. */
+  legacy: boolean;
+  /** The manufacturer page that says so. Always set on a Legacy model. */
+  legacySource: string | null;
+  /** What was found, for a Legacy model or a Confirm Legacy flag. */
+  legacyNote: string | null;
+  /** Could not be confirmed as discontinued: stays in the main row, flagged for someone to confirm. */
+  confirmLegacy: boolean;
+};
+
+type BookRow = {
+  id: number;
+  title: string;
+  manufacturer: string | null;
+  mpn: string | null;
+  no_official_file: boolean;
+  legacy: boolean;
+  legacy_source: string | null;
+  legacy_note: string | null;
+  confirm_legacy: boolean;
+};
+const BOOK_COLS = "id, title, manufacturer, mpn, no_official_file, legacy, legacy_source, legacy_note, confirm_legacy";
+const toBook = (b: BookRow): LibraryBook => ({
+  id: Number(b.id),
+  title: b.title,
+  manufacturer: b.manufacturer ?? "",
+  mpn: b.mpn ?? null,
+  noOfficialFile: !!b.no_official_file,
+  legacy: !!b.legacy,
+  legacySource: b.legacy_source ?? null,
+  legacyNote: b.legacy_note ?? null,
+  confirmLegacy: !!b.confirm_legacy,
+});
 
 /**
  * Every spec sheet belongs to a book. Sheets saved before books existed (or just imported) are
@@ -59,11 +105,7 @@ export type LibraryBook = { id: number; title: string; manufacturer: string };
  */
 async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
   const load = async () =>
-    (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books order by lower(title)")).map((b) => ({
-      id: Number(b.id),
-      title: b.title,
-      manufacturer: b.manufacturer ?? "",
-    }));
+    (await sql.query<BookRow>(`select ${BOOK_COLS} from library_books order by lower(title)`)).map(toBook);
   let books = await load();
   // Books made before makers were recorded: take the maker from the spec sheets, else the title.
   if (books.some((b) => !b.manufacturer)) {
@@ -142,7 +184,7 @@ async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
     if (book) await sql.query("update spec_sheets set book_id = $2 where id = $1 and book_id is null", [sheet.id, book.id]);
   }
   const files = await sql.query<{ id: number; name: string; section: LibrarySection }>(
-    "select id, name, section from library_files where book_id is null and complete order by id",
+    "select id, name, section from library_files where book_id is null and complete and section <> 'training' order by id",
   );
   for (const f of files) {
     const book = matchBook(f.name, books);
@@ -164,8 +206,8 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
     const role = await roleOf(sql, context.userId);
     const books = await ensureBooks(sql);
     const rows = await sql.query<{
-      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; doc_type: string | null; text_pages: number | null; added_by_name: string | null; created_at: string | Date;
-    }>("select id, section, name, mime, size, token, book_id, doc_type, text_pages, added_by_name, created_at from library_files where complete order by lower(name), id");
+      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; doc_type: string | null; text_pages: number | null; added_by_name: string | null; created_at: string | Date; mpn: string | null; source_url: string | null;
+    }>("select id, section, name, mime, size, token, book_id, doc_type, text_pages, added_by_name, created_at, mpn, source_url from library_files where complete and section <> 'training' order by lower(name), id");
     const files = rows.map((r) => ({
       id: Number(r.id),
       section: r.section,
@@ -175,6 +217,8 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
       token: r.token,
       bookId: r.book_id == null ? null : Number(r.book_id),
       docType: r.doc_type ?? null,
+      mpn: r.mpn ?? null,
+      sourceUrl: r.source_url ?? null,
       textPages: r.text_pages == null ? null : Number(r.text_pages),
       addedBy: r.added_by_name || "Teammate",
       createdAt: new Date(r.created_at).toISOString(),
@@ -208,8 +252,9 @@ export const createLibraryBook = createServerFn({ method: "POST" })
     await requireEditor(sql, context.userId);
     const title = titleOf(data.manufacturer, data.model);
     await sql.query("insert into library_books (title, manufacturer, created_by, per_variation) values ($1, $2, $3, true) on conflict (lower(title)) do nothing", [title, tidy(data.manufacturer), context.userId]);
-    const rows = await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books where lower(title) = lower($1)", [title]);
-    return { id: Number(rows[0]!.id), title: rows[0]!.title, manufacturer: rows[0]!.manufacturer ?? tidy(data.manufacturer) };
+    const rows = await sql.query<BookRow>(`select ${BOOK_COLS} from library_books where lower(title) = lower($1)`, [title]);
+    const made = toBook(rows[0]!);
+    return { ...made, manufacturer: made.manufacturer || tidy(data.manufacturer) };
   });
 
 export const renameLibraryBook = createServerFn({ method: "POST" })
@@ -289,11 +334,12 @@ export const moveLibraryFile = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true; name: string }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null; doc_type: string | null }>(
-      "select section, name, original_name, doc_type from library_files where id = $1",
+    const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null; doc_type: string | null; mpn: string | null }>(
+      "select section, name, original_name, doc_type, mpn from library_files where id = $1 and section <> 'training'",
       [data.id],
     );
     if (!file[0]) throw new Error("That file no longer exists.");
+    if ((file[0].mpn ?? "").trim()) throw new Error(`This is the official file for MPN ${file[0].mpn}. Untie it from the MPN before moving it.`);
     // A parts file keeps its name wherever it goes; manuals and spec sheets are named for the model they land on.
     const name = file[0].section === "parts" ? file[0].name : await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id, file[0].doc_type);
     await sql.query("update library_files set book_id = $2, name = $3, original_name = coalesce(original_name, $4) where id = $1", [data.id, data.bookId, name, file[0].name]);
@@ -308,7 +354,7 @@ export const setLibraryFileType = createServerFn({ method: "POST" })
     const sql = await ready();
     await requireEditor(sql, context.userId);
     const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null; book_id: number | null }>(
-      "select section, name, original_name, book_id from library_files where id = $1",
+      "select section, name, original_name, book_id from library_files where id = $1 and section <> 'training'",
       [data.id],
     );
     if (!file[0]) throw new Error("That file no longer exists.");
@@ -347,8 +393,9 @@ export const setManualCopy = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const file = await sql.query<{ section: LibrarySection; book_id: number | null }>("select section, book_id from library_files where id = $1 and complete", [data.fileId]);
+    const file = await sql.query<{ section: LibrarySection; book_id: number | null; mpn: string | null }>("select section, book_id, mpn from library_files where id = $1 and complete", [data.fileId]);
     if (!file[0]) throw new Error("That file no longer exists.");
+    if ((file[0].mpn ?? "").trim()) throw new Error("A file tied to one MPN is not copied to other variations.");
     const books = (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books")).map((b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "" }));
     const book = books.find((b) => b.id === data.bookId);
     if (!book) throw new Error("That model is no longer in The Library.");
@@ -358,6 +405,163 @@ export const setManualCopy = createServerFn({ method: "POST" })
     }
     if (data.show) await sql.query("delete from library_file_hidden where file_id = $1 and book_id = $2", [data.fileId, data.bookId]);
     else await sql.query("insert into library_file_hidden (file_id, book_id, hidden_by) values ($1, $2, $3) on conflict (file_id, book_id) do nothing", [data.fileId, data.bookId, context.userId]);
+    return { ok: true };
+  });
+
+/**
+ * Set or clear the MPN a variation's official files are matched on. Two variations cannot share one. An MPN that
+ * has official files tied to it is not changed here: untie those files first, so no file ends up tied to a number
+ * it was not matched to.
+ */
+export const setBookMpn = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { bookId: number; mpn: string | null }) => z.object({ bookId: z.number().int().positive(), mpn: z.string().max(60).nullable() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ mpn: string | null }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const mpn = cleanMpn(data.mpn);
+    const book = (await sql.query<{ mpn: string | null }>("select mpn from library_books where id = $1", [data.bookId]))[0];
+    if (!book) throw new Error("That model is no longer in The Library.");
+    if ((book.mpn ?? "") === (mpn ?? "")) return { mpn };
+    if (mpn) {
+      const clash = await sql.query<{ title: string }>(
+        "select title from library_books where id <> $1 and mpn is not null and upper(regexp_replace(mpn, '[^A-Za-z0-9]+', '', 'g')) = $2 limit 1",
+        [data.bookId, mpnKey(mpn)],
+      );
+      if (clash[0]) throw new Error(`MPN ${mpn} is already on ${clash[0].title}.`);
+    }
+    if (!sameMpn(book.mpn, mpn)) {
+      const tied = await sql.query("select 1 from library_files where book_id = $1 and mpn is not null limit 1", [data.bookId]);
+      if (tied.length) throw new Error("Files here are tied to the current MPN. Untie them before changing it.");
+    }
+    try {
+      await sql.query("update library_books set mpn = $2, no_official_file = case when $2::text is null then false else no_official_file end where id = $1", [data.bookId, mpn]);
+    } catch (e) {
+      if (/unique|duplicate/i.test(String(e))) throw new Error(`MPN ${mpn} is already on another model.`);
+      throw e;
+    }
+    return { mpn };
+  });
+
+/** Mark that the manufacturer has no official file for this exact MPN (or clear the mark). */
+export const setNoOfficialFile = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { bookId: number; value: boolean }) => z.object({ bookId: z.number().int().positive(), value: z.boolean() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const book = (await sql.query<{ mpn: string | null }>("select mpn from library_books where id = $1", [data.bookId]))[0];
+    if (!book) throw new Error("That model is no longer in The Library.");
+    if (data.value && !mpnKey(book.mpn)) throw new Error("Set this variation's MPN first. The flag is about one exact MPN.");
+    await sql.query("update library_books set no_official_file = $2 where id = $1", [data.bookId, data.value]);
+    return { ok: true };
+  });
+
+/**
+ * Record a stored file as the manufacturer's official file for its variation's MPN, with where it came from.
+ * The file has to be stored on that variation already, and cannot be tied to a different MPN. Tying a spec sheet
+ * clears a "no official file" mark made earlier.
+ */
+export const tieOfficialFile = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { fileId: number; bookId: number; sourceUrl: string }) =>
+    z.object({ fileId: z.number().int().positive(), bookId: z.number().int().positive(), sourceUrl: z.string().max(1000) }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<{ mpn: string; sourceUrl: string }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const file = (await sql.query<{ book_id: number | null; mpn: string | null; section: LibrarySection }>(
+      "select book_id, mpn, section from library_files where id = $1 and complete",
+      [data.fileId],
+    ))[0];
+    if (!file) throw new Error("That file no longer exists.");
+    const book = (await sql.query<{ mpn: string | null }>("select mpn from library_books where id = $1", [data.bookId]))[0];
+    if (!book) throw new Error("That model is no longer in The Library.");
+    const problem = tieError({
+      bookMpn: book.mpn,
+      fileBookId: file.book_id == null ? null : Number(file.book_id),
+      bookId: data.bookId,
+      fileMpn: file.mpn,
+      sourceUrl: data.sourceUrl,
+    });
+    if (problem) throw new Error(problem);
+    const url = cleanSourceUrl(data.sourceUrl);
+    await sql.query("update library_files set mpn = $2, source_url = $3 where id = $1", [data.fileId, book.mpn, url]);
+    if (file.section === "spec") await sql.query("update library_books set no_official_file = false where id = $1", [data.bookId]);
+    return { mpn: book.mpn!, sourceUrl: url };
+  });
+
+/** Remove the MPN tie from a file. The file stays where it is. */
+export const untieOfficialFile = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { fileId: number }) => z.object({ fileId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    await sql.query("update library_files set mpn = null, source_url = null where id = $1", [data.fileId]);
+    return { ok: true };
+  });
+
+/**
+ * Move a model under Legacy for its manufacturer, or back to the main row. Moving it there needs the manufacturer
+ * page that lists it as discontinued or obsolete. The model keeps its spec sheet, manuals and parts, still opens,
+ * and nothing is deleted or renamed.
+ */
+export const setBookLegacy = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { bookId: number; legacy: boolean; sourceUrl?: string | null; note?: string | null }) =>
+    z
+      .object({
+        bookId: z.number().int().positive(),
+        legacy: z.boolean(),
+        sourceUrl: z.string().max(1000).nullable().optional(),
+        note: z.string().max(2000).nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<{ legacy: boolean }> => {
+    const sql = await ready();
+    const role = await requireEditor(sql, context.userId);
+    const book = (await sql.query<{ id: number }>("select id from library_books where id = $1", [data.bookId]))[0];
+    if (!book) throw new Error("That model is no longer in The Library.");
+    if (data.legacy) {
+      const problem = legacyMoveError({ sourceUrl: data.sourceUrl });
+      if (problem) throw new Error(problem);
+      await sql.query(
+        `update library_books
+            set legacy = true, legacy_source = $2, legacy_note = $3, legacy_by = $4, legacy_at = now(), confirm_legacy = false
+          where id = $1`,
+        [data.bookId, cleanSourceUrl(data.sourceUrl), cleanLegacyNote(data.note), role.name],
+      );
+    } else {
+      await sql.query(
+        "update library_books set legacy = false, legacy_source = null, legacy_note = null, legacy_by = null, legacy_at = null where id = $1",
+        [data.bookId],
+      );
+    }
+    return { legacy: data.legacy };
+  });
+
+/**
+ * Flag a model Confirm Legacy (it could not be confirmed as discontinued), or clear the flag. The model stays in
+ * the main row either way. A model already under Legacy needs no flag.
+ */
+export const setConfirmLegacy = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { bookId: number; value: boolean; note?: string | null }) =>
+    z.object({ bookId: z.number().int().positive(), value: z.boolean(), note: z.string().max(2000).nullable().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sql = await ready();
+    await requireEditor(sql, context.userId);
+    const book = (await sql.query<{ legacy: boolean }>("select legacy from library_books where id = $1", [data.bookId]))[0];
+    if (!book) throw new Error("That model is no longer in The Library.");
+    if (book.legacy) throw new Error("This model is already under Legacy.");
+    await sql.query("update library_books set confirm_legacy = $2, legacy_note = $3 where id = $1", [
+      data.bookId,
+      data.value,
+      data.value ? cleanLegacyNote(data.note) : null,
+    ]);
     return { ok: true };
   });
 

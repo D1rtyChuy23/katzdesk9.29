@@ -1,21 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listJobs } from "@/lib/ops/api";
+import { getMyAccess } from "@/lib/ops/access";
+import { BillingExportButton, ItemListImportButton } from "./billing-tools";
 import { URGENCIES, URGENCY_RANK } from "@/lib/ops/lookups";
 import { isClosedCall, isOpenCall } from "@/lib/ops/ticket-status";
 import { formatShortDate } from "@/lib/ops/clock";
 import type { ServiceJob } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SelectField } from "@/components/ui/select-field";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { JobSheet, NewJobDialog } from "./job-sheet";
 import { CorrigoImportButton, CorrigoReviewList, type CorrigoReviewItem } from "./corrigo-import";
 import { SortSelect, useDeskSort } from "./sort-bar";
-import { ActionMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
+import { ActionMenu, ImportMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
 import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { Plus } from "lucide-react";
 import { ExportButton } from "./export-dialog";
+import { ListToolbar, ToolbarSearch, ToolbarSelect, TOOLBAR_SELECT } from "./list-toolbar";
 import { TechFilter, TechName } from "./tech-select";
 import { sameTech } from "@/lib/ops/tech-match";
 import { mineByTechnician } from "@/lib/ops/my-view";
@@ -39,6 +40,7 @@ export function JobsPage({
     queryFn: () => listJobs({ data: { kind } }),
   });
   const { filterMine, matchMine, role } = useMyView();
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const [q, setQ] = useState("");
 
   const [tech, setTech] = useState("");
@@ -105,9 +107,14 @@ export function JobsPage({
           <h1 className="font-display text-3xl font-medium tracking-tight">{title}</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">{lede}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <ActionMenu label="Import / Export">
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {/* Imports live on Tickets only. More than one: the Import list. One: its own button. */}
+          <ImportMenu>
             {kind === "service" ? <CorrigoImportButton onImported={setReview} /> : null}
+            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ItemListImportButton /> : null}
+          </ImportMenu>
+          <ActionMenu label="Export">
+            <BillingExportButton />
             <ExportButton defaultType={kind === "tlc" ? "tlc" : "pending"} />
           </ActionMenu>
           <Button onClick={() => setCreate(true)}>
@@ -156,34 +163,21 @@ export function JobsPage({
         />
       ) : null}
 
-      <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-toolbar">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search tickets…"
-          className="h-9 w-56 shrink-0"
-          aria-label="Search tickets"
-        />
+      <ListToolbar>
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search tickets…" />
         <TechFilter
           value={tech}
           onChange={setTech}
           extraNames={(jobs.data ?? []).map((j) => j.technician)}
-          className="h-9 w-40 shrink-0"
+          className={`${TOOLBAR_SELECT} w-40`}
         />
-        <SelectField
-          value={urgency}
-          onChange={(e) => setUrgency(e.target.value)}
-          allowEmpty
-          emptyLabel="All urgency"
-          aria-label="Filter by urgency"
-          className="h-9 w-40 shrink-0"
-        >
+        <ToolbarSelect value={urgency} onChange={(e) => setUrgency(e.target.value)} allowEmpty emptyLabel="All urgency" aria-label="Filter by urgency" className="w-40">
           {URGENCIES.map((u) => (
             <option key={u}>{u}</option>
           ))}
-        </SelectField>
+        </ToolbarSelect>
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
-      </div>
+      </ListToolbar>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
         <div className="min-w-0">

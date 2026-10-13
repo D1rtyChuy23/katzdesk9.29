@@ -16,6 +16,8 @@ import {
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { Thread } from "./thread";
+import { ChargesPanel } from "./charges-panel";
+import { RepairQuotePanel } from "./repair-quote-panel";
 import { CustomerCombo, EquipmentMultiCombo, LockedCustomer, useDirectory } from "./directory-fields";
 import { ProviderDispatchBlock } from "./provider-dispatch";
 import { listedEquipment } from "@/lib/ops/equipment";
@@ -245,6 +247,8 @@ export function JobSheet({
                   </Button>
                 </div>
               </form>
+              <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+              <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
               <JobPulledUnits jobId={j.id} />
               <Thread entityType={j.kind} entityId={j.id} />
             </SheetBody>
