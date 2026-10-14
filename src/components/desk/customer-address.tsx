@@ -7,46 +7,6 @@ import { cn } from "@/lib/utils";
 /** An account's saved map pin and how good it is (exact / close: the street was found; approx: ZIP area only). */
 export type PinTarget = { point: LatLng | null; quality: PinQuality | null };
 
-/** Short words in a street address that stay upper case: compass points and road types like FM 1960, IH 10 or US 59. */
-const KEEP_UPPER = new Set(["N", "S", "E", "W", "NE", "NW", "SE", "SW", "FM", "US", "SH", "SR", "IH", "TX", "CR", "RR", "PO"]);
-
-function addressWord(w: string): string {
-  // "FM" and "FM-1960" both stay as they are.
-  if (KEEP_UPPER.has(w) || KEEP_UPPER.has(w.split("-")[0]!)) return w;
-  // "WESTHEIMER" → "Westheimer", "HWY-6" → "Hwy-6", "1ST" → "1st", "MCKINNEY" → "McKinney".
-  return w
-    .toLowerCase()
-    .replace(/(^|[^a-z0-9'])([a-z])/g, (_, pre: string, c: string) => pre + c.toUpperCase())
-    .replace(/^Mc([a-z])/, (_, c: string) => `Mc${c.toUpperCase()}`);
-}
-
-/**
- * The geocoder's matched address the way people write it: "4444 WESTHEIMER RD, HOUSTON, TX, 77027" becomes
- * "4444 Westheimer Rd, Houston, TX 77027". An address that is already mixed case is left as it is.
- */
-function pinAddressLabel(raw: string | null | undefined): string | null {
-  const parts = String(raw ?? "")
-    .split(",")
-    .map((p) => p.replace(/\s+/g, " ").trim())
-    .filter(Boolean);
-  if (!parts.length) return null;
-  const joined = parts.join(", ");
-  if (joined !== joined.toUpperCase()) return joined;
-  // State and ZIP stay as they are: "TX, 77027" → "TX 77027"; a lone "TX" or "TX 77027" is kept too.
-  let tail: string | null = null;
-  const last = parts[parts.length - 1]!;
-  const state = parts[parts.length - 2];
-  if (parts.length >= 3 && /^\d{5}(-\d{4})?$/.test(last) && state && /^[A-Z]{2}$/.test(state)) {
-    tail = `${state} ${last}`;
-    parts.splice(-2, 2);
-  } else if (parts.length >= 2 && /^[A-Z]{2}( \d{5}(-\d{4})?)?$/.test(last)) {
-    tail = last;
-    parts.splice(-1, 1);
-  }
-  const head = parts.map((p) => p.split(" ").map(addressWord).join(" "));
-  return [...head, ...(tail ? [tail] : [])].join(", ");
-}
-
 /** True when the pin is a real street match, so directions go to the pin itself. */
 const drivable = (pin: PinTarget | null | undefined): boolean => !!pin && isPoint(pin.point) && canDriveTo(pin.quality);
 
@@ -105,8 +65,7 @@ function DirectionsPin({
 
 /**
  * The account's address under the customer on a ticket, PM, install or deal window, with a pin for directions.
- * Follows the customer as it is changed. When the account has no typed address but its map pin is a street match,
- * the address the geocoder matched is shown instead, marked as coming from the pin.
+ * Follows the customer as it is changed. Directions go to the saved map pin when it is a street match.
  */
 export function CustomerAddress({ customer, className }: { customer: string | null | undefined; className?: string }) {
   const name = (customer ?? "").trim();
@@ -119,38 +78,24 @@ export function CustomerAddress({ customer, className }: { customer: string | nu
   if (!name) return null;
   const location = q.data?.location ?? null;
   const pin: PinTarget | null = location ? { point: { lat: location.latitude, lng: location.longitude }, quality: location.match } : null;
-  const typed = q.data?.address?.trim() || null;
-  const fromPin = !typed && drivable(pin) ? pinAddressLabel(location?.matchedAddress) : null;
-  const shown = typed ?? fromPin;
+  const address = q.data?.address?.trim() || null;
   return (
     <div className={className ?? "mt-1.5"} data-testid="customer-address">
       {q.isLoading ? (
         <p className="text-xs text-muted-foreground">Looking up the address…</p>
-      ) : shown ? (
+      ) : address ? (
         <p className="flex items-start gap-1 text-sm text-muted-foreground">
-          <DirectionsPin pin={pin} address={shown} />
-          <span className="min-w-0">
-            <a
-              href={(fromPin ? placeUrl({ point: pin?.point, quality: pin?.quality }) : placeUrl({ address: shown })) ?? undefined}
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-primary hover:underline"
-              title="Open in Google Maps"
-              data-testid="customer-address-map"
-            >
-              {shown}
-            </a>
-            {fromPin ? (
-              <span className="ml-1 text-xs whitespace-nowrap text-muted-foreground" data-testid="customer-address-from-pin">
-                (from map pin)
-              </span>
-            ) : null}
-          </span>
-        </p>
-      ) : drivable(pin) ? (
-        <p className="flex items-center gap-1 text-xs text-muted-foreground" data-testid="customer-address-none">
-          <DirectionsPin pin={pin} />
-          No address typed on this account. Directions use the map pin.
+          <DirectionsPin pin={pin} address={address} />
+          <a
+            href={placeUrl({ address }) ?? undefined}
+            target="_blank"
+            rel="noreferrer"
+            className="min-w-0 hover:text-primary hover:underline"
+            title="Open in Google Maps"
+            data-testid="customer-address-map"
+          >
+            {address}
+          </a>
         </p>
       ) : (
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="customer-address-none">
@@ -199,8 +144,7 @@ export function useAccountAddresses() {
 
 /**
  * The address in small type under an account name on a list row, with the pin for directions (to the exact map pin
- * when it is a street match). With no typed address, the geocoder's matched address stands in when the pin is a
- * street match. Nothing when the account has neither an address nor a pin good enough to drive to.
+ * when it is a street match). Nothing when the account has no address saved.
  */
 export function AddressLine({ customer, className }: { customer: string | null | undefined; className?: string }) {
   const all = useAccountAddresses();
@@ -210,15 +154,13 @@ export function AddressLine({ customer, className }: { customer: string | null |
     point: entry.latitude != null && entry.longitude != null ? { lat: entry.latitude, lng: entry.longitude } : null,
     quality: entry.match,
   };
-  const typed = entry.address?.trim() || null;
-  const fromPin = !typed && drivable(pin) ? pinAddressLabel(entry.geocodeAddress) : null;
-  const text = typed ?? fromPin ?? (drivable(pin) ? "Map pin" : null);
-  if (!text) return null;
+  const address = entry.address?.trim() || null;
+  if (!address) return null;
   return (
     <span className={cn("flex min-w-0 items-start gap-0.5 text-xs text-muted-foreground", className)} data-testid="row-address">
-      <DirectionsPin pin={pin} address={typed ?? fromPin} size="sm" inRow />
-      <span className="min-w-0 break-words" title={typed ? text : fromPin ? `${text} (from map pin)` : "No address typed on this account. Directions use the map pin."}>
-        {text}
+      <DirectionsPin pin={pin} address={address} size="sm" inRow />
+      <span className="min-w-0 break-words" title={address}>
+        {address}
       </span>
     </span>
   );

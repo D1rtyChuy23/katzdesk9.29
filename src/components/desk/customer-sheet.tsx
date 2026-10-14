@@ -372,9 +372,6 @@ export function CustomerHistorySheet({
                   <div className="mt-4">
                     <ProviderDispatchBlock customer={data.name} assignable />
                   </div>
-                  <div className="mt-4">
-                    <NearbyAccounts accountId={data.id} name={data.name} />
-                  </div>
                   {/* Recipes are not a tab of their own: the account has the five tabs, and its recipes sit under Details. */}
                   <div className="mt-4" data-testid="account-recipes">
                   <CustomerRecipes
@@ -384,6 +381,9 @@ export function CustomerHistorySheet({
                     models={(directoryEquip.data ?? []).map((e) => e.name)}
                     onOpen={(d) => setRecipeDraft(d)}
                   />
+                  </div>
+                  <div className="mt-6">
+                    <NearbyAccounts accountId={data.id} name={data.name} />
                   </div>
                 </Tabs.Content>
 

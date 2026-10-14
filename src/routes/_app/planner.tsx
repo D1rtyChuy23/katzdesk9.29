@@ -41,7 +41,7 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Planner</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Day is the dispatch board: techs down the side, hours across. Calendar is the month. Drag a job to move it. Routes puts each tech&rsquo;s day on a map.
+            Day is the dispatch board: techs down the side, hours across. Calendar is the month. Drag a job to move it.
           </p>
         </div>
         <CalendarDockButton />
