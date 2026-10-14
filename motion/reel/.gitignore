@@ -1,2 +1,4 @@
 out/
 *.wav
+node_modules
+render.log
