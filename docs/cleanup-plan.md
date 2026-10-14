@@ -948,3 +948,22 @@ Checked with clicks:
 - Where the "one long panel" was seen: there is one account window (Customers → an account), and it opens on the tabs. If it still looks stacked, the preview is on an older copy: pull main and restart.
 
 Checked with clicks: import window on the real file after 0071: Update 197 (Class → Water Filters), Add 0; approved: Parts 3,431, Water Filters 196, Service 42, Equipment 303, Dispensers 0; the same file again changes nothing; 0 of 3,972 classed parts lack a Description. Picker for BWT8121 shows "BWT Bestmax L Filter, Part # BWT812113, Water Filters". Mod Coffeehouse: five tabs, one panel visible per tab.
+
+## 46. Database Changes Apply When Code Is Pulled Into A Running Preview
+
+**What broke.** After pulling the latest main into a preview that was already running, the new database changes never ran. `startup.sh` exits when the app is already up, and the dev server only applied migrations when it first started. The pulled code then asked for columns that did not exist yet:
+- Every account, ticket, PM and install lost its address ("No address on this account yet"), because the address lookup now reads the map pin columns from 0072 (`column "latitude" does not exist`).
+- Customers → Import → Locations failed the same way.
+- The same thing would have hit 0070 and 0071 (parts class, Get Later, photos, five classes) if the preview was not fully restarted after those pulls: the Parts list and the parts import fail without them.
+
+**Fix** (`src/lib/db.ts`). Before each use, the preview compares the `migrations/` folder on disk with what it has applied and applies any new file, one transaction each, recorded in `_migrations` like at startup. A pull is enough; no restart. Production is unchanged: the deploy build applies migrations to Neon as before.
+
+Checked:
+- The database was one migration behind with the server running. Before the 0072 file arrived the address lookup failed; after it arrived it worked with no restart (`[db] applied 0072_customer_location.sql`).
+- Old code was running and main plus this fix was pulled on top: the address came back with no restart.
+- The other session's location import works once 0072 is in: a sample geocoded CSV saved 2 pins (by account number and by name), flagged 1 close match, 1 No_Match and 1 unknown account for review, and the account shows "Map pin: 29.30562, -94.79288".
+- All 21 pages load with no app errors; typecheck, lint (0 errors), tests (same 9 Grok share-card failures as before) and the production build pass.
+
+**To confirm:**
+- The agent skills added to `.claude/skills` (2,057 files) are not app code and do not change the app or the build. The dev server does watch them, about 2,600 of its 3,500 file watches. If the Grok preview ever stops with "file watchers" / ENOSPC, add `**/.claude/**` to `server.watch.ignored` in `vite.config.ts`.
+- If a preview still looks stale after a pull, stop the dev server and start it again; `sh /workspace/startup.sh` alone does nothing while the app is up.
