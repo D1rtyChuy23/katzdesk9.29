@@ -68,6 +68,41 @@ const PART_HEADERS: Record<string, PartField> = {
   inactive: "inactive",
 };
 
+/** The only classes kept on the parts list. Anything else on a file is not added and is moved off the active list. */
+export const PART_CLASSES = ["Parts", "Water Filters", "Service", "Equipment", "Dispensers"] as const;
+export type PartClass = (typeof PART_CLASSES)[number];
+export const isPartClass = (v: unknown): v is PartClass => (PART_CLASSES as readonly string[]).includes(String(v));
+
+const SHEET_CLASS: Record<string, PartClass> = {
+  parts: "Parts",
+  filters: "Water Filters",
+  "water filters": "Water Filters",
+  service: "Service",
+  services: "Service",
+  equipment: "Equipment",
+  dispensers: "Dispensers",
+};
+const classKey = (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const CLASS_BY_NAME = new Map<string, PartClass>(PART_CLASSES.map((c) => [classKey(c), c]));
+
+/**
+ * Which of the five classes a row belongs to. The NetSuite export keeps one tab per class (Parts, Filters,
+ * Equipment, Service) and its Class column is a path ("Equipment : Parts and Filters"), so a tab named for a class
+ * decides it. Any other tab: the Class column's own name, its first or last part ("Service : Catering" is Service).
+ * null means the row is in none of the five.
+ */
+export function partClassFor(rawClass: string, sheetName: string): PartClass | null {
+  const bySheet = SHEET_CLASS[classKey(sheetName)];
+  if (bySheet) return bySheet;
+  const parts = rawClass.split(":").map(classKey).filter(Boolean);
+  for (const k of [classKey(rawClass), parts[0], parts[parts.length - 1]]) {
+    const hit = k ? CLASS_BY_NAME.get(k) : undefined;
+    if (hit) return hit;
+  }
+  if (/water filter/.test(classKey(rawClass))) return "Water Filters";
+  return null;
+}
+
 export type PartImportRow = {
   line: number;
   sheet: string;
@@ -79,8 +114,12 @@ export type PartImportRow = {
   rate: number | null;
   cost: number | null;
   kind: ChargeKind;
-  /** The NetSuite Class as the file has it ("Equipment : Parts and Filters"), or null when the file has none. */
-  cls: string | null;
+  /** One of the five classes, or null when the file has none. */
+  cls: PartClass | null;
+  /** The NetSuite Class as the file has it ("Equipment : Parts and Filters"), kept as read. */
+  sourceClass: string | null;
+  /** False when the file gives a class that is not one of the five: the row is not added. */
+  keep: boolean;
   /** From an Inactive column: false when marked inactive; null when the file has no such column. */
   active: boolean | null;
 };
@@ -153,6 +192,9 @@ export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }
       const rate = cell(r, "rate");
       const cost = cell(r, "cost");
       const cls = cell(r, "class").replace(/\s+/g, " ");
+      const bucket = partClassFor(cls, sheet.name);
+      // No class anywhere (a plain list of part numbers) is kept as it is; a class outside the five is not.
+      const keep = bucket != null || (!cls && !SHEET_CLASS[classKey(sheet.name)]);
       const inactive = cols.inactive != null ? yesNo(r[cols.inactive]) : null;
       rows.push({
         line: i + 1,
@@ -164,7 +206,9 @@ export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }
         rate: rate ? cleanRate(rate) : null,
         cost: cost ? cleanRate(cost) : null,
         kind: kindFromClass(cls, rawName || mpn),
-        cls: cls || null,
+        cls: bucket,
+        sourceClass: cls || null,
+        keep,
         active: inactive == null ? null : !inactive,
       });
     }
@@ -188,7 +232,7 @@ export type StoredPart = {
   active?: boolean;
 };
 
-export type PartPlanStatus = "new" | "update" | "same" | "shared_mpn" | "sku_taken" | "hidden";
+export type PartPlanStatus = "new" | "update" | "same" | "shared_mpn" | "sku_taken" | "hidden" | "not_kept";
 
 export type PartPlanLine = {
   status: PartPlanStatus;
@@ -230,6 +274,17 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
     const key = mpnKey(row.mpn);
     const hits = [...(mpns.get(key) ?? [])];
     for (const p of bySkuKey.get(key) ?? []) if (!hits.some((h) => h.id === p.id)) hits.push(p);
+    if (row.keep === false) {
+      // A class outside the five: never added. A part already on the list is moved off the active list (MPN kept).
+      const was = hits.length === 1 && !hits[0]!.hidden && hits[0]!.active !== false ? hits[0]! : null;
+      return {
+        status: "not_kept",
+        row,
+        partId: was?.id ?? null,
+        changes: was ? ["Moved off the active list"] : [],
+        reason: `Class ${row.sourceClass ?? ""} is not one of ${PART_CLASSES.join(", ")}.`,
+      };
+    }
     if (hits.length > 1) {
       return { status: "shared_mpn", row, partId: null, changes: [], reason: `${hits.length} parts already share MPN ${row.mpn} (${hits.map((h) => h.sku).join(", ")}). Fix that on Parts first.` };
     }

@@ -10,6 +10,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
+import { PART_CLASSES } from "@/lib/ops/part-pricing";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
 import type { ChargeKind } from "@/lib/ops/charges";
 
@@ -153,6 +154,7 @@ export type PartsPage = {
   /** Parts whose photo was confirmed by research and is ready to pull. */
   readyToPull: number;
   classes: string[];
+  classCounts: Record<string, number>;
   canEditMpn: boolean;
   canHide: boolean;
   canRemove: boolean;
@@ -200,9 +202,12 @@ export const listParts = createServerFn({ method: "POST" })
               count(*) filter (where image is null and r_verdict = 'confirmed' and r_image is not null)::int as ready
          from ${FROM} where active and hidden_at is null and kind not in ('trip', 'labor')`,
     ))[0];
-    const classes = (await sql.query<{ c: string }>(
-      "select distinct item_class as c from billing_items where item_class is not null and hidden_at is null and kind not in ('trip', 'labor') order by 1",
-    )).map((r) => r.c);
+    // Only the five classes are ever offered; counts are the active, visible parts in each.
+    const classRows = await sql.query<{ c: string; n: number }>(
+      "select item_class as c, count(*)::int as n from billing_items where active and hidden_at is null and kind not in ('trip', 'labor') and item_class is not null group by 1",
+    );
+    const classCounts: Record<string, number> = Object.fromEntries(PART_CLASSES.map((c) => [c, classRows.find((r) => r.c === c)?.n ?? 0]));
+    const classes: string[] = [...PART_CLASSES];
     const who = await powers(sql, context.userId);
     return {
       rows: rows.map(toRow),
@@ -212,6 +217,7 @@ export const listParts = createServerFn({ method: "POST" })
       getLaterCount: extra?.get_later ?? 0,
       readyToPull: extra?.ready ?? 0,
       classes,
+      classCounts,
       canEditMpn: who.canEditMpn,
       canHide: who.canHide,
       canRemove: who.canRemove,

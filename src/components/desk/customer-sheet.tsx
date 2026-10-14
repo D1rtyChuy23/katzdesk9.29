@@ -62,7 +62,7 @@ const KIND_LABEL: Record<HistoryKind, string> = {
   recipe: "Recipe",
 };
 
-type AccountTab = "details" | "equipment" | "tickets" | "invoices" | "pre-inspection" | "recipes";
+type AccountTab = "details" | "equipment" | "tickets" | "invoices" | "pre-inspection";
 
 /** The account's categories, one per tab, in this order. */
 const ACCOUNT_TABS: { id: AccountTab; label: string }[] = [
@@ -71,7 +71,6 @@ const ACCOUNT_TABS: { id: AccountTab; label: string }[] = [
   { id: "tickets", label: "Tickets" },
   { id: "invoices", label: "Invoices" },
   { id: "pre-inspection", label: "Pre-Inspection" },
-  { id: "recipes", label: "Recipes" },
 ];
 
 const FILTERS: { id: "all" | Exclude<HistoryKind, "recipe">; label: string }[] = [
@@ -297,7 +296,6 @@ export function CustomerHistorySheet({
     if (t === "equipment") return accountEquip.data?.length ?? null;
     if (t === "tickets") return counts.all || null;
     if (t === "pre-inspection") return openInstalls.reduce((n, i) => n + (i.inspection?.machineCount ?? 0), 0) || null;
-    if (t === "recipes") return data?.recipes?.length || null;
     return null;
   };
 
@@ -369,6 +367,16 @@ export function CustomerHistorySheet({
                   <div className="mt-4">
                     <ProviderDispatchBlock customer={data.name} assignable />
                   </div>
+                  {/* Recipes are not a tab of their own: the account has the five tabs, and its recipes sit under Details. */}
+                  <div className="mt-4" data-testid="account-recipes">
+                  <CustomerRecipes
+                    customer={data.name}
+                    recipes={data.recipes}
+                    house={houseRecipes.data ?? []}
+                    models={(directoryEquip.data ?? []).map((e) => e.name)}
+                    onOpen={(d) => setRecipeDraft(d)}
+                  />
+                  </div>
                 </Tabs.Content>
 
                 <Tabs.Content value="equipment" className="p-5 outline-none" data-testid="account-panel-equipment">
@@ -439,16 +447,6 @@ export function CustomerHistorySheet({
                     openId={inspectId}
                     onOpen={(id) => setInspectId((cur) => (cur === id ? null : id))}
                     alwaysOpen
-                  />
-                </Tabs.Content>
-
-                <Tabs.Content value="recipes" className="p-5 outline-none" data-testid="account-panel-recipes">
-                  <CustomerRecipes
-                    customer={data.name}
-                    recipes={data.recipes}
-                    house={houseRecipes.data ?? []}
-                    models={(directoryEquip.data ?? []).map((e) => e.name)}
-                    onOpen={(d) => setRecipeDraft(d)}
                   />
                 </Tabs.Content>
               </Tabs.Root>

@@ -183,7 +183,7 @@ function Page() {
           >
             {page.data.classes.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {c} · {(page.data?.classCounts?.[c] ?? 0).toLocaleString()}
               </option>
             ))}
           </ToolbarSelect>
@@ -408,7 +408,7 @@ function PartRowView({
       <div className="min-w-0 flex-1">
         {/* Part name is the NetSuite Description; blank when none is stored. */}
         <p className="font-medium break-words" data-testid="part-name">
-          {row.description || <span className="text-muted-foreground">{row.item}</span>}
+          {row.description}
         </p>
         <p className="text-sm text-muted-foreground" data-testid="part-mpn">
           Part # {row.mpn ? <span className="font-medium text-foreground">{row.mpn}</span> : <span>not set</span>}
@@ -445,11 +445,6 @@ function PartRowView({
             </Button>
           ) : null}
         </div>
-        {row.description && row.description !== row.item ? (
-          <p className="mt-0.5 text-[11px] text-muted-foreground" data-testid="part-description">
-            NetSuite item {row.item}
-          </p>
-        ) : null}
         {reviewing ? <PhotoReview part={row} onClose={() => setReviewing(false)} onSaved={onChanged} /> : null}
         {editingDesc ? (
           <form

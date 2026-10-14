@@ -7,6 +7,7 @@ import {
   mpnKey,
   partRowsFromSheets,
   planPartImport,
+  PART_CLASSES,
   planPricing,
   priceRowsFromSheets,
   pricingToApply,
@@ -149,9 +150,9 @@ test("NetSuite item export: Name is the part number, Description the part name, 
   assert.equal(r.nameIsMpn, true);
   assert.equal(r.duplicates, 1);
   assert.deepEqual(r.rows.map((x) => [x.mpn, x.sku, x.description, x.cls, x.active, x.kind]), [
-    ["016-246-6102", "016-246-6102", "246 Series AC PSC 115V/230V (Roaster Gear Motor)", "Equipment : Parts and Filters", true, "part"],
-    ["BUNN32400.0003", "BUNN32400.0003", "BUNN TIMER KIT, DGTL-240V", "Equipment : Parts and Filters", false, "part"],
-    ["AIRPOT2.4LS/SLINER", "AIRPOT2.4LS/SLINER", "Airpot 2.4 Liters - w/Stainless Steel Liner", "Equipment : Equipment Sales", true, "equipment"],
+    ["016-246-6102", "016-246-6102", "246 Series AC PSC 115V/230V (Roaster Gear Motor)", "Parts", true, "part"],
+    ["BUNN32400.0003", "BUNN32400.0003", "BUNN TIMER KIT, DGTL-240V", "Parts", false, "part"],
+    ["AIRPOT2.4LS/SLINER", "AIRPOT2.4LS/SLINER", "Airpot 2.4 Liters - w/Stainless Steel Liner", "Equipment", true, "equipment"],
   ]);
 });
 
@@ -167,8 +168,42 @@ test("a part loaded earlier by its SKU alone is the same part: updated, never ad
   ]);
   assert.equal(plan[0].status, "update");
   assert.equal(plan[0].partId, 9);
-  assert.ok(plan[0].changes.includes("Class → Equipment : Parts and Filters"));
+  assert.ok(plan[0].changes.includes("Class → Parts"));
   assert.ok(plan[0].changes.includes("MPN written BUNN32400.0003"));
   // FETCO52018 as a part number differs from the stored MPN 52018, and its SKU belongs to that part: not added twice.
   assert.equal(plan[1].status, "sku_taken");
+});
+
+test("five classes: tabs decide the class, any other class is not added and moves a listed part off the active list", () => {
+  const r = partRowsFromSheets([
+    { name: "Filters", matrix: [["Name", "Description", "Class"], ["BWT-1", "Water filter cartridge", "Equipment : Parts and Filters"]] },
+    { name: "Service", matrix: [["Name", "Description", "Class"], ["SVC-1", "Catering setup", "Service : Catering"]] },
+    { name: "Items", matrix: [
+      ["Name", "Description", "Class"],
+      ["DSP-1", "Cold brew dispenser", "Dispensers"],
+      ["GC-1", "Gift card", "Gift Cards"],
+      ["LS-1", "Lease payment", "Equipment : Leases"],
+      ["BLANK-1", "", ""],
+    ] },
+  ]);
+  assert.deepEqual(r.rows.map((x) => [x.mpn, x.cls, x.keep, x.description, x.sourceClass]), [
+    ["BWT-1", "Water Filters", true, "Water filter cartridge", "Equipment : Parts and Filters"],
+    ["SVC-1", "Service", true, "Catering setup", "Service : Catering"],
+    ["DSP-1", "Dispensers", true, "Cold brew dispenser", "Dispensers"],
+    ["GC-1", null, false, "Gift card", "Gift Cards"],
+    ["LS-1", "Equipment", true, "Lease payment", "Equipment : Leases"],
+    ["BLANK-1", null, true, null, null],
+  ]);
+  assert.deepEqual(PART_CLASSES, ["Parts", "Water Filters", "Service", "Equipment", "Dispensers"]);
+  const plan = planPartImport(r.rows, [
+    { id: 5, sku: "GC-1", item: "GC-1", mpn: "GC-1", description: "Gift card", rate: 5, cost: null, listPrice: null, itemClass: null, active: true },
+  ]);
+  assert.equal(plan[3].status, "not_kept");
+  assert.equal(plan[3].partId, 5);
+  assert.deepEqual(plan[3].changes, ["Moved off the active list"]);
+  // A class outside the five that is not on the list yet is simply not added.
+  const none = planPartImport(r.rows, []);
+  assert.equal(none[3].status, "not_kept");
+  assert.equal(none[3].partId, null);
+  assert.equal(none.filter((p) => p.status === "new").length, 5);
 });

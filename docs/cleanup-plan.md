@@ -929,3 +929,22 @@ Checked with clicks:
 - BUNN37192.0000 → Review Photos (2): Parts Town and HowdyBrewer, reason "Only 2 sources…".
 - A 1400×800 sample photo with the part off to one side came out 800×800, centered on white, and enlarges on click.
 - Mod Coffeehouse opens on tabs: Equipment 3, Tickets 5, Invoices (WO-0405 $333, Install #364 $473), Pre-Inspection 4.
+
+## 45. Five Classes, Description As The Part Name, Five Account Tabs
+
+**Five classes only.** Parts keep one of: **Parts, Water Filters, Service, Equipment, Dispensers**. Nothing else is added and the Class filter on Parts offers only these five, each with its count.
+- The NetSuite file's Class column is a path ("Equipment : Parts and Filters", "Service : Catering"), not these names. The file has one tab per class, so the tab decides: Parts tab → Parts, Filters tab → Water Filters, Equipment tab → Equipment, Service tab → Service. A file without those tabs is read from the Class column's own name (first or last part of the path; "Dispensers" → Dispensers).
+- A row whose class is none of the five is not added, and a part already listed in it is moved off the active list (`active` off, so it is out of the list and the invoice picker). Its MPN is kept and nothing is deleted. The import window shows these as "Class not kept".
+- The class as the file wrote it is kept in `source_class`. Migration 0071 puts the parts already loaded into the five (Service, Equipment, and everything else the file called Parts and Filters as Parts). **Import the items file again to move the water filters** (196 parts) from Parts to Water Filters; the window shows each as "Class → Water Filters".
+- Parts with no class (not from the file) are left alone and stay on the list.
+
+**Description is the part name.** Written onto each kept MPN on Add and Update (all 3,972 parts from the file have one here). The Parts list and the invoice picker show part number (Name column), part name (Description) and class. The name is only the Description: with none, it is left blank, never the NetSuite item name. The "NetSuite item …" line is gone from the row.
+
+**Account tabs: the five.** Details, Equipment, Tickets, Invoices, Pre-Inspection, one click each, only that category shown. Recipes were a sixth tab; they now sit at the bottom of Details.
+
+**To confirm:**
+- Dispensers: the file has no class or tab by that name, so no part is Dispensers yet. Nothing was guessed from the part names. Tell me which items are dispensers (a list, or a file) and they move there.
+- Equipment includes the one "Equipment : Leases" row and Service includes Catering, Roasting and Training, because they sit on the Equipment and Service tabs.
+- Where the "one long panel" was seen: there is one account window (Customers → an account), and it opens on the tabs. If it still looks stacked, the preview is on an older copy: pull main and restart.
+
+Checked with clicks: import window on the real file after 0071: Update 197 (Class → Water Filters), Add 0; approved: Parts 3,431, Water Filters 196, Service 42, Equipment 303, Dispensers 0; the same file again changes nothing; 0 of 3,972 classed parts lack a Description. Picker for BWT8121 shows "BWT Bestmax L Filter, Part # BWT812113, Water Filters". Mod Coffeehouse: five tabs, one panel visible per tab.

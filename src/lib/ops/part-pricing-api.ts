@@ -78,6 +78,8 @@ export type PartsPreview = {
   notApplied: number;
   /** Hidden parts in the file. They are not added, not updated, and not un-hidden. */
   hiddenSkipped: number;
+  /** Rows whose class is not one of the five: not added; a part already listed is moved off the active list. */
+  notKept: number;
   duplicatesInFile: number;
   skipped: number;
   applied: boolean;
@@ -99,7 +101,7 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
     if (read.rows.length > 50_000) throw new Error("Up to 50,000 parts at a time.");
     const plan = planPartImport(read.rows, await storedParts(sql));
     const count = (s: PartPlanStatus) => plan.filter((p) => p.status === s).length;
-    const order: Record<PartPlanStatus, number> = { update: 1, new: 2, hidden: 3, shared_mpn: 4, sku_taken: 5, same: 9 };
+    const order: Record<PartPlanStatus, number> = { update: 1, new: 2, not_kept: 3, hidden: 4, shared_mpn: 5, sku_taken: 6, same: 9 };
     const preview: PartsPreview = {
       filename: data.filename,
       rowCount: read.rows.length,
@@ -108,6 +110,7 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
       same: count("same"),
       notApplied: count("shared_mpn") + count("sku_taken"),
       hiddenSkipped: count("hidden"),
+      notKept: count("not_kept"),
       duplicatesInFile: read.duplicates,
       skipped: read.skipped,
       applied: false,
@@ -131,11 +134,12 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
            rate = coalesce(s.rate, b.rate),
            cost = coalesce(s.cost, b.cost),
            item_class = coalesce(s.cls, b.item_class),
+           source_class = coalesce(s.src, b.source_class),
            kind = case when s.cls is not null and b.kind not in ('trip', 'labor') then s.kind else b.kind end,
            active = coalesce(s.active, b.active),
            updated_at = now()
-          from unnest($1::int[], $2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $7::text[], $8::boolean[])
-               as s(id, mpn, description, rate, cost, cls, kind, active)
+          from unnest($1::int[], $2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $7::text[], $8::boolean[], $9::text[])
+               as s(id, mpn, description, rate, cost, cls, kind, active, src)
          where b.id = s.id and b.hidden_at is null`,
         [
           part.map((p) => p.partId),
@@ -146,17 +150,23 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
           part.map((p) => p.row.cls),
           part.map((p) => p.row.kind),
           part.map((p) => p.row.active),
+          part.map((p) => p.row.sourceClass),
         ],
       );
+    }
+    // A class outside the five: the part is moved off the active list (it stays on the record, MPN kept).
+    const off = plan.filter((p) => p.status === "not_kept" && p.partId != null).map((p) => p.partId);
+    for (let i = 0; i < off.length; i += CHUNK) {
+      await sql.query("update billing_items set active = false, updated_at = now() where id = any($1::int[]) and hidden_at is null", [off.slice(i, i + CHUNK)]);
     }
     const adds = plan.filter((p) => p.status === "new");
     for (let i = 0; i < adds.length; i += CHUNK) {
       const part = adds.slice(i, i + CHUNK).map((p) => ({ ...p.row, sku: p.row.sku ?? p.row.mpn }));
       await sql.query(
-        `insert into billing_items (sku, parent, item, description, rate, cost, kind, mfr_part, item_class, active)
-         select s.sku, s.parent, s.item, s.description, s.rate, s.cost, s.kind, s.mpn, s.cls, coalesce(s.active, true)
-           from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::numeric[], $6::numeric[], $7::text[], $8::text[], $9::text[], $10::boolean[])
-                as s(sku, parent, item, description, rate, cost, kind, mpn, cls, active)
+        `insert into billing_items (sku, parent, item, description, rate, cost, kind, mfr_part, item_class, source_class, active)
+         select s.sku, s.parent, s.item, s.description, s.rate, s.cost, s.kind, s.mpn, s.cls, s.src, coalesce(s.active, true)
+           from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::numeric[], $6::numeric[], $7::text[], $8::text[], $9::text[], $10::boolean[], $11::text[])
+                as s(sku, parent, item, description, rate, cost, kind, mpn, cls, active, src)
          on conflict do nothing`,
         [
           part.map((r) => r.sku),
@@ -169,6 +179,7 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
           part.map((r) => r.mpn),
           part.map((r) => r.cls),
           part.map((r) => r.active),
+          part.map((r) => r.sourceClass),
         ],
       );
     }

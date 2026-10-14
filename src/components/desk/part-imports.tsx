@@ -103,6 +103,7 @@ const PART_STATUS: Record<PartsPreview["lines"][number]["status"], { label: stri
   shared_mpn: { label: "Not applied", tone: "danger" },
   sku_taken: { label: "Not applied", tone: "danger" },
   hidden: { label: "Hidden, skipped", tone: "outline" },
+  not_kept: { label: "Class not kept", tone: "outline" },
 };
 
 /** Import Parts (NetSuite): an Excel export matched on MPN. Opens the approval window; nothing is written before Approve. */
@@ -146,7 +147,7 @@ export function ImportPartsButton() {
           <DialogTitle>Import Parts (NetSuite)</DialogTitle>
           <DialogDescription>
             The NetSuite item export: <span className="font-medium">Name</span> is the part number (MPN), <span className="font-medium">Description</span> is the
-            part name, and <span className="font-medium">Class</span>, Base Price, Purchase Price and Inactive are kept. A file with its own MPN column uses that column instead.
+            part name (left blank when the file has none), and Base Price, Purchase Price and Inactive are kept. Only five classes are kept: Parts, Water Filters, Service, Equipment and Dispensers. A row in any other class is not added, and a part already listed in one is moved off the active list. A file with its own MPN column uses that column instead.
             Matched on the part number: one already on a part updates it, a new one adds a part. Never a second part for one part number. A hidden part is skipped and stays
             hidden. Blank cells change nothing.
           </DialogDescription>
@@ -161,6 +162,7 @@ export function ImportPartsButton() {
                 <Badge variant="warn">Update {preview.updated}</Badge>
                 <Badge variant="outline">No change {preview.same}</Badge>
                 {preview.notApplied ? <Badge variant="danger">Not applied {preview.notApplied}</Badge> : null}
+                {preview.notKept ? <Badge variant="outline">Class not kept {preview.notKept}</Badge> : null}
                 {preview.hiddenSkipped ? (
                   <Badge variant="outline" data-testid="import-hidden-skipped">
                     Hidden, skipped {preview.hiddenSkipped}

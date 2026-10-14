@@ -350,7 +350,7 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
                 <span className="min-w-0">
                   {/* Part name (the NetSuite Description), or the item when none is stored: never made up. */}
                   <span className="line-clamp-2 font-medium" data-testid="part-result-description">
-                    {it.description || it.item}
+                    {it.description}
                   </span>
                   <span className="block truncate text-xs text-muted-foreground" data-testid="part-result-number">
                     Part # <span className="font-medium text-foreground">{it.mfrPart || it.part?.sku || "not set"}</span>
