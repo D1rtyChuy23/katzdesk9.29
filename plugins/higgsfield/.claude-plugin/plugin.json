@@ -1,0 +1,6 @@
+{
+  "name": "higgsfield",
+  "description": "Generate images, video, audio and 3D with the Higgsfield MCP connector: pick the right tool, quote credits, run batches and show results.",
+  "version": "0.1.0",
+  "author": { "name": "D1rtyChuy23" }
+}
