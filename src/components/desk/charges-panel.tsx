@@ -72,6 +72,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
 
   const after = (next: TicketCharges, message: string) => {
     qc.setQueryData(["charges", jobId], next);
+    // The ticket's Invoice window reads these same lines.
+    void qc.invalidateQueries({ queryKey: ["invoice"] });
     void qc.invalidateQueries({ queryKey: ["activity"] });
     void qc.invalidateQueries({ queryKey: ["jobs"] });
     toast.success(message);
@@ -333,7 +335,7 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
       {term.length >= 2 ? (
         <ul className="mt-1 max-h-56 overflow-y-auto rounded-lg border border-border" data-testid="part-results">
           {list.map((it) => (
-            <li key={it.item} className="flex items-start gap-2 px-2 py-1.5 hover:bg-muted">
+            <li key={it.item} className="flex items-start gap-2 px-2 py-1.5 hover:bg-muted" data-testid="part-result">
               {/* The photo enlarges on its own; choosing the part is the rest of the row. */}
               <PartThumb part={it.part} name={it.item} size="sm" />
               <button
@@ -347,10 +349,13 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
               >
                 <span className="min-w-0">
                   <span className="block truncate font-medium">{it.item}</span>
+                  {/* The part's stored description, or nothing: never filled in. */}
+                  <span className="line-clamp-2 text-xs text-foreground/80" data-testid="part-result-description">
+                    {it.description ?? ""}
+                  </span>
                   <span className="block truncate text-xs text-muted-foreground">
                     MPN {it.mfrPart ? it.mfrPart : "not set"}
                   </span>
-                  {it.description ? <span className="block truncate text-xs text-muted-foreground">{it.description}</span> : null}
                 </span>
                 <span className="shrink-0 tabular text-xs text-muted-foreground">{it.rate != null ? money(it.rate) : ""}</span>
               </button>

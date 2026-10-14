@@ -873,3 +873,20 @@ Each machine on an install's pre-inspection has a trash button. It asks first, t
 - Each removal is written to the install's activity.
 
 Checked with clicks: install with Mythos and Bunn Axiom-APS, Puqpress added at the site; removed Puqpress (pre-inspection only), then the Axiom (pre-inspection and equipment list); after a reload only Mythos is left, and the install's equipment reads Mythos.
+
+## 43. Part Description And One Invoice Window
+
+**Part Description.** Each part on Parts shows its Description next to its name, MPN and photo, and the invoice picker shows it under the part name with the MPN and photo. Blank when none is stored: nothing is ever filled in. Admin and Sales can Add or Edit Description on Parts (`setPartDescription`). A NetSuite item import that has a Description column still writes its own.
+
+**Invoice, the same action on every customer record.** An Invoice button in the window of a service ticket, TLC ticket, PM, install, rebuild and deal. It opens the Invoice window; there is no separate page.
+- Bill To: name, account number, address (pin for directions) and rep, read from the account (the account's rep, else the record's). The customer is never asked for; anything missing is named ("No account number") and fixed on the account.
+- Lines: parts (photo, item, MPN, description, qty, price, amount) and labor (Labor Hour, Trip Charge). Add from the same part picker as Charges; remove with the trash on the line.
+- Discount: Percent or Amount, one value. Parts, Labor, Subtotal, Discount and Total use the existing charge and discount math (`invoiceTotals` wraps `chargesTotal` and `applyDiscount`; no new rules).
+- Approve saves; Cancel (or closing the window) saves nothing. Reopening reads what is saved, so a cancelled draft never comes back.
+- Tickets: the invoice is the ticket's Charges. Approve writes the same lines and discount through the same code as the Charges panel (P.O. kept), so the billing export, Parts Profit and the Charges panel read the same thing. A billed ticket's invoice is locked until its Sales Order number is cleared. If the Charges change after approval, the window says so.
+- Other records: lines in `invoice_lines`, discount and approval in `invoices` (0069), with the billing info as it read at approval.
+- Each approval is written to the record's activity.
+
+**To confirm:** approved invoices on installs, rebuilds, PMs and deals are saved on the record but are not yet in the billing export (which is built for ticket charges and the billing script) or in Parts Profit. Say if they should be.
+
+Checked with clicks: Add Description on a part with none, saved; the picker shows it under the part name with the MPN and photo. Mod Coffeehouse service ticket WO-0405 → Invoice → Bill To Mod Coffeehouse, account 00077, 2126 Post Office Street, Lance Oden; burr set + 1.5 h labor, 10% → $370.00 − $37.00 = $333.00; Cancel saved nothing; again with Approve → the Charges panel shows the same two lines and $333.00. Mod Coffeehouse install #364 → Invoice → the same window and Bill To; gasket × 2 + 3 h labor − $25.00 = $473.00, approved, reopened as saved. PM, deal and rebuild open the same window; billed ticket WO-9880 is locked; no sideways scroll on a phone.

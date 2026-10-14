@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { InvoiceButton } from "@/components/desk/invoice-window";
 import { ModuleRecord } from "@/components/desk/module-record";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -176,6 +177,9 @@ export function PmSheet({
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <StatusBadge status={pm.status} />
                 <FlagBadge flag={pm.flag} />
+              </div>
+              <div className="mt-2">
+                <InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} />
               </div>
             </SheetHeader>
             <SheetBody>
@@ -386,6 +390,9 @@ export function InstallSheet({
                 {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
               </div>
               <CustomerAddress customer={row.customer} className="mt-2" />
+              <div className="mt-2">
+                <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} />
+              </div>
               <label className="mt-3 flex w-fit items-center gap-2 text-sm font-medium" data-testid="trf-check-window">
                 <input
                   type="checkbox"
@@ -887,6 +894,9 @@ export function DealSheet({
                         : "Open"
                   }
                 />
+              </div>
+              <div className="mt-2">
+                <InvoiceButton type="deal" id={deal.id} key={`invoice-deal-${deal.id}`} />
               </div>
             </SheetHeader>
             <SheetBody>

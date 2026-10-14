@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, EyeOff, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { clearPartImage, hideParts, listParts, removePart, restoreParts, setPartImage, setPartMpn, type PartRow } from "@/lib/ops/parts-api";
+import { clearPartImage, hideParts, listParts, removePart, restoreParts, setPartDescription, setPartImage, setPartMpn, type PartRow } from "@/lib/ops/parts-api";
 import { resizeImageToBase64 } from "@/lib/image-resize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -225,6 +225,18 @@ function PartRowView({
   const [removeNote, setRemoveNote] = useState<string | null>(null);
   const [mpn, setMpn] = useState(row.mpn ?? "");
   useEffect(() => setMpn(row.mpn ?? ""), [row.mpn]);
+  const [editingDesc, setEditingDesc] = useState(false);
+  const [desc, setDesc] = useState(row.description ?? "");
+  useEffect(() => setDesc(row.description ?? ""), [row.description]);
+  const saveDesc = useMutation({
+    mutationFn: () => setPartDescription({ data: { id: row.id, description: desc.trim() || null } }),
+    onSuccess: () => {
+      setEditingDesc(false);
+      toast.success(desc.trim() ? "Description saved" : "Description cleared");
+      onChanged();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the description"),
+  });
 
   const upload = useMutation({
     mutationFn: async (file: File) => setPartImage({ data: { id: row.id, base64: await resizeImageToBase64(file) } }),
@@ -303,7 +315,49 @@ function PartRowView({
           {row.rate != null ? ` · ${money(row.rate)}` : ""}
           {row.listPrice != null ? <span data-testid="part-list-price"> · Mfr {money(row.listPrice)}</span> : null}
         </p>
-        {row.description ? <p className="mt-0.5 text-sm break-words text-muted-foreground">{row.description}</p> : null}
+        {/* Description: what is stored, or blank. Nothing is filled in for a part that has none. */}
+        <p className="mt-0.5 text-sm break-words text-muted-foreground" data-testid="part-description">
+          {row.description ? (
+            <>
+              <span className="text-[11px] font-medium tracking-wide uppercase">Description</span> <span className="text-foreground/80">{row.description}</span>
+            </>
+          ) : null}
+        </p>
+        {editingDesc ? (
+          <form
+            className="mt-2 flex flex-wrap items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveDesc.mutate();
+            }}
+            data-testid="part-description-form"
+          >
+            <Input
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              aria-label={`Description for ${row.item}`}
+              placeholder="What this part is"
+              maxLength={500}
+              className="h-9 w-full sm:w-96"
+              autoFocus
+              data-testid="part-description-input"
+            />
+            <Button type="submit" size="sm" disabled={saveDesc.isPending} data-testid="part-description-save">
+              Save
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setDesc(row.description ?? "");
+                setEditingDesc(false);
+              }}
+            >
+              Cancel
+            </Button>
+          </form>
+        ) : null}
         {showHidden ? (
           <p className="mt-1 text-xs text-muted-foreground" data-testid="part-hidden-meta">
             Hidden by {row.hiddenBy || "Desk"}
@@ -373,6 +427,12 @@ function PartRowView({
             <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(true)}>
               <Pencil className="size-4" />
               {row.mpn ? "Edit MPN" : "Set MPN"}
+            </Button>
+          ) : null}
+          {canEditMpn && !editingDesc ? (
+            <Button type="button" size="sm" variant="ghost" onClick={() => setEditingDesc(true)} data-testid="part-description-edit">
+              <Pencil className="size-4" />
+              {row.description ? "Edit Description" : "Add Description"}
             </Button>
           ) : null}
           {canHide && showHidden ? (

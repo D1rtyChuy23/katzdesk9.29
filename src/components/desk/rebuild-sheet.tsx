@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listRebuildLinks,
@@ -186,6 +187,9 @@ export function RebuildSheet({
                 ? ` · ${row.daysLateEarly === 0 ? "on time" : row.daysLateEarly > 0 ? `${row.daysLateEarly} days late` : `${-row.daysLateEarly} days early`}`
                 : ""}
             </p>
+            <div className="mt-2">
+              <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} />
+            </div>
           </SheetHeader>
           <SerialNoticeBanner notice={row.serialNotice} />
           <SheetBody>

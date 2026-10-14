@@ -1,4 +1,5 @@
 import { CustomerAddress } from "./customer-address";
+import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { createJob, getJob, listAssets, mergeServiceTickets, unassignAssetFromService, updateJob } from "@/lib/ops/api";
@@ -105,6 +106,9 @@ export function JobSheet({
                 <StatusBadge status={j.status} />
                 <FlagBadge flag={j.flag} />
                 <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} />
+              </div>
+              <div className="mt-2">
+                <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
               </div>
             </SheetHeader>
             <SheetBody>

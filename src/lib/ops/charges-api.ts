@@ -328,6 +328,74 @@ const lineSchema = z.object({
   rate: z.union([z.number(), z.string()]),
 });
 
+export type ChargeLinesInput = z.input<typeof lineSchema>[];
+export type DiscountInput = { kind: string; value: string | number } | null | undefined;
+
+/**
+ * Replace a ticket's charge lines (and P.O. and discount when given). One path for the Charges panel and the
+ * Invoice window, so both write the same lines the same way. A billed ticket is not changed.
+ * po undefined keeps the stored P.O.; discount undefined keeps the stored discount, null clears it.
+ */
+export async function writeTicketCharges(
+  sql: Sql,
+  jobId: number,
+  userId: string,
+  input: { po?: string; lines: ChargeLinesInput; discount?: DiscountInput },
+): Promise<void> {
+  const cur = await loadCharges(sql, jobId);
+  if (cur.state === "billed") throw new Error(`This ticket is already billed on ${cur.nsSo}. Clear the Sales Order number to change the charges.`);
+  const problems = checkCharges(input.lines);
+  if (problems.length) throw new Error(`Line ${problems[0].index + 1}: ${problems[0].message}`);
+  // Left out = keep what is saved. Null or blank = no discount. Stored as the choice, never as a discounted total.
+  const typed = input.discount === undefined ? { discount: cur.discount } : input.discount === null ? { discount: null } : cleanDiscount(input.discount.kind, input.discount.value);
+  if ("error" in typed) throw new Error(typed.error);
+
+  const items = input.lines.map((l) => l.item.trim());
+  const kinds = new Map<string, ChargeKind>();
+  if (items.length) {
+    const known = await sql.query<{ item: string; kind: ChargeKind }>(
+      "select item, kind from billing_items where lower(btrim(item)) = any($1::text[])",
+      [items.map((i) => i.toLowerCase())],
+    );
+    for (const k of known) kinds.set(k.item.trim().toLowerCase(), k.kind);
+  }
+  const lines = input.lines.map((l, i) => ({
+    item: items[i],
+    description: l.description.trim(),
+    qty: cleanQty(l.qty)!,
+    rate: cleanRate(l.rate)!,
+    kind: kinds.get(items[i].toLowerCase()) ?? kindForItem(items[i]),
+  }));
+
+  // One statement: the old lines and the new ones change together or not at all.
+  await sql.query(
+    `with d as (delete from ticket_charges where job_id = $1)
+     insert into ticket_charges (job_id, item, description, qty, rate, kind, sort)
+     select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+       from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
+            as t(item, description, qty, rate, kind, ord)`,
+    [jobId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
+  );
+  await sql.query("update service_jobs set po = $2, discount_kind = $3, discount_value = $4, updated_at = now() where id = $1", [
+    jobId,
+    input.po === undefined ? cur.po.trim() || null : input.po.trim() || null,
+    typed.discount?.kind ?? null,
+    typed.discount?.value ?? null,
+  ]);
+  const after = applyDiscount(chargesTotal(lines), typed.discount);
+  await logJob(
+    sql,
+    jobId,
+    userId,
+    `charges: ${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountLabel(typed.discount)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`,
+  );
+}
+
+/** A ticket's charges as the Invoice window reads them (no cost or margin). */
+export async function loadTicketCharges(sql: Sql, jobId: number): Promise<TicketCharges> {
+  return loadCharges(sql, jobId);
+}
+
 /** Replace the charge lines and P.O. on a ticket. A ticket that is already billed is not changed. */
 export const saveTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -343,53 +411,7 @@ export const saveTicketCharges = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<TicketCharges> => {
     const sql = await ready();
-    const cur = await loadCharges(sql, data.jobId);
-    if (cur.state === "billed") throw new Error(`This ticket is already billed on ${cur.nsSo}. Clear the Sales Order number to change the charges.`);
-    const problems = checkCharges(data.lines);
-    if (problems.length) throw new Error(`Line ${problems[0].index + 1}: ${problems[0].message}`);
-    // Left out = keep what is saved. Null or blank = no discount. Stored as the choice, never as a discounted total.
-    const typed = data.discount === undefined ? { discount: cur.discount } : data.discount === null ? { discount: null } : cleanDiscount(data.discount.kind, data.discount.value);
-    if ("error" in typed) throw new Error(typed.error);
-
-    const items = data.lines.map((l) => l.item.trim());
-    const kinds = new Map<string, ChargeKind>();
-    if (items.length) {
-      const known = await sql.query<{ item: string; kind: ChargeKind }>(
-        "select item, kind from billing_items where lower(btrim(item)) = any($1::text[])",
-        [items.map((i) => i.toLowerCase())],
-      );
-      for (const k of known) kinds.set(k.item.trim().toLowerCase(), k.kind);
-    }
-    const lines = data.lines.map((l, i) => ({
-      item: items[i],
-      description: l.description.trim(),
-      qty: cleanQty(l.qty)!,
-      rate: cleanRate(l.rate)!,
-      kind: kinds.get(items[i].toLowerCase()) ?? kindForItem(items[i]),
-    }));
-
-    // One statement: the old lines and the new ones change together or not at all.
-    await sql.query(
-      `with d as (delete from ticket_charges where job_id = $1)
-       insert into ticket_charges (job_id, item, description, qty, rate, kind, sort)
-       select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
-         from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
-              as t(item, description, qty, rate, kind, ord)`,
-      [data.jobId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
-    );
-    await sql.query("update service_jobs set po = $2, discount_kind = $3, discount_value = $4, updated_at = now() where id = $1", [
-      data.jobId,
-      data.po.trim() || null,
-      typed.discount?.kind ?? null,
-      typed.discount?.value ?? null,
-    ]);
-    const after = applyDiscount(chargesTotal(lines), typed.discount);
-    await logJob(
-      sql,
-      data.jobId,
-      context.userId,
-      `charges: ${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountLabel(typed.discount)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`,
-    );
+    await writeTicketCharges(sql, data.jobId, context.userId, { po: data.po, lines: data.lines, discount: data.discount });
     return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
   });
 

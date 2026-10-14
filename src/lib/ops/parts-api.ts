@@ -171,6 +171,22 @@ export const clearPartImage = createServerFn({ method: "POST" })
     return loadPart(sql, data.id);
   });
 
+/**
+ * The part's description, as typed on Parts. Blank clears it. Only what someone types is stored; nothing is filled
+ * in for a part that has none. (A NetSuite item import with a Description column still writes its own.)
+ */
+export const setPartDescription = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; description: string | null }) => z.object({ id: z.number().int().positive(), description: z.string().max(500).nullable() }).parse(d))
+  .handler(async ({ data, context }): Promise<PartRow> => {
+    const sql = await ready();
+    if (!(await powers(sql, context.userId)).canEditMpn) throw new Error("Only Admin and Sales can change a part's description.");
+    const text = (data.description ?? "").replace(/\s+/g, " ").trim();
+    const rows = await sql.query("update billing_items set description = $2, updated_at = now() where id = $1 returning id", [data.id, text || null]);
+    if (!rows.length) throw new Error("That part is no longer on the list.");
+    return loadPart(sql, data.id);
+  });
+
 /** Record the manufacturer part number for a part. Blank clears it. */
 export const setPartMpn = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
