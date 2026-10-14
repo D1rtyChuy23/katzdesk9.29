@@ -123,6 +123,7 @@ export function DeskMap({
   selectedId,
   onPinClick,
   fitKey,
+  fitTo,
   focus,
   className,
   children,
@@ -133,6 +134,8 @@ export function DeskMap({
   selectedId?: string | number | null;
   onPinClick?: (pin: MapPin) => void;
   fitKey?: string;
+  /** Fit to these points instead of every pin when fitKey changes (e.g. one rep's accounts). */
+  fitTo?: readonly LatLng[] | null;
   /** Pan to this point (zooming in a little) when it changes. */
   focus?: LatLng | null;
   className?: string;
@@ -164,7 +167,7 @@ export function DeskMap({
     if (!size) return;
     if (lastFit.current === key && view) return;
     lastFit.current = key;
-    setView(fitView(points, size.w, size.h));
+    setView(fitView(fitTo?.length ? fitTo : points, size.w, size.h));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refit only when the fit key or the box size changes
   }, [key, size]);
 
