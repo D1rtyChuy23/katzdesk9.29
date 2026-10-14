@@ -7,6 +7,11 @@
       "name": "motion-design",
       "description": "15-second motion-graphics workflow: Opus builds, Jev evaluates review notes, code renders and checks exports.",
       "source": "./plugins/motion-design"
+    },
+    {
+      "name": "app-builder",
+      "description": "App-builder playbooks (design-ui, auth, neon, og, xai-api, building-games, controls, threejs, multiplayer-p2p, sprite/map/asset generation).",
+      "source": "./plugins/app-builder"
     }
   ]
 }
