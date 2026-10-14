@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
-import { getCustomerAddress, listAccountAddresses } from "@/lib/ops/api";
+import { getCustomerAddress, listAccountAddresses, type CustomerLocation } from "@/lib/ops/api";
 import { cn } from "@/lib/utils";
 
 /** Google Maps for an address, opened in a new tab. */
@@ -94,7 +94,28 @@ export function CustomerAddress({ customer, className }: { customer: string | nu
           No address on this account yet.
         </p>
       )}
+      {q.data?.location ? <LocationLine location={q.data.location} /> : null}
     </div>
+  );
+}
+
+/** The saved map pin from the geocoded customer list: opens Google Maps at the exact point. */
+function LocationLine({ location }: { location: CustomerLocation }) {
+  const { latitude: lat, longitude: lng } = location;
+  const label = location.match === "close" ? "Map pin (close match, check it)" : "Map pin";
+  return (
+    <p className="mt-0.5 pl-9 text-xs text-muted-foreground" data-testid="customer-location">
+      <a
+        href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
+        target="_blank"
+        rel="noreferrer"
+        className={cn("hover:text-primary hover:underline", location.match === "close" && "text-warning")}
+        title={location.matchedAddress ? `Geocoded as ${location.matchedAddress}` : "Open the pin in Google Maps"}
+        data-testid="customer-location-map"
+      >
+        {label}: {lat.toFixed(5)}, {lng.toFixed(5)}
+      </a>
+    </p>
   );
 }
 

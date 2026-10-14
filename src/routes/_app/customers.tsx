@@ -12,6 +12,7 @@ import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { SORT_ACCOUNT_NUMBER, SORT_ALPHA, sortDesk } from "@/lib/ops/sort";
 import { AccountNumberImportButton } from "@/components/desk/account-number-import";
+import { GeocodeImportButton } from "@/components/desk/geocode-import";
 import { CustomerHistorySheet } from "@/components/desk/customer-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { AccountEquipImportButton } from "@/components/desk/account-equip-import";
@@ -148,6 +149,7 @@ function Page() {
           {/* One Import control: a list when there is more than one import, the single button otherwise. */}
           <ImportMenu>
             {isAdminOrRole ? <AccountNumberImportButton /> : null}
+            {isAdminOrRole ? <GeocodeImportButton /> : null}
             <AccountEquipImportButton
               onImported={(name) => {
                 if (!name) return;

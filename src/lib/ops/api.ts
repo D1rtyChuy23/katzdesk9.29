@@ -2286,12 +2286,22 @@ export const listDirectory = createServerFn({ method: "GET" }).middleware([deskM
 	return await sql.query(`select id, name from ${table} where archived = false order by lower(name)`);
 });
 /** The account's address (from the clean customer list), for tickets, PMs and installs. */
-export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { name: string }) => d).handler(async ({ data }: any): Promise<{ address: string | null }> => {
+export type CustomerLocation = { latitude: number; longitude: number; match: "exact" | "close" | null; matchedAddress: string | null };
+export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { name: string }) => d).handler(async ({ data }: any): Promise<{ address: string | null; location: CustomerLocation | null }> => {
 	const sql = await ready();
 	const name = String(data.name ?? "").trim();
-	if (!name) return { address: null };
-	const row = (await sql.query("select address from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc limit 1", [name]))[0];
-	return { address: row?.address ? String(row.address) : null };
+	if (!name) return { address: null, location: null };
+	const row = (await sql.query("select address, latitude, longitude, geocode_match, geocode_address from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc limit 1", [name]))[0];
+	const location: CustomerLocation | null =
+		row && row.latitude !== null && row.latitude !== undefined && row.longitude !== null && row.longitude !== undefined
+			? {
+					latitude: Number(row.latitude),
+					longitude: Number(row.longitude),
+					match: row.geocode_match === "exact" || row.geocode_match === "close" ? row.geocode_match : null,
+					matchedAddress: row.geocode_address ? String(row.geocode_address) : null,
+				}
+			: null;
+	return { address: row?.address ? String(row.address) : null, location };
 });
 /** Every saved account address, keyed by lower-case account name, for the list rows (one call, not one per row). */
 export const listAccountAddresses = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Record<string, string>> => {
