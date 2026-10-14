@@ -1,6 +1,6 @@
 ---
 name: motion-design
-description: Build a polished 15-second motion-graphics video from a brief. Opus creates the storyboard, scenes, timing and animation code; Jev evaluates supplied review text (brief compliance, criteria, next action); code renders frames, checks exports and records each version. Use when asked for a motion-design video, animated explainer, or motion graphics.
+description: Build a polished 15-second motion-graphics video from a brief. Opus creates the storyboard, scenes, timing and animation code; Jev evaluates supplied review text (brief compliance, criteria, next action); code renders frames, checks exports and records each version. Hands building, rendering, audio and voice-over to the motion-reel skill while keeping its own interview, Jev review and export rules. Use when asked for a motion-design video, animated explainer, or motion graphics.
 ---
 
 # Motion Design: Claude Opus + Jev
@@ -24,6 +24,33 @@ Visual review uses rendered previews. Jev receives text notes, not raw video.
 - Batch independent checks about the same review notes.
 - Revise only with specific feedback. Keep an attempt limit.
 - Return the editable project, preview, final export, and review notes.
+
+## Production with motion-reel
+
+This skill runs the process; the `motion-reel` skill does the production work.
+Load `motion-reel` once the storyboard (§02) is approved and use it for:
+
+- gathering real assets from a product URL, and the beat grid behind the storyboard
+- building and rendering the canvas animation (its film is a pure function of time,
+  which satisfies "deterministic animation with an inspectable timeline")
+- contact sheets for visual review, sound effects, voice-over, and the final mix
+
+Where the two overlap, this skill's rules win:
+
+- **Intake:** ask the six questions in §00 once. Pass the answers to `motion-reel`
+  instead of running its own intake again.
+- **Sign-off:** the approved §02 storyboard is the shot list `motion-reel` asks the
+  user to sign off.
+- **Review:** turn `motion-reel` contact sheets into text notes, then route them
+  through §03/§04 (Jev gets the notes, never the video).
+- **Revisions:** one focused revision per review cycle with an attempt limit (§07),
+  even where `motion-reel`'s critique loop would iterate more.
+- **Export:** the §05 checks and §07 rules (MP4, H.264) apply to every
+  `motion-reel` render, including extra formats it delivers.
+- **Economics:** count `motion-reel`'s renders and model calls in §01.
+
+If `motion-reel` is not available in the session, build and render the scenes
+directly following §04 and §08.
 
 ## 00. Interview first (wait for answers)
 
