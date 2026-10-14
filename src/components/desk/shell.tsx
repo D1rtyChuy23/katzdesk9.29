@@ -11,6 +11,7 @@ import {
   Hammer,
   Handshake,
   MapPin,
+  MapPinned,
   Menu,
   MessageSquare,
   Package,
@@ -58,13 +59,14 @@ type DeskTo =
   | "/locations"
   | "/modules"
   | "/customers"
+  | "/map"
   | "/network"
   | "/analytics"
   | "/settings"
   | "/access";
 
 /** Pages whose lists actually narrow when My View is on — the toggle is noise elsewhere. */
-const MY_VIEW_ROUTES: string[] = ["/", "/planner", "/service", "/tlc", "/pms", "/installs", "/pipeline", "/rebuilds", "/customers"];
+const MY_VIEW_ROUTES: string[] = ["/", "/planner", "/service", "/tlc", "/pms", "/installs", "/pipeline", "/rebuilds", "/customers", "/map"];
 
 type NavItem = {
   to: DeskTo;
@@ -86,6 +88,7 @@ const NAV: { label: string; items: NavItem[] }[] = [
     label: "Accounts",
     items: [
       { to: "/customers", label: "Customers", icon: Store },
+      { to: "/map", label: "Map", icon: MapPinned },
       { to: "/recipes", label: "Recipes", icon: BookOpen },
       { to: "/network", label: "Out Of Network", icon: Globe },
       { to: "/customer-names", label: "Clean Names", icon: ListChecks },

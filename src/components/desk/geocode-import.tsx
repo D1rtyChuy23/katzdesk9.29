@@ -79,6 +79,8 @@ export function GeocodeImportButton() {
       toast.success(`Saved ${r.saved} location${r.saved === 1 ? "" : "s"}`);
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["customer-address"] });
+      void qc.invalidateQueries({ queryKey: ["account-addresses"] });
+      void qc.invalidateQueries({ queryKey: ["account-geo"] });
       setOpen(false);
       setPreview(null);
     },

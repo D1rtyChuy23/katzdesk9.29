@@ -6,6 +6,7 @@
  */
 import { chargesTotal, checkCharges, lineAmount, round2, type ChargeKind } from "./charges.ts";
 import { applyDiscount, type Discount } from "./discount.ts";
+import type { PinQuality } from "./geo.ts";
 
 export const INVOICE_TARGETS = ["service", "tlc", "pm", "install", "rebuild", "deal"] as const;
 export type InvoiceTarget = (typeof INVOICE_TARGETS)[number];
@@ -63,6 +64,10 @@ export type BillTo = {
   netsuiteId: string | null;
   /** False when the record's customer is not on the KatzDesk customer list. */
   onList: boolean;
+  /** The account's saved map pin, for directions to the exact spot (only when it is a street match). */
+  latitude?: number | null;
+  longitude?: number | null;
+  geocodeMatch?: PinQuality | null;
 };
 
 /** What is missing from the billing info, so the window can say it plainly instead of asking for the customer. */

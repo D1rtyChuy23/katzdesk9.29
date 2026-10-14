@@ -6,6 +6,7 @@ import { catalogModels } from "@/lib/ops/equipment";
 import { InstallPlanner } from "@/components/desk/install-planner";
 import { PlannerCalendar, usePlannerWork } from "@/components/desk/planner-calendar";
 import { DayBoard } from "@/components/desk/day-board";
+import { RoutePlanner } from "@/components/desk/route-planner";
 import { CalendarDockButton } from "@/components/desk/pending-calendar";
 import { useMyView } from "@/components/desk/my-view-bar";
 import { FilterChip } from "@/components/desk/desk-charts";
@@ -32,7 +33,7 @@ function Page() {
     [installs],
   );
 
-  const [tab, setTab] = useState<"day" | "calendar" | "timeline">("calendar");
+  const [tab, setTab] = useState<"day" | "calendar" | "timeline" | "routes">("calendar");
 
   return (
     <div>
@@ -40,7 +41,7 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Planner</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Day is the dispatch board: techs down the side, hours across. Calendar is the month. Drag a job to move it.
+            Day is the dispatch board: techs down the side, hours across. Calendar is the month. Drag a job to move it. Routes puts each tech&rsquo;s day on a map.
           </p>
         </div>
         <CalendarDockButton />
@@ -55,6 +56,9 @@ function Page() {
         <FilterChip selected={tab === "timeline"} onClick={() => setTab("timeline")}>
           Timeline
         </FilterChip>
+        <FilterChip selected={tab === "routes"} onClick={() => setTab("routes")} data-testid="planner-tab-routes">
+          Routes
+        </FilterChip>
       </div>
       <div className="mt-4">
         {work.loading ? (
@@ -68,6 +72,8 @@ function Page() {
             services={work.services}
             tlcs={work.tlcs}
           />
+        ) : tab === "routes" ? (
+          <RoutePlanner installs={work.installs} pms={work.pms} services={work.services} tlcs={work.tlcs} />
         ) : (
           <InstallPlanner installs={installs} recipes={recs.data ?? []} catalog={catalog} myRep={mineRep} />
         )}

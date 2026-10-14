@@ -75,6 +75,10 @@ function Page() {
     void qc.invalidateQueries({ queryKey: ["customers"] });
     void qc.invalidateQueries({ queryKey: ["directory", "customer"] });
     void qc.invalidateQueries({ queryKey: ["customer-history"] });
+    // Names changed: addresses, pins and the map are keyed by name, so read them again.
+    void qc.invalidateQueries({ queryKey: ["account-addresses"] });
+    void qc.invalidateQueries({ queryKey: ["customer-address"] });
+    void qc.invalidateQueries({ queryKey: ["account-geo"] });
   }
 
   const start = useMutation({

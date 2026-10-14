@@ -27,6 +27,7 @@ import { JobSheet } from "./job-sheet";
 import { DealSheet, InstallSheet, PmSheet } from "./entity-sheets";
 import { RecipeEditorSheet } from "./recipe-sheet";
 import { ProviderDispatchBlock } from "./provider-dispatch";
+import { NearbyAccounts } from "./nearby-accounts";
 import { RenameDialog } from "./rename-dialog";
 import type { RecipeDraft } from "./recipe-form";
 import { cn } from "@/lib/utils";
@@ -366,6 +367,9 @@ export function CustomerHistorySheet({
                   ) : null}
                   <div className="mt-4">
                     <ProviderDispatchBlock customer={data.name} assignable />
+                  </div>
+                  <div className="mt-4">
+                    <NearbyAccounts accountId={data.id} name={data.name} />
                   </div>
                   {/* Recipes are not a tab of their own: the account has the five tabs, and its recipes sit under Details. */}
                   <div className="mt-4" data-testid="account-recipes">
