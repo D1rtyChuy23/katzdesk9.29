@@ -7,6 +7,11 @@
       "name": "motion-design",
       "description": "15-second motion-graphics workflow: Opus builds, Jev evaluates review notes, code renders and checks exports.",
       "source": "./plugins/motion-design"
+    },
+    {
+      "name": "minimind",
+      "description": "Set up, download and evaluate the minimind-3 chat LLM from Hugging Face in a cloud session.",
+      "source": "./plugins/minimind"
     }
   ]
 }

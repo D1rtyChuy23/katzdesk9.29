@@ -2,8 +2,8 @@
 # Sets up jingyaogong/minimind outside this repo, downloads the minimind-3
 # weights and runs eval_llm.py in auto-test mode. Safe to re-run.
 #
-#   bash scripts/setup-minimind.sh            # setup + download + eval
-#   SKIP_EVAL=1 bash scripts/setup-minimind.sh
+#   bash .claude/skills/minimind/scripts/setup-minimind.sh   # setup + download + eval
+#   SKIP_EVAL=1 bash .claude/skills/minimind/scripts/setup-minimind.sh
 #
 # Env: MINIMIND_DIR (default /home/user/minimind), MAX_NEW_TOKENS (default 256).
 # Needs huggingface.co plus its file hosts (cas-server.xethub.hf.co for Xet,

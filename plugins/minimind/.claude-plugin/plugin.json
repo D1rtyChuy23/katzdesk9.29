@@ -1,0 +1,6 @@
+{
+  "name": "minimind",
+  "description": "Set up, download and evaluate the minimind-3 chat LLM from Hugging Face in a cloud session.",
+  "version": "0.1.0",
+  "author": { "name": "D1rtyChuy23" }
+}
