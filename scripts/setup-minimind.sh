@@ -6,7 +6,9 @@
 #   SKIP_EVAL=1 bash scripts/setup-minimind.sh
 #
 # Env: MINIMIND_DIR (default /home/user/minimind), MAX_NEW_TOKENS (default 256).
-# Needs huggingface.co (or www.modelscope.cn) allowed in the network policy.
+# Needs huggingface.co plus its file hosts (cas-server.xethub.hf.co for Xet,
+# us.aws.cdn.hf.co for plain HTTP), or www.modelscope.cn, allowed in the
+# network policy. huggingface.co alone only fetches the small files.
 set -euo pipefail
 
 DIR="${MINIMIND_DIR:-/home/user/minimind}"
@@ -36,13 +38,15 @@ pip_install() {
 pip_install -r requirements.txt
 pip_install "pyarrow<21" numpy==1.26.4
 
-if [ ! -f minimind-3/config.json ]; then
+# Check for the weights, not config.json: a blocked LFS host leaves a partial
+# download with config.json but no model file.
+if [ ! -f minimind-3/model.safetensors ] && [ ! -f minimind-3/pytorch_model.bin ]; then
   rm -rf minimind-3
   if ! "$PY" -c "from huggingface_hub import snapshot_download; snapshot_download('jingyaogong/minimind-3', local_dir='minimind-3')"; then
     echo "Hugging Face download failed; trying ModelScope..." >&2
     rm -rf minimind-3
     if ! .venv/bin/modelscope download --model gongjy/minimind-3 --local_dir ./minimind-3; then
-      echo "Could not download minimind-3. Allow huggingface.co in the environment's network access settings and start a new session." >&2
+      echo "Could not download minimind-3. Allow huggingface.co, cas-server.xethub.hf.co and us.aws.cdn.hf.co in the environment's network access settings and start a new session." >&2
       exit 1
     fi
   fi
