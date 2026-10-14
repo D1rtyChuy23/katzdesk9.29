@@ -50,6 +50,8 @@ const globalRef = globalThis as typeof globalThis & {
   __pgliteRestored__?: Promise<import("@electric-sql/pglite").PGlite>;
   __pgliteDesk__?: Promise<import("@electric-sql/pglite").PGlite>;
   __pgliteMigrateChain__?: Promise<void>;
+  /** The migration file names on disk the last time they were all applied (see applyMigrationsAddedOnDisk). */
+  __pgliteDiskMigrationsSeen__?: string;
 };
 
 /**
@@ -145,9 +147,10 @@ async function createPgliteSql(): Promise<Sql> {
 
   // Apply migrations/ (the single schema source) so preview matches production.
   // SQL is inlined by the bundler via import.meta.glob (no runtime fs); applied
-  // files are tracked in _migrations. Runs once per module instance — so an HMR
-  // reload after adding a migration file applies it live — with passes
-  // serialized on a global chain so concurrent callers never double-apply.
+  // files are tracked in _migrations. Runs once per module instance, with passes
+  // serialized on a global chain so concurrent callers never double-apply. A
+  // migration that arrives while the server is running (a git pull) is picked up
+  // by applyMigrationsAddedOnDisk below, not by this pass.
   // (0009 notifications; 0012–0015 ops; 0016–0017 provider locations/people; 0018 ping once; 0028 pre-inspection; 0029 per machine; 0032 stock actions.)
   const migrate = async (): Promise<void> => {
     const migrations = import.meta.glob("/migrations/*.sql", {
@@ -208,7 +211,66 @@ export function getSql(): Promise<Sql> {
     sqlPromise = null; // don't memoize failures — let the next call retry
     throw err;
   });
-  return sqlPromise;
+  if (dbSource !== "pglite") return sqlPromise;
+  return sqlPromise.then(async (sql) => {
+    await applyMigrationsAddedOnDisk();
+    return sql;
+  });
+}
+
+/**
+ * Preview only (PGLite on a disk, never serverless). The migration glob in
+ * createPgliteSql is fixed when this module is first compiled, and the dev
+ * server does not compile it again when a `git pull` adds a migration file (nor
+ * re-run the pass when other files change), so a pulled migration used to wait
+ * for a full restart while the pulled code already queried its new columns
+ * ("column … does not exist" until then). Before each use, the migrations folder
+ * on disk is compared with what this server last applied; a new file is applied
+ * the same way as at startup (one transaction, recorded in `_migrations`). One
+ * directory listing per call; the database is read only when the folder changed.
+ * A migration that fails throws here, so the error shows instead of a silent
+ * half-updated schema, and the next call tries again.
+ */
+async function applyMigrationsAddedOnDisk(): Promise<void> {
+  if (typeof process === "undefined" || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) return;
+  let fs: typeof import("node:fs");
+  let dir: string;
+  let names: string[];
+  try {
+    fs = await import("node:fs");
+    const { resolve } = await import("node:path");
+    dir = resolve(process.cwd(), "migrations");
+    names = fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith(".sql"))
+      .sort((a, b) => a.localeCompare(b));
+  } catch {
+    return; // no migrations folder next to the running server: nothing to compare
+  }
+  const seen = names.join("\n");
+  if (globalRef.__pgliteDiskMigrationsSeen__ === seen) return;
+  const pg = await globalRef.__pgliteDesk__;
+  if (!pg) return;
+  const { join } = await import("node:path");
+  const pass = (globalRef.__pgliteMigrateChain__ ?? Promise.resolve())
+    .catch(() => undefined) // an earlier failed pass must not wedge the chain
+    .then(async () => {
+      const done = new Set(
+        (await pg.query<{ name: string }>("select name from _migrations")).rows.map((r) => r.name),
+      );
+      for (const name of names) {
+        if (done.has(name)) continue;
+        const text = fs.readFileSync(join(dir, name), "utf8");
+        await pg.transaction(async (tx) => {
+          await tx.exec(text);
+          await tx.query("insert into _migrations (name) values ($1)", [name]);
+        });
+        console.log(`[db] applied ${name} (it arrived while the server was running)`);
+      }
+    });
+  globalRef.__pgliteMigrateChain__ = pass;
+  await pass;
+  globalRef.__pgliteDiskMigrationsSeen__ = seen;
 }
 
 /**
