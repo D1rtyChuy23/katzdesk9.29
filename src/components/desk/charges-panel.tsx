@@ -348,13 +348,20 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
                 }}
               >
                 <span className="min-w-0">
-                  <span className="block truncate font-medium">{it.item}</span>
-                  {/* The part's stored description, or nothing: never filled in. */}
-                  <span className="line-clamp-2 text-xs text-foreground/80" data-testid="part-result-description">
-                    {it.description ?? ""}
+                  {/* Part name (the NetSuite Description), or the item when none is stored: never made up. */}
+                  <span className="line-clamp-2 font-medium" data-testid="part-result-description">
+                    {it.description || it.item}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    MPN {it.mfrPart ? it.mfrPart : "not set"}
+                  <span className="block truncate text-xs text-muted-foreground" data-testid="part-result-number">
+                    Part # <span className="font-medium text-foreground">{it.mfrPart || it.part?.sku || "not set"}</span>
+                  </span>
+                  <span className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
+                    {it.itemClass ? <span data-testid="part-result-class">{it.itemClass}</span> : null}
+                    {it.getLater ? (
+                      <span className="font-semibold text-warning" data-testid="part-result-get-later">
+                        Get Later
+                      </span>
+                    ) : null}
                   </span>
                 </span>
                 <span className="shrink-0 tabular text-xs text-muted-foreground">{it.rate != null ? money(it.rate) : ""}</span>

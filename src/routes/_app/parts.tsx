@@ -3,15 +3,17 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, EyeOff, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { clearPartImage, hideParts, listParts, removePart, restoreParts, setPartDescription, setPartImage, setPartMpn, type PartRow } from "@/lib/ops/parts-api";
-import { resizeImageToBase64 } from "@/lib/image-resize";
+import { clearPartImage, hideParts, listParts, removePart, restoreParts, setPartDescription, setPartGetLater, setPartImage, setPartMpn, type PartRow } from "@/lib/ops/parts-api";
+import { treatPartPhoto, treatResearchedPhoto } from "@/lib/part-photo-treatment";
+import { Badge } from "@/components/ui/badge";
+import { PhotoReview } from "@/components/desk/photo-review";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PartThumb } from "@/components/desk/part-thumb";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
 import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { getMyAccess } from "@/lib/ops/access";
-import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
+import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 
 export const Route = createFileRoute("/_app/parts")({ component: Page });
 
@@ -32,6 +34,8 @@ function Page() {
   const [term, setTerm] = useState("");
   const [noPhoto, setNoPhoto] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
+  const [getLater, setGetLater] = useState(false);
+  const [itemClass, setItemClass] = useState("");
   const [offset, setOffset] = useState(0);
   const [extra, setExtra] = useState<PartRow[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
@@ -48,8 +52,8 @@ function Page() {
   }, [q]);
 
   const page = useQuery({
-    queryKey: ["parts", term, noPhoto, showHidden, offset],
-    queryFn: () => listParts({ data: { q: term, noPhoto, hidden: showHidden, offset } }),
+    queryKey: ["parts", term, noPhoto, showHidden, getLater, itemClass, offset],
+    queryFn: () => listParts({ data: { q: term, noPhoto, hidden: showHidden, getLater, itemClass: itemClass || undefined, offset } }),
   });
   const rows = offset === 0 ? (page.data?.rows ?? []) : [...extra, ...(page.data?.rows ?? [])];
   const total = page.data?.total ?? 0;
@@ -77,6 +81,45 @@ function Page() {
   });
 
   const toggle = (id: number) => setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+  const resetPaging = () => {
+    setOffset(0);
+    setExtra([]);
+  };
+
+  // Every part whose photo research confirmed one photo (same MPN on 3+ agreeing sources) and has none attached yet:
+  // fetched, given the standard treatment, and saved. Anything that fails stays flagged Confirm Photo.
+  const [pulling, setPulling] = useState<string | null>(null);
+  async function pullConfirmed() {
+    setPulling("Finding parts…");
+    let done = 0;
+    let failed = 0;
+    try {
+      let offsetAt = 0;
+      const todo: PartRow[] = [];
+      for (;;) {
+        const p = await listParts({ data: { noPhoto: true, offset: offsetAt } });
+        todo.push(...p.rows.filter((r) => r.research?.verdict === "confirmed" && r.research.imageUrl));
+        if (p.rows.length < 50) break;
+        offsetAt += 50;
+      }
+      for (const r of todo) {
+        setPulling(`Pulling ${done + failed + 1} of ${todo.length}…`);
+        try {
+          const base64 = await treatResearchedPhoto(r.id, -1);
+          await setPartImage({ data: { id: r.id, base64, sourceUrl: r.research!.imageUrl } });
+          done += 1;
+        } catch {
+          failed += 1;
+        }
+      }
+      toast.success(`${done} confirmed photo${done === 1 ? "" : "s"} attached${failed ? `; ${failed} could not be reached and stay flagged Confirm Photo` : ""}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not pull the photos");
+    } finally {
+      setPulling(null);
+      refresh();
+    }
+  }
 
   return (
     <div>
@@ -89,6 +132,12 @@ function Page() {
         </div>
         {isAdmin ? (
           <div className="flex shrink-0 flex-wrap gap-2">
+            {page.data?.readyToPull ? (
+              <Button type="button" size="sm" variant="outline" disabled={!!pulling} onClick={() => void pullConfirmed()} data-testid="parts-pull-confirmed">
+                <Camera className="size-4" />
+                {pulling ?? `Pull Confirmed Photos (${page.data.readyToPull})`}
+              </Button>
+            ) : null}
             <ImportMenu>
               <ImportPartsButton />
               <UpdatePricingButton />
@@ -98,17 +147,47 @@ function Page() {
       </header>
 
       <ListToolbar>
-        <ToolbarSearch value={q} onChange={setQ} placeholder="Search SKU, MPN or description…" label="Search parts" testId="parts-search" />
+        <ToolbarSearch value={q} onChange={setQ} placeholder="Search part number or name…" label="Search parts" testId="parts-search" />
         <FilterChip
           selected={noPhoto}
+          data-testid="parts-confirm-photo"
           onClick={() => {
             setNoPhoto(!noPhoto);
-            setOffset(0);
-            setExtra([]);
+            resetPaging();
           }}
         >
-          No Photo Yet
+          Confirm Photo
         </FilterChip>
+        <FilterChip
+          selected={getLater}
+          data-testid="parts-get-later-filter"
+          onClick={() => {
+            setGetLater(!getLater);
+            resetPaging();
+          }}
+        >
+          Get Later · {(page.data?.getLaterCount ?? 0).toLocaleString()}
+        </FilterChip>
+        {page.data?.classes.length ? (
+          <ToolbarSelect
+            value={itemClass}
+            onChange={(e) => {
+              setItemClass(e.target.value);
+              resetPaging();
+            }}
+            allowEmpty
+            emptyLabel="All classes"
+            aria-label="Filter by class"
+            className="w-56"
+            data-testid="parts-class-filter"
+          >
+            {page.data.classes.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </ToolbarSelect>
+        ) : null}
         <FilterChip
           selected={showHidden}
           data-testid="parts-show-hidden"
@@ -238,8 +317,26 @@ function PartRowView({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the description"),
   });
 
+  const [reviewing, setReviewing] = useState(false);
+  const later = useMutation({
+    mutationFn: (on: boolean) => setPartGetLater({ data: { id: row.id, on } }),
+    onSuccess: (_r, on) => {
+      toast.success(on ? "Marked Get Later" : "Get Later cleared");
+      onChanged();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not change Get Later"),
+  });
+  const pull = useMutation({
+    mutationFn: async () => setPartImage({ data: { id: row.id, base64: await treatResearchedPhoto(row.id, -1), sourceUrl: row.research?.imageUrl ?? null } }),
+    onSuccess: () => {
+      toast.success("Confirmed photo attached");
+      onChanged();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not get the photo; it stays flagged Confirm Photo"),
+  });
   const upload = useMutation({
-    mutationFn: async (file: File) => setPartImage({ data: { id: row.id, base64: await resizeImageToBase64(file) } }),
+    // Same treatment as a researched photo: trimmed, centered on the light square.
+    mutationFn: async (file: File) => setPartImage({ data: { id: row.id, base64: await treatPartPhoto(file) } }),
     onSuccess: () => {
       toast.success(row.hasImage ? "Photo replaced" : "Photo added");
       onChanged();
@@ -309,20 +406,51 @@ function PartRowView({
       ) : null}
       <PartThumb part={{ id: row.id, sku: row.sku, mpn: row.mpn, hasImage: row.hasImage, imageVersion: row.imageVersion }} name={row.item} size="lg" />
       <div className="min-w-0 flex-1">
-        <p className="font-medium break-words">{row.item}</p>
+        {/* Part name is the NetSuite Description; blank when none is stored. */}
+        <p className="font-medium break-words" data-testid="part-name">
+          {row.description || <span className="text-muted-foreground">{row.item}</span>}
+        </p>
         <p className="text-sm text-muted-foreground" data-testid="part-mpn">
-          MPN {row.mpn ? <span className="font-medium text-foreground">{row.mpn}</span> : <span>not set</span>}
+          Part # {row.mpn ? <span className="font-medium text-foreground">{row.mpn}</span> : <span>not set</span>}
           {row.rate != null ? ` · ${money(row.rate)}` : ""}
           {row.listPrice != null ? <span data-testid="part-list-price"> · Mfr {money(row.listPrice)}</span> : null}
         </p>
-        {/* Description: what is stored, or blank. Nothing is filled in for a part that has none. */}
-        <p className="mt-0.5 text-sm break-words text-muted-foreground" data-testid="part-description">
-          {row.description ? (
-            <>
-              <span className="text-[11px] font-medium tracking-wide uppercase">Description</span> <span className="text-foreground/80">{row.description}</span>
-            </>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+          {row.itemClass ? (
+            <span className="text-muted-foreground" data-testid="part-class">
+              <span className="font-medium tracking-wide uppercase">Class</span> {row.itemClass}
+            </span>
           ) : null}
-        </p>
+          <label className="inline-flex cursor-pointer items-center gap-1.5 font-medium" title="Marks the part to pull later. Price and stock do not change." data-testid="part-get-later">
+            <input type="checkbox" className="size-4 accent-primary" checked={row.getLater} disabled={later.isPending} onChange={(e) => later.mutate(e.target.checked)} />
+            Get Later
+          </label>
+          {row.hasImage && row.photoStatus === "confirmed" ? (
+            <Badge size="tight" variant="success" title={row.photoSourceUrl ? `From ${row.photoSourceUrl}` : row.photoConfirmedBy ? `Added by ${row.photoConfirmedBy}` : undefined} data-testid="part-photo-confirmed">
+              Photo Confirmed
+            </Badge>
+          ) : !row.hasImage ? (
+            <Badge size="tight" variant="warn" title={row.research?.reason ?? "No photo has been confirmed for this part number yet."} data-testid="part-confirm-photo">
+              Confirm Photo
+            </Badge>
+          ) : null}
+          {!row.hasImage && row.research?.verdict === "confirmed" && row.research.imageUrl ? (
+            <Button type="button" size="sm" variant="outline" className="h-7" disabled={pull.isPending} onClick={() => pull.mutate()} data-testid="part-pull-confirmed">
+              {pull.isPending ? "Pulling…" : "Pull Confirmed Photo"}
+            </Button>
+          ) : null}
+          {!row.hasImage && row.research?.verdict === "review" && row.research.candidates.length ? (
+            <Button type="button" size="sm" variant="outline" className="h-7" onClick={() => setReviewing(true)} data-testid="part-review-photos">
+              Review Photos ({row.research.candidates.length})
+            </Button>
+          ) : null}
+        </div>
+        {row.description && row.description !== row.item ? (
+          <p className="mt-0.5 text-[11px] text-muted-foreground" data-testid="part-description">
+            NetSuite item {row.item}
+          </p>
+        ) : null}
+        {reviewing ? <PhotoReview part={row} onClose={() => setReviewing(false)} onSaved={onChanged} /> : null}
         {editingDesc ? (
           <form
             className="mt-2 flex flex-wrap items-center gap-2"
@@ -432,7 +560,7 @@ function PartRowView({
           {canEditMpn && !editingDesc ? (
             <Button type="button" size="sm" variant="ghost" onClick={() => setEditingDesc(true)} data-testid="part-description-edit">
               <Pencil className="size-4" />
-              {row.description ? "Edit Description" : "Add Description"}
+              {row.description ? "Edit Part Name" : "Add Part Name"}
             </Button>
           ) : null}
           {canHide && showHidden ? (

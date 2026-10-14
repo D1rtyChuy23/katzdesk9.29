@@ -182,3 +182,29 @@ test("plan: the same MPN on two new models in one file is a conflict", () => {
   ]);
   assert.deepEqual(p.map((l) => l.status), ["new-mpn", "conflict"]);
 });
+
+test("photo treatment: the part is found inside its background border and centered on the square", async () => {
+  const { partBox, centerOnSquare, PHOTO_EDGE } = await import("../src/lib/ops/part-images.ts");
+  // 10x6 white image with a dark 4x2 part at (5,3).
+  const w = 10, h = 6;
+  const data = new Uint8ClampedArray(w * h * 4).fill(255);
+  for (let y = 3; y < 5; y++) for (let x = 5; x < 9; x++) { const i = (y * w + x) * 4; data[i] = 40; data[i + 1] = 40; data[i + 2] = 40; }
+  assert.deepEqual(partBox(data, w, h), { x: 5, y: 3, w: 4, h: 2 });
+  // All background: the whole frame is kept.
+  assert.deepEqual(partBox(new Uint8ClampedArray(16).fill(255), 2, 2), { x: 0, y: 0, w: 2, h: 2 });
+  const at = centerOnSquare({ w: 4, h: 2 });
+  assert.equal(at.w, Math.round(PHOTO_EDGE * 0.84));
+  assert.equal(at.x, Math.round((PHOTO_EDGE - at.w) / 2));
+  assert.equal(at.y, Math.round((PHOTO_EDGE - at.h) / 2));
+  const tall = centerOnSquare({ w: 1, h: 3 });
+  assert.equal(tall.h, Math.round(PHOTO_EDGE * 0.84));
+});
+
+test("photo treatment: an off-white source background becomes the one white, the part is left alone", async () => {
+  const { flattenBackground, PHOTO_BACKGROUND } = await import("../src/lib/ops/part-images.ts");
+  assert.equal(PHOTO_BACKGROUND, "#ffffff");
+  // off-white, see-through, already white, a dark part pixel
+  const data = new Uint8ClampedArray([246, 245, 241, 255, 10, 10, 10, 0, 255, 255, 255, 255, 60, 64, 70, 255]);
+  assert.equal(flattenBackground(data), 2);
+  assert.deepEqual([...data], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 60, 64, 70, 255]);
+});

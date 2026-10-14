@@ -83,6 +83,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
       qc.setQueryData(["invoice", type, id], next);
       // A ticket's invoice is its Charges: the panel and the billing list read the same lines.
       void qc.invalidateQueries({ queryKey: ["charges", id] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
       toast.success(`Invoice approved · ${money(next.total)}`);

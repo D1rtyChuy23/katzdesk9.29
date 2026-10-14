@@ -890,3 +890,42 @@ Checked with clicks: install with Mythos and Bunn Axiom-APS, Puqpress added at t
 **To confirm:** approved invoices on installs, rebuilds, PMs and deals are saved on the record but are not yet in the billing export (which is built for ticket charges and the billing script) or in Parts Profit. Say if they should be.
 
 Checked with clicks: Add Description on a part with none, saved; the picker shows it under the part name with the MPN and photo. Mod Coffeehouse service ticket WO-0405 → Invoice → Bill To Mod Coffeehouse, account 00077, 2126 Post Office Street, Lance Oden; burr set + 1.5 h labor, 10% → $370.00 − $37.00 = $333.00; Cancel saved nothing; again with Approve → the Charges panel shows the same two lines and $333.00. Mod Coffeehouse install #364 → Invoice → the same window and Bill To; gasket × 2 + 3 h labor − $25.00 = $473.00, approved, reopened as saved. PM, deal and rebuild open the same window; billed ticket WO-9880 is locked; no sideways scroll on a phone.
+
+## 44. Parts From The NetSuite Items File, Get Later, Photo Review, Account Tabs
+
+**The file.** Import → Import Parts reads the NetSuite items export (NetSuite-Items-2026-10-12.xlsx: Parts, Filters, Equipment and Service sheets). On it, **Name is the part number (MPN)** and **Description is the part name**. Class, Base Price (rate), Purchase Price (cost) and Inactive are kept. Display Name is used as the name only when a file has no Description column.
+- Match on MPN, compared without case, spaces or punctuation (`mpnKey`). If the part exists, it is updated. If not, it is added. A part loaded earlier with that number as its SKU and no MPN counts as the same part. Never a second row for one MPN; a number repeated in the file is counted as "Same MPN twice in file" and used once.
+- Nothing is applied until Approve in the import window (the rule from 41). Blank cells do not wipe what is stored. Hidden parts are not touched.
+- Nothing is added that is not on the file.
+- Checked: the real file read 3,976 rows, Add 3,973, Update 2, Not applied 1 (a local test part whose SKU was taken), Same MPN twice 3. After Approve, running the same file again changes nothing.
+
+**Class and Get Later** (migration 0070). Each part stores its NetSuite Class. Get Later is a checkbox on the part, anyone on the Desk can tick it, and it records who and when. It does not change price or stock; it only marks the part to pull later. Parts has a Get Later filter (with its count) and a Class filter. The Parts list and the invoice picker both show the part name, Part #, Class and Get Later.
+
+**Photos.** A photo is attached only when it is the same MPN on at least 3 independent sources and those photos agree. Otherwise the part shows **Confirm Photo**.
+- Research results live in `part_photo_research`: verdict, reason, the image to use, and candidates with site, source page and the part number the page shows.
+- Pilot: 40 parts researched, 2 confirmed (BUNN32400.0003, FETCO1024.00020.00), 38 flagged. Flagged parts with candidates show **Review Photos (n)**: candidates side by side with the reason, the source page and photo address, Use This Photo or None Of These. Watermarked candidates cannot be used.
+- Report: reports/NetSuite part photo sourcing.md (kept out of git).
+- Photos are fetched through `/api/part-photo-source/:id`, signed in only, and only addresses on that part's research. This workspace cannot reach the photo sites, so the 2 confirmed photos are pulled on the live site with **Pull Confirmed Photos** (Admin). If a source does not answer, the part stays flagged.
+- **One treatment for every photo** (researched or uploaded): trim the background border, center the part on a white 800×800 square with an 8% margin, turn leftover near-white background into the same white, JPEG. No watermark is ever used. Click any part photo to enlarge it.
+
+**Account tabs.** An account no longer scrolls through stacked sections. The account window opens on tabs, one per category: **Details, Equipment, Tickets, Invoices, Pre-Inspection, Recipes**, with counts. Clicking a tab shows only that category.
+- Equipment and Pre-Inspection show their lists right away (no extra click inside the tab).
+- Invoices lists the account's ticket invoices (from Charges) and approved invoices on installs, PMs, rebuilds and deals. Each row opens the Invoice window from 43.
+- The tab row scrolls sideways on a phone; the page does not.
+
+**To confirm:**
+- The Equipment and Service sheets were imported as items too (they are billable lines in NetSuite). Say if only the Parts and Filters sheets should be.
+- About 3,900 parts have not been researched yet and show Confirm Photo. Researching the full list is a longer run in the same table.
+- The research found data issues in the item list. Each needs a decision, not a guess:
+  - OptiPure vs Pentair Everpure vendor label
+  - Fetco 52018 marked discontinued, but Parts Town has stock
+  - "was 95888900" is probably 958889000
+  - numbers already superseded: Mahlkönig 309560 → 702926, Ditting 240078 → kit 703425, Fetco 24012 → 1024.00020.00, F.1.034
+- A manual upload counts as confirmed by the person who uploaded it.
+
+Checked with clicks:
+- BUNN32400.0003 reads: BUNN TIMER KIT, DGTL-240V(NO ADPTR), Part # BUNN32400.0003, Class Equipment : Parts and Filters. Get Later ticked, and the Get Later filter shows 1. The row shows Confirm Photo and Pull Confirmed Photo; here the source cannot be reached, so the part stays flagged.
+- The invoice picker shows the same name, Part #, class and Get Later.
+- BUNN37192.0000 → Review Photos (2): Parts Town and HowdyBrewer, reason "Only 2 sources…".
+- A 1400×800 sample photo with the part off to one side came out 800×800, centered on white, and enlarges on click.
+- Mod Coffeehouse opens on tabs: Equipment 3, Tickets 5, Invoices (WO-0405 $333, Install #364 $473), Pre-Inspection 4.

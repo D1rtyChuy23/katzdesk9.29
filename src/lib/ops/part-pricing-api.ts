@@ -45,11 +45,23 @@ function readSheets(base64: string) {
 }
 
 async function storedParts(sql: Sql): Promise<StoredPart[]> {
-  const rows = await sql.query<{ id: number; sku: string; item: string; mfr_part: string | null; description: string | null; rate: string | null; cost: string | null; list_price: string | null; hidden: boolean }>(
-    "select id, sku, item, mfr_part, description, rate, cost, list_price, (hidden_at is not null) as hidden from billing_items",
+  const rows = await sql.query<{ id: number; sku: string; item: string; mfr_part: string | null; description: string | null; rate: string | null; cost: string | null; list_price: string | null; hidden: boolean; item_class: string | null; active: boolean }>(
+    "select id, sku, item, mfr_part, description, rate, cost, list_price, (hidden_at is not null) as hidden, item_class, active from billing_items",
   );
   const n = (v: string | null) => (v == null ? null : Number(v));
-  return rows.map((r) => ({ id: Number(r.id), sku: r.sku, item: r.item, mpn: r.mfr_part, description: r.description, rate: n(r.rate), cost: n(r.cost), listPrice: n(r.list_price), hidden: flagOn(r.hidden) }));
+  return rows.map((r) => ({
+    id: Number(r.id),
+    sku: r.sku,
+    item: r.item,
+    mpn: r.mfr_part,
+    description: r.description,
+    rate: n(r.rate),
+    cost: n(r.cost),
+    listPrice: n(r.list_price),
+    hidden: flagOn(r.hidden),
+    itemClass: r.item_class,
+    active: flagOn(r.active),
+  }));
 }
 
 const fileInput = { filename: z.string().max(300), base64: z.string().min(4), apply: z.boolean() };
@@ -107,29 +119,58 @@ export const importPartsNetsuite = createServerFn({ method: "POST" })
     };
     if (!data.apply) return preview;
 
-    // Approved: the same plan, written. Blank cells keep what is stored.
-    for (const p of plan) {
-      const r = p.row;
-      if (p.status === "update" && p.partId != null) {
-        await sql.query(
-          `update billing_items set
-             mfr_part = $2,
-             description = coalesce($3, description),
-             rate = coalesce($4, rate),
-             cost = coalesce($5, cost),
-             updated_at = now()
-           where id = $1 and hidden_at is null`,
-          [p.partId, r.mpn, r.description, r.rate, r.cost],
-        );
-      } else if (p.status === "new") {
-        const sku = r.sku ?? r.mpn;
-        await sql.query(
-          `insert into billing_items (sku, parent, item, description, rate, cost, kind, mfr_part)
-           values ($1, $2, $3, $4, $5, $6, $7, $8)
-           on conflict do nothing`,
-          [sku, r.parent, itemFullName(sku, r.parent), r.description, r.rate, r.cost, r.kind, r.mpn],
-        );
-      }
+    // Approved: the same plan, written in batches. Blank cells keep what is stored; hidden parts stay as they are.
+    const CHUNK = 500;
+    const updates = plan.filter((p) => p.status === "update" && p.partId != null);
+    for (let i = 0; i < updates.length; i += CHUNK) {
+      const part = updates.slice(i, i + CHUNK);
+      await sql.query(
+        `update billing_items b set
+           mfr_part = s.mpn,
+           description = coalesce(s.description, b.description),
+           rate = coalesce(s.rate, b.rate),
+           cost = coalesce(s.cost, b.cost),
+           item_class = coalesce(s.cls, b.item_class),
+           kind = case when s.cls is not null and b.kind not in ('trip', 'labor') then s.kind else b.kind end,
+           active = coalesce(s.active, b.active),
+           updated_at = now()
+          from unnest($1::int[], $2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $7::text[], $8::boolean[])
+               as s(id, mpn, description, rate, cost, cls, kind, active)
+         where b.id = s.id and b.hidden_at is null`,
+        [
+          part.map((p) => p.partId),
+          part.map((p) => p.row.mpn),
+          part.map((p) => p.row.description),
+          part.map((p) => p.row.rate),
+          part.map((p) => p.row.cost),
+          part.map((p) => p.row.cls),
+          part.map((p) => p.row.kind),
+          part.map((p) => p.row.active),
+        ],
+      );
+    }
+    const adds = plan.filter((p) => p.status === "new");
+    for (let i = 0; i < adds.length; i += CHUNK) {
+      const part = adds.slice(i, i + CHUNK).map((p) => ({ ...p.row, sku: p.row.sku ?? p.row.mpn }));
+      await sql.query(
+        `insert into billing_items (sku, parent, item, description, rate, cost, kind, mfr_part, item_class, active)
+         select s.sku, s.parent, s.item, s.description, s.rate, s.cost, s.kind, s.mpn, s.cls, coalesce(s.active, true)
+           from unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::numeric[], $6::numeric[], $7::text[], $8::text[], $9::text[], $10::boolean[])
+                as s(sku, parent, item, description, rate, cost, kind, mpn, cls, active)
+         on conflict do nothing`,
+        [
+          part.map((r) => r.sku),
+          part.map((r) => r.parent),
+          part.map((r) => itemFullName(r.sku, r.parent)),
+          part.map((r) => r.description),
+          part.map((r) => r.rate),
+          part.map((r) => r.cost),
+          part.map((r) => r.kind),
+          part.map((r) => r.mpn),
+          part.map((r) => r.cls),
+          part.map((r) => r.active),
+        ],
+      );
     }
     await sql.query(
       "insert into part_import_runs (kind, filename, row_count, added, updated, not_applied, approved_by) values ('parts', $1, $2, $3, $4, $5, $6)",

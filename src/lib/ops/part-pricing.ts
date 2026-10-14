@@ -32,7 +32,7 @@ const blankRow = (r: unknown[]) => r.every((c) => !String(c ?? "").trim());
 
 // ------------------------------------------------------------------------------------------ parts import
 
-type PartField = "mpn" | "name" | "description" | "rate" | "cost" | "parent" | "class";
+type PartField = "mpn" | "name" | "description" | "displayName" | "rate" | "cost" | "parent" | "class" | "inactive";
 
 const PART_HEADERS: Record<string, PartField> = {
   mpn: "mpn",
@@ -52,7 +52,8 @@ const PART_HEADERS: Record<string, PartField> = {
   sku: "name",
   description: "description",
   "sales description": "description",
-  "display name": "description",
+  // Only used when the file has no Description column: "Display Name" is often blank in a NetSuite export.
+  "display name": "displayName",
   "base price": "rate",
   "sell price": "rate",
   "sales price": "rate",
@@ -64,6 +65,7 @@ const PART_HEADERS: Record<string, PartField> = {
   parent: "parent",
   "parent item": "parent",
   class: "class",
+  inactive: "inactive",
 };
 
 export type PartImportRow = {
@@ -77,32 +79,63 @@ export type PartImportRow = {
   rate: number | null;
   cost: number | null;
   kind: ChargeKind;
+  /** The NetSuite Class as the file has it ("Equipment : Parts and Filters"), or null when the file has none. */
+  cls: string | null;
+  /** From an Inactive column: false when marked inactive; null when the file has no such column. */
+  active: boolean | null;
 };
 
-export type PartFileRead = { rows: PartImportRow[]; skipped: number; duplicates: number; columns: { name: boolean; description: boolean; rate: boolean; cost: boolean } };
+export type PartFileRead = {
+  rows: PartImportRow[];
+  skipped: number;
+  duplicates: number;
+  columns: { name: boolean; description: boolean; rate: boolean; cost: boolean; cls: boolean };
+  /** True when the file has no MPN column and its Name column is the part number (NetSuite item export). */
+  nameIsMpn: boolean;
+};
 
-/** Rows of a NetSuite parts export. MPN is required; the same MPN twice in the file keeps the first. */
+function yesNo(v: unknown): boolean | null {
+  const s = String(v ?? "").trim().toLowerCase();
+  if (!s) return null;
+  if (["yes", "y", "true", "t", "1", "x"].includes(s)) return true;
+  if (["no", "n", "false", "f", "0"].includes(s)) return false;
+  return null;
+}
+
+/**
+ * Rows of a NetSuite parts export. The part number (MPN) is required: an MPN column, or, when the file has none,
+ * the Name column (a NetSuite item export, where Name is the part number and Description is the part name).
+ * The same MPN twice in the file keeps the first. Every sheet with the columns is read.
+ */
 export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }[]): PartFileRead {
   const rows: PartImportRow[] = [];
   const seen = new Set<string>();
-  const columns = { name: false, description: false, rate: false, cost: false };
+  const columns = { name: false, description: false, rate: false, cost: false, cls: false };
   let skipped = 0;
   let duplicates = 0;
   let readable = 0;
+  let nameIsMpn = false;
   for (const sheet of sheets) {
-    const found = findHeader(sheet.matrix, PART_HEADERS, ["mpn"]);
+    let found = findHeader(sheet.matrix, PART_HEADERS, ["mpn"]);
+    let fromName = false;
+    if (!found) {
+      found = findHeader(sheet.matrix, PART_HEADERS, ["name"]);
+      fromName = !!found;
+    }
     if (!found) continue;
     readable += 1;
+    if (fromName) nameIsMpn = true;
     const { head, cols } = found;
     if (cols.name != null) columns.name = true;
-    if (cols.description != null) columns.description = true;
+    if (cols.description != null || cols.displayName != null) columns.description = true;
     if (cols.rate != null) columns.rate = true;
     if (cols.cost != null) columns.cost = true;
+    if (cols.class != null) columns.cls = true;
     const cell = (r: unknown[], f: PartField) => (cols[f] != null ? String(r[cols[f]!] ?? "").trim() : "");
     for (let i = head + 1; i < sheet.matrix.length; i++) {
       const r = sheet.matrix[i] ?? [];
       if (blankRow(r)) continue;
-      const mpn = cell(r, "mpn").replace(/\s+/g, " ");
+      const mpn = (fromName ? cell(r, "name") : cell(r, "mpn")).replace(/\s+/g, " ");
       const key = mpnKey(mpn);
       if (!key) {
         skipped += 1;
@@ -114,25 +147,30 @@ export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }
       }
       seen.add(key);
       const rawName = cell(r, "name");
-      const split = rawName ? splitItemName(rawName) : null;
+      // Name is the part number: it is also the NetSuite item name, so it is the SKU as it stands.
+      const split = rawName && !fromName ? splitItemName(rawName) : null;
       const parent = cell(r, "parent") || split?.parent || null;
       const rate = cell(r, "rate");
       const cost = cell(r, "cost");
+      const cls = cell(r, "class").replace(/\s+/g, " ");
+      const inactive = cols.inactive != null ? yesNo(r[cols.inactive]) : null;
       rows.push({
         line: i + 1,
         sheet: sheet.name,
         mpn,
-        sku: split?.sku || null,
+        sku: fromName ? mpn : split?.sku || null,
         parent,
-        description: cell(r, "description") || null,
+        description: (cols.description != null ? cell(r, "description") : cell(r, "displayName")) || null,
         rate: rate ? cleanRate(rate) : null,
         cost: cost ? cleanRate(cost) : null,
-        kind: kindFromClass(cell(r, "class"), rawName || mpn),
+        kind: kindFromClass(cls, rawName || mpn),
+        cls: cls || null,
+        active: inactive == null ? null : !inactive,
       });
     }
   }
-  if (!readable) throw new Error("Could not find an MPN column. The first row needs a header like MPN (or Mfr Part Number), Name, Description, Base Price.");
-  return { rows, skipped, duplicates, columns };
+  if (!readable) throw new Error("Could not find an MPN or Name column. The first row needs a header like Name (or MPN), Description, Class, Base Price.");
+  return { rows, skipped, duplicates, columns, nameIsMpn };
 }
 
 export type StoredPart = {
@@ -146,6 +184,8 @@ export type StoredPart = {
   listPrice: number | null;
   /** Set when the part was hidden. Imports skip it and never clear the hide. */
   hidden?: boolean;
+  itemClass?: string | null;
+  active?: boolean;
 };
 
 export type PartPlanStatus = "new" | "update" | "same" | "shared_mpn" | "sku_taken" | "hidden";
@@ -180,8 +220,16 @@ function byMpn<T extends { mpn: string | null }>(parts: T[]): Map<string, T[]> {
 export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): PartPlanLine[] {
   const mpns = byMpn(stored);
   const skus = new Map(stored.map((p) => [p.sku.trim().toLowerCase(), p]));
+  // A part loaded from the item list before MPNs were kept has its part number only as its SKU: same part.
+  const bySkuKey = new Map<string, StoredPart[]>();
+  for (const p of stored) {
+    const k = mpnKey(p.sku);
+    if (k && !mpnKey(p.mpn)) bySkuKey.set(k, [...(bySkuKey.get(k) ?? []), p]);
+  }
   return rows.map((row): PartPlanLine => {
-    const hits = mpns.get(mpnKey(row.mpn)) ?? [];
+    const key = mpnKey(row.mpn);
+    const hits = [...(mpns.get(key) ?? [])];
+    for (const p of bySkuKey.get(key) ?? []) if (!hits.some((h) => h.id === p.id)) hits.push(p);
     if (hits.length > 1) {
       return { status: "shared_mpn", row, partId: null, changes: [], reason: `${hits.length} parts already share MPN ${row.mpn} (${hits.map((h) => h.sku).join(", ")}). Fix that on Parts first.` };
     }
@@ -199,6 +247,8 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
     if (row.rate != null && row.rate !== hit.rate) changes.push(`Base Price ${money(hit.rate)} → ${money(row.rate)}`);
     if (row.cost != null && row.cost !== hit.cost) changes.push(`Purchase Price ${money(hit.cost)} → ${money(row.cost)}`);
     if (row.mpn !== (hit.mpn ?? "")) changes.push(`MPN written ${row.mpn}`);
+    if (row.cls != null && row.cls !== (hit.itemClass ?? "")) changes.push(`Class → ${row.cls}`);
+    if (row.active != null && hit.active != null && row.active !== hit.active) changes.push(row.active ? "Active again" : "Marked inactive");
     return { status: changes.length ? "update" : "same", row, partId: hit.id, changes, reason: null };
   });
 }

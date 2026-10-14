@@ -64,6 +64,8 @@ type ItemRow = {
   rate: string | null;
   kind: ChargeKind;
   mfr_part: string | null;
+  item_class: string | null;
+  get_later: boolean | null;
 };
 
 function toItem(r: ItemRow): BillingItem {
@@ -74,6 +76,8 @@ function toItem(r: ItemRow): BillingItem {
     kind: r.kind,
     mfrPart: r.mfr_part,
     part: { id: Number(r.id), sku: r.sku, mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
+    itemClass: r.item_class,
+    getLater: !!r.get_later,
   };
 }
 
@@ -87,7 +91,7 @@ export const searchBillingItems = createServerFn({ method: "POST" })
     const sql = await ready();
     const nq = normalizePartNo(q);
     const rows = await sql.query<ItemRow>(
-      `select id, sku, item, description, rate, kind, mfr_part, (image is not null) as has_image,
+      `select id, sku, item, description, rate, kind, mfr_part, item_class, get_later, (image is not null) as has_image,
                 case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version
          from billing_items
         where active

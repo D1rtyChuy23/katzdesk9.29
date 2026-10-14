@@ -46,7 +46,21 @@ export type PartRow = {
   hiddenAt: string | null;
   hiddenBy: string | null;
   hiddenReason: string | null;
+  /** NetSuite Class as the item file has it. */
+  itemClass: string | null;
+  /** Marked to pull later. Does not change price or stock. */
+  getLater: boolean;
+  getLaterBy: string | null;
+  /** "confirmed" once a photo was confirmed (same MPN on 3+ agreeing sources, or chosen by a person). */
+  photoStatus: "confirmed" | null;
+  photoSourceUrl: string | null;
+  photoConfirmedBy: string | null;
+  /** Photo research for this part number, when it has been researched. */
+  research: PhotoResearch | null;
 };
+
+export type PhotoCandidate = { imageUrl: string; pageUrl: string | null; site: string | null; mpnShown: string | null; watermark?: boolean | null };
+export type PhotoResearch = { verdict: "confirmed" | "review"; reason: string | null; imageUrl: string | null; candidates: PhotoCandidate[] };
 
 type Raw = {
   id: number;
@@ -62,12 +76,41 @@ type Raw = {
   hidden_at: string | Date | null;
   hidden_by: string | null;
   hidden_reason: string | null;
+  item_class: string | null;
+  get_later: boolean | null;
+  get_later_by: string | null;
+  photo_status: string | null;
+  photo_source_url: string | null;
+  photo_confirmed_by: string | null;
+  r_verdict: string | null;
+  r_reason: string | null;
+  r_image: string | null;
+  r_candidates: unknown;
 };
 
 const COLS = `id, sku, item, description, mfr_part, rate, list_price, kind,
   (image is not null) as has_image,
   case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
-  hidden_at, hidden_by, hidden_reason`;
+  hidden_at, hidden_by, hidden_reason, item_class, get_later, get_later_by, photo_status, photo_source_url, photo_confirmed_by,
+  r_verdict, r_reason, r_image, r_candidates`;
+
+/** The part's photo research, found by its part number (MPN, else SKU) with case, spaces and punctuation removed. */
+const FROM = `billing_items
+  left join lateral (
+    select pr.verdict as r_verdict, pr.reason as r_reason, pr.image_url as r_image, pr.candidates as r_candidates
+      from part_photo_research pr
+     where pr.mpn_key in (regexp_replace(upper(coalesce(billing_items.mfr_part, '')), '[^A-Z0-9]+', '', 'g'), regexp_replace(upper(billing_items.sku), '[^A-Z0-9]+', '', 'g'))
+     order by (pr.mpn_key = regexp_replace(upper(coalesce(billing_items.mfr_part, '')), '[^A-Z0-9]+', '', 'g')) desc
+     limit 1
+  ) research on true`;
+
+function candidatesOf(raw: unknown): PhotoCandidate[] {
+  const list = typeof raw === "string" ? (() => { try { return JSON.parse(raw); } catch { return []; } })() : raw;
+  if (!Array.isArray(list)) return [];
+  return list
+    .filter((c) => c && typeof c.imageUrl === "string" && /^https:\/\//.test(c.imageUrl))
+    .map((c) => ({ imageUrl: c.imageUrl, pageUrl: c.pageUrl ?? null, site: c.site ?? null, mpnShown: c.mpnShown ?? null, watermark: c.watermark ?? null }));
+}
 
 const whenHidden = (v: string | Date | null): string | null => {
   if (v == null || v === "") return null;
@@ -89,14 +132,45 @@ const toRow = (r: Raw): PartRow => ({
   hiddenAt: whenHidden(r.hidden_at),
   hiddenBy: r.hidden_by,
   hiddenReason: r.hidden_reason,
+  itemClass: r.item_class,
+  getLater: !!r.get_later,
+  getLaterBy: r.get_later_by,
+  photoStatus: r.photo_status === "confirmed" && r.has_image ? "confirmed" : null,
+  photoSourceUrl: r.photo_source_url,
+  photoConfirmedBy: r.photo_confirmed_by,
+  research:
+    r.r_verdict === "confirmed" || r.r_verdict === "review"
+      ? { verdict: r.r_verdict, reason: r.r_reason, imageUrl: r.r_image, candidates: candidatesOf(r.r_candidates) }
+      : null,
 });
 
-export type PartsPage = { rows: PartRow[]; total: number; withPhoto: number; hiddenCount: number; canEditMpn: boolean; canHide: boolean; canRemove: boolean };
+export type PartsPage = {
+  rows: PartRow[];
+  total: number;
+  withPhoto: number;
+  hiddenCount: number;
+  getLaterCount: number;
+  /** Parts whose photo was confirmed by research and is ready to pull. */
+  readyToPull: number;
+  classes: string[];
+  canEditMpn: boolean;
+  canHide: boolean;
+  canRemove: boolean;
+};
 
 export const listParts = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { q?: string; noPhoto?: boolean; offset?: number; hidden?: boolean }) =>
-    z.object({ q: z.string().max(120).optional(), noPhoto: z.boolean().optional(), offset: z.number().int().min(0).max(100000).optional(), hidden: z.boolean().optional() }).parse(d),
+  .validator((d: { q?: string; noPhoto?: boolean; offset?: number; hidden?: boolean; getLater?: boolean; itemClass?: string }) =>
+    z
+      .object({
+        q: z.string().max(120).optional(),
+        noPhoto: z.boolean().optional(),
+        offset: z.number().int().min(0).max(100000).optional(),
+        hidden: z.boolean().optional(),
+        getLater: z.boolean().optional(),
+        itemClass: z.string().max(120).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<PartsPage> => {
     const sql = await ready();
@@ -106,10 +180,12 @@ export const listParts = createServerFn({ method: "POST" })
     const where = `${data.hidden ? "" : "active and "}kind not in ('trip', 'labor')
       and hidden_at is ${data.hidden ? "not null" : "null"}
       and ($1 = '' or item ilike $2 or sku ilike $2 or description ilike $2 or mfr_part ilike $2)
-      and (not $3 or image is null)`;
-    const args = [q, like, !!data.noPhoto];
+      and (not $3 or image is null)
+      and (not $4 or get_later)
+      and ($5 = '' or coalesce(item_class, '') = $5)`;
+    const args = [q, like, !!data.noPhoto, !!data.getLater, data.itemClass ?? ""];
     const rows = await sql.query<Raw>(
-      `select ${COLS} from billing_items where ${where} order by (image is null), lower(sku) limit 50 offset ${Number(data.offset ?? 0)}`,
+      `select ${COLS} from ${FROM} where ${where} order by (image is null), lower(sku) limit 50 offset ${Number(data.offset ?? 0)}`,
       args,
     );
     const counts = (await sql.query<{ total: number; with_photo: number }>(
@@ -119,12 +195,23 @@ export const listParts = createServerFn({ method: "POST" })
     const hiddenCount = (await sql.query<{ n: number }>(
       "select count(*)::int as n from billing_items where hidden_at is not null and kind not in ('trip', 'labor')",
     ))[0];
+    const extra = (await sql.query<{ get_later: number; ready: number }>(
+      `select count(*) filter (where get_later)::int as get_later,
+              count(*) filter (where image is null and r_verdict = 'confirmed' and r_image is not null)::int as ready
+         from ${FROM} where active and hidden_at is null and kind not in ('trip', 'labor')`,
+    ))[0];
+    const classes = (await sql.query<{ c: string }>(
+      "select distinct item_class as c from billing_items where item_class is not null and hidden_at is null and kind not in ('trip', 'labor') order by 1",
+    )).map((r) => r.c);
     const who = await powers(sql, context.userId);
     return {
       rows: rows.map(toRow),
       total: counts?.total ?? 0,
       withPhoto: counts?.with_photo ?? 0,
       hiddenCount: hiddenCount?.n ?? 0,
+      getLaterCount: extra?.get_later ?? 0,
+      readyToPull: extra?.ready ?? 0,
+      classes,
       canEditMpn: who.canEditMpn,
       canHide: who.canHide,
       canRemove: who.canRemove,
@@ -132,7 +219,7 @@ export const listParts = createServerFn({ method: "POST" })
   });
 
 async function loadPart(sql: Sql, id: number): Promise<PartRow> {
-  const r = (await sql.query<Raw>(`select ${COLS} from billing_items where id = $1`, [id]))[0];
+  const r = (await sql.query<Raw>(`select ${COLS} from ${FROM} where id = $1`, [id]))[0];
   if (!r) throw new Error("That part is no longer on the list.");
   return toRow(r);
 }
@@ -140,23 +227,52 @@ async function loadPart(sql: Sql, id: number): Promise<PartRow> {
 /** Add or replace the photo. The same photo shows on the invoice picker and on the invoice line. */
 export const setPartImage = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number; base64: string }) =>
+  .validator((d: { id: number; base64: string; sourceUrl?: string | null }) =>
     z
       .object({
         id: z.number().int().positive(),
         base64: z.string().min(8).max(Math.ceil((MAX_PART_IMAGE_BYTES * 4) / 3) + 16).regex(/^[A-Za-z0-9+/]+=*$/),
+        sourceUrl: z.string().max(2000).nullable().optional(),
       })
       .parse(d),
   )
-  .handler(async ({ data }): Promise<PartRow> => {
+  .handler(async ({ data, context }): Promise<PartRow> => {
     const sql = await ready();
     const bytes = new Uint8Array(Buffer.from(data.base64, "base64"));
     const problem = partImageError(bytes);
     if (problem) throw new Error(problem);
     const mime = sniffImage(bytes)!;
+    // A photo a person adds or picks is a confirmed photo; a researched one carries the address it came from.
+    if (data.sourceUrl) {
+      const known = await sql.query(
+        `select 1 from billing_items b join part_photo_research pr
+            on pr.mpn_key in (regexp_replace(upper(coalesce(b.mfr_part, '')), '[^A-Z0-9]+', '', 'g'), regexp_replace(upper(b.sku), '[^A-Z0-9]+', '', 'g'))
+          where b.id = $1 and (pr.image_url = $2 or pr.candidates @> jsonb_build_array(jsonb_build_object('imageUrl', $2::text)))`,
+        [data.id, data.sourceUrl],
+      );
+      if (!known.length) throw new Error("That photo is not one of this part's researched photos.");
+    }
+    const who = (await powers(sql, context.userId)).name;
     const rows = await sql.query(
-      "update billing_items set image = decode($2, 'base64'), image_mime = $3, image_updated_at = now() where id = $1 returning id",
-      [data.id, data.base64, mime],
+      `update billing_items set image = decode($2, 'base64'), image_mime = $3, image_updated_at = now(),
+              photo_status = 'confirmed', photo_source_url = $4, photo_confirmed_by = $5, photo_confirmed_at = now()
+        where id = $1 returning id`,
+      [data.id, data.base64, mime, data.sourceUrl ?? null, who],
+    );
+    if (!rows.length) throw new Error("That part is no longer on the list.");
+    return loadPart(sql, data.id);
+  });
+
+/** Get Later: mark a part to pull later. It does not change price or stock. Anyone on the Desk. */
+export const setPartGetLater = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; on: boolean }) => z.object({ id: z.number().int().positive(), on: z.boolean() }).parse(d))
+  .handler(async ({ data, context }): Promise<PartRow> => {
+    const sql = await ready();
+    const who = (await powers(sql, context.userId)).name;
+    const rows = await sql.query(
+      "update billing_items set get_later = $2, get_later_at = case when $2 then now() else null end, get_later_by = case when $2 then $3 else null end where id = $1 returning id",
+      [data.id, data.on, who],
     );
     if (!rows.length) throw new Error("That part is no longer on the list.");
     return loadPart(sql, data.id);
@@ -167,7 +283,10 @@ export const clearPartImage = createServerFn({ method: "POST" })
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
   .handler(async ({ data }): Promise<PartRow> => {
     const sql = await ready();
-    await sql.query("update billing_items set image = null, image_mime = null, image_updated_at = null where id = $1", [data.id]);
+    await sql.query(
+      "update billing_items set image = null, image_mime = null, image_updated_at = null, photo_status = null, photo_source_url = null, photo_confirmed_by = null, photo_confirmed_at = null where id = $1",
+      [data.id],
+    );
     return loadPart(sql, data.id);
   });
 

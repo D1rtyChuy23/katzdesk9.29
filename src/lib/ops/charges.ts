@@ -29,6 +29,10 @@ export type BillingItem = {
   kind: ChargeKind;
   mfrPart: string | null;
   part?: PartRef | null;
+  /** NetSuite Class ("Equipment : Parts and Filters"), when the item list carried one. */
+  itemClass?: string | null;
+  /** Marked to pull later. Does not change price or stock. */
+  getLater?: boolean;
 };
 
 /** The two fixed-rate service items. Names match NetSuite exactly. */

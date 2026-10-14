@@ -285,3 +285,72 @@ export const approveInvoice = createServerFn({ method: "POST" })
       .catch(() => undefined);
     return readInvoice(sql, ref.type, data.id);
   });
+
+export type AccountInvoice = {
+  type: InvoiceTarget;
+  id: number;
+  title: string;
+  total: number;
+  approvedAt: string | null;
+  approvedBy: string | null;
+  /** "Approved", "Billed SO4401", or "Not approved" (a ticket with charges no one approved yet). */
+  status: string;
+};
+
+/**
+ * Every invoice on one account: approved invoices on any record, and tickets that have charges but no approval yet.
+ * Read for the account's Invoices tab; each row opens the same Invoice window.
+ */
+export const listAccountInvoices = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { customer: string }) => z.object({ customer: z.string().max(300) }).parse(d))
+  .handler(async ({ data }): Promise<AccountInvoice[]> => {
+    const sql = await ready();
+    const name = data.customer.trim();
+    if (!name) return [];
+    const approved = await sql.query<{ entity_type: InvoiceTarget; entity_id: number; total: string | null; approved_at: string | Date | null; approved_by: string | null }>(
+      "select entity_type, entity_id, total, approved_at, approved_by from invoices where lower(btrim(customer)) = lower($1) and approved_at is not null order by approved_at desc",
+      [name],
+    );
+    const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; discount_kind: string | null; discount_value: string | null; amount: string }>(
+      `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.discount_kind, j.discount_value, sum(round(c.qty * c.rate, 2))::text as amount
+         from service_jobs j join ticket_charges c on c.job_id = j.id
+        where lower(btrim(j.customer)) = lower($1) and j.duplicate_of is null
+        group by j.id
+        order by j.id desc`,
+      [name],
+    );
+    const out: AccountInvoice[] = [];
+    const seen = new Set<string>();
+    for (const t of tickets) {
+      const type: InvoiceTarget = t.kind === "tlc" ? "tlc" : "service";
+      const head = approved.find((a) => a.entity_type === type && Number(a.entity_id) === Number(t.id));
+      const total = invoiceTotals([{ qty: 1, rate: Number(t.amount), kind: "part" }], toDiscount(t.discount_kind, t.discount_value)).total;
+      seen.add(`${type}-${t.id}`);
+      out.push({
+        type,
+        id: Number(t.id),
+        title: targetTitle(type, { id: Number(t.id), wo: t.wo, callId: t.call_id }),
+        total,
+        approvedAt: head?.approved_at ? new Date(head.approved_at).toISOString() : null,
+        approvedBy: head?.approved_by ?? null,
+        status: t.ns_so ? `Billed ${t.ns_so}` : head ? "Approved" : "Not approved",
+      });
+    }
+    for (const a of approved) {
+      const key = `${a.entity_type}-${a.entity_id}`;
+      if (seen.has(key)) continue;
+      const ref = await resolveRecord(sql, a.entity_type, Number(a.entity_id)).catch(() => null);
+      if (!ref) continue;
+      out.push({
+        type: ref.type,
+        id: Number(a.entity_id),
+        title: ref.title,
+        total: Number(a.total ?? 0),
+        approvedAt: a.approved_at ? new Date(a.approved_at).toISOString() : null,
+        approvedBy: a.approved_by,
+        status: "Approved",
+      });
+    }
+    return out;
+  });

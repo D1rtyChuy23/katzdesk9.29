@@ -40,7 +40,9 @@ test("parts file: MPN required, the same MPN twice keeps the first", () => {
   assert.equal(r.duplicates, 1);
   assert.equal(r.skipped, 1);
   assert.deepEqual([r.rows[0].sku, r.rows[0].parent, r.rows[0].rate, r.rows[0].cost], ["EVER104120", "PARTS", 14, 6]);
-  assert.throws(() => partRowsFromSheets([{ name: "S", matrix: [["Name", "Price"], ["A", "1"]] }]), /MPN column/);
+  // No MPN column: Name is the part number (NetSuite item export). Neither column: refused.
+  assert.equal(partRowsFromSheets([{ name: "S", matrix: [["Name", "Price"], ["A-1", "1"]] }]).rows[0].mpn, "A-1");
+  assert.throws(() => partRowsFromSheets([{ name: "S", matrix: [["Item Description", "Price"], ["A", "1"]] }]), /MPN or Name column/);
 });
 
 test("parts plan: existing MPN updates, new MPN adds, never a second part for one MPN", () => {
@@ -129,4 +131,44 @@ test("parts profit per MPN", () => {
     ["104120", 3, 19.5, 36, 15.3, 43.97, 0],
     ["2000-A", 1, 0, 80, 0, null, 1],
   ]);
+});
+
+test("NetSuite item export: Name is the part number, Description the part name, Class and Inactive kept", () => {
+  const r = partRowsFromSheets([
+    { name: "Parts", matrix: [
+      ["Name", "Display Name", "Description", "Class", "SubType", "Base Price", "Purchase Price", "Preferred Vendor", "Inactive"],
+      ["016-246-6102", "", "246 Series AC PSC 115V/230V (Roaster Gear Motor)", "Equipment : Parts and Filters", "", "696.96", "576.99", "", "No"],
+      ["BUNN32400.0003", "", "BUNN TIMER KIT, DGTL-240V", "Equipment : Parts and Filters", "", "120", "80", "BUNN", "Yes"],
+    ] },
+    { name: "Equipment", matrix: [
+      ["Name", "Display Name", "Description", "Class", "SubType", "Base Price", "Purchase Price", "Preferred Vendor", "Inactive"],
+      ["AIRPOT2.4LS/SLINER", "", "Airpot 2.4 Liters - w/Stainless Steel Liner", "Equipment : Equipment Sales", "", "52.95", "35.35", "Service Ideas", "No"],
+      ["016-246-6102", "", "Same part number again", "Equipment : Parts and Filters", "", "1", "1", "", "No"],
+    ] },
+  ]);
+  assert.equal(r.nameIsMpn, true);
+  assert.equal(r.duplicates, 1);
+  assert.deepEqual(r.rows.map((x) => [x.mpn, x.sku, x.description, x.cls, x.active, x.kind]), [
+    ["016-246-6102", "016-246-6102", "246 Series AC PSC 115V/230V (Roaster Gear Motor)", "Equipment : Parts and Filters", true, "part"],
+    ["BUNN32400.0003", "BUNN32400.0003", "BUNN TIMER KIT, DGTL-240V", "Equipment : Parts and Filters", false, "part"],
+    ["AIRPOT2.4LS/SLINER", "AIRPOT2.4LS/SLINER", "Airpot 2.4 Liters - w/Stainless Steel Liner", "Equipment : Equipment Sales", true, "equipment"],
+  ]);
+});
+
+test("a part loaded earlier by its SKU alone is the same part: updated, never added twice", () => {
+  const rows = partRowsFromSheets([{ name: "Parts", matrix: [
+    ["Name", "Description", "Class", "Base Price"],
+    ["BUNN32400.0003", "BUNN TIMER KIT, DGTL-240V", "Equipment : Parts and Filters", "120"],
+    ["FETCO52018", "FETCO RELAY", "Equipment : Parts and Filters", "40"],
+  ] }]).rows;
+  const plan = planPartImport(rows, [
+    { id: 9, sku: "BUNN32400.0003", item: "BUNN32400.0003", mpn: null, description: "Timer", rate: 100, cost: null, listPrice: null, itemClass: null, active: true },
+    { id: 10, sku: "FETCO52018", item: "FETCO52018", mpn: "52018", description: "Relay", rate: 40, cost: null, listPrice: null, itemClass: null, active: true },
+  ]);
+  assert.equal(plan[0].status, "update");
+  assert.equal(plan[0].partId, 9);
+  assert.ok(plan[0].changes.includes("Class → Equipment : Parts and Filters"));
+  assert.ok(plan[0].changes.includes("MPN written BUNN32400.0003"));
+  // FETCO52018 as a part number differs from the stored MPN 52018, and its SKU belongs to that part: not added twice.
+  assert.equal(plan[1].status, "sku_taken");
 });

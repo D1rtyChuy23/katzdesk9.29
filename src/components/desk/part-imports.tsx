@@ -145,8 +145,10 @@ export function ImportPartsButton() {
         <DialogContent className="sm:max-w-3xl" data-testid="parts-import">
           <DialogTitle>Import Parts (NetSuite)</DialogTitle>
           <DialogDescription>
-            An Excel export with an <span className="font-medium">MPN</span> column (plus Name, Description, Base Price, Purchase Price if you have them). Matched on
-            MPN: an MPN already on a part updates it, a new MPN adds a part. Never a second part for one MPN. A hidden part is skipped and stays hidden. Blank cells change nothing.
+            The NetSuite item export: <span className="font-medium">Name</span> is the part number (MPN), <span className="font-medium">Description</span> is the
+            part name, and <span className="font-medium">Class</span>, Base Price, Purchase Price and Inactive are kept. A file with its own MPN column uses that column instead.
+            Matched on the part number: one already on a part updates it, a new one adds a part. Never a second part for one part number. A hidden part is skipped and stays
+            hidden. Blank cells change nothing.
           </DialogDescription>
           {!preview ? (
             <div>

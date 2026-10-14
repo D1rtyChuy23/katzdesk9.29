@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
+import { listAccountInvoices } from "@/lib/ops/invoice-api";
+import { InvoiceWindow } from "@/components/desk/invoice-window";
+import type { InvoiceTarget } from "@/lib/ops/invoice";
 import { CustomerAddress } from "@/components/desk/customer-address";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -57,6 +61,18 @@ const KIND_LABEL: Record<HistoryKind, string> = {
   deal: "Pipeline",
   recipe: "Recipe",
 };
+
+type AccountTab = "details" | "equipment" | "tickets" | "invoices" | "pre-inspection" | "recipes";
+
+/** The account's categories, one per tab, in this order. */
+const ACCOUNT_TABS: { id: AccountTab; label: string }[] = [
+  { id: "details", label: "Details" },
+  { id: "equipment", label: "Equipment" },
+  { id: "tickets", label: "Tickets" },
+  { id: "invoices", label: "Invoices" },
+  { id: "pre-inspection", label: "Pre-Inspection" },
+  { id: "recipes", label: "Recipes" },
+];
 
 const FILTERS: { id: "all" | Exclude<HistoryKind, "recipe">; label: string }[] = [
   { id: "all", label: "All" },
@@ -165,6 +181,9 @@ export function CustomerHistorySheet({
   });
   const [filter, setFilter] = useState<"all" | Exclude<HistoryKind, "recipe">>("all");
   const [q, setQ] = useState("");
+  // Each account opens on Details.
+  const [tab, setTab] = useState<AccountTab>("details");
+  useEffect(() => setTab("details"), [customerId]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [recipeDraft, setRecipeDraft] = useState<RecipeDraft | null>(null);
@@ -273,11 +292,19 @@ export function CustomerHistorySheet({
   const pendingTlcs = pending.filter((it) => it.kind === "tlc");
   const pendingPms = pending.filter((it) => it.kind === "pm");
   const pendingFocus = [...pendingTlcs, ...pendingPms];
+  const openInstalls = (data?.installs ?? []).filter((i) => isOpenInstall(i));
+  const tabCount = (t: AccountTab): number | null => {
+    if (t === "equipment") return accountEquip.data?.length ?? null;
+    if (t === "tickets") return counts.all || null;
+    if (t === "pre-inspection") return openInstalls.reduce((n, i) => n + (i.inspection?.machineCount ?? 0), 0) || null;
+    if (t === "recipes") return data?.recipes?.length || null;
+    return null;
+  };
 
   return (
     <>
       <Sheet open={customerId != null} onOpenChange={(o) => !o && onClose()}>
-        <SheetContent className="sm:max-w-lg">
+        <SheetContent className="sm:max-w-2xl">
           <SheetHeader>
             <p className="text-xs tracking-wide text-muted-foreground uppercase">Customer</p>
             <div className="flex items-start justify-between gap-2">
@@ -302,124 +329,129 @@ export function CustomerHistorySheet({
                 <Skeleton className="mt-3 h-24 w-full" />
               </div>
             ) : data ? (
-              <div className="p-5">
-                {data.nameLocked ? (
-                  <CleanListBlock name={data.name} cleanList={data.cleanList ?? null} />
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    {canRename
-                      ? "Edit the name to move every call, install, PM, deal, recipe, and network link onto it."
-                      : "Ask an admin to rename this account — history follows the new name."}
-                  </p>
-                )}
-
-                <AccountNumberField
-                  id={data.id}
-                  value={data.accountNumber ?? null}
-                  canEdit={!!data.canEditAccountNumber}
-                />
-
-                <AccountMarksForm
-                  id={data.id}
-                  aviKatz={data.aviKatz}
-                  accountRep={data.accountRep}
-                />
-                {!data.accountRep && data.repFlag ? (
-                  <p className="mt-1 text-xs font-medium text-warning" data-testid="rep-flag">
-                    Rep left blank: {data.repFlag}.
-                  </p>
-                ) : null}
-
-                <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
-
-                <PreInspectionList
-                  installs={(data.installs ?? []).filter((i) => isOpenInstall(i))}
-                  openId={inspectId}
-                  onOpen={(id) => setInspectId((cur) => (cur === id ? null : id))}
-                />
-
-                <div className="mt-4">
-                  <ProviderDispatchBlock customer={data.name} assignable />
-                </div>
-
-                <div className="relative mt-4">
-                  <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder="Search this account…"
-                    className="pl-9"
-                    aria-label="Search history"
-                  />
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {FILTERS.map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setFilter(f.id)}
-                      className={cn(
-                        "rounded-full px-3 py-1 text-xs",
-                        filter === f.id ? "bg-ink text-ink-foreground" : "bg-muted text-muted-foreground",
-                      )}
+              // One tab is one category. Click a tab to open it; nothing is stacked in one long scroll.
+              <Tabs.Root value={tab} onValueChange={(v) => setTab(v as AccountTab)} className="flex min-h-0 flex-col" data-testid="account-tabs">
+                <Tabs.List
+                  aria-label="Account sections"
+                  className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-border bg-card px-3 pt-2"
+                  data-testid="account-tab-list"
+                >
+                  {ACCOUNT_TABS.map((t) => (
+                    <Tabs.Trigger
+                      key={t.id}
+                      value={t.id}
+                      className="relative shrink-0 rounded-t-md px-3 pt-2 pb-2.5 text-sm font-medium text-muted-foreground hover:text-foreground data-[state=active]:text-foreground data-[state=active]:after:absolute data-[state=active]:after:inset-x-2 data-[state=active]:after:bottom-0 data-[state=active]:after:h-0.5 data-[state=active]:after:rounded-full data-[state=active]:after:bg-primary"
+                      data-testid={`account-tab-${t.id}`}
                     >
-                      {f.label}
-                      {counts[f.id] ? ` ${counts[f.id]}` : ""}
-                    </button>
+                      {t.label}
+                      {tabCount(t.id) != null ? <span className="ml-1 text-xs font-normal text-muted-foreground tabular">{tabCount(t.id)}</span> : null}
+                    </Tabs.Trigger>
                   ))}
-                </div>
+                </Tabs.List>
 
-                <p className="mt-4 text-xs text-muted-foreground">Select a call or record to review.</p>
-
-                <section className="mt-2">
-                  <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-                    Pending TLC & PMs
-                  </h2>
-                  {pendingFocus.length ? (
-                    <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
-                      {pendingFocus.map((it) => (
-                        <HistoryRow
-                          key={`pending-${it.key}`}
-                          item={it}
-                          onOpen={() => {
-                            setSelectedKey(it.key);
-                            setReviewing(true);
-                          }}
-                        />
-                      ))}
-                    </ul>
+                <Tabs.Content value="details" className="p-5 outline-none" data-testid="account-panel-details">
+                  {data.nameLocked ? (
+                    <CleanListBlock name={data.name} cleanList={data.cleanList ?? null} />
                   ) : (
-                    <p className="mt-2 text-sm text-muted-foreground">No open TLCs or PMs on this account.</p>
+                    <p className="text-xs text-muted-foreground">
+                      {canRename
+                        ? "Edit the name to move every call, install, PM, deal, recipe, and network link onto it."
+                        : "Ask an admin to rename this account — history follows the new name."}
+                    </p>
                   )}
-                </section>
+                  <AccountNumberField id={data.id} value={data.accountNumber ?? null} canEdit={!!data.canEditAccountNumber} />
+                  <AccountMarksForm id={data.id} aviKatz={data.aviKatz} accountRep={data.accountRep} />
+                  {!data.accountRep && data.repFlag ? (
+                    <p className="mt-1 text-xs font-medium text-warning" data-testid="rep-flag">
+                      Rep left blank: {data.repFlag}.
+                    </p>
+                  ) : null}
+                  <div className="mt-4">
+                    <ProviderDispatchBlock customer={data.name} assignable />
+                  </div>
+                </Tabs.Content>
 
-                <h2 className="mt-5 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-                  Account History
-                </h2>
-                <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
-                  {visible.map((it) => (
-                    <HistoryRow
-                      key={it.key}
-                      item={it}
-                      onOpen={() => {
-                        setSelectedKey(it.key);
-                        setReviewing(true);
-                      }}
-                    />
-                  ))}
-                </ul>
-                {!visible.length ? (
-                  <p className="mt-3 text-sm text-muted-foreground">Nothing on this account matches.</p>
-                ) : null}
+                <Tabs.Content value="equipment" className="p-5 outline-none" data-testid="account-panel-equipment">
+                  <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
+                </Tabs.Content>
 
-                <CustomerRecipes
-                  customer={data.name}
-                  recipes={data.recipes}
-                  house={houseRecipes.data ?? []}
-                  models={(directoryEquip.data ?? []).map((e) => e.name)}
-                  onOpen={(d) => setRecipeDraft(d)}
-                />
-              </div>
+                <Tabs.Content value="tickets" className="p-5 outline-none" data-testid="account-panel-tickets">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search this account…" className="pl-9" aria-label="Search history" />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {FILTERS.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setFilter(f.id)}
+                        className={cn("rounded-full px-3 py-1 text-xs", filter === f.id ? "bg-ink text-ink-foreground" : "bg-muted text-muted-foreground")}
+                      >
+                        {f.label}
+                        {counts[f.id] ? ` ${counts[f.id]}` : ""}
+                      </button>
+                    ))}
+                  </div>
+                  <section className="mt-4">
+                    <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pending TLC & PMs</h2>
+                    {pendingFocus.length ? (
+                      <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
+                        {pendingFocus.map((it) => (
+                          <HistoryRow
+                            key={`pending-${it.key}`}
+                            item={it}
+                            onOpen={() => {
+                              setSelectedKey(it.key);
+                              setReviewing(true);
+                            }}
+                          />
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">No open TLCs or PMs on this account.</p>
+                    )}
+                  </section>
+                  <h2 className="mt-5 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Account History</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">Select a call or record to review.</p>
+                  <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
+                    {visible.map((it) => (
+                      <HistoryRow
+                        key={it.key}
+                        item={it}
+                        onOpen={() => {
+                          setSelectedKey(it.key);
+                          setReviewing(true);
+                        }}
+                      />
+                    ))}
+                  </ul>
+                  {!visible.length ? <p className="mt-3 text-sm text-muted-foreground">Nothing on this account matches.</p> : null}
+                </Tabs.Content>
+
+                <Tabs.Content value="invoices" className="p-5 outline-none" data-testid="account-panel-invoices">
+                  <AccountInvoices customer={data.name} />
+                </Tabs.Content>
+
+                <Tabs.Content value="pre-inspection" className="p-5 outline-none" data-testid="account-panel-pre-inspection">
+                  <PreInspectionList
+                    installs={(data.installs ?? []).filter((i) => isOpenInstall(i))}
+                    openId={inspectId}
+                    onOpen={(id) => setInspectId((cur) => (cur === id ? null : id))}
+                    alwaysOpen
+                  />
+                </Tabs.Content>
+
+                <Tabs.Content value="recipes" className="p-5 outline-none" data-testid="account-panel-recipes">
+                  <CustomerRecipes
+                    customer={data.name}
+                    recipes={data.recipes}
+                    house={houseRecipes.data ?? []}
+                    models={(directoryEquip.data ?? []).map((e) => e.name)}
+                    onOpen={(d) => setRecipeDraft(d)}
+                  />
+                </Tabs.Content>
+              </Tabs.Root>
             ) : (
               <p className="p-5 text-sm text-muted-foreground">Account not found.</p>
             )}
@@ -456,14 +488,18 @@ function PreInspectionList({
   installs,
   openId,
   onOpen,
+  alwaysOpen = false,
 }: {
   installs: Install[];
   openId: number | null;
   onOpen: (id: number) => void;
+  /** In its own tab the list is open straight away. */
+  alwaysOpen?: boolean;
 }) {
-  // Collapsed until asked for, so the customer window stays short. The count is every unit on the open installs.
-  const [shown, setShown] = useState(false);
-  if (!installs.length) return null;
+  // Collapsed until asked for, unless it has its own tab. The count is every unit on the open installs.
+  const [open, setShown] = useState(false);
+  const shown = alwaysOpen || open;
+  if (!installs.length) return alwaysOpen ? <p className="text-sm text-muted-foreground" data-testid="account-pre-inspection-none">No open installs on this account, so nothing to pre-inspect.</p> : null;
   const units = installs.reduce((n, i) => n + (i.inspection?.machineCount ?? 0), 0);
   const passed = installs.reduce((n, i) => n + (i.inspection?.passedCount ?? 0), 0);
   const toggle = () => {
@@ -476,12 +512,13 @@ function PreInspectionList({
     <section className="mt-4" data-testid="account-pre-inspection" data-open={shown ? "true" : "false"}>
       <button
         type="button"
-        onClick={toggle}
+        onClick={alwaysOpen ? undefined : toggle}
         aria-expanded={shown}
-        className="desk-flat flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted/60"
+        disabled={alwaysOpen}
+        className="desk-flat flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-left enabled:hover:bg-muted/60 disabled:cursor-default"
         data-testid="account-pre-inspection-toggle"
       >
-        {shown ? <ChevronDown className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" />}
+        {alwaysOpen ? null : shown ? <ChevronDown className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" />}
         <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pre-Inspection</span>
         <span className="text-sm font-medium" data-testid="account-pre-inspection-count">
           {units} unit{units === 1 ? "" : "s"}
@@ -535,24 +572,16 @@ function AccountEquipmentList({
   }[];
   loading: boolean;
 }) {
-  // Collapsed until asked for: a long equipment list no longer pushes the rest of the window down.
-  const [shown, setShown] = useState(false);
+  // The Equipment tab is the category, so the list shows as soon as the tab opens.
   return (
-    <section className="mt-4" data-testid="account-equipment" data-open={shown ? "true" : "false"}>
-      <button
-        type="button"
-        onClick={() => setShown(!shown)}
-        aria-expanded={shown}
-        className="desk-flat flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted/60"
-        data-testid="account-equipment-toggle"
-      >
-        {shown ? <ChevronDown className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" />}
+    <section className="mt-4" data-testid="account-equipment" data-open="true">
+      <p className="flex items-center gap-2 px-1">
         <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Equipment On This Account</span>
         <span className="text-sm font-medium" data-testid="account-equipment-count">
           {loading ? "…" : `${rows.length} unit${rows.length === 1 ? "" : "s"}`}
         </span>
-      </button>
-      {!shown ? null : loading ? (
+      </p>
+      {loading ? (
         <p className="mt-2 text-sm text-muted-foreground">Loading equipment…</p>
       ) : rows.length ? (
         <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
@@ -905,3 +934,42 @@ function AccountMarksForm({
   );
 }
 
+
+/** The account's invoices: approved ones on any record, and tickets with charges not approved yet. Each opens the Invoice window. */
+function AccountInvoices({ customer }: { customer: string }) {
+  const q = useQuery({ queryKey: ["account-invoices", customer.toLowerCase()], queryFn: () => listAccountInvoices({ data: { customer } }) });
+  const [open, setOpen] = useState<{ type: InvoiceTarget; id: number } | null>(null);
+  const rows = q.data ?? [];
+  return (
+    <div data-testid="account-invoices">
+      {q.isLoading ? (
+        <Skeleton className="h-24 w-full" />
+      ) : rows.length ? (
+        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+          {rows.map((r) => (
+            <li key={`${r.type}-${r.id}`}>
+              <button
+                type="button"
+                onClick={() => setOpen({ type: r.type, id: r.id })}
+                className="desk-flat flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
+                data-testid="account-invoice-row"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">{r.title}</span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {r.status}
+                    {r.approvedAt ? ` · ${r.approvedBy ?? "Desk"} · ${formatShortDate(r.approvedAt.slice(0, 10))}` : ""}
+                  </span>
+                </span>
+                <span className="shrink-0 text-sm font-medium tabular">{money(r.total)}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">No invoices on this account yet. Open a ticket, install or other record and choose Invoice.</p>
+      )}
+      {open ? <InvoiceWindow type={open.type} id={open.id} onClose={() => setOpen(null)} /> : null}
+    </div>
+  );
+}
