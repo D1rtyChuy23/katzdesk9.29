@@ -7,11 +7,12 @@ import { cn } from "@/lib/utils";
 /** An account's saved map pin and how good it is (exact / close: the street was found; approx: ZIP area only). */
 export type PinTarget = { point: LatLng | null; quality: PinQuality | null };
 
-/** Short words in a street address that stay upper case: compass points and road types like FM 1960 or US 59. */
-const KEEP_UPPER = new Set(["N", "S", "E", "W", "NE", "NW", "SE", "SW", "FM", "US", "SH", "CR", "RR", "PO"]);
+/** Short words in a street address that stay upper case: compass points and road types like FM 1960, IH 10 or US 59. */
+const KEEP_UPPER = new Set(["N", "S", "E", "W", "NE", "NW", "SE", "SW", "FM", "US", "SH", "SR", "IH", "TX", "CR", "RR", "PO"]);
 
 function addressWord(w: string): string {
-  if (KEEP_UPPER.has(w)) return w;
+  // "FM" and "FM-1960" both stay as they are.
+  if (KEEP_UPPER.has(w) || KEEP_UPPER.has(w.split("-")[0]!)) return w;
   // "WESTHEIMER" → "Westheimer", "HWY-6" → "Hwy-6", "1ST" → "1st", "MCKINNEY" → "McKinney".
   return w
     .toLowerCase()
@@ -178,7 +179,7 @@ function LocationLine({ location }: { location: CustomerLocation }) {
         className={cn("hover:text-primary hover:underline", match === "close" && "text-warning")}
         title={
           match === "approx"
-            ? "Only the ZIP code was found, so this pin is the middle of the ZIP area. Directions use the typed address."
+            ? "Only the ZIP code was found, so this pin is the middle of the ZIP area. It is never used for directions."
             : location.matchedAddress
               ? `Geocoded as ${location.matchedAddress}`
               : "Open the pin in Google Maps"
@@ -216,7 +217,7 @@ export function AddressLine({ customer, className }: { customer: string | null |
   return (
     <span className={cn("flex min-w-0 items-start gap-0.5 text-xs text-muted-foreground", className)} data-testid="row-address">
       <DirectionsPin pin={pin} address={typed ?? fromPin} size="sm" inRow />
-      <span className="min-w-0 break-words" title={typed ? text : `${text} (from map pin)`}>
+      <span className="min-w-0 break-words" title={typed ? text : fromPin ? `${text} (from map pin)` : "No address typed on this account. Directions use the map pin."}>
         {text}
       </span>
     </span>

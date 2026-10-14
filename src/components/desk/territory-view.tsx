@@ -178,7 +178,7 @@ export function TerritoryView() {
       if (counts.get(NONE)) items.push({ key: NONE, label: "No rep", color: NO_REP_COLOR, count: counts.get(NONE) });
     } else {
       items.push({ key: "lit", label: shown === NONE ? "No rep" : shown, color: shown === NONE ? NO_REP_COLOR : colorOf(shown), count: counts.get("lit") ?? 0 });
-      items.push({ key: "faded", label: "Everyone else", color: FADED, count: counts.get("faded") ?? 0 });
+      if (counts.get("faded")) items.push({ key: "faded", label: "Everyone else", color: FADED, count: counts.get("faded") });
     }
     return { pins: out, legend: items, litPoints };
   }, [accounts, inScope, colorOf, shown]);

@@ -42,12 +42,15 @@ export function NearbyAccounts({ accountId, name }: { accountId: number; name: s
   const hidden = all.length - shown.length;
 
   let body: ReactNode;
-  if (geo.isLoading) {
-    body = <p className="mt-3 text-sm text-muted-foreground">Finding accounts nearby…</p>;
-  } else if (geo.isError) {
-    body = (
+  if (!geo.data) {
+    // No list yet: still loading, or the first load failed. A failed refresh keeps showing the list it already has.
+    body = geo.isError ? (
       <p className="mt-3 text-sm text-destructive" data-testid="nearby-error">
         Could not load nearby accounts{geo.error instanceof Error ? `: ${geo.error.message}` : "."}
+      </p>
+    ) : (
+      <p className="mt-3 text-sm text-muted-foreground" data-testid="nearby-loading">
+        Finding accounts nearby…
       </p>
     );
   } else if (!origin) {
@@ -109,7 +112,7 @@ export function NearbyAccounts({ accountId, name }: { accountId: number; name: s
 
   return (
     <section className="rounded-xl border border-border bg-card p-4" data-testid="nearby-accounts">
-      <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Nearby</p>
+      <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Nearby</h2>
       <p className="mt-0.5 text-xs text-muted-foreground">Accounts close to this one, nearest first. Distances are straight-line.</p>
       {body}
     </section>

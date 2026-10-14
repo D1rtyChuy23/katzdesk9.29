@@ -37,7 +37,7 @@ export type AccountGeo = {
   accountNumber: string | null;
   openCalls: number;
   openTlcs: number;
-  /** Open tickets whose scheduled date has passed. */
+  /** Open tickets and TLCs whose scheduled date has passed (same rule as the past-due flag). */
   pastDueCalls: number;
   openPms: number;
   pmsPastDue: number;

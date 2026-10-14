@@ -215,6 +215,10 @@ export function CustomerHistorySheet({
       void qc.invalidateQueries({ queryKey: ["deals"] });
       void qc.invalidateQueries({ queryKey: ["recipes"] });
       void qc.invalidateQueries({ queryKey: ["network"] });
+      // Pins and addresses are looked up by name: refresh them so lists and the map follow the new name.
+      void qc.invalidateQueries({ queryKey: ["account-addresses"] });
+      void qc.invalidateQueries({ queryKey: ["customer-address"] });
+      void qc.invalidateQueries({ queryKey: ["account-geo"] });
       if (row.merged || row.id !== customerId) {
         void navigate({ to: "/customers", search: { open: row.id }, replace: true });
       }
