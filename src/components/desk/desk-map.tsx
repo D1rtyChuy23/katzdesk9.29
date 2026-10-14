@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Map as PigeonMap, ZoomControl, type PigeonProps, type Point } from "pigeon-maps";
+import { Map as PigeonMap, ZoomControl, type PigeonProps, type Point, type TileComponent } from "pigeon-maps";
 import { cn } from "@/lib/utils";
 import { isPoint, type LatLng } from "@/lib/ops/geo";
 
@@ -29,6 +29,35 @@ export type MapPin = {
 };
 
 const HOUSTON: Point = [29.76, -95.37];
+
+/** Tile status reported to the map so it can say when the street map could not load. */
+type TileReport = (ok: boolean) => void;
+
+/** pigeon's tile image, plus: a tile that fails to load hides itself instead of showing a broken-image icon. */
+function tileWithStatus(report: TileReport): TileComponent {
+  return function Tile({ tile, tileLoaded }) {
+    return (
+      <img
+        src={tile.url}
+        srcSet={tile.srcSet}
+        width={tile.width}
+        height={tile.height}
+        loading="lazy"
+        alt=""
+        onLoad={() => {
+          report(true);
+          tileLoaded();
+        }}
+        onError={(e) => {
+          e.currentTarget.style.visibility = "hidden";
+          report(false);
+          tileLoaded();
+        }}
+        style={{ position: "absolute", left: tile.left, top: tile.top, willChange: "transform", transformOrigin: "top left", opacity: 1 }}
+      />
+    );
+  };
+}
 
 /** Web Mercator: the zoom that fits a lat/lng box into width × height pixels (with padding), capped. */
 export function fitView(points: readonly LatLng[], width: number, height: number, opts: { pad?: number; maxZoom?: number } = {}): { center: Point; zoom: number } {
@@ -146,6 +175,12 @@ export function DeskMap({
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [view, setView] = useState<{ center: Point; zoom: number } | null>(null);
   const lastFit = useRef<string | null>(null);
+  // Street tiles: once one loads the map is fine; if only failures arrive, say so (pins and routes still work).
+  const [tiles, setTiles] = useState<"unknown" | "ok" | "failed">("unknown");
+  const tileComponent = useMemo(
+    () => tileWithStatus((ok) => setTiles((cur) => (cur === "ok" ? cur : ok ? "ok" : "failed"))),
+    [],
+  );
 
   useEffect(() => {
     const el = box.current;
@@ -191,6 +226,7 @@ export function DeskMap({
           center={view.center}
           zoom={view.zoom}
           provider={tileUrl}
+          tileComponent={tileComponent}
           dprs={[1, 2]}
           minZoom={3}
           maxZoom={18}
@@ -208,8 +244,21 @@ export function DeskMap({
           metaWheelZoom={false}
         >
           <PinLayer pins={pins} route={route} selectedId={selectedId} onPinClick={onPinClick} />
-          <ZoomControl />
+          <ZoomControl
+            buttonStyle={{
+              background: "var(--color-card)",
+              color: "var(--color-foreground)",
+              border: "1px solid var(--color-border)",
+              width: 32,
+              height: 32,
+            }}
+          />
         </PigeonMap>
+      ) : null}
+      {tiles === "failed" ? (
+        <p className="pointer-events-none absolute bottom-2 left-2 z-10 rounded-sm bg-card/90 px-2 py-1 text-xs text-muted-foreground" data-testid="desk-map-tiles-failed">
+          The street map could not load. Pins still show.
+        </p>
       ) : null}
       {children}
     </div>
