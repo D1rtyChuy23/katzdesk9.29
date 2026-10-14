@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useDeferredValue, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPinOff, Navigation, RotateCcw, Store, X } from "lucide-react";
 import { DeskMap, type MapPin } from "./desk-map";
@@ -251,7 +251,7 @@ export function CustomerMap() {
       const labels =
         colorBy === "work"
           ? ["Nothing open", "Open work or PM due soon", "Past due"]
-          : ["No open PM", "Open PM, later or no date", `PM due in ${data?.dueDays ?? 14} days`, "PM past due"];
+          : ["No open PM", "Open PM, later or no date", `PM due within ${data?.dueDays ?? 14} days`, "PM past due"];
       const colors = colorBy === "work" ? WORK_COLOR : PM_COLOR;
       for (let i = labels.length - 1; i >= 0; i--) items.push({ key: `tone-${i}`, label: labels[i]!, color: colors[i]!, count: tones[i] ?? 0 });
     }
@@ -278,7 +278,9 @@ export function CustomerMap() {
     setSelectedId(a.id);
     const p = pointOf(a);
     if (!fromList || !p) return;
-    setFocus(p);
+    // The map pans only when the focus point changes, so tapping the same row again nudges it by a hair (~0.1 mm)
+    // to bring the account back into view after the map was moved.
+    setFocus((f) => (f && f.lat === p.lat && f.lng === p.lng ? { lat: p.lat + 1e-9, lng: p.lng } : p));
     // On a phone the list sits under the map: bring the map back into view.
     if (window.matchMedia("(max-width: 1023px)").matches) mapBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -372,7 +374,9 @@ export function CustomerMap() {
                     ? "No account has a map pin yet. Import the verified locations file from Customers → Import → Locations."
                     : filtered.length === 0
                       ? "No accounts match these filters."
-                      : "None of these accounts has a pin to show."}
+                      : !showApprox && counts.approx
+                        ? "These accounts only have ZIP area pins, which are hidden. Turn on ZIP Area Pins to see them."
+                        : "None of these accounts has a pin to show."}
                 </p>
               </div>
             ) : null}
@@ -541,65 +545,43 @@ function AccountCard({ account: a, scoped, onClose }: { account: AccountGeo; sco
   );
 }
 
-/** One line per kind of open work, with the late and due-soon parts called out. */
+/** Parts of one line, separated by a muted dot. */
+function joined(parts: ReactNode[]): ReactNode {
+  return parts.map((part, i) => (
+    <Fragment key={i}>
+      {i ? <span className="text-muted-foreground"> · </span> : null}
+      {part}
+    </Fragment>
+  ));
+}
+
+/**
+ * One line per kind of open work, with the late and due-soon parts called out. Tickets and TLCs share a line because
+ * the past-due count covers both (same rule as the past-due flag on the Tickets and TLC pages).
+ */
 function workLines(a: AccountGeo): ReactNode[] {
   const out: ReactNode[] = [];
-  const sep = <span className="text-muted-foreground"> · </span>;
-  if (a.openCalls) {
-    out.push(
-      <>
-        {plural(a.openCalls, "open ticket")}
-        {a.pastDueCalls ? (
-          <>
-            {sep}
-            <span className="font-medium text-destructive">{a.pastDueCalls} past due</span>
-          </>
-        ) : null}
-      </>,
-    );
-  }
-  if (a.openTlcs) out.push(<>{plural(a.openTlcs, "open TLC")}</>);
+  const late = (n: number) => <span className="font-medium text-destructive">{n} past due</span>;
+  const calls: ReactNode[] = [];
+  if (a.openCalls) calls.push(plural(a.openCalls, "open ticket"));
+  if (a.openTlcs) calls.push(plural(a.openTlcs, "open TLC"));
+  if (a.pastDueCalls) calls.push(late(a.pastDueCalls));
+  if (calls.length) out.push(joined(calls));
   if (a.openPms) {
     out.push(
-      <>
-        {plural(a.openPms, "open PM")}
-        {a.pmsPastDue ? (
-          <>
-            {sep}
-            <span className="font-medium text-destructive">{a.pmsPastDue} past due</span>
-          </>
-        ) : null}
-        {a.pmsDueSoon ? (
-          <>
-            {sep}
-            <span className="font-medium text-warning">{a.pmsDueSoon} due soon</span>
-          </>
-        ) : null}
-        {a.nextPm ? (
-          <>
-            {sep}next {formatLongDate(a.nextPm)}
-          </>
-        ) : null}
-        {a.pmsNoDate ? (
-          <>
-            {sep}
-            {a.pmsNoDate} with no date
-          </>
-        ) : null}
-      </>,
+      joined(
+        [
+          plural(a.openPms, "open PM"),
+          a.pmsPastDue ? late(a.pmsPastDue) : null,
+          a.pmsDueSoon ? <span className="font-medium text-warning">{a.pmsDueSoon} due soon</span> : null,
+          a.nextPm ? `next ${formatLongDate(a.nextPm)}` : null,
+          a.pmsNoDate ? `${a.pmsNoDate} with no date` : null,
+        ].filter((x) => x != null),
+      ),
     );
   }
   if (a.openInstalls) {
-    out.push(
-      <>
-        {plural(a.openInstalls, "open install")}
-        {a.nextInstall ? (
-          <>
-            {sep}next {formatLongDate(a.nextInstall)}
-          </>
-        ) : null}
-      </>,
-    );
+    out.push(joined([plural(a.openInstalls, "open install"), a.nextInstall ? `next ${formatLongDate(a.nextInstall)}` : null].filter((x) => x != null)));
   }
   return out;
 }

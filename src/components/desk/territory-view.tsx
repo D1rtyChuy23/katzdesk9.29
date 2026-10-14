@@ -11,7 +11,7 @@ import { ShowMoreButton, useShowMore } from "./show-more";
 import { useMyView } from "./my-view-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/separator";
-import { groupByArea, milesLabel, NO_REP_COLOR, spread, suggestRep, type Area, type LatLng } from "@/lib/ops/geo";
+import { groupByArea, isPoint, milesLabel, NO_REP_COLOR, spread, suggestRep, type Area, type LatLng } from "@/lib/ops/geo";
 import type { AccountGeo } from "@/lib/ops/geo-api";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +64,10 @@ type Suggestion = { rep: string; count: number; nearestMiles: number } | null;
 type NoRepArea = Area<AccountGeo> & { suggestion: Suggestion };
 type NoRepAreas = { areas: NoRepArea[]; unplaced: AccountGeo[] };
 
-/** Grouping is the slow part (every pin against every pin), so it runs once per data load and is kept. */
+/**
+ * Grouping ~2,600 accounts takes tens of milliseconds, more on a phone, so it runs once per data load, after the tab
+ * has painted, and is kept (switching tabs does not redo it).
+ */
 const AREA_CACHE = new WeakMap<AccountGeo[], NoRepAreas>();
 
 function buildNoRepAreas(accounts: AccountGeo[]): NoRepAreas {
@@ -111,7 +114,9 @@ export function TerritoryView() {
 
   const [shown, setShown] = useState<string | null>(null);
   const [pinId, setPinId] = useState<number | null>(null);
-  const [focus, setFocus] = useState<LatLng | null>(null);
+  // What the map fits to after the last Show On Map: an area's pins, or (null) the shown rep's pins. `n` changes on
+  // every click so the same button fits again after the map has been moved.
+  const [fit, setFit] = useState<{ n: number; points: LatLng[] | null }>({ n: 0, points: null });
   const [openAreas, setOpenAreas] = useState<Set<string>>(() => new Set());
   const mapBox = useRef<HTMLDivElement>(null);
 
@@ -140,9 +145,10 @@ export function TerritoryView() {
   const areaPage = useShowMore(areas?.areas ?? [], areas, 30);
 
   // Map: the accounts behind the cards plus every account with no rep.
-  const { pins, legend } = useMemo(() => {
+  const { pins, legend, litPoints } = useMemo(() => {
     const lit = (a: AccountGeo) => (shown === NONE ? !a.rep : a.rep === shown);
     const out: (MapPin & { rank: number })[] = [];
+    const litPoints: LatLng[] = [];
     const counts = new Map<string, number>();
     for (const a of accounts) {
       if (a.rep && !inScope(a)) continue;
@@ -156,6 +162,7 @@ export function TerritoryView() {
         out.push({ id: a.id, lat: p.lat, lng: p.lng, color, hollow: approx, size: 5, title, rank: a.rep ? 1 : 0 });
       } else if (lit(a)) {
         counts.set("lit", (counts.get("lit") ?? 0) + 1);
+        litPoints.push(p);
         out.push({ id: a.id, lat: p.lat, lng: p.lng, color, hollow: approx, size: 6, title, rank: 1 });
       } else {
         counts.set("faded", (counts.get("faded") ?? 0) + 1);
@@ -173,16 +180,22 @@ export function TerritoryView() {
       items.push({ key: "lit", label: shown === NONE ? "No rep" : shown, color: shown === NONE ? NO_REP_COLOR : colorOf(shown), count: counts.get("lit") ?? 0 });
       items.push({ key: "faded", label: "Everyone else", color: FADED, count: counts.get("faded") ?? 0 });
     }
-    return { pins: out, legend: items };
+    return { pins: out, legend: items, litPoints };
   }, [accounts, inScope, colorOf, shown]);
 
   const pinAccount = pinId != null ? geo.byId.get(pinId) ?? null : null;
 
-  function showOnMap(rep: string, at?: LatLng) {
+  /** Light up one rep (or the accounts with no rep) and fit the map to them, or to `points` (one area) when given. */
+  function showOnMap(rep: string, points?: LatLng[]) {
     setShown(rep);
     setPinId(null);
-    if (at) setFocus(at);
+    setFit((f) => ({ n: f.n + 1, points: points?.length ? points : null }));
     mapBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function showAll() {
+    setShown(null);
+    setFit((f) => ({ n: f.n + 1, points: null }));
   }
 
   function toggleArea(key: string) {
@@ -239,7 +252,7 @@ export function TerritoryView() {
             )}
           </p>
           {shown ? (
-            <Button type="button" variant="outline" size="sm" className="h-9" onClick={() => setShown(null)} data-testid="territory-show-all">
+            <Button type="button" variant="outline" size="sm" className="h-9" onClick={showAll} data-testid="territory-show-all">
               Show All Reps
             </Button>
           ) : null}
@@ -250,8 +263,8 @@ export function TerritoryView() {
             pins={pins}
             selectedId={pinId}
             onPinClick={(pin) => setPinId(Number(pin.id))}
-            fitKey={`territory|${shown ?? "all"}|${data.accounts.length}|${scoped}`}
-            focus={focus}
+            fitKey={`territory|${fit.n}|${shown ?? "all"}|${data.accounts.length}|${scoped}`}
+            fitTo={fit.points ?? (shown ? litPoints : null)}
             className="h-[45vh] min-h-72"
             label="Territory map"
           >
@@ -335,7 +348,7 @@ export function TerritoryView() {
                 suggestion={area.suggestion}
                 open={openAreas.has(area.key)}
                 onToggle={() => toggleArea(area.key)}
-                onShow={() => showOnMap(NONE, area.center)}
+                onShow={() => showOnMap(NONE, area.items.map(pointOf).filter(isPoint))}
               />
             ))}
             <ShowMoreButton as="li" remaining={areaPage.remaining} onClick={areaPage.showMore} label="areas" />

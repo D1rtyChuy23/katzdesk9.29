@@ -19,7 +19,7 @@ function Page() {
             ? "Every account on one map, colored by rep, open work or PMs due. Tap a pin to see the account and get directions."
             : "Each rep's accounts on the map, and the accounts with no rep grouped by area with the nearest rep."}
         </p>
-        <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Map view" data-testid="map-tabs">
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Map view" data-testid="map-tabs">
           <FilterChip selected={tab === "accounts"} onClick={() => setTab("accounts")} data-testid="map-tab-accounts">
             Accounts
           </FilterChip>
