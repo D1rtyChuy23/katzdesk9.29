@@ -101,7 +101,7 @@ function PinLayer({
               strokeDasharray={p.hollow ? "3 2" : undefined}
             />
             {p.label ? (
-              <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fill="#fff" style={{ fontVariantNumeric: "tabular-nums" }}>
+              <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fill={p.hollow ? p.color : "#fff"} style={{ fontVariantNumeric: "tabular-nums" }}>
                 {p.label}
               </text>
             ) : null}
