@@ -82,7 +82,13 @@ export function fitView(points: readonly LatLng[], width: number, height: number
   return { center, zoom };
 }
 
-/** Draws pins (and an optional route line) as one SVG over the tiles. A child of the pigeon map. */
+/**
+ * Draws pins (and an optional route line) as one SVG over the tiles. A child of the pigeon map.
+ * Pin positions are worked out once per view (pins, zoom, center, size, selection) relative to the map center; while
+ * the map is dragged pigeon only shifts that center, so the whole layer moves with one transform instead of
+ * re-placing ~2,600 pins on every frame. Pins do not block dragging or pinching (pigeon's own Marker behaves the
+ * same way); a tap still opens the pin, and a mouse drag that happens to end on a pin does not count as a tap.
+ */
 function PinLayer({
   pins,
   route,
@@ -91,52 +97,85 @@ function PinLayer({
   latLngToPixel,
   mapState,
 }: PigeonProps & { pins: readonly MapPin[]; route?: readonly LatLng[]; selectedId?: string | number | null; onPinClick?: (pin: MapPin) => void }) {
-  if (!latLngToPixel || !mapState) return null;
-  const { width, height } = mapState;
-  const px = (p: { lat: number; lng: number }) => latLngToPixel([p.lat, p.lng]);
-  const margin = 24;
-  const visible = pins
-    .map((p) => ({ p, xy: px(p) }))
-    .filter(({ xy }) => xy[0] > -margin && xy[1] > -margin && xy[0] < width + margin && xy[1] < height + margin);
-  // Selected pin last so it draws on top.
-  visible.sort((a, b) => Number(a.p.id === selectedId) - Number(b.p.id === selectedId));
-  const line = route && route.length > 1 ? route.map((p) => px(p).join(",")).join(" ") : null;
+  const down = useRef<{ x: number; y: number } | null>(null);
+  const zoom = mapState?.zoom ?? 0;
+  const cLat = mapState?.center[0] ?? 0;
+  const cLng = mapState?.center[1] ?? 0;
+  const width = mapState?.width ?? 0;
+  const height = mapState?.height ?? 0;
+  const layer = useMemo(() => {
+    if (!latLngToPixel) return null;
+    const origin = latLngToPixel([cLat, cLng]);
+    const rel = (p: { lat: number; lng: number }): Point => {
+      const xy = latLngToPixel([p.lat, p.lng]);
+      return [xy[0] - origin[0], xy[1] - origin[1]];
+    };
+    // Keep one extra screen on every side, so pins dragged into view are already there until pigeon settles.
+    const mx = width;
+    const my = height;
+    const visible = pins
+      .map((p) => ({ p, xy: rel(p) }))
+      .filter(({ xy }) => Math.abs(xy[0]) < width / 2 + mx && Math.abs(xy[1]) < height / 2 + my);
+    // Selected pin last so it draws on top.
+    visible.sort((a, b) => Number(a.p.id === selectedId) - Number(b.p.id === selectedId));
+    const line = route && route.length > 1 ? route.map((p) => rel(p).join(",")).join(" ") : null;
+    return (
+      <>
+        {line ? <polyline points={line} fill="none" stroke="var(--color-primary)" strokeWidth={3} strokeOpacity={0.75} strokeLinejoin="round" strokeDasharray="6 5" /> : null}
+        {visible.map(({ p, xy }) => {
+          const selected = p.id === selectedId;
+          const r = (p.size ?? 6) + (selected ? 3 : 0) + (p.label ? 4 : 0);
+          return (
+            <g
+              key={p.id}
+              transform={`translate(${xy[0]},${xy[1]})`}
+              className={cn("pigeon-click-block", onPinClick && "cursor-pointer")}
+              style={{ pointerEvents: onPinClick ? "auto" : "none" }}
+              onPointerDown={onPinClick ? (e) => void (down.current = { x: e.clientX, y: e.clientY }) : undefined}
+              onClick={
+                onPinClick
+                  ? (e) => {
+                      e.stopPropagation();
+                      const d = down.current;
+                      down.current = null;
+                      if (d && Math.abs(e.clientX - d.x) + Math.abs(e.clientY - d.y) > 4) return; // a drag, not a tap
+                      onPinClick(p);
+                    }
+                  : undefined
+              }
+              data-testid="map-pin"
+              data-pin-id={String(p.id)}
+            >
+              {p.title ? <title>{p.title}</title> : null}
+              {/* Larger invisible hit area for fingers. */}
+              <circle r={Math.max(r + 4, 10)} fill="transparent" />
+              {selected ? <circle r={r + 5} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.5} /> : null}
+              <circle
+                r={r}
+                fill={p.hollow ? "var(--color-card)" : p.color}
+                fillOpacity={p.hollow ? 0.85 : 0.92}
+                stroke={p.hollow ? p.color : "var(--color-card)"}
+                strokeWidth={p.hollow ? 2.5 : 1.5}
+                strokeDasharray={p.hollow ? "3 2" : undefined}
+              />
+              {p.label ? (
+                <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fill={p.hollow ? p.color : "#fff"} style={{ fontVariantNumeric: "tabular-nums" }}>
+                  {p.label}
+                </text>
+              ) : null}
+            </g>
+          );
+        })}
+      </>
+    );
+    // latLngToPixel is a new function on every pigeon render; the view it depends on is in zoom / center / size.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pins, route, selectedId, onPinClick, zoom, cLat, cLng, width, height]);
+  if (!latLngToPixel || !mapState || !layer) return null;
+  const origin = latLngToPixel([cLat, cLng]);
   return (
-    <svg width={width} height={height} className="pointer-events-none absolute top-0 left-0" style={{ overflow: "visible" }} aria-hidden={false}>
-      {line ? <polyline points={line} fill="none" stroke="var(--color-primary)" strokeWidth={3} strokeOpacity={0.75} strokeLinejoin="round" strokeDasharray="6 5" /> : null}
-      {visible.map(({ p, xy }) => {
-        const selected = p.id === selectedId;
-        const r = (p.size ?? 6) + (selected ? 3 : 0) + (p.label ? 4 : 0);
-        return (
-          <g
-            key={p.id}
-            transform={`translate(${xy[0]},${xy[1]})`}
-            className={cn("pigeon-click-block pigeon-drag-block", onPinClick && "cursor-pointer")}
-            style={{ pointerEvents: onPinClick ? "auto" : "none" }}
-            onClick={onPinClick ? (e) => (e.stopPropagation(), onPinClick(p)) : undefined}
-            data-testid="map-pin"
-            data-pin-id={String(p.id)}
-          >
-            {p.title ? <title>{p.title}</title> : null}
-            {/* Larger invisible hit area for fingers. */}
-            <circle r={Math.max(r + 6, 12)} fill="transparent" />
-            {selected ? <circle r={r + 5} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.5} /> : null}
-            <circle
-              r={r}
-              fill={p.hollow ? "var(--color-card)" : p.color}
-              fillOpacity={p.hollow ? 0.85 : 0.92}
-              stroke={p.hollow ? p.color : "var(--color-card)"}
-              strokeWidth={p.hollow ? 2.5 : 1.5}
-              strokeDasharray={p.hollow ? "3 2" : undefined}
-            />
-            {p.label ? (
-              <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fill={p.hollow ? p.color : "#fff"} style={{ fontVariantNumeric: "tabular-nums" }}>
-                {p.label}
-              </text>
-            ) : null}
-          </g>
-        );
-      })}
+    <svg width={width} height={height} className="pointer-events-none absolute top-0 left-0" style={{ overflow: "visible" }}>
+      <g transform={`translate(${origin[0]},${origin[1]})`}>{layer}</g>
     </svg>
   );
 }

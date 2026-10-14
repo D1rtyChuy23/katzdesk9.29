@@ -302,7 +302,8 @@ export const MAX_WAYPOINTS = 9;
 
 /** A route stop for a Google Maps link: a pin, or a typed address when the pin is only approximate. */
 export type RouteStop = LatLng | string;
-const stopParam = (s: RouteStop) => (typeof s === "string" ? s.trim() : fmt(s));
+// "|" separates waypoints in the link, so it cannot appear inside a typed address.
+const stopParam = (s: RouteStop) => (typeof s === "string" ? s.replace(/\|/g, " ").replace(/\s{2,}/g, " ").trim() : fmt(s));
 
 /**
  * One or more Google Maps route links covering `stops` in order. Without `origin` Google starts from the phone's

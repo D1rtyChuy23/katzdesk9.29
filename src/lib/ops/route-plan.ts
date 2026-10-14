@@ -177,12 +177,16 @@ export function isApprox(s: Pick<PlacedStop, "point" | "quality">): boolean {
   return isPoint(s.point) && !canDriveTo(s.quality);
 }
 
-/** What goes into the Google Maps link: the pin when it is a street match, else the typed address, else the pin. */
+/**
+ * What goes into the Google Maps link: the pin when it is a street match, else the typed address. A stop whose pin is
+ * only the ZIP area and has no typed address is left out of the link (it stays in the list and on the map): the
+ * middle of a ZIP code is never a driving destination.
+ */
 export function linkStop(s: Pick<PlacedStop, "point" | "quality" | "address">): RouteStop | null {
   if (!isPoint(s.point)) return null;
   if (canDriveTo(s.quality)) return s.point;
   const typed = (s.address ?? "").trim();
-  return typed || s.point;
+  return typed || null;
 }
 
 const sameStop = (a: RouteStop, b: RouteStop) =>

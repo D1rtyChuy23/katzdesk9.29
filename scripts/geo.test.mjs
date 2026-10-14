@@ -163,6 +163,9 @@ test("route links: up to 9 waypoints per link, legs chain, no origin means curre
   const mixed = new URL(routeUrls([GALLERIA, "5740 San Felipe, Houston, TX 77057", KATY])[0]).searchParams;
   assert.equal(mixed.get("waypoints"), "29.741468,-95.452042|5740 San Felipe, Houston, TX 77057");
   assert.equal(routeUrls(["  ", { lat: 0, lng: 0 }]).length, 0);
+  // A "|" typed in an address must not split it into two stops.
+  const piped = new URL(routeUrls(["12 Main St | Suite 4, Katy, TX", KATY])[0]).searchParams;
+  assert.equal(piped.get("waypoints"), "12 Main St Suite 4, Katy, TX");
 });
 
 test("territories: suggest the rep with the most accounts nearby", () => {

@@ -513,8 +513,8 @@ function TechCard({
             {approxTyped ? " Stops with only a ZIP area pin go in by their typed address." : ""}
             {approxBare
               ? approxBare === 1
-                ? " One stop has only a ZIP area pin and no typed address, so the link only gets you to that ZIP area."
-                : ` ${approxBare} stops have only a ZIP area pin and no typed address, so the link only gets you to their ZIP areas.`
+                ? " One stop has only a ZIP area pin and no typed address, so it is left out of the link. Add its address to include it."
+                : ` ${approxBare} stops have only a ZIP area pin and no typed address, so they are left out of the link. Add their addresses to include them.`
               : ""}
           </p>
         </div>

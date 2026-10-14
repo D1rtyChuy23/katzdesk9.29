@@ -227,10 +227,10 @@ test("routes: promised times keep their order; untimed stops slot in by distance
   assert.equal(stopTime(ryan.stops[2].time), "11:30a");
 });
 
-test("route links: approximate (ZIP area) stops go in as the typed address, else the pin", () => {
+test("route links: approximate (ZIP area) stops go in as the typed address, or are left out", () => {
   assert.deepEqual(linkStop({ point: GALLERIA, quality: "exact", address: "4444 Westheimer Rd" }), GALLERIA);
   assert.equal(linkStop({ point: KATY, quality: "approx", address: " 1 Main St, Katy, TX 77494 " }), "1 Main St, Katy, TX 77494");
-  assert.deepEqual(linkStop({ point: SUGAR_LAND, quality: "approx", address: null }), SUGAR_LAND);
+  assert.equal(linkStop({ point: SUGAR_LAND, quality: "approx", address: null }), null);
   assert.equal(linkStop({ point: null, quality: null, address: "9 Nowhere Ln" }), null);
   assert.equal(isApprox({ point: KATY, quality: "approx" }), true);
   assert.equal(isApprox({ point: GALLERIA, quality: "close" }), false);
@@ -252,8 +252,10 @@ test("route links: approximate (ZIP area) stops go in as the typed address, else
   );
   const [ryan] = planTechRoutes(placed, []);
   const url = new URL(ryan.links[0]);
-  assert.equal(url.searchParams.get("destination"), "29.599400,-95.614200");
-  assert.equal(url.searchParams.get("waypoints"), "29.741468,-95.452042|1 Main St, Katy, TX 77494");
+  // Sugar Land Grill (ZIP area only, no typed address) stays in the stop list but not in the link.
+  assert.equal(ryan.stops.length, 3);
+  assert.equal(url.searchParams.get("destination"), "1 Main St, Katy, TX 77494");
+  assert.equal(url.searchParams.get("waypoints"), "29.741468,-95.452042");
 });
 
 test("route links: two jobs in a row at one place are one stop; long days split into legs", () => {
