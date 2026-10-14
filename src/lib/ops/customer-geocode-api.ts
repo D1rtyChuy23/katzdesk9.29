@@ -3,7 +3,7 @@ import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
-import { countGeocodes, geoRowsFromMatrix, planGeocodes, type GeoCounts, type GeoPlanLine, type GeoRow } from "@/lib/ops/customer-geocode";
+import { countGeocodes, geoRowsFromMatrix, planGeocodes, type GeoCounts, type GeoPlanLine, type GeoQuality, type GeoRow } from "@/lib/ops/customer-geocode";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -15,6 +15,8 @@ async function ready() {
 async function requireEditor(sql: Sql, userId: string) {
   if (!(await canReviewNames(sql, userId))) throw new Error("Only an Admin can import customer locations.");
 }
+
+const savedQuality = (v: string | null): GeoQuality | null => (v === "exact" || v === "close" || v === "approx" ? v : null);
 
 async function loadAccounts(sql: Sql) {
   const rows = await sql.query<{
@@ -33,7 +35,7 @@ async function loadAccounts(sql: Sql) {
     netsuiteId: r.netsuite_id,
     latitude: r.latitude === null ? null : Number(r.latitude),
     longitude: r.longitude === null ? null : Number(r.longitude),
-    quality: r.geocode_match === "exact" || r.geocode_match === "close" || r.geocode_match === "approx" ? r.geocode_match : null,
+    quality: savedQuality(r.geocode_match),
   }));
 }
 
