@@ -30,6 +30,16 @@ export type GeoAccount = {
   longitude?: number | null;
 };
 
+export type GeoQuality = "exact" | "close" | "approx";
+
+/** Match Type column → quality. */
+export function qualityOf(matchType: string): GeoQuality {
+  const t = matchType.trim();
+  if (/^exact$/i.test(t)) return "exact";
+  if (/^approx/i.test(t)) return "approx";
+  return "close";
+}
+
 export type GeoStatus = "save" | "same" | "no_location" | "unmatched" | "conflict";
 
 export type GeoPlanLine = {
@@ -42,8 +52,11 @@ export type GeoPlanLine = {
   matchedAddress: string;
   latitude: number | null;
   longitude: number | null;
-  /** 'exact' or 'close' when the row has a location. */
-  quality: "exact" | "close" | null;
+  /**
+   * 'exact' or 'close' (Census Non_Exact) when the street address was found; 'approx' when only the ZIP code's
+   * center is known (Match Type "Approximate"): good for grouping by area, never used for directions.
+   */
+  quality: GeoQuality | null;
   status: GeoStatus;
   accountId: number | null;
   accountName: string | null;
@@ -178,7 +191,7 @@ export function planGeocodes(rows: GeoRow[], accounts: GeoAccount[]): GeoPlanLin
   });
   return found.map(({ r, acct, by, ambiguous }) => {
     const located = hasLocation(r);
-    const quality = located ? (/^exact$/i.test(r.matchType.trim()) ? "exact" : "close") : null;
+    const quality = located ? qualityOf(r.matchType) : null;
     const base = {
       line: r.line,
       name: r.name,
@@ -194,7 +207,12 @@ export function planGeocodes(rows: GeoRow[], accounts: GeoAccount[]): GeoPlanLin
       accountName: acct?.name ?? null,
       matchedBy: by,
     } as const;
-    const closeNote = quality === "close" ? "Close (not exact) match; check the pin is the right building" : "";
+    const closeNote =
+      quality === "close"
+        ? "Close (not exact) match; check the pin is the right building"
+        : quality === "approx"
+          ? "Street address not found; pinned at the ZIP code's center (approximate). Fix the address in NetSuite"
+          : "";
     if (!acct) {
       const reason = ambiguous ? "More than one KatzDesk account has a name like this" : "No KatzDesk account with this account number, Internal ID or name";
       return { ...base, status: "unmatched" as const, reason, review: true, reviewReason: located ? reason : `${reason}. ${noLocationReason(r)}` };
@@ -213,10 +231,10 @@ export function planGeocodes(rows: GeoRow[], accounts: GeoAccount[]): GeoPlanLin
       return { ...base, status: "no_location" as const, reason, review: true, reviewReason: reason };
     }
     if (samePoint(acct.latitude, base.latitude) && samePoint(acct.longitude, base.longitude)) {
-      return { ...base, status: "same" as const, reason: "Already saved; nothing changes", review: quality === "close", reviewReason: closeNote };
+      return { ...base, status: "same" as const, reason: "Already saved; nothing changes", review: quality !== "exact", reviewReason: closeNote };
     }
     const reason = acct.latitude != null ? "Will replace the saved location" : "Will be saved";
-    return { ...base, status: "save" as const, reason, review: quality === "close", reviewReason: closeNote };
+    return { ...base, status: "save" as const, reason, review: quality !== "exact", reviewReason: closeNote };
   });
 }
 

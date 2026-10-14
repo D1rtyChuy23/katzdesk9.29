@@ -2286,7 +2286,7 @@ export const listDirectory = createServerFn({ method: "GET" }).middleware([deskM
 	return await sql.query(`select id, name from ${table} where archived = false order by lower(name)`);
 });
 /** The account's address (from the clean customer list), for tickets, PMs and installs. */
-export type CustomerLocation = { latitude: number; longitude: number; match: "exact" | "close" | null; matchedAddress: string | null };
+export type CustomerLocation = { latitude: number; longitude: number; match: "exact" | "close" | "approx" | null; matchedAddress: string | null };
 export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { name: string }) => d).handler(async ({ data }: any): Promise<{ address: string | null; location: CustomerLocation | null }> => {
 	const sql = await ready();
 	const name = String(data.name ?? "").trim();
@@ -2297,7 +2297,7 @@ export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([
 			? {
 					latitude: Number(row.latitude),
 					longitude: Number(row.longitude),
-					match: row.geocode_match === "exact" || row.geocode_match === "close" ? row.geocode_match : null,
+					match: row.geocode_match === "exact" || row.geocode_match === "close" || row.geocode_match === "approx" ? row.geocode_match : null,
 					matchedAddress: row.geocode_address ? String(row.geocode_address) : null,
 				}
 			: null;

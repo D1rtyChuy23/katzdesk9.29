@@ -166,7 +166,7 @@ export function GeocodeImportButton() {
                           {l.matchedBy ? <span className="block text-xs text-muted-foreground">by {l.matchedBy}</span> : null}
                         </td>
                         <td className="px-3 py-1.5 text-xs">
-                          {l.quality === "exact" ? "Exact" : l.quality === "close" ? "Close" : l.result || "—"}
+                          {l.quality === "exact" ? "Exact" : l.quality === "close" ? "Close" : l.quality === "approx" ? "ZIP area" : l.result || "—"}
                         </td>
                         <td className="px-3 py-1.5 text-xs text-muted-foreground">
                           <Badge size="tight" variant={STATUS_LABEL[l.status].variant} className="mr-1">

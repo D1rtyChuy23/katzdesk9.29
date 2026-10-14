@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { countGeocodes, geoRowsFromMatrix, hasLocation, planGeocodes, reviewCsv } from "../src/lib/ops/customer-geocode.ts";
+import { countGeocodes, geoRowsFromMatrix, hasLocation, planGeocodes, qualityOf, reviewCsv } from "../src/lib/ops/customer-geocode.ts";
 
 const HEAD = [
   "Internal ID", "Account", "Name", "Shipping Address 1", "Shipping Address 2", "Shipping City", "Shipping State/Province", "Shipping Zip",
@@ -99,4 +99,20 @@ test("review CSV lists only rows that need a person, worst first, quoted for Exc
   assert.match(lines[1], /^4,Texican Court,/);
   assert.match(lines[lines.length - 1], /^2,Common Bond Tanglewood,.*"5740 San Felipe, Unit 130, Houston, TX 77057"/);
   assert.ok(!csv.includes("Steak 48 Houston"));
+});
+
+test("ZIP-area pins (Match Type Approximate) save as approx and go on the review list", () => {
+  assert.equal(qualityOf("Exact"), "exact");
+  assert.equal(qualityOf("Non_Exact"), "close");
+  assert.equal(qualityOf("Approximate"), "approx");
+  const rows = geoRowsFromMatrix([
+    HEAD,
+    ["1523", "1012362", "Texican Court", "501 W. Las Colinas Blvd.", "", "Irving", "TX", "75039", "Match (ZIP area)", "Approximate", "Irving, TX, 75039 (ZIP area)", "32.8697", "-96.9389"],
+  ]);
+  assert.equal(hasLocation(rows[0]), true);
+  const [line] = planGeocodes(rows, accounts);
+  assert.equal(line.status, "save");
+  assert.equal(line.quality, "approx");
+  assert.equal(line.review, true);
+  assert.match(line.reviewReason, /ZIP code's center/);
 });

@@ -325,3 +325,8 @@ html[data-contrast="high"] :focus-visible {
 html[data-motion="reduced"] .katz-cloud {
   animation: none;
 }
+
+/* Customer map (desk-map.tsx): dim the street tiles in dark mode so pins and labels stay readable. */
+html.dark .desk-map .pigeon-tiles img {
+  filter: brightness(0.6) contrast(1.12) saturate(0.65);
+}
