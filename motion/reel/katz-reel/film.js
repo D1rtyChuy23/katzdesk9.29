@@ -11,21 +11,11 @@ const B = [8, 16, 24, 32, 44, 56, 64, 88, 100, 108, 120];   // shot boundaries (
 
 // Every accent: [beat, label, sfx, opts]. sfx.mjs voices each one so sound can't drift from picture.
 const HITS = [
-  [0, 'badge slam', 'impact'], [2, 'COFFEE EDUCATION', 'thud'], [3.2, 'subtitle', 'tick'],
-  ...B.map((b) => [b, 'wipe', 'whoosh', { len: 0.6 }]),
-  [8.7, 'title', 'pop', { pitch: 'D5' }], [10, 'stat', 'pop', { pitch: 'D6' }], [11, 'stat', 'pop', { pitch: 'F#6' }],
-  [12, 'cherry splits', 'thud'], [13, 'stat', 'pop', { pitch: 'A6' }], [14, 'caption', 'tick'],
-  [16.7, 'title', 'pop', { pitch: 'D5' }], [18, 'stat', 'pop', { pitch: 'D6' }], [20, 'stat', 'pop', { pitch: 'F#6' }], [22, 'stat', 'pop', { pitch: 'A6' }],
-  [24.7, 'photo', 'pop', { pitch: 'D5' }], [26, 'stat', 'pop', { pitch: 'D6' }], [28, 'stat', 'pop', { pitch: 'F#6' }], [30, 'stat', 'pop', { pitch: 'A6' }],
-  [33, 'tag', 'click'], [36, 'tag', 'click'], [39, 'tag', 'click'], [42, 'tag', 'click'],
-  [45, 'panel', 'thud'], [47, 'panel', 'thud'], [49, 'panel', 'thud'], [51, 'panel + arrow', 'thud'], [52, 'arrow', 'whoosh', { len: 1.4 }],
-  [57, 'card', 'pop', { pitch: 'D6' }], [59, 'card', 'pop', { pitch: 'F#6' }], [61, 'card', 'pop', { pitch: 'A6' }], [62.4, 'roaster rumble', 'sub', { len: 1 }],
-  [64.8, 'bar starts', 'whoosh', { len: 1 }],
-  ...['D5', 'E5', 'F#5', 'G5', 'A5', 'B5', 'C#6', 'D6'].map((p, i) => [65 + i * 2.9, `bean ${i + 1}`, 'tok', { pitch: p }]),
-  [89, 'card', 'thud'], [92, 'card', 'thud'], [95, 'card', 'thud'], [98, 'espresso card', 'impact'],
-  [101.5, 'step', 'pop', { pitch: 'D6' }], [103, 'step', 'pop', { pitch: 'F#6' }], [104.5, 'step', 'pop', { pitch: 'A6' }],
-  [109, 'wheel opens', 'whoosh', { len: 1.2 }], [112, 'wheel settles', 'bell', { pitch: 'D6' }],
-  [120.5, 'end badge', 'impact'], [121.4, 'tagline', 'bell', { pitch: 'D6' }],
+  [0, 'badge lands', 'impact'],
+  ...B.map((b) => [b, 'wipe', 'whoosh', { len: 0.9 }]),
+  [12, 'cherry splits', 'thud'],
+  [112, 'wheel settles', 'bell', { pitch: 'C6' }],
+  [120.5, 'end badge', 'thud'], [121.4, 'tagline', 'bell', { pitch: 'C6' }],
 ];
 
 // ------------------------------------------------------------------ helpers
