@@ -169,21 +169,6 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                       <MapPin className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden />
                       {v.billTo.address}
                     </a>
-                  ) : toPin(v.billTo) ? (
-                    <span>
-                      <span className="text-muted-foreground">Not set</span>
-                      {" · "}
-                      <a
-                        href={directions(v.billTo) ?? undefined}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-start gap-1 hover:text-primary hover:underline"
-                        data-testid="invoice-bill-pin"
-                      >
-                        <MapPin className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden />
-                        Directions to the map pin
-                      </a>
-                    </span>
                   ) : (
                     <span className="text-muted-foreground">Not set</span>
                   )}
