@@ -188,14 +188,20 @@ export function linkStop(s: Pick<PlacedStop, "point" | "quality" | "address">): 
 const sameStop = (a: RouteStop, b: RouteStop) =>
   typeof a === "string" || typeof b === "string" ? a === b : Math.abs(a.lat - b.lat) < 1e-7 && Math.abs(a.lng - b.lng) < 1e-7;
 
+/** Where a tech's day can start. Without one, Google Maps starts from the phone's current location. */
+export type RouteStart = { key: string; label: string; point: LatLng };
+
+/** The Katz shop (Katz Coffee Service Dept., 2400 Karbach St, Houston, TX 77092; exact Census match). */
+export const KATZ_SHOP: RouteStart = { key: "shop", label: "The Shop (2400 Karbach St)", point: { lat: 29.808821, lng: -95.46121 } };
+
 /** Google Maps links for stops in this order. Two jobs in a row at the same place count as one stop. */
-export function routeLinks(stops: readonly Pick<PlacedStop, "point" | "quality" | "address">[]): string[] {
+export function routeLinks(stops: readonly Pick<PlacedStop, "point" | "quality" | "address">[], start?: RouteStart | null): string[] {
   const list: RouteStop[] = [];
   for (const s of stops) {
     const r = linkStop(s);
     if (r && !(list.length && sameStop(list[list.length - 1]!, r))) list.push(r);
   }
-  return routeUrls(list);
+  return routeUrls(list, start?.point ?? null);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -241,7 +247,7 @@ export function techOrder(roster: readonly string[], techs: readonly string[]): 
  * One list per tech with work that day: roster order, then others by name, "Unassigned" last. Each routed list is in
  * the suggested order (timed stops keep their time order, untimed ones slot in where they add the fewest miles).
  */
-export function planTechRoutes(stops: readonly PlacedStop[], roster: readonly string[] = []): TechRoute[] {
+export function planTechRoutes(stops: readonly PlacedStop[], roster: readonly string[] = [], start: RouteStart | null = null): TechRoute[] {
   const groups = new Map<string, PlacedStop[]>();
   for (const s of stops) groups.set(s.tech, [...(groups.get(s.tech) ?? []), s]);
   const order = [...techOrder(roster, [...groups.keys()]).filter((t) => groups.has(t)), ...(groups.has(NO_TECH) ? [NO_TECH] : [])];
@@ -260,14 +266,14 @@ export function planTechRoutes(stops: readonly PlacedStop[], roster: readonly st
         links: [],
       };
     }
-    const plan = orderStops(list.map((s) => ({ item: s, point: s.point, time: s.time })));
+    const plan = orderStops(list.map((s) => ({ item: s, point: s.point, time: s.time })), start?.point ?? null);
     const rows: RouteRow[] = plan.ordered.map((o, i) => ({
       ...o.item,
       point: o.point as LatLng,
       n: i + 1,
-      legMiles: i > 0 ? milesBetween(plan.ordered[i - 1]!.point as LatLng, o.point as LatLng) : null,
+      legMiles: i > 0 ? milesBetween(plan.ordered[i - 1]!.point as LatLng, o.point as LatLng) : start ? milesBetween(start.point, o.point as LatLng) : null,
     }));
-    return { tech, label, routed: true, stops: rows, unrouted: plan.unrouted.map((u) => u.item), miles: plan.miles, links: routeLinks(rows) };
+    return { tech, label, routed: true, stops: rows, unrouted: plan.unrouted.map((u) => u.item), miles: plan.miles, links: routeLinks(rows, start) };
   });
 }
 

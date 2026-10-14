@@ -1,25 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  collectDayStops,
-  colorOfTech,
-  crewLabel,
-  isApprox,
-  linkStop,
-  milesNote,
-  placeStops,
-  planAreas,
-  planTechRoutes,
-  routeLinks,
-  stopCount,
-  stopTime,
-  techColors,
-  techKey,
-  techOrder,
-  typeCounts,
-  MISSING_LABEL,
-  NO_TECH,
-} from "../src/lib/ops/route-plan.ts";
+import { collectDayStops, colorOfTech, crewLabel, isApprox, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
 import { NO_REP_COLOR, REP_PALETTE } from "../src/lib/ops/geo.ts";
 
 const DAY = "2026-10-14";
@@ -341,4 +322,24 @@ test("an empty day plans nothing", () => {
   assert.deepEqual(collectDayStops(none, DAY), []);
   assert.deepEqual(planTechRoutes([], ["Ryan Gloria"]), []);
   assert.deepEqual(planAreas([]), { areas: [], unplaced: [] });
+});
+
+test("starting from the shop: first leg is measured from the shop, links start there, order can change", () => {
+  const services = [
+    ticket({ id: 1, customer: "Katy Diner", technician: "Ryan Gloria" }),
+    ticket({ id: 2, customer: "Steak 48", technician: "Ryan Gloria" }),
+  ];
+  const placed = placeStops(collectDayStops({ ...none, services }, DAY), find);
+  const here = planTechRoutes(placed, ["Ryan Gloria"])[0];
+  const shop = planTechRoutes(placed, ["Ryan Gloria"], KATZ_SHOP)[0];
+  assert.equal(here.stops.length, 2);
+  assert.equal(shop.stops.length, 2);
+  assert.equal(here.stops[0].legMiles, null);
+  assert.ok(shop.stops[0].legMiles > 0);
+  // The shop (Karbach St) is much closer to the Galleria than to Katy, so the Galleria stop comes first.
+  assert.equal(shop.stops[0].customer, "Steak 48");
+  assert.ok(shop.miles > 0);
+  const q = new URL(shop.links[0]).searchParams;
+  assert.equal(q.get("origin"), "29.808821,-95.461210");
+  assert.equal(new URL(here.links[0]).searchParams.get("origin"), null);
 });

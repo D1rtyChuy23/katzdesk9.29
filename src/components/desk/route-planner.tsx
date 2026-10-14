@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, MapPin as MapPinIcon, Navigation, TriangleAlert } from "lucide-react";
@@ -12,6 +12,7 @@ import {
   crewLabel,
   isApprox,
   jobKey,
+  KATZ_SHOP,
   milesNote,
   placeStops,
   planAreas,
@@ -28,6 +29,7 @@ import {
   THIRD_PARTY,
   type AreaGroup,
   type PlacedStop,
+  type RouteStart,
   type StopType,
   type TechRoute,
 } from "@/lib/ops/route-plan";
@@ -76,6 +78,8 @@ function pinTitle(s: PlacedStop, n?: number): string {
  * Planner Routes tab: the day's open work per tech in a suggested stop order (straight-line miles, promised times kept),
  * with Google Maps links, or grouped by area so a dispatcher can spot two techs in one area or unassigned work nearby.
  */
+const START_PREF = "katz-desk-route-start";
+
 export function RoutePlanner({
   installs,
   pms,
@@ -96,13 +100,31 @@ export function RoutePlanner({
   const [selected, setSelected] = useState<string | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
   const [focus, setFocus] = useState<LatLng | null>(null);
+  // Where the day starts: the phone's current location (Google Maps decides) or the shop. Remembered on this device.
+  const [startFrom, setStartFrom] = useState<"here" | "shop">("here");
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(START_PREF) === "shop") setStartFrom("shop");
+    } catch {
+      /* storage blocked: keep the default */
+    }
+  }, []);
+  const chooseStart = (next: "here" | "shop") => {
+    setStartFrom(next);
+    try {
+      window.localStorage.setItem(START_PREF, next);
+    } catch {
+      /* storage blocked: the choice still applies for this visit */
+    }
+  };
+  const start: RouteStart | null = startFrom === "shop" ? KATZ_SHOP : null;
   const mapBox = useRef<HTMLDivElement>(null);
 
   const rosterNames = useMemo(() => (roster.data?.techs ?? []).filter((t) => t.active).map((t) => t.name), [roster.data]);
   const dayStops = useMemo(() => collectDayStops({ installs, pms, services, tlcs }, day), [installs, pms, services, tlcs, day]);
   const { byName } = geo;
   const placed = useMemo(() => placeStops(dayStops, (customer) => byName.get(nameKey(customer))), [dayStops, byName]);
-  const routes = useMemo(() => planTechRoutes(placed, rosterNames), [placed, rosterNames]);
+  const routes = useMemo(() => planTechRoutes(placed, rosterNames, start), [placed, rosterNames, start]);
   const colors = useMemo(() => techColors(rosterNames, routes.map((r) => r.tech)), [rosterNames, routes]);
   const areas = useMemo(() => planAreas(placed), [placed]);
   const counts = useMemo(() => typeCounts(dayStops), [dayStops]);
@@ -113,14 +135,14 @@ export function RoutePlanner({
   const offMap = jobs.filter((s) => s.missing).length;
   const techCount = routes.filter((r) => r.tech !== NO_TECH).length;
 
-  const { pins, route } = useMemo(() => {
+  const { pins, route, fitTo } = useMemo(() => {
     const out: MapPin[] = [];
     if (!current) {
       for (const s of placed) {
         if (s.second || !s.point) continue;
         out.push({ id: s.key, lat: s.point.lat, lng: s.point.lng, color: colorOfTech(colors, s.tech), hollow: isApprox(s), title: pinTitle(s) });
       }
-      return { pins: out, route: undefined };
+      return { pins: out, route: undefined, fitTo: null };
     }
     const mine = new Set(current.stops.map(jobKey));
     for (const s of placed) {
@@ -134,13 +156,15 @@ export function RoutePlanner({
         lat: s.point.lat,
         lng: s.point.lng,
         color,
-        // Filled even for ZIP-area stops: the map draws the number in white, which would vanish on a hollow pin.
+        hollow: isApprox(s),
         size: 7,
         label: current.routed ? String(s.n) : undefined,
         title: pinTitle(s, current.routed ? s.n : undefined),
       });
     }
-    return { pins: out, route: current.routed && current.stops.length > 1 ? current.stops.map((s) => s.point) : undefined };
+    const points = current.stops.map((s) => s.point);
+    // Fit the view to this tech's stops; everyone else's gray dots may sit off screen.
+    return { pins: out, route: current.routed && points.length > 1 ? points : undefined, fitTo: points };
   }, [placed, current, colors]);
 
   const anyApprox = pins.some((p) => p.hollow);
@@ -181,7 +205,8 @@ export function RoutePlanner({
   }
 
   const changeDay = (next: string) => {
-    if (!next) return;
+    // The date box can hand back "" (cleared) or a half-typed year; keep the current day until it is a real date.
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(next)) return;
     setDay(next);
     setHighlight(null);
     setFocus(null);
@@ -229,6 +254,17 @@ export function RoutePlanner({
             By Area
           </FilterChip>
         </div>
+        {view === "tech" ? (
+          <div className="flex items-center gap-1.5" role="group" aria-label="Start each route from">
+            <span className="text-xs text-muted-foreground">Start From</span>
+            <FilterChip selected={startFrom === "here"} onClick={() => chooseStart("here")} data-testid="route-start-here">
+              Current Location
+            </FilterChip>
+            <FilterChip selected={startFrom === "shop"} onClick={() => chooseStart("shop")} data-testid="route-start-shop">
+              The Shop
+            </FilterChip>
+          </div>
+        ) : null}
         {dayStops.length ? (
           <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-label="Work this day">
             {STOP_TYPES.filter((t) => counts[t]).map((t) => (
@@ -272,6 +308,7 @@ export function RoutePlanner({
                   selectedId={highlight}
                   onPinClick={onPin}
                   fitKey={fitKey}
+                  fitTo={fitTo}
                   focus={view === "area" ? focus : null}
                   className="h-[45vh] min-h-64 lg:h-[60vh]"
                   label={current ? `Route map for ${current.label}` : "Map of the day's stops"}
@@ -322,6 +359,7 @@ export function RoutePlanner({
                     highlight={highlight}
                     onToggle={() => toggleTech(r.tech)}
                     onOpen={open}
+                    start={start}
                   />
                 ))
               : (
@@ -346,6 +384,7 @@ function TechCard({
   highlight,
   onToggle,
   onOpen,
+  start,
 }: {
   route: TechRoute;
   color: string;
@@ -353,9 +392,12 @@ function TechCard({
   highlight: string | null;
   onToggle: () => void;
   onOpen: (s: PlacedStop) => void;
+  start: RouteStart | null;
 }) {
   const total = r.stops.length + r.unrouted.length;
-  const approx = r.stops.filter(isApprox).length;
+  // ZIP-area pins go into the link as the typed address; with no typed address the link can only reach the ZIP area.
+  const approxTyped = r.stops.filter((s) => isApprox(s) && s.address).length;
+  const approxBare = r.stops.filter((s) => isApprox(s) && !s.address).length;
   return (
     <section
       className={cn("rounded-lg border bg-card p-3", selected ? "border-primary ring-1 ring-primary/40" : "border-border")}
@@ -370,7 +412,7 @@ function TechCard({
           <h3 className={cn("leading-tight font-medium break-words", r.tech === NO_TECH && "text-muted-foreground")}>{r.label}</h3>
           <p className="tabular text-xs text-muted-foreground">
             {stopCount(total)}
-            {r.routed && r.stops.length > 1 ? ` · ${milesNote(r.miles)}` : ""}
+            {r.routed && (r.stops.length > 1 || start) && r.miles > 0 ? ` · ${milesNote(r.miles)}` : ""}
           </p>
         </div>
         {r.stops.length ? (
@@ -423,13 +465,13 @@ function TechCard({
                 )}
                 <StopText stop={s} />
                 {s.legMiles != null ? (
-                  <span className="tabular mt-0.5 shrink-0 text-xs text-muted-foreground" title="Straight-line distance from the previous stop">
+                  <span className="tabular mt-0.5 shrink-0 text-xs text-muted-foreground" title={i === 0 && start ? "Straight-line distance from the shop" : "Straight-line distance from the previous stop"}>
                     {s.legMiles < 0.05 && s.accountId != null && r.stops[i - 1]?.accountId === s.accountId ? (
                       "Same place"
                     ) : (
                       <>
                         {milesLabel(s.legMiles)}
-                        <span className="sr-only"> from the previous stop</span>
+                        <span className="sr-only">{i === 0 && start ? " from the shop" : " from the previous stop"}</span>
                       </>
                     )}
                   </span>
@@ -465,9 +507,14 @@ function TechCard({
             </div>
           )}
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Starts from your current location.
+            {start ? `Starts from ${start.label.replace(/^The /, "the ")}.` : "Starts from your current location."}
             {r.links.length > 1 ? " Google Maps takes about 10 stops per link, so each leg starts where the last one ended." : ""}
-            {approx ? " Stops with only a ZIP area pin use the typed address." : ""}
+            {approxTyped ? " Stops with only a ZIP area pin go in by their typed address." : ""}
+            {approxBare
+              ? approxBare === 1
+                ? " One stop has only a ZIP area pin and no typed address, so the link only gets you to that ZIP area."
+                : ` ${approxBare} stops have only a ZIP area pin and no typed address, so the link only gets you to their ZIP areas.`
+              : ""}
           </p>
         </div>
       ) : null}
@@ -481,7 +528,15 @@ function StopText({ stop: s, showCrew }: { stop: PlacedStop; showCrew?: boolean 
   const detail = [
     s.city,
     isApprox(s) ? APPROX_LABEL : null,
-    showCrew ? null : s.second ? `2nd tech with ${techLabel(s.partner)}` : s.partner ? `With ${s.partner} (2nd tech)` : null,
+    showCrew
+      ? null
+      : s.second
+        ? s.partner
+          ? `2nd tech with ${s.partner}`
+          : "2nd tech, no main tech assigned yet"
+        : s.partner
+          ? `With ${s.partner} (2nd tech)`
+          : null,
   ].filter(Boolean);
   return (
     <span className="min-w-0 flex-1">
