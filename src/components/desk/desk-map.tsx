@@ -165,7 +165,7 @@ export function DeskMap({
   fitKey?: string;
   /** Fit to these points instead of every pin when fitKey changes (e.g. one rep's accounts). */
   fitTo?: readonly LatLng[] | null;
-  /** Pan to this point (zooming in a little) when it changes. */
+  /** Pan to this point (zooming in a little) whenever a new focus object is passed. Keep it in state. */
   focus?: LatLng | null;
   className?: string;
   children?: ReactNode;
@@ -206,10 +206,12 @@ export function DeskMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refit only when the fit key or the box size changes
   }, [key, size]);
 
+  // Each new focus object pans the map, even to the same point again (after the user has panned away). Callers keep
+  // focus in state, so it only changes when they ask for a pan.
   useEffect(() => {
     if (!focus || !isPoint(focus)) return;
     setView((v) => ({ center: [focus.lat, focus.lng], zoom: Math.max(v?.zoom ?? 12, 13) }));
-  }, [focus?.lat, focus?.lng]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [focus]);
 
   return (
     <div

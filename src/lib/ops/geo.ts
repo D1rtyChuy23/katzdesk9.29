@@ -125,9 +125,11 @@ export function groupByArea<T>(
   }
   // Spatial grid with cells about `radius` wide, so neighbours are found in the 3 × 3 cells around a point instead of
   // by comparing every pair (2,600 accounts: ~10 ms instead of ~400 ms).
-  const lat0 = placed.length ? placed.reduce((s, x) => s + x.p.lat, 0) / placed.length : 0;
+  // Size cells for the pin farthest from the equator, where a degree of longitude is shortest, so no cell is ever
+  // narrower than `radius` miles and the 3 × 3 search never misses a neighbour.
+  const maxAbsLat = placed.reduce((m, x) => Math.max(m, Math.abs(x.p.lat)), 0);
   const cellLat = radius / 69;
-  const cellLng = radius / (69 * Math.max(0.2, Math.cos(rad(lat0))));
+  const cellLng = radius / (69 * Math.max(0.2, Math.cos(rad(maxAbsLat))));
   const cellOf = (p: LatLng) => [Math.floor(p.lat / cellLat), Math.floor(p.lng / cellLng)] as const;
   const grid = new Map<string, number[]>();
   placed.forEach((x, i) => {

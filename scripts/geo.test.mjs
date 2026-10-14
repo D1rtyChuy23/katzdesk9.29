@@ -182,3 +182,23 @@ test("rep colors are stable and distinct", () => {
   assert.notEqual(a.get("Amanda S"), a.get("Bob T"));
   assert.ok(![...a.values()].includes(NO_REP_COLOR));
 });
+
+test("areas: the grid never misses a neighbour, even far from the average latitude (matches brute force)", () => {
+  // Houston-area pins pull the average south; a pair near Charlotte NC (35.2 N) sits 4.9 mi apart east-west.
+  const items = [];
+  for (let i = 0; i < 40; i++) items.push({ id: `h${i}`, p: { lat: 29.6 + (i % 8) * 0.05, lng: -95.6 + Math.floor(i / 8) * 0.05 } });
+  const rad = (d) => (d * Math.PI) / 180;
+  const gap = 4.9 / (69 * Math.cos(rad(35.2))); // 4.9 mi of longitude at 35.2 N, in degrees
+  // Put nc1 just west of a grid line as an average-latitude grid would draw it; nc2 then lands two cells east there.
+  const lat0 = (items.reduce((s, i) => s + i.p.lat, 0) + 2 * 35.2) / (items.length + 2);
+  const wOld = 5 / (69 * Math.cos(rad(lat0)));
+  const nc1 = Math.floor(-80.8 / wOld) * wOld - 1e-7;
+  items.push({ id: "nc1", p: { lat: 35.2, lng: nc1 } }, { id: "nc2", p: { lat: 35.2, lng: nc1 + gap } });
+  const { areas } = groupByArea(items, (i) => i.p, () => "X", { radiusMiles: 5, tieKey: (i) => i.id });
+  const nc = areas.find((a) => a.items.some((i) => i.id === "nc1"));
+  assert.deepEqual(nc.items.map((i) => i.id).sort(), ["nc1", "nc2"]);
+  // Nothing is lost or duplicated.
+  const ids = areas.flatMap((a) => a.items.map((i) => i.id));
+  assert.equal(ids.length, items.length);
+  assert.equal(new Set(ids).size, items.length);
+});

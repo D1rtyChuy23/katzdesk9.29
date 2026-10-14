@@ -24,7 +24,8 @@ async function loadAccounts(sql: Sql) {
     netsuite_id: string | null;
     latitude: number | null;
     longitude: number | null;
-  }>("select id, name, account_number, netsuite_id, latitude, longitude from directory_customers where archived = false order by name_locked desc, id");
+    geocode_match: string | null;
+  }>("select id, name, account_number, netsuite_id, latitude, longitude, geocode_match from directory_customers where archived = false order by name_locked desc, id");
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -32,6 +33,7 @@ async function loadAccounts(sql: Sql) {
     netsuiteId: r.netsuite_id,
     latitude: r.latitude === null ? null : Number(r.latitude),
     longitude: r.longitude === null ? null : Number(r.longitude),
+    quality: r.geocode_match === "exact" || r.geocode_match === "close" || r.geocode_match === "approx" ? r.geocode_match : null,
   }));
 }
 

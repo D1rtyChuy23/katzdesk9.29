@@ -278,9 +278,8 @@ export function CustomerMap() {
     setSelectedId(a.id);
     const p = pointOf(a);
     if (!fromList || !p) return;
-    // The map pans only when the focus point changes, so tapping the same row again nudges it by a hair (~0.1 mm)
-    // to bring the account back into view after the map was moved.
-    setFocus((f) => (f && f.lat === p.lat && f.lng === p.lng ? { lat: p.lat + 1e-9, lng: p.lng } : p));
+    // A new focus object pans the map, so tapping the same row again brings the account back after the map moved.
+    setFocus({ lat: p.lat, lng: p.lng });
     // On a phone the list sits under the map: bring the map back into view.
     if (window.matchMedia("(max-width: 1023px)").matches) mapBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -344,7 +343,7 @@ export function CustomerMap() {
       {/* Counts and key sit above the map on a wide screen; on a phone the key and the import note move under it. */}
       <div className="mt-4 space-y-2">
         <p className="text-xs text-muted-foreground" data-testid="map-counts">
-          <span className="font-medium text-foreground">{plural(counts.pinned, "account")} on the map</span>
+          <span className="font-medium text-foreground">{plural(showApprox ? counts.pinned : counts.pinned - counts.approx, "account")} on the map</span>
           {" · "}
           {counts.noPin.toLocaleString("en-US")} without a pin
           {!showApprox && counts.approx ? ` · ${plural(counts.approx, "ZIP area pin")} hidden` : ""}

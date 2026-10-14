@@ -116,3 +116,17 @@ test("ZIP-area pins (Match Type Approximate) save as approx and go on the review
   assert.equal(line.review, true);
   assert.match(line.reviewReason, /ZIP code's center/);
 });
+
+test("re-import corrects a pin saved with the wrong type at the same point (e.g. ZIP area saved as close)", () => {
+  const rows = geoRowsFromMatrix([
+    HEAD,
+    ["1523", "1012362", "Texican Court", "501 W. Las Colinas Blvd.", "", "Irving", "TX", "75039", "Match (ZIP area)", "Approximate", "Irving, TX, 75039 (ZIP area)", "32.8697", "-96.9389"],
+  ]);
+  const saved = [{ id: 3, name: "Texican Court", latitude: 32.8697, longitude: -96.9389, quality: "close" }];
+  const [fix] = planGeocodes(rows, saved);
+  assert.equal(fix.status, "save");
+  assert.equal(fix.quality, "approx");
+  assert.match(fix.reason, /correct the pin type/);
+  const [same] = planGeocodes(rows, [{ ...saved[0], quality: "approx" }]);
+  assert.equal(same.status, "same");
+});

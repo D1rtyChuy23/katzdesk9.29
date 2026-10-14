@@ -284,8 +284,9 @@ export function RoutePlanner({
 
       {geo.isLoading ? (
         <Skeleton className="mt-4 h-64 w-full" />
-      ) : geo.isError ? (
+      ) : geo.isError && !geo.data ? (
         <div className="mt-4 rounded-lg border border-border p-4 text-sm" role="alert">
+          {/* Only when nothing has loaded yet: a failed background refresh keeps the plan on screen. */}
           <p className="font-medium">Could not load the map pins.</p>
           <p className="mt-1 text-muted-foreground">{geo.error instanceof Error ? geo.error.message : "Something went wrong."}</p>
           <Button type="button" variant="outline" className="mt-3 h-9" onClick={() => void geo.refetch()}>

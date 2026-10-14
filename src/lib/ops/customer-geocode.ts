@@ -28,6 +28,8 @@ export type GeoAccount = {
   netsuiteId?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  /** The saved pin's type (geocode_match), so a re-import can correct it even when the point is the same. */
+  quality?: GeoQuality | null;
 };
 
 export type GeoQuality = "exact" | "close" | "approx";
@@ -230,10 +232,13 @@ export function planGeocodes(rows: GeoRow[], accounts: GeoAccount[]): GeoPlanLin
       const reason = noLocationReason(r);
       return { ...base, status: "no_location" as const, reason, review: true, reviewReason: reason };
     }
-    if (samePoint(acct.latitude, base.latitude) && samePoint(acct.longitude, base.longitude)) {
+    const samePlace = samePoint(acct.latitude, base.latitude) && samePoint(acct.longitude, base.longitude);
+    // Same point and same pin type: nothing to do. Same point but a different type (e.g. a ZIP-area pin that an older
+    // import saved as a close match) is saved again so directions stop using it.
+    if (samePlace && (acct.quality === undefined || acct.quality === quality)) {
       return { ...base, status: "same" as const, reason: "Already saved; nothing changes", review: quality !== "exact", reviewReason: closeNote };
     }
-    const reason = acct.latitude != null ? "Will replace the saved location" : "Will be saved";
+    const reason = samePlace ? "Will correct the pin type" : acct.latitude != null ? "Will replace the saved location" : "Will be saved";
     return { ...base, status: "save" as const, reason, review: quality !== "exact", reviewReason: closeNote };
   });
 }
