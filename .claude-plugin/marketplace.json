@@ -19,6 +19,16 @@
       "name": "archify",
       "description": "Architecture, workflow, sequence, data-flow, lifecycle, ERD, class, tree, timeline and waterfall diagrams as interactive HTML (vendored from tt-a1i/archify, MIT).",
       "source": "./plugins/archify"
+    },
+    {
+      "name": "agent-skills",
+      "description": "Addy Osmani's 25 engineering skills (spec, plan, build, test, review, ship) plus /spec, /plan, /build, /test, /review, /ship commands and reviewer agents. Pulled from addyosmani/agent-skills (MIT).",
+      "source": {
+        "source": "github",
+        "repo": "addyosmani/agent-skills"
+      },
+      "homepage": "https://github.com/addyosmani/agent-skills",
+      "license": "MIT"
     }
   ]
 }
