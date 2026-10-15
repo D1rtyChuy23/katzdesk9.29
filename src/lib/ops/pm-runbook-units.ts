@@ -21,6 +21,11 @@ export type PlannedUnit = {
    */
   unitKey: string;
   /**
+   * The key this line has while it matches no account unit ('piece:<text>#<n>', n counting lines of the same text).
+   * Ticks and choices saved under it are moved to the account key once the unit is matched.
+   */
+  pieceKey: string;
+  /**
    * Where the unit's options live: the normalised serial when there is one (follows the unit between warehouse and
    * accounts), else 'acct:<id>' (persists across PMs), else null (matched nothing: options stay with this PM).
    */
@@ -51,6 +56,7 @@ export function optionsKeyFor(serial: string | null | undefined): string | null 
 export function planUnits(equipment: string | null | undefined, accountRows: AccountUnitRow[], match: Matcher): PlannedUnit[] {
   const used = new Set<number>();
   const seen = new Map<string, number>();
+  const ordinals = new Map<string, number>();
   const out: PlannedUnit[] = [];
   for (const piece of splitEquipment(equipment)) {
     const hit = match(piece);
@@ -76,6 +82,9 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
     }
     const sk = optionsKeyFor(serial);
     const accountId = idx >= 0 ? accountRows[idx].id : null;
+    const pieceBase = `piece:${compactEquip(piece)}`;
+    const ord = (ordinals.get(pieceBase) ?? 0) + 1;
+    ordinals.set(pieceBase, ord);
     let unitKey: string;
     if (accountId != null) unitKey = `acct:${accountId}`;
     else {
@@ -86,6 +95,7 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
     }
     out.push({
       unitKey,
+      pieceKey: `${pieceBase}#${ord}`,
       optionsKey: sk ?? (accountId != null ? `acct:${accountId}` : null),
       accountId,
       installDate: idx >= 0 ? (accountRows[idx].installDate ?? null) : null,

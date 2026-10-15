@@ -128,6 +128,52 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     });
     if (!planned.length) return empty;
 
+    // A line that was ticked before its account unit existed is now matched: move that work to the unit.
+    for (const u of planned) {
+      if (u.accountId == null || u.pieceKey === u.unitKey) continue;
+      const old = (
+        await sql.query<{ options: unknown }>("select options from pm_runbook_units where pm_job_id = $1 and unit_key = $2", [
+          data.pmId,
+          u.pieceKey,
+        ])
+      )[0];
+      const hasChecks = (
+        await sql.query<{ n: number }>(
+          "select count(*)::int as n from pm_runbook_checks where pm_job_id = $1 and unit_key = $2",
+          [data.pmId, u.pieceKey],
+        )
+      )[0];
+      if (!old && !(hasChecks?.n > 0)) continue;
+      // Options typed while the unit was unknown become the unit's options, unless it already has some.
+      const carried = old?.options ? asJson(old.options) : {};
+      if (u.optionsKey && Object.keys(carried).length) {
+        const made = await sql.query<{ id: number }>(
+          `insert into unit_runbook_options (unit_key, serial_key, runbook_id, options, updated_by)
+           values ($1, case when $1 like 'acct:%' then null else $1 end, $2, $3::jsonb, 'PM carry-over')
+           on conflict (unit_key) do nothing returning id`,
+          [u.optionsKey, u.runbookId, JSON.stringify(carried)],
+        );
+        if (made[0]) {
+          await sql.query(
+            "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('unit_runbook', $1, 'PM carry-over', 'options changed', $2)",
+            [made[0].id, `Options carried over from PM #${data.pmId} when the unit was added to the account`],
+          );
+        }
+      }
+      await sql.query(
+        `update pm_runbook_units set unit_key = $3, serial_key = coalesce(serial_key, $4)
+          where pm_job_id = $1 and unit_key = $2
+            and not exists (select 1 from pm_runbook_units x where x.pm_job_id = $1 and x.unit_key = $3)`,
+        [data.pmId, u.pieceKey, u.unitKey, u.serialKey],
+      );
+      await sql.query(
+        `update pm_runbook_checks c set unit_key = $3, serial_key = coalesce(c.serial_key, $4)
+          where c.pm_job_id = $1 and c.unit_key = $2
+            and not exists (select 1 from pm_runbook_checks x where x.pm_job_id = $1 and x.unit_key = $3 and x.key = c.key)`,
+        [data.pmId, u.pieceKey, u.unitKey, u.serialKey],
+      );
+    }
+
     const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown }>(
       "select unit_key, model, interval_mo, options from pm_runbook_units where pm_job_id = $1",
       [data.pmId],

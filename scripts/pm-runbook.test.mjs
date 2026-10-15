@@ -219,3 +219,15 @@ test("no install date: next interval follows the last full PMs", () => {
   assert.equal(n("36"), "12");
   assert.equal(nextFromHistory(def, ["12", "12"])?.combined, true);
 });
+
+test("units: pieceKey is the key a line had before it matched an account unit", () => {
+  const text = "e'4m X-Wide\ne'4s X-Wide\ne'4m X-Wide";
+  const before = planUnits(text, [], matcher);
+  const rows = [
+    { id: 4, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: null },
+    { id: 5, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: "S-1" },
+  ];
+  const after = planUnits(text, rows, matcher);
+  assert.deepEqual(after.map((u) => u.pieceKey), before.map((u) => u.unitKey));
+  assert.deepEqual(after.map((u) => u.unitKey), ["acct:4", before[1].unitKey, "acct:5"]);
+});
