@@ -58,7 +58,8 @@ type BinField = "mpn" | "sku" | "rack" | "shelf" | "bin" | "code";
 /**
  * The part number columns the parts import already knows (MPN, Mfr Part, Name, SKU, Item and the rest), plus
  * Part # (the MPN, as Parts labels it) and the bin columns. "Bin Number", "Bin Location" and "Bin Code" are the
- * whole location; a plain "Bin" is the bin piece when the sheet has a Rack or Shelf column, else the whole location.
+ * whole location, as is "Proposed Bin" (the Bin Code Review workbook, where Item Name is the part); a plain "Bin" is
+ * the bin piece when the sheet has a Rack or Shelf column, else the whole location.
  */
 const BIN_HEADERS: Record<string, BinField> = {
   ...Object.fromEntries(
@@ -86,6 +87,7 @@ const BIN_HEADERS: Record<string, BinField> = {
   "bin number": "code",
   "bin location": "code",
   "bin code": "code",
+  "proposed bin": "code",
 };
 
 export type BinFileRow = {
