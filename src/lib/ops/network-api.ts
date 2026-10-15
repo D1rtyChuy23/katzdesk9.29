@@ -62,6 +62,7 @@ function mapProvider(
     pmPricing: (r.pm_pricing as string) ?? null,
     partsStocking: (r.parts_stocking as string) ?? null,
     notes: (r.notes as string) ?? null,
+    website: (r.website as string) ?? null,
     lastUpdated: isoDate(r.last_updated),
     primaryFor: Number(extra?.primaryFor ?? r.primary_for ?? 0),
     secondaryFor: Number(extra?.secondaryFor ?? r.secondary_for ?? 0),
@@ -204,7 +205,15 @@ function mapAddress(r: {
   city: string | null;
   state: string | null;
   zip: string | null;
+  latitude?: unknown;
+  longitude?: unknown;
+  geocode_match?: string | null;
+  geocode_address?: string | null;
 }): ProviderAddress {
+  const lat = r.latitude == null || r.latitude === "" ? null : Number(r.latitude);
+  const lng = r.longitude == null || r.longitude === "" ? null : Number(r.longitude);
+  const pinned = lat !== null && lng !== null && Number.isFinite(lat) && Number.isFinite(lng);
+  const match = r.geocode_match;
   return {
     id: r.id,
     label: r.label,
@@ -213,6 +222,10 @@ function mapAddress(r: {
     city: r.city,
     state: r.state,
     zip: r.zip,
+    latitude: pinned ? lat : null,
+    longitude: pinned ? lng : null,
+    quality: pinned && (match === "exact" || match === "close" || match === "approx") ? match : null,
+    geocodeAddress: r.geocode_address ?? null,
   };
 }
 
@@ -247,8 +260,13 @@ async function loadAddresses(
     city: string | null;
     state: string | null;
     zip: string | null;
+    latitude: unknown;
+    longitude: unknown;
+    geocode_match: string | null;
+    geocode_address: string | null;
   }>(
-    `select id, label, line1, line2, city, state, zip from provider_addresses
+    `select id, label, line1, line2, city, state, zip, latitude, longitude, geocode_match, geocode_address
+     from provider_addresses
      where provider_id = $1
      order by id`,
     [providerId],
@@ -308,8 +326,8 @@ export const upsertProvider = createServerFn({ method: "POST" })
           after_hours_rate = ${blank(data.afterHoursRate)},
           travel_policy = ${blank(data.travelPolicy)},
           equipment_serviced = ${blank(data.equipmentServiced)},
-          coverage = ${blank(data.coverage)},
-          contacts = ${blank(data.contacts)},
+          coverage = case when ${data.coverage === undefined}::boolean then coverage else ${blank(data.coverage)}::text end,
+          contacts = case when ${data.contacts === undefined}::boolean then contacts else ${blank(data.contacts)}::text end,
           pm_pricing = ${blank(data.pmPricing)},
           parts_stocking = ${blank(data.partsStocking)},
           notes = ${blank(data.notes)},

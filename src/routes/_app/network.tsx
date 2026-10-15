@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { archiveProvider, listNetwork, renameProvider } from "@/lib/ops/network-api";
+import { PROVIDER_GEO_KEY } from "@/lib/ops/provider-geo-api";
+import { getMyAccess } from "@/lib/ops/access";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { providerStates, statusTone, type NetworkAccount, type NetworkOverview, type NetworkProvider } from "@/lib/ops/network";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ProviderSheet } from "@/components/desk/provider-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { DispatchCard } from "@/components/desk/provider-dispatch";
+import { ProviderImportButton } from "@/components/desk/provider-import";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { SORT_ALPHA, sortDesk } from "@/lib/ops/sort";
@@ -31,6 +34,9 @@ function Page() {
   const [tab, setTab] = useState<Tab>("providers");
   const net = useQuery({ queryKey: ["network"], queryFn: () => listNetwork() });
   const d = net.data;
+  // Provider imports are for an Admin (the Admin role or a desk admin), like the other imports.
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const canImport = !!me.data?.isAdmin || me.data?.role === "admin";
 
   function openProvider(id: number) {
     setSelected(id);
@@ -43,6 +49,18 @@ function Page() {
     void navigate({ to: "/network", search: {}, replace: true });
   }
 
+  const addButton = (
+    <Button
+      onClick={() => {
+        setSelected(null);
+        setCreating(true);
+      }}
+    >
+      <Plus className="size-4" />
+      Add provider
+    </Button>
+  );
+
   return (
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -53,15 +71,14 @@ function Page() {
             rates and notes, then assign customers. Primary is who we call first.
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setSelected(null);
-            setCreating(true);
-          }}
-        >
-          <Plus className="size-4" />
-          Add provider
-        </Button>
+        {canImport ? (
+          <div className="grid gap-2 sm:flex sm:items-center">
+            <ProviderImportButton />
+            {addButton}
+          </div>
+        ) : (
+          addButton
+        )}
       </header>
 
       {d?.unassigned.length ? (
@@ -149,6 +166,7 @@ function ProvidersPane({
       void qc.invalidateQueries({ queryKey: ["network"] });
       void qc.invalidateQueries({ queryKey: ["customer-providers"] });
       void qc.invalidateQueries({ queryKey: ["provider"] });
+      void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
@@ -165,6 +183,7 @@ function ProvidersPane({
       void qc.invalidateQueries({ queryKey: ["network"] });
       void qc.invalidateQueries({ queryKey: ["provider"] });
       void qc.invalidateQueries({ queryKey: ["customer-providers"] });
+      void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not rename"),
   });

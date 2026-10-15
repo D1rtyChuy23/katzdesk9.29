@@ -1,7 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { archiveProvider, getProvider, renameProvider, upsertProvider } from "@/lib/ops/network-api";
-import { PROVIDER_STATUSES, statusTone, type ProviderDraft } from "@/lib/ops/network";
+import { PROVIDER_GEO_KEY } from "@/lib/ops/provider-geo-api";
+import {
+  formatAddress,
+  mainAddress,
+  PIN_QUALITY_LABEL,
+  PROVIDER_STATUSES,
+  statusTone,
+  websiteHref,
+  websiteLabel,
+  type ProviderDetail,
+  type ProviderDraft,
+} from "@/lib/ops/network";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input, Label, Textarea } from "@/components/ui/input";
@@ -55,6 +67,7 @@ export function ProviderSheet({
       void qc.invalidateQueries({ queryKey: ["network"] });
       void qc.invalidateQueries({ queryKey: ["provider"] });
       void qc.invalidateQueries({ queryKey: ["customer-providers"] });
+      void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
       if (creating) {
         if (onCreated) onCreated(saved.id);
         else onClose();
@@ -70,6 +83,7 @@ export function ProviderSheet({
       void qc.invalidateQueries({ queryKey: ["network"] });
       void qc.invalidateQueries({ queryKey: ["provider"] });
       void qc.invalidateQueries({ queryKey: ["customer-providers"] });
+      void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
       if (row.merged && onCreated) onCreated(row.id);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not rename"),
@@ -79,6 +93,7 @@ export function ProviderSheet({
     onSuccess: () => {
       toast.success("Provider removed from the list");
       void qc.invalidateQueries({ queryKey: ["network"] });
+      void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
       onClose();
     },
   });
@@ -155,6 +170,7 @@ export function ProviderSheet({
           ) : !creating ? (
             <p className="mt-1 text-xs text-warning">Status not confirmed yet.</p>
           ) : null}
+          {!creating && p ? <ProviderWhere provider={p} /> : null}
         </SheetHeader>
         <SheetBody>
           {id != null && row.isLoading ? (
@@ -309,5 +325,32 @@ export function ProviderSheet({
       onSave={(n) => rename.mutate(n)}
     />
     </>
+  );
+}
+
+/** The provider's web site and main address with how good its map pin is (set by Import Providers). */
+function ProviderWhere({ provider: p }: { provider: ProviderDetail }) {
+  const site = websiteHref(p.website);
+  const main = mainAddress(p.addresses);
+  const address = main ? formatAddress({ ...main, label: null }) : "";
+  if (!site && !address) return null;
+  return (
+    <div className="mt-2 space-y-0.5 text-xs" data-testid="provider-where">
+      {site ? (
+        <p>
+          <a href={site} target="_blank" rel="noreferrer" className="font-medium text-primary underline-offset-4 hover:underline" data-testid="provider-website">
+            {websiteLabel(p.website)}
+          </a>
+        </p>
+      ) : null}
+      {address ? (
+        <p data-testid="provider-main-address">
+          <span>{address}</span>{" "}
+          <span className={cn(main?.quality === "close" ? "text-warning" : "text-muted-foreground")} data-testid="provider-pin-quality">
+            · {main?.quality ? PIN_QUALITY_LABEL[main.quality] : "No map pin yet"}
+          </span>
+        </p>
+      ) : null}
+    </div>
   );
 }
