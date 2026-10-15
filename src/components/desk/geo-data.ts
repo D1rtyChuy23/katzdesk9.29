@@ -47,3 +47,22 @@ export function openWork(a: AccountGeo): number {
 export function needsAttention(a: AccountGeo): boolean {
   return openWork(a) > 0 || a.pmsPastDue > 0 || a.pmsDueSoon > 0;
 }
+
+/**
+ * Scrolls `el` to the top of the screen. On a phone the sticky app header can wrap onto two or three rows, so it is
+ * measured and `el` lands just under it; on wider screens `el` keeps its own scroll margin (scroll-mt-*), as before.
+ */
+export function scrollUnderHeader(el: HTMLElement | null) {
+  if (!el) return;
+  if (window.matchMedia("(max-width: 639px)").matches) {
+    let header = 0;
+    for (const h of document.querySelectorAll("header")) {
+      const s = getComputedStyle(h);
+      if (s.position === "sticky" || s.position === "fixed") header = Math.max(header, (parseFloat(s.top) || 0) + h.getBoundingClientRect().height);
+    }
+    el.style.scrollMarginTop = `${Math.round(header) + 8}px`;
+  } else {
+    el.style.scrollMarginTop = "";
+  }
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}

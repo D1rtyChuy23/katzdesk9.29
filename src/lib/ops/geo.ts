@@ -367,6 +367,36 @@ export function spread(points: readonly LatLng[]): { center: LatLng; medianMiles
   return { center, medianMiles: d.length % 2 ? d[mid]! : (d[mid - 1]! + d[mid]!) / 2 };
 }
 
+// ---------------------------------------------------------------------------------------------------------------
+// Account type (the map's "Type" colors)
+
+/**
+ * customer: serviced by Katz. oon: an out-of-network customer (on the Out of Network page: a provider is assigned or
+ * one is still needed). ak: Avi Katz account.
+ */
+export type AccountType = "customer" | "oon" | "ak";
+
+/** Legend and card order. */
+export const ACCOUNT_TYPES: readonly AccountType[] = ["customer", "oon", "ak"];
+
+/** "Out-of-network customer": on the Out of Network page (a provider is assigned or one is still needed). */
+export const ACCOUNT_TYPE_LABEL: Record<AccountType, string> = {
+  customer: "Customer",
+  oon: "Out-of-network customer",
+  ak: "Avi Katz account",
+};
+
+/**
+ * One type per account, for coloring pins. Precedence when an account is more than one: out-of-network first (it is
+ * on the Out of Network page, a provider assigned or one still needed, so someone other than Katz does the service
+ * work), then Avi Katz account (the avi_katz flag), then Customer (Katz-serviced, everything else).
+ */
+export function accountType(a: { outOfNetwork: boolean; aviKatz: boolean }): AccountType {
+  if (a.outOfNetwork) return "oon";
+  if (a.aviKatz) return "ak";
+  return "customer";
+}
+
 /**
  * Stable color per rep from a fixed palette (same rep, same color on every page). Index by the rep's position in the
  * sorted rep list so the palette is used evenly; "No rep" always uses the neutral slot.

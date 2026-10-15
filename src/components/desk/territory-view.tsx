@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, MapPinned, RotateCcw, Store, X } from "lucide-react";
 import { DeskMap, type MapPin } from "./desk-map";
-import { needsAttention, pointOf, useGeoIndex } from "./geo-data";
+import { needsAttention, pointOf, scrollUnderHeader, useGeoIndex } from "./geo-data";
 import { MapLegend, Swatch, type LegendItem } from "./customer-map";
 import { RepName } from "./rep-select";
 import { AkBadge, NoRepFlag } from "./ak-badge";
@@ -190,7 +190,7 @@ export function TerritoryView() {
     setShown(rep);
     setPinId(null);
     setFit((f) => ({ n: f.n + 1, points: points?.length ? points : null }));
-    mapBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollUnderHeader(mapBox.current);
   }
 
   function showAll() {
@@ -485,7 +485,8 @@ function AreaRow({
             {paged.visible.map((a) => (
               <li key={a.id} className="border-b border-border last:border-b-0">
                 <OpenLink entityType="customer" id={a.id} className="flex min-h-10 items-center gap-2 px-3 py-2 text-sm hover:bg-muted/60">
-                  <span className="min-w-0 flex-1 truncate">
+                  {/* The name wraps on a phone instead of cutting off. */}
+                  <span className="min-w-0 flex-1 break-words sm:truncate">
                     {a.name}
                     <AkBadge on={a.aviKatz} className="ml-1.5 align-middle" />
                   </span>
@@ -511,11 +512,12 @@ function PinCard({ account: a, onClose }: { account: AccountGeo; onClose: () => 
     >
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">
+          {/* On a phone the card is narrow: the name and the rep / city line wrap instead of cutting off. */}
+          <p className="text-sm font-medium break-words sm:truncate">
             {a.name}
             <AkBadge on={a.aviKatz} className="ml-1.5 align-middle" />
           </p>
-          <p className="truncate text-xs text-muted-foreground">
+          <p className="text-xs break-words text-muted-foreground sm:truncate">
             {a.rep ? <RepName name={a.rep} /> : <NoRepFlag show />}
             {a.city ? ` · ${a.city}` : ""}
           </p>

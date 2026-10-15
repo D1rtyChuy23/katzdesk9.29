@@ -16,7 +16,7 @@ function Page() {
         <h1 className="font-display text-3xl font-medium tracking-tight">Map</h1>
         <p className="mt-1 max-w-xl text-sm text-muted-foreground">
           {tab === "accounts"
-            ? "Every account on one map, colored by rep, open work or PMs due. Tap a pin to see the account and get directions."
+            ? "Every account and service provider on one map, colored by rep, open work, PMs due or type. Tap a pin to see the details and get directions."
             : "Each rep's accounts on the map, and the accounts with no rep grouped by area with the nearest rep."}
         </p>
         <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Map view" data-testid="map-tabs">
@@ -27,7 +27,7 @@ function Page() {
             Territories
           </FilterChip>
           {/* Accounts with no pin or only a ZIP area pin, and the other addresses on file for them. */}
-          <Link to="/address-report" className="self-center px-1 text-sm font-medium text-primary underline-offset-4 hover:underline" data-testid="map-address-report">
+          <Link to="/address-report" className="self-center px-1 text-sm font-medium text-primary underline-offset-4 hover:underline max-sm:py-2" data-testid="map-address-report">
             Address Report
           </Link>
         </div>

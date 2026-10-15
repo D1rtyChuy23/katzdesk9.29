@@ -34,6 +34,11 @@ export type AccountGeo = {
   rep: string | null;
   noRep: boolean;
   aviKatz: boolean;
+  /**
+   * The account is on the Out of Network page (a provider is assigned or one is still needed): a network_accounts row,
+   * or a customer_providers row to a provider that is not archived (any role), matched by lower-case name.
+   */
+  outOfNetwork: boolean;
   accountNumber: string | null;
   openCalls: number;
   openTlcs: number;
@@ -64,6 +69,7 @@ type Row = {
   name: string;
   account_rep: string | null;
   avi_katz: unknown;
+  out_of_network: unknown;
   account_number: string | null;
   address: string | null;
   latitude: unknown;
@@ -93,8 +99,11 @@ const quality = (v: string | null): PinQuality | null => (v === "exact" || v ===
  * Every active account with its pin, rep and open work, in one query. Open means the same as everywhere else:
  * tickets not done and not Completed / Cancelled / Phone Resolved (merged duplicates left out); PMs not done and not
  * Completed / Cancelled; installs not complete and not Installed. Jobs link to accounts by name (lower(name)), like
- * the Customers list. For a sales rep (not an admin), work on accounts that are not theirs is counted as zero, the
- * same scope the Tickets and PMs pages use; the accounts themselves still show, as on the Customers list.
+ * the Customers list. Out of network means the account is on the Out of Network page (a provider is assigned or one is
+ * still needed): it is on the Out of Network accounts list (network_accounts), or a provider that is not archived is
+ * assigned to it (customer_providers), both matched the same way by lower(customer). For a sales rep (not an admin),
+ * work on accounts that are not theirs is counted as zero, the same scope the Tickets and PMs pages use; the accounts
+ * themselves still show, as on the Customers list.
  */
 export const listAccountGeo = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
@@ -128,8 +137,17 @@ export const listAccountGeo = createServerFn({ method: "GET" })
           where archived = false and not complete and coalesce(equip_status, '') <> 'Installed'
             and coalesce(customer, '') <> ''
           group by 1
+       ), oon as (
+         select lower(cp.customer) as k
+           from customer_providers cp
+           join network_providers np on np.id = cp.provider_id
+          where np.archived = false and coalesce(cp.customer, '') <> ''
+         union
+         select lower(customer)
+           from network_accounts
+          where coalesce(customer, '') <> ''
        )
-       select d.id, d.name, d.account_rep, d.avi_katz, d.account_number, d.address,
+       select d.id, d.name, d.account_rep, d.avi_katz, (oon.k is not null) as out_of_network, d.account_number, d.address,
               d.latitude, d.longitude, d.geocode_match, d.geocode_address,
               coalesce(svc.open_calls, 0) as open_calls, coalesce(svc.open_tlcs, 0) as open_tlcs,
               coalesce(svc.past_due_calls, 0) as past_due_calls,
@@ -140,6 +158,7 @@ export const listAccountGeo = createServerFn({ method: "GET" })
          left join svc on svc.k = lower(d.name)
          left join pm on pm.k = lower(d.name)
          left join inst on inst.k = lower(d.name)
+         left join oon on oon.k = lower(d.name)
         where d.archived = false
         order by lower(d.name), d.id`,
       [today, PM_DUE_DAYS],
@@ -172,6 +191,7 @@ export const listAccountGeo = createServerFn({ method: "GET" })
         rep,
         noRep: isNoRep(r.account_rep),
         aviKatz: flagOn(r.avi_katz),
+        outOfNetwork: flagOn(r.out_of_network),
         accountNumber: r.account_number ? String(r.account_number) : null,
         openCalls: counts ? Number(r.open_calls) : 0,
         openTlcs: counts ? Number(r.open_tlcs) : 0,

@@ -880,7 +880,11 @@ export function DeskMap({
         />
       ) : null}
       {tiles === "failed" ? (
-        <p className="pointer-events-none absolute bottom-2 left-2 z-10 rounded-sm bg-card/90 px-2 py-1 text-xs text-muted-foreground" data-testid="desk-map-tiles-failed">
+        // On a phone it ends before the attribution in the corner (it wraps instead of running under it).
+        <p
+          className="pointer-events-none absolute bottom-2 left-2 z-10 rounded-sm bg-card/90 px-2 py-1 text-xs text-muted-foreground max-sm:max-w-[calc(100%-6.5rem)]"
+          data-testid="desk-map-tiles-failed"
+        >
           The street map could not load. Pins still show.
         </p>
       ) : null}

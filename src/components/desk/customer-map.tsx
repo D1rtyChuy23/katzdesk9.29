@@ -1,9 +1,10 @@
-import { Fragment, useDeferredValue, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Globe, MapPinOff, Navigation, RotateCcw, Store, X } from "lucide-react";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { DeskMap, type MapPin } from "./desk-map";
-import { needsAttention, openWork, pointOf, useGeoIndex } from "./geo-data";
+import { needsAttention, openWork, pointOf, scrollUnderHeader, useGeoIndex } from "./geo-data";
 import { FilterChip } from "./desk-charts";
 import { ListToolbar, ToolbarSearch, TOOLBAR_SELECT } from "./list-toolbar";
 import { RepFilter, RepName } from "./rep-select";
@@ -13,20 +14,63 @@ import { useMyView } from "./my-view-bar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/separator";
-import { canDriveTo, directionsUrl, NO_REP_COLOR, type LatLng, type PinQuality } from "@/lib/ops/geo";
+import {
+  ACCOUNT_TYPE_LABEL,
+  ACCOUNT_TYPES,
+  accountType,
+  canDriveTo,
+  directionsUrl,
+  NO_REP_COLOR,
+  type AccountType,
+  type LatLng,
+  type PinQuality,
+} from "@/lib/ops/geo";
 import type { AccountGeo } from "@/lib/ops/geo-api";
-import { listProviderGeo, PROVIDER_GEO_KEY, type ProviderGeo } from "@/lib/ops/provider-geo-api";
+import { listProviderGeo, MAX_PROVIDER_PINS, PROVIDER_GEO_KEY, type ProviderGeo } from "@/lib/ops/provider-geo-api";
 import { firstEmail, statusTone, telHref, websiteHref, websiteLabel } from "@/lib/ops/network";
 import { formatLongDate } from "@/lib/ops/clock";
 import { cn } from "@/lib/utils";
 
-type ColorBy = "rep" | "work" | "pms";
+type ColorBy = "rep" | "work" | "pms" | "type";
 
 const COLOR_BY: { id: ColorBy; label: string }[] = [
   { id: "rep", label: "Rep" },
   { id: "work", label: "Open Work" },
   { id: "pms", label: "PMs Due" },
+  { id: "type", label: "Type" },
 ];
+
+/** What the map shows: account pins, service provider diamonds, or both (the default). */
+type MapShow = "customers" | "providers" | "both";
+
+const SHOW_OPTIONS: { id: MapShow; label: string; testId: string }[] = [
+  { id: "customers", label: "Customers", testId: "map-show-customers" },
+  { id: "providers", label: "Service Providers", testId: "map-providers" },
+  { id: "both", label: "Both", testId: "map-show-both" },
+];
+
+const isMapShow = (v: unknown): v is MapShow => v === "customers" || v === "providers" || v === "both";
+
+/** The Show choice is remembered per viewer on this device. */
+const showKey = (userId: string) => `katz-desk-map-show:${userId}`;
+
+/**
+ * Type mode colors, per theme, as CSS variables set on the map's root (TYPE_COLOR_VARS). Light: blue #1d4ed8, gold
+ * #a16207, teal #0f766e (5.9, 4.3 and 4.8:1 on the muted map surface #f4f0e9). Dark: #60a5fa, #facc15, #14b8a6
+ * (5.7, 9.5 and 5.9:1 on #2e2822). Blue, gold and teal stay apart for red-green color blindness too, none of them
+ * reads as the past-due red, and none is the near-black (cream in dark mode) of the service provider diamonds.
+ */
+const TYPE_COLOR: Record<AccountType, string> = {
+  customer: "var(--map-type-customer)",
+  oon: "var(--map-type-oon)",
+  ak: "var(--map-type-ak)",
+};
+const TYPE_COLOR_VARS =
+  "[--map-type-customer:#1d4ed8] [--map-type-oon:#a16207] [--map-type-ak:#0f766e] dark:[--map-type-customer:#60a5fa] dark:[--map-type-oon:#facc15] dark:[--map-type-ak:#14b8a6]";
+/** Type mode draw order: the fewer out-of-network and Avi Katz pins sit on top of the Katz-serviced ones. */
+const TYPE_RANK: Record<AccountType, number> = { customer: 0, ak: 1, oon: 2 };
+
+const HOLLOW_KEY: LegendItem = { key: "approx", label: "Hollow: ZIP area (approximate)", color: "var(--color-muted-foreground)", hollow: true };
 
 /** Pin colors for the work and PM modes (rep colors come from the shared palette). */
 const RED = "#b3261e";
@@ -82,6 +126,10 @@ function paint(a: AccountGeo, mode: ColorBy, colorOf: (rep: string | null) => st
   if (mode === "pms") {
     const t = pmTone(a);
     return { color: PM_COLOR[t], rank: t };
+  }
+  if (mode === "type") {
+    const t = accountType(a);
+    return { color: TYPE_COLOR[t], rank: TYPE_RANK[t] };
   }
   return a.rep ? { color: colorOf(a.rep), rank: 1 } : { color: NO_REP_COLOR, rank: 0 };
 }
@@ -160,13 +208,15 @@ function rowWork(a: AccountGeo): { text: string; tone: "danger" | "warn" } | nul
 }
 
 /**
- * The Accounts tab of the Map page: every account with a pin, colored by rep, open work or PMs due, with a side
- * panel that shows the picked account and a list of the filtered accounts (needs attention first).
+ * The Accounts tab of the Map page: every account with a pin, colored by rep, open work, PMs due or account type, and
+ * the Out of Network service providers as diamonds (Show: Customers, Service Providers or Both), with a side panel
+ * that shows the picked pin and a list of the filtered accounts (needs attention first) or providers (A to Z).
  */
 export function CustomerMap() {
   const geo = useGeoIndex();
   const { filterMine, matchMine, role } = useMyView();
   const scoped = filterMine && role === "sales";
+  const userId = useCurrentUser()?.id ?? "desk";
 
   const [q, setQ] = useState("");
   const needle = useDeferredValue(q.trim().toLowerCase());
@@ -174,7 +224,10 @@ export function CustomerMap() {
   const [rep, setRep] = useState("");
   const [attention, setAttention] = useState(false);
   const [showApprox, setShowApprox] = useState(true);
-  const [showProviders, setShowProviders] = useState(true);
+  // Both until this viewer's saved choice is read (after mount, so the server render and the first client one match).
+  const [show, setShow] = useState<MapShow>("both");
+  /** Which list the side panel shows when both layers are on the map. */
+  const [listTab, setListTab] = useState<"accounts" | "providers">("accounts");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   /** The picked service provider pin (its address id); a provider and an account are never picked together. */
   const [providerPick, setProviderPick] = useState<number | null>(null);
@@ -182,17 +235,47 @@ export function CustomerMap() {
   const mapBox = useRef<HTMLDivElement>(null);
   const panelBox = useRef<HTMLElement>(null);
 
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(showKey(userId));
+      setShow(isMapShow(saved) ? saved : "both");
+    } catch {
+      /* storage blocked: keep Both */
+    }
+  }, [userId]);
+
+  function chooseShow(next: MapShow) {
+    setShow(next);
+    if (next === "customers") setProviderPick(null);
+    if (next === "providers") setSelectedId(null);
+    try {
+      window.localStorage.setItem(showKey(userId), next);
+    } catch {
+      /* storage blocked: the choice still applies for this visit */
+    }
+  }
+
+  const showAccounts = show !== "providers";
+  const showProviders = show !== "customers";
+
   const { accounts, byId, colorOf } = geo;
   const data = geo.data;
 
-  // Out of Network service providers with a pinned address: their own layer, not touched by the account filters.
+  // Out of Network service providers with a pinned address: their own layer. The account filters never touch it; the
+  // search box searches it (name or address) only when the map shows service providers alone.
   const providerGeo = useQuery({ queryKey: PROVIDER_GEO_KEY, queryFn: () => listProviderGeo(), staleTime: 2 * 60_000 });
   const providerRows = providerGeo.data?.providers;
   const providerByPin = useMemo(() => new Map((providerRows ?? []).map((p) => [providerPinId(p.addressId), p])), [providerRows]);
+  const providerMatches = useMemo(() => {
+    if (!providerRows) return [];
+    if (show !== "providers" || !needle) return providerRows;
+    return providerRows.filter((p) => p.name.toLowerCase().includes(needle) || p.address.toLowerCase().includes(needle));
+  }, [providerRows, show, needle]);
   const providerPins = useMemo<MapPin[]>(() => {
     if (!showProviders || !providerRows) return [];
-    // "ZIP Area Pins" off hides every ZIP-area pin, providers' too (the picked one stays, like a picked account).
-    const shown = showApprox ? providerRows : providerRows.filter((p) => p.quality !== "approx" || p.addressId === providerPick);
+    // "ZIP Area Pins" off hides every ZIP-area pin, providers' too. The picked one always stays, like a picked account.
+    const matching = new Set(providerMatches.map((p) => p.addressId));
+    const shown = providerRows.filter((p) => p.addressId === providerPick || (matching.has(p.addressId) && (showApprox || p.quality !== "approx")));
     return shown.map((p) => ({
       id: providerPinId(p.addressId),
       lat: p.lat,
@@ -203,9 +286,22 @@ export function CustomerMap() {
       size: 7,
       title: `${p.name} · Service provider${p.quality === "approx" ? " · ZIP area (approximate)" : ""}`,
     }));
-  }, [providerRows, showProviders, showApprox, providerPick]);
-  // Providers drawn on the map (a provider with two pinned locations counts once).
-  const providerCount = useMemo(() => new Set(providerPins.map((pin) => providerByPin.get(String(pin.id))?.providerId)).size, [providerPins, providerByPin]);
+  }, [providerRows, providerMatches, showProviders, showApprox, providerPick]);
+  // Providers on the map for the counts and the key. providers: a provider with two pinned locations counts once.
+  // locations: the diamonds drawn, which the key counts (a picked pin kept on the map only because it is picked does
+  // not count, like a picked account). listed / rows: providers and location rows in the side list (one row per
+  // pinned location, ZIP area ones included).
+  const providerStats = useMemo(() => {
+    const shown = showApprox ? providerMatches : providerMatches.filter((p) => p.quality !== "approx");
+    return {
+      providers: new Set(shown.map((p) => p.providerId)).size,
+      locations: shown.length,
+      approxHidden: providerMatches.length - shown.length,
+      listed: new Set(providerMatches.map((p) => p.providerId)).size,
+      rows: providerMatches.length,
+    };
+  }, [providerMatches, showApprox]);
+  const providerCount = providerStats.providers;
   const selectedProvider = showProviders && providerPick != null ? providerByPin.get(providerPinId(providerPick)) ?? null : null;
 
   // Filters that decide which accounts are in play (the list and the pins). Color mode is not one of them.
@@ -233,6 +329,7 @@ export function CustomerMap() {
   // Pins: rebuilt only when the filtered set, the color mode or the ZIP toggle changes (not on selection).
   const basePins = useMemo(() => {
     const out: (MapPin & { rank: number })[] = [];
+    if (!showAccounts) return out;
     for (const a of filtered) {
       const p = pointOf(a);
       if (!p) continue;
@@ -246,16 +343,17 @@ export function CustomerMap() {
         color,
         rank,
         hollow: approx,
-        size: rank === 0 && colorBy !== "rep" ? 5 : 6,
-        title: `${a.name}${a.city ? ` · ${a.city}` : ""}${approx ? " · ZIP area (approximate)" : ""}`,
+        // Nothing open (gray) is drawn a little smaller in the work and PM modes.
+        size: rank === 0 && (colorBy === "work" || colorBy === "pms") ? 5 : 6,
+        title: `${a.name}${a.city ? ` · ${a.city}` : ""}${colorBy === "type" ? ` · ${ACCOUNT_TYPE_LABEL[accountType(a)]}` : ""}${approx ? " · ZIP area (approximate)" : ""}`,
       });
     }
     // Lower ranks first so red / amber pins draw over gray ones.
     out.sort((x, y) => x.rank - y.rank);
     return out;
-  }, [filtered, colorBy, colorOf, showApprox]);
+  }, [filtered, colorBy, colorOf, showApprox, showAccounts]);
 
-  const selected = selectedId != null ? byId.get(selectedId) ?? null : null;
+  const selected = showAccounts && selectedId != null ? byId.get(selectedId) ?? null : null;
 
   // The picked account always shows on the map, even when the ZIP area pins are hidden or a filter left it out.
   const pins = useMemo(() => {
@@ -266,16 +364,24 @@ export function CustomerMap() {
     return [...basePins, { id: selected.id, lat: p.lat, lng: p.lng, color, hollow: selected.quality === "approx", title: selected.name }];
   }, [basePins, selected, colorBy, colorOf]);
 
-  // Provider diamonds draw over the account dots. The view still fits the accounts only (as before), so turning the
-  // providers on never zooms the map out to every state they cover; with no account pins left (a search that matches
-  // nothing) it shows the default view, as it does with the providers off.
+  // Provider diamonds draw over the account dots. With accounts on the map the view fits the accounts only, so showing
+  // both never zooms the map out to every state the providers cover; with no account pins left (a search that matches
+  // nothing) it shows the default view. Service Providers alone fits the providers.
   const mapPins = useMemo(() => (providerPins.length ? [...pins, ...providerPins] : pins), [pins, providerPins]);
-  const fitTo = useMemo(() => pins.map((p) => ({ lat: p.lat, lng: p.lng })), [pins]);
+  const fitTo = useMemo(() => (showAccounts ? pins : providerPins).map((p) => ({ lat: p.lat, lng: p.lng })), [showAccounts, pins, providerPins]);
 
   const legend = useMemo<LegendItem[]>(() => {
     const items: LegendItem[] = [];
     if (!basePins.length) return items;
-    if (colorBy === "rep") {
+    if (colorBy === "type") {
+      const n: Record<AccountType, number> = { customer: 0, oon: 0, ak: 0 };
+      for (const p of basePins) {
+        const a = byId.get(Number(p.id));
+        if (a) n[accountType(a)] += 1;
+      }
+      // Every type is listed, with 0 when none is on the map, so the key always explains all three colors.
+      for (const t of ACCOUNT_TYPES) items.push({ key: `type-${t}`, label: ACCOUNT_TYPE_LABEL[t], color: TYPE_COLOR[t], count: n[t] });
+    } else if (colorBy === "rep") {
       const byRep = new Map<string, number>();
       let none = 0;
       for (const p of basePins) {
@@ -298,19 +404,25 @@ export function CustomerMap() {
       const colors = colorBy === "work" ? WORK_COLOR : PM_COLOR;
       for (let i = labels.length - 1; i >= 0; i--) items.push({ key: `tone-${i}`, label: labels[i]!, color: colors[i]!, count: tones[i] ?? 0 });
     }
-    if (showApprox && counts.approx) items.push({ key: "approx", label: "Hollow: ZIP area (approximate)", color: "var(--color-muted-foreground)", hollow: true });
+    if (showApprox && counts.approx) items.push(HOLLOW_KEY);
     return items;
   }, [basePins, byId, colorBy, colorOf, counts.approx, data?.dueDays, showApprox]);
 
   const mapLegend = useMemo<LegendItem[]>(() => {
     if (!providerPins.length) return legend;
     // A hollow (ZIP area) provider diamond gets the hollow key even when no account pin is approximate.
-    const hollowKey: LegendItem[] =
-      providerPins.some((p) => p.hollow) && !legend.some((i) => i.key === "approx")
-        ? [{ key: "approx", label: "Hollow: ZIP area (approximate)", color: "var(--color-muted-foreground)", hollow: true }]
-        : [];
-    return [...legend, ...hollowKey, { key: "providers", label: "Service provider", color: PROVIDER_COLOR, shape: "diamond", count: providerCount }];
-  }, [legend, providerPins, providerCount]);
+    const hollowKey: LegendItem[] = providerPins.some((p) => p.hollow) && !legend.some((i) => i.key === "approx") ? [HOLLOW_KEY] : [];
+    // Like every other key entry, the count is the pins drawn: a provider with two pinned locations is two diamonds.
+    const multi = providerStats.locations > providerStats.providers;
+    const providersKey: LegendItem = {
+      key: "providers",
+      label: multi ? "Service provider location" : "Service provider",
+      color: PROVIDER_COLOR,
+      shape: "diamond",
+      count: providerStats.locations,
+    };
+    return show === "providers" ? [providersKey, ...hollowKey] : [...legend, ...hollowKey, providersKey];
+  }, [legend, providerPins, providerStats, show]);
 
   // The list: needs attention first (past due first), then by name.
   const list = useMemo(
@@ -319,6 +431,9 @@ export function CustomerMap() {
   );
   const filterKey = `${needle}|${rep}|${attention}|${scoped}`;
   const paged = useShowMore(list, filterKey, LIST_STEP);
+  // Providers are listed A to Z (the server's order), one row per pinned location, whatever the ZIP toggle says.
+  const providerPaged = useShowMore(providerMatches, `${show}|${needle}`, LIST_STEP);
+  const listKind = show === "both" ? listTab : show === "providers" ? "providers" : "accounts";
 
   const anyFilter = !!needle || !!rep || attention;
   const clearFilters = () => {
@@ -327,6 +442,11 @@ export function CustomerMap() {
     setAttention(false);
   };
 
+  /** On a phone or tablet the list sits under the map: bring the map back into view after a pick from the list. */
+  function showMapAfterListPick() {
+    if (window.matchMedia("(max-width: 1023px)").matches) scrollUnderHeader(mapBox.current);
+  }
+
   function pick(a: AccountGeo, fromList: boolean) {
     setProviderPick(null);
     setSelectedId(a.id);
@@ -334,8 +454,15 @@ export function CustomerMap() {
     if (!fromList || !p) return;
     // A new focus object pans the map, so tapping the same row again brings the account back after the map moved.
     setFocus({ lat: p.lat, lng: p.lng });
-    // On a phone the list sits under the map: bring the map back into view.
-    if (window.matchMedia("(max-width: 1023px)").matches) mapBox.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    showMapAfterListPick();
+  }
+
+  function pickProvider(p: ProviderGeo, fromList: boolean) {
+    setSelectedId(null);
+    setProviderPick(p.addressId);
+    if (!fromList) return;
+    setFocus({ lat: p.lat, lng: p.lng });
+    showMapAfterListPick();
   }
 
   // No data yet: loading (also what the server renders, so the first client render matches it).
@@ -365,55 +492,116 @@ export function CustomerMap() {
   }
 
   const nothingPinned = accounts.every((a) => a.lat == null || a.lng == null);
-  const importNote = counts.noPin ? "More can be placed by importing the verified locations file (Customers → Import → Locations)." : null;
+  const importNote = showAccounts && counts.noPin ? "More can be placed by importing the verified locations file (Customers → Import → Locations)." : null;
+  const providersReady = !!providerGeo.data;
+
+  // What the map says when it has nothing to draw.
+  let mapNote: string | null = null;
+  if (show === "providers") {
+    if (providerGeo.isError) mapNote = "Could not load the service providers.";
+    else if (!providersReady) mapNote = "Loading the service providers…";
+    else if (!providerPins.length)
+      mapNote = !providerRows?.length
+        ? "No service provider has a pinned address yet."
+        : !providerMatches.length
+          ? "No service providers match this search."
+          : "These service providers only have ZIP area pins, which are hidden. Turn on ZIP Area Pins to see them.";
+  } else if (basePins.length === 0) {
+    mapNote = nothingPinned
+      ? "No account has a map pin yet. Import the verified locations file from Customers → Import → Locations."
+      : filtered.length === 0
+        ? "No accounts match these filters."
+        : !showApprox && counts.approx
+          ? "These accounts only have ZIP area pins, which are hidden. Turn on ZIP Area Pins to see them."
+          : "None of these accounts has a pin to show.";
+  }
 
   return (
-    <div data-testid="customer-map">
+    <div className={TYPE_COLOR_VARS} data-testid="customer-map">
       <ListToolbar>
-        <ToolbarSearch value={q} onChange={setQ} placeholder="Search accounts…" testId="map-search" />
-        <RepFilter value={rep} onChange={setRep} extraNames={data.reps} className={TOOLBAR_SELECT} />
-        <FilterChip selected={attention} onClick={() => setAttention((v) => !v)} data-testid="map-attention">
-          Needs Attention
-        </FilterChip>
+        <ToolbarSearch value={q} onChange={setQ} placeholder={show === "providers" ? "Search service providers…" : "Search accounts…"} testId="map-search" />
+        {/* The account filters do nothing to the service providers, so they step aside while only providers show. */}
+        {showAccounts ? (
+          <>
+            <RepFilter value={rep} onChange={setRep} extraNames={data.reps} className={TOOLBAR_SELECT} />
+            <FilterChip selected={attention} onClick={() => setAttention((v) => !v)} data-testid="map-attention">
+              Needs Attention
+            </FilterChip>
+          </>
+        ) : null}
         <FilterChip
           selected={showApprox}
           onClick={() => setShowApprox((v) => !v)}
-          title="Accounts placed only at the center of their ZIP code, drawn as hollow pins"
+          title="Accounts and service providers placed only at the center of their ZIP code, drawn as hollow pins"
           data-testid="map-approx"
         >
           ZIP Area Pins
         </FilterChip>
-        <FilterChip
-          selected={showProviders}
-          onClick={() => {
-            setShowProviders((v) => !v);
-            setProviderPick(null);
-          }}
-          title="Out of Network service providers with a shop address, drawn as diamonds"
-          data-testid="map-providers"
-        >
-          Service Providers
-        </FilterChip>
       </ListToolbar>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2" role="group" aria-label="Color by">
-        <span className="mr-1 text-xs font-medium text-muted-foreground">Color By</span>
-        {COLOR_BY.map((c) => (
-          <FilterChip key={c.id} selected={colorBy === c.id} onClick={() => setColorBy(c.id)} data-testid={`map-color-${c.id}`}>
-            {c.label}
-          </FilterChip>
-        ))}
+      {/* Show comes first so it stays put when Color By steps aside (Service Providers alone have one color). */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex flex-wrap items-center gap-2 max-sm:w-full" role="group" aria-label="Show on the map" data-testid="map-show">
+          <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Show</span>
+          <div className="flex h-9 rounded-full bg-secondary p-0.5 max-sm:w-full">
+            {SHOW_OPTIONS.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                aria-pressed={show === o.id}
+                onClick={() => chooseShow(o.id)}
+                className={cn(
+                  "desk-flat h-8 rounded-full px-3 text-sm font-medium whitespace-nowrap max-sm:flex-auto max-sm:px-2",
+                  // Same picked look as the chips (lighter on a phone in dark mode, where ink is darker than the track).
+                  show === o.id ? "bg-ink text-ink-foreground max-sm:dark:bg-cream max-sm:dark:text-ink" : "text-foreground hover:bg-background/60",
+                )}
+                data-testid={o.testId}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {showAccounts ? (
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Color by">
+            <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Color By</span>
+            {COLOR_BY.map((c) => (
+              <FilterChip key={c.id} selected={colorBy === c.id} onClick={() => setColorBy(c.id)} data-testid={`map-color-${c.id}`}>
+                {c.label}
+              </FilterChip>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {/* Counts and key sit above the map on a wide screen; on a phone the key and the import note move under it. */}
       <div className="mt-4 space-y-2">
         <p className="text-xs text-muted-foreground" data-testid="map-counts">
-          <span className="font-medium text-foreground">{plural(showApprox ? counts.pinned : counts.pinned - counts.approx, "account")} on the map</span>
-          {" · "}
-          {counts.noPin.toLocaleString("en-US")} without a pin
-          {!showApprox && counts.approx ? ` · ${plural(counts.approx, "ZIP area pin")} hidden` : ""}
-          {showProviders && providerGeo.data ? <span data-testid="map-provider-count"> · {plural(providerCount, "service provider")} on the map</span> : null}
-          {importNote ? <span className="hidden lg:inline"> · {importNote}</span> : null}
+          {show === "providers" ? (
+            providerGeo.isError ? (
+              <span className="text-destructive">Could not load the service providers.</span>
+            ) : !providersReady ? (
+              "Loading the service providers…"
+            ) : (
+              <>
+                <span className="font-medium text-foreground" data-testid="map-provider-count">
+                  {plural(providerCount, "service provider")} on the map
+                </span>
+                {providerStats.locations > providerCount ? ` · ${plural(providerStats.locations, "location")}` : ""}
+                {!showApprox && providerStats.approxHidden ? ` · ${plural(providerStats.approxHidden, "ZIP area pin")} hidden` : ""}
+                {providerGeo.data?.truncated ? ` · only the first ${MAX_PROVIDER_PINS.toLocaleString("en-US")} locations are shown` : ""}
+              </>
+            )
+          ) : (
+            <>
+              <span className="font-medium text-foreground">{plural(showApprox ? counts.pinned : counts.pinned - counts.approx, "account")} on the map</span>
+              {" · "}
+              {counts.noPin.toLocaleString("en-US")} without a pin
+              {!showApprox && counts.approx ? ` · ${plural(counts.approx, "ZIP area pin")} hidden` : ""}
+              {show === "both" && providersReady ? <span data-testid="map-provider-count"> · {plural(providerCount, "service provider")} on the map</span> : null}
+              {importNote ? <span className="hidden lg:inline"> · {importNote}</span> : null}
+            </>
+          )}
         </p>
         <MapLegend items={mapLegend} className="hidden lg:flex" />
       </div>
@@ -422,47 +610,43 @@ export function CustomerMap() {
         <div ref={mapBox} className="min-w-0 scroll-mt-32 lg:flex-1 lg:scroll-mt-20">
           <DeskMap
             pins={mapPins}
-            selectedId={selectedProvider ? providerPinId(selectedProvider.addressId) : selectedId}
+            selectedId={selectedProvider ? providerPinId(selectedProvider.addressId) : (selected?.id ?? null)}
             onPinClick={(pin) => {
               const provider = providerByPin.get(String(pin.id));
               if (provider) {
-                setSelectedId(null);
-                setProviderPick(provider.addressId);
+                pickProvider(provider, false);
                 return;
               }
               const a = byId.get(Number(pin.id));
               if (a) pick(a, false);
             }}
-            fitKey={`${filterKey}|${data.accounts.length}`}
-            fitTo={providerPins.length ? fitTo : undefined}
-            fitToOnly={providerPins.length > 0}
+            fitKey={show === "providers" ? `providers|${needle}|${providerRows ? providerRows.length : "loading"}` : `${filterKey}|${data.accounts.length}`}
+            fitTo={fitTo}
+            fitToOnly
             focus={focus}
             className={MAP_HEIGHT}
             label="Customer map"
           >
-            {basePins.length === 0 ? (
+            {mapNote ? (
               <div className="pointer-events-none absolute inset-0 grid place-items-center p-4">
-                <p className="max-w-xs rounded-lg border border-border bg-card/95 px-4 py-3 text-center text-sm text-muted-foreground shadow-[var(--shadow-soft)]">
-                  {nothingPinned
-                    ? "No account has a map pin yet. Import the verified locations file from Customers → Import → Locations."
-                    : filtered.length === 0
-                      ? "No accounts match these filters."
-                      : !showApprox && counts.approx
-                        ? "These accounts only have ZIP area pins, which are hidden. Turn on ZIP Area Pins to see them."
-                        : "None of these accounts has a pin to show."}
+                <p className="max-w-xs rounded-lg border border-border bg-card/95 px-4 py-3 text-center text-sm text-muted-foreground shadow-[var(--shadow-soft)]" data-testid="map-note">
+                  {mapNote}
                 </p>
               </div>
             ) : null}
             {selectedProvider || selected ? (
-              // Phone only: the details card is under the map, so say which account is picked and offer a way down.
-              <div className="absolute right-2 bottom-7 left-2 z-10 flex items-center gap-2 rounded-lg border border-border bg-card/95 py-1.5 pr-1.5 pl-3 shadow-[var(--shadow-soft)] lg:hidden">
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{selectedProvider?.name ?? selected?.name}</span>
+              // Phone and tablet: the details card is under the map, so say what is picked and offer a way down. On a
+              // phone it sits at the top, beside the zoom buttons, clear of the attribution and the tiles note below.
+              <div className="absolute right-2 bottom-7 left-2 z-10 flex items-center gap-2 rounded-lg border border-border bg-card/95 py-1.5 pr-1.5 pl-3 shadow-[var(--shadow-soft)] max-sm:top-2 max-sm:bottom-auto max-sm:left-14 lg:hidden">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium max-sm:line-clamp-2 max-sm:leading-snug max-sm:break-words max-sm:whitespace-normal">
+                  {selectedProvider?.name ?? selected?.name}
+                </span>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   className="h-9 px-3"
-                  onClick={() => panelBox.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  onClick={() => scrollUnderHeader(panelBox.current)}
                   data-testid="map-details-jump"
                 >
                   Details
@@ -479,24 +663,72 @@ export function CustomerMap() {
         <aside
           ref={panelBox}
           className="flex min-w-0 scroll-mt-32 flex-col overflow-hidden rounded-lg border border-border bg-card lg:h-[calc(100vh-14rem)] lg:min-h-[28rem] lg:w-96 lg:shrink-0 lg:scroll-mt-20"
-          aria-label="Accounts on the map"
+          aria-label={show === "providers" ? "Service providers on the map" : show === "both" ? "Accounts and service providers on the map" : "Accounts on the map"}
           data-testid="map-panel"
         >
           {selectedProvider ? (
             <ProviderCard provider={selectedProvider} onClose={() => setProviderPick(null)} />
           ) : selected ? (
-            <AccountCard account={selected} scoped={data.scoped} onClose={() => setSelectedId(null)} />
+            <AccountCard account={selected} scoped={data.scoped} type={colorBy === "type" ? accountType(selected) : null} onClose={() => setSelectedId(null)} />
           ) : (
-            <p className="border-b border-border px-4 py-3 text-xs text-muted-foreground">Tap a pin or an account below to see its details.</p>
+            <p className="border-b border-border px-4 py-3 text-xs text-muted-foreground">
+              {listKind === "providers" ? "Tap a pin or a service provider below to see its details." : "Tap a pin or an account below to see its details."}
+            </p>
           )}
 
-          <div className="flex items-baseline justify-between gap-2 border-b border-border px-4 py-2.5">
-            <h2 className="text-sm font-medium">{plural(filtered.length, "account")}</h2>
-            <span className="text-[11px] text-muted-foreground">Needs attention first</span>
-          </div>
+          {show === "both" ? (
+            <div className="flex items-end gap-1 border-b border-border px-2" role="group" aria-label="List" data-testid="map-list-tabs">
+              <ListTab selected={listKind === "accounts"} onClick={() => setListTab("accounts")} count={filtered.length} testId="map-list-accounts">
+                Accounts
+              </ListTab>
+              {/* The count is the rows in the list: one per pinned location, so it says locations when a provider has two. */}
+              <ListTab selected={listKind === "providers"} onClick={() => setListTab("providers")} count={providersReady ? providerStats.rows : null} testId="map-list-providers">
+                {providersReady && providerStats.rows > providerStats.listed ? "Provider Locations" : "Service Providers"}
+              </ListTab>
+            </div>
+          ) : (
+            <div className="flex items-baseline justify-between gap-2 border-b border-border px-4 py-2.5">
+              <h2 className="text-sm font-medium">
+                {listKind === "accounts"
+                  ? plural(filtered.length, "account")
+                  : providersReady
+                    ? `${plural(providerStats.listed, "service provider")}${providerStats.rows > providerStats.listed ? ` · ${plural(providerStats.rows, "location")}` : ""}`
+                    : "Service providers"}
+              </h2>
+              <span className="text-[11px] text-muted-foreground">{listKind === "accounts" ? "Needs attention first" : "A to Z"}</span>
+            </div>
+          )}
 
           <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-            {list.length === 0 ? (
+            {listKind === "providers" ? (
+              providerGeo.isError ? (
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground" role="alert" data-testid="map-providers-error">
+                  <p>Could not load the service providers.</p>
+                  <Button type="button" variant="outline" className="mt-3" onClick={() => void providerGeo.refetch()}>
+                    <RotateCcw />
+                    Try Again
+                  </Button>
+                </div>
+              ) : !providersReady ? (
+                <p className="px-4 py-8 text-center text-sm text-muted-foreground">Loading the service providers…</p>
+              ) : providerMatches.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground" data-testid="map-providers-empty">
+                  <p>{providerRows?.length ? "No service providers match this search." : "No service provider has a pinned address yet."}</p>
+                  {providerRows?.length && needle ? (
+                    <Button type="button" variant="outline" className="mt-3" onClick={() => setQ("")}>
+                      Clear Search
+                    </Button>
+                  ) : null}
+                </div>
+              ) : (
+                <ul data-testid="map-provider-list">
+                  {providerPaged.visible.map((p) => (
+                    <ProviderRow key={p.addressId} provider={p} selected={p.addressId === providerPick} onPick={() => pickProvider(p, true)} />
+                  ))}
+                  <ShowMoreButton as="li" remaining={providerPaged.remaining} onClick={providerPaged.showMore} label="service providers" />
+                </ul>
+              )
+            ) : list.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground" data-testid="map-empty">
                 <p>{accounts.length === 0 ? "There are no accounts yet." : "No accounts match these filters."}</p>
                 {anyFilter ? (
@@ -520,6 +752,25 @@ export function CustomerMap() {
   );
 }
 
+/** One of the two lists in the side panel when both layers are on the map. */
+function ListTab({ selected, onClick, count, testId, children }: { selected: boolean; onClick: () => void; count: number | null; testId: string; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={cn(
+        "desk-flat -mb-px flex h-11 items-center gap-1.5 border-b-2 px-2.5 text-sm font-medium",
+        selected ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+      )}
+      data-testid={testId}
+    >
+      {children}
+      {count != null ? <span className="tabular text-xs font-normal text-muted-foreground">{count.toLocaleString("en-US")}</span> : null}
+    </button>
+  );
+}
+
 function AccountRow({ account: a, color, selected, onPick }: { account: AccountGeo; color: string; selected: boolean; onPick: () => void }) {
   const hasPin = a.lat != null && a.lng != null;
   const work = rowWork(a);
@@ -533,17 +784,18 @@ function AccountRow({ account: a, color, selected, onPick }: { account: AccountG
         data-testid="map-account-row"
       >
         {hasPin ? <Swatch color={color} hollow={a.quality === "approx"} className="mt-1.5" /> : <MapPinOff className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />}
+        {/* On a phone the lines wrap instead of cutting off: the row has the full width there. */}
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium">
+          <span className="block text-sm font-medium break-words sm:truncate">
             {a.name}
             <AkBadge on={a.aviKatz} className="ml-1.5 align-middle" />
           </span>
-          <span className="block truncate text-xs text-muted-foreground">
+          <span className="block text-xs text-muted-foreground break-words sm:truncate">
             {a.city ?? "No city"}
             {" · "}
             {a.rep ? <RepName name={a.rep} /> : <NoRepFlag show />}
           </span>
-          {work ? <span className={cn("block truncate text-xs", work.tone === "danger" ? "text-destructive" : "text-warning")}>{work.text}</span> : null}
+          {work ? <span className={cn("block text-xs break-words sm:truncate", work.tone === "danger" ? "text-destructive" : "text-warning")}>{work.text}</span> : null}
         </span>
         {!hasPin ? (
           <Badge variant="outline" size="tight" className="mt-0.5">
@@ -555,8 +807,35 @@ function AccountRow({ account: a, color, selected, onPick }: { account: AccountG
   );
 }
 
+/** A service provider location in the side panel list: name and status, the address, and the dispatch phone. */
+function ProviderRow({ provider: p, selected, onPick }: { provider: ProviderGeo; selected: boolean; onPick: () => void }) {
+  return (
+    <li className="border-b border-border last:border-b-0">
+      <button
+        type="button"
+        onClick={onPick}
+        aria-current={selected ? "true" : undefined}
+        className={cn("desk-flat flex min-h-11 w-full items-start gap-2.5 px-4 py-2.5 text-left hover:bg-muted/60", selected && "bg-muted")}
+        data-testid="map-provider-row"
+      >
+        <Swatch color={PROVIDER_COLOR} shape="diamond" hollow={p.quality === "approx"} className="mt-1.5" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-medium break-words">
+            {p.name}
+            <Badge variant={statusTone(p.status)} size="tight" className="ml-1.5 align-middle">
+              {p.status || "Unconfirmed"}
+            </Badge>
+          </span>
+          <span className="block text-xs break-words text-muted-foreground">{p.address || (p.geocodeAddress ? properCase(p.geocodeAddress) : "No address")}</span>
+          {p.dispatchPhone ? <span className="block text-xs text-muted-foreground tabular">{p.dispatchPhone}</span> : null}
+        </span>
+      </button>
+    </li>
+  );
+}
+
 /** The picked account: who, where, how good the pin is, what is open, and the two ways out. */
-function AccountCard({ account: a, scoped, onClose }: { account: AccountGeo; scoped: boolean; onClose: () => void }) {
+function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGeo; scoped: boolean; type: AccountType | null; onClose: () => void }) {
   const point = pointOf(a);
   const address = shownAddress(a);
   const url = directionsUrl({ point, quality: a.quality, address: a.address });
@@ -578,6 +857,13 @@ function AccountCard({ account: a, scoped, onClose }: { account: AccountGeo; sco
             <AkBadge on={a.aviKatz} className="ml-1.5 align-middle" />
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">{a.rep ? <RepName name={a.rep} /> : <NoRepFlag show />}</p>
+          {/* Coloring by Type: say which type the pin's color stands for. */}
+          {type ? (
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="map-account-type">
+              <Swatch color={TYPE_COLOR[type]} />
+              {ACCOUNT_TYPE_LABEL[type]}
+            </p>
+          ) : null}
         </div>
         <Button type="button" variant="ghost" size="icon" className="-mt-1.5 -mr-2 size-9" onClick={onClose} aria-label="Close account details">
           <X />
@@ -619,6 +905,9 @@ function AccountCard({ account: a, scoped, onClose }: { account: AccountGeo; sco
     </section>
   );
 }
+
+/** Phone only: a link in the provider card is a 32px tall tap target (its text stays 12px). */
+const PHONE_TAP = "max-sm:inline-block max-sm:py-2";
 
 /**
  * The picked service provider: who, status, how to reach them, what they cover, where the pin is and how good it is,
@@ -663,12 +952,13 @@ function ProviderCard({ provider: p, onClose }: { provider: ProviderGeo; onClose
         {p.quality ? QUALITY_LABEL[p.quality] : "Pin placed, match not recorded"}
       </p>
 
-      <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs">
+      {/* On a phone the phone, email and website links get a taller tap area; the labels line up with their text. */}
+      <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs max-sm:items-baseline">
         {row(
           "Dispatch",
           p.dispatchPhone ? (
             tel ? (
-              <a href={tel} className="font-medium text-primary underline-offset-4 hover:underline" data-testid="map-provider-phone">
+              <a href={tel} className={cn("font-medium text-primary underline-offset-4 hover:underline", PHONE_TAP)} data-testid="map-provider-phone">
                 {p.dispatchPhone}
               </a>
             ) : (
@@ -681,7 +971,7 @@ function ProviderCard({ provider: p, onClose }: { provider: ProviderGeo; onClose
         {row(
           "Email",
           email ? (
-            <a href={`mailto:${email}`} className="text-primary underline-offset-4 hover:underline" data-testid="map-provider-email">
+            <a href={`mailto:${email}`} className={cn("text-primary underline-offset-4 hover:underline", PHONE_TAP)} data-testid="map-provider-email">
               {email}
             </a>
           ) : (
@@ -691,7 +981,7 @@ function ProviderCard({ provider: p, onClose }: { provider: ProviderGeo; onClose
         {row(
           "Website",
           site ? (
-            <a href={site} target="_blank" rel="noreferrer" className="text-primary underline-offset-4 hover:underline" data-testid="map-provider-website">
+            <a href={site} target="_blank" rel="noreferrer" className={cn("text-primary underline-offset-4 hover:underline", PHONE_TAP)} data-testid="map-provider-website">
               {websiteLabel(p.website)}
             </a>
           ) : (
