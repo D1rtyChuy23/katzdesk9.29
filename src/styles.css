@@ -326,11 +326,8 @@ html[data-motion="reduced"] .katz-cloud {
   animation: none;
 }
 
-/* Customer map (desk-map.tsx). pigeon-maps hard-codes a light gray background; use the theme's muted surface
-   (visible while tiles load), and dim the street tiles in dark mode so pins and labels stay readable. */
-.desk-map > div[dir="ltr"] {
-  background: var(--color-muted) !important;
-}
-html.dark .desk-map .pigeon-tiles img {
+/* Customer map (desk-map.tsx). The theme's muted surface shows while tiles load (bg-muted on the map); dim the
+   street tiles in dark mode so pins and labels stay readable. */
+html.dark .desk-map .desk-map-tiles img {
   filter: brightness(0.6) contrast(1.12) saturate(0.65);
 }
