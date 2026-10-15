@@ -86,13 +86,30 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
 /** Billing info from the account: name, account number, address, rep (the account's rep, else the record's). */
 async function billTo(sql: Sql, ref: Ref): Promise<BillTo> {
   const acct = ref.customer
-    ? (await sql.query<{ name: string; account_number: string | null; address: string | null; netsuite_id: string | null }>(
-        "select name, account_number, address, netsuite_id from directory_customers where archived = false and lower(btrim(name)) = lower(btrim($1)) order by name_locked desc, id limit 1",
+    ? (await sql.query<{
+        name: string;
+        account_number: string | null;
+        address: string | null;
+        netsuite_id: string | null;
+        latitude: number | string | null;
+        longitude: number | string | null;
+        geocode_match: string | null;
+      }>(
+        "select name, account_number, address, netsuite_id, latitude, longitude, geocode_match from directory_customers where archived = false and lower(btrim(name)) = lower(btrim($1)) order by name_locked desc, id limit 1",
         [ref.customer],
       ))[0]
     : undefined;
   const marks = await loadAccountMarks(sql);
   const rep = accountRepFor(marks, acct?.name ?? ref.customer) ?? canonicalRepName(ref.recordRep) ?? (ref.recordRep?.trim() || null);
+  const coord = (v: number | string | null | undefined): number | null => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const latitude = coord(acct?.latitude);
+  const longitude = coord(acct?.longitude);
+  const pinned = latitude !== null && longitude !== null;
+  const match = acct?.geocode_match;
   return {
     name: acct?.name ?? (ref.customer || "No customer on this record"),
     accountNumber: acct?.account_number?.trim() || null,
@@ -100,6 +117,9 @@ async function billTo(sql: Sql, ref: Ref): Promise<BillTo> {
     rep: rep && rep.trim() ? rep : null,
     netsuiteId: acct?.netsuite_id?.trim() || null,
     onList: !!acct,
+    latitude: pinned ? latitude : null,
+    longitude: pinned ? longitude : null,
+    geocodeMatch: pinned && (match === "exact" || match === "close" || match === "approx") ? match : null,
   };
 }
 

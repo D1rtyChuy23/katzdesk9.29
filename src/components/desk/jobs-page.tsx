@@ -32,11 +32,14 @@ export function JobsPage({
   title,
   lede,
   initialOpen,
+  initialTab,
 }: {
   kind: "service" | "tlc";
   title: string;
   lede: string;
   initialOpen?: number;
+  /** A ping or note notification opens its ticket on the Ping tab. */
+  initialTab?: "ping";
 }) {
   const jobs = useQuery({
     queryKey: ["jobs", kind],
@@ -50,9 +53,18 @@ export function JobsPage({
   const [urgency, setUrgency] = useState("");
   const [view, setView] = useState<"active" | "flagged" | "unassigned" | "complete" | "all">("active");
   const [openId, setOpenId] = useState<number | null>(initialOpen ?? null);
+  const [openTab, setOpenTab] = useState<"ping" | undefined>(initialOpen != null ? initialTab : undefined);
   useEffect(() => {
-    if (initialOpen != null) setOpenId(initialOpen);
-  }, [initialOpen]);
+    if (initialOpen != null) {
+      setOpenId(initialOpen);
+      setOpenTab(initialTab);
+    }
+  }, [initialOpen, initialTab]);
+  // A ticket opened from the list or New call opens on its Ticket tab.
+  const openFromList = (id: number) => {
+    setOpenTab(undefined);
+    setOpenId(id);
+  };
   const [create, setCreate] = useState(false);
   const [review, setReview] = useState<CorrigoReviewItem[]>([]);
   const [sort, setSort] = useDeskSort(`jobs-${kind}`, "flag");
@@ -175,14 +187,14 @@ export function JobsPage({
           value={tech}
           onChange={setTech}
           extraNames={(jobs.data ?? []).map((j) => j.technician)}
-          className={`${TOOLBAR_SELECT} w-40`}
+          className={`${TOOLBAR_SELECT} ${HALF_ROW_ON_PHONE}`}
         />
-        <ToolbarSelect value={urgency} onChange={(e) => setUrgency(e.target.value)} allowEmpty emptyLabel="All urgency" aria-label="Filter by urgency" className="w-40">
+        <ToolbarSelect value={urgency} onChange={(e) => setUrgency(e.target.value)} allowEmpty emptyLabel="All urgency" aria-label="Filter by urgency" className={HALF_ROW_ON_PHONE}>
           {URGENCIES.map((u) => (
             <option key={u}>{u}</option>
           ))}
         </ToolbarSelect>
-        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
+        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0 max-sm:w-full" />
       </ListToolbar>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
@@ -217,39 +229,48 @@ export function JobsPage({
         ) : (
           <ul>
             {rows.map((j) => (
-              <JobRow key={j.id} job={j} onOpen={() => setOpenId(j.id)} />
+              <JobRow key={j.id} job={j} onOpen={() => openFromList(j.id)} />
             ))}
           </ul>
         )}
         </div>
       </div>
 
-      <JobSheet id={openId} onClose={() => setOpenId(null)} />
+      <JobSheet id={openId} initialTab={openTab} onClose={() => setOpenId(null)} />
       <NewJobDialog
         kind={kind}
         open={create}
         onOpenChange={setCreate}
-        onCreated={(id) => setOpenId(id)}
+        onCreated={openFromList}
       />
     </div>
   );
 }
 
+/** Tech and urgency pick-lists: side by side, half the row each, on a phone; 160px from sm up. */
+const HALF_ROW_ON_PHONE = "w-40 max-sm:w-auto max-sm:min-w-0 max-sm:grow max-sm:basis-[calc(50%-0.25rem)]";
+
+/**
+ * One ticket. xl: a table row. Below xl the columns stack, except on a phone, where the chips, dates and tech
+ * flow along one or two lines under the account so a row stays short.
+ */
 function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
   return (
     <li>
       <button
         type="button"
         onClick={onOpen}
-        className="desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] xl:items-center xl:gap-3"
+        className="desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 max-sm:flex max-sm:flex-wrap max-sm:items-center max-sm:gap-x-2.5 max-sm:gap-y-1 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] xl:items-center xl:gap-3"
       >
-        <span>
+        <span className="max-sm:w-full">
           <span className="block font-medium">
-            {job.customer ?? "Untitled"} <AkBadge on={job.aviKatz} className="ml-1 align-middle" />
+            {/* A blank customer reads "Untitled" on phones only; sm and up keep the blank line they had. */}
+            {job.customer?.trim() ? job.customer : job.customer == null ? "Untitled" : <span className="sm:hidden">Untitled</span>}{" "}
+            <AkBadge on={job.aviKatz} className="ml-1 align-middle" />
           </span>
           <AddressLine customer={job.customer} />
 
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground max-sm:block">
             {job.callId}
             {job.wo ? ` · ${job.wo}` : ""}
             {job.issue ? ` · ${job.issue}` : ""}
@@ -260,7 +281,7 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
             </span>
           ) : null}
         </span>
-        <span className="flex flex-wrap gap-1">
+        <span className="flex flex-wrap gap-1 max-sm:contents">
           <DuplicateBadge duplicateOf={job.duplicateOf} siblingCount={job.siblings?.length ?? 0} />
           <FlagBadge flag={job.flag} />
           <span className="xl:hidden">
@@ -271,6 +292,8 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
           <UrgencyBadge urgency={job.urgency} />
         </span>
         <StatusBadge status={job.status} />
+        {/* Phones: the dates and tech start their own line under the chips. Not rendered from sm up. */}
+        <span aria-hidden className="hidden max-sm:block max-sm:h-0 max-sm:basis-full" />
         {/* Below xl the columns stack, so the bare dates need their labels. */}
         <span className="tabular text-sm text-muted-foreground">
           <span className="xl:hidden">Received </span>

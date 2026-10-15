@@ -4,7 +4,9 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const ink = "#1A1612";
+// The dark series. A CSS variable so phones in dark mode can lift it off the dark card (styles.css); anywhere it is
+// not set it is the same #1A1612 as before.
+const ink = "var(--chart-ink, #1A1612)";
 const primary = "#2F5D50";
 const warning = "#9A5B12";
 const muted = "#6F675E";
@@ -406,7 +408,8 @@ export function FilterChip({
       type={type}
       className={cn(
         "h-9 rounded-full px-3 text-sm font-medium",
-        selected ? "bg-ink text-ink-foreground" : "bg-secondary text-foreground",
+        // Phones in dark mode: ink is darker than an unselected chip there, so the picked one reads lighter instead.
+        selected ? "bg-ink text-ink-foreground max-sm:dark:bg-cream max-sm:dark:text-ink" : "bg-secondary text-foreground",
         className,
       )}
       aria-pressed={selected}
@@ -650,7 +653,8 @@ export function StatCard({
       >
         {value}
       </p>
-      {hint ? <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{hint}</p> : null}
+      {/* Phones show the whole hint (status counts can need a third line); sm and up clamp to two. */}
+      {hint ? <p className="mt-1 text-xs text-muted-foreground sm:line-clamp-2">{hint}</p> : null}
       {breakdown?.length ? (
         <div className="mt-1 hidden min-w-0 overflow-hidden @[11rem]:block">
           <BreakdownList items={breakdown.slice(0, 3)} />

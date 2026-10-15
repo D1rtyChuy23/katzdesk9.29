@@ -45,6 +45,20 @@ export function AutoGrowTextarea({
   React.useLayoutEffect(() => {
     resize();
   }, [resize, value, defaultValue]);
+  // A box mounted or refilled while hidden (a tab that is not open) measures 0 and gets the minimum height:
+  // measure again when it shows, before it is painted.
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let shown = el.offsetWidth > 0;
+    const ro = new ResizeObserver(() => {
+      const now = el.offsetWidth > 0;
+      if (now && !shown) resize();
+      shown = now;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [resize]);
   return (
     <textarea
       {...props}

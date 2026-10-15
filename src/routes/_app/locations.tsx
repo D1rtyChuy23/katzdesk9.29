@@ -146,7 +146,7 @@ function Page() {
       </ListToolbar>
 
       {groups.length > 1 ? (
-        <nav aria-label="Jump to location" className="mt-3 flex flex-wrap gap-1.5">
+        <nav aria-label="Jump to location" className="mt-3 flex flex-wrap gap-1.5 max-sm:gap-2">
           {groups.map((g) => {
             const units = g.rows.reduce((n, a) => n + a.qty, 0);
             return (
@@ -154,7 +154,8 @@ function Page() {
                 key={g.key}
                 href={`#loc-${g.key}`}
                 className={cn(
-                  "rounded-full border border-border px-2.5 py-1 text-xs tabular hover:border-primary/50",
+                  // Phones: a 40px tall chip with readable text.
+                  "rounded-full border border-border px-2.5 py-1 text-xs tabular hover:border-primary/50 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:gap-1 max-sm:px-3 max-sm:text-sm",
                   units === 0 ? "text-muted-foreground" : "bg-card text-foreground",
                 )}
               >

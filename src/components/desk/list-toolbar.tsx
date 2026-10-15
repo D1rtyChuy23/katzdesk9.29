@@ -17,7 +17,7 @@ export function ListToolbar({ className, children, ...props }: ComponentProps<"d
   );
 }
 
-/** The search box that starts the row. Same width, height and icon on every page. */
+/** The search box that starts the row. Same width, height and icon on every page; the full row on a phone. */
 export function ToolbarSearch({
   value,
   onChange,
@@ -35,7 +35,7 @@ export function ToolbarSearch({
   className?: string;
 }) {
   return (
-    <div className={cn("relative w-56 shrink-0", className)} data-toolbar-search="">
+    <div className={cn("relative w-full shrink-0 sm:w-56", className)} data-toolbar-search="">
       <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
       <Input
         value={value}

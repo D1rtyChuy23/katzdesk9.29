@@ -2286,7 +2286,7 @@ export const listDirectory = createServerFn({ method: "GET" }).middleware([deskM
 	return await sql.query(`select id, name from ${table} where archived = false order by lower(name)`);
 });
 /** The account's address (from the clean customer list), for tickets, PMs and installs. */
-export type CustomerLocation = { latitude: number; longitude: number; match: "exact" | "close" | null; matchedAddress: string | null };
+export type CustomerLocation = { latitude: number; longitude: number; match: "exact" | "close" | "approx" | null; matchedAddress: string | null };
 export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { name: string }) => d).handler(async ({ data }: any): Promise<{ address: string | null; location: CustomerLocation | null }> => {
 	const sql = await ready();
 	const name = String(data.name ?? "").trim();
@@ -2297,20 +2297,56 @@ export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([
 			? {
 					latitude: Number(row.latitude),
 					longitude: Number(row.longitude),
-					match: row.geocode_match === "exact" || row.geocode_match === "close" ? row.geocode_match : null,
+					match: row.geocode_match === "exact" || row.geocode_match === "close" || row.geocode_match === "approx" ? row.geocode_match : null,
 					matchedAddress: row.geocode_address ? String(row.geocode_address) : null,
 				}
 			: null;
 	return { address: row?.address ? String(row.address) : null, location };
 });
-/** Every saved account address, keyed by lower-case account name, for the list rows (one call, not one per row). */
-export const listAccountAddresses = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Record<string, string>> => {
+/** One account's typed address and saved map pin, for the list rows. */
+export type AccountAddress = {
+	address: string | null;
+	latitude: number | null;
+	longitude: number | null;
+	/** exact / close: the street was found. approx: only the ZIP code's center (never for directions). */
+	match: "exact" | "close" | "approx" | null;
+	/** The address the geocoder matched (Census, upper case). */
+	geocodeAddress: string | null;
+};
+/**
+ * Every saved account address and map pin, keyed by lower-case account name, for the list rows (one call, not one
+ * per row). Accounts with an address or a pin are included. When two accounts share a name, one with a typed address
+ * wins (as before, when only addressed rows were read), then name_locked desc, then id.
+ */
+export const listAccountAddresses = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Record<string, AccountAddress>> => {
 	const sql = await ready();
-	const rows = await sql.query("select name, address from directory_customers where archived = false and coalesce(btrim(address), '') <> '' order by name_locked desc, id");
-	const out: Record<string, string> = {};
+	const rows = await sql.query(
+		`select name, address, latitude, longitude, geocode_match, geocode_address
+		   from directory_customers
+		  where archived = false
+		    and (coalesce(btrim(address), '') <> '' or (latitude is not null and longitude is not null))
+		  order by (coalesce(btrim(address), '') = ''), name_locked desc, id`,
+	);
+	const coord = (v) => {
+		if (v === null || v === undefined || v === "") return null;
+		const n = Number(v);
+		return Number.isFinite(n) ? n : null;
+	};
+	const out: Record<string, AccountAddress> = {};
 	for (const r of rows) {
 		const key = String(r.name ?? "").trim().toLowerCase();
-		if (key && !out[key]) out[key] = String(r.address).trim();
+		if (!key || out[key]) continue;
+		const latitude = coord(r.latitude);
+		const longitude = coord(r.longitude);
+		const pinned = latitude !== null && longitude !== null;
+		const match = r.geocode_match === "exact" || r.geocode_match === "close" || r.geocode_match === "approx" ? r.geocode_match : null;
+		out[key] = {
+			address: r.address ? String(r.address).trim() || null : null,
+			latitude: pinned ? latitude : null,
+			longitude: pinned ? longitude : null,
+			match: pinned ? match : null,
+			geocodeAddress: r.geocode_address ? String(r.geocode_address).trim() || null : null,
+		};
 	}
 	return out;
 });

@@ -6,6 +6,7 @@ import {
   removeProviderAddress,
   removeProviderContact,
 } from "@/lib/ops/network-api";
+import { PROVIDER_GEO_KEY } from "@/lib/ops/provider-geo-api";
 import {
   findDuplicateAddress,
   findDuplicateContact,
@@ -28,6 +29,8 @@ type Place = ProviderAddress | (AddressDraft & { id: number });
 function invalidate(qc: ReturnType<typeof useQueryClient>) {
   void qc.invalidateQueries({ queryKey: ["provider"] });
   void qc.invalidateQueries({ queryKey: ["network"] });
+  // An address added or removed changes the provider's pins on the Map.
+  void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
 }
 
 export function PeopleEditor({

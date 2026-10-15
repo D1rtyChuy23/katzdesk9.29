@@ -240,7 +240,7 @@ function Page() {
                     <OpenLink
                       entityType={c.entityType}
                       id={c.entityId}
-                      className="text-sm font-medium underline-offset-2 hover:underline"
+                      className="text-sm font-medium underline-offset-2 hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center"
                     >
                       {c.customer ?? c.entityType}
                     </OpenLink>
@@ -252,7 +252,7 @@ function Page() {
                       {c.canClaim ? (
                         <button
                           type="button"
-                          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground max-sm:h-10"
                           disabled={claim.isPending}
                           onClick={() => claim.mutate(c.id)}
                         >
@@ -270,7 +270,7 @@ function Page() {
                       />
                       <button
                         type="button"
-                        className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                        className="text-xs text-muted-foreground underline-offset-2 hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:px-2"
                         onClick={() => resolve.mutate(c.id)}
                       >
                         Mark answered
@@ -302,16 +302,17 @@ function Page() {
                     flash === c.id && "ring-2 ring-primary ring-offset-4 ring-offset-card",
                   )}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  {/* Phones: a long name line keeps the full width and Claim / Ping wrap under it, on the right. */}
+                  <div className="flex items-start justify-between gap-2 max-sm:flex-wrap max-sm:gap-y-1">
                     <p className="text-sm">
                       <span className="font-medium">{c.ownerLabel}</span>
                       <span className="text-muted-foreground"> · {c.customer ?? c.entityType}</span>
                     </p>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 max-sm:ml-auto">
                       {c.canClaim ? (
                         <button
                           type="button"
-                          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground max-sm:h-10"
                           disabled={claim.isPending}
                           onClick={() => claim.mutate(c.id)}
                         >

@@ -1,8 +1,23 @@
 import { CustomerAddress } from "./customer-address";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { createJob, getJob, listAssets, mergeServiceTickets, unassignAssetFromService, updateJob } from "@/lib/ops/api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
+import { ChevronDown } from "lucide-react";
+import {
+  createJob,
+  getCustomerHistory,
+  getJob,
+  listAssets,
+  listComments,
+  listDirectory,
+  listModules,
+  mergeServiceTickets,
+  unassignAssetFromService,
+  updateJob,
+} from "@/lib/ops/api";
+import { moduleAccount } from "@/lib/ops/eversys";
+import { cn } from "@/lib/utils";
 import { CALL_STATUSES, CALL_TYPES, URGENCIES } from "@/lib/ops/lookups";
 import { formatLongDate } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
@@ -15,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/separator";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { ChargesPanel } from "./charges-panel";
@@ -27,24 +43,58 @@ import { toast } from "sonner";
 import { TechSelect } from "./tech-select";
 import { SerialNoticeBanner, SerialPullField } from "./serial-notice";
 import { UnitPlaceField } from "./unit-place-field";
+import { SheetTabs } from "./sheet-tabs";
+import { AccountEquipmentList, HistoryRow, pendingSchedules, useAccountEquipment } from "./account-history";
+import { ModuleRecord } from "./module-record";
+import { PmSheet } from "./entity-sheets";
+
+/** The ticket's categories, one per tab, in this order. Only a ticket with a customer has tabs. */
+export type TicketTab = "ticket" | "equipment" | "invoicing" | "schedules" | "ping";
+
+const TICKET_TABS: { id: TicketTab; label: string }[] = [
+  { id: "ticket", label: "Ticket" },
+  { id: "equipment", label: "Equipment" },
+  { id: "invoicing", label: "Invoicing" },
+  { id: "schedules", label: "Schedules" },
+  { id: "ping", label: "Ping" },
+];
+
+/** A panel that stays mounted while another tab is open: unsaved edits stay, and closing from any tab still saves. */
+const KEEP_MOUNTED = "outline-none data-[state=inactive]:hidden";
 
 export function JobSheet({
   id,
   onClose,
   lockCustomer = false,
+  initialTab,
 }: {
   id: number | null;
   onClose: () => void;
   lockCustomer?: boolean;
+  /** Open this ticket on that tab (a ping or note notification opens it on Ping). */
+  initialTab?: TicketTab;
 }) {
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
   const [viewId, setViewId] = useState<number | null>(id);
+  // Tab picked and PM opened on this ticket; both start over each time the window opens a ticket.
+  const [tabPick, setTabPick] = useState<{ key: string; tab: TicketTab } | null>(null);
+  const [pmPick, setPmPick] = useState<{ forId: number | null; pmId: number } | null>(null);
   useEffect(() => {
     setViewId(id);
+    setTabPick(null);
+    setPmPick(null);
   }, [id]);
   const activeId = viewId ?? id;
+  // A picked tab belongs to one ticket (and the tab it was opened on). Only the ticket the window was opened with
+  // starts on `initialTab`, and only the first time.
+  const tabKeyOf = (ticketId: number | null) => `${ticketId ?? ""}:${ticketId === id ? (initialTab ?? "") : ""}`;
+  /** Switch this window to another ticket, on its Ticket tab (also when coming back to the ticket a ping opened). */
+  function showTicket(nextId: number) {
+    setTabPick({ key: tabKeyOf(nextId), tab: "ticket" });
+    setViewId(nextId);
+  }
   const job = useQuery({
     queryKey: ["job", activeId],
     queryFn: () => getJob({ data: { id: activeId! } }),
@@ -52,9 +102,11 @@ export function JobSheet({
   });
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof updateJob>[0]["data"]) => updateJob({ data: patch }),
-    onSuccess: () => {
+    onSuccess: (row) => {
       if (!skipToast.current) toast.success("Saved");
       skipToast.current = false;
+      // Keep the saved ticket in the cache, so reopening it right after closing shows (and re-saves) the new values.
+      if (row) qc.setQueryData(["job", row.id], row);
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["job"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
@@ -74,7 +126,7 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["activity"] });
       void qc.invalidateQueries({ queryKey: ["comments"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
-      if (row?.id) setViewId(row.id);
+      if (row?.id && row.id !== activeId) showTicket(row.id);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -82,186 +134,384 @@ export function JobSheet({
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const pulledSerial =
     (assets.data ?? []).find((a) => a.jobId === activeId)?.serial ?? "";
-  return (
-    <Sheet
-      open={id != null}
-      onOpenChange={(o) => {
-        if (!o) {
-          skipToast.current = true;
-          formRef.current?.requestSubmit();
-          onClose();
-        }
+
+  // With a customer the ticket is split into tabs. Another ticket opens on Ticket, unless a ping opened it.
+  const customer = j?.customer?.trim() ?? "";
+  const tabbed = customer !== "";
+  const tabKey = tabKeyOf(activeId);
+  const tab: TicketTab = tabPick?.key === tabKey ? tabPick.tab : activeId === id && initialTab ? initialTab : "ticket";
+  const pickTab = (next: TicketTab) => setTabPick({ key: tabKey, tab: next });
+  // Equipment mounts the first time it is opened on this ticket and then stays (its account queries only run once it
+  // is opened), so a half-picked location is still there after looking at another tab.
+  const [equipSeen, setEquipSeen] = useState<string | null>(null);
+  useEffect(() => {
+    if (tab === "equipment") setEquipSeen(tabKey);
+  }, [tab, tabKey]);
+  const keepEquipment = tab === "equipment" || equipSeen === tabKey;
+  // The account's equipment and schedules: the same queries the account window reads.
+  const accountEquip = useAccountEquipment(tabbed ? customer : null);
+  const directory = useQuery({
+    queryKey: ["directory", "customer"],
+    queryFn: () => listDirectory({ data: { kind: "customer" } }),
+    enabled: tabbed,
+  });
+  const accountId = tabbed
+    ? ((directory.data ?? []).find((c) => c.name.trim().toLowerCase() === customer.toLowerCase())?.id ?? null)
+    : null;
+  const history = useQuery({
+    queryKey: ["customer-history", accountId],
+    queryFn: () => getCustomerHistory({ data: { id: accountId! } }),
+    enabled: accountId != null,
+  });
+  const schedules = useMemo(() => pendingSchedules(history.data, { factorTickets: true }), [history.data]);
+  const comments = useQuery({
+    queryKey: ["comments", j?.kind, j?.id],
+    queryFn: () => listComments({ data: { entityType: j!.kind, entityId: j!.id } }),
+    enabled: tabbed,
+  });
+  const openPm =
+    id != null && pmPick && pmPick.forId === activeId ? (history.data?.pms.find((p) => p.id === pmPick.pmId) ?? null) : null;
+  const tabCount = (t: TicketTab): number | null => {
+    if (t === "equipment") return accountEquip.data?.length ?? null;
+    if (t === "schedules") return schedules.length || null;
+    if (t === "ping") return comments.data?.length || null;
+    return null;
+  };
+  /** A TLC or Factor visit from Schedules: keep what was typed here, then switch this window to it. */
+  function openTicket(nextId: number) {
+    if (nextId === activeId) {
+      pickTab("ticket");
+      return;
+    }
+    skipToast.current = true;
+    formRef.current?.requestSubmit();
+    showTicket(nextId);
+  }
+
+  const pullBlock = j ? (
+    <>
+      <SerialPullField
+        label="Serial number"
+        value={pulledSerial}
+        jobId={j.id}
+        onValue={() => {}}
+      />
+      <p className="mt-1 text-xs text-muted-foreground">
+        Type a warehouse serial to pull that unit onto this ticket without opening Warehouse.
+      </p>
+      <div className="mt-3">
+        <UnitPlaceField serial={pulledSerial} model={j.equipment} />
+      </div>
+    </>
+  ) : null;
+
+  const form = j ? (
+    <form
+      ref={formRef}
+      key={j.id}
+      className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        save.mutate({
+          id: j.id,
+          customer: String(fd.get("customer") ?? ""),
+          contact: String(fd.get("contact") || "") || null,
+          phone: String(fd.get("phone") || "") || null,
+          equipment: String(fd.get("equipment") || "") || null,
+          issue: String(fd.get("issue") || "") || null,
+          workDone: String(fd.get("workDone") || "") || null,
+          callType: String(fd.get("callType") || "") || null,
+          status: String(fd.get("status")),
+          technician: String(fd.get("technician") || "") || null,
+          secondaryTech: String(fd.get("secondaryTech") || "") || null,
+          wo: String(fd.get("wo") || "") || null,
+          scheduled: String(fd.get("scheduled") || "") || null,
+          received: String(fd.get("received") || "") || null,
+          completedAt: String(fd.get("completedAt") || "") || null,
+          notes: String(fd.get("notes") || "") || null,
+          urgency: String(fd.get("urgency") || "") || "Normal",
+        });
       }}
     >
-      <SheetContent>
-        {j ? (
-          <>
-            <SheetHeader>
-              <p className="text-xs tracking-wide text-muted-foreground uppercase">
-                {j.kind === "tlc" ? "TLC + Factor" : "Service call"} · {j.callId}
-              </p>
-              <SheetTitle>{j.customer ?? "Untitled Account"}</SheetTitle>
-              <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5">
-                <UrgencyBadge urgency={j.urgency} />
-                <StatusBadge status={j.status} />
-                <FlagBadge flag={j.flag} />
-                <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} />
-              </div>
-              <div className="mt-2">
-                <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
-              </div>
-            </SheetHeader>
-            <SheetBody>
-              <SerialNoticeBanner notice={j.serialNotice} />
-              <DuplicateBanner
-                job={j}
-                pending={merge.isPending}
-                onOpen={(nextId) => setViewId(nextId)}
-                onMergeIntoThis={(extraId) => merge.mutate({ keeperId: j.id, extraId })}
-                onMergeThisInto={(keeperId) => merge.mutate({ keeperId, extraId: j.id })}
-              />
-              <form
-                ref={formRef}
-                key={j.id}
-                className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const fd = new FormData(e.currentTarget);
-                  save.mutate({
-                    id: j.id,
-                    customer: String(fd.get("customer") ?? ""),
-                    contact: String(fd.get("contact") || "") || null,
-                    phone: String(fd.get("phone") || "") || null,
-                    equipment: String(fd.get("equipment") || "") || null,
-                    issue: String(fd.get("issue") || "") || null,
-                    workDone: String(fd.get("workDone") || "") || null,
-                    callType: String(fd.get("callType") || "") || null,
-                    status: String(fd.get("status")),
-                    technician: String(fd.get("technician") || "") || null,
-                    secondaryTech: String(fd.get("secondaryTech") || "") || null,
-                    wo: String(fd.get("wo") || "") || null,
-                    scheduled: String(fd.get("scheduled") || "") || null,
-                    received: String(fd.get("received") || "") || null,
-                    completedAt: String(fd.get("completedAt") || "") || null,
-                    notes: String(fd.get("notes") || "") || null,
-                    urgency: String(fd.get("urgency") || "") || "Normal",
-                  });
-                }}
-              >
-                <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockCustomer} />
-                {j.customer ? (
-                  <div className="sm:col-span-2">
-                    <ProviderDispatchBlock customer={j.customer} />
+      <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockCustomer} />
+      {j.customer ? (
+        <div className="sm:col-span-2">
+          <ProviderDispatchBlock customer={j.customer} />
+        </div>
+      ) : null}
+      <div className="sm:col-span-2">
+        <BoundEquipment defaultValue={j.equipment ?? ""} recordKey={j.id} />
+      </div>
+      {/* With tabs, pulling a serial from the barn is on the Equipment tab. */}
+      {tabbed ? null : <div className="sm:col-span-2">{pullBlock}</div>}
+      <div className="sm:col-span-2">
+        <Label htmlFor="issue">Issue</Label>
+        <AutoGrowTextarea
+          id="issue"
+          name="issue"
+          defaultValue={j.issue ?? ""}
+          className="mt-1"
+          placeholder="What’s going on…"
+        />
+      </div>
+      <div>
+        <Label htmlFor="urgency">Urgency</Label>
+        <SelectField id="urgency" name="urgency" className="mt-1" defaultValue={j.urgency || "Normal"}>
+          {URGENCIES.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
+        </SelectField>
+      </div>
+      <div className="sm:col-span-2">
+        <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Assignment</p>
+      </div>
+      <div>
+        <Label>Technician</Label>
+        <TechSelect name="technician" defaultValue={j.technician ?? ""} />
+      </div>
+      <div>
+        <Label htmlFor="job-secondary-tech">Secondary Tech</Label>
+        <TechSelect id="job-secondary-tech" name="secondaryTech" defaultValue={j.secondaryTech ?? ""} />
+      </div>
+      <div>
+        <Label>Status</Label>
+        <SelectField name="status" className="mt-1" defaultValue={j.status}>
+          {CALL_STATUSES.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
+        </SelectField>
+      </div>
+      <Field label="Scheduled" name="scheduled" type="date" defaultValue={j.scheduled ?? ""} />
+      <div>
+        <Label>Type</Label>
+        <SelectField name="callType" className="mt-1" defaultValue={j.callType ?? ""} allowEmpty>
+          {CALL_TYPES.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
+        </SelectField>
+      </div>
+      <Field label="WO #" name="wo" defaultValue={j.wo ?? ""} />
+      <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
+      <Field label="Contact" name="contact" defaultValue={j.contact ?? ""} />
+      <Field label="Phone" name="phone" defaultValue={j.phone ?? ""} />
+      <div className="sm:col-span-2">
+        <Label htmlFor="workDone">Description of work</Label>
+        <AutoGrowTextarea
+          id="workDone"
+          name="workDone"
+          defaultValue={j.workDone ?? ""}
+          className="mt-1"
+          placeholder="What was done on site…"
+        />
+      </div>
+      <Field
+        label="Date completed"
+        name="completedAt"
+        type="date"
+        defaultValue={j.completedAt ?? ""}
+      />
+      <div className="sm:col-span-2">
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea id="notes" name="notes" className="mt-1" defaultValue={j.notes ?? ""} />
+      </div>
+      <div className="flex items-center justify-between sm:col-span-2">
+        <p className="text-xs text-muted-foreground">
+          Received {formatLongDate(j.received)}
+          {j.ageDays != null ? ` · ${j.ageDays}d open` : ""}
+        </p>
+        <Button type="submit" size="sm" disabled={save.isPending}>
+          Save
+        </Button>
+      </div>
+    </form>
+  ) : null;
+
+  return (
+    <>
+      <Sheet
+        open={id != null}
+        onOpenChange={(o) => {
+          if (!o) {
+            skipToast.current = true;
+            formRef.current?.requestSubmit();
+            onClose();
+          }
+        }}
+      >
+        <SheetContent>
+          {j ? (
+            <>
+              {/* Phones: a tighter header so more of the ticket shows under it. */}
+              <SheetHeader className="max-sm:py-3">
+                <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                  {j.kind === "tlc" ? "TLC + Factor" : "Service call"} · {j.callId}
+                </p>
+                {/* A blank customer reads "Untitled Account" on phones only; sm and up keep the blank title they had. */}
+                <SheetTitle>
+                  {j.customer?.trim() ? j.customer : j.customer == null ? "Untitled Account" : <span className="sm:hidden">Untitled Account</span>}
+                </SheetTitle>
+                <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5 max-sm:mt-1">
+                  <UrgencyBadge urgency={j.urgency} />
+                  <StatusBadge status={j.status} />
+                  <FlagBadge flag={j.flag} />
+                  <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} />
+                </div>
+                {/* With tabs, the invoice is on the Invoicing tab. */}
+                {tabbed ? null : (
+                  <div className="mt-2">
+                    <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
                   </div>
-                ) : null}
-                <div className="sm:col-span-2">
-                  <BoundEquipment defaultValue={j.equipment ?? ""} recordKey={j.id} />
-                </div>
-                <div className="sm:col-span-2">
-                  <SerialPullField
-                    label="Serial number"
-                    value={pulledSerial}
-                    jobId={j.id}
-                    onValue={() => {}}
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Type a warehouse serial to pull that unit onto this ticket without opening Warehouse.
-                  </p>
-                  <div className="mt-3">
-                    <UnitPlaceField serial={pulledSerial} model={j.equipment} />
-                  </div>
-                </div>
-                <div className="sm:col-span-2">
-                  <Label htmlFor="issue">Issue</Label>
-                  <AutoGrowTextarea
-                    id="issue"
-                    name="issue"
-                    defaultValue={j.issue ?? ""}
-                    className="mt-1"
-                    placeholder="What’s going on…"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="urgency">Urgency</Label>
-                  <SelectField id="urgency" name="urgency" className="mt-1" defaultValue={j.urgency || "Normal"}>
-                    {URGENCIES.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </SelectField>
-                </div>
-                <div className="sm:col-span-2">
-                  <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Assignment</p>
-                </div>
-                <div>
-                  <Label>Technician</Label>
-                  <TechSelect name="technician" defaultValue={j.technician ?? ""} />
-                </div>
-                <div>
-                  <Label htmlFor="job-secondary-tech">Secondary Tech</Label>
-                  <TechSelect id="job-secondary-tech" name="secondaryTech" defaultValue={j.secondaryTech ?? ""} />
-                </div>
-                <div>
-                  <Label>Status</Label>
-                  <SelectField name="status" className="mt-1" defaultValue={j.status}>
-                    {CALL_STATUSES.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </SelectField>
-                </div>
-                <Field label="Scheduled" name="scheduled" type="date" defaultValue={j.scheduled ?? ""} />
-                <div>
-                  <Label>Type</Label>
-                  <SelectField name="callType" className="mt-1" defaultValue={j.callType ?? ""} allowEmpty>
-                    {CALL_TYPES.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </SelectField>
-                </div>
-                <Field label="WO #" name="wo" defaultValue={j.wo ?? ""} />
-                <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
-                <Field label="Contact" name="contact" defaultValue={j.contact ?? ""} />
-                <Field label="Phone" name="phone" defaultValue={j.phone ?? ""} />
-                <div className="sm:col-span-2">
-                  <Label htmlFor="workDone">Description of work</Label>
-                  <AutoGrowTextarea
-                    id="workDone"
-                    name="workDone"
-                    defaultValue={j.workDone ?? ""}
-                    className="mt-1"
-                    placeholder="What was done on site…"
-                  />
-                </div>
-                <Field
-                  label="Date completed"
-                  name="completedAt"
-                  type="date"
-                  defaultValue={j.completedAt ?? ""}
+                )}
+              </SheetHeader>
+              <SheetBody>
+                <SerialNoticeBanner notice={j.serialNotice} />
+                <DuplicateBanner
+                  job={j}
+                  pending={merge.isPending}
+                  onOpen={(nextId) => showTicket(nextId)}
+                  onMergeIntoThis={(extraId) => merge.mutate({ keeperId: j.id, extraId })}
+                  onMergeThisInto={(keeperId) => merge.mutate({ keeperId, extraId: j.id })}
                 />
-                <div className="sm:col-span-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea id="notes" name="notes" className="mt-1" defaultValue={j.notes ?? ""} />
+                {tabbed ? (
+                  <SheetTabs
+                    value={tab}
+                    onValueChange={pickTab}
+                    tabs={TICKET_TABS.map((t) => ({ ...t, count: tabCount(t.id) }))}
+                    label="Ticket sections"
+                    testId="ticket"
+                  >
+                    <Tabs.Content value="ticket" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-ticket">
+                      {form}
+                    </Tabs.Content>
+
+                    <Tabs.Content
+                      value="equipment"
+                      forceMount={keepEquipment || undefined}
+                      className={KEEP_MOUNTED}
+                      data-testid="ticket-panel-equipment"
+                    >
+                      <div className="border-b border-border p-5">
+                        <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
+                      </div>
+                      <section className="border-b border-border p-5" data-testid="ticket-pull-from-barn">
+                        <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pull From Barn</h3>
+                        <div className="mt-3">{pullBlock}</div>
+                      </section>
+                      <JobPulledUnits jobId={j.id} />
+                      <AccountModules customer={customer} />
+                    </Tabs.Content>
+
+                    <Tabs.Content value="invoicing" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-invoicing">
+                      <section className="border-b border-border p-5" data-testid="ticket-invoice">
+                        <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">Parts, labor, discount, total and billing info for this ticket.</p>
+                        <div className="mt-3">
+                          <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
+                        </div>
+                      </section>
+                      <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                      <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
+                    </Tabs.Content>
+
+                    <Tabs.Content value="schedules" className="p-5 outline-none" data-testid="ticket-panel-schedules">
+                      <section data-testid="ticket-schedules">
+                        <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pending TLC, Factor & PMs</h2>
+                        {directory.isLoading || history.isLoading ? (
+                          <Skeleton className="mt-2 h-24 w-full" />
+                        ) : accountId == null ? (
+                          <p className="mt-2 text-sm text-muted-foreground">{customer} is not on the customer list, so its schedules can’t be shown.</p>
+                        ) : schedules.length ? (
+                          <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
+                            {schedules.map((it) => (
+                              <HistoryRow
+                                key={`schedule-${it.key}`}
+                                item={it}
+                                onOpen={() => (it.kind === "pm" ? setPmPick({ forId: activeId, pmId: it.id }) : openTicket(it.id))}
+                              />
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-2 text-sm text-muted-foreground">No open TLCs, Factor visits or PMs on this account.</p>
+                        )}
+                        <p className="mt-3 text-xs text-muted-foreground">
+                          A TLC or Factor visit opens in this window; a PM opens on top.
+                        </p>
+                      </section>
+                    </Tabs.Content>
+
+                    <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-ping">
+                      <Thread entityType={j.kind} entityId={j.id} />
+                    </Tabs.Content>
+                  </SheetTabs>
+                ) : (
+                  <>
+                    {form}
+                    <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                    <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
+                    <JobPulledUnits jobId={j.id} />
+                    <Thread entityType={j.kind} entityId={j.id} />
+                  </>
+                )}
+              </SheetBody>
+            </>
+          ) : (
+            <div className="p-8 text-sm text-muted-foreground">Loading…</div>
+          )}
+        </SheetContent>
+      </Sheet>
+      <PmSheet pm={openPm} onClose={() => setPmPick(null)} />
+    </>
+  );
+}
+
+/** Eversys modules on the account; each opens its trail, swaps and work log (the module record from Modules). */
+function AccountModules({ customer }: { customer: string }) {
+  const modules = useQuery({ queryKey: ["modules"], queryFn: () => listModules() });
+  const [openId, setOpenId] = useState<number | null>(null);
+  const key = customer.trim().toLowerCase();
+  const rows = (modules.data ?? []).filter((m) => moduleAccount(m)?.toLowerCase() === key);
+  return (
+    <section className="p-5" data-testid="ticket-asset-history">
+      <p className="flex items-center gap-2 px-1">
+        <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Asset History</span>
+        <span className="text-sm font-medium" data-testid="ticket-module-count">
+          {modules.isLoading ? "…" : `${rows.length} module${rows.length === 1 ? "" : "s"}`}
+        </span>
+      </p>
+      {modules.isLoading ? (
+        <p className="mt-2 text-sm text-muted-foreground">Loading modules…</p>
+      ) : rows.length ? (
+        <ul className="mt-2 space-y-2">
+          {rows.map((m) => (
+            <li key={m.id} className="overflow-hidden rounded-xl border border-border">
+              <button
+                type="button"
+                onClick={() => setOpenId((cur) => (cur === m.id ? null : m.id))}
+                aria-expanded={openId === m.id}
+                className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left hover:bg-muted/60"
+                data-testid="ticket-module-row"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate font-medium">{m.moduleId}</span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {[m.platform, m.moduleType, m.assignedUnitLabel].filter(Boolean).join(" · ") || m.status}
+                  </span>
+                </span>
+                <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", openId === m.id && "rotate-180")} />
+              </button>
+              {openId === m.id ? (
+                <div className="border-t border-border [&>section]:border-b-0">
+                  <ModuleRecord row={m} />
                 </div>
-                <div className="flex items-center justify-between sm:col-span-2">
-                  <p className="text-xs text-muted-foreground">
-                    Received {formatLongDate(j.received)}
-                    {j.ageDays != null ? ` · ${j.ageDays}d open` : ""}
-                  </p>
-                  <Button type="submit" size="sm" disabled={save.isPending}>
-                    Save
-                  </Button>
-                </div>
-              </form>
-              <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
-              <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
-              <JobPulledUnits jobId={j.id} />
-              <Thread entityType={j.kind} entityId={j.id} />
-            </SheetBody>
-          </>
-        ) : (
-          <div className="p-8 text-sm text-muted-foreground">Loading…</div>
-        )}
-      </SheetContent>
-    </Sheet>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">No modules on this account. Units pulled onto this ticket show above.</p>
+      )}
+    </section>
   );
 }
 

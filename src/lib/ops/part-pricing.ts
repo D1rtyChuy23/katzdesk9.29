@@ -8,7 +8,8 @@ import { cleanRate, itemFullName, kindFromClass, normalizePartNo, round2, splitI
 /** One MPN = one part: case, spaces and dashes never make a second one. */
 export const mpnKey = (raw: string | null | undefined): string => normalizePartNo(raw);
 
-function headerKey(raw: unknown): string {
+/** A header cell as a lookup key: lower case, anything but letters, digits and # becomes a space. */
+export function headerKey(raw: unknown): string {
   return String(raw ?? "")
     .toLowerCase()
     .replace(/[^a-z0-9#]+/g, " ")
@@ -28,13 +29,13 @@ function findHeader<F extends string>(matrix: unknown[][], names: Record<string,
   return null;
 }
 
-const blankRow = (r: unknown[]) => r.every((c) => !String(c ?? "").trim());
+export const blankRow = (r: unknown[]) => r.every((c) => !String(c ?? "").trim());
 
 // ------------------------------------------------------------------------------------------ parts import
 
-type PartField = "mpn" | "name" | "description" | "displayName" | "rate" | "cost" | "parent" | "class" | "inactive";
+export type PartField = "mpn" | "name" | "description" | "displayName" | "rate" | "cost" | "parent" | "class" | "inactive";
 
-const PART_HEADERS: Record<string, PartField> = {
+export const PART_HEADERS: Record<string, PartField> = {
   mpn: "mpn",
   "mfr part": "mpn",
   "mfr part number": "mpn",

@@ -3,6 +3,7 @@
  * Anyone with Desk access can add or replace a photo; only Admin and Sales change an MPN.
  * Hide is reversible and is not the `active` flag: the item import writes `active` and would undo a hide.
  * Remove is Admin only, and only when the part has never been on a charge or a quote.
+ * The bin location (Rack, Shelf, Bin) is a part edit too: Admin and Sales.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -11,6 +12,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
 import { PART_CLASSES } from "@/lib/ops/part-pricing";
+import { BIN_LABEL, BIN_MAX, BIN_PIECES, cleanBinValue } from "@/lib/ops/part-bins";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
 import type { ChargeKind } from "@/lib/ops/charges";
 
@@ -30,6 +32,9 @@ async function powers(sql: Sql, userId: string): Promise<{ canHide: boolean; can
   const canHide = admin || role === "sales";
   return { canHide, canRemove: admin, canEditMpn: canHide, name: rows[0]?.username?.trim() || "Desk" };
 }
+
+/** Who may do what on Parts (the Bin Locations import uses it). canEditMpn covers every part edit: MPN, part name, bin. */
+export const partPowers = powers;
 
 export type PartRow = {
   id: number;
@@ -58,6 +63,12 @@ export type PartRow = {
   photoConfirmedBy: string | null;
   /** Photo research for this part number, when it has been researched. */
   research: PhotoResearch | null;
+  /** Where the part sits in the stockroom; null pieces are not set. */
+  binRack: string | null;
+  binShelf: string | null;
+  binBin: string | null;
+  binUpdatedAt: string | null;
+  binUpdatedBy: string | null;
 };
 
 export type PhotoCandidate = { imageUrl: string; pageUrl: string | null; site: string | null; mpnShown: string | null; watermark?: boolean | null };
@@ -87,13 +98,18 @@ type Raw = {
   r_reason: string | null;
   r_image: string | null;
   r_candidates: unknown;
+  bin_rack: string | null;
+  bin_shelf: string | null;
+  bin_bin: string | null;
+  bin_updated_at: string | Date | null;
+  bin_updated_by: string | null;
 };
 
 const COLS = `id, sku, item, description, mfr_part, rate, list_price, kind,
   (image is not null) as has_image,
   case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
   hidden_at, hidden_by, hidden_reason, item_class, get_later, get_later_by, photo_status, photo_source_url, photo_confirmed_by,
-  r_verdict, r_reason, r_image, r_candidates`;
+  r_verdict, r_reason, r_image, r_candidates, bin_rack, bin_shelf, bin_bin, bin_updated_at, bin_updated_by`;
 
 /** The part's photo research, found by its part number (MPN, else SKU) with case, spaces and punctuation removed. */
 const FROM = `billing_items
@@ -143,6 +159,11 @@ const toRow = (r: Raw): PartRow => ({
     r.r_verdict === "confirmed" || r.r_verdict === "review"
       ? { verdict: r.r_verdict, reason: r.r_reason, imageUrl: r.r_image, candidates: candidatesOf(r.r_candidates) }
       : null,
+  binRack: r.bin_rack,
+  binShelf: r.bin_shelf,
+  binBin: r.bin_bin,
+  binUpdatedAt: whenHidden(r.bin_updated_at),
+  binUpdatedBy: r.bin_updated_by,
 });
 
 export type PartsPage = {
@@ -224,11 +245,58 @@ export const listParts = createServerFn({ method: "POST" })
     };
   });
 
-async function loadPart(sql: Sql, id: number): Promise<PartRow> {
+async function findPart(sql: Sql, id: number): Promise<PartRow | null> {
   const r = (await sql.query<Raw>(`select ${COLS} from ${FROM} where id = $1`, [id]))[0];
-  if (!r) throw new Error("That part is no longer on the list.");
-  return toRow(r);
+  return r ? toRow(r) : null;
 }
+
+async function loadPart(sql: Sql, id: number): Promise<PartRow> {
+  const part = await findPart(sql, id);
+  if (!part) throw new Error("That part is no longer on the list.");
+  return part;
+}
+
+const partIdInput = z.object({ id: z.number().int().positive() });
+
+/** One part for its window on Parts (also a hidden one, so a link to it still opens). Null when it is gone. */
+export const getPart = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof partIdInput>) => partIdInput.parse(d))
+  .handler(async ({ data }): Promise<PartRow | null> => findPart(await ready(), data.id));
+
+const binInput = z.object({
+  id: z.number().int().positive(),
+  rack: z.string().max(200).nullable(),
+  shelf: z.string().max(200).nullable(),
+  bin: z.string().max(200).nullable(),
+});
+
+/**
+ * The part's bin location: Rack, Shelf and Bin, each trimmed; blank clears that piece. Admin and Sales, like the
+ * other part edits. Who changed it and when is kept with it (only when something actually changed).
+ */
+export const setPartBin = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof binInput>) => binInput.parse(d))
+  .handler(async ({ data, context }): Promise<PartRow> => {
+    const sql = await ready();
+    const who = await powers(sql, context.userId);
+    if (!who.canEditMpn) throw new Error("Only Admin and Sales can change a part's bin location.");
+    const next = { rack: cleanBinValue(data.rack), shelf: cleanBinValue(data.shelf), bin: cleanBinValue(data.bin) };
+    for (const k of BIN_PIECES) {
+      if ((next[k]?.length ?? 0) > BIN_MAX) throw new Error(`${BIN_LABEL[k]} can be up to ${BIN_MAX} characters.`);
+    }
+    const rows = await sql.query(
+      `update billing_items set
+          bin_updated_at = case when (bin_rack, bin_shelf, bin_bin) is distinct from ($2::text, $3::text, $4::text) then now() else bin_updated_at end,
+          bin_updated_by = case when (bin_rack, bin_shelf, bin_bin) is distinct from ($2::text, $3::text, $4::text) then $5 else bin_updated_by end,
+          bin_rack = $2, bin_shelf = $3, bin_bin = $4, updated_at = now()
+        where id = $1 returning id`,
+      [data.id, next.rack, next.shelf, next.bin, who.name],
+    );
+    if (!rows.length) throw new Error("That part is no longer on the list.");
+    return loadPart(sql, data.id);
+  });
 
 /** Add or replace the photo. The same photo shows on the invoice picker and on the invoice line. */
 export const setPartImage = createServerFn({ method: "POST" })

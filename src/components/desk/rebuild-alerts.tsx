@@ -23,7 +23,9 @@ export function RebuildAlerts({ rows }: { rows: FlaggedRow[] }) {
         {rows.slice(0, 8).map((r) => (
           <li key={r.id} className="py-2">
             <div className="flex items-start justify-between gap-2">
-              <OpenLink entityType="rebuild" id={r.id} className="min-w-0 font-medium hover:underline">
+              {/* Phones: a taller tap target that grows up into the row's padding (and into the gap above the line under
+                  it), so nothing moves and it never covers that line. */}
+              <OpenLink entityType="rebuild" id={r.id} className="min-w-0 font-medium hover:underline max-sm:-mt-2 max-sm:-mb-0.5 max-sm:pt-2 max-sm:pb-0.5">
                 {r.detail || r.customer}
               </OpenLink>
               <Badge variant={r.flag.level === "danger" ? "danger" : "warn"}>{r.flag.label}</Badge>

@@ -103,7 +103,7 @@ export function Thread({
                 {c.canClaim ? (
                   <button
                     type="button"
-                    className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                    className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground max-sm:h-10"
                     disabled={claim.isPending}
                     onClick={() => claim.mutate(c.id)}
                   >
@@ -113,7 +113,7 @@ export function Thread({
                 {c.askTeam && !c.resolved ? (
                   <button
                     type="button"
-                    className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                    className="text-xs text-muted-foreground underline-offset-2 hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:px-2"
                     onClick={() => resolve.mutate(c.id)}
                   >
                     Mark answered
@@ -145,7 +145,7 @@ export function Thread({
                 key={v || "none"}
                 type="button"
                 onClick={() => setAsk(v)}
-                className={`h-8 rounded-full px-3 text-xs font-medium ${
+                className={`h-8 rounded-full px-3 text-xs font-medium max-sm:h-10 ${
                   ask === v ? "bg-ink text-ink-foreground" : "bg-muted text-foreground"
                 }`}
               >
@@ -161,7 +161,7 @@ export function Thread({
               contextLabel={`Follow up on this ${entityType}`}
               defaultNote={body}
             />
-            <Button type="submit" size="sm" disabled={add.isPending || !body.trim()}>
+            <Button type="submit" size="sm" className="max-sm:h-10" disabled={add.isPending || !body.trim()}>
               Post
             </Button>
           </div>

@@ -288,7 +288,7 @@ function PreviewBody({
 
   return (
     <div className="mt-4" data-equip-import="preview">
-      <ul className="grid gap-2 text-sm sm:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
           <span className="font-medium">{selectedAdds}</span> selected to add
         </li>
@@ -315,7 +315,7 @@ function PreviewBody({
             key={id}
             type="button"
             onClick={() => setFilter(id)}
-            className={`rounded-full px-3 py-1 text-xs ${
+            className={`rounded-full px-3 py-1 text-xs max-sm:py-3 ${
               filter === id ? "bg-ink text-ink-foreground" : "bg-muted text-muted-foreground"
             }`}
           >
@@ -326,14 +326,15 @@ function PreviewBody({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search rows…"
-          className="h-9 min-w-[12rem] flex-1 rounded-md border border-input bg-background px-3 text-sm"
+          className="h-9 min-w-[12rem] flex-1 rounded-md border border-input bg-background px-3 text-sm max-sm:h-10 max-sm:basis-full"
           aria-label="Search import rows"
         />
       </div>
 
+      {/* Phones: each row is a card (account, then status and catalog model); the wide table from sm up. */}
       <div className="mt-3 overflow-x-auto rounded-xl border border-border">
-        <table className="w-full min-w-[72rem] text-left text-sm">
-          <thead className="sticky top-0 bg-card text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        <table className="w-full text-left text-sm max-sm:block sm:min-w-[72rem]">
+          <thead className="sticky top-0 bg-card text-[11px] font-medium tracking-wide text-muted-foreground uppercase max-sm:hidden">
             <tr>
               <th className="w-10 px-3 py-2">
                 <input
@@ -354,7 +355,7 @@ function PreviewBody({
               <th className="px-3 py-2">Status</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="max-sm:block">
             {pageRows.map((r) => {
               const d = drafts[r.key] ?? draftFor(r);
               const ready = rowReady(r, d);
@@ -364,9 +365,9 @@ function PreviewBody({
                 <tr
                   key={r.key}
                   data-equip-status={needsReview ? "review" : r.action === "update" ? "update" : "matched"}
-                  className={`border-t border-border ${needsReview ? "bg-warning/10" : ""}`}
+                  className={`border-t border-border max-sm:grid max-sm:grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)] max-sm:gap-x-2 max-sm:gap-y-2 max-sm:p-3 max-sm:first:border-t-0 ${needsReview ? "bg-warning/10" : ""}`}
                 >
-                  <td className="px-3 py-2 align-top">
+                  <td className="px-3 py-2 align-top max-sm:row-span-6 max-sm:p-0">
                     <input
                       type="checkbox"
                       className="mt-1 size-4 accent-primary"
@@ -379,9 +380,10 @@ function PreviewBody({
                       }}
                     />
                   </td>
-                  <td className="min-w-[16rem] px-3 py-2 align-top">
+                  <td className="px-3 py-2 align-top max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0 sm:min-w-[16rem]">
                     {showPickers ? (
                       <>
+                        <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Account</span>
                         <ComboField
                           value={d.customer}
                           onChange={(customer) => {
@@ -396,6 +398,12 @@ function PreviewBody({
                           emptyHint="No account matches. Do not create one from this file."
                           menuInFlow
                         />
+                        {/* Phones: the field cuts a long name off, so the picked account is also spelled out in full. */}
+                        {d.customer ? (
+                          <span className="mt-1 block text-xs font-medium break-words text-foreground sm:hidden" data-testid="equip-import-account">
+                            KatzDesk account: {d.customer}
+                          </span>
+                        ) : null}
                         <span className="mt-0.5 block text-[11px] text-muted-foreground">
                           File: {r.fileCustomer || "—"}
                         </span>
@@ -403,14 +411,15 @@ function PreviewBody({
                     ) : (
                       <button
                         type="button"
-                        className="text-left font-medium hover:underline"
+                        className="text-left font-medium hover:underline max-sm:min-h-10 max-sm:w-full"
                         onClick={() => setEditing((cur) => ({ ...cur, [r.key]: true }))}
                       >
                         {d.customer || "—"}
                       </button>
                     )}
                   </td>
-                  <td className="min-w-[16rem] px-3 py-2 align-top">
+                  <td className="px-3 py-2 align-top max-sm:order-2 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0 sm:min-w-[16rem]">
+                    <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Catalog model</span>
                     {showPickers ? (
                       <>
                         <ComboField
@@ -442,19 +451,27 @@ function PreviewBody({
                     ) : (
                       <button
                         type="button"
-                        className="text-left hover:underline"
+                        className="text-left hover:underline max-sm:min-h-10 max-sm:w-full"
                         onClick={() => setEditing((cur) => ({ ...cur, [r.key]: true }))}
                       >
                         {d.catalogModel || "—"}
                       </button>
                     )}
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="px-3 py-2 align-top max-sm:order-2 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0 max-sm:break-words">
+                    <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Equipment Name</span>
                     <span className="font-medium">{r.equipmentName || "—"}</span>
                   </td>
-                  <td className="px-3 py-2 align-top whitespace-nowrap">{r.serial || "—"}</td>
-                  <td className="px-3 py-2 align-top whitespace-nowrap">{r.installDate || "—"}</td>
-                  <td className="min-w-[12rem] px-3 py-2 align-top">
+                  <td className="px-3 py-2 align-top whitespace-nowrap max-sm:order-2 max-sm:col-start-2 max-sm:p-0 max-sm:whitespace-normal max-sm:break-words">
+                    <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Serial</span>
+                    {r.serial || "—"}
+                  </td>
+                  <td className="px-3 py-2 align-top whitespace-nowrap max-sm:order-2 max-sm:col-start-3 max-sm:p-0">
+                    <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Install date</span>
+                    {r.installDate || "—"}
+                  </td>
+                  <td className="px-3 py-2 align-top max-sm:order-2 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0 sm:min-w-[12rem]">
+                    <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Ownership</span>
                     {showPickers ? (
                       <SelectField
                         allowEmpty
@@ -476,7 +493,7 @@ function PreviewBody({
                       <span className="mt-0.5 block text-[11px] text-muted-foreground">File: {r.ownershipRaw}</span>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="px-3 py-2 align-top max-sm:order-1 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0">
                     <span className="block text-[11px] font-medium tracking-wide uppercase">
                       {needsReview ? "Needs review" : r.action === "update" ? "Update existing" : "Matched"}
                     </span>
@@ -493,8 +510,8 @@ function PreviewBody({
               );
             })}
             {visible.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-3 py-6 text-muted-foreground">
+              <tr className="max-sm:block">
+                <td colSpan={8} className="px-3 py-6 text-muted-foreground max-sm:block">
                   Nothing in this filter.
                 </td>
               </tr>
@@ -525,7 +542,7 @@ function PreviewBody({
         </div>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-2 max-sm:sticky max-sm:-bottom-5 max-sm:z-10 max-sm:-mx-5 max-sm:-mb-5 max-sm:border-t max-sm:border-border max-sm:bg-card max-sm:px-5 max-sm:py-3">
         {blocked.length ? (
           <p className="mr-auto max-w-md text-xs text-warning">
             {blocked.length} selected row{blocked.length === 1 ? "" : "s"} still need an account and catalog

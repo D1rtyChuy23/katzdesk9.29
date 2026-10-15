@@ -378,35 +378,41 @@ export function InstallSheet({
       <SheetContent className="sm:max-w-4xl">
         {row ? (
           <>
-            <SheetHeader>
+            {/* Phones: only the label and the name stay pinned; the badges, address, Invoice and the Tech Request
+                Form row scroll with the window. From sm up the wrapper is display: contents, so this is the usual
+                header (label, name, then the rest under one border) over the scrolling body. */}
+            <SheetHeader className="max-sm:py-3 sm:border-b-0 sm:pb-0">
               <p className="text-xs tracking-wide text-muted-foreground uppercase">Install</p>
-              <SheetTitle>{row.customer}</SheetTitle>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                <InspectionBadge
-                  overall={row.inspection?.overall}
-                  passed={row.inspection?.passedCount}
-                  total={row.inspection?.machineCount}
-                />
-                <StatusBadge tight status={row.equipStatus} />
-                <FlagBadge flag={row.flag} />
-                {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
-              </div>
-              <CustomerAddress customer={row.customer} className="mt-2" />
-              <div className="mt-2">
-                <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} />
-              </div>
-              <label className="mt-3 flex w-fit items-center gap-2 text-sm font-medium" data-testid="trf-check-window">
-                <input
-                  type="checkbox"
-                  className="size-4 accent-primary"
-                  checked={row.trfIssued}
-                  disabled={save.isPending}
-                  onChange={(e) => save.mutate({ id: row.id, trfIssued: e.target.checked })}
-                />
-                Tech Request Form issued
-              </label>
+              <SheetTitle className="max-sm:text-lg">{row.customer}</SheetTitle>
             </SheetHeader>
-            <SheetBody>
+            <div className="flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-contain sm:contents">
+              <div className="shrink-0 border-b border-border px-5 pb-4 max-sm:pt-2 sm:pr-12">
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <InspectionBadge
+                    overall={row.inspection?.overall}
+                    passed={row.inspection?.passedCount}
+                    total={row.inspection?.machineCount}
+                  />
+                  <StatusBadge tight status={row.equipStatus} />
+                  <FlagBadge flag={row.flag} />
+                  {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
+                </div>
+                <CustomerAddress customer={row.customer} className="mt-2" />
+                <div className="mt-2">
+                  <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} />
+                </div>
+                <label className="mt-3 flex w-fit items-center gap-2 text-sm font-medium" data-testid="trf-check-window">
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary"
+                    checked={row.trfIssued}
+                    disabled={save.isPending}
+                    onChange={(e) => save.mutate({ id: row.id, trfIssued: e.target.checked })}
+                  />
+                  Tech Request Form issued
+                </label>
+              </div>
+            <SheetBody className="max-sm:flex-none max-sm:overflow-visible">
             <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
             <PreInspectionPanel installId={row.id} />
             <SerialNoticeBanner notice={row.serialNotice} />
@@ -572,6 +578,7 @@ export function InstallSheet({
             </form>
             <Thread entityType="install" entityId={row.id} />
             </SheetBody>
+            </div>
           </>
         ) : null}
       </SheetContent>

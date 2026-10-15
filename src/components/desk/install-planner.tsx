@@ -188,9 +188,10 @@ export function InstallPlanner({
         <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" className="w-36" />
       </div>
 
+      {/* Phones: one full-width card per project (names in full); the row's Date and a "this week" note stand in for the day bars. */}
       <div className="mt-4 overflow-x-auto">
-        <div className="min-w-[40rem]">
-          <div className="grid grid-cols-[minmax(10rem,1.4fr)_repeat(7,minmax(2.4rem,1fr))] gap-1 text-[10px] tracking-wide text-muted-foreground uppercase">
+        <div className="sm:min-w-[40rem]">
+          <div className="grid grid-cols-[minmax(10rem,1.4fr)_repeat(7,minmax(2.4rem,1fr))] gap-1 text-[10px] tracking-wide text-muted-foreground uppercase max-sm:hidden">
             <span>Project</span>
             {days.map((d, i) => (
               <span key={d} className={cn("text-center", d === today && "font-semibold text-foreground")}>
@@ -198,7 +199,7 @@ export function InstallPlanner({
               </span>
             ))}
           </div>
-          <ul className="mt-1 space-y-1">
+          <ul className="mt-1 space-y-1 max-sm:space-y-2">
             {rows.map((i) => {
               const hit = i.installDate && i.installDate >= week.start && i.installDate <= week.end;
               const col = hit && i.installDate ? days.indexOf(i.installDate) : -1;
@@ -209,18 +210,19 @@ export function InstallPlanner({
                 <li
                   key={i.id}
                   className={cn(
-                    "grid grid-cols-[minmax(10rem,1.4fr)_repeat(7,minmax(2.4rem,1fr))] items-stretch gap-1 rounded-md border border-transparent px-0.5 py-0.5",
+                    "grid grid-cols-[minmax(10rem,1.4fr)_repeat(7,minmax(2.4rem,1fr))] items-stretch gap-1 rounded-md border border-transparent px-0.5 py-0.5 max-sm:grid-cols-1 max-sm:px-2.5 max-sm:py-1.5",
+                    !clash && "max-sm:border-border/70",
                     clash === "day" && "border-destructive/40 bg-destructive/6",
                     clash === "week" && "border-warning/40 bg-warning/8",
                   )}
                 >
-                  <div className="min-w-0 py-1 pr-2">
-                    <OpenLink entityType="install" id={i.id} className="flex min-w-0 items-center gap-1.5 hover:underline">
-                      <span className="truncate font-medium">{i.customer}</span>
+                  <div className="min-w-0 py-1 pr-2 max-sm:pr-0">
+                    <OpenLink entityType="install" id={i.id} className="flex min-w-0 items-center gap-1.5 hover:underline max-sm:min-h-10">
+                      <span className="truncate font-medium max-sm:break-words max-sm:whitespace-normal">{i.customer}</span>
                       <AkBadge on={i.aviKatz} />
                     </OpenLink>
-                    <p className="truncate text-[11px] text-muted-foreground">{models}</p>
-                    {cfg ? <p className="truncate text-[11px] text-muted-foreground">{cfg}</p> : null}
+                    <p className="truncate text-[11px] text-muted-foreground max-sm:break-words max-sm:whitespace-normal">{models}</p>
+                    {cfg ? <p className="truncate text-[11px] text-muted-foreground max-sm:break-words max-sm:whitespace-normal">{cfg}</p> : null}
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                       <StatusBadge tight status={i.equipStatus === "Ready" ? "Ready" : "Not Ready"} />
                       <InspectionBadge
@@ -231,21 +233,27 @@ export function InstallPlanner({
                       <RepName name={i.accountRep} />
                       <NoRepFlag show={i.noRep} />
                     </div>
-                    <label className="mt-1 block text-[11px] text-muted-foreground">
+                    <label className="mt-1 block text-[11px] text-muted-foreground max-sm:mt-2 max-sm:flex max-sm:flex-wrap max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-1">
                       Date
                       <input
                         type="date"
-                        className="ml-1 rounded border border-input bg-card px-1 py-0.5 text-xs text-foreground"
+                        className="ml-1 rounded border border-input bg-card px-1 py-0.5 text-xs text-foreground max-sm:ml-0 max-sm:h-10 max-sm:px-2 max-sm:text-sm"
                         value={i.installDate ?? ""}
                         onChange={(e) => saveDate.mutate({ id: i.id, installDate: e.target.value || null })}
                       />
+                      {col >= 0 ? (
+                        <span className={cn("sm:hidden", clash ? "font-medium text-foreground" : "")}>
+                          This week · {WEEKDAYS[col]}
+                          {clash === "day" ? " · another install that day" : clash === "week" ? " · tech has another this week" : ""}
+                        </span>
+                      ) : null}
                     </label>
                   </div>
                   {days.map((d, idx) => (
                     <div
                       key={d}
                       className={cn(
-                        "relative min-h-10 rounded-sm bg-secondary/50",
+                        "relative min-h-10 rounded-sm bg-secondary/50 max-sm:hidden",
                         d === today && "ring-1 ring-primary/40",
                       )}
                     >
