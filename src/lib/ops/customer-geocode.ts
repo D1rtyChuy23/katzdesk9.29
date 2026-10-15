@@ -13,6 +13,11 @@ export type GeoRow = {
   name: string;
   /** Shipping address as it is in the file, for the review list. */
   address: string;
+  /**
+   * The address reads cleanly enough to type onto an account: no number in the city and, when there is a ZIP, 5 or 5+4
+   * digits. Rows that fail are never used by Fill Blank Addresses.
+   */
+  addressFillable: boolean;
   /** Census result as written in the file: Match, Match (suite removed), Tie, No_Match, No address. */
   result: string;
   matchType: string;
@@ -30,6 +35,8 @@ export type GeoAccount = {
   longitude?: number | null;
   /** The saved pin's type (geocode_match), so a re-import can correct it even when the point is the same. */
   quality?: GeoQuality | null;
+  /** The account's own typed address; blank ones can be filled from the file when the import is asked to. */
+  address?: string | null;
 };
 
 export type GeoQuality = "exact" | "close" | "approx";
@@ -67,7 +74,21 @@ export type GeoPlanLine = {
   /** On the review list: no location, no account, a conflict, or only a close match. */
   review: boolean;
   reviewReason: string;
+  /**
+   * The account has no typed address and this row has a clean one, so "Fill Blank Addresses" would write it.
+   * Only for rows whose street the geocoder found (exact or close) and that match exactly one account (Will Save,
+   * Already Saved); never from a ZIP-area or No Location row and never over a typed address.
+   */
+  fillsAddress: boolean;
 };
+
+/**
+ * No typed address: empty, or only the whitespace that JS `trim()` removes (how the Customers list decides whether to
+ * show a street). Written so JS and Postgres regexes read it the same way; the save statement re-checks with it.
+ */
+export const BLANK_ADDRESS_PATTERN = "^[\\s\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]*$";
+const BLANK_ADDRESS = new RegExp(BLANK_ADDRESS_PATTERN);
+export const isBlankAddress = (v: string | null | undefined): boolean => BLANK_ADDRESS.test(v ?? "");
 
 const num = (v: unknown): number | null => {
   const s = String(v ?? "").trim();
@@ -118,18 +139,22 @@ export function geoRowsFromMatrix(matrix: unknown[][]): GeoRow[] {
   if (c.name < 0) throw new Error("The file needs a Name column.");
   if (c.result < 0) throw new Error("The file needs a Geocode Match column.");
   const cell = (r: unknown[], i: number) => (i < 0 ? "" : String(r[i] ?? "").replace(/\s+/g, " ").trim());
+  // Address parts lose a comma typed at either end ("17455 N Outer 40 Rd,"), so joining them never doubles it.
+  const part = (r: unknown[], i: number) => cell(r, i).replace(/^[\s,]+|[\s,]+$/g, "");
   const out: GeoRow[] = [];
   matrix.slice(headerAt + 1).forEach((r, i) => {
     const name = cell(r, c.name);
     if (!name && !cell(r, c.account) && !cell(r, c.internalId)) return;
-    const street = [cell(r, c.addr1), cell(r, c.addr2)].filter(Boolean).join(" ");
-    const stateZip = [cell(r, c.state), cell(r, c.zip)].filter(Boolean).join(" ");
+    const [city, zip] = [part(r, c.city), part(r, c.zip)];
+    const street = [part(r, c.addr1), part(r, c.addr2)].filter(Boolean).join(" ");
+    const stateZip = [part(r, c.state), zip].filter(Boolean).join(" ");
     out.push({
       line: headerAt + i + 2,
       account: cell(r, c.account),
       internalId: cell(r, c.internalId),
       name,
-      address: [street, cell(r, c.city), stateZip].filter(Boolean).join(", "),
+      address: [street, city, stateZip].filter(Boolean).join(", "),
+      addressFillable: !/\d/.test(city) && (!zip || /^\d{5}(-\d{4})?$/.test(zip)),
       result: cell(r, c.result),
       matchType: cell(r, c.matchType),
       matchedAddress: cell(r, c.matchedAddress),
@@ -217,39 +242,50 @@ export function planGeocodes(rows: GeoRow[], accounts: GeoAccount[]): GeoPlanLin
           : "";
     if (!acct) {
       const reason = ambiguous ? "More than one KatzDesk account has a name like this" : "No KatzDesk account with this account number, Internal ID or name";
-      return { ...base, status: "unmatched" as const, reason, review: true, reviewReason: located ? reason : `${reason}. ${noLocationReason(r)}` };
+      return { ...base, status: "unmatched" as const, reason, review: true, reviewReason: located ? reason : `${reason}. ${noLocationReason(r)}`, fillsAddress: false };
     }
     const top = best.get(acct.id)!;
     if (by && RANK[by] < top.rank) {
       const reason = `Another row in the file is a surer match for “${acct.name}”; this row looks like a duplicate`;
-      return { ...base, status: "unmatched" as const, reason, review: true, reviewReason: reason };
+      return { ...base, status: "unmatched" as const, reason, review: true, reviewReason: reason, fillsAddress: false };
     }
     if (top.count > 1) {
       const reason = "This KatzDesk account is on more than one row in the file";
-      return { ...base, status: "conflict" as const, reason, review: true, reviewReason: reason };
+      return { ...base, status: "conflict" as const, reason, review: true, reviewReason: reason, fillsAddress: false };
     }
     if (!located) {
+      // Never fills an address: what the geocoder could not place is often not an address at all (a phone number).
       const reason = noLocationReason(r);
-      return { ...base, status: "no_location" as const, reason, review: true, reviewReason: reason };
+      return { ...base, status: "no_location" as const, reason, review: true, reviewReason: reason, fillsAddress: false };
     }
+    // A blank typed address is filled only from a placed row whose address reads cleanly; a garbled one is listed.
+    // Only a street the geocoder found (exact or close) fills a blank address; a ZIP-area row's street could not be
+    // found and often holds notes or a PO box, so those accounts stay blank for the Address Report.
+    const canFill = isBlankAddress(acct.address) && !isBlankAddress(r.address) && quality !== "approx";
+    const fillsAddress = canFill && r.addressFillable;
+    const garbled = canFill && !r.addressFillable ? "The shipping address looks garbled (a number in the city, or a ZIP that is not 5 digits), so Fill Blank Addresses skips it; fix it in NetSuite" : "";
+    const review = quality !== "exact" || !!garbled;
+    const reviewReason = [closeNote, garbled].filter(Boolean).join(". ");
     const samePlace = samePoint(acct.latitude, base.latitude) && samePoint(acct.longitude, base.longitude);
     // Same point and same pin type: nothing to do. Same point but a different type (e.g. a ZIP-area pin that an older
     // import saved as a close match) is saved again so directions stop using it.
     if (samePlace && (acct.quality === undefined || acct.quality === quality)) {
-      return { ...base, status: "same" as const, reason: "Already saved; nothing changes", review: quality !== "exact", reviewReason: closeNote };
+      return { ...base, status: "same" as const, reason: "Already saved; nothing changes", review, reviewReason, fillsAddress };
     }
     const reason = samePlace ? "Will correct the pin type" : acct.latitude != null ? "Will replace the saved location" : "Will be saved";
-    return { ...base, status: "save" as const, reason, review: quality !== "exact", reviewReason: closeNote };
+    return { ...base, status: "save" as const, reason, review, reviewReason, fillsAddress };
   });
 }
 
-export type GeoCounts = Record<GeoStatus, number> & { review: number };
+/** `addresses`: accounts with no typed address that this file would fill (see GeoPlanLine.fillsAddress). */
+export type GeoCounts = Record<GeoStatus, number> & { review: number; addresses: number };
 
 export function countGeocodes(lines: GeoPlanLine[]): GeoCounts {
-  const c: GeoCounts = { save: 0, same: 0, no_location: 0, unmatched: 0, conflict: 0, review: 0 };
+  const c: GeoCounts = { save: 0, same: 0, no_location: 0, unmatched: 0, conflict: 0, review: 0, addresses: 0 };
   for (const l of lines) {
     c[l.status] += 1;
     if (l.review) c.review += 1;
+    if (l.fillsAddress) c.addresses += 1;
   }
   return c;
 }

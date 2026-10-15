@@ -58,6 +58,14 @@ function downloadReviewList(lines: GeoPlanLine[], filename: string) {
  * Admin-only load of map locations from the Census-geocoded customer list. Shows what will save, what has no
  * location, and what needs a person first; nothing is saved until Save is pressed. The review list downloads as a CSV.
  */
+/** "Save 12 Locations", "Save 2,000 Addresses", or both. */
+function saveLabel(locations: number, addresses: number): string {
+  const n = (v: number, one: string, many: string) => `${v.toLocaleString()} ${v === 1 ? one : many}`;
+  if (locations && addresses) return `Save ${n(locations, "Location", "Locations")} And ${n(addresses, "Address", "Addresses")}`;
+  if (addresses) return `Save ${n(addresses, "Address", "Addresses")}`;
+  return `Save ${n(locations, "Location", "Locations")}`;
+}
+
 export function GeocodeImportButton() {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -67,19 +75,26 @@ export function GeocodeImportButton() {
   const [group, setGroup] = useState<GroupId>("save");
   // Phones show the first lines of the description; More opens the rest.
   const [moreInfo, setMoreInfo] = useState(false);
+  // Off until ticked: writes the file's address onto accounts whose typed address is blank (never over one that is set).
+  const [fillAddresses, setFillAddresses] = useState(false);
 
   const read = useMutation({
     mutationFn: async (file: File) => previewCustomerGeocodes({ data: { filename: file.name, base64: await fileToBase64(file) } }),
     onSuccess: (p) => {
       setPreview(p);
+      setFillAddresses(false);
       setGroup(p.counts.save ? "save" : p.counts.review ? "review" : "same");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not read that file"),
   });
   const save = useMutation({
-    mutationFn: () => applyCustomerGeocodes({ data: { rows: preview!.rows } }),
+    mutationFn: () => applyCustomerGeocodes({ data: { rows: preview!.rows, fillAddresses } }),
     onSuccess: (r) => {
-      toast.success(`Saved ${r.saved} location${r.saved === 1 ? "" : "s"}`);
+      const parts = [`${r.saved} location${r.saved === 1 ? "" : "s"}`];
+      if (fillAddresses) parts.push(`${r.filled} address${r.filled === 1 ? "" : "es"}`);
+      toast.success(`Saved ${parts.join(" and ")}`);
+      void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      void qc.invalidateQueries({ queryKey: ["address-report"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["customer-address"] });
       void qc.invalidateQueries({ queryKey: ["account-addresses"] });
@@ -114,7 +129,7 @@ export function GeocodeImportButton() {
               <p className={cn("text-sm text-muted-foreground", !moreInfo && "max-sm:line-clamp-3")}>
                 The geocoded customer list (CSV or Excel) with <span className="font-medium">Geocode Match</span>, <span className="font-medium">Latitude</span> and{" "}
                 <span className="font-medium">Longitude</span> columns. Rows are matched by account number, then Internal ID, then name. Only the map location is
-                saved; names and addresses are not changed. Nothing saves until you press Save.
+                saved, and names are never changed. Addresses change only when you tick Fill Blank Addresses, and then only on accounts that have none. Nothing saves until you press Save.
               </p>
               <button
                 type="button"
@@ -213,6 +228,20 @@ export function GeocodeImportButton() {
                     </tbody>
                   </table>
                 </div>
+                {preview.counts.addresses ? (
+                  <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-border bg-muted/40 p-3 text-sm" data-testid="geo-import-fill-addresses">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 size-4 shrink-0 accent-primary"
+                      checked={fillAddresses}
+                      onChange={(e) => setFillAddresses(e.target.checked)}
+                    />
+                    <span>
+                      <span className="font-medium">Fill Blank Addresses</span> on {preview.counts.addresses} account{preview.counts.addresses === 1 ? "" : "s"} from
+                      this file&rsquo;s shipping address. Only accounts with no address change; an address already on an account is never replaced.
+                    </span>
+                  </label>
+                ) : null}
                 <div className="flex flex-wrap items-center justify-end gap-2 max-sm:sticky max-sm:-bottom-5 max-sm:z-10 max-sm:-mx-5 max-sm:-mb-5 max-sm:border-t max-sm:border-border max-sm:bg-card max-sm:px-5 max-sm:py-3">
                   <Button
                     type="button"
@@ -229,8 +258,14 @@ export function GeocodeImportButton() {
                   <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="button" size="sm" disabled={!preview.counts.save || save.isPending} onClick={() => save.mutate()} data-testid="geo-import-save">
-                    {save.isPending ? "Saving…" : `Save ${preview.counts.save} Location${preview.counts.save === 1 ? "" : "s"}`}
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={(!preview.counts.save && !(fillAddresses && preview.counts.addresses)) || save.isPending}
+                    onClick={() => save.mutate()}
+                    data-testid="geo-import-save"
+                  >
+                    {save.isPending ? "Saving…" : saveLabel(preview.counts.save, fillAddresses ? preview.counts.addresses : 0)}
                   </Button>
                 </div>
               </>
