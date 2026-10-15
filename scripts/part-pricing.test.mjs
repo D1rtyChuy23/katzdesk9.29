@@ -156,6 +156,21 @@ test("NetSuite item export: Name is the part number, Description the part name, 
   ]);
 });
 
+test("NetSuite saved search: Item Name and MPN columns, Sales Price (base) is the Base Price", () => {
+  const r = partRowsFromSheets([
+    { name: "Parts", matrix: [
+      ["Internal ID", "Item Name", "Item Code", "Sales Description", "Sales Price (base)", "MPN", "Manufacturer", "Class", "Type", "Inactive"],
+      ["741", "BUNN PARTS : BUNN00400.0001", "BUNN00400.0001", "BUNN ELBOW,MALE-TNPL.25FLR X.125MP", "4.8", "00400.0001", "", "Equipment : Parts and Filters", "Inventory Item", "No"],
+      ["740", "BUNN PARTS : 20217.0000", "20217.0000", "Stainless Steel Brew Basket Bunn-Short", "", "20217.0000", "", "Equipment : Parts and Filters", "Inventory Item", "No"],
+    ] },
+  ]);
+  assert.equal(r.columns.rate, true);
+  assert.deepEqual(r.rows.map((x) => [x.mpn, x.sku, x.parent, x.description, x.rate, x.cls]), [
+    ["00400.0001", "BUNN00400.0001", "BUNN PARTS", "BUNN ELBOW,MALE-TNPL.25FLR X.125MP", 4.8, "Parts"],
+    ["20217.0000", "20217.0000", "BUNN PARTS", "Stainless Steel Brew Basket Bunn-Short", null, "Parts"],
+  ]);
+});
+
 test("a part loaded earlier by its SKU alone is the same part: updated, never added twice", () => {
   const rows = partRowsFromSheets([{ name: "Parts", matrix: [
     ["Name", "Description", "Class", "Base Price"],
