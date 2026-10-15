@@ -160,7 +160,7 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
   return (
     <section ref={sectionRef} data-testid="pre-inspection" className="relative scroll-mt-2">
       <p
-        className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3 text-base font-medium"
+        className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3 text-base font-medium max-sm:py-2"
         data-testid="machine-progress"
       >
         {view.machineCount ? `${view.passedCount}/${view.machineCount}` : "0/0"} machines passed
@@ -226,24 +226,26 @@ function MachineList({
                 data-pre={m.preInspected ? "true" : "false"}
                 className={cn(
                   "desk-flat flex min-h-[4.5rem] w-full items-center gap-3 px-4 py-4 text-left active:bg-muted",
+                  // Phones: the row shrinks so Remove stays on screen; photo on the left, name, line and badge stacked.
+                  "max-sm:grid max-sm:min-w-0 max-sm:grid-cols-[3rem_minmax(0,1fr)] max-sm:gap-y-1",
                   // Existing equipment: already pre-inspected, shown highlighted.
                   m.preInspected && "border-l-4 border-primary bg-primary/10",
                 )}
               >
                 {m.thumb ? (
-                  <img src={m.thumb} alt="" className="size-12 shrink-0 rounded-md object-cover" />
+                  <img src={m.thumb} alt="" className="size-12 shrink-0 rounded-md object-cover max-sm:row-span-2" />
                 ) : (
-                  <span className="flex size-12 shrink-0 items-center justify-center rounded-md bg-secondary text-[10px] text-muted-foreground">
+                  <span className="flex size-12 shrink-0 items-center justify-center rounded-md bg-secondary text-[10px] text-muted-foreground max-sm:row-span-2">
                     No photo
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-base font-medium">{m.name}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
+                  <span className="block text-base font-medium max-sm:break-words sm:truncate">{m.name}</span>
+                  <span className="block text-xs text-muted-foreground max-sm:break-words sm:truncate">
                     {[m.preInspected ? "Existing equipment" : null, m.serial ? `SN ${m.serial}` : "No serial", m.electrical || "Electrical missing"].filter(Boolean).join(" · ")}
                   </span>
                 </span>
-                <InspectionBadge overall={m.overall} pre={m.preInspected} />
+                <InspectionBadge overall={m.overall} pre={m.preInspected} className="max-sm:col-start-2 max-sm:justify-self-start" />
               </button>
               <button
                 type="button"

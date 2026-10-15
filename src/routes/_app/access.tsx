@@ -252,7 +252,7 @@ function Page() {
         <label className="mt-4 flex items-start gap-2 text-sm">
           <input
             type="checkbox"
-            className="mt-0.5 size-4 accent-primary"
+            className="mt-0.5 size-4 accent-primary max-sm:size-5 max-sm:shrink-0"
             checked={inviteCanAdd}
             onChange={(e) => setInviteCanAdd(e.target.checked)}
           />

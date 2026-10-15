@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
@@ -222,6 +222,20 @@ export function DayBoard({
     void navigate({ to: META[b.type].to, search: { open: b.id } });
   }
 
+  // On a phone only about two day columns fit: the week opens with today's column next to the sticky tech column,
+  // and another week (or the day view) opens at its start.
+  useEffect(() => {
+    const box = scroller.current;
+    if (!box || !window.matchMedia("(max-width: 639px)").matches) return;
+    const cell = span === "week" && today >= week.start && today <= week.end ? box.querySelector<HTMLElement>(`[data-board-cell][data-date="${today}"]`) : null;
+    if (!cell) {
+      box.scrollLeft = 0;
+      return;
+    }
+    const sticky = box.querySelector<HTMLElement>('[role="rowheader"]')?.offsetWidth ?? 0;
+    box.scrollLeft = Math.max(0, cell.getBoundingClientRect().left - box.getBoundingClientRect().left - box.clientLeft + box.scrollLeft - sticky);
+  }, [span, today, week.start, week.end]);
+
   const step = span === "day" ? 1 : 7;
   const counts = (t: BoardType) => shown.filter((b) => b.type === t).length;
   const columns = span === "day" ? ["none", ...BOARD_HOURS.map(String)] : days;
@@ -233,7 +247,10 @@ export function DayBoard({
           <h2 className="font-display text-xl leading-tight" data-testid="day-board-title">
             {span === "day" ? dayTitle(day) : `Week Of ${formatShortDate(week.start)} – ${formatShortDate(week.end)}`}
           </h2>
-          <p className="text-[11px] text-muted-foreground">Drag a block to another time or tech. Click a block to open it. Completed and cancelled work does not move.</p>
+          <p className="text-[11px] text-muted-foreground">
+            <span className="max-sm:hidden">Drag a block to another time or tech. Click a block to open it. Completed and cancelled work does not move.</span>
+            <span className="sm:hidden">Tap a block to open it and change its time or tech. Swipe to see more hours and techs.</span>
+          </p>
         </div>
         <div className="flex gap-1.5" role="group" aria-label="Board span">
           <FilterChip selected={span === "day"} onClick={() => setSpan("day")} data-testid="board-span-day">
@@ -266,17 +283,23 @@ export function DayBoard({
         ))}
       </ul>
 
-      <div ref={scroller} className="mt-3 overflow-x-auto rounded-lg border border-border" data-testid="day-board-scroll">
+      {/* Phones: a narrower tech column and wider job columns, and the board scrolls inside itself so the hour row stays on top. */}
+      <div
+        ref={scroller}
+        className="mt-3 overflow-x-auto rounded-lg border border-border max-sm:max-h-[calc(100svh-9rem)] max-sm:overflow-y-auto"
+        data-testid="day-board-scroll"
+      >
         <div
-          className="grid text-sm"
+          className="grid text-sm [--day:8rem] [--hour:5rem] [--none:6rem] [--tech:7.5rem] max-sm:[--day:9rem] max-sm:[--hour:7rem] max-sm:[--none:8rem] max-sm:[--tech:5.5rem]"
           style={{
-            gridTemplateColumns: span === "day" ? `7.5rem 6rem repeat(${BOARD_HOURS.length}, minmax(5rem, 1fr))` : "7.5rem repeat(7, minmax(8rem, 1fr))",
-            minWidth: span === "day" ? `${7.5 + 6 + BOARD_HOURS.length * 5}rem` : "63.5rem",
+            gridTemplateColumns:
+              span === "day" ? `var(--tech) var(--none) repeat(${BOARD_HOURS.length}, minmax(var(--hour), 1fr))` : "var(--tech) repeat(7, minmax(var(--day), 1fr))",
+            minWidth: span === "day" ? `calc(var(--tech) + var(--none) + ${BOARD_HOURS.length} * var(--hour))` : "calc(var(--tech) + 7 * var(--day))",
           }}
           role="grid"
           aria-label={span === "day" ? `Schedule for ${dayTitle(day)}` : "Schedule for the week"}
         >
-          <div className="sticky left-0 z-10 border-b border-border bg-card px-2 py-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase" role="columnheader">
+          <div className="sticky left-0 z-10 border-b border-border bg-card px-2 py-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase max-sm:top-0 max-sm:z-20 max-sm:px-1.5" role="columnheader">
             Tech
           </div>
           {columns.map((c, i) => (
@@ -284,7 +307,7 @@ export function DayBoard({
               key={c}
               role="columnheader"
               className={cn(
-                "border-b border-l border-border bg-card px-2 py-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase",
+                "border-b border-l border-border bg-card px-2 py-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase max-sm:sticky max-sm:top-0 max-sm:z-[5]",
                 span === "week" && c === today && "text-foreground",
               )}
             >
@@ -294,7 +317,7 @@ export function DayBoard({
 
           {rows.map((tech) => (
             <div key={tech || "none"} className="contents" role="row" data-testid="board-row" data-tech={tech}>
-              <div className="sticky left-0 z-10 flex min-h-16 items-center border-b border-border bg-card px-2 py-1.5 text-sm font-medium" role="rowheader">
+              <div className="sticky left-0 z-10 flex min-h-16 items-center border-b border-border bg-card px-2 py-1.5 text-sm font-medium max-sm:items-start max-sm:px-1.5 max-sm:py-2.5 max-sm:text-xs" role="rowheader">
                 <span className={cn("min-w-0 break-words", !tech && "text-muted-foreground")}>{tech || "Unassigned"}</span>
               </div>
               {columns.map((c) => {
@@ -330,11 +353,14 @@ export function DayBoard({
                           "desk-flat min-w-0 rounded-md border-l-[3px] px-1.5 py-1 text-left select-none",
                           META[b.type].block,
                           b.shadow && "border border-dashed border-border",
-                          b.locked ? "cursor-pointer opacity-55" : b.shadow ? "cursor-pointer" : "cursor-grab touch-none active:cursor-grabbing",
+                          // Phones keep touch scrolling: a swipe that starts on a block scrolls the board; a tap opens the block.
+                          b.locked ? "cursor-pointer opacity-55" : b.shadow ? "cursor-pointer" : "cursor-grab active:cursor-grabbing sm:touch-none",
                           ghost?.block.key === b.key && "opacity-40",
                         )}
                         onPointerDown={(e) => {
                           if (b.locked || b.shadow || e.button !== 0) return;
+                          // No finger drag on a phone: the swipe scrolls instead, and a tap opens the block to change its time or tech.
+                          if (e.pointerType === "touch" && window.matchMedia("(max-width: 639px)").matches) return;
                           drag.current = { block: b, x: e.clientX, y: e.clientY, active: false };
                           e.currentTarget.setPointerCapture(e.pointerId);
                         }}
@@ -370,8 +396,8 @@ export function DayBoard({
                           }
                         }}
                       >
-                        <span className="line-clamp-2 text-xs leading-tight font-medium break-words">{b.account}</span>
-                        <span className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-muted-foreground">
+                        <span className="line-clamp-2 text-xs leading-tight font-medium break-words max-sm:line-clamp-none">{b.account}</span>
+                        <span className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-muted-foreground max-sm:whitespace-normal">
                           {b.locked ? <Lock className="size-3 shrink-0" aria-hidden /> : null}
                           {(b.locked ? [b.state, timeLabel(b.time)] : b.shadow ? [timeLabel(b.time), `2nd with ${b.tech ?? "no primary"}`] : [timeLabel(b.time), META[b.type].label, b.second ? `+ ${b.second}` : b.ticket]).filter(Boolean).join(" · ")}
                         </span>

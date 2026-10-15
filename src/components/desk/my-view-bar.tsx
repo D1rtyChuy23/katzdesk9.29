@@ -122,7 +122,7 @@ export function MyViewBar({ className }: { className?: string }) {
   // Row density (List vs Compact) lives in Settings → Density; rebuilds keep their own Board/Timeline switch.
   return (
     <div className={cn("flex items-center", className)}>
-      <FilterChip selected={on} onClick={() => setOn(!on)}>
+      <FilterChip selected={on} onClick={() => setOn(!on)} className="max-sm:px-2.5 max-sm:text-xs">
         My View{role ? ` · ${role === "sales" ? "Sales" : role === "admin" ? "Admin" : role === "warehouse" ? "Warehouse" : "Service"}` : ""}
       </FilterChip>
     </div>

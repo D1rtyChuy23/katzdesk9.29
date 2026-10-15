@@ -96,11 +96,12 @@ function ItemTools({
 }) {
   if (!onRenameItem && !onRemoveItem) return null;
   return (
-    <span className="flex shrink-0 items-center">
+    // Phones: room between the option and these (and between the two), so a tap meant for the name does not hit them.
+    <span className="flex shrink-0 items-center max-sm:ml-2 max-sm:gap-1">
       {onRenameItem ? (
         <button
           type="button"
-          className="flex size-9 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="flex size-9 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground max-sm:size-10"
           aria-label={`Rename ${item.name}`}
           title={`Rename this ${noun}`}
           onMouseDown={(e) => {
@@ -115,7 +116,7 @@ function ItemTools({
       {onRemoveItem ? (
         <button
           type="button"
-          className="flex size-9 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-destructive"
+          className="flex size-9 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-destructive max-sm:size-10"
           aria-label={`Remove ${item.name} from the list`}
           title="Remove from the master list"
           onMouseDown={(e) => {
@@ -298,7 +299,7 @@ export function ComboField({
                     }}
                   >
                     <Check className={cn("size-3.5 shrink-0", selected ? "opacity-100" : "opacity-0")} />
-                    <span className="min-w-0 truncate">{item.name}</span>
+                    <span className="min-w-0 truncate max-sm:break-words max-sm:whitespace-normal">{item.name}</span>
                   </button>
                   <ItemTools
                     item={item}
@@ -403,12 +404,12 @@ export function MultiComboField({
               <li
                 key={`${v}-${i}`}
                 title={v}
-                className="flex h-8 max-w-full shrink-0 items-center gap-1 overflow-hidden rounded-full bg-secondary pl-2.5 pr-0.5"
+                className="flex h-8 max-w-full shrink-0 items-center gap-1 overflow-hidden rounded-full bg-secondary pl-2.5 pr-0.5 max-sm:h-10 max-sm:pl-3"
               >
                 <span className="min-w-0 truncate text-sm leading-none text-foreground">{v}</span>
                 <button
                   type="button"
-                  className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground max-sm:size-9"
                   aria-label={`Remove ${v}`}
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -497,7 +498,7 @@ export function MultiComboField({
                     ) : (
                       <Check className="size-3.5 shrink-0 opacity-0" />
                     )}
-                    <span className="min-w-0 truncate">{item.name}</span>
+                    <span className="min-w-0 truncate max-sm:break-words max-sm:whitespace-normal">{item.name}</span>
                     {already > 0 ? (
                       <span className="ml-auto shrink-0 pl-2 text-[11px] text-muted-foreground">add another</span>
                     ) : null}

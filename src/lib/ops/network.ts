@@ -22,6 +22,8 @@ export type NetworkProvider = {
   pmPricing: string | null;
   partsStocking: string | null;
   notes: string | null;
+  /** The provider's web site, as typed or imported (may be a bare domain). */
+  website: string | null;
   lastUpdated: string | null;
   primaryFor: number;
   secondaryFor: number;
@@ -98,6 +100,12 @@ export type ProviderAddress = {
   city: string | null;
   state: string | null;
   zip: string | null;
+  /** Map pin from a provider import (Census geocoder); null when the address has not been placed. */
+  latitude?: number | null;
+  longitude?: number | null;
+  /** exact / close: the street address was found. approx: only the ZIP code's center. */
+  quality?: "exact" | "close" | "approx" | null;
+  geocodeAddress?: string | null;
 };
 
 export type AddressDraft = {
@@ -590,3 +598,62 @@ export function parseContactBlob(raw: string | null | undefined, company?: strin
   return { people, addresses };
 }
 
+/**
+ * The provider's main address: the one labelled Main (set by a provider import), else the first one with a map pin,
+ * else the first one on file. Null when the provider has no address.
+ */
+export function mainAddress<T extends { label?: string | null; latitude?: number | null; longitude?: number | null }>(
+  addresses: readonly T[],
+): T | null {
+  return (
+    addresses.find((a) => (a.label ?? "").trim().toLowerCase() === "main") ??
+    addresses.find((a) => a.latitude != null && a.longitude != null) ??
+    addresses[0] ??
+    null
+  );
+}
+
+const WEB_ADDRESS = /^(https?:\/\/)?([a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}(:\d{1,5})?(\/[^\s]*)?$/i;
+
+/** A link for a typed web site ("example.com" → "https://example.com"); null when it is not a web address. */
+export function websiteHref(raw: string | null | undefined): string | null {
+  const s = String(raw ?? "").trim();
+  if (!s || !WEB_ADDRESS.test(s)) return null;
+  return /^https?:\/\//i.test(s) ? s : `https://${s}`;
+}
+
+/** A web site as people read it: no "https://", no "www.", no trailing slash. */
+export function websiteLabel(raw: string | null | undefined): string {
+  return String(raw ?? "")
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/+$/, "");
+}
+
+/** How good a provider's pin is, in the words the customer map uses. */
+export const PIN_QUALITY_LABEL: Record<"exact" | "close" | "approx", string> = {
+  exact: "Exact pin",
+  close: "Close match, check the pin",
+  approx: "ZIP area (approximate)",
+};
+
+const PHONE = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
+
+const EMAIL = /[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[a-z]{2,}/i;
+
+/**
+ * The first email address in the text, alone ("bevequip@outlook.com (best - copied on all comms)" →
+ * "bevequip@outlook.com"), so a link never carries the rest of the field (a portal URL, a login, a note); else null.
+ */
+export function firstEmail(raw: string | null | undefined): string | null {
+  return String(raw ?? "").match(EMAIL)?.[0] ?? null;
+}
+
+/** A tel: link for the first phone number in the text ("Office: (833) 203-2285 ext 2" → "tel:8332032285"); else null. */
+export function telHref(raw: string | null | undefined): string | null {
+  const m = String(raw ?? "").match(PHONE);
+  if (!m) return null;
+  const digits = m[0].replace(/\D/g, "");
+  return `tel:${digits.length === 11 && digits.startsWith("1") ? `+${digits}` : digits}`;
+}

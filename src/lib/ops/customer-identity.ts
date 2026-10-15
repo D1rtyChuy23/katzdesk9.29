@@ -235,8 +235,12 @@ export async function renameOrMergeProvider(
   if (!row) throw new Error("Provider not found");
   if (row.name === next) return { id: row.id, name: row.name, merged: false };
 
+  // A duplicate already merged into another provider (archived, merged_into set) is not a rename target: its name is
+  // free to use again, and it must stay pointing at the provider it was merged into. An active provider comes first.
   const other = await sql.query<{ id: number; name: string; archived: boolean }>(
-    `select id, name, archived from network_providers where lower(name) = lower($1) and id <> $2 limit 1`,
+    `select id, name, archived from network_providers
+      where lower(name) = lower($1) and id <> $2 and not (archived and merged_into is not null)
+      order by archived, id limit 1`,
     [next, id],
   );
   if (other[0]) {
@@ -263,9 +267,11 @@ export async function renameOrMergeProvider(
     await sql.query(`update provider_locations set provider_id = $1 where provider_id = $2`, [keep.id, id]).catch(() => undefined);
     await sql.query(`update provider_contacts set provider_id = $1 where provider_id = $2`, [keep.id, id]).catch(() => undefined);
     await sql.query(`update provider_addresses set provider_id = $1 where provider_id = $2`, [keep.id, id]).catch(() => undefined);
-    await sql.query(`update network_providers set archived = true, updated_at = now() where id = $1`, [id]);
+    // The merged provider points at the one that kept its customers, and so do the duplicates merged into it before.
+    await sql.query(`update network_providers set archived = true, merged_into = $2, updated_at = now() where id = $1`, [id, keep.id]);
+    await sql.query(`update network_providers set merged_into = $1 where merged_into = $2`, [keep.id, id]);
     if (keep.archived) {
-      await sql.query(`update network_providers set archived = false, name = $1, updated_at = now() where id = $2`, [
+      await sql.query(`update network_providers set archived = false, merged_into = null, name = $1, updated_at = now() where id = $2`, [
         keep.name,
         keep.id,
       ]);
@@ -274,7 +280,7 @@ export async function renameOrMergeProvider(
   }
 
   await sql.query(
-    `update network_providers set name = $1, archived = false, last_updated = current_date, updated_at = now() where id = $2`,
+    `update network_providers set name = $1, archived = false, merged_into = null, last_updated = current_date, updated_at = now() where id = $2`,
     [next, id],
   );
   return { id, name: next, merged: false };

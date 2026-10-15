@@ -83,6 +83,7 @@ export function HandoffReply({
               type="button"
               size="sm"
               variant="ghost"
+              className="max-sm:h-10"
               onClick={() => {
                 setOpen(false);
                 setBody("");
@@ -90,7 +91,7 @@ export function HandoffReply({
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={send.isPending || !body.trim()}>
+            <Button type="submit" size="sm" className="max-sm:h-10" disabled={send.isPending || !body.trim()}>
               {send.isPending ? "Sending…" : "Send"}
             </Button>
           </div>
@@ -98,7 +99,7 @@ export function HandoffReply({
       ) : (
         <button
           type="button"
-          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="h-8 rounded-full px-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground max-sm:h-10"
           onClick={() => setOpen(true)}
         >
           Reply

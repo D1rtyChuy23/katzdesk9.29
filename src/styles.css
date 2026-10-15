@@ -85,6 +85,20 @@ html.dark {
   --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px rgb(0 0 0 / 0.35);
 }
 
+/* Phones in dark mode (below Tailwind's sm breakpoint, 640px). Lift the colours that sink into the dark card:
+   the dispenser bays on the Warehouse rack, the dark "ink" series in charts (Completed $, the second donut slice),
+   and selected text (an auto-selected name in a field). Desktop and tablet keep today's dark palette. */
+@media (width < 40rem) {
+  html.dark {
+    --color-dispense: #a99bbd;
+    --chart-ink: var(--color-copper);
+  }
+  html.dark ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}
+
 html[data-contrast="high"] {
   --color-border: #b7aa98;
   --color-muted-foreground: #3f3a34;
@@ -324,4 +338,10 @@ html[data-contrast="high"] :focus-visible {
 }
 html[data-motion="reduced"] .katz-cloud {
   animation: none;
+}
+
+/* Customer map (desk-map.tsx). The theme's muted surface shows while tiles load (bg-muted on the map); dim the
+   street tiles in dark mode so pins and labels stay readable. */
+html.dark .desk-map .desk-map-tiles img {
+  filter: brightness(0.6) contrast(1.12) saturate(0.65);
 }

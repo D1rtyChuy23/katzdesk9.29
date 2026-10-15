@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { approveInvoice, getInvoice, type InvoiceView } from "@/lib/ops/invoice-api";
 import { LABOR_ITEM, TRIP_ITEM, kindForItem, lineAmount, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
-import { billToGaps, invoiceError, invoiceTotals, isLaborKind, type InvoiceTarget } from "@/lib/ops/invoice";
+import { billToGaps, invoiceError, invoiceTotals, isLaborKind, type BillTo, type InvoiceTarget } from "@/lib/ops/invoice";
+import { canDriveTo, directionsUrl, isPoint } from "@/lib/ops/geo";
 import { formatRep } from "@/lib/ops/rep-match";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,14 @@ type Draft = { item: string; description: string; qty: string; rate: string; kin
 
 const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part });
 
-const directions = (address: string) => `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+/** The account's saved pin as a point, or null. */
+const billPin = (b: BillTo) => (b.latitude != null && b.longitude != null ? { lat: b.latitude, lng: b.longitude } : null);
+
+/** Directions to the account: its exact map pin when the street was found, otherwise the typed address. */
+const directions = (b: BillTo) => directionsUrl({ point: billPin(b), quality: b.geocodeMatch, address: b.address });
+
+/** True when directions go to the saved map pin rather than the typed address. */
+const toPin = (b: BillTo) => isPoint(billPin(b)) && canDriveTo(b.geocodeMatch);
 
 /**
  * Invoice: the same action on every customer record. A button that opens the Invoice window; nothing is a separate
@@ -139,7 +147,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                 <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Bill To</p>
                 <p className="text-[11px] text-muted-foreground">Filled from the account</p>
               </div>
-              <dl className="mt-1 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[7.5rem_1fr]">
+              <dl className="mt-1 grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm sm:grid-cols-[7.5rem_1fr] sm:gap-x-4">
                 <dt className="text-muted-foreground">Name</dt>
                 <dd className="font-medium" data-testid="invoice-bill-name">
                   {v.billTo.name}
@@ -151,7 +159,13 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                 <dt className="text-muted-foreground">Address</dt>
                 <dd data-testid="invoice-bill-address">
                   {v.billTo.address ? (
-                    <a href={directions(v.billTo.address)} target="_blank" rel="noreferrer" className="inline-flex items-start gap-1 hover:text-primary hover:underline">
+                    <a
+                      href={directions(v.billTo) ?? undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-start gap-1 hover:text-primary hover:underline"
+                      title={toPin(v.billTo) ? "Directions to the map pin" : "Directions"}
+                    >
                       <MapPin className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden />
                       {v.billTo.address}
                     </a>

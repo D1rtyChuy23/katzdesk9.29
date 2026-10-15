@@ -20,6 +20,8 @@ import {
   type PriceTarget,
   type StoredPart,
 } from "@/lib/ops/part-pricing";
+import { binRowsFromSheets, binsToApply, binTemplateCsv, binTemplateFileName, planBins, type BinPlanLine, type BinPlanStatus, type StoredBinPart } from "@/lib/ops/part-bins";
+import { partPowers } from "@/lib/ops/parts-api";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -33,9 +35,22 @@ async function requireAdmin(sql: Sql, userId: string) {
   return row?.username || "Admin";
 }
 
-function readSheets(base64: string) {
+/**
+ * Every sheet as rows of cell text. With `datesAsText`, a date cell reads as m/d/yyyy whatever its format, so the
+ * Bin Locations import can tell a bin Excel turned into a date (1-2-7 becomes 1/2/2007) from a real code.
+ */
+function readSheets(base64: string, { datesAsText = false }: { datesAsText?: boolean } = {}) {
   if (base64.length > 24_000_000) throw new Error("That file is too large.");
-  const wb = XLSX.read(base64, { type: "base64", raw: true, cellText: true });
+  const wb = XLSX.read(base64, { type: "base64", raw: true, cellText: true, cellNF: datesAsText });
+  if (datesAsText) {
+    for (const ws of Object.values(wb.Sheets)) {
+      for (const [addr, c] of Object.entries(ws)) {
+        if (addr.startsWith("!") || !c || typeof c !== "object") continue;
+        const cell = c as XLSX.CellObject;
+        if (cell.t === "n" && typeof cell.v === "number" && typeof cell.z === "string" && XLSX.SSF.is_date(cell.z)) cell.w = XLSX.SSF.format("m/d/yyyy", cell.v);
+      }
+    }
+  }
   const sheets = wb.SheetNames.map((name) => ({
     name,
     matrix: XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[name] ?? {}, { header: 1, defval: "", blankrows: false, raw: false }),
@@ -65,6 +80,9 @@ async function storedParts(sql: Sql): Promise<StoredPart[]> {
 }
 
 const fileInput = { filename: z.string().max(300), base64: z.string().min(4), apply: z.boolean() };
+// No zod max on the file: readSheets refuses one over 24,000,000 characters in plain English (a zod message would
+// reach the toast as JSON).
+const binFileInput = z.object(fileInput);
 
 // ------------------------------------------------------------------------------------------ parts import
 
@@ -256,6 +274,124 @@ export const importPartPricing = createServerFn({ method: "POST" })
       [data.filename, data.target, preview.rowCount, apply.length, preview.noMatch + preview.sharedMpn, who],
     );
     return { ...preview, applied: true };
+  });
+
+// ------------------------------------------------------------------------------------------ bin locations
+
+/** Most parts the Bin Template lists. */
+const BIN_TEMPLATE_MAX = 50_000;
+
+/**
+ * The parts a Bin Locations file can reach: the ones on the Parts list (active, not hidden, not trip or labor).
+ * Matching reads them all (as the other imports do), so no part is missed and no shared MPN looks unique.
+ */
+async function storedBinParts(sql: Sql, limit: number | null = null): Promise<StoredBinPart[]> {
+  const rows = await sql.query<{ id: number; sku: string; mfr_part: string | null; description: string | null; bin_rack: string | null; bin_shelf: string | null; bin_bin: string | null }>(
+    `select id, sku, mfr_part, description, bin_rack, bin_shelf, bin_bin
+       from billing_items
+      where active and hidden_at is null and kind not in ('trip', 'labor')
+      order by lower(sku)
+      limit $1`,
+    [limit],
+  );
+  return rows.map((r) => ({ id: Number(r.id), sku: r.sku, mpn: r.mfr_part, description: r.description, rack: r.bin_rack, shelf: r.bin_shelf, bin: r.bin_bin }));
+}
+
+export type BinsPreview = {
+  filename: string;
+  rowCount: number;
+  update: number;
+  same: number;
+  unmatched: number;
+  /** The part number fits two or more parts, or its MPN and SKU point at different parts. */
+  ambiguous: number;
+  /** Rows with no rack, shelf or bin. */
+  blank: number;
+  /** The same part on a later row: the first row is used. */
+  duplicates: number;
+  tooLong: number;
+  /** Values that look like a date Excel made of a bin: not applied. */
+  dates: number;
+  /** Rows with no part number. */
+  skipped: number;
+  applied: boolean;
+  /** Every row except Blank ones, changes first, up to 500. */
+  lines: BinPlanLine[];
+};
+
+const BIN_ORDER: Record<BinPlanStatus, number> = { update: 1, ambiguous: 2, unmatched: 3, date: 4, too_long: 5, duplicate: 6, same: 7, blank: 8 };
+
+/**
+ * Bin Locations: a CSV or Excel file of part numbers and Rack / Shelf / Bin. With apply false nothing is written:
+ * that is the preview. Save sends the file again; it is planned again against what is stored now and written in
+ * one statement, so either every change lands or none does. Admin and Sales, like a bin edit in the part's window.
+ */
+export const importPartBins = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof binFileInput>) => binFileInput.parse(d))
+  .handler(async ({ data, context }): Promise<BinsPreview> => {
+    const sql = await ready();
+    const who = await partPowers(sql, context.userId);
+    if (!who.canEditMpn) throw new Error("Only Admin and Sales can change bin locations.");
+    const read = binRowsFromSheets(readSheets(data.base64, { datesAsText: true }));
+    if (!read.rows.length) throw new Error("No part numbers under the header.");
+    if (read.rows.length > 50_000) throw new Error("Up to 50,000 rows at a time.");
+    const plan = planBins(read.rows, await storedBinParts(sql));
+    const count = (st: BinPlanStatus) => plan.filter((l) => l.status === st).length;
+    const preview: BinsPreview = {
+      filename: data.filename,
+      rowCount: read.rows.length,
+      update: count("update"),
+      same: count("same"),
+      unmatched: count("unmatched"),
+      ambiguous: count("ambiguous"),
+      blank: count("blank"),
+      duplicates: count("duplicate"),
+      tooLong: count("too_long"),
+      dates: count("date"),
+      skipped: read.skipped,
+      applied: false,
+      lines: plan
+        .filter((l) => l.status !== "blank")
+        .sort((a, b) => BIN_ORDER[a.status] - BIN_ORDER[b.status] || a.line - b.line)
+        .slice(0, 500),
+    };
+    if (!data.apply) return preview;
+
+    // The file's own values go in; a blank piece (null) keeps what is stored at the moment of writing, except on a
+    // whole-location row (s.whole), which writes all three pieces as they are.
+    const apply = binsToApply(plan);
+    const written = apply.length
+      ? await sql.query<{ id: number }>(
+          `update billing_items b
+              set bin_rack = case when s.whole then s.rack else coalesce(s.rack, b.bin_rack) end,
+                  bin_shelf = case when s.whole then s.shelf else coalesce(s.shelf, b.bin_shelf) end,
+                  bin_bin = case when s.whole then s.bin else coalesce(s.bin, b.bin_bin) end,
+                  bin_updated_at = now(), bin_updated_by = $6, updated_at = now()
+             from (select * from unnest($1::int[], $2::text[], $3::text[], $4::text[], $5::boolean[]) as u(id, rack, shelf, bin, whole)) s
+            where b.id = s.id and b.hidden_at is null
+              and (case when s.whole then s.rack else coalesce(s.rack, b.bin_rack) end,
+                   case when s.whole then s.shelf else coalesce(s.shelf, b.bin_shelf) end,
+                   case when s.whole then s.bin else coalesce(s.bin, b.bin_bin) end) is distinct from (b.bin_rack, b.bin_shelf, b.bin_bin)
+          returning b.id`,
+          [apply.map((l) => l.partId), apply.map((l) => l.file.rack), apply.map((l) => l.file.shelf), apply.map((l) => l.file.bin), apply.map((l) => l.whole), who.name],
+        )
+      : [];
+    return { ...preview, update: written.length, applied: true };
+  });
+
+/**
+ * The Bin Template: MPN, SKU, Description and the current Rack, Shelf and Bin of every part on the Parts list, up
+ * to 50,000 by SKU (`more` says the list has more; the import still matches every part).
+ */
+export const partBinTemplate = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .handler(async (): Promise<{ filename: string; base64: string; rows: number; more: boolean }> => {
+    const sql = await ready();
+    const all = await storedBinParts(sql, BIN_TEMPLATE_MAX + 1);
+    const parts = all.slice(0, BIN_TEMPLATE_MAX);
+    const csv = binTemplateCsv(parts);
+    return { filename: binTemplateFileName(new Date().toISOString().slice(0, 10)), base64: Buffer.from(csv, "utf8").toString("base64"), rows: parts.length, more: all.length > parts.length };
   });
 
 // ------------------------------------------------------------------------------------------ discount rule

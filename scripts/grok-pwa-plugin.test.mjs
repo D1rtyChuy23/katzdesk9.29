@@ -19,6 +19,13 @@ import { renderInstallPage } from "./grok-pwa-plugin.mjs";
 
 const TEMPLATE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+// Without `cwd` / `site` the injector reads the share-card identity
+// (src/lib/og/site.json, public/og.jpg) from process.cwd(). These cases expect
+// a workspace with no brand files, so run them from an empty directory: an
+// app's own title and card must not leak into them. Cases that read the real
+// workspace go through TEMPLATE_ROOT. node --test gives each file its own process.
+process.chdir(mkdtempSync(join(tmpdir(), "grok-og-cwd-")));
+
 test("injects before </head>", () => {
   const out = injectGrokPwaHead("<html><head><title>x</title></head><body></body></html>");
   assert.match(out, /rel="manifest"/);

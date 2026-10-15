@@ -404,7 +404,7 @@ export const BILLING_CSV_HEADER = [
   "Work Done",
 ];
 
-function csvCell(v: string | number): string {
+export function csvCell(v: string | number): string {
   const s = String(v ?? "");
   // A cell starting with = + - @ can run as a formula when the file is opened in a spreadsheet.
   const safe = /^[=+\-@]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s) ? `'${s}` : s;

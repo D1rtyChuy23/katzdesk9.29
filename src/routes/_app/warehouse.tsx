@@ -308,11 +308,13 @@ function Page() {
         <span>Number in a cell is how many units share that section, up to 12. Add stays available when a section already has units. Capacity this rack: {capacity}.</span>
       </p>
 
-      <div className="mt-3 w-full max-w-full overflow-x-auto rounded-xl border border-border bg-card p-3">
+      <div className="mt-3 w-full max-w-full overflow-x-auto rounded-xl border border-border bg-card p-3 max-sm:pl-0">
         <table className="w-full min-w-[40rem] border-collapse text-center">
           <thead>
             <tr>
-              <th className="pb-2 pr-2 text-left text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              {/* Phones: the Level column stays put while the bays scroll sideways. The box's left padding moves into
+                  this column (pl-0 on the box, pl-3 here), so no cell peeks out to its left. */}
+              <th className="pb-2 pr-2 text-left text-[11px] font-medium tracking-wide text-muted-foreground uppercase max-sm:sticky max-sm:left-0 max-sm:z-10 max-sm:bg-card max-sm:pl-3">
                 Level
               </th>
               {pallets.map((p) => {
@@ -330,7 +332,7 @@ function Page() {
                     <button
                       type="button"
                       className={cn(
-                        "inline-flex min-w-8 items-center justify-center rounded-full px-1.5 py-0.5",
+                        "inline-flex min-w-8 items-center justify-center rounded-full px-1.5 py-0.5 max-sm:min-h-10 max-sm:min-w-10",
                         picked && "bg-primary text-primary-foreground",
                       )}
                       onClick={() => setBayLetter((cur) => (cur === p ? null : p))}
@@ -346,10 +348,10 @@ function Page() {
           <tbody>
             {LEVELS.map((level) => (
               <tr key={level}>
-                <th className="py-1 pr-2 text-left text-xs font-medium text-muted-foreground">
+                <th className="py-1 pr-2 text-left text-xs font-medium text-muted-foreground max-sm:sticky max-sm:left-0 max-sm:z-10 max-sm:bg-card max-sm:pl-3">
                   L{level}
-                  {level === 4 ? <span className="ml-1 font-normal">top</span> : null}
-                  {level === 1 ? <span className="ml-1 font-normal">floor</span> : null}
+                  {level === 4 ? <span className="ml-1 font-normal max-sm:ml-0 max-sm:block">top</span> : null}
+                  {level === 1 ? <span className="ml-1 font-normal max-sm:ml-0 max-sm:block">floor</span> : null}
                 </th>
                 {pallets.map((p) => {
                   const units = bySlot.get(`${p}-${level}`) ?? [];
@@ -449,7 +451,9 @@ function Page() {
                   onChange={() => togglePick(a.id)}
                 />
               ) : null}
-              <button type="button" onClick={() => setSelected(a.id)} className="w-36 shrink-0 text-left font-mono text-xs">
+              {/* Phones: the slot label is only as wide as its text, so the model name gets the room; padding with an equal
+                  negative margin makes it a 40px tap target without moving anything. */}
+              <button type="button" onClick={() => setSelected(a.id)} className="w-auto shrink-0 text-left font-mono text-xs max-sm:-my-3 max-sm:py-3 sm:w-36">
                 {a.pallet && a.level && (a.site === "barn-back" || a.site === "barn-front")
                   ? unitPlaceLabel({ site: a.site, pallet: a.pallet, level: a.level, status: a.status })
                   : a.slotLabel}

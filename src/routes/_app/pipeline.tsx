@@ -32,6 +32,20 @@ export const Route = createFileRoute("/_app/pipeline")({
 
 type DealView = "open" | "complete" | "all" | "gto" | "ordered";
 
+/*
+ * By Producer table on phones (below sm): each row becomes two lines, name and total on top, then deals, completed
+ * and open as labelled values. Same table and cells; CSS only. sm and up keep the five-column table.
+ */
+const BP = {
+  row: "max-sm:flex max-sm:flex-wrap max-sm:items-baseline max-sm:gap-y-0.5 max-sm:py-1.5",
+  name: "max-sm:order-1 max-sm:min-w-0 max-sm:basis-[calc(100%-7rem)] max-sm:p-0 max-sm:pr-2",
+  total: "max-sm:order-2 max-sm:basis-28 max-sm:p-0 max-sm:text-right max-sm:font-medium",
+  value: "max-sm:p-0 max-sm:pr-3 max-sm:text-xs max-sm:text-muted-foreground max-sm:before:mr-1",
+  deals: "max-sm:order-3 max-sm:before:content-['Deals']",
+  done: "max-sm:order-4 max-sm:before:content-['Completed']",
+  open: "max-sm:order-5 max-sm:before:content-['Open']",
+};
+
 function sum(rows: Deal[]) {
   return rows.reduce((n, d) => n + (d.amount ?? 0), 0);
 }
@@ -191,7 +205,7 @@ function Page() {
               xKey="producer"
               openKey="open"
               doneKey="done"
-              renderLabel={(name) => <RepLink name={name} onPick={setRepPanel} />}
+              renderLabel={(name) => <RepLink name={name} onPick={setRepPanel} className="max-sm:py-2.5" />}
             />
           ) : (
             <p className="text-sm text-muted-foreground">No live deals yet.</p>
@@ -215,8 +229,8 @@ function Page() {
           <p className="text-xs text-muted-foreground">Fell-through deals are excluded. Click a rep to see only their deals.</p>
         </div>
         <div className="overflow-x-auto px-4 py-3">
-          <table className="w-full min-w-[36rem] text-sm">
-            <thead className="text-left text-xs tracking-wide text-muted-foreground uppercase">
+          <table className="w-full text-sm max-sm:block sm:min-w-[36rem]">
+            <thead className="text-left text-xs tracking-wide text-muted-foreground uppercase max-sm:hidden">
               <tr>
                 <th className="pb-2 pr-4 font-medium">Producer</th>
                 <th className="pb-2 pr-4 font-medium">Deals</th>
@@ -225,50 +239,50 @@ function Page() {
                 <th className="pb-2 font-medium">Open $</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="max-sm:block">
               {PRODUCERS.map((p) => {
                 const mine = live.filter((d) => sameRep(d.producer, p));
 
                 const c = mine.filter((d) => d.completion === "complete");
                 const o = mine.filter((d) => d.completion !== "complete");
                 return (
-                  <tr key={p} className="border-t border-border">
-                    <td className="py-2 pr-4">
-                      <RepLink name={p} onPick={setRepPanel} className="font-medium">
+                  <tr key={p} className={`border-t border-border ${BP.row}`}>
+                    <td className={`py-2 pr-4 ${BP.name}`}>
+                      <RepLink name={p} onPick={setRepPanel} className="font-medium max-sm:py-2.5">
                         {formatRep(p)}
                       </RepLink>
                     </td>
-                    <td className="tabular py-2 pr-4">{mine.length}</td>
-                    <td className="tabular py-2 pr-4">{money(sum(mine))}</td>
-                    <td className="tabular py-2 pr-4">
+                    <td className={`tabular py-2 pr-4 ${BP.value} ${BP.deals}`}>{mine.length}</td>
+                    <td className={`tabular py-2 pr-4 ${BP.total}`}>{money(sum(mine))}</td>
+                    <td className={`tabular py-2 pr-4 ${BP.value} ${BP.done}`}>
                       {c.length} · {money(sum(c))}
                     </td>
-                    <td className="tabular py-2">{money(sum(o))}</td>
+                    <td className={`tabular py-2 ${BP.value} ${BP.open}`}>{money(sum(o))}</td>
                   </tr>
                 );
               })}
               {unlisted.length ? (
-                <tr className="border-t border-border text-muted-foreground">
-                  <td className="py-2 pr-4">No rep assigned</td>
-                  <td className="tabular py-2 pr-4">{unlisted.length}</td>
-                  <td className="tabular py-2 pr-4">{money(sum(unlisted))}</td>
-                  <td className="tabular py-2 pr-4">
+                <tr className={`border-t border-border text-muted-foreground ${BP.row} max-sm:py-3`}>
+                  <td className={`py-2 pr-4 ${BP.name}`}>No rep assigned</td>
+                  <td className={`tabular py-2 pr-4 ${BP.value} ${BP.deals}`}>{unlisted.length}</td>
+                  <td className={`tabular py-2 pr-4 ${BP.total}`}>{money(sum(unlisted))}</td>
+                  <td className={`tabular py-2 pr-4 ${BP.value} ${BP.done}`}>
                     {unlisted.filter((d) => d.completion === "complete").length} ·{" "}
                     {money(sum(unlisted.filter((d) => d.completion === "complete")))}
                   </td>
-                  <td className="tabular py-2">
+                  <td className={`tabular py-2 ${BP.value} ${BP.open}`}>
                     {money(sum(unlisted.filter((d) => d.completion !== "complete")))}
                   </td>
                 </tr>
               ) : null}
-              <tr className="border-t border-border font-medium">
-                <td className="py-2 pr-4">TOTAL</td>
-                <td className="tabular py-2 pr-4">{live.length}</td>
-                <td className="tabular py-2 pr-4">{money(sum(live))}</td>
-                <td className="tabular py-2 pr-4">
+              <tr className={`border-t border-border font-medium ${BP.row} max-sm:py-3`}>
+                <td className={`py-2 pr-4 ${BP.name}`}>TOTAL</td>
+                <td className={`tabular py-2 pr-4 ${BP.value} ${BP.deals}`}>{live.length}</td>
+                <td className={`tabular py-2 pr-4 ${BP.total}`}>{money(sum(live))}</td>
+                <td className={`tabular py-2 pr-4 ${BP.value} ${BP.done}`}>
                   {completed.length} · {money(sum(completed))}
                 </td>
-                <td className="tabular py-2">{money(sum(active))}</td>
+                <td className={`tabular py-2 ${BP.value} ${BP.open}`}>{money(sum(active))}</td>
               </tr>
             </tbody>
           </table>
@@ -367,7 +381,7 @@ function DealRow({ deal: d, onOpen, onRep }: { deal: Deal; onOpen: () => void; o
           ) : null}
           <AddressLine customer={d.customer} />
           <span className="mt-0.5 block text-xs text-muted-foreground">
-            {d.producer && !d.noRep ? <RepLink name={d.producer} onPick={onRep} /> : <NoRepFlag show />} ·{" "}
+            {d.producer && !d.noRep ? <RepLink name={d.producer} onPick={onRep} className="max-sm:py-2.5" /> : <NoRepFlag show />} ·{" "}
             {d.equipment || "No equipment listed"}
           </span>
           {d.machines.some((m) => m.boardId != null) ? (

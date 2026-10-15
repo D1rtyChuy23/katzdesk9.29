@@ -32,6 +32,16 @@ import { getMyAccess } from "@/lib/ops/access";
 import { reviewRackUnit, setShopTest } from "@/lib/ops/rack-stock";
 import { toast } from "sonner";
 
+/**
+ * Phones: the first tabbable control in this window is the Shop test note, and focusing it on open pops up the
+ * on-screen keyboard over half the window. Focus the window itself there instead. sm and up keep Radix's default.
+ */
+function phoneSheetFocus(e: Event) {
+  if (!window.matchMedia("(width < 40rem)").matches) return;
+  e.preventDefault();
+  (e.currentTarget instanceof HTMLElement ? e.currentTarget : (e.target as HTMLElement | null))?.focus({ preventScroll: true });
+}
+
 export function AssetSheet({
   asset,
   onClose,
@@ -132,7 +142,7 @@ export function AssetSheet({
 
   return (
     <Sheet open={!!asset} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent>
+      <SheetContent onOpenAutoFocus={phoneSheetFocus}>
         {asset ? (
           <>
             <SheetHeader>

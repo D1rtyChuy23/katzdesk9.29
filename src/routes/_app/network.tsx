@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { archiveProvider, listNetwork, renameProvider } from "@/lib/ops/network-api";
+import { PROVIDER_GEO_KEY } from "@/lib/ops/provider-geo-api";
+import { getMyAccess } from "@/lib/ops/access";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
 import { providerStates, statusTone, type NetworkAccount, type NetworkOverview, type NetworkProvider } from "@/lib/ops/network";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ProviderSheet } from "@/components/desk/provider-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { DispatchCard } from "@/components/desk/provider-dispatch";
+import { ProviderImportButton } from "@/components/desk/provider-import";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { SORT_ALPHA, sortDesk } from "@/lib/ops/sort";
@@ -31,6 +34,9 @@ function Page() {
   const [tab, setTab] = useState<Tab>("providers");
   const net = useQuery({ queryKey: ["network"], queryFn: () => listNetwork() });
   const d = net.data;
+  // Provider imports are for an Admin (the Admin role or a desk admin), like the other imports.
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const canImport = !!me.data?.isAdmin || me.data?.role === "admin";
 
   function openProvider(id: number) {
     setSelected(id);
@@ -43,6 +49,18 @@ function Page() {
     void navigate({ to: "/network", search: {}, replace: true });
   }
 
+  const addButton = (
+    <Button
+      onClick={() => {
+        setSelected(null);
+        setCreating(true);
+      }}
+    >
+      <Plus className="size-4" />
+      Add provider
+    </Button>
+  );
+
   return (
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -53,15 +71,14 @@ function Page() {
             rates and notes, then assign customers. Primary is who we call first.
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setSelected(null);
-            setCreating(true);
-          }}
-        >
-          <Plus className="size-4" />
-          Add provider
-        </Button>
+        {canImport ? (
+          <div className="grid gap-2 sm:flex sm:items-center">
+            <ProviderImportButton />
+            {addButton}
+          </div>
+        ) : (
+          addButton
+        )}
       </header>
 
       {d?.unassigned.length ? (
@@ -149,6 +166,7 @@ function ProvidersPane({
       void qc.invalidateQueries({ queryKey: ["network"] });
       void qc.invalidateQueries({ queryKey: ["customer-providers"] });
       void qc.invalidateQueries({ queryKey: ["provider"] });
+      void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
@@ -165,6 +183,7 @@ function ProvidersPane({
       void qc.invalidateQueries({ queryKey: ["network"] });
       void qc.invalidateQueries({ queryKey: ["provider"] });
       void qc.invalidateQueries({ queryKey: ["customer-providers"] });
+      void qc.invalidateQueries({ queryKey: PROVIDER_GEO_KEY });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not rename"),
   });
@@ -211,19 +230,19 @@ function ProvidersPane({
         {rows.map((p) => (
           <li
             key={p.id}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-2 py-1 last:border-b-0"
+            className="grid grid-cols-1 items-center gap-2 border-b border-border px-2 py-1 last:border-b-0 max-sm:gap-y-0 sm:grid-cols-[minmax(0,1fr)_auto]"
           >
             <button
               type="button"
               onClick={() => onOpen(p.id)}
               className="desk-flat grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center"
             >
-              <span>
+              <span className="max-sm:min-w-0">
                 <span className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-medium">{p.name}</span>
+                  <span className="font-medium max-sm:break-words">{p.name}</span>
                   <Badge variant={statusTone(p.status)}>{p.status || "Unconfirmed"}</Badge>
                 </span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">
+                <span className="mt-0.5 block text-xs text-muted-foreground max-sm:break-words">
                   {[p.dispatchPhone, p.dispatchEmail].filter(Boolean).join(" · ") || "No dispatch contact yet"}
                 </span>
               </span>
@@ -235,11 +254,12 @@ function ProvidersPane({
                 {p.secondaryFor ? ` · ${p.secondaryFor} backup` : ""}
               </span>
             </button>
-            <div className="flex shrink-0 items-center gap-1 pr-1">
+            <div className="flex shrink-0 items-center gap-1 pr-1 max-sm:justify-end max-sm:pb-2">
             <Button
               type="button"
               size="sm"
               variant="outline"
+              className="max-sm:h-10 max-sm:px-4"
               aria-label={`Rename ${p.name}`}
               onClick={() => setRenaming({ id: p.id, name: p.name })}
             >
@@ -250,6 +270,7 @@ function ProvidersPane({
               type="button"
               size="sm"
               variant="outline"
+              className="max-sm:h-10 max-sm:px-4"
               disabled={remove.isPending}
               aria-label={`Remove ${p.name}`}
               onClick={() => {
@@ -327,7 +348,7 @@ function AccountsPane({
                   {[a.city, a.state, a.zip].filter(Boolean).join(", ") || a.region || "Location TBD"}
                 </p>
                 {a.equipment ? (
-                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{a.equipment}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground sm:line-clamp-1">{a.equipment}</p>
                 ) : null}
               </div>
               {!a.primary ? (

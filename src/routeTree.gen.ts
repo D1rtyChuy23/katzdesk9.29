@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccessRouteImport } from './routes/_app/access'
+import { Route as AppAddressReportRouteImport } from './routes/_app/address-report'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppCustomerNamesRouteImport } from './routes/_app/customer-names'
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
@@ -20,6 +21,7 @@ import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
 import { Route as AppLibraryRouteImport } from './routes/_app/library'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
+import { Route as AppMapRouteImport } from './routes/_app/map'
 import { Route as AppModulesRouteImport } from './routes/_app/modules'
 import { Route as AppNetworkRouteImport } from './routes/_app/network'
 import { Route as AppPartsRouteImport } from './routes/_app/parts'
@@ -56,6 +58,11 @@ const AppAccessRoute = AppAccessRouteImport.update({
   path: '/access',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAddressReportRoute = AppAddressReportRouteImport.update({
+  id: '/address-report',
+  path: '/address-report',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -89,6 +96,11 @@ const AppLibraryRoute = AppLibraryRouteImport.update({
 const AppLocationsRoute = AppLocationsRouteImport.update({
   id: '/locations',
   path: '/locations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMapRoute = AppMapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => AppRoute,
 } as any)
 const AppModulesRoute = AppModulesRouteImport.update({
@@ -176,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/address-report': typeof AppAddressReportRoute
   '/analytics': typeof AppAnalyticsRoute
   '/customer-names': typeof AppCustomerNamesRoute
   '/customers': typeof AppCustomersRoute
@@ -183,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/installs': typeof AppInstallsRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
+  '/map': typeof AppMapRoute
   '/modules': typeof AppModulesRoute
   '/network': typeof AppNetworkRoute
   '/parts': typeof AppPartsRoute
@@ -203,6 +217,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/address-report': typeof AppAddressReportRoute
   '/analytics': typeof AppAnalyticsRoute
   '/customer-names': typeof AppCustomerNamesRoute
   '/customers': typeof AppCustomersRoute
@@ -210,6 +225,7 @@ export interface FileRoutesByTo {
   '/installs': typeof AppInstallsRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
+  '/map': typeof AppMapRoute
   '/modules': typeof AppModulesRoute
   '/network': typeof AppNetworkRoute
   '/parts': typeof AppPartsRoute
@@ -233,6 +249,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/access': typeof AppAccessRoute
+  '/_app/address-report': typeof AppAddressReportRoute
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/customer-names': typeof AppCustomerNamesRoute
   '/_app/customers': typeof AppCustomersRoute
@@ -240,6 +257,7 @@ export interface FileRoutesById {
   '/_app/installs': typeof AppInstallsRoute
   '/_app/library': typeof AppLibraryRoute
   '/_app/locations': typeof AppLocationsRoute
+  '/_app/map': typeof AppMapRoute
   '/_app/modules': typeof AppModulesRoute
   '/_app/network': typeof AppNetworkRoute
   '/_app/parts': typeof AppPartsRoute
@@ -264,6 +282,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/access'
+    | '/address-report'
     | '/analytics'
     | '/customer-names'
     | '/customers'
@@ -271,6 +290,7 @@ export interface FileRouteTypes {
     | '/installs'
     | '/library'
     | '/locations'
+    | '/map'
     | '/modules'
     | '/network'
     | '/parts'
@@ -291,6 +311,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/access'
+    | '/address-report'
     | '/analytics'
     | '/customer-names'
     | '/customers'
@@ -298,6 +319,7 @@ export interface FileRouteTypes {
     | '/installs'
     | '/library'
     | '/locations'
+    | '/map'
     | '/modules'
     | '/network'
     | '/parts'
@@ -320,6 +342,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/_app/access'
+    | '/_app/address-report'
     | '/_app/analytics'
     | '/_app/customer-names'
     | '/_app/customers'
@@ -327,6 +350,7 @@ export interface FileRouteTypes {
     | '/_app/installs'
     | '/_app/library'
     | '/_app/locations'
+    | '/_app/map'
     | '/_app/modules'
     | '/_app/network'
     | '/_app/parts'
@@ -385,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccessRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/address-report': {
+      id: '/_app/address-report'
+      path: '/address-report'
+      fullPath: '/address-report'
+      preLoaderRoute: typeof AppAddressReportRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/analytics': {
       id: '/_app/analytics'
       path: '/analytics'
@@ -432,6 +463,13 @@ declare module '@tanstack/react-router' {
       path: '/locations'
       fullPath: '/locations'
       preLoaderRoute: typeof AppLocationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/map': {
+      id: '/_app/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof AppMapRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/modules': {
@@ -551,6 +589,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAccessRoute: typeof AppAccessRoute
+  AppAddressReportRoute: typeof AppAddressReportRoute
   AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppCustomerNamesRoute: typeof AppCustomerNamesRoute
   AppCustomersRoute: typeof AppCustomersRoute
@@ -558,6 +597,7 @@ interface AppRouteChildren {
   AppInstallsRoute: typeof AppInstallsRoute
   AppLibraryRoute: typeof AppLibraryRoute
   AppLocationsRoute: typeof AppLocationsRoute
+  AppMapRoute: typeof AppMapRoute
   AppModulesRoute: typeof AppModulesRoute
   AppNetworkRoute: typeof AppNetworkRoute
   AppPartsRoute: typeof AppPartsRoute
@@ -575,6 +615,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccessRoute: AppAccessRoute,
+  AppAddressReportRoute: AppAddressReportRoute,
   AppAnalyticsRoute: AppAnalyticsRoute,
   AppCustomerNamesRoute: AppCustomerNamesRoute,
   AppCustomersRoute: AppCustomersRoute,
@@ -582,6 +623,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInstallsRoute: AppInstallsRoute,
   AppLibraryRoute: AppLibraryRoute,
   AppLocationsRoute: AppLocationsRoute,
+  AppMapRoute: AppMapRoute,
   AppModulesRoute: AppModulesRoute,
   AppNetworkRoute: AppNetworkRoute,
   AppPartsRoute: AppPartsRoute,

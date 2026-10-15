@@ -75,7 +75,7 @@ export function ComingDuePanel({
               <section key={b.id}>
                 <button
                   type="button"
-                  className="flex w-full items-baseline justify-between gap-2 text-left"
+                  className="flex w-full items-baseline justify-between gap-2 text-left max-sm:min-h-10 max-sm:items-center"
                   onClick={() => setOpen(open === b.id ? null : b.id)}
                 >
                   <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
@@ -91,11 +91,12 @@ export function ComingDuePanel({
                           entityType={row.entityType}
                           id={row.id}
                           title={`${row.customer} · ${kindLabel(row)} · ${formatShortDate(row.scheduled)} · ${row.status}${row.wo ? ` · ${row.wo}` : ""}${row.technician || row.accountRep ? ` · ${row.technician || row.accountRep}` : ""}`}
-                          className="desk-flat grid gap-0.5 px-2.5 py-1.5 hover:bg-muted/60 sm:grid-cols-[minmax(0,1.4fr)_4.5rem_7.5rem_minmax(0,9rem)] sm:items-center sm:gap-2"
+                          className="desk-flat grid gap-0.5 px-2.5 py-1.5 hover:bg-muted/60 max-sm:flex max-sm:flex-wrap max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-1 max-sm:py-2 sm:grid-cols-[minmax(0,1.4fr)_4.5rem_7.5rem_minmax(0,9rem)] sm:items-center sm:gap-2"
                         >
-                          <span className="min-w-0">
+                          {/* Phones: name and WO on top, then kind · date · status · tech on one line. */}
+                          <span className="min-w-0 max-sm:w-full">
                             <span className="flex min-w-0 items-center gap-1.5">
-                              <span className="truncate font-medium">{row.customer}</span>
+                              <span className="truncate font-medium max-sm:break-words max-sm:whitespace-normal">{row.customer}</span>
                               <AkBadge on={row.aviKatz} />
                             </span>
                             <span className="block truncate text-[11px] text-muted-foreground">
@@ -110,7 +111,7 @@ export function ComingDuePanel({
                           </span>
                           <span className="text-[11px] text-muted-foreground">
                             {kindLabel(row)}
-                            <span className="mt-0.5 block tabular">{formatShortDate(row.scheduled)}</span>
+                            <span className="mt-0.5 block tabular max-sm:mt-0 max-sm:ml-1 max-sm:inline">{formatShortDate(row.scheduled)}</span>
                           </span>
                           <StatusBadge status={row.status} />
                           <span className="min-w-0 truncate text-[11px] text-muted-foreground">

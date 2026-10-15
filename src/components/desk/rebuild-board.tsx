@@ -76,10 +76,12 @@ export function RebuildBoard({
     <div>
       {canEdit ? (
         <p className="mb-2 text-xs text-muted-foreground">
-          Drag a project into the next column as work moves. Remove takes it off the board without deleting history.
+          <span className="max-sm:hidden">Drag a project into the next column as work moves. Remove takes it off the board without deleting history.</span>
+          <span className="sm:hidden">Open a project to move it to the next status. Remove takes it off the board without deleting history.</span>
         </p>
       ) : null}
-      <div className="flex min-w-0 gap-3 overflow-x-auto pb-2">
+      {/* Phones: the status columns stack, one under the other, at full width. */}
+      <div className="flex min-w-0 gap-3 overflow-x-auto pb-2 max-sm:flex-col max-sm:overflow-visible">
         {REBUILD_STATUSES.map((status) => {
           const cards = rows.filter((r) => r.status === status);
           const hot = overStatus === status && dragId != null;
@@ -88,7 +90,7 @@ export function RebuildBoard({
               key={status}
               data-testid={`rebuild-col-${status}`}
               className={cn(
-                "flex w-64 shrink-0 flex-col rounded-xl border border-border bg-muted/40 transition-colors",
+                "flex w-64 shrink-0 flex-col rounded-xl border border-border bg-muted/40 transition-colors max-sm:w-full",
                 hot && "border-primary bg-primary/8 ring-2 ring-primary/40",
               )}
               onDragOver={(e) => {
@@ -110,11 +112,11 @@ export function RebuildBoard({
                 <h3 className="text-sm font-medium">{status}</h3>
                 <span className="tabular text-xs text-muted-foreground">{cards.length}</span>
               </header>
-              <ul className="flex min-h-24 flex-1 flex-col gap-2 px-2 pb-2">
+              <ul className={cn("flex min-h-24 flex-1 flex-col gap-2 px-2 pb-2", cards.length === 0 && "max-sm:min-h-0")}>
                 {cards.length === 0 ? (
                   <li
                     className={cn(
-                      "rounded-lg border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground",
+                      "rounded-lg border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground max-sm:py-2",
                       hot && "border-primary/50 text-primary",
                     )}
                   >
@@ -161,14 +163,14 @@ export function RebuildBoard({
                           ) : null}
                           <div className="min-w-0 flex-1">
                             <p className="font-medium leading-snug">{r.title}</p>
-                            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground max-sm:break-words max-sm:whitespace-normal">
                               {r.equipment || "No equipment"} · {r.account}
                             </p>
                           </div>
                           {canEdit ? (
                             <button
                               type="button"
-                              className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive"
+                              className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive max-sm:-my-1 max-sm:-mr-1 max-sm:size-10"
                               aria-label={`Remove ${r.title}`}
                               data-testid={`rebuild-remove-${r.id}`}
                               disabled={remove.isPending}
