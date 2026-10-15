@@ -209,7 +209,7 @@ export function RebuildSheet({
                 <CustomerCombo label="Account" value={account} onChange={setAccount} />
                 <button
                   type="button"
-                  className="mt-1 text-xs text-primary underline-offset-2 hover:underline"
+                  className="mt-1 text-xs text-primary underline-offset-2 hover:underline max-sm:mt-2 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:text-sm"
                   onClick={() => setAccount(SHOP_ACCOUNT)}
                   disabled={locked}
                 >

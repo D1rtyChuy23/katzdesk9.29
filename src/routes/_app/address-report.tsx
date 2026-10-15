@@ -273,14 +273,14 @@ function ReportRow({
   const pin = row.hasStreetPin ? "Street Pin" : row.pinQuality === "approx" ? "ZIP Area Pin" : "No Pin";
   return (
     <li
-      className="grid gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start md:px-4"
+      className="grid grid-cols-[minmax(0,1fr)] gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start md:px-4"
       data-testid="address-row"
       data-id={row.id}
       data-status={row.status}
     >
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-          <Link to="/customers" search={{ open: row.id }} className="min-w-0 font-medium break-words hover:underline" data-testid="address-name">
+          <Link to="/customers" search={{ open: row.id }} className="min-w-0 font-medium break-words hover:underline max-sm:py-2" data-testid="address-name">
             {row.name}
           </Link>
           {row.nameLocked ? <Lock className="size-3.5 shrink-0 text-primary" aria-label="Name locked from the clean list" /> : null}

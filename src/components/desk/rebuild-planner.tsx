@@ -123,13 +123,14 @@ export function RebuildPlanner({
         <Input value={account} onChange={(e) => setAccount(e.target.value)} placeholder="Account" />
         <Input value={equip} onChange={(e) => setEquip(e.target.value)} placeholder="Equipment" />
       </div>
+      {/* Phones: each project's name sits above a full-width bar, so the whole window fits without a sideways scroll. */}
       <div className="mt-4 overflow-x-auto">
-        <div className="min-w-[640px]">
-          <div className="mb-1 grid grid-cols-[11rem_1fr] text-[11px] text-muted-foreground">
-            <span />
+        <div className="sm:min-w-[640px]">
+          <div className="mb-1 grid grid-cols-[11rem_1fr] text-[11px] text-muted-foreground max-sm:grid-cols-1">
+            <span className="max-sm:hidden" />
             <div className="relative h-5">
               {ticks.map((d, i) => (
-                <span key={d} className="absolute -translate-x-1/2" style={{ left: `${(i / 6) * 100}%` }}>
+                <span key={d} className={cn("absolute -translate-x-1/2", i === 0 && "max-sm:translate-x-0")} style={{ left: `${(i / 6) * 100}%` }}>
                   {formatShortDate(d)}
                 </span>
               ))}
@@ -146,10 +147,19 @@ export function RebuildPlanner({
               const overlap =
                 range && (weekHits.get(`${r.owner || "unassigned"}:${Math.floor(start / 7)}`) ?? 0) > 1;
               return (
-                <li key={r.id} className="grid grid-cols-[11rem_1fr] items-center gap-2">
-                  <button type="button" className="min-w-0 truncate text-left text-xs hover:underline" onClick={() => onOpen(r.id)}>
+                <li key={r.id} className="grid grid-cols-[11rem_1fr] items-center gap-2 max-sm:grid-cols-1 max-sm:gap-1">
+                  <button
+                    type="button"
+                    className="min-w-0 truncate text-left text-xs hover:underline max-sm:min-h-10 max-sm:break-words max-sm:whitespace-normal"
+                    onClick={() => onOpen(r.id)}
+                  >
                     <span className="font-medium">{r.account}</span>
-                    <span className="block truncate text-muted-foreground" data-testid="rebuild-row-cost" title={r.quote ? `Parts ${money(r.quote.parts)} · Labor ${money(r.quote.labor)}` : "No repair quote on this project yet"}>
+                    <span className="block font-medium sm:hidden">{r.title}</span>
+                    <span
+                      className="block truncate text-muted-foreground max-sm:break-words max-sm:whitespace-normal"
+                      data-testid="rebuild-row-cost"
+                      title={r.quote ? `Parts ${money(r.quote.parts)} · Labor ${money(r.quote.labor)}` : "No repair quote on this project yet"}
+                    >
                       {r.quote ? `Cost ${costGlance(r.quote)} · ` : "No quote · "}
                       {r.equipment || r.title}
                     </span>
@@ -162,7 +172,8 @@ export function RebuildPlanner({
                         onClick={() => onOpen(r.id)}
                         title={`${r.title} · ${range.start} → ${range.end}`}
                         className={cn(
-                          "absolute top-1 h-6 rounded-md px-2 text-left text-[10px] leading-6 text-cream",
+                          // Bars turn light in dark mode, so phones put dark text on them there.
+                          "absolute top-1 h-6 rounded-md px-2 text-left text-[10px] leading-6 text-cream max-sm:dark:text-ink",
                           r.health === "overdue" ? "bg-destructive" : r.health === "at-risk" || r.health === "no-date" ? "bg-warning" : "bg-primary",
                           overlap && "ring-2 ring-warning",
                         )}
@@ -178,18 +189,19 @@ export function RebuildPlanner({
               );
             })}
           </ul>
+          {/* On a phone nothing in here is wider than the card any more, so the target dates are never cut off. */}
           {canEdit ? (
-            <ul className="mt-3 space-y-1">
+            <ul className="mt-3 space-y-1 max-sm:space-y-0 max-sm:divide-y max-sm:divide-border">
               {list
                 .filter((r) => r.status !== "Completed")
                 .slice(0, 12)
                 .map((r) => (
-                  <li key={`date-${r.id}`} className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className="w-40 truncate">{r.title}</span>
+                  <li key={`date-${r.id}`} className="flex flex-wrap items-center gap-2 text-xs max-sm:py-2">
+                    <span className="w-40 truncate max-sm:w-full max-sm:text-sm max-sm:break-words max-sm:whitespace-normal">{r.title}</span>
                     <Badge variant="outline">{HEALTH_LABEL[r.health]}</Badge>
                     <Input
                       type="date"
-                      className="h-8 w-40"
+                      className="h-8 w-40 max-sm:h-10"
                       value={r.targetComplete ?? ""}
                       onChange={(e) => saveDate.mutate({ id: r.id, targetComplete: e.target.value || null })}
                     />

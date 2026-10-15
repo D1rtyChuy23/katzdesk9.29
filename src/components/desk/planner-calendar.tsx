@@ -32,7 +32,7 @@ const TYPE_META: Record<CalType, { label: string; short: string; entity: "instal
   installs: { label: "Installs", short: "Install", entity: "install", className: "bg-primary/15 text-primary" },
   pms: { label: "PMs", short: "PM", entity: "pm", className: "bg-secondary text-foreground" },
   tlcs: { label: "TLCs", short: "TLC", entity: "tlc", className: "bg-warning/15 text-warning" },
-  services: { label: "Services", short: "Service", entity: "service", className: "bg-ink/10 text-ink" },
+  services: { label: "Services", short: "Service", entity: "service", className: "bg-ink/10 text-ink max-sm:dark:bg-cream/12 max-sm:dark:text-cream" },
 };
 
 export type CalItem = {
@@ -366,17 +366,21 @@ export function PlannerCalendar({
         })}
       </div>
 
+      {/* Page variant on a phone: the month reads as a list of the days that have work (plus today), names in full. */}
+      {!pop && visible.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground sm:hidden">Nothing pending this month.</p>
+      ) : null}
       <div className="mt-4 overflow-x-auto">
-        <div className={pop ? "min-w-[22rem]" : "min-w-[44rem]"}>
-          <div className="grid grid-cols-7 gap-1 text-[10px] tracking-wide text-muted-foreground uppercase">
+        <div className={pop ? "min-w-[22rem]" : "sm:min-w-[44rem]"}>
+          <div className={cn("grid grid-cols-7 gap-1 text-[10px] tracking-wide text-muted-foreground uppercase", !pop && "max-sm:hidden")}>
             {WEEKDAYS.map((d) => (
               <span key={d} className="px-1">
                 {pop ? d.slice(0, 1) : d}
               </span>
             ))}
           </div>
-          <div className="mt-1 grid grid-cols-7 gap-1">
-            {cells.map((d) => {
+          <div className={cn("mt-1 grid grid-cols-7 gap-1", !pop && "max-sm:grid-cols-1 max-sm:gap-2")}>
+            {cells.map((d, idx) => {
               const inMonth = d >= month.start && d <= month.end;
               const dayItems = inMonth ? (byDay.get(d) ?? []) : [];
               const isToday = d === today;
@@ -403,16 +407,25 @@ export function PlannerCalendar({
                   }}
                   className={cn(
                     "rounded-md border border-transparent bg-secondary/40 p-1",
-                    pop ? "min-h-[4.5rem]" : "min-h-[6.5rem]",
+                    pop ? "min-h-[4.5rem]" : "min-h-[6.5rem] max-sm:min-h-0 max-sm:p-2",
+                    !pop && (!inMonth || (!dayItems.length && !isToday)) && "max-sm:hidden",
                     !inMonth && "opacity-40",
                     isToday && "border-primary/40 bg-primary/5",
                     over === d && "border-primary bg-primary/10",
                   )}
                 >
-                  <p className={cn("px-1 text-[11px] tabular", isToday && "font-semibold text-foreground")}>
-                    {pop ? Number(d.slice(8)) : formatShortDate(d)}
+                  <p className={cn("px-1 text-[11px] tabular", !pop && "max-sm:text-xs max-sm:font-medium", isToday && "font-semibold text-foreground")}>
+                    {pop ? (
+                      Number(d.slice(8))
+                    ) : (
+                      <>
+                        <span className="sm:hidden">{WEEKDAYS[idx % 7]} </span>
+                        {formatShortDate(d)}
+                        {isToday ? <span className="sm:hidden"> · Today</span> : null}
+                      </>
+                    )}
                   </p>
-                  <ul className="mt-0.5 space-y-0.5">
+                  <ul className={cn("mt-0.5 space-y-0.5", !pop && "max-sm:mt-1 max-sm:space-y-1")}>
                     {dayItems.map((it) => {
                       const meta = TYPE_META[it.type];
                       const st = ticketNo(it);
@@ -449,13 +462,23 @@ export function PlannerCalendar({
                                 openItem(it);
                               }
                             }}
-                            className="desk-lift block min-w-0 cursor-grab rounded-sm px-1 py-0.5 text-left active:cursor-grabbing"
+                            className={cn(
+                              "desk-lift block min-w-0 cursor-grab rounded-sm px-1 py-0.5 text-left active:cursor-grabbing",
+                              !pop && "max-sm:py-1.5",
+                            )}
                           >
-                            <span className={cn("inline-block rounded px-1 text-[9px] font-medium tracking-wide uppercase", meta.className)}>
+                            <span className={cn("inline-block rounded px-1 text-[9px] font-medium tracking-wide uppercase", !pop && "max-sm:mr-1.5", meta.className)}>
                               {meta.short}
                             </span>
-                            <span className="mt-0.5 block truncate text-[11px] font-medium leading-tight">{it.account}</span>
-                            <span className="block truncate text-[10px] text-muted-foreground">
+                            <span
+                              className={cn(
+                                "mt-0.5 block truncate text-[11px] font-medium leading-tight",
+                                !pop && "max-sm:mt-0 max-sm:inline max-sm:text-sm max-sm:break-words max-sm:whitespace-normal",
+                              )}
+                            >
+                              {it.account}
+                            </span>
+                            <span className={cn("block truncate text-[10px] text-muted-foreground", !pop && "max-sm:mt-0.5 max-sm:text-xs max-sm:break-words max-sm:whitespace-normal")}>
                               {[st, it.owner].filter(Boolean).join(" · ") || meta.label}
                             </span>
                           </div>

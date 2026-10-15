@@ -59,10 +59,13 @@ export function PartThumb({
   const inside = (
     <>
       <ImageOff className="size-4 text-muted-foreground" aria-hidden />
-      <span className="max-w-full text-[10px] leading-tight font-medium break-all text-foreground" data-testid="part-slot-label">
+      {/* Phones: break at spaces and hyphens first ("SKU FETCO-1252-" / "SPRAY"), mid-word only when nothing else fits. */}
+      <span className="max-w-full text-[10px] leading-tight font-medium break-all text-foreground max-sm:[overflow-wrap:anywhere] max-sm:[word-break:normal]" data-testid="part-slot-label">
         {label.main}
       </span>
-      {size !== "sm" && label.sub ? <span className="max-w-full text-[9px] leading-tight break-all text-muted-foreground">{label.sub}</span> : null}
+      {size !== "sm" && label.sub ? (
+        <span className="max-w-full text-[9px] leading-tight break-all text-muted-foreground max-sm:[overflow-wrap:anywhere] max-sm:[word-break:normal]">{label.sub}</span>
+      ) : null}
     </>
   );
   if (onOpen) {

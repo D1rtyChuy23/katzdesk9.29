@@ -342,12 +342,16 @@ export function JobSheet({
         <SheetContent>
           {j ? (
             <>
-              <SheetHeader>
+              {/* Phones: a tighter header so more of the ticket shows under it. */}
+              <SheetHeader className="max-sm:py-3">
                 <p className="text-xs tracking-wide text-muted-foreground uppercase">
                   {j.kind === "tlc" ? "TLC + Factor" : "Service call"} · {j.callId}
                 </p>
-                <SheetTitle>{j.customer ?? "Untitled Account"}</SheetTitle>
-                <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5">
+                {/* A blank customer reads "Untitled Account" on phones only; sm and up keep the blank title they had. */}
+                <SheetTitle>
+                  {j.customer?.trim() ? j.customer : j.customer == null ? "Untitled Account" : <span className="sm:hidden">Untitled Account</span>}
+                </SheetTitle>
+                <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5 max-sm:mt-1">
                   <UrgencyBadge urgency={j.urgency} />
                   <StatusBadge status={j.status} />
                   <FlagBadge flag={j.flag} />

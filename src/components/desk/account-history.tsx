@@ -195,24 +195,28 @@ export function AccountEquipmentList({
   );
 }
 
+/**
+ * One history row. From sm up: kind | title + subtitle | badges. On a phone the kind label and the badges share the
+ * top line and the title and subtitle get the full width under them, so ticket numbers do not break mid-ID.
+ */
 export function HistoryRow({ item, onOpen }: { item: HistoryItem; onOpen: () => void }) {
   return (
     <li>
       <button
         type="button"
         onClick={onOpen}
-        className="desk-flat flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60"
+        className="desk-flat flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-muted/60 max-sm:flex-wrap max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-1"
       >
-        <span className="mt-0.5 w-16 shrink-0 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        <span className="mt-0.5 w-16 shrink-0 text-[11px] font-medium tracking-wide text-muted-foreground uppercase max-sm:mt-0 max-sm:w-auto max-sm:flex-1">
           {KIND_LABEL[item.kind]}
         </span>
-        <span className="min-w-0 flex-1">
+        <span className="min-w-0 flex-1 max-sm:order-last max-sm:basis-full">
           <span className="block font-medium">{item.title}</span>
           <span className="block text-xs text-muted-foreground">
             {[item.subtitle, formatShortDate(item.date), item.technician].filter(Boolean).join(" · ")}
           </span>
         </span>
-        <span className="flex shrink-0 flex-col items-end gap-1">
+        <span className="flex shrink-0 flex-col items-end gap-1 max-sm:min-w-0 max-sm:shrink max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:justify-end">
           {item.urgency ? <UrgencyBadge urgency={item.urgency} /> : null}
           <StatusBadge status={item.status} />
           <FlagBadge flag={item.flag} />

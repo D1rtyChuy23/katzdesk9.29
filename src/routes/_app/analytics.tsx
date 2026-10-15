@@ -42,6 +42,19 @@ const OPEN_AS: Record<AnalyticsType, string> = { installs: "install", service: "
 
 const PAGE = 100;
 
+/*
+ * Phones (below sm): the wide tables become one card per row. Same table, same rows and test ids; CSS only
+ * (display, order and a label before each value). sm and up keep the table exactly as it was.
+ */
+const CARD_TABLE = "max-sm:block";
+const CARD_HEAD = "max-sm:hidden";
+const CARD_BODY = "max-sm:block";
+const CARD_ROW = "max-sm:flex max-sm:flex-wrap max-sm:items-center max-sm:gap-x-3 max-sm:gap-y-1 max-sm:px-4 max-sm:py-3";
+/** A full-width line of the card. */
+const CARD_LINE = "max-sm:basis-full max-sm:max-w-none max-sm:p-0";
+/** A small value in a run of values; the label comes from before:content on the cell. */
+const CARD_VALUE = "max-sm:p-0 max-sm:text-left max-sm:text-xs max-sm:before:mr-1 max-sm:before:font-normal max-sm:before:text-muted-foreground";
+
 type ReportView = "records" | "profit";
 
 function Page() {
@@ -152,8 +165,10 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
             {r.label}
           </FilterChip>
         ))}
-        {/* From and To stay side by side, so the range never splits across two lines. */}
-        <span className="flex shrink-0 items-center gap-2">
+        {/* From and To stay side by side, so the range never splits across two lines. Phones: tighter boxes (To keeps
+            room for the six-digit year Chrome reserves when there is no max), and the pair wraps on the narrowest screens
+            rather than running off the edge. */}
+        <span className="flex shrink-0 items-center gap-2 max-sm:max-w-full max-sm:flex-wrap">
         <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
           From
           <Input
@@ -164,7 +179,7 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
               setRange("custom");
               setDates((d) => ({ ...d, from: e.target.value }));
             }}
-            className="h-9 w-[9.5rem] rounded-full"
+            className="h-9 w-[8.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]"
             aria-label="From date"
             data-testid="analytics-from"
           />
@@ -179,7 +194,7 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
               setRange("custom");
               setDates((d) => ({ ...d, to: e.target.value }));
             }}
-            className="h-9 w-[9.5rem] rounded-full"
+            className="h-9 w-[9.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]"
             aria-label="To date"
             data-testid="analytics-to"
           />
@@ -225,8 +240,8 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
           <Skeleton className="h-64 w-full" />
         ) : rows.length ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[62rem] text-sm">
-              <thead className="text-left text-xs tracking-wide text-muted-foreground uppercase">
+            <table className={`w-full text-sm sm:min-w-[62rem] ${CARD_TABLE}`}>
+              <thead className={`text-left text-xs tracking-wide text-muted-foreground uppercase ${CARD_HEAD}`}>
                 <tr className="border-b border-border">
                   <th className="px-4 py-2.5 font-medium">Type</th>
                   <th className="px-2 py-2.5 font-medium">Account</th>
@@ -239,7 +254,7 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
                   <th className="px-2 py-2.5 pr-4 font-medium">Detail</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className={CARD_BODY}>
                 {rows.slice(0, shown).map((r) => (
                   <RecordRow key={`${r.type}-${r.id}`} row={r} />
                 ))}
@@ -266,24 +281,30 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
 
 function RecordRow({ row: r }: { row: AnalyticsRow }) {
   return (
-    <tr className="border-b border-border align-top last:border-b-0 hover:bg-muted/60" data-testid="analytics-row" data-type={r.type}>
-      <td className="px-4 py-2 text-xs font-semibold tracking-[0.08em] text-copper uppercase">{ANALYTICS_LABEL[r.type]}</td>
-      <td className="px-2 py-2">
-        <OpenLink entityType={OPEN_AS[r.type]} id={r.id} className="font-medium hover:underline" title="Open this record">
+    // Phone card: account on top; type, account #, date and status; then rep, tech and reference; then the detail.
+    <tr
+      className={`border-b border-border align-top last:border-b-0 hover:bg-muted/60 ${CARD_ROW} max-sm:pt-1.5`}
+      data-testid="analytics-row"
+      data-type={r.type}
+    >
+      <td className="px-4 py-2 text-xs font-semibold tracking-[0.08em] text-copper uppercase max-sm:p-0">{ANALYTICS_LABEL[r.type]}</td>
+      <td className={`px-2 py-2 max-sm:order-first ${CARD_LINE}`}>
+        <OpenLink entityType={OPEN_AS[r.type]} id={r.id} className="font-medium hover:underline max-sm:inline-block max-sm:py-2 max-sm:text-base max-sm:leading-snug" title="Open this record">
           {r.account || "No account"}
         </OpenLink>
       </td>
-      <td className="tabular px-2 py-2 whitespace-nowrap" data-testid="analytics-account-number">
+      <td className={`tabular px-2 py-2 whitespace-nowrap ${CARD_VALUE} max-sm:before:content-['Acct']`} data-testid="analytics-account-number">
         {r.accountNumber || <span className="text-muted-foreground">—</span>}
       </td>
-      <td className="tabular px-2 py-2 whitespace-nowrap">{r.date || "—"}</td>
-      <td className="px-2 py-2">
+      <td className="tabular px-2 py-2 whitespace-nowrap max-sm:p-0 max-sm:text-xs">{r.date || "—"}</td>
+      {/* Phones: the cell's box drops out and its ::after takes a full line, so rep / tech / reference start a new line. */}
+      <td className="px-2 py-2 max-sm:contents max-sm:after:basis-full max-sm:after:content-['']">
         <StatusBadge status={r.status} tight />
       </td>
-      <td className="px-2 py-2">{r.rep ? formatRep(r.rep) || r.rep : <span className="text-muted-foreground">No rep</span>}</td>
-      <td className="px-2 py-2">{r.tech || <span className="text-muted-foreground">—</span>}</td>
-      <td className="tabular px-2 py-2">{r.ref || <span className="text-muted-foreground">—</span>}</td>
-      <td className="max-w-[18rem] px-2 py-2 pr-4 text-xs text-muted-foreground">
+      <td className={`px-2 py-2 ${CARD_VALUE} max-sm:before:content-['Rep']`}>{r.rep ? formatRep(r.rep) || r.rep : <span className="text-muted-foreground">No rep</span>}</td>
+      <td className={`px-2 py-2 ${CARD_VALUE} max-sm:before:content-['Tech']`}>{r.tech || <span className="text-muted-foreground">—</span>}</td>
+      <td className={`tabular px-2 py-2 ${CARD_VALUE} max-sm:before:content-['Ref']`}>{r.ref || <span className="text-muted-foreground">—</span>}</td>
+      <td className={`max-w-[18rem] px-2 py-2 pr-4 text-xs text-muted-foreground ${CARD_LINE}`}>
         <span className="line-clamp-2" title={r.detail}>
           {r.detail}
         </span>
@@ -368,14 +389,14 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
             {r.label}
           </FilterChip>
         ))}
-        <span className="flex shrink-0 items-center gap-2">
+        <span className="flex shrink-0 items-center gap-2 max-sm:max-w-full max-sm:flex-wrap">
           <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
             From
-            <Input type="date" value={dates.from} max={dates.to || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, from: e.target.value })); }} className="h-9 w-[9.5rem] rounded-full" aria-label="From date" />
+            <Input type="date" value={dates.from} max={dates.to || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, from: e.target.value })); }} className="h-9 w-[8.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]" aria-label="From date" />
           </label>
           <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
             To
-            <Input type="date" value={dates.to} min={dates.from || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, to: e.target.value })); }} className="h-9 w-[9.5rem] rounded-full" aria-label="To date" />
+            <Input type="date" value={dates.to} min={dates.from || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, to: e.target.value })); }} className="h-9 w-[9.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]" aria-label="To date" />
           </label>
         </span>
         <ToolbarNote>{rows.length} MPN{rows.length === 1 ? "" : "s"}</ToolbarNote>
@@ -391,8 +412,8 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
           <Skeleton className="h-64 w-full" />
         ) : rows.length ? (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[56rem] text-sm">
-              <thead className="text-left text-xs tracking-wide text-muted-foreground uppercase">
+            <table className={`w-full text-sm sm:min-w-[56rem] ${CARD_TABLE}`}>
+              <thead className={`text-left text-xs tracking-wide text-muted-foreground uppercase ${CARD_HEAD}`}>
                 <tr className="border-b border-border">
                   <th className="px-4 py-2.5 font-medium">MPN</th>
                   <th className="px-2 py-2.5 font-medium">Part</th>
@@ -405,24 +426,25 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
                   <th className="px-2 py-2.5 pr-4 text-right font-medium">Margin %</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className={CARD_BODY}>
                 {rows.slice(0, shown).map((r) => (
-                  <tr key={`${r.mpn}-${r.sku}`} className="border-b border-border align-top last:border-b-0" data-testid="profit-row">
-                    <td className="px-4 py-2 font-medium">{r.mpn}</td>
-                    <td className="max-w-[16rem] px-2 py-2 text-xs text-muted-foreground">
+                  // Phone card: MPN, then the part, then the money as labelled values.
+                  <tr key={`${r.mpn}-${r.sku}`} className={`border-b border-border align-top last:border-b-0 ${CARD_ROW}`} data-testid="profit-row">
+                    <td className={`px-4 py-2 font-medium ${CARD_LINE}`}>{r.mpn}</td>
+                    <td className={`max-w-[16rem] px-2 py-2 text-xs text-muted-foreground ${CARD_LINE} max-sm:pb-1`}>
                       <span className="block font-medium text-foreground">{r.sku}</span>
-                      <span className="line-clamp-1">{r.description}</span>
+                      <span className="line-clamp-1 max-sm:line-clamp-none">{r.description}</span>
                     </td>
-                    <td className="tabular px-2 py-2 text-right">{r.qty}</td>
-                    <td className="tabular px-2 py-2 text-right">
+                    <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Qty']`}>{r.qty}</td>
+                    <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Cost']`}>
                       {money(r.cost)}
                       {r.noCost ? <span className="block text-[11px] text-warning">{r.noCost} with no cost</span> : null}
                     </td>
-                    <td className="tabular px-2 py-2 text-right">{money(r.sell)}</td>
-                    <td className="tabular px-2 py-2 text-right">{money(r.ourDiscount)}</td>
-                    <td className="tabular px-2 py-2 text-right">{money(r.ticketDiscount)}</td>
-                    <td className={`tabular px-2 py-2 text-right font-medium ${r.margin < 0 ? "text-destructive" : ""}`}>{money(r.margin)}</td>
-                    <td className="tabular px-2 py-2 pr-4 text-right">{r.marginPct == null ? "—" : `${r.marginPct}%`}</td>
+                    <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Sell']`}>{money(r.sell)}</td>
+                    <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Discount']`}>{money(r.ourDiscount)}</td>
+                    <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Ticket_discount']`}>{money(r.ticketDiscount)}</td>
+                    <td className={`tabular px-2 py-2 text-right font-medium ${r.margin < 0 ? "text-destructive" : ""} ${CARD_VALUE} max-sm:before:content-['Margin']`}>{money(r.margin)}</td>
+                    <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['Margin_%']`}>{r.marginPct == null ? "—" : `${r.marginPct}%`}</td>
                   </tr>
                 ))}
               </tbody>

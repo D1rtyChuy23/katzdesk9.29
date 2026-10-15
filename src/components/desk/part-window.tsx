@@ -101,7 +101,7 @@ function PartWindowView({ row, canEditMpn, onChanged }: { row: PartRow; canEditM
         <p className="text-xs tracking-wide text-muted-foreground uppercase">{row.hiddenAt ? "Part · Hidden" : "Part"}</p>
         {/* The NetSuite Description is the part's name. None stored: say so, never fill one in. */}
         {row.description ? (
-          <SheetTitle className="break-words" data-testid="part-window-title">
+          <SheetTitle className="break-words max-sm:text-lg max-sm:leading-snug" data-testid="part-window-title">
             {row.description}
           </SheetTitle>
         ) : (

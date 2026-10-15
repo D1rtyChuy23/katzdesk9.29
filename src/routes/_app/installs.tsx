@@ -639,7 +639,7 @@ function MarkInstalledButton({
       type="button"
       size="sm"
       variant="outline"
-      className="shrink-0"
+      className="shrink-0 max-sm:h-10 max-sm:min-w-10"
       data-testid="mark-installed"
       disabled={marking}
       aria-label={`Mark ${customer} installed`}
@@ -673,11 +673,13 @@ function InstallActions({
   onToggleInspect?: () => void;
 }) {
   return (
-    <div className="flex shrink-0 flex-col items-end gap-1">
+    // Phones: the actions sit on their own row under the row's text, so the name and lines get the full width.
+    <div className="flex shrink-0 flex-col items-end gap-1 max-sm:w-full max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:justify-end">
       {open && onTicket && siteIsReady(install.equipStatus, install.inspection?.overall) ? (
         <Button
           type="button"
           size="sm"
+          className="max-sm:h-10"
           data-testid="open-install-ticket"
           onClick={(e) => {
             e.stopPropagation();
@@ -693,6 +695,7 @@ function InstallActions({
           type="button"
           size="sm"
           variant={inspecting ? "default" : "outline"}
+          className="max-sm:h-10"
           data-testid="open-pre-inspection"
           aria-expanded={!!inspecting}
           onClick={(e) => {
@@ -771,7 +774,7 @@ function RemoveInstallButton({ install }: { install: Install }) {
       type="button"
       size="sm"
       variant="outline"
-      className="shrink-0"
+      className="shrink-0 max-sm:h-10 max-sm:min-w-10"
       aria-label={`Remove ${install.customer} from the list`}
       data-testid="archive-row"
       disabled={remove.isPending}
@@ -802,7 +805,7 @@ function InstallRow({
   const open = isOpenInstall(i);
   return (
     <article className="border-b border-border px-3 py-3 last:border-b-0 md:px-4">
-      <div className="flex items-start gap-2">
+      <div className="flex flex-wrap items-start gap-2 sm:flex-nowrap">
         {open ? (
           <OpenInstallSelect customer={i.customer} selected={selected} onToggle={onToggleSelect} />
         ) : null}
@@ -811,12 +814,12 @@ function InstallRow({
             <button
               type="button"
               onClick={onOpen}
-              className="text-left tabular text-sm font-medium hover:underline"
+              className="text-left tabular text-sm font-medium hover:underline max-sm:py-1.5"
             >
               {i.daysOut == null ? "needs date" : i.daysOut < 0 ? `${i.daysOut}d` : i.daysOut === 0 ? "today" : `${i.daysOut}d`}
             </button>
-            <button type="button" onClick={onOpen} className="min-w-0 text-left font-medium hover:underline">
-              <span className="block truncate">
+            <button type="button" onClick={onOpen} className="min-w-0 text-left font-medium hover:underline max-sm:py-1">
+              <span className="block break-words sm:truncate">
                 {i.customer} <AkBadge on={i.aviKatz} className="ml-1 align-middle" />
               </span>
               {i.accountNumber ? (
@@ -847,14 +850,14 @@ function InstallRow({
           <button
             type="button"
             onClick={onOpen}
-            className="mt-0.5 text-left text-sm text-muted-foreground hover:text-foreground sm:pl-20"
+            className="mt-0.5 text-left text-sm text-muted-foreground hover:text-foreground max-sm:py-1.5 sm:pl-20"
           >
             {formatShortDate(i.installDate)} · <TechName name={i.technician} />
             {" · "}
             {i.accountRep ? <RepName name={i.accountRep} /> : <NoRepFlag show />}
           </button>
           {i.dealId ? (
-            <OpenLink entityType="deal" id={i.dealId} className="mt-0.5 block w-fit text-xs text-copper hover:underline sm:pl-20" title="Open the deal these machines came from">
+            <OpenLink entityType="deal" id={i.dealId} className="mt-0.5 block w-fit text-xs text-copper hover:underline max-sm:py-2 sm:pl-20" title="Open the deal these machines came from">
               From the deal
             </OpenLink>
           ) : null}

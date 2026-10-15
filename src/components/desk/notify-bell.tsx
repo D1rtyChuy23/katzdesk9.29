@@ -187,7 +187,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
           {unread ? (
             <button
               type="button"
-              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+              className="text-xs text-muted-foreground underline-offset-2 hover:underline max-sm:-my-2 max-sm:min-h-10 max-sm:px-1"
               onClick={() => mark.mutate({ all: true })}
             >
               Mark all read
@@ -213,7 +213,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                   data-testid={`pings-${id}`}
                   onClick={() => pickRead(id)}
                   className={cn(
-                    "px-2.5 py-1 text-xs font-medium tabular",
+                    "px-2.5 py-1 text-xs font-medium tabular max-sm:h-10",
                     readFilter === id ? "bg-ink text-ink-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -228,7 +228,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search pings"
                 aria-label="Search pings"
-                className="h-7 w-full rounded-full border border-border bg-background pr-2 pl-7 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-7 w-full rounded-full border border-border bg-background pr-2 pl-7 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring max-sm:h-10"
               />
             </label>
           </div>
@@ -239,7 +239,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                   value={kind}
                   onChange={(e) => setKind(e.target.value as PingKind | "")}
                   aria-label="Filter pings by type"
-                  className="h-7 min-w-0 flex-1 rounded-full border border-border bg-background px-2 text-xs"
+                  className="h-7 min-w-0 flex-1 rounded-full border border-border bg-background px-2 text-xs max-sm:h-10"
                 >
                   <option value="">All types</option>
                   {kinds.map(([k, n]) => (
@@ -255,7 +255,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                   value={account}
                   onChange={(e) => setAccount(e.target.value)}
                   aria-label="Filter pings by account"
-                  className="h-7 min-w-0 flex-1 rounded-full border border-border bg-background px-2 text-xs"
+                  className="h-7 min-w-0 flex-1 rounded-full border border-border bg-background px-2 text-xs max-sm:h-10"
                 >
                   <option value="">All accounts</option>
                   {accounts.map((a) => (
@@ -292,7 +292,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                     <span aria-label="Unread" className="absolute top-3.5 left-1 size-1.5 rounded-full bg-primary" />
                   ) : null}
                   <p className="flex items-baseline justify-between gap-2 text-sm">
-                    <span className="min-w-0 truncate">
+                    <span className="min-w-0 truncate max-sm:break-words max-sm:whitespace-normal">
                       <span className={cn(!n.read && "font-semibold", n.read && "font-medium")}>{n.fromName ?? "Teammate"}</span>
                       <span className="text-muted-foreground"> · {headline(n)}</span>
                     </span>
@@ -300,7 +300,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
                       {KIND_LABEL[n.kind]}
                     </span>
                   </p>
-                  {subject(n) ? <p className="mt-0.5 truncate text-xs font-medium">{subject(n)}</p> : null}
+                  {subject(n) ? <p className="mt-0.5 truncate text-xs font-medium max-sm:break-words max-sm:whitespace-normal">{subject(n)}</p> : null}
                   <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
                   <time className="mt-1 block text-[11px] text-muted-foreground" dateTime={n.createdAt}>
                     {formatPingTime(n.createdAt)}

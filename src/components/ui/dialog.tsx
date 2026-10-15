@@ -38,7 +38,9 @@ export function DialogContent({
   return (
     <DialogPrimitive.Portal>
       {/* Plain overlay — not Dialog.Overlay — so react-remove-scroll does not cancel wheel events on lists portaled to the body. */}
-      <div className="fixed inset-0 z-50 bg-ink/40" style={{ pointerEvents: "auto" }} />
+      {/* Phones: a sheet fills the screen there, so the overlay rises over it (z-[70], after the sheet in the DOM) and
+          dims it; a little darker in dark mode so the dialog stands off the sheet. sm and up stay as they were. */}
+      <div className="fixed inset-0 z-50 bg-ink/40 max-sm:z-[70] max-sm:dark:bg-black/60" style={{ pointerEvents: "auto" }} />
       <DialogPrimitive.Content
         className={cn(
           "fixed top-20 left-1/2 z-[70] flex w-[calc(100%-1.5rem)] max-w-lg -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -63,6 +65,9 @@ export function DialogContent({
         {...props}
       >
         <PageScrollLock />
+        {/* Phones: the close button sits in this solid strip above the scroll area, so scrolled content goes under the
+            strip (whole lines out of view) instead of passing beside and under the button. sm and up have no strip. */}
+        <div aria-hidden className="h-12 shrink-0 bg-card sm:hidden" />
         <div
           data-dialog-scroll
           className="min-h-0 overflow-y-auto overscroll-contain p-5"
@@ -70,7 +75,8 @@ export function DialogContent({
         >
           {children}
         </div>
-        <DialogPrimitive.Close className="absolute top-3 right-3 z-30 rounded-sm bg-card/80 p-1 text-muted-foreground hover:bg-muted">
+        {/* Phones: a 40px tap target inside the top strip, on a solid card. */}
+        <DialogPrimitive.Close className="absolute top-3 right-3 z-30 rounded-sm bg-card/80 p-1 text-muted-foreground hover:bg-muted max-sm:top-2 max-sm:right-2 max-sm:bg-card max-sm:p-3">
           <X className="size-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

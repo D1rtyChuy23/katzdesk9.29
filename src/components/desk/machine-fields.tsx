@@ -535,7 +535,8 @@ export function MachineFields({
             <div className={cn("col-span-2 min-w-0", showRecipe ? "lg:col-span-1" : "sm:col-span-3")}>
               <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
               <p className="flex min-w-0 items-center gap-1 text-sm font-medium" title={spec.equipment}>
-                <span className="min-w-0 truncate">{spec.equipment}</span>
+                {/* Phones: the model name wraps instead of being cut off, and Remove is a 40px target set off from it. */}
+                <span className="min-w-0 truncate max-sm:break-words max-sm:whitespace-normal">{spec.equipment}</span>
                 {onRemove ? (
                   <button
                     type="button"
@@ -543,7 +544,7 @@ export function MachineFields({
                     aria-label={`Remove ${spec.equipment} from this ${where}`}
                     title={`Remove from this ${where}`}
                     data-testid="machine-remove"
-                    className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                    className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground max-sm:ml-1 max-sm:size-10"
                   >
                     <X className="size-3.5" />
                   </button>

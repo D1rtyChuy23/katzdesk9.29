@@ -84,13 +84,16 @@ export function CustomerAddress({ customer, className }: { customer: string | nu
       {q.isLoading ? (
         <p className="text-xs text-muted-foreground">Looking up the address…</p>
       ) : address ? (
+        // Phones: the address link and the pin line under it are 32px tap targets that never cover the name above or
+        // each other. The address grows into the gap below its line without moving anything; the pin line moves down
+        // 4px and adds 8px below.
         <p className="flex items-start gap-1 text-sm text-muted-foreground">
           <DirectionsPin pin={pin} address={address} />
           <a
             href={placeUrl({ address }) ?? undefined}
             target="_blank"
             rel="noreferrer"
-            className="min-w-0 hover:text-primary hover:underline"
+            className="min-w-0 hover:text-primary hover:underline max-sm:-mt-0.5 max-sm:-mb-2.5 max-sm:pt-0.5 max-sm:pb-2.5"
             title="Open in Google Maps"
             data-testid="customer-address-map"
           >
@@ -116,12 +119,12 @@ function LocationLine({ location }: { location: CustomerLocation }) {
   const label = match === "approx" ? "ZIP area pin (approximate)" : match === "close" ? "Map pin (close match, check it)" : "Map pin";
   const href = placeUrl({ point, quality: match });
   return (
-    <p className="mt-0.5 pl-9 text-xs text-muted-foreground" data-testid="customer-location">
+    <p className="mt-0.5 pl-9 text-xs text-muted-foreground max-sm:mt-1.5" data-testid="customer-location">
       <a
         href={href ?? undefined}
         target="_blank"
         rel="noreferrer"
-        className={cn("hover:text-primary hover:underline", match === "close" && "text-warning")}
+        className={cn("hover:text-primary hover:underline max-sm:inline-block max-sm:py-2 max-sm:-mb-2", match === "close" && "text-warning")}
         title={
           match === "approx"
             ? "Only the ZIP code was found, so this pin is the middle of the ZIP area. It is never used for directions."
@@ -131,7 +134,11 @@ function LocationLine({ location }: { location: CustomerLocation }) {
         }
         data-testid="customer-location-map"
       >
-        {label}: {point.lat.toFixed(5)}, {point.lng.toFixed(5)}
+        {label}
+        {/* Phones: the label alone keeps this to one short line; the link still opens the pin. */}
+        <span className="max-sm:hidden">
+          : {point.lat.toFixed(5)}, {point.lng.toFixed(5)}
+        </span>
       </a>
     </p>
   );

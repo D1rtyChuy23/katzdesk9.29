@@ -172,7 +172,8 @@ export function RecipeForm({
             key={f.name}
             className={cn("relative rounded-lg border border-border p-3 pt-2", f.name === "milk" && "sm:col-span-2")}
           >
-            <div className="flex items-center justify-between gap-2 pr-10">
+            {/* Phones: the label row is as tall as the remove button, so the field starts below it. */}
+            <div className="flex items-center justify-between gap-2 pr-10 max-sm:min-h-9">
               <Label htmlFor={f.name}>{f.label}</Label>
             </div>
             <button

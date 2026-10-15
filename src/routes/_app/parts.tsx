@@ -375,11 +375,13 @@ function PartRowView({
   });
 
   return (
-    <li className="flex gap-3 p-3 sm:p-4" data-testid="part-row" data-sku={row.sku} data-hidden={showHidden ? "1" : "0"}>
+    // Phones: the checkbox and photo float at the top left; the name and part # run beside them, and everything
+    // below (meta, forms, the action buttons) uses the full width under the photo. sm and up stay a flex row.
+    <li className="flex gap-3 p-3 max-sm:flow-root sm:p-4" data-testid="part-row" data-sku={row.sku} data-hidden={showHidden ? "1" : "0"}>
       {canHide && !showHidden ? (
         <input
           type="checkbox"
-          className="mt-1 size-4 shrink-0"
+          className="mt-1 size-4 shrink-0 max-sm:float-left max-sm:mr-3"
           checked={selected}
           aria-label={`Select ${row.item}`}
           data-testid="part-select"
@@ -391,12 +393,13 @@ function PartRowView({
         name={row.item}
         size="lg"
         onOpen={() => onOpen(row.id)}
+        className="max-sm:float-left max-sm:mr-3 max-sm:mb-2 max-sm:size-20"
       />
       <div className="min-w-0 flex-1">
         {/* Part name is the NetSuite Description; blank when none is stored. A click opens the part's window. */}
         <p className="font-medium break-words" data-testid="part-name">
           {row.description ? (
-            <button type="button" className="max-w-full text-left break-words hover:underline focus-visible:underline focus-visible:outline-none" onClick={() => onOpen(row.id)} data-testid="part-open">
+            <button type="button" className="max-w-full text-left break-words hover:underline focus-visible:underline focus-visible:outline-none max-sm:block" onClick={() => onOpen(row.id)} data-testid="part-open">
               {row.description}
             </button>
           ) : null}
@@ -460,7 +463,7 @@ function PartRowView({
           </form>
         ) : null}
 
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2 max-sm:clear-left">
           <PartPhotoButtons row={row} photo={photo} />
           {canEditMpn ? <PartMpnEditButton row={row} edit={mpn} /> : null}
           {canEditMpn ? <PartNameEditButton row={row} edit={name} /> : null}

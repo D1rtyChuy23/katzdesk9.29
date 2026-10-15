@@ -24,6 +24,7 @@ import { FilterChip } from "@/components/desk/desk-charts";
 import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { formatPingTime } from "@/lib/ops/clock";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/customer-names")({ component: Page });
 
@@ -241,7 +242,10 @@ function Page() {
               {SECTIONS.map((s) => (
                 <FilterChip key={s.id} selected={section === s.id} onClick={() => setSection(s.id)} data-testid={`clean-section-${s.id}`}>
                   {s.label} {counts[s.id].all}
-                  {counts[s.id].waiting && s.id !== "locked" ? <span className="ml-1 opacity-70">· {counts[s.id].waiting} waiting</span> : null}
+                  {counts[s.id].waiting && s.id !== "locked" ? (
+                    // On a phone the waiting count only shows when it differs from the total.
+                    <span className={cn("ml-1 opacity-70", counts[s.id].waiting === counts[s.id].all && "max-sm:hidden")}>· {counts[s.id].waiting} waiting</span>
+                  ) : null}
                 </FilterChip>
               ))}
             </div>
@@ -314,7 +318,7 @@ function ReportRow({
   const unlocked = !isLocked(it);
   const approveLabel = it.kind === "no_match" ? "Keep" : !it.customerId ? "Add And Lock" : it.cleanName ? "Approve" : "Lock Name";
   return (
-    <li className="grid gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start md:px-4" data-testid="clean-row" data-status={it.status}>
+    <li className="grid grid-cols-[minmax(0,1fr)] gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start md:px-4" data-testid="clean-row" data-status={it.status}>
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <span className="min-w-0 font-medium" data-testid="clean-katz">
@@ -528,7 +532,7 @@ function ChooseName({
       data-testid="choose-account"
     >
       <input type="radio" name={`choose-${it.id}`} className="size-4 shrink-0 accent-primary" checked={pick === a.id} onChange={() => setPick(a.id)} />
-      <span className="min-w-0 flex-1 truncate text-sm">{a.name}</span>
+      <span className="min-w-0 flex-1 text-sm max-sm:break-words sm:truncate">{a.name}</span>
       {a.nameLocked ? <Lock className="size-3.5 shrink-0 text-primary" aria-label="Locked" /> : null}
       {a.id === it.customerId ? <span className="shrink-0 text-[11px] text-muted-foreground">on this row now</span> : null}
       <span className="shrink-0 text-[11px] text-muted-foreground tabular">
@@ -537,7 +541,7 @@ function ChooseName({
     </label>
   );
   return (
-    <div className="rounded-xl border border-border bg-background p-3 sm:col-span-2" data-testid="choose-name">
+    <div className="rounded-xl border border-border bg-background p-3 max-sm:min-w-0 sm:col-span-2" data-testid="choose-name">
       <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
         Choose the KatzDesk account for {it.cleanName ? `“${it.cleanName}”` : `“${it.katzName ?? "this row"}”`}
       </p>

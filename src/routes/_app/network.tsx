@@ -230,19 +230,19 @@ function ProvidersPane({
         {rows.map((p) => (
           <li
             key={p.id}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-2 py-1 last:border-b-0"
+            className="grid grid-cols-1 items-center gap-2 border-b border-border px-2 py-1 last:border-b-0 max-sm:gap-y-0 sm:grid-cols-[minmax(0,1fr)_auto]"
           >
             <button
               type="button"
               onClick={() => onOpen(p.id)}
               className="desk-flat grid min-w-0 gap-1 rounded-md px-2 py-2.5 text-left hover:bg-muted/60 md:grid-cols-[1fr_11rem_7rem] md:items-center"
             >
-              <span>
+              <span className="max-sm:min-w-0">
                 <span className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-medium">{p.name}</span>
+                  <span className="font-medium max-sm:break-words">{p.name}</span>
                   <Badge variant={statusTone(p.status)}>{p.status || "Unconfirmed"}</Badge>
                 </span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">
+                <span className="mt-0.5 block text-xs text-muted-foreground max-sm:break-words">
                   {[p.dispatchPhone, p.dispatchEmail].filter(Boolean).join(" · ") || "No dispatch contact yet"}
                 </span>
               </span>
@@ -254,11 +254,12 @@ function ProvidersPane({
                 {p.secondaryFor ? ` · ${p.secondaryFor} backup` : ""}
               </span>
             </button>
-            <div className="flex shrink-0 items-center gap-1 pr-1">
+            <div className="flex shrink-0 items-center gap-1 pr-1 max-sm:justify-end max-sm:pb-2">
             <Button
               type="button"
               size="sm"
               variant="outline"
+              className="max-sm:h-10 max-sm:px-4"
               aria-label={`Rename ${p.name}`}
               onClick={() => setRenaming({ id: p.id, name: p.name })}
             >
@@ -269,6 +270,7 @@ function ProvidersPane({
               type="button"
               size="sm"
               variant="outline"
+              className="max-sm:h-10 max-sm:px-4"
               disabled={remove.isPending}
               aria-label={`Remove ${p.name}`}
               onClick={() => {
@@ -346,7 +348,7 @@ function AccountsPane({
                   {[a.city, a.state, a.zip].filter(Boolean).join(", ") || a.region || "Location TBD"}
                 </p>
                 {a.equipment ? (
-                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{a.equipment}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground sm:line-clamp-1">{a.equipment}</p>
                 ) : null}
               </div>
               {!a.primary ? (

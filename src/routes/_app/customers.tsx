@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { ChevronRight, Lock, Pencil, Plus, Trash2 } from "lucide-react";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { RepName } from "@/components/desk/rep-select";
+import { cn } from "@/lib/utils";
 import { useMyView } from "@/components/desk/my-view-bar";
 
 
@@ -163,7 +164,7 @@ function Page() {
 
       <ListToolbar>
         <ToolbarSearch value={q} onChange={setQ} placeholder="Search customers…" />
-        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_ACCOUNT_NUMBER]} className="shrink-0" />
+        <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_ACCOUNT_NUMBER]} className="shrink-0 max-sm:w-full" />
       </ListToolbar>
 
       {canAdd ? (
@@ -196,7 +197,7 @@ function Page() {
           return (
           <li
             key={c.id}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-2 py-1 last:border-b-0"
+            className="grid grid-cols-1 items-center border-b border-border px-2 py-1 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-2"
           >
             <button
               type="button"
@@ -204,7 +205,7 @@ function Page() {
               className="desk-flat flex min-w-0 items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-muted/60"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">
+                <p className="font-medium max-sm:break-words sm:truncate">
                   {c.name} <AkBadge on={c.aviKatz} className="ml-1 align-middle" />
                   {c.nameLocked ? (
                     <Lock className="ml-1.5 inline size-3.5 align-middle text-primary" aria-label="Name locked from the clean list" data-testid="name-locked" />
@@ -214,7 +215,7 @@ function Page() {
                   ) : null}
                 </p>
                 <AddressLine customer={c.name} />
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground sm:truncate">
                   {c.accountRep ? <RepName name={c.accountRep} /> : <NoRepFlag show />}
                   {" · "}
                   {countLabel(c.calls, "call", "calls")}
@@ -229,10 +230,14 @@ function Page() {
                   {c.recipes ? ` · ${countLabel(c.recipes, "recipe", "recipes")}` : ""}
                 </p>
                 {pending ? (
-                  <p className="truncate text-xs text-amber-800 dark:text-amber-300">{pending}</p>
+                  <p className="text-xs text-amber-800 sm:truncate dark:text-amber-300">{pending}</p>
                 ) : null}
               </div>
-              <span className="w-28 shrink-0 text-right text-sm tabular" data-testid="customer-account-number" title="Account Number">
+              <span
+                className={cn("w-auto shrink-0 text-right text-sm tabular sm:w-28", !c.accountNumber && "max-sm:hidden")}
+                data-testid="customer-account-number"
+                title="Account Number"
+              >
                 {c.accountNumber ? (
                   <>
                     <span className="block text-[10px] tracking-wide text-muted-foreground uppercase">Account #</span>
@@ -245,23 +250,25 @@ function Page() {
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </button>
             {isAdmin ? (
-              <div className="flex shrink-0 items-center gap-1 pr-1">
+              <div className="flex shrink-0 items-center gap-1 pr-1 max-sm:justify-end max-sm:gap-2 max-sm:pb-2">
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
+                  className="max-sm:h-10 max-sm:px-3.5 max-sm:text-sm"
                   aria-label={`Rename ${c.name}`}
                   disabled={c.nameLocked}
                   title={c.nameLocked ? "Locked from the clean list. Unlock it on Clean Names to change it." : undefined}
                   onClick={() => setRenaming({ id: c.id, name: c.name })}
                 >
                   <Pencil className="size-3.5" />
-                  <span className="hidden sm:inline">Edit</span>
+                  <span>Edit</span>
                 </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
+                  className="max-sm:h-10 max-sm:px-3.5 max-sm:text-sm"
                   disabled={remove.isPending || (!c.accountNumber && c.removalFlag)}
                   aria-label={c.accountNumber ? `Remove ${c.name}` : `Flag ${c.name} for review`}
                   title={c.accountNumber ? undefined : "No Account Number: this flags the account for review. It is not removed."}
@@ -276,7 +283,7 @@ function Page() {
                   }}
                 >
                   <Trash2 className="size-3.5" />
-                  <span className="hidden sm:inline">{c.accountNumber ? "Remove" : c.removalFlag ? "Flagged" : "Flag For Review"}</span>
+                  <span>{c.accountNumber ? "Remove" : c.removalFlag ? "Flagged" : "Flag For Review"}</span>
                 </Button>
               </div>
             ) : null}

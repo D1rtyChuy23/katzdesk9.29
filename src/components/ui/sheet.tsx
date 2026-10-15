@@ -49,7 +49,8 @@ export function SheetContent({
       >
         <PageScrollLock />
         {children}
-        <DialogPrimitive.Close className="absolute top-3 right-3 z-10 rounded-sm p-1 text-muted-foreground hover:bg-muted">
+        {/* Phones: a 40px tap target; SheetHeader's pr-12 keeps the title clear of it. */}
+        <DialogPrimitive.Close className="absolute top-3 right-3 z-10 rounded-sm p-1 text-muted-foreground hover:bg-muted max-sm:top-2 max-sm:right-2 max-sm:p-3">
           <X className="size-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

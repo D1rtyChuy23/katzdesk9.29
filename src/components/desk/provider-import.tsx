@@ -64,6 +64,8 @@ export function ProviderImportButton() {
   const [filename, setFilename] = useState("");
   const [group, setGroup] = useState<ProviderPlanStatus>("update");
   const [addNew, setAddNew] = useState(false);
+  // Phones show the first lines of the long description; More opens the rest.
+  const [moreInfo, setMoreInfo] = useState(false);
 
   const read = useMutation({
     mutationFn: async (file: File) => previewProviderImport({ data: { filename: file.name, base64: await fileToBase64(file), addNew } }),
@@ -115,81 +117,93 @@ export function ProviderImportButton() {
         }}
       >
         <DialogContent className="sm:max-w-4xl" data-testid="provider-import">
-          <DialogTitle>Import Providers</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            The cleaned provider list (CSV or Excel) with <span className="font-medium">Provider ID</span>, <span className="font-medium">Current Name</span>,{" "}
-            <span className="font-medium">Name</span> and <span className="font-medium">Merge Into</span> columns, the dispatch contacts, web site and the
-            geocoded shop address. Rows are matched by Provider ID, then Current Name, then Name. Blank cells keep what is there. A duplicate with Merge Into
-            moves its customers, contacts, addresses and coverage to that provider and is archived, never deleted. Nothing saves until you press Save.
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" variant={preview ? "outline" : "default"} disabled={busy} onClick={() => fileRef.current?.click()} data-testid="provider-import-pick">
-              <FileUp className="size-4" />
-              {read.isPending ? "Reading…" : preview ? "Pick Another File" : "Pick A File"}
-            </Button>
-            {filename ? <span className="text-xs text-muted-foreground">{filename}</span> : null}
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".csv,text/csv,.xlsx,.xls"
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden
-              data-testid="provider-import-file"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                e.target.value = "";
-                if (f && f.size > MAX_FILE_BYTES) {
-                  toast.error("That file is too large (up to about 9 MB).");
-                } else if (f) {
-                  setFilename(f.name);
-                  read.mutate(f);
-                }
-              }}
-            />
+          <div className="max-sm:space-y-3">
+            <DialogTitle>Import Providers</DialogTitle>
+            <div>
+              <p className={cn("text-sm text-muted-foreground", !moreInfo && "max-sm:line-clamp-3")}>
+                The cleaned provider list (CSV or Excel) with <span className="font-medium">Provider ID</span>, <span className="font-medium">Current Name</span>,{" "}
+                <span className="font-medium">Name</span> and <span className="font-medium">Merge Into</span> columns, the dispatch contacts, web site and the
+                geocoded shop address. Rows are matched by Provider ID, then Current Name, then Name. Blank cells keep what is there. A duplicate with Merge Into
+                moves its customers, contacts, addresses and coverage to that provider and is archived, never deleted. Nothing saves until you press Save.
+              </p>
+              <button
+                type="button"
+                className="h-9 text-sm font-medium text-primary sm:hidden"
+                aria-expanded={moreInfo}
+                onClick={() => setMoreInfo(!moreInfo)}
+              >
+                {moreInfo ? "Less" : "More"}
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" size="sm" variant={preview ? "outline" : "default"} disabled={busy} onClick={() => fileRef.current?.click()} data-testid="provider-import-pick">
+                <FileUp className="size-4" />
+                {read.isPending ? "Reading…" : preview ? "Pick Another File" : "Pick A File"}
+              </Button>
+              {filename ? <span className="text-xs text-muted-foreground">{filename}</span> : null}
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".csv,text/csv,.xlsx,.xls"
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden
+                data-testid="provider-import-file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f && f.size > MAX_FILE_BYTES) {
+                    toast.error("That file is too large (up to about 9 MB).");
+                  } else if (f) {
+                    setFilename(f.name);
+                    read.mutate(f);
+                  }
+                }}
+              />
+            </div>
+            {preview ? (
+              <>
+                <div className="flex flex-wrap gap-2" data-testid="provider-import-counts">
+                  {GROUPS.map((g) => (
+                    <FilterChip key={g.id} selected={group === g.id} onClick={() => setGroup(g.id)} data-testid={`provider-import-tab-${g.id}`}>
+                      {g.label} {preview.counts[g.id]}
+                    </FilterChip>
+                  ))}
+                </div>
+                {canAddAny ? (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-primary"
+                      checked={addNew}
+                      disabled={busy}
+                      data-testid="provider-import-add-new"
+                      onChange={(e) => {
+                        setAddNew(e.target.checked);
+                        replan.mutate(e.target.checked);
+                      }}
+                    />
+                    Add new providers (rows with a Name that are not in KatzDesk yet)
+                  </label>
+                ) : null}
+                <ul className="divide-y divide-border overflow-y-auto rounded-lg border border-border sm:max-h-[22rem]" data-testid="provider-import-lines">
+                  {lines.slice(0, 300).map((l) => (
+                    <PlanRow key={l.line} line={l} />
+                  ))}
+                  {lines.length > 300 ? <li className="px-3 py-3 text-xs text-muted-foreground">Showing the first 300 of {lines.length}.</li> : null}
+                  {!lines.length ? <li className="px-3 py-4 text-sm text-muted-foreground">Nothing here.</li> : null}
+                </ul>
+                <div className="flex flex-wrap items-center justify-end gap-2 max-sm:sticky max-sm:-bottom-5 max-sm:z-10 max-sm:-mx-5 max-sm:-mb-5 max-sm:border-t max-sm:border-border max-sm:bg-card max-sm:px-5 max-sm:py-3">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="button" size="sm" disabled={!toSave || busy} onClick={() => save.mutate()} data-testid="provider-import-save">
+                    {save.isPending ? "Saving…" : `Save ${plural(toSave, "Change")}`}
+                  </Button>
+                </div>
+              </>
+            ) : null}
           </div>
-          {preview ? (
-            <>
-              <div className="flex flex-wrap gap-2" data-testid="provider-import-counts">
-                {GROUPS.map((g) => (
-                  <FilterChip key={g.id} selected={group === g.id} onClick={() => setGroup(g.id)} data-testid={`provider-import-tab-${g.id}`}>
-                    {g.label} {preview.counts[g.id]}
-                  </FilterChip>
-                ))}
-              </div>
-              {canAddAny ? (
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-primary"
-                    checked={addNew}
-                    disabled={busy}
-                    data-testid="provider-import-add-new"
-                    onChange={(e) => {
-                      setAddNew(e.target.checked);
-                      replan.mutate(e.target.checked);
-                    }}
-                  />
-                  Add new providers (rows with a Name that are not in KatzDesk yet)
-                </label>
-              ) : null}
-              <ul className="max-h-[22rem] divide-y divide-border overflow-y-auto rounded-lg border border-border" data-testid="provider-import-lines">
-                {lines.slice(0, 300).map((l) => (
-                  <PlanRow key={l.line} line={l} />
-                ))}
-                {lines.length > 300 ? <li className="px-3 py-3 text-xs text-muted-foreground">Showing the first 300 of {lines.length}.</li> : null}
-                {!lines.length ? <li className="px-3 py-4 text-sm text-muted-foreground">Nothing here.</li> : null}
-              </ul>
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="button" size="sm" disabled={!toSave || busy} onClick={() => save.mutate()} data-testid="provider-import-save">
-                  {save.isPending ? "Saving…" : `Save ${plural(toSave, "Change")}`}
-                </Button>
-              </div>
-            </>
-          ) : null}
         </DialogContent>
       </Dialog>
     </>

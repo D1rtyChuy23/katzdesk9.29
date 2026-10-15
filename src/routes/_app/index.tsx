@@ -160,7 +160,7 @@ function FlagList({
     <div className="min-w-0 rounded-xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <h2 className="min-w-0 text-balance font-display text-xl leading-snug">{title}</h2>
-        <Link to={href} className="mt-1 shrink-0 text-xs text-muted-foreground hover:text-foreground">
+        <Link to={href} className="mt-1 shrink-0 text-xs text-muted-foreground hover:text-foreground max-sm:-mx-3 max-sm:-mt-2 max-sm:-mb-3 max-sm:p-3">
           Open
         </Link>
       </div>
@@ -179,7 +179,7 @@ function FlagList({
           {shown.map((r) => (
             <li key={`${r.entityType}-${r.id}`} className="py-2.5">
               <div className="flex items-start justify-between gap-2">
-                <OpenLink entityType={r.entityType} id={r.id} className="min-w-0 font-medium hover:underline">
+                <OpenLink entityType={r.entityType} id={r.id} className="min-w-0 font-medium hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center">
                   {r.customer}
                 </OpenLink>
                 <PingButton

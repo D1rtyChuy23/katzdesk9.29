@@ -124,7 +124,7 @@ export function DispatchCard({
       </div>
       <div className="mt-1.5 flex flex-col gap-0.5 text-sm">
         {phone ? (
-          <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-1.5 text-foreground hover:underline">
+          <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-1.5 text-foreground hover:underline max-sm:min-h-10">
             <Phone className="size-3.5 text-muted-foreground" />
             {phone}
           </a>
@@ -132,7 +132,7 @@ export function DispatchCard({
           <p className="text-xs text-muted-foreground">No dispatch phone on file</p>
         )}
         {email ? (
-          <a href={`mailto:${email.split(/\s/)[0]}`} className="inline-flex items-center gap-1.5 break-all hover:underline">
+          <a href={`mailto:${email.split(/\s/)[0]}`} className="inline-flex items-center gap-1.5 break-all hover:underline max-sm:min-h-10">
             <Mail className="size-3.5 shrink-0 text-muted-foreground" />
             {email}
           </a>
@@ -270,9 +270,9 @@ export function ProviderAccountList({
         <ul className="mt-3 divide-y divide-border rounded-xl border border-border">
           {accounts.map((a) => (
             <li key={a.linkId} className="flex flex-wrap items-center gap-2 px-3 py-2">
-              <p className="min-w-0 flex-1 font-medium">{a.customer}</p>
+              <p className="min-w-0 flex-1 font-medium max-sm:basis-full max-sm:break-words">{a.customer}</p>
               <SelectField
-                className="w-32"
+                className="w-32 max-sm:flex-1"
                 value={a.role}
                 onChange={(e) =>
                   roleMut.mutate({ linkId: a.linkId, role: e.target.value as ProviderRole })

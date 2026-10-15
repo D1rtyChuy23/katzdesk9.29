@@ -112,7 +112,7 @@ function Page() {
       </StatRow>
       <ListToolbar>
         <ToolbarSearch value={q} onChange={setQ} placeholder="Search PMs…" />
-        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0" />
+        <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0 max-sm:w-full" />
       </ListToolbar>
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
         <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase md:grid">
@@ -122,23 +122,27 @@ function Page() {
           <span>Projected</span>
           <span>Tech</span>
         </div>
+        {/* md: a table row. Below md the columns stack, except on a phone, where the flag, status, date and tech
+            flow along one or two lines under the account so a row stays short. */}
         {rows.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setSelected(p.id)}
-            className="desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3"
+            className="desk-flat grid w-full gap-1 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-muted/60 max-sm:flex max-sm:flex-wrap max-sm:items-center max-sm:gap-x-2.5 max-sm:gap-y-1 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_9rem_5.5rem_7rem] md:items-center md:gap-3"
           >
-            <span>
+            <span className="max-sm:w-full">
               <span className="font-medium">{p.customer}</span>
               <AkBadge on={p.aviKatz} className="ml-1 align-middle" />
               <AddressLine customer={p.customer} />
               <span className="mt-0.5 block text-xs text-muted-foreground">{p.equipment}</span>
             </span>
-            <span className="flex flex-wrap gap-1">
+            <span className="flex flex-wrap gap-1 max-sm:contents">
               <FlagBadge flag={p.flag} />
             </span>
             <StatusBadge status={p.status} />
+            {/* Phones: the date and tech start their own line under the chips. Not rendered from sm up. */}
+            <span aria-hidden className="hidden max-sm:block max-sm:h-0 max-sm:basis-full" />
             <span className="tabular text-sm text-muted-foreground">
               <span className="md:hidden">Projected </span>
               {formatShortDate(p.projected)}

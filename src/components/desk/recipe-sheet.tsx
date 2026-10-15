@@ -117,6 +117,8 @@ export function RecipeChip({
     <div
       className={cn(
         "inline-flex h-8 max-w-[16rem] items-center rounded-full border",
+        // Phones: the chip may use the row's width and wrap, so the full machine name shows (no tooltip on touch).
+        "max-sm:h-auto max-sm:min-h-8 max-sm:max-w-full max-sm:rounded-2xl",
         tone === "saved" && "border-primary/30 bg-primary/8",
         tone === "house" && "border-border bg-card",
         tone === "empty" && "border-border bg-background",
@@ -137,10 +139,11 @@ export function RecipeChip({
             source: null,
           });
         }}
-        className="inline-flex min-w-0 flex-1 items-center gap-1 px-2.5 text-left"
+        className="inline-flex min-w-0 flex-1 items-center gap-1 px-2.5 text-left max-sm:min-h-10 max-sm:py-1.5"
         title={preview ?? piece.label}
       >
-        <span className="min-w-0 truncate text-xs font-medium text-foreground">{shortEquipLabel(piece.label, 28)}</span>
+        <span className="min-w-0 truncate text-xs font-medium text-foreground max-sm:hidden">{shortEquipLabel(piece.label, 28)}</span>
+        <span className="min-w-0 text-xs font-medium break-words text-foreground sm:hidden">{piece.label}</span>
         {tone === "empty" ? null : (
           <BookOpen className="size-3 shrink-0 text-muted-foreground" aria-label={tone === "saved" ? "Account recipe" : "House recipe"} />
         )}
@@ -148,7 +151,7 @@ export function RecipeChip({
       {onRemove ? (
         <button
           type="button"
-          className="flex size-8 shrink-0 items-center justify-center rounded-r-full text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="flex size-8 shrink-0 items-center justify-center rounded-r-full text-muted-foreground hover:bg-muted hover:text-foreground max-sm:size-10"
           aria-label={`Remove ${piece.label}`}
           title="Remove this equipment from the install"
           onClick={(e) => {

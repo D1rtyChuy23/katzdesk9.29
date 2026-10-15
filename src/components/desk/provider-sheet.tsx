@@ -338,7 +338,7 @@ function ProviderWhere({ provider: p }: { provider: ProviderDetail }) {
     <div className="mt-2 space-y-0.5 text-xs" data-testid="provider-where">
       {site ? (
         <p>
-          <a href={site} target="_blank" rel="noreferrer" className="font-medium text-primary underline-offset-4 hover:underline" data-testid="provider-website">
+          <a href={site} target="_blank" rel="noreferrer" className="font-medium text-primary underline-offset-4 hover:underline max-sm:inline-block max-sm:-mt-2 max-sm:py-2" data-testid="provider-website">
             {websiteLabel(p.website)}
           </a>
         </p>

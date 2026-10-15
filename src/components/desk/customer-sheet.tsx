@@ -52,12 +52,13 @@ export type { HistoryKind };
 type AccountTab = "details" | "equipment" | "tickets" | "invoices" | "pre-inspection";
 
 /** The account's categories, one per tab, in this order. */
-const ACCOUNT_TABS: { id: AccountTab; label: string }[] = [
+const ACCOUNT_TABS: { id: AccountTab; label: string; short?: string }[] = [
   { id: "details", label: "Details" },
   { id: "equipment", label: "Equipment" },
   { id: "tickets", label: "Tickets" },
   { id: "invoices", label: "Invoices" },
-  { id: "pre-inspection", label: "Pre-Inspection" },
+  // "Pre-Insp." on phones under 375px, so five tabs with counts fit across.
+  { id: "pre-inspection", label: "Pre-Inspection", short: "Pre-Insp." },
 ];
 
 const FILTERS: { id: "all" | Exclude<HistoryKind, "recipe">; label: string }[] = [
@@ -99,6 +100,8 @@ export function CustomerHistorySheet({
   // Each account opens on Details.
   const [tab, setTab] = useState<AccountTab>("details");
   useEffect(() => setTab("details"), [customerId]);
+  // Phones: the account whose clamped title was tapped open (another account opens clamped again).
+  const [titleOpenFor, setTitleOpenFor] = useState<number | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [recipeDraft, setRecipeDraft] = useState<RecipeDraft | null>(null);
@@ -205,8 +208,15 @@ export function CustomerHistorySheet({
           <SheetHeader>
             <p className="text-xs tracking-wide text-muted-foreground uppercase">Customer</p>
             <div className="flex items-start justify-between gap-2">
-              <SheetTitle className="flex items-center gap-2">
-                {data?.name ?? "Account"}
+              <SheetTitle className="flex items-center gap-2 max-sm:text-lg">
+                {/* Phones: a long name stops at two lines so the tabs stay near the top; tap it to read the whole name. */}
+                <span
+                  className={titleOpenFor === customerId ? undefined : "max-sm:line-clamp-2"}
+                  onClick={() => setTitleOpenFor((cur) => (cur === customerId ? null : customerId))}
+                  data-testid="account-title-name"
+                >
+                  {data?.name ?? "Account"}
+                </span>
                 <AkBadge on={data?.aviKatz} />
               </SheetTitle>
 
@@ -285,7 +295,10 @@ export function CustomerHistorySheet({
                         key={f.id}
                         type="button"
                         onClick={() => setFilter(f.id)}
-                        className={cn("rounded-full px-3 py-1 text-xs", filter === f.id ? "bg-ink text-ink-foreground" : "bg-muted text-muted-foreground")}
+                        className={cn(
+                          "rounded-full px-3 py-1 text-xs max-sm:min-h-10 max-sm:px-3.5 max-sm:text-sm",
+                          filter === f.id ? "bg-ink text-ink-foreground" : "bg-muted text-muted-foreground",
+                        )}
                       >
                         {f.label}
                         {counts[f.id] ? ` ${counts[f.id]}` : ""}
@@ -651,9 +664,9 @@ function CleanListBlock({ name, cleanList }: { name: string; cleanList: { netsui
   return (
     <dl className="grid gap-x-4 gap-y-1 rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-sm sm:grid-cols-[auto_minmax(0,1fr)]" data-testid="clean-list-block">
       <dt className="text-xs text-muted-foreground">Display Name</dt>
-      <dd className="flex items-center gap-1.5 font-medium" data-testid="clean-display">
+      <dd className="flex items-center gap-1.5 font-medium max-sm:flex-wrap" data-testid="clean-display">
         {name}
-        <Lock className="size-3.5 text-primary" aria-label="Locked" />
+        <Lock className="size-3.5 text-primary max-sm:shrink-0" aria-label="Locked" />
         <span className="text-xs font-normal text-muted-foreground">Locked from the clean list</span>
       </dd>
       {cleanList ? (

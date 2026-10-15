@@ -147,7 +147,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                 <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Bill To</p>
                 <p className="text-[11px] text-muted-foreground">Filled from the account</p>
               </div>
-              <dl className="mt-1 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[7.5rem_1fr]">
+              <dl className="mt-1 grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm sm:grid-cols-[7.5rem_1fr] sm:gap-x-4">
                 <dt className="text-muted-foreground">Name</dt>
                 <dd className="font-medium" data-testid="invoice-bill-name">
                   {v.billTo.name}

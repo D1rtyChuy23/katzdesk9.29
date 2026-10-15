@@ -241,7 +241,8 @@ function Page() {
                 onClick={() => setSelected(m.id)}
                 className={cn(
                   "desk-flat grid min-w-0 gap-1 rounded-md text-left hover:bg-muted/50 md:grid-cols-[8rem_1fr_9rem_7rem] md:items-center",
-                  where !== "hq" && "opacity-55 hover:opacity-80",
+                  // Phones: the muted row background marks it; dimming the text too made it hard to read.
+                  where !== "hq" && "opacity-55 hover:opacity-80 max-sm:opacity-100",
                 )}
               >
                 <span className="font-mono text-xs">{m.moduleId}</span>

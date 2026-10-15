@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ActionButton, FilterChip } from "./desk-charts";
+import { cn } from "@/lib/utils";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -64,6 +65,8 @@ export function GeocodeImportButton() {
   const [preview, setPreview] = useState<GeocodePreview | null>(null);
   const [filename, setFilename] = useState("");
   const [group, setGroup] = useState<GroupId>("save");
+  // Phones show the first lines of the description; More opens the rest.
+  const [moreInfo, setMoreInfo] = useState(false);
 
   const read = useMutation({
     mutationFn: async (file: File) => previewCustomerGeocodes({ data: { filename: file.name, base64: await fileToBase64(file) } }),
@@ -105,116 +108,134 @@ export function GeocodeImportButton() {
         }}
       >
         <DialogContent className="sm:max-w-4xl" data-testid="geo-import">
-          <DialogTitle>Import Locations</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            The geocoded customer list (CSV or Excel) with <span className="font-medium">Geocode Match</span>, <span className="font-medium">Latitude</span> and{" "}
-            <span className="font-medium">Longitude</span> columns. Rows are matched by account number, then Internal ID, then name. Only the map location is
-            saved; names and addresses are not changed. Nothing saves until you press Save.
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" variant={preview ? "outline" : "default"} disabled={read.isPending} onClick={() => fileRef.current?.click()} data-testid="geo-import-pick">
-              <FileUp className="size-4" />
-              {read.isPending ? "Reading…" : preview ? "Pick Another File" : "Pick A File"}
-            </Button>
-            {filename ? <span className="text-xs text-muted-foreground">{filename}</span> : null}
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".csv,text/csv,.xlsx,.xls"
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden
-              data-testid="geo-import-file"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                e.target.value = "";
-                if (f) {
-                  setFilename(f.name);
-                  read.mutate(f);
-                }
-              }}
-            />
+          <div className="max-sm:space-y-3">
+            <DialogTitle>Import Locations</DialogTitle>
+            <div>
+              <p className={cn("text-sm text-muted-foreground", !moreInfo && "max-sm:line-clamp-3")}>
+                The geocoded customer list (CSV or Excel) with <span className="font-medium">Geocode Match</span>, <span className="font-medium">Latitude</span> and{" "}
+                <span className="font-medium">Longitude</span> columns. Rows are matched by account number, then Internal ID, then name. Only the map location is
+                saved; names and addresses are not changed. Nothing saves until you press Save.
+              </p>
+              <button
+                type="button"
+                className="h-9 text-sm font-medium text-primary sm:hidden"
+                aria-expanded={moreInfo}
+                onClick={() => setMoreInfo(!moreInfo)}
+              >
+                {moreInfo ? "Less" : "More"}
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" size="sm" variant={preview ? "outline" : "default"} disabled={read.isPending} onClick={() => fileRef.current?.click()} data-testid="geo-import-pick">
+                <FileUp className="size-4" />
+                {read.isPending ? "Reading…" : preview ? "Pick Another File" : "Pick A File"}
+              </Button>
+              {filename ? <span className="text-xs text-muted-foreground">{filename}</span> : null}
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".csv,text/csv,.xlsx,.xls"
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden
+                data-testid="geo-import-file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) {
+                    setFilename(f.name);
+                    read.mutate(f);
+                  }
+                }}
+              />
+            </div>
+            {preview ? (
+              <>
+                <div className="flex flex-wrap gap-2" data-testid="geo-import-counts">
+                  {GROUPS.map((g) => (
+                    <FilterChip key={g.id} selected={group === g.id} onClick={() => setGroup(g.id)} data-testid={`geo-import-tab-${g.id}`}>
+                      {g.label} {preview.counts[g.id]}
+                    </FilterChip>
+                  ))}
+                </div>
+                {/* Phones: each line is a card (Why right under the name); the table from sm up. */}
+                <div className="overflow-y-auto rounded-lg border border-border sm:max-h-80">
+                  <table className="w-full text-sm max-sm:block" data-testid="geo-import-lines">
+                    <thead className="sticky top-0 bg-card text-left text-[11px] tracking-wide text-muted-foreground uppercase max-sm:hidden">
+                      <tr>
+                        <th className="px-3 py-2 font-medium">Line</th>
+                        <th className="px-3 py-2 font-medium">In the file</th>
+                        <th className="px-3 py-2 font-medium">KatzDesk account</th>
+                        <th className="px-3 py-2 font-medium">Geocoder</th>
+                        <th className="px-3 py-2 font-medium">Why</th>
+                      </tr>
+                    </thead>
+                    <tbody className="max-sm:block">
+                      {lines.slice(0, 500).map((l) => (
+                        <tr key={l.line} className="border-t border-border align-top max-sm:flex max-sm:flex-col max-sm:gap-1 max-sm:px-3 max-sm:py-2.5 max-sm:first:border-t-0">
+                          <td className="px-3 py-1.5 tabular text-muted-foreground max-sm:p-0 max-sm:text-xs">
+                            <span className="sm:hidden">Line </span>
+                            {l.line}
+                          </td>
+                          <td className="px-3 py-1.5 max-sm:p-0 max-sm:break-words">
+                            <span className="max-sm:font-medium">{l.name || "—"}</span>
+                            {l.address ? <span className="block text-xs text-muted-foreground">{l.address}</span> : null}
+                          </td>
+                          <td className="px-3 py-1.5 max-sm:order-1 max-sm:p-0 max-sm:break-words">
+                            <span className="text-muted-foreground sm:hidden">KatzDesk account: </span>
+                            {l.accountName ?? <span className="text-muted-foreground">No match</span>}
+                            {l.matchedBy ? <span className="block text-xs text-muted-foreground">by {l.matchedBy}</span> : null}
+                          </td>
+                          <td className="px-3 py-1.5 text-xs max-sm:order-1 max-sm:p-0">
+                            <span className="text-muted-foreground sm:hidden">Geocoder: </span>
+                            {l.quality === "exact" ? "Exact" : l.quality === "close" ? "Close" : l.quality === "approx" ? "ZIP area" : l.result || "—"}
+                          </td>
+                          <td className="px-3 py-1.5 text-xs text-muted-foreground max-sm:p-0">
+                            <Badge size="tight" variant={STATUS_LABEL[l.status].variant} className="mr-1">
+                              {STATUS_LABEL[l.status].label}
+                            </Badge>
+                            {group === "review" && l.reviewReason ? l.reviewReason : l.reason}
+                          </td>
+                        </tr>
+                      ))}
+                      {lines.length > 500 ? (
+                        <tr className="max-sm:block">
+                          <td colSpan={5} className="px-3 py-3 text-xs text-muted-foreground max-sm:block">
+                            Showing the first 500 of {lines.length}. The review list download has every row that needs a person.
+                          </td>
+                        </tr>
+                      ) : null}
+                      {!lines.length ? (
+                        <tr className="max-sm:block">
+                          <td colSpan={5} className="px-3 py-4 text-muted-foreground max-sm:block">Nothing here.</td>
+                        </tr>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex flex-wrap items-center justify-end gap-2 max-sm:sticky max-sm:-bottom-5 max-sm:z-10 max-sm:-mx-5 max-sm:-mb-5 max-sm:border-t max-sm:border-border max-sm:bg-card max-sm:px-5 max-sm:py-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mr-auto"
+                    disabled={!preview.counts.review}
+                    onClick={() => downloadReviewList(preview.lines, filename)}
+                    data-testid="geo-import-review-download"
+                  >
+                    <Download className="size-4" />
+                    Download Review List ({preview.counts.review})
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="button" size="sm" disabled={!preview.counts.save || save.isPending} onClick={() => save.mutate()} data-testid="geo-import-save">
+                    {save.isPending ? "Saving…" : `Save ${preview.counts.save} Location${preview.counts.save === 1 ? "" : "s"}`}
+                  </Button>
+                </div>
+              </>
+            ) : null}
           </div>
-          {preview ? (
-            <>
-              <div className="flex flex-wrap gap-2" data-testid="geo-import-counts">
-                {GROUPS.map((g) => (
-                  <FilterChip key={g.id} selected={group === g.id} onClick={() => setGroup(g.id)} data-testid={`geo-import-tab-${g.id}`}>
-                    {g.label} {preview.counts[g.id]}
-                  </FilterChip>
-                ))}
-              </div>
-              <div className="max-h-80 overflow-y-auto rounded-lg border border-border">
-                <table className="w-full text-sm" data-testid="geo-import-lines">
-                  <thead className="sticky top-0 bg-card text-left text-[11px] tracking-wide text-muted-foreground uppercase">
-                    <tr>
-                      <th className="px-3 py-2 font-medium">Line</th>
-                      <th className="px-3 py-2 font-medium">In the file</th>
-                      <th className="px-3 py-2 font-medium">KatzDesk account</th>
-                      <th className="px-3 py-2 font-medium">Geocoder</th>
-                      <th className="px-3 py-2 font-medium">Why</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lines.slice(0, 500).map((l) => (
-                      <tr key={l.line} className="border-t border-border align-top">
-                        <td className="px-3 py-1.5 tabular text-muted-foreground">{l.line}</td>
-                        <td className="px-3 py-1.5">
-                          {l.name || "—"}
-                          {l.address ? <span className="block text-xs text-muted-foreground">{l.address}</span> : null}
-                        </td>
-                        <td className="px-3 py-1.5">
-                          {l.accountName ?? <span className="text-muted-foreground">No match</span>}
-                          {l.matchedBy ? <span className="block text-xs text-muted-foreground">by {l.matchedBy}</span> : null}
-                        </td>
-                        <td className="px-3 py-1.5 text-xs">
-                          {l.quality === "exact" ? "Exact" : l.quality === "close" ? "Close" : l.quality === "approx" ? "ZIP area" : l.result || "—"}
-                        </td>
-                        <td className="px-3 py-1.5 text-xs text-muted-foreground">
-                          <Badge size="tight" variant={STATUS_LABEL[l.status].variant} className="mr-1">
-                            {STATUS_LABEL[l.status].label}
-                          </Badge>
-                          {group === "review" && l.reviewReason ? l.reviewReason : l.reason}
-                        </td>
-                      </tr>
-                    ))}
-                    {lines.length > 500 ? (
-                      <tr>
-                        <td colSpan={5} className="px-3 py-3 text-xs text-muted-foreground">
-                          Showing the first 500 of {lines.length}. The review list download has every row that needs a person.
-                        </td>
-                      </tr>
-                    ) : null}
-                    {!lines.length ? (
-                      <tr>
-                        <td colSpan={5} className="px-3 py-4 text-muted-foreground">Nothing here.</td>
-                      </tr>
-                    ) : null}
-                  </tbody>
-                </table>
-              </div>
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mr-auto"
-                  disabled={!preview.counts.review}
-                  onClick={() => downloadReviewList(preview.lines, filename)}
-                  data-testid="geo-import-review-download"
-                >
-                  <Download className="size-4" />
-                  Download Review List ({preview.counts.review})
-                </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="button" size="sm" disabled={!preview.counts.save || save.isPending} onClick={() => save.mutate()} data-testid="geo-import-save">
-                  {save.isPending ? "Saving…" : `Save ${preview.counts.save} Location${preview.counts.save === 1 ? "" : "s"}`}
-                </Button>
-              </div>
-            </>
-          ) : null}
         </DialogContent>
       </Dialog>
     </>

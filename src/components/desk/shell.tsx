@@ -238,20 +238,34 @@ function NavLinks({
   );
 }
 
-function Brand() {
+/** `compact`: on a phone (the menu drawer) the logo and wordmark sit on one short row so the whole menu fits. */
+function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <Link to="/" className="group flex flex-col items-start px-4" aria-label="Katz Desk home" data-testid="brand-block">
+    <Link
+      to="/"
+      className={cn("group flex flex-col items-start px-4", compact && "max-sm:w-fit max-sm:flex-row max-sm:items-center max-sm:gap-3")}
+      aria-label="Katz Desk home"
+      data-testid="brand-block"
+    >
       <img
         src="/brand/katz-coffee-mark.svg"
         alt="Katz Coffee"
         width={334}
         height={177}
-        className="h-auto w-[8.5rem] drop-shadow-[0_6px_16px_rgb(0_0_0/0.45)] transition-transform group-hover:-rotate-1"
+        className={cn(
+          "h-auto w-[8.5rem] drop-shadow-[0_6px_16px_rgb(0_0_0/0.45)] transition-transform group-hover:-rotate-1",
+          compact && "max-sm:w-16",
+        )}
       />
-      <span className="mt-3 font-display text-2xl leading-none font-medium tracking-tight text-cream">
+      <span className={cn("mt-3 font-display text-2xl leading-none font-medium tracking-tight text-cream", compact && "max-sm:mt-0 max-sm:text-xl")}>
         Katz <span className="italic text-cream/70">Desk</span>
       </span>
-      <span className="mt-2 flex items-center gap-2 text-[10px] font-semibold tracking-[0.22em] text-katz-gold uppercase">
+      <span
+        className={cn(
+          "mt-2 flex items-center gap-2 text-[10px] font-semibold tracking-[0.22em] text-katz-gold uppercase",
+          compact && "max-sm:hidden",
+        )}
+      >
         <span aria-hidden className="h-px w-5 bg-katz-gold/60" />
         Service And Sales
       </span>
@@ -370,9 +384,10 @@ export function AppShell({
           >
             <Menu className="size-5" />
           </Button>
-          <Link to="/" className="flex items-center gap-2 md:hidden">
+          {/* Phones show the logo only, so the menu, logo, My View, theme and bell fit on one row. */}
+          <Link to="/" className="flex items-center gap-2 max-sm:min-h-10 md:hidden">
             <img src="/brand/katz-coffee-mark.svg" alt="Katz Coffee" width={334} height={177} className="h-7 w-auto" />
-            <span className="font-display text-lg leading-none font-medium tracking-tight">
+            <span className="font-display text-lg leading-none font-medium tracking-tight max-sm:hidden">
               Katz <span className="italic text-muted-foreground">Desk</span>
             </span>
           </Link>
@@ -381,7 +396,7 @@ export function AppShell({
               <GlobalSearch />
             </div>
           )}
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2 max-sm:gap-1">
             {role === "warehouse" || !MY_VIEW_ROUTES.includes(pathname) ? null : <MyViewBar />}
             <ThemeToggle />
             <NotifyBell />
@@ -406,15 +421,15 @@ export function AppShell({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="flex w-64 flex-col overflow-hidden bg-gradient-to-b from-ink to-[#241c15] p-0 text-ink-foreground sm:max-w-64">
           <SidebarClouds />
-          <div className="relative shrink-0 px-2 py-5">
-            <Brand />
+          <div className="relative shrink-0 px-2 py-5 max-sm:py-3">
+            <Brand compact />
           </div>
           <div className="sheet-scroll relative min-h-0 flex-1 overflow-y-auto px-2">
             <NavLinks onNavigate={() => setOpen(false)} isAdmin={isAdmin} role={role} />
           </div>
-          <div className="relative shrink-0 border-t border-cream/10 p-3">
-            <p className="px-1 text-[11px] text-cream/40">Signed in</p>
-            <div className="mt-1 text-cream [&_button]:text-cream/70 [&_span]:text-cream">
+          <div className="relative shrink-0 border-t border-cream/10 p-3 max-sm:py-2">
+            <p className="px-1 text-[11px] text-cream/40 max-sm:hidden">Signed in</p>
+            <div className="mt-1 text-cream max-sm:mt-0 [&_button]:text-cream/70 [&_span]:text-cream">
               <UserButton />
             </div>
           </div>
