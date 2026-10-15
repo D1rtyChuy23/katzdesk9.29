@@ -45,6 +45,22 @@ test("header detection: Part #, MPN, Mfr Part, Name, SKU and Item are part numbe
   assert.throws(() => binRowsFromSheets(sheet([["Rack", "Shelf"], ["A", "1"]])), /part number column/);
 });
 
+test("the Bin Code Review workbook imports: Item Name is the part, Proposed Bin the whole code, a blank Current Bin is ignored", () => {
+  const head = ["Item name", "Display name", "Internal ID", "Current bin", "Description", "Extracted code", "Proposed bin", "Conflict (status)"];
+  const r = binRowsFromSheets([
+    { name: "Summary", matrix: [["Metric", "Value"], ["Would change (Review: one code, bin empty)", "2"]] },
+    { name: "Review", matrix: [head, ["BUNN PARTS : BUNN00400.0001", "", "741", "", "BUNN ELBOW (E6-6)..", "E6-6", "E6-6", "Would change"], ["PARTS : EVER2000", "", "9", "", "Eversys Pin (G14-1)", "G14-1", "G14-1", "Would change"]] },
+    { name: "Conflicts", matrix: [head] },
+    { name: "Duplicate bins", matrix: [["Item", "Internal ID", "Current bin", "Extracted code", "Description"], ["BIN G14-1", "", "", "", "5 items"]] },
+  ]);
+  assert.deepEqual(r.rows.map((x) => [x.sheet, x.sku, x.mpn, x.rack, x.shelf, x.bin, x.whole]), [
+    ["Review", "BUNN00400.0001", null, null, null, "E6-6", true],
+    ["Review", "EVER2000", null, null, null, "G14-1", true],
+  ]);
+  const plan = planBins(r.rows, stored);
+  assert.deepEqual(plan.map((l) => [l.status, l.partId]), [["unmatched", null], ["update", 2]]);
+});
+
 test("columns: MPN and SKU columns are both kept; a NetSuite Name with its parent is read as the SKU", () => {
   const r = binRowsFromSheets(sheet([["Name", "MPN", "Rack"], ["PARTS : EVER2000", "2000-A", "R2"], ["", "", "R9"], ["", "", ""]]));
   assert.equal(r.rows.length, 1);

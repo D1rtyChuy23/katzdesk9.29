@@ -58,6 +58,8 @@ export const PART_HEADERS: Record<string, PartField> = {
   "base price": "rate",
   "sell price": "rate",
   "sales price": "rate",
+  // NetSuite's saved search labels the base price level "Sales Price (base)".
+  "sales price base": "rate",
   price: "rate",
   rate: "rate",
   "purchase price": "cost",
