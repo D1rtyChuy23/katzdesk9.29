@@ -2,7 +2,7 @@
  * PM runbook — pure logic. Ported unchanged in behavior from the standalone runbook page: a machine
  * definition plus a unit's config in, a kit list and a step list out. No DOM, no database, safe for node --test.
  */
-import type { KitPrice } from "./pm-runbook-prices.ts";
+import { anyFound, kitPriceParts, summarizePrices, uncountedNote, usd, type KitPrice } from "./pm-runbook-prices.ts";
 import type { RunbookConfig, RunbookDefinition } from "./pm-runbook-schema.ts";
 
 export type KitLine = {
@@ -117,7 +117,6 @@ export function stepIds(groups: StepGroup[]): string[] {
 
 /** Plain-text kit list for pasting into an order email or chat. Short lines, no tables. */
 export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: string, prices?: KitPrice[]): string {
-  const money = (n: number) => `$${n.toFixed(2)}`;
   const model = def.models.find((m) => m.id === c.model) ?? def.models[0];
   const interval = def.intervals.find((i) => i.id === c.pm);
   const lines = kitList(def, c);
@@ -138,26 +137,17 @@ export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: s
     }
     const split = k.parts.length > 1 ? ` (${k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")})` : "";
     const p = prices?.find((x) => x.ev === k.ev);
-    // Name the Parts list number when it differs (EVER117077 for EV117077): that is the number to order by.
-    const part = p?.sku && p.sku !== k.ev ? `Part ${p.sku}, ` : "";
-    const price =
-      !p
-        ? ""
-        : p.status === "missing"
-          ? "  [not in parts catalog]"
-          : p.unit != null
-            ? `  [${part}${money(p.unit)} each, ${money(p.line ?? 0)}${p.status === "inactive" ? ", inactive in catalog" : ""}]`
-            : `  [${part}no sell price in catalog]`;
+    const price = p ? `  [${kitPriceParts(p).join(", ")}]` : "";
     out.push(`${k.ev} x${k.q}  ${k.name}${split}${price}`);
   }
   if (!lines.length) out.push("No kits for this setup.");
   else {
     out.push("");
     out.push(`${lines.length} kit lines, ${totalKits(lines)} kits in total`);
-    const sum = (prices ?? []).reduce((a, p) => a + (p.line ?? 0), 0);
-    if (prices && sum > 0) {
-      const short = prices.filter((p) => p.line == null).length;
-      out.push(`Total at sell price: ${money(Math.round(sum * 100) / 100)}${short ? ` (${short} kit${short === 1 ? "" : "s"} without a price)` : ""}`);
+    if (prices) {
+      const s = summarizePrices(prices);
+      const note = uncountedNote(s);
+      out.push(anyFound(s) ? `Total at sell price: ${usd(s.total)}${note ? ` (${note})` : ""}` : "No kit prices found in the parts catalog yet.");
     }
   }
   return out.join("\n");

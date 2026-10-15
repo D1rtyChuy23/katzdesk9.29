@@ -84,11 +84,14 @@ export type KitPriceStatus = "priced" | "no-price" | "inactive" | "missing";
 
 export type KitPrice = {
   ev: string;
+  /** Kits on the line. */
+  q: number;
   status: KitPriceStatus;
-  /** Present unless the kit is missing or has no price. */
+  /** The sell price of one kit: on a priced part, and shown (never counted) on an inactive or hidden one. */
   unit: number | null;
-  /** unit x quantity. */
+  /** unit x quantity, only on a priced line: the lines the total adds up. */
   line: number | null;
+  /** The Parts list number the kit matched. */
   sku: string | null;
 };
 
@@ -97,42 +100,62 @@ const money = (n: number) => Math.round(n * 100) / 100;
 /** `catalog` is keyed by `kitKey` of the kit number, as `pickCatalog` returns it. */
 export function priceKits(lines: KitLine[], catalog: Record<string, CatalogKit | undefined>): KitPrice[] {
   return lines.map((k) => {
+    const base = { ev: k.ev, q: k.q, unit: null, line: null };
     const hit = catalog[kitKey(k.ev)];
-    if (!hit) return { ev: k.ev, status: "missing", unit: null, line: null, sku: null };
-    if (hit.hidden || !hit.active) {
-      const unit = hit.rate != null ? money(hit.rate) : null;
-      return { ev: k.ev, status: "inactive", unit, line: unit != null ? money(unit * k.q) : null, sku: hit.sku };
-    }
-    if (hit.rate == null || !(hit.rate > 0)) return { ev: k.ev, status: "no-price", unit: null, line: null, sku: hit.sku };
-    const unit = money(hit.rate);
-    return { ev: k.ev, status: "priced", unit, line: money(unit * k.q), sku: hit.sku };
+    if (!hit) return { ...base, status: "missing", sku: null };
+    const unit = hit.rate != null && hit.rate > 0 ? money(hit.rate) : null;
+    // A part the Parts list hides or retired is flagged with its last price, but is not something to sell.
+    if (hit.hidden || !hit.active) return { ...base, status: "inactive", unit, sku: hit.sku };
+    if (unit == null) return { ...base, status: "no-price", sku: hit.sku };
+    return { ...base, status: "priced", unit, line: money(unit * k.q), sku: hit.sku };
   });
 }
 
+/** Counted in kits (quantities) throughout, the same unit as "N kits in total". */
 export type KitPriceSummary = {
-  /** Sum of lines that have a price (inactive kits included at their stored price). */
+  /** Sum of the priced lines. Inactive or hidden parts are flagged on their row, never counted. */
   total: number;
-  priced: number;
-  /** Kits not in the catalog at all. */
+  /** Kits on the list, and how many of them the total leaves out. */
+  kits: number;
+  uncounted: number;
+  /** Kits the Parts list does not have at all. */
   missing: number;
-  /** In the catalog but with no sell price, or inactive. */
-  attention: number;
 };
 
 export function summarizePrices(prices: KitPrice[]): KitPriceSummary {
+  const kits = (ps: KitPrice[]) => ps.reduce((a, p) => a + p.q, 0);
   return {
     total: money(prices.reduce((a, p) => a + (p.line ?? 0), 0)),
-    priced: prices.filter((p) => p.status === "priced").length,
-    missing: prices.filter((p) => p.status === "missing").length,
-    attention: prices.filter((p) => p.status === "no-price" || p.status === "inactive").length,
+    kits: kits(prices),
+    uncounted: kits(prices.filter((p) => p.status !== "priced")),
+    missing: kits(prices.filter((p) => p.status === "missing")),
   };
+}
+
+/** True when at least one kit matched a part in the Parts list, sellable or not: then there is a total to show. */
+export const anyFound = (s: KitPriceSummary): boolean => s.missing < s.kits;
+
+/** "7 of 10 kits not counted": the same words on the sheet and in the copied kit list. Empty when all count. */
+export function uncountedNote(s: KitPriceSummary): string {
+  return s.uncounted ? `${s.uncounted} of ${s.kits} kit${s.kits === 1 ? "" : "s"} not counted` : "";
 }
 
 export const PRICE_NOTE: Record<KitPriceStatus, string> = {
   priced: "",
-  "no-price": "In the catalog, no sell price",
+  "no-price": "No sell price in the catalog",
   inactive: "Inactive or hidden in the catalog",
   missing: "Not in parts catalog",
 };
 
 export const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/**
+ * One kit's price, as short pieces the sheet joins with " · " and the copied kit list with ", ": the Parts list
+ * number when it differs from the kit number (the number to order by), then the price or why there is none.
+ */
+export function kitPriceParts(p: KitPrice): string[] {
+  const part = p.sku && kitKey(p.sku) !== kitKey(p.ev) ? [`Part ${p.sku}`] : [];
+  if (p.status === "priced") return [...part, `${usd(p.unit ?? 0)} each`, usd(p.line ?? 0)];
+  if (p.status === "inactive") return [...part, PRICE_NOTE.inactive, ...(p.unit != null ? [`${usd(p.unit)} each`] : []), "not counted"];
+  return [...part, PRICE_NOTE[p.status]];
+}

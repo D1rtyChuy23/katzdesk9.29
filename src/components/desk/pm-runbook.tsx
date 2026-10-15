@@ -14,7 +14,7 @@ import {
   type RunbookUnit,
 } from "@/lib/ops/pm-runbook-api";
 import { banners, kitList, kitListText, optionKeys, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
-import { PRICE_NOTE, priceKits, summarizePrices, usd } from "@/lib/ops/pm-runbook-prices";
+import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import { useCopy } from "./spec-sheet";
 
@@ -281,20 +281,29 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
 
       {priceSummary ? (
         <p className="text-sm text-muted-foreground">
-          {priceSummary.total > 0 ? (
+          {anyFound(priceSummary) ? (
             <>
               Kit list at sell price <b className="font-mono text-foreground">{usd(priceSummary.total)}</b>
-              {priceSummary.missing + priceSummary.attention > 0 ? " (not every kit has a price)" : ""}
+              {uncountedNote(priceSummary) ? ` (${uncountedNote(priceSummary)})` : ""}
             </>
           ) : (
             "No kit prices found in the parts catalog yet."
           )}
           {priceSummary.missing > 0 ? (
             <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">
-              {priceSummary.missing} not in parts catalog
+              {priceSummary.missing} kit{priceSummary.missing === 1 ? "" : "s"} not in parts catalog
             </span>
           ) : null}
         </p>
+      ) : priceQ.isError ? (
+        <p className="text-sm text-amber-900">
+          Kit prices could not be loaded from the parts catalog, so the copied kit list has none.{" "}
+          <button type="button" className="font-medium underline" onClick={() => void priceQ.refetch()}>
+            Try again
+          </button>
+        </p>
+      ) : priceQ.isLoading ? (
+        <p className="text-sm text-muted-foreground">Looking up kit prices in the parts catalog…</p>
       ) : null}
 
       <div className="grid gap-3">
@@ -324,20 +333,11 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                       {(() => {
                         const p = prices?.find((x) => x.ev === k.ev);
                         if (!p) return null;
-                        const part = p.sku && p.sku !== k.ev ? `Part ${p.sku} · ` : "";
-                        if (p.status === "priced")
-                          return (
-                            <span className="block text-xs text-muted-foreground">
-                              {part}
-                              {usd(p.unit ?? 0)} each · {usd(p.line ?? 0)}
-                            </span>
-                          );
-                        return (
-                          <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">
-                            {part}
-                            {PRICE_NOTE[p.status]}
-                            {p.unit != null ? ` · ${usd(p.unit)} each` : ""}
-                          </span>
+                        const text = kitPriceParts(p).join(" · ");
+                        return p.status === "priced" ? (
+                          <span className="block text-xs text-muted-foreground">{text}</span>
+                        ) : (
+                          <span className="mt-0.5 block w-fit rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">{text}</span>
                         );
                       })()}
                       {on && stamp(key) ? <span className="block text-xs text-muted-foreground">Checked in: {stamp(key)}</span> : null}

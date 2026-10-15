@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
 import { defaultConfig, kitList, kitListText } from "../src/lib/ops/pm-runbook.ts";
-import { catalogKeys, kitKey, matchRank, pickCatalog, priceKits, summarizePrices } from "../src/lib/ops/pm-runbook-prices.ts";
+import { anyFound, catalogKeys, kitKey, kitPriceParts, matchRank, pickCatalog, priceKits, summarizePrices, uncountedNote } from "../src/lib/ops/pm-runbook-prices.ts";
 
 const def = parseRunbookDefinition(
   JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/eversys-e4-xwide.json", import.meta.url), "utf8")),
@@ -31,18 +31,70 @@ test("prices each kit by quantity and flags what the catalog lacks", () => {
   assert.deepEqual([by.EV117077.status, by.EV117077.unit, by.EV117077.line], ["priced", 100, 200]);
   assert.deepEqual([by.EV108389.status, by.EV108389.line], ["priced", 50.5]);
   assert.deepEqual([by.EV108354.status, by.EV108354.line], ["no-price", null]);
-  assert.deepEqual([by.EV108339.status, by.EV108339.line], ["inactive", 60]);
+  // Hidden in the Parts list: its last price is shown, but it is not something to sell, so it is not counted.
+  assert.deepEqual([by.EV108339.status, by.EV108339.unit, by.EV108339.line], ["inactive", 30, null]);
   assert.deepEqual([by.EV108351.status, by.EV108351.sku], ["missing", null]);
   const s = summarizePrices(p);
-  assert.deepEqual(s, { total: 310.5, priced: 2, missing: 1, attention: 2 });
+  // 10 kits: EV108354 x3, EV108339 x2 and EV108351 x2 are left out of the $250.50.
+  // Everything in kits: EV108351 is one line of 2 kits.
+  assert.deepEqual(s, { total: 250.5, kits: 10, uncounted: 7, missing: 2 });
+  assert.equal(uncountedNote(s), "7 of 10 kits not counted");
+  assert.equal(uncountedNote({ ...s, uncounted: 0 }), "");
+});
+
+test("an inactive or hidden part keeps its flag and never shows a $0 or negative price", () => {
+  const one = (hit) => priceKits([{ ev: "EV108339", q: 2 }], { EV108339: hit })[0];
+  assert.deepEqual(kitPriceParts(one(item("EVER108339", null, { active: false }))), [
+    "Part EVER108339",
+    "Inactive or hidden in the catalog",
+    "not counted",
+  ]);
+  assert.equal(one(item("EVER108339", 0, { hidden: true })).unit, null);
+  assert.equal(one(item("EVER108339", -25, { hidden: true })).unit, null);
+  assert.deepEqual(kitPriceParts(one(item("EVER108339", 89.9, { hidden: true }))), [
+    "Part EVER108339",
+    "Inactive or hidden in the catalog",
+    "$89.90 each",
+    "not counted",
+  ]);
+  // The same number spelled differently is not a different part.
+  assert.deepEqual(kitPriceParts(one(item("ev-108339", 10))), ["$10.00 each", "$20.00"]);
 });
 
 test("copy text carries prices, the missing flag and a total", () => {
   const p = priceKits(lines, { EV117077: item("EV117077", 100), EV108389: item("EV108389", 50.5) });
   const t = kitListText(def, cfg, "Cafe Uno", p);
   assert.match(t, /EV117077 x2 {2}Brew module Standard {2}\[\$100\.00 each, \$200\.00\]/);
-  assert.match(t, /EV108351 x2 {2}Frame add-on, milk {2}\[not in parts catalog\]/);
-  assert.match(t, /Total at sell price: \$250\.50 \(3 kits without a price\)/);
+  assert.match(t, /EV108351 x2 {2}Frame add-on, milk {2}\[Not in parts catalog\]/);
+  // Counts kits, the same unit as "10 kits in total" just above it.
+  assert.match(t, /10 kits in total\nTotal at sell price: \$250\.50 \(7 of 10 kits not counted\)$/);
+});
+
+test("copy text uses the sheet's money format and says when nothing is priced", () => {
+  const big = kitListText(def, cfg, "Cafe Uno", priceKits(lines, { EV117077: item("EVER117077", 1234.5) }));
+  assert.match(big, /\[Part EVER117077, \$1,234\.50 each, \$2,469\.00\]/);
+  assert.match(big, /Total at sell price: \$2,469\.00 \(8 of 10 kits not counted\)$/);
+  const none = kitListText(def, cfg, "Cafe Uno", priceKits(lines, {}));
+  assert.match(none, /No kit prices found in the parts catalog yet\.$/);
+  assert.ok(!none.includes("Total at sell price"));
+});
+
+test("parts that are found but none sellable still show a total and say why", () => {
+  const hidden = (sku, rate) => item(sku, rate, { hidden: true });
+  const p = priceKits(lines, {
+    EV117077: hidden("EVER117077", 100),
+    EV108389: hidden("EVER108389", 50.5),
+    EV108354: item("EVER108354", 0),
+    EV108339: item("EVER108339", 30, { active: false }),
+  });
+  const s = summarizePrices(p);
+  assert.deepEqual(s, { total: 0, kits: 10, uncounted: 10, missing: 2 });
+  assert.equal(anyFound(s), true);
+  const t = kitListText(def, cfg, "Cafe Uno", p);
+  assert.match(t, /\[Part EVER117077, Inactive or hidden in the catalog, \$100\.00 each, not counted\]/);
+  assert.match(t, /Total at sell price: \$0\.00 \(10 of 10 kits not counted\)$/);
+  assert.ok(!t.includes("No kit prices found"));
+  assert.equal(anyFound(summarizePrices(priceKits(lines, {}))), false);
 });
 
 test("copy text is unchanged without prices", () => {
@@ -137,8 +189,8 @@ test("copy text names the Parts list number when it differs from the kit number"
   const t = kitListText(def, cfg, "Cafe Uno", p);
   assert.match(t, /EV117077 x2 {2}Brew module Standard {2}\[Part EVER117077, \$100\.00 each, \$200\.00\]/);
   assert.match(t, /EV108389 x1 {2}[^\n]*\[\$50\.50 each, \$50\.50\]/);
-  assert.match(t, /EV108354 x3 {2}[^\n]*\[Part EVER108354, no sell price in catalog\]/);
-  assert.match(t, /EV108351 x2 {2}[^\n]*\[not in parts catalog\]/);
+  assert.match(t, /EV108354 x3 {2}[^\n]*\[Part EVER108354, No sell price in the catalog\]/);
+  assert.match(t, /EV108351 x2 {2}[^\n]*\[Not in parts catalog\]/);
 });
 
 test("against the real Parts list, every runbook kit it has is found under EVER", () => {
