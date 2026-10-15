@@ -116,7 +116,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     if (!unit) return;
     const options: Record<string, string> = {};
     for (const k of optionKeys(def)) options[k] = k === key ? val : c[k];
-    setOptions.mutate({ pmId, unitKey: unit.unitKey, runbookId: unit.runbookId, options, serialKey: unit.serialKey });
+    setOptions.mutate({ pmId, unitKey: unit.unitKey, runbookId: unit.runbookId, options, optionsKey: unit.optionsKey });
   }
   function pickJob(key: "model" | "pm", val: string) {
     if (!unit) return;
@@ -174,7 +174,11 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
 
       <div className="text-sm text-muted-foreground">
         {unit.piece}
-        {unit.serial ? ` · SN ${unit.serial}` : " · no serial on file, so options stay with this PM only"}
+        {unit.serial
+          ? ` · SN ${unit.serial}`
+          : unit.awaitingSerial
+            ? " · no serial on file: options are kept on this account unit and move to the serial once it is added"
+            : " · not matched to an account unit, so options stay with this PM only"}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">

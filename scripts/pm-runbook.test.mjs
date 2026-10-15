@@ -118,8 +118,8 @@ const matcher = (piece) => {
 
 test("units: one per X-Wide line, serials taken from the account's matching units", () => {
   const rows = [
-    { catalogModel: "Eversys Enigma e'4m X-Wide Classic", equipmentName: "Eversys Enigma e'4m X-Wide Classic", serial: "SN 100" },
-    { catalogModel: "Eversys Enigma e'4s X-Wide Classic", equipmentName: "Eversys Enigma e'4s X-Wide Classic", serial: "N/A" },
+    { id: 7, catalogModel: "Eversys Enigma e'4m X-Wide Classic", equipmentName: "Eversys Enigma e'4m X-Wide Classic", serial: "SN 100" },
+    { id: 8, catalogModel: "Eversys Enigma e'4s X-Wide Classic", equipmentName: "Eversys Enigma e'4s X-Wide Classic", serial: "N/A" },
   ];
   const u = planUnits(
     "Eversys Enigma e'4s X-Wide Classic\nEversys Enigma e'4m X-Wide Classic\nGrinder Mazzer",
@@ -128,9 +128,11 @@ test("units: one per X-Wide line, serials taken from the account's matching unit
   );
   assert.equal(u.length, 2);
   assert.equal(u[0].model, "4s");
-  assert.match(u[0].unitKey, /^piece:.*#1$/);
+  assert.equal(u[0].unitKey, "acct:8");
   assert.equal(u[0].serialKey, null);
-  assert.equal(u[1].unitKey, "sn100");
+  assert.equal(u[0].optionsKey, "acct:8");
+  assert.equal(u[1].unitKey, "acct:7");
+  assert.equal(u[1].optionsKey, "sn100");
   assert.equal(u[1].serial, "SN 100");
 });
 
@@ -140,7 +142,7 @@ test("units: two identical lines get distinct keys", () => {
 });
 
 test("units: loose 'E4X-WIDE' text borrows the model from the account's unit", () => {
-  const rows = [{ catalogModel: "Eversys Enigma e'4m X-Wide Classic", equipmentName: "e'4m X-Wide", serial: "A1" }];
+  const rows = [{ id: 3, catalogModel: "Eversys Enigma e'4m X-Wide Classic", equipmentName: "e'4m X-Wide", serial: "A1" }];
   const [u] = planUnits("E4X-WIDE", rows, matcher);
   assert.equal(u.model, "4ms");
   assert.equal(u.serialKey, "a1");
@@ -151,4 +153,28 @@ test("options key is the same for a warehouse serial and an account serial", () 
   assert.equal(optionsKeyFor("#E4-123456"), "e4-123456");
   assert.equal(optionsKeyFor("N/A"), null);
   assert.equal(optionsKeyFor(""), null);
+});
+
+test("units: a line with no account match keeps options with this PM only", () => {
+  const [u] = planUnits("e'4s X-Wide", [], matcher);
+  assert.match(u.unitKey, /^piece:/);
+  assert.equal(u.optionsKey, null);
+});
+
+test("units: adding a serial keeps the PM-level key and moves the options key from the account id to the serial", () => {
+  const row = { id: 9, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: null };
+  const [before] = planUnits("e'4m X-Wide", [row], matcher);
+  const [after] = planUnits("e'4m X-Wide", [{ ...row, serial: "E4-777" }], matcher);
+  assert.equal(before.unitKey, after.unitKey);
+  assert.equal(before.optionsKey, "acct:9");
+  assert.equal(after.optionsKey, "e4-777");
+});
+
+test("units: same text twice at an account maps to two distinct account units", () => {
+  const rows = [
+    { id: 1, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: null },
+    { id: 2, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: null },
+  ];
+  const u = planUnits("e'4m X-Wide\ne'4m X-Wide", rows, matcher);
+  assert.deepEqual(u.map((x) => x.unitKey), ["acct:1", "acct:2"]);
 });

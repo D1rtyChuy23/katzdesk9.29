@@ -6,11 +6,21 @@
 import { compactEquip, parseSerial, sameCatalogModel, serialKey } from "./account-equip.ts";
 import { splitEquipment } from "./equipment.ts";
 
-export type AccountUnitRow = { catalogModel: string; equipmentName: string; serial: string | null };
+export type AccountUnitRow = { id: number; catalogModel: string; equipmentName: string; serial: string | null };
 
 export type PlannedUnit = {
-  /** Stable id for ticks and per-job choices: the serial key, else 'piece:<text>#<n>'. */
+  /**
+   * Stable id for this PM's ticks and choices. 'acct:<account_equipment id>' when the line matches an account unit
+   * (so adding a serial later does not change it), else 'piece:<text>#<n>'.
+   */
   unitKey: string;
+  /**
+   * Where the unit's options live: the normalised serial when there is one (follows the unit between warehouse and
+   * accounts), else 'acct:<id>' (persists across PMs), else null (matched nothing: options stay with this PM).
+   */
+  optionsKey: string | null;
+  /** account_equipment row the line matched, if any. */
+  accountId: number | null;
   /** The equipment text as written on the PM job. */
   piece: string;
   serial: string | null;
@@ -57,15 +67,23 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
       if (!model && rowHit?.model) model = rowHit.model;
     }
     const sk = optionsKeyFor(serial);
+    const accountId = idx >= 0 ? accountRows[idx].id : null;
     let unitKey: string;
-    if (sk) unitKey = sk;
+    if (accountId != null) unitKey = `acct:${accountId}`;
     else {
       const base = `piece:${compactEquip(piece)}`;
       const n = (seen.get(base) ?? 0) + 1;
       seen.set(base, n);
       unitKey = `${base}#${n}`;
     }
-    out.push({ unitKey, piece, serial, serialKey: sk, runbookId: hit.runbookId, model });
+    out.push({
+      unitKey,
+      optionsKey: sk ?? (accountId != null ? `acct:${accountId}` : null),
+      accountId,
+      piece,
+      serial,
+      serialKey: sk,
+      runbookId: hit.runbookId, model });
   }
   return out;
 }

@@ -23,8 +23,10 @@ export type RunbookUnit = {
   unitKey: string;
   piece: string;
   serial: string | null;
-  /** Normalised serial the options are stored under; null when the unit has no serial yet. */
-  serialKey: string | null;
+  /** Where options are stored: the serial, else 'acct:<id>', else null (options then stay with this PM only). */
+  optionsKey: string | null;
+  /** True when the unit matched an account unit but has no serial yet (options move to the serial once added). */
+  awaitingSerial: boolean;
   runbookId: string;
   /** model, pm and every option key. */
   config: RunbookConfig;
@@ -91,14 +93,14 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     )[0];
     if (!pm) return empty;
 
-    const acct = await sql.query<{ customer: string; catalog_model: string; equipment_name: string; serial: string | null }>(
-      "select customer, catalog_model, equipment_name, serial from account_equipment where lower(customer) = lower($1) order by id",
+    const acct = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null }>(
+      "select id, customer, catalog_model, equipment_name, serial from account_equipment where lower(customer) = lower($1) order by id",
       [pm.customer],
     );
     const key = normalizeCustomerKey(pm.customer);
     const rows = acct
       .filter((r) => normalizeCustomerKey(r.customer) === key)
-      .map((r) => ({ catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial }));
+      .map((r) => ({ id: r.id, catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial }));
 
     const planned = planUnits(pm.equipment, rows, (piece) => {
       for (const rb of RUNBOOKS) {
@@ -117,11 +119,21 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       "select unit_key, key, done_by, done_at from pm_runbook_checks where pm_job_id = $1",
       [data.pmId],
     );
-    const serialKeys = planned.map((u) => u.serialKey).filter((k): k is string => !!k);
-    const optRows = serialKeys.length
-      ? await sql.query<{ id: number; serial_key: string; options: unknown }>(
-          "select id, serial_key, options from unit_runbook_options where serial_key = any($1::text[])",
-          [serialKeys],
+    // A serial was added to a unit whose options were kept under its account id: move them to the serial.
+    for (const u of planned) {
+      if (u.serialKey && u.accountId != null) {
+        await sql.query(
+          `update unit_runbook_options set unit_key = $1, serial_key = $1, updated_at = now()
+            where unit_key = $2 and not exists (select 1 from unit_runbook_options where unit_key = $1)`,
+          [u.serialKey, `acct:${u.accountId}`],
+        );
+      }
+    }
+    const optionKeys = planned.map((u) => u.optionsKey).filter((k): k is string => !!k);
+    const optRows = optionKeys.length
+      ? await sql.query<{ id: number; unit_key: string; options: unknown }>(
+          "select id, unit_key, options from unit_runbook_options where unit_key = any($1::text[])",
+          [optionKeys],
         )
       : [];
     const ids = optRows.map((r) => r.id);
@@ -136,7 +148,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     const units: RunbookUnit[] = planned.map((u) => {
       const rb = runbookById(u.runbookId)!;
       const s = saved.find((x) => x.unit_key === u.unitKey);
-      const optRow = u.serialKey ? optRows.find((r) => r.serial_key === u.serialKey) : undefined;
+      const optRow = u.optionsKey ? optRows.find((r) => r.unit_key === u.optionsKey) : undefined;
       const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
       const config = normalizeConfig(rb.def, {
         ...options,
@@ -149,7 +161,8 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         unitKey: u.unitKey,
         piece: u.piece,
         serial: u.serial,
-        serialKey: u.serialKey,
+        optionsKey: u.optionsKey,
+        awaitingSerial: !u.serialKey && u.accountId != null,
         runbookId: u.runbookId,
         config,
         checks: ticks,
@@ -194,8 +207,8 @@ export const setRunbookUnitConfig = createServerFn({ method: "POST" })
 const optionsInput = unitInput.extend({
   runbookId: z.string(),
   options: z.record(z.string(), z.string()),
-  /** Normalised serial when the unit has one; options are then stored on the unit. */
-  serialKey: z.string().max(200).nullable(),
+  /** Serial or 'acct:<id>' (from getPmRunbook); null keeps the options with this PM only. */
+  optionsKey: z.string().max(200).nullable(),
 });
 
 /** Machine options. Keyed by serial so they follow the unit between warehouse and accounts; changes go to `activity`. */
@@ -218,7 +231,7 @@ export const setRunbookUnitOptions = createServerFn({ method: "POST" })
       const o = rb.def.options.find((x) => x.key === key);
       return val == null ? "not set" : (o?.choices.find((c) => c.val === val)?.label ?? val);
     };
-    if (!data.serialKey) {
+    if (!data.optionsKey) {
       await sql.query(
         `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, options, updated_by)
          values ($1, $2, $3, $4::jsonb, $5)
@@ -229,20 +242,20 @@ export const setRunbookUnitOptions = createServerFn({ method: "POST" })
       return { ok: true };
     }
     const cur = (
-      await sql.query<{ id: number; options: unknown }>("select id, options from unit_runbook_options where serial_key = $1", [
-        data.serialKey,
+      await sql.query<{ id: number; options: unknown }>("select id, options from unit_runbook_options where unit_key = $1", [
+        data.optionsKey,
       ])
     )[0];
     const before = cur ? asJson(cur.options) : {};
     const row = (
       await sql.query<{ id: number }>(
-        `insert into unit_runbook_options (serial_key, runbook_id, options, updated_by)
-         values ($1, $2, $3::jsonb, $4)
-         on conflict (serial_key) do update
+        `insert into unit_runbook_options (unit_key, serial_key, runbook_id, options, updated_by)
+         values ($1, case when $1 like 'acct:%' then null else $1 end, $2, $3::jsonb, $4)
+         on conflict (unit_key) do update
            set options = excluded.options, runbook_id = excluded.runbook_id,
                updated_by = excluded.updated_by, updated_at = now()
          returning id`,
-        [data.serialKey, data.runbookId, JSON.stringify(next), me.name],
+        [data.optionsKey, data.runbookId, JSON.stringify(next), me.name],
       )
     )[0];
     const changes: string[] = [];
