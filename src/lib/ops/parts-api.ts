@@ -202,7 +202,7 @@ export const listParts = createServerFn({ method: "POST" })
               count(*) filter (where image is null and r_verdict = 'confirmed' and r_image is not null)::int as ready
          from ${FROM} where active and hidden_at is null and kind not in ('trip', 'labor')`,
     ))[0];
-    // Only the five classes are ever offered; counts are the active, visible parts in each.
+    // Only the six classes are ever offered; counts are the active, visible parts in each.
     const classRows = await sql.query<{ c: string; n: number }>(
       "select item_class as c, count(*)::int as n from billing_items where active and hidden_at is null and kind not in ('trip', 'labor') and item_class is not null group by 1",
     );

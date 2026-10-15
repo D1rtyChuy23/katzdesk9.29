@@ -69,32 +69,62 @@ const PART_HEADERS: Record<string, PartField> = {
 };
 
 /** The only classes kept on the parts list. Anything else on a file is not added and is moved off the active list. */
-export const PART_CLASSES = ["Parts", "Water Filters", "Service", "Equipment", "Dispensers"] as const;
+export const PART_CLASSES = ["Parts", "Water Filters", "Cleaning Material", "Equipment", "Service", "Discounts"] as const;
 export type PartClass = (typeof PART_CLASSES)[number];
 export const isPartClass = (v: unknown): v is PartClass => (PART_CLASSES as readonly string[]).includes(String(v));
 
+// The NetSuite "Filters" tab also holds portafilters, baskets and gaskets, so it is Parts; a water filter is told
+// by its item name (below). Dispensers are Equipment.
 const SHEET_CLASS: Record<string, PartClass> = {
   parts: "Parts",
-  filters: "Water Filters",
+  filters: "Parts",
   "water filters": "Water Filters",
+  "cleaning material": "Cleaning Material",
   service: "Service",
   services: "Service",
   equipment: "Equipment",
-  dispensers: "Dispensers",
+  dispensers: "Equipment",
+  discounts: "Discounts",
 };
 const classKey = (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-const CLASS_BY_NAME = new Map<string, PartClass>(PART_CLASSES.map((c) => [classKey(c), c]));
+const CLASS_BY_NAME = new Map<string, PartClass>([...PART_CLASSES.map((c) => [classKey(c), c] as const), ["dispensers", "Equipment"]]);
+
+/** Water filters sit under the "WF" parent item in NetSuite, so their item names start with WF. */
+const WATER_FILTER_NAME = /^WF/i;
+/** Blue Island coffee items are not kept. */
+const BLUE_ISLAND = /^blue ?island/i;
+/** "Discount", but not "discontinued". */
+const DISCOUNT = /\bdiscount\b/i;
+/** Cleaning chemicals, and the brushes and tools used to clean. A pump's brush kit or a brushed finish is not one. */
+const CLEANING_CHEMICAL = /\b(cleaner|detergent|descal\w*|decalcif\w*|cafiza|urnex|rinza|tabz|grindz|sanitiz\w*)\b/i;
+const CLEANING_TOOL = /\b(cleaning (brush|tool|key|kit|cloth|pad)|clean ?out tool|brush(es)?)\b/i;
+const NOT_CLEANING = /brush kit assembly|motor brush|carbon brush/i;
+
+const isBlueIsland = (row: { mpn: string; sku: string | null; description: string | null }) =>
+  [row.sku, row.mpn, row.description].some((v) => BLUE_ISLAND.test(String(v ?? "").trim()));
+
+export function isCleaningMaterial(description: string): boolean {
+  return CLEANING_CHEMICAL.test(description) || (CLEANING_TOOL.test(description) && !NOT_CLEANING.test(description));
+}
 
 /**
- * Which of the five classes a row belongs to. The NetSuite export keeps one tab per class (Parts, Filters,
- * Equipment, Service) and its Class column is a path ("Equipment : Parts and Filters"), so a tab named for a class
- * decides it. Any other tab: the Class column's own name, its first or last part ("Service : Catering" is Service).
- * null means the row is in none of the five.
+ * Which class a row belongs to. Blue Island items are none. A discount is Discounts wherever it sits. Otherwise the
+ * Service tab (or a Service class) is Service; an item named under the WF parent is a Water Filter; a cleaning
+ * chemical or tool is Cleaning Material; then the tab decides (Parts, Filters, Equipment …), and on any other tab
+ * the Class column's own name, its first or last part ("Equipment : Equipment Sales" is Equipment).
+ * null means the row is in none of the classes.
  */
-export function partClassFor(rawClass: string, sheetName: string): PartClass | null {
-  const bySheet = SHEET_CLASS[classKey(sheetName)];
-  if (bySheet) return bySheet;
+export function partClassFor(rawClass: string, sheetName: string, item: { name?: string | null; description?: string | null } = {}): PartClass | null {
+  const name = String(item.name ?? "").trim();
+  const description = String(item.description ?? "").trim();
+  if (BLUE_ISLAND.test(name) || BLUE_ISLAND.test(description)) return null;
+  if (DISCOUNT.test(description) || DISCOUNT.test(name)) return "Discounts";
   const parts = rawClass.split(":").map(classKey).filter(Boolean);
+  const bySheet = SHEET_CLASS[classKey(sheetName)];
+  if (bySheet === "Service" || (!bySheet && parts[0] === "service")) return "Service";
+  if (WATER_FILTER_NAME.test(name)) return "Water Filters";
+  if (description && isCleaningMaterial(description)) return "Cleaning Material";
+  if (bySheet) return bySheet;
   for (const k of [classKey(rawClass), parts[0], parts[parts.length - 1]]) {
     const hit = k ? CLASS_BY_NAME.get(k) : undefined;
     if (hit) return hit;
@@ -114,11 +144,11 @@ export type PartImportRow = {
   rate: number | null;
   cost: number | null;
   kind: ChargeKind;
-  /** One of the five classes, or null when the file has none. */
+  /** One of the six classes, or null when the file has none. */
   cls: PartClass | null;
   /** The NetSuite Class as the file has it ("Equipment : Parts and Filters"), kept as read. */
   sourceClass: string | null;
-  /** False when the file gives a class that is not one of the five: the row is not added. */
+  /** False when the file gives a class that is not one of the six, or the row is a Blue Island item: not added. */
   keep: boolean;
   /** From an Inactive column: false when marked inactive; null when the file has no such column. */
   active: boolean | null;
@@ -192,9 +222,11 @@ export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }
       const rate = cell(r, "rate");
       const cost = cell(r, "cost");
       const cls = cell(r, "class").replace(/\s+/g, " ");
-      const bucket = partClassFor(cls, sheet.name);
-      // No class anywhere (a plain list of part numbers) is kept as it is; a class outside the five is not.
-      const keep = bucket != null || (!cls && !SHEET_CLASS[classKey(sheet.name)]);
+      const description = (cols.description != null ? cell(r, "description") : cell(r, "displayName")) || null;
+      const bucket = partClassFor(cls, sheet.name, { name: rawName || mpn, description });
+      // No class anywhere (a plain list of part numbers) is kept as it is; a class outside the six, or a Blue
+      // Island item, is not.
+      const keep = bucket != null || (!cls && !SHEET_CLASS[classKey(sheet.name)] && !isBlueIsland({ mpn, sku: rawName, description }));
       const inactive = cols.inactive != null ? yesNo(r[cols.inactive]) : null;
       rows.push({
         line: i + 1,
@@ -202,7 +234,7 @@ export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }
         mpn,
         sku: fromName ? mpn : split?.sku || null,
         parent,
-        description: (cols.description != null ? cell(r, "description") : cell(r, "displayName")) || null,
+        description,
         rate: rate ? cleanRate(rate) : null,
         cost: cost ? cleanRate(cost) : null,
         kind: kindFromClass(cls, rawName || mpn),
@@ -275,14 +307,16 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
     const hits = [...(mpns.get(key) ?? [])];
     for (const p of bySkuKey.get(key) ?? []) if (!hits.some((h) => h.id === p.id)) hits.push(p);
     if (row.keep === false) {
-      // A class outside the five: never added. A part already on the list is moved off the active list (MPN kept).
+      // A class outside the six, or a Blue Island item: never added. A part already on the list is moved off the active list (MPN kept).
       const was = hits.length === 1 && !hits[0]!.hidden && hits[0]!.active !== false ? hits[0]! : null;
       return {
         status: "not_kept",
         row,
         partId: was?.id ?? null,
         changes: was ? ["Moved off the active list"] : [],
-        reason: `Class ${row.sourceClass ?? ""} is not one of ${PART_CLASSES.join(", ")}.`,
+        reason: isBlueIsland(row)
+          ? "Blue Island items are not kept."
+          : `Class ${row.sourceClass ?? ""} is not one of ${PART_CLASSES.join(", ")}.`,
       };
     }
     if (hits.length > 1) {

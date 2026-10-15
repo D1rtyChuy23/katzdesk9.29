@@ -147,7 +147,7 @@ export function ImportPartsButton() {
           <DialogTitle>Import Parts (NetSuite)</DialogTitle>
           <DialogDescription>
             The NetSuite item export: <span className="font-medium">Name</span> is the part number (MPN), <span className="font-medium">Description</span> is the
-            part name (left blank when the file has none), and Base Price, Purchase Price and Inactive are kept. Only five classes are kept: Parts, Water Filters, Service, Equipment and Dispensers. A row in any other class is not added, and a part already listed in one is moved off the active list. A file with its own MPN column uses that column instead.
+            part name (left blank when the file has none), and Base Price, Purchase Price and Inactive are kept. Six classes are kept: Parts, Water Filters (items under the WF parent), Cleaning Material (cleaning chemicals, brushes and tools), Equipment (dispensers included), Service and Discounts. Blue Island items and any other class are not added, and a part already listed in one is moved off the active list. A file with its own MPN column uses that column instead.
             Matched on the part number: one already on a part updates it, a new one adds a part. Never a second part for one part number. A hidden part is skipped and stays
             hidden. Blank cells change nothing.
           </DialogDescription>

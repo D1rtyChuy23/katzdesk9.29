@@ -174,36 +174,75 @@ test("a part loaded earlier by its SKU alone is the same part: updated, never ad
   assert.equal(plan[1].status, "sku_taken");
 });
 
-test("five classes: tabs decide the class, any other class is not added and moves a listed part off the active list", () => {
+test("six classes: WF items are water filters, cleaning material and discounts by name, dispensers are equipment, Blue Island is not kept", () => {
   const r = partRowsFromSheets([
-    { name: "Filters", matrix: [["Name", "Description", "Class"], ["BWT-1", "Water filter cartridge", "Equipment : Parts and Filters"]] },
-    { name: "Service", matrix: [["Name", "Description", "Class"], ["SVC-1", "Catering setup", "Service : Catering"]] },
+    { name: "Filters", matrix: [
+      ["Name", "Description", "Class"],
+      ["WF160-50010", "Optipure FX-11 Single 10\"", "Equipment : Parts and Filters"],
+      ["RAN10071118", "Rancilio Single Spout Portafilter (F5-2)", "Equipment : Parts and Filters"],
+      ["WF704-39905", "Everpure Brush Kit Assembly for 115V Diaphragm Pump", "Equipment : Parts and Filters"],
+    ] },
+    { name: "Parts", matrix: [
+      ["Name", "Description", "Class"],
+      ["LM5.380", "La Marzocco Swift Cleaning Brush (was 5.118)..", "Equipment : Parts and Filters"],
+      ["FETCO1102.00114.00", "FETCO KIT, STRONG COIL - ITEM DISCOUNTINUED", "Equipment : Parts and Filters"],
+    ] },
+    { name: "Equipment", matrix: [
+      ["Name", "Description", "Class"],
+      ["URNEXE16TABLETS", "Cafiza E16 Espresso Machine Cleaner, 100/jar", "Equipment : Equipment Sales"],
+      ["CLDEQUIPMENT", "Equipment Discount for machines, airpots, dispensers, and other equipment.", "Equipment : Equipment Sales"],
+      ["PCS1000NK-N", "Service Ideas Portion Control Server, 33.8 oz (1 liter), Brushed", "Equipment : Equipment Sales"],
+    ] },
+    { name: "Service", matrix: [
+      ["Name", "Description", "Class"],
+      ["SVC-1", "Catering setup", "Service : Catering"],
+      ["TRAINING&CLEANING", "TRAINING&CLEANING", "Service : Training"],
+      ["CLDSERVICE", "Service Discount", "Service : Equipment Service"],
+      ["BLUE ISLAND KCUP 4/30ct", "Blue Island Fulfillment Kcup Case 4/30ct", "Service : Other Service"],
+    ] },
     { name: "Items", matrix: [
       ["Name", "Description", "Class"],
       ["DSP-1", "Cold brew dispenser", "Dispensers"],
       ["GC-1", "Gift card", "Gift Cards"],
       ["LS-1", "Lease payment", "Equipment : Leases"],
       ["BLANK-1", "", ""],
+      ["BLUEISLANDPITCHERPACKBX", "Blue Island Coffee Cold Brew Pitcher Pack", ""],
     ] },
   ]);
-  assert.deepEqual(r.rows.map((x) => [x.mpn, x.cls, x.keep, x.description, x.sourceClass]), [
-    ["BWT-1", "Water Filters", true, "Water filter cartridge", "Equipment : Parts and Filters"],
-    ["SVC-1", "Service", true, "Catering setup", "Service : Catering"],
-    ["DSP-1", "Dispensers", true, "Cold brew dispenser", "Dispensers"],
-    ["GC-1", null, false, "Gift card", "Gift Cards"],
-    ["LS-1", "Equipment", true, "Lease payment", "Equipment : Leases"],
-    ["BLANK-1", null, true, null, null],
+  assert.deepEqual(r.rows.map((x) => [x.mpn, x.cls, x.keep]), [
+    ["WF160-50010", "Water Filters", true],
+    ["RAN10071118", "Parts", true],
+    ["WF704-39905", "Water Filters", true],
+    ["LM5.380", "Cleaning Material", true],
+    ["FETCO1102.00114.00", "Parts", true],
+    ["URNEXE16TABLETS", "Cleaning Material", true],
+    ["CLDEQUIPMENT", "Discounts", true],
+    ["PCS1000NK-N", "Equipment", true],
+    ["SVC-1", "Service", true],
+    ["TRAINING&CLEANING", "Service", true],
+    ["CLDSERVICE", "Discounts", true],
+    ["BLUE ISLAND KCUP 4/30ct", null, false],
+    ["DSP-1", "Equipment", true],
+    ["GC-1", null, false],
+    ["LS-1", "Equipment", true],
+    ["BLANK-1", null, true],
+    ["BLUEISLANDPITCHERPACKBX", null, false],
   ]);
-  assert.deepEqual(PART_CLASSES, ["Parts", "Water Filters", "Service", "Equipment", "Dispensers"]);
+  assert.equal(r.rows[8].sourceClass, "Service : Catering");
+  assert.deepEqual(PART_CLASSES, ["Parts", "Water Filters", "Cleaning Material", "Equipment", "Service", "Discounts"]);
   const plan = planPartImport(r.rows, [
     { id: 5, sku: "GC-1", item: "GC-1", mpn: "GC-1", description: "Gift card", rate: 5, cost: null, listPrice: null, itemClass: null, active: true },
+    { id: 6, sku: "BLUE ISLAND KCUP 4/30ct", item: "BLUE ISLAND KCUP 4/30ct", mpn: "BLUE ISLAND KCUP 4/30ct", description: null, rate: 5, cost: null, listPrice: null, itemClass: "Service", active: true },
   ]);
-  assert.equal(plan[3].status, "not_kept");
-  assert.equal(plan[3].partId, 5);
-  assert.deepEqual(plan[3].changes, ["Moved off the active list"]);
-  // A class outside the five that is not on the list yet is simply not added.
+  assert.equal(plan[13].status, "not_kept");
+  assert.equal(plan[13].partId, 5);
+  assert.deepEqual(plan[13].changes, ["Moved off the active list"]);
+  assert.equal(plan[11].status, "not_kept");
+  assert.equal(plan[11].partId, 6);
+  assert.equal(plan[11].reason, "Blue Island items are not kept.");
+  // A class outside the six that is not on the list yet is simply not added.
   const none = planPartImport(r.rows, []);
-  assert.equal(none[3].status, "not_kept");
-  assert.equal(none[3].partId, null);
-  assert.equal(none.filter((p) => p.status === "new").length, 5);
+  assert.equal(none[13].status, "not_kept");
+  assert.equal(none[13].partId, null);
+  assert.equal(none.filter((p) => p.status === "new").length, 14);
 });
