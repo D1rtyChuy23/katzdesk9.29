@@ -324,10 +324,17 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                       {(() => {
                         const p = prices?.find((x) => x.ev === k.ev);
                         if (!p) return null;
+                        const part = p.sku && p.sku !== k.ev ? `Part ${p.sku} · ` : "";
                         if (p.status === "priced")
-                          return <span className="block text-xs text-muted-foreground">{usd(p.unit ?? 0)} each · {usd(p.line ?? 0)}</span>;
+                          return (
+                            <span className="block text-xs text-muted-foreground">
+                              {part}
+                              {usd(p.unit ?? 0)} each · {usd(p.line ?? 0)}
+                            </span>
+                          );
                         return (
                           <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">
+                            {part}
                             {PRICE_NOTE[p.status]}
                             {p.unit != null ? ` · ${usd(p.unit)} each` : ""}
                           </span>

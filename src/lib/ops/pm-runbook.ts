@@ -138,14 +138,16 @@ export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: s
     }
     const split = k.parts.length > 1 ? ` (${k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")})` : "";
     const p = prices?.find((x) => x.ev === k.ev);
+    // Name the Parts list number when it differs (EVER117077 for EV117077): that is the number to order by.
+    const part = p?.sku && p.sku !== k.ev ? `Part ${p.sku}, ` : "";
     const price =
       !p
         ? ""
         : p.status === "missing"
           ? "  [not in parts catalog]"
           : p.unit != null
-            ? `  [${money(p.unit)} each, ${money(p.line ?? 0)}${p.status === "inactive" ? ", inactive in catalog" : ""}]`
-            : "  [no sell price in catalog]";
+            ? `  [${part}${money(p.unit)} each, ${money(p.line ?? 0)}${p.status === "inactive" ? ", inactive in catalog" : ""}]`
+            : `  [${part}no sell price in catalog]`;
     out.push(`${k.ev} x${k.q}  ${k.name}${split}${price}`);
   }
   if (!lines.length) out.push("No kits for this setup.");
