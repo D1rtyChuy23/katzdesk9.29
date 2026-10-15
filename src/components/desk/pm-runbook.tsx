@@ -1,0 +1,346 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, ClipboardCopy } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  clearRunbookChecks,
+  getPmRunbook,
+  setRunbookCheck,
+  setRunbookUnitConfig,
+  setRunbookUnitOptions,
+  type RunbookUnit,
+} from "@/lib/ops/pm-runbook-api";
+import { banners, kitList, kitListText, optionKeys, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { runbookById } from "@/lib/ops/runbooks";
+import { useCopy } from "./spec-sheet";
+
+function Seg({
+  label,
+  value,
+  choices,
+  disabled,
+  onPick,
+}: {
+  label: string;
+  value: string;
+  choices: { val: string; label: string }[];
+  disabled: boolean;
+  onPick: (val: string) => void;
+}) {
+  return (
+    <div className="grid gap-1">
+      <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{label}</span>
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label={label}>
+        {choices.map((c) => (
+          <button
+            key={c.val}
+            type="button"
+            disabled={disabled}
+            aria-pressed={value === c.val}
+            onClick={() => onPick(c.val)}
+            className={cn(
+              "min-h-9 rounded-md border px-3 py-1 text-left text-sm disabled:cursor-default",
+              value === c.val ? "border-primary bg-primary font-semibold text-primary-foreground" : "border-border bg-background",
+            )}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Runbook for one PM job: a tab per unit with kit list and service steps. Office roles see ticks read-only. */
+export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }) {
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ["pm-runbook", pmId], queryFn: () => getPmRunbook({ data: { pmId } }) });
+  const [active, setActive] = useState<string | null>(null);
+  const { copy, copied, dialog } = useCopy();
+  const units = useMemo(() => q.data?.units ?? [], [q.data]);
+  const canWrite = !!q.data?.canWrite;
+  useEffect(() => {
+    if (!units.length) return;
+    if (!active || !units.some((u) => u.unitKey === active)) setActive(units[0].unitKey);
+  }, [units, active]);
+  const unit: RunbookUnit | undefined = units.find((u) => u.unitKey === active) ?? units[0];
+  const rb = unit ? runbookById(unit.runbookId) : undefined;
+  const refresh = () => qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+  const onError = (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save");
+
+  const setConfig = useMutation({
+    mutationFn: (d: Parameters<typeof setRunbookUnitConfig>[0]["data"]) => setRunbookUnitConfig({ data: d }),
+    onSuccess: refresh,
+    onError,
+  });
+  const setOptions = useMutation({
+    mutationFn: (d: Parameters<typeof setRunbookUnitOptions>[0]["data"]) => setRunbookUnitOptions({ data: d }),
+    onSuccess: refresh,
+    onError,
+  });
+  const tick = useMutation({
+    mutationFn: (d: Parameters<typeof setRunbookCheck>[0]["data"]) => setRunbookCheck({ data: d }),
+    onSuccess: refresh,
+    onError,
+  });
+  const clear = useMutation({
+    mutationFn: (d: { pmId: number; unitKey: string }) => clearRunbookChecks({ data: d }),
+    onSuccess: refresh,
+    onError,
+  });
+  const [armed, setArmed] = useState(false);
+  useEffect(() => setArmed(false), [active]);
+
+  const view = useMemo(() => {
+    if (!unit || !rb) return null;
+    const kits = kitList(rb.def, unit.config);
+    const steps = stepList(rb.def, unit.config);
+    const modules: { module: string; kits: typeof kits }[] = [];
+    for (const k of kits) {
+      let m = modules.find((x) => x.module === k.module);
+      if (!m) modules.push((m = { module: k.module, kits: [] }));
+      m.kits.push(k);
+    }
+    const ids = stepIds(steps);
+    const done = ids.filter((id) => unit.checks[id]).length;
+    return { kits, steps, modules, stepTotal: ids.length, stepDone: done };
+  }, [unit, rb]);
+
+  if (q.isLoading || !units.length || !unit || !rb || !view) return null;
+  const def = rb.def;
+  const c = unit.config;
+
+  function pickOption(key: string, val: string) {
+    if (!unit) return;
+    const options: Record<string, string> = {};
+    for (const k of optionKeys(def)) options[k] = k === key ? val : c[k];
+    setOptions.mutate({ pmId, unitKey: unit.unitKey, runbookId: unit.runbookId, options, serialKey: unit.serialKey });
+  }
+  function pickJob(key: "model" | "pm", val: string) {
+    if (!unit) return;
+    setConfig.mutate({
+      pmId,
+      unitKey: unit.unitKey,
+      runbookId: unit.runbookId,
+      model: key === "model" ? val : c.model,
+      interval: key === "pm" ? val : c.pm,
+    });
+  }
+  function toggle(key: string, done: boolean) {
+    if (!unit) return;
+    tick.mutate({ pmId, unitKey: unit.unitKey, key, done });
+  }
+  const stamp = (key: string) => {
+    const t = unit.checks[key];
+    if (!t) return null;
+    const when = new Date(t.at);
+    const day = Number.isNaN(when.getTime()) ? "" : when.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    return [t.by, day].filter(Boolean).join(" · ");
+  };
+  const time = def.models.find((m) => m.id === c.model)?.time?.[c.pm];
+  const header = `${customer}${unit.serial ? ` · SN ${unit.serial}` : ""}`;
+
+  return (
+    <section className="grid gap-4 border-b border-border p-5" aria-label="Runbook">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-heading text-base font-semibold">Runbook</h3>
+        <span className="text-xs text-muted-foreground">
+          {def.title}
+          {canWrite ? "" : " · view only"}
+        </span>
+      </div>
+
+      {units.length > 1 ? (
+        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Units on this PM">
+          {units.map((u, i) => (
+            <button
+              key={u.unitKey}
+              type="button"
+              role="tab"
+              aria-selected={u.unitKey === unit.unitKey}
+              onClick={() => setActive(u.unitKey)}
+              className={cn(
+                "max-w-full truncate rounded-md border px-3 py-1.5 text-sm",
+                u.unitKey === unit.unitKey ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
+              )}
+            >
+              {i + 1}. {u.serial ? `SN ${u.serial}` : u.piece}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="text-sm text-muted-foreground">
+        {unit.piece}
+        {unit.serial ? ` · SN ${unit.serial}` : " · no serial on file, so options stay with this PM only"}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
+        <Seg label="Service interval" value={c.pm} disabled={!canWrite} choices={def.intervals.map((i) => ({ val: i.id, label: i.label }))} onPick={(v) => pickJob("pm", v)} />
+        {visibleOptions(def, c).map((o) => (
+          <Seg key={o.key} label={o.label} value={c[o.key]} disabled={!canWrite} choices={o.choices} onPick={(v) => pickOption(o.key, v)} />
+        ))}
+      </div>
+
+      {banners(def, c).map((b, i) => (
+        <p
+          key={i}
+          className={cn(
+            "rounded-md px-3 py-2 text-sm",
+            b.tone === "warn" ? "bg-amber-100 text-amber-900" : b.tone === "bad" ? "bg-red-100 text-red-900" : "bg-emerald-50 text-emerald-900",
+          )}
+        >
+          {b.text}
+        </p>
+      ))}
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-sm">
+          Kit lines <b className="font-mono">{view.kits.length}</b> · Kits in total <b className="font-mono">{totalKits(view.kits)}</b>
+          {time ? (
+            <>
+              {" "}
+              · Time allowance <b className="font-mono">{time}</b>
+            </>
+          ) : null}
+        </div>
+        <Button type="button" size="sm" variant="outline" onClick={() => void copy("kits", kitListText(def, c, header))}>
+          {copied === "kits" ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />}
+          Copy kit list
+        </Button>
+      </div>
+
+      <div className="grid gap-3">
+        <h4 className="text-sm font-semibold">Kits to order and check in</h4>
+        {view.modules.length ? (
+          view.modules.map((m) => (
+            <div key={m.module} className="grid gap-1.5">
+              <div className="border-b-2 border-border pb-1 text-sm font-semibold">{m.module}</div>
+              {m.kits.map((k) => {
+                const key = `kit:${k.ev}`;
+                const on = !!unit.checks[key];
+                return (
+                  <label key={k.ev} className={cn("flex items-start gap-3 rounded-md border border-border p-2", on && "bg-muted")}>
+                    <input
+                      type="checkbox"
+                      className="mt-1 size-5 accent-[var(--primary)]"
+                      checked={on}
+                      disabled={!canWrite || tick.isPending}
+                      onChange={(e) => toggle(key, e.target.checked)}
+                    />
+                    <span className="min-w-0 flex-1 text-sm">
+                      <span className="font-mono font-semibold">{k.ev}</span> <span className={cn(on && "line-through opacity-70")}>{k.name}</span>
+                      {k.parts.length > 1 ? (
+                        <span className="block text-xs font-medium">Made up of: {k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")}</span>
+                      ) : null}
+                      {k.notes.length ? <span className="block text-xs text-muted-foreground">{k.notes.join(" ")}</span> : null}
+                      {on && stamp(key) ? <span className="block text-xs text-muted-foreground">Checked in: {stamp(key)}</span> : null}
+                    </span>
+                    <span className="font-mono text-base font-semibold whitespace-nowrap">
+                      x{k.q}
+                      <small className="block text-right text-[10px] font-normal text-muted-foreground">{k.interval} mo</small>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">No kits for this setup.</p>
+        )}
+      </div>
+
+      <div className="grid gap-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h4 className="text-sm font-semibold">Service steps</h4>
+          <span className="text-xs text-muted-foreground">
+            {view.stepDone} of {view.stepTotal} steps done
+          </span>
+        </div>
+        <div className="h-2 overflow-hidden rounded bg-muted" aria-hidden="true">
+          <div className="h-full bg-primary" style={{ width: `${view.stepTotal ? Math.round((view.stepDone / view.stepTotal) * 100) : 0}%` }} />
+        </div>
+        {view.steps.map((g) => (
+          <div key={g.module} className="grid gap-1.5">
+            <div className="border-b-2 border-border pb-1 text-sm font-semibold">{g.module}</div>
+            {g.items.map((s) => {
+              const key = `step:${s.id}`;
+              const on = !!unit.checks[key];
+              return (
+                <label key={s.id} className={cn("flex items-start gap-3 rounded-md border border-border p-2", on && "bg-muted")}>
+                  <input
+                    type="checkbox"
+                    className="mt-1 size-5 accent-[var(--primary)]"
+                    checked={on}
+                    disabled={!canWrite || tick.isPending}
+                    onChange={(e) => toggle(key, e.target.checked)}
+                  />
+                  <span className="min-w-0 flex-1 text-sm">
+                    <span className={cn(on && "line-through opacity-70")}>{s.text}</span>
+                    {s.ref ? <span className="block font-mono text-xs text-muted-foreground">{s.ref}</span> : null}
+                    {on && stamp(key) ? <span className="block text-xs text-muted-foreground">Done: {stamp(key)}</span> : null}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        ))}
+        {canWrite && Object.keys(unit.checks).length ? (
+          <div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className={armed ? "border-red-700 bg-red-100 text-red-900" : undefined}
+              onClick={() => {
+                if (armed) {
+                  clear.mutate({ pmId, unitKey: unit.unitKey });
+                  setArmed(false);
+                } else setArmed(true);
+              }}
+            >
+              {armed ? "Tap again to clear every tick" : "Clear all ticks"}
+            </Button>
+          </div>
+        ) : null}
+      </div>
+
+      {unit.history.length ? (
+        <details className="text-sm">
+          <summary className="cursor-pointer font-semibold">Option history for this unit</summary>
+          <ul className="mt-2 grid gap-1 text-xs text-muted-foreground">
+            {unit.history.map((h, i) => (
+              <li key={i}>
+                {new Date(h.at).toLocaleDateString()} · {h.who ?? "Someone"}: {h.detail}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+
+      {def.changes?.supersessions?.length || def.changes?.stockNote ? (
+        <details className="text-sm">
+          <summary className="cursor-pointer font-semibold">Number changes: check your stock labels</summary>
+          <div className="mt-2 grid gap-2">
+            {def.changes?.stockNote ? (
+              <p className="rounded-md bg-amber-100 px-3 py-2 text-amber-900">
+                <b>{def.changes.stockNote.title}</b> {def.changes.stockNote.text}
+              </p>
+            ) : null}
+            <ul className="grid gap-1 text-xs">
+              {(def.changes?.supersessions ?? []).map((r) => (
+                <li key={r[0] + r[1]}>
+                  <span className="font-mono">{r[0]}</span> → <span className="font-mono">{r[1]}</span>: {r[2]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
+      ) : null}
+      {dialog}
+    </section>
+  );
+}
