@@ -46,7 +46,7 @@ export declare function readOgSite(cwd?: string): OgSite;
 export declare function ogCardPublicPath(cwd?: string): string;
 export declare function snapshotOgIdentity(cwd?: string): { site: OgSite };
 export declare function customOgAssetPath(cwd?: string): string;
-export declare function resolveOgCardAsset(site?: OgSite, cwd?: string): string;
+export declare function resolveOgCardAsset(site?: OgSite): string;
 export declare function ogServiceUrl(): string;
 export declare function titleFromDocument(html: string): string;
 export declare function resolveOgTitle(
@@ -61,7 +61,6 @@ export declare function grokOgHeadTags(ctx?: {
   appName?: string;
   site?: OgSite;
   documentTitle?: string;
-  cwd?: string;
 }): string[];
 export declare function stripShareMetaTags(html: string): string;
 export declare function normalizeHeadContext(ctx?: GrokHeadContext): {

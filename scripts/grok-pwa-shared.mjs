@@ -259,12 +259,6 @@ export function ogCardPublicPath(cwd = process.cwd()) {
   return "";
 }
 
-function detectCustomOgCard(cwd = process.cwd(), site = {}) {
-  if (ogCardPublicPath(cwd)) return true;
-  // Vercel runtime has no public/: trust a bake that already saw the file.
-  return siteHasCustomCard(site) || Boolean(String(site.image ?? "").trim());
-}
-
 /** Snapshot for Vite/Nitro to bake into the server bundle (Vercel has no workspace FS). */
 export function snapshotOgIdentity(cwd = process.cwd()) {
   const site = { ...readOgSite(cwd) };
@@ -318,19 +312,15 @@ export function siteHasCustomCard(site = {}) {
 }
 
 /**
- * Preview: public/og.jpg|png on disk.
- * Vercel: the bake (`card=custom` / `image`) because the function cannot stat public/.
- * Otherwise empty — caller emits the og.grok.me placeholder.
+ * Card path from the resolved identity: `image`, else /og.jpg for
+ * `card=custom`, else empty — caller emits the og.grok.me placeholder.
+ * public/ is read once, by snapshotOgIdentity (live preview snapshots the
+ * workspace per request; `vite build` bakes it for Vercel, whose function
+ * cannot stat public/).
  */
-export function resolveOgCardAsset(site = {}, cwd = process.cwd()) {
-  return ogCardPublicPath(cwd) || (detectCustomOgCard(cwd, site) ? String(site.image ?? "").trim() || "/og.jpg" : "");
-}
-
-/** Stamp `card=custom` when public/og.jpg or public/og.png is on disk. */
-function applyCustomCardFromFs(site, cwd) {
-  const disk = ogCardPublicPath(cwd);
-  if (!disk) return site;
-  return { ...site, card: "custom", image: disk };
+export function resolveOgCardAsset(site = {}) {
+  const image = String(site.image ?? "").trim();
+  return image || (siteHasCustomCard(site) ? "/og.jpg" : "");
 }
 
 export function grokOgHeadTags({
@@ -338,7 +328,6 @@ export function grokOgHeadTags({
   appName = DEFAULT_APP_NAME,
   site = {},
   documentTitle = "",
-  cwd = process.cwd(),
 } = {}) {
   const title = resolveOgTitle(site, appName, host, documentTitle);
   const publicHost = resolvePublicHost(host);
@@ -354,7 +343,7 @@ export function grokOgHeadTags({
     tags.push(`<meta property="og:type" content="x:game">`);
   }
   if (publicHost) {
-    const asset = resolveOgCardAsset(site, cwd);
+    const asset = resolveOgCardAsset(site);
     const custom = Boolean(asset);
     let image = custom
       ? `https://${publicHost}${asset.startsWith("/") ? asset : `/${asset}`}`
@@ -402,14 +391,12 @@ function insertBeforeHeadClose(html, snippet) {
 
 export function normalizeHeadContext(ctx = {}) {
   const cwd = ctx.cwd ?? process.cwd();
-  // Middleware passes a baked `site`. Still consult the workspace so a
-  // public/og.jpg generated after that snapshot (or missed by a wrong cwd)
-  // wins over the og.grok.me placeholder. Vercel has no public/ to read, so
-  // a correct bake is unchanged.
-  const site = applyCustomCardFromFs(
-    ctx.site !== undefined ? ctx.site : snapshotOgIdentity(cwd).site,
-    cwd,
-  );
+  // An explicit `site` is the identity baked at `vite build` (the Nitro
+  // middleware passes it) and is used as-is, not re-checked against the
+  // workspace: a public/og.jpg added after that build is not in its output,
+  // and the deployed function (no public/) shows the placeholder for it, so
+  // `vite preview` must too. Without `site`, snapshot the workspace now.
+  const site = ctx.site !== undefined ? ctx.site : snapshotOgIdentity(cwd).site;
   const appName = resolveOgTitle(site, ctx.appName ?? DEFAULT_APP_NAME, ctx.host ?? "");
   return {
     appName,
@@ -424,7 +411,7 @@ export function normalizeHeadContext(ctx = {}) {
 
 export function injectGrokPwaHead(html, ctx = {}) {
   if (typeof html !== "string") return html;
-  const { site, projectId, creator, creatorId, host, cwd } = normalizeHeadContext(ctx);
+  const { site, projectId, creator, creatorId, host } = normalizeHeadContext(ctx);
   const documentTitle = titleFromDocument(html);
   const appName = resolveOgTitle(
     site,
@@ -444,7 +431,7 @@ export function injectGrokPwaHead(html, ctx = {}) {
 
   next = insertAfterHeadOpen(
     next,
-    grokOgHeadTags({ host, appName, site, documentTitle, cwd }).join(""),
+    grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
   );
 
   if (!next.includes("/grok-app-builder/extensions.js")) {
