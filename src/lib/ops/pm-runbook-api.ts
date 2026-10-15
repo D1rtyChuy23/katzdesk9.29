@@ -19,6 +19,7 @@ import {
   type RunbookRole,
 } from "@/lib/ops/pm-runbook";
 import { planUnits } from "@/lib/ops/pm-runbook-units";
+import { kitKey, type CatalogKit } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig } from "@/lib/ops/pm-runbook-schema";
 
 export type RunbookUnit = {
@@ -474,4 +475,50 @@ export const clearRunbookChecks = createServerFn({ method: "POST" })
     await requireWriter(sql, context.userId);
     await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2", [data.pmId, data.unitKey]);
     return { ok: true };
+  });
+
+/**
+ * Sell prices for kit numbers from the parts catalog, matched on SKU or manufacturer number (case, spaces and
+ * dashes ignored). Read-only. Kits the catalog does not have are simply absent from the result.
+ */
+export const getKitPrices = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .validator((d: { evs: string[] }) => z.object({ evs: z.array(z.string().min(1).max(40)).max(200) }).parse(d))
+  .handler(async ({ data }): Promise<Record<string, CatalogKit>> => {
+    const keys = [...new Set(data.evs.map(kitKey).filter(Boolean))];
+    if (!keys.length) return {};
+    const sql = await ready();
+    const rows = await sql.query<{
+      sku: string;
+      item: string | null;
+      mfr_part: string | null;
+      rate: string | null;
+      active: unknown;
+      hidden: unknown;
+    }>(
+      `select sku, item, mfr_part, rate, active, (hidden_at is not null) as hidden
+         from billing_items
+        where upper(regexp_replace(sku, '[^A-Za-z0-9]+', '', 'g')) = any($1::text[])
+           or upper(regexp_replace(coalesce(mfr_part, ''), '[^A-Za-z0-9]+', '', 'g')) = any($1::text[])
+        order by id`,
+      [keys],
+    );
+    const out: Record<string, CatalogKit> = {};
+    for (const r of rows) {
+      const entry: CatalogKit = {
+        sku: r.sku,
+        name: r.item,
+        rate: r.rate == null ? null : Number(r.rate),
+        active: flagOn(r.active),
+        hidden: flagOn(r.hidden),
+      };
+      for (const k of [kitKey(r.sku), kitKey(r.mfr_part)]) {
+        if (!keys.includes(k)) continue;
+        // Two catalog rows can carry one number: prefer the one that is active, visible and priced.
+        const cur = out[k];
+        const score = (c: CatalogKit) => (c.active && !c.hidden ? 2 : 0) + (c.rate != null && c.rate > 0 ? 1 : 0);
+        if (!cur || score(entry) > score(cur)) out[k] = entry;
+      }
+    }
+    return out;
   });

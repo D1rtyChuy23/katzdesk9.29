@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "katzdesk-runbook",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set BETTER_AUTH_URL=http://localhost:8090&& npx vite dev --host localhost --port 8090 --strictPort"],
+      "port": 8090
+    }
+  ]
+}

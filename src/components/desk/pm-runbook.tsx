@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   clearRunbookChecks,
+  getKitPrices,
   getPmRunbook,
   setRunbookCheck,
   setRunbookUnitConfig,
@@ -13,6 +14,7 @@ import {
   type RunbookUnit,
 } from "@/lib/ops/pm-runbook-api";
 import { banners, kitList, kitListText, optionKeys, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { PRICE_NOTE, priceKits, summarizePrices, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import { useCopy } from "./spec-sheet";
 
@@ -90,6 +92,12 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     onSuccess: refresh,
     onError,
   });
+  const kitNumbers = useMemo(() => (unit && rb ? kitList(rb.def, unit.config).map((k) => k.ev) : []), [unit, rb]);
+  const priceQ = useQuery({
+    queryKey: ["pm-runbook-prices", kitNumbers.join(",")],
+    queryFn: () => getKitPrices({ data: { evs: kitNumbers } }),
+    enabled: kitNumbers.length > 0,
+  });
   const [armed, setArmed] = useState(false);
   useEffect(() => setArmed(false), [active]);
 
@@ -107,6 +115,11 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     const done = ids.filter((id) => unit.checks[id]).length;
     return { kits, steps, modules, stepTotal: ids.length, stepDone: done };
   }, [unit, rb]);
+  const prices = useMemo(
+    () => (priceQ.data && view ? priceKits(view.kits, priceQ.data) : null),
+    [priceQ.data, view],
+  );
+  const priceSummary = prices ? summarizePrices(prices) : null;
 
   if (q.isLoading || !units.length || !unit || !rb || !view) return null;
   const def = rb.def;
@@ -260,11 +273,29 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             </>
           ) : null}
         </div>
-        <Button type="button" size="sm" variant="outline" onClick={() => void copy("kits", kitListText(def, c, header))}>
+        <Button type="button" size="sm" variant="outline" onClick={() => void copy("kits", kitListText(def, c, header, prices ?? undefined))}>
           {copied === "kits" ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />}
           Copy kit list
         </Button>
       </div>
+
+      {priceSummary ? (
+        <p className="text-sm text-muted-foreground">
+          {priceSummary.total > 0 ? (
+            <>
+              Kit list at sell price <b className="font-mono text-foreground">{usd(priceSummary.total)}</b>
+              {priceSummary.missing + priceSummary.attention > 0 ? " (not every kit has a price)" : ""}
+            </>
+          ) : (
+            "No kit prices found in the parts catalog yet."
+          )}
+          {priceSummary.missing > 0 ? (
+            <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">
+              {priceSummary.missing} not in parts catalog
+            </span>
+          ) : null}
+        </p>
+      ) : null}
 
       <div className="grid gap-3">
         <h4 className="text-sm font-semibold">Kits to order and check in</h4>
@@ -290,6 +321,18 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                         <span className="block text-xs font-medium">Made up of: {k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")}</span>
                       ) : null}
                       {k.notes.length ? <span className="block text-xs text-muted-foreground">{k.notes.join(" ")}</span> : null}
+                      {(() => {
+                        const p = prices?.find((x) => x.ev === k.ev);
+                        if (!p) return null;
+                        if (p.status === "priced")
+                          return <span className="block text-xs text-muted-foreground">{usd(p.unit ?? 0)} each · {usd(p.line ?? 0)}</span>;
+                        return (
+                          <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">
+                            {PRICE_NOTE[p.status]}
+                            {p.unit != null ? ` · ${usd(p.unit)} each` : ""}
+                          </span>
+                        );
+                      })()}
                       {on && stamp(key) ? <span className="block text-xs text-muted-foreground">Checked in: {stamp(key)}</span> : null}
                     </span>
                     <span className="font-mono text-base font-semibold whitespace-nowrap">
