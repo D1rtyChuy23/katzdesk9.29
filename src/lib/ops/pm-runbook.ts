@@ -169,6 +169,30 @@ export function intervalFromStyle(def: RunbookDefinition, style: string | null |
   return def.intervals.some((i) => i.id === m[1]) ? m[1] : null;
 }
 
+/**
+ * Recommended PM interval from the unit's install date at this location. PMs fall on each anniversary: the
+ * shortest interval every year, and a longer interval when the anniversary is a multiple of it (with 12 and 36:
+ * 12, 12, 36, 12, 12, 36…). Returns null without a usable install date. The tech can always choose otherwise
+ * (what the customer wants, or what is recommended): this only sets the default.
+ */
+export function recommendInterval(
+  def: RunbookDefinition,
+  installDate: string | null | undefined,
+  now: Date = new Date(),
+): { id: string; months: number; milestone: number } | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(installDate ?? ""));
+  if (!m) return null;
+  const start = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  if (Number.isNaN(start.getTime()) || start.getTime() > now.getTime()) return null;
+  const months = (now.getUTCFullYear() - start.getUTCFullYear()) * 12 + (now.getUTCMonth() - start.getUTCMonth());
+  const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
+  if (!ids.length) return null;
+  const unit = ids[0];
+  const milestone = Math.max(unit, Math.round(months / unit) * unit);
+  const pick = [...ids].reverse().find((n) => milestone % n === 0) ?? unit;
+  return { id: String(pick), months, milestone };
+}
+
 // ---------------- who may do what ----------------
 
 export type RunbookRole = "admin" | "sales" | "service" | "warehouse" | null;

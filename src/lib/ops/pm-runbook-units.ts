@@ -6,7 +6,13 @@
 import { compactEquip, parseSerial, sameCatalogModel, serialKey } from "./account-equip.ts";
 import { splitEquipment } from "./equipment.ts";
 
-export type AccountUnitRow = { id: number; catalogModel: string; equipmentName: string; serial: string | null };
+export type AccountUnitRow = {
+  id: number;
+  catalogModel: string;
+  equipmentName: string;
+  serial: string | null;
+  installDate?: string | null;
+};
 
 export type PlannedUnit = {
   /**
@@ -21,6 +27,8 @@ export type PlannedUnit = {
   optionsKey: string | null;
   /** account_equipment row the line matched, if any. */
   accountId: number | null;
+  /** Install date at this location from the matched account unit. */
+  installDate: string | null;
   /** The equipment text as written on the PM job. */
   piece: string;
   serial: string | null;
@@ -80,6 +88,7 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
       unitKey,
       optionsKey: sk ?? (accountId != null ? `acct:${accountId}` : null),
       accountId,
+      installDate: idx >= 0 ? (accountRows[idx].installDate ?? null) : null,
       piece,
       serial,
       serialKey: sk,

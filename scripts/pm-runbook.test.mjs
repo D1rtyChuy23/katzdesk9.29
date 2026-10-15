@@ -7,6 +7,7 @@ import {
   canWriteRunbook,
   defaultConfig,
   intervalFromStyle,
+  recommendInterval,
   kitList,
   kitListText,
   matchE4XWide,
@@ -177,4 +178,24 @@ test("units: same text twice at an account maps to two distinct account units", 
   ];
   const u = planUnits("e'4m X-Wide\ne'4m X-Wide", rows, matcher);
   assert.deepEqual(u.map((x) => x.unitKey), ["acct:1", "acct:2"]);
+});
+
+test("recommended interval follows the install anniversary: 12, 12, 36, 12, 12, 36", () => {
+  const at = (iso) => recommendInterval(def, "2023-03-10", new Date(iso))?.id;
+  assert.equal(at("2024-03-15T00:00:00Z"), "12"); // year 1
+  assert.equal(at("2025-03-01T00:00:00Z"), "12"); // year 2
+  assert.equal(at("2026-03-20T00:00:00Z"), "36"); // year 3
+  assert.equal(at("2027-04-01T00:00:00Z"), "12");
+  assert.equal(at("2029-03-01T00:00:00Z"), "36"); // year 6
+});
+
+test("recommended interval: no or future install date gives no recommendation", () => {
+  assert.equal(recommendInterval(def, null), null);
+  assert.equal(recommendInterval(def, "not a date"), null);
+  assert.equal(recommendInterval(def, "2030-01-01", new Date("2026-10-15T00:00:00Z")), null);
+});
+
+test("planUnits carries the account unit's install date", () => {
+  const rows = [{ id: 1, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: null, installDate: "2023-03-10" }];
+  assert.equal(planUnits("e'4m X-Wide", rows, matcher)[0].installDate, "2023-03-10");
 });

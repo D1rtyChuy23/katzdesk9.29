@@ -14,6 +14,7 @@ import {
   canWriteRunbook,
   intervalFromStyle,
   normalizeConfig,
+  recommendInterval,
   type RunbookRole,
 } from "@/lib/ops/pm-runbook";
 import { planUnits } from "@/lib/ops/pm-runbook-units";
@@ -33,6 +34,12 @@ export type RunbookUnit = {
   /** Every ticked key with who and when. */
   checks: Record<string, { by: string | null; at: string }>;
   history: { who: string | null; at: string; detail: string }[];
+  /** Install date at this location, from the account unit. */
+  installDate: string | null;
+  /** Interval recommended from the install date; the tech may choose otherwise. */
+  recommended: { id: string; label: string; months: number; milestone: number } | null;
+  /** Earlier PMs on this unit (by serial, so they follow it between accounts). */
+  earlier: { pmId: number; status: string; completedAt: string | null; kits: number; steps: number }[];
 };
 
 export type PmRunbookData = {
@@ -93,14 +100,14 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     )[0];
     if (!pm) return empty;
 
-    const acct = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null }>(
-      "select id, customer, catalog_model, equipment_name, serial from account_equipment where lower(customer) = lower($1) order by id",
+    const acct = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null; install_date: string | null }>(
+      "select id, customer, catalog_model, equipment_name, serial, install_date::text as install_date from account_equipment where lower(customer) = lower($1) order by id",
       [pm.customer],
     );
     const key = normalizeCustomerKey(pm.customer);
     const rows = acct
       .filter((r) => normalizeCustomerKey(r.customer) === key)
-      .map((r) => ({ id: r.id, catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial }));
+      .map((r) => ({ id: r.id, catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial, installDate: r.install_date }));
 
     const planned = planUnits(pm.equipment, rows, (piece) => {
       for (const rb of RUNBOOKS) {
@@ -129,6 +136,17 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         );
       }
     }
+    // Earlier PMs found these units by account id; now the serial is known, label them so history follows it.
+    for (const u of planned) {
+      if (u.serialKey && u.accountId != null) {
+        for (const t of ["pm_runbook_units", "pm_runbook_checks"]) {
+          await sql.query(`update ${t} set serial_key = $1 where unit_key = $2 and serial_key is null`, [
+            u.serialKey,
+            `acct:${u.accountId}`,
+          ]);
+        }
+      }
+    }
     const optionKeys = planned.map((u) => u.optionsKey).filter((k): k is string => !!k);
     const optRows = optionKeys.length
       ? await sql.query<{ id: number; unit_key: string; options: unknown }>(
@@ -145,15 +163,38 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         )
       : [];
 
+    const trailKeys = planned.map((u) => u.unitKey);
+    const serialKeys = planned.map((u) => u.serialKey).filter((k): k is string => !!k);
+    const trail = await sql.query<{
+      pm_job_id: number;
+      unit_key: string;
+      serial_key: string | null;
+      status: string;
+      completed_at: string | null;
+      kits: number;
+      steps: number;
+    }>(
+      `select c.pm_job_id, c.unit_key, c.serial_key, p.status, p.completed_at::text as completed_at,
+              (count(*) filter (where c.key like 'kit:%'))::int as kits,
+              (count(*) filter (where c.key like 'step:%'))::int as steps
+         from pm_runbook_checks c join pm_jobs p on p.id = c.pm_job_id
+        where c.pm_job_id <> $1 and (c.serial_key = any($2::text[]) or c.unit_key = any($3::text[]))
+        group by c.pm_job_id, c.unit_key, c.serial_key, p.status, p.completed_at
+        order by c.pm_job_id desc`,
+      [data.pmId, serialKeys, trailKeys],
+    );
+    const now = new Date();
+
     const units: RunbookUnit[] = planned.map((u) => {
       const rb = runbookById(u.runbookId)!;
       const s = saved.find((x) => x.unit_key === u.unitKey);
       const optRow = u.optionsKey ? optRows.find((r) => r.unit_key === u.optionsKey) : undefined;
       const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
+      const rec = recommendInterval(rb.def, u.installDate, now);
       const config = normalizeConfig(rb.def, {
         ...options,
         model: s?.model ?? u.model ?? undefined,
-        pm: s?.interval_mo ?? intervalFromStyle(rb.def, pm.style) ?? undefined,
+        pm: s?.interval_mo ?? intervalFromStyle(rb.def, pm.style) ?? rec?.id ?? undefined,
       });
       const ticks: RunbookUnit["checks"] = {};
       for (const c of checks) if (c.unit_key === u.unitKey) ticks[c.key] = { by: c.done_by, at: String(c.done_at) };
@@ -166,6 +207,13 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         runbookId: u.runbookId,
         config,
         checks: ticks,
+        installDate: u.installDate,
+        recommended: rec
+          ? { ...rec, label: rb.def.intervals.find((i) => i.id === rec.id)?.label ?? `${rec.id}-month PM` }
+          : null,
+        earlier: trail
+          .filter((t) => (u.serialKey && t.serial_key === u.serialKey) || t.unit_key === u.unitKey)
+          .map((t) => ({ pmId: t.pm_job_id, status: t.status, completedAt: t.completed_at, kits: t.kits, steps: t.steps })),
         history: optRow
           ? hist
               .filter((h) => h.entity_id === optRow.id)
@@ -177,7 +225,11 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     return { units, canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions };
   });
 
+/** The unit's serial (not 'acct:<id>'), so earlier PMs are found by serial. Null when there is none yet. */
+const serialOf = (optionsKey: string | null | undefined) => (optionsKey && !optionsKey.startsWith("acct:") ? optionsKey : null);
+
 const configInput = unitInput.extend({
+  optionsKey: z.string().max(200).nullable().optional(),
   runbookId: z.string(),
   model: z.string(),
   interval: z.string(),
@@ -195,11 +247,12 @@ export const setRunbookUnitConfig = createServerFn({ method: "POST" })
     if (!rb.def.models.some((m) => m.id === data.model)) throw new Error("Unknown model.");
     if (!rb.def.intervals.some((i) => i.id === data.interval)) throw new Error("Unknown interval.");
     await sql.query(
-      `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, model, interval_mo, updated_by)
-       values ($1, $2, $3, $4, $5, $6)
+      `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, model, interval_mo, updated_by, serial_key)
+       values ($1, $2, $3, $4, $5, $6, $7)
        on conflict (pm_job_id, unit_key) do update
-         set model = excluded.model, interval_mo = excluded.interval_mo, updated_by = excluded.updated_by, updated_at = now()`,
-      [data.pmId, data.unitKey, data.runbookId, data.model, data.interval, me.name],
+         set model = excluded.model, interval_mo = excluded.interval_mo, updated_by = excluded.updated_by,
+             serial_key = coalesce(excluded.serial_key, pm_runbook_units.serial_key), updated_at = now()`,
+      [data.pmId, data.unitKey, data.runbookId, data.model, data.interval, me.name, serialOf(data.optionsKey)],
     );
     return { ok: true };
   });
@@ -274,6 +327,7 @@ export const setRunbookUnitOptions = createServerFn({ method: "POST" })
   });
 
 const checkInput = unitInput.extend({
+  optionsKey: z.string().max(200).nullable().optional(),
   key: z.string().regex(/^(kit|step):[A-Za-z0-9._-]{1,80}$/),
   done: z.boolean(),
 });
@@ -286,9 +340,9 @@ export const setRunbookCheck = createServerFn({ method: "POST" })
     const me = await requireWriter(sql, context.userId);
     if (data.done) {
       await sql.query(
-        `insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by) values ($1, $2, $3, $4)
+        `insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by, serial_key) values ($1, $2, $3, $4, $5)
          on conflict (pm_job_id, unit_key, key) do nothing`,
-        [data.pmId, data.unitKey, data.key, me.name],
+        [data.pmId, data.unitKey, data.key, me.name, serialOf(data.optionsKey)],
       );
     } else {
       await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [

@@ -124,13 +124,14 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
       pmId,
       unitKey: unit.unitKey,
       runbookId: unit.runbookId,
+      optionsKey: unit.optionsKey,
       model: key === "model" ? val : c.model,
       interval: key === "pm" ? val : c.pm,
     });
   }
   function toggle(key: string, done: boolean) {
     if (!unit) return;
-    tick.mutate({ pmId, unitKey: unit.unitKey, key, done });
+    tick.mutate({ pmId, unitKey: unit.unitKey, optionsKey: unit.optionsKey, key, done });
   }
   const stamp = (key: string) => {
     const t = unit.checks[key];
@@ -188,6 +189,24 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
           <Seg key={o.key} label={o.label} value={c[o.key]} disabled={!canWrite} choices={o.choices} onPick={(v) => pickOption(o.key, v)} />
         ))}
       </div>
+
+      {unit.recommended && unit.recommended.id !== c.pm ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
+          <span>
+            Recommended: <b>{unit.recommended.label}</b>. Installed {unit.installDate}, so this is the {unit.recommended.milestone}-month
+            visit at this location. Choose otherwise if the customer wants a different service.
+          </span>
+          {canWrite ? (
+            <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.recommended!.id)}>
+              Use recommended
+            </Button>
+          ) : null}
+        </div>
+      ) : unit.recommended ? (
+        <p className="text-xs text-muted-foreground">
+          Matches the recommendation from the install date ({unit.installDate}, {unit.recommended.milestone}-month visit).
+        </p>
+      ) : null}
 
       {banners(def, c).map((b, i) => (
         <p
@@ -311,6 +330,20 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
           </div>
         ) : null}
       </div>
+
+      {unit.earlier.length ? (
+        <details className="text-sm">
+          <summary className="cursor-pointer font-semibold">Earlier PMs on this unit ({unit.earlier.length})</summary>
+          <ul className="mt-2 grid gap-1 text-xs text-muted-foreground">
+            {unit.earlier.map((e) => (
+              <li key={e.pmId}>
+                PM #{e.pmId} · {e.status}
+                {e.completedAt ? ` · completed ${e.completedAt}` : ""} · {e.kits} kits checked in, {e.steps} steps done
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
 
       {unit.history.length ? (
         <details className="text-sm">
