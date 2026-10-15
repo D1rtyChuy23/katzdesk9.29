@@ -190,11 +190,41 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         ))}
       </div>
 
+      {unit.missingInstallDate ? (
+        <div className="grid gap-2 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
+          <span>
+            <b>No install date on file for this unit</b>, so its PM interval cannot be worked out from its age. Add the
+            install date on the account equipment.
+          </span>
+          {unit.fromHistory ? (
+            <span className="flex flex-wrap items-center justify-between gap-2">
+              <span>
+                Suggested from the last full PM ({unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval}-month, PM #
+                {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.pmId}
+                {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt
+                  ? `, ${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt}`
+                  : ""}
+                ): <b>{unit.fromHistory.label}</b>
+                {unit.fromHistory.combined ? ", the 12 + 36 together visit" : ""}.
+              </span>
+              {canWrite && unit.fromHistory.id !== c.pm ? (
+                <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.fromHistory!.id)}>
+                  Use suggestion
+                </Button>
+              ) : null}
+            </span>
+          ) : (
+            <span>No earlier full PM on record for this unit either, so choose the interval yourself.</span>
+          )}
+        </div>
+      ) : null}
+
       {unit.recommended && unit.recommended.id !== c.pm ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
-            Recommended: <b>{unit.recommended.label}</b>. Installed {unit.installDate}, so this is the {unit.recommended.milestone}-month
-            visit at this location. Choose otherwise if the customer wants a different service.
+            Recommended: <b>{unit.recommended.label}</b>
+            {unit.recommended.combined ? " (12 + 36 together)" : ""}. Installed {unit.installDate}, so this is year{" "}
+            {unit.recommended.year} at this location. Choose otherwise if the customer wants a different service.
           </span>
           {canWrite ? (
             <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.recommended!.id)}>
@@ -204,7 +234,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </div>
       ) : unit.recommended ? (
         <p className="text-xs text-muted-foreground">
-          Matches the recommendation from the install date ({unit.installDate}, {unit.recommended.milestone}-month visit).
+          Matches the recommendation from the install date ({unit.installDate}, year {unit.recommended.year}).
         </p>
       ) : null}
 

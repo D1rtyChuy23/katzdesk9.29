@@ -13,6 +13,7 @@ import {
   canEditRunbookDefinitions,
   canWriteRunbook,
   intervalFromStyle,
+  nextFromHistory,
   normalizeConfig,
   recommendInterval,
   type RunbookRole,
@@ -37,7 +38,16 @@ export type RunbookUnit = {
   /** Install date at this location, from the account unit. */
   installDate: string | null;
   /** Interval recommended from the install date; the tech may choose otherwise. */
-  recommended: { id: string; label: string; months: number; milestone: number } | null;
+  recommended: { id: string; label: string; months: number; milestone: number; year: number; combined: boolean } | null;
+  /** True when the account unit has no install date, so the interval cannot be worked out from its age. */
+  missingInstallDate: boolean;
+  /** Suggested from the last full PM on this unit, used when there is no install date. */
+  fromHistory: {
+    id: string;
+    label: string;
+    combined: boolean;
+    basedOn: { pmId: number; interval: string; completedAt: string | null }[];
+  } | null;
   /** Earlier PMs on this unit (by serial, so they follow it between accounts). */
   earlier: { pmId: number; status: string; completedAt: string | null; kits: number; steps: number }[];
 };
@@ -185,16 +195,63 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     );
     const now = new Date();
 
+    // Full (completed) PMs on each unit, oldest first: same account matched by account unit, plus any PM that
+    // carries the unit's serial (the unit may have been serviced under another account).
+    const doneRows = await sql.query<{ id: number; equipment: string | null; style: string | null; completed_at: string | null }>(
+      `select id, equipment, style, completed_at::text as completed_at from pm_jobs
+        where lower(customer) = lower($1) and id <> $2 and (completed_at is not null or status = 'Completed')`,
+      [pm.customer, data.pmId],
+    );
+    const bySerial = serialKeys.length
+      ? await sql.query<{ id: number; style: string | null; completed_at: string | null; unit_key: string; interval_mo: string | null; serial_key: string }>(
+          `select p.id, p.style, p.completed_at::text as completed_at, r.unit_key, r.interval_mo, r.serial_key
+             from pm_runbook_units r join pm_jobs p on p.id = r.pm_job_id
+            where r.serial_key = any($1::text[]) and p.id <> $2 and (p.completed_at is not null or p.status = 'Completed')`,
+          [serialKeys, data.pmId],
+        )
+      : [];
+    const savedIntervals = await sql.query<{ pm_job_id: number; unit_key: string; interval_mo: string | null }>(
+      `select pm_job_id, unit_key, interval_mo from pm_runbook_units
+        where pm_job_id = any($1::int[]) and interval_mo is not null`,
+      [doneRows.map((r) => r.id)],
+    );
+    const pmMatcher = (piece: string) => {
+      for (const rb of RUNBOOKS) {
+        const h = rb.matchPiece(piece);
+        if (h) return { runbookId: rb.def.id, model: h.model };
+      }
+      return null;
+    };
+    const fullPms = (u: (typeof planned)[number], def: NonNullable<ReturnType<typeof runbookById>>["def"]) => {
+      const out = new Map<number, { pmId: number; interval: string; completedAt: string | null }>();
+      for (const d of doneRows) {
+        const hit = planUnits(d.equipment, rows, pmMatcher).find((x) => x.unitKey === u.unitKey);
+        if (!hit) continue;
+        const interval =
+          savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === u.unitKey)?.interval_mo ?? intervalFromStyle(def, d.style);
+        if (interval) out.set(d.id, { pmId: d.id, interval, completedAt: d.completed_at });
+      }
+      for (const b of bySerial) {
+        if (!u.serialKey || b.serial_key !== u.serialKey) continue;
+        const interval = b.interval_mo ?? intervalFromStyle(def, b.style);
+        if (interval) out.set(b.id, { pmId: b.id, interval, completedAt: b.completed_at });
+      }
+      return [...out.values()].sort((a, b) => (a.completedAt ?? "9999").localeCompare(b.completedAt ?? "9999") || a.pmId - b.pmId);
+    };
+
     const units: RunbookUnit[] = planned.map((u) => {
       const rb = runbookById(u.runbookId)!;
       const s = saved.find((x) => x.unit_key === u.unitKey);
       const optRow = u.optionsKey ? optRows.find((r) => r.unit_key === u.optionsKey) : undefined;
       const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
       const rec = recommendInterval(rb.def, u.installDate, now);
+      const past = rec ? [] : fullPms(u, rb.def);
+      const next = rec ? null : nextFromHistory(rb.def, past.map((p) => p.interval));
+      const histNext = next ? { id: next.id, combined: next.combined } : null;
       const config = normalizeConfig(rb.def, {
         ...options,
         model: s?.model ?? u.model ?? undefined,
-        pm: s?.interval_mo ?? intervalFromStyle(rb.def, pm.style) ?? rec?.id ?? undefined,
+        pm: s?.interval_mo ?? intervalFromStyle(rb.def, pm.style) ?? rec?.id ?? histNext?.id ?? undefined,
       });
       const ticks: RunbookUnit["checks"] = {};
       for (const c of checks) if (c.unit_key === u.unitKey) ticks[c.key] = { by: c.done_by, at: String(c.done_at) };
@@ -210,6 +267,15 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         installDate: u.installDate,
         recommended: rec
           ? { ...rec, label: rb.def.intervals.find((i) => i.id === rec.id)?.label ?? `${rec.id}-month PM` }
+          : null,
+        missingInstallDate: !rec,
+        fromHistory: next
+          ? {
+              id: next.id,
+              combined: next.combined,
+              label: rb.def.intervals.find((i) => i.id === next.id)?.label ?? `${next.id}-month PM`,
+              basedOn: past.slice(-3),
+            }
           : null,
         earlier: trail
           .filter((t) => (u.serialKey && t.serial_key === u.serialKey) || t.unit_key === u.unitKey)

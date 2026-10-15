@@ -170,16 +170,19 @@ export function intervalFromStyle(def: RunbookDefinition, style: string | null |
 }
 
 /**
- * Recommended PM interval from the unit's install date at this location. PMs fall on each anniversary: the
- * shortest interval every year, and a longer interval when the anniversary is a multiple of it (with 12 and 36:
- * 12, 12, 36, 12, 12, 36…). Returns null without a usable install date. The tech can always choose otherwise
- * (what the customer wants, or what is recommended): this only sets the default.
+ * Eversys PM cycle (all Eversys equipment): year 1 is a 12-month PM, year 2 is a 12-month PM, and year 3 is the
+ * 12 and 36-month PMs together, then the cycle repeats. The 36-month list already contains the 12-month kits, so
+ * "36" here means both sets. Generic over the definition: the cycle is the longest interval over the shortest.
+ *
+ * Recommended PM interval from the unit's install date at this location, on each anniversary. Returns null
+ * without a usable install date. The tech can always choose otherwise (what the customer wants, or what is
+ * recommended): this only sets the default.
  */
 export function recommendInterval(
   def: RunbookDefinition,
   installDate: string | null | undefined,
   now: Date = new Date(),
-): { id: string; months: number; milestone: number } | null {
+): { id: string; months: number; milestone: number; year: number; combined: boolean } | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(installDate ?? ""));
   if (!m) return null;
   const start = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
@@ -190,7 +193,27 @@ export function recommendInterval(
   const unit = ids[0];
   const milestone = Math.max(unit, Math.round(months / unit) * unit);
   const pick = [...ids].reverse().find((n) => milestone % n === 0) ?? unit;
-  return { id: String(pick), months, milestone };
+  return { id: String(pick), months, milestone, year: milestone / 12, combined: pick > unit };
+}
+
+/**
+ * Next interval from a unit's earlier full (completed) PMs, oldest first, for a unit with no install date:
+ * after two short PMs in a row the next one is the long (combined) PM, otherwise the short one.
+ * Returns null with no earlier PM to go on.
+ */
+export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]): { id: string; combined: boolean } | null {
+  const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
+  if (!ids.length || !priorIntervals.length) return null;
+  const short = ids[0];
+  const long = ids[ids.length - 1];
+  const cycle = Math.max(1, Math.round(long / short));
+  let run = 0;
+  for (const raw of priorIntervals) {
+    const n = Number(raw);
+    run = n >= long && long > short ? 0 : run + 1;
+  }
+  const next = long > short && run % cycle === cycle - 1 ? long : short;
+  return { id: String(next), combined: next > short };
 }
 
 // ---------------- who may do what ----------------

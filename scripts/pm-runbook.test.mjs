@@ -7,6 +7,7 @@ import {
   canWriteRunbook,
   defaultConfig,
   intervalFromStyle,
+  nextFromHistory,
   recommendInterval,
   kitList,
   kitListText,
@@ -198,4 +199,23 @@ test("recommended interval: no or future install date gives no recommendation", 
 test("planUnits carries the account unit's install date", () => {
   const rows = [{ id: 1, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: null, installDate: "2023-03-10" }];
   assert.equal(planUnits("e'4m X-Wide", rows, matcher)[0].installDate, "2023-03-10");
+});
+
+test("Eversys cycle: year 1 and 2 are 12, year 3 is 12 + 36 together", () => {
+  const r = (iso) => recommendInterval(def, "2023-03-10", new Date(iso));
+  assert.deepEqual([r("2024-03-10T00:00:00Z").year, r("2024-03-10T00:00:00Z").combined], [1, false]);
+  assert.equal(r("2025-03-10T00:00:00Z").combined, false);
+  assert.deepEqual([r("2026-03-10T00:00:00Z").id, r("2026-03-10T00:00:00Z").combined], ["36", true]);
+});
+
+test("no install date: next interval follows the last full PMs", () => {
+  const n = (...p) => nextFromHistory(def, p)?.id;
+  assert.equal(nextFromHistory(def, []), null);
+  assert.equal(n("12"), "12");
+  assert.equal(n("12", "12"), "36");
+  assert.equal(n("12", "12", "36"), "12");
+  assert.equal(n("12", "12", "36", "12"), "12");
+  assert.equal(n("12", "12", "36", "12", "12"), "36");
+  assert.equal(n("36"), "12");
+  assert.equal(nextFromHistory(def, ["12", "12"])?.combined, true);
 });
