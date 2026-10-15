@@ -19,7 +19,6 @@ import {
   REP_PALETTE,
   type LatLng,
   type PinQuality,
-  type RouteStop,
 } from "./geo.ts";
 
 export type StopType = BoardType;
@@ -34,7 +33,6 @@ export const STOP_LABEL: Record<StopType, string> = { service: "Ticket", tlc: "T
 export const STOP_TYPES: StopType[] = ["service", "tlc", "pm", "install"];
 
 export const ANY_TIME = "Any time";
-export const APPROX_LABEL = "ZIP area (approximate)";
 
 /** Tech name as lists group by it: the roster spelling when known, else the typed name, "" for no tech (day board rule). */
 export function techKey(name: string | null | undefined): string {
@@ -136,61 +134,57 @@ export type StopPlace = {
   city: string | null;
 };
 
-export type MissingReason = "no-account" | "no-pin";
+export type MissingReason = "no-account" | "no-pin" | "zip-area";
 
 export const MISSING_LABEL: Record<MissingReason, string> = {
   "no-account": "No account matches this customer name",
   "no-pin": "No map pin for this account",
+  "zip-area": "ZIP area only: no pin for the street address",
 };
 
 export type PlacedStop = DayStop & {
   accountId: number | null;
+  /** The account's street-address pin; null when there is none (no pin, or only the ZIP area's center). */
   point: LatLng | null;
+  /** How good the account's pin is (also set for a ZIP-area pin that is not used); null when there is no pin. */
   quality: PinQuality | null;
-  /** The account's typed address (used in route links when the pin is only the ZIP area). */
+  /** The account's typed address. */
   address: string | null;
   city: string | null;
-  /** Why the stop is not on the map; null when it has a pin. */
+  /** Why the stop is not on the map; null when it has a street-address pin. */
   missing: MissingReason | null;
 };
 
-/** Attach each stop's account pin. `find` gets the stored customer name (jobs link to accounts by name only). */
+/**
+ * Attach each stop's account pin. `find` gets the stored customer name (jobs link to accounts by name only).
+ * Only a street match (exact or close) is a stop location. A ZIP-area pin is the middle of a ZIP code: it never goes
+ * into the stop order, onto the route line, onto the map or into a Google Maps link, so that stop is listed as not on
+ * the map ("zip-area"), like a stop with no pin at all.
+ */
 export function placeStops(stops: readonly DayStop[], find: (customer: string) => StopPlace | null | undefined): PlacedStop[] {
   return stops.map((s) => {
     const a = s.lookupName ? find(s.lookupName) ?? null : null;
     const p = a ? { lat: a.lat, lng: a.lng } : null;
-    const point = isPoint(p) ? { lat: p.lat, lng: p.lng } : null;
+    const pinned = isPoint(p);
+    const street = pinned && canDriveTo(a?.quality);
     return {
       ...s,
       accountId: a ? a.id : null,
-      point,
-      quality: point ? a?.quality ?? null : null,
+      point: street ? { lat: p.lat, lng: p.lng } : null,
+      quality: pinned ? a?.quality ?? null : null,
       address: a?.address?.trim() || null,
       city: a?.city ?? null,
-      missing: !a ? "no-account" : point ? null : "no-pin",
+      missing: !a ? "no-account" : street ? null : pinned ? "zip-area" : "no-pin",
     };
   });
 }
 
-/** The pin is only a ZIP-code center: fine for ordering and areas, not for driving to. */
-export function isApprox(s: Pick<PlacedStop, "point" | "quality">): boolean {
-  return isPoint(s.point) && !canDriveTo(s.quality);
+/** What goes into the Google Maps link: the street-address pin, or nothing (a ZIP-area pin or a typed address never does). */
+export function linkStop(s: Pick<PlacedStop, "point" | "quality">): LatLng | null {
+  return isPoint(s.point) && canDriveTo(s.quality) ? s.point : null;
 }
 
-/**
- * What goes into the Google Maps link: the pin when it is a street match, else the typed address. A stop whose pin is
- * only the ZIP area and has no typed address is left out of the link (it stays in the list and on the map): the
- * middle of a ZIP code is never a driving destination.
- */
-export function linkStop(s: Pick<PlacedStop, "point" | "quality" | "address">): RouteStop | null {
-  if (!isPoint(s.point)) return null;
-  if (canDriveTo(s.quality)) return s.point;
-  const typed = (s.address ?? "").trim();
-  return typed || null;
-}
-
-const sameStop = (a: RouteStop, b: RouteStop) =>
-  typeof a === "string" || typeof b === "string" ? a === b : Math.abs(a.lat - b.lat) < 1e-7 && Math.abs(a.lng - b.lng) < 1e-7;
+const sameStop = (a: LatLng, b: LatLng) => Math.abs(a.lat - b.lat) < 1e-7 && Math.abs(a.lng - b.lng) < 1e-7;
 
 /** Where a tech's day can start. Without one, Google Maps starts from the phone's current location. */
 export type RouteStart = { key: string; label: string; point: LatLng };
@@ -199,8 +193,8 @@ export type RouteStart = { key: string; label: string; point: LatLng };
 export const KATZ_SHOP: RouteStart = { key: "shop", label: "The Shop (2400 Karbach St)", point: { lat: 29.808821, lng: -95.46121 } };
 
 /** Google Maps links for stops in this order. Two jobs in a row at the same place count as one stop. */
-export function routeLinks(stops: readonly Pick<PlacedStop, "point" | "quality" | "address">[], start?: RouteStart | null): string[] {
-  const list: RouteStop[] = [];
+export function routeLinks(stops: readonly Pick<PlacedStop, "point" | "quality">[], start?: RouteStart | null): string[] {
+  const list: LatLng[] = [];
   for (const s of stops) {
     const r = linkStop(s);
     if (r && !(list.length && sameStop(list[list.length - 1]!, r))) list.push(r);
@@ -224,9 +218,9 @@ export type TechRoute = {
   label: string;
   /** False for "3rd Party" (an outside contractor) and for work with no tech yet: those stops are listed, not routed. */
   routed: boolean;
-  /** Stops with a pin: suggested order when routed, time order otherwise. */
+  /** Stops with a street-address pin: suggested order when routed, time order otherwise. */
   stops: RouteRow[];
-  /** Stops with no pin ("Not on the map"), time order. */
+  /** Stops with no street-address pin ("Not on the map": no account, no pin, or only a ZIP-area pin), time order. */
   unrouted: PlacedStop[];
   /** Straight-line miles along the suggested order (0 when not routed). */
   miles: number;
@@ -309,7 +303,7 @@ export const crewLabel = (s: Pick<DayStop, "tech" | "partner">) => `${techLabel(
 
 /**
  * Every job of the day (one row per job, so a two-tech ticket shows once with both names) grouped by pins within
- * `radiusMiles` of each other, named by city. Biggest area first. Stops with no pin come back in `unplaced`.
+ * `radiusMiles` of each other, named by city. Biggest area first. Stops with no street-address pin come back in `unplaced`.
  */
 export function planAreas(stops: readonly PlacedStop[], radiusMiles = 5): { areas: AreaGroup[]; unplaced: PlacedStop[] } {
   const jobs = stops.filter((s) => !s.second);

@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, MapPin as MapPinIcon, Navigation, TriangleAlert } from "lucide-react";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { listTechs } from "@/lib/ops/roster";
 import { milesLabel, NO_REP_COLOR, type LatLng } from "@/lib/ops/geo";
 import {
-  APPROX_LABEL,
   collectDayStops,
   colorOfTech,
   crewLabel,
-  isApprox,
   jobKey,
   KATZ_SHOP,
   milesNote,
@@ -71,7 +69,7 @@ function TypeBadge({ type }: { type: StopType }) {
 }
 
 function pinTitle(s: PlacedStop, n?: number): string {
-  return [n ? `${n}. ${s.customer}` : s.customer, STOP_LABEL[s.type], stopTime(s.time), crewLabel(s), isApprox(s) ? APPROX_LABEL : null].filter(Boolean).join(" · ");
+  return [n ? `${n}. ${s.customer}` : s.customer, STOP_LABEL[s.type], stopTime(s.time), crewLabel(s)].join(" · ");
 }
 
 /**
@@ -140,7 +138,7 @@ export function RoutePlanner({
     if (!current) {
       for (const s of placed) {
         if (s.second || !s.point) continue;
-        out.push({ id: s.key, lat: s.point.lat, lng: s.point.lng, color: colorOfTech(colors, s.tech), hollow: isApprox(s), title: pinTitle(s) });
+        out.push({ id: s.key, lat: s.point.lat, lng: s.point.lng, color: colorOfTech(colors, s.tech), title: pinTitle(s) });
       }
       return { pins: out, route: undefined, fitTo: null };
     }
@@ -156,7 +154,6 @@ export function RoutePlanner({
         lat: s.point.lat,
         lng: s.point.lng,
         color,
-        hollow: isApprox(s),
         size: 7,
         label: current.routed ? String(s.n) : undefined,
         title: pinTitle(s, current.routed ? s.n : undefined),
@@ -167,7 +164,6 @@ export function RoutePlanner({
     return { pins: out, route: current.routed && points.length > 1 ? points : undefined, fitTo: points };
   }, [placed, current, colors]);
 
-  const anyApprox = pins.some((p) => p.hollow);
   const legendTechs = [...new Set(jobs.filter((s) => s.point).map((s) => s.tech))].sort(
     (a, b) => Number(a === NO_TECH) - Number(b === NO_TECH) || routes.findIndex((r) => r.tech === a) - routes.findIndex((r) => r.tech === b),
   );
@@ -339,7 +335,6 @@ export function RoutePlanner({
                       {view === "tech" ? <p>Choose Show On Map on a tech to see their route.</p> : null}
                     </>
                   )}
-                  {anyApprox ? <p>Hollow pins are a ZIP area (approximate), not the street address.</p> : null}
                 </div>
               </>
             ) : (
@@ -396,9 +391,6 @@ function TechCard({
   start: RouteStart | null;
 }) {
   const total = r.stops.length + r.unrouted.length;
-  // ZIP-area pins go into the link as the typed address; with no typed address the link can only reach the ZIP area.
-  const approxTyped = r.stops.filter((s) => isApprox(s) && s.address).length;
-  const approxBare = r.stops.filter((s) => isApprox(s) && !s.address).length;
   return (
     <section
       className={cn("rounded-lg border bg-card p-3", selected ? "border-primary ring-1 ring-primary/40" : "border-border")}
@@ -510,12 +502,6 @@ function TechCard({
           <p className="mt-1.5 text-xs text-muted-foreground">
             {start ? `Starts from ${start.label.replace(/^The /, "the ")}.` : "Starts from your current location."}
             {r.links.length > 1 ? " Google Maps takes about 10 stops per link, so each leg starts where the last one ended." : ""}
-            {approxTyped ? " Stops with only a ZIP area pin go in by their typed address." : ""}
-            {approxBare
-              ? approxBare === 1
-                ? " One stop has only a ZIP area pin and no typed address, so it is left out of the link. Add its address to include it."
-                : ` ${approxBare} stops have only a ZIP area pin and no typed address, so they are left out of the link. Add their addresses to include them.`
-              : ""}
           </p>
         </div>
       ) : null}
@@ -528,7 +514,6 @@ function TechCard({
 function StopText({ stop: s, showCrew }: { stop: PlacedStop; showCrew?: boolean }) {
   const detail = [
     s.city,
-    isApprox(s) ? APPROX_LABEL : null,
     showCrew
       ? null
       : s.second
@@ -576,11 +561,11 @@ function NotOnMap({
       </p>
       <ul className="mt-1 divide-y divide-border">
         {stops.map((s) => (
-          <li key={s.key} id={`route-stop-${s.key}`}>
+          <li key={s.key} id={`route-stop-${s.key}`} className="flex items-start gap-1">
             <button
               type="button"
               onClick={() => onOpen(s)}
-              className="desk-flat flex min-h-11 w-full items-start gap-2 rounded-md px-1.5 py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              className="desk-flat flex min-h-11 min-w-0 flex-1 items-start gap-2 rounded-md px-1.5 py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               data-testid="route-unrouted-stop"
               data-key={s.key}
             >
@@ -609,6 +594,21 @@ function NotOnMap({
                 </span>
               </span>
             </button>
+            {/* The account is known but has no street-address pin: its row in the Address Report. No account, no link.
+                A new tab, so the Planner stays on Routes and this day while stops are fixed one after another. */}
+            {s.accountId != null ? (
+              <Link
+                to="/address-report"
+                search={{ account: s.accountId }}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2 text-xs font-medium text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                aria-label={`Fix Address: ${s.customer} in the Address Report (opens in a new tab)`}
+                data-testid="route-address-report"
+              >
+                Fix Address
+              </Link>
+            ) : null}
           </li>
         ))}
       </ul>

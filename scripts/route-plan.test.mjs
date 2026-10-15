@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { collectDayStops, colorOfTech, crewLabel, isApprox, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
+import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
 import { NO_REP_COLOR, REP_PALETTE } from "../src/lib/ops/geo.ts";
 
 const DAY = "2026-10-14";
@@ -36,9 +36,13 @@ const ACCOUNTS = new Map(
     { id: 11, name: "Steak 48", ...GALLERIA, quality: "exact", address: "4444 Westheimer Rd, Houston, TX 77027", city: "Houston" },
     { id: 12, name: "Common Bond Tanglewood", ...TANGLEWOOD, quality: "close", address: "5740 San Felipe St, Houston, TX 77057", city: "Houston" },
     { id: 13, name: "MARQ*E", ...MARQE, quality: "exact", address: null, city: "Houston" },
-    { id: 14, name: "Katy Diner", ...KATY, quality: "approx", address: "1 Main St, Katy, TX 77494", city: "Katy" },
+    { id: 14, name: "Katy Diner", ...KATY, quality: "close", address: "1 Main St, Katy, TX 77494", city: "Katy" },
     { id: 15, name: "Sugar Land Grill", ...SUGAR_LAND, quality: "approx", address: null, city: "Sugar Land" },
     { id: 16, name: "No Pin Cafe", lat: null, lng: null, quality: null, address: "9 Nowhere Ln, Houston, TX 77002", city: "Houston" },
+    // Only the ZIP code's center (the street address was not found), though an address is typed.
+    { id: 17, name: "Katy Zip Diner", lat: 29.7858, lng: -95.8245, quality: "approx", address: "2 Main St, Katy, TX 77494", city: "Katy" },
+    // A pin whose match was never recorded: not known to be the street address either.
+    { id: 18, name: "Unknown Match Bar", lat: 29.76, lng: -95.37, quality: null, address: null, city: "Houston" },
   ].map((a) => [a.name.toLowerCase(), a]),
 );
 const find = (name) => ACCOUNTS.get(name.trim().toLowerCase());
@@ -227,14 +231,14 @@ test("routes: promised times keep their order; untimed stops slot in by distance
   assert.equal(stopTime(ryan.stops[2].time), "11:30a");
 });
 
-test("route links: approximate (ZIP area) stops go in as the typed address, or are left out", () => {
-  assert.deepEqual(linkStop({ point: GALLERIA, quality: "exact", address: "4444 Westheimer Rd" }), GALLERIA);
-  assert.equal(linkStop({ point: KATY, quality: "approx", address: " 1 Main St, Katy, TX 77494 " }), "1 Main St, Katy, TX 77494");
+test("ZIP-area pins are never stop locations: not ordered, not on the line, not in the link; listed as not on the map", () => {
+  assert.deepEqual(linkStop({ point: GALLERIA, quality: "exact" }), GALLERIA);
+  assert.deepEqual(linkStop({ point: TANGLEWOOD, quality: "close" }), TANGLEWOOD);
+  // Neither a ZIP-area pin nor the typed address goes to Google.
+  assert.equal(linkStop({ point: KATY, quality: "approx", address: " 2 Main St, Katy, TX 77494 " }), null);
   assert.equal(linkStop({ point: SUGAR_LAND, quality: "approx", address: null }), null);
   assert.equal(linkStop({ point: null, quality: null, address: "9 Nowhere Ln" }), null);
-  assert.equal(isApprox({ point: KATY, quality: "approx" }), true);
-  assert.equal(isApprox({ point: GALLERIA, quality: "close" }), false);
-  assert.equal(isApprox({ point: null, quality: null }), false);
+  assert.equal(MISSING_LABEL["zip-area"], "ZIP area only: no pin for the street address");
 
   const placed = placeStops(
     collectDayStops(
@@ -242,20 +246,49 @@ test("route links: approximate (ZIP area) stops go in as the typed address, or a
         ...none,
         services: [
           ticket({ id: 1, customer: "Steak 48", scheduledTime: "08:00" }),
-          ticket({ id: 2, customer: "Katy Diner", scheduledTime: "10:00" }),
+          ticket({ id: 2, customer: "Katy Zip Diner", scheduledTime: "10:00" }),
           ticket({ id: 3, customer: "Sugar Land Grill", scheduledTime: "12:00" }),
+          ticket({ id: 4, customer: "Unknown Match Bar" }),
+          ticket({ id: 5, customer: "Common Bond Tanglewood", technician: null }),
+          ticket({ id: 6, customer: "Katy Zip Diner", technician: null }),
         ],
       },
       DAY,
     ),
     find,
   );
-  const [ryan] = planTechRoutes(placed, []);
+  const by = new Map(placed.map((s) => [s.id, s]));
+  // The account is still found (for its Address Report link), but the ZIP-area pin is dropped.
+  assert.deepEqual([by.get(2).accountId, by.get(2).point, by.get(2).quality, by.get(2).missing], [17, null, "approx", "zip-area"]);
+  assert.deepEqual([by.get(3).accountId, by.get(3).point, by.get(3).missing], [15, null, "zip-area"]);
+  assert.equal(by.get(4).point, null);
+  assert.notEqual(by.get(4).missing, null);
+
+  const [ryan, unassigned] = planTechRoutes(placed, ["Ryan Gloria"]);
+  assert.equal(ryan.tech, "Ryan Gloria");
+  assert.deepEqual(ryan.stops.map((s) => [s.id, s.n]), [[1, 1]]);
+  assert.deepEqual(ryan.unrouted.map((s) => [s.id, s.missing]), [
+    [2, "zip-area"],
+    [3, "zip-area"],
+    [4, by.get(4).missing],
+  ]);
+  assert.equal(ryan.miles, 0);
+  assert.equal(ryan.links.length, 1);
   const url = new URL(ryan.links[0]);
-  // Sugar Land Grill (ZIP area only, no typed address) stays in the stop list but not in the link.
-  assert.equal(ryan.stops.length, 3);
-  assert.equal(url.searchParams.get("destination"), "1 Main St, Katy, TX 77494");
-  assert.equal(url.searchParams.get("waypoints"), "29.741468,-95.452042");
+  assert.equal(url.searchParams.get("destination"), "29.741468,-95.452042");
+  assert.equal(url.searchParams.get("waypoints"), null);
+  assert.doesNotMatch(ryan.links[0], /Main|29\.7858|29\.5994|29\.76,/);
+  // Lists that are not routed follow the same rule.
+  assert.equal(unassigned.tech, NO_TECH);
+  assert.deepEqual(unassigned.stops.map((s) => s.id), [5]);
+  assert.deepEqual(unassigned.unrouted.map((s) => [s.id, s.missing]), [[6, "zip-area"]]);
+  // By Area: off the map too.
+  const { areas, unplaced } = planAreas(placed);
+  assert.deepEqual(areas.flatMap((a) => a.stops.map((s) => s.id)).sort(), [1, 5]);
+  assert.deepEqual(unplaced.map((s) => s.id).sort(), [2, 3, 4, 6]);
+  // A day with only ZIP-area stops gets no link at all.
+  const [zipOnly] = planTechRoutes(placed.filter((s) => s.id === 2 || s.id === 3), ["Ryan Gloria"]);
+  assert.deepEqual([zipOnly.stops.length, zipOnly.unrouted.length, zipOnly.links.length], [0, 2, 0]);
 });
 
 test("route links: two jobs in a row at one place are one stop; long days split into legs", () => {
