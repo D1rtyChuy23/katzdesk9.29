@@ -35,6 +35,14 @@ export type MapPin = {
   label?: string;
   /** Native tooltip. */
   title?: string;
+  /** Dot (default) or diamond: diamonds mark Out of Network service providers on the customer map. */
+  shape?: "circle" | "diamond";
+};
+
+/** A diamond around 0,0 with the same area as a dot of radius r. */
+const diamondPath = (r: number) => {
+  const d = Math.round(r * 1.25 * 100) / 100;
+  return `M0 ${-d}L${d} 0L0 ${d}L${-d} 0Z`;
 };
 
 /** [lat, lng], or [x, y] in pixels. */
@@ -689,15 +697,33 @@ function MapSurface({
               <g style={{ transform: "scale(var(--pin-k, 1))" }}>
                 {/* Larger invisible hit area for fingers. */}
                 <circle r={Math.max(r + 4, 10)} fill="transparent" />
-                {selected ? <circle r={r + 5} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.5} /> : null}
-                <circle
-                  r={r}
-                  fill={p.hollow ? "var(--color-card)" : p.color}
-                  fillOpacity={p.hollow ? 0.85 : 0.92}
-                  stroke={p.hollow ? p.color : "var(--color-card)"}
-                  strokeWidth={p.hollow ? 2.5 : 1.5}
-                  strokeDasharray={p.hollow ? "3 2" : undefined}
-                />
+                {p.shape === "diamond" ? (
+                  <>
+                    {selected ? <path d={diamondPath(r + 5)} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.5} strokeLinejoin="round" /> : null}
+                    <path
+                      d={diamondPath(r)}
+                      fill={p.hollow ? "var(--color-card)" : p.color}
+                      fillOpacity={p.hollow ? 0.85 : 0.95}
+                      stroke={p.hollow ? p.color : "var(--color-card)"}
+                      strokeWidth={p.hollow ? 2.5 : 1.5}
+                      strokeDasharray={p.hollow ? "3 2" : undefined}
+                      strokeLinejoin="round"
+                      data-pin-shape="diamond"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {selected ? <circle r={r + 5} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.5} /> : null}
+                    <circle
+                      r={r}
+                      fill={p.hollow ? "var(--color-card)" : p.color}
+                      fillOpacity={p.hollow ? 0.85 : 0.92}
+                      stroke={p.hollow ? p.color : "var(--color-card)"}
+                      strokeWidth={p.hollow ? 2.5 : 1.5}
+                      strokeDasharray={p.hollow ? "3 2" : undefined}
+                    />
+                  </>
+                )}
                 {p.label ? (
                   <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fill={p.hollow ? p.color : "#fff"} style={{ fontVariantNumeric: "tabular-nums" }}>
                     {p.label}
@@ -769,6 +795,7 @@ export function DeskMap({
   onPinClick,
   fitKey,
   fitTo,
+  fitToOnly,
   focus,
   className,
   children,
@@ -781,6 +808,8 @@ export function DeskMap({
   fitKey?: string;
   /** Fit to these points instead of every pin when fitKey changes (e.g. one rep's accounts). */
   fitTo?: readonly LatLng[] | null;
+  /** Fit to fitTo only: when it is empty the map shows the default view instead of fitting every pin. */
+  fitToOnly?: boolean;
   /** Pan to this point (zooming in a little) whenever a new focus object is passed. Keep it in state. */
   focus?: LatLng | null;
   className?: string;
@@ -818,7 +847,7 @@ export function DeskMap({
     if (!size) return;
     if (lastFit.current === key && view) return;
     lastFit.current = key;
-    setView(fitView(fitTo?.length ? fitTo : points, size.w, size.h));
+    setView(fitView(fitTo?.length || fitToOnly ? fitTo ?? [] : points, size.w, size.h));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refit only when the fit key or the box size changes
   }, [key, size]);
 
