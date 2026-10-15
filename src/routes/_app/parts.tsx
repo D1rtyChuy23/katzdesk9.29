@@ -1,23 +1,41 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, EyeOff, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { Camera, EyeOff, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { clearPartImage, hideParts, listParts, removePart, restoreParts, setPartDescription, setPartGetLater, setPartImage, setPartMpn, type PartRow } from "@/lib/ops/parts-api";
-import { treatPartPhoto, treatResearchedPhoto } from "@/lib/part-photo-treatment";
-import { Badge } from "@/components/ui/badge";
-import { PhotoReview } from "@/components/desk/photo-review";
+import { hideParts, listParts, removePart, restoreParts, setPartImage, type PartRow } from "@/lib/ops/parts-api";
+import { binText } from "@/lib/ops/part-bins";
+import { treatResearchedPhoto } from "@/lib/part-photo-treatment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PartThumb } from "@/components/desk/part-thumb";
+import { PartWindow } from "@/components/desk/part-window";
+import {
+  PartGetLater,
+  PartMpnEditButton,
+  PartMpnForm,
+  PartNameEditButton,
+  PartNameForm,
+  PartPhotoButtons,
+  PartPhotoFile,
+  PartPhotoReview,
+  PartPhotoStatus,
+} from "@/components/desk/part-controls";
+import { partMoney as money, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "@/components/desk/part-edits";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
-import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
+import { BinLocationsButton, ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 
-export const Route = createFileRoute("/_app/parts")({ component: Page });
+/** `?part=<id>` opens that part's window, so a part can be linked. */
+type PartsSearch = { part?: number };
 
-const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+function parsePartsSearch(s: Record<string, unknown>): PartsSearch {
+  const n = typeof s.part === "number" ? s.part : typeof s.part === "string" && s.part.trim() ? Number(s.part) : NaN;
+  return Number.isInteger(n) && n > 0 ? { part: n } : {};
+}
+
+export const Route = createFileRoute("/_app/parts")({ validateSearch: parsePartsSearch, component: Page });
 
 function hiddenWhen(iso: string | null): string {
   if (!iso) return "";
@@ -28,6 +46,12 @@ function hiddenWhen(iso: string | null): string {
 
 function Page() {
   const qc = useQueryClient();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/parts" });
+  // The open window lives in the address (?part=), so a link opens it. Opening and closing replace the entry, as the
+  // other windows do, so Back never gets stuck on Parts. The list does not jump.
+  const openPart = (id: number) => void navigate({ search: (s) => ({ ...s, part: id }), replace: true, resetScroll: false });
+  const closePart = () => void navigate({ search: (s) => ({ ...s, part: undefined }), replace: true, resetScroll: false });
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const isAdmin = !!me.data?.isAdmin || me.data?.role === "admin";
   const [q, setQ] = useState("");
@@ -130,17 +154,19 @@ function Page() {
             The NetSuite item list with each part's photo and MPN. Hide an obsolete part to take it off this list and the invoice picker. A ticket that already used it keeps the line.
           </p>
         </div>
-        {isAdmin ? (
+        {/* Admin: Pull Confirmed Photos and every import. Sales: Bin Locations only, like a bin edit in the part's window. */}
+        {isAdmin || page.data?.canEditMpn ? (
           <div className="flex shrink-0 flex-wrap gap-2">
-            {page.data?.readyToPull ? (
+            {isAdmin && page.data?.readyToPull ? (
               <Button type="button" size="sm" variant="outline" disabled={!!pulling} onClick={() => void pullConfirmed()} data-testid="parts-pull-confirmed">
                 <Camera className="size-4" />
                 {pulling ?? `Pull Confirmed Photos (${page.data.readyToPull})`}
               </Button>
             ) : null}
             <ImportMenu>
-              <ImportPartsButton />
-              <UpdatePricingButton />
+              {isAdmin ? <ImportPartsButton /> : null}
+              {isAdmin ? <UpdatePricingButton /> : null}
+              <BinLocationsButton />
             </ImportMenu>
           </div>
         ) : null}
@@ -249,6 +275,7 @@ function Page() {
             selected={selected.includes(r.id)}
             onToggle={toggle}
             onChanged={refresh}
+            onOpen={openPart}
           />
         ))}
         {!rows.length && !page.isLoading ? (
@@ -274,6 +301,14 @@ function Page() {
           </Button>
         </div>
       ) : null}
+
+      <PartWindow
+        id={search.part ?? null}
+        initial={rows.find((r) => r.id === search.part)}
+        canEditMpn={!!page.data?.canEditMpn}
+        onClose={closePart}
+        onChanged={refresh}
+      />
     </div>
   );
 }
@@ -287,6 +322,7 @@ function PartRowView({
   selected,
   onToggle,
   onChanged,
+  onOpen,
 }: {
   row: PartRow;
   canEditMpn: boolean;
@@ -296,70 +332,16 @@ function PartRowView({
   selected: boolean;
   onToggle: (id: number) => void;
   onChanged: () => void;
+  /** Opens the part's window. */
+  onOpen: (id: number) => void;
 }) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [editing, setEditing] = useState(false);
   const [hiding, setHiding] = useState(false);
   const [reason, setReason] = useState("");
   const [removeNote, setRemoveNote] = useState<string | null>(null);
-  const [mpn, setMpn] = useState(row.mpn ?? "");
-  useEffect(() => setMpn(row.mpn ?? ""), [row.mpn]);
-  const [editingDesc, setEditingDesc] = useState(false);
-  const [desc, setDesc] = useState(row.description ?? "");
-  useEffect(() => setDesc(row.description ?? ""), [row.description]);
-  const saveDesc = useMutation({
-    mutationFn: () => setPartDescription({ data: { id: row.id, description: desc.trim() || null } }),
-    onSuccess: () => {
-      setEditingDesc(false);
-      toast.success(desc.trim() ? "Description saved" : "Description cleared");
-      onChanged();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the description"),
-  });
-
-  const [reviewing, setReviewing] = useState(false);
-  const later = useMutation({
-    mutationFn: (on: boolean) => setPartGetLater({ data: { id: row.id, on } }),
-    onSuccess: (_r, on) => {
-      toast.success(on ? "Marked Get Later" : "Get Later cleared");
-      onChanged();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not change Get Later"),
-  });
-  const pull = useMutation({
-    mutationFn: async () => setPartImage({ data: { id: row.id, base64: await treatResearchedPhoto(row.id, -1), sourceUrl: row.research?.imageUrl ?? null } }),
-    onSuccess: () => {
-      toast.success("Confirmed photo attached");
-      onChanged();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not get the photo; it stays flagged Confirm Photo"),
-  });
-  const upload = useMutation({
-    // Same treatment as a researched photo: trimmed, centered on the light square.
-    mutationFn: async (file: File) => setPartImage({ data: { id: row.id, base64: await treatPartPhoto(file) } }),
-    onSuccess: () => {
-      toast.success(row.hasImage ? "Photo replaced" : "Photo added");
-      onChanged();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the photo"),
-  });
-  const remove = useMutation({
-    mutationFn: () => clearPartImage({ data: { id: row.id } }),
-    onSuccess: () => {
-      toast.success("Photo removed");
-      onChanged();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove the photo"),
-  });
-  const saveMpn = useMutation({
-    mutationFn: () => setPartMpn({ data: { id: row.id, mpn: mpn.trim() || null } }),
-    onSuccess: () => {
-      setEditing(false);
-      toast.success("MPN saved");
-      onChanged();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the MPN"),
-  });
+  const photo = usePartPhoto(row, onChanged);
+  const mpn = usePartMpnEdit(row, onChanged);
+  const name = usePartNameEdit(row, onChanged);
+  const bin = binText({ rack: row.binRack, shelf: row.binShelf, bin: row.binBin });
   const hide = useMutation({
     mutationFn: () => hideParts({ data: { ids: [row.id], reason: reason.trim() || undefined } }),
     onSuccess: () => {
@@ -404,11 +386,20 @@ function PartRowView({
           onChange={() => onToggle(row.id)}
         />
       ) : null}
-      <PartThumb part={{ id: row.id, sku: row.sku, mpn: row.mpn, hasImage: row.hasImage, imageVersion: row.imageVersion }} name={row.item} size="lg" />
+      <PartThumb
+        part={{ id: row.id, sku: row.sku, mpn: row.mpn, hasImage: row.hasImage, imageVersion: row.imageVersion }}
+        name={row.item}
+        size="lg"
+        onOpen={() => onOpen(row.id)}
+      />
       <div className="min-w-0 flex-1">
-        {/* Part name is the NetSuite Description; blank when none is stored. */}
+        {/* Part name is the NetSuite Description; blank when none is stored. A click opens the part's window. */}
         <p className="font-medium break-words" data-testid="part-name">
-          {row.description}
+          {row.description ? (
+            <button type="button" className="max-w-full text-left break-words hover:underline focus-visible:underline focus-visible:outline-none" onClick={() => onOpen(row.id)} data-testid="part-open">
+              {row.description}
+            </button>
+          ) : null}
         </p>
         <p className="text-sm text-muted-foreground" data-testid="part-mpn">
           Part # {row.mpn ? <span className="font-medium text-foreground">{row.mpn}</span> : <span>not set</span>}
@@ -421,66 +412,16 @@ function PartRowView({
               <span className="font-medium tracking-wide uppercase">Class</span> {row.itemClass}
             </span>
           ) : null}
-          <label className="inline-flex cursor-pointer items-center gap-1.5 font-medium" title="Marks the part to pull later. Price and stock do not change." data-testid="part-get-later">
-            <input type="checkbox" className="size-4 accent-primary" checked={row.getLater} disabled={later.isPending} onChange={(e) => later.mutate(e.target.checked)} />
-            Get Later
-          </label>
-          {row.hasImage && row.photoStatus === "confirmed" ? (
-            <Badge size="tight" variant="success" title={row.photoSourceUrl ? `From ${row.photoSourceUrl}` : row.photoConfirmedBy ? `Added by ${row.photoConfirmedBy}` : undefined} data-testid="part-photo-confirmed">
-              Photo Confirmed
-            </Badge>
-          ) : !row.hasImage ? (
-            <Badge size="tight" variant="warn" title={row.research?.reason ?? "No photo has been confirmed for this part number yet."} data-testid="part-confirm-photo">
-              Confirm Photo
-            </Badge>
+          {bin ? (
+            <span className="text-muted-foreground" data-testid="part-bin">
+              <span className="font-medium tracking-wide uppercase">Bin</span> {bin}
+            </span>
           ) : null}
-          {!row.hasImage && row.research?.verdict === "confirmed" && row.research.imageUrl ? (
-            <Button type="button" size="sm" variant="outline" className="h-7" disabled={pull.isPending} onClick={() => pull.mutate()} data-testid="part-pull-confirmed">
-              {pull.isPending ? "Pulling…" : "Pull Confirmed Photo"}
-            </Button>
-          ) : null}
-          {!row.hasImage && row.research?.verdict === "review" && row.research.candidates.length ? (
-            <Button type="button" size="sm" variant="outline" className="h-7" onClick={() => setReviewing(true)} data-testid="part-review-photos">
-              Review Photos ({row.research.candidates.length})
-            </Button>
-          ) : null}
+          <PartGetLater row={row} onChanged={onChanged} />
+          <PartPhotoStatus row={row} photo={photo} />
         </div>
-        {reviewing ? <PhotoReview part={row} onClose={() => setReviewing(false)} onSaved={onChanged} /> : null}
-        {editingDesc ? (
-          <form
-            className="mt-2 flex flex-wrap items-center gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              saveDesc.mutate();
-            }}
-            data-testid="part-description-form"
-          >
-            <Input
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              aria-label={`Description for ${row.item}`}
-              placeholder="What this part is"
-              maxLength={500}
-              className="h-9 w-full sm:w-96"
-              autoFocus
-              data-testid="part-description-input"
-            />
-            <Button type="submit" size="sm" disabled={saveDesc.isPending} data-testid="part-description-save">
-              Save
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setDesc(row.description ?? "");
-                setEditingDesc(false);
-              }}
-            >
-              Cancel
-            </Button>
-          </form>
-        ) : null}
+        <PartPhotoReview row={row} photo={photo} onChanged={onChanged} />
+        <PartNameForm row={row} edit={name} />
         {showHidden ? (
           <p className="mt-1 text-xs text-muted-foreground" data-testid="part-hidden-meta">
             Hidden by {row.hiddenBy || "Desk"}
@@ -490,23 +431,7 @@ function PartRowView({
           </p>
         ) : null}
 
-        {editing ? (
-          <form
-            className="mt-2 flex flex-wrap items-center gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              saveMpn.mutate();
-            }}
-          >
-            <Input value={mpn} onChange={(e) => setMpn(e.target.value)} aria-label={`MPN for ${row.item}`} placeholder="Manufacturer part number" className="h-9 w-56" autoFocus />
-            <Button type="submit" size="sm" disabled={saveMpn.isPending}>
-              Save
-            </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(false)}>
-              Cancel
-            </Button>
-          </form>
-        ) : null}
+        <PartMpnForm row={row} edit={mpn} />
 
         {hiding ? (
           <form
@@ -536,28 +461,9 @@ function PartRowView({
         ) : null}
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Button type="button" size="sm" variant="outline" disabled={upload.isPending} onClick={() => fileRef.current?.click()} data-testid="part-photo-add">
-            <Camera className="size-4" />
-            {upload.isPending ? "Saving…" : row.hasImage ? "Replace Photo" : "Add Photo"}
-          </Button>
-          {row.hasImage ? (
-            <Button type="button" size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate()}>
-              <Trash2 className="size-4" />
-              Remove
-            </Button>
-          ) : null}
-          {canEditMpn && !editing ? (
-            <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(true)}>
-              <Pencil className="size-4" />
-              {row.mpn ? "Edit MPN" : "Set MPN"}
-            </Button>
-          ) : null}
-          {canEditMpn && !editingDesc ? (
-            <Button type="button" size="sm" variant="ghost" onClick={() => setEditingDesc(true)} data-testid="part-description-edit">
-              <Pencil className="size-4" />
-              {row.description ? "Edit Part Name" : "Add Part Name"}
-            </Button>
-          ) : null}
+          <PartPhotoButtons row={row} photo={photo} />
+          {canEditMpn ? <PartMpnEditButton row={row} edit={mpn} /> : null}
+          {canEditMpn ? <PartNameEditButton row={row} edit={name} /> : null}
           {canHide && showHidden ? (
             <Button type="button" size="sm" variant="outline" disabled={restore.isPending} onClick={() => restore.mutate()} data-testid="part-restore">
               <RotateCcw className="size-4" />
@@ -587,20 +493,7 @@ function PartRowView({
               Remove Part
             </Button>
           ) : null}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden
-            data-testid="part-photo-file"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              e.target.value = "";
-              if (f) upload.mutate(f);
-            }}
-          />
+          <PartPhotoFile photo={photo} />
         </div>
         {removeNote ? (
           <p className="mt-2 text-sm text-destructive" data-testid="part-remove-refused">
