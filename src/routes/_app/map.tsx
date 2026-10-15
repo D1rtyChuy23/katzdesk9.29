@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { FilterChip } from "@/components/desk/desk-charts";
 import { CustomerMap } from "@/components/desk/customer-map";
@@ -26,6 +26,10 @@ function Page() {
           <FilterChip selected={tab === "territories"} onClick={() => setTab("territories")} data-testid="map-tab-territories">
             Territories
           </FilterChip>
+          {/* Accounts with no pin or only a ZIP area pin, and the other addresses on file for them. */}
+          <Link to="/address-report" className="self-center px-1 text-sm font-medium text-primary underline-offset-4 hover:underline" data-testid="map-address-report">
+            Address Report
+          </Link>
         </div>
       </header>
       {tab === "accounts" ? <CustomerMap /> : <TerritoryView />}

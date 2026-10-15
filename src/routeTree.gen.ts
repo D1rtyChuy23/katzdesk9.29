@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccessRouteImport } from './routes/_app/access'
+import { Route as AppAddressReportRouteImport } from './routes/_app/address-report'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppCustomerNamesRouteImport } from './routes/_app/customer-names'
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
@@ -55,6 +56,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppAccessRoute = AppAccessRouteImport.update({
   id: '/access',
   path: '/access',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAddressReportRoute = AppAddressReportRouteImport.update({
+  id: '/address-report',
+  path: '/address-report',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/address-report': typeof AppAddressReportRoute
   '/analytics': typeof AppAnalyticsRoute
   '/customer-names': typeof AppCustomerNamesRoute
   '/customers': typeof AppCustomersRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/address-report': typeof AppAddressReportRoute
   '/analytics': typeof AppAnalyticsRoute
   '/customer-names': typeof AppCustomerNamesRoute
   '/customers': typeof AppCustomersRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/access': typeof AppAccessRoute
+  '/_app/address-report': typeof AppAddressReportRoute
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/customer-names': typeof AppCustomerNamesRoute
   '/_app/customers': typeof AppCustomersRoute
@@ -273,6 +282,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/access'
+    | '/address-report'
     | '/analytics'
     | '/customer-names'
     | '/customers'
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/access'
+    | '/address-report'
     | '/analytics'
     | '/customer-names'
     | '/customers'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/_app/access'
+    | '/_app/address-report'
     | '/_app/analytics'
     | '/_app/customer-names'
     | '/_app/customers'
@@ -395,6 +407,13 @@ declare module '@tanstack/react-router' {
       path: '/access'
       fullPath: '/access'
       preLoaderRoute: typeof AppAccessRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/address-report': {
+      id: '/_app/address-report'
+      path: '/address-report'
+      fullPath: '/address-report'
+      preLoaderRoute: typeof AppAddressReportRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/analytics': {
@@ -570,6 +589,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAccessRoute: typeof AppAccessRoute
+  AppAddressReportRoute: typeof AppAddressReportRoute
   AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppCustomerNamesRoute: typeof AppCustomerNamesRoute
   AppCustomersRoute: typeof AppCustomersRoute
@@ -595,6 +615,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccessRoute: AppAccessRoute,
+  AppAddressReportRoute: AppAddressReportRoute,
   AppAnalyticsRoute: AppAnalyticsRoute,
   AppCustomerNamesRoute: AppCustomerNamesRoute,
   AppCustomersRoute: AppCustomersRoute,
