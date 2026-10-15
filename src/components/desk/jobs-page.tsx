@@ -32,11 +32,14 @@ export function JobsPage({
   title,
   lede,
   initialOpen,
+  initialTab,
 }: {
   kind: "service" | "tlc";
   title: string;
   lede: string;
   initialOpen?: number;
+  /** A ping or note notification opens its ticket on the Ping tab. */
+  initialTab?: "ping";
 }) {
   const jobs = useQuery({
     queryKey: ["jobs", kind],
@@ -50,9 +53,18 @@ export function JobsPage({
   const [urgency, setUrgency] = useState("");
   const [view, setView] = useState<"active" | "flagged" | "unassigned" | "complete" | "all">("active");
   const [openId, setOpenId] = useState<number | null>(initialOpen ?? null);
+  const [openTab, setOpenTab] = useState<"ping" | undefined>(initialOpen != null ? initialTab : undefined);
   useEffect(() => {
-    if (initialOpen != null) setOpenId(initialOpen);
-  }, [initialOpen]);
+    if (initialOpen != null) {
+      setOpenId(initialOpen);
+      setOpenTab(initialTab);
+    }
+  }, [initialOpen, initialTab]);
+  // A ticket opened from the list or New call opens on its Ticket tab.
+  const openFromList = (id: number) => {
+    setOpenTab(undefined);
+    setOpenId(id);
+  };
   const [create, setCreate] = useState(false);
   const [review, setReview] = useState<CorrigoReviewItem[]>([]);
   const [sort, setSort] = useDeskSort(`jobs-${kind}`, "flag");
@@ -217,19 +229,19 @@ export function JobsPage({
         ) : (
           <ul>
             {rows.map((j) => (
-              <JobRow key={j.id} job={j} onOpen={() => setOpenId(j.id)} />
+              <JobRow key={j.id} job={j} onOpen={() => openFromList(j.id)} />
             ))}
           </ul>
         )}
         </div>
       </div>
 
-      <JobSheet id={openId} onClose={() => setOpenId(null)} />
+      <JobSheet id={openId} initialTab={openTab} onClose={() => setOpenId(null)} />
       <NewJobDialog
         kind={kind}
         open={create}
         onOpenChange={setCreate}
-        onCreated={(id) => setOpenId(id)}
+        onCreated={openFromList}
       />
     </div>
   );

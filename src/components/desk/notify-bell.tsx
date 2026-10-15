@@ -151,7 +151,10 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
       );
     }
     const to = pathFor(t.type);
-    if (t.id && to !== "/" && t.type !== "handoff") {
+    if (t.id && !t.fallback && (t.type === "service" || t.type === "tlc")) {
+      // A ping or a note on a ticket opens that ticket on its Ping tab.
+      void navigate({ to: t.type === "tlc" ? "/tlc" : "/service", search: { open: t.id, tab: "ping" } });
+    } else if (t.id && to !== "/" && t.type !== "handoff") {
       void navigate({ to, search: { open: t.id } });
     } else if (t.type === "handoff" && n.commentId) {
       void navigate({ to: "/handoff", search: { open: n.commentId } });
