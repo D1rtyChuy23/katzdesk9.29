@@ -1,0 +1,115 @@
+{
+  "id": "eversys-legacy-plus",
+  "manufacturer": "Eversys",
+  "title": "Legacy+ PM Runbook",
+  "subtitle": "Eversys Legacy+ | L'2c, L'2m | preventive maintenance kits and steps",
+  "sources": "Based on the Legacy+ PM Kits Manual V4.0 (SAP 5700112914, 02.06.2026), TI-240, the e'Support history of service kit releases V3.0 (12.10.2026) and the Legacy+ brewing unit exploded view V2.0. Legacy Steam (L'2s) has no PM kit manual and is not covered. Check the Webshop configurator with the machine's serial number before ordering.",
+  "storageKey": "legacy-plus-runbook-v1",
+  "models": [
+    { "id": "2c", "label": "L'2c (coffee)" },
+    { "id": "2m", "label": "L'2m (milk)" }
+  ],
+  "intervals": [
+    { "id": "12", "label": "12-month PM" },
+    { "id": "36", "label": "36-month PM" }
+  ],
+  "options": [
+    { "key": "brew", "label": "Brew module (by part number)", "default": "m",
+      "choices": [ { "val": "m", "label": "Medium, 115923" }, { "val": "l", "label": "Large, 118839" } ] },
+    { "key": "grinders", "label": "Grinders", "default": "4",
+      "choices": [ { "val": "1", "label": "1" }, { "val": "2", "label": "2" }, { "val": "3", "label": "3" }, { "val": "4", "label": "4" } ] },
+    { "key": "powder", "label": "Powder module", "default": "no",
+      "choices": [ { "val": "no", "label": "Not fitted" }, { "val": "yes", "label": "Fitted" } ] },
+    { "key": "step15", "label": "1.5-Step (L'2m)", "default": "no", "when": { "model": ["2m"] },
+      "choices": [ { "val": "no", "label": "No" }, { "val": "yes", "label": "Yes" } ] },
+    { "key": "milk2", "label": "2 milk types (L'2m)", "default": "no", "when": { "model": ["2m"] },
+      "choices": [ { "val": "no", "label": "No" }, { "val": "yes", "label": "Yes" } ] }
+  ],
+  "banners": [
+    { "tone": "ok", "text": "Updated October 2026 to the Legacy+ PM Kits Manual V4.0: 24-month kits are now 36-month kits (TI-240), and the grinder kit moved from 12 to 36 months." },
+    { "tone": "warn", "text": "Legacy Steam (L'2s) is not covered: Eversys publishes no PM kit manual for it. Ask Eversys USA before ordering." },
+    { "tone": "ok", "text": "Brew module: check its part number. 115923 is medium (kit EV113692), 118839 is large (kit EV119813)." },
+    { "when": { "pm": ["12"] }, "tone": "ok", "text": "12-month PM: only 12-month kits are listed. Grinder, hydraulic, milk add-on, water pump, hot water valve block, 2 milk types and powder 36 are 36-month items." }
+  ],
+  "kits": [
+    { "ev": "EV113706", "name": "Grinder module Standard", "module": "Grinder module", "interval": 36,
+      "qty": { "by": "grinders", "map": { "1": 1, "2": 2, "3": 3, "4": 4 } }, "note": "One per grinder. Grinder outlet blade 112690. Now 36 months." },
+    { "ev": "EV113692", "name": "Medium brew module Standard", "module": "Brew module", "interval": 12, "qty": 1,
+      "when": { "brew": ["m"] }, "note": "Brew module M (115923). Tubes 525 mm and 350 mm." },
+    { "ev": "EV119813", "name": "Large brew module Standard", "module": "Brew module", "interval": 12, "qty": 1,
+      "when": { "brew": ["l"] }, "note": "Brew module L (118839). Piston seal L-XL 116945." },
+    { "ev": "EV113695", "name": "Hydraulic module Standard", "module": "Hydraulic module", "interval": 36, "qty": 1,
+      "note": "Now 36 months." },
+    { "ev": "EV113696", "name": "Milk module V3 Standard", "module": "Milk module", "interval": 12, "qty": 1,
+      "when": { "model": ["2m"] }, "note": "Some parts moved to EV113697 (release history V3.0)." },
+    { "ev": "EV113697", "name": "Milk module add-on", "module": "Milk module", "interval": 36, "qty": 1,
+      "when": { "model": ["2m"] }, "note": "Now 36 months. US shop title: 36-Month Milk PM Kit." },
+    { "ev": "EV113700", "name": "Frame add-on, automatic cleaning module", "module": "Frame", "interval": 12, "qty": 1,
+      "when": { "model": ["2m"] } },
+    { "ev": "EV113701", "name": "Frame add-on, water pump", "module": "Frame", "interval": 36, "qty": 1, "note": "Now 36 months." },
+    { "ev": "EV113704", "name": "Frame add-on, hot water valve block", "module": "Frame", "interval": 36, "qty": 1,
+      "note": "Now 36 months. The US shop still titles it \"FRAME/TEA/24M\"." },
+    { "ev": "EV113698", "name": "Add-on 1.5-Step", "module": "Frame", "interval": 12, "qty": 1,
+      "when": { "model": ["2m"], "step15": ["yes"] } },
+    { "ev": "EV113699", "name": "Add-on 2 milk types", "module": "Frame", "interval": 36, "qty": 1,
+      "when": { "model": ["2m"], "milk2": ["yes"] }, "note": "Now 36 months." },
+    { "ev": "EV113942", "name": "Powder module Standard", "module": "Powder module", "interval": 12, "qty": 1,
+      "when": { "powder": ["yes"] }, "note": "112590, 112592 and 113916 moved to EV120356." },
+    { "ev": "EV120356", "name": "Powder module Standard, long interval", "module": "Powder module", "interval": 36, "qty": 1,
+      "when": { "powder": ["yes"] }, "note": "New 36-month kit." }
+  ],
+  "steps": [
+    { "module": "Grinder module", "items": [
+      { "id": "grind-burrs", "text": "Check ground-coffee total: change burrs after every 2000 kg.", "ref": "Manual p.6" },
+      { "id": "grind-damper", "text": "Check the grinder damper: the rubber must be flexible with no cracks.", "ref": "Manual p.6" },
+      { "id": "grind-clean", "text": "Clean the grinder at every service.", "ref": "Manual p.6" },
+      { "id": "grind-kit", "text": "Fit EV113706 on each grinder.", "ref": "Manual p.6", "when": { "pm": ["36"] } }
+    ] },
+    { "module": "Brew module", "items": [
+      { "id": "brew-kit", "text": "Fit EV113692 (medium, 115923) or EV119813 (large, 118839).", "ref": "Manual p.8, p.10" },
+      { "id": "brew-grease", "text": "Clean, then grease the shafts of the bottom arm and the top piston with JAX Pyro-plate FGN.", "ref": "Manual p.8" },
+      { "id": "brew-screen", "text": "Check the piston screens for clogging. Clean or replace if needed.", "ref": "Manual p.8" },
+      { "id": "brew-lock", "text": "Turn the piston screen 1/4 turn to lock it, then tighten the piston head to 8 N·m.", "ref": "Manual p.8" },
+      { "id": "brew-tubes", "text": "Cut the 525 mm and 350 mm tubes from FEP tube 101169 (1 m) or 105491 (50 m).", "ref": "Manual p.8" }
+    ] },
+    { "module": "Hydraulic module", "items": [
+      { "id": "hyd-kit", "text": "Fit EV113695.", "ref": "Manual p.12", "when": { "pm": ["36"] } },
+      { "id": "hyd-hose", "text": "Replace the 80 mm silicone hose (cut from 25 m hose 104451). Do this at every service.", "ref": "Manual p.12" }
+    ] },
+    { "module": "Milk module V3", "when": { "model": ["2m"] }, "items": [
+      { "id": "milk-kit", "text": "Fit EV113696 (hose 104719 cut to 400 mm).", "ref": "Manual p.14" },
+      { "id": "milk-kit36", "text": "Fit EV113697.", "ref": "Manual p.14", "when": { "pm": ["36"] } },
+      { "id": "milk-pipes", "text": "Change the milk pipes (every 12 months). 25 m blue 106186, green 106189.", "ref": "Manual p.14" }
+    ] },
+    { "module": "Frame", "items": [
+      { "id": "frame-clean", "text": "Fit EV113700 (automatic cleaning module).", "ref": "Manual p.16", "when": { "model": ["2m"] } },
+      { "id": "frame-36", "text": "Fit EV113701 (water pump) and EV113704 (hot water valve block).", "ref": "Manual p.16", "when": { "pm": ["36"] } },
+      { "id": "frame-15", "text": "Fit EV113698 and clean the 1.5-Step outlet, the fitting silicone pipe and the aerator.", "ref": "Manual p.18", "when": { "model": ["2m"], "step15": ["yes"] } },
+      { "id": "frame-milk2", "text": "Fit EV113699 (2 milk types).", "ref": "Manual p.18", "when": { "model": ["2m"], "milk2": ["yes"], "pm": ["36"] } }
+    ] },
+    { "module": "Powder module", "when": { "powder": ["yes"] }, "items": [
+      { "id": "powder-kit", "text": "Fit EV113942.", "ref": "Manual p.20" },
+      { "id": "powder-kit36", "text": "Fit EV120356.", "ref": "Manual p.20", "when": { "pm": ["36"] } }
+    ] },
+    { "module": "Close out", "items": [
+      { "id": "close-stock", "text": "Record the service (date, interval, kits used). Old 24-month kits may be used for the 36-month interval.", "ref": "TI-240" }
+    ] }
+  ],
+  "changes": {
+    "stockNote": { "title": "24-month kits in stock are still usable.", "text": "Per TI-240 (from 1 May 2026) the 24-month kits are replaced by 36-month kits, and existing 24-month kits can be used for the 36-month interval. The grinder kit EV113706 moved from 12 to 36 months." },
+    "supersessions": [
+      ["EV113706", "Same number", "Grinder Standard: 12 months → 36 months."],
+      ["EV113695", "Same number", "Hydraulic Standard now 36 months; 112552, 112553, 112237 and 100208 removed."],
+      ["EV113696 → EV113697", "Parts moved", "Milk 12-month kit trimmed; the parts moved into the 36-month milk add-on EV113697."],
+      ["EV113704, EV113701, EV113699", "Same numbers", "Now 36 months. EV113701: 100217 removed."],
+      ["EV113942 → EV120356", "Parts moved", "112590, 112592 and 113916 moved into the new 36-month powder kit EV120356."],
+      ["EV108349", "None", "Frame add-on outlet V2. Deleted."]
+    ]
+  },
+  "reference": [
+    { "title": "Interval rule", "text": "Under 50,000 cycles a year per group head: 12-month PM in years 1 and 2, 36-month PM in year 3, then repeat. Over 50,000: the same 12, 12, 36 pattern every 50,000 cycles. At least one PM a year is mandatory." },
+    { "title": "Identify the model from the serial", "text": "First 8 digits of the serial (e'Support, List of machine serial numbers - North America): L'2c 01344800, L'2m 01344900." },
+    { "title": "Time allowance", "text": "The Legacy+ PM manual gives no maintenance time." },
+    { "title": "Escalation", "text": "Eversys technical support: +41 27 588 00 17 or techsupport@eversys.com. Eversys USA: service.usa@eversys.com. Have the machine serial number and the kit number ready." }
+  ]
+}

@@ -45,6 +45,8 @@ export type PlannedUnit = {
 };
 
 type Matcher = (piece: string) => { runbookId: string; model: string | null } | null;
+/** Runbook and model from a serial number. When it knows the serial, it overrides what the text suggested. */
+type SerialMatcher = (serial: string) => { runbookId: string; model: string | null } | null;
 
 /** Key under which a unit's options live. Same value whether the unit sits in `assets` or `account_equipment`. */
 export function optionsKeyFor(serial: string | null | undefined): string | null {
@@ -53,7 +55,12 @@ export function optionsKeyFor(serial: string | null | undefined): string | null 
   return k || null;
 }
 
-export function planUnits(equipment: string | null | undefined, accountRows: AccountUnitRow[], match: Matcher): PlannedUnit[] {
+export function planUnits(
+  equipment: string | null | undefined,
+  accountRows: AccountUnitRow[],
+  match: Matcher,
+  bySerial?: SerialMatcher,
+): PlannedUnit[] {
   const used = new Set<number>();
   const seen = new Map<string, number>();
   const ordinals = new Map<string, number>();
@@ -74,11 +81,18 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
     }
     let serial: string | null = null;
     let model = hit.model;
+    let runbookId = hit.runbookId;
     if (idx >= 0) {
       used.add(idx);
       serial = parseSerial(accountRows[idx].serial);
       const rowHit = match(accountRows[idx].equipmentName) ?? match(accountRows[idx].catalogModel);
       if (!model && rowHit?.model) model = rowHit.model;
+      // The serial names the exact machine (e.g. "Shotmaster CT" text, serial 01153900… = Shotmaster c).
+      const s = serial && bySerial ? bySerial(serial) : null;
+      if (s) {
+        runbookId = s.runbookId;
+        model = s.model ?? (s.runbookId === hit.runbookId ? model : null);
+      }
     }
     const sk = optionsKeyFor(serial);
     const accountId = idx >= 0 ? accountRows[idx].id : null;
@@ -102,7 +116,9 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
       piece,
       serial,
       serialKey: sk,
-      runbookId: hit.runbookId, model });
+      runbookId,
+      model,
+    });
   }
   return out;
 }

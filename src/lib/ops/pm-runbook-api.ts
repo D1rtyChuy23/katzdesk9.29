@@ -8,7 +8,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { normalizeCustomerKey } from "@/lib/ops/account-equip";
-import { RUNBOOKS, runbookById } from "@/lib/ops/runbooks";
+import { matchRunbookPiece, matchRunbookSerial, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
   canWriteRunbook,
@@ -120,13 +120,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       .filter((r) => normalizeCustomerKey(r.customer) === key)
       .map((r) => ({ id: r.id, catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial, installDate: r.install_date }));
 
-    const planned = planUnits(pm.equipment, rows, (piece) => {
-      for (const rb of RUNBOOKS) {
-        const h = rb.matchPiece(piece);
-        if (h) return { runbookId: rb.def.id, model: h.model };
-      }
-      return null;
-    });
+    const planned = planUnits(pm.equipment, rows, matchRunbookPiece, matchRunbookSerial);
     if (!planned.length) return empty;
 
     // A line that was ticked before its account unit existed is now matched: move that work to the unit.
@@ -262,17 +256,11 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         where pm_job_id = any($1::int[]) and interval_mo is not null`,
       [doneRows.map((r) => r.id)],
     );
-    const pmMatcher = (piece: string) => {
-      for (const rb of RUNBOOKS) {
-        const h = rb.matchPiece(piece);
-        if (h) return { runbookId: rb.def.id, model: h.model };
-      }
-      return null;
-    };
+    const pmMatcher = matchRunbookPiece;
     const fullPms = (u: (typeof planned)[number], def: NonNullable<ReturnType<typeof runbookById>>["def"]) => {
       const out = new Map<number, { pmId: number; interval: string; completedAt: string | null }>();
       for (const d of doneRows) {
-        const hit = planUnits(d.equipment, rows, pmMatcher).find((x) => x.unitKey === u.unitKey);
+        const hit = planUnits(d.equipment, rows, pmMatcher, matchRunbookSerial).find((x) => x.unitKey === u.unitKey);
         if (!hit) continue;
         const interval =
           savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === u.unitKey)?.interval_mo ?? intervalFromStyle(def, d.style);

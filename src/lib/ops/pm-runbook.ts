@@ -156,14 +156,14 @@ export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: s
 // ---------------- recognising units ----------------
 
 /**
- * Eversys e'4 X-Wide in free text ("Eversys Enigma e'4m X-Wide Classic", "E4X-WIDE").
+ * Eversys e'4 X-Wide in free text ("Eversys Enigma e'4m X-Wide Classic", "E4X-WIDE", "E'4s xtrawide").
  * Returns null when the piece is not an X-Wide e'4. `model` is the definition model id, or null when the
  * text names X-Wide but not the S/MS variant (the tech picks it).
  */
 export function matchE4XWide(piece: string | null | undefined): { model: "4s" | "4ms" | null } | null {
   const t = (piece ?? "").trim();
   if (!t) return null;
-  if (!/\bx[\s-]?wide\b/i.test(t) && !/\be'?\s?4\s?x[\s-]?wide\b/i.test(t)) return null;
+  if (!/\bx(?:tra)?[\s-]?wide\b/i.test(t) && !/\be'?\s?4\s?x(?:tra)?[\s-]?wide\b/i.test(t)) return null;
   if (!/\be[’']?\s?4/i.test(t)) return null;
   if (/\be[’']?\s?4\s?ms\b/i.test(t) || /\be[’']?\s?4\s?m\b/i.test(t)) return { model: "4ms" };
   if (/\be[’']?\s?4\s?s\b/i.test(t)) return { model: "4s" };

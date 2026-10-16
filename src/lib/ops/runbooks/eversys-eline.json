@@ -1,0 +1,135 @@
+{
+  "id": "eversys-eline",
+  "manufacturer": "Eversys",
+  "title": "E'line PM Runbook",
+  "subtitle": "Eversys E'line (older generation) | E'2, E'4, E'6 and e'line Shotmaster | preventive maintenance kits and steps",
+  "sources": "Based on the E'line PM Kits Manual V4.0 (SAP 5700105849, 01.05.2026) for the brew and milk modules, and the Enigma | Shotmaster | E'choco PM Kits Manual V4.0 (SAP 5700111715) for every other module, as the E'line manual directs. Plus TI-240 and the e'Support history of service kit releases V3.0 (12.10.2026).",
+  "storageKey": "eline-runbook-v1",
+  "models": [
+    { "id": "2c", "label": "E'2c", "time": { "12": "1h35", "36": "2h35" } },
+    { "id": "2s", "label": "E'2s", "time": { "12": "2h55", "36": "3h55" } },
+    { "id": "2ms", "label": "E'2ms (milk)", "time": { "12": "3h30", "36": "4h30" } },
+    { "id": "4s", "label": "E'4s", "time": { "12": "3h20", "36": "4h55" } },
+    { "id": "4ms", "label": "E'4ms (milk; also E'4ms self-service)", "time": { "12": "4h20", "36": "5h55" } },
+    { "id": "6s", "label": "E'6s", "time": { "12": "4h25", "36": "7h00" } },
+    { "id": "6ms", "label": "E'6ms (milk)", "time": { "12": "5h30", "36": "8h05" } },
+    { "id": "shot", "label": "e'line Shotmaster", "time": { "12": "2h15", "36": "4h35" } }
+  ],
+  "intervals": [
+    { "id": "12", "label": "12-month PM" },
+    { "id": "36", "label": "36-month PM" }
+  ],
+  "options": [
+    { "key": "wand", "label": "Steam wands", "default": "1", "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "choices": [ { "val": "1", "label": "One wand" }, { "val": "2", "label": "Two wands" } ] },
+    { "key": "tea", "label": "Hot water / tea option", "default": "auto", "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "choices": [ { "val": "auto", "label": "Automatic" }, { "val": "manual", "label": "Manual" }, { "val": "none", "label": "No tea option" } ] },
+    { "key": "choco", "label": "E'choco", "default": "no",
+      "choices": [ { "val": "no", "label": "Not fitted" }, { "val": "1", "label": "Fitted" }, { "val": "2", "label": "Fitted, 2 outlets" } ] },
+    { "key": "amer", "label": "Adjustable Americano", "default": "no",
+      "choices": [ { "val": "no", "label": "Not fitted" }, { "val": "yes", "label": "Fitted" } ] }
+  ],
+  "banners": [
+    { "tone": "ok", "text": "E'line is the older generation. Brew and milk use E'line kits; every other module uses the Enigma kits (E'line PM manual p.4)." },
+    { "tone": "ok", "text": "Updated October 2026: E'line brew kit EV102821 is no longer available; use EV118340 (it includes the top and bottom pistons). 24-month kits are now 36-month kits (TI-240)." },
+    { "when": { "model": ["2ms", "4ms", "6ms"] }, "tone": "warn", "text": "E'line milk machines: the Enigma milk add-ons (EV108354 #3/#4, EV108312) are listed because the E'line manual sends every non-brew, non-milk module to the Enigma kits. Confirm the 1.5-Step frame kits with the Webshop configurator; they are not listed here." },
+    { "when": { "model": ["shot"] }, "tone": "warn", "text": "e'line Shotmaster: the Enigma kits for the other modules are taken at the Shotmaster c quantities (coffee only, 2 brew units). Confirm with the Webshop configurator." },
+    { "when": { "pm": ["12"] }, "tone": "ok", "text": "12-month PM: only 12-month kits are listed. Hydraulic kits and the Everfoam, milk and hot water add-ons are 36-month items." }
+  ],
+  "kits": [
+    { "ev": "EV118340", "name": "E'line brew unit Standard (blue seal)", "module": "Brew module", "interval": 12,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3, "shot": 2 } },
+      "note": "One per brew unit. Replaces EV102821 (no longer available). Includes top piston 116915 and bottom piston 117268." },
+    { "ev": "EV109586", "name": "Hydraulic module Standard (Enigma kit)", "module": "Hydraulic module", "interval": 36,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3, "shot": 2 } } },
+    { "ev": "EV109590", "name": "Hydraulic add-on, adjustable Americano", "module": "Hydraulic module", "interval": 36,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3, "shot": 2 } },
+      "when": { "amer": ["yes"] } },
+    { "ev": "EV102865", "name": "Hydraulic add-on, E'choco", "module": "Hydraulic module", "interval": 36,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3, "shot": 2 } },
+      "when": { "choco": ["1", "2"] }, "note": "NetSuite name: Kit - Solenoid Valve 25mm - ODE (same kit)." },
+
+    { "ev": "EV108389", "name": "Steam module Standard (Enigma kit)", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] } },
+    { "ev": "EV108354", "name": "Steam add-on (ODE valve 32 mm)", "module": "Steam module", "interval": 12,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "qty": { "by": "wand", "map": { "1": 1, "2": 2 } },
+      "part": { "by": "wand", "map": { "1": "steam wand (#1)", "2": "steam wands (#1/#2)" } } },
+    { "ev": "EV108354", "name": "Steam add-on (ODE valve 32 mm)", "module": "Steam module", "interval": 12,
+      "when": { "model": ["2ms", "4ms", "6ms"] },
+      "qty": { "by": "model", "map": { "2ms": 1, "4ms": 2, "6ms": 2 } }, "part": "milk option (#3/#4)" },
+    { "ev": "EV108391", "name": "Steam add-on, Everfoam", "module": "Steam module", "interval": 36,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] }, "qty": { "by": "wand", "map": { "1": 1, "2": 2 } } },
+    { "ev": "EV109568", "name": "Steam add-on, automatic hot water", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"], "tea": ["auto"] } },
+    { "ev": "EV109570", "name": "Steam add-on, manual hot water", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"], "tea": ["manual"] } },
+    { "ev": "EV108390", "name": "Steam add-on, no tea option", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"], "tea": ["none"] } },
+    { "ev": "EV108312", "name": "Steam add-on, milk", "module": "Steam module", "interval": 36,
+      "when": { "model": ["2ms", "4ms", "6ms"] }, "qty": { "by": "model", "map": { "2ms": 1, "4ms": 2, "6ms": 2 } } },
+
+    { "ev": "EV102824", "name": "E'line milk module V1 Standard", "module": "Milk module", "interval": 12,
+      "when": { "model": ["2ms", "4ms", "6ms"] }, "qty": { "by": "model", "map": { "2ms": 1, "4ms": 2, "6ms": 2 } },
+      "note": "E'line milk V1 kit. The manual lists no 36-month milk kit for E'line." },
+
+    { "ev": "EV109706", "name": "E'choco Standard", "module": "E'choco", "interval": 12, "qty": 1,
+      "when": { "choco": ["1", "2"] }, "note": "O-ring 118259 x2 in the V4.0 kit." },
+    { "ev": "EV111934", "name": "E'choco add-on, 2 outlets", "module": "E'choco", "interval": 12, "qty": 1,
+      "when": { "choco": ["2"], "model": ["4ms", "6s", "6ms", "shot"] } }
+  ],
+  "steps": [
+    { "module": "Grinder module", "items": [
+      { "id": "grind-burrs", "text": "Check ground-coffee total: change burrs after every 2000 kg.", "ref": "Enigma manual p.6" },
+      { "id": "grind-clean", "text": "Clean the grinder at every service.", "ref": "Enigma manual p.6" },
+      { "id": "grind-grease", "text": "Clean, then apply a thin layer of grease (JAX Pyro-plate FGN) to the threads of the upper burr support.", "ref": "Enigma manual p.6" }
+    ] },
+    { "module": "Brew module", "items": [
+      { "id": "brew-kit", "text": "Fit kit EV118340 on each brew unit.", "ref": "E'line manual p.6" },
+      { "id": "brew-grease", "text": "Clean, then grease the shafts of the bottom arm and the top piston with JAX Pyro-plate FGN.", "ref": "E'line manual p.6" },
+      { "id": "brew-pin", "text": "Grease the cylindrical pin on the shaft of the bottom arm with MOLYKOTE BR2 PLUS (Art. 150058).", "ref": "E'line manual p.6" },
+      { "id": "brew-screen", "text": "Check the piston screens for clogging. Clean or replace if needed.", "ref": "E'line manual p.6" }
+    ] },
+    { "module": "Hydraulic module", "when": { "pm": ["36"] }, "items": [
+      { "id": "hyd-kit", "text": "Fit EV109586 on each hydraulic module.", "ref": "Enigma manual p.10" },
+      { "id": "hyd-choco", "text": "Fit EV102865 for E'choco.", "ref": "Enigma manual p.10", "when": { "choco": ["1", "2"] } },
+      { "id": "hyd-amer", "text": "Fit EV109590 for the adjustable Americano.", "ref": "Enigma manual p.10", "when": { "amer": ["yes"] } },
+      { "id": "hyd-scale", "text": "Check the heating element and boiler for scale. Descale with Eversys descaler (PI-19) if needed.", "ref": "Enigma manual p.10" }
+    ] },
+    { "module": "Steam module", "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] }, "items": [
+      { "id": "steam-kit", "text": "Fit EV108389 and the steam add-ons listed in section 2.", "ref": "Enigma manual p.12" },
+      { "id": "steam-loctite", "text": "Apply Loctite Permabond MM115 pure to the thread of the air injector when reassembling.", "ref": "Enigma manual p.12" },
+      { "id": "steam-scale", "text": "Check the heating element and boiler for scale. Descale with Eversys descaler (PI-19) if needed.", "ref": "Enigma manual p.12" }
+    ] },
+    { "module": "Milk module V1", "when": { "model": ["2ms", "4ms", "6ms"] }, "items": [
+      { "id": "milk-kit", "text": "Fit EV102824 on each milk module.", "ref": "E'line manual p.10" },
+      { "id": "milk-pipes", "text": "Change the milk pipes (every 12 months). 25 m blue 106186, green 106189.", "ref": "E'line manual p.10" }
+    ] },
+    { "module": "E'choco", "when": { "choco": ["1", "2"] }, "items": [
+      { "id": "choco-kit", "text": "Fit EV109706.", "ref": "Enigma manual p.22" },
+      { "id": "choco-2", "text": "Fit EV111934 for the second outlet.", "ref": "Enigma manual p.22", "when": { "choco": ["2"], "model": ["4ms", "6s", "6ms", "shot"] } }
+    ] },
+    { "module": "Close out", "items": [
+      { "id": "close-stock", "text": "Record the service (date, interval, kits used). Old 24-month kits may be used for the 36-month interval.", "ref": "TI-240" }
+    ] }
+  ],
+  "changes": {
+    "stockNote": { "title": "Old E'line brew kits are gone.", "text": "EV102821 (Service Kit Brewing E'Line) is no longer available: use EV118340. 24-month kits are replaced by 36-month kits (TI-240); 24-month kits in stock can be used for the 36-month interval." },
+    "supersessions": [
+      ["EV102821", "EV118340", "E'line brew kit. The new kit adds the top piston 116915 and bottom piston 117268."],
+      ["EV109586, EV109590, EV102865", "Same numbers", "Hydraulic kits now 36 months."],
+      ["EV108391, EV108312, EV109568, EV109570, EV108390", "Same numbers", "Steam add-ons now 36 months."],
+      ["EV109706", "Same number", "101667 removed, O-ring 118259 added (x2)."],
+      ["Full-machine kits 102941-102946, 103083-103089", "Module kits", "Not in the V4.0 manuals. Order module kits instead."]
+    ]
+  },
+  "reference": [
+    { "title": "Time allowance (excl. descaling)", "table": {
+        "head": ["Machine", "12-month PM", "36-month PM"],
+        "rows": [["E'2c", "1h35", "2h35"], ["E'2s", "2h55", "3h55"], ["E'2ms", "3h30", "4h30"], ["E'4s", "3h20", "4h55"], ["E'4ms / E'4ms self-service", "4h20", "5h55"], ["E'6s", "4h25", "7h00"], ["E'6ms", "5h30", "8h05"], ["e'line Shotmaster", "2h15", "4h35"]],
+        "monoCols": [1, 2] } },
+    { "title": "Interval rule", "text": "Under 50,000 cycles a year per group head: 12-month PM in years 1 and 2, 36-month PM in year 3, then repeat. Over 50,000: the same 12, 12, 36 pattern every 50,000 cycles. At least one PM a year is mandatory." },
+    { "title": "Identify the model from the serial", "text": "First 8 digits of the serial (e'Support, List of machine serial numbers - North America): E'2c 00999400, E'2s 00999100, E'2ms 00998500, E'4s 00998600, E'4ms 00998700, E'4s self-service 00999500, E'4ms self-service 00999600, E'6s 00999700, E'6ms 00999800, Shotmaster 00999300." },
+    { "title": "Escalation", "text": "Eversys technical support: +41 27 588 00 17 or techsupport@eversys.com. Eversys USA: service.usa@eversys.com. Have the machine serial number and the kit number ready." }
+  ]
+}
