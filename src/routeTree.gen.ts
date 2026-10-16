@@ -30,6 +30,7 @@ import { Route as AppPlannerRouteImport } from './routes/_app/planner'
 import { Route as AppPmsRouteImport } from './routes/_app/pms'
 import { Route as AppRebuildsRouteImport } from './routes/_app/rebuilds'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
+import { Route as AppRunbookReadinessRouteImport } from './routes/_app/runbook-readiness'
 import { Route as AppServiceRouteImport } from './routes/_app/service'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
@@ -143,6 +144,11 @@ const AppRecipesRoute = AppRecipesRouteImport.update({
   path: '/recipes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRunbookReadinessRoute = AppRunbookReadinessRouteImport.update({
+  id: '/runbook-readiness',
+  path: '/runbook-readiness',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppServiceRoute = AppServiceRouteImport.update({
   id: '/service',
   path: '/service',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/pms': typeof AppPmsRoute
   '/rebuilds': typeof AppRebuildsRoute
   '/recipes': typeof AppRecipesRoute
+  '/runbook-readiness': typeof AppRunbookReadinessRoute
   '/service': typeof AppServiceRoute
   '/settings': typeof AppSettingsRoute
   '/tlc': typeof AppTlcRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/pms': typeof AppPmsRoute
   '/rebuilds': typeof AppRebuildsRoute
   '/recipes': typeof AppRecipesRoute
+  '/runbook-readiness': typeof AppRunbookReadinessRoute
   '/service': typeof AppServiceRoute
   '/settings': typeof AppSettingsRoute
   '/tlc': typeof AppTlcRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/_app/pms': typeof AppPmsRoute
   '/_app/rebuilds': typeof AppRebuildsRoute
   '/_app/recipes': typeof AppRecipesRoute
+  '/_app/runbook-readiness': typeof AppRunbookReadinessRoute
   '/_app/service': typeof AppServiceRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/tlc': typeof AppTlcRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/pms'
     | '/rebuilds'
     | '/recipes'
+    | '/runbook-readiness'
     | '/service'
     | '/settings'
     | '/tlc'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/pms'
     | '/rebuilds'
     | '/recipes'
+    | '/runbook-readiness'
     | '/service'
     | '/settings'
     | '/tlc'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/_app/pms'
     | '/_app/rebuilds'
     | '/_app/recipes'
+    | '/_app/runbook-readiness'
     | '/_app/service'
     | '/_app/settings'
     | '/_app/tlc'
@@ -528,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRecipesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/runbook-readiness': {
+      id: '/_app/runbook-readiness'
+      path: '/runbook-readiness'
+      fullPath: '/runbook-readiness'
+      preLoaderRoute: typeof AppRunbookReadinessRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/service': {
       id: '/_app/service'
       path: '/service'
@@ -606,6 +625,7 @@ interface AppRouteChildren {
   AppPmsRoute: typeof AppPmsRoute
   AppRebuildsRoute: typeof AppRebuildsRoute
   AppRecipesRoute: typeof AppRecipesRoute
+  AppRunbookReadinessRoute: typeof AppRunbookReadinessRoute
   AppServiceRoute: typeof AppServiceRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTlcRoute: typeof AppTlcRoute
@@ -632,6 +652,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPmsRoute: AppPmsRoute,
   AppRebuildsRoute: AppRebuildsRoute,
   AppRecipesRoute: AppRecipesRoute,
+  AppRunbookReadinessRoute: AppRunbookReadinessRoute,
   AppServiceRoute: AppServiceRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTlcRoute: AppTlcRoute,

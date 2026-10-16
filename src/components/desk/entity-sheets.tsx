@@ -48,6 +48,7 @@ import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/compo
 import { FlagBadge, StatusBadge } from "./flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { Thread } from "./thread";
+import { PmRunbook } from "./pm-runbook";
 import { CustomerCombo, EquipmentCombo, EquipmentMultiCombo, LockedCustomer } from "./directory-fields";
 import { TechSelect } from "./tech-select";
 import { RepSelect } from "./rep-select";
@@ -256,6 +257,7 @@ export function PmSheet({
                 <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
               </div>
             </form>
+            <PmRunbook pmId={pm.id} customer={pm.customer} />
             <Thread entityType="pm" entityId={pm.id} />
             </SheetBody>
           </>
