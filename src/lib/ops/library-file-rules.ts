@@ -6,8 +6,12 @@ export const LIBRARY_SECTIONS: LibrarySection[] = ["spec", "manuals", "parts"];
 
 /** Biggest single file. */
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
-/** Files travel in pieces this size so each request stays small. */
-export const CHUNK_BYTES = 1024 * 1024;
+/**
+ * Files travel in pieces this size so each request stays small. 1 MB pieces (about 1.4 MB once base64-encoded)
+ * were rejected with a 502 by the katzdesk.grok.me proxy; 512 KB pieces go through. A 20 MB file is 40 pieces,
+ * inside the server's limit of 101 (seq 0-100).
+ */
+export const CHUNK_BYTES = 512 * 1024;
 
 const TYPES: Record<string, string> = {
   pdf: "application/pdf",
