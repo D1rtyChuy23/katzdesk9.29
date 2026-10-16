@@ -1,0 +1,150 @@
+{
+  "id": "eversys-cameo",
+  "manufacturer": "Eversys",
+  "title": "Cameo PM Runbook",
+  "subtitle": "Eversys Cameo | C'2c, C'2s, C'2ms (Classic, Core, ST, Cameo X) | preventive maintenance kits and steps",
+  "sources": "Based on the Cameo | C'choco PM Kits Manual V4.0 (SAP 5700105620, 01.05.2026), TI-240, and the e'Support history of service kit releases V3.0 (12.10.2026). Check the Webshop configurator with the machine's serial number before ordering.",
+  "storageKey": "cameo-runbook-v1",
+  "models": [
+    { "id": "2c", "label": "C'2c (coffee)", "time": { "12": "55m", "36": "2h05" } },
+    { "id": "2s", "label": "C'2s (steam)", "time": { "12": "2h20", "36": "3h05" } },
+    { "id": "2ms", "label": "C'2ms (milk)", "time": { "12": "2h40", "36": "4h30" } }
+  ],
+  "intervals": [
+    { "id": "12", "label": "12-month PM" },
+    { "id": "36", "label": "36-month PM" }
+  ],
+  "options": [
+    { "key": "wand", "label": "Steam wand (C'2ms)", "default": "yes", "when": { "model": ["2ms"] },
+      "choices": [ { "val": "yes", "label": "Fitted" }, { "val": "no", "label": "No steam wand" } ] },
+    { "key": "step15", "label": "1.5-Step (C'2ms)", "default": "no", "when": { "model": ["2ms"] },
+      "choices": [ { "val": "no", "label": "No" }, { "val": "yes", "label": "Yes" } ] },
+    { "key": "hotclean", "label": "Automatic hot cleaning (C'2ms)", "default": "no", "when": { "model": ["2ms"] },
+      "choices": [ { "val": "no", "label": "No" }, { "val": "yes", "label": "Yes" } ] },
+    { "key": "choco", "label": "C'choco", "default": "no",
+      "choices": [ { "val": "no", "label": "Not fitted" }, { "val": "yes", "label": "Fitted" } ] }
+  ],
+  "banners": [
+    { "tone": "ok", "text": "Updated October 2026 to the Cameo PM Kits Manual V4.0: 24-month kits are now 36-month kits (TI-240). Old 24-month kits in stock can be used for the 36-month PM." },
+    { "when": { "model": ["2c"] }, "tone": "ok", "text": "C'2c has no steam boiler: no steam or milk kits." },
+    { "when": { "model": ["2s"] }, "tone": "ok", "text": "C'2s has no milk system, so milk-module and frame add-on kits are not listed." },
+    { "when": { "pm": ["12"] }, "tone": "ok", "text": "12-month PM: only 12-month kits are listed. Hydraulic, steam 36, Everfoam, milk 36 and frame Standard are 36-month items." }
+  ],
+  "kits": [
+    { "ev": "EV108358", "name": "Brew module Standard", "module": "Brew module", "interval": 12, "qty": 1,
+      "note": "Cameo brew kit (tube 108149 is 320 mm). Not the Enigma kit EV117077." },
+    { "ev": "EV108304", "name": "Hydraulic module Standard", "module": "Hydraulic module", "interval": 36, "qty": 1,
+      "note": "Now 36 months; 100281 removed." },
+    { "ev": "EV102865", "name": "Hydraulic add-on (C'choco / automatic hot cleaning)", "module": "Hydraulic module", "interval": 36, "qty": 1,
+      "when": { "choco": ["yes"] }, "part": "C'choco",
+      "note": "NetSuite name: Kit - Solenoid Valve 25mm - ODE (same kit)." },
+    { "ev": "EV102865", "name": "Hydraulic add-on (C'choco / automatic hot cleaning)", "module": "Hydraulic module", "interval": 36, "qty": 1,
+      "when": { "model": ["2ms"], "hotclean": ["yes"] }, "part": "automatic hot cleaning" },
+
+    { "ev": "EV108380", "name": "Steam module Standard", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2s", "2ms"] } },
+    { "ev": "EV108311", "name": "Steam module Standard, long interval", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s", "2ms"] }, "note": "Now 36 months (NetSuite still says 24M). Includes tea regulator 108009." },
+    { "ev": "EV108354", "name": "Steam add-on (ODE valve 32 mm)", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2s"] }, "part": "steam wand (#1)" },
+    { "ev": "EV108354", "name": "Steam add-on (ODE valve 32 mm)", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms"], "wand": ["yes"] }, "part": "steam wand (#1)" },
+    { "ev": "EV108354", "name": "Steam add-on (ODE valve 32 mm)", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms"] }, "part": "milk (#2)" },
+    { "ev": "EV114733", "name": "Steam add-on, banjo plug", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2s"] }, "note": "Check the manual drawing (p.15): its two banjo tables read oddly." },
+    { "ev": "EV114733", "name": "Steam add-on, banjo plug", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms"], "wand": ["no"] }, "note": "Check the manual drawing (p.15): its two banjo tables read oddly." },
+    { "ev": "EV108391", "name": "Steam add-on, Everfoam", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s"] }, "note": "Now 36 months." },
+    { "ev": "EV108391", "name": "Steam add-on, Everfoam", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2ms"], "wand": ["yes"] }, "note": "Now 36 months." },
+    { "ev": "EV108312", "name": "Steam add-on, milk", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2ms"] }, "note": "Now 36 months." },
+
+    { "ev": "EV108339", "name": "Milk module V2 Standard", "module": "Milk module", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms"] }, "note": "Filter 101326 removed. Steam injector is now 117430." },
+    { "ev": "EV108340", "name": "Milk module V2 Standard, long interval", "module": "Milk module", "interval": 36, "qty": 1,
+      "when": { "model": ["2ms"] }, "note": "Now 36 months." },
+
+    { "ev": "EV108359", "name": "Frame Standard", "module": "Frame", "interval": 36, "qty": 1,
+      "note": "Now 36 months; contents changed (O-ring 100066 x6)." },
+    { "ev": "EV108351", "name": "Frame add-on, milk", "module": "Frame", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms"], "step15": ["no"] } },
+    { "ev": "EV108364", "name": "Frame add-on, 1.5-Step", "module": "Frame", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms"], "step15": ["yes"] }, "note": "Cut tubes to the machine's dimensions." },
+
+    { "ev": "EV109706", "name": "C'choco Standard", "module": "C'choco", "interval": 12, "qty": 1,
+      "when": { "choco": ["yes"] }, "note": "O-ring 118259 x2 in the V4.0 kit." }
+  ],
+  "steps": [
+    { "module": "Grinder module", "items": [
+      { "id": "grind-burrs", "text": "Check ground-coffee total: change burrs after every 2000 kg.", "ref": "Manual p.6" },
+      { "id": "grind-clean", "text": "Clean the grinder at every service.", "ref": "Manual p.6" },
+      { "id": "grind-grease", "text": "Clean, then apply a thin layer of grease (JAX Pyro-plate FGN) to the threads of the upper burr support.", "ref": "Manual p.6" }
+    ] },
+    { "module": "Brew module", "items": [
+      { "id": "brew-kit", "text": "Fit kit EV108358.", "ref": "Manual p.8" },
+      { "id": "brew-grease", "text": "Clean, then grease the shafts of the bottom arm and the top piston with JAX Pyro-plate FGN.", "ref": "Manual p.8" },
+      { "id": "brew-lock", "text": "Turn the piston screen 1/4 turn to lock it on the piston head, then tighten the piston head to 8 N·m.", "ref": "Manual p.8" },
+      { "id": "brew-screen", "text": "Check the piston screens for clogging. Clean or replace if needed.", "ref": "Manual p.8" }
+    ] },
+    { "module": "Hydraulic module", "when": { "pm": ["36"] }, "items": [
+      { "id": "hyd-kit", "text": "Fit EV108304.", "ref": "Manual p.10" },
+      { "id": "hyd-choco", "text": "Fit EV102865 for C'choco.", "ref": "Manual p.10", "when": { "choco": ["yes"] } },
+      { "id": "hyd-hotclean", "text": "Fit EV102865 for automatic hot cleaning.", "ref": "Manual p.10", "when": { "model": ["2ms"], "hotclean": ["yes"] } },
+      { "id": "hyd-scale", "text": "Descale the boiler with Eversys descaler (PI-19) if needed. Boiler spare part, if it must be changed: 104357.", "ref": "Manual p.10" }
+    ] },
+    { "module": "Steam module", "when": { "model": ["2s", "2ms"] }, "items": [
+      { "id": "steam-kit", "text": "Fit EV108380 (and EV108311 at 36 months) and the steam add-ons listed in section 2.", "ref": "Manual p.12" },
+      { "id": "steam-loctite", "text": "Apply Loctite Permabond MM115 pure to the thread of the air injector when reassembling.", "ref": "Manual p.14" },
+      { "id": "steam-scale", "text": "Descale the boiler with Eversys descaler (PI-19) if needed. Steam boiler spare part: 104361.", "ref": "Manual p.14" }
+    ] },
+    { "module": "Milk module V2", "when": { "model": ["2ms"] }, "items": [
+      { "id": "milk-kit", "text": "Fit EV108339.", "ref": "Manual p.16" },
+      { "id": "milk-kit36", "text": "Fit EV108340.", "ref": "Manual p.16", "when": { "pm": ["36"] } },
+      { "id": "milk-pipes", "text": "Change the milk pipes (every 12 months). 25 m blue 106186, green 106189.", "ref": "Manual p.16" },
+      { "id": "milk-loctite", "text": "Apply Loctite Permabond MM115 pure to the thread of the air injector when reassembling.", "ref": "Manual p.16" }
+    ] },
+    { "module": "Frame", "items": [
+      { "id": "frame-std", "text": "Fit EV108359.", "ref": "Manual p.18", "when": { "pm": ["36"] } },
+      { "id": "frame-kit", "text": "Fit the frame add-on listed in section 2 (EV108351 or EV108364).", "ref": "Manual p.18", "when": { "model": ["2ms"] } },
+      { "id": "frame-tubes", "text": "Cut hose 104719 to length (270 mm + 55 mm). Clean the 1.5-Step outlet, the fitting silicone pipe and the aerator.", "ref": "Manual p.18", "when": { "model": ["2ms"] } }
+    ] },
+    { "module": "C'choco", "when": { "choco": ["yes"] }, "items": [
+      { "id": "choco-kit", "text": "Fit EV109706.", "ref": "Manual p.20" }
+    ] },
+    { "module": "Close out", "items": [
+      { "id": "close-stock", "text": "Record the service (date, interval, kits used). Old 24-month kits may be used for the 36-month interval.", "ref": "TI-240" }
+    ] }
+  ],
+  "changes": {
+    "stockNote": { "title": "24-month kits in stock are still usable.", "text": "Per TI-240 (from 1 May 2026) the 24-month kits are replaced by 36-month kits, and existing 24-month kits can be used for the 36-month interval. 12-month kits are unchanged. NetSuite names for EV108311, EV108340 and EV108359 still say 24M." },
+    "supersessions": [
+      ["EV108304", "Same number", "Hydraulic Standard now 36 months; 100281 removed."],
+      ["EV108311", "Same number", "Steam Standard now 36 months; 106727 and 101073 removed."],
+      ["EV108340, EV108359, EV108312, EV108391", "Same numbers", "Now 36 months. EV108359 contents changed."],
+      ["EV102865", "Same number", "C'choco / auto hot cleaning add-on: 102167 and 100217 removed; now 36 months."],
+      ["EV108339", "Same number", "Filter 101326 removed. Steam injector now 117430."],
+      ["EV109706", "Same number", "101667 removed, O-ring 118259 added (x2)."],
+      ["EV108341", "None", "Cold foam add-on. Deleted."],
+      ["EV108348, EV108349, EV108352", "None", "Frame outlet V1, outlet V2 and inlet V1 add-ons. Deleted."],
+      ["EV114994, EV115575", "None", "Americano and banjo fitting add-ons. Deleted (banjo plug EV114733 is current)."],
+      ["5300100255", "None", "Grinder silent block. Deleted."]
+    ],
+    "contents": [
+      "EV108304 Hydraulic Standard: 100281 removed; now 36 months.",
+      "EV108311 Steam Standard: 106727 and 101073 removed; now 36 months.",
+      "EV108339 Milk Standard: filter 101326 removed; steam injector 117430."
+    ]
+  },
+  "reference": [
+    { "title": "Time allowance (excl. descaling)", "table": {
+        "head": ["Machine", "12-month PM", "36-month PM"],
+        "rows": [["C'2c", "55 min", "2h05"], ["C'2s", "2h20", "3h05"], ["C'2ms", "2h40", "4h30"], ["C'choco", "15 min", "15 min"]],
+        "monoCols": [1, 2] } },
+    { "title": "Interval rule", "text": "Under 50,000 cycles a year per group head: 12-month PM in years 1 and 2, 36-month PM in year 3, then repeat. Over 50,000: the same 12, 12, 36 pattern every 50,000 cycles. At least one PM a year is mandatory." },
+    { "title": "Identify the model from the serial", "text": "First 8 digits of the serial (e'Support, List of machine serial numbers - North America). C'2c: 00998100 Classic, 01139400 Core, 01147000 ST. C'2s: 00998200 or 01831300 Classic, 01138900 Core, 01146900 ST, 01063900 Cameo X. C'2ms: 00998300 or 01833300 Classic, 01092600 Core, 01146800 ST, 01031100 Cameo X. The rating plate is behind the left bean hopper." },
+    { "title": "Escalation", "text": "Eversys technical support: +41 27 588 00 17 or techsupport@eversys.com. Eversys USA: service.usa@eversys.com. Have the machine serial number and the kit number ready." }
+  ]
+}

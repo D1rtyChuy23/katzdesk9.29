@@ -1,0 +1,177 @@
+{
+  "id": "eversys-enigma",
+  "manufacturer": "Eversys",
+  "title": "Enigma PM Runbook",
+  "subtitle": "Eversys Enigma | E'2c, E'2s, E'2ms, E'4s, E'4ms, E'6s, E'6ms (Classic and ST) | preventive maintenance kits and steps",
+  "sources": "Based on the Enigma | Shotmaster | E'choco PM Kits Manual V4.0 (SAP 5700111715, 01.05.2026), TI-240, and the e'Support history of service kit releases V3.0 (12.10.2026). X-Wide units use the X-Wide runbook. Check the Webshop configurator with the machine's serial number before ordering.",
+  "storageKey": "enigma-runbook-v1",
+  "models": [
+    { "id": "2c", "label": "E'2c", "time": { "12": "1h35", "36": "2h35" } },
+    { "id": "2s", "label": "E'2s", "time": { "12": "2h55", "36": "3h55" } },
+    { "id": "2ms", "label": "E'2ms (milk)", "time": { "12": "3h30", "36": "4h30" } },
+    { "id": "4s", "label": "E'4s", "time": { "12": "3h20", "36": "4h55" } },
+    { "id": "4ms", "label": "E'4ms (milk)", "time": { "12": "4h20", "36": "5h55" } },
+    { "id": "6s", "label": "E'6s", "time": { "12": "4h25", "36": "7h00" } },
+    { "id": "6ms", "label": "E'6ms (milk)", "time": { "12": "5h30", "36": "8h05" } }
+  ],
+  "intervals": [
+    { "id": "12", "label": "12-month PM" },
+    { "id": "36", "label": "36-month PM" }
+  ],
+  "options": [
+    { "key": "wand", "label": "Steam wands", "default": "1", "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "choices": [ { "val": "1", "label": "One wand" }, { "val": "2", "label": "Two wands" } ] },
+    { "key": "tea", "label": "Hot water / tea option", "default": "auto", "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "choices": [ { "val": "auto", "label": "Automatic" }, { "val": "manual", "label": "Manual" }, { "val": "none", "label": "No tea option" } ] },
+    { "key": "choco", "label": "E'choco", "default": "no",
+      "choices": [ { "val": "no", "label": "Not fitted" }, { "val": "1", "label": "Fitted" }, { "val": "2", "label": "Fitted, 2 outlets" } ] },
+    { "key": "amer", "label": "Adjustable Americano", "default": "no",
+      "choices": [ { "val": "no", "label": "Not fitted" }, { "val": "yes", "label": "Fitted" } ] },
+    { "key": "steps", "label": "1.5-Step units", "default": "0", "when": { "model": ["2ms", "4ms", "6ms"] },
+      "choices": [ { "val": "0", "label": "None" }, { "val": "1", "label": "One" }, { "val": "2", "label": "Two" } ] }
+  ],
+  "banners": [
+    { "tone": "ok", "text": "Updated October 2026 to the PM Kits Manual V4.0: 24-month kits are now 36-month kits (TI-240). Old 24-month kits in stock can be used for the 36-month PM." },
+    { "when": { "model": ["2c"] }, "tone": "ok", "text": "E'2c has no steam boiler: no steam, hot water or milk kits." },
+    { "when": { "model": ["2s", "4s", "6s"] }, "tone": "ok", "text": "No milk system on this model, so milk-module and frame kits are not listed." },
+    { "when": { "model": ["2ms"], "steps": ["2"] }, "tone": "warn", "text": "The manual gives no two-1.5-Step setup for the E'2ms. Check the unit." },
+    { "when": { "model": ["2c", "2s", "2ms", "4s"], "choco": ["2"] }, "tone": "warn", "text": "The manual lists no 2-outlet E'choco add-on (EV111934) for this model. Check with the Webshop configurator." },
+    { "when": { "pm": ["12"] }, "tone": "ok", "text": "12-month PM: only 12-month kits are listed. Hydraulic kits and the Everfoam, milk and hot water add-ons are 36-month items." }
+  ],
+  "kits": [
+    { "ev": "EV117077", "name": "Brew module Standard", "module": "Brew module", "interval": 12,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3 } },
+      "note": "One per brew unit. Includes tubes 108153 (245 mm) and 104528 (180 mm)." },
+    { "ev": "EV109586", "name": "Hydraulic module Standard", "module": "Hydraulic module", "interval": 36,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3 } },
+      "note": "Now 36 months." },
+    { "ev": "EV109590", "name": "Hydraulic add-on, adjustable Americano", "module": "Hydraulic module", "interval": 36,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3 } },
+      "when": { "amer": ["yes"] } },
+    { "ev": "EV102865", "name": "Hydraulic add-on, E'choco", "module": "Hydraulic module", "interval": 36,
+      "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3 } },
+      "when": { "choco": ["1", "2"] }, "note": "NetSuite name: Kit - Solenoid Valve 25mm - ODE (same kit)." },
+
+    { "ev": "EV108389", "name": "Steam module Standard", "module": "Steam module", "interval": 12, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "note": "Includes cables 104158, 104159 and thermostats 103739. O-ring 106371 or 100364." },
+    { "ev": "EV108354", "name": "Steam add-on (ODE valve 32 mm)", "module": "Steam module", "interval": 12,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "qty": { "by": "wand", "map": { "1": 1, "2": 2 } },
+      "part": { "by": "wand", "map": { "1": "steam wand (#1)", "2": "steam wands (#1/#2)" } } },
+    { "ev": "EV108354", "name": "Steam add-on (ODE valve 32 mm)", "module": "Steam module", "interval": 12,
+      "when": { "model": ["2ms", "4ms", "6ms"] },
+      "qty": { "by": "model", "map": { "2ms": 1, "4ms": 2, "6ms": 2 } },
+      "part": "milk option (#3/#4)" },
+    { "ev": "EV108391", "name": "Steam add-on, Everfoam", "module": "Steam module", "interval": 36,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] },
+      "qty": { "by": "wand", "map": { "1": 1, "2": 2 } } },
+    { "ev": "EV109568", "name": "Steam add-on, automatic hot water", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"], "tea": ["auto"] },
+      "note": "Eversys USA shop still titles it \"PR. VALVE/24M\"; the manual and release history say automatic hot water, 36 months." },
+    { "ev": "EV109570", "name": "Steam add-on, manual hot water", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"], "tea": ["manual"] } },
+    { "ev": "EV108390", "name": "Steam add-on, no tea option", "module": "Steam module", "interval": 36, "qty": 1,
+      "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"], "tea": ["none"] } },
+    { "ev": "EV108312", "name": "Steam add-on, milk", "module": "Steam module", "interval": 36,
+      "when": { "model": ["2ms", "4ms", "6ms"] },
+      "qty": { "by": "model", "map": { "2ms": 1, "4ms": 2, "6ms": 2 } }, "note": "Now 36 months." },
+
+    { "ev": "EV108339", "name": "Milk module V2 Standard", "module": "Milk module", "interval": 12,
+      "when": { "model": ["2ms", "4ms", "6ms"] },
+      "qty": { "by": "model", "map": { "2ms": 1, "4ms": 2, "6ms": 2 } },
+      "note": "Filter 101326 removed. Steam injector is now 117430." },
+    { "ev": "EV108340", "name": "Milk module V2 Standard, long interval", "module": "Milk module", "interval": 36,
+      "when": { "model": ["2ms", "4ms", "6ms"] },
+      "qty": { "by": "model", "map": { "2ms": 1, "4ms": 2, "6ms": 2 } }, "note": "Now 36 months." },
+
+    { "ev": "EV108351", "name": "Frame add-on, milk", "module": "Frame", "interval": 12, "qty": 2,
+      "when": { "model": ["4ms", "6ms"], "steps": ["0"] } },
+    { "ev": "EV108351", "name": "Frame add-on, milk", "module": "Frame", "interval": 12, "qty": 1,
+      "when": { "model": ["4ms", "6ms"], "steps": ["1"] } },
+    { "ev": "EV108351", "name": "Frame add-on, milk", "module": "Frame", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms"], "steps": ["0"] } },
+    { "ev": "EV108364", "name": "Frame add-on, 1.5-Step", "module": "Frame", "interval": 12, "qty": 1,
+      "when": { "model": ["2ms", "4ms", "6ms"], "steps": ["1"] }, "note": "Cut tubes to the machine's dimensions." },
+    { "ev": "EV108364", "name": "Frame add-on, 1.5-Step", "module": "Frame", "interval": 12, "qty": 2,
+      "when": { "model": ["4ms", "6ms"], "steps": ["2"] }, "note": "Cut tubes to the machine's dimensions." },
+
+    { "ev": "EV109706", "name": "E'choco Standard", "module": "E'choco", "interval": 12, "qty": 1,
+      "when": { "choco": ["1", "2"] }, "note": "O-ring 118259 x2 in the V4.0 kit." },
+    { "ev": "EV111934", "name": "E'choco add-on, 2 outlets", "module": "E'choco", "interval": 12, "qty": 1,
+      "when": { "choco": ["2"], "model": ["4ms", "6s", "6ms"] }, "note": "Silicone pipe 110301 x2 (cut from 1 m pipe 111629)." }
+  ],
+  "steps": [
+    { "module": "Grinder module", "items": [
+      { "id": "grind-burrs", "text": "Check ground-coffee total: change burrs after every 2000 kg.", "ref": "Manual p.6" },
+      { "id": "grind-clean", "text": "Clean the grinder at every service.", "ref": "Manual p.6" },
+      { "id": "grind-grease", "text": "Clean, then apply a thin layer of grease (JAX Pyro-plate FGN) to the threads of the upper burr support so the burrs cannot jam.", "ref": "Manual p.6" }
+    ] },
+    { "module": "Brew module", "items": [
+      { "id": "brew-kit", "text": "Fit kit EV117077 on each brew unit.", "ref": "Manual p.8" },
+      { "id": "brew-grease", "text": "Clean, then grease the shafts of the bottom arm and the top piston with JAX Pyro-plate FGN.", "ref": "Manual p.8" },
+      { "id": "brew-screen", "text": "Check the piston screens for clogging. Clean or replace if needed.", "ref": "Manual p.8" },
+      { "id": "brew-lock", "text": "Turn each piston screen 1/4 turn to lock it on the piston head, then tighten the piston head to 8 N·m.", "ref": "Manual p.8" }
+    ] },
+    { "module": "Hydraulic module", "when": { "pm": ["36"] }, "items": [
+      { "id": "hyd-kit", "text": "Fit EV109586 on each hydraulic module.", "ref": "Manual p.10" },
+      { "id": "hyd-choco", "text": "Fit EV102865 for E'choco.", "ref": "Manual p.10", "when": { "choco": ["1", "2"] } },
+      { "id": "hyd-amer", "text": "Fit EV109590 for the adjustable Americano.", "ref": "Manual p.10", "when": { "amer": ["yes"] } },
+      { "id": "hyd-scale", "text": "Check the heating element and boiler for scale. Descale with Eversys descaler (PI-19) if needed.", "ref": "Manual p.10" }
+    ] },
+    { "module": "Steam module", "when": { "model": ["2s", "2ms", "4s", "4ms", "6s", "6ms"] }, "items": [
+      { "id": "steam-kit", "text": "Fit EV108389 and the steam add-ons listed in section 2.", "ref": "Manual p.12" },
+      { "id": "steam-loctite", "text": "Apply Loctite Permabond MM115 pure to the thread of the air injector when reassembling.", "ref": "Manual p.12" },
+      { "id": "steam-scale", "text": "Check the heating element and boiler for scale. Descale with Eversys descaler (PI-19) if needed.", "ref": "Manual p.12" }
+    ] },
+    { "module": "Milk module V2", "when": { "model": ["2ms", "4ms", "6ms"] }, "items": [
+      { "id": "milk-kit", "text": "Fit EV108339.", "ref": "Manual p.18" },
+      { "id": "milk-kit36", "text": "Fit EV108340.", "ref": "Manual p.18", "when": { "pm": ["36"] } },
+      { "id": "milk-pipes", "text": "Change the milk pipes (every 12 months). 25 m blue 106186, green 106189.", "ref": "Manual p.18" },
+      { "id": "milk-loctite", "text": "Apply Loctite Permabond MM115 pure to the thread of the air injector when reassembling.", "ref": "Manual p.18" }
+    ] },
+    { "module": "Frame", "when": { "model": ["2ms", "4ms", "6ms"] }, "items": [
+      { "id": "frame-kit", "text": "Fit the frame add-on kits listed in section 2 (EV108351 and/or EV108364).", "ref": "Manual p.20" },
+      { "id": "frame-tubes", "text": "Cut the tubes to the machine's dimensions. Clean the 1.5-Step outlet, the fitting silicone pipe and the aerator.", "ref": "Manual p.20" }
+    ] },
+    { "module": "E'choco", "when": { "choco": ["1", "2"] }, "items": [
+      { "id": "choco-kit", "text": "Fit EV109706.", "ref": "Manual p.22" },
+      { "id": "choco-2", "text": "Fit EV111934 for the second outlet.", "ref": "Manual p.22", "when": { "choco": ["2"], "model": ["4ms", "6s", "6ms"] } }
+    ] },
+    { "module": "Close out", "items": [
+      { "id": "close-stock", "text": "Record the service (date, interval, kits used). Old 24-month kits may be used for the 36-month interval.", "ref": "TI-240" }
+    ] }
+  ],
+  "changes": {
+    "stockNote": { "title": "24-month kits in stock are still usable.", "text": "Per TI-240 (from 1 May 2026) the 24-month kits are replaced by 36-month kits, and existing 24-month kits can be used for the 36-month interval. 12-month kits are unchanged. Kit labels in NetSuite may still say 24M." },
+    "supersessions": [
+      ["EV109586, EV109590, EV102865", "Same numbers", "Hydraulic kits now 36 months. EV102865: 102167 and 100217 removed."],
+      ["EV108391, EV108312", "Same numbers", "Everfoam and milk steam add-ons now 36 months."],
+      ["EV109568, EV109570, EV108390", "Same numbers", "Hot water / tea add-ons now 36 months; 102167 and 100217 removed. EV109568 is automatic hot water (the US shop title \"PR. VALVE/24M\" is out of date)."],
+      ["EV108339", "Same number", "Filter 101326 removed. Steam injector now 117430."],
+      ["EV109706", "Same number", "101667 removed, O-ring 118259 added (x2)."],
+      ["EV114467", "None", "Grinder Standard 24 mo. Deleted."],
+      ["EV110005, EV108349", "None", "Frame Standard 24 mo and outlet V2. Deleted."]
+    ],
+    "contents": [
+      "EV109586 Hydraulic Standard: now 36 months.",
+      "EV108339 Milk Standard: filter 101326 removed; steam injector 117430.",
+      "EV109706 E'choco Standard: 101667 removed, 118259 O-ring x2 added.",
+      "EV109568, EV109570, EV108390 hot water kits: 102167 and 100217 removed; PTFE seal 100544 x2."
+    ]
+  },
+  "reference": [
+    { "title": "Time allowance (excl. descaling)", "table": {
+        "head": ["Machine", "12-month PM", "36-month PM"],
+        "rows": [["E'2c", "1h35", "2h35"], ["E'2s", "2h55", "3h55"], ["E'2ms", "3h30", "4h30"], ["E'4s", "3h20", "4h55"], ["E'4ms", "4h20", "5h55"], ["E'6s", "4h25", "7h00"], ["E'6ms", "5h30", "8h05"], ["E'choco", "15 min", "15 min"]],
+        "monoCols": [1, 2] } },
+    { "title": "Interval rule", "text": "Under 50,000 cycles a year per group head: 12-month PM in years 1 and 2, 36-month PM in year 3, then repeat. Over 50,000: the same 12, 12, 36 pattern every 50,000 cycles. At least one PM a year is mandatory." },
+    { "title": "Identify the model from the serial", "text": "The first 8 digits of the serial give the model (e'Support, List of machine serial numbers - North America). Classic: E'2c 01106800, E'2s 01106900, E'2ms 01108400, E'4s 01107000, E'4ms 01107100, E'6s 01159800, E'6ms 01159900. ST: E'2c 01165300, E'2s 01165400, E'2ms 01165500, E'4s 01165600, E'4ms 01165700, E'6s 01165800, E'6ms 01165900." },
+    { "title": "Consumables named in the manual", "list": [
+        "Grease JAX Pyro-plate FGN: Art. 104486 / SAP 8040150057",
+        "Loctite Permabond MM115 pure: SAP 8040200104",
+        "Eversys descaler: see PI-19 (1 L bottle) and descaling kit",
+        "Milk pipe, 25 m: blue 106186, green 106189" ] },
+    { "title": "Escalation", "text": "Eversys technical support: +41 27 588 00 17 or techsupport@eversys.com. Eversys USA: service.usa@eversys.com. Have the machine serial number and the kit number ready." }
+  ]
+}

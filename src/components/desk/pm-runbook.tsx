@@ -454,6 +454,16 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 </li>
               ))}
             </ul>
+            {def.changes?.contents?.length ? (
+              <>
+                <p className="text-xs font-semibold">What changed inside the kits</p>
+                <ul className="grid gap-1 text-xs">
+                  {def.changes.contents.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </div>
         </details>
       ) : null}
