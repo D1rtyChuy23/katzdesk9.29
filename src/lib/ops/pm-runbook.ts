@@ -2,6 +2,7 @@
  * PM runbook — pure logic. Ported unchanged in behavior from the standalone runbook page: a machine
  * definition plus a unit's config in, a kit list and a step list out. No DOM, no database, safe for node --test.
  */
+import { anyFound, kitPriceParts, summarizePrices, uncountedNote, usd, type KitPrice } from "./pm-runbook-prices.ts";
 import type { RunbookConfig, RunbookDefinition } from "./pm-runbook-schema.ts";
 
 export type KitLine = {
@@ -115,7 +116,7 @@ export function stepIds(groups: StepGroup[]): string[] {
 }
 
 /** Plain-text kit list for pasting into an order email or chat. Short lines, no tables. */
-export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: string): string {
+export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: string, prices?: KitPrice[]): string {
   const model = def.models.find((m) => m.id === c.model) ?? def.models[0];
   const interval = def.intervals.find((i) => i.id === c.pm);
   const lines = kitList(def, c);
@@ -135,12 +136,19 @@ export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: s
       mod = k.module;
     }
     const split = k.parts.length > 1 ? ` (${k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")})` : "";
-    out.push(`${k.ev} x${k.q}  ${k.name}${split}`);
+    const p = prices?.find((x) => x.ev === k.ev);
+    const price = p ? `  [${kitPriceParts(p).join(", ")}]` : "";
+    out.push(`${k.ev} x${k.q}  ${k.name}${split}${price}`);
   }
   if (!lines.length) out.push("No kits for this setup.");
   else {
     out.push("");
     out.push(`${lines.length} kit lines, ${totalKits(lines)} kits in total`);
+    if (prices) {
+      const s = summarizePrices(prices);
+      const note = uncountedNote(s);
+      out.push(anyFound(s) ? `Total at sell price: ${usd(s.total)}${note ? ` (${note})` : ""}` : "No kit prices found in the parts catalog yet.");
+    }
   }
   return out.join("\n");
 }
