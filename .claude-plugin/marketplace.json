@@ -1,12 +1,34 @@
 {
   "name": "d1rtychuy23-skills",
   "description": "Personal Claude Code skills by D1rtyChuy23.",
-  "owner": { "name": "D1rtyChuy23" },
+  "owner": {
+    "name": "D1rtyChuy23"
+  },
   "plugins": [
     {
       "name": "motion-design",
       "description": "15-second motion-graphics workflow: Opus builds, Jev evaluates review notes, code renders and checks exports.",
       "source": "./plugins/motion-design"
+    },
+    {
+      "name": "app-builder",
+      "description": "App-builder playbooks (design-ui, auth, neon, og, xai-api, building-games, controls, threejs, multiplayer-p2p, sprite/map/asset generation).",
+      "source": "./plugins/app-builder"
+    },
+    {
+      "name": "archify",
+      "description": "Architecture, workflow, sequence, data-flow, lifecycle, ERD, class, tree, timeline and waterfall diagrams as interactive HTML (vendored from tt-a1i/archify, MIT).",
+      "source": "./plugins/archify"
+    },
+    {
+      "name": "agent-skills",
+      "description": "Addy Osmani's 25 engineering skills (spec, plan, build, test, review, ship) plus /spec, /plan, /build, /test, /review, /ship commands and reviewer agents. Pulled from addyosmani/agent-skills (MIT).",
+      "source": {
+        "source": "github",
+        "repo": "addyosmani/agent-skills"
+      },
+      "homepage": "https://github.com/addyosmani/agent-skills",
+      "license": "MIT"
     }
   ]
 }
