@@ -237,7 +237,7 @@ test("PM Guide is a manual type, and a typed file name keeps the file's extensio
   assert.ok("error" in customFileName(" ", "old.pdf"));
 });
 
-import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, collapseImportTargets, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, importFailureSettled, importSkipReason, isMainChip, mainChipFor, removedCopies, shouldStartDownload, variationsOf } from "../src/lib/ops/library-file-rules.ts";
+import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, classifyImportDuplicates, collapseImportTargets, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, importFailureSettled, importSkipReason, isMainChip, mainChipFor, removedCopies, shouldStartDownload, variationsOf, withDuplicateMarker } from "../src/lib/ops/library-file-rules.ts";
 
 const fam = [
   { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
@@ -527,11 +527,43 @@ test("skip when the same name is on the book, or the same size and document numb
     ),
     "A manual or parts file in this family already has this size and document number.",
   );
+  assert.equal(
+    importSkipReason(
+      { name: "BUNN AXIOM-15-3 (2U-1L) - Spec Sheet 38700.0000", size: 9, section: "spec", bookId: 2 },
+      books,
+      [{ name: "BUNN AXIOM-15-3 (2U-1L) - Spec Sheet 38700.0000.pdf", size: 9, section: "spec", bookId: 2, complete: true }],
+    ),
+    "Already on this book with the same name.",
+  );
 });
 
 test("a download is not started once the run has used 150 seconds", () => {
   assert.equal(shouldStartDownload(149_999), true);
   assert.equal(shouldStartDownload(150_000), false);
   assert.equal(shouldStartDownload(150_001), false);
+});
+
+test("an import twin matches the older file once the extension is removed", () => {
+  const files = [
+    { id: 98, name: "X - Spec Sheet 38700.0000.pdf", size: 100, section: "spec", bookId: 3, fromImport: false },
+    { id: 531, name: "X - Spec Sheet 38700.0000", size: 100, section: "spec", bookId: 3, fromImport: true },
+    { id: 12, name: "BUNN AXIOM - 12 Month PM.pdf", size: 50, section: "manuals", bookId: 3, fromImport: false },
+    { id: 600, name: "BUNN AXIOM - 12 Month PM", size: 50, section: "manuals", bookId: 3, fromImport: true },
+    { id: 99, name: "X - Spec Sheet 38700.0000.pdf", size: 100, section: "spec", bookId: 4, fromImport: false },
+    { id: 601, name: "X - Spec Sheet 38700.0000", size: 180, section: "spec", bookId: 4, fromImport: true },
+    { id: 700, name: "X - Spec Sheet 38700.0000", size: 100, section: "spec", bookId: 9, fromImport: true },
+  ];
+  const out = classifyImportDuplicates(files);
+  assert.equal(out.twins.length, 2);
+  assert.deepEqual(out.twins.map((t) => [t.section, t.oldId, t.newId, t.size]), [
+    ["manuals", 12, 600, 50],
+    ["spec", 98, 531, 100],
+  ]);
+  assert.equal(out.differentSize.length, 1);
+  assert.equal(out.differentSize[0].oldId, 99);
+  assert.equal(out.differentSize[0].newId, 601);
+  assert.equal(out.twins.some((t) => t.bookId === 9), false);
+  assert.equal(withDuplicateMarker("X - Spec Sheet 38700.0000"), "X - Spec Sheet 38700.0000 - Duplicate To Delete");
+  assert.equal(withDuplicateMarker("Guide.pdf"), "Guide - Duplicate To Delete.pdf");
 });
 

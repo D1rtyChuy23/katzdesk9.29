@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cleanupLibraryDuplicates, storeLibraryFileOnce, type LibraryBook, type LibraryCleanupReport, type LibraryFile } from "@/lib/ops/library-files";
-import { importLibraryBatch, libraryImportLogCsv, type LibraryImportReport } from "@/lib/ops/library-import";
+import { importLibraryBatch, libraryImportLogCsv, resolveImportDuplicates, type ImportDuplicateReport, type LibraryImportReport } from "@/lib/ops/library-import";
 import { familyDuplicateGroups, familyOf, isMainChip, nameKey, sizeText, type ShareFile } from "@/lib/ops/library-file-rules";
 
 /** Jesus counted 54 from the dedupe plus #27, #37 and #50. The dialog shows the count actually found. */
@@ -68,6 +68,17 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not download the log"),
   });
   const changing = (importReport?.rows ?? []).filter((row) => row.action !== "SKIP");
+  const [dupes, setDupes] = useState<ImportDuplicateReport | null>(null);
+  const [confirmTwins, setConfirmTwins] = useState(false);
+  const duplicates = useMutation({
+    mutationFn: (apply: boolean) => resolveImportDuplicates({ data: { apply } }),
+    onSuccess: (result, apply) => {
+      setDupes(result);
+      setConfirmTwins(false);
+      if (apply) onChanged();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not review the import duplicates"),
+  });
   const untiedSpecs = books
     .filter((book) => (book.mpn ?? "").trim())
     .flatMap((book) =>
@@ -179,6 +190,73 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
           </div>
         ) : null}
       </div>
+
+      <div className="mt-5" data-testid="library-import-dupes">
+        <h3 className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Import Duplicates</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          A newer import copy and the older file it repeated. Review changes nothing. Fix twins copies the MPN and link onto the older file when that file has no MPN, then renames the newer copy so the cleanup can remove it. Nothing is deleted here.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button type="button" variant="outline" disabled={duplicates.isPending} onClick={() => duplicates.mutate(false)} data-testid="library-dupe-review">
+            {duplicates.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            Review
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={duplicates.isPending || !dupes || dupes.twins.length === 0}
+            onClick={() => setConfirmTwins(true)}
+            data-testid="library-dupe-fix"
+          >
+            Fix twins
+          </Button>
+        </div>
+        {dupes ? (
+          <div className="mt-3 text-sm" data-testid="library-dupe-result">
+            <p>
+              {dupes.applied ? "Fixed" : "Would fix"} <strong>{dupes.twins.length}</strong> twin{dupes.twins.length === 1 ? "" : "s"}. Same name with a different size, left alone: <strong>{dupes.differentSize.length}</strong>.
+            </p>
+            {dupes.twins.length ? (
+              <ul className="mt-2 max-h-64 divide-y divide-border overflow-y-auto rounded-lg border border-border" data-testid="library-dupe-twins">
+                {dupes.twins.map((pair) => (
+                  <li key={`${pair.oldId}-${pair.newId}`} className="px-3 py-2 break-words">
+                    <span className="font-medium">{pair.bookTitle}</span>
+                    <span className="block text-muted-foreground">Old file {pair.oldId}: {pair.oldName}</span>
+                    <span className="block text-muted-foreground">New file {pair.newId}: {pair.newName} · {sizeText(pair.size)}{pair.mpn ? ` · MPN ${pair.mpn}` : ""}{pair.sourceUrl ? ` · ${pair.sourceUrl}` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {dupes.differentSize.length ? (
+              <ul className="mt-2 max-h-40 divide-y divide-border overflow-y-auto rounded-lg border border-border" data-testid="library-dupe-sizes">
+                {dupes.differentSize.map((pair) => (
+                  <li key={`${pair.oldId}-${pair.newId}`} className="px-3 py-2 break-words text-muted-foreground">
+                    {pair.bookTitle}: file {pair.oldId} ({sizeText(pair.oldSize)}) and file {pair.newId} ({sizeText(pair.newSize)})
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      <Dialog open={confirmTwins} onOpenChange={(o) => !o && !duplicates.isPending && setConfirmTwins(false)}>
+        <DialogContent data-testid="library-dupe-confirm">
+          <DialogTitle>Fix {dupes?.twins.length ?? 0} twin files?</DialogTitle>
+          <DialogDescription>
+            The older file keeps the newer copy's MPN and link when it has no MPN. The newer copy is renamed Duplicate To Delete. Nothing is deleted.
+          </DialogDescription>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button type="button" disabled={duplicates.isPending} onClick={() => duplicates.mutate(true)} data-testid="library-dupe-confirm-fix">
+              {duplicates.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+              Fix {dupes?.twins.length ?? 0} twins
+            </Button>
+            <Button type="button" variant="outline" disabled={duplicates.isPending} onClick={() => setConfirmTwins(false)}>
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="mt-5" data-testid="library-untied-specs">
         <h3 className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Spec Sheets Not Tied</h3>

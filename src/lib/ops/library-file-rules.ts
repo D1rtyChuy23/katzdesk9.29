@@ -621,9 +621,22 @@ export type ImportExistingFile = {
   mpn?: string | null;
 };
 
+/** Lowercased name with one trailing file extension removed. ".0000" is a document suffix, not an extension. */
+export function libraryNameKey(name: string): string {
+  return name.trim().toLowerCase().replace(/\.[a-z]{1,8}$/, "");
+}
+
+/** Insert the cleanup marker. A numeric suffix such as ".0000" stays where it is. */
+export function withDuplicateMarker(name: string): string {
+  if (name.includes("Duplicate To Delete")) return name;
+  const ext = /(\.[A-Za-z]{1,8})$/.exec(name);
+  if (!ext) return `${name} - Duplicate To Delete`;
+  return `${name.slice(0, name.length - ext[1]!.length)} - Duplicate To Delete${ext[1]}`;
+}
+
 /**
  * Why this file should not be stored again, or null when it should.
- * Same final name on that book, or — manuals and parts only — the same size and a numbered document
+ * Same final name on that book (extension ignored), or — manuals and parts only — the same size and a numbered document
  * anywhere in the family. A last word with no digit ("Guide", "PM", "Manual") is not a document number.
  * `size` is ignored for the name check. Pass the real byte size for the document-number check.
  */
@@ -632,9 +645,9 @@ export function importSkipReason(
   books: ImportBook[],
   files: ImportExistingFile[],
 ): string | null {
-  const wantName = incoming.name.trim().toLowerCase();
+  const wantName = libraryNameKey(incoming.name);
   const sameName = files.some(
-    (f) => f.complete && f.bookId === incoming.bookId && f.name.trim().toLowerCase() === wantName,
+    (f) => f.complete && f.bookId === incoming.bookId && libraryNameKey(f.name) === wantName,
   );
   if (sameName) return "Already on this book with the same name.";
   if (!copiesToVariations(incoming.section)) return null;
@@ -670,5 +683,95 @@ export function importFailureSettled(reason: string): boolean {
 /** A run may keep downloading only while it is under 150 seconds. At 150000 ms and above, stop. */
 export function shouldStartDownload(elapsedMs: number): boolean {
   return elapsedMs < 150_000;
+}
+
+export type ImportTwinFile = {
+  id: number;
+  name: string;
+  size: number;
+  section: string;
+  bookId: number | null;
+  fromImport: boolean;
+};
+
+export type ImportTwinPair = {
+  bookId: number;
+  section: string;
+  size: number;
+  oldId: number;
+  oldName: string;
+  newId: number;
+  newName: string;
+};
+
+export type ImportSizeMismatch = {
+  bookId: number;
+  section: string;
+  oldId: number;
+  oldName: string;
+  oldSize: number;
+  newId: number;
+  newName: string;
+  newSize: number;
+};
+
+/**
+ * Pairs an import-created file with the older file it repeated.
+ * Same book, section, size, and name once the extension is removed. A different size is listed and not treated as a twin.
+ */
+export function classifyImportDuplicates(files: ImportTwinFile[]): { twins: ImportTwinPair[]; differentSize: ImportSizeMismatch[] } {
+  const groups = new Map<string, ImportTwinFile[]>();
+  for (const file of files) {
+    if (file.bookId == null) continue;
+    const key = `${file.bookId}|${file.section}|${libraryNameKey(file.name)}`;
+    const group = groups.get(key) ?? [];
+    group.push(file);
+    groups.set(key, group);
+  }
+  const twins: ImportTwinPair[] = [];
+  const differentSize: ImportSizeMismatch[] = [];
+  for (const group of groups.values()) {
+    const olds = group.filter((f) => !f.fromImport).sort((a, b) => a.id - b.id);
+    const news = group.filter((f) => f.fromImport).sort((a, b) => a.id - b.id);
+    if (!olds.length || !news.length) continue;
+    const usedOld = new Set<number>();
+    const usedNew = new Set<number>();
+    for (const created of news) {
+      const prior = olds.find((f) => !usedOld.has(f.id) && f.size === created.size);
+      if (!prior || prior.bookId == null) continue;
+      usedOld.add(prior.id);
+      usedNew.add(created.id);
+      twins.push({
+        bookId: prior.bookId,
+        section: prior.section,
+        size: prior.size,
+        oldId: prior.id,
+        oldName: prior.name,
+        newId: created.id,
+        newName: created.name,
+      });
+    }
+    const leftOld = olds.filter((f) => !usedOld.has(f.id));
+    const leftNew = news.filter((f) => !usedNew.has(f.id));
+    const count = Math.min(leftOld.length, leftNew.length);
+    for (let i = 0; i < count; i += 1) {
+      const prior = leftOld[i]!;
+      const created = leftNew[i]!;
+      if (prior.bookId == null || prior.size === created.size) continue;
+      differentSize.push({
+        bookId: prior.bookId,
+        section: prior.section,
+        oldId: prior.id,
+        oldName: prior.name,
+        oldSize: prior.size,
+        newId: created.id,
+        newName: created.name,
+        newSize: created.size,
+      });
+    }
+  }
+  twins.sort((a, b) => a.oldId - b.oldId);
+  differentSize.sort((a, b) => a.oldId - b.oldId);
+  return { twins, differentSize };
 }
 
