@@ -14,13 +14,16 @@ import {
   CHUNK_BYTES,
   MAX_FILE_BYTES,
   collapseImportTargets,
+  classifyImportDuplicates,
   importFailureSettled,
   importSkipReason,
   isMainChip,
   isManualType,
   shouldStartDownload,
+  withDuplicateMarker,
   type CollapsedImportTarget,
   type ImportExistingFile,
+  type ImportTwinFile,
   type LibrarySection,
 } from "@/lib/ops/library-file-rules";
 import { cleanMpn, cleanSourceUrl, mpnKey, sameMpn, tieError } from "@/lib/ops/mpn-rules";
@@ -504,4 +507,129 @@ export const libraryImportLogCsv = createServerFn({ method: "GET" })
       lines.push([row.id, row.run_at, row.url, row.book_id, row.action, row.reason, row.file_id].map(csvCell).join(","));
     }
     return lines.join("\n");
+  });
+
+export type ImportDuplicateRow = {
+  bookId: number;
+  bookTitle: string;
+  section: string;
+  size: number;
+  oldId: number;
+  oldName: string;
+  newId: number;
+  newName: string;
+  mpn: string | null;
+  sourceUrl: string | null;
+};
+
+export type ImportSizeRow = {
+  bookId: number;
+  bookTitle: string;
+  section: string;
+  oldId: number;
+  oldName: string;
+  oldSize: number;
+  newId: number;
+  newName: string;
+  newSize: number;
+};
+
+export type ImportDuplicateReport = {
+  applied: boolean;
+  twins: ImportDuplicateRow[];
+  differentSize: ImportSizeRow[];
+};
+
+/** Review or repair files the import stored again because the older name ended in ".pdf". Never deletes. */
+export const resolveImportDuplicates = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { apply: boolean }) => z.object({ apply: z.boolean() }).parse(d))
+  .handler(async ({ data: request, context }): Promise<ImportDuplicateReport> => {
+    const sql = await ready();
+    await requireLibraryAdmin(sql, context.userId);
+    const stored = new Set(
+      (
+        await sql.query<{ file_id: number }>(
+          `select distinct file_id from library_import_log
+            where action = 'OK' and file_id is not null and reason like 'Stored %'`,
+        )
+      ).map((r) => Number(r.file_id)),
+    );
+    const rows = await sql.query<{
+      id: number;
+      name: string;
+      size: number;
+      section: string;
+      book_id: number | null;
+      mpn: string | null;
+      source_url: string | null;
+      book_title: string | null;
+    }>(
+      `select f.id, f.name, f.size, f.section, f.book_id, f.mpn, f.source_url, b.title as book_title
+         from library_files f
+         left join library_books b on b.id = f.book_id
+        where f.complete and f.section <> 'training'`,
+    );
+    const byId = new Map(rows.map((r) => [Number(r.id), r]));
+    const titleOf = (id: number) => byId.get(id)?.book_title ?? "Unknown model";
+    const candidates: ImportTwinFile[] = rows.map((r) => ({
+      id: Number(r.id),
+      name: r.name,
+      size: Number(r.size),
+      section: r.section,
+      bookId: r.book_id == null ? null : Number(r.book_id),
+      fromImport: stored.has(Number(r.id)),
+    }));
+    const found = classifyImportDuplicates(candidates);
+    const twins: ImportDuplicateRow[] = found.twins.map((pair) => ({
+      bookId: pair.bookId,
+      bookTitle: titleOf(pair.oldId),
+      section: pair.section,
+      size: pair.size,
+      oldId: pair.oldId,
+      oldName: pair.oldName,
+      newId: pair.newId,
+      newName: pair.newName,
+      mpn: byId.get(pair.newId)?.mpn ?? null,
+      sourceUrl: byId.get(pair.newId)?.source_url ?? null,
+    }));
+    const differentSize: ImportSizeRow[] = found.differentSize.map((pair) => ({
+      bookId: pair.bookId,
+      bookTitle: titleOf(pair.oldId),
+      section: pair.section,
+      oldId: pair.oldId,
+      oldName: pair.oldName,
+      oldSize: pair.oldSize,
+      newId: pair.newId,
+      newName: pair.newName,
+      newSize: pair.newSize,
+    }));
+    if (!request.apply) return { applied: false, twins, differentSize };
+    for (const pair of twins) {
+      const renamed = withDuplicateMarker(pair.newName);
+      // One statement, so the copy, the clear, and the log commit together or not at all.
+      await sql.query(
+        `with src as (
+           select mpn, source_url from library_files where id = $2
+         ),
+         old_upd as (
+           update library_files o
+              set mpn = case when btrim(coalesce(o.mpn, '')) = '' then (select mpn from src) else o.mpn end,
+                  source_url = case when btrim(coalesce(o.mpn, '')) = '' then (select source_url from src) else o.source_url end
+            where o.id = $1
+           returning o.id
+         ),
+         new_upd as (
+           update library_files n
+              set mpn = null, source_url = null, name = $4
+            where n.id = $2
+           returning n.id
+         )
+         insert into library_import_log (url, book_id, action, reason, file_id)
+         select null, $3, 'OK', $5, $2
+          where exists (select 1 from old_upd) and exists (select 1 from new_upd)`,
+        [pair.oldId, pair.newId, pair.bookId, renamed, `twin of file ${pair.oldId}`],
+      );
+    }
+    return { applied: true, twins, differentSize };
   });
