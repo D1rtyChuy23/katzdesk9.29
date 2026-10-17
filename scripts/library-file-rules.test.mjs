@@ -257,9 +257,20 @@ const famFiles = [
   { id: 14, section: "manuals", bookId: 6 },
 ];
 
-test("the main chip is the variation named like its parent", () => {
-  assert.equal(isMainChip(fam[0]), true);
-  assert.equal(isMainChip(fam[2]), false);
+test("the main chip is the variation named like its parent, and only when the family has another book", () => {
+  assert.equal(isMainChip(fam[0], fam), true);
+  assert.equal(isMainChip(fam[2], fam), false);
+  assert.equal(isMainChip({ id: 43, title: "BUNN TB3", manufacturer: "BUNN" }, [{ id: 43, title: "BUNN TB3", manufacturer: "BUNN" }]), false);
+  assert.equal(isMainChip({ id: 126, title: "Ditting 1403", manufacturer: "Ditting" }, [{ id: 126, title: "Ditting 1403", manufacturer: "Ditting" }]), false);
+  assert.equal(isMainChip({ id: 142, title: "Vitrifrigo FG20i", manufacturer: "Vitrifrigo" }, [{ id: 142, title: "Vitrifrigo FG20i", manufacturer: "Vitrifrigo" }]), false);
+  const eversys = [
+    { id: 20, title: "Eversys Cameo", manufacturer: "Eversys" },
+    { id: 21, title: "Eversys Cameo C'2s", manufacturer: "Eversys" },
+    { id: 22, title: "Eversys Legacy", manufacturer: "Eversys" },
+    { id: 23, title: "Eversys Legacy C'2s", manufacturer: "Eversys" },
+  ];
+  assert.equal(isMainChip(eversys[0], eversys), true);
+  assert.equal(isMainChip(eversys[2], eversys), true);
   assert.equal(mainChipFor(fam[2], fam)?.id, 1);
   assert.equal(mainChipFor(fam[3], fam)?.id, 1);
   assert.equal(mainChipFor(fam[0], fam), null);

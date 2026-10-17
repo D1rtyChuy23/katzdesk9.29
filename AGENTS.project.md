@@ -26,7 +26,7 @@ When you receive a prompt, check the From line. Treat it as a request from that 
   - D1rtyChuy23/katzdesk is an old backup;
   - D1rtyChuy23/katzdesk.10.16 is a copy and doesn't deploy.
 - Never push, force-push or reset main. Work on a branch and open a PR. Chuy merges after Claude reviews.
-- A merge to main deploys, and pending files in migrations/ run on that deploy.
+- A merge to main does NOT deploy by itself. After merging, Chuy publishes from Grok/Vercel. Pending files in migrations/ run during that publish build.
 - Never run the Library import, the Library cleanup or any delete against the production database. Chuy presses those buttons himself.
 - Don't commit .vercel/output.
 - Before you open a PR, these must pass:

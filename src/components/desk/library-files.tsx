@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { ArrowRightLeft, Loader2, Mail, MessageSquare, Pencil, Plus, Tag, Trash2, Upload } from "lucide-react";
 import { appendLibraryChunk, createLibraryBook, finishLibraryFile, moveLibraryFile, startLibraryFile, type LibraryBook, type LibraryFile, type StoreOnceOffer } from "@/lib/ops/library-files";
-import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, fileUrl, isMainChip, modelLabel, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, familyOf, fileUrl, modelLabel, nameKey, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -61,7 +61,9 @@ export async function uploadLibraryFile(
       let mainTitle = offer.mainChip?.title ?? "";
       if (mainId == null) {
         const made = await createLibraryBook({ data: { manufacturer: offer.manufacturer, model: offer.family } });
-        if (!isMainChip(made)) throw new Error(`${made.title} is not the main chip for ${offer.family}. Nothing was moved.`);
+        const namedLikeFamily = nameKey(modelLabel(made.title, made.manufacturer)) === nameKey(familyOf(made.title, made.manufacturer))
+          && nameKey(familyOf(made.title, made.manufacturer)) === nameKey(offer.family);
+        if (!namedLikeFamily) throw new Error(`${made.title} is not the main chip for ${offer.family}. Nothing was moved.`);
         mainId = made.id;
         mainTitle = made.title;
       }

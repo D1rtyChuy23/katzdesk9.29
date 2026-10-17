@@ -412,7 +412,7 @@ function Page() {
   const familyKey = (b: LibraryBook) => nameKey(familyOf(b.title, b.manufacturer));
   const families = [...new Map(currentModels.map((m) => [familyKey(m), familyOf(m.title, m.manufacturer)])).entries()]
     // The main chip (named like the parent) leads its row.
-    .map(([key, name]) => ({ key, name, books: currentModels.filter((m) => familyKey(m) === key).sort((x, y) => Number(isMainChip(y)) - Number(isMainChip(x))) }))
+    .map(([key, name]) => ({ key, name, books: currentModels.filter((m) => familyKey(m) === key).sort((x, y) => Number(isMainChip(y, books)) - Number(isMainChip(x, books))) }))
     .sort((x, y) => x.name.localeCompare(y.name, "en", { sensitivity: "base", numeric: true }));
   const family = current && !current.legacy ? families.find((f) => f.key === familyKey(current)) ?? null : null;
   const inside = current ? inBook(current.id) : null;
@@ -420,7 +420,7 @@ function Page() {
   const mainChip = current ? mainChipFor(current, books) : null;
   const copies = current ? copiedManuals(current, books, files, hidden) : [];
   const dropped = current ? removedCopies(current, books, files, hidden) : [];
-  const copyTargets = current && isMainChip(current) ? variationsOf(current, books) : [];
+  const copyTargets = current && isMainChip(current, books) ? variationsOf(current, books) : [];
   const mainName = mainChip ? modelLabel(mainChip.title, mainChip.manufacturer) : "";
   return (
     <div>

@@ -68,6 +68,13 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not download the log"),
   });
   const changing = (importReport?.rows ?? []).filter((row) => row.action !== "SKIP");
+  const untiedSpecs = books
+    .filter((book) => (book.mpn ?? "").trim())
+    .flatMap((book) =>
+      files
+        .filter((file) => file.section === "spec" && file.bookId === book.id && !(file.mpn ?? "").trim())
+        .map((file) => ({ book, file })),
+    );
   return (
     <section className="mt-8 rounded-xl border border-border bg-card px-4 py-4" data-testid="library-admin">
       <h2 className="font-display text-lg font-medium">Library Admin</h2>
@@ -99,7 +106,7 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
           <ul className="mt-2 divide-y divide-border" data-testid="library-dup-report">
             {groups.map((g) => {
               const familyBooks = books.filter((b) => b.manufacturer.toLowerCase() === g.manufacturer.toLowerCase() && nameKey(familyOf(b.title, b.manufacturer)) === nameKey(g.family));
-              const main = familyBooks.find((b) => isMainChip(b)) ?? null;
+              const main = familyBooks.find((b) => isMainChip(b, books)) ?? null;
               const onMain = main ? g.files.find((f) => f.bookId === main.id) : undefined;
               const keep = [...g.files].sort((a, b) => a.id - b.id)[0]!;
               const label = main ? main.title : `${g.manufacturer} ${g.family}`;
@@ -171,6 +178,25 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
             )}
           </div>
         ) : null}
+      </div>
+
+      <div className="mt-5" data-testid="library-untied-specs">
+        <h3 className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Spec Sheets Not Tied</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Models that have an MPN, and a spec sheet on that model that is not tied to it. This list changes nothing.
+        </p>
+        {untiedSpecs.length === 0 ? (
+          <p className="mt-2 text-sm text-muted-foreground">Every spec sheet on a model with an MPN is tied.</p>
+        ) : (
+          <ul className="mt-2 divide-y divide-border" data-testid="library-untied-rows">
+            {untiedSpecs.map(({ book, file }) => (
+              <li key={file.id} className="py-2 text-sm break-words">
+                <span className="font-medium">{book.title}</span>
+                <span className="block text-muted-foreground">{file.name} · file {file.id}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <Dialog open={!!report} onOpenChange={(o) => !o && !review.isPending && setReport(null)}>
