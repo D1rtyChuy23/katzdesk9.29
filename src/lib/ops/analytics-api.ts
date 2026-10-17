@@ -44,7 +44,7 @@ const oneLine = (v: unknown) => text(v).split(/\r?\n/).map((s) => s.trim()).filt
 const firstDay = (...values: unknown[]) => values.map(isoDay).find(Boolean) ?? "";
 
 /** Every install, service ticket, PM, TLC ticket and rebuild still on its list, as one kind of row. */
-async function loadRows(sql: Sql): Promise<AnalyticsRow[]> {
+export async function loadAnalyticsRows(sql: Sql): Promise<AnalyticsRow[]> {
   const marks = await loadAccountMarks(sql);
   // A record with no rep of its own shows the rep saved on the customer account, as the lists do.
   const rep = (own: unknown, customer: unknown) => {
@@ -152,7 +152,7 @@ export const getAnalytics = createServerFn({ method: "POST" })
   .validator((d: AnalyticsFilters) => filterInput.parse(d))
   .handler(async ({ data }): Promise<AnalyticsView> => {
     const sql = await ready();
-    const all = await loadRows(sql);
+    const all = await loadAnalyticsRows(sql);
     const rows = sortRows(filterRows(all, data));
     return {
       rows,
@@ -172,7 +172,7 @@ export const downloadAnalytics = createServerFn({ method: "POST" })
   .validator((d: { filters: AnalyticsFilters; format: ExportFormat }) => z.object({ filters: filterInput, format: z.enum(["pdf", "xlsx", "docx"]) }).parse(d))
   .handler(async ({ data }): Promise<AnalyticsFile> => {
     const sql = await ready();
-    const report = buildReport(await loadRows(sql), data.filters, formatNowChicago().stamp);
+    const report = buildReport(await loadAnalyticsRows(sql), data.filters, formatNowChicago().stamp);
     const filename = reportFileName(todayChicago(), data.format);
     const mime = EXPORT_FORMATS.find((f) => f.format === data.format)!.mime;
     const records = report.records.rows.length;
