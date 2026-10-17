@@ -286,7 +286,16 @@ test("E'4S has no milk module or milk frame; E'4MS has both", () => {
   assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Milk Module").reason, "E'4S X-Wide has no milk module");
   assert.equal(moduleTypeFit(def, cfg({ model: "4ms" }), "Milk Module").ok, true);
   assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Brew Module").ok, true);
-  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Pump Module").reason, "E'4S X-Wide has no pump module");
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Pump Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s", choco: "no" }), "Powder Module").ok, false);
+  assert.match(moduleTypeFit(def, cfg({ model: "4s", choco: "no" }), "Powder Module").reason ?? "", /has no powder module/);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s", choco: "1" }), "Powder Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms", choco: "2" }), "Powder Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms" }), "Powder Module", []).ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Powder Module", []).ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Milk Module", []).ok, false);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms", choco: "no" }), "Powder Module", ["choco"]).ok, false);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms", choco: "no" }), "Powder Module", ["choco"]).reason, "E'4MS X-Wide (milk) has no powder module");
   assert.equal(platformFit(["Enigma / e'Line"], "Enigma / e'Line", "E'4S X-Wide").ok, true);
   assert.equal(platformFit(["Enigma / e'Line"], "Cameo", "E'4S X-Wide").reason, "E'4S X-Wide is Enigma / e'Line, not Cameo.");
   const blocked = moduleAssignmentBlock(def, cfg({ model: "4s" }), "Milk Module", "Cameo", ["Enigma / e'Line"]);

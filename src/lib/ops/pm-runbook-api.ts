@@ -122,7 +122,7 @@ export async function recordCompletedRunbook(
     [pmId],
   );
   const checks = await sql.query<{ unit_key: string; key: string }>(
-    "select unit_key, key from pm_runbook_checks where pm_job_id = $1 and key like 'step:%'",
+    "select unit_key, key from pm_runbook_checks where pm_job_id = $1 and (key like 'step:%' or key like 'kit:%')",
     [pmId],
   );
   const keys = units.map((u) => u.optionsKey).filter((k): k is string => !!k);
@@ -150,7 +150,9 @@ export async function recordCompletedRunbook(
         label: o.label,
         value: o.choices.find((c) => c.val === config[o.key])?.label ?? String(config[o.key] ?? ""),
       })),
-      kits: kitList(rb.def, config).map((k) => ({ ev: k.ev, q: k.q, name: k.name })),
+      kits: kitList(rb.def, config)
+        .filter((k) => ticked.has(`kit:${k.ev}`))
+        .map((k) => ({ ev: k.ev, q: k.q, name: k.name })),
       steps: stepList(rb.def, config)
         .flatMap((g) => g.items)
         .filter((item) => ticked.has(`step:${item.id}`))
@@ -382,6 +384,17 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         where pm_job_id = any($1::int[]) and interval_mo is not null`,
       [doneRows.map((r) => r.id)],
     );
+    const earlierLinks = doneRows.length
+      ? await sql.query<{ pm_job_id: number; piece_key: string; account_equipment_id: number }>(
+          "select pm_job_id, piece_key, account_equipment_id from pm_runbook_unit_links where pm_job_id = any($1::int[])",
+          [doneRows.map((r) => r.id)],
+        )
+      : [];
+    const earlierPins: Record<number, Record<string, number>> = {};
+    for (const link of earlierLinks) {
+      const bag = earlierPins[link.pm_job_id] ?? (earlierPins[link.pm_job_id] = {});
+      bag[link.piece_key] = Number(link.account_equipment_id);
+    }
     const pmMatcher = (piece: string) => {
       for (const rb of RUNBOOKS) {
         const h = rb.matchPiece(piece);
@@ -392,7 +405,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     const fullPms = (u: (typeof planned)[number], def: NonNullable<ReturnType<typeof runbookById>>["def"]) => {
       const out = new Map<number, { pmId: number; interval: string; completedAt: string | null }>();
       for (const d of doneRows) {
-        const hit = planUnits(d.equipment, rows, pmMatcher).find((x) => x.unitKey === u.unitKey);
+        const hit = planUnits(d.equipment, rows, pmMatcher, earlierPins[d.id]).find((x) => x.unitKey === u.unitKey);
         if (!hit) continue;
         const interval =
           savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === u.unitKey)?.interval_mo ?? intervalFromStyle(def, d.style);
@@ -467,6 +480,8 @@ const logAssetInput = z.object({
   accountId: z.number().int().positive().nullable(),
   serial: z.string().max(80),
   installDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  /** Move the account unit that already has this serial onto this customer, then pin the line. */
+  move: z.boolean().optional(),
 });
 
 /**
@@ -479,7 +494,7 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof logAssetInput>) => logAssetInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
-    await requireWriter(sql, context.userId);
+    const me = await requireWriter(sql, context.userId);
     const pm = (
       await sql.query<{ customer: string; equipment: string | null }>("select customer, equipment from pm_jobs where id = $1", [data.pmId])
     )[0];
@@ -490,21 +505,74 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
     const serialText = data.serial.trim();
     const installDate = data.installDate || null;
     let accountId = data.accountId;
+
+    const claimSerial = async (parsed: string, key: string): Promise<number | null> => {
+      const dup = (
+        await sql.query<{ id: number; customer: string }>("select id, customer from account_equipment where serial_key = $1 limit 1", [key])
+      )[0];
+      if (!dup) return null;
+      if (accountId != null && Number(dup.id) === accountId) return accountId;
+      if (normalizeCustomerKey(dup.customer) === normalizeCustomerKey(pm.customer) || !data.move) {
+        throw new Error(`Serial ${parsed} is already on ${dup.customer}.`);
+      }
+      const taken = await sql.query<{ piece_key: string }>(
+        "select piece_key from pm_runbook_unit_links where pm_job_id = $1 and account_equipment_id = $2 and piece_key <> $3",
+        [data.pmId, dup.id, data.pieceKey],
+      );
+      if (taken[0]) throw new Error("That unit is already logged on another line of this PM.");
+      await sql.query("update account_equipment set customer = $2, updated_at = now() where id = $1", [Number(dup.id), pm.customer]);
+      const attached = await sql.query<{ id: number; assigned_unit_label: string | null }>(
+        "select id, assigned_unit_label from modules where assigned_unit_id = $1",
+        [Number(dup.id)],
+      );
+      if (attached.length) {
+        await sql.query("update modules set assigned_customer = $2, location = $2, updated_at = now() where assigned_unit_id = $1", [
+          Number(dup.id),
+          pm.customer,
+        ]);
+        for (const m of attached) {
+          await sql.query(
+            `insert into module_stops (module_id, kind, customer, unit_id, unit_label, from_place, to_place, by_name)
+             values ($1, 'moved', $2, $3, $4, $5, $2, $6)`,
+            [m.id, pm.customer, Number(dup.id), m.assigned_unit_label, dup.customer, me.name],
+          );
+        }
+      }
+      const detail = `Moved SN ${parsed} from ${dup.customer} to ${pm.customer}.`;
+      for (const name of [dup.customer, pm.customer]) {
+        const acct = (
+          await sql.query<{ id: number }>(
+            "select id from directory_customers where archived = false and lower(name) = lower($1) limit 1",
+            [name],
+          )
+        )[0];
+        if (!acct) continue;
+        await sql.query(
+          "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('customer', $1, $2, 'equipment moved', $3)",
+          [acct.id, me.name, detail],
+        );
+      }
+      return Number(dup.id);
+    };
+
     if (accountId == null) {
       const parsed = parseSerial(serialText);
       if (!parsed) throw new Error("Enter the serial.");
       const key = serialKey(parsed);
-      const dup = await sql.query<{ customer: string }>("select customer from account_equipment where serial_key = $1 limit 1", [key]);
-      if (dup[0]) throw new Error(`Serial ${parsed} is already on ${dup[0].customer}.`);
-      const rb = runbookById(line.runbookId);
-      const model = rb?.def.models.find((m) => m.id === line.model)?.label ?? line.piece;
-      const inserted = await sql.query<{ id: number }>(
-        `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date)
-         values ($1, $2, $2, $3, $4, $5) returning id`,
-        [pm.customer, model, parsed, key, installDate],
-      );
-      if (!inserted[0]) throw new Error("Could not add that unit.");
-      accountId = Number(inserted[0].id);
+      const moved = await claimSerial(parsed, key);
+      if (moved != null) {
+        accountId = moved;
+      } else {
+        const rb = runbookById(line.runbookId);
+        const model = rb?.def.models.find((m) => m.id === line.model)?.label ?? line.piece;
+        const inserted = await sql.query<{ id: number }>(
+          `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date)
+           values ($1, $2, $2, $3, $4, $5) returning id`,
+          [pm.customer, model, parsed, key, installDate],
+        );
+        if (!inserted[0]) throw new Error("Could not add that unit.");
+        accountId = Number(inserted[0].id);
+      }
     } else {
       const row = (
         await sql.query<{ id: number; customer: string; serial: string | null; serial_key: string | null; install_date: string | null }>(
@@ -520,17 +588,16 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       if (!existing && !parsed) throw new Error("Enter the serial.");
       if (!existing && parsed) {
         const key = serialKey(parsed);
-        const dup = await sql.query<{ customer: string; id: number }>(
-          "select id, customer from account_equipment where serial_key = $1 and id <> $2 limit 1",
-          [key, accountId],
-        );
-        if (dup[0]) throw new Error(`Serial ${parsed} is already on ${dup[0].customer}.`);
-        await sql.query(
-          `update account_equipment
-              set serial = $2, serial_key = $3, install_date = coalesce(install_date, $4), updated_at = now()
-            where id = $1`,
-          [accountId, parsed, key, installDate],
-        );
+        const moved = await claimSerial(parsed, key);
+        if (moved != null && moved !== accountId) accountId = moved;
+        else if (moved == null) {
+          await sql.query(
+            `update account_equipment
+                set serial = $2, serial_key = $3, install_date = coalesce(install_date, $4), updated_at = now()
+              where id = $1`,
+            [accountId, parsed, key, installDate],
+          );
+        }
       } else if (installDate && !row.install_date) {
         await sql.query("update account_equipment set install_date = $2, updated_at = now() where id = $1", [accountId, installDate]);
       }
