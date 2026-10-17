@@ -237,7 +237,7 @@ test("PM Guide is a manual type, and a typed file name keeps the file's extensio
   assert.ok("error" in customFileName(" ", "old.pdf"));
 });
 
-import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, collapseImportTargets, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, importFailureSettled, importSkipReason, isMainChip, mainChipFor, removedCopies, variationsOf } from "../src/lib/ops/library-file-rules.ts";
+import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, collapseImportTargets, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, importFailureSettled, importSkipReason, isMainChip, mainChipFor, removedCopies, shouldStartDownload, variationsOf } from "../src/lib/ops/library-file-rules.ts";
 
 const fam = [
   { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
@@ -502,5 +502,25 @@ test("skip when the same name is on the book, or the same size and document numb
   assert.equal(importSkipReason({ name: "BUNN AXIOM-DV-APS - Spec 55012.pdf", size: 2000, section: "spec", bookId: 2 }, books, files), null);
   assert.equal(importSkipReason({ name: "Fetco CBS-1252 - Parts 55012.pdf", size: 2000, section: "parts", bookId: 9 }, books, files), null);
   assert.equal(importSkipReason({ name: "Unfinished.pdf", size: 1000, section: "manuals", bookId: 1 }, books, files), null);
+  assert.equal(
+    importSkipReason({ name: "BUNN AXIOM - 6 Month PM", size: 4000, section: "manuals", bookId: 1 }, books, [
+      { name: "BUNN AXIOM - 12 Month PM", size: 4000, section: "manuals", bookId: 1, complete: true },
+    ]),
+    null,
+  );
+  assert.equal(
+    importSkipReason(
+      { name: "BUNN AXIOM - Programming 41154.0000", size: 5000, section: "manuals", bookId: 1 },
+      books,
+      [{ name: "BUNN AXIOM-DV-APS - Programming 41154.0000", size: 5000, section: "manuals", bookId: 2, complete: true }],
+    ),
+    "A manual or parts file in this family already has this size and document number.",
+  );
+});
+
+test("a download is not started once the run has used 150 seconds", () => {
+  assert.equal(shouldStartDownload(149_999), true);
+  assert.equal(shouldStartDownload(150_000), false);
+  assert.equal(shouldStartDownload(150_001), false);
 });
 

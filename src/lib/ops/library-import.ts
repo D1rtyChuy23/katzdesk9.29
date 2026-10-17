@@ -18,6 +18,7 @@ import {
   importSkipReason,
   isMainChip,
   isManualType,
+  shouldStartDownload,
   type CollapsedImportTarget,
   type ImportExistingFile,
   type LibrarySection,
@@ -27,6 +28,8 @@ import { cleanMpn, cleanSourceUrl, mpnKey, sameMpn, tieError } from "@/lib/ops/m
 const DUPLICATE_MARKER = "Duplicate To Delete";
 const CAMEO_FILE = "5700105620";
 const DEFAULT_LIMIT = 15;
+const DOWNLOAD_TIMEOUT_MS = 25_000;
+export const IMPORT_TIME_NOTE = "Stopped early to stay under the time limit. Tap Run again.";
 
 type ImportJson = {
   markAsDuplicate: number[];
@@ -56,6 +59,7 @@ export type LibraryImportReport = {
   rows: LibraryImportRow[];
   left: number;
   limit: number;
+  note: string | null;
 };
 
 type MemFile = ImportExistingFile & { id: number; sourceUrl: string | null };
@@ -109,7 +113,7 @@ async function fetchPdf(url: string): Promise<{ bytes: Uint8Array } | { error: s
   try {
     res = await fetch(url, {
       redirect: "follow",
-      signal: AbortSignal.timeout(45_000),
+      signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
       headers: { "user-agent": "KatzDesk/library-import" },
     });
   } catch (err) {
@@ -193,6 +197,7 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
     const sql = await ready();
     const role = await requireLibraryAdmin(sql, context.userId);
     const limit = request.limit ?? DEFAULT_LIMIT;
+    const startedAt = Date.now();
     const books = (
       await sql.query<{ id: number; title: string; manufacturer: string | null; mpn: string | null }>(
         "select id, title, manufacturer, mpn from library_books",
@@ -309,6 +314,7 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
 
     let fetched = 0;
     let left = 0;
+    let stoppedEarly = false;
     for (const upload of data.uploads) {
       const targets = upload.targets.flatMap((target) => {
         const section = sectionOf(target.section);
@@ -337,7 +343,9 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
         pending.push(dest);
       }
       if (!pending.length) continue;
-      if (fetched >= limit) {
+      const overTime = !shouldStartDownload(Date.now() - startedAt);
+      if (fetched >= limit || overTime) {
+        if (overTime && fetched < limit) stoppedEarly = true;
         left += 1;
         continue;
       }
@@ -480,7 +488,7 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
       }
     }
 
-    return { applied: request.apply, counts, rows, left, limit };
+    return { applied: request.apply, counts, rows, left, limit, note: stoppedEarly ? IMPORT_TIME_NOTE : null };
   });
 
 export const libraryImportLogCsv = createServerFn({ method: "GET" })

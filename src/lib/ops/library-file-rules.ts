@@ -622,7 +622,8 @@ export type ImportExistingFile = {
 
 /**
  * Why this file should not be stored again, or null when it should.
- * Same final name on that book, or — manuals and parts only — the same size and document number anywhere in the family.
+ * Same final name on that book, or — manuals and parts only — the same size and a numbered document
+ * anywhere in the family. A last word with no digit ("Guide", "PM", "Manual") is not a document number.
  * `size` is ignored for the name check. Pass the real byte size for the document-number check.
  */
 export function importSkipReason(
@@ -637,8 +638,9 @@ export function importSkipReason(
   if (sameName) return "Already on this book with the same name.";
   if (!copiesToVariations(incoming.section)) return null;
   const book = books.find((b) => b.id === incoming.bookId);
-  const wantDoc = docNumber(incoming.name).toLowerCase();
-  if (!book || !wantDoc) return null;
+  const wantDoc = docNumber(incoming.name);
+  if (!book || !wantDoc || !/\d/.test(wantDoc)) return null;
+  const wantKey = wantDoc.toLowerCase();
   const sameDoc = files.some((f) => {
     if (!f.complete || !copiesToVariations(f.section) || f.bookId == null || f.size !== incoming.size) return false;
     const other = books.find((b) => b.id === f.bookId);
@@ -647,7 +649,8 @@ export function importSkipReason(
       && nameKey(familyOf(other.title, other.manufacturer)) === nameKey(familyOf(book.title, book.manufacturer));
     if (!same) return false;
     const named = f.docName?.trim() ? f.docName.trim() : f.name;
-    return docNumber(named).toLowerCase() === wantDoc;
+    const otherDoc = docNumber(named);
+    return /\d/.test(otherDoc) && otherDoc.toLowerCase() === wantKey;
   });
   return sameDoc ? "A manual or parts file in this family already has this size and document number." : null;
 }
@@ -661,5 +664,10 @@ export function importFailureSettled(reason: string): boolean {
   if (/not a pdf/i.test(reason)) return true;
   if (/larger than 20 mb/i.test(reason)) return true;
   return /\b404\b/.test(reason) || /\b410\b/.test(reason);
+}
+
+/** A run may keep downloading only while it is under 150 seconds. At 150000 ms and above, stop. */
+export function shouldStartDownload(elapsedMs: number): boolean {
+  return elapsedMs < 150_000;
 }
 

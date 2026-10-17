@@ -154,6 +154,7 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
             <p data-testid="library-import-left">
               {importReport.applied ? "This run" : "Preview"}: {importReport.counts.OK} to store, {importReport.counts.SKIP} already there, {importReport.counts.FAIL} failed, {importReport.counts.CONFLICT} conflicts. Uploads left: <strong>{importReport.left}</strong>.
             </p>
+            {importReport.note ? <p data-testid="library-import-note">{importReport.note}</p> : null}
             {changing.length ? (
               <ul className="mt-2 max-h-64 divide-y divide-border overflow-y-auto rounded-lg border border-border" data-testid="library-import-rows">
                 {changing.map((row, index) => (
