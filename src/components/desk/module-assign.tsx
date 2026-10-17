@@ -87,6 +87,7 @@ export function AssignModuleDialog({
           module.moduleType,
           module.platform,
           hit.runbook.platforms,
+          Object.keys(only.options),
         )
       : null;
     if (!block) setUnitId(only.id);
@@ -162,6 +163,7 @@ export function AssignModuleDialog({
                           module.moduleType,
                           module.platform,
                           hit.runbook.platforms,
+                          Object.keys(u.options),
                         )
                       : null;
                     return (

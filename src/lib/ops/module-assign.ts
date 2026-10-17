@@ -245,7 +245,7 @@ export const assignModule = createServerFn({ method: "POST" })
     if (hit?.model) {
       const saved = await savedUnitOptions(sql, unit.serial, unit.id);
       const config = normalizeConfig(hit.runbook.def, { ...saved, model: hit.model });
-      const reason = moduleAssignmentBlock(hit.runbook.def, config, mod.module_type, mod.platform, hit.runbook.platforms);
+      const reason = moduleAssignmentBlock(hit.runbook.def, config, mod.module_type, mod.platform, hit.runbook.platforms, Object.keys(saved));
       if (reason) throw new Error(reason);
     }
     const who = await actorOf(sql, context.userId);

@@ -521,6 +521,23 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       );
       if (taken[0]) throw new Error("That unit is already logged on another line of this PM.");
       await sql.query("update account_equipment set customer = $2, updated_at = now() where id = $1", [Number(dup.id), pm.customer]);
+      const attached = await sql.query<{ id: number; assigned_unit_label: string | null }>(
+        "select id, assigned_unit_label from modules where assigned_unit_id = $1",
+        [Number(dup.id)],
+      );
+      if (attached.length) {
+        await sql.query("update modules set assigned_customer = $2, location = $2, updated_at = now() where assigned_unit_id = $1", [
+          Number(dup.id),
+          pm.customer,
+        ]);
+        for (const m of attached) {
+          await sql.query(
+            `insert into module_stops (module_id, kind, customer, unit_id, unit_label, from_place, to_place, by_name)
+             values ($1, 'moved', $2, $3, $4, $5, $2, $6)`,
+            [m.id, pm.customer, Number(dup.id), m.assigned_unit_label, dup.customer, me.name],
+          );
+        }
+      }
       const detail = `Moved SN ${parsed} from ${dup.customer} to ${pm.customer}.`;
       for (const name of [dup.customer, pm.customer]) {
         const acct = (

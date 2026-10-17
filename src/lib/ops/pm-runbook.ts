@@ -142,14 +142,50 @@ function definedGroups(def: RunbookDefinition): string[] {
   return names;
 }
 
-/** Whether this desk module type belongs on the unit. A type this runbook never mentions is allowed. */
-export function moduleTypeFit(def: RunbookDefinition, c: RunbookConfig, moduleType: string): ModuleTypeFit {
+function whenKnown(
+  when: Record<string, string[]> | undefined | null,
+  c: RunbookConfig,
+  savedKeys: readonly string[] | null,
+): boolean {
+  if (!when) return true;
+  for (const k of Object.keys(when)) {
+    if (k === "pm") continue;
+    if (savedKeys && k !== "model" && !savedKeys.includes(k)) continue;
+    if ((when[k] ?? []).indexOf(String(c[k] ?? "")) === -1) return false;
+  }
+  return true;
+}
+
+/** The runbook group this type lands on for this config, or null when nothing applies. */
+function appliedGroup(def: RunbookDefinition, c: RunbookConfig, alias: string, savedKeys: readonly string[] | null): string | null {
+  for (const k of def.kits) {
+    if (!groupCovers(k.module, alias) || !whenKnown(k.when, c, savedKeys)) continue;
+    if (Number(resolve(k.qty, c)) > 0) return k.module;
+  }
+  for (const g of def.steps) {
+    if (!groupCovers(g.module, alias) || !whenKnown(g.when, c, savedKeys)) continue;
+    if (g.items.some((s) => whenKnown(s.when, c, savedKeys))) return g.module;
+  }
+  return null;
+}
+
+/**
+ * Whether this desk module type belongs on the unit. A type this runbook never mentions is allowed.
+ * `savedKeys` is the option keys actually stored on the unit. Omit it when the config is complete.
+ * With an empty list, only the model can exclude a type, so E'choco stays allowed until someone saves choco.
+ */
+export function moduleTypeFit(
+  def: RunbookDefinition,
+  c: RunbookConfig,
+  moduleType: string,
+  savedKeys?: readonly string[] | null,
+): ModuleTypeFit {
   const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
   const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
   const known = definedGroups(def);
   const knownAlias = aliases.find((alias) => known.some((g) => groupCovers(g, alias)));
   if (!knownAlias) return { ok: true, group: null, reason: null };
-  const hit = applicableModules(def, c).find((g) => groupCovers(g, knownAlias));
+  const hit = appliedGroup(def, c, knownAlias, savedKeys === undefined ? null : savedKeys);
   if (hit) return { ok: true, group: hit, reason: null };
   return { ok: false, group: null, reason: `${label} has no ${moduleNoun(moduleType)} module` };
 }
@@ -171,6 +207,7 @@ export function moduleAssignmentBlock(
   moduleType: string | null | undefined,
   platform: string | null | undefined,
   allowedPlatforms: readonly string[],
+  savedKeys?: readonly string[] | null,
 ): string | null {
   const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
   if (platform) {
@@ -178,7 +215,7 @@ export function moduleAssignmentBlock(
     if (platformReason) return platformReason;
   }
   if (moduleType) {
-    const typeReason = moduleTypeFit(def, c, moduleType).reason;
+    const typeReason = moduleTypeFit(def, c, moduleType, savedKeys).reason;
     if (typeReason) return typeReason;
   }
   return null;
