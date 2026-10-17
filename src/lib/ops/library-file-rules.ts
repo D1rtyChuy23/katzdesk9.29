@@ -6,8 +6,12 @@ export const LIBRARY_SECTIONS: LibrarySection[] = ["spec", "manuals", "parts"];
 
 /** Biggest single file. */
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
-/** Files travel in pieces this size so each request stays small. */
-export const CHUNK_BYTES = 1024 * 1024;
+/**
+ * Files travel in pieces this size so each request stays small. 1 MB pieces (about 1.4 MB once base64-encoded)
+ * were rejected with a 502 by the katzdesk.grok.me proxy; 512 KB pieces go through. A 20 MB file is 40 pieces,
+ * inside the server's limit of 101 (seq 0-100).
+ */
+export const CHUNK_BYTES = 512 * 1024;
 
 const TYPES: Record<string, string> = {
   pdf: "application/pdf",
@@ -262,12 +266,34 @@ export function shortDocName(name: string, bookTitle: string): string {
 export const nameKey = (v: string) => v.toLowerCase().replace(/[\s_\-–]+/g, "-").replace(/^-+|-+$/g, "");
 
 /**
- * The family a model sits under: its first word, up to the first dash or space.
- * "Axiom-DV-APS" → "Axiom"; "G9-2T HD Stainless" → "G9"; "ITCB-DV" → "ITCB"; "Nitron" → "Nitron".
+ * The family a model sits under.
+ * A word model keeps its first word, up to the first dash or space:
+ * "Axiom-DV-APS" → "Axiom"; "G9-2T HD Stainless" → "G9"; "GR-2.2" → "GR"; "ITCB-DV" → "ITCB".
+ * A LETTERS-DIGITS model with 3 or more digits (CBS-1252, GRS-1201, MBS-1221) is a series.
+ * The last digit is the variant, so CBS-1250, CBS-1251 and CBS-1252 share "CBS-125", and
+ * CBS-1231 and CBS-1232 share "CBS-123". A code that is already 3 digits ("CBS-125") is the
+ * family itself, so a main chip with that name stays the main chip. Two digits (Axiom-15-3)
+ * are a variant code, not a series, and the family stays the first word.
  */
 export function familyOf(title: string, maker: string): string {
   const model = modelLabel(title, maker);
+  const head = model.split(/\s+/).filter(Boolean)[0] ?? model;
+  const coded = /^([A-Za-z]+)[-–](\d{3,})/.exec(head);
+  if (coded) {
+    const letters = coded[1]!;
+    const digits = coded[2]!;
+    // Four or more digits: keep the first three (CBS-1252 → CBS-125). Three digits is already the family.
+    const series = digits.length >= 4 ? digits.slice(0, 3) : digits;
+    return `${letters}-${series}`;
+  }
   return model.split(/[\s\-–_]+/).filter(Boolean)[0] ?? model;
+}
+
+/** Document number: the last token of a file name, extension removed. "IPB 55012.pdf" → "55012". */
+export function docNumber(name: string): string {
+  const stem = name.replace(/\.[A-Za-z0-9]+$/, "");
+  const parts = stem.split(/[^A-Za-z0-9]+/).filter(Boolean);
+  return parts[parts.length - 1] ?? "";
 }
 
 /** Words that open a file name without naming a model. */
@@ -370,4 +396,98 @@ export function removedCopies<F extends FamilyFile, T extends FamilyBook>(book: 
   if (!main) return [];
   const gone = new Set(hidden.filter((h) => h.bookId === book.id).map((h) => h.fileId));
   return files.filter((f) => f.bookId === main.id && isShared(f) && gone.has(f.id));
+}
+
+// ---- One copy of a manual or parts file per family ----
+
+/** A stored manual or parts file that can be compared for a shared copy. `docName` is the name the document number is read from (the original name, when the shelf renamed it). */
+export type ShareFile = {
+  id: number;
+  name: string;
+  docName?: string | null;
+  size: number;
+  section: LibrarySection;
+  bookId: number | null;
+  mpn?: string | null;
+};
+
+const docKey = (name: string) => docNumber(name).toLowerCase();
+const shareDocName = (f: { name: string; docName?: string | null }) => (f.docName?.trim() ? f.docName.trim() : f.name);
+
+/**
+ * Manuals or parts already stored on another book in the same family with the same byte size and the same
+ * document number. Spec sheets are never duplicates. A file tied to one MPN stays on its own variation.
+ * Uploading onto the main chip is already "store once", so that is not reported here.
+ */
+export function familyDuplicates<F extends ShareFile, B extends FamilyBook>(
+  incoming: { name: string; size: number; section: LibrarySection; bookId: number },
+  books: B[],
+  files: F[],
+): F[] {
+  if (!copiesToVariations(incoming.section)) return [];
+  const want = docKey(incoming.name);
+  if (!want) return [];
+  const book = books.find((b) => b.id === incoming.bookId);
+  if (!book || isMainChip(book)) return [];
+  return files.filter((f) => {
+    if (!copiesToVariations(f.section) || (f.mpn ?? "").trim()) return false;
+    if (f.bookId == null || f.bookId === incoming.bookId || f.size !== incoming.size) return false;
+    if (docKey(shareDocName(f)) !== want) return false;
+    const other = books.find((b) => b.id === f.bookId);
+    return !!other && sameFamily(book, other);
+  });
+}
+
+export type FamilyDuplicateGroup<F> = {
+  manufacturer: string;
+  family: string;
+  size: number;
+  /** The document number as it appears on the first file in the group. */
+  docNumber: string;
+  files: F[];
+};
+
+/**
+ * Manuals and parts that share a byte size and a document number on more than one book in one family.
+ * Spec sheets are left out. One group is one shared document.
+ */
+export function familyDuplicateGroups<F extends ShareFile, B extends FamilyBook>(books: B[], files: F[]): FamilyDuplicateGroup<F>[] {
+  const byId = new Map(books.map((b) => [b.id, b]));
+  const groups = new Map<string, FamilyDuplicateGroup<F> & { bookIds: Set<number> }>();
+  for (const f of files) {
+    if (!copiesToVariations(f.section) || (f.mpn ?? "").trim() || f.bookId == null) continue;
+    const book = byId.get(f.bookId);
+    if (!book) continue;
+    const doc = docNumber(shareDocName(f));
+    if (!doc) continue;
+    const family = familyOf(book.title, book.manufacturer);
+    const key = `${book.manufacturer.toLowerCase()}|${nameKey(family)}|${f.size}|${doc.toLowerCase()}`;
+    const group = groups.get(key) ?? { manufacturer: book.manufacturer, family, size: f.size, docNumber: doc, files: [], bookIds: new Set<number>() };
+    group.files.push(f);
+    group.bookIds.add(f.bookId);
+    groups.set(key, group);
+  }
+  return [...groups.values()]
+    .filter((g) => g.bookIds.size >= 2)
+    .map((g) => ({ manufacturer: g.manufacturer, family: g.family, size: g.size, docNumber: g.docNumber, files: g.files }))
+    .sort((a, b) => a.family.localeCompare(b.family, "en", { numeric: true }) || a.docNumber.localeCompare(b.docNumber, "en", { numeric: true }) || a.size - b.size);
+}
+
+/** Empty duplicate books the one-time cleanup may remove, and only when the title matches and the book has nothing in it. */
+export const CLEANUP_BOOKS = [
+  { id: 34, title: "BUNN AXIOM-15-3 (2U/1L)" },
+  { id: 35, title: "BUNN AXIOM-15-3 (3 Lower)" },
+] as const;
+
+export type CleanupBookFacts = { id: number; title: string; files: number; sheets: number; fixes: number; notes: number };
+
+/** Whether one of the known empty duplicate books can be removed. Anything else is left alone. */
+export function cleanupBookDecision(expected: { id: number; title: string }, found: CleanupBookFacts | null): { action: "remove" | "skip" | "missing"; reason: string } {
+  if (!found || found.id !== expected.id) return { action: "missing", reason: `Book #${expected.id} is not in The Library.` };
+  if (found.title.trim() !== expected.title) return { action: "skip", reason: `Title is "${found.title}", not "${expected.title}". Left in place.` };
+  if (found.files > 0) return { action: "skip", reason: `Has ${found.files} file${found.files === 1 ? "" : "s"}. Left in place.` };
+  if (found.sheets > 0) return { action: "skip", reason: "Has a spec sheet. Left in place." };
+  if (found.fixes > 0) return { action: "skip", reason: "Has troubleshoot notes. Left in place." };
+  if (found.notes > 0) return { action: "skip", reason: "Has unofficial sources. Left in place." };
+  return { action: "remove", reason: "Empty, and the title matches. It will be removed." };
 }

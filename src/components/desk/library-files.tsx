@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { ArrowRightLeft, Loader2, Mail, MessageSquare, Pencil, Plus, Tag, Trash2, Upload } from "lucide-react";
-import { appendLibraryChunk, finishLibraryFile, startLibraryFile, type LibraryBook, type LibraryFile } from "@/lib/ops/library-files";
-import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, fileUrl, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { appendLibraryChunk, createLibraryBook, finishLibraryFile, moveLibraryFile, startLibraryFile, type LibraryBook, type LibraryFile, type StoreOnceOffer } from "@/lib/ops/library-files";
+import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, fileUrl, isMainChip, modelLabel, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,23 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(s);
 }
 
-/** Store one file in a book's shelf. Sent in pieces; returns the name it was filed under. */
+export type StoreOnceChoice = "once" | "separate" | "skip";
+
+export type UploadResult = {
+  name: string;
+  section: LibrarySection;
+  storedOnce: boolean;
+  bookId: number;
+  bookTitle: string;
+  manufacturer: string;
+};
+
+/** The chip the shared copy should sit on: the main chip's model, or the family name when that chip does not exist yet. */
+export function storeOnceLabel(offer: StoreOnceOffer): string {
+  return offer.mainChip ? modelLabel(offer.mainChip.title, offer.manufacturer) : offer.family;
+}
+
+/** Store one file in a book's shelf. Sent in pieces; returns the name it was filed under. A family duplicate can be kept as one copy on the main chip instead. */
 export async function uploadLibraryFile(
   file: File,
   section: LibrarySection,
@@ -21,18 +37,55 @@ export async function uploadLibraryFile(
   onProgress?: (pct: number) => void,
   docType?: ManualType,
   customName?: string,
-): Promise<{ name: string; section: LibrarySection }> {
-  const { id, name, section: filed } = await startLibraryFile({
-    data: { section, bookId, name: file.name, size: file.size, ...(docType ? { docType } : {}), ...(customName?.trim() ? { customName: customName.trim() } : {}) },
-  });
+  onDuplicate?: (offer: StoreOnceOffer) => Promise<StoreOnceChoice>,
+): Promise<UploadResult | null> {
+  const begin = (storeSeparate: boolean) =>
+    startLibraryFile({
+      data: {
+        section,
+        bookId,
+        name: file.name,
+        size: file.size,
+        storeSeparate,
+        ...(docType ? { docType } : {}),
+        ...(customName?.trim() ? { customName: customName.trim() } : {}),
+      },
+    });
+  let started = await begin(false);
+  if (started.kind === "duplicate") {
+    const choice = onDuplicate ? await onDuplicate(started.offer) : "separate";
+    if (choice === "skip") return null;
+    if (choice === "once") {
+      const offer = started.offer;
+      let mainId = offer.mainChip?.id ?? null;
+      let mainTitle = offer.mainChip?.title ?? "";
+      if (mainId == null) {
+        const made = await createLibraryBook({ data: { manufacturer: offer.manufacturer, model: offer.family } });
+        if (!isMainChip(made)) throw new Error(`${made.title} is not the main chip for ${offer.family}. Nothing was moved.`);
+        mainId = made.id;
+        mainTitle = made.title;
+      }
+      const moved = offer.match.bookId === mainId ? null : await moveLibraryFile({ data: { id: offer.match.id, bookId: mainId } });
+      return {
+        name: moved?.name ?? offer.match.name,
+        section: offer.match.section,
+        storedOnce: true,
+        bookId: mainId,
+        bookTitle: mainTitle,
+        manufacturer: offer.manufacturer,
+      };
+    }
+    started = await begin(true);
+  }
+  if (started.kind !== "started") throw new Error("Could not start that upload.");
   const parts = Math.ceil(file.size / CHUNK_BYTES);
   for (let seq = 0; seq < parts; seq++) {
     onProgress?.(Math.round((seq / parts) * 100));
     const bytes = new Uint8Array(await file.slice(seq * CHUNK_BYTES, (seq + 1) * CHUNK_BYTES).arrayBuffer());
-    await appendLibraryChunk({ data: { id, seq, base64: toBase64(bytes) } });
+    await appendLibraryChunk({ data: { id: started.id, seq, base64: toBase64(bytes) } });
   }
-  await finishLibraryFile({ data: { id } });
-  return { name, section: filed };
+  await finishLibraryFile({ data: { id: started.id } });
+  return { name: started.name, section: started.section, storedOnce: false, bookId, bookTitle: "", manufacturer: "" };
 }
 
 export const originOf = () => (typeof window === "undefined" ? "" : window.location.origin);
@@ -357,6 +410,47 @@ export function ManualTypePicker({
         <Button type="button" variant="ghost" className="mt-2 w-fit" onClick={onCancel}>
           {cancelLabel}
         </Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Offered when a manual or parts file matches one already stored on another model in the same family. */
+export function StoreOnceDialog({
+  offer,
+  fileName,
+  busy,
+  onChoose,
+}: {
+  offer: StoreOnceOffer | null;
+  fileName: string;
+  busy?: boolean;
+  onChoose: (choice: StoreOnceChoice) => void;
+}) {
+  const label = offer ? storeOnceLabel(offer) : "";
+  return (
+    <Dialog open={!!offer} onOpenChange={(o) => !o && !busy && onChoose("skip")}>
+      <DialogContent data-testid="store-once-dialog">
+        <DialogTitle>Store Once On {label}?</DialogTitle>
+        <DialogDescription>
+          {fileName} is the same size ({offer ? sizeText(offer.match.size) : ""}) and document number as {offer?.match.name}, already on {offer?.match.bookTitle}.
+          {offer && offer.matchCount > 1 ? ` ${offer.matchCount} files in this family match.` : ""}{" "}
+          {offer?.mainChip && offer.match.bookId === offer.mainChip.id
+            ? `That copy is already on ${label}, so this file will not be uploaded.`
+            : `Storing it once moves that copy onto ${label}${offer?.mainChip ? "" : ", which will be added for this family,"} and does not upload this file.`}{" "}
+          A variation that should not show it can use Remove Here.
+        </DialogDescription>
+        <div className="mt-4 flex flex-col gap-2">
+          <Button type="button" disabled={busy} onClick={() => onChoose("once")} data-testid="store-once-confirm">
+            Store Once On {label}
+          </Button>
+          <Button type="button" variant="outline" disabled={busy} onClick={() => onChoose("separate")} data-testid="store-once-separate">
+            Upload This Copy Too
+          </Button>
+          <Button type="button" variant="ghost" className="w-fit" disabled={busy} onClick={() => onChoose("skip")}>
+            Skip This File
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
