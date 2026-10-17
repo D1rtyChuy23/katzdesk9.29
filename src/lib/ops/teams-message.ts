@@ -259,7 +259,8 @@ export function draftTeamsChat(id: TeamsChatId, snap: TeamsSnapshot): TeamsDraft
     const mine = jobsForTech(snap.calls, id);
     text = [`Your open calls.`, section("Calls", mine.map(callLine), "None.")].join("\n\n");
   }
-  return { id: chat.id, name: chat.name, group: chat.group, kind: chat.kind, about: chat.about, title, text: `${title}\n\n${text}` };
+  // `text` is the approved body. The clock stamp stays on `title` so a later minute does not expire the approval.
+  return { id: chat.id, name: chat.name, group: chat.group, kind: chat.kind, about: chat.about, title, text };
 }
 
 export function draftAll(snap: TeamsSnapshot): TeamsDraft[] {

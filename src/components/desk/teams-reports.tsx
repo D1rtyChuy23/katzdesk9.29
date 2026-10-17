@@ -67,6 +67,7 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
         {current ? (
           <div>
             <p className="text-sm font-medium">{current.name}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{current.title}</p>
             <p className="mt-1 text-xs text-muted-foreground">{current.about}</p>
             <p className="mt-2 text-xs text-muted-foreground">
               {current.approved ? `Approved${current.approvedBy ? ` by ${current.approvedBy}` : ""}` : "Not approved"}

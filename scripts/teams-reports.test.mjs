@@ -114,9 +114,12 @@ test("each chat gets only its own lines, and the text is what would be sent", ()
   assert.equal(clipLine(`  ${"x".repeat(200)}`).length <= 160, true);
 });
 
-test("approving is a match on the exact text", () => {
+test("the clock minute is not part of the approved text", () => {
   const draft = draftTeamsChat("big-tymers", empty);
-  assert.equal(draft.text, draftTeamsChat("big-tymers", empty).text);
+  const later = draftTeamsChat("big-tymers", { ...empty, when: "2026-10-17 8:01 AM CT" });
+  assert.equal(later.text, draft.text);
+  assert.notEqual(later.title, draft.title);
+  assert.doesNotMatch(draft.text, /8:00 AM/);
   const changed = draftTeamsChat("big-tymers", { ...empty, attention: [{ label: "Past due — scheduled", board: "Service", customer: "Coco", tech: "", ref: "SC-4" }] });
   assert.notEqual(changed.text, draft.text);
 });
