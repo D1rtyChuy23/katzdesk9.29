@@ -491,3 +491,149 @@ export function cleanupBookDecision(expected: { id: number; title: string }, fou
   if (found.notes > 0) return { action: "skip", reason: "Has unofficial sources. Left in place." };
   return { action: "remove", reason: "Empty, and the title matches. It will be removed." };
 }
+
+// ---- Library import: one shared copy on the main chip, spec sheets stay put ----
+
+const IMPORT_NAME_SEP = " - ";
+
+/** "BUNN" + "AXIOM" → "BUNN AXIOM". A family that already starts with the maker is not doubled. */
+export function mainChipTitle(manufacturer: string, family: string): string {
+  const maker = manufacturer.replace(/\s+/g, " ").trim();
+  const model = family.replace(/\s+/g, " ").trim();
+  if (!maker) return model;
+  return model.toLowerCase().startsWith(maker.toLowerCase() + " ") ? model : `${maker} ${model}`;
+}
+
+/** The stored name: the text before " - " is the variation, and becomes the main chip title. */
+export function rewriteMainChipName(targetName: string, mainTitle: string): string {
+  const at = targetName.indexOf(IMPORT_NAME_SEP);
+  if (at < 0) return targetName;
+  return `${mainTitle}${targetName.slice(at)}`;
+}
+
+export type ImportPlanTarget = {
+  bookId: number;
+  section: LibrarySection;
+  docType: string | null;
+  name: string;
+};
+
+export type CollapsedImportTarget = {
+  /** Null when the main chip is not in The Library yet and has to be added. */
+  bookId: number | null;
+  bookTitle: string;
+  manufacturer: string;
+  createMainChip: boolean;
+  section: LibrarySection;
+  docType: string | null;
+  name: string;
+  /** Set when the target names a book that is not in The Library. */
+  missingBookId?: number;
+};
+
+export type ImportBook = { id: number; title: string; manufacturer: string };
+
+/**
+ * Manuals and parts for one file that land on the same main chip become one target, named for that chip.
+ * Spec sheets stay on the book they name and are never merged with another book. A missing book stays its own row.
+ */
+export function collapseImportTargets(
+  targets: ImportPlanTarget[],
+  books: ImportBook[],
+): CollapsedImportTarget[] {
+  const byId = new Map(books.map((b) => [b.id, b]));
+  const out: CollapsedImportTarget[] = [];
+  const seen = new Set<string>();
+  for (const target of targets) {
+    const book = byId.get(target.bookId);
+    if (!book) {
+      out.push({
+        bookId: null,
+        bookTitle: "",
+        manufacturer: "",
+        createMainChip: false,
+        section: target.section,
+        docType: target.docType,
+        name: target.name,
+        missingBookId: target.bookId,
+      });
+      continue;
+    }
+    if (!copiesToVariations(target.section)) {
+      const key = `spec|${book.id}|${target.name.trim().toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        bookId: book.id,
+        bookTitle: book.title,
+        manufacturer: book.manufacturer,
+        createMainChip: false,
+        section: target.section,
+        docType: null,
+        name: target.name,
+      });
+      continue;
+    }
+    const family = familyOf(book.title, book.manufacturer);
+    const main = isMainChip(book) ? book : mainChipFor(book, books);
+    const bookTitle = main ? main.title : mainChipTitle(book.manufacturer, family);
+    const bookId = main ? main.id : null;
+    const key = `share|${target.section}|${bookId ?? `new:${bookTitle.toLowerCase()}`}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      bookId,
+      bookTitle,
+      manufacturer: book.manufacturer,
+      createMainChip: main == null,
+      section: target.section,
+      docType: target.docType,
+      name: rewriteMainChipName(target.name, bookTitle),
+    });
+  }
+  return out;
+}
+
+export type ImportExistingFile = {
+  name: string;
+  size: number;
+  section: LibrarySection;
+  bookId: number | null;
+  complete: boolean;
+  /** The name the document number is read from when the shelf renamed the file. */
+  docName?: string | null;
+  mpn?: string | null;
+};
+
+/**
+ * Why this file should not be stored again, or null when it should.
+ * Same final name on that book, or — manuals and parts only — the same size and document number anywhere in the family.
+ * `size` is ignored for the name check. Pass the real byte size for the document-number check.
+ */
+export function importSkipReason(
+  incoming: { name: string; size: number; section: LibrarySection; bookId: number },
+  books: ImportBook[],
+  files: ImportExistingFile[],
+): string | null {
+  const wantName = incoming.name.trim().toLowerCase();
+  const sameName = files.some(
+    (f) => f.complete && f.bookId === incoming.bookId && f.name.trim().toLowerCase() === wantName,
+  );
+  if (sameName) return "Already on this book with the same name.";
+  if (!copiesToVariations(incoming.section)) return null;
+  const book = books.find((b) => b.id === incoming.bookId);
+  const wantDoc = docNumber(incoming.name).toLowerCase();
+  if (!book || !wantDoc) return null;
+  const sameDoc = files.some((f) => {
+    if (!f.complete || !copiesToVariations(f.section) || f.bookId == null || f.size !== incoming.size) return false;
+    const other = books.find((b) => b.id === f.bookId);
+    if (!other) return false;
+    const same = other.manufacturer.toLowerCase() === book.manufacturer.toLowerCase()
+      && nameKey(familyOf(other.title, other.manufacturer)) === nameKey(familyOf(book.title, book.manufacturer));
+    if (!same) return false;
+    const named = f.docName?.trim() ? f.docName.trim() : f.name;
+    return docNumber(named).toLowerCase() === wantDoc;
+  });
+  return sameDoc ? "A manual or parts file in this family already has this size and document number." : null;
+}
+

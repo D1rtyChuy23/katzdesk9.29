@@ -237,7 +237,7 @@ test("PM Guide is a manual type, and a typed file name keeps the file's extensio
   assert.ok("error" in customFileName(" ", "old.pdf"));
 });
 
-import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, isMainChip, mainChipFor, removedCopies, variationsOf } from "../src/lib/ops/library-file-rules.ts";
+import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, collapseImportTargets, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, importSkipReason, isMainChip, mainChipFor, removedCopies, variationsOf } from "../src/lib/ops/library-file-rules.ts";
 
 const fam = [
   { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
@@ -374,3 +374,82 @@ test("the empty duplicate books are removed only when the id, title and emptines
   assert.equal(cleanupBookDecision(CLEANUP_BOOKS[0], null).action, "missing");
   assert.equal(cleanupBookDecision(CLEANUP_BOOKS[1], { ...empty, id: 35, title: CLEANUP_BOOKS[1].title }).action, "remove");
 });
+
+const axiomBooks = [
+  { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
+  { id: 2, title: "BUNN AXIOM-DV-APS", manufacturer: "BUNN" },
+  { id: 3, title: "BUNN AXIOM-15-3 (2U/1L)", manufacturer: "BUNN" },
+  { id: 4, title: "BUNN AXIOM-35-3", manufacturer: "BUNN" },
+  { id: 7, title: "BUNN AXIOM-15-3 (3 Lower)", manufacturer: "BUNN" },
+  { id: 8, title: "BUNN AXIOM-15-3 (2U-1L)", manufacturer: "BUNN" },
+];
+
+test("three BUNN AXIOM variation targets for one manual become one target on BUNN AXIOM", () => {
+  const targets = [
+    { bookId: 2, section: "manuals", docType: "Programming Manual", name: "BUNN AXIOM-DV-APS - Programming 41154.0000" },
+    { bookId: 3, section: "manuals", docType: "Programming Manual", name: "BUNN AXIOM-15-3 (2U/1L) - Programming 41154.0000" },
+    { bookId: 4, section: "manuals", docType: "Programming Manual", name: "BUNN AXIOM-35-3 - Programming 41154.0000" },
+  ];
+  const out = collapseImportTargets(targets, axiomBooks);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].bookId, 1);
+  assert.equal(out[0].bookTitle, "BUNN AXIOM");
+  assert.equal(out[0].createMainChip, false);
+  assert.equal(out[0].name, "BUNN AXIOM - Programming 41154.0000");
+});
+
+test("a spec sheet never collapses, and a missing main chip is named for the family", () => {
+  const specs = collapseImportTargets(
+    [
+      { bookId: 8, section: "spec", docType: null, name: "BUNN AXIOM-15-3 (2U-1L) - Spec Sheet 38700.0000" },
+      { bookId: 7, section: "spec", docType: null, name: "BUNN AXIOM-15-3 (3 Lower) - Spec Sheet 38700.0002" },
+    ],
+    axiomBooks,
+  );
+  assert.equal(specs.length, 2);
+  assert.deepEqual(specs.map((t) => t.bookId), [8, 7]);
+  assert.equal(specs[0].name, "BUNN AXIOM-15-3 (2U-1L) - Spec Sheet 38700.0000");
+  assert.equal(specs[1].name, "BUNN AXIOM-15-3 (3 Lower) - Spec Sheet 38700.0002");
+
+  const withoutMain = axiomBooks.filter((b) => b.id !== 1);
+  const manual = collapseImportTargets(
+    [
+      { bookId: 2, section: "manuals", docType: "Programming Manual", name: "BUNN AXIOM-DV-APS - Programming 41154.0000" },
+      { bookId: 3, section: "parts", docType: null, name: "BUNN AXIOM-15-3 (2U/1L) - Parts 41154.0000" },
+    ],
+    withoutMain,
+  );
+  assert.equal(manual.length, 2);
+  assert.equal(manual[0].createMainChip, true);
+  assert.equal(manual[0].bookTitle, "BUNN AXIOM");
+  assert.equal(manual[0].bookId, null);
+  assert.equal(manual[0].name, "BUNN AXIOM - Programming 41154.0000");
+  assert.equal(manual[1].section, "parts");
+  assert.equal(manual[1].name, "BUNN AXIOM - Parts 41154.0000");
+});
+
+test("skip when the same name is on the book, or the same size and document number is in the family", () => {
+  const books = [
+    { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
+    { id: 2, title: "BUNN AXIOM-DV-APS", manufacturer: "BUNN" },
+    { id: 9, title: "Fetco CBS-1252", manufacturer: "Fetco" },
+  ];
+  const files = [
+    { name: "BUNN AXIOM - Programming 41154.0000", size: 1000, section: "manuals", bookId: 1, complete: true },
+    { name: "BUNN AXIOM-DV-APS - Parts 55012.pdf", docName: "55012.pdf", size: 2000, section: "parts", bookId: 2, complete: true },
+    { name: "Spec 55012.pdf", size: 2000, section: "spec", bookId: 2, complete: true },
+    { name: "Unfinished.pdf", size: 1000, section: "manuals", bookId: 1, complete: false },
+  ];
+  assert.equal(
+    importSkipReason({ name: "BUNN AXIOM - Programming 41154.0000", size: 5, section: "manuals", bookId: 1 }, books, files),
+    "Already on this book with the same name.",
+  );
+  assert.equal(
+    importSkipReason({ name: "BUNN AXIOM - Other 55012.pdf", size: 2000, section: "parts", bookId: 1 }, books, files),
+    "A manual or parts file in this family already has this size and document number.",
+  );
+  assert.equal(importSkipReason({ name: "BUNN AXIOM-DV-APS - Spec 55012.pdf", size: 2000, section: "spec", bookId: 2 }, books, files), null);
+  assert.equal(importSkipReason({ name: "Fetco CBS-1252 - Parts 55012.pdf", size: 2000, section: "parts", bookId: 9 }, books, files), null);
+  assert.equal(importSkipReason({ name: "Unfinished.pdf", size: 1000, section: "manuals", bookId: 1 }, books, files), null);
+});
+
