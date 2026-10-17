@@ -19,6 +19,11 @@ export function runbookById(id: string): RegisteredRunbook | undefined {
   return RUNBOOKS.find((r) => r.def.id === id);
 }
 
+export function runbookForPlatform(platform: string | null | undefined): RegisteredRunbook | null {
+  if (!platform) return null;
+  return RUNBOOKS.find((r) => r.platforms.includes(platform)) ?? null;
+}
+
 export function runbookForPiece(piece: string): { runbook: RegisteredRunbook; model: string | null } | null {
   for (const runbook of RUNBOOKS) {
     const hit = runbook.matchPiece(piece);

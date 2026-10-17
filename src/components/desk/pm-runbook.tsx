@@ -25,6 +25,7 @@ import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
 import type { ModuleRow } from "@/lib/ops/types";
+import { ModuleRunbook } from "@/components/desk/module-runbook";
 import { useCopy } from "./spec-sheet";
 
 function Seg({
@@ -71,6 +72,7 @@ function UnitModules({
   canWrite,
   customer,
   platforms,
+  pmId,
 }: {
   unit: RunbookUnit;
   def: RunbookDefinition;
@@ -78,6 +80,7 @@ function UnitModules({
   canWrite: boolean;
   customer: string;
   platforms: readonly string[];
+  pmId: number;
 }) {
   const qc = useQueryClient();
   const mods = useQuery({
@@ -86,6 +89,7 @@ function UnitModules({
     enabled: unit.accountId != null,
   });
   const [open, setOpen] = useState(false);
+  const [runbookFor, setRunbookFor] = useState<number | null>(null);
   const [platform, setPlatform] = useState(platforms[0] ?? "");
   const [type, setType] = useState("");
   const label = def.models.find((m) => m.id === config.model)?.label ?? unit.piece;
@@ -132,10 +136,15 @@ function UnitModules({
               <p className="text-sm font-medium">{g.name}</p>
               <ul className="mt-1 grid gap-1">
                 {g.rows.map((m) => (
-                  <li key={m.id} className="break-words text-sm text-muted-foreground">
-                    SN {m.moduleId}
-                    {m.moduleType ? ` · ${m.moduleType}` : ""}
-                    {m.platform ? ` · ${m.platform}` : ""}
+                  <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 break-words text-muted-foreground">
+                      SN {m.moduleId}
+                      {m.moduleType ? ` · ${m.moduleType}` : ""}
+                      {m.platform ? ` · ${m.platform}` : ""}
+                    </span>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setRunbookFor(m.id)}>
+                      Runbook
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -219,6 +228,13 @@ function UnitModules({
           </div>
         </DialogContent>
       </Dialog>
+      <Dialog open={runbookFor != null} onOpenChange={(o) => !o && setRunbookFor(null)}>
+        <DialogContent data-testid="module-runbook-pm" className="max-h-[85vh] overflow-y-auto">
+          <DialogTitle>Module runbook</DialogTitle>
+          <DialogDescription>On site, during this PM. The same sheet as the bench, stored on this visit.</DialogDescription>
+          {runbookFor != null ? <div className="mt-3"><ModuleRunbook moduleId={runbookFor} context="pm" pmId={pmId} /></div> : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -264,14 +280,21 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const [choice, setChoice] = useState("new");
   const [serial, setSerial] = useState("");
   const [installDate, setInstallDate] = useState("");
+  const [elsewhere, setElsewhere] = useState<string | null>(null);
   const logAsset = useMutation({
     mutationFn: (d: Parameters<typeof logRunbookAsset>[0]["data"]) => logRunbookAsset({ data: d }),
     onSuccess: () => {
       setLogging(false);
+      setElsewhere(null);
       toast.success("Asset logged. Ticks on this line stay with the unit.");
       refresh();
     },
-    onError,
+    onError: (e: unknown) => {
+      const msg = e instanceof Error ? e.message : "Could not save";
+      const where = /^Serial .+ is already on (.+)\.$/.exec(msg)?.[1] ?? null;
+      if (where && where.toLowerCase() !== customer.trim().toLowerCase()) setElsewhere(where);
+      else toast.error(msg);
+    },
   });
   const kitNumbers = useMemo(() => (unit && rb ? kitList(rb.def, unit.config).map((k) => k.ev) : []), [unit, rb]);
   const priceQ = useQuery({
@@ -398,7 +421,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </div>
       ) : null}
 
-      <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} />
+      <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} pmId={pmId} />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
@@ -687,7 +710,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
               <select
                 className="h-10 w-full rounded-md border border-border bg-background px-2"
                 value={choice}
-                onChange={(e) => setChoice(e.target.value)}
+                onChange={(e) => {
+                  setChoice(e.target.value);
+                  setElsewhere(null);
+                }}
               >
                 <option value="new">Add a new unit</option>
                 {(q.data?.accountUnits ?? []).map((a) => {
@@ -704,7 +730,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             </label>
             <label className="grid gap-1 text-sm">
               <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Serial</span>
-              <Input value={serial} onChange={(e) => setSerial(e.target.value)} required={choice === "new" || !(q.data?.accountUnits ?? []).find((a) => String(a.id) === choice)?.serial} autoComplete="off" />
+              <Input value={serial} onChange={(e) => { setSerial(e.target.value); setElsewhere(null); }} required={choice === "new" || !(q.data?.accountUnits ?? []).find((a) => String(a.id) === choice)?.serial} autoComplete="off" />
             </label>
             <label className="grid gap-1 text-sm">
               <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Install date</span>
@@ -718,6 +744,27 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 Cancel
               </Button>
             </div>
+            {elsewhere ? (
+              <div className="grid gap-2 rounded-md border border-border p-3 text-sm">
+                <p>This serial is already on {elsewhere}. Moving it keeps the same unit, serial, install date and history.</p>
+                <Button
+                  type="button"
+                  disabled={logAsset.isPending}
+                  onClick={() =>
+                    logAsset.mutate({
+                      pmId,
+                      pieceKey: unit.pieceKey,
+                      accountId: choice === "new" ? null : Number(choice),
+                      serial,
+                      installDate: installDate || null,
+                      move: true,
+                    })
+                  }
+                >
+                  Move this unit here
+                </Button>
+              </div>
+            ) : null}
           </form>
         </DialogContent>
       </Dialog>

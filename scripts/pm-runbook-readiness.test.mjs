@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { matchE4XWide } from "../src/lib/ops/pm-runbook.ts";
+import { planUnits } from "../src/lib/ops/pm-runbook-units.ts";
 import { buildReadiness, readinessCsv, readinessSummary } from "../src/lib/ops/pm-runbook-readiness.ts";
 
 const match = (piece) => {
@@ -57,4 +58,29 @@ test("csv lists only lines with gaps and escapes quotes", () => {
   const csv = readinessCsv(rows);
   assert.match(csv, /^"PM","Customer","Status","Equipment line","Missing"\n"7","Cafe ""Uno""",/);
   assert.equal(readinessCsv([]).split("\n").length, 1);
+});
+
+test("a pin attaches the named account unit even when the text would match a different one", () => {
+  const equipment = "e'4s X-Wide";
+  const pieceKey = planUnits(equipment, [], match)[0].pieceKey;
+  const units = [
+    unit(1, "Cafe Uno", "e'4s X-Wide", "SN 100", "2024-01-01"),
+    unit(2, "Cafe Uno", "La Marzocco GB5", "SN 200", null),
+  ];
+  assert.equal(buildReadiness([pm(1, "Cafe Uno", equipment)], units, match)[0].accountId, 1);
+  const pinned = buildReadiness([pm(1, "Cafe Uno", equipment)], units, match, { 1: { [pieceKey]: 2 } });
+  assert.equal(pinned[0].accountId, 2);
+  assert.equal(pinned[0].serial, "SN 200");
+});
+
+test("an earlier PM matches a pinned unit the equipment text would miss", () => {
+  const equipment = "e'4s X-Wide";
+  const pieceKey = planUnits(equipment, [], match)[0].pieceKey;
+  const rows = [
+    { id: 1, catalogModel: "e'4s X-Wide", equipmentName: "e'4s X-Wide", serial: "SN 100" },
+    { id: 2, catalogModel: "La Marzocco GB5", equipmentName: "La Marzocco GB5", serial: "SN 200" },
+  ];
+  const pinned = planUnits(equipment, rows, match, { [pieceKey]: 2 });
+  assert.equal(pinned.find((u) => u.unitKey === "acct:2")?.accountId, 2);
+  assert.equal(planUnits(equipment, rows, match).some((u) => u.unitKey === "acct:2"), false);
 });

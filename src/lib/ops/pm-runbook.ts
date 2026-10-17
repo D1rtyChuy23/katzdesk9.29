@@ -115,7 +115,7 @@ const MODULE_TYPE_GROUPS: Record<string, string[]> = {
   "Grinder Module": ["Grinder module"],
   "Milk Module": ["Milk module"],
   "Pump Module": ["Pump module"],
-  "Powder Module": ["Powder module"],
+  "Powder Module": ["E'choco"],
 };
 
 function groupCovers(group: string, alias: string): boolean {
@@ -135,15 +135,58 @@ function moduleNoun(type: string): string {
 
 export type ModuleTypeFit = { ok: boolean; group: string | null; reason: string | null };
 
-/** Whether this desk module type belongs on the unit. The reason names the model, e.g. "E'4S X-Wide has no milk module". */
-export function moduleTypeFit(def: RunbookDefinition, c: RunbookConfig, moduleType: string): ModuleTypeFit {
-  const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
-  const groups = applicableModules(def, c);
-  const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
-  for (const alias of aliases) {
-    const hit = groups.find((g) => groupCovers(g, alias));
-    if (hit) return { ok: true, group: hit, reason: null };
+function definedGroups(def: RunbookDefinition): string[] {
+  const names: string[] = [];
+  for (const k of def.kits) if (!names.includes(k.module)) names.push(k.module);
+  for (const g of def.steps) if (!names.includes(g.module)) names.push(g.module);
+  return names;
+}
+
+function whenKnown(
+  when: Record<string, string[]> | undefined | null,
+  c: RunbookConfig,
+  savedKeys: readonly string[] | null,
+): boolean {
+  if (!when) return true;
+  for (const k of Object.keys(when)) {
+    if (k === "pm") continue;
+    if (savedKeys && k !== "model" && !savedKeys.includes(k)) continue;
+    if ((when[k] ?? []).indexOf(String(c[k] ?? "")) === -1) return false;
   }
+  return true;
+}
+
+/** The runbook group this type lands on for this config, or null when nothing applies. */
+function appliedGroup(def: RunbookDefinition, c: RunbookConfig, alias: string, savedKeys: readonly string[] | null): string | null {
+  for (const k of def.kits) {
+    if (!groupCovers(k.module, alias) || !whenKnown(k.when, c, savedKeys)) continue;
+    if (Number(resolve(k.qty, c)) > 0) return k.module;
+  }
+  for (const g of def.steps) {
+    if (!groupCovers(g.module, alias) || !whenKnown(g.when, c, savedKeys)) continue;
+    if (g.items.some((s) => whenKnown(s.when, c, savedKeys))) return g.module;
+  }
+  return null;
+}
+
+/**
+ * Whether this desk module type belongs on the unit. A type this runbook never mentions is allowed.
+ * `savedKeys` is the option keys actually stored on the unit. Omit it when the config is complete.
+ * With an empty list, only the model can exclude a type, so E'choco stays allowed until someone saves choco.
+ */
+export function moduleTypeFit(
+  def: RunbookDefinition,
+  c: RunbookConfig,
+  moduleType: string,
+  savedKeys?: readonly string[] | null,
+): ModuleTypeFit {
+  const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
+  const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
+  const known = definedGroups(def);
+  const knownAlias = aliases.find((alias) => known.some((g) => groupCovers(g, alias)));
+  if (!knownAlias) return { ok: true, group: null, reason: null };
+  const hit = appliedGroup(def, c, knownAlias, savedKeys === undefined ? null : savedKeys);
+  if (hit) return { ok: true, group: hit, reason: null };
   return { ok: false, group: null, reason: `${label} has no ${moduleNoun(moduleType)} module` };
 }
 
@@ -164,6 +207,7 @@ export function moduleAssignmentBlock(
   moduleType: string | null | undefined,
   platform: string | null | undefined,
   allowedPlatforms: readonly string[],
+  savedKeys?: readonly string[] | null,
 ): string | null {
   const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
   if (platform) {
@@ -171,10 +215,132 @@ export function moduleAssignmentBlock(
     if (platformReason) return platformReason;
   }
   if (moduleType) {
-    const typeReason = moduleTypeFit(def, c, moduleType).reason;
+    const typeReason = moduleTypeFit(def, c, moduleType, savedKeys).reason;
     if (typeReason) return typeReason;
   }
   return null;
+}
+
+/** Runbook groups for a desk module type, or null when this definition has none (Pump, or another family). */
+export function moduleRunbookGroups(def: RunbookDefinition, moduleType: string | null | undefined): string[] | null {
+  if (!moduleType) return null;
+  const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
+  const names = definedGroups(def).filter((g) => aliases.some((alias) => groupCovers(g, alias)));
+  return names.length ? names : null;
+}
+
+/** Kits and steps for one module type. Null when the definition has no group for it. */
+export function moduleServiceView(def: RunbookDefinition, c: RunbookConfig, moduleType: string | null | undefined): { groups: string[]; kits: KitLine[]; steps: StepGroup[] } | null {
+  const groups = moduleRunbookGroups(def, moduleType);
+  if (!groups) return null;
+  return {
+    groups,
+    kits: kitList(def, c).filter((k) => groups.includes(k.module)),
+    steps: stepList(def, c).filter((g) => groups.includes(g.module)),
+  };
+}
+
+/** Options that change this module's kits or steps. Model and interval are not options. */
+export function moduleServiceOptions(def: RunbookDefinition, moduleType: string | null | undefined) {
+  const groups = moduleRunbookGroups(def, moduleType) ?? [];
+  const keys = new Set<string>();
+  const take = (when: Record<string, string[]> | undefined | null, qty?: unknown) => {
+    if (when) for (const k of Object.keys(when)) if (k !== "pm" && k !== "model") keys.add(k);
+    if (qty && typeof qty === "object" && "by" in qty && typeof qty.by === "string") keys.add(qty.by);
+  };
+  for (const k of def.kits) if (groups.includes(k.module)) take(k.when, k.qty);
+  for (const g of def.steps) {
+    if (!groups.includes(g.module)) continue;
+    take(g.when);
+    for (const s of g.items) take(s.when);
+  }
+  return def.options.filter((o) => keys.has(o.key));
+}
+
+/**
+ * Bench setup: the interval and options the tech saved, and the first model whose lists are not empty.
+ * A milk module therefore uses E'4MS even though the default model is E'4S.
+ */
+export function moduleBenchConfig(
+  def: RunbookDefinition,
+  moduleType: string,
+  interval: string | null | undefined,
+  saved: Record<string, string>,
+): RunbookConfig {
+  const base = defaultConfig(def);
+  if (interval && def.intervals.some((i) => i.id === interval)) base.pm = interval;
+  let model = base.model;
+  for (const m of def.models) {
+    const view = moduleServiceView(def, normalizeConfig(def, { ...base, ...saved, model: m.id }), moduleType);
+    if (view && (view.kits.length || view.steps.length)) {
+      model = m.id;
+      break;
+    }
+  }
+  return normalizeConfig(def, { ...base, ...saved, model, pm: base.pm });
+}
+
+/** Checked kits to write onto the module. The Parts list SKU when we have one, otherwise the kit number. */
+export function moduleServiceWorkLines(
+  kits: KitLine[],
+  ticked: readonly string[],
+  skus: Readonly<Record<string, string | null | undefined>>,
+): { item: string; qty: number; description: string }[] {
+  const on = new Set(ticked);
+  return kits
+    .filter((k) => on.has(`kit:${k.ev}`) && k.q > 0)
+    .map((k) => ({ item: skus[k.ev] || k.ev, qty: k.q, description: k.name }));
+}
+
+export type SharedCheck = { key: string; who: string | null; at: string };
+
+export const MODULE_NOT_ON_PM = "This module is not on a unit of this PM.";
+
+/** serial_key on a PM check: the unit's serial, never the acct:<id> fallback. */
+export function checkSerialKey(optionsKey: string | null | undefined): string | null {
+  return optionsKey && !optionsKey.startsWith("acct:") ? optionsKey : null;
+}
+
+/** True when this module's account unit is one of the PM's planned units. */
+export function moduleOnThisPm(accountIds: readonly (number | null)[], assignedUnitId: number | null): boolean {
+  return assignedUnitId != null && accountIds.includes(assignedUnitId);
+}
+
+/**
+ * Checks the module sheet shows. On site they are the PM unit's checks (same who/when).
+ * A second tick of a key already there does not replace who/when — the PM sheet keeps the first stamp.
+ */
+export function applySharedTick(checks: readonly SharedCheck[], key: string, on: boolean, who: string, at: string): SharedCheck[] {
+  if (!on) return checks.filter((c) => c.key !== key);
+  if (checks.some((c) => c.key === key)) return [...checks];
+  return [...checks, { key, who, at }];
+}
+
+export function checksForModuleSheet(
+  context: "bench" | "pm",
+  moduleKeys: readonly string[],
+  unitChecks: readonly SharedCheck[],
+  benchChecks: readonly SharedCheck[],
+): SharedCheck[] {
+  if (context === "bench") return [...benchChecks];
+  const want = new Set(moduleKeys);
+  return unitChecks.filter((c) => want.has(c.key));
+}
+
+/** Plain-text kit list for one module, for pasting into an order. */
+export function moduleKitListText(title: string, intervalLabel: string, kits: KitLine[], prices?: KitPrice[]): string {
+  const out = [title, intervalLabel, ""];
+  for (const k of kits) {
+    const p = prices?.find((x) => x.ev === k.ev);
+    const price = p ? `  [${kitPriceParts(p).join(", ")}]` : "";
+    out.push(`${k.ev} x${k.q}  ${k.name}${price}`);
+  }
+  if (!kits.length) out.push("No kits for this setup.");
+  else {
+    out.push("");
+    out.push(`${kits.length} kit lines, ${totalKits(kits)} kits in total`);
+  }
+  return out.join("\n");
 }
 
 /** First model, first interval, each option at its default (or first choice). */
