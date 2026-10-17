@@ -3,11 +3,14 @@ import { Check, ClipboardCopy } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   clearRunbookChecks,
   getKitPrices,
   getPmRunbook,
+  logRunbookAsset,
   setRunbookCheck,
   setRunbookUnitConfig,
   setRunbookUnitOptions,
@@ -90,6 +93,19 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const clear = useMutation({
     mutationFn: (d: { pmId: number; unitKey: string }) => clearRunbookChecks({ data: d }),
     onSuccess: refresh,
+    onError,
+  });
+  const [logging, setLogging] = useState(false);
+  const [choice, setChoice] = useState("new");
+  const [serial, setSerial] = useState("");
+  const [installDate, setInstallDate] = useState("");
+  const logAsset = useMutation({
+    mutationFn: (d: Parameters<typeof logRunbookAsset>[0]["data"]) => logRunbookAsset({ data: d }),
+    onSuccess: () => {
+      setLogging(false);
+      toast.success("Asset logged. Ticks on this line stay with the unit.");
+      refresh();
+    },
     onError,
   });
   const kitNumbers = useMemo(() => (unit && rb ? kitList(rb.def, unit.config).map((k) => k.ev) : []), [unit, rb]);
@@ -194,6 +210,28 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             ? " · no serial on file: options are kept on this account unit and move to the serial once it is added"
             : " · not matched to an account unit, so options stay with this PM only"}
       </div>
+
+      {!unit.logged ? (
+        <div className="grid gap-2 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
+          <span>This unit is not logged as an asset, so this PM cannot be marked completed.</span>
+          {canWrite ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="w-fit"
+              onClick={() => {
+                setChoice(unit.accountId != null ? String(unit.accountId) : "new");
+                setSerial(unit.serial ?? "");
+                setInstallDate(unit.installDate ?? "");
+                setLogging(true);
+              }}
+            >
+              Log the asset
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
@@ -458,6 +496,64 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </details>
       ) : null}
       {dialog}
+      <Dialog open={logging} onOpenChange={(o) => !o && !logAsset.isPending && setLogging(false)}>
+        <DialogContent data-testid="log-asset">
+          <DialogTitle>Log the asset</DialogTitle>
+          <DialogDescription>
+            {def.models.find((m) => m.id === c.model)?.label ?? unit.piece}. Serial is required. Install date is optional. Ticks already on this line move to the unit.
+          </DialogDescription>
+          <form
+            className="mt-3 grid gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              logAsset.mutate({
+                pmId,
+                pieceKey: unit.pieceKey,
+                accountId: choice === "new" ? null : Number(choice),
+                serial,
+                installDate: installDate || null,
+              });
+            }}
+          >
+            <label className="grid gap-1 text-sm">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Account unit</span>
+              <select
+                className="h-10 w-full rounded-md border border-border bg-background px-2"
+                value={choice}
+                onChange={(e) => setChoice(e.target.value)}
+              >
+                <option value="new">Add a new unit</option>
+                {(q.data?.accountUnits ?? []).map((a) => {
+                  const taken = units.some((u) => u.accountId === a.id && u.pieceKey !== unit.pieceKey);
+                  return (
+                    <option key={a.id} value={a.id} disabled={taken}>
+                      {a.name}
+                      {a.serial ? ` · SN ${a.serial}` : " · no serial"}
+                      {taken ? " · already on this PM" : ""}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Serial</span>
+              <Input value={serial} onChange={(e) => setSerial(e.target.value)} required={choice === "new" || !(q.data?.accountUnits ?? []).find((a) => String(a.id) === choice)?.serial} autoComplete="off" />
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Install date</span>
+              <Input type="date" value={installDate} onChange={(e) => setInstallDate(e.target.value)} />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={logAsset.isPending}>
+                {logAsset.isPending ? "Saving…" : "Log the asset"}
+              </Button>
+              <Button type="button" variant="outline" disabled={logAsset.isPending} onClick={() => setLogging(false)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
+import { loadPmRunbookPlan, pmCompletionRefusal } from "./pm-runbook-api";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
 import { boardLocked, cleanTime, type BoardType } from "./day-board";
@@ -993,6 +994,21 @@ export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddl
 	const c = cur[0];
 	const status = data.status ?? c.status;
 	const done = data.done === undefined ? data.status === undefined ? c.done : CLOSED_PM.has(status) : data.done;
+	const completedAt = data.completedAt === undefined ? c.completed_at : data.completedAt;
+	const completing =
+		(status === "Completed" && c.status !== "Completed") ||
+		(done === true && !c.done && status !== "Cancelled") ||
+		(!!completedAt && !c.completed_at);
+	if (completing) {
+		const plan = await loadPmRunbookPlan(
+			sql,
+			String(data.customer ?? c.customer ?? ""),
+			data.equipment === undefined ? c.equipment : data.equipment,
+			data.id,
+		);
+		const refusal = pmCompletionRefusal(plan.planned);
+		if (refusal) throw new Error(refusal);
+	}
 	await sql`
       update pm_jobs set
         customer = ${data.customer ?? c.customer},

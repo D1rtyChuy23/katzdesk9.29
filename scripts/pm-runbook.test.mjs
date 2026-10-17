@@ -111,7 +111,7 @@ test("service and admin write; sales and warehouse read only; definitions admin 
   assert.equal(canEditRunbookDefinitions("admin", false), true);
 });
 
-import { optionsKeyFor, planUnits } from "../src/lib/ops/pm-runbook-units.ts";
+import { optionsKeyFor, planUnits, pmCompletionRefusal, unloggedUnitLines } from "../src/lib/ops/pm-runbook-units.ts";
 
 const matcher = (piece) => {
   const h = matchE4XWide(piece);
@@ -230,4 +230,33 @@ test("units: pieceKey is the key a line had before it matched an account unit", 
   const after = planUnits(text, rows, matcher);
   assert.deepEqual(after.map((u) => u.pieceKey), before.map((u) => u.unitKey));
   assert.deepEqual(after.map((u) => u.unitKey), ["acct:4", before[1].unitKey, "acct:5"]);
+});
+
+test("a PM cannot be completed while a runbook line has no account unit or no serial", () => {
+  const none = planUnits("e'4m X-Wide\nLa Marzocco GB5", [], matcher);
+  assert.deepEqual(unloggedUnitLines(none), ["e'4m X-Wide"]);
+  assert.match(pmCompletionRefusal(none), /e'4m X-Wide/);
+  const noSerial = planUnits("e'4s X-Wide", [{ id: 8, catalogModel: "e'4s X-Wide", equipmentName: "e'4s X-Wide", serial: "N/A", installDate: "2024-01-01" }], matcher);
+  assert.equal(noSerial[0].accountId, 8);
+  assert.match(pmCompletionRefusal(noSerial), /e'4s X-Wide/);
+  const logged = planUnits("e'4m X-Wide", [{ id: 7, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: "SN 100" }], matcher);
+  assert.equal(pmCompletionRefusal(logged), null);
+  assert.equal(pmCompletionRefusal(planUnits("La Marzocco GB5", [], matcher)), null);
+});
+
+test("a pinned account unit is used for that line and is not taken by an earlier line", () => {
+  const text = "e'4m X-Wide\ne'4s X-Wide";
+  const bare = planUnits(text, [], matcher);
+  const rows = [
+    { id: 1, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: "A" },
+    { id: 2, catalogModel: "Other grinder", equipmentName: "Other grinder", serial: "B" },
+  ];
+  const pinned = { [bare[1].pieceKey]: 1 };
+  const units = planUnits(text, rows, matcher, pinned);
+  assert.equal(units[0].accountId, null);
+  assert.equal(units[1].accountId, 1);
+  assert.equal(units[1].serial, "A");
+  assert.match(pmCompletionRefusal(units), /e'4m X-Wide/);
+  assert.doesNotMatch(pmCompletionRefusal(units) ?? "", /e'4s/);
+  assert.equal(units[1].pieceKey, bare[1].pieceKey);
 });
