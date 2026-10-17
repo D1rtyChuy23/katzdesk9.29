@@ -1,6 +1,7 @@
 /**
  * The Library — Manuals and Parts Diagrams: file rules. Pure: no DOM, safe for node --test.
  */
+import { flagOn } from "./flag.ts";
 export type LibrarySection = "spec" | "manuals" | "parts";
 export const LIBRARY_SECTIONS: LibrarySection[] = ["spec", "manuals", "parts"];
 
@@ -25,6 +26,12 @@ const TYPES: Record<string, string> = {
 };
 export const ACCEPT = Object.keys(TYPES).map((e) => `.${e}`).join(",");
 export const ALLOWED_TEXT = "PDF, images (PNG, JPG, WebP, GIF) and Word (DOC, DOCX)";
+
+/** Add Files and spec-sheet edits: the admin flag, the Admin desk role, or Sales. */
+export function canEditFromRole(row: { is_admin?: unknown; desk_role?: string | null } | null | undefined): boolean {
+  const admin = flagOn(row?.is_admin) || row?.desk_role === "admin";
+  return admin || row?.desk_role === "sales";
+}
 
 export function fileExt(name: string): string {
   const m = /\.([A-Za-z0-9]+)$/.exec(name.trim());
@@ -353,20 +360,21 @@ type FamilyBook = { id: number; title: string; manufacturer: string };
 const sameFamily = (a: FamilyBook, b: FamilyBook) =>
   a.manufacturer.toLowerCase() === b.manufacturer.toLowerCase() && nameKey(familyOf(a.title, a.manufacturer)) === nameKey(familyOf(b.title, b.manufacturer));
 
-/** The main model chip is the variation named exactly like its parent: "AXIOM" under Axiom. */
-export function isMainChip(book: FamilyBook): boolean {
-  return nameKey(modelLabel(book.title, book.manufacturer)) === nameKey(familyOf(book.title, book.manufacturer));
+/** The main model chip is the variation named exactly like its parent, and only when another book is in that family. */
+export function isMainChip(book: FamilyBook, books: readonly FamilyBook[]): boolean {
+  if (nameKey(modelLabel(book.title, book.manufacturer)) !== nameKey(familyOf(book.title, book.manufacturer))) return false;
+  return books.some((other) => other.id !== book.id && sameFamily(other, book));
 }
 
 /** The main chip a variation takes manuals from; null on the main chip itself and for a parent with no main chip. */
 export function mainChipFor<T extends FamilyBook>(book: T, books: T[]): T | null {
-  if (isMainChip(book)) return null;
-  return books.find((b) => b.id !== book.id && sameFamily(b, book) && isMainChip(b)) ?? null;
+  if (isMainChip(book, books)) return null;
+  return books.find((b) => b.id !== book.id && sameFamily(b, book) && isMainChip(b, books)) ?? null;
 }
 
 /** Every other variation of the main chip's parent — where its manuals are copied to. */
 export function variationsOf<T extends FamilyBook>(main: T, books: T[]): T[] {
-  return isMainChip(main) ? books.filter((b) => b.id !== main.id && sameFamily(b, main)) : [];
+  return isMainChip(main, books) ? books.filter((b) => b.id !== main.id && sameFamily(b, main)) : [];
 }
 
 /** `mpn` is set when the file is the official file for one MPN: such a file stays on its own variation. */
@@ -428,7 +436,7 @@ export function familyDuplicates<F extends ShareFile, B extends FamilyBook>(
   const want = docKey(incoming.name);
   if (!want) return [];
   const book = books.find((b) => b.id === incoming.bookId);
-  if (!book || isMainChip(book)) return [];
+  if (!book || isMainChip(book, books)) return [];
   return files.filter((f) => {
     if (!copiesToVariations(f.section) || (f.mpn ?? "").trim()) return false;
     if (f.bookId == null || f.bookId === incoming.bookId || f.size !== incoming.size) return false;
@@ -491,3 +499,286 @@ export function cleanupBookDecision(expected: { id: number; title: string }, fou
   if (found.notes > 0) return { action: "skip", reason: "Has unofficial sources. Left in place." };
   return { action: "remove", reason: "Empty, and the title matches. It will be removed." };
 }
+
+// ---- Library import: share a file only when the whole family is in the upload ----
+
+const IMPORT_NAME_SEP = " - ";
+
+/** The stored name: the text before " - " is the variation, and becomes the main chip title. */
+export function rewriteMainChipName(targetName: string, mainTitle: string): string {
+  const at = targetName.indexOf(IMPORT_NAME_SEP);
+  if (at < 0) return targetName;
+  return `${mainTitle}${targetName.slice(at)}`;
+}
+
+export type ImportPlanTarget = {
+  bookId: number;
+  section: LibrarySection;
+  docType: string | null;
+  name: string;
+};
+
+export type CollapsedImportTarget = {
+  bookId: number | null;
+  bookTitle: string;
+  manufacturer: string;
+  section: LibrarySection;
+  docType: string | null;
+  name: string;
+  /** Set when the target names a book that is not in The Library. No book is created for it. */
+  missingBookId?: number;
+};
+
+export type ImportBook = { id: number; title: string; manufacturer: string };
+
+/**
+ * Where one upload's targets are stored.
+ * Spec sheets stay on the book they name.
+ * Manuals and parts go to the family's existing main chip only when the upload names every variation
+ * (every book from variationsOf(main), and the main chip too when it is one of the targets) and there
+ * are at least two targets. Otherwise each target stays on the book in the JSON, with its name unchanged.
+ * A book is never created here. Two families in one upload are decided separately.
+ */
+export function collapseImportTargets(
+  targets: ImportPlanTarget[],
+  books: ImportBook[],
+): CollapsedImportTarget[] {
+  const byId = new Map(books.map((b) => [b.id, b]));
+  const out: CollapsedImportTarget[] = [];
+  const specSeen = new Set<string>();
+  const groups = new Map<string, ImportPlanTarget[]>();
+
+  for (const target of targets) {
+    const book = byId.get(target.bookId);
+    if (!book) {
+      out.push({
+        bookId: null,
+        bookTitle: "",
+        manufacturer: "",
+        section: target.section,
+        docType: target.docType,
+        name: target.name,
+        missingBookId: target.bookId,
+      });
+      continue;
+    }
+    if (!copiesToVariations(target.section)) {
+      const key = `spec|${book.id}|${target.name.trim().toLowerCase()}`;
+      if (specSeen.has(key)) continue;
+      specSeen.add(key);
+      out.push({
+        bookId: book.id,
+        bookTitle: book.title,
+        manufacturer: book.manufacturer,
+        section: target.section,
+        docType: null,
+        name: target.name,
+      });
+      continue;
+    }
+    const family = familyOf(book.title, book.manufacturer);
+    const key = `${target.section}|${book.manufacturer.toLowerCase()}|${nameKey(family)}`;
+    const group = groups.get(key) ?? [];
+    if (!group.some((t) => t.bookId === target.bookId)) group.push(target);
+    groups.set(key, group);
+  }
+
+  for (const group of groups.values()) {
+    const sample = byId.get(group[0]!.bookId);
+    const main = sample ? (isMainChip(sample, books) ? sample : mainChipFor(sample, books)) : null;
+    const ids = new Set(group.map((t) => t.bookId));
+    const required = main ? variationsOf(main, books).map((b) => b.id) : [];
+    if (main && ids.has(main.id)) required.push(main.id);
+    const share = !!main && group.length >= 2 && required.length >= 2 && required.every((id) => ids.has(id));
+    if (share && main) {
+      const source = group.find((t) => t.bookId !== main.id) ?? group[0]!;
+      out.push({
+        bookId: main.id,
+        bookTitle: main.title,
+        manufacturer: main.manufacturer,
+        section: source.section,
+        docType: source.docType,
+        name: rewriteMainChipName(source.name, main.title),
+      });
+      continue;
+    }
+    for (const target of group) {
+      const book = byId.get(target.bookId)!;
+      out.push({
+        bookId: book.id,
+        bookTitle: book.title,
+        manufacturer: book.manufacturer,
+        section: target.section,
+        docType: target.docType,
+        name: target.name,
+      });
+    }
+  }
+  return out;
+}
+
+export type ImportExistingFile = {
+  name: string;
+  size: number;
+  section: LibrarySection;
+  bookId: number | null;
+  complete: boolean;
+  /** The name the document number is read from when the shelf renamed the file. */
+  docName?: string | null;
+  mpn?: string | null;
+};
+
+/** Lowercased name with one trailing file extension removed. ".0000" is a document suffix, not an extension. */
+export function libraryNameKey(name: string): string {
+  return name.trim().toLowerCase().replace(/\.[a-z]{1,8}$/, "");
+}
+
+/** Insert the cleanup marker. A numeric suffix such as ".0000" stays where it is. */
+export function withDuplicateMarker(name: string): string {
+  if (name.includes("Duplicate To Delete")) return name;
+  const ext = /(\.[A-Za-z]{1,8})$/.exec(name);
+  if (!ext) return `${name} - Duplicate To Delete`;
+  return `${name.slice(0, name.length - ext[1]!.length)} - Duplicate To Delete${ext[1]}`;
+}
+
+/**
+ * Why this file should not be stored again, or null when it should.
+ * Same final name on that book (extension ignored), or — manuals and parts only — the same size and a numbered document
+ * anywhere in the family. A last word with no digit ("Guide", "PM", "Manual") is not a document number.
+ * `size` is ignored for the name check. Pass the real byte size for the document-number check.
+ */
+export function importSkipReason(
+  incoming: { name: string; size: number; section: LibrarySection; bookId: number },
+  books: ImportBook[],
+  files: ImportExistingFile[],
+): string | null {
+  const wantName = libraryNameKey(incoming.name);
+  const sameName = files.some(
+    (f) => f.complete && f.bookId === incoming.bookId && libraryNameKey(f.name) === wantName,
+  );
+  if (sameName) return "Already on this book with the same name.";
+  if (!copiesToVariations(incoming.section)) return null;
+  const book = books.find((b) => b.id === incoming.bookId);
+  const wantDoc = docNumber(incoming.name);
+  if (!book || !wantDoc || !/\d/.test(wantDoc)) return null;
+  const wantKey = wantDoc.toLowerCase();
+  const sameDoc = files.some((f) => {
+    if (!f.complete || !copiesToVariations(f.section) || f.bookId == null || f.size !== incoming.size) return false;
+    const other = books.find((b) => b.id === f.bookId);
+    if (!other) return false;
+    const same = other.manufacturer.toLowerCase() === book.manufacturer.toLowerCase()
+      && nameKey(familyOf(other.title, other.manufacturer)) === nameKey(familyOf(book.title, book.manufacturer));
+    if (!same) return false;
+    const named = f.docName?.trim() ? f.docName.trim() : f.name;
+    const otherDoc = docNumber(named);
+    return /\d/.test(otherDoc) && otherDoc.toLowerCase() === wantKey;
+  });
+  return sameDoc ? "A manual or parts file in this family already has this size and document number." : null;
+}
+
+/**
+ * A failed download is finished only when the file itself is unusable or the URL is gone.
+ * A timeout, a network error, or a 5xx is not finished: the next run tries it again.
+ */
+export function importFailureSettled(reason: string): boolean {
+  if (/will retry/i.test(reason)) return false;
+  if (/not a pdf/i.test(reason)) return true;
+  if (/larger than 20 mb/i.test(reason)) return true;
+  return /\b404\b/.test(reason) || /\b410\b/.test(reason);
+}
+
+/** A run may keep downloading only while it is under 150 seconds. At 150000 ms and above, stop. */
+export function shouldStartDownload(elapsedMs: number): boolean {
+  return elapsedMs < 150_000;
+}
+
+export type ImportTwinFile = {
+  id: number;
+  name: string;
+  size: number;
+  section: string;
+  bookId: number | null;
+  fromImport: boolean;
+};
+
+export type ImportTwinPair = {
+  bookId: number;
+  section: string;
+  size: number;
+  oldId: number;
+  oldName: string;
+  newId: number;
+  newName: string;
+};
+
+export type ImportSizeMismatch = {
+  bookId: number;
+  section: string;
+  oldId: number;
+  oldName: string;
+  oldSize: number;
+  newId: number;
+  newName: string;
+  newSize: number;
+};
+
+/**
+ * Pairs an import-created file with the older file it repeated.
+ * Same book, section, size, and name once the extension is removed. A different size is listed and not treated as a twin.
+ */
+export function classifyImportDuplicates(files: ImportTwinFile[]): { twins: ImportTwinPair[]; differentSize: ImportSizeMismatch[] } {
+  const groups = new Map<string, ImportTwinFile[]>();
+  for (const file of files) {
+    if (file.bookId == null) continue;
+    const key = `${file.bookId}|${file.section}|${libraryNameKey(file.name)}`;
+    const group = groups.get(key) ?? [];
+    group.push(file);
+    groups.set(key, group);
+  }
+  const twins: ImportTwinPair[] = [];
+  const differentSize: ImportSizeMismatch[] = [];
+  for (const group of groups.values()) {
+    const olds = group.filter((f) => !f.fromImport).sort((a, b) => a.id - b.id);
+    const news = group.filter((f) => f.fromImport).sort((a, b) => a.id - b.id);
+    if (!olds.length || !news.length) continue;
+    const usedOld = new Set<number>();
+    const usedNew = new Set<number>();
+    for (const created of news) {
+      const prior = olds.find((f) => !usedOld.has(f.id) && f.size === created.size);
+      if (!prior || prior.bookId == null) continue;
+      usedOld.add(prior.id);
+      usedNew.add(created.id);
+      twins.push({
+        bookId: prior.bookId,
+        section: prior.section,
+        size: prior.size,
+        oldId: prior.id,
+        oldName: prior.name,
+        newId: created.id,
+        newName: created.name,
+      });
+    }
+    const leftOld = olds.filter((f) => !usedOld.has(f.id));
+    const leftNew = news.filter((f) => !usedNew.has(f.id));
+    const count = Math.min(leftOld.length, leftNew.length);
+    for (let i = 0; i < count; i += 1) {
+      const prior = leftOld[i]!;
+      const created = leftNew[i]!;
+      if (prior.bookId == null || prior.size === created.size) continue;
+      differentSize.push({
+        bookId: prior.bookId,
+        section: prior.section,
+        oldId: prior.id,
+        oldName: prior.name,
+        oldSize: prior.size,
+        newId: created.id,
+        newName: created.name,
+        newSize: created.size,
+      });
+    }
+  }
+  twins.sort((a, b) => a.oldId - b.oldId);
+  differentSize.sort((a, b) => a.oldId - b.oldId);
+  return { twins, differentSize };
+}
+

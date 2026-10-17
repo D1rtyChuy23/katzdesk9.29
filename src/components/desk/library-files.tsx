@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { ArrowRightLeft, Loader2, Mail, MessageSquare, Pencil, Plus, Tag, Trash2, Upload } from "lucide-react";
 import { appendLibraryChunk, createLibraryBook, finishLibraryFile, moveLibraryFile, startLibraryFile, type LibraryBook, type LibraryFile, type StoreOnceOffer } from "@/lib/ops/library-files";
-import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, fileUrl, isMainChip, modelLabel, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { ACCEPT, ALLOWED_TEXT, CHUNK_BYTES, MANUAL_TYPES, MAX_FILE_BYTES, emailHref, familyOf, fileUrl, modelLabel, nameKey, sizeText, textHref, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -61,7 +61,9 @@ export async function uploadLibraryFile(
       let mainTitle = offer.mainChip?.title ?? "";
       if (mainId == null) {
         const made = await createLibraryBook({ data: { manufacturer: offer.manufacturer, model: offer.family } });
-        if (!isMainChip(made)) throw new Error(`${made.title} is not the main chip for ${offer.family}. Nothing was moved.`);
+        const namedLikeFamily = nameKey(modelLabel(made.title, made.manufacturer)) === nameKey(familyOf(made.title, made.manufacturer))
+          && nameKey(familyOf(made.title, made.manufacturer)) === nameKey(offer.family);
+        if (!namedLikeFamily) throw new Error(`${made.title} is not the main chip for ${offer.family}. Nothing was moved.`);
         mainId = made.id;
         mainTitle = made.title;
       }
@@ -140,14 +142,14 @@ export function DocRow({
 }) {
   const url = fileUrl(originOf(), file.token);
   return (
-    <li className="flex min-h-12 items-center gap-2 py-1" data-testid="library-file" data-section={file.section} data-copy={copyFrom ? "true" : "false"}>
+    <li className="flex min-h-12 flex-wrap items-center gap-x-2 gap-y-1 py-1" data-testid="library-file" data-section={file.section} data-copy={copyFrom ? "true" : "false"}>
       <span className="w-16 shrink-0 text-[11px] font-semibold tracking-[0.1em] text-copper uppercase">{DOC_TAG[file.section]}</span>
       <a
         href={url}
         target="_blank"
         rel="noopener"
         title={`${file.name} · ${sizeText(file.size)} · added by ${file.addedBy} ${new Date(file.createdAt).toLocaleDateString()}`}
-        className="min-w-0 flex-1 py-2 text-sm font-medium break-words hover:underline"
+        className="min-w-0 flex-1 basis-40 py-2 text-sm font-medium break-words hover:underline"
         data-testid="library-file-open"
       >
         <span data-testid="library-file-name">{label}</span>
@@ -157,34 +159,37 @@ export function DocRow({
           </span>
         ) : null}
       </a>
-      {extra}
-      <SendButtons name={file.name} url={url} />
-      {manage && copyFrom ? (
-        onRemoveCopy ? (
-          <Button type="button" size="sm" variant="ghost" className="h-11 shrink-0 px-2 text-xs" title="Remove from this variation only. It stays on the main chip and the other variations." onClick={() => onRemoveCopy(file)} data-testid="library-copy-remove">
-            <Trash2 className="size-4" /> Remove Here
-          </Button>
-        ) : null
-      ) : manage ? (
-        <>
-          {onType && file.section === "manuals" && file.bookId != null ? (
-            <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Set the manual type for ${file.name}`} title="Set the manual type" onClick={() => onType(file)} data-testid="library-file-type">
-              <Tag className="size-4" />
+      {/* On a phone the actions wrap to their own line under the name, so the name is never squeezed. */}
+      <div className="ml-auto flex max-w-full shrink-0 flex-wrap items-center justify-end gap-2" data-testid="library-file-actions">
+        {extra}
+        <SendButtons name={file.name} url={url} />
+        {manage && copyFrom ? (
+          onRemoveCopy ? (
+            <Button type="button" size="sm" variant="ghost" className="h-11 shrink-0 px-2 text-xs" title="Remove from this variation only. It stays on the main chip and the other variations." onClick={() => onRemoveCopy(file)} data-testid="library-copy-remove">
+              <Trash2 className="size-4" /> Remove Here
             </Button>
-          ) : null}
-          {onRename ? (
-            <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Rename ${file.name}`} title="Rename this file" onClick={() => onRename(file)} data-testid="library-file-rename">
-              <Pencil className="size-4" />
+          ) : null
+        ) : manage ? (
+          <>
+            {onType && file.section === "manuals" && file.bookId != null ? (
+              <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Set the manual type for ${file.name}`} title="Set the manual type" onClick={() => onType(file)} data-testid="library-file-type">
+                <Tag className="size-4" />
+              </Button>
+            ) : null}
+            {onRename ? (
+              <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Rename ${file.name}`} title="Rename this file" onClick={() => onRename(file)} data-testid="library-file-rename">
+                <Pencil className="size-4" />
+              </Button>
+            ) : null}
+            <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Move ${file.name}`} title="Move to another model" onClick={() => onMove(file)} data-testid="library-file-move">
+              <ArrowRightLeft className="size-4" />
             </Button>
-          ) : null}
-          <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Move ${file.name}`} title="Move to another model" onClick={() => onMove(file)} data-testid="library-file-move">
-            <ArrowRightLeft className="size-4" />
-          </Button>
-          <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Delete ${file.name}`} title="Delete" onClick={() => onDelete(file)} data-testid="library-file-delete">
-            <Trash2 className="size-4" />
-          </Button>
-        </>
-      ) : null}
+            <Button type="button" size="sm" variant="ghost" className="size-11 shrink-0 p-0" aria-label={`Delete ${file.name}`} title="Delete" onClick={() => onDelete(file)} data-testid="library-file-delete">
+              <Trash2 className="size-4" />
+            </Button>
+          </>
+        ) : null}
+      </div>
     </li>
   );
 }

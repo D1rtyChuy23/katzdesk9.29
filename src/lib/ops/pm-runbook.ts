@@ -70,6 +70,157 @@ export function stepList(def: RunbookDefinition, c: RunbookConfig): StepGroup[] 
   return out;
 }
 
+/** Drop the PM interval so a 12-month visit still counts a module the machine has. */
+function withoutInterval(when: Record<string, string[]> | undefined | null): Record<string, string[]> | undefined | null {
+  if (!when) return when;
+  const rest: Record<string, string[]> = {};
+  for (const key of Object.keys(when)) {
+    if (key === "pm") continue;
+    rest[key] = when[key]!;
+  }
+  return Object.keys(rest).length ? rest : undefined;
+}
+
+/**
+ * Module groups that have a kit or a step for this model and options.
+ * The service interval does not hide a module the machine has. E'4S has no milk module and no milk frame.
+ */
+export function applicableModules(def: RunbookDefinition, c: RunbookConfig): string[] {
+  const names: string[] = [];
+  const add = (name: string) => {
+    if (!names.includes(name)) names.push(name);
+  };
+  for (const k of def.kits) {
+    if (!matches(withoutInterval(k.when), c)) continue;
+    const q = Number(resolve(k.qty, c));
+    if (!(q > 0)) continue;
+    add(k.module);
+  }
+  for (const group of def.steps) {
+    if (!matches(withoutInterval(group.when), c)) continue;
+    const items = group.items.filter((s) => matches(withoutInterval(s.when), c));
+    if (items.length) add(group.module);
+  }
+  return names;
+}
+
+/** Desk module type → runbook group names. "Milk module V2" still counts as Milk. */
+const MODULE_TYPE_GROUPS: Record<string, string[]> = {
+  "Brew Module": ["Brew module"],
+  "Medium Brew Module": ["Brew module"],
+  "Large Brew Module": ["Brew module"],
+  "Steam S Module": ["Steam module"],
+  "Steam M Module": ["Steam module"],
+  "Hydraulic Module": ["Hydraulic module"],
+  "Grinder Module": ["Grinder module"],
+  "Milk Module": ["Milk module"],
+  "Pump Module": ["Pump module"],
+  "Powder Module": ["E'choco"],
+};
+
+function groupCovers(group: string, alias: string): boolean {
+  const g = group.toLowerCase();
+  const a = alias.toLowerCase();
+  return g === a || g.startsWith(`${a} `);
+}
+
+function moduleNoun(type: string): string {
+  return type
+    .replace(/\s+[SM]\s+Module$/i, " Module")
+    .replace(/^(Medium|Large)\s+/i, "")
+    .replace(/\s+Module$/i, "")
+    .trim()
+    .toLowerCase();
+}
+
+export type ModuleTypeFit = { ok: boolean; group: string | null; reason: string | null };
+
+function definedGroups(def: RunbookDefinition): string[] {
+  const names: string[] = [];
+  for (const k of def.kits) if (!names.includes(k.module)) names.push(k.module);
+  for (const g of def.steps) if (!names.includes(g.module)) names.push(g.module);
+  return names;
+}
+
+function whenKnown(
+  when: Record<string, string[]> | undefined | null,
+  c: RunbookConfig,
+  savedKeys: readonly string[] | null,
+): boolean {
+  if (!when) return true;
+  for (const k of Object.keys(when)) {
+    if (k === "pm") continue;
+    if (savedKeys && k !== "model" && !savedKeys.includes(k)) continue;
+    if ((when[k] ?? []).indexOf(String(c[k] ?? "")) === -1) return false;
+  }
+  return true;
+}
+
+/** The runbook group this type lands on for this config, or null when nothing applies. */
+function appliedGroup(def: RunbookDefinition, c: RunbookConfig, alias: string, savedKeys: readonly string[] | null): string | null {
+  for (const k of def.kits) {
+    if (!groupCovers(k.module, alias) || !whenKnown(k.when, c, savedKeys)) continue;
+    if (Number(resolve(k.qty, c)) > 0) return k.module;
+  }
+  for (const g of def.steps) {
+    if (!groupCovers(g.module, alias) || !whenKnown(g.when, c, savedKeys)) continue;
+    if (g.items.some((s) => whenKnown(s.when, c, savedKeys))) return g.module;
+  }
+  return null;
+}
+
+/**
+ * Whether this desk module type belongs on the unit. A type this runbook never mentions is allowed.
+ * `savedKeys` is the option keys actually stored on the unit. Omit it when the config is complete.
+ * With an empty list, only the model can exclude a type, so E'choco stays allowed until someone saves choco.
+ */
+export function moduleTypeFit(
+  def: RunbookDefinition,
+  c: RunbookConfig,
+  moduleType: string,
+  savedKeys?: readonly string[] | null,
+): ModuleTypeFit {
+  const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
+  const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
+  const known = definedGroups(def);
+  const knownAlias = aliases.find((alias) => known.some((g) => groupCovers(g, alias)));
+  if (!knownAlias) return { ok: true, group: null, reason: null };
+  const hit = appliedGroup(def, c, knownAlias, savedKeys === undefined ? null : savedKeys);
+  if (hit) return { ok: true, group: hit, reason: null };
+  return { ok: false, group: null, reason: `${label} has no ${moduleNoun(moduleType)} module` };
+}
+
+export function platformFit(
+  allowed: readonly string[],
+  platform: string,
+  machineLabel: string,
+): { ok: boolean; reason: string | null } {
+  if (allowed.includes(platform)) return { ok: true, reason: null };
+  const which = allowed.length ? allowed.join(" or ") : "another platform";
+  return { ok: false, reason: `${machineLabel} is ${which}, not ${platform}.` };
+}
+
+/** Why this module cannot go on this unit, or null when it can. A blank type or platform is not a reason. */
+export function moduleAssignmentBlock(
+  def: RunbookDefinition,
+  c: RunbookConfig,
+  moduleType: string | null | undefined,
+  platform: string | null | undefined,
+  allowedPlatforms: readonly string[],
+  savedKeys?: readonly string[] | null,
+): string | null {
+  const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
+  if (platform) {
+    const platformReason = platformFit(allowedPlatforms, platform, label).reason;
+    if (platformReason) return platformReason;
+  }
+  if (moduleType) {
+    const typeReason = moduleTypeFit(def, c, moduleType, savedKeys).reason;
+    if (typeReason) return typeReason;
+  }
+  return null;
+}
+
 /** First model, first interval, each option at its default (or first choice). */
 export function defaultConfig(def: RunbookDefinition): RunbookConfig {
   const d: RunbookConfig = { model: def.models[0].id, pm: def.intervals[0].id };
@@ -236,4 +387,40 @@ export function canWriteRunbook(role: RunbookRole, isAdmin: boolean): boolean {
 /** Machine definitions: admin only for now. Kept separate so it is one line to change. */
 export function canEditRunbookDefinitions(role: RunbookRole, isAdmin: boolean): boolean {
   return isAdmin || role === "admin";
+}
+
+/** Activity action for the one service record a completed PM writes on a unit. */
+export const PM_SERVICE_ACTION = "pm service";
+
+/** Opening of that record. A later save looks for this so it does not write a second one. */
+export function pmServicePrefix(pmId: number): string {
+  return `PM #${pmId} completed`;
+}
+
+export function isPmServiceRecord(action: string, detail: string | null | undefined, pmId: number): boolean {
+  return action === PM_SERVICE_ACTION && String(detail ?? "").startsWith(pmServicePrefix(pmId));
+}
+
+/**
+ * One service record for a completed PM on one unit: the interval, the options, the kit list for that
+ * config, and the steps that were ticked. The caller passes only the ticked steps.
+ */
+export function pmServiceRecord(input: {
+  pmId: number;
+  modelLabel: string;
+  intervalLabel: string;
+  options: { label: string; value: string }[];
+  kits: { ev: string; q: number; name: string }[];
+  steps: string[];
+}): string {
+  const lines = [`${pmServicePrefix(input.pmId)}. ${input.modelLabel}, ${input.intervalLabel}.`];
+  lines.push(input.options.length ? `Options: ${input.options.map((o) => `${o.label}: ${o.value}`).join("; ")}.` : "Options: none.");
+  lines.push(input.kits.length ? `Kits: ${input.kits.map((k) => `${k.q} x ${k.ev} ${k.name}`).join("; ")}.` : "Kits: none.");
+  if (input.steps.length) {
+    lines.push("Steps done:");
+    for (const step of input.steps) lines.push(`- ${step}`);
+  } else {
+    lines.push("Steps done: none.");
+  }
+  return lines.join("\n");
 }

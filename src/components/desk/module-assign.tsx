@@ -4,6 +4,8 @@ import { Check, Coffee, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { getMyAccess } from "@/lib/ops/access";
 import { eversysFamily, moduleAccount } from "@/lib/ops/eversys";
+import { moduleAssignmentBlock, normalizeConfig } from "@/lib/ops/pm-runbook";
+import { runbookForPiece } from "@/lib/ops/runbooks";
 import {
   addEversysUnit,
   assignModule,
@@ -74,9 +76,22 @@ export function AssignModuleDialog({
   const family = module?.platform ?? null;
 
   useEffect(() => {
-    // One Eversys unit on the account: pick it for them.
-    if (list.length === 1 && unitId == null) setUnitId(list[0]!.id);
-  }, [list, unitId]);
+    // One Eversys unit on the account: pick it for them, unless this module does not fit it.
+    const only = list.length === 1 ? list[0] : null;
+    if (!only || unitId != null || !module) return;
+    const hit = runbookForPiece(only.model);
+    const block = hit?.model
+      ? moduleAssignmentBlock(
+          hit.runbook.def,
+          normalizeConfig(hit.runbook.def, { ...only.options, model: hit.model }),
+          module.moduleType,
+          module.platform,
+          hit.runbook.platforms,
+          Object.keys(only.options),
+        )
+      : null;
+    if (!block) setUnitId(only.id);
+  }, [list, unitId, module]);
 
   const addUnit = useMutation({
     mutationFn: () =>
@@ -140,16 +155,28 @@ export function AssignModuleDialog({
                   {list.map((u) => {
                     const on = unitId === u.id;
                     const mismatch = !!family && !!u.family && u.family !== family;
+                    const hit = runbookForPiece(u.model);
+                    const block = hit?.model
+                      ? moduleAssignmentBlock(
+                          hit.runbook.def,
+                          normalizeConfig(hit.runbook.def, { ...u.options, model: hit.model }),
+                          module.moduleType,
+                          module.platform,
+                          hit.runbook.platforms,
+                          Object.keys(u.options),
+                        )
+                      : null;
                     return (
                       <button
                         key={u.id}
                         type="button"
                         role="radio"
                         aria-checked={on}
+                        disabled={!!block}
                         data-testid={`unit-${u.id}`}
                         onClick={() => setUnitId(u.id)}
                         className={cn(
-                          "flex items-start gap-3 rounded-lg border px-3 py-2.5 text-left text-sm",
+                          "flex items-start gap-3 rounded-lg border px-3 py-2.5 text-left text-sm disabled:cursor-not-allowed disabled:opacity-70",
                           on ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-muted/60",
                         )}
                       >
@@ -174,6 +201,7 @@ export function AssignModuleDialog({
                               This unit is {u.family} — the module is listed as {family}.
                             </span>
                           ) : null}
+                          {block ? <span className="mt-0.5 block text-xs text-muted-foreground">{block}</span> : null}
                         </span>
                       </button>
                     );

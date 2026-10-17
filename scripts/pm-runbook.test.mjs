@@ -11,8 +11,14 @@ import {
   recommendInterval,
   kitList,
   kitListText,
+  isPmServiceRecord,
   matchE4XWide,
+  moduleAssignmentBlock,
+  moduleTypeFit,
   normalizeConfig,
+  platformFit,
+  pmServiceRecord,
+  applicableModules,
   stepList,
   totalKits,
 } from "../src/lib/ops/pm-runbook.ts";
@@ -111,7 +117,7 @@ test("service and admin write; sales and warehouse read only; definitions admin 
   assert.equal(canEditRunbookDefinitions("admin", false), true);
 });
 
-import { optionsKeyFor, planUnits } from "../src/lib/ops/pm-runbook-units.ts";
+import { optionsKeyFor, planUnits, pmCompletionRefusal, unloggedUnitLines } from "../src/lib/ops/pm-runbook-units.ts";
 
 const matcher = (piece) => {
   const h = matchE4XWide(piece);
@@ -230,4 +236,88 @@ test("units: pieceKey is the key a line had before it matched an account unit", 
   const after = planUnits(text, rows, matcher);
   assert.deepEqual(after.map((u) => u.pieceKey), before.map((u) => u.unitKey));
   assert.deepEqual(after.map((u) => u.unitKey), ["acct:4", before[1].unitKey, "acct:5"]);
+});
+
+test("a PM cannot be completed while a runbook line has no account unit or no serial", () => {
+  const none = planUnits("e'4m X-Wide\nLa Marzocco GB5", [], matcher);
+  assert.deepEqual(unloggedUnitLines(none), ["e'4m X-Wide"]);
+  assert.match(pmCompletionRefusal(none), /e'4m X-Wide/);
+  const noSerial = planUnits("e'4s X-Wide", [{ id: 8, catalogModel: "e'4s X-Wide", equipmentName: "e'4s X-Wide", serial: "N/A", installDate: "2024-01-01" }], matcher);
+  assert.equal(noSerial[0].accountId, 8);
+  assert.match(pmCompletionRefusal(noSerial), /e'4s X-Wide/);
+  const logged = planUnits("e'4m X-Wide", [{ id: 7, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: "SN 100" }], matcher);
+  assert.equal(pmCompletionRefusal(logged), null);
+  assert.equal(pmCompletionRefusal(planUnits("La Marzocco GB5", [], matcher)), null);
+});
+
+test("a pinned account unit is used for that line and is not taken by an earlier line", () => {
+  const text = "e'4m X-Wide\ne'4s X-Wide";
+  const bare = planUnits(text, [], matcher);
+  const rows = [
+    { id: 1, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: "A" },
+    { id: 2, catalogModel: "Other grinder", equipmentName: "Other grinder", serial: "B" },
+  ];
+  const pinned = { [bare[1].pieceKey]: 1 };
+  const units = planUnits(text, rows, matcher, pinned);
+  assert.equal(units[0].accountId, null);
+  assert.equal(units[1].accountId, 1);
+  assert.equal(units[1].serial, "A");
+  assert.match(pmCompletionRefusal(units), /e'4m X-Wide/);
+  assert.doesNotMatch(pmCompletionRefusal(units) ?? "", /e'4s/);
+  assert.equal(units[1].pieceKey, bare[1].pieceKey);
+});
+
+test("E'4S has no milk module or milk frame; E'4MS has both", () => {
+  const s12 = applicableModules(def, cfg({ model: "4s", pm: "12", choco: "no" }));
+  const s36 = applicableModules(def, cfg({ model: "4s", pm: "36", choco: "no" }));
+  assert.deepEqual(s12, s36);
+  for (const name of ["Brew module", "Hydraulic module", "Steam module", "Grinder module"]) {
+    assert.ok(s12.includes(name), name);
+  }
+  assert.equal(s12.includes("Milk module"), false);
+  assert.equal(s12.includes("Milk module V2"), false);
+  assert.equal(s12.includes("Frame"), false);
+  assert.equal(s12.includes("E'choco"), false);
+  const ms = applicableModules(def, cfg({ model: "4ms", pm: "12", choco: "1" }));
+  assert.ok(ms.includes("Milk module"));
+  assert.ok(ms.includes("Frame"));
+  assert.ok(ms.includes("E'choco"));
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Milk Module").ok, false);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Milk Module").reason, "E'4S X-Wide has no milk module");
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms" }), "Milk Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Brew Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Pump Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s", choco: "no" }), "Powder Module").ok, false);
+  assert.match(moduleTypeFit(def, cfg({ model: "4s", choco: "no" }), "Powder Module").reason ?? "", /has no powder module/);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s", choco: "1" }), "Powder Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms", choco: "2" }), "Powder Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms" }), "Powder Module", []).ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Powder Module", []).ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Milk Module", []).ok, false);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms", choco: "no" }), "Powder Module", ["choco"]).ok, false);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms", choco: "no" }), "Powder Module", ["choco"]).reason, "E'4MS X-Wide (milk) has no powder module");
+  assert.equal(platformFit(["Enigma / e'Line"], "Enigma / e'Line", "E'4S X-Wide").ok, true);
+  assert.equal(platformFit(["Enigma / e'Line"], "Cameo", "E'4S X-Wide").reason, "E'4S X-Wide is Enigma / e'Line, not Cameo.");
+  const blocked = moduleAssignmentBlock(def, cfg({ model: "4s" }), "Milk Module", "Cameo", ["Enigma / e'Line"]);
+  assert.match(blocked ?? "", /not Cameo/);
+  assert.equal(moduleAssignmentBlock(def, cfg({ model: "4ms" }), "Milk Module", "Enigma / e'Line", ["Enigma / e'Line"]), null);
+});
+
+test("a completed PM writes one service record and a later edit is not a second copy", () => {
+  const text = pmServiceRecord({
+    pmId: 12,
+    modelLabel: "E'4MS X-Wide",
+    intervalLabel: "12-month PM",
+    options: [{ label: "Steam wands", value: "1" }],
+    kits: [{ ev: "EV117077", q: 2, name: "Brew PM kit" }],
+    steps: ["Grease the brew group"],
+  });
+  assert.match(text, /^PM #12 completed\. E'4MS X-Wide, 12-month PM\./);
+  assert.match(text, /Options: Steam wands: 1\./);
+  assert.match(text, /Kits: 2 x EV117077 Brew PM kit\./);
+  assert.match(text, /Steps done:\n- Grease the brew group$/);
+  assert.equal(isPmServiceRecord("pm service", text, 12), true);
+  assert.equal(isPmServiceRecord("pm service", text, 123), false);
+  assert.equal(isPmServiceRecord("options changed", text, 12), false);
+  assert.equal(pmServiceRecord({ pmId: 3, modelLabel: "E'4S X-Wide", intervalLabel: "36-month PM", options: [], kits: [], steps: [] }), "PM #3 completed. E'4S X-Wide, 36-month PM.\nOptions: none.\nKits: none.\nSteps done: none.");
 });

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
+import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook } from "./pm-runbook-api";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
 import { boardLocked, cleanTime, type BoardType } from "./day-board";
@@ -993,6 +994,22 @@ export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddl
 	const c = cur[0];
 	const status = data.status ?? c.status;
 	const done = data.done === undefined ? data.status === undefined ? c.done : CLOSED_PM.has(status) : data.done;
+	const completedAt = data.completedAt === undefined ? c.completed_at : data.completedAt;
+	const completing =
+		(status === "Completed" && c.status !== "Completed") ||
+		(done === true && !c.done && status !== "Cancelled") ||
+		(!!completedAt && !c.completed_at);
+	let completionPlan: Awaited<ReturnType<typeof loadPmRunbookPlan>> | null = null;
+	if (completing) {
+		completionPlan = await loadPmRunbookPlan(
+			sql,
+			String(data.customer ?? c.customer ?? ""),
+			data.equipment === undefined ? c.equipment : data.equipment,
+			data.id,
+		);
+		const refusal = pmCompletionRefusal(completionPlan.planned);
+		if (refusal) throw new Error(refusal);
+	}
 	await sql`
       update pm_jobs set
         customer = ${data.customer ?? c.customer},
@@ -1016,6 +1033,9 @@ export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddl
 		changed("equipment", c.equipment, data.equipment === undefined ? c.equipment : data.equipment)
 	]);
 	if (extra) await logActivity(sql, context.userId, "pm", data.id, "updated", extra);
+	if (completing && completionPlan) {
+		await recordCompletedRunbook(sql, data.id, context.userId, completionPlan.planned, data.style === undefined ? c.style : data.style);
+	}
 	return mapPm((await sql`select * from pm_jobs where id = ${data.id}`)[0], todayChicago());
 });
 export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; style?: string }) => d).handler(async ({ data, context }: any) => {

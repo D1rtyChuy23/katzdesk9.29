@@ -7,10 +7,12 @@ export type RegisteredRunbook = {
   def: RunbookDefinition;
   /** Recognises a unit in free equipment text; `model` is a definition model id or null when the tech must pick. */
   matchPiece: (piece: string) => { model: string | null } | null;
+  /** Module platforms this machine uses. Others are refused with a reason. */
+  platforms: readonly string[];
 };
 
 export const RUNBOOKS: RegisteredRunbook[] = [
-  { def: parseRunbookDefinition(e4xwide), matchPiece: matchE4XWide },
+  { def: parseRunbookDefinition(e4xwide), matchPiece: matchE4XWide, platforms: ["Enigma / e'Line"] },
 ];
 
 export function runbookById(id: string): RegisteredRunbook | undefined {

@@ -7,23 +7,33 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { normalizeCustomerKey } from "@/lib/ops/account-equip";
+import { normalizeCustomerKey, parseSerial, serialKey } from "@/lib/ops/account-equip";
 import { RUNBOOKS, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
   canWriteRunbook,
   intervalFromStyle,
+  kitList,
   nextFromHistory,
   normalizeConfig,
+  PM_SERVICE_ACTION,
+  pmServicePrefix,
+  pmServiceRecord,
   recommendInterval,
+  stepList,
+  visibleOptions,
   type RunbookRole,
 } from "@/lib/ops/pm-runbook";
-import { planUnits } from "@/lib/ops/pm-runbook-units";
+import { planUnits, pmCompletionRefusal, type AccountUnitRow, type PlannedUnit } from "@/lib/ops/pm-runbook-units";
 import { catalogKeys, pickCatalog, type CatalogKit } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig } from "@/lib/ops/pm-runbook-schema";
 
 export type RunbookUnit = {
   unitKey: string;
+  pieceKey: string;
+  accountId: number | null;
+  /** True when this line is an account unit with a serial. */
+  logged: boolean;
   piece: string;
   serial: string | null;
   /** Where options are stored: the serial, else 'acct:<id>', else null (options then stay with this PM only). */
@@ -53,8 +63,16 @@ export type RunbookUnit = {
   earlier: { pmId: number; status: string; completedAt: string | null; kits: number; steps: number }[];
 };
 
+export type RunbookAccountUnit = {
+  id: number;
+  name: string;
+  serial: string | null;
+  installDate: string | null;
+};
+
 export type PmRunbookData = {
   units: RunbookUnit[];
+  accountUnits: RunbookAccountUnit[];
   canWrite: boolean;
   canEditDefinitions: boolean;
 };
@@ -85,11 +103,130 @@ async function who(sql: Sql, userId: string) {
   };
 }
 
+/**
+ * After a PM passes the completion check, write one service record on each unit's existing history
+ * (`activity`, entity_type `unit_runbook`). A second completion or a later edit finds that row and does nothing.
+ */
+export async function recordCompletedRunbook(
+  sql: Sql,
+  pmId: number,
+  userId: string,
+  planned: PlannedUnit[],
+  style: string | null,
+): Promise<void> {
+  const me = await who(sql, userId);
+  const units = planned.filter((u) => u.optionsKey && runbookById(u.runbookId));
+  if (!units.length) return;
+  const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown }>(
+    "select unit_key, model, interval_mo, options from pm_runbook_units where pm_job_id = $1",
+    [pmId],
+  );
+  const checks = await sql.query<{ unit_key: string; key: string }>(
+    "select unit_key, key from pm_runbook_checks where pm_job_id = $1 and (key like 'step:%' or key like 'kit:%')",
+    [pmId],
+  );
+  const keys = units.map((u) => u.optionsKey).filter((k): k is string => !!k);
+  const optRows = await sql.query<{ id: number; unit_key: string; options: unknown }>(
+    "select id, unit_key, options from unit_runbook_options where unit_key = any($1::text[])",
+    [keys],
+  );
+  for (const u of units) {
+    const rb = runbookById(u.runbookId);
+    if (!rb || !u.optionsKey) continue;
+    const s = saved.find((x) => x.unit_key === u.unitKey);
+    const optRow = optRows.find((r) => r.unit_key === u.optionsKey);
+    const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
+    const config = normalizeConfig(rb.def, {
+      ...options,
+      model: s?.model ?? u.model ?? undefined,
+      pm: s?.interval_mo ?? intervalFromStyle(rb.def, style) ?? undefined,
+    });
+    const ticked = new Set(checks.filter((c) => c.unit_key === u.unitKey).map((c) => c.key));
+    const detail = pmServiceRecord({
+      pmId,
+      modelLabel: rb.def.models.find((m) => m.id === config.model)?.label ?? u.piece,
+      intervalLabel: rb.def.intervals.find((i) => i.id === config.pm)?.label ?? `${config.pm}-month PM`,
+      options: visibleOptions(rb.def, config).map((o) => ({
+        label: o.label,
+        value: o.choices.find((c) => c.val === config[o.key])?.label ?? String(config[o.key] ?? ""),
+      })),
+      kits: kitList(rb.def, config)
+        .filter((k) => ticked.has(`kit:${k.ev}`))
+        .map((k) => ({ ev: k.ev, q: k.q, name: k.name })),
+      steps: stepList(rb.def, config)
+        .flatMap((g) => g.items)
+        .filter((item) => ticked.has(`step:${item.id}`))
+        .map((item) => item.text),
+    });
+    let historyId = optRow?.id ?? null;
+    if (historyId == null) {
+      const made = await sql.query<{ id: number }>(
+        `insert into unit_runbook_options (unit_key, serial_key, runbook_id, options, updated_by)
+         values ($1, case when $1 like 'acct:%' then null else $1 end, $2, $3::jsonb, $4)
+         on conflict (unit_key) do nothing
+         returning id`,
+        [u.optionsKey, u.runbookId, JSON.stringify(options), me.name],
+      );
+      historyId = made[0]?.id ?? (await sql.query<{ id: number }>("select id from unit_runbook_options where unit_key = $1", [u.optionsKey]))[0]?.id ?? null;
+    }
+    if (historyId == null) continue;
+    const already = await sql.query<{ id: number }>(
+      `select id from activity
+        where entity_type = 'unit_runbook' and entity_id = $1 and action = $2 and detail like $3
+        limit 1`,
+      [historyId, PM_SERVICE_ACTION, `${pmServicePrefix(pmId)}%`],
+    );
+    if (already[0]) continue;
+    await sql.query(
+      "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('unit_runbook', $1, $2, $3, $4)",
+      [historyId, me.name, PM_SERVICE_ACTION, detail],
+    );
+  }
+}
+
 async function requireWriter(sql: Sql, userId: string) {
   const me = await who(sql, userId);
   if (!me.canWrite) throw new Error("Only Service and Admin can change the runbook.");
   return me;
 }
+
+function pmMatcher(piece: string): { runbookId: string; model: string | null } | null {
+  for (const rb of RUNBOOKS) {
+    const h = rb.matchPiece(piece);
+    if (h) return { runbookId: rb.def.id, model: h.model };
+  }
+  return null;
+}
+
+/** Account units and the runbook lines for one PM, including a line pinned to a specific asset. */
+export async function loadPmRunbookPlan(
+  sql: Sql,
+  customer: string,
+  equipment: string | null,
+  pmId: number,
+): Promise<{ planned: PlannedUnit[]; accountUnits: RunbookAccountUnit[]; rows: AccountUnitRow[] }> {
+  const acct = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null; install_date: string | null }>(
+    "select id, customer, catalog_model, equipment_name, serial, install_date::text as install_date from account_equipment where lower(customer) = lower($1) order by id",
+    [customer],
+  );
+  const key = normalizeCustomerKey(customer);
+  const rows = acct
+    .filter((r) => normalizeCustomerKey(r.customer) === key)
+    .map((r) => ({ id: r.id, catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial, installDate: r.install_date }));
+  const links = await sql.query<{ piece_key: string; account_equipment_id: number }>(
+    "select piece_key, account_equipment_id from pm_runbook_unit_links where pm_job_id = $1",
+    [pmId],
+  );
+  const pinned: Record<string, number> = {};
+  for (const link of links) pinned[link.piece_key] = Number(link.account_equipment_id);
+  return {
+    planned: planUnits(equipment, rows, pmMatcher, pinned),
+    accountUnits: rows.map((r) => ({ id: r.id, name: r.equipmentName || r.catalogModel, serial: r.serial, installDate: r.installDate ?? null })),
+    rows,
+  };
+}
+
+export { pmCompletionRefusal };
 
 const unitInput = z.object({
   pmId: z.number().int().positive(),
@@ -102,7 +239,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<PmRunbookData> => {
     const sql = await ready();
     const me = await who(sql, context.userId);
-    const empty = { units: [], canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions };
+    const empty = { units: [], accountUnits: [], canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions };
     const pm = (
       await sql.query<{ customer: string; equipment: string | null; style: string | null }>(
         "select customer, equipment, style from pm_jobs where id = $1",
@@ -111,22 +248,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     )[0];
     if (!pm) return empty;
 
-    const acct = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null; install_date: string | null }>(
-      "select id, customer, catalog_model, equipment_name, serial, install_date::text as install_date from account_equipment where lower(customer) = lower($1) order by id",
-      [pm.customer],
-    );
-    const key = normalizeCustomerKey(pm.customer);
-    const rows = acct
-      .filter((r) => normalizeCustomerKey(r.customer) === key)
-      .map((r) => ({ id: r.id, catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial, installDate: r.install_date }));
-
-    const planned = planUnits(pm.equipment, rows, (piece) => {
-      for (const rb of RUNBOOKS) {
-        const h = rb.matchPiece(piece);
-        if (h) return { runbookId: rb.def.id, model: h.model };
-      }
-      return null;
-    });
+    const { planned, accountUnits, rows } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
     if (!planned.length) return empty;
 
     // A line that was ticked before its account unit existed is now matched: move that work to the unit.
@@ -262,6 +384,17 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         where pm_job_id = any($1::int[]) and interval_mo is not null`,
       [doneRows.map((r) => r.id)],
     );
+    const earlierLinks = doneRows.length
+      ? await sql.query<{ pm_job_id: number; piece_key: string; account_equipment_id: number }>(
+          "select pm_job_id, piece_key, account_equipment_id from pm_runbook_unit_links where pm_job_id = any($1::int[])",
+          [doneRows.map((r) => r.id)],
+        )
+      : [];
+    const earlierPins: Record<number, Record<string, number>> = {};
+    for (const link of earlierLinks) {
+      const bag = earlierPins[link.pm_job_id] ?? (earlierPins[link.pm_job_id] = {});
+      bag[link.piece_key] = Number(link.account_equipment_id);
+    }
     const pmMatcher = (piece: string) => {
       for (const rb of RUNBOOKS) {
         const h = rb.matchPiece(piece);
@@ -272,7 +405,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     const fullPms = (u: (typeof planned)[number], def: NonNullable<ReturnType<typeof runbookById>>["def"]) => {
       const out = new Map<number, { pmId: number; interval: string; completedAt: string | null }>();
       for (const d of doneRows) {
-        const hit = planUnits(d.equipment, rows, pmMatcher).find((x) => x.unitKey === u.unitKey);
+        const hit = planUnits(d.equipment, rows, pmMatcher, earlierPins[d.id]).find((x) => x.unitKey === u.unitKey);
         if (!hit) continue;
         const interval =
           savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === u.unitKey)?.interval_mo ?? intervalFromStyle(def, d.style);
@@ -304,6 +437,9 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       for (const c of checks) if (c.unit_key === u.unitKey) ticks[c.key] = { by: c.done_by, at: String(c.done_at) };
       return {
         unitKey: u.unitKey,
+        pieceKey: u.pieceKey,
+        accountId: u.accountId,
+        logged: u.accountId != null && !!u.serialKey,
         piece: u.piece,
         serial: u.serial,
         optionsKey: u.optionsKey,
@@ -330,12 +466,154 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         history: optRow
           ? hist
               .filter((h) => h.entity_id === optRow.id)
-              .slice(0, 8)
+              .slice(0, 20)
               .map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: h.detail ?? "" }))
           : [],
       };
     });
-    return { units, canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions };
+    return { units, accountUnits, canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions };
+  });
+
+const logAssetInput = z.object({
+  pmId: z.number().int().positive(),
+  pieceKey: z.string().min(1).max(300),
+  accountId: z.number().int().positive().nullable(),
+  serial: z.string().max(80),
+  installDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  /** Move the account unit that already has this serial onto this customer, then pin the line. */
+  move: z.boolean().optional(),
+});
+
+/**
+ * Log one runbook line as an account asset: pick a unit on this customer, or add one.
+ * The model comes from the runbook. A serial is required. The install date is optional.
+ * Ticks already saved under the line's piece key move on the next load, the same way a later match does.
+ */
+export const logRunbookAsset = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof logAssetInput>) => logAssetInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    const me = await requireWriter(sql, context.userId);
+    const pm = (
+      await sql.query<{ customer: string; equipment: string | null }>("select customer, equipment from pm_jobs where id = $1", [data.pmId])
+    )[0];
+    if (!pm) throw new Error("PM not found");
+    const { planned } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
+    const line = planned.find((u) => u.pieceKey === data.pieceKey);
+    if (!line) throw new Error("That line is not a runbook unit on this PM.");
+    const serialText = data.serial.trim();
+    const installDate = data.installDate || null;
+    let accountId = data.accountId;
+
+    const claimSerial = async (parsed: string, key: string): Promise<number | null> => {
+      const dup = (
+        await sql.query<{ id: number; customer: string }>("select id, customer from account_equipment where serial_key = $1 limit 1", [key])
+      )[0];
+      if (!dup) return null;
+      if (accountId != null && Number(dup.id) === accountId) return accountId;
+      if (normalizeCustomerKey(dup.customer) === normalizeCustomerKey(pm.customer) || !data.move) {
+        throw new Error(`Serial ${parsed} is already on ${dup.customer}.`);
+      }
+      const taken = await sql.query<{ piece_key: string }>(
+        "select piece_key from pm_runbook_unit_links where pm_job_id = $1 and account_equipment_id = $2 and piece_key <> $3",
+        [data.pmId, dup.id, data.pieceKey],
+      );
+      if (taken[0]) throw new Error("That unit is already logged on another line of this PM.");
+      await sql.query("update account_equipment set customer = $2, updated_at = now() where id = $1", [Number(dup.id), pm.customer]);
+      const attached = await sql.query<{ id: number; assigned_unit_label: string | null }>(
+        "select id, assigned_unit_label from modules where assigned_unit_id = $1",
+        [Number(dup.id)],
+      );
+      if (attached.length) {
+        await sql.query("update modules set assigned_customer = $2, location = $2, updated_at = now() where assigned_unit_id = $1", [
+          Number(dup.id),
+          pm.customer,
+        ]);
+        for (const m of attached) {
+          await sql.query(
+            `insert into module_stops (module_id, kind, customer, unit_id, unit_label, from_place, to_place, by_name)
+             values ($1, 'moved', $2, $3, $4, $5, $2, $6)`,
+            [m.id, pm.customer, Number(dup.id), m.assigned_unit_label, dup.customer, me.name],
+          );
+        }
+      }
+      const detail = `Moved SN ${parsed} from ${dup.customer} to ${pm.customer}.`;
+      for (const name of [dup.customer, pm.customer]) {
+        const acct = (
+          await sql.query<{ id: number }>(
+            "select id from directory_customers where archived = false and lower(name) = lower($1) limit 1",
+            [name],
+          )
+        )[0];
+        if (!acct) continue;
+        await sql.query(
+          "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('customer', $1, $2, 'equipment moved', $3)",
+          [acct.id, me.name, detail],
+        );
+      }
+      return Number(dup.id);
+    };
+
+    if (accountId == null) {
+      const parsed = parseSerial(serialText);
+      if (!parsed) throw new Error("Enter the serial.");
+      const key = serialKey(parsed);
+      const moved = await claimSerial(parsed, key);
+      if (moved != null) {
+        accountId = moved;
+      } else {
+        const rb = runbookById(line.runbookId);
+        const model = rb?.def.models.find((m) => m.id === line.model)?.label ?? line.piece;
+        const inserted = await sql.query<{ id: number }>(
+          `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date)
+           values ($1, $2, $2, $3, $4, $5) returning id`,
+          [pm.customer, model, parsed, key, installDate],
+        );
+        if (!inserted[0]) throw new Error("Could not add that unit.");
+        accountId = Number(inserted[0].id);
+      }
+    } else {
+      const row = (
+        await sql.query<{ id: number; customer: string; serial: string | null; serial_key: string | null; install_date: string | null }>(
+          "select id, customer, serial, serial_key, install_date::text as install_date from account_equipment where id = $1",
+          [accountId],
+        )
+      )[0];
+      if (!row || normalizeCustomerKey(row.customer) !== normalizeCustomerKey(pm.customer)) {
+        throw new Error("That unit is not on this account.");
+      }
+      const existing = parseSerial(row.serial);
+      const parsed = parseSerial(serialText);
+      if (!existing && !parsed) throw new Error("Enter the serial.");
+      if (!existing && parsed) {
+        const key = serialKey(parsed);
+        const moved = await claimSerial(parsed, key);
+        if (moved != null && moved !== accountId) accountId = moved;
+        else if (moved == null) {
+          await sql.query(
+            `update account_equipment
+                set serial = $2, serial_key = $3, install_date = coalesce(install_date, $4), updated_at = now()
+              where id = $1`,
+            [accountId, parsed, key, installDate],
+          );
+        }
+      } else if (installDate && !row.install_date) {
+        await sql.query("update account_equipment set install_date = $2, updated_at = now() where id = $1", [accountId, installDate]);
+      }
+    }
+    const taken = await sql.query<{ piece_key: string }>(
+      "select piece_key from pm_runbook_unit_links where pm_job_id = $1 and account_equipment_id = $2 and piece_key <> $3",
+      [data.pmId, accountId, data.pieceKey],
+    );
+    if (taken[0]) throw new Error("That account unit is already logged on another line of this PM.");
+    await sql.query(
+      `insert into pm_runbook_unit_links (pm_job_id, piece_key, account_equipment_id)
+       values ($1, $2, $3)
+       on conflict (pm_job_id, piece_key) do update set account_equipment_id = excluded.account_equipment_id`,
+      [data.pmId, data.pieceKey, accountId],
+    );
+    return { ok: true, accountId };
   });
 
 /** The unit's serial (not 'acct:<id>'), so earlier PMs are found by serial. Null when there is none yet. */

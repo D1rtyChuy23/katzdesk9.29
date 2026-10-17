@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { emailHref, fileError, fileUrl, MAX_FILE_BYTES, mimeFor, opensInline, sortByName, textHref } from "../src/lib/ops/library-file-rules.ts";
+import { canEditFromRole, emailHref, fileError, fileUrl, MAX_FILE_BYTES, mimeFor, opensInline, sortByName, textHref } from "../src/lib/ops/library-file-rules.ts";
 
 test("PDF, images and Word are accepted; anything else gets a clear message", () => {
   for (const n of ["a.pdf", "A.PDF", "b.png", "c.jpg", "d.jpeg", "e.webp", "f.gif", "g.doc", "h.docx"]) assert.equal(fileError(n, 1000), null, n);
@@ -237,7 +237,7 @@ test("PM Guide is a manual type, and a typed file name keeps the file's extensio
   assert.ok("error" in customFileName(" ", "old.pdf"));
 });
 
-import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, isMainChip, mainChipFor, removedCopies, variationsOf } from "../src/lib/ops/library-file-rules.ts";
+import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, classifyImportDuplicates, collapseImportTargets, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, importFailureSettled, importSkipReason, isMainChip, mainChipFor, removedCopies, shouldStartDownload, variationsOf, withDuplicateMarker } from "../src/lib/ops/library-file-rules.ts";
 
 const fam = [
   { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
@@ -257,9 +257,20 @@ const famFiles = [
   { id: 14, section: "manuals", bookId: 6 },
 ];
 
-test("the main chip is the variation named like its parent", () => {
-  assert.equal(isMainChip(fam[0]), true);
-  assert.equal(isMainChip(fam[2]), false);
+test("the main chip is the variation named like its parent, and only when the family has another book", () => {
+  assert.equal(isMainChip(fam[0], fam), true);
+  assert.equal(isMainChip(fam[2], fam), false);
+  assert.equal(isMainChip({ id: 43, title: "BUNN TB3", manufacturer: "BUNN" }, [{ id: 43, title: "BUNN TB3", manufacturer: "BUNN" }]), false);
+  assert.equal(isMainChip({ id: 126, title: "Ditting 1403", manufacturer: "Ditting" }, [{ id: 126, title: "Ditting 1403", manufacturer: "Ditting" }]), false);
+  assert.equal(isMainChip({ id: 142, title: "Vitrifrigo FG20i", manufacturer: "Vitrifrigo" }, [{ id: 142, title: "Vitrifrigo FG20i", manufacturer: "Vitrifrigo" }]), false);
+  const eversys = [
+    { id: 20, title: "Eversys Cameo", manufacturer: "Eversys" },
+    { id: 21, title: "Eversys Cameo C'2s", manufacturer: "Eversys" },
+    { id: 22, title: "Eversys Legacy", manufacturer: "Eversys" },
+    { id: 23, title: "Eversys Legacy C'2s", manufacturer: "Eversys" },
+  ];
+  assert.equal(isMainChip(eversys[0], eversys), true);
+  assert.equal(isMainChip(eversys[2], eversys), true);
   assert.equal(mainChipFor(fam[2], fam)?.id, 1);
   assert.equal(mainChipFor(fam[3], fam)?.id, 1);
   assert.equal(mainChipFor(fam[0], fam), null);
@@ -374,3 +385,194 @@ test("the empty duplicate books are removed only when the id, title and emptines
   assert.equal(cleanupBookDecision(CLEANUP_BOOKS[0], null).action, "missing");
   assert.equal(cleanupBookDecision(CLEANUP_BOOKS[1], { ...empty, id: 35, title: CLEANUP_BOOKS[1].title }).action, "remove");
 });
+
+const axiom = [
+  { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
+  { id: 2, title: "BUNN AXIOM-DV-APS", manufacturer: "BUNN" },
+  { id: 3, title: "BUNN AXIOM-15-3 (2U/1L)", manufacturer: "BUNN" },
+  { id: 4, title: "BUNN AXIOM-35-3", manufacturer: "BUNN" },
+  { id: 5, title: "BUNN AXIOM-DV-TC", manufacturer: "BUNN" },
+  { id: 6, title: "BUNN AXIOM-APS", manufacturer: "BUNN" },
+];
+const axiomName = (title) => `${title} - Manual 41154.0000`;
+
+test("targets on all 5 BUNN AXIOM variations become one target on BUNN AXIOM", () => {
+  const targets = [2, 3, 4, 5, 6].map((id) => ({
+    bookId: id,
+    section: "manuals",
+    docType: "Programming Manual",
+    name: axiomName(axiom.find((b) => b.id === id).title),
+  }));
+  const out = collapseImportTargets(targets, axiom);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].bookId, 1);
+  assert.equal(out[0].bookTitle, "BUNN AXIOM");
+  assert.equal(out[0].name, "BUNN AXIOM - Manual 41154.0000");
+  assert.equal(out.some((t) => t.missingBookId), false);
+});
+
+test("targets on 2 of 5 AXIOM variations stay on those books with the name unchanged", () => {
+  const targets = [
+    { bookId: 2, section: "manuals", docType: "Programming Manual", name: axiomName("BUNN AXIOM-DV-APS") },
+    { bookId: 3, section: "manuals", docType: "Programming Manual", name: axiomName("BUNN AXIOM-15-3 (2U/1L)") },
+  ];
+  const out = collapseImportTargets(targets, axiom);
+  assert.equal(out.length, 2);
+  assert.deepEqual(out.map((t) => t.bookId), [2, 3]);
+  assert.deepEqual(out.map((t) => t.name), [axiomName("BUNN AXIOM-DV-APS"), axiomName("BUNN AXIOM-15-3 (2U/1L)")]);
+});
+
+test("G1, G2, G3 and G9 grinders stay on their own books and no book is created", () => {
+  const grinders = [
+    { id: 10, title: "BUNN G1 HD", manufacturer: "BUNN" },
+    { id: 11, title: "BUNN G2 HD", manufacturer: "BUNN" },
+    { id: 12, title: "BUNN G3 HD", manufacturer: "BUNN" },
+    { id: 13, title: "BUNN G9-2T DBC", manufacturer: "BUNN" },
+  ];
+  const targets = grinders.map((b) => ({ bookId: b.id, section: "manuals", docType: "User Manual", name: `${b.title} - Manual 46873.0000` }));
+  const out = collapseImportTargets(targets, grinders);
+  assert.equal(out.length, 4);
+  assert.deepEqual(out.map((t) => t.bookId), [10, 11, 12, 13]);
+  assert.deepEqual(out.map((t) => t.name), targets.map((t) => t.name));
+  assert.equal(out.every((t) => grinders.some((b) => b.id === t.bookId)), true);
+});
+
+test("Rancilio Classe 9 USB and Classe 9 USB Tall stay on those books, not Rancilio Classe", () => {
+  const classe = [
+    { id: 20, title: "Rancilio Classe", manufacturer: "Rancilio" },
+    { id: 21, title: "Rancilio Classe 5", manufacturer: "Rancilio" },
+    { id: 22, title: "Rancilio Classe 7", manufacturer: "Rancilio" },
+    { id: 23, title: "Rancilio Classe 9 USB", manufacturer: "Rancilio" },
+    { id: 24, title: "Rancilio Classe 9 USB Tall", manufacturer: "Rancilio" },
+  ];
+  const targets = [
+    { bookId: 23, section: "manuals", docType: "User Manual", name: "Rancilio Classe 9 USB - Manual 9USB" },
+    { bookId: 24, section: "manuals", docType: "User Manual", name: "Rancilio Classe 9 USB Tall - Manual 9USB" },
+  ];
+  const out = collapseImportTargets(targets, classe);
+  assert.equal(out.length, 2);
+  assert.deepEqual(out.map((t) => t.bookId), [23, 24]);
+  assert.deepEqual(out.map((t) => t.name), targets.map((t) => t.name));
+  assert.equal(out.some((t) => t.bookId === 20), false);
+});
+
+test("a single-target manual whose family has no main chip stays on its book", () => {
+  const books = [{ id: 30, title: "Mazzer Super Jolly", manufacturer: "Mazzer" }];
+  const targets = [{ bookId: 30, section: "manuals", docType: "User Manual", name: "Mazzer Super Jolly - Manual SJ" }];
+  const out = collapseImportTargets(targets, books);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].bookId, 30);
+  assert.equal(out[0].name, "Mazzer Super Jolly - Manual SJ");
+  assert.equal(out[0].missingBookId, undefined);
+});
+
+test("a spec sheet never collapses", () => {
+  const specs = collapseImportTargets(
+    [
+      { bookId: 3, section: "spec", docType: null, name: "BUNN AXIOM-15-3 (2U/1L) - Spec Sheet 38700.0000" },
+      { bookId: 4, section: "spec", docType: null, name: "BUNN AXIOM-35-3 - Spec Sheet 38700.0002" },
+    ],
+    axiom,
+  );
+  assert.equal(specs.length, 2);
+  assert.deepEqual(specs.map((t) => t.bookId), [3, 4]);
+  assert.equal(specs[0].name, "BUNN AXIOM-15-3 (2U/1L) - Spec Sheet 38700.0000");
+  assert.equal(specs[1].name, "BUNN AXIOM-35-3 - Spec Sheet 38700.0002");
+});
+
+test("a timeout or 5xx is not settled; 404 and Not a PDF are", () => {
+  assert.equal(importFailureSettled("Timed out. will retry"), false);
+  assert.equal(importFailureSettled("Download failed (503). will retry"), false);
+  assert.equal(importFailureSettled("Could not download. network down. will retry"), false);
+  assert.equal(importFailureSettled("Download failed (404)."), true);
+  assert.equal(importFailureSettled("Download failed (410)."), true);
+  assert.equal(importFailureSettled("Not a PDF."), true);
+  assert.equal(importFailureSettled("Larger than 20 MB."), true);
+});
+
+test("skip when the same name is on the book, or the same size and document number is in the family", () => {
+  const books = [
+    { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
+    { id: 2, title: "BUNN AXIOM-DV-APS", manufacturer: "BUNN" },
+    { id: 9, title: "Fetco CBS-1252", manufacturer: "Fetco" },
+  ];
+  const files = [
+    { name: "BUNN AXIOM - Programming 41154.0000", size: 1000, section: "manuals", bookId: 1, complete: true },
+    { name: "BUNN AXIOM-DV-APS - Parts 55012.pdf", docName: "55012.pdf", size: 2000, section: "parts", bookId: 2, complete: true },
+    { name: "Spec 55012.pdf", size: 2000, section: "spec", bookId: 2, complete: true },
+    { name: "Unfinished.pdf", size: 1000, section: "manuals", bookId: 1, complete: false },
+  ];
+  assert.equal(
+    importSkipReason({ name: "BUNN AXIOM - Programming 41154.0000", size: 5, section: "manuals", bookId: 1 }, books, files),
+    "Already on this book with the same name.",
+  );
+  assert.equal(
+    importSkipReason({ name: "BUNN AXIOM - Other 55012.pdf", size: 2000, section: "parts", bookId: 1 }, books, files),
+    "A manual or parts file in this family already has this size and document number.",
+  );
+  assert.equal(importSkipReason({ name: "BUNN AXIOM-DV-APS - Spec 55012.pdf", size: 2000, section: "spec", bookId: 2 }, books, files), null);
+  assert.equal(importSkipReason({ name: "Fetco CBS-1252 - Parts 55012.pdf", size: 2000, section: "parts", bookId: 9 }, books, files), null);
+  assert.equal(importSkipReason({ name: "Unfinished.pdf", size: 1000, section: "manuals", bookId: 1 }, books, files), null);
+  assert.equal(
+    importSkipReason({ name: "BUNN AXIOM - 6 Month PM", size: 4000, section: "manuals", bookId: 1 }, books, [
+      { name: "BUNN AXIOM - 12 Month PM", size: 4000, section: "manuals", bookId: 1, complete: true },
+    ]),
+    null,
+  );
+  assert.equal(
+    importSkipReason(
+      { name: "BUNN AXIOM - Programming 41154.0000", size: 5000, section: "manuals", bookId: 1 },
+      books,
+      [{ name: "BUNN AXIOM-DV-APS - Programming 41154.0000", size: 5000, section: "manuals", bookId: 2, complete: true }],
+    ),
+    "A manual or parts file in this family already has this size and document number.",
+  );
+  assert.equal(
+    importSkipReason(
+      { name: "BUNN AXIOM-15-3 (2U-1L) - Spec Sheet 38700.0000", size: 9, section: "spec", bookId: 2 },
+      books,
+      [{ name: "BUNN AXIOM-15-3 (2U-1L) - Spec Sheet 38700.0000.pdf", size: 9, section: "spec", bookId: 2, complete: true }],
+    ),
+    "Already on this book with the same name.",
+  );
+});
+
+test("a download is not started once the run has used 150 seconds", () => {
+  assert.equal(shouldStartDownload(149_999), true);
+  assert.equal(shouldStartDownload(150_000), false);
+  assert.equal(shouldStartDownload(150_001), false);
+});
+
+test("an import twin matches the older file once the extension is removed", () => {
+  const files = [
+    { id: 98, name: "X - Spec Sheet 38700.0000.pdf", size: 100, section: "spec", bookId: 3, fromImport: false },
+    { id: 531, name: "X - Spec Sheet 38700.0000", size: 100, section: "spec", bookId: 3, fromImport: true },
+    { id: 12, name: "BUNN AXIOM - 12 Month PM.pdf", size: 50, section: "manuals", bookId: 3, fromImport: false },
+    { id: 600, name: "BUNN AXIOM - 12 Month PM", size: 50, section: "manuals", bookId: 3, fromImport: true },
+    { id: 99, name: "X - Spec Sheet 38700.0000.pdf", size: 100, section: "spec", bookId: 4, fromImport: false },
+    { id: 601, name: "X - Spec Sheet 38700.0000", size: 180, section: "spec", bookId: 4, fromImport: true },
+    { id: 700, name: "X - Spec Sheet 38700.0000", size: 100, section: "spec", bookId: 9, fromImport: true },
+  ];
+  const out = classifyImportDuplicates(files);
+  assert.equal(out.twins.length, 2);
+  assert.deepEqual(out.twins.map((t) => [t.section, t.oldId, t.newId, t.size]), [
+    ["manuals", 12, 600, 50],
+    ["spec", 98, 531, 100],
+  ]);
+  assert.equal(out.differentSize.length, 1);
+  assert.equal(out.differentSize[0].oldId, 99);
+  assert.equal(out.differentSize[0].newId, 601);
+  assert.equal(out.twins.some((t) => t.bookId === 9), false);
+  assert.equal(withDuplicateMarker("X - Spec Sheet 38700.0000"), "X - Spec Sheet 38700.0000 - Duplicate To Delete");
+  assert.equal(withDuplicateMarker("Guide.pdf"), "Guide - Duplicate To Delete.pdf");
+});
+
+test("Add Files: admin flag, Admin role, or Sales can edit; Service and no role cannot", () => {
+  assert.equal(canEditFromRole({ is_admin: true, desk_role: null }), true);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: "admin" }), true);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: "sales" }), true);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: "service" }), false);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: null }), false);
+  assert.equal(canEditFromRole(null), false);
+});
+
