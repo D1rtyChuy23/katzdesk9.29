@@ -16,9 +16,15 @@ import {
   setRunbookUnitOptions,
   type RunbookUnit,
 } from "@/lib/ops/pm-runbook-api";
-import { banners, kitList, kitListText, optionKeys, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { listModules } from "@/lib/ops/api";
+import { moduleAvailability } from "@/lib/ops/eversys";
+import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
+import { assignModule } from "@/lib/ops/module-assign";
+import { banners, applicableModules, kitList, kitListText, moduleTypeFit, optionKeys, platformFit, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
+import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
+import type { ModuleRow } from "@/lib/ops/types";
 import { useCopy } from "./spec-sheet";
 
 function Seg({
@@ -54,6 +60,165 @@ function Seg({
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function UnitModules({
+  unit,
+  def,
+  config,
+  canWrite,
+  customer,
+  platforms,
+}: {
+  unit: RunbookUnit;
+  def: RunbookDefinition;
+  config: RunbookConfig;
+  canWrite: boolean;
+  customer: string;
+  platforms: readonly string[];
+}) {
+  const qc = useQueryClient();
+  const mods = useQuery({
+    queryKey: ["modules"],
+    queryFn: () => listModules(),
+    enabled: unit.accountId != null,
+  });
+  const [open, setOpen] = useState(false);
+  const [platform, setPlatform] = useState(platforms[0] ?? "");
+  const [type, setType] = useState("");
+  const label = def.models.find((m) => m.id === config.model)?.label ?? unit.piece;
+  const groups = applicableModules(def, config);
+  const mine = (mods.data ?? []).filter((m) => unit.accountId != null && m.assignedUnitId === unit.accountId);
+  const grouped = groups
+    .map((name) => ({
+      name,
+      rows: mine.filter((m) => moduleTypeFit(def, config, m.moduleType ?? "").group === name),
+    }))
+    .filter((g) => g.rows.length);
+  const typeOk = !!type && moduleTypeFit(def, config, type).ok;
+  const platformOk = !!platform && platformFit(platforms, platform, label).ok;
+  const spare = (mods.data ?? []).filter(
+    (m) => typeOk && platformOk && m.moduleType === type && m.platform === platform && moduleAvailability(m) === "hq",
+  );
+  const attach = useMutation({
+    mutationFn: (id: number) => assignModule({ data: { id, customer, unitId: unit.accountId! } }),
+    onSuccess: (r) => {
+      toast.success(`Attached to ${r.unit}`);
+      setOpen(false);
+      void qc.invalidateQueries({ queryKey: ["modules"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not assign"),
+  });
+  return (
+    <div className="grid gap-2" data-testid="unit-modules">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h4 className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Modules on this unit</h4>
+        {canWrite && unit.accountId != null ? (
+          <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
+            Assign module
+          </Button>
+        ) : null}
+      </div>
+      {unit.accountId == null ? (
+        <p className="text-sm text-muted-foreground">Log the asset before modules can be assigned to this unit.</p>
+      ) : mods.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading modules…</p>
+      ) : grouped.length ? (
+        <ul className="grid gap-2">
+          {grouped.map((g) => (
+            <li key={g.name}>
+              <p className="text-sm font-medium">{g.name}</p>
+              <ul className="mt-1 grid gap-1">
+                {g.rows.map((m) => (
+                  <li key={m.id} className="break-words text-sm text-muted-foreground">
+                    SN {m.moduleId}
+                    {m.moduleType ? ` · ${m.moduleType}` : ""}
+                    {m.platform ? ` · ${m.platform}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">No modules assigned to this unit.</p>
+      )}
+      <Dialog open={open} onOpenChange={(o) => !o && !attach.isPending && setOpen(false)}>
+        <DialogContent data-testid="assign-unit-module">
+          <DialogTitle>Assign module</DialogTitle>
+          <DialogDescription>
+            {label}. Only the module types and platform for this machine can be chosen.
+          </DialogDescription>
+          <div className="mt-3 grid gap-3">
+            <div className="grid gap-1">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Platform</span>
+              {MODULE_PLATFORMS.map((p) => {
+                const fit = platformFit(platforms, p, label);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    disabled={!fit.ok}
+                    aria-pressed={platform === p}
+                    onClick={() => setPlatform(p)}
+                    className={cn(
+                      "rounded-md border px-3 py-2 text-left text-sm disabled:cursor-not-allowed disabled:opacity-70",
+                      platform === p && fit.ok ? "border-primary bg-primary text-primary-foreground" : "border-border",
+                    )}
+                  >
+                    <span className="block">{p}</span>
+                    {fit.reason ? <span className="block text-xs text-muted-foreground">{fit.reason}</span> : null}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid gap-1">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Type</span>
+              {MODULE_TYPES.map((t) => {
+                const fit = moduleTypeFit(def, config, t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    disabled={!fit.ok}
+                    aria-pressed={type === t}
+                    onClick={() => setType(t)}
+                    className={cn(
+                      "rounded-md border px-3 py-2 text-left text-sm break-words disabled:cursor-not-allowed disabled:opacity-70",
+                      type === t && fit.ok ? "border-primary bg-primary text-primary-foreground" : "border-border",
+                    )}
+                  >
+                    <span className="block">{t}</span>
+                    {fit.reason ? <span className="block text-xs text-muted-foreground">{fit.reason}</span> : null}
+                  </button>
+                );
+              })}
+            </div>
+            {typeOk && platformOk ? (
+              spare.length ? (
+                <ul className="max-h-48 divide-y divide-border overflow-y-auto rounded-md border border-border">
+                  {spare.map((m: ModuleRow) => (
+                    <li key={m.id}>
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2 text-left text-sm break-words hover:bg-muted"
+                        disabled={attach.isPending}
+                        onClick={() => attach.mutate(m.id)}
+                      >
+                        SN {m.moduleId}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No {type} for {platform} is at HQ.</p>
+              )
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -232,6 +397,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
           ) : null}
         </div>
       ) : null}
+
+      <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
