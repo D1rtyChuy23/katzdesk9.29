@@ -353,20 +353,21 @@ type FamilyBook = { id: number; title: string; manufacturer: string };
 const sameFamily = (a: FamilyBook, b: FamilyBook) =>
   a.manufacturer.toLowerCase() === b.manufacturer.toLowerCase() && nameKey(familyOf(a.title, a.manufacturer)) === nameKey(familyOf(b.title, b.manufacturer));
 
-/** The main model chip is the variation named exactly like its parent: "AXIOM" under Axiom. */
-export function isMainChip(book: FamilyBook): boolean {
-  return nameKey(modelLabel(book.title, book.manufacturer)) === nameKey(familyOf(book.title, book.manufacturer));
+/** The main model chip is the variation named exactly like its parent, and only when another book is in that family. */
+export function isMainChip(book: FamilyBook, books: readonly FamilyBook[]): boolean {
+  if (nameKey(modelLabel(book.title, book.manufacturer)) !== nameKey(familyOf(book.title, book.manufacturer))) return false;
+  return books.some((other) => other.id !== book.id && sameFamily(other, book));
 }
 
 /** The main chip a variation takes manuals from; null on the main chip itself and for a parent with no main chip. */
 export function mainChipFor<T extends FamilyBook>(book: T, books: T[]): T | null {
-  if (isMainChip(book)) return null;
-  return books.find((b) => b.id !== book.id && sameFamily(b, book) && isMainChip(b)) ?? null;
+  if (isMainChip(book, books)) return null;
+  return books.find((b) => b.id !== book.id && sameFamily(b, book) && isMainChip(b, books)) ?? null;
 }
 
 /** Every other variation of the main chip's parent — where its manuals are copied to. */
 export function variationsOf<T extends FamilyBook>(main: T, books: T[]): T[] {
-  return isMainChip(main) ? books.filter((b) => b.id !== main.id && sameFamily(b, main)) : [];
+  return isMainChip(main, books) ? books.filter((b) => b.id !== main.id && sameFamily(b, main)) : [];
 }
 
 /** `mpn` is set when the file is the official file for one MPN: such a file stays on its own variation. */
@@ -428,7 +429,7 @@ export function familyDuplicates<F extends ShareFile, B extends FamilyBook>(
   const want = docKey(incoming.name);
   if (!want) return [];
   const book = books.find((b) => b.id === incoming.bookId);
-  if (!book || isMainChip(book)) return [];
+  if (!book || isMainChip(book, books)) return [];
   return files.filter((f) => {
     if (!copiesToVariations(f.section) || (f.mpn ?? "").trim()) return false;
     if (f.bookId == null || f.bookId === incoming.bookId || f.size !== incoming.size) return false;
@@ -577,7 +578,7 @@ export function collapseImportTargets(
 
   for (const group of groups.values()) {
     const sample = byId.get(group[0]!.bookId);
-    const main = sample ? (isMainChip(sample) ? sample : mainChipFor(sample, books)) : null;
+    const main = sample ? (isMainChip(sample, books) ? sample : mainChipFor(sample, books)) : null;
     const ids = new Set(group.map((t) => t.bookId));
     const required = main ? variationsOf(main, books).map((b) => b.id) : [];
     if (main && ids.has(main.id)) required.push(main.id);

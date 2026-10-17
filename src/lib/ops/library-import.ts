@@ -409,7 +409,7 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
         await push({ action: "FAIL", reason: `Book #${row.bookId} is not in The Library.`, url: row.productPage, bookId: row.bookId, fileId: null });
         continue;
       }
-      if (isMainChip(book)) {
+      if (isMainChip(book, books)) {
         await push({ action: "SKIP", reason: "Main chip. The MPN was left blank.", url: row.productPage, bookId: book.id, fileId: null }, false);
         continue;
       }
@@ -454,7 +454,7 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
     }
 
     for (const book of books) {
-      if (!mpnKey(book.mpn) || isMainChip(book)) continue;
+      if (!mpnKey(book.mpn) || isMainChip(book, books)) continue;
       for (const file of files) {
         if (!file.complete || file.bookId !== book.id) continue;
         const url = file.sourceUrl || urlByName.get(`${book.id}|${file.name.trim().toLowerCase()}`) || null;

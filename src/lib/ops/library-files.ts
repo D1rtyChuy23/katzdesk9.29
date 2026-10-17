@@ -864,7 +864,8 @@ async function ensureMainChip(sql: Sql, userId: string, manufacturer: string, fa
   const made = rows[0];
   if (!made) throw new Error(`Could not add the main chip ${title}.`);
   const book = { id: Number(made.id), title: made.title, manufacturer: made.manufacturer || tidy(manufacturer) };
-  if (!isMainChip(book)) throw new Error(`${book.title} is not the main chip for ${family}. Nothing was moved.`);
+  const catalog = await familyBooks(sql);
+  if (!isMainChip(book, catalog)) throw new Error(`${book.title} is not the main chip for ${family}. Nothing was moved.`);
   return book;
 }
 
@@ -899,7 +900,7 @@ export const storeLibraryFileOnce = createServerFn({ method: "POST" })
     const home = books.find((b) => b.id === file.bookId);
     if (!home) throw new Error("That model is no longer in The Library.");
     let createdMainChip = false;
-    let main = isMainChip(home) ? home : mainChipFor(home, books);
+    let main = isMainChip(home, books) ? home : mainChipFor(home, books);
     if (!main) {
       const maker = (home.manufacturer || group.manufacturer).trim();
       if (maker.length < 2) throw new Error("That model has no manufacturer, so a main chip cannot be added.");
