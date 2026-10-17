@@ -264,14 +264,21 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const [choice, setChoice] = useState("new");
   const [serial, setSerial] = useState("");
   const [installDate, setInstallDate] = useState("");
+  const [elsewhere, setElsewhere] = useState<string | null>(null);
   const logAsset = useMutation({
     mutationFn: (d: Parameters<typeof logRunbookAsset>[0]["data"]) => logRunbookAsset({ data: d }),
     onSuccess: () => {
       setLogging(false);
+      setElsewhere(null);
       toast.success("Asset logged. Ticks on this line stay with the unit.");
       refresh();
     },
-    onError,
+    onError: (e: unknown) => {
+      const msg = e instanceof Error ? e.message : "Could not save";
+      const where = /^Serial .+ is already on (.+)\.$/.exec(msg)?.[1] ?? null;
+      if (where && where.toLowerCase() !== customer.trim().toLowerCase()) setElsewhere(where);
+      else toast.error(msg);
+    },
   });
   const kitNumbers = useMemo(() => (unit && rb ? kitList(rb.def, unit.config).map((k) => k.ev) : []), [unit, rb]);
   const priceQ = useQuery({
@@ -687,7 +694,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
               <select
                 className="h-10 w-full rounded-md border border-border bg-background px-2"
                 value={choice}
-                onChange={(e) => setChoice(e.target.value)}
+                onChange={(e) => {
+                  setChoice(e.target.value);
+                  setElsewhere(null);
+                }}
               >
                 <option value="new">Add a new unit</option>
                 {(q.data?.accountUnits ?? []).map((a) => {
@@ -704,7 +714,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             </label>
             <label className="grid gap-1 text-sm">
               <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Serial</span>
-              <Input value={serial} onChange={(e) => setSerial(e.target.value)} required={choice === "new" || !(q.data?.accountUnits ?? []).find((a) => String(a.id) === choice)?.serial} autoComplete="off" />
+              <Input value={serial} onChange={(e) => { setSerial(e.target.value); setElsewhere(null); }} required={choice === "new" || !(q.data?.accountUnits ?? []).find((a) => String(a.id) === choice)?.serial} autoComplete="off" />
             </label>
             <label className="grid gap-1 text-sm">
               <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Install date</span>
@@ -718,6 +728,27 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 Cancel
               </Button>
             </div>
+            {elsewhere ? (
+              <div className="grid gap-2 rounded-md border border-border p-3 text-sm">
+                <p>This serial is already on {elsewhere}. Moving it keeps the same unit, serial, install date and history.</p>
+                <Button
+                  type="button"
+                  disabled={logAsset.isPending}
+                  onClick={() =>
+                    logAsset.mutate({
+                      pmId,
+                      pieceKey: unit.pieceKey,
+                      accountId: choice === "new" ? null : Number(choice),
+                      serial,
+                      installDate: installDate || null,
+                      move: true,
+                    })
+                  }
+                >
+                  Move this unit here
+                </Button>
+              </div>
+            ) : null}
           </form>
         </DialogContent>
       </Dialog>

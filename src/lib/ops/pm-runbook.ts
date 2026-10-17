@@ -115,7 +115,7 @@ const MODULE_TYPE_GROUPS: Record<string, string[]> = {
   "Grinder Module": ["Grinder module"],
   "Milk Module": ["Milk module"],
   "Pump Module": ["Pump module"],
-  "Powder Module": ["Powder module"],
+  "Powder Module": ["E'choco"],
 };
 
 function groupCovers(group: string, alias: string): boolean {
@@ -135,15 +135,22 @@ function moduleNoun(type: string): string {
 
 export type ModuleTypeFit = { ok: boolean; group: string | null; reason: string | null };
 
-/** Whether this desk module type belongs on the unit. The reason names the model, e.g. "E'4S X-Wide has no milk module". */
+function definedGroups(def: RunbookDefinition): string[] {
+  const names: string[] = [];
+  for (const k of def.kits) if (!names.includes(k.module)) names.push(k.module);
+  for (const g of def.steps) if (!names.includes(g.module)) names.push(g.module);
+  return names;
+}
+
+/** Whether this desk module type belongs on the unit. A type this runbook never mentions is allowed. */
 export function moduleTypeFit(def: RunbookDefinition, c: RunbookConfig, moduleType: string): ModuleTypeFit {
   const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
-  const groups = applicableModules(def, c);
   const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
-  for (const alias of aliases) {
-    const hit = groups.find((g) => groupCovers(g, alias));
-    if (hit) return { ok: true, group: hit, reason: null };
-  }
+  const known = definedGroups(def);
+  const knownAlias = aliases.find((alias) => known.some((g) => groupCovers(g, alias)));
+  if (!knownAlias) return { ok: true, group: null, reason: null };
+  const hit = applicableModules(def, c).find((g) => groupCovers(g, knownAlias));
+  if (hit) return { ok: true, group: hit, reason: null };
   return { ok: false, group: null, reason: `${label} has no ${moduleNoun(moduleType)} module` };
 }
 

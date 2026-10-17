@@ -33,6 +33,7 @@ export function buildReadiness(
   pms: ReadinessPm[],
   units: ReadinessAccountUnit[],
   match: (piece: string) => { runbookId: string; model: string | null } | null,
+  pinsByPm?: Readonly<Record<number, Readonly<Record<string, number>>>> | null,
 ): ReadinessRow[] {
   const byCustomer = new Map<string, AccountUnitRow[]>();
   for (const u of units) {
@@ -44,7 +45,7 @@ export function buildReadiness(
   const out: ReadinessRow[] = [];
   for (const pm of pms) {
     const rows = byCustomer.get(normalizeCustomerKey(pm.customer)) ?? [];
-    for (const u of planUnits(pm.equipment, rows, match)) {
+    for (const u of planUnits(pm.equipment, rows, match, pinsByPm?.[pm.id])) {
       const gaps: ReadinessGap[] = [];
       if (u.accountId == null) gaps.push("no-account-unit");
       else {

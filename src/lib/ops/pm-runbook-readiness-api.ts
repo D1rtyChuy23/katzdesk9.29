@@ -63,6 +63,18 @@ export const getRunbookReadiness = createServerFn({ method: "GET" })
       serial: u.serial,
       installDate: u.install_date,
     }));
-    const rows = buildReadiness(pms, mapped, matchPiece);
+    const ids = pms.map((p) => p.id);
+    const links = ids.length
+      ? await sql.query<{ pm_job_id: number; piece_key: string; account_equipment_id: number }>(
+          "select pm_job_id, piece_key, account_equipment_id from pm_runbook_unit_links where pm_job_id = any($1::int[])",
+          [ids],
+        )
+      : [];
+    const pinsByPm: Record<number, Record<string, number>> = {};
+    for (const link of links) {
+      const bag = pinsByPm[link.pm_job_id] ?? (pinsByPm[link.pm_job_id] = {});
+      bag[link.piece_key] = Number(link.account_equipment_id);
+    }
+    const rows = buildReadiness(pms, mapped, matchPiece, pinsByPm);
     return { rows, summary: readinessSummary(rows), pmsChecked: pms.length };
   });

@@ -81,7 +81,13 @@ export function AssignModuleDialog({
     if (!only || unitId != null || !module) return;
     const hit = runbookForPiece(only.model);
     const block = hit?.model
-      ? moduleAssignmentBlock(hit.runbook.def, normalizeConfig(hit.runbook.def, { model: hit.model }), module.moduleType, module.platform, hit.runbook.platforms)
+      ? moduleAssignmentBlock(
+          hit.runbook.def,
+          normalizeConfig(hit.runbook.def, { ...only.options, model: hit.model }),
+          module.moduleType,
+          module.platform,
+          hit.runbook.platforms,
+        )
       : null;
     if (!block) setUnitId(only.id);
   }, [list, unitId, module]);
@@ -152,7 +158,7 @@ export function AssignModuleDialog({
                     const block = hit?.model
                       ? moduleAssignmentBlock(
                           hit.runbook.def,
-                          normalizeConfig(hit.runbook.def, { model: hit.model }),
+                          normalizeConfig(hit.runbook.def, { ...u.options, model: hit.model }),
                           module.moduleType,
                           module.platform,
                           hit.runbook.platforms,
