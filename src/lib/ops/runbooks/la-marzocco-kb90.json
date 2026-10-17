@@ -1,0 +1,514 @@
+{
+  "id": "la-marzocco-kb90",
+  "manufacturer": "La Marzocco",
+  "title": "KB90 PM Runbook",
+  "subtitle": "La Marzocco KB90 | preventive maintenance kits and steps",
+  "sources": "La Marzocco USA preventative maintenance checklists v2.1 (May 2026): 3/9-month, 6-month and 12-month. Kit numbers are per visit and group count. La Marzocco does not print kit contents on the checklists; where a kit note lists contents it comes from the checklist's replace list or LM's annual PM summary. Confirm kit numbers with La Marzocco USA before ordering. KB90 kit contents: LM KB90 PM summary v2.0 (Dec 2020).",
+  "storageKey": "lm-kb90-runbook-v1",
+  "models": [
+    {
+      "id": "kb90",
+      "label": "KB90"
+    }
+  ],
+  "intervals": [
+    {
+      "id": "3",
+      "label": "3/9-month PM"
+    },
+    {
+      "id": "6",
+      "label": "6-month PM"
+    },
+    {
+      "id": "12",
+      "label": "12-month PM"
+    }
+  ],
+  "options": [
+    {
+      "key": "groups",
+      "label": "Groups",
+      "default": "2",
+      "choices": [
+        {
+          "val": "2",
+          "label": "2 group"
+        },
+        {
+          "val": "3",
+          "label": "3 group"
+        }
+      ]
+    },
+    {
+      "key": "abr",
+      "label": "ABR / integrated scales",
+      "default": "yes",
+      "choices": [
+        {
+          "val": "no",
+          "label": "No"
+        },
+        {
+          "val": "yes",
+          "label": "Yes"
+        }
+      ]
+    }
+  ],
+  "banners": [
+    {
+      "tone": "ok",
+      "text": "One kit per visit. The 3/9-month PM is the same visit at month 3 and month 9; the 6- and 12-month kits are complete for their visit, so earlier kits are not added."
+    },
+    {
+      "when": {
+        "pm": [
+          "3"
+        ]
+      },
+      "tone": "ok",
+      "text": "3/9-month PM: La Marzocco lists loose parts for this visit, not a kit. Quantities are one per group."
+    },
+    {
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ]
+      },
+      "tone": "warn",
+      "text": "The 12-month checklist prints the 3-group kit as KB90.X.12.3. It is listed here as KB90.12.3; confirm with La Marzocco when ordering."
+    }
+  ],
+  "kits": [
+    {
+      "ev": "KB90.6.2",
+      "name": "PM kit, 6-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "2"
+        ]
+      },
+      "note": "LM PM summary (2020): diffuser screens A.5.095, steam valve rebuild 1206, group gaskets and bumpers 1207."
+    },
+    {
+      "ev": "KB90.6.3",
+      "name": "PM kit, 6-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ]
+      },
+      "note": "LM PM summary (2020): diffuser screens A.5.095, steam valve rebuild 1206, group gaskets and bumpers 1207."
+    },
+    {
+      "ev": "KB90.12.2",
+      "name": "PM kit, 12-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "2"
+        ]
+      },
+      "note": "LM PM summary (2020): the 6-month parts plus safety valve B.2.024 + L180, vacuum breakers B.2.029 + L100, expansion valve L140/C, Straight-In bushings F.8.016."
+    },
+    {
+      "ev": "KB90.12.3",
+      "name": "PM kit, 12-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ]
+      },
+      "note": "LM PM summary (2020): the 6-month parts plus safety valve B.2.024 + L180, vacuum breakers B.2.029 + L100, expansion valve L140/C, Straight-In bushings F.8.016."
+    },
+    {
+      "ev": "A.5.095",
+      "name": "Diffuser screen",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3
+        }
+      },
+      "when": {
+        "pm": [
+          "3"
+        ]
+      }
+    },
+    {
+      "ev": "1207",
+      "name": "Group gaskets and bumpers",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3
+        }
+      },
+      "when": {
+        "pm": [
+          "3"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "module": "Water quality",
+      "items": [
+        {
+          "id": "wq-test",
+          "text": "Test the water before and after the filter with the LM test kit (F.9.000.01). Record the filter make and type and compare with the limits in Reference.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Group heads",
+      "items": [
+        {
+          "id": "kb-gh-replace",
+          "text": "Replace the diffuser screens and the group gaskets and bumpers on every group.",
+          "when": {
+            "pm": [
+              "3"
+            ]
+          },
+          "ref": "LM 3/9-mo checklist"
+        },
+        {
+          "id": "kb-gh-kit",
+          "text": "Fit the parts in the PM kit.",
+          "when": {
+            "pm": [
+              "6",
+              "12"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-baskets",
+          "text": "Check the filter baskets and springs.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-flush",
+          "text": "Confirm the auto flush system works.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-jaw",
+          "text": "Check the portafilter jaw bushings.",
+          "when": {
+            "pm": [
+              "3",
+              "6"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-piston",
+          "text": "Check the Straight-In piston for leaks under pressure.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-micro",
+          "text": "Check the group cap micro switches.",
+          "when": {
+            "pm": [
+              "6",
+              "12"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-buttons",
+          "text": "Test every button.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-res",
+          "text": "Measure each flow meter's field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ). Record G1–G3 in kΩ.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-gh-imp",
+          "text": "Check the flow meter impellers.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "kb-gh-flow",
+          "text": "Record each group's flow rate in AV mode: grams in 30 s, G1–G3.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Pressure",
+      "items": [
+        {
+          "id": "kb-pr-press",
+          "text": "Record each group's brewing pressure (bar).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-pr-exp",
+          "text": "Check the expansion valves and record each group's maximum pressure (bar).",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Steam",
+      "items": [
+        {
+          "id": "kb-st-valve",
+          "text": "Check the steam valves work.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Water and drain",
+      "items": [
+        {
+          "id": "kb-wd-probe",
+          "text": "Clean the auto-fill probe.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-wd-leaks",
+          "text": "Check all fittings and valves for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-wd-vb",
+          "text": "Check the vacuum breakers work.",
+          "when": {
+            "pm": [
+              "3",
+              "6"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-wd-sensor",
+          "text": "Check the water sensor for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-wd-lines",
+          "text": "Check the water and drain lines, drain box and hose for leaks or clogs.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Electrical",
+      "items": [
+        {
+          "id": "kb-el-cord",
+          "text": "Check the power cord, cap and outlet.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "kb-el-harness",
+          "text": "Check the wiring harness and components.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "kb-el-box",
+          "text": "Check the electronics box for water or damage.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        }
+      ]
+    },
+    {
+      "module": "Scales",
+      "when": {
+        "abr": [
+          "yes"
+        ]
+      },
+      "items": [
+        {
+          "id": "kb-sc-abr",
+          "text": "Run the ABR scale test.",
+          "when": {
+            "pm": [
+              "3"
+            ]
+          },
+          "ref": "LM 3/9-mo checklist"
+        },
+        {
+          "id": "kb-sc-cal",
+          "text": "Confirm or calibrate the scales with a 100 g weight.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Close out",
+      "items": [
+        {
+          "id": "kb-co-form",
+          "text": "Fill in the La Marzocco checklist for this visit: serial, voltage, group count and every reading. Get the customer's signature.",
+          "ref": "LM checklist"
+        }
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "title": "Water limits (LM test kit F.9.000.01)",
+      "text": "Test before and after the filter. Record the filter make and type: carbon, ion exchange/softener, WAC, reverse osmosis, or none.",
+      "table": {
+        "head": [
+          "Test",
+          "Min",
+          "Max"
+        ],
+        "rows": [
+          [
+            "Total hardness (ppm)",
+            "5",
+            "70"
+          ],
+          [
+            "Alkalinity (ppm)",
+            "5",
+            "80"
+          ],
+          [
+            "Chloride (ppm)",
+            "0",
+            "30"
+          ],
+          [
+            "Iron (ppm)",
+            "0",
+            "0.02"
+          ],
+          [
+            "Free chlorine (ppm)",
+            "0",
+            "0.05"
+          ],
+          [
+            "Total chlorine (ppm)",
+            "0",
+            "0.1"
+          ],
+          [
+            "pH",
+            "6.5",
+            "8.5"
+          ],
+          [
+            "TDS (ppm)",
+            "10",
+            "150"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Specs on the checklists",
+      "list": [
+        "Flow meter field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ).",
+        "Flow rate: the checklist header says ml/30 s but the blanks say g. Record grams in 30 s and note it.",
+        "Brew pressure, expansion valve max pressure and boiler temperature: the checklists give blanks, no targets. Use the machine manual's settings.",
+        "Integrated scales: confirm or calibrate with a 100 g weight."
+      ]
+    },
+    {
+      "title": "Kit and part numbers",
+      "table": {
+        "head": [
+          "Visit",
+          "Part",
+          "What"
+        ],
+        "monoCols": [
+          1
+        ],
+        "rows": [
+          [
+            "3/9-month",
+            "A.5.095",
+            "Diffuser screen, one per group"
+          ],
+          [
+            "3/9-month",
+            "1207",
+            "Group gaskets and bumpers, one per group"
+          ],
+          [
+            "6-month",
+            "KB90.6.<gr>",
+            "PM kit, 2 or 3 groups"
+          ],
+          [
+            "12-month",
+            "KB90.12.<gr>",
+            "PM kit, 2 or 3 groups"
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,343 @@
+{
+  "id": "la-marzocco-gs3",
+  "manufacturer": "La Marzocco",
+  "title": "GS3 PM Runbook",
+  "subtitle": "La Marzocco GS3 AV and GS3 MP | preventive maintenance parts and steps",
+  "sources": "La Marzocco USA GS3 preventative maintenance checklists: 6 Month and 1 Year (undated). The 1-year visit includes the 6-month parts. Confirm part numbers with La Marzocco USA before ordering.",
+  "storageKey": "lm-gs3-runbook-v1",
+  "models": [
+    {
+      "id": "av",
+      "label": "GS3 AV"
+    },
+    {
+      "id": "mp",
+      "label": "GS3 MP"
+    }
+  ],
+  "intervals": [
+    {
+      "id": "6",
+      "label": "6-month PM"
+    },
+    {
+      "id": "12",
+      "label": "12-month PM (1 year)"
+    }
+  ],
+  "options": [
+    {
+      "key": "gasket",
+      "label": "Group gasket",
+      "default": "8",
+      "choices": [
+        {
+          "val": "8",
+          "label": "8 mm (H.3.001)"
+        },
+        {
+          "val": "9",
+          "label": "9 mm (L105/B9)"
+        }
+      ]
+    }
+  ],
+  "banners": [
+    {
+      "tone": "ok",
+      "text": "GS3 parts are loose parts, not a kit. The 1-year PM adds its parts to the 6-month parts."
+    }
+  ],
+  "kits": [
+    {
+      "ev": "H.3.001",
+      "name": "Group gasket 8 mm",
+      "module": "Group head",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "gasket": [
+          "8"
+        ]
+      }
+    },
+    {
+      "ev": "L105/B9",
+      "name": "Group gasket 9 mm",
+      "module": "Group head",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "gasket": [
+          "9"
+        ]
+      }
+    },
+    {
+      "ev": "F.3.040",
+      "name": "Diffuser screen",
+      "module": "Group head",
+      "interval": 6,
+      "qty": 1
+    },
+    {
+      "ev": "SA/600K",
+      "name": "MP valve rebuild kit",
+      "module": "Group head",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "model": [
+          "mp"
+        ]
+      }
+    },
+    {
+      "ev": "L193",
+      "name": "Steam boiler vacuum breaker valve",
+      "module": "Boilers",
+      "interval": 12,
+      "qty": 1
+    },
+    {
+      "ev": "B.2.025",
+      "name": "Pressure safety valve",
+      "module": "Boilers",
+      "interval": 12,
+      "qty": 1
+    }
+  ],
+  "steps": [
+    {
+      "module": "Water quality",
+      "items": [
+        {
+          "id": "gs-wq-test",
+          "text": "Test the water with the La Marzocco water test kit (F.9.000).",
+          "ref": "LM GS3 checklist"
+        }
+      ]
+    },
+    {
+      "module": "Group head",
+      "items": [
+        {
+          "id": "gs-gh-flush",
+          "text": "Clean and backflush the machine.",
+          "ref": "LM GS3 checklist"
+        },
+        {
+          "id": "gs-gh-gasket",
+          "text": "Replace the group gasket and diffuser screen.",
+          "ref": "LM GS3 checklist"
+        },
+        {
+          "id": "gs-gh-baskets",
+          "text": "Replace the portafilter baskets. Note the basket type.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM GS3 1-year"
+        },
+        {
+          "id": "gs-gh-valve",
+          "text": "Inspect the group valve. Mark replaced or acceptable.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM GS3 1-year"
+        },
+        {
+          "id": "gs-gh-flow",
+          "text": "Test the group flow rate.",
+          "ref": "LM GS3 checklist"
+        },
+        {
+          "id": "gs-gh-temp",
+          "text": "Test the brew temperature. Record desired and current.",
+          "ref": "LM GS3 checklist"
+        },
+        {
+          "id": "gs-gh-press",
+          "text": "Test the brew pressure setting.",
+          "ref": "LM GS3 checklist"
+        },
+        {
+          "id": "gs-gh-shots",
+          "text": "Test the shot volumes.",
+          "when": {
+            "model": [
+              "av"
+            ]
+          },
+          "ref": "LM GS3 checklist"
+        },
+        {
+          "id": "gs-gh-res",
+          "text": "Test the flow meter for correct resistance.",
+          "when": {
+            "model": [
+              "av"
+            ]
+          },
+          "ref": "LM GS3 checklist"
+        },
+        {
+          "id": "gs-gh-mp",
+          "text": "Rebuild the MP valve (SA/600K).",
+          "when": {
+            "model": [
+              "mp"
+            ]
+          },
+          "ref": "LM GS3 checklist"
+        }
+      ]
+    },
+    {
+      "module": "Boilers",
+      "items": [
+        {
+          "id": "gs-bo-vbtest",
+          "text": "Test the steam boiler vacuum breaker. Mark replaced or acceptable.",
+          "when": {
+            "pm": [
+              "6"
+            ]
+          },
+          "ref": "LM GS3 6-month"
+        },
+        {
+          "id": "gs-bo-vb",
+          "text": "Replace the steam boiler vacuum breaker valve (L193).",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM GS3 1-year"
+        },
+        {
+          "id": "gs-bo-psv",
+          "text": "Replace the pressure safety valve (B.2.025).",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM GS3 1-year"
+        }
+      ]
+    },
+    {
+      "module": "Water and drain",
+      "items": [
+        {
+          "id": "gs-wd-probe",
+          "text": "Clean the auto-fill probe.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM GS3 1-year"
+        },
+        {
+          "id": "gs-wd-fill",
+          "text": "Test the auto-fill valve. Mark replaced or acceptable.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM GS3 1-year"
+        },
+        {
+          "id": "gs-wd-drain",
+          "text": "Inspect the drain system.",
+          "ref": "LM GS3 checklist"
+        }
+      ]
+    },
+    {
+      "module": "Electrical",
+      "items": [
+        {
+          "id": "gs-el-switch",
+          "text": "Test every switch. Mark replaced or acceptable.",
+          "ref": "LM GS3 checklist"
+        }
+      ]
+    },
+    {
+      "module": "Close out",
+      "items": [
+        {
+          "id": "gs-co-form",
+          "text": "Fill in the La Marzocco GS3 checklist: customer, serial, readings, other parts used and mileage. Sign it.",
+          "ref": "LM GS3 checklist"
+        }
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "title": "Parts",
+      "table": {
+        "head": [
+          "Part",
+          "What",
+          "When"
+        ],
+        "monoCols": [
+          0
+        ],
+        "rows": [
+          [
+            "H.3.001",
+            "Group gasket 8 mm",
+            "6 and 12 months"
+          ],
+          [
+            "L105/B9",
+            "Group gasket 9 mm",
+            "6 and 12 months"
+          ],
+          [
+            "F.3.040",
+            "Diffuser screen",
+            "6 and 12 months"
+          ],
+          [
+            "SA/600K",
+            "MP valve rebuild (MP only)",
+            "6 and 12 months"
+          ],
+          [
+            "L193",
+            "Steam boiler vacuum breaker valve",
+            "12 months"
+          ],
+          [
+            "B.2.025",
+            "Pressure safety valve",
+            "12 months"
+          ],
+          [
+            "F.9.000",
+            "LM water test kit",
+            "Each visit"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Specs",
+      "text": "The GS3 checklists give blanks for flow rate, brew temperature, brew pressure and flow meter resistance, with no targets. Use the GS3 manual's settings."
+    }
+  ]
+}
