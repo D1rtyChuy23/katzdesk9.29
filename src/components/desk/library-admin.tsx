@@ -135,7 +135,7 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
       <div className="mt-5" data-testid="library-import">
         <h3 className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Library import</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Marks the named duplicates, stores official PDFs (manuals and parts once on the main chip, spec sheets on their own model), then sets MPNs and ties official files. Preview changes nothing. Run next 15 downloads at most 15 files.
+          Marks the named duplicates, stores official PDFs (a manual or parts file is put on the family's main chip only when every variation is already targeted; otherwise it stays on the listed model), then sets MPNs and ties official files. Preview changes nothing. Run next 15 downloads at most 15 files. No new books are added.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <Button type="button" variant="outline" disabled={importing.isPending} onClick={() => importing.mutate(false)} data-testid="library-import-preview">

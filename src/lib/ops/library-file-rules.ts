@@ -492,17 +492,9 @@ export function cleanupBookDecision(expected: { id: number; title: string }, fou
   return { action: "remove", reason: "Empty, and the title matches. It will be removed." };
 }
 
-// ---- Library import: one shared copy on the main chip, spec sheets stay put ----
+// ---- Library import: share a file only when the whole family is in the upload ----
 
 const IMPORT_NAME_SEP = " - ";
-
-/** "BUNN" + "AXIOM" → "BUNN AXIOM". A family that already starts with the maker is not doubled. */
-export function mainChipTitle(manufacturer: string, family: string): string {
-  const maker = manufacturer.replace(/\s+/g, " ").trim();
-  const model = family.replace(/\s+/g, " ").trim();
-  if (!maker) return model;
-  return model.toLowerCase().startsWith(maker.toLowerCase() + " ") ? model : `${maker} ${model}`;
-}
 
 /** The stored name: the text before " - " is the variation, and becomes the main chip title. */
 export function rewriteMainChipName(targetName: string, mainTitle: string): string {
@@ -519,23 +511,25 @@ export type ImportPlanTarget = {
 };
 
 export type CollapsedImportTarget = {
-  /** Null when the main chip is not in The Library yet and has to be added. */
   bookId: number | null;
   bookTitle: string;
   manufacturer: string;
-  createMainChip: boolean;
   section: LibrarySection;
   docType: string | null;
   name: string;
-  /** Set when the target names a book that is not in The Library. */
+  /** Set when the target names a book that is not in The Library. No book is created for it. */
   missingBookId?: number;
 };
 
 export type ImportBook = { id: number; title: string; manufacturer: string };
 
 /**
- * Manuals and parts for one file that land on the same main chip become one target, named for that chip.
- * Spec sheets stay on the book they name and are never merged with another book. A missing book stays its own row.
+ * Where one upload's targets are stored.
+ * Spec sheets stay on the book they name.
+ * Manuals and parts go to the family's existing main chip only when the upload names every variation
+ * (every book from variationsOf(main), and the main chip too when it is one of the targets) and there
+ * are at least two targets. Otherwise each target stays on the book in the JSON, with its name unchanged.
+ * A book is never created here. Two families in one upload are decided separately.
  */
 export function collapseImportTargets(
   targets: ImportPlanTarget[],
@@ -543,7 +537,9 @@ export function collapseImportTargets(
 ): CollapsedImportTarget[] {
   const byId = new Map(books.map((b) => [b.id, b]));
   const out: CollapsedImportTarget[] = [];
-  const seen = new Set<string>();
+  const specSeen = new Set<string>();
+  const groups = new Map<string, ImportPlanTarget[]>();
+
   for (const target of targets) {
     const book = byId.get(target.bookId);
     if (!book) {
@@ -551,7 +547,6 @@ export function collapseImportTargets(
         bookId: null,
         bookTitle: "",
         manufacturer: "",
-        createMainChip: false,
         section: target.section,
         docType: target.docType,
         name: target.name,
@@ -561,13 +556,12 @@ export function collapseImportTargets(
     }
     if (!copiesToVariations(target.section)) {
       const key = `spec|${book.id}|${target.name.trim().toLowerCase()}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      if (specSeen.has(key)) continue;
+      specSeen.add(key);
       out.push({
         bookId: book.id,
         bookTitle: book.title,
         manufacturer: book.manufacturer,
-        createMainChip: false,
         section: target.section,
         docType: null,
         name: target.name,
@@ -575,21 +569,42 @@ export function collapseImportTargets(
       continue;
     }
     const family = familyOf(book.title, book.manufacturer);
-    const main = isMainChip(book) ? book : mainChipFor(book, books);
-    const bookTitle = main ? main.title : mainChipTitle(book.manufacturer, family);
-    const bookId = main ? main.id : null;
-    const key = `share|${target.section}|${bookId ?? `new:${bookTitle.toLowerCase()}`}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push({
-      bookId,
-      bookTitle,
-      manufacturer: book.manufacturer,
-      createMainChip: main == null,
-      section: target.section,
-      docType: target.docType,
-      name: rewriteMainChipName(target.name, bookTitle),
-    });
+    const key = `${target.section}|${book.manufacturer.toLowerCase()}|${nameKey(family)}`;
+    const group = groups.get(key) ?? [];
+    if (!group.some((t) => t.bookId === target.bookId)) group.push(target);
+    groups.set(key, group);
+  }
+
+  for (const group of groups.values()) {
+    const sample = byId.get(group[0]!.bookId);
+    const main = sample ? (isMainChip(sample) ? sample : mainChipFor(sample, books)) : null;
+    const ids = new Set(group.map((t) => t.bookId));
+    const required = main ? variationsOf(main, books).map((b) => b.id) : [];
+    if (main && ids.has(main.id)) required.push(main.id);
+    const share = !!main && group.length >= 2 && required.length >= 2 && required.every((id) => ids.has(id));
+    if (share && main) {
+      const source = group.find((t) => t.bookId !== main.id) ?? group[0]!;
+      out.push({
+        bookId: main.id,
+        bookTitle: main.title,
+        manufacturer: main.manufacturer,
+        section: source.section,
+        docType: source.docType,
+        name: rewriteMainChipName(source.name, main.title),
+      });
+      continue;
+    }
+    for (const target of group) {
+      const book = byId.get(target.bookId)!;
+      out.push({
+        bookId: book.id,
+        bookTitle: book.title,
+        manufacturer: book.manufacturer,
+        section: target.section,
+        docType: target.docType,
+        name: target.name,
+      });
+    }
   }
   return out;
 }
@@ -635,5 +650,16 @@ export function importSkipReason(
     return docNumber(named).toLowerCase() === wantDoc;
   });
   return sameDoc ? "A manual or parts file in this family already has this size and document number." : null;
+}
+
+/**
+ * A failed download is finished only when the file itself is unusable or the URL is gone.
+ * A timeout, a network error, or a 5xx is not finished: the next run tries it again.
+ */
+export function importFailureSettled(reason: string): boolean {
+  if (/will retry/i.test(reason)) return false;
+  if (/not a pdf/i.test(reason)) return true;
+  if (/larger than 20 mb/i.test(reason)) return true;
+  return /\b404\b/.test(reason) || /\b410\b/.test(reason);
 }
 

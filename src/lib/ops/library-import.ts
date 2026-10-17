@@ -1,7 +1,8 @@
 /**
  * Library import. Admin only. Preview (apply false) changes nothing.
  * A run stores at most `limit` downloaded files, then sets MPNs and ties official files.
- * It never deletes a file, a book, or a log row, and it does not run the cleanup.
+ * Manuals and parts move to a main chip only when the upload already covers that whole family.
+ * It never creates a book, never deletes a file, and it does not run the cleanup.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -13,11 +14,11 @@ import {
   CHUNK_BYTES,
   MAX_FILE_BYTES,
   collapseImportTargets,
+  importFailureSettled,
   importSkipReason,
   isMainChip,
   isManualType,
   type CollapsedImportTarget,
-  type ImportBook,
   type ImportExistingFile,
   type LibrarySection,
 } from "@/lib/ops/library-file-rules";
@@ -57,7 +58,6 @@ export type LibraryImportReport = {
   limit: number;
 };
 
-type MemBook = ImportBook & { mpn: string | null };
 type MemFile = ImportExistingFile & { id: number; sourceUrl: string | null };
 
 const emptyCounts = (): Record<LibraryImportAction, number> => ({ OK: 0, SKIP: 0, FAIL: 0, CONFLICT: 0 });
@@ -100,6 +100,10 @@ function sectionOf(value: string): LibrarySection | null {
   return value === "spec" || value === "manuals" || value === "parts" ? value : null;
 }
 
+function retryable(reason: string): { error: string } {
+  return { error: `${reason} will retry` };
+}
+
 async function fetchPdf(url: string): Promise<{ bytes: Uint8Array } | { error: string }> {
   let res: Response;
   try {
@@ -109,11 +113,16 @@ async function fetchPdf(url: string): Promise<{ bytes: Uint8Array } | { error: s
       headers: { "user-agent": "KatzDesk/library-import" },
     });
   } catch (err) {
-    return { error: `Could not download. ${err instanceof Error ? err.message : "The download failed."}` };
+    const timedOut = err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError" || /timeout|aborted/i.test(err.message));
+    const detail = err instanceof Error ? err.message : "The download failed.";
+    return retryable(timedOut ? "Timed out." : `Could not download. ${detail}`);
   }
-  if (!res.ok) return { error: `Download failed (${res.status}).` };
+  if (!res.ok) {
+    const reason = `Download failed (${res.status}).`;
+    return importFailureSettled(reason) ? { error: reason } : retryable(reason);
+  }
   const reader = res.body?.getReader();
-  if (!reader) return { error: "Download failed. The file had no body." };
+  if (!reader) return retryable("Download failed. The file had no body.");
   const parts: Uint8Array[] = [];
   let total = 0;
   for (;;) {
@@ -135,20 +144,6 @@ async function fetchPdf(url: string): Promise<{ bytes: Uint8Array } | { error: s
   const head = String.fromCharCode(bytes[0] ?? 0, bytes[1] ?? 0, bytes[2] ?? 0, bytes[3] ?? 0, bytes[4] ?? 0);
   if (head !== "%PDF-") return { error: "Not a PDF." };
   return { bytes };
-}
-
-async function ensureMainChip(sql: Sql, userId: string, manufacturer: string, title: string): Promise<MemBook> {
-  await sql.query(
-    "insert into library_books (title, manufacturer, created_by, per_variation) values ($1, $2, $3, true) on conflict (lower(title)) do nothing",
-    [title, manufacturer, userId],
-  );
-  const rows = await sql.query<{ id: number; title: string; manufacturer: string | null; mpn: string | null }>(
-    "select id, title, manufacturer, mpn from library_books where lower(title) = lower($1)",
-    [title],
-  );
-  const made = rows[0];
-  if (!made) throw new Error(`Could not add the main chip ${title}.`);
-  return { id: Number(made.id), title: made.title, manufacturer: made.manufacturer || manufacturer, mpn: made.mpn ?? null };
 }
 
 async function storePdf(
@@ -229,15 +224,19 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
       mpn: f.mpn,
       sourceUrl: f.source_url,
     }));
-    const logged = await sql.query<{ url: string | null; book_id: number | null; file_id: number | null; action: string }>(
+    const logged = await sql.query<{ url: string | null; book_id: number | null; file_id: number | null; action: string; reason: string | null }>(
       `select distinct on (coalesce(url, ''), coalesce(book_id, 0), coalesce(file_id, 0))
-              url, book_id, file_id, action
+              url, book_id, file_id, action, reason
          from library_import_log
         order by coalesce(url, ''), coalesce(book_id, 0), coalesce(file_id, 0), id desc`,
     );
     const settledUpload = new Set(
       logged
-        .filter((r) => r.url && (r.action === "OK" || r.action === "SKIP" || r.action === "FAIL"))
+        .filter((r) => {
+          if (!r.url) return false;
+          if (r.action === "OK" || r.action === "SKIP") return true;
+          return r.action === "FAIL" && importFailureSettled(r.reason ?? "");
+        })
         .map((r) => `${r.url}|${r.book_id ?? ""}`),
     );
     const settledMark = new Set(
@@ -319,10 +318,7 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
       const pending: CollapsedImportTarget[] = [];
       for (const dest of collapsed) {
         if (dest.missingBookId != null) {
-          const key = `${upload.url}|`;
-          if (settledUpload.has(key)) continue;
-          await push({ action: "FAIL", reason: `Book #${dest.missingBookId} is not in The Library.`, url: upload.url, bookId: null, fileId: null });
-          if (request.apply) settledUpload.add(key);
+          await push({ action: "FAIL", reason: `Book #${dest.missingBookId} is not in The Library. will retry`, url: upload.url, bookId: null, fileId: null });
           continue;
         }
         const settledKey = `${upload.url}|${dest.bookId ?? ""}`;
@@ -350,32 +346,15 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
       if ("error" in pdf) {
         for (const dest of pending) {
           await push({ action: "FAIL", reason: pdf.error, url: upload.url, bookId: dest.bookId, fileId: null });
-          if (request.apply) settledUpload.add(`${upload.url}|${dest.bookId ?? ""}`);
+          if (request.apply && importFailureSettled(pdf.error)) settledUpload.add(`${upload.url}|${dest.bookId ?? ""}`);
         }
         continue;
       }
       for (const dest of pending) {
-        let bookId = dest.bookId;
-        let bookTitle = dest.bookTitle;
-        if (dest.createMainChip) {
-          if (!request.apply) {
-            await push({
-              action: "OK",
-              reason: `Would add ${dest.bookTitle} and store "${dest.name}" there.`,
-              url: upload.url,
-              bookId: null,
-              fileId: null,
-            });
-            continue;
-          }
-          const made = await ensureMainChip(sql, context.userId, dest.manufacturer, dest.bookTitle);
-          books.push(made);
-          bookId = made.id;
-          bookTitle = made.title;
-          urlByName.set(`${made.id}|${dest.name.trim().toLowerCase()}`, upload.url);
-        }
+        const bookId = dest.bookId;
+        const bookTitle = dest.bookTitle;
         if (bookId == null) {
-          await push({ action: "FAIL", reason: `No book for "${bookTitle}".`, url: upload.url, bookId: null, fileId: null });
+          await push({ action: "FAIL", reason: `No book for "${bookTitle}". will retry`, url: upload.url, bookId: null, fileId: null });
           continue;
         }
         const skip = importSkipReason(
@@ -394,7 +373,8 @@ export const importLibraryBatch = createServerFn({ method: "POST" })
         }
         const stored = await storePdf(sql, context.userId, role.name, dest, bookId, pdf.bytes, upload.fileName);
         if ("error" in stored) {
-          await push({ action: "FAIL", reason: stored.error, url: upload.url, bookId, fileId: stored.fileId });
+          const reason = importFailureSettled(stored.error) ? stored.error : `${stored.error} will retry`;
+          await push({ action: "FAIL", reason, url: upload.url, bookId, fileId: stored.fileId });
           continue;
         }
         files.push({
