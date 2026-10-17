@@ -12,7 +12,11 @@ import {
   kitList,
   kitListText,
   matchE4XWide,
+  moduleAssignmentBlock,
+  moduleTypeFit,
   normalizeConfig,
+  platformFit,
+  applicableModules,
   stepList,
   totalKits,
 } from "../src/lib/ops/pm-runbook.ts";
@@ -259,4 +263,31 @@ test("a pinned account unit is used for that line and is not taken by an earlier
   assert.match(pmCompletionRefusal(units), /e'4m X-Wide/);
   assert.doesNotMatch(pmCompletionRefusal(units) ?? "", /e'4s/);
   assert.equal(units[1].pieceKey, bare[1].pieceKey);
+});
+
+test("E'4S has no milk module or milk frame; E'4MS has both", () => {
+  const s12 = applicableModules(def, cfg({ model: "4s", pm: "12", choco: "no" }));
+  const s36 = applicableModules(def, cfg({ model: "4s", pm: "36", choco: "no" }));
+  assert.deepEqual(s12, s36);
+  for (const name of ["Brew module", "Hydraulic module", "Steam module", "Grinder module"]) {
+    assert.ok(s12.includes(name), name);
+  }
+  assert.equal(s12.includes("Milk module"), false);
+  assert.equal(s12.includes("Milk module V2"), false);
+  assert.equal(s12.includes("Frame"), false);
+  assert.equal(s12.includes("E'choco"), false);
+  const ms = applicableModules(def, cfg({ model: "4ms", pm: "12", choco: "1" }));
+  assert.ok(ms.includes("Milk module"));
+  assert.ok(ms.includes("Frame"));
+  assert.ok(ms.includes("E'choco"));
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Milk Module").ok, false);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Milk Module").reason, "E'4S X-Wide has no milk module");
+  assert.equal(moduleTypeFit(def, cfg({ model: "4ms" }), "Milk Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Brew Module").ok, true);
+  assert.equal(moduleTypeFit(def, cfg({ model: "4s" }), "Pump Module").reason, "E'4S X-Wide has no pump module");
+  assert.equal(platformFit(["Enigma / e'Line"], "Enigma / e'Line", "E'4S X-Wide").ok, true);
+  assert.equal(platformFit(["Enigma / e'Line"], "Cameo", "E'4S X-Wide").reason, "E'4S X-Wide is Enigma / e'Line, not Cameo.");
+  const blocked = moduleAssignmentBlock(def, cfg({ model: "4s" }), "Milk Module", "Cameo", ["Enigma / e'Line"]);
+  assert.match(blocked ?? "", /not Cameo/);
+  assert.equal(moduleAssignmentBlock(def, cfg({ model: "4ms" }), "Milk Module", "Enigma / e'Line", ["Enigma / e'Line"]), null);
 });

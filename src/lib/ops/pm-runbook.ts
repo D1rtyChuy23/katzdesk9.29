@@ -70,6 +70,113 @@ export function stepList(def: RunbookDefinition, c: RunbookConfig): StepGroup[] 
   return out;
 }
 
+/** Drop the PM interval so a 12-month visit still counts a module the machine has. */
+function withoutInterval(when: Record<string, string[]> | undefined | null): Record<string, string[]> | undefined | null {
+  if (!when) return when;
+  const rest: Record<string, string[]> = {};
+  for (const key of Object.keys(when)) {
+    if (key === "pm") continue;
+    rest[key] = when[key]!;
+  }
+  return Object.keys(rest).length ? rest : undefined;
+}
+
+/**
+ * Module groups that have a kit or a step for this model and options.
+ * The service interval does not hide a module the machine has. E'4S has no milk module and no milk frame.
+ */
+export function applicableModules(def: RunbookDefinition, c: RunbookConfig): string[] {
+  const names: string[] = [];
+  const add = (name: string) => {
+    if (!names.includes(name)) names.push(name);
+  };
+  for (const k of def.kits) {
+    if (!matches(withoutInterval(k.when), c)) continue;
+    const q = Number(resolve(k.qty, c));
+    if (!(q > 0)) continue;
+    add(k.module);
+  }
+  for (const group of def.steps) {
+    if (!matches(withoutInterval(group.when), c)) continue;
+    const items = group.items.filter((s) => matches(withoutInterval(s.when), c));
+    if (items.length) add(group.module);
+  }
+  return names;
+}
+
+/** Desk module type → runbook group names. "Milk module V2" still counts as Milk. */
+const MODULE_TYPE_GROUPS: Record<string, string[]> = {
+  "Brew Module": ["Brew module"],
+  "Medium Brew Module": ["Brew module"],
+  "Large Brew Module": ["Brew module"],
+  "Steam S Module": ["Steam module"],
+  "Steam M Module": ["Steam module"],
+  "Hydraulic Module": ["Hydraulic module"],
+  "Grinder Module": ["Grinder module"],
+  "Milk Module": ["Milk module"],
+  "Pump Module": ["Pump module"],
+  "Powder Module": ["Powder module"],
+};
+
+function groupCovers(group: string, alias: string): boolean {
+  const g = group.toLowerCase();
+  const a = alias.toLowerCase();
+  return g === a || g.startsWith(`${a} `);
+}
+
+function moduleNoun(type: string): string {
+  return type
+    .replace(/\s+[SM]\s+Module$/i, " Module")
+    .replace(/^(Medium|Large)\s+/i, "")
+    .replace(/\s+Module$/i, "")
+    .trim()
+    .toLowerCase();
+}
+
+export type ModuleTypeFit = { ok: boolean; group: string | null; reason: string | null };
+
+/** Whether this desk module type belongs on the unit. The reason names the model, e.g. "E'4S X-Wide has no milk module". */
+export function moduleTypeFit(def: RunbookDefinition, c: RunbookConfig, moduleType: string): ModuleTypeFit {
+  const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
+  const groups = applicableModules(def, c);
+  const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
+  for (const alias of aliases) {
+    const hit = groups.find((g) => groupCovers(g, alias));
+    if (hit) return { ok: true, group: hit, reason: null };
+  }
+  return { ok: false, group: null, reason: `${label} has no ${moduleNoun(moduleType)} module` };
+}
+
+export function platformFit(
+  allowed: readonly string[],
+  platform: string,
+  machineLabel: string,
+): { ok: boolean; reason: string | null } {
+  if (allowed.includes(platform)) return { ok: true, reason: null };
+  const which = allowed.length ? allowed.join(" or ") : "another platform";
+  return { ok: false, reason: `${machineLabel} is ${which}, not ${platform}.` };
+}
+
+/** Why this module cannot go on this unit, or null when it can. A blank type or platform is not a reason. */
+export function moduleAssignmentBlock(
+  def: RunbookDefinition,
+  c: RunbookConfig,
+  moduleType: string | null | undefined,
+  platform: string | null | undefined,
+  allowedPlatforms: readonly string[],
+): string | null {
+  const label = def.models.find((m) => m.id === c.model)?.label ?? c.model;
+  if (platform) {
+    const platformReason = platformFit(allowedPlatforms, platform, label).reason;
+    if (platformReason) return platformReason;
+  }
+  if (moduleType) {
+    const typeReason = moduleTypeFit(def, c, moduleType).reason;
+    if (typeReason) return typeReason;
+  }
+  return null;
+}
+
 /** First model, first interval, each option at its default (or first choice). */
 export function defaultConfig(def: RunbookDefinition): RunbookConfig {
   const d: RunbookConfig = { model: def.models[0].id, pm: def.intervals[0].id };

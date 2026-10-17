@@ -8,6 +8,8 @@ import { eversysFamily, isEversysMachine, moduleAccount, moduleAvailability } fr
 import { flagOn } from "@/lib/ops/flag";
 import { notifyAdminsModuleReturn } from "@/lib/ops/notify";
 import { swapError, trail, workError, workTotals, type ModuleStop, type ModuleWork, type StopKind } from "@/lib/ops/module-history";
+import { moduleAssignmentBlock, normalizeConfig } from "@/lib/ops/pm-runbook";
+import { runbookForPiece } from "@/lib/ops/runbooks";
 
 export type EversysUnit = {
   id: number;
@@ -199,11 +201,13 @@ export const assignModule = createServerFn({ method: "POST" })
       await sql.query<{
         id: number;
         module_id: string;
+        module_type: string | null;
+        platform: string | null;
         status: string;
         location: string | null;
         assigned_customer: string | null;
         return_pending: boolean;
-      }>("select id, module_id, status, location, assigned_customer, return_pending from modules where id = $1", [data.id])
+      }>("select id, module_id, module_type, platform, status, location, assigned_customer, return_pending from modules where id = $1", [data.id])
     )[0];
     if (!mod) throw new Error("Module not found");
     const current = moduleAccount({ status: mod.status, assignedCustomer: mod.assigned_customer, location: mod.location });
@@ -211,6 +215,12 @@ export const assignModule = createServerFn({ method: "POST" })
     if (flagOn(mod.return_pending)) throw new Error("This module is waiting on a return approval.");
     const unit = (await unitsFor(sql, customer)).find((u) => u.id === data.unitId);
     if (!unit) throw new Error("Pick an Eversys unit on that account.");
+    const hit = runbookForPiece(unit.model);
+    if (hit?.model) {
+      const config = normalizeConfig(hit.runbook.def, { model: hit.model });
+      const reason = moduleAssignmentBlock(hit.runbook.def, config, mod.module_type, mod.platform, hit.runbook.platforms);
+      if (reason) throw new Error(reason);
+    }
     const who = await actorOf(sql, context.userId);
     await sql.query(
       `update modules set
