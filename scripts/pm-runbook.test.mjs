@@ -14,6 +14,16 @@ import {
   isPmServiceRecord,
   matchE4XWide,
   moduleAssignmentBlock,
+  moduleBenchConfig,
+  moduleRunbookGroups,
+  moduleServiceOptions,
+  moduleServiceView,
+  moduleServiceWorkLines,
+  applySharedTick,
+  checksForModuleSheet,
+  checkSerialKey,
+  MODULE_NOT_ON_PM,
+  moduleOnThisPm,
   moduleTypeFit,
   normalizeConfig,
   platformFit,
@@ -301,6 +311,46 @@ test("E'4S has no milk module or milk frame; E'4MS has both", () => {
   const blocked = moduleAssignmentBlock(def, cfg({ model: "4s" }), "Milk Module", "Cameo", ["Enigma / e'Line"]);
   assert.match(blocked ?? "", /not Cameo/);
   assert.equal(moduleAssignmentBlock(def, cfg({ model: "4ms" }), "Milk Module", "Enigma / e'Line", ["Enigma / e'Line"]), null);
+});
+
+test("a module runbook is that type's kits and steps, and only the checked kits are logged", () => {
+  assert.equal(moduleRunbookGroups(def, "Pump Module"), null);
+  assert.equal(moduleServiceView(def, cfg({ model: "4s" }), "Pump Module"), null);
+  const brew = moduleServiceView(def, cfg({ model: "4s", pm: "12" }), "Brew Module");
+  assert.ok(brew.kits.some((k) => k.module === "Brew module"));
+  assert.equal(brew.kits.some((k) => k.module === "Milk module"), false);
+  const milk = moduleServiceView(def, moduleBenchConfig(def, "Milk Module", "12", {}), "Milk Module");
+  assert.ok(milk.kits.some((k) => k.ev === "EV108339"));
+  assert.equal(milk.kits.some((k) => k.module === "Frame"), false);
+  assert.equal(moduleServiceView(def, cfg({ model: "4s", choco: "no" }), "Powder Module").kits.length, 0);
+  const powder = moduleServiceView(def, cfg({ model: "4s", choco: "1", pm: "12" }), "Powder Module");
+  assert.ok(powder.kits.some((k) => k.ev === "EV109706"));
+  assert.deepEqual(moduleServiceOptions(def, "Powder Module").map((o) => o.key), ["choco"]);
+  const lines = moduleServiceWorkLines(powder.kits, ["kit:EV109706"], { EV109706: "EVER109706" });
+  assert.deepEqual(lines.map((l) => l.item), ["EVER109706"]);
+  assert.equal(moduleServiceWorkLines(powder.kits, [], {}).length, 0);
+  assert.equal(moduleServiceWorkLines(powder.kits, ["kit:EV109706"], {}).map((l) => l.item)[0], "EV109706");
+});
+
+test("an on-site module tick is the PM unit's tick, and completion logs only that module", () => {
+  const brew = moduleServiceView(def, cfg({ model: "4s", pm: "12" }), "Brew Module");
+  const milk = moduleServiceView(def, moduleBenchConfig(def, "Milk Module", "12", {}), "Milk Module");
+  const brewKey = `kit:${brew.kits[0].ev}`;
+  const milkKey = `kit:${milk.kits[0].ev}`;
+  const fromModule = applySharedTick([], brewKey, true, "Ana", "t1");
+  assert.deepEqual(checksForModuleSheet("pm", [brewKey], fromModule, []), [{ key: brewKey, who: "Ana", at: "t1" }]);
+  const fromUnit = applySharedTick(fromModule, brewKey, true, "Ben", "t2");
+  assert.equal(checksForModuleSheet("pm", [brewKey], fromUnit, [])[0].who, "Ana");
+  assert.equal(checkSerialKey("SN1"), "SN1");
+  assert.equal(checkSerialKey("acct:4"), null);
+  const both = [brewKey, milkKey];
+  const brewLogged = moduleServiceWorkLines(brew.kits, both, {});
+  assert.deepEqual(brewLogged.map((l) => l.item), [brew.kits[0].ev]);
+  assert.equal(brewLogged.some((l) => l.item === milk.kits[0].ev), false);
+  assert.equal(moduleOnThisPm([10, 11], 11), true);
+  assert.equal(moduleOnThisPm([10], 11), false);
+  assert.equal(moduleOnThisPm([10], null), false);
+  assert.equal(MODULE_NOT_ON_PM, "This module is not on a unit of this PM.");
 });
 
 test("a completed PM writes one service record and a later edit is not a second copy", () => {
