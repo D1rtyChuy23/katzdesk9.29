@@ -13,9 +13,15 @@ import {
   canEditRunbookDefinitions,
   canWriteRunbook,
   intervalFromStyle,
+  kitList,
   nextFromHistory,
   normalizeConfig,
+  PM_SERVICE_ACTION,
+  pmServicePrefix,
+  pmServiceRecord,
   recommendInterval,
+  stepList,
+  visibleOptions,
   type RunbookRole,
 } from "@/lib/ops/pm-runbook";
 import { planUnits, pmCompletionRefusal, type AccountUnitRow, type PlannedUnit } from "@/lib/ops/pm-runbook-units";
@@ -95,6 +101,85 @@ async function who(sql: Sql, userId: string) {
     canWrite: canWriteRunbook(role, isAdmin),
     canEditDefinitions: canEditRunbookDefinitions(role, isAdmin),
   };
+}
+
+/**
+ * After a PM passes the completion check, write one service record on each unit's existing history
+ * (`activity`, entity_type `unit_runbook`). A second completion or a later edit finds that row and does nothing.
+ */
+export async function recordCompletedRunbook(
+  sql: Sql,
+  pmId: number,
+  userId: string,
+  planned: PlannedUnit[],
+  style: string | null,
+): Promise<void> {
+  const me = await who(sql, userId);
+  const units = planned.filter((u) => u.optionsKey && runbookById(u.runbookId));
+  if (!units.length) return;
+  const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown }>(
+    "select unit_key, model, interval_mo, options from pm_runbook_units where pm_job_id = $1",
+    [pmId],
+  );
+  const checks = await sql.query<{ unit_key: string; key: string }>(
+    "select unit_key, key from pm_runbook_checks where pm_job_id = $1 and key like 'step:%'",
+    [pmId],
+  );
+  const keys = units.map((u) => u.optionsKey).filter((k): k is string => !!k);
+  const optRows = await sql.query<{ id: number; unit_key: string; options: unknown }>(
+    "select id, unit_key, options from unit_runbook_options where unit_key = any($1::text[])",
+    [keys],
+  );
+  for (const u of units) {
+    const rb = runbookById(u.runbookId);
+    if (!rb || !u.optionsKey) continue;
+    const s = saved.find((x) => x.unit_key === u.unitKey);
+    const optRow = optRows.find((r) => r.unit_key === u.optionsKey);
+    const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
+    const config = normalizeConfig(rb.def, {
+      ...options,
+      model: s?.model ?? u.model ?? undefined,
+      pm: s?.interval_mo ?? intervalFromStyle(rb.def, style) ?? undefined,
+    });
+    const ticked = new Set(checks.filter((c) => c.unit_key === u.unitKey).map((c) => c.key));
+    const detail = pmServiceRecord({
+      pmId,
+      modelLabel: rb.def.models.find((m) => m.id === config.model)?.label ?? u.piece,
+      intervalLabel: rb.def.intervals.find((i) => i.id === config.pm)?.label ?? `${config.pm}-month PM`,
+      options: visibleOptions(rb.def, config).map((o) => ({
+        label: o.label,
+        value: o.choices.find((c) => c.val === config[o.key])?.label ?? String(config[o.key] ?? ""),
+      })),
+      kits: kitList(rb.def, config).map((k) => ({ ev: k.ev, q: k.q, name: k.name })),
+      steps: stepList(rb.def, config)
+        .flatMap((g) => g.items)
+        .filter((item) => ticked.has(`step:${item.id}`))
+        .map((item) => item.text),
+    });
+    let historyId = optRow?.id ?? null;
+    if (historyId == null) {
+      const made = await sql.query<{ id: number }>(
+        `insert into unit_runbook_options (unit_key, serial_key, runbook_id, options, updated_by)
+         values ($1, case when $1 like 'acct:%' then null else $1 end, $2, $3::jsonb, $4)
+         on conflict (unit_key) do nothing
+         returning id`,
+        [u.optionsKey, u.runbookId, JSON.stringify(options), me.name],
+      );
+      historyId = made[0]?.id ?? (await sql.query<{ id: number }>("select id from unit_runbook_options where unit_key = $1", [u.optionsKey]))[0]?.id ?? null;
+    }
+    if (historyId == null) continue;
+    const already = await sql.query<{ id: number }>(
+      `select id from activity
+        where entity_type = 'unit_runbook' and entity_id = $1 and action = $2 and detail like $3
+        limit 1`,
+      [historyId, PM_SERVICE_ACTION, `${pmServicePrefix(pmId)}%`],
+    );
+    if (already[0]) continue;
+    await sql.query(
+      "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('unit_runbook', $1, $2, $3, $4)",
+      [historyId, me.name, PM_SERVICE_ACTION, detail],
+    );
+  }
 }
 
 async function requireWriter(sql: Sql, userId: string) {
@@ -368,7 +453,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         history: optRow
           ? hist
               .filter((h) => h.entity_id === optRow.id)
-              .slice(0, 8)
+              .slice(0, 20)
               .map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: h.detail ?? "" }))
           : [],
       };

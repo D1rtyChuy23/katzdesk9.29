@@ -632,10 +632,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
 
       {unit.history.length ? (
         <details className="text-sm">
-          <summary className="cursor-pointer font-semibold">Option history for this unit</summary>
-          <ul className="mt-2 grid gap-1 text-xs text-muted-foreground">
+          <summary className="cursor-pointer font-semibold">History for this unit</summary>
+          <ul className="mt-2 grid gap-2 text-xs text-muted-foreground">
             {unit.history.map((h, i) => (
-              <li key={i}>
+              <li key={i} className="break-words whitespace-pre-wrap">
                 {new Date(h.at).toLocaleDateString()} · {h.who ?? "Someone"}: {h.detail}
               </li>
             ))}
