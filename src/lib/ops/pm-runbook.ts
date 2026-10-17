@@ -344,3 +344,39 @@ export function canWriteRunbook(role: RunbookRole, isAdmin: boolean): boolean {
 export function canEditRunbookDefinitions(role: RunbookRole, isAdmin: boolean): boolean {
   return isAdmin || role === "admin";
 }
+
+/** Activity action for the one service record a completed PM writes on a unit. */
+export const PM_SERVICE_ACTION = "pm service";
+
+/** Opening of that record. A later save looks for this so it does not write a second one. */
+export function pmServicePrefix(pmId: number): string {
+  return `PM #${pmId} completed`;
+}
+
+export function isPmServiceRecord(action: string, detail: string | null | undefined, pmId: number): boolean {
+  return action === PM_SERVICE_ACTION && String(detail ?? "").startsWith(pmServicePrefix(pmId));
+}
+
+/**
+ * One service record for a completed PM on one unit: the interval, the options, the kit list for that
+ * config, and the steps that were ticked. The caller passes only the ticked steps.
+ */
+export function pmServiceRecord(input: {
+  pmId: number;
+  modelLabel: string;
+  intervalLabel: string;
+  options: { label: string; value: string }[];
+  kits: { ev: string; q: number; name: string }[];
+  steps: string[];
+}): string {
+  const lines = [`${pmServicePrefix(input.pmId)}. ${input.modelLabel}, ${input.intervalLabel}.`];
+  lines.push(input.options.length ? `Options: ${input.options.map((o) => `${o.label}: ${o.value}`).join("; ")}.` : "Options: none.");
+  lines.push(input.kits.length ? `Kits: ${input.kits.map((k) => `${k.q} x ${k.ev} ${k.name}`).join("; ")}.` : "Kits: none.");
+  if (input.steps.length) {
+    lines.push("Steps done:");
+    for (const step of input.steps) lines.push(`- ${step}`);
+  } else {
+    lines.push("Steps done: none.");
+  }
+  return lines.join("\n");
+}

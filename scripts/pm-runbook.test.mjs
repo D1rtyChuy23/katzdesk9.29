@@ -11,11 +11,13 @@ import {
   recommendInterval,
   kitList,
   kitListText,
+  isPmServiceRecord,
   matchE4XWide,
   moduleAssignmentBlock,
   moduleTypeFit,
   normalizeConfig,
   platformFit,
+  pmServiceRecord,
   applicableModules,
   stepList,
   totalKits,
@@ -290,4 +292,23 @@ test("E'4S has no milk module or milk frame; E'4MS has both", () => {
   const blocked = moduleAssignmentBlock(def, cfg({ model: "4s" }), "Milk Module", "Cameo", ["Enigma / e'Line"]);
   assert.match(blocked ?? "", /not Cameo/);
   assert.equal(moduleAssignmentBlock(def, cfg({ model: "4ms" }), "Milk Module", "Enigma / e'Line", ["Enigma / e'Line"]), null);
+});
+
+test("a completed PM writes one service record and a later edit is not a second copy", () => {
+  const text = pmServiceRecord({
+    pmId: 12,
+    modelLabel: "E'4MS X-Wide",
+    intervalLabel: "12-month PM",
+    options: [{ label: "Steam wands", value: "1" }],
+    kits: [{ ev: "EV117077", q: 2, name: "Brew PM kit" }],
+    steps: ["Grease the brew group"],
+  });
+  assert.match(text, /^PM #12 completed\. E'4MS X-Wide, 12-month PM\./);
+  assert.match(text, /Options: Steam wands: 1\./);
+  assert.match(text, /Kits: 2 x EV117077 Brew PM kit\./);
+  assert.match(text, /Steps done:\n- Grease the brew group$/);
+  assert.equal(isPmServiceRecord("pm service", text, 12), true);
+  assert.equal(isPmServiceRecord("pm service", text, 123), false);
+  assert.equal(isPmServiceRecord("options changed", text, 12), false);
+  assert.equal(pmServiceRecord({ pmId: 3, modelLabel: "E'4S X-Wide", intervalLabel: "36-month PM", options: [], kits: [], steps: [] }), "PM #3 completed. E'4S X-Wide, 36-month PM.\nOptions: none.\nKits: none.\nSteps done: none.");
 });
