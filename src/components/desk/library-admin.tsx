@@ -4,7 +4,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { cleanupLibraryDuplicates, storeLibraryFileOnce, type LibraryBook, type LibraryCleanupReport, type LibraryFile } from "@/lib/ops/library-files";
+import { cleanupLibraryDuplicates, importLibraryBatch, storeLibraryFileOnce, type LibraryBook, type LibraryCleanupReport, type LibraryFile, type LibraryImportReport } from "@/lib/ops/library-files";
+import { Input } from "@/components/ui/input";
 import { familyDuplicateGroups, familyOf, isMainChip, nameKey, sizeText, type ShareFile } from "@/lib/ops/library-file-rules";
 
 /** Jesus counted 54 from the dedupe plus #27, #37 and #50. The dialog shows the count actually found. */
@@ -16,6 +17,8 @@ function bookTitle(books: LibraryBook[], id: number | null): string {
 
 export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]; files: LibraryFile[]; onChanged: () => void }) {
   const [report, setReport] = useState<LibraryCleanupReport | null>(null);
+  const [importLimit, setImportLimit] = useState(10);
+  const [importPlan, setImportPlan] = useState<LibraryImportReport | null>(null);
   const share: ShareFile[] = files.map((f) => ({
     id: f.id,
     name: f.name,
@@ -42,13 +45,21 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not store that file once"),
   });
+  const importer = useMutation({
+    mutationFn: (apply: boolean) => importLibraryBatch({ data: { apply, limit: importLimit } }),
+    onSuccess: (r) => {
+      setImportPlan(r);
+      if (r.applied) onChanged();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not review the import"),
+  });
   const removable = (report?.books ?? []).filter((b) => b.action === "remove").length;
   const nothing = !!report && report.named.count + report.abandoned.count + removable === 0;
   return (
     <section className="mt-8 rounded-xl border border-border bg-card px-4 py-4" data-testid="library-admin">
       <h2 className="font-display text-lg font-medium">Library Admin</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        One-time cleanup, and manuals or parts stored more than once in a family. Spec sheets are not part of either.
+        One-time cleanup, the vendor-file import, and manuals or parts stored more than once in a family. Spec sheets are not part of the cleanup or the duplicate report.
       </p>
 
       <div className="mt-4">
@@ -59,6 +70,31 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
         <Button type="button" className="mt-2" variant="outline" disabled={review.isPending} onClick={() => review.mutate(false)} data-testid="library-cleanup-review">
           {review.isPending && !report?.applied ? <Loader2 className="size-4 animate-spin" /> : null}
           Review Cleanup
+        </Button>
+      </div>
+
+      <div className="mt-5">
+        <h3 className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">Import</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Renames #27 and #37 so cleanup can remove them, and renames #50 only after Eversys Cameo already has a file named with 5700105620. Manuals and parts are stored once on the family’s main chip; spec sheets stay on the model. A book MPN is set only when the list has one. Review downloads the next batch and saves nothing.
+        </p>
+        <label className="mt-2 flex items-center gap-2 text-sm" htmlFor="library-import-limit">
+          Files this batch
+          <Input
+            id="library-import-limit"
+            type="number"
+            min={0}
+            max={386}
+            value={importLimit}
+            disabled={importer.isPending}
+            className="w-24"
+            data-testid="library-import-limit"
+            onChange={(e) => setImportLimit(Math.max(0, Math.min(386, Number(e.target.value) || 0)))}
+          />
+        </label>
+        <Button type="button" className="mt-2" variant="outline" disabled={importer.isPending} onClick={() => importer.mutate(false)} data-testid="library-import-review">
+          {importer.isPending && !importPlan?.applied ? <Loader2 className="size-4 animate-spin" /> : null}
+          Review Import
         </Button>
       </div>
 
@@ -107,6 +143,47 @@ export function LibraryAdmin({ books, files, onChanged }: { books: LibraryBook[]
           </ul>
         )}
       </div>
+
+      <Dialog open={!!importPlan} onOpenChange={(o) => !o && !importer.isPending && setImportPlan(null)}>
+        <DialogContent data-testid="library-import-dialog">
+          <DialogTitle>{importPlan?.applied ? "Import Batch Finished" : "Apply This Import Batch?"}</DialogTitle>
+          {importPlan ? (
+            <>
+              <DialogDescription>
+                {importPlan.applied
+                  ? "This is what was saved. Nothing else was changed."
+                  : "Nothing is saved until you apply. Apply renames the marked files, stores the OK PDFs, sets the OK MPNs, and writes every row of this batch to the import log."}
+              </DialogDescription>
+              <ul className="mt-3 grid gap-1 text-sm" data-testid="library-import-counts">
+                <li>OK: <strong>{importPlan.counts.OK}</strong></li>
+                <li>Skip: <strong>{importPlan.counts.SKIP}</strong></li>
+                <li>Fail: <strong>{importPlan.counts.FAIL}</strong></li>
+                <li>Conflict: <strong>{importPlan.counts.CONFLICT}</strong></li>
+              </ul>
+              <ul className="mt-3 max-h-72 overflow-y-auto rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground" data-testid="library-import-rows">
+                {importPlan.rows.map((row, i) => (
+                  <li key={`${row.kind}-${row.bookId ?? "x"}-${row.fileId ?? "x"}-${i}`}>
+                    {row.action} · {row.kind}
+                    {row.fileId ? ` #${row.fileId}` : ""}
+                    {row.bookId ? ` · book #${row.bookId}` : ""} — {row.reason}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {!importPlan.applied && importPlan.rows.length > 0 ? (
+                  <Button type="button" disabled={importer.isPending} onClick={() => importer.mutate(true)} data-testid="library-import-apply">
+                    {importer.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+                    Apply This Batch
+                  </Button>
+                ) : null}
+                <Button type="button" variant="outline" disabled={importer.isPending} onClick={() => setImportPlan(null)}>
+                  {importPlan.applied ? "Close" : "Cancel"}
+                </Button>
+              </div>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!report} onOpenChange={(o) => !o && !review.isPending && setReport(null)}>
         <DialogContent data-testid="library-cleanup-dialog">

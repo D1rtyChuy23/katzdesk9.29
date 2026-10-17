@@ -10,6 +10,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn, cleanSourceUrl, mpnKey, sameMpn, tieError } from "@/lib/ops/mpn-rules";
 import { cleanLegacyNote, legacyMoveError } from "@/lib/ops/legacy-rules";
 import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, copiesToVariations, customFileName, familyDuplicateGroups, familyDuplicates, familyOf, fileError, isMainChip, mainChipFor, type CleanupBookFacts, type HiddenCopy, type ShareFile, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import type { LibraryImportReport } from "@/lib/ops/library-import-rules";
 
 export type LibraryFile = {
   id: number;
@@ -908,4 +909,21 @@ export const storeLibraryFileOnce = createServerFn({ method: "POST" })
     }
     const name = file.bookId === main.id ? file.name : await placeFileInBook(sql, file.id, main.id);
     return { bookId: main.id, bookTitle: main.title, name, createdMainChip };
+  });
+
+export type { LibraryImportReport };
+
+/**
+ * Admin only. apply=false downloads up to `limit` vendor PDFs and returns the plan without writing.
+ * apply=true stores that batch, marks the duplicate files, sets MPNs, and logs every row.
+ * A limit of 0 plans the duplicate marks and MPNs only.
+ */
+export const importLibraryBatch = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { apply: boolean; limit: number }) => z.object({ apply: z.boolean(), limit: z.number().int().min(0).max(1000) }).parse(d))
+  .handler(async ({ data, context }): Promise<LibraryImportReport> => {
+    const sql = await ready();
+    const role = await requireLibraryAdmin(sql, context.userId);
+    const { runLibraryImport } = await import("./library-import-run");
+    return runLibraryImport(sql, { userId: context.userId, userName: role.name, apply: data.apply, limit: data.limit });
   });
