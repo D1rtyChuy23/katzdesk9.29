@@ -292,6 +292,41 @@ export function moduleServiceWorkLines(
     .map((k) => ({ item: skus[k.ev] || k.ev, qty: k.q, description: k.name }));
 }
 
+export type SharedCheck = { key: string; who: string | null; at: string };
+
+export const MODULE_NOT_ON_PM = "This module is not on a unit of this PM.";
+
+/** serial_key on a PM check: the unit's serial, never the acct:<id> fallback. */
+export function checkSerialKey(optionsKey: string | null | undefined): string | null {
+  return optionsKey && !optionsKey.startsWith("acct:") ? optionsKey : null;
+}
+
+/** True when this module's account unit is one of the PM's planned units. */
+export function moduleOnThisPm(accountIds: readonly (number | null)[], assignedUnitId: number | null): boolean {
+  return assignedUnitId != null && accountIds.includes(assignedUnitId);
+}
+
+/**
+ * Checks the module sheet shows. On site they are the PM unit's checks (same who/when).
+ * A second tick of a key already there does not replace who/when — the PM sheet keeps the first stamp.
+ */
+export function applySharedTick(checks: readonly SharedCheck[], key: string, on: boolean, who: string, at: string): SharedCheck[] {
+  if (!on) return checks.filter((c) => c.key !== key);
+  if (checks.some((c) => c.key === key)) return [...checks];
+  return [...checks, { key, who, at }];
+}
+
+export function checksForModuleSheet(
+  context: "bench" | "pm",
+  moduleKeys: readonly string[],
+  unitChecks: readonly SharedCheck[],
+  benchChecks: readonly SharedCheck[],
+): SharedCheck[] {
+  if (context === "bench") return [...benchChecks];
+  const want = new Set(moduleKeys);
+  return unitChecks.filter((c) => want.has(c.key));
+}
+
 /** Plain-text kit list for one module, for pasting into an order. */
 export function moduleKitListText(title: string, intervalLabel: string, kits: KitLine[], prices?: KitPrice[]): string {
   const out = [title, intervalLabel, ""];

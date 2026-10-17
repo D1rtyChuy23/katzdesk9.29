@@ -19,6 +19,11 @@ import {
   moduleServiceOptions,
   moduleServiceView,
   moduleServiceWorkLines,
+  applySharedTick,
+  checksForModuleSheet,
+  checkSerialKey,
+  MODULE_NOT_ON_PM,
+  moduleOnThisPm,
   moduleTypeFit,
   normalizeConfig,
   platformFit,
@@ -325,6 +330,27 @@ test("a module runbook is that type's kits and steps, and only the checked kits 
   assert.deepEqual(lines.map((l) => l.item), ["EVER109706"]);
   assert.equal(moduleServiceWorkLines(powder.kits, [], {}).length, 0);
   assert.equal(moduleServiceWorkLines(powder.kits, ["kit:EV109706"], {}).map((l) => l.item)[0], "EV109706");
+});
+
+test("an on-site module tick is the PM unit's tick, and completion logs only that module", () => {
+  const brew = moduleServiceView(def, cfg({ model: "4s", pm: "12" }), "Brew Module");
+  const milk = moduleServiceView(def, moduleBenchConfig(def, "Milk Module", "12", {}), "Milk Module");
+  const brewKey = `kit:${brew.kits[0].ev}`;
+  const milkKey = `kit:${milk.kits[0].ev}`;
+  const fromModule = applySharedTick([], brewKey, true, "Ana", "t1");
+  assert.deepEqual(checksForModuleSheet("pm", [brewKey], fromModule, []), [{ key: brewKey, who: "Ana", at: "t1" }]);
+  const fromUnit = applySharedTick(fromModule, brewKey, true, "Ben", "t2");
+  assert.equal(checksForModuleSheet("pm", [brewKey], fromUnit, [])[0].who, "Ana");
+  assert.equal(checkSerialKey("SN1"), "SN1");
+  assert.equal(checkSerialKey("acct:4"), null);
+  const both = [brewKey, milkKey];
+  const brewLogged = moduleServiceWorkLines(brew.kits, both, {});
+  assert.deepEqual(brewLogged.map((l) => l.item), [brew.kits[0].ev]);
+  assert.equal(brewLogged.some((l) => l.item === milk.kits[0].ev), false);
+  assert.equal(moduleOnThisPm([10, 11], 11), true);
+  assert.equal(moduleOnThisPm([10], 11), false);
+  assert.equal(moduleOnThisPm([10], null), false);
+  assert.equal(MODULE_NOT_ON_PM, "This module is not on a unit of this PM.");
 });
 
 test("a completed PM writes one service record and a later edit is not a second copy", () => {

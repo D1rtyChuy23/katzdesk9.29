@@ -32,6 +32,7 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["module-runbook", moduleId] });
     void qc.invalidateQueries({ queryKey: ["module-record", moduleId] });
+    void qc.invalidateQueries({ queryKey: ["pm-runbook"] });
   };
   const save = useMutation({
     mutationFn: (extra: Partial<Parameters<typeof saveModuleRunbook>[0]["data"]>) => saveModuleRunbook({ data: { ...scope, ...extra } }),
@@ -49,7 +50,7 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
   const [busy, setBusy] = useState(false);
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Loading the runbook…</p>;
   if (q.isError) return <p className="text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not load the runbook."}</p>;
-  if (!data?.covered) return <p className="text-sm text-muted-foreground">No runbook for this module type yet.</p>;
+  if (!data?.covered) return <p className="text-sm text-muted-foreground">{data?.notice || "No runbook for this module type yet."}</p>;
   const locked = data.completed || !data.canWrite || save.isPending || done.isPending || busy;
   const text = moduleKitListText(data.title ?? "Module", data.intervals.find((i) => i.id === data.interval)?.label ?? "", data.kits, priced);
   return (
@@ -61,28 +62,37 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
       {data.completed ? (
         <p className="rounded-md bg-muted px-3 py-2 text-sm">This service is completed. The checked kits are on the parts log.</p>
       ) : null}
-      <div className="grid gap-1">
-        <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Service interval</span>
-        <div className="flex flex-wrap gap-1.5">
-          {data.intervals.map((i) => (
-            <button
-              key={i.id}
-              type="button"
-              disabled={locked}
-              aria-pressed={data.interval === i.id}
-              onClick={() => save.mutate({ interval: i.id })}
-              className={cn(
-                "min-h-9 rounded-md border px-3 py-1 text-sm disabled:cursor-default",
-                data.interval === i.id ? "border-primary bg-primary font-semibold text-primary-foreground" : "border-border",
-              )}
-            >
-              {i.label}
-            </button>
-          ))}
-        </div>
-      </div>
-      {context === "bench"
-        ? data.options.map((o) => (
+      {context === "pm" ? (
+        <p className="text-sm break-words">
+          {data.intervals.find((i) => i.id === data.interval)?.label ?? "Interval from the PM"}
+          {data.options.length
+            ? ` · ${data.options.map((o) => `${o.label}: ${o.choices.find((c) => c.val === o.value)?.label ?? o.value}`).join(" · ")}`
+            : ""}
+          <span className="mt-1 block text-xs text-muted-foreground">Interval and options come from the PM.</span>
+        </p>
+      ) : (
+        <>
+          <div className="grid gap-1">
+            <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Service interval</span>
+            <div className="flex flex-wrap gap-1.5">
+              {data.intervals.map((i) => (
+                <button
+                  key={i.id}
+                  type="button"
+                  disabled={locked}
+                  aria-pressed={data.interval === i.id}
+                  onClick={() => save.mutate({ interval: i.id })}
+                  className={cn(
+                    "min-h-9 rounded-md border px-3 py-1 text-sm disabled:cursor-default",
+                    data.interval === i.id ? "border-primary bg-primary font-semibold text-primary-foreground" : "border-border",
+                  )}
+                >
+                  {i.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {data.options.map((o) => (
             <div key={o.key} className="grid gap-1">
               <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{o.label}</span>
               <div className="flex flex-wrap gap-1.5">
@@ -103,8 +113,9 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
                 ))}
               </div>
             </div>
-          ))
-        : null}
+          ))}
+        </>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
           {summary && anyFound(summary) ? (

@@ -12,6 +12,7 @@ import { RUNBOOKS, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
   canWriteRunbook,
+  checkSerialKey,
   intervalFromStyle,
   kitList,
   nextFromHistory,
@@ -617,7 +618,7 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
   });
 
 /** The unit's serial (not 'acct:<id>'), so earlier PMs are found by serial. Null when there is none yet. */
-const serialOf = (optionsKey: string | null | undefined) => (optionsKey && !optionsKey.startsWith("acct:") ? optionsKey : null);
+const serialOf = (optionsKey: string | null | undefined) => checkSerialKey(optionsKey);
 
 const configInput = unitInput.extend({
   optionsKey: z.string().max(200).nullable().optional(),

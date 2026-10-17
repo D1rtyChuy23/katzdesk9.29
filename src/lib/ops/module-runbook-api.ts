@@ -11,8 +11,12 @@ import { flagOn } from "@/lib/ops/flag";
 import { loadPmRunbookPlan } from "@/lib/ops/pm-runbook-api";
 import {
   canWriteRunbook,
+  MODULE_NOT_ON_PM,
+  checkSerialKey,
+  checksForModuleSheet,
   moduleBenchConfig,
   moduleKitListText,
+  moduleOnThisPm,
   moduleRunbookGroups,
   moduleServiceOptions,
   moduleServiceView,
@@ -20,6 +24,7 @@ import {
   normalizeConfig,
   type KitLine,
   type RunbookRole,
+  type SharedCheck,
   type StepGroup,
 } from "@/lib/ops/pm-runbook";
 import { catalogKeys, kitKey, pickCatalog } from "@/lib/ops/pm-runbook-prices";
@@ -82,6 +87,8 @@ export type ModuleRunbookData = {
   steps: StepGroup[];
   checks: Record<string, { who: string | null; at: string }>;
   copyText: string;
+  /** Set when the sheet cannot open for a reason other than "no runbook yet". */
+  notice: string | null;
 };
 
 async function findService(sql: Sql, moduleId: number, context: "bench" | "pm", pmId: number | null): Promise<ServiceRow | null> {
@@ -128,38 +135,40 @@ async function ensureService(
   return inserted[0]!;
 }
 
+async function unitOnPm(sql: Sql, pmId: number, assignedUnitId: number | null) {
+  if (assignedUnitId == null) return null;
+  const pm = (await sql.query<{ customer: string; equipment: string | null }>("select customer, equipment from pm_jobs where id = $1", [pmId]))[0];
+  if (!pm) return null;
+  const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, pmId);
+  if (!moduleOnThisPm(plan.planned.map((u) => u.accountId), assignedUnitId)) return null;
+  return plan.planned.find((u) => u.accountId === assignedUnitId) ?? null;
+}
+
 async function configFor(
   sql: Sql,
   def: Parameters<typeof moduleBenchConfig>[0],
   moduleType: string,
-  assignedUnitId: number | null,
   service: ServiceRow | null,
   context: "bench" | "pm",
   pmId: number | null,
+  pmUnit: Awaited<ReturnType<typeof unitOnPm>>,
 ): Promise<RunbookConfig> {
   const saved = asJson(service?.options);
-  if (context === "pm" && pmId && assignedUnitId) {
-    const pm = (await sql.query<{ customer: string; equipment: string | null; style: string | null }>("select customer, equipment, style from pm_jobs where id = $1", [pmId]))[0];
-    if (pm) {
-      const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, pmId);
-      const unit = plan.planned.find((u) => u.accountId === assignedUnitId);
-      if (unit) {
-        const job = (
-          await sql.query<{ model: string | null; interval_mo: string | null; options: unknown }>(
-            "select model, interval_mo, options from pm_runbook_units where pm_job_id = $1 and unit_key = $2",
-            [pmId, unit.unitKey],
-          )
-        )[0];
-        const opt = unit.optionsKey
-          ? (await sql.query<{ options: unknown }>("select options from unit_runbook_options where unit_key = $1", [unit.optionsKey]))[0]
-          : null;
-        return normalizeConfig(def, {
-          ...asJson(opt?.options ?? job?.options),
-          model: job?.model ?? unit.model ?? undefined,
-          pm: service?.interval_mo ?? job?.interval_mo ?? undefined,
-        });
-      }
-    }
+  if (context === "pm" && pmId && pmUnit) {
+    const job = (
+      await sql.query<{ model: string | null; interval_mo: string | null; options: unknown }>(
+        "select model, interval_mo, options from pm_runbook_units where pm_job_id = $1 and unit_key = $2",
+        [pmId, pmUnit.unitKey],
+      )
+    )[0];
+    const opt = pmUnit.optionsKey
+      ? (await sql.query<{ options: unknown }>("select options from unit_runbook_options where unit_key = $1", [pmUnit.optionsKey]))[0]
+      : null;
+    return normalizeConfig(def, {
+      ...asJson(opt?.options ?? job?.options),
+      model: job?.model ?? pmUnit.model ?? undefined,
+      pm: job?.interval_mo ?? undefined,
+    });
   }
   return moduleBenchConfig(def, moduleType, service?.interval_mo, saved);
 }
@@ -186,23 +195,39 @@ async function viewOf(sql: Sql, data: z.infer<typeof scope>, userId: string): Pr
     steps: [],
     checks: {},
     copyText: "",
+    notice: null,
   };
   if (!mod) return empty;
   const rb = runbookForPlatform(mod.platform);
   if (!rb || !moduleRunbookGroups(rb.def, mod.module_type)) return empty;
   if (data.context === "pm" && !data.pmId) return empty;
+  const pmUnit = data.context === "pm" && data.pmId ? await unitOnPm(sqlReady, data.pmId, mod.assigned_unit_id) : null;
+  if (data.context === "pm" && !pmUnit) return { ...empty, notice: MODULE_NOT_ON_PM };
   const service = await findService(sqlReady, data.moduleId, data.context, data.pmId ?? null);
-  const config = await configFor(sqlReady, rb.def, mod.module_type!, mod.assigned_unit_id, service, data.context, data.pmId ?? null);
+  const config = await configFor(sqlReady, rb.def, mod.module_type!, service, data.context, data.pmId ?? null, pmUnit);
   const view = moduleServiceView(rb.def, config, mod.module_type);
   if (!view) return empty;
-  const checks: ModuleRunbookData["checks"] = {};
-  if (service) {
+  const moduleKeys = [
+    ...view.kits.map((k) => `kit:${k.ev}`),
+    ...view.steps.flatMap((g) => g.items.map((s) => `step:${s.id}`)),
+  ];
+  let unitChecks: SharedCheck[] = [];
+  let benchChecks: SharedCheck[] = [];
+  if (data.context === "pm" && data.pmId && pmUnit) {
+    const rows = await sqlReady.query<{ key: string; done_by: string | null; done_at: string }>(
+      "select key, done_by, done_at::text as done_at from pm_runbook_checks where pm_job_id = $1 and unit_key = $2",
+      [data.pmId, pmUnit.unitKey],
+    );
+    unitChecks = rows.map((r) => ({ key: r.key, who: r.done_by, at: r.done_at }));
+  } else if (service) {
     const rows = await sqlReady.query<{ key: string; done_by: string | null; done_at: string }>(
       "select key, done_by, done_at::text as done_at from module_runbook_checks where service_id = $1",
       [service.id],
     );
-    for (const r of rows) checks[r.key] = { who: r.done_by, at: r.done_at };
+    benchChecks = rows.map((r) => ({ key: r.key, who: r.done_by, at: r.done_at }));
   }
+  const checks: ModuleRunbookData["checks"] = {};
+  for (const r of checksForModuleSheet(data.context, moduleKeys, unitChecks, benchChecks)) checks[r.key] = { who: r.who, at: r.at };
   const interval = rb.def.intervals.find((i) => i.id === config.pm);
   return {
     covered: true,
@@ -222,6 +247,7 @@ async function viewOf(sql: Sql, data: z.infer<typeof scope>, userId: string): Pr
     steps: view.steps,
     checks,
     copyText: moduleKitListText(mod.module_type!, interval?.label ?? `${config.pm}-month PM`, view.kits),
+    notice: null,
   };
 }
 
@@ -248,10 +274,36 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
     if (!me.canWrite) throw new Error("Only Service and Admin can change the runbook.");
     if (data.context === "pm" && !data.pmId) throw new Error("This service needs a PM.");
     const mod = (
-      await sql.query<{ module_type: string | null; platform: string | null }>("select module_type, platform from modules where id = $1", [data.moduleId])
+      await sql.query<{ module_type: string | null; platform: string | null; assigned_unit_id: number | null }>(
+        "select module_type, platform, assigned_unit_id from modules where id = $1",
+        [data.moduleId],
+      )
     )[0];
     const rb = mod ? runbookForPlatform(mod.platform) : null;
     if (!mod || !rb || !moduleRunbookGroups(rb.def, mod.module_type)) throw new Error("No runbook for this module type yet.");
+    if (data.context === "pm") {
+      if (data.interval || data.optionKey || data.optionValue) throw new Error("Interval and options come from the PM.");
+      const unit = await unitOnPm(sql, data.pmId!, mod.assigned_unit_id);
+      if (!unit) throw new Error(MODULE_NOT_ON_PM);
+      const existing = await findService(sql, data.moduleId, data.context, data.pmId ?? null);
+      if (existing?.completed_at && !data.again) throw new Error("This service is already completed.");
+      if (data.checkKey && data.checked != null) {
+        if (!/^(kit|step):[A-Za-z0-9._-]{1,80}$/.test(data.checkKey)) throw new Error("Unknown check.");
+        await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name);
+        if (data.checked) {
+          await sql.query(
+            `insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by, serial_key) values ($1, $2, $3, $4, $5)
+             on conflict (pm_job_id, unit_key, key) do nothing`,
+            [data.pmId, unit.unitKey, data.checkKey, me.name, checkSerialKey(unit.optionsKey)],
+          );
+        } else {
+          await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [data.pmId, unit.unitKey, data.checkKey]);
+        }
+      } else if (data.again) {
+        await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name);
+      }
+      return viewOf(sql, data, context.userId);
+    }
     const existing = await findService(sql, data.moduleId, data.context, data.pmId ?? null);
     if (existing?.completed_at && !data.again) throw new Error("This service is already completed.");
     const service = await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name);
@@ -288,9 +340,19 @@ export const completeModuleRunbook = createServerFn({ method: "POST" })
     const sql = await ready();
     const me = await who(sql, context.userId);
     if (!me.canWrite) throw new Error("Only Service and Admin can change the runbook.");
-    const mod = (await sql.query<{ module_type: string | null; platform: string | null }>("select module_type, platform from modules where id = $1", [data.moduleId]))[0];
+    const mod = (
+      await sql.query<{ module_type: string | null; platform: string | null; assigned_unit_id: number | null }>(
+        "select module_type, platform, assigned_unit_id from modules where id = $1",
+        [data.moduleId],
+      )
+    )[0];
     const rb = mod ? runbookForPlatform(mod.platform) : null;
     if (!mod || !rb || !moduleRunbookGroups(rb.def, mod.module_type)) throw new Error("No runbook for this module type yet.");
+    if (data.context === "pm") {
+      if (!data.pmId) throw new Error("This service needs a PM.");
+      const unit = await unitOnPm(sql, data.pmId, mod.assigned_unit_id);
+      if (!unit) throw new Error(MODULE_NOT_ON_PM);
+    }
     const existing = await findService(sql, data.moduleId, data.context, data.pmId ?? null);
     if (existing?.completed_at) throw new Error("This service is already completed.");
     const service = existing ?? (await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name));
