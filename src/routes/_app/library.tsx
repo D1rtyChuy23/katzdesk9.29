@@ -24,7 +24,9 @@ import { needsWater } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, originOf, uploadLibraryFile } from "@/components/desk/library-files";
+import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, originOf, StoreOnceDialog, uploadLibraryFile, type StoreOnceChoice } from "@/components/desk/library-files";
+import { LibraryAdmin } from "@/components/desk/library-admin";
+import type { StoreOnceOffer } from "@/lib/ops/library-files";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import { MpnPanel, OfficialTag } from "@/components/desk/mpn-panel";
 import { LegacyPanel } from "@/components/desk/legacy-panel";
@@ -69,6 +71,7 @@ function Page() {
   const hidden = lib.data?.hidden ?? [];
   const sheetBook = new Map((lib.data?.sheetBooks ?? []).map((r) => [r.sheetId, r.bookId]));
   const canEdit = !!data.data?.canEdit;
+  const isAdmin = !!lib.data?.isAdmin;
   const selected = open != null ? sheets.find((s) => s.id === open) ?? null : null;
   const bookId = bookParam ?? (selected ? sheetBook.get(selected.id) ?? null : null);
   const book = bookId != null ? books.find((b) => b.id === bookId) ?? null : null;
@@ -94,6 +97,7 @@ function Page() {
   const [codesOpen, setCodesOpen] = useState(false);
   // The toolbar's filters: only Legacy models, or only models flagged Confirm Legacy.
   const [only, setOnly] = useState<"legacy" | "confirm" | null>(null);
+  const [storeOnce, setStoreOnce] = useState<{ offer: StoreOnceOffer; fileName: string; resolve: (choice: StoreOnceChoice) => void } | null>(null);
   const rereadInput = useRef<HTMLInputElement>(null);
   const [rereading, setRereading] = useState(false);
   const [found, setFound] = useState<{ image: string | null; dimsImage: string | null; note: string | null; file: string } | null>(null);
@@ -183,9 +187,39 @@ function Page() {
         if (!known.some((b) => b.id === target!.id)) known = [...known, target];
       }
       try {
-        const filed = await uploadLibraryFile(file, section, target.id, (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }), type ?? undefined, customName);
-        toast.success(`Filed in ${target.title} → ${SHELF[filed.section].title} as ${filed.name}`);
-        last = target;
+        const filed = await uploadLibraryFile(
+          file,
+          section,
+          target.id,
+          (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }),
+          type ?? undefined,
+          customName,
+          (offer) => new Promise((resolve) => setStoreOnce({ offer, fileName: file.name, resolve })),
+        );
+        setStoreOnce(null);
+        if (!filed) {
+          errors.push(`${file.name} was skipped.`);
+          continue;
+        }
+        if (filed.storedOnce) {
+          toast.success(`${file.name} was not uploaded. Stored once on ${filed.bookTitle} as ${filed.name}.`);
+          const landed = known.find((b) => b.id === filed.bookId) ?? {
+            id: filed.bookId,
+            title: filed.bookTitle,
+            manufacturer: filed.manufacturer,
+            mpn: null,
+            noOfficialFile: false,
+            legacy: false,
+            legacySource: null,
+            legacyNote: null,
+            confirmLegacy: false,
+          };
+          if (!known.some((b) => b.id === landed.id)) known = [...known, landed];
+          last = landed;
+        } else {
+          toast.success(`Filed in ${target.title} → ${SHELF[filed.section].title} as ${filed.name}`);
+          last = target;
+        }
       } catch (e) {
         errors.push(`${file.name}: ${e instanceof Error ? e.message : "could not be added"}`);
       }
@@ -374,7 +408,7 @@ function Page() {
   // Current models stay in the main row (family, then variation). Legacy models sit in their own row under the maker.
   const { current: currentModels, legacy: legacyModels } = splitLegacy(models);
   const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : currentModels[0] ?? models[0] ?? null;
-  // Maker → family → variation. A family is the model's first word (Axiom, G9, ITCB); its chips never mix with another family's.
+  // Maker → family → variation. A word family is the model's first word (Axiom, G9, ITCB). A letter-digit series such as CBS-1252 sits under CBS-125.
   const familyKey = (b: LibraryBook) => nameKey(familyOf(b.title, b.manufacturer));
   const families = [...new Map(currentModels.map((m) => [familyKey(m), familyOf(m.title, m.manufacturer)])).entries()]
     // The main chip (named like the parent) leads its row.
@@ -761,6 +795,18 @@ function Page() {
         </section>
       ) : null}
 
+      {isAdmin ? <LibraryAdmin books={books} files={files} onChanged={() => void reload()} /> : null}
+
+      <StoreOnceDialog
+        offer={storeOnce?.offer ?? null}
+        fileName={storeOnce?.fileName ?? ""}
+        busy={!!busy}
+        onChoose={(choice) => {
+          storeOnce?.resolve(choice);
+          setStoreOnce(null);
+        }}
+      />
+
       <Dialog open={!!askNew} onOpenChange={(o) => !o && askNew?.resolve(null)}>
         <DialogContent data-testid="new-chip-dialog">
           <DialogTitle>
@@ -788,7 +834,7 @@ function Page() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={adding && !ask && !askType && !askNew} onOpenChange={(o) => !o && !busy && setAdding(false)}>
+      <Dialog open={adding && !ask && !askType && !askNew && !storeOnce} onOpenChange={(o) => !o && !busy && setAdding(false)}>
         <DialogContent data-testid="add-dialog">
           <DialogTitle>Add Files</DialogTitle>
           <DialogDescription>

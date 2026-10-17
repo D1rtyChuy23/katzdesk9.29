@@ -237,7 +237,7 @@ test("PM Guide is a manual type, and a typed file name keeps the file's extensio
   assert.ok("error" in customFileName(" ", "old.pdf"));
 });
 
-import { copiedManuals, isMainChip, mainChipFor, removedCopies, variationsOf } from "../src/lib/ops/library-file-rules.ts";
+import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, copiedManuals, docNumber, familyDuplicates, familyDuplicateGroups, isMainChip, mainChipFor, removedCopies, variationsOf } from "../src/lib/ops/library-file-rules.ts";
 
 const fam = [
   { id: 1, title: "BUNN AXIOM", manufacturer: "BUNN" },
@@ -295,4 +295,82 @@ test("removing a copy from one variation leaves the main chip and the others alo
   assert.deepEqual(copiedManuals(fam[1], fam, famFiles, partGone).map((f) => f.id), [10, 12]);
   assert.equal(famFiles.some((f) => f.id === 12 && f.bookId === 1), true);
   assert.equal(famFiles.some((f) => f.id === 10 && f.bookId === 1), true);
+});
+
+test("uploads travel in 512 KB pieces", () => {
+  assert.equal(CHUNK_BYTES, 512 * 1024);
+});
+
+test("FETCO letter-digit models share a series, and the older families stay as they were", () => {
+  const of = (maker, model) => familyOf(`${maker} ${model}`, maker);
+  assert.equal(of("Fetco", "CBS-1251"), of("Fetco", "CBS-1252"));
+  assert.equal(of("Fetco", "CBS-1250"), of("Fetco", "CBS-1252"));
+  assert.equal(of("Fetco", "CBS-1252"), "CBS-125");
+  // The main chip is named like the family, and it stays in that family.
+  assert.equal(of("Fetco", "CBS-125"), of("Fetco", "CBS-1252"));
+  assert.notEqual(of("Fetco", "CBS-1231"), of("Fetco", "CBS-1251"));
+  assert.equal(of("Fetco", "CBS-1231"), of("Fetco", "CBS-1232"));
+  assert.equal(of("Fetco", "CBS-1231"), "CBS-123");
+  assert.equal(of("Fetco", "GRS-1201"), "GRS-120");
+  assert.equal(of("Fetco", "MBS-1221"), "MBS-122");
+  assert.equal(of("Bunn", "GR-2.2"), of("Bunn", "GR-2.3"));
+  assert.equal(of("Bunn", "GR-2.2"), "GR");
+  assert.equal(familyOf("BUNN AXIOM-15-3 (2U/1L)", "BUNN"), "AXIOM");
+  assert.equal(familyOf("BUNN AXIOM", "BUNN"), "AXIOM");
+  assert.equal(familyOf("BUNN G9-2T HD Stainless", "BUNN"), "G9");
+  assert.equal(familyOf("Eversys Enigma", "Eversys"), "Enigma");
+  assert.equal(familyOf("Eversys Cameo C'2s", "Eversys"), "Cameo");
+  assert.equal(familyOf("Eversys Legacy", "Eversys"), "Legacy");
+  assert.equal(familyOf("Rancilio Classe 11", "Rancilio"), "Classe");
+});
+
+const fetco = [
+  { id: 1, title: "Fetco CBS-1252", manufacturer: "Fetco" },
+  { id: 2, title: "Fetco CBS-1251", manufacturer: "Fetco" },
+  { id: 3, title: "Fetco CBS-1250", manufacturer: "Fetco" },
+  { id: 4, title: "Fetco CBS-1231", manufacturer: "Fetco" },
+  { id: 5, title: "Fetco CBS-125", manufacturer: "Fetco" },
+];
+const fetcoFiles = [
+  { id: 10, name: "IPB 55012.pdf", size: 1000, section: "parts", bookId: 1 },
+  { id: 11, name: "Shelf name.pdf", docName: "Other 55012.pdf", size: 1000, section: "parts", bookId: 2 },
+  { id: 12, name: "Spec 55012.pdf", size: 1000, section: "spec", bookId: 2 },
+  { id: 13, name: "Other 55012.pdf", size: 999, section: "parts", bookId: 2 },
+  { id: 14, name: "CBS 55012.pdf", size: 1000, section: "parts", bookId: 4 },
+  { id: 15, name: "Tied 55012.pdf", size: 1000, section: "manuals", bookId: 3, mpn: "FET-1" },
+];
+
+test("the document number is the last token of the file name", () => {
+  assert.equal(docNumber("IPB 55012.pdf"), "55012");
+  assert.equal(docNumber("Axiom-DV-APS cleaning guide.pdf"), "guide");
+  assert.equal(docNumber("41234.0001.pdf"), "0001");
+});
+
+test("same size and document number in one family is a duplicate; spec sheets are not", () => {
+  const hit = familyDuplicates({ name: "New 55012.pdf", size: 1000, section: "parts", bookId: 2 }, fetco, fetcoFiles).map((f) => f.id);
+  assert.deepEqual(hit, [10]);
+  // A spec sheet with the same size and number is not a duplicate, and neither is a different size or another series.
+  assert.equal(familyDuplicates({ name: "New 55012.pdf", size: 1000, section: "spec", bookId: 2 }, fetco, fetcoFiles).length, 0);
+  assert.equal(familyDuplicates({ name: "New 55012.pdf", size: 999, section: "parts", bookId: 1 }, fetco, fetcoFiles).some((f) => f.id === 10), false);
+  assert.equal(familyDuplicates({ name: "New 55012.pdf", size: 1000, section: "parts", bookId: 1 }, fetco, fetcoFiles).some((f) => f.id === 14), false);
+  // An MPN file stays on its variation.
+  assert.equal(familyDuplicates({ name: "New 55012.pdf", size: 1000, section: "parts", bookId: 1 }, fetco, fetcoFiles).some((f) => f.id === 15), false);
+  // Uploading onto the main chip is already one shared copy.
+  assert.deepEqual(familyDuplicates({ name: "New 55012.pdf", size: 1000, section: "parts", bookId: 5 }, fetco, fetcoFiles), []);
+  const groups = familyDuplicateGroups(fetco, fetcoFiles);
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].family, "CBS-125");
+  assert.equal(groups[0].docNumber, "55012");
+  assert.deepEqual(groups[0].files.map((f) => f.id).sort((a, b) => a - b), [10, 11]);
+  assert.equal(groups[0].files.some((f) => f.section === "spec"), false);
+});
+
+test("the empty duplicate books are removed only when the id, title and emptiness all match", () => {
+  const empty = { id: 34, title: CLEANUP_BOOKS[0].title, files: 0, sheets: 0, fixes: 0, notes: 0 };
+  assert.equal(cleanupBookDecision(CLEANUP_BOOKS[0], empty).action, "remove");
+  assert.equal(cleanupBookDecision(CLEANUP_BOOKS[0], { ...empty, files: 1 }).action, "skip");
+  assert.equal(cleanupBookDecision(CLEANUP_BOOKS[0], { ...empty, sheets: 1 }).action, "skip");
+  assert.equal(cleanupBookDecision(CLEANUP_BOOKS[0], { ...empty, title: "BUNN AXIOM-15-3" }).action, "skip");
+  assert.equal(cleanupBookDecision(CLEANUP_BOOKS[0], null).action, "missing");
+  assert.equal(cleanupBookDecision(CLEANUP_BOOKS[1], { ...empty, id: 35, title: CLEANUP_BOOKS[1].title }).action, "remove");
 });
