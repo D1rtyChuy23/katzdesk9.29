@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboard } from "@/lib/ops/api";
+import { getMyAccess } from "@/lib/ops/access";
+import { TeamsMorningPanel } from "@/components/desk/teams-reports";
 import { formatLongDate, formatShortDate, weekBounds } from "@/lib/ops/clock";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { Skeleton } from "@/components/ui/separator";
@@ -22,6 +24,8 @@ export const Route = createFileRoute("/_app/")({ component: ClockHome });
 
 function ClockHome() {
   const dash = useQuery({ queryKey: ["dashboard"], queryFn: () => getDashboard() });
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const isAdmin = !!me.data?.isAdmin || me.data?.role === "admin";
   const { role, filterMine, matchMine, compact } = useMyView();
   const d = dash.data;
 
@@ -104,6 +108,8 @@ function ClockHome() {
           </div>
         </div>
       </section>
+
+      <TeamsMorningPanel enabled={isAdmin} />
 
       <ComingDuePanel rows={dueRows} counts={d.comingDueCounts} weekEnd={weekEnd} compact={compact} />
       <RebuildAlerts rows={d.rebuildAlerts ?? []} />

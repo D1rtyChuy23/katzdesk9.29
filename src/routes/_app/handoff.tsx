@@ -15,6 +15,7 @@ import { HandoffReply } from "@/components/desk/handoff-reply";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, sortDesk } from "@/lib/ops/sort";
 import { toast } from "sonner";
+import { TeamsPostButton } from "@/components/desk/teams-reports";
 import type { HandoffFeed } from "@/lib/ops/types";
 
 export const Route = createFileRoute("/_app/handoff")({ validateSearch: parseOpenSearch, component: Page });
@@ -136,12 +137,20 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-medium tracking-tight">Handoff</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          The conversation between sales and service. Mine shows asks, notes, and completed deals that
-          belong to you. Notes without a poster show as Service until someone claims them.
-        </p>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Handoff</h1>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            The conversation between sales and service. Mine shows asks, notes, and completed deals that
+            belong to you. Notes without a poster show as Service until someone claims them.
+          </p>
+        </div>
+        <TeamsPostButton
+          channel="handoff"
+          enabled={!!access.data?.isAdmin || access.data?.role === "admin"}
+          label="Post open asks"
+          testId="handoff-teams"
+        />
       </header>
 
       <div className="flex flex-col gap-3 border-y border-border py-3 sm:flex-row sm:items-center sm:justify-between">
