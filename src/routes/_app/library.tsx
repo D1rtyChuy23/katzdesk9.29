@@ -70,7 +70,7 @@ function Page() {
   const files = lib.data?.files ?? [];
   const hidden = lib.data?.hidden ?? [];
   const sheetBook = new Map((lib.data?.sheetBooks ?? []).map((r) => [r.sheetId, r.bookId]));
-  const canEdit = !!data.data?.canEdit;
+  const canEdit = !!lib.data?.canEdit || !!data.data?.canEdit;
   const isAdmin = !!lib.data?.isAdmin;
   const selected = open != null ? sheets.find((s) => s.id === open) ?? null : null;
   const bookId = bookParam ?? (selected ? sheetBook.get(selected.id) ?? null : null);

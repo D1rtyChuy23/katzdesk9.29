@@ -1,6 +1,7 @@
 /**
  * The Library — Manuals and Parts Diagrams: file rules. Pure: no DOM, safe for node --test.
  */
+import { flagOn } from "./flag.ts";
 export type LibrarySection = "spec" | "manuals" | "parts";
 export const LIBRARY_SECTIONS: LibrarySection[] = ["spec", "manuals", "parts"];
 
@@ -25,6 +26,12 @@ const TYPES: Record<string, string> = {
 };
 export const ACCEPT = Object.keys(TYPES).map((e) => `.${e}`).join(",");
 export const ALLOWED_TEXT = "PDF, images (PNG, JPG, WebP, GIF) and Word (DOC, DOCX)";
+
+/** Add Files and spec-sheet edits: the admin flag, the Admin desk role, or Sales. */
+export function canEditFromRole(row: { is_admin?: unknown; desk_role?: string | null } | null | undefined): boolean {
+  const admin = flagOn(row?.is_admin) || row?.desk_role === "admin";
+  return admin || row?.desk_role === "sales";
+}
 
 export function fileExt(name: string): string {
   const m = /\.([A-Za-z0-9]+)$/.exec(name.trim());

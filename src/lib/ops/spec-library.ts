@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { flagOn } from "@/lib/ops/flag";
+import { canEditFromRole } from "@/lib/ops/library-file-rules";
 import { filterNonUsa, type RemovedItem } from "@/lib/ops/spec-filter";
 import { applySpecDefaults, coreHoleInfo, coreHoleSaveError, espressoCoreDefaults, isEspresso, plugWireError } from "@/lib/ops/spec-defaults";
 import {
@@ -47,9 +47,7 @@ async function roleOf(sql: Sql, userId: string) {
     "select is_admin, desk_role, username from desk_accounts where user_id = $1",
     [userId],
   );
-  const admin = flagOn(rows[0]?.is_admin);
-  const sales = rows[0]?.desk_role === "sales";
-  return { canEdit: admin || sales, name: rows[0]?.username || "Teammate" };
+  return { canEdit: canEditFromRole(rows[0]), name: rows[0]?.username || "Teammate" };
 }
 
 async function requireEditor(sql: Sql, userId: string) {

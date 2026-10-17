@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { emailHref, fileError, fileUrl, MAX_FILE_BYTES, mimeFor, opensInline, sortByName, textHref } from "../src/lib/ops/library-file-rules.ts";
+import { canEditFromRole, emailHref, fileError, fileUrl, MAX_FILE_BYTES, mimeFor, opensInline, sortByName, textHref } from "../src/lib/ops/library-file-rules.ts";
 
 test("PDF, images and Word are accepted; anything else gets a clear message", () => {
   for (const n of ["a.pdf", "A.PDF", "b.png", "c.jpg", "d.jpeg", "e.webp", "f.gif", "g.doc", "h.docx"]) assert.equal(fileError(n, 1000), null, n);
@@ -565,5 +565,14 @@ test("an import twin matches the older file once the extension is removed", () =
   assert.equal(out.twins.some((t) => t.bookId === 9), false);
   assert.equal(withDuplicateMarker("X - Spec Sheet 38700.0000"), "X - Spec Sheet 38700.0000 - Duplicate To Delete");
   assert.equal(withDuplicateMarker("Guide.pdf"), "Guide - Duplicate To Delete.pdf");
+});
+
+test("Add Files: admin flag, Admin role, or Sales can edit; Service and no role cannot", () => {
+  assert.equal(canEditFromRole({ is_admin: true, desk_role: null }), true);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: "admin" }), true);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: "sales" }), true);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: "service" }), false);
+  assert.equal(canEditFromRole({ is_admin: false, desk_role: null }), false);
+  assert.equal(canEditFromRole(null), false);
 });
 
