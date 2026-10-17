@@ -10,7 +10,6 @@ import { ANALYTICS_LABEL, ANALYTICS_TYPES, NO_REP, type AnalyticsFilters, type A
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { formatRep } from "@/lib/ops/rep-match";
 import { ActionButton, ActionMenu, ChartCard, FilterChip, SimpleBars, StatCard, StatRow } from "@/components/desk/desk-charts";
-import { TeamsPostButton } from "@/components/desk/teams-reports";
 import { downloadBase64 } from "@/components/desk/export-dialog";
 import { StatusBadge } from "@/components/desk/flag-badge";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
@@ -73,10 +72,10 @@ function Page() {
       </FilterChip>
     </div>
   ) : null;
-  return view === "profit" && isAdmin ? <PartsProfitView switcher={switcher} /> : <RecordsView switcher={switcher} isAdmin={isAdmin} />;
+  return view === "profit" && isAdmin ? <PartsProfitView switcher={switcher} /> : <RecordsView switcher={switcher} />;
 }
 
-function RecordsView({ switcher, isAdmin }: { switcher: ReactNode; isAdmin: boolean }) {
+function RecordsView({ switcher }: { switcher: ReactNode }) {
   const today = todayChicago();
   const [range, setRange] = useState<RangeId>("year");
   const [dates, setDates] = useState(() => rangeDates("year", today));
@@ -124,7 +123,6 @@ function RecordsView({ switcher, isAdmin }: { switcher: ReactNode; isAdmin: bool
           {switcher}
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <TeamsPostButton channel="analytics" enabled={isAdmin} filters={filters} label="Send to Teams" testId="analytics-teams" />
           <ActionMenu label="Export" testId="analytics-export">
             <ActionButton icon={FileText} busy={building("pdf")} busyLabel="Building…" onClick={() => file.mutate("pdf")} data-testid="analytics-export-pdf">
               PDF

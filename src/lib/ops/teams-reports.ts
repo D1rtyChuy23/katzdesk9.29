@@ -1,51 +1,31 @@
 /**
- * Build the four channel notes from the desk, then post them.
- * Dispatch: blank or duplicated work orders, Needs Approval names, address-report accounts.
- * Parts: ticket lines with no MPN, bin values that look like Excel dates.
- * Handoff: unresolved asks.
- * Analytics: counts for the range on screen, or this month on the morning post. No cost or margin.
+ * Draft the exact text for each Teams chat, and record an admin's approval of that text.
+ * KatzDesk does not post. Group chats and DMs are sent by the Teams login, and only after this OK.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { loadAnalyticsRows } from "@/lib/ops/analytics-api";
-import { ANALYTICS_TYPES, filterRows, scopeLine, summarize, type AnalyticsFilters } from "@/lib/ops/analytics";
-import { addDays, formatNowChicago, todayChicago } from "@/lib/ops/clock";
+import { filterRows, scopeLine, summarize, type AnalyticsFilters } from "@/lib/ops/analytics";
+import { invoicedPartLines } from "@/lib/ops/charges-api";
+import { formatNowChicago, moneyExact, monthBounds, pmFlag, serviceFlag, todayChicago } from "@/lib/ops/clock";
 import { woMatchKey } from "@/lib/ops/corrigo";
 import { flagOn } from "@/lib/ops/flag";
-import { looksLikeExcelDate } from "@/lib/ops/part-bins";
+import { profitByMpn, profitTotals } from "@/lib/ops/part-pricing";
+import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import {
-  TEAMS_CHANNELS,
-  TEAMS_CHANNEL_LABEL,
-  analyticsReport,
   collapseDuplicateWorkOrders,
-  dispatchReport,
-  handoffReport,
-  partsReport,
-  type AddressWait,
-  type AnalyticsCount,
-  type BlankWo,
-  type DuplicateWo,
-  type ExcelBin,
-  type MissingMpn,
-  type NameWait,
-  type OpenAsk,
-  type TeamsChannel,
-  type TeamsNote,
+  draftAll,
+  serviceRegion,
+  teamsChat,
+  type AttentionLine,
+  type OpenCall,
+  type OrderLine,
+  type TeamsChatId,
+  type TeamsDraft,
+  type TeamsSnapshot,
 } from "@/lib/ops/teams-message";
-import { deliverTeamsReport, webhookUrl, type TeamsDelivery } from "@/lib/ops/teams-post";
-
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
-const filtersInput = z
-  .object({
-    from: z.string().regex(DAY).nullable().optional(),
-    to: z.string().regex(DAY).nullable().optional(),
-    types: z.array(z.enum(ANALYTICS_TYPES)).max(ANALYTICS_TYPES.length).nullable().optional(),
-    rep: z.string().max(80).nullable().optional(),
-    q: z.string().max(120).nullable().optional(),
-  })
-  .optional();
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("./seed.server");
@@ -53,259 +33,226 @@ async function ready(): Promise<Sql> {
   return getSql();
 }
 
-async function requireTeamsAdmin(sql: Sql, userId: string): Promise<void> {
-  const rows = await sql.query<{ is_admin: unknown; desk_role: string | null }>(
-    "select is_admin, desk_role from desk_accounts where user_id = $1",
+async function ensureDrafts(sql: Sql) {
+  await sql.query(`
+    create table if not exists teams_drafts (
+      id serial primary key,
+      chat text not null,
+      body text not null,
+      approved_by text not null,
+      approved_at timestamptz not null default now()
+    )`);
+}
+
+async function requireTeamsAdmin(sql: Sql, userId: string): Promise<string> {
+  const rows = await sql.query<{ is_admin: unknown; desk_role: string | null; username: string | null }>(
+    "select is_admin, desk_role, username from desk_accounts where user_id = $1",
     [userId],
   );
   const isAdmin = flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "admin";
-  if (!isAdmin) throw new Error("Only an admin can post a report to Teams.");
+  if (!isAdmin) throw new Error("Only an admin can approve a Teams note.");
+  return rows[0]?.username?.trim() || "Admin";
 }
 
 function thisMonth(): AnalyticsFilters {
+  const bounds = monthBounds(todayChicago());
+  return { from: bounds.start, to: bounds.end, types: null, rep: null, q: null };
+}
+
+async function loadSnapshot(sql: Sql): Promise<TeamsSnapshot> {
   const today = todayChicago();
-  const [y, m] = today.split("-");
-  const next = `${Number(m) === 12 ? Number(y) + 1 : y}-${String((Number(m) % 12) + 1).padStart(2, "0")}-01`;
-  return { from: `${y}-${m}-01`, to: addDays(next, -1), types: null, rep: null, q: null };
-}
+  const marks = await loadAccountMarks(sql);
+  const addresses = await sql.query<{ name: string; address: string | null; pin: string | null }>(
+    "select name, address, geocode_address as pin from directory_customers where archived = false",
+  );
+  const where = new Map<string, string>();
+  for (const row of addresses) {
+    const key = row.name.trim().toLowerCase();
+    if (!key || where.has(key)) continue;
+    where.set(key, [row.address, row.pin].filter(Boolean).join(" "));
+  }
 
-async function blankWorkOrders(sql: Sql): Promise<BlankWo[]> {
-  const jobs = await sql.query<{ board: string; id: number; customer: string | null; ref: string | null }>(
-    `select case when kind = 'tlc' then 'TLC' else 'Service' end as board, id, customer, call_id as ref
+  const jobs = await sql.query<{
+    id: number;
+    kind: string;
+    call_id: string | null;
+    customer: string | null;
+    status: string | null;
+    technician: string | null;
+    technician2: string | null;
+    wo: string | null;
+    issue: string | null;
+    scheduled: string | null;
+    received: string | null;
+    done: boolean;
+  }>(
+    `select id, kind, call_id, customer, status, technician, technician2, wo, issue, scheduled::text, received::text, done
        from service_jobs
-      where duplicate_of is null and done = false and coalesce(btrim(wo), '') = ''
-      order by id desc
-      limit 40`,
+      where duplicate_of is null and done = false`,
   );
-  const pms = await sql.query<{ id: number; customer: string | null }>(
-    `select id, customer from pm_jobs
-      where done = false and coalesce(btrim(wo), '') = ''
-      order by id desc
-      limit 40`,
+  const pms = await sql.query<{
+    id: number;
+    customer: string | null;
+    status: string | null;
+    technician: string | null;
+    wo: string | null;
+    projected: string | null;
+    done: boolean;
+  }>(
+    `select id, customer, status, technician, wo, projected::text, done from pm_jobs where done = false`,
   );
-  const installs = await sql.query<{ id: number; customer: string | null }>(
-    `select id, customer from installs
-      where archived = false and complete = false and coalesce(btrim(wo), '') = ''
-      order by id desc
-      limit 40`,
-  );
-  return [
-    ...jobs.map((r) => ({ board: r.board, id: Number(r.id), customer: r.customer?.trim() || "", ref: r.ref?.trim() || "" })),
-    ...pms.map((r) => ({ board: "PM", id: Number(r.id), customer: r.customer?.trim() || "", ref: "" })),
-    ...installs.map((r) => ({ board: "Install", id: Number(r.id), customer: r.customer?.trim() || "", ref: "" })),
-  ];
-}
 
-async function duplicateWorkOrders(sql: Sql): Promise<DuplicateWo[]> {
-  const rows = await sql.query<{ board: string; id: number; wo: string; customer: string | null }>(
-    `select 'Service' as board, id, wo, customer from service_jobs
-      where duplicate_of is null and done = false and kind = 'service' and coalesce(btrim(wo), '') <> ''
-     union all
-     select 'TLC', id, wo, customer from service_jobs
-      where duplicate_of is null and done = false and kind = 'tlc' and coalesce(btrim(wo), '') <> ''
-     union all
-     select 'PM', id, wo, customer from pm_jobs
-      where done = false and coalesce(btrim(wo), '') <> ''
-     union all
-     select 'Install', id, wo, customer from installs
-      where archived = false and complete = false and coalesce(btrim(wo), '') <> ''`,
+  const attention: AttentionLine[] = [];
+  for (const job of jobs) {
+    const flag = serviceFlag(
+      { kind: job.kind === "tlc" ? "tlc" : "service", status: job.status || "Open", done: !!job.done, received: job.received, scheduled: job.scheduled },
+      today,
+    );
+    if (!flag) continue;
+    attention.push({
+      label: flag.label,
+      board: job.kind === "tlc" ? "TLC" : "Service",
+      customer: job.customer?.trim() || "",
+      tech: job.technician?.trim() || "",
+      ref: job.wo?.trim() || job.call_id?.trim() || "",
+    });
+  }
+  for (const pm of pms) {
+    const flag = pmFlag({ status: pm.status || "", done: !!pm.done, projected: pm.projected }, today);
+    if (!flag) continue;
+    attention.push({
+      label: flag.label,
+      board: "PM",
+      customer: pm.customer?.trim() || "",
+      tech: pm.technician?.trim() || "",
+      ref: pm.wo?.trim() || "",
+    });
+  }
+  attention.sort((a, b) => a.label.localeCompare(b.label) || a.customer.localeCompare(b.customer));
+
+  const dupRows = [
+    ...jobs.filter((j) => j.wo?.trim() && j.kind !== "tlc").map((j) => ({ board: "Service", id: j.id, wo: j.wo || "", customer: j.customer })),
+    ...jobs.filter((j) => j.wo?.trim() && j.kind === "tlc").map((j) => ({ board: "TLC", id: j.id, wo: j.wo || "", customer: j.customer })),
+    ...pms.filter((p) => p.wo?.trim()).map((p) => ({ board: "PM", id: p.id, wo: p.wo || "", customer: p.customer })),
+  ];
+  const installs = await sql.query<{ id: number; customer: string | null; wo: string | null }>(
+    `select id, customer, wo from installs where archived = false and complete = false and coalesce(btrim(wo), '') <> ''`,
   );
-  return collapseDuplicateWorkOrders(
-    rows.map((row) => ({
+  const duplicateWo = collapseDuplicateWorkOrders(
+    [...dupRows, ...installs.map((r) => ({ board: "Install", id: r.id, wo: r.wo || "", customer: r.customer }))].map((row) => ({
       key: woMatchKey(row.wo),
       wo: row.wo,
       where: `${row.board} #${Number(row.id)}${row.customer?.trim() ? ` ${row.customer.trim()}` : ""}`,
     })),
   );
-}
 
-async function namesWaiting(sql: Sql): Promise<NameWait[]> {
-  const rows = await sql.query<{ katz: string | null; clean: string | null; reason: string | null }>(
-    `select katz_name as katz, clean_name as clean, reason
-       from customer_clean_items
-      where run_id = (select max(id) from customer_clean_runs)
-        and status = 'pending'
-        and kind = 'similar'
-      order by id
-      limit 40`,
-  );
-  return rows.map((r) => ({ katz: r.katz?.trim() || "", clean: r.clean?.trim() || "", reason: r.reason?.trim() || "" }));
-}
-
-async function addressesWaiting(sql: Sql): Promise<AddressWait[]> {
-  const rows = await sql.query<{ name: string; address: string | null; pin: string | null }>(
-    `select d.name, d.address, d.geocode_address as pin
-       from directory_customers d
-       left join address_report_reviews r on r.customer_id = d.id
-      where d.archived = false
-        and not (d.latitude is not null and d.longitude is not null and d.geocode_match is distinct from 'approx')
-        and coalesce(r.status, '') <> 'skipped'
-        and not (r.status = 'approved' and coalesce(btrim(d.address), '') = coalesce(btrim(r.address), ''))
-      order by d.name
-      limit 40`,
-  );
-  return rows.map((r) => ({ name: r.name.trim(), address: r.address?.trim() || "", pin: r.pin?.trim() || "" }));
-}
-
-async function missingMpns(sql: Sql): Promise<MissingMpn[]> {
-  const rows = await sql.query<{ call_id: string | null; customer: string | null; item: string }>(
-    `select j.call_id, j.customer, c.item
+  const orderRows = await sql.query<{ call_id: string | null; customer: string | null; item: string; qty: string | null; kind: string; item_class: string | null }>(
+    `select j.call_id, j.customer, c.item, c.qty::text, c.kind, p.item_class
        from ticket_charges c
        join service_jobs j on j.id = c.job_id
        left join lateral (
-         select b.sku, b.mfr_part from billing_items b
+         select b.item_class from billing_items b
           where lower(btrim(b.item)) = lower(btrim(c.item)) or lower(btrim(b.sku)) = lower(btrim(c.item))
           order by (lower(btrim(b.item)) = lower(btrim(c.item))) desc
           limit 1
        ) p on true
       where j.duplicate_of is null
         and j.done = false
+        and coalesce(btrim(j.po), '') = ''
         and c.kind not in ('trip', 'labor')
-        and p.sku is not null
-        and coalesce(btrim(c.mpn), '') = ''
-        and coalesce(btrim(p.mfr_part), '') = ''
       order by j.id desc, c.id
-      limit 40`,
+      limit 80`,
   );
-  return rows.map((r) => ({ callId: r.call_id?.trim() || "", customer: r.customer?.trim() || "", item: r.item.trim() }));
-}
-
-async function excelDateBins(sql: Sql): Promise<ExcelBin[]> {
-  const rows = await sql.query<{ sku: string | null; item: string | null; bin_rack: string | null; bin_shelf: string | null; bin_bin: string | null }>(
-    `select sku, item, bin_rack, bin_shelf, bin_bin
-       from billing_items
-      where bin_rack is not null or bin_shelf is not null or bin_bin is not null`,
-  );
-  const out: ExcelBin[] = [];
-  for (const row of rows) {
-    const sku = (row.sku || row.item || "Part").trim();
-    const pieces: [string, string | null][] = [
-      ["rack", row.bin_rack],
-      ["shelf", row.bin_shelf],
-      ["bin", row.bin_bin],
-    ];
-    for (const [piece, value] of pieces) {
-      const text = value?.trim() || "";
-      if (!looksLikeExcelDate(text)) continue;
-      out.push({ sku, piece, value: text });
-      if (out.length >= 40) return out;
-    }
-  }
-  return out;
-}
-
-async function openAsks(sql: Sql): Promise<OpenAsk[]> {
-  const rows = await sql.query<{ ask_team: string | null; body: string; entity_type: string; customer: string | null }>(
-    `select c.ask_team, c.body, c.entity_type,
-            coalesce(
-              case when c.entity_type in ('service', 'tlc') then (select customer from service_jobs where id = c.entity_id) end,
-              case when c.entity_type = 'pm' then (select customer from pm_jobs where id = c.entity_id) end,
-              case when c.entity_type = 'install' then (select customer from installs where id = c.entity_id) end,
-              case when c.entity_type = 'deal' then (select customer from deals where id = c.entity_id) end
-            ) as customer
-       from comments c
-      where c.ask_team is not null and c.resolved = false
-      order by c.created_at desc
-      limit 40`,
-  );
-  return rows.map((r) => ({
-    team: r.ask_team?.trim() || "",
+  const orders: OrderLine[] = orderRows.map((r) => ({
+    callId: r.call_id?.trim() || "",
     customer: r.customer?.trim() || "",
-    body: r.body.replace(/\s+/g, " ").trim(),
+    item: r.item.trim(),
+    qty: r.qty != null && Number.isFinite(Number(r.qty)) ? String(Number(r.qty)) : "1",
+    water: r.item_class === "Water Filters" || /water filter/i.test(r.item),
   }));
-}
 
-async function analyticsCounts(sql: Sql, filters: AnalyticsFilters): Promise<{ scope: string; counts: AnalyticsCount[] }> {
+  const calls: OpenCall[] = jobs
+    .filter((j) => j.kind !== "tlc")
+    .map((j) => {
+      const customer = j.customer?.trim() || "";
+      return {
+        customer,
+        rep: accountRepFor(marks, customer) || "",
+        tech: j.technician?.trim() || "",
+        tech2: j.technician2?.trim() || "",
+        region: serviceRegion(where.get(customer.toLowerCase()) || ""),
+        status: j.status?.trim() || "Open",
+        when: j.scheduled || "",
+        issue: (j.issue || "").replace(/\s+/g, " ").trim(),
+        ref: j.wo?.trim() || j.call_id?.trim() || "",
+      };
+    });
+
+  const filters = thisMonth();
   const rows = filterRows(await loadAnalyticsRows(sql), filters);
+  const { lines } = await invoicedPartLines(sql, { from: filters.from ?? null, to: filters.to ?? null });
+  const totals = profitTotals(profitByMpn(lines), lines.length);
   return {
-    scope: scopeLine(filters, rows.length),
-    counts: summarize(rows).map((s) => ({
+    when: formatNowChicago().stamp,
+    attention,
+    duplicateWo,
+    orders,
+    calls,
+    kpiScope: scopeLine(filters, rows.length),
+    kpi: summarize(rows).map((s) => ({
       label: s.label,
       total: s.total,
       top: s.statuses.slice(0, 3).map((x) => `${x.status} ${x.count}`).join(", "),
     })),
+    finance: {
+      scope: "This month, invoiced part lines.",
+      sell: moneyExact(totals.sell),
+      cost: moneyExact(totals.cost),
+      margin: moneyExact(totals.margin),
+    },
   };
 }
 
-async function noteFor(sql: Sql, channel: TeamsChannel, filters: AnalyticsFilters | undefined, when: string): Promise<TeamsNote> {
-  if (channel === "dispatch") {
-    const [blankWo, duplicateWo, names, addresses] = await Promise.all([
-      blankWorkOrders(sql),
-      duplicateWorkOrders(sql),
-      namesWaiting(sql),
-      addressesWaiting(sql),
-    ]);
-    return dispatchReport({ blankWo, duplicateWo, names, addresses }, when);
-  }
-  if (channel === "parts") {
-    const [missingMpn, excelDates] = await Promise.all([missingMpns(sql), excelDateBins(sql)]);
-    return partsReport({ missingMpn, excelDates }, when);
-  }
-  if (channel === "handoff") return handoffReport({ asks: await openAsks(sql) }, when);
-  return analyticsReport(await analyticsCounts(sql, filters ?? thisMonth()), when);
-}
+export type TeamsChatCard = TeamsDraft & { approved: boolean; approvedAt: string | null; approvedBy: string | null };
 
-async function postNote(note: TeamsNote): Promise<TeamsDelivery> {
-  return deliverTeamsReport(note, process.env, async (url, body) => {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body,
-      signal: AbortSignal.timeout(12_000),
-    });
-    return { status: res.status };
+async function cards(sql: Sql): Promise<TeamsChatCard[]> {
+  await ensureDrafts(sql);
+  const drafts = draftAll(await loadSnapshot(sql));
+  const approvals = await sql.query<{ chat: string; body: string; approved_by: string; approved_at: string }>(
+    `select distinct on (chat) chat, body, approved_by, approved_at::text
+       from teams_drafts
+      order by chat, id desc`,
+  );
+  const latest = new Map(approvals.map((r) => [r.chat, r]));
+  return drafts.map((draft) => {
+    const hit = latest.get(draft.id);
+    const approved = !!hit && hit.body === draft.text;
+    return { ...draft, approved, approvedAt: approved ? hit!.approved_at : null, approvedBy: approved ? hit!.approved_by : null };
   });
 }
 
-export type TeamsChannelState = { channel: TeamsChannel; label: string; ready: boolean };
-
-export const teamsChannelStatus = createServerFn({ method: "GET" })
+export const teamsChatBoard = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async (): Promise<TeamsChannelState[]> => {
-    return TEAMS_CHANNELS.map((channel) => ({
-      channel,
-      label: TEAMS_CHANNEL_LABEL[channel],
-      ready: !!webhookUrl(channel, process.env),
-    }));
-  });
-
-export const postTeamsChannel = createServerFn({ method: "POST" })
-  .middleware([deskMiddleware])
-  .validator((d: { channel: TeamsChannel; filters?: AnalyticsFilters }) =>
-    z.object({ channel: z.enum(TEAMS_CHANNELS), filters: filtersInput }).parse(d),
-  )
-  .handler(async ({ data, context }): Promise<TeamsDelivery> => {
+  .handler(async ({ context }): Promise<TeamsChatCard[]> => {
     const sql = await ready();
     await requireTeamsAdmin(sql, context.userId);
-    const note = await noteFor(sql, data.channel, data.filters, formatNowChicago().stamp);
-    const result = await postNote(note);
-    if (!result.posted) throw new Error(result.error || "Teams did not accept the note.");
-    return result;
+    return cards(sql);
   });
 
-export const postMorningReports = createServerFn({ method: "POST" })
+export const approveTeamsChat = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ results: TeamsDelivery[] }> => {
+  .validator((d: { chat: TeamsChatId; text: string }) => z.object({ chat: z.string(), text: z.string().max(20_000) }).parse(d))
+  .handler(async ({ data, context }): Promise<{ name: string; approvedAt: string }> => {
+    const chat = teamsChat(data.chat);
+    if (!chat) throw new Error("That chat is not on the list.");
     const sql = await ready();
-    await requireTeamsAdmin(sql, context.userId);
-    const when = formatNowChicago().stamp;
-    const month = thisMonth();
-    const results = await Promise.all(
-      TEAMS_CHANNELS.map(async (channel) => {
-        try {
-          const note = await noteFor(sql, channel, channel === "analytics" ? month : undefined, when);
-          return await postNote(note);
-        } catch (e) {
-          return {
-            channel,
-            label: TEAMS_CHANNEL_LABEL[channel],
-            posted: false,
-            ready: true,
-            lines: 0,
-            error: e instanceof Error ? e.message : "Could not build the note.",
-          } satisfies TeamsDelivery;
-        }
-      }),
+    const who = await requireTeamsAdmin(sql, context.userId);
+    await ensureDrafts(sql);
+    const draft = draftAll(await loadSnapshot(sql)).find((d) => d.id === chat.id);
+    if (!draft || draft.text !== data.text) throw new Error("The desk changed. Read the new text and approve that.");
+    const saved = await sql.query<{ approved_at: string }>(
+      `insert into teams_drafts (chat, body, approved_by) values ($1, $2, $3) returning approved_at::text`,
+      [chat.id, draft.text, who],
     );
-    return { results };
+    return { name: chat.name, approvedAt: saved[0]?.approved_at || "" };
   });

@@ -24,7 +24,6 @@ import {
 import { partMoney as money, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "@/components/desk/part-edits";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
 import { BinLocationsButton, ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
-import { TeamsPostButton } from "@/components/desk/teams-reports";
 import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 
@@ -164,7 +163,6 @@ function Page() {
                 {pulling ?? `Pull Confirmed Photos (${page.data.readyToPull})`}
               </Button>
             ) : null}
-            <TeamsPostButton channel="parts" enabled={isAdmin} label="Post to Teams" testId="parts-teams" />
             <ImportMenu>
               {isAdmin ? <ImportPartsButton /> : null}
               {isAdmin ? <UpdatePricingButton /> : null}
