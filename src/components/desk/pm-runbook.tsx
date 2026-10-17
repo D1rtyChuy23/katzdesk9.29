@@ -25,6 +25,7 @@ import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
 import type { ModuleRow } from "@/lib/ops/types";
+import { ModuleRunbook } from "@/components/desk/module-runbook";
 import { useCopy } from "./spec-sheet";
 
 function Seg({
@@ -71,6 +72,7 @@ function UnitModules({
   canWrite,
   customer,
   platforms,
+  pmId,
 }: {
   unit: RunbookUnit;
   def: RunbookDefinition;
@@ -78,6 +80,7 @@ function UnitModules({
   canWrite: boolean;
   customer: string;
   platforms: readonly string[];
+  pmId: number;
 }) {
   const qc = useQueryClient();
   const mods = useQuery({
@@ -86,6 +89,7 @@ function UnitModules({
     enabled: unit.accountId != null,
   });
   const [open, setOpen] = useState(false);
+  const [runbookFor, setRunbookFor] = useState<number | null>(null);
   const [platform, setPlatform] = useState(platforms[0] ?? "");
   const [type, setType] = useState("");
   const label = def.models.find((m) => m.id === config.model)?.label ?? unit.piece;
@@ -132,10 +136,15 @@ function UnitModules({
               <p className="text-sm font-medium">{g.name}</p>
               <ul className="mt-1 grid gap-1">
                 {g.rows.map((m) => (
-                  <li key={m.id} className="break-words text-sm text-muted-foreground">
-                    SN {m.moduleId}
-                    {m.moduleType ? ` · ${m.moduleType}` : ""}
-                    {m.platform ? ` · ${m.platform}` : ""}
+                  <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 break-words text-muted-foreground">
+                      SN {m.moduleId}
+                      {m.moduleType ? ` · ${m.moduleType}` : ""}
+                      {m.platform ? ` · ${m.platform}` : ""}
+                    </span>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setRunbookFor(m.id)}>
+                      Runbook
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -217,6 +226,13 @@ function UnitModules({
               )
             ) : null}
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={runbookFor != null} onOpenChange={(o) => !o && setRunbookFor(null)}>
+        <DialogContent data-testid="module-runbook-pm" className="max-h-[85vh] overflow-y-auto">
+          <DialogTitle>Module runbook</DialogTitle>
+          <DialogDescription>On site, during this PM. The same sheet as the bench, stored on this visit.</DialogDescription>
+          {runbookFor != null ? <div className="mt-3"><ModuleRunbook moduleId={runbookFor} context="pm" pmId={pmId} /></div> : null}
         </DialogContent>
       </Dialog>
     </div>
@@ -405,7 +421,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </div>
       ) : null}
 
-      <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} />
+      <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} pmId={pmId} />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />

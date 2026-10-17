@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { ModuleRunbook } from "@/components/desk/module-runbook";
 
 const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
@@ -74,6 +75,10 @@ export function ModuleRecord({ row }: { row: ModuleRow }) {
             </Button>
           ) : null}
         </div>
+      </div>
+
+      <div className="mt-5" data-testid="module-runbook-bench">
+        <ModuleRunbook moduleId={row.id} context="bench" />
       </div>
 
       <div className="mt-5">

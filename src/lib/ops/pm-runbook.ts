@@ -221,6 +221,93 @@ export function moduleAssignmentBlock(
   return null;
 }
 
+/** Runbook groups for a desk module type, or null when this definition has none (Pump, or another family). */
+export function moduleRunbookGroups(def: RunbookDefinition, moduleType: string | null | undefined): string[] | null {
+  if (!moduleType) return null;
+  const aliases = MODULE_TYPE_GROUPS[moduleType] ?? [moduleType];
+  const names = definedGroups(def).filter((g) => aliases.some((alias) => groupCovers(g, alias)));
+  return names.length ? names : null;
+}
+
+/** Kits and steps for one module type. Null when the definition has no group for it. */
+export function moduleServiceView(def: RunbookDefinition, c: RunbookConfig, moduleType: string | null | undefined): { groups: string[]; kits: KitLine[]; steps: StepGroup[] } | null {
+  const groups = moduleRunbookGroups(def, moduleType);
+  if (!groups) return null;
+  return {
+    groups,
+    kits: kitList(def, c).filter((k) => groups.includes(k.module)),
+    steps: stepList(def, c).filter((g) => groups.includes(g.module)),
+  };
+}
+
+/** Options that change this module's kits or steps. Model and interval are not options. */
+export function moduleServiceOptions(def: RunbookDefinition, moduleType: string | null | undefined) {
+  const groups = moduleRunbookGroups(def, moduleType) ?? [];
+  const keys = new Set<string>();
+  const take = (when: Record<string, string[]> | undefined | null, qty?: unknown) => {
+    if (when) for (const k of Object.keys(when)) if (k !== "pm" && k !== "model") keys.add(k);
+    if (qty && typeof qty === "object" && "by" in qty && typeof qty.by === "string") keys.add(qty.by);
+  };
+  for (const k of def.kits) if (groups.includes(k.module)) take(k.when, k.qty);
+  for (const g of def.steps) {
+    if (!groups.includes(g.module)) continue;
+    take(g.when);
+    for (const s of g.items) take(s.when);
+  }
+  return def.options.filter((o) => keys.has(o.key));
+}
+
+/**
+ * Bench setup: the interval and options the tech saved, and the first model whose lists are not empty.
+ * A milk module therefore uses E'4MS even though the default model is E'4S.
+ */
+export function moduleBenchConfig(
+  def: RunbookDefinition,
+  moduleType: string,
+  interval: string | null | undefined,
+  saved: Record<string, string>,
+): RunbookConfig {
+  const base = defaultConfig(def);
+  if (interval && def.intervals.some((i) => i.id === interval)) base.pm = interval;
+  let model = base.model;
+  for (const m of def.models) {
+    const view = moduleServiceView(def, normalizeConfig(def, { ...base, ...saved, model: m.id }), moduleType);
+    if (view && (view.kits.length || view.steps.length)) {
+      model = m.id;
+      break;
+    }
+  }
+  return normalizeConfig(def, { ...base, ...saved, model, pm: base.pm });
+}
+
+/** Checked kits to write onto the module. The Parts list SKU when we have one, otherwise the kit number. */
+export function moduleServiceWorkLines(
+  kits: KitLine[],
+  ticked: readonly string[],
+  skus: Readonly<Record<string, string | null | undefined>>,
+): { item: string; qty: number; description: string }[] {
+  const on = new Set(ticked);
+  return kits
+    .filter((k) => on.has(`kit:${k.ev}`) && k.q > 0)
+    .map((k) => ({ item: skus[k.ev] || k.ev, qty: k.q, description: k.name }));
+}
+
+/** Plain-text kit list for one module, for pasting into an order. */
+export function moduleKitListText(title: string, intervalLabel: string, kits: KitLine[], prices?: KitPrice[]): string {
+  const out = [title, intervalLabel, ""];
+  for (const k of kits) {
+    const p = prices?.find((x) => x.ev === k.ev);
+    const price = p ? `  [${kitPriceParts(p).join(", ")}]` : "";
+    out.push(`${k.ev} x${k.q}  ${k.name}${price}`);
+  }
+  if (!kits.length) out.push("No kits for this setup.");
+  else {
+    out.push("");
+    out.push(`${kits.length} kit lines, ${totalKits(kits)} kits in total`);
+  }
+  return out.join("\n");
+}
+
 /** First model, first interval, each option at its default (or first choice). */
 export function defaultConfig(def: RunbookDefinition): RunbookConfig {
   const d: RunbookConfig = { model: def.models[0].id, pm: def.intervals[0].id };
