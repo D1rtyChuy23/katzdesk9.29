@@ -53,21 +53,41 @@ export function optionsKeyFor(serial: string | null | undefined): string | null 
   return k || null;
 }
 
-export function planUnits(equipment: string | null | undefined, accountRows: AccountUnitRow[], match: Matcher): PlannedUnit[] {
+export function planUnits(
+  equipment: string | null | undefined,
+  accountRows: AccountUnitRow[],
+  match: Matcher,
+  pinned?: Readonly<Record<string, number>> | null,
+): PlannedUnit[] {
   const used = new Set<number>();
   const seen = new Map<string, number>();
   const ordinals = new Map<string, number>();
+  const reserved = new Map<number, string>();
+  for (const [pieceKey, id] of Object.entries(pinned ?? {})) {
+    if (accountRows.some((r) => r.id === id)) reserved.set(id, pieceKey);
+  }
   const out: PlannedUnit[] = [];
   for (const piece of splitEquipment(equipment)) {
     const hit = match(piece);
     if (!hit) continue;
-    let idx = accountRows.findIndex(
-      (r, i) => !used.has(i) && (sameCatalogModel(piece, r.catalogModel) || sameCatalogModel(piece, r.equipmentName)),
-    );
+    const pieceBase = `piece:${compactEquip(piece)}`;
+    const ord = (ordinals.get(pieceBase) ?? 0) + 1;
+    ordinals.set(pieceBase, ord);
+    const pieceKey = `${pieceBase}#${ord}`;
+    const heldForOther = (id: number) => {
+      const owner = reserved.get(id);
+      return owner != null && owner !== pieceKey;
+    };
+    let idx = accountRows.findIndex((r, i) => !used.has(i) && r.id === pinned?.[pieceKey] && !heldForOther(r.id));
+    if (idx < 0) {
+      idx = accountRows.findIndex(
+        (r, i) => !used.has(i) && !heldForOther(r.id) && (sameCatalogModel(piece, r.catalogModel) || sameCatalogModel(piece, r.equipmentName)),
+      );
+    }
     if (idx < 0) {
       // Loose text ("E4X-WIDE"): take an unused account unit the same runbook recognises, model permitting.
       idx = accountRows.findIndex((r, i) => {
-        if (used.has(i)) return false;
+        if (used.has(i) || heldForOther(r.id)) return false;
         const rowHit = match(r.equipmentName) ?? match(r.catalogModel);
         return !!rowHit && rowHit.runbookId === hit.runbookId && (!hit.model || !rowHit.model || rowHit.model === hit.model);
       });
@@ -82,9 +102,6 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
     }
     const sk = optionsKeyFor(serial);
     const accountId = idx >= 0 ? accountRows[idx].id : null;
-    const pieceBase = `piece:${compactEquip(piece)}`;
-    const ord = (ordinals.get(pieceBase) ?? 0) + 1;
-    ordinals.set(pieceBase, ord);
     let unitKey: string;
     if (accountId != null) unitKey = `acct:${accountId}`;
     else {
@@ -95,7 +112,7 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
     }
     out.push({
       unitKey,
-      pieceKey: `${pieceBase}#${ord}`,
+      pieceKey,
       optionsKey: sk ?? (accountId != null ? `acct:${accountId}` : null),
       accountId,
       installDate: idx >= 0 ? (accountRows[idx].installDate ?? null) : null,
@@ -105,4 +122,16 @@ export function planUnits(equipment: string | null | undefined, accountRows: Acc
       runbookId: hit.runbookId, model });
   }
   return out;
+}
+
+/** A runbook line is logged only when it is an account unit that has a serial. Install date is not required. */
+export function unloggedUnitLines(units: PlannedUnit[]): string[] {
+  return units.filter((u) => u.accountId == null || !u.serialKey).map((u) => u.piece);
+}
+
+/** Named error when a PM is being completed with an unlogged runbook unit. Null when completion is allowed. */
+export function pmCompletionRefusal(units: PlannedUnit[]): string | null {
+  const lines = unloggedUnitLines(units);
+  if (!lines.length) return null;
+  return `Log these units as assets before completing this PM: ${lines.join("; ")}`;
 }
