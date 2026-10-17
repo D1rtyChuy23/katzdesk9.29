@@ -491,3 +491,183 @@ export function cleanupBookDecision(expected: { id: number; title: string }, fou
   if (found.notes > 0) return { action: "skip", reason: "Has unofficial sources. Left in place." };
   return { action: "remove", reason: "Empty, and the title matches. It will be removed." };
 }
+
+// ---- Library import: share a file only when the whole family is in the upload ----
+
+const IMPORT_NAME_SEP = " - ";
+
+/** The stored name: the text before " - " is the variation, and becomes the main chip title. */
+export function rewriteMainChipName(targetName: string, mainTitle: string): string {
+  const at = targetName.indexOf(IMPORT_NAME_SEP);
+  if (at < 0) return targetName;
+  return `${mainTitle}${targetName.slice(at)}`;
+}
+
+export type ImportPlanTarget = {
+  bookId: number;
+  section: LibrarySection;
+  docType: string | null;
+  name: string;
+};
+
+export type CollapsedImportTarget = {
+  bookId: number | null;
+  bookTitle: string;
+  manufacturer: string;
+  section: LibrarySection;
+  docType: string | null;
+  name: string;
+  /** Set when the target names a book that is not in The Library. No book is created for it. */
+  missingBookId?: number;
+};
+
+export type ImportBook = { id: number; title: string; manufacturer: string };
+
+/**
+ * Where one upload's targets are stored.
+ * Spec sheets stay on the book they name.
+ * Manuals and parts go to the family's existing main chip only when the upload names every variation
+ * (every book from variationsOf(main), and the main chip too when it is one of the targets) and there
+ * are at least two targets. Otherwise each target stays on the book in the JSON, with its name unchanged.
+ * A book is never created here. Two families in one upload are decided separately.
+ */
+export function collapseImportTargets(
+  targets: ImportPlanTarget[],
+  books: ImportBook[],
+): CollapsedImportTarget[] {
+  const byId = new Map(books.map((b) => [b.id, b]));
+  const out: CollapsedImportTarget[] = [];
+  const specSeen = new Set<string>();
+  const groups = new Map<string, ImportPlanTarget[]>();
+
+  for (const target of targets) {
+    const book = byId.get(target.bookId);
+    if (!book) {
+      out.push({
+        bookId: null,
+        bookTitle: "",
+        manufacturer: "",
+        section: target.section,
+        docType: target.docType,
+        name: target.name,
+        missingBookId: target.bookId,
+      });
+      continue;
+    }
+    if (!copiesToVariations(target.section)) {
+      const key = `spec|${book.id}|${target.name.trim().toLowerCase()}`;
+      if (specSeen.has(key)) continue;
+      specSeen.add(key);
+      out.push({
+        bookId: book.id,
+        bookTitle: book.title,
+        manufacturer: book.manufacturer,
+        section: target.section,
+        docType: null,
+        name: target.name,
+      });
+      continue;
+    }
+    const family = familyOf(book.title, book.manufacturer);
+    const key = `${target.section}|${book.manufacturer.toLowerCase()}|${nameKey(family)}`;
+    const group = groups.get(key) ?? [];
+    if (!group.some((t) => t.bookId === target.bookId)) group.push(target);
+    groups.set(key, group);
+  }
+
+  for (const group of groups.values()) {
+    const sample = byId.get(group[0]!.bookId);
+    const main = sample ? (isMainChip(sample) ? sample : mainChipFor(sample, books)) : null;
+    const ids = new Set(group.map((t) => t.bookId));
+    const required = main ? variationsOf(main, books).map((b) => b.id) : [];
+    if (main && ids.has(main.id)) required.push(main.id);
+    const share = !!main && group.length >= 2 && required.length >= 2 && required.every((id) => ids.has(id));
+    if (share && main) {
+      const source = group.find((t) => t.bookId !== main.id) ?? group[0]!;
+      out.push({
+        bookId: main.id,
+        bookTitle: main.title,
+        manufacturer: main.manufacturer,
+        section: source.section,
+        docType: source.docType,
+        name: rewriteMainChipName(source.name, main.title),
+      });
+      continue;
+    }
+    for (const target of group) {
+      const book = byId.get(target.bookId)!;
+      out.push({
+        bookId: book.id,
+        bookTitle: book.title,
+        manufacturer: book.manufacturer,
+        section: target.section,
+        docType: target.docType,
+        name: target.name,
+      });
+    }
+  }
+  return out;
+}
+
+export type ImportExistingFile = {
+  name: string;
+  size: number;
+  section: LibrarySection;
+  bookId: number | null;
+  complete: boolean;
+  /** The name the document number is read from when the shelf renamed the file. */
+  docName?: string | null;
+  mpn?: string | null;
+};
+
+/**
+ * Why this file should not be stored again, or null when it should.
+ * Same final name on that book, or — manuals and parts only — the same size and a numbered document
+ * anywhere in the family. A last word with no digit ("Guide", "PM", "Manual") is not a document number.
+ * `size` is ignored for the name check. Pass the real byte size for the document-number check.
+ */
+export function importSkipReason(
+  incoming: { name: string; size: number; section: LibrarySection; bookId: number },
+  books: ImportBook[],
+  files: ImportExistingFile[],
+): string | null {
+  const wantName = incoming.name.trim().toLowerCase();
+  const sameName = files.some(
+    (f) => f.complete && f.bookId === incoming.bookId && f.name.trim().toLowerCase() === wantName,
+  );
+  if (sameName) return "Already on this book with the same name.";
+  if (!copiesToVariations(incoming.section)) return null;
+  const book = books.find((b) => b.id === incoming.bookId);
+  const wantDoc = docNumber(incoming.name);
+  if (!book || !wantDoc || !/\d/.test(wantDoc)) return null;
+  const wantKey = wantDoc.toLowerCase();
+  const sameDoc = files.some((f) => {
+    if (!f.complete || !copiesToVariations(f.section) || f.bookId == null || f.size !== incoming.size) return false;
+    const other = books.find((b) => b.id === f.bookId);
+    if (!other) return false;
+    const same = other.manufacturer.toLowerCase() === book.manufacturer.toLowerCase()
+      && nameKey(familyOf(other.title, other.manufacturer)) === nameKey(familyOf(book.title, book.manufacturer));
+    if (!same) return false;
+    const named = f.docName?.trim() ? f.docName.trim() : f.name;
+    const otherDoc = docNumber(named);
+    return /\d/.test(otherDoc) && otherDoc.toLowerCase() === wantKey;
+  });
+  return sameDoc ? "A manual or parts file in this family already has this size and document number." : null;
+}
+
+/**
+ * A failed download is finished only when the file itself is unusable or the URL is gone.
+ * A timeout, a network error, or a 5xx is not finished: the next run tries it again.
+ */
+export function importFailureSettled(reason: string): boolean {
+  if (/will retry/i.test(reason)) return false;
+  if (/not a pdf/i.test(reason)) return true;
+  if (/larger than 20 mb/i.test(reason)) return true;
+  return /\b404\b/.test(reason) || /\b410\b/.test(reason);
+}
+
+/** A run may keep downloading only while it is under 150 seconds. At 150000 ms and above, stop. */
+export function shouldStartDownload(elapsedMs: number): boolean {
+  return elapsedMs < 150_000;
+}
+
