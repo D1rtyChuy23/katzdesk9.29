@@ -68,14 +68,16 @@ export function longestIntervalId(def: RunbookDefinition): string {
 }
 
 /**
- * Kits the longest interval would include that this visit's interval does not.
+ * Kits the longest interval would include that this visit does not already list.
+ * A kit whose own rule names a visit (`when.pm`) belongs to that visit only, so it is never optional.
  * The quantity is the longest-interval quantity. A visit already at that interval has none.
  */
 export function optionalKits(def: RunbookDefinition, c: RunbookConfig): KitLine[] {
   const longest = longestIntervalId(def);
   if (String(c.pm) === String(longest)) return [];
+  const visitOnly = new Set(def.kits.filter((k) => k.when && Object.hasOwn(k.when, "pm")).map((k) => k.ev));
   const current = new Set(kitList(def, c).map((k) => k.ev));
-  return kitList(def, { ...c, pm: longest }).filter((k) => !current.has(k.ev));
+  return kitList(def, { ...c, pm: longest }).filter((k) => !current.has(k.ev) && !visitOnly.has(k.ev));
 }
 
 /** The visit's kits, with added kit numbers that are still optional, in definition order. */
@@ -207,6 +209,39 @@ export function addedKitHistoryLine(action: string, detail: string | null | unde
   return rest ? `${verb} ${rest}` : verb;
 }
 
+export type UnitHistoryLine = { who: string | null; at: string; detail: string };
+
+/** True when this kit note belongs to this unit. New rows store the unit key then the piece key. Old rows start with the unit key. */
+export function kitHistoryMatches(unit: { unitKey: string; pieceKey: string }, detail: string | null | undefined): boolean {
+  const text = String(detail ?? "");
+  const stored = addedKitStoredKeys(text);
+  if (stored.length) return stored[0] === unit.unitKey || stored[1] === unit.pieceKey;
+  return text.startsWith(`${unit.unitKey}: `);
+}
+
+function historyIso(at: Date | string): string {
+  const d = at instanceof Date ? at : new Date(at);
+  return Number.isNaN(d.getTime()) ? String(at) : d.toISOString();
+}
+
+/**
+ * Kit notes and option notes for one unit, newest first, at most 20.
+ * `at` is an ISO string. A Date must not be sorted with String(date): that orders by the weekday name.
+ */
+export function unitHistory(
+  unit: { unitKey: string; pieceKey: string },
+  kitRows: readonly { who: string | null; action: string; detail: string | null; at: Date | string }[],
+  optionRows: readonly { who: string | null; at: Date | string; detail: string | null }[],
+): UnitHistoryLine[] {
+  const lines: UnitHistoryLine[] = [
+    ...kitRows
+      .filter((row) => kitHistoryMatches(unit, row.detail))
+      .map((row) => ({ who: row.who, at: historyIso(row.at), detail: addedKitHistoryLine(row.action, row.detail) })),
+    ...optionRows.map((row) => ({ who: row.who, at: historyIso(row.at), detail: row.detail ?? "" })),
+  ];
+  return lines.sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, 20);
+}
+
 /**
  * One statement: append the kit if it is not already stored, and write the activity row only when a row changed.
  * $1 pm id, $2 unit key, $3 runbook id, $4 kit number, $5 actor, $6 serial key, $7 detail.
@@ -231,29 +266,27 @@ export function pmAddKitSql(): string {
 }
 
 /**
- * One statement: take the kit off the stored list, write one activity row, and delete its tick only when $8 is true.
- * $1 pm id, $2 unit key, $4 kit number, $5 actor, $7 detail, $8 drop tick, $9 check key.
+ * One statement: take the kit off the stored list and write one activity row when a row changed.
+ * Deletes the check keys in $6 (the kit tick and any fitting step) only for that changed row.
+ * $1 pm id, $2 unit key, $3 kit number, $4 actor, $5 detail, $6 check keys.
  */
 export function pmRemoveKitSql(): string {
   return `with up as (
     update pm_runbook_units
-       set added_kits = coalesce(added_kits, '[]'::jsonb) - $4::text,
-           updated_by = $5::text,
+       set added_kits = coalesce(added_kits, '[]'::jsonb) - $3::text,
+           updated_by = $4::text,
            updated_at = now()
      where pm_job_id = $1::int and unit_key = $2::text
-       and coalesce(added_kits, '[]'::jsonb) @> jsonb_build_array($4::text)
-       -- $3 and $6 are bound so this statement's positions match the add. They do not change the row.
-       and $3::text is not distinct from $3::text
-       and $6::text is not distinct from $6::text
+       and coalesce(added_kits, '[]'::jsonb) @> jsonb_build_array($3::text)
     returning pm_job_id, unit_key
   ), act as (
     insert into activity (entity_type, entity_id, actor_name, action, detail)
-    select 'pm', $1::int, $5::text, 'kit removed', $7::text from up
+    select 'pm', $1::int, $4::text, 'kit removed', $5::text from up
     returning id
   ), tick as (
     delete from pm_runbook_checks c
      using up
-     where $8::boolean and c.pm_job_id = up.pm_job_id and c.unit_key = up.unit_key and c.key = $9::text
+     where c.pm_job_id = up.pm_job_id and c.unit_key = up.unit_key and c.key = any($6::text[])
     returning c.key
   )
   select coalesce((select count(*) from up), 0)::int as changed`;
@@ -274,21 +307,21 @@ export function benchAddKitSql(): string {
   select coalesce((select count(*) from up), 0)::int as changed`;
 }
 
-/** $1 service id, $2 kit number, $3 module id, $4 actor, $5 detail, $6 drop tick, $7 check key. */
+/** $1 service id, $2 kit number, $3 module id, $4 actor, $5 detail, $6 check keys. */
 export function benchRemoveKitSql(): string {
   return `with up as (
     update module_runbook_services
        set added_kits = coalesce(added_kits, '[]'::jsonb) - $2::text
-     where id = $1 and coalesce(added_kits, '[]'::jsonb) @> jsonb_build_array($2::text)
+     where id = $1::int and coalesce(added_kits, '[]'::jsonb) @> jsonb_build_array($2::text)
     returning id
   ), act as (
     insert into activity (entity_type, entity_id, actor_name, action, detail)
-    select 'module', $3::int, $4, 'kit removed', $5 from up
+    select 'module', $3::int, $4::text, 'kit removed', $5::text from up
     returning id
   ), tick as (
     delete from module_runbook_checks c
      using up
-     where $6::boolean and c.service_id = up.id and c.key = $7
+     where c.service_id = up.id and c.key = any($6::text[])
     returning c.key
   )
   select coalesce((select count(*) from up), 0)::int as changed`;
@@ -328,6 +361,18 @@ export function stepsForVisit(def: RunbookDefinition, c: RunbookConfig, added: r
     if (items.length) out.push({ module: group.module, items });
   }
   return out;
+}
+
+/** Step keys this one kit adds on top of the visit's own steps. A kit the visit already lists adds none. */
+export function fittingStepKeys(def: RunbookDefinition, c: RunbookConfig, ev: string): string[] {
+  const base = new Set(stepIds(stepList(def, c)));
+  return stepIds(stepsForVisit(def, c, [ev])).filter((id) => !base.has(id));
+}
+
+/** Check keys a remove clears: the kit tick only when it was not already on this visit, plus any fitting step it brought. */
+export function removedKitCheckKeys(def: RunbookDefinition, c: RunbookConfig, ev: string, dropTick: boolean): string[] {
+  const steps = fittingStepKeys(def, c, ev);
+  return dropTick ? [`kit:${ev}`, ...steps] : steps;
 }
 
 /** Drop the PM interval so a 12-month visit still counts a module the machine has. */

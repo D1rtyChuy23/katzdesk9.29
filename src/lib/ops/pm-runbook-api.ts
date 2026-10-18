@@ -12,16 +12,13 @@ import { RUNBOOKS, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
   addedKitDetail,
-  addedKitHistoryLine,
   addedKitSentence,
-  addedKitStoredKeys,
   canWriteRunbook,
   changeAddedKits,
   checkSerialKey,
   intervalFromStyle,
   kitListWithAdded,
   nextFromHistory,
-  normalizeConfig,
   parseAddedKits,
   pmAddKitSql,
   pmRemoveKitSql,
@@ -29,7 +26,9 @@ import {
   pmServicePrefix,
   pmServiceRecord,
   recommendInterval,
+  removedKitCheckKeys,
   stepsForVisit,
+  unitHistory,
   visitConfig,
   visibleOptions,
   type RunbookRole,
@@ -127,10 +126,13 @@ export async function recordCompletedRunbook(
   userId: string,
   planned: PlannedUnit[],
   style: string | null,
+  now: Date = new Date(),
 ): Promise<void> {
   const me = await who(sql, userId);
   const units = planned.filter((u) => u.optionsKey && runbookById(u.runbookId));
   if (!units.length) return;
+  const job = (await sql.query<{ customer: string }>("select customer from pm_jobs where id = $1", [pmId]))[0];
+  if (!job) return;
   const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown; added_kits: unknown }>(
     "select unit_key, model, interval_mo, options, added_kits from pm_runbook_units where pm_job_id = $1",
     [pmId],
@@ -150,11 +152,7 @@ export async function recordCompletedRunbook(
     const s = saved.find((x) => x.unit_key === u.unitKey);
     const optRow = optRows.find((r) => r.unit_key === u.optionsKey);
     const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
-    const config = normalizeConfig(rb.def, {
-      ...options,
-      model: s?.model ?? u.model ?? undefined,
-      pm: s?.interval_mo ?? intervalFromStyle(rb.def, style) ?? undefined,
-    });
+    const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: job.customer, style }, u, now);
     const ticked = new Set(checks.filter((c) => c.unit_key === u.unitKey).map((c) => c.key));
     const detail = pmServiceRecord({
       pmId,
@@ -444,8 +442,8 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         )
       : [];
     const ids = optRows.map((r) => r.id);
-    const hist = ids.length
-      ? await sql.query<{ entity_id: number; actor_name: string | null; detail: string | null; created_at: string }>(
+      const hist = ids.length
+      ? await sql.query<{ entity_id: number; actor_name: string | null; detail: string | null; created_at: Date }>(
           `select entity_id, actor_name, detail, created_at from activity
             where entity_type = 'unit_runbook' and entity_id = any($1::int[]) order by created_at desc, id desc limit 100`,
           [ids],
@@ -508,10 +506,10 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     const fullPms = (u: (typeof planned)[number], def: RunbookDefinition) =>
       earlierVisitsForUnit(def, u, doneRows, savedIntervals, bySerial, rows, earlierPins);
 
-    const kitLog = await sql.query<{ actor_name: string | null; action: string; detail: string | null; created_at: string }>(
+    const kitLog = await sql.query<{ actor_name: string | null; action: string; detail: string | null; created_at: Date }>(
       `select actor_name, action, detail, created_at from activity
         where entity_type = 'pm' and entity_id = $1 and action in ('kit added', 'kit removed')
-        order by created_at desc, id desc limit 40`,
+        order by created_at desc, id desc`,
       [data.pmId],
     );
     const units: RunbookUnit[] = planned.map((u) => {
@@ -533,21 +531,13 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       });
       const ticks: RunbookUnit["checks"] = {};
       for (const c of checks) if (c.unit_key === u.unitKey) ticks[c.key] = { by: c.done_by, at: String(c.done_at) };
-      const kitNotes = kitLog.filter((h) => {
-        const text = String(h.detail ?? "");
-        const keys = addedKitStoredKeys(text);
-        return keys.includes(u.unitKey) || keys.includes(u.pieceKey) || text.startsWith(`${u.unitKey}: `) || text.startsWith(`${u.pieceKey}: `);
-      });
-      const history = [
-        ...kitNotes.map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: addedKitHistoryLine(h.action, h.detail) })),
-        ...(optRow
-          ? hist
-              .filter((h) => h.entity_id === optRow.id)
-              .map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: h.detail ?? "" }))
-          : []),
-      ]
-        .sort((a, b) => String(b.at).localeCompare(String(a.at)))
-        .slice(0, 20);
+      const history = unitHistory(
+        u,
+        kitLog.map((h) => ({ who: h.actor_name, action: h.action, detail: h.detail, at: h.created_at })),
+        optRow
+          ? hist.filter((h) => h.entity_id === optRow.id).map((h) => ({ who: h.actor_name, at: h.created_at, detail: h.detail }))
+          : [],
+      );
       return {
         unitKey: u.unitKey,
         pieceKey: u.pieceKey,
@@ -895,17 +885,8 @@ export const setRunbookAddedKit = createServerFn({ method: "POST" })
     if (data.on) {
       await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, data.runbookId, data.ev, me.name, serialOf(unit.optionsKey), detail]);
     } else {
-      await sql.query(pmRemoveKitSql(), [
-        data.pmId,
-        unit.unitKey,
-        data.runbookId,
-        data.ev,
-        me.name,
-        serialOf(unit.optionsKey),
-        detail,
-        next.dropTick,
-        `kit:${data.ev}`,
-      ]);
+      const clear = removedKitCheckKeys(rb.def, config, data.ev, next.dropTick);
+      await sql.query(pmRemoveKitSql(), [data.pmId, unit.unitKey, data.ev, me.name, detail, clear]);
     }
     return { ok: true };
   });

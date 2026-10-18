@@ -30,6 +30,7 @@ import {
   parseAddedKits,
   pmAddKitSql,
   pmRemoveKitSql,
+  removedKitCheckKeys,
   type KitLine,
   type RunbookRole,
   type SharedCheck,
@@ -312,17 +313,8 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         if (data.addOn) {
           await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, rb.def.id, data.addEv, me.name, checkSerialKey(unit.optionsKey), detail]);
         } else {
-          await sql.query(pmRemoveKitSql(), [
-            data.pmId,
-            unit.unitKey,
-            rb.def.id,
-            data.addEv,
-            me.name,
-            checkSerialKey(unit.optionsKey),
-            detail,
-            next.dropTick,
-            `kit:${data.addEv}`,
-          ]);
+          const clear = removedKitCheckKeys(rb.def, config, data.addEv, next.dropTick);
+          await sql.query(pmRemoveKitSql(), [data.pmId, unit.unitKey, data.addEv, me.name, detail, clear]);
         }
       }
       if (data.checkKey && data.checked != null) {
@@ -369,7 +361,8 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
       if (data.addOn) {
         await sql.query(benchAddKitSql(), [service.id, data.addEv, data.moduleId, me.name, detail]);
       } else {
-        await sql.query(benchRemoveKitSql(), [service.id, data.addEv, data.moduleId, me.name, detail, next.dropTick, `kit:${data.addEv}`]);
+        const clear = removedKitCheckKeys(rb.def, config, data.addEv, next.dropTick);
+        await sql.query(benchRemoveKitSql(), [service.id, data.addEv, data.moduleId, me.name, detail, clear]);
       }
     }
     if (data.checkKey && data.checked != null) {

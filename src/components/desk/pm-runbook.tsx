@@ -21,7 +21,7 @@ import { listModules } from "@/lib/ops/api";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
 import { assignModule } from "@/lib/ops/module-assign";
-import { visitBanners, applicableModules, kitListText, kitListWithAdded, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { visitBanners, applicableModules, kitListText, kitListWithAdded, longestIntervalId, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
@@ -616,7 +616,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         <div className="grid gap-2">
           <h4 className="text-sm font-semibold">Optional kits</h4>
           <p className="text-xs text-muted-foreground">
-            From the 36-month list, not on this visit. Adding one puts it on this PM. It is not checked in until you tick it.
+            From the {def.intervals.find((i) => i.id === longestIntervalId(def))?.label ?? "longer"} list, not on this visit. Adding one puts it on this PM. It is not checked in until you tick it.
           </p>
           {optional.map((k) => {
             const p = optionalPrices?.find((x) => x.ev === k.ev);

@@ -20,7 +20,10 @@ import {
   addedKitHistoryLine,
   addedKitSentence,
   addedKitStoredKeys,
+  fittingStepKeys,
+  kitHistoryMatches,
   stepsForVisit,
+  unitHistory,
   visitBanners,
   visitConfig,
   isPmServiceRecord,
@@ -450,4 +453,59 @@ test("optional kits are the 36-month kits missing from this visit", () => {
   assert.equal(addedKitHistoryLine("kit removed", "piece:eversys:1: EV109590 Hydraulic add-on"), "Removed EV109590 Hydraulic add-on");
   const brewOnly = changeAddedKits(def, twelve, [], "EV109590", true, ["Brew module"]);
   assert.equal(brewOnly.ok, false);
+  const offered = optionalKits(def, cfg({ model: "4s", pm: "12", tea: "auto", wand: "1", amer: "no" }));
+  assert.equal(offered.find((k) => k.ev === "EV109586")?.q, 2);
+  assert.ok(offered.some((k) => k.ev === "EV108391"));
+  assert.ok(offered.some((k) => k.ev === "EV109568"));
+});
+
+test("a kit that names its visit is never optional", () => {
+  const mini = {
+    intervals: [
+      { id: "3", label: "3-month PM" },
+      { id: "6", label: "6-month PM" },
+      { id: "12", label: "12-month PM" },
+    ],
+    kits: [
+      { ev: "K12", name: "Visit kit", module: "Group", interval: 12, qty: 1, when: { pm: ["12"] } },
+      { ev: "P", name: "Part", module: "Group", interval: 12, qty: 1 },
+    ],
+    steps: [],
+  };
+  assert.deepEqual(optionalKits(mini, { model: "m", pm: "3" }).map((k) => k.ev), ["P"]);
+});
+
+test("removing an added kit clears the fitting step it brought, and a base kit clears none", () => {
+  const twelve = cfg({ model: "4s", pm: "12", amer: "yes" });
+  const thirty = cfg({ model: "4s", pm: "36", amer: "yes" });
+  assert.deepEqual(fittingStepKeys(def, twelve, "EV109586"), ["step:hyd-kit"]);
+  assert.deepEqual(fittingStepKeys(def, thirty, "EV109586"), []);
+});
+
+test("history for a unit is newest first, and one machine does not show the other's kit lines", () => {
+  const A = { unitKey: "acct:5", pieceKey: "piece:eversys e4s x wide#1" };
+  const B = { unitKey: "piece:eversys e4s x wide#1", pieceKey: "piece:eversys e4s x wide#2" };
+  const note = (unit, text, at) => ({ who: "Chuy", action: "kit added", detail: addedKitDetail(text, unit.unitKey, unit.pieceKey), at });
+  const mon = new Date("2026-10-12T15:00:00Z");
+  const fri = new Date("2026-10-16T15:00:00Z");
+  const sat = new Date("2026-10-17T15:00:00Z");
+  const days = unitHistory(A, [note(A, "mon", mon), note(A, "sat", sat), note(A, "fri", fri)], []);
+  assert.deepEqual(days.map((l) => l.detail), ["Added sat", "Added fri", "Added mon"]);
+  assert.ok(days.every((l) => /^\d{4}-\d{2}-\d{2}T/.test(l.at)));
+  const older = Array.from({ length: 22 }, (_, i) => note(A, `old ${i}`, new Date(Date.UTC(2026, 0, i + 1))));
+  const kept = unitHistory(A, [...older, note(A, "mon", mon), note(A, "fri", fri), note(A, "sat", sat)], []);
+  assert.equal(kept.length, 20);
+  assert.deepEqual(kept.slice(0, 3).map((l) => l.detail), ["Added sat", "Added fri", "Added mon"]);
+  const shared = [note(A, "on A", sat), note(B, "on B", fri)];
+  assert.deepEqual(unitHistory(A, shared, []).map((l) => l.detail), ["Added on A"]);
+  assert.deepEqual(unitHistory(B, shared, []).map((l) => l.detail), ["Added on B"]);
+  assert.equal(kitHistoryMatches(A, `piece:eversys e4s x wide#1: EV109586 name`), false);
+  assert.equal(kitHistoryMatches(B, `piece:eversys e4s x wide#1: EV109586 name`), true);
+  const busy = [
+    ...Array.from({ length: 40 }, (_, i) => note(A, `A ${i}`, new Date(Date.UTC(2026, 9, 18, 0, i)))),
+    note(B, "B1", new Date("2026-10-01T00:00:00Z")),
+    note(B, "B2", new Date("2026-10-02T00:00:00Z")),
+    note(B, "B3", new Date("2026-10-03T00:00:00Z")),
+  ];
+  assert.deepEqual(unitHistory(B, busy, []).map((l) => l.detail).sort(), ["Added B1", "Added B2", "Added B3"]);
 });

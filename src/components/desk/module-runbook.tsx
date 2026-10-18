@@ -52,6 +52,7 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Loading the runbook…</p>;
   if (q.isError) return <p className="text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not load the runbook."}</p>;
   if (!data?.covered) return <p className="text-sm text-muted-foreground">{data?.notice || "No runbook for this module type yet."}</p>;
+  const longLabel = data.intervals.reduce((best, i) => (Number(i.id) > Number(best.id) ? i : best), data.intervals[0])?.label ?? "longer";
   const locked = data.completed || !data.canWrite || save.isPending || done.isPending || busy;
   const kitsLocked = data.completed || data.pmCompleted || !data.canWrite;
   const text = moduleKitListText(data.title ?? "Module", data.intervals.find((i) => i.id === data.interval)?.label ?? "", data.kits, priced);
@@ -183,7 +184,7 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
         <div className="grid gap-2">
           <h4 className="text-sm font-semibold">Optional kits</h4>
           <p className="text-xs text-muted-foreground">
-            From the 36-month list for this module. Adding one puts it on this list. It is not checked in until you tick it.
+            From the {longLabel} list for this module. Adding one puts it on this list. It is not checked in until you tick it.
           </p>
           {data.optional.map((k) => {
             const p = prices.data ? priceKits([k], prices.data)[0] : undefined;
