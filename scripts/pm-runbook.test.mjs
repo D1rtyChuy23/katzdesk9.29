@@ -44,6 +44,8 @@ import {
   platformFit,
   pmServiceRecord,
   applicableModules,
+  combinedVisitNotes,
+  modulesNotTakenReason,
   stepList,
   totalKits,
 } from "../src/lib/ops/pm-runbook.ts";
@@ -129,6 +131,7 @@ test("recognises X-Wide spellings", () => {
 test("interval from PM style", () => {
   assert.equal(intervalFromStyle(def, "36 month PM"), "36");
   assert.equal(intervalFromStyle(def, "12 month PM"), "12");
+  assert.equal(intervalFromStyle(def, "24 month PM"), "12");
   assert.equal(intervalFromStyle(def, "6 month PM"), null);
   assert.equal(intervalFromStyle(def, "Grinder PM"), null);
 });
@@ -249,6 +252,24 @@ test("no install date: next interval follows the last full PMs", () => {
   assert.equal(n("12", "12", "36", "12", "12"), "36");
   assert.equal(n("36"), "12");
   assert.equal(nextFromHistory(def, ["12", "12"])?.combined, true);
+});
+
+test("La Marzocco style, history and combined-visit text", () => {
+  const linea = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/la-marzocco-linea.json", import.meta.url), "utf8")));
+  assert.equal(intervalFromStyle(linea, "9 month PM"), "3");
+  assert.equal(intervalFromStyle(linea, "3 month PM"), "3");
+  assert.equal(intervalFromStyle(linea, "6 month PM"), "6");
+  const next = (...prior) => nextFromHistory(linea, prior)?.id;
+  assert.equal(next("3"), "6");
+  assert.equal(next("3", "6"), "3");
+  assert.equal(next("3", "6", "3"), "12");
+  assert.equal(next("3", "6", "3", "12"), "3");
+  assert.equal(combinedVisitNotes(def).history, ", the 12 + 36 together visit");
+  assert.equal(combinedVisitNotes(def).recommended, " (12 + 36 together)");
+  assert.equal(combinedVisitNotes(linea).history, ", the 3/9-month and 12-month PMs together");
+  assert.equal(combinedVisitNotes(linea).recommended, " (the 3/9-month and 12-month PMs together)");
+  assert.equal(modulesNotTakenReason(linea, "pb", false), "Linea PB does not take Eversys modules.");
+  assert.equal(modulesNotTakenReason(def, "4s", true), null);
 });
 
 test("units: pieceKey is the key a line had before it matched an account unit", () => {

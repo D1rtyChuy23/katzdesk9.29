@@ -1,0 +1,755 @@
+{
+  "id": "la-marzocco-strada",
+  "manufacturer": "La Marzocco",
+  "title": "Strada PM Runbook",
+  "subtitle": "La Marzocco Strada S and Strada X | preventive maintenance kits and steps",
+  "sources": "La Marzocco USA preventative maintenance checklists v2.1 (May 2026): 3/9-month, 6-month and 12-month. Kit numbers are per visit and group count. La Marzocco does not print kit contents on the checklists; where a kit note lists contents it comes from the checklist's replace list or LM's annual PM summary. Confirm kit numbers with La Marzocco USA before ordering.",
+  "storageKey": "lm-strada-runbook-v1",
+  "models": [
+    {
+      "id": "s",
+      "label": "Strada S"
+    },
+    {
+      "id": "x",
+      "label": "Strada X"
+    }
+  ],
+  "intervals": [
+    {
+      "id": "3",
+      "label": "3/9-month PM"
+    },
+    {
+      "id": "6",
+      "label": "6-month PM"
+    },
+    {
+      "id": "12",
+      "label": "12-month PM"
+    }
+  ],
+  "options": [
+    {
+      "key": "groups",
+      "label": "Groups",
+      "default": "2",
+      "choices": [
+        {
+          "val": "2",
+          "label": "2 group"
+        },
+        {
+          "val": "3",
+          "label": "3 group"
+        }
+      ]
+    },
+    {
+      "key": "abr",
+      "label": "ABR / integrated scales",
+      "default": "no",
+      "when": {
+        "model": [
+          "s"
+        ]
+      },
+      "choices": [
+        {
+          "val": "no",
+          "label": "No"
+        },
+        {
+          "val": "yes",
+          "label": "Yes"
+        }
+      ]
+    },
+    {
+      "key": "gasket",
+      "label": "Group gasket",
+      "default": "rubber",
+      "when": {
+        "model": [
+          "s"
+        ]
+      },
+      "choices": [
+        {
+          "val": "rubber",
+          "label": "8 mm (H.3.001)"
+        },
+        {
+          "val": "silicone",
+          "label": "8 mm silicone (H.3.007)"
+        }
+      ]
+    }
+  ],
+  "banners": [
+    {
+      "tone": "ok",
+      "text": "One kit per visit. The 3/9-month PM is the same visit at month 3 and month 9; the 6- and 12-month kits are complete for their visit, so earlier kits are not added."
+    },
+    {
+      "when": {
+        "pm": [
+          "3"
+        ]
+      },
+      "tone": "ok",
+      "text": "3/9-month PM: La Marzocco lists loose parts for this visit, not a kit. Quantities are one per group."
+    },
+    {
+      "when": {
+        "model": [
+          "x"
+        ],
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ]
+      },
+      "tone": "warn",
+      "text": "The 6-month checklist prints the 3-group kit as STRADA.X.63. It is listed here as STRADA.X.6.3; confirm with La Marzocco when ordering."
+    }
+  ],
+  "kits": [
+    {
+      "ev": "STRADA.S.6.2",
+      "name": "PM kit, 6-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "s"
+        ]
+      }
+    },
+    {
+      "ev": "STRADA.S.6.3",
+      "name": "PM kit, 6-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "s"
+        ]
+      }
+    },
+    {
+      "ev": "STRADA.S.12.2",
+      "name": "PM kit, 12-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "s"
+        ]
+      }
+    },
+    {
+      "ev": "STRADA.S.12.3",
+      "name": "PM kit, 12-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "s"
+        ]
+      }
+    },
+    {
+      "ev": "STRADA.X.6.2",
+      "name": "PM kit, 6-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "x"
+        ]
+      }
+    },
+    {
+      "ev": "STRADA.X.6.3",
+      "name": "PM kit, 6-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "x"
+        ]
+      }
+    },
+    {
+      "ev": "STRADA.X.12.2",
+      "name": "PM kit, 12-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "x"
+        ]
+      }
+    },
+    {
+      "ev": "STRADA.X.12.3",
+      "name": "PM kit, 12-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "x"
+        ]
+      }
+    },
+    {
+      "ev": "F.3.040",
+      "name": "Diffuser screen",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3
+        }
+      },
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "model": [
+          "s"
+        ]
+      }
+    },
+    {
+      "ev": "H.3.001",
+      "name": "Group gasket 8 mm",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3
+        }
+      },
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "model": [
+          "s"
+        ],
+        "gasket": [
+          "rubber"
+        ]
+      }
+    },
+    {
+      "ev": "H.3.007",
+      "name": "Group gasket 8 mm silicone",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3
+        }
+      },
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "model": [
+          "s"
+        ],
+        "gasket": [
+          "silicone"
+        ]
+      }
+    },
+    {
+      "ev": "A.5.095",
+      "name": "Diffuser screen",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3
+        }
+      },
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "model": [
+          "x"
+        ]
+      }
+    },
+    {
+      "ev": "1207",
+      "name": "Group gaskets and bumpers",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3
+        }
+      },
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "model": [
+          "x"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "module": "Water quality",
+      "items": [
+        {
+          "id": "wq-test",
+          "text": "Test the water before and after the filter with the LM test kit (F.9.000.01). Record the filter make and type and compare with the limits in Reference.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Group heads",
+      "items": [
+        {
+          "id": "st-gh-replace",
+          "text": "Replace the diffuser screens and group gaskets on every group.",
+          "when": {
+            "pm": [
+              "3"
+            ]
+          },
+          "ref": "LM 3/9-mo checklist"
+        },
+        {
+          "id": "st-gh-kit",
+          "text": "Fit the parts in the PM kit.",
+          "when": {
+            "pm": [
+              "6",
+              "12"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-baskets",
+          "text": "Check the filter baskets and springs.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-flush",
+          "text": "Confirm the auto flush system works.",
+          "when": {
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-jaw",
+          "text": "Check the portafilter jaw bushings.",
+          "when": {
+            "pm": [
+              "3",
+              "6"
+            ],
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-piston",
+          "text": "Check the Straight-In piston for leaks under pressure.",
+          "when": {
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-micro",
+          "text": "Check the group cap micro switches.",
+          "when": {
+            "pm": [
+              "6",
+              "12"
+            ],
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-buttons",
+          "text": "Test every button.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-res",
+          "text": "Measure each flow meter's field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ). Record G1–G3 in kΩ.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-gh-imp",
+          "text": "Check the flow meter impellers.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "st-gh-flow",
+          "text": "Record each group's flow rate (Strada X: in AV mode): grams in 30 s, G1–G3.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Pressure and pumps",
+      "items": [
+        {
+          "id": "st-pr-press",
+          "text": "Record the brewing pressure (bar). Strada X: each group.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-pr-exp",
+          "text": "Check the expansion valves and record the maximum pressure (bar). Strada X: each group.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-pr-gear",
+          "text": "Check the gear pumps for leaks.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        }
+      ]
+    },
+    {
+      "module": "Steam",
+      "items": [
+        {
+          "id": "st-st-valve",
+          "text": "Check the steam valves work.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Water and drain",
+      "items": [
+        {
+          "id": "st-wd-probe",
+          "text": "Clean the auto-fill probe.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-wd-leaks",
+          "text": "Check all fittings and valves for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-wd-vb",
+          "text": "Check the vacuum breakers work.",
+          "when": {
+            "pm": [
+              "3",
+              "6"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-wd-sensor",
+          "text": "Check the water sensor for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-wd-lines",
+          "text": "Check the water and drain lines, drain box and hose for leaks or clogs.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Electrical",
+      "items": [
+        {
+          "id": "st-el-cord",
+          "text": "Check the power cord, cap and outlet.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-el-harness",
+          "text": "Check the wiring harness and components.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "st-el-box",
+          "text": "Check the electronics box for water or damage.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        }
+      ]
+    },
+    {
+      "module": "Scales",
+      "items": [
+        {
+          "id": "st-sc-abr",
+          "text": "Run the ABR scale test.",
+          "when": {
+            "pm": [
+              "3",
+              "6",
+              "12"
+            ],
+            "model": [
+              "s"
+            ],
+            "abr": [
+              "yes"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-sc-cal-s",
+          "text": "Confirm or calibrate the scales with a 100 g weight.",
+          "when": {
+            "model": [
+              "s"
+            ],
+            "abr": [
+              "yes"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "st-sc-cal-x",
+          "text": "Confirm or calibrate the scales with a 100 g weight.",
+          "when": {
+            "model": [
+              "x"
+            ]
+          },
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Close out",
+      "items": [
+        {
+          "id": "st-co-form",
+          "text": "Fill in the La Marzocco checklist for this visit: serial, voltage, group count and every reading. Get the customer's signature.",
+          "ref": "LM checklist"
+        }
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "title": "Water limits (LM test kit F.9.000.01)",
+      "text": "Test before and after the filter. Record the filter make and type: carbon, ion exchange/softener, WAC, reverse osmosis, or none.",
+      "table": {
+        "head": [
+          "Test",
+          "Min",
+          "Max"
+        ],
+        "rows": [
+          [
+            "Total hardness (ppm)",
+            "5",
+            "70"
+          ],
+          [
+            "Alkalinity (ppm)",
+            "5",
+            "80"
+          ],
+          [
+            "Chloride (ppm)",
+            "0",
+            "30"
+          ],
+          [
+            "Iron (ppm)",
+            "0",
+            "0.02"
+          ],
+          [
+            "Free chlorine (ppm)",
+            "0",
+            "0.05"
+          ],
+          [
+            "Total chlorine (ppm)",
+            "0",
+            "0.1"
+          ],
+          [
+            "pH",
+            "6.5",
+            "8.5"
+          ],
+          [
+            "TDS (ppm)",
+            "10",
+            "150"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Specs on the checklists",
+      "list": [
+        "Flow meter field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ).",
+        "Flow rate: the checklist header says ml/30 s but the blanks say g. Record grams in 30 s and note it.",
+        "Brew pressure, expansion valve max pressure and boiler temperature: the checklists give blanks, no targets. Use the machine manual's settings.",
+        "Integrated scales: confirm or calibrate with a 100 g weight."
+      ]
+    },
+    {
+      "title": "Kit and part numbers",
+      "table": {
+        "head": [
+          "Model",
+          "3/9-month (per group)",
+          "6-month",
+          "12-month"
+        ],
+        "monoCols": [
+          1,
+          2,
+          3
+        ],
+        "rows": [
+          [
+            "Strada S (2–3 gr)",
+            "F.3.040 screen + H.3.001 or H.3.007 gasket",
+            "STRADA.S.6.<gr>",
+            "STRADA.S.12.<gr>"
+          ],
+          [
+            "Strada X (2–3 gr)",
+            "A.5.095 screen + 1207 gaskets and bumpers",
+            "STRADA.X.6.<gr>",
+            "STRADA.X.12.<gr>"
+          ]
+        ]
+      }
+    }
+  ]
+}

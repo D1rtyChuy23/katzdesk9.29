@@ -8,7 +8,7 @@ import { eversysFamily, isEversysMachine, moduleAccount, moduleAvailability } fr
 import { flagOn } from "@/lib/ops/flag";
 import { notifyAdminsModuleReturn } from "@/lib/ops/notify";
 import { swapError, trail, workError, workTotals, type ModuleStop, type ModuleWork, type StopKind } from "@/lib/ops/module-history";
-import { moduleAssignmentBlock, normalizeConfig } from "@/lib/ops/pm-runbook";
+import { moduleAssignmentBlock, modulesNotTakenReason, normalizeConfig } from "@/lib/ops/pm-runbook";
 import { optionsKeyFor } from "@/lib/ops/pm-runbook-units";
 import { runbookForPiece } from "@/lib/ops/runbooks";
 
@@ -242,7 +242,11 @@ export const assignModule = createServerFn({ method: "POST" })
     const unit = (await unitsFor(sql, customer)).find((u) => u.id === data.unitId);
     if (!unit) throw new Error("Pick an Eversys unit on that account.");
     const hit = runbookForPiece(unit.model);
-    if (hit?.model) {
+    if (hit) {
+      const refused = modulesNotTakenReason(hit.runbook.def, hit.model, hit.runbook.modules);
+      if (refused) throw new Error(refused);
+    }
+    if (hit?.model && hit.runbook.modules) {
       const saved = await savedUnitOptions(sql, unit.serial, unit.id);
       const config = normalizeConfig(hit.runbook.def, { ...saved, model: hit.model });
       const reason = moduleAssignmentBlock(hit.runbook.def, config, mod.module_type, mod.platform, hit.runbook.platforms, Object.keys(saved));

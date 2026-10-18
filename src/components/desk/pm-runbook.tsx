@@ -21,7 +21,7 @@ import { listModules } from "@/lib/ops/api";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
 import { assignModule } from "@/lib/ops/module-assign";
-import { visitBanners, applicableModules, kitListText, kitListWithAdded, longestIntervalId, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { visitBanners, applicableModules, combinedVisitNotes, kitListText, kitListWithAdded, longestIntervalId, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
@@ -375,6 +375,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     return [t.by, day].filter(Boolean).join(" · ");
   };
   const time = def.models.find((m) => m.id === c.model)?.time?.[c.pm];
+  const together = combinedVisitNotes(def);
   const header = `${customer}${unit.serial ? ` · SN ${unit.serial}` : ""}`;
 
   return (
@@ -438,7 +439,9 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </div>
       ) : null}
 
-      <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} pmId={pmId} />
+      {rb.modules ? (
+        <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} pmId={pmId} />
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
@@ -463,7 +466,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                   ? `, ${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt}`
                   : ""}
                 ): <b>{unit.fromHistory.label}</b>
-                {unit.fromHistory.combined ? ", the 12 + 36 together visit" : ""}.
+                {unit.fromHistory.combined ? together.history : ""}.
               </span>
               {canWrite && unit.fromHistory.id !== c.pm ? (
                 <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.fromHistory!.id)}>
@@ -481,7 +484,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
             Recommended: <b>{unit.recommended.label}</b>
-            {unit.recommended.combined ? " (12 + 36 together)" : ""}. Installed {unit.installDate}, so this is year{" "}
+            {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is year{" "}
             {unit.recommended.year} at this location. Choose otherwise if the customer wants a different service.
           </span>
           {canWrite ? (

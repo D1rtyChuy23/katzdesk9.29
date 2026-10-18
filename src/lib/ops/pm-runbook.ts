@@ -764,11 +764,18 @@ export function matchE4XWide(piece: string | null | undefined): { model: "4s" | 
   return { model: null };
 }
 
-/** A PM style such as "36 month PM" → interval id "36"; null when it names no interval the definition offers. */
+/** A PM style such as "36 month PM" → that interval id when the definition offers it.
+ * Otherwise the largest offered interval that divides the month number ("9 month PM" → "3", "24 month PM" → "12").
+ * Null when the style names no month, or no offered interval divides it ("6 month PM" on Eversys, so the install date still wins).
+ */
 export function intervalFromStyle(def: RunbookDefinition, style: string | null | undefined): string | null {
   const m = /(\d+)\s*[- ]?\s*(?:month|mo)/i.exec(style ?? "");
   if (!m) return null;
-  return def.intervals.some((i) => i.id === m[1]) ? m[1] : null;
+  const months = Number(m[1]);
+  const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
+  if (ids.includes(months)) return String(months);
+  const fit = [...ids].reverse().find((id) => months % id === 0);
+  return fit ? String(fit) : null;
 }
 
 /**
@@ -823,8 +830,10 @@ export function recommendInterval(
 }
 
 /**
- * Next interval from a unit's earlier full (completed) PMs, oldest first, for a unit with no install date:
- * after two short PMs in a row the next one is the long (combined) PM, otherwise the short one.
+ * Next interval from a unit's earlier full (completed) PMs, oldest first, for a unit with no install date.
+ * `run` is how many of those PMs have happened since the last longest-interval PM.
+ * The next PM is the largest interval id that divides (run + 1) × the shortest interval.
+ * La Marzocco (3, 6, 12) then goes 3, 6, 3, 12. Eversys (12, 36) stays 12, 12, 36.
  * Returns null with no earlier PM to go on.
  */
 export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]): { id: string; combined: boolean } | null {
@@ -832,14 +841,40 @@ export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]
   if (!ids.length || !priorIntervals.length) return null;
   const short = ids[0];
   const long = ids[ids.length - 1];
-  const cycle = Math.max(1, Math.round(long / short));
   let run = 0;
   for (const raw of priorIntervals) {
     const n = Number(raw);
     run = n >= long && long > short ? 0 : run + 1;
   }
-  const next = long > short && run % cycle === cycle - 1 ? long : short;
+  const mark = (run + 1) * short;
+  const next = [...ids].reverse().find((id) => mark % id === 0) ?? short;
   return { id: String(next), combined: next > short };
+}
+
+/**
+ * The clause shown when a visit already includes the shorter intervals.
+ * Plain "N-month PM" labels stay "12 + 36", so the Eversys sentences do not change.
+ * Any other label uses the shortest and the longest: "the 3/9-month and 12-month PMs together".
+ */
+export function combinedVisitNotes(def: RunbookDefinition): { history: string; recommended: string } {
+  const intervals = [...def.intervals].sort((a, b) => Number(a.id) - Number(b.id));
+  const plain = intervals.length > 0 && intervals.every((i) => /^\d+-month PM$/.test(i.label));
+  if (plain) {
+    const nums = intervals.map((i) => i.id).join(" + ");
+    return { history: `, the ${nums} together visit`, recommended: ` (${nums} together)` };
+  }
+  const words = (label: string) => label.replace(/\s*PM\b.*$/, "");
+  const short = words(intervals[0]?.label ?? "");
+  const long = words(intervals[intervals.length - 1]?.label ?? "");
+  const phrase = short && long && short !== long ? `the ${short} and ${long} PMs together` : short;
+  return { history: phrase ? `, ${phrase}` : "", recommended: phrase ? ` (${phrase})` : "" };
+}
+
+/** Why this machine refuses a swappable module, or null when its runbook takes modules. */
+export function modulesNotTakenReason(def: RunbookDefinition, modelId: string | null, takesModules: boolean): string | null {
+  if (takesModules) return null;
+  const label = def.models.find((m) => m.id === modelId)?.label ?? "This machine";
+  return `${label} does not take Eversys modules.`;
 }
 
 // ---------------- who may do what ----------------
