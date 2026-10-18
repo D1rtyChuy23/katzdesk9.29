@@ -780,9 +780,6 @@
         }
       },
       "when": {
-        "pm": [
-          "12"
-        ],
         "model": [
           "classic"
         ],
@@ -790,7 +787,7 @@
           "mp"
         ]
       },
-      "note": "One per group. Non-conical MP valves only."
+      "note": "One per group. Non-conical MP valves only. Due at 12 months; add it on an earlier visit if a valve needs it."
     }
   ],
   "steps": [
