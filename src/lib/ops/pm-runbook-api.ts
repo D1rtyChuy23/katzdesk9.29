@@ -11,6 +11,10 @@ import { normalizeCustomerKey, parseSerial, serialKey } from "@/lib/ops/account-
 import { RUNBOOKS, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
+  addedKitDetail,
+  addedKitHistoryLine,
+  addedKitSentence,
+  addedKitStoredKeys,
   canWriteRunbook,
   changeAddedKits,
   checkSerialKey,
@@ -18,19 +22,21 @@ import {
   kitListWithAdded,
   nextFromHistory,
   normalizeConfig,
-  optionalKits,
   parseAddedKits,
+  pmAddKitSql,
+  pmRemoveKitSql,
   PM_SERVICE_ACTION,
   pmServicePrefix,
   pmServiceRecord,
   recommendInterval,
-  stepList,
+  stepsForVisit,
+  visitConfig,
   visibleOptions,
   type RunbookRole,
 } from "@/lib/ops/pm-runbook";
 import { planUnits, pmCompletionRefusal, type AccountUnitRow, type PlannedUnit } from "@/lib/ops/pm-runbook-units";
 import { catalogKeys, pickCatalog, type CatalogKit } from "@/lib/ops/pm-runbook-prices";
-import type { RunbookConfig } from "@/lib/ops/pm-runbook-schema";
+import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
 
 export type RunbookUnit = {
   unitKey: string;
@@ -161,7 +167,7 @@ export async function recordCompletedRunbook(
       kits: kitListWithAdded(rb.def, config, parseAddedKits(s?.added_kits))
         .filter((k) => ticked.has(`kit:${k.ev}`))
         .map((k) => ({ ev: k.ev, q: k.q, name: k.added ? `${k.name} (added)` : k.name })),
-      steps: stepList(rb.def, config)
+      steps: stepsForVisit(rb.def, config, parseAddedKits(s?.added_kits))
         .flatMap((g) => g.items)
         .filter((item) => ticked.has(`step:${item.id}`))
         .map((item) => item.text),
@@ -204,6 +210,102 @@ function pmMatcher(piece: string): { runbookId: string; model: string | null } |
     if (h) return { runbookId: rb.def.id, model: h.model };
   }
   return null;
+}
+
+/** Completed visits on this unit, oldest first. The same list the PM sheet uses for the next interval. */
+export function earlierVisitsForUnit(
+  def: RunbookDefinition,
+  unit: { unitKey: string; serialKey: string | null },
+  doneRows: { id: number; equipment: string | null; style: string | null; completed_at: string | null }[],
+  savedIntervals: { pm_job_id: number; unit_key: string; interval_mo: string | null }[],
+  bySerial: { id: number; style: string | null; completed_at: string | null; unit_key: string; interval_mo: string | null; serial_key: string }[],
+  rows: AccountUnitRow[],
+  pins: Record<number, Record<string, number>>,
+): { pmId: number; interval: string; completedAt: string | null }[] {
+  const out = new Map<number, { pmId: number; interval: string; completedAt: string | null }>();
+  for (const d of doneRows) {
+    const hit = planUnits(d.equipment, rows, pmMatcher, pins[d.id]).find((x) => x.unitKey === unit.unitKey);
+    if (!hit) continue;
+    const interval = savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === unit.unitKey)?.interval_mo ?? intervalFromStyle(def, d.style);
+    if (interval) out.set(d.id, { pmId: d.id, interval, completedAt: d.completed_at });
+  }
+  for (const b of bySerial) {
+    if (!unit.serialKey || b.serial_key !== unit.serialKey) continue;
+    const interval = b.interval_mo ?? intervalFromStyle(def, b.style);
+    if (interval) out.set(b.id, { pmId: b.id, interval, completedAt: b.completed_at });
+  }
+  return [...out.values()].sort((a, b) => (a.completedAt ?? "9999").localeCompare(b.completedAt ?? "9999") || a.pmId - b.pmId);
+}
+
+/** Interval and options for one unit, the same way the PM sheet works them out. */
+export async function loadVisitConfig(
+  sql: Sql,
+  def: RunbookDefinition,
+  pm: { id: number; customer: string; style: string | null },
+  unit: PlannedUnit,
+  now = new Date(),
+): Promise<RunbookConfig> {
+  const saved = (
+    await sql.query<{ model: string | null; interval_mo: string | null; options: unknown }>(
+      "select model, interval_mo, options from pm_runbook_units where pm_job_id = $1 and unit_key = $2",
+      [pm.id, unit.unitKey],
+    )
+  )[0];
+  const opt = unit.optionsKey
+    ? (await sql.query<{ options: unknown }>("select options from unit_runbook_options where unit_key = $1", [unit.optionsKey]))[0]
+    : null;
+  const doneRows = await sql.query<{ id: number; equipment: string | null; style: string | null; completed_at: string | null }>(
+    `select id, equipment, style, completed_at::text as completed_at from pm_jobs
+      where lower(customer) = lower($1) and id <> $2 and (completed_at is not null or status = 'Completed')`,
+    [pm.customer, pm.id],
+  );
+  const ids = doneRows.map((r) => r.id);
+  const savedIntervals = ids.length
+    ? await sql.query<{ pm_job_id: number; unit_key: string; interval_mo: string | null }>(
+        "select pm_job_id, unit_key, interval_mo from pm_runbook_units where pm_job_id = any($1::int[]) and interval_mo is not null",
+        [ids],
+      )
+    : [];
+  const links = ids.length
+    ? await sql.query<{ pm_job_id: number; piece_key: string; account_equipment_id: number }>(
+        "select pm_job_id, piece_key, account_equipment_id from pm_runbook_unit_links where pm_job_id = any($1::int[])",
+        [ids],
+      )
+    : [];
+  const pins: Record<number, Record<string, number>> = {};
+  for (const link of links) {
+    const bag = pins[link.pm_job_id] ?? (pins[link.pm_job_id] = {});
+    bag[link.piece_key] = Number(link.account_equipment_id);
+  }
+  const acct = await sql.query<{ id: number; catalog_model: string; equipment_name: string; serial: string | null; install_date: string | null }>(
+    "select id, catalog_model, equipment_name, serial, install_date::text as install_date from account_equipment where lower(customer) = lower($1) order by id",
+    [pm.customer],
+  );
+  const rows = acct.map((r) => ({
+    id: r.id,
+    catalogModel: r.catalog_model,
+    equipmentName: r.equipment_name,
+    serial: r.serial,
+    installDate: r.install_date,
+  }));
+  const bySerial = unit.serialKey
+    ? await sql.query<{ id: number; style: string | null; completed_at: string | null; unit_key: string; interval_mo: string | null; serial_key: string }>(
+        `select p.id, p.style, p.completed_at::text as completed_at, r.unit_key, r.interval_mo, r.serial_key
+           from pm_runbook_units r join pm_jobs p on p.id = r.pm_job_id
+          where r.serial_key = $1 and p.id <> $2 and (p.completed_at is not null or p.status = 'Completed')`,
+        [unit.serialKey, pm.id],
+      )
+    : [];
+  const earlier = earlierVisitsForUnit(def, unit, doneRows, savedIntervals, bySerial, rows, pins);
+  return visitConfig(def, {
+    savedInterval: saved?.interval_mo,
+    style: pm.style,
+    installDate: unit.installDate,
+    earlierIntervals: earlier.map((v) => v.interval),
+    model: saved?.model ?? unit.model,
+    options: asJson(opt?.options ?? saved?.options),
+    now,
+  });
 }
 
 /** Account units and the runbook lines for one PM, including a line pinned to a specific asset. */
@@ -403,32 +505,11 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       const bag = earlierPins[link.pm_job_id] ?? (earlierPins[link.pm_job_id] = {});
       bag[link.piece_key] = Number(link.account_equipment_id);
     }
-    const pmMatcher = (piece: string) => {
-      for (const rb of RUNBOOKS) {
-        const h = rb.matchPiece(piece);
-        if (h) return { runbookId: rb.def.id, model: h.model };
-      }
-      return null;
-    };
-    const fullPms = (u: (typeof planned)[number], def: NonNullable<ReturnType<typeof runbookById>>["def"]) => {
-      const out = new Map<number, { pmId: number; interval: string; completedAt: string | null }>();
-      for (const d of doneRows) {
-        const hit = planUnits(d.equipment, rows, pmMatcher, earlierPins[d.id]).find((x) => x.unitKey === u.unitKey);
-        if (!hit) continue;
-        const interval =
-          savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === u.unitKey)?.interval_mo ?? intervalFromStyle(def, d.style);
-        if (interval) out.set(d.id, { pmId: d.id, interval, completedAt: d.completed_at });
-      }
-      for (const b of bySerial) {
-        if (!u.serialKey || b.serial_key !== u.serialKey) continue;
-        const interval = b.interval_mo ?? intervalFromStyle(def, b.style);
-        if (interval) out.set(b.id, { pmId: b.id, interval, completedAt: b.completed_at });
-      }
-      return [...out.values()].sort((a, b) => (a.completedAt ?? "9999").localeCompare(b.completedAt ?? "9999") || a.pmId - b.pmId);
-    };
+    const fullPms = (u: (typeof planned)[number], def: RunbookDefinition) =>
+      earlierVisitsForUnit(def, u, doneRows, savedIntervals, bySerial, rows, earlierPins);
 
-    const kitLog = await sql.query<{ actor_name: string | null; detail: string | null; created_at: string }>(
-      `select actor_name, detail, created_at from activity
+    const kitLog = await sql.query<{ actor_name: string | null; action: string; detail: string | null; created_at: string }>(
+      `select actor_name, action, detail, created_at from activity
         where entity_type = 'pm' and entity_id = $1 and action in ('kit added', 'kit removed')
         order by created_at desc, id desc limit 40`,
       [data.pmId],
@@ -441,15 +522,32 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       const rec = recommendInterval(rb.def, u.installDate, now);
       const past = rec ? [] : fullPms(u, rb.def);
       const next = rec ? null : nextFromHistory(rb.def, past.map((p) => p.interval));
-      const histNext = next ? { id: next.id, combined: next.combined } : null;
-      const config = normalizeConfig(rb.def, {
-        ...options,
-        model: s?.model ?? u.model ?? undefined,
-        pm: s?.interval_mo ?? intervalFromStyle(rb.def, pm.style) ?? rec?.id ?? histNext?.id ?? undefined,
+      const config = visitConfig(rb.def, {
+        savedInterval: s?.interval_mo,
+        style: pm.style,
+        installDate: u.installDate,
+        earlierIntervals: past.map((p) => p.interval),
+        model: s?.model ?? u.model,
+        options,
+        now,
       });
       const ticks: RunbookUnit["checks"] = {};
       for (const c of checks) if (c.unit_key === u.unitKey) ticks[c.key] = { by: c.done_by, at: String(c.done_at) };
-      const kitNotes = kitLog.filter((h) => String(h.detail ?? "").startsWith(`${u.unitKey}: `));
+      const kitNotes = kitLog.filter((h) => {
+        const text = String(h.detail ?? "");
+        const keys = addedKitStoredKeys(text);
+        return keys.includes(u.unitKey) || keys.includes(u.pieceKey) || text.startsWith(`${u.unitKey}: `) || text.startsWith(`${u.pieceKey}: `);
+      });
+      const history = [
+        ...kitNotes.map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: addedKitHistoryLine(h.action, h.detail) })),
+        ...(optRow
+          ? hist
+              .filter((h) => h.entity_id === optRow.id)
+              .map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: h.detail ?? "" }))
+          : []),
+      ]
+        .sort((a, b) => String(b.at).localeCompare(String(a.at)))
+        .slice(0, 20);
       return {
         unitKey: u.unitKey,
         pieceKey: u.pieceKey,
@@ -479,15 +577,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         earlier: trail
           .filter((t) => (u.serialKey && t.serial_key === u.serialKey) || t.unit_key === u.unitKey)
           .map((t) => ({ pmId: t.pm_job_id, status: t.status, completedAt: t.completed_at, kits: t.kits, steps: t.steps })),
-        history: [
-          ...kitNotes.map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: String(h.detail ?? "").slice(u.unitKey.length + 2) })),
-          ...(optRow
-            ? hist
-                .filter((h) => h.entity_id === optRow.id)
-                .slice(0, 20)
-                .map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: h.detail ?? "" }))
-            : []),
-        ].slice(0, 20),
+        history,
       };
     });
     const completed = pm.status === "Completed" || !!pm.completed_at;
@@ -775,43 +865,16 @@ export const clearRunbookChecks = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Store the added-kit list on the PM unit. Clearing ticks does not touch this column. */
-export async function writeUnitAddedKits(
-  sql: Sql,
-  pmId: number,
-  unitKey: string,
-  runbookId: string,
-  optionsKey: string | null | undefined,
-  added: readonly string[],
-  actor: string,
-) {
-  await sql.query(
-    `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, added_kits, updated_by, serial_key)
-     values ($1, $2, $3, $4::jsonb, $5, $6)
-     on conflict (pm_job_id, unit_key) do update
-       set added_kits = excluded.added_kits, updated_by = excluded.updated_by,
-           serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key), updated_at = now()`,
-    [pmId, unitKey, runbookId, JSON.stringify([...added]), actor, serialOf(optionsKey)],
-  );
-}
-
-export async function pmIsCompleted(sql: Sql, pmId: number): Promise<boolean> {
-  const row = (await sql.query<{ status: string; completed_at: string | null }>("select status, completed_at::text as completed_at from pm_jobs where id = $1", [pmId]))[0];
-  if (!row) throw new Error("PM not found.");
-  return row.status === "Completed" || !!row.completed_at;
-}
-
 const addedInput = unitInput.extend({
-  runbookId: z.string(),
-  optionsKey: z.string().max(200).nullable().optional(),
+  runbookId: z.string().max(80),
   ev: z.string().regex(/^[A-Za-z0-9._-]{1,40}$/),
   on: z.boolean(),
 });
 
-/** Add or remove one optional kit on this PM unit. Adding does not tick it. Removing clears its tick. */
+/** Add or remove one optional kit on this PM unit. Adding does not tick it. Removing clears the tick only when the kit is not already on this visit. */
 export const setRunbookAddedKit = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: z.infer<typeof addedInput>) => addedInput.parse(d))
+  .validator((d: z.input<typeof addedInput>) => addedInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
     const me = await requireWriter(sql, context.userId);
@@ -825,35 +888,33 @@ export const setRunbookAddedKit = createServerFn({ method: "POST" })
     const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
     const unit = plan.planned.find((u) => u.unitKey === data.unitKey && u.runbookId === data.runbookId);
     if (!unit) throw new Error("This unit is not on this PM.");
-    const saved = (
-      await sql.query<{ model: string | null; interval_mo: string | null; options: unknown; added_kits: unknown }>(
-        "select model, interval_mo, options, added_kits from pm_runbook_units where pm_job_id = $1 and unit_key = $2",
-        [data.pmId, data.unitKey],
-      )
-    )[0];
-    const opt = unit.optionsKey
-      ? (await sql.query<{ options: unknown }>("select options from unit_runbook_options where unit_key = $1", [unit.optionsKey]))[0]
-      : null;
-    const config = normalizeConfig(rb.def, {
-      ...asJson(opt?.options ?? saved?.options),
-      model: saved?.model ?? unit.model ?? undefined,
-      pm: saved?.interval_mo ?? intervalFromStyle(rb.def, pm.style) ?? undefined,
-    });
-    const next = changeAddedKits(rb.def, config, parseAddedKits(saved?.added_kits), data.ev, data.on);
+    const config = await loadVisitConfig(sql, rb.def, { id: data.pmId, customer: pm.customer, style: pm.style }, unit);
+    const next = changeAddedKits(rb.def, config, data.on ? [] : [data.ev], data.ev, data.on);
     if (!next.ok) throw new Error(next.reason);
-    if (next.changed) {
-      await writeUnitAddedKits(sql, data.pmId, data.unitKey, data.runbookId, unit.optionsKey, next.added, me.name);
-      const name = optionalKits(rb.def, config).find((k) => k.ev === data.ev)?.name ?? data.ev;
-      await sql.query(
-        "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('pm', $1, $2, $3, $4)",
-        [data.pmId, me.name, data.on ? "kit added" : "kit removed", `${data.unitKey}: ${data.ev} ${name}`],
-      );
-    }
-    if (next.dropTick) {
-      await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [data.pmId, data.unitKey, `kit:${data.ev}`]);
+    const detail = addedKitDetail(addedKitSentence(rb.def, data.ev, data.on), unit.unitKey, unit.pieceKey);
+    if (data.on) {
+      await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, data.runbookId, data.ev, me.name, serialOf(unit.optionsKey), detail]);
+    } else {
+      await sql.query(pmRemoveKitSql(), [
+        data.pmId,
+        unit.unitKey,
+        data.runbookId,
+        data.ev,
+        me.name,
+        serialOf(unit.optionsKey),
+        detail,
+        next.dropTick,
+        `kit:${data.ev}`,
+      ]);
     }
     return { ok: true };
   });
+
+export async function pmIsCompleted(sql: Sql, pmId: number): Promise<boolean> {
+  const row = (await sql.query<{ status: string; completed_at: string | null }>("select status, completed_at::text as completed_at from pm_jobs where id = $1", [pmId]))[0];
+  if (!row) throw new Error("PM not found.");
+  return row.status === "Completed" || !!row.completed_at;
+}
 
 /**
  * Sell prices for kit numbers from the parts catalog. A kit is matched to the part already in the Parts list by

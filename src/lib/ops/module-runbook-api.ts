@@ -8,10 +8,14 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { loadPmRunbookPlan, pmIsCompleted, writeUnitAddedKits } from "@/lib/ops/pm-runbook-api";
+import { loadPmRunbookPlan, loadVisitConfig, pmIsCompleted } from "@/lib/ops/pm-runbook-api";
 import {
   canWriteRunbook,
   MODULE_NOT_ON_PM,
+  addedKitDetail,
+  addedKitSentence,
+  benchAddKitSql,
+  benchRemoveKitSql,
   changeAddedKits,
   checkSerialKey,
   checksForModuleSheet,
@@ -22,10 +26,10 @@ import {
   moduleServiceOptions,
   moduleServiceView,
   moduleServiceWorkLines,
-  normalizeConfig,
-  optionalKits,
   optionalKitsLeft,
   parseAddedKits,
+  pmAddKitSql,
+  pmRemoveKitSql,
   type KitLine,
   type RunbookRole,
   type SharedCheck,
@@ -164,20 +168,8 @@ async function configFor(
 ): Promise<RunbookConfig> {
   const saved = asJson(service?.options);
   if (context === "pm" && pmId && pmUnit) {
-    const job = (
-      await sql.query<{ model: string | null; interval_mo: string | null; options: unknown }>(
-        "select model, interval_mo, options from pm_runbook_units where pm_job_id = $1 and unit_key = $2",
-        [pmId, pmUnit.unitKey],
-      )
-    )[0];
-    const opt = pmUnit.optionsKey
-      ? (await sql.query<{ options: unknown }>("select options from unit_runbook_options where unit_key = $1", [pmUnit.optionsKey]))[0]
-      : null;
-    return normalizeConfig(def, {
-      ...asJson(opt?.options ?? job?.options),
-      model: job?.model ?? pmUnit.model ?? undefined,
-      pm: job?.interval_mo ?? undefined,
-    });
+    const job = (await sql.query<{ customer: string; style: string | null }>("select customer, style from pm_jobs where id = $1", [pmId]))[0];
+    if (job) return loadVisitConfig(sql, def, { id: pmId, customer: job.customer, style: job.style }, pmUnit);
   }
   return moduleBenchConfig(def, moduleType, service?.interval_mo, saved);
 }
@@ -314,21 +306,23 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         if (await pmIsCompleted(sql, data.pmId!)) throw new Error("This PM is completed.");
         const config = await configFor(sql, rb.def, mod.module_type!, existing, "pm", data.pmId ?? null, unit);
         const groups = moduleRunbookGroups(rb.def, mod.module_type) ?? [];
-        const row = (
-          await sql.query<{ added_kits: unknown }>("select added_kits from pm_runbook_units where pm_job_id = $1 and unit_key = $2", [data.pmId, unit.unitKey])
-        )[0];
-        const next = changeAddedKits(rb.def, config, parseAddedKits(row?.added_kits), data.addEv, data.addOn, groups);
+        const next = changeAddedKits(rb.def, config, data.addOn ? [] : [data.addEv], data.addEv, data.addOn, groups);
         if (!next.ok) throw new Error(next.reason);
-        if (next.changed) {
-          await writeUnitAddedKits(sql, data.pmId!, unit.unitKey, rb.def.id, unit.optionsKey, next.added, me.name);
-          const name = optionalKits(rb.def, config).find((k) => k.ev === data.addEv)?.name ?? data.addEv;
-          await sql.query(
-            "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('pm', $1, $2, $3, $4)",
-            [data.pmId, me.name, data.addOn ? "kit added" : "kit removed", `${unit.unitKey}: ${data.addEv} ${name}`],
-          );
-        }
-        if (next.dropTick) {
-          await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [data.pmId, unit.unitKey, `kit:${data.addEv}`]);
+        const detail = addedKitDetail(addedKitSentence(rb.def, data.addEv, data.addOn), unit.unitKey, unit.pieceKey);
+        if (data.addOn) {
+          await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, rb.def.id, data.addEv, me.name, checkSerialKey(unit.optionsKey), detail]);
+        } else {
+          await sql.query(pmRemoveKitSql(), [
+            data.pmId,
+            unit.unitKey,
+            rb.def.id,
+            data.addEv,
+            me.name,
+            checkSerialKey(unit.optionsKey),
+            detail,
+            next.dropTick,
+            `kit:${data.addEv}`,
+          ]);
         }
       }
       if (data.checkKey && data.checked != null) {
@@ -365,25 +359,17 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
     }
     if (data.addEv && data.addOn != null) {
       const fresh = (
-        await sql.query<ServiceRow>(
-          "select id, runbook_id, interval_mo, options, added_kits, started_by, started_at::text as started_at, completed_by, completed_at::text as completed_at from module_runbook_services where id = $1",
-          [service.id],
-        )
+        await sql.query<{ interval_mo: string | null; options: unknown }>("select interval_mo, options from module_runbook_services where id = $1", [service.id])
       )[0];
       const config = moduleBenchConfig(rb.def, mod.module_type!, fresh?.interval_mo, asJson(fresh?.options));
       const groups = moduleRunbookGroups(rb.def, mod.module_type) ?? [];
-      const next = changeAddedKits(rb.def, config, parseAddedKits(fresh?.added_kits), data.addEv, data.addOn, groups);
+      const next = changeAddedKits(rb.def, config, data.addOn ? [] : [data.addEv], data.addEv, data.addOn, groups, "service");
       if (!next.ok) throw new Error(next.reason);
-      if (next.changed) {
-        await sql.query("update module_runbook_services set added_kits = $2::jsonb where id = $1", [service.id, JSON.stringify(next.added)]);
-        const name = optionalKits(rb.def, config).find((k) => k.ev === data.addEv)?.name ?? data.addEv;
-        await sql.query(
-          "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('module', $1, $2, $3, $4)",
-          [data.moduleId, me.name, data.addOn ? "kit added" : "kit removed", `${data.addEv} ${name}`],
-        );
-      }
-      if (next.dropTick) {
-        await sql.query("delete from module_runbook_checks where service_id = $1 and key = $2", [service.id, `kit:${data.addEv}`]);
+      const detail = addedKitSentence(rb.def, data.addEv, data.addOn);
+      if (data.addOn) {
+        await sql.query(benchAddKitSql(), [service.id, data.addEv, data.moduleId, me.name, detail]);
+      } else {
+        await sql.query(benchRemoveKitSql(), [service.id, data.addEv, data.moduleId, me.name, detail, next.dropTick, `kit:${data.addEv}`]);
       }
     }
     if (data.checkKey && data.checked != null) {

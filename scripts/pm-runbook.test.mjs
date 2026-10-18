@@ -15,7 +15,14 @@ import {
   kitListText,
   kitListWithAdded,
   optionalKits,
-  ticksAfterRemovingKit,
+  optionalKitsLeft,
+  addedKitDetail,
+  addedKitHistoryLine,
+  addedKitSentence,
+  addedKitStoredKeys,
+  stepsForVisit,
+  visitBanners,
+  visitConfig,
   isPmServiceRecord,
   matchE4XWide,
   moduleAssignmentBlock,
@@ -398,12 +405,49 @@ test("optional kits are the 36-month kits missing from this visit", () => {
   assert.match(text, /Total at sell price: \$10\.00/);
   assert.equal(changeAddedKits(def, twelve, [], "NOPE", true).ok, false);
   assert.equal(changeAddedKits(def, twelve, [], "EV117077", true).ok, false);
+  const refusedPm = changeAddedKits(def, twelve, [], "EV117077", true);
+  assert.equal(refusedPm.ok, false);
+  if (!refusedPm.ok) assert.match(refusedPm.reason, /not optional for this PM/);
+  const refusedService = changeAddedKits(def, twelve, [], "EV117077", true, undefined, "service");
+  assert.equal(refusedService.ok, false);
+  if (!refusedService.ok) assert.match(refusedService.reason, /not optional for this service/);
   const on = changeAddedKits(def, twelve, [], "EV109590", true);
   assert.equal(on.ok && on.dropTick, false);
   const off = changeAddedKits(def, twelve, ["EV109590"], "EV109590", false);
   assert.deepEqual(off.ok && off.added, []);
   assert.equal(off.ok && off.dropTick, true);
-  assert.deepEqual(ticksAfterRemovingKit(["kit:EV109590", "step:hyd-kit"], "EV109590"), ["step:hyd-kit"]);
+  const gone = changeAddedKits(def, twelve, [], "EV109590", false);
+  assert.equal(gone.ok && gone.changed, false);
+  assert.equal(gone.ok && gone.dropTick, false);
+  const base = changeAddedKits(def, cfg({ model: "4s", pm: "36", amer: "yes" }), ["EV109586"], "EV109586", false);
+  assert.equal(base.ok && base.dropTick, false);
+  assert.equal(base.ok && base.changed, true);
+  const kept = changeAddedKits(def, cfg({ model: "4s", pm: "12", amer: "no" }), ["EV109590"], "EV109586", true);
+  assert.deepEqual(kept.ok && kept.added, ["EV109590", "EV109586"]);
+  const ordered = kitListWithAdded(def, twelve, ["EV109586", "EV109590"]).map((k) => k.ev);
+  assert.ok(ordered.indexOf("EV117077") < ordered.indexOf("EV109586"));
+  assert.ok(ordered.indexOf("EV109586") < ordered.indexOf("EV109590"));
+  assert.ok(ordered.indexOf("EV109590") < ordered.indexOf("EV108389"));
+  assert.equal(stepsForVisit(def, twelve, []).some((g) => g.items.some((s) => s.id === "hyd-amer")), false);
+  const withStep = stepsForVisit(def, twelve, ["EV109590"]);
+  assert.ok(withStep.some((g) => g.items.some((s) => s.id === "hyd-amer")));
+  const hydraulic = moduleServiceView(def, twelve, "Hydraulic Module", ["EV109590"]);
+  assert.ok(hydraulic?.steps.some((g) => g.items.some((s) => s.id === "hyd-amer")));
+  assert.match(visitBanners(def, twelve, []).map((b) => b.text).join("\n"), /only 12-month kits are listed/);
+  const banner = visitBanners(def, twelve, ["EV109590"]).map((b) => b.text).join("\n");
+  assert.match(banner, /12-month kits are listed, plus added kits EV109590/);
+  assert.doesNotMatch(banner, /only 12-month kits are listed/);
+  const visit = visitConfig(def, { savedInterval: null, style: "36 month PM", model: "4s", options: { amer: "yes" } });
+  assert.equal(visit.pm, "36");
+  assert.equal(optionalKits(def, visit).length, 0);
+  const onSite = moduleServiceView(def, visit, "Hydraulic Module", []);
+  assert.equal(optionalKitsLeft(def, visit, [], onSite?.groups).length, 0);
+  assert.equal(addedKitSentence(def, "EV109590", true), "Added EV109590 Hydraulic add-on, adjustable Americano (36-month kit)");
+  assert.equal(addedKitSentence(def, "EV109590", false), "Removed EV109590 Hydraulic add-on, adjustable Americano (36-month kit)");
+  const detail = addedKitDetail(addedKitSentence(def, "EV109590", true), "acct:4", "piece:eversys:1");
+  assert.deepEqual(addedKitStoredKeys(detail), ["acct:4", "piece:eversys:1"]);
+  assert.equal(addedKitHistoryLine("kit added", detail), "Added EV109590 Hydraulic add-on, adjustable Americano (36-month kit)");
+  assert.equal(addedKitHistoryLine("kit removed", "piece:eversys:1: EV109590 Hydraulic add-on"), "Removed EV109590 Hydraulic add-on");
   const brewOnly = changeAddedKits(def, twelve, [], "EV109590", true, ["Brew module"]);
   assert.equal(brewOnly.ok, false);
 });

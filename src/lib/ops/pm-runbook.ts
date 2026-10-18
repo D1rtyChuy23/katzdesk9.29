@@ -78,25 +78,36 @@ export function optionalKits(def: RunbookDefinition, c: RunbookConfig): KitLine[
   return kitList(def, { ...c, pm: longest }).filter((k) => !current.has(k.ev));
 }
 
-/** The visit's own kits, then any added kit numbers that are still optional, under their module. */
+/** The visit's kits, with added kit numbers that are still optional, in definition order. */
 export function kitListWithAdded(def: RunbookDefinition, c: RunbookConfig, added: readonly string[]): KitLine[] {
   const base = kitList(def, c).map((k) => ({ ...k, added: false }));
   const have = new Set(base.map((k) => k.ev));
-  const optional = optionalKits(def, c);
-  const extras: KitLine[] = [];
-  for (const ev of added) {
-    if (have.has(ev)) continue;
-    const kit = optional.find((k) => k.ev === ev);
+  const optionalByEv = new Map(optionalKits(def, c).map((k) => [k.ev, k]));
+  const wanted = new Set(added);
+  const moduleOrder: string[] = [];
+  for (const k of def.kits) if (!moduleOrder.includes(k.module)) moduleOrder.push(k.module);
+  const extras = new Map<string, KitLine[]>();
+  const seen = new Set<string>();
+  for (const k of def.kits) {
+    if (seen.has(k.ev)) continue;
+    seen.add(k.ev);
+    if (!wanted.has(k.ev) || have.has(k.ev)) continue;
+    const kit = optionalByEv.get(k.ev);
     if (!kit) continue;
-    have.add(kit.ev);
-    extras.push({ ...kit, added: true });
+    have.add(k.ev);
+    const list = extras.get(k.module) ?? [];
+    list.push({ ...kit, added: true });
+    extras.set(k.module, list);
   }
-  const out: KitLine[] = [...base];
-  for (const extra of extras) {
-    let last = -1;
-    for (let i = 0; i < out.length; i++) if (out[i]?.module === extra.module) last = i;
-    if (last < 0) out.push(extra);
-    else out.splice(last + 1, 0, extra);
+  const baseByModule = new Map<string, KitLine[]>();
+  for (const k of base) {
+    const list = baseByModule.get(k.module) ?? [];
+    list.push(k);
+    baseByModule.set(k.module, list);
+  }
+  const out: KitLine[] = [];
+  for (const module of moduleOrder) {
+    out.push(...(baseByModule.get(module) ?? []), ...(extras.get(module) ?? []));
   }
   return out;
 }
@@ -126,8 +137,9 @@ function safeJson(v: string): unknown {
 export type AddedChange = { ok: true; added: string[]; dropTick: boolean; changed: boolean } | { ok: false; reason: string };
 
 /**
- * Add or remove one kit number. Only a number that is optional right now is accepted.
- * `groups`, when set, limits the change to that module. Removing drops the kit's tick.
+ * Add or remove one stored kit number. Other stored numbers stay, even when they are not optional right now.
+ * The tick is dropped only when a removed kit is not already in this visit's own kit list.
+ * Removing a number that is not stored is a no-op.
  */
 export function changeAddedKits(
   def: RunbookDefinition,
@@ -136,25 +148,150 @@ export function changeAddedKits(
   ev: string,
   on: boolean,
   groups?: readonly string[],
+  place: "pm" | "service" = "pm",
 ): AddedChange {
-  const still = optionalKits(def, c);
-  const stillIds = new Set(still.map((k) => k.ev));
-  const allowed = groups ? still.filter((k) => groups.includes(k.module)) : still;
+  const reason = place === "service" ? "That kit is not optional for this service." : "That kit is not optional for this PM.";
+  const optional = optionalKits(def, c);
+  const allowed = groups ? optional.filter((k) => groups.includes(k.module)) : optional;
   const allowedIds = new Set(allowed.map((k) => k.ev));
-  const clean = current.filter((id) => stillIds.has(id));
   if (on) {
-    if (!allowedIds.has(ev)) return { ok: false, reason: "That kit is not optional for this PM." };
-    if (clean.includes(ev)) return { ok: true, added: clean, dropTick: false, changed: clean.length !== current.length };
-    return { ok: true, added: [...clean, ev], dropTick: false, changed: true };
+    if (!allowedIds.has(ev)) return { ok: false, reason };
+    if (current.includes(ev)) return { ok: true, added: [...current], dropTick: false, changed: false };
+    return { ok: true, added: [...current, ev], dropTick: false, changed: true };
   }
-  if (!current.includes(ev) || (groups && !allowedIds.has(ev))) return { ok: false, reason: "That kit is not optional for this PM." };
-  const added = clean.filter((id) => id !== ev);
-  return { ok: true, added, dropTick: true, changed: true };
+  if (!current.includes(ev)) return { ok: true, added: [...current], dropTick: false, changed: false };
+  if (groups) {
+    const module = def.kits.find((k) => k.ev === ev)?.module;
+    if (module && !groups.includes(module)) return { ok: false, reason };
+  }
+  const base = kitList(def, c).some((k) => k.ev === ev);
+  return { ok: true, added: current.filter((id) => id !== ev), dropTick: !base, changed: true };
 }
 
-/** The tick keys left after an added kit is removed. Adding a kit does not tick it. */
-export function ticksAfterRemovingKit(keys: readonly string[], ev: string): string[] {
-  return keys.filter((k) => k !== `kit:${ev}`);
+/** The sentence stored for an add or a remove. The unit key is not part of it. */
+export function addedKitSentence(def: RunbookDefinition, ev: string, on: boolean): string {
+  const kit = def.kits.find((k) => k.ev === ev);
+  const name = kit?.name ?? ev;
+  const interval = kit?.interval ?? Number(longestIntervalId(def));
+  return `${on ? "Added" : "Removed"} ${ev} ${name} (${interval}-month kit)`;
+}
+
+/** Activity detail: the sentence, then the unit key and the piece key on their own lines. */
+export function addedKitDetail(sentence: string, unitKey: string, pieceKey: string): string {
+  return `${sentence}\n${unitKey}\n${pieceKey}`;
+}
+
+/** The sentence, without the keys stored under it. */
+export function addedKitVisible(detail: string | null | undefined): string {
+  return String(detail ?? "").split("\n")[0] ?? "";
+}
+
+/** Unit keys stored under the sentence, so history still matches after Log the asset moves the key. */
+export function addedKitStoredKeys(detail: string | null | undefined): string[] {
+  return String(detail ?? "")
+    .split("\n")
+    .slice(1)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * The line a person reads. New rows are already "Added …" or "Removed …".
+ * Older rows start with the unit key (`piece:…: EV109590 …`); the verb is put back on.
+ */
+export function addedKitHistoryLine(action: string, detail: string | null | undefined): string {
+  const first = addedKitVisible(detail).trim();
+  if (/^(Added|Removed)\b/.test(first)) return first;
+  const verb = action === "kit removed" ? "Removed" : "Added";
+  const rest = first.replace(/^.*: /, "");
+  return rest ? `${verb} ${rest}` : verb;
+}
+
+/**
+ * One statement: append the kit if it is not already stored, and write the activity row only when a row changed.
+ * $1 pm id, $2 unit key, $3 runbook id, $4 kit number, $5 actor, $6 serial key, $7 detail.
+ */
+export function pmAddKitSql(): string {
+  return `with up as (
+    insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, added_kits, updated_by, serial_key)
+    values ($1::int, $2::text, $3::text, jsonb_build_array($4::text), $5::text, $6::text)
+    on conflict (pm_job_id, unit_key) do update
+      set added_kits = coalesce(pm_runbook_units.added_kits, '[]'::jsonb) || jsonb_build_array($4::text),
+          updated_by = excluded.updated_by,
+          serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key),
+          updated_at = now()
+    where not (coalesce(pm_runbook_units.added_kits, '[]'::jsonb) @> jsonb_build_array($4::text))
+    returning pm_job_id
+  ), act as (
+    insert into activity (entity_type, entity_id, actor_name, action, detail)
+    select 'pm', $1::int, $5::text, 'kit added', $7::text from up
+    returning id
+  )
+  select coalesce((select count(*) from up), 0)::int as changed`;
+}
+
+/**
+ * One statement: take the kit off the stored list, write one activity row, and delete its tick only when $8 is true.
+ * $1 pm id, $2 unit key, $4 kit number, $5 actor, $7 detail, $8 drop tick, $9 check key.
+ */
+export function pmRemoveKitSql(): string {
+  return `with up as (
+    update pm_runbook_units
+       set added_kits = coalesce(added_kits, '[]'::jsonb) - $4::text,
+           updated_by = $5::text,
+           updated_at = now()
+     where pm_job_id = $1::int and unit_key = $2::text
+       and coalesce(added_kits, '[]'::jsonb) @> jsonb_build_array($4::text)
+       -- $3 and $6 are bound so this statement's positions match the add. They do not change the row.
+       and $3::text is not distinct from $3::text
+       and $6::text is not distinct from $6::text
+    returning pm_job_id, unit_key
+  ), act as (
+    insert into activity (entity_type, entity_id, actor_name, action, detail)
+    select 'pm', $1::int, $5::text, 'kit removed', $7::text from up
+    returning id
+  ), tick as (
+    delete from pm_runbook_checks c
+     using up
+     where $8::boolean and c.pm_job_id = up.pm_job_id and c.unit_key = up.unit_key and c.key = $9::text
+    returning c.key
+  )
+  select coalesce((select count(*) from up), 0)::int as changed`;
+}
+
+/** $1 service id, $2 kit number, $3 module id, $4 actor, $5 detail. */
+export function benchAddKitSql(): string {
+  return `with up as (
+    update module_runbook_services
+       set added_kits = coalesce(added_kits, '[]'::jsonb) || jsonb_build_array($2::text)
+     where id = $1 and not (coalesce(added_kits, '[]'::jsonb) @> jsonb_build_array($2::text))
+    returning id
+  ), act as (
+    insert into activity (entity_type, entity_id, actor_name, action, detail)
+    select 'module', $3::int, $4, 'kit added', $5 from up
+    returning id
+  )
+  select coalesce((select count(*) from up), 0)::int as changed`;
+}
+
+/** $1 service id, $2 kit number, $3 module id, $4 actor, $5 detail, $6 drop tick, $7 check key. */
+export function benchRemoveKitSql(): string {
+  return `with up as (
+    update module_runbook_services
+       set added_kits = coalesce(added_kits, '[]'::jsonb) - $2::text
+     where id = $1 and coalesce(added_kits, '[]'::jsonb) @> jsonb_build_array($2::text)
+    returning id
+  ), act as (
+    insert into activity (entity_type, entity_id, actor_name, action, detail)
+    select 'module', $3::int, $4, 'kit removed', $5 from up
+    returning id
+  ), tick as (
+    delete from module_runbook_checks c
+     using up
+     where $6::boolean and c.service_id = up.id and c.key = $7
+    returning c.key
+  )
+  select coalesce((select count(*) from up), 0)::int as changed`;
 }
 
 export function stepList(def: RunbookDefinition, c: RunbookConfig): StepGroup[] {
@@ -163,6 +300,32 @@ export function stepList(def: RunbookDefinition, c: RunbookConfig): StepGroup[] 
     if (!matches(m.when, c)) continue;
     const items = m.items.filter((s) => matches(s.when, c));
     if (items.length) out.push({ module: m.module, items });
+  }
+  return out;
+}
+
+/** Steps for this visit, plus any step whose text or reference names a kit that was added. */
+export function stepsForVisit(def: RunbookDefinition, c: RunbookConfig, added: readonly string[]): StepGroup[] {
+  const base = stepList(def, c);
+  const shown = new Set(base.flatMap((g) => g.items.map((s) => s.id)));
+  const evs = kitListWithAdded(def, c, added)
+    .filter((k) => k.added)
+    .map((k) => k.ev);
+  const extra = new Set<string>();
+  if (evs.length) {
+    for (const group of def.steps) {
+      if (!matches(withoutInterval(group.when), c)) continue;
+      for (const s of group.items) {
+        if (shown.has(s.id) || !matches(withoutInterval(s.when), c)) continue;
+        const blob = `${s.text} ${s.ref ?? ""}`;
+        if (evs.some((ev) => blob.includes(ev))) extra.add(s.id);
+      }
+    }
+  }
+  const out: StepGroup[] = [];
+  for (const group of def.steps) {
+    const items = group.items.filter((s) => shown.has(s.id) || extra.has(s.id));
+    if (items.length) out.push({ module: group.module, items });
   }
   return out;
 }
@@ -338,7 +501,7 @@ export function moduleServiceView(
   return {
     groups,
     kits: kitListWithAdded(def, c, added ?? []).filter((k) => groups.includes(k.module)),
-    steps: stepList(def, c).filter((g) => groups.includes(g.module)),
+    steps: stepsForVisit(def, c, added ?? []).filter((g) => groups.includes(g.module)),
   };
 }
 
@@ -482,6 +645,15 @@ export function banners(def: RunbookDefinition, c: RunbookConfig) {
   return def.banners.filter((b) => matches(b.when, c));
 }
 
+/** The 12-month banner names the kits that were added, instead of saying only 12-month kits are listed. */
+export function visitBanners(def: RunbookDefinition, c: RunbookConfig, added: readonly string[]) {
+  const extras = kitListWithAdded(def, c, added).filter((k) => k.added);
+  return banners(def, c).map((b) => {
+    if (!extras.length || !/only 12-month kits are listed/i.test(b.text)) return b;
+    return { ...b, text: b.text.replace("only 12-month kits are listed", `12-month kits are listed, plus added kits ${extras.map((k) => k.ev).join(", ")}`) };
+  });
+}
+
 export function totalKits(lines: KitLine[]): number {
   return lines.reduce((a, k) => a + k.q, 0);
 }
@@ -552,6 +724,30 @@ export function intervalFromStyle(def: RunbookDefinition, style: string | null |
   const m = /(\d+)\s*[- ]?\s*(?:month|mo)/i.exec(style ?? "");
   if (!m) return null;
   return def.intervals.some((i) => i.id === m[1]) ? m[1] : null;
+}
+
+/**
+ * The interval and options for one unit on one visit. Saved choice wins, then the PM style
+ * ("36 month PM"), then the install-date recommendation, then the earlier-PM history.
+ * The PM sheet, the on-site module sheet and adding a kit all use this.
+ */
+export function visitConfig(
+  def: RunbookDefinition,
+  input: {
+    savedInterval?: string | null;
+    style?: string | null;
+    installDate?: string | null;
+    earlierIntervals?: readonly string[];
+    model?: string | null;
+    options?: Record<string, unknown> | null;
+    now?: Date;
+  },
+): RunbookConfig {
+  const recommended = recommendInterval(def, input.installDate, input.now);
+  const fromHistory = recommended ? null : nextFromHistory(def, [...(input.earlierIntervals ?? [])]);
+  const saved = input.savedInterval && def.intervals.some((i) => i.id === input.savedInterval) ? input.savedInterval : null;
+  const pm = saved ?? intervalFromStyle(def, input.style) ?? recommended?.id ?? fromHistory?.id ?? undefined;
+  return normalizeConfig(def, { ...(input.options ?? {}), model: input.model ?? undefined, pm });
 }
 
 /**
