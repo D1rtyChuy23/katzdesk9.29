@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
-import { defaultConfig, kitList, recommendInterval, stepList } from "../src/lib/ops/pm-runbook.ts";
+import { defaultConfig, kitList, optionalKits, recommendInterval, stepList } from "../src/lib/ops/pm-runbook.ts";
 import { splitEquipment } from "../src/lib/ops/equipment.ts";
 import { matchLmGb5, matchLmGs3, matchLmKb90, matchLmLinea, matchLmStrada } from "../src/lib/ops/runbooks/la-marzocco-match.ts";
 
@@ -65,6 +65,19 @@ test("3/6/12 cycle from install date: 3, 6, 9 (3/9 visit), 12", () => {
   assert.equal(recommendInterval(def, "2027-04-15", now)?.id, "6");
   assert.equal(recommendInterval(def, "2027-01-15", now)?.id, "3");
   assert.equal(recommendInterval(def, "2026-10-15", now)?.id, "12");
+});
+
+test("optional kits follow the visit, not a part that belongs to one interval", () => {
+  const linea = load("la-marzocco-linea");
+  const pb = (pm) => optionalKits(linea, { ...defaultConfig(linea), model: "pb", pm, groups: "3" });
+  assert.deepEqual(pb("3"), []);
+  assert.deepEqual(pb("6"), []);
+  const classic = optionalKits(linea, { ...defaultConfig(linea), model: "classic", pm: "3", groups: "2", ctrl: "mp" });
+  assert.equal(classic.find((k) => k.ev === "SA600/K2")?.q, 2);
+  const gs3 = load("la-marzocco-gs3");
+  const av = optionalKits(gs3, { ...defaultConfig(gs3), model: "av", pm: "6" }).map((k) => k.ev);
+  assert.ok(av.includes("L193"));
+  assert.ok(av.includes("B.2.025"));
 });
 
 test("matchers on real equipment text", () => {

@@ -4,7 +4,7 @@ import { Check, Coffee, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { getMyAccess } from "@/lib/ops/access";
 import { eversysFamily, moduleAccount } from "@/lib/ops/eversys";
-import { moduleAssignmentBlock, normalizeConfig } from "@/lib/ops/pm-runbook";
+import { moduleAssignmentBlock, modulesNotTakenReason, normalizeConfig } from "@/lib/ops/pm-runbook";
 import { runbookForPiece } from "@/lib/ops/runbooks";
 import {
   addEversysUnit,
@@ -21,6 +21,27 @@ import { Input, Label } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { cn } from "@/lib/utils";
 import { CustomerCombo } from "./directory-fields";
+
+function assignmentBlock(
+  model: string,
+  options: Record<string, string>,
+  moduleType: string | null | undefined,
+  platform: string | null | undefined,
+): string | null {
+  const hit = runbookForPiece(model);
+  if (!hit) return null;
+  const refused = modulesNotTakenReason(hit.runbook.def, hit.model, hit.runbook.modules);
+  if (refused) return refused;
+  if (!hit.model) return null;
+  return moduleAssignmentBlock(
+    hit.runbook.def,
+    normalizeConfig(hit.runbook.def, { ...options, model: hit.model }),
+    moduleType,
+    platform,
+    hit.runbook.platforms,
+    Object.keys(options),
+  );
+}
 
 function useRefresh() {
   const qc = useQueryClient();
@@ -79,17 +100,7 @@ export function AssignModuleDialog({
     // One Eversys unit on the account: pick it for them, unless this module does not fit it.
     const only = list.length === 1 ? list[0] : null;
     if (!only || unitId != null || !module) return;
-    const hit = runbookForPiece(only.model);
-    const block = hit?.model
-      ? moduleAssignmentBlock(
-          hit.runbook.def,
-          normalizeConfig(hit.runbook.def, { ...only.options, model: hit.model }),
-          module.moduleType,
-          module.platform,
-          hit.runbook.platforms,
-          Object.keys(only.options),
-        )
-      : null;
+    const block = assignmentBlock(only.model, only.options, module.moduleType, module.platform);
     if (!block) setUnitId(only.id);
   }, [list, unitId, module]);
 
@@ -155,17 +166,7 @@ export function AssignModuleDialog({
                   {list.map((u) => {
                     const on = unitId === u.id;
                     const mismatch = !!family && !!u.family && u.family !== family;
-                    const hit = runbookForPiece(u.model);
-                    const block = hit?.model
-                      ? moduleAssignmentBlock(
-                          hit.runbook.def,
-                          normalizeConfig(hit.runbook.def, { ...u.options, model: hit.model }),
-                          module.moduleType,
-                          module.platform,
-                          hit.runbook.platforms,
-                          Object.keys(u.options),
-                        )
-                      : null;
+                    const block = assignmentBlock(u.model, u.options, module.moduleType, module.platform);
                     return (
                       <button
                         key={u.id}
