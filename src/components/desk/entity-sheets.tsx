@@ -155,6 +155,8 @@ export function PmSheet({
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      if (pm) void qc.invalidateQueries({ queryKey: ["pm-runbook", pm.id] });
+      void qc.invalidateQueries({ queryKey: ["module-runbook"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
