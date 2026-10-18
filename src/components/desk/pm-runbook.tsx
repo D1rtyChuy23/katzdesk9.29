@@ -11,6 +11,7 @@ import {
   getKitPrices,
   getPmRunbook,
   logRunbookAsset,
+  setRunbookAddedKit,
   setRunbookCheck,
   setRunbookUnitConfig,
   setRunbookUnitOptions,
@@ -20,7 +21,7 @@ import { listModules } from "@/lib/ops/api";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
 import { assignModule } from "@/lib/ops/module-assign";
-import { banners, applicableModules, kitList, kitListText, moduleTypeFit, optionKeys, platformFit, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { banners, applicableModules, kitListText, kitListWithAdded, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
@@ -276,6 +277,14 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     onSuccess: refresh,
     onError,
   });
+  const addKit = useMutation({
+    mutationFn: (d: { ev: string; on: boolean }) =>
+      setRunbookAddedKit({
+        data: { pmId, unitKey: unit?.unitKey ?? "", runbookId: unit?.runbookId ?? "", optionsKey: unit?.optionsKey, ev: d.ev, on: d.on },
+      }),
+    onSuccess: refresh,
+    onError,
+  });
   const [logging, setLogging] = useState(false);
   const [choice, setChoice] = useState("new");
   const [serial, setSerial] = useState("");
@@ -296,7 +305,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
       else toast.error(msg);
     },
   });
-  const kitNumbers = useMemo(() => (unit && rb ? kitList(rb.def, unit.config).map((k) => k.ev) : []), [unit, rb]);
+  const added = unit?.addedKits ?? [];
+  const listed = unit && rb ? kitListWithAdded(rb.def, unit.config, added) : [];
+  const optional = unit && rb ? optionalKitsLeft(rb.def, unit.config, added) : [];
+  const kitNumbers = useMemo(() => [...listed, ...optional].map((k) => k.ev), [listed, optional]);
   const priceQ = useQuery({
     queryKey: ["pm-runbook-prices", kitNumbers.join(",")],
     queryFn: () => getKitPrices({ data: { evs: kitNumbers } }),
@@ -307,7 +319,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
 
   const view = useMemo(() => {
     if (!unit || !rb) return null;
-    const kits = kitList(rb.def, unit.config);
+    const kits = kitListWithAdded(rb.def, unit.config, unit.addedKits);
     const steps = stepList(rb.def, unit.config);
     const modules: { module: string; kits: typeof kits }[] = [];
     for (const k of kits) {
@@ -323,11 +335,17 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     () => (priceQ.data && view ? priceKits(view.kits, priceQ.data) : null),
     [priceQ.data, view],
   );
+  const optionalPrices = useMemo(
+    () => (priceQ.data && optional.length ? priceKits(optional, priceQ.data) : null),
+    [priceQ.data, optional],
+  );
   const priceSummary = prices ? summarizePrices(prices) : null;
 
   if (q.isLoading || !units.length || !unit || !rb || !view) return null;
   const def = rb.def;
   const c = unit.config;
+  const pmDone = !!q.data?.completed;
+  const canChangeKits = canWrite && !pmDone;
 
   function pickOption(key: string, val: string) {
     if (!unit) return;
@@ -501,7 +519,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             </>
           ) : null}
         </div>
-        <Button type="button" size="sm" variant="outline" onClick={() => void copy("kits", kitListText(def, c, header, prices ?? undefined))}>
+        <Button type="button" size="sm" variant="outline" onClick={() => void copy("kits", kitListText(def, c, header, prices ?? undefined, unit.addedKits))}>
           {copied === "kits" ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />}
           Copy kit list
         </Button>
@@ -553,7 +571,11 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                       onChange={(e) => toggle(key, e.target.checked)}
                     />
                     <span className="min-w-0 flex-1 text-sm">
-                      <span className="font-mono font-semibold">{k.ev}</span> <span className={cn(on && "line-through opacity-70")}>{k.name}</span>
+                      <span className="font-mono font-semibold">{k.ev}</span>{" "}
+                      <span className={cn(on && "line-through opacity-70")}>{k.name}</span>
+                      {k.added ? (
+                        <span className="ml-2 rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-sky-900 uppercase">Added</span>
+                      ) : null}
                       {k.parts.length > 1 ? (
                         <span className="block text-xs font-medium">Made up of: {k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")}</span>
                       ) : null}
@@ -573,6 +595,19 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                     <span className="font-mono text-base font-semibold whitespace-nowrap">
                       x{k.q}
                       <small className="block text-right text-[10px] font-normal text-muted-foreground">{k.interval} mo</small>
+                      {k.added && canChangeKits ? (
+                        <button
+                          type="button"
+                          className="mt-1 block text-right text-[11px] font-medium underline"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addKit.mutate({ ev: k.ev, on: false });
+                          }}
+                        >
+                          Remove
+                        </button>
+                      ) : null}
                     </span>
                   </label>
                 );
@@ -583,6 +618,39 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
           <p className="text-sm text-muted-foreground">No kits for this setup.</p>
         )}
       </div>
+
+      {optional.length ? (
+        <div className="grid gap-2">
+          <h4 className="text-sm font-semibold">Optional kits</h4>
+          <p className="text-xs text-muted-foreground">
+            From the 36-month list, not on this visit. Adding one puts it on this PM. It is not checked in until you tick it.
+          </p>
+          {optional.map((k) => {
+            const p = optionalPrices?.find((x) => x.ev === k.ev);
+            const text = p ? kitPriceParts(p).join(" · ") : null;
+            return (
+              <div key={k.ev} className="flex items-start gap-3 rounded-md border border-dashed border-border p-2">
+                <span className="min-w-0 flex-1 text-sm break-words">
+                  <span className="font-mono font-semibold">{k.ev}</span> {k.name}
+                  {text ? (
+                    p && p.status === "priced" ? (
+                      <span className="block text-xs text-muted-foreground">{text}</span>
+                    ) : (
+                      <span className="mt-0.5 block w-fit rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">{text}</span>
+                    )
+                  ) : null}
+                </span>
+                <span className="font-mono text-base font-semibold whitespace-nowrap">x{k.q}</span>
+                {canChangeKits ? (
+                  <Button type="button" size="sm" variant="outline" disabled={addKit.isPending} onClick={() => addKit.mutate({ ev: k.ev, on: true })}>
+                    Add
+                  </Button>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div className="grid gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">

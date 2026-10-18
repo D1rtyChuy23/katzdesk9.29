@@ -15,6 +15,8 @@ export type KitLine = {
   /** The "made up of" split; only meaningful when it has more than one entry. */
   parts: { q: number; label: string }[];
   notes: string[];
+  /** True when a tech added this kit from the longer-interval list. It is not part of the visit's own list. */
+  added?: boolean;
 };
 
 export type StepGroup = { module: string; items: { id: string; text: string; ref?: string }[] };
@@ -58,6 +60,101 @@ export function kitList(def: RunbookDefinition, c: RunbookConfig): KitLine[] {
     if (k.note && e.notes.indexOf(k.note) === -1) e.notes.push(k.note);
   }
   return order;
+}
+
+/** The longest interval in the definition ("36" on the e'4). Optional kits are taken from this list. */
+export function longestIntervalId(def: RunbookDefinition): string {
+  return def.intervals.reduce((best, i) => (Number(i.id) > Number(best) ? i.id : best), def.intervals[0]?.id ?? "36");
+}
+
+/**
+ * Kits the longest interval would include that this visit's interval does not.
+ * The quantity is the longest-interval quantity. A visit already at that interval has none.
+ */
+export function optionalKits(def: RunbookDefinition, c: RunbookConfig): KitLine[] {
+  const longest = longestIntervalId(def);
+  if (String(c.pm) === String(longest)) return [];
+  const current = new Set(kitList(def, c).map((k) => k.ev));
+  return kitList(def, { ...c, pm: longest }).filter((k) => !current.has(k.ev));
+}
+
+/** The visit's own kits, then any added kit numbers that are still optional, under their module. */
+export function kitListWithAdded(def: RunbookDefinition, c: RunbookConfig, added: readonly string[]): KitLine[] {
+  const base = kitList(def, c).map((k) => ({ ...k, added: false }));
+  const have = new Set(base.map((k) => k.ev));
+  const optional = optionalKits(def, c);
+  const extras: KitLine[] = [];
+  for (const ev of added) {
+    if (have.has(ev)) continue;
+    const kit = optional.find((k) => k.ev === ev);
+    if (!kit) continue;
+    have.add(kit.ev);
+    extras.push({ ...kit, added: true });
+  }
+  const out: KitLine[] = [...base];
+  for (const extra of extras) {
+    let last = -1;
+    for (let i = 0; i < out.length; i++) if (out[i]?.module === extra.module) last = i;
+    if (last < 0) out.push(extra);
+    else out.splice(last + 1, 0, extra);
+  }
+  return out;
+}
+
+/** Optional kits not yet added. `groups` limits them to one module's runbook groups. */
+export function optionalKitsLeft(def: RunbookDefinition, c: RunbookConfig, added: readonly string[], groups?: readonly string[]): KitLine[] {
+  const have = new Set(added);
+  return optionalKits(def, c).filter((k) => !have.has(k.ev) && (!groups || groups.includes(k.module)));
+}
+
+export function parseAddedKits(v: unknown): string[] {
+  const x = typeof v === "string" ? safeJson(v) : v;
+  if (!Array.isArray(x)) return [];
+  const out: string[] = [];
+  for (const n of x) if (typeof n === "string" && /^[A-Za-z0-9._-]{1,40}$/.test(n) && !out.includes(n)) out.push(n);
+  return out;
+}
+
+function safeJson(v: string): unknown {
+  try {
+    return JSON.parse(v);
+  } catch {
+    return [];
+  }
+}
+
+export type AddedChange = { ok: true; added: string[]; dropTick: boolean; changed: boolean } | { ok: false; reason: string };
+
+/**
+ * Add or remove one kit number. Only a number that is optional right now is accepted.
+ * `groups`, when set, limits the change to that module. Removing drops the kit's tick.
+ */
+export function changeAddedKits(
+  def: RunbookDefinition,
+  c: RunbookConfig,
+  current: readonly string[],
+  ev: string,
+  on: boolean,
+  groups?: readonly string[],
+): AddedChange {
+  const still = optionalKits(def, c);
+  const stillIds = new Set(still.map((k) => k.ev));
+  const allowed = groups ? still.filter((k) => groups.includes(k.module)) : still;
+  const allowedIds = new Set(allowed.map((k) => k.ev));
+  const clean = current.filter((id) => stillIds.has(id));
+  if (on) {
+    if (!allowedIds.has(ev)) return { ok: false, reason: "That kit is not optional for this PM." };
+    if (clean.includes(ev)) return { ok: true, added: clean, dropTick: false, changed: clean.length !== current.length };
+    return { ok: true, added: [...clean, ev], dropTick: false, changed: true };
+  }
+  if (!current.includes(ev) || (groups && !allowedIds.has(ev))) return { ok: false, reason: "That kit is not optional for this PM." };
+  const added = clean.filter((id) => id !== ev);
+  return { ok: true, added, dropTick: true, changed: true };
+}
+
+/** The tick keys left after an added kit is removed. Adding a kit does not tick it. */
+export function ticksAfterRemovingKit(keys: readonly string[], ev: string): string[] {
+  return keys.filter((k) => k !== `kit:${ev}`);
 }
 
 export function stepList(def: RunbookDefinition, c: RunbookConfig): StepGroup[] {
@@ -230,12 +327,17 @@ export function moduleRunbookGroups(def: RunbookDefinition, moduleType: string |
 }
 
 /** Kits and steps for one module type. Null when the definition has no group for it. */
-export function moduleServiceView(def: RunbookDefinition, c: RunbookConfig, moduleType: string | null | undefined): { groups: string[]; kits: KitLine[]; steps: StepGroup[] } | null {
+export function moduleServiceView(
+  def: RunbookDefinition,
+  c: RunbookConfig,
+  moduleType: string | null | undefined,
+  added?: readonly string[],
+): { groups: string[]; kits: KitLine[]; steps: StepGroup[] } | null {
   const groups = moduleRunbookGroups(def, moduleType);
   if (!groups) return null;
   return {
     groups,
-    kits: kitList(def, c).filter((k) => groups.includes(k.module)),
+    kits: kitListWithAdded(def, c, added ?? []).filter((k) => groups.includes(k.module)),
     steps: stepList(def, c).filter((g) => groups.includes(g.module)),
   };
 }
@@ -333,7 +435,8 @@ export function moduleKitListText(title: string, intervalLabel: string, kits: Ki
   for (const k of kits) {
     const p = prices?.find((x) => x.ev === k.ev);
     const price = p ? `  [${kitPriceParts(p).join(", ")}]` : "";
-    out.push(`${k.ev} x${k.q}  ${k.name}${price}`);
+    const mark = k.added ? " (added)" : "";
+    out.push(`${k.ev} x${k.q}  ${k.name}${mark}${price}`);
   }
   if (!kits.length) out.push("No kits for this setup.");
   else {
@@ -389,10 +492,10 @@ export function stepIds(groups: StepGroup[]): string[] {
 }
 
 /** Plain-text kit list for pasting into an order email or chat. Short lines, no tables. */
-export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: string, prices?: KitPrice[]): string {
+export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: string, prices?: KitPrice[], added?: readonly string[]): string {
   const model = def.models.find((m) => m.id === c.model) ?? def.models[0];
   const interval = def.intervals.find((i) => i.id === c.pm);
-  const lines = kitList(def, c);
+  const lines = kitListWithAdded(def, c, added ?? []);
   const out: string[] = [];
   if (header) out.push(header);
   out.push(`${model.label}, ${interval?.label ?? `${c.pm}-month PM`}`);
@@ -411,7 +514,8 @@ export function kitListText(def: RunbookDefinition, c: RunbookConfig, header?: s
     const split = k.parts.length > 1 ? ` (${k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")})` : "";
     const p = prices?.find((x) => x.ev === k.ev);
     const price = p ? `  [${kitPriceParts(p).join(", ")}]` : "";
-    out.push(`${k.ev} x${k.q}  ${k.name}${split}${price}`);
+    const mark = k.added ? " (added)" : "";
+    out.push(`${k.ev} x${k.q}  ${k.name}${split}${mark}${price}`);
   }
   if (!lines.length) out.push("No kits for this setup.");
   else {

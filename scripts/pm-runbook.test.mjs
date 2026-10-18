@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
+import { kitKey, priceKits, summarizePrices, uncountedNote } from "../src/lib/ops/pm-runbook-prices.ts";
 import {
   canEditRunbookDefinitions,
   canWriteRunbook,
@@ -9,8 +10,12 @@ import {
   intervalFromStyle,
   nextFromHistory,
   recommendInterval,
+  changeAddedKits,
   kitList,
   kitListText,
+  kitListWithAdded,
+  optionalKits,
+  ticksAfterRemovingKit,
   isPmServiceRecord,
   matchE4XWide,
   moduleAssignmentBlock,
@@ -370,4 +375,35 @@ test("a completed PM writes one service record and a later edit is not a second 
   assert.equal(isPmServiceRecord("pm service", text, 123), false);
   assert.equal(isPmServiceRecord("options changed", text, 12), false);
   assert.equal(pmServiceRecord({ pmId: 3, modelLabel: "E'4S X-Wide", intervalLabel: "36-month PM", options: [], kits: [], steps: [] }), "PM #3 completed. E'4S X-Wide, 36-month PM.\nOptions: none.\nKits: none.\nSteps done: none.");
+});
+
+test("optional kits are the 36-month kits missing from this visit", () => {
+  const twelve = cfg({ model: "4s", pm: "12", amer: "yes" });
+  const opt = optionalKits(def, twelve);
+  const amer = opt.find((k) => k.ev === "EV109590");
+  assert.ok(amer);
+  assert.equal(amer.q, 2);
+  assert.equal(optionalKits(def, cfg({ model: "4s", pm: "36", amer: "yes" })).length, 0);
+  const added = kitListWithAdded(def, twelve, ["EV109590"]);
+  assert.equal(added.find((k) => k.ev === "EV109590")?.added, true);
+  assert.ok(added.some((k) => k.ev === "EV117077" && !k.added));
+  const priced = priceKits(added, {
+    [kitKey("EV109590")]: { sku: "EVER109590", name: null, description: null, mfrPart: null, rate: 5, active: true, hidden: false },
+  });
+  const summary = summarizePrices(priced);
+  assert.equal(summary.total, 10);
+  assert.match(uncountedNote(summary), /of \d+ kits not counted/);
+  const text = kitListText(def, twelve, undefined, priced, ["EV109590"]);
+  assert.match(text, /Hydraulic module\nEV109590 x2 {2}Hydraulic add-on, adjustable Americano \(added\)/);
+  assert.match(text, /Total at sell price: \$10\.00/);
+  assert.equal(changeAddedKits(def, twelve, [], "NOPE", true).ok, false);
+  assert.equal(changeAddedKits(def, twelve, [], "EV117077", true).ok, false);
+  const on = changeAddedKits(def, twelve, [], "EV109590", true);
+  assert.equal(on.ok && on.dropTick, false);
+  const off = changeAddedKits(def, twelve, ["EV109590"], "EV109590", false);
+  assert.deepEqual(off.ok && off.added, []);
+  assert.equal(off.ok && off.dropTick, true);
+  assert.deepEqual(ticksAfterRemovingKit(["kit:EV109590", "step:hyd-kit"], "EV109590"), ["step:hyd-kit"]);
+  const brewOnly = changeAddedKits(def, twelve, [], "EV109590", true, ["Brew module"]);
+  assert.equal(brewOnly.ok, false);
 });

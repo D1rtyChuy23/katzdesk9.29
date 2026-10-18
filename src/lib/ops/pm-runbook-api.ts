@@ -12,11 +12,14 @@ import { RUNBOOKS, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
   canWriteRunbook,
+  changeAddedKits,
   checkSerialKey,
   intervalFromStyle,
-  kitList,
+  kitListWithAdded,
   nextFromHistory,
   normalizeConfig,
+  optionalKits,
+  parseAddedKits,
   PM_SERVICE_ACTION,
   pmServicePrefix,
   pmServiceRecord,
@@ -46,6 +49,8 @@ export type RunbookUnit = {
   config: RunbookConfig;
   /** Every ticked key with who and when. */
   checks: Record<string, { by: string | null; at: string }>;
+  /** Kit numbers added from the longer interval. Clearing ticks does not remove these. */
+  addedKits: string[];
   history: { who: string | null; at: string; detail: string }[];
   /** Install date at this location, from the account unit. */
   installDate: string | null;
@@ -76,6 +81,8 @@ export type PmRunbookData = {
   accountUnits: RunbookAccountUnit[];
   canWrite: boolean;
   canEditDefinitions: boolean;
+  /** True when the PM is already completed, so added kits stay as they are. */
+  completed: boolean;
 };
 
 async function ready(): Promise<Sql> {
@@ -118,8 +125,8 @@ export async function recordCompletedRunbook(
   const me = await who(sql, userId);
   const units = planned.filter((u) => u.optionsKey && runbookById(u.runbookId));
   if (!units.length) return;
-  const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown }>(
-    "select unit_key, model, interval_mo, options from pm_runbook_units where pm_job_id = $1",
+  const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown; added_kits: unknown }>(
+    "select unit_key, model, interval_mo, options, added_kits from pm_runbook_units where pm_job_id = $1",
     [pmId],
   );
   const checks = await sql.query<{ unit_key: string; key: string }>(
@@ -151,9 +158,9 @@ export async function recordCompletedRunbook(
         label: o.label,
         value: o.choices.find((c) => c.val === config[o.key])?.label ?? String(config[o.key] ?? ""),
       })),
-      kits: kitList(rb.def, config)
+      kits: kitListWithAdded(rb.def, config, parseAddedKits(s?.added_kits))
         .filter((k) => ticked.has(`kit:${k.ev}`))
-        .map((k) => ({ ev: k.ev, q: k.q, name: k.name })),
+        .map((k) => ({ ev: k.ev, q: k.q, name: k.added ? `${k.name} (added)` : k.name })),
       steps: stepList(rb.def, config)
         .flatMap((g) => g.items)
         .filter((item) => ticked.has(`step:${item.id}`))
@@ -240,10 +247,10 @@ export const getPmRunbook = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<PmRunbookData> => {
     const sql = await ready();
     const me = await who(sql, context.userId);
-    const empty = { units: [], accountUnits: [], canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions };
+    const empty = { units: [], accountUnits: [], canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions, completed: false };
     const pm = (
-      await sql.query<{ customer: string; equipment: string | null; style: string | null }>(
-        "select customer, equipment, style from pm_jobs where id = $1",
+      await sql.query<{ customer: string; equipment: string | null; style: string | null; status: string; completed_at: string | null }>(
+        "select customer, equipment, style, status, completed_at::text as completed_at from pm_jobs where id = $1",
         [data.pmId],
       )
     )[0];
@@ -298,8 +305,8 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       );
     }
 
-    const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown }>(
-      "select unit_key, model, interval_mo, options from pm_runbook_units where pm_job_id = $1",
+    const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown; added_kits: unknown }>(
+      "select unit_key, model, interval_mo, options, added_kits from pm_runbook_units where pm_job_id = $1",
       [data.pmId],
     );
     const checks = await sql.query<{ unit_key: string; key: string; done_by: string | null; done_at: string }>(
@@ -420,6 +427,12 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       return [...out.values()].sort((a, b) => (a.completedAt ?? "9999").localeCompare(b.completedAt ?? "9999") || a.pmId - b.pmId);
     };
 
+    const kitLog = await sql.query<{ actor_name: string | null; detail: string | null; created_at: string }>(
+      `select actor_name, detail, created_at from activity
+        where entity_type = 'pm' and entity_id = $1 and action in ('kit added', 'kit removed')
+        order by created_at desc, id desc limit 40`,
+      [data.pmId],
+    );
     const units: RunbookUnit[] = planned.map((u) => {
       const rb = runbookById(u.runbookId)!;
       const s = saved.find((x) => x.unit_key === u.unitKey);
@@ -436,6 +449,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       });
       const ticks: RunbookUnit["checks"] = {};
       for (const c of checks) if (c.unit_key === u.unitKey) ticks[c.key] = { by: c.done_by, at: String(c.done_at) };
+      const kitNotes = kitLog.filter((h) => String(h.detail ?? "").startsWith(`${u.unitKey}: `));
       return {
         unitKey: u.unitKey,
         pieceKey: u.pieceKey,
@@ -448,6 +462,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         runbookId: u.runbookId,
         config,
         checks: ticks,
+        addedKits: parseAddedKits(s?.added_kits),
         installDate: u.installDate,
         recommended: rec
           ? { ...rec, label: rb.def.intervals.find((i) => i.id === rec.id)?.label ?? `${rec.id}-month PM` }
@@ -464,15 +479,19 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         earlier: trail
           .filter((t) => (u.serialKey && t.serial_key === u.serialKey) || t.unit_key === u.unitKey)
           .map((t) => ({ pmId: t.pm_job_id, status: t.status, completedAt: t.completed_at, kits: t.kits, steps: t.steps })),
-        history: optRow
-          ? hist
-              .filter((h) => h.entity_id === optRow.id)
-              .slice(0, 20)
-              .map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: h.detail ?? "" }))
-          : [],
+        history: [
+          ...kitNotes.map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: String(h.detail ?? "").slice(u.unitKey.length + 2) })),
+          ...(optRow
+            ? hist
+                .filter((h) => h.entity_id === optRow.id)
+                .slice(0, 20)
+                .map((h) => ({ who: h.actor_name, at: String(h.created_at), detail: h.detail ?? "" }))
+            : []),
+        ].slice(0, 20),
       };
     });
-    return { units, accountUnits, canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions };
+    const completed = pm.status === "Completed" || !!pm.completed_at;
+    return { units, accountUnits, canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions, completed };
   });
 
 const logAssetInput = z.object({
@@ -753,6 +772,86 @@ export const clearRunbookChecks = createServerFn({ method: "POST" })
     const sql = await ready();
     await requireWriter(sql, context.userId);
     await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2", [data.pmId, data.unitKey]);
+    return { ok: true };
+  });
+
+/** Store the added-kit list on the PM unit. Clearing ticks does not touch this column. */
+export async function writeUnitAddedKits(
+  sql: Sql,
+  pmId: number,
+  unitKey: string,
+  runbookId: string,
+  optionsKey: string | null | undefined,
+  added: readonly string[],
+  actor: string,
+) {
+  await sql.query(
+    `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, added_kits, updated_by, serial_key)
+     values ($1, $2, $3, $4::jsonb, $5, $6)
+     on conflict (pm_job_id, unit_key) do update
+       set added_kits = excluded.added_kits, updated_by = excluded.updated_by,
+           serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key), updated_at = now()`,
+    [pmId, unitKey, runbookId, JSON.stringify([...added]), actor, serialOf(optionsKey)],
+  );
+}
+
+export async function pmIsCompleted(sql: Sql, pmId: number): Promise<boolean> {
+  const row = (await sql.query<{ status: string; completed_at: string | null }>("select status, completed_at::text as completed_at from pm_jobs where id = $1", [pmId]))[0];
+  if (!row) throw new Error("PM not found.");
+  return row.status === "Completed" || !!row.completed_at;
+}
+
+const addedInput = unitInput.extend({
+  runbookId: z.string(),
+  optionsKey: z.string().max(200).nullable().optional(),
+  ev: z.string().regex(/^[A-Za-z0-9._-]{1,40}$/),
+  on: z.boolean(),
+});
+
+/** Add or remove one optional kit on this PM unit. Adding does not tick it. Removing clears its tick. */
+export const setRunbookAddedKit = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof addedInput>) => addedInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    const me = await requireWriter(sql, context.userId);
+    if (await pmIsCompleted(sql, data.pmId)) throw new Error("This PM is completed.");
+    const rb = runbookById(data.runbookId);
+    if (!rb) throw new Error("Unknown runbook.");
+    const pm = (
+      await sql.query<{ customer: string; equipment: string | null; style: string | null }>("select customer, equipment, style from pm_jobs where id = $1", [data.pmId])
+    )[0];
+    if (!pm) throw new Error("PM not found.");
+    const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
+    const unit = plan.planned.find((u) => u.unitKey === data.unitKey && u.runbookId === data.runbookId);
+    if (!unit) throw new Error("This unit is not on this PM.");
+    const saved = (
+      await sql.query<{ model: string | null; interval_mo: string | null; options: unknown; added_kits: unknown }>(
+        "select model, interval_mo, options, added_kits from pm_runbook_units where pm_job_id = $1 and unit_key = $2",
+        [data.pmId, data.unitKey],
+      )
+    )[0];
+    const opt = unit.optionsKey
+      ? (await sql.query<{ options: unknown }>("select options from unit_runbook_options where unit_key = $1", [unit.optionsKey]))[0]
+      : null;
+    const config = normalizeConfig(rb.def, {
+      ...asJson(opt?.options ?? saved?.options),
+      model: saved?.model ?? unit.model ?? undefined,
+      pm: saved?.interval_mo ?? intervalFromStyle(rb.def, pm.style) ?? undefined,
+    });
+    const next = changeAddedKits(rb.def, config, parseAddedKits(saved?.added_kits), data.ev, data.on);
+    if (!next.ok) throw new Error(next.reason);
+    if (next.changed) {
+      await writeUnitAddedKits(sql, data.pmId, data.unitKey, data.runbookId, unit.optionsKey, next.added, me.name);
+      const name = optionalKits(rb.def, config).find((k) => k.ev === data.ev)?.name ?? data.ev;
+      await sql.query(
+        "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('pm', $1, $2, $3, $4)",
+        [data.pmId, me.name, data.on ? "kit added" : "kit removed", `${data.unitKey}: ${data.ev} ${name}`],
+      );
+    }
+    if (next.dropTick) {
+      await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [data.pmId, data.unitKey, `kit:${data.ev}`]);
+    }
     return { ok: true };
   });
 

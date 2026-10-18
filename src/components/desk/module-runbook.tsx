@@ -21,10 +21,11 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
     queryFn: () => getModuleRunbook({ data: scope }),
   });
   const data = q.data;
+  const evs = [...(data?.kits ?? []), ...(data?.optional ?? [])].map((k) => k.ev);
   const prices = useQuery({
-    queryKey: ["pm-runbook-prices", (data?.kits ?? []).map((k) => k.ev).join(",")],
-    queryFn: () => getKitPrices({ data: { evs: (data?.kits ?? []).map((k) => k.ev) } }),
-    enabled: !!data?.kits.length,
+    queryKey: ["pm-runbook-prices", evs.join(",")],
+    queryFn: () => getKitPrices({ data: { evs } }),
+    enabled: evs.length > 0,
   });
   const priced = data ? priceKits(data.kits, prices.data ?? {}) : [];
   const summary = priced.length ? summarizePrices(priced) : null;
@@ -51,7 +52,7 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Loading the runbook…</p>;
   if (q.isError) return <p className="text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not load the runbook."}</p>;
   if (!data?.covered) return <p className="text-sm text-muted-foreground">{data?.notice || "No runbook for this module type yet."}</p>;
-  const locked = data.completed || !data.canWrite || save.isPending || done.isPending || busy;
+  const locked = data.completed || data.pmCompleted || !data.canWrite || save.isPending || done.isPending || busy;
   const text = moduleKitListText(data.title ?? "Module", data.intervals.find((i) => i.id === data.interval)?.label ?? "", data.kits, priced);
   return (
     <div className="grid gap-4" data-testid="module-runbook" data-context={context}>
@@ -151,15 +152,59 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
               />
               <span className="min-w-0 flex-1 text-sm break-words">
                 <span className="font-mono font-semibold">{k.ev}</span> {k.name}
+                {k.added ? (
+                  <span className="ml-2 rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-sky-900 uppercase">Added</span>
+                ) : null}
                 {p ? <span className="block text-xs text-muted-foreground">{kitPriceParts(p).join(" · ")}</span> : null}
                 {on && data.checks[key]?.at ? <span className="block text-xs text-muted-foreground">Checked in: {data.checks[key].who ?? ""} {stamp(data.checks[key].at)}</span> : null}
               </span>
-              <span className="font-mono text-sm font-semibold whitespace-nowrap">x{k.q}</span>
+              <span className="font-mono text-sm font-semibold whitespace-nowrap">
+                x{k.q}
+                {k.added && !locked ? (
+                  <button
+                    type="button"
+                    className="mt-1 block text-right text-[11px] font-medium underline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      save.mutate({ addEv: k.ev, addOn: false });
+                    }}
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </span>
             </label>
           );
         })}
         {!data.kits.length ? <p className="text-sm text-muted-foreground">No kits for this setup.</p> : null}
       </div>
+      {data.optional.length ? (
+        <div className="grid gap-2">
+          <h4 className="text-sm font-semibold">Optional kits</h4>
+          <p className="text-xs text-muted-foreground">
+            From the 36-month list for this module. Adding one puts it on this list. It is not checked in until you tick it.
+          </p>
+          {data.optional.map((k) => {
+            const p = priced.find((x) => x.ev === k.ev) ?? priceKits([k], prices.data ?? {})[0];
+            const text = p ? kitPriceParts(p).join(" · ") : null;
+            return (
+              <div key={k.ev} className="flex items-start gap-3 rounded-md border border-dashed border-border p-2">
+                <span className="min-w-0 flex-1 text-sm break-words">
+                  <span className="font-mono font-semibold">{k.ev}</span> {k.name}
+                  {text ? <span className="block text-xs text-muted-foreground">{text}</span> : null}
+                </span>
+                <span className="font-mono text-sm font-semibold whitespace-nowrap">x{k.q}</span>
+                {!locked ? (
+                  <Button type="button" size="sm" variant="outline" disabled={save.isPending} onClick={() => save.mutate({ addEv: k.ev, addOn: true })}>
+                    Add
+                  </Button>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
       <div className="grid gap-2">
         <h4 className="text-sm font-semibold">Service steps</h4>
         {data.steps.flatMap((g) => g.items).map((s) => {
