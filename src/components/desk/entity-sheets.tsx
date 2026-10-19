@@ -37,7 +37,7 @@ import {
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { absorbWarehouseSerials } from "@/lib/ops/warehouse-serial";
+import { appendServerMachines } from "@/lib/ops/warehouse-serial";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -370,12 +370,18 @@ export function InstallSheet({
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
   const serialSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}`).join("\n");
+  const machineSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}\t${m.powerVoltage}`).join("\n");
   useEffect(() => {
     if (!row || hydratedId !== row.id) return;
-    setSpecs((cur) => absorbWarehouseSerials(cur, row.machines ?? []));
-    // A warehouse assignment writes the serial on the server. Pull it into the open row.
+    const server = row.machines ?? [];
+    setSpecs((cur) => appendServerMachines(cur, server));
+    setEquipPieces((pieces) => {
+      const names = server.map((m) => m.equipment).filter(Boolean);
+      return names.length > pieces.length ? names : pieces;
+    });
+    // A warehouse assignment writes the serial on the server. Pre-inspection can add a machine. Pull both in.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row?.id, hydratedId, serialSig]);
+  }, [row?.id, hydratedId, serialSig, machineSig]);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {

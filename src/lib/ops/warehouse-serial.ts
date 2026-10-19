@@ -86,3 +86,33 @@ export function absorbWarehouseSerials<T extends SerialMachine>(local: T[], serv
   }
   return next;
 }
+
+/**
+ * Keep the rows already on screen, and append a machine the server added that this window does not have yet.
+ * A blank serial counts: pre-inspection can add a model before anyone types a serial.
+ */
+export function appendServerMachines<T extends SerialMachine>(local: T[], server: T[]): T[] {
+  const next = absorbWarehouseSerials(local, server);
+  const used = new Set<number>();
+  for (const row of next) {
+    const idx = server.findIndex((s, i) => {
+      if (used.has(i)) return false;
+      if (!sameWarehouseModel(row.equipment, s.equipment)) return false;
+      const rs = String(row.serial ?? "").trim();
+      const ss = String(s.serial ?? "").trim();
+      const rk = serialKey(rs);
+      const sk = serialKey(ss);
+      if (rk && sk) return rk === sk;
+      return rs === ss;
+    });
+    if (idx >= 0) used.add(idx);
+  }
+  for (let i = 0; i < server.length; i++) {
+    if (used.has(i)) continue;
+    const s = server[i]!;
+    const equipment = String(s.equipment ?? "").trim();
+    if (!equipment) continue;
+    next.push({ ...s, equipment, serial: String(s.serial ?? "").trim(), powerVoltage: String(s.powerVoltage ?? "").trim() });
+  }
+  return next;
+}
