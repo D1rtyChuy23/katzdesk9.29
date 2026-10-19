@@ -590,6 +590,55 @@ test("history for a unit is newest first, and one machine does not show the othe
   assert.deepEqual(unitHistory(B, busy, []).map((l) => l.detail).sort(), ["Added B1", "Added B2", "Added B3"]);
 });
 
+test("a kit note made before a twin is logged stays on that machine", () => {
+  const text = "e'4m X-Wide\ne'4m X-Wide";
+  const before = planUnits(text, [], matcher);
+  const note = addedKitDetail("Added EV109586 Hydraulic module Standard (36-month kit)", before[0].unitKey, before[0].pieceKey);
+  const after = planUnits(text, [{ id: 5, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: "SN5" }], matcher);
+  assert.equal(after[0].unitKey, "acct:5");
+  const rows = [{ who: "Chuy", action: "kit added", detail: note, at: "2026-10-01T00:00:00Z" }];
+  assert.equal(unitHistory(after[0], rows, []).length, 1);
+  assert.equal(unitHistory(after[1], rows, []).length, 0);
+  assert.equal(kitHistoryMatches({ unitKey: "acct:5", pieceKey: "piece:x#1" }, addedKitDetail("Added EV109586", "piece:x#1", "piece:x#1")), true);
+  assert.equal(kitHistoryMatches({ unitKey: before[0].unitKey, pieceKey: after[1].pieceKey }, note), false);
+});
+
+test("no step names two kit numbers that are optional on some visit", () => {
+  const dir = new URL("../src/lib/ops/runbooks/", import.meta.url);
+  const defs = readdirSync(dir)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => parseRunbookDefinition(JSON.parse(readFileSync(new URL(name, dir), "utf8"))));
+  const configsOf = (rb) => {
+    const axes = [
+      ["model", rb.models.map((m) => m.id)],
+      ["pm", rb.intervals.map((i) => i.id)],
+      ...rb.options.map((o) => [o.key, o.choices.map((c) => c.val)]),
+    ];
+    const out = [];
+    const walk = (i, cur) => {
+      if (i === axes.length) {
+        out.push(cur);
+        return;
+      }
+      const [key, vals] = axes[i];
+      for (const v of vals) walk(i + 1, { ...cur, [key]: v });
+    };
+    walk(0, {});
+    return out;
+  };
+  for (const rb of defs) {
+    const optional = new Set();
+    for (const config of configsOf(rb)) for (const kit of optionalKits(rb, config)) optional.add(kit.ev);
+    for (const group of rb.steps) {
+      for (const step of group.items) {
+        const blob = `${step.text} ${step.ref ?? ""}`;
+        const named = [...optional].filter((ev) => blob.includes(ev));
+        assert.ok(named.length <= 1, `${rb.id} ${step.id} names ${named.join(", ")}`);
+      }
+    }
+  }
+});
+
 test("every kit number can be stored and ticked, including a slash", () => {
   const dir = new URL("../src/lib/ops/runbooks/", import.meta.url);
   const defs = readdirSync(dir)

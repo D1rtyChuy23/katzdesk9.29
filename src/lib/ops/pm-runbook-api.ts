@@ -353,6 +353,13 @@ export async function loadPmRunbookPlan(
 
 export { pmCompletionRefusal };
 
+/** Option notes for the units on this PM. No global cap: each unit keeps its own rows, and unitHistory shows 20. */
+export function optionHistorySql(): string {
+  return `select entity_id, actor_name, detail, created_at from activity
+    where entity_type = 'unit_runbook' and entity_id = any($1::int[])
+    order by created_at desc, id desc`;
+}
+
 const unitInput = z.object({
   pmId: z.number().int().positive(),
   unitKey: z.string().min(1).max(300),
@@ -459,10 +466,9 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         )
       : [];
     const ids = optRows.map((r) => r.id);
-      const hist = ids.length
+    const hist = ids.length
       ? await sql.query<{ entity_id: number; actor_name: string | null; detail: string | null; created_at: Date }>(
-          `select entity_id, actor_name, detail, created_at from activity
-            where entity_type = 'unit_runbook' and entity_id = any($1::int[]) order by created_at desc, id desc limit 100`,
+          optionHistorySql(),
           [ids],
         )
       : [];

@@ -220,7 +220,7 @@ export type UnitHistoryLine = { who: string | null; at: string; detail: string }
 export function kitHistoryMatches(unit: { unitKey: string; pieceKey: string }, detail: string | null | undefined): boolean {
   const text = String(detail ?? "");
   const stored = addedKitStoredKeys(text);
-  if (stored.length) return stored[0] === unit.unitKey || stored[1] === unit.pieceKey;
+  if (stored.length) return (unit.unitKey.startsWith("acct:") && stored[0] === unit.unitKey) || stored[1] === unit.pieceKey;
   return text.startsWith(`${unit.unitKey}: `);
 }
 

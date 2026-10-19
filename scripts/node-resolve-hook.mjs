@@ -15,7 +15,7 @@ function fileFor(base) {
 /** Lets a node --test file import the app's `@/` and extensionless TypeScript. */
 export async function resolve(specifier, context, nextResolve) {
   let base = null;
-  if (specifier.startsWith("@/")) base = new URL("../src/" + specifier.slice(2), import.meta.url).pathname;
+  if (specifier.startsWith("@/")) base = fileURLToPath(new URL("../src/" + specifier.slice(2), import.meta.url));
   else if ((specifier.startsWith("./") || specifier.startsWith("../")) && context.parentURL) base = fileURLToPath(new URL(specifier, context.parentURL));
   if (base) {
     const hit = fileFor(base);

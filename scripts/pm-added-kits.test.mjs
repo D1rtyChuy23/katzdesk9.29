@@ -4,7 +4,7 @@ import { register } from "node:module";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
-import { benchAddKitSql, benchRemoveKitSql, defaultConfig, pmAddKitSql, pmRemoveKitSql, removedKitCheckKeys } from "../src/lib/ops/pm-runbook.ts";
+import { benchAddKitSql, benchRemoveKitSql, defaultConfig, pmAddKitSql, pmRemoveKitSql, removedKitCheckKeys, unitHistory } from "../src/lib/ops/pm-runbook.ts";
 
 const def = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/eversys-e4-xwide.json", import.meta.url), "utf8")));
 const twelve = { ...defaultConfig(def), model: "4s", pm: "12" };
@@ -101,7 +101,7 @@ test("a bench add and remove is one statement, and a second remove writes nothin
 });
 
 test("a completed La Marzocco PM stores the install-date interval and leaves a saved one", async () => {
-  process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
+  process.env.DATABASE_URL = "postgres://127.0.0.1:9/unused";
   await register("./node-resolve-hook.mjs", import.meta.url);
   const { recordCompletedRunbook } = await import("../src/lib/ops/pm-runbook-api.ts");
   const pg = new PGlite();
@@ -137,7 +137,7 @@ test("a completed La Marzocco PM stores the install-date interval and leaves a s
 });
 
 test("a completed PM records the same interval the sheets use", async () => {
-  process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
+  process.env.DATABASE_URL = "postgres://127.0.0.1:9/unused";
   await register("./node-resolve-hook.mjs", import.meta.url);
   const { recordCompletedRunbook } = await import("../src/lib/ops/pm-runbook-api.ts");
   const pg = new PGlite();
@@ -180,6 +180,37 @@ test("a completed PM records the same interval the sheets use", async () => {
     assert.match(text, /2 x EV109586/);
     assert.match(text, /Fit EV109586 on each hydraulic module\./);
     assert.doesNotMatch(text, /12-month PM/);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("option history on one unit is not cut off by a newer unit", async () => {
+  process.env.DATABASE_URL = "postgres://127.0.0.1:9/unused";
+  await register("./node-resolve-hook.mjs", import.meta.url);
+  const { optionHistorySql } = await import("../src/lib/ops/pm-runbook-api.ts");
+  const pg = new PGlite();
+  try {
+    await applyMigrations(pg);
+    const idA = (await pg.query("insert into unit_runbook_options (unit_key, serial_key, runbook_id) values ('sn-a', 'sn-a', 'eversys-e4-xwide') returning id")).rows[0].id;
+    const idB = (await pg.query("insert into unit_runbook_options (unit_key, serial_key, runbook_id) values ('sn-b', 'sn-b', 'eversys-e4-xwide') returning id")).rows[0].id;
+    await pg.query(
+      `insert into activity (entity_type, entity_id, actor_name, action, detail, created_at)
+       values ('unit_runbook', $1, 'Chuy', 'options changed', 'older on B', '2020-01-01')`,
+      [idB],
+    );
+    await pg.query(
+      `insert into activity (entity_type, entity_id, actor_name, action, detail, created_at)
+       select 'unit_runbook', $1, 'Chuy', 'options changed', 'A ' || g, timestamptz '2026-01-01' + g * interval '1 minute'
+         from generate_series(1, 100) g`,
+      [idA],
+    );
+    const rows = await pg.query(optionHistorySql(), [[idA, idB]]);
+    const forB = rows.rows.filter((r) => Number(r.entity_id) === Number(idB));
+    assert.equal(forB.length, 1);
+    const lines = unitHistory({ unitKey: "acct:2", pieceKey: "piece:b#1" }, [], forB.map((r) => ({ who: r.actor_name, at: r.created_at, detail: r.detail })));
+    assert.equal(lines.length, 1);
+    assert.match(lines[0].detail, /older on B/);
   } finally {
     await pg.close();
   }
