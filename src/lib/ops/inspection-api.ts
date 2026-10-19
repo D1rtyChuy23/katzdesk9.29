@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
-import { listedEquipment } from "@/lib/ops/equipment";
-import { parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
+import { listedEquipment, matchModel } from "@/lib/ops/equipment";
+import { parseMachinesJson, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -986,36 +986,72 @@ const addEquipInput = z.object({
   electrical: z.string().nullable().optional(),
 });
 
+/**
+ * Add a machine to this install the same way the Equipment picker does: append it to the install's machine list,
+ * then sync pre-inspection from that list. A unit written only onto the visit was dropped — a second machine of
+ * the same model with no serial was deleted as a copy, and any other model was pruned the next time the card saved.
+ */
+export async function addMachineOntoInstall(
+  sql: Sql,
+  data: z.infer<typeof addEquipInput>,
+  actor: string,
+): Promise<InspectionView> {
+  const install = await sql.query<{
+    id: number;
+    customer: string;
+    equipment: string | null;
+    serial: string | null;
+    power_voltage: string | null;
+    machines: string | null;
+  }>(
+    "select id, customer, equipment, serial, power_voltage, machines from installs where id = $1 and archived = false",
+    [data.installId],
+  );
+  const row = install[0];
+  if (!row) throw new Error("Install not found");
+  const model = data.model.trim();
+  if (!model) throw new Error("Pick a model");
+  const serial = (data.serial ?? "").trim();
+  const electrical = (data.electrical ?? "").trim();
+  const key = serialKey(serial);
+  const catalog = await catalogNames(sql);
+  const stored = parseMachinesJson(text(row.machines) || null);
+  const current: MachineSpec[] = stored.length
+    ? stored
+    : piecesFrom(row, catalog).map((p) => ({
+        equipment: p.equipment,
+        serial: p.serial,
+        powerVoltage: p.powerVoltage,
+      }));
+  if (key && current.some((m) => serialKey(m.serial) === key)) {
+    throw new Error("That serial is already on this visit.");
+  }
+  const equipment = matchModel(model, catalog);
+  const packed = serializeMachines([...current, { equipment, serial, powerVoltage: electrical }]);
+  await sql.query(
+    "update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1",
+    [data.installId, packed.equipment, packed.machines, packed.serial, packed.powerVoltage],
+  );
+  await syncInstallUnits(sql, data.installId, { prune: true });
+  const view = await readInspection(sql, data.installId);
+  if (!view) throw new Error("Install not found");
+  const expected = current.filter((m) => m.equipment.trim()).length + 1;
+  if (view.machineCount < expected) throw new Error("Could not add equipment");
+  await sql
+    .query(
+      "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)",
+      [data.installId, actor, `added ${equipment}${serial ? ` (SN ${serial})` : ""} to the install`],
+    )
+    .catch(() => undefined);
+  return view;
+}
+
 export const addInspectionEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof addEquipInput>) => addEquipInput.parse(d))
-  .handler(async ({ data }): Promise<InspectionView> => {
+  .handler(async ({ data, context }): Promise<InspectionView> => {
     const sql = await ready();
-    const install = await requireInstall(sql, data.installId);
-    await ensureUnits(sql, data.installId);
-    const key = serialKey(data.serial);
-    if (key) {
-      const existing = await sql.query<{ id: number }>(
-        `select id from account_equipment where lower(customer) = lower($1) and serial_key = $2`,
-        [install.customer, key],
-      );
-      if (existing[0]) {
-        const linked = await sql.query(
-          "select equipment_id from install_inspection_units where install_id = $1 and equipment_id = $2",
-          [data.installId, existing[0].id],
-        );
-        if (linked[0]) throw new Error("That serial is already on this visit.");
-        await linkUnit(sql, data.installId, existing[0].id);
-        const view = await readInspection(sql, data.installId);
-        if (!view) throw new Error("Install not found");
-        return view;
-      }
-    }
-    const id = await insertEquipment(sql, install.customer, data.model, data.serial ?? null, data.electrical ?? null);
-    await linkUnit(sql, data.installId, id);
-    const view = await readInspection(sql, data.installId);
-    if (!view) throw new Error("Install not found");
-    return view;
+    return addMachineOntoInstall(sql, data, await deskUsername(sql, context.userId));
   });
 
 const removeInput = z.object({ installId: z.number().int().positive(), equipmentId: z.number().int().positive() });
