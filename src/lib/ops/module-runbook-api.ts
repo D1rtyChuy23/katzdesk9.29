@@ -11,6 +11,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { loadPmRunbookPlan, loadVisitConfig, pmIsCompleted } from "@/lib/ops/pm-runbook-api";
 import {
   canWriteRunbook,
+  CHECK_KEY_RE,
   MODULE_NOT_ON_PM,
   addedKitDetail,
   addedKitSentence,
@@ -19,6 +20,7 @@ import {
   changeAddedKits,
   checkSerialKey,
   checksForModuleSheet,
+  KIT_NUMBER_RE,
   moduleBenchConfig,
   moduleKitListText,
   moduleOnThisPm,
@@ -30,13 +32,14 @@ import {
   parseAddedKits,
   pmAddKitSql,
   pmRemoveKitSql,
+  pmTickSql,
   removedKitCheckKeys,
   type KitLine,
   type RunbookRole,
   type SharedCheck,
   type StepGroup,
 } from "@/lib/ops/pm-runbook";
-import { catalogKeys, kitKey, pickCatalog } from "@/lib/ops/pm-runbook-prices";
+import { catalogKeys, kitKey, pickCatalog, prefixForManufacturer } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig } from "@/lib/ops/pm-runbook-schema";
 import { runbookForPlatform } from "@/lib/ops/runbooks";
 
@@ -103,6 +106,8 @@ export type ModuleRunbookData = {
   notice: string | null;
   /** The PM itself is completed, so on-site kits stay as they are. */
   pmCompleted: boolean;
+  /** Runbook whose kit numbers are priced. Null when this module has no runbook. */
+  runbookId: string | null;
 };
 
 async function findService(sql: Sql, moduleId: number, context: "bench" | "pm", pmId: number | null): Promise<ServiceRow | null> {
@@ -200,6 +205,7 @@ async function viewOf(sql: Sql, data: z.infer<typeof scope>, userId: string): Pr
     copyText: "",
     notice: null,
     pmCompleted: false,
+    runbookId: null,
   };
   if (!mod) return empty;
   const rb = runbookForPlatform(mod.platform);
@@ -262,6 +268,7 @@ async function viewOf(sql: Sql, data: z.infer<typeof scope>, userId: string): Pr
     copyText: moduleKitListText(mod.module_type!, interval?.label ?? `${config.pm}-month PM`, view.kits),
     notice: null,
     pmCompleted,
+    runbookId: rb.def.id,
   };
 }
 
@@ -277,7 +284,7 @@ const saveInput = scope.extend({
   checkKey: z.string().max(80).optional(),
   checked: z.boolean().optional(),
   again: z.boolean().optional(),
-  addEv: z.string().regex(/^[A-Za-z0-9._-]{1,40}$/).optional(),
+  addEv: z.string().regex(KIT_NUMBER_RE).optional(),
   addOn: z.boolean().optional(),
 });
 
@@ -311,21 +318,27 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         if (!next.ok) throw new Error(next.reason);
         const detail = addedKitDetail(addedKitSentence(rb.def, data.addEv, data.addOn), unit.unitKey, unit.pieceKey);
         if (data.addOn) {
-          await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, rb.def.id, data.addEv, me.name, checkSerialKey(unit.optionsKey), detail]);
+          await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, rb.def.id, data.addEv, me.name, checkSerialKey(unit.optionsKey), detail, config.pm ?? null]);
         } else {
           const clear = removedKitCheckKeys(rb.def, config, data.addEv, next.dropTick);
           await sql.query(pmRemoveKitSql(), [data.pmId, unit.unitKey, data.addEv, me.name, detail, clear]);
         }
       }
       if (data.checkKey && data.checked != null) {
-        if (!/^(kit|step):[A-Za-z0-9._-]{1,80}$/.test(data.checkKey)) throw new Error("Unknown check.");
+        if (!CHECK_KEY_RE.test(data.checkKey)) throw new Error("Unknown check.");
         await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name);
         if (data.checked) {
-          await sql.query(
-            `insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by, serial_key) values ($1, $2, $3, $4, $5)
-             on conflict (pm_job_id, unit_key, key) do nothing`,
-            [data.pmId, unit.unitKey, data.checkKey, me.name, checkSerialKey(unit.optionsKey)],
-          );
+          const completed = await pmIsCompleted(sql, data.pmId!);
+          const config = completed ? null : await configFor(sql, rb.def, mod.module_type!, existing, "pm", data.pmId ?? null, unit);
+          await sql.query(pmTickSql(), [
+            data.pmId,
+            unit.unitKey,
+            data.checkKey,
+            me.name,
+            checkSerialKey(unit.optionsKey),
+            completed ? null : unit.runbookId,
+            completed ? null : (config?.pm ?? null),
+          ]);
         } else {
           await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [data.pmId, unit.unitKey, data.checkKey]);
         }
@@ -409,7 +422,8 @@ export const completeModuleRunbook = createServerFn({ method: "POST" })
     if (done[0]) {
       const fresh = await viewOf(sql, data, context.userId);
       const ticked = Object.keys(fresh.checks);
-      const keys = [...new Set(fresh.kits.map((k) => k.ev).flatMap(catalogKeys))];
+      const prefix = prefixForManufacturer(rb.def.manufacturer);
+      const keys = [...new Set(fresh.kits.map((k) => k.ev).flatMap((ev) => catalogKeys(ev, prefix)))];
       const rows = keys.length
         ? await sql.query<{ sku: string; item: string | null; description: string | null; mfr_part: string | null; rate: string | null; active: unknown; hidden: unknown }>(
             `select sku, item, description, mfr_part, rate, active, (hidden_at is not null) as hidden
@@ -431,6 +445,7 @@ export const completeModuleRunbook = createServerFn({ method: "POST" })
           active: flagOn(r.active),
           hidden: flagOn(r.hidden),
         })),
+        prefix,
       );
       const skus: Record<string, string | null> = {};
       for (const k of fresh.kits) skus[k.ev] = catalog[kitKey(k.ev)]?.sku ?? null;

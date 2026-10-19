@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
+import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook } from "./pm-runbook-api";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
@@ -1042,7 +1043,7 @@ export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddl
 	const sql = await ready();
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
-      values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? "12 month PM"}, ${todayChicago()}, ${"Pending Scheduling"})
+      values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? DEFAULT_PM_STYLE}, ${todayChicago()}, ${"Pending Scheduling"})
       returning id`;
 	await logActivity(sql, context.userId, "pm", rows[0].id, "opened", data.customer);
 	return mapPm((await sql`select * from pm_jobs where id = ${rows[0].id}`)[0], todayChicago());

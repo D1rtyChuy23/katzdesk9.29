@@ -74,6 +74,8 @@ export const runbookDefinitionSchema = z
     subtitle: z.string().optional(),
     sources: z.string().optional(),
     storageKey: z.string().optional(),
+    /** When true, the default PM style ("12 month PM") is used only after the install date and earlier visits. */
+    defaultStyleLast: z.boolean().optional(),
     models: z.array(modelSchema).min(1),
     intervals: z.array(intervalSchema).min(1),
     options: z.array(optionSchema).default([]),
