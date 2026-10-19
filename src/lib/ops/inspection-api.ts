@@ -1049,7 +1049,12 @@ export const addInspectionEquipment = createServerFn({ method: "POST" })
     return addMachineOntoInstall(sql, data, await deskUsername(sql, context.userId));
   });
 
-const removeInput = z.object({ installId: z.number().int().positive(), equipmentId: z.number().int().positive() });
+const removeInput = z.object({
+  installId: z.number().int().positive(),
+  equipmentId: z.number().int().positive(),
+  /** The equipment list was already saved without this unit. Do not write it again. */
+  keepList: z.boolean().optional(),
+});
 
 /**
  * Take a machine off this install's pre-inspection: its checks, photos and note on this visit go with it. When the
@@ -1092,7 +1097,7 @@ export const removeInspectionEquipment = createServerFn({ method: "POST" })
       used.add(hit.id);
       if (hit.id === data.equipmentId && at < 0) at = i;
     });
-    if (at >= 0) {
+    if (!data.keepList && at >= 0) {
       const packed = serializeMachines(pieces.filter((_, i) => i !== at));
       await sql.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1", [
         data.installId,
