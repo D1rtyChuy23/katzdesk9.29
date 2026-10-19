@@ -273,6 +273,10 @@ test("La Marzocco style, history and combined-visit text", () => {
   assert.equal(next("12", "6"), "3");
   assert.equal(next("6", "3"), "12");
   assert.equal(next("12", "6", "3"), "12");
+  assert.equal(next("6", "3", "3"), "12");
+  assert.equal(next("3", "6", "6"), "12");
+  assert.equal(next("6", "6", "6"), "12");
+  assert.equal(next("6", "6"), "12");
   assert.equal(combinedVisitNotes(def).history, ", the 12 + 36 together visit");
   assert.equal(combinedVisitNotes(def).recommended, " (12 + 36 together)");
   assert.equal(combinedVisitNotes(linea).history, "");
@@ -283,6 +287,8 @@ test("La Marzocco style, history and combined-visit text", () => {
   assert.equal(nextFromHistory(def, ["12", "12"])?.combined, true);
   const gs3 = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/la-marzocco-gs3.json", import.meta.url), "utf8")));
   assert.equal(visitCarriesShorter(gs3, "12"), true);
+  assert.equal(nextFromHistory(gs3, ["6", "6"])?.id, "6");
+  assert.equal(gs3.intervals.find((i) => i.id === "12")?.label, "12-month PM");
   assert.equal(modulesNotTakenReason(linea, "pb", false), "Linea PB does not take Eversys modules.");
   assert.equal(modulesNotTakenReason(def, "4s", true), null);
 });
@@ -292,6 +298,7 @@ test("the default 12-month style waits for the install date on La Marzocco", () 
   const now = new Date("2026-10-18T15:00:00Z");
   const pm = (install, style, earlier = []) => visitConfig(linea, { style, installDate: install, earlierIntervals: earlier, model: "pb", now }).pm;
   assert.equal(pm("2026-07-18", "12 month PM"), "3");
+  assert.equal(visitConfig(linea, { style: " 12 Month PM ", installDate: "2026-07-18", model: "pb", now }).pm, "3");
   assert.equal(pm("2026-04-18", "12 month PM"), "6");
   assert.equal(pm(null, "12 month PM", ["3"]), "6");
   assert.equal(pm(null, "12 month PM", ["3", "6", "3"]), "12");

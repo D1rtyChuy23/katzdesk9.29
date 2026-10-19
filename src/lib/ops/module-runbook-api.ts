@@ -32,6 +32,7 @@ import {
   parseAddedKits,
   pmAddKitSql,
   pmRemoveKitSql,
+  pmTickSql,
   removedKitCheckKeys,
   type KitLine,
   type RunbookRole,
@@ -317,7 +318,7 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         if (!next.ok) throw new Error(next.reason);
         const detail = addedKitDetail(addedKitSentence(rb.def, data.addEv, data.addOn), unit.unitKey, unit.pieceKey);
         if (data.addOn) {
-          await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, rb.def.id, data.addEv, me.name, checkSerialKey(unit.optionsKey), detail]);
+          await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, rb.def.id, data.addEv, me.name, checkSerialKey(unit.optionsKey), detail, config.pm ?? null]);
         } else {
           const clear = removedKitCheckKeys(rb.def, config, data.addEv, next.dropTick);
           await sql.query(pmRemoveKitSql(), [data.pmId, unit.unitKey, data.addEv, me.name, detail, clear]);
@@ -327,11 +328,16 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         if (!CHECK_KEY_RE.test(data.checkKey)) throw new Error("Unknown check.");
         await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name);
         if (data.checked) {
-          await sql.query(
-            `insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by, serial_key) values ($1, $2, $3, $4, $5)
-             on conflict (pm_job_id, unit_key, key) do nothing`,
-            [data.pmId, unit.unitKey, data.checkKey, me.name, checkSerialKey(unit.optionsKey)],
-          );
+          const config = await configFor(sql, rb.def, mod.module_type!, existing, "pm", data.pmId ?? null, unit);
+          await sql.query(pmTickSql(), [
+            data.pmId,
+            unit.unitKey,
+            data.checkKey,
+            me.name,
+            checkSerialKey(unit.optionsKey),
+            unit.runbookId,
+            config.pm ?? null,
+          ]);
         } else {
           await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [data.pmId, unit.unitKey, data.checkKey]);
         }

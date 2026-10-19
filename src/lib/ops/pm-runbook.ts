@@ -249,16 +249,18 @@ export function unitHistory(
 
 /**
  * One statement: append the kit if it is not already stored, and write the activity row only when a row changed.
- * $1 pm id, $2 unit key, $3 runbook id, $4 kit number, $5 actor, $6 serial key, $7 detail.
+ * Also stores the visit interval the first time, and only while it is still null. Never writes a model.
+ * $1 pm id, $2 unit key, $3 runbook id, $4 kit number, $5 actor, $6 serial key, $7 detail, $8 interval (null skips it).
  */
 export function pmAddKitSql(): string {
   return `with up as (
-    insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, added_kits, updated_by, serial_key)
-    values ($1::int, $2::text, $3::text, jsonb_build_array($4::text), $5::text, $6::text)
+    insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, added_kits, updated_by, serial_key, interval_mo)
+    values ($1::int, $2::text, $3::text, jsonb_build_array($4::text), $5::text, $6::text, $8::text)
     on conflict (pm_job_id, unit_key) do update
       set added_kits = coalesce(pm_runbook_units.added_kits, '[]'::jsonb) || jsonb_build_array($4::text),
           updated_by = excluded.updated_by,
           serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key),
+          interval_mo = coalesce(pm_runbook_units.interval_mo, excluded.interval_mo),
           updated_at = now()
     where not (coalesce(pm_runbook_units.added_kits, '[]'::jsonb) @> jsonb_build_array($4::text))
     returning pm_job_id
@@ -268,6 +270,48 @@ export function pmAddKitSql(): string {
     returning id
   )
   select coalesce((select count(*) from up), 0)::int as changed`;
+}
+
+/**
+ * One statement: tick the check, and the first time this sheet is worked store the interval it is showing.
+ * The unit row is skipped when the runbook or interval is null, so a bare tick still lands.
+ * Interval is written only while null. Serial is filled only while null. A model is never written.
+ * $1 pm id, $2 unit key, $3 check key, $4 actor, $5 serial key, $6 runbook id, $7 interval.
+ */
+export function pmTickSql(): string {
+  return `with chk as (
+    insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by, serial_key)
+    values ($1::int, $2::text, $3::text, $4::text, $5::text)
+    on conflict (pm_job_id, unit_key, key) do nothing
+    returning pm_job_id
+  ), up as (
+    insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, interval_mo, updated_by, serial_key)
+    select $1::int, $2::text, $6::text, $7::text, $4::text, $5::text
+     where $6::text is not null and $7::text is not null
+    on conflict (pm_job_id, unit_key) do update
+      set interval_mo = coalesce(pm_runbook_units.interval_mo, excluded.interval_mo),
+          updated_by = excluded.updated_by,
+          serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key),
+          updated_at = now()
+    where pm_runbook_units.interval_mo is null
+    returning pm_job_id
+  )
+  select (select count(*) from chk)::int as ticked, (select count(*) from up)::int as locked`;
+}
+
+/**
+ * Model and interval for this PM unit. A null model does not replace one already stored.
+ * $1 pm id, $2 unit key, $3 runbook id, $4 model, $5 interval, $6 actor, $7 serial key.
+ */
+export function pmUnitConfigSql(): string {
+  return `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, model, interval_mo, updated_by, serial_key)
+    values ($1, $2, $3, $4, $5, $6, $7)
+    on conflict (pm_job_id, unit_key) do update
+      set model = coalesce(excluded.model, pm_runbook_units.model),
+          interval_mo = excluded.interval_mo,
+          updated_by = excluded.updated_by,
+          serial_key = coalesce(excluded.serial_key, pm_runbook_units.serial_key),
+          updated_at = now()`;
 }
 
 /**
@@ -839,6 +883,37 @@ export function unitModelPicked(savedModel: string | null | undefined, matchedMo
   return !!(savedModel && String(savedModel).trim()) || !!(matchedModel && String(matchedModel).trim());
 }
 
+/**
+ * Group count and scales read off the equipment text. Only keys this definition offers, and only a choice it lists.
+ * Groups: "4 Group", "2 gr", or a digit glued to AV ("3AV"). Scales: "with Scales" or the word "ABR", never AV alone.
+ */
+export function optionsFromPiece(def: RunbookDefinition, piece: string | null | undefined): Record<string, string> {
+  const raw = String(piece ?? "");
+  const out: Record<string, string> = {};
+  const set = (key: string, val: string) => {
+    const opt = def.options.find((o) => o.key === key);
+    if (!opt || !opt.choices.some((c) => c.val === val)) return;
+    out[key] = val;
+  };
+  const group =
+    raw.match(/\b([1-9])\s*groups?\b/i)?.[1] ??
+    raw.match(/\b([1-9])\s*gr\b/i)?.[1] ??
+    raw.match(/(?:^|[^A-Za-z0-9])([1-9])\s*av\b/i)?.[1];
+  if (group) set("groups", group);
+  if (/\bwith\s+scales\b/i.test(raw) || /\babr\b/i.test(raw)) set("abr", "yes");
+  return out;
+}
+
+/** Saved options win. An empty bag takes the groups and scales read off the equipment text. */
+export function startingOptions(
+  def: RunbookDefinition,
+  piece: string | null | undefined,
+  saved: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  const bag = saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+  return Object.keys(bag).length ? bag : optionsFromPiece(def, piece);
+}
+
 /** "year 3" when the milestone is a whole number of years, otherwise "month 3". */
 export function milestoneAge(milestone: number): string {
   return milestone % 12 === 0 ? `year ${milestone / 12}` : `month ${milestone}`;
@@ -885,7 +960,8 @@ export function recommendInterval(
  * `pos` is months since the last longest PM. A longest PM sets it back to 0. Any other visit advances one
  * short step; if that visit was a longer interval than the slot it landed on, `pos` jumps to the next slot
  * whose interval is that visit. The next PM is the largest interval that divides `pos` plus one short step.
- * La Marzocco (3, 6, 12) still goes 3, 6, 3, 12 from a run of shorts, and a lone 6 is followed by a 3.
+ * When the longest visit does not carry the shorter kits (La Marzocco, except GS3), a shorter visit stops
+ * at the slot just before a longest one, so it never uses that slot up or jumps past it.
  * Eversys (12, 36) stays 12, 12, 36. Returns null with no earlier PM to go on.
  */
 export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]): { id: string; combined: boolean } | null {
@@ -893,6 +969,7 @@ export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]
   if (!ids.length || !priorIntervals.length) return null;
   const short = ids[0];
   const long = ids[ids.length - 1];
+  const holdsLongest = long > short && !visitCarriesShorter(def, String(long));
   const at = (mark: number) => [...ids].reverse().find((id) => mark % id === 0) ?? short;
   let pos = 0;
   for (const raw of priorIntervals) {
@@ -907,6 +984,10 @@ export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]
       const steps = Math.max(1, Math.ceil(long / short)) * 4;
       for (let step = 1; step <= steps; step++) {
         const candidate = slot + step * short;
+        if (holdsLongest && at(candidate) === long) {
+          found = candidate - short;
+          break;
+        }
         if (at(candidate) === v) {
           found = candidate;
           break;
@@ -914,7 +995,7 @@ export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]
       }
       pos = found;
     } else {
-      pos = slot;
+      pos = holdsLongest && at(slot) === long ? slot - short : slot;
     }
   }
   const next = at(pos + short);

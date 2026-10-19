@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
-import { defaultConfig, kitList, optionalKits, recommendInterval, stepList, unitModelPicked } from "../src/lib/ops/pm-runbook.ts";
+import { defaultConfig, kitList, optionalKits, optionsFromPiece, recommendInterval, startingOptions, stepList, unitModelPicked } from "../src/lib/ops/pm-runbook.ts";
 import { planUnits } from "../src/lib/ops/pm-runbook-units.ts";
 import { splitEquipment } from "../src/lib/ops/equipment.ts";
 import { matchLmGb5, matchLmGs3, matchLmKb90, matchLmLinea, matchLmStrada } from "../src/lib/ops/runbooks/la-marzocco-match.ts";
@@ -107,8 +107,11 @@ test("matchers on real equipment text", () => {
   for (const piece of ["Linea Mini", "La Marzocco Linea Mini", "Linea Micra", "Strada AV 3 group", "Strada EE", "La Marzocco Swift Dual-Hopper Espresso Grinder", "Eversys Enigma e'4m X-Wide Classic"]) {
     for (const fn of [matchLmLinea, matchLmStrada, matchLmKb90, matchLmGb5, matchLmGs3]) assert.equal(fn(piece), null, piece);
   }
-  for (const piece of ["Strada 3AV", "Strada 2EP", "Strada 2 Group EP", "Strada 3 Group MP"]) assert.equal(matchLmStrada(piece), null, piece);
+  for (const piece of ["Strada 3AV", "Strada 2EP", "Strada 2 Group EP", "Strada 3 Group MP", "Strada 3-Group EP", "Strada 3 Groups MP", "Strada 3gr AV", "Strada 2G EP"]) {
+    assert.equal(matchLmStrada(piece), null, piece);
+  }
   assert.equal(matchLmStrada("La Marzocco Strada S AV 2 Group")?.model, "s");
+  assert.equal(matchLmStrada("Strada S AV 2 Group")?.model, "s");
   assert.notEqual(matchLmGb5("GB/5"), null);
   assert.equal(matchLmGb5("GB/5")?.model, null);
   assert.equal(unitModelPicked(null, matchLmStrada("La Marzocco Strada XT 2 Group").model), false);
@@ -125,4 +128,23 @@ test("planUnits uses a model that only the catalog name gives", () => {
   };
   const [gs3] = planUnits("La Marzocco GS3", [{ id: 4, equipmentName: "La Marz GS3", catalogModel: "La Marzocco GS3 MP", serial: "GS-1" }], match);
   assert.equal(gs3.model, "mp");
+  const rows = [
+    { id: 94, equipmentName: "La Marz GS3", catalogModel: "La Marzocco GS3 AV", serial: "AV-1" },
+    { id: 95, equipmentName: "La Marz GS3", catalogModel: "La Marzocco GS3 MP", serial: "MP-1" },
+  ];
+  const both = planUnits("La Marzocco GS3 MP\nLa Marzocco GS3 AV", rows, match);
+  assert.equal(both.find((u) => u.model === "mp")?.unitKey, "acct:95");
+  assert.equal(both.find((u) => u.model === "av")?.unitKey, "acct:94");
+});
+
+test("group count and scales come off the equipment text until the unit has options saved", () => {
+  const linea = load("la-marzocco-linea");
+  const strada = load("la-marzocco-strada");
+  const kb90 = load("la-marzocco-kb90");
+  assert.deepEqual(optionsFromPiece(linea, "La Marzocco Linea PB 4 Group AV"), { groups: "4" });
+  assert.deepEqual(optionsFromPiece(strada, "La Marzocco Strada S 3AV"), { groups: "3" });
+  assert.deepEqual(optionsFromPiece(kb90, "La Marzocco KB90 2AV with Scales"), { groups: "2", abr: "yes" });
+  assert.deepEqual(optionsFromPiece(linea, "La Marzocco Linea PB 2 gr"), { groups: "2" });
+  assert.deepEqual(startingOptions(linea, "La Marzocco Linea PB 4 Group AV", { groups: "2" }), { groups: "2" });
+  assert.deepEqual(startingOptions(linea, "La Marzocco Linea PB 4 Group AV", {}), { groups: "4" });
 });

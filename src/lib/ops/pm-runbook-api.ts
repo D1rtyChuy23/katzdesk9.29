@@ -24,6 +24,8 @@ import {
   parseAddedKits,
   pmAddKitSql,
   pmRemoveKitSql,
+  pmTickSql,
+  pmUnitConfigSql,
   PM_SERVICE_ACTION,
   pmServicePrefix,
   pmServiceRecord,
@@ -32,6 +34,7 @@ import {
   stepsForVisit,
   unitHistory,
   unitModelPicked,
+  startingOptions,
   visitConfig,
   visibleOptions,
   type RunbookRole,
@@ -136,8 +139,10 @@ export async function recordCompletedRunbook(
   const me = await who(sql, userId);
   const units = planned.filter((u) => u.optionsKey && runbookById(u.runbookId));
   if (!units.length) return;
-  const job = (await sql.query<{ customer: string }>("select customer from pm_jobs where id = $1", [pmId]))[0];
+  const job = (await sql.query<{ customer: string; completed_at: string | Date | null }>("select customer, completed_at from pm_jobs where id = $1", [pmId]))[0];
   if (!job) return;
+  const completed = job.completed_at == null || job.completed_at === "" ? null : new Date(job.completed_at as string | Date);
+  const when = completed && !Number.isNaN(completed.getTime()) ? completed : now;
   const saved = await sql.query<{ unit_key: string; model: string | null; interval_mo: string | null; options: unknown; added_kits: unknown }>(
     "select unit_key, model, interval_mo, options, added_kits from pm_runbook_units where pm_job_id = $1",
     [pmId],
@@ -157,7 +162,7 @@ export async function recordCompletedRunbook(
     const s = saved.find((x) => x.unit_key === u.unitKey);
     const optRow = optRows.find((r) => r.unit_key === u.optionsKey);
     const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
-    const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: job.customer, style }, u, now);
+    const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: job.customer, style }, u, when);
     const ticked = new Set(checks.filter((c) => c.unit_key === u.unitKey).map((c) => c.key));
     const detail = pmServiceRecord({
       pmId,
@@ -196,10 +201,11 @@ export async function recordCompletedRunbook(
     if (already[0]) continue;
     await sql.query(
       `with up as (
-         insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, interval_mo, updated_by)
-         values ($1::int, $2::text, $3::text, $4::text, $5::text)
+         insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, interval_mo, updated_by, serial_key)
+         values ($1::int, $2::text, $3::text, $4::text, $5::text, $9::text)
          on conflict (pm_job_id, unit_key) do update
-           set interval_mo = excluded.interval_mo, updated_by = excluded.updated_by, updated_at = now()
+           set interval_mo = excluded.interval_mo, updated_by = excluded.updated_by,
+               serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key), updated_at = now()
          where pm_runbook_units.interval_mo is null
          returning pm_job_id
        ), act as (
@@ -208,7 +214,7 @@ export async function recordCompletedRunbook(
          returning id
        )
        select (select count(*) from up)::int as saved, (select count(*) from act)::int as logged`,
-      [pmId, u.unitKey, u.runbookId, config.pm, me.name, historyId, PM_SERVICE_ACTION, detail],
+      [pmId, u.unitKey, u.runbookId, config.pm, me.name, historyId, PM_SERVICE_ACTION, detail, u.serialKey],
     );
   }
 }
@@ -312,13 +318,14 @@ export async function loadVisitConfig(
       )
     : [];
   const earlier = earlierVisitsForUnit(def, unit, doneRows, savedIntervals, bySerial, rows, pins);
+  const stored = asJson(opt?.options ?? saved?.options);
   return visitConfig(def, {
     savedInterval: saved?.interval_mo,
     style: pm.style,
     installDate: unit.installDate,
     earlierIntervals: earlier.map((v) => v.interval),
     model: saved?.model ?? unit.model,
-    options: asJson(opt?.options ?? saved?.options),
+    options: startingOptions(def, unit.piece, stored),
     now,
   });
 }
@@ -539,7 +546,8 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       const rb = runbookById(u.runbookId)!;
       const s = saved.find((x) => x.unit_key === u.unitKey);
       const optRow = u.optionsKey ? optRows.find((r) => r.unit_key === u.optionsKey) : undefined;
-      const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
+      const stored = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
+      const options = startingOptions(rb.def, u.piece, stored);
       const rec = recommendInterval(rb.def, u.installDate, now);
       const past = rec ? [] : fullPms(u, rb.def);
       const next = rec ? null : nextFromHistory(rb.def, past.map((p) => p.interval));
@@ -746,29 +754,24 @@ const serialOf = (optionsKey: string | null | undefined) => checkSerialKey(optio
 const configInput = unitInput.extend({
   optionsKey: z.string().max(200).nullable().optional(),
   runbookId: z.string(),
-  model: z.string(),
+  model: z.string().nullable().optional(),
   interval: z.string(),
 });
 
-/** Model and PM interval for this job and unit. */
+/** Model and PM interval for this job and unit. An interval-only save sends no model and does not overwrite one. */
 export const setRunbookUnitConfig = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof configInput>) => configInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
     const me = await requireWriter(sql, context.userId);
+    if (await pmIsCompleted(sql, data.pmId)) throw new Error("This PM is completed.");
     const rb = runbookById(data.runbookId);
     if (!rb) throw new Error("Unknown runbook.");
-    if (!rb.def.models.some((m) => m.id === data.model)) throw new Error("Unknown model.");
+    const model = data.model?.trim() ? data.model.trim() : null;
+    if (model && !rb.def.models.some((m) => m.id === model)) throw new Error("Unknown model.");
     if (!rb.def.intervals.some((i) => i.id === data.interval)) throw new Error("Unknown interval.");
-    await sql.query(
-      `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, model, interval_mo, updated_by, serial_key)
-       values ($1, $2, $3, $4, $5, $6, $7)
-       on conflict (pm_job_id, unit_key) do update
-         set model = excluded.model, interval_mo = excluded.interval_mo, updated_by = excluded.updated_by,
-             serial_key = coalesce(excluded.serial_key, pm_runbook_units.serial_key), updated_at = now()`,
-      [data.pmId, data.unitKey, data.runbookId, data.model, data.interval, me.name, serialOf(data.optionsKey)],
-    );
+    await sql.query(pmUnitConfigSql(), [data.pmId, data.unitKey, data.runbookId, model, data.interval, me.name, serialOf(data.optionsKey)]);
     return { ok: true };
   });
 
@@ -847,6 +850,24 @@ const checkInput = unitInput.extend({
   done: z.boolean(),
 });
 
+/** Interval the sheet is showing for this unit, so the first tick can lock it. Null when the unit is not on the plan. */
+async function visitLockForTick(sql: Sql, pmId: number, unitKey: string): Promise<{ runbookId: string; interval: string } | null> {
+  const pm = (
+    await sql.query<{ customer: string; equipment: string | null; style: string | null }>(
+      "select customer, equipment, style from pm_jobs where id = $1",
+      [pmId],
+    )
+  )[0];
+  if (!pm) return null;
+  const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, pmId);
+  const unit = plan.planned.find((u) => u.unitKey === unitKey);
+  if (!unit) return null;
+  const rb = runbookById(unit.runbookId);
+  if (!rb) return null;
+  const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: pm.customer, style: pm.style }, unit);
+  return config.pm ? { runbookId: unit.runbookId, interval: config.pm } : null;
+}
+
 export const setRunbookCheck = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof checkInput>) => checkInput.parse(d))
@@ -854,11 +875,16 @@ export const setRunbookCheck = createServerFn({ method: "POST" })
     const sql = await ready();
     const me = await requireWriter(sql, context.userId);
     if (data.done) {
-      await sql.query(
-        `insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by, serial_key) values ($1, $2, $3, $4, $5)
-         on conflict (pm_job_id, unit_key, key) do nothing`,
-        [data.pmId, data.unitKey, data.key, me.name, serialOf(data.optionsKey)],
-      );
+      const lock = await visitLockForTick(sql, data.pmId, data.unitKey);
+      await sql.query(pmTickSql(), [
+        data.pmId,
+        data.unitKey,
+        data.key,
+        me.name,
+        serialOf(data.optionsKey),
+        lock?.runbookId ?? null,
+        lock?.interval ?? null,
+      ]);
     } else {
       await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [
         data.pmId,
@@ -907,7 +933,7 @@ export const setRunbookAddedKit = createServerFn({ method: "POST" })
     if (!next.ok) throw new Error(next.reason);
     const detail = addedKitDetail(addedKitSentence(rb.def, data.ev, data.on), unit.unitKey, unit.pieceKey);
     if (data.on) {
-      await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, data.runbookId, data.ev, me.name, serialOf(unit.optionsKey), detail]);
+      await sql.query(pmAddKitSql(), [data.pmId, unit.unitKey, data.runbookId, data.ev, me.name, serialOf(unit.optionsKey), detail, config.pm ?? null]);
     } else {
       const clear = removedKitCheckKeys(rb.def, config, data.ev, next.dropTick);
       await sql.query(pmRemoveKitSql(), [data.pmId, unit.unitKey, data.ev, me.name, detail, clear]);
