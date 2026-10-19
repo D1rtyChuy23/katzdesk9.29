@@ -481,7 +481,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 </Button>
               ) : null}
             </span>
-          ) : !unit.fromHistory ? (
+          ) : !unit.fromHistory && !pmDone ? (
             <span>No earlier full PM on record for this unit either, so choose the interval yourself.</span>
           ) : null}
         </div>

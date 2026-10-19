@@ -321,6 +321,11 @@ test("a completed PM does not lock an interval, and an open one locks the day it
     const doneEquip = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, install_date) values ('Cafe', $1, $1, 'SN-D', '2025-10-19') returning id", [donePiece])).rows[0].id;
     assert.equal(await visitLockForTick(sql, doneId, `acct:${doneEquip}`), null);
 
+    const statusPiece = "La Marzocco Linea PB 2AV";
+    const statusId = (await pg.query("insert into pm_jobs (customer, style, equipment, status, completed_at) values ('Status Cafe', '12 month PM', $1, 'Completed', null) returning id", [statusPiece])).rows[0].id;
+    const statusEquip = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, install_date) values ('Status Cafe', $1, $1, 'SN-S', '2025-10-19') returning id", [statusPiece])).rows[0].id;
+    assert.equal(await visitLockForTick(sql, statusId, `acct:${statusEquip}`), null);
+
     const openPiece = "La Marzocco Linea PB";
     const openId = (await pg.query("insert into pm_jobs (customer, style, equipment) values ('Other', '12 month PM', $1) returning id", [openPiece])).rows[0].id;
     const openEquip = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, install_date) values ('Other', $1, $1, 'SN-O', '2026-06-10') returning id", [openPiece])).rows[0].id;

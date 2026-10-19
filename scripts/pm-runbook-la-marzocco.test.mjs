@@ -155,6 +155,7 @@ test("group count and scales come off the equipment text until the unit has opti
   assert.equal(optionsFromPiece(linea, "Linea Classic 2MP").groups, "2");
   assert.equal(optionsFromPiece(linea, "Linea PB 3 grp").groups, "3");
   assert.equal(optionsFromPiece(linea, "Linea PB 3G AV").groups, "3");
+  assert.equal(optionsFromPiece(linea, "La Marzocco Linea PB 3AV; Fetco CBS-2252 NG Twin 1.5G").groups, "3");
   assert.equal(optionsFromPiece(linea, "Linea PB 2 w/ scales").scales, "yes");
   assert.deepEqual(optionsFromPiece(linea, "Linea PB 9 Group"), {});
   assert.deepEqual(startingOptions(linea, "La Marzocco Linea PB 4 Group AV", { groups: "2" }), { groups: "2" });

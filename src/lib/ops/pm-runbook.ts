@@ -885,8 +885,8 @@ export function unitModelPicked(savedModel: string | null | undefined, matchedMo
 
 /**
  * Group count and scales read off the equipment text. Only keys this definition offers, and only a choice it lists.
- * Groups: "4 Group", "3-Group", "3 grp", "2 gr", "3G", or a digit before AV/EE/MP/EP ("3AV", "3EE", "2 EE").
- * Scales: "with Scales", "w/ scales", or the word "ABR", on whichever of scales/abr the definition has. Never AV alone.
+ * Groups: "4 Group", "3-Group", "3 grp", "2 gr", a digit before AV/EE/MP/EP ("3AV", "3EE", "2 EE"), or "3G".
+ * A digit right after a decimal ("1.5G") is not a group count. Scales: "with Scales", "w/ scales", or the word "ABR", on whichever of scales/abr the definition has. Never AV alone.
  */
 export function optionsFromPiece(def: RunbookDefinition, piece: string | null | undefined): Record<string, string> {
   const raw = String(piece ?? "");
@@ -901,8 +901,8 @@ export function optionsFromPiece(def: RunbookDefinition, piece: string | null | 
     raw.match(/\b([1-9])\s*groups?\b/i)?.[1] ??
     raw.match(/\b([1-9])\s*grp\b/i)?.[1] ??
     raw.match(/\b([1-9])\s*gr\b/i)?.[1] ??
-    raw.match(/(?:^|[^A-Za-z0-9])([1-9])\s*g\b/i)?.[1] ??
-    raw.match(/(?:^|[^A-Za-z0-9])([1-9])\s*(?:av|ee|mp|ep)\b/i)?.[1];
+    raw.match(/(?:^|[^A-Za-z0-9.])([1-9])\s*(?:av|ee|mp|ep)\b/i)?.[1] ??
+    raw.match(/(?:^|[^A-Za-z0-9.])([1-9])\s*g\b/i)?.[1];
   if (group) set("groups", group);
   if (/\bwith\s+scales\b/i.test(raw) || /\bw\/\s*scales\b/i.test(raw) || /\babr\b/i.test(raw)) {
     set("scales", "yes");
