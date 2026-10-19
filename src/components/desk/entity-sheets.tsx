@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InvoiceButton } from "@/components/desk/invoice-window";
+import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
 import { ModuleRecord } from "@/components/desk/module-record";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
@@ -252,6 +253,7 @@ export function PmSheet({
                   >
                     <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockCustomer} />
                     <BoundEquipment recordKey={pm.id} defaultValue={pm.equipment ?? ""} />
+                    <SpecOutletLine model={pm.equipment} />
                     <div>
                       <Label>PM style</Label>
                       <SelectField name="style" className="mt-1" defaultValue={pm.style ?? ""} allowEmpty>

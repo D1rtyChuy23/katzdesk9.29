@@ -90,6 +90,8 @@ export type FormUnit = {
   notes: string;
   voltage: string;
   plug: string;
+  /** From the model spec when the unit itself has no amps. */
+  amps?: string;
 };
 
 export type FormRow = {
@@ -115,7 +117,7 @@ export function groupFormRows(units: FormUnit[]): FormRow[] {
     const model = formText(unit.model);
     if (!model) continue;
     const power = placePower(unit.voltage, unit.plug);
-    const outlet = [formText(power.voltage), formText(power.plug)].filter(Boolean).join(" · ");
+    const outlet = [formText(power.voltage), formText(unit.amps), formText(power.plug)].filter(Boolean).join(" · ");
     let group = groups.find((g) => sameWarehouseModel(g.model, model));
     if (!group) {
       group = { model, count: 0, serials: [], notes: [], outlets: [] };
