@@ -376,6 +376,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   };
   const time = def.models.find((m) => m.id === c.model)?.time?.[c.pm];
   const together = combinedVisitNotes(def);
+  const lastPm = unit.fromHistory?.basedOn[unit.fromHistory.basedOn.length - 1];
+  const lastPmLabel = def.intervals.find((i) => i.id === lastPm?.interval)?.label ?? `${lastPm?.interval ?? ""}-month PM`;
   const header = `${customer}${unit.serial ? ` · SN ${unit.serial}` : ""}`;
 
   return (
@@ -465,7 +467,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
           {unit.fromHistory ? (
             <span className="flex flex-wrap items-center justify-between gap-2">
               <span>
-                Suggested from the last full PM ({def.intervals.find((i) => i.id === unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval)?.label ?? `${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval}-month PM`}, PM #
+                Suggested from the last full PM ({lastPmLabel}, PM #
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.pmId}
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt
                   ? `, ${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt}`
