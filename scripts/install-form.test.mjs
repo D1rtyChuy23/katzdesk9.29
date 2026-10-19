@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   accountIsNew,
+  applySerialInPlace,
+  dedupeMachineSerials,
   foldVisitUnits,
   groupFormRows,
+  hasSerial,
   looksLikePlug,
   looksLikeVoltage,
   parseAccountSerialNotice,
@@ -65,6 +68,30 @@ test("the form groups by model, uppercases, and never prints Not set", () => {
   assert.equal(rows[0].equipment, "BUNN ITCB · SN ITCB138003");
   assert.equal(rows[0].notes, "3OZ PORTIONED PACK. 1 GALLON");
   assert.equal(rows[0].outlet, "220V");
+});
+
+test("typing a serial updates that row and a second click does not add one", () => {
+  const rows = [
+    { equipment: "La Marzocco Linea PB 3 Group AV", serial: "", powerVoltage: "220V" },
+    { equipment: "Bunn ITCB-DV", serial: "ITCB138003", powerVoltage: "" },
+  ];
+  const typed = applySerialInPlace(rows, 0, "PB001708");
+  assert.equal(typed.status, "updated");
+  assert.equal(typed.rows.length, 2);
+  assert.equal(typed.rows[0].serial, "PB001708");
+  assert.equal(typed.rows[0].powerVoltage, "220V");
+  const again = applySerialInPlace(typed.rows, 0, "PB001708");
+  assert.equal(again.status, "already");
+  assert.equal(again.rows.length, 2);
+  const clash = applySerialInPlace(typed.rows, 0, "ITCB138003");
+  assert.equal(clash.status, "duplicate");
+  assert.equal(clash.rows[0].serial, "PB001708");
+  assert.equal(hasSerial(typed.rows, "PB001708"), true);
+  const deduped = dedupeMachineSerials([
+    ...typed.rows,
+    { equipment: "La Marzocco Linea PB 3 Group AV", serial: "PB001708", powerVoltage: "" },
+  ]);
+  assert.equal(deduped.length, 2);
 });
 
 test("account type and the already-on-this-account notice", () => {

@@ -556,14 +556,20 @@ export function MachineFields({
               label="Serial"
               compact
               value={spec.serial}
+              model={spec.equipment}
               installId={installId}
               machineIndex={index}
               onValue={(serial) => onChange(patch(index, { serial }))}
               onPulled={(result) => {
-                // A serial pull never fills volts, plug, or water. The rep types those.
+                if (result.duplicateOnInstall) return;
                 const next = patch(index, { serial: result.serial });
                 onChange(next);
                 onPulled?.(next, result);
+              }}
+              onUseUnit={(unit) => {
+                const next = patch(index, { equipment: unit.model, serial: unit.serial });
+                onChange(next);
+                onCommit?.(next);
               }}
             />
             <div className="min-w-0">

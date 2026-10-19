@@ -84,6 +84,50 @@ export function foldVisitUnits<T extends VisitMachine>(rows: T[], extras: VisitE
   return { rows: next, added, changed: changed || added > 0 };
 }
 
+/**
+ * Put a serial on the row the person is editing. Never opens a second row.
+ * A serial that is already on a different row is left untouched.
+ */
+export function applySerialInPlace<T extends VisitMachine>(
+  rows: T[],
+  machineIndex: number | null,
+  serial: string,
+): { rows: T[]; status: "updated" | "already" | "duplicate" } {
+  const trimmed = serial.trim();
+  const key = serialKey(trimmed);
+  if (machineIndex != null && rows[machineIndex]) {
+    const other = rows.findIndex((row, i) => i !== machineIndex && !!key && serialKey(row.serial) === key);
+    if (other >= 0) return { rows, status: "duplicate" };
+    const current = rows[machineIndex]!;
+    if (serialKey(current.serial) === key) return { rows, status: "already" };
+    const next = rows.slice();
+    next[machineIndex] = { ...current, serial: trimmed };
+    return { rows: next, status: "updated" };
+  }
+  if (key && rows.some((row) => serialKey(row.serial) === key)) return { rows, status: "already" };
+  return { rows, status: "already" };
+}
+
+/** One row per serial. A blank serial is kept. The first row with a serial wins. */
+export function dedupeMachineSerials<T extends { serial: string }>(rows: T[]): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const row of rows) {
+    const key = serialKey(row.serial);
+    if (key) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
+    out.push(row);
+  }
+  return out;
+}
+
+export function hasSerial<T extends { serial: string }>(rows: T[], serial: string | null | undefined): boolean {
+  const key = serialKey(serial);
+  return !!key && rows.some((row) => serialKey(row.serial) === key);
+}
+
 export type FormUnit = {
   model: string;
   serial: string;

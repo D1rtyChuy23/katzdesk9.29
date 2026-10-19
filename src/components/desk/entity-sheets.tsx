@@ -38,9 +38,10 @@ import {
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { appendServerMachines } from "@/lib/ops/warehouse-serial";
-import { foldVisitUnits } from "@/lib/ops/install-form";
-import { addInspectionEquipment } from "@/lib/ops/inspection-api";
+import { appendServerMachines, sameWarehouseModel } from "@/lib/ops/warehouse-serial";
+import { dedupeMachineSerials, hasSerial, parseAccountSerialNotice } from "@/lib/ops/install-form";
+import { getInstallInspection, removeInspectionEquipment } from "@/lib/ops/inspection-api";
+import { serialKey } from "@/lib/ops/account-equip";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -377,9 +378,13 @@ export function InstallSheet({
       const names = server.map((m) => m.equipment).filter(Boolean);
       return names.length > pieces.length ? names : pieces;
     });
-    // A warehouse assignment writes the serial on the server. Pre-inspection can add a machine. Pull both in.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, serialSig, machineSig]);
+  const visit = useQuery({
+    queryKey: ["inspection", row?.id],
+    queryFn: () => getInstallInspection({ data: { installId: row!.id } }),
+    enabled: row != null,
+  });
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
@@ -423,11 +428,12 @@ export function InstallSheet({
   };
 
   function persistMachines(next: MachineSpec[]) {
-    setSpecs(next);
-    setEquipPieces(next.map((s) => s.equipment));
+    const unique = dedupeMachineSerials(next);
+    setSpecs(unique);
+    setEquipPieces(unique.map((s) => s.equipment));
     if (!row) return;
-    const packed = serializeMachines(next);
-    loadedSpecs.current = next;
+    const packed = serializeMachines(unique);
+    loadedSpecs.current = unique;
     save.mutate({
       id: row.id,
       equipment: packed.equipment,
@@ -614,19 +620,18 @@ export function InstallSheet({
 
                 <Tabs.Content value="equipment" forceMount className={KEEP_MOUNTED} data-testid="install-panel-equipment">
                   <SerialNoticeBanner
-                    notice={row.serialNotice}
+                    notice={hasSerial(specs, parseAccountSerialNotice(row.serialNotice)?.serial) ? null : row.serialNotice}
                     onAttach={(unit) => {
-                      const folded = foldVisitUnits(specs, [unit]);
-                      if (folded.added || folded.rows.some((r, i) => r.serial !== specs[i]?.serial)) persistMachines(folded.rows);
-                      else toast.message("That unit is already on this install.");
-                      void addInspectionEquipment({ data: { installId: row.id, model: unit.model, serial: unit.serial } })
-                        .then(() => {
-                          void qc.invalidateQueries({ queryKey: ["inspection", row.id] });
-                        })
-                        .catch((e) => {
-                          const message = e instanceof Error ? e.message : "";
-                          if (!/already on this visit/i.test(message)) toast.error(message || "Could not attach that unit");
-                        });
+                      if (hasSerial(specs, unit.serial)) {
+                        toast.message("That unit is already on this install.");
+                        return;
+                      }
+                      const blank = specs.findIndex((s) => sameWarehouseModel(s.equipment, unit.model) && !s.serial.trim());
+                      const next = blank >= 0
+                        ? specs.map((s, i) => (i === blank ? { ...s, serial: unit.serial } : s))
+                        : [...specs, { equipment: unit.model, serial: unit.serial, powerVoltage: "" }];
+                      persistMachines(next);
+                      toast.success("Attached to this install");
                     }}
                   />
                   <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
@@ -653,11 +658,23 @@ export function InstallSheet({
                       onRecipe={(next) => persistMachines(next)}
                       onCommit={(next) => persistMachines(next)}
                       onRemove={(index) => {
-                        try {
-                          persistMachines(specs.filter((_, i) => i !== index));
-                        } catch (err) {
-                          toast.error(err instanceof Error ? err.message : "Could not update equipment");
-                        }
+                        const spec = specs[index];
+                        if (!spec) return;
+                        const label = `${spec.equipment}${spec.serial.trim() ? ` SN ${spec.serial.trim()}` : ""}`;
+                        if (!window.confirm(`Remove ${label} from this install?`)) return;
+                        const next = specs.filter((_, i) => i !== index);
+                        const linked = (visit.data?.machines ?? []).find((m) => {
+                          if (spec.serial.trim() && m.serial && serialKey(m.serial) === serialKey(spec.serial)) return true;
+                          return !spec.serial.trim() && !m.serial && sameWarehouseModel(m.model || m.name, spec.equipment);
+                        });
+                        persistMachines(next);
+                        if (!linked) return;
+                        void removeInspectionEquipment({ data: { installId: row.id, equipmentId: linked.equipmentId, keepList: true } })
+                          .then(() => {
+                            void qc.invalidateQueries({ queryKey: ["inspection", row.id] });
+                            void qc.invalidateQueries({ queryKey: ["installs"] });
+                          })
+                          .catch((e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"));
                       }}
                     />
                   </div>
