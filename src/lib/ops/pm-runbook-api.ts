@@ -15,9 +15,11 @@ import {
   addedKitSentence,
   canWriteRunbook,
   changeAddedKits,
+  CHECK_KEY_RE,
   checkSerialKey,
   historyInterval,
   kitListWithAdded,
+  KIT_NUMBER_RE,
   nextFromHistory,
   parseAddedKits,
   pmAddKitSql,
@@ -29,6 +31,7 @@ import {
   removedKitCheckKeys,
   stepsForVisit,
   unitHistory,
+  unitModelPicked,
   visitConfig,
   visibleOptions,
   type RunbookRole,
@@ -72,6 +75,8 @@ export type RunbookUnit = {
   } | null;
   /** Earlier PMs on this unit (by serial, so they follow it between accounts). */
   earlier: { pmId: number; status: string; completedAt: string | null; kits: number; steps: number }[];
+  /** False when neither the equipment text nor a saved choice names the model. The sheet still opens on the first model. */
+  modelPicked: boolean;
 };
 
 export type RunbookAccountUnit = {
@@ -580,6 +585,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
           .filter((t) => (u.serialKey && t.serial_key === u.serialKey) || t.unit_key === u.unitKey)
           .map((t) => ({ pmId: t.pm_job_id, status: t.status, completedAt: t.completed_at, kits: t.kits, steps: t.steps })),
         history,
+        modelPicked: unitModelPicked(s?.model, u.model),
       };
     });
     const completed = pm.status === "Completed" || !!pm.completed_at;
@@ -831,7 +837,7 @@ export const setRunbookUnitOptions = createServerFn({ method: "POST" })
 
 const checkInput = unitInput.extend({
   optionsKey: z.string().max(200).nullable().optional(),
-  key: z.string().regex(/^(kit|step):[A-Za-z0-9._-]{1,80}$/),
+  key: z.string().regex(CHECK_KEY_RE),
   done: z.boolean(),
 });
 
@@ -869,7 +875,7 @@ export const clearRunbookChecks = createServerFn({ method: "POST" })
 
 const addedInput = unitInput.extend({
   runbookId: z.string().max(80),
-  ev: z.string().regex(/^[A-Za-z0-9._-]{1,40}$/),
+  ev: z.string().regex(KIT_NUMBER_RE),
   on: z.boolean(),
 });
 

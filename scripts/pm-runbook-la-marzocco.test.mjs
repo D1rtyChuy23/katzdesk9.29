@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
-import { defaultConfig, kitList, optionalKits, recommendInterval, stepList } from "../src/lib/ops/pm-runbook.ts";
+import { defaultConfig, kitList, optionalKits, recommendInterval, stepList, unitModelPicked } from "../src/lib/ops/pm-runbook.ts";
+import { planUnits } from "../src/lib/ops/pm-runbook-units.ts";
 import { splitEquipment } from "../src/lib/ops/equipment.ts";
 import { matchLmGb5, matchLmGs3, matchLmKb90, matchLmLinea, matchLmStrada } from "../src/lib/ops/runbooks/la-marzocco-match.ts";
 
@@ -96,6 +97,8 @@ test("matchers on real equipment text", () => {
     ["Kb90 3av", matchLmKb90, "kb90"],
     ["GB5 3av", matchLmGb5, null],
     ["GB5S 2 group", matchLmGb5, "gb5s"],
+    ["La Marzocco GB/5 S 2 Group AV", matchLmGb5, "gb5s"],
+    ["GB/5", matchLmGb5, null],
     ["La Marz GS3", matchLmGs3, null],
     ["GS/3 MP", matchLmGs3, "mp"],
     ["GS3 AV", matchLmGs3, "av"],
@@ -104,5 +107,22 @@ test("matchers on real equipment text", () => {
   for (const piece of ["Linea Mini", "La Marzocco Linea Mini", "Linea Micra", "Strada AV 3 group", "Strada EE", "La Marzocco Swift Dual-Hopper Espresso Grinder", "Eversys Enigma e'4m X-Wide Classic"]) {
     for (const fn of [matchLmLinea, matchLmStrada, matchLmKb90, matchLmGb5, matchLmGs3]) assert.equal(fn(piece), null, piece);
   }
+  for (const piece of ["Strada 3AV", "Strada 2EP", "Strada 2 Group EP", "Strada 3 Group MP"]) assert.equal(matchLmStrada(piece), null, piece);
+  assert.equal(matchLmStrada("La Marzocco Strada S AV 2 Group")?.model, "s");
+  assert.notEqual(matchLmGb5("GB/5"), null);
+  assert.equal(matchLmGb5("GB/5")?.model, null);
+  assert.equal(unitModelPicked(null, matchLmStrada("La Marzocco Strada XT 2 Group").model), false);
   assert.deepEqual(splitEquipment("Linea PB + Swift").map((p) => matchLmLinea(p)?.model ?? "-"), ["pb", "-"]);
+});
+
+test("planUnits uses a model that only the catalog name gives", () => {
+  const match = (piece) => {
+    const gs3 = matchLmGs3(piece);
+    if (gs3) return { runbookId: "la-marzocco-gs3", model: gs3.model };
+    const linea = matchLmLinea(piece);
+    if (linea) return { runbookId: "la-marzocco-linea", model: linea.model };
+    return null;
+  };
+  const [gs3] = planUnits("La Marzocco GS3", [{ id: 4, equipmentName: "La Marz GS3", catalogModel: "La Marzocco GS3 MP", serial: "GS-1" }], match);
+  assert.equal(gs3.model, "mp");
 });

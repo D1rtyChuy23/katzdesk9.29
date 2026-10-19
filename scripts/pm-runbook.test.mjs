@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { test } from "node:test";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
 import { kitKey, priceKits, summarizePrices, uncountedNote } from "../src/lib/ops/pm-runbook-prices.ts";
@@ -14,6 +14,7 @@ import {
   recommendInterval,
   visitCarriesShorter,
   changeAddedKits,
+  CHECK_KEY_RE,
   kitList,
   kitListText,
   kitListWithAdded,
@@ -44,6 +45,7 @@ import {
   moduleOnThisPm,
   moduleTypeFit,
   normalizeConfig,
+  parseAddedKits,
   platformFit,
   pmServiceRecord,
   applicableModules,
@@ -586,4 +588,18 @@ test("history for a unit is newest first, and one machine does not show the othe
     note(B, "B3", new Date("2026-10-03T00:00:00Z")),
   ];
   assert.deepEqual(unitHistory(B, busy, []).map((l) => l.detail).sort(), ["Added B1", "Added B2", "Added B3"]);
+});
+
+test("every kit number can be stored and ticked, including a slash", () => {
+  const dir = new URL("../src/lib/ops/runbooks/", import.meta.url);
+  const defs = readdirSync(dir)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => parseRunbookDefinition(JSON.parse(readFileSync(new URL(name, dir), "utf8"))));
+  assert.ok(defs.length >= 6);
+  for (const def of defs) {
+    for (const kit of def.kits) {
+      assert.deepEqual(parseAddedKits([kit.ev]), [kit.ev], `${def.id} ${kit.ev}`);
+      assert.equal(CHECK_KEY_RE.test(`kit:${kit.ev}`), true, `${def.id} kit:${kit.ev}`);
+    }
+  }
 });

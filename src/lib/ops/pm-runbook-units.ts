@@ -46,6 +46,14 @@ export type PlannedUnit = {
 
 type Matcher = (piece: string) => { runbookId: string; model: string | null } | null;
 
+/** A name hit with no model must not hide a catalog hit that names one, on the same runbook. */
+function rowHitFor(match: Matcher, runbookId: string, row: AccountUnitRow): { runbookId: string; model: string | null } | null {
+  const hits = [match(row.equipmentName), match(row.catalogModel)].filter(
+    (h): h is NonNullable<ReturnType<Matcher>> => !!h && h.runbookId === runbookId,
+  );
+  return hits.find((h) => h.model) ?? hits[0] ?? null;
+}
+
 /** Key under which a unit's options live. Same value whether the unit sits in `assets` or `account_equipment`. */
 export function optionsKeyFor(serial: string | null | undefined): string | null {
   const s = parseSerial(serial);
@@ -88,8 +96,8 @@ export function planUnits(
       // Loose text ("E4X-WIDE"): take an unused account unit the same runbook recognises, model permitting.
       idx = accountRows.findIndex((r, i) => {
         if (used.has(i) || heldForOther(r.id)) return false;
-        const rowHit = match(r.equipmentName) ?? match(r.catalogModel);
-        return !!rowHit && rowHit.runbookId === hit.runbookId && (!hit.model || !rowHit.model || rowHit.model === hit.model);
+        const rowHit = rowHitFor(match, hit.runbookId, r);
+        return !!rowHit && (!hit.model || !rowHit.model || rowHit.model === hit.model);
       });
     }
     let serial: string | null = null;
@@ -97,7 +105,7 @@ export function planUnits(
     if (idx >= 0) {
       used.add(idx);
       serial = parseSerial(accountRows[idx].serial);
-      const rowHit = match(accountRows[idx].equipmentName) ?? match(accountRows[idx].catalogModel);
+      const rowHit = rowHitFor(match, hit.runbookId, accountRows[idx]);
       if (!model && rowHit?.model) model = rowHit.model;
     }
     const sk = optionsKeyFor(serial);

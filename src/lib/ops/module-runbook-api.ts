@@ -11,6 +11,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { loadPmRunbookPlan, loadVisitConfig, pmIsCompleted } from "@/lib/ops/pm-runbook-api";
 import {
   canWriteRunbook,
+  CHECK_KEY_RE,
   MODULE_NOT_ON_PM,
   addedKitDetail,
   addedKitSentence,
@@ -19,6 +20,7 @@ import {
   changeAddedKits,
   checkSerialKey,
   checksForModuleSheet,
+  KIT_NUMBER_RE,
   moduleBenchConfig,
   moduleKitListText,
   moduleOnThisPm,
@@ -277,7 +279,7 @@ const saveInput = scope.extend({
   checkKey: z.string().max(80).optional(),
   checked: z.boolean().optional(),
   again: z.boolean().optional(),
-  addEv: z.string().regex(/^[A-Za-z0-9._-]{1,40}$/).optional(),
+  addEv: z.string().regex(KIT_NUMBER_RE).optional(),
   addOn: z.boolean().optional(),
 });
 
@@ -318,7 +320,7 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         }
       }
       if (data.checkKey && data.checked != null) {
-        if (!/^(kit|step):[A-Za-z0-9._-]{1,80}$/.test(data.checkKey)) throw new Error("Unknown check.");
+        if (!CHECK_KEY_RE.test(data.checkKey)) throw new Error("Unknown check.");
         await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name);
         if (data.checked) {
           await sql.query(

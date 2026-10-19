@@ -444,6 +444,11 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
+        {!unit.modelPicked ? (
+          <p className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900 sm:col-span-2">
+            The equipment text doesn't say which model this is. Pick the machine.
+          </p>
+        ) : null}
         <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
         <Seg label="Service interval" value={c.pm} disabled={!canWrite} choices={def.intervals.map((i) => ({ val: i.id, label: i.label }))} onPick={(v) => pickJob("pm", v)} />
         {visibleOptions(def, c).map((o) => (

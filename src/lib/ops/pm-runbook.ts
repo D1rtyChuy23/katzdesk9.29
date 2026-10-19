@@ -120,11 +120,16 @@ export function optionalKitsLeft(def: RunbookDefinition, c: RunbookConfig, added
   return optionalKits(def, c).filter((k) => !have.has(k.ev) && (!groups || groups.includes(k.module)));
 }
 
+/** Kit numbers such as EV109586, F.3.040 and SA600/K2. */
+export const KIT_NUMBER_RE = /^[A-Za-z0-9._/-]{1,40}$/;
+/** A tick key: `kit:SA600/K2` or `step:hyd-kit`. */
+export const CHECK_KEY_RE = /^(kit|step):[A-Za-z0-9._/-]{1,80}$/;
+
 export function parseAddedKits(v: unknown): string[] {
   const x = typeof v === "string" ? safeJson(v) : v;
   if (!Array.isArray(x)) return [];
   const out: string[] = [];
-  for (const n of x) if (typeof n === "string" && /^[A-Za-z0-9._-]{1,40}$/.test(n) && !out.includes(n)) out.push(n);
+  for (const n of x) if (typeof n === "string" && KIT_NUMBER_RE.test(n) && !out.includes(n)) out.push(n);
   return out;
 }
 
@@ -827,6 +832,11 @@ export function historyInterval(def: RunbookDefinition, savedInterval: string | 
   if (saved) return saved;
   if (defersDefaultStyle(def, style)) return null;
   return intervalFromStyle(def, style);
+}
+
+/** True when the equipment text or a saved choice already names a model. False opens on the first model and the tech should pick. */
+export function unitModelPicked(savedModel: string | null | undefined, matchedModel: string | null | undefined): boolean {
+  return !!(savedModel && String(savedModel).trim()) || !!(matchedModel && String(matchedModel).trim());
 }
 
 /** "year 3" when the milestone is a whole number of years, otherwise "month 3". */
