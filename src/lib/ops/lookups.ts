@@ -1,5 +1,6 @@
 import { DEFAULT_REPS, PRODUCER_INITIALS as REP_INITIALS } from "./rep-match";
 import { normalizeName } from "./norm";
+import { DEFAULT_PM_STYLE } from "./pm-runbook";
 
 export {
   PRODUCERS,
@@ -49,7 +50,7 @@ export const PM_STATUSES = [
   "Cancelled",
 ] as const;
 
-export const PM_STYLES = ["3 month PM", "9 month PM", "6 month PM", "12 month PM", "36 month PM", "Grinder PM"] as const;
+export const PM_STYLES = ["3 month PM", "9 month PM", "6 month PM", DEFAULT_PM_STYLE, "36 month PM", "Grinder PM"] as const;
 
 export const PARTS_STATUSES = [
   "Yes - All Available",

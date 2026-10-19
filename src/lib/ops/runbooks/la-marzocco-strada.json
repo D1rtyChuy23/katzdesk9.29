@@ -1,6 +1,7 @@
 {
   "id": "la-marzocco-strada",
   "manufacturer": "La Marzocco",
+  "defaultStyleLast": true,
   "title": "Strada PM Runbook",
   "subtitle": "La Marzocco Strada S and Strada X | preventive maintenance kits and steps",
   "sources": "La Marzocco USA preventative maintenance checklists v2.1 (May 2026): 3/9-month, 6-month and 12-month. Kit numbers are per visit and group count. La Marzocco does not print kit contents on the checklists; where a kit note lists contents it comes from the checklist's replace list or LM's annual PM summary. Confirm kit numbers with La Marzocco USA before ordering.",

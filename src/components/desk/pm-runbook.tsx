@@ -21,7 +21,7 @@ import { listModules } from "@/lib/ops/api";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
 import { assignModule } from "@/lib/ops/module-assign";
-import { visitBanners, applicableModules, combinedVisitNotes, kitListText, kitListWithAdded, longestIntervalId, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { visitBanners, applicableModules, combinedVisitNotes, kitListText, kitListWithAdded, longestIntervalId, milestoneAge, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
@@ -484,8 +484,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
             Recommended: <b>{unit.recommended.label}</b>
-            {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is year{" "}
-            {unit.recommended.year} at this location. Choose otherwise if the customer wants a different service.
+            {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is{" "}
+            {milestoneAge(unit.recommended.milestone)} at this location. Choose otherwise if the customer wants a different service.
           </span>
           {canWrite ? (
             <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.recommended!.id)}>
@@ -495,7 +495,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </div>
       ) : unit.recommended ? (
         <p className="text-xs text-muted-foreground">
-          Matches the recommendation from the install date ({unit.installDate}, year {unit.recommended.year}).
+          Matches the recommendation from the install date ({unit.installDate}, {milestoneAge(unit.recommended.milestone)}).
         </p>
       ) : null}
 

@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import { getSql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "@/lib/ops/lookups";
+import { DEFAULT_PM_STYLE } from "@/lib/ops/pm-runbook";
 import { todayChicago } from "@/lib/ops/clock";
 import {
   deskHasWrapped,
@@ -487,7 +488,7 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
           const done = CLOSED_PM.has(status);
           const inserted = await sql.query<{ id: number }>(
             `insert into pm_jobs (customer, received, status, technician, wo, work_done, completed_at, style, done)
-             values ($1, $2, $3, $4, $5, $6, $7, '12 month PM', $8)
+             values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
              returning id`,
             [
               customer || "Unknown",
@@ -497,6 +498,7 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
               wo,
               row.workDone,
               row.completedAt,
+              DEFAULT_PM_STYLE,
               done,
             ],
           );

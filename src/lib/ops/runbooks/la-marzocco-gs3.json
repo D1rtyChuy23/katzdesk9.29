@@ -1,6 +1,7 @@
 {
   "id": "la-marzocco-gs3",
   "manufacturer": "La Marzocco",
+  "defaultStyleLast": true,
   "title": "GS3 PM Runbook",
   "subtitle": "La Marzocco GS3 AV and GS3 MP | preventive maintenance parts and steps",
   "sources": "La Marzocco USA GS3 preventative maintenance checklists: 6 Month and 1 Year (undated). The 1-year visit includes the 6-month parts. Confirm part numbers with La Marzocco USA before ordering.",

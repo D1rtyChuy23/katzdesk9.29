@@ -7,7 +7,9 @@ import {
   canEditRunbookDefinitions,
   canWriteRunbook,
   defaultConfig,
+  historyInterval,
   intervalFromStyle,
+  milestoneAge,
   nextFromHistory,
   recommendInterval,
   changeAddedKits,
@@ -270,6 +272,26 @@ test("La Marzocco style, history and combined-visit text", () => {
   assert.equal(combinedVisitNotes(linea).recommended, " (the 3/9-month and 12-month PMs together)");
   assert.equal(modulesNotTakenReason(linea, "pb", false), "Linea PB does not take Eversys modules.");
   assert.equal(modulesNotTakenReason(def, "4s", true), null);
+});
+
+test("the default 12-month style waits for the install date on La Marzocco", () => {
+  const linea = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/la-marzocco-linea.json", import.meta.url), "utf8")));
+  const now = new Date("2026-10-18T15:00:00Z");
+  const pm = (install, style, earlier = []) => visitConfig(linea, { style, installDate: install, earlierIntervals: earlier, model: "pb", now }).pm;
+  assert.equal(pm("2026-07-18", "12 month PM"), "3");
+  assert.equal(pm("2026-04-18", "12 month PM"), "6");
+  assert.equal(pm(null, "12 month PM", ["3"]), "6");
+  assert.equal(pm(null, "12 month PM", ["3", "6", "3"]), "12");
+  assert.equal(historyInterval(linea, null, "12 month PM"), null);
+  assert.equal(historyInterval(linea, "6", "12 month PM"), "6");
+  assert.equal(historyInterval(def, null, "12 month PM"), "12");
+  assert.equal(pm("2026-07-18", "6 month PM"), "6");
+  assert.equal(pm(null, "12 month PM"), "12");
+  const eversys = (style) => visitConfig(def, { style, installDate: "2023-10-10", model: "4s", now }).pm;
+  assert.equal(eversys("12 month PM"), "12");
+  assert.equal(eversys("6 month PM"), "36");
+  assert.equal(milestoneAge(3), "month 3");
+  assert.equal(milestoneAge(36), "year 3");
 });
 
 test("units: pieceKey is the key a line had before it matched an account unit", () => {

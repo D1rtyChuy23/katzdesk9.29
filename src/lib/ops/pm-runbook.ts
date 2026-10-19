@@ -764,6 +764,18 @@ export function matchE4XWide(piece: string | null | undefined): { model: "4s" | 
   return { model: null };
 }
 
+/** The style a new PM and the Corrigo import store when nobody has chosen one. */
+export const DEFAULT_PM_STYLE = "12 month PM" as const;
+
+export function isDefaultPmStyle(style: string | null | undefined): boolean {
+  return String(style ?? "").trim().toLowerCase() === DEFAULT_PM_STYLE.toLowerCase();
+}
+
+/** True when this definition should not let the default style hide the install-date cycle. */
+function defersDefaultStyle(def: RunbookDefinition, style: string | null | undefined): boolean {
+  return !!def.defaultStyleLast && isDefaultPmStyle(style);
+}
+
 /** A PM style such as "36 month PM" → that interval id when the definition offers it.
  * Otherwise the largest offered interval that divides the month number ("9 month PM" → "3", "24 month PM" → "12").
  * Null when the style names no month, or no offered interval divides it ("6 month PM" on Eversys, so the install date still wins).
@@ -779,8 +791,9 @@ export function intervalFromStyle(def: RunbookDefinition, style: string | null |
 }
 
 /**
- * The interval and options for one unit on one visit. Saved choice wins, then the PM style
- * ("36 month PM"), then the install-date recommendation, then the earlier-PM history.
+ * The interval and options for one unit on one visit. Saved choice wins, then the PM style,
+ * then the install-date recommendation, then the earlier-PM history.
+ * On a definition with `defaultStyleLast`, the default style waits until after the install date and history.
  * The PM sheet, the on-site module sheet and adding a kit all use this.
  */
 export function visitConfig(
@@ -798,8 +811,27 @@ export function visitConfig(
   const recommended = recommendInterval(def, input.installDate, input.now);
   const fromHistory = recommended ? null : nextFromHistory(def, [...(input.earlierIntervals ?? [])]);
   const saved = input.savedInterval && def.intervals.some((i) => i.id === input.savedInterval) ? input.savedInterval : null;
-  const pm = saved ?? intervalFromStyle(def, input.style) ?? recommended?.id ?? fromHistory?.id ?? undefined;
+  const fromStyle = intervalFromStyle(def, input.style);
+  const pm = defersDefaultStyle(def, input.style)
+    ? saved ?? recommended?.id ?? fromHistory?.id ?? fromStyle ?? undefined
+    : saved ?? fromStyle ?? recommended?.id ?? fromHistory?.id ?? undefined;
   return normalizeConfig(def, { ...(input.options ?? {}), model: input.model ?? undefined, pm });
+}
+
+/**
+ * Interval recorded for one completed visit. A saved choice wins. The default style counts as unknown
+ * on a `defaultStyleLast` definition, so it does not pretend the visit was a 12-month PM.
+ */
+export function historyInterval(def: RunbookDefinition, savedInterval: string | null | undefined, style: string | null | undefined): string | null {
+  const saved = savedInterval && def.intervals.some((i) => i.id === savedInterval) ? savedInterval : null;
+  if (saved) return saved;
+  if (defersDefaultStyle(def, style)) return null;
+  return intervalFromStyle(def, style);
+}
+
+/** "year 3" when the milestone is a whole number of years, otherwise "month 3". */
+export function milestoneAge(milestone: number): string {
+  return milestone % 12 === 0 ? `year ${milestone / 12}` : `month ${milestone}`;
 }
 
 /**

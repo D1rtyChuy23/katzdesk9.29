@@ -100,6 +100,42 @@ test("a bench add and remove is one statement, and a second remove writes nothin
   }
 });
 
+test("a completed La Marzocco PM stores the install-date interval and leaves a saved one", async () => {
+  process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
+  await register("./node-resolve-hook.mjs", import.meta.url);
+  const { recordCompletedRunbook } = await import("../src/lib/ops/pm-runbook-api.ts");
+  const pg = new PGlite();
+  try {
+    await applyMigrations(pg);
+    const sql = { query: async (text, params) => (await pg.query(text, params)).rows };
+    const pm = (await pg.query("insert into pm_jobs (customer, style) values ('Cafe', '12 month PM') returning id")).rows[0].id;
+    await pg.query(
+      "insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, interval_mo, updated_at) values ($1, $2, $3, $4, $5)",
+      [pm, "acct:2", "la-marzocco-linea", "6", "2020-01-01T00:00:00Z"],
+    );
+    const unit = (key, install) => ({
+      unitKey: key,
+      pieceKey: `${key}-piece`,
+      optionsKey: key === "acct:1" ? "SN-A" : "SN-B",
+      accountId: key === "acct:1" ? 1 : 2,
+      installDate: install,
+      piece: "La Marzocco Linea PB 2AV",
+      serial: key === "acct:1" ? "SN-A" : "SN-B",
+      serialKey: key === "acct:1" ? "SN-A" : "SN-B",
+      runbookId: "la-marzocco-linea",
+      model: "pb",
+    });
+    await recordCompletedRunbook(sql, pm, "user-1", [unit("acct:1", "2026-07-18"), unit("acct:2", "2026-07-18")], "12 month PM", new Date("2026-10-18T15:00:00Z"));
+    const rows = await pg.query("select unit_key, interval_mo, updated_at::text as updated_at from pm_runbook_units order by unit_key");
+    const byKey = Object.fromEntries(rows.rows.map((r) => [r.unit_key, r]));
+    assert.equal(byKey["acct:1"].interval_mo, "3");
+    assert.equal(byKey["acct:2"].interval_mo, "6");
+    assert.match(byKey["acct:2"].updated_at, /^2020-01-01/);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("a completed PM records the same interval the sheets use", async () => {
   process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
   await register("./node-resolve-hook.mjs", import.meta.url);

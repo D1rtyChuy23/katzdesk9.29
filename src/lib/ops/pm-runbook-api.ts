@@ -16,7 +16,7 @@ import {
   canWriteRunbook,
   changeAddedKits,
   checkSerialKey,
-  intervalFromStyle,
+  historyInterval,
   kitListWithAdded,
   nextFromHistory,
   parseAddedKits,
@@ -190,8 +190,20 @@ export async function recordCompletedRunbook(
     );
     if (already[0]) continue;
     await sql.query(
-      "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('unit_runbook', $1, $2, $3, $4)",
-      [historyId, me.name, PM_SERVICE_ACTION, detail],
+      `with up as (
+         insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, interval_mo, updated_by)
+         values ($1::int, $2::text, $3::text, $4::text, $5::text)
+         on conflict (pm_job_id, unit_key) do update
+           set interval_mo = excluded.interval_mo, updated_by = excluded.updated_by, updated_at = now()
+         where pm_runbook_units.interval_mo is null
+         returning pm_job_id
+       ), act as (
+         insert into activity (entity_type, entity_id, actor_name, action, detail)
+         values ('unit_runbook', $6::int, $5::text, $7::text, $8::text)
+         returning id
+       )
+       select (select count(*) from up)::int as saved, (select count(*) from act)::int as logged`,
+      [pmId, u.unitKey, u.runbookId, config.pm, me.name, historyId, PM_SERVICE_ACTION, detail],
     );
   }
 }
@@ -224,12 +236,12 @@ export function earlierVisitsForUnit(
   for (const d of doneRows) {
     const hit = planUnits(d.equipment, rows, pmMatcher, pins[d.id]).find((x) => x.unitKey === unit.unitKey);
     if (!hit) continue;
-    const interval = savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === unit.unitKey)?.interval_mo ?? intervalFromStyle(def, d.style);
+    const interval = historyInterval(def, savedIntervals.find((s) => s.pm_job_id === d.id && s.unit_key === unit.unitKey)?.interval_mo, d.style);
     if (interval) out.set(d.id, { pmId: d.id, interval, completedAt: d.completed_at });
   }
   for (const b of bySerial) {
     if (!unit.serialKey || b.serial_key !== unit.serialKey) continue;
-    const interval = b.interval_mo ?? intervalFromStyle(def, b.style);
+    const interval = historyInterval(def, b.interval_mo, b.style);
     if (interval) out.set(b.id, { pmId: b.id, interval, completedAt: b.completed_at });
   }
   return [...out.values()].sort((a, b) => (a.completedAt ?? "9999").localeCompare(b.completedAt ?? "9999") || a.pmId - b.pmId);
