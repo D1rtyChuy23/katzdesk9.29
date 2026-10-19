@@ -38,7 +38,7 @@ import {
   type SharedCheck,
   type StepGroup,
 } from "@/lib/ops/pm-runbook";
-import { catalogKeys, kitKey, pickCatalog } from "@/lib/ops/pm-runbook-prices";
+import { catalogKeys, kitKey, pickCatalog, prefixForManufacturer } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig } from "@/lib/ops/pm-runbook-schema";
 import { runbookForPlatform } from "@/lib/ops/runbooks";
 
@@ -105,6 +105,8 @@ export type ModuleRunbookData = {
   notice: string | null;
   /** The PM itself is completed, so on-site kits stay as they are. */
   pmCompleted: boolean;
+  /** Runbook whose kit numbers are priced. Null when this module has no runbook. */
+  runbookId: string | null;
 };
 
 async function findService(sql: Sql, moduleId: number, context: "bench" | "pm", pmId: number | null): Promise<ServiceRow | null> {
@@ -202,6 +204,7 @@ async function viewOf(sql: Sql, data: z.infer<typeof scope>, userId: string): Pr
     copyText: "",
     notice: null,
     pmCompleted: false,
+    runbookId: null,
   };
   if (!mod) return empty;
   const rb = runbookForPlatform(mod.platform);
@@ -264,6 +267,7 @@ async function viewOf(sql: Sql, data: z.infer<typeof scope>, userId: string): Pr
     copyText: moduleKitListText(mod.module_type!, interval?.label ?? `${config.pm}-month PM`, view.kits),
     notice: null,
     pmCompleted,
+    runbookId: rb.def.id,
   };
 }
 
@@ -411,7 +415,8 @@ export const completeModuleRunbook = createServerFn({ method: "POST" })
     if (done[0]) {
       const fresh = await viewOf(sql, data, context.userId);
       const ticked = Object.keys(fresh.checks);
-      const keys = [...new Set(fresh.kits.map((k) => k.ev).flatMap(catalogKeys))];
+      const prefix = prefixForManufacturer(rb.def.manufacturer);
+      const keys = [...new Set(fresh.kits.map((k) => k.ev).flatMap((ev) => catalogKeys(ev, prefix)))];
       const rows = keys.length
         ? await sql.query<{ sku: string; item: string | null; description: string | null; mfr_part: string | null; rate: string | null; active: unknown; hidden: unknown }>(
             `select sku, item, description, mfr_part, rate, active, (hidden_at is not null) as hidden
@@ -433,6 +438,7 @@ export const completeModuleRunbook = createServerFn({ method: "POST" })
           active: flagOn(r.active),
           hidden: flagOn(r.hidden),
         })),
+        prefix,
       );
       const skus: Record<string, string | null> = {};
       for (const k of fresh.kits) skus[k.ev] = catalog[kitKey(k.ev)]?.sku ?? null;

@@ -23,8 +23,8 @@ export function ModuleRunbook({ moduleId, context, pmId }: { moduleId: number; c
   const data = q.data;
   const evs = [...(data?.kits ?? []), ...(data?.optional ?? [])].map((k) => k.ev);
   const prices = useQuery({
-    queryKey: ["pm-runbook-prices", evs.join(",")],
-    queryFn: () => getKitPrices({ data: { evs } }),
+    queryKey: ["pm-runbook-prices", data?.runbookId ?? "", evs.join(",")],
+    queryFn: () => getKitPrices({ data: { evs, runbookId: data?.runbookId ?? undefined } }),
     enabled: evs.length > 0,
   });
   const priced = data ? priceKits(data.kits, prices.data ?? {}) : [];

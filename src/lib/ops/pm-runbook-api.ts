@@ -37,7 +37,7 @@ import {
   type RunbookRole,
 } from "@/lib/ops/pm-runbook";
 import { planUnits, pmCompletionRefusal, type AccountUnitRow, type PlannedUnit } from "@/lib/ops/pm-runbook-units";
-import { catalogKeys, pickCatalog, type CatalogKit } from "@/lib/ops/pm-runbook-prices";
+import { catalogKeys, pickCatalog, prefixForManufacturer, type CatalogKit } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
 
 export type RunbookUnit = {
@@ -922,9 +922,12 @@ export async function pmIsCompleted(sql: Sql, pmId: number): Promise<boolean> {
  */
 export const getKitPrices = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .validator((d: { evs: string[] }) => z.object({ evs: z.array(z.string().min(1).max(40)).max(200) }).parse(d))
+  .validator((d: { evs: string[]; runbookId?: string }) =>
+    z.object({ evs: z.array(z.string().min(1).max(40)).max(200), runbookId: z.string().max(80).optional() }).parse(d),
+  )
   .handler(async ({ data }): Promise<Record<string, CatalogKit>> => {
-    const keys = [...new Set(data.evs.flatMap(catalogKeys))];
+    const prefix = prefixForManufacturer(runbookById(data.runbookId ?? "")?.def.manufacturer);
+    const keys = [...new Set(data.evs.flatMap((ev) => catalogKeys(ev, prefix)))];
     if (!keys.length) return {};
     const sql = await ready();
     const rows = await sql.query<{
@@ -954,5 +957,6 @@ export const getKitPrices = createServerFn({ method: "GET" })
         active: flagOn(r.active),
         hidden: flagOn(r.hidden),
       })),
+      prefix,
     );
   });

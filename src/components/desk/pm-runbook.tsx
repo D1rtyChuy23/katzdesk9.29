@@ -309,8 +309,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const optional = useMemo(() => (unit && rb ? optionalKitsLeft(rb.def, unit.config, unit.addedKits) : []), [unit, rb]);
   const kitNumbers = useMemo(() => [...listed, ...optional].map((k) => k.ev), [listed, optional]);
   const priceQ = useQuery({
-    queryKey: ["pm-runbook-prices", kitNumbers.join(",")],
-    queryFn: () => getKitPrices({ data: { evs: kitNumbers } }),
+    queryKey: ["pm-runbook-prices", unit?.runbookId ?? "", kitNumbers.join(",")],
+    queryFn: () => getKitPrices({ data: { evs: kitNumbers, runbookId: unit?.runbookId } }),
     enabled: kitNumbers.length > 0,
   });
   const [armed, setArmed] = useState(false);
