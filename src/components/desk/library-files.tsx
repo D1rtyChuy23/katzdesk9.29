@@ -22,6 +22,7 @@ export type UploadResult = {
   bookId: number;
   bookTitle: string;
   manufacturer: string;
+  fileId?: number;
 };
 
 /** The chip the shared copy should sit on: the main chip's model, or the family name when that chip does not exist yet. */
@@ -75,6 +76,7 @@ export async function uploadLibraryFile(
         bookId: mainId,
         bookTitle: mainTitle,
         manufacturer: offer.manufacturer,
+        fileId: offer.match.id,
       };
     }
     started = await begin(true);
@@ -87,7 +89,7 @@ export async function uploadLibraryFile(
     await appendLibraryChunk({ data: { id: started.id, seq, base64: toBase64(bytes) } });
   }
   await finishLibraryFile({ data: { id: started.id } });
-  return { name: started.name, section: started.section, storedOnce: false, bookId, bookTitle: "", manufacturer: "" };
+  return { name: started.name, section: started.section, storedOnce: false, bookId, bookTitle: "", manufacturer: "", fileId: started.id };
 }
 
 export const originOf = () => (typeof window === "undefined" ? "" : window.location.origin);

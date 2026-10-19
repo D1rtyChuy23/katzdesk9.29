@@ -202,6 +202,38 @@ const extractInput = z.object({
   fileName: z.string().max(300).optional(),
 });
 
+/** Text in, structured draft out. No rate limit — the caller decides how often this runs. */
+export async function extractSpecFromText(apiKey: string, text: string, fileName?: string): Promise<ExtractResult> {
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: `Spec sheet${fileName ? ` "${fileName}"` : ""} text:\n\n${text}` },
+  ];
+  try {
+    const first = await callXai(apiKey, messages);
+    let parsed = parseExtraction(first);
+    let usedRetry = false;
+    if (!parsed.ok) {
+      usedRetry = true;
+      const second = await callXai(apiKey, [
+        ...messages,
+        { role: "assistant", content: first.slice(0, 8000) },
+        { role: "user", content: `That was not valid for the schema (${parsed.error}). Reply with only the corrected JSON object.` },
+      ]);
+      parsed = parseExtraction(second);
+    }
+    if (!parsed.ok) {
+      return { ok: false, reason: "failed", message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.` };
+    }
+    const filtered = filterNonUsa(parsed.data);
+    if (!filtered.draft.configs.length) filtered.draft.configs.push({ label: "Standard", requirements: {} });
+    const draft = applySpecDefaults(filtered.draft, "generate");
+    return { ok: true, draft, removed: filtered.removed, usedRetry };
+  } catch (e) {
+    const msg = e instanceof Error ? (e.name === "AbortError" ? "the AI took too long" : e.message) : "unknown error";
+    return { ok: false, reason: "failed", message: `Reading the sheet failed (${msg}). Fill in the form by hand instead.` };
+  }
+}
+
 /** Text in, structured draft out. The PDF itself never reaches the server. */
 export const extractSpecSheet = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -235,40 +267,7 @@ export const extractSpecSheet = createServerFn({ method: "POST" })
       };
     }
     await sql.query("insert into spec_import_log (user_id) values ($1)", [context.userId]);
-
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `Spec sheet${data.fileName ? ` "${data.fileName}"` : ""} text:\n\n${text}`,
-      },
-    ];
-    try {
-      const first = await callXai(apiKey, messages);
-      let parsed = parseExtraction(first);
-      let usedRetry = false;
-      if (!parsed.ok) {
-        // One retry, telling the model exactly what was wrong.
-        usedRetry = true;
-        const second = await callXai(apiKey, [
-          ...messages,
-          { role: "assistant", content: first.slice(0, 8000) },
-          { role: "user", content: `That was not valid for the schema (${parsed.error}). Reply with only the corrected JSON object.` },
-        ]);
-        parsed = parseExtraction(second);
-      }
-      if (!parsed.ok) {
-        return { ok: false, reason: "failed", message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.` };
-      }
-      const filtered = filterNonUsa(parsed.data);
-      if (!filtered.draft.configs.length) filtered.draft.configs.push({ label: "Standard", requirements: {} });
-      // Katz defaults: 3/8" compression valve inlet, plug + breaker from the electrical configuration.
-      const draft = applySpecDefaults(filtered.draft, "generate");
-      return { ok: true, draft, removed: filtered.removed, usedRetry };
-    } catch (e) {
-      const msg = e instanceof Error ? (e.name === "AbortError" ? "the AI took too long" : e.message) : "unknown error";
-      return { ok: false, reason: "failed", message: `Reading the sheet failed (${msg}). Fill in the form by hand instead.` };
-    }
+    return extractSpecFromText(apiKey, text, data.fileName);
   });
 
 // ---------------- save / delete ----------------

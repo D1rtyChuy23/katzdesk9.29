@@ -48,6 +48,7 @@ export function TrainingSection() {
   const files = data.data?.files ?? [];
   const canEdit = !!data.data?.canEdit;
   const counts = countByTopic(files);
+  const visibleTopics = counts.filter((c) => c.count > 0 || (canEdit && manage));
   const shown = topic ? files.filter((f) => f.topic === topic) : [];
   const label = topicLabel(topic);
 
@@ -99,21 +100,25 @@ export function TrainingSection() {
         <p className="text-xs text-muted-foreground" data-testid="training-note">
           Training material by topic. Not a model spec, and never filed under a machine.
         </p>
-        {canEdit && topic ? (
+        {canEdit ? (
           <Button type="button" size="sm" variant={manage ? "secondary" : "ghost"} className="ml-auto" aria-pressed={manage} onClick={() => setManage(!manage)} data-testid="training-manage">
             <Settings2 className="size-4" /> {manage ? "Done" : "Manage"}
           </Button>
         ) : null}
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Training topics" data-testid="training-topics">
-        {counts.map((c) => (
-          <FilterChip key={c.key} selected={topic === c.key} onClick={() => setTopic(topic === c.key ? null : c.key)} data-testid="training-topic" data-topic={c.key}>
-            {c.label}
-            <span className="ml-1.5 text-xs opacity-60">{c.count}</span>
-          </FilterChip>
-        ))}
-      </div>
+      {visibleTopics.length ? (
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Training topics" data-testid="training-topics">
+          {visibleTopics.map((c) => (
+            <FilterChip key={c.key} selected={topic === c.key} onClick={() => setTopic(topic === c.key ? null : c.key)} data-testid="training-topic" data-topic={c.key}>
+              {c.label}
+              <span className="ml-1.5 text-xs opacity-60">{c.count}</span>
+            </FilterChip>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground" data-testid="training-empty">No training files yet.</p>
+      )}
 
       {topic ? (
         <div

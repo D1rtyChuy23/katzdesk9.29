@@ -16,6 +16,8 @@ import {
   type FormUnit,
   type VisitMachine,
 } from "@/lib/ops/install-form";
+import { outletForModel, withSpecOutlet } from "@/lib/ops/spec-read";
+import { loadSpecOutlets } from "@/lib/ops/spec-read-api";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -118,17 +120,21 @@ export const getInstallForm = createServerFn({ method: "GET" })
       const hit = recipes.find((r) => r.equipment_model && r.equipment_model.toLowerCase() === model.toLowerCase() && r.name);
       return hit?.name ?? "";
     };
+    const outlets = await loadSpecOutlets(sql).catch(() => []);
     const units: FormUnit[] = folded.rows.map((row) => {
       const machine = inspection?.machines.find(
         (m) => (m.serial && serialKey(m.serial) === serialKey(row.serial)) || (!row.serial && (m.model === row.equipment || m.name === row.equipment)),
       );
-      return {
-        model: row.equipment,
-        serial: row.serial,
-        notes: machine?.note || recipeName(row.recipeId, row.equipment),
-        voltage: row.powerVoltage,
-        plug: row.plug ?? "",
-      };
+      return withSpecOutlet(
+        {
+          model: row.equipment,
+          serial: row.serial,
+          notes: machine?.note || recipeName(row.recipeId, row.equipment),
+          voltage: row.powerVoltage,
+          plug: row.plug ?? "",
+        },
+        outletForModel(row.equipment, outlets),
+      );
     });
     const rows = groupFormRows(units);
     const items = (inspection?.machines ?? []).flatMap((m) => m.items);
