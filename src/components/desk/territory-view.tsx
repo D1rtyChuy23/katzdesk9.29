@@ -6,7 +6,6 @@ import { needsAttention, pointOf, scrollUnderHeader, useGeoIndex } from "./geo-d
 import { MapLegend, Swatch, type LegendItem } from "./customer-map";
 import { RepName } from "./rep-select";
 import { AkBadge, NoRepFlag } from "./ak-badge";
-import { OpenLink } from "./open-link";
 import { ShowMoreButton, useShowMore } from "./show-more";
 import { useMyView } from "./my-view-bar";
 import { Button } from "@/components/ui/button";
@@ -105,7 +104,13 @@ function useNoRepAreas(accounts: AccountGeo[] | null): NoRepAreas | null {
  * the accounts with no rep grouped by area, each with the rep who already covers that area best. The map shows one
  * rep's pins in color over everyone else's in gray.
  */
-export function TerritoryView() {
+export function TerritoryView({
+  accountId = null,
+  onSelectAccount,
+}: {
+  accountId?: number | null;
+  onSelectAccount?: (id: number | null) => void;
+} = {}) {
   const geo = useGeoIndex();
   const { filterMine, matchMine, role } = useMyView();
   const scoped = filterMine && role === "sales";
@@ -118,7 +123,9 @@ export function TerritoryView() {
   // every click so the same button fits again after the map has been moved.
   const [fit, setFit] = useState<{ n: number; points: LatLng[] | null }>({ n: 0, points: null });
   const [openAreas, setOpenAreas] = useState<Set<string>>(() => new Set());
+  const [focus, setFocus] = useState<LatLng | null>(null);
   const mapBox = useRef<HTMLDivElement>(null);
+  const appliedAccount = useRef<number | null>(null);
 
   const inScope = useMemo(() => (scoped ? (a: AccountGeo) => a.aviKatz || matchMine(a.rep) : () => true), [scoped, matchMine]);
 
@@ -184,6 +191,46 @@ export function TerritoryView() {
   }, [accounts, inScope, colorOf, shown]);
 
   const pinAccount = pinId != null ? geo.byId.get(pinId) ?? null : null;
+
+  // `?account=` selects the pin here too. A click sets `appliedAccount` first so the map is not moved again.
+  useEffect(() => {
+    if (!data) return;
+    if (accountId == null) {
+      if (appliedAccount.current != null) {
+        appliedAccount.current = null;
+        setPinId(null);
+      }
+      return;
+    }
+    const a = geo.byId.get(accountId);
+    if (!a) return;
+    if (appliedAccount.current !== accountId) {
+      appliedAccount.current = accountId;
+      setPinId(a.id);
+      const p = pointOf(a);
+      if (p) setFocus({ lat: p.lat, lng: p.lng });
+    }
+    if (!areas) return;
+    const hit = areas.areas.find((area) => area.items.some((row) => row.id === a.id));
+    const key = hit?.key ?? (areas.unplaced.some((row) => row.id === a.id) ? "unplaced" : null);
+    if (key) setOpenAreas((cur) => (cur.has(key) ? cur : new Set(cur).add(key)));
+  }, [accountId, data, geo.byId, areas]);
+
+  function chooseAccount(a: AccountGeo, fromList = true) {
+    appliedAccount.current = a.id;
+    setPinId(a.id);
+    const p = pointOf(a);
+    if (p) setFocus({ lat: p.lat, lng: p.lng });
+    onSelectAccount?.(a.id);
+    // On a phone the list is under the map. On a wide screen, leave the list where it is.
+    if (fromList && window.matchMedia("(max-width: 1023px)").matches) scrollUnderHeader(mapBox.current);
+  }
+
+  function closePin() {
+    appliedAccount.current = null;
+    setPinId(null);
+    onSelectAccount?.(null);
+  }
 
   /** Light up one rep (or the accounts with no rep) and fit the map to them, or to `points` (one area) when given. */
   function showOnMap(rep: string, points?: LatLng[]) {
@@ -262,9 +309,13 @@ export function TerritoryView() {
           <DeskMap
             pins={pins}
             selectedId={pinId}
-            onPinClick={(pin) => setPinId(Number(pin.id))}
+            onPinClick={(pin) => {
+              const a = geo.byId.get(Number(pin.id));
+              if (a) chooseAccount(a, false);
+            }}
             fitKey={`territory|${fit.n}|${shown ?? "all"}|${data.accounts.length}|${scoped}`}
             fitTo={fit.points ?? (shown ? litPoints : null)}
+            focus={focus}
             className="h-[45vh] min-h-72"
             label="Territory map"
           >
@@ -275,7 +326,7 @@ export function TerritoryView() {
                 </p>
               </div>
             ) : null}
-            {pinAccount ? <PinCard account={pinAccount} onClose={() => setPinId(null)} /> : null}
+            {pinAccount ? <PinCard account={pinAccount} onClose={closePin} /> : null}
           </DeskMap>
         </div>
       </section>
@@ -349,6 +400,8 @@ export function TerritoryView() {
                 open={openAreas.has(area.key)}
                 onToggle={() => toggleArea(area.key)}
                 onShow={() => showOnMap(NONE, area.items.map(pointOf).filter(isPoint))}
+                selectedId={pinId}
+                onPick={chooseAccount}
               />
             ))}
             <ShowMoreButton as="li" remaining={areaPage.remaining} onClick={areaPage.showMore} label="areas" />
@@ -359,6 +412,8 @@ export function TerritoryView() {
                 note="Not on the map, so not in an area. Importing the verified locations file can place them."
                 open={openAreas.has("unplaced")}
                 onToggle={() => toggleArea("unplaced")}
+                selectedId={pinId}
+                onPick={chooseAccount}
               />
             ) : null}
             {!areas.areas.length && !areas.unplaced.length ? <li className="px-4 py-6 text-center text-sm text-muted-foreground">Nothing to group.</li> : null}
@@ -437,6 +492,8 @@ function AreaRow({
   open,
   onToggle,
   onShow,
+  selectedId,
+  onPick,
 }: {
   label: string;
   items: AccountGeo[];
@@ -445,6 +502,8 @@ function AreaRow({
   open: boolean;
   onToggle: () => void;
   onShow?: () => void;
+  selectedId?: number | null;
+  onPick?: (a: AccountGeo) => void;
 }) {
   const paged = useShowMore(items, open, 25);
   return (
@@ -484,7 +543,16 @@ function AreaRow({
           <ul className={cn("overflow-hidden rounded-lg border border-border", onShow && "mt-2")}>
             {paged.visible.map((a) => (
               <li key={a.id} className="border-b border-border last:border-b-0">
-                <OpenLink entityType="customer" id={a.id} className="flex min-h-10 items-center gap-2 px-3 py-2 text-sm hover:bg-muted/60">
+                <button
+                  type="button"
+                  onClick={() => onPick?.(a)}
+                  aria-current={selectedId === a.id ? "true" : undefined}
+                  className={cn(
+                    "desk-flat flex min-h-10 w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted/60",
+                    selectedId === a.id && "bg-muted",
+                  )}
+                  data-testid="territory-account"
+                >
                   {/* The name wraps on a phone instead of cutting off. */}
                   <span className="min-w-0 flex-1 break-words sm:truncate">
                     {a.name}
@@ -492,7 +560,7 @@ function AreaRow({
                   </span>
                   {a.quality === "approx" ? <span className="shrink-0 text-[11px] text-muted-foreground">ZIP area</span> : null}
                   {a.city ? <span className="max-w-[40%] shrink-0 truncate text-xs text-muted-foreground">{a.city}</span> : null}
-                </OpenLink>
+                </button>
               </li>
             ))}
             <ShowMoreButton as="li" remaining={paged.remaining} onClick={paged.showMore} label="accounts" />

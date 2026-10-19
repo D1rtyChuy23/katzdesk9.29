@@ -1,6 +1,6 @@
 /**
  * Planner routes: one day's open work per tech, in a suggested stop order, grouped by area, with Google Maps links.
- * Pure: no I/O, no DOM — safe for node --test. Distances are straight-line miles; nothing here knows drive times.
+ * Pure: no I/O, no DOM — safe for node --test. Without drive times, distances are straight-line miles.
  */
 import type { Install, PmJob, ServiceJob } from "./types.ts";
 import { isOpenCall, isOpenPm } from "./ticket-status.ts";
@@ -20,6 +20,7 @@ import {
   type LatLng,
   type PinQuality,
 } from "./geo.ts";
+import type { DriveLeg } from "./drive-route.ts";
 
 export type StopType = BoardType;
 
@@ -209,8 +210,10 @@ export type RouteRow = PlacedStop & {
   point: LatLng;
   /** Stop number in the suggested order (1-based). */
   n: number;
-  /** Straight-line miles from the previous stop; null for the first stop and for lists that are not routed. */
+  /** Miles from the previous stop (drive miles when known, otherwise straight-line). Null for the first stop when the day has no start. */
   legMiles: number | null;
+  /** Drive minutes from the previous stop. Null when drive times are unavailable, and for the first stop when the day has no start. */
+  legMinutes: number | null;
 };
 
 export type TechRoute = {
@@ -222,8 +225,12 @@ export type TechRoute = {
   stops: RouteRow[];
   /** Stops with no street-address pin ("Not on the map": no account, no pin, or only a ZIP-area pin), time order. */
   unrouted: PlacedStop[];
-  /** Straight-line miles along the suggested order (0 when not routed). */
+  /** Miles along the route (drive miles when known, otherwise straight-line). 0 when not routed. */
   miles: number;
+  /** Drive minutes along the route. Null when drive times are unavailable or the list is not routed. */
+  minutes: number | null;
+  /** True when this list was ordered by drive time. */
+  drive: boolean;
   /** Google Maps links (more than one when the day is longer than one link allows); empty when not routed. */
   links: string[];
 };
@@ -241,37 +248,100 @@ export function techOrder(roster: readonly string[], techs: readonly string[]): 
   return [...names, ...extra];
 }
 
+/** Put stops in a saved order. Keys not listed go at the end, in their current order. */
+export function arrangeStops<T extends { key: string }>(stops: readonly T[], order: readonly string[]): T[] {
+  const rank = new Map(order.map((k, i) => [k, i]));
+  return [...stops].sort((a, b) => (rank.get(a.key) ?? 1e9) - (rank.get(b.key) ?? 1e9) || 0);
+}
+
+export type DriveFn = (from: LatLng, to: LatLng) => DriveLeg | null;
+
+export type RouteOpts = {
+  /** Drive minutes and miles between two pins. Null means that pair is unknown (straight-line is used). */
+  drive?: DriveFn | null;
+  /** Saved stop-key order per tech. When present, that tech is not re-optimized. */
+  manual?: Readonly<Record<string, readonly string[]>> | null;
+};
+
 /**
  * One list per tech with work that day: roster order, then others by name, "Unassigned" last. Each routed list is in
- * the suggested order (timed stops keep their time order, untimed ones slot in where they add the fewest miles).
+ * the suggested order (timed stops keep their time order, untimed ones slot in by drive time, or by straight-line
+ * miles when drive times are missing). A saved manual order is kept as-is.
  */
-export function planTechRoutes(stops: readonly PlacedStop[], roster: readonly string[] = [], start: RouteStart | null = null): TechRoute[] {
+export function planTechRoutes(
+  stops: readonly PlacedStop[],
+  roster: readonly string[] = [],
+  start: RouteStart | null = null,
+  opts: RouteOpts | null = null,
+): TechRoute[] {
+  const drive = opts?.drive ?? null;
+  const manual = opts?.manual ?? null;
   const groups = new Map<string, PlacedStop[]>();
   for (const s of stops) groups.set(s.tech, [...(groups.get(s.tech) ?? []), s]);
   const order = [...techOrder(roster, [...groups.keys()]).filter((t) => groups.has(t)), ...(groups.has(NO_TECH) ? [NO_TECH] : [])];
   return order.map((tech) => {
     const list = [...groups.get(tech)!].sort(byTimeThenName);
     const label = techLabel(tech);
+    const blank = {
+      tech,
+      label,
+      routed: false,
+      miles: 0,
+      minutes: null as number | null,
+      drive: false,
+      links: [] as string[],
+    };
     if (!routable(tech)) {
       const pinned = list.filter((s) => isPoint(s.point)) as (PlacedStop & { point: LatLng })[];
       return {
-        tech,
-        label,
-        routed: false,
-        stops: pinned.map((s, i) => ({ ...s, n: i + 1, legMiles: null })),
+        ...blank,
+        stops: pinned.map((s, i) => ({ ...s, n: i + 1, legMiles: null, legMinutes: null })),
         unrouted: list.filter((s) => !isPoint(s.point)),
-        miles: 0,
-        links: [],
       };
     }
-    const plan = orderStops(list.map((s) => ({ item: s, point: s.point, time: s.time })), start?.point ?? null);
-    const rows: RouteRow[] = plan.ordered.map((o, i) => ({
-      ...o.item,
-      point: o.point as LatLng,
-      n: i + 1,
-      legMiles: i > 0 ? milesBetween(plan.ordered[i - 1]!.point as LatLng, o.point as LatLng) : start ? milesBetween(start.point, o.point as LatLng) : null,
-    }));
-    return { tech, label, routed: true, stops: rows, unrouted: plan.unrouted.map((u) => u.item), miles: plan.miles, links: routeLinks(rows, start) };
+    const saved = manual?.[tech];
+    const between = drive
+      ? (a: LatLng, b: LatLng) => {
+          const hit = drive(a, b);
+          return hit ? hit.minutes : milesBetween(a, b);
+        }
+      : undefined;
+    const plan = saved?.length
+      ? {
+          ordered: arrangeStops(
+            list.filter((s) => isPoint(s.point)),
+            saved,
+          ).map((s) => ({ item: s, point: s.point, time: s.time })),
+          unrouted: list.filter((s) => !isPoint(s.point)).map((s) => ({ item: s, point: s.point, time: s.time })),
+        }
+      : orderStops(
+          list.map((s) => ({ item: s, point: s.point, time: s.time })),
+          start?.point ?? null,
+          between,
+        );
+    let minutesSum = 0;
+    let haveMinutes = !!drive;
+    const rows: RouteRow[] = plan.ordered.map((o, i) => {
+      const prev = i > 0 ? (plan.ordered[i - 1]!.point as LatLng) : start?.point ?? null;
+      const here = o.point as LatLng;
+      const hit = prev && drive ? drive(prev, here) : null;
+      if ((i > 0 || start) && !hit) haveMinutes = false;
+      else if (hit) minutesSum += hit.minutes;
+      const miles = hit ? hit.miles : prev ? milesBetween(prev, here) : null;
+      return { ...o.item, point: here, n: i + 1, legMiles: i === 0 && !start ? null : miles, legMinutes: hit ? hit.minutes : null };
+    });
+    const miles = rows.reduce((t, s) => t + (s.legMiles ?? 0), 0);
+    return {
+      tech,
+      label,
+      routed: true,
+      stops: rows,
+      unrouted: plan.unrouted.map((u) => u.item),
+      miles,
+      minutes: haveMinutes ? minutesSum : null,
+      drive: haveMinutes && !saved?.length,
+      links: routeLinks(rows, start),
+    };
   });
 }
 
@@ -329,6 +399,20 @@ export const stopCount = (n: number) => `${n} ${n === 1 ? "stop" : "stops"}`;
 
 /** "about 23 mi straight-line". */
 export const milesNote = (miles: number) => `about ${milesLabel(miles)} straight-line`;
+
+/** "18 min · 7.4 mi" or the straight-line note when drive times are missing. */
+export function routeNote(minutes: number | null, miles: number, drive: boolean): string {
+  if (!drive || minutes == null) return milesNote(miles);
+  return `${Math.round(minutes)} min · ${milesLabel(miles)}`;
+}
+
+export function legNote(minutes: number | null, miles: number | null): string {
+  if (miles == null && minutes == null) return "";
+  const parts: string[] = [];
+  if (minutes != null) parts.push(`${Math.max(1, Math.round(minutes))} min`);
+  if (miles != null) parts.push(milesLabel(miles));
+  return parts.join(" · ");
+}
 
 /** Count of jobs per type (each two-tech ticket once). */
 export function typeCounts(stops: readonly DayStop[]): Record<StopType, number> {

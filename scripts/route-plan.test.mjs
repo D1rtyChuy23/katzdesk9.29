@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
+import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, routeNote, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, arrangeStops, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
 import { NO_REP_COLOR, REP_PALETTE } from "../src/lib/ops/geo.ts";
 
 const DAY = "2026-10-14";
@@ -377,4 +377,61 @@ test("starting from the shop: first leg is measured from the shop, links start t
   const q = new URL(shop.links[0]).searchParams;
   assert.equal(q.get("origin"), "29.808821,-95.461210");
   assert.equal(new URL(here.links[0]).searchParams.get("origin"), null);
+});
+
+test("drive minutes reorder untimed stops, and a set time keeps its slot", () => {
+  const placed = placeStops(
+    collectDayStops(
+      {
+        ...none,
+        services: [
+          ticket({ id: 1, customer: "Katy Diner", scheduledTime: "14:00" }),
+          ticket({ id: 2, customer: "Steak 48", scheduledTime: "9:00" }),
+          ticket({ id: 3, customer: "Common Bond Tanglewood" }),
+          ticket({ id: 4, customer: "MARQ*E", scheduledTime: "11:30" }),
+        ],
+      },
+      DAY,
+    ),
+    find,
+  );
+  const near = (p, q) => Math.abs(p.lat - q.lat) < 0.02 && Math.abs(p.lng - q.lng) < 0.02;
+  // Tanglewood is a short hop only from Katy. The timed stops stay a cheap hop from each other,
+  // so the untimed stop is added after the 2pm stop instead of beside the Galleria.
+  const drive = (a, b) => {
+    const katyTangle = (near(a, KATY) && near(b, TANGLEWOOD)) || (near(a, TANGLEWOOD) && near(b, KATY));
+    const timedHop =
+      [GALLERIA, MARQE, KATY].some((p) => near(a, p)) && [GALLERIA, MARQE, KATY].some((p) => near(b, p));
+    if (katyTangle) return { minutes: 4, miles: 12 };
+    if (timedHop) return { minutes: 8, miles: 6 };
+    return { minutes: 40, miles: 18 };
+  };
+  const plain = planTechRoutes(placed, ["Ryan Gloria"])[0];
+  const ryan = planTechRoutes(placed, ["Ryan Gloria"], null, { drive })[0];
+  assert.deepEqual(
+    ryan.stops.filter((s) => s.time).map((s) => s.time),
+    ["09:00", "11:30", "14:00"],
+  );
+  assert.deepEqual(ryan.stops.map((s) => s.customer), ["Steak 48", "MARQ*E", "Katy Diner", "Common Bond Tanglewood"]);
+  assert.notDeepEqual(
+    plain.stops.map((s) => s.id),
+    ryan.stops.map((s) => s.id),
+  );
+  assert.equal(ryan.drive, true);
+  assert.equal(ryan.stops.at(-1).legMinutes, 4);
+  assert.ok(ryan.minutes > 0);
+  assert.equal(routeNote(ryan.minutes, ryan.miles, true).includes("min"), true);
+  const missed = planTechRoutes(placed, ["Ryan Gloria"], KATZ_SHOP, { drive: () => null })[0];
+  const shop = planTechRoutes(placed, ["Ryan Gloria"], KATZ_SHOP)[0];
+  assert.deepEqual(
+    missed.stops.map((s) => s.id),
+    shop.stops.map((s) => s.id),
+  );
+  assert.equal(missed.drive, false);
+  assert.equal(missed.minutes, null);
+  const manual = planTechRoutes(placed, ["Ryan Gloria"], null, { manual: { "Ryan Gloria": ["service-1", "service-2", "service-4", "service-3"] } })[0];
+  assert.deepEqual(manual.stops.map((s) => s.id), [1, 2, 4, 3]);
+  assert.equal(manual.drive, false);
+  assert.deepEqual(arrangeStops([{ key: "b" }, { key: "a" }, { key: "c" }], ["c", "a"]).map((s) => s.key), ["c", "a", "b"]);
+  assert.equal(routeLinks(manual.stops).length, 1);
 });
