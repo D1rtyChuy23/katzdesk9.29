@@ -16,6 +16,7 @@ import { GeocodeImportButton } from "@/components/desk/geocode-import";
 import { CustomerHistorySheet } from "@/components/desk/customer-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { AccountEquipImportButton } from "@/components/desk/account-equip-import";
+import { SalesRepImportButton } from "@/components/desk/sales-rep-import";
 import { ImportMenu } from "@/components/desk/desk-charts";
 import { toast } from "sonner";
 import { ChevronRight, Lock, Pencil, Plus, Trash2 } from "lucide-react";
@@ -151,6 +152,7 @@ function Page() {
           <ImportMenu>
             {isAdminOrRole ? <AccountNumberImportButton /> : null}
             {isAdminOrRole ? <GeocodeImportButton /> : null}
+            {isAdminOrRole ? <SalesRepImportButton /> : null}
             <AccountEquipImportButton
               onImported={(name) => {
                 if (!name) return;

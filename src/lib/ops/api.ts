@@ -2283,6 +2283,15 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		repFlag: account.rep_flag ?? null,
 		accountNumber: account.account_number ?? null,
 		canEditAccountNumber: await canReviewNames(sql, context.userId),
+		salesReps: (await sql.query(
+			"select rep_name, role, contribution_pct, is_primary from customer_sales_reps where customer_id = $1 order by is_primary desc, lower(rep_name), id",
+			[account.id],
+		)).map((r) => ({
+			name: String(r.rep_name ?? ""),
+			role: r.role ? String(r.role) : null,
+			pct: r.contribution_pct === null || r.contribution_pct === undefined || r.contribution_pct === "" ? null : Number(r.contribution_pct),
+			primary: r.is_primary === true || r.is_primary === "true",
+		})),
 		cleanList: (await canReviewNames(sql, context.userId))
 			? { netsuiteId: account.name_locked === true ? account.netsuite_id ?? null : null, address: account.name_locked === true ? account.address ?? null : null }
 			: null,
