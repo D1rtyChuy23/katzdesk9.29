@@ -1,14 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { FilterChip } from "@/components/desk/desk-charts";
 import { CustomerMap } from "@/components/desk/customer-map";
 import { TerritoryView } from "@/components/desk/territory-view";
 
-export const Route = createFileRoute("/_app/map")({ component: Page });
+type MapSearch = { account?: number };
+
+export const Route = createFileRoute("/_app/map")({
+  validateSearch: (s: Record<string, unknown>): MapSearch => {
+    const raw = s.account;
+    const n = typeof raw === "number" ? raw : typeof raw === "string" && raw ? Number(raw) : NaN;
+    return Number.isFinite(n) && n > 0 ? { account: n } : {};
+  },
+  component: Page,
+});
 
 type MapTab = "accounts" | "territories";
 
 function Page() {
+  const { account } = Route.useSearch();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<MapTab>("accounts");
   return (
     <div>
@@ -26,13 +37,26 @@ function Page() {
           <FilterChip selected={tab === "territories"} onClick={() => setTab("territories")} data-testid="map-tab-territories">
             Territories
           </FilterChip>
-          {/* Accounts with no pin or only a ZIP area pin, and the other addresses on file for them. */}
           <Link to="/address-report" className="self-center px-1 text-sm font-medium text-primary underline-offset-4 hover:underline max-sm:py-2" data-testid="map-address-report">
             Address Report
           </Link>
         </div>
       </header>
-      {tab === "accounts" ? <CustomerMap /> : <TerritoryView />}
+      {tab === "accounts" ? (
+        <CustomerMap
+          accountId={account ?? null}
+          onSelectAccount={(id) =>
+            void navigate({ to: "/map", search: id ? { account: id } : {}, replace: true, resetScroll: false })
+          }
+        />
+      ) : (
+        <TerritoryView
+          accountId={account ?? null}
+          onSelectAccount={(id) =>
+            void navigate({ to: "/map", search: id ? { account: id } : {}, replace: true, resetScroll: false })
+          }
+        />
+      )}
     </div>
   );
 }

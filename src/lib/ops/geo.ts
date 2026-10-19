@@ -207,26 +207,36 @@ export function compass(from: LatLng, to: LatLng): string {
 
 export type Stop<T> = { item: T; point: LatLng | null; time: string | null };
 
-/** Total straight-line miles along `points`, starting at `start` when given. */
-export function pathMiles(points: readonly LatLng[], start?: LatLng | null): number {
+/** Total cost along `points`, starting at `start` when given. `between` defaults to straight-line miles. */
+export function pathCost(points: readonly LatLng[], start: LatLng | null | undefined, between: (a: LatLng, b: LatLng) => number): number {
   let total = 0;
   let prev = start ?? null;
   for (const p of points) {
-    if (prev) total += milesBetween(prev, p);
+    if (prev) total += between(prev, p);
     prev = p;
   }
   return total;
 }
 
+/** Total straight-line miles along `points`, starting at `start` when given. */
+export function pathMiles(points: readonly LatLng[], start?: LatLng | null): number {
+  return pathCost(points, start, milesBetween);
+}
+
 /**
  * Suggested order for a day's stops.
  * - Stops with a set time keep their time order (a customer was promised that time).
- * - Stops without a time are slotted where they add the fewest straight-line miles (cheapest insertion), then the
- *   untimed run is tidied with 2-opt where that does not move any timed stop.
+ * - Stops without a time are slotted where they add the least cost (drive minutes when `between` is given,
+ *   otherwise straight-line miles), then the untimed run is tidied with 2-opt where that does not move a timed stop.
  * - Stops with no pin cannot be placed on a route and come back in `unrouted`, in their original order.
  * `start` is where the day begins (optional; without it the first stop is the start).
  */
-export function orderStops<T>(stops: readonly Stop<T>[], start?: LatLng | null): { ordered: Stop<T>[]; unrouted: Stop<T>[]; miles: number } {
+export function orderStops<T>(
+  stops: readonly Stop<T>[],
+  start?: LatLng | null,
+  between?: (a: LatLng, b: LatLng) => number,
+): { ordered: Stop<T>[]; unrouted: Stop<T>[]; miles: number } {
+  const sep = between ?? milesBetween;
   const unrouted = stops.filter((s) => !isPoint(s.point));
   const routable = stops.filter((s) => isPoint(s.point)) as (Stop<T> & { point: LatLng })[];
   const timed = routable.filter((s) => s.time).sort((a, b) => a.time!.localeCompare(b.time!));
@@ -234,14 +244,12 @@ export function orderStops<T>(stops: readonly Stop<T>[], start?: LatLng | null):
   const route: (Stop<T> & { point: LatLng })[] = [...timed];
   const fixed = new Set<Stop<T>>(timed);
   const legCost = (seq: (Stop<T> & { point: LatLng })[], i: number, p: LatLng) => {
-    // cost of inserting p between seq[i-1] (or start) and seq[i] (or end)
     const before = i > 0 ? seq[i - 1]!.point : start ?? null;
     const after = i < seq.length ? seq[i]!.point : null;
-    const add = (before ? milesBetween(before, p) : 0) + (after ? milesBetween(p, after) : 0);
-    const removed = before && after ? milesBetween(before, after) : 0;
+    const add = (before ? sep(before, p) : 0) + (after ? sep(p, after) : 0);
+    const removed = before && after ? sep(before, after) : 0;
     return add - removed;
   };
-  // Insert the free stop that is cheapest to add first, repeatedly (deterministic: ties keep input order).
   const pending = [...free];
   while (pending.length) {
     let best = { cost: Infinity, k: 0, at: 0 };
@@ -254,8 +262,7 @@ export function orderStops<T>(stops: readonly Stop<T>[], start?: LatLng | null):
     const [s] = pending.splice(best.k, 1);
     route.splice(best.at, 0, s!);
   }
-  // 2-opt on stretches with no timed stop inside, so promised times keep their order.
-  const total = () => pathMiles(route.map((s) => s.point), start);
+  const total = () => pathCost(route.map((s) => s.point), start, sep);
   let improved = true;
   let guard = 0;
   while (improved && guard++ < 200) {
@@ -266,7 +273,7 @@ export function orderStops<T>(stops: readonly Stop<T>[], start?: LatLng | null):
         if (segment.some((s) => fixed.has(s))) continue;
         const before = total();
         const reversed = [...route.slice(0, i), ...segment.reverse(), ...route.slice(j + 1)];
-        const after = pathMiles(reversed.map((s) => s.point), start);
+        const after = pathCost(reversed.map((s) => s.point), start, sep);
         if (after < before - 1e-6) {
           route.splice(0, route.length, ...reversed);
           improved = true;
@@ -274,6 +281,8 @@ export function orderStops<T>(stops: readonly Stop<T>[], start?: LatLng | null):
       }
     }
   }
+  // `miles` is the ordering cost (miles, or minutes when `between` is drive time). Callers that show miles
+  // measure the legs themselves.
   return { ordered: route, unrouted, miles: total() };
 }
 
