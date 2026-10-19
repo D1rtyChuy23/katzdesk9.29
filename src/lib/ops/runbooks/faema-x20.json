@@ -1,0 +1,1455 @@
+{
+  "id": "faema-x20",
+  "manufacturer": "Faema",
+  "title": "X20 PM Runbook",
+  "subtitle": "Faema X20 (S20) | Cycle Based Maintenance kits and checks",
+  "sources": "Faema / Gruppo Cimbali Service Bulletin #S022 (11/2022), Preventive Maintenance Program CBM for S20/X20: plan tables, kit codes and the Measurements and Checks list. The CBM kits replace the old PPM kits A–I. Confirm kit codes with Faema before ordering.",
+  "storageKey": "faema-x20-runbook-v1",
+  "models": [
+    {
+      "id": "x20",
+      "label": "Faema X20"
+    }
+  ],
+  "intervals": [
+    {
+      "id": "1",
+      "label": "Visit 1"
+    },
+    {
+      "id": "2",
+      "label": "Visit 2"
+    },
+    {
+      "id": "3",
+      "label": "Visit 3"
+    },
+    {
+      "id": "4",
+      "label": "Visit 4"
+    },
+    {
+      "id": "5",
+      "label": "Visit 5"
+    },
+    {
+      "id": "6",
+      "label": "Visit 6"
+    },
+    {
+      "id": "7",
+      "label": "Visit 7"
+    },
+    {
+      "id": "8",
+      "label": "Visit 8"
+    },
+    {
+      "id": "9",
+      "label": "Visit 9"
+    },
+    {
+      "id": "10",
+      "label": "Visit 10"
+    },
+    {
+      "id": "11",
+      "label": "Visit 11"
+    },
+    {
+      "id": "12",
+      "label": "Visit 12"
+    },
+    {
+      "id": "13",
+      "label": "Visit 13"
+    },
+    {
+      "id": "14",
+      "label": "Visit 14"
+    }
+  ],
+  "options": [
+    {
+      "key": "plan",
+      "label": "Plan (coffee cycles a year)",
+      "default": "standard",
+      "choices": [
+        {
+          "val": "basic",
+          "label": "Basic: under 20,000 (1 visit a year)"
+        },
+        {
+          "val": "standard",
+          "label": "Standard: 20,000–40,000 (2 visits a year)"
+        },
+        {
+          "val": "business",
+          "label": "Business: 40,000–60,000 (3 visits a year)"
+        }
+      ]
+    },
+    {
+      "key": "milk",
+      "label": "Milk system",
+      "default": "yes",
+      "choices": [
+        {
+          "val": "yes",
+          "label": "Fitted"
+        },
+        {
+          "val": "no",
+          "label": "Not fitted"
+        }
+      ]
+    },
+    {
+      "key": "choco",
+      "label": "Chocolate / soluble",
+      "default": "no",
+      "choices": [
+        {
+          "val": "no",
+          "label": "Not fitted"
+        },
+        {
+          "val": "yes",
+          "label": "Fitted"
+        }
+      ]
+    }
+  ],
+  "banners": [
+    {
+      "tone": "ok",
+      "text": "Pick the plan from the machine's coffee cycles a year (Counters). The visit number counts PMs since install on that plan: Basic 1 a year, Standard every 6 months, Business every 4 months."
+    },
+    {
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14"
+        ]
+      },
+      "tone": "bad",
+      "text": "Basic has 6 visits. In year 7 Faema calls for disposal or overhaul."
+    },
+    {
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "14"
+        ]
+      },
+      "tone": "bad",
+      "text": "Standard has 13 visits. After year 7's first visit Faema calls for disposal or overhaul."
+    },
+    {
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "13"
+        ]
+      },
+      "tone": "warn",
+      "text": "Last visit on the Standard plan. Next is disposal or overhaul."
+    },
+    {
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "14"
+        ]
+      },
+      "tone": "warn",
+      "text": "Last visit on the Business plan. Next is disposal or overhaul."
+    }
+  ],
+  "kits": [
+    {
+      "ev": "FA781739010",
+      "name": "Kit B, coffee basic (781.739.010)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      "note": "25 min. Instructions 981.223.010."
+    },
+    {
+      "ev": "FA781739010",
+      "name": "Kit B, coffee basic (781.739.010)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ]
+      },
+      "note": "25 min. Instructions 981.223.010."
+    },
+    {
+      "ev": "FA781739010",
+      "name": "Kit B, coffee basic (781.739.010)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14"
+        ]
+      },
+      "note": "25 min. Instructions 981.223.010."
+    },
+    {
+      "ev": "FA781740010",
+      "name": "Kit E1, coffee extended 1 (781.740.010)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "2",
+          "4"
+        ]
+      },
+      "note": "60 min. Instructions 981.224.010."
+    },
+    {
+      "ev": "FA781740010",
+      "name": "Kit E1, coffee extended 1 (781.740.010)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "9",
+          "12"
+        ]
+      },
+      "note": "60 min. Instructions 981.224.010."
+    },
+    {
+      "ev": "FA781740010",
+      "name": "Kit E1, coffee extended 1 (781.740.010)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "9",
+          "12"
+        ]
+      },
+      "note": "60 min. Instructions 981.224.010."
+    },
+    {
+      "ev": "FA781741000",
+      "name": "Kit E2, coffee extended 2 (781.741.000)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "3",
+          "6"
+        ]
+      },
+      "note": "50 min. Instructions 981.225.000."
+    },
+    {
+      "ev": "FA781741000",
+      "name": "Kit E2, coffee extended 2 (781.741.000)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "5",
+          "10"
+        ]
+      },
+      "note": "50 min. Instructions 981.225.000."
+    },
+    {
+      "ev": "FA781741000",
+      "name": "Kit E2, coffee extended 2 (781.741.000)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "5",
+          "10"
+        ]
+      },
+      "note": "50 min. Instructions 981.225.000."
+    },
+    {
+      "ev": "FA781742000",
+      "name": "Kit E3, coffee extended 3 (781.742.000)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "4"
+        ]
+      },
+      "note": "20 min. Instructions 981.226.000."
+    },
+    {
+      "ev": "FA781742000",
+      "name": "Kit E3, coffee extended 3 (781.742.000)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "5",
+          "10"
+        ]
+      },
+      "note": "20 min. Instructions 981.226.000."
+    },
+    {
+      "ev": "FA781742000",
+      "name": "Kit E3, coffee extended 3 (781.742.000)",
+      "module": "Coffee",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "5",
+          "10"
+        ]
+      },
+      "note": "20 min. Instructions 981.226.000."
+    },
+    {
+      "ev": "FA781743000",
+      "name": "Kit M, milk (781.743.000)",
+      "module": "Milk",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "milk": [
+          "yes"
+        ]
+      },
+      "note": "5–10 min. Instructions 981.227.000."
+    },
+    {
+      "ev": "FA781743000",
+      "name": "Kit M, milk (781.743.000)",
+      "module": "Milk",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ],
+        "milk": [
+          "yes"
+        ]
+      },
+      "note": "5–10 min. Instructions 981.227.000."
+    },
+    {
+      "ev": "FA781743000",
+      "name": "Kit M, milk (781.743.000)",
+      "module": "Milk",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14"
+        ],
+        "milk": [
+          "yes"
+        ]
+      },
+      "note": "5–10 min. Instructions 981.227.000."
+    },
+    {
+      "ev": "FA966957000",
+      "name": "Kit EM, extended milk (966.957.000)",
+      "module": "Milk",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "3",
+          "6"
+        ],
+        "milk": [
+          "yes"
+        ]
+      },
+      "note": "10 min. Instructions 946.472.000."
+    },
+    {
+      "ev": "FA966957000",
+      "name": "Kit EM, extended milk (966.957.000)",
+      "module": "Milk",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "9",
+          "12"
+        ],
+        "milk": [
+          "yes"
+        ]
+      },
+      "note": "10 min. Instructions 946.472.000."
+    },
+    {
+      "ev": "FA966957000",
+      "name": "Kit EM, extended milk (966.957.000)",
+      "module": "Milk",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "9",
+          "12"
+        ],
+        "milk": [
+          "yes"
+        ]
+      },
+      "note": "10 min. Instructions 946.472.000."
+    },
+    {
+      "ev": "FA781745000",
+      "name": "Kit C, chocolate / soluble (781.745.000)",
+      "module": "Chocolate",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "basic"
+        ],
+        "pm": [
+          "2",
+          "4"
+        ],
+        "choco": [
+          "yes"
+        ]
+      },
+      "note": "10 min. Instructions 981.229.000."
+    },
+    {
+      "ev": "FA781745000",
+      "name": "Kit C, chocolate / soluble (781.745.000)",
+      "module": "Chocolate",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "standard"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "9",
+          "12"
+        ],
+        "choco": [
+          "yes"
+        ]
+      },
+      "note": "10 min. Instructions 981.229.000."
+    },
+    {
+      "ev": "FA781745000",
+      "name": "Kit C, chocolate / soluble (781.745.000)",
+      "module": "Chocolate",
+      "interval": 1,
+      "qty": 1,
+      "when": {
+        "plan": [
+          "business"
+        ],
+        "pm": [
+          "2",
+          "5",
+          "8",
+          "11",
+          "14"
+        ],
+        "choco": [
+          "yes"
+        ]
+      },
+      "note": "10 min. Instructions 981.229.000."
+    }
+  ],
+  "steps": [
+    {
+      "module": "Counters and archives",
+      "items": [
+        {
+          "id": "x-cnt-cycles-basic",
+          "text": "Record the total machine cycles, and the right and left grinder cycles.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-cnt-cycles-standard",
+          "text": "Record the total machine cycles, and the right and left grinder cycles.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-cnt-cycles-business",
+          "text": "Record the total machine cycles, and the right and left grinder cycles.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-cnt-errors",
+          "text": "Check the Malfunction Archive. Act on any errors.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-cnt-wash",
+          "text": "Check the Wash Archive.",
+          "ref": "Faema S022 checks"
+        }
+      ]
+    },
+    {
+      "module": "Coffee",
+      "items": [
+        {
+          "id": "x-co-kit",
+          "text": "Fit the coffee kits listed for this visit, following each kit's instruction sheet.",
+          "ref": "Faema S022 kits"
+        },
+        {
+          "id": "x-co-flow-basic",
+          "text": "Run a coffee recipe and check the flow meter value (DV) rises steadily to the programmed quantity.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-co-flow-standard",
+          "text": "Run a coffee recipe and check the flow meter value (DV) rises steadily to the programmed quantity.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-co-flow-business",
+          "text": "Run a coffee recipe and check the flow meter value (DV) rises steadily to the programmed quantity.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-co-group-basic",
+          "text": "Check the brew group heating (cartridge heater and temperature sensor) from Manual Commands.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-co-group-standard",
+          "text": "Check the brew group heating (cartridge heater and temperature sensor) from Manual Commands.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-co-group-business",
+          "text": "Check the brew group heating (cartridge heater and temperature sensor) from Manual Commands.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-co-temp-basic",
+          "text": "Check coffee water at the spout is above 80 °C (176 °F).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-co-temp-standard",
+          "text": "Check coffee water at the spout is above 80 °C (176 °F).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-co-temp-business",
+          "text": "Check coffee water at the spout is above 80 °C (176 °F).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-co-grind-basic",
+          "text": "Check both grinders: grind coarseness and dose for each drink.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-co-grind-standard",
+          "text": "Check both grinders: grind coarseness and dose for each drink.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-co-grind-business",
+          "text": "Check both grinders: grind coarseness and dose for each drink.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "module": "Boiler and hydraulics",
+      "items": [
+        {
+          "id": "x-hy-press",
+          "text": "Check boiler pressure (PC) in Manual Commands: 1.4–1.6 bar (20–23 PSI).",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-hy-sensor",
+          "text": "Dispense steam and check the PC value drops with the boiler pressure.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-hy-level-basic",
+          "text": "Dispense hot water and check the level probe (SL) value changes, and the SL icon goes green, gray, green.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-level-standard",
+          "text": "Dispense hot water and check the level probe (SL) value changes, and the SL icon goes green, gray, green.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-level-business",
+          "text": "Dispense hot water and check the level probe (SL) value changes, and the SL icon goes green, gray, green.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-pump-basic",
+          "text": "Fit a gauge, run the pump from Manual Commands: 8–10 bar (119–149 PSI).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-pump-standard",
+          "text": "Fit a gauge, run the pump from Manual Commands: 8–10 bar (119–149 PSI).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-pump-business",
+          "text": "Fit a gauge, run the pump from Manual Commands: 8–10 bar (119–149 PSI).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-exp-basic",
+          "text": "Check the expansion valve doesn't leak during a brew cycle.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-exp-standard",
+          "text": "Check the expansion valve doesn't leak during a brew cycle.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-exp-business",
+          "text": "Check the expansion valve doesn't leak during a brew cycle.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-water",
+          "text": "Check the softener or filter: water hardness below the set limit.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-hy-leaks",
+          "text": "Check the hydraulic circuit for leaks, especially where there is scale. Find the cause.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-hy-drain",
+          "text": "Check the drain hose is clear and has no siphons.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-hy-safety",
+          "text": "Safety valve and service boiler: check as local law requires.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-hy-hotw-basic",
+          "text": "Check hot water at the wand is 85–97 °C (185–206 °F).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-hotw-standard",
+          "text": "Check hot water at the wand is 85–97 °C (185–206 °F).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-hy-hotw-business",
+          "text": "Check hot water at the wand is 85–97 °C (185–206 °F).",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "module": "Milk",
+      "when": {
+        "milk": [
+          "yes"
+        ]
+      },
+      "items": [
+        {
+          "id": "x-mi-kit",
+          "text": "Fit the milk kits listed for this visit.",
+          "ref": "Faema S022 kits"
+        },
+        {
+          "id": "x-mi-froth-basic",
+          "text": "Check frothed milk temperature is within the original settings.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-mi-froth-standard",
+          "text": "Check frothed milk temperature is within the original settings.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-mi-froth-business",
+          "text": "Check frothed milk temperature is within the original settings.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-mi-wash",
+          "text": "Check milk washes in the Wash Archive. Milk circuit, heater and spout free of residue.",
+          "ref": "Faema S022 checks"
+        }
+      ]
+    },
+    {
+      "module": "Chocolate",
+      "when": {
+        "choco": [
+          "yes"
+        ]
+      },
+      "items": [
+        {
+          "id": "x-ch-kit",
+          "text": "Fit the chocolate kit if it is listed for this visit.",
+          "ref": "Faema S022 kits"
+        },
+        {
+          "id": "x-ch-temp-basic",
+          "text": "Check soluble drink temperature is within the original settings.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-ch-temp-standard",
+          "text": "Check soluble drink temperature is within the original settings.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-ch-temp-business",
+          "text": "Check soluble drink temperature is within the original settings.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-ch-wash",
+          "text": "Check soluble washes in the Wash Archive. Soluble circuit and mixer free of residue.",
+          "ref": "Faema S022 checks"
+        }
+      ]
+    },
+    {
+      "module": "Electrical",
+      "items": [
+        {
+          "id": "x-el-wiring-basic",
+          "text": "Machine off: check earthing, wiring and connectors. Replace anything burnt.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "basic"
+            ],
+            "pm": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        },
+        {
+          "id": "x-el-wiring-standard",
+          "text": "Machine off: check earthing, wiring and connectors. Replace anything burnt.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "standard"
+            ],
+            "pm": [
+              "2",
+              "4",
+              "6",
+              "8",
+              "10",
+              "12"
+            ]
+          }
+        },
+        {
+          "id": "x-el-wiring-business",
+          "text": "Machine off: check earthing, wiring and connectors. Replace anything burnt.",
+          "ref": "Faema S022 checks",
+          "when": {
+            "plan": [
+              "business"
+            ],
+            "pm": [
+              "3",
+              "6",
+              "9",
+              "12"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "module": "Close out",
+      "items": [
+        {
+          "id": "x-co-washes",
+          "text": "Check coffee washes in the Wash Archive. Group and coffee circuit free of residue.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-co-quality",
+          "text": "Pull drinks and confirm quality meets the customer's needs.",
+          "ref": "Faema S022 checks"
+        },
+        {
+          "id": "x-co-checkup",
+          "text": "Run the installation CHECK UP from the user manual.",
+          "ref": "Faema S022"
+        }
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "title": "CBM plan (visits that get each kit)",
+      "table": {
+        "head": [
+          "Kit",
+          "Basic (1/yr)",
+          "Standard (2/yr)",
+          "Business (3/yr)"
+        ],
+        "monoCols": [
+          0
+        ],
+        "rows": [
+          [
+            "B",
+            "every visit",
+            "every visit",
+            "every visit"
+          ],
+          [
+            "E1",
+            "2, 4",
+            "3, 6, 9, 12",
+            "3, 6, 9, 12"
+          ],
+          [
+            "E2",
+            "3, 6",
+            "5, 10",
+            "5, 10"
+          ],
+          [
+            "E3",
+            "4",
+            "5, 10",
+            "5, 10"
+          ],
+          [
+            "M",
+            "every visit",
+            "every visit",
+            "every visit"
+          ],
+          [
+            "EM",
+            "3, 6",
+            "3, 6, 9, 12",
+            "3, 6, 9, 12"
+          ],
+          [
+            "C",
+            "2, 4",
+            "3, 6, 9, 12",
+            "2, 5, 8, 11, 14"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Service time",
+      "text": "Kits: B 25 min, E1 60, E2 50, E3 20, M 10, EM 10, C 10. Checks: 20 min each visit, 60 min on the yearly visit."
+    },
+    {
+      "title": "Yearly checks",
+      "text": "Faema marks some checks yearly. On Standard they are listed on even visits, on Business on visits 3, 6, 9 and 12 (the anniversary visit). Basic does them every visit."
+    }
+  ]
+}

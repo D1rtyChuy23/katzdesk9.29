@@ -1,0 +1,261 @@
+{
+  "id": "bravilor-sego12",
+  "manufacturer": "Bravilor Bonamat",
+  "title": "Sego 12 PM Runbook",
+  "subtitle": "Bravilor Bonamat Sego 12 | preventive maintenance parts and steps",
+  "sources": "Bravilor Bonamat USA Sego 12 Preventive Maintenance sheet, Sego 12 Descaling Guide and Sego technical manual. Confirm BB6.980.000.756 contents with Bravilor before ordering.",
+  "storageKey": "bravilor-sego12-runbook-v1",
+  "models": [
+    {
+      "id": "sego12",
+      "label": "Sego 12"
+    }
+  ],
+  "intervals": [
+    {
+      "id": "6",
+      "label": "6-month PM (over 10,000 drinks a year)"
+    },
+    {
+      "id": "12",
+      "label": "12-month PM"
+    }
+  ],
+  "options": [
+    {
+      "key": "burrs",
+      "label": "Grinder burrs",
+      "default": "ok",
+      "choices": [
+        {
+          "val": "ok",
+          "label": "OK"
+        },
+        {
+          "val": "worn",
+          "label": "Worn, replace"
+        }
+      ]
+    }
+  ],
+  "banners": [
+    {
+      "tone": "ok",
+      "text": "Bravilor: 1 PM a year up to 10,000 dispenses a year, 2 a year above that. Every visit is the same full PM."
+    }
+  ],
+  "kits": [
+    {
+      "ev": "BB6.980.000.756",
+      "name": "Sego 12 Preventative Maintenance Kit",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "note": "Bravilor's PM sheet calls for the CIRCO brewer service set 6.000.331.083 and the mixer seals 6.229.806.001, 6.030.071.020, 6.229.807.001 and O-ring 6.011.001.152. Confirm the kit holds them."
+    },
+    {
+      "ev": "BB7.190.103.105",
+      "name": "Renegite descaler, 1 packet",
+      "module": "Descaling",
+      "interval": 6,
+      "qty": 1,
+      "note": "Sold by the case of 50."
+    },
+    {
+      "ev": "BB6.331.433.001",
+      "name": "Grinder discs",
+      "module": "Grinder",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "burrs": [
+          "worn"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "module": "General",
+      "items": [
+        {
+          "id": "sg-ge-clean",
+          "text": "Do the weekly cleaning: brewer, mixing chamber and the rest. Wipe the machine down inside and out.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        },
+        {
+          "id": "sg-ge-inspect",
+          "text": "Inspect every part for damage, wear and leaks.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        }
+      ]
+    },
+    {
+      "module": "Descaling",
+      "items": [
+        {
+          "id": "sg-de-run",
+          "text": "Descale from Setup > Maintenance > Descaling (about 60 min, don't leave it). One Renegite packet in 17 fl oz of 140 °F water.",
+          "ref": "Sego descaling guide"
+        },
+        {
+          "id": "sg-de-selector",
+          "text": "Remove and take apart the water selector. Clean off scale, grease the drive auger and rotating disc with food-grade grease, refit.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        },
+        {
+          "id": "sg-de-reservoir",
+          "text": "Take out the cold water reservoir. Check the float and pump for damage, dirt, wear and scale. Refit.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        },
+        {
+          "id": "sg-de-reminder",
+          "text": "Set the descale reminder for the water hardness (Process settings > Descale management).",
+          "ref": "Bravilor Sego 12 PM sheet"
+        }
+      ]
+    },
+    {
+      "module": "Brewer (CIRCO)",
+      "items": [
+        {
+          "id": "sg-br-set",
+          "text": "Remove the CIRCO brewer, replace every part in the brewer service set, grease the large O-ring, refit and test.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        }
+      ]
+    },
+    {
+      "module": "Mixing system",
+      "items": [
+        {
+          "id": "sg-mx-seals",
+          "text": "Remove the mixing bowl. Replace both mixer seals, the holder seal and the water inlet O-ring.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        },
+        {
+          "id": "sg-mx-shaft",
+          "text": "Check and clean the mixer motor shaft. Refit and check for leaks.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        }
+      ]
+    },
+    {
+      "module": "Grinder",
+      "items": [
+        {
+          "id": "sg-gr-empty",
+          "text": "Empty and clean the bean canister. Vacuum or run out the beans left in the grinder.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        },
+        {
+          "id": "sg-gr-burrs",
+          "text": "Check the grinder burrs for wear. Replace if worn (6.331.433.001).",
+          "ref": "Bravilor Sego 12 PM sheet"
+        },
+        {
+          "id": "sg-gr-cal",
+          "text": "Refill beans and calibrate the grinders: Setup > Service > Calibration (gram scale).",
+          "ref": "Bravilor Sego 12 PM sheet"
+        }
+      ]
+    },
+    {
+      "module": "Close out",
+      "items": [
+        {
+          "id": "sg-co-test",
+          "text": "Dispense several drinks and check the machine works properly.",
+          "ref": "Bravilor Sego 12 PM sheet"
+        }
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "title": "Descaling by water hardness",
+      "table": {
+        "head": [
+          "Water",
+          "ppm",
+          "Gallons between descales",
+          "Descales a year"
+        ],
+        "rows": [
+          [
+            "Very soft",
+            "0–60",
+            "528",
+            "1"
+          ],
+          [
+            "Soft",
+            "60–119",
+            "396",
+            "1"
+          ],
+          [
+            "Medium hard",
+            "120–179",
+            "264",
+            "1–2"
+          ],
+          [
+            "Hard",
+            "180–239",
+            "132",
+            "3"
+          ],
+          [
+            "Very hard",
+            "240–500",
+            "66",
+            "4"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Parts named on the PM sheet",
+      "table": {
+        "head": [
+          "Part",
+          "What"
+        ],
+        "monoCols": [
+          0
+        ],
+        "rows": [
+          [
+            "6.000.331.083",
+            "CIRCO brewer service set"
+          ],
+          [
+            "6.229.806.001",
+            "Rubber seal, mixer"
+          ],
+          [
+            "6.030.071.020",
+            "Rubber seal, mixer"
+          ],
+          [
+            "6.229.807.001",
+            "Holder rubber seal"
+          ],
+          [
+            "6.011.001.152",
+            "O-ring, mixing chamber water inlet"
+          ],
+          [
+            "7.190.103.105",
+            "Renegite descaler (case of 50)"
+          ],
+          [
+            "6.331.433.001",
+            "Grinder discs (if worn)"
+          ]
+        ]
+      }
+    }
+  ]
+}
