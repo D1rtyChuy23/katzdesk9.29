@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
+import { foldVisitUnits } from "@/lib/ops/install-form";
+import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { isBarn, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { normalizeCustomerKey } from "@/lib/ops/account-equip";
@@ -319,18 +321,21 @@ async function writeInstallSerial(
         }))
       : [{ equipment: row.equipment ?? fill.model ?? "", serial: row.serial ?? "", powerVoltage: row.power_voltage ?? "" }];
   }
-  let idx = machineIndex ?? specs.findIndex((s) => serialKey(s.serial) === serialKey(serial) || !s.serial.trim());
-  if (idx < 0 || idx >= specs.length) idx = 0;
-  if (!specs.length) {
-    specs = [{ equipment: fill.model ?? "", serial, powerVoltage: "" }];
-    idx = 0;
+  const key = serialKey(serial);
+  const model = (fill.model ?? "").trim();
+  const indexed = machineIndex != null ? specs[machineIndex] : undefined;
+  const indexedFits = !!indexed && (!indexed.serial.trim() || !model || sameWarehouseModel(indexed.equipment, model) || serialKey(indexed.serial) === key);
+  if (key && specs.some((s) => serialKey(s.serial) === key)) {
+    // Already an equipment row. Leave the other machines alone.
+  } else if (indexed && indexedFits) {
+    specs[machineIndex!] = {
+      ...indexed,
+      equipment: indexed.equipment || model,
+      serial,
+    };
+  } else {
+    specs = foldVisitUnits(specs, [{ model: model || indexed?.equipment || "Equipment", serial }]).rows;
   }
-  const cur = specs[idx] ?? { equipment: "", serial: "", powerVoltage: "" };
-  specs[idx] = {
-    ...cur,
-    equipment: cur.equipment || fill.model || "",
-    serial,
-  };
   const packed = serializeMachines(specs);
   await sql.query(
     `update installs set equipment = $2, serial = $3, power_voltage = $4, machines = $5, updated_at = now()

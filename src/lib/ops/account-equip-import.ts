@@ -598,3 +598,79 @@ export const listAccountEquipment = createServerFn({ method: "GET" })
         );
     return rows.map(mapDbUnit);
   });
+
+async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: number) {
+  await sql.query("delete from install_inspection_units where equipment_id = $1", [id]);
+  await sql.query("delete from install_inspection_photos where equipment_id = $1", [id]);
+  await sql.query("delete from pm_runbook_unit_links where account_equipment_id = $1", [id]);
+}
+
+/** Take one equipment row off the account. Does not guess which duplicate is real. */
+export const removeAccountEquipment = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data }) => {
+    const sql = await ready();
+    const row = (await sql.query<{ id: number }>("select id from account_equipment where id = $1", [data.id]))[0];
+    if (!row) throw new Error("That unit is not on the account.");
+    await dropEquipmentLinks(sql, data.id);
+    await sql.query("delete from account_equipment where id = $1", [data.id]);
+    return { id: data.id };
+  });
+
+/**
+ * Keep one account unit and drop the other. A short leftover serial (such as "L") is replaced by the longer one.
+ * Inspection links move onto the unit that stays.
+ */
+export const mergeAccountEquipment = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { keepId: number; dropId: number }) =>
+    z.object({ keepId: z.number().int().positive(), dropId: z.number().int().positive() }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (data.keepId === data.dropId) throw new Error("Pick two different units.");
+    const sql = await ready();
+    const rows = await sql.query<{ id: number; customer: string; serial: string | null; electrical: string | null }>(
+      "select id, customer, serial, electrical from account_equipment where id = any($1::int[])",
+      [[data.keepId, data.dropId]],
+    );
+    const keep = rows.find((r) => r.id === data.keepId);
+    const drop = rows.find((r) => r.id === data.dropId);
+    if (!keep || !drop) throw new Error("Those units are not both on an account.");
+    if (keep.customer.trim().toLowerCase() !== drop.customer.trim().toLowerCase()) {
+      throw new Error("Those units are on different accounts.");
+    }
+    const keepSerial = (keep.serial ?? "").trim();
+    const dropSerial = (drop.serial ?? "").trim();
+    const serial = dropSerial && keepSerial.length <= 2 && dropSerial.length > keepSerial.length ? dropSerial : keepSerial || dropSerial;
+    const electrical = (keep.electrical ?? "").trim() || (drop.electrical ?? "").trim() || null;
+    if (serial !== keepSerial || electrical !== (keep.electrical ?? "").trim()) {
+      await sql.query(
+        "update account_equipment set serial = $2, serial_key = $3, electrical = $4, updated_at = now() where id = $1",
+        [keep.id, serial || null, serial ? serialKey(serial) : null, electrical],
+      );
+    }
+    await sql.query(
+      `delete from install_inspection_units d
+        where d.equipment_id = $2
+          and exists (
+            select 1 from install_inspection_units k
+             where k.install_id = d.install_id and k.equipment_id = $1
+          )`,
+      [keep.id, drop.id],
+    );
+    await sql.query("update install_inspection_units set equipment_id = $1 where equipment_id = $2", [keep.id, drop.id]);
+    await sql.query("update install_inspection_photos set equipment_id = $1 where equipment_id = $2", [keep.id, drop.id]);
+    await sql.query(
+      `delete from pm_runbook_unit_links d
+        where d.account_equipment_id = $2
+          and exists (
+            select 1 from pm_runbook_unit_links k
+             where k.pm_job_id = d.pm_job_id and k.piece_key = d.piece_key and k.account_equipment_id = $1
+          )`,
+      [keep.id, drop.id],
+    );
+    await sql.query("update pm_runbook_unit_links set account_equipment_id = $1 where account_equipment_id = $2", [keep.id, drop.id]);
+    await sql.query("delete from account_equipment where id = $1", [drop.id]);
+    return { keepId: keep.id, serial };
+  });

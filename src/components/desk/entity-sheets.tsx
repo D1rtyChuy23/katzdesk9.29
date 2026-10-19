@@ -38,6 +38,8 @@ import {
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { appendServerMachines } from "@/lib/ops/warehouse-serial";
+import { foldVisitUnits } from "@/lib/ops/install-form";
+import { addInspectionEquipment, getInstallInspection } from "@/lib/ops/inspection-api";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -382,6 +384,16 @@ export function InstallSheet({
     // A warehouse assignment writes the serial on the server. Pre-inspection can add a machine. Pull both in.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, serialSig, machineSig]);
+  const visit = useQuery({
+    queryKey: ["inspection", row?.id],
+    queryFn: () => getInstallInspection({ data: { installId: row!.id } }),
+    enabled: row != null,
+  });
+  const visitSig = [
+    ...(visit.data?.machines ?? []).map((m) => `${m.model}|${m.serial ?? ""}`),
+    ...(assets.data ?? []).filter((a) => a.installId === row?.id).map((a) => `${a.model}|${a.serial ?? ""}`),
+  ].join("\n");
+  const foldedFor = useRef("");
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
@@ -437,6 +449,21 @@ export function InstallSheet({
       machines: packed.machines,
     });
   }
+
+  useEffect(() => {
+    if (!row || hydratedId !== row.id || !visit.data || visit.data.installId !== row.id) return;
+    const extras = [
+      ...visit.data.machines.map((m) => ({ model: m.model || m.name, serial: m.serial, electrical: m.electrical })),
+      ...(assets.data ?? []).filter((a) => a.installId === row.id).map((a) => ({ model: a.model, serial: a.serial, electrical: null })),
+    ];
+    const folded = foldVisitUnits(specs, extras);
+    const sig = `${row.id}:${visitSig}:${folded.rows.map((r) => `${r.equipment}|${r.serial}|${r.powerVoltage}|${r.plug ?? ""}`).join(";")}`;
+    if ((!folded.added && !folded.changed) || foldedFor.current === sig) return;
+    foldedFor.current = sig;
+    persistMachines(folded.rows);
+    // Units already on the visit (pre-inspection or the barn) join the equipment list once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row?.id, hydratedId, visitSig]);
 
   return (
     <Sheet
@@ -615,7 +642,22 @@ export function InstallSheet({
                 </Tabs.Content>
 
                 <Tabs.Content value="equipment" className="outline-none" data-testid="install-panel-equipment">
-                  <SerialNoticeBanner notice={row.serialNotice} />
+                  <SerialNoticeBanner
+                    notice={row.serialNotice}
+                    onAttach={(unit) => {
+                      const folded = foldVisitUnits(specs, [unit]);
+                      if (folded.added || folded.rows.some((r, i) => r.serial !== specs[i]?.serial)) persistMachines(folded.rows);
+                      else toast.message("That unit is already on this install.");
+                      void addInspectionEquipment({ data: { installId: row.id, model: unit.model, serial: unit.serial } })
+                        .then(() => {
+                          void qc.invalidateQueries({ queryKey: ["inspection", row.id] });
+                        })
+                        .catch((e) => {
+                          const message = e instanceof Error ? e.message : "";
+                          if (!/already on this visit/i.test(message)) toast.error(message || "Could not attach that unit");
+                        });
+                    }}
+                  />
                   <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
                   <div className="grid gap-3 border-b border-border px-4 py-3">
                     <EquipmentMultiCombo

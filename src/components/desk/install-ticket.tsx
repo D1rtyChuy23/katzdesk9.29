@@ -1,15 +1,14 @@
 import { useEffect, useRef } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Printer } from "lucide-react";
 import { toast } from "sonner";
-import { projectLabel, ticketLines, ticketOpen, type TicketLine } from "@/lib/ops/deal-board";
+import { projectLabel, ticketLines, ticketOpen } from "@/lib/ops/deal-board";
 import { findRecipeFor, recipeLabel } from "@/lib/ops/equipment";
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import type { MachineSpec } from "@/lib/ops/machines";
 import type { Install, Recipe } from "@/lib/ops/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-const esc = (s: string) => s.replace(/&/g, "&" + "amp;").replace(/</g, "&" + "lt;").replace(/>/g, "&" + "gt;").replace(/"/g, "&" + "quot;");
 
 /** The recipe a unit shows on its row: the one picked, else the one the account or the house already has for the model. */
 function recipeFor(recipes: Recipe[], install: Install, m: MachineSpec): Recipe | null {
@@ -34,42 +33,28 @@ function meta(install: Install): [string, string][] {
   ];
 }
 
-function printTicket(install: Install, lines: TicketLine[]) {
-  const w = window.open("", "_blank", "noopener,noreferrer,width=900,height=700");
-  if (!w) {
-    toast.error("Allow pop-ups to print the install ticket.");
-    return;
-  }
-  const cell = (v: string | null) => (v == null ? "" : v || "Not set");
-  const rows = lines
-    .map(
-      (l) =>
-        `<tr><td>${esc(l.model)}</td><td>${esc(cell(l.ownership))}</td><td>${esc(cell(l.serial))}</td><td>${esc(cell(l.volts))}</td><td>${esc(cell(l.plug))}</td><td>${esc(cell(l.water))}</td><td>${esc(cell(l.recipe))}</td></tr>`,
-    )
-    .join("");
-  w.document.write(`<!doctype html><html><head><title>Install Ticket · ${esc(install.customer)}</title>
-    <style>
-      body { font: 13px/1.4 system-ui, sans-serif; padding: 24px; color: #1a1612; }
-      h1 { font-size: 22px; margin: 0 0 4px; }
-      p { color: #5c5348; margin: 0 0 16px; }
-      table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1px solid #d7cfc4; padding: 6px 8px; text-align: left; vertical-align: top; }
-      th { background: #f4efe8; }
-    </style></head><body>
-    <h1>Install Ticket · ${esc(install.customer)}</h1>
-    <p>${meta(install).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(" · ")}</p>
-    <table><thead><tr><th>Model</th><th>Sold / Loan / Lease</th><th>Serial</th><th>Volts</th><th>Plug</th><th>Water</th><th>Recipe</th></tr></thead><tbody>${rows}</tbody></table>
-    </body></html>`);
-  w.document.close();
-  w.focus();
-  w.print();
-}
-
 /**
  * The install ticket for a board project. It opens once the project is Ready (equipment Ready and the
  * pre-inspection passed) and is read from the project's own machine rows: Sold, Loan or Lease, recipe,
  * and configuration (volts, plug, water when the unit takes it). Nothing is typed here twice.
  */
+function PrintFormButton({ installId }: { installId: number }) {
+  const navigate = useNavigate();
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      className="ml-auto"
+      data-testid="install-ticket-print"
+      onClick={() => void navigate({ to: "/installs/$installId/print", params: { installId: String(installId) } })}
+    >
+      <Printer className="size-4" />
+      Print
+    </Button>
+  );
+}
+
 export function InstallTicket({ install, machines, recipes }: { install: Install; machines: MachineSpec[]; recipes: Recipe[] }) {
   const ready = ticketOpen(install.equipStatus, install.inspection?.overall) && !install.complete;
   const box = useRef<HTMLElement>(null);
@@ -85,8 +70,10 @@ export function InstallTicket({ install, machines, recipes }: { install: Install
   if (install.complete) return null;
   if (!ready) {
     return (
-      <div className="border-b border-border px-5 py-3 text-xs text-muted-foreground" data-testid="install-ticket" data-state="waiting">
-        <span className="font-medium text-foreground">Install ticket</span> opens when this project is Ready: equipment status Ready and the pre-inspection passed.
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-3 text-xs text-muted-foreground" data-testid="install-ticket" data-state="waiting">
+        <span className="font-medium text-foreground">Install ticket</span>
+        <span>opens when this project is Ready: equipment status Ready and the pre-inspection passed.</span>
+        <PrintFormButton installId={install.id} />
       </div>
     );
   }
@@ -103,10 +90,7 @@ export function InstallTicket({ install, machines, recipes }: { install: Install
           Project Ready
         </Badge>
         {install.project && install.project.of > 1 ? <Badge size="tight" variant="outline">{projectLabel(install.project.n, install.project.of)}</Badge> : null}
-        <Button type="button" size="sm" variant="outline" className="ml-auto" onClick={() => printTicket(install, lines)} data-testid="install-ticket-print">
-          <Printer className="size-4" />
-          Print
-        </Button>
+        <PrintFormButton installId={install.id} />
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         Filled from this project. {meta(install).map(([k, v]) => `${k}: ${v}`).join(" · ")}
