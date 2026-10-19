@@ -346,6 +346,8 @@ export async function writeTicketCharges(
   userId: string,
   input: { po?: string; lines: ChargeLinesInput; discount?: DiscountInput },
 ): Promise<void> {
+  const merged = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
+  if (merged?.duplicate_of) throw new Error(`This ticket was merged into #${merged.duplicate_of}. Add charges there.`);
   const cur = await loadCharges(sql, jobId);
   if (cur.state === "billed") throw new Error(`This ticket is already billed on ${cur.nsSo}. Clear the Sales Order number to change the charges.`);
   const problems = checkCharges(input.lines);

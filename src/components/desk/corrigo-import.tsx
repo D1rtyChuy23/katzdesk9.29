@@ -63,8 +63,9 @@ export function CorrigoImportButton({
   const apply = useMutation({
     mutationFn: (rows: CorrigoPreview["rows"]) => applyCorrigoImport({ data: { rows } }),
     onSuccess: (res) => {
+      const notMerged = res.review.filter((item) => item.reason === "merge").length;
       toast.success(
-        `Corrigo import saved · ${res.updated} updated · ${res.created} created`,
+        `Corrigo import saved · ${res.updated} updated · ${res.created} created${notMerged ? ` · ${notMerged} not merged` : ""}`,
       );
       setOpen(false);
       setPreview(null);
@@ -77,6 +78,9 @@ export function CorrigoImportButton({
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
+      void qc.invalidateQueries({ queryKey: ["charges"] });
+      void qc.invalidateQueries({ queryKey: ["invoice"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not import"),
   });
@@ -667,6 +671,7 @@ export function CorrigoReviewList({
                   {item.entityType && item.entityType !== "service" ? ` · ${item.entityType}` : ""}
                   {item.technician ? ` · ${item.technician}` : ""}
                   {item.reason === "wrap" ? " · repeated after 9999" : ""}
+                  {item.reason === "merge" && item.note ? ` · not merged: ${item.note}` : ""}
                 </span>
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">

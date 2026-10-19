@@ -41,7 +41,8 @@ export type CorrigoApplyResult = {
     status: string;
     technician: string | null;
     entityType: CorrigoBoard;
-    reason?: "open" | "wrap";
+    reason?: "open" | "wrap" | "merge";
+    note?: string;
   }[];
 };
 
@@ -313,6 +314,7 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
     let updated = 0;
     let created = 0;
     const review: CorrigoApplyResult["review"] = [];
+    const heldByExtra = new Map<number, string>();
 
     const hitsForWrap = await loadHits(sql);
     const wrapped = deskHasWrapped(hitsForWrap);
@@ -472,7 +474,10 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
         for (const extra of row.conflictIds ?? []) {
           if (wrapRepeat) break;
           if ((extra.board === "service" || extra.board === "tlc") && extra.id !== jobId) {
-            await tryMergeServiceDuplicate(sql, jobId, extra.id, actor);
+            const outcome = await tryMergeServiceDuplicate(sql, jobId, extra.id, actor);
+            if (typeof outcome === "object" && outcome.result === "held" && !heldByExtra.has(extra.id)) {
+              heldByExtra.set(extra.id, outcome.reason);
+            }
           }
         }
         updated += 1;
@@ -570,6 +575,42 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
       }
     }
 
-    await reconcileServiceDuplicates(sql, actor);
+    const reconciled = await reconcileServiceDuplicates(sql, actor);
+    for (const held of reconciled.held) {
+      if (!heldByExtra.has(held.extraId)) heldByExtra.set(held.extraId, held.reason);
+    }
+    if (heldByExtra.size) {
+      const extras = await sql.query<{
+        id: number;
+        kind: string;
+        wo: string | null;
+        customer: string | null;
+        status: string;
+        technician: string | null;
+      }>("select id, kind, wo, customer, status, technician from service_jobs where id = any($1::int[])", [
+        [...heldByExtra.keys()],
+      ]);
+      for (const row of extras) {
+        const note = heldByExtra.get(Number(row.id));
+        if (!note) continue;
+        const entityType = jobBoard(row.kind);
+        const cur = review.find((item) => item.entityType === entityType && item.id === Number(row.id));
+        if (cur) {
+          cur.reason = "merge";
+          cur.note = note;
+        } else {
+          review.push({
+            id: Number(row.id),
+            wo: row.wo ?? "",
+            customer: row.customer,
+            status: row.status,
+            technician: row.technician,
+            entityType,
+            reason: "merge",
+            note,
+          });
+        }
+      }
+    }
     return { updated, created, review };
   });

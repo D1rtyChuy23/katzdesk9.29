@@ -1169,7 +1169,7 @@ async function patchWoDuplicates(sql: Sql) {
   const meta = await sql<{ v: string }>`select v from seed_meta where k = 'wo_duplicates'`;
   if (meta[0]?.v === "v1") return;
   const result = await reconcileServiceDuplicates(sql, "KatzDesk");
-  console.info("[katz-desk] wo duplicates", result.merged, "merged", result.flagged, "flagged");
+  console.info("[katz-desk] wo duplicates", result.merged, "merged", result.flagged, "flagged", result.held.length, "held");
   await sql`insert into seed_meta (k, v) values ('wo_duplicates', 'v1') on conflict (k) do update set v = 'v1'`;
 }
 

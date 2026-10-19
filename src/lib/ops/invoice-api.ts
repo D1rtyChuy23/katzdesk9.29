@@ -48,19 +48,24 @@ type Ref = { type: InvoiceTarget; id: number; customer: string; title: string; r
 /** The record the invoice is for: its customer comes from the record itself, never asked for again. */
 async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise<Ref> {
   if (type === "service" || type === "tlc") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null }>(
-      "select customer, wo, call_id, kind, ns_so from service_jobs where id = $1",
+    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null }>(
+      "select customer, wo, call_id, kind, ns_so, duplicate_of from service_jobs where id = $1",
       [id],
     ))[0];
     if (!r) throw new Error("That ticket is no longer on the list.");
     const kind: InvoiceTarget = r.kind === "tlc" ? "tlc" : "service";
+    const locked = r.duplicate_of
+      ? `This ticket was merged into #${r.duplicate_of}. Open that ticket to change its invoice.`
+      : r.ns_so
+        ? `This ticket is billed on ${r.ns_so}. Clear the Sales Order number on the ticket to change its invoice.`
+        : null;
     return {
       type: kind,
       id,
       customer: (r.customer ?? "").trim(),
       title: targetTitle(kind, { id, wo: r.wo, callId: r.call_id }),
       recordRep: null,
-      locked: r.ns_so ? `This ticket is billed on ${r.ns_so}. Clear the Sales Order number on the ticket to change its invoice.` : null,
+      locked,
     };
   }
   if (type === "pm") {
