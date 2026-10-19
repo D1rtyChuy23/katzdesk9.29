@@ -649,7 +649,7 @@ export function CorrigoReviewList({
         <div>
           <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For Review</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999.
+            Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999, and tickets that could not be merged.
           </p>
         </div>
         <Button type="button" size="sm" variant="outline" onClick={onDismiss}>
@@ -671,8 +671,10 @@ export function CorrigoReviewList({
                   {item.entityType && item.entityType !== "service" ? ` · ${item.entityType}` : ""}
                   {item.technician ? ` · ${item.technician}` : ""}
                   {item.reason === "wrap" ? " · repeated after 9999" : ""}
-                  {item.reason === "merge" && item.note ? ` · not merged: ${item.note}` : ""}
                 </span>
+                {item.reason === "merge" && item.note ? (
+                  <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">not merged: {item.note}</span>
+                ) : null}
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">
                 {item.reason === "wrap" && !/open|dispatch|progress|follow/i.test(item.status)

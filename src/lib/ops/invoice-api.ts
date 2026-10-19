@@ -16,6 +16,7 @@ async function ready(): Promise<Sql> {
 }
 
 export type InvoiceLine = {
+  id?: number;
   item: string;
   description: string;
   qty: number;
@@ -139,6 +140,7 @@ const toDiscount = (kind: string | null, value: string | number | null): Discoun
 
 async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]> {
   const rows = await sql.query<{
+    id: number;
     item: string;
     description: string | null;
     qty: string;
@@ -150,7 +152,7 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
     has_image: boolean | null;
     image_version: string | null;
   }>(
-    `select l.item, l.description, l.qty, l.rate, l.kind,
+    `select l.id, l.item, l.description, l.qty, l.rate, l.kind,
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
             case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version
        from invoice_lines l
@@ -165,6 +167,7 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
     [invoiceId],
   );
   return rows.map((r) => ({
+    id: Number(r.id),
     item: r.item,
     description: r.description ?? "",
     qty: Number(r.qty),
@@ -181,7 +184,7 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number): Promise<I
   let discount: Discount | null;
   if (usesTicketCharges(ref.type)) {
     const c = await loadTicketCharges(sql, id);
-    lines = c.lines.map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part }));
+    lines = c.lines.map((l) => ({ id: l.id, item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part }));
     discount = c.discount;
   } else {
     lines = h ? await projectLines(sql, h.id) : [];
@@ -220,6 +223,7 @@ const lineInput = z.object({
 
 const approveInput = targetInput.extend({
   lines: z.array(lineInput).max(200),
+  lineIds: z.array(z.number().int().positive()).max(200),
   discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable(),
 });
 
@@ -247,7 +251,7 @@ export const approveInvoice = createServerFn({ method: "POST" })
     let lines: { item: string; description: string; qty: number; rate: number; kind: ChargeKind }[];
     if (usesTicketCharges(ref.type)) {
       // The ticket's own Charges: same write as the Charges panel, P.O. kept as it is.
-      await writeTicketCharges(sql, data.id, context.userId, { lines: data.lines, discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value } : null });
+      await writeTicketCharges(sql, data.id, context.userId, { lines: data.lines, lineIds: data.lineIds, discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value } : null });
       lines = (await loadTicketCharges(sql, data.id)).lines;
     } else {
       const items = data.lines.map((l) => l.item.trim());

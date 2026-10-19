@@ -5,7 +5,7 @@ import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
-const { mergeMoneyRefusal, mergeServiceJobs, mergeTicketsSql, reconcileServiceDuplicates, tryMergeServiceDuplicate } = await import(
+const { attachHeldReview, mergeMoneyRefusal, mergeServiceJobs, mergeTicketsSql, reconcileServiceDuplicates, tryMergeServiceDuplicate } = await import(
   "../src/lib/ops/wo-duplicates.ts"
 );
 
@@ -122,16 +122,22 @@ test("a keeper's line and the extra's two lines become sorts 1, 2, 3 and stay on
 });
 
 test("a billed keeper with the extra's lines is refused and nothing moves", async () => {
-  const wo = "WO-4102";
-  const keeper = await ticket({ wo, nsSo: "SO100" });
-  const extra = await ticket({ wo });
+  const keeper = await ticket({ wo: "wo 4102", customer: "Walk-in", nsSo: "SO100" });
+  const extra = await ticket({ wo: "WO-4102", customer: "North Cafe", po: "PO-7" });
   await line(keeper, 1, "Keep");
   await line(extra, 1, "Extra");
+  await pg.query("insert into comments (entity_type, entity_id, body) values ('service', $1, 'stay put')", [extra]);
   const result = await mergeServiceJobs(sql, keeper, extra, "Chuy");
   assert.deepEqual(result, { refused: `Ticket #${keeper} is billed on SO100. Clear its Sales Order before merging charges into it.` });
   assert.deepEqual(await chargeSorts(extra), [{ item: "Extra", sort: 1 }]);
   const dup = await pg.query("select duplicate_of from service_jobs where id = $1", [extra]);
   assert.equal(dup.rows[0].duplicate_of, null);
+  const comment = await pg.query("select entity_id from comments where body = 'stay put'");
+  assert.equal(Number(comment.rows[0].entity_id), extra);
+  const kept = await pg.query("select customer, wo, po from service_jobs where id = $1", [keeper]);
+  assert.equal(kept.rows[0].customer, "Walk-in");
+  assert.equal(kept.rows[0].wo, "wo 4102");
+  assert.equal(kept.rows[0].po, null);
 });
 
 test("an extra that is already billed is refused", async () => {
@@ -170,6 +176,9 @@ test("the statement itself writes nothing when the keeper was billed after the c
   const keeper = await ticket({ wo: "WO-4106", nsSo: "SO300" });
   const extra = await ticket({ wo: "WO-4106" });
   await line(extra, 1, "Race");
+  const stamps = await pg.query("select id, updated_at::text as updated from service_jobs where id = any($1::int[])", [[keeper, extra]]);
+  const ku = stamps.rows.find((row) => Number(row.id) === keeper).updated;
+  const eu = stamps.rows.find((row) => Number(row.id) === extra).updated;
   const rows = await pg.query(mergeTicketsSql(), [
     keeper,
     extra,
@@ -188,6 +197,8 @@ test("the statement itself writes nothing when the keeper was billed after the c
     null,
     null,
     "Normal",
+    ku,
+    eu,
   ]);
   assert.equal(rows.rows.length, 0);
   assert.deepEqual(await chargeSorts(extra), [{ item: "Race", sort: 1 }]);
@@ -273,6 +284,7 @@ test("an older merge into the extra follows the keeper, and merging again change
   await pg.query("update service_jobs set duplicate_of = $2 where id = $1", [older, extra]);
   await line(extra, 1, "Once");
   assert.deepEqual(await mergeServiceJobs(sql, keeper, extra, "Chuy"), { keeperId: keeper, extraId: extra });
+  assert.deepEqual(await chargeSorts(keeper), [{ item: "Once", sort: 1 }]);
   const pointed = await pg.query("select duplicate_of from service_jobs where id = $1", [older]);
   assert.equal(Number(pointed.rows[0].duplicate_of), keeper);
   const before = await pg.query("select item, sort, job_id from ticket_charges where job_id = $1", [keeper]);
@@ -293,7 +305,12 @@ test("Corrigo holds a billed extra, and the reconcile lists that hold", async ()
   const extra = await ticket({ wo, customer: "Cafe", nsSo: "SO400" });
   await line(extra, 1, "Held");
   const outcome = await tryMergeServiceDuplicate(sql, keeper, extra, "Chuy");
-  assert.deepEqual(outcome, { result: "held", reason: `Ticket #${extra} is billed on SO400. Merge the other ticket into it instead.` });
+  assert.deepEqual(outcome, {
+    result: "held",
+    reason: `Ticket #${extra} is billed on SO400. Merge the other ticket into it instead.`,
+    keeperId: keeper,
+    extraId: extra,
+  });
   const recon = await reconcileServiceDuplicates(sql, "Chuy");
   assert.ok(recon.held.some((held) => held.keeperId === keeper && held.extraId === extra && held.reason === outcome.reason));
   assert.equal((await pg.query("select duplicate_of from service_jobs where id = $1", [extra])).rows[0].duplicate_of, null);
@@ -336,7 +353,7 @@ test("mergeMoneyRefusal names the first reason, in order", () => {
       money({ id: 3, discountKind: "amount", discountValue: 10 }),
       money({ id: 4, lines: 1, discountKind: "amount", discountValue: 50 }),
     ),
-    "Ticket #4 has a $50.00 discount that ticket #3 doesn't. Make the discounts match first.",
+    "Ticket #3 has a $10.00 discount and ticket #4 has $50.00; merged, only one would apply. Make the discounts match first.",
   );
   assert.equal(
     mergeMoneyRefusal(
@@ -357,6 +374,27 @@ test("mergeMoneyRefusal names the first reason, in order", () => {
   assert.equal(
     mergeMoneyRefusal(money({ id: 1, lines: 150 }), money({ id: 2, lines: 150, discountKind: "percent", discountValue: 10 })),
     "Ticket #2 has a 10% discount that ticket #1 doesn't. Make the discounts match first.",
+  );
+  assert.equal(
+    mergeMoneyRefusal(
+      money({ id: 1, lines: 1, completedAt: "2026-04-01" }),
+      money({ id: 2, lines: 1, completedAt: "2026-04-08" }),
+    ),
+    "Ticket #2 was completed 2026-04-08 and #1 2026-04-01, so charges would bill in a different week. Make the completed dates match first.",
+  );
+  assert.equal(
+    mergeMoneyRefusal(
+      money({ id: 1, lines: 150, completedAt: "2026-04-01", discountKind: "percent", discountValue: 10 }),
+      money({ id: 2, lines: 150, completedAt: "2026-04-08" }),
+    ),
+    "Ticket #1 has a 10% discount that ticket #2 doesn't. Make the discounts match first.",
+  );
+  assert.equal(
+    mergeMoneyRefusal(
+      money({ id: 1, lines: 150, completedAt: "2026-04-01" }),
+      money({ id: 2, lines: 150, completedAt: "2026-04-08" }),
+    ),
+    "Ticket #2 was completed 2026-04-08 and #1 2026-04-01, so charges would bill in a different week. Make the completed dates match first.",
   );
 });
 
@@ -419,4 +457,214 @@ test("zero rows from the statement re-reads the reason, or says the tickets chan
     "Chuy",
   );
   assert.deepEqual(billed, { refused: "Ticket #2 is billed on SO9. Merge the other ticket into it instead." });
+});
+
+test("a keeper's percent does not spread onto the extra's undiscounted lines", async () => {
+  const keeper = await ticket({ wo: "WO-4201", discountKind: "percent", discountValue: 10 });
+  const extra = await ticket({ wo: "WO-4201" });
+  await line(keeper, 1, "Keep");
+  await line(extra, 1, "Extra");
+  const result = await mergeServiceJobs(sql, keeper, extra, "Chuy");
+  assert.deepEqual(result, {
+    refused: `Ticket #${keeper} has a 10% discount that ticket #${extra} doesn't. Make the discounts match first.`,
+  });
+  assert.deepEqual(await chargeSorts(extra), [{ item: "Extra", sort: 1 }]);
+});
+
+test("a discount mismatch is refused whichever ticket is kept", async () => {
+  const discounted = await ticket({ wo: "WO-4202", discountKind: "percent", discountValue: 10 });
+  const plain = await ticket({ wo: "WO-4202" });
+  await line(discounted, 1, "Disc");
+  await line(plain, 1, "Plain");
+  const one = await mergeServiceJobs(sql, discounted, plain, "Chuy");
+  const other = await mergeServiceJobs(sql, plain, discounted, "Chuy");
+  assert.deepEqual(one, {
+    refused: `Ticket #${discounted} has a 10% discount that ticket #${plain} doesn't. Make the discounts match first.`,
+  });
+  assert.deepEqual(other, {
+    refused: `Ticket #${discounted} has a 10% discount that ticket #${plain} doesn't. Make the discounts match first.`,
+  });
+  assert.equal((await chargeSorts(discounted)).length, 1);
+  assert.equal((await chargeSorts(plain)).length, 1);
+});
+
+test("two amount discounts are refused because only one would apply", async () => {
+  const keeper = await ticket({ wo: "WO-4203", discountKind: "amount", discountValue: 50 });
+  const extra = await ticket({ wo: "WO-4203", discountKind: "amount", discountValue: 50 });
+  await line(keeper, 1, "Keep");
+  await line(extra, 1, "Extra");
+  const result = await mergeServiceJobs(sql, keeper, extra, "Chuy");
+  assert.deepEqual(result, {
+    refused: `Ticket #${keeper} has a $50.00 discount and ticket #${extra} has $50.00; merged, only one would apply. Make the discounts match first.`,
+  });
+  assert.equal((await chargeSorts(keeper)).length, 1);
+});
+
+test("an extra with a discount and no lines does not hand the discount over", async () => {
+  const keeper = await ticket({ wo: "WO-4204" });
+  const extra = await ticket({ wo: "WO-4204", discountKind: "percent", discountValue: 10 });
+  assert.deepEqual(await mergeServiceJobs(sql, keeper, extra, "Chuy"), { keeperId: keeper, extraId: extra });
+  const saved = await pg.query("select discount_kind, discount_value from service_jobs where id = $1", [keeper]);
+  assert.equal(saved.rows[0].discount_kind, null);
+  assert.equal(saved.rows[0].discount_value, null);
+});
+
+test("charges are not merged onto a different completed date", async () => {
+  const keeper = await ticket({ wo: "WO-4205", completed: "2026-04-01" });
+  const extra = await ticket({ wo: "WO-4205", completed: "2026-04-08" });
+  await line(extra, 1, "Jump");
+  const result = await mergeServiceJobs(sql, keeper, extra, "Chuy");
+  assert.deepEqual(result, {
+    refused: `Ticket #${extra} was completed 2026-04-08 and #${keeper} 2026-04-01, so charges would bill in a different week. Make the completed dates match first.`,
+  });
+  assert.deepEqual(await chargeSorts(extra), [{ item: "Jump", sort: 1 }]);
+  assert.deepEqual(await chargeSorts(keeper), []);
+});
+
+test("reconcile skips a held pair, with one merge row, and the importing ticket stays open", async () => {
+  const importer = await ticket({ wo: "WO-4206", customer: "Cafe" });
+  const extra = await ticket({ wo: "WO-4206", customer: "Cafe" });
+  const skipped = await reconcileServiceDuplicates(sql, "Chuy", [{ keeperId: importer, extraId: extra }]);
+  assert.equal(skipped.merged, 0);
+  const marked = await pg.query("select duplicate_of from service_jobs where id = any($1::int[])", [[importer, extra]]);
+  assert.deepEqual(marked.rows.map((row) => row.duplicate_of), [null, null]);
+  const review = attachHeldReview(
+    [{ id: importer, wo: "WO-4206", customer: "Cafe", status: "Open", technician: null, entityType: "service", reason: "open" }],
+    [{ keeperId: importer, extraId: extra, reason: "Ticket held", perRowExtra: extra }],
+    [
+      { id: importer, kind: "service", wo: "WO-4206", customer: "Cafe", status: "Open", technician: null, duplicate_of: null },
+      { id: extra, kind: "service", wo: "WO-4206", customer: "Cafe", status: "Open", technician: null, duplicate_of: null },
+    ],
+  );
+  assert.equal(review.filter((row) => row.reason === "merge").length, 1);
+  assert.equal(review.find((row) => row.id === importer).reason, "open");
+  assert.equal(review.find((row) => row.reason === "merge").id, extra);
+});
+
+async function mergeParams(keeper, extra, keeperUpdated, extraUpdated) {
+  return [
+    keeper,
+    extra,
+    "Chuy",
+    "Cafe",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "2026-04-01",
+    null,
+    null,
+    "Normal",
+    keeperUpdated,
+    extraUpdated,
+  ];
+}
+
+test("a keeper that was already merged makes the statement write nothing", async () => {
+  const keeper = await ticket({ wo: "WO-4207" });
+  const extra = await ticket({ wo: "WO-4207" });
+  const other = await ticket({ wo: "WO-4208" });
+  await line(extra, 1, "Stay");
+  await pg.query("update service_jobs set duplicate_of = $2 where id = $1", [keeper, other]);
+  const stamps = await pg.query("select id, updated_at::text as updated from service_jobs where id = any($1::int[])", [[keeper, extra]]);
+  const ku = stamps.rows.find((row) => Number(row.id) === keeper).updated;
+  const eu = stamps.rows.find((row) => Number(row.id) === extra).updated;
+  const rows = await sql.query(mergeTicketsSql(), await mergeParams(keeper, extra, ku, eu));
+  assert.equal(rows.length, 0);
+  assert.deepEqual(await chargeSorts(extra), [{ item: "Stay", sort: 1 }]);
+});
+
+test("an extra already merged into another ticket is refused", async () => {
+  const keeper = await ticket({ wo: "WO-4209" });
+  const extra = await ticket({ wo: "WO-4209" });
+  const other = await ticket({ wo: "WO-4210" });
+  await pg.query("update service_jobs set duplicate_of = $2 where id = $1", [extra, other]);
+  assert.deepEqual(await mergeServiceJobs(sql, keeper, extra, "Chuy"), {
+    refused: `Ticket #${extra} was already merged into #${other}.`,
+  });
+});
+
+test("a changed updated_at makes the merge write nothing", async () => {
+  const keeper = await ticket({ wo: "WO-4211" });
+  const extra = await ticket({ wo: "WO-4211" });
+  await line(extra, 1, "Stay");
+  const rows = await sql.query(mergeTicketsSql(), await mergeParams(keeper, extra, "stale", "stale"));
+  assert.equal(rows.length, 0);
+  assert.deepEqual(await chargeSorts(extra), [{ item: "Stay", sort: 1 }]);
+  assert.equal((await pg.query("select duplicate_of from service_jobs where id = $1", [extra])).rows[0].duplicate_of, null);
+});
+
+test("stale line ids are refused, and a save on the merged extra is refused", async () => {
+  process.env.DATABASE_URL = "postgres://127.0.0.1:9/unused";
+  const { writeTicketCharges } = await import("../src/lib/ops/charges-api.ts");
+  const keeper = await ticket({ wo: "WO-4212" });
+  const extra = await ticket({ wo: "WO-4212" });
+  await line(keeper, 1, "Keep");
+  await line(extra, 1, "Moved");
+  const ids = (await pg.query("select id from ticket_charges where job_id = $1 order by id", [keeper])).rows.map((row) => Number(row.id));
+  await assert.rejects(
+    () => writeTicketCharges(sql, keeper, "user", { lines: [{ item: "Keep", description: "", qty: 1, rate: 10 }], lineIds: [ids[0] + 99] }),
+    (err) => err instanceof Error && err.message === "These charges changed since you opened them. Reload and try again.",
+  );
+  assert.deepEqual(await chargeSorts(keeper), [{ item: "Keep", sort: 1 }]);
+  assert.deepEqual(await mergeServiceJobs(sql, keeper, extra, "Chuy"), { keeperId: keeper, extraId: extra });
+  await assert.rejects(
+    () => writeTicketCharges(sql, extra, "user", { lines: [{ item: "New", description: "", qty: 1, rate: 10 }], lineIds: [] }),
+    (err) => err instanceof Error && err.message === `This ticket was merged into #${keeper}. Add charges there.`,
+  );
+  await assert.rejects(
+    () => writeTicketCharges(sql, keeper, "user", { lines: [{ item: "Keep", description: "", qty: 1, rate: 10 }], lineIds: ids }),
+    (err) => err instanceof Error && err.message === "These charges changed since you opened them. Reload and try again.",
+  );
+  assert.deepEqual(await chargeSorts(keeper), [
+    { item: "Keep", sort: 1 },
+    { item: "Moved", sort: 2 },
+  ]);
+});
+
+test("a merged ticket cannot take a Sales Order, and clearing one still works", async () => {
+  process.env.DATABASE_URL = "postgres://127.0.0.1:9/unused";
+  const { recordTicketSalesOrder } = await import("../src/lib/ops/charges-api.ts");
+  const keeper = await ticket({ wo: "WO-4213" });
+  const extra = await ticket({ wo: "WO-4213", nsSo: "SO1" });
+  await pg.query("update service_jobs set duplicate_of = $2 where id = $1", [extra, keeper]);
+  await assert.rejects(
+    () => recordTicketSalesOrder(sql, extra, "user", "SO9"),
+    (err) => err instanceof Error && err.message === `This ticket was merged into #${keeper}. Enter the Sales Order there.`,
+  );
+  assert.equal((await pg.query("select ns_so from service_jobs where id = $1", [extra])).rows[0].ns_so, "SO1");
+  await recordTicketSalesOrder(sql, extra, "user", null);
+  assert.equal((await pg.query("select ns_so from service_jobs where id = $1", [extra])).rows[0].ns_so, null);
+});
+
+test("the keeper's invoice row takes the merged customer and keeps the bill-to name", async () => {
+  const keeper = await ticket({ wo: "WO-4214", customer: "Walk-in" });
+  const extra = await ticket({ wo: "WO-4214", customer: "North Cafe" });
+  await pg.query("insert into invoices (entity_type, entity_id, customer, bill_name) values ('service', $1, 'Walk-in', 'Keep bill')", [keeper]);
+  assert.deepEqual(await mergeServiceJobs(sql, keeper, extra, "Chuy"), { keeperId: keeper, extraId: extra });
+  const inv = await pg.query("select customer, bill_name from invoices where entity_type = 'service' and entity_id = $1", [keeper]);
+  assert.equal(inv.rows[0].customer, "North Cafe");
+  assert.equal(inv.rows[0].bill_name, "Keep bill");
+});
+
+test("the merge note says one charge line, and leaves out a blank work order", async () => {
+  const one = await ticket({ wo: "WO-4215" });
+  const extra = await ticket({ wo: "WO-4215" });
+  await line(extra, 1, "Only");
+  assert.deepEqual(await mergeServiceJobs(sql, one, extra, "Chuy"), { keeperId: one, extraId: extra });
+  const oneDetail = await pg.query("select detail from activity where action = 'merged' and entity_id = $1", [one]);
+  assert.match(oneDetail.rows[0].detail, /moved 1 charge line$/);
+  assert.doesNotMatch(oneDetail.rows[0].detail, /charge lines/);
+
+  const blank = await ticket({ wo: null });
+  const other = await ticket({ wo: null });
+  assert.deepEqual(await mergeServiceJobs(sql, blank, other, "Chuy"), { keeperId: blank, extraId: other });
+  const blankDetail = await pg.query("select detail from activity where action = 'merged' and entity_id = $1", [blank]);
+  assert.equal(blankDetail.rows[0].detail.includes("·  ·"), false);
+  assert.match(blankDetail.rows[0].detail, /into this ticket · moved 0 charge lines/);
 });

@@ -18,7 +18,7 @@ import {
   type CorrigoHit,
   type CorrigoPreviewRow,
 } from "@/lib/ops/corrigo";
-import { reconcileServiceDuplicates, tryMergeServiceDuplicate } from "@/lib/ops/wo-duplicates";
+import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
 
 export type CorrigoPreview = {
@@ -314,7 +314,12 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
     let updated = 0;
     let created = 0;
     const review: CorrigoApplyResult["review"] = [];
-    const heldByExtra = new Map<number, string>();
+    const heldPairs = new Map<string, HeldReview>();
+    const holdKey = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
+    const rememberHold = (keeperId: number, extraId: number, reason: string, perRowExtra: number) => {
+      const key = holdKey(keeperId, extraId);
+      if (!heldPairs.has(key)) heldPairs.set(key, { keeperId, extraId, reason, perRowExtra });
+    };
 
     const hitsForWrap = await loadHits(sql);
     const wrapped = deskHasWrapped(hitsForWrap);
@@ -475,8 +480,8 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
           if (wrapRepeat) break;
           if ((extra.board === "service" || extra.board === "tlc") && extra.id !== jobId) {
             const outcome = await tryMergeServiceDuplicate(sql, jobId, extra.id, actor);
-            if (typeof outcome === "object" && outcome.result === "held" && !heldByExtra.has(extra.id)) {
-              heldByExtra.set(extra.id, outcome.reason);
+            if (typeof outcome === "object" && outcome.result === "held") {
+              rememberHold(outcome.keeperId, outcome.extraId, outcome.reason, extra.id);
             }
           }
         }
@@ -575,11 +580,14 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
       }
     }
 
-    const reconciled = await reconcileServiceDuplicates(sql, actor);
-    for (const held of reconciled.held) {
-      if (!heldByExtra.has(held.extraId)) heldByExtra.set(held.extraId, held.reason);
-    }
-    if (heldByExtra.size) {
+    const reconciled = await reconcileServiceDuplicates(
+      sql,
+      actor,
+      [...heldPairs.values()].map((held) => ({ keeperId: held.keeperId, extraId: held.extraId })),
+    );
+    for (const held of reconciled.held) rememberHold(held.keeperId, held.extraId, held.reason, held.extraId);
+    if (heldPairs.size) {
+      const ids = [...new Set([...heldPairs.values()].flatMap((held) => [held.keeperId, held.extraId, held.perRowExtra]))];
       const extras = await sql.query<{
         id: number;
         kind: string;
@@ -587,30 +595,13 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
         customer: string | null;
         status: string;
         technician: string | null;
-      }>("select id, kind, wo, customer, status, technician from service_jobs where id = any($1::int[])", [
-        [...heldByExtra.keys()],
-      ]);
-      for (const row of extras) {
-        const note = heldByExtra.get(Number(row.id));
-        if (!note) continue;
-        const entityType = jobBoard(row.kind);
-        const cur = review.find((item) => item.entityType === entityType && item.id === Number(row.id));
-        if (cur) {
-          cur.reason = "merge";
-          cur.note = note;
-        } else {
-          review.push({
-            id: Number(row.id),
-            wo: row.wo ?? "",
-            customer: row.customer,
-            status: row.status,
-            technician: row.technician,
-            entityType,
-            reason: "merge",
-            note,
-          });
-        }
-      }
+        duplicate_of: number | null;
+      }>("select id, kind, wo, customer, status, technician, duplicate_of from service_jobs where id = any($1::int[])", [ids]);
+      return {
+        updated,
+        created,
+        review: attachHeldReview(review, [...heldPairs.values()], extras),
+      };
     }
     return { updated, created, review };
   });
