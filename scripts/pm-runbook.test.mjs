@@ -12,6 +12,7 @@ import {
   milestoneAge,
   nextFromHistory,
   recommendInterval,
+  visitCarriesShorter,
   changeAddedKits,
   kitList,
   kitListText,
@@ -266,10 +267,20 @@ test("La Marzocco style, history and combined-visit text", () => {
   assert.equal(next("3", "6"), "3");
   assert.equal(next("3", "6", "3"), "12");
   assert.equal(next("3", "6", "3", "12"), "3");
+  assert.equal(next("6"), "3");
+  assert.equal(next("12", "6"), "3");
+  assert.equal(next("6", "3"), "12");
+  assert.equal(next("12", "6", "3"), "12");
   assert.equal(combinedVisitNotes(def).history, ", the 12 + 36 together visit");
   assert.equal(combinedVisitNotes(def).recommended, " (12 + 36 together)");
-  assert.equal(combinedVisitNotes(linea).history, ", the 3/9-month and 12-month PMs together");
-  assert.equal(combinedVisitNotes(linea).recommended, " (the 3/9-month and 12-month PMs together)");
+  assert.equal(combinedVisitNotes(linea).history, "");
+  assert.equal(combinedVisitNotes(linea).recommended, "");
+  assert.equal(recommendInterval(linea, "2026-05-18", new Date("2026-10-18T15:00:00Z"))?.combined, false);
+  assert.equal(nextFromHistory(linea, ["3"])?.combined, false);
+  assert.equal(recommendInterval(def, "2023-03-10", new Date("2026-03-20T00:00:00Z"))?.combined, true);
+  assert.equal(nextFromHistory(def, ["12", "12"])?.combined, true);
+  const gs3 = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/la-marzocco-gs3.json", import.meta.url), "utf8")));
+  assert.equal(visitCarriesShorter(gs3, "12"), true);
   assert.equal(modulesNotTakenReason(linea, "pb", false), "Linea PB does not take Eversys modules.");
   assert.equal(modulesNotTakenReason(def, "4s", true), null);
 });
@@ -292,6 +303,30 @@ test("the default 12-month style waits for the install date on La Marzocco", () 
   assert.equal(eversys("6 month PM"), "36");
   assert.equal(milestoneAge(3), "month 3");
   assert.equal(milestoneAge(36), "year 3");
+  assert.equal(recommendInterval(linea, "2026-05-31", new Date("2026-10-01T00:00:00Z"))?.id, "3");
+  assert.equal(recommendInterval(linea, "2026-05-01", new Date("2026-09-30T00:00:00Z"))?.id, "6");
+  const oldNext = (prior) => {
+    const ids = [12, 36];
+    const short = 12;
+    const long = 36;
+    let run = 0;
+    for (const raw of prior) {
+      const n = Number(raw);
+      run = n >= long && long > short ? 0 : run + 1;
+    }
+    const mark = (run + 1) * short;
+    return String([...ids].reverse().find((id) => mark % id === 0) ?? short);
+  };
+  const sequences = [[]];
+  for (let len = 1; len <= 6; len++) {
+    const next = [];
+    for (const seq of sequences) for (const id of ["12", "36"]) next.push([...seq, id]);
+    sequences.push(...next);
+  }
+  for (const seq of sequences) {
+    if (!seq.length) continue;
+    assert.equal(nextFromHistory(def, seq)?.id, oldNext(seq), seq.join(","));
+  }
 });
 
 test("units: pieceKey is the key a line had before it matched an account unit", () => {

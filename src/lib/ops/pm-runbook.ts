@@ -834,6 +834,12 @@ export function milestoneAge(milestone: number): string {
   return milestone % 12 === 0 ? `year ${milestone / 12}` : `month ${milestone}`;
 }
 
+/** True when this visit's kit list also carries kits from a shorter visit. A kit that names its visit (`when.pm`) does not. */
+export function visitCarriesShorter(def: RunbookDefinition, id: string): boolean {
+  const n = Number(id);
+  return def.kits.some((k) => Number(k.interval) < n && !(k.when && Object.hasOwn(k.when, "pm")));
+}
+
 /**
  * Eversys PM cycle (all Eversys equipment): year 1 is a 12-month PM, year 2 is a 12-month PM, and year 3 is the
  * 12 and 36-month PMs together, then the cycle repeats. The 36-month list already contains the 12-month kits, so
@@ -842,6 +848,8 @@ export function milestoneAge(milestone: number): string {
  * Recommended PM interval from the unit's install date at this location, on each anniversary. Returns null
  * without a usable install date. The tech can always choose otherwise (what the customer wants, or what is
  * recommended): this only sets the default.
+ * When the shortest interval is under 12 months, age is days / 30.4375 so the day of the month counts.
+ * Eversys (shortest 12) stays on calendar months.
  */
 export function recommendInterval(
   def: RunbookDefinition,
@@ -852,44 +860,67 @@ export function recommendInterval(
   if (!m) return null;
   const start = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
   if (Number.isNaN(start.getTime()) || start.getTime() > now.getTime()) return null;
-  const months = (now.getUTCFullYear() - start.getUTCFullYear()) * 12 + (now.getUTCMonth() - start.getUTCMonth());
   const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
   if (!ids.length) return null;
   const unit = ids[0];
+  const calendar = (now.getUTCFullYear() - start.getUTCFullYear()) * 12 + (now.getUTCMonth() - start.getUTCMonth());
+  const months = unit < 12 ? (now.getTime() - start.getTime()) / 86400000 / 30.4375 : calendar;
   const milestone = Math.max(unit, Math.round(months / unit) * unit);
   const pick = [...ids].reverse().find((n) => milestone % n === 0) ?? unit;
-  return { id: String(pick), months, milestone, year: milestone / 12, combined: pick > unit };
+  return { id: String(pick), months, milestone, year: milestone / 12, combined: visitCarriesShorter(def, String(pick)) };
 }
 
 /**
  * Next interval from a unit's earlier full (completed) PMs, oldest first, for a unit with no install date.
- * `run` is how many of those PMs have happened since the last longest-interval PM.
- * The next PM is the largest interval id that divides (run + 1) × the shortest interval.
- * La Marzocco (3, 6, 12) then goes 3, 6, 3, 12. Eversys (12, 36) stays 12, 12, 36.
- * Returns null with no earlier PM to go on.
+ * `pos` is months since the last longest PM. A longest PM sets it back to 0. Any other visit advances one
+ * short step; if that visit was a longer interval than the slot it landed on, `pos` jumps to the next slot
+ * whose interval is that visit. The next PM is the largest interval that divides `pos` plus one short step.
+ * La Marzocco (3, 6, 12) still goes 3, 6, 3, 12 from a run of shorts, and a lone 6 is followed by a 3.
+ * Eversys (12, 36) stays 12, 12, 36. Returns null with no earlier PM to go on.
  */
 export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]): { id: string; combined: boolean } | null {
   const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
   if (!ids.length || !priorIntervals.length) return null;
   const short = ids[0];
   const long = ids[ids.length - 1];
-  let run = 0;
+  const at = (mark: number) => [...ids].reverse().find((id) => mark % id === 0) ?? short;
+  let pos = 0;
   for (const raw of priorIntervals) {
-    const n = Number(raw);
-    run = n >= long && long > short ? 0 : run + 1;
+    const v = Number(raw);
+    if (v === long) {
+      pos = 0;
+      continue;
+    }
+    const slot = pos + short;
+    if (ids.includes(v) && v > at(slot)) {
+      let found = slot;
+      const steps = Math.max(1, Math.ceil(long / short)) * 4;
+      for (let step = 1; step <= steps; step++) {
+        const candidate = slot + step * short;
+        if (at(candidate) === v) {
+          found = candidate;
+          break;
+        }
+      }
+      pos = found;
+    } else {
+      pos = slot;
+    }
   }
-  const mark = (run + 1) * short;
-  const next = [...ids].reverse().find((id) => mark % id === 0) ?? short;
-  return { id: String(next), combined: next > short };
+  const next = at(pos + short);
+  return { id: String(next), combined: visitCarriesShorter(def, String(next)) };
 }
 
 /**
  * The clause shown when a visit already includes the shorter intervals.
+ * Empty when the longest visit does not carry shorter kits (La Marzocco: one kit per visit).
  * Plain "N-month PM" labels stay "12 + 36", so the Eversys sentences do not change.
  * Any other label uses the shortest and the longest: "the 3/9-month and 12-month PMs together".
  */
 export function combinedVisitNotes(def: RunbookDefinition): { history: string; recommended: string } {
   const intervals = [...def.intervals].sort((a, b) => Number(a.id) - Number(b.id));
+  const longest = intervals[intervals.length - 1]?.id;
+  if (!longest || !visitCarriesShorter(def, longest)) return { history: "", recommended: "" };
   const plain = intervals.length > 0 && intervals.every((i) => /^\d+-month PM$/.test(i.label));
   if (plain) {
     const nums = intervals.map((i) => i.id).join(" + ");

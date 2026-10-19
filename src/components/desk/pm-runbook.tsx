@@ -460,7 +460,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
           {unit.fromHistory ? (
             <span className="flex flex-wrap items-center justify-between gap-2">
               <span>
-                Suggested from the last full PM ({unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval}-month, PM #
+                Suggested from the last full PM ({def.intervals.find((i) => i.id === unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval)?.label ?? `${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval}-month PM`}, PM #
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.pmId}
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt
                   ? `, ${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt}`
@@ -597,7 +597,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                       </span>
                       <span className="font-mono text-base font-semibold whitespace-nowrap">
                         x{k.q}
-                        <small className="block text-right text-[10px] font-normal text-muted-foreground">{k.interval} mo</small>
+                        <small className="block text-right text-[10px] font-normal text-muted-foreground">{(def.intervals.find((i) => i.id === String(k.interval))?.label ?? `${k.interval}-month PM`).replace(/\s*PM\b.*$/, "")}</small>
                       </span>
                     </label>
                     {k.added && canChangeKits ? (
