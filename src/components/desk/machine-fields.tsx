@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { toast } from "sonner";
+import { looksLikePlug, looksLikeVoltage, placePower } from "@/lib/ops/install-form";
 import { SerialPullField } from "./serial-notice";
 import { UnitPlaceField } from "./unit-place-field";
 
@@ -573,8 +574,20 @@ export function MachineFields({
                   value={spec.powerVoltage}
                   autoComplete="off"
                   data-testid="machine-voltage"
-                  onChange={(e) => onChange(patch(index, { powerVoltage: e.target.value }))}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const placed = placePower(raw, spec.plug ?? "");
+                    if (placed.moved === "plug") {
+                      toast.message("That reads as a plug, so it went in Plug.");
+                      onChange(patch(index, { powerVoltage: "", plug: placed.plug }));
+                      return;
+                    }
+                    onChange(patch(index, { powerVoltage: raw }));
+                  }}
                 />
+                {looksLikePlug(spec.powerVoltage) ? (
+                  <span className="text-[11px] font-medium text-warning">This looks like a plug, not voltage.</span>
+                ) : null}
               </label>
             </div>
             <div className={showRecipe ? undefined : "col-span-2 sm:col-span-1"}>
@@ -622,7 +635,25 @@ export function MachineFields({
               </label>
               <label className={fieldLabel}>
                 Plug
-                <Input value={spec.plug ?? ""} autoComplete="off" className="normal-case" data-testid="machine-plug" onChange={(e) => onChange(patch(index, { plug: e.target.value }))} />
+                <Input
+                  value={spec.plug ?? ""}
+                  autoComplete="off"
+                  className="normal-case"
+                  data-testid="machine-plug"
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const placed = placePower(spec.powerVoltage, raw);
+                    if (placed.moved === "voltage") {
+                      toast.message("That reads as voltage, so it went in Voltage.");
+                      onChange(patch(index, { plug: "", powerVoltage: placed.voltage }));
+                      return;
+                    }
+                    onChange(patch(index, { plug: raw }));
+                  }}
+                />
+                {looksLikeVoltage(spec.plug) ? (
+                  <span className="text-[11px] font-medium text-warning">This looks like voltage, not a plug.</span>
+                ) : null}
               </label>
               {need === "none" ? null : (
                 <label className={fieldLabel}>

@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { listAccountEquipment } from "@/lib/ops/account-equip-import";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { listAccountEquipment, mergeAccountEquipment, removeAccountEquipment } from "@/lib/ops/account-equip-import";
 import { detectBoard } from "@/lib/ops/corrigo";
 import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
 import { formatShortDate, money } from "@/lib/ops/clock";
@@ -145,6 +147,7 @@ export function AccountEquipmentList({
   className = "mt-4",
 }: {
   rows: {
+    id?: number;
     catalogModel: string;
     equipmentName: string;
     serial: string | null;
@@ -154,7 +157,28 @@ export function AccountEquipmentList({
   loading: boolean;
   className?: string;
 }) {
-  // The Equipment tab is the category, so the list shows as soon as the tab opens.
+  const qc = useQueryClient();
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["account-equipment"] });
+    void qc.invalidateQueries({ queryKey: ["inspection"] });
+    void qc.invalidateQueries({ queryKey: ["installs"] });
+  };
+  const remove = useMutation({
+    mutationFn: (id: number) => removeAccountEquipment({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Removed from this account");
+      refresh();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
+  });
+  const merge = useMutation({
+    mutationFn: (d: { keepId: number; dropId: number }) => mergeAccountEquipment({ data: d }),
+    onSuccess: () => {
+      toast.success("Merged into one unit");
+      refresh();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not merge"),
+  });
   return (
     <section className={className} data-testid="account-equipment" data-open="true">
       <p className="flex items-center gap-2 px-1">
@@ -167,26 +191,68 @@ export function AccountEquipmentList({
         <p className="mt-2 text-sm text-muted-foreground">Loading equipment…</p>
       ) : rows.length ? (
         <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
-          {rows.map((row, i) => (
-            <li key={`${row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
-              <p className="font-medium">{row.equipmentName || row.catalogModel}</p>
-              <p className="text-xs text-muted-foreground">
-                {[
-                  row.catalogModel && row.catalogModel !== row.equipmentName ? row.catalogModel : null,
-                  row.serial ? `SN ${row.serial}` : null,
-                  row.ownership,
-                  row.installDate ? `Installed ${formatShortDate(row.installDate)}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-              {row.serial ? (
-                <div className="mt-2">
-                  <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} />
-                </div>
-              ) : null}
-            </li>
-          ))}
+          {rows.map((row, i) => {
+            const twins = rows.filter(
+              (other, j) => j !== i && other.id && row.id && other.catalogModel.trim().toLowerCase() === row.catalogModel.trim().toLowerCase(),
+            );
+            return (
+              <li key={`${row.id ?? row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
+                <p className="font-medium">{row.equipmentName || row.catalogModel}</p>
+                <p className="text-xs text-muted-foreground">
+                  {[
+                    row.catalogModel && row.catalogModel !== row.equipmentName ? row.catalogModel : null,
+                    row.serial ? `SN ${row.serial}` : "No serial",
+                    row.ownership,
+                    row.installDate ? `Installed ${formatShortDate(row.installDate)}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+                {row.serial ? (
+                  <div className="mt-2">
+                    <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} />
+                  </div>
+                ) : null}
+                {row.id ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {twins.map((twin) => (
+                      <Button
+                        key={twin.id}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={merge.isPending}
+                        data-testid="merge-account-unit"
+                        onClick={() => {
+                          const keep = twin.serial || twin.equipmentName || "the other row";
+                          const drop = row.serial || "this row";
+                          if (window.confirm(`Keep SN ${keep} and remove SN ${drop}? This does not change the other row's model.`)) {
+                            merge.mutate({ keepId: twin.id!, dropId: row.id! });
+                          }
+                        }}
+                      >
+                        Merge into {twin.serial || twin.equipmentName}
+                      </Button>
+                    ))}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={remove.isPending}
+                      data-testid="remove-account-unit"
+                      onClick={() => {
+                        if (window.confirm(`Remove ${row.equipmentName || row.catalogModel}${row.serial ? ` SN ${row.serial}` : ""} from this account?`)) {
+                          remove.mutate(row.id!);
+                        }
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">No imported equipment on this account yet.</p>

@@ -1,15 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { applySerialPull, type SerialPullResult } from "@/lib/ops/serial-pull";
+import { parseAccountSerialNotice } from "@/lib/ops/install-form";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-export function SerialNoticeBanner({ notice }: { notice?: string | null }) {
+export function SerialNoticeBanner({
+  notice,
+  onAttach,
+}: {
+  notice?: string | null;
+  /** When the serial is already on the account, add that unit to this install instead of only warning. */
+  onAttach?: (unit: { serial: string; model: string }) => void;
+}) {
   if (!notice?.trim()) return null;
+  const existing = parseAccountSerialNotice(notice);
   const miss = /not found/i.test(notice);
-  const warn = /already assigned/i.test(notice);
+  const warn = /already assigned/i.test(notice) || !!existing;
   return (
     <div
       className={`border-b px-5 py-3 text-sm ${
@@ -19,8 +28,14 @@ export function SerialNoticeBanner({ notice }: { notice?: string | null }) {
             ? "border-warning/30 bg-warning/10"
             : "border-primary/20 bg-primary/5"
       }`}
+      data-testid="serial-notice"
     >
       <p className="font-medium">{notice}</p>
+      {existing && onAttach ? (
+        <Button type="button" size="sm" variant="outline" className="mt-2" data-testid="attach-existing-unit" onClick={() => onAttach(existing)}>
+          Attach existing unit to this install
+        </Button>
+      ) : null}
     </div>
   );
 }

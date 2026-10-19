@@ -19,6 +19,7 @@ import { Route as AppCustomerNamesRouteImport } from './routes/_app/customer-nam
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
+import { Route as AppInstallsInstallIdPrintRouteImport } from './routes/_app/installs.$installId.print'
 import { Route as AppLibraryRouteImport } from './routes/_app/library'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppMapRouteImport } from './routes/_app/map'
@@ -87,6 +88,11 @@ const AppHandoffRoute = AppHandoffRouteImport.update({
 const AppInstallsRoute = AppInstallsRouteImport.update({
   id: '/installs',
   path: '/installs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInstallsInstallIdPrintRoute = AppInstallsInstallIdPrintRouteImport.update({
+  id: '/installs/$installId/print',
+  path: '/installs/$installId/print',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLibraryRoute = AppLibraryRouteImport.update({
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
+  '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
+  '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
@@ -263,6 +271,7 @@ export interface FileRoutesById {
   '/_app/customers': typeof AppCustomersRoute
   '/_app/handoff': typeof AppHandoffRoute
   '/_app/installs': typeof AppInstallsRoute
+  '/_app/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
   '/_app/library': typeof AppLibraryRoute
   '/_app/locations': typeof AppLocationsRoute
   '/_app/map': typeof AppMapRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
+    | '/installs/$installId/print'
     | '/library'
     | '/locations'
     | '/map'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
+    | '/installs/$installId/print'
     | '/library'
     | '/locations'
     | '/map'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/_app/customers'
     | '/_app/handoff'
     | '/_app/installs'
+    | '/_app/installs/$installId/print'
     | '/_app/library'
     | '/_app/locations'
     | '/_app/map'
@@ -461,6 +473,13 @@ declare module '@tanstack/react-router' {
       path: '/installs'
       fullPath: '/installs'
       preLoaderRoute: typeof AppInstallsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/installs/$installId/print': {
+      id: '/_app/installs/$installId/print'
+      path: '/installs/$installId/print'
+      fullPath: '/installs/$installId/print'
+      preLoaderRoute: typeof AppInstallsInstallIdPrintRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/library': {
@@ -614,6 +633,7 @@ interface AppRouteChildren {
   AppCustomersRoute: typeof AppCustomersRoute
   AppHandoffRoute: typeof AppHandoffRoute
   AppInstallsRoute: typeof AppInstallsRoute
+  AppInstallsInstallIdPrintRoute: typeof AppInstallsInstallIdPrintRoute
   AppLibraryRoute: typeof AppLibraryRoute
   AppLocationsRoute: typeof AppLocationsRoute
   AppMapRoute: typeof AppMapRoute
@@ -641,6 +661,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCustomersRoute: AppCustomersRoute,
   AppHandoffRoute: AppHandoffRoute,
   AppInstallsRoute: AppInstallsRoute,
+  AppInstallsInstallIdPrintRoute: AppInstallsInstallIdPrintRoute,
   AppLibraryRoute: AppLibraryRoute,
   AppLocationsRoute: AppLocationsRoute,
   AppMapRoute: AppMapRoute,
