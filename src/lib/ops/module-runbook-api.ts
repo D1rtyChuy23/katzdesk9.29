@@ -328,15 +328,16 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         if (!CHECK_KEY_RE.test(data.checkKey)) throw new Error("Unknown check.");
         await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name);
         if (data.checked) {
-          const config = await configFor(sql, rb.def, mod.module_type!, existing, "pm", data.pmId ?? null, unit);
+          const completed = await pmIsCompleted(sql, data.pmId!);
+          const config = completed ? null : await configFor(sql, rb.def, mod.module_type!, existing, "pm", data.pmId ?? null, unit);
           await sql.query(pmTickSql(), [
             data.pmId,
             unit.unitKey,
             data.checkKey,
             me.name,
             checkSerialKey(unit.optionsKey),
-            unit.runbookId,
-            config.pm ?? null,
+            completed ? null : unit.runbookId,
+            completed ? null : (config?.pm ?? null),
           ]);
         } else {
           await sql.query("delete from pm_runbook_checks where pm_job_id = $1 and unit_key = $2 and key = $3", [data.pmId, unit.unitKey, data.checkKey]);

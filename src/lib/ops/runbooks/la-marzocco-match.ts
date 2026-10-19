@@ -25,6 +25,7 @@ export function matchLmStrada(piece: string | null | undefined): Hit<"s" | "x"> 
   if (!/\bstrada\b/i.test(t)) return null;
   if (/\bstrada\s+s\b/i.test(t)) return { model: "s" };
   if (/\bstrada\s+x\b/i.test(t)) return { model: "x" };
+  if (/\bstrada\s+xt\b/i.test(t)) return { model: null };
   if (/\b(?:ep|av|mp|ee)\b/i.test(t) || /\bstrada(?:\s+\d+)?\s*(?:group\s+)?(?:ep|av|mp|ee)\b/i.test(t)) return null;
   return { model: null };
 }

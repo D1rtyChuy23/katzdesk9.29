@@ -54,7 +54,7 @@ function Seg({
             aria-pressed={value === c.val}
             onClick={() => onPick(c.val)}
             className={cn(
-              "min-h-9 rounded-md border px-3 py-1 text-left text-sm disabled:cursor-default",
+              "min-h-9 rounded-md border px-3 py-1 text-left text-sm disabled:cursor-default disabled:opacity-60",
               value === c.val ? "border-primary bg-primary font-semibold text-primary-foreground" : "border-border bg-background",
             )}
           >
@@ -464,7 +464,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             <b>No install date on file for this unit</b>, so its PM interval cannot be worked out from its age. Add the
             install date on the account equipment.
           </span>
-          {unit.fromHistory ? (
+          {unit.fromHistory && !pmDone ? (
             <span className="flex flex-wrap items-center justify-between gap-2">
               <span>
                 Suggested from the last full PM ({lastPmLabel}, PM #
@@ -475,31 +475,33 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 ): <b>{unit.fromHistory.label}</b>
                 {unit.fromHistory.combined ? together.history : ""}.
               </span>
-              {canWrite && !pmDone && unit.fromHistory.id !== c.pm ? (
+              {canWrite && unit.fromHistory.id !== c.pm ? (
                 <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.fromHistory!.id)}>
                   Use suggestion
                 </Button>
               ) : null}
             </span>
-          ) : (
+          ) : !unit.fromHistory ? (
             <span>No earlier full PM on record for this unit either, so choose the interval yourself.</span>
-          )}
+          ) : null}
         </div>
       ) : null}
 
       {unit.recommended && unit.recommended.id !== c.pm ? (
+        pmDone ? null : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
             Recommended: <b>{unit.recommended.label}</b>
             {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is{" "}
             {milestoneAge(unit.recommended.milestone)} at this location. Choose otherwise if the customer wants a different service.
           </span>
-          {canWrite && !pmDone ? (
+          {canWrite ? (
             <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.recommended!.id)}>
               Use recommended
             </Button>
           ) : null}
         </div>
+        )
       ) : unit.recommended ? (
         <p className="text-xs text-muted-foreground">
           Matches the recommendation from the install date ({unit.installDate}, {milestoneAge(unit.recommended.milestone)}).

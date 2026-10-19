@@ -164,9 +164,14 @@ export async function recordCompletedRunbook(
     const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
     const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: job.customer, style }, u, when);
     const ticked = new Set(checks.filter((c) => c.unit_key === u.unitKey).map((c) => c.key));
+    const confirmed = unitModelPicked(s?.model, u.model);
+    const modelLabel =
+      !confirmed && rb.def.models.length > 1
+        ? `${u.piece} (model not confirmed)`
+        : (rb.def.models.find((m) => m.id === config.model)?.label ?? u.piece);
     const detail = pmServiceRecord({
       pmId,
-      modelLabel: rb.def.models.find((m) => m.id === config.model)?.label ?? u.piece,
+      modelLabel,
       intervalLabel: rb.def.intervals.find((i) => i.id === config.pm)?.label ?? `${config.pm}-month PM`,
       options: visibleOptions(rb.def, config).map((o) => ({
         label: o.label,
@@ -850,21 +855,26 @@ const checkInput = unitInput.extend({
   done: z.boolean(),
 });
 
-/** Interval the sheet is showing for this unit, so the first tick can lock it. Null when the unit is not on the plan. */
-async function visitLockForTick(sql: Sql, pmId: number, unitKey: string): Promise<{ runbookId: string; interval: string } | null> {
+/** Interval the sheet is showing for this unit, so the first tick can lock it. Null when the PM is completed or the unit is not on the plan. */
+export async function visitLockForTick(
+  sql: Sql,
+  pmId: number,
+  unitKey: string,
+  now = new Date(),
+): Promise<{ runbookId: string; interval: string } | null> {
   const pm = (
-    await sql.query<{ customer: string; equipment: string | null; style: string | null }>(
-      "select customer, equipment, style from pm_jobs where id = $1",
+    await sql.query<{ customer: string; equipment: string | null; style: string | null; status: string; completed_at: string | null }>(
+      "select customer, equipment, style, status, completed_at::text as completed_at from pm_jobs where id = $1",
       [pmId],
     )
   )[0];
-  if (!pm) return null;
+  if (!pm || pm.status === "Completed" || pm.completed_at) return null;
   const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, pmId);
   const unit = plan.planned.find((u) => u.unitKey === unitKey);
   if (!unit) return null;
   const rb = runbookById(unit.runbookId);
   if (!rb) return null;
-  const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: pm.customer, style: pm.style }, unit);
+  const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: pm.customer, style: pm.style }, unit, now);
   return config.pm ? { runbookId: unit.runbookId, interval: config.pm } : null;
 }
 

@@ -307,3 +307,65 @@ test("saving only the interval does not mark a guessed model as picked", async (
     await pg.close();
   }
 });
+
+test("a completed PM does not lock an interval, and an open one locks the day it is worked", async () => {
+  process.env.DATABASE_URL = "postgres://127.0.0.1:9/unused";
+  await register("./node-resolve-hook.mjs", import.meta.url);
+  const { visitLockForTick } = await import("../src/lib/ops/pm-runbook-api.ts");
+  const pg = new PGlite();
+  try {
+    await applyMigrations(pg);
+    const sql = { query: async (text, params) => (await pg.query(text, params)).rows };
+    const donePiece = "La Marzocco Linea PB 2AV";
+    const doneId = (await pg.query("insert into pm_jobs (customer, style, equipment, completed_at) values ('Cafe', '12 month PM', $1, '2026-01-19') returning id", [donePiece])).rows[0].id;
+    const doneEquip = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, install_date) values ('Cafe', $1, $1, 'SN-D', '2025-10-19') returning id", [donePiece])).rows[0].id;
+    assert.equal(await visitLockForTick(sql, doneId, `acct:${doneEquip}`), null);
+
+    const openPiece = "La Marzocco Linea PB";
+    const openId = (await pg.query("insert into pm_jobs (customer, style, equipment) values ('Other', '12 month PM', $1) returning id", [openPiece])).rows[0].id;
+    const openEquip = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, install_date) values ('Other', $1, $1, 'SN-O', '2026-06-10') returning id", [openPiece])).rows[0].id;
+    const open = await visitLockForTick(sql, openId, `acct:${openEquip}`, new Date("2026-10-19T00:00:00Z"));
+    assert.deepEqual(open, { runbookId: "la-marzocco-linea", interval: "3" });
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a completion does not record a guessed model as fact", async () => {
+  process.env.DATABASE_URL = "postgres://127.0.0.1:9/unused";
+  await register("./node-resolve-hook.mjs", import.meta.url);
+  const { recordCompletedRunbook } = await import("../src/lib/ops/pm-runbook-api.ts");
+  const pg = new PGlite();
+  try {
+    await applyMigrations(pg);
+    const sql = { query: async (text, params) => (await pg.query(text, params)).rows };
+    const pm = (await pg.query("insert into pm_jobs (customer, style, equipment) values ('Cafe', '6 month PM', 'Linea 2AV') returning id")).rows[0].id;
+    await pg.query("insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, interval_mo) values ($1, 'acct:1', 'la-marzocco-linea', '6')", [pm]);
+    await recordCompletedRunbook(
+      sql,
+      pm,
+      "user-1",
+      [
+        {
+          unitKey: "acct:1",
+          pieceKey: "piece:linea 2av#1",
+          optionsKey: "SN-A",
+          accountId: 1,
+          installDate: null,
+          piece: "Linea 2AV",
+          serial: "SN-A",
+          serialKey: "SN-A",
+          runbookId: "la-marzocco-linea",
+          model: null,
+        },
+      ],
+      "6 month PM",
+      new Date("2026-10-19T00:00:00Z"),
+    );
+    const detail = (await pg.query("select detail from activity where entity_type = 'unit_runbook' and action = 'pm service'")).rows[0].detail;
+    assert.match(detail, /model not confirmed/);
+    assert.doesNotMatch(detail, /Linea Classic/);
+  } finally {
+    await pg.close();
+  }
+});
