@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   TEAMS_CHATS,
+  TEAMS_FEEDS,
   clipLine,
   collapseDuplicateWorkOrders,
   draftTeamsChat,
@@ -22,7 +23,6 @@ const empty = {
   duplicateWo: [],
   orders: [],
   calls: [],
-  deliveries: [],
   kpiScope: "Oct 1, 2026 to Oct 31, 2026 · 0 records",
   kpi: [],
   finance: null,
@@ -55,18 +55,29 @@ test("the chat list is the group chats and DMs, with no team channel", () => {
   assert.ok(!names.some((n) => n === "Dispatch" || n === "Analytics"));
 });
 
-test("Corey Russell is the delivery dispatcher, not a tech", () => {
-  const corey = teamsChat("dm-cory");
-  assert.equal(corey.name, "Corey Russell");
-  assert.equal(corey.group, "Dispatch");
-  assert.equal(corey.kind, "dm");
-  assert.equal(corey.feed, "dispatch");
-  assert.equal(corey.about, "Installs still to deliver, by install date.");
+test("Corey Russell dispatches drivers and his chat has no automatic note", () => {
+  assert.deepEqual(teamsChat("dm-cory"), {
+    id: "dm-cory",
+    name: "Corey Russell",
+    group: "Dispatch",
+    kind: "dm",
+    about: "Driver Dispatcher and Vehicle Maintenance",
+    feed: "none",
+    target: null,
+  });
   assert.equal(techChatId("Cory Russell"), null);
   assert.equal(techChatId("Corey Russell"), null);
   assert.equal(techChatId("Cory"), null);
-  const snap = { ...empty, calls: [call({ tech: "Cory Russell", customer: "Tech Ticket" })] };
-  assert.doesNotMatch(draft("dm-cory", snap).text, /Tech Ticket/);
+  const snap = {
+    ...empty,
+    attention: [{ label: "Open past 48 hrs", board: "Service", customer: "Blue Door", tech: "Cory Russell", ref: "SC-9" }],
+    orders: [{ callId: "SC-9", customer: "Blue Door", item: "Everpure", qty: "2", water: true }],
+    calls: [call({ tech: "Cory Russell", customer: "Tech Ticket" })],
+  };
+  const corey = draft("dm-cory", snap);
+  assert.equal(corey.text, "");
+  assert.equal(corey.name, "Corey Russell");
+  assert.equal(corey.about, "Driver Dispatcher and Vehicle Maintenance");
 });
 
 test("cities and ZIPs pick DFW or SA/ATX", () => {
@@ -126,7 +137,7 @@ test("each chat gets only its own lines, and the text is what would be sent", ()
   assert.match(draft("service-monkeys", snap).text, /Houston Cafe/);
   assert.doesNotMatch(draft("service-monkeys", snap).text, /Blue Door/);
   assert.match(draft("dm-ryan", snap).text, /Blue Door/);
-  assert.match(draft("dm-cory", snap).text, /None\./);
+  assert.equal(draft("dm-cory", snap).text, "");
   const k = draft("k-team", snap);
   assert.match(k.text, /Service · 3 · Open 3/);
   assert.match(k.text, /Sell \$10\.00 · cost \$4\.00 · margin \$6\.00/);
@@ -156,23 +167,39 @@ test("the 17 chats that did not change send byte-for-byte the same text as befor
   }
 });
 
-test("the dispatch note lists installs still to deliver in the order given, clipped like the rest", () => {
-  const none = draft("dm-cory", empty);
-  assert.equal(none.text, "Installs still to deliver, by install date.\n\nTo deliver\nNone.");
-  const deliveries = [
-    { date: "2026-10-21", customer: "Blue Door", equipment: "Bunn ICB-DV Twin with a very long name that keeps going", status: "Ready" },
-    { date: "2026-10-23", customer: "", equipment: "", status: "Not Ready" },
-    ...Array.from({ length: 8 }, (_, i) => ({ date: "", customer: `Late ${i}`, equipment: "Eversys Cameo", status: "Not Ready" })),
-  ];
-  const text = draft("dm-cory", { ...empty, deliveries }).text;
-  const lines = text.split("\n");
-  assert.equal(lines[0], "Installs still to deliver, by install date.");
-  assert.equal(lines[2], "To deliver");
-  assert.equal(lines[3], "- 2026-10-21 · Blue Door · Bunn ICB-DV Twin with a very long name… · Ready");
-  assert.equal(lines[4], "- 2026-10-23 · No account · No equipment · Not Ready");
-  assert.equal(lines[5], "- No date · Late 0 · Eversys Cameo · Not Ready");
-  assert.equal(lines.at(-1), "And 2 more.");
-  assert.equal(lines.filter((l) => l.startsWith("- ")).length, 8);
+test("the dispatch feed is gone, and 'Nothing automatic' gives an empty note", () => {
+  assert.deepEqual([...TEAMS_FEEDS], ["service", "orders", "rep", "region", "leadership", "tech", "none"]);
+  assert.equal(TEAMS_CHATS.some((c) => c.feed === "dispatch"), false);
+  const busy = {
+    ...empty,
+    attention: [{ label: "Open past 48 hrs", board: "Service", customer: "Blue Door", tech: "", ref: "SC-9" }],
+    calls: [call({ rep: "Sean Marshall", tech: "Ryan Gloria", region: "dfw" })],
+    kpi: [{ label: "Service", total: 3, top: "Open 3" }],
+  };
+  const chat = (feed) => ({ id: "x", name: "X", group: "New", kind: "dm", about: "", feed, target: null });
+  assert.equal(draftTeamsChat(chat("none"), busy).text, "");
+  // A feed name that is not on the list (an old 'dispatch' row) drafts nothing rather than a tech note.
+  assert.equal(draftTeamsChat(chat("dispatch"), busy).text, "");
+});
+
+test("typing Liz as an added chat's rep matches Lizbeth Romero's calls", () => {
+  const snap = {
+    ...empty,
+    calls: [
+      call({ customer: "Short Name", rep: "Liz" }),
+      call({ customer: "Full Name", rep: "Lizbeth Romero" }),
+      call({ customer: "Not Her", rep: "Lisa Smith" }),
+    ],
+  };
+  for (const target of ["Liz", "liz", "Liz Romero", "Lizbeth", "Lizbeth Romero"]) {
+    const chat = { id: "liz-2", name: "Liz 2", group: "Reps", kind: "group", about: "", feed: "rep", target };
+    const text = draftTeamsChat(chat, snap).text;
+    assert.match(text, /Short Name/, target);
+    assert.match(text, /Full Name/, target);
+    assert.doesNotMatch(text, /Not Her/, target);
+    assert.equal(repChatId("Lizbeth Romero", [chat]), "liz-2", target);
+    assert.equal(repChatId("Liz", [chat]), "liz-2", target);
+  }
 });
 
 test("a chat added for a person or region follows the same rules as the built-in ones", () => {

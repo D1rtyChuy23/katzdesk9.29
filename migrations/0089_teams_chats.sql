@@ -1,13 +1,13 @@
 -- Teams group chats and DMs an admin can add and remove. KatzDesk does not post.
--- feed picks what the note lists; target is the rep, region (dfw | sa-atx | other) or tech it follows.
--- Corey Russell is the delivery dispatcher, not a tech. His id stays dm-cory so his teams_drafts history stays linked.
+-- feed picks what the note lists ('none' = no automatic note); target is the rep, region (dfw | sa-atx | other) or tech it follows.
+-- Corey Russell dispatches drivers, not a tech, and gets no automatic note. His id stays dm-cory so his teams_drafts history stays linked.
 create table if not exists teams_chats (
   id          text primary key,
   name        text not null,
   grp         text not null,
   kind        text not null check (kind in ('group', 'dm')),
   about       text not null default '',
-  feed        text not null check (feed in ('service', 'orders', 'rep', 'region', 'leadership', 'tech', 'dispatch')),
+  feed        text not null check (feed in ('service', 'orders', 'rep', 'region', 'leadership', 'tech', 'none')),
   target      text,
   sort        int not null default 0,
   created_by  text,
@@ -32,5 +32,5 @@ insert into teams_chats (id, name, grp, kind, about, feed, target, sort) values
   ('dm-lance', 'Lance Oden', 'Techs', 'dm', 'Lance''s open calls.', 'tech', 'Lance Oden', 150),
   ('dm-oliver', 'Oliver Garcia', 'Techs', 'dm', 'Oliver''s open calls.', 'tech', 'Oliver Garcia', 160),
   ('dm-charles', 'Charles Foster', 'Techs', 'dm', 'Charles''s open calls.', 'tech', 'Charles Foster', 170),
-  ('dm-cory', 'Corey Russell', 'Dispatch', 'dm', 'Installs still to deliver, by install date.', 'dispatch', null, 180)
+  ('dm-cory', 'Corey Russell', 'Dispatch', 'dm', 'Driver Dispatcher and Vehicle Maintenance', 'none', null, 180)
 on conflict (id) do nothing;

@@ -8,8 +8,8 @@ import { canonicalTechName } from "./tech-match.ts";
 const MAX_LINES = 8;
 const MAX_CHARS = 160;
 
-/** What a chat's note lists. `target` names the rep, region (dfw | sa-atx | other) or tech for those feeds. */
-export const TEAMS_FEEDS = ["service", "orders", "rep", "region", "leadership", "tech", "dispatch"] as const;
+/** What a chat's note lists. `target` names the rep, region (dfw | sa-atx | other) or tech for those feeds. "none" has no automatic note. */
+export const TEAMS_FEEDS = ["service", "orders", "rep", "region", "leadership", "tech", "none"] as const;
 export type TeamsFeed = (typeof TEAMS_FEEDS)[number];
 
 export type TeamsChat = {
@@ -41,18 +41,18 @@ export const TEAMS_CHATS: TeamsChat[] = [
   { id: "dm-lance", name: "Lance Oden", group: "Techs", kind: "dm", about: "Lance's open calls.", feed: "tech", target: "Lance Oden" },
   { id: "dm-oliver", name: "Oliver Garcia", group: "Techs", kind: "dm", about: "Oliver's open calls.", feed: "tech", target: "Oliver Garcia" },
   { id: "dm-charles", name: "Charles Foster", group: "Techs", kind: "dm", about: "Charles's open calls.", feed: "tech", target: "Charles Foster" },
-  // Corey is the delivery dispatcher, not a tech. The id stays so his approval history stays linked.
-  { id: "dm-cory", name: "Corey Russell", group: "Dispatch", kind: "dm", about: "Installs still to deliver, by install date.", feed: "dispatch", target: null },
+  // Corey dispatches drivers; he is not a tech and gets no automatic note. The id stays so his approval history stays linked.
+  { id: "dm-cory", name: "Corey Russell", group: "Dispatch", kind: "dm", about: "Driver Dispatcher and Vehicle Maintenance", feed: "none", target: null },
 ];
 
 export function teamsChat(id: string): TeamsChat | null {
   return TEAMS_CHATS.find((c) => c.id === id) ?? null;
 }
 
-export function clipLine(raw: string, max = MAX_CHARS): string {
+export function clipLine(raw: string): string {
   const s = String(raw ?? "").replace(/\s+/g, " ").trim();
-  if (s.length <= max) return s;
-  return `${s.slice(0, max - 1).trimEnd()}…`;
+  if (s.length <= MAX_CHARS) return s;
+  return `${s.slice(0, MAX_CHARS - 1).trimEnd()}…`;
 }
 
 export type TeamsDraft = {
@@ -88,13 +88,13 @@ function firstName(raw: string): string {
   return raw.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
 }
 
-/** Same rules the built-in rep chats always used: Corrigo/rep-list name, or first name (Liz is Lizbeth). */
+/** Same rules the built-in rep chats always used: Corrigo/rep-list name, or first name (Liz is Lizbeth, on either side). */
 function repMatches(rep: string, target: string): boolean {
   const raw = rep.trim();
   const want = target.trim();
   if (!raw || !want) return false;
-  const first = firstName(raw) === "liz" ? "lizbeth" : firstName(raw);
-  return canonicalRepName(raw) === (canonicalRepName(want) ?? want) || first === firstName(want);
+  const first = (s: string) => (firstName(s) === "liz" ? "lizbeth" : firstName(s));
+  return canonicalRepName(raw) === (canonicalRepName(want) ?? want) || first(raw) === first(want);
 }
 
 /** A roster tech matches by roster name ("Josh" is Joshua Harper). Anyone else matches by first name. */
@@ -130,7 +130,6 @@ export type OpenCall = {
   ref: string;
 };
 export type AnalyticsCount = { label: string; total: number; top: string };
-export type DeliveryLine = { date: string; customer: string; equipment: string; status: string };
 
 export type TeamsSnapshot = {
   when: string;
@@ -138,8 +137,6 @@ export type TeamsSnapshot = {
   duplicateWo: DuplicateWo[];
   orders: OrderLine[];
   calls: OpenCall[];
-  /** Installs still to deliver, already in install-date order. */
-  deliveries: DeliveryLine[];
   kpiScope: string;
   kpi: AnalyticsCount[];
   finance: { scope: string; sell: string; cost: string; margin: string } | null;
@@ -164,7 +161,7 @@ export function collapseDuplicateWorkOrders(rows: { key: string; wo: string; whe
 }
 
 function section(heading: string, lines: string[], empty: string): string {
-  const shown = lines.map((line) => clipLine(line)).filter(Boolean);
+  const shown = lines.map(clipLine).filter(Boolean);
   const kept = shown.slice(0, MAX_LINES);
   const more = shown.length - kept.length;
   const body = kept.length
@@ -177,10 +174,6 @@ function callLine(c: OpenCall): string {
   const when = c.when ? ` · ${c.when}` : "";
   const issue = c.issue ? ` · ${c.issue}` : "";
   return `${c.customer || "No account"} · ${c.status || "Open"}${when} · ${c.ref || "No number"}${issue}`;
-}
-
-function deliveryLine(d: DeliveryLine): string {
-  return `${d.date || "No date"} · ${d.customer || "No account"} · ${clipLine(d.equipment, 40) || "No equipment"} · ${d.status || "Not Ready"}`;
 }
 
 export function draftTeamsChat(chat: TeamsChat, snap: TeamsSnapshot): TeamsDraft {
@@ -232,12 +225,11 @@ export function draftTeamsChat(chat: TeamsChat, snap: TeamsSnapshot): TeamsDraft
       ),
       finance,
     ].join("\n\n");
-  } else if (chat.feed === "dispatch") {
-    text = ["Installs still to deliver, by install date.", section("To deliver", snap.deliveries.map(deliveryLine), "None.")].join("\n\n");
-  } else {
+  } else if (chat.feed === "tech") {
     const mine = snap.calls.filter((c) => techMatches(c.tech, target) || techMatches(c.tech2, target));
     text = [`Your open calls.`, section("Calls", mine.map(callLine), "None.")].join("\n\n");
   }
+  // A "none" chat has no automatic note, so `text` stays empty and there is nothing to approve.
   // `text` is the approved body. The clock stamp stays on `title` so a later minute does not expire the approval.
   return { id: chat.id, name: chat.name, group: chat.group, kind: chat.kind, about: chat.about, title, text };
 }

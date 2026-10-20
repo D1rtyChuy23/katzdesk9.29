@@ -158,13 +158,6 @@ async function loadSnapshot(sql: Sql): Promise<TeamsSnapshot> {
     })),
   );
 
-  const deliveryRows = await sql.query<{ date: string | null; customer: string | null; equipment: string | null; equip_status: string | null }>(
-    `select install_date::text as date, customer, equipment, equip_status
-       from installs
-      where archived = false and complete = false and coalesce(equip_status, '') <> 'Installed'
-      order by install_date nulls last, lower(customer), id`,
-  );
-
   const orderRows = await sql.query<{ call_id: string | null; customer: string | null; item: string; qty: string | null; kind: string; item_class: string | null }>(
     `select j.call_id, j.customer, c.item, c.qty::text, c.kind, p.item_class
        from ticket_charges c
@@ -217,12 +210,6 @@ async function loadSnapshot(sql: Sql): Promise<TeamsSnapshot> {
     duplicateWo,
     orders,
     calls,
-    deliveries: deliveryRows.map((r) => ({
-      date: r.date || "",
-      customer: r.customer?.trim() || "",
-      equipment: r.equipment || "",
-      status: r.equip_status?.trim() || "",
-    })),
     kpiScope: scopeLine(filters, rows.length),
     kpi: summarize(rows).map((s) => ({
       label: s.label,
@@ -238,21 +225,29 @@ async function loadSnapshot(sql: Sql): Promise<TeamsSnapshot> {
   };
 }
 
-export type TeamsChatCard = TeamsDraft & { approved: boolean; approvedAt: string | null; approvedBy: string | null };
+export type TeamsChatCard = TeamsDraft & {
+  feed: TeamsFeed;
+  target: string | null;
+  approved: boolean;
+  approvedAt: string | null;
+  approvedBy: string | null;
+};
 
 export async function chatCards(sql: Sql): Promise<TeamsChatCard[]> {
   await ensureDrafts(sql);
-  const drafts = draftAll(await loadSnapshot(sql), await loadTeamsChats(sql));
+  const chats = await loadTeamsChats(sql);
+  const drafts = draftAll(await loadSnapshot(sql), chats);
   const approvals = await sql.query<{ chat: string; body: string; approved_by: string; approved_at: string }>(
     `select distinct on (chat) chat, body, approved_by, approved_at::text
        from teams_drafts
       order by chat, id desc`,
   );
   const latest = new Map(approvals.map((r) => [r.chat, r]));
-  return drafts.map((draft) => {
+  return drafts.map((draft, i) => {
     const hit = latest.get(draft.id);
     const approved = !!hit && hit.body === draft.text;
-    return { ...draft, approved, approvedAt: approved ? hit!.approved_at : null, approvedBy: approved ? hit!.approved_by : null };
+    const { feed, target } = chats[i]!;
+    return { ...draft, feed, target, approved, approvedAt: approved ? hit!.approved_at : null, approvedBy: approved ? hit!.approved_by : null };
   });
 }
 
@@ -260,6 +255,7 @@ export async function approveChat(sql: Sql, userId: string, chatId: string, text
   const who = await requireTeamsAdmin(sql, userId);
   const chat = (await loadTeamsChats(sql)).find((c) => c.id === chatId);
   if (!chat) throw new Error("That chat is not on the list.");
+  if (chat.feed === "none") throw new Error("This chat has no automatic note, so there is nothing to approve.");
   await ensureDrafts(sql);
   const draft = draftTeamsChat(chat, await loadSnapshot(sql));
   if (draft.text !== text) throw new Error("The desk changed. Read the new text and approve that.");
@@ -271,16 +267,17 @@ export async function approveChat(sql: Sql, userId: string, chatId: string, text
 }
 
 export type NewTeamsChat = { name: string; group: string; kind: string; about?: string; feed: string; target?: string | null };
+export type TeamsChatEdit = NewTeamsChat & { id: string };
 
 function oneLine(raw: string | null | undefined, max: number): string {
   return String(raw ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 }
 
-export async function addChat(sql: Sql, userId: string, input: NewTeamsChat): Promise<{ id: string; name: string }> {
-  const who = await requireTeamsAdmin(sql, userId, "add or remove a Teams chat");
+/** The add and edit forms share these checks. A typed group reuses an existing group with the same letters, ignoring capitals. */
+async function cleanChat(sql: Sql, input: NewTeamsChat, id = "") {
   const name = oneLine(input.name, 80);
   if (!name) throw new Error("Give the chat a name.");
-  const group = oneLine(input.group, 40);
+  let group = oneLine(input.group, 40);
   if (!group) throw new Error("Pick a group for the chat.");
   if (input.kind !== "group" && input.kind !== "dm") throw new Error("Pick group chat or DM.");
   const feed = TEAMS_FEEDS.find((f) => f === input.feed);
@@ -293,6 +290,14 @@ export async function addChat(sql: Sql, userId: string, input: NewTeamsChat): Pr
     target = oneLine(input.target, 10).toLowerCase();
     if (target !== "dfw" && target !== "sa-atx" && target !== "other") throw new Error("Pick DFW, SA/ATX or Other.");
   }
+  const same = await sql.query<{ grp: string }>("select grp from teams_chats where lower(grp) = lower($1) and id <> $2 order by sort, id limit 1", [group, id]);
+  if (same[0]) group = same[0].grp;
+  return { name, group, kind: input.kind, about: oneLine(input.about, 200), feed, target };
+}
+
+export async function addChat(sql: Sql, userId: string, input: NewTeamsChat): Promise<{ id: string; name: string }> {
+  const who = await requireTeamsAdmin(sql, userId, "add or remove a Teams chat");
+  const { name, group, kind, about, feed, target } = await cleanChat(sql, input);
   await ensureDrafts(sql);
   // A removed chat's approvals stay in teams_drafts, so a new chat never reuses its id.
   const base = name.toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").slice(0, 40).replace(/^-+|-+$/g, "") || "chat";
@@ -307,9 +312,24 @@ export async function addChat(sql: Sql, userId: string, input: NewTeamsChat): Pr
      select $1, $2, $3, $4, $5, $6, $7, coalesce(max(sort), 0) + 10, $8 from teams_chats
      on conflict (id) do nothing
      returning id`,
-    [id, name, group, input.kind, oneLine(input.about, 200), feed, target, who],
+    [id, name, group, kind, about, feed, target, who],
   );
   if (!saved.length) throw new Error("Someone just added a chat with that name. Try again.");
+  return { id, name };
+}
+
+/** Same id, so the chat's approvals in teams_drafts stay linked. A note whose text changes needs approving again. */
+export async function updateChat(sql: Sql, userId: string, input: TeamsChatEdit): Promise<{ id: string; name: string }> {
+  await requireTeamsAdmin(sql, userId, "edit a Teams chat");
+  const id = String(input.id ?? "");
+  const known = await sql.query("select 1 from teams_chats where id = $1", [id]);
+  if (!known.length) throw new Error("That chat is not on the list.");
+  const { name, group, kind, about, feed, target } = await cleanChat(sql, input, id);
+  const saved = await sql.query<{ id: string }>(
+    "update teams_chats set name = $2, grp = $3, kind = $4, about = $5, feed = $6, target = $7 where id = $1 returning id",
+    [id, name, group, kind, about, feed, target],
+  );
+  if (!saved.length) throw new Error("That chat is not on the list.");
   return { id, name };
 }
 
@@ -338,21 +358,24 @@ export const approveTeamsChat = createServerFn({ method: "POST" })
   .validator((d: { chat: string; text: string }) => z.object({ chat: z.string(), text: z.string().max(20_000) }).parse(d))
   .handler(async ({ data, context }): Promise<{ name: string; approvedAt: string }> => approveChat(await ready(), context.userId, data.chat, data.text));
 
+const chatFields = z.object({
+  name: z.string().max(500),
+  group: z.string().max(500),
+  kind: z.string().max(20),
+  about: z.string().max(1000).optional(),
+  feed: z.string().max(40),
+  target: z.string().max(500).nullable().optional(),
+});
+
 export const addTeamsChat = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: NewTeamsChat) =>
-    z
-      .object({
-        name: z.string().max(500),
-        group: z.string().max(500),
-        kind: z.string().max(20),
-        about: z.string().max(1000).optional(),
-        feed: z.string().max(40),
-        target: z.string().max(500).nullable().optional(),
-      })
-      .parse(d),
-  )
+  .validator((d: NewTeamsChat) => chatFields.parse(d))
   .handler(async ({ data, context }): Promise<{ id: string; name: string }> => addChat(await ready(), context.userId, data));
+
+export const updateTeamsChat = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: TeamsChatEdit) => chatFields.extend({ id: z.string().min(1).max(200) }).parse(d))
+  .handler(async ({ data, context }): Promise<{ id: string; name: string }> => updateChat(await ready(), context.userId, data));
 
 export const removeTeamsChat = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
