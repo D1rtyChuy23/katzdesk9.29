@@ -344,6 +344,26 @@ async function writeInstallSerial(
   return status;
 }
 
+/** The serial is on another row of this install: nothing else is written or pulled, and the row being typed keeps the serial it had. */
+async function alreadyOnInstall(sql: Sql, installId: number, serial: string, model: string | null): Promise<SerialPullResult> {
+  const notice = `Serial ${serial} is already on this install.`;
+  await setInstallNotice(sql, installId, notice);
+  return {
+    serial,
+    found: true,
+    pulled: false,
+    needsConfirm: false,
+    alreadyHere: true,
+    duplicateOnInstall: true,
+    allocatedTo: null,
+    notice,
+    model,
+    powerVoltage: null,
+    location: null,
+    assetId: null,
+  };
+}
+
 const lookupInput = z.object({ serial: z.string() });
 
 export const lookupSerial = createServerFn({ method: "POST" })
@@ -402,17 +422,14 @@ export const applySerialPull = createServerFn({ method: "POST" })
         normalizeCustomerKey(accountHit.customer) === normalizeCustomerKey(customer);
       if (same) {
         const canonical = accountHit.serial ?? serial;
-        let duplicateOnInstall = false;
-        let notice = `Serial ${canonical} is already on this account · ${accountHit.catalogModel}`;
+        const notice = `Serial ${canonical} is already on this account · ${accountHit.catalogModel}`;
         if (data.installId) {
           const wrote = await writeInstallSerial(sql, data.installId, canonical, data.machineIndex ?? null, {
             model: accountHit.catalogModel,
             powerVoltage: null,
           });
-          duplicateOnInstall = wrote === "duplicate";
-          if (duplicateOnInstall) notice = `Serial ${canonical} is already on this install.`;
-          if (duplicateOnInstall || data.machineIndex == null) await setInstallNotice(sql, data.installId, notice);
-          else await setInstallNotice(sql, data.installId, "");
+          if (wrote === "duplicate") return alreadyOnInstall(sql, data.installId, canonical, accountHit.catalogModel);
+          await setInstallNotice(sql, data.installId, data.machineIndex == null ? notice : "");
         }
         if (data.jobId) {
           const job = (
@@ -435,7 +452,6 @@ export const applySerialPull = createServerFn({ method: "POST" })
           pulled: false,
           needsConfirm: false,
           alreadyHere: true,
-          duplicateOnInstall,
           allocatedTo: null,
           notice,
           model: accountHit.catalogModel,
@@ -446,10 +462,11 @@ export const applySerialPull = createServerFn({ method: "POST" })
       }
       const notice = `Serial ${accountHit.serial ?? serial} is on ${accountHit.customer}'s inventory — not moved.`;
       if (data.installId) {
-        await writeInstallSerial(sql, data.installId, serial, data.machineIndex ?? null, {
+        const wrote = await writeInstallSerial(sql, data.installId, serial, data.machineIndex ?? null, {
           model: accountHit.catalogModel,
           powerVoltage: null,
         });
+        if (wrote === "duplicate") return alreadyOnInstall(sql, data.installId, serial, accountHit.catalogModel);
         await setInstallNotice(sql, data.installId, notice);
       }
       if (data.jobId) await setJobNotice(sql, data.jobId, notice);
@@ -492,10 +509,11 @@ export const applySerialPull = createServerFn({ method: "POST" })
     if (!asset) {
       const result = notFoundResult(serial);
       if (data.installId) {
-        await writeInstallSerial(sql, data.installId, serial, data.machineIndex ?? null, {
+        const wrote = await writeInstallSerial(sql, data.installId, serial, data.machineIndex ?? null, {
           model: null,
           powerVoltage: null,
         });
+        if (wrote === "duplicate") return alreadyOnInstall(sql, data.installId, serial, null);
         await setInstallNotice(sql, data.installId, result.notice);
         await logActivity(sql, context.userId, "install", data.installId, "serial-miss", result.notice);
       }
@@ -517,10 +535,11 @@ export const applySerialPull = createServerFn({ method: "POST" })
     if (here) {
       const notice = pulledNotice(serial, hit);
       if (data.installId) {
-        await writeInstallSerial(sql, data.installId, asset.serial ?? serial, data.machineIndex ?? null, {
+        const wrote = await writeInstallSerial(sql, data.installId, asset.serial ?? serial, data.machineIndex ?? null, {
           model: hit.model,
           powerVoltage: null,
         });
+        if (wrote === "duplicate") return alreadyOnInstall(sql, data.installId, asset.serial ?? serial, hit.model);
         await setInstallNotice(sql, data.installId, notice);
       }
       if (data.jobId) await setJobNotice(sql, data.jobId, notice);
@@ -573,19 +592,21 @@ export const applySerialPull = createServerFn({ method: "POST" })
     }
 
     const extra = !hit.available && hit.allocatedTo ? `was assigned to ${hit.allocatedTo}` : undefined;
+    // The install row first: a serial already on another row pulls nothing from the warehouse.
+    if (data.installId) {
+      const wrote = await writeInstallSerial(sql, data.installId, asset.serial ?? serial, data.machineIndex ?? null, {
+        model: hit.model,
+        powerVoltage: null,
+      });
+      if (wrote === "duplicate") return alreadyOnInstall(sql, data.installId, asset.serial ?? serial, hit.model);
+    }
     await attachAsset(sql, context.userId, asset, {
       customer,
       installId: data.installId,
       jobId: data.jobId,
     });
     const notice = pulledNotice(asset.serial ?? serial, hit, extra);
-    if (data.installId) {
-      await writeInstallSerial(sql, data.installId, asset.serial ?? serial, data.machineIndex ?? null, {
-        model: hit.model,
-        powerVoltage: null,
-      });
-      await setInstallNotice(sql, data.installId, notice);
-    }
+    if (data.installId) await setInstallNotice(sql, data.installId, notice);
     if (data.jobId) await setJobNotice(sql, data.jobId, notice);
 
     return {

@@ -108,19 +108,16 @@ export function applySerialInPlace<T extends VisitMachine>(
   return { rows, status: "already" };
 }
 
-/** One row per serial. A blank serial is kept. The first row with a serial wins. */
+/** One row per serial: the first row keeps it, and a later row with the same serial keeps its machine with the serial cleared. */
 export function dedupeMachineSerials<T extends { serial: string }>(rows: T[]): T[] {
   const seen = new Set<string>();
-  const out: T[] = [];
-  for (const row of rows) {
+  return rows.map((row) => {
     const key = serialKey(row.serial);
-    if (key) {
-      if (seen.has(key)) continue;
-      seen.add(key);
-    }
-    out.push(row);
-  }
-  return out;
+    if (!key) return row;
+    if (seen.has(key)) return { ...row, serial: "" };
+    seen.add(key);
+    return row;
+  });
 }
 
 export function hasSerial<T extends { serial: string }>(rows: T[], serial: string | null | undefined): boolean {
@@ -136,36 +133,70 @@ function rowsMatch(a: { equipment: string; serial: string }, b: { equipment: str
   return true;
 }
 
+/** For each row, the index of its own row in `against` (or -1), one to one: the same serial first, then a blank serial on either side. */
+function pairRows(rows: VisitMachine[], against: VisitMachine[]): number[] {
+  const pair = rows.map(() => -1);
+  const used = new Set<number>();
+  for (const loose of [false, true]) {
+    rows.forEach((r, i) => {
+      if (pair[i]! >= 0) return;
+      const j = against.findIndex(
+        (a, k) => !used.has(k) && (loose ? rowsMatch(r, a) : sameWarehouseModel(r.equipment, a.equipment) && serialKey(r.serial) === serialKey(a.serial)),
+      );
+      if (j < 0) return;
+      pair[i] = j;
+      used.add(j);
+    });
+  }
+  return pair;
+}
+
+const EDITABLE = ["serial", "powerVoltage", "plug", "ownership", "water", "recipeId"] as const;
+const editedHere = (a: VisitMachine, b: VisitMachine) => EDITABLE.some((k) => String(a[k] ?? "").trim() !== String(b[k] ?? "").trim());
+
 /**
- * What to save. The form's rows stay, including a row the form removed.
- * A machine the server added since `previous` is appended, so a pre-inspection add is not dropped.
- * A blank serial takes the serial the server stored on that same row.
+ * The form's rows brought up to date with the server's list. `previous` is the server's list as this window last saw it.
+ * - A machine the server added since then (pre-inspection Add) is appended, unless it is a row this window added itself.
+ * - A machine the server took off (pre-inspection Remove) goes, unless this window changed that row.
+ * - A blank serial takes a serial the server wrote on that same row since then. A serial cleared here stays cleared.
+ * Rows are matched one to one, so two machines of one model with no serial stay two rows.
  */
 export function machinesBeforeSave<T extends VisitMachine>(editing: T[], previous: T[], server: T[]): T[] {
-  const next = editing.map((r) => ({ ...r }));
-  const have = new Set(next.map((r) => serialKey(r.serial)).filter(Boolean));
-  for (const s of server) {
-    const key = serialKey(s.serial);
-    if (!key || have.has(key)) continue;
-    const blank = next.findIndex((r) => sameWarehouseModel(r.equipment, s.equipment) && !String(r.serial ?? "").trim());
-    if (blank < 0) continue;
-    next[blank] = { ...next[blank]!, serial: String(s.serial).trim() };
-    have.add(key);
-  }
-  const used = new Set<number>();
-  for (const s of server) {
-    const equipment = String(s.equipment ?? "").trim();
-    if (!equipment) continue;
-    const idx = previous.findIndex((p, i) => !used.has(i) && rowsMatch(p, s));
-    if (idx >= 0) {
-      used.add(idx);
-      continue;
-    }
-    const serial = String(s.serial ?? "").trim();
-    if (next.some((r) => rowsMatch(r, { equipment, serial }))) continue;
-    next.push({ ...s, equipment, serial, powerVoltage: String(s.powerVoltage ?? "").trim() });
-  }
+  const serverPrev = pairRows(server, previous);
+  const editPrev = pairRows(editing, previous);
+  const prevSerials = new Set(previous.map((p) => serialKey(p.serial)).filter(Boolean));
+  const have = new Set(editing.map((r) => serialKey(r.serial)).filter(Boolean));
+  const next: T[] = [];
+  editing.forEach((r, i) => {
+    const p = editPrev[i]!;
+    const j = p < 0 ? -1 : serverPrev.indexOf(p);
+    if (p >= 0 && j < 0 && !editedHere(r, previous[p]!)) return;
+    const key = j < 0 ? "" : serialKey(server[j]!.serial);
+    const fill = !!key && !serialKey(r.serial) && !serialKey(previous[p]!.serial) && !prevSerials.has(key) && !have.has(key);
+    if (fill) have.add(key);
+    next.push(fill ? { ...r, serial: String(server[j]!.serial).trim() } : { ...r });
+  });
+  const added = server.filter((s, j) => serverPrev[j]! < 0 && String(s.equipment ?? "").trim() && !have.has(serialKey(s.serial)));
+  const mine = editing.filter((_, i) => editPrev[i]! < 0);
+  pairRows(added, mine).forEach((k, n) => {
+    if (k >= 0) return;
+    const s = added[n]!;
+    next.push({ ...s, equipment: String(s.equipment).trim(), serial: String(s.serial ?? "").trim(), powerVoltage: String(s.powerVoltage ?? "").trim() });
+  });
   return dedupeMachineSerials(next);
+}
+
+/**
+ * The pre-inspection unit an equipment row stands for: the unit with its serial, or the only no-serial unit of its model.
+ * Null when two units (or two rows) could be it; then the save's prune picks the unit, and its checks stay with the kept row.
+ */
+export function visitUnitForRow<U extends { serial: string | null; model: string; name: string }>(rows: VisitMachine[], index: number, units: U[]): U | null {
+  const row = rows[index];
+  if (!row) return null;
+  const key = serialKey(row.serial);
+  const twin = (equipment: string, serial: string | null) => (key ? serialKey(serial) === key : !serialKey(serial) && sameWarehouseModel(equipment, row.equipment));
+  const hits = units.filter((u) => twin(u.model || u.name, u.serial));
+  return hits.length === 1 && rows.filter((r) => twin(r.equipment, r.serial)).length === 1 ? hits[0]! : null;
 }
 
 export type FormUnit = {

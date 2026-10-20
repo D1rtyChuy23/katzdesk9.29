@@ -39,9 +39,8 @@ import {
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
-import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice } from "@/lib/ops/install-form";
+import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice, visitUnitForRow } from "@/lib/ops/install-form";
 import { getInstallInspection, removeInspectionEquipment } from "@/lib/ops/inspection-api";
-import { serialKey } from "@/lib/ops/account-equip";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -386,7 +385,7 @@ export function InstallSheet({
     const next = machinesBeforeSave(specsRef.current, previous, server);
     setSpecs(next);
     setEquipPieces(next.map((s) => s.equipment));
-    // A pre-inspection add shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
+    // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, serialSig, machineSig]);
   const visit = useQuery({
@@ -678,10 +677,7 @@ export function InstallSheet({
                         const label = `${spec.equipment}${spec.serial.trim() ? ` SN ${spec.serial.trim()}` : ""}`;
                         if (!window.confirm(`Remove ${label} from this install?`)) return;
                         const next = specs.filter((_, i) => i !== index);
-                        const linked = (visit.data?.machines ?? []).find((m) => {
-                          if (spec.serial.trim() && m.serial && serialKey(m.serial) === serialKey(spec.serial)) return true;
-                          return !spec.serial.trim() && !m.serial && sameWarehouseModel(m.model || m.name, spec.equipment);
-                        });
+                        const linked = visitUnitForRow(specs, index, visit.data?.machines ?? []);
                         persistMachines(next);
                         if (!linked) return;
                         void removeInspectionEquipment({ data: { installId: row.id, equipmentId: linked.equipmentId, keepList: true } })

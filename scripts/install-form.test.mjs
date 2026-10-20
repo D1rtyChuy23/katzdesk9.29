@@ -13,6 +13,7 @@ import {
   parseAccountSerialNotice,
   placePower,
   rollChecks,
+  visitUnitForRow,
 } from "../src/lib/ops/install-form.ts";
 
 test("a visit unit with its own serial is added, and a second pass does not add it again", () => {
@@ -92,7 +93,10 @@ test("typing a serial updates that row and a second click does not add one", () 
     ...typed.rows,
     { equipment: "La Marzocco Linea PB 3 Group AV", serial: "PB001708", powerVoltage: "" },
   ]);
-  assert.equal(deduped.length, 2);
+  assert.deepEqual(
+    deduped.map((r) => r.serial),
+    ["PB001708", "ITCB138003", ""],
+  );
 });
 
 test("a machine added on the server is kept on save, and a row removed in the form stays removed", () => {
@@ -111,6 +115,50 @@ test("a machine added on the server is kept on save, and a row removed in the fo
   const filled = machinesBeforeSave(previous, previous, [{ equipment: "Bunn ITCB", serial: "SN1", powerVoltage: "" }]);
   assert.equal(filled.length, 1);
   assert.equal(filled[0].serial, "SN1");
+});
+
+const row = (equipment, serial = "", powerVoltage = "") => ({ equipment, serial, powerVoltage });
+const shown = (rows) => rows.map((r) => r.equipment + (r.serial ? ` SN ${r.serial}` : ""));
+
+test("a second machine of a model already on the install is kept, and a serial added with it stays on its own row", () => {
+  const F = row("Fetco CBS-51H");
+  assert.deepEqual(shown(machinesBeforeSave([F], [F], [F, F])), ["Fetco CBS-51H", "Fetco CBS-51H"]);
+  assert.deepEqual(shown(machinesBeforeSave([F], [F], [F, row("Fetco CBS-51H", "FX100")])), ["Fetco CBS-51H", "Fetco CBS-51H SN FX100"]);
+  // Install 54: two ITCBs added on the Pre-inspection tab, the window refreshed once after both or after each.
+  const C = row("Eversys Cameo");
+  const I = row("Bunn ITCB-DV");
+  assert.equal(machinesBeforeSave([C], [C], [C, I, I]).length, 3);
+  assert.equal(machinesBeforeSave(machinesBeforeSave([C], [C], [C, I]), [C, I], [C, I, I]).length, 3);
+  // A row this window added and saved comes back from the server once, not twice.
+  assert.equal(machinesBeforeSave([F, F], [F], [F, F]).length, 2);
+});
+
+test("a serial cleared in the window stays cleared, and only a serial new on the server fills a blank row", () => {
+  const T = (serial) => row("Bunn TB3", serial);
+  assert.deepEqual(shown(machinesBeforeSave([T("")], [T("W1")], [T("W1")])), ["Bunn TB3"]);
+  // A warehouse assignment wrote this serial on the server since the window last looked.
+  assert.deepEqual(shown(machinesBeforeSave([T("")], [T("")], [T("WH7")])), ["Bunn TB3 SN WH7"]);
+});
+
+test("a machine removed on the Pre-inspection tab leaves the window too, unless the window changed that row", () => {
+  const T = row("Bunn TB3");
+  const F = row("Fetco CBS-51H");
+  assert.deepEqual(shown(machinesBeforeSave([T, F], [T, F], [T])), ["Bunn TB3"]);
+  assert.deepEqual(shown(machinesBeforeSave([T, { ...F, powerVoltage: "120V" }], [T, F], [T])), ["Bunn TB3", "Fetco CBS-51H"]);
+});
+
+test("a serial repeated on a later row is cleared there, and that machine stays", () => {
+  assert.deepEqual(shown(dedupeMachineSerials([row("Fetco CBS-51H", "S1"), row("Bunn TB3", "S1")])), ["Fetco CBS-51H SN S1", "Bunn TB3"]);
+});
+
+test("removing an equipment row takes a pre-inspection unit only when no other unit or row can be it", () => {
+  const unit = (equipmentId, model, serial = null) => ({ equipmentId, model, name: model, serial });
+  const units = [unit(1, "Bunn TB3"), unit(2, "Fetco CBS-51H"), unit(3, "Fetco CBS-51H"), unit(4, "Bunn G9-2T", "G9X")];
+  const rows = [row("Bunn TB3"), row("Fetco CBS-51H"), row("Fetco CBS-51H"), row("Bunn G9-2T", "G9X")];
+  assert.equal(visitUnitForRow(rows, 0, units)?.equipmentId, 1);
+  assert.equal(visitUnitForRow(rows, 3, units)?.equipmentId, 4);
+  assert.equal(visitUnitForRow(rows, 2, units), null);
+  assert.equal(visitUnitForRow(rows.slice(1, 3), 1, [units[1]]), null);
 });
 
 test("account type and the already-on-this-account notice", () => {

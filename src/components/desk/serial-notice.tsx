@@ -71,9 +71,9 @@ export function SerialPullField({
   const [pending, setPending] = useState<SerialPullResult | null>(null);
   const [offer, setOffer] = useState<{ model: string; serial: string } | null>(null);
   const looked = useRef("");
+  /** The row's serial before this edit: typing reaches the row right away, so `value` follows the text. */
   const saved = useRef(value);
   useEffect(() => {
-    saved.current = value;
     setText(value);
   }, [value]);
 
@@ -96,12 +96,16 @@ export function SerialPullField({
       setPending(null);
       looked.current = result.serial.trim().replace(/[#\s]/g, "").toLowerCase();
       if (result.duplicateOnInstall) {
+        // The row goes back to its serial, and typing the same one again asks the server again.
+        looked.current = "";
         setText(saved.current);
+        onValue(saved.current);
         setOffer(null);
         toast.message(result.notice);
         return;
       }
       if (result.serial && result.serial !== text) setText(result.serial);
+      saved.current = result.serial;
       onValue(result.serial);
       onPulled?.(result);
       if (result.alreadyHere && result.model && model && !sameWarehouseModel(model, result.model)) {
@@ -122,6 +126,7 @@ export function SerialPullField({
     const next = raw.trim();
     if (!next) {
       looked.current = "";
+      saved.current = "";
       setOffer(null);
       onValue("");
       return;
@@ -148,9 +153,17 @@ export function SerialPullField({
         value={text}
         autoComplete="off"
         placeholder="Type the serial"
-        onChange={(e) => setText(e.target.value)}
+        onFocus={() => {
+          saved.current = value;
+        }}
+        onChange={(e) => {
+          // The row holds what is typed, so closing the window (Escape too) saves it. The lookup waits for blur or Enter.
+          setText(e.target.value);
+          onValue(e.target.value);
+        }}
         onBlur={() => {
-          if (text.trim()) commit(text);
+          // A cleared serial is committed too, or the old one would come back on the next save.
+          if (text.trim() || saved.current.trim()) commit(text);
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {

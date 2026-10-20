@@ -9,11 +9,14 @@ register(new URL("./ts-alias-hook.mjs", import.meta.url));
 // Keep this file off the preview database. db.ts boots PGLite on import when DATABASE_URL is unset.
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
-const { addMachineOntoInstall, readInspection } = await import("../src/lib/ops/inspection-api.ts");
+const { addMachineOntoInstall, readInspection, syncInstallUnits } = await import("../src/lib/ops/inspection-api.ts");
 const { mergeEquipmentUnits, removeEquipmentUnit } = await import("../src/lib/ops/account-equip-import.ts");
 const { formMachines } = await import("../src/lib/ops/install-form-api.ts");
-const { groupFormRows } = await import("../src/lib/ops/install-form.ts");
-const { parseMachinesJson } = await import("../src/lib/ops/machines.ts");
+const installForm = await import("../src/lib/ops/install-form.ts");
+const { groupFormRows } = installForm;
+const machines = await import("../src/lib/ops/machines.ts");
+const { parseMachinesJson } = machines;
+const { catalogModels } = await import("../src/lib/ops/equipment.ts");
 
 const ITCB_CATALOG = 'Bunn ITCB-DV, 29" w/Flip Tray';
 
@@ -53,6 +56,135 @@ function effects(src) {
   }
   return out;
 }
+
+/**
+ * The install window's machine list, step for step with InstallSheet: it opens on the board's row, its effect brings the list
+ * up to date when the board refetches, an Equipment-tab save sends listForSave, and closing sends the list only if it changed.
+ * Saves go through updateInstall's machine part: the columns, then syncInstallUnits with prune.
+ */
+async function openWindow(pg, sql, id) {
+  const boardRow = async () => {
+    const r = (await pg.query("select * from installs where id = $1", [id])).rows[0];
+    const dir = (await pg.query("select name from directory_equipment where archived = false")).rows.map((d) => d.name);
+    return { ...r, powerVoltage: r.power_voltage, machines: machines.specsFromInstall(r.equipment, r.serial, r.power_voltage, r.machines, catalogModels(dir)) };
+  };
+  const send = async (packed) => {
+    await pg.query("update installs set equipment = $2, serial = $3, power_voltage = $4, machines = $5 where id = $1", [
+      id,
+      packed.equipment,
+      packed.serial,
+      packed.powerVoltage,
+      packed.machines,
+    ]);
+    await syncInstallUnits(sql, id, { prune: true });
+  };
+  let row = await boardRow();
+  const w = { specs: machines.machinesOnOpen(row), loaded: machines.machinesOnOpen(row), seen: row.machines };
+  w.refetch = async () => {
+    row = await boardRow();
+    w.loaded = installForm.machinesBeforeSave(w.loaded, w.seen, row.machines);
+    w.specs = installForm.machinesBeforeSave(w.specs, w.seen, row.machines);
+    w.seen = row.machines;
+  };
+  w.save = async (next) => {
+    w.specs = w.loaded = installForm.machinesBeforeSave(next, w.seen, row.machines);
+    await send(machines.serializeMachines(w.specs));
+    await w.refetch();
+  };
+  w.close = async () => {
+    const changed = machines.changedMachineFields(w.specs, w.loaded);
+    if (changed.machines !== undefined) await send(changed);
+  };
+  return w;
+}
+
+async function checkAndPhoto(pg, id, equipmentId) {
+  await pg.query("insert into install_inspection_items (install_id, equipment_id, category, status) values ($1, $2, 'Water', 'Fail')", [id, equipmentId]);
+  await pg.query("insert into install_inspection_photos (install_id, equipment_id, category, data_url) values ($1, $2, 'Water', 'data:image/jpeg;base64,AA')", [
+    id,
+    equipmentId,
+  ]);
+}
+
+async function kept(pg, sql, id, equipmentId) {
+  const view = await readInspection(sql, id);
+  const n = async (table) => (await pg.query(`select count(*)::int as n from ${table} where install_id = $1 and equipment_id = $2`, [id, equipmentId])).rows[0].n;
+  return { onVisit: view.machines.some((m) => m.equipmentId === equipmentId), checks: await n("install_inspection_items"), photos: await n("install_inspection_photos") };
+}
+
+const storedList = async (pg, id) => parseMachinesJson((await pg.query("select machines from installs where id = $1", [id])).rows[0].machines).map((m) => m.equipment);
+
+test("a second machine of a model already on the install, added on the Pre-inspection tab, keeps its check and photo through a save and the close", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Brews & Books", "Bunn TB3");
+    await readInspection(sql, id);
+    const w = await openWindow(pg, sql, id);
+    const view = await addMachineOntoInstall(sql, { installId: id, model: "Bunn TB3", serial: null, electrical: null }, "Test");
+    const added = view.machines.at(-1).equipmentId;
+    await checkAndPhoto(pg, id, added);
+    await w.refetch();
+    assert.equal(w.specs.length, 2);
+    await w.save(w.specs.map((s, i) => (i === 0 ? { ...s, powerVoltage: "120V" } : s)));
+    await w.close();
+    assert.deepEqual(await kept(pg, sql, id, added), { onVisit: true, checks: 1, photos: 1 });
+    assert.equal((await readInspection(sql, id)).machines.length, 2);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("removing one of two identical no-serial rows keeps the other unit's check and photo", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Twin Cafe", "Bunn G9-2T\nBunn TB3\nBunn TB3");
+    const first = (await readInspection(sql, id)).machines.filter((m) => m.model === "Bunn TB3")[0].equipmentId;
+    await checkAndPhoto(pg, id, first);
+    const w = await openWindow(pg, sql, id);
+    const unit = installForm.visitUnitForRow(w.specs, 2, (await readInspection(sql, id)).machines);
+    assert.equal(unit, null);
+    await w.save(w.specs.filter((_, i) => i !== 2));
+    assert.deepEqual(await kept(pg, sql, id, first), { onVisit: true, checks: 1, photos: 1 });
+    assert.deepEqual(await storedList(pg, id), ["Bunn G9-2T", "Bunn TB3"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a machine removed on the Pre-inspection tab stays off the list after an Equipment save and the close", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "S4 Cafe", "Bunn TB3\nBunn G9-2T");
+    await readInspection(sql, id);
+    const w = await openWindow(pg, sql, id);
+    // removeInspectionEquipment takes the machine off installs.machines, then refresh() refetches the board.
+    await pg.query("update installs set equipment = 'Bunn TB3', machines = $2 where id = $1", [id, JSON.stringify([{ equipment: "Bunn TB3", serial: "", powerVoltage: "" }])]);
+    await w.refetch();
+    assert.deepEqual(w.specs.map((s) => s.equipment), ["Bunn TB3"]);
+    await w.save(w.specs.map((s) => ({ ...s, powerVoltage: "120V" })));
+    await w.close();
+    assert.deepEqual(await storedList(pg, id), ["Bunn TB3"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a serial already on another row of the install changes nothing on any serial pull path", () => {
+  const src = readFileSync(new URL("../src/lib/ops/serial-pull.ts", import.meta.url), "utf8");
+  const handler = src.slice(src.indexOf("export const applySerialPull"));
+  const writes = handler.match(/await writeInstallSerial\(/g).length;
+  const checked = handler.match(/const wrote = await writeInstallSerial\([^;]*;\s*if \(wrote === "duplicate"\) return alreadyOnInstall\(/g) ?? [];
+  assert.equal(checked.length, writes);
+  // Nothing comes out of the warehouse before the install row takes the serial.
+  assert.ok(handler.indexOf("await attachAsset(") > handler.lastIndexOf("await writeInstallSerial("));
+});
+
+test("a serial typed in the Serial box reaches the row at once, and a cleared one is committed on blur", () => {
+  const src = componentSource("../src/components/desk/serial-notice.tsx", "SerialPullField");
+  const input = src.slice(src.indexOf("<Input"), src.indexOf("/>", src.indexOf("<Input")));
+  assert.match(input, /onChange=\{\(e\) => \{[^}]*onValue\(e\.target\.value\);/);
+  assert.match(input, /onBlur=\{\(\) => \{[^}]*if \(text\.trim\(\) \|\| saved\.current\.trim\(\)\) commit\(text\);/);
+});
 
 test("opening an install sheet saves nothing: no effect in InstallSheet writes the machine list", () => {
   const found = effects(componentSource("../src/components/desk/entity-sheets.tsx", "InstallSheet"));
