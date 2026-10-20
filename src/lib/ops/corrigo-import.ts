@@ -51,6 +51,12 @@ function jobBoard(kind: string | null | undefined): CorrigoBoard {
   return kind === "tlc" ? "tlc" : "service";
 }
 
+/** The received date, or the day of the ticket's first activity entry (the tables keep no created date). */
+function receivedSql(table: string, entityType: string): string {
+  return `to_char(coalesce(${table}.received, (select min(a.created_at)::date from activity a
+            where a.entity_type = ${entityType} and a.entity_id = ${table}.id)), 'YYYY-MM-DD') as received`;
+}
+
 async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<CorrigoHit[]> {
   const jobs = await sql.query<{
     id: number;
@@ -63,10 +69,12 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     completed_at: string | null;
     ns_so: string | null;
     has_charges: boolean;
+    received: string | null;
   }>(
     `select id, wo, status, customer, kind, duplicate_of, done,
             to_char(completed_at, 'YYYY-MM-DD') as completed_at, ns_so,
-            exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges
+            exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges,
+            ${receivedSql("service_jobs", "service_jobs.kind")}
        from service_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
@@ -78,8 +86,11 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     customer: string | null;
     done: boolean;
     completed_at: string | null;
+    received: string | null;
   }>(
-    `select id, wo, status, customer, done, to_char(completed_at, 'YYYY-MM-DD') as completed_at from pm_jobs
+    `select id, wo, status, customer, done, to_char(completed_at, 'YYYY-MM-DD') as completed_at,
+            ${receivedSql("pm_jobs", "'pm'")}
+       from pm_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
   );
@@ -90,8 +101,11 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     customer: string;
     complete: boolean;
     completed_at: string | null;
+    received: string | null;
   }>(
-    `select id, wo, equip_status as status, customer, complete, to_char(completed_at, 'YYYY-MM-DD') as completed_at from installs
+    `select id, wo, equip_status as status, customer, complete, to_char(completed_at, 'YYYY-MM-DD') as completed_at,
+            ${receivedSql("installs", "'install'")}
+       from installs
       where archived = false and coalesce(wo, '') <> ''
       order by id asc`,
   );
@@ -107,6 +121,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       completedAt: r.completed_at,
       billedSo: r.ns_so,
       hasCharges: !!r.has_charges,
+      received: r.received,
     })),
     ...pms.map((r) => ({
       board: "pm" as const,
@@ -116,6 +131,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       wo: r.wo,
       done: !!r.done,
       completedAt: r.completed_at,
+      received: r.received,
     })),
     ...installs.map((r) => ({
       board: "install" as const,
@@ -125,6 +141,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       wo: r.wo,
       done: !!r.complete,
       completedAt: r.completed_at,
+      received: r.received,
     })),
   ];
 }
@@ -135,6 +152,7 @@ async function findExistingHit(
   preferredBoard?: CorrigoBoard | null,
   fileCustomer?: string | null,
   wrapped?: boolean,
+  today?: string,
 ): Promise<CorrigoHit | null> {
   if (!matchKey) return null;
   const hits = await loadHits(sql);
@@ -144,7 +162,7 @@ async function findExistingHit(
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
-  const attachable = group.filter((h) => shouldAttachToHit(h, fileCustomer, rolled));
+  const attachable = group.filter((h) => shouldAttachToHit(h, fileCustomer, rolled, today));
   return pickKeeper(attachable, preferredBoard);
 }
 
@@ -233,9 +251,10 @@ const previewInput = z.object({ records: z.array(recordInput).max(2000) });
 export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]): Promise<CorrigoPreviewPart> {
   const hits = await loadHits(sql);
   const wrapped = deskHasWrapped(hits);
+  const today = todayChicago();
   const index = indexHits(hits);
   const rows = records.map((rec) =>
-    resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, { wrapped }),
+    resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, { wrapped, today }),
   );
   const unmapped = [
     ...new Set(rows.map((r) => r.statusUnmapped).filter((s): s is string => !!s)),
@@ -306,6 +325,7 @@ export async function applyCorrigoRows(
 
   const hitsForWrap = await loadHits(sql);
   const wrapped = deskHasWrapped(hitsForWrap);
+  const today = todayChicago();
   let wrapRepeat = false;
 
   function maybeReview(
@@ -337,7 +357,7 @@ export async function applyCorrigoRows(
     let jobId = row.jobId;
     wrapRepeat = !!row.wrapRepeat;
     if (action === "create" || (action === "update" && !jobId)) {
-      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped);
+      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, today);
       if (hit) {
         action = "update";
         jobId = hit.id;

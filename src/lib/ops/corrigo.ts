@@ -131,6 +131,8 @@ export type CorrigoHit = {
   done?: boolean;
   /** YYYY-MM-DD on the ticket now. */
   completedAt?: string | null;
+  /** YYYY-MM-DD the ticket came in, or its first activity entry when it has no received date. */
+  received?: string | null;
   /** NetSuite Sales Order (service tickets only). */
   billedSo?: string | null;
   hasCharges?: boolean;
@@ -234,19 +236,28 @@ export function hitClosed(hit: Pick<CorrigoHit, "status" | "done">): boolean {
   return CLOSED_HIT.has(String(hit.status ?? "").trim().toLowerCase());
 }
 
+/** Came in within 365 days of the import (today), so it is from the current run of ST# numbers. */
+function recentTicket(hit: CorrigoHit, today: string | null | undefined): boolean {
+  if (!today || !hit.received) return false;
+  return hit.received >= new Date(Date.parse(today) - 365 * 86_400_000).toISOString().slice(0, 10);
+}
+
 /**
- * After WO-9999 the 4-digit numbers start over. Don't fold a new job onto a
- * closed ticket from the previous cycle when the customer doesn't match.
+ * After WO-9999 the 4-digit numbers start over. Don't fold a new job onto a closed ticket from the previous
+ * cycle when the customer doesn't match. A closed ticket received in the last 365 days is this cycle's, so it
+ * is the same job however Corrigo spells the customer.
  */
 export function shouldAttachToHit(
   hit: CorrigoHit,
   fileCustomer: string | null | undefined,
   wrapped: boolean,
+  today?: string | null,
 ): boolean {
   if (!wrapped) return true;
   const n = woNumeric(hit.wo);
   if (n == null || n > WO_WRAP) return true;
   if (!hitClosed(hit)) return true;
+  if (recentTicket(hit, today)) return true;
   if (customersCompatible(hit.customer, fileCustomer)) return true;
   return false;
 }
@@ -547,7 +558,7 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
 export function resolvePreviewRow(
   rec: CorrigoRecord,
   match: { unique: CorrigoHit | null; conflicts: CorrigoHit[] },
-  opts: { wrapped?: boolean } = {},
+  opts: { wrapped?: boolean; today?: string } = {},
 ): CorrigoPreviewRow {
   const wrapped = !!opts.wrapped;
   const group = [
@@ -561,7 +572,7 @@ export function resolvePreviewRow(
   });
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
-  const attachable = pool.filter((h) => shouldAttachToHit(h, rec.customer, wrapped));
+  const attachable = pool.filter((h) => shouldAttachToHit(h, rec.customer, wrapped, opts.today));
   const existing = pickKeeper(attachable.length ? attachable : [], hinted);
   const extras = existing
     ? group.filter((h) => h.board !== existing.board || h.id !== existing.id)
@@ -582,8 +593,10 @@ export function resolvePreviewRow(
     .map((c) => ({ board: c.board, id: c.id }));
   const n = woNumeric(rec.rawWo || rec.canonicalWo);
   const postWrapNumber = n != null && n < 5000;
+  // A copy received in the last 365 days is this cycle's duplicate: flagged to merge, not a repeat.
+  const oldCycle = extras.filter((h) => !recentTicket(h, opts.today));
   const wrapRepeat =
-    wrapped && postWrapNumber && (extras.length > 0 || (!existing && group.length > 0));
+    wrapped && postWrapNumber && (oldCycle.length > 0 || (!existing && group.length > 0));
   const note = existing ? matchNote(rec.rawWo, rec.canonicalWo, existing.wo) : null;
 
   return {
