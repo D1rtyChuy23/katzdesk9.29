@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
-import { listedEquipment, matchModel } from "@/lib/ops/equipment";
+import { joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
 import { parseMachinesJson, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import {
   CORE_HOLE_CATEGORY,
@@ -207,6 +207,31 @@ function piecesFrom(
   }));
 }
 
+/**
+ * The install's machines, ready to save back: the saved list, or the typed one with the serial and voltage typed on
+ * a machine's line ("Bunn ITCB 120v SN:ITCB064919") kept on that machine. Saving the typed list without them erased
+ * the serial.
+ */
+export function installMachines(
+  row: { equipment?: string | null; serial?: string | null; power_voltage?: string | null; machines?: unknown },
+  catalog: string[] = [],
+): { machines: MachineSpec[]; typed: boolean } {
+  const stored = parseMachinesJson(text(row.machines) || null);
+  if (stored.length) return { machines: stored, typed: false };
+  const machines: MachineSpec[] = piecesFrom(row, catalog).map((p) => ({ ...p }));
+  const taken = new Set<MachineSpec>();
+  // One line can name several machines, each followed by its serial ("Mazzer SJ E SN:2601514, Mazzer Mini E SN:…").
+  for (const part of text(row.equipment).split(/\r?\n|(?<=\bSN\s*:?\s*[A-Z0-9-]+)(?![A-Z0-9-])/i)) {
+    const named = listedEquipment(part, catalog);
+    const m = named.length === 1 ? machines.find((s) => !taken.has(s) && s.equipment === named[0]) : undefined;
+    if (!m) continue;
+    taken.add(m);
+    m.serial ||= part.match(/\bSN\s*:?\s*([A-Z0-9-]+)/i)?.[1] ?? "";
+    m.powerVoltage ||= part.match(/\b\d{3}\s*v(?:olts?)?\b/i)?.[0] ?? "";
+  }
+  return { machines, typed: true };
+}
+
 type AcctUnit = {
   id: number;
   catalog_model: string;
@@ -216,7 +241,7 @@ type AcctUnit = {
   electrical: string | null;
 };
 
-async function catalogNames(sql: Sql): Promise<string[]> {
+export async function catalogNames(sql: Sql): Promise<string[]> {
   const rows = await sql
     .query<{ name: string }>(
       `select name from directory_equipment where archived = false and coalesce(name, '') <> ''`,
@@ -1015,22 +1040,17 @@ export async function addMachineOntoInstall(
   const electrical = (data.electrical ?? "").trim();
   const key = serialKey(serial);
   const catalog = await catalogNames(sql);
-  const stored = parseMachinesJson(text(row.machines) || null);
-  const current: MachineSpec[] = stored.length
-    ? stored
-    : piecesFrom(row, catalog).map((p) => ({
-        equipment: p.equipment,
-        serial: p.serial,
-        powerVoltage: p.powerVoltage,
-      }));
+  const { machines: current, typed } = installMachines(row, catalog);
   if (key && current.some((m) => serialKey(m.serial) === key)) {
     throw new Error("That serial is already on this visit.");
   }
   const equipment = matchModel(model, catalog);
   const packed = serializeMachines([...current, { equipment, serial, powerVoltage: electrical }]);
+  // Typed lines stay as typed ("2 x e4s ... SN: ..."); the new machine goes on a line of its own.
+  const lines = typed ? joinEquipment([text(row.equipment), equipment]) : packed.equipment;
   await sql.query(
     "update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1",
-    [data.installId, packed.equipment, packed.machines, packed.serial, packed.powerVoltage],
+    [data.installId, lines, packed.machines, packed.serial, packed.powerVoltage],
   );
   await syncInstallUnits(sql, data.installId, { prune: true });
   const view = await readInspection(sql, data.installId);
