@@ -6,7 +6,8 @@ import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { approveExact, approveOne, specReadRows } = await import("../src/lib/ops/spec-read-api.ts");
+const { approveExact, approveOne, noSheetBooks, resolveHandEntry, specReadRows } = await import("../src/lib/ops/spec-read-api.ts");
+const { saveTarget } = await import("../src/lib/ops/spec-library.ts");
 
 const pg = new PGlite();
 const dir = new URL("../migrations/", import.meta.url);
@@ -114,4 +115,41 @@ test("approve all exact skips a refused sheet, names it, and still approves the 
   assert.equal(result.approved, 1);
   assert.deepEqual(result.skipped, ["Curtis G4 Single.pdf: This sheet was moved to another model. Read it again."]);
   assert.equal((await sql.query("select status from spec_reads where file_id = $1", [fine.file]))[0].status, "read");
+});
+
+test("a hand entry closes its Spec Review row, and a model with a tied sheet leaves the no-sheet list", async () => {
+  const { book, file } = await bookWithRead("Bunn ITCB-DV", "Bunn", null, {});
+  await sql.query("update spec_reads set status = 'unreadable' where file_id = $1", [file]);
+  // Nothing saved on the model yet: the row stays open.
+  assert.equal(await resolveHandEntry(sql, file), false);
+  assert.equal((await sql.query("select status from spec_reads where file_id = $1", [file]))[0].status, "unreadable");
+  // saveSpecSheet, then moveSpecSheet ties it to the row's model, as afterImport does.
+  await sql.query("insert into spec_sheets (manufacturer, model, book_id) values ('Bunn', 'ITCB-DV', $1)", [book]);
+  assert.equal(await resolveHandEntry(sql, file), true);
+  const row = (await sql.query("select status, resolved_at from spec_reads where file_id = $1", [file]))[0];
+  assert.equal(row.status, "read");
+  assert.ok(row.resolved_at);
+  const done = await sql.query("select label, detail from library_admin_done where section = 'spec-review' and item_key = $1", [`file:${file}`]);
+  assert.deepEqual(done, [{ label: "Bunn ITCB-DV", detail: "Entered by hand" }]);
+  const typed = (await sql.query("insert into library_books (title, manufacturer) values ('BUNN CWTF15', 'BUNN') returning id"))[0].id;
+  const bare = (await sql.query("insert into library_books (title, manufacturer) values ('BUNN CWTF20', 'BUNN') returning id"))[0].id;
+  await sql.query("insert into spec_sheets (manufacturer, model, book_id) values ('BUNN', 'CWTF15', $1)", [typed]);
+  const ids = (await noSheetBooks(sql)).map((b) => b.id);
+  assert.equal(ids.includes(typed), false);
+  assert.equal(ids.includes(bare), true);
+});
+
+test("a hand entry for one model never takes over the sheet tied to another", async () => {
+  const family = (await sql.query("insert into library_books (title, manufacturer) values ('Fetco CBS-2152', 'Fetco') returning id"))[0].id;
+  const variation = (await sql.query("insert into library_books (title, manufacturer) values ('Fetco CBS-2152-DV', 'Fetco') returning id"))[0].id;
+  const sheet = (await sql.query("insert into spec_sheets (manufacturer, model, book_id) values ('Fetco', 'CBS-2152', $1) returning id", [family]))[0].id;
+  const d = { manufacturer: "fetco", model: "cbs-2152" };
+  await assert.rejects(
+    () => saveTarget(sql, d, { overwrite: true, bookId: variation }),
+    /^Error: Fetco CBS-2152 is the spec sheet for Fetco CBS-2152\. Nothing was saved\./,
+  );
+  assert.equal((await sql.query("select book_id from spec_sheets where id = $1", [sheet]))[0].book_id, family);
+  // Its own model, or a save from Add Files (no model), still asks to replace it.
+  assert.equal((await saveTarget(sql, d, { bookId: family })).conflict.id, sheet);
+  assert.deepEqual(await saveTarget(sql, d, { overwrite: true }), { id: sheet });
 });

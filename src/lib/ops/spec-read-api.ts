@@ -101,18 +101,24 @@ export async function specReadRows(sql: Sql) {
   );
 }
 
+/** Models with no spec PDF and no sheet tied to them (a hand-entered sheet counts). */
+export async function noSheetBooks(sql: Sql): Promise<{ id: number; title: string }[]> {
+  const books = await sql.query<{ id: number; title: string }>(
+    `select b.id, b.title from library_books b
+      where not exists (
+        select 1 from library_files f where f.book_id = b.id and f.section = 'spec' and f.complete
+      )
+        and not exists (select 1 from spec_sheets s where s.book_id = b.id)
+      order by lower(b.title)`,
+  );
+  return books.map((b) => ({ id: Number(b.id), title: b.title }));
+}
+
 export const listSpecReads = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .handler(async (): Promise<SpecReadBoard> => {
     const sql = await ready();
     const reads = await specReadRows(sql);
-    const books = await sql.query<{ id: number; title: string }>(
-      `select b.id, b.title from library_books b
-        where not exists (
-          select 1 from library_files f where f.book_id = b.id and f.section = 'spec' and f.complete
-        )
-        order by lower(b.title)`,
-    );
     const rows: SpecReadRow[] = reads.map((r) => {
       const changes = asChanges(r.changes);
       return {
@@ -129,7 +135,7 @@ export const listSpecReads = createServerFn({ method: "GET" })
     return {
       rows,
       queued: rows.filter((r) => r.status === "queued").length,
-      noSheet: books.map((b) => ({ id: Number(b.id), title: b.title })),
+      noSheet: await noSheetBooks(sql),
     };
   });
 
@@ -403,6 +409,39 @@ export async function approveOne(sql: Sql, fileId: number, useNew: string[]): Pr
   );
   return { title: book.title };
 }
+
+/**
+ * Specs typed by hand for a sheet the reader couldn't read: close its Spec Review row, the way an approve does.
+ * Only once its model has a tied sheet. False when nothing was closed.
+ */
+export async function resolveHandEntry(sql: Sql, fileId: number): Promise<boolean> {
+  const rows = await sql.query<{ file_id: number }>(
+    `with r as (
+       update spec_reads r set status = 'read', resolved_at = now(), updated_at = now()
+         from library_files f
+        where r.file_id = $1 and f.id = r.file_id and r.status = 'unreadable'
+          and exists (select 1 from spec_sheets s where s.book_id = f.book_id)
+       returning r.file_id, f.book_id, f.name
+     ), done as (
+       insert into library_admin_done (section, item_key, label, detail, resolved_at)
+       select 'spec-review', 'file:' || r.file_id, coalesce(b.title, r.name), 'Entered by hand', now()
+         from r left join library_books b on b.id = r.book_id
+       on conflict (section, item_key) do update set label = excluded.label, detail = excluded.detail, resolved_at = now()
+     )
+     select file_id from r`,
+    [fileId],
+  );
+  return rows.length > 0;
+}
+
+export const resolveSpecHandEntry = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { fileId: number }) => z.object({ fileId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ resolved: boolean }> => {
+    const sql = await ready();
+    await requireAdmin(sql, context.userId);
+    return { resolved: await resolveHandEntry(sql, data.fileId) };
+  });
 
 export const approveSpecRead = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])

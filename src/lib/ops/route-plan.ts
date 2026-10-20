@@ -20,7 +20,7 @@ import {
   type LatLng,
   type PinQuality,
 } from "./geo.ts";
-import type { DriveLeg } from "./drive-route.ts";
+import { pointKey, type DriveLeg } from "./drive-route.ts";
 
 export type StopType = BoardType;
 
@@ -200,6 +200,8 @@ export function linkStop(s: Pick<PlacedStop, "point" | "quality">): LatLng | nul
 }
 
 const sameStop = (a: LatLng, b: LatLng) => Math.abs(a.lat - b.lat) < 1e-7 && Math.abs(a.lng - b.lng) < 1e-7;
+/** Same place for drive times: the drive table keeps one pin per pointKey, so pins that round alike share its legs. */
+const samePin = (a: LatLng, b: LatLng) => sameStop(a, b) || pointKey(a) === pointKey(b);
 
 /** Where a tech's day can start. Without one, Google Maps starts from the phone's current location. */
 export type RouteStart = { key: string; label: string; point: LatLng };
@@ -282,17 +284,14 @@ export function arrangeStops<T extends { key: string }>(stops: readonly T[], ord
 
 export type DriveFn = (from: LatLng, to: LatLng) => DriveLeg | null;
 
-/** Every distinct pair has a drive time. One unknown pair, and the whole list stays straight-line. Same pin counts as known. */
+/** Every distinct pair has a drive time. One unknown pair, and the whole list stays straight-line. Points are one per pointKey. */
 function driveCovers(points: readonly LatLng[], drive: DriveFn): boolean {
   let pairs = 0;
   for (let i = 0; i < points.length; i++) {
     for (let j = 0; j < points.length; j++) {
       if (i === j) continue;
-      const a = points[i]!;
-      const b = points[j]!;
-      if (sameStop(a, b)) continue;
       pairs += 1;
-      if (!drive(a, b)) return false;
+      if (!drive(points[i]!, points[j]!)) return false;
     }
   }
   return pairs > 0;
@@ -301,7 +300,8 @@ function driveCovers(points: readonly LatLng[], drive: DriveFn): boolean {
 function routePoints(start: RouteStart | null, stops: readonly { point: LatLng | null }[]): LatLng[] {
   const out: LatLng[] = [];
   const add = (p: LatLng | null | undefined) => {
-    if (!isPoint(p) || out.some((q) => sameStop(q, p))) return;
+    // One per pointKey, like the drive table, so every pair between() can ask for is checked.
+    if (!isPoint(p) || out.some((q) => pointKey(q) === pointKey(p))) return;
     out.push(p);
   };
   add(start?.point);
@@ -355,7 +355,7 @@ export function planTechRoutes(
     const saved = manual?.[tech];
     const pinned = list.filter((s) => isPoint(s.point));
     const useDrive = !!drive && driveCovers(routePoints(start, pinned), drive);
-    const between = useDrive ? (a: LatLng, b: LatLng) => (sameStop(a, b) ? 0 : drive!(a, b)!.minutes) : undefined;
+    const between = useDrive ? (a: LatLng, b: LatLng) => (samePin(a, b) ? 0 : drive!(a, b)!.minutes) : undefined;
     const plan = saved?.length
       ? {
           ordered: arrangeStops(
@@ -374,7 +374,7 @@ export function planTechRoutes(
       const prev = i > 0 ? (plan.ordered[i - 1]!.point as LatLng) : start?.point ?? null;
       const here = o.point as LatLng;
       if ((i === 0 && !start) || !prev) return { ...o.item, point: here, n: i + 1, legMiles: null, legMinutes: null };
-      if (sameStop(prev, here)) {
+      if (samePin(prev, here)) {
         if (useDrive) minutesSum += 0;
         return { ...o.item, point: here, n: i + 1, legMiles: 0, legMinutes: useDrive ? 0 : null };
       }

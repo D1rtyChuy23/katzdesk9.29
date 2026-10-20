@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { emptyDraft } from "../src/lib/ops/spec-schema.ts";
 import { groupFormRows } from "../src/lib/ops/install-form.ts";
@@ -13,6 +14,7 @@ import {
   outletForModel,
   outletFromConfigs,
   handEntryForRow,
+  tiedSheetId,
   valuesFromParts,
   withSpecOutlet,
   blankSpecValues,
@@ -105,10 +107,10 @@ test("amps and plug come from the spec only when voltage is blank or it matches,
   assert.equal(blank.voltage, "220V");
   assert.equal(blank.amps, "20A");
   assert.equal(blank.plug, "L6-20P");
-  const same = withSpecOutlet({ model: "Bunn ITCB", voltage: "220 V", plug: "NEMA", amps: "" }, spec);
+  const same = withSpecOutlet({ model: "Bunn ITCB", voltage: "220 V", plug: "l6 20p", amps: "" }, spec);
   assert.equal(same.voltage, "220 V");
   assert.equal(same.amps, "20A");
-  assert.equal(same.plug, "NEMA");
+  assert.equal(same.plug, "l6 20p");
   assert.equal(outletFromConfigs([
     { voltage: "120V", amps: "15A", plug: "5-15P" },
     { voltage: "220V", amps: "20A", plug: "L6-20P" },
@@ -123,6 +125,65 @@ test("amps and plug come from the spec only when voltage is blank or it matches,
     { model: "Bunn ITCB", serial: "", notes: "", voltage: "220V", plug: "", amps: "20A" },
   ]);
   assert.equal(rows[0].outlet, "220V · 20A");
+});
+
+test("a unit with its own plug that isn't the spec's takes neither voltage nor amps from the spec", () => {
+  const spec = { model: "X", manufacturer: "Bunn", voltage: "208V", amps: "30A", plug: "NEMA 6-30P" };
+  const own = withSpecOutlet({ model: "X", voltage: "", plug: "NEMA 5-15P", amps: "" }, spec);
+  assert.deepEqual([own.voltage, own.amps, own.plug], ["", "", "NEMA 5-15P"]);
+  const ownVolts = withSpecOutlet({ model: "X", voltage: "208V", plug: "NEMA 5-15P", amps: "" }, spec);
+  assert.deepEqual([ownVolts.voltage, ownVolts.amps, ownVolts.plug], ["208V", "", "NEMA 5-15P"]);
+  const samePlug = withSpecOutlet({ model: "X", voltage: "", plug: "nema 6-30p", amps: "" }, spec);
+  assert.deepEqual([samePlug.voltage, samePlug.amps, samePlug.plug], ["208V", "30A", "nema 6-30p"]);
+});
+
+test("plugs are compared by NEMA code, and a spec with no plug clashes with no unit", () => {
+  const unit = (plug) => ({ model: "X", voltage: "", plug, amps: "" });
+  const bits = (u) => [u.voltage, u.amps, u.plug];
+  const twist = { model: "X", manufacturer: "Bunn", voltage: "208V", amps: "30A", plug: "NEMA L6-30 twist-lock" };
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30P"), twist)), ["208V", "30A", "L6-30P"]);
+  const twenty = { model: "X", manufacturer: "Bunn", voltage: "120V", amps: "20A", plug: "NEMA 5-20" };
+  assert.deepEqual(bits(withSpecOutlet(unit("5-20P"), twenty)), ["120V", "20A", "5-20P"]);
+  const noPlug = { model: "X", manufacturer: "Bunn", voltage: "120V", amps: "15A", plug: "" };
+  assert.deepEqual(bits(withSpecOutlet(unit("NEMA 5-15P"), noPlug)), ["120V", "15A", "NEMA 5-15P"]);
+  const thirty = { model: "X", manufacturer: "Bunn", voltage: "208V", amps: "30A", plug: "6-30P" };
+  assert.deepEqual(bits(withSpecOutlet(unit("5-15P"), thirty)), ["", "", "5-15P"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30P"), { ...twist, plug: "NEMA 6-30" })), ["", "", "L6-30P"]);
+});
+
+test("plugs typed with an R, a space, no hyphen or hardwire wording still match the spec's plug", () => {
+  const unit = (plug) => ({ model: "X", voltage: "", plug, amps: "" });
+  const bits = (u) => [u.voltage, u.amps];
+  const spec = (plug, voltage, amps) => ({ model: "X", manufacturer: "Bunn", voltage, amps, plug });
+  const l630 = spec("NEMA L6-30 twist-lock", "208V", "30A");
+  const l620 = spec("NEMA L6-20 twist-lock", "208V", "20A");
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30R"), l630)), ["208V", "30A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("l6 20p"), l620)), ["208V", "20A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L620P"), l620)), ["208V", "20A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("5-20R"), spec("NEMA 5-20", "120V", "20A"))), ["120V", "20A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("Hardwired"), spec("Hardwire only", "208V 3-phase", "40A"))), ["208V 3-phase", "40A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("Hard wire"), spec("Hardwire only", "208V 3-phase", "40A"))), ["208V 3-phase", "40A"]);
+  // A different outlet, however it is spelled, still takes nothing.
+  assert.deepEqual(bits(withSpecOutlet(unit("5-15P"), spec("6-30P", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30P"), spec("NEMA 6-30", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30"), spec("NEMA L14-30 twist-lock", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30R"), spec("NEMA L14-30 twist-lock", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("Hardwired"), spec("NEMA 5-20", "120V", "20A"))), ["", ""]);
+});
+
+test("a hand entry on a model that already has a sheet opens that sheet", () => {
+  const sheetBooks = [{ sheetId: 4, bookId: null }, { sheetId: 3, bookId: 9 }];
+  assert.equal(tiedSheetId(sheetBooks, 9), 3);
+  assert.equal(tiedSheetId(sheetBooks, 8), null);
+});
+
+test("opening a tied sheet clears the Library search, so the Edit form isn't filtered out", () => {
+  const src = readFileSync(new URL("../src/routes/_app/library.tsx", import.meta.url), "utf8");
+  const start = src.indexOf("function editTiedSheet(");
+  assert.ok(start >= 0);
+  const body = src.slice(start, src.indexOf("\n  }\n", start));
+  assert.match(body, /setQ\(""\);/);
+  assert.ok(body.indexOf('setQ("")') < body.indexOf("navigate("), "search is cleared before the sheet opens");
 });
 
 test("tiles, admin order, and the summary line", () => {

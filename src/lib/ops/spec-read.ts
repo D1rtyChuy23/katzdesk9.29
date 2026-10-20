@@ -6,6 +6,7 @@
  * extracted value is new (the model was blank) or already the same.
  */
 import type { Kv, Requirements, SpecSheetDraft } from "./spec-schema.ts";
+import { nemaCode } from "./spec-defaults.ts";
 import { sameWarehouseModel } from "./warehouse-serial.ts";
 
 export const SPEC_FIELDS = [
@@ -225,15 +226,28 @@ export function outletForModel(model: string, specs: SpecOutlet[]): SpecOutlet |
   );
 }
 
-/** Blank voltage is filled from the spec. Amps and plug come along only when the unit has no voltage, or it matches. */
+/**
+ * Blank voltage is filled from the spec. Amps and plug come along only when the unit has no voltage, or it matches.
+ * A unit with its own plug that isn't the spec's is on another outlet: it takes neither voltage nor amps from the spec.
+ * Plugs are compared by NEMA code ("L6-30P" or "l6 30r" is "NEMA L6-30 twist-lock"), and a spec with no plug clashes with none.
+ */
 export function withSpecOutlet<T extends { model: string; voltage: string; plug: string; amps?: string }>(unit: T, spec: SpecOutlet | undefined): T {
   if (!spec) return unit;
   const ownVoltage = unit.voltage.trim();
-  const voltsMatch = !ownVoltage || fold(ownVoltage) === fold(spec.voltage);
+  const ownPlug = unit.plug.trim();
+  // "L6-30R", "l6 20p" and "L630" are all L6-30; "Hardwired" is "Hardwire only".
+  const plugCode = (p: string) => {
+    const t = p.toUpperCase();
+    if (/HARD\s*-?\s*WIRE/.test(t)) return "hardwire";
+    const m = t.match(/\b(L?)(5|6|14|15)\s*-?\s*(15|20|30|50)\s*[PR]?\b/);
+    return m ? `${m[1]}${m[2]}-${m[3]}` : (nemaCode(p) ?? fold(p));
+  };
+  const plugMatch = !ownPlug || !spec.plug.trim() || fold(ownPlug) === fold(spec.plug) || plugCode(ownPlug) === plugCode(spec.plug);
+  const voltsMatch = plugMatch && (!ownVoltage || fold(ownVoltage) === fold(spec.voltage));
   return {
     ...unit,
-    voltage: ownVoltage || spec.voltage,
-    plug: unit.plug.trim() || (voltsMatch ? spec.plug : ""),
+    voltage: ownVoltage || (plugMatch ? spec.voltage : ""),
+    plug: ownPlug || (voltsMatch ? spec.plug : ""),
     amps: (unit.amps ?? "").trim() || (voltsMatch ? spec.amps : ""),
   };
 }
@@ -251,6 +265,11 @@ export function outletFromConfigs(
     (r) => fold(r.voltage) === fold(first.voltage) && fold(r.amps) === fold(first.amps) && fold(r.plug) === fold(first.plug),
   );
   return same ? first : null;
+}
+
+/** The sheet already tied to this model. A hand entry edits it, so a blank form can't replace it. */
+export function tiedSheetId(sheetBooks: readonly { sheetId: number; bookId: number | null }[], bookId: number): number | null {
+  return sheetBooks.find((r) => r.bookId === bookId)?.sheetId ?? null;
 }
 
 /** Hand entry is only for a sheet the reader could not read, and only when it sits on a model. */
