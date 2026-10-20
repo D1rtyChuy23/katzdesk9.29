@@ -25,7 +25,7 @@ import {
   isOpenInstall,
 } from "./clock";
 import { isoDayOrNull as isoDate } from "./iso";
-import { findWoEverywhere, woBoardName, woSearchKey, type WoBoardHit } from "./wo-search";
+import { findWoEverywhere, searchTicketText, woBoardName, woSearchKey, type WoBoardHit } from "./wo-search";
 import { canMarkInstalled, loadInspectionSummaries, syncInstallUnits, withInspections } from "./inspection-api";
 import { emptyInspection } from "./pre-inspection";
 import type {
@@ -1619,17 +1619,16 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 	const hits: SearchHit[] = [];
 	// A WO number finds its ticket on every board, in any status, ahead of the text matches.
 	const woKey = woSearchKey(q);
-	if (woKey) for (const w of await findWoEverywhere(sql, woKey, await repCustomerScope(sql, context.userId))) hits.push({
+	// A sales rep sees only their accounts' tickets, TLCs and PMs here too, in the WO block and the text matches.
+	const inScope = await repCustomerScope(sql, context.userId);
+	if (woKey) for (const w of await findWoEverywhere(sql, woKey, inScope)) hits.push({
 		entityType: w.entityType,
 		id: w.id,
 		title: w.customer ?? w.wo,
 		subtitle: `${w.wo} · ${woBoardName(w.entityType)} · ${w.status}`,
 		status: w.status
 	});
-	const jobs = await sql`
-      select id, kind, customer, call_id, status, wo from service_jobs
-      where customer ilike ${like} or call_id ilike ${like} or coalesce(wo,'') ilike ${like} or coalesce(issue,'') ilike ${like}
-      order by received desc nulls last limit 8`;
+	const { jobs, pms } = await searchTicketText(sql, like, inScope);
 	for (const j of jobs) hits.push({
 		entityType: j.kind,
 		id: j.id,
@@ -1637,8 +1636,6 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 		subtitle: `${j.call_id}${j.wo ? " · " + j.wo : ""} · ${j.status}`,
 		status: j.status
 	});
-	const pms = await sql`
-      select id, customer, status, equipment, wo from pm_jobs where customer ilike ${like} or coalesce(wo,'') ilike ${like} limit 5`;
 	for (const p of pms) hits.push({
 		entityType: "pm",
 		id: p.id,

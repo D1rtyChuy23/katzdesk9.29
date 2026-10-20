@@ -80,6 +80,29 @@ export async function findWoEverywhere(
   ];
 }
 
+/**
+ * The top search's text matches on tickets/TLCs (newest 8) and PMs (5). With `inScope` (a sales rep's accounts),
+ * other accounts' rows are left out before the 8 and 5 are taken, as findWoEverywhere, listJobs and listPms do.
+ */
+export async function searchTicketText(
+  sql: { query: <R = Record<string, unknown>>(text: string, params?: unknown[]) => Promise<R[]> },
+  like: string,
+  inScope?: ((customer: string | null) => boolean) | null,
+) {
+  const jobs = await sql.query<{ id: number; kind: string; customer: string | null; call_id: string; status: string; wo: string | null }>(
+    `select id, kind, customer, call_id, status, wo from service_jobs
+      where customer ilike $1 or call_id ilike $1 or coalesce(wo,'') ilike $1 or coalesce(issue,'') ilike $1
+      order by received desc nulls last${inScope ? "" : " limit 8"}`,
+    [like],
+  );
+  const pms = await sql.query<{ id: number; customer: string; status: string; equipment: string | null; wo: string | null }>(
+    `select id, customer, status, equipment, wo from pm_jobs where customer ilike $1 or coalesce(wo,'') ilike $1${inScope ? "" : " limit 5"}`,
+    [like],
+  );
+  const shown = (r: { customer: string | null }) => !inScope || inScope(r.customer);
+  return { jobs: jobs.filter(shown).slice(0, 8), pms: pms.filter(shown).slice(0, 5) };
+}
+
 /** Board name a person sees, for "WO-0859 is on PMs". */
 export function woBoardName(entityType: string): string {
   if (entityType === "tlc") return "TLC + Factor";

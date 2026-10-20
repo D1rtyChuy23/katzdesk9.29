@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { findWoEverywhere, withWoMatches, woBoardName, woMatchesSearch, woSearchKey } = await import("../src/lib/ops/wo-search.ts");
+const { findWoEverywhere, searchTicketText, withWoMatches, woBoardName, woMatchesSearch, woSearchKey } = await import("../src/lib/ops/wo-search.ts");
 const { corrigoReviewReason } = await import("../src/lib/ops/corrigo.ts");
 
 test("a WO number in the search box gives its match key however it is typed", () => {
@@ -75,8 +75,38 @@ test("a sales rep's WO lookup leaves out tickets, TLCs and PMs on other accounts
   const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
   const calls = [...api.matchAll(/findWoEverywhere\(([^\n]*)/g)].map((m) => m[1]);
   assert.equal(calls.length, 2);
-  for (const call of calls) assert.match(call, /repCustomerScope\(sql, context\.userId\)/);
+  for (const call of calls) assert.match(call, /repCustomerScope\(sql, context\.userId\)|, inScope\)/);
   assert.match(api, /async function repCustomerScope[\s\S]{0,200}salesRepScope\(sql, userId\)[\s\S]{0,200}accountRepFor\(marks, customer\)/);
+});
+
+test("a sales rep's top search text matches for a WO number show only their accounts' tickets, TLCs and PMs; an admin sees all", async () => {
+  const pg = new PGlite();
+  const dir = new URL("../migrations/", import.meta.url);
+  for (const name of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, dir), "utf8"));
+  const sql = { query: async (text, params) => (await pg.query(text, params)).rows };
+  await pg.query("insert into service_jobs (kind, call_id, customer, wo, status, received) values ('service', 'SC-1', 'Mine', 'WO-9439', 'Completed', '2026-01-01')");
+  await pg.query("insert into service_jobs (kind, call_id, customer, wo, status, received) values ('tlc', 'TF-1', 'Mine', 'WO-9439', 'Open', '2026-01-02')");
+  // Ten newer matches on another account: the rep's own two still show, not cut off by the newest 8.
+  for (let n = 0; n < 10; n++) {
+    await pg.query(`insert into service_jobs (kind, call_id, customer, wo, status, received) values ('${n % 2 ? "tlc" : "service"}', 'SC-T${n}', 'Theirs', 'WO-9439', 'Completed', '2026-02-${10 + n}')`);
+  }
+  await pg.query("insert into pm_jobs (customer, status, wo) values ('Theirs', 'Scheduled', 'WO-9439')");
+  await pg.query("insert into pm_jobs (customer, status, wo) values ('Mine', 'Scheduled', 'WO-9439')");
+  const mine = (customer) => customer === "Mine";
+  const rep = await searchTicketText(sql, "%WO-9439%", mine);
+  assert.deepEqual(rep.jobs.map((j) => `${j.kind}:${j.customer}`), ["tlc:Mine", "service:Mine"]);
+  assert.deepEqual(rep.pms.map((p) => p.customer), ["Mine"]);
+  const admin = await searchTicketText(sql, "%WO-9439%", null);
+  assert.equal(admin.jobs.length, 8);
+  assert.ok(admin.jobs.every((j) => j.customer === "Theirs"));
+  assert.deepEqual(admin.pms.map((p) => p.customer).sort(), ["Mine", "Theirs"]);
+  // The top search works out the rep's scope once and gives it to the WO block and these text matches.
+  const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
+  const search = api.slice(api.indexOf("export const searchAll"), api.indexOf("export const findWoTickets"));
+  assert.match(search, /const inScope = await repCustomerScope\(sql, context\.userId\);/);
+  assert.match(search, /findWoEverywhere\(sql, woKey, inScope\)/);
+  assert.match(search, /searchTicketText\(sql, like, inScope\)/);
+  assert.doesNotMatch(search, /from (service_jobs|pm_jobs)/);
 });
 
 test("a ticket the Corrigo import created is listed for review even when it is already closed", () => {
