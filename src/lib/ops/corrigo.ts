@@ -2,7 +2,7 @@
 
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { CLOSED_CALL, CLOSED_PM } from "./ticket-status.ts";
-import { listedEquipment } from "./equipment.ts";
+import { BETWEEN_MACHINES, listedEquipment } from "./equipment.ts";
 import { compactEquip, matchCatalogModel } from "./account-equip.ts";
 
 export { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
@@ -641,26 +641,140 @@ function catalogModelOf(name: string, catalog: string[]): string | null {
   return hit.status === "matched" ? hit.catalogModel : null;
 }
 
+const LEADING_QTY = /^\s*(?:qty\s*)?(\d{1,2})\s*[x×]\s/i;
+
+/** Catalog words that describe a machine but never name one ("Install new machine", "flip tray", "1.5 gallon brewer"). */
+const PLAIN_WORDS = new Set([
+  "la", "de", "machine", "espresso", "filter", "tray", "flip", "gallon", "group", "grinder", "grinders", "brewer",
+  "step", "classic", "super", "traditional", "single", "twin", "dual", "portion", "combo", "hopper", "voltage",
+  "tall", "short", "black", "blk", "electronic", "automatic", "auto", "semi", "volumetric", "compact", "usb", "aps",
+  "av", "st", "ct", "tap", "taps", "module", "steam", "pour", "over", "milk", "scales", "with", "timer", "doser",
+  "up", "on", "demand", "stand", "alone", "fridge", "beside", "element", "retail", "specialty", "dispenser",
+  "french", "press", "thermal", "carafe", "dilute", "lower", "upper", "warmers", "rapid", "rinse", "station",
+  "commercial", "food", "blender", "variable", "speed", "hp", "oz", "plus", "pro", "wide", "tamper", "cronos",
+  "touchpads", "turbosteam", "sure",
+]);
+/** Model words that are also everyday words or first names: alone they don't make a text name a machine. */
+const EVERYDAY_MODEL_WORDS = new Set(["duke", "jay", "legacy", "legend", "major", "mini", "stealth", "swan", "swift", "wally"]);
+const MACHINE_NOUNS = new Set(["machine", "brewer", "grinder", "unit", "fridge"]);
+const COUNT_WORDS = new Set(["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "pair", "couple"]);
+const COUNT_FILLER = new Set(["new", "more", "additional", "extra", "of", "the", "old", "used"]);
+
+type FreeTextCatalog = {
+  names: { name: string; words: string[] }[];
+  vocab: Set<string>;
+  pairs: Set<string>;
+  brands: Set<string>;
+  isCode: (w: string) => boolean;
+  isModel: (w: string) => boolean;
+};
+
+function freeTextCatalog(catalog: string[]): FreeTextCatalog {
+  const names = catalog.map((name) => ({ name, words: compactEquip(name).split(" ").filter(Boolean) }));
+  const vocab = new Set(names.flatMap((n) => n.words));
+  const pairs = new Set(names.flatMap((n) => n.words.slice(1).map((w, i) => `${n.words[i]} ${w}`)));
+  // "La Marzocco", "de Jong": the brand is the word after the article.
+  const brands = new Set(names.map((n) => (n.words[0] && n.words[0].length > 2 ? n.words[0] : n.words[1])).filter(Boolean));
+  const capitals = new Set(catalog.flatMap((c) => c.match(/\b[A-Z]{3,}\b/g) ?? []).map((w) => w.toLowerCase()));
+  const named = (w: string) => vocab.has(w) && !brands.has(w) && !PLAIN_WORDS.has(w);
+  // A model code: letters then digits (c'2s, E65S, TB3, G9-2T), or one the catalog writes in capitals (ITCB, CWTF).
+  const isCode = (w: string) => named(w) && (/^[a-z]+\d/.test(w) || capitals.has(w));
+  const isModel = (w: string) => named(w) && /^[a-z]{3,}$/.test(w) && !isCode(w);
+  return { names, vocab, pairs, brands, isCode, isModel };
+}
+
+/** A count of machines anywhere in the words: "2 x", "x2", "two Cameos", "3 Bunn brewers", "qty". */
+function countsMachines(words: string[], cat: FreeTextCatalog): boolean {
+  const machineWord = (w: string | undefined) =>
+    !!w && [w, w.replace(/s$/, "")].some((x) => cat.brands.has(x) || cat.isCode(x) || cat.isModel(x) || MACHINE_NOUNS.has(x));
+  return words.some((w, i) => {
+    const prev = words[i - 1];
+    const next = words[i + 1];
+    if (w === "qty" || w === "quantity" || /^\d{1,2}x$/.test(w)) return true;
+    if (/^x\d{1,2}$/.test(w)) return !cat.vocab.has(w);
+    // "Cameo x 2", but not "Strada X 2 Group".
+    if (w === "x") return /^\d{1,2}$/.test(next ?? "") && !cat.pairs.has(`${prev} x`);
+    if (!/^\d{1,2}$/.test(w) && !COUNT_WORDS.has(w)) return false;
+    if (next === "x") return true;
+    // Part of a model name: "Classe 5", "2 Group", "1 Tap".
+    if (cat.pairs.has(`${prev} ${w}`) || cat.pairs.has(`${w} ${next}`)) return false;
+    return machineWord(words.slice(i + 1).find((x) => !COUNT_FILLER.has(x)));
+  });
+}
+
 /**
- * The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog. From free
- * text (a problem description) only names that read as one catalog model count, so the words around them ("Install",
- * "Brewer") are not read as machines; a sentence is read again by its catalog words alone.
+ * The one catalog model a name in free text reads as: "" when it names no machine (no brand, model code or model
+ * word), null when it does but doesn't read as exactly one model. It counts only with a model code, or a brand and
+ * a model word. The model is the one catalog name holding every catalog word of the name (or spelled with exactly
+ * those words), or else the one holding every word that isn't plain.
  */
-export function namedMachines(text: string | null | undefined, catalog: string[], catalogOnly = false): string[] {
-  const words = catalogOnly ? new Set(catalog.flatMap((c) => compactEquip(c).split(" "))) : null;
+function freeTextModel(words: string[], cat: FreeTextCatalog): string | null {
+  const brand = words.some((w) => cat.brands.has(w));
+  const code = words.some(cat.isCode);
+  if (!brand && !code && !words.some((w) => cat.isModel(w) && !EVERYDAY_MODEL_WORDS.has(w))) return "";
+  const known = words.filter((w) => cat.vocab.has(w));
+  const key = known.filter((w) => !PLAIN_WORDS.has(w) && (w.length > 1 || /\d/.test(w)));
+  if (!code && !(brand && key.some((w) => cat.isModel(w) || (/\d/.test(w) && /[a-z]/.test(w))))) return null;
+  const fits = (need: string[]) => cat.names.filter((n) => need.every((w) => n.words.includes(w)));
+  const all = fits(known);
+  const exact = all.filter((n) => new Set(n.words).size === new Set(known).size);
+  const pick = all.length === 1 ? all[0] : exact.length === 1 ? exact[0] : null;
+  if (pick || all.length) return pick?.name ?? null;
+  const keyed = fits(key);
+  return keyed.length === 1 ? keyed[0]!.name : null;
+}
+
+/** The machines one free text names, or null when it can't be read cleanly. */
+function freeTextMachines(text: string, cat: FreeTextCatalog): string[] | null {
   const out: string[] = [];
-  for (const piece of String(text ?? "").split(/\r?\n|;|,\s*(?=\d{1,2}\s*[x×]\s)/)) {
+  for (const segment of text.split(/\r?\n|;|\.\s+|,\s*(?=\d{1,2}\s*[x×]\s)/)) {
+    const lead = segment.match(LEADING_QTY);
+    const rest = segment
+      .replace(LEADING_QTY, " ")
+      .replace(/\bS\/?N\s*[:#]?\s*[A-Z0-9-]+/gi, " ")
+      .replace(VOLTS, " ")
+      .replace(/×/g, "x");
+    if (/\(\s*(?:x\s*)?\d{1,2}\s*x?\s*\)/i.test(rest)) return null;
+    if (countsMachines(compactEquip(rest).split(" ").filter(Boolean), cat)) return null;
+    const found: string[] = [];
+    for (const name of rest.split(BETWEEN_MACHINES)) {
+      const model = freeTextModel(compactEquip(name).split(" ").filter(Boolean), cat);
+      if (model === null) return null;
+      if (model) found.push(model);
+    }
+    // A leading "N x" counts one machine.
+    if (lead && found.length !== 1) return null;
+    found.forEach((name) => out.push(...Array<string>(lead ? Number(lead[1]) : 1).fill(name)));
+  }
+  return out;
+}
+
+/**
+ * The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog.
+ * Free text (freeText: the problem description, then the work done) names machines only when it reads cleanly:
+ * every name with a brand, model code or model word reads as exactly one catalog model, and the only quantity is a
+ * leading "N x". Anything else names none, never a partial list. The work done counts only when the problem
+ * description names nothing; when both name machines they must agree.
+ */
+export function namedMachines(
+  text: string | null | undefined | readonly (string | null | undefined)[],
+  catalog: string[],
+  freeText = false,
+): string[] {
+  const texts = (typeof text === "string" || text == null ? [text] : text).map((t) => String(t ?? ""));
+  if (freeText) {
+    const cat = freeTextCatalog(catalog);
+    const reads = texts.map((t) => freeTextMachines(t, cat));
+    if (reads.some((r) => r === null)) return [];
+    const named = reads.filter((r): r is string[] => !!r?.length);
+    const key = (list: string[]) => [...list].sort().join("\n");
+    return named.every((r) => key(r) === key(named[0]!)) ? (named[0] ?? []) : [];
+  }
+  const out: string[] = [];
+  for (const piece of texts.join("\n").split(/\r?\n|;|,\s*(?=\d{1,2}\s*[x×]\s)/)) {
     if (!piece.trim() || SERIAL_ONLY.test(piece.trim())) continue;
-    const qty = Number(piece.match(/^\s*(?:qty\s*)?(\d{1,2})\s*[x×]\s/i)?.[1] ?? 1);
-    listedEquipment(piece, catalog)
-      .flatMap((name) => {
-        if (!words) return [name];
-        const model =
-          catalogModelOf(name, catalog) ??
-          catalogModelOf(compactEquip(name).split(" ").filter((w) => words.has(w)).join(" "), catalog);
-        return model ? [model] : [];
-      })
-      .forEach((name, i) => out.push(...Array<string>(i === 0 ? qty : 1).fill(name)));
+    const qty = Number(piece.match(LEADING_QTY)?.[1] ?? 1);
+    listedEquipment(piece, catalog).forEach((name, i) => out.push(...Array<string>(i === 0 ? qty : 1).fill(name)));
   }
   return out;
 }
@@ -692,7 +806,7 @@ function installByEquipment(
   if (!free.length) return { install: null, note: `install #${mine[0].id} already matched by an earlier row` };
   const named = rec.equipment?.trim()
     ? namedMachines(rec.equipment, catalog)
-    : namedMachines([rec.issue, rec.workDone].filter(Boolean).join("\n"), catalog, true);
+    : namedMachines([rec.issue, rec.workDone], catalog, true);
   if (!named.length) return { install: null, note: "no equipment named to match an install" };
   if (free.length > 1) return { install: null, note: `${free.length === 2 ? "two" : free.length} installs could match` };
   const only = free[0];

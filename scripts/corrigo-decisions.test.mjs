@@ -501,3 +501,107 @@ test("reopen: a completed date Corrigo wrote but that can't be read does not reo
   assert.equal((await ticketRow(sql, id)).completed, "2026-10-12");
   assert.doesNotMatch(await lastLog(sql, "service", id), /cleared/);
 });
+
+// N1: free text (problem description, then work done) names machines only when it reads cleanly; otherwise none.
+
+test("install: free text counts a name only with a model code, pins each name to one catalog model, and otherwise names none", () => {
+  const cameo = "Eversys Cameo c'2s - 2 Step Classic";
+  const itcb = 'Bunn ITCB-DV, 29" w/Flip Tray';
+  const g92tHd = "Bunn G9-2T HD Dual Portion Grinder";
+  const named = (text) => namedMachines(text, realCatalog, true);
+  // Plain words in the work done add nothing; the problem description's machine stands.
+  assert.deepEqual(named(["Install Eversys Cameo c'2s", "Installed machine and trained staff."]), [cameo]);
+  for (const words of [
+    "Install new machine",
+    "Remove old machine and install new Linea Mini",
+    "Install espresso machine",
+    "Install water filter",
+    "Install flip tray",
+    "Install 1.5 gallon brewer",
+    "Install 1 group",
+    "Install single hopper grinder",
+    "Installed machine and trained staff.",
+    "Set up machine and trained staff",
+  ]) {
+    assert.deepEqual(named(words), [], words);
+  }
+  // Two machines that each read as one model are both named.
+  assert.deepEqual(named("Install Bunn ITCB and G9-2T HD grinder"), [itcb, g92tHd]);
+  // A name with a brand or model word that fits several models (or none) leaves the whole text naming nothing.
+  for (const text of [
+    "Install new Cameo c'2s and Bunn Axiom",
+    "Install Bunn ITCB and Bunn G9-2T",
+    "Install Bunn ITCB and Bunn Axiom-APS",
+    "Install Eversys Cameo c'2s and Linea Mini",
+    "Install Cameo",
+    "Install Bunn brewer",
+  ]) {
+    assert.deepEqual(named(text), [], text);
+  }
+  // A quantity anywhere but a leading "N x" on its own line leaves the whole text naming nothing.
+  for (const text of [
+    "Install 2 x Eversys Cameo c'2s",
+    "Install 2 Eversys Cameo c'2s",
+    "Install two Eversys Cameo c'2s",
+    "Install Eversys Cameo c'2s x2",
+    "Install Bunn ITCB (2)",
+    "Install Bunn ITCB, qty 2",
+    "2 x Bunn ITCB and Bunn TB3",
+  ]) {
+    assert.deepEqual(named(text), [], text);
+  }
+  assert.deepEqual(named("2 x Bunn ITCB\nBunn TB3"), [itcb, itcb, "Bunn TB3"]);
+  // Work done is read only when the problem description names nothing; when both name machines they must agree.
+  assert.deepEqual(named(["Install", "Installed Bunn ITCB"]), [itcb]);
+  assert.deepEqual(named(["Install Eversys Cameo c'2s", "Installed Cameo c'2s, trained 3 staff"]), [cameo]);
+  assert.deepEqual(named(["Install Eversys Cameo c'2s", "Installed Bunn ITCB"]), []);
+  assert.deepEqual(named(["Install Eversys Cameo c'2s", "Installed 2 x Cameo c'2s"]), []);
+  assert.deepEqual(named(["Install Bunn Axiom", "Installed Bunn ITCB"]), []);
+});
+
+test("install: with the real catalog, free text attaches only on a clean read of the install's package (WO-0665, WO-0666)", async () => {
+  const sql = await freshDb();
+  await sql.query("insert into directory_equipment (name) select unnest($1::text[])", [realCatalog]);
+  const ids = {
+    a: await openInstall(sql, "Cafe Alpha", { equipment: "Eversys Cameo c'2s" }),
+    b: await openInstall(sql, "Cafe Bravo", { equipment: "Eversys Cameo c'2s" }),
+    c: await openInstall(sql, "Cafe Charlie", { equipment: "Bunn ITCB" }),
+    d: await openInstall(sql, "Cafe Dakota", { equipment: "Eversys Cameo c'2s" }),
+    e: await openInstall(sql, "Cafe Easy", { equipment: "La Marzocco Linea Mini" }),
+    f: await openInstall(sql, "Cafe Fox", { equipment: "Bunn ITCB" }),
+  };
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "P.O. #", "Problem Description", "Work Done", "Date/Time Completed"],
+    ["0665", "Completed", "Cafe Alpha", "Install", "Install Eversys Cameo c'2s", "Installed machine and trained staff.", "10/19/2026"],
+    ["0666", "Work Started", "Cafe Bravo", "Install", "Install 2 x Eversys Cameo c'2s", "", ""],
+    ["0667", "Work Started", "Cafe Charlie", "Install", "Install Bunn ITCB and G9-2T HD grinder", "", ""],
+    ["0668", "Work Started", "Cafe Dakota", "Install", "Install new Cameo c'2s and Bunn Axiom", "", ""],
+    ["0669", "Work Started", "Cafe Easy", "Install", "Remove old machine and install new Linea Mini", "", ""],
+    ["0670", "Work Started", "Cafe Fox", "Install", "Install new machine", "", ""],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  const none = "no equipment named to match an install";
+  assert.deepEqual(
+    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.byEquipment, r.matchNote]),
+    [
+      ["WO-0665", "update", ids.a, true, `install #${ids.a} matched by account and equipment`],
+      ["WO-0666", "create", null, false, none],
+      ["WO-0667", "create", null, false, `equipment differs from install #${ids.c}`],
+      ["WO-0668", "create", null, false, none],
+      ["WO-0669", "create", null, false, none],
+      ["WO-0670", "create", null, false, none],
+    ],
+  );
+  const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual([res.updated, res.created], [1, 5]);
+  assert.deepEqual(await installsOf(sql, "Cafe Alpha"), [{ id: ids.a, wo: "WO-0665", equip_status: "Installed" }]);
+  for (const [customer, id, wo] of [
+    ["Cafe Bravo", ids.b, "WO-0666"],
+    ["Cafe Charlie", ids.c, "WO-0667"],
+    ["Cafe Dakota", ids.d, "WO-0668"],
+    ["Cafe Easy", ids.e, "WO-0669"],
+    ["Cafe Fox", ids.f, "WO-0670"],
+  ]) {
+    assert.deepEqual((await installsOf(sql, customer)).map((r) => [r.id === id, r.wo]), [[true, null], [false, wo]], customer);
+  }
+});
