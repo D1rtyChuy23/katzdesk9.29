@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { approveOne } = await import("../src/lib/ops/spec-read-api.ts");
+const { approveOne, specReadRows } = await import("../src/lib/ops/spec-read-api.ts");
 
 const pg = new PGlite();
 const dir = new URL("../migrations/", import.meta.url);
@@ -71,4 +71,33 @@ test("a duplicate MPN is refused before anything is written", async () => {
   await assert.rejects(() => approveOne(sql, file, ["mpn"]), /MPN c2131 10 is already on another model\. Nothing was saved\./);
   const sheets = await sql.query("select id from spec_sheets where manufacturer = 'Fetco' and model = 'CBS-2132'");
   assert.equal(sheets.length, 0);
+});
+
+test("a sheet moved to another model after it was read is not approved onto the old one", async () => {
+  const { book, file } = await bookWithRead("BUNN ICB-DV Short", "BUNN", null, { voltage: "120V", amps: "15A" });
+  const tall = (await sql.query("insert into library_books (title, manufacturer) values ('BUNN ICB-DV Tall', 'BUNN') returning id"))[0].id;
+  // Move only changes the file's model, as moveLibraryFile does.
+  await sql.query("update library_files set book_id = $2 where id = $1", [file, tall]);
+  const row = (await specReadRows(sql)).find((r) => Number(r.file_id) === file);
+  assert.equal(Number(row.book_id), tall);
+  assert.equal(row.book_title, "BUNN ICB-DV Tall");
+  await assert.rejects(() => approveOne(sql, file, []), /^Error: This sheet was moved to another model\. Read it again\.$/);
+  assert.equal((await sql.query("select id from spec_sheets where book_id = any($1::int[])", [[book, tall]])).length, 0);
+  assert.equal((await sql.query("select status from spec_reads where file_id = $1", [file]))[0].status, "needs_review");
+});
+
+test("Use new on the MPN is refused while a file is tied to the current MPN, before anything is written", async () => {
+  const { book, file } = await bookWithRead("BUNN CWTF15-TC", "BUNN", "12950.0360", { voltage: "120V", mpn: "12950.0212" });
+  await sql.query("update library_files set mpn = '12950.0360' where id = $1", [file]);
+  await assert.rejects(() => approveOne(sql, file, ["mpn"]), /^Error: Files here are tied to the current MPN\. Untie them before changing it\.$/);
+  assert.equal((await sql.query("select mpn from library_books where id = $1", [book]))[0].mpn, "12950.0360");
+  assert.equal((await sql.query("select id from spec_sheets where book_id = $1 or (manufacturer = 'BUNN' and model = 'CWTF15-TC')", [book])).length, 0);
+  assert.equal((await sql.query("select status from spec_reads where file_id = $1", [file]))[0].status, "needs_review");
+});
+
+test("an MPN filled from a read is cleaned like one typed in", async () => {
+  const long = "12950.0212-" + "X".repeat(60);
+  const { book, file } = await bookWithRead("BUNN CWTF35", "BUNN", null, { voltage: "120V", mpn: long });
+  await approveOne(sql, file, []);
+  assert.equal((await sql.query("select mpn from library_books where id = $1", [book]))[0].mpn, long.slice(0, 60));
 });
