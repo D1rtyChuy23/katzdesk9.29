@@ -105,10 +105,10 @@ test("amps and plug come from the spec only when voltage is blank or it matches,
   assert.equal(blank.voltage, "220V");
   assert.equal(blank.amps, "20A");
   assert.equal(blank.plug, "L6-20P");
-  const same = withSpecOutlet({ model: "Bunn ITCB", voltage: "220 V", plug: "NEMA", amps: "" }, spec);
+  const same = withSpecOutlet({ model: "Bunn ITCB", voltage: "220 V", plug: "l6 20p", amps: "" }, spec);
   assert.equal(same.voltage, "220 V");
   assert.equal(same.amps, "20A");
-  assert.equal(same.plug, "NEMA");
+  assert.equal(same.plug, "l6 20p");
   assert.equal(outletFromConfigs([
     { voltage: "120V", amps: "15A", plug: "5-15P" },
     { voltage: "220V", amps: "20A", plug: "L6-20P" },
@@ -123,6 +123,16 @@ test("amps and plug come from the spec only when voltage is blank or it matches,
     { model: "Bunn ITCB", serial: "", notes: "", voltage: "220V", plug: "", amps: "20A" },
   ]);
   assert.equal(rows[0].outlet, "220V · 20A");
+});
+
+test("a unit with its own plug that isn't the spec's takes neither voltage nor amps from the spec", () => {
+  const spec = { model: "X", manufacturer: "Bunn", voltage: "208V", amps: "30A", plug: "NEMA 6-30P" };
+  const own = withSpecOutlet({ model: "X", voltage: "", plug: "NEMA 5-15P", amps: "" }, spec);
+  assert.deepEqual([own.voltage, own.amps, own.plug], ["", "", "NEMA 5-15P"]);
+  const ownVolts = withSpecOutlet({ model: "X", voltage: "208V", plug: "NEMA 5-15P", amps: "" }, spec);
+  assert.deepEqual([ownVolts.voltage, ownVolts.amps, ownVolts.plug], ["208V", "", "NEMA 5-15P"]);
+  const samePlug = withSpecOutlet({ model: "X", voltage: "", plug: "nema 6-30p", amps: "" }, spec);
+  assert.deepEqual([samePlug.voltage, samePlug.amps, samePlug.plug], ["208V", "30A", "nema 6-30p"]);
 });
 
 test("tiles, admin order, and the summary line", () => {

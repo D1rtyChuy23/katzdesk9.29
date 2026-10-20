@@ -225,15 +225,20 @@ export function outletForModel(model: string, specs: SpecOutlet[]): SpecOutlet |
   );
 }
 
-/** Blank voltage is filled from the spec. Amps and plug come along only when the unit has no voltage, or it matches. */
+/**
+ * Blank voltage is filled from the spec. Amps and plug come along only when the unit has no voltage, or it matches.
+ * A unit with its own plug that isn't the spec's is on another outlet: it takes neither voltage nor amps from the spec.
+ */
 export function withSpecOutlet<T extends { model: string; voltage: string; plug: string; amps?: string }>(unit: T, spec: SpecOutlet | undefined): T {
   if (!spec) return unit;
   const ownVoltage = unit.voltage.trim();
-  const voltsMatch = !ownVoltage || fold(ownVoltage) === fold(spec.voltage);
+  const ownPlug = unit.plug.trim();
+  const plugMatch = !ownPlug || fold(ownPlug) === fold(spec.plug);
+  const voltsMatch = plugMatch && (!ownVoltage || fold(ownVoltage) === fold(spec.voltage));
   return {
     ...unit,
-    voltage: ownVoltage || spec.voltage,
-    plug: unit.plug.trim() || (voltsMatch ? spec.plug : ""),
+    voltage: ownVoltage || (plugMatch ? spec.voltage : ""),
+    plug: ownPlug || (voltsMatch ? spec.plug : ""),
     amps: (unit.amps ?? "").trim() || (voltsMatch ? spec.amps : ""),
   };
 }
