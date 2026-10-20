@@ -8,6 +8,7 @@ import { todayChicago } from "@/lib/ops/clock";
 import {
   boardStatus,
   completedOnUpdate,
+  corrigoReopens,
   corrigoReviewReason,
   deskHasWrapped,
   indexHits,
@@ -221,7 +222,10 @@ async function logCorrigo(
 function completedLog(date: ReturnType<typeof completedOnUpdate>, desk: string | null, file: string | null): string {
   if (date.change === "moved") return ` · completed ${desk} → ${file}`;
   if (date.change === "set") return ` · completed ${file}`;
-  if (date.change === "billed") return ` · completed kept ${desk || "no date"} (billed; Corrigo says ${file})`;
+  if (date.change === "cleared") return ` · completed ${desk} → (cleared, reopened)`;
+  if (date.change === "billed") {
+    return ` · completed kept ${desk || "no date"} (billed; ${file ? `Corrigo says ${file}` : "Corrigo reopened it"})`;
+  }
   return "";
 }
 
@@ -389,7 +393,8 @@ export async function applyCorrigoRows(
         const status = boardStatus("pm", row.statusRaw, row.completedAt, cur[0].status).status;
         const technician = row.technician || cur[0].technician;
         const workDone = row.workDone || cur[0].work_done;
-        const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null);
+        const reopened = corrigoReopens("pm", row.statusRaw, row.completedAt, cur[0].status);
+        const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null, reopened);
         const completedAt = date.value;
         const customer = chosen || cur[0].customer;
         const done = CLOSED_PM.has(status);
@@ -472,7 +477,8 @@ export async function applyCorrigoRows(
       const status = boardStatus(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status).status;
       const technician = row.technician || cur[0].technician;
       const workDone = row.workDone || cur[0].work_done;
-      const date = completedOnUpdate(row.completedAt, cur[0].completed_at, cur[0].ns_so);
+      const reopened = corrigoReopens(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status);
+      const date = completedOnUpdate(row.completedAt, cur[0].completed_at, cur[0].ns_so, reopened);
       const completedAt = date.value;
       const customer = chosen || cur[0].customer;
       const done = CLOSED_CALL.has(status);

@@ -476,9 +476,11 @@ function PreviewBody({
                     <span className="whitespace-nowrap">
                       {r.completedKept
                         ? r.oldCompletedAt || "—"
-                        : r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
-                          ? `${r.oldCompletedAt} → ${r.completedAt}`
-                          : r.completedAt || r.oldCompletedAt || "—"}
+                        : r.completedCleared
+                          ? `${r.oldCompletedAt} → (cleared, reopened)`
+                          : r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
+                            ? `${r.oldCompletedAt} → ${r.completedAt}`
+                            : r.completedAt || r.oldCompletedAt || "—"}
                     </span>
                     {r.completedNote ? (
                       <span className="mt-0.5 block max-w-[14rem] text-[11px] text-warning">{r.completedNote}</span>

@@ -101,3 +101,94 @@ test("wrap: a WO-0772 an earlier import already duplicated attaches to the first
   await applyCorrigoRows(sql, preview.rows, "Chuy");
   assert.equal((await sql.query("select duplicate_of from service_jobs where id = $1", [copy]))[0].duplicate_of, first);
 });
+
+const lastLog = async (sql, type, id) =>
+  (await sql.query("select detail from activity where entity_type = $1 and entity_id = $2 and action = 'corrigo' order by id desc limit 1", [type, id]))[0].detail;
+
+async function doneTicket(sql, wo, nsSo = null) {
+  const rows = await sql.query(
+    "insert into service_jobs (kind, call_id, customer, wo, status, done, completed_at, ns_so) values ('service', $1, 'Cafe A', $2, 'Completed', true, '2026-10-12', $3) returning id",
+    [`SC-${wo}`, wo, nsSo],
+  );
+  return rows[0].id;
+}
+
+test("reopen: an open Corrigo status with no completed date clears a service ticket's and a PM's completed date", async () => {
+  const { pmIsCompleted } = await import("../src/lib/ops/pm-runbook-api.ts");
+  const sql = await freshDb();
+  const ticket = await doneTicket(sql, "WO-0780");
+  const pm = (await sql.query("insert into pm_jobs (customer, status, wo, done, completed_at) values ('Cafe A', 'Completed', 'WO-0782', true, '2026-10-12') returning id"))[0].id;
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Date/Time Completed", "P.O. #"],
+    ["0780", "Work Started", "", ""],
+    ["0782", "Work Started", "", "PM"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  for (const row of preview.rows) {
+    assert.equal(row.completedCleared, true, row.wo);
+    assert.equal(row.completedKept, false, row.wo);
+  }
+  const ui = readFileSync(new URL("../src/components/desk/corrigo-import.tsx", import.meta.url), "utf8");
+  assert.match(ui, /r\.completedCleared\s*\?\s*`\$\{r\.oldCompletedAt\} → \(cleared, reopened\)`/);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual(await sql.query("select status, done, completed_at from service_jobs where id = $1", [ticket]), [
+    { status: "In Progress", done: false, completed_at: null },
+  ]);
+  assert.match(await lastLog(sql, "service", ticket), /completed 2026-10-12 → \(cleared, reopened\)/);
+  assert.deepEqual(await sql.query("select status, done, completed_at from pm_jobs where id = $1", [pm]), [
+    { status: "In Progress", done: false, completed_at: null },
+  ]);
+  assert.equal(await pmIsCompleted(sql, pm), false);
+  assert.match(await lastLog(sql, "pm", pm), /completed 2026-10-12 → \(cleared, reopened\)/);
+});
+
+test("reopen: a billed ticket keeps its completed date, and the preview and log say so", async () => {
+  const sql = await freshDb();
+  const id = await doneTicket(sql, "WO-0781", "SO-1001");
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Date/Time Completed"], ["0781", "Work Started", ""]]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.equal(preview.rows[0].completedNote, "billed on SO-1001 — keeps 2026-10-12");
+  assert.equal(preview.rows[0].completedKept, true);
+  assert.equal(preview.rows[0].completedCleared, false);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.equal((await sql.query("select to_char(completed_at, 'YYYY-MM-DD') as d from service_jobs where id = $1", [id]))[0].d, "2026-10-12");
+  assert.match(await lastLog(sql, "service", id), /completed kept 2026-10-12 \(billed; Corrigo reopened it\)/);
+});
+
+test("reopen: a Sales Order saved between preview and apply keeps the date (guard in the UPDATE)", async () => {
+  const sql = await freshDb();
+  const id = await doneTicket(sql, "WO-0783");
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Date/Time Completed"], ["0783", "Picked Up", ""]]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.equal(preview.rows[0].completedCleared, true);
+  const realQuery = sql.query;
+  sql.query = async (text, params) => {
+    if (/^\s*update service_jobs set/.test(text)) await realQuery("update service_jobs set ns_so = 'SO-2002' where id = $1", [id]);
+    return realQuery(text, params);
+  };
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.equal((await realQuery("select to_char(completed_at, 'YYYY-MM-DD') as d from service_jobs where id = $1", [id]))[0].d, "2026-10-12");
+});
+
+test("reopen: a closed status, no status, an unmapped status, a completed date or an install never clears the date", async () => {
+  const sql = await freshDb();
+  const ids = [];
+  for (const wo of ["WO-0784", "WO-0785", "WO-0786", "WO-0787"]) ids.push(await doneTicket(sql, wo));
+  const install = (await sql.query("insert into installs (customer, wo, equip_status, complete, completed_at) values ('Cafe A', 'WO-0788', 'Installed', true, '2026-10-12') returning id"))[0].id;
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Date/Time Completed", "P.O. #"],
+    ["0784", "Cancelled", "", ""],
+    ["0785", "", "", ""],
+    ["0786", "Attention", "", ""],
+    ["0787", "Work Started", "10/19/2026", ""],
+    ["0788", "Work Started", "", "Install"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.deepEqual(preview.rows.map((r) => r.completedCleared), [false, false, false, false, false]);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  const dates = await sql.query("select to_char(completed_at, 'YYYY-MM-DD') as d from service_jobs where id = any($1::int[]) order by id", [ids]);
+  assert.deepEqual(dates.map((r) => r.d), ["2026-10-12", "2026-10-12", "2026-10-12", "2026-10-19"]);
+  assert.deepEqual(await sql.query("select equip_status, complete, to_char(completed_at, 'YYYY-MM-DD') as d from installs where id = $1", [install]), [
+    { equip_status: "Installed", complete: true, d: "2026-10-12" },
+  ]);
+});

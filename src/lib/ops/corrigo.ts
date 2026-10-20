@@ -1,6 +1,7 @@
 /** Corrigo report → KatzDesk tickets. Mapping only — no sales fields. */
 
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
+import { CLOSED_CALL, CLOSED_PM } from "./ticket-status.ts";
 
 export { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 
@@ -163,6 +164,8 @@ export type CorrigoPreviewRow = {
   oldCompletedAt: string | null;
   /** Billed on a Sales Order: the import keeps oldCompletedAt whatever Corrigo says. */
   completedKept: boolean;
+  /** Corrigo reopened the ticket: the import clears oldCompletedAt. */
+  completedCleared: boolean;
   completedNote: string | null;
   workDone: string | null;
   issue: string | null;
@@ -336,6 +339,21 @@ export function boardStatus(
   const mapped = board === "pm" ? row.pm : board === "install" ? row.install : row.service;
   if (mapped) return { status: mapped, unmapped: null, note: null };
   return { status: fallback, unmapped: null, note: `${text} has no ${board === "pm" ? "PM" : "install"} status → ${keeps}` };
+}
+
+/**
+ * Corrigo put a service ticket, TLC or PM back to an open status (one the file's status maps to, not a kept one)
+ * with no completed date: the import clears its completed date. Installs never move back.
+ */
+export function corrigoReopens(
+  board: CorrigoBoard,
+  raw: string | null,
+  completedAt: string | null,
+  current: string | null,
+): boolean {
+  if (completedAt || board === "install") return false;
+  const next = boardStatus(board, raw, null, current);
+  return !next.note && !(board === "pm" ? CLOSED_PM : CLOSED_CALL).has(next.status);
 }
 
 export function detectBoard(hints: {
@@ -515,26 +533,33 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
 }
 
 /**
- * The completed date an import writes on an existing ticket. Corrigo's date wins, except on a ticket billed
- * on a Sales Order: its date picked the billing week and NetSuite already has it. A billed ticket with no date
- * keeps none, as the update's SQL does.
+ * The completed date an import writes on an existing ticket. Corrigo's date wins, and a reopened ticket
+ * (corrigoReopens) loses its date, except on a ticket billed on a Sales Order: its date picked the billing week
+ * and NetSuite already has it. A billed ticket with no date keeps none, as the update's SQL does.
  */
 export function completedOnUpdate(
   fileDate: string | null | undefined,
   deskDate: string | null | undefined,
   billedSo: string | null | undefined,
-): { value: string | null; change: "set" | "moved" | "billed" | null } {
+  reopened = false,
+): { value: string | null; change: "set" | "moved" | "billed" | "cleared" | null } {
   const desk = deskDate || null;
   const file = fileDate || null;
+  if (!file && reopened && desk) {
+    return String(billedSo ?? "").trim() ? { value: desk, change: "billed" } : { value: null, change: "cleared" };
+  }
   if (!file || file === desk) return { value: desk, change: null };
   if (String(billedSo ?? "").trim()) return { value: desk, change: "billed" };
   return { value: file, change: desk ? "moved" : "set" };
 }
 
-function completedNote(rec: CorrigoRecord, existing: CorrigoHit | null): string | null {
+function completedNote(
+  rec: CorrigoRecord,
+  existing: CorrigoHit | null,
+  next: ReturnType<typeof completedOnUpdate> | null,
+): string | null {
   if (!rec.completedAt && rec.completedRaw) return `couldn't read the date "${rec.completedRaw}"`;
-  if (!existing) return null;
-  const next = completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo);
+  if (!existing || !next) return null;
   if (next.change === "billed") return `billed on ${String(existing.billedSo).trim()} — keeps ${existing.completedAt || "no date"}`;
   // Billing exports pick tickets by completed date, and nothing records which exports went out.
   if (next.change === "moved" && existing.hasCharges) return "has charges, not billed yet — check it wasn't in an earlier export";
@@ -587,6 +612,14 @@ export function resolvePreviewRow(
   const resolved = boardStatus(board, rec.statusRaw, rec.completedAt, oldStatus);
   const newStatus = resolved.status;
   const statusUnmapped = resolved.unmapped;
+  const date = existing
+    ? completedOnUpdate(
+        rec.completedAt,
+        existing.completedAt,
+        existing.billedSo,
+        corrigoReopens(board, rec.statusRaw, rec.completedAt, oldStatus),
+      )
+    : null;
   const siblingIds = extras
     .filter((h) => h.board === "service" || h.board === "tlc" || h.board === existing?.board)
     .filter((h) => h.board === "service" || h.board === "tlc")
@@ -623,8 +656,9 @@ export function resolvePreviewRow(
     technician: rec.technician,
     completedAt: rec.completedAt,
     oldCompletedAt: existing?.completedAt ?? null,
-    completedKept: !!existing && completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo).change === "billed",
-    completedNote: completedNote(rec, existing),
+    completedKept: date?.change === "billed",
+    completedCleared: date?.change === "cleared",
+    completedNote: completedNote(rec, existing, date),
     workDone: rec.workDone,
     issue: rec.issue,
     conflictIds: siblingIds.length ? siblingIds : null,
