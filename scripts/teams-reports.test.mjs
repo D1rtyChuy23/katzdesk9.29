@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   TEAMS_CHATS,
   clipLine,
@@ -7,8 +8,11 @@ import {
   draftTeamsChat,
   repChatId,
   serviceRegion,
+  teamsChat,
   techChatId,
 } from "../src/lib/ops/teams-message.ts";
+
+const draft = (id, snap) => draftTeamsChat(teamsChat(id), snap);
 
 const when = "2026-10-17 8:00 AM CT";
 
@@ -18,6 +22,7 @@ const empty = {
   duplicateWo: [],
   orders: [],
   calls: [],
+  deliveries: [],
   kpiScope: "Oct 1, 2026 to Oct 31, 2026 · 0 records",
   kpi: [],
   finance: null,
@@ -45,8 +50,23 @@ test("the chat list is the group chats and DMs, with no team channel", () => {
   assert.ok(names.includes("Service Monkeys"));
   assert.ok(names.includes("The K Team"));
   assert.equal(names.filter((n) => n.includes("Customers' Request")).length, 6);
-  assert.equal(TEAMS_CHATS.filter((c) => c.kind === "dm").map((c) => c.name).join(", "), "Ryan Gloria, Josh, Lance Oden, Oliver Garcia, Charles Foster, Cory Russell");
+  assert.equal(TEAMS_CHATS.filter((c) => c.kind === "dm").map((c) => c.name).join(", "), "Ryan Gloria, Josh, Lance Oden, Oliver Garcia, Charles Foster, Corey Russell");
+  assert.equal(TEAMS_CHATS.filter((c) => c.group === "Techs").map((c) => c.name).join(", "), "Ryan Gloria, Josh, Lance Oden, Oliver Garcia, Charles Foster");
   assert.ok(!names.some((n) => n === "Dispatch" || n === "Analytics"));
+});
+
+test("Corey Russell is the delivery dispatcher, not a tech", () => {
+  const corey = teamsChat("dm-cory");
+  assert.equal(corey.name, "Corey Russell");
+  assert.equal(corey.group, "Dispatch");
+  assert.equal(corey.kind, "dm");
+  assert.equal(corey.feed, "dispatch");
+  assert.equal(corey.about, "Installs still to deliver, by install date.");
+  assert.equal(techChatId("Cory Russell"), null);
+  assert.equal(techChatId("Corey Russell"), null);
+  assert.equal(techChatId("Cory"), null);
+  const snap = { ...empty, calls: [call({ tech: "Cory Russell", customer: "Tech Ticket" })] };
+  assert.doesNotMatch(draft("dm-cory", snap).text, /Tech Ticket/);
 });
 
 test("cities and ZIPs pick DFW or SA/ATX", () => {
@@ -67,7 +87,6 @@ test("rep and tech chats follow the person, including Liz and Josh", () => {
   assert.equal(repChatId("Bill McKinley"), null);
   assert.equal(techChatId("Josh"), "dm-josh");
   assert.equal(techChatId("Joshua Harper"), "dm-josh");
-  assert.equal(techChatId("Cory Russell"), "dm-cory");
   assert.equal(techChatId("Bill McKinley"), null);
 });
 
@@ -94,32 +113,86 @@ test("each chat gets only its own lines, and the text is what would be sent", ()
     kpi: [{ label: "Service", total: 3, top: "Open 3" }],
     finance: { scope: "This month, invoiced part lines.", sell: "$10.00", cost: "$4.00", margin: "$6.00" },
   };
-  const big = draftTeamsChat("big-tymers", snap);
+  const big = draft("big-tymers", snap);
   assert.match(big.text, /Open past 48 hrs · Service · Blue Door · Ryan Gloria · SC-9/);
   assert.doesNotMatch(big.text, /Everpure|Amanda/);
-  const po = draftTeamsChat("purchase-orders", snap);
+  const po = draft("purchase-orders", snap);
   assert.match(po.text, /Water filter · SC-9 · Blue Door · Everpure · qty 2/);
   assert.match(po.text, /NetSuite/);
-  assert.match(draftTeamsChat("rep-amanda", snap).text, /Blue Door/);
-  assert.doesNotMatch(draftTeamsChat("rep-amanda", snap).text, /Night Owl/);
-  assert.match(draftTeamsChat("dfw", snap).text, /Blue Door/);
-  assert.match(draftTeamsChat("sa-atx", snap).text, /Night Owl/);
-  assert.match(draftTeamsChat("service-monkeys", snap).text, /Houston Cafe/);
-  assert.doesNotMatch(draftTeamsChat("service-monkeys", snap).text, /Blue Door/);
-  assert.match(draftTeamsChat("dm-ryan", snap).text, /Blue Door/);
-  assert.match(draftTeamsChat("dm-cory", snap).text, /None\./);
-  const k = draftTeamsChat("k-team", snap);
+  assert.match(draft("rep-amanda", snap).text, /Blue Door/);
+  assert.doesNotMatch(draft("rep-amanda", snap).text, /Night Owl/);
+  assert.match(draft("dfw", snap).text, /Blue Door/);
+  assert.match(draft("sa-atx", snap).text, /Night Owl/);
+  assert.match(draft("service-monkeys", snap).text, /Houston Cafe/);
+  assert.doesNotMatch(draft("service-monkeys", snap).text, /Blue Door/);
+  assert.match(draft("dm-ryan", snap).text, /Blue Door/);
+  assert.match(draft("dm-cory", snap).text, /None\./);
+  const k = draft("k-team", snap);
   assert.match(k.text, /Service · 3 · Open 3/);
   assert.match(k.text, /Sell \$10\.00 · cost \$4\.00 · margin \$6\.00/);
   assert.equal(clipLine(`  ${"x".repeat(200)}`).length <= 160, true);
 });
 
 test("the clock minute is not part of the approved text", () => {
-  const draft = draftTeamsChat("big-tymers", empty);
-  const later = draftTeamsChat("big-tymers", { ...empty, when: "2026-10-17 8:01 AM CT" });
-  assert.equal(later.text, draft.text);
-  assert.notEqual(later.title, draft.title);
-  assert.doesNotMatch(draft.text, /8:00 AM/);
-  const changed = draftTeamsChat("big-tymers", { ...empty, attention: [{ label: "Past due — scheduled", board: "Service", customer: "Coco", tech: "", ref: "SC-4" }] });
-  assert.notEqual(changed.text, draft.text);
+  const first = draft("big-tymers", empty);
+  const later = draft("big-tymers", { ...empty, when: "2026-10-17 8:01 AM CT" });
+  assert.equal(later.text, first.text);
+  assert.notEqual(later.title, first.title);
+  assert.doesNotMatch(first.text, /8:00 AM/);
+  const changed = draft("big-tymers", { ...empty, attention: [{ label: "Past due — scheduled", board: "Service", customer: "Coco", tech: "", ref: "SC-4" }] });
+  assert.notEqual(changed.text, first.text);
+});
+
+test("the 17 chats that did not change send byte-for-byte the same text as before", () => {
+  // Captured from main f3089f5 (hard-coded chats) over one fixed snapshot.
+  const before = JSON.parse(readFileSync(new URL("./fixtures/teams-drafts-before.json", import.meta.url), "utf8"));
+  const kept = TEAMS_CHATS.filter((c) => c.id !== "dm-cory");
+  assert.equal(kept.length, 17);
+  assert.deepEqual(kept.map((c) => c.id).sort(), Object.keys(before.drafts).filter((id) => id !== "dm-cory").sort());
+  for (const chat of kept) {
+    const now = draftTeamsChat(chat, before.snapshot);
+    const old = before.drafts[chat.id];
+    for (const key of ["name", "group", "kind", "about", "title", "text"]) assert.equal(now[key], old[key], `${chat.id} ${key}`);
+  }
+});
+
+test("the dispatch note lists installs still to deliver in the order given, clipped like the rest", () => {
+  const none = draft("dm-cory", empty);
+  assert.equal(none.text, "Installs still to deliver, by install date.\n\nTo deliver\nNone.");
+  const deliveries = [
+    { date: "2026-10-21", customer: "Blue Door", equipment: "Bunn ICB-DV Twin with a very long name that keeps going", status: "Ready" },
+    { date: "2026-10-23", customer: "", equipment: "", status: "Not Ready" },
+    ...Array.from({ length: 8 }, (_, i) => ({ date: "", customer: `Late ${i}`, equipment: "Eversys Cameo", status: "Not Ready" })),
+  ];
+  const text = draft("dm-cory", { ...empty, deliveries }).text;
+  const lines = text.split("\n");
+  assert.equal(lines[0], "Installs still to deliver, by install date.");
+  assert.equal(lines[2], "To deliver");
+  assert.equal(lines[3], "- 2026-10-21 · Blue Door · Bunn ICB-DV Twin with a very long name… · Ready");
+  assert.equal(lines[4], "- 2026-10-23 · No account · No equipment · Not Ready");
+  assert.equal(lines[5], "- No date · Late 0 · Eversys Cameo · Not Ready");
+  assert.equal(lines.at(-1), "And 2 more.");
+  assert.equal(lines.filter((l) => l.startsWith("- ")).length, 8);
+});
+
+test("a chat added for a person or region follows the same rules as the built-in ones", () => {
+  const snap = {
+    ...empty,
+    calls: [
+      call({ customer: "Liz Shop", rep: "Liz", tech: "Josh" }),
+      call({ customer: "Mike Shop", rep: "Melinda Warden", tech: "Mike Jones", region: "dfw" }),
+      call({ customer: "Tulsa", region: "other" }),
+    ],
+  };
+  const custom = (feed, target) => draftTeamsChat({ id: "x", name: "X", group: "New", kind: "dm", about: "", feed, target }, snap).text;
+  assert.match(custom("rep", "Lizbeth Romero"), /Liz Shop/);
+  assert.match(custom("rep", "Melinda"), /Mike Shop/);
+  assert.doesNotMatch(custom("rep", "Melinda"), /Liz Shop/);
+  assert.match(custom("tech", "Joshua Harper"), /Liz Shop/);
+  assert.match(custom("tech", "Josh"), /Liz Shop/);
+  assert.match(custom("tech", "Mike"), /Mike Shop/);
+  assert.doesNotMatch(custom("tech", "Mike"), /Liz Shop/);
+  assert.match(custom("region", "dfw"), /Mike Shop/);
+  assert.match(custom("region", "other"), /Tulsa/);
+  assert.doesNotMatch(custom("region", "other"), /Liz Shop/);
 });

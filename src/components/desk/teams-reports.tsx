@@ -1,12 +1,23 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { approveTeamsChat, teamsChatBoard, type TeamsChatCard } from "@/lib/ops/teams-reports";
-import { TEAMS_CHATS, type TeamsChatGroup } from "@/lib/ops/teams-message";
+import { Input } from "@/components/ui/input";
+import { SelectField } from "@/components/ui/select-field";
+import { addTeamsChat, approveTeamsChat, removeTeamsChat, teamsChatBoard, type NewTeamsChat, type TeamsChatCard } from "@/lib/ops/teams-reports";
 
-const GROUPS: TeamsChatGroup[] = ["Service", "Orders", "Reps", "Regions", "Leadership", "Techs"];
+const FEEDS: { value: string; label: string }[] = [
+  { value: "service", label: "Service tracker" },
+  { value: "orders", label: "Purchase orders" },
+  { value: "rep", label: "A rep's customers" },
+  { value: "region", label: "A region" },
+  { value: "leadership", label: "K Team counts" },
+  { value: "tech", label: "A tech's open calls" },
+  { value: "dispatch", label: "Deliveries (dispatch)" },
+];
+
+const BLANK: NewTeamsChat = { name: "", group: "", kind: "group", feed: "service", target: "" };
 
 /**
  * The exact note for each group chat and DM. Approving stores that text.
@@ -24,9 +35,30 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not approve"),
   });
+  const [form, setForm] = useState<NewTeamsChat | null>(null);
+  const add = useMutation({
+    mutationFn: (chat: NewTeamsChat) => addTeamsChat({ data: chat }),
+    onSuccess: (r) => {
+      toast.success(`Added ${r.name}. Nothing was posted.`);
+      setForm(null);
+      setPicked(r.id);
+      void qc.invalidateQueries({ queryKey: ["teams-chats"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add the chat"),
+  });
+  const remove = useMutation({
+    mutationFn: (card: TeamsChatCard) => removeTeamsChat({ data: { id: card.id } }),
+    onSuccess: (r) => {
+      toast.success(`Removed ${r.name}.`);
+      void qc.invalidateQueries({ queryKey: ["teams-chats"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove the chat"),
+  });
   if (!enabled) return null;
   const cards = board.data ?? [];
+  const groups = [...new Set(cards.map((c) => c.group))];
   const current = cards.find((c) => c.id === picked) ?? cards[0];
+  const needs = form?.feed === "rep" ? "Rep name" : form?.feed === "tech" ? "Tech name" : null;
   return (
     <section className="rounded-xl border border-border bg-card p-5 shadow-soft" data-testid="teams-chats">
       <h2 className="font-display text-xl font-medium tracking-tight">Teams chats</h2>
@@ -38,13 +70,12 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
         <p className="mt-4 text-sm text-destructive">{board.error instanceof Error ? board.error.message : "Could not read the chats."}</p>
       ) : null}
       <div className="mt-4 grid gap-4 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <div className="space-y-4">
-          {GROUPS.map((group) => (
+        <div className="min-w-0 space-y-4">
+          {groups.map((group) => (
             <div key={group}>
-              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{group}</p>
+              <p className="truncate text-xs font-medium tracking-wide text-muted-foreground uppercase">{group}</p>
               <ul className="mt-1">
-                {TEAMS_CHATS.filter((c) => c.group === group).map((chat) => {
-                  const card = cards.find((c) => c.id === chat.id);
+                {cards.filter((c) => c.group === group).map((chat) => {
                   const on = current?.id === chat.id;
                   return (
                     <li key={chat.id}>
@@ -55,7 +86,7 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
                         data-testid={`teams-chat-${chat.id}`}
                       >
                         <span className="truncate">{chat.name}</span>
-                        {card?.approved ? <Check className="size-3.5 shrink-0 text-primary" aria-label="Approved" /> : null}
+                        {chat.approved ? <Check className="size-3.5 shrink-0 text-primary" aria-label="Approved" /> : null}
                       </button>
                     </li>
                   );
@@ -63,9 +94,66 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
               </ul>
             </div>
           ))}
+          {form ? null : (
+            <Button type="button" size="sm" variant="outline" onClick={() => setForm(BLANK)} data-testid="teams-add-open">
+              <Plus className="size-4" />
+              Add chat
+            </Button>
+          )}
         </div>
-        {current ? (
-          <div>
+        {form ? (
+          <form
+            className="grid min-w-0 content-start gap-2 sm:grid-cols-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              add.mutate(form);
+            }}
+            data-testid="teams-add-form"
+          >
+            <p className="text-sm font-medium sm:col-span-2">Add a chat</p>
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Chat name" aria-label="Chat name" />
+            <Input value={form.group} onChange={(e) => setForm({ ...form, group: e.target.value })} placeholder="Group" aria-label="Group" list="teams-groups" />
+            <datalist id="teams-groups">
+              {groups.map((g) => (
+                <option key={g} value={g} />
+              ))}
+            </datalist>
+            <SelectField value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })} aria-label="Group chat or DM">
+              <option value="group">Group chat</option>
+              <option value="dm">DM</option>
+            </SelectField>
+            <SelectField
+              value={form.feed}
+              onChange={(e) => setForm({ ...form, feed: e.target.value, target: e.target.value === "region" ? "dfw" : "" })}
+              aria-label="What it shows"
+            >
+              {FEEDS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </SelectField>
+            {needs ? (
+              <Input value={form.target ?? ""} onChange={(e) => setForm({ ...form, target: e.target.value })} placeholder={needs} aria-label={needs} />
+            ) : null}
+            {form.feed === "region" ? (
+              <SelectField value={form.target ?? "dfw"} onChange={(e) => setForm({ ...form, target: e.target.value })} aria-label="Region">
+                <option value="dfw">DFW</option>
+                <option value="sa-atx">SA/ATX</option>
+                <option value="other">Other (no tech yet)</option>
+              </SelectField>
+            ) : null}
+            <div className="flex flex-wrap gap-2 sm:col-span-2">
+              <Button type="submit" size="sm" disabled={add.isPending} data-testid="teams-add-save">
+                {add.isPending ? "Saving…" : "Add chat"}
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setForm(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : current ? (
+          <div className="min-w-0">
             <p className="text-sm font-medium">{current.name}</p>
             <p className="mt-1 text-xs text-muted-foreground">{current.title}</p>
             <p className="mt-1 text-xs text-muted-foreground">{current.about}</p>
@@ -99,6 +187,19 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
               >
                 <Copy className="size-4" />
                 Copy
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                disabled={remove.isPending}
+                onClick={() => {
+                  if (window.confirm(`Remove ${current.name}? Its approved notes stay in the history.`)) remove.mutate(current);
+                }}
+                data-testid="teams-remove"
+              >
+                <Trash2 className="size-4" />
+                Remove
               </Button>
             </div>
           </div>
