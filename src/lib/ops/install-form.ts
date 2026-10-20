@@ -128,6 +128,46 @@ export function hasSerial<T extends { serial: string }>(rows: T[], serial: strin
   return !!key && rows.some((row) => serialKey(row.serial) === key);
 }
 
+function rowsMatch(a: { equipment: string; serial: string }, b: { equipment: string; serial: string }): boolean {
+  if (!sameWarehouseModel(a.equipment, b.equipment)) return false;
+  const ak = serialKey(a.serial);
+  const bk = serialKey(b.serial);
+  if (ak && bk) return ak === bk;
+  return true;
+}
+
+/**
+ * What to save. The form's rows stay, including a row the form removed.
+ * A machine the server added since `previous` is appended, so a pre-inspection add is not dropped.
+ * A blank serial takes the serial the server stored on that same row.
+ */
+export function machinesBeforeSave<T extends VisitMachine>(editing: T[], previous: T[], server: T[]): T[] {
+  const next = editing.map((r) => ({ ...r }));
+  const have = new Set(next.map((r) => serialKey(r.serial)).filter(Boolean));
+  for (const s of server) {
+    const key = serialKey(s.serial);
+    if (!key || have.has(key)) continue;
+    const blank = next.findIndex((r) => sameWarehouseModel(r.equipment, s.equipment) && !String(r.serial ?? "").trim());
+    if (blank < 0) continue;
+    next[blank] = { ...next[blank]!, serial: String(s.serial).trim() };
+    have.add(key);
+  }
+  const used = new Set<number>();
+  for (const s of server) {
+    const equipment = String(s.equipment ?? "").trim();
+    if (!equipment) continue;
+    const idx = previous.findIndex((p, i) => !used.has(i) && rowsMatch(p, s));
+    if (idx >= 0) {
+      used.add(idx);
+      continue;
+    }
+    const serial = String(s.serial ?? "").trim();
+    if (next.some((r) => rowsMatch(r, { equipment, serial }))) continue;
+    next.push({ ...s, equipment, serial, powerVoltage: String(s.powerVoltage ?? "").trim() });
+  }
+  return dedupeMachineSerials(next);
+}
+
 export type FormUnit = {
   model: string;
   serial: string;
