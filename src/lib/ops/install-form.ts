@@ -151,7 +151,8 @@ function pairRows(rows: VisitMachine[], against: VisitMachine[]): number[] {
   for (const match of passes) {
     rows.forEach((r, i) => {
       if (pair[i]! >= 0) return;
-      const j = against.findIndex((a, k) => !used.has(k) && match(r, a));
+      // A tie goes to the row at the same place.
+      const j = i < against.length && !used.has(i) && match(r, against[i]!) ? i : against.findIndex((a, k) => !used.has(k) && match(r, a));
       if (j < 0) return;
       pair[i] = j;
       used.add(j);
@@ -194,21 +195,15 @@ export function machinesBeforeSave<T extends VisitMachine>(editing: T[], previou
 
 /**
  * The pre-inspection unit an equipment row stands for: the unit with its serial, or the only no-serial unit of its model.
- * When two units (or two rows) could be it, a unit with nothing recorded on it (not started, no photo, no note), so the
- * one with checks stays. Null when there is none; then the save's prune picks the unit.
+ * Null when two units (or two rows) could be it: then the save's prune drops a unit, and it keeps the one with anything recorded.
  */
-export function visitUnitForRow<U extends { serial: string | null; model: string; name: string; overall: string; photoCount: number; note: string | null }>(
-  rows: VisitMachine[],
-  index: number,
-  units: U[],
-): U | null {
+export function visitUnitForRow<U extends { serial: string | null; model: string; name: string }>(rows: VisitMachine[], index: number, units: U[]): U | null {
   const row = rows[index];
   if (!row) return null;
   const key = serialKey(row.serial);
   const twin = (equipment: string, serial: string | null) => (key ? serialKey(serial) === key : !serialKey(serial) && sameWarehouseModel(equipment, row.equipment));
   const hits = units.filter((u) => twin(u.model || u.name, u.serial));
-  if (hits.length === 1 && rows.filter((r) => twin(r.equipment, r.serial)).length === 1) return hits[0]!;
-  return hits.find((u) => u.overall === "Not started" && !u.photoCount && !u.note?.trim()) ?? null;
+  return hits.length === 1 && rows.filter((r) => twin(r.equipment, r.serial)).length === 1 ? hits[0]! : null;
 }
 
 /**

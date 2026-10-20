@@ -161,14 +161,23 @@ test("removing an equipment row takes a pre-inspection unit only when no other u
   assert.equal(visitUnitForRow(rows.slice(1, 3), 1, [units[1]]), null);
 });
 
-test("when two units could be the removed row, the one with nothing recorded on it goes", () => {
+test("when two units could be the removed row, none is picked: the save's prune keeps the one with anything recorded", () => {
   const unit = (equipmentId, overall, photoCount = 0, note = null) => ({ equipmentId, model: "Fetco CBS-51H", name: "Fetco CBS-51H", serial: null, overall, photoCount, note });
   const rows = [row("Fetco CBS-51H"), row("Fetco CBS-51H")];
-  // The second unit (a pre-inspection add) holds the check and photo, whichever row is removed.
-  for (const index of [0, 1]) assert.equal(visitUnitForRow(rows, index, [unit(1, "Not started"), unit(2, "Failed", 1)])?.equipmentId, 1);
-  assert.equal(visitUnitForRow(rows, 0, [unit(1, "Failed", 1), unit(2, "Not started")])?.equipmentId, 2);
-  // A note or a photo counts as recorded too. With nothing empty, the save's prune decides.
-  assert.equal(visitUnitForRow(rows, 0, [unit(1, "Not started", 0, "Left of the sink"), unit(2, "Not started", 1)]), null);
+  for (const index of [0, 1]) {
+    assert.equal(visitUnitForRow(rows, index, [unit(1, "Not started"), unit(2, "Failed", 1)]), null);
+    assert.equal(visitUnitForRow(rows, index, [unit(1, "Failed", 1), unit(2, "Not started")]), null);
+  }
+});
+
+test("two identical rows pair at the same place, so the server's change lands on its own row when the other row has an unsaved edit", () => {
+  const prev = [row("Fetco CBS-51H", "", "120V"), row("Fetco CBS-51H", "", "120V")];
+  const editing = [{ ...prev[0], powerVoltage: "220V" }, { ...prev[1] }];
+  const volts = (rows) => rows.map((r) => `${r.powerVoltage} ${r.serial}`.trim());
+  // A warehouse serial written on row 1 stays on row 1, not on the edited 220V row.
+  assert.deepEqual(volts(machinesBeforeSave(editing, prev, [prev[0], { ...prev[1], serial: "S1" }])), ["220V", "120V S1"]);
+  // Row 1 removed on the Pre-inspection tab leaves the window; the edited row 0 stays.
+  assert.deepEqual(volts(machinesBeforeSave(editing, prev, [prev[0]])), ["220V"]);
 });
 
 test("two machines of one model with no serial are told apart by voltage and plug when the server's list changes", () => {

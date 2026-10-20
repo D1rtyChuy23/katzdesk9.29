@@ -80,7 +80,9 @@ export function SerialPullField({
     setText(value);
   }, [value]);
 
+  // Behind the install window's saves: a serial just cleared on another row is saved before this lookup asks the server.
   const pull = useMutation({
+    scope: installId ? { id: `install-sheet-${installId}` } : undefined,
     mutationFn: (opts: { serial: string; confirmReuse?: boolean }) =>
       applySerialPull({
         data: {

@@ -285,7 +285,9 @@ async function writePieceFields(sql: Sql, hit: AcctUnit, piece: Piece): Promise<
   hit.electrical = nextPower;
 }
 
-function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>): AcctUnit | undefined {
+function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>, catalog: string[] = []): AcctUnit | undefined {
+  // The row's catalog name: a unit added on Pre-inspection under "Eversys Cameo c'2s - 2 Step Classic" is the row "Eversys Cameo c'2s".
+  const catalogModel = catalog.length ? matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel : null;
   const key = serialKey(piece.serial);
   if (key) {
     for (const pool of pools) {
@@ -299,7 +301,9 @@ function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>): AcctUn
       // ("Bunn ITCB"). Either one is the same machine; matching only the catalog name added a new unit on every load.
       (a) =>
         !used.has(a.id) &&
-        (sameCatalogModel(a.catalog_model, piece.equipment) || sameCatalogModel(a.equipment_name, piece.equipment)) &&
+        (sameCatalogModel(a.catalog_model, piece.equipment) ||
+          sameCatalogModel(a.equipment_name, piece.equipment) ||
+          (!!catalogModel && sameCatalogModel(a.catalog_model, catalogModel))) &&
         !serialKey(a.serial),
     );
     if (hit) return hit;
@@ -348,12 +352,25 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     [installId],
   );
   const linkedIds = new Set(links.map((l) => l.equipment_id));
-  const linkedRows = account.filter((a) => linkedIds.has(a.id));
+  // A unit with anything recorded on this visit is claimed before an empty twin, so the prune drops the empty one.
+  const recorded = new Set(
+    (
+      await sql.query<{ equipment_id: number }>(
+        `select equipment_id from install_inspection_items where install_id = $1 and (status <> 'Not inspected' or coalesce(notes, '') <> '')
+         union select equipment_id from install_inspection_photos where install_id = $1
+         union select equipment_id from install_inspection_units where install_id = $1 and (coalesce(note, '') <> '' or coalesce(visit_kind, '') <> '' or coalesce(core_needed, '') <> '')`,
+        [installId],
+      )
+    ).map((r) => r.equipment_id),
+  );
+  const linkedRows = account
+    .filter((a) => linkedIds.has(a.id))
+    .sort((a, b) => Number(recorded.has(b.id)) - Number(recorded.has(a.id)) || a.id - b.id);
   const used = new Set<number>();
   const keep = new Set<number>();
   let first: number | null = null;
   for (const piece of pieces) {
-    let hit = claimUnit(piece, [linkedRows, account], used);
+    let hit = claimUnit(piece, [linkedRows, account], used, catalog);
     if (!hit) {
       // An older combined unit that names this machine becomes this machine: its checks and photos stay with it.
       const old = linkedRows.find(

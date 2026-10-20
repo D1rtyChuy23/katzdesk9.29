@@ -17,8 +17,10 @@ const { groupFormRows } = installForm;
 const machines = await import("../src/lib/ops/machines.ts");
 const { parseMachinesJson } = machines;
 const { catalogModels } = await import("../src/lib/ops/equipment.ts");
+const { appendServerMachines } = await import("../src/lib/ops/warehouse-serial.ts");
 
 const ITCB_CATALOG = 'Bunn ITCB-DV, 29" w/Flip Tray';
+const CAMEO_CATALOG = "Eversys Cameo c'2s - 2 Step Classic";
 
 async function fresh() {
   const pg = new PGlite();
@@ -80,8 +82,8 @@ async function openWindow(pg, sql, id) {
   };
   let row = await boardRow();
   const w = { specs: machines.machinesOnOpen(row), loaded: machines.machinesOnOpen(row), seen: row.machines };
-  w.refetch = async () => {
-    row = await boardRow();
+  w.refetch = async (next) => {
+    row = next ?? (await boardRow());
     w.loaded = installForm.machinesBeforeSave(w.loaded, w.seen, row.machines);
     w.specs = installForm.machinesBeforeSave(w.specs, w.seen, row.machines);
     w.seen = row.machines;
@@ -94,6 +96,14 @@ async function openWindow(pg, sql, id) {
   w.close = async () => {
     const changed = machines.changedMachineFields(w.specs, w.loaded);
     if (changed.machines !== undefined) await send(changed);
+  };
+  /** Pre-inspection Add: rememberAddedMachine puts the visit's machines on the cached row, then refresh() refetches. */
+  w.preAdd = async (model) => {
+    const view = await addMachineOntoInstall(sql, { installId: id, model, serial: null, electrical: null }, "Test");
+    const shown = view.machines.map((m) => ({ equipment: m.name || m.model, serial: m.serial ?? "", powerVoltage: m.electrical ?? "" }));
+    await w.refetch({ ...row, machines: appendServerMachines(row.machines, shown) });
+    await w.refetch();
+    return view;
   };
   return w;
 }
@@ -124,8 +134,11 @@ async function lookupSerial(pg, id, index, serial) {
   return placed.status;
 }
 
-/** removeInspectionEquipment with keepList: the unit's checks, photos and link go, and the account row when nothing else uses it. */
-async function dropUnit(pg, id, equipmentId) {
+/**
+ * removeInspectionEquipment with keepList: the unit's checks, photos and link go, and the account row when nothing else
+ * uses it. It answers with readInspection, which syncs the units against the list that still has the row.
+ */
+async function dropUnit(pg, sql, id, equipmentId) {
   for (const table of ["install_inspection_photos", "install_inspection_items", "install_inspection_units"]) {
     await pg.query(`delete from ${table} where install_id = $1 and equipment_id = $2`, [id, equipmentId]);
   }
@@ -134,6 +147,15 @@ async function dropUnit(pg, id, equipmentId) {
         and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)`,
     [equipmentId],
   );
+  await readInspection(sql, id);
+}
+
+/** The Equipment tab's Remove: the unit visitUnitForRow picks goes first, then the list is saved (the save's prune runs last). */
+async function removeRow(sql, pg, id, w, index) {
+  const unit = installForm.visitUnitForRow(w.specs, index, (await readInspection(sql, id)).machines);
+  if (unit) await dropUnit(pg, sql, id, unit.equipmentId);
+  await w.save(w.specs.filter((_, i) => i !== index));
+  return unit;
 }
 
 test("a second machine of a model already on the install, added on the Pre-inspection tab, keeps its check and photo through a save and the close", async () => {
@@ -163,10 +185,8 @@ test("removing one of two identical no-serial rows keeps the other unit's check 
     const first = (await readInspection(sql, id)).machines.filter((m) => m.model === "Bunn TB3")[0].equipmentId;
     await checkAndPhoto(pg, id, first);
     const w = await openWindow(pg, sql, id);
-    const unit = installForm.visitUnitForRow(w.specs, 2, (await readInspection(sql, id)).machines);
-    assert.notEqual(unit?.equipmentId, first);
-    if (unit) await dropUnit(pg, id, unit.equipmentId);
-    await w.save(w.specs.filter((_, i) => i !== 2));
+    // Two units could be the row, so none is taken off first: the save's prune keeps the one with the check.
+    assert.equal(await removeRow(sql, pg, id, w, 2), null);
     assert.deepEqual(await kept(pg, sql, id, first), { onVisit: true, checks: 1, photos: 1 });
     assert.deepEqual(await storedList(pg, id), ["Bunn G9-2T", "Bunn TB3"]);
   } finally {
@@ -185,11 +205,7 @@ test("removing either of two identical no-serial rows keeps the check and photo 
       const added = view.machines.at(-1).equipmentId;
       await checkAndPhoto(pg, id, added);
       await w.refetch();
-      // The Equipment tab's Remove: the unit it picks goes first, then the list is saved (the save's prune runs last).
-      const unit = installForm.visitUnitForRow(w.specs, index, (await readInspection(sql, id)).machines);
-      assert.notEqual(unit?.equipmentId, added);
-      if (unit) await dropUnit(pg, id, unit.equipmentId);
-      await w.save(w.specs.filter((_, i) => i !== index));
+      assert.equal(await removeRow(sql, pg, id, w, index), null);
       assert.deepEqual(await kept(pg, sql, id, added), { onVisit: true, checks: 1, photos: 1 }, `row ${index}`);
       await w.close();
       assert.deepEqual(await kept(pg, sql, id, added), { onVisit: true, checks: 1, photos: 1 }, `row ${index}`);
@@ -197,6 +213,71 @@ test("removing either of two identical no-serial rows keeps the check and photo 
       assert.equal((await readInspection(sql, id)).machines.length, 1);
     } finally {
       await pg.close();
+    }
+  }
+});
+
+test("removing either row of a machine added again under its catalog name keeps the added unit's check and photo", async () => {
+  // The install row says "Eversys Cameo c'2s"; Pre-inspection Add uses the catalog name. The same for Bunn ITCB / ITCB-DV.
+  for (const [short, long] of [
+    ["Eversys Cameo c'2s", CAMEO_CATALOG],
+    ["Bunn ITCB", ITCB_CATALOG],
+  ]) {
+    for (const index of [0, 1]) {
+      const { pg, sql } = await fresh();
+      try {
+        await pg.query("insert into directory_equipment (name) values ($1)", [CAMEO_CATALOG]);
+        const id = (
+          await pg.query("insert into installs (customer, equipment, machines) values ('Real Cafe', $1, $2) returning id", [
+            short,
+            JSON.stringify([{ equipment: short, serial: "", powerVoltage: "" }]),
+          ])
+        ).rows[0].id;
+        await readInspection(sql, id);
+        const w = await openWindow(pg, sql, id);
+        const added = (await w.preAdd(long)).machines.at(-1).equipmentId;
+        await checkAndPhoto(pg, id, added);
+        assert.equal(w.specs.length, 2);
+        await removeRow(sql, pg, id, w, index);
+        await w.close();
+        assert.deepEqual(await kept(pg, sql, id, added), { onVisit: true, checks: 1, photos: 1 }, `${short} row ${index}`);
+        assert.equal((await readInspection(sql, id)).machines.length, 1, `${short} row ${index}`);
+      } finally {
+        await pg.close();
+      }
+    }
+  }
+});
+
+test("an item note with no status, or a core-hole answer, stays when either of two identical rows is removed", async () => {
+  for (const mark of ["note", "core"]) {
+    for (const index of [0, 1]) {
+      const { pg, sql } = await fresh();
+      try {
+        const id = await install(pg, "Note Cafe", "Bunn TB3");
+        await readInspection(sql, id);
+        const w = await openWindow(pg, sql, id);
+        // The first unit (the lower id) holds the answer; the one added second is empty.
+        const first = (await w.preAdd("Bunn TB3")).machines[0].equipmentId;
+        if (mark === "note") {
+          await pg.query(
+            "insert into install_inspection_items (install_id, equipment_id, category, status, notes) values ($1, $2, 'water', 'Not inspected', 'Ask the manager')",
+            [id, first],
+          );
+        } else {
+          await pg.query("update install_inspection_units set core_needed = 'no' where install_id = $1 and equipment_id = $2", [id, first]);
+        }
+        await removeRow(sql, pg, id, w, index);
+        await w.close();
+        const units = (await pg.query("select equipment_id, core_needed from install_inspection_units where install_id = $1", [id])).rows;
+        const notes = (await pg.query("select notes from install_inspection_items where install_id = $1 and equipment_id = $2 and notes is not null", [id, first])).rows;
+        const label = `${mark} row ${index}`;
+        assert.deepEqual(units.map((u) => u.equipment_id), [first], label);
+        if (mark === "note") assert.deepEqual(notes, [{ notes: "Ask the manager" }], label);
+        else assert.equal(units[0].core_needed, "no", label);
+      } finally {
+        await pg.close();
+      }
     }
   }
 });
@@ -241,6 +322,15 @@ test("a serial moved from one row to another is kept: the clear saves at once, s
   } finally {
     await pg.close();
   }
+});
+
+test("the Serial box's lookup waits in the install window's save queue, so a serial cleared on one row is saved before another row looks it up", () => {
+  const field = componentSource("../src/components/desk/serial-notice.tsx", "SerialPullField");
+  assert.match(field, /const pull = useMutation\(\{\s*scope: installId \? \{ id: `install-sheet-\$\{installId\}` \} : undefined,/);
+  // The same queue as the sheet's save and dropUnit.
+  const sheet = componentSource("../src/components/desk/entity-sheets.tsx", "InstallSheet");
+  assert.match(sheet, /const queue = \{ id: `install-sheet-\$\{row\?\.id\}` \};/);
+  assert.match(sheet, /installId=\{row\.id\}/);
 });
 
 test("a serial typed over one saved on another row, then Escape, is not saved on the second row", async () => {
