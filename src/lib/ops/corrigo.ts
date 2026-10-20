@@ -171,6 +171,8 @@ export type CorrigoPreviewRow = {
   statusNote: string | null;
   technician: string | null;
   completedAt: string | null;
+  /** The completed cell as written (apply needs it: a date it couldn't read never reopens a ticket). */
+  completedRaw: string | null;
   /** The ticket's completed date before this import. */
   oldCompletedAt: string | null;
   /** Billed on a Sales Order: the import keeps oldCompletedAt whatever Corrigo says. */
@@ -259,6 +261,34 @@ export function hitClosed(hit: Pick<CorrigoHit, "status" | "done">): boolean {
 function recentTicket(hit: CorrigoHit, today: string | null | undefined): boolean {
   if (!today || !hit.received) return false;
   return hit.received >= new Date(Date.parse(today) - 365 * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** After the wrap, a ticket from this cycle wins over an old-cycle copy of the same number. */
+export function thisCycleFirst(hits: CorrigoHit[], wrapped: boolean, today: string | null | undefined): CorrigoHit[] {
+  const recent = wrapped ? hits.filter((h) => recentTicket(h, today)) : [];
+  return recent.length ? recent : hits;
+}
+
+/**
+ * After the wrap, same-number service tickets from different cycles (one received in the last 365 days, one not)
+ * are different jobs: pairs the duplicate merge must leave alone.
+ */
+export function crossCyclePairs(hits: CorrigoHit[], today: string): { keeperId: number; extraId: number }[] {
+  const groups = new Map<string, CorrigoHit[]>();
+  for (const h of hits) {
+    const key = woMatchKey(h.wo ?? "");
+    if (!key || h.duplicateOf || (h.board !== "service" && h.board !== "tlc")) continue;
+    groups.set(key, [...(groups.get(key) ?? []), h]);
+  }
+  const out: { keeperId: number; extraId: number }[] = [];
+  for (const list of groups.values()) {
+    for (const a of list) {
+      for (const b of list) {
+        if (a.id < b.id && recentTicket(a, today) !== recentTicket(b, today)) out.push({ keeperId: a.id, extraId: b.id });
+      }
+    }
+  }
+  return out;
 }
 
 /**
@@ -366,8 +396,10 @@ export function corrigoReopens(
   raw: string | null,
   completedAt: string | null,
   current: string | null,
+  /** The completed cell as written: a date the import couldn't read still means Corrigo has one. */
+  completedRaw?: string | null,
 ): boolean {
-  if (completedAt || board === "install") return false;
+  if (completedAt || completedRaw?.trim() || board === "install") return false;
   const next = boardStatus(board, raw, null, current);
   return !next.note && !(board === "pm" ? CLOSED_PM : CLOSED_CALL).has(next.status);
 }
@@ -600,17 +632,34 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
 const SERIAL_ONLY = /^SN\s*:?\s*[A-Z0-9-]+$/i;
 const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
 
+/** The catalog model a machine name reads as ("Eversys Cameo c'2s" → "Eversys Cameo c'2s - 2 Step Classic"), ignoring voltage. */
+function catalogModelOf(name: string, catalog: string[]): string | null {
+  if (catalog.includes(name)) return name;
+  const bare = name.replace(VOLTS, " ").trim();
+  if (!bare) return null;
+  const hit = matchCatalogModel(bare, bare, catalog);
+  return hit.status === "matched" ? hit.catalogModel : null;
+}
+
 /**
  * The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog. From free
- * text (a problem description) only catalog names count, so the words around them are not read as machines.
+ * text (a problem description) only names that read as one catalog model count, so the words around them ("Install",
+ * "Brewer") are not read as machines; a sentence is read again by its catalog words alone.
  */
 export function namedMachines(text: string | null | undefined, catalog: string[], catalogOnly = false): string[] {
+  const words = catalogOnly ? new Set(catalog.flatMap((c) => compactEquip(c).split(" "))) : null;
   const out: string[] = [];
   for (const piece of String(text ?? "").split(/\r?\n|;|,\s*(?=\d{1,2}\s*[x×]\s)/)) {
     if (!piece.trim() || SERIAL_ONLY.test(piece.trim())) continue;
     const qty = Number(piece.match(/^\s*(?:qty\s*)?(\d{1,2})\s*[x×]\s/i)?.[1] ?? 1);
     listedEquipment(piece, catalog)
-      .filter((name) => !catalogOnly || catalog.includes(name))
+      .flatMap((name) => {
+        if (!words) return [name];
+        const model =
+          catalogModelOf(name, catalog) ??
+          catalogModelOf(compactEquip(name).split(" ").filter((w) => words.has(w)).join(" "), catalog);
+        return model ? [model] : [];
+      })
       .forEach((name, i) => out.push(...Array<string>(i === 0 ? qty : 1).fill(name)));
   }
   return out;
@@ -620,10 +669,7 @@ export function namedMachines(text: string | null | undefined, catalog: string[]
 function sameMachines(a: string[], b: string[], catalog: string[]): boolean {
   const keys = (list: string[]) =>
     list
-      .map((name) => {
-        const bare = name.replace(VOLTS, " ").trim();
-        return compactEquip(matchCatalogModel(bare, bare, catalog).catalogModel ?? bare);
-      })
+      .map((name) => compactEquip(catalogModelOf(name, catalog) ?? name.replace(VOLTS, " ").trim()))
       .sort()
       .join("\n");
   return a.length === b.length && keys(a) === keys(b);
@@ -680,14 +726,19 @@ export function resolvePreviewRow(
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
   const attachable = pool.filter((h) => shouldAttachToHit(h, rec.customer, wrapped, opts.today));
-  const woHit = pickKeeper(attachable.length ? attachable : [], hinted);
+  const woHit = pickKeeper(thisCycleFirst(attachable, wrapped, opts.today), hinted);
   const equip =
     !woHit && hinted === "install"
       ? installByEquipment(rec, opts.installs ?? [], opts.catalog ?? [], opts.taken ?? new Set())
       : null;
   const existing = woHit ?? equip?.install ?? null;
+  // After the wrap, a copy from the other cycle than the chosen ticket is a different job, not a duplicate to merge.
   const extras = existing
-    ? group.filter((h) => h.board !== existing.board || h.id !== existing.id)
+    ? group.filter(
+        (h) =>
+          (h.board !== existing.board || h.id !== existing.id) &&
+          (!wrapped || recentTicket(h, opts.today) === recentTicket(existing, opts.today)),
+      )
     : group;
   const board = detectBoard({
     po: rec.po,
@@ -704,7 +755,7 @@ export function resolvePreviewRow(
         rec.completedAt,
         existing.completedAt,
         existing.billedSo,
-        corrigoReopens(board, rec.statusRaw, rec.completedAt, oldStatus),
+        corrigoReopens(board, rec.statusRaw, rec.completedAt, oldStatus, rec.completedRaw),
       )
     : null;
   const siblingIds = extras
@@ -713,10 +764,13 @@ export function resolvePreviewRow(
     .map((c) => ({ board: c.board, id: c.id }));
   const n = woNumeric(rec.rawWo || rec.canonicalWo);
   const postWrapNumber = n != null && n < 5000;
-  // A copy received in the last 365 days is this cycle's duplicate: flagged to merge, not a repeat.
-  const oldCycle = extras.filter((h) => !recentTicket(h, opts.today));
+  // A row on this cycle's ticket is never a repeat; on an old-cycle ticket it is when other copies of the number exist.
   const wrapRepeat =
-    wrapped && postWrapNumber && (oldCycle.length > 0 || (!existing && group.length > 0));
+    wrapped &&
+    postWrapNumber &&
+    (existing
+      ? !recentTicket(existing, opts.today) && group.some((h) => h.board !== existing.board || h.id !== existing.id)
+      : group.length > 0);
   const note = woHit ? matchNote(rec.rawWo, rec.canonicalWo, woHit.wo) : null;
 
   return {
@@ -740,6 +794,7 @@ export function resolvePreviewRow(
     statusNote: resolved.note,
     technician: rec.technician,
     completedAt: rec.completedAt,
+    completedRaw: rec.completedRaw ?? null,
     oldCompletedAt: existing?.completedAt ?? null,
     completedKept: date?.change === "billed",
     completedCleared: date?.change === "cleared",

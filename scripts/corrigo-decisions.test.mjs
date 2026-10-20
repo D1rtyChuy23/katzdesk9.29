@@ -4,10 +4,12 @@ import { readFileSync, readdirSync } from "node:fs";
 import { register } from "node:module";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
+// The production equipment catalog (the same 151 names as directory_equipment in the parity copy).
+import realCatalog from "../src/lib/ops/directory-equipment.json" with { type: "json" };
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
+const { namedMachines, parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
 const { addDays, todayChicago } = await import("../src/lib/ops/clock.ts");
 const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
 
@@ -310,4 +312,192 @@ test("install: an install given another WO after the preview is not overwritten 
   await sql.query("update installs set wo = 'WO-5555' where id = $1", [id]);
   await applyCorrigoRows(sql, preview.rows, "Chuy");
   assert.deepEqual((await installsOf(sql, "Cafe Lima")).map((r) => [r.id === id, r.wo]), [[true, "WO-5555"], [false, "WO-1201"]]);
+});
+
+// Review fixes: real catalog spellings, a wrapped desk with both cycles of one number, and apply races.
+
+test("install: free text finds machines spelled as the real catalog spells them, and plain words name nothing", () => {
+  const cameo = "Eversys Cameo c'2s - 2 Step Classic";
+  assert.deepEqual(namedMachines("Install Eversys Cameo c'2s", realCatalog, true), [cameo]);
+  assert.deepEqual(namedMachines("New install of Bunn ITCB brewer", realCatalog, true), ['Bunn ITCB-DV, 29" w/Flip Tray']);
+  assert.deepEqual(namedMachines("Install new Cameo c'2s", realCatalog, true), [cameo]);
+  for (const words of ["Install", "Set up", "Installation follow-up", "Brewer"]) {
+    assert.deepEqual(namedMachines(words, realCatalog, true), [], words);
+  }
+});
+
+test("install: with the real catalog and no equipment column, the problem description finds the account's open install", async () => {
+  const sql = await freshDb();
+  await sql.query("insert into directory_equipment (name) select unnest($1::text[])", [realCatalog]);
+  const mike = await openInstall(sql, "Cafe Mike", { equipment: "Eversys Cameo c'2s" });
+  const november = await openInstall(sql, "Cafe November", { machines: ['Bunn ITCB-DV, 29" w/Flip Tray'] });
+  const oscar = await openInstall(sql, "Cafe Oscar", { equipment: "Bunn ITCB 120v SN:ITCB064919\nEversys Cameo c'2s - 2 Step Classic" });
+  const papa = await openInstall(sql, "Cafe Papa", { machines: ["Eversys Cameo c'2s - 2 Step Classic"] });
+  const quebec = await openInstall(sql, "Cafe Quebec", { machines: ["Eversys Cameo c'2s - 2 Step Classic"] });
+  const romeo = await openInstall(sql, "Cafe Romeo", { machines: ['Bunn ITCB-DV, 29" w/Flip Tray'] });
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "P.O. #", "Problem Description"],
+    ["0663", "Work Started", "Cafe Mike", "", "Install Eversys Cameo c'2s"],
+    ["0664", "Work Started", "Cafe November", "", "New install of Bunn ITCB brewer"],
+    ["0665", "Work Started", "Cafe Oscar", "", "Install new Cameo c'2s; Bunn ITCB"],
+    ["0666", "Work Started", "Cafe Papa", "Install", "Install"],
+    ["0667", "Work Started", "Cafe Quebec", "Install", "Set up"],
+    ["0668", "Work Started", "Cafe Romeo", "Install", "Brewer"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  const none = "no equipment named to match an install";
+  assert.deepEqual(
+    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.matchNote]),
+    [
+      ["WO-0663", "update", mike, `install #${mike} matched by account and equipment`],
+      ["WO-0664", "update", november, `install #${november} matched by account and equipment`],
+      ["WO-0665", "update", oscar, `install #${oscar} matched by account and equipment`],
+      ["WO-0666", "create", null, none],
+      ["WO-0667", "create", null, none],
+      ["WO-0668", "create", null, none],
+    ],
+  );
+  const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual([res.updated, res.created], [3, 3]);
+  for (const [id, wo] of [[mike, "WO-0663"], [november, "WO-0664"], [oscar, "WO-0665"]]) {
+    assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, wo);
+  }
+  for (const id of [papa, quebec, romeo]) assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, null);
+});
+
+const ticketRow = async (sql, id) =>
+  (
+    await sql.query(
+      "select customer, status, to_char(completed_at, 'YYYY-MM-DD') as completed, duplicate_of from service_jobs where id = $1",
+      [id],
+    )
+  )[0];
+
+test("wrap: this cycle's ticket wins over an old-cycle copy of the number, which is neither a conflict nor merged", async () => {
+  const sql = await wrappedDesk();
+  // A: both cycles spelled like the file. B: only the old-cycle copy is spelled like the file. C: the old copy is another customer's.
+  const aOld = await closedTicket(sql, "WO-0790", "Cafe Alpha", daysAgo(700));
+  const aNew = await closedTicket(sql, "WO-0790", "Cafe Alpha", daysAgo(20));
+  const bOld = await closedTicket(sql, "WO-0791", "Alpha Coffee Co", daysAgo(700));
+  const bNew = await closedTicket(sql, "WO-0791", "Cafe Alpha", daysAgo(20));
+  const cOld = await closedTicket(sql, "WO-0793", "Old Bistro", daysAgo(700));
+  const cNew = await closedTicket(sql, "WO-0793", "Cafe Alpha", daysAgo(20));
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "Date/Time Completed"],
+    ["0790", "Completed", "Cafe Alpha", "10/19/2026"],
+    ["0791", "Completed", "Alpha Coffee Co", "10/19/2026"],
+    ["0793", "Completed", "Cafe Alpha", "10/19/2026"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.deepEqual(
+    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.wrapRepeat, r.conflictIds, r.oldCompletedAt]),
+    [
+      ["WO-0790", "update", aNew, false, null, daysAgo(20)],
+      ["WO-0791", "update", bNew, false, null, daysAgo(20)],
+      ["WO-0793", "update", cNew, false, null, daysAgo(20)],
+    ],
+  );
+  assert.equal(preview.wrapCount, 0);
+  assert.equal(preview.conflictCount, 0);
+  for (const r of preview.rows) assert.doesNotMatch(r.matchNote ?? "", /after 9999/, r.wo);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  for (const id of [aNew, bNew, cNew]) {
+    const t = await ticketRow(sql, id);
+    assert.deepEqual([t.completed, t.duplicate_of], ["2026-10-19", null], `#${id}`);
+  }
+  assert.deepEqual(await ticketRow(sql, aOld), { customer: "Cafe Alpha", status: "Completed", completed: daysAgo(700), duplicate_of: null });
+  assert.deepEqual(await ticketRow(sql, bOld), { customer: "Alpha Coffee Co", status: "Completed", completed: daysAgo(700), duplicate_of: null });
+  assert.deepEqual(await ticketRow(sql, cOld), { customer: "Old Bistro", status: "Completed", completed: daysAgo(700), duplicate_of: null });
+});
+
+test("wrap: Corrigo reopening a number with both cycles on the desk reopens this cycle's ticket, and the DB matches the preview", async () => {
+  const sql = await wrappedDesk();
+  const old = await closedTicket(sql, "WO-0790", "Cafe Alpha", daysAgo(700));
+  const recent = await closedTicket(sql, "WO-0790", "Cafe Alpha", daysAgo(20));
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Date/Time Completed"], ["0790", "Work Started", "Cafe Alpha", ""]]);
+  const preview = await previewCorrigoRecords(sql, records);
+  const row = preview.rows[0];
+  assert.deepEqual([row.jobId, row.oldCompletedAt, row.completedCleared, row.newStatus], [recent, daysAgo(20), true, "In Progress"]);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual(await ticketRow(sql, recent), { customer: "Cafe Alpha", status: row.newStatus, completed: null, duplicate_of: null });
+  assert.deepEqual(await ticketRow(sql, old), { customer: "Cafe Alpha", status: "Completed", completed: daysAgo(700), duplicate_of: null });
+});
+
+test("wrap: at apply a row previewed as new attaches to this cycle's ticket, not the old-cycle copy", async () => {
+  const sql = await wrappedDesk();
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Date/Time Completed"], ["0794", "Completed", "Cafe Alpha", "10/19/2026"]]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.equal(preview.rows[0].action, "create");
+  const old = await closedTicket(sql, "WO-0794", "Cafe Alpha", daysAgo(700));
+  const recent = await closedTicket(sql, "WO-0794", "Cafe Alpha", daysAgo(20));
+  const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual([res.updated, res.created], [1, 0]);
+  assert.equal((await ticketRow(sql, recent)).completed, "2026-10-19");
+  assert.deepEqual(await ticketRow(sql, old), { customer: "Cafe Alpha", status: "Completed", completed: daysAgo(700), duplicate_of: null });
+});
+
+test("wrap: no received date and no activity dates a ticket by its completed date; the first activity counts on its Chicago day", async () => {
+  const sql = await wrappedDesk();
+  const done = (
+    await sql.query(
+      "insert into service_jobs (kind, call_id, customer, wo, status, done, completed_at) values ('service', 'SC-0795', 'Cafe Sierra', 'WO-0795', 'Completed', true, $1) returning id",
+      [daysAgo(10)],
+    )
+  )[0].id;
+  const edge = await closedTicket(sql, "WO-0796", "Cafe Tango", null);
+  // 03:00 UTC on the day 365 days ago is the evening before in Chicago: 366 days ago.
+  await sql.query("insert into activity (entity_type, entity_id, action, created_at) values ('service', $1, 'opened', $2)", [edge, `${daysAgo(365)}T03:00:00Z`]);
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name"],
+    ["0795", "Completed", "Sierra Coffee"],
+    ["0796", "Completed", "Tango Coffee"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.deepEqual(preview.rows.map((r) => [r.action, r.jobId, r.wrapRepeat]), [["update", done, false], ["create", null, true]]);
+});
+
+test("install: an equipment-matched install archived or completed after the preview gets a new install instead, counted", async () => {
+  const sql = await installDesk();
+  const uniform = await openInstall(sql, "Cafe Uniform", { machines: ["Bunn ITCB"] });
+  const victor = await openInstall(sql, "Cafe Victor", { machines: ["Bunn ITCB"] });
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "P.O. #", "Equipment"],
+    ["1301", "Work Started", "Cafe Uniform", "Install", "Bunn ITCB"],
+    ["1302", "Work Started", "Cafe Victor", "Install", "Bunn ITCB"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.deepEqual(preview.rows.map((r) => [r.jobId, r.byEquipment]), [[uniform, true], [victor, true]]);
+  await sql.query("update installs set archived = true where id = $1", [uniform]);
+  await sql.query("update installs set complete = true, equip_status = 'Installed' where id = $1", [victor]);
+  const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual([res.updated, res.created], [0, 2]);
+  assert.deepEqual((await installsOf(sql, "Cafe Uniform")).map((r) => [r.id === uniform, r.wo]), [[true, null], [false, "WO-1301"]]);
+  assert.deepEqual(
+    (await installsOf(sql, "Cafe Victor")).map((r) => [r.id === victor, r.wo, r.equip_status]),
+    [[true, null, "Installed"], [false, "WO-1302", "Ready"]],
+  );
+});
+
+test("install: the activity log says when an install was matched by account and equipment", async () => {
+  const sql = await installDesk();
+  const id = await openInstall(sql, "Cafe Whiskey", { machines: ["Bunn ITCB"] });
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "P.O. #", "Equipment", "Date/Time Completed"],
+    ["1401", "Completed", "Cafe Whiskey", "Install", "Bunn ITCB", "10/19/2026"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.equal(await lastLog(sql, "install", id), "Corrigo import · WO-1401 · completed 2026-10-19 · matched by account and equipment");
+});
+
+test("reopen: a completed date Corrigo wrote but that can't be read does not reopen the ticket", async () => {
+  const sql = await freshDb();
+  const id = await doneTicket(sql, "WO-0807");
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Date/Time Completed"], ["0807", "Work Started", "not a date"]]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.equal(preview.rows[0].completedCleared, false);
+  assert.equal(preview.rows[0].completedNote, 'couldn\'t read the date "not a date"');
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.equal((await ticketRow(sql, id)).completed, "2026-10-12");
+  assert.doesNotMatch(await lastLog(sql, "service", id), /cleared/);
 });

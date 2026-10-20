@@ -10,6 +10,7 @@ import {
   completedOnUpdate,
   corrigoReopens,
   corrigoReviewReason,
+  crossCyclePairs,
   deskHasWrapped,
   indexHits,
   isWalkIn,
@@ -17,6 +18,7 @@ import {
   pickKeeper,
   resolvePreviewRow,
   shouldAttachToHit,
+  thisCycleFirst,
   woMatchKey,
   type CorrigoBoard,
   type CorrigoHit,
@@ -55,10 +57,15 @@ function jobBoard(kind: string | null | undefined): CorrigoBoard {
   return kind === "tlc" ? "tlc" : "service";
 }
 
-/** The received date, or the day of the ticket's first activity entry (the tables keep no created date). */
+/**
+ * The received date, else the Chicago day of the ticket's first activity entry (the tables keep no created date),
+ * else its completed date.
+ */
 function receivedSql(table: string, entityType: string): string {
-  return `to_char(coalesce(${table}.received, (select min(a.created_at)::date from activity a
-            where a.entity_type = ${entityType} and a.entity_id = ${table}.id)), 'YYYY-MM-DD') as received`;
+  return `to_char(coalesce(${table}.received,
+            (select (min(a.created_at) at time zone 'America/Chicago')::date from activity a
+              where a.entity_type = ${entityType} and a.entity_id = ${table}.id),
+            ${table}.completed_at), 'YYYY-MM-DD') as received`;
 }
 
 async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<CorrigoHit[]> {
@@ -203,7 +210,7 @@ async function findExistingHit(
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
   const attachable = group.filter((h) => shouldAttachToHit(h, fileCustomer, rolled, today));
-  return pickKeeper(attachable, preferredBoard);
+  return pickKeeper(thisCycleFirst(attachable, rolled, today), preferredBoard);
 }
 
 async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: string) {
@@ -360,9 +367,11 @@ const applyRow = z.object({
   statusRaw: z.string().nullable(),
   technician: z.string().nullable(),
   completedAt: z.string().nullable(),
+  completedRaw: z.string().nullable().optional(),
   workDone: z.string().nullable(),
   issue: z.string().nullable(),
   wrapRepeat: z.boolean().optional(),
+  byEquipment: z.boolean().optional(),
   conflictIds: z
     .array(z.object({ board: z.enum(["service", "tlc", "pm", "install"]), id: z.number() }))
     .nullable()
@@ -422,9 +431,14 @@ export async function applyCorrigoRows(
     let jobId = row.jobId;
     wrapRepeat = !!row.wrapRepeat;
     if (action === "update" && jobId && board === "install") {
-      // An install matched by equipment that got another WO since the preview: open a new one, as a fresh preview would.
-      const now = await sql.query<{ wo: string | null }>("select wo from installs where id = $1", [jobId]);
-      if (now[0]?.wo?.trim() && woMatchKey(now[0].wo) !== matchKey) {
+      // An install that got another WO since the preview, or one matched by equipment that was archived or completed
+      // since: open a new one, as a fresh preview would.
+      const now = await sql.query<{ wo: string | null; archived: boolean; complete: boolean }>(
+        "select wo, archived, complete from installs where id = $1",
+        [jobId],
+      );
+      const gone = row.byEquipment && (!now[0] || now[0].archived || now[0].complete);
+      if (gone || (now[0]?.wo?.trim() && woMatchKey(now[0].wo) !== matchKey)) {
         action = "create";
         jobId = null;
       }
@@ -462,7 +476,7 @@ export async function applyCorrigoRows(
         const status = boardStatus("pm", row.statusRaw, row.completedAt, cur[0].status).status;
         const technician = row.technician || cur[0].technician;
         const workDone = row.workDone || cur[0].work_done;
-        const reopened = corrigoReopens("pm", row.statusRaw, row.completedAt, cur[0].status);
+        const reopened = corrigoReopens("pm", row.statusRaw, row.completedAt, cur[0].status, row.completedRaw);
         const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null, reopened);
         const completedAt = date.value;
         const customer = chosen || cur[0].customer;
@@ -512,7 +526,14 @@ export async function applyCorrigoRows(
             where id = $1`,
           [jobId, technician, completedAt, workDone, equipStatus, keptWo, complete, customer],
         );
-        await logCorrigo(sql, "install", jobId, actor, `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}`);
+        await logCorrigo(
+          sql,
+          "install",
+          jobId,
+          actor,
+          `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}` +
+            (row.byEquipment ? " · matched by account and equipment" : ""),
+        );
         updated += 1;
         maybeReview(
           "install",
@@ -546,7 +567,7 @@ export async function applyCorrigoRows(
       const status = boardStatus(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status).status;
       const technician = row.technician || cur[0].technician;
       const workDone = row.workDone || cur[0].work_done;
-      const reopened = corrigoReopens(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status);
+      const reopened = corrigoReopens(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status, row.completedRaw);
       const date = completedOnUpdate(row.completedAt, cur[0].completed_at, cur[0].ns_so, reopened);
       const completedAt = date.value;
       const customer = chosen || cur[0].customer;
@@ -674,11 +695,12 @@ export async function applyCorrigoRows(
     }
   }
 
-  const reconciled = await reconcileServiceDuplicates(
-    sql,
-    actor,
-    [...heldPairs.values()].map((held) => ({ keeperId: held.keeperId, extraId: held.extraId })),
-  );
+  // After the wrap, the same number on tickets from two cycles is two jobs: the merge leaves those pairs alone.
+  const otherCycle = wrapped ? crossCyclePairs(await loadHits(sql), today) : [];
+  const reconciled = await reconcileServiceDuplicates(sql, actor, [
+    ...[...heldPairs.values()].map((held) => ({ keeperId: held.keeperId, extraId: held.extraId })),
+    ...otherCycle,
+  ]);
   for (const held of reconciled.held) rememberHold(held.keeperId, held.extraId, held.reason, held.extraId);
   if (heldPairs.size) {
     const ids = [...new Set([...heldPairs.values()].flatMap((held) => [held.keeperId, held.extraId, held.perRowExtra]))];
