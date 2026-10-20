@@ -192,7 +192,7 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
             </div>
           </form>
         ) : current ? (
-          <div className="min-w-0">
+          <div className="min-w-0 break-words">
             <p className="text-sm font-medium">{current.name}</p>
             <p className="mt-1 text-xs text-muted-foreground">{current.title}</p>
             <p className="mt-1 text-xs text-muted-foreground">{current.about}</p>
