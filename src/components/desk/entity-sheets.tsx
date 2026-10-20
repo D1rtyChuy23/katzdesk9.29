@@ -37,7 +37,7 @@ import {
 } from "@/lib/ops/lookups";
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
-import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
+import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { appendServerMachines } from "@/lib/ops/warehouse-serial";
 import { foldVisitUnits } from "@/lib/ops/install-form";
 import { addInspectionEquipment } from "@/lib/ops/inspection-api";
@@ -348,6 +348,8 @@ export function InstallSheet({
   const [equipPieces, setEquipPieces] = useState<string[]>([]);
   const [specs, setSpecs] = useState<MachineSpec[]>([]);
   const [hydratedId, setHydratedId] = useState<number | null>(null);
+  /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
+  const loadedSpecs = useRef<MachineSpec[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
   const catalog = catalogModels([
@@ -357,20 +359,11 @@ export function InstallSheet({
   ]);
   useEffect(() => {
     setCustomer(row?.customer ?? "");
-    const saved = row?.machines ?? [];
-    const fromSaved = saved.map((s) => s.equipment).filter(Boolean);
-    const names = catalog.length
-      ? listedEquipment(fromSaved.join("\n") || row?.equipment, catalog)
-      : fromSaved.length
-        ? fromSaved
-        : (row?.equipment ?? "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-    setEquipPieces(names);
-    setSpecs(
-      mergeMachineSpecs(names, saved, {
-        serial: row?.serial,
-        powerVoltage: row?.powerVoltage,
-      }),
-    );
+    // The row's machines keep the serials typed on its lines. Reading the names again from the text dropped them.
+    const loaded = row ? machinesOnOpen(row, catalog) : [];
+    loadedSpecs.current = loaded;
+    setEquipPieces(loaded.map((s) => s.equipment));
+    setSpecs(loaded.map((s) => ({ ...s })));
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
   const serialSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}`).join("\n");
@@ -378,6 +371,7 @@ export function InstallSheet({
   useEffect(() => {
     if (!row || hydratedId !== row.id) return;
     const server = row.machines ?? [];
+    loadedSpecs.current = appendServerMachines(loadedSpecs.current, server);
     setSpecs((cur) => appendServerMachines(cur, server));
     setEquipPieces((pieces) => {
       const names = server.map((m) => m.equipment).filter(Boolean);
@@ -521,11 +515,9 @@ export function InstallSheet({
                     onSubmit={(e) => {
                       e.preventDefault();
                       const fd = new FormData(e.currentTarget);
-                      const packed = serializeMachines(specs);
                       save.mutate({
                         id: row.id,
                         customer: String(fd.get("customer") || row.customer),
-                        equipment: packed.equipment,
                         equipStatus: String(fd.get("equipStatus") || "") || null,
                         installDate: String(fd.get("installDate") || "") || null,
                         technician: String(fd.get("technician") || "") || null,
@@ -537,9 +529,8 @@ export function InstallSheet({
                         accountRep: String(fd.get("accountRep") || "") || null,
                         aviKatz: fd.get("aviKatz") === "on",
                         paymentStatus: String(fd.get("paymentStatus") || "") || null,
-                        serial: packed.serial,
-                        powerVoltage: packed.powerVoltage,
-                        machines: packed.machines,
+                        // Closing the window submits this form: an unchanged list is left as saved, typed serials and all.
+                        ...changedMachineFields(specs, loadedSpecs.current),
                       });
                     }}
                   >

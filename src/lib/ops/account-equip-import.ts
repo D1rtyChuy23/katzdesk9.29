@@ -4,8 +4,8 @@ import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
-import { catalogNames, installMachines } from "@/lib/ops/inspection-api";
-import { serializeMachines } from "@/lib/ops/machines";
+import { catalogNames } from "@/lib/ops/inspection-api";
+import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import {
   isWalkIn,
   mapOwnership,
