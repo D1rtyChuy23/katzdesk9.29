@@ -229,13 +229,19 @@ export function outletForModel(model: string, specs: SpecOutlet[]): SpecOutlet |
 /**
  * Blank voltage is filled from the spec. Amps and plug come along only when the unit has no voltage, or it matches.
  * A unit with its own plug that isn't the spec's is on another outlet: it takes neither voltage nor amps from the spec.
- * Plugs are compared by NEMA code ("L6-30P" is "NEMA L6-30 twist-lock"), and a spec with no plug clashes with none.
+ * Plugs are compared by NEMA code ("L6-30P" or "l6 30r" is "NEMA L6-30 twist-lock"), and a spec with no plug clashes with none.
  */
 export function withSpecOutlet<T extends { model: string; voltage: string; plug: string; amps?: string }>(unit: T, spec: SpecOutlet | undefined): T {
   if (!spec) return unit;
   const ownVoltage = unit.voltage.trim();
   const ownPlug = unit.plug.trim();
-  const plugCode = (p: string) => nemaCode(p) ?? fold(p);
+  // "L6-30R", "l6 20p" and "L630" are all L6-30; "Hardwired" is "Hardwire only".
+  const plugCode = (p: string) => {
+    const t = p.toUpperCase();
+    if (/HARD\s*-?\s*WIRE/.test(t)) return "hardwire";
+    const m = t.match(/\b(L?)(5|6|14|15)\s*-?\s*(15|20|30|50)\s*[PR]?\b/);
+    return m ? `${m[1]}${m[2]}-${m[3]}` : (nemaCode(p) ?? fold(p));
+  };
   const plugMatch = !ownPlug || !spec.plug.trim() || fold(ownPlug) === fold(spec.plug) || plugCode(ownPlug) === plugCode(spec.plug);
   const voltsMatch = plugMatch && (!ownVoltage || fold(ownVoltage) === fold(spec.voltage));
   return {

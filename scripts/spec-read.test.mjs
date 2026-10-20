@@ -151,6 +151,26 @@ test("plugs are compared by NEMA code, and a spec with no plug clashes with no u
   assert.deepEqual(bits(withSpecOutlet(unit("L6-30P"), { ...twist, plug: "NEMA 6-30" })), ["", "", "L6-30P"]);
 });
 
+test("plugs typed with an R, a space, no hyphen or hardwire wording still match the spec's plug", () => {
+  const unit = (plug) => ({ model: "X", voltage: "", plug, amps: "" });
+  const bits = (u) => [u.voltage, u.amps];
+  const spec = (plug, voltage, amps) => ({ model: "X", manufacturer: "Bunn", voltage, amps, plug });
+  const l630 = spec("NEMA L6-30 twist-lock", "208V", "30A");
+  const l620 = spec("NEMA L6-20 twist-lock", "208V", "20A");
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30R"), l630)), ["208V", "30A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("l6 20p"), l620)), ["208V", "20A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L620P"), l620)), ["208V", "20A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("5-20R"), spec("NEMA 5-20", "120V", "20A"))), ["120V", "20A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("Hardwired"), spec("Hardwire only", "208V 3-phase", "40A"))), ["208V 3-phase", "40A"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("Hard wire"), spec("Hardwire only", "208V 3-phase", "40A"))), ["208V 3-phase", "40A"]);
+  // A different outlet, however it is spelled, still takes nothing.
+  assert.deepEqual(bits(withSpecOutlet(unit("5-15P"), spec("6-30P", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30P"), spec("NEMA 6-30", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30"), spec("NEMA L14-30 twist-lock", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30R"), spec("NEMA L14-30 twist-lock", "208V", "30A"))), ["", ""]);
+  assert.deepEqual(bits(withSpecOutlet(unit("Hardwired"), spec("NEMA 5-20", "120V", "20A"))), ["", ""]);
+});
+
 test("a hand entry on a model that already has a sheet opens that sheet", () => {
   const sheetBooks = [{ sheetId: 4, bookId: null }, { sheetId: 3, bookId: 9 }];
   assert.equal(tiedSheetId(sheetBooks, 9), 3);
