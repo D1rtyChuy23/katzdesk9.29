@@ -225,15 +225,42 @@ export function outletForModel(model: string, specs: SpecOutlet[]): SpecOutlet |
   );
 }
 
-/** Blank voltage, amps, or plug take the spec. A value already on the unit stays. */
+/** Blank voltage is filled from the spec. Amps and plug come along only when the unit has no voltage, or it matches. */
 export function withSpecOutlet<T extends { model: string; voltage: string; plug: string; amps?: string }>(unit: T, spec: SpecOutlet | undefined): T {
   if (!spec) return unit;
+  const ownVoltage = unit.voltage.trim();
+  const voltsMatch = !ownVoltage || fold(ownVoltage) === fold(spec.voltage);
   return {
     ...unit,
-    voltage: unit.voltage.trim() || spec.voltage,
-    plug: unit.plug.trim() || spec.plug,
-    amps: (unit.amps ?? "").trim() || spec.amps,
+    voltage: ownVoltage || spec.voltage,
+    plug: unit.plug.trim() || (voltsMatch ? spec.plug : ""),
+    amps: (unit.amps ?? "").trim() || (voltsMatch ? spec.amps : ""),
   };
+}
+
+export type OutletBits = { voltage: string; amps: string; plug: string };
+
+/** One outlet when every config agrees. Differing configs are skipped so the print does not guess. */
+export function outletFromConfigs(
+  configs: readonly { voltage?: string | null; amps?: string | null; plug?: string | null }[],
+): OutletBits | null {
+  if (!configs.length) return null;
+  const rows = configs.map((c) => ({ voltage: clean(c.voltage), amps: clean(c.amps), plug: clean(c.plug) }));
+  const first = rows[0]!;
+  const same = rows.every(
+    (r) => fold(r.voltage) === fold(first.voltage) && fold(r.amps) === fold(first.amps) && fold(r.plug) === fold(first.plug),
+  );
+  return same ? first : null;
+}
+
+/** Hand entry is only for a sheet the reader could not read, and only when it sits on a model. */
+export function handEntryForRow(row: {
+  status: string;
+  fileId: number;
+  bookId: number | null;
+}): { kind: "file"; fileId: number; bookId: number } | null {
+  if (row.status !== "unreadable" || row.bookId == null) return null;
+  return { kind: "file", fileId: row.fileId, bookId: row.bookId };
 }
 
 /** One tile status. A stored sheet that has not been read yet has no chip. */

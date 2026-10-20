@@ -11,6 +11,8 @@ import {
   isExact,
   orderAdminSections,
   outletForModel,
+  outletFromConfigs,
+  handEntryForRow,
   valuesFromParts,
   withSpecOutlet,
   blankSpecValues,
@@ -92,13 +94,31 @@ test("a manufacturer with a bracket in its name does not break the outlet lookup
   assert.equal(outletForModel("Acme (USA G", [odd])?.voltage, "120V");
 });
 
-test("a unit keeps its own voltage, and a blank outlet takes the spec including amps", () => {
+test("amps and plug come from the spec only when voltage is blank or it matches, and disagreeing configs are skipped", () => {
   const spec = { model: "Bunn ITCB", manufacturer: "Bunn", voltage: "220V", amps: "20A", plug: "L6-20P" };
   assert.equal(outletForModel("Bunn ITCB", [spec])?.amps, "20A");
-  const filled = withSpecOutlet({ model: "Bunn ITCB", voltage: "120V", plug: "", amps: "" }, spec);
-  assert.equal(filled.voltage, "120V");
-  assert.equal(filled.amps, "20A");
-  assert.equal(filled.plug, "L6-20P");
+  const otherVolts = withSpecOutlet({ model: "Bunn ITCB", voltage: "120V", plug: "", amps: "" }, spec);
+  assert.equal(otherVolts.voltage, "120V");
+  assert.equal(otherVolts.amps, "");
+  assert.equal(otherVolts.plug, "");
+  const blank = withSpecOutlet({ model: "Bunn ITCB", voltage: "", plug: "", amps: "" }, spec);
+  assert.equal(blank.voltage, "220V");
+  assert.equal(blank.amps, "20A");
+  assert.equal(blank.plug, "L6-20P");
+  const same = withSpecOutlet({ model: "Bunn ITCB", voltage: "220 V", plug: "NEMA", amps: "" }, spec);
+  assert.equal(same.voltage, "220 V");
+  assert.equal(same.amps, "20A");
+  assert.equal(same.plug, "NEMA");
+  assert.equal(outletFromConfigs([
+    { voltage: "120V", amps: "15A", plug: "5-15P" },
+    { voltage: "220V", amps: "20A", plug: "L6-20P" },
+  ]), null);
+  assert.equal(outletFromConfigs([
+    { voltage: "220V", amps: "20A", plug: "L6-20P" },
+    { voltage: "220 V", amps: "20A", plug: "L6-20P" },
+  ])?.voltage, "220V");
+  assert.equal(handEntryForRow({ status: "unreadable", fileId: 4, bookId: 9 })?.kind, "file");
+  assert.equal(handEntryForRow({ status: "needs_review", fileId: 4, bookId: 9 }), null);
   const rows = groupFormRows([
     { model: "Bunn ITCB", serial: "", notes: "", voltage: "220V", plug: "", amps: "20A" },
   ]);

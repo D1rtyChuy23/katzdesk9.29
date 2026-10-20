@@ -34,11 +34,15 @@ export function LibraryAdmin({
   files,
   onChanged,
   onMoveFile,
+  onEnterByHand,
+  onEnterForModel,
 }: {
   books: LibraryBook[];
   files: LibraryFile[];
   onChanged: () => void;
   onMoveFile?: (file: LibraryFile) => void;
+  onEnterByHand: (row: { fileId: number; bookId: number | null; status: string }) => void;
+  onEnterForModel: (book: { id: number; title: string }) => void;
 }) {
   const qc = useQueryClient();
   const state = useQuery({ queryKey: ["library-admin-state"], queryFn: () => listLibraryAdminState() });
@@ -247,6 +251,8 @@ export function LibraryAdmin({
           queued={reads.data?.queued ?? 0}
           noSheet={reads.data?.noSheet ?? []}
           onChanged={reload}
+          onEnterByHand={onEnterByHand}
+          onEnterForModel={onEnterForModel}
         />
       ),
     },

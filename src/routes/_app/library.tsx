@@ -18,15 +18,15 @@ import {
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { chipForDoc, copiedManuals, docVariation, familyOf, isMainChip, mainChipFor, removedCopies, variationsOf, fileError, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { chipForDoc, copiedManuals, docVariation, familyOf, fileUrl, isMainChip, mainChipFor, removedCopies, variationsOf, fileError, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 import { listSpecReadStatus, runSpecReads } from "@/lib/ops/spec-read-api";
-import { TILE_LABEL, bookSpecStatus, type TileStatus } from "@/lib/ops/spec-read";
+import { TILE_LABEL, bookSpecStatus, handEntryForRow, type TileStatus } from "@/lib/ops/spec-read";
 import { pdfImages } from "@/lib/pdf-text";
 import { needsWater } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, StoreOnceDialog, uploadLibraryFile, type StoreOnceChoice } from "@/components/desk/library-files";
+import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, StoreOnceDialog, originOf, uploadLibraryFile, type StoreOnceChoice } from "@/components/desk/library-files";
 import { LibraryAdmin } from "@/components/desk/library-admin";
 import type { StoreOnceOffer } from "@/lib/ops/library-files";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
@@ -83,7 +83,8 @@ function Page() {
   const book = bookId != null ? books.find((b) => b.id === bookId) ?? null : null;
 
   const [mode, setMode] = useState<"browse" | "import" | "edit">("browse");
-  const [importFile, setImportFile] = useState<{ file: File; bookId: number } | null>(null);
+  const [importFile, setImportFile] = useState<{ file: File | null; bookId: number } | null>(null);
+  const [handSeed, setHandSeed] = useState<{ manufacturer: string; model: string } | null>(null);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<{ section: LibrarySection; text: string } | null>(null);
   const [problems, setProblems] = useState<string[]>([]);
@@ -290,12 +291,44 @@ function Page() {
     }
   }
 
+  /** A scanned or unread sheet: open the stored PDF in Spec Import, the way a hand entry used to. */
+  async function enterSpecsByHand(row: { status: string; fileId: number; bookId: number | null }) {
+    const hand = handEntryForRow(row);
+    if (!hand) return;
+    const file = files.find((f) => f.id === hand.fileId);
+    if (!file) {
+      toast.error("That sheet is not in the library.");
+      return;
+    }
+    try {
+      const res = await fetch(fileUrl(originOf(), file.token));
+      if (!res.ok) throw new Error("Couldn't open that file.");
+      setHandSeed(null);
+      setImportFile({ file: new File([await res.blob()], file.name, { type: file.mime || "application/pdf" }), bookId: hand.bookId });
+      setMode("import");
+      void navigate({ to: "/library", search: { book: hand.bookId } });
+    } catch (e) {
+      fail(e, "Couldn't open that file.");
+    }
+  }
+
+  /** A model with no sheet has no PDF. Open a blank form tied to that book. */
+  function enterSpecsForModel(book: { id: number; title: string }) {
+    const full = books.find((b) => b.id === book.id);
+    const manufacturer = full?.manufacturer ?? "";
+    setHandSeed({ manufacturer, model: modelLabel(book.title, manufacturer) });
+    setImportFile({ file: null, bookId: book.id });
+    setMode("import");
+    void navigate({ to: "/library", search: { book: book.id } });
+  }
+
   /** After the AI read is saved: the sheet joins its book and the original PDF is kept there. */
   async function afterImport(id: number, pdf: File | null) {
     const from = importFile;
     setOpenMaker(null);
     setMode("browse");
     setImportFile(null);
+    setHandSeed(null);
     try {
       if (from) await moveSpecSheet({ data: { sheetId: id, bookId: from.bookId } });
       await reload();
@@ -465,7 +498,16 @@ function Page() {
       </header>
 
       {tab === "training" ? <TrainingSection /> : null}
-      {tab === "admin" && isAdmin ? <LibraryAdmin books={books} files={files} onChanged={() => void reload()} onMoveFile={(file) => setAsk({ kind: "move-file", file })} /> : null}
+      {tab === "admin" && isAdmin ? (
+        <LibraryAdmin
+          books={books}
+          files={files}
+          onChanged={() => void reload()}
+          onMoveFile={(file) => setAsk({ kind: "move-file", file })}
+          onEnterByHand={(row) => void enterSpecsByHand(row)}
+          onEnterForModel={enterSpecsForModel}
+        />
+      ) : null}
 
       {tab !== "library" ? null : (
       <>
@@ -496,12 +538,14 @@ function Page() {
       {mode === "import" ? (
         <section className="mt-5" data-testid="spec-import-panel">
           <SpecImport
-            key={importFile ? `file-${importFile.file.name}` : "import"}
+            key={importFile?.file ? `file-${importFile.bookId}-${importFile.file.name}` : importFile ? `hand-${importFile.bookId}` : "import"}
             aiReady={!!data.data?.aiReady}
             initialFile={importFile?.file ?? null}
+            seed={!importFile?.file ? handSeed : null}
             onCancel={() => {
               setMode("browse");
               setImportFile(null);
+              setHandSeed(null);
             }}
             onSaved={(id, pdf) => void afterImport(id, pdf)}
           />

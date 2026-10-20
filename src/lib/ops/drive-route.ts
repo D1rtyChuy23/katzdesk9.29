@@ -76,3 +76,13 @@ export function driveBetween(legs: ReadonlyMap<string, DriveLeg>, from: LatLng |
   if (!from) return null;
   return legs.get(pairKey(from, to)) ?? null;
 }
+
+/** Includes each stop, so a table from another day is not reused when the tech and status match. */
+export function driveTableStamp(
+  groups: readonly { tech: string; points: readonly LatLng[] }[],
+  states: readonly ("ok" | "err" | "wait")[],
+): string {
+  return groups
+    .map((g, i) => `${g.tech}:${g.points.map((p) => pointKey(p)).join(",")}:${states[i] ?? "wait"}`)
+    .join("|");
+}

@@ -6,7 +6,7 @@ import { addDays, todayChicago } from "@/lib/ops/clock";
 import { listTechs } from "@/lib/ops/roster";
 import { updateInstall, updateJob, updatePm } from "@/lib/ops/api";
 import { NO_REP_COLOR, type LatLng } from "@/lib/ops/geo";
-import { driveBetween, legsFromTable, pointKey, type DriveLeg } from "@/lib/ops/drive-route";
+import { driveBetween, driveTableStamp, legsFromTable, pointKey, type DriveLeg } from "@/lib/ops/drive-route";
 import { driveLine, driveTable } from "@/lib/ops/drive-route-api";
 import {
   collectDayStops,
@@ -21,6 +21,7 @@ import {
   planTechRoutes,
   routable,
   routeNote,
+  routeStartNote,
   stopCount,
   stopTime,
   techColors,
@@ -200,7 +201,10 @@ export function RoutePlanner({
       retry: 1,
     })),
   });
-  const driveStamp = driveAsked.map((g, i) => `${g.tech}:${driveQs[i]?.data ? "ok" : driveQs[i]?.isError ? "err" : "wait"}`).join("|");
+  const driveStamp = driveTableStamp(
+    driveAsked,
+    driveAsked.map((_, i) => (driveQs[i]?.data ? "ok" : driveQs[i]?.isError ? "err" : "wait")),
+  );
   const driveFn = useMemo(() => {
     const legs = new Map<string, DriveLeg>();
     driveAsked.forEach((g, i) => {
@@ -798,7 +802,7 @@ function TechCard({
             </div>
           )}
           <p className="mt-1.5 text-xs text-muted-foreground">
-            {start ? `Starts from ${start.label.replace(/^The /, "the ")}.` : "Opens from the phone's current location. The stop order above starts at the first stop."}
+            {routeStartNote(start)}
             {r.links.length > 1 ? " Google Maps takes about 10 stops per link, so each leg starts where the last one ended." : ""}
           </p>
         </div>

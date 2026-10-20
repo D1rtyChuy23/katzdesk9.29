@@ -18,6 +18,7 @@ import {
   diffSpec,
   isExact,
   outletForModel,
+  outletFromConfigs,
   valuesFromDraft,
   valuesFromParts,
   type FieldChange,
@@ -567,6 +568,7 @@ export const listSpecOutlets = createServerFn({ method: "GET" })
 
 export async function loadSpecOutlets(sql: Sql): Promise<SpecOutlet[]> {
   const rows = await sql.query<{
+    id: number;
     manufacturer: string;
     model: string;
     book_title: string | null;
@@ -575,27 +577,41 @@ export async function loadSpecOutlets(sql: Sql): Promise<SpecOutlet[]> {
     requirements: unknown;
     specs: unknown;
   }>(
-    `select distinct on (s.id) s.manufacturer, s.model, b.title as book_title, b.manufacturer as book_mfr, b.mpn, c.requirements, s.specs
+    `select s.id, s.manufacturer, s.model, b.title as book_title, b.manufacturer as book_mfr, b.mpn, c.requirements, s.specs
        from spec_sheets s
        left join library_books b on b.id = s.book_id
        left join spec_configs c on c.sheet_id = s.id
       order by s.id, c.position`,
   );
-  return rows.map((row) => {
-    const specs = asJson(row.specs);
-    const values = valuesFromParts({
-      requirements: (asJson(row.requirements) ?? {}) as Requirements,
-      specs: Array.isArray(specs) ? (specs as Kv[]) : [],
-      mpn: row.mpn,
+  const groups = new Map<number, typeof rows>();
+  for (const row of rows) {
+    const id = Number(row.id);
+    const list = groups.get(id) ?? [];
+    list.push(row);
+    groups.set(id, list);
+  }
+  const out: SpecOutlet[] = [];
+  for (const list of groups.values()) {
+    const configs = list.map((row) => {
+      const specs = asJson(row.specs);
+      return valuesFromParts({
+        requirements: (asJson(row.requirements) ?? {}) as Requirements,
+        specs: Array.isArray(specs) ? (specs as Kv[]) : [],
+        mpn: row.mpn,
+      });
     });
-    return {
+    const outlet = outletFromConfigs(configs);
+    if (!outlet) continue;
+    const row = list[0]!;
+    out.push({
       model: row.book_title || `${row.manufacturer} ${row.model}`.trim(),
       manufacturer: row.book_mfr || row.manufacturer,
-      voltage: values.voltage,
-      amps: values.amps,
-      plug: values.plug,
-    };
-  });
+      voltage: outlet.voltage,
+      amps: outlet.amps,
+      plug: outlet.plug,
+    });
+  }
+  return out;
 }
 
 export { outletForModel };
