@@ -278,7 +278,11 @@ export const runSpecReads = createServerFn({ method: "POST" })
           [row.book_id],
         )
       )[0];
-      const current = await currentValues(sql, Number(row.book_id), book?.mpn ?? "");
+      const current = await currentValues(
+        sql,
+        { id: Number(row.book_id), title: book?.title ?? "", manufacturer: book?.manufacturer ?? null },
+        book?.mpn ?? "",
+      );
       const extracted = valuesFromDraft(result.draft, null);
       // The model's MPN is not inside the draft. Compare it on its own.
       extracted.mpn = extracted.mpn || guessMpn(result.draft);
@@ -305,13 +309,31 @@ function guessMpn(draft: SpecSheetDraft): string {
   return valuesFromDraft(draft).mpn;
 }
 
-async function currentValues(sql: Sql, bookId: number, mpn: string): Promise<SpecValues> {
-  const sheet = (
-    await sql.query<{ id: number; specs: unknown }>(
-      "select id, specs from spec_sheets where book_id = $1 order by id limit 1",
-      [bookId],
+type BookRef = { id: number; title: string; manufacturer: string | null };
+type SheetRow = { id: number; specs: unknown; manufacturer: string; model: string; book_id: number | null };
+
+/**
+ * The model's spec sheet: the one tied to it, else an untied sheet with the same maker and model.
+ * A sheet under that maker and model that belongs to another model comes back too, so the caller can refuse.
+ */
+async function sheetForBook(sql: Sql, book: BookRef): Promise<SheetRow | undefined> {
+  const manufacturer = (book.manufacturer ?? "").trim();
+  const model = manufacturer ? modelLabel(book.title, manufacturer) : "";
+  return (
+    await sql.query<SheetRow>(
+      `select id, specs, manufacturer, model, book_id
+         from spec_sheets
+        where book_id = $1 or (lower(manufacturer) = lower($2) and lower(model) = lower($3))
+        order by case when book_id = $1 then 0 when book_id is null then 1 else 2 end, id
+        limit 1`,
+      [book.id, manufacturer, model],
     )
   )[0];
+}
+
+async function currentValues(sql: Sql, book: BookRef, mpn: string): Promise<SpecValues> {
+  const found = await sheetForBook(sql, book);
+  const sheet = found && (found.book_id == null || found.book_id === book.id) ? found : undefined;
   if (!sheet) return { ...blankSpecValues(), mpn };
   const config = (
     await sql.query<{ requirements: unknown }>(
@@ -332,7 +354,7 @@ const approveInput = z.object({
   useNew: z.array(z.string()).max(20).optional(),
 });
 
-async function approveOne(sql: Sql, fileId: number, useNew: string[]): Promise<{ title: string }> {
+export async function approveOne(sql: Sql, fileId: number, useNew: string[]): Promise<{ title: string }> {
   const row = (
     await sql.query<{ book_id: number | null; status: string; extracted: unknown }>(
       "select book_id, status, extracted from spec_reads where file_id = $1",
@@ -424,12 +446,10 @@ async function writeApproved(
   const manufacturer = (book.manufacturer ?? "").trim();
   const model = modelLabel(book.title, manufacturer);
   if (!manufacturer || !model) throw new Error(`${book.title} has no manufacturer, so the specs can't be saved on it.`);
-  const existing = (
-    await sql.query<{ id: number; specs: unknown; manufacturer: string; model: string }>(
-      "select id, specs, manufacturer, model from spec_sheets where book_id = $1 order by id limit 1",
-      [book.id],
-    )
-  )[0];
+  const existing = await sheetForBook(sql, book);
+  if (existing && existing.book_id != null && existing.book_id !== book.id) {
+    throw new Error(`${existing.manufacturer} ${existing.model} already has a spec sheet on another model. Tie it first.`);
+  }
   const config = existing
     ? (
         await sql.query<{ id: number; label: string; requirements: unknown }>(
@@ -454,6 +474,18 @@ async function writeApproved(
   const applied = applySpecPicks(draft, extracted, book.mpn ?? "", picks);
   const requirements = JSON.stringify(applied.draft.configs[0]!.requirements ?? {});
   const specJson = JSON.stringify(applied.draft.specs);
+  const newMpn = applied.mpn && applied.mpn !== (book.mpn ?? "") ? applied.mpn : null;
+  if (newMpn) {
+    // Same match as library_books_mpn_uidx, checked before anything is written.
+    const taken = await sql.query<{ id: number }>(
+      `select id from library_books
+        where id <> $2 and mpn is not null and btrim(mpn) <> ''
+          and upper(regexp_replace(mpn, '[^A-Za-z0-9]+', '', 'g')) = upper(regexp_replace($1, '[^A-Za-z0-9]+', '', 'g'))
+        limit 1`,
+      [newMpn, book.id],
+    );
+    if (taken[0]) throw new Error(`MPN ${newMpn} is already on another model. Nothing was saved.`);
+  }
   if (existing && config) {
     await sql.query("update spec_sheets set specs = $2::jsonb, book_id = $3, updated_at = now() where id = $1", [
       existing.id,
@@ -475,21 +507,21 @@ async function writeApproved(
     const inserted = await sql.query<{ id: number }>(
       `insert into spec_sheets (manufacturer, model, specs, mfr_notes, created_by, book_id)
        values ($1, $2, $3::jsonb, '{}'::jsonb, 'Spec read', $4)
-       on conflict (manufacturer, model) do update set specs = excluded.specs, book_id = coalesce(spec_sheets.book_id, excluded.book_id), updated_at = now()
+       on conflict (manufacturer, model) do nothing
        returning id`,
       [manufacturer, model, specJson, book.id],
     );
     const id = inserted[0]?.id;
-    if (!id) throw new Error("The spec sheet could not be saved.");
+    if (!id) throw new Error(`A spec sheet for ${manufacturer} ${model} was just added. Try again.`);
     const has = await sql.query<{ id: number }>("select id from spec_configs where sheet_id = $1 order by position limit 1", [id]);
     if (has[0]) await sql.query("update spec_configs set requirements = $2::jsonb where id = $1", [has[0].id, requirements]);
     else await sql.query("insert into spec_configs (sheet_id, label, position, requirements) values ($1, 'Standard', 0, $2::jsonb)", [id, requirements]);
   }
-  if (applied.mpn && applied.mpn !== (book.mpn ?? "")) {
+  if (newMpn) {
     try {
-      await sql.query("update library_books set mpn = $2 where id = $1", [book.id, applied.mpn]);
+      await sql.query("update library_books set mpn = $2 where id = $1", [book.id, newMpn]);
     } catch (e) {
-      if (/unique|duplicate/i.test(String(e))) throw new Error(`MPN ${applied.mpn} is already on another model. It was not changed.`);
+      if (/unique|duplicate/i.test(String(e))) throw new Error(`MPN ${newMpn} is already on another model. It was not changed.`);
       throw e;
     }
   }
