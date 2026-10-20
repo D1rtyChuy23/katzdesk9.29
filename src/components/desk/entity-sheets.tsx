@@ -40,7 +40,7 @@ import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { appendServerMachines } from "@/lib/ops/warehouse-serial";
 import { foldVisitUnits } from "@/lib/ops/install-form";
-import { addInspectionEquipment, getInstallInspection } from "@/lib/ops/inspection-api";
+import { addInspectionEquipment } from "@/lib/ops/inspection-api";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -304,10 +304,10 @@ export function PmSheet({
                     </div>
                   </form>
                 </Tabs.Content>
-                <Tabs.Content value="runbook" className="outline-none" data-testid="pm-panel-runbook">
+                <Tabs.Content value="runbook" forceMount className={KEEP_MOUNTED} data-testid="pm-panel-runbook">
                   <PmRunbook pmId={pm.id} customer={pm.customer} />
                 </Tabs.Content>
-                <Tabs.Content value="invoices" className="p-5 outline-none" data-testid="pm-panel-invoices">
+                <Tabs.Content value="invoices" forceMount className={`p-5 ${KEEP_MOUNTED}`} data-testid="pm-panel-invoices">
                   <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                   <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this PM.</p>
                   <div className="mt-3">
@@ -386,16 +386,6 @@ export function InstallSheet({
     // A warehouse assignment writes the serial on the server. Pre-inspection can add a machine. Pull both in.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, serialSig, machineSig]);
-  const visit = useQuery({
-    queryKey: ["inspection", row?.id],
-    queryFn: () => getInstallInspection({ data: { installId: row!.id } }),
-    enabled: row != null,
-  });
-  const visitSig = [
-    ...(visit.data?.machines ?? []).map((m) => `${m.model}|${m.serial ?? ""}`),
-    ...(assets.data ?? []).filter((a) => a.installId === row?.id).map((a) => `${a.model}|${a.serial ?? ""}`),
-  ].join("\n");
-  const foldedFor = useRef("");
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
@@ -451,21 +441,6 @@ export function InstallSheet({
       machines: packed.machines,
     });
   }
-
-  useEffect(() => {
-    if (!row || hydratedId !== row.id || !visit.data || visit.data.installId !== row.id) return;
-    const extras = [
-      ...visit.data.machines.map((m) => ({ model: m.model || m.name, serial: m.serial, electrical: m.electrical })),
-      ...(assets.data ?? []).filter((a) => a.installId === row.id).map((a) => ({ model: a.model, serial: a.serial, electrical: null })),
-    ];
-    const folded = foldVisitUnits(specs, extras);
-    const sig = `${row.id}:${visitSig}:${folded.rows.map((r) => `${r.equipment}|${r.serial}|${r.powerVoltage}|${r.plug ?? ""}`).join(";")}`;
-    if ((!folded.added && !folded.changed) || foldedFor.current === sig) return;
-    foldedFor.current = sig;
-    persistMachines(folded.rows);
-    // Units already on the visit (pre-inspection or the barn) join the equipment list once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row?.id, hydratedId, visitSig]);
 
   return (
     <Sheet
@@ -643,7 +618,7 @@ export function InstallSheet({
                   </form>
                 </Tabs.Content>
 
-                <Tabs.Content value="equipment" className="outline-none" data-testid="install-panel-equipment">
+                <Tabs.Content value="equipment" forceMount className={KEEP_MOUNTED} data-testid="install-panel-equipment">
                   <SerialNoticeBanner
                     notice={row.serialNotice}
                     onAttach={(unit) => {
@@ -695,7 +670,7 @@ export function InstallSheet({
                   <InstallAssets installId={row.id} />
                 </Tabs.Content>
 
-                <Tabs.Content value="invoices" className="p-5 outline-none" data-testid="install-panel-invoices">
+                <Tabs.Content value="invoices" forceMount className={`p-5 ${KEEP_MOUNTED}`} data-testid="install-panel-invoices">
                   <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                   <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this install.</p>
                   <div className="mt-3">
@@ -703,7 +678,7 @@ export function InstallSheet({
                   </div>
                 </Tabs.Content>
 
-                <Tabs.Content value="pre-inspection" className="outline-none" data-testid="install-panel-pre-inspection">
+                <Tabs.Content value="pre-inspection" forceMount className={KEEP_MOUNTED} data-testid="install-panel-pre-inspection">
                   <PreInspectionPanel installId={row.id} />
                 </Tabs.Content>
 

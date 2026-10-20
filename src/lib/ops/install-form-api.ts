@@ -1,9 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getSql } from "@/lib/db";
+import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { parseMachinesJson } from "@/lib/ops/machines";
-import { readInspection } from "@/lib/ops/inspection-api";
+import { catalogNames, installMachines, readInspection, type InspectionView } from "@/lib/ops/inspection-api";
 import { unitType } from "@/lib/ops/pre-inspection";
 import { serialKey } from "@/lib/ops/account-equip";
 import {
@@ -43,6 +42,27 @@ export type InstallFormPayload = {
   corrigo: { label: string; notes: string }[];
 };
 
+/**
+ * The units on the form: the install's machines, split the way pre-inspection splits them so each unit there matches
+ * the name it was made from, and any pre-inspection or barn unit not already on that list.
+ */
+export async function formMachines(
+  sql: Sql,
+  install: { id: number; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null },
+  inspection: InspectionView | null,
+) {
+  const assets = await sql.query<{ model: string | null; serial: string | null }>(
+    "select model, serial from assets where install_id = $1",
+    [install.id],
+  );
+  const base: VisitMachine[] = installMachines(install, await catalogNames(sql)).machines;
+  const extras = [
+    ...(inspection?.machines ?? []).map((m) => ({ model: m.name || m.model, serial: m.serial, electrical: m.electrical })),
+    ...assets.map((a) => ({ model: a.model ?? "", serial: a.serial, electrical: null })),
+  ];
+  return foldVisitUnits(base, extras);
+}
+
 export const getInstallForm = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: { installId: number }) => z.object({ installId: z.number().int().positive() }).parse(d))
@@ -73,10 +93,6 @@ export const getInstallForm = createServerFn({ method: "GET" })
       )
     )[0];
     const inspection = await readInspection(sql, install.id);
-    const assets = await sql.query<{ model: string | null; serial: string | null }>(
-      "select model, serial from assets where install_id = $1",
-      [install.id],
-    );
     const priorInstalls = (
       await sql.query<{ n: number }>(
         "select count(*)::int as n from installs where archived = false and id <> $1 and lower(customer) = lower($2)",
@@ -93,23 +109,7 @@ export const getInstallForm = createServerFn({ method: "GET" })
       )
     )[0]?.n ?? 0;
 
-    const saved = parseMachinesJson(install.machines);
-    const base: VisitMachine[] = saved.length
-      ? saved
-      : (install.equipment ?? "")
-          .split(/\r?\n/)
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map((equipment, i, all) => ({
-            equipment,
-            serial: all.length === 1 ? (install.serial ?? "") : "",
-            powerVoltage: all.length === 1 ? (install.power_voltage ?? "") : "",
-          }));
-    const extras = [
-      ...(inspection?.machines ?? []).map((m) => ({ model: m.model || m.name, serial: m.serial, electrical: m.electrical })),
-      ...assets.map((a) => ({ model: a.model ?? "", serial: a.serial, electrical: null })),
-    ];
-    const folded = foldVisitUnits(base, extras);
+    const folded = await formMachines(sql, install, inspection);
     const recipes = await sql.query<{ id: number; name: string | null; equipment_model: string | null }>(
       "select id, name, equipment_model from recipes where lower(customer) = lower($1) or coalesce(customer, '') = ''",
       [customer],

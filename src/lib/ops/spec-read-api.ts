@@ -7,7 +7,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { modelLabel, shouldStartDownload } from "@/lib/ops/library-file-rules";
+import { copiesToVariations, isMainChip, mainChipFor, modelLabel, shouldStartDownload, type LibrarySection } from "@/lib/ops/library-file-rules";
+import { cleanMpn, sameMpn } from "@/lib/ops/mpn-rules";
 import { extractSpecFromText } from "@/lib/ops/spec-library";
 import { emptyDraft, type Kv, type Requirements, type SpecSheetDraft } from "@/lib/ops/spec-schema";
 import {
@@ -80,25 +81,30 @@ function asChanges(raw: unknown): FieldChange[] {
   });
 }
 
+/** Every read, on the model its file is on now, so a moved sheet's tile follows it. */
+export async function specReadRows(sql: Sql) {
+  return sql.query<{
+    file_id: number;
+    book_id: number | null;
+    status: SpecReadRow["status"];
+    error: string | null;
+    changes: unknown;
+    book_title: string | null;
+    file_name: string | null;
+  }>(
+    `select r.file_id, f.book_id, r.status, r.error, r.changes, b.title as book_title, f.name as file_name
+       from spec_reads r
+       left join library_files f on f.id = r.file_id
+       left join library_books b on b.id = f.book_id
+      order by lower(coalesce(b.title, '')), r.file_id`,
+  );
+}
+
 export const listSpecReads = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .handler(async (): Promise<SpecReadBoard> => {
     const sql = await ready();
-    const reads = await sql.query<{
-      file_id: number;
-      book_id: number | null;
-      status: SpecReadRow["status"];
-      error: string | null;
-      changes: unknown;
-      book_title: string | null;
-      file_name: string | null;
-    }>(
-      `select r.file_id, r.book_id, r.status, r.error, r.changes, b.title as book_title, f.name as file_name
-         from spec_reads r
-         left join library_books b on b.id = r.book_id
-         left join library_files f on f.id = r.file_id
-        order by lower(coalesce(b.title, '')), r.file_id`,
-    );
+    const reads = await specReadRows(sql);
     const books = await sql.query<{ id: number; title: string }>(
       `select b.id, b.title from library_books b
         where not exists (
@@ -131,9 +137,7 @@ export const listSpecReadStatus = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .handler(async (): Promise<{ fileId: number; bookId: number | null; status: string }[]> => {
     const sql = await ready();
-    const rows = await sql.query<{ file_id: number; book_id: number | null; status: string }>(
-      "select file_id, book_id, status from spec_reads",
-    );
+    const rows = await specReadRows(sql);
     return rows.map((r) => ({ fileId: Number(r.file_id), bookId: r.book_id == null ? null : Number(r.book_id), status: r.status }));
   });
 
@@ -191,7 +195,7 @@ function asBytes(data: unknown): Uint8Array {
   return new Uint8Array();
 }
 
-async function queueFiles(sql: Sql, fileIds: number[] | null, force: boolean) {
+export async function queueFiles(sql: Sql, fileIds: number[] | null, force: boolean) {
   if (fileIds && !fileIds.length) return;
   const params: unknown[] = [];
   const only = fileIds ? `and f.id = any($1::int[])` : "";
@@ -206,14 +210,28 @@ async function queueFiles(sql: Sql, fileIds: number[] | null, force: boolean) {
            status = 'queued',
            error = null,
            updated_at = now()
-     where ${force ? "true" : "spec_reads.status in ('queued', 'unreadable')"}`,
+     where ${force ? "true" : "spec_reads.status = 'queued'"}`,
     params,
   );
 }
 
+/** The queued sheets a run reads: only the ones asked for when fileIds is set. */
+export async function queuedSheets(sql: Sql, fileIds: number[] | null) {
+  return sql.query<{ file_id: number; book_id: number; name: string }>(
+    `select r.file_id, r.book_id, f.name
+       from spec_reads r
+       join library_files f on f.id = r.file_id
+      where r.status = 'queued' ${fileIds ? "and r.file_id = any($1::int[])" : ""}
+      order by r.file_id
+      limit 40`,
+    fileIds ? [fileIds] : [],
+  );
+}
+
 /**
- * Queue stored spec sheets and read up to 15 of them. Already-read sheets are
- * left alone unless fileIds is set (a sheet someone just added, or Tie and read).
+ * Queue stored spec sheets and read up to 15 of them. Already-read and unreadable
+ * sheets are left alone unless fileIds is set (a sheet someone just added, or Tie
+ * and read); then only those sheets are read.
  */
 export const runSpecReads = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -225,14 +243,7 @@ export const runSpecReads = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("AI reading isn't available here yet.");
     await queueFiles(sql, data.fileIds ?? null, !!data.fileIds);
     const limit = data.limit ?? READ_BATCH;
-    const queued = await sql.query<{ file_id: number; book_id: number; name: string }>(
-      `select r.file_id, r.book_id, f.name
-         from spec_reads r
-         join library_files f on f.id = r.file_id
-        where r.status = 'queued'
-        order by r.file_id
-        limit 40`,
-    );
+    const queued = await queuedSheets(sql, data.fileIds ?? null);
     const started = Date.now();
     let read = 0;
     let review = 0;
@@ -278,7 +289,11 @@ export const runSpecReads = createServerFn({ method: "POST" })
           [row.book_id],
         )
       )[0];
-      const current = await currentValues(sql, Number(row.book_id), book?.mpn ?? "");
+      const current = await currentValues(
+        sql,
+        { id: Number(row.book_id), title: book?.title ?? "", manufacturer: book?.manufacturer ?? null },
+        book?.mpn ?? "",
+      );
       const extracted = valuesFromDraft(result.draft, null);
       // The model's MPN is not inside the draft. Compare it on its own.
       extracted.mpn = extracted.mpn || guessMpn(result.draft);
@@ -305,13 +320,31 @@ function guessMpn(draft: SpecSheetDraft): string {
   return valuesFromDraft(draft).mpn;
 }
 
-async function currentValues(sql: Sql, bookId: number, mpn: string): Promise<SpecValues> {
-  const sheet = (
-    await sql.query<{ id: number; specs: unknown }>(
-      "select id, specs from spec_sheets where book_id = $1 order by id limit 1",
-      [bookId],
+type BookRef = { id: number; title: string; manufacturer: string | null };
+type SheetRow = { id: number; specs: unknown; manufacturer: string; model: string; book_id: number | null };
+
+/**
+ * The model's spec sheet: the one tied to it, else an untied sheet with the same maker and model.
+ * A sheet under that maker and model that belongs to another model comes back too, so the caller can refuse.
+ */
+async function sheetForBook(sql: Sql, book: BookRef): Promise<SheetRow | undefined> {
+  const manufacturer = (book.manufacturer ?? "").trim();
+  const model = manufacturer ? modelLabel(book.title, manufacturer) : "";
+  return (
+    await sql.query<SheetRow>(
+      `select id, specs, manufacturer, model, book_id
+         from spec_sheets
+        where book_id = $1 or (lower(manufacturer) = lower($2) and lower(model) = lower($3))
+        order by case when book_id = $1 then 0 when book_id is null then 1 else 2 end, id
+        limit 1`,
+      [book.id, manufacturer, model],
     )
   )[0];
+}
+
+async function currentValues(sql: Sql, book: BookRef, mpn: string): Promise<SpecValues> {
+  const found = await sheetForBook(sql, book);
+  const sheet = found && (found.book_id == null || found.book_id === book.id) ? found : undefined;
   if (!sheet) return { ...blankSpecValues(), mpn };
   const config = (
     await sql.query<{ requirements: unknown }>(
@@ -332,15 +365,20 @@ const approveInput = z.object({
   useNew: z.array(z.string()).max(20).optional(),
 });
 
-async function approveOne(sql: Sql, fileId: number, useNew: string[]): Promise<{ title: string }> {
+export async function approveOne(sql: Sql, fileId: number, useNew: string[]): Promise<{ title: string }> {
   const row = (
-    await sql.query<{ book_id: number | null; status: string; extracted: unknown }>(
-      "select book_id, status, extracted from spec_reads where file_id = $1",
+    await sql.query<{ book_id: number | null; read_book_id: number | null; status: string; extracted: unknown }>(
+      `select f.book_id, r.book_id as read_book_id, r.status, r.extracted
+         from spec_reads r
+         join library_files f on f.id = r.file_id
+        where r.file_id = $1`,
       [fileId],
     )
   )[0];
   if (!row || row.status !== "needs_review") throw new Error("That sheet is not waiting for review.");
   if (row.book_id == null) throw new Error("That spec sheet is not on a model.");
+  // The read compared the sheet with the model it was on then. Moved since, it has to be read again.
+  if (Number(row.book_id) !== Number(row.read_book_id)) throw new Error("This sheet was moved to another model. Read it again.");
   const book = (
     await sql.query<{ id: number; title: string; manufacturer: string | null; mpn: string | null }>(
       "select id, title, manufacturer, mpn from library_books where id = $1",
@@ -378,21 +416,30 @@ export const approveSpecRead = createServerFn({ method: "POST" })
 /** Approve every review that only fills blanks or matches what's already saved. */
 export const approveExactSpecReads = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ approved: number }> => {
+  .handler(async ({ context }): Promise<{ approved: number; skipped: string[] }> => {
     const sql = await ready();
     await requireAdmin(sql, context.userId);
-    const rows = await sql.query<{ file_id: number; changes: unknown }>(
-      "select file_id, changes from spec_reads where status = 'needs_review'",
-    );
-    let approved = 0;
-    for (const row of rows) {
-      const changes = asChanges(row.changes);
-      if (!isExact(changes)) continue;
+    return approveExact(sql);
+  });
+
+/** Approve each exact review. One that is refused (moved, tied elsewhere, MPN taken) is skipped and named, and the rest still go. */
+export async function approveExact(sql: Sql): Promise<{ approved: number; skipped: string[] }> {
+  const rows = await sql.query<{ file_id: number; changes: unknown; name: string }>(
+    "select r.file_id, r.changes, f.name from spec_reads r join library_files f on f.id = r.file_id where r.status = 'needs_review' order by r.file_id",
+  );
+  let approved = 0;
+  const skipped: string[] = [];
+  for (const row of rows) {
+    if (!isExact(asChanges(row.changes))) continue;
+    try {
       await approveOne(sql, Number(row.file_id), []);
       approved += 1;
+    } catch (e) {
+      skipped.push(`${row.name}: ${e instanceof Error ? e.message : String(e)}`);
     }
-    return { approved };
-  });
+  }
+  return { approved, skipped };
+}
 
 /** Copy the model's MPN onto an untied spec sheet, then read it. */
 export const tieAndReadSpec = createServerFn({ method: "POST" })
@@ -424,12 +471,10 @@ async function writeApproved(
   const manufacturer = (book.manufacturer ?? "").trim();
   const model = modelLabel(book.title, manufacturer);
   if (!manufacturer || !model) throw new Error(`${book.title} has no manufacturer, so the specs can't be saved on it.`);
-  const existing = (
-    await sql.query<{ id: number; specs: unknown; manufacturer: string; model: string }>(
-      "select id, specs, manufacturer, model from spec_sheets where book_id = $1 order by id limit 1",
-      [book.id],
-    )
-  )[0];
+  const existing = await sheetForBook(sql, book);
+  if (existing && existing.book_id != null && existing.book_id !== book.id) {
+    throw new Error(`${existing.manufacturer} ${existing.model} already has a spec sheet on another model. Tie it first.`);
+  }
   const config = existing
     ? (
         await sql.query<{ id: number; label: string; requirements: unknown }>(
@@ -454,6 +499,24 @@ async function writeApproved(
   const applied = applySpecPicks(draft, extracted, book.mpn ?? "", picks);
   const requirements = JSON.stringify(applied.draft.configs[0]!.requirements ?? {});
   const specJson = JSON.stringify(applied.draft.specs);
+  const cleaned = cleanMpn(applied.mpn);
+  const newMpn = cleaned && cleaned !== (book.mpn ?? "") ? cleaned : null;
+  if (newMpn) {
+    // Same match as library_books_mpn_uidx, checked before anything is written.
+    const taken = await sql.query<{ id: number }>(
+      `select id from library_books
+        where id <> $2 and mpn is not null and btrim(mpn) <> ''
+          and upper(regexp_replace(mpn, '[^A-Za-z0-9]+', '', 'g')) = upper(regexp_replace($1, '[^A-Za-z0-9]+', '', 'g'))
+        limit 1`,
+      [newMpn, book.id],
+    );
+    if (taken[0]) throw new Error(`MPN ${newMpn} is already on another model. Nothing was saved.`);
+    // The same rule as setBookMpn: a file tied to the current MPN would point at a number no model has.
+    if (!sameMpn(book.mpn, newMpn)) {
+      const tied = await sql.query("select 1 from library_files where book_id = $1 and mpn is not null limit 1", [book.id]);
+      if (tied.length) throw new Error("Files here are tied to the current MPN. Untie them before changing it.");
+    }
+  }
   if (existing && config) {
     await sql.query("update spec_sheets set specs = $2::jsonb, book_id = $3, updated_at = now() where id = $1", [
       existing.id,
@@ -475,21 +538,21 @@ async function writeApproved(
     const inserted = await sql.query<{ id: number }>(
       `insert into spec_sheets (manufacturer, model, specs, mfr_notes, created_by, book_id)
        values ($1, $2, $3::jsonb, '{}'::jsonb, 'Spec read', $4)
-       on conflict (manufacturer, model) do update set specs = excluded.specs, book_id = coalesce(spec_sheets.book_id, excluded.book_id), updated_at = now()
+       on conflict (manufacturer, model) do nothing
        returning id`,
       [manufacturer, model, specJson, book.id],
     );
     const id = inserted[0]?.id;
-    if (!id) throw new Error("The spec sheet could not be saved.");
+    if (!id) throw new Error(`A spec sheet for ${manufacturer} ${model} was just added. Try again.`);
     const has = await sql.query<{ id: number }>("select id from spec_configs where sheet_id = $1 order by position limit 1", [id]);
     if (has[0]) await sql.query("update spec_configs set requirements = $2::jsonb where id = $1", [has[0].id, requirements]);
     else await sql.query("insert into spec_configs (sheet_id, label, position, requirements) values ($1, 'Standard', 0, $2::jsonb)", [id, requirements]);
   }
-  if (applied.mpn && applied.mpn !== (book.mpn ?? "")) {
+  if (newMpn) {
     try {
-      await sql.query("update library_books set mpn = $2 where id = $1", [book.id, applied.mpn]);
+      await sql.query("update library_books set mpn = $2 where id = $1", [book.id, newMpn]);
     } catch (e) {
-      if (/unique|duplicate/i.test(String(e))) throw new Error(`MPN ${applied.mpn} is already on another model. It was not changed.`);
+      if (/unique|duplicate/i.test(String(e))) throw new Error(`MPN ${newMpn} is already on another model. It was not changed.`);
       throw e;
     }
   }
@@ -600,7 +663,48 @@ export const listLibraryAdminState = createServerFn({ method: "GET" })
     };
   });
 
-/** Keep one copy of a shared file and delete the other copies. The keeper stays on its model. */
+/**
+ * Keep one copy of a shared file and delete the other copies. The keeper must sit on the family's
+ * main chip, and every deleted copy on a model that takes manuals from it, so no model loses the file.
+ */
+export async function keepOneCopy(sql: Sql, keepId: number, removeIds: number[]): Promise<{ removed: number }> {
+  const ids = removeIds.filter((id) => id !== keepId);
+  if (!ids.length) return { removed: 0 };
+  const books = (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books")).map(
+    (b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "" }),
+  );
+  const files = await sql.query<{ id: number; section: LibrarySection; book_id: number | null; mpn: string | null }>(
+    "select id, section, book_id, mpn from library_files where id = any($1::int[])",
+    [[keepId, ...ids]],
+  );
+  const bookOf = (f: { book_id: number | null } | undefined) => books.find((b) => f?.book_id != null && b.id === Number(f.book_id));
+  const keep = files.find((f) => Number(f.id) === keepId);
+  const main = bookOf(keep);
+  // A variation only shows a shared (no MPN) manual or parts file that sits on its main chip.
+  const safe =
+    !!keep &&
+    !!main &&
+    isMainChip(main, books) &&
+    copiesToVariations(keep.section) &&
+    !(keep.mpn ?? "").trim() &&
+    files.every((f) => {
+      const book = bookOf(f);
+      return f === keep || (f.section === keep.section && !!book && (book.id === main.id || mainChipFor(book, books)?.id === main.id));
+    });
+  if (!safe) throw new Error("Store this file once on the main chip first, so the other models keep it.");
+  // A model that had hidden the kept copy (it showed twice) shows it again once its own copy is gone.
+  const rows = await sql.query<{ removed: number }>(
+    `with gone as (
+       delete from library_files where id = any($1::int[]) and id <> $2 and section <> 'training' returning id, book_id
+     ), shown as (
+       delete from library_file_hidden h using gone where h.file_id = $2 and h.book_id = gone.book_id
+     )
+     select count(*)::int as removed from gone`,
+    [ids, keepId],
+  );
+  return { removed: rows[0]?.removed ?? 0 };
+}
+
 export const keepOneLibraryCopy = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { keepId: number; removeIds: number[] }) =>
@@ -609,11 +713,5 @@ export const keepOneLibraryCopy = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ removed: number }> => {
     const sql = await ready();
     await requireAdmin(sql, context.userId);
-    const ids = data.removeIds.filter((id) => id !== data.keepId);
-    if (!ids.length) return { removed: 0 };
-    const rows = await sql.query<{ id: number }>(
-      "delete from library_files where id = any($1::int[]) and id <> $2 and section <> 'training' returning id",
-      [ids, data.keepId],
-    );
-    return { removed: rows.length };
+    return keepOneCopy(sql, data.keepId, data.removeIds);
   });

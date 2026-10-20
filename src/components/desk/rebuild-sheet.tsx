@@ -392,7 +392,7 @@ export function RebuildSheet({
               <p className="text-xs text-muted-foreground">Updated {formatShortDate(row.updatedAt.slice(0, 10))}</p>
             </form>
             </Tabs.Content>
-            <Tabs.Content value="equipment" className="space-y-4 px-5 py-4 outline-none" data-testid="rebuild-panel-equipment">
+            <Tabs.Content value="equipment" forceMount className={`space-y-4 px-5 py-4 ${KEEP_MOUNTED}`} data-testid="rebuild-panel-equipment">
               <SerialNoticeBanner notice={row.serialNotice} />
               <EquipmentCombo label="Equipment" value={equipment} onChange={setEquipment} />
               <div>
@@ -423,7 +423,7 @@ export function RebuildSheet({
                 </Button>
               ) : null}
             </Tabs.Content>
-            <Tabs.Content value="invoices" className="outline-none" data-testid="rebuild-panel-invoices">
+            <Tabs.Content value="invoices" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-invoices">
               <section className="border-b border-border p-5">
                 <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                 <p className="mt-1 text-xs text-muted-foreground">Billing info for this rebuild.</p>

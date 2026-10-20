@@ -66,6 +66,32 @@ test("tank, brew, and dimensions come off the sheet", () => {
   assert.equal(values.mpn, "ITCB");
 });
 
+test("a brew value gets its own row and never overwrites a tank or boiler capacity", () => {
+  const draft = emptyDraft();
+  draft.specs = [{ label: "Tank capacity", value: "3 gal" }];
+  const filled = applySpecPicks(draft, { ...blankSpecValues(), brew: "3.8 gal/hr" }, "", {});
+  assert.deepEqual(filled.draft.specs, [
+    { label: "Tank capacity", value: "3 gal" },
+    { label: "Brew capacity", value: "3.8 gal/hr" },
+  ]);
+  const espresso = emptyDraft();
+  espresso.specs = [
+    { label: "Boiler capacity", value: "11 L" },
+    { label: "Brew capacity", value: "2 gal/hr" },
+  ];
+  const picked = applySpecPicks(espresso, { ...blankSpecValues(), brew: "3 gal/hr" }, "", { brew: "new" });
+  assert.deepEqual(picked.draft.specs, [
+    { label: "Boiler capacity", value: "11 L" },
+    { label: "Brew capacity", value: "3 gal/hr" },
+  ]);
+});
+
+test("a manufacturer with a bracket in its name does not break the outlet lookup", () => {
+  const odd = { model: "G", manufacturer: "Acme (USA", voltage: "120V", amps: "15A", plug: "" };
+  assert.equal(outletForModel("BUNN ICB", [odd]), undefined);
+  assert.equal(outletForModel("Acme (USA G", [odd])?.voltage, "120V");
+});
+
 test("a unit keeps its own voltage, and a blank outlet takes the spec including amps", () => {
   const spec = { model: "Bunn ITCB", manufacturer: "Bunn", voltage: "220V", amps: "20A", plug: "L6-20P" };
   assert.equal(outletForModel("Bunn ITCB", [spec])?.amps, "20A");

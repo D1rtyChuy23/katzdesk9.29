@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, routeNote, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, arrangeStops, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
+import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, routeNote, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, arrangeStops, moveWrites, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
 import { NO_REP_COLOR, REP_PALETTE } from "../src/lib/ops/geo.ts";
 
 const DAY = "2026-10-14";
@@ -434,4 +434,19 @@ test("drive minutes reorder untimed stops, and a set time keeps its slot", () =>
   assert.equal(manual.drive, false);
   assert.deepEqual(arrangeStops([{ key: "b" }, { key: "a" }, { key: "c" }], ["c", "a"]).map((s) => s.key), ["c", "a", "b"]);
   assert.equal(routeLinks(manual.stops).length, 1);
+});
+
+test("Undo of a Move on a two-tech ticket's main copy puts the 2nd tech back too", () => {
+  const [main, second] = collectDayStops({ installs: [], pms: [], services: [ticket({ id: 7, technician: "Ryan Gloria", secondaryTech: "Jose Garcia" })], tlcs: [] }, DAY);
+  // Moving Ryan's copy to nobody, or onto Jose, clears or promotes the 2nd tech on the server.
+  for (const to of [NO_TECH, "Jose Garcia"]) {
+    const w = moveWrites(main, main.tech, to);
+    assert.deepEqual(w.forward, { id: 7, technician: to || null });
+    assert.deepEqual(w.undo, { id: 7, technician: "Ryan Gloria", secondaryTech: "Jose Garcia" });
+  }
+  assert.deepEqual(moveWrites(second, second.tech, NO_TECH), { forward: { id: 7, secondaryTech: null }, undo: { id: 7, secondaryTech: "Jose Garcia" } });
+  const [solo] = collectDayStops({ installs: [], pms: [], services: [ticket({ id: 8 })], tlcs: [] }, DAY);
+  assert.deepEqual(moveWrites(solo, solo.tech, "Jose Garcia").undo, { id: 8, technician: "Ryan Gloria", secondaryTech: null });
+  const [visit] = collectDayStops({ installs: [], pms: [pm({ id: 9 })], services: [], tlcs: [] }, DAY);
+  assert.deepEqual(moveWrites(visit, visit.tech, NO_TECH), { forward: { id: 9, technician: null }, undo: { id: 9, technician: "Ryan Gloria" } });
 });

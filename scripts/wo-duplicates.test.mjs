@@ -380,7 +380,7 @@ test("mergeMoneyRefusal names the first reason, in order", () => {
       money({ id: 1, lines: 1, completedAt: "2026-04-01" }),
       money({ id: 2, lines: 1, completedAt: "2026-04-08" }),
     ),
-    "Ticket #2 was completed 2026-04-08 and #1 2026-04-01, so charges would bill in a different week. Make the completed dates match first.",
+    "Ticket #2 (completed 2026-04-08) and #1 (completed 2026-04-01) would bill in different weeks. Make the completed dates match first.",
   );
   assert.equal(
     mergeMoneyRefusal(
@@ -394,7 +394,10 @@ test("mergeMoneyRefusal names the first reason, in order", () => {
       money({ id: 1, lines: 150, completedAt: "2026-04-01" }),
       money({ id: 2, lines: 150, completedAt: "2026-04-08" }),
     ),
-    "Ticket #2 was completed 2026-04-08 and #1 2026-04-01, so charges would bill in a different week. Make the completed dates match first.",
+    "Ticket #2 (completed 2026-04-08) and #1 (completed 2026-04-01) would bill in different weeks. Make the completed dates match first.",
+  );  assert.equal(
+    mergeMoneyRefusal(money({ id: 1, lines: 0, completedAt: "2026-04-01" }), money({ id: 2, lines: 1, completedAt: null })),
+    "Ticket #2 (not completed yet) and #1 (completed 2026-04-01) would bill in different weeks. Make the completed dates match first.",
   );
 });
 
@@ -515,7 +518,7 @@ test("charges are not merged onto a different completed date", async () => {
   await line(extra, 1, "Jump");
   const result = await mergeServiceJobs(sql, keeper, extra, "Chuy");
   assert.deepEqual(result, {
-    refused: `Ticket #${extra} was completed 2026-04-08 and #${keeper} 2026-04-01, so charges would bill in a different week. Make the completed dates match first.`,
+    refused: `Ticket #${extra} (completed 2026-04-08) and #${keeper} (completed 2026-04-01) would bill in different weeks. Make the completed dates match first.`,
   });
   assert.deepEqual(await chargeSorts(extra), [{ item: "Jump", sort: 1 }]);
   assert.deepEqual(await chargeSorts(keeper), []);

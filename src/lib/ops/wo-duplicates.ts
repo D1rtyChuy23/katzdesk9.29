@@ -159,8 +159,8 @@ function discountRefusal(keeper: MergeMoney, extra: MergeMoney): string | null {
   return `Ticket #${hasId} has a ${discountPhrase(has.kind, has.value)} discount that ticket #${lacksId} doesn't. Make the discounts match first.`;
 }
 
-function completedWord(value: string | null): string {
-  return value || "not yet";
+function completedPhrase(value: string | null): string {
+  return value ? `completed ${value}` : "not completed yet";
 }
 
 /** A blank extra counts as a different date. Lines must not change which week they bill in. */
@@ -170,7 +170,7 @@ function completedRefusal(keeper: MergeMoney, extra: MergeMoney): string | null 
   const moved =
     (extra.lines > 0 && kd != null && kd !== ed) || (keeper.lines > 0 && kd == null && ed != null);
   if (!moved) return null;
-  return `Ticket #${extra.id} was completed ${completedWord(ed)} and #${keeper.id} ${completedWord(kd)}, so charges would bill in a different week. Make the completed dates match first.`;
+  return `Ticket #${extra.id} (${completedPhrase(ed)}) and #${keeper.id} (${completedPhrase(kd)}) would bill in different weeks. Make the completed dates match first.`;
 }
 
 /**
