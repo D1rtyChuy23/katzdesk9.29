@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, routeNote, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, arrangeStops, moveWrites, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
+import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, routeNote, routeStartNote, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, arrangeStops, moveWrites, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
 import { NO_REP_COLOR, REP_PALETTE } from "../src/lib/ops/geo.ts";
 
 const DAY = "2026-10-14";
@@ -434,6 +434,51 @@ test("drive minutes reorder untimed stops, and a set time keeps its slot", () =>
   assert.equal(manual.drive, false);
   assert.deepEqual(arrangeStops([{ key: "b" }, { key: "a" }, { key: "c" }], ["c", "a"]).map((s) => s.key), ["c", "a", "b"]);
   assert.equal(routeLinks(manual.stops).length, 1);
+});
+
+test("drive times are used only when every leg is known, otherwise the whole list is straight-line", () => {
+  const placed = placeStops(
+    collectDayStops(
+      {
+        ...none,
+        services: [
+          ticket({ id: 1, customer: "Katy Diner" }),
+          ticket({ id: 2, customer: "Steak 48" }),
+        ],
+      },
+      DAY,
+    ),
+    find,
+  );
+  const near = (p, q) => Math.abs(p.lat - q.lat) < 0.02 && Math.abs(p.lng - q.lng) < 0.02;
+  const partial = (a, b) => {
+    if (near(a, KATY) && near(b, GALLERIA)) return null;
+    return { minutes: 1, miles: 99 };
+  };
+  const plain = planTechRoutes(placed, ["Ryan Gloria"])[0];
+  const mixed = planTechRoutes(placed, ["Ryan Gloria"], null, { drive: partial })[0];
+  assert.deepEqual(
+    mixed.stops.map((s) => s.id),
+    plain.stops.map((s) => s.id),
+  );
+  assert.equal(mixed.drive, false);
+  assert.equal(mixed.minutes, null);
+  assert.ok(mixed.stops.every((s) => s.legMinutes == null));
+  assert.equal(mixed.miles, plain.miles);
+});
+
+test("current location orders from the pin but the Maps link leaves the origin off", () => {
+  const placed = placeStops(
+    collectDayStops({ ...none, services: [ticket({ id: 2, customer: "Steak 48" })] }, DAY),
+    find,
+  );
+  const here = { key: "here", label: "Current location", point: { lat: 29.76, lng: -95.37 } };
+  const route = planTechRoutes(placed, ["Ryan Gloria"], here)[0];
+  assert.ok(route.stops[0].legMiles > 0);
+  assert.equal(new URL(route.links[0]).searchParams.get("origin"), null);
+  assert.equal(routeStartNote(here), "Starts from your current location.");
+  assert.equal(routeStartNote(KATZ_SHOP), "Starts from the Shop (2400 Karbach St).");
+  assert.equal(routeStartNote(null).includes("current location"), true);
 });
 
 test("Undo of a Move on a two-tech ticket's main copy puts the 2nd tech back too", () => {

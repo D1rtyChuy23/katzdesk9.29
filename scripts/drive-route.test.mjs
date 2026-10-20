@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { legsFromTable, parseOsrmRoute, parseOsrmTable, pointKey } from "../src/lib/ops/drive-route.ts";
+import { legsFromTable, parseOsrmRoute, parseOsrmTable, pointKey, driveTableStamp } from "../src/lib/ops/drive-route.ts";
 
 test("an OSRM table becomes drive legs, and a bad table is ignored", () => {
   const points = [
@@ -39,4 +39,15 @@ test("an OSRM route line is lat/lng points", () => {
     { lat: 29.81, lng: -95.39 },
   ]);
   assert.equal(parseOsrmRoute({ routes: [] }), null);
+});
+
+test("a drive table stamp changes when the stops change, even if the tech and status do not", () => {
+  const a = { lat: 29.8, lng: -95.4 };
+  const b = { lat: 29.7, lng: -95.5 };
+  const today = driveTableStamp([{ tech: "Ryan Gloria", points: [a, b] }], ["ok"]);
+  const otherDay = driveTableStamp([{ tech: "Ryan Gloria", points: [a] }], ["ok"]);
+  assert.notEqual(today, otherDay);
+  assert.equal(today, driveTableStamp([{ tech: "Ryan Gloria", points: [a, b] }], ["ok"]));
+  assert.ok(today.includes(pointKey(a)));
+  assert.ok(today.includes(pointKey(b)));
 });

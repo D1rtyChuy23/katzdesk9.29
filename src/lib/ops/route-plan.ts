@@ -214,7 +214,19 @@ export function routeLinks(stops: readonly Pick<PlacedStop, "point" | "quality">
     const r = linkStop(s);
     if (r && !(list.length && sameStop(list[list.length - 1]!, r))) list.push(r);
   }
-  return routeUrls(list, start?.point ?? null);
+  return routeUrls(list, routeMapsStart(start)?.point ?? null);
+}
+
+/** Maps origin. Current location is left off so Google uses the phone's live position. Ordering still uses the pin. */
+export function routeMapsStart(start: RouteStart | null | undefined): RouteStart | null {
+  if (!start || start.key === "here") return null;
+  return start;
+}
+
+/** The sentence under the Maps button. */
+export function routeStartNote(start: RouteStart | null | undefined): string {
+  if (!start || start.key === "here") return "Starts from your current location.";
+  return `Starts from ${start.label.replace(/^The /, "the ")}.`;
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -270,6 +282,33 @@ export function arrangeStops<T extends { key: string }>(stops: readonly T[], ord
 
 export type DriveFn = (from: LatLng, to: LatLng) => DriveLeg | null;
 
+/** Every distinct pair has a drive time. One unknown pair, and the whole list stays straight-line. Same pin counts as known. */
+function driveCovers(points: readonly LatLng[], drive: DriveFn): boolean {
+  let pairs = 0;
+  for (let i = 0; i < points.length; i++) {
+    for (let j = 0; j < points.length; j++) {
+      if (i === j) continue;
+      const a = points[i]!;
+      const b = points[j]!;
+      if (sameStop(a, b)) continue;
+      pairs += 1;
+      if (!drive(a, b)) return false;
+    }
+  }
+  return pairs > 0;
+}
+
+function routePoints(start: RouteStart | null, stops: readonly { point: LatLng | null }[]): LatLng[] {
+  const out: LatLng[] = [];
+  const add = (p: LatLng | null | undefined) => {
+    if (!isPoint(p) || out.some((q) => sameStop(q, p))) return;
+    out.push(p);
+  };
+  add(start?.point);
+  for (const s of stops) add(s.point);
+  return out;
+}
+
 export type RouteOpts = {
   /** Drive minutes and miles between two pins. Null means that pair is unknown (straight-line is used). */
   drive?: DriveFn | null;
@@ -314,12 +353,9 @@ export function planTechRoutes(
       };
     }
     const saved = manual?.[tech];
-    const between = drive
-      ? (a: LatLng, b: LatLng) => {
-          const hit = drive(a, b);
-          return hit ? hit.minutes : milesBetween(a, b);
-        }
-      : undefined;
+    const pinned = list.filter((s) => isPoint(s.point));
+    const useDrive = !!drive && driveCovers(routePoints(start, pinned), drive);
+    const between = useDrive ? (a: LatLng, b: LatLng) => (sameStop(a, b) ? 0 : drive!(a, b)!.minutes) : undefined;
     const plan = saved?.length
       ? {
           ordered: arrangeStops(
@@ -334,15 +370,18 @@ export function planTechRoutes(
           between,
         );
     let minutesSum = 0;
-    let haveMinutes = !!drive;
     const rows: RouteRow[] = plan.ordered.map((o, i) => {
       const prev = i > 0 ? (plan.ordered[i - 1]!.point as LatLng) : start?.point ?? null;
       const here = o.point as LatLng;
-      const hit = prev && drive ? drive(prev, here) : null;
-      if ((i > 0 || start) && !hit) haveMinutes = false;
-      else if (hit) minutesSum += hit.minutes;
-      const miles = hit ? hit.miles : prev ? milesBetween(prev, here) : null;
-      return { ...o.item, point: here, n: i + 1, legMiles: i === 0 && !start ? null : miles, legMinutes: hit ? hit.minutes : null };
+      if ((i === 0 && !start) || !prev) return { ...o.item, point: here, n: i + 1, legMiles: null, legMinutes: null };
+      if (sameStop(prev, here)) {
+        if (useDrive) minutesSum += 0;
+        return { ...o.item, point: here, n: i + 1, legMiles: 0, legMinutes: useDrive ? 0 : null };
+      }
+      const hit = useDrive ? drive!(prev, here) : null;
+      if (hit) minutesSum += hit.minutes;
+      const miles = hit ? hit.miles : milesBetween(prev, here);
+      return { ...o.item, point: here, n: i + 1, legMiles: miles, legMinutes: hit ? hit.minutes : null };
     });
     const miles = rows.reduce((t, s) => t + (s.legMiles ?? 0), 0);
     return {
@@ -352,8 +391,8 @@ export function planTechRoutes(
       stops: rows,
       unrouted: plan.unrouted.map((u) => u.item),
       miles,
-      minutes: haveMinutes ? minutesSum : null,
-      drive: haveMinutes && !saved?.length,
+      minutes: useDrive ? minutesSum : null,
+      drive: useDrive && !saved?.length,
       links: routeLinks(rows, start),
     };
   });

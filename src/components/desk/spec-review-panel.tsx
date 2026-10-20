@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { approveExactSpecReads, approveSpecRead, runSpecReads, type SpecReadRow } from "@/lib/ops/spec-read-api";
-import { clipRows } from "@/lib/ops/spec-read";
+import { clipRows, handEntryForRow } from "@/lib/ops/spec-read";
 
 /** The review list. Nothing here is saved until Approve. */
 export function SpecReviewPanel({
@@ -12,11 +12,15 @@ export function SpecReviewPanel({
   queued,
   noSheet,
   onChanged,
+  onEnterByHand,
+  onEnterForModel,
 }: {
   rows: SpecReadRow[];
   queued: number;
   noSheet: { id: number; title: string }[];
   onChanged: () => void;
+  onEnterByHand: (row: SpecReadRow) => void;
+  onEnterForModel: (book: { id: number; title: string }) => void;
 }) {
   const [showAll, setShowAll] = useState(false);
   const [showSheets, setShowSheets] = useState(false);
@@ -83,7 +87,14 @@ export function SpecReviewPanel({
                 <span className="ml-2 text-xs font-normal text-muted-foreground">{row.fileName}</span>
               </p>
               {row.status === "unreadable" ? (
-                <p className="mt-1 text-sm text-muted-foreground">{row.error || "Unreadable"}</p>
+                <div className="mt-1">
+                  <p className="text-sm text-muted-foreground">{row.error || "Unreadable"}</p>
+                  {handEntryForRow(row) ? (
+                    <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => onEnterByHand(row)} data-testid="enter-specs-by-hand">
+                      Enter specs by hand
+                    </Button>
+                  ) : null}
+                </div>
               ) : (
                 <>
                   <ul className="mt-2 grid gap-1 text-sm">
@@ -139,7 +150,12 @@ export function SpecReviewPanel({
         {noSheet.length ? (
           <ul className="mt-2 max-h-48 overflow-y-auto text-sm">
             {(showSheets ? noSheet : noSheet.slice(0, 10)).map((book) => (
-              <li key={book.id} className="py-0.5">{book.title}</li>
+              <li key={book.id} className="flex flex-wrap items-center justify-between gap-2 py-1">
+                <span>{book.title}</span>
+                <Button type="button" size="sm" variant="outline" onClick={() => onEnterForModel(book)} data-testid="enter-specs-for-model">
+                  Enter specs by hand
+                </Button>
+              </li>
             ))}
           </ul>
         ) : (
