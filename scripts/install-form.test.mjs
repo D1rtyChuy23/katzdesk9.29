@@ -7,6 +7,7 @@ import {
   foldVisitUnits,
   groupFormRows,
   hasSerial,
+  machinesBeforeSave,
   looksLikePlug,
   looksLikeVoltage,
   parseAccountSerialNotice,
@@ -92,6 +93,24 @@ test("typing a serial updates that row and a second click does not add one", () 
     { equipment: "La Marzocco Linea PB 3 Group AV", serial: "PB001708", powerVoltage: "" },
   ]);
   assert.equal(deduped.length, 2);
+});
+
+test("a machine added on the server is kept on save, and a row removed in the form stays removed", () => {
+  const previous = [{ equipment: "Bunn ITCB", serial: "", powerVoltage: "" }];
+  const editing = [{ equipment: "Bunn ITCB", serial: "ABC", powerVoltage: "" }];
+  const server = [
+    { equipment: "Bunn ITCB", serial: "", powerVoltage: "" },
+    { equipment: "Eversys Enigma", serial: "EV1", powerVoltage: "220V" },
+  ];
+  const saved = machinesBeforeSave(editing, previous, server);
+  assert.equal(saved.length, 2);
+  assert.equal(saved[0].serial, "ABC");
+  assert.equal(saved[1].equipment, "Eversys Enigma");
+  assert.equal(saved[1].serial, "EV1");
+  assert.equal(machinesBeforeSave([], previous, previous).length, 0);
+  const filled = machinesBeforeSave(previous, previous, [{ equipment: "Bunn ITCB", serial: "SN1", powerVoltage: "" }]);
+  assert.equal(filled.length, 1);
+  assert.equal(filled[0].serial, "SN1");
 });
 
 test("account type and the already-on-this-account notice", () => {

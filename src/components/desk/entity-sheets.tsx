@@ -38,8 +38,8 @@ import {
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { appendServerMachines, sameWarehouseModel } from "@/lib/ops/warehouse-serial";
-import { dedupeMachineSerials, hasSerial, parseAccountSerialNotice } from "@/lib/ops/install-form";
+import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
+import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice } from "@/lib/ops/install-form";
 import { getInstallInspection, removeInspectionEquipment } from "@/lib/ops/inspection-api";
 import { serialKey } from "@/lib/ops/account-equip";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
@@ -353,6 +353,9 @@ export function InstallSheet({
   const loadedSpecs = useRef<MachineSpec[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
+  const specsRef = useRef(specs);
+  specsRef.current = specs;
+  const seenServer = useRef<{ id: number; rows: MachineSpec[] } | null>(null);
   const catalog = catalogModels([
     ...(directoryEquip.data ?? []).map((e) => e.name),
     ...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
@@ -372,12 +375,18 @@ export function InstallSheet({
   useEffect(() => {
     if (!row || hydratedId !== row.id) return;
     const server = row.machines ?? [];
-    loadedSpecs.current = appendServerMachines(loadedSpecs.current, server);
-    setSpecs((cur) => appendServerMachines(cur, server));
-    setEquipPieces((pieces) => {
-      const names = server.map((m) => m.equipment).filter(Boolean);
-      return names.length > pieces.length ? names : pieces;
-    });
+    const seen = seenServer.current;
+    if (!seen || seen.id !== row.id) {
+      seenServer.current = { id: row.id, rows: server };
+      return;
+    }
+    const previous = seen.rows;
+    seenServer.current = { id: row.id, rows: server };
+    loadedSpecs.current = machinesBeforeSave(loadedSpecs.current, previous, server);
+    const next = machinesBeforeSave(specsRef.current, previous, server);
+    setSpecs(next);
+    setEquipPieces(next.map((s) => s.equipment));
+    // A pre-inspection add shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, serialSig, machineSig]);
   const visit = useQuery({
@@ -427,13 +436,19 @@ export function InstallSheet({
     return null;
   };
 
+  function listForSave(next: MachineSpec[]): MachineSpec[] {
+    if (!row) return dedupeMachineSerials(next);
+    const baseline = seenServer.current?.id === row.id ? seenServer.current.rows : specs;
+    return machinesBeforeSave(next, baseline, row.machines ?? []);
+  }
+
   function persistMachines(next: MachineSpec[]) {
-    const unique = dedupeMachineSerials(next);
-    setSpecs(unique);
-    setEquipPieces(unique.map((s) => s.equipment));
+    next = listForSave(next);
+    setSpecs(next);
+    setEquipPieces(next.map((s) => s.equipment));
     if (!row) return;
-    const packed = serializeMachines(unique);
-    loadedSpecs.current = unique;
+    const packed = serializeMachines(next);
+    loadedSpecs.current = next;
     save.mutate({
       id: row.id,
       equipment: packed.equipment,
