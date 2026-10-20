@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, routeNote, routeStartNote, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, arrangeStops, moveWrites, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
-import { NO_REP_COLOR, REP_PALETTE } from "../src/lib/ops/geo.ts";
+import { NO_REP_COLOR, REP_PALETTE, milesBetween } from "../src/lib/ops/geo.ts";
+import { driveBetween, legsFromTable, pointKey } from "../src/lib/ops/drive-route.ts";
 
 const DAY = "2026-10-14";
 const OTHER = "2026-10-15";
@@ -465,6 +466,43 @@ test("drive times are used only when every leg is known, otherwise the whole lis
   assert.equal(mixed.minutes, null);
   assert.ok(mixed.stops.every((s) => s.legMinutes == null));
   assert.equal(mixed.miles, plain.miles);
+});
+
+// A drive table built the way route-planner.tsx builds it: one pin per pointKey (5 decimals), the start first.
+function tableDrive(placed, start) {
+  const pts = [];
+  for (const s of placed) if (s.point && !pts.some((p) => pointKey(p) === pointKey(s.point))) pts.push(s.point);
+  const points = [start.point, ...pts.filter((p) => pointKey(p) !== pointKey(start.point))];
+  const grid = (f) => points.map((a, i) => points.map((b, j) => (i === j ? 0 : f(milesBetween(a, b)))));
+  const legs = legsFromTable(points, { seconds: grid((mi) => (mi * 2.5 + 2) * 60), meters: grid((mi) => mi * 1609.344) });
+  return (a, b) => driveBetween(legs, a, b);
+}
+
+test("two accounts in one building keep drive minutes, and pins that round alike don't break the route", () => {
+  const day = (accounts) => {
+    const byName = new Map(accounts.map((a, i) => [a.name.toLowerCase(), { id: 900 + i, quality: "exact", address: null, city: "Houston", ...a }]));
+    const services = accounts.map((a, i) => ticket({ id: i + 1, customer: a.name }));
+    return placeStops(collectDayStops({ ...none, services }, DAY), (n) => byName.get(n.toLowerCase()));
+  };
+  // Real pins at The Post (401 Franklin): 0.3 m apart, so the drive table keeps only one of them.
+  const post = day([
+    { name: "Jackson's Brew", lat: 29.765379615726, lng: -95.366225875392 },
+    { name: "Shakkar", lat: 29.76537668, lng: -95.36622609 },
+    { name: "Steak 48", ...GALLERIA },
+    { name: "Katy Diner", ...KATY },
+  ]);
+  const route = planTechRoutes(post, ["Ryan Gloria"], KATZ_SHOP, { drive: tableDrive(post, KATZ_SHOP) })[0];
+  assert.equal(route.drive, true);
+  assert.ok(route.stops.every((s) => s.legMinutes != null));
+  assert.ok(route.minutes > 0);
+  // Aa sorts first. Bb and Cc are each within 1e-7 of Aa but not of each other, and all three share one pointKey.
+  const rab = day([
+    { name: "Aa", lat: 29.7000001, lng: -95.4 },
+    { name: "Bb", lat: 29.70000004, lng: -95.4 },
+    { name: "Cc", lat: 29.70000016, lng: -95.4 },
+    { name: "Far", lat: 29.8, lng: -95.5 },
+  ]);
+  assert.doesNotThrow(() => planTechRoutes(rab, ["Ryan Gloria"], KATZ_SHOP, { drive: tableDrive(rab, KATZ_SHOP) }));
 });
 
 test("current location orders from the pin but the Maps link leaves the origin off", () => {
