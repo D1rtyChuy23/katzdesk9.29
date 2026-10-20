@@ -201,6 +201,7 @@ function listSig(reps: { name: string; role: string | null; pct: number | null; 
  * Match by Internal ID, then Account Number, then exact name (case and punctuation aside, and only when one account has it).
  * A rep who is not already a Katz Desk sales rep or user is listed and never created.
  * Primary Sales Rep changes only when the file names a known rep and the account's rep is blank or different.
+ * An account that more than one file customer matches saves nothing, so it never gets merged reps and a random primary.
  */
 export function planSalesReps(
   files: SalesRepFile[],
@@ -233,7 +234,7 @@ export function planSalesReps(
   }
   const saved = new Map(current.map((c) => [c.customerId, c.reps]));
 
-  return files.map((file) => {
+  const lines: SalesRepPlanLine[] = files.map((file) => {
     let account: SalesRepAccount | null = null;
     let matchedBy: SalesRepPlanLine["matchedBy"] = null;
     const idHits = file.internalId ? byNetsuite.get(file.internalId.trim()) ?? [] : [];
@@ -317,6 +318,20 @@ export function planSalesReps(
     const status: SalesRepStatus = unknownReps.length ? "unknown" : willSave ? "update" : "same";
     return { ...base, status, willSave, nextPrimary, primaryChange, currentPrimary, reason: parts.join(" ") };
   });
+  const perAccount = new Map<number, number>();
+  for (const l of lines) if (l.accountId !== null) perAccount.set(l.accountId, (perAccount.get(l.accountId) ?? 0) + 1);
+  return lines.map((l) =>
+    l.accountId !== null && (perAccount.get(l.accountId) ?? 0) > 1
+      ? {
+          ...l,
+          status: "unmatched",
+          willSave: false,
+          primaryChange: false,
+          nextPrimary: null,
+          reason: "More than one row in the file matches this Katz Desk account. Nothing is saved.",
+        }
+      : l,
+  );
 }
 
 export function countSalesReps(lines: SalesRepPlanLine[]): SalesRepCounts {

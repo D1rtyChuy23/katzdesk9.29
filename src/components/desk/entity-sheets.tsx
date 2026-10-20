@@ -304,10 +304,10 @@ export function PmSheet({
                     </div>
                   </form>
                 </Tabs.Content>
-                <Tabs.Content value="runbook" className="outline-none" data-testid="pm-panel-runbook">
+                <Tabs.Content value="runbook" forceMount className={KEEP_MOUNTED} data-testid="pm-panel-runbook">
                   <PmRunbook pmId={pm.id} customer={pm.customer} />
                 </Tabs.Content>
-                <Tabs.Content value="invoices" className="p-5 outline-none" data-testid="pm-panel-invoices">
+                <Tabs.Content value="invoices" forceMount className={`p-5 ${KEEP_MOUNTED}`} data-testid="pm-panel-invoices">
                   <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                   <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this PM.</p>
                   <div className="mt-3">
@@ -618,7 +618,7 @@ export function InstallSheet({
                   </form>
                 </Tabs.Content>
 
-                <Tabs.Content value="equipment" className="outline-none" data-testid="install-panel-equipment">
+                <Tabs.Content value="equipment" forceMount className={KEEP_MOUNTED} data-testid="install-panel-equipment">
                   <SerialNoticeBanner
                     notice={row.serialNotice}
                     onAttach={(unit) => {
@@ -670,7 +670,7 @@ export function InstallSheet({
                   <InstallAssets installId={row.id} />
                 </Tabs.Content>
 
-                <Tabs.Content value="invoices" className="p-5 outline-none" data-testid="install-panel-invoices">
+                <Tabs.Content value="invoices" forceMount className={`p-5 ${KEEP_MOUNTED}`} data-testid="install-panel-invoices">
                   <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                   <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this install.</p>
                   <div className="mt-3">
@@ -678,7 +678,7 @@ export function InstallSheet({
                   </div>
                 </Tabs.Content>
 
-                <Tabs.Content value="pre-inspection" className="outline-none" data-testid="install-panel-pre-inspection">
+                <Tabs.Content value="pre-inspection" forceMount className={KEEP_MOUNTED} data-testid="install-panel-pre-inspection">
                   <PreInspectionPanel installId={row.id} />
                 </Tabs.Content>
 

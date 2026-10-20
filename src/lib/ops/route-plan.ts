@@ -122,6 +122,20 @@ export function collectDayStops(
   return out.sort(byTimeThenName);
 }
 
+/** A stop's tech fields as updateJob, updatePm and updateInstall take them. */
+export type TechWrite = { id: number; technician?: string | null; secondaryTech?: string | null };
+
+/**
+ * What moving a stop from one tech to another writes, and what its Undo writes back. Moving a ticket's main tech to
+ * nobody, or onto the 2nd tech, clears or promotes the 2nd tech on the server, so Undo of the main copy puts both back.
+ */
+export function moveWrites(s: Pick<DayStop, "id" | "type" | "partner" | "second">, from: string, to: string): { forward: TechWrite; undo: TechWrite } {
+  const tech = (t: string) => (t === NO_TECH ? null : t);
+  if (s.second) return { forward: { id: s.id, secondaryTech: tech(to) }, undo: { id: s.id, secondaryTech: tech(from) } };
+  if (s.type === "pm" || s.type === "install") return { forward: { id: s.id, technician: tech(to) }, undo: { id: s.id, technician: tech(from) } };
+  return { forward: { id: s.id, technician: tech(to) }, undo: { id: s.id, technician: tech(from), secondaryTech: tech(s.partner) } };
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // Where each stop is
 

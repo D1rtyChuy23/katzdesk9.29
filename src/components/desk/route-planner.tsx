@@ -15,6 +15,7 @@ import {
   jobKey,
   KATZ_SHOP,
   legNote,
+  moveWrites,
   placeStops,
   planAreas,
   planTechRoutes,
@@ -35,6 +36,7 @@ import {
   type RouteStart,
   type StopType,
   type TechRoute,
+  type TechWrite,
 } from "@/lib/ops/route-plan";
 import type { Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { Badge } from "@/components/ui/badge";
@@ -288,29 +290,25 @@ export function RoutePlanner({
     return [...names].sort((a, b) => a.localeCompare(b));
   }, [rosterNames, routes]);
 
-  async function writeTech(s: PlacedStop, to: string) {
-    const tech = to === NO_TECH ? null : to;
-    if (s.type === "pm") await updatePm({ data: { id: s.id, technician: tech } });
-    else if (s.type === "install") await updateInstall({ data: { id: s.id, technician: tech } });
-    else if (s.second) await updateJob({ data: { id: s.id, secondaryTech: tech } });
-    else await updateJob({ data: { id: s.id, technician: tech } });
+  async function writeTech(s: PlacedStop, w: TechWrite) {
+    if (s.type === "pm") await updatePm({ data: { id: w.id, technician: w.technician } });
+    else if (s.type === "install") await updateInstall({ data: { id: w.id, technician: w.technician } });
+    else await updateJob({ data: w });
     void qc.invalidateQueries({ queryKey: ["installs"] });
     void qc.invalidateQueries({ queryKey: ["pms"] });
     void qc.invalidateQueries({ queryKey: ["jobs"] });
     void qc.invalidateQueries({ queryKey: ["dashboard"] });
   }
 
-  function patchTech(s: PlacedStop, to: string) {
-    const tech = to === NO_TECH ? null : to;
+  function patchTech(s: PlacedStop, w: TechWrite) {
+    const { id, ...fields } = w;
     if (s.type === "pm") {
-      qc.setQueryData<PmJob[]>(["pms"], (rows) => rows?.map((r) => (r.id === s.id ? { ...r, technician: tech } : r)));
+      qc.setQueryData<PmJob[]>(["pms"], (rows) => rows?.map((r) => (r.id === id ? { ...r, ...fields } : r)));
     } else if (s.type === "install") {
-      qc.setQueryData<Install[]>(["installs"], (rows) => rows?.map((r) => (r.id === s.id ? { ...r, technician: tech } : r)));
+      qc.setQueryData<Install[]>(["installs"], (rows) => rows?.map((r) => (r.id === id ? { ...r, ...fields } : r)));
     } else {
       const key = ["jobs", s.type === "tlc" ? "tlc" : "service"] as const;
-      qc.setQueryData<ServiceJob[]>(key, (rows) =>
-        rows?.map((r) => (r.id === s.id ? (s.second ? { ...r, secondaryTech: tech } : { ...r, technician: tech }) : r)),
-      );
+      qc.setQueryData<ServiceJob[]>(key, (rows) => rows?.map((r) => (r.id === id ? { ...r, ...fields } : r)));
     }
   }
 
@@ -340,25 +338,26 @@ export function RoutePlanner({
       else dest.push(s.key);
       next[toTech] = dest;
     }
-    if (changedTech) patchTech(s, toTech);
+    const writes = moveWrites(s, fromTech, toTech);
+    if (changedTech) patchTech(s, writes.forward);
     saveManual(next);
     try {
-      if (changedTech) await writeTech(s, toTech);
+      if (changedTech) await writeTech(s, writes.forward);
       setUndo({
         label: changedTech
           ? `Moved ${STOP_LABEL[s.type]} ${s.customer} from ${techLabel(fromTech)} to ${techLabel(toTech)}.`
           : `Reordered ${s.customer} on ${techLabel(fromTech)}.`,
         run: async () => {
           if (changedTech) {
-            patchTech(s, fromTech);
-            await writeTech(s, fromTech);
+            patchTech(s, writes.undo);
+            await writeTech(s, writes.undo);
           }
           saveManual(prevManual);
           setUndo(null);
         },
       });
     } catch (err) {
-      if (changedTech) patchTech(s, fromTech);
+      if (changedTech) patchTech(s, writes.undo);
       saveManual(prevManual);
       toast.error(err instanceof Error ? err.message : "Could not move that stop");
     }

@@ -120,3 +120,32 @@ test("reps across the row are read, and a matching primary is not saved again", 
   assert.equal(line.status, "same");
   assert.equal(line.primaryChange, false);
 });
+
+test("two rows in the file that land on one Katz Desk account are both held back", () => {
+  const files = salesRepFilesFromMatrix([
+    ["Internal ID", "Customer Name", "Primary Sales Rep", "Sales Rep", "Role", "Contribution %", "Primary"],
+    ["501", "Starbucks Kingwood", "Sean Marshall", "Sean Marshall", "Sales", "100%", "Yes"],
+    ["502", "Starbucks Kingwood", "Lizbeth Romero", "Lizbeth Romero", "Sales", "100%", "Yes"],
+  ]);
+  const lines = planSalesReps(files, [{ id: 1, name: "Starbucks Kingwood", netsuiteId: null, accountNumber: null, accountRep: "Amanda Logg" }], known, []);
+  assert.equal(lines.length, 2);
+  assert.ok(lines.every((l) => l.accountId === 1));
+  assert.equal(lines.filter((l) => l.willSave).length, 0);
+  for (const l of lines) {
+    assert.equal(l.status, "unmatched");
+    assert.equal(l.primaryChange, false);
+    assert.equal(l.nextPrimary, null);
+    assert.equal(l.reason, "More than one row in the file matches this Katz Desk account. Nothing is saved.");
+  }
+  assert.equal(countSalesReps(lines).unmatched, 2);
+
+  // One row by Internal ID and another NetSuite record by exact name: same account, so neither is saved.
+  const mixed = salesRepFilesFromMatrix([
+    ["Internal ID", "Customer Name", "Primary Sales Rep"],
+    ["158", "Woody's Smokehouse", "Sean Marshall"],
+    ["777", "Woody's Smokehouse", "Amanda Logg"],
+  ]);
+  const both = planSalesReps(mixed, accounts, known, []);
+  assert.deepEqual(both.map((l) => l.matchedBy), ["internal ID", "name"]);
+  assert.ok(both.every((l) => l.status === "unmatched" && !l.willSave));
+});
