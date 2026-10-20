@@ -99,8 +99,8 @@ async function openWindow(pg, sql, id) {
 }
 
 async function checkAndPhoto(pg, id, equipmentId) {
-  await pg.query("insert into install_inspection_items (install_id, equipment_id, category, status) values ($1, $2, 'Water', 'Fail')", [id, equipmentId]);
-  await pg.query("insert into install_inspection_photos (install_id, equipment_id, category, data_url) values ($1, $2, 'Water', 'data:image/jpeg;base64,AA')", [
+  await pg.query("insert into install_inspection_items (install_id, equipment_id, category, status) values ($1, $2, 'water', 'Fail')", [id, equipmentId]);
+  await pg.query("insert into install_inspection_photos (install_id, equipment_id, category, data_url) values ($1, $2, 'water', 'data:image/jpeg;base64,AA')", [
     id,
     equipmentId,
   ]);
@@ -113,6 +113,28 @@ async function kept(pg, sql, id, equipmentId) {
 }
 
 const storedList = async (pg, id) => parseMachinesJson((await pg.query("select machines from installs where id = $1", [id])).rows[0].machines).map((m) => m.equipment);
+const storedSerials = async (pg, id) =>
+  parseMachinesJson((await pg.query("select machines from installs where id = $1", [id])).rows[0].machines).map((m) => [m.equipment, m.serial]);
+
+/** The Serial box's lookup on one row (writeInstallSerial): the serial goes on that row unless another row of the install has it. */
+async function lookupSerial(pg, id, index, serial) {
+  const list = parseMachinesJson((await pg.query("select machines from installs where id = $1", [id])).rows[0].machines);
+  const placed = installForm.applySerialInPlace(list, index, serial);
+  if (placed.status === "updated") await pg.query("update installs set machines = $2 where id = $1", [id, JSON.stringify(placed.rows)]);
+  return placed.status;
+}
+
+/** removeInspectionEquipment with keepList: the unit's checks, photos and link go, and the account row when nothing else uses it. */
+async function dropUnit(pg, id, equipmentId) {
+  for (const table of ["install_inspection_photos", "install_inspection_items", "install_inspection_units"]) {
+    await pg.query(`delete from ${table} where install_id = $1 and equipment_id = $2`, [id, equipmentId]);
+  }
+  await pg.query(
+    `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
+        and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)`,
+    [equipmentId],
+  );
+}
 
 test("a second machine of a model already on the install, added on the Pre-inspection tab, keeps its check and photo through a save and the close", async () => {
   const { pg, sql } = await fresh();
@@ -142,10 +164,111 @@ test("removing one of two identical no-serial rows keeps the other unit's check 
     await checkAndPhoto(pg, id, first);
     const w = await openWindow(pg, sql, id);
     const unit = installForm.visitUnitForRow(w.specs, 2, (await readInspection(sql, id)).machines);
-    assert.equal(unit, null);
+    assert.notEqual(unit?.equipmentId, first);
+    if (unit) await dropUnit(pg, id, unit.equipmentId);
     await w.save(w.specs.filter((_, i) => i !== 2));
     assert.deepEqual(await kept(pg, sql, id, first), { onVisit: true, checks: 1, photos: 1 });
     assert.deepEqual(await storedList(pg, id), ["Bunn G9-2T", "Bunn TB3"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("removing either of two identical no-serial rows keeps the check and photo on the unit added second", async () => {
+  for (const index of [0, 1]) {
+    const { pg, sql } = await fresh();
+    try {
+      const id = await install(pg, "Mirror Cafe", "Bunn TB3");
+      await readInspection(sql, id);
+      const w = await openWindow(pg, sql, id);
+      const view = await addMachineOntoInstall(sql, { installId: id, model: "Bunn TB3", serial: null, electrical: null }, "Test");
+      const added = view.machines.at(-1).equipmentId;
+      await checkAndPhoto(pg, id, added);
+      await w.refetch();
+      // The Equipment tab's Remove: the unit it picks goes first, then the list is saved (the save's prune runs last).
+      const unit = installForm.visitUnitForRow(w.specs, index, (await readInspection(sql, id)).machines);
+      assert.notEqual(unit?.equipmentId, added);
+      if (unit) await dropUnit(pg, id, unit.equipmentId);
+      await w.save(w.specs.filter((_, i) => i !== index));
+      assert.deepEqual(await kept(pg, sql, id, added), { onVisit: true, checks: 1, photos: 1 }, `row ${index}`);
+      await w.close();
+      assert.deepEqual(await kept(pg, sql, id, added), { onVisit: true, checks: 1, photos: 1 }, `row ${index}`);
+      assert.deepEqual(await storedList(pg, id), ["Bunn TB3"]);
+      assert.equal((await readInspection(sql, id)).machines.length, 1);
+    } finally {
+      await pg.close();
+    }
+  }
+});
+
+test("an Equipment-tab Remove takes its pre-inspection unit off before the list is saved, in the save's own queue", () => {
+  const src = componentSource("../src/components/desk/entity-sheets.tsx", "InstallSheet");
+  // Both mutations share one scope, so the save (and its prune) waits for the remove, and the remove's unit check cannot fail.
+  assert.match(src, /const save = useMutation\(\{\s*scope: queue,\s*mutationFn: \(d[^)]*\) => updateInstall\(/);
+  assert.match(src, /const dropUnit = useMutation\(\{\s*scope: queue,\s*mutationFn: [^\n]*removeInspectionEquipment\(\{ data: \{ \.\.\.v, keepList: true \} \}\)/);
+  const remove = src.slice(src.indexOf("onRemove={(index) => {"));
+  const drop = remove.indexOf("dropUnit.mutate(");
+  assert.ok(drop >= 0 && drop < remove.indexOf("persistMachines(next)"));
+});
+
+test("a serial moved from one row to another is kept: the clear saves at once, so the other row's lookup takes it", async () => {
+  const field = componentSource("../src/components/desk/serial-notice.tsx", "SerialPullField");
+  const commit = field.slice(field.indexOf("function commit("), field.indexOf("const key = next"));
+  assert.match(commit, /const had = saved\.current\.trim\(\);[\s\S]*if \(had\) onCleared\?\.\(\);/);
+  const rows = componentSource("../src/components/desk/machine-fields.tsx", "MachineFields");
+  assert.match(rows, /onCleared=\{installId \? \(\) => onCommit\?\.\(patch\(index, \{ serial: "" \}\)\) : undefined\}/);
+  const { pg, sql } = await fresh();
+  try {
+    const TB3 = { equipment: "Bunn TB3", serial: "", powerVoltage: "" };
+    const id = (
+      await pg.query("insert into installs (customer, equipment, machines) values ('Move Cafe', $1, $2) returning id", ["Bunn TB3\nBunn TB3", JSON.stringify([TB3, TB3])])
+    ).rows[0].id;
+    await readInspection(sql, id);
+    const w = await openWindow(pg, sql, id);
+    // Typed on the wrong row: the lookup writes it there and the row saves.
+    assert.equal(await lookupSerial(pg, id, 0, "TB9"), "updated");
+    await w.save(w.specs.map((s, i) => (i === 0 ? { ...s, serial: "TB9" } : s)));
+    // Cleared there: onCleared saves the row at once.
+    await w.save(w.specs.map((s, i) => (i === 0 ? { ...s, serial: "" } : s)));
+    // Typed on the right row: the server no longer has it on the first row.
+    assert.equal(await lookupSerial(pg, id, 1, "TB9"), "updated");
+    await w.save(w.specs.map((s, i) => (i === 1 ? { ...s, serial: "TB9" } : s)));
+    await w.close();
+    assert.deepEqual(await storedSerials(pg, id), [
+      ["Bunn TB3", ""],
+      ["Bunn TB3", "TB9"],
+    ]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a serial typed over one saved on another row, then Escape, is not saved on the second row", async () => {
+  // The close sends changedMachineFields(specs, loadedSpecs.current) (install-close-serials checks that line).
+  const T = (serial) => ({ equipment: "Bunn TB3", serial, powerVoltage: "" });
+  const G = (serial) => ({ equipment: "Bunn G9-2T", serial, powerVoltage: "" });
+  const F = { equipment: "Fetco CBS-51H", serial: "", powerVoltage: "120V" };
+  assert.deepEqual(machines.changedMachineFields([T("X1"), G("X1")], [T("X1"), G("")]), {});
+  // A typed copy on an earlier row is the one cleared too.
+  assert.deepEqual(installForm.clearTypedDuplicates([G("X1"), T("X1")], [G(""), T("X1")]), [G(""), T("X1")]);
+  // Not a duplicate: a row kept here but dropped from the baseline only shifts the rows, and nothing is cleared.
+  assert.deepEqual(installForm.clearTypedDuplicates([T(""), F, G("X")], [T(""), G("X")]), [T(""), F, G("X")]);
+  const { pg, sql } = await fresh();
+  try {
+    const id = (
+      await pg.query("insert into installs (customer, equipment, machines) values ('Esc Cafe', $1, $2) returning id", [
+        "Bunn TB3\nBunn G9-2T",
+        JSON.stringify([T("X1"), G("")]),
+      ])
+    ).rows[0].id;
+    await readInspection(sql, id);
+    const w = await openWindow(pg, sql, id);
+    w.specs = w.specs.map((s, i) => (i === 1 ? { ...s, serial: "X1" } : s));
+    await w.close();
+    assert.deepEqual(await storedSerials(pg, id), [
+      ["Bunn TB3", "X1"],
+      ["Bunn G9-2T", ""],
+    ]);
   } finally {
     await pg.close();
   }

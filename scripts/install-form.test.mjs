@@ -161,6 +161,31 @@ test("removing an equipment row takes a pre-inspection unit only when no other u
   assert.equal(visitUnitForRow(rows.slice(1, 3), 1, [units[1]]), null);
 });
 
+test("when two units could be the removed row, the one with nothing recorded on it goes", () => {
+  const unit = (equipmentId, overall, photoCount = 0, note = null) => ({ equipmentId, model: "Fetco CBS-51H", name: "Fetco CBS-51H", serial: null, overall, photoCount, note });
+  const rows = [row("Fetco CBS-51H"), row("Fetco CBS-51H")];
+  // The second unit (a pre-inspection add) holds the check and photo, whichever row is removed.
+  for (const index of [0, 1]) assert.equal(visitUnitForRow(rows, index, [unit(1, "Not started"), unit(2, "Failed", 1)])?.equipmentId, 1);
+  assert.equal(visitUnitForRow(rows, 0, [unit(1, "Failed", 1), unit(2, "Not started")])?.equipmentId, 2);
+  // A note or a photo counts as recorded too. With nothing empty, the save's prune decides.
+  assert.equal(visitUnitForRow(rows, 0, [unit(1, "Not started", 0, "Left of the sink"), unit(2, "Not started", 1)]), null);
+});
+
+test("two machines of one model with no serial are told apart by voltage and plug when the server's list changes", () => {
+  const A = { equipment: "Fetco CBS-51H", serial: "", powerVoltage: "220V", plug: "6-20" };
+  const B = { equipment: "Fetco CBS-51H", serial: "", powerVoltage: "120V", plug: "5-15" };
+  // The 220V one was removed on the Pre-inspection tab: the 120V one stays.
+  assert.deepEqual(machinesBeforeSave([A, B], [A, B], [B]), [B]);
+  // Another tab wrote a serial on the 220V row: it lands on that row.
+  assert.deepEqual(
+    machinesBeforeSave([A, B], [A, B], [{ ...A, serial: "W220" }, B]).map((r) => [r.powerVoltage, r.serial]),
+    [
+      ["220V", "W220"],
+      ["120V", ""],
+    ],
+  );
+});
+
 test("account type and the already-on-this-account notice", () => {
   assert.equal(accountIsNew(0, 0), true);
   assert.equal(accountIsNew(1, 0), false);

@@ -393,7 +393,10 @@ export function InstallSheet({
     queryFn: () => getInstallInspection({ data: { installId: row!.id } }),
     enabled: row != null,
   });
+  /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
+  const queue = { id: `install-sheet-${row?.id}` };
   const save = useMutation({
+    scope: queue,
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
       const keys = Object.keys(vars).filter((k) => k !== "id");
@@ -409,6 +412,11 @@ export function InstallSheet({
       void qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  const dropUnit = useMutation({
+    scope: queue,
+    mutationFn: (v: { installId: number; equipmentId: number }) => removeInspectionEquipment({ data: { ...v, keepList: true } }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"),
   });
   const dropInstall = useMutation({
     mutationFn: () => archiveInstall({ data: { id: row!.id } }),
@@ -678,14 +686,9 @@ export function InstallSheet({
                         if (!window.confirm(`Remove ${label} from this install?`)) return;
                         const next = specs.filter((_, i) => i !== index);
                         const linked = visitUnitForRow(specs, index, visit.data?.machines ?? []);
+                        // The unit goes first; the save waits in the same queue, then refreshes the list and the visit.
+                        if (linked) dropUnit.mutate({ installId: row.id, equipmentId: linked.equipmentId });
                         persistMachines(next);
-                        if (!linked) return;
-                        void removeInspectionEquipment({ data: { installId: row.id, equipmentId: linked.equipmentId, keepList: true } })
-                          .then(() => {
-                            void qc.invalidateQueries({ queryKey: ["inspection", row.id] });
-                            void qc.invalidateQueries({ queryKey: ["installs"] });
-                          })
-                          .catch((e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"));
                       }}
                     />
                   </div>

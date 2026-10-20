@@ -133,16 +133,25 @@ function rowsMatch(a: { equipment: string; serial: string }, b: { equipment: str
   return true;
 }
 
-/** For each row, the index of its own row in `against` (or -1), one to one: the same serial first, then a blank serial on either side. */
+const EDITABLE = ["serial", "powerVoltage", "plug", "ownership", "water", "recipeId"] as const;
+const editedHere = (a: VisitMachine, b: VisitMachine) => EDITABLE.some((k) => String(a[k] ?? "").trim() !== String(b[k] ?? "").trim());
+
+/**
+ * For each row, the index of its own row in `against` (or -1), one to one: an identical row first (serial, voltage, plug,
+ * ownership, water, recipe), then the same serial, then a blank serial on either side.
+ */
 function pairRows(rows: VisitMachine[], against: VisitMachine[]): number[] {
   const pair = rows.map(() => -1);
   const used = new Set<number>();
-  for (const loose of [false, true]) {
+  const passes = [
+    (r: VisitMachine, a: VisitMachine) => sameWarehouseModel(r.equipment, a.equipment) && !editedHere(r, a),
+    (r: VisitMachine, a: VisitMachine) => sameWarehouseModel(r.equipment, a.equipment) && serialKey(r.serial) === serialKey(a.serial),
+    rowsMatch,
+  ];
+  for (const match of passes) {
     rows.forEach((r, i) => {
       if (pair[i]! >= 0) return;
-      const j = against.findIndex(
-        (a, k) => !used.has(k) && (loose ? rowsMatch(r, a) : sameWarehouseModel(r.equipment, a.equipment) && serialKey(r.serial) === serialKey(a.serial)),
-      );
+      const j = against.findIndex((a, k) => !used.has(k) && match(r, a));
       if (j < 0) return;
       pair[i] = j;
       used.add(j);
@@ -150,9 +159,6 @@ function pairRows(rows: VisitMachine[], against: VisitMachine[]): number[] {
   }
   return pair;
 }
-
-const EDITABLE = ["serial", "powerVoltage", "plug", "ownership", "water", "recipeId"] as const;
-const editedHere = (a: VisitMachine, b: VisitMachine) => EDITABLE.some((k) => String(a[k] ?? "").trim() !== String(b[k] ?? "").trim());
 
 /**
  * The form's rows brought up to date with the server's list. `previous` is the server's list as this window last saw it.
@@ -188,15 +194,34 @@ export function machinesBeforeSave<T extends VisitMachine>(editing: T[], previou
 
 /**
  * The pre-inspection unit an equipment row stands for: the unit with its serial, or the only no-serial unit of its model.
- * Null when two units (or two rows) could be it; then the save's prune picks the unit, and its checks stay with the kept row.
+ * When two units (or two rows) could be it, a unit with nothing recorded on it (not started, no photo, no note), so the
+ * one with checks stays. Null when there is none; then the save's prune picks the unit.
  */
-export function visitUnitForRow<U extends { serial: string | null; model: string; name: string }>(rows: VisitMachine[], index: number, units: U[]): U | null {
+export function visitUnitForRow<U extends { serial: string | null; model: string; name: string; overall: string; photoCount: number; note: string | null }>(
+  rows: VisitMachine[],
+  index: number,
+  units: U[],
+): U | null {
   const row = rows[index];
   if (!row) return null;
   const key = serialKey(row.serial);
   const twin = (equipment: string, serial: string | null) => (key ? serialKey(serial) === key : !serialKey(serial) && sameWarehouseModel(equipment, row.equipment));
   const hits = units.filter((u) => twin(u.model || u.name, u.serial));
-  return hits.length === 1 && rows.filter((r) => twin(r.equipment, r.serial)).length === 1 ? hits[0]! : null;
+  if (hits.length === 1 && rows.filter((r) => twin(r.equipment, r.serial)).length === 1) return hits[0]!;
+  return hits.find((u) => u.overall === "Not started" && !u.photoCount && !u.note?.trim()) ?? null;
+}
+
+/**
+ * The close's list: a serial typed on a row (no lookup yet) that the saved list already has on another row is cleared
+ * there, as the Serial box's lookup would. Only a real duplicate counts: the saved copy is still on its own row.
+ */
+export function clearTypedDuplicates<T extends { serial: string }>(rows: T[], saved: { serial: string }[]): T[] {
+  const savedAt = (i: number) => serialKey(saved[i]?.serial);
+  return rows.map((r, i) => {
+    const key = serialKey(r.serial);
+    if (!key || savedAt(i) === key) return r;
+    return rows.some((o, k) => k !== i && savedAt(k) === key && serialKey(o.serial) === key) ? { ...r, serial: "" } : r;
+  });
 }
 
 export type FormUnit = {

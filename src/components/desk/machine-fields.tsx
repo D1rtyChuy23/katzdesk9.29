@@ -571,6 +571,8 @@ export function MachineFields({
                 onChange(next);
                 onCommit?.(next);
               }}
+              // Moving a serial to another row: the clear is saved first, or the other row's lookup finds it here.
+              onCleared={installId ? () => onCommit?.(patch(index, { serial: "" })) : undefined}
             />
             <div className="min-w-0">
               <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase" htmlFor={`pwr-${index}`}>

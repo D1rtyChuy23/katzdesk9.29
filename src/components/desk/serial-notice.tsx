@@ -50,6 +50,7 @@ export function SerialPullField({
   machineIndex,
   onPulled,
   onUseUnit,
+  onCleared,
   model,
   compact = false,
 }: {
@@ -64,6 +65,8 @@ export function SerialPullField({
   onPulled?: (result: SerialPullResult) => void;
   /** Replace this row with the account unit that already owns the serial. */
   onUseUnit?: (unit: { model: string; serial: string }) => void;
+  /** A serial that was on the row was cleared. Save it now: the next lookup checks the server's list. */
+  onCleared?: () => void;
   model?: string;
 }) {
   const qc = useQueryClient();
@@ -125,10 +128,12 @@ export function SerialPullField({
   function commit(raw: string, confirmReuse = false) {
     const next = raw.trim();
     if (!next) {
+      const had = saved.current.trim();
       looked.current = "";
       saved.current = "";
       setOffer(null);
       onValue("");
+      if (had) onCleared?.();
       return;
     }
     if (!installId && !jobId) {
