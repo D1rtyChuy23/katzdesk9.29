@@ -98,7 +98,7 @@ function nextCatalogHit(text: string, patterns: { name: string; re: RegExp }[]):
 }
 
 /** Between-machine separators. Never split GB/5, A/2, 1L/2U. */
-export const BETWEEN_MACHINES = /\s+(?:&|\+|and)\s+|,\s+|(?<=[A-Za-z]{2,})\s*\/\s*(?=[A-Z][a-zA-Z])/i;
+const BETWEEN_MACHINES = /\s+(?:&|\+|and)\s+|,\s+|(?<=[A-Za-z]{2,})\s*\/\s*(?=[A-Z][a-zA-Z])/i;
 
 function splitNonCatalog(raw: string, catalog: string[]): string[] {
   const pieces: string[] = [];
