@@ -19,9 +19,9 @@ import { cn } from "@/lib/utils";
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-type Draft = { item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null };
+type Draft = { id?: number; item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null };
 
-const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part });
+const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ id: l.id, item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part });
 
 /** The account's saved pin as a point, or null. */
 const billPin = (b: BillTo) => (b.latitude != null && b.longitude != null ? { lat: b.latitude, lng: b.longitude } : null);
@@ -65,6 +65,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   // Always read fresh when the window opens, so a cancelled draft never comes back.
   const q = useQuery({ queryKey: ["invoice", type, id], queryFn: () => getInvoice({ data: { type, id } }), refetchOnMount: "always" });
   const [lines, setLines] = useState<Draft[] | null>(null);
+  const [loadedIds, setLoadedIds] = useState<number[]>([]);
   const [discKind, setDiscKind] = useState<DiscountKind>("percent");
   const [discValue, setDiscValue] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -73,6 +74,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   useEffect(() => {
     if (!v || lines) return;
     setLines(v.lines.map(toDraft));
+    setLoadedIds(v.lines.flatMap((l) => (l.id != null ? [l.id] : [])));
     setDiscKind(v.discount?.kind ?? "percent");
     setDiscValue(v.discount ? String(v.discount.value) : "");
   }, [v, lines]);
@@ -84,6 +86,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
           type,
           id,
           lines: (lines ?? []).map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate })),
+          lineIds: loadedIds,
           discount: discValue.trim() ? { kind: discKind, value: discValue } : null,
         },
       }),

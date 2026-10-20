@@ -79,7 +79,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     toast.success(message);
   };
   const save = useMutation({
-    mutationFn: () => saveTicketCharges({ data: { jobId, po, lines, discount: discValue.trim() ? { kind: discKind, value: discValue } : null } }),
+    mutationFn: () => saveTicketCharges({ data: { jobId, po, lines, lineIds: (charges.data?.lines ?? []).map((l) => l.id), discount: discValue.trim() ? { kind: discKind, value: discValue } : null } }),
     onSuccess: (next) => after(next, "Charges saved"),
     onError: (e: Error) => toast.error(e.message),
   });

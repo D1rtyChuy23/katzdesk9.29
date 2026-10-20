@@ -63,8 +63,9 @@ export function CorrigoImportButton({
   const apply = useMutation({
     mutationFn: (rows: CorrigoPreview["rows"]) => applyCorrigoImport({ data: { rows } }),
     onSuccess: (res) => {
+      const notMerged = res.review.filter((item) => item.reason === "merge").length;
       toast.success(
-        `Corrigo import saved · ${res.updated} updated · ${res.created} created`,
+        `Corrigo import saved · ${res.updated} updated · ${res.created} created${notMerged ? ` · ${notMerged} not merged` : ""}`,
       );
       setOpen(false);
       setPreview(null);
@@ -77,6 +78,9 @@ export function CorrigoImportButton({
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
+      void qc.invalidateQueries({ queryKey: ["charges"] });
+      void qc.invalidateQueries({ queryKey: ["invoice"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not import"),
   });
@@ -645,7 +649,7 @@ export function CorrigoReviewList({
         <div>
           <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For Review</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999.
+            Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999, and tickets that could not be merged.
           </p>
         </div>
         <Button type="button" size="sm" variant="outline" onClick={onDismiss}>
@@ -668,6 +672,9 @@ export function CorrigoReviewList({
                   {item.technician ? ` · ${item.technician}` : ""}
                   {item.reason === "wrap" ? " · repeated after 9999" : ""}
                 </span>
+                {item.reason === "merge" && item.note ? (
+                  <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">not merged: {item.note}</span>
+                ) : null}
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">
                 {item.reason === "wrap" && !/open|dispatch|progress|follow/i.test(item.status)

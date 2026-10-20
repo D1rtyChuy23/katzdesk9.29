@@ -897,12 +897,14 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	if (extra) await logActivity(sql, context.userId, cur[0].kind, data.id, "updated", extra);
 	return getJob({ data: { id: data.id } });
 });
-export const mergeServiceTickets = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { keeperId: number; extraId: number }) => d).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
+const mergeInput = z.object({ keeperId: z.number().int().positive(), extraId: z.number().int().positive() });
+export const mergeServiceTickets = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: z.input<typeof mergeInput>) => mergeInput.parse(d)).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
 	const sql = await ready();
 	if (data.keeperId === data.extraId) throw new Error("Pick a different ticket to merge into.");
 	const actor = await deskUsername(sql, context.userId);
 	const result = await mergeServiceJobs(sql, data.keeperId, data.extraId, actor);
 	if (!result) throw new Error("Could not merge those tickets.");
+	if ("refused" in result) throw new Error(result.refused);
 	return getJob({ data: { id: result.keeperId } });
 });
 export const createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind: "service" | "tlc"; customer: string; issue?: string; equipment?: string; contact?: string; phone?: string; received?: string; callType?: string; technician?: string; urgency?: string }) => d).handler(async ({ data, context }: any) => {
