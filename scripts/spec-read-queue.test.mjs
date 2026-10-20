@@ -1,0 +1,95 @@
+import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
+import { register } from "node:module";
+import { test } from "node:test";
+import { PGlite } from "@electric-sql/pglite";
+
+await register("./node-resolve-hook.mjs", import.meta.url);
+process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
+const { keepOneCopy, queueFiles, queuedSheets } = await import("../src/lib/ops/spec-read-api.ts");
+const { copiedManuals } = await import("../src/lib/ops/library-file-rules.ts");
+
+async function freshDb() {
+  const pg = new PGlite();
+  const dir = new URL("../migrations/", import.meta.url);
+  for (const name of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, dir), "utf8"));
+  return { query: async (text, params) => (await pg.query(text, params)).rows };
+}
+
+async function book(sql, title, manufacturer) {
+  return (await sql.query("insert into library_books (title, manufacturer) values ($1, $2) returning id", [title, manufacturer]))[0].id;
+}
+
+async function file(sql, bookId, section, name, size = 5000, originalName = null) {
+  return (
+    await sql.query(
+      "insert into library_files (section, name, original_name, mime, size, token, complete, book_id) values ($1, $2, $3, 'application/pdf', $4, gen_random_uuid()::text, true, $5) returning id",
+      [section, name, originalName, size, bookId],
+    )
+  )[0].id;
+}
+
+async function specFiles(sql, count) {
+  const bookId = await book(sql, "BUNN Test", "BUNN");
+  const ids = [];
+  for (let i = 1; i <= count; i++) ids.push(await file(sql, bookId, "spec", `Sheet ${i}.pdf`, 10));
+  return ids;
+}
+
+async function statusOf(sql, ids) {
+  const rows = await sql.query("select file_id, status from spec_reads where file_id = any($1::int[]) order by file_id", [ids]);
+  return rows.map((r) => r.status);
+}
+
+const queuedIds = async (sql, fileIds) => (await queuedSheets(sql, fileIds)).map((r) => Number(r.file_id));
+
+test("Read next 15 does not put unreadable sheets back in the queue, so the rest get read", async () => {
+  const sql = await freshDb();
+  const ids = await specFiles(sql, 20);
+  await queueFiles(sql, null, false);
+  // The first batch found 15 scanned sheets.
+  await sql.query("update spec_reads set status = 'unreadable', error = 'Scanned' where file_id = any($1::int[])", [ids.slice(0, 15)]);
+  await queueFiles(sql, null, false);
+  assert.deepEqual(await statusOf(sql, ids.slice(0, 15)), Array(15).fill("unreadable"));
+  assert.deepEqual(await queuedIds(sql, null), ids.slice(15));
+  // Reading one sheet on purpose still retries it.
+  await queueFiles(sql, [ids[0]], true);
+  assert.deepEqual(await statusOf(sql, [ids[0]]), ["queued"]);
+});
+
+test("a per-file read reads only the sheets asked for, not the lowest one in the queue", async () => {
+  const sql = await freshDb();
+  const ids = await specFiles(sql, 5);
+  await queueFiles(sql, null, false);
+  const asked = ids[4];
+  await queueFiles(sql, [asked], true);
+  assert.deepEqual(await queuedIds(sql, [asked]), [asked]);
+  assert.deepEqual(await queuedIds(sql, null), ids);
+});
+
+test("keep one refuses when no copy is on the main chip, and works when the variations take manuals from it", async () => {
+  const sql = await freshDb();
+  const h120 = await book(sql, "BUNN H5X 120V", "BUNN");
+  const h240 = await book(sql, "BUNN H5X 240V", "BUNN");
+  const a = await file(sql, h120, "manuals", "BUNN H5X 120V - Installation 43599.0000.pdf", 5000, "43599.0000.pdf");
+  const b = await file(sql, h240, "manuals", "BUNN H5X 240V - Installation 43599.0000.pdf", 5000, "43599.0000.pdf");
+  await assert.rejects(() => keepOneCopy(sql, a, [a, b]), /Store this file once on the main chip first, so the other models keep it\./);
+  assert.equal((await sql.query("select id from library_files where id = any($1::int[])", [[a, b]])).length, 2);
+
+  const main = await book(sql, "BUNN ICB", "BUNN");
+  const dv = await book(sql, "BUNN ICB-DV", "BUNN");
+  const keep = await file(sql, main, "manuals", "BUNN ICB - Installation 39343.0000.pdf", 7000, "39343.0000.pdf");
+  const extra = await file(sql, dv, "manuals", "BUNN ICB-DV - Installation 39343.0000.pdf", 7000, "39343.0000.pdf");
+  // A copy on a model outside the family is refused, and nothing is deleted.
+  await assert.rejects(() => keepOneCopy(sql, keep, [keep, extra, b]), /Store this file once on the main chip first/);
+  assert.equal((await sql.query("select id from library_files where id = any($1::int[])", [[keep, extra, b]])).length, 3);
+
+  assert.deepEqual(await keepOneCopy(sql, keep, [keep, extra]), { removed: 1 });
+  const books = (await sql.query("select id, title, manufacturer from library_books")).map((r) => ({ id: r.id, title: r.title, manufacturer: r.manufacturer }));
+  const files = (await sql.query("select id, section, book_id, mpn from library_files")).map((r) => ({ id: r.id, section: r.section, bookId: r.book_id, mpn: r.mpn }));
+  assert.equal(files.some((f) => f.id === extra), false);
+  assert.deepEqual(
+    copiedManuals(books.find((x) => x.id === dv), books, files, []).map((f) => f.id),
+    [keep],
+  );
+});

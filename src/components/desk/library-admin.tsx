@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { AdminSection, resolvedOn } from "@/components/desk/admin-section";
 import { SpecReviewPanel } from "@/components/desk/spec-review-panel";
-import { cleanupLibraryDuplicates, deleteLibraryFile, setConfirmLegacy, type LibraryBook, type LibraryCleanupReport, type LibraryFile } from "@/lib/ops/library-files";
+import { cleanupLibraryDuplicates, deleteLibraryFile, setConfirmLegacy, storeLibraryFileOnce, type LibraryBook, type LibraryCleanupReport, type LibraryFile } from "@/lib/ops/library-files";
 import { importLibraryBatch, libraryImportLogCsv, libraryImportPending, resolveImportDuplicates } from "@/lib/ops/library-import";
-import { familyDuplicateGroups, sizeText, type ShareFile } from "@/lib/ops/library-file-rules";
+import { familyDuplicateGroups, isMainChip, mainChipFor, sizeText, type ShareFile } from "@/lib/ops/library-file-rules";
 import { keepOneLibraryCopy, listLibraryAdminState, listSpecReads, rememberLibraryDone, runSpecReads, setLibraryAdminOpen, tieAndReadSpec } from "@/lib/ops/spec-read-api";
 import { adminSummary, clipRows, orderAdminSections } from "@/lib/ops/spec-read";
 
@@ -132,6 +132,14 @@ export function LibraryAdmin({
       reload();
     },
     onError: (e) => fail(e, "Could not remove the extra copies"),
+  });
+  const storeOnce = useMutation({
+    mutationFn: (fileId: number) => storeLibraryFileOnce({ data: { fileId } }),
+    onSuccess: (r) => {
+      toast.success(r.createdMainChip ? `Added ${r.bookTitle} and stored ${r.name} there.` : `Stored ${r.name} on ${r.bookTitle}.`);
+      reload();
+    },
+    onError: (e) => fail(e, "Could not store that file once"),
   });
   const importing = useMutation({
     mutationFn: (apply: boolean) => importLibraryBatch({ data: { apply, limit: 15 } }),
@@ -277,7 +285,7 @@ export function LibraryAdmin({
     {
       id: "duplicates",
       title: "Same File On Several Models",
-      hint: "Same size and document number, on more than one model in one family. Keep one, remove others deletes the extra copies. The keeper stays.",
+      hint: "Same size and document number, on more than one model in one family. Store Once moves one copy onto the main chip. Then Keep one, remove others deletes the extra copies, and every model still shows the file.",
       noun: groups.length === 1 ? "duplicate group" : "duplicate groups",
       openCount: groups.length,
       testId: "library-dup-report",
@@ -285,7 +293,11 @@ export function LibraryAdmin({
         show(
           "duplicates",
           groups.map((g) => {
-            const keep = [...g.files].sort((a, b) => a.id - b.id)[0]!;
+            const home = books.find((b) => b.id === g.files[0]!.bookId);
+            const main = home ? (isMainChip(home, books) ? home : mainChipFor(home, books)) : null;
+            // Only a copy on the main chip reaches every variation, so only that copy can be the keeper.
+            const onMain = main ? g.files.find((f) => f.bookId === main.id) : undefined;
+            const keep = onMain ?? [...g.files].sort((a, b) => a.id - b.id)[0]!;
             const key = `dup:${g.manufacturer}|${g.family}|${g.docNumber}|${g.size}`;
             const label = `${g.manufacturer} ${g.family} · ${g.docNumber}`;
             return {
@@ -303,11 +315,11 @@ export function LibraryAdmin({
                     size="sm"
                     className="mt-2"
                     variant="outline"
-                    disabled={keepOne.isPending}
-                    onClick={() => keepOne.mutate({ keepId: keep.id, removeIds: g.files.map((f) => f.id), key, label })}
-                    data-testid="library-dup-keep"
+                    disabled={keepOne.isPending || storeOnce.isPending}
+                    onClick={() => (onMain ? keepOne.mutate({ keepId: keep.id, removeIds: g.files.map((f) => f.id), key, label }) : storeOnce.mutate(keep.id))}
+                    data-testid={onMain ? "library-dup-keep" : "library-dup-store-once"}
                   >
-                    Keep one, remove others
+                    {onMain ? "Keep one, remove others" : `Store Once On ${main ? main.title : `${g.manufacturer} ${g.family}`}`}
                   </Button>
                 </div>
               ),

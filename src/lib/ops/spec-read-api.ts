@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { modelLabel, shouldStartDownload } from "@/lib/ops/library-file-rules";
+import { copiesToVariations, isMainChip, mainChipFor, modelLabel, shouldStartDownload, type LibrarySection } from "@/lib/ops/library-file-rules";
 import { extractSpecFromText } from "@/lib/ops/spec-library";
 import { emptyDraft, type Kv, type Requirements, type SpecSheetDraft } from "@/lib/ops/spec-schema";
 import {
@@ -191,7 +191,7 @@ function asBytes(data: unknown): Uint8Array {
   return new Uint8Array();
 }
 
-async function queueFiles(sql: Sql, fileIds: number[] | null, force: boolean) {
+export async function queueFiles(sql: Sql, fileIds: number[] | null, force: boolean) {
   if (fileIds && !fileIds.length) return;
   const params: unknown[] = [];
   const only = fileIds ? `and f.id = any($1::int[])` : "";
@@ -206,14 +206,28 @@ async function queueFiles(sql: Sql, fileIds: number[] | null, force: boolean) {
            status = 'queued',
            error = null,
            updated_at = now()
-     where ${force ? "true" : "spec_reads.status in ('queued', 'unreadable')"}`,
+     where ${force ? "true" : "spec_reads.status = 'queued'"}`,
     params,
   );
 }
 
+/** The queued sheets a run reads: only the ones asked for when fileIds is set. */
+export async function queuedSheets(sql: Sql, fileIds: number[] | null) {
+  return sql.query<{ file_id: number; book_id: number; name: string }>(
+    `select r.file_id, r.book_id, f.name
+       from spec_reads r
+       join library_files f on f.id = r.file_id
+      where r.status = 'queued' ${fileIds ? "and r.file_id = any($1::int[])" : ""}
+      order by r.file_id
+      limit 40`,
+    fileIds ? [fileIds] : [],
+  );
+}
+
 /**
- * Queue stored spec sheets and read up to 15 of them. Already-read sheets are
- * left alone unless fileIds is set (a sheet someone just added, or Tie and read).
+ * Queue stored spec sheets and read up to 15 of them. Already-read and unreadable
+ * sheets are left alone unless fileIds is set (a sheet someone just added, or Tie
+ * and read); then only those sheets are read.
  */
 export const runSpecReads = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -225,14 +239,7 @@ export const runSpecReads = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("AI reading isn't available here yet.");
     await queueFiles(sql, data.fileIds ?? null, !!data.fileIds);
     const limit = data.limit ?? READ_BATCH;
-    const queued = await sql.query<{ file_id: number; book_id: number; name: string }>(
-      `select r.file_id, r.book_id, f.name
-         from spec_reads r
-         join library_files f on f.id = r.file_id
-        where r.status = 'queued'
-        order by r.file_id
-        limit 40`,
-    );
+    const queued = await queuedSheets(sql, data.fileIds ?? null);
     const started = Date.now();
     let read = 0;
     let review = 0;
@@ -632,7 +639,42 @@ export const listLibraryAdminState = createServerFn({ method: "GET" })
     };
   });
 
-/** Keep one copy of a shared file and delete the other copies. The keeper stays on its model. */
+/**
+ * Keep one copy of a shared file and delete the other copies. The keeper must sit on the family's
+ * main chip, and every deleted copy on a model that takes manuals from it, so no model loses the file.
+ */
+export async function keepOneCopy(sql: Sql, keepId: number, removeIds: number[]): Promise<{ removed: number }> {
+  const ids = removeIds.filter((id) => id !== keepId);
+  if (!ids.length) return { removed: 0 };
+  const books = (await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books")).map(
+    (b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "" }),
+  );
+  const files = await sql.query<{ id: number; section: LibrarySection; book_id: number | null; mpn: string | null }>(
+    "select id, section, book_id, mpn from library_files where id = any($1::int[])",
+    [[keepId, ...ids]],
+  );
+  const bookOf = (f: { book_id: number | null } | undefined) => books.find((b) => f?.book_id != null && b.id === Number(f.book_id));
+  const keep = files.find((f) => Number(f.id) === keepId);
+  const main = bookOf(keep);
+  // A variation only shows a shared (no MPN) manual or parts file that sits on its main chip.
+  const safe =
+    !!keep &&
+    !!main &&
+    isMainChip(main, books) &&
+    copiesToVariations(keep.section) &&
+    !(keep.mpn ?? "").trim() &&
+    files.every((f) => {
+      const book = bookOf(f);
+      return f === keep || (f.section === keep.section && !!book && (book.id === main.id || mainChipFor(book, books)?.id === main.id));
+    });
+  if (!safe) throw new Error("Store this file once on the main chip first, so the other models keep it.");
+  const rows = await sql.query<{ id: number }>(
+    "delete from library_files where id = any($1::int[]) and id <> $2 and section <> 'training' returning id",
+    [ids, keepId],
+  );
+  return { removed: rows.length };
+}
+
 export const keepOneLibraryCopy = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { keepId: number; removeIds: number[] }) =>
@@ -641,11 +683,5 @@ export const keepOneLibraryCopy = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ removed: number }> => {
     const sql = await ready();
     await requireAdmin(sql, context.userId);
-    const ids = data.removeIds.filter((id) => id !== data.keepId);
-    if (!ids.length) return { removed: 0 };
-    const rows = await sql.query<{ id: number }>(
-      "delete from library_files where id = any($1::int[]) and id <> $2 and section <> 'training' returning id",
-      [ids, data.keepId],
-    );
-    return { removed: rows.length };
+    return keepOneCopy(sql, data.keepId, data.removeIds);
   });

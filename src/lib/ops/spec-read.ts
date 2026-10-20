@@ -190,13 +190,14 @@ export function applySpecPicks(
   if (should("width")) req.dimensions = { ...req.dimensions, width: clean(extracted.width) };
   if (should("depth")) req.dimensions = { ...req.dimensions, depth: clean(extracted.depth) };
   if (should("weight")) req.dimensions = { ...req.dimensions, weight: clean(extracted.weight) };
-  const upsert = (label: string, value: string, re: RegExp) => {
-    const idx = next.specs.findIndex((s) => re.test(s.label));
+  const upsert = (label: string, value: string, match: (label: string) => boolean) => {
+    const idx = next.specs.findIndex((s) => match(s.label));
     if (idx >= 0) next.specs[idx] = { label: next.specs[idx]!.label, value };
     else next.specs.push({ label, value });
   };
-  if (should("tank")) upsert("Tank or boiler", clean(extracted.tank), TANK_RE);
-  if (should("brew")) upsert("Brew capacity", clean(extracted.brew), BREW_RE);
+  if (should("tank")) upsert("Tank or boiler", clean(extracted.tank), (l) => TANK_RE.test(l));
+  // "Tank capacity" also matches the brew pattern. Leave tank and boiler rows out, as valuesFromParts does.
+  if (should("brew")) upsert("Brew capacity", clean(extracted.brew), (l) => BREW_RE.test(l) && !TANK_RE.test(l));
   const nextMpn = clean(extracted.mpn);
   const pick = picks.mpn;
   const mpn = nextMpn && (pick === "new" || (pick !== "old" && !clean(bookMpn))) ? nextMpn : null;
@@ -211,6 +212,8 @@ export type SpecOutlet = {
   plug: string;
 };
 
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export function outletForModel(model: string, specs: SpecOutlet[]): SpecOutlet | undefined {
   const name = model.trim();
   if (!name) return undefined;
@@ -218,7 +221,7 @@ export function outletForModel(model: string, specs: SpecOutlet[]): SpecOutlet |
     (s) =>
       sameWarehouseModel(s.model, name) ||
       sameWarehouseModel(`${s.manufacturer} ${s.model}`, name) ||
-      sameWarehouseModel(s.model, name.replace(new RegExp(`^${s.manufacturer}\\s+`, "i"), "")),
+      sameWarehouseModel(s.model, name.replace(new RegExp(`^${escapeRe(s.manufacturer)}\\s+`, "i"), "")),
   );
 }
 
