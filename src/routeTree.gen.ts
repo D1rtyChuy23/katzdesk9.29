@@ -19,7 +19,6 @@ import { Route as AppCustomerNamesRouteImport } from './routes/_app/customer-nam
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
-import { Route as AppInstallsInstallIdPrintRouteImport } from './routes/_app/installs.$installId.print'
 import { Route as AppLibraryRouteImport } from './routes/_app/library'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppMapRouteImport } from './routes/_app/map'
@@ -40,6 +39,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiLibraryFileTokenRouteImport } from './routes/api/library-file/$token'
 import { Route as ApiPartImageIdRouteImport } from './routes/api/part-image/$id'
 import { Route as ApiPartPhotoSourceIdRouteImport } from './routes/api/part-photo-source/$id'
+import { Route as AppInstallsInstallIdPrintRouteImport } from './routes/_app/installs_.$installId.print'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -88,11 +88,6 @@ const AppHandoffRoute = AppHandoffRouteImport.update({
 const AppInstallsRoute = AppInstallsRouteImport.update({
   id: '/installs',
   path: '/installs',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppInstallsInstallIdPrintRoute = AppInstallsInstallIdPrintRouteImport.update({
-  id: '/installs/$installId/print',
-  path: '/installs/$installId/print',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLibraryRoute = AppLibraryRouteImport.update({
@@ -195,6 +190,12 @@ const ApiPartPhotoSourceIdRoute = ApiPartPhotoSourceIdRouteImport.update({
   path: '/api/part-photo-source/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppInstallsInstallIdPrintRoute =
+  AppInstallsInstallIdPrintRouteImport.update({
+    id: '/installs_/$installId/print',
+    path: '/installs/$installId/print',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -206,7 +207,6 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
-  '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
@@ -227,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
   '/api/part-photo-source/$id': typeof ApiPartPhotoSourceIdRoute
+  '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -237,7 +238,6 @@ export interface FileRoutesByTo {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
-  '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
@@ -259,6 +259,7 @@ export interface FileRoutesByTo {
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
   '/api/part-photo-source/$id': typeof ApiPartPhotoSourceIdRoute
+  '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -271,7 +272,6 @@ export interface FileRoutesById {
   '/_app/customers': typeof AppCustomersRoute
   '/_app/handoff': typeof AppHandoffRoute
   '/_app/installs': typeof AppInstallsRoute
-  '/_app/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
   '/_app/library': typeof AppLibraryRoute
   '/_app/locations': typeof AppLocationsRoute
   '/_app/map': typeof AppMapRoute
@@ -293,6 +293,7 @@ export interface FileRoutesById {
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
   '/api/part-photo-source/$id': typeof ApiPartPhotoSourceIdRoute
+  '/_app/installs_/$installId/print': typeof AppInstallsInstallIdPrintRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -306,7 +307,6 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
-    | '/installs/$installId/print'
     | '/library'
     | '/locations'
     | '/map'
@@ -327,6 +327,7 @@ export interface FileRouteTypes {
     | '/api/library-file/$token'
     | '/api/part-image/$id'
     | '/api/part-photo-source/$id'
+    | '/installs/$installId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -337,7 +338,6 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
-    | '/installs/$installId/print'
     | '/library'
     | '/locations'
     | '/map'
@@ -359,6 +359,7 @@ export interface FileRouteTypes {
     | '/api/library-file/$token'
     | '/api/part-image/$id'
     | '/api/part-photo-source/$id'
+    | '/installs/$installId/print'
   id:
     | '__root__'
     | '/_app'
@@ -370,7 +371,6 @@ export interface FileRouteTypes {
     | '/_app/customers'
     | '/_app/handoff'
     | '/_app/installs'
-    | '/_app/installs/$installId/print'
     | '/_app/library'
     | '/_app/locations'
     | '/_app/map'
@@ -392,6 +392,7 @@ export interface FileRouteTypes {
     | '/api/library-file/$token'
     | '/api/part-image/$id'
     | '/api/part-photo-source/$id'
+    | '/_app/installs_/$installId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -473,13 +474,6 @@ declare module '@tanstack/react-router' {
       path: '/installs'
       fullPath: '/installs'
       preLoaderRoute: typeof AppInstallsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/installs/$installId/print': {
-      id: '/_app/installs/$installId/print'
-      path: '/installs/$installId/print'
-      fullPath: '/installs/$installId/print'
-      preLoaderRoute: typeof AppInstallsInstallIdPrintRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/library': {
@@ -622,6 +616,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPartPhotoSourceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/installs_/$installId/print': {
+      id: '/_app/installs_/$installId/print'
+      path: '/installs/$installId/print'
+      fullPath: '/installs/$installId/print'
+      preLoaderRoute: typeof AppInstallsInstallIdPrintRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -633,7 +634,6 @@ interface AppRouteChildren {
   AppCustomersRoute: typeof AppCustomersRoute
   AppHandoffRoute: typeof AppHandoffRoute
   AppInstallsRoute: typeof AppInstallsRoute
-  AppInstallsInstallIdPrintRoute: typeof AppInstallsInstallIdPrintRoute
   AppLibraryRoute: typeof AppLibraryRoute
   AppLocationsRoute: typeof AppLocationsRoute
   AppMapRoute: typeof AppMapRoute
@@ -651,6 +651,7 @@ interface AppRouteChildren {
   AppTlcRoute: typeof AppTlcRoute
   AppWarehouseRoute: typeof AppWarehouseRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppInstallsInstallIdPrintRoute: typeof AppInstallsInstallIdPrintRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -661,7 +662,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppCustomersRoute: AppCustomersRoute,
   AppHandoffRoute: AppHandoffRoute,
   AppInstallsRoute: AppInstallsRoute,
-  AppInstallsInstallIdPrintRoute: AppInstallsInstallIdPrintRoute,
   AppLibraryRoute: AppLibraryRoute,
   AppLocationsRoute: AppLocationsRoute,
   AppMapRoute: AppMapRoute,
@@ -679,6 +679,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppTlcRoute: AppTlcRoute,
   AppWarehouseRoute: AppWarehouseRoute,
   AppIndexRoute: AppIndexRoute,
+  AppInstallsInstallIdPrintRoute: AppInstallsInstallIdPrintRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

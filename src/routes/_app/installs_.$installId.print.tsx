@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { InstallFormPage } from "@/components/desk/install-form-page";
 
-export const Route = createFileRoute("/_app/installs/$installId/print")({
+export const Route = createFileRoute("/_app/installs_/$installId/print")({
   component: Page,
 });
 

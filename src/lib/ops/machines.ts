@@ -147,6 +147,91 @@ export function specsFromInstall(
     const names = listedEquipment(fromJson.map((s) => s.equipment).join("\n"), catalog);
     return mergeMachineSpecs(names, fromJson, { serial, powerVoltage });
   }
-  const names = listedEquipment(equipment, catalog);
-  return mergeMachineSpecs(names, [], { serial, powerVoltage });
+  return typedMachines(equipment ?? "", serial, powerVoltage, catalog);
+}
+
+const SN = /\bSN\s*:?\s*([A-Z0-9-]+)/i;
+/** A line that is only a serial ("SN: ITCB189507"), typed under the machine it belongs to. */
+const SERIAL_LINE = /^SN\s*:?\s*[A-Z0-9-]+$/i;
+
+/**
+ * The machines typed in an install's equipment text, with the serial and voltage typed on a machine's line
+ * ("Bunn ITCB 120v SN:ITCB064919") kept on that machine. One line can name several machines, each followed by its
+ * serial ("Mazzer SJ E SN:2601514, Mazzer Mini E SN:…"), and a line that is only a serial belongs to the machine on
+ * the line above it. Reading the names alone dropped every serial, and a serial line read as a machine named "SN:…".
+ */
+function typedMachines(
+  equipment: string,
+  serial: string | null | undefined,
+  powerVoltage: string | null | undefined,
+  catalog: string[],
+): MachineSpec[] {
+  const lines = equipment.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const named = listedEquipment(lines.filter((l) => !SERIAL_LINE.test(l)).join("\n"), catalog);
+  const machines = mergeMachineSpecs(named, [], { serial, powerVoltage });
+  const taken = new Set<MachineSpec>();
+  let above: MachineSpec | undefined;
+  for (const line of lines) {
+    if (SERIAL_LINE.test(line)) {
+      if (above && !above.serial) above.serial = line.match(SN)?.[1] ?? "";
+      above = undefined;
+      continue;
+    }
+    for (const part of line.split(/(?<=\bSN\s*:?\s*[A-Z0-9-]+)(?![A-Z0-9-])/i)) {
+      if (!part.trim()) continue;
+      const names = listedEquipment(part, catalog);
+      const m = names.length === 1 ? machines.find((s) => !taken.has(s) && s.equipment === names[0]) : undefined;
+      above = m;
+      if (!m) continue;
+      taken.add(m);
+      m.serial ||= part.match(SN)?.[1] ?? "";
+      m.powerVoltage ||= part.match(/\b\d{3}\s*v(?:olts?)?\b/i)?.[0] ?? "";
+    }
+  }
+  return machines;
+}
+
+function text(v: unknown): string {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  try {
+    return JSON.stringify(v);
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * The install's machines, ready to save back: the saved list, or the typed one with each machine's serial and
+ * voltage kept (see typedMachines). Saving the typed list without them erased the serial.
+ */
+export function installMachines(
+  row: { equipment?: string | null; serial?: string | null; power_voltage?: string | null; machines?: unknown },
+  catalog: string[] = [],
+): { machines: MachineSpec[]; typed: boolean } {
+  const stored = parseMachinesJson(text(row.machines) || null);
+  if (stored.length) return { machines: stored, typed: false };
+  return { machines: typedMachines(text(row.equipment), text(row.serial), text(row.power_voltage), catalog), typed: true };
+}
+
+/** The list an install window starts from: the machines the board read for the row, serials included. */
+export function machinesOnOpen(
+  row: { equipment?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] },
+  catalog: string[] = [],
+): MachineSpec[] {
+  const saved = row.machines ?? [];
+  if (saved.length) return saved.map((s) => ({ ...s }));
+  const names = catalog.length
+    ? listedEquipment(row.equipment, catalog)
+    : (row.equipment ?? "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+  return mergeMachineSpecs(names, [], { serial: row.serial, powerVoltage: row.powerVoltage });
+}
+
+/**
+ * The machine fields a details save sends: none while the list is the one the window loaded. Saving it anyway
+ * rewrote typed text ("2 x e4s … SN: …") as bare names every time the window closed.
+ */
+export function changedMachineFields(specs: MachineSpec[], loaded: MachineSpec[]): Partial<ReturnType<typeof serializeMachines>> {
+  const packed = serializeMachines(specs);
+  return JSON.stringify(packed) === JSON.stringify(serializeMachines(loaded)) ? {} : packed;
 }

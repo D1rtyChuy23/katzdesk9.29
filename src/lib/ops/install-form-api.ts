@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { catalogNames, installMachines, readInspection, type InspectionView } from "@/lib/ops/inspection-api";
+import { catalogNames, readInspection, type InspectionView } from "@/lib/ops/inspection-api";
+import { installMachines } from "@/lib/ops/machines";
 import { unitType } from "@/lib/ops/pre-inspection";
 import { serialKey } from "@/lib/ops/account-equip";
 import {

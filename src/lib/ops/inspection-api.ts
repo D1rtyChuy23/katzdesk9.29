@@ -4,7 +4,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
 import { joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
-import { parseMachinesJson, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
+import { installMachines, parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -205,31 +205,6 @@ function piecesFrom(
     serial: named.length === 1 ? text(row.serial) : "",
     powerVoltage: named.length === 1 ? text(row.power_voltage) : "",
   }));
-}
-
-/**
- * The install's machines, ready to save back: the saved list, or the typed one with the serial and voltage typed on
- * a machine's line ("Bunn ITCB 120v SN:ITCB064919") kept on that machine. Saving the typed list without them erased
- * the serial.
- */
-export function installMachines(
-  row: { equipment?: string | null; serial?: string | null; power_voltage?: string | null; machines?: unknown },
-  catalog: string[] = [],
-): { machines: MachineSpec[]; typed: boolean } {
-  const stored = parseMachinesJson(text(row.machines) || null);
-  if (stored.length) return { machines: stored, typed: false };
-  const machines: MachineSpec[] = piecesFrom(row, catalog).map((p) => ({ ...p }));
-  const taken = new Set<MachineSpec>();
-  // One line can name several machines, each followed by its serial ("Mazzer SJ E SN:2601514, Mazzer Mini E SN:…").
-  for (const part of text(row.equipment).split(/\r?\n|(?<=\bSN\s*:?\s*[A-Z0-9-]+)(?![A-Z0-9-])/i)) {
-    const named = listedEquipment(part, catalog);
-    const m = named.length === 1 ? machines.find((s) => !taken.has(s) && s.equipment === named[0]) : undefined;
-    if (!m) continue;
-    taken.add(m);
-    m.serial ||= part.match(/\bSN\s*:?\s*([A-Z0-9-]+)/i)?.[1] ?? "";
-    m.powerVoltage ||= part.match(/\b\d{3}\s*v(?:olts?)?\b/i)?.[0] ?? "";
-  }
-  return { machines, typed: true };
 }
 
 type AcctUnit = {
