@@ -23,6 +23,7 @@ export function SpecImport({
   aiReady,
   initialFile,
   seed = null,
+  bookId = null,
   onSaved,
   onCancel,
 }: {
@@ -32,6 +33,8 @@ export function SpecImport({
   initialFile?: File | null;
   /** Open the blank form for a model that has no sheet. */
   seed?: { manufacturer: string; model: string } | null;
+  /** A hand entry for this model. Saving never takes over a sheet tied to another model. */
+  bookId?: number | null;
   /** `pdf` is the original that was read, so the caller can keep it in the book. */
   onSaved: (id: number, pdf: File | null) => void;
   onCancel: () => void;
@@ -107,7 +110,7 @@ export function SpecImport({
   }
 
   const save = useMutation({
-    mutationFn: (overwrite: boolean) => saveSpecSheet({ data: { draft, id: editing?.id ?? null, overwrite } }),
+    mutationFn: (overwrite: boolean) => saveSpecSheet({ data: { draft, id: editing?.id ?? null, overwrite, bookId } }),
     onSuccess: (res) => {
       if (!res.ok) {
         setConflict(res.conflict);

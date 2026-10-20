@@ -258,6 +258,11 @@ export function outletFromConfigs(
   return same ? first : null;
 }
 
+/** The sheet already tied to this model. A hand entry edits it, so a blank form can't replace it. */
+export function tiedSheetId(sheetBooks: readonly { sheetId: number; bookId: number | null }[], bookId: number): number | null {
+  return sheetBooks.find((r) => r.bookId === bookId)?.sheetId ?? null;
+}
+
 /** Hand entry is only for a sheet the reader could not read, and only when it sits on a model. */
 export function handEntryForRow(row: {
   status: string;

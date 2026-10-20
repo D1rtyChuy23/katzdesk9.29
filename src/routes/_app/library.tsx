@@ -19,8 +19,8 @@ import {
   type LibraryFile,
 } from "@/lib/ops/library-files";
 import { chipForDoc, copiedManuals, docVariation, familyOf, fileUrl, isMainChip, mainChipFor, removedCopies, variationsOf, fileError, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
-import { listSpecReadStatus, runSpecReads } from "@/lib/ops/spec-read-api";
-import { TILE_LABEL, bookSpecStatus, handEntryForRow, type TileStatus } from "@/lib/ops/spec-read";
+import { listSpecReadStatus, resolveSpecHandEntry, runSpecReads } from "@/lib/ops/spec-read-api";
+import { TILE_LABEL, bookSpecStatus, handEntryForRow, tiedSheetId, type TileStatus } from "@/lib/ops/spec-read";
 import { pdfImages } from "@/lib/pdf-text";
 import { needsWater } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
@@ -85,6 +85,8 @@ function Page() {
   const [mode, setMode] = useState<"browse" | "import" | "edit">("browse");
   const [importFile, setImportFile] = useState<{ file: File | null; bookId: number } | null>(null);
   const [handSeed, setHandSeed] = useState<{ manufacturer: string; model: string } | null>(null);
+  // The Spec Review file whose specs are being typed by hand. Saving closes its row.
+  const [handFile, setHandFile] = useState<number | null>(null);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<{ section: LibrarySection; text: string } | null>(null);
   const [problems, setProblems] = useState<string[]>([]);
@@ -291,10 +293,22 @@ function Page() {
     }
   }
 
+  /** The model already has a sheet: edit it, so a blank form can't replace it. */
+  function editTiedSheet(bookId: number): boolean {
+    const sheetId = tiedSheetId(lib.data?.sheetBooks ?? [], bookId);
+    if (sheetId == null) return false;
+    setOpenMaker(null);
+    setMode("edit");
+    void navigate({ to: "/library", search: { book: bookId, open: sheetId } });
+    return true;
+  }
+
   /** A scanned or unread sheet: open the stored PDF in Spec Import, the way a hand entry used to. */
   async function enterSpecsByHand(row: { status: string; fileId: number; bookId: number | null }) {
     const hand = handEntryForRow(row);
     if (!hand) return;
+    setHandFile(hand.fileId);
+    if (editTiedSheet(hand.bookId)) return;
     const file = files.find((f) => f.id === hand.fileId);
     if (!file) {
       toast.error("That sheet is not in the library.");
@@ -314,6 +328,8 @@ function Page() {
 
   /** A model with no sheet has no PDF. Open a blank form tied to that book. */
   function enterSpecsForModel(book: { id: number; title: string }) {
+    setHandFile(null);
+    if (editTiedSheet(book.id)) return;
     const full = books.find((b) => b.id === book.id);
     const manufacturer = full?.manufacturer ?? "";
     setHandSeed({ manufacturer, model: modelLabel(book.title, manufacturer) });
@@ -325,12 +341,15 @@ function Page() {
   /** After the AI read is saved: the sheet joins its book and the original PDF is kept there. */
   async function afterImport(id: number, pdf: File | null) {
     const from = importFile;
+    const hand = handFile;
     setOpenMaker(null);
     setMode("browse");
     setImportFile(null);
     setHandSeed(null);
+    setHandFile(null);
     try {
       if (from) await moveSpecSheet({ data: { sheetId: id, bookId: from.bookId } });
+      if (from && hand != null) await resolveSpecHandEntry({ data: { fileId: hand } });
       await reload();
       const fresh = await qc.fetchQuery({ queryKey: ["library-files"], queryFn: () => listLibraryFiles() });
       const target = fresh.sheetBooks.find((r) => r.sheetId === id)?.bookId ?? null;
@@ -343,6 +362,20 @@ function Page() {
       fail(e, "Saved, but the PDF could not be stored. Drop it on Spec Sheet.");
       go({ open: id });
     }
+  }
+
+  /** After Edit is saved. Opened from a Spec Review row, it closes that row too. */
+  async function afterEdit(id: number, bookId: number) {
+    const hand = handFile;
+    setMode("browse");
+    setHandFile(null);
+    try {
+      if (hand != null) await resolveSpecHandEntry({ data: { fileId: hand } });
+    } catch (e) {
+      fail(e, "Saved, but the Spec Review row is still open.");
+    }
+    void reload();
+    go({ book: bookId, open: id });
   }
 
   async function reread(file: File) {
@@ -542,10 +575,12 @@ function Page() {
             aiReady={!!data.data?.aiReady}
             initialFile={importFile?.file ?? null}
             seed={!importFile?.file ? handSeed : null}
+            bookId={importFile?.bookId ?? null}
             onCancel={() => {
               setMode("browse");
               setImportFile(null);
               setHandSeed(null);
+              setHandFile(null);
             }}
             onSaved={(id, pdf) => void afterImport(id, pdf)}
           />
@@ -815,14 +850,17 @@ function Page() {
 
                     {mode === "edit" && selected ? (
                       <div className="mt-4">
-                        <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => setMode("browse")} onSaved={(id) => { setMode("browse"); void reload(); go({ book: current.id, open: id }); }} />
+                        <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => { setMode("browse"); setHandFile(null); }} onSaved={(id) => void afterEdit(id, current.id)} />
                       </div>
                     ) : selected && mode === "browse" && sheetBook.get(selected.id) === current.id ? (
                       <div className="mt-4" data-testid="book-spec-sheet">
                         <SpecSheetView
                           sheet={selected}
                           canEdit={canEdit}
-                          onEdit={() => setMode("edit")}
+                          onEdit={() => {
+                            setHandFile(null);
+                            setMode("edit");
+                          }}
                           onDelete={() => setConfirmDelete(true)}
                           onRefresh={canEdit ? () => refresh.mutate(selected.id) : undefined}
                           refreshing={refresh.isPending}

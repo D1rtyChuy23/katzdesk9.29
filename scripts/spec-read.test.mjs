@@ -13,6 +13,7 @@ import {
   outletForModel,
   outletFromConfigs,
   handEntryForRow,
+  tiedSheetId,
   valuesFromParts,
   withSpecOutlet,
   blankSpecValues,
@@ -133,6 +134,12 @@ test("a unit with its own plug that isn't the spec's takes neither voltage nor a
   assert.deepEqual([ownVolts.voltage, ownVolts.amps, ownVolts.plug], ["208V", "", "NEMA 5-15P"]);
   const samePlug = withSpecOutlet({ model: "X", voltage: "", plug: "nema 6-30p", amps: "" }, spec);
   assert.deepEqual([samePlug.voltage, samePlug.amps, samePlug.plug], ["208V", "30A", "nema 6-30p"]);
+});
+
+test("a hand entry on a model that already has a sheet opens that sheet", () => {
+  const sheetBooks = [{ sheetId: 4, bookId: null }, { sheetId: 3, bookId: 9 }];
+  assert.equal(tiedSheetId(sheetBooks, 9), 3);
+  assert.equal(tiedSheetId(sheetBooks, 8), null);
 });
 
 test("tiles, admin order, and the summary line", () => {
