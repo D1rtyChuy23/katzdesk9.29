@@ -295,17 +295,18 @@ function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>, catalog
       if (hit) return hit;
     }
   }
+  const power = piece.powerVoltage.trim();
   for (const pool of pools) {
-    const hit = pool.find(
-      // The account row keeps the catalog name ("Bunn ITCB-DV, 29\" w/Flip Tray") and the name from the install
-      // ("Bunn ITCB"). Either one is the same machine; matching only the catalog name added a new unit on every load.
-      (a) =>
-        !used.has(a.id) &&
-        (sameCatalogModel(a.catalog_model, piece.equipment) ||
-          sameCatalogModel(a.equipment_name, piece.equipment) ||
-          (!!catalogModel && sameCatalogModel(a.catalog_model, catalogModel))) &&
-        !serialKey(a.serial),
-    );
+    // The account row keeps the catalog name ("Bunn ITCB-DV, 29\" w/Flip Tray") and the name from the install
+    // ("Bunn ITCB"). Either one is the same machine; matching only the catalog name added a new unit on every load.
+    const fits = (a: AcctUnit) =>
+      !used.has(a.id) &&
+      (sameCatalogModel(a.catalog_model, piece.equipment) ||
+        sameCatalogModel(a.equipment_name, piece.equipment) ||
+        (!!catalogModel && sameCatalogModel(a.catalog_model, catalogModel))) &&
+      !serialKey(a.serial);
+    // Two machines of one model told apart by voltage: the unit with this row's voltage first.
+    const hit = (power && pool.find((a) => fits(a) && (a.electrical ?? "").trim() === power)) || pool.find(fits);
     if (hit) return hit;
   }
   return undefined;
@@ -1109,7 +1110,7 @@ export const removeInspectionEquipment = createServerFn({ method: "POST" })
     const used = new Set<number>();
     let at = -1;
     pieces.forEach((piece, i) => {
-      const hit = claimUnit(piece, [linked], used);
+      const hit = claimUnit(piece, [linked], used, catalog);
       if (!hit) return;
       used.add(hit.id);
       if (hit.id === data.equipmentId && at < 0) at = i;

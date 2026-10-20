@@ -605,3 +605,28 @@ test("the printed request form lists a one-ITCB install once", async () => {
     await pg.close();
   }
 });
+
+test("two machines of one model told apart by voltage keep their own voltage when one gets a check", async () => {
+  for (const [first, added] of [["Bunn TB3", "Bunn TB3"], ["Eversys Cameo c'2s", "Eversys Cameo c'2s - 2 Step Classic"]]) {
+    const { pg, sql } = await fresh();
+    try {
+      await pg.query("insert into directory_equipment (name) values ('Eversys Cameo c''2s - 2 Step Classic')");
+      const id = (
+        await pg.query("insert into installs (customer, equipment, machines) values ('Volt Cafe', $1, $2) returning id", [
+          first,
+          JSON.stringify([{ equipment: first, serial: "", powerVoltage: "220V" }]),
+        ])
+      ).rows[0].id;
+      await readInspection(sql, id);
+      const view = await addMachineOntoInstall(sql, { installId: id, model: added, serial: null, electrical: "120V" }, "t");
+      const second = view.machines.at(-1).equipmentId;
+      await pg.query("insert into install_inspection_items (install_id, equipment_id, category, status) values ($1, $2, 'water', 'Fail')", [id, second]);
+      const after = await readInspection(sql, id);
+      const volts = Object.fromEntries(after.machines.map((m) => [m.equipmentId, m.electrical]));
+      assert.equal(volts[second], "120V", first);
+      assert.equal(after.machines.find((m) => m.equipmentId === second)?.overall, "Failed", first);
+    } finally {
+      await pg.close();
+    }
+  }
+});
