@@ -470,7 +470,16 @@ function PreviewBody({
                     ) : null}
                   </td>
                   <td className="px-3 py-2 align-top">{r.technician || "—"}</td>
-                  <td className="px-3 py-2 align-top whitespace-nowrap">{r.completedAt || "—"}</td>
+                  <td className="px-3 py-2 align-top">
+                    <span className="whitespace-nowrap">
+                      {r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
+                        ? `${r.oldCompletedAt} → ${r.completedAt}`
+                        : r.completedAt || r.oldCompletedAt || "—"}
+                    </span>
+                    {r.completedNote ? (
+                      <span className="mt-0.5 block max-w-[14rem] text-[11px] text-warning">{r.completedNote}</span>
+                    ) : null}
+                  </td>
                 </tr>
               );
             })}

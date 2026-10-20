@@ -7,6 +7,7 @@ import { DEFAULT_PM_STYLE } from "@/lib/ops/pm-runbook";
 import { todayChicago } from "@/lib/ops/clock";
 import {
   boardStatus,
+  completedOnUpdate,
   corrigoReviewReason,
   deskHasWrapped,
   indexHits,
@@ -59,8 +60,14 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     kind: string;
     duplicate_of: number | null;
     done: boolean;
+    completed_at: string | null;
+    ns_so: string | null;
+    has_charges: boolean;
   }>(
-    `select id, wo, status, customer, kind, duplicate_of, done from service_jobs
+    `select id, wo, status, customer, kind, duplicate_of, done,
+            to_char(completed_at, 'YYYY-MM-DD') as completed_at, ns_so,
+            exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges
+       from service_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
   );
@@ -70,8 +77,9 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     status: string;
     customer: string | null;
     done: boolean;
+    completed_at: string | null;
   }>(
-    `select id, wo, status, customer, done from pm_jobs
+    `select id, wo, status, customer, done, to_char(completed_at, 'YYYY-MM-DD') as completed_at from pm_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
   );
@@ -81,8 +89,9 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     status: string | null;
     customer: string;
     complete: boolean;
+    completed_at: string | null;
   }>(
-    `select id, wo, equip_status as status, customer, complete from installs
+    `select id, wo, equip_status as status, customer, complete, to_char(completed_at, 'YYYY-MM-DD') as completed_at from installs
       where archived = false and coalesce(wo, '') <> ''
       order by id asc`,
   );
@@ -95,6 +104,9 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       wo: r.wo,
       duplicateOf: r.duplicate_of ?? null,
       done: !!r.done,
+      completedAt: r.completed_at,
+      billedSo: r.ns_so,
+      hasCharges: !!r.has_charges,
     })),
     ...pms.map((r) => ({
       board: "pm" as const,
@@ -103,6 +115,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       customer: r.customer,
       wo: r.wo,
       done: !!r.done,
+      completedAt: r.completed_at,
     })),
     ...installs.map((r) => ({
       board: "install" as const,
@@ -111,6 +124,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       customer: r.customer,
       wo: r.wo,
       done: !!r.complete,
+      completedAt: r.completed_at,
     })),
   ];
 }
@@ -186,6 +200,13 @@ async function logCorrigo(
   );
 }
 
+function completedLog(date: ReturnType<typeof completedOnUpdate>, desk: string | null, file: string | null): string {
+  if (date.change === "moved") return ` · completed ${desk} → ${file}`;
+  if (date.change === "set") return ` · completed ${file}`;
+  if (date.change === "billed") return ` · completed kept ${desk} (billed; Corrigo says ${file})`;
+  return "";
+}
+
 /** An update keeps the ticket's own spelling (WO-0870) when it is the same number. */
 function storedWo(current: string | null, wo: string): string {
   return current && woMatchKey(current) === woMatchKey(wo) ? current : wo;
@@ -197,6 +218,7 @@ const recordInput = z.object({
   canonicalWo: z.string(),
   technician: z.string().nullable(),
   completedAt: z.string().nullable(),
+  completedRaw: z.string().nullable(),
   workDone: z.string().nullable(),
   statusRaw: z.string().nullable(),
   issue: z.string().nullable(),
@@ -338,7 +360,8 @@ export async function applyCorrigoRows(
           customer: string | null;
           wo: string | null;
         }>(
-          `select id, status, technician, work_done, completed_at, customer, wo from pm_jobs where id = $1`,
+          `select id, status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo
+             from pm_jobs where id = $1`,
           [jobId],
         );
         if (!cur[0]) continue;
@@ -346,7 +369,8 @@ export async function applyCorrigoRows(
         const status = boardStatus("pm", row.statusRaw, row.completedAt, cur[0].status).status;
         const technician = row.technician || cur[0].technician;
         const workDone = row.workDone || cur[0].work_done;
-        const completedAt = row.completedAt || cur[0].completed_at;
+        const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null);
+        const completedAt = date.value;
         const customer = chosen || cur[0].customer;
         const done = CLOSED_PM.has(status);
         await sql.query(
@@ -356,7 +380,7 @@ export async function applyCorrigoRows(
             where id = $1`,
           [jobId, technician, completedAt, workDone, status, keptWo, done, customer],
         );
-        await logCorrigo(sql, "pm", jobId, actor, `Corrigo import · ${keptWo}`);
+        await logCorrigo(sql, "pm", jobId, actor, `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}`);
         updated += 1;
         maybeReview("pm", jobId, keptWo, customer, status, technician, done);
         continue;
@@ -373,7 +397,7 @@ export async function applyCorrigoRows(
           wo: string | null;
           complete: boolean;
         }>(
-          `select id, equip_status, technician, work_done, completed_at, customer, wo, complete
+          `select id, equip_status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, complete
              from installs where id = $1 and archived = false`,
           [jobId],
         );
@@ -383,7 +407,8 @@ export async function applyCorrigoRows(
         const equipStatus = boardStatus("install", row.statusRaw, row.completedAt, current).status;
         const technician = row.technician || cur[0].technician;
         const workDone = row.workDone || cur[0].work_done;
-        const completedAt = row.completedAt || cur[0].completed_at;
+        const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null);
+        const completedAt = date.value;
         const customer = chosen || cur[0].customer;
         const complete = equipStatus === "Installed";
         await sql.query(
@@ -393,7 +418,7 @@ export async function applyCorrigoRows(
             where id = $1`,
           [jobId, technician, completedAt, workDone, equipStatus, keptWo, complete, customer],
         );
-        await logCorrigo(sql, "install", jobId, actor, `Corrigo import · ${keptWo}`);
+        await logCorrigo(sql, "install", jobId, actor, `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}`);
         updated += 1;
         maybeReview(
           "install",
@@ -416,8 +441,9 @@ export async function applyCorrigoRows(
         completed_at: string | null;
         customer: string | null;
         wo: string | null;
+        ns_so: string | null;
       }>(
-        `select id, kind, status, technician, work_done, completed_at, customer, wo
+        `select id, kind, status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, ns_so
            from service_jobs where id = $1`,
         [jobId],
       );
@@ -426,13 +452,17 @@ export async function applyCorrigoRows(
       const status = boardStatus(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status).status;
       const technician = row.technician || cur[0].technician;
       const workDone = row.workDone || cur[0].work_done;
-      const completedAt = row.completedAt || cur[0].completed_at;
+      const date = completedOnUpdate(row.completedAt, cur[0].completed_at, cur[0].ns_so);
+      const completedAt = date.value;
       const customer = chosen || cur[0].customer;
       const done = CLOSED_CALL.has(status);
       const jobBoardKind = jobBoard(cur[0].kind);
       await sql.query(
         `update service_jobs set
-            technician = $2, completed_at = $3, work_done = $4, status = $5,
+            technician = $2,
+            -- An SO saved since the read above keeps its billing date.
+            completed_at = case when nullif(btrim(ns_so), '') is null then $3::date else completed_at end,
+            work_done = $4, status = $5,
             wo = $6, done = $7, customer = $8, updated_at = now()
           where id = $1`,
         [jobId, technician, completedAt, workDone, status, keptWo, done, customer],
@@ -442,7 +472,8 @@ export async function applyCorrigoRows(
         jobBoardKind,
         jobId,
         actor,
-        status !== cur[0].status ? `${cur[0].status} → ${status} · ${keptWo}` : `Corrigo import · ${keptWo}`,
+        (status !== cur[0].status ? `${cur[0].status} → ${status} · ${keptWo}` : `Corrigo import · ${keptWo}`) +
+          completedLog(date, cur[0].completed_at, row.completedAt),
       );
       for (const extra of row.conflictIds ?? []) {
         if (wrapRepeat) break;

@@ -111,6 +111,8 @@ export type CorrigoRecord = {
   canonicalWo: string;
   technician: string | null;
   completedAt: string | null;
+  /** The completed cell as written, so the preview can show a date it couldn't read. */
+  completedRaw: string | null;
   workDone: string | null;
   statusRaw: string | null;
   issue: string | null;
@@ -127,6 +129,11 @@ export type CorrigoHit = {
   wo: string | null;
   duplicateOf?: number | null;
   done?: boolean;
+  /** YYYY-MM-DD on the ticket now. */
+  completedAt?: string | null;
+  /** NetSuite Sales Order (service tickets only). */
+  billedSo?: string | null;
+  hasCharges?: boolean;
 };
 
 export type CorrigoPreviewRow = {
@@ -150,6 +157,9 @@ export type CorrigoPreviewRow = {
   statusNote: string | null;
   technician: string | null;
   completedAt: string | null;
+  /** The ticket's completed date before this import. */
+  oldCompletedAt: string | null;
+  completedNote: string | null;
   workDone: string | null;
   issue: string | null;
   conflictIds: { board: CorrigoBoard; id: number }[] | null;
@@ -256,8 +266,17 @@ export function normalizeWo(raw: string): string {
   return woCanonical(raw);
 }
 
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
 export function parseCompletedDate(raw: string | null | undefined): string | null {
-  const s = String(raw ?? "").trim();
+  const s = String(raw ?? "")
+    .trim()
+    // CSV text the spreadsheet library leaves alone: "Mon 10/19/2026", "Oct 19, 2026 3:45 PM".
+    .replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s+/i, "")
+    .replace(/^([a-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})/i, (all, mon: string, d: string, y: string) => {
+      const m = MONTHS.indexOf(mon.toLowerCase()) + 1;
+      return m ? `${m}/${d}/${y}` : all;
+    });
   if (!s) return null;
   const iso = s.match(/^(\d{4}-\d{2}-\d{2})/);
   if (iso) return iso[1];
@@ -467,6 +486,7 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
       canonicalWo: woCanonical(rawWo),
       technician: cell(row, cols.technician) || null,
       completedAt: parseCompletedDate(cell(row, cols.completedAt)),
+      completedRaw: cell(row, cols.completedAt) || null,
       workDone: cell(row, cols.workDone) || null,
       statusRaw: cell(row, cols.status) || null,
       issue: cell(row, cols.issue) || null,
@@ -479,6 +499,32 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
     byKey.set(matchKey, prev ? { ...prev, ...withoutBlanks(rec) } : rec);
   }
   return { skipped, records: [...byKey.values()], columns, missing };
+}
+
+/**
+ * The completed date an import writes on an existing ticket. Corrigo's date wins, except on a ticket billed
+ * on a Sales Order: its date picked the billing week and NetSuite already has it.
+ */
+export function completedOnUpdate(
+  fileDate: string | null | undefined,
+  deskDate: string | null | undefined,
+  billedSo: string | null | undefined,
+): { value: string | null; change: "set" | "moved" | "billed" | null } {
+  const desk = deskDate || null;
+  const file = fileDate || null;
+  if (!file || file === desk) return { value: desk, change: null };
+  if (desk && String(billedSo ?? "").trim()) return { value: desk, change: "billed" };
+  return { value: file, change: desk ? "moved" : "set" };
+}
+
+function completedNote(rec: CorrigoRecord, existing: CorrigoHit | null): string | null {
+  if (!rec.completedAt && rec.completedRaw) return `couldn't read the date "${rec.completedRaw}"`;
+  if (!existing) return null;
+  const next = completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo);
+  if (next.change === "billed") return `billed on ${String(existing.billedSo).trim()} — keeps ${existing.completedAt}`;
+  // Billing exports pick tickets by completed date, and nothing records which exports went out.
+  if (next.change === "moved" && existing.hasCharges) return "has charges, not billed yet — check it wasn't in an earlier export";
+  return null;
 }
 
 export function matchNote(rawWo: string, canonicalWo: string, existingWo?: string | null): string | null {
@@ -560,6 +606,8 @@ export function resolvePreviewRow(
     statusNote: resolved.note,
     technician: rec.technician,
     completedAt: rec.completedAt,
+    oldCompletedAt: existing?.completedAt ?? null,
+    completedNote: completedNote(rec, existing),
     workDone: rec.workDone,
     issue: rec.issue,
     conflictIds: siblingIds.length ? siblingIds : null,
