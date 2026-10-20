@@ -9,7 +9,7 @@ import realCatalog from "../src/lib/ops/directory-equipment.json" with { type: "
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { namedMachines, parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
+const { descriptionNames, parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
 const { addDays, todayChicago } = await import("../src/lib/ops/clock.ts");
 const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
 
@@ -238,12 +238,12 @@ test("install: a row with no WO match attaches to the account's one open install
   assert.deepEqual(await installsOf(sql, "Cafe Delta"), [{ id, wo: "WO-1001", equip_status: "Ready" }]);
 });
 
-test("install: with no equipment column the machines are read from the problem description against the catalog", async () => {
+test("install: with no equipment column a problem description that is the install's machine name attaches", async () => {
   const sql = await installDesk();
   const id = await openInstall(sql, "Cafe Echo", { equipment: "Bunn ITCB 120v SN:ITCB064919" });
   const { records } = parseCorrigoMatrix([
     ["ST#", "Operational Status", "Customer Name", "Problem Description"],
-    ["1002", "Completed", "Cafe Echo", "New install of Bunn ITCB brewer"],
+    ["1002", "Completed", "Cafe Echo", "New install of Bunn ITCB"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
   assert.deepEqual([preview.rows[0].action, preview.rows[0].jobId, preview.rows[0].newStatus], ["update", id, "Installed"]);
@@ -271,7 +271,7 @@ test("install: no equipment named, different equipment, a different quantity or 
   assert.deepEqual(
     preview.rows.map((r) => [r.action, r.jobId, r.matchNote]),
     [
-      ["create", null, "no equipment named to match an install"],
+      ["create", null, `the problem description doesn't name install #${foxtrot}'s equipment`],
       ["create", null, `equipment differs from install #${golf}`],
       ["create", null, `equipment differs from install #${hotel}`],
       ["create", null, "two installs could match"],
@@ -316,16 +316,6 @@ test("install: an install given another WO after the preview is not overwritten 
 
 // Review fixes: real catalog spellings, a wrapped desk with both cycles of one number, and apply races.
 
-test("install: free text finds machines spelled as the real catalog spells them, and plain words name nothing", () => {
-  const cameo = "Eversys Cameo c'2s - 2 Step Classic";
-  assert.deepEqual(namedMachines("Install Eversys Cameo c'2s", realCatalog, true), [cameo]);
-  assert.deepEqual(namedMachines("New install of Bunn ITCB brewer", realCatalog, true), ['Bunn ITCB-DV, 29" w/Flip Tray']);
-  assert.deepEqual(namedMachines("Install new Cameo c'2s", realCatalog, true), [cameo]);
-  for (const words of ["Install", "Set up", "Installation follow-up", "Brewer"]) {
-    assert.deepEqual(namedMachines(words, realCatalog, true), [], words);
-  }
-});
-
 test("install: with the real catalog and no equipment column, the problem description finds the account's open install", async () => {
   const sql = await freshDb();
   await sql.query("insert into directory_equipment (name) select unnest($1::text[])", [realCatalog]);
@@ -338,24 +328,24 @@ test("install: with the real catalog and no equipment column, the problem descri
   const { records } = parseCorrigoMatrix([
     ["ST#", "Operational Status", "Customer Name", "P.O. #", "Problem Description"],
     ["0663", "Work Started", "Cafe Mike", "", "Install Eversys Cameo c'2s"],
-    ["0664", "Work Started", "Cafe November", "", "New install of Bunn ITCB brewer"],
+    ["0664", "Work Started", "Cafe November", "", "New install of Bunn ITCB-DV, 29\" w/Flip Tray"],
     ["0665", "Work Started", "Cafe Oscar", "", "Install new Cameo c'2s; Bunn ITCB"],
     ["0666", "Work Started", "Cafe Papa", "Install", "Install"],
     ["0667", "Work Started", "Cafe Quebec", "Install", "Set up"],
     ["0668", "Work Started", "Cafe Romeo", "Install", "Brewer"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
-  const none = "no equipment named to match an install";
+  const none = (id) => `the problem description doesn't name install #${id}'s equipment`;
   assert.deepEqual(
     preview.rows.map((r) => [r.wo, r.action, r.jobId, r.matchNote]),
     [
       ["WO-0663", "update", mike, `install #${mike} matched by account and equipment`],
       ["WO-0664", "update", november, `install #${november} matched by account and equipment`],
-      // Two machines in free text name none.
-      ["WO-0665", "create", null, none],
-      ["WO-0666", "create", null, none],
-      ["WO-0667", "create", null, none],
-      ["WO-0668", "create", null, none],
+      // The install has two machines, and free text names one.
+      ["WO-0665", "create", null, none(oscar)],
+      ["WO-0666", "create", null, none(papa)],
+      ["WO-0667", "create", null, none(quebec)],
+      ["WO-0668", "create", null, none(romeo)],
     ],
   );
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
@@ -503,114 +493,108 @@ test("reopen: a completed date Corrigo wrote but that can't be read does not reo
   assert.doesNotMatch(await lastLog(sql, "service", id), /cleared/);
 });
 
-// N1: free text (the problem description only) names a machine only when it is one catalog model's own words, with
-// nothing around them but filler words and a leading "N x"; anything else names none.
+// N1: with no Equipment column, the problem description (never the work done) names the account's one open install's
+// machine only when, filler words and a leading "N x" aside, it is exactly that machine's catalog name: in full or
+// before " - ", with or without the brand, and no other catalog model shares that spelling or starts with it.
 
-test("install: free text names one machine only when the problem description is one model's own words, filler and a leading N x", () => {
+test("install: free text names the install's machine only when the description is exactly its catalog name", () => {
   const cameo = "Eversys Cameo c'2s - 2 Step Classic";
   const itcb = 'Bunn ITCB-DV, 29" w/Flip Tray';
-  const named = (text) => namedMachines(text, realCatalog, true);
-  assert.deepEqual(named("Install Eversys Cameo c'2s"), [cameo]);
-  assert.deepEqual(named("Install new Cameo c'2s"), [cameo]);
-  assert.deepEqual(named("New install of Bunn ITCB brewer"), [itcb]);
-  assert.deepEqual(named("Bunn ITCB"), [itcb]);
-  assert.deepEqual(named("Please deliver the new Bunn ITCB unit"), [itcb]);
-  assert.deepEqual(named("Install Bunn TB3"), ["Bunn TB3"]);
-  assert.deepEqual(named("2 x Eversys Cameo c'2s"), [cameo, cameo]);
-  assert.deepEqual(named("Install 2x Bunn ITCB"), [itcb, itcb]);
-  for (const text of [
-    "Install",
-    "Set up",
-    "Installation follow-up",
-    "Brewer",
-    "Install new machine",
-    // One word alone, or words that aren't the model's first or second word, name nothing.
-    "Install TB3",
-    "Install c'2m",
-    "Install ITCB",
-    "Install twin 1.5G",
-    "Please deliver and set up the new Bunn ITCB unit",
-    // Any other word, a second machine, any other number or quantity, or words in parentheses.
-    "Install 2 x Eversys Cameo c'2s and train staff",
-    "Install Bunn ITCB and G9-2T HD grinder",
-    "Install new Cameo c'2s and Bunn Axiom",
-    "Remove old machine and install new Linea Mini",
-    "Install new Cameo c'2s; Bunn ITCB",
-    "2 x Bunn ITCB\nBunn TB3",
-    "Install Bunn ITCB Bunn ITCB",
-    "Install Eversys Cameo c'2s (Classic)",
-    "Install Bunn ITCB (2)",
-    "Bunn ITCB x 2",
-    "(2) Bunn ITCB",
-    "cameo, itcb",
-    "Install Eversys Cameo c'2s #2",
-    "Install 2 Eversys Cameo c'2s",
-    "Install two Eversys Cameo c'2s",
-    "Install Eversys Cameo c'2s x2",
-    "Install Bunn ITCB, qty 2",
-    "Install Cameo",
-    "Install Bunn brewer",
-    "Install Eversys Cameo c'2s and Linea Mini",
-    // The 10/20 re-verify's rows that attached to a package the text doesn't name.
-    "Install Eversys Cameo c'2s (with Mahlkonig E65S grinder)",
-    "Install Bunn ITCB (2 units)",
-    "Install Bunn ITCB (qty 2)",
-    "Install two La Marzocco Linea Mini",
-    "Install 2 La Marzocco Linea PB 2 Group",
-    "Install Bunn ITCB qty2",
-    "Install both Eversys Cameo c'2s",
-    "Install Bunn TB3, 2 pcs",
-    "Install Eversys Cameo c'2s and grinder",
-    "Install Eversys Cameo c'2s w/ grinder",
-    "Install Bunn ITCB. Also install grinder.",
-    "Install Bunn CWTF single brewer",
-    "Install Eversys Cameo c'2s (2 units)",
-    "Install Bunn ITCB (two)",
-    "Install Bunn ITCB (and G9-2T HD grinder)",
-    "Install Eversys Cameo c'2s with grinder",
-    "Install Eversys Cameo c'2s + grinder",
-    "Install Eversys Cameo c'2s and new brewer",
-    "Install two de Jong Duke Virtu",
-    "Install Eversys Cameo c'2s - 2",
-    "Install Eversys Cameo c'2s and another one",
-    "Install 2nd Eversys Cameo c'2s",
-    "Install Eversys Cameo c'2s for both bars",
-    "Install a dozen Bunn ITCB",
-    "Install Bunn ITCB twice",
-    "Install Bunn ITCB and train staff on grinder",
-    "2 x Bunn ITCB and grinder",
-    "Install La Marzocco KB90 2AV without scales",
-    "Install Eversys Enigma e'4s, not the X-Wide",
-    // Generic words, and work-done wording, name nothing.
-    "Install espresso machine",
-    "Install water filter",
-    "Install flip tray",
-    "Install 1.5 gallon brewer",
-    "Install 1 group",
-    "Install single hopper grinder",
-    "Mini fridge install",
-    "Install Plus",
-    "Install 2 group",
-    "Install Linea",
-    "Install Linea PB",
-    "Install Bunn",
-    "Install La Marzocco",
-    "Install Super Traditional",
-    "Install X-Wide",
-    "Install the HD grinder",
-    "Install e'4s",
-    "Install G9",
-    "Install Axiom",
-    "Install 2 x Cameo",
-    "Install Cameo and ITCB",
-    "Install ITCB and G9-2T HD",
-    "Install brewer: Bunn ITCB; grinder: Bunn G9-2T HD",
-    "Installed machine and trained staff.",
-    "Set up machine and trained staff",
-    "Installed Cameo, trained staff",
-    "Trained barista on Cameo",
+  const e65s = "Mahlkonig E65S GBW Espresso Grinder";
+  const g92t = "Bunn G9-2T HD Dual Portion Grinder";
+  const kb90s = "La Marzocco KB90 2AV with Scales";
+  const enigma = "Eversys Enigma e'4s Super Traditional";
+  const duke = "de Jong Duke Virtu 9236d Espresso Machine";
+  const names = (text, machines) => descriptionNames(text, machines, realCatalog);
+  for (const [text, machines] of [
+    ["Install Eversys Cameo c'2s", [cameo]],
+    ["Install new Cameo c'2s", [cameo]],
+    ["Eversys Cameo C’2S", [cameo]],
+    ["Install Eversys Cameo c'2s - 2 Step Classic", [cameo]],
+    ["Cameo c2s install.", [cameo]],
+    ["2 x Eversys Cameo c'2s", [cameo, cameo]],
+    ["Install 2x new Cameo c'2s", [cameo, cameo]],
+    ["Install Bunn TB3", ["Bunn TB3"]],
+    ["Install TB3", ["Bunn TB3"]],
+    ["Please deliver the new Bunn TB3", ["Bunn TB3"]],
+    ["Bunn TB3 120V", ["Bunn TB3"]],
+    ["Bunn TB3\nInstall", ["Bunn TB3"]],
+    ["Install new La Marzocco Linea Mini", ["La Marzocco Linea Mini"]],
+    ["Linea Mini set up", ["La Marzocco Linea Mini"]],
+    ['Install Bunn ITCB-DV, 29" w/Flip Tray', [itcb]],
+    ["Install La Marzocco KB90 2AV with Scales", [kb90s]],
+    ["Install Eversys Enigma e'4s Super Traditional", [enigma]],
+    ["Install Bunn G9-2T HD Dual Portion Grinder", [g92t]],
+    ["Install Duke Virtu 9236d Espresso Machine", [duke]],
   ]) {
-    assert.deepEqual(named(text), [], text);
+    assert.equal(names(text, machines), true, text);
+  }
+  for (const [text, machines] of [
+    // Nothing, or work-done wording.
+    ["", [cameo]],
+    ["Install", [cameo]],
+    ["Install new machine", [cameo]],
+    ["Installed machine and grinder", [cameo]],
+    // A second machine, with a word or with punctuation between.
+    ["Install Eversys Cameo c'2s and grinder", [cameo]],
+    ["Install Eversys Cameo c'2s + new machine", [cameo]],
+    ["Install Eversys Cameo c'2s; Bunn ITCB", [cameo]],
+    ["Eversys Cameo c'2s\nBunn TB3", [cameo]],
+    ["Install Bunn TB3, Bunn TB3", ["Bunn TB3"]],
+    ["Install Bunn TB3 Bunn TB3", ["Bunn TB3"]],
+    ["Install Bunn TB3 & machine", ["Bunn TB3"]],
+    ["Install Mahlkonig E65S grinder & espresso machine", [e65s]],
+    ["Install Mahlkonig E65S grinder, espresso machine", [e65s]],
+    ["Install Mahlkonig E65S grinder for the new espresso machine", [e65s]],
+    ["Install Mahlkonig E65S GBW Espresso Grinder & machine", [e65s]],
+    ["Install Mahlkonig E65S GBW Espresso Grinder\nInstall brewer", [e65s]],
+    ["Install Bunn G9-2T HD grinder + brewer", [g92t]],
+    ["Install Bunn G9-2T HD Dual Portion Grinder / brewer", [g92t]],
+    ["Install Bunn G9-2T HD Dual Portion Grinder; new brewer", [g92t]],
+    // Any other word, or part of a name: a brand, a code alone, generic words, "with" a filler.
+    ["Install Eversys Cameo c'2s machine", [cameo]],
+    ["Install Eversys Cameo c'2s (Classic)", [cameo]],
+    ["Install Eversys Cameo c'2s for both bars", [cameo]],
+    ["Install Cameo", [cameo]],
+    ["Install c'2s", [cameo]],
+    ["Install Bunn ITCB", [itcb]],
+    ["New install of Bunn ITCB brewer", [itcb]],
+    ["Install Bunn flip tray", [itcb]],
+    ["Install Bunn TB3 brewer", ["Bunn TB3"]],
+    ["Install Bunn", ["Bunn TB3"]],
+    ["Install La Marzocco KB90 2AV with machine", [kb90s]],
+    ["Install La Marzocco scales", [kb90s]],
+    ["Install Mazzer Mini with new machine", ["Mazzer Mini Doser with Timer"]],
+    ["Install Mazzer Mini", ["Mazzer Mini Doser with Timer"]],
+    ["Install Mazzer Super Jolly w/ brewer", ["Mazzer Super Jolly Doser V Up w/ Timer"]],
+    ["Install Rancilio grinder", ["Rancilio Kyro EVO On-Demand Grinder"]],
+    ["Install Bunn dispenser", ["Bunn FMD-1 Specialty Dispenser"]],
+    ["Install de Jong", [duke]],
+    ["Install de Jong espresso machine", [duke]],
+    ["Install steam taps", ["Modbar Steam 2 Taps, 1 Module"]],
+    ["Install Bunn CWTF-APS", ["Bunn CWTF TWIN-APS"]],
+    ["Install new Bunn CWTF brewer", ["Bunn CWTF TWIN-APS"]],
+    ["Install Mazzer Robur S", ["Mazzer Robur S Electronic"]],
+    // A spelling another model shares or starts with.
+    ["Install La Marzocco KB90 2AV", ["La Marzocco KB90 2AV"]],
+    ["Install Bunn CWTF15", ["Bunn CWTF15 - 3 Lower Warmers"]],
+    ["Install Rancilio Classe 5 USB 1 Group Auto-Volumetric", ["Rancilio Classe 5 USB 1 Group Auto-Volumetric"]],
+    // Another model, another quantity, or an install that isn't one catalog model.
+    ["Install Eversys Enigma e'4s Super Traditional", ["Eversys Enigma e'4s X-Wide Super Traditional"]],
+    ["Install Eversys Cameo C'2m", [cameo]],
+    ["Install Bunn TB3", [cameo]],
+    ["Install Eversys Cameo c'2s", [cameo, cameo]],
+    ["Install 2 x Eversys Cameo c'2s", [cameo]],
+    ["Install Eversys Cameo c'2s x2", [cameo, cameo]],
+    ["Install 2 Eversys Cameo c'2s", [cameo, cameo]],
+    ["Install two Eversys Cameo c'2s", [cameo, cameo]],
+    ["Install Eversys Cameo c'2s ²", [cameo]],
+    ["Install ２ x Eversys Cameo c'2s", [cameo, cameo]],
+    ["Install Eversys Cameo c'2s", [cameo, "Bunn TB3"]],
+    ["Install Some Unknown Brewer", ["Some Unknown Brewer"]],
+    ["Install Eversys Cameo c'2s", []],
+  ]) {
+    assert.equal(names(text, machines), false, `${text} → ${machines.join(", ")}`);
   }
 });
 
@@ -641,19 +625,19 @@ test("install: free text attaches only on the problem description's one machine;
     ["0673", "Work Started", "Cafe India", "Install", "Install Eversys Cameo c'2s (with Mahlkonig E65S grinder)", "", ""],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
-  const none = "no equipment named to match an install";
+  const none = (id) => `the problem description doesn't name install #${id}'s equipment`;
   assert.deepEqual(
     preview.rows.map((r) => [r.wo, r.action, r.jobId, r.byEquipment, r.matchNote]),
     [
       ["WO-0665", "update", ids.a, true, `install #${ids.a} matched by account and equipment`],
-      ["WO-0666", "create", null, false, `equipment differs from install #${ids.b}`],
-      ["WO-0667", "create", null, false, none],
-      ["WO-0668", "create", null, false, none],
-      ["WO-0669", "create", null, false, none],
-      ["WO-0670", "create", null, false, none],
-      ["WO-0671", "create", null, false, none],
+      ["WO-0666", "create", null, false, none(ids.b)],
+      ["WO-0667", "create", null, false, none(ids.c)],
+      ["WO-0668", "create", null, false, none(ids.d)],
+      ["WO-0669", "create", null, false, none(ids.e)],
+      ["WO-0670", "create", null, false, none(ids.f)],
+      ["WO-0671", "create", null, false, none(ids.g)],
       ["WO-0672", "update", ids.h, true, `install #${ids.h} matched by account and equipment`],
-      ["WO-0673", "create", null, false, none],
+      ["WO-0673", "create", null, false, none(ids.i)],
     ],
   );
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");

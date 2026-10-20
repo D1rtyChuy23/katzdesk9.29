@@ -641,40 +641,48 @@ function catalogModelOf(name: string, catalog: string[]): string | null {
   return hit.status === "matched" ? hit.catalogModel : null;
 }
 
-/** Words a problem description may put around the one machine it names. Nothing else is filler. */
+/** Words a problem description may put before or after its machine's name ("Install new …", "… set up"). */
 const FILLER = new Set([
   "install", "installs", "installed", "installation", "new", "of", "the", "a", "an", "for", "at", "to", "please", "set",
-  "setup", "up", "deliver", "delivery", "brewer", "machine", "unit", "equipment",
+  "setup", "up", "deliver", "delivery",
 ]);
-const NUMBER = /^(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)$/;
 
-/** Lowercase words, punctuation-insensitive ("c'2s" → c2s, "G9-2T" → g92t); words in parentheses and after # count. */
-const wordsOf = (text: string) => compactEquip(text.replace(/[#()]/g, " ").replace(/×/g, "x")).split(" ").filter(Boolean);
+/** Lowercase, apostrophes and voltage dropped ("C’2s 120V" → "c2s"), one space between words, no closing period. */
+const plain = (text: string) =>
+  text.toLowerCase().replace(VOLTS, " ").replace(/['’‘`´]/g, "").replace(/×/g, "x").replace(/\s+/g, " ").trim().replace(/[.!]+$/, "").trim();
 
-/**
- * The machines a problem description names: one machine name, after an optional leading "N x" (N 1-9), with only
- * filler words around it ("Install new Cameo c'2s", "2 x Bunn ITCB"). It must read as one catalog model, and its
- * words must be that model's own words, each once, at least two of them, one being the model's first or second word
- * (Bunn, ITCB; Eversys, Cameo), so "flip tray" or "TB3" alone name nothing. Any other word or number, a second
- * machine, or anything but filler in parentheses names none.
- */
-function freeTextMachines(text: string, catalog: string[]): string[] {
-  if ([...text.matchAll(/\(([^)]*)\)/g)].some((m) => wordsOf(m[1]!).some((w) => !FILLER.has(w)))) return [];
-  const [, qty = "1", name = ""] = /^(?:([1-9]) ?x )?(.*)$/.exec(wordsOf(text).filter((w) => !FILLER.has(w)).join(" "))!;
-  const words = name.split(" ").filter(Boolean);
-  if (words.length < 2 || words.some((w) => NUMBER.test(w)) || new Set(words).size !== words.length) return [];
-  const model = catalogModelOf(words.join(" "), catalog);
-  const own = model ? wordsOf(model) : [];
-  const named = words.every((w) => own.includes(w)) && own.slice(0, 2).some((w) => words.includes(w));
-  return model && named ? Array<string>(Number(qty)).fill(model) : [];
+/** A catalog name as a description may write it: in full or before " - ", with or without its brand. */
+function spellingsOf(name: string): string[] {
+  return [name, name.split(" - ")[0]!].flatMap((n) => {
+    const words = plain(n).split(" ");
+    return [words.join(" "), words.slice(["la", "de"].includes(words[0]!) ? 2 : 1).join(" ")];
+  });
 }
 
 /**
- * The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog. Free text
- * (freeText: the problem description) names at most one model, read by freeTextMachines.
+ * Whether a problem description names the install's machines: after filler words and an optional leading "N x"
+ * (N 1-9, the install's unit count), what is left is exactly one spelling of its one catalog model that no other
+ * model shares or starts with ("Install new Cameo c'2s", "2 x Bunn TB3"). Anything else — another word, a second
+ * machine, punctuation between names, part of a name — doesn't.
  */
-export function namedMachines(text: string | null | undefined, catalog: string[], freeText = false): string[] {
-  if (freeText) return freeTextMachines(String(text ?? ""), catalog);
+export function descriptionNames(text: string, machines: string[], catalog: string[]): boolean {
+  const model = machines.length ? catalogModelOf(machines[0]!, catalog) : null;
+  if (!model || machines.some((m) => catalogModelOf(m, catalog) !== model)) return false;
+  const unfilled = (words: string[]) => {
+    const out = [...words];
+    while (out.length && FILLER.has(out[0]!)) out.shift();
+    while (out.length && FILLER.has(out.at(-1)!)) out.pop();
+    return out.join(" ");
+  };
+  const [, qty = "1", rest = ""] = /^(?:([1-9]) ?x )?(.*)$/.exec(unfilled(plain(text).split(" ")))!;
+  const said = unfilled(rest.split(" "));
+  const others = catalog.filter((n) => plain(n) !== plain(model)).flatMap(spellingsOf);
+  const clash = (s: string) => others.some((o) => o === s || (o.startsWith(s) && /[\s,/(-]/.test(o[s.length]!)));
+  return !!said && Number(qty) === machines.length && spellingsOf(model).includes(said) && !clash(said);
+}
+
+/** The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog. */
+export function namedMachines(text: string | null | undefined, catalog: string[]): string[] {
   const out: string[] = [];
   for (const piece of String(text ?? "").split(/\r?\n|;|,\s*(?=\d{1,2}\s*[x×]\s)/)) {
     if (!piece.trim() || SERIAL_ONLY.test(piece.trim())) continue;
@@ -709,13 +717,20 @@ function installByEquipment(
   if (!mine.length) return null;
   const free = mine.filter((i) => !taken.has(i.id));
   if (!free.length) return { install: null, note: `install #${mine[0].id} already matched by an earlier row` };
-  const named = rec.equipment?.trim()
-    ? namedMachines(rec.equipment, catalog)
-    : namedMachines(rec.issue, catalog, true);
-  if (!named.length) return { install: null, note: "no equipment named to match an install" };
-  if (free.length > 1) return { install: null, note: `${free.length === 2 ? "two" : free.length} installs could match` };
-  const only = free[0];
-  if (!sameMachines(named, only.machines, catalog)) return { install: null, note: `equipment differs from install #${only.id}` };
+  const only = free[0]!;
+  const several = { install: null, note: `${free.length === 2 ? "two" : free.length} installs could match` };
+  if (!rec.equipment?.trim()) {
+    // With no Equipment column, only a problem description that is exactly the install's machine name counts.
+    if (free.length > 1) return several;
+    if (!descriptionNames(rec.issue ?? "", only.machines, catalog)) {
+      return { install: null, note: `the problem description doesn't name install #${only.id}'s equipment` };
+    }
+  } else {
+    const named = namedMachines(rec.equipment, catalog);
+    if (!named.length) return { install: null, note: "no equipment named to match an install" };
+    if (free.length > 1) return several;
+    if (!sameMachines(named, only.machines, catalog)) return { install: null, note: `equipment differs from install #${only.id}` };
+  }
   return { install: only, note: `install #${only.id} matched by account and equipment` };
 }
 
