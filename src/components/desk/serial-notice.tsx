@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { applySerialPull, type SerialPullResult } from "@/lib/ops/serial-pull";
 import { parseAccountSerialNotice } from "@/lib/ops/install-form";
+import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -48,6 +49,9 @@ export function SerialPullField({
   jobId,
   machineIndex,
   onPulled,
+  onUseUnit,
+  onCleared,
+  model,
   compact = false,
 }: {
   /** On a one-line machine row: the small caps label the other fields on that row use. */
@@ -59,16 +63,26 @@ export function SerialPullField({
   jobId?: number;
   machineIndex?: number;
   onPulled?: (result: SerialPullResult) => void;
+  /** Replace this row with the account unit that already owns the serial. */
+  onUseUnit?: (unit: { model: string; serial: string }) => void;
+  /** A serial that was on the row was cleared. Save it now: the next lookup checks the server's list. */
+  onCleared?: () => void;
+  model?: string;
 }) {
   const qc = useQueryClient();
   const [text, setText] = useState(value);
   const [pending, setPending] = useState<SerialPullResult | null>(null);
+  const [offer, setOffer] = useState<{ model: string; serial: string } | null>(null);
   const looked = useRef("");
+  /** The row's serial before this edit: typing reaches the row right away, so `value` follows the text. */
+  const saved = useRef(value);
   useEffect(() => {
     setText(value);
   }, [value]);
 
+  // Behind the install window's saves: a serial just cleared on another row is saved before this lookup asks the server.
   const pull = useMutation({
+    scope: installId ? { id: `install-sheet-${installId}` } : undefined,
     mutationFn: (opts: { serial: string; confirmReuse?: boolean }) =>
       applySerialPull({
         data: {
@@ -86,11 +100,24 @@ export function SerialPullField({
       }
       setPending(null);
       looked.current = result.serial.trim().replace(/[#\s]/g, "").toLowerCase();
+      if (result.duplicateOnInstall) {
+        // The row goes back to its serial, and typing the same one again asks the server again.
+        looked.current = "";
+        setText(saved.current);
+        onValue(saved.current);
+        setOffer(null);
+        toast.message(result.notice);
+        return;
+      }
       if (result.serial && result.serial !== text) setText(result.serial);
+      saved.current = result.serial;
       onValue(result.serial);
       onPulled?.(result);
+      if (result.alreadyHere && result.model && model && !sameWarehouseModel(model, result.model)) {
+        setOffer({ model: result.model, serial: result.serial });
+      } else setOffer(null);
       if (result.pulled) toast.success(result.notice);
-      else toast.message(result.notice);
+      else if (!result.alreadyHere) toast.message(result.notice);
       void qc.invalidateQueries({ queryKey: ["assets"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
       void qc.invalidateQueries({ queryKey: ["jobs"] });
@@ -102,12 +129,19 @@ export function SerialPullField({
 
   function commit(raw: string, confirmReuse = false) {
     const next = raw.trim();
-    onValue(next);
     if (!next) {
+      const had = saved.current.trim();
       looked.current = "";
+      saved.current = "";
+      setOffer(null);
+      onValue("");
+      if (had) onCleared?.();
       return;
     }
-    if (!installId && !jobId) return;
+    if (!installId && !jobId) {
+      onValue(next);
+      return;
+    }
     const key = next.replace(/[#\s]/g, "").toLowerCase();
     if (!confirmReuse && key === looked.current) return;
     pull.mutate({ serial: next, confirmReuse });
@@ -126,12 +160,17 @@ export function SerialPullField({
         value={text}
         autoComplete="off"
         placeholder="Type the serial"
+        onFocus={() => {
+          saved.current = value;
+        }}
         onChange={(e) => {
+          // The row holds what is typed, so closing the window (Escape too) saves it. The lookup waits for blur or Enter.
           setText(e.target.value);
           onValue(e.target.value);
         }}
         onBlur={() => {
-          if (text.trim()) commit(text);
+          // A cleared serial is committed too, or the old one would come back on the next save.
+          if (text.trim() || saved.current.trim()) commit(text);
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -140,6 +179,21 @@ export function SerialPullField({
           }
         }}
       />
+      {offer && onUseUnit ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="mt-2"
+          data-testid="use-account-unit"
+          onClick={() => {
+            onUseUnit(offer);
+            setOffer(null);
+          }}
+        >
+          Use {offer.model} · SN {offer.serial}
+        </Button>
+      ) : null}
       {pull.isPending ? (
         <p className="mt-1 text-xs text-muted-foreground">Checking warehouse…</p>
       ) : null}

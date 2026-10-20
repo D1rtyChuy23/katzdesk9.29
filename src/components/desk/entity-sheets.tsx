@@ -38,9 +38,9 @@ import {
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { appendServerMachines } from "@/lib/ops/warehouse-serial";
-import { foldVisitUnits } from "@/lib/ops/install-form";
-import { addInspectionEquipment } from "@/lib/ops/inspection-api";
+import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
+import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice, visitUnitForRow } from "@/lib/ops/install-form";
+import { getInstallInspection, removeInspectionEquipment } from "@/lib/ops/inspection-api";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -352,6 +352,9 @@ export function InstallSheet({
   const loadedSpecs = useRef<MachineSpec[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
+  const specsRef = useRef(specs);
+  specsRef.current = specs;
+  const seenServer = useRef<{ id: number; rows: MachineSpec[] } | null>(null);
   const catalog = catalogModels([
     ...(directoryEquip.data ?? []).map((e) => e.name),
     ...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
@@ -371,16 +374,29 @@ export function InstallSheet({
   useEffect(() => {
     if (!row || hydratedId !== row.id) return;
     const server = row.machines ?? [];
-    loadedSpecs.current = appendServerMachines(loadedSpecs.current, server);
-    setSpecs((cur) => appendServerMachines(cur, server));
-    setEquipPieces((pieces) => {
-      const names = server.map((m) => m.equipment).filter(Boolean);
-      return names.length > pieces.length ? names : pieces;
-    });
-    // A warehouse assignment writes the serial on the server. Pre-inspection can add a machine. Pull both in.
+    const seen = seenServer.current;
+    if (!seen || seen.id !== row.id) {
+      seenServer.current = { id: row.id, rows: server };
+      return;
+    }
+    const previous = seen.rows;
+    seenServer.current = { id: row.id, rows: server };
+    loadedSpecs.current = machinesBeforeSave(loadedSpecs.current, previous, server);
+    const next = machinesBeforeSave(specsRef.current, previous, server);
+    setSpecs(next);
+    setEquipPieces(next.map((s) => s.equipment));
+    // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, serialSig, machineSig]);
+  const visit = useQuery({
+    queryKey: ["inspection", row?.id],
+    queryFn: () => getInstallInspection({ data: { installId: row!.id } }),
+    enabled: row != null,
+  });
+  /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
+  const queue = { id: `install-sheet-${row?.id}` };
   const save = useMutation({
+    scope: queue,
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
       const keys = Object.keys(vars).filter((k) => k !== "id");
@@ -396,6 +412,11 @@ export function InstallSheet({
       void qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  const dropUnit = useMutation({
+    scope: queue,
+    mutationFn: (v: { installId: number; equipmentId: number }) => removeInspectionEquipment({ data: { ...v, keepList: true } }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"),
   });
   const dropInstall = useMutation({
     mutationFn: () => archiveInstall({ data: { id: row!.id } }),
@@ -422,7 +443,14 @@ export function InstallSheet({
     return null;
   };
 
+  function listForSave(next: MachineSpec[]): MachineSpec[] {
+    if (!row) return dedupeMachineSerials(next);
+    const baseline = seenServer.current?.id === row.id ? seenServer.current.rows : specs;
+    return machinesBeforeSave(next, baseline, row.machines ?? []);
+  }
+
   function persistMachines(next: MachineSpec[]) {
+    next = listForSave(next);
     setSpecs(next);
     setEquipPieces(next.map((s) => s.equipment));
     if (!row) return;
@@ -614,19 +642,18 @@ export function InstallSheet({
 
                 <Tabs.Content value="equipment" forceMount className={KEEP_MOUNTED} data-testid="install-panel-equipment">
                   <SerialNoticeBanner
-                    notice={row.serialNotice}
+                    notice={hasSerial(specs, parseAccountSerialNotice(row.serialNotice)?.serial) ? null : row.serialNotice}
                     onAttach={(unit) => {
-                      const folded = foldVisitUnits(specs, [unit]);
-                      if (folded.added || folded.rows.some((r, i) => r.serial !== specs[i]?.serial)) persistMachines(folded.rows);
-                      else toast.message("That unit is already on this install.");
-                      void addInspectionEquipment({ data: { installId: row.id, model: unit.model, serial: unit.serial } })
-                        .then(() => {
-                          void qc.invalidateQueries({ queryKey: ["inspection", row.id] });
-                        })
-                        .catch((e) => {
-                          const message = e instanceof Error ? e.message : "";
-                          if (!/already on this visit/i.test(message)) toast.error(message || "Could not attach that unit");
-                        });
+                      if (hasSerial(specs, unit.serial)) {
+                        toast.message("That unit is already on this install.");
+                        return;
+                      }
+                      const blank = specs.findIndex((s) => sameWarehouseModel(s.equipment, unit.model) && !s.serial.trim());
+                      const next = blank >= 0
+                        ? specs.map((s, i) => (i === blank ? { ...s, serial: unit.serial } : s))
+                        : [...specs, { equipment: unit.model, serial: unit.serial, powerVoltage: "" }];
+                      persistMachines(next);
+                      toast.success("Attached to this install");
                     }}
                   />
                   <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
@@ -653,11 +680,15 @@ export function InstallSheet({
                       onRecipe={(next) => persistMachines(next)}
                       onCommit={(next) => persistMachines(next)}
                       onRemove={(index) => {
-                        try {
-                          persistMachines(specs.filter((_, i) => i !== index));
-                        } catch (err) {
-                          toast.error(err instanceof Error ? err.message : "Could not update equipment");
-                        }
+                        const spec = specs[index];
+                        if (!spec) return;
+                        const label = `${spec.equipment}${spec.serial.trim() ? ` SN ${spec.serial.trim()}` : ""}`;
+                        if (!window.confirm(`Remove ${label} from this install?`)) return;
+                        const next = specs.filter((_, i) => i !== index);
+                        const linked = visitUnitForRow(specs, index, visit.data?.machines ?? []);
+                        // The unit goes first; the save waits in the same queue, then refreshes the list and the visit.
+                        if (linked) dropUnit.mutate({ installId: row.id, equipmentId: linked.equipmentId });
+                        persistMachines(next);
                       }}
                     />
                   </div>

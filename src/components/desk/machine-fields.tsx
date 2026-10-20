@@ -556,15 +556,23 @@ export function MachineFields({
               label="Serial"
               compact
               value={spec.serial}
+              model={spec.equipment}
               installId={installId}
               machineIndex={index}
               onValue={(serial) => onChange(patch(index, { serial }))}
               onPulled={(result) => {
-                // A serial pull never fills volts, plug, or water. The rep types those.
+                if (result.duplicateOnInstall) return;
                 const next = patch(index, { serial: result.serial });
                 onChange(next);
                 onPulled?.(next, result);
               }}
+              onUseUnit={(unit) => {
+                const next = patch(index, { equipment: unit.model, serial: unit.serial });
+                onChange(next);
+                onCommit?.(next);
+              }}
+              // Moving a serial to another row: the clear is saved first, or the other row's lookup finds it here.
+              onCleared={installId ? () => onCommit?.(patch(index, { serial: "" })) : undefined}
             />
             <div className="min-w-0">
               <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase" htmlFor={`pwr-${index}`}>

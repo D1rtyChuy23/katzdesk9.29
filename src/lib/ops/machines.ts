@@ -1,4 +1,5 @@
 import { joinEquipment, listedEquipment } from "./equipment";
+import { clearTypedDuplicates } from "./install-form";
 
 export type MachineSpec = {
   equipment: string;
@@ -232,6 +233,7 @@ export function machinesOnOpen(
  * rewrote typed text ("2 x e4s … SN: …") as bare names every time the window closed.
  */
 export function changedMachineFields(specs: MachineSpec[], loaded: MachineSpec[]): Partial<ReturnType<typeof serializeMachines>> {
-  const packed = serializeMachines(specs);
+  // A serial typed on a row (Escape before the lookup) that the loaded list has on another row is not sent there.
+  const packed = serializeMachines(clearTypedDuplicates(specs, loaded));
   return JSON.stringify(packed) === JSON.stringify(serializeMachines(loaded)) ? {} : packed;
 }
