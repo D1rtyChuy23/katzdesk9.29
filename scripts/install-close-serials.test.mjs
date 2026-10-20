@@ -130,3 +130,13 @@ test("the install window's details form sends the machine list only when it chan
   assert.doesNotMatch(submit, /serializeMachines\(specs\)/);
   assert.match(sheet, /machinesOnOpen\(/);
 });
+
+test("a save moves the window's baseline, so an edit put back after Save is still saved on close", () => {
+  const src = readFileSync(new URL("../src/components/desk/entity-sheets.tsx", import.meta.url), "utf8");
+  const start = src.indexOf("export function InstallSheet(");
+  const sheet = src.slice(start, src.indexOf("\nexport function ", start + 1));
+  const persist = sheet.slice(sheet.indexOf("function persistMachines"), sheet.indexOf("save.mutate", sheet.indexOf("function persistMachines")));
+  assert.match(persist, /loadedSpecs\.current = next;/);
+  const submit = sheet.slice(sheet.indexOf("onSubmit={"), sheet.indexOf("save.mutate", sheet.indexOf("onSubmit={")));
+  assert.match(submit, /if \(Object\.keys\(machineFields\)\.length\) loadedSpecs\.current = specs;/);
+});

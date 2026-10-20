@@ -427,6 +427,7 @@ export function InstallSheet({
     setEquipPieces(next.map((s) => s.equipment));
     if (!row) return;
     const packed = serializeMachines(next);
+    loadedSpecs.current = next;
     save.mutate({
       id: row.id,
       equipment: packed.equipment,
@@ -515,6 +516,8 @@ export function InstallSheet({
                     onSubmit={(e) => {
                       e.preventDefault();
                       const fd = new FormData(e.currentTarget);
+                      const machineFields = changedMachineFields(specs, loadedSpecs.current);
+                      if (Object.keys(machineFields).length) loadedSpecs.current = specs;
                       save.mutate({
                         id: row.id,
                         customer: String(fd.get("customer") || row.customer),
@@ -530,7 +533,7 @@ export function InstallSheet({
                         aviKatz: fd.get("aviKatz") === "on",
                         paymentStatus: String(fd.get("paymentStatus") || "") || null,
                         // Closing the window submits this form: an unchanged list is left as saved, typed serials and all.
-                        ...changedMachineFields(specs, loadedSpecs.current),
+                        ...machineFields,
                       });
                     }}
                   >
