@@ -2,6 +2,8 @@
 
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { CLOSED_CALL, CLOSED_PM } from "./ticket-status.ts";
+import { listedEquipment } from "./equipment.ts";
+import { compactEquip, matchCatalogModel } from "./account-equip.ts";
 
 export { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 
@@ -71,6 +73,11 @@ const HEADER_KEYS: Record<string, CorrigoCol> = {
   "call type": "callType",
   type: "callType",
   "ticket type": "callType",
+  equipment: "equipment",
+  asset: "equipment",
+  "asset name": "equipment",
+  "equipment description": "equipment",
+  "equipment package": "equipment",
 };
 
 /** Corrigo's CSV export names columns TextBox_## (key: normalizeHeader). Empty until Chuy supplies the mapping. */
@@ -86,6 +93,7 @@ export const COL_LABEL: Record<CorrigoCol, string> = {
   customer: "Customer Name",
   po: "P.O. #",
   callType: "Call Type",
+  equipment: "Equipment",
 };
 
 /** Without these every ticket keeps its status / completed date, so the preview warns when one is missing. */
@@ -102,7 +110,8 @@ export type CorrigoCol =
   | "issue"
   | "customer"
   | "po"
-  | "callType";
+  | "callType"
+  | "equipment";
 
 export type CorrigoBoard = "service" | "tlc" | "pm" | "install";
 
@@ -120,6 +129,8 @@ export type CorrigoRecord = {
   customer: string | null;
   po: string | null;
   callType: string | null;
+  /** The machines on the row, from an Equipment / Asset column. */
+  equipment?: string | null;
 };
 
 export type CorrigoHit = {
@@ -171,7 +182,12 @@ export type CorrigoPreviewRow = {
   issue: string | null;
   conflictIds: { board: CorrigoBoard; id: number }[] | null;
   wrapRepeat: boolean;
+  /** No install had this WO: jobId is the account's open install whose equipment matches. */
+  byEquipment: boolean;
 };
+
+/** An install with no WO yet that isn't archived or complete, with its machine models. */
+export type OpenInstall = CorrigoHit & { machines: string[] };
 
 export function normalizeHeader(raw: string): string {
   return String(raw ?? "")
@@ -524,6 +540,7 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
       customer: cell(row, cols.customer) || null,
       po: cell(row, cols.po) || null,
       callType: cell(row, cols.callType) || null,
+      equipment: cell(row, cols.equipment) || null,
     };
     const prev = byKey.get(matchKey);
     // Several lines for one ST# (cost lines, subtotals): a later non-blank cell wins; a blank never wipes one.
@@ -580,10 +597,75 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
   return null;
 }
 
+const SERIAL_ONLY = /^SN\s*:?\s*[A-Z0-9-]+$/i;
+const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
+
+/**
+ * The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog. From free
+ * text (a problem description) only catalog names count, so the words around them are not read as machines.
+ */
+export function namedMachines(text: string | null | undefined, catalog: string[], catalogOnly = false): string[] {
+  const out: string[] = [];
+  for (const piece of String(text ?? "").split(/\r?\n|;|,\s*(?=\d{1,2}\s*[x×]\s)/)) {
+    if (!piece.trim() || SERIAL_ONLY.test(piece.trim())) continue;
+    const qty = Number(piece.match(/^\s*(?:qty\s*)?(\d{1,2})\s*[x×]\s/i)?.[1] ?? 1);
+    listedEquipment(piece, catalog)
+      .filter((name) => !catalogOnly || catalog.includes(name))
+      .forEach((name, i) => out.push(...Array<string>(i === 0 ? qty : 1).fill(name)));
+  }
+  return out;
+}
+
+/** Same machine models, in any order, ignoring voltage; quantities count. */
+function sameMachines(a: string[], b: string[], catalog: string[]): boolean {
+  const keys = (list: string[]) =>
+    list
+      .map((name) => {
+        const bare = name.replace(VOLTS, " ").trim();
+        return compactEquip(matchCatalogModel(bare, bare, catalog).catalogModel ?? bare);
+      })
+      .sort()
+      .join("\n");
+  return a.length === b.length && keys(a) === keys(b);
+}
+
+/**
+ * An install row whose WO no install has goes on the account's open install only when there is exactly one and
+ * the row names the same machines as its equipment package. note says what happened either way.
+ */
+function installByEquipment(
+  rec: CorrigoRecord,
+  installs: OpenInstall[],
+  catalog: string[],
+  taken: Set<number>,
+): { install: OpenInstall | null; note: string } | null {
+  const key = isWalkIn(rec.customer) ? "" : normalizeCustomerKey(rec.customer);
+  const mine = key ? installs.filter((i) => normalizeCustomerKey(i.customer) === key) : [];
+  if (!mine.length) return null;
+  const free = mine.filter((i) => !taken.has(i.id));
+  if (!free.length) return { install: null, note: `install #${mine[0].id} already matched by an earlier row` };
+  const named = rec.equipment?.trim()
+    ? namedMachines(rec.equipment, catalog)
+    : namedMachines([rec.issue, rec.workDone].filter(Boolean).join("\n"), catalog, true);
+  if (!named.length) return { install: null, note: "no equipment named to match an install" };
+  if (free.length > 1) return { install: null, note: `${free.length === 2 ? "two" : free.length} installs could match` };
+  const only = free[0];
+  if (!sameMachines(named, only.machines, catalog)) return { install: null, note: `equipment differs from install #${only.id}` };
+  return { install: only, note: `install #${only.id} matched by account and equipment` };
+}
+
 export function resolvePreviewRow(
   rec: CorrigoRecord,
   match: { unique: CorrigoHit | null; conflicts: CorrigoHit[] },
-  opts: { wrapped?: boolean; today?: string } = {},
+  opts: {
+    wrapped?: boolean;
+    today?: string;
+    /** Open installs with no WO, and the equipment catalog, for an install row no WO matches. */
+    installs?: OpenInstall[];
+    catalog?: string[];
+    /** Installs an earlier row of this import already attached to. */
+    taken?: Set<number>;
+  } = {},
 ): CorrigoPreviewRow {
   const wrapped = !!opts.wrapped;
   const group = [
@@ -598,7 +680,12 @@ export function resolvePreviewRow(
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
   const attachable = pool.filter((h) => shouldAttachToHit(h, rec.customer, wrapped, opts.today));
-  const existing = pickKeeper(attachable.length ? attachable : [], hinted);
+  const woHit = pickKeeper(attachable.length ? attachable : [], hinted);
+  const equip =
+    !woHit && hinted === "install"
+      ? installByEquipment(rec, opts.installs ?? [], opts.catalog ?? [], opts.taken ?? new Set())
+      : null;
+  const existing = woHit ?? equip?.install ?? null;
   const extras = existing
     ? group.filter((h) => h.board !== existing.board || h.id !== existing.id)
     : group;
@@ -630,16 +717,14 @@ export function resolvePreviewRow(
   const oldCycle = extras.filter((h) => !recentTicket(h, opts.today));
   const wrapRepeat =
     wrapped && postWrapNumber && (oldCycle.length > 0 || (!existing && group.length > 0));
-  const note = existing ? matchNote(rec.rawWo, rec.canonicalWo, existing.wo) : null;
+  const note = woHit ? matchNote(rec.rawWo, rec.canonicalWo, woHit.wo) : null;
 
   return {
     wo: rec.canonicalWo,
     rawWo: rec.rawWo,
     matchKey: rec.matchKey,
     canonicalWo: rec.canonicalWo,
-    matchNote: wrapRepeat
-      ? [note, wrapRepeatNote(rec.canonicalWo)].filter(Boolean).join(" · ")
-      : note,
+    matchNote: [note, equip?.note, wrapRepeat ? wrapRepeatNote(rec.canonicalWo) : null].filter(Boolean).join(" · ") || null,
     customer: preferredImportCustomer(rec.customer, existing?.customer),
     fileCustomer: rec.customer,
     existingCustomer: existing?.customer ?? null,
@@ -663,6 +748,7 @@ export function resolvePreviewRow(
     issue: rec.issue,
     conflictIds: siblingIds.length ? siblingIds : null,
     wrapRepeat,
+    byEquipment: !!equip?.install,
   };
 }
 

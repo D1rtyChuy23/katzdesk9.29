@@ -61,7 +61,13 @@ export function CorrigoImportButton({
     mutationFn: async (file: File) => {
       const parsed = await readCorrigoFile(file);
       const parts = [];
-      for (const records of chunkByBytes(parsed.records)) parts.push(await previewCorrigoImport({ data: { records } }));
+      // A later chunk must not attach a row to an install an earlier chunk's row took.
+      const claimedInstalls: number[] = [];
+      for (const records of chunkByBytes(parsed.records)) {
+        const part = await previewCorrigoImport({ data: { records, claimedInstalls: [...claimedInstalls] } });
+        for (const r of part.rows) if (r.byEquipment && r.jobId) claimedInstalls.push(r.jobId);
+        parts.push(part);
+      }
       return mergeCorrigoPreviews(parts, parsed);
     },
     onSuccess: (data, file) => {

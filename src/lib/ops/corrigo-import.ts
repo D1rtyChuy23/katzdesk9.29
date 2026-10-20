@@ -13,6 +13,7 @@ import {
   deskHasWrapped,
   indexHits,
   isWalkIn,
+  namedMachines,
   pickKeeper,
   resolvePreviewRow,
   shouldAttachToHit,
@@ -21,7 +22,9 @@ import {
   type CorrigoHit,
   type CorrigoPreviewPart,
   type CorrigoRecord,
+  type OpenInstall,
 } from "@/lib/ops/corrigo";
+import { installMachines } from "@/lib/ops/machines";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
 
@@ -147,6 +150,42 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
   ];
 }
 
+/** Open installs with no WO yet, each with its machine models, and the equipment catalog they are read with. */
+async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; catalog: string[] }> {
+  const catalog = (
+    await sql.query<{ name: string }>("select name from directory_equipment where archived = false and coalesce(name, '') <> ''")
+  ).map((r) => r.name);
+  const rows = await sql.query<{
+    id: number;
+    customer: string;
+    equip_status: string | null;
+    completed_at: string | null;
+    equipment: string | null;
+    serial: string | null;
+    power_voltage: string | null;
+    machines: string | null;
+  }>(
+    `select id, customer, equip_status, to_char(completed_at, 'YYYY-MM-DD') as completed_at, equipment, serial, power_voltage, machines
+       from installs
+      where archived = false and complete = false and coalesce(btrim(wo), '') = ''
+      order by id`,
+  );
+  const installs = rows.map((r): OpenInstall => {
+    const { machines, typed } = installMachines(r, catalog);
+    return {
+      board: "install",
+      id: r.id,
+      status: r.equip_status || "Not Ready",
+      customer: r.customer,
+      wo: null,
+      completedAt: r.completed_at,
+      // Typed equipment text is read again so "2 x Bunn ITCB" counts two.
+      machines: typed ? namedMachines(r.equipment, catalog) : machines.map((m) => m.equipment),
+    };
+  });
+  return { installs, catalog };
+}
+
 async function findExistingHit(
   sql: Awaited<ReturnType<typeof getSql>>,
   matchKey: string,
@@ -247,19 +286,41 @@ const recordInput = z.object({
   customer: z.string().nullable(),
   po: z.string().nullable(),
   callType: z.string().nullable(),
+  equipment: z.string().nullable().optional(),
 });
 
-/** The browser reads the file and sends only these fields, a chunk at a time (Vercel refuses a request over ~4.5 MB). */
-const previewInput = z.object({ records: z.array(recordInput).max(2000) });
+/**
+ * The browser reads the file and sends only these fields, a chunk at a time (Vercel refuses a request over ~4.5 MB),
+ * with the installs earlier chunks attached rows to.
+ */
+const previewInput = z.object({
+  records: z.array(recordInput).max(2000),
+  claimedInstalls: z.array(z.number().int()).max(2000).optional(),
+});
 
-export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]): Promise<CorrigoPreviewPart> {
+export async function previewCorrigoRecords(
+  sql: Sql,
+  records: CorrigoRecord[],
+  claimedInstalls: number[] = [],
+): Promise<CorrigoPreviewPart> {
   const hits = await loadHits(sql);
   const wrapped = deskHasWrapped(hits);
   const today = todayChicago();
   const index = indexHits(hits);
-  const rows = records.map((rec) =>
-    resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, { wrapped, today }),
-  );
+  const { installs, catalog } = await loadOpenInstalls(sql);
+  // Rows are applied in order, so a later row can't attach to an install an earlier row took.
+  const taken = new Set(claimedInstalls);
+  const rows = records.map((rec) => {
+    const row = resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, {
+      wrapped,
+      today,
+      installs,
+      catalog,
+      taken,
+    });
+    if (row.byEquipment && row.jobId) taken.add(row.jobId);
+    return row;
+  });
   const unmapped = [
     ...new Set(rows.map((r) => r.statusUnmapped).filter((s): s is string => !!s)),
   ];
@@ -277,7 +338,7 @@ export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]):
 export const previewCorrigoImport = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof previewInput>) => previewInput.parse(d))
-  .handler(async ({ data }) => previewCorrigoRecords(await ready(), data.records));
+  .handler(async ({ data }) => previewCorrigoRecords(await ready(), data.records, data.claimedInstalls));
 
 const applyRow = z.object({
   wo: z.string(),
@@ -360,6 +421,14 @@ export async function applyCorrigoRows(
     let action = row.action;
     let jobId = row.jobId;
     wrapRepeat = !!row.wrapRepeat;
+    if (action === "update" && jobId && board === "install") {
+      // An install matched by equipment that got another WO since the preview: open a new one, as a fresh preview would.
+      const now = await sql.query<{ wo: string | null }>("select wo from installs where id = $1", [jobId]);
+      if (now[0]?.wo?.trim() && woMatchKey(now[0].wo) !== matchKey) {
+        action = "create";
+        jobId = null;
+      }
+    }
     if (action === "create" || (action === "update" && !jobId)) {
       const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, today);
       if (hit) {
