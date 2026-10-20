@@ -30,6 +30,7 @@ import { CustomerCombo, EquipmentMultiCombo } from "@/components/desk/directory-
 import { MachineFields } from "@/components/desk/machine-fields";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { withWoMatches } from "@/lib/ops/wo-search";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
 import { ActionMenu, FilterChip, StatCard, StatRow } from "@/components/desk/desk-charts";
@@ -98,6 +99,8 @@ function Page() {
         [i.customer, i.equipment, i.wo, i.technician, i.serial, i.powerVoltage, ...(i.machines ?? []).flatMap((m) => [m.equipment, m.serial, m.powerVoltage])].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
+    // A WO number finds its install in either lane.
+    list = withWoMatches(list, data.data ?? [], q);
     return sortDesk(list, sort, {
       date: (i) => i.installDate ?? i.received,
       name: (i) => i.customer,

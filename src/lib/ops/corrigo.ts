@@ -4,20 +4,34 @@ import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 
 export { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 
-export const CORRIGO_STATUS: Record<string, string> = {
-  cancelled: "Cancelled",
-  canceled: "Cancelled",
-  completed: "Completed",
-  complete: "Completed",
-  unassigned: "Open",
-  "needs accepting": "Open",
-  "waiting for pickup": "Open",
-  "picked up": "Dispatched",
-  "en route": "Dispatched",
-  enroute: "Dispatched",
-  "work started": "In Progress",
-  paused: "In Progress",
-  "on hold": "Follow-up Needed",
+type BoardStatuses = { service: string; pm: string | null; install: string | null };
+
+/**
+ * Corrigo status → the status written on each board (TLC uses the service column).
+ * null = keep the ticket's current status; a new ticket gets NEW_TICKET_STATUS.
+ * Starred (*) entries are proposed defaults for Chuy to confirm — change them here.
+ */
+export const CORRIGO_STATUS: Record<string, BoardStatuses> = {
+  unassigned: { service: "Open", pm: null, install: null },
+  "needs accepting": { service: "Open", pm: null, install: null },
+  "waiting for pickup": { service: "Dispatched", pm: "Scheduled", install: null }, // * service, * pm
+  "picked up": { service: "Dispatched", pm: "Ready to Dispatch", install: "Ready" }, // * install
+  "en route": { service: "Dispatched", pm: "Ready to Dispatch", install: "Ready" }, // * install
+  enroute: { service: "Dispatched", pm: "Ready to Dispatch", install: "Ready" }, // * install
+  "work started": { service: "In Progress", pm: "In Progress", install: "Ready" }, // * install
+  paused: { service: "In Progress", pm: "In Progress", install: "Ready" }, // * install
+  "on hold": { service: "Follow-up Needed", pm: null, install: null },
+  completed: { service: "Completed", pm: "Completed", install: "Installed" },
+  complete: { service: "Completed", pm: "Completed", install: "Installed" },
+  cancelled: { service: "Cancelled", pm: "Cancelled", install: null },
+  canceled: { service: "Cancelled", pm: "Cancelled", install: null },
+};
+
+const NEW_TICKET_STATUS: Record<CorrigoBoard, string> = {
+  service: "Open",
+  tlc: "Open",
+  pm: "Pending Scheduling",
+  install: "Not Ready",
 };
 
 const HEADER_KEYS: Record<string, CorrigoCol> = {
@@ -36,8 +50,15 @@ const HEADER_KEYS: Record<string, CorrigoCol> = {
   "date completed": "completedAt",
   "time completed": "completedAt",
   completed: "completedAt",
+  "completed date": "completedAt",
+  "completion date": "completedAt",
+  "completed on": "completedAt",
   "work done": "workDone",
   "operational status": "status",
+  status: "status",
+  "wo status": "status",
+  "work order status": "status",
+  "ticket status": "status",
   "problem description": "issue",
   problem: "issue",
   "customer name": "customer",
@@ -50,6 +71,26 @@ const HEADER_KEYS: Record<string, CorrigoCol> = {
   type: "callType",
   "ticket type": "callType",
 };
+
+/** Corrigo's CSV export names columns TextBox_## (key: normalizeHeader). Empty until Chuy supplies the mapping. */
+export const CORRIGO_TEXTBOX_HEADERS: Record<string, CorrigoCol> = {};
+
+export const COL_LABEL: Record<CorrigoCol, string> = {
+  wo: "ST#",
+  technician: "Primary Service Tech",
+  completedAt: "Date/Time Completed",
+  workDone: "Work Done",
+  status: "Operational Status",
+  issue: "Problem Description",
+  customer: "Customer Name",
+  po: "P.O. #",
+  callType: "Call Type",
+};
+
+/** Without these every ticket keeps its status / completed date, so the preview warns when one is missing. */
+const NEEDED_COLS: CorrigoCol[] = ["status", "completedAt"];
+
+const TEXTBOX = /^text\s*_?box/i;
 
 export type CorrigoCol =
   | "wo"
@@ -70,6 +111,8 @@ export type CorrigoRecord = {
   canonicalWo: string;
   technician: string | null;
   completedAt: string | null;
+  /** The completed cell as written, so the preview can show a date it couldn't read. */
+  completedRaw: string | null;
   workDone: string | null;
   statusRaw: string | null;
   issue: string | null;
@@ -86,6 +129,11 @@ export type CorrigoHit = {
   wo: string | null;
   duplicateOf?: number | null;
   done?: boolean;
+  /** YYYY-MM-DD on the ticket now. */
+  completedAt?: string | null;
+  /** NetSuite Sales Order (service tickets only). */
+  billedSo?: string | null;
+  hasCharges?: boolean;
 };
 
 export type CorrigoPreviewRow = {
@@ -105,8 +153,15 @@ export type CorrigoPreviewRow = {
   oldStatus: string | null;
   newStatus: string;
   statusUnmapped: string | null;
+  statusRaw: string | null;
+  statusNote: string | null;
   technician: string | null;
   completedAt: string | null;
+  /** The ticket's completed date before this import. */
+  oldCompletedAt: string | null;
+  /** Billed on a Sales Order: the import keeps oldCompletedAt whatever Corrigo says. */
+  completedKept: boolean;
+  completedNote: string | null;
   workDone: string | null;
   issue: string | null;
   conflictIds: { board: CorrigoBoard; id: number }[] | null;
@@ -204,7 +259,8 @@ export function wrapRepeatNote(canonicalWo: string): string {
 export function woCanonical(raw: string): string {
   const core = woCore(raw);
   if (!core) return "";
-  return `WO-${core}`;
+  // Corrigo numbers are 4 digits; a spreadsheet turns "0855" into 855.
+  return `WO-${/^\d{1,3}$/.test(core) ? core.padStart(4, "0") : core}`;
 }
 
 /** @deprecated use woCanonical */
@@ -212,8 +268,17 @@ export function normalizeWo(raw: string): string {
   return woCanonical(raw);
 }
 
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
 export function parseCompletedDate(raw: string | null | undefined): string | null {
-  const s = String(raw ?? "").trim();
+  const s = String(raw ?? "")
+    .trim()
+    // CSV text the spreadsheet library leaves alone: "Mon 10/19/2026", "Oct 19, 2026 3:45 PM".
+    .replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s+/i, "")
+    .replace(/^([a-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})/i, (all, mon: string, d: string, y: string) => {
+      const m = MONTHS.indexOf(mon.toLowerCase()) + 1;
+      return m ? `${m}/${d}/${y}` : all;
+    });
   if (!s) return null;
   const iso = s.match(/^(\d{4}-\d{2}-\d{2})/);
   if (iso) return iso[1];
@@ -238,17 +303,28 @@ export function statusKey(raw: string): string {
   return raw.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
 }
 
-export function translateStatus(
+/**
+ * The status the import writes on this board — the preview and every apply path use it.
+ * current = the ticket's status today (null for a new ticket).
+ */
+export function boardStatus(
+  board: CorrigoBoard,
   raw: string | null,
   completedAt: string | null,
-): { status: string | null; unmapped: string | null } {
+  current: string | null,
+): { status: string; unmapped: string | null; note: string | null } {
   const text = (raw ?? "").trim();
-  if (!text) {
-    return { status: completedAt ? "Completed" : "Open", unmapped: null };
-  }
-  const mapped = CORRIGO_STATUS[statusKey(text)];
-  if (mapped) return { status: mapped, unmapped: null };
-  return { status: null, unmapped: text };
+  if (!text && completedAt) return boardStatus(board, "completed", null, current);
+  const fallback = current || NEW_TICKET_STATUS[board];
+  const keeps = `${current ? "keeps" : "opens as"} ${fallback}`;
+  if (!text) return { status: fallback, unmapped: null, note: `no status in file → ${keeps}` };
+  const key = statusKey(text);
+  const row = Object.hasOwn(CORRIGO_STATUS, key) ? CORRIGO_STATUS[key] : undefined;
+  if (!row) return { status: fallback, unmapped: text, note: `unmapped: ${text} → ${keeps}` };
+  if (board === "install" && current === "Installed") return { status: "Installed", unmapped: null, note: null };
+  const mapped = board === "pm" ? row.pm : board === "install" ? row.install : row.service;
+  if (mapped) return { status: mapped, unmapped: null, note: null };
+  return { status: fallback, unmapped: null, note: `${text} has no ${board === "pm" ? "PM" : "install"} status → ${keeps}` };
 }
 
 export function detectBoard(hints: {
@@ -272,6 +348,21 @@ export function boardLabel(board: CorrigoBoard): string | null {
   return null;
 }
 
+
+/**
+ * Why an imported ticket goes on the For Review list, or null. A ticket the import created is always
+ * listed, even closed, so it can be found from there whichever board it went to.
+ */
+export function corrigoReviewReason(row: {
+  created: boolean;
+  closed: boolean;
+  wrapRepeat: boolean;
+}): "open" | "wrap" | "created" | null {
+  if (row.wrapRepeat) return "wrap";
+  if (!row.closed) return "open";
+  if (row.created) return "created";
+  return null;
+}
 
 /** Same account, empty, or Walk-In — safe to fold onto one ticket. */
 export function customersCompatible(
@@ -299,10 +390,13 @@ export function preferredImportCustomer(
   return file || existing;
 }
 
+/** Report title / parameter rows can sit above the header (SSRS exports). */
+const HEADER_SCAN_ROWS = 15;
+
 export function findHeaderRow(matrix: string[][]): number {
   let best = 0;
   let bestScore = -1;
-  const limit = Math.min(matrix.length, 5);
+  const limit = Math.min(matrix.length, HEADER_SCAN_ROWS);
   for (let i = 0; i < limit; i++) {
     const cols = mapHeaderRow(matrix[i] ?? []);
     const score = Object.keys(cols).length + (cols.wo != null ? 3 : 0);
@@ -317,10 +411,18 @@ export function findHeaderRow(matrix: string[][]): number {
 export function mapHeaderRow(row: string[]): Partial<Record<CorrigoCol, number>> {
   const cols: Partial<Record<CorrigoCol, number>> = {};
   row.forEach((cell, i) => {
-    const key = HEADER_KEYS[normalizeHeader(cell)];
+    const norm = normalizeHeader(cell);
+    const key = HEADER_KEYS[norm] ?? CORRIGO_TEXTBOX_HEADERS[norm];
     if (key && cols[key] == null) cols[key] = i;
   });
+  // "Operational Status" wins over a plain "Status" column wherever it sits.
+  const op = row.findIndex((c) => normalizeHeader(c) === "operational status");
+  if (op >= 0) cols.status = op;
   return cols;
+}
+
+function withoutBlanks<T extends object>(o: T): Partial<T> {
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v != null)) as Partial<T>;
 }
 
 function cell(row: string[], idx: number | undefined): string {
@@ -328,16 +430,46 @@ function cell(row: string[], idx: number | undefined): string {
   return String(row[idx] ?? "").trim();
 }
 
-export function parseCorrigoMatrix(matrix: string[][]): {
+export type CorrigoParse = {
   skipped: number;
   records: CorrigoRecord[];
-} {
-  if (!matrix.length) return { skipped: 0, records: [] };
+  /** Which file header fed each field, e.g. { wo: "TextBox_12" }. */
+  columns: Partial<Record<CorrigoCol, string>>;
+  /** Status / completed-date columns the file doesn't have. */
+  missing: CorrigoCol[];
+};
+
+function headerProblem(row: string[]): string {
+  const found = row.map((c) => String(c ?? "").trim()).filter(Boolean);
+  const list = found.length ? found.slice(0, 40).join(", ") + (found.length > 40 ? ", …" : "") : "(none)";
+  const textBox = found.some((h) => TEXTBOX.test(h));
+  return (
+    `Could not find the ${COL_LABEL.wo} column. Expected headers: ` +
+    (Object.keys(COL_LABEL) as CorrigoCol[]).map((c) => COL_LABEL[c]).join(", ") +
+    `. Headers found: ${list}.` +
+    (textBox
+      ? " This is Corrigo's CSV export, which names columns TextBox_##. Export the report to Excel, or send the TextBox list so it can be added."
+      : "")
+  );
+}
+
+export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
+  if (!matrix.length) return { skipped: 0, records: [], columns: {}, missing: [] };
   const headerAt = findHeaderRow(matrix);
-  const cols = mapHeaderRow(matrix[headerAt] ?? []);
+  const header = matrix[headerAt] ?? [];
+  const cols = mapHeaderRow(header);
   if (cols.wo == null) {
-    throw new Error("Could not find an ST# column. Headers can sit on row 1 or 2.");
+    // Show the row that looks most like a header: TextBox names, else the first filled row.
+    const top = matrix.slice(0, HEADER_SCAN_ROWS);
+    const shown =
+      top.find((r) => r.some((c) => TEXTBOX.test(String(c ?? "").trim()))) ??
+      top.find((r) => r.some((c) => String(c ?? "").trim())) ??
+      header;
+    throw new Error(headerProblem(shown));
   }
+  const columns: Partial<Record<CorrigoCol, string>> = {};
+  for (const [k, i] of Object.entries(cols) as [CorrigoCol, number][]) columns[k] = String(header[i] ?? "").trim();
+  const missing = NEEDED_COLS.filter((c) => cols[c] == null);
   let skipped = 0;
   const byKey = new Map<string, CorrigoRecord>();
   for (let i = headerAt + 1; i < matrix.length; i++) {
@@ -345,25 +477,57 @@ export function parseCorrigoMatrix(matrix: string[][]): {
     if (row.every((c) => !String(c ?? "").trim())) continue;
     const rawWo = cell(row, cols.wo);
     const matchKey = woMatchKey(rawWo);
-    if (!matchKey) {
+    // Blank or not a number ("Total", "Subtotal"): not a ticket line.
+    if (!/^\d+$/.test(matchKey)) {
       skipped += 1;
       continue;
     }
-    byKey.set(matchKey, {
+    const rec: CorrigoRecord = {
       rawWo,
       matchKey,
       canonicalWo: woCanonical(rawWo),
       technician: cell(row, cols.technician) || null,
       completedAt: parseCompletedDate(cell(row, cols.completedAt)),
+      completedRaw: cell(row, cols.completedAt) || null,
       workDone: cell(row, cols.workDone) || null,
       statusRaw: cell(row, cols.status) || null,
       issue: cell(row, cols.issue) || null,
       customer: cell(row, cols.customer) || null,
       po: cell(row, cols.po) || null,
       callType: cell(row, cols.callType) || null,
-    });
+    };
+    const prev = byKey.get(matchKey);
+    // Several lines for one ST# (cost lines, subtotals): a later non-blank cell wins; a blank never wipes one.
+    byKey.set(matchKey, prev ? { ...prev, ...withoutBlanks(rec) } : rec);
   }
-  return { skipped, records: [...byKey.values()] };
+  return { skipped, records: [...byKey.values()], columns, missing };
+}
+
+/**
+ * The completed date an import writes on an existing ticket. Corrigo's date wins, except on a ticket billed
+ * on a Sales Order: its date picked the billing week and NetSuite already has it. A billed ticket with no date
+ * keeps none, as the update's SQL does.
+ */
+export function completedOnUpdate(
+  fileDate: string | null | undefined,
+  deskDate: string | null | undefined,
+  billedSo: string | null | undefined,
+): { value: string | null; change: "set" | "moved" | "billed" | null } {
+  const desk = deskDate || null;
+  const file = fileDate || null;
+  if (!file || file === desk) return { value: desk, change: null };
+  if (String(billedSo ?? "").trim()) return { value: desk, change: "billed" };
+  return { value: file, change: desk ? "moved" : "set" };
+}
+
+function completedNote(rec: CorrigoRecord, existing: CorrigoHit | null): string | null {
+  if (!rec.completedAt && rec.completedRaw) return `couldn't read the date "${rec.completedRaw}"`;
+  if (!existing) return null;
+  const next = completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo);
+  if (next.change === "billed") return `billed on ${String(existing.billedSo).trim()} — keeps ${existing.completedAt || "no date"}`;
+  // Billing exports pick tickets by completed date, and nothing records which exports went out.
+  if (next.change === "moved" && existing.hasCharges) return "has charges, not billed yet — check it wasn't in an earlier export";
+  return null;
 }
 
 export function matchNote(rawWo: string, canonicalWo: string, existingWo?: string | null): string | null {
@@ -385,7 +549,6 @@ export function resolvePreviewRow(
   match: { unique: CorrigoHit | null; conflicts: CorrigoHit[] },
   opts: { wrapped?: boolean } = {},
 ): CorrigoPreviewRow {
-  const translated = translateStatus(rec.statusRaw, rec.completedAt);
   const wrapped = !!opts.wrapped;
   const group = [
     ...(match.unique ? [match.unique] : []),
@@ -410,11 +573,9 @@ export function resolvePreviewRow(
     existing: existing?.board ?? null,
   });
   const oldStatus = existing?.status ?? null;
-  let newStatus: string;
-  const statusUnmapped = translated.unmapped;
-  if (translated.status) newStatus = translated.status;
-  else if (oldStatus) newStatus = oldStatus;
-  else newStatus = "Open";
+  const resolved = boardStatus(board, rec.statusRaw, rec.completedAt, oldStatus);
+  const newStatus = resolved.status;
+  const statusUnmapped = resolved.unmapped;
   const siblingIds = extras
     .filter((h) => h.board === "service" || h.board === "tlc" || h.board === existing?.board)
     .filter((h) => h.board === "service" || h.board === "tlc")
@@ -444,8 +605,13 @@ export function resolvePreviewRow(
     oldStatus,
     newStatus,
     statusUnmapped,
+    statusRaw: rec.statusRaw,
+    statusNote: resolved.note,
     technician: rec.technician,
     completedAt: rec.completedAt,
+    oldCompletedAt: existing?.completedAt ?? null,
+    completedKept: !!existing && completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo).change === "billed",
+    completedNote: completedNote(rec, existing),
     workDone: rec.workDone,
     issue: rec.issue,
     conflictIds: siblingIds.length ? siblingIds : null,
@@ -488,4 +654,73 @@ export function indexHits(hits: CorrigoHit[]): Map<string, { unique: CorrigoHit 
     out.set(key, { unique: keeper, conflicts: extras });
   }
   return out;
+}
+
+/** One sheet cell → text. Dates use the cell's own calendar day (not UTC), so a 9 PM finish stays on its day. */
+export function stringifyCell(v: unknown): string {
+  if (v == null || v === "") return "";
+  if (v instanceof Date && !Number.isNaN(v.getTime())) {
+    return `${v.getFullYear()}-${String(v.getMonth() + 1).padStart(2, "0")}-${String(v.getDate()).padStart(2, "0")}`;
+  }
+  if (typeof v === "number" && Number.isFinite(v)) {
+    if (Number.isInteger(v)) return String(v);
+    const rounded = Math.round(v);
+    if (Math.abs(v - rounded) < 1e-6) return String(rounded);
+  }
+  const s = String(v);
+  if (/^\d+\.0+$/.test(s)) return s.replace(/\.0+$/, "");
+  return s;
+}
+
+/** Vercel refuses a request or response over ~4.5 MB, and server functions add ~26% to the JSON. */
+const CORRIGO_CHUNK_BYTES = 1_500_000;
+const CORRIGO_CHUNK_ROWS = 300;
+
+export function chunkByBytes<T>(items: T[], maxBytes = CORRIGO_CHUNK_BYTES, maxItems = CORRIGO_CHUNK_ROWS): T[][] {
+  const enc = new TextEncoder();
+  const out: T[][] = [];
+  let cur: T[] = [];
+  let size = 0;
+  for (const item of items) {
+    const n = enc.encode(JSON.stringify(item)).length + 1;
+    if (cur.length && (size + n > maxBytes || cur.length >= maxItems)) {
+      out.push(cur);
+      cur = [];
+      size = 0;
+    }
+    cur.push(item);
+    size += n;
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
+export type CorrigoPreviewPart = {
+  updateCount: number;
+  createCount: number;
+  skipped: number;
+  conflictCount: number;
+  wrapCount: number;
+  unmapped: string[];
+  rows: CorrigoPreviewRow[];
+};
+
+export type CorrigoPreview = CorrigoPreviewPart & Pick<CorrigoParse, "columns" | "missing">;
+
+/** Join the per-chunk previews into one, plus what the browser learned from the header row. */
+export function mergeCorrigoPreviews(
+  parts: CorrigoPreviewPart[],
+  parsed: Pick<CorrigoParse, "skipped" | "columns" | "missing">,
+): CorrigoPreview {
+  return {
+    updateCount: parts.reduce((n, p) => n + p.updateCount, 0),
+    createCount: parts.reduce((n, p) => n + p.createCount, 0),
+    skipped: parsed.skipped + parts.reduce((n, p) => n + p.skipped, 0),
+    conflictCount: parts.reduce((n, p) => n + p.conflictCount, 0),
+    wrapCount: parts.reduce((n, p) => n + p.wrapCount, 0),
+    unmapped: [...new Set(parts.flatMap((p) => p.unmapped))],
+    rows: parts.flatMap((p) => p.rows),
+    columns: parsed.columns,
+    missing: parsed.missing,
+  };
 }

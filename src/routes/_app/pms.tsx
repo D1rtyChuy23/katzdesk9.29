@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createPm, listPms } from "@/lib/ops/api";
 import { isOpenPm } from "@/lib/ops/ticket-status";
+import { withWoMatches } from "@/lib/ops/wo-search";
 import { formatShortDate } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
@@ -47,9 +48,10 @@ function Page() {
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((p) =>
-        [p.customer, p.equipment, p.style, p.technician].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
+        [p.customer, p.equipment, p.style, p.technician, p.wo].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
+    list = withWoMatches(list, pms.data ?? [], q);
     return sortDesk(list, sort, {
       date: (p) => p.projected ?? p.received,
       name: (p) => p.customer,
