@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { emptyDraft } from "../src/lib/ops/spec-schema.ts";
 import { groupFormRows } from "../src/lib/ops/install-form.ts";
@@ -136,10 +137,33 @@ test("a unit with its own plug that isn't the spec's takes neither voltage nor a
   assert.deepEqual([samePlug.voltage, samePlug.amps, samePlug.plug], ["208V", "30A", "nema 6-30p"]);
 });
 
+test("plugs are compared by NEMA code, and a spec with no plug clashes with no unit", () => {
+  const unit = (plug) => ({ model: "X", voltage: "", plug, amps: "" });
+  const bits = (u) => [u.voltage, u.amps, u.plug];
+  const twist = { model: "X", manufacturer: "Bunn", voltage: "208V", amps: "30A", plug: "NEMA L6-30 twist-lock" };
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30P"), twist)), ["208V", "30A", "L6-30P"]);
+  const twenty = { model: "X", manufacturer: "Bunn", voltage: "120V", amps: "20A", plug: "NEMA 5-20" };
+  assert.deepEqual(bits(withSpecOutlet(unit("5-20P"), twenty)), ["120V", "20A", "5-20P"]);
+  const noPlug = { model: "X", manufacturer: "Bunn", voltage: "120V", amps: "15A", plug: "" };
+  assert.deepEqual(bits(withSpecOutlet(unit("NEMA 5-15P"), noPlug)), ["120V", "15A", "NEMA 5-15P"]);
+  const thirty = { model: "X", manufacturer: "Bunn", voltage: "208V", amps: "30A", plug: "6-30P" };
+  assert.deepEqual(bits(withSpecOutlet(unit("5-15P"), thirty)), ["", "", "5-15P"]);
+  assert.deepEqual(bits(withSpecOutlet(unit("L6-30P"), { ...twist, plug: "NEMA 6-30" })), ["", "", "L6-30P"]);
+});
+
 test("a hand entry on a model that already has a sheet opens that sheet", () => {
   const sheetBooks = [{ sheetId: 4, bookId: null }, { sheetId: 3, bookId: 9 }];
   assert.equal(tiedSheetId(sheetBooks, 9), 3);
   assert.equal(tiedSheetId(sheetBooks, 8), null);
+});
+
+test("opening a tied sheet clears the Library search, so the Edit form isn't filtered out", () => {
+  const src = readFileSync(new URL("../src/routes/_app/library.tsx", import.meta.url), "utf8");
+  const start = src.indexOf("function editTiedSheet(");
+  assert.ok(start >= 0);
+  const body = src.slice(start, src.indexOf("\n  }\n", start));
+  assert.match(body, /setQ\(""\);/);
+  assert.ok(body.indexOf('setQ("")') < body.indexOf("navigate("), "search is cleared before the sheet opens");
 });
 
 test("tiles, admin order, and the summary line", () => {

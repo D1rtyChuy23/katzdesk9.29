@@ -6,6 +6,7 @@
  * extracted value is new (the model was blank) or already the same.
  */
 import type { Kv, Requirements, SpecSheetDraft } from "./spec-schema.ts";
+import { nemaCode } from "./spec-defaults.ts";
 import { sameWarehouseModel } from "./warehouse-serial.ts";
 
 export const SPEC_FIELDS = [
@@ -228,12 +229,14 @@ export function outletForModel(model: string, specs: SpecOutlet[]): SpecOutlet |
 /**
  * Blank voltage is filled from the spec. Amps and plug come along only when the unit has no voltage, or it matches.
  * A unit with its own plug that isn't the spec's is on another outlet: it takes neither voltage nor amps from the spec.
+ * Plugs are compared by NEMA code ("L6-30P" is "NEMA L6-30 twist-lock"), and a spec with no plug clashes with none.
  */
 export function withSpecOutlet<T extends { model: string; voltage: string; plug: string; amps?: string }>(unit: T, spec: SpecOutlet | undefined): T {
   if (!spec) return unit;
   const ownVoltage = unit.voltage.trim();
   const ownPlug = unit.plug.trim();
-  const plugMatch = !ownPlug || fold(ownPlug) === fold(spec.plug);
+  const plugCode = (p: string) => nemaCode(p) ?? fold(p);
+  const plugMatch = !ownPlug || !spec.plug.trim() || fold(ownPlug) === fold(spec.plug) || plugCode(ownPlug) === plugCode(spec.plug);
   const voltsMatch = plugMatch && (!ownVoltage || fold(ownVoltage) === fold(spec.voltage));
   return {
     ...unit,

@@ -297,6 +297,7 @@ function Page() {
   function editTiedSheet(bookId: number): boolean {
     const sheetId = tiedSheetId(lib.data?.sheetBooks ?? [], bookId);
     if (sheetId == null) return false;
+    setQ("");
     setOpenMaker(null);
     setMode("edit");
     void navigate({ to: "/library", search: { book: bookId, open: sheetId } });
