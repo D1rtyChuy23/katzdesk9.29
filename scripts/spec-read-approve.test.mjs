@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { approveOne, specReadRows } = await import("../src/lib/ops/spec-read-api.ts");
+const { approveExact, approveOne, specReadRows } = await import("../src/lib/ops/spec-read-api.ts");
 
 const pg = new PGlite();
 const dir = new URL("../migrations/", import.meta.url);
@@ -100,4 +100,18 @@ test("an MPN filled from a read is cleaned like one typed in", async () => {
   const { book, file } = await bookWithRead("BUNN CWTF35", "BUNN", null, { voltage: "120V", mpn: long });
   await approveOne(sql, file, []);
   assert.equal((await sql.query("select mpn from library_books where id = $1", [book]))[0].mpn, long.slice(0, 60));
+});
+
+test("approve all exact skips a refused sheet, names it, and still approves the rest", async () => {
+  await sql.query("update spec_reads set status = 'read' where status = 'needs_review'");
+  const exact = JSON.stringify([{ key: "voltage", label: "Voltage", oldValue: "", newValue: "120V", kind: "fill" }]);
+  const moved = await bookWithRead("Curtis G4 Single", "Curtis", null, { voltage: "120V" });
+  const fine = await bookWithRead("Curtis G4 Twin", "Curtis", null, { voltage: "120V" });
+  await sql.query("update spec_reads set changes = $2::jsonb where file_id = any($1::int[])", [[moved.file, fine.file], exact]);
+  const elsewhere = (await sql.query("insert into library_books (title, manufacturer) values ('Curtis G4 Triple', 'Curtis') returning id"))[0].id;
+  await sql.query("update library_files set book_id = $2 where id = $1", [moved.file, elsewhere]);
+  const result = await approveExact(sql);
+  assert.equal(result.approved, 1);
+  assert.deepEqual(result.skipped, ["Curtis G4 Single.pdf: This sheet was moved to another model. Read it again."]);
+  assert.equal((await sql.query("select status from spec_reads where file_id = $1", [fine.file]))[0].status, "read");
 });

@@ -691,6 +691,16 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
             select 1 from install_inspection_items k
              where k.install_id = d.install_id and k.equipment_id = $1 and k.category = d.category
           )
+     ), answered as (
+       -- A kept check that was never answered takes the dropped unit's answer, notes joined.
+       update install_inspection_items k
+          set status = d.status,
+              notes = nullif(concat_ws(' / ', nullif(btrim(k.notes), ''), nullif(btrim(d.notes), '')), ''),
+              updated_at = now()
+         from install_inspection_items d
+        where k.equipment_id = $1 and d.equipment_id = $2
+          and k.install_id = d.install_id and k.category = d.category
+          and k.status = 'Not inspected' and d.status <> 'Not inspected'
      ), links as (
        update install_inspection_units k
           set note = coalesce(k.note, d.note),

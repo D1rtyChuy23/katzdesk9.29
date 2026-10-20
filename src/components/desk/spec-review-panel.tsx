@@ -52,6 +52,7 @@ export function SpecReviewPanel({
     mutationFn: () => approveExactSpecReads(),
     onSuccess: (r) => {
       toast.success(r.approved ? `Approved ${r.approved}` : "Nothing was an exact match");
+      if (r.skipped.length) toast.error(`Not approved: ${r.skipped.join(" · ")}`);
       onChanged();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not approve those sheets"),

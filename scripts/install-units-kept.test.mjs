@@ -127,6 +127,39 @@ test("Merge into the serial row keeps the pre-inspection result and does not add
   }
 });
 
+test("Merge gives a kept check that was never answered the dropped unit's answer", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Cheeks Coffee", "Bunn ITCB");
+    const imported = (
+      await pg.query(
+        "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Cheeks Coffee', $1, 'Bunn ITCB-DV', 'ITCB075996', 'itcb075996') returning id",
+        [ITCB_CATALOG],
+      )
+    ).rows[0].id;
+    const view = await readInspection(sql, id);
+    const unit = view.machines.find((m) => !m.serial);
+    const category = unit.items[0].category;
+    await pg.query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2) on conflict do nothing", [id, imported]);
+    await pg.query("insert into install_inspection_items (install_id, equipment_id, category, status, notes) values ($1, $2, $3, 'Not inspected', 'Ask the manager')", [
+      id,
+      imported,
+      category,
+    ]);
+    await pg.query("insert into install_inspection_items (install_id, equipment_id, category, status, notes) values ($1, $2, $3, 'Pass', '20A outlet')", [
+      id,
+      unit.equipmentId,
+      category,
+    ]);
+
+    await mergeEquipmentUnits(sql, imported, unit.equipmentId);
+    const rows = (await pg.query("select equipment_id, status, notes from install_inspection_items where install_id = $1 and category = $2", [id, category])).rows;
+    assert.deepEqual(rows, [{ equipment_id: imported, status: "Pass", notes: "Ask the manager / 20A outlet" }]);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("Merge puts the kept serial on the install in place of the dropped one", async () => {
   const { pg, sql } = await fresh();
   try {

@@ -416,21 +416,30 @@ export const approveSpecRead = createServerFn({ method: "POST" })
 /** Approve every review that only fills blanks or matches what's already saved. */
 export const approveExactSpecReads = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ approved: number }> => {
+  .handler(async ({ context }): Promise<{ approved: number; skipped: string[] }> => {
     const sql = await ready();
     await requireAdmin(sql, context.userId);
-    const rows = await sql.query<{ file_id: number; changes: unknown }>(
-      "select file_id, changes from spec_reads where status = 'needs_review'",
-    );
-    let approved = 0;
-    for (const row of rows) {
-      const changes = asChanges(row.changes);
-      if (!isExact(changes)) continue;
+    return approveExact(sql);
+  });
+
+/** Approve each exact review. One that is refused (moved, tied elsewhere, MPN taken) is skipped and named, and the rest still go. */
+export async function approveExact(sql: Sql): Promise<{ approved: number; skipped: string[] }> {
+  const rows = await sql.query<{ file_id: number; changes: unknown; name: string }>(
+    "select r.file_id, r.changes, f.name from spec_reads r join library_files f on f.id = r.file_id where r.status = 'needs_review' order by r.file_id",
+  );
+  let approved = 0;
+  const skipped: string[] = [];
+  for (const row of rows) {
+    if (!isExact(asChanges(row.changes))) continue;
+    try {
       await approveOne(sql, Number(row.file_id), []);
       approved += 1;
+    } catch (e) {
+      skipped.push(`${row.name}: ${e instanceof Error ? e.message : String(e)}`);
     }
-    return { approved };
-  });
+  }
+  return { approved, skipped };
+}
 
 /** Copy the model's MPN onto an untied spec sheet, then read it. */
 export const tieAndReadSpec = createServerFn({ method: "POST" })
@@ -683,11 +692,17 @@ export async function keepOneCopy(sql: Sql, keepId: number, removeIds: number[])
       return f === keep || (f.section === keep.section && !!book && (book.id === main.id || mainChipFor(book, books)?.id === main.id));
     });
   if (!safe) throw new Error("Store this file once on the main chip first, so the other models keep it.");
-  const rows = await sql.query<{ id: number }>(
-    "delete from library_files where id = any($1::int[]) and id <> $2 and section <> 'training' returning id",
+  // A model that had hidden the kept copy (it showed twice) shows it again once its own copy is gone.
+  const rows = await sql.query<{ removed: number }>(
+    `with gone as (
+       delete from library_files where id = any($1::int[]) and id <> $2 and section <> 'training' returning id, book_id
+     ), shown as (
+       delete from library_file_hidden h using gone where h.file_id = $2 and h.book_id = gone.book_id
+     )
+     select count(*)::int as removed from gone`,
     [ids, keepId],
   );
-  return { removed: rows.length };
+  return { removed: rows[0]?.removed ?? 0 };
 }
 
 export const keepOneLibraryCopy = createServerFn({ method: "POST" })

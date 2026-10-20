@@ -93,3 +93,15 @@ test("keep one refuses when no copy is on the main chip, and works when the vari
     [keep],
   );
 });
+
+test("keep one shows the kept copy again on a variation that had hidden it", async () => {
+  const sql = await freshDb();
+  const main = await book(sql, "BUNN AXIOM", "BUNN");
+  const twin = await book(sql, "BUNN AXIOM Twin", "BUNN");
+  const keep = await file(sql, main, "manuals", "BUNN AXIOM - Installation 44000.0000.pdf", 6000, "44000.0000.pdf");
+  const own = await file(sql, twin, "manuals", "BUNN AXIOM Twin - Installation 44000.0000.pdf", 6000, "44000.0000.pdf");
+  // The variation hid the main chip's copy because it showed twice.
+  await sql.query("insert into library_file_hidden (file_id, book_id) values ($1, $2)", [keep, twin]);
+  assert.deepEqual(await keepOneCopy(sql, keep, [keep, own]), { removed: 1 });
+  assert.equal((await sql.query("select 1 from library_file_hidden where file_id = $1 and book_id = $2", [keep, twin])).length, 0);
+});
