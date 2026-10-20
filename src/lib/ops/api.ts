@@ -1604,7 +1604,14 @@ export const getHandoff = createServerFn({ method: "GET" }).middleware([deskMidd
 		pendingHandoffs: uniquePendingHandoffs(liveDeals)
 	};
 });
-export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => d).handler(async ({ data }): Promise<SearchHit[]> => {
+/** A sales rep's test for a ticket's customer, as listJobs and listPms use it; null when this person sees every account. */
+async function repCustomerScope(sql: any, userId: string): Promise<((customer: string | null) => boolean) | null> {
+	const scope = await salesRepScope(sql, userId);
+	if (!scope) return null;
+	const marks = await loadAccountMarks(sql);
+	return (customer) => scope(accountRepFor(marks, customer));
+}
+export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => d).handler(async ({ data, context }: any): Promise<SearchHit[]> => {
 	const sql = await ready();
 	const q = data.q.trim();
 	if (q.length < 2) return [];
@@ -1612,7 +1619,7 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 	const hits: SearchHit[] = [];
 	// A WO number finds its ticket on every board, in any status, ahead of the text matches.
 	const woKey = woSearchKey(q);
-	if (woKey) for (const w of await findWoEverywhere(sql, woKey)) hits.push({
+	if (woKey) for (const w of await findWoEverywhere(sql, woKey, await repCustomerScope(sql, context.userId))) hits.push({
 		entityType: w.entityType,
 		id: w.id,
 		title: w.customer ?? w.wo,
@@ -1718,9 +1725,11 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 	}).slice(0, 28);
 });
 /** Every ticket with this WO number, on any board and in any status (the Tickets page's "also on" line). */
-export const findWoTickets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => z.object({ q: z.string().max(100) }).parse(d)).handler(async ({ data }): Promise<WoBoardHit[]> => {
+export const findWoTickets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => z.object({ q: z.string().max(100) }).parse(d)).handler(async ({ data, context }: any): Promise<WoBoardHit[]> => {
 	const key = woSearchKey(data.q);
-	return key ? findWoEverywhere(await ready(), key) : [];
+	if (!key) return [];
+	const sql = await ready();
+	return findWoEverywhere(sql, key, await repCustomerScope(sql, context.userId));
 });
 export const handoffDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number }) => d).handler(async ({ data }: any) => {
 	await maybeHandoffInstall(await ready(), data.dealId);

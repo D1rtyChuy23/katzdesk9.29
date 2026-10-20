@@ -55,6 +55,30 @@ test("findWoEverywhere returns the WO on every board in any status, with where i
   );
 });
 
+test("a sales rep's WO lookup leaves out tickets, TLCs and PMs on other accounts, as their lists do; installs stay", async () => {
+  const pg = new PGlite();
+  const dir = new URL("../migrations/", import.meta.url);
+  for (const name of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, dir), "utf8"));
+  const sql = { query: async (text, params) => (await pg.query(text, params)).rows };
+  await pg.query("insert into service_jobs (kind, call_id, customer, wo, status) values ('service', 'SC-1', 'Mine', 'WO-0857', 'Open')");
+  await pg.query("insert into service_jobs (kind, call_id, customer, wo, status) values ('tlc', 'TLC-1', 'Theirs', 'WO-0857', 'Open')");
+  await pg.query("insert into pm_jobs (customer, status, wo) values ('Theirs', 'Scheduled', 'WO-0857')");
+  await pg.query("insert into pm_jobs (customer, status, wo) values ('Mine', 'Scheduled', 'WO-0857')");
+  await pg.query("insert into installs (customer, equip_status, wo) values ('Theirs', 'Not Ready', 'WO-0857')");
+  const mine = (customer) => customer === "Mine";
+  assert.deepEqual(
+    (await findWoEverywhere(sql, "857", mine)).map((h) => `${h.entityType}:${h.customer}`),
+    ["service:Mine", "pm:Mine", "install:Theirs"],
+  );
+  assert.equal((await findWoEverywhere(sql, "857", null)).length, 5);
+  // Both WO lookups (the top search and the Tickets page's "is on" line) pass the rep's scope.
+  const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
+  const calls = [...api.matchAll(/findWoEverywhere\(([^\n]*)/g)].map((m) => m[1]);
+  assert.equal(calls.length, 2);
+  for (const call of calls) assert.match(call, /repCustomerScope\(sql, context\.userId\)/);
+  assert.match(api, /async function repCustomerScope[\s\S]{0,200}salesRepScope\(sql, userId\)[\s\S]{0,200}accountRepFor\(marks, customer\)/);
+});
+
 test("a ticket the Corrigo import created is listed for review even when it is already closed", () => {
   assert.equal(corrigoReviewReason({ created: true, closed: true, wrapRepeat: false }), "created");
   assert.equal(corrigoReviewReason({ created: false, closed: true, wrapRepeat: false }), null);

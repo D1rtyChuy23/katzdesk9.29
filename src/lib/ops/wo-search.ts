@@ -42,10 +42,14 @@ export type WoBoardHit = {
 /** SQL: the digits of a stored WO with leading zeros dropped — the same key as woMatchKey for WO-#### values. */
 const WO_KEY_SQL = (col: string) => `ltrim(regexp_replace(coalesce(${col}, ''), '[^0-9]', '', 'g'), '0')`;
 
-/** Every ticket carrying this WO key: service, TLC, PM and install boards, open or closed. */
+/**
+ * Every ticket carrying this WO key: service, TLC, PM and install boards, open or closed. With `inScope` (a sales
+ * rep's accounts), tickets, TLCs and PMs on other accounts are left out, as listJobs and listPms do; installs stay.
+ */
 export async function findWoEverywhere(
   sql: { query: <R = Record<string, unknown>>(text: string, params?: unknown[]) => Promise<R[]> },
   key: string,
+  inScope?: ((customer: string | null) => boolean) | null,
 ): Promise<WoBoardHit[]> {
   const k = key.replace(/^0+/, "");
   if (!k) return [];
@@ -62,9 +66,10 @@ export async function findWoEverywhere(
     [k],
   );
   const exact = (wo: string) => woMatchKey(wo) === k;
+  const shown = (r: { wo: string; customer: string | null }) => exact(r.wo) && (!inScope || inScope(r.customer));
   return [
-    ...jobs.filter((r) => exact(r.wo)).map((r) => ({ entityType: (r.kind === "tlc" ? "tlc" : "service") as "service" | "tlc", id: r.id, customer: r.customer, wo: r.wo, status: r.status })),
-    ...pms.filter((r) => exact(r.wo)).map((r) => ({ entityType: "pm" as const, id: r.id, customer: r.customer, wo: r.wo, status: r.status })),
+    ...jobs.filter(shown).map((r) => ({ entityType: (r.kind === "tlc" ? "tlc" : "service") as "service" | "tlc", id: r.id, customer: r.customer, wo: r.wo, status: r.status })),
+    ...pms.filter(shown).map((r) => ({ entityType: "pm" as const, id: r.id, customer: r.customer, wo: r.wo, status: r.status })),
     ...installs.filter((r) => exact(r.wo)).map((r) => ({
       entityType: "install" as const,
       id: r.id,

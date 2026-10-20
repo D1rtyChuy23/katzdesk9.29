@@ -203,7 +203,7 @@ async function logCorrigo(
 function completedLog(date: ReturnType<typeof completedOnUpdate>, desk: string | null, file: string | null): string {
   if (date.change === "moved") return ` · completed ${desk} → ${file}`;
   if (date.change === "set") return ` · completed ${file}`;
-  if (date.change === "billed") return ` · completed kept ${desk} (billed; Corrigo says ${file})`;
+  if (date.change === "billed") return ` · completed kept ${desk || "no date"} (billed; Corrigo says ${file})`;
   return "";
 }
 

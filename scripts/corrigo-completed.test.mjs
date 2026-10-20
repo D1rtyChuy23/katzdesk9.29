@@ -119,3 +119,37 @@ test("a Sales Order saved between preview and apply keeps the ticket's date", as
   await applyCorrigoRows(sql, preview.rows, "Chuy");
   assert.equal(await dateOf(sql, id), "2026-10-12");
 });
+
+test("a billed ticket with no completed date keeps none: the preview, the activity log and the database agree", async () => {
+  assert.deepEqual(corrigo.completedOnUpdate("2026-10-19", null, "SO-5001"), { value: null, change: "billed" });
+  const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
+  const sql = await freshDb();
+  const id = await ticket(sql, "WO-0775", "SO-5001");
+  await sql.query("update service_jobs set completed_at = null where id = $1", [id]);
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Date/Time Completed"], ["0775", "Completed", "10/19/2026"]]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.equal(preview.rows[0].completedNote, "billed on SO-5001 — keeps no date");
+  assert.equal(preview.rows[0].completedKept, true);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.equal(await dateOf(sql, id), null);
+  assert.match(await lastLog(sql, id), /completed kept no date \(billed; Corrigo says 2026-10-19\)/);
+});
+
+test("a billed row shows the date it keeps, with no arrow", () => {
+  assert.equal(resolvePreviewRow(rec(), { unique: hit({ billedSo: "SO-5001" }), conflicts: [] }).completedKept, true);
+  assert.equal(resolvePreviewRow(rec(), { unique: hit(), conflicts: [] }).completedKept, false);
+  assert.equal(resolvePreviewRow(rec(), { unique: null, conflicts: [] }).completedKept, false);
+  const ui = readFileSync(new URL("../src/components/desk/corrigo-import.tsx", import.meta.url), "utf8");
+  assert.match(ui, /\{r\.completedKept\s*\?\s*r\.oldCompletedAt \|\| "—"\s*:/);
+});
+
+test("a chunk that fails after others saved still sends their tickets to For Review and says at least N rows were saved", () => {
+  const ui = readFileSync(new URL("../src/components/desk/corrigo-import.tsx", import.meta.url), "utf8");
+  const start = ui.indexOf("res = await applyCorrigoImport(");
+  const caught = ui.slice(ui.indexOf("} catch (e) {", start), ui.indexOf("out.updated += res.updated;", start));
+  assert.ok(caught.length > 0, "the apply loop catches a failed chunk");
+  const reported = caught.indexOf("onImported(out.review);");
+  assert.ok(reported > 0, "onImported(out.review) runs when a chunk fails");
+  assert.ok(reported < caught.indexOf("throw new Error("), "before the error is thrown");
+  assert.match(caught, /Stopped after at least \$\{out\.updated \+ out\.created\} rows were saved/);
+});

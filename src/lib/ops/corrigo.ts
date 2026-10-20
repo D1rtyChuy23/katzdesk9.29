@@ -159,6 +159,8 @@ export type CorrigoPreviewRow = {
   completedAt: string | null;
   /** The ticket's completed date before this import. */
   oldCompletedAt: string | null;
+  /** Billed on a Sales Order: the import keeps oldCompletedAt whatever Corrigo says. */
+  completedKept: boolean;
   completedNote: string | null;
   workDone: string | null;
   issue: string | null;
@@ -503,7 +505,8 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
 
 /**
  * The completed date an import writes on an existing ticket. Corrigo's date wins, except on a ticket billed
- * on a Sales Order: its date picked the billing week and NetSuite already has it.
+ * on a Sales Order: its date picked the billing week and NetSuite already has it. A billed ticket with no date
+ * keeps none, as the update's SQL does.
  */
 export function completedOnUpdate(
   fileDate: string | null | undefined,
@@ -513,7 +516,7 @@ export function completedOnUpdate(
   const desk = deskDate || null;
   const file = fileDate || null;
   if (!file || file === desk) return { value: desk, change: null };
-  if (desk && String(billedSo ?? "").trim()) return { value: desk, change: "billed" };
+  if (String(billedSo ?? "").trim()) return { value: desk, change: "billed" };
   return { value: file, change: desk ? "moved" : "set" };
 }
 
@@ -521,7 +524,7 @@ function completedNote(rec: CorrigoRecord, existing: CorrigoHit | null): string 
   if (!rec.completedAt && rec.completedRaw) return `couldn't read the date "${rec.completedRaw}"`;
   if (!existing) return null;
   const next = completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo);
-  if (next.change === "billed") return `billed on ${String(existing.billedSo).trim()} — keeps ${existing.completedAt}`;
+  if (next.change === "billed") return `billed on ${String(existing.billedSo).trim()} — keeps ${existing.completedAt || "no date"}`;
   // Billing exports pick tickets by completed date, and nothing records which exports went out.
   if (next.change === "moved" && existing.hasCharges) return "has charges, not billed yet — check it wasn't in an earlier export";
   return null;
@@ -607,6 +610,7 @@ export function resolvePreviewRow(
     technician: rec.technician,
     completedAt: rec.completedAt,
     oldCompletedAt: existing?.completedAt ?? null,
+    completedKept: !!existing && completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo).change === "billed",
     completedNote: completedNote(rec, existing),
     workDone: rec.workDone,
     issue: rec.issue,

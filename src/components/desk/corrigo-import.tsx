@@ -83,8 +83,10 @@ export function CorrigoImportButton({
         } catch (e) {
           const why = e instanceof Error ? e.message : "Could not import";
           if (!out.updated && !out.created) throw e;
+          // Tickets the earlier chunks created still go to For Review. Rows the failed chunk wrote first aren't counted.
+          onImported(out.review);
           throw new Error(
-            `Stopped after ${out.updated + out.created} rows were saved: ${why} Importing the same file again is safe — rows match by WO.`,
+            `Stopped after at least ${out.updated + out.created} rows were saved: ${why} Importing the same file again is safe — rows match by WO.`,
           );
         }
         out.updated += res.updated;
@@ -472,9 +474,11 @@ function PreviewBody({
                   <td className="px-3 py-2 align-top">{r.technician || "—"}</td>
                   <td className="px-3 py-2 align-top">
                     <span className="whitespace-nowrap">
-                      {r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
-                        ? `${r.oldCompletedAt} → ${r.completedAt}`
-                        : r.completedAt || r.oldCompletedAt || "—"}
+                      {r.completedKept
+                        ? r.oldCompletedAt || "—"
+                        : r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
+                          ? `${r.oldCompletedAt} → ${r.completedAt}`
+                          : r.completedAt || r.oldCompletedAt || "—"}
                     </span>
                     {r.completedNote ? (
                       <span className="mt-0.5 block max-w-[14rem] text-[11px] text-warning">{r.completedNote}</span>
