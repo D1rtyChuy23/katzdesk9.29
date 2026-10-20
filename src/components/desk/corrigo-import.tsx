@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { applyCorrigoImport, previewCorrigoImport } from "@/lib/ops/corrigo-import";
-import type { CorrigoApplyResult, CorrigoPreview } from "@/lib/ops/corrigo-import";
-import { isWalkIn, type CorrigoPreviewRow } from "@/lib/ops/corrigo";
+import type { CorrigoApplyResult } from "@/lib/ops/corrigo-import";
+import {
+  chunkByBytes,
+  COL_LABEL,
+  isWalkIn,
+  mergeCorrigoPreviews,
+  type CorrigoPreview,
+  type CorrigoPreviewRow,
+} from "@/lib/ops/corrigo";
+import { readCorrigoFile } from "@/lib/ops/corrigo-file";
 import { addDirectoryEntry, updateCustomerAccount } from "@/lib/ops/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,19 +31,6 @@ import { ActionButton } from "@/components/desk/desk-charts";
 
 export type CorrigoReviewItem = CorrigoApplyResult["review"][number];
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read that file."));
-    reader.onload = () => {
-      const result = String(reader.result ?? "");
-      const comma = result.indexOf(",");
-      resolve(comma >= 0 ? result.slice(comma + 1) : result);
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 export function CorrigoImportButton({
   onImported,
 }: {
@@ -49,8 +44,10 @@ export function CorrigoImportButton({
 
   const load = useMutation({
     mutationFn: async (file: File) => {
-      const base64 = await fileToBase64(file);
-      return previewCorrigoImport({ data: { filename: file.name, base64 } });
+      const parsed = await readCorrigoFile(file);
+      const parts = [];
+      for (const records of chunkByBytes(parsed.records)) parts.push(await previewCorrigoImport({ data: { records } }));
+      return mergeCorrigoPreviews(parts, parsed);
     },
     onSuccess: (data, file) => {
       setFileName(file.name);
@@ -61,7 +58,31 @@ export function CorrigoImportButton({
   });
 
   const apply = useMutation({
-    mutationFn: (rows: CorrigoPreview["rows"]) => applyCorrigoImport({ data: { rows } }),
+    mutationFn: async (rows: CorrigoPreview["rows"]) => {
+      const out: CorrigoApplyResult = { updated: 0, created: 0, review: [] };
+      const seen = new Set<string>();
+      for (const chunk of chunkByBytes(rows.filter((r) => r.action !== "skip"))) {
+        let res: CorrigoApplyResult;
+        try {
+          res = await applyCorrigoImport({ data: { rows: chunk } });
+        } catch (e) {
+          const why = e instanceof Error ? e.message : "Could not import";
+          if (!out.updated && !out.created) throw e;
+          throw new Error(
+            `Stopped after ${out.updated + out.created} rows were saved: ${why} Importing the same file again is safe — rows match by WO.`,
+          );
+        }
+        out.updated += res.updated;
+        out.created += res.created;
+        // Each chunk re-checks held merges, so the same ticket can come back twice.
+        for (const item of res.review) {
+          const key = `${item.entityType}-${item.id}`;
+          if (!seen.has(key)) out.review.push(item);
+          seen.add(key);
+        }
+      }
+      return out;
+    },
     onSuccess: (res) => {
       const notMerged = res.review.filter((item) => item.reason === "merge").length;
       toast.success(
@@ -70,6 +91,10 @@ export function CorrigoImportButton({
       setOpen(false);
       setPreview(null);
       onImported(res.review);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not import"),
+    // Earlier chunks may be saved even when a later one fails.
+    onSettled: () => {
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["job"] });
       void qc.invalidateQueries({ queryKey: ["pms"] });
@@ -82,7 +107,6 @@ export function CorrigoImportButton({
       void qc.invalidateQueries({ queryKey: ["invoice"] });
       void qc.invalidateQueries({ queryKey: ["account-invoices"] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not import"),
   });
 
   function cancel() {
@@ -251,9 +275,11 @@ function PreviewBody({
           <span className="font-medium">{unchecked}</span> unchecked (will skip)
         </li>
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-          {preview.unmapped.length
-            ? `${preview.unmapped.length} unmapped status${preview.unmapped.length === 1 ? "" : "es"}`
-            : "No unmapped statuses"}
+          {preview.missing.includes("status")
+            ? "No status column"
+            : preview.unmapped.length
+              ? `${preview.unmapped.length} unmapped status${preview.unmapped.length === 1 ? "" : "es"}`
+              : "No unmapped statuses"}
         </li>
       </ul>
       {preview.wrapCount ? (
@@ -264,7 +290,7 @@ function PreviewBody({
             ? ` · ${preview.conflictCount} already on more than one ticket`
             : ""}
           {preview.skipped
-            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} with no ST#`
+            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} without an ST# number`
             : ""}
           .
         </p>
@@ -273,19 +299,36 @@ function PreviewBody({
           {preview.conflictCount} WO conflict{preview.conflictCount === 1 ? "" : "s"} already on more
           than one ticket — import updates the original and flags the rest to merge
           {preview.skipped
-            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} with no ST#`
+            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} without an ST# number`
             : ""}
           .
         </p>
       ) : preview.skipped ? (
         <p className="mt-3 text-xs text-muted-foreground">
-          {preview.skipped} row{preview.skipped === 1 ? "" : "s"} with no ST#.
+          {preview.skipped} row{preview.skipped === 1 ? "" : "s"} without an ST# number.
+        </p>
+      ) : null}
+      <p className="mt-3 text-xs text-muted-foreground" data-testid="corrigo-columns">
+        Read from file:{" "}
+        {(Object.keys(COL_LABEL) as (keyof typeof COL_LABEL)[])
+          .map((c) => `${COL_LABEL[c]} ← ${preview.columns[c] ?? "not found"}`)
+          .join(" · ")}
+      </p>
+      {preview.missing.includes("status") ? (
+        <p className="mt-2 text-xs text-warning" data-testid="corrigo-no-status">
+          No status column found. Existing tickets keep their status; new tickets open as Open, Pending
+          Scheduling or Not Ready, by board.
+        </p>
+      ) : null}
+      {preview.missing.includes("completedAt") ? (
+        <p className="mt-2 text-xs text-warning" data-testid="corrigo-no-completed">
+          No completed-date column found. Completed dates on existing tickets will not change.
         </p>
       ) : null}
       {preview.unmapped.length ? (
         <p className="mt-3 text-xs text-muted-foreground">
           Unmapped: {preview.unmapped.join(", ")}. Existing tickets keep their KatzDesk status;
-          new tickets open as Open.
+          new tickets open as Open, Pending Scheduling or Not Ready, by board.
         </p>
       ) : null}
 
@@ -405,9 +448,9 @@ function PreviewBody({
                   </td>
                   <td className="px-3 py-2 align-top">
                     {r.oldStatus ? `${r.oldStatus} → ${r.newStatus}` : r.newStatus}
-                    {r.statusUnmapped ? (
-                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                        unmapped: {r.statusUnmapped}
+                    {r.statusNote ? (
+                      <span className={`mt-0.5 block text-[11px] ${r.statusUnmapped ? "text-warning" : "text-muted-foreground"}`}>
+                        {r.statusNote}
                       </span>
                     ) : null}
                   </td>
