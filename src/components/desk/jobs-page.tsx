@@ -3,7 +3,9 @@ import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-i
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useQuery } from "@tanstack/react-query";
-import { listJobs } from "@/lib/ops/api";
+import { findWoTickets, listJobs } from "@/lib/ops/api";
+import { withWoMatches, woBoardName, woSearchKey } from "@/lib/ops/wo-search";
+import { OpenLink } from "./open-link";
 import { getMyAccess } from "@/lib/ops/access";
 import { BillingExportButton, ItemListImportButton } from "./billing-tools";
 import { URGENCIES, URGENCY_RANK } from "@/lib/ops/lookups";
@@ -95,6 +97,8 @@ export function JobsPage({
           .some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
+    // A WO number finds its ticket in any status, view or filter.
+    list = withWoMatches(list, jobs.data ?? [], q);
     return sortDesk(list, sort, {
       date: (j) => j.received ?? j.scheduled,
       name: (j) => j.customer,
@@ -105,6 +109,15 @@ export function JobsPage({
     });
   }, [jobs.data, q, tech, urgency, view, sort, filterMine, matchMine, role]);
 
+  // The same WO on another board (PM, Install, the other ticket list): say where it is.
+  const woKey = woSearchKey(q);
+  const elsewhere = useQuery({
+    // Under "jobs" so a Corrigo import refreshes it.
+    queryKey: ["jobs", "wo-elsewhere", woKey],
+    queryFn: () => findWoTickets({ data: { q } }),
+    enabled: !!woKey,
+  });
+  const otherBoards = woKey ? (elsewhere.data ?? []).filter((h) => h.entityType !== kind) : [];
   const liveJobs = (jobs.data ?? []).filter((j) => !j.duplicateOf);
   const activeCount = liveJobs.filter((j) => isOpenCall(j)).length;
   const flagCount = (jobs.data ?? []).filter(
@@ -196,6 +209,18 @@ export function JobsPage({
         </ToolbarSelect>
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0 max-sm:w-full" />
       </ListToolbar>
+
+      {otherBoards.length ? (
+        <ul className="mt-3 space-y-1 text-sm" data-testid="wo-other-boards">
+          {otherBoards.map((h) => (
+            <li key={`${h.entityType}-${h.id}`}>
+              <OpenLink entityType={h.entityType} id={h.id} className="text-primary underline-offset-2 hover:underline">
+                {h.wo} is on {woBoardName(h.entityType)} · {h.status}{h.customer ? ` · ${h.customer}` : ""}
+              </OpenLink>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
         <div className="min-w-0">

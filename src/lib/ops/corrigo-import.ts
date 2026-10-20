@@ -7,6 +7,7 @@ import { DEFAULT_PM_STYLE } from "@/lib/ops/pm-runbook";
 import { todayChicago } from "@/lib/ops/clock";
 import {
   boardStatus,
+  corrigoReviewReason,
   deskHasWrapped,
   indexHits,
   isWalkIn,
@@ -32,8 +33,10 @@ export type CorrigoApplyResult = {
     status: string;
     technician: string | null;
     entityType: CorrigoBoard;
-    reason?: "open" | "wrap" | "merge";
+    reason?: "open" | "wrap" | "merge" | "created";
     note?: string;
+    /** The import made this ticket. */
+    created?: boolean;
   }[];
 };
 
@@ -291,15 +294,16 @@ export async function applyCorrigoRows(
     status: string,
     technician: string | null,
     closed: boolean,
+    created = false,
   ) {
-    const reason: "open" | "wrap" = wrapRepeat ? "wrap" : "open";
-    if (reason === "open" && closed) return;
+    const reason = corrigoReviewReason({ created, closed, wrapRepeat });
+    if (!reason) return;
     if (review.some((r) => r.entityType === board && r.id === id)) {
       const cur = review.find((r) => r.entityType === board && r.id === id);
       if (cur && reason === "wrap") cur.reason = "wrap";
       return;
     }
-    review.push({ id, wo, customer, status, technician, entityType: board, reason });
+    review.push({ id, wo, customer, status, technician, entityType: board, reason, created });
   }
 
   for (const row of rows) {
@@ -478,7 +482,7 @@ export async function applyCorrigoRows(
         if (id) {
           await logCorrigo(sql, "pm", id, actor, `Opened from Corrigo · ${wo}`);
           created += 1;
-          maybeReview("pm", id, wo, customer, status, row.technician, done);
+          maybeReview("pm", id, wo, customer, status, row.technician, done, true);
         }
         continue;
       }
@@ -505,7 +509,7 @@ export async function applyCorrigoRows(
         if (id) {
           await logCorrigo(sql, "install", id, actor, `Opened from Corrigo · ${wo}`);
           created += 1;
-          maybeReview("install", id, wo, customer, equipStatus, row.technician, complete);
+          maybeReview("install", id, wo, customer, equipStatus, row.technician, complete, true);
         }
         continue;
       }
@@ -539,7 +543,7 @@ export async function applyCorrigoRows(
       if (id) {
         await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}`);
         created += 1;
-        maybeReview(board, id, wo, customer, status, row.technician, done);
+        maybeReview(board, id, wo, customer, status, row.technician, done, true);
       }
     }
   }

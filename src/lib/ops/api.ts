@@ -25,6 +25,7 @@ import {
   isOpenInstall,
 } from "./clock";
 import { isoDayOrNull as isoDate } from "./iso";
+import { findWoEverywhere, woBoardName, woSearchKey, type WoBoardHit } from "./wo-search";
 import { canMarkInstalled, loadInspectionSummaries, syncInstallUnits, withInspections } from "./inspection-api";
 import { emptyInspection } from "./pre-inspection";
 import type {
@@ -1608,7 +1609,16 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 	const q = data.q.trim();
 	if (q.length < 2) return [];
 	const like = `%${q.replace(/%/g, "")}%`;
-	const hits = [];
+	const hits: SearchHit[] = [];
+	// A WO number finds its ticket on every board, in any status, ahead of the text matches.
+	const woKey = woSearchKey(q);
+	if (woKey) for (const w of await findWoEverywhere(sql, woKey)) hits.push({
+		entityType: w.entityType,
+		id: w.id,
+		title: w.customer ?? w.wo,
+		subtitle: `${w.wo} · ${woBoardName(w.entityType)} · ${w.status}`,
+		status: w.status
+	});
 	const jobs = await sql`
       select id, kind, customer, call_id, status, wo from service_jobs
       where customer ilike ${like} or call_id ilike ${like} or coalesce(wo,'') ilike ${like} or coalesce(issue,'') ilike ${like}
@@ -1617,29 +1627,32 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 		entityType: j.kind,
 		id: j.id,
 		title: j.customer ?? j.call_id,
-		subtitle: `${j.call_id}${j.wo ? " · " + j.wo : ""}`,
+		subtitle: `${j.call_id}${j.wo ? " · " + j.wo : ""} · ${j.status}`,
 		status: j.status
 	});
 	const pms = await sql`
-      select id, customer, status, equipment from pm_jobs where customer ilike ${like} limit 5`;
+      select id, customer, status, equipment, wo from pm_jobs where customer ilike ${like} or coalesce(wo,'') ilike ${like} limit 5`;
 	for (const p of pms) hits.push({
 		entityType: "pm",
 		id: p.id,
 		title: p.customer,
-		subtitle: p.equipment ?? "PM",
+		subtitle: `${p.wo || p.equipment || "PM"} · ${p.status}`,
 		status: p.status
 	});
 	const ins = await sql`
-      select id, customer, equip_status, wo from installs
+      select id, customer, equip_status, complete, wo from installs
       where archived = false and (customer ilike ${like} or coalesce(wo,'') ilike ${like})
       limit 5`;
-	for (const i of ins) hits.push({
-		entityType: "install",
-		id: i.id,
-		title: i.customer,
-		subtitle: i.wo ?? "Install",
-		status: i.equip_status
-	});
+	for (const i of ins) {
+		const status = isInstalled({ complete: !!i.complete, equipStatus: i.equip_status }) ? "Installed" : i.equip_status || "Not Ready";
+		hits.push({
+			entityType: "install",
+			id: i.id,
+			title: i.customer,
+			subtitle: `${i.wo || "Install"} · ${status}`,
+			status
+		});
+	}
 	const deals = await sql`
       select id, customer, producer, completion from deals
       where archived = false and customer ilike ${like}
@@ -1696,7 +1709,18 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 		subtitle: "Account history",
 		status: null
 	});
-	return hits.slice(0, 28);
+	const seen = new Set<string>();
+	return hits.filter((h) => {
+		const k = `${h.entityType}:${h.id}`;
+		if (seen.has(k)) return false;
+		seen.add(k);
+		return true;
+	}).slice(0, 28);
+});
+/** Every ticket with this WO number, on any board and in any status (the Tickets page's "also on" line). */
+export const findWoTickets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => z.object({ q: z.string().max(100) }).parse(d)).handler(async ({ data }): Promise<WoBoardHit[]> => {
+	const key = woSearchKey(data.q);
+	return key ? findWoEverywhere(await ready(), key) : [];
 });
 export const handoffDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number }) => d).handler(async ({ data }: any) => {
 	await maybeHandoffInstall(await ready(), data.dealId);

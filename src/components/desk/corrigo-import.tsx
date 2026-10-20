@@ -11,6 +11,7 @@ import {
   type CorrigoPreviewRow,
 } from "@/lib/ops/corrigo";
 import { readCorrigoFile } from "@/lib/ops/corrigo-file";
+import { woBoardName } from "@/lib/ops/wo-search";
 import { addDirectoryEntry, updateCustomerAccount } from "@/lib/ops/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,20 @@ import { AkBadge } from "@/components/desk/ak-badge";
 import { ActionButton } from "@/components/desk/desk-charts";
 
 export type CorrigoReviewItem = CorrigoApplyResult["review"][number];
+
+/** "2 created on Installs" or "3 created (2 on Tickets, 1 on PMs)". */
+function createdText(res: CorrigoApplyResult): string {
+  const byBoard = new Map<string, number>();
+  for (const item of res.review) {
+    if (!item.created) continue;
+    const board = woBoardName(item.entityType);
+    byBoard.set(board, (byBoard.get(board) ?? 0) + 1);
+  }
+  const boards = [...byBoard];
+  if (boards.length === 1) return `${res.created} created on ${boards[0][0]}`;
+  if (!boards.length) return `${res.created} created`;
+  return `${res.created} created (${boards.map(([board, n]) => `${n} on ${board}`).join(", ")})`;
+}
 
 export function CorrigoImportButton({
   onImported,
@@ -86,7 +101,7 @@ export function CorrigoImportButton({
     onSuccess: (res) => {
       const notMerged = res.review.filter((item) => item.reason === "merge").length;
       toast.success(
-        `Corrigo import saved · ${res.updated} updated · ${res.created} created${notMerged ? ` · ${notMerged} not merged` : ""}`,
+        `Corrigo import saved · ${res.updated} updated · ${createdText(res)}${notMerged ? ` · ${notMerged} not merged` : ""}`,
       );
       setOpen(false);
       setPreview(null);
@@ -692,7 +707,7 @@ export function CorrigoReviewList({
         <div>
           <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For Review</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999, and tickets that could not be merged.
+            Open work from the last Corrigo file, every ticket it created (closed ones too), ST#s that reused a number after WO-9999, and tickets that could not be merged.
           </p>
         </div>
         <Button type="button" size="sm" variant="outline" onClick={onDismiss}>
@@ -711,7 +726,8 @@ export function CorrigoReviewList({
                 <span className="block truncate font-medium">{item.customer || "Untitled"}</span>
                 <span className="block truncate text-xs text-muted-foreground">
                   {item.wo}
-                  {item.entityType && item.entityType !== "service" ? ` · ${item.entityType}` : ""}
+                  {item.entityType && item.entityType !== "service" ? ` · ${woBoardName(item.entityType)}` : ""}
+                  {item.created ? " · new" : ""}
                   {item.technician ? ` · ${item.technician}` : ""}
                   {item.reason === "wrap" ? " · repeated after 9999" : ""}
                 </span>

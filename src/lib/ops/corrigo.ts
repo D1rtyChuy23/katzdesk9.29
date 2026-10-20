@@ -328,6 +328,21 @@ export function boardLabel(board: CorrigoBoard): string | null {
 }
 
 
+/**
+ * Why an imported ticket goes on the For Review list, or null. A ticket the import created is always
+ * listed, even closed, so it can be found from there whichever board it went to.
+ */
+export function corrigoReviewReason(row: {
+  created: boolean;
+  closed: boolean;
+  wrapRepeat: boolean;
+}): "open" | "wrap" | "created" | null {
+  if (row.wrapRepeat) return "wrap";
+  if (!row.closed) return "open";
+  if (row.created) return "created";
+  return null;
+}
+
 /** Same account, empty, or Walk-In — safe to fold onto one ticket. */
 export function customersCompatible(
   a: string | null | undefined,
