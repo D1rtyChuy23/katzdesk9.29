@@ -204,9 +204,10 @@ export function PmSheet({
     enabled: pm != null,
   });
   const stackedOn = isPmStack(stack.data) ? stack.data.stackedOn : null;
-  // Locked while stacked and the names match. A Corrigo split leaves the customer editable.
+  // Locked while stacked and the names match. A Corrigo split leaves the customer editable,
+  // unless the sheet was already told to lock it.
   const customersDiffer = !!stackedOn && !stackedOn.customerMatches;
-  const lockPmCustomer = !customersDiffer && (lockCustomer || !!stackedOn);
+  const lockPmCustomer = lockCustomer || (!customersDiffer && !!stackedOn);
   const tabCount = (id: PmTab): number | null => (id === "ping" ? comments.data?.length || null : null);
   return (
     <Sheet

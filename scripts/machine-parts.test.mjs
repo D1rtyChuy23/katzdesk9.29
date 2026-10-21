@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { addMachinePartSql, pinLineSql, removeMachinePartSql } = await import("../src/lib/ops/pm-runbook-api.ts");
+const { addMachinePartSql, machinePartQty, pinLineSql, removeMachinePartSql } = await import("../src/lib/ops/pm-runbook-api.ts");
 const { partHistory } = await import("../src/lib/ops/parts-api.ts");
 
 const pg = new PGlite();
@@ -53,6 +53,13 @@ async function add(pmId, itemId, piece = "piece:linea pb#1", extra = {}) {
     extra.serial ?? "123",
   ]);
 }
+
+test("a quantity that rounds to zero is refused before the insert", () => {
+  assert.throws(() => machinePartQty("0.001"), /Quantity must be more than 0\./);
+  assert.equal(machinePartQty("2"), 2);
+  assert.throws(() => machinePartQty(""), /Quantity must be more than zero\./);
+  assert.throws(() => machinePartQty(0), /Quantity must be more than zero\./);
+});
 
 test("adding a part writes one row and one activity row", async () => {
   const pmId = await pm("Completed");

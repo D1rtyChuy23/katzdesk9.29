@@ -69,6 +69,7 @@ async function machinesFor(
   const partRows = await sql.query<{
     id: number;
     piece_key: string;
+    machine_label: string;
     item: string;
     description: string | null;
     qty: string;
@@ -83,7 +84,7 @@ async function machinesFor(
     has_image: boolean | null;
     image_version: string | null;
   }>(
-    `select m.id, m.piece_key, m.item, m.description, m.qty, m.billable, m.billing_item_id,
+    `select m.id, m.piece_key, m.machine_label, m.item, m.description, m.qty, m.billable, m.billing_item_id,
             b.item as current_item, b.rate, b.active, (b.hidden_at is not null) as hidden,
             b.sku, b.mfr_part, (b.image is not null) as has_image,
             case when b.image is null then null else extract(epoch from b.image_updated_at)::bigint::text end as image_version
@@ -101,7 +102,11 @@ async function machinesFor(
     let ticks: string[] = [];
     if (rb && unit) {
       const config = await loadVisitConfig(sql, rb.def, { id: pm.id, customer: pm.customer, style: pm.style }, unit);
-      kits = kitListWithAdded(rb.def, config, addedByUnit.get(unit.unitKey) ?? []).map((k) => ({ ev: k.ev, name: k.name, q: k.q }));
+      const fromUnit = addedByUnit.get(unit.unitKey) ?? [];
+      const fromPiece = unit.unitKey === machine.pieceKey ? [] : (addedByUnit.get(machine.pieceKey) ?? []);
+      const added = [...fromUnit];
+      for (const ev of fromPiece) if (!added.includes(ev)) added.push(ev);
+      kits = kitListWithAdded(rb.def, config, added).map((k) => ({ ev: k.ev, name: k.name, q: k.q }));
       const keys = new Set([unit.unitKey, machine.pieceKey]);
       ticks = checks.filter((c) => keys.has(c.unit_key)).map((c) => c.key);
     }
@@ -117,6 +122,31 @@ async function machinesFor(
       catalog: [],
       parts: partRows.filter((r) => r.piece_key === machine.pieceKey).map(toPart),
       runbookId: machine.runbookId,
+      offPm: false,
+    });
+  }
+  const known = new Set(plan.machines.map((m) => m.pieceKey));
+  const leftover = new Map<string, typeof partRows>();
+  for (const row of partRows) {
+    if (known.has(row.piece_key)) continue;
+    const bag = leftover.get(row.piece_key) ?? [];
+    bag.push(row);
+    leftover.set(row.piece_key, bag);
+  }
+  for (const [pieceKey, rows] of leftover) {
+    draft.push({
+      label: rows.find((r) => r.machine_label.trim())?.machine_label.trim() || pieceKey,
+      serial: null,
+      machineKey: pieceKey,
+      accountId: null,
+      serialKey: null,
+      manufacturer: null,
+      kits: [],
+      ticks: [],
+      catalog: [],
+      parts: rows.map(toPart),
+      runbookId: null,
+      offPm: true,
     });
   }
   const evs = new Map<string, Set<string>>();

@@ -242,6 +242,50 @@ const approveInput = targetInput.extend({
   discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable(),
 });
 
+/**
+ * Approve a PM's own invoice only while it is not stacked. One statement: lock the PM, insert the header
+ * and replace the lines only when stacked_job_id is null. Zero rows means it was stacked first.
+ */
+export function approvePmInvoiceSql(): string {
+  return `with locked as (
+       select p.id from pm_jobs p where p.id = $2::int for update
+     ),
+     open_pm as (
+       select locked.id
+         from locked
+        where not exists (
+          select 1 from pm_jobs p where p.id = locked.id and p.stacked_job_id is not null
+        )
+     ),
+     inv as (
+       insert into invoices (
+         entity_type, entity_id, customer, discount_kind, discount_value,
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at
+       )
+       select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now()
+         from open_pm
+       on conflict (entity_type, entity_id) do update set
+         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
+         bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
+         approved_at = now(), updated_at = now()
+       returning id
+     ),
+     cleared as (
+       delete from invoice_lines where invoice_id in (select id from inv) returning id
+     ),
+     lined as (
+       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
+       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+         from inv
+         join unnest($12::text[], $13::text[], $14::numeric[], $15::numeric[], $16::text[]) with ordinality
+              as t(item, description, qty, rate, kind, ord) on true
+        where (select count(*) from cleared) >= 0
+       returning id
+     )
+     select inv.id, (select count(*) from lined)::int as lined from inv`;
+}
+
 const ACTIVITY_TYPE: Record<InvoiceTarget, string> = { service: "service", tlc: "tlc", pm: "pm", install: "install", rebuild: "rebuild", deal: "deal" };
 
 /**
@@ -285,39 +329,61 @@ export const approveInvoice = createServerFn({ method: "POST" })
       }));
     }
     const totals = invoiceTotals(lines, typed.discount);
-    const saved = await sql.query<{ id: number }>(
-      `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now())
-       on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
-         bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
-         total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()
-       returning id`,
-      [
+    if (ref.type === "pm") {
+      const savedPm = await sql.query<{ id: number }>(approvePmInvoiceSql(), [
         ref.type,
         data.id,
         ref.customer || null,
-        // A ticket keeps its discount on the ticket, so it is never stored twice.
-        usesTicketCharges(ref.type) ? null : (typed.discount?.kind ?? null),
-        usesTicketCharges(ref.type) ? null : (typed.discount?.value ?? null),
+        typed.discount?.kind ?? null,
+        typed.discount?.value ?? null,
         bill.name,
         bill.accountNumber,
         bill.address,
         bill.rep,
         totals.total,
         who,
-      ],
-    );
-    if (!usesTicketCharges(ref.type)) {
-      // One statement: the old lines and the new ones change together or not at all.
-      await sql.query(
-        `with d as (delete from invoice_lines where invoice_id = $1)
-         insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
-         select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
-           from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
-                as t(item, description, qty, rate, kind, ord)`,
-        [saved[0]!.id, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
+        lines.map((l) => l.item),
+        lines.map((l) => l.description),
+        lines.map((l) => l.qty),
+        lines.map((l) => l.rate),
+        lines.map((l) => l.kind),
+      ]);
+      if (!savedPm[0]) throw new Error((await pmInvoiceLock(sql, data.id)) ?? "This PM is billed on a ticket. Open the ticket's Invoicing tab.");
+    } else {
+      const saved = await sql.query<{ id: number }>(
+        `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now())
+         on conflict (entity_type, entity_id) do update set
+           customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+           bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
+           total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()
+         returning id`,
+        [
+          ref.type,
+          data.id,
+          ref.customer || null,
+          // A ticket keeps its discount on the ticket, so it is never stored twice.
+          usesTicketCharges(ref.type) ? null : (typed.discount?.kind ?? null),
+          usesTicketCharges(ref.type) ? null : (typed.discount?.value ?? null),
+          bill.name,
+          bill.accountNumber,
+          bill.address,
+          bill.rep,
+          totals.total,
+          who,
+        ],
       );
+      if (!usesTicketCharges(ref.type)) {
+        // One statement: the old lines and the new ones change together or not at all.
+        await sql.query(
+          `with d as (delete from invoice_lines where invoice_id = $1)
+           insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
+           select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+             from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
+                  as t(item, description, qty, rate, kind, ord)`,
+          [saved[0]!.id, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
+        );
+      }
     }
     await sql
       .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [

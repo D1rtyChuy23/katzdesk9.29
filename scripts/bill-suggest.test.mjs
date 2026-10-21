@@ -176,3 +176,53 @@ test("a cancelled PM gives no lines, descriptions stop at 500 characters, and th
   assert.equal(many[0].sourceKey, "mp:1");
   assert.equal(many[199].sourceKey, "mp:200");
 });
+
+test("a billable part whose machine is no longer on the PM is listed and not addable", () => {
+  const lines = linesOf([
+    {
+      id: 32,
+      status: "Open",
+      machines: [
+        machine({
+          offPm: true,
+          label: "Faema X20",
+          serial: null,
+          kits: [{ ev: "F.3.040", name: "Group gasket", q: 1 }],
+          ticks: ["kit:F.3.040"],
+          parts: [
+            {
+              id: 7,
+              item: "PARTS : EVER104120",
+              description: "Burr set",
+              qty: 1,
+              billable: true,
+              billingItemId: 1,
+              active: true,
+              hidden: false,
+              rate: 12,
+              currentItem: "PARTS : EVER104120",
+              part: null,
+            },
+            {
+              id: 8,
+              item: "PARTS : FREE",
+              description: "No charge",
+              qty: 1,
+              billable: false,
+              billingItemId: 2,
+              active: true,
+              hidden: false,
+              rate: 4,
+              currentItem: "PARTS : FREE",
+              part: null,
+            },
+          ],
+        }),
+      ],
+    },
+  ]);
+  assert.equal(lines.length, 1);
+  assert.equal(lines[0].sourceKey, "mp:7");
+  assert.equal(lines[0].reason, "This machine is no longer on PM #32.");
+  assert.equal(lines[0].item, "PARTS : EVER104120");
+});

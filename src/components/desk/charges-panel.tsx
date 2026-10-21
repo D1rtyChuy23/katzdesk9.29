@@ -79,6 +79,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     void qc.invalidateQueries({ queryKey: ["invoice"] });
     void qc.invalidateQueries({ queryKey: ["activity"] });
     void qc.invalidateQueries({ queryKey: ["jobs"] });
+    void qc.invalidateQueries({ queryKey: ["pm-bill", jobId] });
     toast.success(message);
   };
   const save = useMutation({

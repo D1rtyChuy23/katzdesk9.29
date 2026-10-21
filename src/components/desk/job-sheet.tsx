@@ -110,7 +110,8 @@ export function JobSheet({
   const stackedPms = isJobStack(pmStack.data) ? pmStack.data.stacked : [];
   const stackCandidates = isJobStack(pmStack.data) ? pmStack.data.candidates : [];
   const stackCustomersDiffer = stackedPms.some((p) => !p.customerMatches);
-  const lockTicketCustomer = !stackCustomersDiffer && (lockCustomer || (stackedPms.length > 0 && stackedPms.every((p) => p.customerMatches)));
+  const lockTicketCustomer = lockCustomer || (!stackCustomersDiffer && stackedPms.length > 0 && stackedPms.every((p) => p.customerMatches));
+  const canStackWrite = isJobStack(pmStack.data) && pmStack.data.canWrite;
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof updateJob>[0]["data"]) => updateJob({ data: patch }),
     onSuccess: (row) => {
@@ -256,9 +257,9 @@ export function JobSheet({
       }}
     >
       <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockTicketCustomer} />
-      {stackCustomersDiffer ? (
-        <p className="text-xs text-warning sm:col-span-2">Customer differs from ticket #{j.id}</p>
-      ) : null}
+      {stackedPms.filter((p) => !p.customerMatches).map((p) => (
+        <p key={p.pmId} className="text-xs text-warning sm:col-span-2">Customer differs from PM #{p.pmId}</p>
+      ))}
       {j.customer ? (
         <div className="sm:col-span-2">
           <ProviderDispatchBlock customer={j.customer} />
@@ -448,6 +449,7 @@ export function JobSheet({
                         jobId={j.id}
                         stacked={stackedPms}
                         candidates={stackCandidates}
+                        canWrite={canStackWrite}
                         onOpenPm={(pmId) => setPmPick({ forId: activeId, pmId })}
                       />
                       <section data-testid="ticket-schedules">

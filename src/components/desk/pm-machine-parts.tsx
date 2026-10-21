@@ -28,6 +28,7 @@ function Row({
     onSuccess: () => {
       toast.success("Part removed");
       void qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+      void qc.invalidateQueries({ queryKey: ["pm-bill"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -67,6 +68,7 @@ export function OtherParts({
   pieceKey,
   parts,
   orphans,
+  onlyOrphans = false,
   locked,
   canWrite,
   completed,
@@ -75,6 +77,7 @@ export function OtherParts({
   pieceKey: string;
   parts: PmMachinePart[];
   orphans: PmMachinePart[];
+  onlyOrphans?: boolean;
   locked: string | null;
   canWrite: boolean;
   completed: boolean;
@@ -98,9 +101,24 @@ export function OtherParts({
       setNote("");
       toast.success("Part added");
       void qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+      void qc.invalidateQueries({ queryKey: ["pm-bill"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  if (onlyOrphans) {
+    return (
+      <div className="grid gap-2" data-testid="other-parts">
+        {locked ? <p className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">{locked}</p> : null}
+        <h4 className="text-sm font-semibold">Parts on a line no longer on this PM</h4>
+        <ul className="grid gap-1.5">
+          {orphans.map((p) => (
+            <Row key={p.id} pmId={pmId} part={p} canChange={canChange} />
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-2" data-testid="other-parts">

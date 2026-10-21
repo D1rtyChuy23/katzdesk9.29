@@ -22,7 +22,7 @@ async function requireWriter(sql: Sql, userId: string): Promise<string> {
     [userId],
   ))[0];
   if (!canWriteRunbook((r?.desk_role ?? null) as RunbookRole, flagOn(r?.is_admin))) {
-    throw new Error("Only Service and Admin can change the runbook.");
+    throw new Error("Only Service and Admin can stack or unstack a PM.");
   }
   return r?.username || "Teammate";
 }
@@ -92,7 +92,7 @@ export const unstackPm = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-async function explainUnstack(sql: Sql, pmId: number): Promise<string> {
+export async function explainUnstack(sql: Sql, pmId: number): Promise<string> {
   const pm = (await sql.query<{ stacked_job_id: number | null }>("select stacked_job_id from pm_jobs where id = $1", [pmId]))[0];
   if (!pm?.stacked_job_id) return `PM #${pmId} is not on a ticket.`;
   const jobId = Number(pm.stacked_job_id);
@@ -100,8 +100,8 @@ async function explainUnstack(sql: Sql, pmId: number): Promise<string> {
     `select count(*)::int as n from ticket_charges c
       where c.job_id = $2
         and (
-          (split_part(c.source_key, ':', 1) = 'pmkit' and split_part(c.source_key, ':', 2) = $1::text)
-          or c.source_key in (select 'mp:' || m.id::text from machine_parts m where m.pm_job_id = $1)
+          (split_part(c.source_key, ':', 1) = 'pmkit' and split_part(c.source_key, ':', 2) = $1::int::text)
+          or c.source_key in (select 'mp:' || m.id::text from machine_parts m where m.pm_job_id = $1::int)
         )`,
     [pmId, jobId],
   ))[0];
@@ -130,19 +130,28 @@ export type StackedPmRow = {
   customerMatches: boolean;
 };
 
+async function canStack(sql: Sql, userId: string): Promise<boolean> {
+  const r = (await sql.query<{ is_admin: unknown; desk_role: string | null }>(
+    "select is_admin, desk_role from desk_accounts where user_id = $1",
+    [userId],
+  ))[0];
+  return canWriteRunbook((r?.desk_role ?? null) as RunbookRole, flagOn(r?.is_admin));
+}
+
 const listInput = z.union([z.object({ pmId: z.number().int().positive() }), z.object({ jobId: z.number().int().positive() })]);
 
-/** Tickets a PM can stack on, or PMs a ticket can take. Read-only. */
+/** Tickets a PM can stack on, or PMs a ticket can take. Read-only. Service and Admin get canWrite. */
 export const listStackCandidates = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.input<typeof listInput>) => listInput.parse(d))
-  .handler(async ({ data }): Promise<
-    | { stackedOn: StackedOn | null; candidates: StackedOn[] }
-    | { stacked: StackedPmRow[]; candidates: StackedPmRow[] }
+  .handler(async ({ data, context }): Promise<
+    | { stackedOn: StackedOn | null; candidates: StackedOn[]; canWrite: boolean }
+    | { stacked: StackedPmRow[]; candidates: StackedPmRow[]; canWrite: boolean }
   > => {
     const sql = await ready();
-    if ("pmId" in data) return listForPm(sql, data.pmId);
-    return listForJob(sql, data.jobId);
+    const canWrite = await canStack(sql, context.userId);
+    if ("pmId" in data) return { ...(await listForPm(sql, data.pmId)), canWrite };
+    return { ...(await listForJob(sql, data.jobId)), canWrite };
   });
 
 const TICKET_WHERE = `
@@ -150,16 +159,12 @@ const TICKET_WHERE = `
   and nullif(btrim(j.ns_so), '') is null
   and j.status not in ('Cancelled', 'Phone Resolved')
   and coalesce(j.phone_resolved, false) = false
-  and (
-    (j.status <> 'Completed' and j.completed_at is null)
-    or j.completed_at >= current_date - 90
-  )
   and regexp_replace(lower(coalesce(j.customer, '')), '[^a-z0-9]+', '', 'g') = $1
 `;
 
-async function listForPm(sql: Sql, pmId: number) {
+export async function listForPm(sql: Sql, pmId: number) {
   const pm = (await sql.query<{ customer: string | null; stacked_job_id: number | null }>("select customer, stacked_job_id from pm_jobs where id = $1", [pmId]))[0];
-  if (!pm) return { stackedOn: null, candidates: [] };
+  if (!pm) return { stackedOn: null, candidates: [] as StackedOn[] };
   const key = normalizeCustomerKey(pm.customer);
   const stackedOn = pm.stacked_job_id
     ? await readTicket(sql, Number(pm.stacked_job_id), key)
@@ -170,7 +175,7 @@ async function listForPm(sql: Sql, pmId: number) {
            from service_jobs j
           where true ${TICKET_WHERE}
             and j.id is distinct from $2
-          order by j.id desc
+          order by coalesce(j.completed_at, j.scheduled, j.received) desc nulls last, j.id desc
           limit 20`,
         [key, pm.stacked_job_id ?? 0],
       )
@@ -201,7 +206,7 @@ function toTicket(r: { id: number; kind: string; wo: string | null; call_id: str
   };
 }
 
-async function listForJob(sql: Sql, jobId: number) {
+export async function listForJob(sql: Sql, jobId: number) {
   const job = (await sql.query<{ customer: string | null }>("select customer from service_jobs where id = $1", [jobId]))[0];
   const key = normalizeCustomerKey(job?.customer);
   const stacked = await sql.query<{ id: number; customer: string | null; status: string; equipment: string | null }>(
@@ -220,11 +225,7 @@ async function listForJob(sql: Sql, jobId: number) {
               join invoice_lines l on l.invoice_id = i.id
              where i.entity_type = 'pm' and i.entity_id = p.id
             )
-            and (
-              (p.status <> 'Completed' and p.completed_at is null)
-              or p.completed_at >= current_date - 90
-            )
-          order by p.id desc
+          order by coalesce(p.completed_at, p.projected, p.received) desc nulls last, p.id desc
           limit 20`,
         [key],
       )

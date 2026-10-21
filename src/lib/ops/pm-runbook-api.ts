@@ -683,10 +683,18 @@ const addPartInput = z.object({
   note: z.string().max(500).optional(),
 });
 
+/** cleanQty("0.001") rounds to 0, and the table then rejects it. Refuse that before the insert. */
+export function machinePartQty(raw: unknown): number {
+  const qty = cleanQty(raw);
+  if (qty != null && qty <= 0) throw new Error("Quantity must be more than 0.");
+  if (qty == null || qty > 1000) throw new Error("Quantity must be more than zero.");
+  return qty;
+}
+
 /** Log one Parts-list item on a machine of this PM. Service and Admin. The machine comes from the plan, not the client. */
 export const addMachinePart = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: z.infer<typeof addPartInput>) => addPartInput.parse(d))
+  .validator((d: z.input<typeof addPartInput>) => addPartInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
     const me = await requireWriter(sql, context.userId);
@@ -695,8 +703,7 @@ export const addMachinePart = createServerFn({ method: "POST" })
     const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
     const line = plan.machines.find((m) => m.pieceKey === data.pieceKey);
     if (!line) throw new Error("That machine is not on this PM.");
-    const qty = cleanQty(data.qty);
-    if (qty == null || qty > 1000) throw new Error("Quantity must be more than zero.");
+    const qty = machinePartQty(data.qty);
     const saved = await sql.query<{ id: number }>(addMachinePartSql(), [
       data.pmId,
       data.billingItemId,
@@ -722,7 +729,7 @@ const removePartInput = z.object({
 /** Take one extra part off this PM. Refused while a ticket charge still points at it. */
 export const removeMachinePart = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: z.infer<typeof removePartInput>) => removePartInput.parse(d))
+  .validator((d: z.input<typeof removePartInput>) => removePartInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
     const me = await requireWriter(sql, context.userId);
@@ -772,7 +779,18 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       unitKey: m.unitKey,
       earlierParts: earlierByPiece.get(m.pieceKey) ?? [],
     }));
-    if (!machines.length) return empty;
+    if (!machines.length) {
+      if (!parts.length) return empty;
+      // The equipment text was cleared. The parts are still here so they can be removed.
+      return {
+        ...empty,
+        canWrite: me.canWrite,
+        canEditDefinitions: me.canEditDefinitions,
+        completed: pm.status === "Completed" || !!pm.completed_at,
+        parts,
+        partsLocked,
+      };
+    }
 
     const sheet = {
       accountUnits,

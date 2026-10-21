@@ -38,13 +38,13 @@ export function AddPmParts({
   const data = q.data;
   const draftKey = draftKeys.join("\n");
   const lines = useMemo(() => data?.groups.flatMap((g) => g.lines) ?? [], [data]);
-  const blocked = (line: BillSuggestLine) => !!line.reason || sourceKeyTaken(draftKeys, line.sourceKey) || line.alreadyOn;
+  const blocked = (line: BillSuggestLine) => !!line.reason || sourceKeyTaken(draftKeys, line.sourceKey);
 
   useEffect(() => {
     if (!open) return;
     const keys = draftKey ? draftKey.split("\n") : [];
     const next: Record<string, boolean> = {};
-    for (const line of lines) next[line.sourceKey] = !line.reason && !sourceKeyTaken(keys, line.sourceKey) && !line.alreadyOn;
+    for (const line of lines) next[line.sourceKey] = !line.reason && !sourceKeyTaken(keys, line.sourceKey);
     setPicked(next);
   }, [open, lines, draftKey]);
 

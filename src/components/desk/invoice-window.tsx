@@ -99,6 +99,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
       void qc.invalidateQueries({ queryKey: ["account-invoices"] });
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
+      void qc.invalidateQueries({ queryKey: ["pm-bill", id] });
       toast.success(`Invoice approved · ${money(next.total)}`);
       onClose();
     },
@@ -390,9 +391,11 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
               <Button type="button" variant="outline" onClick={onClose} disabled={approve.isPending} data-testid="invoice-cancel">
                 Cancel
               </Button>
-              <Button type="button" onClick={() => approve.mutate()} disabled={locked || approve.isPending || !!problem || !draft.length} data-testid="invoice-approve">
-                {approve.isPending ? "Approving…" : "Approve"}
-              </Button>
+              {locked ? null : (
+                <Button type="button" onClick={() => approve.mutate()} disabled={approve.isPending || !!problem || !draft.length} data-testid="invoice-approve">
+                  {approve.isPending ? "Approving…" : "Approve"}
+                </Button>
+              )}
             </div>
           </>
         )}

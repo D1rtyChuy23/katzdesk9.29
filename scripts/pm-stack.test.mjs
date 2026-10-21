@@ -8,7 +8,8 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const { stackCustomerRefusal, stackPmSql, stackRefusal, unstackPmSql } = await import("../src/lib/ops/pm-stack.ts");
 const { stackedPmLock } = await import("../src/lib/ops/invoice.ts");
-const { pmInvoiceLock } = await import("../src/lib/ops/invoice-api.ts");
+const { approvePmInvoiceSql, pmInvoiceLock } = await import("../src/lib/ops/invoice-api.ts");
+const { explainUnstack, listForJob, listForPm } = await import("../src/lib/ops/pm-stack-api.ts");
 
 const pg = new PGlite();
 const dir = new URL("../migrations/", import.meta.url);
@@ -96,6 +97,12 @@ test("stacking a completed PM on a completed ticket writes both activity rows", 
   await pg.query(
     `insert into pm_jobs (id, customer, equipment, status, technician) values (4, 'Porsche - Houston', 'Linea PB + Swift', 'Completed', 'Oliver')`,
   );
+  const forPm = await listForPm(sql, 4);
+  assert.ok(forPm.candidates.some((c) => c.jobId === 99), "completed ticket #99 is a candidate even with completed_at null");
+  const forJob = await listForJob(sql, 99);
+  assert.ok(forJob.candidates.some((p) => p.pmId === 4), "completed PM #4 is a candidate even with completed_at null");
+  assert.equal((await pg.query("select completed_at from service_jobs where id = 99")).rows[0].completed_at, null);
+  assert.equal((await pg.query("select completed_at from pm_jobs where id = 4")).rows[0].completed_at, null);
   const saved = await sql.query(stackPmSql(), [4, 99, "Oliver"]);
   assert.equal(saved.length, 1);
   assert.equal(Number(saved[0].id), 4);
@@ -195,6 +202,7 @@ test("unstack waits for this PM's lines and a clear Sales Order, and a deleted t
   await pg.query("delete from ticket_charges where job_id = 523");
   await charge(523, "pmkit:32:piece:faema x20#1:EV1");
   assert.equal((await sql.query(unstackPmSql(), [32, "Oliver"])).length, 0);
+  assert.equal(await explainUnstack(sql, 32), "Take PM #32's lines off ticket #523 first.");
   assert.equal(Number((await pg.query("select stacked_job_id from pm_jobs where id = 32")).rows[0].stacked_job_id), 523);
 
   await pg.query("delete from ticket_charges where job_id = 523");
@@ -222,6 +230,7 @@ test("unstack waits for this PM's lines and a clear Sales Order, and a deleted t
   await pg.query("update service_jobs set ns_so = 'SO4401' where id = 523");
   await pg.query("delete from ticket_charges where job_id = 523");
   assert.equal((await sql.query(unstackPmSql(), [32, "Oliver"])).length, 0);
+  assert.equal(await explainUnstack(sql, 32), "Ticket #523 is billed (SO4401). Clear its Sales Order before unstacking PM #32.");
   assert.equal(Number((await pg.query("select stacked_job_id from pm_jobs where id = 32")).rows[0].stacked_job_id), 523);
   await pg.query("update service_jobs set ns_so = null where id = 523");
 
@@ -267,4 +276,48 @@ test("an unchanged customer saves, a real change is refused, and matching the pa
     "PM #32 is stacked on this ticket (Levy GRB). Unstack it first.",
   );
   assert.equal(stackCustomerRefusal("Levy GRB", "Levy, GRB", [{ id: 32, customer: "Other Co" }], "ticket"), null);
+});
+
+test("approving a stacked PM's invoice writes nothing, and an unstacked one does", async () => {
+  const job = await ticket({ wo: "WO-RACE", customer: "Race Co" });
+  const id = await pm({ customer: "Race Co", stackedJobId: job });
+  const args = (item, total) => [
+    "pm",
+    id,
+    "Race Co",
+    null,
+    null,
+    "Race Co",
+    null,
+    null,
+    null,
+    total,
+    "Oliver",
+    [item],
+    ["Gasket"],
+    [1],
+    [total],
+    ["part"],
+  ];
+  assert.equal((await sql.query(approvePmInvoiceSql(), args("PARTS : X", 10))).length, 0);
+  assert.equal(Number((await pg.query("select count(*)::int as n from invoices where entity_type = 'pm' and entity_id = $1", [id])).rows[0].n), 0);
+
+  await pg.query("update pm_jobs set stacked_job_id = null where id = $1", [id]);
+  const saved = await sql.query(approvePmInvoiceSql(), args("PARTS : X", 10));
+  assert.equal(saved.length, 1);
+  const lines = await pg.query(
+    "select l.item from invoice_lines l join invoices i on i.id = l.invoice_id where i.entity_type = 'pm' and i.entity_id = $1",
+    [id],
+  );
+  assert.equal(lines.rows[0].item, "PARTS : X");
+
+  await pg.query("update pm_jobs set stacked_job_id = $2 where id = $1", [id, job]);
+  assert.equal((await sql.query(approvePmInvoiceSql(), args("PARTS : Y", 99))).length, 0);
+  const still = await pg.query(
+    "select l.item, i.total::float as total from invoices i join invoice_lines l on l.invoice_id = i.id where i.entity_type = 'pm' and i.entity_id = $1",
+    [id],
+  );
+  assert.equal(still.rows.length, 1);
+  assert.equal(still.rows[0].item, "PARTS : X");
+  assert.equal(Number(still.rows[0].total), 10);
 });

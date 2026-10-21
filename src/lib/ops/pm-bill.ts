@@ -45,6 +45,8 @@ export type BillMachine = {
   ticks: string[];
   catalog: BillCatalogRow[];
   parts: BillPart[];
+  /** The equipment line is gone. Billable parts are listed and cannot be added. */
+  offPm?: boolean;
 };
 
 export type BillPm = { id: number; status: string; machines: BillMachine[] };
@@ -142,44 +144,54 @@ export function suggestBill(pms: readonly BillPm[], onBill: readonly string[]): 
     }
     for (const machine of pm.machines) {
       const group: BillGroup = { pmId: pm.id, machine: machine.label, note: null, lines: [] };
-      const ticked = new Set(machine.ticks.filter((t) => t.startsWith("kit:")).map((t) => kitKey(t.slice(4))));
-      const kits = machine.kits.filter((k) => ticked.has(kitKey(k.ev)) && k.q > 0);
-      const prefix = prefixForManufacturer(machine.manufacturer);
-      const catalog = pickCatalog(kits.map((k) => k.ev), machine.catalog, prefix);
-      const priced = priceKits(kits.map(asKit), catalog);
-      kits.forEach((kit, i) => {
-        const price = priced[i];
-        if (!price) return;
-        const hit = catalog[kitKey(kit.ev)];
-        const row = hit ? picked(machine.catalog, hit) : undefined;
-        const prior = [...claimed.values()].find((c) => c.ev === kitKey(kit.ev) && sameUnit(c.machine, machine));
-        const sourceKey = `pmkit:${pm.id}:${machine.machineKey}:${kit.ev}`;
-        const reason = prior
-          ? `Also on PM #${prior.pmId} for this machine.`
-          : price.status === "priced"
-            ? null
-            : PRICE_NOTE[price.status];
-        const text = (row?.description ?? "").trim() || kit.name || kit.ev;
-        push(group, {
-          item: (price.status === "priced" ? hit?.name : hit?.name || kit.name) || kit.ev,
-          description: describe(text, machine.label, machine.serial, pm.id),
-          qty: kit.q,
-          rate: price.status === "priced" ? (price.unit ?? 0) : 0,
-          part: row?.part ?? null,
-          sourceKey,
-          pmId: pm.id,
-          machine: machine.label,
-          reason,
-          alreadyOn: sourceKeyTaken(onBill, sourceKey),
+      if (!machine.offPm) {
+        const ticked = new Set(machine.ticks.filter((t) => t.startsWith("kit:")).map((t) => kitKey(t.slice(4))));
+        const kits = machine.kits.filter((k) => ticked.has(kitKey(k.ev)) && k.q > 0);
+        const prefix = prefixForManufacturer(machine.manufacturer);
+        const catalog = pickCatalog(kits.map((k) => k.ev), machine.catalog, prefix);
+        const priced = priceKits(kits.map(asKit), catalog);
+        kits.forEach((kit, i) => {
+          const price = priced[i];
+          if (!price) return;
+          const hit = catalog[kitKey(kit.ev)];
+          const row = hit ? picked(machine.catalog, hit) : undefined;
+          const prior = [...claimed.values()].find((c) => c.ev === kitKey(kit.ev) && sameUnit(c.machine, machine));
+          const sourceKey = `pmkit:${pm.id}:${machine.machineKey}:${kit.ev}`;
+          const reason = prior
+            ? `Also on PM #${prior.pmId} for this machine.`
+            : price.status === "priced"
+              ? null
+              : PRICE_NOTE[price.status];
+          const text = (row?.description ?? "").trim() || kit.name || kit.ev;
+          push(group, {
+            item: (price.status === "priced" ? hit?.name : hit?.name || kit.name) || kit.ev,
+            description: describe(text, machine.label, machine.serial, pm.id),
+            qty: kit.q,
+            rate: price.status === "priced" ? (price.unit ?? 0) : 0,
+            part: row?.part ?? null,
+            sourceKey,
+            pmId: pm.id,
+            machine: machine.label,
+            reason,
+            alreadyOn: sourceKeyTaken(onBill, sourceKey),
+          });
+          if (!prior) claimed.set(`${pm.id}:${machine.machineKey}:${kitKey(kit.ev)}`, { pmId: pm.id, machine, ev: kitKey(kit.ev) });
         });
-        if (!prior) claimed.set(`${pm.id}:${machine.machineKey}:${kitKey(kit.ev)}`, { pmId: pm.id, machine, ev: kitKey(kit.ev) });
-      });
+      }
       for (const part of machine.parts) {
         if (!part.billable || !(part.qty > 0)) continue;
         const gone = part.billingItemId == null;
         const dead = !gone && (part.hidden || !part.active);
         const priced = !gone && !dead && part.rate != null && part.rate > 0;
-        const reason = gone ? "No longer in the Parts list." : dead ? PRICE_NOTE.inactive : priced ? null : PRICE_NOTE["no-price"];
+        const reason = machine.offPm
+          ? `This machine is no longer on PM #${pm.id}.`
+          : gone
+            ? "No longer in the Parts list."
+            : dead
+              ? PRICE_NOTE.inactive
+              : priced
+                ? null
+                : PRICE_NOTE["no-price"];
         const sourceKey = `mp:${part.id}`;
         push(group, {
           item: (part.currentItem ?? "").trim() || part.item,

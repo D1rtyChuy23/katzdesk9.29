@@ -2,11 +2,11 @@ import { listStackCandidates, type StackedOn, type StackedPmRow } from "@/lib/op
 
 type StackData = Awaited<ReturnType<typeof listStackCandidates>>;
 
-export function isPmStack(data: StackData | undefined): data is { stackedOn: StackedOn | null; candidates: StackedOn[] } {
+export function isPmStack(data: StackData | undefined): data is { stackedOn: StackedOn | null; candidates: StackedOn[]; canWrite: boolean } {
   return !!data && "stackedOn" in data;
 }
 
-export function isJobStack(data: StackData | undefined): data is { stacked: StackedPmRow[]; candidates: StackedPmRow[] } {
+export function isJobStack(data: StackData | undefined): data is { stacked: StackedPmRow[]; candidates: StackedPmRow[]; canWrite: boolean } {
   return !!data && "stacked" in data;
 }
 

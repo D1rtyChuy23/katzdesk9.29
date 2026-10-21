@@ -259,7 +259,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const machine = machines.find((m) => m.key === active) ?? machines[0];
   const unit: RunbookUnit | undefined = machine ? units.find((u) => u.pieceKey === machine.pieceKey) : undefined;
   const rb = unit ? runbookById(unit.runbookId) : undefined;
-  const refresh = () => qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+    void qc.invalidateQueries({ queryKey: ["pm-bill"] });
+  };
   const onError = (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save");
 
   const setConfig = useMutation({
@@ -345,7 +348,22 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   );
   const priceSummary = prices ? summarizePrices(prices) : null;
 
-  if (q.isLoading || !machines.length || !machine) return null;
+  if (q.isLoading) return null;
+  if (!machines.length || !machine) {
+    if (!parts.length) return null;
+    return (
+      <OtherParts
+        pmId={pmId}
+        pieceKey=""
+        parts={[]}
+        orphans={parts}
+        onlyOrphans
+        locked={q.data?.partsLocked ?? null}
+        canWrite={canWrite}
+        completed={!!q.data?.completed}
+      />
+    );
+  }
   const mine = parts.filter((p) => p.pieceKey === machine.pieceKey);
   const knownPieces = new Set(machines.map((m) => m.pieceKey));
   const orphans: PmMachinePart[] = machines[machines.length - 1]?.key === machine.key ? parts.filter((p) => !knownPieces.has(p.pieceKey)) : [];

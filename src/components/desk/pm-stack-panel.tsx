@@ -18,6 +18,7 @@ function useStackActions() {
     void qc.invalidateQueries({ queryKey: ["job"] });
     void qc.invalidateQueries({ queryKey: ["pm-stack"] });
     void qc.invalidateQueries({ queryKey: ["pm"] });
+    void qc.invalidateQueries({ queryKey: ["pm-bill"] });
   };
   const stack = useMutation({
     mutationFn: (pair: { pmId: number; jobId: number }) => stackPmOnTicket({ data: pair }),
@@ -55,6 +56,7 @@ export function PmStackHeader({
   const data = isPmStack(q.data) ? q.data : null;
   if (!data) return null;
   const on = data.stackedOn;
+  if (!on && !data.canWrite) return null;
   return (
     <div className="mt-2" data-testid="pm-stack">
       {on ? (
@@ -66,15 +68,17 @@ export function PmStackHeader({
           <OpenLink entityType={on.kind} id={on.jobId} className="text-xs font-medium text-primary hover:underline">
             <span onClick={onSaveFirst}>Open ticket</span>
           </OpenLink>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={unstack.isPending}
-            onClick={() => unstack.mutate({ pmId, jobId: on.jobId })}
-          >
-            Unstack
-          </Button>
+          {data.canWrite ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={unstack.isPending}
+              onClick={() => unstack.mutate({ pmId, jobId: on.jobId })}
+            >
+              Unstack
+            </Button>
+          ) : null}
           {on.customerMatches ? null : (
             <p className="w-full text-xs text-warning">Customer differs from ticket #{on.jobId}</p>
           )}
@@ -112,11 +116,13 @@ export function TicketPmStack({
   jobId,
   stacked,
   candidates,
+  canWrite,
   onOpenPm,
 }: {
   jobId: number;
   stacked: StackedPmRow[];
   candidates: StackedPmRow[];
+  canWrite: boolean;
   onOpenPm: (pmId: number) => void;
 }) {
   const { stack, unstack } = useStackActions();
@@ -133,43 +139,49 @@ export function TicketPmStack({
               <span className="min-w-0 truncate text-sm">{p.customer}</span>
               <StatusBadge status={p.status} />
               {p.customerMatches ? null : (
-                <span className="text-xs text-warning">Customer differs from ticket #{jobId}</span>
+                <span className="text-xs text-warning">Customer differs from PM #{p.pmId}</span>
               )}
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="ml-auto"
-                disabled={unstack.isPending}
-                onClick={() => unstack.mutate({ pmId: p.pmId, jobId })}
-              >
-                Unstack
-              </Button>
+              {canWrite ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="ml-auto"
+                  disabled={unstack.isPending}
+                  onClick={() => unstack.mutate({ pmId: p.pmId, jobId })}
+                >
+                  Unstack
+                </Button>
+              ) : null}
             </li>
           ))}
         </ul>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">No PMs stacked on this ticket.</p>
       )}
-      <h2 className="mt-4 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Stack a PM here</h2>
-      {candidates.length ? (
-        <ul className="mt-2 space-y-1">
-          {candidates.map((p) => (
-            <li key={p.pmId} data-testid="pm-stack-row">
-              <button
-                type="button"
-                className="text-left text-sm text-primary hover:underline disabled:opacity-40"
-                disabled={stack.isPending}
-                onClick={() => stack.mutate({ pmId: p.pmId, jobId })}
-              >
-                PM #{p.pmId} · {p.customer} · {p.status}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-2 text-sm text-muted-foreground">No PMs to stack.</p>
-      )}
+      {canWrite ? (
+        <>
+          <h2 className="mt-4 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Stack a PM here</h2>
+          {candidates.length ? (
+            <ul className="mt-2 space-y-1">
+              {candidates.map((p) => (
+                <li key={p.pmId} data-testid="pm-stack-row">
+                  <button
+                    type="button"
+                    className="text-left text-sm text-primary hover:underline disabled:opacity-40"
+                    disabled={stack.isPending}
+                    onClick={() => stack.mutate({ pmId: p.pmId, jobId })}
+                  >
+                    PM #{p.pmId} · {p.customer} · {p.status}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm text-muted-foreground">No PMs to stack.</p>
+          )}
+        </>
+      ) : null}
     </section>
   );
 }
