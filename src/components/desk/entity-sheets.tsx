@@ -63,6 +63,7 @@ import { RepSelect } from "./rep-select";
 import { AkBadge } from "./ak-badge";
 
 import { MachineFields } from "./machine-fields";
+import { InstallCustomerField, InstallWorkOrders, MergeInstall } from "./install-project-fields";
 import { InstallTicket } from "./install-ticket";
 import { OpenLink } from "./open-link";
 import { CustomerAddress } from "./customer-address";
@@ -395,12 +396,20 @@ export function InstallSheet({
   const save = useMutation({
     scope: queue,
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
-    onSuccess: (_row, vars) => {
+    onSuccess: (saved, vars) => {
       const keys = Object.keys(vars).filter((k) => k !== "id");
       const machineOnly = keys.every((k) =>
         ["equipment", "serial", "powerVoltage", "machines"].includes(k),
       );
-      if (!machineOnly && !skipToast.current) toast.success("Saved");
+      // A new customer: say which of the install's own account units went with it and which stayed.
+      const moved = saved?.unitsMoved;
+      if (moved && (moved.moved.length || moved.stayed.length)) {
+        toast.message(
+          [moved.moved.length ? `Moved to ${saved.customer}: ${moved.moved.join(", ")}` : null, moved.stayed.length ? `Stayed on the old account: ${moved.stayed.join(", ")}` : null]
+            .filter(Boolean)
+            .join(" · "),
+        );
+      } else if (!machineOnly && !skipToast.current) toast.success("Saved");
       skipToast.current = false;
       void qc.invalidateQueries({ queryKey: ["installs"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
@@ -549,7 +558,7 @@ export function InstallSheet({
                         equipStatus: String(fd.get("equipStatus") || "") || null,
                         installDate: String(fd.get("installDate") || "") || null,
                         technician: String(fd.get("technician") || "") || null,
-                        wo: String(fd.get("wo") || "") || null,
+                        // WOs are added and removed on the Work orders list, which saves at once.
                         reqsReady: String(fd.get("reqsReady") || "") || null,
                         notes: String(fd.get("notes") || "") || null,
                         workDone: String(fd.get("workDone") || "") || null,
@@ -562,7 +571,7 @@ export function InstallSheet({
                       });
                     }}
                   >
-                    <input type="hidden" name="customer" value={customer || row.customer} />
+                    <InstallCustomerField row={row} value={customer || row.customer} onChange={setCustomer} />
                     <div>
                       <Label>Equipment status</Label>
                       <SelectField name="equipStatus" className="mt-1" defaultValue={row.equipStatus ?? ""} allowEmpty>
@@ -576,7 +585,6 @@ export function InstallSheet({
                       <Label>Tech</Label>
                       <TechSelect name="technician" defaultValue={row.technician ?? ""} />
                     </div>
-                    <Field label="WO #" name="wo" defaultValue={row.wo ?? ""} />
                     <div>
                       <Label>Site ready?</Label>
                       <SelectField name="reqsReady" className="mt-1" defaultValue={row.reqsReady ?? ""} allowEmpty>
@@ -619,6 +627,15 @@ export function InstallSheet({
                       <Label>Notes</Label>
                       <Textarea name="notes" className="mt-1" defaultValue={row.notes ?? ""} />
                     </div>
+                    <InstallWorkOrders row={row} />
+                    <MergeInstall
+                      row={row}
+                      onMerged={(keepId) => {
+                        skipToast.current = true;
+                        if (onOpenRelated) onOpenRelated(keepId);
+                        else onClose();
+                      }}
+                    />
                     <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2">
                       <Button
                         type="button"

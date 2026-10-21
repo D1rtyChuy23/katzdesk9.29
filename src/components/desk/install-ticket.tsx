@@ -28,7 +28,7 @@ function meta(install: Install): [string, string][] {
   return [
     ["Install date", install.installDate ?? "Not set"],
     ["Tech", install.technician ?? "Not assigned"],
-    ["WO #", install.wo ?? "Not set"],
+    ["WO #", install.workOrders?.length ? install.workOrders.map((w) => w.wo).join(", ") : install.wo ?? "Not set"],
     ["Account rep", install.accountRep ?? "Not set"],
   ];
 }
