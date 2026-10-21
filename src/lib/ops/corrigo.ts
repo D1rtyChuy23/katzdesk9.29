@@ -651,7 +651,7 @@ const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
 /** A serial on its own line ("SN: 4471", "S/N 4471", "Serial # 4471"), or one ending a machine's line. */
 const SERIAL = String.raw`(?:s\/?n|serial(?:\s*(?:#|no\.?|number))?)`;
 // The serial is one token with at least three digits ("ITCB064919", "X482"), so a count ("2pcs", "1of2") never is.
-const SERIAL_NUMBER = String.raw`${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))(?=(?:[a-z-]*\d){3})[a-z0-9-]+$`;
+const SERIAL_NUMBER = String.raw`${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))(?=(?:[a-z-]*\d){3})([a-z0-9-]+)$`;
 const SERIAL_LINE = new RegExp(`^${SERIAL_NUMBER}`, "i");
 const SERIAL_TAIL = new RegExp(String.raw`\s+${SERIAL_NUMBER}`, "i");
 
@@ -701,6 +701,12 @@ function spelledMachines(text: string, catalog: string[]): string[] | null {
   return model ? Array<string>(Number(qty)).fill(model) : null;
 }
 
+/** The serial a line ends with or is, unless that "serial" is a catalog model ("SN CBS-1231" may be a Fetco brewer). */
+function serialOf(re: RegExp, text: string, catalog: string[]): string | null {
+  const token = re.exec(text)?.[1];
+  return token && !spelledMachines(token, catalog) ? token : null;
+}
+
 /**
  * Machines read exactly, one entry per unit: each line (or ; or , between machines) is exactly one catalog spelling
  * with its voltage aside. A serial may end a machine's line, or follow the line's last machine on its own line, at
@@ -712,16 +718,17 @@ export function exactMachines(pieces: string[], catalog: string[]): string[] | n
   for (const piece of pieces.flatMap((p) => p.split(/\r?\n|;/))) {
     const line = piece.trim();
     if (!line) continue;
-    if (SERIAL_LINE.test(line)) {
+    if (serialOf(SERIAL_LINE, line, catalog)) {
       if (serialsLeft-- <= 0) return null;
       continue;
     }
     const read = (texts: string[]) => {
-      const each = texts.map((t) => spelledMachines(t.replace(SERIAL_TAIL, "").trim(), catalog));
+      const tails = texts.map((t) => !!serialOf(SERIAL_TAIL, t, catalog));
+      const each = texts.map((t, i) => spelledMachines(tails[i] ? t.replace(SERIAL_TAIL, "") : t, catalog));
       if (!each.every(Boolean)) return null;
       // Serial lines that follow belong to the line's last machine.
       const last = texts.length - 1;
-      return { units: each.flat() as string[], left: each[last]!.length - (SERIAL_TAIL.test(texts[last]!) ? 1 : 0) };
+      return { units: each.flat() as string[], left: each[last]!.length - (tails[last] ? 1 : 0) };
     };
     // Some catalog names have a comma ('Bunn ITCB-DV, 29" w/Flip Tray'); otherwise a comma is between machines.
     const got = read([line]) ?? (line.includes(",") ? read(line.split(",")) : null);

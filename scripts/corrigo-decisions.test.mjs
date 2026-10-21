@@ -817,6 +817,10 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
     "Bunn TB3 S/N2",
     "Bunn TB3\nSN: 2",
     "Bunn TB3 Serial # 2each",
+    // A catalog model after SN is a machine, not a serial.
+    "Bunn TB3 SN CBS-1231",
+    "Bunn TB3\nSN CBS-1232",
+    "Bunn TB3 SN51H-15",
   ]) {
     assert.equal(exact(text), null, text);
   }
