@@ -83,12 +83,7 @@ export function stackPmSql(): string {
         where j.id = $2
         for update
      ), pm as (
-       select p.id, p.customer, p.status, p.stacked_job_id,
-              exists (
-                select 1 from invoices i
-                join invoice_lines l on l.invoice_id = i.id
-               where i.entity_type = 'pm' and i.entity_id = p.id
-              ) as has_lines
+       select p.id, p.customer, p.status, p.stacked_job_id
          from pm_jobs p
         where p.id = $1
         for update
@@ -109,7 +104,9 @@ export function stackPmSql(): string {
           and ${ticketKey} <> 'walkin'
           and ${pmKey} = ${ticketKey}
           and ticket.stacked < 10
-          and not pm.has_lines
+          -- A volatile function reads with a fresh snapshot, so an own-invoice approve that committed while this
+          -- statement waited for the PM lock is seen (a plain subquery here would use the statement's old snapshot).
+          and not pm_own_invoice_has_lines(pm.id)
      ), upd as (
        update pm_jobs p
           set stacked_job_id = ok.job_id, updated_at = now()

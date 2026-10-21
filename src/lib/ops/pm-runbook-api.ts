@@ -687,8 +687,8 @@ const addPartInput = z.object({
 /** cleanQty("0.001") rounds to 0, and the table then rejects it. Refuse that before the insert. */
 export function machinePartQty(raw: unknown): number {
   const qty = cleanQty(raw);
-  if (qty != null && qty <= 0) throw new Error("Quantity must be more than 0.");
-  if (qty == null || qty > 1000) throw new Error("Quantity must be more than zero.");
+  if (qty == null || qty <= 0) throw new Error("Quantity must be more than 0.");
+  if (qty > 1000) throw new Error("Quantity can't be more than 1000.");
   return qty;
 }
 

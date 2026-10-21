@@ -57,8 +57,9 @@ async function add(pmId, itemId, piece = "piece:linea pb#1", extra = {}) {
 test("a quantity that rounds to zero is refused before the insert", () => {
   assert.throws(() => machinePartQty("0.001"), /Quantity must be more than 0\./);
   assert.equal(machinePartQty("2"), 2);
-  assert.throws(() => machinePartQty(""), /Quantity must be more than zero\./);
-  assert.throws(() => machinePartQty(0), /Quantity must be more than zero\./);
+  assert.throws(() => machinePartQty(""), /Quantity must be more than 0\./);
+  assert.throws(() => machinePartQty(0), /Quantity must be more than 0\./);
+  assert.throws(() => machinePartQty("1001"), /Quantity can't be more than 1000\./);
 });
 
 test("adding a part writes one row and one activity row", async () => {

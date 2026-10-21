@@ -245,17 +245,15 @@ const approveInput = targetInput.extend({
 /**
  * Approve a PM's own invoice only while it is not stacked. One statement: lock the PM, insert the header
  * and replace the lines only when stacked_job_id is null. Zero rows means it was stacked first.
+ * The stacked check sits on the locked row itself: in READ COMMITTED a `for update` that waited re-reads only the
+ * row it locks, while a separate subquery would still see the snapshot from before a stack committed.
  */
 export function approvePmInvoiceSql(): string {
   return `with locked as (
-       select p.id from pm_jobs p where p.id = $2::int for update
+       select p.id from pm_jobs p where p.id = $2::int and p.stacked_job_id is null for update
      ),
      open_pm as (
-       select locked.id
-         from locked
-        where not exists (
-          select 1 from pm_jobs p where p.id = locked.id and p.stacked_job_id is not null
-        )
+       select locked.id from locked
      ),
      inv as (
        insert into invoices (
