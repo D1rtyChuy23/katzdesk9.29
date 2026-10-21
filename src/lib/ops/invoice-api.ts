@@ -5,7 +5,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { cleanQty, cleanRate, kindForItem, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { loadTicketCharges, writeTicketCharges } from "@/lib/ops/charges-api";
 import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount";
-import { INVOICE_TARGETS, invoiceError, invoiceTotals, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
+import { INVOICE_TARGETS, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 
@@ -72,9 +72,16 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     };
   }
   if (type === "pm") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null }>("select customer, wo from pm_jobs where id = $1", [id]))[0];
+    const r = (await sql.query<{ customer: string | null; wo: string | null; stacked_job_id: number | null; job_wo: string | null; call_id: string | null }>(
+      `select p.customer, p.wo, p.stacked_job_id, j.wo as job_wo, j.call_id
+         from pm_jobs p
+         left join service_jobs j on j.id = p.stacked_job_id
+        where p.id = $1`,
+      [id],
+    ))[0];
     if (!r) throw new Error("That PM is no longer on the list.");
-    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id, wo: r.wo }), recordRep: null, locked: null };
+    const locked = r.stacked_job_id == null ? null : stackedPmLock({ jobId: Number(r.stacked_job_id), wo: r.job_wo, callId: r.call_id });
+    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id, wo: r.wo }), recordRep: null, locked };
   }
   if (type === "install") {
     const r = (await sql.query<{ customer: string | null; account_rep: string | null }>("select customer, account_rep from installs where id = $1 and archived = false", [id]))[0];
@@ -89,6 +96,11 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
   const r = (await sql.query<{ customer: string | null; producer: string | null }>("select customer, producer from deals where id = $1 and archived = false", [id]))[0];
   if (!r) throw new Error("That deal is no longer on the list.");
   return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id }), recordRep: r.producer, locked: null };
+}
+
+/** The lock sentence resolveRecord returns for a PM, or null when the PM bills on its own invoice. */
+export async function pmInvoiceLock(sql: Sql, pmId: number): Promise<string | null> {
+  return (await resolveRecord(sql, "pm", pmId)).locked;
 }
 
 /** Billing info from the account: name, account number, address, rep (the account's rep, else the record's). */

@@ -7,6 +7,7 @@ import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/l
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook, stampMachineParts } from "./pm-runbook-api";
+import { stackCustomerRefusal } from "./pm-stack";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
 import { boardLocked, cleanTime, type BoardType } from "./day-board";
@@ -244,7 +245,8 @@ function mapPm(r: any, today: any) {
 			done: !!r.done,
 			projected
 		}, today),
-		aviKatz: false
+		aviKatz: false,
+		stackedJobId: r.stacked_job_id == null ? null : Number(r.stacked_job_id)
 	};
 }
 function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
@@ -833,6 +835,11 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	const sql = await ready();
 	const cur = await sql`select * from service_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Job not found");
+	if (data.customer !== undefined) {
+		const partners = await sql`select id, customer from pm_jobs where stacked_job_id = ${data.id}`;
+		const refusal = stackCustomerRefusal(cur[0].customer, data.customer, partners.map((p: { id: number; customer: string | null }) => ({ id: Number(p.id), customer: p.customer })), "ticket");
+		if (refusal) throw new Error(refusal);
+	}
 	const next = {
 		contact: data.contact ?? cur[0].contact,
 		phone: data.phone ?? cur[0].phone,
@@ -991,10 +998,30 @@ export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddlew
 	const scope = await salesRepScope(sql, context.userId);
 	return applyMarks((await sql`select * from pm_jobs order by received desc nulls last, id desc`).map((r) => mapPm(r, todayChicago())), marks).filter((p: any) => !scope || scope(accountRepFor(marks, p.customer ?? null)));
 });
+export const getPm = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d)).handler(async ({ data, context }: any): Promise<PmJob | null> => {
+	const sql = await ready();
+	const marks = await loadAccountMarks(sql);
+	const rows = await sql`select * from pm_jobs where id = ${data.id}`;
+	if (!rows[0]) return null;
+	const scope = await salesRepScope(sql, context.userId);
+	const [pm] = applyMarks([mapPm(rows[0], todayChicago())], marks);
+	if (scope && !scope(accountRepFor(marks, pm.customer ?? null))) return null;
+	return pm;
+});
 export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; style?: string | null; projected?: string | null; partsStatus?: string | null; status?: string; technician?: string | null; notes?: string | null; workDone?: string | null; completedAt?: string | null; done?: boolean; wo?: string | null }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`select * from pm_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("PM not found");
+	if (data.customer !== undefined && cur[0].stacked_job_id) {
+		const partners = await sql`select id, customer from service_jobs where id = ${cur[0].stacked_job_id}`;
+		const refusal = stackCustomerRefusal(
+			cur[0].customer,
+			data.customer,
+			partners.map((p: { id: number; customer: string | null }) => ({ id: Number(p.id), customer: p.customer })),
+			"pm",
+		);
+		if (refusal) throw new Error(refusal);
+	}
 	const c = cur[0];
 	const status = data.status ?? c.status;
 	const done = data.done === undefined ? data.status === undefined ? c.done : CLOSED_PM.has(status) : data.done;
