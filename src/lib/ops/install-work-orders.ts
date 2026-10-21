@@ -7,8 +7,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { todayChicago } from "@/lib/ops/clock";
-import { woCanonical, woMatchKey } from "@/lib/ops/corrigo";
+import { addDays, todayChicago } from "@/lib/ops/clock";
+import { WO_WRAP, woCanonical, woMatchKey } from "@/lib/ops/corrigo";
 import type { InstallWorkOrder } from "@/lib/ops/types";
 import { INSTALL_WOS_SQL, findWoEverywhere, type WoBoardHit } from "@/lib/ops/wo-search";
 
@@ -184,6 +184,43 @@ async function openInstall(sql: Sql, installId: number): Promise<{ id: number; w
   return rows[0];
 }
 
+/** Corrigo's ST# numbers started over after 9999 somewhere on the desk (deskHasWrapped, read in SQL). */
+async function deskWrapped(sql: Sql): Promise<boolean> {
+  const rows = await sql.query(
+    `select 1 from (select wo from service_jobs union all select wo from pm_jobs union all select wo from installs
+                    union all select wo from install_work_orders) w
+      where ltrim(regexp_replace(coalesce(wo, ''), '[^0-9]', '', 'g'), '0') ~ '^[0-9]{4,}$'
+        and ltrim(regexp_replace(wo, '[^0-9]', '', 'g'), '0')::numeric >= ${WO_WRAP}
+      limit 1`,
+  );
+  return rows.length > 0;
+}
+
+/**
+ * One WO is one install's: two projects with one number are one project. Refuse a WO another open install carries —
+ * after the wrap, not a completed install whose WO came in over a year ago (the import calls that number a new job).
+ */
+export async function assertWoFree(sql: Sql, installId: number, raw: string): Promise<void> {
+  const key = woMatchKey(raw);
+  if (!key) return;
+  const near = await sql.query<{ id: number; wo: string; complete: boolean; received: string | null }>(
+    `select i.id, w.wo, i.complete,
+            to_char(coalesce((select x.received from install_work_orders x where x.install_id = i.id and x.wo = w.wo limit 1),
+                             i.received, i.completed_at), 'YYYY-MM-DD') as received
+       from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
+      where i.archived = false and i.id <> $1 and regexp_replace(w.wo, '[^A-Za-z0-9]', '', 'g') ilike '%' || $2 || '%'
+      order by i.id`,
+    [installId, key],
+  );
+  const hits = near.filter((r) => woMatchKey(r.wo) === key);
+  if (!hits.length) return;
+  const n = /^\d+$/.test(key) ? Number(key) : Infinity;
+  const cutoff = addDays(todayChicago(), -365);
+  const wrapped = n <= WO_WRAP && hits.some((r) => r.complete) ? await deskWrapped(sql) : false;
+  const other = hits.find((r) => !(wrapped && r.complete && !!r.received && r.received < cutoff));
+  if (other) throw new Error(`${/^\d+$/.test(key) ? woCanonical(raw) : raw.trim()} is on install #${other.id}. Merge the installs instead.`);
+}
+
 const addInput = z.object({ installId: z.number().int().positive(), wo: z.string().trim().min(1).max(60) });
 const removeInput = z.object({ installId: z.number().int().positive(), matchKey: z.string().trim().min(1).max(60) });
 
@@ -197,15 +234,7 @@ export async function addInstallWorkOrderFor(sql: Sql, userId: string, data: z.i
   const wo = /^\d+$/.test(key) ? woCanonical(data.wo) : data.wo.trim();
   const have = (await loadInstallWos(sql, [install.id])).get(install.id) ?? [];
   if (have.some((w) => w.matchKey === key)) throw new Error(`${wo} is already on this install.`);
-  // One WO is one install's: two projects with one number are one project.
-  const near = await sql.query<{ id: number; wo: string }>(
-    `select i.id, w.wo from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
-      where i.archived = false and i.id <> $1 and regexp_replace(w.wo, '[^A-Za-z0-9]', '', 'g') ilike '%' || $2 || '%'
-      order by i.id`,
-    [install.id, key],
-  );
-  const other = near.find((r) => woMatchKey(r.wo) === key);
-  if (other) throw new Error(`${wo} is on install #${other.id}. Merge the installs instead.`);
+  await assertWoFree(sql, install.id, data.wo);
   const actor = await actorName(sql, userId);
   await recordInstallWo(sql, install.id, { wo, source: "desk", addedBy: actor });
   await log(sql, install.id, actor, `added ${wo}`);

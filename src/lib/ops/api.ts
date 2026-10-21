@@ -72,7 +72,7 @@ import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
 import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, accountNumberFor } from "./reps";
 import { woMatchKey } from "./corrigo";
 import { mergeServiceJobs } from "./wo-duplicates";
-import { INSTALL_WOS_SQL, setPrimaryWo, withWorkOrders } from "./install-work-orders";
+import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
 import { deliverPings } from "./notify";
@@ -1406,6 +1406,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	// The owner's lock on the customer: anyone else's change is refused, the same message as the equipment lock.
 	await assertCustomerChangeAllowed(sql, c, data.customer);
 	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
+	// The WO # field follows Add WO's rule: another open install's WO means merging the installs.
+	if (data.wo !== undefined && data.wo && woMatchKey(data.wo) !== woMatchKey(c.wo ?? "")) await assertWoFree(sql, data.id, data.wo);
 	// Tech Request Form issued: a person ticks it, and only Sales or an admin may.
 	if (data.trfIssued !== undefined && !!data.trfIssued !== !!c.trf_issued) {
 		const me = (await sql.query("select is_admin, desk_role, username from desk_accounts where user_id = $1", [context.userId]))[0] as any;
