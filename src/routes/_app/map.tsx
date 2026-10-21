@@ -4,13 +4,13 @@ import { FilterChip } from "@/components/desk/desk-charts";
 import { CustomerMap } from "@/components/desk/customer-map";
 import { TerritoryView } from "@/components/desk/territory-view";
 
-type MapSearch = { account?: number };
+type MapSearch = { account?: number; tab?: "territories" };
 
 export const Route = createFileRoute("/_app/map")({
   validateSearch: (s: Record<string, unknown>): MapSearch => {
     const raw = s.account;
     const n = typeof raw === "number" ? raw : typeof raw === "string" && raw ? Number(raw) : NaN;
-    return Number.isFinite(n) && n > 0 ? { account: n } : {};
+    return { ...(Number.isFinite(n) && n > 0 ? { account: n } : {}), ...(s.tab === "territories" ? { tab: "territories" } : {}) };
   },
   component: Page,
 });
@@ -18,9 +18,9 @@ export const Route = createFileRoute("/_app/map")({
 type MapTab = "accounts" | "territories";
 
 function Page() {
-  const { account } = Route.useSearch();
+  const { account, tab: startTab } = Route.useSearch();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<MapTab>("accounts");
+  const [tab, setTab] = useState<MapTab>(startTab ?? "accounts");
   return (
     <div>
       <header>

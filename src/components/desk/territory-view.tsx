@@ -596,7 +596,7 @@ function PinCard({ account: a, onClose }: { account: AccountGeo; onClose: () => 
         </Button>
       </div>
       <Button asChild size="sm" className="mt-2 h-9 px-3">
-        <Link to="/customers" search={{ open: a.id }}>
+        <Link to="/customers" search={{ open: a.id, from: "territories" }}>
           <Store />
           Open Account
         </Link>

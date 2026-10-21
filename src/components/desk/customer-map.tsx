@@ -932,7 +932,7 @@ function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGe
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Button asChild size="sm" className="h-9 px-3">
-          <Link to="/customers" search={{ open: a.id }} data-testid="map-open-account">
+          <Link to="/customers" search={{ open: a.id, from: "map" }} data-testid="map-open-account">
             <Store />
             Open Account
           </Link>

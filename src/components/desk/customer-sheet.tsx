@@ -139,7 +139,7 @@ export function CustomerHistorySheet({
       void qc.invalidateQueries({ queryKey: ["customer-address"] });
       void qc.invalidateQueries({ queryKey: ["account-geo"] });
       if (row.merged || row.id !== customerId) {
-        void navigate({ to: "/customers", search: { open: row.id }, replace: true });
+        void navigate({ to: "/customers", search: (prev) => ({ ...prev, open: row.id }), replace: true });
       }
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save name"),

@@ -9,6 +9,14 @@ export function parseOpenSearch(s: Record<string, unknown>): OpenSearch {
   return {};
 }
 
+/** Customers: `?open=`, plus `from=` when the Map opened the account, so closing it goes back there. */
+export type CustomerSearch = OpenSearch & { from?: "map" | "territories" };
+
+export function parseCustomerSearch(s: Record<string, unknown>): CustomerSearch {
+  const base = parseOpenSearch(s);
+  return s.from === "map" || s.from === "territories" ? { ...base, from: s.from } : base;
+}
+
 /** Tickets and TLC + Factor: `?open=`, plus `tab=ping` when a ping or note notification opened the ticket. */
 export type TicketSearch = OpenSearch & { tab?: "ping" };
 
