@@ -650,8 +650,8 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
 const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
 /** A serial on its own line ("SN: 4471", "S/N 4471", "Serial # 4471"), or one ending a machine's line. */
 const SERIAL = String.raw`(?:s\/?n|serial(?:\s*(?:#|no\.?|number))?)`;
-// Spaced or after ":"/"#" it is any token with a digit, but not a count ("x2", "2 units"); run together, only digits.
-const SERIAL_NUMBER = String.raw`${SERIAL}(?:(?:\s*[:#]\s*|\s+)(?!(?:x\d+|\d+x|\d+-?units?)$)[a-z0-9-]*\d[a-z0-9-]*|\d[\d-]*)$`;
+// The serial is one token with at least three digits ("ITCB064919", "X482"), so a count ("2pcs", "1of2") never is.
+const SERIAL_NUMBER = String.raw`${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))(?=(?:[a-z-]*\d){3})[a-z0-9-]+$`;
 const SERIAL_LINE = new RegExp(`^${SERIAL_NUMBER}`, "i");
 const SERIAL_TAIL = new RegExp(String.raw`\s+${SERIAL_NUMBER}`, "i");
 

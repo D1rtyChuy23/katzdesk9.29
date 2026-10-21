@@ -750,10 +750,13 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
   ]);
   assert.deepEqual(exact('Bunn ITCB-DV, 29" w/Flip Tray'), ['Bunn ITCB-DV, 29" w/Flip Tray']);
   assert.deepEqual(exact("Bunn TB3 SN12345"), ["Bunn TB3"]);
+  assert.deepEqual(exact("Bunn TB3 SN: X482"), ["Bunn TB3"]);
+  assert.deepEqual(exact("Bunn TB3 SN0110710025266E0006"), ["Bunn TB3"]);
+  assert.deepEqual(exact("Bunn TB3\nSerial No. 12345A"), ["Bunn TB3"]);
   assert.deepEqual(exact("Bunn TB3\nS/N TB3001"), ["Bunn TB3"]);
-  assert.deepEqual(exact("2 x Bunn TB3 SN: A1\nSN: A2"), ["Bunn TB3", "Bunn TB3"]);
-  assert.deepEqual(exact("Mazzer Mini Electronic, Bunn TB3 SN: 1"), ["Mazzer Mini Electronic", "Bunn TB3"]);
-  assert.deepEqual(exact("Mazzer Mini Electronic, Bunn TB3\nSN: 1"), ["Mazzer Mini Electronic", "Bunn TB3"]);
+  assert.deepEqual(exact("2 x Bunn TB3 SN: A1001\nSN: A1002"), ["Bunn TB3", "Bunn TB3"]);
+  assert.deepEqual(exact("Mazzer Mini Electronic, Bunn TB3 SN: 1001"), ["Mazzer Mini Electronic", "Bunn TB3"]);
+  assert.deepEqual(exact("Mazzer Mini Electronic, Bunn TB3\nSN: 1001"), ["Mazzer Mini Electronic", "Bunn TB3"]);
   assert.deepEqual(exact("Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed"), [
     "Blendtec Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed",
   ]);
@@ -793,7 +796,7 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
     // At most one serial per unit of the machine line it follows or ends.
     "Bunn TB3 SN: TB3001\nSN: TB3002",
     "Bunn TB3 SN: TB3001; SN: TB3002",
-    "2 x Bunn TB3 SN: A1\nSN: A2\nSN: A3",
+    "2 x Bunn TB3 SN: A1001\nSN: A1002\nSN: A1003",
     "Bunn TB3\nSN: TB3001\nSN: TB3002\nMazzer Mini Electronic",
     "Bunn TB3 SN: TB3001\nMazzer Mini Electronic\nSN: 2608789\nSN: 2608790",
     "SN: 123\nBunn TB3",
@@ -801,13 +804,19 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
     "Bunn TB3 SNX-1000",
     "Bunn TB3 Serializer2",
     // Serial lines after a comma line belong to its last machine.
-    "Bunn TB3, Mazzer Mini Electronic SN: 1\nSN: 2",
-    "Bunn TB3, Mazzer Mini Electronic\nSN: 1\nSN: 2",
-    "2 x Bunn TB3, Mazzer Mini Electronic SN: 1\nSN: 2\nSN: 3",
-    // A word or a count run against SN is not a serial.
+    "Bunn TB3, Mazzer Mini Electronic SN: 1001\nSN: 1002",
+    "Bunn TB3, Mazzer Mini Electronic\nSN: 1001\nSN: 1002",
+    "2 x Bunn TB3, Mazzer Mini Electronic SN: 1001\nSN: 1002\nSN: 1003",
+    // A serial has at least three digits, so a word or a count after SN is not one.
     "Bunn TB3 SN2GO",
     "Bunn TB3 SN x2",
     "Bunn TB3 S/N 2-units",
+    "Bunn TB3 SN 2pcs",
+    "Bunn TB3 SN qty2",
+    "Bunn TB3 S/N 1of2",
+    "Bunn TB3 S/N2",
+    "Bunn TB3\nSN: 2",
+    "Bunn TB3 Serial # 2each",
   ]) {
     assert.equal(exact(text), null, text);
   }
