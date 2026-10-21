@@ -293,11 +293,16 @@ export function AssetSheet({
                 save.mutate(
                   {
                     id: asset.id,
-                    model,
-                    serial: String(fd.get("serial") || "") || null,
-                    qty: Number(fd.get("qty") || 1),
-                    customerOwned: owned || null,
-                    purpose: String(fd.get("purpose") || "") || null,
+                    // A locked unit's record fields are disabled (and not in the form): only the notes are sent.
+                    ...(asset.lockedAt
+                      ? {}
+                      : {
+                          model,
+                          serial: String(fd.get("serial") || "") || null,
+                          qty: Number(fd.get("qty") || 1),
+                          customerOwned: owned || null,
+                          purpose: String(fd.get("purpose") || "") || null,
+                        }),
                     notes: String(fd.get("notes") || "") || null,
                   },
                   {
@@ -324,6 +329,8 @@ export function AssetSheet({
                 );
               }}
             >
+              {/* Locked: model, serial, quantity, owner and purpose wait for the owner to unlock it. Notes stay open. */}
+              <fieldset disabled={!!asset.lockedAt} className="contents" title={asset.lockedBy ? `Locked by ${asset.lockedBy}` : undefined} data-testid="asset-record-fields">
               <div className="sm:col-span-2">
                 <EquipmentCombo name="model" label="Model" value={model} onChange={setModel} required />
               </div>
@@ -348,6 +355,7 @@ export function AssetSheet({
                 <Label htmlFor="purpose">Purpose</Label>
                 <Input id="purpose" name="purpose" className="mt-1" defaultValue={asset.purpose ?? ""} />
               </div>
+              </fieldset>
               <div className="sm:col-span-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea id="notes" name="notes" className="mt-1" defaultValue={asset.notes ?? ""} />

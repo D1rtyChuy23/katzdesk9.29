@@ -51,7 +51,7 @@ import { backfillAssignedSerialsOnce } from "./serial-backfill";
 import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { assertUnlocked } from "./equipment-lock";
 import { LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "./equipment-lock-rules";
-import { boardRow, cleanMachine, confirmError, continuable, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus } from "./deal-board";
+import { boardRow, cleanMachine, confirmError, continuable, dropReleased, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus, releasedUids } from "./deal-board";
 import { listedEquipment, matchModel, catalogModels } from "./equipment";
 import {
   BACK_PALLETS,
@@ -1250,12 +1250,16 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 	const completion = data.completion === undefined ? c.completion : data.completion;
 	// The machine rows are the equipment list: equipment is kept as the joined models so lists and search still read it.
 	let machinesJson = c.machines ?? null;
+	// Every tie the owner ever released on this deal: a window opened before the release still sends that row.
+	const released = releasedUids(c.released_uids, release);
+	if (release.size) await sql`update deals set released_uids = ${JSON.stringify([...released])} where id = ${data.id}`;
 	if (data.machines !== undefined) {
 		const stored = parseMachinesJson(c.machines ?? null);
 		// Confirmed machines are changed on the Board: the deal keeps them as stored.
-		const onBoard = new Set<string>((await loadBoardProjects(sql)).flatMap((p: any) => p.machines.map((m: any) => m.uid)).filter((u: string) => u && !release.has(u)));
-		const kept = stored.filter((m) => !m.uid || !release.has(m.uid));
-		const packed = serializeMachines(lockConfirmed(keepTies(Array.isArray(data.machines) ? data.machines : [], kept), kept, onBoard));
+		const onBoard = new Set<string>((await loadBoardProjects(sql)).flatMap((p: any) => p.machines.map((m: any) => m.uid)).filter((u: string) => u && !released.has(u)));
+		const kept = stored.filter((m) => !m.uid || !released.has(m.uid));
+		const incoming = dropReleased(Array.isArray(data.machines) ? data.machines : [], released);
+		const packed = serializeMachines(lockConfirmed(keepTies(incoming, kept), kept, onBoard));
 		machinesJson = packed.machines;
 		data.equipment = packed.equipment;
 	}
@@ -1868,8 +1872,7 @@ export const createAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	}
 	return row;
 });
-export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; model?: string; serial?: string | null; qty?: number; customerOwned?: string | null; purpose?: string | null; notes?: string | null; pallet?: string | null; level?: number | null; site?: string }) => d).handler(async ({ data, context }: any): Promise<Asset> => {
-	const sql = await ready();
+export async function updateAssetFor(sql: any, data: { id: number; model?: string; serial?: string | null; qty?: number; customerOwned?: string | null; purpose?: string | null; notes?: string | null; pallet?: string | null; level?: number | null; site?: string }, context: { userId?: string } | null): Promise<Asset> {
 	const cur = await sql`select * from assets where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Asset not found");
 	const c = cur[0];
@@ -1877,8 +1880,15 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	const level = data.level === undefined ? c.level : data.level;
 	let line = c.line_no;
 	const site = data.site === undefined ? c.site : data.site;
-	// A locked unit keeps its place until the owner unlocks it.
-	if (site !== c.site || String(pallet ?? "") !== String(c.pallet ?? "") || Number(level ?? 0) !== Number(c.level ?? 0)) await assertUnlocked(sql, c);
+	// A locked unit keeps its place, model, serial, quantity, owner and purpose until the owner unlocks it. Notes stay open.
+	const same = (a: unknown, b: unknown) => String(a ?? "").trim() === String(b ?? "").trim();
+	const recordChanged =
+		(data.model !== undefined && !same(data.model, c.model)) ||
+		(data.serial !== undefined && !same(data.serial, c.serial)) ||
+		(data.qty !== undefined && Number(data.qty) !== Number(c.qty ?? 1)) ||
+		(data.customerOwned !== undefined && !same(data.customerOwned, c.customer_owned)) ||
+		(data.purpose !== undefined && !same(data.purpose, c.purpose));
+	if (recordChanged || site !== c.site || String(pallet ?? "") !== String(c.pallet ?? "") || Number(level ?? 0) !== Number(c.level ?? 0)) await assertUnlocked(sql, c);
 	if (isBarn(site) && pallet && !isValidBay(String(pallet))) {
 		throw new Error("Pick a bay A through P");
 	}
@@ -1922,7 +1932,8 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
 		});
 	}
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
-});
+}
+export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; model?: string; serial?: string | null; qty?: number; customerOwned?: string | null; purpose?: string | null; notes?: string | null; pallet?: string | null; level?: number | null; site?: string }) => d).handler(async ({ data, context }: any): Promise<Asset> => updateAssetFor(await ready(), data, context));
 /** Copy or clear a warehouse serial on a record that stores machine rows. Service jobs have none, so that path no-ops. */
 async function stampWarehouseSerial(sql: any, table: "installs" | "deals" | "service_jobs", id: number, unit: { model: string; serial: string | null }, mode: "place" | "clear", addRow: boolean) {
 	if (table === "service_jobs") {

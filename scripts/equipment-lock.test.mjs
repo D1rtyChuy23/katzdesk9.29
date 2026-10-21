@@ -17,7 +17,8 @@ const { canLockEquipment, setLock } = await import("../src/lib/ops/equipment-loc
 const { lockedMessage } = await import("../src/lib/ops/equipment-lock-rules.ts");
 const { placeMove } = await import("../src/lib/ops/unit-place-rules.ts");
 const api = await import("../src/lib/ops/api.ts");
-const { keepTies, lockConfirmed } = await import("../src/lib/ops/deal-board.ts");
+const { dropReleased, keepTies, lockConfirmed, releasedUids } = await import("../src/lib/ops/deal-board.ts");
+const { reviewRackUnitFor } = await import("../src/lib/ops/rack-stock.ts");
 const machines = await import("../src/lib/ops/machines.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
@@ -205,7 +206,7 @@ test("a confirmed deal machine the owner removes is not put back by the server",
   assert.deepEqual(lockConfirmed(keepTies(incoming, kept), kept, held).map((m) => m.uid), ["u2"]);
   const src = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
   assert.match(src, /if \(release\.size\) \{\s*const \{ canLockEquipment \} = await import\("\.\/equipment-lock"\);\s*if \(!\(await canLockEquipment\(sql, context\.userId\)\)\) throw/);
-  assert.match(src, /lockConfirmed\(keepTies\(Array\.isArray\(data\.machines\) \? data\.machines : \[\], kept\), kept, onBoard\)/);
+  assert.match(src, /lockConfirmed\(keepTies\(incoming, kept\), kept, onBoard\)/);
   assert.equal(machines.serializeMachines(kept).equipment, "Fetco 52H");
 });
 
@@ -234,4 +235,72 @@ test("the lock shows on every equipment list, and only the owner sees Lock / Unl
   assert.match(deals, /save\.mutate\(\{ id: deal\.id, machines: next, \.\.\.\(release\?\.length \? \{ releaseUids: release \} : \{\}\) \}\)/);
   const rows = read("machine-fields.tsx");
   assert.match(rows, /\{onRemoveLocked \? \(\s*<button[\s\S]*?onClick=\{\(\) => onRemoveLocked\(index\)\}/);
+});
+
+test("a stale window that still holds a machine the owner took off a deal does not put it back", () => {
+  const stored = [{ equipment: "Fetco 52H", serial: "", powerVoltage: "", uid: "u2", confirmedAt: "2026-10-01" }];
+  // The owner released u1 earlier; this save comes from a window opened before that.
+  const released = releasedUids(JSON.stringify(["u1"]));
+  const stale = [{ equipment: "Bunn TB3", serial: "", powerVoltage: "", uid: "u1", confirmedAt: "2026-10-01" }, stored[0]];
+  const onBoard = new Set(["u1", "u2"].filter((u) => !released.has(u)));
+  assert.deepEqual(lockConfirmed(keepTies(dropReleased(stale, released), stored), stored, onBoard).map((m) => m.uid), ["u2"]);
+  assert.deepEqual([...releasedUids("not json", ["u3"])], ["u3"]);
+  const src = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
+  assert.match(src, /const released = releasedUids\(c\.released_uids, release\);/);
+  assert.match(src, /const incoming = dropReleased\(Array\.isArray\(data\.machines\) \? data\.machines : \[\], released\);/);
+});
+
+test("a locked asset's model, serial, quantity, owner and purpose can't change; its notes can", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await people(pg);
+    const asset = (await pg.query("insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status, purpose) values ('equip', 'Bunn TB3', 'TB-1', 1, 'barn-back', 'A', 1, 1, 'ready', 'Spare') returning id")).rows[0].id;
+    await setLock(sql, "u-owner", { kind: "asset", id: asset, locked: true });
+    const ctx = { userId: "u-tech" };
+    for (const change of [{ model: "Fetco 52H" }, { serial: "TB-2" }, { qty: 2 }, { customerOwned: "Cafe" }, { purpose: "Loaner" }]) {
+      await assert.rejects(() => api.updateAssetFor(sql, { id: asset, ...change }, ctx), /Locked by chuy/, JSON.stringify(change));
+    }
+    // The same values sent back unchanged, and a note, still save.
+    const saved = await api.updateAssetFor(sql, { id: asset, model: "Bunn TB3", serial: "TB-1", qty: 1, customerOwned: null, purpose: "Spare", notes: "checked" }, ctx);
+    assert.equal(saved.notes, "checked");
+    const sheet = readFileSync(new URL("../src/components/desk/asset-sheet.tsx", import.meta.url), "utf8");
+    assert.match(sheet, /<fieldset disabled=\{!!asset\.lockedAt\}/);
+    assert.match(sheet, /\.\.\.\(asset\.lockedAt\s*\? \{\}/);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("logging a runbook unit checks the lock before it moves a unit or writes its serial or install date", () => {
+  const src = readFileSync(new URL("../src/lib/ops/pm-runbook-api.ts", import.meta.url), "utf8");
+  const fn = src.slice(src.indexOf("export const logRunbookAsset"), src.indexOf("/** The unit's serial (not 'acct:<id>')"));
+  assert.match(fn, /await assertUnitUnlocked\(sql, Number\(dup\.id\)\);\s*await sql\.query\("update account_equipment set customer = \$2/);
+  assert.match(fn, /await assertUnitUnlocked\(sql, accountId\);\s*await sql\.query\(\s*`update account_equipment\s*set serial = \$2/);
+  assert.match(fn, /await assertUnitUnlocked\(sql, accountId\);\s*await sql\.query\("update account_equipment set install_date = \$2/);
+});
+
+test("rejecting a rack add respects a person's lock and puts the System lock back on a unit it returns to sold or assigned", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await people(pg);
+    const add = async (fromStatus) =>
+      (
+        await pg.query(
+          `insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status, review_status, review_origin, review_from_status, review_from_site)
+           values ('equip', 'Bunn TB3', $1, 1, 'barn-back', 'A', 1, 1, 'ready', 'pending', 'moved', $2, 'field') returning id`,
+          [`TB-${fromStatus}`, fromStatus],
+        )
+      ).rows[0].id;
+    const sold = await add("sold");
+    await reviewRackUnitFor(sql, { id: sold, decision: "reject", note: "Wrong unit" }, { userId: "u-owner" });
+    assert.deepEqual((await pg.query("select status, locked_by from assets where id = $1", [sold])).rows[0], { status: "sold", locked_by: "System (sold)" });
+    const assigned = await add("assigned");
+    await reviewRackUnitFor(sql, { id: assigned, decision: "reject", note: "Wrong unit" }, { userId: "u-owner" });
+    assert.equal((await pg.query("select locked_by from assets where id = $1", [assigned])).rows[0].locked_by, "System (assigned)");
+    const held = await add("ready");
+    await pg.query("update assets set locked_at = now(), locked_by = 'chuy' where id = $1", [held]);
+    await assert.rejects(() => reviewRackUnitFor(sql, { id: held, decision: "reject", note: "Wrong unit" }, { userId: "u-owner" }), /Locked by chuy/);
+  } finally {
+    await pg.close();
+  }
 });

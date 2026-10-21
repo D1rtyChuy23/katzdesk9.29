@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
+import { isLocked, LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "@/lib/ops/equipment-lock-rules";
 import { flagOn } from "@/lib/ops/flag";
 import { serialKey } from "@/lib/ops/account-equip";
 import { notifyAdminsRackReview } from "@/lib/ops/notify";
@@ -285,84 +286,100 @@ const reviewInput = z.object({
   note: z.string().nullable().optional(),
 });
 
+/** Approve or reject a warehouse rack add (admin). */
+export async function reviewRackUnitFor(sql: Sql, data: z.infer<typeof reviewInput>, context: { userId: string }): Promise<{ ok: true }> {
+  const role = await roleOf(sql, context.userId);
+  if (!role.admin) throw new Error("Only an admin can review a rack add.");
+  const rows = await sql.query<{
+    id: number;
+    model: string;
+    serial: string | null;
+    review_status: string | null;
+    review_actor: string | null;
+    review_origin: string | null;
+    review_from_site: string | null;
+    review_from_pallet: string | null;
+    review_from_level: number | null;
+    review_from_line: number | null;
+    review_from_status: string | null;
+    status: string;
+    locked_at: unknown;
+    locked_by: string | null;
+  }>(
+    `select id, model, serial, review_status, review_actor, review_origin,
+            review_from_site, review_from_pallet, review_from_level, review_from_line, review_from_status,
+            status, locked_at, locked_by
+       from assets where id = $1`,
+    [data.id],
+  );
+  const asset = rows[0];
+  if (!asset) throw new Error("Unit not found");
+  if (asset.review_status !== "pending") throw new Error("This unit is not waiting for review.");
+  if (data.decision === "approve") {
+    await sql.query(
+      `update assets set review_status = 'approved', review_note = null, updated_at = now() where id = $1`,
+      [asset.id],
+    );
+    return { ok: true };
+  }
+  const note = (data.note ?? "").trim();
+  if (!note) throw new Error("Reject needs a short note.");
+  // A lock a person put on holds a reject too; only the owner unlocks it.
+  if (isLocked(asset) && !/^System \(/.test(asset.locked_by ?? "")) {
+    const { assertUnlocked } = await import("@/lib/ops/equipment-lock");
+    await assertUnlocked(sql, asset);
+  }
+  // Put back on an account or sold: the lock that status carries goes back on with it.
+  const restored = asset.review_from_status === "sold" ? LOCKED_BY_SOLD : asset.review_from_status === "assigned" ? LOCKED_BY_ASSIGNED : null;
+  if (asset.review_origin === "created") {
+    await sql.query("delete from assets where id = $1", [asset.id]);
+  } else {
+    await sql.query(
+      `update assets set
+         review_status = 'rejected',
+         review_note = $2,
+         status = coalesce($3, status),
+         site = coalesce($4, site),
+         pallet = $5,
+         level = $6,
+         line_no = $7,
+         locked_at = case when $8::text is not null then coalesce(locked_at, now()) else locked_at end,
+         locked_by = case when $8::text is not null then coalesce(locked_by, $8::text) else locked_by end,
+         updated_at = now()
+       where id = $1`,
+      [
+        asset.id,
+        note,
+        asset.review_from_status,
+        asset.review_from_site,
+        asset.review_from_pallet,
+        asset.review_from_level,
+        asset.review_from_line,
+        restored,
+      ],
+    );
+  }
+  if (asset.review_actor) {
+    const serial = asset.serial ? ` SN ${asset.serial}` : "";
+    await sql.query(
+      `insert into desk_notifications (user_id, from_user_id, from_name, body, entity_type, entity_id)
+       values ($1, $2, $3, $4, 'asset', $5)`,
+      [
+        asset.review_actor,
+        context.userId,
+        role.name,
+        `Rejected ${asset.model}${serial}. ${note}`,
+        asset.review_origin === "created" ? null : asset.id,
+      ],
+    );
+  }
+  return { ok: true };
+}
+
 export const reviewRackUnit = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof reviewInput>) => reviewInput.parse(d))
-  .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const sql = await ready();
-    const role = await roleOf(sql, context.userId);
-    if (!role.admin) throw new Error("Only an admin can review a rack add.");
-    const rows = await sql.query<{
-      id: number;
-      model: string;
-      serial: string | null;
-      review_status: string | null;
-      review_actor: string | null;
-      review_origin: string | null;
-      review_from_site: string | null;
-      review_from_pallet: string | null;
-      review_from_level: number | null;
-      review_from_line: number | null;
-      review_from_status: string | null;
-    }>(
-      `select id, model, serial, review_status, review_actor, review_origin,
-              review_from_site, review_from_pallet, review_from_level, review_from_line, review_from_status
-         from assets where id = $1`,
-      [data.id],
-    );
-    const asset = rows[0];
-    if (!asset) throw new Error("Unit not found");
-    if (asset.review_status !== "pending") throw new Error("This unit is not waiting for review.");
-    if (data.decision === "approve") {
-      await sql.query(
-        `update assets set review_status = 'approved', review_note = null, updated_at = now() where id = $1`,
-        [asset.id],
-      );
-      return { ok: true };
-    }
-    const note = (data.note ?? "").trim();
-    if (!note) throw new Error("Reject needs a short note.");
-    if (asset.review_origin === "created") {
-      await sql.query("delete from assets where id = $1", [asset.id]);
-    } else {
-      await sql.query(
-        `update assets set
-           review_status = 'rejected',
-           review_note = $2,
-           status = coalesce($3, status),
-           site = coalesce($4, site),
-           pallet = $5,
-           level = $6,
-           line_no = $7,
-           updated_at = now()
-         where id = $1`,
-        [
-          asset.id,
-          note,
-          asset.review_from_status,
-          asset.review_from_site,
-          asset.review_from_pallet,
-          asset.review_from_level,
-          asset.review_from_line,
-        ],
-      );
-    }
-    if (asset.review_actor) {
-      const serial = asset.serial ? ` SN ${asset.serial}` : "";
-      await sql.query(
-        `insert into desk_notifications (user_id, from_user_id, from_name, body, entity_type, entity_id)
-         values ($1, $2, $3, $4, 'asset', $5)`,
-        [
-          asset.review_actor,
-          context.userId,
-          role.name,
-          `Rejected ${asset.model}${serial}. ${note}`,
-          asset.review_origin === "created" ? null : asset.id,
-        ],
-      );
-    }
-    return { ok: true };
-  });
+  .handler(async ({ data, context }): Promise<{ ok: true }> => reviewRackUnitFor(await ready(), data, context));
 
 const testInput = z.object({
   id: z.number().int().positive(),

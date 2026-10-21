@@ -14,3 +14,6 @@ update assets
 -- The install whose pre-inspection load made the account row. The prune deletes only rows its own install made;
 -- a unit that was on the account before (imported, added by hand) is only taken off the visit.
 alter table account_equipment add column if not exists created_by_install integer;
+
+-- Board ties the owner took off a deal. A window opened before that still holds the row; its save drops it again.
+alter table deals add column if not exists released_uids text;
