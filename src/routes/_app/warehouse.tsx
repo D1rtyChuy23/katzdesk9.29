@@ -18,7 +18,7 @@ import {
   bayFor,
   slotId,
 } from "@/lib/ops/warehouse";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import type { Asset } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -46,7 +46,7 @@ type Rack = "barn-back" | "barn-front";
 type SlotKey = { rack: Rack; pallet: string; level: number };
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
@@ -55,6 +55,7 @@ function Page() {
   const [q, setQ] = useState("");
   const [slot, setSlot] = useState<SlotKey | null>(null);
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [movingId, setMovingId] = useState<number | null>(null);
   // Units ticked for a group move (warehouse / admin).
   const [picked, setPicked] = useState<number[]>([]);
@@ -621,7 +622,10 @@ function Page() {
         ) : null}
       </div>
 
-      <AssetSheet asset={selectedRow} onClose={() => setSelected(null)} />
+      <AssetSheet asset={selectedRow} onClose={() => {
+          setSelected(null);
+          back();
+        }} />
       <AddDialog
         open={create}
         onOpenChange={setCreate}

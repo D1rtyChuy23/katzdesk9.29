@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/service")({
 });
 
 function Page() {
-  const { open, tab } = Route.useSearch();
+  const { open, tab, from } = Route.useSearch();
   return (
     <JobsPage
       kind="service"
@@ -16,6 +16,7 @@ function Page() {
       lede="Field calls on a 48-hour clock. Active work stays on top; completed history is one toggle away."
       initialOpen={open}
       initialTab={tab}
+      from={from}
     />
   );
 }

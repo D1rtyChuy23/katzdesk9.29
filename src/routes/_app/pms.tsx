@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { PmSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
 import { ActionMenu, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
@@ -29,12 +29,13 @@ export const Route = createFileRoute("/_app/pms")({
 });
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const qc = useQueryClient();
   const pms = useQuery({ queryKey: ["pms"], queryFn: () => listPms() });
   const [q, setQ] = useState("");
   const [view, setView] = useState<"active" | "all" | "flagged" | "need-date">("active");
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("pms", "date-asc");
   const { filterMine, matchMine, role } = useMyView();
@@ -169,7 +170,10 @@ function Page() {
           </div>
         ) : null}
       </div>
-      <PmSheet pm={selectedRow} onClose={() => setSelected(null)} />
+      <PmSheet pm={selectedRow} onClose={() => {
+          setSelected(null);
+          back();
+        }} />
       <SimpleCreateDialog
         title="New PM"
         open={create}

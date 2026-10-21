@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { fromFor } from "@/lib/ops/search-params";
 import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { addDays, formatShortDate, todayChicago, weekBounds, WEEKDAYS } from "@/lib/ops/clock";
@@ -98,6 +99,7 @@ export function DayBoard({
 }) {
   const today = todayChicago();
   const navigate = useNavigate();
+  const here = useLocation();
   const qc = useQueryClient();
   const roster = useQuery({ queryKey: ["roster"], queryFn: () => listTechs() });
   const [day, setDay] = useState(today);
@@ -219,7 +221,7 @@ export function DayBoard({
   }
 
   function open(b: Block) {
-    void navigate({ to: META[b.type].to, search: { open: b.id } });
+    void navigate({ to: META[b.type].to, search: { open: b.id, from: fromFor(here, META[b.type].to) } });
   }
 
   // On a phone only about two day columns fit: the week opens with today's column next to the sticky tech column,

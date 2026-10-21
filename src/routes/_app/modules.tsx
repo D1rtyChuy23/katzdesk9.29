@@ -15,7 +15,7 @@ import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, StatusDonut, togg
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { SORT_ALPHA, SORT_DATE, SORT_EQUIP, SORT_STATUS, SORT_TECH, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ExportButton } from "@/components/desk/export-dialog";
@@ -27,11 +27,12 @@ export const Route = createFileRoute("/_app/modules")({
 });
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["modules"], queryFn: () => listModules() });
   const [q, setQ] = useState("");
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("modules", "status");
   const [bubble, setBubble] = useState<"ready" | "shop" | null>(null);
@@ -277,7 +278,10 @@ function Page() {
           </p>
         ) : null}
       </div>
-      <ModuleSheet row={selectedRow} onClose={() => setSelected(null)} onAssign={(m) => setAssignFor(m)} />
+      <ModuleSheet row={selectedRow} onClose={() => {
+          setSelected(null);
+          back();
+        }} onAssign={(m) => setAssignFor(m)} />
       <AssignModuleDialog module={assignFor} onOpenChange={(o) => !o && setAssignFor(null)} />
       <NewModuleDialog
         open={create}

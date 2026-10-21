@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useFromHere } from "@/lib/ops/search-params";
 import { ChevronDown, MapPinned, RotateCcw, Store, X } from "lucide-react";
 import { DeskMap, type MapPin } from "./desk-map";
 import { needsAttention, pointOf, scrollUnderHeader, useGeoIndex } from "./geo-data";
@@ -573,6 +574,7 @@ function AreaRow({
 
 /** The tapped pin, over the map's corner: name, rep, city, and a way into the account. */
 function PinCard({ account: a, onClose }: { account: AccountGeo; onClose: () => void }) {
+  const fromMap = useFromHere("/customers");
   return (
     <div
       className="absolute top-2 right-2 left-14 z-10 rounded-lg border border-border bg-card/95 p-3 shadow-[var(--shadow-soft)] sm:left-auto sm:w-72"
@@ -596,7 +598,7 @@ function PinCard({ account: a, onClose }: { account: AccountGeo; onClose: () => 
         </Button>
       </div>
       <Button asChild size="sm" className="mt-2 h-9 px-3">
-        <Link to="/customers" search={{ open: a.id }}>
+        <Link to="/customers" search={{ open: a.id, from: fromMap }}>
           <Store />
           Open Account
         </Link>

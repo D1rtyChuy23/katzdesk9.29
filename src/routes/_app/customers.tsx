@@ -3,7 +3,7 @@ import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState, type FormEvent } from "react";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { getMyAccess } from "@/lib/ops/access";
 import { addDirectoryEntry, archiveDirectoryEntry, listCustomerRecords, renameCustomer } from "@/lib/ops/api";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,9 @@ export const Route = createFileRoute("/_app/customers")({
 function Page() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const list = useQuery({ queryKey: ["customers", "records"], queryFn: () => listCustomerRecords() });
   const [q, setQ] = useState("");
@@ -126,12 +127,12 @@ function Page() {
 
   function openCustomer(id: number) {
     setSelected(id);
-    void navigate({ to: "/customers", search: { open: id }, replace: true });
+    void navigate({ to: "/customers", search: { open: id, from }, replace: true });
   }
 
   function closeCustomer() {
     setSelected(null);
-    void navigate({ to: "/customers", search: {}, replace: true });
+    if (!back()) void navigate({ to: "/customers", search: {}, replace: true });
   }
 
   return (

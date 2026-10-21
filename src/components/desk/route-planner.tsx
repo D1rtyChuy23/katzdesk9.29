@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { fromFor } from "@/lib/ops/search-params";
 import { ChevronLeft, ChevronRight, MapPin as MapPinIcon, Navigation, TriangleAlert } from "lucide-react";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { listTechs } from "@/lib/ops/roster";
@@ -115,6 +116,7 @@ export function RoutePlanner({
 }) {
   const today = todayChicago();
   const navigate = useNavigate();
+  const location = useLocation();
   const qc = useQueryClient();
   const geo = useGeoIndex();
   const roster = useQuery({ queryKey: ["roster"], queryFn: () => listTechs() });
@@ -285,7 +287,7 @@ export function RoutePlanner({
   );
 
   function open(s: PlacedStop) {
-    void navigate({ to: TYPE_META[s.type].to, search: { open: s.id } });
+    void navigate({ to: TYPE_META[s.type].to, search: { open: s.id, from: fromFor(location, TYPE_META[s.type].to) } });
   }
 
   const techChoices = useMemo(() => {
