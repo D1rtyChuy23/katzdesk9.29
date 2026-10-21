@@ -5,6 +5,14 @@
   "subtitle": "Faema X20 (S20) | Cycle Based Maintenance kits and checks",
   "sources": "Faema / Gruppo Cimbali Service Bulletin #S022 (11/2022), Preventive Maintenance Program CBM for S20/X20: plan tables, kit codes and the Measurements and Checks list. The CBM kits replace the old PPM kits A–I. Confirm kit codes with Faema before ordering.",
   "storageKey": "faema-x20-runbook-v1",
+  "visitsPerYear": {
+    "by": "plan",
+    "map": {
+      "basic": 1,
+      "standard": 2,
+      "business": 3
+    }
+  },
   "models": [
     {
       "id": "x20",

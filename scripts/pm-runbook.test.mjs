@@ -8,9 +8,11 @@ import {
   canWriteRunbook,
   defaultConfig,
   historyInterval,
+  intervalAgeLabel,
   intervalFromStyle,
   milestoneAge,
   nextFromHistory,
+  pastLastVisit,
   recommendInterval,
   visitCarriesShorter,
   changeAddedKits,
@@ -54,6 +56,7 @@ import {
   stepList,
   totalKits,
 } from "../src/lib/ops/pm-runbook.ts";
+import { splitEquipment } from "../src/lib/ops/equipment.ts";
 
 const raw = JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/eversys-e4-xwide.json", import.meta.url), "utf8"));
 const def = parseRunbookDefinition(raw);
@@ -658,4 +661,68 @@ test("every kit number can be stored and ticked, including a slash", () => {
       assert.equal(CHECK_KEY_RE.test(`kit:${kit.ev}`), true, `${def.id} kit:${kit.ev}`);
     }
   }
+});
+
+const x20 = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/faema-x20.json", import.meta.url), "utf8")));
+const x20Now = new Date("2026-10-19T15:00:00Z");
+
+test("X20 visits follow the plan, not a month style", () => {
+  const at = (install, plan) => recommendInterval(x20, install, x20Now, plan ? { plan } : {})?.id ?? null;
+  assert.equal(at("2025-10-19", "standard"), "2");
+  assert.equal(at("2025-10-19", "basic"), "1");
+  assert.equal(at("2025-10-19", "business"), "3");
+  assert.equal(at("2026-04-19", "standard"), "1");
+  assert.equal(at("2023-10-19", undefined), "6");
+  assert.equal(visitConfig(x20, { style: "12 month PM", installDate: "2023-10-19", now: x20Now, options: { plan: "standard" } }).pm, "6");
+  assert.equal(visitConfig(x20, { style: "12 month PM", installDate: "2023-10-19", now: x20Now, options: {} }).pm, "6");
+  assert.equal(nextFromHistory(x20, ["6", "3"])?.id, "4");
+  assert.equal(nextFromHistory(x20, ["6", "3"])?.combined, false);
+  assert.equal(nextFromHistory(x20, ["14"]), null);
+  assert.equal(historyInterval(x20, null, "6 month PM"), null);
+  assert.equal(historyInterval(x20, "6", "6 month PM"), "6");
+  assert.equal(intervalFromStyle(x20, "12 month PM"), null);
+  assert.equal(recommendInterval(x20, "2021-10-19", x20Now, { plan: "business" }), null);
+  assert.equal(pastLastVisit(x20, "2021-10-19", x20Now, { plan: "business" }), true);
+  assert.equal(pastLastVisit(x20, "2022-04-19", x20Now, { plan: "business" }), false);
+  assert.equal(recommendInterval(x20, "2022-04-19", x20Now, { plan: "business" })?.id, "14");
+  assert.equal(pastLastVisit(x20, "2025-10-19", x20Now, { plan: "standard" }), false);
+  assert.equal(pastLastVisit(def, "2021-10-19", x20Now), false);
+  assert.equal(intervalAgeLabel(x20, 2), "visit 2");
+  assert.equal(intervalAgeLabel(def, 36), "year 3");
+  assert.equal(intervalAgeLabel(def, 3), "month 3");
+  const sego = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/bravilor-sego12.json", import.meta.url), "utf8")));
+  assert.equal(intervalFromStyle(sego, "12 month PM"), "12");
+  assert.equal(intervalFromStyle(sego, "6 month PM"), "6");
+  assert.equal(sego.defaultStyleLast, undefined);
+  assert.equal(sego.visitsPerYear, undefined);
+});
+
+test("visitsPerYear names an option and interval ids run 1..n", () => {
+  const rawX20 = JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/faema-x20.json", import.meta.url), "utf8"));
+  assert.equal(parseRunbookDefinition(rawX20).visitsPerYear.by, "plan");
+  const badBy = structuredClone(rawX20);
+  badBy.visitsPerYear.by = "nope";
+  assert.throws(() => parseRunbookDefinition(badBy));
+  const gap = structuredClone(rawX20);
+  gap.intervals = gap.intervals.filter((i) => i.id !== "4");
+  assert.throws(() => parseRunbookDefinition(gap));
+});
+
+test("Faema X20 is one machine, not a quantity, and plans as faema-x20", async () => {
+  assert.deepEqual(splitEquipment("Faema X20"), ["Faema X20"]);
+  assert.deepEqual(splitEquipment("X20"), ["X20"]);
+  assert.deepEqual(splitEquipment("Classe 5 x2"), ["Classe 5"]);
+  assert.deepEqual(splitEquipment("TB3 x 2"), ["TB3"]);
+  const { register } = await import("node:module");
+  await register("./node-resolve-hook.mjs", import.meta.url);
+  const { runbookForPiece } = await import("../src/lib/ops/runbooks/index.ts");
+  const match = (piece) => {
+    const hit = runbookForPiece(piece);
+    return hit ? { runbookId: hit.runbook.def.id, model: hit.model } : null;
+  };
+  const units = planUnits("Faema X20", [], match);
+  assert.equal(units.length, 1);
+  assert.equal(units[0].runbookId, "faema-x20");
+  assert.equal(units[0].model, "x20");
+  assert.equal(planUnits("Bravilor Sego 12", [], match).map((u) => u.runbookId).join(), "bravilor-sego12");
 });
