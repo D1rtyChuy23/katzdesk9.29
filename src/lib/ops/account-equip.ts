@@ -37,6 +37,8 @@ export type ExistingUnit = {
   equipmentName: string;
   serial: string | null;
   serialKey: string | null;
+  /** Locked by the owner: an import never fills or rewrites it. */
+  lockedBy?: string | null;
 };
 
 export type UnitMatch = {
@@ -271,6 +273,15 @@ export function sameCatalogModel(a: string, b: string): boolean {
   return compactEquip(a) === compactEquip(b) && !!compactEquip(a);
 }
 
+/** Two account rows for one model: the same catalog name, or names that read as the same model either way round. */
+export function sameUnitModel(
+  a: { catalogModel: string; equipmentName: string },
+  b: { catalogModel: string; equipmentName: string },
+): boolean {
+  const names = (u: { catalogModel: string; equipmentName: string }) => [u.catalogModel, u.equipmentName].filter((n) => n?.trim());
+  return names(a).some((x) => names(b).some((y) => x.trim().toLowerCase() === y.trim().toLowerCase() || sameCatalogModel(x, y)));
+}
+
 export function matchAccount(name: string, accounts: AccountHit[]): AccountMatch {
   const trimmed = String(name ?? "").trim();
   if (!trimmed) return { status: "unmatched", account: null, candidates: [] };
@@ -475,13 +486,21 @@ export function matchExistingUnit(opts: {
     if (foreign) {
       return { action: "review", existingId: null, foreignAccount: foreign.customer };
     }
+    // The same serial on this account is that unit whatever model it was saved under.
     const same = opts.existing.find(
-      (e) =>
-        serialKey(e.serial) === key &&
-        normalizeCustomerKey(e.customer) === customerKey &&
-        sameCatalogModel(e.catalogModel, opts.catalogModel),
+      (e) => serialKey(e.serial) === key && normalizeCustomerKey(e.customer) === customerKey,
     );
     if (same) return { action: "update", existingId: same.id, foreignAccount: null };
+    // A unit of this model with no serial yet takes it (the one with this name first); adding made two of one machine.
+    const blank = opts.existing.filter(
+      (e) =>
+        normalizeCustomerKey(e.customer) === customerKey &&
+        sameCatalogModel(e.catalogModel, opts.catalogModel) &&
+        !serialKey(e.serial) &&
+        !e.lockedBy,
+    );
+    const fill = blank.find((e) => sameEquipLabel(e.equipmentName, opts.equipmentName)) ?? blank[0];
+    if (fill) return { action: "update", existingId: fill.id, foreignAccount: null };
     return { action: "add", existingId: null, foreignAccount: null };
   }
   const same = opts.existing.find(

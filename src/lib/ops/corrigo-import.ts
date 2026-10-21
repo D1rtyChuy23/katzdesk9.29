@@ -25,7 +25,7 @@ import {
   type CorrigoRecord,
   type OpenInstall,
 } from "@/lib/ops/corrigo";
-import { installMachines } from "@/lib/ops/machines";
+import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
 
@@ -177,7 +177,10 @@ async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; ca
       order by id`,
   );
   const installs = rows.map((r): OpenInstall => {
-    const { machines, typed } = installMachines(r, catalog);
+    // The saved rows as saved: a row that is only a serial stays a row here (the install window folds it into the row
+    // above), so an unknown unit is never guessed into a match.
+    const saved = parseMachinesJson(r.machines);
+    const { machines, typed } = saved.length ? { machines: saved, typed: false } : installMachines(r, catalog);
     // Each saved machine row names its machine on its own; a row that reads as nothing is an unknown unit.
     const each = machines.map((m) => exactMachines([m.equipment], catalog));
     const exact = typed ? exactMachines([r.equipment ?? ""], catalog) : each.every(Boolean) ? (each as string[][]).flat() : null;

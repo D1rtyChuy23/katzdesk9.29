@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { lookupUnitPlace, setAssetPlace, setUnitPlace } from "@/lib/ops/unit-place";
 import { LEVELS, palletsFor, rackBayError } from "@/lib/ops/warehouse";
 import { Lock } from "lucide-react";
-import { PLACE_CHOICES, isRackPlace, placeDraftError, placeMove } from "@/lib/ops/unit-place-rules";
+import { PLACE_CHOICES, isRackPlace, placeDraftError } from "@/lib/ops/unit-place-rules";
 import { serialKey } from "@/lib/ops/account-equip";
 import { Input, Label } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
@@ -122,10 +122,13 @@ export function UnitPlaceField({
   compact = false,
   status,
   placeLabel,
+  lockedBy,
 }: {
   /** Known status and place of the unit, when the caller already has the record. */
   status?: string | null;
   placeLabel?: string | null;
+  /** Who locked the unit, when the caller already has the record (null: not locked). */
+  lockedBy?: string | null;
   serial?: string;
   model?: string | null;
   assetId?: number;
@@ -181,10 +184,12 @@ export function UnitPlaceField({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not set location"),
   });
   const bound = !!onDraft;
-  // Assigned to an account or sold: it is an asset at that site or customer, so the place is locked.
+  // Locked (assigning or selling stamps it; the owner can lock or unlock any unit): the place can't change.
   const unitStatus = status ?? (lookup.data?.found ? lookup.data.status : null);
-  if (unitStatus && placeMove({ status: unitStatus }) === "blocked") {
+  const by = lockedBy !== undefined ? lockedBy : lookup.data?.found ? lookup.data.lockedBy : null;
+  if (by) {
     const where = placeLabel ?? lookup.data?.place ?? "an account";
+    const byAssign = /^System \(assigned/.test(by) && unitStatus === "assigned";
     return (
       <div className={compact ? "col-span-2 min-w-0 lg:col-span-1" : undefined} data-testid="unit-place-locked">
         {compact ? <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Location</p> : <Label>Location</Label>}
@@ -192,8 +197,10 @@ export function UnitPlaceField({
           <Lock className="mt-0.5 size-3.5 shrink-0 text-copper" aria-hidden="true" />
           <span className="min-w-0 break-words">{where}</span>
         </p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          Locked. {unitStatus === "sold" ? "Sold" : "Assigned"} — an asset at that site or customer. Return it to the barn to move it.
+        <p className="mt-0.5 text-xs text-muted-foreground" title={`Locked by ${by}`}>
+          {byAssign
+            ? "Locked. Assigned — an asset at that site or customer. Return it to the barn to move it."
+            : `Locked by ${by}. Only the owner can unlock it.`}
         </p>
       </div>
     );

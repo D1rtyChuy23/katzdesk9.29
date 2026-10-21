@@ -4,7 +4,8 @@ import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
-import { catalogNames } from "@/lib/ops/inspection-api";
+import { catalogNames, dropMergedRow, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
+import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import {
   isWalkIn,
@@ -31,6 +32,9 @@ export type AccountEquipRow = {
   electrical: string | null;
   ownership: string | null;
   updatedAt: string;
+  /** Locked by the owner: Remove and Merge are off until it is unlocked. */
+  lockedAt: string | null;
+  lockedBy: string | null;
 };
 
 export type EquipPreviewRow = {
@@ -203,8 +207,13 @@ function mapDbUnit(r: {
   electrical: string | null;
   ownership: string | null;
   updated_at: string;
+  locked_at?: unknown;
+  locked_by?: string | null;
 }): AccountEquipRow {
+  const lockedAt = r.locked_at instanceof Date ? r.locked_at.toISOString() : r.locked_at ? String(r.locked_at) : null;
   return {
+    lockedAt,
+    lockedBy: lockedAt ? r.locked_by || "the owner" : null,
     id: r.id,
     customer: r.customer,
     catalogModel: r.catalog_model,
@@ -240,8 +249,10 @@ async function loadExisting(sql: Awaited<ReturnType<typeof getSql>>): Promise<Ex
       equipment_name: string;
       serial: string | null;
       serial_key: string | null;
+      locked_at: unknown;
+      locked_by: string | null;
     }>(
-      `select id, customer, catalog_model, equipment_name, serial, serial_key from account_equipment`,
+      `select id, customer, catalog_model, equipment_name, serial, serial_key, locked_at, locked_by from account_equipment`,
     )
     .catch(() => []);
   return rows.map((r) => ({
@@ -251,6 +262,7 @@ async function loadExisting(sql: Awaited<ReturnType<typeof getSql>>): Promise<Ex
     equipmentName: r.equipment_name,
     serial: r.serial,
     serialKey: r.serial_key,
+    lockedBy: r.locked_at ? r.locked_by || "the owner" : null,
   }));
 }
 
@@ -290,6 +302,11 @@ function buildPreviewRow(
     existingId = unit.existingId;
     foreignAccount = unit.foreignAccount;
     if (unit.foreignAccount) reviewReasons.push(`Serial already on ${unit.foreignAccount}`);
+    const locked = existing.find((e) => e.id === unit.existingId)?.lockedBy;
+    if (locked) {
+      action = "review";
+      reviewReasons.push(`Locked by ${locked}. Only the owner can unlock it.`);
+    }
   } else {
     action = "review";
   }
@@ -457,7 +474,8 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
         serial,
         existing,
       });
-      if (unit.foreignAccount) {
+      // A locked unit is left as it is: only the owner changes it.
+      if (unit.foreignAccount || existing.find((e) => e.id === unit.existingId)?.lockedBy) {
         skipped += 1;
         continue;
       }
@@ -577,7 +595,7 @@ export const listAccountEquipment = createServerFn({ method: "GET" })
           ownership: string | null;
           updated_at: string;
         }>(
-          `select id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, updated_at
+          `select id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, updated_at, locked_at, locked_by
              from account_equipment
             where lower(customer) = lower($1)
             order by lower(catalog_model), id`,
@@ -595,7 +613,7 @@ export const listAccountEquipment = createServerFn({ method: "GET" })
           ownership: string | null;
           updated_at: string;
         }>(
-          `select id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, updated_at
+          `select id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, updated_at, locked_at, locked_by
              from account_equipment
             order by lower(customer), lower(catalog_model), id`,
         );
@@ -608,12 +626,17 @@ async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: nu
   await sql.query("delete from pm_runbook_unit_links where account_equipment_id = $1", [id]);
 }
 
-/** Take one equipment row off the account. Does not guess which duplicate is real. */
+/**
+ * Take one equipment row off the account. Does not guess which duplicate is real. An open install whose visit has the
+ * unit loses that machine from its equipment list too; left on the list, the next load made the unit again.
+ */
 export async function removeEquipmentUnit(sql: Sql, id: number): Promise<{ id: number }> {
   const row = (await sql.query<{ id: number }>("select id from account_equipment where id = $1", [id]))[0];
   if (!row) throw new Error("That unit is not on the account.");
   const mod = (await sql.query<{ module_id: string }>("select module_id from modules where assigned_unit_id = $1 limit 1", [id]))[0];
   if (mod) throw new Error(`Eversys module ${mod.module_id} is still on this unit. Swap it or return it first.`);
+  await assertUnitUnlocked(sql, id);
+  await takeUnitOffOpenInstalls(sql, id);
   await dropEquipmentLinks(sql, id);
   await sql.query("delete from account_equipment where id = $1", [id]);
   return { id };
@@ -643,6 +666,9 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   const keep = rows.find((r) => r.id === keepId);
   const drop = rows.find((r) => r.id === dropId);
   if (!keep || !drop) throw new Error("Those units are not both on an account.");
+  // A locked unit is neither dropped nor rewritten.
+  await assertUnitUnlocked(sql, dropId);
+  await assertUnitUnlocked(sql, keepId);
   if (keep.customer.trim().toLowerCase() !== drop.customer.trim().toLowerCase()) {
     throw new Error("Those units are on different accounts.");
   }
@@ -656,6 +682,8 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
       [keep.id, serial || null, serial ? serialKey(serial) : null, electrical],
     );
   }
+  // An open install whose visit has both units loses the dropped unit's row; one row is left for the kept unit.
+  await dropMergedRow(sql, keep.id, drop.id);
   // An install that lists the dropped unit takes the kept serial on that machine. Otherwise its next load matches
   // no unit (a machine with no serial never takes a unit that has one) and adds the dropped unit back.
   const key = serialKey(serial);

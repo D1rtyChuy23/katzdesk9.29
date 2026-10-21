@@ -1,4 +1,5 @@
-import { serialKey } from "./account-equip.ts";
+import { compactEquip, sameCatalogModel, serialKey } from "./account-equip.ts";
+import { matchModel } from "./equipment.ts";
 
 /** A machine row that can take a warehouse serial. Other fields are left alone. */
 export type SerialMachine = {
@@ -22,24 +23,40 @@ export function sameWarehouseModel(a: string, b: string): boolean {
 }
 
 /**
+ * The same model under another name: the catalog reads both as one model, or one name is the other with more words
+ * after it ("Bunn ITCB" and 'Bunn ITCB-DV, 29" w/Flip Tray').
+ */
+export function readsAsModel(row: string, model: string, catalog: string[]): boolean {
+  if (sameCatalogModel(matchModel(row, catalog), matchModel(model, catalog))) return true;
+  const a = compactEquip(row);
+  const b = compactEquip(model);
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  return short.length >= 6 && long.startsWith(`${short} `);
+}
+
+/**
  * Put a warehouse unit's serial on the matching machine row.
- * Fills a row of that model with no serial. If every matching row already has one,
+ * Fills a row of that model with no serial (the same name first, then a row the catalog reads as that model). If every matching row already has one,
  * or the model is not on the list yet, adds a row when `addRow` is set.
  * Never writes volts, plug, or water.
  */
 export function placeWarehouseSerial<T extends SerialMachine>(
   rows: T[],
   unit: { model: string; serial: string | null | undefined },
-  opts?: { addRow?: boolean },
+  opts?: { addRow?: boolean; catalog?: string[] },
 ): { rows: T[]; changed: boolean } {
   const serial = String(unit.serial ?? "").trim();
   const model = String(unit.model ?? "").trim();
   if (!serial || !model) return { rows, changed: false };
   const key = serialKey(serial);
-  if (rows.some((r) => sameWarehouseModel(r.equipment, model) && serialKey(r.serial) === key)) {
+  // Already on a row, under this name or another one for the same model.
+  if (rows.some((r) => serialKey(r.serial) === key && (sameWarehouseModel(r.equipment, model) || readsAsModel(r.equipment, model, opts?.catalog ?? [])))) {
     return { rows, changed: false };
   }
-  const blank = rows.findIndex((r) => sameWarehouseModel(r.equipment, model) && !String(r.serial ?? "").trim());
+  const empty = (r: T) => !String(r.serial ?? "").trim();
+  let blank = rows.findIndex((r) => sameWarehouseModel(r.equipment, model) && empty(r));
+  // A row picked from the directory under its full name takes the unit too; adding one made two machines.
+  if (blank < 0) blank = rows.findIndex((r) => empty(r) && readsAsModel(r.equipment, model, opts?.catalog ?? []));
   if (blank >= 0) {
     const next = rows.slice();
     next[blank] = { ...next[blank]!, serial };

@@ -1,6 +1,7 @@
 import type { Sql } from "@/lib/db";
 import { parseMachinesJson, serializeMachines, specsFromInstall } from "./machines";
 import { placeWarehouseSerial } from "./warehouse-serial";
+import { catalogNames } from "./inspection-api";
 
 /**
  * Installs that already have a warehouse unit assigned, but a blank serial on the matching machine row.
@@ -27,13 +28,14 @@ export async function backfillAssignedSerials(sql: Sql): Promise<number> {
         and nullif(btrim(coalesce(a.serial, '')), '') is not null`,
   );
   let n = 0;
+  const catalog = assets.length ? await catalogNames(sql) : [];
   const deals = new Map<number, { model: string; serial: string }[]>();
   for (const a of assets) {
     const model = String(a.model ?? "").trim();
     const serial = String(a.serial ?? "").trim();
     if (!model || !serial) continue;
-    const specs = specsFromInstall(a.equipment, a.install_serial, a.power_voltage, a.machines);
-    const placed = placeWarehouseSerial(specs, { model, serial }, { addRow: false });
+    const specs = specsFromInstall(a.equipment, a.install_serial, a.power_voltage, a.machines, catalog);
+    const placed = placeWarehouseSerial(specs, { model, serial }, { addRow: false, catalog });
     if (placed.changed) {
       const packed = serializeMachines(placed.rows);
       await sql.query(
@@ -58,11 +60,11 @@ export async function backfillAssignedSerials(sql: Sql): Promise<number> {
     if (!row) continue;
     let specs = parseMachinesJson(row.machines);
     if (!specs.length && row.equipment) {
-      specs = specsFromInstall(row.equipment, null, null, null);
+      specs = specsFromInstall(row.equipment, null, null, null, catalog);
     }
     let changed = false;
     for (const unit of units) {
-      const placed = placeWarehouseSerial(specs, unit, { addRow: false });
+      const placed = placeWarehouseSerial(specs, unit, { addRow: false, catalog });
       if (!placed.changed) continue;
       specs = placed.rows;
       changed = true;
