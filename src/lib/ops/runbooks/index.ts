@@ -1,7 +1,10 @@
 /** Bundled PM runbook definitions. Phase 1: files in this folder; a later phase moves them to the database. */
 import { parseRunbookDefinition, type RunbookDefinition } from "../pm-runbook-schema.ts";
 import { matchE4XWide } from "../pm-runbook.ts";
+import { matchFaemaX20, matchSego12 } from "./faema-bravilor-match.ts";
+import sego12 from "./bravilor-sego12.json";
 import e4xwide from "./eversys-e4-xwide.json";
+import x20 from "./faema-x20.json";
 import gb5 from "./la-marzocco-gb5.json";
 import gs3 from "./la-marzocco-gs3.json";
 import kb90 from "./la-marzocco-kb90.json";
@@ -26,6 +29,8 @@ export const RUNBOOKS: RegisteredRunbook[] = [
   { def: parseRunbookDefinition(kb90), matchPiece: matchLmKb90, platforms: [], modules: false },
   { def: parseRunbookDefinition(gb5), matchPiece: matchLmGb5, platforms: [], modules: false },
   { def: parseRunbookDefinition(gs3), matchPiece: matchLmGs3, platforms: [], modules: false },
+  { def: parseRunbookDefinition(x20), matchPiece: matchFaemaX20, platforms: [], modules: false },
+  { def: parseRunbookDefinition(sego12), matchPiece: matchSego12, platforms: [], modules: false },
 ];
 
 export function runbookById(id: string): RegisteredRunbook | undefined {

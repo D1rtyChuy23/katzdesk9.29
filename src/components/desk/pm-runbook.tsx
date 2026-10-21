@@ -21,7 +21,7 @@ import { listModules } from "@/lib/ops/api";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
 import { assignModule } from "@/lib/ops/module-assign";
-import { visitBanners, applicableModules, combinedVisitNotes, kitListText, kitListWithAdded, longestIntervalId, milestoneAge, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { visitBanners, applicableModules, combinedVisitNotes, intervalAgeLabel, kitListText, kitListWithAdded, longestIntervalId, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
@@ -487,13 +487,19 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </div>
       ) : null}
 
+      {unit.pastLastVisit ? (
+        <div className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
+          <b>Past the last visit on this plan</b>. The install date is past the visits this sheet lists, so choose the interval yourself.
+        </div>
+      ) : null}
+
       {unit.recommended && unit.recommended.id !== c.pm ? (
         pmDone ? null : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
             Recommended: <b>{unit.recommended.label}</b>
             {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is{" "}
-            {milestoneAge(unit.recommended.milestone)} at this location. Choose otherwise if the customer wants a different service.
+            {intervalAgeLabel(def, unit.recommended.milestone)} at this location. Choose otherwise if the customer wants a different service.
           </span>
           {canWrite ? (
             <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.recommended!.id)}>
@@ -504,7 +510,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         )
       ) : unit.recommended ? (
         <p className="text-xs text-muted-foreground">
-          Matches the recommendation from the install date ({unit.installDate}, {milestoneAge(unit.recommended.milestone)}).
+          Matches the recommendation from the install date ({unit.installDate}, {intervalAgeLabel(def, unit.recommended.milestone)}).
         </p>
       ) : null}
 
@@ -606,7 +612,9 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                       </span>
                       <span className="font-mono text-base font-semibold whitespace-nowrap">
                         x{k.q}
-                        <small className="block text-right text-[10px] font-normal text-muted-foreground">{(def.intervals.find((i) => i.id === String(k.interval))?.label ?? `${k.interval}-month PM`).replace(/\s*PM\b.*$/, "")}</small>
+                        {def.visitsPerYear ? null : (
+                          <small className="block text-right text-[10px] font-normal text-muted-foreground">{(def.intervals.find((i) => i.id === String(k.interval))?.label ?? `${k.interval}-month PM`).replace(/\s*PM\b.*$/, "")}</small>
+                        )}
                       </span>
                     </label>
                     {k.added && canChangeKits ? (
