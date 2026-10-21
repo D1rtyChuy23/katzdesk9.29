@@ -10,3 +10,7 @@ alter table assets add column if not exists locked_by text;
 update assets
    set locked_at = now(), locked_by = 'System (assigned or sold)'
  where status in ('assigned', 'sold') and locked_at is null;
+
+-- The install whose pre-inspection load made the account row. The prune deletes only rows its own install made;
+-- a unit that was on the account before (imported, added by hand) is only taken off the visit.
+alter table account_equipment add column if not exists created_by_install integer;

@@ -150,9 +150,19 @@ export function specsFromInstall(
   return typedMachines(equipment ?? "", serial, powerVoltage, catalog);
 }
 
-const SN = /\bSN\s*:?\s*([A-Z0-9-]+)/i;
-/** A line that is only a serial ("SN: ITCB189507"), typed under the machine it belongs to. */
-export const SERIAL_LINE = /^SN\s*:?\s*[A-Z0-9-]+$/i;
+/** A serial typed on a machine's line ("Bunn ITCB SN:ITCB064919"): the same shape as SERIAL_LINE, so "Snowball" is not one. */
+const SN = /\bS\/?N(?:\s*[:#]\s*|\s+|(?=\d))((?=(?:[a-z-]*\d){3})[a-z0-9-]+)/i;
+/**
+ * A line that is only a serial ("SN: ITCB189507", "S/N 231515042"), typed under the machine it belongs to. SN is
+ * followed by a separator or a digit and the serial has at least three digits, as the Corrigo reader requires, so
+ * a machine called "Snowball" or "SNAP" is not read as a serial.
+ */
+export const SERIAL_LINE = /^S\/?N(?:\s*[:#]\s*|\s+|(?=\d))(?=(?:[a-z-]*\d){3})[a-z0-9-]+$/i;
+/** The serial on a SERIAL_LINE line, without the "SN:" in front. */
+function serialOfLine(line: string): string {
+  return line.replace(/^S\/?N\s*[:#]?\s*/i, "").trim();
+}
+
 /** A bare model suffix ("-DV") saved as a machine of its own. */
 export const SUFFIX_ONLY = /^[-\u2013][A-Za-z0-9]{1,8}$/;
 
@@ -166,7 +176,7 @@ export function storedMachines(raw: string | null | undefined): MachineSpec[] {
     const name = m.equipment.trim();
     const above = out[out.length - 1];
     if (SERIAL_LINE.test(name) || SUFFIX_ONLY.test(name)) {
-      const serial = m.serial || (SERIAL_LINE.test(name) ? (name.match(SN)?.[1] ?? "") : "");
+      const serial = m.serial || (SERIAL_LINE.test(name) ? serialOfLine(name) : "");
       if (above && !above.serial && serial) above.serial = serial;
       continue;
     }
@@ -202,7 +212,7 @@ function typedMachines(
   let above: MachineSpec | undefined;
   for (const line of lines) {
     if (SERIAL_LINE.test(line)) {
-      if (above && !above.serial) above.serial = line.match(SN)?.[1] ?? "";
+      if (above && !above.serial) above.serial = serialOfLine(line);
       above = undefined;
       continue;
     }

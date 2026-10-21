@@ -113,6 +113,11 @@ function splitNonCatalog(raw: string, catalog: string[]): string[] {
 /** One word that describes the machine before it (a colour, a finish or a size), never a machine of its own. */
 const TRAILING_WORD = /^(black|white|silver|red|blue|green|grey|gray|gold|copper|chrome|stainless|matte|polished|short|tall|small|medium|large)$/i;
 
+/** A name that is only such a word ("BLACK"): never a machine. */
+export function isTrailingWord(name: string): boolean {
+  return TRAILING_WORD.test(name.trim());
+}
+
 /** "Puqpress Q2 Automatic Tamper BLACK" read as the tamper + "BLACK": the word goes back on the tamper. */
 function attachTrailingWords(pieces: string[]): string[] {
   const out: string[] = [];

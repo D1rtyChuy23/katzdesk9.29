@@ -1466,7 +1466,8 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 		accountRep: data.accountRep === undefined ? undefined : canonicalRepName(data.accountRep) ?? (data.accountRep || null)
 	});
 	if (data.equipment !== undefined || data.machines !== undefined || data.serial !== undefined || data.powerVoltage !== undefined) {
-		await syncInstallUnits(sql, data.id, { prune: true });
+		// The list as stored before this save: only a serial changed in this save is written onto the row's unit.
+		await syncInstallUnits(sql, data.id, { prune: true, before: { equipment: c.equipment, serial: c.serial, power_voltage: c.power_voltage, machines: c.machines } });
 	}
 	const today = todayChicago();
 	const week = weekBounds(today);

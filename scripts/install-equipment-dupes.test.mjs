@@ -41,13 +41,14 @@ const serverCatalog = async (pg) =>
     ...(await pg.query("select distinct model from assets where kind = 'equip'")).rows.map((d) => d.model),
   ]);
 
-/** updateInstall's machine part: matchModel on the server catalog, then sync with prune. */
+/** updateInstall's machine part: matchModel on the server catalog, then sync with prune and the list stored before. */
 async function saveList(pg, sql, id, specs) {
   const cat = await serverCatalog(pg);
+  const before = (await pg.query("select equipment, serial, power_voltage, machines from installs where id = $1", [id])).rows[0];
   const packed = machines.serializeMachines(specs);
   const mj = JSON.stringify(machines.parseMachinesJson(packed.machines).map((s) => ({ ...s, equipment: matchModel(s.equipment, cat) })));
   await pg.query("update installs set equipment = $2, serial = $3, power_voltage = $4, machines = $5 where id = $1", [id, packed.equipment, packed.serial, packed.powerVoltage, mj]);
-  await syncInstallUnits(sql, id, { prune: true });
+  await syncInstallUnits(sql, id, { prune: true, before });
 }
 
 /** The install window's rows (mapInstall: specsFromInstall with the server catalog). */
@@ -446,4 +447,144 @@ test("Merge is offered for account rows that read as the same model", () => {
   assert.equal(sameUnitModel({ catalogModel: "Bunn TB3", equipmentName: "TB3" }, { catalogModel: "Fetco 52H", equipmentName: "Fetco 52H" }), false);
   const src = readFileSync(new URL("../src/components/desk/account-history.tsx", import.meta.url), "utf8");
   assert.match(src, /const twins = rows\.filter\(\(other, j\) => j !== i && other\.id && row\.id && sameUnitModel\(other, row\)\);/);
+});
+
+test("R1: a serial corrected on the account is not put back by opening the install, open or completed", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Revert Cafe", "Bunn TB3 SN:TB-111");
+    await readInspection(sql, id);
+    const unit = (await acct(pg, "Revert Cafe"))[0].id;
+    // A tech reads the real plate on a PM and corrects the account record.
+    await pg.query("update account_equipment set serial = 'TB-1111', serial_key = 'tb-1111' where id = $1", [unit]);
+    await readInspection(sql, id);
+    assert.deepEqual((await acct(pg, "Revert Cafe")).map((a) => a.serial), ["TB-1111"]);
+    await pg.query("update installs set complete = true where id = $1", [id]);
+    await readInspection(sql, id);
+    assert.deepEqual((await acct(pg, "Revert Cafe")).map((a) => a.serial), ["TB-1111"]);
+    // A save that leaves the row's serial as it was does not write it either.
+    await pg.query("update installs set complete = false where id = $1", [id]);
+    await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "TB-111", powerVoltage: "120V" }]);
+    assert.deepEqual((await acct(pg, "Revert Cafe")).map((a) => a.serial), ["TB-1111"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("R1: a corrected serial is never written onto an installed unit (install date) or on a completed install", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Dated Cafe", "Bunn TB3");
+    await readInspection(sql, id);
+    await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "TB-111", powerVoltage: "" }]);
+    const unit = (await acct(pg, "Dated Cafe"))[0].id;
+    await pg.query("update account_equipment set install_date = '2024-01-01' where id = $1", [unit]);
+    await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "TB-112", powerVoltage: "" }]);
+    assert.deepEqual((await acct(pg, "Dated Cafe")).map((a) => a.serial), ["TB-111"]);
+    await pg.query("update account_equipment set install_date = null where id = $1", [unit]);
+    await pg.query("update installs set complete = true where id = $1", [id]);
+    await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "TB-113", powerVoltage: "" }]);
+    assert.deepEqual((await acct(pg, "Dated Cafe")).map((a) => a.serial), ["TB-111"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("R2: the prune only unlinks a unit that was on the account before the visit; its runbook history stays", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, electrical, ownership) values ('Old Cafe', 'Bunn TB3', 'Bunn TB3', '120V', 'Sold')");
+    const before = (await acct(pg, "Old Cafe"))[0].id;
+    await pg.query("insert into unit_runbook_options (unit_key, runbook_id, options) values ($1, 'bunn', '{\"wand\":2}')", [`acct:${before}`]);
+    const id = await install(pg, "Old Cafe", "Bunn TB3\nFetco 52H");
+    await readInspection(sql, id);
+    await saveList(pg, sql, id, [{ equipment: "Fetco 52H", serial: "", powerVoltage: "" }]);
+    assert.deepEqual((await acct(pg, "Old Cafe")).map((a) => [a.id, a.equipment_name]).filter(([i]) => i === before), [[before, "Bunn TB3"]]);
+    assert.equal((await readInspection(sql, id)).machines.some((m) => m.equipmentId === before), false);
+    assert.equal((await pg.query("select count(*)::int n from unit_runbook_options")).rows[0].n, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("R2: Remove keeps the account record while runbook history or a copied visit points at it", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Hist Cafe", "Bunn TB3\nFetco 52H");
+    const units = (await readInspection(sql, id)).machines;
+    const tb3 = units.find((m) => m.name === "Bunn TB3").equipmentId;
+    const fetco = units.find((m) => m.name === "Fetco 52H").equipmentId;
+    await pg.query("insert into unit_runbook_options (unit_key, runbook_id, options) values ($1, 'bunn', '{}')", [`acct:${tb3}`]);
+    const other = await install(pg, "Hist Cafe", null);
+    await pg.query("insert into account_equipment (id, customer, catalog_model, equipment_name) values (9001, 'Hist Cafe', 'Fetco 52H', 'Fetco 52H')");
+    await pg.query("insert into install_inspection_units (install_id, equipment_id, copied_from_equipment) values ($1, 9001, $2)", [other, fetco]);
+    await removeInspectionUnit(sql, { installId: id, equipmentId: tb3 }, "Test");
+    await removeInspectionUnit(sql, { installId: id, equipmentId: fetco }, "Test");
+    const left = (await acct(pg, "Hist Cafe")).map((a) => a.id);
+    assert.ok(left.includes(tb3) && left.includes(fetco));
+  } finally {
+    await pg.close();
+  }
+});
+
+test("R3: a new row whose name extends an existing unit's name does not take that unit from its own row", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Steal Cafe", "Acme Brewer");
+    await readInspection(sql, id);
+    const u1 = (await acct(pg, "Steal Cafe"))[0].id;
+    await pg.query("insert into install_inspection_items (install_id, equipment_id, category, status) values ($1, $2, 'electrical', 'Passed')", [id, u1]);
+    await saveList(pg, sql, id, [
+      { equipment: "Acme Brewer Twin", serial: "", powerVoltage: "208V" },
+      { equipment: "Acme Brewer", serial: "", powerVoltage: "" },
+    ]);
+    const view = await readInspection(sql, id);
+    assert.equal(view.machines.find((m) => m.equipmentId === u1)?.name, "Acme Brewer");
+    assert.deepEqual((await acct(pg, "Steal Cafe")).map((a) => a.equipment_name), ["Acme Brewer", "Acme Brewer Twin"]);
+    // Remove sees the same claims: the Twin row's unit goes, not the original.
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: "Acme Brewer Twin", serial: "" }, "Test");
+    assert.deepEqual((await readInspection(sql, id)).machines.map((m) => m.equipmentId), [u1]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("R4: a saved machine called 'Snowball' or 'SNAP' is a machine, not a serial", () => {
+  const raw = JSON.stringify([
+    { equipment: "Bunn TB3", serial: "", powerVoltage: "" },
+    { equipment: "Snowball", serial: "", powerVoltage: "" },
+    { equipment: "SNAP", serial: "", powerVoltage: "" },
+    { equipment: "SN: 231515042", serial: "", powerVoltage: "" },
+  ]);
+  assert.deepEqual(machines.storedMachines(raw).map((m) => [m.equipment, m.serial]), [
+    ["Bunn TB3", ""],
+    ["Snowball", ""],
+    ["SNAP", "231515042"],
+  ]);
+  assert.deepEqual(machines.specsFromInstall("Fetco 52H\nS/N 231515042\nSnowball", null, null, null).map((m) => [m.equipment, m.serial]), [
+    ["Fetco 52H", "231515042"],
+    ["Snowball", ""],
+  ]);
+});
+
+test("R5: every Remove keeps recipe, ownership, plug, water and the deal tie on the rows that stay", async () => {
+  for (const how of ["preinspection", "account", "row"]) {
+    const { pg, sql } = await fresh();
+    try {
+      const rows = [
+        { equipment: "Bunn TB3", serial: "", powerVoltage: "120V", recipeId: 7, ownership: "Sold", plug: "5-15P", water: "1/4in", uid: "u-tb3", confirmedAt: "2026-10-01" },
+        { equipment: "Fetco 52H", serial: "", powerVoltage: "208V", recipeId: 9, ownership: "Leased", plug: "L6-30P", water: "3/8in", uid: "u-52h", confirmedAt: "2026-10-01" },
+      ];
+      const id = (await pg.query("insert into installs (customer, equipment, machines) values ('Tie Cafe', 'Bunn TB3\nFetco 52H', $1) returning id", [JSON.stringify(rows)])).rows[0].id;
+      const view = await readInspection(sql, id);
+      const tb3 = view.machines.find((m) => m.name === "Bunn TB3").equipmentId;
+      if (how === "preinspection") await removeInspectionUnit(sql, { installId: id, equipmentId: tb3 }, "tester");
+      else if (how === "account") await removeEquipmentUnit(sql, tb3);
+      else await removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "" }, "tester");
+      const after = machines.parseMachinesJson((await pg.query("select machines from installs where id = $1", [id])).rows[0].machines);
+      assert.deepEqual(after, [{ ...rows[1], recipeId: 9 }], how);
+    } finally {
+      await pg.close();
+    }
+  }
 });

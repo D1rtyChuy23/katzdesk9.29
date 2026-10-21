@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
-import { catalogModels, joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
-import { SERIAL_LINE, SUFFIX_ONLY, installMachines, serializeMachines } from "@/lib/ops/machines";
+import { catalogModels, isTrailingWord, joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
+import { SERIAL_LINE, SUFFIX_ONLY, installMachines, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { assertUnlocked } from "@/lib/ops/equipment-lock";
 import { isLocked, lockedBy } from "@/lib/ops/equipment-lock-rules";
 import { readsAsModel } from "@/lib/ops/warehouse-serial";
@@ -186,7 +186,11 @@ function text(v: unknown): string {
   }
 }
 
-type Piece = { equipment: string; serial: string; powerVoltage: string };
+/**
+ * One machine row with everything it carries (recipe, ownership, plug, water, the deal's tie). Matching reads only
+ * the model, serial and voltage; a list written back keeps the rest, or the board and deal ties break.
+ */
+type Piece = MachineSpec;
 
 /**
  * One piece per machine, the same list the install window shows (installMachines): split catalog-aware, so
@@ -202,11 +206,7 @@ function piecesFrom(
   },
   catalog: string[] = [],
 ): Piece[] {
-  return installMachines({ ...row, machines: text(row.machines) || null }, catalog).machines.map((m) => ({
-    equipment: m.equipment,
-    serial: m.serial,
-    powerVoltage: m.powerVoltage,
-  }));
+  return installMachines({ ...row, machines: text(row.machines) || null }, catalog).machines;
 }
 
 type AcctUnit = {
@@ -216,6 +216,8 @@ type AcctUnit = {
   serial: string | null;
   serial_key: string | null;
   electrical: string | null;
+  /** Set when the account record holds an installed unit: a load never rewrites its serial. */
+  install_date?: unknown;
   /** Locked by the owner: the load still claims it, but never rewrites or deletes it. */
   locked_at?: unknown;
   locked_by?: string | null;
@@ -232,23 +234,32 @@ export async function catalogNames(sql: Sql): Promise<string[]> {
   return catalogModels(rows.map((r) => r.name));
 }
 
-/** The account's record goes only when it was made for a visit and nothing else uses it. */
-async function dropUnusedUnit(sql: Sql, id: number): Promise<void> {
+/**
+ * The account's record goes only when nothing else uses it: no serial or install date, no visit, photo, module,
+ * PM runbook link or runbook history ('acct:<id>'), not copied onto another visit, not locked. With `madeBy`, only
+ * when that install's load made it: the prune never deletes a unit that was on the account before.
+ */
+async function dropUnusedUnit(sql: Sql, id: number, opts?: { madeBy?: number }): Promise<void> {
   await sql
     .query(
       `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
-          and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)
+          and ($2::int is null or a.created_by_install = $2::int)
+          and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id or u.copied_from_equipment = a.id)
           and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)
           and not exists (select 1 from modules m where m.assigned_unit_id = a.id)
           and not exists (select 1 from pm_runbook_unit_links l where l.account_equipment_id = a.id)
+          and not exists (select 1 from pm_runbook_units r where r.unit_key = 'acct:' || a.id)
+          and not exists (select 1 from pm_runbook_checks c where c.unit_key = 'acct:' || a.id)
+          and not exists (select 1 from unit_runbook_options o where o.unit_key = 'acct:' || a.id)
           and a.locked_at is null`,
-      [id],
+      [id, opts?.madeBy ?? null],
     )
     .catch(() => undefined);
 }
 
 async function insertEquipment(
   sql: Sql,
+  installId: number,
   customer: string,
   model: string,
   serial: string | null,
@@ -259,10 +270,10 @@ async function insertEquipment(
   const catalogModel = matched.catalogModel || model.trim();
   const key = serialKey(serial) || null;
   const rows = await sql.query<{ id: number }>(
-    `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, electrical)
-     values ($1, $2, $3, $4, $5, $6)
+    `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, electrical, created_by_install)
+     values ($1, $2, $3, $4, $5, $6, $7)
      returning id`,
-    [customer, catalogModel, model.trim() || catalogModel, serial?.trim() || null, key, electrical?.trim() || null],
+    [customer, catalogModel, model.trim() || catalogModel, serial?.trim() || null, key, electrical?.trim() || null, installId],
   );
   const id = rows[0]?.id;
   if (!id) throw new Error("Could not add equipment");
@@ -332,9 +343,16 @@ function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>, catalog
     const hit = (power && pool.find((a) => fits(a) && (a.electrical ?? "").trim() === power)) || pool.find(fits);
     if (hit) return hit;
   }
-  // A unit on this visit saved under an earlier spelling of the row ("Fetco 1251" for "Fetco 1251 Plus", before the
-  // warehouse models were in the catalog) is still the row's machine, not a reason to add another.
-  return pools[0]?.find(
+  return undefined;
+}
+
+/**
+ * The second pass, for a piece nothing claimed by serial or model: a unit on this visit saved under an earlier
+ * spelling of the row ("Fetco 1251" for "Fetco 1251 Plus", before the warehouse models were in the catalog). It runs
+ * after every piece had its exact match, so "Acme Brewer Twin" never takes the "Acme Brewer" unit from its own row.
+ */
+function claimEarlierName(piece: Piece, linked: AcctUnit[], used: Set<number>, catalog: string[]): AcctUnit | undefined {
+  return linked.find(
     (a) =>
       !used.has(a.id) &&
       !serialKey(a.serial) &&
@@ -357,7 +375,7 @@ function ownUnit(piece: Piece, pieces: Piece[], linked: AcctUnit[], used: Set<nu
   );
 }
 
-/** Which linked unit each piece is: the matching the load uses. -1 when a piece has none. */
+/** Which linked unit each piece is: the matching the load uses, in its two passes. -1 when a piece has none. */
 function claimLinked(pieces: Piece[], linked: AcctUnit[], catalog: string[]): number[] {
   const used = new Set<number>();
   const ids = pieces.map((piece) => {
@@ -367,10 +385,10 @@ function claimLinked(pieces: Piece[], linked: AcctUnit[], catalog: string[]): nu
   });
   pieces.forEach((piece, i) => {
     if (ids[i]! >= 0) return;
-    const own = ownUnit(piece, pieces, linked, used);
-    if (!own) return;
-    used.add(own.id);
-    ids[i] = own.id;
+    const other = claimEarlierName(piece, linked, used, catalog) ?? ownUnit(piece, pieces, linked, used);
+    if (!other) return;
+    used.add(other.id);
+    ids[i] = other.id;
   });
   return ids;
 }
@@ -432,7 +450,8 @@ async function unlinkUnit(sql: Sql, installId: number, equipmentId: number): Pro
   await dropUnusedUnit(sql, equipmentId);
 }
 
-async function writeList(sql: Sql, installId: number, pieces: Piece[]): Promise<void> {
+/** Write the machine rows back as they are: recipe, ownership, plug, water and the deal's tie included. */
+async function writeList(sql: Sql, installId: number, pieces: MachineSpec[]): Promise<void> {
   const packed = serializeMachines(pieces);
   await sql.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1", [
     installId,
@@ -505,15 +524,24 @@ async function unitPassed(sql: Sql, installId: number, equipmentId: number): Pro
   return inspectionOverall(items, unit[0]?.core_needed, unit[0] ? unitChecks(unit[0]) : null) === "Passed";
 }
 
-/** Add install machines to pre-inspection. Prune only when the install equipment list was saved. */
-export async function syncInstallUnits(sql: Sql, installId: number, opts?: { prune?: boolean }): Promise<void> {
+/**
+ * Add install machines to pre-inspection. Prune only when the install equipment list was saved. `before` is the list
+ * as it was stored before that save: a serial is written over a unit's serial only when the row's serial changed in
+ * this save, never on a load.
+ */
+export async function syncInstallUnits(
+  sql: Sql,
+  installId: number,
+  opts?: { prune?: boolean; before?: Omit<ListRow, "complete"> | null },
+): Promise<void> {
   const install = await sql.query<{
     customer: string;
     equipment: string | null;
     serial: string | null;
     power_voltage: string | null;
     machines: string | null;
-  }>("select customer, equipment, serial, power_voltage, machines from installs where id = $1", [installId]);
+    complete: unknown;
+  }>("select customer, equipment, serial, power_voltage, machines, complete from installs where id = $1", [installId]);
   const row = install[0];
   if (!row) return;
   const catalog = await catalogNames(sql);
@@ -521,7 +549,7 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
   /** A unit saved under the whole one-line list ("Linea / Swift / Axiom") before machines were split. */
   const combined = (a: AcctUnit) => listedEquipment(a.equipment_name, catalog).length > 1;
   const account = await sql.query<AcctUnit>(
-    `select id, catalog_model, equipment_name, serial, serial_key, electrical, locked_at, locked_by
+    `select id, catalog_model, equipment_name, serial, serial_key, electrical, install_date, locked_at, locked_by
        from account_equipment where lower(customer) = lower($1) order by id`,
     [row.customer],
   );
@@ -538,8 +566,18 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
   const used = new Set<number>();
   const keep = new Set<number>();
   let first: number | null = null;
-  for (const piece of pieces) {
-    let hit = claimUnit(piece, [linkedRows, account], used, catalog);
+  // First pass: every piece takes its unit by serial, then by model. Only then do the looser matches run, so one
+  // row never takes the unit another row names exactly.
+  const hits: (AcctUnit | undefined)[] = pieces.map((piece) => {
+    const hit = claimUnit(piece, [linkedRows, account], used, catalog);
+    if (hit) used.add(hit.id);
+    return hit;
+  });
+  // Serials the list had before this save: a row whose serial is not among them was corrected in this save.
+  const beforeKeys = opts?.prune && opts.before ? new Set(piecesFrom(opts.before, catalog).map((p) => serialKey(p.serial)).filter(Boolean)) : null;
+  for (const [i, piece] of pieces.entries()) {
+    if (hits[i]) continue;
+    let hit = claimEarlierName(piece, linkedRows, used, catalog);
     if (!hit) {
       // An older combined unit that names this machine becomes this machine: its checks and photos stay with it.
       const old = linkedRows.find(
@@ -554,21 +592,25 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
       }
     }
     if (!hit) {
+      // This row's own unit with a serial no row has any more: still this row's machine, not a second one. Its serial
+      // is rewritten only when the row's serial was corrected in this save; a load never writes it, so a serial fixed on
+      // the account stays. An installed unit, a completed install or a serial another unit holds is never written.
       const own = ownUnit(piece, pieces, linkedRows, used);
       const key = serialKey(piece.serial);
-      // A corrected serial goes on the unit when no other unit holds it. A cleared one, or one another unit holds,
-      // leaves the unit's serial alone: it is still this row's machine, not a second one.
-      const clash =
-        own && key
-          ? await sql.query("select 1 from account_equipment where serial_key = $1 and id <> $2 limit 1", [key, own.id])
-          : [];
-      if (own && key && !clash[0] && !isLocked(own)) {
-        await sql.query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [own.id, piece.serial.trim(), key]);
-        own.serial = piece.serial.trim();
-        own.serial_key = key;
+      const corrected = !!own && !!key && !!beforeKeys && !beforeKeys.has(key) && !isLocked(own) && own.install_date == null && !isComplete(row);
+      const clash = corrected ? await sql.query("select 1 from account_equipment where serial_key = $1 and id <> $2 limit 1", [key, own!.id]) : [];
+      if (corrected && !clash[0]) {
+        await sql.query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [own!.id, piece.serial.trim(), key]);
+        own!.serial = piece.serial.trim();
+        own!.serial_key = key;
       }
-      if (own) hit = own;
+      hit = own;
     }
+    if (hit) used.add(hit.id);
+    hits[i] = hit;
+  }
+  for (const [i, piece] of pieces.entries()) {
+    let hit = hits[i];
     if (hit && combined(hit) && !isLocked(hit)) {
       // Matched by model but still labelled with the whole list: show just this machine's name.
       hit.equipment_name = piece.equipment;
@@ -576,7 +618,7 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     }
     let id = hit?.id;
     if (!id) {
-      id = await insertEquipment(sql, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
+      id = await insertEquipment(sql, installId, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
       hit = {
         id,
         catalog_model: piece.equipment,
@@ -618,14 +660,16 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, a.id]);
     linkedIds.delete(a.id);
   }
-  // Copies of a machine already on this visit, made by the old matching: no serial, no check, no photo, no note.
-  // Unlinked here; the account row goes too when nothing else uses it.
+  // Copies of a machine already on this visit, made by the old matching, and units an older load made from a serial
+  // line or a colour word ("SN:231515042", "BLACK"): no serial, no check, no photo, no note. Unlinked here; the
+  // account row goes too when nothing else uses it.
   const keptModels = account.filter((a) => keep.has(a.id));
   for (const a of linkedRows) {
     if (keep.has(a.id) || serialKey(a.serial) || isLocked(a)) continue;
     const twin =
       SUFFIX_ONLY.test((a.equipment_name ?? "").trim()) ||
       SERIAL_LINE.test((a.equipment_name ?? "").trim()) ||
+      isTrailingWord(a.equipment_name ?? "") ||
       keptModels.some(
         (k) => sameCatalogModel(k.catalog_model, a.catalog_model) || sameCatalogModel(k.equipment_name, a.equipment_name),
       );
@@ -651,8 +695,9 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
-    // The account row goes too when this visit made it and nothing else uses it, as on Remove.
-    await dropUnusedUnit(sql, id);
+    // The account row goes too only when this install's load made it and nothing else uses it. A unit that was on the
+    // account before (imported, added by hand, from another visit) is only taken off this visit.
+    await dropUnusedUnit(sql, id, { madeBy: installId });
   }
 }
 
