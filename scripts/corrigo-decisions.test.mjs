@@ -284,6 +284,7 @@ async function openInstall(sql, customer, { machines = null, equipment = null, w
 
 const installsOf = async (sql, customer) =>
   sql.query("select id, wo, equip_status from installs where lower(customer) = lower($1) order by id", [customer]);
+const wosOf = async (sql, id) => (await sql.query("select wo from install_work_orders where install_id = $1 order by id", [id])).map((r) => r.wo);
 
 test("install: the equipment column is read from Equipment, Asset, Asset Name, Equipment Description and Equipment Package", () => {
   for (const name of ["Equipment", "Asset", "Asset Name", "Equipment Description", "Equipment Package"]) {
@@ -323,14 +324,15 @@ test("install: with no equipment column a problem description that is the instal
   assert.deepEqual(await installsOf(sql, "Cafe Echo"), [{ id, wo: "WO-1002", equip_status: "Installed" }]);
 });
 
-test("install: no equipment named, different equipment, a different quantity or two open installs open a new install and say why", async () => {
+// Chuy 10/21: an install row whose WO no install has preselects the account's one open install unless it names other
+// equipment exactly, and an open install that already has a WO is a candidate too (a multi-day project).
+test("install: no equipment named attaches to the one open install, a WO'd one too; different equipment, a different quantity or two open installs preselect a new install and say why", async () => {
   const sql = await installDesk();
   const foxtrot = await openInstall(sql, "Cafe Foxtrot", { machines: ["Eversys e'4m"] });
   const golf = await openInstall(sql, "Cafe Golf", { machines: ["Eversys e'4m"] });
   const hotel = await openInstall(sql, "Cafe Hotel", { machines: ["Bunn ITCB"] });
-  await openInstall(sql, "Cafe India", { machines: ["Eversys e'4m"] });
-  await openInstall(sql, "Cafe India", { machines: ["Eversys e'4m"] });
-  await openInstall(sql, "Cafe Kilo", { machines: ["Eversys e'4m"], wo: "WO-0042" });
+  const india = [await openInstall(sql, "Cafe India", { machines: ["Eversys e'4m"] }), await openInstall(sql, "Cafe India", { machines: ["Eversys e'4m"] })];
+  const kilo = await openInstall(sql, "Cafe Kilo", { machines: ["Eversys e'4m"], wo: "WO-0042" });
   const { records } = parseCorrigoMatrix([
     ["ST#", "Customer Name", "P.O. #", "Equipment", "Problem Description"],
     ["1003", "Cafe Foxtrot", "Install", "", "Install"],
@@ -343,20 +345,35 @@ test("install: no equipment named, different equipment, a different quantity or 
   assert.deepEqual(
     preview.rows.map((r) => [r.action, r.jobId, r.matchNote]),
     [
-      ["create", null, `the problem description doesn't name install #${foxtrot}'s equipment`],
+      ["update", foxtrot, `install #${foxtrot} is the account's only open install`],
       ["create", null, `equipment differs from install #${golf}`],
       ["create", null, `equipment differs from install #${hotel}`],
       ["create", null, "two installs could match"],
-      ["create", null, null],
+      ["update", kilo, `install #${kilo} matched by account and equipment`],
     ],
   );
-  await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual((await installsOf(sql, "Cafe Foxtrot")).map((r) => [r.id === foxtrot, r.wo]), [[true, null], [false, "WO-1003"]]);
+  // Every row with candidates gets the picker: each candidate, then Create new; a preselected new install keeps them.
+  assert.deepEqual(
+    preview.rows.map((r) => [r.installChoice, r.installOptions?.map((o) => o.id)]),
+    [
+      [foxtrot, [foxtrot, null]],
+      [null, [golf, null]],
+      [null, [hotel, null]],
+      [null, [...india, null]],
+      [kilo, [kilo, null]],
+    ],
+  );
+  assert.equal(preview.rows[4].installOptions[0].label, `Attach to install #${kilo} · Eversys e'4m · Not Ready · WO-0042`);
+  const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual([res.updated, res.created], [2, 3]);
+  assert.deepEqual(await installsOf(sql, "Cafe Foxtrot"), [{ id: foxtrot, wo: "WO-1003", equip_status: "Not Ready" }]);
   assert.equal((await installsOf(sql, "Cafe India")).filter((r) => r.wo === "WO-1006").length, 1);
   assert.equal((await installsOf(sql, "Cafe India")).filter((r) => !r.wo).length, 2);
+  assert.deepEqual(await installsOf(sql, "Cafe Kilo"), [{ id: kilo, wo: "WO-0042", equip_status: "Not Ready" }]);
+  assert.deepEqual(await wosOf(sql, kilo), ["WO-0042", "WO-1007"]);
 });
 
-test("install: two rows for one open install — the first attaches, the next opens a new install, in one chunk or across chunks", async () => {
+test("install: two rows for one open install both go on it — the second as another work order, in one chunk or across chunks", async () => {
   const sql = await installDesk();
   const id = await openInstall(sql, "Cafe Juliet", { machines: ["Eversys e'4m"] });
   const { records } = parseCorrigoMatrix([
@@ -365,17 +382,22 @@ test("install: two rows for one open install — the first attaches, the next op
     ["1102", "Cafe Juliet", "Install", "Eversys e'4m"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
-  assert.deepEqual(preview.rows.map((r) => [r.action, r.jobId]), [["update", id], ["create", null]]);
-  assert.equal(preview.rows[1].matchNote, `install #${id} already matched by an earlier row`);
-  const later = await previewCorrigoRecords(sql, records.slice(1), [id]);
-  assert.deepEqual([later.rows[0].action, later.rows[0].matchNote], ["create", `install #${id} already matched by an earlier row`]);
+  assert.deepEqual(preview.rows.map((r) => [r.action, r.jobId]), [["update", id], ["update", id]]);
+  assert.equal(preview.rows[1].matchNote, `install #${id} matched by account and equipment`);
+  // The second row's picker shows the first row's WO on the install.
+  assert.match(preview.rows[1].installOptions[0].label, /· WO-1101$/);
+  const later = await previewCorrigoRecords(sql, records.slice(1));
+  assert.deepEqual([later.rows[0].action, later.rows[0].jobId], ["update", id]);
+  // The browser settles the rows of every chunk again, in file order.
   const ui = readFileSync(new URL("../src/components/desk/corrigo-import.tsx", import.meta.url), "utf8");
-  assert.match(ui, /previewCorrigoImport\(\{ data: \{ records, claimedInstalls: \[\.\.\.claimedInstalls\] \} \}\)/);
+  assert.match(ui, /settleInstallRows\(/);
+  assert.doesNotMatch(ui, /claimedInstalls/);
   await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual((await installsOf(sql, "Cafe Juliet")).map((r) => [r.id === id, r.wo]), [[true, "WO-1101"], [false, "WO-1102"]]);
+  assert.deepEqual((await installsOf(sql, "Cafe Juliet")).map((r) => [r.id === id, r.wo]), [[true, "WO-1101"]]);
+  assert.deepEqual(await wosOf(sql, id), ["WO-1101", "WO-1102"]);
 });
 
-test("install: an install given another WO after the preview is not overwritten — apply opens a new one", async () => {
+test("install: an install given another WO after the preview keeps it as its first WO and takes the row's as another", async () => {
   const sql = await installDesk();
   const id = await openInstall(sql, "Cafe Lima", { machines: ["Bunn ITCB"] });
   const { records } = parseCorrigoMatrix([["ST#", "Customer Name", "P.O. #", "Equipment"], ["1201", "Cafe Lima", "Install", "Bunn ITCB"]]);
@@ -383,7 +405,8 @@ test("install: an install given another WO after the preview is not overwritten 
   assert.equal(preview.rows[0].jobId, id);
   await sql.query("update installs set wo = 'WO-5555' where id = $1", [id]);
   await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual((await installsOf(sql, "Cafe Lima")).map((r) => [r.id === id, r.wo]), [[true, "WO-5555"], [false, "WO-1201"]]);
+  assert.deepEqual((await installsOf(sql, "Cafe Lima")).map((r) => [r.id === id, r.wo]), [[true, "WO-5555"]]);
+  assert.deepEqual(await wosOf(sql, id), ["WO-5555", "WO-1201"]);
 });
 
 // Review fixes: real catalog spellings, a wrapped desk with both cycles of one number, and apply races.
@@ -407,25 +430,24 @@ test("install: with the real catalog and no equipment column, the problem descri
     ["0668", "Work Started", "Cafe Romeo", "Install", "Brewer"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
-  const none = (id) => `the problem description doesn't name install #${id}'s equipment`;
+  const only = (id) => `install #${id} is the account's only open install`;
   assert.deepEqual(
-    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.matchNote]),
+    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.byEquipment, r.matchNote]),
     [
-      ["WO-0663", "update", mike, `install #${mike} matched by account and equipment`],
-      ["WO-0664", "update", november, `install #${november} matched by account and equipment`],
-      // The install's "Bunn ITCB" isn't a catalog spelling, so nothing is matched against it.
-      ["WO-0665", "create", null, `install #${oscar}'s equipment isn't written as catalog names`],
-      ["WO-0666", "create", null, none(papa)],
-      ["WO-0667", "create", null, none(quebec)],
-      ["WO-0668", "create", null, none(romeo)],
+      ["WO-0663", "update", mike, true, `install #${mike} matched by account and equipment`],
+      ["WO-0664", "update", november, true, `install #${november} matched by account and equipment`],
+      // Nothing here names other equipment exactly (Oscar's "Bunn ITCB" isn't a catalog spelling): the one open install.
+      ["WO-0665", "update", oscar, false, only(oscar)],
+      ["WO-0666", "update", papa, false, only(papa)],
+      ["WO-0667", "update", quebec, false, only(quebec)],
+      ["WO-0668", "update", romeo, false, only(romeo)],
     ],
   );
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual([res.updated, res.created], [2, 4]);
-  for (const [id, wo] of [[mike, "WO-0663"], [november, "WO-0664"]]) {
+  assert.deepEqual([res.updated, res.created], [6, 0]);
+  for (const [id, wo] of [[mike, "WO-0663"], [november, "WO-0664"], [oscar, "WO-0665"], [papa, "WO-0666"], [quebec, "WO-0667"], [romeo, "WO-0668"]]) {
     assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, wo);
   }
-  for (const id of [oscar, papa, quebec, romeo]) assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, null);
 });
 
 const ticketRow = async (sql, id) =>
@@ -698,27 +720,28 @@ test("install: free text attaches only on the problem description's one machine;
   ]);
   const preview = await previewCorrigoRecords(sql, records);
   const none = (id) => `the problem description doesn't name install #${id}'s equipment`;
-  const unread = (id) => `install #${id}'s equipment isn't written as catalog names`;
+  const only = (id) => `install #${id} is the account's only open install`;
+  // Only a description that is exactly other catalog machines (WO-0666: two Cameos for one) preselects a new install.
   assert.deepEqual(
     preview.rows.map((r) => [r.wo, r.action, r.jobId, r.byEquipment, r.matchNote]),
     [
       ["WO-0665", "update", ids.a, true, `install #${ids.a} matched by account and equipment`],
       ["WO-0666", "create", null, false, none(ids.b)],
-      ["WO-0667", "create", null, false, unread(ids.c)],
-      ["WO-0668", "create", null, false, none(ids.d)],
-      ["WO-0669", "create", null, false, none(ids.e)],
-      ["WO-0670", "create", null, false, unread(ids.f)],
-      ["WO-0671", "create", null, false, unread(ids.g)],
+      ["WO-0667", "update", ids.c, false, only(ids.c)],
+      ["WO-0668", "update", ids.d, false, only(ids.d)],
+      ["WO-0669", "update", ids.e, false, only(ids.e)],
+      ["WO-0670", "update", ids.f, false, only(ids.f)],
+      ["WO-0671", "update", ids.g, false, only(ids.g)],
       ["WO-0672", "update", ids.h, true, `install #${ids.h} matched by account and equipment`],
-      ["WO-0673", "create", null, false, none(ids.i)],
+      ["WO-0673", "update", ids.i, false, only(ids.i)],
     ],
   );
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual([res.updated, res.created], [2, 7]);
+  assert.deepEqual([res.updated, res.created], [8, 1]);
   assert.deepEqual(await installsOf(sql, "Cafe Alpha"), [{ id: ids.a, wo: "WO-0665", equip_status: "Installed" }]);
   assert.deepEqual(await installsOf(sql, "Cafe Hotel"), [{ id: ids.h, wo: "WO-0672", equip_status: "Ready" }]);
+  assert.deepEqual((await installsOf(sql, "Cafe Bravo")).map((r) => [r.id === ids.b, r.wo]), [[true, null], [false, "WO-0666"]]);
   for (const [customer, id, wo] of [
-    ["Cafe Bravo", ids.b, "WO-0666"],
     ["Cafe Charlie", ids.c, "WO-0667"],
     ["Cafe Dakota", ids.d, "WO-0668"],
     ["Cafe Easy", ids.e, "WO-0669"],
@@ -726,7 +749,7 @@ test("install: free text attaches only on the problem description's one machine;
     ["Cafe Golf", ids.g, "WO-0671"],
     ["Cafe India", ids.i, "WO-0673"],
   ]) {
-    assert.deepEqual((await installsOf(sql, customer)).map((r) => [r.id === id, r.wo]), [[true, null], [false, wo]], customer);
+    assert.deepEqual((await installsOf(sql, customer)).map((r) => [r.id === id, r.wo]), [[true, wo]], customer);
   }
 });
 
@@ -871,26 +894,30 @@ test("install: a loosely written install never matches, by the problem descripti
     ["0693", "Work Started", "Cafe Lima", "Install", "", "Bunn TB3"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
-  const unread = (id) => `install #${id}'s equipment isn't written as catalog names`;
+  const only = (id) => `install #${id} is the account's only open install`;
+  // A loose install (or a loose Equipment column) is never matched by equipment, and never read as different either:
+  // the account's one open install is preselected, not by equipment.
   assert.deepEqual(
-    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.matchNote]),
+    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.byEquipment, r.matchNote]),
     [
-      ["WO-0681", "create", null, unread(ids.a)],
-      ["WO-0682", "create", null, unread(ids.b)],
-      ["WO-0683", "create", null, unread(ids.c)],
-      ["WO-0684", "create", null, unread(ids.d)],
-      ["WO-0685", "create", null, unread(ids.e)],
-      ["WO-0686", "update", ids.f, `install #${ids.f} matched by account and equipment`],
-      ["WO-0687", "create", null, `equipment differs from install #${ids.g}`],
-      ["WO-0688", "create", null, "the Equipment column isn't written as catalog names"],
-      ["WO-0689", "create", null, "the Equipment column isn't written as catalog names"],
-      ["WO-0690", "create", null, "the Equipment column isn't written as catalog names"],
-      ["WO-0691", "create", null, `the problem description doesn't name install #${ids.k}'s equipment`],
-      ["WO-0692", "update", ids.k, `install #${ids.k} matched by account and equipment`],
-      ["WO-0693", "create", null, unread(ids.l)],
+      ["WO-0681", "update", ids.a, false, only(ids.a)],
+      ["WO-0682", "update", ids.b, false, only(ids.b)],
+      ["WO-0683", "update", ids.c, false, only(ids.c)],
+      ["WO-0684", "update", ids.d, false, only(ids.d)],
+      ["WO-0685", "update", ids.e, false, only(ids.e)],
+      ["WO-0686", "update", ids.f, true, `install #${ids.f} matched by account and equipment`],
+      ["WO-0687", "create", null, false, `equipment differs from install #${ids.g}`],
+      ["WO-0688", "update", ids.h, false, only(ids.h)],
+      ["WO-0689", "update", ids.i, false, only(ids.i)],
+      ["WO-0690", "update", ids.j, false, only(ids.j)],
+      ["WO-0691", "create", null, false, `the problem description doesn't name install #${ids.k}'s equipment`],
+      ["WO-0692", "update", ids.k, true, `install #${ids.k} matched by account and equipment`],
+      ["WO-0693", "update", ids.l, false, only(ids.l)],
     ],
   );
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual([res.updated, res.created], [2, 11]);
-  for (const id of [ids.a, ids.b, ids.c, ids.d, ids.e]) assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, null);
+  assert.deepEqual([res.updated, res.created], [11, 2]);
+  for (const [id, wo] of [[ids.a, "WO-0681"], [ids.b, "WO-0682"], [ids.c, "WO-0683"], [ids.d, "WO-0684"], [ids.e, "WO-0685"]]) {
+    assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, wo);
+  }
 });

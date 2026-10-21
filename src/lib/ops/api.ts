@@ -72,6 +72,8 @@ import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
 import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, accountNumberFor } from "./reps";
 import { woMatchKey } from "./corrigo";
 import { mergeServiceJobs } from "./wo-duplicates";
+import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
+import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
 import { deliverPings } from "./notify";
 
@@ -261,6 +263,10 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		scheduledTime: cleanTime(r.sched_time),
 		technician: r.technician,
 		wo: r.wo,
+		// Filled by withWorkOrders.
+		workOrders: [],
+		customerLockedAt: r.customer_locked_at ? String(r.customer_locked_at instanceof Date ? r.customer_locked_at.toISOString() : r.customer_locked_at) : null,
+		customerLockedBy: r.customer_locked_by ?? null,
 		reqsReady: r.reqs_ready,
 		notes: r.notes,
 		workDone: r.work_done ?? null,
@@ -1389,13 +1395,19 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 		const same = installs.filter((x) => x.dealId === i.dealId);
 		i.project = { n: same.indexOf(i) + 1, of: same.length };
 	}
-	return withInspections(sql, applyMarks(installs, marks));
+	return withWorkOrders(sql, await withInspections(sql, applyMarks(installs, marks)));
 });
-export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+type UpdateInstallInput = { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean };
+export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: UpdateInstallInput) => d).handler(async ({ data, context }: any) => updateInstallFor(await ready(), data, context));
+export async function updateInstallFor(sql: any, data: UpdateInstallInput, context: { userId: string }): Promise<Install> {
 	const cur = await sql`select * from installs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Install not found");
 	const c = cur[0];
+	// The owner's lock on the customer: anyone else's change is refused, the same message as the equipment lock.
+	await assertCustomerChangeAllowed(sql, c, data.customer);
+	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
+	// The WO # field follows Add WO's rule: another open install's WO means merging the installs.
+	if (data.wo !== undefined && data.wo && woMatchKey(data.wo) !== woMatchKey(c.wo ?? "")) await assertWoFree(sql, data.id, data.wo);
 	// Tech Request Form issued: a person ticks it, and only Sales or an admin may.
 	if (data.trfIssued !== undefined && !!data.trfIssued !== !!c.trf_issued) {
 		const me = (await sql.query("select is_admin, desk_role, username from desk_accounts where user_id = $1", [context.userId]))[0] as any;
@@ -1463,6 +1475,13 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 		data.duplicateOf === null && c.duplicate_of ? "cleared duplicate flag" : data.duplicateOf && data.duplicateOf !== c.duplicate_of ? `flagged duplicate of #${data.duplicateOf}` : null
 	]);
 	if (extra) await logActivity(sql, context.userId, "install", data.id, "updated", extra);
+	// installs.wo is the project's first WO: its work-order row follows it.
+	if (data.wo !== undefined) await setPrimaryWo(sql, data.id, c.wo, data.wo, await deskUsername(sql, context.userId));
+	// The install's own account units go with it to the new customer (not a locked one, nor one on another visit).
+	const unitsMoved = data.customer !== undefined && data.customer !== c.customer ? await moveInstallUnits(sql, data.id, c.customer, data.customer) : null;
+	if (unitsMoved?.moved.length || unitsMoved?.stayed.length) {
+		await logActivity(sql, context.userId, "install", data.id, "updated", [unitsMoved.moved.length ? `moved to ${data.customer}: ${unitsMoved.moved.join(", ")}` : null, unitsMoved.stayed.length ? `stayed on ${c.customer}: ${unitsMoved.stayed.join(", ")}` : null].filter(Boolean).join(" · "));
+	}
 	const customerName = String(data.customer ?? c.customer);
 	if (data.technician !== undefined) await pingRepTechAssigned(sql, context.userId, { id: data.id, customer: customerName, before: c.technician, after: data.technician, rep: data.accountRep === undefined ? c.account_rep : data.accountRep });
 	if (data.aviKatz !== undefined || data.accountRep !== undefined) await upsertAccountMarks(sql, customerName, {
@@ -1476,8 +1495,9 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);
-	return (await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks)))[0];
-});
+	const saved = (await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks))))[0];
+	return { ...saved, unitsMoved };
+}
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; technician?: string; serial?: string; powerVoltage?: string; machines?: MachineSpec[] | string | null }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const catalog = await loadEquipCatalog(sql);
@@ -1508,7 +1528,7 @@ export const createInstall = createServerFn({ method: "POST" }).middleware([desk
       returning *`;
 	await logActivity(sql, context.userId, "install", rows[0].id, "opened", duplicateOf ? `${name} · possible duplicate of #${duplicateOf}` : name);
 	await syncInstallUnits(sql, rows[0].id);
-	return mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog);
+	return (await withWorkOrders(sql, [mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog)]))[0];
 });
 export const archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
@@ -1637,8 +1657,9 @@ async function repCustomerScope(sql: any, userId: string): Promise<((customer: s
 	const marks = await loadAccountMarks(sql);
 	return (customer) => scope(accountRepFor(marks, customer));
 }
-export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => d).handler(async ({ data, context }: any): Promise<SearchHit[]> => {
-	const sql = await ready();
+export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => d).handler(async ({ data, context }: any): Promise<SearchHit[]> => searchAllFor(await ready(), data, context));
+/** The top search. A WO number finds its install by any of the project's work orders. */
+export async function searchAllFor(sql: any, data: { q: string }, context: { userId: string }): Promise<SearchHit[]> {
 	const q = data.q.trim();
 	if (q.length < 2) return [];
 	const like = `%${q.replace(/%/g, "")}%`;
@@ -1669,10 +1690,12 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 		subtitle: `${p.wo || p.equipment || "PM"} · ${p.status}`,
 		status: p.status
 	});
-	const ins = await sql`
-      select id, customer, equip_status, complete, wo from installs
-      where archived = false and (customer ilike ${like} or coalesce(wo,'') ilike ${like})
-      limit 5`;
+	const ins = await sql.query(
+		`select i.id, i.customer, i.equip_status, i.complete, i.wo from installs i
+      where i.archived = false and (i.customer ilike $1 or exists (select 1 from ${INSTALL_WOS_SQL} w where w.install_id = i.id and w.wo ilike $1))
+      limit 5`,
+		[like]
+	);
 	for (const i of ins) {
 		const status = isInstalled({ complete: !!i.complete, equipStatus: i.equip_status }) ? "Installed" : i.equip_status || "Not Ready";
 		hits.push({
@@ -1746,7 +1769,7 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 		seen.add(k);
 		return true;
 	}).slice(0, 28);
-});
+}
 /** Every ticket with this WO number, on any board and in any status (the Tickets page's "also on" line). */
 export const findWoTickets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => z.object({ q: z.string().max(100) }).parse(d)).handler(async ({ data, context }: any): Promise<WoBoardHit[]> => {
 	const key = woSearchKey(data.q);
@@ -2386,7 +2409,7 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 			: null,
 		jobs: applyMarks(attachJobSiblings(jobs.map((r) => mapJob(r, today))).filter((j) => !j.duplicateOf), marks),
 		pms: applyMarks(pms.map((r) => mapPm(r, today)), marks),
-		installs: await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks)),
+		installs: await withWorkOrders(sql, await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks))),
 		deals: await (async () => {
 			const projects = await loadBoardProjects(sql, catalog);
 			return deals.map((r) => attachBoard(mapDeal(r, marks), projects));

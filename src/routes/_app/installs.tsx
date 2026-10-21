@@ -30,7 +30,7 @@ import { CustomerCombo, EquipmentMultiCombo } from "@/components/desk/directory-
 import { MachineFields } from "@/components/desk/machine-fields";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
-import { withWoMatches } from "@/lib/ops/wo-search";
+import { rowWos, withWoMatches } from "@/lib/ops/wo-search";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
 import { ActionMenu, FilterChip, StatCard, StatRow } from "@/components/desk/desk-charts";
@@ -97,7 +97,7 @@ function Page() {
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((i) =>
-        [i.customer, i.equipment, i.wo, i.technician, i.serial, i.powerVoltage, ...(i.machines ?? []).flatMap((m) => [m.equipment, m.serial, m.powerVoltage])].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
+        [i.customer, i.equipment, ...rowWos(i), i.technician, i.serial, i.powerVoltage, ...(i.machines ?? []).flatMap((m) => [m.equipment, m.serial, m.powerVoltage])].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
     // A WO number finds its install in either lane.
@@ -393,6 +393,11 @@ function Page() {
       </Dialog>
     </div>
   );
+}
+
+/** Every work order of the project, the first one first (workOrders holds the primary too). */
+function installWos(i: Install): string[] {
+  return i.workOrders?.length ? i.workOrders.map((w) => w.wo) : rowWos(i);
 }
 
 function sameAccount(name: string, rows: Install[], exceptId?: number) {
@@ -862,6 +867,12 @@ function InstallRow({
             {formatShortDate(i.installDate)} · <TechName name={i.technician} />
             {" · "}
             {i.accountRep ? <RepName name={i.accountRep} /> : <NoRepFlag show />}
+            {installWos(i).length ? (
+              <span className="tabular" data-testid="install-wos">
+                {" · "}
+                {installWos(i).join(", ")}
+              </span>
+            ) : null}
           </button>
           {i.dealId ? (
             <OpenLink entityType="deal" id={i.dealId} className="mt-0.5 block w-fit text-xs text-copper hover:underline max-sm:py-2 sm:pl-20" title="Open the deal these machines came from">

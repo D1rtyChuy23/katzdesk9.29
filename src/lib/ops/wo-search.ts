@@ -19,14 +19,24 @@ export function woMatchesSearch(wo: string | null | undefined, key: string): boo
   return !!wo && woMatchKey(wo) === key;
 }
 
+/** Every WO a row carries: its own, and an install project's other work orders. */
+export function rowWos(row: { wo?: string | null; workOrders?: { wo: string }[] | null }): string[] {
+  return [row.wo ?? "", ...(row.workOrders ?? []).map((w) => w.wo)].filter((wo) => wo.trim());
+}
+
 /**
- * A board's rows for a search: tickets whose WO matches come first and ignore the view, status and other
- * filters; then the rows the view already shows. Without a WO number in the box, `shown` is returned as is.
+ * A board's rows for a search: tickets whose WO matches (any of an install's work orders) come first and ignore the
+ * view, status and other filters; then the rows the view already shows. Without a WO number in the box, `shown` is
+ * returned as is.
  */
-export function withWoMatches<T extends { id: number; wo?: string | null }>(shown: T[], all: T[], q: string): T[] {
+export function withWoMatches<T extends { id: number; wo?: string | null; workOrders?: { wo: string }[] | null }>(
+  shown: T[],
+  all: T[],
+  q: string,
+): T[] {
   const key = woSearchKey(q);
   if (!key) return shown;
-  const hits = all.filter((row) => woMatchesSearch(row.wo, key));
+  const hits = all.filter((row) => rowWos(row).some((wo) => woMatchesSearch(wo, key)));
   const ids = new Set(hits.map((row) => row.id));
   return [...hits, ...shown.filter((row) => !ids.has(row.id))];
 }
@@ -38,6 +48,10 @@ export type WoBoardHit = {
   wo: string;
   status: string;
 };
+
+/** SQL: every (install_id, wo) an install carries — its work-order rows, and installs.wo in case a row is missing. */
+export const INSTALL_WOS_SQL = `(select install_id, wo from install_work_orders
+   union select id as install_id, btrim(wo) as wo from installs where coalesce(btrim(wo), '') <> '')`;
 
 /** SQL: the digits of a stored WO with leading zeros dropped — the same key as woMatchKey for WO-#### values. */
 const WO_KEY_SQL = (col: string) => `ltrim(regexp_replace(coalesce(${col}, ''), '[^0-9]', '', 'g'), '0')`;
@@ -61,8 +75,12 @@ export async function findWoEverywhere(
     `select id, customer, wo, status from pm_jobs where ${WO_KEY_SQL("wo")} = $1 order by id`,
     [k],
   );
+  // An install is found by any of its work orders; the hit names the WO that matched.
   const installs = await sql.query<{ id: number; customer: string | null; wo: string; equip_status: string | null; complete: boolean }>(
-    `select id, customer, wo, equip_status, complete from installs where archived = false and ${WO_KEY_SQL("wo")} = $1 order by id`,
+    `select distinct on (i.id) i.id, i.customer, w.wo, i.equip_status, i.complete
+       from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
+      where i.archived = false and ${WO_KEY_SQL("w.wo")} = $1
+      order by i.id`,
     [k],
   );
   const exact = (wo: string) => woMatchKey(wo) === k;

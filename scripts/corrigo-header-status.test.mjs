@@ -195,7 +195,15 @@ async function freshDb() {
 
 async function statusOf(sql, board, wo) {
   if (board === "pm") return (await sql.query("select status, wo from pm_jobs where wo = $1", [wo]))[0];
-  if (board === "install") return (await sql.query("select equip_status as status, wo from installs where wo = $1", [wo]))[0];
+  // An install project is found by any of its work orders (installs.wo is only the first).
+  if (board === "install") {
+    return (
+      await sql.query(
+        "select i.equip_status as status, i.wo from installs i where i.wo = $1 or exists (select 1 from install_work_orders w where w.install_id = i.id and w.wo = $1)",
+        [wo],
+      )
+    )[0];
+  }
   return (await sql.query("select status, wo from service_jobs where wo = $1", [wo]))[0];
 }
 
