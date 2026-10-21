@@ -9,7 +9,7 @@ const load = (id) => parseRunbookDefinition(JSON.parse(readFileSync(new URL(`../
 const kits = (def, over) => kitList(def, { ...defaultConfig(def), ...over }).map((k) => `${k.q}x ${k.ev}`);
 const ids = (def, over) => stepList(def, { ...defaultConfig(def), ...over }).flatMap((g) => g.items.map((s) => s.id));
 
-const B = "FA781739010", E1 = "FA781740010", E2 = "FA781741000", E3 = "FA781742000", M = "FA781743000", EM = "FA966957000", C = "FA781745000";
+const B = "FA781739020", E1 = "FA781740010", E2 = "FA781741000", E3 = "FA781742000", M = "FA781743000", EM = "FA966957000", C = "FA781745000";
 
 test("X20 Basic plan follows Faema's table, milk fitted, chocolate fitted", () => {
   const def = load("faema-x20");
