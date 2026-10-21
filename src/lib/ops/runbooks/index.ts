@@ -43,7 +43,7 @@ const only = (fn: (piece: string) => RunbookHit | null) => (piece: string) => {
 
 /**
  * Order matters: the first runbook that recognises the text wins. X-Wide comes first ("E'4s X-Wide"), then E'line
- * ("Eversys e'4s e'line", "E'line Shotmaster"), then Shotmaster, before the general Enigma match ("e'4 Shotmaster Pro").
+ * ("Eversys e'4s e'line"), then Shotmaster (an Enigma, even when the text says e'line), before the general Enigma match.
  * E'line modules are their own platform ("e'Line"); X-Wide stays first for "Enigma / e'Line" bench work.
  */
 export const RUNBOOKS: RegisteredRunbook[] = [

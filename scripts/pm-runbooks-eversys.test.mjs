@@ -193,7 +193,7 @@ test("serial prefixes name the machine", () => {
   assert.equal(identifyBySerial("1166500213400").model, "spro"); // leading zero lost in a spreadsheet
   assert.equal(identifyBySerial("0099820025259C0040").runbookId, "eversys-cameo");
   assert.equal(identifyBySerial("0116600000000").runbookId, "eversys-e4-xwide");
-  assert.equal(identifyBySerial("0099930000000").runbookId, "eversys-eline");
+  assert.equal(identifyBySerial("0099930000000").runbookId, "eversys-shotmaster");
   assert.equal(identifyBySerial("KB000276"), null);
   assert.equal(identifyBySerial("2109963"), null);
   assert.equal(identifyBySerial(null), null);
@@ -287,7 +287,10 @@ test("registry: fridges, loaner notes and loose Legacy text are not machines", a
 
 test("registry: E'line spellings and bare Enigma", async () => {
   const { matchRunbookPiece } = await registry();
-  assert.deepEqual(matchRunbookPiece("E'line Shotmaster"), { runbookId: "eversys-eline", model: "shot" });
+  // There is no E'line Shotmaster: a Shotmaster is an Enigma.
+  assert.deepEqual(matchRunbookPiece("E'line Shotmaster"), { runbookId: "eversys-shotmaster", model: null });
+  assert.deepEqual(identifyBySerial("0099930000000"), { runbookId: "eversys-shotmaster", model: null, type: "Shotmaster" });
+  assert.ok(!eline.models.some((m) => m.id === "shot"));
   assert.deepEqual(matchRunbookPiece("Eversys E-line e'4s"), { runbookId: "eversys-eline", model: "4s" });
   assert.deepEqual(matchRunbookPiece("E'line E6"), { runbookId: "eversys-eline", model: null });
   assert.deepEqual(matchRunbookPiece("Eversys e'4 Shotmaster Pro"), { runbookId: "eversys-shotmaster", model: null });

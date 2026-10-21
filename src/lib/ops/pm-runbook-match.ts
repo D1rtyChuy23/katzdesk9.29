@@ -66,7 +66,8 @@ export const EVERSYS_SERIAL_PREFIXES: Record<string, RunbookHit & { type: string
   "00999600": { runbookId: "eversys-eline", model: "4ms", type: "E'4ms self-service (E'line)" },
   "00999700": { runbookId: "eversys-eline", model: "6s", type: "E'6s (E'line)" },
   "00999800": { runbookId: "eversys-eline", model: "6ms", type: "E'6ms (E'line)" },
-  "00999300": { runbookId: "eversys-eline", model: "shot", type: "Shotmaster (E'line)" },
+  // There is no E'line Shotmaster: a Shotmaster is an Enigma. The tech picks c / s / ms.
+  "00999300": { runbookId: "eversys-shotmaster", model: null, type: "Shotmaster" },
   // Legacy+
   "01344800": { runbookId: "eversys-legacy-plus", model: "2c", type: "L'2c" },
   "01344900": { runbookId: "eversys-legacy-plus", model: "2m", type: "L'2m" },
@@ -110,7 +111,6 @@ const notAMachine = (t: string) => /fridge|loaner/i.test(t);
 export function matchShotmaster(piece: string): RunbookHit | null {
   const t = piece.trim();
   if (!/shot\s?-?master/i.test(t) || notAMachine(t)) return null;
-  if (new RegExp(LINE, "i").test(t)) return null; // the E'line Shotmaster is on the E'line runbook
   if (/\bms\s*[/-]?\s*pro\b|\bm\s*[/-]\s*pro\b/i.test(t)) return { runbookId: "eversys-shotmaster", model: "mspro" };
   if (/\bs\s*[/-]\s*pro\b|\bs-?pro\b/i.test(t)) return { runbookId: "eversys-shotmaster", model: "spro" };
   if (/\bpro\b/i.test(t)) return { runbookId: "eversys-shotmaster", model: null };
@@ -158,12 +158,15 @@ function enigmaModel(t: string): string | null {
   return null;
 }
 
-/** Older E'line generation: the text says e'line ("Eversys e'4s e'line", "E'line E4", "E-line e'4s", "E'line Shotmaster"). */
+/**
+ * Older E'line generation, before the Enigma overhaul: the text says e'line ("Eversys e'4s e'line", "E'line E4",
+ * "E-line e'4s"). There is no E'line Shotmaster; a Shotmaster is an Enigma, so that text goes to the Shotmaster runbook.
+ */
 export function matchELine(piece: string): RunbookHit | null {
   const t = piece.trim();
   if (!new RegExp(LINE, "i").test(t) || notAMachine(t)) return null;
   if (/x[\s-]?(tra)?\s?wide/i.test(t)) return null;
-  if (/shot\s?-?master/i.test(t)) return { runbookId: "eversys-eline", model: "shot" };
+  if (/shot\s?-?master/i.test(t)) return null;
   const rest = t.replace(new RegExp(LINE, "ig"), " ");
   if (!new RegExp(`\\b${E}[246]`, "i").test(rest)) return null;
   return { runbookId: "eversys-eline", model: enigmaModel(rest) };
