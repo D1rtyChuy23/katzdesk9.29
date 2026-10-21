@@ -1,20 +1,45 @@
+import { useLocation, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-export type OpenSearch = { open?: number };
+/** `?open=` a record, and `from=` the page (path and search) that opened it, so closing the window goes back there. */
+export type OpenSearch = { open?: number; from?: string };
+
+/** Only a path in this app: "/map?account=29", never "//host" or a full URL. */
+export function parseFrom(raw: unknown): string | undefined {
+  return typeof raw === "string" && /^\/(?![/\\])/.test(raw) && raw.length <= 2000
+    ? raw
+    : undefined;
+}
 
 export function parseOpenSearch(s: Record<string, unknown>): OpenSearch {
   const raw = s.open;
-  if (typeof raw === "number" && Number.isFinite(raw)) return { open: raw };
-  if (typeof raw === "string" && raw && !Number.isNaN(Number(raw))) return { open: Number(raw) };
-  return {};
+  const from = parseFrom(s.from);
+  const open =
+    typeof raw === "number" && Number.isFinite(raw)
+      ? raw
+      : typeof raw === "string" && raw && !Number.isNaN(Number(raw))
+        ? Number(raw)
+        : undefined;
+  return { ...(open != null ? { open } : {}), ...(from ? { from } : {}) };
 }
 
-/** Customers: `?open=`, plus `from=` when the Map opened the account, so closing it goes back there. */
-export type CustomerSearch = OpenSearch & { from?: "map" | "territories" };
+/** The page a record opens from (this one): undefined when the record is on this same page. */
+export function fromFor(here: { pathname: string; href: string }, to: string): string | undefined {
+  return here.pathname === to ? undefined : here.href;
+}
 
-export function parseCustomerSearch(s: Record<string, unknown>): CustomerSearch {
-  const base = parseOpenSearch(s);
-  return s.from === "map" || s.from === "territories" ? { ...base, from: s.from } : base;
+export function useFromHere(to: string): string | undefined {
+  return fromFor(useLocation(), to);
+}
+
+/** Closing a record window: go back to the page that opened it, when one did. Returns whether it went back. */
+export function useBackTo(from: string | undefined): () => boolean {
+  const router = useRouter();
+  return () => {
+    if (!from) return false;
+    router.history.replace(from);
+    return true;
+  };
 }
 
 /** Tickets and TLC + Factor: `?open=`, plus `tab=ping` when a ping or note notification opened the ticket. */

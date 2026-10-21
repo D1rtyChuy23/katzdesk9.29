@@ -29,7 +29,7 @@ import type { RecipeDraft } from "@/components/desk/recipe-form";
 import { CustomerCombo, EquipmentMultiCombo } from "@/components/desk/directory-fields";
 import { MachineFields } from "@/components/desk/machine-fields";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { withWoMatches } from "@/lib/ops/wo-search";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/_app/installs")({
 });
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["installs"], queryFn: () => listInstalls() });
   const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });
@@ -67,6 +67,7 @@ function Page() {
   const [lane, setLane] = useState<"prep" | "installed">("prep");
   const [slice, setSlice] = useState<"all" | "ready" | "not-ready">("all");
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("installs", "date-asc");
   const [picked, setPicked] = useState<number[]>([]);
@@ -329,7 +330,10 @@ function Page() {
           </div>
         ) : null}
       </div>
-      <InstallSheet row={selectedRow} onClose={() => setSelected(null)} onOpenRelated={(id) => setSelected(id)} />
+      <InstallSheet row={selectedRow} onClose={() => {
+          setSelected(null);
+          back();
+        }} onOpenRelated={(id) => setSelected(id)} />
       <NewInstallDialog
         open={create}
         existing={allInstalls}

@@ -3,7 +3,7 @@ import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState, type FormEvent } from "react";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { parseCustomerSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { getMyAccess } from "@/lib/ops/access";
 import { addDirectoryEntry, archiveDirectoryEntry, listCustomerRecords, renameCustomer } from "@/lib/ops/api";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import { useMyView } from "@/components/desk/my-view-bar";
 
 
 export const Route = createFileRoute("/_app/customers")({
-  validateSearch: parseCustomerSearch,
+  validateSearch: parseOpenSearch,
   component: Page,
 });
 
@@ -36,6 +36,7 @@ function Page() {
   const navigate = useNavigate();
   const { open, from } = Route.useSearch();
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const list = useQuery({ queryKey: ["customers", "records"], queryFn: () => listCustomerRecords() });
   const [q, setQ] = useState("");
@@ -130,14 +131,8 @@ function Page() {
   }
 
   function closeCustomer() {
-    const id = selected;
     setSelected(null);
-    // Opened from the Map: go back there with the same account picked.
-    if (from) {
-      void navigate({ to: "/map", search: { ...(id ? { account: id } : {}), ...(from === "territories" ? { tab: "territories" } : {}) } });
-      return;
-    }
-    void navigate({ to: "/customers", search: {}, replace: true });
+    if (!back()) void navigate({ to: "/customers", search: {}, replace: true });
   }
 
   return (

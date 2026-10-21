@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useBackTo } from "@/lib/ops/search-params";
 import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
 import { AddressLine } from "@/components/desk/customer-address";
@@ -34,12 +35,15 @@ export function JobsPage({
   title,
   lede,
   initialOpen,
+  from,
   initialTab,
 }: {
   kind: "service" | "tlc";
   title: string;
   lede: string;
   initialOpen?: number;
+  /** The page that opened the ticket; closing it goes back there. */
+  from?: string;
   /** A ping or note notification opens its ticket on the Ping tab. */
   initialTab?: "ping";
 }) {
@@ -55,6 +59,7 @@ export function JobsPage({
   const [urgency, setUrgency] = useState("");
   const [view, setView] = useState<"active" | "flagged" | "unassigned" | "complete" | "all">("active");
   const [openId, setOpenId] = useState<number | null>(initialOpen ?? null);
+  const back = useBackTo(from);
   const [openTab, setOpenTab] = useState<"ping" | undefined>(initialOpen != null ? initialTab : undefined);
   useEffect(() => {
     if (initialOpen != null) {
@@ -261,7 +266,10 @@ export function JobsPage({
         </div>
       </div>
 
-      <JobSheet id={openId} initialTab={openTab} onClose={() => setOpenId(null)} />
+      <JobSheet id={openId} initialTab={openTab} onClose={() => {
+          setOpenId(null);
+          back();
+        }} />
       <NewJobDialog
         kind={kind}
         open={create}

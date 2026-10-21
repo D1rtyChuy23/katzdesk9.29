@@ -1,5 +1,6 @@
 import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useFromHere } from "@/lib/ops/search-params";
 import { useQuery } from "@tanstack/react-query";
 import { Globe, MapPinOff, Navigation, RotateCcw, Store, X } from "lucide-react";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
@@ -886,6 +887,7 @@ function ProviderRow({ provider: p, selected, onPick }: { provider: ProviderGeo;
 
 /** The picked account: who, where, how good the pin is, what is open, and the two ways out. */
 function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGeo; scoped: boolean; type: AccountType | null; onClose: () => void }) {
+  const fromMap = useFromHere("/customers");
   const point = pointOf(a);
   const address = shownAddress(a);
   const url = directionsUrl({ point, quality: a.quality, address: a.address });
@@ -932,7 +934,7 @@ function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGe
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Button asChild size="sm" className="h-9 px-3">
-          <Link to="/customers" search={{ open: a.id, from: "map" }} data-testid="map-open-account">
+          <Link to="/customers" search={{ open: a.id, from: fromMap }} data-testid="map-open-account">
             <Store />
             Open Account
           </Link>
@@ -964,6 +966,7 @@ const PHONE_TAP = "max-sm:inline-block max-sm:py-2";
  * Directions (only to a street match) and a way into the Out of Network page with the provider open.
  */
 function ProviderCard({ provider: p, onClose }: { provider: ProviderGeo; onClose: () => void }) {
+  const fromMapToNetwork = useFromHere("/network");
   const point = { lat: p.lat, lng: p.lng };
   const drivable = canDriveTo(p.quality);
   const url = drivable ? directionsUrl({ point, quality: p.quality }) : null;
@@ -1043,7 +1046,7 @@ function ProviderCard({ provider: p, onClose }: { provider: ProviderGeo; onClose
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Button asChild size="sm" className="h-9 px-3">
-          <Link to="/network" search={{ open: p.providerId }} data-testid="map-open-provider">
+          <Link to="/network" search={{ open: p.providerId, from: fromMapToNetwork }} data-testid="map-open-provider">
             <Globe />
             Open In Out Of Network
           </Link>

@@ -21,7 +21,7 @@ import {
 } from "@/lib/ops/unit-place";
 import { PlacePicker, emptyPlaceDraft, type PlaceDraft } from "@/components/desk/unit-place-field";
 import { placeDraftError } from "@/lib/ops/unit-place-rules";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import type { Asset } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_app/locations")({
 });
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
@@ -51,6 +51,7 @@ function Page() {
   const [tab, setTab] = useState<"deployed" | "field" | "sold" | "all">("deployed");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [panel, setPanel] = useState<null | { site: string; mode: "barn" | "list" }>(null);
   const [movingId, setMovingId] = useState<number | null>(null);
   const [moveDraft, setMoveDraft] = useState<PlaceDraft>(emptyPlaceDraft());
@@ -318,7 +319,10 @@ function Page() {
         ))}
       </div>
 
-      <AssetSheet asset={selectedRow} onClose={() => setSelected(null)} />
+      <AssetSheet asset={selectedRow} onClose={() => {
+          setSelected(null);
+          back();
+        }} />
     </div>
   );
 }

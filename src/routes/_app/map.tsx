@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import { FilterChip } from "@/components/desk/desk-charts";
 import { CustomerMap } from "@/components/desk/customer-map";
 import { TerritoryView } from "@/components/desk/territory-view";
@@ -18,9 +17,16 @@ export const Route = createFileRoute("/_app/map")({
 type MapTab = "accounts" | "territories";
 
 function Page() {
-  const { account, tab: startTab } = Route.useSearch();
+  const { account, tab: tabParam } = Route.useSearch();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<MapTab>(startTab ?? "accounts");
+  // The tab and picked account live in the address, so closing an account opened from here comes back to both.
+  const tab: MapTab = tabParam ?? "accounts";
+  const go = (next: { account?: number | null; tab?: MapTab }) => {
+    const t = next.tab ?? tab;
+    const id = "account" in next ? next.account : account;
+    void navigate({ to: "/map", search: { ...(id ? { account: id } : {}), ...(t === "territories" ? { tab: t } : {}) }, replace: true, resetScroll: false });
+  };
+  const setTab = (t: MapTab) => go({ tab: t, account: null });
   return (
     <div>
       <header>
@@ -45,16 +51,12 @@ function Page() {
       {tab === "accounts" ? (
         <CustomerMap
           accountId={account ?? null}
-          onSelectAccount={(id) =>
-            void navigate({ to: "/map", search: id ? { account: id } : {}, replace: true, resetScroll: false })
-          }
+          onSelectAccount={(id) => go({ account: id })}
         />
       ) : (
         <TerritoryView
           accountId={account ?? null}
-          onSelectAccount={(id) =>
-            void navigate({ to: "/map", search: id ? { account: id } : {}, replace: true, resetScroll: false })
-          }
+          onSelectAccount={(id) => go({ account: id })}
         />
       )}
     </div>

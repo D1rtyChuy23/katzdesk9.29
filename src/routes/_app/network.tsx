@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { archiveProvider, listNetwork, renameProvider } from "@/lib/ops/network-api";
 import { PROVIDER_GEO_KEY } from "@/lib/ops/provider-geo-api";
 import { getMyAccess } from "@/lib/ops/access";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { providerStates, statusTone, type NetworkAccount, type NetworkOverview, type NetworkProvider } from "@/lib/ops/network";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,9 @@ type Tab = "providers" | "accounts" | "coverage";
 
 function Page() {
   const navigate = useNavigate();
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [creating, setCreating] = useState(false);
   const [tab, setTab] = useState<Tab>("providers");
   const net = useQuery({ queryKey: ["network"], queryFn: () => listNetwork() });
@@ -41,12 +42,12 @@ function Page() {
   function openProvider(id: number) {
     setSelected(id);
     setCreating(false);
-    void navigate({ to: "/network", search: { open: id }, replace: true });
+    void navigate({ to: "/network", search: { open: id, from }, replace: true });
   }
   function close() {
     setSelected(null);
     setCreating(false);
-    void navigate({ to: "/network", search: {}, replace: true });
+    if (!back()) void navigate({ to: "/network", search: {}, replace: true });
   }
 
   const addButton = (
