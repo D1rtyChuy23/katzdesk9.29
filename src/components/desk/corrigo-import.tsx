@@ -197,8 +197,11 @@ type RowDraft = {
   /** The person picked the customer; until then it follows the install choice. */
   customerEdited: boolean;
   keepWalkIn: boolean;
-  /** Install rows with a picker: the install chosen (null = a new install). */
-  installChoice: number | null;
+  /**
+   * Install rows with a picker: the install the person chose (null = a new install). Not set: the preselection, which
+   * can change as earlier rows change (a later row follows the first row's new install).
+   */
+  installChoice?: number | null;
 };
 
 function draftFor(row: CorrigoPreviewRow): RowDraft {
@@ -208,7 +211,6 @@ function draftFor(row: CorrigoPreviewRow): RowDraft {
     customer: row.customer ?? "",
     customerEdited: false,
     keepWalkIn: false,
-    installChoice: row.installChoice,
   };
 }
 
@@ -246,8 +248,8 @@ function PreviewBody({
     () =>
       settleInstallRows(
         preview.rows,
-        // null is a choice too (a new install), so only a row with no draft yet takes the preselection.
-        (r) => (rowKey(r) in drafts ? drafts[rowKey(r)]!.installChoice : r.installChoice),
+        // null is a choice too (a new install); a row nobody picked for (undefined) takes the preselection.
+        (r) => drafts[rowKey(r)]?.installChoice,
         (r) => drafts[rowKey(r)]?.selected ?? true,
       ),
     [preview.rows, drafts],
@@ -279,7 +281,7 @@ function PreviewBody({
 
   function patch(key: string, next: Partial<RowDraft>) {
     setDrafts((cur) => {
-      const prev = cur[key] ?? { selected: false, customer: "", customerEdited: false, keepWalkIn: false, installChoice: null };
+      const prev = cur[key] ?? { selected: false, customer: "", customerEdited: false, keepWalkIn: false };
       return { ...cur, [key]: { ...prev, ...next } };
     });
   }

@@ -228,6 +228,7 @@ async function findExistingHit(
   fileCustomer?: string | null,
   wrapped?: boolean,
   today?: string,
+  row?: { statusRaw: string | null; completedAt: string | null } | null,
 ): Promise<CorrigoHit | null> {
   if (!matchKey) return null;
   const hits = await loadHits(sql);
@@ -237,7 +238,7 @@ async function findExistingHit(
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
-  return pickKeeper(preferFileCustomerInstalls(attachableHits(group, fileCustomer, rolled, today), fileCustomer), preferredBoard);
+  return pickKeeper(preferFileCustomerInstalls(attachableHits(group, fileCustomer, rolled, today, row), fileCustomer), preferredBoard);
 }
 
 async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: string) {
@@ -390,6 +391,7 @@ const applyRow = z.object({
   shared: z.string().nullable().optional(),
   byEquipment: z.boolean().optional(),
   byAccount: z.boolean().optional(),
+  installNewFrom: z.string().regex(/^\d+$/).nullable().optional(),
   installSiblings: z
     .array(z.object({ wo: z.string(), status: z.string().nullable(), completedAt: z.string().nullable() }))
     .max(200)
@@ -458,6 +460,16 @@ export async function applyCorrigoRows(
     shared = row.shared ?? null;
     // The row goes on an open install picked for the account (by equipment or not), not on one with its WO.
     const picked = !!(row.byAccount || row.byEquipment);
+    if (action === "update" && !jobId && board === "install" && row.installNewFrom) {
+      // The new install an earlier row of this import opened (this chunk or an earlier one): the one with its WO.
+      const opened = await sql.query<{ id: number }>(
+        `select w.install_id as id from install_work_orders w join installs i on i.id = w.install_id
+          where i.archived = false and w.match_key = $1 order by w.install_id desc limit 1`,
+        [row.installNewFrom],
+      );
+      if (opened[0]) jobId = opened[0].id;
+      else action = "create";
+    }
     if (action === "update" && jobId && board === "install") {
       // A picked install archived, completed or moved to another account since the preview, or a WO taken off its
       // install since: open a new one (or find the WO's install), as a fresh preview would. Another WO added to the
@@ -480,7 +492,7 @@ export async function applyCorrigoRows(
       }
     }
     if (action === "create" || (action === "update" && !jobId)) {
-      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, today);
+      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, today, row);
       if (hit) {
         action = "update";
         jobId = hit.id;
@@ -695,7 +707,14 @@ export async function applyCorrigoRows(
       }
 
       if (board === "install") {
-        const equipStatus = boardStatus("install", row.statusRaw, row.completedAt, null).status;
+        // A new install later rows of this file go on: its status counts their WOs too, as the preview did.
+        const later = row.installSiblings?.length
+          ? installStatusFromCorrigo(
+              { status: "Not Ready", completedAt: null, wos: withSiblingWos([], row.installSiblings, matchKey) },
+              { matchKey, canonicalWo: wo, statusRaw: row.statusRaw, completedAt: row.completedAt },
+            )
+          : null;
+        const equipStatus = later?.status ?? boardStatus("install", row.statusRaw, row.completedAt, null).status;
         const complete = equipStatus === "Installed";
         const inserted = await sql.query<{ id: number }>(
           `insert into installs (received, customer, technician, wo, work_done, completed_at, equip_status, complete)
@@ -707,7 +726,7 @@ export async function applyCorrigoRows(
             row.technician,
             wo,
             row.workDone,
-            row.completedAt,
+            later ? later.completedAt : row.completedAt,
             equipStatus,
             complete,
           ],

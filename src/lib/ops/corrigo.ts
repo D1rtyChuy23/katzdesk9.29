@@ -167,6 +167,8 @@ export type InstallOption = {
   summary: string;
   /** The install's customer when it isn't the file's account (a name that only starts the same): listed, never picked. */
   otherName?: string | null;
+  /** A new install an earlier row of this file opens (that row's WO match key); id is newInstallChoice(key). */
+  newFrom?: string | null;
   /** The install before this import (null for a new one). */
   state: InstallState | null;
   /** The row names exactly this install's machines. */
@@ -223,6 +225,12 @@ export type CorrigoPreviewRow = {
   installState: InstallState | null;
   /** WOs the file's later rows put on the same install (settleInstallRows); the import counts them as the preview did. */
   installSiblings?: InstallWo[] | null;
+  /** The preview's own preselection (installChoice is what the walk settled on). */
+  installPreselect?: number | null;
+  /** The row goes on the new install an earlier row of this file opens: that row's WO match key. */
+  installNewFrom?: string | null;
+  /** The machines the row names exactly (Equipment column, else the problem description), or null. */
+  namedMachines?: string[] | null;
 };
 
 /**
@@ -320,10 +328,19 @@ export function attachableHits(
   fileCustomer: string | null | undefined,
   wrapped: boolean,
   today: string | null | undefined,
+  /** The file's row: its status and completed date say whether it is that old project's WO or a new job. */
+  row?: { statusRaw: string | null; completedAt: string | null } | null,
 ): CorrigoHit[] {
-  // After the wrap, a closed install whose WO (any of its work orders) came in over a year ago is another job.
+  // After the wrap, a closed install whose WO came in over a year ago is another job when the row is open, or was
+  // completed after the project was. Completed on or before the project's date, it is the same (a long project).
+  const reused = (h: CorrigoHit) =>
+    !row ||
+    !installWoDone({ status: row.statusRaw, completedAt: row.completedAt }) ||
+    (!!row.completedAt && !!h.completedAt && row.completedAt > h.completedAt);
   const hits = wrapped
-    ? all.filter((h) => !(h.board === "install" && hitClosed(h) && !recentTicket(h, today) && (woNumeric(h.wo) ?? Infinity) <= WO_WRAP))
+    ? all.filter(
+        (h) => !(h.board === "install" && hitClosed(h) && !recentTicket(h, today) && (woNumeric(h.wo) ?? Infinity) <= WO_WRAP && reused(h)),
+      )
     : all;
   const recent = wrapped ? hits.filter((h) => recentTicket(h, today)) : [];
   const named = recent.filter((h) => !isWalkIn(h.customer)).map((h) => normalizeCustomerKey(h.customer));
@@ -924,47 +941,124 @@ export function withSiblingWos(wos: InstallWo[], siblings: InstallWo[] | null | 
   return [...wos, ...(siblings ?? []).filter((w) => !have.has(woMatchKey(w.wo)))];
 }
 
+/** The picker's choice for "the new install from WO-0901": a number no install id can be. */
+export function newInstallChoice(matchKey: string): number {
+  return -(Number(matchKey) + 1);
+}
+
+export const newInstallLabel = (wo: string) => `Attach to the new install from ${wo}`;
+
+type NewInstall = { id: number; key: string; wo: string; account: string; customer: string | null; machines: string[] | null };
+
 /**
  * Walk the rows in order with each install row's choice (the preview's preselection, or what the person picked), so
  * a second row for one install sees the first row's WO on it — the order the import writes them. A row's status
  * also counts the WOs the file's later rows put on that install (installSiblings, which the import reads too), so
- * WO-0831 Completed with WO-0855 still open in the same file doesn't install the project. Sets each install row's
- * action, install, statuses and default customer. `included` leaves unchecked rows out of the walk.
+ * WO-0831 Completed with WO-0855 still open in the same file doesn't install the project.
+ *
+ * Several rows for one account (strict match, not Walk-In) whose WOs are on no ticket and that has no open install:
+ * the first opens the install and each later one goes on it as another WO ("Attach to the new install from WO-0901",
+ * preselected; Create new install can still be chosen). A row that names other equipment exactly than that row
+ * preselects its own new install. Choosing something else on the first row hands the role to the next.
+ *
+ * `choiceOf` gives a row's chosen install (undefined: the preselection); `included` leaves unchecked rows out.
  */
 export function settleInstallRows<T extends CorrigoPreviewRow>(
   rows: T[],
-  choiceOf: (row: T) => number | null = (r) => r.installChoice,
+  choiceOf: (row: T) => number | null | undefined = () => undefined,
   included: (row: T) => boolean = () => true,
 ): T[] {
   const sim = new Map<number, InstallState>();
   const stateOf = (id: number, base: InstallState | null) => sim.get(id) ?? base;
-  const isInstallRow = (row: T) => row.action !== "skip" && row.board === "install" && (!!row.installOptions || !!row.installState);
-  const targetOf = (row: T): number | null => {
+  // The options the preview found (an earlier walk's "new install" choices are rebuilt each time).
+  const ownOptions = (row: T) => row.installOptions?.filter((o) => !o.newFrom) ?? null;
+  // No WO matched and the account has no open install of its own (a similar name may be listed): rows that combine.
+  const combinable = (row: T) =>
+    row.action !== "skip" &&
+    row.board === "install" &&
+    !row.installState &&
+    !!row.fileCustomer?.trim() &&
+    !isWalkIn(row.fileCustomer) &&
+    (ownOptions(row) ?? []).every((o) => o.id == null || !!o.otherName);
+  const isInstallRow = (row: T) =>
+    row.action !== "skip" && row.board === "install" && (!!row.installOptions || !!row.installState || combinable(row));
+  const made: NewInstall[] = [];
+  const optionsOf: (InstallOption[] | null)[] = [];
+  const opener: (NewInstall | null)[] = [];
+  // First pass, in file order: each row's install, and the new installs rows open.
+  const targets = rows.map((row, i): number | null => {
+    optionsOf[i] = null;
+    opener[i] = null;
     if (!isInstallRow(row)) return null;
-    if (row.installOptions) {
-      const choice = choiceOf(row);
-      return row.installOptions.some((o) => o.id === choice) ? choice : null;
+    const own = ownOptions(row);
+    if (!own && row.installState) return row.action === "update" ? row.jobId : null;
+    const mine = combinable(row) ? made.filter((m) => customersStrictlyMatch(m.account, row.fileCustomer)) : [];
+    const fresh = mine.map(
+      (m): InstallOption => ({ id: m.id, label: newInstallLabel(m.wo), customer: m.customer, summary: "", state: null, byEquipment: false, newFrom: m.key }),
+    );
+    const create: InstallOption = own?.find((o) => o.id == null) ?? {
+      id: null,
+      label: NEW_INSTALL_LABEL,
+      customer: preferredImportCustomer(row.fileCustomer, null),
+      summary: "",
+      state: null,
+      byEquipment: false,
+    };
+    const options = own || fresh.length ? [...(own ?? []).filter((o) => o.id != null), ...fresh, create] : null;
+    optionsOf[i] = options;
+    const explicit = choiceOf(row);
+    let choice: number | null;
+    if (explicit !== undefined) choice = options?.some((o) => o.id === explicit) ? explicit : null;
+    else {
+      const differs = (m: NewInstall) => !!m.machines && !!row.namedMachines && !sameMachines(m.machines, row.namedMachines);
+      const fit = mine.find((m) => !differs(m));
+      const pre = row.installPreselect !== undefined ? row.installPreselect : row.installChoice;
+      choice = fit ? fit.id : options?.some((o) => o.id === pre) ? pre : null;
     }
-    return row.action === "update" ? row.jobId : null;
-  };
-  const targets = rows.map(targetOf);
+    if (choice == null && combinable(row) && included(row)) {
+      const m: NewInstall = {
+        id: newInstallChoice(row.matchKey),
+        key: row.matchKey,
+        wo: row.canonicalWo,
+        account: row.fileCustomer!,
+        customer: row.customer,
+        machines: row.namedMachines ?? null,
+      };
+      made.push(m);
+      opener[i] = m;
+    }
+    return choice;
+  });
+  const siblingsOf = (i: number, id: number) =>
+    rows
+      .map((r, j) => ({ r, j }))
+      .filter(({ r, j }) => j > i && targets[j] === id && included(r))
+      .map(({ r }): InstallWo => ({ wo: r.canonicalWo, status: r.statusRaw, completedAt: r.completedAt }));
   return rows.map((row, i) => {
     if (!isInstallRow(row)) return row;
-    const options = row.installOptions?.map((o) => {
-      const state = o.id == null ? null : stateOf(o.id, o.state);
-      return o.id == null || !state ? o : { ...o, label: installOptionLabel(o.id, o.summary, state, o.otherName) };
-    });
+    const options = optionsOf[i]?.map((o) => {
+      const state = o.id == null || o.newFrom ? null : stateOf(o.id, o.state);
+      return !state ? o : { ...o, label: installOptionLabel(o.id!, o.summary, state, o.otherName) };
+    }) ?? null;
     const id = targets[i]!;
     const option = options ? options.find((o) => o.id === id) ?? options.find((o) => o.id == null) : undefined;
-    const base = id == null ? null : options ? stateOf(id, option!.state) : stateOf(id, row.installState);
-    if (!options && !base) return row;
+    const base = id == null ? null : option?.newFrom ? sim.get(id) ?? null : options ? stateOf(id, option!.state) : stateOf(id, row.installState);
     if (id == null || !base) {
-      const fresh = boardStatus("install", row.statusRaw, row.completedAt, null);
+      if (!options && !opener[i] && !combinable(row)) return row;
+      // A new install; one later rows go on is counted with their WOs, like any project.
+      const later = opener[i] ? siblingsOf(i, opener[i]!.id) : [];
+      const fresh = later.length
+        ? installStatusFromCorrigo({ status: NEW_TICKET_STATUS.install, completedAt: null, wos: withSiblingWos([], later, row.matchKey) }, row)
+        : { ...boardStatus("install", row.statusRaw, row.completedAt, null), completedAt: row.completedAt, wos: [] as InstallWo[] };
+      if (opener[i] && included(row)) {
+        sim.set(opener[i]!.id, { status: fresh.status, completedAt: fresh.completedAt, wos: withInstallWo([], row) });
+      }
       return {
         ...row,
-        installOptions: options ?? null,
+        installOptions: options,
         installChoice: null,
-        installSiblings: null,
+        installSiblings: later.length ? later : null,
+        installNewFrom: null,
         action: "create",
         jobId: null,
         oldStatus: null,
@@ -979,20 +1073,18 @@ export function settleInstallRows<T extends CorrigoPreviewRow>(
         byEquipment: false,
       };
     }
-    const siblings = rows
-      .map((r, j) => ({ r, j }))
-      .filter(({ r, j }) => j > i && targets[j] === id && included(r))
-      .map(({ r }): InstallWo => ({ wo: r.canonicalWo, status: r.statusRaw, completedAt: r.completedAt }));
+    const siblings = siblingsOf(i, id);
     const next = installStatusFromCorrigo({ ...base, wos: withSiblingWos(base.wos, siblings, row.matchKey) }, row);
     if (included(row)) sim.set(id, { status: next.status, completedAt: next.completedAt, wos: withInstallWo(base.wos, row) });
     const held = next.wos.length > 1 && !!row.completedAt && next.date.change === null && next.status !== "Installed";
     return {
       ...row,
-      installOptions: options ?? null,
+      installOptions: options,
       installChoice: options ? id : null,
       installSiblings: siblings.length ? siblings : null,
+      installNewFrom: option?.newFrom ?? null,
       action: "update",
-      jobId: id,
+      jobId: option?.newFrom ? null : id,
       oldStatus: base.status,
       newStatus: next.status,
       statusUnmapped: next.unmapped,
@@ -1027,7 +1119,7 @@ export function resolvePreviewRow(
   });
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
-  const woHit = pickKeeper(preferFileCustomerInstalls(attachableHits(pool, rec.customer, wrapped, opts.today), rec.customer), hinted);
+  const woHit = pickKeeper(preferFileCustomerInstalls(attachableHits(pool, rec.customer, wrapped, opts.today, rec), rec.customer), hinted);
   const pick = !woHit && hinted === "install" ? installCandidates(rec, opts.installs ?? [], opts.catalog ?? []) : null;
   const existing = woHit ?? pick?.choice ?? null;
   // After the wrap, a copy from the other cycle than the chosen ticket, or another customer's, is a different job.
@@ -1146,6 +1238,13 @@ export function resolvePreviewRow(
         ]
       : null,
     installChoice: pick?.choice?.id ?? null,
+    installPreselect: pick?.choice?.id ?? null,
+    namedMachines:
+      board === "install" && opts.catalog?.length
+        ? rec.equipment?.trim()
+          ? exactMachines([rec.equipment], opts.catalog)
+          : spelledMachines(rec.issue ?? "", opts.catalog)
+        : null,
     installState:
       woHit?.board === "install"
         ? { status: woHit.status, completedAt: woHit.completedAt ?? null, wos: woHit.wos ?? [] }
