@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
-import { joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
-import { installMachines, parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
+import { catalogModels, joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
+import { SERIAL_LINE, SUFFIX_ONLY, installMachines, serializeMachines } from "@/lib/ops/machines";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -181,11 +181,11 @@ function text(v: unknown): string {
 }
 
 type Piece = { equipment: string; serial: string; powerVoltage: string };
-const SUFFIX_ONLY = /^[-\u2013][A-Za-z0-9]{1,8}$/;
 
 /**
- * One piece per machine, split the same way the install's Equipment section splits it
- * (catalog-aware), so "Linea / Swift / Axiom-APS" on one line is three machines, not one.
+ * One piece per machine, the same list the install window shows (installMachines): split catalog-aware, so
+ * "Linea / Swift / Axiom-APS" on one line is three machines, and a line that is only a serial ("SN:231515042") is
+ * the serial of the machine above it, not a machine. A bare suffix ("-DV") saved as its own machine is dropped.
  */
 function piecesFrom(
   row: {
@@ -196,14 +196,10 @@ function piecesFrom(
   },
   catalog: string[] = [],
 ): Piece[] {
-  // A bare suffix ("-DV") saved as its own machine is part of the one before it, not a machine.
-  const machines = parseMachinesJson(text(row.machines) || null).filter((m) => !SUFFIX_ONLY.test(m.equipment.trim()));
-  if (machines.length) return machines;
-  const named = listedEquipment(text(row.equipment), catalog);
-  return named.map((equipment) => ({
-    equipment,
-    serial: named.length === 1 ? text(row.serial) : "",
-    powerVoltage: named.length === 1 ? text(row.power_voltage) : "",
+  return installMachines({ ...row, machines: text(row.machines) || null }, catalog).machines.map((m) => ({
+    equipment: m.equipment,
+    serial: m.serial,
+    powerVoltage: m.powerVoltage,
   }));
 }
 
@@ -216,13 +212,29 @@ type AcctUnit = {
   electrical: string | null;
 };
 
+/** The same list the board and the install window read (loadEquipCatalog): directory names and warehouse models. */
 export async function catalogNames(sql: Sql): Promise<string[]> {
   const rows = await sql
     .query<{ name: string }>(
-      `select name from directory_equipment where archived = false and coalesce(name, '') <> ''`,
+      `select name from directory_equipment where archived = false and coalesce(name, '') <> ''
+       union select distinct model as name from assets where kind = 'equip' and coalesce(model, '') <> ''`,
     )
     .catch(() => []);
-  return rows.map((r) => r.name);
+  return catalogModels(rows.map((r) => r.name));
+}
+
+/** The account's record goes only when it was made for a visit and nothing else uses it. */
+async function dropUnusedUnit(sql: Sql, id: number): Promise<void> {
+  await sql
+    .query(
+      `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
+          and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)
+          and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)
+          and not exists (select 1 from modules m where m.assigned_unit_id = a.id)
+          and not exists (select 1 from pm_runbook_unit_links l where l.account_equipment_id = a.id)`,
+      [id],
+    )
+    .catch(() => undefined);
 }
 
 async function insertEquipment(
@@ -312,6 +324,39 @@ function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>, catalog
   return undefined;
 }
 
+/**
+ * This install's own unit for a piece nothing else claims: the same model, with a serial no piece on the list has any
+ * more. The serial was corrected or cleared on the row, or changed on the account; it is still the same machine.
+ */
+function ownUnit(piece: Piece, pieces: Piece[], linked: AcctUnit[], used: Set<number>): AcctUnit | undefined {
+  const keys = new Set(pieces.map((p) => serialKey(p.serial)).filter(Boolean));
+  return linked.find(
+    (a) =>
+      !used.has(a.id) &&
+      !!serialKey(a.serial) &&
+      !keys.has(serialKey(a.serial)) &&
+      (sameCatalogModel(a.catalog_model, piece.equipment) || sameCatalogModel(a.equipment_name, piece.equipment)),
+  );
+}
+
+/** Which linked unit each piece is: the matching the load uses. -1 when a piece has none. */
+function claimLinked(pieces: Piece[], linked: AcctUnit[], catalog: string[]): number[] {
+  const used = new Set<number>();
+  const ids = pieces.map((piece) => {
+    const hit = claimUnit(piece, [linked], used, catalog);
+    if (hit) used.add(hit.id);
+    return hit?.id ?? -1;
+  });
+  pieces.forEach((piece, i) => {
+    if (ids[i]! >= 0) return;
+    const own = ownUnit(piece, pieces, linked, used);
+    if (!own) return;
+    used.add(own.id);
+    ids[i] = own.id;
+  });
+  return ids;
+}
+
 async function unitPassed(sql: Sql, installId: number, equipmentId: number): Promise<boolean> {
   const [items, unit] = await Promise.all([
     sql.query<{ category: string; status: string }>(
@@ -385,6 +430,22 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
         hit = old;
       }
     }
+    if (!hit) {
+      const own = ownUnit(piece, pieces, linkedRows, used);
+      const key = serialKey(piece.serial);
+      // A corrected serial goes on the unit when no other unit holds it. A cleared one, or one another unit holds,
+      // leaves the unit's serial alone: it is still this row's machine, not a second one.
+      const clash =
+        own && key
+          ? await sql.query("select 1 from account_equipment where serial_key = $1 and id <> $2 limit 1", [key, own.id])
+          : [];
+      if (own && key && !clash[0]) {
+        await sql.query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [own.id, piece.serial.trim(), key]);
+        own.serial = piece.serial.trim();
+        own.serial_key = key;
+      }
+      if (own) hit = own;
+    }
     if (hit && combined(hit)) {
       // Matched by model but still labelled with the whole list: show just this machine's name.
       hit.equipment_name = piece.equipment;
@@ -441,6 +502,7 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     if (keep.has(a.id) || serialKey(a.serial)) continue;
     const twin =
       SUFFIX_ONLY.test((a.equipment_name ?? "").trim()) ||
+      SERIAL_LINE.test((a.equipment_name ?? "").trim()) ||
       keptModels.some(
         (k) => sameCatalogModel(k.catalog_model, a.catalog_model) || sameCatalogModel(k.equipment_name, a.equipment_name),
       );
@@ -455,15 +517,7 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, a.id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, a.id]);
     linkedIds.delete(a.id);
-    await sql
-      .query(
-        `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
-            and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)
-            and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)
-            and not exists (select 1 from modules m where m.assigned_unit_id = a.id)`,
-        [a.id],
-      )
-      .catch(() => undefined);
+    await dropUnusedUnit(sql, a.id);
   }
   if (!opts?.prune) return;
   for (const id of linkedIds) {
@@ -472,6 +526,8 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
+    // The account row goes too when this visit made it and nothing else uses it, as on Remove.
+    await dropUnusedUnit(sql, id);
   }
 }
 
@@ -1107,14 +1163,7 @@ export const removeInspectionEquipment = createServerFn({ method: "POST" })
         where u.install_id = $1 order by a.id`,
       [data.installId],
     );
-    const used = new Set<number>();
-    let at = -1;
-    pieces.forEach((piece, i) => {
-      const hit = claimUnit(piece, [linked], used, catalog);
-      if (!hit) return;
-      used.add(hit.id);
-      if (hit.id === data.equipmentId && at < 0) at = i;
-    });
+    const at = claimLinked(pieces, linked, catalog).indexOf(data.equipmentId);
     if (!data.keepList && at >= 0) {
       const packed = serializeMachines(pieces.filter((_, i) => i !== at));
       await sql.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1", [
@@ -1128,16 +1177,7 @@ export const removeInspectionEquipment = createServerFn({ method: "POST" })
     await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
-    // The account's record goes only when it was made for this visit and nothing else uses it.
-    await sql
-      .query(
-        `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
-            and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id)
-            and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)
-            and not exists (select 1 from modules m where m.assigned_unit_id = a.id)`,
-        [data.equipmentId],
-      )
-      .catch(() => undefined);
+    await dropUnusedUnit(sql, data.equipmentId);
     await sql
       .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
         data.installId,

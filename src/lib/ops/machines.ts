@@ -143,17 +143,45 @@ export function specsFromInstall(
   machines: string | null | undefined,
   catalog: string[] = [],
 ): MachineSpec[] {
-  const fromJson = parseMachinesJson(machines);
-  if (fromJson.length) {
-    const names = listedEquipment(fromJson.map((s) => s.equipment).join("\n"), catalog);
-    return mergeMachineSpecs(names, fromJson, { serial, powerVoltage });
-  }
+  // The saved list is read as saved, the same as pre-inspection reads it. Splitting the names again turned
+  // 'Bunn ITCB-DV, 29" w/Flip Tray' into two machines on the window while the visit had one.
+  const fromJson = storedMachines(machines);
+  if (fromJson.length) return mergeMachineSpecs(fromJson.map((s) => s.equipment), fromJson, { serial, powerVoltage });
   return typedMachines(equipment ?? "", serial, powerVoltage, catalog);
 }
 
 const SN = /\bSN\s*:?\s*([A-Z0-9-]+)/i;
 /** A line that is only a serial ("SN: ITCB189507"), typed under the machine it belongs to. */
-const SERIAL_LINE = /^SN\s*:?\s*[A-Z0-9-]+$/i;
+export const SERIAL_LINE = /^SN\s*:?\s*[A-Z0-9-]+$/i;
+/** A bare model suffix ("-DV") saved as a machine of its own. */
+export const SUFFIX_ONLY = /^[-\u2013][A-Za-z0-9]{1,8}$/;
+
+/**
+ * The saved machine list. A row that is only a serial ("SN:231515042") is the serial of the row above it, and a bare
+ * suffix ("-DV") is part of the row above it: neither is a machine. Older saves wrote both as rows of their own.
+ */
+export function storedMachines(raw: string | null | undefined): MachineSpec[] {
+  const out: MachineSpec[] = [];
+  for (const m of parseMachinesJson(raw)) {
+    const name = m.equipment.trim();
+    const above = out[out.length - 1];
+    if (SERIAL_LINE.test(name) || SUFFIX_ONLY.test(name)) {
+      const serial = m.serial || (SERIAL_LINE.test(name) ? (name.match(SN)?.[1] ?? "") : "");
+      if (above && !above.serial && serial) above.serial = serial;
+      continue;
+    }
+    if (/\n/.test(name)) {
+      // The whole typed text saved as one name by an older serial lookup: one row per machine again.
+      const typed = typedMachines(name, null, null, []);
+      if (typed.length) {
+        out.push({ ...m, equipment: typed[0]!.equipment, serial: m.serial || typed[0]!.serial }, ...typed.slice(1));
+        continue;
+      }
+    }
+    out.push(m);
+  }
+  return out;
+}
 
 /**
  * The machines typed in an install's equipment text, with the serial and voltage typed on a machine's line
@@ -210,7 +238,7 @@ export function installMachines(
   row: { equipment?: string | null; serial?: string | null; power_voltage?: string | null; machines?: unknown },
   catalog: string[] = [],
 ): { machines: MachineSpec[]; typed: boolean } {
-  const stored = parseMachinesJson(text(row.machines) || null);
+  const stored = storedMachines(text(row.machines) || null);
   if (stored.length) return { machines: stored, typed: false };
   return { machines: typedMachines(text(row.equipment), text(row.serial), text(row.power_voltage), catalog), typed: true };
 }
