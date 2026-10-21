@@ -49,6 +49,8 @@ export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
 import { backfillAssignedSerialsOnce } from "./serial-backfill";
 import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
+import { assertUnlocked } from "./equipment-lock";
+import { LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "./equipment-lock-rules";
 import { boardRow, cleanMachine, confirmError, continuable, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus } from "./deal-board";
 import { listedEquipment, matchModel, catalogModels } from "./equipment";
 import {
@@ -408,7 +410,9 @@ function mapAsset(r: any) {
 		stockHold: r.stock_hold === "remove" || r.stock_hold === "assign" ? r.stock_hold : null,
 		stockHoldCustomer: r.stock_hold_customer ?? null,
 		stockHoldReason: r.stock_hold_reason ?? null,
-		stockHoldBy: r.stock_hold_by ?? null
+		stockHoldBy: r.stock_hold_by ?? null,
+		lockedAt: r.locked_at ? (r.locked_at instanceof Date ? r.locked_at.toISOString() : String(r.locked_at)) : null,
+		lockedBy: r.locked_at ? r.locked_by ?? null : null
 	};
 }
 function mapRecipe(r: any) {
@@ -1231,10 +1235,16 @@ export const listDeals = createServerFn({ method: "GET" }).middleware([deskMiddl
 	const projects = await loadBoardProjects(sql, await loadEquipCatalog(sql));
 	return (await sql`select * from deals where archived = false order by id`).map((r) => attachBoard(mapDeal(r, marks), projects));
 });
-export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; machines?: MachineSpec[] | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean }) => d).handler(async ({ data, context }: any) => {
+export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; machines?: MachineSpec[] | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean; releaseUids?: string[] }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
+	// The owner may take a confirmed machine off the deal: its tie is released, so the stored row is not put back.
+	const release = new Set<string>(Array.isArray(data.releaseUids) ? data.releaseUids.filter((u: unknown) => typeof u === "string" && u) : []);
+	if (release.size) {
+		const { canLockEquipment } = await import("./equipment-lock");
+		if (!(await canLockEquipment(sql, context.userId))) throw new Error("Only the owner can take a confirmed machine off a deal.");
+	}
 	const c = cur[0];
 	const producer = data.producer === undefined ? c.producer : canonicalRepName(data.producer);
 	const completion = data.completion === undefined ? c.completion : data.completion;
@@ -1243,8 +1253,9 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 	if (data.machines !== undefined) {
 		const stored = parseMachinesJson(c.machines ?? null);
 		// Confirmed machines are changed on the Board: the deal keeps them as stored.
-		const onBoard = new Set<string>((await loadBoardProjects(sql)).flatMap((p: any) => p.machines.map((m: any) => m.uid)).filter(Boolean));
-		const packed = serializeMachines(lockConfirmed(keepTies(Array.isArray(data.machines) ? data.machines : [], stored), stored, onBoard));
+		const onBoard = new Set<string>((await loadBoardProjects(sql)).flatMap((p: any) => p.machines.map((m: any) => m.uid)).filter((u: string) => u && !release.has(u)));
+		const kept = stored.filter((m) => !m.uid || !release.has(m.uid));
+		const packed = serializeMachines(lockConfirmed(keepTies(Array.isArray(data.machines) ? data.machines : [], kept), kept, onBoard));
 		machinesJson = packed.machines;
 		data.equipment = packed.equipment;
 	}
@@ -1865,6 +1876,8 @@ export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMi
 	const level = data.level === undefined ? c.level : data.level;
 	let line = c.line_no;
 	const site = data.site === undefined ? c.site : data.site;
+	// A locked unit keeps its place until the owner unlocks it.
+	if (site !== c.site || String(pallet ?? "") !== String(c.pallet ?? "") || Number(level ?? 0) !== Number(c.level ?? 0)) await assertUnlocked(sql, c);
 	if (isBarn(site) && pallet && !isValidBay(String(pallet))) {
 		throw new Error("Pick a bay A through P");
 	}
@@ -1949,8 +1962,7 @@ async function stampWarehouseSerial(sql: any, table: "installs" | "deals" | "ser
 	}
 	return row.deal_id ?? null;
 }
-export const assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+export async function assignAssetToInstallFor(sql: any, data: { assetId: number; installId: number }, context: { userId: string }) {
 	await backfillAssignedSerialsOnce(sql);
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
@@ -1958,6 +1970,7 @@ export const assignAssetToInstall = createServerFn({ method: "POST" }).middlewar
 	if (asset.status === "sold") throw new Error("Already sold");
 	const inst = (await sql`
       select id, customer from installs where id = ${data.installId}`)[0];
+	if (asset.status !== "assigned") await assertUnlocked(sql, asset);
 	if (!inst) throw new Error("Install not found");
 	// Locked: a unit already assigned to an account is an asset at that site until it is returned.
 	if (asset.status === "assigned") {
@@ -1986,6 +1999,8 @@ export const assignAssetToInstall = createServerFn({ method: "POST" }).middlewar
         origin_pallet = ${originPallet},
         origin_level = ${originLevel},
         purpose = ${asset.customer_owned ? "Customer-owned / loaner" : "Install"},
+        locked_at = now(),
+        locked_by = ${LOCKED_BY_ASSIGNED},
         updated_at = now()
       where id = ${data.assetId}`;
 	const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
@@ -1994,12 +2009,13 @@ export const assignAssetToInstall = createServerFn({ method: "POST" }).middlewar
 	const detail = `Pulled ${asset.model}${asset.serial ? " · " + asset.serial : ""} from ${asset.pallet ? slotId(asset.pallet, asset.level ?? 0, asset.line_no) : siteLabel(asset.site)}.`;
 	await logActivity(sql, context.userId, "install", inst.id, "assigned-asset", detail);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
-});
-export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+}
+export const assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => assignAssetToInstallFor(await ready(), data, context));
+export async function unassignAssetFromInstallFor(sql: any, data: { assetId: number; installId: number }, context: { userId: string }) {
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
 	if (asset.install_id !== data.installId) throw new Error("That unit is not on this install");
+	await assertUnlocked(sql, asset, { release: true });
 	const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
 	const dealId = await stampWarehouseSerial(sql, "installs", data.installId, unit, "clear", false);
 	if (dealId) await stampWarehouseSerial(sql, "deals", Number(dealId), unit, "clear", false);
@@ -2020,11 +2036,14 @@ export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middl
         sold_to = null,
         sold_at = null,
         purpose = null,
+        locked_at = null,
+        locked_by = null,
         updated_at = now()
       where id = ${data.assetId}`;
 	await logActivity(sql, context.userId, "install", data.installId, "unassigned-asset", asset.model);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
-});
+}
+export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => unassignAssetFromInstallFor(await ready(), data, context));
 export const assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; customer: string; jobId?: number | null }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const customer = data.customer.trim();
@@ -2034,6 +2053,7 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
 	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	if (asset.status === "sold") throw new Error("Already sold");
 	if (asset.status !== "ready") throw new Error("That unit is already off the rack");
+	await assertUnlocked(sql, asset);
 	const acct = (await sql`
         select name from directory_customers
         where archived = false and lower(name) = lower(${customer})
@@ -2064,6 +2084,8 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
         origin_pallet = ${originPallet},
         origin_level = ${originLevel},
         purpose = ${asset.customer_owned ? "Customer-owned / service loaner" : "Service"},
+        locked_at = now(),
+        locked_by = ${LOCKED_BY_ASSIGNED},
         updated_at = now()
       where id = ${data.assetId}`;
 	const unit = { model: String(asset.model ?? ""), serial: asset.serial ?? null };
@@ -2082,6 +2104,7 @@ export const unassignAssetFromService = createServerFn({ method: "POST" }).middl
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
 	if (asset.status !== "assigned" || asset.install_id) throw new Error("That unit is not pulled for service");
+	await assertUnlocked(sql, asset, { release: true });
 	const slot = await findOpenBarnSlot(sql, {
 		site: asset.origin_site ?? null,
 		pallet: asset.origin_pallet ?? null,
@@ -2109,17 +2132,20 @@ export const unassignAssetFromService = createServerFn({ method: "POST" }).middl
         sold_to = null,
         sold_at = null,
         purpose = null,
+        locked_at = null,
+        locked_by = null,
         updated_at = now()
       where id = ${data.assetId}`;
 	await logActivity(sql, context.userId, "asset", data.assetId, "unassigned-service", asset.model);
 	if (jobId && jobKind) await logActivity(sql, context.userId, jobKind, jobId, "unassigned-asset", asset.model);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 });
-export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; site: "barn-back" | "barn-front"; pallet: string; level: number }) => d).handler(async ({ data, context }: any): Promise<Asset> => {
-	const sql = await ready();
+export async function returnAssetToWarehouseFor(sql: any, data: { id: number; site: "barn-back" | "barn-front"; pallet: string; level: number }, context: { userId: string }): Promise<Asset> {
 	const prev = (await sql`select * from assets where id = ${data.id}`)[0];
 	if (!prev) throw new Error("Asset not found");
 	if (prev.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
+	// A sold unit, or one a person locked, waits for the owner to unlock it. An assignment's own lock comes off here.
+	await assertUnlocked(sql, prev, { release: true });
 	const pallet = String(data.pallet || "").trim().toUpperCase();
 	if (data.site !== "barn-back" && data.site !== "barn-front") throw new Error("Pick a rack");
 	const bayErr = rackBayError(data.site, pallet);
@@ -2148,6 +2174,8 @@ export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middlew
         sold_to = null,
         sold_at = null,
         purpose = null,
+        locked_at = null,
+        locked_by = null,
         updated_at = now()
       where id = ${data.id}`;
 	await logActivity(sql, context.userId, "asset", data.id, "returned", `${data.pallet}-L${data.level}`);
@@ -2160,12 +2188,13 @@ export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middlew
 		status: prev.status,
 	});
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
-});
-export const markAssetSold = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; soldTo: string }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+}
+export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; site: "barn-back" | "barn-front"; pallet: string; level: number }) => d).handler(async ({ data, context }: any): Promise<Asset> => returnAssetToWarehouseFor(await ready(), data, context));
+export async function markAssetSoldFor(sql: any, data: { id: number; soldTo: string }, context: { userId: string }) {
 	const cur = (await sql`select * from assets where id = ${data.id}`)[0];
 	if (!cur) throw new Error("Asset not found");
 	if (cur.customer_owned) throw new Error("Customer-owned unit — return it, don’t sell it");
+	await assertUnlocked(sql, cur, { release: true });
 	await sql`
       update assets set
         status = 'sold',
@@ -2175,11 +2204,14 @@ export const markAssetSold = createServerFn({ method: "POST" }).middleware([desk
         line_no = null,
         sold_to = ${data.soldTo},
         sold_at = ${todayChicago()},
+        locked_at = now(),
+        locked_by = ${LOCKED_BY_SOLD},
         updated_at = now()
       where id = ${data.id}`;
 	await logActivity(sql, context.userId, "asset", data.id, "sold", data.soldTo);
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
-});
+}
+export const markAssetSold = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; soldTo: string }) => d).handler(async ({ data, context }: any) => markAssetSoldFor(await ready(), data, context));
 export const listRecipes = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Recipe[]> => {
 	return (await (await ready())`
       select * from recipes

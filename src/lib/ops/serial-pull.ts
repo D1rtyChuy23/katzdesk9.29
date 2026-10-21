@@ -6,6 +6,8 @@ import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import { foldVisitUnits, applySerialInPlace, dedupeMachineSerials } from "@/lib/ops/install-form";
 import { catalogModels } from "@/lib/ops/equipment";
 import { catalogNames } from "@/lib/ops/inspection-api";
+import { assertUnlocked } from "@/lib/ops/equipment-lock";
+import { LOCKED_BY_ASSIGNED } from "@/lib/ops/equipment-lock-rules";
 import { isBarn, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { normalizeCustomerKey } from "@/lib/ops/account-equip";
 
@@ -60,6 +62,8 @@ type AssetLite = {
   customer_owned: string | null;
   stock_hold: string | null;
   stock_hold_customer: string | null;
+  locked_at?: unknown;
+  locked_by?: string | null;
 };
 
 export function serialKey(raw: string | null | undefined): string {
@@ -194,7 +198,7 @@ async function loadBySerial(sql: Sql, raw: string): Promise<AssetLite | null> {
   const rows = await sql.query<AssetLite>(
     `select id, model, serial, status, site, pallet, level, line_no, sold_to, install_id, job_id,
             notes, purpose, origin_site, origin_pallet, origin_level, customer_owned,
-            stock_hold, stock_hold_customer
+            stock_hold, stock_hold_customer, locked_at, locked_by
        from assets
       where serial is not null and btrim(serial) <> ''`,
   );
@@ -245,6 +249,8 @@ async function attachAsset(
   asset: AssetLite,
   opts: { customer: string; installId?: number; jobId?: number },
 ) {
+  // A sold unit or one a person locked stays put; an assignment's own lock moves with a confirmed reuse, as before.
+  await assertUnlocked(sql, asset, { release: true });
   const originSite = asset.origin_site ?? asset.site;
   const originPallet = asset.origin_pallet ?? asset.pallet;
   const originLevel = asset.origin_level ?? asset.level;
@@ -269,6 +275,8 @@ async function attachAsset(
         origin_pallet = $6,
         origin_level = $7,
         purpose = $8,
+        locked_at = now(),
+        locked_by = $9,
         updated_at = now()
       where id = $1`,
     [
@@ -280,6 +288,7 @@ async function attachAsset(
       originPallet,
       originLevel,
       purpose,
+      LOCKED_BY_ASSIGNED,
     ],
   );
   const detail = `Pulled ${asset.model}${asset.serial ? " · " + asset.serial : ""} from ${locationOf(asset)}.`;

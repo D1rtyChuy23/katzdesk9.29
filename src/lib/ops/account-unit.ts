@@ -13,8 +13,10 @@ export async function accountUnitWithSerial(
   serial: string | null,
 ): Promise<{ id: number; serial: string | null } | null> {
   if (!serialKey(serial)) return null;
+  // A locked unit is never filled: the owner changes it.
   const rows = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null; serial_key: string | null }>(
-    "select id, customer, catalog_model, equipment_name, serial, serial_key from account_equipment where lower(customer) = lower($1) order by id",
+    `select id, customer, catalog_model, equipment_name, serial, serial_key from account_equipment
+      where lower(customer) = lower($1) and (locked_at is null or coalesce(serial_key, '') <> '') order by id`,
     [customer],
   );
   const unit = matchExistingUnit({

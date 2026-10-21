@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { serialKey } from "@/lib/ops/account-equip";
+import { assertUnlocked } from "@/lib/ops/equipment-lock";
+import { isLocked } from "@/lib/ops/equipment-lock-rules";
 import { electricalFrom, placeMove, resolvePlaceSite, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
 import { requireStock } from "@/lib/ops/rack-stock";
 import {
@@ -52,6 +54,9 @@ export type UnitPlace = {
   pallet: string | null;
   electrical: string | null;
   status: string | null;
+  /** Locked units can't change place: who locked it, or null when it is not locked. */
+  lockedBy: string | null;
+  locked: boolean;
 };
 
 type AssetRow = {
@@ -69,10 +74,12 @@ type AssetRow = {
   sold_to: string | null;
   install_id: number | null;
   job_id: number | null;
+  locked_at: unknown;
+  locked_by: string | null;
 };
 
 const ASSET_COLS = `id, model, serial, status, site, pallet, level, line_no, notes, purpose,
-  customer_owned, sold_to, install_id, job_id`;
+  customer_owned, sold_to, install_id, job_id, locked_at, locked_by`;
 
 function withNote(notes: string | null, extra: string | null | undefined): string | null {
   const add = (extra ?? "").trim();
@@ -131,6 +138,8 @@ function toPlace(row: AssetRow | null): UnitPlace {
       pallet: null,
       electrical: null,
       status: null,
+      lockedBy: null,
+      locked: false,
     };
   }
   return {
@@ -150,6 +159,8 @@ function toPlace(row: AssetRow | null): UnitPlace {
     pallet: row.pallet,
     electrical: electricalFrom(row.notes) || electricalFrom(row.purpose),
     status: row.status,
+    lockedBy: isLocked(row) ? row.locked_by || "the owner" : null,
+    locked: isLocked(row),
   };
 }
 
@@ -177,9 +188,7 @@ async function parkInBarn(
   fromLabel: string,
   rack: "barn-back" | "barn-front" = "barn-back",
 ): Promise<string> {
-  if (placeMove(row) === "blocked") {
-    throw new Error(`That serial is already allocated${row.sold_to ? ` to ${row.sold_to}` : ""}.`);
-  }
+  if (placeMove(row) === "blocked") await assertUnlocked(sql, row);
   const letter = pallet.trim().toUpperCase();
   const bayErr = rackBayError(rack, letter);
   if (bayErr) throw new Error(bayErr);
@@ -233,9 +242,7 @@ async function parkAtLocation(
 ): Promise<string> {
   const dest = resolvePlaceSite(site);
   if (!isLocationSite(dest)) throw new Error("Pick a location");
-  if (placeMove(row) === "blocked") {
-    throw new Error(`That serial is already allocated${row.sold_to ? ` to ${row.sold_to}` : ""}.`);
-  }
+  if (placeMove(row) === "blocked") await assertUnlocked(sql, row);
   const label = (otherLabel ?? "").trim();
   if (dest === "other" && !label) throw new Error("Other needs a short label.");
   const { assertNotHeld } = await import("@/lib/ops/stock-actions");
@@ -348,9 +355,7 @@ export const addUnitToLocation = createServerFn({ method: "POST" })
     if (serial) {
       const existing = await bySerial(sql, serial);
       const action = placeMove(existing);
-      if (action === "blocked" && existing) {
-        throw new Error(`That serial is already allocated${existing.sold_to ? ` to ${existing.sold_to}` : ""}.`);
-      }
+      if (action === "blocked" && existing) await assertUnlocked(sql, existing);
       if (existing && action === "move") {
         await parkAtLocation(sql, context.userId, existing, data.site, electrical, data.otherLabel ?? null);
         return { assetId: existing.id, pulled: isBarn(existing.site) };
@@ -435,9 +440,7 @@ export const setUnitPlace = createServerFn({ method: "POST" })
     if (!serialKey(serial)) throw new Error("Enter a serial so this stays one record.");
     const existing = await bySerial(sql, serial);
     const action = placeMove(existing);
-    if (action === "blocked" && existing) {
-      throw new Error(`That serial is already allocated${existing.sold_to ? ` to ${existing.sold_to}` : ""}.`);
-    }
+    if (action === "blocked" && existing) await assertUnlocked(sql, existing);
     if (data.site === "barn") throw new Error("Pick a rack.");
     const rack = barnRack(data.site);
     if (rack) {
@@ -532,12 +535,8 @@ async function swapAssetPlaces(
   ) {
     throw new Error("That unit is not in this section.");
   }
-  if (placeMove(mover) === "blocked") {
-    throw new Error(`That serial is already allocated${mover.sold_to ? ` to ${mover.sold_to}` : ""}.`);
-  }
-  if (placeMove(other) === "blocked") {
-    throw new Error(`That serial is already allocated${other.sold_to ? ` to ${other.sold_to}` : ""}.`);
-  }
+  if (placeMove(mover) === "blocked") await assertUnlocked(sql, mover);
+  if (placeMove(other) === "blocked") await assertUnlocked(sql, other);
   const { assertNotHeld } = await import("@/lib/ops/stock-actions");
   await assertNotHeld(sql, mover.id);
   await assertNotHeld(sql, other.id);

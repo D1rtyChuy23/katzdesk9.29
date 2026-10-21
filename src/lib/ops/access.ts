@@ -15,6 +15,8 @@ export type DeskAccess = {
   canAddCustomers: boolean;
   canEditRoster: boolean;
   canAssignRoles: boolean;
+  /** Lock and unlock equipment and assets: the desk owner only (canLockEquipment). */
+  canLockEquipment: boolean;
   role: DeskRole;
   usernameChosen: boolean;
   needsUsername: boolean;
@@ -240,6 +242,7 @@ function mapAccess(row: AccessRow, canEditRoster = false): DeskAccess {
     canAddCustomers: isAdmin || flagOn(row.can_add_customers),
     canEditRoster,
     canAssignRoles: canEditRoster,
+    canLockEquipment: canEditRoster,
     role: parseRole(row.desk_role),
     usernameChosen,
     needsUsername: !usernameChosen,
@@ -724,12 +727,14 @@ export const getMyAccess = createServerFn({ method: "GET" })
       const promoted = await promoteAdmin(sql, context.userId, profile.email);
       const { canUserEditRoster } = await import("@/lib/ops/roster");
       const canEdit = await canUserEditRoster(sql, context.userId);
-      return { ...promoted, canEditRoster: canEdit, canAssignRoles: canEdit };
+      // canLockEquipment wraps the same owner check.
+      return { ...promoted, canEditRoster: canEdit, canAssignRoles: canEdit, canLockEquipment: canEdit };
     }
     const mapped = mapAccess((await loadAccess(sql, context.userId)) ?? fresh);
     const { canUserEditRoster } = await import("@/lib/ops/roster");
     const canEdit = await canUserEditRoster(sql, context.userId);
-    return { ...mapped, canEditRoster: canEdit, canAssignRoles: canEdit };
+    // canLockEquipment wraps the same owner check.
+    return { ...mapped, canEditRoster: canEdit, canAssignRoles: canEdit, canLockEquipment: canEdit };
   });
 
 export const claimInvite = createServerFn({ method: "POST" })

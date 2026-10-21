@@ -37,6 +37,8 @@ export type ExistingUnit = {
   equipmentName: string;
   serial: string | null;
   serialKey: string | null;
+  /** Locked by the owner: an import never fills or rewrites it. */
+  lockedBy?: string | null;
 };
 
 export type UnitMatch = {
@@ -494,7 +496,8 @@ export function matchExistingUnit(opts: {
       (e) =>
         normalizeCustomerKey(e.customer) === customerKey &&
         sameCatalogModel(e.catalogModel, opts.catalogModel) &&
-        !serialKey(e.serial),
+        !serialKey(e.serial) &&
+        !e.lockedBy,
     );
     const fill = blank.find((e) => sameEquipLabel(e.equipmentName, opts.equipmentName)) ?? blank[0];
     if (fill) return { action: "update", existingId: fill.id, foreignAccount: null };

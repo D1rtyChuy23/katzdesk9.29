@@ -163,9 +163,11 @@ export const addToRackSlot = createServerFn({ method: "POST" })
     const serial = data.serial?.trim() || "";
     const electrical = data.electrical?.trim() || null;
     const existing = serial ? await findSerial(sql, serial) : null;
-    if (existing && (existing.status === "sold" || existing.sold_to)) {
-      throw new Error(`That serial is already allocated${existing.sold_to ? ` to ${existing.sold_to}` : ""}.`);
+    if (existing) {
+      const { assertAssetUnlocked } = await import("@/lib/ops/equipment-lock");
+      await assertAssetUnlocked(sql, existing.id);
     }
+    if (existing?.sold_to) throw new Error(`That serial is already allocated to ${existing.sold_to}.`);
     if (existing) {
       const same =
         existing.site === site &&
