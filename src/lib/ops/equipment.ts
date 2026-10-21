@@ -109,10 +109,23 @@ function splitNonCatalog(raw: string, catalog: string[]): string[] {
   return pieces;
 }
 
+/** One word that describes the machine before it (a colour, a finish or a size), never a machine of its own. */
+const TRAILING_WORD = /^(black|white|silver|red|blue|green|grey|gray|gold|copper|chrome|stainless|matte|polished|short|tall|small|medium|large)$/i;
+
+/** "Puqpress Q2 Automatic Tamper BLACK" read as the tamper + "BLACK": the word goes back on the tamper. */
+function attachTrailingWords(pieces: string[]): string[] {
+  const out: string[] = [];
+  for (const p of pieces) {
+    if (out.length && TRAILING_WORD.test(p.trim())) out[out.length - 1] = `${out[out.length - 1]} ${p.trim()}`;
+    else out.push(p);
+  }
+  return out;
+}
+
 function extractLine(line: string, catalog: string[], catalogKey: Map<string, string>, patterns: { name: string; re: RegExp }[]): string[] {
   const exact = catalogKey.get(normalize(line));
   if (exact) return [exact];
-  if (!patterns.length) return splitNonCatalog(line, catalog);
+  if (!patterns.length) return attachTrailingWords(splitNonCatalog(line, catalog));
 
   const out: string[] = [];
   let rest = line;
@@ -128,7 +141,7 @@ function extractLine(line: string, catalog: string[], catalogKey: Map<string, st
     out.push(hit.name);
     rest = rest.slice(hit.end).replace(/^[\s,;+&]+|^\s*\/\s*|^\s+and\s+/i, "");
   }
-  return out.filter(Boolean);
+  return attachTrailingWords(out.filter(Boolean));
 }
 
 /**
