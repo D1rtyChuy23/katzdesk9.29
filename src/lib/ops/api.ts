@@ -27,7 +27,7 @@ import {
 } from "./clock";
 import { isoDayOrNull as isoDate } from "./iso";
 import { findWoEverywhere, searchTicketText, woBoardName, woSearchKey, type WoBoardHit } from "./wo-search";
-import { canMarkInstalled, loadInspectionSummaries, syncInstallUnits, unitsDroppedBy, withInspections } from "./inspection-api";
+import { INSTALLED_KEPT, canMarkInstalled, listEditRefusal, loadInspectionSummaries, syncInstallUnits, unitsDroppedBy, withInspections } from "./inspection-api";
 import { emptyInspection } from "./pre-inspection";
 import type {
   Asset,
@@ -50,7 +50,7 @@ export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
 import { backfillAssignedSerialsOnce } from "./serial-backfill";
 import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
-import { assertUnlocked } from "./equipment-lock";
+import { assertUnlocked, canLockEquipment } from "./equipment-lock";
 import { LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "./equipment-lock-rules";
 import { boardRow, cleanMachine, confirmError, continuable, dropReleased, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus, releasedUids } from "./deal-board";
 import { listedEquipment, matchModel, catalogModels, savedMachineName } from "./equipment";
@@ -1463,15 +1463,21 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 			equipment: savedMachineName(s.equipment, catalog)
 		})));
 	})();
-	// An installed project keeps its pre-inspection as it was, so its list may not drop a machine the visit has: the two would disagree.
-	if (wasInstalled && nowInstalled && (data.equipment !== undefined || data.machines !== undefined)) {
-		const dropped = await unitsDroppedBy(sql, data.id, {
-			equipment: data.equipment === undefined ? c.equipment : data.equipment,
-			serial: data.serial === undefined ? c.serial : data.serial,
-			power_voltage: data.powerVoltage === undefined ? c.power_voltage : data.powerVoltage,
-			machines: machinesJson
-		});
-		if (dropped.length) throw new Error("This install is marked installed. Its equipment list and pre-inspection are kept as they were, so a machine can't come off the list.");
+	const nextList = {
+		equipment: data.equipment === undefined ? c.equipment : data.equipment,
+		serial: data.serial === undefined ? c.serial : data.serial,
+		power_voltage: data.powerVoltage === undefined ? c.power_voltage : data.powerVoltage,
+		machines: machinesJson
+	};
+	const listEdited = data.equipment !== undefined || data.machines !== undefined || data.serial !== undefined || data.powerVoltage !== undefined;
+	// An installed project keeps its pre-inspection as it was, so only the owner may drop a machine the visit has.
+	if (wasInstalled && nowInstalled && listEdited && (await unitsDroppedBy(sql, data.id, nextList)).length && !(await canLockEquipment(sql, context.userId))) {
+		throw new Error(INSTALLED_KEPT);
+	}
+	// The list and the pre-inspection mirror each other: a save that would leave them apart is refused before it is stored.
+	if (listEdited) {
+		const refusal = await listEditRefusal(sql, data.id, nextList);
+		if (refusal) throw new Error(refusal);
 	}
 	await sql`
       update installs set

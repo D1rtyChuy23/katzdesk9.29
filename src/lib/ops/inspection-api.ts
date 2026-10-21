@@ -5,8 +5,8 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
 import { catalogModels, isTrailingWord, joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
 import { SERIAL_LINE, SUFFIX_ONLY, installMachines, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { assertUnlocked } from "@/lib/ops/equipment-lock";
-import { isLocked, lockedBy } from "@/lib/ops/equipment-lock-rules";
+import { assertUnlocked, canLockEquipment, lockOwnerName } from "@/lib/ops/equipment-lock";
+import { isLocked, lockedBy, lockedMessage } from "@/lib/ops/equipment-lock-rules";
 import { readsAsModel } from "@/lib/ops/warehouse-serial";
 import {
   CORE_HOLE_CATEGORY,
@@ -556,6 +556,105 @@ async function unitPassed(sql: Sql, installId: number, equipmentId: number): Pro
   return inspectionOverall(items, unit[0]?.core_needed, unit[0] ? unitChecks(unit[0]) : null) === "Passed";
 }
 
+/** The row and the unit name one machine: the same catalog model under either name. */
+function sameMachine(unit: AcctUnit, piece: Piece, catalog: string[]): boolean {
+  if (sameCatalogModel(unit.catalog_model, piece.equipment) || sameCatalogModel(unit.equipment_name, piece.equipment)) return true;
+  const model = catalog.length ? matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel : null;
+  return !!model && (sameCatalogModel(unit.catalog_model, model) || sameCatalogModel(unit.equipment_name, model));
+}
+
+/**
+ * The install's list and its pre-inspection mirror each other. After a save matched each row to its unit: a row whose
+ * model was changed in this save renames its unit; otherwise the row shows its unit's serial, voltage and (when the
+ * serial names another model) name. A load (`saved` false) only fills a blank serial or voltage on a row: it never
+ * overwrites what a row says, so a window still holding the old list can't save an old serial back over the account's.
+ * `before` is the list stored before a window save.
+ */
+async function mirrorList(
+  sql: Sql,
+  installId: number,
+  pieces: Piece[],
+  units: (AcctUnit | undefined)[],
+  catalog: string[],
+  saved: boolean,
+  before: Piece[] | null,
+): Promise<void> {
+  const modelBefore = new Map((before ?? []).filter((p) => serialKey(p.serial)).map((p) => [serialKey(p.serial), p.equipment]));
+  let changed = false;
+  for (const [i, piece] of pieces.entries()) {
+    const unit = units[i];
+    if (!unit) continue;
+    const key = serialKey(piece.serial);
+    if (saved && key && unit.serial_key === key && !sameMachine(unit, piece, catalog)) {
+      const was = modelBefore.get(key);
+      if (was !== undefined && !sameCatalogModel(was, piece.equipment) && !isLocked(unit)) {
+        unit.catalog_model = matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel || piece.equipment;
+        unit.equipment_name = piece.equipment;
+        await sql.query("update account_equipment set catalog_model = $2, equipment_name = $3, updated_at = now() where id = $1", [
+          unit.id,
+          unit.catalog_model,
+          unit.equipment_name,
+        ]);
+      } else {
+        pieces[i] = { ...pieces[i]!, equipment: unit.equipment_name || unit.catalog_model };
+        changed = true;
+      }
+    }
+    if (unit.serial_key && serialKey(pieces[i]!.serial) !== unit.serial_key && (saved || !key)) {
+      pieces[i] = { ...pieces[i]!, serial: unit.serial ?? "" };
+      changed = true;
+    }
+    if (!pieces[i]!.powerVoltage.trim() && unit.electrical?.trim()) {
+      pieces[i] = { ...pieces[i]!, powerVoltage: unit.electrical.trim() };
+      changed = true;
+    }
+  }
+  if (changed) await writeList(sql, installId, pieces);
+}
+
+/**
+ * Why a save of this list must not be stored, or null. The list and the pre-inspection mirror each other, so a save is
+ * refused rather than leaving them apart: a locked unit's row may not change its serial or model or come off the list,
+ * and a serial another account's unit holds can't go on a row.
+ */
+export async function listEditRefusal(sql: Sql, installId: number, next: Omit<ListRow, "complete">): Promise<string | null> {
+  const row = (await sql.query<ListRow & { customer: string }>("select customer, equipment, serial, power_voltage, machines from installs where id = $1", [installId]))[0];
+  if (!row) return null;
+  const catalog = await catalogNames(sql);
+  const linked = await linkedUnits(sql, installId);
+  const beforePieces = piecesFrom(row, catalog);
+  const nextPieces = piecesFrom(next, catalog);
+  const before = claimLinked(beforePieces, linked, catalog);
+  const after = claimLinked(nextPieces, linked, catalog);
+  for (const unit of linked) {
+    if (!isLocked(unit) || !before.includes(unit.id)) continue;
+    const label = `${unit.equipment_name || unit.catalog_model}${unit.serial ? ` SN ${unit.serial}` : ""}`;
+    const lock = lockedMessage(lockedBy(unit), await lockOwnerName(sql));
+    const at = after.indexOf(unit.id);
+    if (at < 0) return `${label} can't come off the list. ${lock}`;
+    const piece = nextPieces[at]!;
+    const key = serialKey(piece.serial);
+    const prev = beforePieces[before.indexOf(unit.id)];
+    // A row left as it was is never refused, however loosely it names its locked unit.
+    if (prev && serialKey(prev.serial) === key && sameCatalogModel(prev.equipment, piece.equipment)) continue;
+    const cleared = !key && !!unit.serial_key && serialKey(prev?.serial) === unit.serial_key;
+    if ((key && key !== unit.serial_key) || cleared || !sameMachine(unit, piece, catalog)) return `${label} can't be changed. ${lock}`;
+  }
+  const beforeKeys = new Set(beforePieces.map((p) => serialKey(p.serial)).filter(Boolean));
+  for (const piece of nextPieces) {
+    const key = serialKey(piece.serial);
+    if (!key || beforeKeys.has(key)) continue;
+    const other = (
+      await sql.query<{ customer: string; name: string | null }>(
+        "select customer, coalesce(nullif(equipment_name, ''), catalog_model) as name from account_equipment where serial_key = $1 and lower(customer) <> lower($2) limit 1",
+        [key, row.customer],
+      )
+    )[0];
+    if (other) return `SN ${piece.serial.trim()} is already on ${other.customer}${other.name ? ` (${other.name})` : ""}. Fix the serial, or move that unit first.`;
+  }
+  return null;
+}
+
 /**
  * Add install machines to pre-inspection. Prune only when the install equipment list was saved. `before` is the list
  * as it was stored before that save: a serial is written over a unit's serial only when the row's serial changed in
@@ -626,21 +725,31 @@ export async function syncInstallUnits(
     if (!hit) {
       // This row's own unit with a serial no row has any more: still this row's machine, not a second one. Its serial
       // is rewritten only when the row's serial was corrected in this save; a load never writes it, so a serial fixed on
-      // the account stays. An installed unit, a completed install or a serial another unit holds is never written.
+      // the account stays (the row takes the unit's serial instead, below). A locked unit or a serial another unit holds
+      // is never written; a save that would do either is refused before it is stored (listEditRefusal).
       const own = ownUnit(piece, pieces, linkedRows, used);
       const key = serialKey(piece.serial);
-      const corrected = !!own && !!key && !!beforeKeys && !beforeKeys.has(key) && !isLocked(own) && own.install_date == null && !isComplete(row);
+      const corrected = !!own && !!key && !!beforeKeys && !beforeKeys.has(key) && !isLocked(own);
       const clash = corrected ? await sql.query("select 1 from account_equipment where serial_key = $1 and id <> $2 limit 1", [key, own!.id]) : [];
       if (corrected && !clash[0]) {
         await sql.query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [own!.id, piece.serial.trim(), key]);
         own!.serial = piece.serial.trim();
         own!.serial_key = key;
       }
+      // Cleared on the row in this save (the list had the unit's serial and now no row does): cleared on the unit too,
+      // so a serial typed on the wrong row can be moved to the right one.
+      const cleared = !!own && !key && !!beforeKeys && !!own.serial_key && beforeKeys.has(own.serial_key) && !isLocked(own);
+      if (cleared) {
+        await sql.query("update account_equipment set serial = null, serial_key = null, updated_at = now() where id = $1", [own!.id]);
+        own!.serial = null;
+        own!.serial_key = null;
+      }
       hit = own;
     }
     if (hit) used.add(hit.id);
     hits[i] = hit;
   }
+  const finalUnits: (AcctUnit | undefined)[] = [];
   for (const [i, piece] of pieces.entries()) {
     let hit = hits[i];
     if (hit && combined(hit) && !isLocked(hit)) {
@@ -665,9 +774,11 @@ export async function syncInstallUnits(
     }
     used.add(id);
     keep.add(id);
+    finalUnits[i] = hit;
     if (!first) first = id;
     await linkUnit(sql, installId, id);
   }
+  await mirrorList(sql, installId, pieces, finalUnits, catalog, !!opts?.prune, opts?.prune && opts.before ? piecesFrom(opts.before, catalog) : null);
   if (first) {
     await sql.query(
       `update install_inspection_items set equipment_id = $1 where install_id = $2 and equipment_id is null`,
@@ -1268,6 +1379,8 @@ const addEquipInput = z.object({
   model: z.string().min(1),
   serial: z.string().nullable().optional(),
   electrical: z.string().nullable().optional(),
+  /** A machine of this model already on the visit with no serial: the serial goes on it instead of a second machine. */
+  fillEquipmentId: z.number().int().positive().optional(),
 });
 
 /**
@@ -1279,6 +1392,7 @@ export async function addMachineOntoInstall(
   sql: Sql,
   data: z.infer<typeof addEquipInput>,
   actor: string,
+  opts?: { owner?: boolean },
 ): Promise<InspectionView> {
   const install = await sql.query<{
     id: number;
@@ -1295,6 +1409,17 @@ export async function addMachineOntoInstall(
   if (!row) throw new Error("Install not found");
   const model = data.model.trim();
   if (!model) throw new Error("Pick a model");
+  if (data.fillEquipmentId) {
+    const unit = (await sql.query<AcctUnit>("select id, catalog_model, equipment_name, serial, serial_key, electrical from account_equipment where id = $1", [data.fillEquipmentId]))[0];
+    if (unit && serialKey(unit.serial)) throw new Error("That machine already has a serial. Use Edit on it to change it.");
+    return editInspectionUnit(sql, {
+      installId: data.installId,
+      equipmentId: data.fillEquipmentId,
+      model: unit ? unit.equipment_name || unit.catalog_model : model,
+      serial: data.serial ?? "",
+      electrical: data.electrical?.trim() ? data.electrical : (unit?.electrical ?? ""),
+    }, actor, opts);
+  }
   const serial = (data.serial ?? "").trim();
   const electrical = (data.electrical ?? "").trim();
   const key = serialKey(serial);
@@ -1330,7 +1455,7 @@ export const addInspectionEquipment = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof addEquipInput>) => addEquipInput.parse(d))
   .handler(async ({ data, context }): Promise<InspectionView> => {
     const sql = await ready();
-    return addMachineOntoInstall(sql, data, await deskUsername(sql, context.userId));
+    return addMachineOntoInstall(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
   });
 
 const removeInput = z.object({
@@ -1349,6 +1474,7 @@ export async function removeInspectionUnit(
   sql: Sql,
   data: z.infer<typeof removeInput>,
   actor: string,
+  opts?: { owner?: boolean },
 ): Promise<InspectionView & { removed: string; fromList: boolean }> {
   await requireInstall(sql, data.installId);
   await requireUnit(sql, data.installId, data.equipmentId);
@@ -1358,7 +1484,7 @@ export async function removeInspectionUnit(
       [data.installId],
     )
   )[0]!;
-  if (isComplete(row)) throw new Error("This install is marked installed. Its pre-inspection is kept as it was.");
+  if (isComplete(row) && !opts?.owner) throw new Error(INSTALLED_KEPT);
   const unit = (
     await sql.query<AcctUnit>(
       "select id, catalog_model, equipment_name, serial, serial_key, electrical, locked_at, locked_by from account_equipment where id = $1",
@@ -1392,7 +1518,92 @@ export const removeInspectionEquipment = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof removeInput>) => removeInput.parse(d))
   .handler(async ({ data, context }): Promise<InspectionView & { removed: string; fromList: boolean }> => {
     const sql = await ready();
-    return removeInspectionUnit(sql, data, await deskUsername(sql, context.userId));
+    return removeInspectionUnit(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
+  });
+
+/** An installed project's list and pre-inspection are kept as they were; only the owner changes them. */
+export const INSTALLED_KEPT = "This install is marked installed. Its equipment list and pre-inspection are kept as they were; only the owner can change them.";
+
+const editUnitInput = z.object({
+  installId: z.number().int().positive(),
+  equipmentId: z.number().int().positive(),
+  model: z.string().trim().min(1, "Pick a model").max(200),
+  serial: z.string().max(100).nullable().optional(),
+  electrical: z.string().max(100).nullable().optional(),
+});
+
+/**
+ * Edit one machine on Pre-inspection: its model, serial and electrical change on the account's unit and on the install's
+ * equipment list together, so the two always match (a unit with no row on the list gets one). A locked unit, or a serial
+ * another unit holds, is refused. An installed project is changed only by the owner.
+ */
+export async function editInspectionUnit(
+  sql: Sql,
+  data: z.infer<typeof editUnitInput>,
+  actor: string,
+  opts?: { owner?: boolean },
+): Promise<InspectionView> {
+  await requireInstall(sql, data.installId);
+  await requireUnit(sql, data.installId, data.equipmentId);
+  const row = (
+    await sql.query<ListRow & { customer: string }>("select customer, equipment, serial, power_voltage, machines, complete from installs where id = $1", [data.installId])
+  )[0]!;
+  if (isComplete(row) && !opts?.owner) throw new Error(INSTALLED_KEPT);
+  const unit = (
+    await sql.query<AcctUnit>(
+      "select id, catalog_model, equipment_name, serial, serial_key, electrical, locked_at, locked_by from account_equipment where id = $1",
+      [data.equipmentId],
+    )
+  )[0];
+  if (!unit) throw new Error("That machine is not on this visit.");
+  await assertUnlocked(sql, unit);
+  const catalog = await catalogNames(sql);
+  const equipment = matchModel(data.model.trim(), catalog);
+  const serial = (data.serial ?? "").trim();
+  const key = serialKey(serial) || null;
+  const electrical = (data.electrical ?? "").trim();
+  const pieces = piecesFrom(row, catalog);
+  const linked = await linkedUnits(sql, data.installId);
+  const at = listIndexOf(pieces, linked, catalog, data.equipmentId);
+  if (key) {
+    if (pieces.some((p, i) => i !== at && serialKey(p.serial) === key)) throw new Error("That serial is already on this visit.");
+    const other = (
+      await sql.query<{ customer: string; name: string | null }>(
+        "select customer, coalesce(nullif(equipment_name, ''), catalog_model) as name from account_equipment where serial_key = $1 and id <> $2 limit 1",
+        [key, unit.id],
+      )
+    )[0];
+    if (other) throw new Error(`SN ${serial} is already on ${other.customer}${other.name ? ` (${other.name})` : ""}.`);
+  }
+  const catalogModel = matchCatalogModel(equipment, equipment, catalog).catalogModel || equipment;
+  await sql.query(
+    "update account_equipment set catalog_model = $2, equipment_name = $3, serial = $4, serial_key = $5, electrical = $6, updated_at = now() where id = $1",
+    [unit.id, catalogModel, equipment, serial || null, key, electrical || null],
+  );
+  const piece = { equipment, serial, powerVoltage: electrical };
+  const next = at >= 0 ? pieces.map((p, i) => (i === at ? { ...p, ...piece } : p)) : [...pieces, piece];
+  await writeList(sql, data.installId, next);
+  await syncInstallUnits(sql, data.installId);
+  const was = `${unit.equipment_name || unit.catalog_model}${unit.serial ? ` (SN ${unit.serial})` : ""}`;
+  const now = `${equipment}${serial ? ` (SN ${serial})` : ""}${electrical ? ` · ${electrical}` : ""}`;
+  await sql
+    .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+      data.installId,
+      actor,
+      `edited ${was} on the pre-inspection and the equipment list: now ${now}`,
+    ])
+    .catch(() => undefined);
+  const view = await readInspection(sql, data.installId);
+  if (!view) throw new Error("Install not found");
+  return view;
+}
+
+export const editInspectionEquipment = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof editUnitInput>) => editUnitInput.parse(d))
+  .handler(async ({ data, context }): Promise<InspectionView> => {
+    const sql = await ready();
+    return editInspectionUnit(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
   });
 
 const removeRowInput = z.object({
@@ -1414,12 +1625,13 @@ export async function removeInstallRow(
   sql: Sql,
   data: z.infer<typeof removeRowInput>,
   actor: string,
+  opts?: { owner?: boolean },
 ): Promise<{ removed: string | null }> {
   const row = (
     await sql.query<ListRow>("select equipment, serial, power_voltage, machines, complete from installs where id = $1 and archived = false", [data.installId])
   )[0];
   if (!row) throw new Error("Install not found");
-  if (isComplete(row)) throw new Error("This install is marked installed. Its equipment list and pre-inspection are kept as they were.");
+  if (isComplete(row) && !opts?.owner) throw new Error(INSTALLED_KEPT);
   const catalog = await catalogNames(sql);
   const pieces = piecesFrom(row, catalog);
   const key = serialKey(data.serial);
@@ -1453,7 +1665,7 @@ export const removeInstallMachine = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof removeRowInput>) => removeRowInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
-    return removeInstallRow(sql, data, await deskUsername(sql, context.userId));
+    return removeInstallRow(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
   });
 
 const copyInput = z.object({

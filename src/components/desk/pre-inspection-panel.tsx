@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, ChevronLeft, ImagePlus, Images, Trash2, Download } from "lucide-react";
+import { Camera, ChevronLeft, ImagePlus, Images, Pencil, Trash2, Download } from "lucide-react";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
+  editInspectionEquipment,
   removeInspectionEquipment,
   addInspectionPhoto,
   copyInspectionNa,
@@ -20,6 +21,7 @@ import {
   type InspectionView,
 } from "@/lib/ops/inspection-api";
 import { formatPingTime } from "@/lib/ops/clock";
+import { sameCatalogModel } from "@/lib/ops/account-equip";
 import { serializeMachines } from "@/lib/ops/machines";
 import type { Install } from "@/lib/ops/types";
 import { appendServerMachines } from "@/lib/ops/warehouse-serial";
@@ -199,6 +201,7 @@ function MachineList({
   onSaved: (v: InspectionView) => void;
 }) {
   const [removing, setRemoving] = useState<InspectionView["machines"][number] | null>(null);
+  const [editing, setEditing] = useState<InspectionView["machines"][number] | null>(null);
   const remove = useMutation({
     mutationFn: (equipmentId: number) => removeInspectionEquipment({ data: { installId: view.installId, equipmentId } }),
     onSuccess: (next) => {
@@ -256,6 +259,17 @@ function MachineList({
               </button>
               <button
                 type="button"
+                className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+                aria-label={`Edit ${m.name}`}
+                title={m.locked ? `Locked by ${m.lockedBy}` : "Edit model, serial and electrical (the equipment list changes too)"}
+                disabled={m.locked}
+                onClick={() => setEditing(m)}
+                data-testid={`edit-machine-${m.equipmentId}`}
+              >
+                <Pencil className="size-4" />
+              </button>
+              <button
+                type="button"
                 className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-40"
                 aria-label={`Remove ${m.name} from the pre-inspection`}
                 title={m.locked ? `Locked by ${m.lockedBy}` : "Remove from the pre-inspection"}
@@ -271,8 +285,9 @@ function MachineList({
       ) : (
         <p className="px-4 py-3 text-sm text-muted-foreground">Add the unit at the site, then inspect only that one.</p>
       )}
-      <AddMachine installId={view.installId} onSaved={onSaved} />
+      <AddMachine installId={view.installId} machines={view.machines} onSaved={onSaved} />
       <MetaForm view={view} onSaved={onSaved} />
+      <EditMachine installId={view.installId} machine={editing} onClose={() => setEditing(null)} onSaved={onSaved} />
       <Dialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
         <DialogContent className="max-w-md" data-testid="remove-machine-dialog">
           <DialogTitle>Remove This Machine?</DialogTitle>
@@ -331,20 +346,36 @@ function rememberAddedMachine(qc: ReturnType<typeof useQueryClient>, view: Inspe
   });
 }
 
-function AddMachine({ installId, onSaved }: { installId: number; onSaved: (v: InspectionView) => void }) {
+function AddMachine({
+  installId,
+  machines,
+  onSaved,
+}: {
+  installId: number;
+  machines: InspectionView["machines"];
+  onSaved: (v: InspectionView) => void;
+}) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [model, setModel] = useState("");
   const [serial, setSerial] = useState("");
   const [electrical, setElectrical] = useState("");
+  // The same model already listed with no serial: the serial goes on that machine unless the tech says it's another one.
+  const blank = serial.trim() && model.trim()
+    ? machines.find((m) => !m.serial?.trim() && !m.locked && (sameCatalogModel(m.model, model) || sameCatalogModel(m.name, model)))
+    : undefined;
+  const [another, setAnother] = useState(false);
+  const fillId = blank && !another ? blank.equipmentId : undefined;
   const add = useMutation({
-    mutationFn: (input: { model: string; serial: string; electrical: string }) =>
+    mutationFn: (input: { model: string; serial: string; electrical: string; fillEquipmentId?: number }) =>
       addInspectionEquipment({
-        data: { installId, model: input.model, serial: input.serial || null, electrical: input.electrical || null },
+        data: { installId, model: input.model, serial: input.serial || null, electrical: input.electrical || null, fillEquipmentId: input.fillEquipmentId },
       }),
-    onSuccess: (view) => {
-      toast.success("Equipment added");
-      rememberAddedMachine(qc, view);
+    onSuccess: (view, input) => {
+      toast.success(input.fillEquipmentId ? "Serial added to the machine on the list" : "Equipment added");
+      if (input.fillEquipmentId) void qc.invalidateQueries({ queryKey: ["installs"] });
+      else rememberAddedMachine(qc, view);
+      setAnother(false);
       setModel("");
       setSerial("");
       setElectrical("");
@@ -360,7 +391,7 @@ function AddMachine({ installId, onSaved }: { installId: number; onSaved: (v: In
       toast.error("Pick a model");
       return;
     }
-    add.mutate({ model: next, serial: serial.trim(), electrical: electrical.trim() });
+    add.mutate({ model: next, serial: serial.trim(), electrical: electrical.trim(), fillEquipmentId: fillId });
   }
 
   if (!open) {
@@ -401,15 +432,106 @@ function AddMachine({ installId, onSaved }: { installId: number; onSaved: (v: In
         </div>
       </div>
       <UnitPlaceField serial={serial} model={model} />
+      {blank ? (
+        <label className="flex items-start gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm" data-testid="add-equipment-fill">
+          <input type="checkbox" className="mt-1" checked={!another} onChange={(e) => setAnother(!e.target.checked)} />
+          <span>
+            Put this serial on the {blank.name} already listed (it has no serial).
+            <span className="block text-xs text-muted-foreground">Untick only if this is another machine of the same model.</span>
+          </span>
+        </label>
+      ) : null}
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={add.isPending} data-testid="add-equipment-save">
-          {add.isPending ? "Adding…" : "Add to this visit"}
+          {add.isPending ? "Saving…" : fillId ? "Save serial" : "Add to this visit"}
         </Button>
         <Button type="button" size="sm" variant="outline" onClick={() => setOpen(false)}>
           Cancel
         </Button>
       </div>
     </form>
+  );
+}
+
+function EditMachine({
+  installId,
+  machine,
+  onClose,
+  onSaved,
+}: {
+  installId: number;
+  machine: InspectionView["machines"][number] | null;
+  onClose: () => void;
+  onSaved: (v: InspectionView) => void;
+}) {
+  const qc = useQueryClient();
+  const [model, setModel] = useState("");
+  const [serial, setSerial] = useState("");
+  const [electrical, setElectrical] = useState("");
+  useEffect(() => {
+    setModel(machine ? machine.name || machine.model : "");
+    setSerial(machine?.serial ?? "");
+    setElectrical(machine?.electrical ?? "");
+  }, [machine]);
+  const save = useMutation({
+    mutationFn: () =>
+      editInspectionEquipment({
+        data: { installId, equipmentId: machine!.equipmentId, model: model.trim(), serial: serial.trim() || null, electrical: electrical.trim() || null },
+      }),
+    onSuccess: (view) => {
+      toast.success("Saved on the pre-inspection and the equipment list");
+      void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["customers"] });
+      onSaved(view);
+      onClose();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  return (
+    <Dialog open={!!machine} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md" data-testid="edit-machine-dialog">
+        <DialogTitle>Edit Machine</DialogTitle>
+        <DialogDescription>Changes here show on the install's equipment list and the account's equipment too.</DialogDescription>
+        <form
+          className="mt-3 grid gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!model.trim()) {
+              toast.error("Pick a model");
+              return;
+            }
+            save.mutate();
+          }}
+        >
+          <EquipmentCombo label="Model" value={model} onChange={setModel} menuInFlow required />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div>
+              <Label htmlFor={`edit-sn-${installId}`}>Serial</Label>
+              <Input id={`edit-sn-${installId}`} className="mt-1" value={serial} onChange={(e) => setSerial(e.target.value)} data-testid="edit-machine-serial" />
+            </div>
+            <div>
+              <Label htmlFor={`edit-el-${installId}`}>Electrical</Label>
+              <Input
+                id={`edit-el-${installId}`}
+                className="mt-1"
+                value={electrical}
+                onChange={(e) => setElectrical(e.target.value)}
+                placeholder="120V or 220V"
+                data-testid="edit-machine-electrical"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={save.isPending}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={save.isPending} data-testid="edit-machine-save">
+              {save.isPending ? "Saving…" : "Save"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

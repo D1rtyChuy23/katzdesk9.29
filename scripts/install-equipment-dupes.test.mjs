@@ -179,15 +179,17 @@ test("P2: correcting a serial on a row rewrites that unit; the account keeps one
   }
 });
 
-test("P2: a serial cleared on a row keeps the same unit (its serial is not erased) and adds no blank twin", async () => {
+test("P2: a serial cleared on a row clears it on the same unit (they mirror) and adds no blank twin", async () => {
   const { pg, sql } = await fresh();
   try {
     const id = await install(pg, "Clear Cafe", "Bunn TB3");
     await readInspection(sql, id);
     await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "TB-111", powerVoltage: "" }]);
+    const unit = (await acct(pg, "Clear Cafe"))[0].id;
     await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "", powerVoltage: "" }]);
-    assert.deepEqual((await acct(pg, "Clear Cafe")).map((a) => a.serial), ["TB-111"]);
-    assert.equal((await readInspection(sql, id)).machines.length, 1);
+    assert.deepEqual((await acct(pg, "Clear Cafe")).map((a) => [a.id, a.serial]), [[unit, null]]);
+    assert.deepEqual((await readInspection(sql, id)).machines.map((m) => [m.equipmentId, m.serial]), [[unit, null]]);
+    assert.deepEqual((await windowSpecs(pg, id)).map((s) => s.serial), [""]);
   } finally {
     await pg.close();
   }
@@ -422,19 +424,23 @@ test("the Equipment tab's Remove of one of two identical rows keeps the unit wit
   }
 });
 
-test("an installed install refuses a list change its kept pre-inspection would disagree with", async () => {
+test("an installed install refuses a list change its kept pre-inspection would disagree with, except from the owner", async () => {
   const { pg, sql } = await fresh();
   try {
     const id = await install(pg, "Done Cafe", "Bunn TB3\nFetco 52H");
     await readInspection(sql, id);
     await pg.query("update installs set complete = true where id = $1", [id]);
-    await assert.rejects(() => removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "" }, "Test"), /marked installed/);
+    await assert.rejects(() => removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "" }, "Test"), /marked installed.*only the owner/);
     const tb3 = JSON.stringify([{ equipment: "Bunn TB3", serial: "", powerVoltage: "120V" }]);
     assert.equal((await unitsDroppedBy(sql, id, { equipment: "Bunn TB3", serial: null, power_voltage: null, machines: tb3 })).length, 1);
     const both = JSON.stringify([{ equipment: "Bunn TB3", serial: "", powerVoltage: "120V" }, { equipment: "Fetco 52H", serial: "", powerVoltage: "" }]);
     assert.deepEqual(await unitsDroppedBy(sql, id, { equipment: "Bunn TB3\nFetco 52H", serial: null, power_voltage: null, machines: both }), []);
     const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
-    assert.match(api, /if \(wasInstalled && nowInstalled && [^\n]*\) \{\s*const dropped = await unitsDroppedBy\(/);
+    assert.match(api, /if \(wasInstalled && nowInstalled && listEdited && \(await unitsDroppedBy\(sql, data\.id, nextList\)\)\.length && !\(await canLockEquipment\(sql, context\.userId\)\)\)/);
+    // The owner can take a machine off an installed project: the row and its unit go together.
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "" }, "Chuy", { owner: true });
+    assert.deepEqual((await windowSpecs(pg, id)).map((s) => s.equipment), ["Fetco 52H"]);
+    assert.deepEqual((await readInspection(sql, id)).machines.map((m) => m.name), ["Fetco 52H"]);
   } finally {
     await pg.close();
   }
@@ -471,7 +477,7 @@ test("R1: a serial corrected on the account is not put back by opening the insta
   }
 });
 
-test("R1: a corrected serial is never written onto an installed unit (install date) or on a completed install", async () => {
+test("R1: a serial corrected on a row is written onto its unit even with an install date or on a completed install (they mirror)", async () => {
   const { pg, sql } = await fresh();
   try {
     const id = await install(pg, "Dated Cafe", "Bunn TB3");
@@ -480,11 +486,12 @@ test("R1: a corrected serial is never written onto an installed unit (install da
     const unit = (await acct(pg, "Dated Cafe"))[0].id;
     await pg.query("update account_equipment set install_date = '2024-01-01' where id = $1", [unit]);
     await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "TB-112", powerVoltage: "" }]);
-    assert.deepEqual((await acct(pg, "Dated Cafe")).map((a) => a.serial), ["TB-111"]);
+    assert.deepEqual((await acct(pg, "Dated Cafe")).map((a) => [a.id, a.serial]), [[unit, "TB-112"]]);
     await pg.query("update account_equipment set install_date = null where id = $1", [unit]);
     await pg.query("update installs set complete = true where id = $1", [id]);
     await saveList(pg, sql, id, [{ equipment: "Bunn TB3", serial: "TB-113", powerVoltage: "" }]);
-    assert.deepEqual((await acct(pg, "Dated Cafe")).map((a) => a.serial), ["TB-111"]);
+    assert.deepEqual((await acct(pg, "Dated Cafe")).map((a) => [a.id, a.serial]), [[unit, "TB-113"]]);
+    assert.deepEqual((await readInspection(sql, id)).machines.map((m) => m.serial), ["TB-113"]);
   } finally {
     await pg.close();
   }
