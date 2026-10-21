@@ -83,7 +83,8 @@
     ] },
     { "module": "Frame", "items": [
       { "id": "frame-clean", "text": "Fit EV113700 (automatic cleaning module).", "ref": "Manual p.16", "when": { "model": ["2m"] } },
-      { "id": "frame-36", "text": "Fit EV113701 (water pump) and EV113704 (hot water valve block).", "ref": "Manual p.16", "when": { "pm": ["36"] } },
+      { "id": "frame-36-pump", "text": "Fit EV113701 (water pump).", "ref": "Manual p.16", "when": { "pm": ["36"] } },
+      { "id": "frame-36-valve", "text": "Fit EV113704 (hot water valve block).", "ref": "Manual p.16", "when": { "pm": ["36"] } },
       { "id": "frame-15", "text": "Fit EV113698 and clean the 1.5-Step outlet, the fitting silicone pipe and the aerator.", "ref": "Manual p.18", "when": { "model": ["2m"], "step15": ["yes"] } },
       { "id": "frame-milk2", "text": "Fit EV113699 (2 milk types).", "ref": "Manual p.18", "when": { "model": ["2m"], "milk2": ["yes"], "pm": ["36"] } }
     ] },

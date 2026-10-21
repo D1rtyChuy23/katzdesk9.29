@@ -72,21 +72,27 @@ export const EVERSYS_SERIAL_PREFIXES: Record<string, RunbookHit & { type: string
   "01344900": { runbookId: "eversys-legacy-plus", model: "2m", type: "L'2m" },
 };
 
+/** First 6 digits → entry, for serials whose digits 7–8 aren't "00" ("0183330226105C0012"). Every 6-digit prefix is unique. */
+const BY_SIX = new Map<string, RunbookHit & { type: string }>(
+  Object.entries(EVERSYS_SERIAL_PREFIXES).map(([k, v]) => [k.slice(0, 6), v]),
+);
+
+function prefixHit(digits: string): (RunbookHit & { type: string }) | null {
+  if (digits.length < 8) return null;
+  return EVERSYS_SERIAL_PREFIXES[digits.slice(0, 8)] ?? BY_SIX.get(digits.slice(0, 6)) ?? null;
+}
+
 /**
  * Runbook and model from an Eversys serial ("0115390026159E0001" → Shotmaster c). Null for any serial whose first
- * 8 digits are not on the list. A spreadsheet may have dropped the leading zero ("1166500213400"): the zero is put
- * back only when the result is a listed prefix, so other makers' serials never match.
+ * digits are not on the list. A spreadsheet may have dropped the leading zero ("1166000250770"): the zero is put
+ * back only for a full-length serial (12+ digits), not for another maker's short one ("1107000").
+ * Callers apply it only to a unit the text already calls an Eversys (see matchRunbookSerial).
  */
 export function identifyBySerial(serial: string | null | undefined): (RunbookHit & { type: string }) | null {
-  const lead = /^\s*(\d+)/.exec(String(serial ?? ""))?.[1] ?? "";
-  if (lead.length >= 8) {
-    const hit = EVERSYS_SERIAL_PREFIXES[lead.slice(0, 8)];
-    if (hit) return hit;
-  }
-  if (lead.length >= 7 && lead[0] !== "0") {
-    const hit = EVERSYS_SERIAL_PREFIXES[`0${lead.slice(0, 7)}`];
-    if (hit) return hit;
-  }
+  const raw = String(serial ?? "").replace(/^\s*(?:s\s*\/?\s*n|serial(?:\s*(?:no\.?|number|#))?)\s*[:#.]?\s*/i, "");
+  const lead = /^\s*(\d+)/.exec(raw)?.[1] ?? "";
+  if (lead[0] === "0") return prefixHit(lead);
+  if (lead.length >= 12) return prefixHit(`0${lead}`);
   return null;
 }
 
@@ -95,11 +101,16 @@ export function identifyBySerial(serial: string | null | undefined): (RunbookHit
 const E = "e[’'`]?\\s?"; // e'4, e’4, E4, e 4
 const C = "c[’'`]?\\s?"; // c'2, C2
 const L = "l[’'`]?\\s?"; // L'2
+const LINE = "\\be[’'`-]?\\s?line\\b"; // e'line, E-line, Eline
+
+/** A fridge or a "need a loaner" note is not a machine with a PM. */
+const notAMachine = (t: string) => /fridge|loaner/i.test(t);
 
 /** Eversys Shotmaster (Enigma range). "Shotmaster CT" is how Katz writes the coffee-only Shotmaster c. */
 export function matchShotmaster(piece: string): RunbookHit | null {
   const t = piece.trim();
-  if (!/shot\s?-?master/i.test(t)) return null;
+  if (!/shot\s?-?master/i.test(t) || notAMachine(t)) return null;
+  if (new RegExp(LINE, "i").test(t)) return null; // the E'line Shotmaster is on the E'line runbook
   if (/\bms\s*[/-]?\s*pro\b|\bm\s*[/-]\s*pro\b/i.test(t)) return { runbookId: "eversys-shotmaster", model: "mspro" };
   if (/\bs\s*[/-]\s*pro\b|\bs-?pro\b/i.test(t)) return { runbookId: "eversys-shotmaster", model: "spro" };
   if (/\bpro\b/i.test(t)) return { runbookId: "eversys-shotmaster", model: null };
@@ -113,6 +124,7 @@ export function matchShotmaster(piece: string): RunbookHit | null {
 /** Eversys Cameo: "Cameo", "Eversys Cameo c'2s", "Cameo C2's", "cameo C2M". */
 export function matchCameo(piece: string): RunbookHit | null {
   const t = piece.trim();
+  if (notAMachine(t)) return null;
   const named = /\bcameo\b/i.test(t);
   const code = new RegExp(`\\b${C}2\\s?[’'\`]?\\s?(ms|m|s|c|ct)\\b`, "i").exec(t);
   if (!named && !code) return null;
@@ -126,7 +138,9 @@ export function matchCameo(piece: string): RunbookHit | null {
 export function matchLegacyPlus(piece: string): RunbookHit | null {
   const t = piece.trim();
   const code = new RegExp(`\\b${L}2\\s?[’'\`]?\\s?(c|m|s)\\b`, "i").exec(t);
-  const named = /^(eversys\s+)?legacy\s*\+?(\s|$)/i.test(t) || /eversys\s+legacy/i.test(t) || /legacy\s*\+/i.test(t);
+  if (notAMachine(t)) return null;
+  // "Legacy" alone, "Eversys Legacy", "Legacy+" or an L'2 code; not any text starting "Legacy " ("Legacy Lounge Bunn").
+  const named = /^(eversys\s+)?legacy\s*\+?$/i.test(t) || /eversys\s+legacy/i.test(t) || /legacy\s*\+/i.test(t);
   if (!named && !code) return null;
   if (/legacy\s+steam/i.test(t) || code?.[1]?.toLowerCase() === "s") return null;
   const v = code?.[1]?.toLowerCase();
@@ -144,22 +158,25 @@ function enigmaModel(t: string): string | null {
   return null;
 }
 
-/** Older E'line generation: the text says e'line ("Eversys e'4s e'line", "E'line E4"). */
+/** Older E'line generation: the text says e'line ("Eversys e'4s e'line", "E'line E4", "E-line e'4s", "E'line Shotmaster"). */
 export function matchELine(piece: string): RunbookHit | null {
   const t = piece.trim();
-  if (!new RegExp(`${E}line`, "i").test(t)) return null;
-  if (!new RegExp(`\\b${E}[246]`, "i").test(t.replace(new RegExp(`${E}line`, "ig"), " "))) return null;
+  if (!new RegExp(LINE, "i").test(t) || notAMachine(t)) return null;
   if (/x[\s-]?(tra)?\s?wide/i.test(t)) return null;
-  return { runbookId: "eversys-eline", model: enigmaModel(t.replace(new RegExp(`${E}line`, "ig"), " ")) };
+  if (/shot\s?-?master/i.test(t)) return { runbookId: "eversys-eline", model: "shot" };
+  const rest = t.replace(new RegExp(LINE, "ig"), " ");
+  if (!new RegExp(`\\b${E}[246]`, "i").test(rest)) return null;
+  return { runbookId: "eversys-eline", model: enigmaModel(rest) };
 }
 
 /** Current Enigma e'2 / e'4 / e'6 (not X-Wide, not Shotmaster, not E'line). */
 export function matchEnigma(piece: string): RunbookHit | null {
   const t = piece.trim();
   if (/x[\s-]?(tra)?\s?wide/i.test(t)) return null; // X-Wide has its own runbook
-  if (/shot\s?-?master/i.test(t) || new RegExp(`${E}line`, "i").test(t)) return null;
+  if (/shot\s?-?master/i.test(t) || new RegExp(LINE, "i").test(t) || notAMachine(t)) return null;
   const code = new RegExp(`\\b${E}[246]\\s?[’'\`]?\\s?(ms|m|s|ct|c)?\\b`, "i").exec(t);
-  if (!code) return null;
+  // "Enigma" or "Eversys Enigma" with no size: the Enigma runbook, the tech picks the model.
+  if (!code) return /\benigma\b/i.test(t) ? { runbookId: "eversys-enigma", model: null } : null;
   // A bare "E4" alone is too loose; it needs "Eversys"/"Enigma", an apostrophe (e'4) or a model letter (E4s).
   const strong = /eversys|enigma/i.test(t) || /[’'`]/.test(code[0]) || !!code[1];
   if (!strong) return null;

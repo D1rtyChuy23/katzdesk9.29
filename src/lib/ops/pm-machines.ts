@@ -4,7 +4,7 @@
  */
 import { compactEquip, parseSerial, sameCatalogModel } from "./account-equip.ts";
 import { splitEquipment } from "./equipment.ts";
-import { optionsKeyFor, planUnits, type AccountUnitRow, type PlannedUnit } from "./pm-runbook-units.ts";
+import { optionsKeyFor, planUnits, type AccountUnitRow, type PlannedUnit, type SerialMatcher } from "./pm-runbook-units.ts";
 
 export type PlannedMachine = {
   /** 'acct:<id>' when the line is matched to an account unit, otherwise the piece key. */
@@ -31,7 +31,7 @@ export function planMachines(
   rows: AccountUnitRow[],
   match: Matcher,
   pinned?: Readonly<Record<string, number>> | null,
-  bySerial?: (serial: string) => { runbookId: string; model: string | null } | null,
+  bySerial?: SerialMatcher,
 ): PlannedMachine[] {
   const planned = planUnits(equipment, rows, match, pinned, bySerial);
   const queue: PlannedUnit[] = [...planned];

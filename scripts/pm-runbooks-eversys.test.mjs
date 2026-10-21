@@ -226,3 +226,100 @@ test("X-Wide also recognises Katz's \"xtrawide\" spelling", async () => {
   const { matchE4XWide } = await import("../src/lib/ops/pm-runbook.ts");
   assert.deepEqual(matchE4XWide("E'4s xtrawide"), { model: "4s" });
 });
+
+// ---------------- review fixes (registry, serials, spellings) ----------------
+
+let registryLoad;
+/** The registry imports JSON, which plain node needs the resolve hook for. */
+const registry = () =>
+  (registryLoad ??= (async () => {
+    const { register } = await import("node:module");
+    register("./node-resolve-hook.mjs", import.meta.url);
+    return import("../src/lib/ops/runbooks/index.ts");
+  })());
+
+test("a serial moves only an Eversys unit, never another maker's", async () => {
+  const { matchRunbookPiece, matchRunbookSerial } = await registry();
+  const row = (name, serial) => [{ id: 1, catalogModel: name, equipmentName: name, serial }];
+  const plan = (name, serial) => planUnits(name, row(name, serial), matchRunbookPiece, null, matchRunbookSerial)[0];
+  assert.equal(plan("Faema X20", "11600001").runbookId, "faema-x20");
+  assert.equal(plan("La Marzocco Linea PB", "1107000").runbookId, "la-marzocco-linea");
+  assert.equal(plan("Bravilor Sego 12", "1165300123").runbookId, "bravilor-sego12");
+  // Eversys text still takes the serial's machine.
+  assert.deepEqual(
+    { id: plan("Eversys Shotmaster CT", "0116650021340E0001").runbookId, model: plan("Eversys Shotmaster CT", "0116650021340E0001").model },
+    { id: "eversys-shotmaster", model: "spro" },
+  );
+  assert.equal(plan("Eversys Cameo", "0183330226105C0012").model, "2ms");
+});
+
+test("identifyBySerial: short numbers keep no zero, 6-digit fallback, SN prefixes", () => {
+  assert.equal(identifyBySerial("1107000"), null); // a Faema / Mazzer-length serial
+  assert.equal(identifyBySerial("11600001"), null);
+  assert.deepEqual(identifyBySerial("110710024283E0008"), identifyBySerial("0110710024283E0008"));
+  assert.equal(identifyBySerial("110710024283E0008").model, "4ms");
+  assert.equal(identifyBySerial("1166000250770").runbookId, "eversys-e4-xwide");
+  assert.equal(identifyBySerial("0183330226105C0012").model, "2ms");
+  assert.equal(identifyBySerial("0183130226090C0003").model, "2s");
+  assert.equal(identifyBySerial("SN: 0115390026159E0001").model, "c");
+  assert.equal(identifyBySerial("S/N 0115390026159E0001").model, "c");
+  assert.equal(identifyBySerial("Serial # 0115390026159E0001").model, "c");
+});
+
+test("every 6-digit serial prefix names one machine type", async () => {
+  const { EVERSYS_SERIAL_PREFIXES } = await import("../src/lib/ops/pm-runbook-match.ts");
+  const six = new Map();
+  for (const [k, v] of Object.entries(EVERSYS_SERIAL_PREFIXES)) {
+    const p = k.slice(0, 6);
+    assert.ok(!six.has(p) || six.get(p) === v, `prefix ${p} is shared`);
+    six.set(p, v);
+  }
+});
+
+test("registry: fridges, loaner notes and loose Legacy text are not machines", async () => {
+  const { matchRunbookPiece } = await registry();
+  for (const t of ["Cameo fridge", "Eversys Cameo c'Fridge Beside", "Eversys e'4s e'Fridge", "Cameo loaner for the time being", "Need a loaner for Cameo", "Legacy Lounge Bunn"]) {
+    assert.equal(matchRunbookPiece(t), null, t);
+  }
+  assert.deepEqual(matchRunbookPiece("Legacy"), { runbookId: "eversys-legacy-plus", model: null });
+  assert.deepEqual(matchRunbookPiece("Eversys Legacy L'2m"), { runbookId: "eversys-legacy-plus", model: "2m" });
+});
+
+test("registry: E'line spellings and bare Enigma", async () => {
+  const { matchRunbookPiece } = await registry();
+  assert.deepEqual(matchRunbookPiece("E'line Shotmaster"), { runbookId: "eversys-eline", model: "shot" });
+  assert.deepEqual(matchRunbookPiece("Eversys E-line e'4s"), { runbookId: "eversys-eline", model: "4s" });
+  assert.deepEqual(matchRunbookPiece("E'line E6"), { runbookId: "eversys-eline", model: null });
+  assert.deepEqual(matchRunbookPiece("Eversys e'4 Shotmaster Pro"), { runbookId: "eversys-shotmaster", model: null });
+  assert.deepEqual(matchRunbookPiece("Enigma"), { runbookId: "eversys-enigma", model: null });
+  assert.deepEqual(matchRunbookPiece("Eversys Enigma"), { runbookId: "eversys-enigma", model: null });
+  assert.deepEqual(matchRunbookPiece("E'4s xtrawide e'line"), { runbookId: "eversys-e4-xwide", model: "4s" });
+});
+
+test("E'line modules are their own platform; X-Wide keeps Enigma / e'Line bench work", async () => {
+  const { runbookForPlatform, runbookById } = await registry();
+  const { eversysFamily } = await import("../src/lib/ops/eversys.ts");
+  const { MODULE_PLATFORMS } = await import("../src/lib/ops/lookups.ts");
+  assert.ok(MODULE_PLATFORMS.includes("e'Line"));
+  assert.equal(runbookForPlatform("e'Line").def.id, "eversys-eline");
+  assert.equal(runbookForPlatform("Enigma / e'Line").def.id, "eversys-e4-xwide");
+  assert.deepEqual(runbookById("eversys-eline").platforms, ["e'Line"]);
+  assert.equal(eversysFamily("Eversys e'4s e'line"), "e'Line");
+  assert.equal(eversysFamily("Eversys Enigma e'4s"), "Enigma / e'Line");
+});
+
+test("a module on a PM machine follows that machine's runbook, not the platform's", async () => {
+  const { runbookForModule } = await registry();
+  const { moduleServiceView } = await import("../src/lib/ops/pm-runbook.ts");
+  const brew = (rb, model) => qty(moduleServiceView(rb.def, { ...defaultConfig(rb.def), model }, "Brew Module").kits);
+  const elineRb = runbookForModule("Enigma / e'Line", "eversys-eline");
+  assert.equal(elineRb.def.id, "eversys-eline");
+  assert.deepEqual(brew(elineRb, "4ms"), { EV118340: 2 });
+  const e6 = runbookForModule("Enigma / e'Line", "eversys-enigma");
+  assert.equal(e6.def.id, "eversys-enigma");
+  assert.equal(brew(e6, "6ms").EV117077, 3);
+  assert.ok(moduleServiceView(e6.def, { ...defaultConfig(e6.def), model: "6ms" }, "Milk Module").kits.some((k) => k.ev === "EV108339"));
+  // Bench work, and a machine whose runbook takes no modules, use the platform's runbook.
+  assert.equal(runbookForModule("Enigma / e'Line", null).def.id, "eversys-e4-xwide");
+  assert.equal(runbookForModule("Enigma / e'Line", "la-marzocco-linea").def.id, "eversys-e4-xwide");
+});

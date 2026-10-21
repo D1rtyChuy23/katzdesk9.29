@@ -42,15 +42,16 @@ const only = (fn: (piece: string) => RunbookHit | null) => (piece: string) => {
 };
 
 /**
- * Order matters: the first runbook that recognises the text wins. X-Wide and Shotmaster come before the general
- * Enigma match ("E'4s X-Wide", "e'4 Shotmaster Pro"), and E'line before Enigma ("Eversys e'4s e'line").
+ * Order matters: the first runbook that recognises the text wins. X-Wide comes first ("E'4s X-Wide"), then E'line
+ * ("Eversys e'4s e'line", "E'line Shotmaster"), then Shotmaster, before the general Enigma match ("e'4 Shotmaster Pro").
+ * E'line modules are their own platform ("e'Line"); X-Wide stays first for "Enigma / e'Line" bench work.
  */
 export const RUNBOOKS: RegisteredRunbook[] = [
   { def: parseRunbookDefinition(e4xwide), matchPiece: matchE4XWide, platforms: ["Enigma / e'Line"], modules: true },
+  { def: parseRunbookDefinition(eline), matchPiece: only(matchELine), platforms: ["e'Line"], modules: true },
   { def: parseRunbookDefinition(shotmaster), matchPiece: only(matchShotmaster), platforms: ["Enigma / e'Line"], modules: true },
   { def: parseRunbookDefinition(cameo), matchPiece: only(matchCameo), platforms: ["Cameo"], modules: true },
   { def: parseRunbookDefinition(legacyPlus), matchPiece: only(matchLegacyPlus), platforms: ["Legacy"], modules: true },
-  { def: parseRunbookDefinition(eline), matchPiece: only(matchELine), platforms: ["Enigma / e'Line"], modules: true },
   { def: parseRunbookDefinition(enigma), matchPiece: only(matchEnigma), platforms: ["Enigma / e'Line"], modules: true },
   { def: parseRunbookDefinition(linea), matchPiece: matchLmLinea, platforms: [], modules: false },
   { def: parseRunbookDefinition(strada), matchPiece: matchLmStrada, platforms: [], modules: false },
@@ -78,16 +79,29 @@ export function runbookForPiece(piece: string): { runbook: RegisteredRunbook; mo
   return null;
 }
 
+/**
+ * The runbook a module service follows. On a PM it is the runbook of the machine the module sits on (an E'line or e'6ms
+ * module gets that machine's kits); on the bench, or when that machine's runbook takes no modules, the platform's.
+ */
+export function runbookForModule(platform: string | null | undefined, unitRunbookId?: string | null): RegisteredRunbook | null {
+  const own = unitRunbookId ? runbookById(unitRunbookId) : undefined;
+  return own?.modules ? own : runbookForPlatform(platform);
+}
+
 /** Runbook id and model for a line of equipment text, or null when no runbook covers it. */
 export function matchRunbookPiece(piece: string): RunbookHit | null {
   const r = runbookForPiece(piece);
   return r ? { runbookId: r.runbook.def.id, model: r.model } : null;
 }
 
-/** Runbook id and model from an Eversys serial, when its first 8 digits are listed and that runbook exists. */
-export function matchRunbookSerial(serial: string | null | undefined): RunbookHit | null {
+/**
+ * Runbook id and model from an Eversys serial, when its prefix is listed and that runbook exists. With the runbook the
+ * text matched, it applies only when that runbook is the same maker's (a Faema or La Marzocco serial never moves a unit).
+ */
+export function matchRunbookSerial(serial: string | null | undefined, textRunbookId?: string): RunbookHit | null {
   const hit = identifyBySerial(serial);
   if (!hit || !runbookById(hit.runbookId)) return null;
+  if (textRunbookId !== undefined && runbookById(textRunbookId)?.def.manufacturer !== runbookById(hit.runbookId)!.def.manufacturer) return null;
   const def = runbookById(hit.runbookId)!.def;
   const model = hit.model && def.models.some((m) => m.id === hit.model) ? hit.model : null;
   return { runbookId: hit.runbookId, model };

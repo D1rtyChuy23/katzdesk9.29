@@ -4,7 +4,7 @@
  * interval can be recommended). Pure: callers pass the PMs and each customer's account units.
  */
 import { normalizeCustomerKey } from "./account-equip.ts";
-import { planUnits, type AccountUnitRow } from "./pm-runbook-units.ts";
+import { planUnits, type AccountUnitRow, type SerialMatcher } from "./pm-runbook-units.ts";
 
 export type ReadinessPm = { id: number; customer: string; equipment: string | null; status: string };
 export type ReadinessAccountUnit = AccountUnitRow & { customer: string };
@@ -34,7 +34,7 @@ export function buildReadiness(
   units: ReadinessAccountUnit[],
   match: (piece: string) => { runbookId: string; model: string | null } | null,
   pinsByPm?: Readonly<Record<number, Readonly<Record<string, number>>>> | null,
-  bySerial?: (serial: string) => { runbookId: string; model: string | null } | null,
+  bySerial?: SerialMatcher,
 ): ReadinessRow[] {
   const byCustomer = new Map<string, AccountUnitRow[]>();
   for (const u of units) {

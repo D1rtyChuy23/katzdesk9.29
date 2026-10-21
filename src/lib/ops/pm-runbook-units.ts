@@ -45,8 +45,11 @@ export type PlannedUnit = {
 };
 
 type Matcher = (piece: string) => { runbookId: string; model: string | null } | null;
-/** Runbook and model from a serial number. When it knows the serial, it overrides what the text suggested. */
-type SerialMatcher = (serial: string) => { runbookId: string; model: string | null } | null;
+/**
+ * Runbook and model from a serial number, given the runbook the text matched. When it knows the serial, it overrides
+ * what the text suggested; it returns null for a serial that doesn't belong to that maker.
+ */
+export type SerialMatcher = (serial: string, textRunbookId: string) => { runbookId: string; model: string | null } | null;
 
 /** A name hit with no model must not hide a catalog hit that names one, on the same runbook. */
 function rowHitFor(match: Matcher, runbookId: string, row: AccountUnitRow): { runbookId: string; model: string | null } | null {
@@ -112,7 +115,7 @@ export function planUnits(
       const rowHit = rowHitFor(match, hit.runbookId, accountRows[idx]);
       if (!model && rowHit?.model) model = rowHit.model;
       // The serial names the exact machine (e.g. "Shotmaster CT" text, serial 01153900… = Shotmaster c).
-      const s = serial && bySerial ? bySerial(serial) : null;
+      const s = serial && bySerial ? bySerial(serial, hit.runbookId) : null;
       if (s) {
         runbookId = s.runbookId;
         model = s.model ?? (s.runbookId === hit.runbookId ? model : null);
