@@ -1,6 +1,6 @@
 /** Corrigo report → KatzDesk tickets. Mapping only — no sales fields. */
 
-import { customersLooselyMatch } from "./clean-names.ts";
+import { customersLooselyMatch, customersStrictlyMatch } from "./clean-names.ts";
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { CLOSED_CALL, CLOSED_PM } from "./ticket-status.ts";
 
@@ -165,6 +165,8 @@ export type InstallOption = {
   customer: string | null;
   /** Machine names for the label ("Eversys e'4m, Mahlkonig E65S"). */
   summary: string;
+  /** The install's customer when it isn't the file's account (a name that only starts the same): listed, never picked. */
+  otherName?: string | null;
   /** The install before this import (null for a new one). */
   state: InstallState | null;
   /** The row names exactly this install's machines. */
@@ -314,17 +316,29 @@ export function thisCycleFirst(hits: CorrigoHit[], wrapped: boolean, today: stri
  * ticket with the file's customer counts.
  */
 export function attachableHits(
-  hits: CorrigoHit[],
+  all: CorrigoHit[],
   fileCustomer: string | null | undefined,
   wrapped: boolean,
   today: string | null | undefined,
 ): CorrigoHit[] {
+  // After the wrap, a closed install whose WO (any of its work orders) came in over a year ago is another job.
+  const hits = wrapped
+    ? all.filter((h) => !(h.board === "install" && hitClosed(h) && !recentTicket(h, today) && (woNumeric(h.wo) ?? Infinity) <= WO_WRAP))
+    : all;
   const recent = wrapped ? hits.filter((h) => recentTicket(h, today)) : [];
   const named = recent.filter((h) => !isWalkIn(h.customer)).map((h) => normalizeCustomerKey(h.customer));
   const oneCustomer = new Set(named.filter(Boolean)).size <= 1;
   const ok = hits.filter((h) => shouldAttachToHit(h, fileCustomer, wrapped) || (oneCustomer && recent.includes(h)));
   // Two customers' tickets carry the number this cycle: only the file customer's own copies count, open ones too.
   return thisCycleFirst(oneCustomer ? ok : ok.filter((h) => customersCompatible(h.customer, fileCustomer)), wrapped, today);
+}
+
+/** Two installs carrying one WO: the one with the file's customer (strict match) is the WO's, when there is one. */
+export function preferFileCustomerInstalls(hits: CorrigoHit[], fileCustomer: string | null | undefined): CorrigoHit[] {
+  const installs = hits.filter((h) => h.board === "install");
+  if (installs.length < 2) return hits;
+  const named = installs.filter((h) => customersStrictlyMatch(h.customer, fileCustomer));
+  return named.length ? hits.filter((h) => h.board !== "install" || named.includes(h)) : hits;
 }
 
 /**
@@ -830,9 +844,10 @@ export function installStatusFromCorrigo(
   const date = completedOnUpdate(row.completedAt, state.completedAt, null);
   if (wos.length < 2 || resolved.status !== "Installed") return { ...resolved, completedAt: date.value, date, wos, done };
   if (state.status === "Installed" || done === wos.length) {
-    // The project's completed date is its last work order's.
+    // The project's completed date is its last work order's: an earlier WO's date never moves it back.
     const last = wos.map((w) => w.completedAt).filter((d): d is string => !!d).sort().at(-1) ?? null;
-    const all = state.status === "Installed" ? date : completedOnUpdate(last ?? row.completedAt, state.completedAt, null);
+    const target = last && state.completedAt && last < state.completedAt ? state.completedAt : (last ?? row.completedAt);
+    const all = completedOnUpdate(target, state.completedAt, null);
     return { ...resolved, completedAt: all.value, date: all, wos, done };
   }
   const keep = state.status || NEW_TICKET_STATUS.install;
@@ -850,39 +865,51 @@ export function installStatusFromCorrigo(
 const sameMachines = (a: string[], b: string[]) => [...a].sort().join("\n") === [...b].sort().join("\n");
 
 /**
- * The open installs an install row whose WO no install has may attach to: the account's (a looser name match, so
- * "Baldi Management" finds "Baldi Management Group Inc."), WOs or not. One open install is preselected unless the row
- * names other equipment — the Equipment column, else the problem description, read exactly as catalog machines and
- * different from that install's exact machines. Two or more: a new install is preselected; any can still be chosen.
+ * The open installs an install row whose WO no install has may attach to, WOs or not. The account's installs match
+ * strictly ("Baldi Management" is "Baldi Management Group Inc."); an install whose name only starts the same
+ * ("Federal Grill" for "Federal Grill - Katy") is listed too, under its own name, but never preselected. The
+ * account's one open install is preselected unless the row names other equipment — the Equipment column, else the
+ * problem description, read exactly as catalog machines and different from that install's exact machines. Two or
+ * more: a new install is preselected; any can still be chosen.
  */
 function installCandidates(
   rec: CorrigoRecord,
   installs: OpenInstall[],
   catalog: string[],
-): { candidates: OpenInstall[]; choice: OpenInstall | null; note: string; byEquipment: boolean } | null {
+): { candidates: OpenInstall[]; choice: OpenInstall | null; note: string; byEquipment: boolean; strict: Set<number> } | null {
   if (isWalkIn(rec.customer)) return null;
-  const mine = installs.filter((i) => customersLooselyMatch(i.customer, rec.customer));
-  if (!mine.length) return null;
-  if (mine.length > 1) {
-    return { candidates: mine, choice: null, note: `${mine.length === 2 ? "two" : mine.length} installs could match`, byEquipment: false };
+  const listed = installs.filter((i) => customersLooselyMatch(i.customer, rec.customer));
+  if (!listed.length) return null;
+  const mine = listed.filter((i) => customersStrictlyMatch(i.customer, rec.customer));
+  const strict = new Set(mine.map((i) => i.id));
+  // The account's installs first, then the similar names.
+  const candidates = [...mine, ...listed.filter((i) => !strict.has(i.id))];
+  const none = (note: string) => ({ candidates, choice: null, note, byEquipment: false, strict });
+  if (!mine.length) {
+    const others = listed.map((i) => `#${i.id}`).join(", ");
+    return none(
+      listed.length === 1
+        ? `install #${listed[0]!.id} is on another name (${listed[0]!.customer}) — not picked`
+        : `installs ${others} are on other names — not picked`,
+    );
   }
+  if (mine.length > 1) return none(`${mine.length === 2 ? "two" : mine.length} installs could match`);
   const only = mine[0]!;
   const column = !!rec.equipment?.trim();
   const named = column ? exactMachines([rec.equipment!], catalog) : spelledMachines(rec.issue ?? "", catalog);
   if (named && only.machines.length) {
     if (!sameMachines(named, only.machines)) {
-      const note = column ? `equipment differs from install #${only.id}` : `the problem description doesn't name install #${only.id}'s equipment`;
-      return { candidates: mine, choice: null, note, byEquipment: false };
+      return none(column ? `equipment differs from install #${only.id}` : `the problem description doesn't name install #${only.id}'s equipment`);
     }
-    return { candidates: mine, choice: only, note: `install #${only.id} matched by account and equipment`, byEquipment: true };
+    return { candidates, choice: only, note: `install #${only.id} matched by account and equipment`, byEquipment: true, strict };
   }
-  return { candidates: mine, choice: only, note: `install #${only.id} is the account's only open install`, byEquipment: false };
+  return { candidates, choice: only, note: `install #${only.id} is the account's only open install`, byEquipment: false, strict };
 }
 
-/** "Attach to install #12 · Eversys e'4m · Ready · WO-0831, WO-0855". */
-export function installOptionLabel(id: number, summary: string, state: InstallState): string {
+/** "Attach to install #12 · Eversys e'4m · Ready · WO-0831, WO-0855"; another name shows after the number. */
+export function installOptionLabel(id: number, summary: string, state: InstallState, otherName?: string | null): string {
   const wos = state.wos.map((w) => w.wo).join(", ");
-  return `Attach to install #${id} · ${summary || "no equipment listed"} · ${state.status} · ${wos || "no WO yet"}`;
+  return `Attach to install #${id}${otherName ? ` (${otherName})` : ""} · ${summary || "no equipment listed"} · ${state.status} · ${wos || "no WO yet"}`;
 }
 
 export const NEW_INSTALL_LABEL = "Create new install";
@@ -925,7 +952,7 @@ export function settleInstallRows<T extends CorrigoPreviewRow>(
     if (!isInstallRow(row)) return row;
     const options = row.installOptions?.map((o) => {
       const state = o.id == null ? null : stateOf(o.id, o.state);
-      return o.id == null || !state ? o : { ...o, label: installOptionLabel(o.id, o.summary, state) };
+      return o.id == null || !state ? o : { ...o, label: installOptionLabel(o.id, o.summary, state, o.otherName) };
     });
     const id = targets[i]!;
     const option = options ? options.find((o) => o.id === id) ?? options.find((o) => o.id == null) : undefined;
@@ -1000,7 +1027,7 @@ export function resolvePreviewRow(
   });
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
-  const woHit = pickKeeper(attachableHits(pool, rec.customer, wrapped, opts.today), hinted);
+  const woHit = pickKeeper(preferFileCustomerInstalls(attachableHits(pool, rec.customer, wrapped, opts.today), rec.customer), hinted);
   const pick = !woHit && hinted === "install" ? installCandidates(rec, opts.installs ?? [], opts.catalog ?? []) : null;
   const existing = woHit ?? pick?.choice ?? null;
   // After the wrap, a copy from the other cycle than the chosen ticket, or another customer's, is a different job.
@@ -1060,7 +1087,13 @@ export function resolvePreviewRow(
         .filter(Boolean)
         .join(" · ") || null,
     // An install picked by account keeps its own name ("Baldi Management Group Inc."), not the file's spelling.
-    customer: pick?.choice ? pick.choice.customer : preferredImportCustomer(rec.customer, existing?.customer),
+    // A WO's install with the file's account (strict match) keeps its own spelling too.
+    customer:
+      pick?.choice
+        ? pick.choice.customer
+        : woHit?.board === "install" && customersStrictlyMatch(woHit.customer, rec.customer)
+          ? woHit.customer
+          : preferredImportCustomer(rec.customer, existing?.customer),
     fileCustomer: rec.customer,
     existingCustomer: existing?.customer ?? null,
     fileWalkIn: isWalkIn(rec.customer),
@@ -1091,11 +1124,13 @@ export function resolvePreviewRow(
       ? [
           ...pick.candidates.map((c): InstallOption => {
             const state = { status: c.status, completedAt: c.completedAt ?? null, wos: c.wos };
+            const otherName = pick.strict.has(c.id) ? null : c.customer;
             return {
               id: c.id,
-              label: installOptionLabel(c.id, c.summary, state),
+              label: installOptionLabel(c.id, c.summary, state, otherName),
               customer: c.customer,
               summary: c.summary,
+              otherName,
               state,
               byEquipment: pick.byEquipment && pick.choice?.id === c.id,
             };

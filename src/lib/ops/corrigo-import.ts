@@ -17,6 +17,7 @@ import {
   indexHits,
   isWalkIn,
   pickKeeper,
+  preferFileCustomerInstalls,
   installStatusFromCorrigo,
   resolvePreviewRow,
   settleInstallRows,
@@ -30,7 +31,8 @@ import {
 } from "@/lib/ops/corrigo";
 import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
 import { INSTALL_WOS_SQL, loadInstallWos, recordInstallWo } from "@/lib/ops/install-work-orders";
-import { customersLooselyMatch } from "@/lib/ops/clean-names";
+import { customersStrictlyMatch } from "@/lib/ops/clean-names";
+import { moveInstallUnits } from "@/lib/ops/install-projects";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
 
@@ -65,11 +67,15 @@ function jobBoard(kind: string | null | undefined): CorrigoBoard {
  * The received date, else the Chicago day of the ticket's first activity entry (the tables keep no created date),
  * else its completed date.
  */
-function receivedSql(table: string, entityType: string): string {
-  return `to_char(coalesce(${table}.received,
+function receivedDateSql(table: string, entityType: string): string {
+  return `coalesce(${table}.received,
             (select (min(a.created_at) at time zone 'America/Chicago')::date from activity a
               where a.entity_type = ${entityType} and a.entity_id = ${table}.id),
-            ${table}.completed_at), 'YYYY-MM-DD') as received`;
+            ${table}.completed_at)`;
+}
+
+function receivedSql(table: string, entityType: string): string {
+  return `to_char(${receivedDateSql(table, entityType)}, 'YYYY-MM-DD') as received`;
 }
 
 async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<CorrigoHit[]> {
@@ -118,9 +124,12 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     completed_at: string | null;
     received: string | null;
   }>(
-    // One hit per work order: an install project is found by any of its WOs.
+    // One hit per work order: an install project is found by any of its WOs. Each WO is dated by its own row (the
+    // day it came onto the install), else by the install, so after the wrap an old project's WO isn't this cycle's.
     `select i.id, w.wo, i.equip_status as status, i.customer, i.complete, to_char(i.completed_at, 'YYYY-MM-DD') as completed_at,
-            ${receivedSql("i", "'install'")}
+            to_char(coalesce(
+              (select x.received from install_work_orders x where x.install_id = i.id and x.wo = w.wo limit 1),
+              ${receivedDateSql("i", "'install'")}), 'YYYY-MM-DD') as received
        from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
       where i.archived = false
       order by i.id asc`,
@@ -228,7 +237,7 @@ async function findExistingHit(
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
-  return pickKeeper(attachableHits(group, fileCustomer, rolled, today), preferredBoard);
+  return pickKeeper(preferFileCustomerInstalls(attachableHits(group, fileCustomer, rolled, today), fileCustomer), preferredBoard);
 }
 
 async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: string) {
@@ -459,10 +468,11 @@ export async function applyCorrigoRows(
         ])
       )[0];
       const sameAccount = (name: string) =>
-        customersLooselyMatch(name, row.fileCustomer ?? row.customer) ||
+        customersStrictlyMatch(name, row.fileCustomer ?? row.customer) ||
         (!!row.existingCustomer && name.trim().toLowerCase() === row.existingCustomer.trim().toLowerCase());
+      // A project an earlier row of this file installed (the preview showed it Installed) is still the one.
       const gone = picked
-        ? !now || now.archived || now.complete || !sameAccount(now.customer)
+        ? !now || now.archived || (now.complete && row.oldStatus !== "Installed") || !sameAccount(now.customer)
         : !((await loadInstallWos(sql, [jobId])).get(jobId) ?? []).some((w) => w.matchKey === matchKey);
       if (gone) {
         action = "create";
@@ -564,6 +574,8 @@ export async function applyCorrigoRows(
           [jobId, technician, completedAt, workDone, equipStatus, primary, complete, customer],
         );
         await recordInstallWo(sql, jobId, { wo: keptWo, status: row.statusRaw, completedAt: row.completedAt, source: "corrigo", addedBy: actor });
+        // A new customer takes the install's own account units with it, as the install window does.
+        const unitsMoved = customer !== cur[0].customer ? await moveInstallUnits(sql, jobId, cur[0].customer, customer) : null;
         const added = !wos.some((w) => w.matchKey === matchKey);
         await logCorrigo(
           sql,
@@ -572,7 +584,8 @@ export async function applyCorrigoRows(
           actor,
           `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}` +
             (row.byEquipment ? " · matched by account and equipment" : picked ? " · picked by account" : "") +
-            (next.wos.length > 1 ? ` · ${next.done} of ${next.wos.length} work orders completed` : ""),
+            (next.wos.length > 1 ? ` · ${next.done} of ${next.wos.length} work orders completed` : "") +
+            (unitsMoved?.moved.length ? ` · moved to ${customer}: ${unitsMoved.moved.join(", ")}` : ""),
         );
         updated += 1;
         maybeReview(
