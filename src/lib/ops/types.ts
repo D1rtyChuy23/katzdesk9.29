@@ -66,6 +66,8 @@ export type PmJob = {
   updatedAt: string;
   flag: ClockFlag | null;
   aviKatz: boolean;
+  /** The service or TLC ticket this PM bills on, or null when it has its own invoice. */
+  stackedJobId: number | null;
 };
 
 

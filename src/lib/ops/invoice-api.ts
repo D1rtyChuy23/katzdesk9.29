@@ -5,7 +5,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { cleanQty, cleanRate, kindForItem, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { loadTicketCharges, writeTicketCharges } from "@/lib/ops/charges-api";
 import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount";
-import { INVOICE_TARGETS, invoiceError, invoiceTotals, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
+import { INVOICE_TARGETS, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 
@@ -24,6 +24,8 @@ export type InvoiceLine = {
   kind: ChargeKind;
   /** The part on the item list, for its photo and MPN. Null for labor and for an item that is not on the list. */
   part: PartRef | null;
+  /** Copied from a stacked PM. Ticket invoices only; a PM's own invoice lines do not carry one. */
+  sourceKey?: string | null;
 };
 
 export type InvoiceView = InvoiceTotals & {
@@ -70,9 +72,16 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     };
   }
   if (type === "pm") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null }>("select customer, wo from pm_jobs where id = $1", [id]))[0];
+    const r = (await sql.query<{ customer: string | null; wo: string | null; stacked_job_id: number | null; job_wo: string | null; call_id: string | null }>(
+      `select p.customer, p.wo, p.stacked_job_id, j.wo as job_wo, j.call_id
+         from pm_jobs p
+         left join service_jobs j on j.id = p.stacked_job_id
+        where p.id = $1`,
+      [id],
+    ))[0];
     if (!r) throw new Error("That PM is no longer on the list.");
-    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id, wo: r.wo }), recordRep: null, locked: null };
+    const locked = r.stacked_job_id == null ? null : stackedPmLock({ jobId: Number(r.stacked_job_id), wo: r.job_wo, callId: r.call_id });
+    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id, wo: r.wo }), recordRep: null, locked };
   }
   if (type === "install") {
     const r = (await sql.query<{ customer: string | null; account_rep: string | null }>("select customer, account_rep from installs where id = $1 and archived = false", [id]))[0];
@@ -87,6 +96,11 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
   const r = (await sql.query<{ customer: string | null; producer: string | null }>("select customer, producer from deals where id = $1 and archived = false", [id]))[0];
   if (!r) throw new Error("That deal is no longer on the list.");
   return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id }), recordRep: r.producer, locked: null };
+}
+
+/** The lock sentence resolveRecord returns for a PM, or null when the PM bills on its own invoice. */
+export async function pmInvoiceLock(sql: Sql, pmId: number): Promise<string | null> {
+  return (await resolveRecord(sql, "pm", pmId)).locked;
 }
 
 /** Billing info from the account: name, account number, address, rep (the account's rep, else the record's). */
@@ -184,7 +198,7 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number): Promise<I
   let discount: Discount | null;
   if (usesTicketCharges(ref.type)) {
     const c = await loadTicketCharges(sql, id);
-    lines = c.lines.map((l) => ({ id: l.id, item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part }));
+    lines = c.lines.map((l) => ({ id: l.id, item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part, sourceKey: l.sourceKey ?? null }));
     discount = c.discount;
   } else {
     lines = h ? await projectLines(sql, h.id) : [];
@@ -219,6 +233,7 @@ const lineInput = z.object({
   description: z.string().max(500),
   qty: z.union([z.number(), z.string().max(20)]),
   rate: z.union([z.number(), z.string().max(20)]),
+  sourceKey: z.string().max(400).regex(/^(pmkit|mp):/).nullable().optional(),
 });
 
 const approveInput = targetInput.extend({
@@ -226,6 +241,48 @@ const approveInput = targetInput.extend({
   lineIds: z.array(z.number().int().positive()).max(200),
   discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable(),
 });
+
+/**
+ * Approve a PM's own invoice only while it is not stacked. One statement: lock the PM, insert the header
+ * and replace the lines only when stacked_job_id is null. Zero rows means it was stacked first.
+ * The stacked check sits on the locked row itself: in READ COMMITTED a `for update` that waited re-reads only the
+ * row it locks, while a separate subquery would still see the snapshot from before a stack committed.
+ */
+export function approvePmInvoiceSql(): string {
+  return `with locked as (
+       select p.id from pm_jobs p where p.id = $2::int and p.stacked_job_id is null for update
+     ),
+     open_pm as (
+       select locked.id from locked
+     ),
+     inv as (
+       insert into invoices (
+         entity_type, entity_id, customer, discount_kind, discount_value,
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at
+       )
+       select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now()
+         from open_pm
+       on conflict (entity_type, entity_id) do update set
+         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
+         bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
+         approved_at = now(), updated_at = now()
+       returning id
+     ),
+     cleared as (
+       delete from invoice_lines where invoice_id in (select id from inv) returning id
+     ),
+     lined as (
+       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
+       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+         from inv
+         join unnest($12::text[], $13::text[], $14::numeric[], $15::numeric[], $16::text[]) with ordinality
+              as t(item, description, qty, rate, kind, ord) on true
+        where (select count(*) from cleared) >= 0
+       returning id
+     )
+     select inv.id, (select count(*) from lined)::int as lined from inv`;
+}
 
 const ACTIVITY_TYPE: Record<InvoiceTarget, string> = { service: "service", tlc: "tlc", pm: "pm", install: "install", rebuild: "rebuild", deal: "deal" };
 
@@ -270,39 +327,61 @@ export const approveInvoice = createServerFn({ method: "POST" })
       }));
     }
     const totals = invoiceTotals(lines, typed.discount);
-    const saved = await sql.query<{ id: number }>(
-      `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now())
-       on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
-         bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
-         total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()
-       returning id`,
-      [
+    if (ref.type === "pm") {
+      const savedPm = await sql.query<{ id: number }>(approvePmInvoiceSql(), [
         ref.type,
         data.id,
         ref.customer || null,
-        // A ticket keeps its discount on the ticket, so it is never stored twice.
-        usesTicketCharges(ref.type) ? null : (typed.discount?.kind ?? null),
-        usesTicketCharges(ref.type) ? null : (typed.discount?.value ?? null),
+        typed.discount?.kind ?? null,
+        typed.discount?.value ?? null,
         bill.name,
         bill.accountNumber,
         bill.address,
         bill.rep,
         totals.total,
         who,
-      ],
-    );
-    if (!usesTicketCharges(ref.type)) {
-      // One statement: the old lines and the new ones change together or not at all.
-      await sql.query(
-        `with d as (delete from invoice_lines where invoice_id = $1)
-         insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
-         select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
-           from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
-                as t(item, description, qty, rate, kind, ord)`,
-        [saved[0]!.id, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
+        lines.map((l) => l.item),
+        lines.map((l) => l.description),
+        lines.map((l) => l.qty),
+        lines.map((l) => l.rate),
+        lines.map((l) => l.kind),
+      ]);
+      if (!savedPm[0]) throw new Error((await pmInvoiceLock(sql, data.id)) ?? "This PM is billed on a ticket. Open the ticket's Invoicing tab.");
+    } else {
+      const saved = await sql.query<{ id: number }>(
+        `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now())
+         on conflict (entity_type, entity_id) do update set
+           customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+           bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
+           total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()
+         returning id`,
+        [
+          ref.type,
+          data.id,
+          ref.customer || null,
+          // A ticket keeps its discount on the ticket, so it is never stored twice.
+          usesTicketCharges(ref.type) ? null : (typed.discount?.kind ?? null),
+          usesTicketCharges(ref.type) ? null : (typed.discount?.value ?? null),
+          bill.name,
+          bill.accountNumber,
+          bill.address,
+          bill.rep,
+          totals.total,
+          who,
+        ],
       );
+      if (!usesTicketCharges(ref.type)) {
+        // One statement: the old lines and the new ones change together or not at all.
+        await sql.query(
+          `with d as (delete from invoice_lines where invoice_id = $1)
+           insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
+           select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+             from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
+                  as t(item, description, qty, rate, kind, ord)`,
+          [saved[0]!.id, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
+        );
+      }
     }
     await sql
       .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [

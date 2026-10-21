@@ -237,12 +237,14 @@ export function unitHistory(
   unit: { unitKey: string; pieceKey: string },
   kitRows: readonly { who: string | null; action: string; detail: string | null; at: Date | string }[],
   optionRows: readonly { who: string | null; at: Date | string; detail: string | null }[],
+  partRows: readonly { who: string | null; at: Date | string; detail: string | null }[] = [],
 ): UnitHistoryLine[] {
   const lines: UnitHistoryLine[] = [
     ...kitRows
       .filter((row) => kitHistoryMatches(unit, row.detail))
       .map((row) => ({ who: row.who, at: historyIso(row.at), detail: addedKitHistoryLine(row.action, row.detail) })),
     ...optionRows.map((row) => ({ who: row.who, at: historyIso(row.at), detail: row.detail ?? "" })),
+    ...partRows.map((row) => ({ who: row.who, at: historyIso(row.at), detail: row.detail ?? "" })),
   ];
   return lines.sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, 20);
 }
@@ -1141,10 +1143,21 @@ export function pmServiceRecord(input: {
   options: { label: string; value: string }[];
   kits: { ev: string; q: number; name: string }[];
   steps: string[];
+  /** Extra parts logged on this machine. Omitted, or empty, leaves the record exactly as it was. */
+  otherParts?: { qty: number; item: string; description?: string | null; billable?: boolean }[];
 }): string {
   const lines = [`${pmServicePrefix(input.pmId)}. ${input.modelLabel}, ${input.intervalLabel}.`];
   lines.push(input.options.length ? `Options: ${input.options.map((o) => `${o.label}: ${o.value}`).join("; ")}.` : "Options: none.");
   lines.push(input.kits.length ? `Kits: ${input.kits.map((k) => `${k.q} x ${k.ev} ${k.name}`).join("; ")}.` : "Kits: none.");
+  const extras = input.otherParts ?? [];
+  if (extras.length) {
+    const bits = extras.map((p) => {
+      const desc = String(p.description ?? "").trim();
+      const charge = p.billable === false ? " (no charge)" : "";
+      return `${Number(p.qty)} x ${p.item}${desc ? ` ${desc}` : ""}${charge}`;
+    });
+    lines.push(`Other parts: ${bits.join("; ")}.`);
+  }
   if (input.steps.length) {
     lines.push("Steps done:");
     for (const step of input.steps) lines.push(`- ${step}`);

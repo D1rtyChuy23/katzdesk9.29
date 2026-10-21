@@ -10,6 +10,8 @@ export type ChargeLine = {
   qty: number;
   rate: number;
   kind: ChargeKind;
+  /** Which PM kit or machine part this line was copied from. A hand-typed line has none. */
+  sourceKey?: string | null;
 };
 
 /** Where a part's photo and MPN come from: the inventory record. The picker and the invoice line read the same one. */
@@ -120,12 +122,17 @@ export function searchItems<T extends Pick<BillingItem, "item" | "description" |
 export type ChargeProblem = { index: number; message: string };
 
 /** What must be fixed before the lines are saved. Nothing here changes the lines. */
-export function checkCharges(lines: { item: string; qty: unknown; rate: unknown }[]): ChargeProblem[] {
+export function checkCharges(lines: { item: string; qty: unknown; rate: unknown; sourceKey?: string | null }[]): ChargeProblem[] {
   const out: ChargeProblem[] = [];
+  const seen = new Set<string>();
   lines.forEach((l, index) => {
     if (!String(l.item ?? "").trim()) out.push({ index, message: "Pick an item." });
     if (cleanQty(l.qty) == null) out.push({ index, message: "Quantity must be more than zero." });
     if (cleanRate(l.rate) == null) out.push({ index, message: "Rate must be zero or more." });
+    const key = String(l.sourceKey ?? "").trim();
+    if (!key) return;
+    if (seen.has(key)) out.push({ index, message: "This line is already on this bill." });
+    else seen.add(key);
   });
   return out;
 }

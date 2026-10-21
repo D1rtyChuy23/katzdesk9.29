@@ -671,3 +671,144 @@ test("the merge note says one charge line, and leaves out a blank work order", a
   assert.equal(blankDetail.rows[0].detail.includes("·  ·"), false);
   assert.match(blankDetail.rows[0].detail, /into this ticket · moved 0 charge lines/);
 });
+
+test("mergeMoneyRefusal names a stacked PM ahead of moving charges, and only after the older reasons", () => {
+  assert.equal(
+    mergeMoneyRefusal(
+      money({ id: 1, nsSo: "SO1" }),
+      money({ id: 2, nsSo: "SO2", stackedPms: [{ id: 32, customer: "Levy GRB" }] }),
+    ),
+    "Ticket #2 is billed on SO2. Merge the other ticket into it instead.",
+  );
+  assert.equal(
+    mergeMoneyRefusal(
+      money({ id: 7, nsSo: "SO7", lines: 2 }),
+      money({ id: 8, lines: 2, stackedPms: [{ id: 32, customer: "Levy GRB" }] }),
+    ),
+    "Ticket #7 is billed on SO7. Unstack PM #32 from #8 before merging.",
+  );
+  assert.equal(
+    mergeMoneyRefusal(
+      money({ id: 3, lines: 1, stackedPms: [{ id: 32, customer: "Cafe" }] }),
+      money({ id: 4, lines: 1, discountKind: "percent", discountValue: 10, stackedPms: Array.from({ length: 11 }, (_, i) => ({ id: i + 1, customer: "Cafe" })) }),
+      "Cafe",
+    ),
+    "Ticket #4 has a 10% discount that ticket #3 doesn't. Make the discounts match first.",
+  );
+  const eleven = Array.from({ length: 6 }, (_, i) => ({ id: i + 1, customer: "Cafe" }));
+  assert.equal(
+    mergeMoneyRefusal(money({ id: 1, stackedPms: eleven }), money({ id: 2, stackedPms: eleven.slice(0, 5) }), "Cafe"),
+    "Together these tickets carry more than 10 PMs. Unstack some first.",
+  );
+  assert.equal(
+    mergeMoneyRefusal(money({ id: 1, stackedPms: Array.from({ length: 10 }, (_, i) => ({ id: i + 1, customer: "Cafe" })) }), money({ id: 2 }), "Cafe"),
+    null,
+  );
+  assert.equal(
+    mergeMoneyRefusal(money({ id: 1 }), money({ id: 2, stackedPms: [{ id: 32, customer: "Levy GRB" }] }), "Other Co"),
+    "PM #32 is for Levy GRB, not Other Co. Unstack it before merging.",
+  );
+  assert.equal(
+    mergeMoneyRefusal(money({ id: 1 }), money({ id: 2, stackedPms: [{ id: 32, customer: "Levy, GRB" }] }), "Levy GRB"),
+    null,
+  );
+});
+
+async function pmOn(jobId, customer) {
+  const row = await pg.query(
+    "insert into pm_jobs (customer, equipment, status, stacked_job_id) values ($1, 'Faema X20', 'Open', $2) returning id",
+    [customer, jobId],
+  );
+  return Number(row.rows[0].id);
+}
+
+test("a merge moves the extra's stacked PM and its keyed charge onto the keeper", async () => {
+  const keeper = await ticket({ customer: "Levy GRB", wo: "WO-4301", completed: null });
+  const extra = await ticket({ customer: "Levy GRB", wo: "WO-4302", completed: null });
+  const pmId = await pmOn(extra, "Levy GRB");
+  const key = `pmkit:${pmId}:piece:faema x20#1:EV1`;
+  await pg.query(
+    "insert into ticket_charges (job_id, item, qty, rate, kind, sort, source_key) values ($1, 'PARTS : EVER104120', 1, 12, 'part', 1, $2)",
+    [extra, key],
+  );
+  assert.deepEqual(await mergeServiceJobs(sql, keeper, extra, "Chuy"), { keeperId: keeper, extraId: extra });
+  const movedPm = await pg.query("select stacked_job_id from pm_jobs where id = $1", [pmId]);
+  assert.equal(Number(movedPm.rows[0].stacked_job_id), keeper);
+  const lineRow = await pg.query("select job_id, source_key from ticket_charges where source_key = $1", [key]);
+  assert.equal(Number(lineRow.rows[0].job_id), keeper);
+  assert.equal(lineRow.rows[0].source_key, key);
+  const note = await pg.query("select detail from activity where entity_type = 'pm' and entity_id = $1 and action = 'stacked'", [pmId]);
+  assert.equal(note.rows[0].detail, `Moved to ticket #${keeper}; ticket #${extra} was merged into it.`);
+});
+
+test("a merge is refused for a billed keeper, for 11 PMs, and for a PM on another customer", async () => {
+  const billed = await ticket({ customer: "Levy GRB", wo: "WO-4303", nsSo: "SO4401" });
+  const billedExtra = await ticket({ customer: "Levy GRB", wo: "WO-4304" });
+  const billedPm = await pmOn(billedExtra, "Levy GRB");
+  await line(billedExtra, 1, "Would move");
+  const billedResult = await mergeServiceJobs(sql, billed, billedExtra, "Chuy");
+  assert.deepEqual(billedResult, {
+    refused: `Ticket #${billed} is billed on SO4401. Unstack PM #${billedPm} from #${billedExtra} before merging.`,
+  });
+  assert.equal(Number((await pg.query("select stacked_job_id from pm_jobs where id = $1", [billedPm])).rows[0].stacked_job_id), billedExtra);
+
+  const keeper = await ticket({ customer: "Levy GRB", wo: "WO-4305" });
+  const extra = await ticket({ customer: "Levy GRB", wo: "WO-4306" });
+  for (let i = 0; i < 6; i += 1) await pmOn(keeper, "Levy GRB");
+  for (let i = 0; i < 5; i += 1) await pmOn(extra, "Levy GRB");
+  const tooMany = await mergeServiceJobs(sql, keeper, extra, "Chuy");
+  assert.deepEqual(tooMany, { refused: "Together these tickets carry more than 10 PMs. Unstack some first." });
+  assert.equal((await pg.query("select duplicate_of from service_jobs where id = $1", [extra])).rows[0].duplicate_of, null);
+
+  const same = await ticket({ customer: "Levy GRB", wo: "WO-4307" });
+  const other = await ticket({ customer: "Levy GRB", wo: "WO-4308" });
+  const foreign = await pmOn(other, "Other Co");
+  const differ = await mergeServiceJobs(sql, same, other, "Chuy");
+  assert.deepEqual(differ, { refused: `PM #${foreign} is for Other Co, not Levy GRB. Unstack it before merging.` });
+  assert.equal(Number((await pg.query("select stacked_job_id from pm_jobs where id = $1", [foreign])).rows[0].stacked_job_id), other);
+});
+
+test("the statement itself writes nothing for stacked PMs when the pre-check is skipped", async () => {
+  async function stamps(ids) {
+    const rows = await pg.query("select id, updated_at::text as updated from service_jobs where id = any($1::int[])", [ids]);
+    return rows.rows;
+  }
+  const billed = await ticket({ customer: "Levy GRB", wo: "WO-4310", nsSo: "SO9", completed: null });
+  const billedExtra = await ticket({ customer: "Levy GRB", wo: "WO-4311", completed: null });
+  const billedPm = await pmOn(billedExtra, "Levy GRB");
+  let times = await stamps([billed, billedExtra]);
+  let rows = await sql.query(mergeTicketsSql(), [
+    billed, billedExtra, "Chuy", "Levy GRB", null, null, null, null, null, null, "WO-4310", null, null, null, null, null, "Normal",
+    times.find((r) => Number(r.id) === billed).updated,
+    times.find((r) => Number(r.id) === billedExtra).updated,
+  ]);
+  assert.equal(rows.length, 0);
+  assert.equal(Number((await pg.query("select stacked_job_id from pm_jobs where id = $1", [billedPm])).rows[0].stacked_job_id), billedExtra);
+
+  const keeper = await ticket({ customer: "Cafe", wo: "WO-4312", completed: null });
+  const extra = await ticket({ customer: "Cafe", wo: "WO-4313", completed: null });
+  for (let i = 0; i < 6; i += 1) await pmOn(keeper, "Cafe");
+  for (let i = 0; i < 5; i += 1) await pmOn(extra, "Cafe");
+  times = await stamps([keeper, extra]);
+  rows = await sql.query(mergeTicketsSql(), await mergeParams(
+    keeper,
+    extra,
+    times.find((r) => Number(r.id) === keeper).updated,
+    times.find((r) => Number(r.id) === extra).updated,
+  ));
+  assert.equal(rows.length, 0);
+
+  const home = await ticket({ customer: "Cafe", wo: "WO-4314", completed: null });
+  const away = await ticket({ customer: "Cafe", wo: "WO-4315", completed: null });
+  const foreign = await pmOn(away, "Other Co");
+  times = await stamps([home, away]);
+  rows = await sql.query(mergeTicketsSql(), await mergeParams(
+    home,
+    away,
+    times.find((r) => Number(r.id) === home).updated,
+    times.find((r) => Number(r.id) === away).updated,
+  ));
+  assert.equal(rows.length, 0);
+  assert.equal(Number((await pg.query("select stacked_job_id from pm_jobs where id = $1", [foreign])).rows[0].stacked_job_id), away);
+});
+

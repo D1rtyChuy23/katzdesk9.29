@@ -224,3 +224,90 @@ test("billing CSV carries the bare SKU next to the item name", () => {
   assert.match(head, /,Item,SKU,Description,/);
   assert.match(row, /,PARTS : EVER104120,EVER104120,Pump,/);
 });
+
+test("a repeated sourceKey is refused; lines with no key are not compared", () => {
+  const problems = checkCharges([
+    { item: "PARTS : A", qty: 1, rate: 1, sourceKey: "mp:1" },
+    { item: "PARTS : B", qty: 1, rate: 1, sourceKey: null },
+    { item: "PARTS : C", qty: 1, rate: 1 },
+    { item: "PARTS : A", qty: 1, rate: 1, sourceKey: "mp:1" },
+    { item: "PARTS : D", qty: 1, rate: 1, sourceKey: "  " },
+    { item: "PARTS : E", qty: 1, rate: 1, sourceKey: "pmkit:32:acct:1:EV1" },
+  ]);
+  assert.deepEqual(problems, [{ index: 3, message: "This line is already on this bill." }]);
+});
+
+import { readFileSync, readdirSync } from "node:fs";
+import { register } from "node:module";
+import { PGlite } from "@electric-sql/pglite";
+
+await register("./node-resolve-hook.mjs", import.meta.url);
+process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
+const { loadTicketCharges, replaceTicketChargesSql, writeTicketCharges } = await import("../src/lib/ops/charges-api.ts");
+
+const pg = new PGlite();
+const dir = new URL("../migrations/", import.meta.url);
+for (const name of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) {
+  await pg.exec(readFileSync(new URL(name, dir), "utf8"));
+}
+const sql = { query: async (text, params) => (await pg.query(text, params)).rows };
+
+async function openTicket() {
+  const row = await pg.query(
+    "insert into service_jobs (kind, call_id, customer, status) values ('service', $1, 'Cafe', 'Open') returning id",
+    [`SC-CHG-${Math.random().toString(36).slice(2)}`],
+  );
+  return Number(row.rows[0].id);
+}
+
+test("replaceTicketChargesSql twice with the same keyed lines keeps both keys", async () => {
+  const jobId = await openTicket();
+  const run = () =>
+    sql.query(replaceTicketChargesSql(), [
+      jobId,
+      ["PARTS : A", "PARTS : B"],
+      ["Gasket", "Valve"],
+      [2, 1],
+      [10, 5],
+      ["part", "part"],
+      true,
+      [],
+      null,
+      null,
+      null,
+      ["mp:9", "pmkit:4:acct:1:K1"],
+    ]);
+  await run();
+  await run();
+  const rows = await pg.query("select item, source_key from ticket_charges where job_id = $1 order by sort, id", [jobId]);
+  assert.equal(rows.rows.length, 2);
+  assert.deepEqual(
+    rows.rows.map((r) => r.source_key),
+    ["mp:9", "pmkit:4:acct:1:K1"],
+  );
+});
+
+test("writeTicketCharges then loadTicketCharges keeps sourceKeys, and saving them again keeps them", async () => {
+  const jobId = await openTicket();
+  const lines = [
+    { item: "PARTS : EVER104120", description: "Gasket", qty: 2, rate: 10, sourceKey: "mp:1" },
+    { item: "PARTS : EVER100200", description: "Valve", qty: 1, rate: 5, sourceKey: "pmkit:32:piece:linea pb#1:EV1" },
+  ];
+  await writeTicketCharges(sql, jobId, "user", { lines });
+  const loaded = await loadTicketCharges(sql, jobId);
+  assert.deepEqual(
+    loaded.lines.map((l) => l.sourceKey),
+    ["mp:1", "pmkit:32:piece:linea pb#1:EV1"],
+  );
+  await writeTicketCharges(sql, jobId, "user", {
+    lines: loaded.lines.map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, sourceKey: l.sourceKey })),
+    lineIds: loaded.lines.map((l) => l.id),
+  });
+  const again = await loadTicketCharges(sql, jobId);
+  assert.equal(again.lines.length, 2);
+  assert.deepEqual(
+    again.lines.map((l) => l.sourceKey),
+    ["mp:1", "pmkit:32:piece:linea pb#1:EV1"],
+  );
+});
+

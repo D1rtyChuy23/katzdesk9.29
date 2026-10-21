@@ -66,6 +66,8 @@ import { MachineFields } from "./machine-fields";
 import { InstallCustomerField, InstallWorkOrders, MergeInstall } from "./install-project-fields";
 import { InstallTicket } from "./install-ticket";
 import { OpenLink } from "./open-link";
+import { PmStackHeader } from "./pm-stack-panel";
+import { isPmStack, pmStackQuery } from "./pm-stack-shared";
 import { CustomerAddress } from "./customer-address";
 import { SerialNoticeBanner } from "./serial-notice";
 import { AssignedLine, ModuleReturnActions } from "./module-assign";
@@ -200,6 +202,15 @@ export function PmSheet({
     queryFn: () => listComments({ data: { entityType: "pm", entityId: pm!.id } }),
     enabled: pm != null,
   });
+  const stack = useQuery({
+    ...pmStackQuery(pm?.id ?? 0),
+    enabled: pm != null,
+  });
+  const stackedOn = isPmStack(stack.data) ? stack.data.stackedOn : null;
+  // Locked while stacked and the names match. A Corrigo split leaves the customer editable,
+  // unless the sheet was already told to lock it.
+  const customersDiffer = !!stackedOn && !stackedOn.customerMatches;
+  const lockPmCustomer = lockCustomer || (!customersDiffer && !!stackedOn);
   const tabCount = (id: PmTab): number | null => (id === "ping" ? comments.data?.length || null : null);
   return (
     <Sheet
@@ -222,6 +233,13 @@ export function PmSheet({
                 <StatusBadge status={pm.status} />
                 <FlagBadge flag={pm.flag} />
               </div>
+              <PmStackHeader
+                pmId={pm.id}
+                onSaveFirst={() => {
+                  skipToast.current = true;
+                  formRef.current?.requestSubmit();
+                }}
+              />
             </SheetHeader>
             <SheetBody>
               <SheetTabs
@@ -254,7 +272,7 @@ export function PmSheet({
                       });
                     }}
                   >
-                    <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockCustomer} />
+                    <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockPmCustomer} />
                     <BoundEquipment recordKey={pm.id} defaultValue={pm.equipment ?? ""} />
                     <SpecOutletLine model={pm.equipment} />
                     <div>
@@ -286,7 +304,7 @@ export function PmSheet({
                       <Label>Tech</Label>
                       <TechSelect name="technician" defaultValue={pm.technician ?? ""} />
                     </div>
-                    <Field label="WO #" name="wo" defaultValue={pm.wo ?? ""} />
+                    <Field label="WO #" name="wo" defaultValue={pm.wo ?? ""} placeholder={stackedOn?.wo?.trim() || undefined} />
                     <Field label="Date completed" name="completedAt" type="date" defaultValue={pm.completedAt ?? ""} />
                     <div className="sm:col-span-2">
                       <Label htmlFor={`pm-work-${pm.id}`}>Description of work</Label>

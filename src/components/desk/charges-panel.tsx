@@ -14,19 +14,21 @@ import {
   type ChargeLine,
   type PartRef,
 } from "@/lib/ops/charges";
+import { tripDraftWarning } from "@/lib/ops/pm-bill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { PartThumb } from "./part-thumb";
+import { AddPmParts } from "./pm-bill-add";
 import { applyDiscount, cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
 import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-type DraftLine = { item: string; description: string; qty: string; rate: string; part: PartRef | null };
+type DraftLine = { item: string; description: string; qty: string; rate: string; part: PartRef | null; sourceKey?: string | null };
 
 function toDraft(l: ChargeLine & { part: PartRef | null }): DraftLine {
-  return { item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), part: l.part };
+  return { item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), part: l.part, sourceKey: l.sourceKey ?? null };
 }
 
 /** Trip and labor are services: no photo slot. Parts and equipment get one. */
@@ -42,6 +44,7 @@ function draftLines(lines: DraftLine[]): ChargeLine[] {
     qty: Number(l.qty) || 0,
     rate: Number(l.rate) || 0,
     kind: kindForItem(l.item),
+    sourceKey: l.sourceKey ?? null,
   }));
 }
 
@@ -76,6 +79,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     void qc.invalidateQueries({ queryKey: ["invoice"] });
     void qc.invalidateQueries({ queryKey: ["activity"] });
     void qc.invalidateQueries({ queryKey: ["jobs"] });
+    void qc.invalidateQueries({ queryKey: ["pm-bill", jobId] });
     toast.success(message);
   };
   const save = useMutation({
@@ -193,18 +197,33 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
       {!billed ? (
         <div className="mt-3 space-y-3">
           <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" variant="outline" onClick={() => add({ item: TRIP_ITEM, description: "Trip Charge for Service Call", qty: "1", rate: "150.00", part: null })}>
+            <Button type="button" size="sm" variant="outline" onClick={() => add({ item: TRIP_ITEM, description: "Trip Charge for Service Call", qty: "1", rate: "150.00", part: null, sourceKey: null })}>
               <Plus className="size-4" />
               Trip Charge
             </Button>
-            <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", part: null })}>
+            <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", part: null, sourceKey: null })}>
               <Plus className="size-4" />
               Labor Hour
             </Button>
+            <AddPmParts
+              jobId={jobId}
+              draftKeys={lines.flatMap((l) => (l.sourceKey ? [l.sourceKey] : []))}
+              draftCount={lines.length}
+              onAdd={(rows) => {
+                for (const row of rows) {
+                  add({ item: row.item, description: row.description, qty: String(row.qty), rate: row.rate.toFixed(2), part: row.part, sourceKey: row.sourceKey });
+                }
+              }}
+            />
           </div>
+          {tripDraftWarning(lines.filter((l) => kindForItem(l.item) === "trip").length) ? (
+            <p className="text-xs text-warning" data-testid="trip-warning">
+              {tripDraftWarning(lines.filter((l) => kindForItem(l.item) === "trip").length)}
+            </p>
+          ) : null}
           <PartPicker
             onPick={(it) =>
-              add({ item: it.item, description: it.description ?? "", qty: "1", rate: it.rate != null ? it.rate.toFixed(2) : "0.00", part: it.part ?? null })
+              add({ item: it.item, description: it.description ?? "", qty: "1", rate: it.rate != null ? it.rate.toFixed(2) : "0.00", part: it.part ?? null, sourceKey: null })
             }
           />
         </div>

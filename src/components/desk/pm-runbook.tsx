@@ -15,6 +15,7 @@ import {
   setRunbookCheck,
   setRunbookUnitConfig,
   setRunbookUnitOptions,
+  type PmMachinePart,
   type RunbookUnit,
 } from "@/lib/ops/pm-runbook-api";
 import { listModules } from "@/lib/ops/api";
@@ -27,6 +28,7 @@ import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
 import type { ModuleRow } from "@/lib/ops/types";
 import { ModuleRunbook } from "@/components/desk/module-runbook";
+import { OtherParts } from "./pm-machine-parts";
 import { useCopy } from "./spec-sheet";
 
 function Seg({
@@ -247,14 +249,20 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const [active, setActive] = useState<string | null>(null);
   const { copy, copied, dialog } = useCopy();
   const units = useMemo(() => q.data?.units ?? [], [q.data]);
+  const machines = useMemo(() => q.data?.machines ?? [], [q.data]);
+  const parts = useMemo(() => q.data?.parts ?? [], [q.data]);
   const canWrite = !!q.data?.canWrite;
   useEffect(() => {
-    if (!units.length) return;
-    if (!active || !units.some((u) => u.unitKey === active)) setActive(units[0].unitKey);
-  }, [units, active]);
-  const unit: RunbookUnit | undefined = units.find((u) => u.unitKey === active) ?? units[0];
+    if (!machines.length) return;
+    if (!active || !machines.some((m) => m.key === active)) setActive(machines[0].key);
+  }, [machines, active]);
+  const machine = machines.find((m) => m.key === active) ?? machines[0];
+  const unit: RunbookUnit | undefined = machine ? units.find((u) => u.pieceKey === machine.pieceKey) : undefined;
   const rb = unit ? runbookById(unit.runbookId) : undefined;
-  const refresh = () => qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+    void qc.invalidateQueries({ queryKey: ["pm-bill"] });
+  };
   const onError = (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save");
 
   const setConfig = useMutation({
@@ -340,7 +348,140 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   );
   const priceSummary = prices ? summarizePrices(prices) : null;
 
-  if (q.isLoading || !units.length || !unit || !rb || !view) return null;
+  if (q.isLoading) return null;
+  if (!machines.length || !machine) {
+    if (!parts.length) return null;
+    return (
+      <OtherParts
+        pmId={pmId}
+        pieceKey=""
+        parts={[]}
+        orphans={parts}
+        onlyOrphans
+        locked={q.data?.partsLocked ?? null}
+        canWrite={canWrite}
+        completed={!!q.data?.completed}
+      />
+    );
+  }
+  const mine = parts.filter((p) => p.pieceKey === machine.pieceKey);
+  const knownPieces = new Set(machines.map((m) => m.pieceKey));
+  const orphans: PmMachinePart[] = machines[machines.length - 1]?.key === machine.key ? parts.filter((p) => !knownPieces.has(p.pieceKey)) : [];
+  const partsBlock = (
+    <OtherParts
+      pmId={pmId}
+      pieceKey={machine.pieceKey}
+      parts={mine}
+      orphans={orphans}
+      locked={q.data?.partsLocked ?? null}
+      canWrite={canWrite}
+      completed={!!q.data?.completed}
+    />
+  );
+  const tabs =
+    machines.length > 1 ? (
+      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Units on this PM">
+        {machines.map((m, i) => (
+          <button
+            key={m.key}
+            type="button"
+            role="tab"
+            aria-selected={m.key === machine.key}
+            onClick={() => setActive(m.key)}
+            className={cn(
+              "max-w-full truncate rounded-md border px-3 py-1.5 text-sm",
+              m.key === machine.key ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
+            )}
+          >
+            {i + 1}. {m.serial ? `SN ${m.serial}` : m.piece}
+          </button>
+        ))}
+      </div>
+    ) : null;
+
+  if (!unit || !rb || !view) {
+    return (
+      <section className="grid gap-4 border-b border-border p-5" aria-label="Runbook">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="font-heading text-base font-semibold">Runbook</h3>
+          <span className="text-xs text-muted-foreground">{canWrite ? "No runbook for this machine" : "No runbook for this machine · view only"}</span>
+        </div>
+        {tabs}
+        <div className="text-sm text-muted-foreground">
+          {machine.piece}
+          {machine.serial ? ` · SN ${machine.serial}` : ""}
+        </div>
+        {!machine.serial && canWrite ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="w-fit"
+            onClick={() => {
+              setChoice(machine.accountId != null ? String(machine.accountId) : "new");
+              setSerial("");
+              setInstallDate("");
+              setLogging(true);
+            }}
+          >
+            Log the asset
+          </Button>
+        ) : null}
+        {machine.earlierParts.length ? (
+          <ul className="grid gap-1 text-xs text-muted-foreground">
+            {machine.earlierParts.map((h, i) => (
+              <li key={i}>
+                {new Date(h.at).toLocaleDateString()} · {h.who ?? "Someone"}: {h.detail}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {partsBlock}
+        <Dialog open={logging} onOpenChange={(o) => !o && !logAsset.isPending && setLogging(false)}>
+          <DialogContent data-testid="log-asset">
+            <DialogTitle>Log the asset</DialogTitle>
+            <DialogDescription>{machine.piece}. Serial is required. Install date is optional.</DialogDescription>
+            <form
+              className="mt-3 grid gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                logAsset.mutate({ pmId, pieceKey: machine.pieceKey, accountId: choice === "new" ? null : Number(choice), serial, installDate: installDate || null });
+              }}
+            >
+              <label className="grid gap-1 text-sm">
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Account unit</span>
+                <select className="h-10 w-full rounded-md border border-border bg-background px-2" value={choice} onChange={(e) => setChoice(e.target.value)}>
+                  <option value="new">Add a new unit</option>
+                  {(q.data?.accountUnits ?? []).map((a) => {
+                    const taken = machines.some((m) => m.accountId === a.id && m.pieceKey !== machine.pieceKey);
+                    return (
+                      <option key={a.id} value={a.id} disabled={taken}>
+                        {a.name}
+                        {a.serial ? ` · SN ${a.serial}` : " · no serial"}
+                        {taken ? " · already on this PM" : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+              <label className="grid gap-1 text-sm">
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Serial</span>
+                <Input value={serial} onChange={(e) => setSerial(e.target.value)} required={choice === "new"} autoComplete="off" />
+              </label>
+              <label className="grid gap-1 text-sm">
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Install date</span>
+                <Input type="date" value={installDate} onChange={(e) => setInstallDate(e.target.value)} />
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" disabled={logAsset.isPending}>{logAsset.isPending ? "Saving…" : "Log the asset"}</Button>
+                <Button type="button" variant="outline" disabled={logAsset.isPending} onClick={() => setLogging(false)}>Cancel</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </section>
+    );
+  }
   const def = rb.def;
   const c = unit.config;
   const pmDone = !!q.data?.completed;
@@ -390,25 +531,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </span>
       </div>
 
-      {units.length > 1 ? (
-        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Units on this PM">
-          {units.map((u, i) => (
-            <button
-              key={u.unitKey}
-              type="button"
-              role="tab"
-              aria-selected={u.unitKey === unit.unitKey}
-              onClick={() => setActive(u.unitKey)}
-              className={cn(
-                "max-w-full truncate rounded-md border px-3 py-1.5 text-sm",
-                u.unitKey === unit.unitKey ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
-              )}
-            >
-              {i + 1}. {u.serial ? `SN ${u.serial}` : u.piece}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      {tabs}
 
       <div className="text-sm text-muted-foreground">
         {unit.piece}
@@ -665,6 +788,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </div>
       ) : null}
 
+      {partsBlock}
+
       <div className="grid gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h4 className="text-sm font-semibold">Service steps</h4>
@@ -798,7 +923,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
               >
                 <option value="new">Add a new unit</option>
                 {(q.data?.accountUnits ?? []).map((a) => {
-                  const taken = units.some((u) => u.accountId === a.id && u.pieceKey !== unit.pieceKey);
+                  const taken = machines.some((m) => m.accountId === a.id && m.pieceKey !== unit.pieceKey);
                   return (
                     <option key={a.id} value={a.id} disabled={taken}>
                       {a.name}

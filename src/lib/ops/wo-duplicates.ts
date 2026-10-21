@@ -1,4 +1,5 @@
 import { customersCompatible, isWalkIn, woCanonical, woMatchKey } from "./corrigo";
+import { normalizeCustomerKey } from "./customer-key";
 
 type SqlLike = {
   query<T = Record<string, unknown>>(text: string, params?: unknown[]): Promise<T[]>;
@@ -122,6 +123,8 @@ export type MergeMoney = {
   discountValue: number | null;
   /** YYYY-MM-DD, or null when the ticket is not completed. */
   completedAt: string | null;
+  /** PMs stacked on this ticket. Omitted by older callers; treated as none. */
+  stackedPms?: { id: number; customer: string | null }[];
 };
 
 function salesOrder(nsSo: string | null): string | null {
@@ -176,11 +179,16 @@ function completedRefusal(keeper: MergeMoney, extra: MergeMoney): string | null 
 /**
  * Why these two tickets must not be folded together, or null when the money can move.
  * Checked again inside mergeTicketsSql so a Sales Order saved in between still stops the write.
+ * `mergedCustomer` is preferCustomer of the two tickets ($4). Existing callers may omit it.
  */
-export function mergeMoneyRefusal(keeper: MergeMoney, extra: MergeMoney): string | null {
+export function mergeMoneyRefusal(keeper: MergeMoney, extra: MergeMoney, mergedCustomer?: string | null): string | null {
   const extraSo = salesOrder(extra.nsSo);
   if (extraSo) return `Ticket #${extra.id} is billed on ${extraSo}. Merge the other ticket into it instead.`;
   const keeperSo = salesOrder(keeper.nsSo);
+  const extraPms = [...(extra.stackedPms ?? [])].sort((a, b) => a.id - b.id);
+  if (keeperSo && extraPms[0]) {
+    return `Ticket #${keeper.id} is billed on ${keeperSo}. Unstack PM #${extraPms[0].id} from #${extra.id} before merging.`;
+  }
   if (keeperSo && extra.lines > 0) {
     return `Ticket #${keeper.id} is billed on ${keeperSo}. Clear its Sales Order before merging charges into it.`;
   }
@@ -190,6 +198,15 @@ export function mergeMoneyRefusal(keeper: MergeMoney, extra: MergeMoney): string
   const completed = completedRefusal(keeper, extra);
   if (completed) return completed;
   if (keeper.lines + extra.lines > 200) return "Together these tickets would have more than 200 charge lines.";
+  const all = [...(keeper.stackedPms ?? []), ...extraPms];
+  if (all.length > 10) return "Together these tickets carry more than 10 PMs. Unstack some first.";
+  const mergedKey = normalizeCustomerKey(mergedCustomer);
+  const mismatch = [...all].sort((a, b) => a.id - b.id).find((p) => normalizeCustomerKey(p.customer) !== mergedKey);
+  if (mismatch) {
+    const name = (mismatch.customer ?? "").trim() || "another customer";
+    const mergedName = String(mergedCustomer ?? "").trim() || "the merged customer";
+    return `PM #${mismatch.id} is for ${name}, not ${mergedName}. Unstack it before merging.`;
+  }
   return null;
 }
 
@@ -239,9 +256,17 @@ async function loadMergeMoney(
   const keeper = rows.find((row) => Number(row.id) === keeperId);
   const extra = rows.find((row) => Number(row.id) === extraId);
   if (!keeper || !extra) return null;
+  const pmRows = await sql.query<{ id: number; stacked_job_id: number; customer: string | null }>(
+    `select id, stacked_job_id, customer from pm_jobs where stacked_job_id = any($1::int[]) order by id`,
+    [[keeperId, extraId]],
+  );
+  const stacked = (jobId: number) =>
+    pmRows
+      .filter((p) => Number(p.stacked_job_id) === jobId)
+      .map((p) => ({ id: Number(p.id), customer: p.customer }));
   return {
-    keeper: toMoney(keeper),
-    extra: toMoney(extra),
+    keeper: { ...toMoney(keeper), stackedPms: stacked(keeperId) },
+    extra: { ...toMoney(extra), stackedPms: stacked(extraId) },
     keeperUpdated: keeper.updated ?? "",
     extraUpdated: extra.updated ?? "",
   };
@@ -324,6 +349,17 @@ export function mergeTicketsSql(): string {
        and keeper_updated = $18
        and extra_updated = $19
        and keeper_lines + extra_lines <= 200
+       and not (
+         nullif(btrim(keeper_so), '') is not null
+         and exists (select 1 from pm_jobs p where p.stacked_job_id = extra_id)
+       )
+       and (select count(*)::int from pm_jobs p where p.stacked_job_id in (keeper_id, extra_id)) <= 10
+       and not exists (
+         select 1 from pm_jobs p
+          where p.stacked_job_id in (keeper_id, extra_id)
+            and regexp_replace(lower(coalesce(p.customer, '')), '[^a-z0-9]+', '', 'g')
+                is distinct from regexp_replace(lower(coalesce($4::text, '')), '[^a-z0-9]+', '', 'g')
+       )
   ), chg as (
     update ticket_charges c
        set job_id = s.keeper_id,
@@ -384,6 +420,18 @@ export function mergeTicketsSql(): string {
        and i.entity_type in ('service', 'tlc')
        and i.customer is distinct from $4
     returning i.id
+  ), pms as (
+    update pm_jobs p
+       set stacked_job_id = g.keeper_id, updated_at = now()
+      from g
+     where p.stacked_job_id = g.extra_id
+    returning p.id, g.keeper_id, g.extra_id
+  ), pm_act as (
+    insert into activity (entity_type, entity_id, actor_name, action, detail)
+    select 'pm', pms.id, $3, 'stacked',
+           'Moved to ticket #' || pms.keeper_id::text || '; ticket #' || pms.extra_id::text || ' was merged into it.'
+      from pms
+    returning id
   ), job as (
     update service_jobs k
        set customer = $4,
@@ -473,7 +521,9 @@ export function mergeTicketsSql(): string {
          (select count(*)::int from pings) as notifications,
          (select count(*)::int from ast) as assets,
          (select count(*)::int from dup) as duplicates,
-         (select count(*)::int from merged) as noted
+         (select count(*)::int from merged) as noted,
+         (select count(*)::int from pms) as pms_moved,
+         (select count(*)::int from pm_act) as pms_noted
     from g`;
 }
 
@@ -496,7 +546,8 @@ export async function mergeServiceJobs(
 
   const money = await loadMergeMoney(sql, keeper.id, extra.id);
   if (!money) return null;
-  const reason = mergeMoneyRefusal(money.keeper, money.extra);
+  const mergedCustomer = preferCustomer(keeper.customer, extra.customer);
+  const reason = mergeMoneyRefusal(money.keeper, money.extra, mergedCustomer);
   if (reason) return { refused: reason };
 
   const next = mergeJobFields(keeper, extra);
@@ -525,7 +576,9 @@ export async function mergeServiceJobs(
     const againExtra = await loadJob(sql, extra.id);
     if (againExtra?.duplicate_of) return { refused: `Ticket #${extra.id} was already merged into #${againExtra.duplicate_of}.` };
     const again = await loadMergeMoney(sql, keeper.id, extra.id);
-    const raced = again ? mergeMoneyRefusal(again.keeper, again.extra) : null;
+    const raced = again
+      ? mergeMoneyRefusal(again.keeper, again.extra, preferCustomer(keeper.customer, againExtra?.customer ?? extra.customer))
+      : null;
     return { refused: raced ?? CHANGED_WHILE_MERGING };
   }
   return { keeperId: keeper.id, extraId: extra.id };
