@@ -178,7 +178,9 @@ async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; ca
   );
   const installs = rows.map((r): OpenInstall => {
     const { machines, typed } = installMachines(r, catalog);
-    const pieces = typed ? String(r.equipment ?? "").split(/\r?\n/) : machines.map((m) => m.equipment);
+    // Each saved machine row names its machine on its own; a row that reads as nothing is an unknown unit.
+    const each = machines.map((m) => exactMachines([m.equipment], catalog));
+    const exact = typed ? exactMachines([r.equipment ?? ""], catalog) : each.every(Boolean) ? (each as string[][]).flat() : null;
     return {
       board: "install",
       id: r.id,
@@ -187,7 +189,7 @@ async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; ca
       wo: null,
       completedAt: r.completed_at,
       // Read exactly, so "2 x Bunn TB3" counts two and a loose or guessed name ("Cameo", "TB3 / ITCB") counts none.
-      machines: exactMachines(pieces, catalog) ?? [],
+      machines: exact ?? [],
     };
   });
   return { installs, catalog };
@@ -370,7 +372,7 @@ const applyRow = z.object({
   workDone: z.string().nullable(),
   issue: z.string().nullable(),
   wrapRepeat: z.boolean().optional(),
-  shared: z.string().max(2000).nullable().optional(),
+  shared: z.string().nullable().optional(),
   byEquipment: z.boolean().optional(),
   conflictIds: z
     .array(z.object({ board: z.enum(["service", "tlc", "pm", "install"]), id: z.number() }))

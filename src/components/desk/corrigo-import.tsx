@@ -307,8 +307,8 @@ function PreviewBody({
       </ul>
       {preview.wrapCount ? (
         <p className="mt-3 text-xs text-muted-foreground">
-          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 —
-          those stay on For review so nobody merges two different jobs
+          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 or share it with
+          another customer&apos;s ticket — those stay on For review so nobody merges two different jobs
           {preview.conflictCount
             ? ` · ${preview.conflictCount} already on more than one ticket`
             : ""}
@@ -432,7 +432,7 @@ function PreviewBody({
                     ) : null}
                     {r.wrapRepeat ? (
                       <span className="mt-0.5 block text-[11px] font-normal tracking-wide text-warning uppercase">
-                        Repeated after 9999
+                        {r.shared ? "Number on another ticket too" : "Repeated after 9999"}
                       </span>
                     ) : null}
                     {r.conflictIds?.length ? (
@@ -728,7 +728,7 @@ export function CorrigoReviewList({
         <div>
           <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For Review</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Open work from the last Corrigo file, every ticket it created (closed ones too), ST#s that reused a number after WO-9999, and tickets that could not be merged.
+            Open work from the last Corrigo file, every ticket it created (closed ones too), ST#s that reused a number after WO-9999 or share it with another customer&apos;s ticket, and tickets that could not be merged.
           </p>
         </div>
         <Button type="button" size="sm" variant="outline" onClick={onDismiss}>

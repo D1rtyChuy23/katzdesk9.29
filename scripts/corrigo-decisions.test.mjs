@@ -749,6 +749,9 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
     "Mazzer Robur S Electronic",
   ]);
   assert.deepEqual(exact('Bunn ITCB-DV, 29" w/Flip Tray'), ['Bunn ITCB-DV, 29" w/Flip Tray']);
+  assert.deepEqual(exact("Bunn TB3 SN12345"), ["Bunn TB3"]);
+  assert.deepEqual(exact("Bunn TB3\nS/N TB3001"), ["Bunn TB3"]);
+  assert.deepEqual(exact("2 x Bunn TB3 SN: A1\nSN: A2"), ["Bunn TB3", "Bunn TB3"]);
   assert.deepEqual(exact("Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed"), [
     "Blendtec Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed",
   ]);
@@ -785,6 +788,16 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
     "Bunn TB3\nSnapchill-2",
     "Bunn TB3\nSN: TB3001\nSN: TB3002",
     "Bunn ITCB-DV, w/Flip Tray",
+    // At most one serial per unit of the machine line it follows or ends.
+    "Bunn TB3 SN: TB3001\nSN: TB3002",
+    "Bunn TB3 SN: TB3001; SN: TB3002",
+    "2 x Bunn TB3 SN: A1\nSN: A2\nSN: A3",
+    "Bunn TB3\nSN: TB3001\nSN: TB3002\nMazzer Mini Electronic",
+    "Bunn TB3 SN: TB3001\nMazzer Mini Electronic\nSN: 2608789\nSN: 2608790",
+    "SN: 123\nBunn TB3",
+    "Bunn TB3 Snapchill-2",
+    "Bunn TB3 SNX-1000",
+    "Bunn TB3 Serializer2",
   ]) {
     assert.equal(exact(text), null, text);
   }
@@ -814,6 +827,7 @@ test("install: a loosely written install never matches, by the problem descripti
     i: await openInstall(sql, "Cafe India", { equipment: "Eversys Cameo c'2s" }),
     j: await openInstall(sql, "Cafe Juliet", { equipment: "La Marzocco Linea Mini" }),
     k: await openInstall(sql, "Cafe Kilo", { equipment: "Mazzer Mini Electronic SN:2608789, Mazzer Robur S Electronic SN:2601514" }),
+    l: await openInstall(sql, "Cafe Lima", { machines: ["Bunn TB3 SN: TB3001", "S/N TB3002"] }),
   };
   const { records } = parseCorrigoMatrix([
     ["ST#", "Operational Status", "Customer Name", "P.O. #", "Problem Description", "Equipment"],
@@ -830,6 +844,8 @@ test("install: a loosely written install never matches, by the problem descripti
     ["0690", "Work Started", "Cafe Juliet", "Install", "", "Linea Mini w/ Mazzer Mini"],
     ["0691", "Work Started", "Cafe Kilo", "Install", "Install Mazzer Mini Electronic", ""],
     ["0692", "Work Started", "Cafe Kilo", "Install", "", "Mazzer Robur S Electronic, Mazzer Mini Electronic"],
+    // A saved machine row that is only a serial is a unit with no name.
+    ["0693", "Work Started", "Cafe Lima", "Install", "", "Bunn TB3"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
   const unread = (id) => `install #${id}'s equipment isn't written as catalog names`;
@@ -848,9 +864,10 @@ test("install: a loosely written install never matches, by the problem descripti
       ["WO-0690", "create", null, "the Equipment column isn't written as catalog names"],
       ["WO-0691", "create", null, `the problem description doesn't name install #${ids.k}'s equipment`],
       ["WO-0692", "update", ids.k, `install #${ids.k} matched by account and equipment`],
+      ["WO-0693", "create", null, unread(ids.l)],
     ],
   );
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual([res.updated, res.created], [2, 10]);
+  assert.deepEqual([res.updated, res.created], [2, 11]);
   for (const id of [ids.a, ids.b, ids.c, ids.d, ids.e]) assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, null);
 });

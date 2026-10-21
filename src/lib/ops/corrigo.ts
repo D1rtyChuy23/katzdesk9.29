@@ -650,8 +650,9 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
 const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
 /** A serial on its own line ("SN: 4471", "S/N 4471", "Serial # 4471"), or one ending a machine's line. */
 const SERIAL = String.raw`(?:s\/?n|serial(?:\s*(?:#|no\.?|number))?)`;
-const SERIAL_LINE = new RegExp(String.raw`^${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))[a-z0-9-]*\d[a-z0-9-]*$`, "i");
-const SERIAL_TAIL = new RegExp(String.raw`\s+${SERIAL}\s*[:#]?\s*[a-z0-9-]*\d[a-z0-9-]*$`, "i");
+const SERIAL_NUMBER = String.raw`${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))[a-z0-9-]*\d[a-z0-9-]*$`;
+const SERIAL_LINE = new RegExp(`^${SERIAL_NUMBER}`, "i");
+const SERIAL_TAIL = new RegExp(String.raw`\s+${SERIAL_NUMBER}`, "i");
 
 /** Words a problem description may put before or after its machine's name ("Install new …", "… set up"). */
 const FILLER = new Set([
@@ -699,31 +700,34 @@ function spelledMachines(text: string, catalog: string[]): string[] | null {
   return model ? Array<string>(Number(qty)).fill(model) : null;
 }
 
-/** One machine's line ("Bunn TB3 SN: 4471", "2 x Bunn TB3") read exactly, or null. */
-const lineMachines = (line: string, catalog: string[]) => spelledMachines(line.replace(SERIAL_TAIL, "").trim(), catalog);
-
 /**
  * Machines read exactly, one entry per unit: each line (or ; or , between machines) is exactly one catalog spelling
- * with its serial and voltage aside. null when any one isn't, or there are more serial lines than units, so a
- * guessed model or count never matches.
+ * with its voltage aside. A serial may end a machine's line or follow it on its own line, at most one per unit of
+ * that line. null when anything else is there, so a guessed model or count never matches.
  */
 export function exactMachines(pieces: string[], catalog: string[]): string[] | null {
   const out: string[] = [];
-  let serials = 0;
+  let serialsLeft = 0;
   for (const piece of pieces.flatMap((p) => p.split(/\r?\n|;/))) {
     const line = piece.trim();
     if (!line) continue;
     if (SERIAL_LINE.test(line)) {
-      serials += 1;
+      if (serialsLeft-- <= 0) return null;
       continue;
     }
+    const read = (texts: string[]) => {
+      const each = texts.map((t) => spelledMachines(t.replace(SERIAL_TAIL, "").trim(), catalog));
+      if (!each.every(Boolean)) return null;
+      return { units: each.flat() as string[], tails: texts.filter((t) => SERIAL_TAIL.test(t)).length };
+    };
     // Some catalog names have a comma ('Bunn ITCB-DV, 29" w/Flip Tray'); otherwise a comma is between machines.
-    const parts = line.split(",").map((p) => lineMachines(p, catalog));
-    const named = lineMachines(line, catalog) ?? (parts.length > 1 && parts.every(Boolean) ? parts.flat() : null);
-    if (!named) return null;
-    out.push(...(named as string[]));
+    const got = read([line]) ?? (line.includes(",") ? read(line.split(",")) : null);
+    if (!got) return null;
+    serialsLeft = got.units.length - got.tails;
+    if (serialsLeft < 0) return null;
+    out.push(...got.units);
   }
-  return out.length && serials <= out.length ? out : null;
+  return out.length ? out : null;
 }
 
 /**
