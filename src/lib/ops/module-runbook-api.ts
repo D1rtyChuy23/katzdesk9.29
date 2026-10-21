@@ -41,7 +41,7 @@ import {
 } from "@/lib/ops/pm-runbook";
 import { catalogKeys, kitKey, pickCatalog, prefixForManufacturer } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig } from "@/lib/ops/pm-runbook-schema";
-import { runbookForPlatform } from "@/lib/ops/runbooks";
+import { runbookForModule } from "@/lib/ops/runbooks";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -208,10 +208,10 @@ async function viewOf(sql: Sql, data: z.infer<typeof scope>, userId: string): Pr
     runbookId: null,
   };
   if (!mod) return empty;
-  const rb = runbookForPlatform(mod.platform);
-  if (!rb || !moduleRunbookGroups(rb.def, mod.module_type)) return empty;
   if (data.context === "pm" && !data.pmId) return empty;
   const pmUnit = data.context === "pm" && data.pmId ? await unitOnPm(sqlReady, data.pmId, mod.assigned_unit_id) : null;
+  const rb = runbookForModule(mod.platform, pmUnit?.runbookId);
+  if (!rb || !moduleRunbookGroups(rb.def, mod.module_type)) return empty;
   if (data.context === "pm" && !pmUnit) return { ...empty, notice: MODULE_NOT_ON_PM };
   const service = await findService(sqlReady, data.moduleId, data.context, data.pmId ?? null);
   const config = await configFor(sqlReady, rb.def, mod.module_type!, service, data.context, data.pmId ?? null, pmUnit);
@@ -302,11 +302,12 @@ export const saveModuleRunbook = createServerFn({ method: "POST" })
         [data.moduleId],
       )
     )[0];
-    const rb = mod ? runbookForPlatform(mod.platform) : null;
+    const pmUnit = mod && data.context === "pm" ? await unitOnPm(sql, data.pmId!, mod.assigned_unit_id) : null;
+    const rb = mod ? runbookForModule(mod.platform, pmUnit?.runbookId) : null;
     if (!mod || !rb || !moduleRunbookGroups(rb.def, mod.module_type)) throw new Error("No runbook for this module type yet.");
     if (data.context === "pm") {
       if (data.interval || data.optionKey || data.optionValue) throw new Error("Interval and options come from the PM.");
-      const unit = await unitOnPm(sql, data.pmId!, mod.assigned_unit_id);
+      const unit = pmUnit;
       if (!unit) throw new Error(MODULE_NOT_ON_PM);
       const existing = await findService(sql, data.moduleId, data.context, data.pmId ?? null);
       if (existing?.completed_at && !data.again) throw new Error("This service is already completed.");
@@ -405,13 +406,11 @@ export const completeModuleRunbook = createServerFn({ method: "POST" })
         [data.moduleId],
       )
     )[0];
-    const rb = mod ? runbookForPlatform(mod.platform) : null;
+    if (data.context === "pm" && !data.pmId) throw new Error("This service needs a PM.");
+    const pmUnit = mod && data.context === "pm" ? await unitOnPm(sql, data.pmId!, mod.assigned_unit_id) : null;
+    const rb = mod ? runbookForModule(mod.platform, pmUnit?.runbookId) : null;
     if (!mod || !rb || !moduleRunbookGroups(rb.def, mod.module_type)) throw new Error("No runbook for this module type yet.");
-    if (data.context === "pm") {
-      if (!data.pmId) throw new Error("This service needs a PM.");
-      const unit = await unitOnPm(sql, data.pmId, mod.assigned_unit_id);
-      if (!unit) throw new Error(MODULE_NOT_ON_PM);
-    }
+    if (data.context === "pm" && !pmUnit) throw new Error(MODULE_NOT_ON_PM);
     const existing = await findService(sql, data.moduleId, data.context, data.pmId ?? null);
     if (existing?.completed_at) throw new Error("This service is already completed.");
     const service = existing ?? (await ensureService(sql, data.moduleId, data.context, data.pmId ?? null, rb.def.id, me.name));

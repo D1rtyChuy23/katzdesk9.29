@@ -11,10 +11,12 @@ export function isEversysMachine(model: string | null | undefined): boolean {
 }
 
 /** Map a machine model to the module platform family used on the Modules page. */
-export function eversysFamily(model: string | null | undefined): "Cameo" | "Enigma / e'Line" | "Legacy" | "Shotmaster" | null {
+export function eversysFamily(model: string | null | undefined): "Cameo" | "Enigma / e'Line" | "e'Line" | "Legacy" | "Shotmaster" | null {
   const m = (model ?? "").toLowerCase();
   if (!m) return null;
   if (/cameo|\bc'\s?2/.test(m)) return "Cameo";
+  // The older E'line generation is its own module platform (an E'line X-Wide is still an X-Wide).
+  if (/\be[’'`-]?\s?line\b/.test(m) && !/x[\s-]?(tra)?\s?wide/.test(m)) return "e'Line";
   if (/enigma|e'?line|\be'\s?[46]/.test(m)) return "Enigma / e'Line";
   if (/legacy|\bl'2/.test(m)) return "Legacy";
   if (/shotmaster/.test(m)) return "Shotmaster";

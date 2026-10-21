@@ -75,7 +75,7 @@ export const PAYMENT_TERMS = [
 
 export const ACCOUNT_TYPES = ["Avi Account", "Richard Account"] as const;
 
-export const MODULE_PLATFORMS = ["Cameo", "Enigma / e'Line", "Legacy"] as const;
+export const MODULE_PLATFORMS = ["Cameo", "Enigma / e'Line", "e'Line", "Legacy"] as const;
 
 export const MODULE_TYPES = [
   "Brew Module",

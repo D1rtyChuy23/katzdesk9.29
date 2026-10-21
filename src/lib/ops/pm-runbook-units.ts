@@ -45,6 +45,11 @@ export type PlannedUnit = {
 };
 
 type Matcher = (piece: string) => { runbookId: string; model: string | null } | null;
+/**
+ * Runbook and model from a serial number, given the runbook the text matched. When it knows the serial, it overrides
+ * what the text suggested; it returns null for a serial that doesn't belong to that maker.
+ */
+export type SerialMatcher = (serial: string, textRunbookId: string) => { runbookId: string; model: string | null } | null;
 
 /** A name hit with no model must not hide a catalog hit that names one, on the same runbook. */
 function rowHitFor(match: Matcher, runbookId: string, row: AccountUnitRow): { runbookId: string; model: string | null } | null {
@@ -66,6 +71,7 @@ export function planUnits(
   accountRows: AccountUnitRow[],
   match: Matcher,
   pinned?: Readonly<Record<string, number>> | null,
+  bySerial?: SerialMatcher,
 ): PlannedUnit[] {
   const used = new Set<number>();
   const seen = new Map<string, number>();
@@ -102,11 +108,18 @@ export function planUnits(
     }
     let serial: string | null = null;
     let model = hit.model;
+    let runbookId = hit.runbookId;
     if (idx >= 0) {
       used.add(idx);
       serial = parseSerial(accountRows[idx].serial);
       const rowHit = rowHitFor(match, hit.runbookId, accountRows[idx]);
       if (!model && rowHit?.model) model = rowHit.model;
+      // The serial names the exact machine (e.g. "Shotmaster CT" text, serial 01153900… = Shotmaster c).
+      const s = serial && bySerial ? bySerial(serial, hit.runbookId) : null;
+      if (s) {
+        runbookId = s.runbookId;
+        model = s.model ?? (s.runbookId === hit.runbookId ? model : null);
+      }
     }
     const sk = optionsKeyFor(serial);
     const accountId = idx >= 0 ? accountRows[idx].id : null;
@@ -127,7 +140,9 @@ export function planUnits(
       piece,
       serial,
       serialKey: sk,
-      runbookId: hit.runbookId, model });
+      runbookId,
+      model,
+    });
   }
   return out;
 }

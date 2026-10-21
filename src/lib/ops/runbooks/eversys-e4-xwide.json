@@ -26,19 +26,20 @@
       "choices": [ { "val": "0", "label": "None" }, { "val": "1", "label": "One" }, { "val": "2", "label": "Two" } ] }
   ],
   "banners": [
+    { "tone": "ok", "text": "Updated October 2026: checked against the PM Kits Manual V4.0, TI-240 and the release history V3.0. 24-month kits are now 36-month kits." },
     { "when": { "model": ["4s"] }, "tone": "ok", "text": "E'4S has no milk system, so milk-module and frame kits are not listed." },
     { "when": { "model": ["4s"], "choco": ["2"] }, "tone": "warn", "text": "E'4S with a 2-outlet E'choco: the 2026 manual lists the EV111934 add-on for the E'4MS only. Check with the Webshop configurator." },
     { "when": { "pm": ["12"] }, "tone": "ok", "text": "12-month PM: only 12-month kits are listed. Hydraulic kits and the Everfoam, milk and hot water add-ons are 36-month items." }
   ],
   "kits": [
     { "ev": "EV117077", "name": "Brew module Standard", "module": "Brew module", "interval": 12, "qty": 2,
-      "note": "Includes tubes 108153 (245 mm) and 104528 (180 mm). Replaces EV108358." },
+      "note": "Includes tubes 108153 (245 mm) and 104528 (180 mm). Not the Cameo brew kit EV108358 (320 mm tube)." },
     { "ev": "EV109586", "name": "Hydraulic module Standard", "module": "Hydraulic module", "interval": 36, "qty": 2,
       "note": "Now 36 months. 100208 removed; cables and thermostats added in 2025." },
     { "ev": "EV109590", "name": "Hydraulic add-on, adjustable Americano", "module": "Hydraulic module", "interval": 36, "qty": 2,
       "when": { "amer": ["yes"] } },
     { "ev": "EV102865", "name": "Hydraulic add-on, E'choco", "module": "Hydraulic module", "interval": 36, "qty": 2,
-      "when": { "choco": ["1", "2"] }, "note": "Replaces EV109589." },
+      "when": { "choco": ["1", "2"] }, "note": "NetSuite name: Kit - Solenoid Valve 25mm - ODE (same kit)." },
 
     { "ev": "EV108389", "name": "Steam module Standard", "module": "Steam module", "interval": 12, "qty": 1,
       "note": "Includes cables 104158, 104159 and thermostats 103739. O-ring 106371 or 100364." },
@@ -52,7 +53,7 @@
     { "ev": "EV108391", "name": "Steam add-on, Everfoam", "module": "Steam module", "interval": 36,
       "qty": { "by": "wand", "map": { "1": 1, "2": 2 } } },
     { "ev": "EV109568", "name": "Steam add-on, automatic hot water", "module": "Steam module", "interval": 36, "qty": 1,
-      "when": { "tea": ["auto"] }, "note": "Plunger 102917 x4, O-ring 102921 x4, PTFE seal 100544 x2." },
+      "when": { "tea": ["auto"] }, "note": "Plunger 102917 x4, O-ring 102921 x4, PTFE seal 100544 x2. The US shop still titles it \"PR. VALVE/24M\"; the manual and release history say automatic hot water, 36 months." },
     { "ev": "EV109570", "name": "Steam add-on, manual hot water", "module": "Steam module", "interval": 36, "qty": 1,
       "when": { "tea": ["manual"] }, "note": "Plunger 102917 x5, O-ring 102921 x5, PTFE seal 100544 x2." },
     { "ev": "EV108390", "name": "Steam add-on, no tea option", "module": "Steam module", "interval": 36, "qty": 1,
@@ -72,7 +73,7 @@
       "note": "Cut tubes to the machine's dimensions." },
 
     { "ev": "EV109706", "name": "E'choco Standard", "module": "E'choco", "interval": 12, "qty": 1,
-      "when": { "choco": ["1", "2"] }, "note": "118259 O-ring: manual says x1, e'Support says x2. Check the kit." },
+      "when": { "choco": ["1", "2"] }, "note": "O-ring 118259 x2 in the V4.0 kit." },
     { "ev": "EV111934", "name": "E'choco add-on, 2 outlets", "module": "E'choco", "interval": 12, "qty": 1,
       "when": { "choco": ["2"], "model": ["4ms"] }, "note": "Silicone pipe 110301 x2 (cut from 1 m pipe 111629)." }
   ],
@@ -111,7 +112,7 @@
       { "id": "frame-tubes", "text": "Cut the tubes to the machine's dimensions. Clean the 1.5-Step outlet, the fitting silicone pipe and the aerator.", "ref": "Manual p.20" }
     ] },
     { "module": "E'choco", "when": { "choco": ["1", "2"] }, "items": [
-      { "id": "choco-kit", "text": "Fit EV109706. Check how many 118259 O-rings are in the kit.", "ref": "Manual p.22" },
+      { "id": "choco-kit", "text": "Fit EV109706.", "ref": "Manual p.22" },
       { "id": "choco-2", "text": "Fit EV111934 for the second outlet.", "ref": "Manual p.22", "when": { "choco": ["2"], "model": ["4ms"] } }
     ] },
     { "module": "Close out", "items": [
@@ -121,11 +122,11 @@
   "changes": {
     "stockNote": { "title": "24-month kits in stock are still usable.", "text": "Per TI-240 (from 1 May 2026) the 24-month kit is replaced by a 36-month kit, and existing 24-month kits can be used for the 36-month interval. 12-month kits are unchanged." },
     "supersessions": [
-      ["EV108358", "EV117077", "Brew Standard 12 mo. Same parts plus two tubes (108153 and 104528)."],
+      ["EV108358", "EV117077", "Enigma brew kit is EV117077. EV108358 is the Cameo brew kit (320 mm tube): do not use it on an X-Wide."],
       ["EV108392", "EV108354", "Steam-wand add-on. Same parts, listed under the EV108354 #3/#4 positions."],
-      ["EV109589", "EV102865", "Hydraulic E'choco add-on. Same parts. Now a 36-month kit."],
+      ["EV109589", "EV102865", "EV109589 is in no current Eversys source. The E'choco hydraulic add-on is EV102865, now 36 months."],
       ["EV108390", "EV108390", "Same number, renamed \"no tea option\", 36 mo. Contents trimmed (no 102167, no 100217)."],
-      ["EV108350", "EV108349 (probable)", "Old frame E'choco add-on had one 100242; that line moved into EV108349. EV108349 is itself deleted in 2026, so ask Eversys."],
+      ["EV108350", "None", "Frame E'choco add-on. Not in the V4.0 manual, so it is no longer part of the PM (the US shop still sells it)."],
       ["EV108342", "None", "Milk add-on for 2 milk types. Removed."],
       ["EV114467", "None", "Grinder Standard 24 mo. Deleted (service history V3.0)."],
       ["EV110005, EV108349", "None", "Frame Standard and Frame add-on outlet V2. Deleted (service history V3.0)."],
@@ -134,7 +135,7 @@
     "contents": [
       "EV109586 Hydraulic Standard: 100208 O-ring removed; now 36 months.",
       "EV108339 Milk Standard: filter 101326 removed. The steam injector is now 117430 (replaces 103635).",
-      "EV109706 E'choco Standard: 101667 removed, 118259 O-ring added. The manual says x1, the e'Support page says x2: check the kit.",
+      "EV109706 E'choco Standard: 101667 removed, 118259 O-ring x2 added.",
       "EV109568, EV109570, EV108390 hot water kits: 102167 and 100217 removed; PTFE seal 100544 x2.",
       "EV102865 E'choco hydraulic add-on: 102167 and 100217 removed."
     ]

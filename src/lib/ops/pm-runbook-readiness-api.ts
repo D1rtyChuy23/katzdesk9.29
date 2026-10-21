@@ -2,7 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { RUNBOOKS } from "@/lib/ops/runbooks";
+import { matchRunbookPiece, matchRunbookSerial } from "@/lib/ops/runbooks";
 import {
   buildReadiness,
   readinessSummary,
@@ -17,13 +17,7 @@ async function ready(): Promise<Sql> {
   return getSql();
 }
 
-const matchPiece = (piece: string) => {
-  for (const rb of RUNBOOKS) {
-    const h = rb.matchPiece(piece);
-    if (h) return { runbookId: rb.def.id, model: h.model };
-  }
-  return null;
-};
+const matchPiece = matchRunbookPiece;
 
 export type RunbookReadiness = {
   rows: ReadinessRow[];
@@ -75,6 +69,6 @@ export const getRunbookReadiness = createServerFn({ method: "GET" })
       const bag = pinsByPm[link.pm_job_id] ?? (pinsByPm[link.pm_job_id] = {});
       bag[link.piece_key] = Number(link.account_equipment_id);
     }
-    const rows = buildReadiness(pms, mapped, matchPiece, pinsByPm);
+    const rows = buildReadiness(pms, mapped, matchPiece, pinsByPm, matchRunbookSerial);
     return { rows, summary: readinessSummary(rows), pmsChecked: pms.length };
   });
