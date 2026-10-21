@@ -26,7 +26,7 @@ import {
 } from "./clock";
 import { isoDayOrNull as isoDate } from "./iso";
 import { findWoEverywhere, searchTicketText, woBoardName, woSearchKey, type WoBoardHit } from "./wo-search";
-import { canMarkInstalled, loadInspectionSummaries, syncInstallUnits, withInspections } from "./inspection-api";
+import { canMarkInstalled, loadInspectionSummaries, syncInstallUnits, unitsDroppedBy, withInspections } from "./inspection-api";
 import { emptyInspection } from "./pre-inspection";
 import type {
   Asset,
@@ -1408,6 +1408,16 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 			equipment: matchModel(s.equipment, catalog)
 		})));
 	})();
+	// An installed project keeps its pre-inspection as it was, so its list may not drop a machine the visit has: the two would disagree.
+	if (wasInstalled && nowInstalled && (data.equipment !== undefined || data.machines !== undefined)) {
+		const dropped = await unitsDroppedBy(sql, data.id, {
+			equipment: data.equipment === undefined ? c.equipment : data.equipment,
+			serial: data.serial === undefined ? c.serial : data.serial,
+			power_voltage: data.powerVoltage === undefined ? c.power_voltage : data.powerVoltage,
+			machines: machinesJson
+		});
+		if (dropped.length) throw new Error("This install is marked installed. Its equipment list and pre-inspection are kept as they were, so a machine can't come off the list.");
+	}
 	await sql`
       update installs set
         customer = ${data.customer ?? c.customer},

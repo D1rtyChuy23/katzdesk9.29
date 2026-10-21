@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
-import { catalogNames } from "@/lib/ops/inspection-api";
+import { catalogNames, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import {
   isWalkIn,
@@ -608,12 +608,16 @@ async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: nu
   await sql.query("delete from pm_runbook_unit_links where account_equipment_id = $1", [id]);
 }
 
-/** Take one equipment row off the account. Does not guess which duplicate is real. */
+/**
+ * Take one equipment row off the account. Does not guess which duplicate is real. An open install whose visit has the
+ * unit loses that machine from its equipment list too; left on the list, the next load made the unit again.
+ */
 export async function removeEquipmentUnit(sql: Sql, id: number): Promise<{ id: number }> {
   const row = (await sql.query<{ id: number }>("select id from account_equipment where id = $1", [id]))[0];
   if (!row) throw new Error("That unit is not on the account.");
   const mod = (await sql.query<{ module_id: string }>("select module_id from modules where assigned_unit_id = $1 limit 1", [id]))[0];
   if (mod) throw new Error(`Eversys module ${mod.module_id} is still on this unit. Swap it or return it first.`);
+  await takeUnitOffOpenInstalls(sql, id);
   await dropEquipmentLinks(sql, id);
   await sql.query("delete from account_equipment where id = $1", [id]);
   return { id };

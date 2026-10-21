@@ -357,6 +357,120 @@ function claimLinked(pieces: Piece[], linked: AcctUnit[], catalog: string[]): nu
   return ids;
 }
 
+/** Units with a check, note, photo or answer on this visit. */
+async function recordedUnits(sql: Sql, installId: number): Promise<Set<number>> {
+  const rows = await sql.query<{ equipment_id: number }>(
+    `select equipment_id from install_inspection_items where install_id = $1 and (status <> 'Not inspected' or coalesce(notes, '') <> '')
+     union select equipment_id from install_inspection_photos where install_id = $1
+     union select equipment_id from install_inspection_units where install_id = $1 and (coalesce(note, '') <> '' or coalesce(visit_kind, '') <> '' or coalesce(core_needed, '') <> '')`,
+    [installId],
+  );
+  return new Set(rows.map((r) => r.equipment_id));
+}
+
+/** The units on this visit in the order the load claims them: anything recorded first, then oldest. */
+async function linkedUnits(sql: Sql, installId: number): Promise<AcctUnit[]> {
+  const [linked, recorded] = await Promise.all([
+    sql.query<AcctUnit>(
+      `select a.id, a.catalog_model, a.equipment_name, a.serial, a.serial_key, a.electrical
+         from install_inspection_units u join account_equipment a on a.id = u.equipment_id
+        where u.install_id = $1 order by a.id`,
+      [installId],
+    ),
+    recordedUnits(sql, installId),
+  ]);
+  return linked.sort((a, b) => Number(recorded.has(b.id)) - Number(recorded.has(a.id)) || a.id - b.id);
+}
+
+/**
+ * Where this unit is on the install's list: the piece the load gives it, else the only piece of its model that no other
+ * unit on the visit claims. -1 when it is not on the list.
+ */
+function listIndexOf(pieces: Piece[], linked: AcctUnit[], catalog: string[], equipmentId: number): number {
+  const claims = claimLinked(pieces, linked, catalog);
+  const at = claims.indexOf(equipmentId);
+  if (at >= 0) return at;
+  const unit = linked.find((a) => a.id === equipmentId);
+  if (!unit) return -1;
+  const open = pieces
+    .map((piece, i) => ({ piece, i }))
+    .filter(({ piece, i }) => {
+      if (claims[i]! >= 0) return false;
+      const model = catalog.length ? matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel : null;
+      return (
+        sameCatalogModel(unit.catalog_model, piece.equipment) ||
+        sameCatalogModel(unit.equipment_name, piece.equipment) ||
+        (!!model && sameCatalogModel(unit.catalog_model, model))
+      );
+    });
+  return open.length === 1 ? open[0]!.i : -1;
+}
+
+/** Take one unit off a visit: its checks, photos and link. The account's record goes too when nothing else uses it. */
+async function unlinkUnit(sql: Sql, installId: number, equipmentId: number): Promise<void> {
+  await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
+  await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
+  await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
+  await dropUnusedUnit(sql, equipmentId);
+}
+
+async function writeList(sql: Sql, installId: number, pieces: Piece[]): Promise<void> {
+  const packed = serializeMachines(pieces);
+  await sql.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1", [
+    installId,
+    packed.equipment,
+    packed.machines,
+    packed.serial,
+    packed.powerVoltage,
+  ]);
+}
+
+type ListRow = { equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; complete?: unknown };
+
+const isComplete = (row: { complete?: unknown }) => row.complete === true || String(row.complete) === "true";
+
+/**
+ * The units a new machine list would take off this visit: claimed by the list now, claimed by nothing in the next one.
+ * An installed project uses it to refuse a list change its kept pre-inspection would disagree with.
+ */
+export async function unitsDroppedBy(sql: Sql, installId: number, next: Omit<ListRow, "complete">): Promise<number[]> {
+  const row = (await sql.query<ListRow>("select equipment, serial, power_voltage, machines from installs where id = $1", [installId]))[0];
+  if (!row) return [];
+  const catalog = await catalogNames(sql);
+  const linked = await linkedUnits(sql, installId);
+  const before = claimLinked(piecesFrom(row, catalog), linked, catalog);
+  const after = new Set(claimLinked(piecesFrom(next, catalog), linked, catalog));
+  return before.filter((id) => id >= 0 && !after.has(id));
+}
+
+/**
+ * Take this unit off the install's equipment list on every open install whose visit has it (not installed, not
+ * archived), and off those visits, so the next load does not put it back. Used when the unit leaves the account.
+ */
+export async function takeUnitOffOpenInstalls(sql: Sql, equipmentId: number): Promise<number[]> {
+  const installs = await sql.query<ListRow & { id: number }>(
+    `select i.id, i.equipment, i.serial, i.power_voltage, i.machines from installs i
+      where i.archived = false and coalesce(i.complete, false) = false
+        and exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)`,
+    [equipmentId],
+  );
+  if (!installs.length) return [];
+  const catalog = await catalogNames(sql);
+  const touched: number[] = [];
+  for (const row of installs) {
+    const pieces = piecesFrom(row, catalog);
+    const at = listIndexOf(pieces, await linkedUnits(sql, row.id), catalog, equipmentId);
+    if (at >= 0) {
+      await writeList(sql, row.id, pieces.filter((_, i) => i !== at));
+      touched.push(row.id);
+    }
+    await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [row.id, equipmentId]);
+    await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [row.id, equipmentId]);
+    await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [row.id, equipmentId]);
+  }
+  return touched;
+}
+
 async function unitPassed(sql: Sql, installId: number, equipmentId: number): Promise<boolean> {
   const [items, unit] = await Promise.all([
     sql.query<{ category: string; status: string }>(
@@ -399,16 +513,7 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
   );
   const linkedIds = new Set(links.map((l) => l.equipment_id));
   // A unit with anything recorded on this visit is claimed before an empty twin, so the prune drops the empty one.
-  const recorded = new Set(
-    (
-      await sql.query<{ equipment_id: number }>(
-        `select equipment_id from install_inspection_items where install_id = $1 and (status <> 'Not inspected' or coalesce(notes, '') <> '')
-         union select equipment_id from install_inspection_photos where install_id = $1
-         union select equipment_id from install_inspection_units where install_id = $1 and (coalesce(note, '') <> '' or coalesce(visit_kind, '') <> '' or coalesce(core_needed, '') <> '')`,
-        [installId],
-      )
-    ).map((r) => r.equipment_id),
-  );
+  const recorded = await recordedUnits(sql, installId);
   const linkedRows = account
     .filter((a) => linkedIds.has(a.id))
     .sort((a, b) => Number(recorded.has(b.id)) - Number(recorded.has(a.id)) || a.id - b.id);
@@ -1135,59 +1240,109 @@ const removeInput = z.object({
  * machine is on the install's equipment list it comes off that list too, or the next load would put it back. The
  * account's equipment record stays unless nothing else uses it. An installed project is left as it is.
  */
+export async function removeInspectionUnit(
+  sql: Sql,
+  data: z.infer<typeof removeInput>,
+  actor: string,
+): Promise<InspectionView & { removed: string; fromList: boolean }> {
+  await requireInstall(sql, data.installId);
+  await requireUnit(sql, data.installId, data.equipmentId);
+  const row = (
+    await sql.query<{ customer: string; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; complete: boolean }>(
+      "select customer, equipment, serial, power_voltage, machines, complete from installs where id = $1",
+      [data.installId],
+    )
+  )[0]!;
+  if (isComplete(row)) throw new Error("This install is marked installed. Its pre-inspection is kept as it was.");
+  const unit = (
+    await sql.query<AcctUnit>("select id, catalog_model, equipment_name, serial, serial_key, electrical from account_equipment where id = $1", [data.equipmentId])
+  )[0];
+  const name = unit?.equipment_name || unit?.catalog_model || "Machine";
+
+  // Which machine on the install's list is this unit: the same matching the load uses. A unit the list cannot match
+  // takes the only machine of its model that no other unit claims, or the next load would add it back.
+  const catalog = await catalogNames(sql);
+  const pieces = piecesFrom(row, catalog);
+  const at = listIndexOf(pieces, await linkedUnits(sql, data.installId), catalog, data.equipmentId);
+  if (!data.keepList && at >= 0) await writeList(sql, data.installId, pieces.filter((_, i) => i !== at));
+  await unlinkUnit(sql, data.installId, data.equipmentId);
+  await sql
+    .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+      data.installId,
+      actor,
+      `removed ${name}${unit?.serial ? ` (SN ${unit.serial})` : ""} from the pre-inspection${at >= 0 ? " and the equipment list" : ""}`,
+    ])
+    .catch(() => undefined);
+  const view = await readInspection(sql, data.installId);
+  if (!view) throw new Error("Install not found");
+  return { ...view, removed: name, fromList: at >= 0 };
+}
+
 export const removeInspectionEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof removeInput>) => removeInput.parse(d))
   .handler(async ({ data, context }): Promise<InspectionView & { removed: string; fromList: boolean }> => {
     const sql = await ready();
-    await requireInstall(sql, data.installId);
-    await requireUnit(sql, data.installId, data.equipmentId);
-    const row = (
-      await sql.query<{ customer: string; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; complete: boolean }>(
-        "select customer, equipment, serial, power_voltage, machines, complete from installs where id = $1",
-        [data.installId],
-      )
-    )[0]!;
-    if (row.complete === true || String(row.complete) === "true") throw new Error("This install is marked installed. Its pre-inspection is kept as it was.");
-    const unit = (
-      await sql.query<AcctUnit>("select id, catalog_model, equipment_name, serial, serial_key, electrical from account_equipment where id = $1", [data.equipmentId])
-    )[0];
-    const name = unit?.equipment_name || unit?.catalog_model || "Machine";
+    return removeInspectionUnit(sql, data, await deskUsername(sql, context.userId));
+  });
 
-    // Which machine on the install's list is this unit: the same matching the load uses.
-    const catalog = await catalogNames(sql);
-    const pieces = piecesFrom(row, catalog);
-    const linked = await sql.query<AcctUnit>(
-      `select a.id, a.catalog_model, a.equipment_name, a.serial, a.serial_key, a.electrical
-         from install_inspection_units u join account_equipment a on a.id = u.equipment_id
-        where u.install_id = $1 order by a.id`,
-      [data.installId],
-    );
-    const at = claimLinked(pieces, linked, catalog).indexOf(data.equipmentId);
-    if (!data.keepList && at >= 0) {
-      const packed = serializeMachines(pieces.filter((_, i) => i !== at));
-      await sql.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1", [
-        data.installId,
-        packed.equipment,
-        packed.machines,
-        packed.serial,
-        packed.powerVoltage,
-      ]);
-    }
-    await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
-    await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
-    await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [data.installId, data.equipmentId]);
-    await dropUnusedUnit(sql, data.equipmentId);
-    await sql
-      .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
-        data.installId,
-        await deskUsername(sql, context.userId),
-        `removed ${name}${unit?.serial ? ` (SN ${unit.serial})` : ""} from the pre-inspection${at >= 0 ? " and the equipment list" : ""}`,
-      ])
-      .catch(() => undefined);
-    const view = await readInspection(sql, data.installId);
-    if (!view) throw new Error("Install not found");
-    return { ...view, removed: name, fromList: at >= 0 };
+const removeRowInput = z.object({
+  installId: z.number().int().positive(),
+  /** The row's place on the window's list, and what it reads, so a list saved elsewhere meanwhile is not cut wrong. */
+  index: z.number().int().min(0),
+  equipment: z.string(),
+  serial: z.string().nullable().optional(),
+});
+
+/**
+ * The Equipment tab's Remove: the row comes off the list and the unit the load gave that row comes off the visit,
+ * whatever was recorded on it. Leaving it to the save's prune kept a unit that had passed or was marked existing,
+ * so the visit and the account still had a machine the list no longer did. An installed project is refused: its
+ * list and its kept pre-inspection must not disagree. A row the server's list does not have (added in the window and
+ * not saved yet) removes nothing here.
+ */
+export async function removeInstallRow(
+  sql: Sql,
+  data: z.infer<typeof removeRowInput>,
+  actor: string,
+): Promise<{ removed: string | null }> {
+  const row = (
+    await sql.query<ListRow>("select equipment, serial, power_voltage, machines, complete from installs where id = $1 and archived = false", [data.installId])
+  )[0];
+  if (!row) throw new Error("Install not found");
+  if (isComplete(row)) throw new Error("This install is marked installed. Its equipment list and pre-inspection are kept as they were.");
+  const catalog = await catalogNames(sql);
+  const pieces = piecesFrom(row, catalog);
+  const key = serialKey(data.serial);
+  const same = (p: Piece) =>
+    serialKey(p.serial) === key &&
+    (sameCatalogModel(p.equipment, data.equipment) || sameCatalogModel(matchModel(p.equipment, catalog), matchModel(data.equipment, catalog)));
+  const fits = pieces.map((p, i) => (same(p) ? i : -1)).filter((i) => i >= 0);
+  const at = fits.includes(data.index) ? data.index : fits.length === 1 ? fits[0]! : -1;
+  if (at < 0) return { removed: null };
+  const linked = await linkedUnits(sql, data.installId);
+  const rest = pieces.filter((_, i) => i !== at);
+  const after = new Set(claimLinked(rest, linked, catalog));
+  const gone = claimLinked(pieces, linked, catalog).filter((id) => id >= 0 && !after.has(id));
+  await writeList(sql, data.installId, rest);
+  for (const id of gone) await unlinkUnit(sql, data.installId, id);
+  const piece = pieces[at]!;
+  await sql
+    .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+      data.installId,
+      actor,
+      `removed ${piece.equipment}${piece.serial ? ` (SN ${piece.serial})` : ""} from the equipment list${gone.length ? " and the pre-inspection" : ""}`,
+    ])
+    .catch(() => undefined);
+  return { removed: piece.equipment };
+}
+
+export const removeInstallMachine = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof removeRowInput>) => removeRowInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    return removeInstallRow(sql, data, await deskUsername(sql, context.userId));
   });
 
 const copyInput = z.object({

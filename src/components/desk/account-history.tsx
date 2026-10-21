@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { sameUnitModel } from "@/lib/ops/account-equip";
 import { listAccountEquipment, mergeAccountEquipment, removeAccountEquipment } from "@/lib/ops/account-equip-import";
 import { detectBoard } from "@/lib/ops/corrigo";
 import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
@@ -192,9 +193,8 @@ export function AccountEquipmentList({
       ) : rows.length ? (
         <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
           {rows.map((row, i) => {
-            const twins = rows.filter(
-              (other, j) => j !== i && other.id && row.id && other.catalogModel.trim().toLowerCase() === row.catalogModel.trim().toLowerCase(),
-            );
+            // Merge is offered for any row that reads as the same model, not only the exact catalog name.
+            const twins = rows.filter((other, j) => j !== i && other.id && row.id && sameUnitModel(other, row));
             return (
               <li key={`${row.id ?? row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
                 <p className="font-medium">{row.equipmentName || row.catalogModel}</p>

@@ -39,8 +39,9 @@ import {
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
 import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
-import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice, visitUnitForRow } from "@/lib/ops/install-form";
-import { getInstallInspection, removeInspectionEquipment } from "@/lib/ops/inspection-api";
+import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice } from "@/lib/ops/install-form";
+import { isInstalled } from "@/lib/ops/install-status";
+import { removeInstallMachine } from "@/lib/ops/inspection-api";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -388,11 +389,6 @@ export function InstallSheet({
     // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, serialSig, machineSig]);
-  const visit = useQuery({
-    queryKey: ["inspection", row?.id],
-    queryFn: () => getInstallInspection({ data: { installId: row!.id } }),
-    enabled: row != null,
-  });
   /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
   const queue = { id: `install-sheet-${row?.id}` };
   const save = useMutation({
@@ -413,9 +409,9 @@ export function InstallSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
-  const dropUnit = useMutation({
+  const dropRow = useMutation({
     scope: queue,
-    mutationFn: (v: { installId: number; equipmentId: number }) => removeInspectionEquipment({ data: { ...v, keepList: true } }),
+    mutationFn: (v: { installId: number; index: number; equipment: string; serial: string }) => removeInstallMachine({ data: v }),
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"),
   });
   const dropInstall = useMutation({
@@ -683,12 +679,18 @@ export function InstallSheet({
                         const spec = specs[index];
                         if (!spec) return;
                         const label = `${spec.equipment}${spec.serial.trim() ? ` SN ${spec.serial.trim()}` : ""}`;
+                        if (isInstalled(row)) {
+                          toast.error("This install is marked installed. Its equipment list and pre-inspection are kept as they were.");
+                          return;
+                        }
                         if (!window.confirm(`Remove ${label} from this install?`)) return;
                         const next = specs.filter((_, i) => i !== index);
-                        const linked = visitUnitForRow(specs, index, visit.data?.machines ?? []);
-                        // The unit goes first; the save waits in the same queue, then refreshes the list and the visit.
-                        if (linked) dropUnit.mutate({ installId: row.id, equipmentId: linked.equipmentId });
-                        persistMachines(next);
+                        // The server takes the row off the list and its unit off the visit (even one that passed); the save
+                        // follows in the same queue with the rest of the window's list. A refused remove saves nothing.
+                        dropRow.mutate(
+                          { installId: row.id, index, equipment: spec.equipment, serial: spec.serial },
+                          { onSuccess: () => persistMachines(next) },
+                        );
                       }}
                     />
                   </div>

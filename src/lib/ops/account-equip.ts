@@ -271,6 +271,15 @@ export function sameCatalogModel(a: string, b: string): boolean {
   return compactEquip(a) === compactEquip(b) && !!compactEquip(a);
 }
 
+/** Two account rows for one model: the same catalog name, or names that read as the same model either way round. */
+export function sameUnitModel(
+  a: { catalogModel: string; equipmentName: string },
+  b: { catalogModel: string; equipmentName: string },
+): boolean {
+  const names = (u: { catalogModel: string; equipmentName: string }) => [u.catalogModel, u.equipmentName].filter((n) => n?.trim());
+  return names(a).some((x) => names(b).some((y) => x.trim().toLowerCase() === y.trim().toLowerCase() || sameCatalogModel(x, y)));
+}
+
 export function matchAccount(name: string, accounts: AccountHit[]): AccountMatch {
   const trimmed = String(name ?? "").trim();
   if (!trimmed) return { status: "unmatched", account: null, candidates: [] };
