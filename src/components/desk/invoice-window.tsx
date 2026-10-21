@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { approveInvoice, getInvoice, type InvoiceView } from "@/lib/ops/invoice-api";
 import { LABOR_ITEM, TRIP_ITEM, kindForItem, lineAmount, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
-import { billToGaps, invoiceError, invoiceTotals, isLaborKind, type BillTo, type InvoiceTarget } from "@/lib/ops/invoice";
+import { billToGaps, invoiceError, invoiceTotals, isLaborKind, usesTicketCharges, type BillTo, type InvoiceTarget } from "@/lib/ops/invoice";
+import { tripDraftWarning } from "@/lib/ops/pm-bill";
 import { canDriveTo, directionsUrl, isPoint } from "@/lib/ops/geo";
 import { formatRep } from "@/lib/ops/rep-match";
 import { Badge } from "@/components/ui/badge";
@@ -13,15 +14,16 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label } from "@/components/ui/input";
 import { PartPicker } from "./charges-panel";
+import { AddPmParts } from "./pm-bill-add";
 import { PartThumb } from "./part-thumb";
 import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-type Draft = { item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null };
+type Draft = { id?: number; item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null; sourceKey?: string | null };
 
-const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part });
+const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ id: l.id, item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part, sourceKey: l.sourceKey ?? null });
 
 /** The account's saved pin as a point, or null. */
 const billPin = (b: BillTo) => (b.latitude != null && b.longitude != null ? { lat: b.latitude, lng: b.longitude } : null);
@@ -65,6 +67,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   // Always read fresh when the window opens, so a cancelled draft never comes back.
   const q = useQuery({ queryKey: ["invoice", type, id], queryFn: () => getInvoice({ data: { type, id } }), refetchOnMount: "always" });
   const [lines, setLines] = useState<Draft[] | null>(null);
+  const [loadedIds, setLoadedIds] = useState<number[]>([]);
   const [discKind, setDiscKind] = useState<DiscountKind>("percent");
   const [discValue, setDiscValue] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -73,6 +76,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   useEffect(() => {
     if (!v || lines) return;
     setLines(v.lines.map(toDraft));
+    setLoadedIds(v.lines.flatMap((l) => (l.id != null ? [l.id] : [])));
     setDiscKind(v.discount?.kind ?? "percent");
     setDiscValue(v.discount ? String(v.discount.value) : "");
   }, [v, lines]);
@@ -83,7 +87,8 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
         data: {
           type,
           id,
-          lines: (lines ?? []).map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate })),
+          lines: (lines ?? []).map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, sourceKey: l.sourceKey ?? null })),
+          lineIds: loadedIds,
           discount: discValue.trim() ? { kind: discKind, value: discValue } : null,
         },
       }),
@@ -94,6 +99,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
       void qc.invalidateQueries({ queryKey: ["account-invoices"] });
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
+      void qc.invalidateQueries({ queryKey: ["pm-bill", id] });
       toast.success(`Invoice approved · ${money(next.total)}`);
       onClose();
     },
@@ -256,15 +262,40 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
               {!locked ? (
                 <div className="mt-3 space-y-3" data-testid="invoice-add">
                   <div className="flex flex-wrap gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", kind: "labor", part: null })} data-testid="invoice-add-labor">
+                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", kind: "labor", part: null, sourceKey: null })} data-testid="invoice-add-labor">
                       <Plus className="size-4" />
                       Labor Hour
                     </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: TRIP_ITEM, description: "Trip Charge for Service Call", qty: "1", rate: "150.00", kind: "trip", part: null })} data-testid="invoice-add-trip">
+                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: TRIP_ITEM, description: "Trip Charge for Service Call", qty: "1", rate: "150.00", kind: "trip", part: null, sourceKey: null })} data-testid="invoice-add-trip">
                       <Plus className="size-4" />
                       Trip Charge
                     </Button>
+                    {usesTicketCharges(type) ? (
+                      <AddPmParts
+                        jobId={id}
+                        draftKeys={draft.flatMap((l) => (l.sourceKey ? [l.sourceKey] : []))}
+                        draftCount={draft.length}
+                        onAdd={(rows) => {
+                          for (const row of rows) {
+                            add({
+                              item: row.item,
+                              description: row.description,
+                              qty: String(row.qty),
+                              rate: row.rate.toFixed(2),
+                              kind: kindForItem(row.item),
+                              part: row.part,
+                              sourceKey: row.sourceKey,
+                            });
+                          }
+                        }}
+                      />
+                    ) : null}
                   </div>
+                  {tripDraftWarning(draft.filter((l) => l.kind === "trip").length) ? (
+                    <p className="text-xs text-warning" data-testid="trip-warning">
+                      {tripDraftWarning(draft.filter((l) => l.kind === "trip").length)}
+                    </p>
+                  ) : null}
                   <PartPicker
                     id={`invoice-part-${type}-${id}`}
                     onPick={(it) =>
@@ -276,6 +307,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                         rate: it.rate != null ? it.rate.toFixed(2) : "0.00",
                         kind: it.kind || kindForItem(it.item),
                         part: it.part ?? null,
+                        sourceKey: null,
                       })
                     }
                   />
@@ -359,9 +391,11 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
               <Button type="button" variant="outline" onClick={onClose} disabled={approve.isPending} data-testid="invoice-cancel">
                 Cancel
               </Button>
-              <Button type="button" onClick={() => approve.mutate()} disabled={locked || approve.isPending || !!problem || !draft.length} data-testid="invoice-approve">
-                {approve.isPending ? "Approving…" : "Approve"}
-              </Button>
+              {locked ? null : (
+                <Button type="button" onClick={() => approve.mutate()} disabled={approve.isPending || !!problem || !draft.length} data-testid="invoice-approve">
+                  {approve.isPending ? "Approving…" : "Approve"}
+                </Button>
+              )}
             </div>
           </>
         )}

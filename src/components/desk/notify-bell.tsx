@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { fromFor } from "@/lib/ops/search-params";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Search } from "lucide-react";
 import { listNotifications, markNotificationRead, type DeskNotice, type PingKind } from "@/lib/ops/notify";
@@ -43,6 +44,7 @@ function subject(n: DeskNotice): string | null {
 export function NotifyBell({ ink }: { ink?: boolean }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const here = useLocation();
   const [open, setOpen] = useState(false);
   const [readFilter, setReadFilter] = useState<ReadFilter>("all");
   const [kind, setKind] = useState<PingKind | "">("");
@@ -153,9 +155,9 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
     const to = pathFor(t.type);
     if (t.id && !t.fallback && (t.type === "service" || t.type === "tlc")) {
       // A ping or a note on a ticket opens that ticket on its Ping tab.
-      void navigate({ to: t.type === "tlc" ? "/tlc" : "/service", search: { open: t.id, tab: "ping" } });
+      void navigate({ to: t.type === "tlc" ? "/tlc" : "/service", search: { open: t.id, tab: "ping", from: fromFor(here, t.type === "tlc" ? "/tlc" : "/service") } });
     } else if (t.id && to !== "/" && t.type !== "handoff") {
-      void navigate({ to, search: { open: t.id } });
+      void navigate({ to, search: { open: t.id, from: fromFor(here, to) } });
     } else if (t.type === "handoff" && n.commentId) {
       void navigate({ to: "/handoff", search: { open: n.commentId } });
     } else {

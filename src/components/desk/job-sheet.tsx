@@ -8,6 +8,7 @@ import {
   createJob,
   getCustomerHistory,
   getJob,
+  getPm,
   listAssets,
   listComments,
   listDirectory,
@@ -47,6 +48,8 @@ import { SheetTabs } from "./sheet-tabs";
 import { AccountEquipmentList, HistoryRow, pendingSchedules, useAccountEquipment } from "./account-history";
 import { ModuleRecord } from "./module-record";
 import { PmSheet } from "./entity-sheets";
+import { TicketPmStack } from "./pm-stack-panel";
+import { isJobStack, jobStackQuery, openPmReminders } from "./pm-stack-shared";
 
 /** The ticket's categories, one per tab, in this order. Only a ticket with a customer has tabs. */
 export type TicketTab = "ticket" | "equipment" | "invoicing" | "schedules" | "ping";
@@ -100,6 +103,15 @@ export function JobSheet({
     queryFn: () => getJob({ data: { id: activeId! } }),
     enabled: activeId != null,
   });
+  const pmStack = useQuery({
+    ...jobStackQuery(activeId ?? 0),
+    enabled: activeId != null,
+  });
+  const stackedPms = isJobStack(pmStack.data) ? pmStack.data.stacked : [];
+  const stackCandidates = isJobStack(pmStack.data) ? pmStack.data.candidates : [];
+  const stackCustomersDiffer = stackedPms.some((p) => !p.customerMatches);
+  const lockTicketCustomer = lockCustomer || (!stackCustomersDiffer && stackedPms.length > 0 && stackedPms.every((p) => p.customerMatches));
+  const canStackWrite = isJobStack(pmStack.data) && pmStack.data.canWrite;
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof updateJob>[0]["data"]) => updateJob({ data: patch }),
     onSuccess: (row) => {
@@ -125,6 +137,10 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
       void qc.invalidateQueries({ queryKey: ["comments"] });
+      void qc.invalidateQueries({ queryKey: ["charges"] });
+      void qc.invalidateQueries({ queryKey: ["invoice"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       if (row?.id && row.id !== activeId) showTicket(row.id);
     },
@@ -169,8 +185,14 @@ export function JobSheet({
     queryFn: () => listComments({ data: { entityType: j!.kind, entityId: j!.id } }),
     enabled: tabbed,
   });
-  const openPm =
+  const openPmFromHistory =
     id != null && pmPick && pmPick.forId === activeId ? (history.data?.pms.find((p) => p.id === pmPick.pmId) ?? null) : null;
+  const openPmFetch = useQuery({
+    queryKey: ["pm", pmPick?.pmId],
+    queryFn: () => getPm({ data: { id: pmPick!.pmId } }),
+    enabled: pmPick != null && pmPick.forId === activeId && !openPmFromHistory && (accountId == null || history.isFetched),
+  });
+  const openPm = openPmFromHistory ?? openPmFetch.data ?? null;
   const tabCount = (t: TicketTab): number | null => {
     if (t === "equipment") return accountEquip.data?.length ?? null;
     if (t === "schedules") return schedules.length || null;
@@ -234,7 +256,10 @@ export function JobSheet({
         });
       }}
     >
-      <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockCustomer} />
+      <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockTicketCustomer} />
+      {stackedPms.filter((p) => !p.customerMatches).map((p) => (
+        <p key={p.pmId} className="text-xs text-warning sm:col-span-2">Customer differs from PM #{p.pmId}</p>
+      ))}
       {j.customer ? (
         <div className="sm:col-span-2">
           <ProviderDispatchBlock customer={j.customer} />
@@ -365,6 +390,11 @@ export function JobSheet({
                 )}
               </SheetHeader>
               <SheetBody>
+                {openPmReminders(j.status, stackedPms).map((p) => (
+                  <p key={p.pmId} className="border-b border-border bg-warning/10 px-5 py-2 text-sm" data-testid="pm-still-open">
+                    PM #{p.pmId} on this ticket is still open. Complete it on its own sheet.
+                  </p>
+                ))}
                 <SerialNoticeBanner notice={j.serialNotice} />
                 <DuplicateBanner
                   job={j}
@@ -415,6 +445,13 @@ export function JobSheet({
                     </Tabs.Content>
 
                     <Tabs.Content value="schedules" className="p-5 outline-none" data-testid="ticket-panel-schedules">
+                      <TicketPmStack
+                        jobId={j.id}
+                        stacked={stackedPms}
+                        candidates={stackCandidates}
+                        canWrite={canStackWrite}
+                        onOpenPm={(pmId) => setPmPick({ forId: activeId, pmId })}
+                      />
                       <section data-testid="ticket-schedules">
                         <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pending TLC, Factor & PMs</h2>
                         {directory.isLoading || history.isLoading ? (
@@ -460,7 +497,11 @@ export function JobSheet({
           )}
         </SheetContent>
       </Sheet>
-      <PmSheet pm={openPm} onClose={() => setPmPick(null)} />
+      <PmSheet
+        pm={openPm}
+        onClose={() => setPmPick(null)}
+        lockCustomer={!!stackedPms.find((p) => p.pmId === openPm?.id && p.customerMatches)}
+      />
     </>
   );
 }

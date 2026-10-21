@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useFromHere } from "@/lib/ops/search-params";
 import { useEffect, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Lock, RotateCcw, Undo2 } from "lucide-react";
@@ -270,6 +271,7 @@ function ReportRow({
   onSkip: () => void;
   onRestore: () => void;
 }) {
+  const fromReport = useFromHere("/customers");
   const pin = row.hasStreetPin ? "Street Pin" : row.pinQuality === "approx" ? "ZIP Area Pin" : "No Pin";
   return (
     <li
@@ -280,7 +282,7 @@ function ReportRow({
     >
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-          <Link to="/customers" search={{ open: row.id }} className="min-w-0 font-medium break-words hover:underline max-sm:py-2" data-testid="address-name">
+          <Link to="/customers" search={{ open: row.id, from: fromReport }} className="min-w-0 font-medium break-words hover:underline max-sm:py-2" data-testid="address-name">
             {row.name}
           </Link>
           {row.nameLocked ? <Lock className="size-3.5 shrink-0 text-primary" aria-label="Name locked from the clean list" /> : null}

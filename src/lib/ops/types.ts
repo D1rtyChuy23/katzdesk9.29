@@ -66,6 +66,8 @@ export type PmJob = {
   updatedAt: string;
   flag: ClockFlag | null;
   aviKatz: boolean;
+  /** The service or TLC ticket this PM bills on, or null when it has its own invoice. */
+  stackedJobId: number | null;
 };
 
 
@@ -134,6 +136,20 @@ export type Deal = {
 };
 
 
+/** One Corrigo work order on an install project (install_work_orders); the primary is installs.wo. */
+export type InstallWorkOrder = {
+  wo: string;
+  matchKey: string;
+  /** Corrigo's Operational Status for this WO, as the file wrote it. */
+  status: string | null;
+  completedAt: string | null;
+  primary: boolean;
+  received: string | null;
+  source: string | null;
+  addedBy: string | null;
+  addedAt: string | null;
+};
+
 export type Install = {
   id: number;
   /** Sales ticks this once the Tech Request Form has been sent. Never ticked automatically. */
@@ -148,7 +164,14 @@ export type Install = {
   /** Time of day on the install date, "HH:MM"; null until someone sets one on the day board. */
   scheduledTime: string | null;
   technician: string | null;
+  /** The project's first Corrigo WO. workOrders lists every WO it carries, this one first. */
   wo: string | null;
+  workOrders: InstallWorkOrder[];
+  /** The owner locked the customer: nobody changes it until the owner unlocks it. */
+  customerLockedAt: string | null;
+  customerLockedBy: string | null;
+  /** After a customer change: the install's own account units that moved with it, and those that stayed. */
+  unitsMoved?: { moved: string[]; stayed: string[] } | null;
   reqsReady: string | null;
   notes: string | null;
   workDone: string | null;
@@ -348,6 +371,9 @@ export type Asset = {
   stockHoldCustomer: string | null;
   stockHoldReason: string | null;
   stockHoldBy: string | null;
+  /** Locked: no move, return, sale or removal until the owner unlocks it. Assigning or selling stamps it. */
+  lockedAt: string | null;
+  lockedBy: string | null;
 };
 
 export type Recipe = {
@@ -417,6 +443,8 @@ export type CustomerHistory = {
   accountNumber?: string | null;
   /** The viewer may set the account number (Admin role or desk admin). */
   canEditAccountNumber?: boolean;
+  /** Sales reps NetSuite has on this account. Read-only. Primary Sales Rep is accountRep. */
+  salesReps?: { name: string; role: string | null; pct: number | null; primary: boolean }[];
   jobs: ServiceJob[];
   pms: PmJob[];
   installs: Install[];

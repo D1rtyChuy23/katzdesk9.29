@@ -22,6 +22,8 @@ export function SpecImport({
   editing,
   aiReady,
   initialFile,
+  seed = null,
+  bookId = null,
   onSaved,
   onCancel,
 }: {
@@ -29,12 +31,22 @@ export function SpecImport({
   aiReady: boolean;
   /** Start reading this PDF straight away (a spec sheet already stored in a book). */
   initialFile?: File | null;
+  /** Open the blank form for a model that has no sheet. */
+  seed?: { manufacturer: string; model: string } | null;
+  /** A hand entry for this model. Saving never takes over a sheet tied to another model. */
+  bookId?: number | null;
   /** `pdf` is the original that was read, so the caller can keep it in the book. */
   onSaved: (id: number, pdf: File | null) => void;
   onCancel: () => void;
 }) {
-  const [stage, setStage] = useState<Stage>(editing ? "review" : initialFile ? "reading" : "drop");
-  const [draft, setDraft] = useState<SpecSheetDraft>(() => (editing ? strip(editing) : emptyDraft()));
+  const blank = (): SpecSheetDraft => {
+    const draft = emptyDraft();
+    if (!initialFile && seed?.manufacturer) draft.manufacturer = seed.manufacturer;
+    if (!initialFile && seed?.model) draft.model = seed.model;
+    return draft;
+  };
+  const [stage, setStage] = useState<Stage>(editing ? "review" : initialFile ? "reading" : seed ? "review" : "drop");
+  const [draft, setDraft] = useState<SpecSheetDraft>(() => (editing ? strip(editing) : seed && !initialFile ? blank() : emptyDraft()));
   const [removed, setRemoved] = useState<RemovedItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -98,7 +110,7 @@ export function SpecImport({
   }
 
   const save = useMutation({
-    mutationFn: (overwrite: boolean) => saveSpecSheet({ data: { draft, id: editing?.id ?? null, overwrite } }),
+    mutationFn: (overwrite: boolean) => saveSpecSheet({ data: { draft, id: editing?.id ?? null, overwrite, bookId } }),
     onSuccess: (res) => {
       if (!res.ok) {
         setConflict(res.conflict);

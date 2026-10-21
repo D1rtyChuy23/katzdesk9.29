@@ -1,0 +1,498 @@
+{
+  "id": "la-marzocco-gb5",
+  "manufacturer": "La Marzocco",
+  "defaultStyleLast": true,
+  "title": "GB5 PM Runbook",
+  "subtitle": "La Marzocco GB5 S | preventive maintenance kits and steps",
+  "sources": "La Marzocco USA preventative maintenance checklists v2.1 (May 2026): 3/9-month, 6-month and 12-month. Kit numbers are per visit and group count. La Marzocco does not print kit contents on the checklists; where a kit note lists contents it comes from the checklist's replace list or LM's annual PM summary. Confirm kit numbers with La Marzocco USA before ordering. GB5 S kit contents: LM GB5 S PM summary v1.0 (Mar 2021).",
+  "storageKey": "lm-gb5-runbook-v1",
+  "models": [
+    {
+      "id": "gb5s",
+      "label": "GB5 S"
+    },
+    {
+      "id": "gb5",
+      "label": "GB5 (original)"
+    }
+  ],
+  "intervals": [
+    {
+      "id": "3",
+      "label": "3/9-month PM"
+    },
+    {
+      "id": "6",
+      "label": "6-month PM"
+    },
+    {
+      "id": "12",
+      "label": "12-month PM"
+    }
+  ],
+  "options": [
+    {
+      "key": "groups",
+      "label": "Groups",
+      "default": "2",
+      "choices": [
+        {
+          "val": "2",
+          "label": "2 group"
+        },
+        {
+          "val": "3",
+          "label": "3 group"
+        },
+        {
+          "val": "4",
+          "label": "4 group"
+        }
+      ]
+    },
+    {
+      "key": "scales",
+      "label": "Integrated scales (ABR)",
+      "default": "no",
+      "choices": [
+        {
+          "val": "no",
+          "label": "No"
+        },
+        {
+          "val": "yes",
+          "label": "Yes"
+        }
+      ]
+    }
+  ],
+  "banners": [
+    {
+      "tone": "ok",
+      "text": "One kit per visit. The 3/9-month PM is the same visit at month 3 and month 9; the 6- and 12-month kits are complete for their visit, so earlier kits are not added."
+    },
+    {
+      "when": {
+        "model": [
+          "gb5"
+        ]
+      },
+      "tone": "warn",
+      "text": "La Marzocco publishes this checklist for the GB5 S. For an original GB5, confirm the kit with La Marzocco before ordering."
+    }
+  ],
+  "kits": [
+    {
+      "ev": "GB5S.3.2",
+      "name": "PM kit, 3/9-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "2"
+        ]
+      },
+      "note": "LM PM summary (2021): group gaskets H.3.001 and diffuser screens F.3.040."
+    },
+    {
+      "ev": "GB5S.3.3",
+      "name": "PM kit, 3/9-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "3"
+        ]
+      },
+      "note": "LM PM summary (2021): group gaskets H.3.001 and diffuser screens F.3.040."
+    },
+    {
+      "ev": "GB5S.3.4",
+      "name": "PM kit, 3/9-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "4"
+        ]
+      },
+      "note": "LM PM summary (2021): group gaskets H.3.001 and diffuser screens F.3.040."
+    },
+    {
+      "ev": "GB5S.6.2",
+      "name": "PM kit, 6-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "2"
+        ]
+      },
+      "note": "LM PM summary (2021): group gaskets H.3.001, diffuser screens F.3.040, steam valve rebuild 1206."
+    },
+    {
+      "ev": "GB5S.6.3",
+      "name": "PM kit, 6-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ]
+      },
+      "note": "LM PM summary (2021): group gaskets H.3.001, diffuser screens F.3.040, steam valve rebuild 1206."
+    },
+    {
+      "ev": "GB5S.6.4",
+      "name": "PM kit, 6-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "4"
+        ]
+      },
+      "note": "LM PM summary (2021): group gaskets H.3.001, diffuser screens F.3.040, steam valve rebuild 1206."
+    },
+    {
+      "ev": "GB5S.12.2",
+      "name": "PM kit, 12-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "2"
+        ]
+      },
+      "note": "LM PM summary (2021): the 6-month parts plus safety valve B.2.024, steam boiler vacuum breaker B.2.029, steam valve vacuum breakers L192, expansion valve L140/C."
+    },
+    {
+      "ev": "GB5S.12.3",
+      "name": "PM kit, 12-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ]
+      },
+      "note": "LM PM summary (2021): the 6-month parts plus safety valve B.2.024, steam boiler vacuum breaker B.2.029, steam valve vacuum breakers L192, expansion valve L140/C."
+    },
+    {
+      "ev": "GB5S.12.4",
+      "name": "PM kit, 12-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "4"
+        ]
+      },
+      "note": "LM PM summary (2021): the 6-month parts plus safety valve B.2.024, steam boiler vacuum breaker B.2.029, steam valve vacuum breakers L192, expansion valve L140/C."
+    }
+  ],
+  "steps": [
+    {
+      "module": "Water quality",
+      "items": [
+        {
+          "id": "wq-test",
+          "text": "Test the water before and after the filter with the LM test kit (F.9.000.01). Record the filter make and type and compare with the limits in Reference.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Group heads",
+      "items": [
+        {
+          "id": "gb-gh-kit",
+          "text": "Fit the parts in the PM kit: group gaskets and diffuser screens on every group, plus the visit's other parts (see Kits).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-gh-baskets",
+          "text": "Check the filter baskets and springs.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-gh-buttons",
+          "text": "Test every button.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-gh-res",
+          "text": "Measure each flow meter's field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ). Record G1–G4 in kΩ.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-gh-imp",
+          "text": "Check the flow meter impellers.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "gb-gh-flow",
+          "text": "Record each group's flow rate: grams in 30 s, G1–G4.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Boilers and pressure",
+      "items": [
+        {
+          "id": "gb-br-press",
+          "text": "Record the brewing pressure (bar).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-br-exp",
+          "text": "Check the expansion valve and record its maximum pressure (bar).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-br-temp",
+          "text": "Record the coffee boiler temperature (°F).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-br-vb",
+          "text": "Check the vacuum breakers work.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Steam",
+      "items": [
+        {
+          "id": "gb-st-rebuild",
+          "text": "Rebuild the steam valves (in the kit).",
+          "when": {
+            "pm": [
+              "6",
+              "12"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-st-valve",
+          "text": "Check the steam valves work.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Water and drain",
+      "items": [
+        {
+          "id": "gb-wd-probe",
+          "text": "Clean the auto-fill probe.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-wd-leaks",
+          "text": "Check all fittings and valves for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-wd-line",
+          "text": "Check the water line and water meter for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-wd-drain",
+          "text": "Check the drain box and hose for leaks or clogs.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Electrical",
+      "items": [
+        {
+          "id": "gb-el-cord",
+          "text": "Check the power cord, cap and outlet.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "gb-el-harness",
+          "text": "Check the wiring harness and components.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "gb-el-box",
+          "text": "Check the electronics box.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        }
+      ]
+    },
+    {
+      "module": "Scales",
+      "when": {
+        "scales": [
+          "yes"
+        ]
+      },
+      "items": [
+        {
+          "id": "gb-sc-cal",
+          "text": "Confirm or calibrate the integrated scales with a 100 g weight.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Close out",
+      "items": [
+        {
+          "id": "gb-co-form",
+          "text": "Fill in the La Marzocco checklist for this visit: serial, voltage, group count and every reading. Get the customer's signature.",
+          "ref": "LM checklist"
+        }
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "title": "Water limits (LM test kit F.9.000.01)",
+      "text": "Test before and after the filter. Record the filter make and type: carbon, ion exchange/softener, WAC, reverse osmosis, or none.",
+      "table": {
+        "head": [
+          "Test",
+          "Min",
+          "Max"
+        ],
+        "rows": [
+          [
+            "Total hardness (ppm)",
+            "5",
+            "70"
+          ],
+          [
+            "Alkalinity (ppm)",
+            "5",
+            "80"
+          ],
+          [
+            "Chloride (ppm)",
+            "0",
+            "30"
+          ],
+          [
+            "Iron (ppm)",
+            "0",
+            "0.02"
+          ],
+          [
+            "Free chlorine (ppm)",
+            "0",
+            "0.05"
+          ],
+          [
+            "Total chlorine (ppm)",
+            "0",
+            "0.1"
+          ],
+          [
+            "pH",
+            "6.5",
+            "8.5"
+          ],
+          [
+            "TDS (ppm)",
+            "10",
+            "150"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Specs on the checklists",
+      "list": [
+        "Flow meter field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ).",
+        "Flow rate: the checklist header says ml/30 s but the blanks say g. Record grams in 30 s and note it.",
+        "Brew pressure, expansion valve max pressure and boiler temperature: the checklists give blanks, no targets. Use the machine manual's settings.",
+        "Integrated scales: confirm or calibrate with a 100 g weight."
+      ]
+    },
+    {
+      "title": "Kit numbers",
+      "table": {
+        "head": [
+          "Visit",
+          "Kit"
+        ],
+        "monoCols": [
+          1
+        ],
+        "rows": [
+          [
+            "3/9-month",
+            "GB5S.3.<gr> (2–4 groups)"
+          ],
+          [
+            "6-month",
+            "GB5S.6.<gr>"
+          ],
+          [
+            "12-month",
+            "GB5S.12.<gr>"
+          ]
+        ]
+      }
+    }
+  ]
+}

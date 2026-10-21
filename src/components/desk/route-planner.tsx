@@ -1,20 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { fromFor } from "@/lib/ops/search-params";
 import { ChevronLeft, ChevronRight, MapPin as MapPinIcon, Navigation, TriangleAlert } from "lucide-react";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { listTechs } from "@/lib/ops/roster";
-import { milesLabel, NO_REP_COLOR, type LatLng } from "@/lib/ops/geo";
+import { updateInstall, updateJob, updatePm } from "@/lib/ops/api";
+import { NO_REP_COLOR, type LatLng } from "@/lib/ops/geo";
+import { driveBetween, driveTableStamp, legsFromTable, pointKey, type DriveLeg } from "@/lib/ops/drive-route";
+import { driveLine, driveTable } from "@/lib/ops/drive-route-api";
 import {
   collectDayStops,
   colorOfTech,
   crewLabel,
   jobKey,
   KATZ_SHOP,
-  milesNote,
+  legNote,
+  moveWrites,
   placeStops,
   planAreas,
   planTechRoutes,
+  routable,
+  routeNote,
+  routeStartNote,
   stopCount,
   stopTime,
   techColors,
@@ -30,6 +38,7 @@ import {
   type RouteStart,
   type StopType,
   type TechRoute,
+  type TechWrite,
 } from "@/lib/ops/route-plan";
 import type { Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +49,7 @@ import { cn } from "@/lib/utils";
 import { FilterChip } from "./desk-charts";
 import { DeskMap, type MapPin } from "./desk-map";
 import { nameKey, useGeoIndex } from "./geo-data";
+import { toast } from "sonner";
 
 /** Same colors and pages as the day board. */
 const TYPE_META: Record<StopType, { plural: string; to: "/service" | "/pms" | "/tlc" | "/installs"; chip: string; dot: string }> = {
@@ -72,11 +82,26 @@ function pinTitle(s: PlacedStop, n?: number): string {
   return [n ? `${n}. ${s.customer}` : s.customer, STOP_LABEL[s.type], stopTime(s.time), crewLabel(s)].join(" · ");
 }
 
+function isFinitePoint(p: LatLng | null | undefined): p is LatLng {
+  return !!p && Number.isFinite(p.lat) && Number.isFinite(p.lng);
+}
+
 /**
  * Planner Routes tab: the day's open work per tech in a suggested stop order (straight-line miles, promised times kept),
  * with Google Maps links, or grouped by area so a dispatcher can spot two techs in one area or unassigned work nearby.
  */
 const START_PREF = "katz-desk-route-start";
+const orderKey = (day: string) => `katz-desk-route-order:${day}`;
+
+function readOrder(day: string): Record<string, string[]> {
+  try {
+    const raw = window.localStorage.getItem(orderKey(day));
+    const parsed = raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
 export function RoutePlanner({
   installs,
@@ -91,6 +116,8 @@ export function RoutePlanner({
 }) {
   const today = todayChicago();
   const navigate = useNavigate();
+  const location = useLocation();
+  const qc = useQueryClient();
   const geo = useGeoIndex();
   const roster = useQuery({ queryKey: ["roster"], queryFn: () => listTechs() });
   const [day, setDay] = useState(today);
@@ -98,8 +125,11 @@ export function RoutePlanner({
   const [selected, setSelected] = useState<string | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
   const [focus, setFocus] = useState<LatLng | null>(null);
-  // Where the day starts: the phone's current location (Google Maps decides) or the shop. Remembered on this device.
   const [startFrom, setStartFrom] = useState<"here" | "shop">("here");
+  const [here, setHere] = useState<LatLng | null>(null);
+  const [manual, setManual] = useState<Record<string, string[]>>({});
+  const [undo, setUndo] = useState<{ label: string; run: () => Promise<void> } | null>(null);
+  const [pendingMove, setPendingMove] = useState<{ stop: PlacedStop; to: string; before?: string } | null>(null);
   useEffect(() => {
     try {
       if (window.localStorage.getItem(START_PREF) === "shop") setStartFrom("shop");
@@ -107,6 +137,19 @@ export function RoutePlanner({
       /* storage blocked: keep the default */
     }
   }, []);
+  useEffect(() => {
+    setManual(readOrder(day));
+    setUndo(null);
+    setPendingMove(null);
+  }, [day]);
+  useEffect(() => {
+    if (startFrom !== "here" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setHere({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setHere(null),
+      { enableHighAccuracy: false, maximumAge: 120_000, timeout: 8000 },
+    );
+  }, [startFrom]);
   const chooseStart = (next: "here" | "shop") => {
     setStartFrom(next);
     try {
@@ -115,32 +158,107 @@ export function RoutePlanner({
       /* storage blocked: the choice still applies for this visit */
     }
   };
-  const start: RouteStart | null = startFrom === "shop" ? KATZ_SHOP : null;
+  const saveManual = (next: Record<string, string[]>) => {
+    setManual(next);
+    try {
+      if (Object.keys(next).length) window.localStorage.setItem(orderKey(day), JSON.stringify(next));
+      else window.localStorage.removeItem(orderKey(day));
+    } catch {
+      /* the order still applies for this visit */
+    }
+  };
+  const origin = startFrom === "shop" ? KATZ_SHOP.point : here;
+  const start: RouteStart | null = startFrom === "shop" ? KATZ_SHOP : here ? { key: "here", label: "Current location", point: here } : null;
   const mapBox = useRef<HTMLDivElement>(null);
 
   const rosterNames = useMemo(() => (roster.data?.techs ?? []).filter((t) => t.active).map((t) => t.name), [roster.data]);
   const dayStops = useMemo(() => collectDayStops({ installs, pms, services, tlcs }, day), [installs, pms, services, tlcs, day]);
   const { byName } = geo;
   const placed = useMemo(() => placeStops(dayStops, (customer) => byName.get(nameKey(customer))), [dayStops, byName]);
-  const routes = useMemo(() => planTechRoutes(placed, rosterNames, start), [placed, rosterNames, start]);
+  const driveGroups = useMemo(() => {
+    const byTech = new Map<string, LatLng[]>();
+    for (const s of placed) {
+      // A two-tech ticket has a copy on each tech. Each copy belongs in that tech's drive table.
+      if (!routable(s.tech)) continue;
+      const point = s.point;
+      if (!isFinitePoint(point)) continue;
+      const list = byTech.get(s.tech) ?? [];
+      if (!list.some((p) => pointKey(p) === pointKey(point))) list.push(point);
+      byTech.set(s.tech, list);
+    }
+    const groups: { tech: string; points: LatLng[]; skip: boolean }[] = [];
+    for (const [tech, pts] of byTech) {
+      const points = origin && isFinitePoint(origin) ? [origin, ...pts.filter((p) => pointKey(p) !== pointKey(origin))] : pts;
+      // One matrix per tech so a busy day is not limited by every stop in the shop sharing one request.
+      groups.push({ tech, points, skip: points.length < 2 || points.length > 25 });
+    }
+    return groups;
+  }, [placed, origin]);
+  const driveAsked = driveGroups.filter((g) => !g.skip);
+  const driveQs = useQueries({
+    queries: driveAsked.map((g) => ({
+      queryKey: ["drive-table", g.tech, g.points.map(pointKey).join("|")],
+      queryFn: () => driveTable({ data: { points: g.points } }),
+      staleTime: 10 * 60 * 1000,
+      retry: 1,
+    })),
+  });
+  const driveStamp = driveTableStamp(
+    driveAsked,
+    driveAsked.map((_, i) => (driveQs[i]?.data ? "ok" : driveQs[i]?.isError ? "err" : "wait")),
+  );
+  const driveFn = useMemo(() => {
+    const legs = new Map<string, DriveLeg>();
+    driveAsked.forEach((g, i) => {
+      const table = driveQs[i]?.data;
+      if (!table) return;
+      for (const [k, v] of legsFromTable(g.points, table)) legs.set(k, v);
+    });
+    if (!legs.size) return null;
+    return (a: LatLng, b: LatLng) => driveBetween(legs, a, b);
+    // driveStamp tracks which tables have arrived; the maps themselves are read from this render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [driveStamp]);
+  const driveFailed = driveQs.some((q) => q.isError) || driveGroups.some((g) => g.skip && g.points.length > 25);
+  const driveWaiting = driveAsked.length > 0 && driveQs.some((q) => q.isPending);
+  const manualOn = Object.keys(manual).length > 0;
+  const routes = useMemo(
+    () => planTechRoutes(placed, rosterNames, start, { drive: driveFn, manual: manualOn ? manual : null }),
+    [placed, rosterNames, start, driveFn, manual, manualOn],
+  );
   const colors = useMemo(() => techColors(rosterNames, routes.map((r) => r.tech)), [rosterNames, routes]);
   const areas = useMemo(() => planAreas(placed), [placed]);
   const counts = useMemo(() => typeCounts(dayStops), [dayStops]);
   const colorOf = (tech: string) => colorOfTech(colors, tech);
 
   const current = view === "tech" ? routes.find((r) => r.tech === selected) ?? null : null;
+  const linePoints = useMemo(() => {
+    if (!current?.routed) return [] as LatLng[];
+    const pts: LatLng[] = [];
+    if (origin) pts.push(origin);
+    for (const s of current.stops) pts.push(s.point);
+    return pts;
+  }, [current, origin]);
+  const lineQ = useQuery({
+    queryKey: ["drive-line", linePoints.map(pointKey).join("|")],
+    queryFn: () => driveLine({ data: { points: linePoints } }),
+    enabled: linePoints.length >= 2 && linePoints.length <= 25,
+    staleTime: 10 * 60 * 1000,
+    retry: 1,
+  });
+  const road = lineQ.data?.line ?? null;
   const jobs = placed.filter((s) => !s.second);
   const offMap = jobs.filter((s) => s.missing).length;
   const techCount = routes.filter((r) => r.tech !== NO_TECH).length;
 
-  const { pins, route, fitTo } = useMemo(() => {
+  const { pins, route, fitTo, onRoads } = useMemo(() => {
     const out: MapPin[] = [];
     if (!current) {
       for (const s of placed) {
         if (s.second || !s.point) continue;
         out.push({ id: s.key, lat: s.point.lat, lng: s.point.lng, color: colorOfTech(colors, s.tech), title: pinTitle(s) });
       }
-      return { pins: out, route: undefined, fitTo: null };
+      return { pins: out, route: undefined, onRoads: false, fitTo: null };
     }
     const mine = new Set(current.stops.map(jobKey));
     for (const s of placed) {
@@ -159,17 +277,111 @@ export function RoutePlanner({
         title: pinTitle(s, current.routed ? s.n : undefined),
       });
     }
-    const points = current.stops.map((s) => s.point);
-    // Fit the view to this tech's stops; everyone else's gray dots may sit off screen.
-    return { pins: out, route: current.routed && points.length > 1 ? points : undefined, fitTo: points };
-  }, [placed, current, colors]);
+    const straight = current.stops.map((s) => s.point);
+    const line = road && road.length > 1 ? road : straight;
+    return { pins: out, route: current.routed && line.length > 1 ? line : undefined, onRoads: !!(road && road.length > 1), fitTo: straight };
+  }, [placed, current, colors, road]);
 
   const legendTechs = [...new Set(jobs.filter((s) => s.point).map((s) => s.tech))].sort(
     (a, b) => Number(a === NO_TECH) - Number(b === NO_TECH) || routes.findIndex((r) => r.tech === a) - routes.findIndex((r) => r.tech === b),
   );
 
   function open(s: PlacedStop) {
-    void navigate({ to: TYPE_META[s.type].to, search: { open: s.id } });
+    void navigate({ to: TYPE_META[s.type].to, search: { open: s.id, from: fromFor(location, TYPE_META[s.type].to) } });
+  }
+
+  const techChoices = useMemo(() => {
+    const names = new Set(rosterNames.filter((t) => t && t !== THIRD_PARTY));
+    for (const r of routes) if (r.tech && r.tech !== THIRD_PARTY) names.add(r.tech);
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [rosterNames, routes]);
+
+  async function writeTech(s: PlacedStop, w: TechWrite) {
+    if (s.type === "pm") await updatePm({ data: { id: w.id, technician: w.technician } });
+    else if (s.type === "install") await updateInstall({ data: { id: w.id, technician: w.technician } });
+    else await updateJob({ data: w });
+    void qc.invalidateQueries({ queryKey: ["installs"] });
+    void qc.invalidateQueries({ queryKey: ["pms"] });
+    void qc.invalidateQueries({ queryKey: ["jobs"] });
+    void qc.invalidateQueries({ queryKey: ["dashboard"] });
+  }
+
+  function patchTech(s: PlacedStop, w: TechWrite) {
+    const { id, ...fields } = w;
+    if (s.type === "pm") {
+      qc.setQueryData<PmJob[]>(["pms"], (rows) => rows?.map((r) => (r.id === id ? { ...r, ...fields } : r)));
+    } else if (s.type === "install") {
+      qc.setQueryData<Install[]>(["installs"], (rows) => rows?.map((r) => (r.id === id ? { ...r, ...fields } : r)));
+    } else {
+      const key = ["jobs", s.type === "tlc" ? "tlc" : "service"] as const;
+      qc.setQueryData<ServiceJob[]>(key, (rows) => rows?.map((r) => (r.id === id ? { ...r, ...fields } : r)));
+    }
+  }
+
+  function orderOf(tech: string): string[] {
+    return manual[tech] ?? routes.find((r) => r.tech === tech)?.stops.map((s) => s.key) ?? [];
+  }
+
+  async function commitMove(s: PlacedStop, toTech: string, before?: string) {
+    if (s.tech === toTech && (!before || before === s.key)) return;
+    const prevManual = manual;
+    const fromTech = s.tech;
+    const changedTech = fromTech !== toTech;
+    const next: Record<string, string[]> = { ...manual };
+    if (changedTech) {
+      // A new tech is planned again by drive time. A drag that only reorders one list is kept below.
+      delete next[fromTech];
+      delete next[toTech];
+      for (const [tech, keys] of Object.entries(next)) {
+        const filtered = keys.filter((k) => k !== s.key);
+        if (filtered.length) next[tech] = filtered;
+        else delete next[tech];
+      }
+    } else {
+      const dest = orderOf(toTech).filter((k) => k !== s.key);
+      const at = before ? dest.indexOf(before) : -1;
+      if (at >= 0) dest.splice(at, 0, s.key);
+      else dest.push(s.key);
+      next[toTech] = dest;
+    }
+    const writes = moveWrites(s, fromTech, toTech);
+    if (changedTech) patchTech(s, writes.forward);
+    saveManual(next);
+    try {
+      if (changedTech) await writeTech(s, writes.forward);
+      setUndo({
+        label: changedTech
+          ? `Moved ${STOP_LABEL[s.type]} ${s.customer} from ${techLabel(fromTech)} to ${techLabel(toTech)}.`
+          : `Reordered ${s.customer} on ${techLabel(fromTech)}.`,
+        run: async () => {
+          if (changedTech) {
+            patchTech(s, writes.undo);
+            await writeTech(s, writes.undo);
+          }
+          saveManual(prevManual);
+          setUndo(null);
+        },
+      });
+    } catch (err) {
+      if (changedTech) patchTech(s, writes.undo);
+      saveManual(prevManual);
+      toast.error(err instanceof Error ? err.message : "Could not move that stop");
+    }
+  }
+
+  function askMove(s: PlacedStop, toTech: string, before?: string) {
+    if (s.tech === toTech && (!before || before === s.key)) return;
+    if (s.tech !== toTech) {
+      setPendingMove({ stop: s, to: toTech, before });
+      return;
+    }
+    void commitMove(s, toTech, before);
+  }
+
+  function dropKey(raw: string, toTech: string, before?: string) {
+    const s = placed.find((x) => x.key === raw);
+    if (!s) return;
+    void askMove(s, toTech, before);
   }
 
   /** On a phone the map sits above the list: bring it back into view when a choice changes what it shows. */
@@ -224,7 +436,18 @@ export function RoutePlanner({
             {dayTitle(day)}
           </h2>
           <p className="text-[11px] text-muted-foreground">
-            Suggested stop order by straight-line distance. Stops with a set time stay in time order. Click a stop to open it.
+            {manualOn
+              ? "Reordered routes stay as you left them. Re-optimize to plan by drive time again."
+              : driveWaiting
+                ? "Checking drive times…"
+                : driveFailed
+                  ? "Drive times are unavailable, so this is the straight-line order. Stops with a set time stay in time order."
+                  : routes.some((r) => r.drive)
+                    ? "Ordered by drive time from the start. Stops with a set time stay in time order."
+                    : startFrom === "here" && !here
+                      ? "Location isn't available, so the order starts at the first stop. Pick The Shop to start there."
+                      : "Suggested stop order by straight-line distance. Stops with a set time stay in time order."}{" "}
+            Click a stop to open it.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -259,6 +482,11 @@ export function RoutePlanner({
             <FilterChip selected={startFrom === "shop"} onClick={() => chooseStart("shop")} data-testid="route-start-shop">
               The Shop
             </FilterChip>
+            {manualOn ? (
+              <Button type="button" size="sm" variant="outline" className="h-9" onClick={() => saveManual({})} data-testid="route-reoptimize">
+                Re-optimize
+              </Button>
+            ) : null}
           </div>
         ) : null}
         {dayStops.length ? (
@@ -296,12 +524,44 @@ export function RoutePlanner({
         </div>
       ) : (
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          {undo ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm lg:col-span-2" data-testid="route-undo">
+              <span>{undo.label}</span>
+              <Button type="button" size="sm" variant="outline" className="h-9" onClick={() => void undo.run().catch((e) => toast.error(e instanceof Error ? e.message : "Could not undo"))}>
+                Undo
+              </Button>
+            </div>
+          ) : null}
+          {pendingMove ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2 text-sm lg:col-span-2" data-testid="route-move-preview">
+              <span>
+                Move {STOP_LABEL[pendingMove.stop.type]} {pendingMove.stop.customer} from {techLabel(pendingMove.stop.tech)} to {techLabel(pendingMove.to)}?
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                className="h-9"
+                data-testid="route-move-confirm"
+                onClick={() => {
+                  const move = pendingMove;
+                  setPendingMove(null);
+                  void commitMove(move.stop, move.to, move.before);
+                }}
+              >
+                Move
+              </Button>
+              <Button type="button" size="sm" variant="outline" className="h-9" onClick={() => setPendingMove(null)}>
+                Cancel
+              </Button>
+            </div>
+          ) : null}
           <div ref={mapBox} className="min-w-0 scroll-mt-4 lg:sticky lg:top-4 lg:order-2 lg:self-start">
             {pins.length ? (
               <>
                 <DeskMap
                   pins={pins}
                   route={route}
+                  routeDashed={!onRoads}
                   selectedId={highlight}
                   onPinClick={onPin}
                   fitKey={fitKey}
@@ -315,7 +575,12 @@ export function RoutePlanner({
                     <p>
                       {current.routed ? (
                         <>
-                          Numbered pins are {current.label}&rsquo;s stops in order; the dashed line is the suggested route.
+                          Numbered pins are {current.label}&rsquo;s stops in order;{" "}
+                          {lineQ.isFetching && !onRoads
+                            ? "checking the roads…"
+                            : onRoads
+                              ? "the line follows the roads."
+                              : "the dashed line is the straight-line order."}
                         </>
                       ) : (
                         <>Pins are {current.tech === NO_TECH ? "unassigned stops" : `${current.label}’s stops`}. No route is planned for them.</>
@@ -355,7 +620,11 @@ export function RoutePlanner({
                     highlight={highlight}
                     onToggle={() => toggleTech(r.tech)}
                     onOpen={open}
+                    onMove={(s, to) => askMove(s, to)}
+                    onDropKey={dropKey}
+                    techs={techChoices}
                     start={start}
+                    hold={pendingMove && pendingMove.stop.tech === r.tech ? { key: pendingMove.stop.key, to: pendingMove.to } : null}
                   />
                 ))
               : (
@@ -380,7 +649,11 @@ function TechCard({
   highlight,
   onToggle,
   onOpen,
+  onMove,
+  onDropKey,
+  techs,
   start,
+  hold,
 }: {
   route: TechRoute;
   color: string;
@@ -388,7 +661,11 @@ function TechCard({
   highlight: string | null;
   onToggle: () => void;
   onOpen: (s: PlacedStop) => void;
+  onMove: (s: PlacedStop, to: string) => void;
+  onDropKey: (key: string, toTech: string, before?: string) => void;
+  techs: string[];
   start: RouteStart | null;
+  hold: { key: string; to: string } | null;
 }) {
   const total = r.stops.length + r.unrouted.length;
   return (
@@ -398,6 +675,15 @@ function TechCard({
       data-tech={r.tech}
       data-routed={r.routed ? "true" : "false"}
       aria-label={r.label}
+      onDragOver={(e) => {
+        if (!r.routed && r.tech === THIRD_PARTY) return;
+        e.preventDefault();
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        const key = e.dataTransfer.getData("text/plain");
+        if (key) onDropKey(key, r.tech);
+      }}
     >
       <header className="flex items-start gap-2">
         <span className="mt-1.5 size-3 shrink-0 rounded-full" style={{ backgroundColor: color }} aria-hidden />
@@ -405,7 +691,7 @@ function TechCard({
           <h3 className={cn("leading-tight font-medium break-words", r.tech === NO_TECH && "text-muted-foreground")}>{r.label}</h3>
           <p className="tabular text-xs text-muted-foreground">
             {stopCount(total)}
-            {r.routed && (r.stops.length > 1 || start) && r.miles > 0 ? ` · ${milesNote(r.miles)}` : ""}
+            {r.routed && (r.stops.length > 1 || start) && r.miles > 0 ? ` · ${routeNote(r.minutes, r.miles, r.minutes != null)}` : ""}
           </p>
         </div>
         {r.stops.length ? (
@@ -427,21 +713,37 @@ function TechCard({
 
       {!r.routed ? (
         <p className="mt-2 text-xs text-muted-foreground">
-          {r.tech === THIRD_PARTY ? "Outside contractor: stops are listed, no route is planned." : "No tech yet. Assign these on the Day tab."}
+          {r.tech === THIRD_PARTY
+            ? "Outside contractor: stops are listed, no route is planned."
+            : "No tech yet. Choose Move to on a stop, or drag it onto a tech."}
         </p>
       ) : null}
 
       {r.stops.length ? (
         <ol className="mt-2 divide-y divide-border" aria-label={r.routed ? `${r.label} stops in suggested order` : `${r.label} stops`}>
           {r.stops.map((s, i) => (
-            <li key={s.key} id={`route-stop-${s.key}`} className="scroll-mt-4">
+            <li
+              key={s.key}
+              id={`route-stop-${s.key}`}
+              className="scroll-mt-4"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const key = e.dataTransfer.getData("text/plain");
+                if (key) onDropKey(key, r.tech, s.key);
+              }}
+            >
+              <div className={cn("flex items-start gap-1", highlight === s.key && "rounded-md bg-primary/10")}>
               <button
                 type="button"
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData("text/plain", s.key);
+                  e.dataTransfer.effectAllowed = "move";
+                }}
                 onClick={() => onOpen(s)}
-                className={cn(
-                  "desk-flat flex min-h-12 w-full items-start gap-3 rounded-md px-1.5 py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                  highlight === s.key && "bg-primary/10",
-                )}
+                className="desk-flat flex min-h-12 min-w-0 flex-1 items-start gap-3 rounded-md px-1.5 py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 data-testid="route-stop"
                 data-key={s.key}
               >
@@ -457,19 +759,21 @@ function TechCard({
                   <span className="mt-2 ml-2 size-2 shrink-0 rounded-full" style={{ backgroundColor: color }} aria-hidden />
                 )}
                 <StopText stop={s} />
-                {s.legMiles != null ? (
-                  <span className="tabular mt-0.5 shrink-0 text-xs text-muted-foreground" title={i === 0 && start ? "Straight-line distance from the shop" : "Straight-line distance from the previous stop"}>
-                    {s.legMiles < 0.05 && s.accountId != null && r.stops[i - 1]?.accountId === s.accountId ? (
+                {s.legMiles != null || s.legMinutes != null ? (
+                  <span className="tabular mt-0.5 shrink-0 text-xs text-muted-foreground" title={i === 0 && start ? "From the start" : "From the previous stop"}>
+                    {s.legMiles != null && s.legMiles < 0.05 && s.accountId != null && r.stops[i - 1]?.accountId === s.accountId ? (
                       "Same place"
                     ) : (
                       <>
-                        {milesLabel(s.legMiles)}
-                        <span className="sr-only">{i === 0 && start ? " from the shop" : " from the previous stop"}</span>
+                        {legNote(s.legMinutes, s.legMiles)}
+                        <span className="sr-only">{i === 0 && start ? " from the start" : " from the previous stop"}</span>
                       </>
                     )}
                   </span>
                 ) : null}
               </button>
+              <MoveToSelect stop={s} techs={techs} value={hold?.key === s.key ? hold.to : s.tech} onMove={onMove} />
+              </div>
             </li>
           ))}
         </ol>
@@ -500,13 +804,15 @@ function TechCard({
             </div>
           )}
           <p className="mt-1.5 text-xs text-muted-foreground">
-            {start ? `Starts from ${start.label.replace(/^The /, "the ")}.` : "Starts from your current location."}
+            {routeStartNote(start)}
             {r.links.length > 1 ? " Google Maps takes about 10 stops per link, so each leg starts where the last one ended." : ""}
           </p>
         </div>
       ) : null}
 
-      {r.unrouted.length ? <NotOnMap stops={r.unrouted} onOpen={onOpen} /> : null}
+      {r.unrouted.length ? (
+        <NotOnMap stops={r.unrouted} onOpen={onOpen} onMove={onMove} techs={techs} hold={hold} />
+      ) : null}
     </section>
   );
 }
@@ -541,17 +847,59 @@ function StopText({ stop: s, showCrew }: { stop: PlacedStop; showCrew?: boolean 
   );
 }
 
+function MoveToSelect({
+  stop,
+  techs,
+  value,
+  onMove,
+}: {
+  stop: PlacedStop;
+  techs: string[];
+  value: string;
+  onMove: (s: PlacedStop, to: string) => void;
+}) {
+  const current = stop.tech;
+  return (
+    <label className="mt-1.5 flex shrink-0 flex-col items-stretch">
+      <span className="px-0.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">Move to</span>
+      <select
+        className="h-9 max-w-36 rounded-md border border-border bg-card px-1 text-xs"
+        value={value}
+        aria-label={`Move ${stop.customer} to`}
+        data-testid="route-move"
+        onChange={(e) => onMove(stop, e.target.value)}
+      >
+        {current === NO_TECH ? <option value={NO_TECH}>Unassigned</option> : null}
+        {techs.map((t) => (
+          <option key={t} value={t}>
+            {t}
+          </option>
+        ))}
+        {current !== NO_TECH ? <option value={NO_TECH}>Unassigned</option> : null}
+        {current && current !== NO_TECH && !techs.includes(current) ? <option value={current}>{current}</option> : null}
+        {value && value !== current && value !== NO_TECH && !techs.includes(value) ? <option value={value}>{value}</option> : null}
+      </select>
+    </label>
+  );
+}
+
 function NotOnMap({
   stops,
   onOpen,
   colorOf,
   className,
+  onMove,
+  techs,
+  hold,
 }: {
   stops: PlacedStop[];
   onOpen: (s: PlacedStop) => void;
   /** Set in By Area: each row then names its tech. */
   colorOf?: (tech: string) => string;
   className?: string;
+  onMove?: (s: PlacedStop, to: string) => void;
+  techs?: string[];
+  hold?: { key: string; to: string } | null;
 }) {
   return (
     <div className={cn("mt-3 rounded-lg border border-dashed border-border p-2.5", className)} data-testid="route-unrouted">
@@ -564,6 +912,15 @@ function NotOnMap({
           <li key={s.key} id={`route-stop-${s.key}`} className="flex items-start gap-1">
             <button
               type="button"
+              draggable={!!onMove}
+              onDragStart={
+                onMove
+                  ? (e) => {
+                      e.dataTransfer.setData("text/plain", s.key);
+                      e.dataTransfer.effectAllowed = "move";
+                    }
+                  : undefined
+              }
               onClick={() => onOpen(s)}
               className="desk-flat flex min-h-11 min-w-0 flex-1 items-start gap-2 rounded-md px-1.5 py-2 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               data-testid="route-unrouted-stop"
@@ -594,6 +951,9 @@ function NotOnMap({
                 </span>
               </span>
             </button>
+            {onMove && techs ? (
+              <MoveToSelect stop={s} techs={techs} value={hold?.key === s.key ? hold.to : s.tech} onMove={onMove} />
+            ) : null}
             {/* The account is known but has no street-address pin: its row in the Address Report. No account, no link.
                 A new tab, so the Planner stays on Routes and this day while stops are fixed one after another. */}
             {s.accountId != null ? (

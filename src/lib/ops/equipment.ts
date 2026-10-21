@@ -47,7 +47,8 @@ function cleanPiece(raw: string): string | null {
   let t = raw.replace(/\s+/g, " ").trim();
   t = t.replace(/^\(+/, "").replace(/\)+$/, "").trim();
   t = t.replace(/^(qty\s*)?\d+\s*[x×]\s*/i, "");
-  t = t.replace(/\s*[x×]\s*\d+\s*$/i, "");
+  // A single trailing digit is a quantity ("x2", "x 2"). "X20" is a model, not a count.
+  t = t.replace(/\s*[x×]\s*\d\s*$/i, "");
   t = t.replace(/\bwith\s+[\d.]+\s*wands?\b/i, "");
   t = t.replace(/\b\d+\s*v(olts?)?\b/i, "");
   t = t.replace(/\s+/g, " ").trim();
@@ -74,7 +75,9 @@ function catalogPattern(name: string): RegExp | null {
     .filter((p) => p.length > 0)
     .map(escapeRe);
   if (!parts.length) return null;
-  return new RegExp(`(?<![a-zA-Z0-9])${parts.join("[^a-zA-Z0-9]+")}(?![a-zA-Z0-9])`, "i");
+  // A comma is between machines ("fetco, gr2.2" is two), so a name only spans one when it has a comma itself.
+  const joiner = name.includes(",") ? "[^a-zA-Z0-9]+" : "[^a-zA-Z0-9,]+";
+  return new RegExp(`(?<![a-zA-Z0-9])${parts.join(joiner)}(?![a-zA-Z0-9])`, "i");
 }
 
 type CatalogHit = { index: number; end: number; name: string };
@@ -109,10 +112,28 @@ function splitNonCatalog(raw: string, catalog: string[]): string[] {
   return pieces;
 }
 
+/** One word that describes the machine before it (a colour, a finish or a size), never a machine of its own. */
+const TRAILING_WORD = /^(black|white|silver|red|blue|green|grey|gray|gold|copper|chrome|stainless|matte|polished|short|tall|small|medium|large)$/i;
+
+/** A name that is only such a word ("BLACK"): never a machine. */
+export function isTrailingWord(name: string): boolean {
+  return TRAILING_WORD.test(name.trim());
+}
+
+/** "Puqpress Q2 Automatic Tamper BLACK" read as the tamper + "BLACK": the word goes back on the tamper. */
+function attachTrailingWords(pieces: string[]): string[] {
+  const out: string[] = [];
+  for (const p of pieces) {
+    if (out.length && TRAILING_WORD.test(p.trim())) out[out.length - 1] = `${out[out.length - 1]} ${p.trim()}`;
+    else out.push(p);
+  }
+  return out;
+}
+
 function extractLine(line: string, catalog: string[], catalogKey: Map<string, string>, patterns: { name: string; re: RegExp }[]): string[] {
   const exact = catalogKey.get(normalize(line));
   if (exact) return [exact];
-  if (!patterns.length) return splitNonCatalog(line, catalog);
+  if (!patterns.length) return attachTrailingWords(splitNonCatalog(line, catalog));
 
   const out: string[] = [];
   let rest = line;
@@ -128,7 +149,7 @@ function extractLine(line: string, catalog: string[], catalogKey: Map<string, st
     out.push(hit.name);
     rest = rest.slice(hit.end).replace(/^[\s,;+&]+|^\s*\/\s*|^\s+and\s+/i, "");
   }
-  return out.filter(Boolean);
+  return attachTrailingWords(out.filter(Boolean));
 }
 
 /**
@@ -157,7 +178,7 @@ export function listedEquipment(
     if (pieces.length) out.push(...pieces);
     else out.push(matchModel(line, catalog));
   }
-  return rejoinSplitModels(out, catalogKey);
+  return rejoinSplitModels(out, catalogKey, raw);
 }
 
 /** Split a messy install equipment blob into one piece per machine. */
@@ -181,7 +202,7 @@ export function joinEquipment(pieces: string[]): string | null {
   return next.length ? next.join("\n") : null;
 }
 
-function rejoinSplitModels(pieces: string[], catalogKey: Map<string, string>): string[] {
+function rejoinSplitModels(pieces: string[], catalogKey: Map<string, string>, raw = ""): string[] {
   if (pieces.length < 2) return pieces;
   const out: string[] = [];
   for (let i = 0; i < pieces.length; i++) {
@@ -194,7 +215,9 @@ function rejoinSplitModels(pieces: string[], catalogKey: Map<string, string>): s
       i += 1;
       continue;
     }
-    if (b) {
+    // Typed with a comma between them ("fetco, gr2.2"): two machines, even when the two words make a catalog name.
+    const commaBetween = !!b && new RegExp(`${escapeRe(a)}\\s*,\\s*${escapeRe(b)}`, "i").test(raw);
+    if (b && !commaBetween) {
       const slash = catalogKey.get(normalize(`${a}/${b}`));
       const spaced = catalogKey.get(normalize(`${a} ${b}`));
       if (slash || spaced) {
@@ -274,6 +297,17 @@ export function matchModel(piece: string, catalog: string[]): string {
   const uniqueEnough = Boolean(best && best.score >= 5_000 && (pt.length > 1 || nearBest));
   if (uniqueEnough && best) return best.model;
   return best && best.score >= 10_000 ? best.model : raw;
+}
+
+/**
+ * The name a saved machine row keeps: unchanged when the list reads it as exactly that one machine ("Bunn G9-2 Short",
+ * a catalog name with a colour or size word), else the catalog's spelling (matchModel). Matching it again turned
+ * "Bunn G9-2 Short" into "Bunn G9" on every save while the load read the longer name.
+ */
+export function savedMachineName(piece: string, catalog: string[]): string {
+  const name = piece.trim();
+  const read = listedEquipment(name, catalog);
+  return read.length === 1 && read[0] === name ? name : matchModel(piece, catalog);
 }
 
 function aliasCanonical(raw: string): string | null {

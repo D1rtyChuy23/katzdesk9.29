@@ -396,9 +396,10 @@ const idsInput = z.object({
   reason: z.string().max(200).optional(),
 });
 
-/** Where this part is already written on a ticket charge or a repair quote. History is the item text, not the row. */
-async function partHistory(sql: Sql, part: { item: string; sku: string }): Promise<string[]> {
-  const args = [part.item.trim().toLowerCase(), part.sku.trim().toLowerCase()];
+/** Where this part is already written: a ticket charge, a repair quote, or a part logged on a PM machine. */
+export async function partHistory(sql: Sql, part: { id?: number; item: string; sku: string }): Promise<string[]> {
+  const textArgs = [part.item.trim().toLowerCase(), part.sku.trim().toLowerCase()];
+  const machineArgs = [...textArgs, part.id ?? 0];
   const tickets = await sql.query<{ id: number; wo: string | null; customer: string | null }>(
     `select j.id, j.wo, j.customer
        from ticket_charges c
@@ -407,7 +408,7 @@ async function partHistory(sql: Sql, part: { item: string; sku: string }): Promi
       group by j.id, j.wo, j.customer
       order by j.id
       limit 5`,
-    args,
+    textArgs,
   );
   const quotes = await sql.query<{ id: number; status: string; wo: string | null }>(
     `select q.id, q.status, j.wo
@@ -418,7 +419,18 @@ async function partHistory(sql: Sql, part: { item: string; sku: string }): Promi
       group by q.id, q.status, j.wo
       order by q.id
       limit 5`,
-    args,
+    textArgs,
+  );
+  const machines = await sql.query<{ id: number; customer: string | null }>(
+    `select p.id, p.customer
+       from machine_parts m
+       join pm_jobs p on p.id = m.pm_job_id
+      where m.removed_at is null
+        and (m.billing_item_id = $3 or lower(btrim(m.item)) = $1 or lower(btrim(m.item)) = $2)
+      group by p.id, p.customer
+      order by p.id
+      limit 5`,
+    machineArgs,
   );
   const lines = [
     ...tickets.map((t) => {
@@ -426,6 +438,7 @@ async function partHistory(sql: Sql, part: { item: string; sku: string }): Promi
       return t.customer?.trim() ? `${label} (${t.customer.trim()})` : label;
     }),
     ...quotes.map((q) => (q.wo?.trim() ? `repair quote on ticket ${q.wo.trim()} (${q.status})` : `repair quote #${q.id} (${q.status})`)),
+    ...machines.map((p) => `PM #${p.id} (machine part)`),
   ];
   return lines;
 }

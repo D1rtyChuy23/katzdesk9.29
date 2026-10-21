@@ -1,0 +1,12 @@
+---
+description: KatzDesk team rules (Claude, Grok, Cursor). Who builds, who reviews, and how to sign prompts.
+alwaysApply: true
+---
+Read and follow AGENTS.project.md in the repo root. It is the shared rule file for Claude, Grok and Cursor.
+
+Key points:
+- You are **Cursor**.
+- Start every prompt or report meant for another agent with `From: Cursor — <date> — for: <agent or Chuy>`, and end it with `— Cursor`.
+- Work only in D1rtyChuy23/katzdesk9.29, on a branch, through a PR. Never push to main.
+- Don't push to a PR branch another agent is building unless Chuy says so.
+- Never run the Library import, the cleanup or any delete against production.

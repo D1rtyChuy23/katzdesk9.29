@@ -3,19 +3,32 @@ import { Check, ClipboardCopy } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   clearRunbookChecks,
   getKitPrices,
   getPmRunbook,
+  logRunbookAsset,
+  setRunbookAddedKit,
   setRunbookCheck,
   setRunbookUnitConfig,
   setRunbookUnitOptions,
+  type PmMachinePart,
   type RunbookUnit,
 } from "@/lib/ops/pm-runbook-api";
-import { banners, kitList, kitListText, optionKeys, stepIds, stepList, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { listModules } from "@/lib/ops/api";
+import { moduleAvailability } from "@/lib/ops/eversys";
+import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
+import { assignModule } from "@/lib/ops/module-assign";
+import { visitBanners, applicableModules, combinedVisitNotes, intervalAgeLabel, kitListText, kitListWithAdded, longestIntervalId, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
+import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
+import type { ModuleRow } from "@/lib/ops/types";
+import { ModuleRunbook } from "@/components/desk/module-runbook";
+import { OtherParts } from "./pm-machine-parts";
 import { useCopy } from "./spec-sheet";
 
 function Seg({
@@ -43,7 +56,7 @@ function Seg({
             aria-pressed={value === c.val}
             onClick={() => onPick(c.val)}
             className={cn(
-              "min-h-9 rounded-md border px-3 py-1 text-left text-sm disabled:cursor-default",
+              "min-h-9 rounded-md border px-3 py-1 text-left text-sm disabled:cursor-default disabled:opacity-60",
               value === c.val ? "border-primary bg-primary font-semibold text-primary-foreground" : "border-border bg-background",
             )}
           >
@@ -55,6 +68,180 @@ function Seg({
   );
 }
 
+function UnitModules({
+  unit,
+  def,
+  config,
+  canWrite,
+  customer,
+  platforms,
+  pmId,
+}: {
+  unit: RunbookUnit;
+  def: RunbookDefinition;
+  config: RunbookConfig;
+  canWrite: boolean;
+  customer: string;
+  platforms: readonly string[];
+  pmId: number;
+}) {
+  const qc = useQueryClient();
+  const mods = useQuery({
+    queryKey: ["modules"],
+    queryFn: () => listModules(),
+    enabled: unit.accountId != null,
+  });
+  const [open, setOpen] = useState(false);
+  const [runbookFor, setRunbookFor] = useState<number | null>(null);
+  const [platform, setPlatform] = useState(platforms[0] ?? "");
+  const [type, setType] = useState("");
+  const label = def.models.find((m) => m.id === config.model)?.label ?? unit.piece;
+  const groups = applicableModules(def, config);
+  const mine = (mods.data ?? []).filter((m) => unit.accountId != null && m.assignedUnitId === unit.accountId);
+  const grouped = groups
+    .map((name) => ({
+      name,
+      rows: mine.filter((m) => moduleTypeFit(def, config, m.moduleType ?? "").group === name),
+    }))
+    .filter((g) => g.rows.length);
+  const typeOk = !!type && moduleTypeFit(def, config, type).ok;
+  const platformOk = !!platform && platformFit(platforms, platform, label).ok;
+  const spare = (mods.data ?? []).filter(
+    (m) => typeOk && platformOk && m.moduleType === type && m.platform === platform && moduleAvailability(m) === "hq",
+  );
+  const attach = useMutation({
+    mutationFn: (id: number) => assignModule({ data: { id, customer, unitId: unit.accountId! } }),
+    onSuccess: (r) => {
+      toast.success(`Attached to ${r.unit}`);
+      setOpen(false);
+      void qc.invalidateQueries({ queryKey: ["modules"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not assign"),
+  });
+  return (
+    <div className="grid gap-2" data-testid="unit-modules">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h4 className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Modules on this unit</h4>
+        {canWrite && unit.accountId != null ? (
+          <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
+            Assign module
+          </Button>
+        ) : null}
+      </div>
+      {unit.accountId == null ? (
+        <p className="text-sm text-muted-foreground">Log the asset before modules can be assigned to this unit.</p>
+      ) : mods.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading modules…</p>
+      ) : grouped.length ? (
+        <ul className="grid gap-2">
+          {grouped.map((g) => (
+            <li key={g.name}>
+              <p className="text-sm font-medium">{g.name}</p>
+              <ul className="mt-1 grid gap-1">
+                {g.rows.map((m) => (
+                  <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 break-words text-muted-foreground">
+                      SN {m.moduleId}
+                      {m.moduleType ? ` · ${m.moduleType}` : ""}
+                      {m.platform ? ` · ${m.platform}` : ""}
+                    </span>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setRunbookFor(m.id)}>
+                      Runbook
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">No modules assigned to this unit.</p>
+      )}
+      <Dialog open={open} onOpenChange={(o) => !o && !attach.isPending && setOpen(false)}>
+        <DialogContent data-testid="assign-unit-module">
+          <DialogTitle>Assign module</DialogTitle>
+          <DialogDescription>
+            {label}. Only the module types and platform for this machine can be chosen.
+          </DialogDescription>
+          <div className="mt-3 grid gap-3">
+            <div className="grid gap-1">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Platform</span>
+              {MODULE_PLATFORMS.map((p) => {
+                const fit = platformFit(platforms, p, label);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    disabled={!fit.ok}
+                    aria-pressed={platform === p}
+                    onClick={() => setPlatform(p)}
+                    className={cn(
+                      "rounded-md border px-3 py-2 text-left text-sm disabled:cursor-not-allowed disabled:opacity-70",
+                      platform === p && fit.ok ? "border-primary bg-primary text-primary-foreground" : "border-border",
+                    )}
+                  >
+                    <span className="block">{p}</span>
+                    {fit.reason ? <span className="block text-xs text-muted-foreground">{fit.reason}</span> : null}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid gap-1">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Type</span>
+              {MODULE_TYPES.map((t) => {
+                const fit = moduleTypeFit(def, config, t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    disabled={!fit.ok}
+                    aria-pressed={type === t}
+                    onClick={() => setType(t)}
+                    className={cn(
+                      "rounded-md border px-3 py-2 text-left text-sm break-words disabled:cursor-not-allowed disabled:opacity-70",
+                      type === t && fit.ok ? "border-primary bg-primary text-primary-foreground" : "border-border",
+                    )}
+                  >
+                    <span className="block">{t}</span>
+                    {fit.reason ? <span className="block text-xs text-muted-foreground">{fit.reason}</span> : null}
+                  </button>
+                );
+              })}
+            </div>
+            {typeOk && platformOk ? (
+              spare.length ? (
+                <ul className="max-h-48 divide-y divide-border overflow-y-auto rounded-md border border-border">
+                  {spare.map((m: ModuleRow) => (
+                    <li key={m.id}>
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2 text-left text-sm break-words hover:bg-muted"
+                        disabled={attach.isPending}
+                        onClick={() => attach.mutate(m.id)}
+                      >
+                        SN {m.moduleId}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No {type} for {platform} is at HQ.</p>
+              )
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={runbookFor != null} onOpenChange={(o) => !o && setRunbookFor(null)}>
+        <DialogContent data-testid="module-runbook-pm" className="max-h-[85vh] overflow-y-auto">
+          <DialogTitle>Module runbook</DialogTitle>
+          <DialogDescription>On site, during this PM. The same sheet as the bench, stored on this visit.</DialogDescription>
+          {runbookFor != null ? <div className="mt-3"><ModuleRunbook moduleId={runbookFor} context="pm" pmId={pmId} /></div> : null}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 /** Runbook for one PM job: a tab per unit with kit list and service steps. Office roles see ticks read-only. */
 export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }) {
   const qc = useQueryClient();
@@ -62,14 +249,20 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const [active, setActive] = useState<string | null>(null);
   const { copy, copied, dialog } = useCopy();
   const units = useMemo(() => q.data?.units ?? [], [q.data]);
+  const machines = useMemo(() => q.data?.machines ?? [], [q.data]);
+  const parts = useMemo(() => q.data?.parts ?? [], [q.data]);
   const canWrite = !!q.data?.canWrite;
   useEffect(() => {
-    if (!units.length) return;
-    if (!active || !units.some((u) => u.unitKey === active)) setActive(units[0].unitKey);
-  }, [units, active]);
-  const unit: RunbookUnit | undefined = units.find((u) => u.unitKey === active) ?? units[0];
+    if (!machines.length) return;
+    if (!active || !machines.some((m) => m.key === active)) setActive(machines[0].key);
+  }, [machines, active]);
+  const machine = machines.find((m) => m.key === active) ?? machines[0];
+  const unit: RunbookUnit | undefined = machine ? units.find((u) => u.pieceKey === machine.pieceKey) : undefined;
   const rb = unit ? runbookById(unit.runbookId) : undefined;
-  const refresh = () => qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["pm-runbook", pmId] });
+    void qc.invalidateQueries({ queryKey: ["pm-bill"] });
+  };
   const onError = (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save");
 
   const setConfig = useMutation({
@@ -92,10 +285,40 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     onSuccess: refresh,
     onError,
   });
-  const kitNumbers = useMemo(() => (unit && rb ? kitList(rb.def, unit.config).map((k) => k.ev) : []), [unit, rb]);
+  const addKit = useMutation({
+    mutationFn: (d: { ev: string; on: boolean }) =>
+      setRunbookAddedKit({
+        data: { pmId, unitKey: unit?.unitKey ?? "", runbookId: unit?.runbookId ?? "", ev: d.ev, on: d.on },
+      }),
+    onSuccess: refresh,
+    onError,
+  });
+  const [logging, setLogging] = useState(false);
+  const [choice, setChoice] = useState("new");
+  const [serial, setSerial] = useState("");
+  const [installDate, setInstallDate] = useState("");
+  const [elsewhere, setElsewhere] = useState<string | null>(null);
+  const logAsset = useMutation({
+    mutationFn: (d: Parameters<typeof logRunbookAsset>[0]["data"]) => logRunbookAsset({ data: d }),
+    onSuccess: () => {
+      setLogging(false);
+      setElsewhere(null);
+      toast.success("Asset logged. Ticks on this line stay with the unit.");
+      refresh();
+    },
+    onError: (e: unknown) => {
+      const msg = e instanceof Error ? e.message : "Could not save";
+      const where = /^Serial .+ is already on (.+)\.$/.exec(msg)?.[1] ?? null;
+      if (where && where.toLowerCase() !== customer.trim().toLowerCase()) setElsewhere(where);
+      else toast.error(msg);
+    },
+  });
+  const listed = useMemo(() => (unit && rb ? kitListWithAdded(rb.def, unit.config, unit.addedKits) : []), [unit, rb]);
+  const optional = useMemo(() => (unit && rb ? optionalKitsLeft(rb.def, unit.config, unit.addedKits) : []), [unit, rb]);
+  const kitNumbers = useMemo(() => [...listed, ...optional].map((k) => k.ev), [listed, optional]);
   const priceQ = useQuery({
-    queryKey: ["pm-runbook-prices", kitNumbers.join(",")],
-    queryFn: () => getKitPrices({ data: { evs: kitNumbers } }),
+    queryKey: ["pm-runbook-prices", unit?.runbookId ?? "", kitNumbers.join(",")],
+    queryFn: () => getKitPrices({ data: { evs: kitNumbers, runbookId: unit?.runbookId } }),
     enabled: kitNumbers.length > 0,
   });
   const [armed, setArmed] = useState(false);
@@ -103,8 +326,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
 
   const view = useMemo(() => {
     if (!unit || !rb) return null;
-    const kits = kitList(rb.def, unit.config);
-    const steps = stepList(rb.def, unit.config);
+    const kits = kitListWithAdded(rb.def, unit.config, unit.addedKits);
+    const steps = stepsForVisit(rb.def, unit.config, unit.addedKits);
     const modules: { module: string; kits: typeof kits }[] = [];
     for (const k of kits) {
       let m = modules.find((x) => x.module === k.module);
@@ -119,11 +342,150 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     () => (priceQ.data && view ? priceKits(view.kits, priceQ.data) : null),
     [priceQ.data, view],
   );
+  const optionalPrices = useMemo(
+    () => (priceQ.data && optional.length ? priceKits(optional, priceQ.data) : null),
+    [priceQ.data, optional],
+  );
   const priceSummary = prices ? summarizePrices(prices) : null;
 
-  if (q.isLoading || !units.length || !unit || !rb || !view) return null;
+  if (q.isLoading) return null;
+  if (!machines.length || !machine) {
+    if (!parts.length) return null;
+    return (
+      <OtherParts
+        pmId={pmId}
+        pieceKey=""
+        parts={[]}
+        orphans={parts}
+        onlyOrphans
+        locked={q.data?.partsLocked ?? null}
+        canWrite={canWrite}
+        completed={!!q.data?.completed}
+      />
+    );
+  }
+  const mine = parts.filter((p) => p.pieceKey === machine.pieceKey);
+  const knownPieces = new Set(machines.map((m) => m.pieceKey));
+  const orphans: PmMachinePart[] = machines[machines.length - 1]?.key === machine.key ? parts.filter((p) => !knownPieces.has(p.pieceKey)) : [];
+  const partsBlock = (
+    <OtherParts
+      pmId={pmId}
+      pieceKey={machine.pieceKey}
+      parts={mine}
+      orphans={orphans}
+      locked={q.data?.partsLocked ?? null}
+      canWrite={canWrite}
+      completed={!!q.data?.completed}
+    />
+  );
+  const tabs =
+    machines.length > 1 ? (
+      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Units on this PM">
+        {machines.map((m, i) => (
+          <button
+            key={m.key}
+            type="button"
+            role="tab"
+            aria-selected={m.key === machine.key}
+            onClick={() => setActive(m.key)}
+            className={cn(
+              "max-w-full truncate rounded-md border px-3 py-1.5 text-sm",
+              m.key === machine.key ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
+            )}
+          >
+            {i + 1}. {m.serial ? `SN ${m.serial}` : m.piece}
+          </button>
+        ))}
+      </div>
+    ) : null;
+
+  if (!unit || !rb || !view) {
+    return (
+      <section className="grid gap-4 border-b border-border p-5" aria-label="Runbook">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="font-heading text-base font-semibold">Runbook</h3>
+          <span className="text-xs text-muted-foreground">{canWrite ? "No runbook for this machine" : "No runbook for this machine · view only"}</span>
+        </div>
+        {tabs}
+        <div className="text-sm text-muted-foreground">
+          {machine.piece}
+          {machine.serial ? ` · SN ${machine.serial}` : ""}
+        </div>
+        {!machine.serial && canWrite ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="w-fit"
+            onClick={() => {
+              setChoice(machine.accountId != null ? String(machine.accountId) : "new");
+              setSerial("");
+              setInstallDate("");
+              setLogging(true);
+            }}
+          >
+            Log the asset
+          </Button>
+        ) : null}
+        {machine.earlierParts.length ? (
+          <ul className="grid gap-1 text-xs text-muted-foreground">
+            {machine.earlierParts.map((h, i) => (
+              <li key={i}>
+                {new Date(h.at).toLocaleDateString()} · {h.who ?? "Someone"}: {h.detail}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {partsBlock}
+        <Dialog open={logging} onOpenChange={(o) => !o && !logAsset.isPending && setLogging(false)}>
+          <DialogContent data-testid="log-asset">
+            <DialogTitle>Log the asset</DialogTitle>
+            <DialogDescription>{machine.piece}. Serial is required. Install date is optional.</DialogDescription>
+            <form
+              className="mt-3 grid gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                logAsset.mutate({ pmId, pieceKey: machine.pieceKey, accountId: choice === "new" ? null : Number(choice), serial, installDate: installDate || null });
+              }}
+            >
+              <label className="grid gap-1 text-sm">
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Account unit</span>
+                <select className="h-10 w-full rounded-md border border-border bg-background px-2" value={choice} onChange={(e) => setChoice(e.target.value)}>
+                  <option value="new">Add a new unit</option>
+                  {(q.data?.accountUnits ?? []).map((a) => {
+                    const taken = machines.some((m) => m.accountId === a.id && m.pieceKey !== machine.pieceKey);
+                    return (
+                      <option key={a.id} value={a.id} disabled={taken}>
+                        {a.name}
+                        {a.serial ? ` · SN ${a.serial}` : " · no serial"}
+                        {taken ? " · already on this PM" : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+              <label className="grid gap-1 text-sm">
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Serial</span>
+                <Input value={serial} onChange={(e) => setSerial(e.target.value)} required={choice === "new"} autoComplete="off" />
+              </label>
+              <label className="grid gap-1 text-sm">
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Install date</span>
+                <Input type="date" value={installDate} onChange={(e) => setInstallDate(e.target.value)} />
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" disabled={logAsset.isPending}>{logAsset.isPending ? "Saving…" : "Log the asset"}</Button>
+                <Button type="button" variant="outline" disabled={logAsset.isPending} onClick={() => setLogging(false)}>Cancel</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </section>
+    );
+  }
   const def = rb.def;
   const c = unit.config;
+  const pmDone = !!q.data?.completed;
+  const canChangeKits = canWrite && !pmDone;
 
   function pickOption(key: string, val: string) {
     if (!unit) return;
@@ -138,7 +500,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
       unitKey: unit.unitKey,
       runbookId: unit.runbookId,
       optionsKey: unit.optionsKey,
-      model: key === "model" ? val : c.model,
+      model: key === "model" ? val : null,
       interval: key === "pm" ? val : c.pm,
     });
   }
@@ -154,6 +516,9 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
     return [t.by, day].filter(Boolean).join(" · ");
   };
   const time = def.models.find((m) => m.id === c.model)?.time?.[c.pm];
+  const together = combinedVisitNotes(def);
+  const lastPm = unit.fromHistory?.basedOn[unit.fromHistory.basedOn.length - 1];
+  const lastPmLabel = def.intervals.find((i) => i.id === lastPm?.interval)?.label ?? `${lastPm?.interval ?? ""}-month PM`;
   const header = `${customer}${unit.serial ? ` · SN ${unit.serial}` : ""}`;
 
   return (
@@ -166,25 +531,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </span>
       </div>
 
-      {units.length > 1 ? (
-        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Units on this PM">
-          {units.map((u, i) => (
-            <button
-              key={u.unitKey}
-              type="button"
-              role="tab"
-              aria-selected={u.unitKey === unit.unitKey}
-              onClick={() => setActive(u.unitKey)}
-              className={cn(
-                "max-w-full truncate rounded-md border px-3 py-1.5 text-sm",
-                u.unitKey === unit.unitKey ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
-              )}
-            >
-              {i + 1}. {u.serial ? `SN ${u.serial}` : u.piece}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      {tabs}
 
       <div className="text-sm text-muted-foreground">
         {unit.piece}
@@ -195,9 +542,40 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             : " · not matched to an account unit, so options stay with this PM only"}
       </div>
 
+      {!unit.logged ? (
+        <div className="grid gap-2 rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
+          <span>This unit is not logged as an asset, so this PM cannot be marked completed.</span>
+          {canWrite ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="w-fit"
+              onClick={() => {
+                setChoice(unit.accountId != null ? String(unit.accountId) : "new");
+                setSerial(unit.serial ?? "");
+                setInstallDate(unit.installDate ?? "");
+                setLogging(true);
+              }}
+            >
+              Log the asset
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {rb.modules ? (
+        <UnitModules unit={unit} def={def} config={c} canWrite={canWrite} customer={customer} platforms={rb.platforms} pmId={pmId} />
+      ) : null}
+
       <div className="grid gap-3 sm:grid-cols-2">
-        <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
-        <Seg label="Service interval" value={c.pm} disabled={!canWrite} choices={def.intervals.map((i) => ({ val: i.id, label: i.label }))} onPick={(v) => pickJob("pm", v)} />
+        {canWrite && !pmDone && !unit.modelPicked ? (
+          <p className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900 sm:col-span-2">
+            The equipment text doesn't say which model this is. Pick the machine.
+          </p>
+        ) : null}
+        <Seg label="Machine" value={c.model} disabled={!canWrite || pmDone} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
+        <Seg label="Service interval" value={c.pm} disabled={!canWrite || pmDone} choices={def.intervals.map((i) => ({ val: i.id, label: i.label }))} onPick={(v) => pickJob("pm", v)} />
         {visibleOptions(def, c).map((o) => (
           <Seg key={o.key} label={o.label} value={c[o.key]} disabled={!canWrite} choices={o.choices} onPick={(v) => pickOption(o.key, v)} />
         ))}
@@ -209,16 +587,16 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             <b>No install date on file for this unit</b>, so its PM interval cannot be worked out from its age. Add the
             install date on the account equipment.
           </span>
-          {unit.fromHistory ? (
+          {unit.fromHistory && !pmDone ? (
             <span className="flex flex-wrap items-center justify-between gap-2">
               <span>
-                Suggested from the last full PM ({unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval}-month, PM #
+                Suggested from the last full PM ({lastPmLabel}, PM #
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.pmId}
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt
                   ? `, ${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt}`
                   : ""}
                 ): <b>{unit.fromHistory.label}</b>
-                {unit.fromHistory.combined ? ", the 12 + 36 together visit" : ""}.
+                {unit.fromHistory.combined ? together.history : ""}.
               </span>
               {canWrite && unit.fromHistory.id !== c.pm ? (
                 <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.fromHistory!.id)}>
@@ -226,18 +604,25 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 </Button>
               ) : null}
             </span>
-          ) : (
+          ) : !unit.fromHistory && !pmDone ? (
             <span>No earlier full PM on record for this unit either, so choose the interval yourself.</span>
-          )}
+          ) : null}
+        </div>
+      ) : null}
+
+      {unit.pastLastVisit ? (
+        <div className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">
+          <b>Past the last visit on this plan</b>. The install date is past the visits this sheet lists, so choose the interval yourself.
         </div>
       ) : null}
 
       {unit.recommended && unit.recommended.id !== c.pm ? (
+        pmDone ? null : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
             Recommended: <b>{unit.recommended.label}</b>
-            {unit.recommended.combined ? " (12 + 36 together)" : ""}. Installed {unit.installDate}, so this is year{" "}
-            {unit.recommended.year} at this location. Choose otherwise if the customer wants a different service.
+            {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is{" "}
+            {intervalAgeLabel(def, unit.recommended.milestone)} at this location. Choose otherwise if the customer wants a different service.
           </span>
           {canWrite ? (
             <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.recommended!.id)}>
@@ -245,13 +630,14 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             </Button>
           ) : null}
         </div>
+        )
       ) : unit.recommended ? (
         <p className="text-xs text-muted-foreground">
-          Matches the recommendation from the install date ({unit.installDate}, year {unit.recommended.year}).
+          Matches the recommendation from the install date ({unit.installDate}, {intervalAgeLabel(def, unit.recommended.milestone)}).
         </p>
       ) : null}
 
-      {banners(def, c).map((b, i) => (
+      {visitBanners(def, c, unit.addedKits).map((b, i) => (
         <p
           key={i}
           className={cn(
@@ -273,7 +659,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             </>
           ) : null}
         </div>
-        <Button type="button" size="sm" variant="outline" onClick={() => void copy("kits", kitListText(def, c, header, prices ?? undefined))}>
+        <Button type="button" size="sm" variant="outline" onClick={() => void copy("kits", kitListText(def, c, header, prices ?? undefined, unit.addedKits))}>
           {copied === "kits" ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />}
           Copy kit list
         </Button>
@@ -316,37 +702,50 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 const key = `kit:${k.ev}`;
                 const on = !!unit.checks[key];
                 return (
-                  <label key={k.ev} className={cn("flex items-start gap-3 rounded-md border border-border p-2", on && "bg-muted")}>
-                    <input
-                      type="checkbox"
-                      className="mt-1 size-5 accent-[var(--primary)]"
-                      checked={on}
-                      disabled={!canWrite || tick.isPending}
-                      onChange={(e) => toggle(key, e.target.checked)}
-                    />
-                    <span className="min-w-0 flex-1 text-sm">
-                      <span className="font-mono font-semibold">{k.ev}</span> <span className={cn(on && "line-through opacity-70")}>{k.name}</span>
-                      {k.parts.length > 1 ? (
-                        <span className="block text-xs font-medium">Made up of: {k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")}</span>
-                      ) : null}
-                      {k.notes.length ? <span className="block text-xs text-muted-foreground">{k.notes.join(" ")}</span> : null}
-                      {(() => {
-                        const p = prices?.find((x) => x.ev === k.ev);
-                        if (!p) return null;
-                        const text = kitPriceParts(p).join(" · ");
-                        return p.status === "priced" ? (
-                          <span className="block text-xs text-muted-foreground">{text}</span>
-                        ) : (
-                          <span className="mt-0.5 block w-fit rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">{text}</span>
-                        );
-                      })()}
-                      {on && stamp(key) ? <span className="block text-xs text-muted-foreground">Checked in: {stamp(key)}</span> : null}
-                    </span>
-                    <span className="font-mono text-base font-semibold whitespace-nowrap">
-                      x{k.q}
-                      <small className="block text-right text-[10px] font-normal text-muted-foreground">{k.interval} mo</small>
-                    </span>
-                  </label>
+                  <div key={k.ev} className={cn("flex items-start gap-3 rounded-md border border-border p-2", on && "bg-muted")}>
+                    <label className="flex min-w-0 flex-1 items-start gap-3">
+                      <input
+                        type="checkbox"
+                        className="mt-1 size-5 accent-[var(--primary)]"
+                        checked={on}
+                        disabled={!canWrite || tick.isPending}
+                        onChange={(e) => toggle(key, e.target.checked)}
+                      />
+                      <span className="min-w-0 flex-1 text-sm">
+                        <span className="font-mono font-semibold">{k.ev}</span>{" "}
+                        <span className={cn(on && "line-through opacity-70")}>{k.name}</span>
+                        {k.added ? (
+                          <span className="ml-2 rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-sky-900 uppercase">Added</span>
+                        ) : null}
+                        {k.parts.length > 1 ? (
+                          <span className="block text-xs font-medium">Made up of: {k.parts.map((p) => `${p.q} x ${p.label}`).join(" + ")}</span>
+                        ) : null}
+                        {k.notes.length ? <span className="block text-xs text-muted-foreground">{k.notes.join(" ")}</span> : null}
+                        {(() => {
+                          const p = prices?.find((x) => x.ev === k.ev);
+                          if (!p) return null;
+                          const text = kitPriceParts(p).join(" · ");
+                          return p.status === "priced" ? (
+                            <span className="block text-xs text-muted-foreground">{text}</span>
+                          ) : (
+                            <span className="mt-0.5 block w-fit rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">{text}</span>
+                          );
+                        })()}
+                        {on && stamp(key) ? <span className="block text-xs text-muted-foreground">Checked in: {stamp(key)}</span> : null}
+                      </span>
+                      <span className="font-mono text-base font-semibold whitespace-nowrap">
+                        x{k.q}
+                        {def.visitsPerYear ? null : (
+                          <small className="block text-right text-[10px] font-normal text-muted-foreground">{(def.intervals.find((i) => i.id === String(k.interval))?.label ?? `${k.interval}-month PM`).replace(/\s*PM\b.*$/, "")}</small>
+                        )}
+                      </span>
+                    </label>
+                    {k.added && canChangeKits ? (
+                      <Button type="button" size="sm" variant="outline" disabled={addKit.isPending} onClick={() => addKit.mutate({ ev: k.ev, on: false })}>
+                        Remove
+                      </Button>
+                    ) : null}
+                  </div>
                 );
               })}
             </div>
@@ -355,6 +754,41 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
           <p className="text-sm text-muted-foreground">No kits for this setup.</p>
         )}
       </div>
+
+      {canChangeKits && optional.length ? (
+        <div className="grid gap-2">
+          <h4 className="text-sm font-semibold">Optional kits</h4>
+          <p className="text-xs text-muted-foreground">
+            From the {def.intervals.find((i) => i.id === longestIntervalId(def))?.label ?? "longer"} list, not on this visit. Adding one puts it on this PM. It is not checked in until you tick it.
+          </p>
+          {optional.map((k) => {
+            const p = optionalPrices?.find((x) => x.ev === k.ev);
+            const text = p ? kitPriceParts(p).join(" · ") : null;
+            return (
+              <div key={k.ev} className="flex items-start gap-3 rounded-md border border-dashed border-border p-2">
+                <span className="min-w-0 flex-1 text-sm break-words">
+                  <span className="font-mono font-semibold">{k.ev}</span> {k.name}
+                  {text ? (
+                    p && p.status === "priced" ? (
+                      <span className="block text-xs text-muted-foreground">{text}</span>
+                    ) : (
+                      <span className="mt-0.5 block w-fit rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900">{text}</span>
+                    )
+                  ) : null}
+                </span>
+                <span className="font-mono text-base font-semibold whitespace-nowrap">x{k.q}</span>
+                {canChangeKits ? (
+                  <Button type="button" size="sm" variant="outline" disabled={addKit.isPending} onClick={() => addKit.mutate({ ev: k.ev, on: true })}>
+                    Add
+                  </Button>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {partsBlock}
 
       <div className="grid gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -427,10 +861,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
 
       {unit.history.length ? (
         <details className="text-sm">
-          <summary className="cursor-pointer font-semibold">Option history for this unit</summary>
-          <ul className="mt-2 grid gap-1 text-xs text-muted-foreground">
+          <summary className="cursor-pointer font-semibold">History for this unit</summary>
+          <ul className="mt-2 grid gap-2 text-xs text-muted-foreground">
             {unit.history.map((h, i) => (
-              <li key={i}>
+              <li key={i} className="break-words whitespace-pre-wrap">
                 {new Date(h.at).toLocaleDateString()} · {h.who ?? "Someone"}: {h.detail}
               </li>
             ))}
@@ -468,6 +902,88 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
         </details>
       ) : null}
       {dialog}
+      <Dialog open={logging} onOpenChange={(o) => !o && !logAsset.isPending && setLogging(false)}>
+        <DialogContent data-testid="log-asset">
+          <DialogTitle>Log the asset</DialogTitle>
+          <DialogDescription>
+            {def.models.find((m) => m.id === c.model)?.label ?? unit.piece}. Serial is required. Install date is optional. Ticks already on this line move to the unit.
+          </DialogDescription>
+          <form
+            className="mt-3 grid gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              logAsset.mutate({
+                pmId,
+                pieceKey: unit.pieceKey,
+                accountId: choice === "new" ? null : Number(choice),
+                serial,
+                installDate: installDate || null,
+              });
+            }}
+          >
+            <label className="grid gap-1 text-sm">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Account unit</span>
+              <select
+                className="h-10 w-full rounded-md border border-border bg-background px-2"
+                value={choice}
+                onChange={(e) => {
+                  setChoice(e.target.value);
+                  setElsewhere(null);
+                }}
+              >
+                <option value="new">Add a new unit</option>
+                {(q.data?.accountUnits ?? []).map((a) => {
+                  const taken = machines.some((m) => m.accountId === a.id && m.pieceKey !== unit.pieceKey);
+                  return (
+                    <option key={a.id} value={a.id} disabled={taken}>
+                      {a.name}
+                      {a.serial ? ` · SN ${a.serial}` : " · no serial"}
+                      {taken ? " · already on this PM" : ""}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Serial</span>
+              <Input value={serial} onChange={(e) => { setSerial(e.target.value); setElsewhere(null); }} required={choice === "new" || !(q.data?.accountUnits ?? []).find((a) => String(a.id) === choice)?.serial} autoComplete="off" />
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Install date</span>
+              <Input type="date" value={installDate} onChange={(e) => setInstallDate(e.target.value)} />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={logAsset.isPending}>
+                {logAsset.isPending ? "Saving…" : "Log the asset"}
+              </Button>
+              <Button type="button" variant="outline" disabled={logAsset.isPending} onClick={() => setLogging(false)}>
+                Cancel
+              </Button>
+            </div>
+            {elsewhere ? (
+              <div className="grid gap-2 rounded-md border border-border p-3 text-sm">
+                <p>This serial is already on {elsewhere}. Moving it keeps the same unit, serial, install date and history.</p>
+                <Button
+                  type="button"
+                  disabled={logAsset.isPending}
+                  onClick={() =>
+                    logAsset.mutate({
+                      pmId,
+                      pieceKey: unit.pieceKey,
+                      accountId: choice === "new" ? null : Number(choice),
+                      serial,
+                      installDate: installDate || null,
+                      move: true,
+                    })
+                  }
+                >
+                  Move this unit here
+                </Button>
+              </div>
+            ) : null}
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

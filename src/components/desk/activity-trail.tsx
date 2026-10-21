@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { listActivity } from "@/lib/ops/api";
+import { addedKitHistoryLine } from "@/lib/ops/pm-runbook";
 import { cn } from "@/lib/utils";
 
 function actionLine(action: string, detail: string | null): string {
@@ -14,6 +15,7 @@ function actionLine(action: string, detail: string | null): string {
   if (action === "returned") return detail ? `returned to ${detail}` : "returned to warehouse";
   if (action === "sold") return detail ? `sold to ${detail}` : "marked sold";
   if (action === "updated") return detail ?? "saved changes";
+  if (action === "kit added" || action === "kit removed") return addedKitHistoryLine(action, detail);
   return detail || action;
 }
 

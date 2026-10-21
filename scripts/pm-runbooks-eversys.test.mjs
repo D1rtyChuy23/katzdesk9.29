@@ -212,13 +212,13 @@ test("planUnits: the serial picks the model the text left open", () => {
     { id: 1, catalogModel: "Eversys e'4s", equipmentName: "Eversys e'4 Shotmaster Pro (Production)", serial: "1166500213400" },
     { id: 2, catalogModel: "Eversys Enigma e'4s ST", equipmentName: "Eversys Enigma Shotmaster", serial: "0116560022200000" },
   ];
-  const [pro] = planUnits("Eversys e'4 Shotmaster Pro (Production)", rows, match, bySerial);
+  const [pro] = planUnits("Eversys e'4 Shotmaster Pro (Production)", rows, match, null, bySerial);
   assert.equal(pro.runbookId, "eversys-shotmaster");
   assert.equal(pro.model, "spro");
-  const [named] = planUnits("Eversys Enigma Shotmaster", rows, match, bySerial);
+  const [named] = planUnits("Eversys Enigma Shotmaster", rows, match, null, bySerial);
   assert.equal(named.runbookId, "eversys-enigma"); // the plate says E'4s/ST
   assert.equal(named.model, "4s");
-  const [noSerial] = planUnits("Eversys Shotmaster CT", [], match, bySerial);
+  const [noSerial] = planUnits("Eversys Shotmaster CT", [], match, null, bySerial);
   assert.equal(noSerial.model, "c");
 });
 

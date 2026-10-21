@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightLeft, ChevronDown, ChevronRight, FileUp, Loader2, Pencil, Plus, Search, Settings2, Trash2 } from "lucide-react";
+import { ArrowRightLeft, ChevronDown, ChevronRight, FileUp, Loader2, Pencil, Plus, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { deleteSpecSheet, getSpecImage, listSpecSheets, refreshSpecDefaults, setSpecImages, type SavedSpecSheet } from "@/lib/ops/spec-library";
 import {
@@ -18,19 +18,23 @@ import {
   type LibraryBook,
   type LibraryFile,
 } from "@/lib/ops/library-files";
-import { chipForDoc, copiedManuals, docVariation, familyOf, isMainChip, mainChipFor, removedCopies, variationsOf, fileError, fileUrl, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { chipForDoc, copiedManuals, docVariation, familyOf, fileUrl, isMainChip, mainChipFor, removedCopies, variationsOf, fileError, likelyBooks, manualTypeFromName, matchBook, modelLabel, nameKey, SHELF, shortDocName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { listSpecReadStatus, resolveSpecHandEntry, runSpecReads } from "@/lib/ops/spec-read-api";
+import { TILE_LABEL, bookSpecStatus, handEntryForRow, tiedSheetId, type TileStatus } from "@/lib/ops/spec-read";
 import { pdfImages } from "@/lib/pdf-text";
 import { needsWater } from "@/lib/ops/spec-defaults";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, originOf, uploadLibraryFile } from "@/components/desk/library-files";
+import { AddTarget, BookPicker, DocRow, DROP_RULES, ManualTypePicker, StoreOnceDialog, originOf, uploadLibraryFile, type StoreOnceChoice } from "@/components/desk/library-files";
+import { LibraryAdmin } from "@/components/desk/library-admin";
+import type { StoreOnceOffer } from "@/lib/ops/library-files";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import { MpnPanel, OfficialTag } from "@/components/desk/mpn-panel";
 import { LegacyPanel } from "@/components/desk/legacy-panel";
 import { FilterChip } from "@/components/desk/desk-charts";
 import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
-import { CONFIRM_LEGACY, splitLegacy } from "@/lib/ops/legacy-rules";
+import { splitLegacy } from "@/lib/ops/legacy-rules";
 import { EquipmentCodesImport } from "@/components/desk/equipment-codes-import";
 import { TrainingSection } from "@/components/desk/training-section";
 import { SpecSheetView } from "@/components/desk/spec-sheet";
@@ -38,11 +42,13 @@ import { SpecImport } from "@/components/desk/spec-import";
 import { TroubleshootPanel } from "@/components/desk/troubleshoot-panel";
 import { cn } from "@/lib/utils";
 
-type Search = { open?: number; book?: number };
+type Tab = "library" | "training" | "admin";
+type Search = { open?: number; book?: number; tab?: Tab };
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : typeof v === "string" && v && !Number.isNaN(Number(v)) ? Number(v) : undefined);
+const tabOf = (v: unknown): Tab | undefined => (v === "training" || v === "admin" ? v : undefined);
 
 export const Route = createFileRoute("/_app/library")({
-  validateSearch: (s: Record<string, unknown>): Search => ({ open: num(s.open), book: num(s.book) }),
+  validateSearch: (s: Record<string, unknown>): Search => ({ open: num(s.open), book: num(s.book), tab: tabOf(s.tab) }),
   component: Page,
 });
 
@@ -58,23 +64,29 @@ type Ask =
   | { kind: "move-sheet"; sheet: SavedSpecSheet };
 
 function Page() {
-  const { open, book: bookParam } = Route.useSearch();
+  const { open, book: bookParam, tab: tabParam } = Route.useSearch();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["spec-library"], queryFn: () => listSpecSheets() });
   const lib = useQuery({ queryKey: ["library-files"], queryFn: () => listLibraryFiles() });
+  const specStatus = useQuery({ queryKey: ["spec-read-status"], queryFn: () => listSpecReadStatus() });
   const sheets = data.data?.sheets ?? [];
   const books = lib.data?.books ?? [];
   const files = lib.data?.files ?? [];
   const hidden = lib.data?.hidden ?? [];
   const sheetBook = new Map((lib.data?.sheetBooks ?? []).map((r) => [r.sheetId, r.bookId]));
-  const canEdit = !!data.data?.canEdit;
+  const canEdit = !!lib.data?.canEdit || !!data.data?.canEdit;
+  const isAdmin = !!lib.data?.isAdmin;
+  const tab: Tab = tabParam === "admin" && !isAdmin ? "library" : (tabParam ?? "library");
   const selected = open != null ? sheets.find((s) => s.id === open) ?? null : null;
   const bookId = bookParam ?? (selected ? sheetBook.get(selected.id) ?? null : null);
   const book = bookId != null ? books.find((b) => b.id === bookId) ?? null : null;
 
   const [mode, setMode] = useState<"browse" | "import" | "edit">("browse");
-  const [importFile, setImportFile] = useState<{ file: File; bookId: number } | null>(null);
+  const [importFile, setImportFile] = useState<{ file: File | null; bookId: number } | null>(null);
+  const [handSeed, setHandSeed] = useState<{ manufacturer: string; model: string } | null>(null);
+  // The Spec Review file whose specs are being typed by hand. Saving closes its row.
+  const [handFile, setHandFile] = useState<number | null>(null);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<{ section: LibrarySection; text: string } | null>(null);
   const [problems, setProblems] = useState<string[]>([]);
@@ -91,17 +103,22 @@ function Page() {
   const [openMaker, setOpenMaker] = useState<string | null>(null);
   const [manage, setManage] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [readOnAdd, setReadOnAdd] = useState(true);
   const [codesOpen, setCodesOpen] = useState(false);
-  // The toolbar's filters: only Legacy models, or only models flagged Confirm Legacy.
-  const [only, setOnly] = useState<"legacy" | "confirm" | null>(null);
+  const [storeOnce, setStoreOnce] = useState<{ offer: StoreOnceOffer; fileName: string; resolve: (choice: StoreOnceChoice) => void } | null>(null);
   const rereadInput = useRef<HTMLInputElement>(null);
   const [rereading, setRereading] = useState(false);
   const [found, setFound] = useState<{ image: string | null; dimsImage: string | null; note: string | null; file: string } | null>(null);
   const bookPanel = useRef<HTMLDivElement>(null);
 
-  const go = (s: Search) => void navigate({ to: "/library", search: s });
+  const go = (s: Search) => void navigate({ to: "/library", search: { ...s, tab: s.tab ?? (tab === "library" ? undefined : tab) } });
   const reload = () =>
-    Promise.all([qc.invalidateQueries({ queryKey: ["library-files"] }), qc.invalidateQueries({ queryKey: ["spec-library"] })]);
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ["library-files"] }),
+      qc.invalidateQueries({ queryKey: ["spec-library"] }),
+      qc.invalidateQueries({ queryKey: ["spec-read-status"] }),
+      qc.invalidateQueries({ queryKey: ["spec-reads"] }),
+    ]);
   const fail = (e: unknown, fallback: string) => toast.error(e instanceof Error ? e.message : fallback);
 
   useEffect(() => {
@@ -125,6 +142,7 @@ function Page() {
   async function addFiles(section: LibrarySection, list: File[], into?: LibraryBook | null) {
     if (!list.length || busy) return;
     const errors: string[] = [];
+    const queuedReads: number[] = [];
     let known = books;
     let last: LibraryBook | null = null;
     for (const file of list) {
@@ -183,9 +201,40 @@ function Page() {
         if (!known.some((b) => b.id === target!.id)) known = [...known, target];
       }
       try {
-        const filed = await uploadLibraryFile(file, section, target.id, (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }), type ?? undefined, customName);
-        toast.success(`Filed in ${target.title} → ${SHELF[filed.section].title} as ${filed.name}`);
-        last = target;
+        const filed = await uploadLibraryFile(
+          file,
+          section,
+          target.id,
+          (pct) => setBusy({ section, text: `Adding ${file.name}… ${pct}%` }),
+          type ?? undefined,
+          customName,
+          (offer) => new Promise((resolve) => setStoreOnce({ offer, fileName: file.name, resolve })),
+        );
+        setStoreOnce(null);
+        if (!filed) {
+          errors.push(`${file.name} was skipped.`);
+          continue;
+        }
+        if (section === "spec" && readOnAdd && isAdmin && filed.fileId) queuedReads.push(filed.fileId);
+        if (filed.storedOnce) {
+          toast.success(`${file.name} was not uploaded. Stored once on ${filed.bookTitle} as ${filed.name}.`);
+          const landed = known.find((b) => b.id === filed.bookId) ?? {
+            id: filed.bookId,
+            title: filed.bookTitle,
+            manufacturer: filed.manufacturer,
+            mpn: null,
+            noOfficialFile: false,
+            legacy: false,
+            legacySource: null,
+            legacyNote: null,
+            confirmLegacy: false,
+          };
+          if (!known.some((b) => b.id === landed.id)) known = [...known, landed];
+          last = landed;
+        } else {
+          toast.success(`Filed in ${target.title} → ${SHELF[filed.section].title} as ${filed.name}`);
+          last = target;
+        }
       } catch (e) {
         errors.push(`${file.name}: ${e instanceof Error ? e.message : "could not be added"}`);
       }
@@ -193,6 +242,14 @@ function Page() {
     setBusy(null);
     setProblems(errors);
     if (errors.length) toast.error(errors.length === 1 ? errors[0]! : `${errors.length} files were not added — see the list at the top`);
+    if (queuedReads.length) {
+      try {
+        const res = await runSpecReads({ data: { fileIds: queuedReads, limit: 15 } });
+        toast.success(res.review ? `${res.review} spec sheet${res.review === 1 ? "" : "s"} ready to review in Library Admin.` : "Spec sheet queued.");
+      } catch (e) {
+        fail(e, "The file was saved, but the specs could not be read.");
+      }
+    }
     await reload();
     if (last) {
       setAdding(false);
@@ -226,23 +283,74 @@ function Page() {
 
   async function readSpecsFrom(file: LibraryFile) {
     try {
+      const res = await runSpecReads({ data: { fileIds: [file.id], limit: 1 } });
+      toast.success(res.review ? `${file.name} is in Spec Review.` : res.unreadable ? "That sheet could not be read." : `${file.name} is queued.`);
+      await qc.invalidateQueries({ queryKey: ["spec-reads"] });
+      await qc.invalidateQueries({ queryKey: ["spec-read-status"] });
+      if (isAdmin) void navigate({ to: "/library", search: { tab: "admin", book: file.bookId ?? undefined } });
+    } catch (e) {
+      fail(e, "Couldn't read that file.");
+    }
+  }
+
+  /** The model already has a sheet: edit it, so a blank form can't replace it. */
+  function editTiedSheet(bookId: number): boolean {
+    const sheetId = tiedSheetId(lib.data?.sheetBooks ?? [], bookId);
+    if (sheetId == null) return false;
+    setQ("");
+    setOpenMaker(null);
+    setMode("edit");
+    void navigate({ to: "/library", search: { book: bookId, open: sheetId } });
+    return true;
+  }
+
+  /** A scanned or unread sheet: open the stored PDF in Spec Import, the way a hand entry used to. */
+  async function enterSpecsByHand(row: { status: string; fileId: number; bookId: number | null }) {
+    const hand = handEntryForRow(row);
+    if (!hand) return;
+    setHandFile(hand.fileId);
+    if (editTiedSheet(hand.bookId)) return;
+    const file = files.find((f) => f.id === hand.fileId);
+    if (!file) {
+      toast.error("That sheet is not in the library.");
+      return;
+    }
+    try {
       const res = await fetch(fileUrl(originOf(), file.token));
       if (!res.ok) throw new Error("Couldn't open that file.");
-      setImportFile({ file: new File([await res.blob()], file.name, { type: file.mime }), bookId: file.bookId! });
+      setHandSeed(null);
+      setImportFile({ file: new File([await res.blob()], file.name, { type: file.mime || "application/pdf" }), bookId: hand.bookId });
       setMode("import");
+      void navigate({ to: "/library", search: { book: hand.bookId } });
     } catch (e) {
       fail(e, "Couldn't open that file.");
     }
   }
 
+  /** A model with no sheet has no PDF. Open a blank form tied to that book. */
+  function enterSpecsForModel(book: { id: number; title: string }) {
+    setHandFile(null);
+    if (editTiedSheet(book.id)) return;
+    const full = books.find((b) => b.id === book.id);
+    const manufacturer = full?.manufacturer ?? "";
+    setHandSeed({ manufacturer, model: modelLabel(book.title, manufacturer) });
+    setImportFile({ file: null, bookId: book.id });
+    setMode("import");
+    void navigate({ to: "/library", search: { book: book.id } });
+  }
+
   /** After the AI read is saved: the sheet joins its book and the original PDF is kept there. */
   async function afterImport(id: number, pdf: File | null) {
     const from = importFile;
+    const hand = handFile;
     setOpenMaker(null);
     setMode("browse");
     setImportFile(null);
+    setHandSeed(null);
+    setHandFile(null);
     try {
       if (from) await moveSpecSheet({ data: { sheetId: id, bookId: from.bookId } });
+      if (from && hand != null) await resolveSpecHandEntry({ data: { fileId: hand } });
       await reload();
       const fresh = await qc.fetchQuery({ queryKey: ["library-files"], queryFn: () => listLibraryFiles() });
       const target = fresh.sheetBooks.find((r) => r.sheetId === id)?.bookId ?? null;
@@ -255,6 +363,20 @@ function Page() {
       fail(e, "Saved, but the PDF could not be stored. Drop it on Spec Sheet.");
       go({ open: id });
     }
+  }
+
+  /** After Edit is saved. Opened from a Spec Review row, it closes that row too. */
+  async function afterEdit(id: number, bookId: number) {
+    const hand = handFile;
+    setMode("browse");
+    setHandFile(null);
+    try {
+      if (hand != null) await resolveSpecHandEntry({ data: { fileId: hand } });
+    } catch (e) {
+      fail(e, "Saved, but the Spec Review row is still open.");
+    }
+    void reload();
+    go({ book: bookId, open: id });
   }
 
   async function reread(file: File) {
@@ -358,13 +480,8 @@ function Page() {
     files: files.filter((f) => f.bookId === id),
   });
   const needle = q.trim().toLowerCase();
-  const shownBooks = books.filter(
-    (b) => b.title.toLowerCase().includes(needle) && (only === "legacy" ? b.legacy : only === "confirm" ? b.confirmLegacy && !b.legacy : true),
-  );
-  const legacyCount = books.filter((b) => b.legacy).length;
-  const confirmCount = books.filter((b) => b.confirmLegacy && !b.legacy).length;
+  const shownBooks = books.filter((b) => b.title.toLowerCase().includes(needle) || b.manufacturer.toLowerCase().includes(needle));
   const makers = [...new Set(shownBooks.map((b) => b.manufacturer))].sort((x, y) => x.localeCompare(y, "en", { sensitivity: "base" }));
-  const unfiled = files.filter((f) => f.bookId == null);
   const loading = data.isLoading || lib.isLoading;
   // One maker open at a time: the one clicked, else the one holding the open model, else the only search hit.
   // Nothing is open until a maker is picked (or a search leaves just one).
@@ -374,11 +491,11 @@ function Page() {
   // Current models stay in the main row (family, then variation). Legacy models sit in their own row under the maker.
   const { current: currentModels, legacy: legacyModels } = splitLegacy(models);
   const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : currentModels[0] ?? models[0] ?? null;
-  // Maker → family → variation. A family is the model's first word (Axiom, G9, ITCB); its chips never mix with another family's.
+  // Maker → family → variation. A word family is the model's first word (Axiom, G9, ITCB). A letter-digit series such as CBS-1252 sits under CBS-125.
   const familyKey = (b: LibraryBook) => nameKey(familyOf(b.title, b.manufacturer));
   const families = [...new Map(currentModels.map((m) => [familyKey(m), familyOf(m.title, m.manufacturer)])).entries()]
     // The main chip (named like the parent) leads its row.
-    .map(([key, name]) => ({ key, name, books: currentModels.filter((m) => familyKey(m) === key).sort((x, y) => Number(isMainChip(y)) - Number(isMainChip(x))) }))
+    .map(([key, name]) => ({ key, name, books: currentModels.filter((m) => familyKey(m) === key).sort((x, y) => Number(isMainChip(y, books)) - Number(isMainChip(x, books))) }))
     .sort((x, y) => x.name.localeCompare(y.name, "en", { sensitivity: "base", numeric: true }));
   const family = current && !current.legacy ? families.find((f) => f.key === familyKey(current)) ?? null : null;
   const inside = current ? inBook(current.id) : null;
@@ -386,19 +503,48 @@ function Page() {
   const mainChip = current ? mainChipFor(current, books) : null;
   const copies = current ? copiedManuals(current, books, files, hidden) : [];
   const dropped = current ? removedCopies(current, books, files, hidden) : [];
-  const copyTargets = current && isMainChip(current) ? variationsOf(current, books) : [];
+  const copyTargets = current && isMainChip(current, books) ? variationsOf(current, books) : [];
   const mainName = mainChip ? modelLabel(mainChip.title, mainChip.manufacturer) : "";
+  const statusFor = (bookId: number): TileStatus | null =>
+    bookSpecStatus(
+      files.filter((f) => f.bookId === bookId && f.section === "spec").length,
+      (specStatus.data ?? []).filter((r) => r.bookId === bookId).map((r) => r.status),
+    );
+  const setTab = (next: Tab) => void navigate({ to: "/library", search: { tab: next === "library" ? undefined : next, book: bookParam, open } });
   return (
     <div>
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
-        {canEdit ? (
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div>
+          <h1 className="font-display text-3xl font-medium tracking-tight">The Library</h1>
+          <div className="mt-2 flex gap-1" role="tablist" aria-label="Library sections">
+            <Button type="button" role="tab" aria-selected={tab === "library"} variant={tab === "library" ? "secondary" : "ghost"} onClick={() => setTab("library")} data-testid="library-tab">Library</Button>
+            <Button type="button" role="tab" aria-selected={tab === "training"} variant={tab === "training" ? "secondary" : "ghost"} onClick={() => setTab("training")} data-testid="training-tab">Training</Button>
+            {isAdmin ? (
+              <Button type="button" role="tab" aria-selected={tab === "admin"} variant={tab === "admin" ? "secondary" : "ghost"} onClick={() => setTab("admin")} data-testid="admin-tab">Admin</Button>
+            ) : null}
+          </div>
+        </div>
+        {canEdit && tab === "library" ? (
           <Button type="button" className="sm:ml-auto" onClick={() => setAdding(true)} data-testid="library-add">
             <Plus className="size-4" /> Add Files
           </Button>
         ) : null}
       </header>
 
+      {tab === "training" ? <TrainingSection /> : null}
+      {tab === "admin" && isAdmin ? (
+        <LibraryAdmin
+          books={books}
+          files={files}
+          onChanged={() => void reload()}
+          onMoveFile={(file) => setAsk({ kind: "move-file", file })}
+          onEnterByHand={(row) => void enterSpecsByHand(row)}
+          onEnterForModel={enterSpecsForModel}
+        />
+      ) : null}
+
+      {tab !== "library" ? null : (
+      <>
       <ListToolbar data-testid="library-toolbar">
         <ToolbarSearch
           value={q}
@@ -410,32 +556,10 @@ function Page() {
           label="Search maker or model"
           testId="book-search"
         />
-        <FilterChip
-          selected={only === "legacy"}
-          onClick={() => {
-            setOnly(only === "legacy" ? null : "legacy");
-            setOpenMaker(null);
-          }}
-          data-testid="filter-legacy"
-        >
-          Legacy {legacyCount}
-        </FilterChip>
-        <FilterChip
-          selected={only === "confirm"}
-          onClick={() => {
-            setOnly(only === "confirm" ? null : "confirm");
-            setOpenMaker(null);
-          }}
-          data-testid="filter-confirm-legacy"
-        >
-          {CONFIRM_LEGACY} {confirmCount}
-        </FilterChip>
         <ToolbarNote data-testid="library-count">
           {shownBooks.length} model{shownBooks.length === 1 ? "" : "s"}
         </ToolbarNote>
       </ListToolbar>
-
-      <TrainingSection />
 
       {problems.length ? (
         <ul className="mt-3 grid gap-1 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm" role="alert" data-testid="library-errors">
@@ -448,12 +572,16 @@ function Page() {
       {mode === "import" ? (
         <section className="mt-5" data-testid="spec-import-panel">
           <SpecImport
-            key={importFile ? `file-${importFile.file.name}` : "import"}
+            key={importFile?.file ? `file-${importFile.bookId}-${importFile.file.name}` : importFile ? `hand-${importFile.bookId}` : "import"}
             aiReady={!!data.data?.aiReady}
             initialFile={importFile?.file ?? null}
+            seed={!importFile?.file ? handSeed : null}
+            bookId={importFile?.bookId ?? null}
             onCancel={() => {
               setMode("browse");
               setImportFile(null);
+              setHandSeed(null);
+              setHandFile(null);
             }}
             onSaved={(id, pdf) => void afterImport(id, pdf)}
           />
@@ -466,18 +594,18 @@ function Page() {
         <p className="mt-5 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="books-empty">
           {!books.length
             ? "Nothing here yet. Use Add Files to add the first spec sheet, manual or parts diagram."
-            : only === "legacy" && !needle
-              ? "No model is under Legacy. A model moves there only when its manufacturer lists it as discontinued or obsolete."
-              : only === "confirm" && !needle
-                ? "No model is flagged Confirm Legacy."
-                : "Nothing matches that search."}
+            : "Nothing matches that search."}
         </p>
       ) : (
         <>
           <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" role="radiogroup" aria-label="Manufacturer" data-testid="library-makers">
             {makers.map((maker) => {
-              const count = shownBooks.filter((b) => b.manufacturer === maker).length;
+              const mine = shownBooks.filter((b) => b.manufacturer === maker);
+              const count = mine.length;
               const on = maker === activeMaker;
+              const sheetCount = mine.reduce((n, b) => n + files.filter((f) => f.bookId === b.id && f.section === "spec").length, 0);
+              const readCount = mine.filter((b) => statusFor(b.id) === "read").length;
+              const reviewCount = mine.filter((b) => statusFor(b.id) === "needs_review").length;
               return (
                 <button
                   key={maker}
@@ -497,8 +625,11 @@ function Page() {
                   }}
                 >
                   <span className="font-display text-lg leading-tight font-medium break-words">{maker}</span>
-                  <span className="text-xs opacity-70">
-                    {count} model{count === 1 ? "" : "s"}
+                  <span className="mt-1 flex flex-wrap gap-1 text-[10px] tracking-wide uppercase opacity-80" data-testid="maker-spec-counts">
+                    <span className="rounded-full border border-current/30 px-1.5 py-0.5">{count} models</span>
+                    <span className="rounded-full border border-current/30 px-1.5 py-0.5">{sheetCount} sheets</span>
+                    <span className="rounded-full border border-current/30 px-1.5 py-0.5">{readCount} read</span>
+                    <span className="rounded-full border border-current/30 px-1.5 py-0.5">{reviewCount} review</span>
                   </span>
                 </button>
               );
@@ -568,7 +699,7 @@ function Page() {
                         }}
                       >
                         {modelLabel(m.title, m.manufacturer)}
-                        {m.confirmLegacy ? <span className="ml-1.5 text-[10px] font-semibold tracking-wide uppercase opacity-80">· {CONFIRM_LEGACY}</span> : null}
+                        {statusFor(m.id) ? <span className="ml-1.5 text-[10px] font-semibold tracking-wide uppercase opacity-80" data-testid="model-spec-status">{TILE_LABEL[statusFor(m.id)!]}</span> : null}
                       </FilterChip>
                     ))}
                   </div>
@@ -577,8 +708,8 @@ function Page() {
               {/* Its own row, named for what it holds, so it is never mistaken for a model family (Eversys makes a machine called Legacy). */}
               {legacyModels.length ? (
                 <>
-                  <p className="mt-3 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase" data-testid="legacy-heading">
-                    Legacy <span className="font-normal tracking-normal normal-case">· discontinued or obsolete models · {legacyModels.length}</span>
+                  <p className="mt-3 text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase" data-testid="legacy-heading" title="Discontinued or obsolete models">
+                    Legacy
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-2" role="radiogroup" aria-label={`${activeMaker} Legacy models`} data-testid="legacy-chips">
                     {legacyModels.map((m) => (
@@ -602,8 +733,8 @@ function Page() {
                 </>
               ) : null}
               <div className="mb-3" />
-                    <LegacyPanel book={current} canEdit={canEdit} manage={manage} onChanged={() => void reload()} />
-                    <MpnPanel book={current} files={inside.files} canEdit={canEdit} onChanged={() => void reload()} />
+                    {manage ? <LegacyPanel book={current} canEdit={canEdit} manage={manage} onChanged={() => void reload()} /> : null}
+                    {manage ? <MpnPanel book={current} files={inside.files} canEdit={canEdit} onChanged={() => void reload()} /> : null}
                     <div className="flex flex-col gap-4 sm:flex-row">
                       <ModelPhoto sheet={inside.sheets.find((s) => s.hasImage) ?? null} title={current.title} />
                       <ul className="min-w-0 flex-1 divide-y divide-border" data-testid="docs">
@@ -643,7 +774,7 @@ function Page() {
                             onRename={(file) => setFileRename({ file, name: file.name.replace(/\.[A-Za-z0-9]+$/, "") })}
                             extra={
                               <>
-                                {f.section === "spec" && canEdit && !inside.sheets.length && f.mime === "application/pdf" ? (
+                                {f.section === "spec" && isAdmin && f.mime === "application/pdf" ? (
                                   <Button type="button" size="sm" variant="outline" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
                                     <FileUp className="size-4" /> Read Specs
                                   </Button>
@@ -676,7 +807,7 @@ function Page() {
                             onClick={() => setFixOpen(!fixOpen)}
                             data-testid="troubleshoot-open"
                           >
-                            Troubleshoot <span className="font-normal text-muted-foreground">· only from files stored on this model</span>
+                            Troubleshoot <span className="font-normal text-muted-foreground" title="Only from files stored on this model">· from this model's files</span>
                           </button>
                           {fixOpen ? <ChevronDown className="size-4 text-muted-foreground" /> : <ChevronRight className="size-4 text-muted-foreground" />}
                         </li>
@@ -684,8 +815,8 @@ function Page() {
                     </div>
 
                     {copyTargets.length ? (
-                      <p className="mt-2 text-xs text-muted-foreground" data-testid="main-chip-note">
-                        Main chip: a manual or parts file added here is copied to every {family?.name} variation ({copyTargets.length}). Spec sheets stay here.
+                      <p className="mt-2 text-xs text-muted-foreground" data-testid="main-chip-note" title={`A manual or parts file added on the main chip is copied to every ${family?.name} variation (${copyTargets.length}). Spec sheets stay on this chip.`}>
+                        Main chip. Manuals and parts copy to {copyTargets.length} {family?.name} variation{copyTargets.length === 1 ? "" : "s"}.
                       </p>
                     ) : null}
                     {canEdit ? (
@@ -720,14 +851,17 @@ function Page() {
 
                     {mode === "edit" && selected ? (
                       <div className="mt-4">
-                        <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => setMode("browse")} onSaved={(id) => { setMode("browse"); void reload(); go({ book: current.id, open: id }); }} />
+                        <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => { setMode("browse"); setHandFile(null); }} onSaved={(id) => void afterEdit(id, current.id)} />
                       </div>
                     ) : selected && mode === "browse" && sheetBook.get(selected.id) === current.id ? (
                       <div className="mt-4" data-testid="book-spec-sheet">
                         <SpecSheetView
                           sheet={selected}
                           canEdit={canEdit}
-                          onEdit={() => setMode("edit")}
+                          onEdit={() => {
+                            setHandFile(null);
+                            setMode("edit");
+                          }}
                           onDelete={() => setConfirmDelete(true)}
                           onRefresh={canEdit ? () => refresh.mutate(selected.id) : undefined}
                           refreshing={refresh.isPending}
@@ -739,27 +873,18 @@ function Page() {
           ) : null}
         </>
       )}
+      </>
+      )}
 
-      {unfiled.length ? (
-        <section className="mt-6 rounded-xl border border-border bg-card px-4 py-3" aria-labelledby="unfiled-title" data-testid="library-unfiled">
-          <div className="flex items-center gap-2">
-            <h2 id="unfiled-title" className="font-display text-lg font-medium">
-              Not Filed Yet
-            </h2>
-            <span className="text-xs text-muted-foreground">{unfiled.length}</span>
-            {canEdit ? (
-              <Button type="button" size="sm" variant={manage ? "secondary" : "ghost"} className="ml-auto" onClick={() => setManage(!manage)}>
-                <Settings2 className="size-4" /> {manage ? "Done" : "Manage"}
-              </Button>
-            ) : null}
-          </div>
-          <ul className="divide-y divide-border">
-            {unfiled.map((f) => (
-              <DocRow key={f.id} file={f} label={f.name.replace(/\.[A-Za-z0-9]+$/, "")} manage={manage} onMove={(file) => setAsk({ kind: "move-file", file })} onDelete={setFileToDelete} />
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <StoreOnceDialog
+        offer={storeOnce?.offer ?? null}
+        fileName={storeOnce?.fileName ?? ""}
+        busy={!!busy}
+        onChoose={(choice) => {
+          storeOnce?.resolve(choice);
+          setStoreOnce(null);
+        }}
+      />
 
       <Dialog open={!!askNew} onOpenChange={(o) => !o && askNew?.resolve(null)}>
         <DialogContent data-testid="new-chip-dialog">
@@ -788,20 +913,23 @@ function Page() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={adding && !ask && !askType && !askNew} onOpenChange={(o) => !o && !busy && setAdding(false)}>
+      <Dialog open={adding && !ask && !askType && !askNew && !storeOnce} onOpenChange={(o) => !o && !busy && setAdding(false)}>
         <DialogContent data-testid="add-dialog">
           <DialogTitle>Add Files</DialogTitle>
-          <DialogDescription>
-            Drop a file on its type, or click to choose. The first word of the file name is the model it is filed under; a new name makes a new chip, and if the name isn't clear, you pick. {DROP_RULES}
+          <DialogDescription title={`Drop a file on its type, or click to choose. The first word of the file name is the model. ${DROP_RULES}`}>
+            Drop a file on its type. The file name picks the model.
           </DialogDescription>
+          {isAdmin ? (
+            <label className="mt-3 flex items-center gap-2 text-sm" data-testid="read-specs-from-sheet">
+              <input type="checkbox" checked={readOnAdd} onChange={(e) => setReadOnAdd(e.target.checked)} />
+              Read specs from this sheet
+            </label>
+          ) : null}
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             {TYPES.map((t) => (
               <AddTarget key={t.section} id={t.id} label={t.add} large busy={busy?.section === t.section ? busy.text : null} disabled={!!busy} onFiles={(list) => void addFiles(t.section, list)} />
             ))}
           </div>
-          <Button type="button" variant="outline" className="mt-3 w-fit" onClick={() => { setAdding(false); setImportFile(null); setMode("import"); }} data-testid="library-import">
-            <FileUp className="size-4" /> Import A Spec Sheet And Read Its Specs
-          </Button>
           <Button type="button" variant="outline" className="mt-2 w-fit" onClick={() => { setAdding(false); setCodesOpen(true); }} data-testid="codes-import-open">
             <FileUp className="size-4" /> Import Equipment Codes
           </Button>

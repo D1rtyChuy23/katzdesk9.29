@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useFromHere } from "@/lib/ops/search-params";
 
 const ROUTES = {
   service: "/service",
@@ -43,8 +44,34 @@ export function OpenLink({
       </Link>
     );
   }
-  const to: AppPath = ROUTES[entityType];
-  if (!id || entityType === "handoff") {
+  return (
+    <RecordLink
+      to={ROUTES[entityType]}
+      id={entityType === "handoff" ? 0 : id}
+      className={className}
+      title={title}
+    >
+      {children}
+    </RecordLink>
+  );
+}
+
+/** A link that opens record `id` on page `to`, remembering this page so closing the record comes back here. */
+function RecordLink({
+  to,
+  id,
+  className,
+  title,
+  children,
+}: {
+  to: AppPath;
+  id: number;
+  className?: string;
+  title?: string;
+  children: ReactNode;
+}) {
+  const from = useFromHere(to);
+  if (!id) {
     return (
       <Link to={to} className={className} title={title}>
         {children}
@@ -52,7 +79,7 @@ export function OpenLink({
     );
   }
   return (
-    <Link to={to} search={{ open: id }} className={className} title={title}>
+    <Link to={to} search={{ open: id, from }} className={className} title={title}>
       {children}
     </Link>
   );

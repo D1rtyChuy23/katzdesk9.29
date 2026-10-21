@@ -5,12 +5,13 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createPm, listPms } from "@/lib/ops/api";
 import { isOpenPm } from "@/lib/ops/ticket-status";
+import { withWoMatches } from "@/lib/ops/wo-search";
 import { formatShortDate } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
 import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
 import { PmSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
 import { ActionMenu, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
@@ -28,12 +29,13 @@ export const Route = createFileRoute("/_app/pms")({
 });
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const qc = useQueryClient();
   const pms = useQuery({ queryKey: ["pms"], queryFn: () => listPms() });
   const [q, setQ] = useState("");
   const [view, setView] = useState<"active" | "all" | "flagged" | "need-date">("active");
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [create, setCreate] = useState(false);
   const [sort, setSort] = useDeskSort("pms", "date-asc");
   const { filterMine, matchMine, role } = useMyView();
@@ -47,9 +49,10 @@ function Page() {
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((p) =>
-        [p.customer, p.equipment, p.style, p.technician].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
+        [p.customer, p.equipment, p.style, p.technician, p.wo].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
+    list = withWoMatches(list, pms.data ?? [], q);
     return sortDesk(list, sort, {
       date: (p) => p.projected ?? p.received,
       name: (p) => p.customer,
@@ -167,7 +170,10 @@ function Page() {
           </div>
         ) : null}
       </div>
-      <PmSheet pm={selectedRow} onClose={() => setSelected(null)} />
+      <PmSheet pm={selectedRow} onClose={() => {
+          setSelected(null);
+          back();
+        }} />
       <SimpleCreateDialog
         title="New PM"
         open={create}

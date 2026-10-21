@@ -20,6 +20,9 @@ import {
   type InspectionView,
 } from "@/lib/ops/inspection-api";
 import { formatPingTime } from "@/lib/ops/clock";
+import { serializeMachines } from "@/lib/ops/machines";
+import type { Install } from "@/lib/ops/types";
+import { appendServerMachines } from "@/lib/ops/warehouse-serial";
 import {
   CORE_HOLE_QUESTION,
   INSPECTION_ITEM_STATUSES,
@@ -42,6 +45,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { EquipmentCombo } from "./directory-fields";
+import { LockBadge } from "./lock-badge";
 import { UnitPlaceField } from "./unit-place-field";
 import { toast } from "sonner";
 
@@ -240,7 +244,10 @@ function MachineList({
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
-                  <span className="block text-base font-medium max-sm:break-words sm:truncate">{m.name}</span>
+                  <span className="flex min-w-0 items-center gap-2 text-base font-medium max-sm:flex-wrap max-sm:break-words">
+                    <span className="min-w-0 sm:truncate">{m.name}</span>
+                    <LockBadge lockedBy={m.lockedBy} />
+                  </span>
                   <span className="block text-xs text-muted-foreground max-sm:break-words sm:truncate">
                     {[m.preInspected ? "Existing equipment" : null, m.serial ? `SN ${m.serial}` : "No serial", m.electrical || "Electrical missing"].filter(Boolean).join(" · ")}
                   </span>
@@ -249,9 +256,10 @@ function MachineList({
               </button>
               <button
                 type="button"
-                className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-40"
                 aria-label={`Remove ${m.name} from the pre-inspection`}
-                title="Remove from the pre-inspection"
+                title={m.locked ? `Locked by ${m.lockedBy}` : "Remove from the pre-inspection"}
+                disabled={m.locked}
                 onClick={() => setRemoving(m)}
                 data-testid={`remove-machine-${m.equipmentId}`}
               >
@@ -287,18 +295,56 @@ function MachineList({
   );
 }
 
+function rememberAddedMachine(qc: ReturnType<typeof useQueryClient>, view: InspectionView) {
+  qc.setQueryData<Install[] | undefined>(["installs"], (rows) => {
+    if (!Array.isArray(rows)) return rows;
+    return rows.map((row) => {
+      if (row.id !== view.installId) return row;
+      const machines = appendServerMachines(
+        row.machines ?? [],
+        view.machines.map((m) => ({
+          equipment: m.name || m.model,
+          serial: m.serial ?? "",
+          powerVoltage: m.electrical ?? "",
+        })),
+      );
+      const packed = serializeMachines(machines);
+      return {
+        ...row,
+        machines,
+        equipment: packed.equipment ?? row.equipment,
+        serial: packed.serial,
+        powerVoltage: packed.powerVoltage,
+        inspection: row.inspection
+          ? {
+              ...row.inspection,
+              overall: view.overall,
+              failedItems: view.failedItems,
+              photoCount: view.photoCount,
+              overrideReason: view.overrideReason,
+              machineCount: view.machineCount,
+              passedCount: view.passedCount,
+            }
+          : row.inspection,
+      };
+    });
+  });
+}
+
 function AddMachine({ installId, onSaved }: { installId: number; onSaved: (v: InspectionView) => void }) {
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [model, setModel] = useState("");
   const [serial, setSerial] = useState("");
   const [electrical, setElectrical] = useState("");
   const add = useMutation({
-    mutationFn: () =>
+    mutationFn: (input: { model: string; serial: string; electrical: string }) =>
       addInspectionEquipment({
-        data: { installId, model, serial: serial || null, electrical: electrical || null },
+        data: { installId, model: input.model, serial: input.serial || null, electrical: input.electrical || null },
       }),
     onSuccess: (view) => {
       toast.success("Equipment added");
+      rememberAddedMachine(qc, view);
       setModel("");
       setSerial("");
       setElectrical("");
@@ -307,6 +353,15 @@ function AddMachine({ installId, onSaved }: { installId: number; onSaved: (v: In
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add equipment"),
   });
+
+  function submit() {
+    const next = model.trim();
+    if (!next) {
+      toast.error("Pick a model");
+      return;
+    }
+    add.mutate({ model: next, serial: serial.trim(), electrical: electrical.trim() });
+  }
 
   if (!open) {
     return (
@@ -324,11 +379,7 @@ function AddMachine({ installId, onSaved }: { installId: number; onSaved: (v: In
       data-testid="add-equipment-form"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!model.trim()) {
-          toast.error("Pick a model");
-          return;
-        }
-        add.mutate();
+        submit();
       }}
     >
       <EquipmentCombo label="Model" value={model} onChange={setModel} menuInFlow required />

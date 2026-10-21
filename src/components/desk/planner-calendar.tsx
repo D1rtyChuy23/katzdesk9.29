@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { fromFor } from "@/lib/ops/search-params";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   addDays,
@@ -190,6 +191,7 @@ export function PlannerCalendar({
 }) {
   const today = todayChicago();
   const navigate = useNavigate();
+  const here = useLocation();
   const qc = useQueryClient();
   const [anchor, setAnchor] = useState(() => monthBounds(today).start);
   const [types, setTypes] = useState<Set<CalType>>(() => new Set(ALL_TYPES));
@@ -295,7 +297,7 @@ export function PlannerCalendar({
           : it.entityType === "tlc"
             ? "/tlc"
             : "/service";
-    void navigate({ to, search: { open: it.id } });
+    void navigate({ to, search: { open: it.id, from: fromFor(here, to) } });
   }
 
   const monthAll = items.filter((it) => it.date >= month.start && it.date <= month.end);

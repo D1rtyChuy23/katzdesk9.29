@@ -74,6 +74,13 @@ export const runbookDefinitionSchema = z
     subtitle: z.string().optional(),
     sources: z.string().optional(),
     storageKey: z.string().optional(),
+    /** When true, the default PM style ("12 month PM") is used only after the install date and earlier visits. */
+    defaultStyleLast: z.boolean().optional(),
+    /**
+     * Visit numbers instead of months. `by` is an option key; `map` is visits per year for each choice.
+     * Interval ids must be 1..n.
+     */
+    visitsPerYear: z.object({ by: z.string().min(1), map: z.record(z.string(), z.number()) }).optional(),
     models: z.array(modelSchema).min(1),
     intervals: z.array(intervalSchema).min(1),
     options: z.array(optionSchema).default([]),
@@ -125,6 +132,23 @@ export const runbookDefinitionSchema = z
       checkWhen(o.when, `option ${o.key}`);
       if (o.default !== undefined && !values[o.key].has(o.default)) {
         fail(`option ${o.key}: default '${o.default}' is not a choice`);
+      }
+    }
+    if (m.visitsPerYear) {
+      const opt = m.options.find((o) => o.key === m.visitsPerYear!.by);
+      if (!opt) fail(`visitsPerYear: by '${m.visitsPerYear.by}' is not an option key`);
+      else {
+        for (const key of Object.keys(m.visitsPerYear.map)) {
+          if (!opt.choices.some((c) => c.val === key)) fail(`visitsPerYear: '${key}' is not a value of '${m.visitsPerYear.by}'`);
+        }
+      }
+      const n = m.intervals.length;
+      const ids = new Set(m.intervals.map((i) => i.id));
+      for (let i = 1; i <= n; i++) {
+        if (!ids.has(String(i))) {
+          fail(`visitsPerYear: interval ids must run 1..${n}`);
+          break;
+        }
       }
     }
   });

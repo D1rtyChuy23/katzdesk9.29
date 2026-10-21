@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { toast } from "sonner";
+import { looksLikePlug, looksLikeVoltage, placePower } from "@/lib/ops/install-form";
 import { SerialPullField } from "./serial-notice";
 import { UnitPlaceField } from "./unit-place-field";
 
@@ -470,6 +471,7 @@ export function MachineFields({
   where = "install",
   dealId,
   rowLocked,
+  onRemoveLocked,
   rowFooter,
 }: {
   /** The recipe column of the install layout. Deals show the recipe on the configuration line instead. */
@@ -494,6 +496,8 @@ export function MachineFields({
   recipes?: Recipe[];
   /** Deal rows: a machine already on the Board reads as it was sent. From then on it is changed on the Board. */
   rowLocked?: (spec: MachineSpec, index: number) => boolean;
+  /** The owner's Remove on a row rowLocked holds. Nobody else gets the button. */
+  onRemoveLocked?: (index: number) => void;
   /** A line under a machine: the deal's Confirm button, or where the machine is on the Board. */
   rowFooter?: (spec: MachineSpec, index: number) => ReactNode;
 }) {
@@ -511,7 +515,21 @@ export function MachineFields({
           return (
             <div key={`${spec.equipment}-${index}`} data-testid="machine-row" data-locked="true" className="py-2">
               <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
-              <p className="text-sm font-medium">{spec.equipment}</p>
+              <p className="flex min-w-0 items-center gap-1 text-sm font-medium">
+                <span className="min-w-0 break-words">{spec.equipment}</span>
+                {onRemoveLocked ? (
+                  <button
+                    type="button"
+                    onClick={() => onRemoveLocked(index)}
+                    aria-label={`Remove ${spec.equipment} from this ${where}`}
+                    title={`Remove from this ${where} (owner)`}
+                    data-testid="machine-remove-locked"
+                    className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground max-sm:ml-1 max-sm:size-10"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                ) : null}
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground" data-testid="machine-glance">
                 {machineGlance(spec) || "No details were set"}
               </p>
@@ -555,15 +573,23 @@ export function MachineFields({
               label="Serial"
               compact
               value={spec.serial}
+              model={spec.equipment}
               installId={installId}
               machineIndex={index}
               onValue={(serial) => onChange(patch(index, { serial }))}
               onPulled={(result) => {
-                // A serial pull never fills volts, plug, or water. The rep types those.
+                if (result.duplicateOnInstall) return;
                 const next = patch(index, { serial: result.serial });
                 onChange(next);
                 onPulled?.(next, result);
               }}
+              onUseUnit={(unit) => {
+                const next = patch(index, { equipment: unit.model, serial: unit.serial });
+                onChange(next);
+                onCommit?.(next);
+              }}
+              // Moving a serial to another row: the clear is saved first, or the other row's lookup finds it here.
+              onCleared={installId ? () => onCommit?.(patch(index, { serial: "" })) : undefined}
             />
             <div className="min-w-0">
               <label className="grid gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase" htmlFor={`pwr-${index}`}>
@@ -573,8 +599,20 @@ export function MachineFields({
                   value={spec.powerVoltage}
                   autoComplete="off"
                   data-testid="machine-voltage"
-                  onChange={(e) => onChange(patch(index, { powerVoltage: e.target.value }))}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const placed = placePower(raw, spec.plug ?? "");
+                    if (placed.moved === "plug") {
+                      toast.message("That reads as a plug, so it went in Plug.");
+                      onChange(patch(index, { powerVoltage: "", plug: placed.plug }));
+                      return;
+                    }
+                    onChange(patch(index, { powerVoltage: raw }));
+                  }}
                 />
+                {looksLikePlug(spec.powerVoltage) ? (
+                  <span className="text-[11px] font-medium text-warning">This looks like a plug, not voltage.</span>
+                ) : null}
               </label>
             </div>
             <div className={showRecipe ? undefined : "col-span-2 sm:col-span-1"}>
@@ -622,7 +660,25 @@ export function MachineFields({
               </label>
               <label className={fieldLabel}>
                 Plug
-                <Input value={spec.plug ?? ""} autoComplete="off" className="normal-case" data-testid="machine-plug" onChange={(e) => onChange(patch(index, { plug: e.target.value }))} />
+                <Input
+                  value={spec.plug ?? ""}
+                  autoComplete="off"
+                  className="normal-case"
+                  data-testid="machine-plug"
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const placed = placePower(spec.powerVoltage, raw);
+                    if (placed.moved === "voltage") {
+                      toast.message("That reads as voltage, so it went in Voltage.");
+                      onChange(patch(index, { plug: "", powerVoltage: placed.voltage }));
+                      return;
+                    }
+                    onChange(patch(index, { plug: raw }));
+                  }}
+                />
+                {looksLikeVoltage(spec.plug) ? (
+                  <span className="text-[11px] font-medium text-warning">This looks like voltage, not a plug.</span>
+                ) : null}
               </label>
               {need === "none" ? null : (
                 <label className={fieldLabel}>

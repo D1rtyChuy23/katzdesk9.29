@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { serialKey } from "@/lib/ops/account-equip";
+import { assertUnlocked } from "@/lib/ops/equipment-lock";
 import { isWalkIn } from "@/lib/ops/customer-key";
 import { flagOn } from "@/lib/ops/flag";
 import { notifyAdminsStockRequest } from "@/lib/ops/notify";
@@ -30,6 +31,8 @@ type AssetRow = {
   purpose: string | null;
   sold_to: string | null;
   stock_hold: string | null;
+  locked_at?: unknown;
+  locked_by?: string | null;
 };
 
 type ActionRow = {
@@ -100,7 +103,7 @@ async function actorOf(sql: Sql, userId: string) {
   };
 }
 
-const ASSET_COLS = `id, model, serial, status, site, pallet, level, line_no, notes, purpose, sold_to, stock_hold`;
+const ASSET_COLS = `id, model, serial, status, site, pallet, level, line_no, notes, purpose, sold_to, stock_hold, locked_at, locked_by`;
 
 async function loadAsset(sql: Sql, id: number): Promise<AssetRow | null> {
   const rows = await sql.query<AssetRow>(`select ${ASSET_COLS} from assets where id = $1`, [id]);
@@ -148,7 +151,7 @@ async function accountHolding(sql: Sql, row: AssetRow): Promise<string | null> {
   if ((CUSTOMER_SITES as readonly string[]).includes(row.site)) {
     return SITE_LABEL[row.site] ?? row.site;
   }
-  if (row.status === "sold" || row.status === "assigned" || (row.sold_to && !isWarehouseStockPlace(row.site))) {
+  if (row.sold_to && !isWarehouseStockPlace(row.site)) {
     return row.sold_to?.trim() || "a customer account";
   }
   const key = serialKey(row.serial);
@@ -161,6 +164,8 @@ async function accountHolding(sql: Sql, row: AssetRow): Promise<string | null> {
 }
 
 async function assertRemovable(sql: Sql, row: AssetRow) {
+  // A locked unit (assigned, sold, or locked by the owner) stays until the owner unlocks it.
+  await assertUnlocked(sql, row);
   if (!isWarehouseStockPlace(row.site)) {
     const holding = await accountHolding(sql, row);
     if (holding) throw new Error(customerLocationMessage(holding));
@@ -223,11 +228,12 @@ async function putOnAccount(sql: Sql, customer: string, model: string, serial: s
   const key = serialKey(serial);
   const electrical = electricalFrom(notes);
   if (key) {
-    const existing = await sql.query<{ id: number }>(
-      "select id from account_equipment where serial_key = $1 order by id limit 1",
+    const existing = await sql.query<{ id: number; locked_at: unknown; locked_by: string | null }>(
+      "select id, locked_at, locked_by from account_equipment where serial_key = $1 order by id limit 1",
       [key],
     );
     if (existing[0]) {
+      await assertUnlocked(sql, existing[0]);
       await sql.query(
         `update account_equipment set
             customer = $2,
@@ -238,6 +244,16 @@ async function putOnAccount(sql: Sql, customer: string, model: string, serial: s
             updated_at = now()
           where id = $1`,
         [existing[0].id, customer, model, serial?.trim() || null, electrical],
+      );
+      return;
+    }
+    // A unit of this model with no serial on the account is this one: it takes the serial instead of a second row.
+    const { accountUnitWithSerial } = await import("@/lib/ops/account-unit");
+    const blank = await accountUnitWithSerial(sql, customer, model, serial);
+    if (blank) {
+      await sql.query(
+        "update account_equipment set serial = $2, serial_key = $3, electrical = coalesce($4, electrical), updated_at = now() where id = $1",
+        [blank.id, serial?.trim() || null, key, electrical],
       );
       return;
     }
@@ -428,6 +444,7 @@ export const requestStockAssign = createServerFn({ method: "POST" })
     const who = await actorOf(sql, context.userId);
     const row = await loadAsset(sql, data.id);
     if (!row) throw new Error("Unit not found");
+    await assertUnlocked(sql, row);
     if (!isWarehouseStockPlace(row.site)) {
       throw new Error("Assign starts from a unit on a rack, in staging, training, or the lobby.");
     }

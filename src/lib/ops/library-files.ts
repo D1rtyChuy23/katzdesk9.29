@@ -1,5 +1,5 @@
 /**
- * The Library — Manuals and Parts Diagrams. Files are stored in Postgres (bytea) in ~1 MB pieces.
+ * The Library — Manuals and Parts Diagrams. Files are stored in Postgres (bytea) in ~512 KB pieces.
  * Everyone with Desk access can list, open and share links; only Admin and Sales add or delete.
  */
 import { createServerFn } from "@tanstack/react-start";
@@ -9,7 +9,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn, cleanSourceUrl, mpnKey, sameMpn, tieError } from "@/lib/ops/mpn-rules";
 import { cleanLegacyNote, legacyMoveError } from "@/lib/ops/legacy-rules";
-import { CHUNK_BYTES, copiesToVariations, customFileName, fileError, mainChipFor, type HiddenCopy, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
+import { CHUNK_BYTES, CLEANUP_BOOKS, cleanupBookDecision, copiesToVariations, customFileName, familyDuplicateGroups, familyDuplicates, familyOf, fileError, isMainChip, mainChipFor, type CleanupBookFacts, type HiddenCopy, type ShareFile, makerOf, manualTypeFromName, matchBook, MANUAL_TYPES, variationTitle, mimeFor, shelfFileName, sortByName, type LibrarySection, type ManualType } from "@/lib/ops/library-file-rules";
 
 export type LibraryFile = {
   id: number;
@@ -26,6 +26,8 @@ export type LibraryFile = {
   mpn: string | null;
   /** The manufacturer page or file the official file came from. */
   sourceUrl: string | null;
+  /** The name the file was dropped with, when the shelf gave it another name. The document number is read from this. */
+  originalName: string | null;
   /** Pages of readable text kept for Troubleshoot: null = not read yet, 0 = no readable text. */
   textPages: number | null;
   addedBy: string;
@@ -42,7 +44,13 @@ async function roleOf(sql: Sql, userId: string) {
     "select is_admin, desk_role, username from desk_accounts where user_id = $1",
     [userId],
   );
-  return { canEdit: flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "admin" || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
+  const isAdmin = flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "admin";
+  return { isAdmin, canEdit: isAdmin || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
+}
+async function requireLibraryAdmin(sql: Sql, userId: string) {
+  const role = await roleOf(sql, userId);
+  if (!role.isAdmin) throw new Error("Only an admin can do that in The Library.");
+  return role;
 }
 async function requireEditor(sql: Sql, userId: string) {
   const role = await roleOf(sql, userId);
@@ -201,13 +209,13 @@ async function ensureBooks(sql: Sql): Promise<LibraryBook[]> {
 
 export const listLibraryFiles = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ books: LibraryBook[]; files: LibraryFile[]; sheetBooks: { sheetId: number; bookId: number | null }[]; hidden: HiddenCopy[]; canEdit: boolean }> => {
+  .handler(async ({ context }): Promise<{ books: LibraryBook[]; files: LibraryFile[]; sheetBooks: { sheetId: number; bookId: number | null }[]; hidden: HiddenCopy[]; canEdit: boolean; isAdmin: boolean }> => {
     const sql = await ready();
     const role = await roleOf(sql, context.userId);
     const books = await ensureBooks(sql);
     const rows = await sql.query<{
-      id: number; section: LibrarySection; name: string; mime: string; size: number; token: string; book_id: number | null; doc_type: string | null; text_pages: number | null; added_by_name: string | null; created_at: string | Date; mpn: string | null; source_url: string | null;
-    }>("select id, section, name, mime, size, token, book_id, doc_type, text_pages, added_by_name, created_at, mpn, source_url from library_files where complete and section <> 'training' order by lower(name), id");
+      id: number; section: LibrarySection; name: string; original_name: string | null; mime: string; size: number; token: string; book_id: number | null; doc_type: string | null; text_pages: number | null; added_by_name: string | null; created_at: string | Date; mpn: string | null; source_url: string | null;
+    }>("select id, section, name, original_name, mime, size, token, book_id, doc_type, text_pages, added_by_name, created_at, mpn, source_url from library_files where complete and section <> 'training' order by lower(name), id");
     const files = rows.map((r) => ({
       id: Number(r.id),
       section: r.section,
@@ -219,6 +227,7 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
       docType: r.doc_type ?? null,
       mpn: r.mpn ?? null,
       sourceUrl: r.source_url ?? null,
+      originalName: r.original_name ?? null,
       textPages: r.text_pages == null ? null : Number(r.text_pages),
       addedBy: r.added_by_name || "Teammate",
       createdAt: new Date(r.created_at).toISOString(),
@@ -231,6 +240,7 @@ export const listLibraryFiles = createServerFn({ method: "GET" })
       // Main-chip manuals a variation removed its copy of.
       hidden: (await sql.query<{ file_id: number; book_id: number }>("select file_id, book_id from library_file_hidden")).map((r) => ({ fileId: Number(r.file_id), bookId: Number(r.book_id) })),
       canEdit: role.canEdit,
+      isAdmin: role.isAdmin,
     };
   });
 
@@ -295,18 +305,85 @@ async function nameInBook(sql: Sql, bookId: number, sec: LibrarySection, origina
   return shelfFileName(book[0].title, sec, original, taken.map((t) => t.name), type);
 }
 
+export type StoreOnceOffer = {
+  family: string;
+  manufacturer: string;
+  /** Null when the family has no chip named like the family yet. Confirming the offer creates it. */
+  mainChip: { id: number; title: string } | null;
+  match: { id: number; name: string; size: number; bookId: number; bookTitle: string; section: LibrarySection };
+  matchCount: number;
+};
+
+export type LibraryUploadStart = { kind: "started"; id: number; name: string; section: LibrarySection } | { kind: "duplicate"; offer: StoreOnceOffer };
+
+async function familyBooks(sql: Sql) {
+  const rows = await sql.query<{ id: number; title: string; manufacturer: string | null }>("select id, title, manufacturer from library_books");
+  return rows.map((b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "" }));
+}
+
 export const startLibraryFile = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { section: LibrarySection; bookId: number; name: string; size: number; docType?: ManualType; customName?: string }) =>
-    z.object({ section, bookId: z.number().int().positive(), name: z.string().trim().min(1).max(200), size: z.number().int().positive(), docType: z.enum(MANUAL_TYPES).optional(), customName: z.string().max(200).optional() }).parse(d),
+  .validator((d: { section: LibrarySection; bookId: number; name: string; size: number; docType?: ManualType; customName?: string; storeSeparate?: boolean }) =>
+    z.object({
+      section,
+      bookId: z.number().int().positive(),
+      name: z.string().trim().min(1).max(200),
+      size: z.number().int().positive(),
+      docType: z.enum(MANUAL_TYPES).optional(),
+      customName: z.string().max(200).optional(),
+      storeSeparate: z.boolean().optional(),
+    }).parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ id: number; name: string; section: LibrarySection }> => {
+  .handler(async ({ data, context }): Promise<LibraryUploadStart> => {
     const sql = await ready();
     const role = await requireEditor(sql, context.userId);
     const problem = fileError(data.name, data.size);
     if (problem) throw new Error(problem);
     // Uploads that were abandoned part-way are swept here.
     await sql.query("delete from library_files where not complete and created_at < now() - interval '1 hour'");
+    const books = await familyBooks(sql);
+    const target = books.find((b) => b.id === data.bookId);
+    if (!target) throw new Error("That book no longer exists. Pick another.");
+    // A manual or parts file dropped on a variation, when the family already has the same document: offer to keep one copy.
+    if (!data.storeSeparate && copiesToVariations(data.section)) {
+      const rows = await sql.query<{ id: number; name: string; original_name: string | null; size: number; section: LibrarySection; book_id: number; mpn: string | null }>(
+        `select id, name, original_name, size, section, book_id, mpn from library_files
+          where complete and section in ('manuals', 'parts') and size = $1 and book_id is not null`,
+        [data.size],
+      );
+      const share: ShareFile[] = rows.map((r) => ({
+        id: Number(r.id),
+        name: r.name,
+        docName: r.original_name,
+        size: Number(r.size),
+        section: r.section,
+        bookId: Number(r.book_id),
+        mpn: r.mpn,
+      }));
+      const hits = familyDuplicates({ name: data.name, size: data.size, section: data.section, bookId: data.bookId }, books, share);
+      if (hits.length) {
+        const main = mainChipFor(target, books);
+        const preferred = (main ? hits.find((h) => h.bookId === main.id) : undefined) ?? [...hits].sort((a, b) => a.id - b.id)[0]!;
+        const on = books.find((b) => b.id === preferred.bookId);
+        return {
+          kind: "duplicate",
+          offer: {
+            family: familyOf(target.title, target.manufacturer),
+            manufacturer: target.manufacturer,
+            mainChip: main ? { id: main.id, title: main.title } : null,
+            match: {
+              id: preferred.id,
+              name: preferred.name,
+              size: preferred.size,
+              bookId: Number(preferred.bookId),
+              bookTitle: on?.title ?? "",
+              section: preferred.section,
+            },
+            matchCount: hits.length,
+          },
+        };
+      }
+    }
     // Stored as "Family - Type"; the name it arrived with is kept alongside.
     // A manual is never filed as a plain "Manual": the type comes from the person, else from an obvious file name.
     const type = data.section === "manuals" ? data.docType ?? manualTypeFromName(data.name) : null;
@@ -324,8 +401,21 @@ export const startLibraryFile = createServerFn({ method: "POST" })
        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning id`,
       [sec, name, data.name, mimeFor(data.name), data.size, newToken(), context.userId, role.name, data.bookId, type],
     );
-    return { id: Number(rows[0]!.id), name, section: sec };
+    return { kind: "started", id: Number(rows[0]!.id), name, section: sec };
   });
+
+/** Put a file in a book and rename it for that book. A parts file keeps its name. */
+async function placeFileInBook(sql: Sql, fileId: number, bookId: number): Promise<string> {
+  const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null; doc_type: string | null; mpn: string | null }>(
+    "select section, name, original_name, doc_type, mpn from library_files where id = $1 and section <> 'training'",
+    [fileId],
+  );
+  if (!file[0]) throw new Error("That file no longer exists.");
+  if ((file[0].mpn ?? "").trim()) throw new Error(`This is the official file for MPN ${file[0].mpn}. Untie it from the MPN before moving it.`);
+  const name = file[0].section === "parts" ? file[0].name : await nameInBook(sql, bookId, file[0].section, file[0].original_name || file[0].name, fileId, file[0].doc_type);
+  await sql.query("update library_files set book_id = $2, name = $3, original_name = coalesce(original_name, $4) where id = $1", [fileId, bookId, name, file[0].name]);
+  return name;
+}
 
 /** Put a file in a (different) book; it is renamed for that book. */
 export const moveLibraryFile = createServerFn({ method: "POST" })
@@ -334,16 +424,7 @@ export const moveLibraryFile = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true; name: string }> => {
     const sql = await ready();
     await requireEditor(sql, context.userId);
-    const file = await sql.query<{ section: LibrarySection; name: string; original_name: string | null; doc_type: string | null; mpn: string | null }>(
-      "select section, name, original_name, doc_type, mpn from library_files where id = $1 and section <> 'training'",
-      [data.id],
-    );
-    if (!file[0]) throw new Error("That file no longer exists.");
-    if ((file[0].mpn ?? "").trim()) throw new Error(`This is the official file for MPN ${file[0].mpn}. Untie it from the MPN before moving it.`);
-    // A parts file keeps its name wherever it goes; manuals and spec sheets are named for the model they land on.
-    const name = file[0].section === "parts" ? file[0].name : await nameInBook(sql, data.bookId, file[0].section, file[0].original_name || file[0].name, data.id, file[0].doc_type);
-    await sql.query("update library_files set book_id = $2, name = $3, original_name = coalesce(original_name, $4) where id = $1", [data.id, data.bookId, name, file[0].name]);
-    return { ok: true, name };
+    return { ok: true, name: await placeFileInBook(sql, data.id, data.bookId) };
   });
 
 /** Name a stored manual by its type. Manuals only: parts files stay parts files. */
@@ -631,4 +712,201 @@ export const deleteLibraryFile = createServerFn({ method: "POST" })
     // Training files are deleted from Education And Training (Admin and Sales), not from a model book.
     await sql.query("delete from library_files where id = $1 and section <> 'training'", [data.id]);
     return { ok: true };
+  });
+
+// ---- One-time cleanup, and storing one shared copy on the main chip ----
+
+/** Files whose name contains this phrase are the duplicates marked for the one-time cleanup. */
+const DUPLICATE_MARKER = "Duplicate To Delete";
+export const LIBRARY_CLEANUP_SPACE_NOTE =
+  "Neon reclaims the freed space on its own. This does not run VACUUM. The smaller size shows up after Neon finishes.";
+
+export type LibraryCleanupFile = { id: number; name: string; size: number };
+export type LibraryCleanupBook = {
+  id: number;
+  expectedTitle: string;
+  title: string | null;
+  action: "remove" | "skip" | "missing";
+  reason: string;
+};
+export type LibraryCleanupReport = {
+  applied: boolean;
+  named: { count: number; bytes: number; files: LibraryCleanupFile[] };
+  abandoned: { count: number; bytes: number; files: LibraryCleanupFile[] };
+  books: LibraryCleanupBook[];
+  totalBytes: number;
+  spaceNote: string;
+};
+
+const sumBytes = (files: LibraryCleanupFile[]) => files.reduce((n, f) => n + f.size, 0);
+const asFiles = (rows: { id: number; name: string; size: number }[]): LibraryCleanupFile[] =>
+  rows.map((r) => ({ id: Number(r.id), name: r.name, size: Number(r.size) }));
+
+async function libraryCleanupPlan(sql: Sql): Promise<Omit<LibraryCleanupReport, "applied">> {
+  const like = `%${DUPLICATE_MARKER}%`;
+  const named = asFiles(
+    await sql.query<{ id: number; name: string; size: number }>("select id, name, size from library_files where name like $1 order by id", [like]),
+  );
+  const abandoned = asFiles(
+    await sql.query<{ id: number; name: string; size: number }>(
+      `select id, name, size from library_files
+        where complete = false and created_at < now() - interval '1 hour' and name not like $1
+        order by id`,
+      [like],
+    ),
+  );
+  const books: LibraryCleanupBook[] = [];
+  for (const expected of CLEANUP_BOOKS) {
+    const rows = await sql.query<{ id: number; title: string; files: number; sheets: number; fixes: number; notes: number }>(
+      `select b.id, b.title,
+         (select count(*)::int from library_files f where f.book_id = b.id) as files,
+         (select count(*)::int from spec_sheets s where s.book_id = b.id) as sheets,
+         (select count(*)::int from library_fixes x where x.book_id = b.id) as fixes,
+         (select count(*)::int from library_unofficial_sources u where u.book_id = b.id) as notes
+       from library_books b where b.id = $1`,
+      [expected.id],
+    );
+    const found: CleanupBookFacts | null = rows[0]
+      ? { id: Number(rows[0].id), title: rows[0].title, files: Number(rows[0].files), sheets: Number(rows[0].sheets), fixes: Number(rows[0].fixes), notes: Number(rows[0].notes) }
+      : null;
+    const decision = cleanupBookDecision(expected, found);
+    books.push({ id: expected.id, expectedTitle: expected.title, title: found?.title ?? null, action: decision.action, reason: decision.reason });
+  }
+  return {
+    named: { count: named.length, bytes: sumBytes(named), files: named },
+    abandoned: { count: abandoned.length, bytes: sumBytes(abandoned), files: abandoned },
+    books,
+    totalBytes: sumBytes(named) + sumBytes(abandoned),
+    spaceNote: LIBRARY_CLEANUP_SPACE_NOTE,
+  };
+}
+
+/**
+ * Admin only. With apply false, counts what the cleanup would remove and deletes nothing.
+ * With apply true, removes only: files whose name contains "Duplicate To Delete" (and their chunks and text),
+ * incomplete uploads older than one hour (and their chunks), and the two empty duplicate books when they are empty.
+ */
+export const cleanupLibraryDuplicates = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { apply: boolean }) => z.object({ apply: z.boolean() }).parse(d))
+  .handler(async ({ data, context }): Promise<LibraryCleanupReport> => {
+    const sql = await ready();
+    await requireLibraryAdmin(sql, context.userId);
+    const plan = await libraryCleanupPlan(sql);
+    if (!data.apply) return { ...plan, applied: false };
+    const like = `%${DUPLICATE_MARKER}%`;
+    // Text and chunks go first, then the file rows. The foreign key would remove them too; deleting them
+    // here is the cleanup itself. Books were decided above, before any delete, so only a book that was already empty is removed.
+    await sql.query(
+      `delete from library_file_text t
+        using library_files f
+        where t.file_id = f.id and f.name like $1`,
+      [like],
+    );
+    await sql.query(
+      `delete from library_file_chunks c
+        using library_files f
+        where c.file_id = f.id
+          and (f.name like $1 or (f.complete = false and f.created_at < now() - interval '1 hour'))`,
+      [like],
+    );
+    const removed = await sql.query<{ id: number; name: string; size: number; named: boolean }>(
+      `delete from library_files f
+        where f.name like $1
+           or (f.complete = false and f.created_at < now() - interval '1 hour')
+        returning f.id, f.name, f.size, (f.name like $1) as named`,
+      [like],
+    );
+    const named = asFiles(removed.filter((r) => flagOn(r.named)));
+    const abandoned = asFiles(removed.filter((r) => !flagOn(r.named)));
+    const books: LibraryCleanupBook[] = [];
+    for (const book of plan.books) {
+      if (book.action !== "remove") {
+        books.push(book);
+        continue;
+      }
+      const gone = await sql.query<{ id: number }>(
+        `delete from library_books b
+          where b.id = $1 and b.title = $2
+            and not exists (select 1 from library_files f where f.book_id = b.id)
+            and not exists (select 1 from spec_sheets s where s.book_id = b.id)
+            and not exists (select 1 from library_fixes x where x.book_id = b.id)
+            and not exists (select 1 from library_unofficial_sources u where u.book_id = b.id)
+          returning b.id`,
+        [book.id, book.expectedTitle],
+      );
+      books.push(
+        gone.length
+          ? { ...book, action: "remove", reason: "Removed. It was empty and the title matched." }
+          : { ...book, action: "skip", reason: "Left in place. It was no longer an empty book with that title." },
+      );
+    }
+    return {
+      applied: true,
+      named: { count: named.length, bytes: sumBytes(named), files: named },
+      abandoned: { count: abandoned.length, bytes: sumBytes(abandoned), files: abandoned },
+      books,
+      totalBytes: sumBytes(named) + sumBytes(abandoned),
+      spaceNote: LIBRARY_CLEANUP_SPACE_NOTE,
+    };
+  });
+
+async function ensureMainChip(sql: Sql, userId: string, manufacturer: string, family: string) {
+  const title = titleOf(manufacturer, family);
+  await sql.query(
+    "insert into library_books (title, manufacturer, created_by, per_variation) values ($1, $2, $3, true) on conflict (lower(title)) do nothing",
+    [title, tidy(manufacturer), userId],
+  );
+  const rows = await sql.query<{ id: number; title: string; manufacturer: string | null }>(
+    "select id, title, manufacturer from library_books where lower(title) = lower($1)",
+    [title],
+  );
+  const made = rows[0];
+  if (!made) throw new Error(`Could not add the main chip ${title}.`);
+  const book = { id: Number(made.id), title: made.title, manufacturer: made.manufacturer || tidy(manufacturer) };
+  const catalog = await familyBooks(sql);
+  if (!isMainChip(book, catalog)) throw new Error(`${book.title} is not the main chip for ${family}. Nothing was moved.`);
+  return book;
+}
+
+/**
+ * Admin report action. Moves one manual or parts file onto the family's main chip when another book in that
+ * family already has the same size and document number. Does not delete the other copies.
+ */
+export const storeLibraryFileOnce = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { fileId: number }) => z.object({ fileId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ bookId: number; bookTitle: string; name: string; createdMainChip: boolean }> => {
+    const sql = await ready();
+    await requireLibraryAdmin(sql, context.userId);
+    const books = await familyBooks(sql);
+    const rows = await sql.query<{ id: number; name: string; original_name: string | null; size: number; section: LibrarySection; book_id: number | null; mpn: string | null }>(
+      `select id, name, original_name, size, section, book_id, mpn from library_files
+        where complete and section in ('manuals', 'parts') and book_id is not null`,
+    );
+    const share: ShareFile[] = rows.map((r) => ({
+      id: Number(r.id),
+      name: r.name,
+      docName: r.original_name,
+      size: Number(r.size),
+      section: r.section,
+      bookId: r.book_id == null ? null : Number(r.book_id),
+      mpn: r.mpn,
+    }));
+    const file = share.find((f) => f.id === data.fileId);
+    if (!file || file.bookId == null) throw new Error("That file is not a manual or parts file on a model.");
+    const group = familyDuplicateGroups(books, share).find((g) => g.files.some((f) => f.id === file.id));
+    if (!group) throw new Error("Nothing else in this family has the same size and document number.");
+    const home = books.find((b) => b.id === file.bookId);
+    if (!home) throw new Error("That model is no longer in The Library.");
+    let createdMainChip = false;
+    let main = isMainChip(home, books) ? home : mainChipFor(home, books);
+    if (!main) {
+      const maker = (home.manufacturer || group.manufacturer).trim();
+      if (maker.length < 2) throw new Error("That model has no manufacturer, so a main chip cannot be added.");
+      main = await ensureMainChip(sql, context.userId, maker, group.family);
+      createdMainChip = true;
+    }
+    const name = file.bookId === main.id ? file.name : await placeFileInBook(sql, file.id, main.id);
+    return { bookId: main.id, bookTitle: main.title, name, createdMainChip };
   });

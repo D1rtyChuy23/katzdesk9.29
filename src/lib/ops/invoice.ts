@@ -50,9 +50,15 @@ export function invoiceTotals(lines: { qty: number; rate: number; kind: ChargeKi
 }
 
 /** The first thing wrong with the lines, as a sentence, or null. Same checks as ticket charges. */
-export function invoiceError(lines: { item: string; qty: unknown; rate: unknown }[]): string | null {
+export function invoiceError(lines: { item: string; qty: unknown; rate: unknown; sourceKey?: string | null }[]): string | null {
   const problems = checkCharges(lines);
   return problems.length ? `Line ${problems[0].index + 1}: ${problems[0].message}` : null;
+}
+
+/** A stacked PM's own invoice cannot take a second copy of the lines. */
+export function stackedPmLock(ticket: { jobId: number; wo: string | null; callId: string | null }): string {
+  const label = String(ticket.wo ?? "").trim() || String(ticket.callId ?? "").trim();
+  return `This PM is billed on ticket #${ticket.jobId}${label ? ` (${label})` : ""}. Open the ticket's Invoicing tab.`;
 }
 
 export type BillTo = {

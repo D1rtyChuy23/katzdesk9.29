@@ -1,0 +1,1221 @@
+{
+  "id": "la-marzocco-linea",
+  "manufacturer": "La Marzocco",
+  "defaultStyleLast": true,
+  "title": "Linea PM Runbook",
+  "subtitle": "La Marzocco Linea Classic, Linea Classic S and Linea PB | preventive maintenance kits and steps",
+  "sources": "La Marzocco USA preventative maintenance checklists v2.1 (May 2026): 3/9-month, 6-month and 12-month. Kit numbers are per visit and group count. La Marzocco does not print kit contents on the checklists; where a kit note lists contents it comes from the checklist's replace list or LM's annual PM summary. Confirm kit numbers with La Marzocco USA before ordering.",
+  "storageKey": "lm-linea-runbook-v1",
+  "models": [
+    {
+      "id": "classic",
+      "label": "Linea Classic"
+    },
+    {
+      "id": "classic-s",
+      "label": "Linea Classic S"
+    },
+    {
+      "id": "pb",
+      "label": "Linea PB"
+    }
+  ],
+  "intervals": [
+    {
+      "id": "3",
+      "label": "3/9-month PM"
+    },
+    {
+      "id": "6",
+      "label": "6-month PM"
+    },
+    {
+      "id": "12",
+      "label": "12-month PM"
+    }
+  ],
+  "options": [
+    {
+      "key": "groups",
+      "label": "Groups",
+      "default": "2",
+      "choices": [
+        {
+          "val": "1",
+          "label": "1 group"
+        },
+        {
+          "val": "2",
+          "label": "2 group"
+        },
+        {
+          "val": "3",
+          "label": "3 group"
+        },
+        {
+          "val": "4",
+          "label": "4 group"
+        }
+      ]
+    },
+    {
+      "key": "ctrl",
+      "label": "Brew control",
+      "default": "av",
+      "choices": [
+        {
+          "val": "av",
+          "label": "AV (volumetric)"
+        },
+        {
+          "val": "ee",
+          "label": "EE (semi-auto)"
+        },
+        {
+          "val": "mp",
+          "label": "MP (paddle)"
+        }
+      ]
+    },
+    {
+      "key": "scales",
+      "label": "Integrated scales (ABR)",
+      "default": "no",
+      "when": {
+        "model": [
+          "pb"
+        ]
+      },
+      "choices": [
+        {
+          "val": "no",
+          "label": "No"
+        },
+        {
+          "val": "yes",
+          "label": "Yes"
+        }
+      ]
+    }
+  ],
+  "banners": [
+    {
+      "tone": "ok",
+      "text": "One kit per visit. The 3/9-month PM is the same visit at month 3 and month 9; the 6- and 12-month kits are complete for their visit, so earlier kits are not added."
+    },
+    {
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "groups": [
+          "1"
+        ]
+      },
+      "tone": "bad",
+      "text": "Linea PB has no 1-group PM kit. Pick 2, 3 or 4 groups."
+    },
+    {
+      "when": {
+        "model": [
+          "classic-s",
+          "pb"
+        ],
+        "ctrl": [
+          "mp"
+        ]
+      },
+      "tone": "warn",
+      "text": "MP is a Linea Classic option. Check the brew control on this unit."
+    },
+    {
+      "when": {
+        "model": [
+          "classic"
+        ]
+      },
+      "tone": "warn",
+      "text": "Linea Classic: the checklist does not list the kit contents, and the MP valve rebuild (SA600/K2) is listed separately."
+    }
+  ],
+  "kits": [
+    {
+      "ev": "LINEA.3.1",
+      "name": "PM kit, 3/9-month PM, 1 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "1"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.3.2",
+      "name": "PM kit, 3/9-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.3.3",
+      "name": "PM kit, 3/9-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.3.4",
+      "name": "PM kit, 3/9-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.6.1",
+      "name": "PM kit, 6-month PM, 1 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "1"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.6.2",
+      "name": "PM kit, 6-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.6.3",
+      "name": "PM kit, 6-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.6.4",
+      "name": "PM kit, 6-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.12.1",
+      "name": "PM kit, 12-month PM, 1 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "1"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.12.2",
+      "name": "PM kit, 12-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.12.3",
+      "name": "PM kit, 12-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LINEA.12.4",
+      "name": "PM kit, 12-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "classic"
+        ]
+      },
+      "note": "La Marzocco does not print this kit's contents. Check the kit before the visit."
+    },
+    {
+      "ev": "LCS.3.1",
+      "name": "PM kit, 3/9-month PM, 1 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "1"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens."
+    },
+    {
+      "ev": "LCS.3.2",
+      "name": "PM kit, 3/9-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens."
+    },
+    {
+      "ev": "LCS.3.3",
+      "name": "PM kit, 3/9-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens."
+    },
+    {
+      "ev": "LCS.3.4",
+      "name": "PM kit, 3/9-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens."
+    },
+    {
+      "ev": "LCS.6.1",
+      "name": "PM kit, 6-month PM, 1 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "1"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
+    },
+    {
+      "ev": "LCS.6.2",
+      "name": "PM kit, 6-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
+    },
+    {
+      "ev": "LCS.6.3",
+      "name": "PM kit, 6-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
+    },
+    {
+      "ev": "LCS.6.4",
+      "name": "PM kit, 6-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
+    },
+    {
+      "ev": "LCS.12.1",
+      "name": "PM kit, 12-month PM, 1 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "1"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
+    },
+    {
+      "ev": "LCS.12.2",
+      "name": "PM kit, 12-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
+    },
+    {
+      "ev": "LCS.12.3",
+      "name": "PM kit, 12-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
+    },
+    {
+      "ev": "LCS.12.4",
+      "name": "PM kit, 12-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "classic-s"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
+    },
+    {
+      "ev": "PB.3.2",
+      "name": "PM kit, 3/9-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens."
+    },
+    {
+      "ev": "PB.3.3",
+      "name": "PM kit, 3/9-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens."
+    },
+    {
+      "ev": "PB.3.4",
+      "name": "PM kit, 3/9-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 3,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "3"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens."
+    },
+    {
+      "ev": "PB.6.2",
+      "name": "PM kit, 6-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
+    },
+    {
+      "ev": "PB.6.3",
+      "name": "PM kit, 6-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
+    },
+    {
+      "ev": "PB.6.4",
+      "name": "PM kit, 6-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 6,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "6"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
+    },
+    {
+      "ev": "PB.12.2",
+      "name": "PM kit, 12-month PM, 2 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "2"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
+    },
+    {
+      "ev": "PB.12.3",
+      "name": "PM kit, 12-month PM, 3 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "3"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
+    },
+    {
+      "ev": "PB.12.4",
+      "name": "PM kit, 12-month PM, 4 group",
+      "module": "PM kit",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "pm": [
+          "12"
+        ],
+        "groups": [
+          "4"
+        ],
+        "model": [
+          "pb"
+        ]
+      },
+      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
+    },
+    {
+      "ev": "SA600/K2",
+      "name": "MP valve rebuild kit (non-conical valves)",
+      "module": "Group heads",
+      "interval": 12,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "1": 1,
+          "2": 2,
+          "3": 3,
+          "4": 4
+        }
+      },
+      "when": {
+        "model": [
+          "classic"
+        ],
+        "ctrl": [
+          "mp"
+        ]
+      },
+      "note": "One per group. Non-conical MP valves only. Due at 12 months; add it on an earlier visit if a valve needs it."
+    }
+  ],
+  "steps": [
+    {
+      "module": "Water quality",
+      "items": [
+        {
+          "id": "wq-test",
+          "text": "Test the water before and after the filter with the LM test kit (F.9.000.01). Record the filter make and type and compare with the limits in Reference.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Group heads",
+      "items": [
+        {
+          "id": "li-gh-gaskets",
+          "text": "Replace the group gaskets and diffuser screens on every group (from the PM kit).",
+          "when": {
+            "model": [
+              "classic-s",
+              "pb"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-gh-kit",
+          "text": "Fit the parts in the PM kit (the Linea Classic checklist does not list them).",
+          "when": {
+            "model": [
+              "classic"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-gh-baskets",
+          "text": "Check the filter baskets and springs.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-gh-buttons",
+          "text": "Test every button.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-gh-res",
+          "text": "Measure each flow meter's field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ). Record G1–G4 in kΩ.",
+          "when": {
+            "ctrl": [
+              "av"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-gh-imp",
+          "text": "Check the flow meter impellers.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "ctrl": [
+              "av"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-gh-vdc",
+          "text": "Test the DC voltage at the control board (VDC).",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic"
+            ],
+            "ctrl": [
+              "av"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-gh-flow",
+          "text": "Record each group's flow rate: grams in 30 s, G1–G4.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-gh-mp",
+          "text": "Check the MP valves. Non-conical valves: rebuild with SA600/K2 if needed.",
+          "when": {
+            "pm": [
+              "3",
+              "6"
+            ],
+            "ctrl": [
+              "mp"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-gh-mp12",
+          "text": "Rebuild the non-conical MP valves (SA600/K2).",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic"
+            ],
+            "ctrl": [
+              "mp"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        }
+      ]
+    },
+    {
+      "module": "Boilers and pressure",
+      "items": [
+        {
+          "id": "li-br-press",
+          "text": "Record the brewing pressure (bar).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-br-exp",
+          "text": "Check the expansion valve and record its maximum pressure (bar).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-br-temp",
+          "text": "Record the coffee boiler temperature (°F).",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-br-pstat",
+          "text": "Check the steam boiler pressurestat.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-br-cont",
+          "text": "Check the steam boiler contactor.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-br-psv",
+          "text": "Replace the pressure safety valve.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic-s",
+              "pb"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-br-vb",
+          "text": "Replace the vacuum breaker.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic-s",
+              "pb"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-br-vbchk",
+          "text": "Check the vacuum breakers work.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Steam",
+      "items": [
+        {
+          "id": "li-st-rebuild",
+          "text": "Rebuild the steam valves.",
+          "when": {
+            "pm": [
+              "6",
+              "12"
+            ],
+            "model": [
+              "classic-s",
+              "pb"
+            ]
+          },
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-st-wandvb",
+          "text": "Replace the steam wand vacuum breakers.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic-s",
+              "pb"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-st-valve",
+          "text": "Check the steam valves work.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Water and drain",
+      "items": [
+        {
+          "id": "li-wd-probe",
+          "text": "Clean the auto-fill probe.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-wd-leaks",
+          "text": "Check all fittings and valves for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-wd-line",
+          "text": "Check the water line and water meter for leaks.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-wd-drain",
+          "text": "Check the drain box and hose for leaks or clogs.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Electrical",
+      "items": [
+        {
+          "id": "li-el-cord",
+          "text": "Check the power cord, cap and outlet.",
+          "ref": "LM checklist"
+        },
+        {
+          "id": "li-el-harness",
+          "text": "Check the wiring harness and components.",
+          "when": {
+            "pm": [
+              "12"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-el-box",
+          "text": "Check the electronics box.",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "classic-s",
+              "pb"
+            ]
+          },
+          "ref": "LM 12-mo checklist"
+        }
+      ]
+    },
+    {
+      "module": "Scales",
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "scales": [
+          "yes"
+        ]
+      },
+      "items": [
+        {
+          "id": "li-sc-cal",
+          "text": "Confirm or calibrate the integrated scales with a 100 g weight.",
+          "ref": "LM checklist"
+        }
+      ]
+    },
+    {
+      "module": "Close out",
+      "items": [
+        {
+          "id": "li-co-form",
+          "text": "Fill in the La Marzocco checklist for this visit: serial, voltage, group count and every reading. Get the customer's signature.",
+          "ref": "LM checklist"
+        }
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "title": "Water limits (LM test kit F.9.000.01)",
+      "text": "Test before and after the filter. Record the filter make and type: carbon, ion exchange/softener, WAC, reverse osmosis, or none.",
+      "table": {
+        "head": [
+          "Test",
+          "Min",
+          "Max"
+        ],
+        "rows": [
+          [
+            "Total hardness (ppm)",
+            "5",
+            "70"
+          ],
+          [
+            "Alkalinity (ppm)",
+            "5",
+            "80"
+          ],
+          [
+            "Chloride (ppm)",
+            "0",
+            "30"
+          ],
+          [
+            "Iron (ppm)",
+            "0",
+            "0.02"
+          ],
+          [
+            "Free chlorine (ppm)",
+            "0",
+            "0.05"
+          ],
+          [
+            "Total chlorine (ppm)",
+            "0",
+            "0.1"
+          ],
+          [
+            "pH",
+            "6.5",
+            "8.5"
+          ],
+          [
+            "TDS (ppm)",
+            "10",
+            "150"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Specs on the checklists",
+      "list": [
+        "Flow meter field resistance: 2.2 kΩ ±10% (1.98–2.42 kΩ).",
+        "Flow rate: the checklist header says ml/30 s but the blanks say g. Record grams in 30 s and note it.",
+        "Brew pressure, expansion valve max pressure and boiler temperature: the checklists give blanks, no targets. Use the machine manual's settings.",
+        "Integrated scales: confirm or calibrate with a 100 g weight."
+      ]
+    },
+    {
+      "title": "Kit numbers",
+      "table": {
+        "head": [
+          "Model",
+          "3/9-month",
+          "6-month",
+          "12-month"
+        ],
+        "monoCols": [
+          1,
+          2,
+          3
+        ],
+        "rows": [
+          [
+            "Linea Classic (1–4 gr)",
+            "LINEA.3.<gr>",
+            "LINEA.6.<gr>",
+            "LINEA.12.<gr>"
+          ],
+          [
+            "Linea Classic S (1–4 gr)",
+            "LCS.3.<gr>",
+            "LCS.6.<gr>",
+            "LCS.12.<gr>"
+          ],
+          [
+            "Linea PB (2–4 gr)",
+            "PB.3.<gr>",
+            "PB.6.<gr>",
+            "PB.12.<gr>"
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -3,7 +3,10 @@ import { lastMoveLine, placeDraftError, placeMove, unitPlaceLabel } from "../src
 
 assert.equal(placeMove(null), "create");
 assert.equal(placeMove({ status: "ready" }), "move");
-assert.equal(placeMove({ status: "assigned" }), "blocked");
+// The lock decides, not the status: assigning stamps it, and the owner can take it off.
+assert.equal(placeMove({ status: "assigned", locked_at: "2026-10-21T00:00:00Z" }), "blocked");
+assert.equal(placeMove({ status: "assigned", locked_at: null }), "move");
+assert.equal(placeMove({ status: "ready", locked_at: "2026-10-21T00:00:00Z" }), "blocked");
 assert.equal(unitPlaceLabel({ site: "barn-back", pallet: "g", level: 1, status: "ready" }), "Back · G-L1");
 assert.equal(unitPlaceLabel({ site: "barn-front", pallet: "G", level: 1, status: "ready" }), "Front · G-L1");
 assert.equal(placeDraftError({ site: "barn-front", pallet: "K" }), "Pick a level.");
@@ -35,11 +38,11 @@ console.log("unit place ok");
   assert.equal(placeDraftError({ site: "barn-front", pallet: "" }), "Pick a bay I through P.");
 }
 
-// A unit assigned to an account, or sold, is locked in place.
+// A unit assigned to an account, or sold, is locked in place: the lock is stamped when it is assigned or sold.
 {
   const { placeMove } = await import("../src/lib/ops/unit-place-rules.ts");
-  assert.equal(placeMove({ status: "assigned" }), "blocked");
-  assert.equal(placeMove({ status: "sold" }), "blocked");
+  assert.equal(placeMove({ status: "assigned", locked_at: "2026-10-21T00:00:00Z" }), "blocked");
+  assert.equal(placeMove({ status: "sold", lockedAt: "2026-10-21T00:00:00Z" }), "blocked");
   assert.equal(placeMove({ status: "ready" }), "move");
   assert.equal(placeMove({ status: "deployed" }), "move");
   assert.equal(placeMove(null), "create");

@@ -1,0 +1,6216 @@
+{
+ "about": "KatzDesk Library import data, 2026-10-16. uploads = every official document planned for the Library (many already uploaded; skip those). mpns = book MPNs (null = leave blank).",
+ "markAsDuplicate": [
+  27,
+  37,
+  50
+ ],
+ "uploads": [
+  {
+   "url": "https://catalog.bunn.com/public/docs/41154.0000/E17/01/000/41154.0000.pdf",
+   "fileName": "41154.0000.pdf",
+   "targets": [
+    {
+     "bookId": 1,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN AXIOM - Programming 41154.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000024857/M03/38/000/38700.0000.pdf",
+   "fileName": "38700.0000.pdf",
+   "targets": [
+    {
+     "bookId": 8,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN AXIOM-15-3 (2U-1L) - Spec Sheet 38700.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000026093/M03/52/000/38700.0002.pdf",
+   "fileName": "38700.0002.pdf",
+   "targets": [
+    {
+     "bookId": 7,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN AXIOM-15-3 (3 Lower) - Spec Sheet 38700.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000024010/M03/89/000/38700.0010.pdf",
+   "fileName": "38700.0010.pdf",
+   "targets": [
+    {
+     "bookId": 4,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN AXIOM-DV-APS - Spec Sheet 38700.0010"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000024398/M03/52/000/38700.0011.pdf",
+   "fileName": "38700.0011.pdf",
+   "targets": [
+    {
+     "bookId": 5,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN Axiom-DV-TC - Spec Sheet 38700.0011"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000024183/M03/46/000/38700.0013.pdf",
+   "fileName": "38700.0013.pdf",
+   "targets": [
+    {
+     "bookId": 6,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN AXIOM-TWIN-APS - Spec Sheet 38700.0013"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/39645.0001/E17/01/000/39645.0001.pdf",
+   "fileName": "39645.0001.pdf",
+   "targets": [
+    {
+     "bookId": 5,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN Axiom-DV-TC - Cleaning Card 39645.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/36705.0000/E17/03/000/36705.0000.pdf",
+   "fileName": "36705.0000.pdf",
+   "targets": [
+    {
+     "bookId": 17,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN FPG-2 DBC SST - Installation and Operating 36705.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/10218.0000/E17/01/000/10218.0000.pdf",
+   "fileName": "10218.0000.pdf",
+   "targets": [
+    {
+     "bookId": 16,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN G9-2T HD Stainless - Installation and Operating 10218.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54141.0000/E17/03/000/54141.0000.pdf",
+   "fileName": "54141.0000.pdf",
+   "targets": [
+    {
+     "bookId": 15,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN ITB Dual Dilution - Installation and Operating 54141.0000"
+    },
+    {
+     "bookId": 13,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN ITCB-DV - Installation and Operating 54141.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54299.0000/E17/04/000/54299.0000.pdf",
+   "fileName": "54299.0000.pdf",
+   "targets": [
+    {
+     "bookId": 15,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN ITB Dual Dilution - Service and Repair 54299.0000"
+    },
+    {
+     "bookId": 13,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN ITCB-DV - Service and Repair 54299.0000"
+    },
+    {
+     "bookId": 44,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN ITB-LP - Service and Repair 54299.0000"
+    },
+    {
+     "bookId": 45,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN ICB-DV Short - Service and Repair 54299.0000"
+    },
+    {
+     "bookId": 46,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN ICB-DV Tall - Service and Repair 54299.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/53867.0000/E17/02/000/53867.0000.PDF",
+   "fileName": "53867.0000.PDF",
+   "targets": [
+    {
+     "bookId": 15,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN ITB Dual Dilution - Programming 53867.0000"
+    },
+    {
+     "bookId": 13,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN ITCB-DV - Programming 53867.0000"
+    },
+    {
+     "bookId": 45,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN ICB-DV Short - Programming 53867.0000"
+    },
+    {
+     "bookId": 46,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN ICB-DV Tall - Programming 53867.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54501.0000/E17/00/000/54501.0000.pdf",
+   "fileName": "54501.0000.pdf",
+   "targets": [
+    {
+     "bookId": 15,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN ITB Dual Dilution - Cleaning Card 54501.0000"
+    },
+    {
+     "bookId": 44,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN ITB-LP - Cleaning Card 54501.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54501.0002/E17/00/000/54501.0002.pdf",
+   "fileName": "54501.0002.pdf",
+   "targets": [
+    {
+     "bookId": 15,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN ITB Dual Dilution - Cleaning Card 54501.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/45917.0000/E17/00/000/45917.0000.pdf",
+   "fileName": "45917.0000.pdf",
+   "targets": [
+    {
+     "bookId": 13,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN ITCB-DV - Cleaning Card 45917.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/53868.0000/E17/13/000/53868.0000.pdf",
+   "fileName": "53868.0000.pdf",
+   "targets": [
+    {
+     "bookId": 13,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN ITCB-DV - Parts Catalog 53868.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54261.0003/E17/07/000/54261.0003.pdf",
+   "fileName": "54261.0003.pdf",
+   "targets": [
+    {
+     "bookId": 14,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN NITRON - Installation and Operating 54261.0003"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/55124.0000/E17/00/000/55124.0000.pdf",
+   "fileName": "55124.0000.pdf",
+   "targets": [
+    {
+     "bookId": 14,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN NITRON - Service and Repair 55124.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/55076.0000/E17/01/000/55076.0000.pdf",
+   "fileName": "55076.0000.pdf",
+   "targets": [
+    {
+     "bookId": 14,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "BUNN NITRON - Use and Care 55076.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000024399/M03/40/000/12950.0212.pdf",
+   "fileName": "12950.0212.pdf",
+   "targets": [
+    {
+     "bookId": 39,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN CWTF15-3 (3 Lower) - Spec Sheet 12950.0212"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/40566.0000/E17/08/000/40566.0000.pdf",
+   "fileName": "40566.0000.pdf",
+   "targets": [
+    {
+     "bookId": 39,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN CWTF15-3 (3 Lower) - Parts Catalog 40566.0000"
+    },
+    {
+     "bookId": 40,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN CWTF15-3 (2U-1L) - Parts Catalog 40566.0000"
+    },
+    {
+     "bookId": 41,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN CWTF15-APS - Parts Catalog 40566.0000"
+    },
+    {
+     "bookId": 42,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN CWTF15-TC - Parts Catalog 40566.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41721.0000/E17/02/000/41721.0000.pdf",
+   "fileName": "41721.0000.pdf",
+   "targets": [
+    {
+     "bookId": 39,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN CWTF15-3 (3 Lower) - Installation and Operating 41721.0000"
+    },
+    {
+     "bookId": 40,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN CWTF15-3 (2U-1L) - Installation and Operating 41721.0000"
+    },
+    {
+     "bookId": 41,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN CWTF15-APS - Installation and Operating 41721.0000"
+    },
+    {
+     "bookId": 42,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN CWTF15-TC - Installation and Operating 41721.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41711.0001/E17/00/000/41711.0001.pdf",
+   "fileName": "41711.0001.pdf",
+   "targets": [
+    {
+     "bookId": 39,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN CWTF15-3 (3 Lower) - Service and Repair 41711.0001"
+    },
+    {
+     "bookId": 40,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN CWTF15-3 (2U-1L) - Service and Repair 41711.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/36552.0000/E17/00/000/36552.0000.pdf",
+   "fileName": "36552.0000.pdf",
+   "targets": [
+    {
+     "bookId": 39,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN CWTF15-3 (3 Lower) - Cleaning Card 36552.0000"
+    },
+    {
+     "bookId": 40,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN CWTF15-3 (2U-1L) - Cleaning Card 36552.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000044408/M03/33/000/12950.0213.pdf",
+   "fileName": "12950.0213.pdf",
+   "targets": [
+    {
+     "bookId": 40,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN CWTF15-3 (2U-1L) - Spec Sheet 12950.0213"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000038025/M03/71/000/23001.0006.pdf",
+   "fileName": "23001.0006.pdf",
+   "targets": [
+    {
+     "bookId": 41,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN CWTF15-APS - Spec Sheet 23001.0006"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41711.0001/E17/01/000/41711.0001.pdf",
+   "fileName": "41711.0001.pdf",
+   "targets": [
+    {
+     "bookId": 41,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN CWTF15-APS - Service and Repair 41711.0001"
+    },
+    {
+     "bookId": 42,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN CWTF15-TC - Service and Repair 41711.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/42054.0000/E17/00/000/42054.0000.pdf",
+   "fileName": "42054.0000.pdf",
+   "targets": [
+    {
+     "bookId": 41,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN CWTF15-APS - Cleaning Card 42054.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000023938/M03/64/000/12950.0360.pdf",
+   "fileName": "12950.0360.pdf",
+   "targets": [
+    {
+     "bookId": 42,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN CWTF15-TC - Spec Sheet 12950.0360"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/36552.0000/E17/01/000/36552.0000.pdf",
+   "fileName": "36552.0000.pdf",
+   "targets": [
+    {
+     "bookId": 42,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN CWTF15-TC - Cleaning Card 36552.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000031378/M03/44/000/36700.0009.pdf",
+   "fileName": "36700.0009.pdf",
+   "targets": [
+    {
+     "bookId": 43,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN TB3 - Spec Sheet 36700.0009"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41328.0002/E17/06/000/41328.0002.pdf",
+   "fileName": "41328.0002.pdf",
+   "targets": [
+    {
+     "bookId": 43,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN TB3 - Parts Catalog 41328.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41465.0001/E17/00/000/41465.0001.pdf",
+   "fileName": "41465.0001.pdf",
+   "targets": [
+    {
+     "bookId": 43,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN TB3 - Installation and Operating 41465.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41722.0000/E17/01/000/41722.0000.pdf",
+   "fileName": "41722.0000.pdf",
+   "targets": [
+    {
+     "bookId": 43,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN TB3 - Service and Repair 41722.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000044769/M03/06/000/52000.0101.pdf",
+   "fileName": "52000.0101.pdf",
+   "targets": [
+    {
+     "bookId": 44,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN ITB-LP - Spec Sheet 52000.0101"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54464.0000/E17/02/000/54464.0000.pdf",
+   "fileName": "54464.0000.pdf",
+   "targets": [
+    {
+     "bookId": 44,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN ITB-LP - Parts Catalog 54464.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/53867.0000/E17/01/000/53867.0000.PDF",
+   "fileName": "53867.0000.PDF",
+   "targets": [
+    {
+     "bookId": 44,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN ITB-LP - Programming 53867.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54141.8000/E17/03/000/54141.8000.pdf",
+   "fileName": "54141.8000.pdf",
+   "targets": [
+    {
+     "bookId": 44,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN ITB-LP - Installation and Operating (Spanish) 54141.8000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000044768/M03/62/000/53100.0100.pdf",
+   "fileName": "53100.0100.pdf",
+   "targets": [
+    {
+     "bookId": 45,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN ICB-DV Short - Spec Sheet 53100.0100"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54233.0000/E17/16/000/54233.0000.pdf",
+   "fileName": "54233.0000.pdf",
+   "targets": [
+    {
+     "bookId": 45,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN ICB-DV Short - Parts Catalog 54233.0000"
+    },
+    {
+     "bookId": 46,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN ICB-DV Tall - Parts Catalog 54233.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54212.0000/E17/03/000/54212.0000.pdf",
+   "fileName": "54212.0000.pdf",
+   "targets": [
+    {
+     "bookId": 45,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN ICB-DV Short - Installation and Operating 54212.0000"
+    },
+    {
+     "bookId": 46,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN ICB-DV Tall - Installation and Operating 54212.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/55089.0000/E17/01/000/55089.0000.pdf",
+   "fileName": "55089.0000.pdf",
+   "targets": [
+    {
+     "bookId": 45,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN ICB-DV Short - Cleaning Card 55089.0000"
+    },
+    {
+     "bookId": 46,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN ICB-DV Tall - Cleaning Card 55089.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000058459/M03/02/000/53100.0101.pdf",
+   "fileName": "53100.0101.pdf",
+   "targets": [
+    {
+     "bookId": 46,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN ICB-DV Tall - Spec Sheet 53100.0101"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000035106/M03/20/000/58000.0010.pdf",
+   "fileName": "58000.0010.pdf",
+   "targets": [
+    {
+     "bookId": 47,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN Ultra NX - Spec Sheet 58000.0010"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/58042.0000/E17/17/000/58042.0000.pdf",
+   "fileName": "58042.0000.pdf",
+   "targets": [
+    {
+     "bookId": 47,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN Ultra NX - Parts Catalog 58042.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/58039.0001/E17/03/000/58039.0001.pdf",
+   "fileName": "58039.0001.pdf",
+   "targets": [
+    {
+     "bookId": 47,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN Ultra NX - Installation and Operating 58039.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/58039.0002/E17/03/000/58039.0002.pdf",
+   "fileName": "58039.0002.pdf",
+   "targets": [
+    {
+     "bookId": 47,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN Ultra NX - Installation and Operating 58039.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/58041.0000/E17/03/000/58041.0000.pdf",
+   "fileName": "58041.0000.pdf",
+   "targets": [
+    {
+     "bookId": 47,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN Ultra NX - Service and Repair 58041.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/58040.0000/E17/00/000/58040.0000.pdf",
+   "fileName": "58040.0000.pdf",
+   "targets": [
+    {
+     "bookId": 47,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN Ultra NX - Programming 58040.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/58028.0000/E17/02/000/58028.0000.pdf",
+   "fileName": "58028.0000.pdf",
+   "targets": [
+    {
+     "bookId": 47,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "BUNN Ultra NX - Use and Care 58028.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000003196/M03/99/000/22104.0000.pdf",
+   "fileName": "22104.0000.pdf",
+   "targets": [
+    {
+     "bookId": 48,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN G1 HD - Spec Sheet 22104.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/43291.0002/E17/08/000/43291.0002.pdf",
+   "fileName": "43291.0002.pdf",
+   "targets": [
+    {
+     "bookId": 48,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN G1 HD - Parts Catalog 43291.0002"
+    },
+    {
+     "bookId": 49,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN G2 HD - Parts Catalog 43291.0002"
+    },
+    {
+     "bookId": 50,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN G3 HD - Parts Catalog 43291.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/43254.0000/E17/04/000/43254.0000.pdf",
+   "fileName": "43254.0000.pdf",
+   "targets": [
+    {
+     "bookId": 48,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN G1 HD - Installation and Operating 43254.0000"
+    },
+    {
+     "bookId": 49,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN G2 HD - Installation and Operating 43254.0000"
+    },
+    {
+     "bookId": 50,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN G3 HD - Installation and Operating 43254.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41545.0000/E17/04/000/41545.0000.pdf",
+   "fileName": "41545.0000.pdf",
+   "targets": [
+    {
+     "bookId": 48,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN G1 HD - Service and Repair 41545.0000"
+    },
+    {
+     "bookId": 49,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN G2 HD - Service and Repair 41545.0000"
+    },
+    {
+     "bookId": 50,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN G3 HD - Service and Repair 41545.0000"
+    },
+    {
+     "bookId": 51,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN G9-2T DBC - Service and Repair 41545.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000003194/M03/93/000/22102.0000.pdf",
+   "fileName": "22102.0000.pdf",
+   "targets": [
+    {
+     "bookId": 49,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN G2 HD - Spec Sheet 22102.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000045996/M03/65/000/22100.0000.pdf",
+   "fileName": "22100.0000.pdf",
+   "targets": [
+    {
+     "bookId": 50,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN G3 HD - Spec Sheet 22100.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000030109/M03/90/000/33700.0000.pdf",
+   "fileName": "33700.0000.pdf",
+   "targets": [
+    {
+     "bookId": 51,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN G9-2T DBC - Spec Sheet 33700.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/33737.0002/E17/05/000/33737.0002.pdf",
+   "fileName": "33737.0002.pdf",
+   "targets": [
+    {
+     "bookId": 51,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN G9-2T DBC - Parts Catalog 33737.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/33736.0000/E17/04/000/33736.0000.pdf",
+   "fileName": "33736.0000.pdf",
+   "targets": [
+    {
+     "bookId": 51,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN G9-2T DBC - Installation and Operating 33736.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000003245/M03/13/000/24250.6000.pdf",
+   "fileName": "24250.6000.pdf",
+   "targets": [
+    {
+     "bookId": 52,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN G9-2 HD - Spec Sheet 24250.6000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/10171.0000/E17/01/000/10171.0000.pdf",
+   "fileName": "10171.0000.pdf",
+   "targets": [
+    {
+     "bookId": 52,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN G9-2 HD - Installation and Operating 10171.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/41545.0000/E17/03/000/41545.0000.pdf",
+   "fileName": "41545.0000.pdf",
+   "targets": [
+    {
+     "bookId": 52,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN G9-2 HD - Service and Repair 41545.0000"
+    },
+    {
+     "bookId": 54,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN LPG-2E - Service and Repair 41545.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000019119/M03/47/000/55600.0100.pdf",
+   "fileName": "55600.0100.pdf",
+   "targets": [
+    {
+     "bookId": 53,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN GVH-1 - Spec Sheet 55600.0100"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/55495.0000/E17/03/000/55495.0000.pdf",
+   "fileName": "55495.0000.pdf",
+   "targets": [
+    {
+     "bookId": 53,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN GVH-1 - Parts Catalog 55495.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/55496.0000/E17/02/000/55496.0000.pdf",
+   "fileName": "55496.0000.pdf",
+   "targets": [
+    {
+     "bookId": 53,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN GVH-1 - Installation and Operating 55496.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000046614/M03/03/000/26800.0000.pdf",
+   "fileName": "26800.0000.pdf",
+   "targets": [
+    {
+     "bookId": 54,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN LPG-2E - Spec Sheet 26800.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/27092.0001/E17/03/000/27092.0001.pdf",
+   "fileName": "27092.0001.pdf",
+   "targets": [
+    {
+     "bookId": 54,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN LPG-2E - Parts Catalog 27092.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/27091.0000/E17/02/000/27091.0000.pdf",
+   "fileName": "27091.0000.pdf",
+   "targets": [
+    {
+     "bookId": 54,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN LPG-2E - Installation and Operating 27091.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/42061.0000/E17/00/000/42061.0000.pdf",
+   "fileName": "42061.0000.pdf",
+   "targets": [
+    {
+     "bookId": 54,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN LPG-2E - Cleaning Card 42061.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000022572/M03/75/000/43600.0026.pdf",
+   "fileName": "43600.0026.pdf",
+   "targets": [
+    {
+     "bookId": 55,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN H5X 120V - Spec Sheet 43600.0026"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/47656.0000/E17/14/000/47656.0000.pdf",
+   "fileName": "47656.0000.pdf",
+   "targets": [
+    {
+     "bookId": 55,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN H5X 120V - Parts Catalog 47656.0000"
+    },
+    {
+     "bookId": 56,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN H5X 240V - Parts Catalog 47656.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/46819.0002/E17/03/000/46819.0002.pdf",
+   "fileName": "46819.0002.pdf",
+   "targets": [
+    {
+     "bookId": 55,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN H5X 120V - Installation and Operating 46819.0002"
+    },
+    {
+     "bookId": 56,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN H5X 240V - Installation and Operating 46819.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/42311.0000/E17/06/000/42311.0000.pdf",
+   "fileName": "42311.0000.pdf",
+   "targets": [
+    {
+     "bookId": 55,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN H5X 120V - Service and Repair 42311.0000"
+    },
+    {
+     "bookId": 56,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN H5X 240V - Service and Repair 42311.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000042880/M03/60/000/43600.0003.pdf",
+   "fileName": "43600.0003.pdf",
+   "targets": [
+    {
+     "bookId": 56,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN H5X 240V - Spec Sheet 43600.0003"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000003684/M03/49/000/36900.0000.pdf",
+   "fileName": "36900.0000.pdf",
+   "targets": [
+    {
+     "bookId": 57,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN iMIX-3 - Spec Sheet 36900.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/37509.0002/E17/03/000/37509.0002.pdf",
+   "fileName": "37509.0002.pdf",
+   "targets": [
+    {
+     "bookId": 57,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN iMIX-3 - Parts Catalog 37509.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/37510.0002/E17/02/000/37510.0002.pdf",
+   "fileName": "37510.0002.pdf",
+   "targets": [
+    {
+     "bookId": 57,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN iMIX-3 - Installation and Operating 37510.0002"
+    },
+    {
+     "bookId": 58,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN iMIX-5 - Installation and Operating 37510.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/42032.0000/E17/04/000/42032.0000.pdf",
+   "fileName": "42032.0000.pdf",
+   "targets": [
+    {
+     "bookId": 57,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN iMIX-3 - Service and Repair 42032.0000"
+    },
+    {
+     "bookId": 58,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN iMIX-5 - Service and Repair 42032.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000003752/M03/43/000/37000.0000.pdf",
+   "fileName": "37000.0000.pdf",
+   "targets": [
+    {
+     "bookId": 58,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN iMIX-5 - Spec Sheet 37000.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/37259.0002/E17/03/000/37259.0002.pdf",
+   "fileName": "37259.0002.pdf",
+   "targets": [
+    {
+     "bookId": 58,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN iMIX-5 - Parts Catalog 37259.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000003771/M03/33/000/SET00.0196.pdf",
+   "fileName": "SET00.0196.pdf",
+   "targets": [
+    {
+     "bookId": 59,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN FMD-1 - Spec Sheet SET00.0196"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/29113.0002/E17/02/000/29113.0002.pdf",
+   "fileName": "29113.0002.pdf",
+   "targets": [
+    {
+     "bookId": 59,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN FMD-1 - Parts Catalog 29113.0002"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/29112.0000/E17/02/000/29112.0000.pdf",
+   "fileName": "29112.0000.pdf",
+   "targets": [
+    {
+     "bookId": 59,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN FMD-1 - Installation and Operating 29112.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/42672.0000/E17/01/000/42672.0000.pdf",
+   "fileName": "42672.0000.pdf",
+   "targets": [
+    {
+     "bookId": 59,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "BUNN FMD-1 - Service and Repair 42672.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/35111.0000/E17/00/000/35111.0000.pdf",
+   "fileName": "35111.0000.pdf",
+   "targets": [
+    {
+     "bookId": 59,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN FMD-1 - Cleaning Card 35111.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000033167/M03/41/000/44400.0100.pdf",
+   "fileName": "44400.0100.pdf",
+   "targets": [
+    {
+     "bookId": 60,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN Sure Immersion 220 - Spec Sheet 44400.0100"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54077.0000/E17/22/000/54077.0000.pdf",
+   "fileName": "54077.0000.pdf",
+   "targets": [
+    {
+     "bookId": 60,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN Sure Immersion 220 - Parts Catalog 54077.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/53058.0000/E17/09/000/53058.0000.pdf",
+   "fileName": "53058.0000.pdf",
+   "targets": [
+    {
+     "bookId": 60,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN Sure Immersion 220 - Installation and Operating 53058.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/54377.0000/E17/05/000/54377.0000.pdf",
+   "fileName": "54377.0000.pdf",
+   "targets": [
+    {
+     "bookId": 60,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN Sure Immersion 220 - Programming 54377.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/59036.0000/E17/00/000/59036.0000.pdf",
+   "fileName": "59036.0000.pdf",
+   "targets": [
+    {
+     "bookId": 60,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN Sure Immersion 220 - Cleaning Card 59036.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/0000000000000010000034077/M03/57/000/44400.0200.pdf",
+   "fileName": "44400.0200.pdf",
+   "targets": [
+    {
+     "bookId": 61,
+     "section": "spec",
+     "docType": null,
+     "name": "BUNN Sure Immersion 312 - Spec Sheet 44400.0200"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/53728.0001/E17/16/000/53728.0001.pdf",
+   "fileName": "53728.0001.pdf",
+   "targets": [
+    {
+     "bookId": 61,
+     "section": "parts",
+     "docType": null,
+     "name": "BUNN Sure Immersion 312 - Parts Catalog 53728.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/53565.0001/E17/07/000/53565.0001.pdf",
+   "fileName": "53565.0001.pdf",
+   "targets": [
+    {
+     "bookId": 61,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BUNN Sure Immersion 312 - Installation and Operating 53565.0001"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/55783.0000/E17/03/000/55783.0000.pdf",
+   "fileName": "55783.0000.pdf",
+   "targets": [
+    {
+     "bookId": 61,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "BUNN Sure Immersion 312 - Programming 55783.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://catalog.bunn.com/public/docs/59037.0000/E17/00/000/59037.0000.pdf",
+   "fileName": "59037.0000.pdf",
+   "targets": [
+    {
+     "bookId": 61,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "BUNN Sure Immersion 312 - Cleaning Card 59037.0000"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P213-CBS-1250-December-2025.pdf",
+   "fileName": "P213-CBS-1250-December-2025.pdf",
+   "targets": [
+    {
+     "bookId": 20,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1250 Plus - User's Guide and Operator Instructions P213"
+    },
+    {
+     "bookId": 71,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1251 Plus - User's Guide and Operator Instructions P213"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/cbs-51h-15-Spec-Sheet.pdf",
+   "fileName": "cbs-51h-15-Spec-Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 62,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-51H-15 - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P183-CBS-5000H.pdf",
+   "fileName": "P183-CBS-5000H.pdf",
+   "targets": [
+    {
+     "bookId": 62,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-51H-15 - User's Guide and Operator Instructions P183"
+    },
+    {
+     "bookId": 63,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-52H-15 - User's Guide and Operator Instructions P183"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/50H-60H-SERIES-BREWERS-CLEANING-AND-PREVENTATIVE-MAINTENANCE.pdf",
+   "fileName": "50H-60H-SERIES-BREWERS-CLEANING-AND-PREVENTATIVE-MAINTENANCE.pdf",
+   "targets": [
+    {
+     "bookId": 62,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "FETCO CBS-51H-15 - Cleaning and Maintenance"
+    },
+    {
+     "bookId": 63,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "FETCO CBS-52H-15 - Cleaning and Maintenance"
+    },
+    {
+     "bookId": 64,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "FETCO CBS-62H-30 - Cleaning and Maintenance"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/cbs-52h-15-Spec-Sheet.pdf",
+   "fileName": "cbs-52h-15-Spec-Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 63,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-52H-15 - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/CBS-6000-Series-User-Guide.pdf",
+   "fileName": "CBS-6000-Series-User-Guide.pdf",
+   "targets": [
+    {
+     "bookId": 64,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-62H-30 - User's Guide P103"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/CBS1130UserGuide.pdf",
+   "fileName": "CBS1130UserGuide.pdf",
+   "targets": [
+    {
+     "bookId": 65,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1131V+ - User's Guide and Operator Instructions P166"
+    },
+    {
+     "bookId": 66,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1132V+ - User's Guide and Operator Instructions P166"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Extractor-Maintenence.pdf",
+   "fileName": "Extractor-Maintenence.pdf",
+   "targets": [
+    {
+     "bookId": 65,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "FETCO CBS-1131V+ - Extractor Cleaning and Maintenance"
+    },
+    {
+     "bookId": 66,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "FETCO CBS-1132V+ - Extractor Cleaning and Maintenance"
+    },
+    {
+     "bookId": 67,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "FETCO CBS-1151V+ - Extractor Cleaning and Maintenance"
+    },
+    {
+     "bookId": 68,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "FETCO CBS-1152V+ - Extractor Cleaning and Maintenance"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/XTS-Vplus-Extractor-and-Luxus-pm-cleaning-guidelines.pdf",
+   "fileName": "XTS-Vplus-Extractor-and-Luxus-pm-cleaning-guidelines.pdf",
+   "targets": [
+    {
+     "bookId": 65,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "FETCO CBS-1131V+ - Dispenser Cleaning and PM"
+    },
+    {
+     "bookId": 66,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "FETCO CBS-1132V+ - Dispenser Cleaning and PM"
+    },
+    {
+     "bookId": 67,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "FETCO CBS-1151V+ - Dispenser Cleaning and PM"
+    },
+    {
+     "bookId": 68,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "FETCO CBS-1152V+ - Dispenser Cleaning and PM"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/CBS1150UserGuide.pdf",
+   "fileName": "CBS1150UserGuide.pdf",
+   "targets": [
+    {
+     "bookId": 67,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1151V+ - User's Guide and Operator Instructions P167"
+    },
+    {
+     "bookId": 68,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1152V+ - User's Guide and Operator Instructions P167"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Sellsheet-CBS-1230-Plus-US-Letter-Rev6.pdf",
+   "fileName": "Sellsheet-CBS-1230-Plus-US-Letter-Rev6.pdf",
+   "targets": [
+    {
+     "bookId": 69,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-1231 Plus - Spec Sheet Rev6"
+    },
+    {
+     "bookId": 70,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-1232 Plus - Spec Sheet Rev6"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P211-CBS-1230-November-2025.pdf",
+   "fileName": "P211-CBS-1230-November-2025.pdf",
+   "targets": [
+    {
+     "bookId": 69,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1231 Plus - User's Guide and Operator Instructions P211"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P211-CBS-1230-November-2025-xr7d.pdf",
+   "fileName": "P211-CBS-1230-November-2025-xr7d.pdf",
+   "targets": [
+    {
+     "bookId": 70,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1232 Plus - User's Guide and Operator Instructions P211"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Sellsheet-CBS-1250-Plus-US-Letter-Rev4.pdf",
+   "fileName": "Sellsheet-CBS-1250-Plus-US-Letter-Rev4.pdf",
+   "targets": [
+    {
+     "bookId": 71,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-1251 Plus - Spec Sheet Rev4"
+    },
+    {
+     "bookId": 72,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-1252 Plus - Spec Sheet Rev4"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P213-CBS-1250-December-2025-jgk9.pdf",
+   "fileName": "P213-CBS-1250-December-2025-jgk9.pdf",
+   "targets": [
+    {
+     "bookId": 72,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-1252 Plus - User's Guide and Operator Instructions P213"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Sellsheet-CBS-2250-NG-US-Letter-Rev4.pdf",
+   "fileName": "Sellsheet-CBS-2250-NG-US-Letter-Rev4.pdf",
+   "targets": [
+    {
+     "bookId": 73,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-2251 NG - Spec Sheet Rev4"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P195-CBS-2250NG-0124.pdf",
+   "fileName": "P195-CBS-2250NG-0124.pdf",
+   "targets": [
+    {
+     "bookId": 73,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-2251 NG - User's Guide and Operator Instructions P195"
+    },
+    {
+     "bookId": 74,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO CBS-2252 NG - User's Guide and Operator Instructions P195"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Update-Screensaver.pdf",
+   "fileName": "Update-Screensaver.pdf",
+   "targets": [
+    {
+     "bookId": 73,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "FETCO CBS-2251 NG - Screensaver Upload Instructions"
+    },
+    {
+     "bookId": 74,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "FETCO CBS-2252 NG - Screensaver Upload Instructions"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Sellsheet-CBS-2250-NG-US-Letter-Rev4-adpa.pdf",
+   "fileName": "Sellsheet-CBS-2250-NG-US-Letter-Rev4-adpa.pdf",
+   "targets": [
+    {
+     "bookId": 74,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO CBS-2252 NG - Spec Sheet Rev4"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Sellsheet-MBS-1221-Plus-US-Letter-Rev3.pdf",
+   "fileName": "Sellsheet-MBS-1221-Plus-US-Letter-Rev3.pdf",
+   "targets": [
+    {
+     "bookId": 75,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO MBS-1221 - Spec Sheet Rev3"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P202-MBS-1221-November-2025.pdf",
+   "fileName": "P202-MBS-1221-November-2025.pdf",
+   "targets": [
+    {
+     "bookId": 75,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO MBS-1221 - User's Guide and Operator Instructions P202"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/MBS-1251-Spec-Sheet.pdf",
+   "fileName": "MBS-1251-Spec-Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 33,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO MBS-1251 - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P237-MBS-1251-May-2026.pdf",
+   "fileName": "P237-MBS-1251-May-2026.pdf",
+   "targets": [
+    {
+     "bookId": 33,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO MBS-1251 - User's Guide and Operator Instructions P237"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/HWD-2102-Spec-Sheet.pdf",
+   "fileName": "HWD-2102-Spec-Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 76,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO HWD-2102 - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/HWD-2102-User-Guide.pdf",
+   "fileName": "HWD-2102-User-Guide.pdf",
+   "targets": [
+    {
+     "bookId": 76,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO HWD-2102 - User Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P119SPA-HWD-2102-REVISED.pdf",
+   "fileName": "P119SPA-HWD-2102-REVISED.pdf",
+   "targets": [
+    {
+     "bookId": 76,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO HWD-2102 - User Guide (Spanish) P119SPA"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Fetco-HWD-tank-descaling-procedure.pdf",
+   "fileName": "Fetco-HWD-tank-descaling-procedure.pdf",
+   "targets": [
+    {
+     "bookId": 76,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "FETCO HWD-2102 - Cleaning and Maintenance"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P185-GR-12-de4c.pdf",
+   "fileName": "P185-GR-12-de4c.pdf",
+   "targets": [
+    {
+     "bookId": 77,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO GR-2.2 - User's Guide and Operator Instructions P185"
+    },
+    {
+     "bookId": 78,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO GR-2.3 - User's Guide and Operator Instructions P185"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/Sellsheet-GRS-1200-US-Letter-Rev2-sj8s.pdf",
+   "fileName": "Sellsheet-GRS-1200-US-Letter-Rev2-sj8s.pdf",
+   "targets": [
+    {
+     "bookId": 79,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO GRS-1201 - Spec Sheet Rev2"
+    },
+    {
+     "bookId": 80,
+     "section": "spec",
+     "docType": null,
+     "name": "FETCO GRS-1202 - Spec Sheet Rev2"
+    }
+   ]
+  },
+  {
+   "url": "https://www.fetco.com/s/P235-GRS-1200-May-2024.pdf",
+   "fileName": "P235-GRS-1200-May-2024.pdf",
+   "targets": [
+    {
+     "bookId": 79,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO GRS-1201 - User's Guide and Operator Instructions P235"
+    },
+    {
+     "bookId": 80,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "FETCO GRS-1202 - User's Guide and Operator Instructions P235"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-s-manual/",
+   "fileName": "linea-classic-s-manual.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Classic S - Manual MAN.29.1 V1.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-s-installation-guide/",
+   "fileName": "linea-classic-s-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Classic S - Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-qsg/",
+   "fileName": "linea-classic-qsg.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "La Marzocco Linea Classic S - Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-s-12-month-preventative-maintenance/",
+   "fileName": "linea-classic-s-12-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea Classic S - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-s-3-9-month-preventative-maintenance/",
+   "fileName": "linea-classic-s-3-9-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea Classic S - PM Checklist 3-9 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-s-6-month-preventative-maintenance/",
+   "fileName": "linea-classic-s-6-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea Classic S - PM Checklist 6 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-s-update-interruptions/",
+   "fileName": "linea-classic-s-update-interruptions.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "La Marzocco Linea Classic S - Update Interruptions"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-s-parts-catalog/",
+   "fileName": "linea-classic-s-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 9,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Linea Classic S - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-manual/",
+   "fileName": "linea-pb-manual.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea PB - Manual NB-0007 V5.1"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-installation-guide/",
+   "fileName": "linea-pb-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea PB - Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-installation-template/",
+   "fileName": "linea-pb-installation-template.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea PB - Installation Template"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-auto-brew-ratio-installation-guide/",
+   "fileName": "linea-pb-auto-brew-ratio-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea PB - Auto Brew Ratio Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-auto-brew-ratio-quick-start-guide/",
+   "fileName": "linea-pb-auto-brew-ratio-quick-start-guide.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "La Marzocco Linea PB - Auto Brew Ratio Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-12-month-preventative-maintenance/",
+   "fileName": "linea-pb-12-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea PB - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-3-9-month-preventative-maintenance/",
+   "fileName": "linea-pb-3-9-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea PB - PM Checklist 3-9 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-6-month-preventative-maintenance/",
+   "fileName": "linea-pb-6-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea PB - PM Checklist 6 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-pb-parts-catalog/",
+   "fileName": "linea-pb-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 10,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Linea PB - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-s-manual/",
+   "fileName": "strada-s-manual.pdf",
+   "targets": [
+    {
+     "bookId": 12,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Strada S - Manual V1.1"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-installation-guide-2/",
+   "fileName": "strada-installation-guide-2.pdf",
+   "targets": [
+    {
+     "bookId": 12,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Strada S - Installation Guide (S & X)"
+    },
+    {
+     "bookId": 11,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Strada X - Installation Guide (S & X)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-s-12-month-preventative-maintenance/",
+   "fileName": "strada-s-12-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 12,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Strada S - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-s-3-9-month-preventative-maintenance/",
+   "fileName": "strada-s-3-9-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 12,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Strada S - PM Checklist 3-9 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-s-6-month-preventative-maintenance/",
+   "fileName": "strada-s-6-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 12,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Strada S - PM Checklist 6 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-6-month-preventative-maintenance-2/",
+   "fileName": "strada-6-month-preventative-maintenance-2.pdf",
+   "targets": [
+    {
+     "bookId": 12,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Strada S - PM Checklist 6 Month (S & X)"
+    },
+    {
+     "bookId": 11,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Strada X - PM Checklist 6 Month (S & X)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-s-parts-catalog/",
+   "fileName": "strada-s-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 12,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Strada S - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-x-manual/",
+   "fileName": "strada-x-manual.pdf",
+   "targets": [
+    {
+     "bookId": 11,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Strada X - Manual NB-0017 V2.1"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-x-12-month-preventative-maintenance/",
+   "fileName": "strada-x-12-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 11,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Strada X - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-x-3-9-month-preventative-maintenance/",
+   "fileName": "strada-x-3-9-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 11,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Strada X - PM Checklist 3-9 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-x-parts-catalog/",
+   "fileName": "strada-x-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 11,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Strada X - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/swift-manual/",
+   "fileName": "swift-manual.pdf",
+   "targets": [
+    {
+     "bookId": 19,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Swift - Manual V3.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/swift-user-guide/",
+   "fileName": "swift-user-guide.pdf",
+   "targets": [
+    {
+     "bookId": 19,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "La Marzocco Swift - User Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/swift-product-brochure-english/",
+   "fileName": "swift-product-brochure-english.pdf",
+   "targets": [
+    {
+     "bookId": 19,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco Swift - Spec Sheet (Brochure)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/swift-parts-catalog/",
+   "fileName": "swift-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 19,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Swift - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2021/11/2021_ProductSheet_LineaClassic.pdf",
+   "fileName": "2021_ProductSheet_LineaClassic.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco Linea Classic - Spec Sheet 2021"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-manual/",
+   "fileName": "linea-classic-manual.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Classic - Manual V2.1"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-installation-guide/",
+   "fileName": "linea-classic-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Classic - Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-installation-template/",
+   "fileName": "linea-classic-installation-template.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Classic - Installation Template"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-12-month-preventative-maintenance/",
+   "fileName": "linea-classic-12-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea Classic - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-3-9-month-preventative-maintenance/",
+   "fileName": "linea-classic-3-9-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea Classic - PM Checklist 3-9 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-6-month-preventative-maintenance/",
+   "fileName": "linea-classic-6-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco Linea Classic - PM Checklist 6 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-classic-parts-catalog/",
+   "fileName": "linea-classic-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 81,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Linea Classic - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-mini-manual/",
+   "fileName": "linea-mini-manual.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Mini - Manual (LM Serial) MAN.12.05.1.01 V2.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-mini-quick-start-guide/",
+   "fileName": "linea-mini-quick-start-guide.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "La Marzocco Linea Mini - Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-mini-installation-guide/",
+   "fileName": "linea-mini-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Mini - Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/linea-mini-installation-template/",
+   "fileName": "linea-mini-installation-template.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Mini - Installation Template"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-s-product-sheet/",
+   "fileName": "gb5-s-product-sheet.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco GB5 S - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-s-manual/",
+   "fileName": "gb5-s-manual.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco GB5 S - Manual MAN.25.1 V1.1"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-s-installation-guide/",
+   "fileName": "gb5-s-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco GB5 S - Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-s-12-month-preventative-maintenance/",
+   "fileName": "gb5-s-12-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco GB5 S - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-s-3-9-month-preventative-maintenance/",
+   "fileName": "gb5-s-3-9-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco GB5 S - PM Checklist 3-9 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-s-6-month-preventative-maintenance/",
+   "fileName": "gb5-s-6-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco GB5 S - PM Checklist 6 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-s-annual-summary/",
+   "fileName": "gb5-s-annual-summary.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco GB5 S - PM Annual Summary"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gb5-parts-catalog/",
+   "fileName": "gb5-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 83,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco GB5 S - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2019/02/La-Marzocco-GS3.pdf",
+   "fileName": "La-Marzocco-GS3.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco GS3 AV - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2020/03/MAN.2.1.02_GS3_EN_V2.0_ONLINE.pdf",
+   "fileName": "MAN.2.1.02_GS3_EN_V2.0_ONLINE.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "La Marzocco GS3 AV - Operating and Programming Manual MAN.2.1.02 V2.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gs3-installation-guide/",
+   "fileName": "gs3-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco GS3 AV - Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gs3-installation-template/",
+   "fileName": "gs3-installation-template.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco GS3 AV - Installation Template"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gs3-1-year-preventative-maintenance/",
+   "fileName": "gs3-1-year-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco GS3 AV - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/gs3-6-month-preventative-maintenance/",
+   "fileName": "gs3-6-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco GS3 AV - PM Checklist 6 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-product-sheet/",
+   "fileName": "kb90-product-sheet.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco KB90 - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-manual/",
+   "fileName": "kb90-manual.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco KB90 - Manual NB-0007 V3.1"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-installation-guide/",
+   "fileName": "kb90-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco KB90 - Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-12-month-preventative-maintenance/",
+   "fileName": "kb90-12-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco KB90 - PM Checklist 12 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-3-9-month-preventative-maintenance/",
+   "fileName": "kb90-3-9-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco KB90 - PM Checklist 3-9 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-6-month-preventative-maintenance/",
+   "fileName": "kb90-6-month-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco KB90 - PM Checklist 6 Month"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-annual-summary/",
+   "fileName": "kb90-annual-summary.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "La Marzocco KB90 - PM Annual Summary"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/kb90-parts-catalog/",
+   "fileName": "kb90-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 85,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco KB90 - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-product-sheet/",
+   "fileName": "strada-product-sheet.pdf",
+   "targets": [
+    {
+     "bookId": 86,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco Strada AV - Spec Sheet"
+    },
+    {
+     "bookId": 87,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco Strada EE - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-av-manual/",
+   "fileName": "strada-av-manual.pdf",
+   "targets": [
+    {
+     "bookId": 86,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Strada AV - Manual MAN.16.1.03 V3.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-av-parts-catalog/",
+   "fileName": "strada-av-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 86,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Strada AV - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-ee-manual/",
+   "fileName": "strada-ee-manual.pdf",
+   "targets": [
+    {
+     "bookId": 87,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Strada EE - Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/strada-ee-parts-catalog/",
+   "fileName": "strada-ee-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 87,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Strada EE - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2024/04/2024_ProductSheet_Swan.pdf",
+   "fileName": "2024_ProductSheet_Swan.pdf",
+   "targets": [
+    {
+     "bookId": 88,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco Swan - Spec Sheet 2024"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2025/07/MAN.27.1.01_SWAN_EN-FR_V2.0_ONLINE.pdf",
+   "fileName": "MAN.27.1.01_SWAN_EN-FR_V2.0_ONLINE.pdf",
+   "targets": [
+    {
+     "bookId": 88,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Swan - Manual MAN.27.1.01 V2.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/swan-burr-installation/",
+   "fileName": "swan-burr-installation.pdf",
+   "targets": [
+    {
+     "bookId": 88,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "La Marzocco Swan - Burr Installation"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2025/07/Swan_parts_catalog_V1.0.pdf",
+   "fileName": "Swan_parts_catalog_V1.0.pdf",
+   "targets": [
+    {
+     "bookId": 88,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Swan - Parts Catalog V1.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/jay-product-sheet/",
+   "fileName": "jay-product-sheet.pdf",
+   "targets": [
+    {
+     "bookId": 89,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco Jay - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/jay-manual/",
+   "fileName": "jay-manual.pdf",
+   "targets": [
+    {
+     "bookId": 89,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Jay - Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/jay-quick-start-guide/",
+   "fileName": "jay-quick-start-guide.pdf",
+   "targets": [
+    {
+     "bookId": 89,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "La Marzocco Jay - Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/jay-parts-catalog/",
+   "fileName": "jay-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 89,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Jay - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/wally-milk-manual/",
+   "fileName": "wally-milk-manual.pdf",
+   "targets": [
+    {
+     "bookId": 90,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Wally Milk - Manual MAN.26.1 V1.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/wally-milk-connection-kits/",
+   "fileName": "wally-milk-connection-kits.pdf",
+   "targets": [
+    {
+     "bookId": 90,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Wally Milk - Connection Kits"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/wally-milk-quick-start-guide/",
+   "fileName": "wally-milk-quick-start-guide.pdf",
+   "targets": [
+    {
+     "bookId": 90,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "La Marzocco Wally Milk - Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/wally-milk-parts-catalog/",
+   "fileName": "wally-milk-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 90,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Wally Milk - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-espresso-av-operating-manual/",
+   "fileName": "modbar-espresso-av-operating-manual.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Espresso AV - Operating Manual MAN.21.1.02 V2.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-espresso-av-pre-installation-guide/",
+   "fileName": "modbar-espresso-av-pre-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Espresso AV - Pre-Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2024/05/D.7.003.US_Template_cutting_MODBAR-AV_V1.2.pdf",
+   "fileName": "D.7.003.US_Template_cutting_MODBAR-AV_V1.2.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Espresso AV - Tap Cut Hole Template V1.2"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-espresso-av-preventative-maintenance/",
+   "fileName": "modbar-espresso-av-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Modbar Espresso AV - PM Checklist"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-espresso-av-parts-catalog/",
+   "fileName": "modbar-espresso-av-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "parts",
+     "docType": null,
+     "name": "Modbar Espresso AV - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2024/09/MB-DripTray-EN_Template_cutting_MODBAR-drip-tray-rinser_V1.0.pdf",
+   "fileName": "MB-DripTray-EN_Template_cutting_MODBAR-drip-tray-rinser_V1.0.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Espresso AV - Drip Tray Cut Hole Template V1.0"
+    },
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Drip Tray Cut Hole Template V1.0"
+    },
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Pour-Over - Drip Tray Cut Hole Template V1.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-operating-manual-2/",
+   "fileName": "modbar-steam-operating-manual-2.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Operating Manual (2023)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-operating-manual/",
+   "fileName": "modbar-steam-operating-manual.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Operating Manual (Original)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-pre-installation-guide/",
+   "fileName": "modbar-steam-pre-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Pre-Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-pre-installation-guide-2/",
+   "fileName": "modbar-steam-pre-installation-guide-2.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Pre-Installation Guide (2019) V4.3"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2024/05/D.7.004.US_Template_cutting_MODBAR-NEW-STEAM_V1.3.pdf",
+   "fileName": "D.7.004.US_Template_cutting_MODBAR-NEW-STEAM_V1.3.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Tap Cut Hole Template V1.3"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-new/",
+   "fileName": "modbar-steam-new.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Modbar Steam - PM Checklist (New)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-pre-2019/",
+   "fileName": "modbar-steam-pre-2019.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Modbar Steam - PM Checklist (Pre-2019)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-parts-catalog-2/",
+   "fileName": "modbar-steam-parts-catalog-2.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "parts",
+     "docType": null,
+     "name": "Modbar Steam - Parts Catalog (2023)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-steam-parts-catalog/",
+   "fileName": "modbar-steam-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "parts",
+     "docType": null,
+     "name": "Modbar Steam - Parts Catalog (Original)"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-pour-over-operating-manual/",
+   "fileName": "modbar-pour-over-operating-manual.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Pour-Over - Operating Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-pour-over-manual/",
+   "fileName": "modbar-pour-over-manual.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Pour-Over - Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-pour-over-pre-installation-guide/",
+   "fileName": "modbar-pour-over-pre-installation-guide.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Pour-Over - Pre-Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2024/05/US_Template_cutting_POUR-OVER_V1.2.pdf",
+   "fileName": "US_Template_cutting_POUR-OVER_V1.2.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Pour-Over - Tap Cut Hole Template V1.2"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-pour-over-preventative-maintenance/",
+   "fileName": "modbar-pour-over-preventative-maintenance.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Modbar Pour-Over - PM Checklist"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-pour-over-parts-catalog/",
+   "fileName": "modbar-pour-over-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "parts",
+     "docType": null,
+     "name": "Modbar Pour-Over - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/modbar-pour-over-parts-catalog-2/",
+   "fileName": "modbar-pour-over-parts-catalog-2.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "parts",
+     "docType": null,
+     "name": "Modbar Pour-Over - Parts Catalog 2.0"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2025/02/Super_Jolly_V_UP_Manual_ISJ0L0120_EN.pdf",
+   "fileName": "Super_Jolly_V_UP_Manual_ISJ0L0120_EN.pdf",
+   "targets": [
+    {
+     "bookId": 114,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mazzer Super Jolly V Up Electronic - Manual ISJ0L0120"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2024/05/Super-Jolly-V-Up-Electronic.pdf",
+   "fileName": "Super-Jolly-V-Up-Electronic.pdf",
+   "targets": [
+    {
+     "bookId": 114,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Super Jolly V Up Electronic - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-super-jolly-v-up-timer-parts-catalog/",
+   "fileName": "mazzer-super-jolly-v-up-timer-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 115,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Super Jolly V Up Doser Timer - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2020/11/Mazzer-ps-web-1120b.pdf",
+   "fileName": "Mazzer-ps-web-1120b.pdf",
+   "targets": [
+    {
+     "bookId": 116,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Robur S Automatic - Spec Sheet"
+    },
+    {
+     "bookId": 117,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Robur S Electronic - Spec Sheet"
+    },
+    {
+     "bookId": 119,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Mini Electronic - Spec Sheet"
+    },
+    {
+     "bookId": 122,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Kony S Electronic - Spec Sheet"
+    },
+    {
+     "bookId": 124,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Major V Electronic - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2024/04/Robur-S-Doser-min.pdf",
+   "fileName": "Robur-S-Doser-min.pdf",
+   "targets": [
+    {
+     "bookId": 116,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Robur S Automatic - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-v-s-grinder-user-manual/",
+   "fileName": "mazzer-v-s-grinder-user-manual.pdf",
+   "targets": [
+    {
+     "bookId": 117,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mazzer Robur S Electronic - V & S Grinder User Manual"
+    },
+    {
+     "bookId": 122,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mazzer Kony S Electronic - V & S Grinder User Manual"
+    },
+    {
+     "bookId": 124,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mazzer Major V Electronic - V & S Grinder User Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-robur-s-quick-start-guide/",
+   "fileName": "mazzer-robur-s-quick-start-guide.pdf",
+   "targets": [
+    {
+     "bookId": 117,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mazzer Robur S Electronic - Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-s-grinder-electronic-interface-guide/",
+   "fileName": "mazzer-s-grinder-electronic-interface-guide.pdf",
+   "targets": [
+    {
+     "bookId": 117,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "Mazzer Robur S Electronic - Electronic Interface Guide"
+    },
+    {
+     "bookId": 122,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "Mazzer Kony S Electronic - Electronic Interface Guide"
+    },
+    {
+     "bookId": 124,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "Mazzer Major V Electronic - Electronic Interface Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2023/09/robur_s_electronic-parts_catalog-29aug2019.pdf",
+   "fileName": "robur_s_electronic-parts_catalog-29aug2019.pdf",
+   "targets": [
+    {
+     "bookId": 117,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Robur S Electronic - Parts Catalog 2019-08-29"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2023/09/Mazzer-All-E-Grinders-User-Manual-1.pdf",
+   "fileName": "Mazzer-All-E-Grinders-User-Manual-1.pdf",
+   "targets": [
+    {
+     "bookId": 118,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mazzer Robur Electronic - All E Grinders User Manual EL02"
+    },
+    {
+     "bookId": 121,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mazzer Kony Electronic - All E Grinders User Manual EL02"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-robur-e-parts-catalog/",
+   "fileName": "mazzer-robur-e-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 118,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Robur Electronic - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-mini-operating-manual/",
+   "fileName": "mazzer-mini-operating-manual.pdf",
+   "targets": [
+    {
+     "bookId": 120,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Mini Doser Timer - Spec Sheet STMIDOS092008"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-kony-e-parts-catalog/",
+   "fileName": "mazzer-kony-e-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 121,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Kony Electronic - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2021/02/qsg-mazzer-majorV-roburS-konyS-020821.pdf",
+   "fileName": "qsg-mazzer-majorV-roburS-konyS-020821.pdf",
+   "targets": [
+    {
+     "bookId": 122,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mazzer Kony S Electronic - Quick Start Guide 02-08-21"
+    },
+    {
+     "bookId": 124,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mazzer Major V Electronic - Quick Start Guide 02-08-21"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2023/09/kony_s_electronic_parts_catalog_23mar2021.pdf",
+   "fileName": "kony_s_electronic_parts_catalog_23mar2021.pdf",
+   "targets": [
+    {
+     "bookId": 122,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Kony S Electronic - Parts Catalog 2021-03-23"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-kony-operating-manual/",
+   "fileName": "mazzer-kony-operating-manual.pdf",
+   "targets": [
+    {
+     "bookId": 123,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Kony Automatic - Spec Sheet STKODOS052008"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/wp-content/uploads/2021/01/mazzer_majorV_elec_parts_catalog_08Jan2021-Copy.pdf",
+   "fileName": "mazzer_majorV_elec_parts_catalog_08Jan2021-Copy.pdf",
+   "targets": [
+    {
+     "bookId": 124,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer Major V Electronic - Parts Catalog 2021-01-08"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-zm-manual/",
+   "fileName": "mazzer-zm-manual.pdf",
+   "targets": [
+    {
+     "bookId": 125,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mazzer ZM - Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-zm-quick-start-guide/",
+   "fileName": "mazzer-zm-quick-start-guide.pdf",
+   "targets": [
+    {
+     "bookId": 125,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mazzer ZM - Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://lamarzoccousa.com/documents/mazzer-zm-filter-parts-catalog/",
+   "fileName": "mazzer-zm-filter-parts-catalog.pdf",
+   "targets": [
+    {
+     "bookId": 125,
+     "section": "parts",
+     "docType": null,
+     "name": "Mazzer ZM - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2022/04/Rancilio_Classe5_Flyer_Web_ENG.pdf",
+   "fileName": "Rancilio_Classe5_Flyer_Web_ENG.pdf",
+   "targets": [
+    {
+     "bookId": 32,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe - Spec Sheet (Brochure)"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2025/01/INFO-RAN_C5_USB_2.pdf",
+   "fileName": "INFO-RAN_C5_USB_2.pdf",
+   "targets": [
+    {
+     "bookId": 30,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB - Spec Sheet 2025-01"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/46900197_DS_Classe5_AI_2021-04.pdf",
+   "fileName": "46900197_DS_Classe5_AI_2021-04.pdf",
+   "targets": [
+    {
+     "bookId": 30,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 USB - Electrical & Hydraulic Diagrams 46900197"
+    },
+    {
+     "bookId": 29,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 USB Compact 220V - Electrical & Hydraulic Diagrams 46900197"
+    },
+    {
+     "bookId": 31,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 USB Compact 120V - Electrical & Hydraulic Diagrams 46900197"
+    },
+    {
+     "bookId": 95,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 S 2 Group - Electrical & Hydraulic Diagrams 46900197"
+    },
+    {
+     "bookId": 99,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 USB 3 Group - Electrical & Hydraulic Diagrams 46900197"
+    },
+    {
+     "bookId": 100,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 USB 3 Group Tall - Electrical & Hydraulic Diagrams 46900197"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2025/10/INFO-RAN_C5_USB_2C_110.pdf",
+   "fileName": "INFO-RAN_C5_USB_2C_110.pdf",
+   "targets": [
+    {
+     "bookId": 31,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB Compact 120V - Spec Sheet 2025-10"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/09/C-Spec-Sheet-RANCILIO-C5-S-1G-08-21.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-C5-S-1G-08-21.pdf",
+   "targets": [
+    {
+     "bookId": 94,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 S 1 Group - Spec Sheet 08-21"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/Classe5S1G_PartsCatalog-09-2020.pdf",
+   "fileName": "Classe5S1G_PartsCatalog-09-2020.pdf",
+   "targets": [
+    {
+     "bookId": 94,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 5 S 1 Group - Parts Catalog 09-2020"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2022/06/46900307_UM_Classe5_-_2022-04.pdf",
+   "fileName": "46900307_UM_Classe5_-_2022-04.pdf",
+   "targets": [
+    {
+     "bookId": 94,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 5 S 1 Group - User Manual 46900307"
+    },
+    {
+     "bookId": 95,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 5 S 2 Group - User Manual 46900307"
+    },
+    {
+     "bookId": 96,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 5 ST 1 Group - User Manual 46900307"
+    },
+    {
+     "bookId": 97,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 5 USB 1 Group - User Manual 46900307"
+    },
+    {
+     "bookId": 98,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 5 USB 1 Group Tall - User Manual 46900307"
+    },
+    {
+     "bookId": 99,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 5 USB 3 Group - User Manual 46900307"
+    },
+    {
+     "bookId": 100,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 5 USB 3 Group Tall - User Manual 46900307"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/46900202_DS_Classe5-1Gr_AE_2021-01.pdf",
+   "fileName": "46900202_DS_Classe5-1Gr_AE_2021-01.pdf",
+   "targets": [
+    {
+     "bookId": 94,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 S 1 Group - Electrical & Hydraulic Diagrams 46900202"
+    },
+    {
+     "bookId": 96,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 ST 1 Group - Electrical & Hydraulic Diagrams 46900202"
+    },
+    {
+     "bookId": 97,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 USB 1 Group - Electrical & Hydraulic Diagrams 46900202"
+    },
+    {
+     "bookId": 98,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 5 USB 1 Group Tall - Electrical & Hydraulic Diagrams 46900202"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/C-Spec-Sheet-RAN-C5-S-12-20.pdf",
+   "fileName": "C-Spec-Sheet-RAN-C5-S-12-20.pdf",
+   "targets": [
+    {
+     "bookId": 95,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 S 2 Group - Spec Sheet 12-20"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2024/09/SPEC-RAN_C5_S_2.pdf",
+   "fileName": "SPEC-RAN_C5_S_2.pdf",
+   "targets": [
+    {
+     "bookId": 95,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 S 2 Group - Spec Sheet 2024-09"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/Classe5S_PartsCatalog-05-2021.pdf",
+   "fileName": "Classe5S_PartsCatalog-05-2021.pdf",
+   "targets": [
+    {
+     "bookId": 95,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 5 S 2 Group - Parts Catalog 05-2021"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/09/C-Spec-Sheet-RANCILIO-C5-S-1G-TANK-08-21.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-C5-S-1G-TANK-08-21.pdf",
+   "targets": [
+    {
+     "bookId": 96,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 ST 1 Group - Spec Sheet 08-21"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/Classe5ST1G_PartsCatalog-09-2020.pdf",
+   "fileName": "Classe5ST1G_PartsCatalog-09-2020.pdf",
+   "targets": [
+    {
+     "bookId": 96,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 5 ST 1 Group - Parts Catalog 09-2020"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/09/C-Spec-Sheet-RANCILIO-C5-USB-1G-08-21.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-C5-USB-1G-08-21.pdf",
+   "targets": [
+    {
+     "bookId": 97,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 1 Group - Spec Sheet 08-21"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2024/09/SPEC-RAN_C5_USB_1G.pdf",
+   "fileName": "SPEC-RAN_C5_USB_1G.pdf",
+   "targets": [
+    {
+     "bookId": 97,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 1 Group - Spec Sheet 2024-09"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/Classe5USB1G_PartsCatalog-09-2020.pdf",
+   "fileName": "Classe5USB1G_PartsCatalog-09-2020.pdf",
+   "targets": [
+    {
+     "bookId": 97,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 1 Group - Parts Catalog 09-2020"
+    },
+    {
+     "bookId": 98,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 1 Group Tall - Parts Catalog 09-2020"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/09/C-Spec-Sheet-RANCILIO-C5-USB-TALL-1G-08-21.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-C5-USB-TALL-1G-08-21.pdf",
+   "targets": [
+    {
+     "bookId": 98,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 1 Group Tall - Spec Sheet 08-21"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/C-Spec-Sheet-RANCILIO-C5-USB-08-21.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-C5-USB-08-21.pdf",
+   "targets": [
+    {
+     "bookId": 99,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 3 Group - Spec Sheet 08-21"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2025/01/SPEC-RAN_C5_USB_3.pdf",
+   "fileName": "SPEC-RAN_C5_USB_3.pdf",
+   "targets": [
+    {
+     "bookId": 99,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 3 Group - Spec Sheet 2025-01"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/Classe5USB_PartsCatalog-05-2021.pdf",
+   "fileName": "Classe5USB_PartsCatalog-05-2021.pdf",
+   "targets": [
+    {
+     "bookId": 99,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 3 Group - Parts Catalog 05-2021"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/C-Spec-Sheet-RANCILIO-C5-USB-TALL-08-21.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-C5-USB-TALL-08-21.pdf",
+   "targets": [
+    {
+     "bookId": 100,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 3 Group Tall - Spec Sheet 08-21"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2025/01/INFO-RAN_C5_USB_3_T.pdf",
+   "fileName": "INFO-RAN_C5_USB_3_T.pdf",
+   "targets": [
+    {
+     "bookId": 100,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 3 Group Tall - Spec Sheet 2025-01"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/06/Classe5USBTall_PartsCatalog-05-2021.pdf",
+   "fileName": "Classe5USBTall_PartsCatalog-05-2021.pdf",
+   "targets": [
+    {
+     "bookId": 100,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 5 USB 3 Group Tall - Parts Catalog 05-2021"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/05/C-Spec-Sheet-RANCILIO-CLASSE-7-USB-v9.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-CLASSE-7-USB-v9.pdf",
+   "targets": [
+    {
+     "bookId": 101,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 7 USB - Spec Sheet V9"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/Classe7USB_16_PartsCatalog-05-2021-LR.pdf",
+   "fileName": "Classe7USB_16_PartsCatalog-05-2021-LR.pdf",
+   "targets": [
+    {
+     "bookId": 101,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 7 USB - Parts Catalog 05-2021"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2025/08/Manual-User-Classe-7-2025-02-EN.pdf",
+   "fileName": "Manual-User-Classe-7-2025-02-EN.pdf",
+   "targets": [
+    {
+     "bookId": 101,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 7 USB - User Manual 2025-02"
+    },
+    {
+     "bookId": 102,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 7 USB Tall - User Manual 2025-02"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/46900196_DS_Classe7-16_AI_2021-01-LR.pdf",
+   "fileName": "46900196_DS_Classe7-16_AI_2021-01-LR.pdf",
+   "targets": [
+    {
+     "bookId": 101,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 7 USB - Electrical & Hydraulic Diagrams 46900196"
+    },
+    {
+     "bookId": 102,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 7 USB Tall - Electrical & Hydraulic Diagrams 46900196"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/05/C-Spec-Sheet-RANCILIO-CLASSE-7-USB-TALL-v3.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-CLASSE-7-USB-TALL-v3.pdf",
+   "targets": [
+    {
+     "bookId": 102,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 7 USB Tall - Spec Sheet V3"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/Classe7USBTall_16_PartsCatalog-07-2021-LR.pdf",
+   "fileName": "Classe7USBTall_16_PartsCatalog-07-2021-LR.pdf",
+   "targets": [
+    {
+     "bookId": 102,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 7 USB Tall - Parts Catalog 07-2021"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/05/C-Spec-Sheet-RANCILIO-CLASSE-9-USB-v9.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-CLASSE-9-USB-v9.pdf",
+   "targets": [
+    {
+     "bookId": 103,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 9 USB - Spec Sheet V9"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/Classe-9-USB-Parts-Catalog-2021-07-LR.pdf",
+   "fileName": "Classe-9-USB-Parts-Catalog-2021-07-LR.pdf",
+   "targets": [
+    {
+     "bookId": 103,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 9 USB - Parts Catalog 2021-07"
+    },
+    {
+     "bookId": 104,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Classe 9 USB Tall - Parts Catalog 2021-07"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/MAN_Classe9-2021-06-LR.pdf",
+   "fileName": "MAN_Classe9-2021-06-LR.pdf",
+   "targets": [
+    {
+     "bookId": 103,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 9 USB - User Manual 2021-06"
+    },
+    {
+     "bookId": 104,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Classe 9 USB Tall - User Manual 2021-06"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/08/Classe-9-Electrical-Hydraulic-46900189_DS_Classe9_AG_2021-06.pdf",
+   "fileName": "Classe-9-Electrical-Hydraulic-46900189_DS_Classe9_AG_2021-06.pdf",
+   "targets": [
+    {
+     "bookId": 103,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 9 USB - Electrical & Hydraulic Diagrams 46900189"
+    },
+    {
+     "bookId": 104,
+     "section": "manuals",
+     "docType": "Service And Repair Manual",
+     "name": "Rancilio Classe 9 USB Tall - Electrical & Hydraulic Diagrams 46900189"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2021/05/C-Spec-Sheet-RANCILIO-CLASSE-9-USB-TALL-v9.pdf",
+   "fileName": "C-Spec-Sheet-RANCILIO-CLASSE-9-USB-TALL-v9.pdf",
+   "targets": [
+    {
+     "bookId": 104,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Classe 9 USB Tall - Spec Sheet V9"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2022/06/2022_RancilioSpecialty_Invicta_Scheda_EN.pdf",
+   "fileName": "2022_RancilioSpecialty_Invicta_Scheda_EN.pdf",
+   "targets": [
+    {
+     "bookId": 105,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Invicta - Spec Sheet 2022"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2025/05/Manual-User-Invicta-2025-02.pdf",
+   "fileName": "Manual-User-Invicta-2025-02.pdf",
+   "targets": [
+    {
+     "bookId": 105,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Invicta - Product Manual 2025-02"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2023/12/2023_RANCILIO-GRINDTEC_KRYO_CATALOGUE_WEB-LR_EN.pdf",
+   "fileName": "2023_RANCILIO-GRINDTEC_KRYO_CATALOGUE_WEB-LR_EN.pdf",
+   "targets": [
+    {
+     "bookId": 106,
+     "section": "spec",
+     "docType": null,
+     "name": "Rancilio Kryo 65 OD Evo - Spec Sheet (Brochure) 2023"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2022/07/46900300_UM_Kryo_65_OD_Evo_-_2021-11.pdf",
+   "fileName": "46900300_UM_Kryo_65_OD_Evo_-_2021-11.pdf",
+   "targets": [
+    {
+     "bookId": 106,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Rancilio Kryo 65 OD Evo - Product Manual 46900300"
+    }
+   ]
+  },
+  {
+   "url": "https://www.ranciliogroupna.com/wp-content/uploads/2022/07/Kryo-Evo-Parts-Catalog-03-22-RMDEVOOD_en-US.pdf",
+   "fileName": "Kryo-Evo-Parts-Catalog-03-22-RMDEVOOD_en-US.pdf",
+   "targets": [
+    {
+     "bookId": 106,
+     "section": "parts",
+     "docType": null,
+     "name": "Rancilio Kryo 65 OD Evo - Parts Catalog 03-22"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700105619_Cameo_IM_EN.pdf",
+   "fileName": "5700105619_Cameo_IM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 24,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Cameo - Installation Manual 5700105619"
+    },
+    {
+     "bookId": 18,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Cameo Classic - Installation Manual 5700105619"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700105620_Cameo_PM_Kit_EN.pdf",
+   "fileName": "5700105620_Cameo_PM_Kit_EN.pdf",
+   "targets": [
+    {
+     "bookId": 18,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Cameo Classic - PM Kit Manual 5700105620 V4.0"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700109748_Enigma_UM_EN.pdf",
+   "fileName": "5700109748_Enigma_UM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 25,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Enigma e'4 - User Manual 5700109748"
+    },
+    {
+     "bookId": 26,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Enigma e'4 X-Wide - User Manual 5700109748"
+    },
+    {
+     "bookId": 107,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Enigma e'4 ST - User Manual 5700109748"
+    },
+    {
+     "bookId": 108,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Enigma e'4 X-Wide ST - User Manual 5700109748"
+    },
+    {
+     "bookId": 109,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Enigma e'6 - User Manual 5700109748"
+    },
+    {
+     "bookId": 110,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Shotmaster CT Classic - User Manual 5700109748"
+    },
+    {
+     "bookId": 111,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Shotmaster Classic - User Manual 5700109748"
+    },
+    {
+     "bookId": 112,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Shotmaster Pro ST - User Manual 5700109748"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700111111_Enigma_IM_EN.pdf",
+   "fileName": "5700111111_Enigma_IM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 25,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Enigma e'4 - Installation Manual 5700111111"
+    },
+    {
+     "bookId": 26,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Enigma e'4 X-Wide - Installation Manual 5700111111"
+    },
+    {
+     "bookId": 107,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Enigma e'4 ST - Installation Manual 5700111111"
+    },
+    {
+     "bookId": 108,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Enigma e'4 X-Wide ST - Installation Manual 5700111111"
+    },
+    {
+     "bookId": 109,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Enigma e'6 - Installation Manual 5700111111"
+    },
+    {
+     "bookId": 110,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Shotmaster CT Classic - Installation Manual 5700111111"
+    },
+    {
+     "bookId": 111,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Shotmaster Classic - Installation Manual 5700111111"
+    },
+    {
+     "bookId": 112,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Shotmaster Pro ST - Installation Manual 5700111111"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700111715_Enigma_PM_Kit_EN.pdf",
+   "fileName": "5700111715_Enigma_PM_Kit_EN.pdf",
+   "targets": [
+    {
+     "bookId": 25,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Enigma e'4 - PM Kit Manual 5700111715 V4.0"
+    },
+    {
+     "bookId": 26,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Enigma e'4 X-Wide - PM Kit Manual 5700111715 V4.0"
+    },
+    {
+     "bookId": 107,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Enigma e'4 ST - PM Kit Manual 5700111715 V4.0"
+    },
+    {
+     "bookId": 108,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Enigma e'4 X-Wide ST - PM Kit Manual 5700111715 V4.0"
+    },
+    {
+     "bookId": 109,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Enigma e'6 - PM Kit Manual 5700111715 V4.0"
+    },
+    {
+     "bookId": 110,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Shotmaster CT Classic - PM Kit Manual 5700111715 V4.0"
+    },
+    {
+     "bookId": 111,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Shotmaster Classic - PM Kit Manual 5700111715 V4.0"
+    },
+    {
+     "bookId": 112,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Shotmaster Pro ST - PM Kit Manual 5700111715 V4.0"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700114451_Efridge_UM_EN.pdf",
+   "fileName": "5700114451_Efridge_UM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 27,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys E'fridge - User Manual 5700114451"
+    },
+    {
+     "bookId": 28,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys E'fridge ST - User Manual 5700114451"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700114456_Efridge_IM_EN.pdf",
+   "fileName": "5700114456_Efridge_IM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 27,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys E'fridge - Installation Manual 5700114456"
+    },
+    {
+     "bookId": 28,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys E'fridge ST - Installation Manual 5700114456"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700120069_LegacyPlus_UM_EN.pdf",
+   "fileName": "5700120069_LegacyPlus_UM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 23,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Legacy - User Manual 5700120069"
+    },
+    {
+     "bookId": 22,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Legacy L'2c - User Manual 5700120069"
+    },
+    {
+     "bookId": 21,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys Legacy L'2m - User Manual 5700120069"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700120068_LegacyPlus_IM_EN.pdf",
+   "fileName": "5700120068_LegacyPlus_IM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 23,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Legacy - Installation Manual 5700120068"
+    },
+    {
+     "bookId": 22,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Legacy L'2c - Installation Manual 5700120068"
+    },
+    {
+     "bookId": 21,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Legacy L'2m - Installation Manual 5700120068"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700112914_Legacy_PM_Kit_EN.pdf",
+   "fileName": "5700112914_Legacy_PM_Kit_EN.pdf",
+   "targets": [
+    {
+     "bookId": 23,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Legacy - PM Kit Manual 5700112914 V4.0"
+    },
+    {
+     "bookId": 22,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Legacy L'2c - PM Kit Manual 5700112914 V4.0"
+    },
+    {
+     "bookId": 21,
+     "section": "manuals",
+     "docType": "PM Guide",
+     "name": "Eversys Legacy L'2m - PM Kit Manual 5700112914 V4.0"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700120024_Data_sheet_LegacyPlus_EN-US.pdf",
+   "fileName": "5700120024_Data_sheet_LegacyPlus_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 23,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys Legacy - Spec Sheet 5700120024"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700109672_Data_sheet_Enigma_E4_ST_EN-US.pdf",
+   "fileName": "5700109672_Data_sheet_Enigma_E4_ST_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 107,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys Enigma e'4 ST - Spec Sheet 5700109672"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700109674_Data_sheet_Enigma_E4_x-wide_ST_EN-US.pdf",
+   "fileName": "5700109674_Data_sheet_Enigma_E4_x-wide_ST_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 108,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys Enigma e'4 X-Wide ST - Spec Sheet 5700109674"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700109675_Data_sheet_Enigma_E6_EN-US.pdf",
+   "fileName": "5700109675_Data_sheet_Enigma_E6_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 109,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys Enigma e'6 - Spec Sheet 5700109675"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700109677_Data_sheet_Enigma_Shot_CT_EN-US.pdf",
+   "fileName": "5700109677_Data_sheet_Enigma_Shot_CT_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 110,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys Shotmaster CT Classic - Spec Sheet 5700109677"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700109679_Data_sheet_Enigma_Shot_EN-US.pdf",
+   "fileName": "5700109679_Data_sheet_Enigma_Shot_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 111,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys Shotmaster Classic - Spec Sheet 5700109679"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700109682_Data_sheet_Enigma_Shot_pro_ST_EN-US.pdf",
+   "fileName": "5700109682_Data_sheet_Enigma_Shot_pro_ST_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 112,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys Shotmaster Pro ST - Spec Sheet 5700109682"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700107694_Data_sheet_Cameo_Cfridgebeside_EN-US.pdf",
+   "fileName": "5700107694_Data_sheet_Cameo_Cfridgebeside_EN-US.pdf",
+   "targets": [
+    {
+     "bookId": 113,
+     "section": "spec",
+     "docType": null,
+     "name": "Eversys C'fridge Beside - Spec Sheet 5700107694"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700110340_CfridgeBeside_UM_EN.pdf",
+   "fileName": "5700110340_CfridgeBeside_UM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 113,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Eversys C'fridge Beside - User Manual 5700110340"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700114454_CfridgeBeside_IM_EN.pdf",
+   "fileName": "5700114454_CfridgeBeside_IM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 113,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys C'fridge Beside - Installation Manual 5700114454"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700118628_Cameo_CM_EN.pdf",
+   "fileName": "5700118628_Cameo_CM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 24,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Cameo - Commissioning Manual 5700118628"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700118629_Enigma_CM_EN.pdf",
+   "fileName": "5700118629_Enigma_CM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 25,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Enigma e'4 - Commissioning Manual 5700118629"
+    },
+    {
+     "bookId": 26,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Enigma e'4 X-Wide - Commissioning Manual 5700118629"
+    }
+   ]
+  },
+  {
+   "url": "https://services.eversys.com/includes/download.php?p=downloads&f=5700120070_LegacyPlus_CM_EN.pdf",
+   "fileName": "5700120070_LegacyPlus_CM_EN.pdf",
+   "targets": [
+    {
+     "bookId": 23,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Eversys Legacy - Commissioning Manual 5700120070"
+    }
+   ]
+  },
+  {
+   "url": "https://home.lamarzoccousa.com/wp-content/uploads/2018/08/La-Marzocco-Linea-Mini-Spec-Sheet.pdf",
+   "fileName": "La-Marzocco-Linea-Mini-Spec-Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "spec",
+     "docType": null,
+     "name": "La Marzocco Linea Mini - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://home.lamarzoccousa.com/wp-content/uploads/2025/06/MAN.34.05.1_LINEAMINI-2023_EN-FR_V1.0-1.pdf",
+   "fileName": "MAN.34.05.1_LINEAMINI-2023_EN-FR_V1.0-1.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Mini - Manual (MI Serial) MAN.34.05.1 V1.0"
+    }
+   ]
+  },
+  {
+   "url": "https://home.lamarzoccousa.com/wp-content/uploads/2024/06/Home_Machines_plumb_in_manual_V3.0-min.pdf",
+   "fileName": "Home_Machines_plumb_in_manual_V3.0-min.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Mini - Home Machines Plumb In Manual V3.0"
+    },
+    {
+     "bookId": 84,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco GS3 AV - Home Machines Plumb In Manual V3.0"
+    }
+   ]
+  },
+  {
+   "url": "https://home.lamarzoccousa.com/wp-content/uploads/2026/09/LM-Retrofit-Kit-Connected-Machine-Install.pdf",
+   "fileName": "LM-Retrofit-Kit-Connected-Machine-Install.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco Linea Mini - Connected Machine Retrofit Kit Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://home.lamarzoccousa.com/wp-content/uploads/2024/11/Mini_R_Parts_-Catalog_V1.0-1.pdf",
+   "fileName": "Mini_R_Parts_-Catalog_V1.0-1.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Linea Mini - Parts Catalog (MI Serial) V1.0"
+    }
+   ]
+  },
+  {
+   "url": "https://home.lamarzoccousa.com/wp-content/uploads/2020/08/CM-Retrofit-Install-GS3-2020-USA-FINAL.pdf",
+   "fileName": "CM-Retrofit-Install-GS3-2020-USA-FINAL.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "La Marzocco GS3 AV - Connected Machine Retrofit Kit Installation Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://home.lamarzoccousa.com/wp-content/uploads/2024/08/GS3_Parts_Catalog_V3.4_Color-min-2.pdf",
+   "fileName": "GS3_Parts_Catalog_V3.4_Color-min-2.pdf",
+   "targets": [
+    {
+     "bookId": 84,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco GS3 AV - Parts Catalog V3.4"
+    }
+   ]
+  },
+  {
+   "url": "https://www.lamarzoccousa.com/wp-content/uploads/2020/03/lineamini_Parts_Catalog_V1.6_COLOR.pdf",
+   "fileName": "lineamini_Parts_Catalog_V1.6_COLOR.pdf",
+   "targets": [
+    {
+     "bookId": 82,
+     "section": "parts",
+     "docType": null,
+     "name": "La Marzocco Linea Mini - Parts Catalog (LM Serial) V1.6"
+    }
+   ]
+  },
+  {
+   "url": "https://modbar.com/wp-content/uploads/free/ESPRESSO-AV-SYSTEM/Brochure-Modbar-Espresso-AV.pdf",
+   "fileName": "Brochure-Modbar-Espresso-AV.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "spec",
+     "docType": null,
+     "name": "Modbar Espresso AV - Spec Sheet (Brochure)"
+    }
+   ]
+  },
+  {
+   "url": "https://modbar.com/wp-content/uploads/2024/03/Modbar-Pre-Installation-Requirements.pdf",
+   "fileName": "Modbar-Pre-Installation-Requirements.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Espresso AV - Pre-Installation Requirements"
+    },
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Pre-Installation Requirements"
+    },
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Pour-Over - Pre-Installation Requirements"
+    }
+   ]
+  },
+  {
+   "url": "https://modbar.com/wp-content/uploads/2025/12/Pre-Installation-Diagrams-Rev.Nov25.pdf",
+   "fileName": "Pre-Installation-Diagrams-Rev.Nov25.pdf",
+   "targets": [
+    {
+     "bookId": 91,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Espresso AV - Pre-Installation Diagrams Rev Nov25"
+    },
+    {
+     "bookId": 92,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Steam - Pre-Installation Diagrams Rev Nov25"
+    },
+    {
+     "bookId": 93,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Modbar Pour-Over - Pre-Installation Diagrams Rev Nov25"
+    }
+   ]
+  },
+  {
+   "url": "https://modbar.com/wp-content/uploads/free/STEAM-SYSTEM/Brochure-Modbar-Steam.pdf",
+   "fileName": "Brochure-Modbar-Steam.pdf",
+   "targets": [
+    {
+     "bookId": 92,
+     "section": "spec",
+     "docType": null,
+     "name": "Modbar Steam - Spec Sheet (Brochure)"
+    }
+   ]
+  },
+  {
+   "url": "https://modbar.com/wp-content/uploads/2025/10/Modbar-pour-over-2025.pdf",
+   "fileName": "Modbar-pour-over-2025.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "spec",
+     "docType": null,
+     "name": "Modbar Pour-Over - Spec Sheet (Brochure) 2025"
+    }
+   ]
+  },
+  {
+   "url": "https://modbar.com/wp-content/uploads/free/POUR-OVER-SYSTEM/Brochure-Modbar-Pour-Over.pdf",
+   "fileName": "Brochure-Modbar-Pour-Over.pdf",
+   "targets": [
+    {
+     "bookId": 93,
+     "section": "spec",
+     "docType": null,
+     "name": "Modbar Pour-Over - Spec Sheet (Brochure) Pre-2025"
+    }
+   ]
+  },
+  {
+   "url": "https://www.mazzer.com/wp-content/uploads/2021/10/depliant-Super-Jolly-V-Up-2022-ELECTRONIC-ENG-split-pages.pdf",
+   "fileName": "depliant-Super-Jolly-V-Up-2022-ELECTRONIC-ENG-split-pages.pdf",
+   "targets": [
+    {
+     "bookId": 114,
+     "section": "spec",
+     "docType": null,
+     "name": "Mazzer Super Jolly V Up Electronic - Spec Sheet (Brochure) DPSJELC072022"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.ditting.com/Products/Ditting_1403_Shop_Grinder_Product_Sheet.pdf",
+   "fileName": "Ditting_1403_Shop_Grinder_Product_Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 126,
+     "section": "spec",
+     "docType": null,
+     "name": "Ditting 1403 - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.ditting.com/Service/Ditting_1203_1403_Shop_Grinder_Original_instruction_manual_EN.pdf",
+   "fileName": "Ditting_1203_1403_Shop_Grinder_Original_instruction_manual_EN.pdf",
+   "targets": [
+    {
+     "bookId": 126,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Ditting 1403 - Original Instruction Manual"
+    },
+    {
+     "bookId": 127,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Ditting 1203 - Original Instruction Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.ditting.com/Service/Ditting_1203_1403_1403_Industrial_Shop_Grinder_Spare_Parts_List.pdf",
+   "fileName": "Ditting_1203_1403_1403_Industrial_Shop_Grinder_Spare_Parts_List.pdf",
+   "targets": [
+    {
+     "bookId": 126,
+     "section": "parts",
+     "docType": null,
+     "name": "Ditting 1403 - Parts Catalog"
+    },
+    {
+     "bookId": 127,
+     "section": "parts",
+     "docType": null,
+     "name": "Ditting 1203 - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.ditting.com/Products/Ditting_1203_Shop_Grinder_Product_Sheet.pdf",
+   "fileName": "Ditting_1203_Shop_Grinder_Product_Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 127,
+     "section": "spec",
+     "docType": null,
+     "name": "Ditting 1203 - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Products/Mahlkoenig_E65T_GbS_Espresso_Grinder_Product_Sheet.pdf",
+   "fileName": "Mahlkoenig_E65T_GbS_Espresso_Grinder_Product_Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "spec",
+     "docType": null,
+     "name": "Mahlk\u00f6nig E65T GbS - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkoenig_E65T_GbS_Original_instructions_EN_WEB.pdf",
+   "fileName": "Mahlkoenig_E65T_GbS_Original_instructions_EN_WEB.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mahlk\u00f6nig E65T GbS - Original Instruction Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkonig_E65T_GbS_quickguide_EN.pdf",
+   "fileName": "Mahlkonig_E65T_GbS_quickguide_EN.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mahlk\u00f6nig E65T GbS - Set Up Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Quick_Start_Guide_Mahlkoenig_Grind_by_Sync_Espresso_Grinder.pdf",
+   "fileName": "Quick_Start_Guide_Mahlkoenig_Grind_by_Sync_Espresso_Grinder.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mahlk\u00f6nig E65T GbS - Sync Quick Start Guide"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkonig_Software_Manual_Grind_by_Sync.pdf",
+   "fileName": "Mahlkonig_Software_Manual_Grind_by_Sync.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "Mahlk\u00f6nig E65T GbS - Software Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkoenig_Sync_App_Mobile_User_Guide.pdf",
+   "fileName": "Mahlkoenig_Sync_App_Mobile_User_Guide.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mahlk\u00f6nig E65T GbS - User Guide Sync Mobile App"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkoenig_Sync_App_Desktop_User_Guide.pdf",
+   "fileName": "Mahlkoenig_Sync_App_Desktop_User_Guide.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mahlk\u00f6nig E65T GbS - User Guide Sync Desktop App"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkoenig_E65T_GbS_Espresso_Grinder_Spare_Parts_List.pdf",
+   "fileName": "Mahlkoenig_E65T_GbS_Espresso_Grinder_Spare_Parts_List.pdf",
+   "targets": [
+    {
+     "bookId": 128,
+     "section": "parts",
+     "docType": null,
+     "name": "Mahlk\u00f6nig E65T GbS - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Products/Mahlkoenig_E65S_GbW_Espresso_Grinder_Product_Sheet.pdf",
+   "fileName": "Mahlkoenig_E65S_GbW_Espresso_Grinder_Product_Sheet.pdf",
+   "targets": [
+    {
+     "bookId": 129,
+     "section": "spec",
+     "docType": null,
+     "name": "Mahlk\u00f6nig E65S GbW - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Products/Mahlkoenig_E65S_Gbw_Espresso_Grinder_Product_Brochure.pdf",
+   "fileName": "Mahlkoenig_E65S_Gbw_Espresso_Grinder_Product_Brochure.pdf",
+   "targets": [
+    {
+     "bookId": 129,
+     "section": "spec",
+     "docType": null,
+     "name": "Mahlk\u00f6nig E65S GbW - Spec Sheet (Brochure)"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkoenig_E65S_Gbw_Espresso_Grinder_Original_instruction_manual_EN.pdf",
+   "fileName": "Mahlkoenig_E65S_Gbw_Espresso_Grinder_Original_instruction_manual_EN.pdf",
+   "targets": [
+    {
+     "bookId": 129,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Mahlk\u00f6nig E65S GbW - Original Instruction Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkoenig_E65S_Gbw_Espresso_Grinder_Quick_start_manual_DE_EN.pdf",
+   "fileName": "Mahlkoenig_E65S_Gbw_Espresso_Grinder_Quick_start_manual_DE_EN.pdf",
+   "targets": [
+    {
+     "bookId": 129,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Mahlk\u00f6nig E65S GbW - Quick Start Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://downloads.mahlkoenig.de/Service/Mahlkoenig_E65S_Gbw_Espresso_Grinder_Spare_Parts_List.pdf",
+   "fileName": "Mahlkoenig_E65S_Gbw_Espresso_Grinder_Spare_Parts_List.pdf",
+   "targets": [
+    {
+     "bookId": 129,
+     "section": "parts",
+     "docType": null,
+     "name": "Mahlk\u00f6nig E65S GbW - Parts Catalog"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/624392",
+   "fileName": "624392.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "spec",
+     "docType": null,
+     "name": "Bravilor Bonamat Sego 12 - Spec Sheet US.22.V3"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/584146",
+   "fileName": "584146.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Bravilor Bonamat Sego 12 - Safety Book 700.403.713F"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/584149",
+   "fileName": "584149.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Bravilor Bonamat Sego 12 - Quick Guide 700.403.837B"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/585667",
+   "fileName": "585667.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "Bravilor Bonamat Sego 12 - Cleaning Instructions"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/585670",
+   "fileName": "585670.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "Bravilor Bonamat Sego 12 - Rinsing Coffee System"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/585673",
+   "fileName": "585673.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "Bravilor Bonamat Sego 12 - Cleaning Brewer"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/585676",
+   "fileName": "585676.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "Bravilor Bonamat Sego 12 - Descale Coffee System"
+    }
+   ]
+  },
+  {
+   "url": "https://admin.b2b.bravilor.com/files/591316",
+   "fileName": "591316.pdf",
+   "targets": [
+    {
+     "bookId": 130,
+     "section": "manuals",
+     "docType": "Cleaning Manual",
+     "name": "Bravilor Bonamat Sego 12 - Sticker CIRCO-Brewer"
+    }
+   ]
+  },
+  {
+   "url": "https://media.faema.com/medias/X20-103-BROCHURE-EN.pdf",
+   "fileName": "X20-103-BROCHURE-EN.pdf",
+   "targets": [
+    {
+     "bookId": 131,
+     "section": "spec",
+     "docType": null,
+     "name": "Faema X20 - Spec Sheet (Brochure)"
+    }
+   ]
+  },
+  {
+   "url": "https://media.faema.com/medias/E61-103-BROCHURE-EN.pdf",
+   "fileName": "E61-103-BROCHURE-EN.pdf",
+   "targets": [
+    {
+     "bookId": 132,
+     "section": "spec",
+     "docType": null,
+     "name": "Faema E61 Legend - Spec Sheet (Brochure)"
+    },
+    {
+     "bookId": 133,
+     "section": "spec",
+     "docType": null,
+     "name": "Faema E61 Jubile - Spec Sheet (Brochure)"
+    }
+   ]
+  },
+  {
+   "url": "https://www.dejongduke.com/sites/default/files/2026-05/DJD_Brochure-US_VIRTU_EN_v.5.pdf",
+   "fileName": "DJD_Brochure-US_VIRTU_EN_v.5.pdf",
+   "targets": [
+    {
+     "bookId": 134,
+     "section": "spec",
+     "docType": null,
+     "name": "de Jong Duke Virtu - Spec Sheet (Brochure) V5"
+    }
+   ]
+  },
+  {
+   "url": "https://optipurewater.com/wp-content/uploads/164-00102_BWS100_2-Spec-Sheet_R2-1.pdf",
+   "fileName": "164-00102_BWS100_2-Spec-Sheet_R2-1.pdf",
+   "targets": [
+    {
+     "bookId": 135,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure BWS100 - Spec Sheet (2) 164-00102 R2"
+    }
+   ]
+  },
+  {
+   "url": "https://optipurewater.com/wp-content/uploads/164-00116_BWS100_16-Spec-Sheet_R2-1.pdf",
+   "fileName": "164-00116_BWS100_16-Spec-Sheet_R2-1.pdf",
+   "targets": [
+    {
+     "bookId": 135,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure BWS100 - Spec Sheet (16) 164-00116 R2"
+    }
+   ]
+  },
+  {
+   "url": "https://optipurewater.com/wp-content/uploads/BWS100_IOM_R4.pdf",
+   "fileName": "BWS100_IOM_R4.pdf",
+   "targets": [
+    {
+     "bookId": 135,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Everpure BWS100 - Installation, Operation & Maintenance Manual R4"
+    }
+   ]
+  },
+  {
+   "url": "https://optipurewater.com/wp-content/uploads/BWS350-iom-manual_v5.pdf",
+   "fileName": "BWS350-iom-manual_v5.pdf",
+   "targets": [
+    {
+     "bookId": 136,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Everpure BWS350 - Installation, Operation & Maintenance Manual V5"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/200-/204-53040-ams-qt-spec.pdf",
+   "fileName": "204-53040-ams-qt-spec.pdf",
+   "targets": [
+    {
+     "bookId": 136,
+     "section": "parts",
+     "docType": null,
+     "name": "Everpure BWS350 - RO Replacement Cartridge AMS-QT 204-53040"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/sell-sheets/ev701881-ez-ro-sell-sheet.pdf",
+   "fileName": "ev701881-ez-ro-sell-sheet.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (Sell Sheet) EV701881"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997551-ez-ro-200-2g-spec.pdf",
+   "fileName": "ev997551-ez-ro-200-2g-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (2G) EV9975-51"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997552-ez-ro-200-5g-spec.pdf",
+   "fileName": "ev997552-ez-ro-200-5g-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (5G) EV9975-52"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997553-ez-ro-200-10g-spec.pdf",
+   "fileName": "ev997553-ez-ro-200-10g-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (10G) EV9975-53"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997554-ez-ro-200-16g-spec.pdf",
+   "fileName": "ev997554-ez-ro-200-16g-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (16G) EV9975-54"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997559-ez-ro-200-2g-bl-spec.pdf",
+   "fileName": "ev997559-ez-ro-200-2g-bl-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (2G-BL) EV9975-59"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997560-ez-ro-200-5g-bl-spec.pdf",
+   "fileName": "ev997560-ez-ro-200-5g-bl-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (5G-BL) EV9975-60"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997561-ez-ro-200-10g-bl-spec.pdf",
+   "fileName": "ev997561-ez-ro-200-10g-bl-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (10G-BL) EV9975-61"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/ev9900/ev997562-ez-ro-200-16g-bl-spec.pdf",
+   "fileName": "ev997562-ez-ro-200-16g-bl-spec.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure EZ-RO 200 - Spec Sheet (16G-BL) EV9975-62"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/io-guides-manuals/ev3159-30-ez-ro-nobl-hpn-reva-4-25-22-low-res1.pdf",
+   "fileName": "ev3159-30-ez-ro-nobl-hpn-reva-4-25-22-low-res1.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Everpure EZ-RO 200 - Installation Manual (Hydropneumatic Tanks) EV3159-30 Rev A"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/io-guides-manuals/ev3159-31-ez-ro-blend-hpn-reva-4-25-22-low-res1.pdf",
+   "fileName": "ev3159-31-ez-ro-blend-hpn-reva-4-25-22-low-res1.pdf",
+   "targets": [
+    {
+     "bookId": 137,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Everpure EZ-RO 200 - Installation Manual (Blending & Hydropneumatic Tanks) EV3159-31 Rev A"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/160-/164-01302-ops175-2-spec.pdf",
+   "fileName": "164-01302-ops175-2-spec.pdf",
+   "targets": [
+    {
+     "bookId": 138,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure OPS175 - Spec Sheet (2) 164-01302"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/160-/164-01305-ops175-5-spec.pdf",
+   "fileName": "164-01305-ops175-5-spec.pdf",
+   "targets": [
+    {
+     "bookId": 138,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure OPS175 - Spec Sheet (5) 164-01305"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/160-/164-01310-ops175-10-spec.pdf",
+   "fileName": "164-01310-ops175-10-spec.pdf",
+   "targets": [
+    {
+     "bookId": 138,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure OPS175 - Spec Sheet (10) 164-01310"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/160-/164-01402-ops175cr-2-spec.pdf",
+   "fileName": "164-01402-ops175cr-2-spec.pdf",
+   "targets": [
+    {
+     "bookId": 138,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure OPS175 - Spec Sheet (CR 2) 164-01402"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/160-/164-01405-ops175cr-5-spec.pdf",
+   "fileName": "164-01405-ops175cr-5-spec.pdf",
+   "targets": [
+    {
+     "bookId": 138,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure OPS175 - Spec Sheet (CR 5) 164-01405"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/160-/164-01410-ops175cr-10-spec.pdf",
+   "fileName": "164-01410-ops175cr-10-spec.pdf",
+   "targets": [
+    {
+     "bookId": 138,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure OPS175 - Spec Sheet (CR 10) 164-01410"
+    }
+   ]
+  },
+  {
+   "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/everpure/commercial/spec-sheets/160-/164-01416-ops175cr-16-spec.pdf",
+   "fileName": "164-01416-ops175cr-16-spec.pdf",
+   "targets": [
+    {
+     "bookId": 138,
+     "section": "spec",
+     "docType": null,
+     "name": "Everpure OPS175 - Spec Sheet (CR 16) 164-01416"
+    }
+   ]
+  },
+  {
+   "url": "https://www.bwt.com/en-us/-/media/bwt/global-data/documents/produktdatenblaetter-pou-ps/bwt-bestmax.pdf?rev=6346d87fefcb4312bd3345957fc7ea66",
+   "fileName": "bwt-bestmax.pdf",
+   "targets": [
+    {
+     "bookId": 139,
+     "section": "spec",
+     "docType": null,
+     "name": "BWT bestmax - Spec Sheet 01-1912"
+    }
+   ]
+  },
+  {
+   "url": "https://www.bwt.com/da-dk/-/media/57cfcdda31fe478d9ab7d483c64ebc96.pdf?rev=9075aad0be8c4e36b5122718b65ee9e7",
+   "fileName": "57cfcdda31fe478d9ab7d483c64ebc96.pdf",
+   "targets": [
+    {
+     "bookId": 139,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "BWT bestmax - Installation and Operating Instructions with Capacity Tables 2017"
+    }
+   ]
+  },
+  {
+   "url": "https://cdn.blendtec.com/files/commercial/spec_sheets/Spec-Sheet-Stealth-885-US-ENG.pdf",
+   "fileName": "Spec-Sheet-Stealth-885-US-ENG.pdf",
+   "targets": [
+    {
+     "bookId": 140,
+     "section": "spec",
+     "docType": null,
+     "name": "Blendtec Stealth 885 - Spec Sheet SPS-050 A02"
+    }
+   ]
+  },
+  {
+   "url": "https://cdn.blendtec.com/files/commercial/spec_sheets/Spec-Sheet-Rapid-Rinser-US-ENG.pdf",
+   "fileName": "Spec-Sheet-Rapid-Rinser-US-ENG.pdf",
+   "targets": [
+    {
+     "bookId": 141,
+     "section": "spec",
+     "docType": null,
+     "name": "Blendtec Rapid Rinse Station - Spec Sheet"
+    }
+   ]
+  },
+  {
+   "url": "https://blendtec.eu/wp-content/uploads/pdf/manuals/commercial-products.pdf",
+   "fileName": "commercial-products.pdf",
+   "targets": [
+    {
+     "bookId": 140,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Blendtec Stealth 885 - Commercial Products Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://blendtec.eu/wp-content/uploads/pdf/manuals/95-CD-IG-132+A01+Cycle+Chart,+Stealth,+US+ENG,+April+2018.pdf",
+   "fileName": "95-CD-IG-132+A01+Cycle+Chart,+Stealth,+US+ENG,+April+2018.pdf",
+   "targets": [
+    {
+     "bookId": 140,
+     "section": "manuals",
+     "docType": "Programming Manual",
+     "name": "Blendtec Stealth 885 - Cycle Chart 95-CD-IG-132 A01"
+    }
+   ]
+  },
+  {
+   "url": "https://blendtec.eu/wp-content/uploads/pdf/manuals/blendtec_rapid_rinser_manual.pdf",
+   "fileName": "blendtec_rapid_rinser_manual.pdf",
+   "targets": [
+    {
+     "bookId": 141,
+     "section": "manuals",
+     "docType": "Operating / Installation Manual",
+     "name": "Blendtec Rapid Rinse Station - Manual"
+    }
+   ]
+  },
+  {
+   "url": "https://www.vitrifrigo.com/en_us/amfile/file/download/file/52/product/508/",
+   "fileName": "508.pdf",
+   "targets": [
+    {
+     "bookId": 142,
+     "section": "manuals",
+     "docType": "User Manual",
+     "name": "Vitrifrigo FG20i - Instruction Manual"
+    }
+   ]
+  }
+ ],
+ "mpns": [
+  {
+   "bookId": 1,
+   "title": "BUNN AXIOM",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 4,
+   "title": "BUNN AXIOM-DV-APS",
+   "mpn": "38700.0010",
+   "productPage": "https://commercial.bunn.com/38700.0010"
+  },
+  {
+   "bookId": 5,
+   "title": "BUNN Axiom-DV-TC",
+   "mpn": "38700.0011",
+   "productPage": "https://commercial.bunn.com/38700.0011"
+  },
+  {
+   "bookId": 6,
+   "title": "BUNN AXIOM-TWIN-APS",
+   "mpn": "38700.0013",
+   "productPage": "https://commercial.bunn.com/38700.0013"
+  },
+  {
+   "bookId": 7,
+   "title": "BUNN AXIOM-15-3 (3 Lower Warmers)",
+   "mpn": "38700.0002",
+   "productPage": "https://commercial.bunn.com/38700.0002"
+  },
+  {
+   "bookId": 8,
+   "title": "BUNN AXIOM-15-3 (2U/1L Warmer)",
+   "mpn": "38700.0000",
+   "productPage": "https://commercial.bunn.com/38700.0000"
+  },
+  {
+   "bookId": 9,
+   "title": "La Marzocco Linea Classic S",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 10,
+   "title": "La Marzocco Linea PB",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 11,
+   "title": "La Marzocco Strada X",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 12,
+   "title": "La Marzocco Strada S",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 13,
+   "title": "BUNN ITCB-DV 29\" Trunk W/Tray",
+   "mpn": "52200.0100",
+   "productPage": "https://commercial.bunn.com/52200.0100"
+  },
+  {
+   "bookId": 14,
+   "title": "BUNN NITRON Cold Draft W/RDG & NGM",
+   "mpn": "51600.0028",
+   "productPage": "https://commercial.bunn.com/51600.0028"
+  },
+  {
+   "bookId": 15,
+   "title": "BUNN ITB Dual Dilution",
+   "mpn": "52000.0301",
+   "productPage": "https://commercial.bunn.com/52000.0301"
+  },
+  {
+   "bookId": 16,
+   "title": "BUNN G9-2T HD Stainless",
+   "mpn": "24250.0021",
+   "productPage": "https://commercial.bunn.com/24250.0021"
+  },
+  {
+   "bookId": 17,
+   "title": "BUNN FPG-2 DBC SST",
+   "mpn": "36400.0000",
+   "productPage": "https://commercial.bunn.com/36400.0000"
+  },
+  {
+   "bookId": 18,
+   "title": "Eversys Cameo Classic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 19,
+   "title": "La Marzocco Swift",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 20,
+   "title": "FETCO CBS-1250 Plus",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 21,
+   "title": "Eversys Legacy L'2m",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 22,
+   "title": "Eversys Legacy L'2c",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 23,
+   "title": "Eversys Legacy",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 24,
+   "title": "Eversys Cameo",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 25,
+   "title": "Eversys Enigma e'4",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 26,
+   "title": "Eversys Enigma e'4 X-Wide",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 27,
+   "title": "Eversys E'fridge",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 28,
+   "title": "Eversys E'fridge Super Traditional",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 29,
+   "title": "Rancilio Classe 5 USB Compact 220V",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 30,
+   "title": "Rancilio Classe 5 USB",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 31,
+   "title": "Rancilio Classe 5 USB Compact 120V",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 32,
+   "title": "Rancilio Classe",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 33,
+   "title": "FETCO MBS-1251",
+   "mpn": "MBS-1251",
+   "productPage": "https://www.fetco.com/s/MBS-1251-Spec-Sheet.pdf"
+  },
+  {
+   "bookId": 39,
+   "title": "BUNN CWTF15-3 (3 Lower)",
+   "mpn": "12950.0212",
+   "productPage": "https://commercial.bunn.com/12950.0212"
+  },
+  {
+   "bookId": 40,
+   "title": "BUNN CWTF15-3 (2U/1L)",
+   "mpn": "12950.0213",
+   "productPage": "https://commercial.bunn.com/12950.0213"
+  },
+  {
+   "bookId": 41,
+   "title": "BUNN CWTF15-APS",
+   "mpn": "23001.0006",
+   "productPage": "https://commercial.bunn.com/23001.0006"
+  },
+  {
+   "bookId": 42,
+   "title": "BUNN CWTF15-TC",
+   "mpn": "12950.0360",
+   "productPage": "https://commercial.bunn.com/12950.0360"
+  },
+  {
+   "bookId": 43,
+   "title": "BUNN TB3",
+   "mpn": "36700.0009",
+   "productPage": "https://commercial.bunn.com/36700.0009"
+  },
+  {
+   "bookId": 44,
+   "title": "BUNN ITB-LP",
+   "mpn": "52000.0101",
+   "productPage": "https://commercial.bunn.com/52000.0101"
+  },
+  {
+   "bookId": 45,
+   "title": "BUNN ICB-DV Short",
+   "mpn": "53100.0100",
+   "productPage": "https://commercial.bunn.com/53100.0100"
+  },
+  {
+   "bookId": 46,
+   "title": "BUNN ICB-DV Tall",
+   "mpn": "53100.0101",
+   "productPage": "https://commercial.bunn.com/53100.0101"
+  },
+  {
+   "bookId": 47,
+   "title": "BUNN Ultra NX",
+   "mpn": "58000.0010",
+   "productPage": "https://commercial.bunn.com/58000.0010"
+  },
+  {
+   "bookId": 48,
+   "title": "BUNN G1 HD",
+   "mpn": "22104.0000",
+   "productPage": "https://commercial.bunn.com/22104.0000"
+  },
+  {
+   "bookId": 49,
+   "title": "BUNN G2 HD",
+   "mpn": "22102.0000",
+   "productPage": "https://commercial.bunn.com/22102.0000"
+  },
+  {
+   "bookId": 50,
+   "title": "BUNN G3 HD",
+   "mpn": "22100.0000",
+   "productPage": "https://commercial.bunn.com/22100.0000"
+  },
+  {
+   "bookId": 51,
+   "title": "BUNN G9-2T DBC",
+   "mpn": "33700.0000",
+   "productPage": "https://commercial.bunn.com/33700.0000"
+  },
+  {
+   "bookId": 52,
+   "title": "BUNN G9-2 HD",
+   "mpn": "24250.6000",
+   "productPage": "https://commercial.bunn.com/24250.6000"
+  },
+  {
+   "bookId": 53,
+   "title": "BUNN GVH-1",
+   "mpn": "55600.0100",
+   "productPage": "https://commercial.bunn.com/55600.0100"
+  },
+  {
+   "bookId": 54,
+   "title": "BUNN LPG-2E",
+   "mpn": "26800.0000",
+   "productPage": "https://commercial.bunn.com/26800.0000"
+  },
+  {
+   "bookId": 55,
+   "title": "BUNN H5X 120V",
+   "mpn": "43600.0026",
+   "productPage": "https://commercial.bunn.com/43600.0026"
+  },
+  {
+   "bookId": 56,
+   "title": "BUNN H5X 240V",
+   "mpn": "43600.0003",
+   "productPage": "https://commercial.bunn.com/43600.0003"
+  },
+  {
+   "bookId": 57,
+   "title": "BUNN iMIX-3",
+   "mpn": "36900.0000",
+   "productPage": "https://commercial.bunn.com/36900.0000"
+  },
+  {
+   "bookId": 58,
+   "title": "BUNN iMIX-5",
+   "mpn": "37000.0000",
+   "productPage": "https://commercial.bunn.com/37000.0000"
+  },
+  {
+   "bookId": 59,
+   "title": "BUNN FMD-1",
+   "mpn": "SET00.0196",
+   "productPage": "https://commercial.bunn.com/SET00.0196"
+  },
+  {
+   "bookId": 60,
+   "title": "BUNN Sure Immersion 220",
+   "mpn": "44400.0100",
+   "productPage": "https://commercial.bunn.com/44400.0100"
+  },
+  {
+   "bookId": 61,
+   "title": "BUNN Sure Immersion 312",
+   "mpn": "44400.0200",
+   "productPage": "https://commercial.bunn.com/44400.0200"
+  },
+  {
+   "bookId": 62,
+   "title": "FETCO CBS-51H-15",
+   "mpn": "CBS-51H-15",
+   "productPage": "https://www.fetco.com/s/cbs-51h-15-Spec-Sheet.pdf"
+  },
+  {
+   "bookId": 63,
+   "title": "FETCO CBS-52H-15",
+   "mpn": "CBS-52H-15",
+   "productPage": "https://www.fetco.com/s/cbs-52h-15-Spec-Sheet.pdf"
+  },
+  {
+   "bookId": 64,
+   "title": "FETCO CBS-62H-30",
+   "mpn": "CBS-62H-30",
+   "productPage": "https://www.fetco.com/s/CBS-6000-Series-User-Guide.pdf"
+  },
+  {
+   "bookId": 65,
+   "title": "FETCO CBS-1131V+",
+   "mpn": "CBS-1131-XV+",
+   "productPage": "https://www.fetco.com/s/CBS1130UserGuide.pdf"
+  },
+  {
+   "bookId": 66,
+   "title": "FETCO CBS-1132V+",
+   "mpn": "CBS-1132-XV+",
+   "productPage": "https://www.fetco.com/s/CBS1130UserGuide.pdf"
+  },
+  {
+   "bookId": 67,
+   "title": "FETCO CBS-1151V+",
+   "mpn": "CBS-1151-XV+",
+   "productPage": "https://www.fetco.com/s/CBS1150UserGuide.pdf"
+  },
+  {
+   "bookId": 68,
+   "title": "FETCO CBS-1152V+",
+   "mpn": "CBS-1152-XV+",
+   "productPage": "https://www.fetco.com/s/CBS1150UserGuide.pdf"
+  },
+  {
+   "bookId": 69,
+   "title": "FETCO CBS-1231 Plus",
+   "mpn": "CBS-1231",
+   "productPage": "https://www.fetco.com/s/Sellsheet-CBS-1230-Plus-US-Letter-Rev6.pdf"
+  },
+  {
+   "bookId": 70,
+   "title": "FETCO CBS-1232 Plus",
+   "mpn": "CBS-1232",
+   "productPage": "https://www.fetco.com/s/Sellsheet-CBS-1230-Plus-US-Letter-Rev6.pdf"
+  },
+  {
+   "bookId": 71,
+   "title": "FETCO CBS-1251 Plus",
+   "mpn": "CBS-1251",
+   "productPage": "https://www.fetco.com/brewers/p/cbs-1251"
+  },
+  {
+   "bookId": 72,
+   "title": "FETCO CBS-1252 Plus",
+   "mpn": "CBS-1252",
+   "productPage": "https://www.fetco.com/brewers/p/cbs-1252"
+  },
+  {
+   "bookId": 73,
+   "title": "FETCO CBS-2251 NG",
+   "mpn": "CBS-2251",
+   "productPage": "https://www.fetco.com/s/P195-CBS-2250NG-0124.pdf"
+  },
+  {
+   "bookId": 74,
+   "title": "FETCO CBS-2252 NG",
+   "mpn": "CBS-2252",
+   "productPage": "https://www.fetco.com/s/P195-CBS-2250NG-0124.pdf"
+  },
+  {
+   "bookId": 75,
+   "title": "FETCO MBS-1221",
+   "mpn": "MBS-1221",
+   "productPage": "https://www.fetco.com/s/Sellsheet-MBS-1221-Plus-US-Letter-Rev3.pdf"
+  },
+  {
+   "bookId": 76,
+   "title": "FETCO HWD-2102",
+   "mpn": "HWD-2102",
+   "productPage": "https://www.fetco.com/hot-water-dispensers/p/hwd-2102"
+  },
+  {
+   "bookId": 77,
+   "title": "FETCO GR-2.2",
+   "mpn": "GR-2.2",
+   "productPage": "https://www.fetco.com/s/P185-GR-12-de4c.pdf"
+  },
+  {
+   "bookId": 78,
+   "title": "FETCO GR-2.3",
+   "mpn": "GR-2.3",
+   "productPage": "https://www.fetco.com/s/P185-GR-12-de4c.pdf"
+  },
+  {
+   "bookId": 79,
+   "title": "FETCO GRS-1201",
+   "mpn": "GRS-1201",
+   "productPage": "https://www.fetco.com/coffee-grinders/p/gr-1201"
+  },
+  {
+   "bookId": 80,
+   "title": "FETCO GRS-1202",
+   "mpn": "GRS-1202",
+   "productPage": "https://www.fetco.com/coffee-grinders/p/gr-1202"
+  },
+  {
+   "bookId": 81,
+   "title": "La Marzocco Linea Classic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 82,
+   "title": "La Marzocco Linea Mini",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 83,
+   "title": "La Marzocco GB5 S",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 84,
+   "title": "La Marzocco GS3 AV",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 85,
+   "title": "La Marzocco KB90",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 86,
+   "title": "La Marzocco Strada AV",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 87,
+   "title": "La Marzocco Strada EE",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 88,
+   "title": "La Marzocco Swan",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 89,
+   "title": "La Marzocco Jay",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 90,
+   "title": "La Marzocco Wally Milk",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 91,
+   "title": "Modbar Espresso AV",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 92,
+   "title": "Modbar Steam",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 93,
+   "title": "Modbar Pour-Over",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 94,
+   "title": "Rancilio Classe 5 S 1 Group",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 95,
+   "title": "Rancilio Classe 5 S 2 Group",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 96,
+   "title": "Rancilio Classe 5 ST 1 Group",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 97,
+   "title": "Rancilio Classe 5 USB 1 Group",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 98,
+   "title": "Rancilio Classe 5 USB 1 Group Tall",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 99,
+   "title": "Rancilio Classe 5 USB 3 Group",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 100,
+   "title": "Rancilio Classe 5 USB 3 Group Tall",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 101,
+   "title": "Rancilio Classe 7 USB",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 102,
+   "title": "Rancilio Classe 7 USB Tall",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 103,
+   "title": "Rancilio Classe 9 USB",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 104,
+   "title": "Rancilio Classe 9 USB Tall",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 105,
+   "title": "Rancilio Invicta",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 106,
+   "title": "Rancilio Kryo 65 OD Evo",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 107,
+   "title": "Eversys Enigma e'4 ST",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 108,
+   "title": "Eversys Enigma e'4 X-Wide ST",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 109,
+   "title": "Eversys Enigma e'6",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 110,
+   "title": "Eversys Shotmaster CT Classic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 111,
+   "title": "Eversys Shotmaster Classic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 112,
+   "title": "Eversys Shotmaster Pro ST",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 113,
+   "title": "Eversys C'fridge Beside",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 114,
+   "title": "Mazzer Super Jolly V Up Electronic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 115,
+   "title": "Mazzer Super Jolly V Up Doser Timer",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 116,
+   "title": "Mazzer Robur S Automatic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 117,
+   "title": "Mazzer Robur S Electronic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 118,
+   "title": "Mazzer Robur Electronic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 119,
+   "title": "Mazzer Mini Electronic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 120,
+   "title": "Mazzer Mini Doser Timer",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 121,
+   "title": "Mazzer Kony Electronic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 122,
+   "title": "Mazzer Kony S Electronic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 123,
+   "title": "Mazzer Kony Automatic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 124,
+   "title": "Mazzer Major V Electronic",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 125,
+   "title": "Mazzer ZM",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 126,
+   "title": "Ditting 1403",
+   "mpn": "KR1403",
+   "productPage": "https://downloads.ditting.com/Products/Ditting_1403_Shop_Grinder_Product_Sheet.pdf"
+  },
+  {
+   "bookId": 127,
+   "title": "Ditting 1203",
+   "mpn": "KR1203",
+   "productPage": "https://downloads.ditting.com/Products/Ditting_1203_Shop_Grinder_Product_Sheet.pdf"
+  },
+  {
+   "bookId": 128,
+   "title": "Mahlk\u00f6nig E65T GbS",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 129,
+   "title": "Mahlk\u00f6nig E65S GbW",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 130,
+   "title": "Bravilor Bonamat Sego 12",
+   "mpn": "8.036.027.92001",
+   "productPage": "https://www.bravilor.com/en/products/espresso-machines-en/sego-12/"
+  },
+  {
+   "bookId": 131,
+   "title": "Faema X20",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 132,
+   "title": "Faema E61 Legend",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 133,
+   "title": "Faema E61 Jubile",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 134,
+   "title": "de Jong Duke Virtu",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 135,
+   "title": "Everpure BWS100",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 136,
+   "title": "Everpure BWS350",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 137,
+   "title": "Everpure EZ-RO 200",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 138,
+   "title": "Everpure OPS175",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 139,
+   "title": "BWT bestmax",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 140,
+   "title": "Blendtec Stealth 885",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 141,
+   "title": "Blendtec Rapid Rinse Station",
+   "mpn": null,
+   "productPage": null
+  },
+  {
+   "bookId": 142,
+   "title": "Vitrifrigo FG20i",
+   "mpn": "FG20I-SX-Black",
+   "productPage": "https://www.vitrifrigo.com/en_us/milkcoolers-fg20i-black-vitrifrigo"
+  }
+ ]
+}

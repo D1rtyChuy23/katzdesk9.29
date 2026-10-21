@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
-import { NO_REP_COLOR, REP_PALETTE } from "../src/lib/ops/geo.ts";
+import { collectDayStops, colorOfTech, crewLabel, linkStop, milesNote, placeStops, planAreas, planTechRoutes, routeLinks, routeNote, routeStartNote, stopCount, stopTime, techColors, techKey, techOrder, typeCounts, arrangeStops, moveWrites, MISSING_LABEL, NO_TECH, KATZ_SHOP } from "../src/lib/ops/route-plan.ts";
+import { NO_REP_COLOR, REP_PALETTE, milesBetween } from "../src/lib/ops/geo.ts";
+import { driveBetween, legsFromTable, pointKey } from "../src/lib/ops/drive-route.ts";
 
 const DAY = "2026-10-14";
 const OTHER = "2026-10-15";
@@ -377,4 +378,158 @@ test("starting from the shop: first leg is measured from the shop, links start t
   const q = new URL(shop.links[0]).searchParams;
   assert.equal(q.get("origin"), "29.808821,-95.461210");
   assert.equal(new URL(here.links[0]).searchParams.get("origin"), null);
+});
+
+test("drive minutes reorder untimed stops, and a set time keeps its slot", () => {
+  const placed = placeStops(
+    collectDayStops(
+      {
+        ...none,
+        services: [
+          ticket({ id: 1, customer: "Katy Diner", scheduledTime: "14:00" }),
+          ticket({ id: 2, customer: "Steak 48", scheduledTime: "9:00" }),
+          ticket({ id: 3, customer: "Common Bond Tanglewood" }),
+          ticket({ id: 4, customer: "MARQ*E", scheduledTime: "11:30" }),
+        ],
+      },
+      DAY,
+    ),
+    find,
+  );
+  const near = (p, q) => Math.abs(p.lat - q.lat) < 0.02 && Math.abs(p.lng - q.lng) < 0.02;
+  // Tanglewood is a short hop only from Katy. The timed stops stay a cheap hop from each other,
+  // so the untimed stop is added after the 2pm stop instead of beside the Galleria.
+  const drive = (a, b) => {
+    const katyTangle = (near(a, KATY) && near(b, TANGLEWOOD)) || (near(a, TANGLEWOOD) && near(b, KATY));
+    const timedHop =
+      [GALLERIA, MARQE, KATY].some((p) => near(a, p)) && [GALLERIA, MARQE, KATY].some((p) => near(b, p));
+    if (katyTangle) return { minutes: 4, miles: 12 };
+    if (timedHop) return { minutes: 8, miles: 6 };
+    return { minutes: 40, miles: 18 };
+  };
+  const plain = planTechRoutes(placed, ["Ryan Gloria"])[0];
+  const ryan = planTechRoutes(placed, ["Ryan Gloria"], null, { drive })[0];
+  assert.deepEqual(
+    ryan.stops.filter((s) => s.time).map((s) => s.time),
+    ["09:00", "11:30", "14:00"],
+  );
+  assert.deepEqual(ryan.stops.map((s) => s.customer), ["Steak 48", "MARQ*E", "Katy Diner", "Common Bond Tanglewood"]);
+  assert.notDeepEqual(
+    plain.stops.map((s) => s.id),
+    ryan.stops.map((s) => s.id),
+  );
+  assert.equal(ryan.drive, true);
+  assert.equal(ryan.stops.at(-1).legMinutes, 4);
+  assert.ok(ryan.minutes > 0);
+  assert.equal(routeNote(ryan.minutes, ryan.miles, true).includes("min"), true);
+  const missed = planTechRoutes(placed, ["Ryan Gloria"], KATZ_SHOP, { drive: () => null })[0];
+  const shop = planTechRoutes(placed, ["Ryan Gloria"], KATZ_SHOP)[0];
+  assert.deepEqual(
+    missed.stops.map((s) => s.id),
+    shop.stops.map((s) => s.id),
+  );
+  assert.equal(missed.drive, false);
+  assert.equal(missed.minutes, null);
+  const manual = planTechRoutes(placed, ["Ryan Gloria"], null, { manual: { "Ryan Gloria": ["service-1", "service-2", "service-4", "service-3"] } })[0];
+  assert.deepEqual(manual.stops.map((s) => s.id), [1, 2, 4, 3]);
+  assert.equal(manual.drive, false);
+  assert.deepEqual(arrangeStops([{ key: "b" }, { key: "a" }, { key: "c" }], ["c", "a"]).map((s) => s.key), ["c", "a", "b"]);
+  assert.equal(routeLinks(manual.stops).length, 1);
+});
+
+test("drive times are used only when every leg is known, otherwise the whole list is straight-line", () => {
+  const placed = placeStops(
+    collectDayStops(
+      {
+        ...none,
+        services: [
+          ticket({ id: 1, customer: "Katy Diner" }),
+          ticket({ id: 2, customer: "Steak 48" }),
+        ],
+      },
+      DAY,
+    ),
+    find,
+  );
+  const near = (p, q) => Math.abs(p.lat - q.lat) < 0.02 && Math.abs(p.lng - q.lng) < 0.02;
+  const partial = (a, b) => {
+    if (near(a, KATY) && near(b, GALLERIA)) return null;
+    return { minutes: 1, miles: 99 };
+  };
+  const plain = planTechRoutes(placed, ["Ryan Gloria"])[0];
+  const mixed = planTechRoutes(placed, ["Ryan Gloria"], null, { drive: partial })[0];
+  assert.deepEqual(
+    mixed.stops.map((s) => s.id),
+    plain.stops.map((s) => s.id),
+  );
+  assert.equal(mixed.drive, false);
+  assert.equal(mixed.minutes, null);
+  assert.ok(mixed.stops.every((s) => s.legMinutes == null));
+  assert.equal(mixed.miles, plain.miles);
+});
+
+// A drive table built the way route-planner.tsx builds it: one pin per pointKey (5 decimals), the start first.
+function tableDrive(placed, start) {
+  const pts = [];
+  for (const s of placed) if (s.point && !pts.some((p) => pointKey(p) === pointKey(s.point))) pts.push(s.point);
+  const points = [start.point, ...pts.filter((p) => pointKey(p) !== pointKey(start.point))];
+  const grid = (f) => points.map((a, i) => points.map((b, j) => (i === j ? 0 : f(milesBetween(a, b)))));
+  const legs = legsFromTable(points, { seconds: grid((mi) => (mi * 2.5 + 2) * 60), meters: grid((mi) => mi * 1609.344) });
+  return (a, b) => driveBetween(legs, a, b);
+}
+
+test("two accounts in one building keep drive minutes, and pins that round alike don't break the route", () => {
+  const day = (accounts) => {
+    const byName = new Map(accounts.map((a, i) => [a.name.toLowerCase(), { id: 900 + i, quality: "exact", address: null, city: "Houston", ...a }]));
+    const services = accounts.map((a, i) => ticket({ id: i + 1, customer: a.name }));
+    return placeStops(collectDayStops({ ...none, services }, DAY), (n) => byName.get(n.toLowerCase()));
+  };
+  // Real pins at The Post (401 Franklin): 0.3 m apart, so the drive table keeps only one of them.
+  const post = day([
+    { name: "Jackson's Brew", lat: 29.765379615726, lng: -95.366225875392 },
+    { name: "Shakkar", lat: 29.76537668, lng: -95.36622609 },
+    { name: "Steak 48", ...GALLERIA },
+    { name: "Katy Diner", ...KATY },
+  ]);
+  const route = planTechRoutes(post, ["Ryan Gloria"], KATZ_SHOP, { drive: tableDrive(post, KATZ_SHOP) })[0];
+  assert.equal(route.drive, true);
+  assert.ok(route.stops.every((s) => s.legMinutes != null));
+  assert.ok(route.minutes > 0);
+  // Aa sorts first. Bb and Cc are each within 1e-7 of Aa but not of each other, and all three share one pointKey.
+  const rab = day([
+    { name: "Aa", lat: 29.7000001, lng: -95.4 },
+    { name: "Bb", lat: 29.70000004, lng: -95.4 },
+    { name: "Cc", lat: 29.70000016, lng: -95.4 },
+    { name: "Far", lat: 29.8, lng: -95.5 },
+  ]);
+  assert.doesNotThrow(() => planTechRoutes(rab, ["Ryan Gloria"], KATZ_SHOP, { drive: tableDrive(rab, KATZ_SHOP) }));
+});
+
+test("current location orders from the pin but the Maps link leaves the origin off", () => {
+  const placed = placeStops(
+    collectDayStops({ ...none, services: [ticket({ id: 2, customer: "Steak 48" })] }, DAY),
+    find,
+  );
+  const here = { key: "here", label: "Current location", point: { lat: 29.76, lng: -95.37 } };
+  const route = planTechRoutes(placed, ["Ryan Gloria"], here)[0];
+  assert.ok(route.stops[0].legMiles > 0);
+  assert.equal(new URL(route.links[0]).searchParams.get("origin"), null);
+  assert.equal(routeStartNote(here), "Starts from your current location.");
+  assert.equal(routeStartNote(KATZ_SHOP), "Starts from the Shop (2400 Karbach St).");
+  assert.equal(routeStartNote(null).includes("current location"), true);
+});
+
+test("Undo of a Move on a two-tech ticket's main copy puts the 2nd tech back too", () => {
+  const [main, second] = collectDayStops({ installs: [], pms: [], services: [ticket({ id: 7, technician: "Ryan Gloria", secondaryTech: "Jose Garcia" })], tlcs: [] }, DAY);
+  // Moving Ryan's copy to nobody, or onto Jose, clears or promotes the 2nd tech on the server.
+  for (const to of [NO_TECH, "Jose Garcia"]) {
+    const w = moveWrites(main, main.tech, to);
+    assert.deepEqual(w.forward, { id: 7, technician: to || null });
+    assert.deepEqual(w.undo, { id: 7, technician: "Ryan Gloria", secondaryTech: "Jose Garcia" });
+  }
+  assert.deepEqual(moveWrites(second, second.tech, NO_TECH), { forward: { id: 7, secondaryTech: null }, undo: { id: 7, secondaryTech: "Jose Garcia" } });
+  const [solo] = collectDayStops({ installs: [], pms: [], services: [ticket({ id: 8 })], tlcs: [] }, DAY);
+  assert.deepEqual(moveWrites(solo, solo.tech, "Jose Garcia").undo, { id: 8, technician: "Ryan Gloria", secondaryTech: null });
+  const [visit] = collectDayStops({ installs: [], pms: [pm({ id: 9 })], services: [], tlcs: [] }, DAY);
+  assert.deepEqual(moveWrites(visit, visit.tech, NO_TECH), { forward: { id: 9, technician: null }, undo: { id: 9, technician: "Ryan Gloria" } });
 });

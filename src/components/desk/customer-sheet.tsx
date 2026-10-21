@@ -14,6 +14,7 @@ import { getMyAccess } from "@/lib/ops/access";
 import { formatShortDate, money, isOpenInstall } from "@/lib/ops/clock";
 import type { Install, Recipe } from "@/lib/ops/types";
 import { ComboField } from "@/components/ui/combo-field";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -138,7 +139,7 @@ export function CustomerHistorySheet({
       void qc.invalidateQueries({ queryKey: ["customer-address"] });
       void qc.invalidateQueries({ queryKey: ["account-geo"] });
       if (row.merged || row.id !== customerId) {
-        void navigate({ to: "/customers", search: { open: row.id }, replace: true });
+        void navigate({ to: "/customers", search: (prev) => ({ ...prev, open: row.id }), replace: true });
       }
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save name"),
@@ -257,6 +258,7 @@ export function CustomerHistorySheet({
                   )}
                   <AccountNumberField id={data.id} value={data.accountNumber ?? null} canEdit={!!data.canEditAccountNumber} />
                   <AccountMarksForm id={data.id} aviKatz={data.aviKatz} accountRep={data.accountRep} />
+                  <AssignedSalesReps reps={data.salesReps ?? []} />
                   {!data.accountRep && data.repFlag ? (
                     <p className="mt-1 text-xs font-medium text-warning" data-testid="rep-flag">
                       Rep left blank: {data.repFlag}.
@@ -689,6 +691,41 @@ function CleanListBlock({ name, cleanList }: { name: string; cleanList: { netsui
   );
 }
 
+function AssignedSalesReps({
+  reps,
+}: {
+  reps: { name: string; role: string | null; pct: number | null; primary: boolean }[];
+}) {
+  return (
+    <section className="mt-4" data-testid="assigned-sales-reps">
+      <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Assigned Sales Reps</h3>
+      <p className="mt-1 text-xs text-muted-foreground">From NetSuite. Read-only here.</p>
+      {reps.length ? (
+        <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
+          {reps.map((r) => (
+            <li key={`${r.name}-${r.role ?? ""}-${r.pct ?? ""}`} className="flex items-center gap-3 px-3 py-2 text-sm" data-testid="assigned-sales-rep">
+              <span className="min-w-0 flex-1">
+                <span className="font-medium">{r.name}</span>
+                {r.role ? <span className="text-muted-foreground"> · {r.role}</span> : null}
+              </span>
+              {r.primary ? (
+                <Badge variant="outline" size="tight">
+                  Primary
+                </Badge>
+              ) : null}
+              {r.pct != null && Number.isFinite(r.pct) ? (
+                <span className="tabular text-muted-foreground">{String(r.pct).replace(/\.0+$/, "")}%</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">No sales reps imported for this account yet.</p>
+      )}
+    </section>
+  );
+}
+
 function AccountMarksForm({
   id,
   aviKatz,
@@ -711,8 +748,8 @@ function AccountMarksForm({
       toast.success(
         vars.accountRep !== undefined
           ? vars.accountRep
-            ? `${vars.accountRep} saved as the rep on this account`
-            : "Rep cleared on this account"
+            ? `${vars.accountRep} saved as the primary sales rep on this account`
+            : "Primary sales rep cleared on this account"
           : "Account updated",
       );
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
@@ -728,7 +765,7 @@ function AccountMarksForm({
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
       <div>
         <RepSelect
-          label="Rep"
+          label="Primary Sales Rep"
           value={rep}
           onChange={(v) => {
             setRep(v);
@@ -737,7 +774,7 @@ function AccountMarksForm({
         />
         {rep ? (
           <p className="mt-1 text-[11px] text-muted-foreground">
-            Shows on this account's calls, PMs, installs, and deals that don't have their own rep.
+            The one rep installs, reminders, and the board use when a record doesn’t have its own.
           </p>
         ) : null}
       </div>

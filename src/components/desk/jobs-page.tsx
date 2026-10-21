@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { useBackTo } from "@/lib/ops/search-params";
 import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useQuery } from "@tanstack/react-query";
-import { listJobs } from "@/lib/ops/api";
+import { findWoTickets, listJobs } from "@/lib/ops/api";
+import { withWoMatches, woBoardName, woSearchKey } from "@/lib/ops/wo-search";
+import { OpenLink } from "./open-link";
 import { getMyAccess } from "@/lib/ops/access";
 import { BillingExportButton, ItemListImportButton } from "./billing-tools";
 import { URGENCIES, URGENCY_RANK } from "@/lib/ops/lookups";
@@ -32,12 +35,15 @@ export function JobsPage({
   title,
   lede,
   initialOpen,
+  from,
   initialTab,
 }: {
   kind: "service" | "tlc";
   title: string;
   lede: string;
   initialOpen?: number;
+  /** The page that opened the ticket; closing it goes back there. */
+  from?: string;
   /** A ping or note notification opens its ticket on the Ping tab. */
   initialTab?: "ping";
 }) {
@@ -53,6 +59,7 @@ export function JobsPage({
   const [urgency, setUrgency] = useState("");
   const [view, setView] = useState<"active" | "flagged" | "unassigned" | "complete" | "all">("active");
   const [openId, setOpenId] = useState<number | null>(initialOpen ?? null);
+  const back = useBackTo(from);
   const [openTab, setOpenTab] = useState<"ping" | undefined>(initialOpen != null ? initialTab : undefined);
   useEffect(() => {
     if (initialOpen != null) {
@@ -95,6 +102,8 @@ export function JobsPage({
           .some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
+    // A WO number finds its ticket in any status, view or filter.
+    list = withWoMatches(list, jobs.data ?? [], q);
     return sortDesk(list, sort, {
       date: (j) => j.received ?? j.scheduled,
       name: (j) => j.customer,
@@ -105,6 +114,15 @@ export function JobsPage({
     });
   }, [jobs.data, q, tech, urgency, view, sort, filterMine, matchMine, role]);
 
+  // The same WO on another board (PM, Install, the other ticket list): say where it is.
+  const woKey = woSearchKey(q);
+  const elsewhere = useQuery({
+    // Under "jobs" so a Corrigo import refreshes it.
+    queryKey: ["jobs", "wo-elsewhere", woKey],
+    queryFn: () => findWoTickets({ data: { q } }),
+    enabled: !!woKey,
+  });
+  const otherBoards = woKey ? (elsewhere.data ?? []).filter((h) => h.entityType !== kind) : [];
   const liveJobs = (jobs.data ?? []).filter((j) => !j.duplicateOf);
   const activeCount = liveJobs.filter((j) => isOpenCall(j)).length;
   const flagCount = (jobs.data ?? []).filter(
@@ -197,6 +215,18 @@ export function JobsPage({
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0 max-sm:w-full" />
       </ListToolbar>
 
+      {otherBoards.length ? (
+        <ul className="mt-3 space-y-1 text-sm" data-testid="wo-other-boards">
+          {otherBoards.map((h) => (
+            <li key={`${h.entityType}-${h.id}`}>
+              <OpenLink entityType={h.entityType} id={h.id} className="text-primary underline-offset-2 hover:underline">
+                {h.wo} is on {woBoardName(h.entityType)} · {h.status}{h.customer ? ` · ${h.customer}` : ""}
+              </OpenLink>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
         <div className="min-w-0">
         <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_5.5rem_8.5rem_4.5rem_4.5rem_7rem] gap-3 border-b border-border px-4 py-2 text-[11px] font-medium tracking-wide text-muted-foreground uppercase xl:grid">
@@ -236,7 +266,10 @@ export function JobsPage({
         </div>
       </div>
 
-      <JobSheet id={openId} initialTab={openTab} onClose={() => setOpenId(null)} />
+      <JobSheet id={openId} initialTab={openTab} onClose={() => {
+          setOpenId(null);
+          back();
+        }} />
       <NewJobDialog
         kind={kind}
         open={create}

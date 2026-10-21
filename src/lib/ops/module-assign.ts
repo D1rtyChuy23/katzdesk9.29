@@ -8,6 +8,9 @@ import { eversysFamily, isEversysMachine, moduleAccount, moduleAvailability } fr
 import { flagOn } from "@/lib/ops/flag";
 import { notifyAdminsModuleReturn } from "@/lib/ops/notify";
 import { swapError, trail, workError, workTotals, type ModuleStop, type ModuleWork, type StopKind } from "@/lib/ops/module-history";
+import { moduleAssignmentBlock, modulesNotTakenReason, normalizeConfig } from "@/lib/ops/pm-runbook";
+import { optionsKeyFor } from "@/lib/ops/pm-runbook-units";
+import { runbookForPiece } from "@/lib/ops/runbooks";
 
 export type EversysUnit = {
   id: number;
@@ -16,6 +19,8 @@ export type EversysUnit = {
   serial: string | null;
   family: string | null;
   label: string;
+  /** Saved runbook options (serial key, else acct:<id>). Empty when none are saved. */
+  options: Record<string, string>;
   modules: { id: number; moduleId: string; moduleType: string | null }[];
 };
 
@@ -83,6 +88,28 @@ function unitLabel(model: string, serial: string | null) {
   return `${model}${serial?.trim() ? ` · SN ${serial.trim()}` : ""}`;
 }
 
+function optionBag(value: unknown): Record<string, string> {
+  const x = typeof value === "string" ? JSON.parse(value) : value;
+  if (!x || typeof x !== "object" || Array.isArray(x)) return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(x as Record<string, unknown>)) {
+    if (typeof v === "string") out[k] = v;
+  }
+  return out;
+}
+
+async function savedUnitOptions(sql: Sql, serial: string | null, unitId: number): Promise<Record<string, string>> {
+  const serialKeyValue = optionsKeyFor(serial);
+  const keys = [serialKeyValue, `acct:${unitId}`].filter((k): k is string => !!k);
+  const rows = await sql.query<{ unit_key: string; options: unknown }>(
+    "select unit_key, options from unit_runbook_options where unit_key = any($1::text[])",
+    [keys],
+  );
+  const bySerial = serialKeyValue ? rows.find((r) => r.unit_key === serialKeyValue) : undefined;
+  const byAccount = rows.find((r) => r.unit_key === `acct:${unitId}`);
+  return optionBag(bySerial?.options ?? byAccount?.options);
+}
+
 async function unitsFor(sql: Sql, customer: string): Promise<EversysUnit[]> {
   const rows = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null }>(
     `select id, customer, catalog_model, equipment_name, serial
@@ -97,7 +124,7 @@ async function unitsFor(sql: Sql, customer: string): Promise<EversysUnit[]> {
     "select id, module_id, module_type, assigned_unit_id from modules where assigned_unit_id = any($1)",
     [units.map((u) => u.id)],
   );
-  return units.map((u) => {
+  return Promise.all(units.map(async (u) => {
     const model = isEversysMachine(u.catalog_model) ? u.catalog_model : u.equipment_name;
     return {
       id: u.id,
@@ -105,12 +132,13 @@ async function unitsFor(sql: Sql, customer: string): Promise<EversysUnit[]> {
       model,
       serial: u.serial,
       family: eversysFamily(model),
+      options: await savedUnitOptions(sql, u.serial, u.id),
       label: unitLabel(model, u.serial),
       modules: mods
         .filter((m) => Number(m.assigned_unit_id) === u.id)
         .map((m) => ({ id: m.id, moduleId: m.module_id, moduleType: m.module_type })),
     };
-  });
+  }));
 }
 
 /** Eversys machines on one account (from its equipment list), with the modules already on each. */
@@ -151,18 +179,30 @@ export const addEversysUnit = createServerFn({ method: "POST" })
     if (!isEversysMachine(model)) throw new Error("Pick an Eversys model (Cameo, Enigma, e'4, Legacy…).");
     const serial = data.serial?.trim() || null;
     const key = serial ? serialKey(serial) : null;
+    let inserted: { id: number }[] = [];
     if (key) {
-      const dup = await sql.query<{ customer: string }>(
-        "select customer from account_equipment where serial_key = $1 limit 1",
+      const dup = await sql.query<{ id: number; customer: string }>(
+        "select id, customer from account_equipment where serial_key = $1 limit 1",
         [key],
       );
-      if (dup[0]) throw new Error(`Serial ${serial} is already on ${dup[0].customer}.`);
+      if (dup[0] && dup[0].customer.trim().toLowerCase() !== customer.trim().toLowerCase()) {
+        throw new Error(`Serial ${serial} is already on ${dup[0].customer}.`);
+      }
+      // That serial on this account, or a unit of this model with no serial yet, is this unit: no second row.
+      const { accountUnitWithSerial } = await import("@/lib/ops/account-unit");
+      const have = await accountUnitWithSerial(sql, customer, model, serial);
+      if (have && !serialKey(have.serial)) {
+        await sql.query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [have.id, serial, key]);
+      }
+      if (have) inserted = [{ id: have.id }];
     }
-    const inserted = await sql.query<{ id: number }>(
-      `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key)
-       values ($1, $2, $2, $3, $4) returning id`,
-      [customer, model, serial, key],
-    );
+    if (!inserted.length) {
+      inserted = await sql.query<{ id: number }>(
+        `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key)
+         values ($1, $2, $2, $3, $4) returning id`,
+        [customer, model, serial, key],
+      );
+    }
     const who = await actorOf(sql, context.userId);
     const acct = await sql.query<{ id: number }>(
       "select id from directory_customers where archived = false and lower(name) = lower($1) limit 1",
@@ -199,11 +239,13 @@ export const assignModule = createServerFn({ method: "POST" })
       await sql.query<{
         id: number;
         module_id: string;
+        module_type: string | null;
+        platform: string | null;
         status: string;
         location: string | null;
         assigned_customer: string | null;
         return_pending: boolean;
-      }>("select id, module_id, status, location, assigned_customer, return_pending from modules where id = $1", [data.id])
+      }>("select id, module_id, module_type, platform, status, location, assigned_customer, return_pending from modules where id = $1", [data.id])
     )[0];
     if (!mod) throw new Error("Module not found");
     const current = moduleAccount({ status: mod.status, assignedCustomer: mod.assigned_customer, location: mod.location });
@@ -211,6 +253,17 @@ export const assignModule = createServerFn({ method: "POST" })
     if (flagOn(mod.return_pending)) throw new Error("This module is waiting on a return approval.");
     const unit = (await unitsFor(sql, customer)).find((u) => u.id === data.unitId);
     if (!unit) throw new Error("Pick an Eversys unit on that account.");
+    const hit = runbookForPiece(unit.model);
+    if (hit) {
+      const refused = modulesNotTakenReason(hit.runbook.def, hit.model, hit.runbook.modules);
+      if (refused) throw new Error(refused);
+    }
+    if (hit?.model && hit.runbook.modules) {
+      const saved = await savedUnitOptions(sql, unit.serial, unit.id);
+      const config = normalizeConfig(hit.runbook.def, { ...saved, model: hit.model });
+      const reason = moduleAssignmentBlock(hit.runbook.def, config, mod.module_type, mod.platform, hit.runbook.platforms, Object.keys(saved));
+      if (reason) throw new Error(reason);
+    }
     const who = await actorOf(sql, context.userId);
     await sql.query(
       `update modules set

@@ -84,7 +84,7 @@ export function NearbyAccounts({ accountId, name }: { accountId: number; name: s
                 key={item.id}
                 account={item}
                 miles={miles}
-                onOpen={() => void navigate({ to: "/customers", search: { open: item.id }, replace: true })}
+                onOpen={() => void navigate({ to: "/customers", search: (prev) => ({ ...prev, open: item.id }), replace: true })}
               />
             ))}
             <ShowMoreButton as="li" remaining={remaining} onClick={showMore} label={remaining === 1 ? "account" : "accounts"} />

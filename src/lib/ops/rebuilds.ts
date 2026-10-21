@@ -4,6 +4,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { todayChicago } from "@/lib/ops/clock";
 import { serialKey } from "@/lib/ops/serial-pull";
+import { LOCKED_BY_ASSIGNED } from "@/lib/ops/equipment-lock-rules";
 import { loadTechs } from "@/lib/ops/roster";
 import { loadAccountMarks, isAviKatz, accountRepFor } from "@/lib/ops/reps";
 import {
@@ -659,14 +660,18 @@ export const pullRebuildSerial = createServerFn({ method: "POST" })
       ]);
       throw new Error(`${notice} Confirm reuse or cancel.`);
     }
+    const { assertAssetUnlocked } = await import("@/lib/ops/equipment-lock");
+    await assertAssetUnlocked(sql, hit.assetId, { release: true });
     await sql.query(
       `update assets set
          status = 'assigned',
          sold_to = $2,
          purpose = 'In-house rebuild',
+         locked_at = now(),
+         locked_by = $3,
          updated_at = now()
        where id = $1`,
-      [hit.assetId, cur.account],
+      [hit.assetId, cur.account, LOCKED_BY_ASSIGNED],
     );
     const extra = !hit.available && hit.soldTo && !sameAccount ? ` (was ${hit.soldTo})` : "";
     const notice = `Serial ${hit.serial} pulled from warehouse · ${hit.model} · ${hit.location}${extra}`;

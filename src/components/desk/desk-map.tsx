@@ -253,6 +253,7 @@ function MapSurface({
   onTiles,
   pins,
   route,
+  routeDashed = true,
   selectedId,
   onPinClick,
 }: {
@@ -263,6 +264,8 @@ function MapSurface({
   onTiles: (ok: boolean) => void;
   pins: readonly MapPin[];
   route?: readonly LatLng[];
+  /** Dashed for a straight-line guess. Solid when the line follows roads. */
+  routeDashed?: boolean;
   selectedId?: string | number | null;
   onPinClick?: (pin: MapPin) => void;
 }) {
@@ -676,7 +679,17 @@ function MapSurface({
     return (
       <>
         {line ? (
-          <polyline points={line} fill="none" stroke="var(--color-primary)" strokeWidth={3} strokeOpacity={0.75} strokeLinejoin="round" strokeDasharray="6 5" vectorEffect="non-scaling-stroke" />
+          <polyline
+            points={line}
+            fill="none"
+            stroke="var(--color-primary)"
+            strokeWidth={3}
+            strokeOpacity={0.85}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            strokeDasharray={routeDashed ? "6 5" : undefined}
+            vectorEffect="non-scaling-stroke"
+          />
         ) : null}
         {visible.map(({ p, xy }) => {
           const selected = p.id === selectedId;
@@ -735,7 +748,7 @@ function MapSurface({
         })}
       </>
     );
-  }, [pins, route, selectedId, clickable, base, width, height, engine]);
+  }, [pins, route, routeDashed, selectedId, clickable, base, width, height, engine]);
 
   // Where `base`'s center is on screen now, and how much the view has zoomed since.
   const k = 2 ** (cam.zoom - base.zoom);
@@ -791,6 +804,7 @@ function MapSurface({
 export function DeskMap({
   pins,
   route,
+  routeDashed = true,
   selectedId,
   onPinClick,
   fitKey,
@@ -803,6 +817,7 @@ export function DeskMap({
 }: {
   pins: readonly MapPin[];
   route?: readonly LatLng[];
+  routeDashed?: boolean;
   selectedId?: string | number | null;
   onPinClick?: (pin: MapPin) => void;
   fitKey?: string;
@@ -875,6 +890,7 @@ export function DeskMap({
           onTiles={onTiles}
           pins={pins}
           route={route}
+          routeDashed={routeDashed}
           selectedId={selectedId}
           onPinClick={onPinClick}
         />

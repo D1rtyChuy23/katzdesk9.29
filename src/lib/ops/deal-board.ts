@@ -171,6 +171,24 @@ export function lockConfirmed<T extends Pick<BoardMachine, "uid">>(incoming: T[]
   return out;
 }
 
+/** The released ties stored on a deal (a JSON list), plus any released in this save. */
+export function releasedUids(stored: string | null | undefined, more: Iterable<string> = []): Set<string> {
+  let list: unknown = [];
+  try {
+    list = JSON.parse(stored || "[]");
+  } catch {
+    list = [];
+  }
+  const out = new Set<string>(Array.isArray(list) ? list.filter((u): u is string => typeof u === "string" && !!u) : []);
+  for (const u of more) if (u) out.add(u);
+  return out;
+}
+
+/** A row the owner took off the deal stays off: a window opened before that still sends it with its tie. */
+export function dropReleased<T extends Pick<BoardMachine, "uid">>(incoming: T[], released: Set<string>): T[] {
+  return incoming.filter((m) => !m.uid || !released.has(m.uid));
+}
+
 export type ProjectStatus = "In Prep" | "Ready" | "Installed";
 
 export function projectStatus(p: { installed: boolean; equipStatus: string | null | undefined; overall: InspectionOverall | null | undefined }): ProjectStatus {

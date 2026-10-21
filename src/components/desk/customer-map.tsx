@@ -1,5 +1,6 @@
 import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useFromHere } from "@/lib/ops/search-params";
 import { useQuery } from "@tanstack/react-query";
 import { Globe, MapPinOff, Navigation, RotateCcw, Store, X } from "lucide-react";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
@@ -212,7 +213,14 @@ function rowWork(a: AccountGeo): { text: string; tone: "danger" | "warn" } | nul
  * the Out of Network service providers as diamonds (Show: Customers, Service Providers or Both), with a side panel
  * that shows the picked pin and a list of the filtered accounts (needs attention first) or providers (A to Z).
  */
-export function CustomerMap() {
+export function CustomerMap({
+  accountId = null,
+  onSelectAccount,
+}: {
+  /** From `/map?account=`. A list click must not open Customers. */
+  accountId?: number | null;
+  onSelectAccount?: (id: number | null) => void;
+} = {}) {
   const geo = useGeoIndex();
   const { filterMine, matchMine, role } = useMyView();
   const scoped = filterMine && role === "sales";
@@ -234,6 +242,9 @@ export function CustomerMap() {
   const [focus, setFocus] = useState<LatLng | null>(null);
   const mapBox = useRef<HTMLDivElement>(null);
   const panelBox = useRef<HTMLElement>(null);
+  const listPane = useRef<HTMLDivElement>(null);
+  /** Last account written to the URL, so a list click does not scroll the list again when the URL catches up. */
+  const appliedAccount = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -260,6 +271,29 @@ export function CustomerMap() {
 
   const { accounts, byId, colorOf } = geo;
   const data = geo.data;
+
+  // A refresh or Back with `?account=` selects that account without touching filters. A list click sets
+  // `appliedAccount` first, so this does not move the list when the URL catches up.
+  useEffect(() => {
+    if (!data) return;
+    if (accountId == null) {
+      if (appliedAccount.current != null) {
+        appliedAccount.current = null;
+        setSelectedId(null);
+      }
+      return;
+    }
+    if (appliedAccount.current === accountId) return;
+    const a = byId.get(accountId);
+    if (!a) return;
+    appliedAccount.current = accountId;
+    setProviderPick(null);
+    setSelectedId(a.id);
+    const p = pointOf(a);
+    if (p) setFocus({ lat: p.lat, lng: p.lng });
+    const row = listPane.current?.querySelector<HTMLElement>(`[data-map-account="${a.id}"]`);
+    row?.scrollIntoView({ block: "nearest" });
+  }, [accountId, data, byId]);
 
   // Out of Network service providers with a pinned address: their own layer. The account filters never touch it; the
   // search box searches it (name or address) only when the map shows service providers alone.
@@ -448,21 +482,34 @@ export function CustomerMap() {
   }
 
   function pick(a: AccountGeo, fromList: boolean) {
+    const top = listPane.current?.scrollTop;
     setProviderPick(null);
     setSelectedId(a.id);
+    appliedAccount.current = a.id;
     const p = pointOf(a);
-    if (!fromList || !p) return;
-    // A new focus object pans the map, so tapping the same row again brings the account back after the map moved.
-    setFocus({ lat: p.lat, lng: p.lng });
-    showMapAfterListPick();
+    // A new focus object pans the map (and zooms in if the view is wide), including a second tap on the same row.
+    if (p) setFocus({ lat: p.lat, lng: p.lng });
+    if (fromList) showMapAfterListPick();
+    onSelectAccount?.(a.id);
+    if (top != null) requestAnimationFrame(() => {
+      if (listPane.current) listPane.current.scrollTop = top;
+    });
   }
 
   function pickProvider(p: ProviderGeo, fromList: boolean) {
     setSelectedId(null);
+    appliedAccount.current = null;
+    onSelectAccount?.(null);
     setProviderPick(p.addressId);
     if (!fromList) return;
     setFocus({ lat: p.lat, lng: p.lng });
     showMapAfterListPick();
+  }
+
+  function closeAccount() {
+    appliedAccount.current = null;
+    setSelectedId(null);
+    onSelectAccount?.(null);
   }
 
   // No data yet: loading (also what the server renders, so the first client render matches it).
@@ -669,7 +716,7 @@ export function CustomerMap() {
           {selectedProvider ? (
             <ProviderCard provider={selectedProvider} onClose={() => setProviderPick(null)} />
           ) : selected ? (
-            <AccountCard account={selected} scoped={data.scoped} type={colorBy === "type" ? accountType(selected) : null} onClose={() => setSelectedId(null)} />
+            <AccountCard account={selected} scoped={data.scoped} type={colorBy === "type" ? accountType(selected) : null} onClose={closeAccount} />
           ) : (
             <p className="border-b border-border px-4 py-3 text-xs text-muted-foreground">
               {listKind === "providers" ? "Tap a pin or a service provider below to see its details." : "Tap a pin or an account below to see its details."}
@@ -699,7 +746,7 @@ export function CustomerMap() {
             </div>
           )}
 
-          <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+          <div ref={listPane} className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
             {listKind === "providers" ? (
               providerGeo.isError ? (
                 <div className="px-4 py-8 text-center text-sm text-muted-foreground" role="alert" data-testid="map-providers-error">
@@ -778,10 +825,14 @@ function AccountRow({ account: a, color, selected, onPick }: { account: AccountG
     <li className="border-b border-border last:border-b-0">
       <button
         type="button"
-        onClick={onPick}
+        onClick={(e) => {
+          e.preventDefault();
+          onPick();
+        }}
         aria-current={selected ? "true" : undefined}
         className={cn("desk-flat flex min-h-11 w-full items-start gap-2.5 px-4 py-2.5 text-left hover:bg-muted/60", selected && "bg-muted")}
         data-testid="map-account-row"
+        data-map-account={a.id}
       >
         {hasPin ? <Swatch color={color} hollow={a.quality === "approx"} className="mt-1.5" /> : <MapPinOff className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />}
         {/* On a phone the lines wrap instead of cutting off: the row has the full width there. */}
@@ -836,6 +887,7 @@ function ProviderRow({ provider: p, selected, onPick }: { provider: ProviderGeo;
 
 /** The picked account: who, where, how good the pin is, what is open, and the two ways out. */
 function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGeo; scoped: boolean; type: AccountType | null; onClose: () => void }) {
+  const fromMap = useFromHere("/customers");
   const point = pointOf(a);
   const address = shownAddress(a);
   const url = directionsUrl({ point, quality: a.quality, address: a.address });
@@ -882,7 +934,7 @@ function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGe
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Button asChild size="sm" className="h-9 px-3">
-          <Link to="/customers" search={{ open: a.id }} data-testid="map-open-account">
+          <Link to="/customers" search={{ open: a.id, from: fromMap }} data-testid="map-open-account">
             <Store />
             Open Account
           </Link>
@@ -914,6 +966,7 @@ const PHONE_TAP = "max-sm:inline-block max-sm:py-2";
  * Directions (only to a street match) and a way into the Out of Network page with the provider open.
  */
 function ProviderCard({ provider: p, onClose }: { provider: ProviderGeo; onClose: () => void }) {
+  const fromMapToNetwork = useFromHere("/network");
   const point = { lat: p.lat, lng: p.lng };
   const drivable = canDriveTo(p.quality);
   const url = drivable ? directionsUrl({ point, quality: p.quality }) : null;
@@ -993,7 +1046,7 @@ function ProviderCard({ provider: p, onClose }: { provider: ProviderGeo; onClose
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Button asChild size="sm" className="h-9 px-3">
-          <Link to="/network" search={{ open: p.providerId }} data-testid="map-open-provider">
+          <Link to="/network" search={{ open: p.providerId, from: fromMapToNetwork }} data-testid="map-open-provider">
             <Globe />
             Open In Out Of Network
           </Link>

@@ -111,7 +111,7 @@ export type TicketCharges = {
   nsSo: string | null;
   billedAt: string | null;
   /** Each line carries its part's photo reference when the item is on the item list. */
-  lines: (ChargeLine & { part: PartRef | null })[];
+  lines: (ChargeLine & { id: number; part: PartRef | null })[];
   /** The one discount on this ticket, or null. */
   discount: Discount | null;
   /** The lines added up, before the discount. */
@@ -139,6 +139,7 @@ type ChargeRow = {
   qty: string;
   rate: string;
   kind: ChargeKind;
+  source_key: string | null;
   pid: number | null;
   sku: string | null;
   mfr_part: string | null;
@@ -158,7 +159,7 @@ type ChargeRow = {
 
 async function chargeRows(sql: Sql, jobId: number): Promise<ChargeRow[]> {
   return sql.query<ChargeRow>(
-    `select c.id, c.item, c.description, c.qty, c.rate, c.kind,
+    `select c.id, c.item, c.description, c.qty, c.rate, c.kind, c.source_key,
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
             case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version,
             p.list_price as p_list, p.cost as p_cost,
@@ -221,11 +222,13 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
   if (!job) throw new Error("That ticket is no longer on the list.");
   const rows = await chargeRows(sql, jobId);
   const lines = rows.map((r) => ({
+    id: Number(r.id),
     item: r.item,
     description: r.description ?? "",
     qty: Number(r.qty),
     rate: Number(r.rate),
     kind: r.kind,
+    sourceKey: r.source_key,
     part: r.pid == null ? null : { id: Number(r.pid), sku: r.sku ?? "", mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
   }));
   const discount: Discount | null =
@@ -330,10 +333,42 @@ const lineSchema = z.object({
   description: z.string().max(500),
   qty: z.union([z.number(), z.string()]),
   rate: z.union([z.number(), z.string()]),
+  sourceKey: z.string().max(400).regex(/^(pmkit|mp):/).nullable().optional(),
 });
 
 export type ChargeLinesInput = z.input<typeof lineSchema>[];
 export type DiscountInput = { kind: string; value: string | number } | null | undefined;
+
+/**
+ * One statement: lock the ticket, replace its charge lines, and write the P.O. and discount together.
+ * source_key rides in $12. There is no unique index on it — the delete and the insert are one statement,
+ * and a second save of the same keys must succeed. Duplicate keys are refused in checkCharges instead.
+ */
+export function replaceTicketChargesSql(): string {
+  return `with j as (
+       select s.id
+         from service_jobs s
+        where s.id = $1
+          and s.duplicate_of is null
+          and nullif(btrim(s.ns_so), '') is null
+          and ($7::boolean or coalesce((select array_agg(c.id order by c.id) from ticket_charges c where c.job_id = s.id), '{}') = $8::int[])
+        for update
+     ), d as (
+       delete from ticket_charges c using j where c.job_id = j.id
+     ), ins as (
+       insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort)
+       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, nullif(btrim(t.source_key), ''), t.ord
+         from j
+         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $12::text[]) with ordinality
+              as t(item, description, qty, rate, kind, source_key, ord)
+       returning ticket_charges.id
+     )
+     update service_jobs s
+        set po = $9, discount_kind = $10, discount_value = $11, updated_at = now()
+       from j
+      where s.id = j.id
+     returning s.id`;
+}
 
 /**
  * Replace a ticket's charge lines (and P.O. and discount when given). One path for the Charges panel and the
@@ -344,8 +379,10 @@ export async function writeTicketCharges(
   sql: Sql,
   jobId: number,
   userId: string,
-  input: { po?: string; lines: ChargeLinesInput; discount?: DiscountInput },
+  input: { po?: string; lines: ChargeLinesInput; discount?: DiscountInput; lineIds?: number[] },
 ): Promise<void> {
+  const merged = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
+  if (merged?.duplicate_of) throw new Error(`This ticket was merged into #${merged.duplicate_of}. Add charges there.`);
   const cur = await loadCharges(sql, jobId);
   if (cur.state === "billed") throw new Error(`This ticket is already billed on ${cur.nsSo}. Clear the Sales Order number to change the charges.`);
   const problems = checkCharges(input.lines);
@@ -369,23 +406,34 @@ export async function writeTicketCharges(
     qty: cleanQty(l.qty)!,
     rate: cleanRate(l.rate)!,
     kind: kinds.get(items[i].toLowerCase()) ?? kindForItem(items[i]),
+    sourceKey: String(l.sourceKey ?? "").trim(),
   }));
+  const checkIds = input.lineIds != null;
+  const lineIds = input.lineIds == null ? [] : [...input.lineIds].map(Number).sort((a, b) => a - b);
+  const po = input.po === undefined ? cur.po.trim() || null : input.po.trim() || null;
 
-  // One statement: the old lines and the new ones change together or not at all.
-  await sql.query(
-    `with d as (delete from ticket_charges where job_id = $1)
-     insert into ticket_charges (job_id, item, description, qty, rate, kind, sort)
-     select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
-       from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
-            as t(item, description, qty, rate, kind, ord)`,
-    [jobId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
-  );
-  await sql.query("update service_jobs set po = $2, discount_kind = $3, discount_value = $4, updated_at = now() where id = $1", [
-    jobId,
-    input.po === undefined ? cur.po.trim() || null : input.po.trim() || null,
-    typed.discount?.kind ?? null,
-    typed.discount?.value ?? null,
-  ]);
+  // One statement: the ticket is locked, and the old lines, the new lines, and the P.O. change together or not at all.
+  const saved = await sql.query<{ id: number }>(replaceTicketChargesSql(), [
+      jobId,
+      lines.map((l) => l.item),
+      lines.map((l) => l.description),
+      lines.map((l) => l.qty),
+      lines.map((l) => l.rate),
+      lines.map((l) => l.kind),
+      !checkIds,
+      lineIds,
+      po,
+      typed.discount?.kind ?? null,
+      typed.discount?.value ?? null,
+      lines.map((l) => l.sourceKey),
+    ]);
+  if (!saved[0]) {
+    const row = (await sql.query<{ duplicate_of: number | null; ns_so: string | null }>("select duplicate_of, ns_so from service_jobs where id = $1", [jobId]))[0];
+    if (row?.duplicate_of) throw new Error(`This ticket was merged into #${row.duplicate_of}. Add charges there.`);
+    const so = String(row?.ns_so ?? "").trim();
+    if (so) throw new Error(`This ticket is already billed on ${so}. Clear the Sales Order number to change the charges.`);
+    throw new Error("These charges changed since you opened them. Reload and try again.");
+  }
   const after = applyDiscount(chargesTotal(lines), typed.discount);
   await logJob(
     sql,
@@ -403,21 +451,40 @@ export async function loadTicketCharges(sql: Sql, jobId: number): Promise<Ticket
 /** Replace the charge lines and P.O. on a ticket. A ticket that is already billed is not changed. */
 export const saveTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { jobId: number; po: string; lines: z.input<typeof lineSchema>[]; discount?: { kind: string; value: string | number } | null }) =>
+  .validator((d: { jobId: number; po: string; lines: z.input<typeof lineSchema>[]; lineIds: number[]; discount?: { kind: string; value: string | number } | null }) =>
     z
       .object({
         jobId: z.number().int().positive(),
         po: z.string().max(120),
         lines: z.array(lineSchema).max(200),
+        lineIds: z.array(z.number().int().positive()).max(200),
         discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<TicketCharges> => {
     const sql = await ready();
-    await writeTicketCharges(sql, data.jobId, context.userId, { po: data.po, lines: data.lines, discount: data.discount });
+    await writeTicketCharges(sql, data.jobId, context.userId, { po: data.po, lines: data.lines, lineIds: data.lineIds, discount: data.discount });
     return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
   });
+
+/** Record or clear the NetSuite Sales Order. Setting a number on a merged ticket is refused; clearing is allowed. */
+export async function recordTicketSalesOrder(sql: Sql, jobId: number, userId: string, nsSo: string | null): Promise<void> {
+  const so = cleanSalesOrder(nsSo);
+  const saved = await sql.query<{ id: number }>(
+    `update service_jobs set ns_so = $2, billed_at = case when $2::text is null then null else now() end, updated_at = now()
+      where id = $1 and ($2::text is null or duplicate_of is null)
+      returning id`,
+    [jobId, so],
+  );
+  if (!saved[0]) {
+    const dup = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
+    if (dup?.duplicate_of) throw new Error(`This ticket was merged into #${dup.duplicate_of}. Enter the Sales Order there.`);
+    throw new Error("That ticket is no longer on the list.");
+  }
+  await logJob(sql, jobId, userId, so ? `billed on ${so}` : "cleared Sales Order number");
+  await storeInvoicedProfit(sql, jobId, !!so);
+}
 
 /** Record the NetSuite Sales Order the billing script made for this ticket. Blank clears it. */
 export const setTicketSalesOrder = createServerFn({ method: "POST" })
@@ -427,13 +494,7 @@ export const setTicketSalesOrder = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<TicketCharges> => {
     const sql = await ready();
-    const so = cleanSalesOrder(data.nsSo);
-    await sql.query("update service_jobs set ns_so = $2, billed_at = case when $2::text is null then null else now() end, updated_at = now() where id = $1", [
-      data.jobId,
-      so,
-    ]);
-    await logJob(sql, data.jobId, context.userId, so ? `billed on ${so}` : "cleared Sales Order number");
-    await storeInvoicedProfit(sql, data.jobId, !!so);
+    await recordTicketSalesOrder(sql, data.jobId, context.userId, data.nsSo);
     return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
   });
 
