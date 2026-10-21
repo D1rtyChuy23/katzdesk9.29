@@ -139,6 +139,7 @@ type ChargeRow = {
   qty: string;
   rate: string;
   kind: ChargeKind;
+  source_key: string | null;
   pid: number | null;
   sku: string | null;
   mfr_part: string | null;
@@ -158,7 +159,7 @@ type ChargeRow = {
 
 async function chargeRows(sql: Sql, jobId: number): Promise<ChargeRow[]> {
   return sql.query<ChargeRow>(
-    `select c.id, c.item, c.description, c.qty, c.rate, c.kind,
+    `select c.id, c.item, c.description, c.qty, c.rate, c.kind, c.source_key,
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
             case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version,
             p.list_price as p_list, p.cost as p_cost,
@@ -227,6 +228,7 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
     qty: Number(r.qty),
     rate: Number(r.rate),
     kind: r.kind,
+    sourceKey: r.source_key,
     part: r.pid == null ? null : { id: Number(r.pid), sku: r.sku ?? "", mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
   }));
   const discount: Discount | null =
@@ -331,10 +333,42 @@ const lineSchema = z.object({
   description: z.string().max(500),
   qty: z.union([z.number(), z.string()]),
   rate: z.union([z.number(), z.string()]),
+  sourceKey: z.string().max(400).regex(/^(pmkit|mp):/).nullable().optional(),
 });
 
 export type ChargeLinesInput = z.input<typeof lineSchema>[];
 export type DiscountInput = { kind: string; value: string | number } | null | undefined;
+
+/**
+ * One statement: lock the ticket, replace its charge lines, and write the P.O. and discount together.
+ * source_key rides in $12. There is no unique index on it — the delete and the insert are one statement,
+ * and a second save of the same keys must succeed. Duplicate keys are refused in checkCharges instead.
+ */
+export function replaceTicketChargesSql(): string {
+  return `with j as (
+       select s.id
+         from service_jobs s
+        where s.id = $1
+          and s.duplicate_of is null
+          and nullif(btrim(s.ns_so), '') is null
+          and ($7::boolean or coalesce((select array_agg(c.id order by c.id) from ticket_charges c where c.job_id = s.id), '{}') = $8::int[])
+        for update
+     ), d as (
+       delete from ticket_charges c using j where c.job_id = j.id
+     ), ins as (
+       insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort)
+       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, nullif(btrim(t.source_key), ''), t.ord
+         from j
+         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $12::text[]) with ordinality
+              as t(item, description, qty, rate, kind, source_key, ord)
+       returning ticket_charges.id
+     )
+     update service_jobs s
+        set po = $9, discount_kind = $10, discount_value = $11, updated_at = now()
+       from j
+      where s.id = j.id
+     returning s.id`;
+}
 
 /**
  * Replace a ticket's charge lines (and P.O. and discount when given). One path for the Charges panel and the
@@ -372,37 +406,14 @@ export async function writeTicketCharges(
     qty: cleanQty(l.qty)!,
     rate: cleanRate(l.rate)!,
     kind: kinds.get(items[i].toLowerCase()) ?? kindForItem(items[i]),
+    sourceKey: String(l.sourceKey ?? "").trim(),
   }));
   const checkIds = input.lineIds != null;
   const lineIds = input.lineIds == null ? [] : [...input.lineIds].map(Number).sort((a, b) => a - b);
   const po = input.po === undefined ? cur.po.trim() || null : input.po.trim() || null;
 
   // One statement: the ticket is locked, and the old lines, the new lines, and the P.O. change together or not at all.
-  const saved = await sql.query<{ id: number }>(
-    `with j as (
-       select s.id
-         from service_jobs s
-        where s.id = $1
-          and s.duplicate_of is null
-          and nullif(btrim(s.ns_so), '') is null
-          and ($7::boolean or coalesce((select array_agg(c.id order by c.id) from ticket_charges c where c.job_id = s.id), '{}') = $8::int[])
-        for update
-     ), d as (
-       delete from ticket_charges c using j where c.job_id = j.id
-     ), ins as (
-       insert into ticket_charges (job_id, item, description, qty, rate, kind, sort)
-       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
-         from j
-         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
-              as t(item, description, qty, rate, kind, ord)
-       returning ticket_charges.id
-     )
-     update service_jobs s
-        set po = $9, discount_kind = $10, discount_value = $11, updated_at = now()
-       from j
-      where s.id = j.id
-     returning s.id`,
-    [
+  const saved = await sql.query<{ id: number }>(replaceTicketChargesSql(), [
       jobId,
       lines.map((l) => l.item),
       lines.map((l) => l.description),
@@ -414,8 +425,8 @@ export async function writeTicketCharges(
       po,
       typed.discount?.kind ?? null,
       typed.discount?.value ?? null,
-    ],
-  );
+      lines.map((l) => l.sourceKey),
+    ]);
   if (!saved[0]) {
     const row = (await sql.query<{ duplicate_of: number | null; ns_so: string | null }>("select duplicate_of, ns_so from service_jobs where id = $1", [jobId]))[0];
     if (row?.duplicate_of) throw new Error(`This ticket was merged into #${row.duplicate_of}. Add charges there.`);

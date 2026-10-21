@@ -24,6 +24,8 @@ export type InvoiceLine = {
   kind: ChargeKind;
   /** The part on the item list, for its photo and MPN. Null for labor and for an item that is not on the list. */
   part: PartRef | null;
+  /** Copied from a stacked PM. Ticket invoices only; a PM's own invoice lines do not carry one. */
+  sourceKey?: string | null;
 };
 
 export type InvoiceView = InvoiceTotals & {
@@ -184,7 +186,7 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number): Promise<I
   let discount: Discount | null;
   if (usesTicketCharges(ref.type)) {
     const c = await loadTicketCharges(sql, id);
-    lines = c.lines.map((l) => ({ id: l.id, item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part }));
+    lines = c.lines.map((l) => ({ id: l.id, item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part, sourceKey: l.sourceKey ?? null }));
     discount = c.discount;
   } else {
     lines = h ? await projectLines(sql, h.id) : [];
@@ -219,6 +221,7 @@ const lineInput = z.object({
   description: z.string().max(500),
   qty: z.union([z.number(), z.string().max(20)]),
   rate: z.union([z.number(), z.string().max(20)]),
+  sourceKey: z.string().max(400).regex(/^(pmkit|mp):/).nullable().optional(),
 });
 
 const approveInput = targetInput.extend({

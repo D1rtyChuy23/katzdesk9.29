@@ -19,9 +19,9 @@ import { cn } from "@/lib/utils";
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-type Draft = { id?: number; item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null };
+type Draft = { id?: number; item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null; sourceKey?: string | null };
 
-const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ id: l.id, item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part });
+const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ id: l.id, item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part, sourceKey: l.sourceKey ?? null });
 
 /** The account's saved pin as a point, or null. */
 const billPin = (b: BillTo) => (b.latitude != null && b.longitude != null ? { lat: b.latitude, lng: b.longitude } : null);
@@ -85,7 +85,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
         data: {
           type,
           id,
-          lines: (lines ?? []).map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate })),
+          lines: (lines ?? []).map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, sourceKey: l.sourceKey ?? null })),
           lineIds: loadedIds,
           discount: discValue.trim() ? { kind: discKind, value: discValue } : null,
         },
@@ -259,11 +259,11 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
               {!locked ? (
                 <div className="mt-3 space-y-3" data-testid="invoice-add">
                   <div className="flex flex-wrap gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", kind: "labor", part: null })} data-testid="invoice-add-labor">
+                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: LABOR_ITEM, description: "Service Labor Hour", qty: "1", rate: "150.00", kind: "labor", part: null, sourceKey: null })} data-testid="invoice-add-labor">
                       <Plus className="size-4" />
                       Labor Hour
                     </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: TRIP_ITEM, description: "Trip Charge for Service Call", qty: "1", rate: "150.00", kind: "trip", part: null })} data-testid="invoice-add-trip">
+                    <Button type="button" size="sm" variant="outline" onClick={() => add({ item: TRIP_ITEM, description: "Trip Charge for Service Call", qty: "1", rate: "150.00", kind: "trip", part: null, sourceKey: null })} data-testid="invoice-add-trip">
                       <Plus className="size-4" />
                       Trip Charge
                     </Button>
@@ -279,6 +279,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                         rate: it.rate != null ? it.rate.toFixed(2) : "0.00",
                         kind: it.kind || kindForItem(it.item),
                         part: it.part ?? null,
+                        sourceKey: null,
                       })
                     }
                   />
