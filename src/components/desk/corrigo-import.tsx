@@ -246,7 +246,8 @@ function PreviewBody({
     () =>
       settleInstallRows(
         preview.rows,
-        (r) => drafts[rowKey(r)]?.installChoice ?? r.installChoice,
+        // null is a choice too (a new install), so only a row with no draft yet takes the preselection.
+        (r) => (rowKey(r) in drafts ? drafts[rowKey(r)]!.installChoice : r.installChoice),
         (r) => drafts[rowKey(r)]?.selected ?? true,
       ),
     [preview.rows, drafts],
