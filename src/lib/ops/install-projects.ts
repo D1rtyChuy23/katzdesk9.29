@@ -100,6 +100,7 @@ type InstallRow = {
   notes: string | null;
   wo: string | null;
   deal_id: number | null;
+  received: string | null;
   customer_locked_at: unknown;
   customer_locked_by: string | null;
   updated: string;
@@ -174,6 +175,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   if (keepId === dropId) throw new Error("Pick another install to merge into.");
   const rows = await sql.query<InstallRow>(
     `select id, customer, archived, equipment, serial, power_voltage, machines, notes, wo, deal_id, customer_locked_at, customer_locked_by,
+            to_char(received, 'YYYY-MM-DD') as received,
             updated_at::text as updated
        from installs where id = any($1::int[])`,
     [[keepId, dropId]],
@@ -188,17 +190,17 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   if (keep.deal_id && drop.deal_id && keep.deal_id !== drop.deal_id) {
     throw new Error(`Install #${keep.id} is from deal #${keep.deal_id} and #${drop.id} from deal #${drop.deal_id}: two projects, not one. They can't be merged.`);
   }
-  // A locked customer: the drop's units would take the keeper's spelling, so only the same name merges.
-  if (keep.customer.trim().toLowerCase() !== drop.customer.trim().toLowerCase()) {
-    const locked = [drop, keep].find((r) => r.customer_locked_at);
-    if (locked) throw new Error(lockedMessage(locked.customer_locked_by, await lockOwnerName(sql)));
+  // The drop's locked customer: its units would take the keeper's spelling, so only the same name merges.
+  if (drop.customer_locked_at && keep.customer.trim().toLowerCase() !== drop.customer.trim().toLowerCase()) {
+    throw new Error(lockedMessage(drop.customer_locked_by, await lockOwnerName(sql)));
   }
-  // Warehouse units reserved or assigned to the drop go to the keeper; a lock a person put on one waits for the owner.
+  // Warehouse units reserved, assigned or sold to the drop go to the keeper (same account; only the install changes).
+  // The lock an assignment or a sale puts on by itself moves with them; a lock a person put on waits for the owner.
   const assets = await sql.query<{ id: number; status: string | null; locked_at: unknown; locked_by: string | null }>(
     "select id, status, locked_at, locked_by from assets where install_id = $1",
     [dropId],
   );
-  for (const a of assets) await assertUnlocked(sql, a, { release: true });
+  for (const a of assets) if (!/^System \(/.test(a.locked_by ?? "")) await assertUnlocked(sql, a);
   const actor = await actorName(sql, userId);
   const catalog = await catalogNames(sql);
 
@@ -210,20 +212,31 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     [[keepId, dropId]],
   );
   const keeperUnits = linked.filter((u) => u.install_id === keepId);
-  const moving = linked.filter(
-    (u) =>
-      u.install_id === dropId &&
-      !keeperUnits.some((k) => k.id === u.id || (sameModel(k, u) && (serialKey(k.serial) || "") === (serialKey(u.serial) || ""))),
-  );
+  const dropUnits = linked.filter((u) => u.install_id === dropId);
+  // Each drop unit's twin on the keeper, one to one in id order: a unit both visits share is its own twin, then the
+  // same model and serial. A drop unit with no twin moves to the keeper.
+  const taken = new Set<number>();
+  const twinOf = new Map<number, number>();
+  for (const u of dropUnits) {
+    if (keeperUnits.some((k) => k.id === u.id)) {
+      twinOf.set(u.id, u.id);
+      taken.add(u.id);
+    }
+  }
+  for (const u of dropUnits) {
+    if (twinOf.has(u.id)) continue;
+    const k = keeperUnits.find((k) => !taken.has(k.id) && sameModel(k, u) && (serialKey(k.serial) || "") === (serialKey(u.serial) || ""));
+    if (!k) continue;
+    twinOf.set(u.id, k.id);
+    taken.add(k.id);
+  }
+  const moving = dropUnits.filter((u) => !twinOf.has(u.id));
   // A unit on the drop's spelling of the account moves to the keeper's: a locked one would have to change, so refuse.
   const recustomer = moving.filter((u) => normalizeCustomerKey(u.customer) !== normalizeCustomerKey(keep.customer));
   for (const u of recustomer) await assertUnlocked(sql, u);
-  const staying = linked.filter((u) => u.install_id === dropId && !moving.includes(u));
-  const stayed = staying.length;
-  // Each staying drop unit and the keeper unit it is a twin of: the twin gets the checks and photos it has none of.
-  const twins = staying
-    .map((u) => ({ drop: u.id, keep: keeperUnits.find((k) => k.id !== u.id && sameModel(k, u) && (serialKey(k.serial) || "") === (serialKey(u.serial) || ""))?.id }))
-    .filter((t): t is { drop: number; keep: number } => t.keep != null);
+  const stayed = twinOf.size;
+  // Each staying drop unit and its twin: the twin gets the checks and photos it has none of.
+  const twins = [...twinOf].map(([dropUnit, keepUnit]) => ({ drop: dropUnit, keep: keepUnit }));
 
   const { list, added } = mergedMachineList(installMachines(keep, catalog).machines, installMachines(drop, catalog).machines);
   const packed = serializeMachines(list);
@@ -260,9 +273,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        returning w.id
      ), wo_add as (
        -- The drop's primary had no row of its own (saved before the table): the keeper gets one.
-       insert into install_work_orders (install_id, wo, match_key, status, completed_at, source, added_by)
-       select g.keep_id, x.wo, x.match_key, x.status, x.completed_at::date, 'merge', $5
-         from g, jsonb_to_recordset($6::jsonb) as x(wo text, match_key text, status text, completed_at text)
+       insert into install_work_orders (install_id, wo, match_key, status, completed_at, received, source, added_by)
+       select g.keep_id, x.wo, x.match_key, x.status, x.completed_at::date, x.received::date, 'merge', $5
+         from g, jsonb_to_recordset($6::jsonb) as x(wo text, match_key text, status text, completed_at text, received text)
         where not exists (select 1 from install_work_orders w where w.install_id = g.drop_id and w.match_key = x.match_key)
        on conflict (install_id, match_key) do nothing
        returning id
@@ -312,10 +325,16 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
           and not exists (select 1 from install_inspection_items k where k.install_id = g.keep_id and k.equipment_id is null and k.category = i.category)
        returning i.id
      ), twin_items as (
-       update install_inspection_items i set install_id = g.keep_id, equipment_id = t.k_eq
-         from g, unnest($17::int[], $18::int[]) as t(d_eq, k_eq)
-        where i.install_id = g.drop_id and i.equipment_id = t.d_eq
-          and not exists (select 1 from install_inspection_items k where k.install_id = g.keep_id and k.equipment_id = t.k_eq and k.category = i.category)
+       -- One drop check per keeper unit and category (the pairs are one to one; distinct on keeps it so).
+       update install_inspection_items i set install_id = g.keep_id, equipment_id = x.k_eq
+         from g, (
+           select distinct on (t.k_eq, s.category) s.id, t.k_eq
+             from install_inspection_items s join unnest($17::int[], $18::int[]) as t(d_eq, k_eq) on s.equipment_id = t.d_eq
+            where s.install_id = $2::int
+            order by t.k_eq, s.category, s.id
+         ) x
+        where i.id = x.id and i.install_id = g.drop_id
+          and not exists (select 1 from install_inspection_items k where k.install_id = g.keep_id and k.equipment_id = x.k_eq and k.category = i.category)
        returning i.id
      ), twin_photos as (
        update install_inspection_photos p set install_id = g.keep_id, equipment_id = t.k_eq
@@ -376,7 +395,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
       keep.updated,
       drop.updated,
       actor,
-      JSON.stringify(newWos.map((w) => ({ wo: w.wo, match_key: w.matchKey, status: w.status, completed_at: w.completedAt }))),
+      // A primary with no row of its own is dated by the drop install.
+      JSON.stringify(newWos.map((w) => ({ wo: w.wo, match_key: w.matchKey, status: w.status, completed_at: w.completedAt, received: w.received ?? drop.received }))),
       packed.equipment,
       packed.machines,
       packed.serial,
