@@ -9,7 +9,7 @@ import realCatalog from "../src/lib/ops/directory-equipment.json" with { type: "
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { descriptionNames, parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
+const { descriptionNames, exactMachines, parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
 const { addDays, todayChicago } = await import("../src/lib/ops/clock.ts");
 const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
 
@@ -90,11 +90,11 @@ test("wrap: a closed ticket older than 365 days keeps the exact customer-name ru
   assert.equal(same.rows[0].jobId, old);
 });
 
-test("wrap: a WO-0772 an earlier import already duplicated attaches to the first ticket and flags the copy to merge, not as a repeat", async () => {
+test("wrap: a WO-0772 an earlier import already duplicated for the same customer attaches to the first and merges the copy", async () => {
   const sql = await wrappedDesk();
-  const first = await closedTicket(sql, "WO-0772", "Cafe Alpha", daysAgo(30));
-  const copy = await closedTicket(sql, "WO-0772", "Café Alpha LLC", daysAgo(10));
-  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name"], ["0772", "Completed", "Café Alpha LLC"]]);
+  const first = await closedTicket(sql, "WO-0772", "Cafe Alpha LLC", daysAgo(30));
+  const copy = await closedTicket(sql, "WO-0772", "Cafe Alpha LLC", daysAgo(10));
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name"], ["0772", "Completed", "Cafe Alpha LLC"]]);
   const preview = await previewCorrigoRecords(sql, records);
   const row = preview.rows[0];
   assert.equal(row.jobId, first);
@@ -102,6 +102,34 @@ test("wrap: a WO-0772 an earlier import already duplicated attaches to the first
   assert.deepEqual(row.conflictIds, [{ board: "service", id: copy }]);
   await applyCorrigoRows(sql, preview.rows, "Chuy");
   assert.equal((await sql.query("select duplicate_of from service_jobs where id = $1", [copy]))[0].duplicate_of, first);
+});
+
+test("wrap: one number on two of this cycle's tickets for different customers goes on the file customer's, and the other is left alone (WO-0368)", async () => {
+  const sql = await wrappedDesk();
+  const stella = await closedTicket(sql, "WO-0368", "Stella Southern", daysAgo(60));
+  const icon = await closedTicket(sql, "WO-0368", "Hotel Icon", daysAgo(60));
+  await sql.query("update service_jobs set work_done = 'Stella Southern work' where id = $1", [stella]);
+  const file = (customer) =>
+    parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Work Done"], ["0368", "Completed", customer, "Corrigo work"]]).records;
+  const preview = await previewCorrigoRecords(sql, file("Hotel Icon"));
+  const row = preview.rows[0];
+  assert.deepEqual([row.action, row.jobId, row.conflictIds, row.wrapRepeat], ["update", icon, null, true]);
+  assert.match(row.matchNote, new RegExp(`WO-0368 is also on #${stella} \\(Stella Southern\\)`));
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  const both = await sql.query("select id, customer, work_done, duplicate_of from service_jobs where id = any($1::int[]) order by id", [[stella, icon]]);
+  assert.deepEqual(both, [
+    { id: stella, customer: "Stella Southern", work_done: "Stella Southern work", duplicate_of: null },
+    { id: icon, customer: "Hotel Icon", work_done: "Corrigo work", duplicate_of: null },
+  ]);
+  // Neither customer matches: neither ticket is guessed at, in the preview or at apply.
+  const other = await previewCorrigoRecords(sql, file("Hotel Icon Downtown"));
+  assert.deepEqual([other.rows[0].action, other.rows[0].wrapRepeat], ["create", true]);
+  await applyCorrigoRows(sql, other.rows, "Chuy");
+  assert.deepEqual(
+    (await sql.query("select customer from service_jobs where id = any($1::int[]) order by id", [[stella, icon]])).map((r) => r.customer),
+    ["Stella Southern", "Hotel Icon"],
+  );
+  assert.equal((await woRows(sql, "0368")).length, 3);
 });
 
 const lastLog = async (sql, type, id) =>
@@ -341,8 +369,8 @@ test("install: with the real catalog and no equipment column, the problem descri
     [
       ["WO-0663", "update", mike, `install #${mike} matched by account and equipment`],
       ["WO-0664", "update", november, `install #${november} matched by account and equipment`],
-      // The install has two machines, and free text names one.
-      ["WO-0665", "create", null, none(oscar)],
+      // The install's "Bunn ITCB" isn't a catalog spelling, so nothing is matched against it.
+      ["WO-0665", "create", null, `install #${oscar}'s equipment isn't written as catalog names`],
       ["WO-0666", "create", null, none(papa)],
       ["WO-0667", "create", null, none(quebec)],
       ["WO-0668", "create", null, none(romeo)],
@@ -626,16 +654,17 @@ test("install: free text attaches only on the problem description's one machine;
   ]);
   const preview = await previewCorrigoRecords(sql, records);
   const none = (id) => `the problem description doesn't name install #${id}'s equipment`;
+  const unread = (id) => `install #${id}'s equipment isn't written as catalog names`;
   assert.deepEqual(
     preview.rows.map((r) => [r.wo, r.action, r.jobId, r.byEquipment, r.matchNote]),
     [
       ["WO-0665", "update", ids.a, true, `install #${ids.a} matched by account and equipment`],
       ["WO-0666", "create", null, false, none(ids.b)],
-      ["WO-0667", "create", null, false, none(ids.c)],
+      ["WO-0667", "create", null, false, unread(ids.c)],
       ["WO-0668", "create", null, false, none(ids.d)],
       ["WO-0669", "create", null, false, none(ids.e)],
-      ["WO-0670", "create", null, false, none(ids.f)],
-      ["WO-0671", "create", null, false, none(ids.g)],
+      ["WO-0670", "create", null, false, unread(ids.f)],
+      ["WO-0671", "create", null, false, unread(ids.g)],
       ["WO-0672", "update", ids.h, true, `install #${ids.h} matched by account and equipment`],
       ["WO-0673", "create", null, false, none(ids.i)],
     ],
@@ -655,4 +684,95 @@ test("install: free text attaches only on the problem description's one machine;
   ]) {
     assert.deepEqual((await installsOf(sql, customer)).map((r) => [r.id === id, r.wo]), [[true, null], [false, wo]], customer);
   }
+});
+
+// N2: the install's own machines count only when each is exactly a catalog spelling, so a loose, guessed or
+// miscounted install list ("TB3 x2", "Cameo", "TB3 / ITCB") never matches, by free text or by the Equipment column.
+
+test("install: an install's machines are read exactly — loose, partial, two-machine or miscounted text reads as nothing", () => {
+  const cameo = "Eversys Cameo c'2s - 2 Step Classic";
+  const exact = (text) => exactMachines(text.split("\n"), realCatalog);
+  assert.deepEqual(exact("Bunn TB3"), ["Bunn TB3"]);
+  assert.deepEqual(exact("TB3"), ["Bunn TB3"]);
+  assert.deepEqual(exact("2 x Bunn TB3"), ["Bunn TB3", "Bunn TB3"]);
+  assert.deepEqual(exact("Bunn TB3 SN 12345"), ["Bunn TB3"]);
+  assert.deepEqual(exact("Eversys Cameo c'2s 120v\nSN:ABC123\nBunn TB3"), [cameo, "Bunn TB3"]);
+  assert.deepEqual(exact("ICB-DV Short"), ["BUNN ICB-DV Short"]);
+  assert.deepEqual(exact("Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed"), [
+    "Blendtec Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed",
+  ]);
+  for (const text of [
+    "",
+    "Bunn TB3 x2",
+    "(2) Bunn TB3",
+    "2 Bunn TB3",
+    "Bunn TB3 (2)",
+    "TB3 / ITCB",
+    "Linea Mini w/ Mazzer Mini",
+    "Linea Mini + grinder",
+    "Bunn TB3 & Bunn ITCB",
+    "Rancilio Kyro EVO On-Demand Grinder and grinder",
+    "La Marzocco",
+    "Rancilio Classe",
+    "Cameo",
+    "Eversys Cameo",
+    "Mazzer Robur",
+    "La Marzocco KB90",
+    "Espresso Machine",
+    "Bunn ITCB 120v SN:ITCB064919",
+    "Bunn CWTF15-TC",
+    "Bunn CWTF15",
+    "Rancilio Classe 7 USB 2 Group Tall",
+    "Bunn H5X Element 120V",
+    "Eversys Cameo c'2s\nCameo",
+  ]) {
+    assert.equal(exact(text), null, text);
+  }
+});
+
+test("install: spellings ignore filler on every model, a lone generic word is never one, and any longer name is a clash", () => {
+  const catalog = [...realCatalog, "Acme The Grinder", "Bunn Grinder", 'Bunn X 29" Tall', "Bunn X 29", "Bunn Y 7 Brewer Set"];
+  assert.equal(descriptionNames("The Grinder", ["Bunn Grinder"], catalog), false);
+  assert.equal(descriptionNames("Install grinder", ["Bunn Grinder"], catalog), false);
+  assert.equal(descriptionNames("Install Bunn Grinder", ["Bunn Grinder"], catalog), true);
+  assert.equal(descriptionNames("Install Bunn X 29", ["Bunn X 29"], catalog), false);
+  assert.equal(descriptionNames("Install Bunn Y 7 Brewer Set", ["Bunn Y 7 Brewer Set"], catalog), true);
+});
+
+test("install: a loosely written install never matches, by the problem description or by the Equipment column", async () => {
+  const sql = await freshDb();
+  await sql.query("insert into directory_equipment (name) select unnest($1::text[])", [realCatalog]);
+  const ids = {
+    a: await openInstall(sql, "Cafe Able", { equipment: "Bunn TB3 x2" }),
+    b: await openInstall(sql, "Cafe Baker", { equipment: "TB3 / ITCB" }),
+    c: await openInstall(sql, "Cafe Charlie", { machines: ["Linea Mini w/ Mazzer Mini"] }),
+    d: await openInstall(sql, "Cafe Dog", { equipment: "Bunn CWTF15-TC" }),
+    e: await openInstall(sql, "Cafe Echo", { equipment: "Cameo" }),
+    f: await openInstall(sql, "Cafe Fox", { equipment: "TB3" }),
+  };
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "P.O. #", "Problem Description", "Equipment"],
+    ["0681", "Work Started", "Cafe Able", "Install", "Install Bunn TB3", ""],
+    ["0682", "Work Started", "Cafe Baker", "Install", 'Install Bunn ITCB-DV, 29" w/Flip Tray', ""],
+    ["0683", "Work Started", "Cafe Charlie", "Install", "Install La Marzocco Linea Mini", ""],
+    ["0684", "Work Started", "Cafe Dog", "Install", "", "Bunn CWTF TWIN-APS"],
+    ["0685", "Work Started", "Cafe Echo", "Install", "", "Eversys Cameo c'2s"],
+    ["0686", "Work Started", "Cafe Fox", "Install", "Install Bunn TB3", ""],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  const unread = (id) => `install #${id}'s equipment isn't written as catalog names`;
+  assert.deepEqual(
+    preview.rows.map((r) => [r.wo, r.action, r.jobId, r.matchNote]),
+    [
+      ["WO-0681", "create", null, unread(ids.a)],
+      ["WO-0682", "create", null, unread(ids.b)],
+      ["WO-0683", "create", null, unread(ids.c)],
+      ["WO-0684", "create", null, unread(ids.d)],
+      ["WO-0685", "create", null, unread(ids.e)],
+      ["WO-0686", "update", ids.f, `install #${ids.f} matched by account and equipment`],
+    ],
+  );
+  const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual([res.updated, res.created], [1, 5]);
+  for (const id of [ids.a, ids.b, ids.c, ids.d, ids.e]) assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, null);
 });

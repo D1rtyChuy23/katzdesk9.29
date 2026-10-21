@@ -6,19 +6,18 @@ import { CLOSED_CALL, CLOSED_PM } from "@/lib/ops/lookups";
 import { DEFAULT_PM_STYLE } from "@/lib/ops/pm-runbook";
 import { todayChicago } from "@/lib/ops/clock";
 import {
+  attachableHits,
   boardStatus,
   completedOnUpdate,
   corrigoReopens,
   corrigoReviewReason,
   crossCyclePairs,
   deskHasWrapped,
+  exactMachines,
   indexHits,
   isWalkIn,
-  namedMachines,
   pickKeeper,
   resolvePreviewRow,
-  shouldAttachToHit,
-  thisCycleFirst,
   woMatchKey,
   type CorrigoBoard,
   type CorrigoHit,
@@ -179,6 +178,7 @@ async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; ca
   );
   const installs = rows.map((r): OpenInstall => {
     const { machines, typed } = installMachines(r, catalog);
+    const pieces = typed ? String(r.equipment ?? "").split(/\r?\n/) : machines.map((m) => m.equipment);
     return {
       board: "install",
       id: r.id,
@@ -186,8 +186,8 @@ async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; ca
       customer: r.customer,
       wo: null,
       completedAt: r.completed_at,
-      // Typed equipment text is read again so "2 x Bunn ITCB" counts two.
-      machines: typed ? namedMachines(r.equipment, catalog) : machines.map((m) => m.equipment),
+      // Read exactly, so "2 x Bunn TB3" counts two and a loose or guessed name ("Cameo", "TB3 / ITCB") counts none.
+      machines: exactMachines(pieces, catalog) ?? [],
     };
   });
   return { installs, catalog };
@@ -209,8 +209,7 @@ async function findExistingHit(
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
-  const attachable = group.filter((h) => shouldAttachToHit(h, fileCustomer, rolled, today));
-  return pickKeeper(thisCycleFirst(attachable, rolled, today), preferredBoard);
+  return pickKeeper(attachableHits(group, fileCustomer, rolled, today), preferredBoard);
 }
 
 async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: string) {

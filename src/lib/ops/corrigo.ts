@@ -189,6 +189,7 @@ export type CorrigoPreviewRow = {
 };
 
 /** An install with no WO yet that isn't archived or complete, with its machine models. */
+/** machines: read by exactMachines, empty when they aren't exactly catalog names. */
 export type OpenInstall = CorrigoHit & { machines: string[] };
 
 export function normalizeHeader(raw: string): string {
@@ -270,6 +271,24 @@ export function thisCycleFirst(hits: CorrigoHit[], wrapped: boolean, today: stri
 }
 
 /**
+ * The tickets with a row's number it may go on, this cycle's first. After the wrap a closed ticket ≤9999 needs the
+ * file's customer (shouldAttachToHit), except that this cycle's copies (received in the last 365 days) are the same
+ * job however Corrigo spells the customer — as long as they all belong to one customer.
+ */
+export function attachableHits(
+  hits: CorrigoHit[],
+  fileCustomer: string | null | undefined,
+  wrapped: boolean,
+  today: string | null | undefined,
+): CorrigoHit[] {
+  const recent = wrapped ? hits.filter((h) => recentTicket(h, today)) : [];
+  const named = recent.filter((h) => !isWalkIn(h.customer)).map((h) => normalizeCustomerKey(h.customer));
+  const oneCustomer = new Set(named.filter(Boolean)).size <= 1;
+  const ok = hits.filter((h) => shouldAttachToHit(h, fileCustomer, wrapped) || (oneCustomer && recent.includes(h)));
+  return thisCycleFirst(ok, wrapped, today);
+}
+
+/**
  * After the wrap, same-number service tickets from different cycles (one received in the last 365 days, one not)
  * are different jobs: pairs the duplicate merge must leave alone.
  */
@@ -292,21 +311,18 @@ export function crossCyclePairs(hits: CorrigoHit[], today: string): { keeperId: 
 }
 
 /**
- * After WO-9999 the 4-digit numbers start over. Don't fold a new job onto a closed ticket from the previous
- * cycle when the customer doesn't match. A closed ticket received in the last 365 days is this cycle's, so it
- * is the same job however Corrigo spells the customer.
+ * After WO-9999 the 4-digit numbers start over. Don't fold a new job onto a closed ticket when the customer doesn't
+ * match (attachableHits lets this cycle's copies through).
  */
 export function shouldAttachToHit(
   hit: CorrigoHit,
   fileCustomer: string | null | undefined,
   wrapped: boolean,
-  today?: string | null,
 ): boolean {
   if (!wrapped) return true;
   const n = woNumeric(hit.wo);
   if (n == null || n > WO_WRAP) return true;
   if (!hitClosed(hit)) return true;
-  if (recentTicket(hit, today)) return true;
   if (customersCompatible(hit.customer, fileCustomer)) return true;
   return false;
 }
@@ -651,34 +667,66 @@ const FILLER = new Set([
 const plain = (text: string) =>
   text.toLowerCase().replace(VOLTS, " ").replace(/['’‘`´]/g, "").replace(/×/g, "x").replace(/\s+/g, " ").trim().replace(/[.!]+$/, "").trim();
 
-/** A catalog name as a description may write it: in full or before " - ", with or without its brand. */
-function spellingsOf(name: string): string[] {
-  return [name, name.split(" - ")[0]!].flatMap((n) => {
-    const words = plain(n).split(" ");
-    return [words.join(" "), words.slice(["la", "de"].includes(words[0]!) ? 2 : 1).join(" ")];
-  });
+/** The words without filler at either end, joined. */
+function unfilled(words: string[]): string {
+  const out = words.filter(Boolean);
+  while (out.length && FILLER.has(out[0]!)) out.shift();
+  while (out.length && FILLER.has(out.at(-1)!)) out.pop();
+  return out.join(" ");
 }
 
 /**
- * Whether a problem description names the install's machines: after filler words and an optional leading "N x"
- * (N 1-9, the install's unit count), what is left is exactly one spelling of its one catalog model that no other
- * model shares or starts with ("Install new Cameo c'2s", "2 x Bunn TB3"). Anything else — another word, a second
- * machine, punctuation between names, part of a name — doesn't.
+ * A catalog name as a text may write it: in full or before " - ", with or without its brand. Without the brand it
+ * must keep two words or a digit ("tb3", "linea mini"), so a bare "grinder" is never one.
+ */
+function spellingsOf(name: string): string[] {
+  return [name, name.split(" - ")[0]!].flatMap((n) => {
+    const words = plain(n).split(" ");
+    const bare = unfilled(words.slice(["la", "de"].includes(words[0]!) ? 2 : 1));
+    return [unfilled(words), bare.includes(" ") || /\d/.test(bare) ? bare : ""];
+  }).filter(Boolean);
+}
+
+/** The one catalog model a text is exactly a spelling of, when no other model shares that spelling or starts with it. */
+function modelSpelled(said: string, catalog: string[]): string | null {
+  const owners = said ? catalog.filter((n) => spellingsOf(n).includes(said)) : [];
+  if (new Set(owners.map(plain)).size !== 1) return null;
+  const model = owners[0]!;
+  const longer = (o: string) => o.length > said.length && o.startsWith(said) && /[^a-z0-9]/.test(o[said.length]!);
+  return catalog.some((n) => plain(n) !== plain(model) && spellingsOf(n).some(longer)) ? null : model;
+}
+
+/** "Install 2 x new Cameo c'2s" → two of that model: filler at the ends and an optional leading "N x" (N 1-9) aside. */
+function spelledMachines(text: string, catalog: string[]): string[] | null {
+  const [, qty = "1", rest = ""] = /^(?:([1-9]) ?x )?(.*)$/.exec(unfilled(plain(text).split(" ")))!;
+  const model = modelSpelled(unfilled(rest.split(" ")), catalog);
+  return model ? Array<string>(Number(qty)).fill(model) : null;
+}
+
+/**
+ * An install's machines read exactly, one entry per unit: each machine row, or each line of typed equipment (serial
+ * and voltage aside), is exactly one catalog spelling. null when any one isn't, so a guessed model never counts.
+ */
+export function exactMachines(pieces: string[], catalog: string[]): string[] | null {
+  const out: string[] = [];
+  for (const piece of pieces) {
+    const text = piece.replace(/\s+(?:s\/?n|serial)\b.*$/i, "").trim();
+    if (!text || SERIAL_ONLY.test(text)) continue;
+    const named = spelledMachines(text, catalog);
+    if (!named) return null;
+    out.push(...named);
+  }
+  return out.length ? out : null;
+}
+
+/**
+ * Whether a problem description names an install's machines (read by exactMachines): the same one model, the same
+ * number of units ("Install new Cameo c'2s", "2 x Bunn TB3"). Anything else — another word, a second machine,
+ * punctuation between names, part of a name — doesn't.
  */
 export function descriptionNames(text: string, machines: string[], catalog: string[]): boolean {
-  const model = machines.length ? catalogModelOf(machines[0]!, catalog) : null;
-  if (!model || machines.some((m) => catalogModelOf(m, catalog) !== model)) return false;
-  const unfilled = (words: string[]) => {
-    const out = [...words];
-    while (out.length && FILLER.has(out[0]!)) out.shift();
-    while (out.length && FILLER.has(out.at(-1)!)) out.pop();
-    return out.join(" ");
-  };
-  const [, qty = "1", rest = ""] = /^(?:([1-9]) ?x )?(.*)$/.exec(unfilled(plain(text).split(" ")))!;
-  const said = unfilled(rest.split(" "));
-  const others = catalog.filter((n) => plain(n) !== plain(model)).flatMap(spellingsOf);
-  const clash = (s: string) => others.some((o) => o === s || (o.startsWith(s) && /[\s,/(-]/.test(o[s.length]!)));
-  return !!said && Number(qty) === machines.length && spellingsOf(model).includes(said) && !clash(said);
+  const named = spelledMachines(text, catalog);
+  return !!named && named.length === machines.length && named.every((m, i) => m === machines[i]);
 }
 
 /** The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog. */
@@ -719,9 +767,11 @@ function installByEquipment(
   if (!free.length) return { install: null, note: `install #${mine[0].id} already matched by an earlier row` };
   const only = free[0]!;
   const several = { install: null, note: `${free.length === 2 ? "two" : free.length} installs could match` };
+  const unread = { install: null, note: `install #${only.id}'s equipment isn't written as catalog names` };
   if (!rec.equipment?.trim()) {
     // With no Equipment column, only a problem description that is exactly the install's machine name counts.
     if (free.length > 1) return several;
+    if (!only.machines.length) return unread;
     if (!descriptionNames(rec.issue ?? "", only.machines, catalog)) {
       return { install: null, note: `the problem description doesn't name install #${only.id}'s equipment` };
     }
@@ -729,6 +779,7 @@ function installByEquipment(
     const named = namedMachines(rec.equipment, catalog);
     if (!named.length) return { install: null, note: "no equipment named to match an install" };
     if (free.length > 1) return several;
+    if (!only.machines.length) return unread;
     if (!sameMachines(named, only.machines, catalog)) return { install: null, note: `equipment differs from install #${only.id}` };
   }
   return { install: only, note: `install #${only.id} matched by account and equipment` };
@@ -759,21 +810,19 @@ export function resolvePreviewRow(
   });
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
-  const attachable = pool.filter((h) => shouldAttachToHit(h, rec.customer, wrapped, opts.today));
-  const woHit = pickKeeper(thisCycleFirst(attachable, wrapped, opts.today), hinted);
+  const woHit = pickKeeper(attachableHits(pool, rec.customer, wrapped, opts.today), hinted);
   const equip =
     !woHit && hinted === "install"
       ? installByEquipment(rec, opts.installs ?? [], opts.catalog ?? [], opts.taken ?? new Set())
       : null;
   const existing = woHit ?? equip?.install ?? null;
-  // After the wrap, a copy from the other cycle than the chosen ticket is a different job, not a duplicate to merge.
-  const extras = existing
-    ? group.filter(
-        (h) =>
-          (h.board !== existing.board || h.id !== existing.id) &&
-          (!wrapped || recentTicket(h, opts.today) === recentTicket(existing, opts.today)),
-      )
-    : group;
+  // After the wrap, a copy from the other cycle than the chosen ticket, or another customer's, is a different job.
+  const others = existing ? group.filter((h) => h.board !== existing.board || h.id !== existing.id) : group;
+  const otherJob = (h: CorrigoHit) =>
+    !!existing &&
+    wrapped &&
+    (recentTicket(h, opts.today) !== recentTicket(existing, opts.today) || !customersCompatible(h.customer, existing.customer));
+  const extras = others.filter((h) => !otherJob(h));
   const board = detectBoard({
     po: rec.po,
     issue: rec.issue,
@@ -798,13 +847,15 @@ export function resolvePreviewRow(
     .map((c) => ({ board: c.board, id: c.id }));
   const n = woNumeric(rec.rawWo || rec.canonicalWo);
   const postWrapNumber = n != null && n < 5000;
-  // A row on this cycle's ticket is never a repeat; on an old-cycle ticket it is when other copies of the number exist.
+  // Another customer's ticket from this cycle with the number: left alone, and the row goes to For Review.
+  const strangers =
+    existing && recentTicket(existing, opts.today) ? others.filter((h) => recentTicket(h, opts.today) && otherJob(h)) : [];
+  // A row on this cycle's ticket is a repeat only beside such a ticket; on an old-cycle ticket it is when other
+  // copies of the number exist.
   const wrapRepeat =
     wrapped &&
     postWrapNumber &&
-    (existing
-      ? !recentTicket(existing, opts.today) && group.some((h) => h.board !== existing.board || h.id !== existing.id)
-      : group.length > 0);
+    (existing ? (recentTicket(existing, opts.today) ? strangers.length > 0 : others.length > 0) : group.length > 0);
   const note = woHit ? matchNote(rec.rawWo, rec.canonicalWo, woHit.wo) : null;
 
   return {
@@ -812,7 +863,18 @@ export function resolvePreviewRow(
     rawWo: rec.rawWo,
     matchKey: rec.matchKey,
     canonicalWo: rec.canonicalWo,
-    matchNote: [note, equip?.note, wrapRepeat ? wrapRepeatNote(rec.canonicalWo) : null].filter(Boolean).join(" · ") || null,
+    matchNote:
+      [
+        note,
+        equip?.note,
+        strangers.length
+          ? `${rec.canonicalWo} is also on ${strangers.map((h) => `#${h.id} (${h.customer || "no customer"})`).join(", ")}`
+          : wrapRepeat
+            ? wrapRepeatNote(rec.canonicalWo)
+            : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") || null,
     customer: preferredImportCustomer(rec.customer, existing?.customer),
     fileCustomer: rec.customer,
     existingCustomer: existing?.customer ?? null,
