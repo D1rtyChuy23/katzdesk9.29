@@ -3,7 +3,7 @@
   "manufacturer": "Faema",
   "title": "X20 PM Runbook",
   "subtitle": "Faema X20 (S20) | Cycle Based Maintenance kits and checks",
-  "sources": "Faema / Gruppo Cimbali Service Bulletin #S022 (11/2022), Preventive Maintenance Program CBM for S20/X20: plan tables, kit codes and the Measurements and Checks list. The CBM kits replace the old PPM kits A–I. Confirm kit codes with Faema before ordering.",
+  "sources": "Faema / Gruppo Cimbali Service Bulletin #S022 (11/2022), Preventive Maintenance Program CBM for S20/X20: plan tables, kit codes and the Measurements and Checks list. The CBM kits replace the old PPM kits A–I. Kit B uses NetSuite's 781.739.020 (the bulletin lists 781.739.010). Confirm kit codes with Faema before ordering.",
   "storageKey": "faema-x20-runbook-v1",
   "visitsPerYear": {
     "by": "plan",
@@ -191,8 +191,8 @@
   ],
   "kits": [
     {
-      "ev": "FA781739010",
-      "name": "Kit B, coffee basic (781.739.010)",
+      "ev": "FA781739020",
+      "name": "Kit B, coffee basic (781.739.020)",
       "module": "Coffee",
       "interval": 1,
       "qty": 1,
@@ -212,8 +212,8 @@
       "note": "25 min. Instructions 981.223.010."
     },
     {
-      "ev": "FA781739010",
-      "name": "Kit B, coffee basic (781.739.010)",
+      "ev": "FA781739020",
+      "name": "Kit B, coffee basic (781.739.020)",
       "module": "Coffee",
       "interval": 1,
       "qty": 1,
@@ -240,8 +240,8 @@
       "note": "25 min. Instructions 981.223.010."
     },
     {
-      "ev": "FA781739010",
-      "name": "Kit B, coffee basic (781.739.010)",
+      "ev": "FA781739020",
+      "name": "Kit B, coffee basic (781.739.020)",
       "module": "Coffee",
       "interval": 1,
       "qty": 1,
