@@ -202,6 +202,38 @@ const extractInput = z.object({
   fileName: z.string().max(300).optional(),
 });
 
+/** Text in, structured draft out. No rate limit — the caller decides how often this runs. */
+export async function extractSpecFromText(apiKey: string, text: string, fileName?: string): Promise<ExtractResult> {
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: `Spec sheet${fileName ? ` "${fileName}"` : ""} text:\n\n${text}` },
+  ];
+  try {
+    const first = await callXai(apiKey, messages);
+    let parsed = parseExtraction(first);
+    let usedRetry = false;
+    if (!parsed.ok) {
+      usedRetry = true;
+      const second = await callXai(apiKey, [
+        ...messages,
+        { role: "assistant", content: first.slice(0, 8000) },
+        { role: "user", content: `That was not valid for the schema (${parsed.error}). Reply with only the corrected JSON object.` },
+      ]);
+      parsed = parseExtraction(second);
+    }
+    if (!parsed.ok) {
+      return { ok: false, reason: "failed", message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.` };
+    }
+    const filtered = filterNonUsa(parsed.data);
+    if (!filtered.draft.configs.length) filtered.draft.configs.push({ label: "Standard", requirements: {} });
+    const draft = applySpecDefaults(filtered.draft, "generate");
+    return { ok: true, draft, removed: filtered.removed, usedRetry };
+  } catch (e) {
+    const msg = e instanceof Error ? (e.name === "AbortError" ? "the AI took too long" : e.message) : "unknown error";
+    return { ok: false, reason: "failed", message: `Reading the sheet failed (${msg}). Fill in the form by hand instead.` };
+  }
+}
+
 /** Text in, structured draft out. The PDF itself never reaches the server. */
 export const extractSpecSheet = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -235,40 +267,7 @@ export const extractSpecSheet = createServerFn({ method: "POST" })
       };
     }
     await sql.query("insert into spec_import_log (user_id) values ($1)", [context.userId]);
-
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `Spec sheet${data.fileName ? ` "${data.fileName}"` : ""} text:\n\n${text}`,
-      },
-    ];
-    try {
-      const first = await callXai(apiKey, messages);
-      let parsed = parseExtraction(first);
-      let usedRetry = false;
-      if (!parsed.ok) {
-        // One retry, telling the model exactly what was wrong.
-        usedRetry = true;
-        const second = await callXai(apiKey, [
-          ...messages,
-          { role: "assistant", content: first.slice(0, 8000) },
-          { role: "user", content: `That was not valid for the schema (${parsed.error}). Reply with only the corrected JSON object.` },
-        ]);
-        parsed = parseExtraction(second);
-      }
-      if (!parsed.ok) {
-        return { ok: false, reason: "failed", message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.` };
-      }
-      const filtered = filterNonUsa(parsed.data);
-      if (!filtered.draft.configs.length) filtered.draft.configs.push({ label: "Standard", requirements: {} });
-      // Katz defaults: 3/8" compression valve inlet, plug + breaker from the electrical configuration.
-      const draft = applySpecDefaults(filtered.draft, "generate");
-      return { ok: true, draft, removed: filtered.removed, usedRetry };
-    } catch (e) {
-      const msg = e instanceof Error ? (e.name === "AbortError" ? "the AI took too long" : e.message) : "unknown error";
-      return { ok: false, reason: "failed", message: `Reading the sheet failed (${msg}). Fill in the form by hand instead.` };
-    }
+    return extractSpecFromText(apiKey, text, data.fileName);
   });
 
 // ---------------- save / delete ----------------
@@ -279,9 +278,38 @@ const saveInput = z.object({
   id: z.number().int().positive().nullable().optional(),
   /** The user confirmed replacing the sheet that already has this manufacturer + model. */
   overwrite: z.boolean().optional(),
+  /** A hand entry for this model: a sheet tied to a different model is refused, not replaced. */
+  bookId: z.number().int().positive().nullable().optional(),
 });
 
-type SaveResult = { ok: true; id: number } | { ok: false; conflict: { id: number; manufacturer: string; model: string } };
+type SpecClash = { id: number; manufacturer: string; model: string };
+type SaveResult = { ok: true; id: number } | { ok: false; conflict: SpecClash };
+
+/** The sheet a save writes over: the one being edited, or the same maker + model once the user agrees to replace it. */
+export async function saveTarget(
+  sql: Sql,
+  d: { manufacturer: string; model: string },
+  data: { id?: number | null; overwrite?: boolean; bookId?: number | null },
+): Promise<{ id: number | null } | { conflict: SpecClash }> {
+  const same = await sql.query<SpecClash & { book_id: number | null; book_title: string | null }>(
+    `select s.id, s.manufacturer, s.model, s.book_id, b.title as book_title
+       from spec_sheets s left join library_books b on b.id = s.book_id
+      where lower(s.manufacturer) = lower($1) and lower(s.model) = lower($2) limit 1`,
+    [d.manufacturer, d.model],
+  );
+  const clash = same[0];
+  const targetId = data.id ?? null;
+  if (!clash || clash.id === targetId) return { id: targetId };
+  if (targetId) throw new Error(`${clash.manufacturer} ${clash.model} already has its own page. Open that one instead.`);
+  // Same rule as approving a read: a sheet on another model is never moved or overwritten from here.
+  if (data.bookId && clash.book_id != null && Number(clash.book_id) !== data.bookId) {
+    throw new Error(
+      `${clash.manufacturer} ${clash.model} is the spec sheet for ${clash.book_title ?? "another model"}. Nothing was saved. Use a different model name, or move that sheet here first.`,
+    );
+  }
+  if (!data.overwrite) return { conflict: { id: clash.id, manufacturer: clash.manufacturer, model: clash.model } };
+  return { id: clash.id };
+}
 
 /** Upsert the sheet and replace its configurations in ONE statement (atomic on Neon and PGLite). */
 export const saveSpecSheet = createServerFn({ method: "POST" })
@@ -305,17 +333,9 @@ export const saveSpecSheet = createServerFn({ method: "POST" })
     const labels = d.configs.map((c) => c.label.toLowerCase());
     if (new Set(labels).size !== labels.length) throw new Error("Two configurations have the same name. Rename one.");
 
-    const same = await sql.query<{ id: number; manufacturer: string; model: string }>(
-      "select id, manufacturer, model from spec_sheets where lower(manufacturer) = lower($1) and lower(model) = lower($2) limit 1",
-      [d.manufacturer, d.model],
-    );
-    const clash = same[0];
-    let targetId: number | null = data.id ?? null;
-    if (clash && clash.id !== targetId) {
-      if (targetId) throw new Error(`${clash.manufacturer} ${clash.model} already has its own page. Open that one instead.`);
-      if (!data.overwrite) return { ok: false, conflict: clash };
-      targetId = clash.id;
-    }
+    const target = await saveTarget(sql, d, data);
+    if ("conflict" in target) return { ok: false, conflict: target.conflict };
+    const targetId = target.id;
     const params = [
       d.manufacturer,
       d.model,

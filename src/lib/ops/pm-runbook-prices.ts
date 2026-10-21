@@ -22,28 +22,42 @@ export type CatalogRow = CatalogKit & { mfrPart: string | null; description: str
 /**
  * Eversys numbers its parts by six digits. The guides write them "EV117077"; NetSuite and the Parts list write the
  * same part "EVER117077", sometimes with the bare "117077" as its manufacturer number. One part, three spellings.
+ * La Marzocco parts are filed with an "LM" prefix and no space: F.3.040 is LMF.3.040, 1207 is LM1207.
  */
 const eversysDigits = (key: string): string | null => /^EV(?:ER)?(\d{6})$/.exec(key)?.[1] ?? null;
 
-/** Every number a kit can be filed under in the Parts list: its own, plus the Eversys spellings of its six digits. */
-export function catalogKeys(ev: string): string[] {
+/** Parts-list prefix for a runbook manufacturer. Unknown makers have none, so matching stays as it is today. */
+export const MANUFACTURER_PREFIX: Readonly<Record<string, string>> = { "La Marzocco": "LM" };
+
+export function prefixForManufacturer(manufacturer: string | null | undefined): string | undefined {
+  if (!manufacturer) return undefined;
+  return MANUFACTURER_PREFIX[manufacturer] || undefined;
+}
+
+/** Every number a kit can be filed under in the Parts list: its own, the Eversys spellings, and the maker prefix. */
+export function catalogKeys(ev: string, prefix?: string | null): string[] {
   const k = kitKey(ev);
   if (!k) return [];
   const d = eversysDigits(k);
-  return d ? [...new Set([k, `EV${d}`, `EVER${d}`, d])] : [k];
+  const keys = d ? [k, `EV${d}`, `EVER${d}`, d] : [k];
+  const p = prefix ? kitKey(prefix) : "";
+  if (p) keys.push(`${p}${k}`);
+  return [...new Set(keys)];
 }
 
 /**
- * How closely a Parts list row matches a kit: 3 the same number, 2 the same six Eversys digits (EV / EVER),
- * 1 the bare six digits on a part that is plainly Eversys, 0 not this kit. Bare digits alone never match another
- * maker's part that happens to share them, nor an Eversys part filed under different digits ("EVER109570 … was
- * 108390" is its own part, not kit 108390).
+ * How closely a Parts list row matches a kit: 4 the maker prefix plus the kit number, 3 the same number,
+ * 2 the same six Eversys digits (EV / EVER), 1 the bare six digits on a part that is plainly Eversys, 0 not this kit.
+ * Bare digits alone never match another maker's part that happens to share them, nor an Eversys part filed under
+ * different digits ("EVER109570 … was 108390" is its own part, not kit 108390).
  */
-export function matchRank(ev: string, row: Pick<CatalogRow, "sku" | "mfrPart" | "name" | "description">): number {
+export function matchRank(ev: string, row: Pick<CatalogRow, "sku" | "mfrPart" | "name" | "description">, prefix?: string | null): number {
   const k = kitKey(ev);
   if (!k) return 0;
   const sku = kitKey(row.sku);
   const nums = [sku, kitKey(row.mfrPart)].filter(Boolean);
+  const p = prefix ? kitKey(prefix) : "";
+  if (p && nums.includes(`${p}${k}`)) return 4;
   if (nums.includes(k)) return 3;
   const d = eversysDigits(k);
   if (!d) return 0;
@@ -56,19 +70,25 @@ export function matchRank(ev: string, row: Pick<CatalogRow, "sku" | "mfrPart" | 
 }
 
 /**
- * One Parts list row per kit, keyed by `kitKey` of the kit number. Bare six digits are only a fallback, used when no
- * part carries the kit's number or its EV / EVER spelling, and only when exactly one part has them: never a guess
- * between look-alikes such as a 12- and a 24-month version. Among the rest a part that is active, visible and priced
+ * One Parts list row per kit, keyed by `kitKey` of the kit number. When a row is the maker prefix plus the kit
+ * number, bare-number rows are dropped, so another maker's "1207" cannot beat "LM1207". The bare number stays a
+ * fallback when no prefixed row is in the pool. Bare six digits are only a fallback, used when no part carries
+ * the kit's number or its EV / EVER spelling, and only when exactly one part has them: never a guess between
+ * look-alikes such as a 12- and a 24-month version. Among the rest a part that is active, visible and priced
  * wins; among equals the closer number wins, then the first row. Kits with no matching part are absent.
  */
-export function pickCatalog(evs: string[], rows: CatalogRow[]): Record<string, CatalogKit> {
+export function pickCatalog(evs: string[], rows: CatalogRow[], prefix?: string | null): Record<string, CatalogKit> {
   const out: Record<string, CatalogKit> = {};
+  const p = prefix ? kitKey(prefix) : "";
   for (const ev of evs) {
     const k = kitKey(ev);
     if (!k || out[k]) continue;
-    const ranked = rows.map((r) => ({ r, rank: matchRank(ev, r) })).filter((x) => x.rank > 0);
-    const pool = ranked.some((x) => x.rank > 1) ? ranked.filter((x) => x.rank > 1) : ranked;
+    const ranked = rows.map((r) => ({ r, rank: matchRank(ev, r, prefix) })).filter((x) => x.rank > 0);
+    let pool = ranked.some((x) => x.rank > 1) ? ranked.filter((x) => x.rank > 1) : ranked;
     if (pool.length > 1 && pool.every((x) => x.rank === 1)) continue;
+    const prefixed = p ? `${p}${k}` : "";
+    const isPrefixed = (r: CatalogRow) => prefixed !== "" && [kitKey(r.sku), kitKey(r.mfrPart)].includes(prefixed);
+    if (prefixed && pool.some((x) => isPrefixed(x.r))) pool = pool.filter((x) => isPrefixed(x.r));
     let pick: CatalogRow | null = null;
     let best = 0;
     for (const { r, rank } of pool) {

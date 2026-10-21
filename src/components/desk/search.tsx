@@ -1,4 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { fromFor } from "@/lib/ops/search-params";
 import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ export function GlobalSearch() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const here = useLocation();
   const delayed = useDebounced(q, 180);
   const results = useQuery({
     queryKey: ["search", delayed],
@@ -81,7 +83,7 @@ export function GlobalSearch() {
                       if (to === "/") {
                         void navigate({ to: "/" });
                       } else {
-                        void navigate({ to, search: { open: h.id } });
+                        void navigate({ to, search: { open: h.id, from: fromFor(here, to) } });
                       }
                       setOpen(false);
                       setQ("");

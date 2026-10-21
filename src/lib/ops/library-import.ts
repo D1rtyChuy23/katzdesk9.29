@@ -633,3 +633,60 @@ export const resolveImportDuplicates = createServerFn({ method: "POST" })
     }
     return { applied: true, twins, differentSize };
   });
+
+export type ImportPendingRow = { key: string; label: string };
+
+/** How many Library Import uploads are still waiting. Does not download anything. */
+export const libraryImportPending = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .handler(async ({ context }): Promise<{ left: number; rows: ImportPendingRow[] }> => {
+    const sql = await ready();
+    await requireLibraryAdmin(sql, context.userId);
+    const books = (
+      await sql.query<{ id: number; title: string; manufacturer: string | null; mpn: string | null }>(
+        "select id, title, manufacturer, mpn from library_books",
+      )
+    ).map((b) => ({ id: Number(b.id), title: b.title, manufacturer: b.manufacturer ?? "", mpn: b.mpn ?? null }));
+    const files = (
+      await sql.query<{ id: number; name: string; original_name: string | null; size: number; section: string; book_id: number | null; complete: boolean; mpn: string | null }>(
+        "select id, name, original_name, size, section, book_id, complete, mpn from library_files where section <> 'training'",
+      )
+    ).map((f) => ({
+      id: Number(f.id),
+      name: f.name,
+      docName: f.original_name,
+      size: Number(f.size),
+      section: (sectionOf(f.section) ?? "manuals") as LibrarySection,
+      bookId: f.book_id == null ? null : Number(f.book_id),
+      complete: !!f.complete,
+      mpn: f.mpn,
+    }));
+    const logged = await sql.query<{ url: string | null; book_id: number | null; action: string; reason: string | null }>(
+      `select distinct on (coalesce(url, ''), coalesce(book_id, 0)) url, book_id, action, reason
+         from library_import_log
+        order by coalesce(url, ''), coalesce(book_id, 0), id desc`,
+    );
+    const settled = new Set(
+      logged
+        .filter((r) => {
+          if (!r.url) return false;
+          if (r.action === "OK" || r.action === "SKIP") return true;
+          return r.action === "FAIL" && importFailureSettled(r.reason ?? "");
+        })
+        .map((r) => `${r.url}|${r.book_id ?? ""}`),
+    );
+    const rows: ImportPendingRow[] = [];
+    for (const upload of data.uploads) {
+      const targets = upload.targets.flatMap((target) => {
+        const section = sectionOf(target.section);
+        return section ? [{ bookId: target.bookId, section, docType: target.docType, name: target.name }] : [];
+      });
+      for (const dest of collapseImportTargets(targets, books)) {
+        if (dest.bookId == null) continue;
+        if (settled.has(`${upload.url}|${dest.bookId}`)) continue;
+        if (importSkipReason({ name: dest.name, size: -1, section: dest.section, bookId: dest.bookId }, books, files)) continue;
+        rows.push({ key: `${upload.url}|${dest.bookId}`, label: `${dest.bookTitle}: ${dest.name}` });
+      }
+    }
+    return { left: rows.length, rows };
+  });

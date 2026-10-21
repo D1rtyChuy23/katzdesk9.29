@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { test } from "node:test";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
 import { kitKey, priceKits, summarizePrices, uncountedNote } from "../src/lib/ops/pm-runbook-prices.ts";
@@ -7,10 +7,14 @@ import {
   canEditRunbookDefinitions,
   canWriteRunbook,
   defaultConfig,
+  historyInterval,
   intervalFromStyle,
+  milestoneAge,
   nextFromHistory,
   recommendInterval,
+  visitCarriesShorter,
   changeAddedKits,
+  CHECK_KEY_RE,
   kitList,
   kitListText,
   kitListWithAdded,
@@ -41,6 +45,7 @@ import {
   moduleOnThisPm,
   moduleTypeFit,
   normalizeConfig,
+  parseAddedKits,
   platformFit,
   pmServiceRecord,
   applicableModules,
@@ -264,12 +269,73 @@ test("La Marzocco style, history and combined-visit text", () => {
   assert.equal(next("3", "6"), "3");
   assert.equal(next("3", "6", "3"), "12");
   assert.equal(next("3", "6", "3", "12"), "3");
+  assert.equal(next("6"), "3");
+  assert.equal(next("12", "6"), "3");
+  assert.equal(next("6", "3"), "12");
+  assert.equal(next("12", "6", "3"), "12");
+  assert.equal(next("6", "3", "3"), "12");
+  assert.equal(next("3", "6", "6"), "12");
+  assert.equal(next("6", "6", "6"), "12");
+  assert.equal(next("6", "6"), "12");
   assert.equal(combinedVisitNotes(def).history, ", the 12 + 36 together visit");
   assert.equal(combinedVisitNotes(def).recommended, " (12 + 36 together)");
-  assert.equal(combinedVisitNotes(linea).history, ", the 3/9-month and 12-month PMs together");
-  assert.equal(combinedVisitNotes(linea).recommended, " (the 3/9-month and 12-month PMs together)");
+  assert.equal(combinedVisitNotes(linea).history, "");
+  assert.equal(combinedVisitNotes(linea).recommended, "");
+  assert.equal(recommendInterval(linea, "2026-05-18", new Date("2026-10-18T15:00:00Z"))?.combined, false);
+  assert.equal(nextFromHistory(linea, ["3"])?.combined, false);
+  assert.equal(recommendInterval(def, "2023-03-10", new Date("2026-03-20T00:00:00Z"))?.combined, true);
+  assert.equal(nextFromHistory(def, ["12", "12"])?.combined, true);
+  const gs3 = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/la-marzocco-gs3.json", import.meta.url), "utf8")));
+  assert.equal(visitCarriesShorter(gs3, "12"), true);
+  assert.equal(nextFromHistory(gs3, ["6", "6"])?.id, "6");
+  assert.equal(gs3.intervals.find((i) => i.id === "12")?.label, "12-month PM");
   assert.equal(modulesNotTakenReason(linea, "pb", false), "Linea PB does not take Eversys modules.");
   assert.equal(modulesNotTakenReason(def, "4s", true), null);
+});
+
+test("the default 12-month style waits for the install date on La Marzocco", () => {
+  const linea = parseRunbookDefinition(JSON.parse(readFileSync(new URL("../src/lib/ops/runbooks/la-marzocco-linea.json", import.meta.url), "utf8")));
+  const now = new Date("2026-10-18T15:00:00Z");
+  const pm = (install, style, earlier = []) => visitConfig(linea, { style, installDate: install, earlierIntervals: earlier, model: "pb", now }).pm;
+  assert.equal(pm("2026-07-18", "12 month PM"), "3");
+  assert.equal(visitConfig(linea, { style: " 12 Month PM ", installDate: "2026-07-18", model: "pb", now }).pm, "3");
+  assert.equal(pm("2026-04-18", "12 month PM"), "6");
+  assert.equal(pm(null, "12 month PM", ["3"]), "6");
+  assert.equal(pm(null, "12 month PM", ["3", "6", "3"]), "12");
+  assert.equal(historyInterval(linea, null, "12 month PM"), null);
+  assert.equal(historyInterval(linea, "6", "12 month PM"), "6");
+  assert.equal(historyInterval(def, null, "12 month PM"), "12");
+  assert.equal(pm("2026-07-18", "6 month PM"), "6");
+  assert.equal(pm(null, "12 month PM"), "12");
+  const eversys = (style) => visitConfig(def, { style, installDate: "2023-10-10", model: "4s", now }).pm;
+  assert.equal(eversys("12 month PM"), "12");
+  assert.equal(eversys("6 month PM"), "36");
+  assert.equal(milestoneAge(3), "month 3");
+  assert.equal(milestoneAge(36), "year 3");
+  assert.equal(recommendInterval(linea, "2026-05-31", new Date("2026-10-01T00:00:00Z"))?.id, "3");
+  assert.equal(recommendInterval(linea, "2026-05-01", new Date("2026-09-30T00:00:00Z"))?.id, "6");
+  const oldNext = (prior) => {
+    const ids = [12, 36];
+    const short = 12;
+    const long = 36;
+    let run = 0;
+    for (const raw of prior) {
+      const n = Number(raw);
+      run = n >= long && long > short ? 0 : run + 1;
+    }
+    const mark = (run + 1) * short;
+    return String([...ids].reverse().find((id) => mark % id === 0) ?? short);
+  };
+  const sequences = [[]];
+  for (let len = 1; len <= 6; len++) {
+    const next = [];
+    for (const seq of sequences) for (const id of ["12", "36"]) next.push([...seq, id]);
+    sequences.push(...next);
+  }
+  for (const seq of sequences) {
+    if (!seq.length) continue;
+    assert.equal(nextFromHistory(def, seq)?.id, oldNext(seq), seq.join(","));
+  }
 });
 
 test("units: pieceKey is the key a line had before it matched an account unit", () => {
@@ -529,4 +595,67 @@ test("history for a unit is newest first, and one machine does not show the othe
     note(B, "B3", new Date("2026-10-03T00:00:00Z")),
   ];
   assert.deepEqual(unitHistory(B, busy, []).map((l) => l.detail).sort(), ["Added B1", "Added B2", "Added B3"]);
+});
+
+test("a kit note made before a twin is logged stays on that machine", () => {
+  const text = "e'4m X-Wide\ne'4m X-Wide";
+  const before = planUnits(text, [], matcher);
+  const note = addedKitDetail("Added EV109586 Hydraulic module Standard (36-month kit)", before[0].unitKey, before[0].pieceKey);
+  const after = planUnits(text, [{ id: 5, catalogModel: "e'4m X-Wide", equipmentName: "e'4m X-Wide", serial: "SN5" }], matcher);
+  assert.equal(after[0].unitKey, "acct:5");
+  const rows = [{ who: "Chuy", action: "kit added", detail: note, at: "2026-10-01T00:00:00Z" }];
+  assert.equal(unitHistory(after[0], rows, []).length, 1);
+  assert.equal(unitHistory(after[1], rows, []).length, 0);
+  assert.equal(kitHistoryMatches({ unitKey: "acct:5", pieceKey: "piece:x#1" }, addedKitDetail("Added EV109586", "piece:x#1", "piece:x#1")), true);
+  assert.equal(kitHistoryMatches({ unitKey: before[0].unitKey, pieceKey: after[1].pieceKey }, note), false);
+});
+
+test("no step names two kit numbers that are optional on some visit", () => {
+  const dir = new URL("../src/lib/ops/runbooks/", import.meta.url);
+  const defs = readdirSync(dir)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => parseRunbookDefinition(JSON.parse(readFileSync(new URL(name, dir), "utf8"))));
+  const configsOf = (rb) => {
+    const axes = [
+      ["model", rb.models.map((m) => m.id)],
+      ["pm", rb.intervals.map((i) => i.id)],
+      ...rb.options.map((o) => [o.key, o.choices.map((c) => c.val)]),
+    ];
+    const out = [];
+    const walk = (i, cur) => {
+      if (i === axes.length) {
+        out.push(cur);
+        return;
+      }
+      const [key, vals] = axes[i];
+      for (const v of vals) walk(i + 1, { ...cur, [key]: v });
+    };
+    walk(0, {});
+    return out;
+  };
+  for (const rb of defs) {
+    const optional = new Set();
+    for (const config of configsOf(rb)) for (const kit of optionalKits(rb, config)) optional.add(kit.ev);
+    for (const group of rb.steps) {
+      for (const step of group.items) {
+        const blob = `${step.text} ${step.ref ?? ""}`;
+        const named = [...optional].filter((ev) => blob.includes(ev));
+        assert.ok(named.length <= 1, `${rb.id} ${step.id} names ${named.join(", ")}`);
+      }
+    }
+  }
+});
+
+test("every kit number can be stored and ticked, including a slash", () => {
+  const dir = new URL("../src/lib/ops/runbooks/", import.meta.url);
+  const defs = readdirSync(dir)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => parseRunbookDefinition(JSON.parse(readFileSync(new URL(name, dir), "utf8"))));
+  assert.ok(defs.length >= 6);
+  for (const def of defs) {
+    for (const kit of def.kits) {
+      assert.deepEqual(parseAddedKits([kit.ev]), [kit.ev], `${def.id} ${kit.ev}`);
+      assert.equal(CHECK_KEY_RE.test(`kit:${kit.ev}`), true, `${def.id} kit:${kit.ev}`);
+    }
+  }
 });

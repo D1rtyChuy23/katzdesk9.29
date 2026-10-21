@@ -8,57 +8,41 @@ import { canonicalTechName } from "./tech-match.ts";
 const MAX_LINES = 8;
 const MAX_CHARS = 160;
 
-export const TEAMS_CHAT_IDS = [
-  "big-tymers",
-  "purchase-orders",
-  "rep-sean",
-  "rep-shannon",
-  "rep-amanda",
-  "rep-liz",
-  "rep-chelsea",
-  "rep-iliana",
-  "dfw",
-  "sa-atx",
-  "service-monkeys",
-  "k-team",
-  "dm-ryan",
-  "dm-josh",
-  "dm-lance",
-  "dm-oliver",
-  "dm-charles",
-  "dm-cory",
-] as const;
-export type TeamsChatId = (typeof TEAMS_CHAT_IDS)[number];
-
-export type TeamsChatGroup = "Service" | "Orders" | "Reps" | "Regions" | "Leadership" | "Techs";
+/** What a chat's note lists. `target` names the rep, region (dfw | sa-atx | other) or tech for those feeds. "none" has no automatic note. */
+export const TEAMS_FEEDS = ["service", "orders", "rep", "region", "leadership", "tech", "none"] as const;
+export type TeamsFeed = (typeof TEAMS_FEEDS)[number];
 
 export type TeamsChat = {
-  id: TeamsChatId;
+  id: string;
   name: string;
-  group: TeamsChatGroup;
+  group: string;
   kind: "group" | "dm";
   about: string;
+  feed: TeamsFeed;
+  target: string | null;
 };
 
+/** The built-in chats, same as the teams_chats seed. Used when that table is empty. */
 export const TEAMS_CHATS: TeamsChat[] = [
-  { id: "big-tymers", name: "Big Tymers, Big Poppin", group: "Service", kind: "group", about: "Main service tracker. What needs attention." },
-  { id: "purchase-orders", name: "Purchase Order Requests", group: "Orders", kind: "group", about: "Parts and water-filter orders to place in NetSuite." },
-  { id: "rep-sean", name: "Sean's Customers' Request", group: "Reps", kind: "group", about: "Sean Marshall's customer service calls." },
-  { id: "rep-shannon", name: "Shannon's Customers' Request", group: "Reps", kind: "group", about: "Shannon Cafourek's customer service calls." },
-  { id: "rep-amanda", name: "Amanda's Customers' Request", group: "Reps", kind: "group", about: "Amanda Logg's customer service calls." },
-  { id: "rep-liz", name: "Liz's Customers' Request", group: "Reps", kind: "group", about: "Lizbeth Romero's customer service calls." },
-  { id: "rep-chelsea", name: "Chelsea's Customers' Request", group: "Reps", kind: "group", about: "Chelsea's customer service calls." },
-  { id: "rep-iliana", name: "Iliana's Customers' Request", group: "Reps", kind: "group", about: "Iliana's customer service calls." },
-  { id: "dfw", name: "DFW Service Chat", group: "Regions", kind: "group", about: "Dallas and Fort Worth service with Bill and Shannon." },
-  { id: "sa-atx", name: "SA/ATX", group: "Regions", kind: "group", about: "San Antonio and Austin service." },
-  { id: "service-monkeys", name: "Service Monkeys", group: "Regions", kind: "group", about: "Open calls outside DFW and SA/ATX that still need a tech." },
-  { id: "k-team", name: "The K Team", group: "Leadership", kind: "group", about: "This month's counts and the parts-profit total." },
-  { id: "dm-ryan", name: "Ryan Gloria", group: "Techs", kind: "dm", about: "Ryan's open calls." },
-  { id: "dm-josh", name: "Josh", group: "Techs", kind: "dm", about: "Josh's open calls." },
-  { id: "dm-lance", name: "Lance Oden", group: "Techs", kind: "dm", about: "Lance's open calls." },
-  { id: "dm-oliver", name: "Oliver Garcia", group: "Techs", kind: "dm", about: "Oliver's open calls." },
-  { id: "dm-charles", name: "Charles Foster", group: "Techs", kind: "dm", about: "Charles's open calls." },
-  { id: "dm-cory", name: "Cory Russell", group: "Techs", kind: "dm", about: "Cory's open calls." },
+  { id: "big-tymers", name: "Big Tymers, Big Poppin", group: "Service", kind: "group", about: "Main service tracker. What needs attention.", feed: "service", target: null },
+  { id: "purchase-orders", name: "Purchase Order Requests", group: "Orders", kind: "group", about: "Parts and water-filter orders to place in NetSuite.", feed: "orders", target: null },
+  { id: "rep-sean", name: "Sean's Customers' Request", group: "Reps", kind: "group", about: "Sean Marshall's customer service calls.", feed: "rep", target: "Sean Marshall" },
+  { id: "rep-shannon", name: "Shannon's Customers' Request", group: "Reps", kind: "group", about: "Shannon Cafourek's customer service calls.", feed: "rep", target: "Shannon Cafourek" },
+  { id: "rep-amanda", name: "Amanda's Customers' Request", group: "Reps", kind: "group", about: "Amanda Logg's customer service calls.", feed: "rep", target: "Amanda Logg" },
+  { id: "rep-liz", name: "Liz's Customers' Request", group: "Reps", kind: "group", about: "Lizbeth Romero's customer service calls.", feed: "rep", target: "Lizbeth Romero" },
+  { id: "rep-chelsea", name: "Chelsea's Customers' Request", group: "Reps", kind: "group", about: "Chelsea's customer service calls.", feed: "rep", target: "Chelsea" },
+  { id: "rep-iliana", name: "Iliana's Customers' Request", group: "Reps", kind: "group", about: "Iliana's customer service calls.", feed: "rep", target: "Iliana" },
+  { id: "dfw", name: "DFW Service Chat", group: "Regions", kind: "group", about: "Dallas and Fort Worth service with Bill and Shannon.", feed: "region", target: "dfw" },
+  { id: "sa-atx", name: "SA/ATX", group: "Regions", kind: "group", about: "San Antonio and Austin service.", feed: "region", target: "sa-atx" },
+  { id: "service-monkeys", name: "Service Monkeys", group: "Regions", kind: "group", about: "Open calls outside DFW and SA/ATX that still need a tech.", feed: "region", target: "other" },
+  { id: "k-team", name: "The K Team", group: "Leadership", kind: "group", about: "This month's counts and the parts-profit total.", feed: "leadership", target: null },
+  { id: "dm-ryan", name: "Ryan Gloria", group: "Techs", kind: "dm", about: "Ryan's open calls.", feed: "tech", target: "Ryan Gloria" },
+  { id: "dm-josh", name: "Josh", group: "Techs", kind: "dm", about: "Josh's open calls.", feed: "tech", target: "Joshua Harper" },
+  { id: "dm-lance", name: "Lance Oden", group: "Techs", kind: "dm", about: "Lance's open calls.", feed: "tech", target: "Lance Oden" },
+  { id: "dm-oliver", name: "Oliver Garcia", group: "Techs", kind: "dm", about: "Oliver's open calls.", feed: "tech", target: "Oliver Garcia" },
+  { id: "dm-charles", name: "Charles Foster", group: "Techs", kind: "dm", about: "Charles's open calls.", feed: "tech", target: "Charles Foster" },
+  // Corey dispatches drivers; he is not a tech and gets no automatic note. The id stays so his approval history stays linked.
+  { id: "dm-cory", name: "Corey Russell", group: "Dispatch", kind: "dm", about: "Driver Dispatcher and Vehicle Maintenance", feed: "none", target: null },
 ];
 
 export function teamsChat(id: string): TeamsChat | null {
@@ -72,9 +56,9 @@ export function clipLine(raw: string): string {
 }
 
 export type TeamsDraft = {
-  id: TeamsChatId;
+  id: string;
   name: string;
-  group: TeamsChatGroup;
+  group: string;
   kind: "group" | "dm";
   about: string;
   title: string;
@@ -104,40 +88,31 @@ function firstName(raw: string): string {
   return raw.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
 }
 
-const REP_CHAT: { id: TeamsChatId; test: (rep: string) => boolean }[] = [
-  { id: "rep-sean", test: (rep) => canonicalRepName(rep) === "Sean Marshall" || firstName(rep) === "sean" },
-  { id: "rep-shannon", test: (rep) => canonicalRepName(rep) === "Shannon Cafourek" || firstName(rep) === "shannon" },
-  { id: "rep-amanda", test: (rep) => canonicalRepName(rep) === "Amanda Logg" || firstName(rep) === "amanda" },
-  { id: "rep-liz", test: (rep) => canonicalRepName(rep) === "Lizbeth Romero" || firstName(rep) === "liz" || firstName(rep) === "lizbeth" },
-  { id: "rep-chelsea", test: (rep) => firstName(rep) === "chelsea" },
-  { id: "rep-iliana", test: (rep) => firstName(rep) === "iliana" },
-];
-
-export function repChatId(rep: string | null | undefined): TeamsChatId | null {
-  const raw = (rep ?? "").trim();
-  if (!raw) return null;
-  return REP_CHAT.find((c) => c.test(raw))?.id ?? null;
+/** Same rules the built-in rep chats always used: Corrigo/rep-list name, or first name (Liz is Lizbeth, on either side). */
+function repMatches(rep: string, target: string): boolean {
+  const raw = rep.trim();
+  const want = target.trim();
+  if (!raw || !want) return false;
+  const first = (s: string) => (firstName(s) === "liz" ? "lizbeth" : firstName(s));
+  return canonicalRepName(raw) === (canonicalRepName(want) ?? want) || first(raw) === first(want);
 }
 
-const TECH_CHAT: { id: TeamsChatId; name: string }[] = [
-  { id: "dm-ryan", name: "Ryan Gloria" },
-  { id: "dm-josh", name: "Joshua Harper" },
-  { id: "dm-lance", name: "Lance Oden" },
-  { id: "dm-oliver", name: "Oliver Garcia" },
-  { id: "dm-charles", name: "Charles Foster" },
-  { id: "dm-cory", name: "Cory Russell" },
-];
+/** A roster tech matches by roster name ("Josh" is Joshua Harper). Anyone else matches by first name. */
+function techMatches(tech: string, target: string): boolean {
+  const raw = tech.trim();
+  const want = target.trim();
+  if (!raw || !want) return false;
+  const roster = canonicalTechName(want);
+  if (roster) return canonicalTechName(raw) === roster;
+  return firstName(raw) === firstName(want);
+}
 
-export function techChatId(tech: string | null | undefined): TeamsChatId | null {
-  const raw = (tech ?? "").trim();
-  if (!raw) return null;
-  const canonical = canonicalTechName(raw);
-  if (canonical) {
-    const hit = TECH_CHAT.find((t) => t.name === canonical);
-    if (hit) return hit.id;
-  }
-  if (firstName(raw) === "cory" || /\bcory russell\b/i.test(raw)) return "dm-cory";
-  return null;
+export function repChatId(rep: string | null | undefined, chats: TeamsChat[] = TEAMS_CHATS): string | null {
+  return chats.find((c) => c.feed === "rep" && repMatches(rep ?? "", c.target ?? ""))?.id ?? null;
+}
+
+export function techChatId(tech: string | null | undefined, chats: TeamsChat[] = TEAMS_CHATS): string | null {
+  return chats.find((c) => c.feed === "tech" && techMatches(tech ?? "", c.target ?? ""))?.id ?? null;
 }
 
 export type AttentionLine = { label: string; board: string; customer: string; tech: string; ref: string };
@@ -201,15 +176,11 @@ function callLine(c: OpenCall): string {
   return `${c.customer || "No account"} · ${c.status || "Open"}${when} · ${c.ref || "No number"}${issue}`;
 }
 
-function jobsForTech(calls: OpenCall[], id: TeamsChatId): OpenCall[] {
-  return calls.filter((c) => techChatId(c.tech) === id || techChatId(c.tech2) === id);
-}
-
-export function draftTeamsChat(id: TeamsChatId, snap: TeamsSnapshot): TeamsDraft {
-  const chat = teamsChat(id)!;
+export function draftTeamsChat(chat: TeamsChat, snap: TeamsSnapshot): TeamsDraft {
   const title = `${chat.name} · ${snap.when}`;
+  const target = chat.target ?? "";
   let text = "";
-  if (id === "big-tymers") {
+  if (chat.feed === "service") {
     text = [
       "What needs attention.",
       section(
@@ -223,7 +194,7 @@ export function draftTeamsChat(id: TeamsChatId, snap: TeamsSnapshot): TeamsDraft
         "None.",
       ),
     ].join("\n\n");
-  } else if (id === "purchase-orders") {
+  } else if (chat.feed === "orders") {
     text = [
       "Parts and water filters on open tickets with no purchase order. Place these in NetSuite.",
       section(
@@ -232,17 +203,16 @@ export function draftTeamsChat(id: TeamsChatId, snap: TeamsSnapshot): TeamsDraft
         "None.",
       ),
     ].join("\n\n");
-  } else if (id.startsWith("rep-")) {
-    const mine = snap.calls.filter((c) => repChatId(c.rep) === id);
+  } else if (chat.feed === "rep") {
+    const mine = snap.calls.filter((c) => repMatches(c.rep, target));
     text = [`Open service calls on your accounts.`, section("Calls", mine.map(callLine), "None.")].join("\n\n");
-  } else if (id === "dfw" || id === "sa-atx") {
-    const region = id === "dfw" ? "dfw" : "sa-atx";
-    const mine = snap.calls.filter((c) => c.region === region);
+  } else if (chat.feed === "region" && target !== "other") {
+    const mine = snap.calls.filter((c) => c.region === target);
     text = [`Open service calls in this region.`, section("Calls", mine.map(callLine), "None.")].join("\n\n");
-  } else if (id === "service-monkeys") {
+  } else if (chat.feed === "region") {
     const mine = snap.calls.filter((c) => c.region === "other" && !c.tech && !c.tech2);
     text = [`Open calls outside Dallas–Fort Worth and San Antonio–Austin that have no tech yet.`, section("Needs a tech", mine.map(callLine), "None.")].join("\n\n");
-  } else if (id === "k-team") {
+  } else if (chat.feed === "leadership") {
     const finance = snap.finance
       ? section("Parts profit", [`Sell ${snap.finance.sell} · cost ${snap.finance.cost} · margin ${snap.finance.margin}`, snap.finance.scope], "None.")
       : section("Parts profit", [], "Not included.");
@@ -255,14 +225,15 @@ export function draftTeamsChat(id: TeamsChatId, snap: TeamsSnapshot): TeamsDraft
       ),
       finance,
     ].join("\n\n");
-  } else {
-    const mine = jobsForTech(snap.calls, id);
+  } else if (chat.feed === "tech") {
+    const mine = snap.calls.filter((c) => techMatches(c.tech, target) || techMatches(c.tech2, target));
     text = [`Your open calls.`, section("Calls", mine.map(callLine), "None.")].join("\n\n");
   }
+  // A "none" chat has no automatic note, so `text` stays empty and there is nothing to approve.
   // `text` is the approved body. The clock stamp stays on `title` so a later minute does not expire the approval.
   return { id: chat.id, name: chat.name, group: chat.group, kind: chat.kind, about: chat.about, title, text };
 }
 
-export function draftAll(snap: TeamsSnapshot): TeamsDraft[] {
-  return TEAMS_CHAT_IDS.map((id) => draftTeamsChat(id, snap));
+export function draftAll(snap: TeamsSnapshot, chats: TeamsChat[] = TEAMS_CHATS): TeamsDraft[] {
+  return chats.map((chat) => draftTeamsChat(chat, snap));
 }

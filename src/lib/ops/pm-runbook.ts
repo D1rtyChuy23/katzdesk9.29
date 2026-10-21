@@ -120,11 +120,16 @@ export function optionalKitsLeft(def: RunbookDefinition, c: RunbookConfig, added
   return optionalKits(def, c).filter((k) => !have.has(k.ev) && (!groups || groups.includes(k.module)));
 }
 
+/** Kit numbers such as EV109586, F.3.040 and SA600/K2. */
+export const KIT_NUMBER_RE = /^[A-Za-z0-9._/-]{1,40}$/;
+/** A tick key: `kit:SA600/K2` or `step:hyd-kit`. */
+export const CHECK_KEY_RE = /^(kit|step):[A-Za-z0-9._/-]{1,80}$/;
+
 export function parseAddedKits(v: unknown): string[] {
   const x = typeof v === "string" ? safeJson(v) : v;
   if (!Array.isArray(x)) return [];
   const out: string[] = [];
-  for (const n of x) if (typeof n === "string" && /^[A-Za-z0-9._-]{1,40}$/.test(n) && !out.includes(n)) out.push(n);
+  for (const n of x) if (typeof n === "string" && KIT_NUMBER_RE.test(n) && !out.includes(n)) out.push(n);
   return out;
 }
 
@@ -215,7 +220,7 @@ export type UnitHistoryLine = { who: string | null; at: string; detail: string }
 export function kitHistoryMatches(unit: { unitKey: string; pieceKey: string }, detail: string | null | undefined): boolean {
   const text = String(detail ?? "");
   const stored = addedKitStoredKeys(text);
-  if (stored.length) return stored[0] === unit.unitKey || stored[1] === unit.pieceKey;
+  if (stored.length) return (unit.unitKey.startsWith("acct:") && stored[0] === unit.unitKey) || stored[1] === unit.pieceKey;
   return text.startsWith(`${unit.unitKey}: `);
 }
 
@@ -244,16 +249,18 @@ export function unitHistory(
 
 /**
  * One statement: append the kit if it is not already stored, and write the activity row only when a row changed.
- * $1 pm id, $2 unit key, $3 runbook id, $4 kit number, $5 actor, $6 serial key, $7 detail.
+ * Also stores the visit interval the first time, and only while it is still null. Never writes a model.
+ * $1 pm id, $2 unit key, $3 runbook id, $4 kit number, $5 actor, $6 serial key, $7 detail, $8 interval (null skips it).
  */
 export function pmAddKitSql(): string {
   return `with up as (
-    insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, added_kits, updated_by, serial_key)
-    values ($1::int, $2::text, $3::text, jsonb_build_array($4::text), $5::text, $6::text)
+    insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, added_kits, updated_by, serial_key, interval_mo)
+    values ($1::int, $2::text, $3::text, jsonb_build_array($4::text), $5::text, $6::text, $8::text)
     on conflict (pm_job_id, unit_key) do update
       set added_kits = coalesce(pm_runbook_units.added_kits, '[]'::jsonb) || jsonb_build_array($4::text),
           updated_by = excluded.updated_by,
           serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key),
+          interval_mo = coalesce(pm_runbook_units.interval_mo, excluded.interval_mo),
           updated_at = now()
     where not (coalesce(pm_runbook_units.added_kits, '[]'::jsonb) @> jsonb_build_array($4::text))
     returning pm_job_id
@@ -263,6 +270,48 @@ export function pmAddKitSql(): string {
     returning id
   )
   select coalesce((select count(*) from up), 0)::int as changed`;
+}
+
+/**
+ * One statement: tick the check, and the first time this sheet is worked store the interval it is showing.
+ * The unit row is skipped when the runbook or interval is null, so a bare tick still lands.
+ * Interval is written only while null. Serial is filled only while null. A model is never written.
+ * $1 pm id, $2 unit key, $3 check key, $4 actor, $5 serial key, $6 runbook id, $7 interval.
+ */
+export function pmTickSql(): string {
+  return `with chk as (
+    insert into pm_runbook_checks (pm_job_id, unit_key, key, done_by, serial_key)
+    values ($1::int, $2::text, $3::text, $4::text, $5::text)
+    on conflict (pm_job_id, unit_key, key) do nothing
+    returning pm_job_id
+  ), up as (
+    insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, interval_mo, updated_by, serial_key)
+    select $1::int, $2::text, $6::text, $7::text, $4::text, $5::text
+     where $6::text is not null and $7::text is not null
+    on conflict (pm_job_id, unit_key) do update
+      set interval_mo = coalesce(pm_runbook_units.interval_mo, excluded.interval_mo),
+          updated_by = excluded.updated_by,
+          serial_key = coalesce(pm_runbook_units.serial_key, excluded.serial_key),
+          updated_at = now()
+    where pm_runbook_units.interval_mo is null
+    returning pm_job_id
+  )
+  select (select count(*) from chk)::int as ticked, (select count(*) from up)::int as locked`;
+}
+
+/**
+ * Model and interval for this PM unit. A null model does not replace one already stored.
+ * $1 pm id, $2 unit key, $3 runbook id, $4 model, $5 interval, $6 actor, $7 serial key.
+ */
+export function pmUnitConfigSql(): string {
+  return `insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, model, interval_mo, updated_by, serial_key)
+    values ($1, $2, $3, $4, $5, $6, $7)
+    on conflict (pm_job_id, unit_key) do update
+      set model = coalesce(excluded.model, pm_runbook_units.model),
+          interval_mo = excluded.interval_mo,
+          updated_by = excluded.updated_by,
+          serial_key = coalesce(excluded.serial_key, pm_runbook_units.serial_key),
+          updated_at = now()`;
 }
 
 /**
@@ -764,6 +813,18 @@ export function matchE4XWide(piece: string | null | undefined): { model: "4s" | 
   return { model: null };
 }
 
+/** The style a new PM and the Corrigo import store when nobody has chosen one. */
+export const DEFAULT_PM_STYLE = "12 month PM" as const;
+
+export function isDefaultPmStyle(style: string | null | undefined): boolean {
+  return String(style ?? "").trim().toLowerCase() === DEFAULT_PM_STYLE.toLowerCase();
+}
+
+/** True when this definition should not let the default style hide the install-date cycle. */
+function defersDefaultStyle(def: RunbookDefinition, style: string | null | undefined): boolean {
+  return !!def.defaultStyleLast && isDefaultPmStyle(style);
+}
+
 /** A PM style such as "36 month PM" → that interval id when the definition offers it.
  * Otherwise the largest offered interval that divides the month number ("9 month PM" → "3", "24 month PM" → "12").
  * Null when the style names no month, or no offered interval divides it ("6 month PM" on Eversys, so the install date still wins).
@@ -779,8 +840,9 @@ export function intervalFromStyle(def: RunbookDefinition, style: string | null |
 }
 
 /**
- * The interval and options for one unit on one visit. Saved choice wins, then the PM style
- * ("36 month PM"), then the install-date recommendation, then the earlier-PM history.
+ * The interval and options for one unit on one visit. Saved choice wins, then the PM style,
+ * then the install-date recommendation, then the earlier-PM history.
+ * On a definition with `defaultStyleLast`, the default style waits until after the install date and history.
  * The PM sheet, the on-site module sheet and adding a kit all use this.
  */
 export function visitConfig(
@@ -798,8 +860,76 @@ export function visitConfig(
   const recommended = recommendInterval(def, input.installDate, input.now);
   const fromHistory = recommended ? null : nextFromHistory(def, [...(input.earlierIntervals ?? [])]);
   const saved = input.savedInterval && def.intervals.some((i) => i.id === input.savedInterval) ? input.savedInterval : null;
-  const pm = saved ?? intervalFromStyle(def, input.style) ?? recommended?.id ?? fromHistory?.id ?? undefined;
+  const fromStyle = intervalFromStyle(def, input.style);
+  const pm = defersDefaultStyle(def, input.style)
+    ? saved ?? recommended?.id ?? fromHistory?.id ?? fromStyle ?? undefined
+    : saved ?? fromStyle ?? recommended?.id ?? fromHistory?.id ?? undefined;
   return normalizeConfig(def, { ...(input.options ?? {}), model: input.model ?? undefined, pm });
+}
+
+/**
+ * Interval recorded for one completed visit. A saved choice wins. The default style counts as unknown
+ * on a `defaultStyleLast` definition, so it does not pretend the visit was a 12-month PM.
+ */
+export function historyInterval(def: RunbookDefinition, savedInterval: string | null | undefined, style: string | null | undefined): string | null {
+  const saved = savedInterval && def.intervals.some((i) => i.id === savedInterval) ? savedInterval : null;
+  if (saved) return saved;
+  if (defersDefaultStyle(def, style)) return null;
+  return intervalFromStyle(def, style);
+}
+
+/** True when the equipment text or a saved choice already names a model. False opens on the first model and the tech should pick. */
+export function unitModelPicked(savedModel: string | null | undefined, matchedModel: string | null | undefined): boolean {
+  return !!(savedModel && String(savedModel).trim()) || !!(matchedModel && String(matchedModel).trim());
+}
+
+/**
+ * Group count and scales read off the equipment text. Only keys this definition offers, and only a choice it lists.
+ * Groups: "4 Group", "3-Group", "3 grp", "2 gr", a digit before AV/EE/MP/EP ("3AV", "3EE", "2 EE"), or "3G".
+ * A digit right after a decimal ("1.5G") is not a group count. Scales: "with Scales", "w/ scales", or the word "ABR", on whichever of scales/abr the definition has. Never AV alone.
+ */
+export function optionsFromPiece(def: RunbookDefinition, piece: string | null | undefined): Record<string, string> {
+  const raw = String(piece ?? "");
+  const out: Record<string, string> = {};
+  const set = (key: string, val: string) => {
+    const opt = def.options.find((o) => o.key === key);
+    if (!opt || !opt.choices.some((c) => c.val === val)) return;
+    out[key] = val;
+  };
+  const group =
+    raw.match(/\b([1-9])\s*-\s*groups?\b/i)?.[1] ??
+    raw.match(/\b([1-9])\s*groups?\b/i)?.[1] ??
+    raw.match(/\b([1-9])\s*grp\b/i)?.[1] ??
+    raw.match(/\b([1-9])\s*gr\b/i)?.[1] ??
+    raw.match(/(?:^|[^A-Za-z0-9.])([1-9])\s*(?:av|ee|mp|ep)\b/i)?.[1] ??
+    raw.match(/(?:^|[^A-Za-z0-9.])([1-9])\s*g\b/i)?.[1];
+  if (group) set("groups", group);
+  if (/\bwith\s+scales\b/i.test(raw) || /\bw\/\s*scales\b/i.test(raw) || /\babr\b/i.test(raw)) {
+    set("scales", "yes");
+    set("abr", "yes");
+  }
+  return out;
+}
+
+/** Saved options win. An empty bag takes the groups and scales read off the equipment text. */
+export function startingOptions(
+  def: RunbookDefinition,
+  piece: string | null | undefined,
+  saved: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  const bag = saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+  return Object.keys(bag).length ? bag : optionsFromPiece(def, piece);
+}
+
+/** "year 3" when the milestone is a whole number of years, otherwise "month 3". */
+export function milestoneAge(milestone: number): string {
+  return milestone % 12 === 0 ? `year ${milestone / 12}` : `month ${milestone}`;
+}
+
+/** True when this visit's kit list also carries kits from a shorter visit. A kit that names its visit (`when.pm`) does not. */
+export function visitCarriesShorter(def: RunbookDefinition, id: string): boolean {
+  const n = Number(id);
+  return def.kits.some((k) => Number(k.interval) < n && !(k.when && Object.hasOwn(k.when, "pm")));
 }
 
 /**
@@ -810,6 +940,8 @@ export function visitConfig(
  * Recommended PM interval from the unit's install date at this location, on each anniversary. Returns null
  * without a usable install date. The tech can always choose otherwise (what the customer wants, or what is
  * recommended): this only sets the default.
+ * When the shortest interval is under 12 months, age is days / 30.4375 so the day of the month counts.
+ * Eversys (shortest 12) stays on calendar months.
  */
 export function recommendInterval(
   def: RunbookDefinition,
@@ -820,44 +952,73 @@ export function recommendInterval(
   if (!m) return null;
   const start = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
   if (Number.isNaN(start.getTime()) || start.getTime() > now.getTime()) return null;
-  const months = (now.getUTCFullYear() - start.getUTCFullYear()) * 12 + (now.getUTCMonth() - start.getUTCMonth());
   const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
   if (!ids.length) return null;
   const unit = ids[0];
+  const calendar = (now.getUTCFullYear() - start.getUTCFullYear()) * 12 + (now.getUTCMonth() - start.getUTCMonth());
+  const months = unit < 12 ? (now.getTime() - start.getTime()) / 86400000 / 30.4375 : calendar;
   const milestone = Math.max(unit, Math.round(months / unit) * unit);
   const pick = [...ids].reverse().find((n) => milestone % n === 0) ?? unit;
-  return { id: String(pick), months, milestone, year: milestone / 12, combined: pick > unit };
+  return { id: String(pick), months, milestone, year: milestone / 12, combined: visitCarriesShorter(def, String(pick)) };
 }
 
 /**
  * Next interval from a unit's earlier full (completed) PMs, oldest first, for a unit with no install date.
- * `run` is how many of those PMs have happened since the last longest-interval PM.
- * The next PM is the largest interval id that divides (run + 1) × the shortest interval.
- * La Marzocco (3, 6, 12) then goes 3, 6, 3, 12. Eversys (12, 36) stays 12, 12, 36.
- * Returns null with no earlier PM to go on.
+ * `pos` is months since the last longest PM. A longest PM sets it back to 0. Any other visit advances one
+ * short step; if that visit was a longer interval than the slot it landed on, `pos` jumps to the next slot
+ * whose interval is that visit. The next PM is the largest interval that divides `pos` plus one short step.
+ * When the longest visit does not carry the shorter kits (La Marzocco, except GS3), a shorter visit stops
+ * at the slot just before a longest one, so it never uses that slot up or jumps past it.
+ * Eversys (12, 36) stays 12, 12, 36. Returns null with no earlier PM to go on.
  */
 export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]): { id: string; combined: boolean } | null {
   const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
   if (!ids.length || !priorIntervals.length) return null;
   const short = ids[0];
   const long = ids[ids.length - 1];
-  let run = 0;
+  const holdsLongest = long > short && !visitCarriesShorter(def, String(long));
+  const at = (mark: number) => [...ids].reverse().find((id) => mark % id === 0) ?? short;
+  let pos = 0;
   for (const raw of priorIntervals) {
-    const n = Number(raw);
-    run = n >= long && long > short ? 0 : run + 1;
+    const v = Number(raw);
+    if (v === long) {
+      pos = 0;
+      continue;
+    }
+    const slot = pos + short;
+    if (ids.includes(v) && v > at(slot)) {
+      let found = slot;
+      const steps = Math.max(1, Math.ceil(long / short)) * 4;
+      for (let step = 1; step <= steps; step++) {
+        const candidate = slot + step * short;
+        if (holdsLongest && at(candidate) === long) {
+          found = candidate - short;
+          break;
+        }
+        if (at(candidate) === v) {
+          found = candidate;
+          break;
+        }
+      }
+      pos = found;
+    } else {
+      pos = holdsLongest && at(slot) === long ? slot - short : slot;
+    }
   }
-  const mark = (run + 1) * short;
-  const next = [...ids].reverse().find((id) => mark % id === 0) ?? short;
-  return { id: String(next), combined: next > short };
+  const next = at(pos + short);
+  return { id: String(next), combined: visitCarriesShorter(def, String(next)) };
 }
 
 /**
  * The clause shown when a visit already includes the shorter intervals.
+ * Empty when the longest visit does not carry shorter kits (La Marzocco: one kit per visit).
  * Plain "N-month PM" labels stay "12 + 36", so the Eversys sentences do not change.
  * Any other label uses the shortest and the longest: "the 3/9-month and 12-month PMs together".
  */
 export function combinedVisitNotes(def: RunbookDefinition): { history: string; recommended: string } {
   const intervals = [...def.intervals].sort((a, b) => Number(a.id) - Number(b.id));
+  const longest = intervals[intervals.length - 1]?.id;
+  if (!longest || !visitCarriesShorter(def, longest)) return { history: "", recommended: "" };
   const plain = intervals.length > 0 && intervals.every((i) => /^\d+-month PM$/.test(i.label));
   if (plain) {
     const nums = intervals.map((i) => i.id).join(" + ");

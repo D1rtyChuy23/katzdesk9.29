@@ -1,0 +1,644 @@
+{
+  "note": "Main f3089f5 draft output for every default Teams chat over one fixed snapshot. Do not regenerate from new code.",
+  "snapshot": {
+    "when": "2026-10-17 8:00 AM CT",
+    "attention": [
+      {
+        "label": "Past due — scheduled",
+        "board": "Service",
+        "customer": "Account 0",
+        "tech": "",
+        "ref": "WO-200"
+      },
+      {
+        "label": "Open past 48 hrs",
+        "board": "TLC",
+        "customer": "Account 1",
+        "tech": "Ryan Gloria",
+        "ref": "WO-201"
+      },
+      {
+        "label": "Past due — scheduled",
+        "board": "PM",
+        "customer": "Account 2",
+        "tech": "Ryan Gloria",
+        "ref": "WO-202"
+      },
+      {
+        "label": "Open past 48 hrs",
+        "board": "Service",
+        "customer": "",
+        "tech": "",
+        "ref": "WO-203"
+      },
+      {
+        "label": "Past due — scheduled",
+        "board": "TLC",
+        "customer": "Account 4",
+        "tech": "Ryan Gloria",
+        "ref": "WO-204"
+      },
+      {
+        "label": "Open past 48 hrs",
+        "board": "PM",
+        "customer": "Account 5",
+        "tech": "Ryan Gloria",
+        "ref": ""
+      },
+      {
+        "label": "Past due — scheduled",
+        "board": "Service",
+        "customer": "Account 6",
+        "tech": "",
+        "ref": "WO-206"
+      },
+      {
+        "label": "Open past 48 hrs",
+        "board": "TLC",
+        "customer": "Account 7",
+        "tech": "Ryan Gloria",
+        "ref": "WO-207"
+      },
+      {
+        "label": "Past due — scheduled",
+        "board": "PM",
+        "customer": "Account 8",
+        "tech": "Ryan Gloria",
+        "ref": "WO-208"
+      },
+      {
+        "label": "Open past 48 hrs",
+        "board": "Service",
+        "customer": "Account 9",
+        "tech": "",
+        "ref": "WO-209"
+      },
+      {
+        "label": "Past due — scheduled",
+        "board": "TLC",
+        "customer": "Account 10",
+        "tech": "Ryan Gloria",
+        "ref": "WO-210"
+      }
+    ],
+    "duplicateWo": [
+      {
+        "wo": "WO-1182",
+        "where": "Service #2 Blue Door, PM #1 Blue Door"
+      },
+      {
+        "wo": "77",
+        "where": "Install #3 Coco, Service #9 Coco"
+      }
+    ],
+    "orders": [
+      {
+        "callId": "SC-9",
+        "customer": "Blue Door",
+        "item": "Everpure 4C",
+        "qty": "2",
+        "water": true
+      },
+      {
+        "callId": "",
+        "customer": "",
+        "item": "Gasket",
+        "qty": "",
+        "water": false
+      },
+      {
+        "callId": "SC-10",
+        "customer": "Night Owl",
+        "item": "Very long part xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "qty": "1",
+        "water": false
+      }
+    ],
+    "calls": [
+      {
+        "customer": "Cafe 1",
+        "rep": "Sean Marshall",
+        "tech": "Ryan",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Open",
+        "when": "2026-10-11",
+        "issue": "Issue 1   with   spaces",
+        "ref": "SC-101"
+      },
+      {
+        "customer": "Cafe 2",
+        "rep": "Sean Marshall",
+        "tech": "Josh",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-12",
+        "issue": "Issue 2   with   spaces",
+        "ref": "SC-102"
+      },
+      {
+        "customer": "Cafe 3",
+        "rep": "SM",
+        "tech": "Joshua Harper",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Open",
+        "when": "2026-10-13",
+        "issue": "Issue 3   with   spaces",
+        "ref": "SC-103"
+      },
+      {
+        "customer": "Cafe 4",
+        "rep": "SM",
+        "tech": "Lance",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Scheduled",
+        "when": "2026-10-14",
+        "issue": "Issue 4   with   spaces",
+        "ref": "SC-104"
+      },
+      {
+        "customer": "Cafe 5",
+        "rep": "Shannon",
+        "tech": "Lance Oden",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-15",
+        "issue": "Issue 5   with   spaces",
+        "ref": "SC-105"
+      },
+      {
+        "customer": "Cafe 6",
+        "rep": "Shannon",
+        "tech": "Oliver Garcia",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Open",
+        "when": "",
+        "issue": "Issue 6   with   spaces",
+        "ref": "SC-106"
+      },
+      {
+        "customer": "Cafe 7",
+        "rep": "Shannon Cafourek (SC)",
+        "tech": "Oliver",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Open",
+        "when": "2026-10-17",
+        "issue": "Long issue word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end",
+        "ref": "SC-107"
+      },
+      {
+        "customer": "Cafe 8",
+        "rep": "Shannon Cafourek (SC)",
+        "tech": "Charles Foster",
+        "tech2": "",
+        "region": "other",
+        "status": "Scheduled",
+        "when": "2026-10-18",
+        "issue": "Issue 8   with   spaces",
+        "ref": "SC-108"
+      },
+      {
+        "customer": "Cafe 9",
+        "rep": "Amanda Logg",
+        "tech": "Charles",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Open",
+        "when": "2026-10-19",
+        "issue": "",
+        "ref": "SC-109"
+      },
+      {
+        "customer": "Cafe 10",
+        "rep": "Amanda Logg",
+        "tech": "Cory Russell",
+        "tech2": "Jesus Garcia",
+        "region": "sa-atx",
+        "status": "Open",
+        "when": "2026-10-20",
+        "issue": "Issue 10   with   spaces",
+        "ref": "SC-110"
+      },
+      {
+        "customer": "",
+        "rep": "AL",
+        "tech": "Cory",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-21",
+        "issue": "Issue 11   with   spaces",
+        "ref": "SC-111"
+      },
+      {
+        "customer": "Cafe 12",
+        "rep": "AL",
+        "tech": "Bill McKinley",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Scheduled",
+        "when": "",
+        "issue": "Issue 12   with   spaces",
+        "ref": "SC-112"
+      },
+      {
+        "customer": "Cafe 13",
+        "rep": "Liz",
+        "tech": "3rd Party",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Open",
+        "when": "2026-10-23",
+        "issue": "Issue 13   with   spaces",
+        "ref": ""
+      },
+      {
+        "customer": "Cafe 14",
+        "rep": "Liz",
+        "tech": "Jesus Garcia",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-24",
+        "issue": "Long issue word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end",
+        "ref": "SC-114"
+      },
+      {
+        "customer": "Cafe 15",
+        "rep": "Lizbeth Romero",
+        "tech": "",
+        "tech2": "3rd Party",
+        "region": "dfw",
+        "status": "Open",
+        "when": "2026-10-25",
+        "issue": "Issue 15   with   spaces",
+        "ref": "SC-115"
+      },
+      {
+        "customer": "Cafe 16",
+        "rep": "Lizbeth Romero",
+        "tech": "Ryan Gloria",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Scheduled",
+        "when": "2026-10-26",
+        "issue": "Issue 16   with   spaces",
+        "ref": "SC-116"
+      },
+      {
+        "customer": "Cafe 17",
+        "rep": "lizbeth",
+        "tech": "Ryan",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-27",
+        "issue": "Issue 17   with   spaces",
+        "ref": "SC-117"
+      },
+      {
+        "customer": "Cafe 18",
+        "rep": "lizbeth",
+        "tech": "Josh",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Open",
+        "when": "",
+        "issue": "",
+        "ref": "SC-118"
+      },
+      {
+        "customer": "Cafe 19",
+        "rep": "Chelsea Nguyen",
+        "tech": "Joshua Harper",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Open",
+        "when": "2026-10-29",
+        "issue": "Issue 19   with   spaces",
+        "ref": "SC-119"
+      },
+      {
+        "customer": "Cafe 20",
+        "rep": "Chelsea Nguyen",
+        "tech": "Lance",
+        "tech2": "Bill McKinley",
+        "region": "other",
+        "status": "Scheduled",
+        "when": "2026-10-10",
+        "issue": "Issue 20   with   spaces",
+        "ref": "SC-120"
+      },
+      {
+        "customer": "Cafe 21",
+        "rep": "Iliana",
+        "tech": "Lance Oden",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Open",
+        "when": "2026-10-11",
+        "issue": "Long issue word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end",
+        "ref": "SC-121"
+      },
+      {
+        "customer": "",
+        "rep": "Iliana",
+        "tech": "Oliver Garcia",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Open",
+        "when": "2026-10-12",
+        "issue": "Issue 22   with   spaces",
+        "ref": "SC-122"
+      },
+      {
+        "customer": "Cafe 23",
+        "rep": "Bill McKinley",
+        "tech": "Oliver",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-13",
+        "issue": "Issue 23   with   spaces",
+        "ref": "SC-123"
+      },
+      {
+        "customer": "Cafe 24",
+        "rep": "Bill McKinley",
+        "tech": "Charles Foster",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Scheduled",
+        "when": "",
+        "issue": "Issue 24   with   spaces",
+        "ref": "SC-124"
+      },
+      {
+        "customer": "Cafe 25",
+        "rep": "",
+        "tech": "Charles",
+        "tech2": "Cory",
+        "region": "sa-atx",
+        "status": "Open",
+        "when": "2026-10-15",
+        "issue": "Issue 25   with   spaces",
+        "ref": "SC-125"
+      },
+      {
+        "customer": "Cafe 26",
+        "rep": "",
+        "tech": "Cory Russell",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-16",
+        "issue": "Issue 26   with   spaces",
+        "ref": ""
+      },
+      {
+        "customer": "Cafe 27",
+        "rep": "Melinda Warden",
+        "tech": "Cory",
+        "tech2": "",
+        "region": "dfw",
+        "status": "Open",
+        "when": "2026-10-17",
+        "issue": "",
+        "ref": "SC-127"
+      },
+      {
+        "customer": "Cafe 28",
+        "rep": "Melinda Warden",
+        "tech": "Bill McKinley",
+        "tech2": "",
+        "region": "sa-atx",
+        "status": "Scheduled",
+        "when": "2026-10-18",
+        "issue": "Long issue word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end",
+        "ref": "SC-128"
+      },
+      {
+        "customer": "Houston Cafe",
+        "rep": "Shannon Cafourek",
+        "tech": "",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-18",
+        "issue": "Grinder jammed",
+        "ref": "SC-301"
+      },
+      {
+        "customer": "El Paso Deli",
+        "rep": "",
+        "tech": "",
+        "tech2": "Lance Oden",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-18",
+        "issue": "Grinder jammed",
+        "ref": "SC-302"
+      },
+      {
+        "customer": "Tulsa Roasters",
+        "rep": "Iliana",
+        "tech": "",
+        "tech2": "",
+        "region": "other",
+        "status": "Open",
+        "when": "2026-10-18",
+        "issue": "",
+        "ref": "SC-303"
+      }
+    ],
+    "kpiScope": "Oct 1, 2026 to Oct 31, 2026 · 42 records",
+    "kpi": [
+      {
+        "label": "Service",
+        "total": 30,
+        "top": "Open 20, Scheduled 10"
+      },
+      {
+        "label": "Installs",
+        "total": 12,
+        "top": ""
+      }
+    ],
+    "finance": {
+      "scope": "This month, invoiced part lines.",
+      "sell": "$1,234.00",
+      "cost": "$400.00",
+      "margin": "$834.00"
+    }
+  },
+  "drafts": {
+    "big-tymers": {
+      "id": "big-tymers",
+      "name": "Big Tymers, Big Poppin",
+      "group": "Service",
+      "kind": "group",
+      "about": "Main service tracker. What needs attention.",
+      "title": "Big Tymers, Big Poppin · 2026-10-17 8:00 AM CT",
+      "text": "What needs attention.\n\nClock\n- Past due — scheduled · Service · Account 0 · WO-200\n- Open past 48 hrs · TLC · Account 1 · Ryan Gloria · WO-201\n- Past due — scheduled · PM · Account 2 · Ryan Gloria · WO-202\n- Open past 48 hrs · Service · No account · WO-203\n- Past due — scheduled · TLC · Account 4 · Ryan Gloria · WO-204\n- Open past 48 hrs · PM · Account 5 · Ryan Gloria · No number\n- Past due — scheduled · Service · Account 6 · WO-206\n- Open past 48 hrs · TLC · Account 7 · Ryan Gloria · WO-207\nAnd 3 more.\n\nSame work order on more than one open record\n- WO WO-1182 · Service #2 Blue Door, PM #1 Blue Door\n- WO 77 · Install #3 Coco, Service #9 Coco"
+    },
+    "purchase-orders": {
+      "id": "purchase-orders",
+      "name": "Purchase Order Requests",
+      "group": "Orders",
+      "kind": "group",
+      "about": "Parts and water-filter orders to place in NetSuite.",
+      "title": "Purchase Order Requests · 2026-10-17 8:00 AM CT",
+      "text": "Parts and water filters on open tickets with no purchase order. Place these in NetSuite.\n\nTo order\n- Water filter · SC-9 · Blue Door · Everpure 4C · qty 2\n- Part · No call id · No account · Gasket · qty 1\n- Part · SC-10 · Night Owl · Very long part xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…"
+    },
+    "rep-sean": {
+      "id": "rep-sean",
+      "name": "Sean's Customers' Request",
+      "group": "Reps",
+      "kind": "group",
+      "about": "Sean Marshall's customer service calls.",
+      "title": "Sean's Customers' Request · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls on your accounts.\n\nCalls\n- Cafe 1 · Open · 2026-10-11 · SC-101 · Issue 1 with spaces\n- Cafe 2 · Open · 2026-10-12 · SC-102 · Issue 2 with spaces\n- Cafe 3 · Open · 2026-10-13 · SC-103 · Issue 3 with spaces\n- Cafe 4 · Scheduled · 2026-10-14 · SC-104 · Issue 4 with spaces"
+    },
+    "rep-shannon": {
+      "id": "rep-shannon",
+      "name": "Shannon's Customers' Request",
+      "group": "Reps",
+      "kind": "group",
+      "about": "Shannon Cafourek's customer service calls.",
+      "title": "Shannon's Customers' Request · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls on your accounts.\n\nCalls\n- Cafe 5 · Open · 2026-10-15 · SC-105 · Issue 5 with spaces\n- Cafe 6 · Open · SC-106 · Issue 6 with spaces\n- Cafe 7 · Open · 2026-10-17 · SC-107 · Long issue word word word word word word word word word word word word word word word word word word word word word word…\n- Cafe 8 · Scheduled · 2026-10-18 · SC-108 · Issue 8 with spaces\n- Houston Cafe · Open · 2026-10-18 · SC-301 · Grinder jammed"
+    },
+    "rep-amanda": {
+      "id": "rep-amanda",
+      "name": "Amanda's Customers' Request",
+      "group": "Reps",
+      "kind": "group",
+      "about": "Amanda Logg's customer service calls.",
+      "title": "Amanda's Customers' Request · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls on your accounts.\n\nCalls\n- Cafe 9 · Open · 2026-10-19 · SC-109\n- Cafe 10 · Open · 2026-10-20 · SC-110 · Issue 10 with spaces\n- No account · Open · 2026-10-21 · SC-111 · Issue 11 with spaces\n- Cafe 12 · Scheduled · SC-112 · Issue 12 with spaces"
+    },
+    "rep-liz": {
+      "id": "rep-liz",
+      "name": "Liz's Customers' Request",
+      "group": "Reps",
+      "kind": "group",
+      "about": "Lizbeth Romero's customer service calls.",
+      "title": "Liz's Customers' Request · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls on your accounts.\n\nCalls\n- Cafe 13 · Open · 2026-10-23 · No number · Issue 13 with spaces\n- Cafe 14 · Open · 2026-10-24 · SC-114 · Long issue word word word word word word word word word word word word word word word word word word word word word word…\n- Cafe 15 · Open · 2026-10-25 · SC-115 · Issue 15 with spaces\n- Cafe 16 · Scheduled · 2026-10-26 · SC-116 · Issue 16 with spaces\n- Cafe 17 · Open · 2026-10-27 · SC-117 · Issue 17 with spaces\n- Cafe 18 · Open · SC-118"
+    },
+    "rep-chelsea": {
+      "id": "rep-chelsea",
+      "name": "Chelsea's Customers' Request",
+      "group": "Reps",
+      "kind": "group",
+      "about": "Chelsea's customer service calls.",
+      "title": "Chelsea's Customers' Request · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls on your accounts.\n\nCalls\n- Cafe 19 · Open · 2026-10-29 · SC-119 · Issue 19 with spaces\n- Cafe 20 · Scheduled · 2026-10-10 · SC-120 · Issue 20 with spaces"
+    },
+    "rep-iliana": {
+      "id": "rep-iliana",
+      "name": "Iliana's Customers' Request",
+      "group": "Reps",
+      "kind": "group",
+      "about": "Iliana's customer service calls.",
+      "title": "Iliana's Customers' Request · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls on your accounts.\n\nCalls\n- Cafe 21 · Open · 2026-10-11 · SC-121 · Long issue word word word word word word word word word word word word word word word word word word word word word word…\n- No account · Open · 2026-10-12 · SC-122 · Issue 22 with spaces\n- Tulsa Roasters · Open · 2026-10-18 · SC-303"
+    },
+    "dfw": {
+      "id": "dfw",
+      "name": "DFW Service Chat",
+      "group": "Regions",
+      "kind": "group",
+      "about": "Dallas and Fort Worth service with Bill and Shannon.",
+      "title": "DFW Service Chat · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls in this region.\n\nCalls\n- Cafe 3 · Open · 2026-10-13 · SC-103 · Issue 3 with spaces\n- Cafe 6 · Open · SC-106 · Issue 6 with spaces\n- Cafe 9 · Open · 2026-10-19 · SC-109\n- Cafe 12 · Scheduled · SC-112 · Issue 12 with spaces\n- Cafe 15 · Open · 2026-10-25 · SC-115 · Issue 15 with spaces\n- Cafe 18 · Open · SC-118\n- Cafe 21 · Open · 2026-10-11 · SC-121 · Long issue word word word word word word word word word word word word word word word word word word word word word word…\n- Cafe 24 · Scheduled · SC-124 · Issue 24 with spaces\nAnd 1 more."
+    },
+    "sa-atx": {
+      "id": "sa-atx",
+      "name": "SA/ATX",
+      "group": "Regions",
+      "kind": "group",
+      "about": "San Antonio and Austin service.",
+      "title": "SA/ATX · 2026-10-17 8:00 AM CT",
+      "text": "Open service calls in this region.\n\nCalls\n- Cafe 1 · Open · 2026-10-11 · SC-101 · Issue 1 with spaces\n- Cafe 4 · Scheduled · 2026-10-14 · SC-104 · Issue 4 with spaces\n- Cafe 7 · Open · 2026-10-17 · SC-107 · Long issue word word word word word word word word word word word word word word word word word word word word word word…\n- Cafe 10 · Open · 2026-10-20 · SC-110 · Issue 10 with spaces\n- Cafe 13 · Open · 2026-10-23 · No number · Issue 13 with spaces\n- Cafe 16 · Scheduled · 2026-10-26 · SC-116 · Issue 16 with spaces\n- Cafe 19 · Open · 2026-10-29 · SC-119 · Issue 19 with spaces\n- No account · Open · 2026-10-12 · SC-122 · Issue 22 with spaces\nAnd 2 more."
+    },
+    "service-monkeys": {
+      "id": "service-monkeys",
+      "name": "Service Monkeys",
+      "group": "Regions",
+      "kind": "group",
+      "about": "Open calls outside DFW and SA/ATX that still need a tech.",
+      "title": "Service Monkeys · 2026-10-17 8:00 AM CT",
+      "text": "Open calls outside Dallas–Fort Worth and San Antonio–Austin that have no tech yet.\n\nNeeds a tech\n- Houston Cafe · Open · 2026-10-18 · SC-301 · Grinder jammed\n- Tulsa Roasters · Open · 2026-10-18 · SC-303"
+    },
+    "k-team": {
+      "id": "k-team",
+      "name": "The K Team",
+      "group": "Leadership",
+      "kind": "group",
+      "about": "This month's counts and the parts-profit total.",
+      "title": "The K Team · 2026-10-17 8:00 AM CT",
+      "text": "Oct 1, 2026 to Oct 31, 2026 · 42 records\n\nCounts\n- Service · 30 · Open 20, Scheduled 10\n- Installs · 12\n\nParts profit\n- Sell $1,234.00 · cost $400.00 · margin $834.00\n- This month, invoiced part lines."
+    },
+    "dm-ryan": {
+      "id": "dm-ryan",
+      "name": "Ryan Gloria",
+      "group": "Techs",
+      "kind": "dm",
+      "about": "Ryan's open calls.",
+      "title": "Ryan Gloria · 2026-10-17 8:00 AM CT",
+      "text": "Your open calls.\n\nCalls\n- Cafe 1 · Open · 2026-10-11 · SC-101 · Issue 1 with spaces\n- Cafe 16 · Scheduled · 2026-10-26 · SC-116 · Issue 16 with spaces\n- Cafe 17 · Open · 2026-10-27 · SC-117 · Issue 17 with spaces"
+    },
+    "dm-josh": {
+      "id": "dm-josh",
+      "name": "Josh",
+      "group": "Techs",
+      "kind": "dm",
+      "about": "Josh's open calls.",
+      "title": "Josh · 2026-10-17 8:00 AM CT",
+      "text": "Your open calls.\n\nCalls\n- Cafe 2 · Open · 2026-10-12 · SC-102 · Issue 2 with spaces\n- Cafe 3 · Open · 2026-10-13 · SC-103 · Issue 3 with spaces\n- Cafe 18 · Open · SC-118\n- Cafe 19 · Open · 2026-10-29 · SC-119 · Issue 19 with spaces"
+    },
+    "dm-lance": {
+      "id": "dm-lance",
+      "name": "Lance Oden",
+      "group": "Techs",
+      "kind": "dm",
+      "about": "Lance's open calls.",
+      "title": "Lance Oden · 2026-10-17 8:00 AM CT",
+      "text": "Your open calls.\n\nCalls\n- Cafe 4 · Scheduled · 2026-10-14 · SC-104 · Issue 4 with spaces\n- Cafe 5 · Open · 2026-10-15 · SC-105 · Issue 5 with spaces\n- Cafe 20 · Scheduled · 2026-10-10 · SC-120 · Issue 20 with spaces\n- Cafe 21 · Open · 2026-10-11 · SC-121 · Long issue word word word word word word word word word word word word word word word word word word word word word word…\n- El Paso Deli · Open · 2026-10-18 · SC-302 · Grinder jammed"
+    },
+    "dm-oliver": {
+      "id": "dm-oliver",
+      "name": "Oliver Garcia",
+      "group": "Techs",
+      "kind": "dm",
+      "about": "Oliver's open calls.",
+      "title": "Oliver Garcia · 2026-10-17 8:00 AM CT",
+      "text": "Your open calls.\n\nCalls\n- Cafe 6 · Open · SC-106 · Issue 6 with spaces\n- Cafe 7 · Open · 2026-10-17 · SC-107 · Long issue word word word word word word word word word word word word word word word word word word word word word word…\n- No account · Open · 2026-10-12 · SC-122 · Issue 22 with spaces\n- Cafe 23 · Open · 2026-10-13 · SC-123 · Issue 23 with spaces"
+    },
+    "dm-charles": {
+      "id": "dm-charles",
+      "name": "Charles Foster",
+      "group": "Techs",
+      "kind": "dm",
+      "about": "Charles's open calls.",
+      "title": "Charles Foster · 2026-10-17 8:00 AM CT",
+      "text": "Your open calls.\n\nCalls\n- Cafe 8 · Scheduled · 2026-10-18 · SC-108 · Issue 8 with spaces\n- Cafe 9 · Open · 2026-10-19 · SC-109\n- Cafe 24 · Scheduled · SC-124 · Issue 24 with spaces\n- Cafe 25 · Open · 2026-10-15 · SC-125 · Issue 25 with spaces"
+    },
+    "dm-cory": {
+      "id": "dm-cory",
+      "name": "Cory Russell",
+      "group": "Techs",
+      "kind": "dm",
+      "about": "Cory's open calls.",
+      "title": "Cory Russell · 2026-10-17 8:00 AM CT",
+      "text": "Your open calls.\n\nCalls\n- Cafe 10 · Open · 2026-10-20 · SC-110 · Issue 10 with spaces\n- No account · Open · 2026-10-21 · SC-111 · Issue 11 with spaces\n- Cafe 25 · Open · 2026-10-15 · SC-125 · Issue 25 with spaces\n- Cafe 26 · Open · 2026-10-16 · No number · Issue 26 with spaces\n- Cafe 27 · Open · 2026-10-17 · SC-127"
+    }
+  }
+}

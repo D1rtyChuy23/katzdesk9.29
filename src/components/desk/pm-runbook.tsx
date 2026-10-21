@@ -21,7 +21,7 @@ import { listModules } from "@/lib/ops/api";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { MODULE_PLATFORMS, MODULE_TYPES } from "@/lib/ops/lookups";
 import { assignModule } from "@/lib/ops/module-assign";
-import { visitBanners, applicableModules, combinedVisitNotes, kitListText, kitListWithAdded, longestIntervalId, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
+import { visitBanners, applicableModules, combinedVisitNotes, kitListText, kitListWithAdded, longestIntervalId, milestoneAge, moduleTypeFit, optionalKitsLeft, optionKeys, platformFit, stepIds, stepsForVisit, totalKits, visibleOptions } from "@/lib/ops/pm-runbook";
 import { anyFound, kitPriceParts, priceKits, summarizePrices, uncountedNote, usd } from "@/lib/ops/pm-runbook-prices";
 import { runbookById } from "@/lib/ops/runbooks";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
@@ -54,7 +54,7 @@ function Seg({
             aria-pressed={value === c.val}
             onClick={() => onPick(c.val)}
             className={cn(
-              "min-h-9 rounded-md border px-3 py-1 text-left text-sm disabled:cursor-default",
+              "min-h-9 rounded-md border px-3 py-1 text-left text-sm disabled:cursor-default disabled:opacity-60",
               value === c.val ? "border-primary bg-primary font-semibold text-primary-foreground" : "border-border bg-background",
             )}
           >
@@ -309,8 +309,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   const optional = useMemo(() => (unit && rb ? optionalKitsLeft(rb.def, unit.config, unit.addedKits) : []), [unit, rb]);
   const kitNumbers = useMemo(() => [...listed, ...optional].map((k) => k.ev), [listed, optional]);
   const priceQ = useQuery({
-    queryKey: ["pm-runbook-prices", kitNumbers.join(",")],
-    queryFn: () => getKitPrices({ data: { evs: kitNumbers } }),
+    queryKey: ["pm-runbook-prices", unit?.runbookId ?? "", kitNumbers.join(",")],
+    queryFn: () => getKitPrices({ data: { evs: kitNumbers, runbookId: unit?.runbookId } }),
     enabled: kitNumbers.length > 0,
   });
   const [armed, setArmed] = useState(false);
@@ -359,7 +359,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
       unitKey: unit.unitKey,
       runbookId: unit.runbookId,
       optionsKey: unit.optionsKey,
-      model: key === "model" ? val : c.model,
+      model: key === "model" ? val : null,
       interval: key === "pm" ? val : c.pm,
     });
   }
@@ -376,6 +376,8 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
   };
   const time = def.models.find((m) => m.id === c.model)?.time?.[c.pm];
   const together = combinedVisitNotes(def);
+  const lastPm = unit.fromHistory?.basedOn[unit.fromHistory.basedOn.length - 1];
+  const lastPmLabel = def.intervals.find((i) => i.id === lastPm?.interval)?.label ?? `${lastPm?.interval ?? ""}-month PM`;
   const header = `${customer}${unit.serial ? ` · SN ${unit.serial}` : ""}`;
 
   return (
@@ -444,8 +446,13 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Seg label="Machine" value={c.model} disabled={!canWrite} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
-        <Seg label="Service interval" value={c.pm} disabled={!canWrite} choices={def.intervals.map((i) => ({ val: i.id, label: i.label }))} onPick={(v) => pickJob("pm", v)} />
+        {canWrite && !pmDone && !unit.modelPicked ? (
+          <p className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900 sm:col-span-2">
+            The equipment text doesn't say which model this is. Pick the machine.
+          </p>
+        ) : null}
+        <Seg label="Machine" value={c.model} disabled={!canWrite || pmDone} choices={def.models.map((m) => ({ val: m.id, label: m.label }))} onPick={(v) => pickJob("model", v)} />
+        <Seg label="Service interval" value={c.pm} disabled={!canWrite || pmDone} choices={def.intervals.map((i) => ({ val: i.id, label: i.label }))} onPick={(v) => pickJob("pm", v)} />
         {visibleOptions(def, c).map((o) => (
           <Seg key={o.key} label={o.label} value={c[o.key]} disabled={!canWrite} choices={o.choices} onPick={(v) => pickOption(o.key, v)} />
         ))}
@@ -457,10 +464,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             <b>No install date on file for this unit</b>, so its PM interval cannot be worked out from its age. Add the
             install date on the account equipment.
           </span>
-          {unit.fromHistory ? (
+          {unit.fromHistory && !pmDone ? (
             <span className="flex flex-wrap items-center justify-between gap-2">
               <span>
-                Suggested from the last full PM ({unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.interval}-month, PM #
+                Suggested from the last full PM ({lastPmLabel}, PM #
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.pmId}
                 {unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt
                   ? `, ${unit.fromHistory.basedOn[unit.fromHistory.basedOn.length - 1]?.completedAt}`
@@ -474,18 +481,19 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                 </Button>
               ) : null}
             </span>
-          ) : (
+          ) : !unit.fromHistory && !pmDone ? (
             <span>No earlier full PM on record for this unit either, so choose the interval yourself.</span>
-          )}
+          ) : null}
         </div>
       ) : null}
 
       {unit.recommended && unit.recommended.id !== c.pm ? (
+        pmDone ? null : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
             Recommended: <b>{unit.recommended.label}</b>
-            {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is year{" "}
-            {unit.recommended.year} at this location. Choose otherwise if the customer wants a different service.
+            {unit.recommended.combined ? together.recommended : ""}. Installed {unit.installDate}, so this is{" "}
+            {milestoneAge(unit.recommended.milestone)} at this location. Choose otherwise if the customer wants a different service.
           </span>
           {canWrite ? (
             <Button type="button" size="sm" variant="outline" onClick={() => pickJob("pm", unit.recommended!.id)}>
@@ -493,9 +501,10 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
             </Button>
           ) : null}
         </div>
+        )
       ) : unit.recommended ? (
         <p className="text-xs text-muted-foreground">
-          Matches the recommendation from the install date ({unit.installDate}, year {unit.recommended.year}).
+          Matches the recommendation from the install date ({unit.installDate}, {milestoneAge(unit.recommended.milestone)}).
         </p>
       ) : null}
 
@@ -597,7 +606,7 @@ export function PmRunbook({ pmId, customer }: { pmId: number; customer: string }
                       </span>
                       <span className="font-mono text-base font-semibold whitespace-nowrap">
                         x{k.q}
-                        <small className="block text-right text-[10px] font-normal text-muted-foreground">{k.interval} mo</small>
+                        <small className="block text-right text-[10px] font-normal text-muted-foreground">{(def.intervals.find((i) => i.id === String(k.interval))?.label ?? `${k.interval}-month PM`).replace(/\s*PM\b.*$/, "")}</small>
                       </span>
                     </label>
                     {k.added && canChangeKits ? (

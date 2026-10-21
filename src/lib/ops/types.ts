@@ -417,6 +417,8 @@ export type CustomerHistory = {
   accountNumber?: string | null;
   /** The viewer may set the account number (Admin role or desk admin). */
   canEditAccountNumber?: boolean;
+  /** Sales reps NetSuite has on this account. Read-only. Primary Sales Rep is accountRep. */
+  salesReps?: { name: string; role: string | null; pct: number | null; primary: boolean }[];
   jobs: ServiceJob[];
   pms: PmJob[];
   installs: Install[];

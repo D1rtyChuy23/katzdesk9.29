@@ -125,6 +125,10 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
       void qc.invalidateQueries({ queryKey: ["comments"] });
+      void qc.invalidateQueries({ queryKey: ["charges"] });
+      void qc.invalidateQueries({ queryKey: ["invoice"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       if (row?.id && row.id !== activeId) showTicket(row.id);
     },

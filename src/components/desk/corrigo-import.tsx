@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { applyCorrigoImport, previewCorrigoImport } from "@/lib/ops/corrigo-import";
-import type { CorrigoApplyResult, CorrigoPreview } from "@/lib/ops/corrigo-import";
-import { isWalkIn, type CorrigoPreviewRow } from "@/lib/ops/corrigo";
+import type { CorrigoApplyResult } from "@/lib/ops/corrigo-import";
+import {
+  chunkByBytes,
+  COL_LABEL,
+  isWalkIn,
+  mergeCorrigoPreviews,
+  type CorrigoPreview,
+  type CorrigoPreviewRow,
+} from "@/lib/ops/corrigo";
+import { readCorrigoFile } from "@/lib/ops/corrigo-file";
+import { woBoardName } from "@/lib/ops/wo-search";
 import { addDirectoryEntry, updateCustomerAccount } from "@/lib/ops/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,17 +32,18 @@ import { ActionButton } from "@/components/desk/desk-charts";
 
 export type CorrigoReviewItem = CorrigoApplyResult["review"][number];
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read that file."));
-    reader.onload = () => {
-      const result = String(reader.result ?? "");
-      const comma = result.indexOf(",");
-      resolve(comma >= 0 ? result.slice(comma + 1) : result);
-    };
-    reader.readAsDataURL(file);
-  });
+/** "2 created on Installs" or "3 created (2 on Tickets, 1 on PMs)". */
+function createdText(res: CorrigoApplyResult): string {
+  const byBoard = new Map<string, number>();
+  for (const item of res.review) {
+    if (!item.created) continue;
+    const board = woBoardName(item.entityType);
+    byBoard.set(board, (byBoard.get(board) ?? 0) + 1);
+  }
+  const boards = [...byBoard];
+  if (boards.length === 1) return `${res.created} created on ${boards[0][0]}`;
+  if (!boards.length) return `${res.created} created`;
+  return `${res.created} created (${boards.map(([board, n]) => `${n} on ${board}`).join(", ")})`;
 }
 
 export function CorrigoImportButton({
@@ -49,8 +59,16 @@ export function CorrigoImportButton({
 
   const load = useMutation({
     mutationFn: async (file: File) => {
-      const base64 = await fileToBase64(file);
-      return previewCorrigoImport({ data: { filename: file.name, base64 } });
+      const parsed = await readCorrigoFile(file);
+      const parts = [];
+      // A later chunk must not attach a row to an install an earlier chunk's row took.
+      const claimedInstalls: number[] = [];
+      for (const records of chunkByBytes(parsed.records)) {
+        const part = await previewCorrigoImport({ data: { records, claimedInstalls: [...claimedInstalls] } });
+        for (const r of part.rows) if (r.byEquipment && r.jobId) claimedInstalls.push(r.jobId);
+        parts.push(part);
+      }
+      return mergeCorrigoPreviews(parts, parsed);
     },
     onSuccess: (data, file) => {
       setFileName(file.name);
@@ -61,14 +79,45 @@ export function CorrigoImportButton({
   });
 
   const apply = useMutation({
-    mutationFn: (rows: CorrigoPreview["rows"]) => applyCorrigoImport({ data: { rows } }),
+    mutationFn: async (rows: CorrigoPreview["rows"]) => {
+      const out: CorrigoApplyResult = { updated: 0, created: 0, review: [] };
+      const seen = new Set<string>();
+      for (const chunk of chunkByBytes(rows.filter((r) => r.action !== "skip"))) {
+        let res: CorrigoApplyResult;
+        try {
+          res = await applyCorrigoImport({ data: { rows: chunk } });
+        } catch (e) {
+          const why = e instanceof Error ? e.message : "Could not import";
+          if (!out.updated && !out.created) throw e;
+          // Tickets the earlier chunks created still go to For Review. Rows the failed chunk wrote first aren't counted.
+          onImported(out.review);
+          throw new Error(
+            `Stopped after at least ${out.updated + out.created} rows were saved: ${why} Importing the same file again is safe — rows match by WO.`,
+          );
+        }
+        out.updated += res.updated;
+        out.created += res.created;
+        // Each chunk re-checks held merges, so the same ticket can come back twice.
+        for (const item of res.review) {
+          const key = `${item.entityType}-${item.id}`;
+          if (!seen.has(key)) out.review.push(item);
+          seen.add(key);
+        }
+      }
+      return out;
+    },
     onSuccess: (res) => {
+      const notMerged = res.review.filter((item) => item.reason === "merge").length;
       toast.success(
-        `Corrigo import saved · ${res.updated} updated · ${res.created} created`,
+        `Corrigo import saved · ${res.updated} updated · ${createdText(res)}${notMerged ? ` · ${notMerged} not merged` : ""}`,
       );
       setOpen(false);
       setPreview(null);
       onImported(res.review);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not import"),
+    // Earlier chunks may be saved even when a later one fails.
+    onSettled: () => {
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["job"] });
       void qc.invalidateQueries({ queryKey: ["pms"] });
@@ -77,8 +126,10 @@ export function CorrigoImportButton({
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
+      void qc.invalidateQueries({ queryKey: ["charges"] });
+      void qc.invalidateQueries({ queryKey: ["invoice"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not import"),
   });
 
   function cancel() {
@@ -247,20 +298,23 @@ function PreviewBody({
           <span className="font-medium">{unchecked}</span> unchecked (will skip)
         </li>
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-          {preview.unmapped.length
-            ? `${preview.unmapped.length} unmapped status${preview.unmapped.length === 1 ? "" : "es"}`
-            : "No unmapped statuses"}
+          {preview.missing.includes("status")
+            ? "No status column"
+            : preview.unmapped.length
+              ? `${preview.unmapped.length} unmapped status${preview.unmapped.length === 1 ? "" : "es"}`
+              : "No unmapped statuses"}
         </li>
       </ul>
       {preview.wrapCount ? (
         <p className="mt-3 text-xs text-muted-foreground">
-          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 —
-          those stay on For review so nobody merges two different jobs
+          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 or{" "}
+          {preview.wrapCount === 1 ? "shares" : "share"} it with another customer&apos;s ticket — those stay on For review so
+          nobody merges two different jobs
           {preview.conflictCount
             ? ` · ${preview.conflictCount} already on more than one ticket`
             : ""}
           {preview.skipped
-            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} with no ST#`
+            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} without an ST# number`
             : ""}
           .
         </p>
@@ -269,19 +323,36 @@ function PreviewBody({
           {preview.conflictCount} WO conflict{preview.conflictCount === 1 ? "" : "s"} already on more
           than one ticket — import updates the original and flags the rest to merge
           {preview.skipped
-            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} with no ST#`
+            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} without an ST# number`
             : ""}
           .
         </p>
       ) : preview.skipped ? (
         <p className="mt-3 text-xs text-muted-foreground">
-          {preview.skipped} row{preview.skipped === 1 ? "" : "s"} with no ST#.
+          {preview.skipped} row{preview.skipped === 1 ? "" : "s"} without an ST# number.
+        </p>
+      ) : null}
+      <p className="mt-3 text-xs text-muted-foreground" data-testid="corrigo-columns">
+        Read from file:{" "}
+        {(Object.keys(COL_LABEL) as (keyof typeof COL_LABEL)[])
+          .map((c) => `${COL_LABEL[c]} ← ${preview.columns[c] ?? "not found"}`)
+          .join(" · ")}
+      </p>
+      {preview.missing.includes("status") ? (
+        <p className="mt-2 text-xs text-warning" data-testid="corrigo-no-status">
+          No status column found. Existing tickets keep their status; new tickets open as Open, Pending
+          Scheduling or Not Ready, by board.
+        </p>
+      ) : null}
+      {preview.missing.includes("completedAt") ? (
+        <p className="mt-2 text-xs text-warning" data-testid="corrigo-no-completed">
+          No completed-date column found. Completed dates on existing tickets will not change.
         </p>
       ) : null}
       {preview.unmapped.length ? (
         <p className="mt-3 text-xs text-muted-foreground">
           Unmapped: {preview.unmapped.join(", ")}. Existing tickets keep their KatzDesk status;
-          new tickets open as Open.
+          new tickets open as Open, Pending Scheduling or Not Ready, by board.
         </p>
       ) : null}
 
@@ -362,7 +433,7 @@ function PreviewBody({
                     ) : null}
                     {r.wrapRepeat ? (
                       <span className="mt-0.5 block text-[11px] font-normal tracking-wide text-warning uppercase">
-                        Repeated after 9999
+                        {r.shared ? "Number on another ticket too" : "Repeated after 9999"}
                       </span>
                     ) : null}
                     {r.conflictIds?.length ? (
@@ -401,14 +472,27 @@ function PreviewBody({
                   </td>
                   <td className="px-3 py-2 align-top">
                     {r.oldStatus ? `${r.oldStatus} → ${r.newStatus}` : r.newStatus}
-                    {r.statusUnmapped ? (
-                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                        unmapped: {r.statusUnmapped}
+                    {r.statusNote ? (
+                      <span className={`mt-0.5 block text-[11px] ${r.statusUnmapped ? "text-warning" : "text-muted-foreground"}`}>
+                        {r.statusNote}
                       </span>
                     ) : null}
                   </td>
                   <td className="px-3 py-2 align-top">{r.technician || "—"}</td>
-                  <td className="px-3 py-2 align-top whitespace-nowrap">{r.completedAt || "—"}</td>
+                  <td className="px-3 py-2 align-top">
+                    <span className="whitespace-nowrap">
+                      {r.completedKept
+                        ? r.oldCompletedAt || "—"
+                        : r.completedCleared
+                          ? `${r.oldCompletedAt} → (cleared, reopened)`
+                          : r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
+                            ? `${r.oldCompletedAt} → ${r.completedAt}`
+                            : r.completedAt || r.oldCompletedAt || "—"}
+                    </span>
+                    {r.completedNote ? (
+                      <span className="mt-0.5 block max-w-[14rem] text-[11px] text-warning">{r.completedNote}</span>
+                    ) : null}
+                  </td>
                 </tr>
               );
             })}
@@ -645,7 +729,7 @@ export function CorrigoReviewList({
         <div>
           <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For Review</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Open work from the last Corrigo file, plus ST#s that reused a number after WO-9999.
+            Open work from the last Corrigo file, every ticket it created (closed ones too), ST#s that reused a number after WO-9999 or share it with another customer&apos;s ticket, and tickets that could not be merged.
           </p>
         </div>
         <Button type="button" size="sm" variant="outline" onClick={onDismiss}>
@@ -664,10 +748,17 @@ export function CorrigoReviewList({
                 <span className="block truncate font-medium">{item.customer || "Untitled"}</span>
                 <span className="block truncate text-xs text-muted-foreground">
                   {item.wo}
-                  {item.entityType && item.entityType !== "service" ? ` · ${item.entityType}` : ""}
+                  {item.entityType && item.entityType !== "service" ? ` · ${woBoardName(item.entityType)}` : ""}
+                  {item.created ? " · new" : ""}
                   {item.technician ? ` · ${item.technician}` : ""}
-                  {item.reason === "wrap" ? " · repeated after 9999" : ""}
+                  {item.reason === "wrap" ? (item.note ? " · number on another ticket too" : " · repeated after 9999") : ""}
                 </span>
+                {item.reason === "merge" && item.note ? (
+                  <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">not merged: {item.note}</span>
+                ) : null}
+                {item.reason === "wrap" && item.note ? (
+                  <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">{item.note}</span>
+                ) : null}
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">
                 {item.reason === "wrap" && !/open|dispatch|progress|follow/i.test(item.status)

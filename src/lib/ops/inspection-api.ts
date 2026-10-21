@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
-import { listedEquipment } from "@/lib/ops/equipment";
-import { parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
+import { joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
+import { installMachines, parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -216,7 +216,7 @@ type AcctUnit = {
   electrical: string | null;
 };
 
-async function catalogNames(sql: Sql): Promise<string[]> {
+export async function catalogNames(sql: Sql): Promise<string[]> {
   const rows = await sql
     .query<{ name: string }>(
       `select name from directory_equipment where archived = false and coalesce(name, '') <> ''`,
@@ -285,7 +285,9 @@ async function writePieceFields(sql: Sql, hit: AcctUnit, piece: Piece): Promise<
   hit.electrical = nextPower;
 }
 
-function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>): AcctUnit | undefined {
+function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>, catalog: string[] = []): AcctUnit | undefined {
+  // The row's catalog name: a unit added on Pre-inspection under "Eversys Cameo c'2s - 2 Step Classic" is the row "Eversys Cameo c'2s".
+  const catalogModel = catalog.length ? matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel : null;
   const key = serialKey(piece.serial);
   if (key) {
     for (const pool of pools) {
@@ -293,15 +295,18 @@ function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>): AcctUn
       if (hit) return hit;
     }
   }
+  const power = piece.powerVoltage.trim();
   for (const pool of pools) {
-    const hit = pool.find(
-      // The account row keeps the catalog name ("Bunn ITCB-DV, 29\" w/Flip Tray") and the name from the install
-      // ("Bunn ITCB"). Either one is the same machine; matching only the catalog name added a new unit on every load.
-      (a) =>
-        !used.has(a.id) &&
-        (sameCatalogModel(a.catalog_model, piece.equipment) || sameCatalogModel(a.equipment_name, piece.equipment)) &&
-        !serialKey(a.serial),
-    );
+    // The account row keeps the catalog name ("Bunn ITCB-DV, 29\" w/Flip Tray") and the name from the install
+    // ("Bunn ITCB"). Either one is the same machine; matching only the catalog name added a new unit on every load.
+    const fits = (a: AcctUnit) =>
+      !used.has(a.id) &&
+      (sameCatalogModel(a.catalog_model, piece.equipment) ||
+        sameCatalogModel(a.equipment_name, piece.equipment) ||
+        (!!catalogModel && sameCatalogModel(a.catalog_model, catalogModel))) &&
+      !serialKey(a.serial);
+    // Two machines of one model told apart by voltage: the unit with this row's voltage first.
+    const hit = (power && pool.find((a) => fits(a) && (a.electrical ?? "").trim() === power)) || pool.find(fits);
     if (hit) return hit;
   }
   return undefined;
@@ -348,12 +353,25 @@ export async function syncInstallUnits(sql: Sql, installId: number, opts?: { pru
     [installId],
   );
   const linkedIds = new Set(links.map((l) => l.equipment_id));
-  const linkedRows = account.filter((a) => linkedIds.has(a.id));
+  // A unit with anything recorded on this visit is claimed before an empty twin, so the prune drops the empty one.
+  const recorded = new Set(
+    (
+      await sql.query<{ equipment_id: number }>(
+        `select equipment_id from install_inspection_items where install_id = $1 and (status <> 'Not inspected' or coalesce(notes, '') <> '')
+         union select equipment_id from install_inspection_photos where install_id = $1
+         union select equipment_id from install_inspection_units where install_id = $1 and (coalesce(note, '') <> '' or coalesce(visit_kind, '') <> '' or coalesce(core_needed, '') <> '')`,
+        [installId],
+      )
+    ).map((r) => r.equipment_id),
+  );
+  const linkedRows = account
+    .filter((a) => linkedIds.has(a.id))
+    .sort((a, b) => Number(recorded.has(b.id)) - Number(recorded.has(a.id)) || a.id - b.id);
   const used = new Set<number>();
   const keep = new Set<number>();
   let first: number | null = null;
   for (const piece of pieces) {
-    let hit = claimUnit(piece, [linkedRows, account], used);
+    let hit = claimUnit(piece, [linkedRows, account], used, catalog);
     if (!hit) {
       // An older combined unit that names this machine becomes this machine: its checks and photos stay with it.
       const old = linkedRows.find(
@@ -986,39 +1004,75 @@ const addEquipInput = z.object({
   electrical: z.string().nullable().optional(),
 });
 
+/**
+ * Add a machine to this install the same way the Equipment picker does: append it to the install's machine list,
+ * then sync pre-inspection from that list. A unit written only onto the visit was dropped — a second machine of
+ * the same model with no serial was deleted as a copy, and any other model was pruned the next time the card saved.
+ */
+export async function addMachineOntoInstall(
+  sql: Sql,
+  data: z.infer<typeof addEquipInput>,
+  actor: string,
+): Promise<InspectionView> {
+  const install = await sql.query<{
+    id: number;
+    customer: string;
+    equipment: string | null;
+    serial: string | null;
+    power_voltage: string | null;
+    machines: string | null;
+  }>(
+    "select id, customer, equipment, serial, power_voltage, machines from installs where id = $1 and archived = false",
+    [data.installId],
+  );
+  const row = install[0];
+  if (!row) throw new Error("Install not found");
+  const model = data.model.trim();
+  if (!model) throw new Error("Pick a model");
+  const serial = (data.serial ?? "").trim();
+  const electrical = (data.electrical ?? "").trim();
+  const key = serialKey(serial);
+  const catalog = await catalogNames(sql);
+  const { machines: current, typed } = installMachines(row, catalog);
+  if (key && current.some((m) => serialKey(m.serial) === key)) {
+    throw new Error("That serial is already on this visit.");
+  }
+  const equipment = matchModel(model, catalog);
+  const packed = serializeMachines([...current, { equipment, serial, powerVoltage: electrical }]);
+  // Typed lines stay as typed ("2 x e4s ... SN: ..."); the new machine goes on a line of its own.
+  const lines = typed ? joinEquipment([text(row.equipment), equipment]) : packed.equipment;
+  await sql.query(
+    "update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1",
+    [data.installId, lines, packed.machines, packed.serial, packed.powerVoltage],
+  );
+  await syncInstallUnits(sql, data.installId, { prune: true });
+  const view = await readInspection(sql, data.installId);
+  if (!view) throw new Error("Install not found");
+  const expected = current.filter((m) => m.equipment.trim()).length + 1;
+  if (view.machineCount < expected) throw new Error("Could not add equipment");
+  await sql
+    .query(
+      "insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)",
+      [data.installId, actor, `added ${equipment}${serial ? ` (SN ${serial})` : ""} to the install`],
+    )
+    .catch(() => undefined);
+  return view;
+}
+
 export const addInspectionEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof addEquipInput>) => addEquipInput.parse(d))
-  .handler(async ({ data }): Promise<InspectionView> => {
+  .handler(async ({ data, context }): Promise<InspectionView> => {
     const sql = await ready();
-    const install = await requireInstall(sql, data.installId);
-    await ensureUnits(sql, data.installId);
-    const key = serialKey(data.serial);
-    if (key) {
-      const existing = await sql.query<{ id: number }>(
-        `select id from account_equipment where lower(customer) = lower($1) and serial_key = $2`,
-        [install.customer, key],
-      );
-      if (existing[0]) {
-        const linked = await sql.query(
-          "select equipment_id from install_inspection_units where install_id = $1 and equipment_id = $2",
-          [data.installId, existing[0].id],
-        );
-        if (linked[0]) throw new Error("That serial is already on this visit.");
-        await linkUnit(sql, data.installId, existing[0].id);
-        const view = await readInspection(sql, data.installId);
-        if (!view) throw new Error("Install not found");
-        return view;
-      }
-    }
-    const id = await insertEquipment(sql, install.customer, data.model, data.serial ?? null, data.electrical ?? null);
-    await linkUnit(sql, data.installId, id);
-    const view = await readInspection(sql, data.installId);
-    if (!view) throw new Error("Install not found");
-    return view;
+    return addMachineOntoInstall(sql, data, await deskUsername(sql, context.userId));
   });
 
-const removeInput = z.object({ installId: z.number().int().positive(), equipmentId: z.number().int().positive() });
+const removeInput = z.object({
+  installId: z.number().int().positive(),
+  equipmentId: z.number().int().positive(),
+  /** The equipment list was already saved without this unit. Do not write it again. */
+  keepList: z.boolean().optional(),
+});
 
 /**
  * Take a machine off this install's pre-inspection: its checks, photos and note on this visit go with it. When the
@@ -1056,12 +1110,12 @@ export const removeInspectionEquipment = createServerFn({ method: "POST" })
     const used = new Set<number>();
     let at = -1;
     pieces.forEach((piece, i) => {
-      const hit = claimUnit(piece, [linked], used);
+      const hit = claimUnit(piece, [linked], used, catalog);
       if (!hit) return;
       used.add(hit.id);
       if (hit.id === data.equipmentId && at < 0) at = i;
     });
-    if (at >= 0) {
+    if (!data.keepList && at >= 0) {
       const packed = serializeMachines(pieces.filter((_, i) => i !== at));
       await sql.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5, updated_at = now() where id = $1", [
         data.installId,

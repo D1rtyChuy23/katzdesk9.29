@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { listComments } from "@/lib/ops/api";
 import {
   listRebuildLinks,
   pullRebuildSerial,
@@ -20,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { SheetTabs } from "./sheet-tabs";
 import { Badge } from "@/components/ui/badge";
 import { CustomerCombo, EquipmentCombo } from "./directory-fields";
 import { OwnerSelect } from "./owner-select";
@@ -40,6 +43,18 @@ function HealthBadge({ health }: { health: Rebuild["health"] }) {
     health === "overdue" ? "danger" : health === "at-risk" || health === "no-date" ? "warn" : health === "done" ? "outline" : "success";
   return <Badge variant={variant}>{HEALTH_LABEL[health]}</Badge>;
 }
+
+type RebuildTab = "details" | "equipment" | "invoices" | "ping";
+
+/** One category per tab, same shape as a Board install. A rebuild opens on Details. */
+const REBUILD_TABS: { id: RebuildTab; label: string }[] = [
+  { id: "details", label: "Details" },
+  { id: "equipment", label: "Equipment" },
+  { id: "invoices", label: "Invoices" },
+  { id: "ping", label: "Ping" },
+];
+
+const KEEP_MOUNTED = "outline-none data-[state=inactive]:hidden";
 
 export function RebuildSheet({
   row,
@@ -88,6 +103,14 @@ export function RebuildSheet({
     setInstallId(row.installId);
     setJobId(row.jobId);
   }, [row]);
+
+  const [tab, setTab] = useState<RebuildTab>("details");
+  useEffect(() => setTab("details"), [row?.id]);
+  const comments = useQuery({
+    queryKey: ["comments", "rebuild", row?.id],
+    queryFn: () => listComments({ data: { entityType: "rebuild", entityId: row!.id } }),
+    enabled: !!row,
+  });
 
   const links = useQuery({
     queryKey: ["rebuild-links", account],
@@ -187,12 +210,16 @@ export function RebuildSheet({
                 ? ` · ${row.daysLateEarly === 0 ? "on time" : row.daysLateEarly > 0 ? `${row.daysLateEarly} days late` : `${-row.daysLateEarly} days early`}`
                 : ""}
             </p>
-            <div className="mt-2">
-              <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} />
-            </div>
           </SheetHeader>
-          <SerialNoticeBanner notice={row.serialNotice} />
           <SheetBody>
+            <SheetTabs
+              value={tab}
+              onValueChange={setTab}
+              tabs={REBUILD_TABS.map((t) => ({ ...t, count: t.id === "ping" ? comments.data?.length || null : null }))}
+              label="Rebuild sections"
+              testId="rebuild"
+            >
+            <Tabs.Content value="details" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-details">
             <form
               className="space-y-4 px-5 py-4"
               onSubmit={(e) => {
@@ -215,29 +242,6 @@ export function RebuildSheet({
                 >
                   Katz shop / stock
                 </button>
-              </div>
-              <EquipmentCombo label="Equipment" value={equipment} onChange={setEquipment} />
-              <div>
-                <Label htmlFor="rb-serial">Serial</Label>
-                <div className="mt-1 flex gap-2">
-                  <Input
-                    id="rb-serial"
-                    value={serial}
-                    onChange={(e) => setSerial(e.target.value)}
-                    onBlur={() => {
-                      if (locked || !serial.trim()) return;
-                      pull.mutate({});
-                    }}
-                    placeholder="Type a warehouse serial"
-                    disabled={locked}
-                  />
-                  <Button type="button" variant="outline" disabled={locked || pull.isPending} onClick={() => pull.mutate({})}>
-                    Pull
-                  </Button>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Matching a warehouse serial attaches that unit. It does not create a second record.
-                </p>
               </div>
               <OwnerSelect value={owner} onChange={setOwner} />
               <div className="grid gap-3 sm:grid-cols-2">
@@ -366,12 +370,6 @@ export function RebuildSheet({
                 ) : (
                   <p className="text-xs text-muted-foreground">Sales can view this rebuild. Bench status is service-owned.</p>
                 )}
-                <PingButton
-                  entityType="rebuild"
-                  entityId={row.id}
-                  contextLabel={`${row.title} · ${row.account}`}
-                  defaultNote={`${row.title} at ${row.account}`}
-                />
                 {canEdit ? (
                   <Button
                     type="button"
@@ -393,10 +391,60 @@ export function RebuildSheet({
               </div>
               <p className="text-xs text-muted-foreground">Updated {formatShortDate(row.updatedAt.slice(0, 10))}</p>
             </form>
-            <div className="border-t border-border">
+            </Tabs.Content>
+            <Tabs.Content value="equipment" forceMount className={`space-y-4 px-5 py-4 ${KEEP_MOUNTED}`} data-testid="rebuild-panel-equipment">
+              <SerialNoticeBanner notice={row.serialNotice} />
+              <EquipmentCombo label="Equipment" value={equipment} onChange={setEquipment} />
+              <div>
+                <Label htmlFor="rb-serial">Serial</Label>
+                <div className="mt-1 flex gap-2">
+                  <Input
+                    id="rb-serial"
+                    value={serial}
+                    onChange={(e) => setSerial(e.target.value)}
+                    onBlur={() => {
+                      if (locked || !serial.trim()) return;
+                      pull.mutate({});
+                    }}
+                    placeholder="Type a warehouse serial"
+                    disabled={locked}
+                  />
+                  <Button type="button" variant="outline" disabled={locked || pull.isPending} onClick={() => pull.mutate({})}>
+                    Pull
+                  </Button>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Matching a warehouse serial attaches that unit. It does not create a second record.
+                </p>
+              </div>
+              {canEdit ? (
+                <Button type="button" disabled={save.isPending} onClick={() => save.mutate()}>
+                  {save.isPending ? "Saving…" : "Save"}
+                </Button>
+              ) : null}
+            </Tabs.Content>
+            <Tabs.Content value="invoices" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-invoices">
+              <section className="border-b border-border p-5">
+                <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Billing info for this rebuild.</p>
+                <div className="mt-3">
+                  <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} />
+                </div>
+              </section>
               <RepairQuotePanel rebuildId={row.id} key={`quote-${row.id}`} />
-            </div>
-            <Thread entityType="rebuild" entityId={row.id} />
+            </Tabs.Content>
+            <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-ping">
+              <div className="border-b border-border px-5 py-3">
+                <PingButton
+                  entityType="rebuild"
+                  entityId={row.id}
+                  contextLabel={`${row.title} · ${row.account}`}
+                  defaultNote={`${row.title} at ${row.account}`}
+                />
+              </div>
+              <Thread entityType="rebuild" entityId={row.id} />
+            </Tabs.Content>
+            </SheetTabs>
           </SheetBody>
         </SheetContent>
       </Sheet>

@@ -1,15 +1,32 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { FilterChip } from "@/components/desk/desk-charts";
 import { CustomerMap } from "@/components/desk/customer-map";
 import { TerritoryView } from "@/components/desk/territory-view";
 
-export const Route = createFileRoute("/_app/map")({ component: Page });
+type MapSearch = { account?: number; tab?: "territories" };
+
+export const Route = createFileRoute("/_app/map")({
+  validateSearch: (s: Record<string, unknown>): MapSearch => {
+    const raw = s.account;
+    const n = typeof raw === "number" ? raw : typeof raw === "string" && raw ? Number(raw) : NaN;
+    return { ...(Number.isFinite(n) && n > 0 ? { account: n } : {}), ...(s.tab === "territories" ? { tab: "territories" } : {}) };
+  },
+  component: Page,
+});
 
 type MapTab = "accounts" | "territories";
 
 function Page() {
-  const [tab, setTab] = useState<MapTab>("accounts");
+  const { account, tab: tabParam } = Route.useSearch();
+  const navigate = useNavigate();
+  // The tab and picked account live in the address, so closing an account opened from here comes back to both.
+  const tab: MapTab = tabParam ?? "accounts";
+  const go = (next: { account?: number | null; tab?: MapTab }) => {
+    const t = next.tab ?? tab;
+    const id = "account" in next ? next.account : account;
+    void navigate({ to: "/map", search: { ...(id ? { account: id } : {}), ...(t === "territories" ? { tab: t } : {}) }, replace: true, resetScroll: false });
+  };
+  const setTab = (t: MapTab) => go({ tab: t, account: null });
   return (
     <div>
       <header>
@@ -26,13 +43,22 @@ function Page() {
           <FilterChip selected={tab === "territories"} onClick={() => setTab("territories")} data-testid="map-tab-territories">
             Territories
           </FilterChip>
-          {/* Accounts with no pin or only a ZIP area pin, and the other addresses on file for them. */}
           <Link to="/address-report" className="self-center px-1 text-sm font-medium text-primary underline-offset-4 hover:underline max-sm:py-2" data-testid="map-address-report">
             Address Report
           </Link>
         </div>
       </header>
-      {tab === "accounts" ? <CustomerMap /> : <TerritoryView />}
+      {tab === "accounts" ? (
+        <CustomerMap
+          accountId={account ?? null}
+          onSelectAccount={(id) => go({ account: id })}
+        />
+      ) : (
+        <TerritoryView
+          accountId={account ?? null}
+          onSelectAccount={(id) => go({ account: id })}
+        />
+      )}
     </div>
   );
 }

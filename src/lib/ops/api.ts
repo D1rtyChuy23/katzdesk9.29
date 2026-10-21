@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
+import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook } from "./pm-runbook-api";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
@@ -24,6 +25,7 @@ import {
   isOpenInstall,
 } from "./clock";
 import { isoDayOrNull as isoDate } from "./iso";
+import { findWoEverywhere, searchTicketText, woBoardName, woSearchKey, type WoBoardHit } from "./wo-search";
 import { canMarkInstalled, loadInspectionSummaries, syncInstallUnits, withInspections } from "./inspection-api";
 import { emptyInspection } from "./pre-inspection";
 import type {
@@ -896,12 +898,14 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	if (extra) await logActivity(sql, context.userId, cur[0].kind, data.id, "updated", extra);
 	return getJob({ data: { id: data.id } });
 });
-export const mergeServiceTickets = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { keeperId: number; extraId: number }) => d).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
+const mergeInput = z.object({ keeperId: z.number().int().positive(), extraId: z.number().int().positive() });
+export const mergeServiceTickets = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: z.input<typeof mergeInput>) => mergeInput.parse(d)).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
 	const sql = await ready();
 	if (data.keeperId === data.extraId) throw new Error("Pick a different ticket to merge into.");
 	const actor = await deskUsername(sql, context.userId);
 	const result = await mergeServiceJobs(sql, data.keeperId, data.extraId, actor);
 	if (!result) throw new Error("Could not merge those tickets.");
+	if ("refused" in result) throw new Error(result.refused);
 	return getJob({ data: { id: result.keeperId } });
 });
 export const createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind: "service" | "tlc"; customer: string; issue?: string; equipment?: string; contact?: string; phone?: string; received?: string; callType?: string; technician?: string; urgency?: string }) => d).handler(async ({ data, context }: any) => {
@@ -1042,7 +1046,7 @@ export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddl
 	const sql = await ready();
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
-      values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? "12 month PM"}, ${todayChicago()}, ${"Pending Scheduling"})
+      values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? DEFAULT_PM_STYLE}, ${todayChicago()}, ${"Pending Scheduling"})
       returning id`;
 	await logActivity(sql, context.userId, "pm", rows[0].id, "opened", data.customer);
 	return mapPm((await sql`select * from pm_jobs where id = ${rows[0].id}`)[0], todayChicago());
@@ -1600,43 +1604,59 @@ export const getHandoff = createServerFn({ method: "GET" }).middleware([deskMidd
 		pendingHandoffs: uniquePendingHandoffs(liveDeals)
 	};
 });
-export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => d).handler(async ({ data }): Promise<SearchHit[]> => {
+/** A sales rep's test for a ticket's customer, as listJobs and listPms use it; null when this person sees every account. */
+async function repCustomerScope(sql: any, userId: string): Promise<((customer: string | null) => boolean) | null> {
+	const scope = await salesRepScope(sql, userId);
+	if (!scope) return null;
+	const marks = await loadAccountMarks(sql);
+	return (customer) => scope(accountRepFor(marks, customer));
+}
+export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => d).handler(async ({ data, context }: any): Promise<SearchHit[]> => {
 	const sql = await ready();
 	const q = data.q.trim();
 	if (q.length < 2) return [];
 	const like = `%${q.replace(/%/g, "")}%`;
-	const hits = [];
-	const jobs = await sql`
-      select id, kind, customer, call_id, status, wo from service_jobs
-      where customer ilike ${like} or call_id ilike ${like} or coalesce(wo,'') ilike ${like} or coalesce(issue,'') ilike ${like}
-      order by received desc nulls last limit 8`;
+	const hits: SearchHit[] = [];
+	// A WO number finds its ticket on every board, in any status, ahead of the text matches.
+	const woKey = woSearchKey(q);
+	// A sales rep sees only their accounts' tickets, TLCs and PMs here too, in the WO block and the text matches.
+	const inScope = await repCustomerScope(sql, context.userId);
+	if (woKey) for (const w of await findWoEverywhere(sql, woKey, inScope)) hits.push({
+		entityType: w.entityType,
+		id: w.id,
+		title: w.customer ?? w.wo,
+		subtitle: `${w.wo} · ${woBoardName(w.entityType)} · ${w.status}`,
+		status: w.status
+	});
+	const { jobs, pms } = await searchTicketText(sql, like, inScope);
 	for (const j of jobs) hits.push({
 		entityType: j.kind,
 		id: j.id,
 		title: j.customer ?? j.call_id,
-		subtitle: `${j.call_id}${j.wo ? " · " + j.wo : ""}`,
+		subtitle: `${j.call_id}${j.wo ? " · " + j.wo : ""} · ${j.status}`,
 		status: j.status
 	});
-	const pms = await sql`
-      select id, customer, status, equipment from pm_jobs where customer ilike ${like} limit 5`;
 	for (const p of pms) hits.push({
 		entityType: "pm",
 		id: p.id,
 		title: p.customer,
-		subtitle: p.equipment ?? "PM",
+		subtitle: `${p.wo || p.equipment || "PM"} · ${p.status}`,
 		status: p.status
 	});
 	const ins = await sql`
-      select id, customer, equip_status, wo from installs
+      select id, customer, equip_status, complete, wo from installs
       where archived = false and (customer ilike ${like} or coalesce(wo,'') ilike ${like})
       limit 5`;
-	for (const i of ins) hits.push({
-		entityType: "install",
-		id: i.id,
-		title: i.customer,
-		subtitle: i.wo ?? "Install",
-		status: i.equip_status
-	});
+	for (const i of ins) {
+		const status = isInstalled({ complete: !!i.complete, equipStatus: i.equip_status }) ? "Installed" : i.equip_status || "Not Ready";
+		hits.push({
+			entityType: "install",
+			id: i.id,
+			title: i.customer,
+			subtitle: `${i.wo || "Install"} · ${status}`,
+			status
+		});
+	}
 	const deals = await sql`
       select id, customer, producer, completion from deals
       where archived = false and customer ilike ${like}
@@ -1693,7 +1713,20 @@ export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddl
 		subtitle: "Account history",
 		status: null
 	});
-	return hits.slice(0, 28);
+	const seen = new Set<string>();
+	return hits.filter((h) => {
+		const k = `${h.entityType}:${h.id}`;
+		if (seen.has(k)) return false;
+		seen.add(k);
+		return true;
+	}).slice(0, 28);
+});
+/** Every ticket with this WO number, on any board and in any status (the Tickets page's "also on" line). */
+export const findWoTickets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => z.object({ q: z.string().max(100) }).parse(d)).handler(async ({ data, context }: any): Promise<WoBoardHit[]> => {
+	const key = woSearchKey(data.q);
+	if (!key) return [];
+	const sql = await ready();
+	return findWoEverywhere(sql, key, await repCustomerScope(sql, context.userId));
 });
 export const handoffDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number }) => d).handler(async ({ data }: any) => {
 	await maybeHandoffInstall(await ready(), data.dealId);
@@ -2282,6 +2315,15 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		repFlag: account.rep_flag ?? null,
 		accountNumber: account.account_number ?? null,
 		canEditAccountNumber: await canReviewNames(sql, context.userId),
+		salesReps: (await sql.query(
+			"select rep_name, role, contribution_pct, is_primary from customer_sales_reps where customer_id = $1 order by is_primary desc, lower(rep_name), id",
+			[account.id],
+		)).map((r) => ({
+			name: String(r.rep_name ?? ""),
+			role: r.role ? String(r.role) : null,
+			pct: r.contribution_pct === null || r.contribution_pct === undefined || r.contribution_pct === "" ? null : Number(r.contribution_pct),
+			primary: r.is_primary === true || r.is_primary === "true",
+		})),
 		cleanList: (await canReviewNames(sql, context.userId))
 			? { netsuiteId: account.name_locked === true ? account.netsuite_id ?? null : null, address: account.name_locked === true ? account.address ?? null : null }
 			: null,

@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InvoiceButton } from "@/components/desk/invoice-window";
+import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
 import { ModuleRecord } from "@/components/desk/module-record";
 import { useEffect, useMemo, useRef, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import {
   archiveDeal,
   archiveInstall,
@@ -12,6 +14,7 @@ import {
   createModule,
   createPm,
   listAssets,
+  listComments,
   listDirectory,
   listRecipes,
   unassignAssetFromInstall,
@@ -34,8 +37,10 @@ import {
 } from "@/lib/ops/lookups";
 
 import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
-import { mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { absorbWarehouseSerials } from "@/lib/ops/warehouse-serial";
+import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
+import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
+import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice, visitUnitForRow } from "@/lib/ops/install-form";
+import { getInstallInspection, removeInspectionEquipment } from "@/lib/ops/inspection-api";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -45,6 +50,7 @@ import { Input, Label, Textarea, AutoGrowTextarea } from "@/components/ui/input"
 import { SelectField } from "@/components/ui/select-field";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { SheetTabs } from "./sheet-tabs";
 import { FlagBadge, StatusBadge } from "./flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { Thread } from "./thread";
@@ -134,6 +140,30 @@ function BoundEquipment({
   return <EquipmentCombo name={name} value={value} onChange={setValue} />;
 }
 
+/** A panel that stays mounted while another tab is open, so unsaved edits stay and closing still saves. */
+const KEEP_MOUNTED = "outline-none data-[state=inactive]:hidden";
+
+type PmTab = "details" | "runbook" | "invoices" | "ping";
+
+/** Same idea as the account window: one tab is one category. A PM opens on Details. */
+const PM_TABS: { id: PmTab; label: string }[] = [
+  { id: "details", label: "Details" },
+  { id: "runbook", label: "Runbook" },
+  { id: "invoices", label: "Invoices" },
+  { id: "ping", label: "Ping" },
+];
+
+type InstallTab = "details" | "equipment" | "invoices" | "pre-inspection" | "ping";
+
+/** The Board install, including one just created. Five categories, in this order. */
+const INSTALL_TABS: { id: InstallTab; label: string; short?: string }[] = [
+  { id: "details", label: "Details" },
+  { id: "equipment", label: "Equipment" },
+  { id: "invoices", label: "Invoices" },
+  { id: "pre-inspection", label: "Pre-Inspection", short: "Pre-Insp." },
+  { id: "ping", label: "Ping" },
+];
+
 export function PmSheet({
   pm,
   onClose,
@@ -160,6 +190,14 @@ export function PmSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  const [tab, setTab] = useState<PmTab>("details");
+  useEffect(() => setTab("details"), [pm?.id]);
+  const comments = useQuery({
+    queryKey: ["comments", "pm", pm?.id],
+    queryFn: () => listComments({ data: { entityType: "pm", entityId: pm!.id } }),
+    enabled: pm != null,
+  });
+  const tabCount = (id: PmTab): number | null => (id === "ping" ? comments.data?.length || null : null);
   return (
     <Sheet
       open={!!pm}
@@ -181,86 +219,105 @@ export function PmSheet({
                 <StatusBadge status={pm.status} />
                 <FlagBadge flag={pm.flag} />
               </div>
-              <div className="mt-2">
-                <InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} />
-              </div>
             </SheetHeader>
             <SheetBody>
-            <form
-              ref={formRef}
-              className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                save.mutate({
-                  id: pm.id,
-                  customer: String(fd.get("customer")),
-                  equipment: String(fd.get("equipment") || "") || null,
-                  style: String(fd.get("style") || "") || null,
-                  projected: String(fd.get("projected") || "") || null,
-                  partsStatus: String(fd.get("partsStatus") || "") || null,
-                  status: String(fd.get("status")),
-                  technician: String(fd.get("technician") || "") || null,
-                  notes: String(fd.get("notes") || "") || null,
-                  wo: String(fd.get("wo") || "") || null,
-                  workDone: String(fd.get("workDone") || "") || null,
-                  completedAt: String(fd.get("completedAt") || "") || null,
-                });
-              }}
-            >
-              <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockCustomer} />
-              <BoundEquipment recordKey={pm.id} defaultValue={pm.equipment ?? ""} />
-              <div>
-                <Label>PM style</Label>
-                <SelectField name="style" className="mt-1" defaultValue={pm.style ?? ""} allowEmpty>
-                  {PM_STYLES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
-              <div>
-                <Label>Status</Label>
-                <SelectField name="status" className="mt-1" defaultValue={pm.status}>
-                  {PM_STATUSES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
-              <Field label="Projected date" name="projected" type="date" defaultValue={pm.projected ?? ""} />
-              <div>
-                <Label>Parts</Label>
-                <SelectField name="partsStatus" className="mt-1" defaultValue={pm.partsStatus ?? ""} allowEmpty>
-                  {PARTS_STATUSES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
-              <div>
-                <Label>Tech</Label>
-                <TechSelect name="technician" defaultValue={pm.technician ?? ""} />
-              </div>
-              <Field label="WO #" name="wo" defaultValue={pm.wo ?? ""} />
-              <Field label="Date completed" name="completedAt" type="date" defaultValue={pm.completedAt ?? ""} />
-              <div className="sm:col-span-2">
-                <Label htmlFor={`pm-work-${pm.id}`}>Description of work</Label>
-                <AutoGrowTextarea
-                  id={`pm-work-${pm.id}`}
-                  name="workDone"
-                  className="mt-1"
-                  defaultValue={pm.workDone ?? ""}
-                  placeholder="What was done on site…"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Label>Notes</Label>
-                <Textarea name="notes" className="mt-1" defaultValue={pm.notes ?? ""} />
-              </div>
-              <div className="flex justify-end sm:col-span-2">
-                <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
-              </div>
-            </form>
-            <PmRunbook pmId={pm.id} customer={pm.customer} />
-            <Thread entityType="pm" entityId={pm.id} />
+              <SheetTabs
+                value={tab}
+                onValueChange={setTab}
+                tabs={PM_TABS.map((t) => ({ ...t, count: tabCount(t.id) }))}
+                label="PM sections"
+                testId="pm"
+              >
+                <Tabs.Content value="details" forceMount className={KEEP_MOUNTED} data-testid="pm-panel-details">
+                  <form
+                    ref={formRef}
+                    className="grid gap-3 p-5 sm:grid-cols-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      save.mutate({
+                        id: pm.id,
+                        customer: String(fd.get("customer")),
+                        equipment: String(fd.get("equipment") || "") || null,
+                        style: String(fd.get("style") || "") || null,
+                        projected: String(fd.get("projected") || "") || null,
+                        partsStatus: String(fd.get("partsStatus") || "") || null,
+                        status: String(fd.get("status")),
+                        technician: String(fd.get("technician") || "") || null,
+                        notes: String(fd.get("notes") || "") || null,
+                        wo: String(fd.get("wo") || "") || null,
+                        workDone: String(fd.get("workDone") || "") || null,
+                        completedAt: String(fd.get("completedAt") || "") || null,
+                      });
+                    }}
+                  >
+                    <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockCustomer} />
+                    <BoundEquipment recordKey={pm.id} defaultValue={pm.equipment ?? ""} />
+                    <SpecOutletLine model={pm.equipment} />
+                    <div>
+                      <Label>PM style</Label>
+                      <SelectField name="style" className="mt-1" defaultValue={pm.style ?? ""} allowEmpty>
+                        {PM_STYLES.map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </SelectField>
+                    </div>
+                    <div>
+                      <Label>Status</Label>
+                      <SelectField name="status" className="mt-1" defaultValue={pm.status}>
+                        {PM_STATUSES.map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </SelectField>
+                    </div>
+                    <Field label="Projected date" name="projected" type="date" defaultValue={pm.projected ?? ""} />
+                    <div>
+                      <Label>Parts</Label>
+                      <SelectField name="partsStatus" className="mt-1" defaultValue={pm.partsStatus ?? ""} allowEmpty>
+                        {PARTS_STATUSES.map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </SelectField>
+                    </div>
+                    <div>
+                      <Label>Tech</Label>
+                      <TechSelect name="technician" defaultValue={pm.technician ?? ""} />
+                    </div>
+                    <Field label="WO #" name="wo" defaultValue={pm.wo ?? ""} />
+                    <Field label="Date completed" name="completedAt" type="date" defaultValue={pm.completedAt ?? ""} />
+                    <div className="sm:col-span-2">
+                      <Label htmlFor={`pm-work-${pm.id}`}>Description of work</Label>
+                      <AutoGrowTextarea
+                        id={`pm-work-${pm.id}`}
+                        name="workDone"
+                        className="mt-1"
+                        defaultValue={pm.workDone ?? ""}
+                        placeholder="What was done on site…"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Notes</Label>
+                      <Textarea name="notes" className="mt-1" defaultValue={pm.notes ?? ""} />
+                    </div>
+                    <div className="flex justify-end sm:col-span-2">
+                      <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
+                    </div>
+                  </form>
+                </Tabs.Content>
+                <Tabs.Content value="runbook" forceMount className={KEEP_MOUNTED} data-testid="pm-panel-runbook">
+                  <PmRunbook pmId={pm.id} customer={pm.customer} />
+                </Tabs.Content>
+                <Tabs.Content value="invoices" forceMount className={`p-5 ${KEEP_MOUNTED}`} data-testid="pm-panel-invoices">
+                  <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this PM.</p>
+                  <div className="mt-3">
+                    <InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} />
+                  </div>
+                </Tabs.Content>
+                <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="pm-panel-ping">
+                  <Thread entityType="pm" entityId={pm.id} />
+                </Tabs.Content>
+              </SheetTabs>
             </SheetBody>
           </>
         ) : null}
@@ -291,8 +348,13 @@ export function InstallSheet({
   const [equipPieces, setEquipPieces] = useState<string[]>([]);
   const [specs, setSpecs] = useState<MachineSpec[]>([]);
   const [hydratedId, setHydratedId] = useState<number | null>(null);
+  /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
+  const loadedSpecs = useRef<MachineSpec[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
+  const specsRef = useRef(specs);
+  specsRef.current = specs;
+  const seenServer = useRef<{ id: number; rows: MachineSpec[] } | null>(null);
   const catalog = catalogModels([
     ...(directoryEquip.data ?? []).map((e) => e.name),
     ...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
@@ -300,30 +362,41 @@ export function InstallSheet({
   ]);
   useEffect(() => {
     setCustomer(row?.customer ?? "");
-    const saved = row?.machines ?? [];
-    const fromSaved = saved.map((s) => s.equipment).filter(Boolean);
-    const names = catalog.length
-      ? listedEquipment(fromSaved.join("\n") || row?.equipment, catalog)
-      : fromSaved.length
-        ? fromSaved
-        : (row?.equipment ?? "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-    setEquipPieces(names);
-    setSpecs(
-      mergeMachineSpecs(names, saved, {
-        serial: row?.serial,
-        powerVoltage: row?.powerVoltage,
-      }),
-    );
+    // The row's machines keep the serials typed on its lines. Reading the names again from the text dropped them.
+    const loaded = row ? machinesOnOpen(row, catalog) : [];
+    loadedSpecs.current = loaded;
+    setEquipPieces(loaded.map((s) => s.equipment));
+    setSpecs(loaded.map((s) => ({ ...s })));
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
   const serialSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}`).join("\n");
+  const machineSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}\t${m.powerVoltage}`).join("\n");
   useEffect(() => {
     if (!row || hydratedId !== row.id) return;
-    setSpecs((cur) => absorbWarehouseSerials(cur, row.machines ?? []));
-    // A warehouse assignment writes the serial on the server. Pull it into the open row.
+    const server = row.machines ?? [];
+    const seen = seenServer.current;
+    if (!seen || seen.id !== row.id) {
+      seenServer.current = { id: row.id, rows: server };
+      return;
+    }
+    const previous = seen.rows;
+    seenServer.current = { id: row.id, rows: server };
+    loadedSpecs.current = machinesBeforeSave(loadedSpecs.current, previous, server);
+    const next = machinesBeforeSave(specsRef.current, previous, server);
+    setSpecs(next);
+    setEquipPieces(next.map((s) => s.equipment));
+    // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row?.id, hydratedId, serialSig]);
+  }, [row?.id, hydratedId, serialSig, machineSig]);
+  const visit = useQuery({
+    queryKey: ["inspection", row?.id],
+    queryFn: () => getInstallInspection({ data: { installId: row!.id } }),
+    enabled: row != null,
+  });
+  /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
+  const queue = { id: `install-sheet-${row?.id}` };
   const save = useMutation({
+    scope: queue,
     mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
     onSuccess: (_row, vars) => {
       const keys = Object.keys(vars).filter((k) => k !== "id");
@@ -340,6 +413,11 @@ export function InstallSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  const dropUnit = useMutation({
+    scope: queue,
+    mutationFn: (v: { installId: number; equipmentId: number }) => removeInspectionEquipment({ data: { ...v, keepList: true } }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"),
+  });
   const dropInstall = useMutation({
     mutationFn: () => archiveInstall({ data: { id: row!.id } }),
     onSuccess: () => {
@@ -351,12 +429,33 @@ export function InstallSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
+  const [tab, setTab] = useState<InstallTab>("details");
+  useEffect(() => setTab("details"), [row?.id]);
+  const comments = useQuery({
+    queryKey: ["comments", "install", row?.id],
+    queryFn: () => listComments({ data: { entityType: "install", entityId: row!.id } }),
+    enabled: row != null,
+  });
+  const tabCount = (id: InstallTab): number | null => {
+    if (id === "equipment") return specs.length || null;
+    if (id === "pre-inspection") return row?.inspection?.machineCount || null;
+    if (id === "ping") return comments.data?.length || null;
+    return null;
+  };
+
+  function listForSave(next: MachineSpec[]): MachineSpec[] {
+    if (!row) return dedupeMachineSerials(next);
+    const baseline = seenServer.current?.id === row.id ? seenServer.current.rows : specs;
+    return machinesBeforeSave(next, baseline, row.machines ?? []);
+  }
 
   function persistMachines(next: MachineSpec[]) {
+    next = listForSave(next);
     setSpecs(next);
     setEquipPieces(next.map((s) => s.equipment));
     if (!row) return;
     const packed = serializeMachines(next);
+    loadedSpecs.current = next;
     save.mutate({
       id: row.id,
       equipment: packed.equipment,
@@ -380,207 +479,239 @@ export function InstallSheet({
       <SheetContent className="sm:max-w-4xl">
         {row ? (
           <>
-            {/* Phones: only the label and the name stay pinned; the badges, address, Invoice and the Tech Request
-                Form row scroll with the window. From sm up the wrapper is display: contents, so this is the usual
-                header (label, name, then the rest under one border) over the scrolling body. */}
-            <SheetHeader className="max-sm:py-3 sm:border-b-0 sm:pb-0">
+            <SheetHeader className="max-sm:py-3">
               <p className="text-xs tracking-wide text-muted-foreground uppercase">Install</p>
               <SheetTitle className="max-sm:text-lg">{row.customer}</SheetTitle>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <InspectionBadge
+                  overall={row.inspection?.overall}
+                  passed={row.inspection?.passedCount}
+                  total={row.inspection?.machineCount}
+                />
+                <StatusBadge tight status={row.equipStatus} />
+                <FlagBadge flag={row.flag} />
+                {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
+              </div>
+              <CustomerAddress customer={row.customer} className="mt-2" />
             </SheetHeader>
-            <div className="flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-contain sm:contents">
-              <div className="shrink-0 border-b border-border px-5 pb-4 max-sm:pt-2 sm:pr-12">
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  <InspectionBadge
-                    overall={row.inspection?.overall}
-                    passed={row.inspection?.passedCount}
-                    total={row.inspection?.machineCount}
-                  />
-                  <StatusBadge tight status={row.equipStatus} />
-                  <FlagBadge flag={row.flag} />
-                  {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
-                </div>
-                <CustomerAddress customer={row.customer} className="mt-2" />
-                <div className="mt-2">
-                  <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} />
-                </div>
-                <label className="mt-3 flex w-fit items-center gap-2 text-sm font-medium" data-testid="trf-check-window">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-primary"
-                    checked={row.trfIssued}
-                    disabled={save.isPending}
-                    onChange={(e) => save.mutate({ id: row.id, trfIssued: e.target.checked })}
-                  />
-                  Tech Request Form issued
-                </label>
-              </div>
-            <SheetBody className="max-sm:flex-none max-sm:overflow-visible">
-            <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
-            <PreInspectionPanel installId={row.id} />
-            <SerialNoticeBanner notice={row.serialNotice} />
-            {row.duplicateOf ? (
-              <div className="border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm">
-                <p className="font-medium">This account already had an install request.</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Check the earlier one before treating this as a second job — or clear the flag if it’s a new request.
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {onOpenRelated ? (
-                    <Button type="button" size="sm" variant="outline" onClick={() => onOpenRelated(row.duplicateOf!)}>
-                      Open earlier request
-                    </Button>
+            <SheetBody>
+              {/* One tab is one category. A new install opens here on Details. */}
+              <SheetTabs
+                value={tab}
+                onValueChange={setTab}
+                tabs={INSTALL_TABS.map((t) => ({ ...t, count: tabCount(t.id) }))}
+                label="Install sections"
+                testId="install"
+              >
+                <Tabs.Content value="details" forceMount className={KEEP_MOUNTED} data-testid="install-panel-details">
+                  <label className="flex w-fit items-center gap-2 border-b border-border px-5 py-3 text-sm font-medium" data-testid="trf-check-window">
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-primary"
+                      checked={row.trfIssued}
+                      disabled={save.isPending}
+                      onChange={(e) => save.mutate({ id: row.id, trfIssued: e.target.checked })}
+                    />
+                    Tech Request Form issued
+                  </label>
+                  {row.duplicateOf ? (
+                    <div className="border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm">
+                      <p className="font-medium">This account already had an install request.</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Check the earlier one before treating this as a second job — or clear the flag if it’s a new request.
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {onOpenRelated ? (
+                          <Button type="button" size="sm" variant="outline" onClick={() => onOpenRelated(row.duplicateOf!)}>
+                            Open earlier request
+                          </Button>
+                        ) : null}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => save.mutate({ id: row.id, duplicateOf: null })}
+                        >
+                          Not a duplicate
+                        </Button>
+                      </div>
+                    </div>
                   ) : null}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => save.mutate({ id: row.id, duplicateOf: null })}
+                  <form
+                    ref={formRef}
+                    key={row.id}
+                    className="grid gap-3 px-4 py-3 sm:grid-cols-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const fd = new FormData(e.currentTarget);
+                      const machineFields = changedMachineFields(specs, loadedSpecs.current);
+                      if (Object.keys(machineFields).length) loadedSpecs.current = specs;
+                      save.mutate({
+                        id: row.id,
+                        customer: String(fd.get("customer") || row.customer),
+                        equipStatus: String(fd.get("equipStatus") || "") || null,
+                        installDate: String(fd.get("installDate") || "") || null,
+                        technician: String(fd.get("technician") || "") || null,
+                        wo: String(fd.get("wo") || "") || null,
+                        reqsReady: String(fd.get("reqsReady") || "") || null,
+                        notes: String(fd.get("notes") || "") || null,
+                        workDone: String(fd.get("workDone") || "") || null,
+                        completedAt: String(fd.get("completedAt") || "") || null,
+                        accountRep: String(fd.get("accountRep") || "") || null,
+                        aviKatz: fd.get("aviKatz") === "on",
+                        paymentStatus: String(fd.get("paymentStatus") || "") || null,
+                        // Closing the window submits this form: an unchanged list is left as saved, typed serials and all.
+                        ...machineFields,
+                      });
+                    }}
                   >
-                    Not a duplicate
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-            <InstallAssets installId={row.id} />
-            <form
-              ref={formRef}
-              key={row.id}
-              className="grid gap-3 border-b border-border px-4 py-3 sm:grid-cols-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                const packed = serializeMachines(specs);
-                save.mutate({
-                  id: row.id,
-                  customer: String(fd.get("customer") || row.customer),
-                  equipment: packed.equipment,
-                  equipStatus: String(fd.get("equipStatus") || "") || null,
-                  installDate: String(fd.get("installDate") || "") || null,
-                  technician: String(fd.get("technician") || "") || null,
-                  wo: String(fd.get("wo") || "") || null,
-                  reqsReady: String(fd.get("reqsReady") || "") || null,
-                  notes: String(fd.get("notes") || "") || null,
-                  workDone: String(fd.get("workDone") || "") || null,
-                  completedAt: String(fd.get("completedAt") || "") || null,
-                  accountRep: String(fd.get("accountRep") || "") || null,
-                  aviKatz: fd.get("aviKatz") === "on",
-                  paymentStatus: String(fd.get("paymentStatus") || "") || null,
-                  serial: packed.serial,
-                  powerVoltage: packed.powerVoltage,
-                  machines: packed.machines,
-                });
-              }}
-            >
-              <input type="hidden" name="customer" value={customer || row.customer} />
-              <div className="sm:col-span-2">
-                <EquipmentMultiCombo
-                  values={equipPieces}
-                  hideChips
-                  placeholder="Add another…"
-                  onChange={(next) => {
-                    try {
-                      persistMachines(mergeMachineSpecs(next, specs));
-                    } catch (err) {
-                      toast.error(err instanceof Error ? err.message : "Could not update equipment");
-                    }
-                  }}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <MachineFields
-                  specs={specs}
-                  installId={row.id}
-                  customer={row.customer}
-                  recipes={recs.data ?? []}
-                  onChange={setSpecs}
-                  onPulled={(next) => persistMachines(next)}
-                  onRecipe={(next) => persistMachines(next)}
-                  onCommit={(next) => persistMachines(next)}
-                  onRemove={(index) => {
-                    try {
-                      persistMachines(specs.filter((_, i) => i !== index));
-                    } catch (err) {
-                      toast.error(err instanceof Error ? err.message : "Could not update equipment");
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <Label>Equipment status</Label>
-                <SelectField name="equipStatus" className="mt-1" defaultValue={row.equipStatus ?? ""} allowEmpty>
-                  {EQUIP_STATUSES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
-              <Field label="Install date" name="installDate" type="date" defaultValue={row.installDate ?? ""} />
-              <div>
-                <Label>Tech</Label>
-                <TechSelect name="technician" defaultValue={row.technician ?? ""} />
-              </div>
-              <Field label="WO #" name="wo" defaultValue={row.wo ?? ""} />
-              <div>
-                <Label>Site ready?</Label>
-                <SelectField name="reqsReady" className="mt-1" defaultValue={row.reqsReady ?? ""} allowEmpty>
-                  {REQS_READY.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
-              <RepSelect name="accountRep" label="Account rep" defaultValue={row.accountRep ?? ""} />
-              <label className="flex items-center gap-2 text-sm sm:mt-7">
-                <input
-                  type="checkbox"
-                  name="aviKatz"
-                  className="size-4 accent-primary"
-                  defaultChecked={row.aviKatz}
-                />
-                Avi Katz account (AK)
-                <AkBadge on={row.aviKatz} />
-              </label>
+                    <input type="hidden" name="customer" value={customer || row.customer} />
+                    <div>
+                      <Label>Equipment status</Label>
+                      <SelectField name="equipStatus" className="mt-1" defaultValue={row.equipStatus ?? ""} allowEmpty>
+                        {EQUIP_STATUSES.map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </SelectField>
+                    </div>
+                    <Field label="Install date" name="installDate" type="date" defaultValue={row.installDate ?? ""} />
+                    <div>
+                      <Label>Tech</Label>
+                      <TechSelect name="technician" defaultValue={row.technician ?? ""} />
+                    </div>
+                    <Field label="WO #" name="wo" defaultValue={row.wo ?? ""} />
+                    <div>
+                      <Label>Site ready?</Label>
+                      <SelectField name="reqsReady" className="mt-1" defaultValue={row.reqsReady ?? ""} allowEmpty>
+                        {REQS_READY.map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </SelectField>
+                    </div>
+                    <RepSelect name="accountRep" label="Account rep" defaultValue={row.accountRep ?? ""} />
+                    <label className="flex items-center gap-2 text-sm sm:mt-7">
+                      <input
+                        type="checkbox"
+                        name="aviKatz"
+                        className="size-4 accent-primary"
+                        defaultChecked={row.aviKatz}
+                      />
+                      Avi Katz account (AK)
+                      <AkBadge on={row.aviKatz} />
+                    </label>
+                    <div>
+                      <Label>Payment</Label>
+                      <SelectField name="paymentStatus" className="mt-1" defaultValue={row.paymentStatus ?? ""} allowEmpty>
+                        {PAYMENT_TERMS.map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </SelectField>
+                    </div>
+                    <Field label="Date completed" name="completedAt" type="date" defaultValue={row.completedAt ?? ""} />
+                    <div className="sm:col-span-2">
+                      <Label htmlFor={`install-work-${row.id}`}>Description of work</Label>
+                      <AutoGrowTextarea
+                        id={`install-work-${row.id}`}
+                        name="workDone"
+                        className="mt-1"
+                        defaultValue={row.workDone ?? ""}
+                        placeholder="What was done on site…"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Notes</Label>
+                      <Textarea name="notes" className="mt-1" defaultValue={row.notes ?? ""} />
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={dropInstall.isPending}
+                        onClick={() => {
+                          if (window.confirm(`Remove “${row.customer}” from the install list?`)) dropInstall.mutate();
+                        }}
+                      >
+                        <Trash2 className="size-3.5" />
+                        Remove from list
+                      </Button>
+                      <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
+                    </div>
+                  </form>
+                </Tabs.Content>
 
-              <div>
-                <Label>Payment</Label>
-                <SelectField name="paymentStatus" className="mt-1" defaultValue={row.paymentStatus ?? ""} allowEmpty>
-                  {PAYMENT_TERMS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </SelectField>
-              </div>
-              <Field label="Date completed" name="completedAt" type="date" defaultValue={row.completedAt ?? ""} />
-              <div className="sm:col-span-2">
-                <Label htmlFor={`install-work-${row.id}`}>Description of work</Label>
-                <AutoGrowTextarea
-                  id={`install-work-${row.id}`}
-                  name="workDone"
-                  className="mt-1"
-                  defaultValue={row.workDone ?? ""}
-                  placeholder="What was done on site…"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Label>Notes</Label>
-                <Textarea name="notes" className="mt-1" defaultValue={row.notes ?? ""} />
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={dropInstall.isPending}
-                  onClick={() => {
-                    if (window.confirm(`Remove “${row.customer}” from the install list?`)) dropInstall.mutate();
-                  }}
-                >
-                  <Trash2 className="size-3.5" />
-                  Remove from list
-                </Button>
-                <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
-              </div>
-            </form>
-            <Thread entityType="install" entityId={row.id} />
+                <Tabs.Content value="equipment" forceMount className={KEEP_MOUNTED} data-testid="install-panel-equipment">
+                  <SerialNoticeBanner
+                    notice={hasSerial(specs, parseAccountSerialNotice(row.serialNotice)?.serial) ? null : row.serialNotice}
+                    onAttach={(unit) => {
+                      if (hasSerial(specs, unit.serial)) {
+                        toast.message("That unit is already on this install.");
+                        return;
+                      }
+                      const blank = specs.findIndex((s) => sameWarehouseModel(s.equipment, unit.model) && !s.serial.trim());
+                      const next = blank >= 0
+                        ? specs.map((s, i) => (i === blank ? { ...s, serial: unit.serial } : s))
+                        : [...specs, { equipment: unit.model, serial: unit.serial, powerVoltage: "" }];
+                      persistMachines(next);
+                      toast.success("Attached to this install");
+                    }}
+                  />
+                  <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
+                  <div className="grid gap-3 border-b border-border px-4 py-3">
+                    <EquipmentMultiCombo
+                      values={equipPieces}
+                      hideChips
+                      placeholder="Add another…"
+                      onChange={(next) => {
+                        try {
+                          persistMachines(mergeMachineSpecs(next, specs));
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "Could not update equipment");
+                        }
+                      }}
+                    />
+                    <MachineFields
+                      specs={specs}
+                      installId={row.id}
+                      customer={row.customer}
+                      recipes={recs.data ?? []}
+                      onChange={setSpecs}
+                      onPulled={(next) => persistMachines(next)}
+                      onRecipe={(next) => persistMachines(next)}
+                      onCommit={(next) => persistMachines(next)}
+                      onRemove={(index) => {
+                        const spec = specs[index];
+                        if (!spec) return;
+                        const label = `${spec.equipment}${spec.serial.trim() ? ` SN ${spec.serial.trim()}` : ""}`;
+                        if (!window.confirm(`Remove ${label} from this install?`)) return;
+                        const next = specs.filter((_, i) => i !== index);
+                        const linked = visitUnitForRow(specs, index, visit.data?.machines ?? []);
+                        // The unit goes first; the save waits in the same queue, then refreshes the list and the visit.
+                        if (linked) dropUnit.mutate({ installId: row.id, equipmentId: linked.equipmentId });
+                        persistMachines(next);
+                      }}
+                    />
+                  </div>
+                  <InstallAssets installId={row.id} />
+                </Tabs.Content>
+
+                <Tabs.Content value="invoices" forceMount className={`p-5 ${KEEP_MOUNTED}`} data-testid="install-panel-invoices">
+                  <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this install.</p>
+                  <div className="mt-3">
+                    <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} />
+                  </div>
+                </Tabs.Content>
+
+                <Tabs.Content value="pre-inspection" forceMount className={KEEP_MOUNTED} data-testid="install-panel-pre-inspection">
+                  <PreInspectionPanel installId={row.id} />
+                </Tabs.Content>
+
+                <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="install-panel-ping">
+                  <Thread entityType="install" entityId={row.id} />
+                </Tabs.Content>
+              </SheetTabs>
             </SheetBody>
-            </div>
           </>
         ) : null}
       </SheetContent>

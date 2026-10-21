@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/tlc")({
 });
 
 function Page() {
-  const { open, tab } = Route.useSearch();
+  const { open, tab, from } = Route.useSearch();
   return (
     <JobsPage
       kind="tlc"
@@ -16,6 +16,7 @@ function Page() {
       lede="Contract TLC and Factor visits. Anything still open past two weeks is flagged automatically."
       initialOpen={open}
       initialTab={tab}
+      from={from}
     />
   );
 }

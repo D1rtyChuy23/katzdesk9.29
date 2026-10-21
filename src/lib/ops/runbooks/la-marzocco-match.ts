@@ -23,9 +23,10 @@ export function matchLmLinea(piece: string | null | undefined): Hit<"classic" | 
 export function matchLmStrada(piece: string | null | undefined): Hit<"s" | "x"> {
   const t = text(piece);
   if (!/\bstrada\b/i.test(t)) return null;
-  if (/\bstrada\s+(ep|av|mp|ee)\b/i.test(t)) return null;
   if (/\bstrada\s+s\b/i.test(t)) return { model: "s" };
   if (/\bstrada\s+x\b/i.test(t)) return { model: "x" };
+  if (/\bstrada\s+xt\b/i.test(t)) return { model: null };
+  if (/\b(?:ep|av|mp|ee)\b/i.test(t) || /\bstrada(?:\s+\d+)?\s*(?:group\s+)?(?:ep|av|mp|ee)\b/i.test(t)) return null;
   return { model: null };
 }
 
@@ -33,12 +34,12 @@ export function matchLmKb90(piece: string | null | undefined): Hit<"kb90"> {
   return /\bkb[\s-]?90\b/i.test(text(piece)) ? { model: "kb90" } : null;
 }
 
-/** GB5 S, or a plain "GB5" (original or S: the tech picks). */
+/** GB5 S, or a plain "GB5" / "GB/5" (original or S: the tech picks). */
 export function matchLmGb5(piece: string | null | undefined): Hit<"gb5s" | "gb5"> {
   const t = text(piece);
-  if (!/\bgb[\s-]?5/i.test(t)) return null;
-  if (!/\bgb[\s-]?5(\s?s)?\b/i.test(t)) return null;
-  if (/\bgb[\s-]?5\s?s\b/i.test(t)) return { model: "gb5s" };
+  if (!/\bgb[\s/-]?5/i.test(t)) return null;
+  if (!/\bgb[\s/-]?5(\s?s)?\b/i.test(t)) return null;
+  if (/\bgb[\s/-]?5\s?s\b/i.test(t)) return { model: "gb5s" };
   return { model: null };
 }
 

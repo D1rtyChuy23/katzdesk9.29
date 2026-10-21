@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
-import { getSql } from "@/lib/db";
+import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
+import { catalogNames } from "@/lib/ops/inspection-api";
+import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import {
   isWalkIn,
   mapOwnership,
@@ -13,6 +15,7 @@ import {
   OWNERSHIP_VALUES,
   parseInstallDate,
   parseSerial,
+  sameCatalogModel,
   serialKey,
   type ExistingUnit,
 } from "@/lib/ops/account-equip";
@@ -598,3 +601,164 @@ export const listAccountEquipment = createServerFn({ method: "GET" })
         );
     return rows.map(mapDbUnit);
   });
+
+async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: number) {
+  await sql.query("delete from install_inspection_units where equipment_id = $1", [id]);
+  await sql.query("delete from install_inspection_photos where equipment_id = $1", [id]);
+  await sql.query("delete from pm_runbook_unit_links where account_equipment_id = $1", [id]);
+}
+
+/** Take one equipment row off the account. Does not guess which duplicate is real. */
+export async function removeEquipmentUnit(sql: Sql, id: number): Promise<{ id: number }> {
+  const row = (await sql.query<{ id: number }>("select id from account_equipment where id = $1", [id]))[0];
+  if (!row) throw new Error("That unit is not on the account.");
+  const mod = (await sql.query<{ module_id: string }>("select module_id from modules where assigned_unit_id = $1 limit 1", [id]))[0];
+  if (mod) throw new Error(`Eversys module ${mod.module_id} is still on this unit. Swap it or return it first.`);
+  await dropEquipmentLinks(sql, id);
+  await sql.query("delete from account_equipment where id = $1", [id]);
+  return { id };
+}
+
+export const removeAccountEquipment = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data }) => removeEquipmentUnit(await ready(), data.id));
+
+/**
+ * Keep one account unit and drop the other. A short leftover serial (such as "L") is replaced by the longer one.
+ * Inspection links move onto the unit that stays.
+ */
+export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: number): Promise<{ keepId: number; serial: string }> {
+  if (keepId === dropId) throw new Error("Pick two different units.");
+  const rows = await sql.query<{
+    id: number;
+    customer: string;
+    catalog_model: string;
+    equipment_name: string;
+    serial: string | null;
+    electrical: string | null;
+  }>("select id, customer, catalog_model, equipment_name, serial, electrical from account_equipment where id = any($1::int[])", [
+    [keepId, dropId],
+  ]);
+  const keep = rows.find((r) => r.id === keepId);
+  const drop = rows.find((r) => r.id === dropId);
+  if (!keep || !drop) throw new Error("Those units are not both on an account.");
+  if (keep.customer.trim().toLowerCase() !== drop.customer.trim().toLowerCase()) {
+    throw new Error("Those units are on different accounts.");
+  }
+  const keepSerial = (keep.serial ?? "").trim();
+  const dropSerial = (drop.serial ?? "").trim();
+  const serial = dropSerial && keepSerial.length <= 2 && dropSerial.length > keepSerial.length ? dropSerial : keepSerial || dropSerial;
+  const electrical = (keep.electrical ?? "").trim() || (drop.electrical ?? "").trim() || null;
+  if (serial !== keepSerial || electrical !== (keep.electrical ?? "").trim()) {
+    await sql.query(
+      "update account_equipment set serial = $2, serial_key = $3, electrical = $4, updated_at = now() where id = $1",
+      [keep.id, serial || null, serial ? serialKey(serial) : null, electrical],
+    );
+  }
+  // An install that lists the dropped unit takes the kept serial on that machine. Otherwise its next load matches
+  // no unit (a machine with no serial never takes a unit that has one) and adds the dropped unit back.
+  const key = serialKey(serial);
+  const dropKey = serialKey(dropSerial);
+  const linked = key
+    ? await sql.query<{ id: number; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null }>(
+        `select i.id, i.equipment, i.serial, i.power_voltage, i.machines from installs i
+          where exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)`,
+        [drop.id],
+      )
+    : [];
+  const catalog = linked.length ? await catalogNames(sql) : [];
+  const lists = linked.flatMap((row) => {
+    const { machines, typed } = installMachines(row, catalog);
+    if (machines.some((m) => serialKey(m.serial) === key)) return [];
+    const at = machines.findIndex((m) =>
+      dropKey
+        ? serialKey(m.serial) === dropKey
+        : !serialKey(m.serial) && (sameCatalogModel(drop.catalog_model, m.equipment) || sameCatalogModel(drop.equipment_name, m.equipment)),
+    );
+    if (at < 0) return [];
+    machines[at] = { ...machines[at]!, serial };
+    const packed = serializeMachines(machines);
+    return [{ id: row.id, equipment: typed ? row.equipment : packed.equipment, machines: packed.machines, serial: packed.serial, power: packed.powerVoltage }];
+  });
+  // The rest of what the dropped unit carries moves too, or deleting it below erases it: its pre-inspection checks
+  // (the kept unit's own answer wins), the note and answers on its visit, and an Eversys module assigned to it.
+  await sql.query(
+    `with items as (
+       update install_inspection_items d set equipment_id = $1
+        where d.equipment_id = $2
+          and not exists (
+            select 1 from install_inspection_items k
+             where k.install_id = d.install_id and k.equipment_id = $1 and k.category = d.category
+          )
+     ), answered as (
+       -- A kept check that was never answered takes the dropped unit's answer, notes joined.
+       update install_inspection_items k
+          set status = d.status,
+              notes = nullif(concat_ws(' / ', nullif(btrim(k.notes), ''), nullif(btrim(d.notes), '')), ''),
+              updated_at = now()
+         from install_inspection_items d
+        where k.equipment_id = $1 and d.equipment_id = $2
+          and k.install_id = d.install_id and k.category = d.category
+          and k.status = 'Not inspected' and d.status <> 'Not inspected'
+     ), links as (
+       update install_inspection_units k
+          set note = coalesce(k.note, d.note),
+              core_needed = coalesce(k.core_needed, d.core_needed),
+              visit_kind = coalesce(k.visit_kind, d.visit_kind),
+              reqs_same = case when k.visit_kind is null then d.reqs_same else k.reqs_same end,
+              copied_from_install = case when k.visit_kind is null then d.copied_from_install else k.copied_from_install end,
+              copied_from_equipment = case when k.visit_kind is null then d.copied_from_equipment else k.copied_from_equipment end,
+              core_model = case when k.visit_kind is null then d.core_model else k.core_model end
+         from install_inspection_units d
+        where k.equipment_id = $1 and d.equipment_id = $2 and d.install_id = k.install_id
+     ), lists as (
+       update installs i
+          set equipment = f.equipment, machines = f.machines, serial = f.serial, power_voltage = f.power_voltage, updated_at = now()
+         from unnest($3::int[], $4::text[], $5::text[], $6::text[], $7::text[]) as f(id, equipment, machines, serial, power_voltage)
+        where i.id = f.id
+     ), mods as (
+       update modules set assigned_unit_id = $1 where assigned_unit_id = $2
+     )
+     select 1`,
+    [
+      keep.id,
+      drop.id,
+      lists.map((l) => l.id),
+      lists.map((l) => l.equipment),
+      lists.map((l) => l.machines),
+      lists.map((l) => l.serial),
+      lists.map((l) => l.power),
+    ],
+  );
+  await sql.query(
+    `delete from install_inspection_units d
+      where d.equipment_id = $2
+        and exists (
+          select 1 from install_inspection_units k
+           where k.install_id = d.install_id and k.equipment_id = $1
+        )`,
+    [keep.id, drop.id],
+  );
+  await sql.query("update install_inspection_units set equipment_id = $1 where equipment_id = $2", [keep.id, drop.id]);
+  await sql.query("update install_inspection_photos set equipment_id = $1 where equipment_id = $2", [keep.id, drop.id]);
+  await sql.query(
+    `delete from pm_runbook_unit_links d
+      where d.account_equipment_id = $2
+        and exists (
+          select 1 from pm_runbook_unit_links k
+           where k.pm_job_id = d.pm_job_id and k.piece_key = d.piece_key and k.account_equipment_id = $1
+        )`,
+    [keep.id, drop.id],
+  );
+  await sql.query("update pm_runbook_unit_links set account_equipment_id = $1 where account_equipment_id = $2", [keep.id, drop.id]);
+  await sql.query("delete from account_equipment where id = $1", [drop.id]);
+  return { keepId: keep.id, serial };
+}
+
+export const mergeAccountEquipment = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { keepId: number; dropId: number }) =>
+    z.object({ keepId: z.number().int().positive(), dropId: z.number().int().positive() }).parse(d),
+  )
+  .handler(async ({ data }) => mergeEquipmentUnits(await ready(), data.keepId, data.dropId));

@@ -180,6 +180,23 @@ test("bare six digits are only a fallback when no part carries the kit's own num
   assert.equal(pickCatalog(["EV108390"], [was]).EV108390, undefined);
 });
 
+test("La Marzocco kits match the LM prefix and a bare number cannot beat it", () => {
+  const priced = pickCatalog(["F.3.040", "1207", "SA600/K2"], [row("LMF.3.040", { rate: 12 }), row("LM1207", { rate: 8 }), row("LMSA600/K2", { rate: 40 })], "LM");
+  assert.equal(priced.F3040.sku, "LMF.3.040");
+  assert.equal(priced["1207"].sku, "LM1207");
+  assert.equal(priced.SA600K2.sku, "LMSA600/K2");
+  assert.ok(catalogKeys("F.3.040", "LM").includes("LMF3040"));
+  const guarded = pickCatalog(["1207"], [row("1207", { rate: 99, name: "Other maker 1207" }), row("LM1207", { rate: null })], "LM");
+  assert.equal(guarded["1207"].sku, "LM1207");
+  assert.equal(pickCatalog(["EV117077"], [row("LM117077", { rate: 50 })]).EV117077, undefined);
+  assert.equal(matchRank("EV117077", row("LMEV117077")), 0);
+  const bare = [row("F.3.040", { rate: 20 }), row("LMF.3.040", { rate: 10 })];
+  assert.equal(pickCatalog(["F.3.040"], bare).F3040.sku, "F.3.040");
+  assert.deepEqual(pickCatalog(["F.3.040"], bare), pickCatalog(["F.3.040"], bare, undefined));
+  assert.equal(pickCatalog(["EV117077"], [row("EVER117077", { rate: 5 })]).EV117077.sku, "EVER117077");
+  assert.equal(pickCatalog(["EV117077"], [row("EVER117077", { rate: 5 })], undefined).EV117077.sku, "EVER117077");
+});
+
 test("copy text names the Parts list number when it differs from the kit number", () => {
   const p = priceKits(lines, {
     EV117077: item("EVER117077", 100),

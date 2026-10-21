@@ -17,7 +17,7 @@ import { OwnerSelect } from "@/components/desk/owner-select";
 import { ExportButton } from "@/components/desk/export-dialog";
 import { ListToolbar, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { useMyView } from "@/components/desk/my-view-bar";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { Skeleton } from "@/components/ui/separator";
 import { toast } from "sonner";
 
@@ -36,7 +36,7 @@ const FILTERS = [
 ] as const;
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["rebuilds"], queryFn: () => listRebuilds() });
   const { filterMine, matchMine, role } = useMyView();
@@ -44,6 +44,7 @@ function Page() {
   const [chip, setChip] = useState<(typeof FILTERS)[number]["id"]>("all");
   const [view, setView] = useState<"board" | "timeline">(role !== "sales" ? "board" : "timeline");
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [create, setCreate] = useState(false);
   const rows = data.data?.rows ?? [];
   const canEdit = !!data.data?.canEdit;
@@ -157,7 +158,10 @@ function Page() {
         )}
       </div>
 
-      <RebuildSheet row={selectedRow} canEdit={canEdit} onClose={() => setSelected(null)} />
+      <RebuildSheet row={selectedRow} canEdit={canEdit} onClose={() => {
+          setSelected(null);
+          back();
+        }} />
       <CreateRebuildDialog
         open={create}
         onOpenChange={setCreate}

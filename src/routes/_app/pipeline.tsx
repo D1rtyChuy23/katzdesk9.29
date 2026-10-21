@@ -20,7 +20,7 @@ import { ChartCard, FilterChip, SimpleBars, StackedMoneyBars, StatCard, StatRow,
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { ListToolbar, ToolbarSearch, TOOLBAR_SELECT } from "@/components/desk/list-toolbar";
 import { SORT_DEALS, equipmentCount, sortDesk } from "@/lib/ops/sort";
-import { parseOpenSearch, useOpenRecord } from "@/lib/ops/search-params";
+import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Deal } from "@/lib/ops/types";
@@ -65,11 +65,12 @@ function completionLabel(d: Deal) {
 }
 
 function Page() {
-  const { open } = Route.useSearch();
+  const { open, from } = Route.useSearch();
   const data = useQuery({ queryKey: ["deals"], queryFn: () => listDeals() });
   const [q, setQ] = useState("");
   const [view, setView] = useState<DealView>("gto");
   const [selected, setSelected] = useOpenRecord(open);
+  const back = useBackTo(from);
   const [create, setCreate] = useState(false);
   const { filterMine, matchMine } = useMyView();
   const [repFilter, setRepFilter] = useState("");
@@ -334,7 +335,10 @@ function Page() {
           setSelected(id);
         }}
       />
-      <DealSheet deal={selectedRow} onClose={() => setSelected(null)} />
+      <DealSheet deal={selectedRow} onClose={() => {
+          setSelected(null);
+          back();
+        }} />
       <NewDealDialog open={create} onOpenChange={setCreate} onCreated={(id) => setSelected(id)} />
     </div>
   );
