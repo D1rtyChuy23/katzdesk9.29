@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { approveInvoice, getInvoice, type InvoiceView } from "@/lib/ops/invoice-api";
 import { LABOR_ITEM, TRIP_ITEM, kindForItem, lineAmount, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
-import { billToGaps, invoiceError, invoiceTotals, isLaborKind, type BillTo, type InvoiceTarget } from "@/lib/ops/invoice";
+import { billToGaps, invoiceError, invoiceTotals, isLaborKind, usesTicketCharges, type BillTo, type InvoiceTarget } from "@/lib/ops/invoice";
+import { tripDraftWarning } from "@/lib/ops/pm-bill";
 import { canDriveTo, directionsUrl, isPoint } from "@/lib/ops/geo";
 import { formatRep } from "@/lib/ops/rep-match";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label } from "@/components/ui/input";
 import { PartPicker } from "./charges-panel";
+import { AddPmParts } from "./pm-bill-add";
 import { PartThumb } from "./part-thumb";
 import { cn } from "@/lib/utils";
 
@@ -267,7 +269,32 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                       <Plus className="size-4" />
                       Trip Charge
                     </Button>
+                    {usesTicketCharges(type) ? (
+                      <AddPmParts
+                        jobId={id}
+                        draftKeys={draft.flatMap((l) => (l.sourceKey ? [l.sourceKey] : []))}
+                        draftCount={draft.length}
+                        onAdd={(rows) => {
+                          for (const row of rows) {
+                            add({
+                              item: row.item,
+                              description: row.description,
+                              qty: String(row.qty),
+                              rate: row.rate.toFixed(2),
+                              kind: kindForItem(row.item),
+                              part: row.part,
+                              sourceKey: row.sourceKey,
+                            });
+                          }
+                        }}
+                      />
+                    ) : null}
                   </div>
+                  {tripDraftWarning(draft.filter((l) => l.kind === "trip").length) ? (
+                    <p className="text-xs text-warning" data-testid="trip-warning">
+                      {tripDraftWarning(draft.filter((l) => l.kind === "trip").length)}
+                    </p>
+                  ) : null}
                   <PartPicker
                     id={`invoice-part-${type}-${id}`}
                     onPick={(it) =>

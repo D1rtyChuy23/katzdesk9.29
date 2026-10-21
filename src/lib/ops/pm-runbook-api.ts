@@ -42,8 +42,8 @@ import {
 } from "@/lib/ops/pm-runbook";
 import { planUnits, pmCompletionRefusal, type AccountUnitRow, type PlannedUnit } from "@/lib/ops/pm-runbook-units";
 import { partsLockReason, planMachines, type PlannedMachine } from "@/lib/ops/pm-machines";
-import { cleanQty } from "@/lib/ops/charges";
-import { catalogKeys, pickCatalog, prefixForManufacturer, type CatalogKit } from "@/lib/ops/pm-runbook-prices";
+import { cleanQty, type PartRef } from "@/lib/ops/charges";
+import { catalogKeys, pickCatalog, prefixForManufacturer, type CatalogKit, type CatalogRow } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
 
 export type RunbookUnit = {
@@ -1349,44 +1349,69 @@ export async function pmIsCompleted(sql: Sql, pmId: number): Promise<boolean> {
  * Sell prices for kit numbers from the parts catalog. A kit is matched to the part already in the Parts list by
  * SKU or manufacturer number (case, spaces and dashes ignored), and an Eversys kit by its six digits, so the
  * guides' "EV117077" finds the Parts list's "EVER117077". Read-only. Kits the catalog does not have are absent.
+ * `loadKitCatalog` is that lookup. Suggestions for a stacked PM use the same rows.
  */
+export async function loadKitSource(
+  sql: Sql,
+  evs: string[],
+  runbookId?: string | null,
+): Promise<{ prefix: string | undefined; rows: (CatalogRow & { part: PartRef | null })[] }> {
+  const prefix = prefixForManufacturer(runbookById(runbookId ?? "")?.def.manufacturer);
+  const keys = [...new Set(evs.flatMap((ev) => catalogKeys(ev, prefix)))];
+  if (!keys.length) return { prefix, rows: [] };
+  const rows = await sql.query<{
+    id: number;
+    sku: string;
+    item: string | null;
+    description: string | null;
+    mfr_part: string | null;
+    rate: string | null;
+    active: unknown;
+    hidden: unknown;
+    has_image: boolean | null;
+    image_version: string | null;
+  }>(
+    `select id, sku, item, description, mfr_part, rate, active, (hidden_at is not null) as hidden,
+            (image is not null) as has_image,
+            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version
+       from billing_items
+      where upper(regexp_replace(sku, '[^A-Za-z0-9]+', '', 'g')) = any($1::text[])
+         or upper(regexp_replace(coalesce(mfr_part, ''), '[^A-Za-z0-9]+', '', 'g')) = any($1::text[])
+      order by id`,
+    [keys],
+  );
+  return {
+    prefix,
+    rows: rows.map((r) => ({
+      sku: r.sku,
+      name: r.item,
+      description: r.description,
+      mfrPart: r.mfr_part,
+      rate: r.rate == null ? null : Number(r.rate),
+      active: flagOn(r.active),
+      hidden: flagOn(r.hidden),
+      part: {
+        id: Number(r.id),
+        sku: r.sku,
+        mpn: r.mfr_part,
+        hasImage: !!r.has_image,
+        imageVersion: r.image_version,
+      },
+    })),
+  };
+}
+
+export async function loadKitCatalog(sql: Sql, evs: string[], runbookId?: string | null): Promise<Record<string, CatalogKit>> {
+  const { prefix, rows } = await loadKitSource(sql, evs, runbookId);
+  return pickCatalog(evs, rows, prefix);
+}
+
 export const getKitPrices = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: { evs: string[]; runbookId?: string }) =>
     z.object({ evs: z.array(z.string().min(1).max(40)).max(200), runbookId: z.string().max(80).optional() }).parse(d),
   )
   .handler(async ({ data }): Promise<Record<string, CatalogKit>> => {
-    const prefix = prefixForManufacturer(runbookById(data.runbookId ?? "")?.def.manufacturer);
-    const keys = [...new Set(data.evs.flatMap((ev) => catalogKeys(ev, prefix)))];
-    if (!keys.length) return {};
     const sql = await ready();
-    const rows = await sql.query<{
-      sku: string;
-      item: string | null;
-      description: string | null;
-      mfr_part: string | null;
-      rate: string | null;
-      active: unknown;
-      hidden: unknown;
-    }>(
-      `select sku, item, description, mfr_part, rate, active, (hidden_at is not null) as hidden
-         from billing_items
-        where upper(regexp_replace(sku, '[^A-Za-z0-9]+', '', 'g')) = any($1::text[])
-           or upper(regexp_replace(coalesce(mfr_part, ''), '[^A-Za-z0-9]+', '', 'g')) = any($1::text[])
-        order by id`,
-      [keys],
-    );
-    return pickCatalog(
-      data.evs,
-      rows.map((r) => ({
-        sku: r.sku,
-        name: r.item,
-        description: r.description,
-        mfrPart: r.mfr_part,
-        rate: r.rate == null ? null : Number(r.rate),
-        active: flagOn(r.active),
-        hidden: flagOn(r.hidden),
-      })),
-      prefix,
-    );
+    return loadKitCatalog(sql, data.evs, data.runbookId);
   });

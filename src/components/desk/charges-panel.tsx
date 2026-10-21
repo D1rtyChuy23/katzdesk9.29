@@ -14,10 +14,12 @@ import {
   type ChargeLine,
   type PartRef,
 } from "@/lib/ops/charges";
+import { tripDraftWarning } from "@/lib/ops/pm-bill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { PartThumb } from "./part-thumb";
+import { AddPmParts } from "./pm-bill-add";
 import { applyDiscount, cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
 import { cn } from "@/lib/utils";
 
@@ -202,7 +204,22 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
               <Plus className="size-4" />
               Labor Hour
             </Button>
+            <AddPmParts
+              jobId={jobId}
+              draftKeys={lines.flatMap((l) => (l.sourceKey ? [l.sourceKey] : []))}
+              draftCount={lines.length}
+              onAdd={(rows) => {
+                for (const row of rows) {
+                  add({ item: row.item, description: row.description, qty: String(row.qty), rate: row.rate.toFixed(2), part: row.part, sourceKey: row.sourceKey });
+                }
+              }}
+            />
           </div>
+          {tripDraftWarning(lines.filter((l) => kindForItem(l.item) === "trip").length) ? (
+            <p className="text-xs text-warning" data-testid="trip-warning">
+              {tripDraftWarning(lines.filter((l) => kindForItem(l.item) === "trip").length)}
+            </p>
+          ) : null}
           <PartPicker
             onPick={(it) =>
               add({ item: it.item, description: it.description ?? "", qty: "1", rate: it.rate != null ? it.rate.toFixed(2) : "0.00", part: it.part ?? null, sourceKey: null })
