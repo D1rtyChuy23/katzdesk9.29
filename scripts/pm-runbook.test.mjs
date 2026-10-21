@@ -477,6 +477,28 @@ test("a completed PM writes one service record and a later edit is not a second 
   assert.equal(pmServiceRecord({ pmId: 3, modelLabel: "E'4S X-Wide", intervalLabel: "36-month PM", options: [], kits: [], steps: [] }), "PM #3 completed. E'4S X-Wide, 36-month PM.\nOptions: none.\nKits: none.\nSteps done: none.");
 });
 
+test("other parts are written after the kits, and a PM with none keeps the old text", () => {
+  const base = {
+    pmId: 32,
+    modelLabel: "Faema X20",
+    intervalLabel: "36-month PM",
+    options: [],
+    kits: [{ ev: "FA781739020", q: 1, name: "Kit B" }],
+    steps: [],
+  };
+  const plain = pmServiceRecord(base);
+  assert.equal(plain, pmServiceRecord({ ...base, otherParts: [] }));
+  assert.equal(plain.includes("Other parts"), false);
+  const withParts = pmServiceRecord({
+    ...base,
+    otherParts: [
+      { qty: 1, item: "PARTS : EVER104120", description: "Burr set", billable: true },
+      { qty: 2, item: "PARTS : EVER100200", description: "Steam valve gasket", billable: false },
+    ],
+  });
+  assert.match(withParts, /Kits: 1 x FA781739020 Kit B\.\nOther parts: 1 x PARTS : EVER104120 Burr set; 2 x PARTS : EVER100200 Steam valve gasket \(no charge\)\.\nSteps done: none\./);
+});
+
 test("optional kits are the 36-month kits missing from this visit", () => {
   const twelve = cfg({ model: "4s", pm: "12", amer: "yes" });
   const opt = optionalKits(def, twelve);

@@ -41,6 +41,8 @@ import {
   type RunbookRole,
 } from "@/lib/ops/pm-runbook";
 import { planUnits, pmCompletionRefusal, type AccountUnitRow, type PlannedUnit } from "@/lib/ops/pm-runbook-units";
+import { partsLockReason, planMachines, type PlannedMachine } from "@/lib/ops/pm-machines";
+import { cleanQty } from "@/lib/ops/charges";
 import { catalogKeys, pickCatalog, prefixForManufacturer, type CatalogKit } from "@/lib/ops/pm-runbook-prices";
 import type { RunbookConfig, RunbookDefinition } from "@/lib/ops/pm-runbook-schema";
 
@@ -92,6 +94,29 @@ export type RunbookAccountUnit = {
   installDate: string | null;
 };
 
+export type PmMachinePart = {
+  id: number;
+  pieceKey: string;
+  item: string;
+  description: string | null;
+  qty: number;
+  billable: boolean;
+  note: string | null;
+  addedBy: string | null;
+  addedAt: string;
+};
+
+export type PmMachineTab = {
+  key: string;
+  pieceKey: string;
+  accountId: number | null;
+  serial: string | null;
+  piece: string;
+  runbookId: string | null;
+  unitKey: string | null;
+  earlierParts: { who: string | null; at: string; detail: string }[];
+};
+
 export type PmRunbookData = {
   units: RunbookUnit[];
   accountUnits: RunbookAccountUnit[];
@@ -99,6 +124,12 @@ export type PmRunbookData = {
   canEditDefinitions: boolean;
   /** True when the PM is already completed, so added kits stay as they are. */
   completed: boolean;
+  /** Every machine on the equipment text, including lines with no runbook. */
+  machines: PmMachineTab[];
+  /** This PM's active extra parts, newest first, at most 50 per machine. */
+  parts: PmMachinePart[];
+  /** Why parts cannot change, or null. */
+  partsLocked: string | null;
 };
 
 async function ready(): Promise<Sql> {
@@ -154,6 +185,10 @@ export async function recordCompletedRunbook(
     "select unit_key, key from pm_runbook_checks where pm_job_id = $1 and (key like 'step:%' or key like 'kit:%')",
     [pmId],
   );
+  const partRows = await sql.query<{ piece_key: string; qty: string; item: string; description: string | null; billable: boolean }>(
+    "select piece_key, qty, item, description, billable from machine_parts where pm_job_id = $1 and removed_at is null order by id",
+    [pmId],
+  );
   const keys = units.map((u) => u.optionsKey).filter((k): k is string => !!k);
   const optRows = await sql.query<{ id: number; unit_key: string; options: unknown }>(
     "select id, unit_key, options from unit_runbook_options where unit_key = any($1::text[])",
@@ -187,6 +222,9 @@ export async function recordCompletedRunbook(
         .flatMap((g) => g.items)
         .filter((item) => ticked.has(`step:${item.id}`))
         .map((item) => item.text),
+      otherParts: partRows
+        .filter((p) => p.piece_key === u.pieceKey)
+        .map((p) => ({ qty: Number(p.qty), item: p.item, description: p.description, billable: !!p.billable })),
     });
     let historyId = optRow?.id ?? null;
     if (historyId == null) {
@@ -338,13 +376,13 @@ export async function loadVisitConfig(
   });
 }
 
-/** Account units and the runbook lines for one PM, including a line pinned to a specific asset. */
+/** Account units, every machine on the equipment text, and the runbook lines for one PM. */
 export async function loadPmRunbookPlan(
   sql: Sql,
   customer: string,
   equipment: string | null,
   pmId: number,
-): Promise<{ planned: PlannedUnit[]; accountUnits: RunbookAccountUnit[]; rows: AccountUnitRow[] }> {
+): Promise<{ planned: PlannedUnit[]; machines: PlannedMachine[]; accountUnits: RunbookAccountUnit[]; rows: AccountUnitRow[] }> {
   const acct = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null; install_date: string | null }>(
     "select id, customer, catalog_model, equipment_name, serial, install_date::text as install_date from account_equipment where lower(customer) = lower($1) order by id",
     [customer],
@@ -361,12 +399,337 @@ export async function loadPmRunbookPlan(
   for (const link of links) pinned[link.piece_key] = Number(link.account_equipment_id);
   return {
     planned: planUnits(equipment, rows, pmMatcher, pinned),
+    machines: planMachines(equipment, rows, pmMatcher, pinned),
     accountUnits: rows.map((r) => ({ id: r.id, name: r.equipmentName || r.catalogModel, serial: r.serial, installDate: r.installDate ?? null })),
     rows,
   };
 }
 
 export { pmCompletionRefusal };
+
+function isoAt(at: Date | string): string {
+  const d = at instanceof Date ? at : new Date(at);
+  return Number.isNaN(d.getTime()) ? String(at) : d.toISOString();
+}
+
+async function loadMachineParts(sql: Sql, pmId: number): Promise<PmMachinePart[]> {
+  const rows = await sql.query<{
+    id: number;
+    piece_key: string;
+    item: string;
+    description: string | null;
+    qty: string;
+    billable: boolean;
+    note: string | null;
+    added_by: string | null;
+    added_at: Date | string;
+  }>(
+    `select id, piece_key, item, description, qty, billable, note, added_by, added_at
+       from (
+         select m.*, row_number() over (partition by m.piece_key order by m.added_at desc, m.id desc) as n
+           from machine_parts m
+          where m.pm_job_id = $1 and m.removed_at is null
+       ) t
+      where n <= 50
+      order by added_at desc, id desc`,
+    [pmId],
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    pieceKey: r.piece_key,
+    item: r.item,
+    description: r.description,
+    qty: Number(r.qty),
+    billable: !!r.billable,
+    note: r.note,
+    addedBy: r.added_by,
+    addedAt: isoAt(r.added_at),
+  }));
+}
+
+async function pmPartsLock(sql: Sql, pmId: number): Promise<string | null> {
+  const row = (
+    await sql.query<{ status: string; stacked_job_id: number | null; ns_so: string | null; has_lines: unknown }>(
+      `select p.status, p.stacked_job_id, nullif(btrim(j.ns_so), '') as ns_so,
+              exists (
+                select 1 from invoices i
+                join invoice_lines l on l.invoice_id = i.id
+               where i.entity_type = 'pm' and i.entity_id = p.id
+              ) as has_lines
+         from pm_jobs p
+         left join service_jobs j on j.id = p.stacked_job_id
+        where p.id = $1`,
+      [pmId],
+    )
+  )[0];
+  if (!row) return null;
+  return partsLockReason({
+    pmId,
+    status: row.status,
+    stackedJobId: row.stacked_job_id == null ? null : Number(row.stacked_job_id),
+    ticketSo: row.ns_so,
+    pmInvoiceHasLines: flagOn(row.has_lines),
+  });
+}
+
+/** Active parts from other PMs on the same account unit or serial, newest 20 per machine. One query. */
+async function earlierPartNotes(sql: Sql, pmId: number, machines: PlannedMachine[]): Promise<Map<string, { who: string | null; at: string; detail: string }[]>> {
+  const out = new Map<string, { who: string | null; at: string; detail: string }[]>();
+  const keyed = machines.filter((m) => m.accountId != null || m.serialKey);
+  if (!keyed.length) return out;
+  const rows = await sql.query<{
+    piece_key: string;
+    pm_job_id: number;
+    qty: string;
+    item: string;
+    description: string | null;
+    billable: boolean;
+    added_by: string | null;
+    added_at: Date | string;
+  }>(
+    `select k.piece_key, h.pm_job_id, h.qty, h.item, h.description, h.billable, h.added_by, h.added_at
+       from unnest($1::text[], $2::int[], $3::text[]) as k(piece_key, account_id, serial_key)
+       cross join lateral (
+         select m.pm_job_id, m.qty, m.item, m.description, m.billable, m.added_by, m.added_at
+           from machine_parts m
+          where m.removed_at is null
+            and m.pm_job_id <> $4
+            and (
+              (nullif(k.account_id, 0) is not null and m.account_equipment_id = nullif(k.account_id, 0))
+              or (nullif(btrim(k.serial_key), '') is not null and m.serial_key = k.serial_key)
+            )
+          order by m.added_at desc, m.id desc
+          limit 20
+       ) h`,
+    [keyed.map((m) => m.pieceKey), keyed.map((m) => m.accountId ?? 0), keyed.map((m) => m.serialKey ?? ""), pmId],
+  );
+  for (const r of rows) {
+    const desc = String(r.description ?? "").trim();
+    const charge = r.billable ? "" : " (no charge)";
+    const detail = `PM #${r.pm_job_id}: ${Number(r.qty)} x ${r.item}${desc ? ` ${desc}` : ""}${charge}`;
+    const line = { who: r.added_by, at: isoAt(r.added_at), detail };
+    const bag = out.get(r.piece_key) ?? [];
+    bag.push(line);
+    out.set(r.piece_key, bag);
+  }
+  return out;
+}
+
+/**
+ * One statement. Locks the PM, inserts one part only while parts can change, the item is a real part, and
+ * the machine has fewer than 50 active parts, then writes the activity row. 0 rows means the caller re-reads.
+ * $1 pm, $2 billing item, $3 piece key, $4 account id, $5 serial key, $6 machine label, $7 qty, $8 billable,
+ * $9 note, $10 actor, $11 serial as printed.
+ */
+export function addMachinePartSql(): string {
+  return `with pm as (
+       select p.id, p.status, nullif(btrim(j.ns_so), '') as ns_so,
+              exists (
+                select 1 from invoices i
+                join invoice_lines l on l.invoice_id = i.id
+               where i.entity_type = 'pm' and i.entity_id = p.id
+              ) as has_lines
+         from pm_jobs p
+         left join service_jobs j on j.id = p.stacked_job_id
+        where p.id = $1
+        for update of p
+     ), bi as (
+       select b.id, b.item, b.description
+         from billing_items b
+        where b.id = $2
+          and b.active
+          and b.hidden_at is null
+          and b.kind not in ('trip', 'labor')
+     ), room as (
+       select pm.id
+         from pm
+         join bi on true
+        where pm.status <> 'Cancelled'
+          and pm.ns_so is null
+          and not pm.has_lines
+          and (select count(*) from machine_parts m where m.pm_job_id = pm.id and m.piece_key = $3 and m.removed_at is null) < 50
+     ), ins as (
+       insert into machine_parts (pm_job_id, piece_key, account_equipment_id, serial_key, machine_label, billing_item_id, item, description, qty, billable, note, added_by)
+       select room.id, $3, $4, nullif(btrim($5::text), ''), left(btrim($6::text), 200), bi.id, bi.item, bi.description, $7, $8, nullif(btrim($9::text), ''), $10
+         from room
+         join bi on true
+       returning id, qty, item, machine_label
+     ), act as (
+       insert into activity (entity_type, entity_id, actor_name, action, detail)
+       select 'pm', $1::int, $10::text, 'part added',
+              rtrim(rtrim(ins.qty::text, '0'), '.') || ' x ' || ins.item || ' on ' || ins.machine_label ||
+              case when nullif(btrim($11::text), '') is null then '' else ' SN ' || btrim($11::text) end
+         from ins
+       returning id
+     )
+     select ins.id from ins`;
+}
+
+/** Why addMachinePartSql changed nothing. Item 6, then the part, then the 50-part cap. */
+export async function explainAddMachinePart(sql: Sql, pmId: number, billingItemId: number, pieceKey: string): Promise<string> {
+  const lock = await pmPartsLock(sql, pmId);
+  if (lock) return lock;
+  const bi = (await sql.query<{ active: unknown; hidden_at: string | null; kind: string }>("select active, hidden_at, kind from billing_items where id = $1", [billingItemId]))[0];
+  if (!bi || !flagOn(bi.active) || bi.hidden_at) return "That part is hidden or not in the Parts list.";
+  if (bi.kind === "trip" || bi.kind === "labor") return "Pick a part, not trip or labor.";
+  const n = (await sql.query<{ n: number }>("select count(*)::int as n from machine_parts where pm_job_id = $1 and piece_key = $2 and removed_at is null", [pmId, pieceKey]))[0];
+  if (Number(n?.n ?? 0) >= 50) return "This machine already has 50 parts.";
+  return "That part could not be added.";
+}
+
+/**
+ * Soft-remove one part in one statement, only while it is still on the machine, parts can change, and no
+ * ticket charge remembers it. Writes the activity row from the update.
+ * $1 pm, $2 part id, $3 actor.
+ */
+export function removeMachinePartSql(): string {
+  return `with pm as (
+       select p.id, p.status, nullif(btrim(j.ns_so), '') as ns_so,
+              exists (
+                select 1 from invoices i
+                join invoice_lines l on l.invoice_id = i.id
+               where i.entity_type = 'pm' and i.entity_id = p.id
+              ) as has_lines
+         from pm_jobs p
+         left join service_jobs j on j.id = p.stacked_job_id
+        where p.id = $1
+        for update of p
+     ), part as (
+       select m.id, m.qty, m.item, m.machine_label
+         from machine_parts m
+         join pm on pm.id = m.pm_job_id
+        where m.id = $2 and m.removed_at is null
+        for update of m
+     ), ok as (
+       select part.id
+         from part
+         join pm on true
+        where pm.status <> 'Cancelled'
+          and pm.ns_so is null
+          and not pm.has_lines
+          and not exists (select 1 from ticket_charges c where c.source_key = 'mp:' || part.id::text)
+     ), upd as (
+       update machine_parts m
+          set removed_at = now(), removed_by = $3
+         from ok
+        where m.id = ok.id
+       returning m.id, m.qty, m.item, m.machine_label
+     ), act as (
+       insert into activity (entity_type, entity_id, actor_name, action, detail)
+       select 'pm', $1::int, $3::text, 'part removed',
+              rtrim(rtrim(upd.qty::text, '0'), '.') || ' x ' || upd.item || ' on ' || upd.machine_label
+         from upd
+       returning id
+     )
+     select upd.id from upd`;
+}
+
+export async function explainRemoveMachinePart(sql: Sql, pmId: number, partId: number): Promise<string> {
+  const charge = (await sql.query<{ job_id: number }>("select job_id from ticket_charges where source_key = $1 limit 1", [`mp:${partId}`]))[0];
+  const row = (await sql.query<{ removed_at: string | null; pm_job_id: number }>("select removed_at, pm_job_id from machine_parts where id = $1", [partId]))[0];
+  const active = !!row && row.removed_at == null && Number(row.pm_job_id) === pmId;
+  if (active && charge) return `That part is on ticket #${Number(charge.job_id)}'s charges. Take it off there first.`;
+  const lock = await pmPartsLock(sql, pmId);
+  if (active && lock) return lock;
+  return "That part was already removed.";
+}
+
+/**
+ * Pin a PM line to an account unit and stamp that line's parts with the unit and its serial, in one statement.
+ * $1 pm, $2 piece key, $3 account equipment id.
+ */
+export function pinLineSql(): string {
+  return `with link as (
+       insert into pm_runbook_unit_links (pm_job_id, piece_key, account_equipment_id)
+       values ($1, $2, $3)
+       on conflict (pm_job_id, piece_key) do update set account_equipment_id = excluded.account_equipment_id
+       returning account_equipment_id
+     ), eq as (
+       select e.id, e.serial_key from account_equipment e join link on link.account_equipment_id = e.id
+     ), stamped as (
+       update machine_parts m
+          set account_equipment_id = eq.id, serial_key = eq.serial_key
+         from eq
+        where m.pm_job_id = $1 and m.piece_key = $2 and m.removed_at is null
+       returning m.id
+     )
+     select link.account_equipment_id, (select count(*) from stamped)::int as stamped from link`;
+}
+
+/** On completion, fill account unit and serial on parts whose line is now matched. Does not overwrite either. */
+export function stampMachinePartsSql(): string {
+  return `update machine_parts m
+             set account_equipment_id = coalesce(m.account_equipment_id, t.account_id),
+                 serial_key = coalesce(m.serial_key, nullif(btrim(t.serial_key), ''))
+            from unnest($2::text[], $3::int[], $4::text[]) as t(piece_key, account_id, serial_key)
+           where m.pm_job_id = $1
+             and m.removed_at is null
+             and m.piece_key = t.piece_key
+             and t.account_id is not null`;
+}
+
+export async function stampMachineParts(sql: Sql, pmId: number, machines: { pieceKey: string; accountId: number | null; serialKey: string | null }[]): Promise<void> {
+  const lined = machines.filter((m) => m.accountId != null);
+  if (!lined.length) return;
+  await sql.query(stampMachinePartsSql(), [pmId, lined.map((m) => m.pieceKey), lined.map((m) => m.accountId), lined.map((m) => m.serialKey ?? "")]);
+}
+
+const addPartInput = z.object({
+  pmId: z.number().int().positive(),
+  pieceKey: z.string().min(1).max(300),
+  billingItemId: z.number().int().positive(),
+  qty: z.union([z.number(), z.string()]),
+  billable: z.boolean(),
+  note: z.string().max(500).optional(),
+});
+
+/** Log one Parts-list item on a machine of this PM. Service and Admin. The machine comes from the plan, not the client. */
+export const addMachinePart = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof addPartInput>) => addPartInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    const me = await requireWriter(sql, context.userId);
+    const pm = (await sql.query<{ customer: string; equipment: string | null }>("select customer, equipment from pm_jobs where id = $1", [data.pmId]))[0];
+    if (!pm) throw new Error("PM not found");
+    const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
+    const line = plan.machines.find((m) => m.pieceKey === data.pieceKey);
+    if (!line) throw new Error("That machine is not on this PM.");
+    const qty = cleanQty(data.qty);
+    if (qty == null || qty > 1000) throw new Error("Quantity must be more than zero.");
+    const saved = await sql.query<{ id: number }>(addMachinePartSql(), [
+      data.pmId,
+      data.billingItemId,
+      line.pieceKey,
+      line.accountId,
+      line.serialKey,
+      line.piece,
+      qty,
+      data.billable,
+      data.note?.trim() || null,
+      me.name,
+      line.serial,
+    ]);
+    if (!saved[0]) throw new Error(await explainAddMachinePart(sql, data.pmId, data.billingItemId, line.pieceKey));
+    return { ok: true as const, id: Number(saved[0].id) };
+  });
+
+const removePartInput = z.object({
+  pmId: z.number().int().positive(),
+  partId: z.number().int().positive(),
+});
+
+/** Take one extra part off this PM. Refused while a ticket charge still points at it. */
+export const removeMachinePart = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof removePartInput>) => removePartInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    const me = await requireWriter(sql, context.userId);
+    const saved = await sql.query<{ id: number }>(removeMachinePartSql(), [data.pmId, data.partId, me.name]);
+    if (!saved[0]) throw new Error(await explainRemoveMachinePart(sql, data.pmId, data.partId));
+    return { ok: true as const };
+  });
 
 /** Option notes for the units on this PM. No global cap: each unit keeps its own rows, and unitHistory shows 20. */
 export function optionHistorySql(): string {
@@ -386,7 +749,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<PmRunbookData> => {
     const sql = await ready();
     const me = await who(sql, context.userId);
-    const empty = { units: [], accountUnits: [], canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions, completed: false };
+    const empty: PmRunbookData = { units: [], accountUnits: [], canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions, completed: false, machines: [], parts: [], partsLocked: null };
     const pm = (
       await sql.query<{ customer: string; equipment: string | null; style: string | null; status: string; completed_at: string | null }>(
         "select customer, equipment, style, status, completed_at::text as completed_at from pm_jobs where id = $1",
@@ -395,8 +758,32 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     )[0];
     if (!pm) return empty;
 
-    const { planned, accountUnits, rows } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
-    if (!planned.length) return empty;
+    const { planned, machines, accountUnits, rows } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
+    const parts = await loadMachineParts(sql, data.pmId);
+    const partsLocked = await pmPartsLock(sql, data.pmId);
+    const earlierByPiece = await earlierPartNotes(sql, data.pmId, machines);
+    const machineTabs: PmMachineTab[] = machines.map((m) => ({
+      key: m.key,
+      pieceKey: m.pieceKey,
+      accountId: m.accountId,
+      serial: m.serial,
+      piece: m.piece,
+      runbookId: m.runbookId,
+      unitKey: m.unitKey,
+      earlierParts: earlierByPiece.get(m.pieceKey) ?? [],
+    }));
+    if (!machines.length) return empty;
+
+    const sheet = {
+      accountUnits,
+      canWrite: me.canWrite,
+      canEditDefinitions: me.canEditDefinitions,
+      completed: pm.status === "Completed" || !!pm.completed_at,
+      machines: machineTabs,
+      parts,
+      partsLocked,
+    };
+    if (!planned.length) return { ...sheet, units: [] };
 
     // A line that was ticked before its account unit existed is now matched: move that work to the unit.
     for (const u of planned) {
@@ -576,6 +963,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         optRow
           ? hist.filter((h) => h.entity_id === optRow.id).map((h) => ({ who: h.actor_name, at: h.created_at, detail: h.detail }))
           : [],
+        earlierByPiece.get(u.pieceKey) ?? [],
       );
       return {
         unitKey: u.unitKey,
@@ -612,7 +1000,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       };
     });
     const completed = pm.status === "Completed" || !!pm.completed_at;
-    return { units, accountUnits, canWrite: me.canWrite, canEditDefinitions: me.canEditDefinitions, completed };
+    return { units, ...sheet, completed };
   });
 
 const logAssetInput = z.object({
@@ -640,9 +1028,10 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       await sql.query<{ customer: string; equipment: string | null }>("select customer, equipment from pm_jobs where id = $1", [data.pmId])
     )[0];
     if (!pm) throw new Error("PM not found");
-    const { planned } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
-    const line = planned.find((u) => u.pieceKey === data.pieceKey);
-    if (!line) throw new Error("That line is not a runbook unit on this PM.");
+    const { planned, machines } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
+    const line = machines.find((m) => m.pieceKey === data.pieceKey);
+    if (!line) throw new Error("That machine is not on this PM.");
+    const plannedLine = planned.find((u) => u.pieceKey === line.pieceKey);
     const serialText = data.serial.trim();
     const installDate = data.installDate || null;
     let accountId = data.accountId;
@@ -704,8 +1093,8 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       if (moved != null) {
         accountId = moved;
       } else {
-        const rb = runbookById(line.runbookId);
-        const model = rb?.def.models.find((m) => m.id === line.model)?.label ?? line.piece;
+        const rb = line.runbookId ? runbookById(line.runbookId) : undefined;
+        const model = rb?.def.models.find((m) => m.id === plannedLine?.model)?.label ?? line.piece;
         const inserted = await sql.query<{ id: number }>(
           `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date)
            values ($1, $2, $2, $3, $4, $5) returning id`,
@@ -748,12 +1137,7 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       [data.pmId, accountId, data.pieceKey],
     );
     if (taken[0]) throw new Error("That account unit is already logged on another line of this PM.");
-    await sql.query(
-      `insert into pm_runbook_unit_links (pm_job_id, piece_key, account_equipment_id)
-       values ($1, $2, $3)
-       on conflict (pm_job_id, piece_key) do update set account_equipment_id = excluded.account_equipment_id`,
-      [data.pmId, data.pieceKey, accountId],
-    );
+    await sql.query(pinLineSql(), [data.pmId, data.pieceKey, accountId]);
     return { ok: true, accountId };
   });
 

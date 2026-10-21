@@ -6,7 +6,7 @@ import { getSql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
-import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook } from "./pm-runbook-api";
+import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook, stampMachineParts } from "./pm-runbook-api";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
 import { boardLocked, cleanTime, type BoardType } from "./day-board";
@@ -1038,6 +1038,7 @@ export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddl
 	]);
 	if (extra) await logActivity(sql, context.userId, "pm", data.id, "updated", extra);
 	if (completing && completionPlan) {
+		await stampMachineParts(sql, data.id, completionPlan.machines);
 		await recordCompletedRunbook(sql, data.id, context.userId, completionPlan.planned, data.style === undefined ? c.style : data.style);
 	}
 	return mapPm((await sql`select * from pm_jobs where id = ${data.id}`)[0], todayChicago());
