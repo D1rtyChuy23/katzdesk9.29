@@ -198,13 +198,13 @@ async function deskWrapped(sql: Sql): Promise<boolean> {
 
 /**
  * One WO is one install's: two projects with one number are one project. Refuse a WO another open install carries —
- * after the wrap, not a completed install whose WO came in over a year ago (the import calls that number a new job).
+ * after the wrap, not a completed install whose WO came in and that was completed over a year ago (a new job's number).
  */
 export async function assertWoFree(sql: Sql, installId: number, raw: string): Promise<void> {
   const key = woMatchKey(raw);
   if (!key) return;
-  const near = await sql.query<{ id: number; wo: string; complete: boolean; received: string | null }>(
-    `select i.id, w.wo, i.complete,
+  const near = await sql.query<{ id: number; wo: string; complete: boolean; received: string | null; completed_at: string | null }>(
+    `select i.id, w.wo, i.complete, to_char(i.completed_at, 'YYYY-MM-DD') as completed_at,
             to_char(coalesce((select x.received from install_work_orders x where x.install_id = i.id and x.wo = w.wo limit 1),
                              i.received, i.completed_at), 'YYYY-MM-DD') as received
        from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
@@ -217,7 +217,9 @@ export async function assertWoFree(sql: Sql, installId: number, raw: string): Pr
   const n = /^\d+$/.test(key) ? Number(key) : Infinity;
   const cutoff = addDays(todayChicago(), -365);
   const wrapped = n <= WO_WRAP && hits.some((r) => r.complete) ? await deskWrapped(sql) : false;
-  const other = hits.find((r) => !(wrapped && r.complete && !!r.received && r.received < cutoff));
+  // A long project completed recently keeps its number: both its WO and its completion must be over a year old.
+  const old = (r: (typeof hits)[number]) => !!r.received && r.received < cutoff && !!r.completed_at && r.completed_at < cutoff;
+  const other = hits.find((r) => !(wrapped && r.complete && old(r)));
   if (other) throw new Error(`${/^\d+$/.test(key) ? woCanonical(raw) : raw.trim()} is on install #${other.id}. Merge the installs instead.`);
 }
 

@@ -251,6 +251,11 @@ function PreviewBody({
         // null is a choice too (a new install); a row nobody picked for (undefined) takes the preselection.
         (r) => drafts[rowKey(r)]?.installChoice,
         (r) => drafts[rowKey(r)]?.selected ?? true,
+        // A first row's customer as the person set it names the new install its followers go on.
+        (r) => {
+          const d = drafts[rowKey(r)];
+          return d && (d.customerEdited || d.keepWalkIn) ? customerOf(r, d) : undefined;
+        },
       ),
     [preview.rows, drafts],
   );

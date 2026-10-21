@@ -333,10 +333,13 @@ export function attachableHits(
 ): CorrigoHit[] {
   // After the wrap, a closed install whose WO came in over a year ago is another job when the row is open, or was
   // completed after the project was. Completed on or before the project's date, it is the same (a long project).
+  // Kept only when both completed dates are known and the row's is not later.
   const reused = (h: CorrigoHit) =>
     !row ||
     !installWoDone({ status: row.statusRaw, completedAt: row.completedAt }) ||
-    (!!row.completedAt && !!h.completedAt && row.completedAt > h.completedAt);
+    !row.completedAt ||
+    !h.completedAt ||
+    row.completedAt > h.completedAt;
   const hits = wrapped
     ? all.filter(
         (h) => !(h.board === "install" && hitClosed(h) && !recentTicket(h, today) && (woNumeric(h.wo) ?? Infinity) <= WO_WRAP && reused(h)),
@@ -961,12 +964,15 @@ type NewInstall = { id: number; key: string; wo: string; account: string; custom
  * preselected; Create new install can still be chosen). A row that names other equipment exactly than that row
  * preselects its own new install. Choosing something else on the first row hands the role to the next.
  *
- * `choiceOf` gives a row's chosen install (undefined: the preselection); `included` leaves unchecked rows out.
+ * `choiceOf` gives a row's chosen install (undefined: the preselection; a "new install" choice whose row handed the
+ * role on counts as undefined too); `included` leaves unchecked rows out; `customerOf` is the customer the person set
+ * on a row, which names the new install a first row opens (its followers keep that name).
  */
 export function settleInstallRows<T extends CorrigoPreviewRow>(
   rows: T[],
   choiceOf: (row: T) => number | null | undefined = () => undefined,
   included: (row: T) => boolean = () => true,
+  customerOf: (row: T) => string | null | undefined = () => undefined,
 ): T[] {
   const sim = new Map<number, InstallState>();
   const stateOf = (id: number, base: InstallState | null) => sim.get(id) ?? base;
@@ -1007,8 +1013,12 @@ export function settleInstallRows<T extends CorrigoPreviewRow>(
     const options = own || fresh.length ? [...(own ?? []).filter((o) => o.id != null), ...fresh, create] : null;
     optionsOf[i] = options;
     const explicit = choiceOf(row);
+    const valid = explicit !== undefined && (explicit === null || !!options?.some((o) => o.id === explicit));
+    // "The new install from WO-0901" after WO-0901 handed the role on: the row follows whoever has it now.
+    const stale = explicit != null && explicit < 0 && !valid;
     let choice: number | null;
-    if (explicit !== undefined) choice = options?.some((o) => o.id === explicit) ? explicit : null;
+    if (valid) choice = explicit!;
+    else if (explicit !== undefined && !stale) choice = null;
     else {
       const differs = (m: NewInstall) => !!m.machines && !!row.namedMachines && !sameMachines(m.machines, row.namedMachines);
       const fit = mine.find((m) => !differs(m));
@@ -1021,7 +1031,7 @@ export function settleInstallRows<T extends CorrigoPreviewRow>(
         key: row.matchKey,
         wo: row.canonicalWo,
         account: row.fileCustomer!,
-        customer: row.customer,
+        customer: customerOf(row)?.trim() || row.customer,
         machines: row.namedMachines ?? null,
       };
       made.push(m);
