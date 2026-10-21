@@ -2,8 +2,6 @@
 
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { CLOSED_CALL, CLOSED_PM } from "./ticket-status.ts";
-import { listedEquipment } from "./equipment.ts";
-import { compactEquip, matchCatalogModel } from "./account-equip.ts";
 
 export { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 
@@ -184,6 +182,8 @@ export type CorrigoPreviewRow = {
   issue: string | null;
   conflictIds: { board: CorrigoBoard; id: number }[] | null;
   wrapRepeat: boolean;
+  /** Other tickets from this cycle with the number that the row was kept off ("WO-0368 is also on service #528 (…)"). */
+  shared?: string | null;
   /** No install had this WO: jobId is the account's open install whose equipment matches. */
   byEquipment: boolean;
 };
@@ -273,7 +273,8 @@ export function thisCycleFirst(hits: CorrigoHit[], wrapped: boolean, today: stri
 /**
  * The tickets with a row's number it may go on, this cycle's first. After the wrap a closed ticket ≤9999 needs the
  * file's customer (shouldAttachToHit), except that this cycle's copies (received in the last 365 days) are the same
- * job however Corrigo spells the customer — as long as they all belong to one customer.
+ * job however Corrigo spells the customer — as long as they all belong to one customer. When they don't, only a
+ * ticket with the file's customer counts.
  */
 export function attachableHits(
   hits: CorrigoHit[],
@@ -285,7 +286,8 @@ export function attachableHits(
   const named = recent.filter((h) => !isWalkIn(h.customer)).map((h) => normalizeCustomerKey(h.customer));
   const oneCustomer = new Set(named.filter(Boolean)).size <= 1;
   const ok = hits.filter((h) => shouldAttachToHit(h, fileCustomer, wrapped) || (oneCustomer && recent.includes(h)));
-  return thisCycleFirst(ok, wrapped, today);
+  // Two customers' tickets carry the number this cycle: only the file customer's own copies count, open ones too.
+  return thisCycleFirst(oneCustomer ? ok : ok.filter((h) => customersCompatible(h.customer, fileCustomer)), wrapped, today);
 }
 
 /**
@@ -645,17 +647,11 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
   return null;
 }
 
-const SERIAL_ONLY = /^SN\s*:?\s*[A-Z0-9-]+$/i;
 const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
-
-/** The catalog model a machine name reads as ("Eversys Cameo c'2s" → "Eversys Cameo c'2s - 2 Step Classic"), ignoring voltage. */
-function catalogModelOf(name: string, catalog: string[]): string | null {
-  if (catalog.includes(name)) return name;
-  const bare = name.replace(VOLTS, " ").trim();
-  if (!bare) return null;
-  const hit = matchCatalogModel(bare, bare, catalog);
-  return hit.status === "matched" ? hit.catalogModel : null;
-}
+/** A serial on its own line ("SN: 4471", "S/N 4471", "Serial # 4471"), or one ending a machine's line. */
+const SERIAL = String.raw`(?:s\/?n|serial(?:\s*(?:#|no\.?|number))?)`;
+const SERIAL_LINE = new RegExp(String.raw`^${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))[a-z0-9-]*\d[a-z0-9-]*$`, "i");
+const SERIAL_TAIL = new RegExp(String.raw`\s+${SERIAL}\s*[:#]?\s*[a-z0-9-]*\d[a-z0-9-]*$`, "i");
 
 /** Words a problem description may put before or after its machine's name ("Install new …", "… set up"). */
 const FILLER = new Set([
@@ -703,20 +699,31 @@ function spelledMachines(text: string, catalog: string[]): string[] | null {
   return model ? Array<string>(Number(qty)).fill(model) : null;
 }
 
+/** One machine's line ("Bunn TB3 SN: 4471", "2 x Bunn TB3") read exactly, or null. */
+const lineMachines = (line: string, catalog: string[]) => spelledMachines(line.replace(SERIAL_TAIL, "").trim(), catalog);
+
 /**
- * An install's machines read exactly, one entry per unit: each machine row, or each line of typed equipment (serial
- * and voltage aside), is exactly one catalog spelling. null when any one isn't, so a guessed model never counts.
+ * Machines read exactly, one entry per unit: each line (or ; or , between machines) is exactly one catalog spelling
+ * with its serial and voltage aside. null when any one isn't, or there are more serial lines than units, so a
+ * guessed model or count never matches.
  */
 export function exactMachines(pieces: string[], catalog: string[]): string[] | null {
   const out: string[] = [];
-  for (const piece of pieces) {
-    const text = piece.replace(/\s+(?:s\/?n|serial)\b.*$/i, "").trim();
-    if (!text || SERIAL_ONLY.test(text)) continue;
-    const named = spelledMachines(text, catalog);
+  let serials = 0;
+  for (const piece of pieces.flatMap((p) => p.split(/\r?\n|;/))) {
+    const line = piece.trim();
+    if (!line) continue;
+    if (SERIAL_LINE.test(line)) {
+      serials += 1;
+      continue;
+    }
+    // Some catalog names have a comma ('Bunn ITCB-DV, 29" w/Flip Tray'); otherwise a comma is between machines.
+    const parts = line.split(",").map((p) => lineMachines(p, catalog));
+    const named = lineMachines(line, catalog) ?? (parts.length > 1 && parts.every(Boolean) ? parts.flat() : null);
     if (!named) return null;
-    out.push(...named);
+    out.push(...(named as string[]));
   }
-  return out.length ? out : null;
+  return out.length && serials <= out.length ? out : null;
 }
 
 /**
@@ -727,27 +734,6 @@ export function exactMachines(pieces: string[], catalog: string[]): string[] | n
 export function descriptionNames(text: string, machines: string[], catalog: string[]): boolean {
   const named = spelledMachines(text, catalog);
   return !!named && named.length === machines.length && named.every((m, i) => m === machines[i]);
-}
-
-/** The machine models a text names, one entry per unit ("2 x Bunn ITCB" is two), read with the catalog. */
-export function namedMachines(text: string | null | undefined, catalog: string[]): string[] {
-  const out: string[] = [];
-  for (const piece of String(text ?? "").split(/\r?\n|;|,\s*(?=\d{1,2}\s*[x×]\s)/)) {
-    if (!piece.trim() || SERIAL_ONLY.test(piece.trim())) continue;
-    const qty = Number(piece.match(/^\s*(?:qty\s*)?(\d{1,2})\s*[x×]\s/i)?.[1] ?? 1);
-    listedEquipment(piece, catalog).forEach((name, i) => out.push(...Array<string>(i === 0 ? qty : 1).fill(name)));
-  }
-  return out;
-}
-
-/** Same machine models, in any order, ignoring voltage; quantities count. */
-function sameMachines(a: string[], b: string[], catalog: string[]): boolean {
-  const keys = (list: string[]) =>
-    list
-      .map((name) => compactEquip(catalogModelOf(name, catalog) ?? name.replace(VOLTS, " ").trim()))
-      .sort()
-      .join("\n");
-  return a.length === b.length && keys(a) === keys(b);
 }
 
 /**
@@ -776,11 +762,14 @@ function installByEquipment(
       return { install: null, note: `the problem description doesn't name install #${only.id}'s equipment` };
     }
   } else {
-    const named = namedMachines(rec.equipment, catalog);
-    if (!named.length) return { install: null, note: "no equipment named to match an install" };
+    // The Equipment column is read as exactly as the install: the same models, the same number of each.
+    const named = exactMachines([rec.equipment], catalog);
+    if (!named) return { install: null, note: "the Equipment column isn't written as catalog names" };
     if (free.length > 1) return several;
     if (!only.machines.length) return unread;
-    if (!sameMachines(named, only.machines, catalog)) return { install: null, note: `equipment differs from install #${only.id}` };
+    if ([...named].sort().join("\n") !== [...only.machines].sort().join("\n")) {
+      return { install: null, note: `equipment differs from install #${only.id}` };
+    }
   }
   return { install: only, note: `install #${only.id} matched by account and equipment` };
 }
@@ -847,15 +836,16 @@ export function resolvePreviewRow(
     .map((c) => ({ board: c.board, id: c.id }));
   const n = woNumeric(rec.rawWo || rec.canonicalWo);
   const postWrapNumber = n != null && n < 5000;
-  // Another customer's ticket from this cycle with the number: left alone, and the row goes to For Review.
-  const strangers =
-    existing && recentTicket(existing, opts.today) ? others.filter((h) => recentTicket(h, opts.today) && otherJob(h)) : [];
-  // A row on this cycle's ticket is a repeat only beside such a ticket; on an old-cycle ticket it is when other
-  // copies of the number exist.
+  // This cycle's tickets with the number that the row doesn't go on and won't merge: named, and sent to For Review.
+  const strangers = wrapped ? others.filter((h) => recentTicket(h, opts.today) && (!existing || otherJob(h))) : [];
+  const shared = strangers.length
+    ? `${rec.canonicalWo} is also on ${strangers.map((h) => `${h.board} #${h.id} (${h.customer || "no customer"})`).join(", ")}`
+    : null;
+  // Otherwise a row on this cycle's ticket is never a repeat; on an old-cycle ticket it is when other copies exist.
   const wrapRepeat =
     wrapped &&
-    postWrapNumber &&
-    (existing ? (recentTicket(existing, opts.today) ? strangers.length > 0 : others.length > 0) : group.length > 0);
+    (strangers.length > 0 ||
+      (postWrapNumber && (existing ? !recentTicket(existing, opts.today) && others.length > 0 : group.length > 0)));
   const note = woHit ? matchNote(rec.rawWo, rec.canonicalWo, woHit.wo) : null;
 
   return {
@@ -867,11 +857,7 @@ export function resolvePreviewRow(
       [
         note,
         equip?.note,
-        strangers.length
-          ? `${rec.canonicalWo} is also on ${strangers.map((h) => `#${h.id} (${h.customer || "no customer"})`).join(", ")}`
-          : wrapRepeat
-            ? wrapRepeatNote(rec.canonicalWo)
-            : null,
+        shared ?? (wrapRepeat ? wrapRepeatNote(rec.canonicalWo) : null),
       ]
         .filter(Boolean)
         .join(" · ") || null,
@@ -899,6 +885,7 @@ export function resolvePreviewRow(
     issue: rec.issue,
     conflictIds: siblingIds.length ? siblingIds : null,
     wrapRepeat,
+    shared,
     byEquipment: !!equip?.install,
   };
 }

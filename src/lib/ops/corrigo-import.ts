@@ -370,6 +370,7 @@ const applyRow = z.object({
   workDone: z.string().nullable(),
   issue: z.string().nullable(),
   wrapRepeat: z.boolean().optional(),
+  shared: z.string().max(2000).nullable().optional(),
   byEquipment: z.boolean().optional(),
   conflictIds: z
     .array(z.object({ board: z.enum(["service", "tlc", "pm", "install"]), id: z.number() }))
@@ -400,6 +401,7 @@ export async function applyCorrigoRows(
   const wrapped = deskHasWrapped(hitsForWrap);
   const today = todayChicago();
   let wrapRepeat = false;
+  let shared: string | null = null;
 
   function maybeReview(
     board: CorrigoBoard,
@@ -413,12 +415,13 @@ export async function applyCorrigoRows(
   ) {
     const reason = corrigoReviewReason({ created, closed, wrapRepeat });
     if (!reason) return;
-    if (review.some((r) => r.entityType === board && r.id === id)) {
-      const cur = review.find((r) => r.entityType === board && r.id === id);
-      if (cur && reason === "wrap") cur.reason = "wrap";
+    const note = reason === "wrap" && shared ? { note: shared } : {};
+    const cur = review.find((r) => r.entityType === board && r.id === id);
+    if (cur) {
+      if (reason === "wrap") Object.assign(cur, { reason, ...note });
       return;
     }
-    review.push({ id, wo, customer, status, technician, entityType: board, reason, created });
+    review.push({ id, wo, customer, status, technician, entityType: board, reason, created, ...note });
   }
 
   for (const row of rows) {
@@ -429,6 +432,7 @@ export async function applyCorrigoRows(
     let action = row.action;
     let jobId = row.jobId;
     wrapRepeat = !!row.wrapRepeat;
+    shared = row.shared ?? null;
     if (action === "update" && jobId && board === "install") {
       // An install that got another WO since the preview, or one matched by equipment that was archived or completed
       // since: open a new one, as a fresh preview would.

@@ -90,6 +90,27 @@ test("wrap: a closed ticket older than 365 days keeps the exact customer-name ru
   assert.equal(same.rows[0].jobId, old);
 });
 
+test("wrap: a WO-0772 copy an earlier import made under Corrigo's spelling gets the row; the first, spelled differently, is named and left alone", async () => {
+  const sql = await wrappedDesk();
+  const first = await closedTicket(sql, "WO-0772", "Cafe Alpha", daysAgo(30));
+  const copy = await closedTicket(sql, "WO-0772", "Café Alpha LLC", daysAgo(10));
+  const { records } = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name"], ["0772", "Completed", "Café Alpha LLC"]]);
+  const preview = await previewCorrigoRecords(sql, records);
+  const row = preview.rows[0];
+  // Two spellings could be two customers, so nothing is merged: the For Review entry names the other ticket.
+  assert.deepEqual([row.jobId, row.wrapRepeat, row.conflictIds], [copy, true, null]);
+  assert.equal(row.shared, `WO-0772 is also on service #${first} (Cafe Alpha)`);
+  const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual(
+    res.review.map((r) => [r.id, r.reason, r.note]),
+    [[copy, "wrap", `WO-0772 is also on service #${first} (Cafe Alpha)`]],
+  );
+  assert.deepEqual(
+    (await sql.query("select customer, duplicate_of from service_jobs where id = any($1::int[]) order by id", [[first, copy]])),
+    [{ customer: "Cafe Alpha", duplicate_of: null }, { customer: "Café Alpha LLC", duplicate_of: null }],
+  );
+});
+
 test("wrap: a WO-0772 an earlier import already duplicated for the same customer attaches to the first and merges the copy", async () => {
   const sql = await wrappedDesk();
   const first = await closedTicket(sql, "WO-0772", "Cafe Alpha LLC", daysAgo(30));
@@ -114,7 +135,8 @@ test("wrap: one number on two of this cycle's tickets for different customers go
   const preview = await previewCorrigoRecords(sql, file("Hotel Icon"));
   const row = preview.rows[0];
   assert.deepEqual([row.action, row.jobId, row.conflictIds, row.wrapRepeat], ["update", icon, null, true]);
-  assert.match(row.matchNote, new RegExp(`WO-0368 is also on #${stella} \\(Stella Southern\\)`));
+  assert.equal(row.shared, `WO-0368 is also on service #${stella} (Stella Southern)`);
+  assert.match(row.matchNote, /WO-0368 is also on service #\d+ \(Stella Southern\)/);
   await applyCorrigoRows(sql, preview.rows, "Chuy");
   const both = await sql.query("select id, customer, work_done, duplicate_of from service_jobs where id = any($1::int[]) order by id", [[stella, icon]]);
   assert.deepEqual(both, [
@@ -124,12 +146,34 @@ test("wrap: one number on two of this cycle's tickets for different customers go
   // Neither customer matches: neither ticket is guessed at, in the preview or at apply.
   const other = await previewCorrigoRecords(sql, file("Hotel Icon Downtown"));
   assert.deepEqual([other.rows[0].action, other.rows[0].wrapRepeat], ["create", true]);
+  assert.equal(other.rows[0].shared, `WO-0368 is also on service #${stella} (Stella Southern), service #${icon} (Hotel Icon)`);
   await applyCorrigoRows(sql, other.rows, "Chuy");
   assert.deepEqual(
     (await sql.query("select customer from service_jobs where id = any($1::int[]) order by id", [[stella, icon]])).map((r) => r.customer),
     ["Stella Southern", "Hotel Icon"],
   );
   assert.equal((await woRows(sql, "0368")).length, 3);
+});
+
+test("wrap: another customer's open ticket with the number is left alone too, and the end-of-import merge doesn't fold them", async () => {
+  const sql = await wrappedDesk();
+  const stella = await closedTicket(sql, "WO-0368", "Stella Southern", daysAgo(60));
+  const icon = await closedTicket(sql, "WO-0368", "Hotel Icon", daysAgo(60));
+  await sql.query("update service_jobs set status = 'Dispatched', done = false, work_done = 'Stella Southern work' where id = $1", [stella]);
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "Work Done"],
+    ["0368", "Completed", "Hotel Icon", "Corrigo work"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.deepEqual([preview.rows[0].jobId, preview.rows[0].conflictIds, preview.rows[0].wrapRepeat], [icon, null, true]);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual(
+    await sql.query("select id, customer, status, work_done, duplicate_of from service_jobs where id = any($1::int[]) order by id", [[stella, icon]]),
+    [
+      { id: stella, customer: "Stella Southern", status: "Dispatched", work_done: "Stella Southern work", duplicate_of: null },
+      { id: icon, customer: "Hotel Icon", status: "Completed", work_done: "Corrigo work", duplicate_of: null },
+    ],
+  );
 });
 
 const lastLog = async (sql, type, id) =>
@@ -698,6 +742,13 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
   assert.deepEqual(exact("Bunn TB3 SN 12345"), ["Bunn TB3"]);
   assert.deepEqual(exact("Eversys Cameo c'2s 120v\nSN:ABC123\nBunn TB3"), [cameo, "Bunn TB3"]);
   assert.deepEqual(exact("ICB-DV Short"), ["BUNN ICB-DV Short"]);
+  assert.deepEqual(exact("Bunn TB3 Serial # 4471"), ["Bunn TB3"]);
+  assert.deepEqual(exact("Bunn TB3; Bunn TB3"), ["Bunn TB3", "Bunn TB3"]);
+  assert.deepEqual(exact("Mazzer Mini Electronic SN:2608789, Mazzer Robur S Electronic SN:2601514"), [
+    "Mazzer Mini Electronic",
+    "Mazzer Robur S Electronic",
+  ]);
+  assert.deepEqual(exact('Bunn ITCB-DV, 29" w/Flip Tray'), ['Bunn ITCB-DV, 29" w/Flip Tray']);
   assert.deepEqual(exact("Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed"), [
     "Blendtec Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed",
   ]);
@@ -725,6 +776,15 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
     "Rancilio Classe 7 USB 2 Group Tall",
     "Bunn H5X Element 120V",
     "Eversys Cameo c'2s\nCameo",
+    // A serial never hides what follows it, and a line that only starts with "SN" is not a serial.
+    "La Marzocco Linea Mini S/N LM1234 w/ Mazzer Mini Electronic",
+    "Bunn TB3 SN: TB3001 x2",
+    "Bunn TB3 Serial 4471 (2 units)",
+    "Bunn TB3 SN: TB3001, TB3002",
+    "Eversys Cameo c'2s SN: 0099820025259C0040, Bunn ITCB-DV",
+    "Bunn TB3\nSnapchill-2",
+    "Bunn TB3\nSN: TB3001\nSN: TB3002",
+    "Bunn ITCB-DV, w/Flip Tray",
   ]) {
     assert.equal(exact(text), null, text);
   }
@@ -749,6 +809,11 @@ test("install: a loosely written install never matches, by the problem descripti
     d: await openInstall(sql, "Cafe Dog", { equipment: "Bunn CWTF15-TC" }),
     e: await openInstall(sql, "Cafe Echo", { equipment: "Cameo" }),
     f: await openInstall(sql, "Cafe Fox", { equipment: "TB3" }),
+    g: await openInstall(sql, "Cafe Golf", { equipment: "BUNN ICB-DV, TALL" }),
+    h: await openInstall(sql, "Cafe Hotel", { equipment: "Bunn TB3" }),
+    i: await openInstall(sql, "Cafe India", { equipment: "Eversys Cameo c'2s" }),
+    j: await openInstall(sql, "Cafe Juliet", { equipment: "La Marzocco Linea Mini" }),
+    k: await openInstall(sql, "Cafe Kilo", { equipment: "Mazzer Mini Electronic SN:2608789, Mazzer Robur S Electronic SN:2601514" }),
   };
   const { records } = parseCorrigoMatrix([
     ["ST#", "Operational Status", "Customer Name", "P.O. #", "Problem Description", "Equipment"],
@@ -758,6 +823,13 @@ test("install: a loosely written install never matches, by the problem descripti
     ["0684", "Work Started", "Cafe Dog", "Install", "", "Bunn CWTF TWIN-APS"],
     ["0685", "Work Started", "Cafe Echo", "Install", "", "Eversys Cameo c'2s"],
     ["0686", "Work Started", "Cafe Fox", "Install", "Install Bunn TB3", ""],
+    // The Equipment column is read as exactly as the install.
+    ["0687", "Work Started", "Cafe Golf", "Install", "", "ICB-DV Short"],
+    ["0688", "Work Started", "Cafe Hotel", "Install", "", "Bunn TB3 x2"],
+    ["0689", "Work Started", "Cafe India", "Install", "", "Cameo"],
+    ["0690", "Work Started", "Cafe Juliet", "Install", "", "Linea Mini w/ Mazzer Mini"],
+    ["0691", "Work Started", "Cafe Kilo", "Install", "Install Mazzer Mini Electronic", ""],
+    ["0692", "Work Started", "Cafe Kilo", "Install", "", "Mazzer Robur S Electronic, Mazzer Mini Electronic"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
   const unread = (id) => `install #${id}'s equipment isn't written as catalog names`;
@@ -770,9 +842,15 @@ test("install: a loosely written install never matches, by the problem descripti
       ["WO-0684", "create", null, unread(ids.d)],
       ["WO-0685", "create", null, unread(ids.e)],
       ["WO-0686", "update", ids.f, `install #${ids.f} matched by account and equipment`],
+      ["WO-0687", "create", null, `equipment differs from install #${ids.g}`],
+      ["WO-0688", "create", null, "the Equipment column isn't written as catalog names"],
+      ["WO-0689", "create", null, "the Equipment column isn't written as catalog names"],
+      ["WO-0690", "create", null, "the Equipment column isn't written as catalog names"],
+      ["WO-0691", "create", null, `the problem description doesn't name install #${ids.k}'s equipment`],
+      ["WO-0692", "update", ids.k, `install #${ids.k} matched by account and equipment`],
     ],
   );
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual([res.updated, res.created], [1, 5]);
+  assert.deepEqual([res.updated, res.created], [2, 10]);
   for (const id of [ids.a, ids.b, ids.c, ids.d, ids.e]) assert.equal((await sql.query("select wo from installs where id = $1", [id]))[0].wo, null);
 });

@@ -750,10 +750,13 @@ export function CorrigoReviewList({
                   {item.entityType && item.entityType !== "service" ? ` · ${woBoardName(item.entityType)}` : ""}
                   {item.created ? " · new" : ""}
                   {item.technician ? ` · ${item.technician}` : ""}
-                  {item.reason === "wrap" ? " · repeated after 9999" : ""}
+                  {item.reason === "wrap" ? (item.note ? " · number on another ticket too" : " · repeated after 9999") : ""}
                 </span>
                 {item.reason === "merge" && item.note ? (
                   <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">not merged: {item.note}</span>
+                ) : null}
+                {item.reason === "wrap" && item.note ? (
+                  <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">{item.note}</span>
                 ) : null}
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">
