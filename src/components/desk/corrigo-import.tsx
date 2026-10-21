@@ -307,8 +307,9 @@ function PreviewBody({
       </ul>
       {preview.wrapCount ? (
         <p className="mt-3 text-xs text-muted-foreground">
-          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 or share it with
-          another customer&apos;s ticket — those stay on For review so nobody merges two different jobs
+          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 or{" "}
+          {preview.wrapCount === 1 ? "shares" : "share"} it with another customer&apos;s ticket — those stay on For review so
+          nobody merges two different jobs
           {preview.conflictCount
             ? ` · ${preview.conflictCount} already on more than one ticket`
             : ""}

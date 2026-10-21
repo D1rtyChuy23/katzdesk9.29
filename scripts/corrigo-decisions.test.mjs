@@ -752,6 +752,8 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
   assert.deepEqual(exact("Bunn TB3 SN12345"), ["Bunn TB3"]);
   assert.deepEqual(exact("Bunn TB3\nS/N TB3001"), ["Bunn TB3"]);
   assert.deepEqual(exact("2 x Bunn TB3 SN: A1\nSN: A2"), ["Bunn TB3", "Bunn TB3"]);
+  assert.deepEqual(exact("Mazzer Mini Electronic, Bunn TB3 SN: 1"), ["Mazzer Mini Electronic", "Bunn TB3"]);
+  assert.deepEqual(exact("Mazzer Mini Electronic, Bunn TB3\nSN: 1"), ["Mazzer Mini Electronic", "Bunn TB3"]);
   assert.deepEqual(exact("Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed"), [
     "Blendtec Stealth 885, 90 oz Commercial Food Blender, 3.8 HP, Variable Speed",
   ]);
@@ -798,6 +800,14 @@ test("install: an install's machines are read exactly — loose, partial, two-ma
     "Bunn TB3 Snapchill-2",
     "Bunn TB3 SNX-1000",
     "Bunn TB3 Serializer2",
+    // Serial lines after a comma line belong to its last machine.
+    "Bunn TB3, Mazzer Mini Electronic SN: 1\nSN: 2",
+    "Bunn TB3, Mazzer Mini Electronic\nSN: 1\nSN: 2",
+    "2 x Bunn TB3, Mazzer Mini Electronic SN: 1\nSN: 2\nSN: 3",
+    // A word or a count run against SN is not a serial.
+    "Bunn TB3 SN2GO",
+    "Bunn TB3 SN x2",
+    "Bunn TB3 S/N 2-units",
   ]) {
     assert.equal(exact(text), null, text);
   }

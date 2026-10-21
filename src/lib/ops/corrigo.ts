@@ -650,7 +650,8 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
 const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
 /** A serial on its own line ("SN: 4471", "S/N 4471", "Serial # 4471"), or one ending a machine's line. */
 const SERIAL = String.raw`(?:s\/?n|serial(?:\s*(?:#|no\.?|number))?)`;
-const SERIAL_NUMBER = String.raw`${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))[a-z0-9-]*\d[a-z0-9-]*$`;
+// Spaced or after ":"/"#" it is any token with a digit, but not a count ("x2", "2 units"); run together, only digits.
+const SERIAL_NUMBER = String.raw`${SERIAL}(?:(?:\s*[:#]\s*|\s+)(?!(?:x\d+|\d+x|\d+-?units?)$)[a-z0-9-]*\d[a-z0-9-]*|\d[\d-]*)$`;
 const SERIAL_LINE = new RegExp(`^${SERIAL_NUMBER}`, "i");
 const SERIAL_TAIL = new RegExp(String.raw`\s+${SERIAL_NUMBER}`, "i");
 
@@ -702,8 +703,8 @@ function spelledMachines(text: string, catalog: string[]): string[] | null {
 
 /**
  * Machines read exactly, one entry per unit: each line (or ; or , between machines) is exactly one catalog spelling
- * with its voltage aside. A serial may end a machine's line or follow it on its own line, at most one per unit of
- * that line. null when anything else is there, so a guessed model or count never matches.
+ * with its voltage aside. A serial may end a machine's line, or follow the line's last machine on its own line, at
+ * most one per unit. null when anything else is there, so a guessed model or count never matches.
  */
 export function exactMachines(pieces: string[], catalog: string[]): string[] | null {
   const out: string[] = [];
@@ -718,13 +719,14 @@ export function exactMachines(pieces: string[], catalog: string[]): string[] | n
     const read = (texts: string[]) => {
       const each = texts.map((t) => spelledMachines(t.replace(SERIAL_TAIL, "").trim(), catalog));
       if (!each.every(Boolean)) return null;
-      return { units: each.flat() as string[], tails: texts.filter((t) => SERIAL_TAIL.test(t)).length };
+      // Serial lines that follow belong to the line's last machine.
+      const last = texts.length - 1;
+      return { units: each.flat() as string[], left: each[last]!.length - (SERIAL_TAIL.test(texts[last]!) ? 1 : 0) };
     };
     // Some catalog names have a comma ('Bunn ITCB-DV, 29" w/Flip Tray'); otherwise a comma is between machines.
     const got = read([line]) ?? (line.includes(",") ? read(line.split(",")) : null);
     if (!got) return null;
-    serialsLeft = got.units.length - got.tails;
-    if (serialsLeft < 0) return null;
+    serialsLeft = got.left;
     out.push(...got.units);
   }
   return out.length ? out : null;
