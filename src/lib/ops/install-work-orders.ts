@@ -7,9 +7,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
+import { todayChicago } from "@/lib/ops/clock";
 import { woCanonical, woMatchKey } from "@/lib/ops/corrigo";
 import type { InstallWorkOrder } from "@/lib/ops/types";
-import { findWoEverywhere, type WoBoardHit } from "@/lib/ops/wo-search";
+import { INSTALL_WOS_SQL, findWoEverywhere, type WoBoardHit } from "@/lib/ops/wo-search";
 
 export { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 
@@ -116,7 +117,8 @@ export async function recordInstallWo(
      on conflict (install_id, match_key) do update
        set status = coalesce(excluded.status, install_work_orders.status),
            completed_at = coalesce(excluded.completed_at, install_work_orders.completed_at)`,
-    [installId, wo.wo.trim(), key, wo.status?.trim() || null, wo.completedAt || null, wo.received || null, wo.source, wo.addedBy ?? null],
+    // A WO is dated the day it came onto the install unless Corrigo's own date is known.
+    [installId, wo.wo.trim(), key, wo.status?.trim() || null, wo.completedAt || null, wo.received || todayChicago(), wo.source, wo.addedBy ?? null],
   );
   if (!primaryKey) await sql.query("update installs set wo = $2, updated_at = now() where id = $1", [installId, wo.wo.trim()]);
 }
@@ -125,11 +127,12 @@ export async function recordInstallWo(
  * Take a WO off an install. The primary's place goes to the next WO (the oldest added); the last one leaves the
  * install with no WO. Returns the install's new primary.
  */
-export async function dropInstallWo(sql: Sql, installId: number, matchKey: string): Promise<string | null> {
+export async function dropInstallWo(sql: Sql, installId: number, matchKey: string, opts?: { primary?: boolean }): Promise<string | null> {
   const cur = await sql.query<{ wo: string | null }>("select wo from installs where id = $1", [installId]);
   if (!cur[0]) throw new Error("Install not found");
   await sql.query("delete from install_work_orders where install_id = $1 and match_key = $2", [installId, matchKey]);
-  if (woMatchKey(cur[0].wo ?? "") !== matchKey) return cur[0].wo;
+  // `primary`: installs.wo was already cleared (the window's WO # field), so it can't say which one was first.
+  if (!(opts?.primary ?? woMatchKey(cur[0].wo ?? "") === matchKey)) return cur[0].wo;
   const next = await sql.query<{ wo: string }>(
     "select wo from install_work_orders where install_id = $1 order by added_at, id limit 1",
     [installId],
@@ -148,7 +151,7 @@ export async function setPrimaryWo(sql: Sql, installId: number, before: string |
   const newKey = woMatchKey(after ?? "");
   if (oldKey === newKey) return;
   if (!newKey) {
-    if (oldKey) await dropInstallWo(sql, installId, oldKey);
+    if (oldKey) await dropInstallWo(sql, installId, oldKey, { primary: true });
     return;
   }
   const has = await sql.query("select 1 from install_work_orders where install_id = $1 and match_key = $2", [installId, newKey]);
@@ -194,6 +197,15 @@ export async function addInstallWorkOrderFor(sql: Sql, userId: string, data: z.i
   const wo = /^\d+$/.test(key) ? woCanonical(data.wo) : data.wo.trim();
   const have = (await loadInstallWos(sql, [install.id])).get(install.id) ?? [];
   if (have.some((w) => w.matchKey === key)) throw new Error(`${wo} is already on this install.`);
+  // One WO is one install's: two projects with one number are one project.
+  const near = await sql.query<{ id: number; wo: string }>(
+    `select i.id, w.wo from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
+      where i.archived = false and i.id <> $1 and regexp_replace(w.wo, '[^A-Za-z0-9]', '', 'g') ilike '%' || $2 || '%'
+      order by i.id`,
+    [install.id, key],
+  );
+  const other = near.find((r) => woMatchKey(r.wo) === key);
+  if (other) throw new Error(`${wo} is on install #${other.id}. Merge the installs instead.`);
   const actor = await actorName(sql, userId);
   await recordInstallWo(sql, install.id, { wo, source: "desk", addedBy: actor });
   await log(sql, install.id, actor, `added ${wo}`);
