@@ -471,6 +471,7 @@ export function MachineFields({
   where = "install",
   dealId,
   rowLocked,
+  onRemoveLocked,
   rowFooter,
 }: {
   /** The recipe column of the install layout. Deals show the recipe on the configuration line instead. */
@@ -495,6 +496,8 @@ export function MachineFields({
   recipes?: Recipe[];
   /** Deal rows: a machine already on the Board reads as it was sent. From then on it is changed on the Board. */
   rowLocked?: (spec: MachineSpec, index: number) => boolean;
+  /** The owner's Remove on a row rowLocked holds. Nobody else gets the button. */
+  onRemoveLocked?: (index: number) => void;
   /** A line under a machine: the deal's Confirm button, or where the machine is on the Board. */
   rowFooter?: (spec: MachineSpec, index: number) => ReactNode;
 }) {
@@ -512,7 +515,21 @@ export function MachineFields({
           return (
             <div key={`${spec.equipment}-${index}`} data-testid="machine-row" data-locked="true" className="py-2">
               <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Model</p>
-              <p className="text-sm font-medium">{spec.equipment}</p>
+              <p className="flex min-w-0 items-center gap-1 text-sm font-medium">
+                <span className="min-w-0 break-words">{spec.equipment}</span>
+                {onRemoveLocked ? (
+                  <button
+                    type="button"
+                    onClick={() => onRemoveLocked(index)}
+                    aria-label={`Remove ${spec.equipment} from this ${where}`}
+                    title={`Remove from this ${where} (owner)`}
+                    data-testid="machine-remove-locked"
+                    className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground max-sm:ml-1 max-sm:size-10"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                ) : null}
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground" data-testid="machine-glance">
                 {machineGlance(spec) || "No details were set"}
               </p>

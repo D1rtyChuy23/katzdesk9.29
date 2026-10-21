@@ -179,18 +179,30 @@ export const addEversysUnit = createServerFn({ method: "POST" })
     if (!isEversysMachine(model)) throw new Error("Pick an Eversys model (Cameo, Enigma, e'4, Legacy…).");
     const serial = data.serial?.trim() || null;
     const key = serial ? serialKey(serial) : null;
+    let inserted: { id: number }[] = [];
     if (key) {
-      const dup = await sql.query<{ customer: string }>(
-        "select customer from account_equipment where serial_key = $1 limit 1",
+      const dup = await sql.query<{ id: number; customer: string }>(
+        "select id, customer from account_equipment where serial_key = $1 limit 1",
         [key],
       );
-      if (dup[0]) throw new Error(`Serial ${serial} is already on ${dup[0].customer}.`);
+      if (dup[0] && dup[0].customer.trim().toLowerCase() !== customer.trim().toLowerCase()) {
+        throw new Error(`Serial ${serial} is already on ${dup[0].customer}.`);
+      }
+      // That serial on this account, or a unit of this model with no serial yet, is this unit: no second row.
+      const { accountUnitWithSerial } = await import("@/lib/ops/account-unit");
+      const have = await accountUnitWithSerial(sql, customer, model, serial);
+      if (have && !serialKey(have.serial)) {
+        await sql.query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [have.id, serial, key]);
+      }
+      if (have) inserted = [{ id: have.id }];
     }
-    const inserted = await sql.query<{ id: number }>(
-      `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key)
-       values ($1, $2, $2, $3, $4) returning id`,
-      [customer, model, serial, key],
-    );
+    if (!inserted.length) {
+      inserted = await sql.query<{ id: number }>(
+        `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key)
+         values ($1, $2, $2, $3, $4) returning id`,
+        [customer, model, serial, key],
+      );
+    }
     const who = await actorOf(sql, context.userId);
     const acct = await sql.query<{ id: number }>(
       "select id from directory_customers where archived = false and lower(name) = lower($1) limit 1",

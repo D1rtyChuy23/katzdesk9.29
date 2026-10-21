@@ -2,9 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
+import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import { foldVisitUnits, applySerialInPlace, dedupeMachineSerials } from "@/lib/ops/install-form";
-import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
+import { catalogModels } from "@/lib/ops/equipment";
+import { catalogNames } from "@/lib/ops/inspection-api";
+import { assertUnlocked } from "@/lib/ops/equipment-lock";
+import { LOCKED_BY_ASSIGNED } from "@/lib/ops/equipment-lock-rules";
 import { isBarn, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { normalizeCustomerKey } from "@/lib/ops/account-equip";
 
@@ -59,6 +62,8 @@ type AssetLite = {
   customer_owned: string | null;
   stock_hold: string | null;
   stock_hold_customer: string | null;
+  locked_at?: unknown;
+  locked_by?: string | null;
 };
 
 export function serialKey(raw: string | null | undefined): string {
@@ -193,7 +198,7 @@ async function loadBySerial(sql: Sql, raw: string): Promise<AssetLite | null> {
   const rows = await sql.query<AssetLite>(
     `select id, model, serial, status, site, pallet, level, line_no, sold_to, install_id, job_id,
             notes, purpose, origin_site, origin_pallet, origin_level, customer_owned,
-            stock_hold, stock_hold_customer
+            stock_hold, stock_hold_customer, locked_at, locked_by
        from assets
       where serial is not null and btrim(serial) <> ''`,
   );
@@ -244,6 +249,8 @@ async function attachAsset(
   asset: AssetLite,
   opts: { customer: string; installId?: number; jobId?: number },
 ) {
+  // A sold unit or one a person locked stays put; an assignment's own lock moves with a confirmed reuse, as before.
+  await assertUnlocked(sql, asset, { release: true });
   const originSite = asset.origin_site ?? asset.site;
   const originPallet = asset.origin_pallet ?? asset.pallet;
   const originLevel = asset.origin_level ?? asset.level;
@@ -268,6 +275,8 @@ async function attachAsset(
         origin_pallet = $6,
         origin_level = $7,
         purpose = $8,
+        locked_at = now(),
+        locked_by = $9,
         updated_at = now()
       where id = $1`,
     [
@@ -279,6 +288,7 @@ async function attachAsset(
       originPallet,
       originLevel,
       purpose,
+      LOCKED_BY_ASSIGNED,
     ],
   );
   const detail = `Pulled ${asset.model}${asset.serial ? " · " + asset.serial : ""} from ${locationOf(asset)}.`;
@@ -294,7 +304,7 @@ async function attachAsset(
   await logActivity(sql, userId, "asset", asset.id, "assigned-serial", detail);
 }
 
-async function writeInstallSerial(
+export async function writeInstallSerial(
   sql: Sql,
   installId: number,
   serial: string,
@@ -310,17 +320,12 @@ async function writeInstallSerial(
     }>("select equipment, serial, power_voltage, machines from installs where id = $1", [installId])
   )[0];
   if (!row) return "already";
-  const catalog = catalogModels([row.equipment ?? "", fill.model ?? ""]);
-  const names = listedEquipment(row.equipment, catalog);
-  let specs = parseMachinesJson(row.machines);
+  // The list the install window and pre-inspection read, split with the real equipment catalog. Using the install's
+  // own text as the catalog saved the whole typed text as one machine, and a serial line read as a machine.
+  const catalog = catalogModels([...(await catalogNames(sql)), fill.model ?? ""]);
+  let specs = installMachines(row, catalog).machines;
   if (!specs.length) {
-    specs = names.length
-      ? names.map((equipment) => ({
-          equipment,
-          serial: names.length === 1 ? (row.serial ?? "") : "",
-          powerVoltage: names.length === 1 ? (row.power_voltage ?? "") : "",
-        }))
-      : [{ equipment: row.equipment ?? fill.model ?? "", serial: row.serial ?? "", powerVoltage: row.power_voltage ?? "" }];
+    specs = [{ equipment: row.equipment ?? fill.model ?? "", serial: row.serial ?? "", powerVoltage: row.power_voltage ?? "" }];
   }
   const placed = applySerialInPlace(specs, machineIndex, serial);
   if (placed.status === "duplicate") return "duplicate";

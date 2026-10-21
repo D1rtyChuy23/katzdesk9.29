@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { sameUnitModel } from "@/lib/ops/account-equip";
 import { listAccountEquipment, mergeAccountEquipment, removeAccountEquipment } from "@/lib/ops/account-equip-import";
 import { detectBoard } from "@/lib/ops/corrigo";
 import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
@@ -8,6 +9,7 @@ import { formatShortDate, money } from "@/lib/ops/clock";
 import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
+import { LockBadge, LockToggle } from "./lock-badge";
 import { UnitPlaceField } from "./unit-place-field";
 
 /**
@@ -153,6 +155,8 @@ export function AccountEquipmentList({
     serial: string | null;
     installDate: string | null;
     ownership: string | null;
+    /** Locked by the owner: Remove and Merge are off until it is unlocked. */
+    lockedBy?: string | null;
   }[];
   loading: boolean;
   className?: string;
@@ -192,12 +196,14 @@ export function AccountEquipmentList({
       ) : rows.length ? (
         <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
           {rows.map((row, i) => {
-            const twins = rows.filter(
-              (other, j) => j !== i && other.id && row.id && other.catalogModel.trim().toLowerCase() === row.catalogModel.trim().toLowerCase(),
-            );
+            // Merge is offered for any row that reads as the same model, not only the exact catalog name.
+            const twins = rows.filter((other, j) => j !== i && other.id && row.id && sameUnitModel(other, row));
             return (
               <li key={`${row.id ?? row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
-                <p className="font-medium">{row.equipmentName || row.catalogModel}</p>
+                <p className="flex flex-wrap items-center gap-2 font-medium">
+                  {row.equipmentName || row.catalogModel}
+                  <LockBadge lockedBy={row.lockedBy} />
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {[
                     row.catalogModel && row.catalogModel !== row.equipmentName ? row.catalogModel : null,
@@ -210,7 +216,8 @@ export function AccountEquipmentList({
                 </p>
                 {row.serial ? (
                   <div className="mt-2">
-                    <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} />
+                    {/* A unit locked on the account keeps its place; otherwise the barn record's own lock decides. */}
+                    <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} lockedBy={row.lockedBy || undefined} />
                   </div>
                 ) : null}
                 {row.id ? (
@@ -221,7 +228,8 @@ export function AccountEquipmentList({
                         type="button"
                         size="sm"
                         variant="outline"
-                        disabled={merge.isPending}
+                        disabled={merge.isPending || !!row.lockedBy || !!twin.lockedBy}
+                        title={row.lockedBy || twin.lockedBy ? `Locked by ${row.lockedBy || twin.lockedBy}` : undefined}
                         data-testid="merge-account-unit"
                         onClick={() => {
                           const keep = twin.serial || twin.equipmentName || "the other row";
@@ -238,7 +246,8 @@ export function AccountEquipmentList({
                       type="button"
                       size="sm"
                       variant="ghost"
-                      disabled={remove.isPending}
+                      disabled={remove.isPending || !!row.lockedBy}
+                      title={row.lockedBy ? `Locked by ${row.lockedBy}` : undefined}
                       data-testid="remove-account-unit"
                       onClick={() => {
                         if (window.confirm(`Remove ${row.equipmentName || row.catalogModel}${row.serial ? ` SN ${row.serial}` : ""} from this account?`)) {
@@ -248,6 +257,7 @@ export function AccountEquipmentList({
                     >
                       Remove
                     </Button>
+                    <LockToggle kind="unit" id={row.id} locked={!!row.lockedBy} onDone={refresh} />
                   </div>
                 ) : null}
               </li>

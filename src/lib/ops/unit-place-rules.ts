@@ -1,3 +1,4 @@
+import { isLocked } from "./equipment-lock-rules.ts";
 import { LOCATION_SITES, SITE_LABEL, rackBayError, siteLabel, slotId } from "./warehouse.ts";
 
 export const HOUSE_TRAINING = "training";
@@ -68,12 +69,12 @@ export function lastMoveLine(notes: string | null | undefined): string | null {
 }
 
 /**
- * A unit assigned to an account, or sold, is locked: it is an asset at that site or customer.
- * It can't be put on a rack, moved to another place, or given to another account until it is returned.
+ * A locked unit can't be put on a rack, moved to another place, or given to another account. Assigning or selling
+ * a unit locks it by itself; only the owner unlocks it (or a return to the barn, for an assignment's own lock).
  */
-export function placeMove(existing: { status: string } | null): "create" | "move" | "blocked" {
+export function placeMove(existing: { status: string; locked_at?: unknown; lockedAt?: unknown } | null): "create" | "move" | "blocked" {
   if (!existing) return "create";
-  if (existing.status === "sold" || existing.status === "assigned") return "blocked";
+  if (isLocked(existing)) return "blocked";
   return "move";
 }
 

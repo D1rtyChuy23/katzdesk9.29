@@ -282,14 +282,14 @@ test("an item note with no status, or a core-hole answer, stays when either of t
   }
 });
 
-test("an Equipment-tab Remove takes its pre-inspection unit off before the list is saved, in the save's own queue", () => {
+test("an Equipment-tab Remove takes its row and pre-inspection unit off before the list is saved, in the save's own queue", () => {
   const src = componentSource("../src/components/desk/entity-sheets.tsx", "InstallSheet");
-  // Both mutations share one scope, so the save (and its prune) waits for the remove, and the remove's unit check cannot fail.
+  // Both mutations share one scope, so the save (and its prune) waits for the remove. A refused remove saves nothing.
   assert.match(src, /const save = useMutation\(\{\s*scope: queue,\s*mutationFn: \(d[^)]*\) => updateInstall\(/);
-  assert.match(src, /const dropUnit = useMutation\(\{\s*scope: queue,\s*mutationFn: [^\n]*removeInspectionEquipment\(\{ data: \{ \.\.\.v, keepList: true \} \}\)/);
+  assert.match(src, /const dropRow = useMutation\(\{\s*scope: queue,\s*mutationFn: [^\n]*removeInstallMachine\(\{ data: v \}\)/);
   const remove = src.slice(src.indexOf("onRemove={(index) => {"));
-  const drop = remove.indexOf("dropUnit.mutate(");
-  assert.ok(drop >= 0 && drop < remove.indexOf("persistMachines(next)"));
+  const drop = remove.indexOf("dropRow.mutate(");
+  assert.ok(drop >= 0 && drop < remove.indexOf("{ onSuccess: () => persistMachines(next) }"));
 });
 
 test("a serial moved from one row to another is kept: the clear saves at once, so the other row's lookup takes it", async () => {

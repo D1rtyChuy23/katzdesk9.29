@@ -6,6 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
+import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { flagOn } from "@/lib/ops/flag";
 import { normalizeCustomerKey, parseSerial, serialKey } from "@/lib/ops/account-equip";
 import { RUNBOOKS, runbookById } from "@/lib/ops/runbooks";
@@ -661,6 +662,8 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
         [data.pmId, dup.id, data.pieceKey],
       );
       if (taken[0]) throw new Error("That unit is already logged on another line of this PM.");
+      // A locked unit stays on its account until the owner unlocks it.
+      await assertUnitUnlocked(sql, Number(dup.id));
       await sql.query("update account_equipment set customer = $2, updated_at = now() where id = $1", [Number(dup.id), pm.customer]);
       const attached = await sql.query<{ id: number; assigned_unit_label: string | null }>(
         "select id, assigned_unit_label from modules where assigned_unit_id = $1",
@@ -732,6 +735,7 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
         const moved = await claimSerial(parsed, key);
         if (moved != null && moved !== accountId) accountId = moved;
         else if (moved == null) {
+          await assertUnitUnlocked(sql, accountId);
           await sql.query(
             `update account_equipment
                 set serial = $2, serial_key = $3, install_date = coalesce(install_date, $4), updated_at = now()
@@ -740,6 +744,7 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
           );
         }
       } else if (installDate && !row.install_date) {
+        await assertUnitUnlocked(sql, accountId);
         await sql.query("update account_equipment set install_date = $2, updated_at = now() where id = $1", [accountId, installDate]);
       }
     }

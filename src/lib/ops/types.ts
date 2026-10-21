@@ -348,6 +348,9 @@ export type Asset = {
   stockHoldCustomer: string | null;
   stockHoldReason: string | null;
   stockHoldBy: string | null;
+  /** Locked: no move, return, sale or removal until the owner unlocks it. Assigning or selling stamps it. */
+  lockedAt: string | null;
+  lockedBy: string | null;
 };
 
 export type Recipe = {

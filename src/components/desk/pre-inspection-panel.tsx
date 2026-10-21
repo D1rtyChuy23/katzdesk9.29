@@ -45,6 +45,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { EquipmentCombo } from "./directory-fields";
+import { LockBadge } from "./lock-badge";
 import { UnitPlaceField } from "./unit-place-field";
 import { toast } from "sonner";
 
@@ -243,7 +244,10 @@ function MachineList({
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
-                  <span className="block text-base font-medium max-sm:break-words sm:truncate">{m.name}</span>
+                  <span className="flex min-w-0 items-center gap-2 text-base font-medium max-sm:flex-wrap max-sm:break-words">
+                    <span className="min-w-0 sm:truncate">{m.name}</span>
+                    <LockBadge lockedBy={m.lockedBy} />
+                  </span>
                   <span className="block text-xs text-muted-foreground max-sm:break-words sm:truncate">
                     {[m.preInspected ? "Existing equipment" : null, m.serial ? `SN ${m.serial}` : "No serial", m.electrical || "Electrical missing"].filter(Boolean).join(" · ")}
                   </span>
@@ -252,9 +256,10 @@ function MachineList({
               </button>
               <button
                 type="button"
-                className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-40"
                 aria-label={`Remove ${m.name} from the pre-inspection`}
-                title="Remove from the pre-inspection"
+                title={m.locked ? `Locked by ${m.lockedBy}` : "Remove from the pre-inspection"}
+                disabled={m.locked}
                 onClick={() => setRemoving(m)}
                 data-testid={`remove-machine-${m.equipmentId}`}
               >
