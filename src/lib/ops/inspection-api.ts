@@ -7,6 +7,7 @@ import { catalogModels, joinEquipment, listedEquipment, matchModel } from "@/lib
 import { SERIAL_LINE, SUFFIX_ONLY, installMachines, serializeMachines } from "@/lib/ops/machines";
 import { assertUnlocked } from "@/lib/ops/equipment-lock";
 import { isLocked, lockedBy } from "@/lib/ops/equipment-lock-rules";
+import { readsAsModel } from "@/lib/ops/warehouse-serial";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -331,7 +332,14 @@ function claimUnit(piece: Piece, pools: AcctUnit[][], used: Set<number>, catalog
     const hit = (power && pool.find((a) => fits(a) && (a.electrical ?? "").trim() === power)) || pool.find(fits);
     if (hit) return hit;
   }
-  return undefined;
+  // A unit on this visit saved under an earlier spelling of the row ("Fetco 1251" for "Fetco 1251 Plus", before the
+  // warehouse models were in the catalog) is still the row's machine, not a reason to add another.
+  return pools[0]?.find(
+    (a) =>
+      !used.has(a.id) &&
+      !serialKey(a.serial) &&
+      (readsAsModel(a.equipment_name, piece.equipment, catalog) || readsAsModel(a.catalog_model, piece.equipment, catalog)),
+  );
 }
 
 /**

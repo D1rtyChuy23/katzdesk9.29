@@ -121,6 +121,20 @@ test("P3: pre-inspection reads warehouse models too, so the window's name matche
   }
 });
 
+test("P3: a unit saved under the shorter name before warehouse models were read is still that row's machine", async () => {
+  const { pg, sql } = await fresh(["Fetco 1251 Plus"]);
+  try {
+    const id = await install(pg, "Local Foods", "Fetco 1251 SN:12511B");
+    const old = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ('Local Foods', 'Fetco 1251', 'Fetco 1251') returning id")).rows[0].id;
+    await pg.query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [id, old]);
+    const view = await readInspection(sql, id);
+    assert.deepEqual(view.machines.map((m) => [m.equipmentId, m.serial]), [[old, "12511B"]]);
+    assert.equal((await acct(pg, "Local Foods")).length, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("a machine taken off the list leaves the account too when this visit made it and nothing else uses it", async () => {
   const { pg, sql } = await fresh();
   try {

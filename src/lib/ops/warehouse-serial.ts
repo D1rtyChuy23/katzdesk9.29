@@ -26,7 +26,7 @@ export function sameWarehouseModel(a: string, b: string): boolean {
  * The same model under another name: the catalog reads both as one model, or one name is the other with more words
  * after it ("Bunn ITCB" and 'Bunn ITCB-DV, 29" w/Flip Tray').
  */
-function readsAsModel(row: string, model: string, catalog: string[]): boolean {
+export function readsAsModel(row: string, model: string, catalog: string[]): boolean {
   if (sameCatalogModel(matchModel(row, catalog), matchModel(model, catalog))) return true;
   const a = compactEquip(row);
   const b = compactEquip(model);
