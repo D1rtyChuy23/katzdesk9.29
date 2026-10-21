@@ -261,3 +261,33 @@ test("P8: a serial looked up on a typed install keeps one machine per line and t
     await pg.close();
   }
 });
+
+test("P4: a warehouse unit pulled onto a row named by the directory fills that row instead of adding one", async () => {
+  const { pg, sql } = await fresh(["Bunn ITCB"]);
+  try {
+    const id = await install(pg, "Pull Cafe", null);
+    await addMachineOntoInstall(sql, { installId: id, model: ITCB_CATALOG, serial: null, electrical: null }, "Test");
+    const r = (await pg.query("select * from installs where id = $1", [id])).rows[0];
+    // stampWarehouseSerial: specsFromInstall with the equipment catalog, then placeWarehouseSerial.
+    const cat = await serverCatalog(pg);
+    const specs = machines.specsFromInstall(r.equipment, r.serial, r.power_voltage, r.machines, cat);
+    const placed = placeWarehouseSerial(specs, { model: "Bunn ITCB", serial: "ITCB777" }, { addRow: true, catalog: cat });
+    assert.deepEqual(placed.rows.map((m) => [m.equipment, m.serial]), [[ITCB_CATALOG, "ITCB777"]]);
+    const packed = machines.serializeMachines(placed.rows);
+    await pg.query("update installs set equipment = $2, machines = $3, serial = $4, power_voltage = $5 where id = $1", [id, packed.equipment, packed.machines, packed.serial, packed.powerVoltage]);
+    const view = await readInspection(sql, id);
+    assert.deepEqual(view.machines.map((m) => m.serial), ["ITCB777"]);
+    assert.equal((await acct(pg, "Pull Cafe")).length, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("P4: stampWarehouseSerial and the serial backfill pass the equipment catalog", () => {
+  const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
+  const stamp = api.slice(api.indexOf("async function stampWarehouseSerial"), api.indexOf("export const assignAssetToInstall"));
+  assert.match(stamp, /loadEquipCatalog\(sql\)/);
+  assert.doesNotMatch(stamp, /specsFromInstall\([^)]*row\.machines\)/);
+  const backfill = readFileSync(new URL("../src/lib/ops/serial-backfill.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(backfill, /specsFromInstall\([^)]*\b(null|a\.machines)\)/);
+});

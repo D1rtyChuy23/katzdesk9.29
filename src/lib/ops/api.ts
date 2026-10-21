@@ -1911,12 +1911,15 @@ async function stampWarehouseSerial(sql: any, table: "installs" | "deals" | "ser
 			? (await sql`select id, equipment, machines from deals where id = ${id}`)[0]
 			: (await sql`select id, equipment, machines from service_jobs where id = ${id}`)[0];
 	if (!row) return null;
+	// The window's rows, split with the equipment catalog. Without it a saved name such as 'Bunn ITCB-DV, 29" w/Flip Tray' read
+	// as two machines, and the pulled unit went on a row of its own.
+	const catalog = await loadEquipCatalog(sql);
 	const specs = table === "installs"
-		? specsFromInstall(row.equipment, row.serial, row.power_voltage, row.machines)
+		? specsFromInstall(row.equipment, row.serial, row.power_voltage, row.machines, catalog)
 		: parseMachinesJson(row.machines).length
 			? parseMachinesJson(row.machines)
-			: specsFromInstall(row.equipment, null, null, row.machines);
-	const result = mode === "place" ? placeWarehouseSerial(specs, unit, { addRow }) : clearWarehouseSerial(specs, unit);
+			: specsFromInstall(row.equipment, null, null, row.machines, catalog);
+	const result = mode === "place" ? placeWarehouseSerial(specs, unit, { addRow, catalog }) : clearWarehouseSerial(specs, unit);
 	if (result.changed) {
 		const packed = serializeMachines(result.rows);
 		if (table === "installs") {
