@@ -52,7 +52,7 @@ import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { assertUnlocked } from "./equipment-lock";
 import { LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "./equipment-lock-rules";
 import { boardRow, cleanMachine, confirmError, continuable, dropReleased, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus, releasedUids } from "./deal-board";
-import { listedEquipment, matchModel, catalogModels } from "./equipment";
+import { listedEquipment, matchModel, catalogModels, savedMachineName } from "./equipment";
 import {
   BACK_PALLETS,
   BARN_EQUIP_CAPACITY,
@@ -1420,7 +1420,7 @@ export const updateInstall = createServerFn({ method: "POST" }).middleware([desk
 		if (!parsed.length) return raw;
 		return JSON.stringify(parsed.map((s) => ({
 			...s,
-			equipment: matchModel(s.equipment, catalog)
+			equipment: savedMachineName(s.equipment, catalog)
 		})));
 	})();
 	// An installed project keeps its pre-inspection as it was, so its list may not drop a machine the visit has: the two would disagree.
@@ -1485,7 +1485,7 @@ export const createInstall = createServerFn({ method: "POST" }).middleware([desk
 	const parsed = parseMachinesJson(machinesJsonRaw);
 	const machinesJson = parsed.length ? JSON.stringify(parsed.map((s) => ({
 		...s,
-		equipment: matchModel(s.equipment, catalog)
+		equipment: savedMachineName(s.equipment, catalog)
 	}))) : machinesJsonRaw;
 	const name = data.customer.trim();
 	const duplicateOf = (await sql`

@@ -41,6 +41,22 @@ export async function assertAssetUnlocked(sql: Sql, id: number, opts?: { release
   await assertUnlocked(sql, rows[0], opts);
 }
 
+/** The account unit with this serial: a unit locked on an account keeps its place in the barn records too. */
+export async function accountLockOfSerial(sql: Sql, serial: string | null | undefined): Promise<Lockable | null> {
+  const key = (serial ?? "").trim().replace(/[#\s]/g, "").toLowerCase();
+  if (!key) return null;
+  const rows = await sql.query<Lockable>(
+    "select locked_at, locked_by from account_equipment where serial_key = $1 and locked_at is not null limit 1",
+    [key],
+  );
+  return rows[0] ?? null;
+}
+
+/** Refuse a place change for a serial whose account unit is locked. */
+export async function assertSerialUnlocked(sql: Sql, serial: string | null | undefined): Promise<void> {
+  await assertUnlocked(sql, await accountLockOfSerial(sql, serial));
+}
+
 const lockInput = z.object({
   kind: z.enum(["unit", "asset"]),
   id: z.number().int().positive(),

@@ -216,7 +216,8 @@ export function AccountEquipmentList({
                 </p>
                 {row.serial ? (
                   <div className="mt-2">
-                    <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} />
+                    {/* A unit locked on the account keeps its place; otherwise the barn record's own lock decides. */}
+                    <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} lockedBy={row.lockedBy || undefined} />
                   </div>
                 ) : null}
                 {row.id ? (

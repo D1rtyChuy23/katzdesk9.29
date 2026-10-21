@@ -10,9 +10,9 @@ register(new URL("./ts-alias-hook.mjs", import.meta.url));
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
 const { addMachineOntoInstall, readInspection, removeInspectionUnit, removeInstallRow, syncInstallUnits, unitsDroppedBy } = await import("../src/lib/ops/inspection-api.ts");
-const { removeEquipmentUnit } = await import("../src/lib/ops/account-equip-import.ts");
+const { mergeEquipmentUnits, removeEquipmentUnit } = await import("../src/lib/ops/account-equip-import.ts");
 const machines = await import("../src/lib/ops/machines.ts");
-const { catalogModels, listedEquipment, matchModel } = await import("../src/lib/ops/equipment.ts");
+const { catalogModels, listedEquipment, savedMachineName } = await import("../src/lib/ops/equipment.ts");
 const { placeWarehouseSerial } = await import("../src/lib/ops/warehouse-serial.ts");
 const { matchExistingUnit, sameUnitModel } = await import("../src/lib/ops/account-equip.ts");
 const { writeInstallSerial } = await import("../src/lib/ops/serial-pull.ts");
@@ -41,12 +41,12 @@ const serverCatalog = async (pg) =>
     ...(await pg.query("select distinct model from assets where kind = 'equip'")).rows.map((d) => d.model),
   ]);
 
-/** updateInstall's machine part: matchModel on the server catalog, then sync with prune and the list stored before. */
+/** updateInstall's machine part: savedMachineName on the server catalog, then sync with prune and the list stored before. */
 async function saveList(pg, sql, id, specs) {
   const cat = await serverCatalog(pg);
   const before = (await pg.query("select equipment, serial, power_voltage, machines from installs where id = $1", [id])).rows[0];
   const packed = machines.serializeMachines(specs);
-  const mj = JSON.stringify(machines.parseMachinesJson(packed.machines).map((s) => ({ ...s, equipment: matchModel(s.equipment, cat) })));
+  const mj = JSON.stringify(machines.parseMachinesJson(packed.machines).map((s) => ({ ...s, equipment: savedMachineName(s.equipment, cat) })));
   await pg.query("update installs set equipment = $2, serial = $3, power_voltage = $4, machines = $5 where id = $1", [id, packed.equipment, packed.serial, packed.powerVoltage, mj]);
   await syncInstallUnits(sql, id, { prune: true, before });
 }
@@ -586,5 +586,70 @@ test("R5: every Remove keeps recipe, ownership, plug, water and the deal tie on 
     } finally {
       await pg.close();
     }
+  }
+});
+
+test("F2: Merge on the account holds while an open install lists both machines; reopening it does not bring the unit back", async () => {
+  const { pg, sql } = await fresh(["Bunn ITCB"]);
+  try {
+    const id = await install(pg, "Merge Cafe", null);
+    const rows = [{ equipment: "Bunn ITCB", serial: "", powerVoltage: "120V", recipeId: 4, ownership: "Sold", uid: "u-itcb", confirmedAt: "2026-10-01" }];
+    await pg.query("update installs set equipment = 'Bunn ITCB', machines = $2 where id = $1", [id, JSON.stringify(rows)]);
+    await readInspection(sql, id);
+    // A second ITCB added on the Pre-inspection tab, then merged into the first on the account.
+    await addMachineOntoInstall(sql, { installId: id, model: "Bunn ITCB", serial: null, electrical: null }, "Test");
+    const [keep, drop] = (await acct(pg, "Merge Cafe")).map((a) => a.id);
+    await mergeEquipmentUnits(sql, keep, drop);
+    const view = await readInspection(sql, id);
+    assert.deepEqual(view.machines.map((m) => m.equipmentId), [keep]);
+    assert.deepEqual((await acct(pg, "Merge Cafe")).map((a) => a.id), [keep]);
+    const left = machines.parseMachinesJson((await pg.query("select machines from installs where id = $1", [id])).rows[0].machines);
+    assert.equal(left.length, 1);
+    assert.equal(left[0].uid, "u-itcb");
+    assert.equal(left[0].recipeId, 4);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("F3: a comma is between machines, so 'fetco, gr2.2' is two machines in the window and on the visit, and the old units are reused", async () => {
+  const cat = ["Fetco GR2.2", "Bunn ITCB", "Bunn G9-2T", "Bunn TB3", 'Bunn ITCB-DV, 29" w/Flip Tray'];
+  assert.equal(listedEquipment("used cameo 2 step, itcb, g9-2t, fetco, gr2.2, TB3", cat).length, 6);
+  assert.deepEqual(listedEquipment("Fetco GR2.2", cat), ["Fetco GR2.2"]);
+  assert.deepEqual(listedEquipment('Bunn ITCB-DV, 29" w/Flip Tray', cat), ['Bunn ITCB-DV, 29" w/Flip Tray']);
+  const { pg, sql } = await fresh(["Fetco GR2.2"]);
+  try {
+    const id = await install(pg, "Petro Club", "fetco, gr2.2, TB3");
+    const fetco = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ('Petro Club', 'fetco', 'fetco') returning id")).rows[0].id;
+    const gr = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ('Petro Club', 'Fetco GR2.2 Dual Portion Grinder (4 Batch Buttons)', 'gr2.2') returning id")).rows[0].id;
+    await pg.query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2), ($1, $3)", [id, fetco, gr]);
+    const view = await readInspection(sql, id);
+    assert.equal(view.machines.length, (await windowSpecs(pg, id)).length);
+    assert.equal(view.machines.length, 3);
+    assert.ok([fetco, gr].every((u) => view.machines.some((m) => m.equipmentId === u)));
+    assert.equal((await acct(pg, "Petro Club")).length, 3);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("F4: a save keeps the name the load reads ('Bunn G9-2 Short' stays, not 'Bunn G9')", async () => {
+  const { pg, sql } = await fresh(["Bunn G9-2", "Bunn G9", "Bunn Axiom-APS"]);
+  try {
+    const cat = await serverCatalog(pg);
+    assert.equal(savedMachineName("Bunn G9-2 Short", cat), "Bunn G9-2 Short");
+    assert.equal(savedMachineName("TB3", cat), "Bunn TB3");
+    const id = await install(pg, "Donut Shop", "Bunn Axiom-APS 120V SN:AXAP049095\nBunn G9-2 Short SN: G900075916");
+    await readInspection(sql, id);
+    const unit = (await acct(pg, "Donut Shop")).find((a) => a.serial === "G900075916");
+    await saveList(pg, sql, id, await windowSpecs(pg, id));
+    const r = (await pg.query("select machines from installs where id = $1", [id])).rows[0];
+    assert.deepEqual(machines.parseMachinesJson(r.machines).map((m) => m.equipment), ["Bunn Axiom-APS", "Bunn G9-2 Short"]);
+    assert.deepEqual((await readInspection(sql, id)).machines.map((m) => m.name), ["Bunn Axiom-APS", "Bunn G9-2 Short"]);
+    assert.ok((await acct(pg, "Donut Shop")).some((a) => a.id === unit.id && a.equipment_name === "Bunn G9-2 Short"));
+    const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
+    assert.equal((api.match(/equipment: savedMachineName\(s\.equipment, catalog\)/g) ?? []).length, 2);
+  } finally {
+    await pg.close();
   }
 });

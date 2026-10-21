@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
-import { catalogNames, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
+import { catalogNames, dropMergedRow, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import {
@@ -682,6 +682,8 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
       [keep.id, serial || null, serial ? serialKey(serial) : null, electrical],
     );
   }
+  // An open install whose visit has both units loses the dropped unit's row; one row is left for the kept unit.
+  await dropMergedRow(sql, keep.id, drop.id);
   // An install that lists the dropped unit takes the kept serial on that machine. Otherwise its next load matches
   // no unit (a machine with no serial never takes a unit that has one) and adds the dropped unit back.
   const key = serialKey(serial);

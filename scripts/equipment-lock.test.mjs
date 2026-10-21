@@ -304,3 +304,32 @@ test("rejecting a rack add respects a person's lock and puts the System lock bac
     await pg.close();
   }
 });
+
+test("F1: a unit locked on the account can't get a place from anyone but the owner's unlock", async () => {
+  const { setUnitPlaceFor } = await import("../src/lib/ops/unit-place.ts");
+  const { accountLockOfSerial } = await import("../src/lib/ops/equipment-lock.ts");
+  const { pg, sql } = await fresh();
+  try {
+    await people(pg);
+    await pg.query("update desk_accounts set desk_role = 'warehouse' where user_id = 'u-tech'");
+    const id = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Cafe', 'Bunn TB3', 'Bunn TB3', 'TB-50', 'tb-50') returning id")).rows[0].id;
+    await setLock(sql, "u-owner", { kind: "unit", id, locked: true });
+    assert.equal((await accountLockOfSerial(sql, "TB-50"))?.locked_by, "chuy");
+    await assert.rejects(
+      () => setUnitPlaceFor(sql, { serial: "TB-50", model: "Bunn TB3", site: "training" }, { userId: "u-tech" }),
+      /Locked by chuy\. Only chuy can unlock it\./,
+    );
+    assert.equal((await pg.query("select count(*)::int n from assets")).rows[0].n, 0);
+    await setLock(sql, "u-owner", { kind: "unit", id, locked: false });
+    const placed = await setUnitPlaceFor(sql, { serial: "TB-50", model: "Bunn TB3", site: "training" }, { userId: "u-tech" });
+    assert.equal(placed.place, "Training");
+    const src = readFileSync(new URL("../src/lib/ops/unit-place.ts", import.meta.url), "utf8");
+    // Every place change goes through the account lock: park, swap, add to a location, set by serial, the lookup.
+    assert.equal((src.match(/await assertSerialUnlocked\(sql, /g) ?? []).length, 6);
+    assert.match(src, /const acct = await accountLockOfSerial\(sql, data\.serial\);/);
+    const history = readFileSync(new URL("../src/components/desk/account-history.tsx", import.meta.url), "utf8");
+    assert.match(history, /<UnitPlaceField serial=\{row\.serial\} model=\{row\.equipmentName \|\| row\.catalogModel\} lockedBy=\{row\.lockedBy \|\| undefined\} \/>/);
+  } finally {
+    await pg.close();
+  }
+});

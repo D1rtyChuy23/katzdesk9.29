@@ -508,6 +508,31 @@ export async function takeUnitOffOpenInstalls(sql: Sql, equipmentId: number): Pr
   return touched;
 }
 
+/**
+ * Merge on the account: an open install whose visit has both units lists that machine twice. The dropped unit's row
+ * comes off the list (the rows that stay keep everything they carry), or reopening the install makes the unit again.
+ */
+export async function dropMergedRow(sql: Sql, keepId: number, dropId: number): Promise<number[]> {
+  const installs = await sql.query<ListRow & { id: number }>(
+    `select i.id, i.equipment, i.serial, i.power_voltage, i.machines from installs i
+      where i.archived = false and coalesce(i.complete, false) = false
+        and exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)
+        and exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $2)`,
+    [keepId, dropId],
+  );
+  if (!installs.length) return [];
+  const catalog = await catalogNames(sql);
+  const touched: number[] = [];
+  for (const row of installs) {
+    const pieces = piecesFrom(row, catalog);
+    const at = listIndexOf(pieces, await linkedUnits(sql, row.id), catalog, dropId);
+    if (at < 0) continue;
+    await writeList(sql, row.id, pieces.filter((_, i) => i !== at));
+    touched.push(row.id);
+  }
+  return touched;
+}
+
 async function unitPassed(sql: Sql, installId: number, equipmentId: number): Promise<boolean> {
   const [items, unit] = await Promise.all([
     sql.query<{ category: string; status: string }>(
