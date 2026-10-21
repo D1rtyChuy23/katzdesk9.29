@@ -113,6 +113,9 @@ test("1: WOs completed out of order — the project is Installed on its last WO'
       (await sql.query("select equip_status, to_char(completed_at, 'YYYY-MM-DD') as d from installs where id = $1", [baldi]))[0],
       { equip_status: "Installed", d: "2026-10-20" },
     );
+    // All three on the one project: the third row didn't open another install.
+    assert.equal((await sql.query("select count(*)::int as n from installs"))[0].n, 1);
+    assert.deepEqual(await wosOf(sql, baldi), ["WO-0831:Completed", "WO-0855:Completed", "WO-0860:Completed"]);
   } finally {
     await pg.close();
   }
