@@ -238,3 +238,26 @@ test("P8: the window reads a saved list as saved: names are not split again and 
     ],
   );
 });
+
+test("P8: a serial looked up on a typed install keeps one machine per line and the serial-line machine's name", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Wildwood", "Fetco 52H\nBunn TB3\nSN:TB0001");
+    await readInspection(sql, id);
+    const status = await writeInstallSerial(sql, id, "F52NEW", 0, { model: "Fetco 52H", powerVoltage: null });
+    assert.equal(status, "updated");
+    const r = (await pg.query("select * from installs where id = $1", [id])).rows[0];
+    assert.deepEqual(machines.parseMachinesJson(r.machines).map((m) => [m.equipment, m.serial]), [
+      ["Fetco 52H", "F52NEW"],
+      ["Bunn TB3", "TB0001"],
+    ]);
+    const view = await readInspection(sql, id);
+    assert.deepEqual(view.machines.map((m) => [m.name, m.serial]), [
+      ["Fetco 52H", "F52NEW"],
+      ["Bunn TB3", "TB0001"],
+    ]);
+    assert.equal((await acct(pg, "Wildwood")).length, 2);
+  } finally {
+    await pg.close();
+  }
+});

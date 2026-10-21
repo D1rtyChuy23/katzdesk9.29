@@ -2,9 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
-import { parseMachinesJson, serializeMachines } from "@/lib/ops/machines";
+import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import { foldVisitUnits, applySerialInPlace, dedupeMachineSerials } from "@/lib/ops/install-form";
-import { catalogModels, listedEquipment } from "@/lib/ops/equipment";
+import { catalogModels } from "@/lib/ops/equipment";
+import { catalogNames } from "@/lib/ops/inspection-api";
 import { isBarn, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { normalizeCustomerKey } from "@/lib/ops/account-equip";
 
@@ -294,7 +295,7 @@ async function attachAsset(
   await logActivity(sql, userId, "asset", asset.id, "assigned-serial", detail);
 }
 
-async function writeInstallSerial(
+export async function writeInstallSerial(
   sql: Sql,
   installId: number,
   serial: string,
@@ -310,17 +311,12 @@ async function writeInstallSerial(
     }>("select equipment, serial, power_voltage, machines from installs where id = $1", [installId])
   )[0];
   if (!row) return "already";
-  const catalog = catalogModels([row.equipment ?? "", fill.model ?? ""]);
-  const names = listedEquipment(row.equipment, catalog);
-  let specs = parseMachinesJson(row.machines);
+  // The list the install window and pre-inspection read, split with the real equipment catalog. Using the install's
+  // own text as the catalog saved the whole typed text as one machine, and a serial line read as a machine.
+  const catalog = catalogModels([...(await catalogNames(sql)), fill.model ?? ""]);
+  let specs = installMachines(row, catalog).machines;
   if (!specs.length) {
-    specs = names.length
-      ? names.map((equipment) => ({
-          equipment,
-          serial: names.length === 1 ? (row.serial ?? "") : "",
-          powerVoltage: names.length === 1 ? (row.power_voltage ?? "") : "",
-        }))
-      : [{ equipment: row.equipment ?? fill.model ?? "", serial: row.serial ?? "", powerVoltage: row.power_voltage ?? "" }];
+    specs = [{ equipment: row.equipment ?? fill.model ?? "", serial: row.serial ?? "", powerVoltage: row.power_voltage ?? "" }];
   }
   const placed = applySerialInPlace(specs, machineIndex, serial);
   if (placed.status === "duplicate") return "duplicate";
