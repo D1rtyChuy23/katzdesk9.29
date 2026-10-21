@@ -195,6 +195,9 @@ test("install picker: different named equipment preselects Create new; two open 
       ],
     );
     // A candidate can still be chosen: the row then attaches, and the import writes what the preview shows.
+    // Create new (null) chosen on a preselected row sticks: the browser reads a draft's null as a choice.
+    const ui = readFileSync(new URL("../src/components/desk/corrigo-import.tsx", import.meta.url), "utf8");
+    assert.match(ui, /rowKey\(r\) in drafts \? drafts\[rowKey\(r\)\]!\.installChoice : r\.installChoice/);
     const picked = settleInstallRows(preview.rows, (r) => (r.wo === "WO-1002" ? e2 : r.installChoice));
     assert.deepEqual([picked[1].action, picked[1].jobId, picked[1].customer, picked[1].oldStatus], ["update", e2, "Cafe Echo LLC", "Not Ready"]);
     const res = await applyCorrigoRows(sql, picked, "Chuy");
