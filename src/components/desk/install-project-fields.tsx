@@ -4,7 +4,7 @@ import { Lock, LockOpen, X } from "lucide-react";
 import { toast } from "sonner";
 import { getMyAccess } from "@/lib/ops/access";
 import { listInstalls } from "@/lib/ops/api";
-import { customersLooselyMatch } from "@/lib/ops/clean-names";
+import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { isInstalled } from "@/lib/ops/install-status";
 import { mergeInstalls, setInstallCustomerLock } from "@/lib/ops/install-projects";
 import { addInstallWorkOrder, removeInstallWorkOrder } from "@/lib/ops/install-work-orders";
@@ -158,7 +158,7 @@ export function MergeInstall({ row, onMerged }: { row: Install; onMerged: (keepI
   const changed = useInstallsChanged();
   const installs = useQuery({ queryKey: ["installs"], queryFn: () => listInstalls(), enabled: canMerge });
   const [keepId, setKeepId] = useState("");
-  const others = (installs.data ?? []).filter((i) => i.id !== row.id && customersLooselyMatch(i.customer, row.customer));
+  const others = (installs.data ?? []).filter((i) => i.id !== row.id && customersStrictlyMatch(i.customer, row.customer));
   const merge = useMutation({
     mutationFn: (keep: number) => mergeInstalls({ data: { keepId: keep, dropId: row.id } }),
     onSuccess: (res) => {

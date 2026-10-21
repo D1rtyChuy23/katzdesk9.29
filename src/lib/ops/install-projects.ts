@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
-import { customersLooselyMatch } from "@/lib/ops/clean-names";
+import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { assertUnlocked, canLockEquipment, lockOwnerName } from "@/lib/ops/equipment-lock";
 import { lockedMessage } from "@/lib/ops/equipment-lock-rules";
@@ -99,6 +99,9 @@ type InstallRow = {
   machines: string | null;
   notes: string | null;
   wo: string | null;
+  deal_id: number | null;
+  customer_locked_at: unknown;
+  customer_locked_by: string | null;
   updated: string;
 };
 
@@ -158,17 +161,20 @@ export type MergeInstallsResult = {
 };
 
 /**
- * Merge one install of an account into another: the drop's work orders (a number the keeper has is skipped), the
- * machine rows the keeper's list doesn't have, its notes, its activity and Ping thread, and its visit units the keeper
- * has no unit of the same model and serial for (with their checks and photos). The rest stays linked to the drop,
- * which is archived as a duplicate of the keeper. No account unit, photo or check is deleted. Admins only.
+ * Merge one install of an account into another (the same account: a strict name match): the drop's work orders (a
+ * number the keeper has is skipped), the machine rows the keeper's list doesn't have, its notes, its deal, install date
+ * and tech when the keeper has none, its recipes, warehouse units and rebuilds, its visit header (notes added), its
+ * activity and Ping thread, and its visit units the keeper has no unit of the same model and serial for (with their
+ * checks and photos). A drop unit whose twin is on the keeper gives the twin the checks and photos it has none of.
+ * The rest stays on the drop, which is archived as a duplicate of the keeper. Nothing is deleted. Admins only.
  */
 export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<typeof mergeInput>): Promise<MergeInstallsResult> {
   if (!(await canReviewNames(sql, userId))) throw new Error("Only an Admin can merge installs.");
   const { keepId, dropId } = data;
   if (keepId === dropId) throw new Error("Pick another install to merge into.");
   const rows = await sql.query<InstallRow>(
-    `select id, customer, archived, equipment, serial, power_voltage, machines, notes, wo, updated_at::text as updated
+    `select id, customer, archived, equipment, serial, power_voltage, machines, notes, wo, deal_id, customer_locked_at, customer_locked_by,
+            updated_at::text as updated
        from installs where id = any($1::int[])`,
     [[keepId, dropId]],
   );
@@ -176,9 +182,23 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   const drop = rows.find((r) => r.id === dropId);
   if (!keep || !drop) throw new Error("Install not found");
   if (keep.archived || drop.archived) throw new Error("An archived install can't be merged.");
-  if (!customersLooselyMatch(keep.customer, drop.customer)) {
+  if (!customersStrictlyMatch(keep.customer, drop.customer)) {
     throw new Error(`Install #${drop.id} (${drop.customer}) is on another account than #${keep.id} (${keep.customer}).`);
   }
+  if (keep.deal_id && drop.deal_id && keep.deal_id !== drop.deal_id) {
+    throw new Error(`Install #${keep.id} is from deal #${keep.deal_id} and #${drop.id} from deal #${drop.deal_id}: two projects, not one. They can't be merged.`);
+  }
+  // A locked customer: the drop's units would take the keeper's spelling, so only the same name merges.
+  if (keep.customer.trim().toLowerCase() !== drop.customer.trim().toLowerCase()) {
+    const locked = [drop, keep].find((r) => r.customer_locked_at);
+    if (locked) throw new Error(lockedMessage(locked.customer_locked_by, await lockOwnerName(sql)));
+  }
+  // Warehouse units reserved or assigned to the drop go to the keeper; a lock a person put on one waits for the owner.
+  const assets = await sql.query<{ id: number; status: string | null; locked_at: unknown; locked_by: string | null }>(
+    "select id, status, locked_at, locked_by from assets where install_id = $1",
+    [dropId],
+  );
+  for (const a of assets) await assertUnlocked(sql, a, { release: true });
   const actor = await actorName(sql, userId);
   const catalog = await catalogNames(sql);
 
@@ -198,7 +218,12 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   // A unit on the drop's spelling of the account moves to the keeper's: a locked one would have to change, so refuse.
   const recustomer = moving.filter((u) => normalizeCustomerKey(u.customer) !== normalizeCustomerKey(keep.customer));
   for (const u of recustomer) await assertUnlocked(sql, u);
-  const stayed = linked.filter((u) => u.install_id === dropId && !moving.includes(u)).length;
+  const staying = linked.filter((u) => u.install_id === dropId && !moving.includes(u));
+  const stayed = staying.length;
+  // Each staying drop unit and the keeper unit it is a twin of: the twin gets the checks and photos it has none of.
+  const twins = staying
+    .map((u) => ({ drop: u.id, keep: keeperUnits.find((k) => k.id !== u.id && sameModel(k, u) && (serialKey(k.serial) || "") === (serialKey(u.serial) || ""))?.id }))
+    .filter((t): t is { drop: number; keep: number } => t.keep != null);
 
   const { list, added } = mergedMachineList(installMachines(keep, catalog).machines, installMachines(drop, catalog).machines);
   const packed = serializeMachines(list);
@@ -217,11 +242,15 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
 
   // One guarded statement: nothing is written when either install changed or was archived since the reads above.
   const out = await sql.query<{ ok: number }>(
-    `with g as (
+    `with lk as (
+       -- Both installs locked, in id order, then checked as they are now.
+       select id, archived, updated_at::text as updated
+         from installs where id = any(array[$1::int, $2::int]) order by id for update
+     ), g as (
        select k.id as keep_id, d.id as drop_id
-         from installs k join installs d on d.id = $2::int
+         from lk k join lk d on d.id = $2::int
         where k.id = $1::int and k.archived = false and d.archived = false
-          and k.updated_at::text = $3 and d.updated_at::text = $4
+          and k.updated = $3 and d.updated = $4
      ), keeper_keys as (
        select w.match_key from install_work_orders w join g on w.install_id = g.keep_id
      ), wo_move as (
@@ -240,9 +269,60 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), keeper as (
        update installs k
           set equipment = $7, machines = $8, serial = $9, power_voltage = $10, notes = $11,
-              wo = coalesce(nullif(btrim(k.wo), ''), $12), updated_at = now()
-         from g where k.id = g.keep_id
+              wo = coalesce(nullif(btrim(k.wo), ''), $12),
+              deal_id = coalesce(k.deal_id, d.deal_id),
+              install_date = coalesce(k.install_date, d.install_date),
+              technician = coalesce(nullif(btrim(k.technician), ''), d.technician),
+              updated_at = now()
+         from g join installs d on d.id = g.drop_id where k.id = g.keep_id
        returning k.id
+     ), recipes_moved as (
+       update recipes r set install_id = g.keep_id from g where r.install_id = g.drop_id returning r.id
+     ), assets_moved as (
+       update assets a set install_id = g.keep_id, updated_at = now() from g where a.install_id = g.drop_id returning a.id
+     ), rebuilds_moved as (
+       update rebuilds r set install_id = g.keep_id from g where r.install_id = g.drop_id returning r.id
+     ), head_move as (
+       update install_inspections h set install_id = g.keep_id, updated_at = now()
+         from g where h.install_id = g.drop_id and not exists (select 1 from install_inspections k where k.install_id = g.keep_id)
+       returning h.install_id
+     ), head_merge as (
+       -- The keeper's header keeps what it has; the drop's fills the blanks and its notes are added.
+       update install_inspections k
+          set inspector = coalesce(nullif(btrim(k.inspector), ''), d.inspector),
+              inspected_on = coalesce(k.inspected_on, d.inspected_on),
+              site_contact = coalesce(nullif(btrim(k.site_contact), ''), d.site_contact),
+              override_reason = coalesce(nullif(btrim(k.override_reason), ''), d.override_reason),
+              override_by = case when nullif(btrim(k.override_reason), '') is null then d.override_by else k.override_by end,
+              notes = case
+                        when nullif(btrim(d.notes), '') is null then k.notes
+                        when nullif(btrim(k.notes), '') is null then 'From install #' || g.drop_id::text || ': ' || btrim(d.notes)
+                        else btrim(k.notes) || E'\n\nFrom install #' || g.drop_id::text || ': ' || btrim(d.notes)
+                      end,
+              updated_at = now()
+         from g join install_inspections d on d.install_id = g.drop_id
+        where k.install_id = g.keep_id
+       returning k.install_id
+     ), loose_photos as (
+       update install_inspection_photos p set install_id = g.keep_id from g where p.install_id = g.drop_id and p.equipment_id is null returning p.id
+     ), loose_items as (
+       update install_inspection_items i set install_id = g.keep_id
+         from g
+        where i.install_id = g.drop_id and i.equipment_id is null
+          and not exists (select 1 from install_inspection_items k where k.install_id = g.keep_id and k.equipment_id is null and k.category = i.category)
+       returning i.id
+     ), twin_items as (
+       update install_inspection_items i set install_id = g.keep_id, equipment_id = t.k_eq
+         from g, unnest($17::int[], $18::int[]) as t(d_eq, k_eq)
+        where i.install_id = g.drop_id and i.equipment_id = t.d_eq
+          and not exists (select 1 from install_inspection_items k where k.install_id = g.keep_id and k.equipment_id = t.k_eq and k.category = i.category)
+       returning i.id
+     ), twin_photos as (
+       update install_inspection_photos p set install_id = g.keep_id, equipment_id = t.k_eq
+         from g, unnest($17::int[], $18::int[]) as t(d_eq, k_eq)
+        where p.install_id = g.drop_id and p.equipment_id = t.d_eq
+          and not exists (select 1 from install_inspection_photos k where k.install_id = g.keep_id and k.equipment_id = t.k_eq and k.category = p.category)
+       returning p.id
      ), units as (
        update install_inspection_units u set install_id = g.keep_id
          from g
@@ -283,7 +363,10 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      )
      select (select count(*)::int from g) as ok,
             (select count(*)::int from wo_move) + (select count(*)::int from wo_add) as wos,
-            (select count(*)::int from keeper) + (select count(*)::int from units) + (select count(*)::int from items)
+            (select count(*)::int from keeper) + (select count(*)::int from recipes_moved) + (select count(*)::int from assets_moved)
+              + (select count(*)::int from rebuilds_moved) + (select count(*)::int from head_move) + (select count(*)::int from head_merge)
+              + (select count(*)::int from loose_photos) + (select count(*)::int from loose_items) + (select count(*)::int from twin_items)
+              + (select count(*)::int from twin_photos) + (select count(*)::int from units) + (select count(*)::int from items)
               + (select count(*)::int from photos) + (select count(*)::int from acct) + (select count(*)::int from com)
               + (select count(*)::int from act) + (select count(*)::int from pings) + (select count(*)::int from dropped)
               + (select count(*)::int from logged) as touched`,
@@ -304,6 +387,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
       recustomerIds,
       keep.customer,
       detail,
+      twins.map((t) => t.drop),
+      twins.map((t) => t.keep),
     ],
   );
   if (!out[0]?.ok) throw new Error("One of the installs changed since this window opened. Open it again and retry.");
