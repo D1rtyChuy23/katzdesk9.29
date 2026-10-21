@@ -22,6 +22,7 @@ import {
   KIT_NUMBER_RE,
   nextFromHistory,
   parseAddedKits,
+  pastLastVisit,
   pmAddKitSql,
   pmRemoveKitSql,
   pmTickSql,
@@ -69,6 +70,8 @@ export type RunbookUnit = {
   recommended: { id: string; label: string; months: number; milestone: number; year: number; combined: boolean } | null;
   /** True when the account unit has no install date, so the interval cannot be worked out from its age. */
   missingInstallDate: boolean;
+  /** True when the install date is past the last visit a visitsPerYear plan lists. */
+  pastLastVisit: boolean;
   /** Suggested from the last full PM on this unit, used when there is no install date. */
   fromHistory: {
     id: string;
@@ -553,7 +556,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
       const optRow = u.optionsKey ? optRows.find((r) => r.unit_key === u.optionsKey) : undefined;
       const stored = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
       const options = startingOptions(rb.def, u.piece, stored);
-      const rec = recommendInterval(rb.def, u.installDate, now);
+      const rec = recommendInterval(rb.def, u.installDate, now, options);
       const past = rec ? [] : fullPms(u, rb.def);
       const next = rec ? null : nextFromHistory(rb.def, past.map((p) => p.interval));
       const config = visitConfig(rb.def, {
@@ -591,7 +594,8 @@ export const getPmRunbook = createServerFn({ method: "GET" })
         recommended: rec
           ? { ...rec, label: rb.def.intervals.find((i) => i.id === rec.id)?.label ?? `${rec.id}-month PM` }
           : null,
-        missingInstallDate: !rec,
+        missingInstallDate: !u.installDate,
+        pastLastVisit: pastLastVisit(rb.def, u.installDate, now, options),
         fromHistory: next
           ? {
               id: next.id,

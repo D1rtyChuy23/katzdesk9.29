@@ -828,8 +828,10 @@ function defersDefaultStyle(def: RunbookDefinition, style: string | null | undef
 /** A PM style such as "36 month PM" → that interval id when the definition offers it.
  * Otherwise the largest offered interval that divides the month number ("9 month PM" → "3", "24 month PM" → "12").
  * Null when the style names no month, or no offered interval divides it ("6 month PM" on Eversys, so the install date still wins).
+ * A visit-numbered definition (visitsPerYear) ignores month styles: "12 month PM" is not visit 12.
  */
 export function intervalFromStyle(def: RunbookDefinition, style: string | null | undefined): string | null {
+  if (def.visitsPerYear) return null;
   const m = /(\d+)\s*[- ]?\s*(?:month|mo)/i.exec(style ?? "");
   if (!m) return null;
   const months = Number(m[1]);
@@ -857,7 +859,7 @@ export function visitConfig(
     now?: Date;
   },
 ): RunbookConfig {
-  const recommended = recommendInterval(def, input.installDate, input.now);
+  const recommended = recommendInterval(def, input.installDate, input.now, input.options);
   const fromHistory = recommended ? null : nextFromHistory(def, [...(input.earlierIntervals ?? [])]);
   const saved = input.savedInterval && def.intervals.some((i) => i.id === input.savedInterval) ? input.savedInterval : null;
   const fromStyle = intervalFromStyle(def, input.style);
@@ -874,7 +876,8 @@ export function visitConfig(
 export function historyInterval(def: RunbookDefinition, savedInterval: string | null | undefined, style: string | null | undefined): string | null {
   const saved = savedInterval && def.intervals.some((i) => i.id === savedInterval) ? savedInterval : null;
   if (saved) return saved;
-  if (defersDefaultStyle(def, style)) return null;
+  // Visit numbers are not months, so a PM style never stands in for a saved visit.
+  if (def.visitsPerYear || defersDefaultStyle(def, style)) return null;
   return intervalFromStyle(def, style);
 }
 
@@ -926,10 +929,58 @@ export function milestoneAge(milestone: number): string {
   return milestone % 12 === 0 ? `year ${milestone / 12}` : `month ${milestone}`;
 }
 
+/** Visit-numbered books say "visit N". Month books stay "month N" / "year N". */
+export function intervalAgeLabel(def: RunbookDefinition, milestone: number): string {
+  return def.visitsPerYear ? `visit ${milestone}` : milestoneAge(milestone);
+}
+
 /** True when this visit's kit list also carries kits from a shorter visit. A kit that names its visit (`when.pm`) does not. */
 export function visitCarriesShorter(def: RunbookDefinition, id: string): boolean {
   const n = Number(id);
   return def.kits.some((k) => Number(k.interval) < n && !(k.when && Object.hasOwn(k.when, "pm")));
+}
+
+const DAY_MONTH = 30.4375;
+
+/** Install instant when the date parses and is not in the future. */
+function installInstant(installDate: string | null | undefined, now: Date): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(installDate ?? ""));
+  if (!m) return null;
+  const start = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  if (Number.isNaN(start.getTime()) || start.getTime() > now.getTime()) return null;
+  return start;
+}
+
+/**
+ * Visit number for a visitsPerYear definition. The plan is read after defaults, so a blank saved bag
+ * still uses the sheet's default (Standard on the X20). Null without a usable install date or plan rate.
+ */
+function visitDue(
+  def: RunbookDefinition,
+  installDate: string | null | undefined,
+  now: Date,
+  options: Record<string, unknown> | null | undefined,
+): { visit: number; months: number } | null {
+  const spec = def.visitsPerYear;
+  if (!spec) return null;
+  const start = installInstant(installDate, now);
+  if (!start) return null;
+  const months = (now.getTime() - start.getTime()) / 86400000 / DAY_MONTH;
+  const choice = normalizeConfig(def, options)[spec.by];
+  const perYear = choice ? spec.map[choice] : undefined;
+  if (typeof perYear !== "number" || !(perYear > 0)) return null;
+  return { visit: Math.max(1, Math.round((months * perYear) / 12)), months };
+}
+
+/** True when the install date is past the last visit this plan lists. A missing date is not "past". */
+export function pastLastVisit(
+  def: RunbookDefinition,
+  installDate: string | null | undefined,
+  now: Date = new Date(),
+  options?: Record<string, unknown> | null,
+): boolean {
+  const due = visitDue(def, installDate, now, options);
+  return !!due && !def.intervals.some((i) => i.id === String(due.visit));
 }
 
 /**
@@ -942,12 +993,21 @@ export function visitCarriesShorter(def: RunbookDefinition, id: string): boolean
  * recommended): this only sets the default.
  * When the shortest interval is under 12 months, age is days / 30.4375 so the day of the month counts.
  * Eversys (shortest 12) stays on calendar months.
+ * A visitsPerYear definition counts visits: max(1, round(day-accurate months × visits a year / 12)),
+ * using the plan from normalizeConfig (so an empty saved bag still gets the JSON default). Null when
+ * that visit is not one of the offered ids.
  */
 export function recommendInterval(
   def: RunbookDefinition,
   installDate: string | null | undefined,
   now: Date = new Date(),
+  options?: Record<string, unknown> | null,
 ): { id: string; months: number; milestone: number; year: number; combined: boolean } | null {
+  if (def.visitsPerYear) {
+    const due = visitDue(def, installDate, now, options);
+    if (!due || !def.intervals.some((i) => i.id === String(due.visit))) return null;
+    return { id: String(due.visit), months: due.months, milestone: due.visit, year: due.visit, combined: false };
+  }
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(installDate ?? ""));
   if (!m) return null;
   const start = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
@@ -974,6 +1034,12 @@ export function recommendInterval(
 export function nextFromHistory(def: RunbookDefinition, priorIntervals: string[]): { id: string; combined: boolean } | null {
   const ids = def.intervals.map((i) => Number(i.id)).filter((n) => n > 0).sort((a, b) => a - b);
   if (!ids.length || !priorIntervals.length) return null;
+  if (def.visitsPerYear) {
+    const last = Number(priorIntervals[priorIntervals.length - 1]);
+    const id = String(last + 1);
+    if (!Number.isInteger(last) || !def.intervals.some((i) => i.id === id)) return null;
+    return { id, combined: false };
+  }
   const short = ids[0];
   const long = ids[ids.length - 1];
   const holdsLongest = long > short && !visitCarriesShorter(def, String(long));

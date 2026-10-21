@@ -47,7 +47,8 @@ function cleanPiece(raw: string): string | null {
   let t = raw.replace(/\s+/g, " ").trim();
   t = t.replace(/^\(+/, "").replace(/\)+$/, "").trim();
   t = t.replace(/^(qty\s*)?\d+\s*[x×]\s*/i, "");
-  t = t.replace(/\s*[x×]\s*\d+\s*$/i, "");
+  // A single trailing digit is a quantity ("x2", "x 2"). "X20" is a model, not a count.
+  t = t.replace(/\s*[x×]\s*\d\s*$/i, "");
   t = t.replace(/\bwith\s+[\d.]+\s*wands?\b/i, "");
   t = t.replace(/\b\d+\s*v(olts?)?\b/i, "");
   t = t.replace(/\s+/g, " ").trim();
