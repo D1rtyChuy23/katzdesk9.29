@@ -11,6 +11,7 @@ import { filterRows, scopeLine, summarize, type AnalyticsFilters } from "@/lib/o
 import { invoicedPartLines } from "@/lib/ops/charges-api";
 import { formatNowChicago, moneyExact, monthBounds, pmFlag, serviceFlag, todayChicago } from "@/lib/ops/clock";
 import { woMatchKey } from "@/lib/ops/corrigo";
+import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 import { flagOn } from "@/lib/ops/flag";
 import { profitByMpn, profitTotals } from "@/lib/ops/part-pricing";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
@@ -148,10 +149,18 @@ async function loadSnapshot(sql: Sql): Promise<TeamsSnapshot> {
     ...pms.filter((p) => p.wo?.trim()).map((p) => ({ board: "PM", id: p.id, wo: p.wo || "", customer: p.customer })),
   ];
   const installs = await sql.query<{ id: number; customer: string | null; wo: string | null }>(
-    `select id, customer, wo from installs where archived = false and complete = false and coalesce(btrim(wo), '') <> ''`,
+    // Every work order an open install project carries.
+    `select i.id, i.customer, w.wo from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
+      where i.archived = false and i.complete = false and coalesce(btrim(w.wo), '') <> ''`,
   );
   const duplicateWo = collapseDuplicateWorkOrders(
-    [...dupRows, ...installs.map((r) => ({ board: "Install", id: r.id, wo: r.wo || "", customer: r.customer }))].map((row) => ({
+    [
+      ...dupRows,
+      // One line per install and number: "WO-0855" and "855" on one install are one WO.
+      ...installs
+        .filter((r, i, all) => all.findIndex((x) => x.id === r.id && woMatchKey(x.wo || "") === woMatchKey(r.wo || "")) === i)
+        .map((r) => ({ board: "Install", id: r.id, wo: r.wo || "", customer: r.customer })),
+    ].map((row) => ({
       key: woMatchKey(row.wo),
       wo: row.wo,
       where: `${row.board} #${Number(row.id)}${row.customer?.trim() ? ` ${row.customer.trim()}` : ""}`,

@@ -70,6 +70,27 @@ export function wordsOf(name: string): string[] {
 }
 const coreWords = (name: string) => wordsOf(name).filter((w) => !SUFFIXES.has(w));
 
+// The looser install match also drops "Group": "Baldi Management Group Inc." is "Baldi Management".
+const LOOSE_SUFFIXES = new Set([...SUFFIXES, "group", "incorporated", "limited"]);
+
+/**
+ * Install candidates only (never tickets or PMs): the same account when one name's core words — lowercased, punctuation
+ * and Inc / LLC / Group / Co / Corp / Company / The dropped — are the other's, or the first words of the other's
+ * ("Baldi Management" and "Baldi Management Group Inc."). One generic word ("Coffee", "Cafe") never links two names.
+ */
+export function customersLooselyMatch(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (isWalkInName(a) || isWalkInName(b)) return false;
+  const ka = normalizeCustomerKey(a);
+  const kb = normalizeCustomerKey(b);
+  if (!ka || !kb) return false;
+  if (ka === kb) return true;
+  const wa = wordsOf(a ?? "").filter((w) => !LOOSE_SUFFIXES.has(w));
+  const wb = wordsOf(b ?? "").filter((w) => !LOOSE_SUFFIXES.has(w));
+  const [short, long] = wa.length <= wb.length ? [wa, wb] : [wb, wa];
+  if (!short.length || (short.length === 1 && COMMON.has(short[0]!))) return false;
+  return short.every((w, i) => long[i] === w);
+}
+
 function editDistance(a: string, b: string): number {
   if (a === b) return 0;
   const prev = new Array(b.length + 1).fill(0).map((_, i) => i);

@@ -134,6 +134,20 @@ export type Deal = {
 };
 
 
+/** One Corrigo work order on an install project (install_work_orders); the primary is installs.wo. */
+export type InstallWorkOrder = {
+  wo: string;
+  matchKey: string;
+  /** Corrigo's Operational Status for this WO, as the file wrote it. */
+  status: string | null;
+  completedAt: string | null;
+  primary: boolean;
+  received: string | null;
+  source: string | null;
+  addedBy: string | null;
+  addedAt: string | null;
+};
+
 export type Install = {
   id: number;
   /** Sales ticks this once the Tech Request Form has been sent. Never ticked automatically. */
@@ -148,7 +162,14 @@ export type Install = {
   /** Time of day on the install date, "HH:MM"; null until someone sets one on the day board. */
   scheduledTime: string | null;
   technician: string | null;
+  /** The project's first Corrigo WO. workOrders lists every WO it carries, this one first. */
   wo: string | null;
+  workOrders: InstallWorkOrder[];
+  /** The owner locked the customer: nobody changes it until the owner unlocks it. */
+  customerLockedAt: string | null;
+  customerLockedBy: string | null;
+  /** After a customer change: the install's own account units that moved with it, and those that stayed. */
+  unitsMoved?: { moved: string[]; stayed: string[] } | null;
   reqsReady: string | null;
   notes: string | null;
   workDone: string | null;
