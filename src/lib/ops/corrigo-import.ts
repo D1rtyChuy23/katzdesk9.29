@@ -17,7 +17,10 @@ import {
   indexHits,
   isWalkIn,
   pickKeeper,
+  installStatusFromCorrigo,
   resolvePreviewRow,
+  settleInstallRows,
+  withSiblingWos,
   woMatchKey,
   type CorrigoBoard,
   type CorrigoHit,
@@ -26,6 +29,8 @@ import {
   type OpenInstall,
 } from "@/lib/ops/corrigo";
 import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
+import { INSTALL_WOS_SQL, loadInstallWos, recordInstallWo } from "@/lib/ops/install-work-orders";
+import { customersLooselyMatch } from "@/lib/ops/clean-names";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
 
@@ -113,12 +118,14 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     completed_at: string | null;
     received: string | null;
   }>(
-    `select id, wo, equip_status as status, customer, complete, to_char(completed_at, 'YYYY-MM-DD') as completed_at,
-            ${receivedSql("installs", "'install'")}
-       from installs
-      where archived = false and coalesce(wo, '') <> ''
-      order by id asc`,
+    // One hit per work order: an install project is found by any of its WOs.
+    `select i.id, w.wo, i.equip_status as status, i.customer, i.complete, to_char(i.completed_at, 'YYYY-MM-DD') as completed_at,
+            ${receivedSql("i", "'install'")}
+       from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
+      where i.archived = false
+      order by i.id asc`,
   );
+  const installWos = await loadInstallWos(sql, installs.map((r) => r.id));
   return [
     ...jobs.map((r) => ({
       board: jobBoard(r.kind),
@@ -152,11 +159,15 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       done: !!r.complete,
       completedAt: r.completed_at,
       received: r.received,
+      wos: installWos.get(r.id) ?? [],
     })),
   ];
 }
 
-/** Open installs with no WO yet, each with its machine models, and the equipment catalog they are read with. */
+/**
+ * Open installs (not archived, not complete; WOs or not), each with its machine models and work orders, and the
+ * equipment catalog they are read with.
+ */
 async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; catalog: string[] }> {
   const catalog = (
     await sql.query<{ name: string }>("select name from directory_equipment where archived = false and coalesce(name, '') <> ''")
@@ -173,9 +184,10 @@ async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; ca
   }>(
     `select id, customer, equip_status, to_char(completed_at, 'YYYY-MM-DD') as completed_at, equipment, serial, power_voltage, machines
        from installs
-      where archived = false and complete = false and coalesce(btrim(wo), '') = ''
+      where archived = false and complete = false
       order by id`,
   );
+  const wos = await loadInstallWos(sql, rows.map((r) => r.id));
   const installs = rows.map((r): OpenInstall => {
     // The saved rows as saved: a row that is only a serial stays a row here (the install window folds it into the row
     // above), so an unknown unit is never guessed into a match.
@@ -193,6 +205,8 @@ async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; ca
       completedAt: r.completed_at,
       // Read exactly, so "2 x Bunn TB3" counts two and a loose or guessed name ("Cameo", "TB3 / ITCB") counts none.
       machines: exact ?? [],
+      summary: machines.map((m) => m.equipment.trim()).filter(Boolean).join(", "),
+      wos: wos.get(r.id) ?? [],
     };
   });
   return { installs, catalog };
@@ -301,37 +315,26 @@ const recordInput = z.object({
 });
 
 /**
- * The browser reads the file and sends only these fields, a chunk at a time (Vercel refuses a request over ~4.5 MB),
- * with the installs earlier chunks attached rows to.
+ * The browser reads the file and sends only these fields, a chunk at a time (Vercel refuses a request over ~4.5 MB).
+ * It settles the install rows over the whole file again (settleInstallRows), so a later chunk's row sees what an
+ * earlier chunk's row puts on an install.
  */
 const previewInput = z.object({
   records: z.array(recordInput).max(2000),
-  claimedInstalls: z.array(z.number().int()).max(2000).optional(),
 });
 
-export async function previewCorrigoRecords(
-  sql: Sql,
-  records: CorrigoRecord[],
-  claimedInstalls: number[] = [],
-): Promise<CorrigoPreviewPart> {
+export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]): Promise<CorrigoPreviewPart> {
   const hits = await loadHits(sql);
   const wrapped = deskHasWrapped(hits);
   const today = todayChicago();
   const index = indexHits(hits);
   const { installs, catalog } = await loadOpenInstalls(sql);
-  // Rows are applied in order, so a later row can't attach to an install an earlier row took.
-  const taken = new Set(claimedInstalls);
-  const rows = records.map((rec) => {
-    const row = resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, {
-      wrapped,
-      today,
-      installs,
-      catalog,
-      taken,
-    });
-    if (row.byEquipment && row.jobId) taken.add(row.jobId);
-    return row;
-  });
+  // Rows are applied in order: a second row for one install adds its WO to the first row's.
+  const rows = settleInstallRows(
+    records.map((rec) =>
+      resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, { wrapped, today, installs, catalog }),
+    ),
+  );
   const unmapped = [
     ...new Set(rows.map((r) => r.statusUnmapped).filter((s): s is string => !!s)),
   ];
@@ -349,7 +352,7 @@ export async function previewCorrigoRecords(
 export const previewCorrigoImport = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof previewInput>) => previewInput.parse(d))
-  .handler(async ({ data }) => previewCorrigoRecords(await ready(), data.records, data.claimedInstalls));
+  .handler(async ({ data }) => previewCorrigoRecords(await ready(), data.records));
 
 const applyRow = z.object({
   wo: z.string(),
@@ -377,6 +380,12 @@ const applyRow = z.object({
   wrapRepeat: z.boolean().optional(),
   shared: z.string().nullable().optional(),
   byEquipment: z.boolean().optional(),
+  byAccount: z.boolean().optional(),
+  installSiblings: z
+    .array(z.object({ wo: z.string(), status: z.string().nullable(), completedAt: z.string().nullable() }))
+    .max(200)
+    .nullable()
+    .optional(),
   conflictIds: z
     .array(z.object({ board: z.enum(["service", "tlc", "pm", "install"]), id: z.number() }))
     .nullable()
@@ -438,15 +447,24 @@ export async function applyCorrigoRows(
     let jobId = row.jobId;
     wrapRepeat = !!row.wrapRepeat;
     shared = row.shared ?? null;
+    // The row goes on an open install picked for the account (by equipment or not), not on one with its WO.
+    const picked = !!(row.byAccount || row.byEquipment);
     if (action === "update" && jobId && board === "install") {
-      // An install that got another WO since the preview, or one matched by equipment that was archived or completed
-      // since: open a new one, as a fresh preview would.
-      const now = await sql.query<{ wo: string | null; archived: boolean; complete: boolean }>(
-        "select wo, archived, complete from installs where id = $1",
-        [jobId],
-      );
-      const gone = row.byEquipment && (!now[0] || now[0].archived || now[0].complete);
-      if (gone || (now[0]?.wo?.trim() && woMatchKey(now[0].wo) !== matchKey)) {
+      // A picked install archived, completed or moved to another account since the preview, or a WO taken off its
+      // install since: open a new one (or find the WO's install), as a fresh preview would. Another WO added to the
+      // picked install since is fine: an install project carries several.
+      const now = (
+        await sql.query<{ customer: string; archived: boolean; complete: boolean }>("select customer, archived, complete from installs where id = $1", [
+          jobId,
+        ])
+      )[0];
+      const sameAccount = (name: string) =>
+        customersLooselyMatch(name, row.fileCustomer ?? row.customer) ||
+        (!!row.existingCustomer && name.trim().toLowerCase() === row.existingCustomer.trim().toLowerCase());
+      const gone = picked
+        ? !now || now.archived || now.complete || !sameAccount(now.customer)
+        : !((await loadInstallWos(sql, [jobId])).get(jobId) ?? []).some((w) => w.matchKey === matchKey);
+      if (gone) {
         action = "create";
         jobId = null;
       }
@@ -512,35 +530,49 @@ export async function applyCorrigoRows(
           customer: string;
           wo: string | null;
           complete: boolean;
+          customer_locked_at: unknown;
         }>(
-          `select id, equip_status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, complete
+          `select id, equip_status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, complete,
+                  customer_locked_at
              from installs where id = $1 and archived = false`,
           [jobId],
         );
         if (!cur[0]) continue;
-        const keptWo = storedWo(cur[0].wo, wo);
+        const wos = (await loadInstallWos(sql, [jobId])).get(jobId) ?? [];
+        const keptWo = wos.find((w) => w.matchKey === matchKey)?.wo ?? storedWo(cur[0].wo, wo);
         const current = cur[0].complete ? "Installed" : cur[0].equip_status || "Not Ready";
-        const equipStatus = boardStatus("install", row.statusRaw, row.completedAt, current).status;
+        // The same steps as the preview (settleInstallRows): with two or more WOs, the last one completed installs it.
+        const next = installStatusFromCorrigo(
+          { status: current, completedAt: cur[0].completed_at, wos: withSiblingWos(wos, row.installSiblings, matchKey) },
+          { matchKey, canonicalWo: keptWo, statusRaw: row.statusRaw, completedAt: row.completedAt },
+        );
+        const equipStatus = next.status;
         const technician = row.technician || cur[0].technician;
         const workDone = row.workDone || cur[0].work_done;
-        const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null);
-        const completedAt = date.value;
-        const customer = chosen || cur[0].customer;
+        const date = next.date;
+        const completedAt = next.completedAt;
+        // A customer the owner locked stays as it is.
+        const customer = cur[0].customer_locked_at ? cur[0].customer : chosen || cur[0].customer;
         const complete = equipStatus === "Installed";
+        // installs.wo stays the project's first WO.
+        const primary = cur[0].wo?.trim() || keptWo;
         await sql.query(
           `update installs set
               technician = $2, completed_at = $3, work_done = $4, equip_status = $5,
               wo = $6, complete = $7, customer = $8, updated_at = now()
             where id = $1`,
-          [jobId, technician, completedAt, workDone, equipStatus, keptWo, complete, customer],
+          [jobId, technician, completedAt, workDone, equipStatus, primary, complete, customer],
         );
+        await recordInstallWo(sql, jobId, { wo: keptWo, status: row.statusRaw, completedAt: row.completedAt, source: "corrigo", addedBy: actor });
+        const added = !wos.some((w) => w.matchKey === matchKey);
         await logCorrigo(
           sql,
           "install",
           jobId,
           actor,
           `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}` +
-            (row.byEquipment ? " · matched by account and equipment" : ""),
+            (row.byEquipment ? " · matched by account and equipment" : picked ? " · picked by account" : "") +
+            (next.wos.length > 1 ? ` · ${next.done} of ${next.wos.length} work orders completed` : ""),
         );
         updated += 1;
         maybeReview(
@@ -552,6 +584,13 @@ export async function applyCorrigoRows(
           technician,
           complete,
         );
+        if (picked) {
+          // For Review names the install the row went on, and its other work orders.
+          const item = review.find((r) => r.entityType === "install" && r.id === jobId);
+          const others = next.wos.filter((w) => woMatchKey(w.wo) !== matchKey).map((w) => w.wo);
+          const note = `${keptWo} ${added ? "added to" : "on"} install #${jobId}${others.length ? ` with ${others.join(", ")}` : ""}`;
+          if (item && !item.note) item.note = note;
+        }
         continue;
       }
 
@@ -662,6 +701,7 @@ export async function applyCorrigoRows(
         );
         const id = inserted[0]?.id;
         if (id) {
+          await recordInstallWo(sql, id, { wo, status: row.statusRaw, completedAt: row.completedAt, received, source: "corrigo", addedBy: actor });
           await logCorrigo(sql, "install", id, actor, `Opened from Corrigo · ${wo}`);
           created += 1;
           maybeReview("install", id, wo, customer, equipStatus, row.technician, complete, true);

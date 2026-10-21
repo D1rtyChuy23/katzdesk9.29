@@ -7,6 +7,8 @@ import {
   COL_LABEL,
   isWalkIn,
   mergeCorrigoPreviews,
+  normalizeCustomerKey,
+  settleInstallRows,
   type CorrigoPreview,
   type CorrigoPreviewRow,
 } from "@/lib/ops/corrigo";
@@ -61,14 +63,12 @@ export function CorrigoImportButton({
     mutationFn: async (file: File) => {
       const parsed = await readCorrigoFile(file);
       const parts = [];
-      // A later chunk must not attach a row to an install an earlier chunk's row took.
-      const claimedInstalls: number[] = [];
       for (const records of chunkByBytes(parsed.records)) {
-        const part = await previewCorrigoImport({ data: { records, claimedInstalls: [...claimedInstalls] } });
-        for (const r of part.rows) if (r.byEquipment && r.jobId) claimedInstalls.push(r.jobId);
-        parts.push(part);
+        parts.push(await previewCorrigoImport({ data: { records } }));
       }
-      return mergeCorrigoPreviews(parts, parsed);
+      const merged = mergeCorrigoPreviews(parts, parsed);
+      // In file order across every chunk: a later chunk's row for an install sees the WO an earlier row puts on it.
+      return { ...merged, rows: settleInstallRows(merged.rows) };
     },
     onSuccess: (data, file) => {
       setFileName(file.name);
@@ -194,7 +194,11 @@ function rowKey(row: CorrigoPreviewRow) {
 type RowDraft = {
   selected: boolean;
   customer: string;
+  /** The person picked the customer; until then it follows the install choice. */
+  customerEdited: boolean;
   keepWalkIn: boolean;
+  /** Install rows with a picker: the install chosen (null = a new install). */
+  installChoice: number | null;
 };
 
 function draftFor(row: CorrigoPreviewRow): RowDraft {
@@ -202,8 +206,15 @@ function draftFor(row: CorrigoPreviewRow): RowDraft {
   return {
     selected: applicable,
     customer: row.customer ?? "",
+    customerEdited: false,
     keepWalkIn: false,
+    installChoice: row.installChoice,
   };
+}
+
+/** The customer a row imports with: the person's pick, else the one that goes with its install choice. */
+function customerOf(row: CorrigoPreviewRow, d: RowDraft): string {
+  return d.customerEdited || d.keepWalkIn ? d.customer : row.customer ?? "";
 }
 
 function PreviewBody({
@@ -230,7 +241,17 @@ function PreviewBody({
     setDrafts(next);
   }, [preview]);
 
-  const applicable = preview.rows.filter((r) => r.action === "update" || r.action === "create");
+  // The rows as the import will write them with each install row's choice, in file order (the import repeats this).
+  const rows = useMemo(
+    () =>
+      settleInstallRows(
+        preview.rows,
+        (r) => drafts[rowKey(r)]?.installChoice ?? r.installChoice,
+        (r) => drafts[rowKey(r)]?.selected ?? true,
+      ),
+    [preview.rows, drafts],
+  );
+  const applicable = rows.filter((r) => r.action === "update" || r.action === "create");
   const selectedUpdates = applicable.filter(
     (r) => drafts[rowKey(r)]?.selected && r.action === "update",
   ).length;
@@ -251,13 +272,13 @@ function PreviewBody({
     if (!d?.selected) return false;
     if (!r.fileWalkIn) return false;
     if (d.keepWalkIn) return false;
-    const name = d.customer.trim();
+    const name = customerOf(r, d).trim();
     return !name || isWalkIn(name);
   });
 
   function patch(key: string, next: Partial<RowDraft>) {
     setDrafts((cur) => {
-      const prev = cur[key] ?? { selected: false, customer: "", keepWalkIn: false };
+      const prev = cur[key] ?? { selected: false, customer: "", customerEdited: false, keepWalkIn: false, installChoice: null };
       return { ...cur, [key]: { ...prev, ...next } };
     });
   }
@@ -275,14 +296,16 @@ function PreviewBody({
 
   function confirm() {
     if (walkInBlocked.length || selectedCount === 0) return;
-    const rows = preview.rows.map((row) => {
+    const out = rows.map((row) => {
       const d = drafts[rowKey(row)];
       const applicableRow = row.action === "update" || row.action === "create";
-      if (!applicableRow || !d?.selected) return { ...row, action: "skip" as const };
-      const customer = d.keepWalkIn ? "Walk-In" : d.customer.trim() || row.customer;
-      return { ...row, customer };
+      // The picker's options stay here; the import re-reads the chosen install itself.
+      const lean = { ...row, installOptions: null, installState: null };
+      if (!applicableRow || !d?.selected) return { ...lean, action: "skip" as const };
+      const customer = d.keepWalkIn ? "Walk-In" : customerOf(row, d).trim() || row.customer;
+      return { ...lean, customer };
     });
-    onConfirm(rows);
+    onConfirm(out);
   }
 
   return (
@@ -392,9 +415,10 @@ function PreviewBody({
             </tr>
           </thead>
           <tbody>
-            {preview.rows.map((r) => {
+            {rows.map((r) => {
               const key = rowKey(r);
               const d = drafts[key] ?? draftFor(r);
+              const customer = customerOf(r, d);
               const locked = r.action === "skip";
               const walkIn = r.fileWalkIn;
               const needsCustomer =
@@ -402,7 +426,7 @@ function PreviewBody({
                 d.selected &&
                 walkIn &&
                 !d.keepWalkIn &&
-                (!d.customer.trim() || isWalkIn(d.customer));
+                (!customer.trim() || isWalkIn(customer));
               return (
                 <tr
                   key={key}
@@ -450,25 +474,33 @@ function PreviewBody({
                   </td>
                   <td className="min-w-[16rem] px-3 py-2 align-top">
                     {locked ? (
-                      <span>{d.customer || r.customer || "—"}</span>
+                      <span>{customer || r.customer || "—"}</span>
                     ) : (
                       <ImportCustomerPicker
-                        value={d.keepWalkIn ? "Walk-In" : d.customer}
+                        value={d.keepWalkIn ? "Walk-In" : customer}
                         walkIn={walkIn}
                         keepWalkIn={d.keepWalkIn}
                         needsCustomer={needsCustomer}
                         existingCustomer={r.existingCustomer}
                         disabled={pending}
-                        onChange={(customer) =>
+                        onChange={(next) =>
                           patch(key, {
-                            customer,
-                            keepWalkIn: isWalkIn(customer) ? d.keepWalkIn : false,
+                            customer: next,
+                            customerEdited: true,
+                            keepWalkIn: isWalkIn(next) ? d.keepWalkIn : false,
                           })
                         }
-                        onKeepWalkIn={() => patch(key, { keepWalkIn: true, customer: "Walk-In" })}
-                        onClearKeep={() => patch(key, { keepWalkIn: false, customer: "" })}
+                        onKeepWalkIn={() => patch(key, { keepWalkIn: true, customer: "Walk-In", customerEdited: true })}
+                        onClearKeep={() => patch(key, { keepWalkIn: false, customer: "", customerEdited: true })}
                       />
                     )}
+                    {!locked && r.installOptions?.length ? (
+                      <ImportInstallPicker
+                        row={r}
+                        disabled={pending}
+                        onChange={(installChoice) => patch(key, { installChoice })}
+                      />
+                    ) : null}
                   </td>
                   <td className="px-3 py-2 align-top">
                     {r.oldStatus ? `${r.oldStatus} → ${r.newStatus}` : r.newStatus}
@@ -525,6 +557,49 @@ function PreviewBody({
           {pending ? "Saving…" : "Confirm import"}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Install rows no install's WO matches, for an account with open installs: which install the WO goes on, or a new
+ * one. The same list as the customer picker above it. Both names show when the install's differs from Corrigo's.
+ */
+function ImportInstallPicker({
+  row,
+  disabled,
+  onChange,
+}: {
+  row: CorrigoPreviewRow;
+  disabled?: boolean;
+  onChange: (installChoice: number | null) => void;
+}) {
+  const options = row.installOptions ?? [];
+  const items = options.map((o, i) => ({ id: i + 1, name: o.label }));
+  const chosen = options.find((o) => o.id === row.installChoice) ?? options.find((o) => o.id == null);
+  const named = chosen?.id != null && chosen.customer && normalizeCustomerKey(chosen.customer) !== normalizeCustomerKey(row.fileCustomer);
+  return (
+    <div className="mt-2 min-w-0" data-testid="corrigo-install-picker">
+      <p className="mb-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">Install</p>
+      <ComboField
+        value={chosen?.label ?? ""}
+        onChange={(label) => {
+          const next = options.find((o) => o.label === label);
+          // Clearing the field leaves the choice as it was.
+          if (next) onChange(next.id);
+        }}
+        items={items}
+        placeholder="Pick an install…"
+        allowCreate={false}
+        disabled={disabled}
+        noun="install"
+        emptyHint="No install matches. Pick one of the list, or Create new install."
+      />
+      {named ? (
+        <span className="mt-1 block text-xs text-muted-foreground" data-testid="corrigo-install-names">
+          Corrigo: {row.fileCustomer} · Install: {chosen!.customer}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -756,7 +831,7 @@ export function CorrigoReviewList({
                 {item.reason === "merge" && item.note ? (
                   <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">not merged: {item.note}</span>
                 ) : null}
-                {item.reason === "wrap" && item.note ? (
+                {item.reason !== "merge" && item.note ? (
                   <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">{item.note}</span>
                 ) : null}
               </span>
