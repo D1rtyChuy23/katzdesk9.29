@@ -241,6 +241,16 @@ async function putOnAccount(sql: Sql, customer: string, model: string, serial: s
       );
       return;
     }
+    // A unit of this model with no serial on the account is this one: it takes the serial instead of a second row.
+    const { accountUnitWithSerial } = await import("@/lib/ops/account-unit");
+    const blank = await accountUnitWithSerial(sql, customer, model, serial);
+    if (blank) {
+      await sql.query(
+        "update account_equipment set serial = $2, serial_key = $3, electrical = coalesce($4, electrical), updated_at = now() where id = $1",
+        [blank.id, serial?.trim() || null, key, electrical],
+      );
+      return;
+    }
   }
   await sql.query(
     `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, electrical)

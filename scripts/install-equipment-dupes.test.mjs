@@ -291,3 +291,39 @@ test("P4: stampWarehouseSerial and the serial backfill pass the equipment catalo
   const backfill = readFileSync(new URL("../src/lib/ops/serial-backfill.ts", import.meta.url), "utf8");
   assert.doesNotMatch(backfill, /specsFromInstall\([^)]*\b(null|a\.machines)\)/);
 });
+
+test("P9: an import row with a serial fills the account's blank unit of that model; the same serial is an update whatever the model", () => {
+  const existing = [
+    { id: 1, customer: "Cafe", catalogModel: "Bunn TB3", equipmentName: "Bunn TB3", serial: null, serialKey: null },
+    { id: 2, customer: "Cafe", catalogModel: "Fetco 52H", equipmentName: "Fetco 52H", serial: "F-1", serialKey: "f-1" },
+  ];
+  assert.deepEqual(matchExistingUnit({ customer: "Cafe", catalogModel: "Bunn TB3", equipmentName: "TB3", serial: "TB-1", existing }), {
+    action: "update",
+    existingId: 1,
+    foreignAccount: null,
+  });
+  assert.deepEqual(matchExistingUnit({ customer: "Cafe", catalogModel: "Fetco 2051e", equipmentName: "Fetco", serial: "F-1", existing }), {
+    action: "update",
+    existingId: 2,
+    foreignAccount: null,
+  });
+  assert.equal(matchExistingUnit({ customer: "Cafe", catalogModel: "Bunn G9-2T", equipmentName: "G9", serial: "G-1", existing }).action, "add");
+});
+
+test("P9: a unit put on an account with a serial fills its blank unit of that model (stock actions, Eversys add)", async () => {
+  const { accountUnitWithSerial } = await import("../src/lib/ops/account-unit.ts");
+  const { pg, sql } = await fresh();
+  try {
+    const blank = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ('Cafe', 'Bunn TB3', 'Bunn TB3') returning id")).rows[0].id;
+    const other = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Cafe', 'Fetco 52H', 'Fetco 52H', 'F-1', 'f-1') returning id")).rows[0].id;
+    assert.equal((await accountUnitWithSerial(sql, "cafe", "Bunn TB3", "TB-9"))?.id, blank);
+    assert.equal((await accountUnitWithSerial(sql, "Cafe", "Fetco 2051e", "F-1"))?.id, other);
+    assert.equal(await accountUnitWithSerial(sql, "Cafe", "Bunn G9-2T", "G-1"), null);
+    assert.equal(await accountUnitWithSerial(sql, "Cafe", "Bunn TB3", null), null);
+    for (const file of ["../src/lib/ops/stock-actions.ts", "../src/lib/ops/module-assign.ts"]) {
+      assert.match(readFileSync(new URL(file, import.meta.url), "utf8"), /accountUnitWithSerial\(sql, customer, model, serial\)/);
+    }
+  } finally {
+    await pg.close();
+  }
+});
