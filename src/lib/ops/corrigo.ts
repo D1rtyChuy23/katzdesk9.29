@@ -1,6 +1,7 @@
 /** Corrigo report → KatzDesk tickets. Mapping only — no sales fields. */
 
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
+import { CLOSED_CALL, CLOSED_PM } from "./ticket-status.ts";
 
 export { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 
@@ -70,6 +71,11 @@ const HEADER_KEYS: Record<string, CorrigoCol> = {
   "call type": "callType",
   type: "callType",
   "ticket type": "callType",
+  equipment: "equipment",
+  asset: "equipment",
+  "asset name": "equipment",
+  "equipment description": "equipment",
+  "equipment package": "equipment",
 };
 
 /** Corrigo's CSV export names columns TextBox_## (key: normalizeHeader). Empty until Chuy supplies the mapping. */
@@ -85,6 +91,7 @@ export const COL_LABEL: Record<CorrigoCol, string> = {
   customer: "Customer Name",
   po: "P.O. #",
   callType: "Call Type",
+  equipment: "Equipment",
 };
 
 /** Without these every ticket keeps its status / completed date, so the preview warns when one is missing. */
@@ -101,7 +108,8 @@ export type CorrigoCol =
   | "issue"
   | "customer"
   | "po"
-  | "callType";
+  | "callType"
+  | "equipment";
 
 export type CorrigoBoard = "service" | "tlc" | "pm" | "install";
 
@@ -119,6 +127,8 @@ export type CorrigoRecord = {
   customer: string | null;
   po: string | null;
   callType: string | null;
+  /** The machines on the row, from an Equipment / Asset column. */
+  equipment?: string | null;
 };
 
 export type CorrigoHit = {
@@ -131,6 +141,8 @@ export type CorrigoHit = {
   done?: boolean;
   /** YYYY-MM-DD on the ticket now. */
   completedAt?: string | null;
+  /** YYYY-MM-DD the ticket came in, or its first activity entry when it has no received date. */
+  received?: string | null;
   /** NetSuite Sales Order (service tickets only). */
   billedSo?: string | null;
   hasCharges?: boolean;
@@ -157,16 +169,28 @@ export type CorrigoPreviewRow = {
   statusNote: string | null;
   technician: string | null;
   completedAt: string | null;
+  /** The completed cell as written (apply needs it: a date it couldn't read never reopens a ticket). */
+  completedRaw: string | null;
   /** The ticket's completed date before this import. */
   oldCompletedAt: string | null;
   /** Billed on a Sales Order: the import keeps oldCompletedAt whatever Corrigo says. */
   completedKept: boolean;
+  /** Corrigo reopened the ticket: the import clears oldCompletedAt. */
+  completedCleared: boolean;
   completedNote: string | null;
   workDone: string | null;
   issue: string | null;
   conflictIds: { board: CorrigoBoard; id: number }[] | null;
   wrapRepeat: boolean;
+  /** Other tickets from this cycle with the number that the row was kept off ("WO-0368 is also on service #528 (…)"). */
+  shared?: string | null;
+  /** No install had this WO: jobId is the account's open install whose equipment matches. */
+  byEquipment: boolean;
 };
+
+/** An install with no WO yet that isn't archived or complete, with its machine models. */
+/** machines: read by exactMachines, empty when they aren't exactly catalog names. */
+export type OpenInstall = CorrigoHit & { machines: string[] };
 
 export function normalizeHeader(raw: string): string {
   return String(raw ?? "")
@@ -234,9 +258,63 @@ export function hitClosed(hit: Pick<CorrigoHit, "status" | "done">): boolean {
   return CLOSED_HIT.has(String(hit.status ?? "").trim().toLowerCase());
 }
 
+/** Came in within 365 days of the import (today), so it is from the current run of ST# numbers. */
+function recentTicket(hit: CorrigoHit, today: string | null | undefined): boolean {
+  if (!today || !hit.received) return false;
+  return hit.received >= new Date(Date.parse(today) - 365 * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** After the wrap, a ticket from this cycle wins over an old-cycle copy of the same number. */
+export function thisCycleFirst(hits: CorrigoHit[], wrapped: boolean, today: string | null | undefined): CorrigoHit[] {
+  const recent = wrapped ? hits.filter((h) => recentTicket(h, today)) : [];
+  return recent.length ? recent : hits;
+}
+
 /**
- * After WO-9999 the 4-digit numbers start over. Don't fold a new job onto a
- * closed ticket from the previous cycle when the customer doesn't match.
+ * The tickets with a row's number it may go on, this cycle's first. After the wrap a closed ticket ≤9999 needs the
+ * file's customer (shouldAttachToHit), except that this cycle's copies (received in the last 365 days) are the same
+ * job however Corrigo spells the customer — as long as they all belong to one customer. When they don't, only a
+ * ticket with the file's customer counts.
+ */
+export function attachableHits(
+  hits: CorrigoHit[],
+  fileCustomer: string | null | undefined,
+  wrapped: boolean,
+  today: string | null | undefined,
+): CorrigoHit[] {
+  const recent = wrapped ? hits.filter((h) => recentTicket(h, today)) : [];
+  const named = recent.filter((h) => !isWalkIn(h.customer)).map((h) => normalizeCustomerKey(h.customer));
+  const oneCustomer = new Set(named.filter(Boolean)).size <= 1;
+  const ok = hits.filter((h) => shouldAttachToHit(h, fileCustomer, wrapped) || (oneCustomer && recent.includes(h)));
+  // Two customers' tickets carry the number this cycle: only the file customer's own copies count, open ones too.
+  return thisCycleFirst(oneCustomer ? ok : ok.filter((h) => customersCompatible(h.customer, fileCustomer)), wrapped, today);
+}
+
+/**
+ * After the wrap, same-number service tickets from different cycles (one received in the last 365 days, one not)
+ * are different jobs: pairs the duplicate merge must leave alone.
+ */
+export function crossCyclePairs(hits: CorrigoHit[], today: string): { keeperId: number; extraId: number }[] {
+  const groups = new Map<string, CorrigoHit[]>();
+  for (const h of hits) {
+    const key = woMatchKey(h.wo ?? "");
+    if (!key || h.duplicateOf || (h.board !== "service" && h.board !== "tlc")) continue;
+    groups.set(key, [...(groups.get(key) ?? []), h]);
+  }
+  const out: { keeperId: number; extraId: number }[] = [];
+  for (const list of groups.values()) {
+    for (const a of list) {
+      for (const b of list) {
+        if (a.id < b.id && recentTicket(a, today) !== recentTicket(b, today)) out.push({ keeperId: a.id, extraId: b.id });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * After WO-9999 the 4-digit numbers start over. Don't fold a new job onto a closed ticket when the customer doesn't
+ * match (attachableHits lets this cycle's copies through).
  */
 export function shouldAttachToHit(
   hit: CorrigoHit,
@@ -325,6 +403,23 @@ export function boardStatus(
   const mapped = board === "pm" ? row.pm : board === "install" ? row.install : row.service;
   if (mapped) return { status: mapped, unmapped: null, note: null };
   return { status: fallback, unmapped: null, note: `${text} has no ${board === "pm" ? "PM" : "install"} status → ${keeps}` };
+}
+
+/**
+ * Corrigo put a service ticket, TLC or PM back to an open status (one the file's status maps to, not a kept one)
+ * with no completed date: the import clears its completed date. Installs never move back.
+ */
+export function corrigoReopens(
+  board: CorrigoBoard,
+  raw: string | null,
+  completedAt: string | null,
+  current: string | null,
+  /** The completed cell as written: a date the import couldn't read still means Corrigo has one. */
+  completedRaw?: string | null,
+): boolean {
+  if (completedAt || completedRaw?.trim() || board === "install") return false;
+  const next = boardStatus(board, raw, null, current);
+  return !next.note && !(board === "pm" ? CLOSED_PM : CLOSED_CALL).has(next.status);
 }
 
 export function detectBoard(hints: {
@@ -495,6 +590,7 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
       customer: cell(row, cols.customer) || null,
       po: cell(row, cols.po) || null,
       callType: cell(row, cols.callType) || null,
+      equipment: cell(row, cols.equipment) || null,
     };
     const prev = byKey.get(matchKey);
     // Several lines for one ST# (cost lines, subtotals): a later non-blank cell wins; a blank never wipes one.
@@ -504,26 +600,33 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
 }
 
 /**
- * The completed date an import writes on an existing ticket. Corrigo's date wins, except on a ticket billed
- * on a Sales Order: its date picked the billing week and NetSuite already has it. A billed ticket with no date
- * keeps none, as the update's SQL does.
+ * The completed date an import writes on an existing ticket. Corrigo's date wins, and a reopened ticket
+ * (corrigoReopens) loses its date, except on a ticket billed on a Sales Order: its date picked the billing week
+ * and NetSuite already has it. A billed ticket with no date keeps none, as the update's SQL does.
  */
 export function completedOnUpdate(
   fileDate: string | null | undefined,
   deskDate: string | null | undefined,
   billedSo: string | null | undefined,
-): { value: string | null; change: "set" | "moved" | "billed" | null } {
+  reopened = false,
+): { value: string | null; change: "set" | "moved" | "billed" | "cleared" | null } {
   const desk = deskDate || null;
   const file = fileDate || null;
+  if (!file && reopened && desk) {
+    return String(billedSo ?? "").trim() ? { value: desk, change: "billed" } : { value: null, change: "cleared" };
+  }
   if (!file || file === desk) return { value: desk, change: null };
   if (String(billedSo ?? "").trim()) return { value: desk, change: "billed" };
   return { value: file, change: desk ? "moved" : "set" };
 }
 
-function completedNote(rec: CorrigoRecord, existing: CorrigoHit | null): string | null {
+function completedNote(
+  rec: CorrigoRecord,
+  existing: CorrigoHit | null,
+  next: ReturnType<typeof completedOnUpdate> | null,
+): string | null {
   if (!rec.completedAt && rec.completedRaw) return `couldn't read the date "${rec.completedRaw}"`;
-  if (!existing) return null;
-  const next = completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo);
+  if (!existing || !next) return null;
   if (next.change === "billed") return `billed on ${String(existing.billedSo).trim()} — keeps ${existing.completedAt || "no date"}`;
   // Billing exports pick tickets by completed date, and nothing records which exports went out.
   if (next.change === "moved" && existing.hasCharges) return "has charges, not billed yet — check it wasn't in an earlier export";
@@ -544,10 +647,158 @@ export function matchNote(rawWo: string, canonicalWo: string, existingWo?: strin
   return null;
 }
 
+const VOLTS = /\b\d{3}\s*v(?:olts?)?\b/gi;
+/** A serial on its own line ("SN: 4471", "S/N 4471", "Serial # 4471"), or one ending a machine's line. */
+const SERIAL = String.raw`(?:s\/?n|serial(?:\s*(?:#|no\.?|number))?)`;
+// The serial is one token with at least three digits ("ITCB064919", "X482"), so a count ("2pcs", "1of2") never is.
+const SERIAL_NUMBER = String.raw`${SERIAL}(?:\s*[:#]\s*|\s+|(?=\d))(?=(?:[a-z-]*\d){3})([a-z0-9-]+)$`;
+const SERIAL_LINE = new RegExp(`^${SERIAL_NUMBER}`, "i");
+const SERIAL_TAIL = new RegExp(String.raw`\s+${SERIAL_NUMBER}`, "i");
+
+/** Words a problem description may put before or after its machine's name ("Install new …", "… set up"). */
+const FILLER = new Set([
+  "install", "installs", "installed", "installation", "new", "of", "the", "a", "an", "for", "at", "to", "please", "set",
+  "setup", "up", "deliver", "delivery",
+]);
+
+/** Lowercase, apostrophes and voltage dropped ("C’2s 120V" → "c2s"), one space between words, no closing period. */
+const plain = (text: string) =>
+  text.toLowerCase().replace(VOLTS, " ").replace(/['’‘`´]/g, "").replace(/×/g, "x").replace(/\s+/g, " ").trim().replace(/[.!]+$/, "").trim();
+
+/** The words without filler at either end, joined. */
+function unfilled(words: string[]): string {
+  const out = words.filter(Boolean);
+  while (out.length && FILLER.has(out[0]!)) out.shift();
+  while (out.length && FILLER.has(out.at(-1)!)) out.pop();
+  return out.join(" ");
+}
+
+/**
+ * A catalog name as a text may write it: in full or before " - ", with or without its brand. Without the brand it
+ * must keep two words or a digit ("tb3", "linea mini"), so a bare "grinder" is never one.
+ */
+function spellingsOf(name: string): string[] {
+  return [name, name.split(" - ")[0]!].flatMap((n) => {
+    const words = plain(n).split(" ");
+    const bare = unfilled(words.slice(["la", "de"].includes(words[0]!) ? 2 : 1));
+    return [unfilled(words), bare.includes(" ") || /\d/.test(bare) ? bare : ""];
+  }).filter(Boolean);
+}
+
+/** The one catalog model a text is exactly a spelling of, when no other model shares that spelling or starts with it. */
+function modelSpelled(said: string, catalog: string[]): string | null {
+  const owners = said ? catalog.filter((n) => spellingsOf(n).includes(said)) : [];
+  if (new Set(owners.map(plain)).size !== 1) return null;
+  const model = owners[0]!;
+  const longer = (o: string) => o.length > said.length && o.startsWith(said) && /[^a-z0-9]/.test(o[said.length]!);
+  return catalog.some((n) => plain(n) !== plain(model) && spellingsOf(n).some(longer)) ? null : model;
+}
+
+/** "Install 2 x new Cameo c'2s" → two of that model: filler at the ends and an optional leading "N x" (N 1-9) aside. */
+function spelledMachines(text: string, catalog: string[]): string[] | null {
+  const [, qty = "1", rest = ""] = /^(?:([1-9]) ?x )?(.*)$/.exec(unfilled(plain(text).split(" ")))!;
+  const model = modelSpelled(unfilled(rest.split(" ")), catalog);
+  return model ? Array<string>(Number(qty)).fill(model) : null;
+}
+
+/** The serial a line ends with or is, unless that "serial" is a catalog model ("SN CBS-1231" may be a Fetco brewer). */
+function serialOf(re: RegExp, text: string, catalog: string[]): string | null {
+  const token = re.exec(text)?.[1];
+  return token && !spelledMachines(token, catalog) ? token : null;
+}
+
+/**
+ * Machines read exactly, one entry per unit: each line (or ; or , between machines) is exactly one catalog spelling
+ * with its voltage aside. A serial may end a machine's line, or follow the line's last machine on its own line, at
+ * most one per unit. null when anything else is there, so a guessed model or count never matches.
+ */
+export function exactMachines(pieces: string[], catalog: string[]): string[] | null {
+  const out: string[] = [];
+  let serialsLeft = 0;
+  for (const piece of pieces.flatMap((p) => p.split(/\r?\n|;/))) {
+    const line = piece.trim();
+    if (!line) continue;
+    if (serialOf(SERIAL_LINE, line, catalog)) {
+      if (serialsLeft-- <= 0) return null;
+      continue;
+    }
+    const read = (texts: string[]) => {
+      const tails = texts.map((t) => !!serialOf(SERIAL_TAIL, t, catalog));
+      const each = texts.map((t, i) => spelledMachines(tails[i] ? t.replace(SERIAL_TAIL, "") : t, catalog));
+      if (!each.every(Boolean)) return null;
+      // Serial lines that follow belong to the line's last machine.
+      const last = texts.length - 1;
+      return { units: each.flat() as string[], left: each[last]!.length - (tails[last] ? 1 : 0) };
+    };
+    // Some catalog names have a comma ('Bunn ITCB-DV, 29" w/Flip Tray'); otherwise a comma is between machines.
+    const got = read([line]) ?? (line.includes(",") ? read(line.split(",")) : null);
+    if (!got) return null;
+    serialsLeft = got.left;
+    out.push(...got.units);
+  }
+  return out.length ? out : null;
+}
+
+/**
+ * Whether a problem description names an install's machines (read by exactMachines): the same one model, the same
+ * number of units ("Install new Cameo c'2s", "2 x Bunn TB3"). Anything else — another word, a second machine,
+ * punctuation between names, part of a name — doesn't.
+ */
+export function descriptionNames(text: string, machines: string[], catalog: string[]): boolean {
+  const named = spelledMachines(text, catalog);
+  return !!named && named.length === machines.length && named.every((m, i) => m === machines[i]);
+}
+
+/**
+ * An install row whose WO no install has goes on the account's open install only when there is exactly one and
+ * the row names the same machines as its equipment package. note says what happened either way.
+ */
+function installByEquipment(
+  rec: CorrigoRecord,
+  installs: OpenInstall[],
+  catalog: string[],
+  taken: Set<number>,
+): { install: OpenInstall | null; note: string } | null {
+  const key = isWalkIn(rec.customer) ? "" : normalizeCustomerKey(rec.customer);
+  const mine = key ? installs.filter((i) => normalizeCustomerKey(i.customer) === key) : [];
+  if (!mine.length) return null;
+  const free = mine.filter((i) => !taken.has(i.id));
+  if (!free.length) return { install: null, note: `install #${mine[0].id} already matched by an earlier row` };
+  const only = free[0]!;
+  const several = { install: null, note: `${free.length === 2 ? "two" : free.length} installs could match` };
+  const unread = { install: null, note: `install #${only.id}'s equipment isn't written as catalog names` };
+  if (!rec.equipment?.trim()) {
+    // With no Equipment column, only a problem description that is exactly the install's machine name counts.
+    if (free.length > 1) return several;
+    if (!only.machines.length) return unread;
+    if (!descriptionNames(rec.issue ?? "", only.machines, catalog)) {
+      return { install: null, note: `the problem description doesn't name install #${only.id}'s equipment` };
+    }
+  } else {
+    // The Equipment column is read as exactly as the install: the same models, the same number of each.
+    const named = exactMachines([rec.equipment], catalog);
+    if (!named) return { install: null, note: "the Equipment column isn't written as catalog names" };
+    if (free.length > 1) return several;
+    if (!only.machines.length) return unread;
+    if ([...named].sort().join("\n") !== [...only.machines].sort().join("\n")) {
+      return { install: null, note: `equipment differs from install #${only.id}` };
+    }
+  }
+  return { install: only, note: `install #${only.id} matched by account and equipment` };
+}
+
 export function resolvePreviewRow(
   rec: CorrigoRecord,
   match: { unique: CorrigoHit | null; conflicts: CorrigoHit[] },
-  opts: { wrapped?: boolean } = {},
+  opts: {
+    wrapped?: boolean;
+    today?: string;
+    /** Open installs with no WO, and the equipment catalog, for an install row no WO matches. */
+    installs?: OpenInstall[];
+    catalog?: string[];
+    /** Installs an earlier row of this import already attached to. */
+    taken?: Set<number>;
+  } = {},
 ): CorrigoPreviewRow {
   const wrapped = !!opts.wrapped;
   const group = [
@@ -561,11 +812,19 @@ export function resolvePreviewRow(
   });
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
-  const attachable = pool.filter((h) => shouldAttachToHit(h, rec.customer, wrapped));
-  const existing = pickKeeper(attachable.length ? attachable : [], hinted);
-  const extras = existing
-    ? group.filter((h) => h.board !== existing.board || h.id !== existing.id)
-    : group;
+  const woHit = pickKeeper(attachableHits(pool, rec.customer, wrapped, opts.today), hinted);
+  const equip =
+    !woHit && hinted === "install"
+      ? installByEquipment(rec, opts.installs ?? [], opts.catalog ?? [], opts.taken ?? new Set())
+      : null;
+  const existing = woHit ?? equip?.install ?? null;
+  // After the wrap, a copy from the other cycle than the chosen ticket, or another customer's, is a different job.
+  const others = existing ? group.filter((h) => h.board !== existing.board || h.id !== existing.id) : group;
+  const otherJob = (h: CorrigoHit) =>
+    !!existing &&
+    wrapped &&
+    (recentTicket(h, opts.today) !== recentTicket(existing, opts.today) || !customersCompatible(h.customer, existing.customer));
+  const extras = others.filter((h) => !otherJob(h));
   const board = detectBoard({
     po: rec.po,
     issue: rec.issue,
@@ -576,24 +835,45 @@ export function resolvePreviewRow(
   const resolved = boardStatus(board, rec.statusRaw, rec.completedAt, oldStatus);
   const newStatus = resolved.status;
   const statusUnmapped = resolved.unmapped;
+  const date = existing
+    ? completedOnUpdate(
+        rec.completedAt,
+        existing.completedAt,
+        existing.billedSo,
+        corrigoReopens(board, rec.statusRaw, rec.completedAt, oldStatus, rec.completedRaw),
+      )
+    : null;
   const siblingIds = extras
     .filter((h) => h.board === "service" || h.board === "tlc" || h.board === existing?.board)
     .filter((h) => h.board === "service" || h.board === "tlc")
     .map((c) => ({ board: c.board, id: c.id }));
   const n = woNumeric(rec.rawWo || rec.canonicalWo);
   const postWrapNumber = n != null && n < 5000;
+  // This cycle's tickets with the number that the row doesn't go on and won't merge: named, and sent to For Review.
+  const strangers = wrapped ? others.filter((h) => recentTicket(h, opts.today) && (!existing || otherJob(h))) : [];
+  const shared = strangers.length
+    ? `${rec.canonicalWo} is also on ${strangers.map((h) => `${h.board} #${h.id} (${h.customer || "no customer"})`).join(", ")}`
+    : null;
+  // Otherwise a row on this cycle's ticket is never a repeat; on an old-cycle ticket it is when other copies exist.
   const wrapRepeat =
-    wrapped && postWrapNumber && (extras.length > 0 || (!existing && group.length > 0));
-  const note = existing ? matchNote(rec.rawWo, rec.canonicalWo, existing.wo) : null;
+    wrapped &&
+    (strangers.length > 0 ||
+      (postWrapNumber && (existing ? !recentTicket(existing, opts.today) && others.length > 0 : group.length > 0)));
+  const note = woHit ? matchNote(rec.rawWo, rec.canonicalWo, woHit.wo) : null;
 
   return {
     wo: rec.canonicalWo,
     rawWo: rec.rawWo,
     matchKey: rec.matchKey,
     canonicalWo: rec.canonicalWo,
-    matchNote: wrapRepeat
-      ? [note, wrapRepeatNote(rec.canonicalWo)].filter(Boolean).join(" · ")
-      : note,
+    matchNote:
+      [
+        note,
+        equip?.note,
+        shared ?? (wrapRepeat ? wrapRepeatNote(rec.canonicalWo) : null),
+      ]
+        .filter(Boolean)
+        .join(" · ") || null,
     customer: preferredImportCustomer(rec.customer, existing?.customer),
     fileCustomer: rec.customer,
     existingCustomer: existing?.customer ?? null,
@@ -609,13 +889,17 @@ export function resolvePreviewRow(
     statusNote: resolved.note,
     technician: rec.technician,
     completedAt: rec.completedAt,
+    completedRaw: rec.completedRaw ?? null,
     oldCompletedAt: existing?.completedAt ?? null,
-    completedKept: !!existing && completedOnUpdate(rec.completedAt, existing.completedAt, existing.billedSo).change === "billed",
-    completedNote: completedNote(rec, existing),
+    completedKept: date?.change === "billed",
+    completedCleared: date?.change === "cleared",
+    completedNote: completedNote(rec, existing, date),
     workDone: rec.workDone,
     issue: rec.issue,
     conflictIds: siblingIds.length ? siblingIds : null,
     wrapRepeat,
+    shared,
+    byEquipment: !!equip?.install,
   };
 }
 

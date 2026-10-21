@@ -6,21 +6,26 @@ import { CLOSED_CALL, CLOSED_PM } from "@/lib/ops/lookups";
 import { DEFAULT_PM_STYLE } from "@/lib/ops/pm-runbook";
 import { todayChicago } from "@/lib/ops/clock";
 import {
+  attachableHits,
   boardStatus,
   completedOnUpdate,
+  corrigoReopens,
   corrigoReviewReason,
+  crossCyclePairs,
   deskHasWrapped,
+  exactMachines,
   indexHits,
   isWalkIn,
   pickKeeper,
   resolvePreviewRow,
-  shouldAttachToHit,
   woMatchKey,
   type CorrigoBoard,
   type CorrigoHit,
   type CorrigoPreviewPart,
   type CorrigoRecord,
+  type OpenInstall,
 } from "@/lib/ops/corrigo";
+import { installMachines } from "@/lib/ops/machines";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
 
@@ -51,6 +56,17 @@ function jobBoard(kind: string | null | undefined): CorrigoBoard {
   return kind === "tlc" ? "tlc" : "service";
 }
 
+/**
+ * The received date, else the Chicago day of the ticket's first activity entry (the tables keep no created date),
+ * else its completed date.
+ */
+function receivedSql(table: string, entityType: string): string {
+  return `to_char(coalesce(${table}.received,
+            (select (min(a.created_at) at time zone 'America/Chicago')::date from activity a
+              where a.entity_type = ${entityType} and a.entity_id = ${table}.id),
+            ${table}.completed_at), 'YYYY-MM-DD') as received`;
+}
+
 async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<CorrigoHit[]> {
   const jobs = await sql.query<{
     id: number;
@@ -63,10 +79,12 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     completed_at: string | null;
     ns_so: string | null;
     has_charges: boolean;
+    received: string | null;
   }>(
     `select id, wo, status, customer, kind, duplicate_of, done,
             to_char(completed_at, 'YYYY-MM-DD') as completed_at, ns_so,
-            exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges
+            exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges,
+            ${receivedSql("service_jobs", "service_jobs.kind")}
        from service_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
@@ -78,8 +96,11 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     customer: string | null;
     done: boolean;
     completed_at: string | null;
+    received: string | null;
   }>(
-    `select id, wo, status, customer, done, to_char(completed_at, 'YYYY-MM-DD') as completed_at from pm_jobs
+    `select id, wo, status, customer, done, to_char(completed_at, 'YYYY-MM-DD') as completed_at,
+            ${receivedSql("pm_jobs", "'pm'")}
+       from pm_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
   );
@@ -90,8 +111,11 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     customer: string;
     complete: boolean;
     completed_at: string | null;
+    received: string | null;
   }>(
-    `select id, wo, equip_status as status, customer, complete, to_char(completed_at, 'YYYY-MM-DD') as completed_at from installs
+    `select id, wo, equip_status as status, customer, complete, to_char(completed_at, 'YYYY-MM-DD') as completed_at,
+            ${receivedSql("installs", "'install'")}
+       from installs
       where archived = false and coalesce(wo, '') <> ''
       order by id asc`,
   );
@@ -107,6 +131,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       completedAt: r.completed_at,
       billedSo: r.ns_so,
       hasCharges: !!r.has_charges,
+      received: r.received,
     })),
     ...pms.map((r) => ({
       board: "pm" as const,
@@ -116,6 +141,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       wo: r.wo,
       done: !!r.done,
       completedAt: r.completed_at,
+      received: r.received,
     })),
     ...installs.map((r) => ({
       board: "install" as const,
@@ -125,8 +151,48 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       wo: r.wo,
       done: !!r.complete,
       completedAt: r.completed_at,
+      received: r.received,
     })),
   ];
+}
+
+/** Open installs with no WO yet, each with its machine models, and the equipment catalog they are read with. */
+async function loadOpenInstalls(sql: Sql): Promise<{ installs: OpenInstall[]; catalog: string[] }> {
+  const catalog = (
+    await sql.query<{ name: string }>("select name from directory_equipment where archived = false and coalesce(name, '') <> ''")
+  ).map((r) => r.name);
+  const rows = await sql.query<{
+    id: number;
+    customer: string;
+    equip_status: string | null;
+    completed_at: string | null;
+    equipment: string | null;
+    serial: string | null;
+    power_voltage: string | null;
+    machines: string | null;
+  }>(
+    `select id, customer, equip_status, to_char(completed_at, 'YYYY-MM-DD') as completed_at, equipment, serial, power_voltage, machines
+       from installs
+      where archived = false and complete = false and coalesce(btrim(wo), '') = ''
+      order by id`,
+  );
+  const installs = rows.map((r): OpenInstall => {
+    const { machines, typed } = installMachines(r, catalog);
+    // Each saved machine row names its machine on its own; a row that reads as nothing is an unknown unit.
+    const each = machines.map((m) => exactMachines([m.equipment], catalog));
+    const exact = typed ? exactMachines([r.equipment ?? ""], catalog) : each.every(Boolean) ? (each as string[][]).flat() : null;
+    return {
+      board: "install",
+      id: r.id,
+      status: r.equip_status || "Not Ready",
+      customer: r.customer,
+      wo: null,
+      completedAt: r.completed_at,
+      // Read exactly, so "2 x Bunn TB3" counts two and a loose or guessed name ("Cameo", "TB3 / ITCB") counts none.
+      machines: exact ?? [],
+    };
+  });
+  return { installs, catalog };
 }
 
 async function findExistingHit(
@@ -135,6 +201,7 @@ async function findExistingHit(
   preferredBoard?: CorrigoBoard | null,
   fileCustomer?: string | null,
   wrapped?: boolean,
+  today?: string,
 ): Promise<CorrigoHit | null> {
   if (!matchKey) return null;
   const hits = await loadHits(sql);
@@ -144,8 +211,7 @@ async function findExistingHit(
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
-  const attachable = group.filter((h) => shouldAttachToHit(h, fileCustomer, rolled));
-  return pickKeeper(attachable, preferredBoard);
+  return pickKeeper(attachableHits(group, fileCustomer, rolled, today), preferredBoard);
 }
 
 async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: string) {
@@ -203,7 +269,10 @@ async function logCorrigo(
 function completedLog(date: ReturnType<typeof completedOnUpdate>, desk: string | null, file: string | null): string {
   if (date.change === "moved") return ` · completed ${desk} → ${file}`;
   if (date.change === "set") return ` · completed ${file}`;
-  if (date.change === "billed") return ` · completed kept ${desk || "no date"} (billed; Corrigo says ${file})`;
+  if (date.change === "cleared") return ` · completed ${desk} → (cleared, reopened)`;
+  if (date.change === "billed") {
+    return ` · completed kept ${desk || "no date"} (billed; ${file ? `Corrigo says ${file}` : "Corrigo reopened it"})`;
+  }
   return "";
 }
 
@@ -225,18 +294,41 @@ const recordInput = z.object({
   customer: z.string().nullable(),
   po: z.string().nullable(),
   callType: z.string().nullable(),
+  equipment: z.string().nullable().optional(),
 });
 
-/** The browser reads the file and sends only these fields, a chunk at a time (Vercel refuses a request over ~4.5 MB). */
-const previewInput = z.object({ records: z.array(recordInput).max(2000) });
+/**
+ * The browser reads the file and sends only these fields, a chunk at a time (Vercel refuses a request over ~4.5 MB),
+ * with the installs earlier chunks attached rows to.
+ */
+const previewInput = z.object({
+  records: z.array(recordInput).max(2000),
+  claimedInstalls: z.array(z.number().int()).max(2000).optional(),
+});
 
-export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]): Promise<CorrigoPreviewPart> {
+export async function previewCorrigoRecords(
+  sql: Sql,
+  records: CorrigoRecord[],
+  claimedInstalls: number[] = [],
+): Promise<CorrigoPreviewPart> {
   const hits = await loadHits(sql);
   const wrapped = deskHasWrapped(hits);
+  const today = todayChicago();
   const index = indexHits(hits);
-  const rows = records.map((rec) =>
-    resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, { wrapped }),
-  );
+  const { installs, catalog } = await loadOpenInstalls(sql);
+  // Rows are applied in order, so a later row can't attach to an install an earlier row took.
+  const taken = new Set(claimedInstalls);
+  const rows = records.map((rec) => {
+    const row = resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, {
+      wrapped,
+      today,
+      installs,
+      catalog,
+      taken,
+    });
+    if (row.byEquipment && row.jobId) taken.add(row.jobId);
+    return row;
+  });
   const unmapped = [
     ...new Set(rows.map((r) => r.statusUnmapped).filter((s): s is string => !!s)),
   ];
@@ -254,7 +346,7 @@ export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]):
 export const previewCorrigoImport = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof previewInput>) => previewInput.parse(d))
-  .handler(async ({ data }) => previewCorrigoRecords(await ready(), data.records));
+  .handler(async ({ data }) => previewCorrigoRecords(await ready(), data.records, data.claimedInstalls));
 
 const applyRow = z.object({
   wo: z.string(),
@@ -276,9 +368,12 @@ const applyRow = z.object({
   statusRaw: z.string().nullable(),
   technician: z.string().nullable(),
   completedAt: z.string().nullable(),
+  completedRaw: z.string().nullable().optional(),
   workDone: z.string().nullable(),
   issue: z.string().nullable(),
   wrapRepeat: z.boolean().optional(),
+  shared: z.string().nullable().optional(),
+  byEquipment: z.boolean().optional(),
   conflictIds: z
     .array(z.object({ board: z.enum(["service", "tlc", "pm", "install"]), id: z.number() }))
     .nullable()
@@ -306,7 +401,9 @@ export async function applyCorrigoRows(
 
   const hitsForWrap = await loadHits(sql);
   const wrapped = deskHasWrapped(hitsForWrap);
+  const today = todayChicago();
   let wrapRepeat = false;
+  let shared: string | null = null;
 
   function maybeReview(
     board: CorrigoBoard,
@@ -320,12 +417,13 @@ export async function applyCorrigoRows(
   ) {
     const reason = corrigoReviewReason({ created, closed, wrapRepeat });
     if (!reason) return;
-    if (review.some((r) => r.entityType === board && r.id === id)) {
-      const cur = review.find((r) => r.entityType === board && r.id === id);
-      if (cur && reason === "wrap") cur.reason = "wrap";
+    const note = reason === "wrap" && shared ? { note: shared } : {};
+    const cur = review.find((r) => r.entityType === board && r.id === id);
+    if (cur) {
+      if (reason === "wrap") Object.assign(cur, { reason, ...note });
       return;
     }
-    review.push({ id, wo, customer, status, technician, entityType: board, reason, created });
+    review.push({ id, wo, customer, status, technician, entityType: board, reason, created, ...note });
   }
 
   for (const row of rows) {
@@ -336,8 +434,22 @@ export async function applyCorrigoRows(
     let action = row.action;
     let jobId = row.jobId;
     wrapRepeat = !!row.wrapRepeat;
+    shared = row.shared ?? null;
+    if (action === "update" && jobId && board === "install") {
+      // An install that got another WO since the preview, or one matched by equipment that was archived or completed
+      // since: open a new one, as a fresh preview would.
+      const now = await sql.query<{ wo: string | null; archived: boolean; complete: boolean }>(
+        "select wo, archived, complete from installs where id = $1",
+        [jobId],
+      );
+      const gone = row.byEquipment && (!now[0] || now[0].archived || now[0].complete);
+      if (gone || (now[0]?.wo?.trim() && woMatchKey(now[0].wo) !== matchKey)) {
+        action = "create";
+        jobId = null;
+      }
+    }
     if (action === "create" || (action === "update" && !jobId)) {
-      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped);
+      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, today);
       if (hit) {
         action = "update";
         jobId = hit.id;
@@ -369,7 +481,8 @@ export async function applyCorrigoRows(
         const status = boardStatus("pm", row.statusRaw, row.completedAt, cur[0].status).status;
         const technician = row.technician || cur[0].technician;
         const workDone = row.workDone || cur[0].work_done;
-        const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null);
+        const reopened = corrigoReopens("pm", row.statusRaw, row.completedAt, cur[0].status, row.completedRaw);
+        const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null, reopened);
         const completedAt = date.value;
         const customer = chosen || cur[0].customer;
         const done = CLOSED_PM.has(status);
@@ -418,7 +531,14 @@ export async function applyCorrigoRows(
             where id = $1`,
           [jobId, technician, completedAt, workDone, equipStatus, keptWo, complete, customer],
         );
-        await logCorrigo(sql, "install", jobId, actor, `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}`);
+        await logCorrigo(
+          sql,
+          "install",
+          jobId,
+          actor,
+          `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}` +
+            (row.byEquipment ? " · matched by account and equipment" : ""),
+        );
         updated += 1;
         maybeReview(
           "install",
@@ -452,7 +572,8 @@ export async function applyCorrigoRows(
       const status = boardStatus(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status).status;
       const technician = row.technician || cur[0].technician;
       const workDone = row.workDone || cur[0].work_done;
-      const date = completedOnUpdate(row.completedAt, cur[0].completed_at, cur[0].ns_so);
+      const reopened = corrigoReopens(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status, row.completedRaw);
+      const date = completedOnUpdate(row.completedAt, cur[0].completed_at, cur[0].ns_so, reopened);
       const completedAt = date.value;
       const customer = chosen || cur[0].customer;
       const done = CLOSED_CALL.has(status);
@@ -579,11 +700,12 @@ export async function applyCorrigoRows(
     }
   }
 
-  const reconciled = await reconcileServiceDuplicates(
-    sql,
-    actor,
-    [...heldPairs.values()].map((held) => ({ keeperId: held.keeperId, extraId: held.extraId })),
-  );
+  // After the wrap, the same number on tickets from two cycles is two jobs: the merge leaves those pairs alone.
+  const otherCycle = wrapped ? crossCyclePairs(await loadHits(sql), today) : [];
+  const reconciled = await reconcileServiceDuplicates(sql, actor, [
+    ...[...heldPairs.values()].map((held) => ({ keeperId: held.keeperId, extraId: held.extraId })),
+    ...otherCycle,
+  ]);
   for (const held of reconciled.held) rememberHold(held.keeperId, held.extraId, held.reason, held.extraId);
   if (heldPairs.size) {
     const ids = [...new Set([...heldPairs.values()].flatMap((held) => [held.keeperId, held.extraId, held.perRowExtra]))];

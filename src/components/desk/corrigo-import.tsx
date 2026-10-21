@@ -61,7 +61,13 @@ export function CorrigoImportButton({
     mutationFn: async (file: File) => {
       const parsed = await readCorrigoFile(file);
       const parts = [];
-      for (const records of chunkByBytes(parsed.records)) parts.push(await previewCorrigoImport({ data: { records } }));
+      // A later chunk must not attach a row to an install an earlier chunk's row took.
+      const claimedInstalls: number[] = [];
+      for (const records of chunkByBytes(parsed.records)) {
+        const part = await previewCorrigoImport({ data: { records, claimedInstalls: [...claimedInstalls] } });
+        for (const r of part.rows) if (r.byEquipment && r.jobId) claimedInstalls.push(r.jobId);
+        parts.push(part);
+      }
       return mergeCorrigoPreviews(parts, parsed);
     },
     onSuccess: (data, file) => {
@@ -301,8 +307,9 @@ function PreviewBody({
       </ul>
       {preview.wrapCount ? (
         <p className="mt-3 text-xs text-muted-foreground">
-          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 —
-          those stay on For review so nobody merges two different jobs
+          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 or{" "}
+          {preview.wrapCount === 1 ? "shares" : "share"} it with another customer&apos;s ticket — those stay on For review so
+          nobody merges two different jobs
           {preview.conflictCount
             ? ` · ${preview.conflictCount} already on more than one ticket`
             : ""}
@@ -426,7 +433,7 @@ function PreviewBody({
                     ) : null}
                     {r.wrapRepeat ? (
                       <span className="mt-0.5 block text-[11px] font-normal tracking-wide text-warning uppercase">
-                        Repeated after 9999
+                        {r.shared ? "Number on another ticket too" : "Repeated after 9999"}
                       </span>
                     ) : null}
                     {r.conflictIds?.length ? (
@@ -476,9 +483,11 @@ function PreviewBody({
                     <span className="whitespace-nowrap">
                       {r.completedKept
                         ? r.oldCompletedAt || "—"
-                        : r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
-                          ? `${r.oldCompletedAt} → ${r.completedAt}`
-                          : r.completedAt || r.oldCompletedAt || "—"}
+                        : r.completedCleared
+                          ? `${r.oldCompletedAt} → (cleared, reopened)`
+                          : r.oldCompletedAt && r.completedAt && r.oldCompletedAt !== r.completedAt
+                            ? `${r.oldCompletedAt} → ${r.completedAt}`
+                            : r.completedAt || r.oldCompletedAt || "—"}
                     </span>
                     {r.completedNote ? (
                       <span className="mt-0.5 block max-w-[14rem] text-[11px] text-warning">{r.completedNote}</span>
@@ -720,7 +729,7 @@ export function CorrigoReviewList({
         <div>
           <h2 className="text-xs tracking-wide text-muted-foreground uppercase">For Review</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Open work from the last Corrigo file, every ticket it created (closed ones too), ST#s that reused a number after WO-9999, and tickets that could not be merged.
+            Open work from the last Corrigo file, every ticket it created (closed ones too), ST#s that reused a number after WO-9999 or share it with another customer&apos;s ticket, and tickets that could not be merged.
           </p>
         </div>
         <Button type="button" size="sm" variant="outline" onClick={onDismiss}>
@@ -742,10 +751,13 @@ export function CorrigoReviewList({
                   {item.entityType && item.entityType !== "service" ? ` · ${woBoardName(item.entityType)}` : ""}
                   {item.created ? " · new" : ""}
                   {item.technician ? ` · ${item.technician}` : ""}
-                  {item.reason === "wrap" ? " · repeated after 9999" : ""}
+                  {item.reason === "wrap" ? (item.note ? " · number on another ticket too" : " · repeated after 9999") : ""}
                 </span>
                 {item.reason === "merge" && item.note ? (
                   <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">not merged: {item.note}</span>
+                ) : null}
+                {item.reason === "wrap" && item.note ? (
+                  <span className="mt-0.5 block whitespace-normal text-xs text-muted-foreground">{item.note}</span>
                 ) : null}
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">
