@@ -442,12 +442,15 @@ function listIndexOf(pieces: Piece[], linked: AcctUnit[], catalog: string[], equ
   return open.length === 1 ? open[0]!.i : -1;
 }
 
-/** Take one unit off a visit: its checks, photos and link. The account's record goes too when nothing else uses it. */
-async function unlinkUnit(sql: Sql, installId: number, equipmentId: number): Promise<void> {
+/**
+ * Take one unit off a visit: its checks, photos and link. The account's record goes too when nothing else uses it;
+ * with `madeBy`, only when that install's load made it.
+ */
+async function unlinkUnit(sql: Sql, installId: number, equipmentId: number, opts?: { madeBy?: number }): Promise<void> {
   await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
   await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
   await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
-  await dropUnusedUnit(sql, equipmentId);
+  await dropUnusedUnit(sql, equipmentId, opts);
 }
 
 /** Write the machine rows back as they are: recipe, ownership, plug, water and the deal's tie included. */
@@ -525,7 +528,11 @@ export async function dropMergedRow(sql: Sql, keepId: number, dropId: number): P
   const touched: number[] = [];
   for (const row of installs) {
     const pieces = piecesFrom(row, catalog);
-    const at = listIndexOf(pieces, await linkedUnits(sql, row.id), catalog, dropId);
+    const linked = await linkedUnits(sql, row.id);
+    // Only a list with a row for each unit: when the kept unit has no row of its own, the row stays (it becomes the
+    // kept unit's on the next load).
+    if (!claimLinked(pieces, linked, catalog).includes(keepId)) continue;
+    const at = listIndexOf(pieces, linked, catalog, dropId);
     if (at < 0) continue;
     await writeList(sql, row.id, pieces.filter((_, i) => i !== at));
     touched.push(row.id);
@@ -691,10 +698,12 @@ export async function syncInstallUnits(
   const keptModels = account.filter((a) => keep.has(a.id));
   for (const a of linkedRows) {
     if (keep.has(a.id) || serialKey(a.serial) || isLocked(a)) continue;
-    const twin =
+    const junk =
       SUFFIX_ONLY.test((a.equipment_name ?? "").trim()) ||
       SERIAL_LINE.test((a.equipment_name ?? "").trim()) ||
-      isTrailingWord(a.equipment_name ?? "") ||
+      isTrailingWord(a.equipment_name ?? "");
+    const twin =
+      junk ||
       keptModels.some(
         (k) => sameCatalogModel(k.catalog_model, a.catalog_model) || sameCatalogModel(k.equipment_name, a.equipment_name),
       );
@@ -709,7 +718,8 @@ export async function syncInstallUnits(
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, a.id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, a.id]);
     linkedIds.delete(a.id);
-    await dropUnusedUnit(sql, a.id);
+    // A real machine's twin is deleted only when this install's load made it; an imported one stays on the account.
+    await dropUnusedUnit(sql, a.id, junk ? undefined : { madeBy: installId });
   }
   if (!opts?.prune) return;
   for (const id of linkedIds) {
@@ -1425,7 +1435,8 @@ export async function removeInstallRow(
   const gone = claimLinked(pieces, linked, catalog).filter((id) => id >= 0 && !after.has(id));
   for (const id of gone) await assertUnlocked(sql, linked.find((a) => a.id === id));
   await writeList(sql, data.installId, rest);
-  for (const id of gone) await unlinkUnit(sql, data.installId, id);
+  // Same list edit as a save: a unit the account had before this install stays on the account.
+  for (const id of gone) await unlinkUnit(sql, data.installId, id, { madeBy: data.installId });
   const piece = pieces[at]!;
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
