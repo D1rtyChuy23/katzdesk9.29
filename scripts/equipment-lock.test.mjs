@@ -208,3 +208,30 @@ test("a confirmed deal machine the owner removes is not put back by the server",
   assert.match(src, /lockConfirmed\(keepTies\(Array\.isArray\(data\.machines\) \? data\.machines : \[\], kept\), kept, onBoard\)/);
   assert.equal(machines.serializeMachines(kept).equipment, "Fetco 52H");
 });
+
+test("the lock shows on every equipment list, and only the owner sees Lock / Unlock or Remove on a confirmed deal row", () => {
+  const read = (f) => readFileSync(new URL(`../src/components/desk/${f}`, import.meta.url), "utf8");
+  const badge = read("lock-badge.tsx");
+  // The button reads canLockEquipment from getMyAccess and renders nothing for anyone else.
+  assert.match(read("use-can-lock.ts"), /return !!me\.data\?\.canLockEquipment;/);
+  assert.match(badge, /if \(!canLock\) return null;/);
+  assert.match(badge, /title=\{`Locked by \$\{lockedBy\}`\}/);
+  const history = read("account-history.tsx");
+  assert.match(history, /disabled=\{merge\.isPending \|\| !!row\.lockedBy \|\| !!twin\.lockedBy\}/);
+  assert.match(history, /disabled=\{remove\.isPending \|\| !!row\.lockedBy\}/);
+  assert.match(history, /<LockToggle kind="unit" id=\{row\.id\} locked=\{!!row\.lockedBy\} onDone=\{refresh\} \/>/);
+  const pre = read("pre-inspection-panel.tsx");
+  assert.match(pre, /disabled=\{m\.locked\}/);
+  assert.match(pre, /<LockBadge lockedBy=\{m\.lockedBy\} \/>/);
+  const place = read("unit-place-field.tsx");
+  assert.match(place, /const by = lockedBy !== undefined \? lockedBy : lookup\.data\?\.found \? lookup\.data\.lockedBy : null;\s*if \(by\) \{/);
+  const sheet = read("asset-sheet.tsx");
+  assert.match(sheet, /<LockToggle kind="asset" id=\{asset\.id\} locked=\{!!asset\.lockedAt\}/);
+  assert.match(sheet, /\) : asset\.status !== "sold" \|\| !asset\.lockedAt \? \(/);
+  assert.match(sheet, /disabled=\{ret\.isPending \|\| held\}/);
+  const deals = read("entity-sheets.tsx");
+  assert.match(deals, /onRemoveLocked=\{\s*canLock\s*\?/);
+  assert.match(deals, /save\.mutate\(\{ id: deal\.id, machines: next, \.\.\.\(release\?\.length \? \{ releaseUids: release \} : \{\}\) \}\)/);
+  const rows = read("machine-fields.tsx");
+  assert.match(rows, /\{onRemoveLocked \? \(\s*<button[\s\S]*?onClick=\{\(\) => onRemoveLocked\(index\)\}/);
+});

@@ -9,6 +9,7 @@ import { formatShortDate, money } from "@/lib/ops/clock";
 import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
+import { LockBadge, LockToggle } from "./lock-badge";
 import { UnitPlaceField } from "./unit-place-field";
 
 /**
@@ -154,6 +155,8 @@ export function AccountEquipmentList({
     serial: string | null;
     installDate: string | null;
     ownership: string | null;
+    /** Locked by the owner: Remove and Merge are off until it is unlocked. */
+    lockedBy?: string | null;
   }[];
   loading: boolean;
   className?: string;
@@ -197,7 +200,10 @@ export function AccountEquipmentList({
             const twins = rows.filter((other, j) => j !== i && other.id && row.id && sameUnitModel(other, row));
             return (
               <li key={`${row.id ?? row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
-                <p className="font-medium">{row.equipmentName || row.catalogModel}</p>
+                <p className="flex flex-wrap items-center gap-2 font-medium">
+                  {row.equipmentName || row.catalogModel}
+                  <LockBadge lockedBy={row.lockedBy} />
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {[
                     row.catalogModel && row.catalogModel !== row.equipmentName ? row.catalogModel : null,
@@ -221,7 +227,8 @@ export function AccountEquipmentList({
                         type="button"
                         size="sm"
                         variant="outline"
-                        disabled={merge.isPending}
+                        disabled={merge.isPending || !!row.lockedBy || !!twin.lockedBy}
+                        title={row.lockedBy || twin.lockedBy ? `Locked by ${row.lockedBy || twin.lockedBy}` : undefined}
                         data-testid="merge-account-unit"
                         onClick={() => {
                           const keep = twin.serial || twin.equipmentName || "the other row";
@@ -238,7 +245,8 @@ export function AccountEquipmentList({
                       type="button"
                       size="sm"
                       variant="ghost"
-                      disabled={remove.isPending}
+                      disabled={remove.isPending || !!row.lockedBy}
+                      title={row.lockedBy ? `Locked by ${row.lockedBy}` : undefined}
                       data-testid="remove-account-unit"
                       onClick={() => {
                         if (window.confirm(`Remove ${row.equipmentName || row.catalogModel}${row.serial ? ` SN ${row.serial}` : ""} from this account?`)) {
@@ -248,6 +256,7 @@ export function AccountEquipmentList({
                     >
                       Remove
                     </Button>
+                    <LockToggle kind="unit" id={row.id} locked={!!row.lockedBy} onDone={refresh} />
                   </div>
                 ) : null}
               </li>

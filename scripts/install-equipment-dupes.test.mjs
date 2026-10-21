@@ -10,7 +10,7 @@ register(new URL("./ts-alias-hook.mjs", import.meta.url));
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
 const { addMachineOntoInstall, readInspection, removeInspectionUnit, removeInstallRow, syncInstallUnits, unitsDroppedBy } = await import("../src/lib/ops/inspection-api.ts");
-const { removeEquipmentUnit, mergeEquipmentUnits } = await import("../src/lib/ops/account-equip-import.ts");
+const { removeEquipmentUnit } = await import("../src/lib/ops/account-equip-import.ts");
 const machines = await import("../src/lib/ops/machines.ts");
 const { catalogModels, listedEquipment, matchModel } = await import("../src/lib/ops/equipment.ts");
 const { placeWarehouseSerial } = await import("../src/lib/ops/warehouse-serial.ts");

@@ -24,6 +24,8 @@ import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { CustomerCombo, EquipmentCombo } from "./directory-fields";
 import { UnitPlaceField, emptyPlaceDraft, type PlaceDraft } from "./unit-place-field";
+import { LockBadge, LockToggle } from "./lock-badge";
+import { releasedByReturn } from "@/lib/ops/equipment-lock-rules";
 import { StockActions } from "./stock-actions";
 import { isWarehouseStockPlace } from "@/lib/ops/stock-action-rules";
 import { setAssetPlace } from "@/lib/ops/unit-place";
@@ -66,6 +68,9 @@ export function AssetSheet({
   const [place, setPlace] = useState<PlaceDraft>(emptyPlaceDraft());
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const warehouseOnly = me.data?.role === "warehouse";
+  // Locked by a person or by a sale: Return, Mark sold and the pulls wait for the owner. An assignment's own lock comes off with a return.
+  const held = !!asset?.lockedAt && !releasedByReturn({ status: asset.status, lockedAt: asset.lockedAt, lockedBy: asset.lockedBy });
+  const lockTip = held ? `Locked by ${asset?.lockedBy ?? "the owner"}` : undefined;
   const canStock = !!me.data?.isAdmin || warehouseOnly;
   const [testNote, setTestNote] = useState("");
   const [rejectNote, setRejectNote] = useState("");
@@ -162,6 +167,10 @@ export function AssetSheet({
                 {asset.shopTest === "tested" ? <StatusBadge status="Tested" /> : null}
                 {asset.shopTest === "needs-test" ? <StatusBadge status="Needs test" /> : null}
                 {asset.missingSerial ? <StatusBadge status="Serial missing" /> : null}
+                <LockBadge lockedBy={asset.lockedBy} />
+              </div>
+              <div className="mt-2">
+                <LockToggle kind="asset" id={asset.id} locked={!!asset.lockedAt} onDone={() => void qc.invalidateQueries({ queryKey: ["assets"] })} />
               </div>
             </SheetHeader>
             <SheetBody>
@@ -265,7 +274,7 @@ export function AssetSheet({
                 <p className="mt-1 text-sm">{asset.reviewNote}</p>
               </div>
             ) : null}
-            {((canStock && isWarehouseStockPlace(asset.site) && (asset.status === "ready" || asset.status === "deployed")) || asset.stockHold) ? (
+            {((canStock && !asset.lockedAt && isWarehouseStockPlace(asset.site) && (asset.status === "ready" || asset.status === "deployed")) || asset.stockHold) ? (
               <div className="border-b border-border p-5">
                 <StockActions asset={asset} canStock={canStock} isAdmin={!!me.data?.isAdmin} />
               </div>
@@ -367,6 +376,7 @@ export function AssetSheet({
                     draft={place}
                     onDraft={setPlace}
                     status={asset.status}
+                    lockedBy={asset.lockedBy}
                     placeLabel={unitPlaceLabel({
                       site: asset.site,
                       pallet: asset.pallet,
@@ -458,7 +468,8 @@ export function AssetSheet({
                     </SelectField>
                     <Button
                       size="sm"
-                      disabled={!installId || assign.isPending}
+                      disabled={!installId || assign.isPending || held}
+                      title={lockTip}
                       onClick={() => assign.mutate()}
                     >
                       Assign & remove from barn
@@ -482,7 +493,8 @@ export function AssetSheet({
                     </div>
                     <Button
                       size="sm"
-                      disabled={!serviceCustomer.trim() || assignService.isPending}
+                      disabled={!serviceCustomer.trim() || assignService.isPending || held}
+                      title={lockTip}
                       onClick={() => assignService.mutate()}
                     >
                       Assign & remove from barn
@@ -502,7 +514,8 @@ export function AssetSheet({
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={!soldTo.trim() || sold.isPending}
+                      disabled={!soldTo.trim() || sold.isPending || held}
+                      title={lockTip}
                       onClick={() => sold.mutate()}
                     >
                       Mark sold
@@ -512,7 +525,7 @@ export function AssetSheet({
                   <p className="text-xs text-warning">Customer-owned — return, don’t sell.</p>
                 )}
               </div>
-            ) : asset.status !== "sold" ? (
+            ) : asset.status !== "sold" || !asset.lockedAt ? (
               <div className="space-y-3 border-b border-border p-5">
                 <p className="text-xs tracking-wide text-muted-foreground uppercase">Return to barn</p>
                 <p className="text-sm text-muted-foreground">
@@ -551,14 +564,15 @@ export function AssetSheet({
                   </SelectField>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" onClick={() => ret.mutate()} disabled={ret.isPending}>
+                  <Button size="sm" onClick={() => ret.mutate()} disabled={ret.isPending || held} title={lockTip}>
                     Return to warehouse
                   </Button>
                   {!asset.customerOwned ? (
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={!soldTo.trim() || sold.isPending}
+                      disabled={!soldTo.trim() || sold.isPending || held}
+                      title={lockTip}
                       onClick={() => sold.mutate()}
                     >
                       Mark sold
@@ -575,7 +589,7 @@ export function AssetSheet({
               </div>
             ) : (
               <p className="border-b border-border px-5 py-4 text-sm text-muted-foreground">
-                Sold to {asset.soldTo ?? "—"} {asset.soldAt ? `on ${asset.soldAt}` : ""}.
+                Sold to {asset.soldTo ?? "—"} {asset.soldAt ? `on ${asset.soldAt}` : ""}. Locked: only the owner can unlock it to return it.
               </p>
             )}
             <Thread entityType="asset" entityId={asset.id} />

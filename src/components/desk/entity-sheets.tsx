@@ -41,6 +41,7 @@ import { changedMachineFields, machinesOnOpen, mergeMachineSpecs, serializeMachi
 import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
 import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice } from "@/lib/ops/install-form";
 import { isInstalled } from "@/lib/ops/install-status";
+import { useCanLock } from "./use-can-lock";
 import { removeInstallMachine } from "@/lib/ops/inspection-api";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
@@ -742,10 +743,12 @@ function DealMachines({
   specs: MachineSpec[];
   recipes: Recipe[];
   onChange: (next: MachineSpec[]) => void;
-  onPersist: (next: MachineSpec[]) => void;
+  /** release: board ties the owner took off the deal, so the server does not keep those rows. */
+  onPersist: (next: MachineSpec[], release?: string[]) => void;
   onConfirmed: (next: MachineSpec[]) => void;
 }) {
   const qc = useQueryClient();
+  const canLock = useCanLock();
   const [open, setOpen] = useState(specs.length <= DEAL_ROWS_OPEN);
   const [seen, setSeen] = useState(specs.length);
   const [asking, setAsking] = useState<number | null>(null);
@@ -836,6 +839,19 @@ function DealMachines({
           onCommit={onPersist}
           onRecipe={onPersist}
           rowLocked={(s) => s.boardId != null}
+          onRemoveLocked={
+            canLock
+              ? (index) => {
+                  const spec = specs[index];
+                  if (!spec) return;
+                  if (!window.confirm(`Take ${spec.equipment} off this deal? The Board project keeps its machine.`)) return;
+                  onPersist(
+                    specs.filter((_, i) => i !== index),
+                    spec.uid ? [spec.uid] : [],
+                  );
+                }
+              : undefined
+          }
           rowFooter={(s, index) => {
             const project = projectFor(s.boardId);
             if (s.boardId != null) {
@@ -1088,10 +1104,10 @@ export function DealSheet({
                 recipes={recs.data ?? []}
                 onConfirmed={setSpecs}
                 onChange={setSpecs}
-                onPersist={(next) => {
+                onPersist={(next, release) => {
                   setSpecs(next);
                   skipToast.current = true;
-                  save.mutate({ id: deal.id, machines: next });
+                  save.mutate({ id: deal.id, machines: next, ...(release?.length ? { releaseUids: release } : {}) });
                 }}
               />
               <Field label="Equipment Package Amount" name="amount" defaultValue={deal.amount != null ? String(deal.amount) : ""} />
