@@ -4,6 +4,7 @@ import { Download, Printer, Table2 } from "lucide-react";
 import {
   downloadExport,
   previewExport,
+  ACCOUNT_ONLY_REPORTS,
   REPORT_LABELS,
   REPORT_TYPES,
   type BuiltReport,
@@ -245,6 +246,12 @@ export function ExportDialog({
               <option value="csv">CSV</option>
             </SelectField>
           </div>
+          {ACCOUNT_ONLY_REPORTS.includes(type) ? (
+            <p className="text-xs text-muted-foreground sm:col-span-2" data-testid="export-account-only">
+              Lists every serial that appears more than once: account units, install equipment lists, warehouse records, modules, and serials that differ only by dashes or zeros. Only the Account filter applies.
+            </p>
+          ) : (
+          <>
           <div>
             <Label htmlFor="export-from">From</Label>
             <Input id="export-from" type="date" className="mt-1" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
@@ -263,6 +270,8 @@ export function ExportDialog({
               )}
             </div>
           </div>
+          </>
+          )}
           <div className="min-w-0 sm:col-span-2">
             <Label htmlFor="export-customer">Account</Label>
             <Input
@@ -273,6 +282,8 @@ export function ExportDialog({
               placeholder="Search account name…"
             />
           </div>
+          {ACCOUNT_ONLY_REPORTS.includes(type) ? null : (
+          <>
           <div className="sm:col-span-2">
             <Label htmlFor="export-status">Status</Label>
             <SelectField
@@ -299,6 +310,8 @@ export function ExportDialog({
             />
             AK accounts only
           </label>
+          </>
+          )}
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
