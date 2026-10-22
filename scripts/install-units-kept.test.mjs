@@ -71,6 +71,8 @@ async function openWindow(pg, sql, id) {
     return { ...r, powerVoltage: r.power_voltage, machines: machines.specsFromInstall(r.equipment, r.serial, r.power_voltage, r.machines, catalogModels(dir)) };
   };
   const send = async (packed) => {
+    // updateInstall passes the list stored before the save, so a serial changed or cleared in this save reaches its unit.
+    const before = (await pg.query("select equipment, serial, power_voltage, machines from installs where id = $1", [id])).rows[0];
     await pg.query("update installs set equipment = $2, serial = $3, power_voltage = $4, machines = $5 where id = $1", [
       id,
       packed.equipment,
@@ -78,7 +80,7 @@ async function openWindow(pg, sql, id) {
       packed.powerVoltage,
       packed.machines,
     ]);
-    await syncInstallUnits(sql, id, { prune: true });
+    await syncInstallUnits(sql, id, { prune: true, before });
   };
   let row = await boardRow();
   const w = { specs: machines.machinesOnOpen(row), loaded: machines.machinesOnOpen(row), seen: row.machines };

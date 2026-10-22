@@ -437,6 +437,7 @@ export function InstallSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  const canLock = useCanLock();
   const dropRow = useMutation({
     scope: queue,
     mutationFn: (v: { installId: number; index: number; equipment: string; serial: string }) => removeInstallMachine({ data: v }),
@@ -715,8 +716,8 @@ export function InstallSheet({
                         const spec = specs[index];
                         if (!spec) return;
                         const label = `${spec.equipment}${spec.serial.trim() ? ` SN ${spec.serial.trim()}` : ""}`;
-                        if (isInstalled(row)) {
-                          toast.error("This install is marked installed. Its equipment list and pre-inspection are kept as they were.");
+                        if (isInstalled(row) && !canLock) {
+                          toast.error("This install is marked installed. Its equipment list and pre-inspection are kept as they were; only the owner can change them.");
                           return;
                         }
                         if (!window.confirm(`Remove ${label} from this install?`)) return;
