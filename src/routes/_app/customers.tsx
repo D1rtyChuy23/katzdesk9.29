@@ -24,6 +24,7 @@ import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { RepName } from "@/components/desk/rep-select";
 import { cn } from "@/lib/utils";
 import { useMyView } from "@/components/desk/my-view-bar";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 
 export const Route = createFileRoute("/_app/customers")({
@@ -298,7 +299,7 @@ function Page() {
           <li className="px-4 py-8 text-sm text-muted-foreground">Loading accounts…</li>
         ) : rows.length === 0 ? (
           <li className="px-4 py-8 text-sm text-muted-foreground">
-            {needle ? "No customers match that search." : "No customers in the list yet."}
+            {notLoadedText(list, "accounts") ?? (needle ? "No customers match that search." : "No customers in the list yet.")}
           </li>
         ) : null}
       </ul>

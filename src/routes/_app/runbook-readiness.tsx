@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { getRunbookReadiness } from "@/lib/ops/pm-runbook-readiness-api";
 import { GAP_LABEL, readinessCsv, type ReadinessGap } from "@/lib/ops/pm-runbook-readiness";
 import { useCopy } from "@/components/desk/spec-sheet";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/runbook-readiness")({ component: Page });
 
@@ -117,7 +118,7 @@ function Page() {
                 {!rows.length ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
-                      Nothing to show for this filter.
+                      {notLoadedText(q, "runbook readiness") ?? "Nothing to show for this filter."}
                     </td>
                   </tr>
                 ) : null}

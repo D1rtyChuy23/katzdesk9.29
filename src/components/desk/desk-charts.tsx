@@ -600,17 +600,25 @@ export function ImportMenu({ children }: { children: ReactNode }) {
   );
 }
 
+/** False while the page's data is loading or failed to load: the cards in the row show "—", never a fake 0. */
+const StatsLoaded = createContext(true);
+
 export function StatRow({
   children,
   className,
+  loaded = true,
 }: {
   children: ReactNode;
   className?: string;
+  /** The page's list loaded (query.isSuccess). */
+  loaded?: boolean;
 }) {
   return (
-    <div className={cn("mt-5 flex w-full min-w-0 flex-wrap gap-2", className)} data-stat-row="">
-      {children}
-    </div>
+    <StatsLoaded.Provider value={loaded}>
+      <div className={cn("mt-5 flex w-full min-w-0 flex-wrap gap-2", className)} data-stat-row="" data-loaded={loaded ? "true" : "false"}>
+        {children}
+      </div>
+    </StatsLoaded.Provider>
   );
 }
 
@@ -631,6 +639,11 @@ export function StatCard({
   selected?: boolean;
   onClick?: () => void;
 }) {
+  const loaded = useContext(StatsLoaded);
+  if (!loaded) {
+    value = "—";
+    breakdown = undefined;
+  }
   const inner = (
     <>
       <p className="flex items-center gap-1.5 truncate text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">

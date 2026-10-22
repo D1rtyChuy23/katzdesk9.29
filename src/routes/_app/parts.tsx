@@ -26,6 +26,7 @@ import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
 import { BinLocationsButton, ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 /** `?part=<id>` opens that part's window, so a part can be linked. */
 type PartsSearch = { part?: number };
@@ -280,7 +281,7 @@ function Page() {
         ))}
         {!rows.length && !page.isLoading ? (
           <li className="px-4 py-6 text-sm text-muted-foreground">
-            {showHidden ? "No hidden parts." : "No parts match. Import the NetSuite item list from the Service page first."}
+            {notLoadedText(page, "parts") ?? (showHidden ? "No hidden parts." : "No parts match. Import the NetSuite item list from the Service page first.")}
           </li>
         ) : null}
       </ul>

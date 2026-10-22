@@ -17,6 +17,7 @@ import { PingButton } from "@/components/desk/ping-button";
 import { ComingDuePanel } from "@/components/desk/coming-due";
 import { useMyView } from "@/components/desk/my-view-bar";
 import { RebuildAlerts } from "@/components/desk/rebuild-alerts";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 
 
@@ -46,6 +47,9 @@ function ClockHome() {
         </button>
       </div>
     );
+  }
+  if (dash.isError && !d) {
+    return <p className="text-sm text-muted-foreground">{notLoadedText(dash, "Coming Due")}</p>;
   }
   if (dash.isLoading || !d) {
     return (

@@ -20,6 +20,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ExportButton } from "@/components/desk/export-dialog";
 import { TechName } from "@/components/desk/tech-select";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/modules")({
   validateSearch: parseOpenSearch,
@@ -113,7 +114,7 @@ function Page() {
           </Button>
         </div>
       </header>
-      <StatRow>
+      <StatRow loaded={data.isSuccess}>
         <StatCard
           label="At HQ"
           value={hqRows.length}
@@ -157,7 +158,7 @@ function Page() {
       </StatRow>
       <section className="mt-5 grid min-w-0 gap-4 lg:grid-cols-2">
         <ChartCard title="By Status" lede="Where every module sits.">
-          {statusMix.length ? <StatusDonut data={statusMix} unit="modules" /> : <p className="text-sm text-muted-foreground">No modules yet.</p>}
+          {statusMix.length ? <StatusDonut data={statusMix} unit="modules" /> : <p className="text-sm text-muted-foreground">{notLoadedText(data, "modules") ?? "No modules yet."}</p>}
         </ChartCard>
         <ChartCard title="Ready At HQ By Type" lede="What can actually ship.">
           {readyRows.length ? (
@@ -274,7 +275,7 @@ function Page() {
         })}
         {rows.length === 0 ? (
           <p className="px-4 py-8 text-sm text-muted-foreground">
-            {avail === "hq" ? "No modules at HQ match these filters." : "No modules in this view."}
+            {notLoadedText(data, "modules") ?? (avail === "hq" ? "No modules at HQ match these filters." : "No modules in this view.")}
           </p>
         ) : null}
       </div>

@@ -36,6 +36,7 @@ import { ChartCard, FilterChip, SimpleBars, StatCard, StatRow, toggleChip } from
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/warehouse")({
   validateSearch: parseOpenSearch,
@@ -184,7 +185,7 @@ function Page() {
         ) : null}
       </header>
 
-      <StatRow>
+      <StatRow loaded={data.isSuccess}>
         <StatCard
           label="Ready"
           value={equipReady}
@@ -618,7 +619,7 @@ function Page() {
         {slot && slotUnits.length === 0 && !needle && !canStock ? (
           <p className="px-4 py-8 text-sm text-muted-foreground">This slot is empty.</p>
         ) : list.length === 0 && !(canStock && slot) ? (
-          <p className="px-4 py-8 text-sm text-muted-foreground">Nothing on this rack matches.</p>
+          <p className="px-4 py-8 text-sm text-muted-foreground">{notLoadedText(data, "warehouse") ?? "Nothing on this rack matches."}</p>
         ) : null}
       </div>
 

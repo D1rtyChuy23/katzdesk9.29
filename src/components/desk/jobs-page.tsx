@@ -28,6 +28,7 @@ import { sameTech } from "@/lib/ops/tech-match";
 import { mineByTechnician } from "@/lib/ops/my-view";
 import { AkBadge } from "./ak-badge";
 import { useMyView } from "./my-view-bar";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 
 export function JobsPage({
@@ -160,7 +161,7 @@ export function JobsPage({
       </header>
       <SalesScopeNote />
 
-      <StatRow>
+      <StatRow loaded={jobs.isSuccess}>
         <StatCard
           label="Active"
           value={activeCount}
@@ -243,11 +244,12 @@ export function JobsPage({
         ) : rows.length === 0 ? (
           <div className="px-4 py-8">
             <p className="text-sm text-muted-foreground">
-              {q.trim() || tech || urgency
+              {notLoadedText(jobs, "tickets") ??
+                (q.trim() || tech || urgency
                 ? "Nothing matches this search."
                 : view === "active"
                   ? "No open tickets."
-                  : "Nothing in this view."}
+                  : "Nothing in this view.")}
             </p>
             {!q.trim() && !tech && !urgency && view === "active" ? (
               <Button type="button" size="sm" className="mt-3" onClick={() => setCreate(true)}>

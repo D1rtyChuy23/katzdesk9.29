@@ -22,6 +22,7 @@ import { TechName } from "@/components/desk/tech-select";
 import { AkBadge } from "@/components/desk/ak-badge";
 import { useMyView } from "@/components/desk/my-view-bar";
 import { mineByTechnician } from "@/lib/ops/my-view";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/pms")({
   validateSearch: parseOpenSearch,
@@ -88,7 +89,7 @@ function Page() {
         </div>
       </header>
       <SalesScopeNote />
-      <StatRow>
+      <StatRow loaded={pms.isSuccess}>
         <StatCard
           label="Active"
           value={active.length}
@@ -159,7 +160,7 @@ function Page() {
         {rows.length === 0 ? (
           <div className="px-4 py-8">
             <p className="text-sm text-muted-foreground">
-              {q.trim() ? "Nothing matches this search." : "No PMs in this view."}
+              {notLoadedText(pms, "PMs") ?? (q.trim() ? "Nothing matches this search." : "No PMs in this view.")}
             </p>
             {!q.trim() && view === "active" ? (
               <Button type="button" size="sm" className="mt-3" onClick={() => setCreate(true)}>
