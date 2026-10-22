@@ -287,7 +287,7 @@ test("an item note with no status, or a core-hole answer, stays when either of t
 test("an Equipment-tab Remove takes its row and pre-inspection unit off before the list is saved, in the save's own queue", () => {
   const src = componentSource("../src/components/desk/entity-sheets.tsx", "InstallSheet");
   // Both mutations share one scope, so the save (and its prune) waits for the remove. A refused remove saves nothing.
-  assert.match(src, /const save = useMutation\(\{\s*scope: queue,\s*mutationFn: \(d[^)]*\) => \{[\s\S]*?return updateInstall\(/);
+  assert.match(src, /const save = useMutation\(\{\s*scope: queue,\s*mutationFn: \((?:d|vars)[^)]*\) => \{[\s\S]*?return updateInstall\(/);
   assert.match(src, /const dropRow = useMutation\(\{\s*scope: queue,\s*mutationFn: [^\n]*removeInstallMachine\(\{ data: v \}\)/);
   const remove = src.slice(src.indexOf("onRemove={(index) => {"));
   const drop = remove.indexOf("dropRow.mutate(");

@@ -521,23 +521,25 @@ test("a window that opened before the ids, saved after a machine was swapped on 
   }
 });
 
-test("the install window's baseline follows every field and id; a save's base is worked out when it runs, and a failed save takes nothing", () => {
+test("the install window: its baseline follows every field and id, each save sends the list it was built on, a refused one hands its base on, and a read waits for the window's own saves", () => {
   const src = readFileSync(new URL("../src/components/desk/entity-sheets.tsx", import.meta.url), "utf8");
   const start = src.indexOf("export function InstallSheet(");
   const sheet = src.slice(start, src.indexOf("\nexport function ", start + 1));
   assert.match(sheet, /const machineSig = JSON\.stringify\(row\?\.machines \?\? \[\]\);/);
   assert.match(sheet, /\}, \[row\?\.id, hydratedId, machineSig\]\);/);
-  // A read moves both baselines; a send moves what the window expects; the base is read in mutationFn, not when queued.
-  assert.match(sheet, /seenServer\.current = confirmed\.current = \{ id: row\.id, rows: server \};/);
-  const persist = sheet.slice(sheet.indexOf("function persistMachines"), sheet.indexOf("save.mutate", sheet.indexOf("function persistMachines")));
-  assert.match(persist, /sentAhead\.current = true;\s*seenServer\.current = \{ id: current\.id, rows: next \};/);
-  assert.doesNotMatch(persist, /machinesBase/);
+  assert.match(sheet, /if \(pending\.current\.get\(row\.id\)\) return;/);
+  const send = sheet.slice(sheet.indexOf("function listSend"), sheet.indexOf("function persistMachines"));
+  assert.match(send, /const builtOn = knownServer\(id\);/);
+  assert.match(send, /sentAhead\.current = true;\s*seenServer\.current = \{ id, rows \};\s*return \{ builtOn, sent: rows \};/);
+  const persist = sheet.slice(sheet.indexOf("function persistMachines"), sheet.indexOf("return (", sheet.indexOf("function persistMachines")));
+  assert.match(persist, /\.\.\.listSend\(current\.id, next\),/);
   const save = sheet.slice(sheet.indexOf("const save = useMutation("), sheet.indexOf("const canLock"));
-  assert.match(save, /const known = confirmed\.current\?\.id === d\.id \? confirmed\.current\.rows/);
-  assert.match(save, /if \(vars\.machines !== undefined\) confirmed\.current = \{ id: vars\.id, rows: sentRows\(vars\.machines\) \};/);
-  assert.match(save, /seenServer\.current = confirmed\.current;\s*sentAhead\.current = false;/);
-  const forSave = sheet.slice(sheet.indexOf("function listForSave"), sheet.indexOf("function persistMachines"));
-  assert.match(forSave, /const server = seen && sentAhead\.current \? seen : \(current\.machines \?\? \[\]\);/);
+  assert.match(save, /machinesBase: JSON\.stringify\(baseOf\(builtOn\)\)/);
+  assert.match(save, /refused\.current\.set\(vars\.sent, vars\.builtOn\);/);
+  assert.match(save, /onSettled: \(_data, _error, vars\) => \{/);
+  // A Remove's follow-up save takes off the row with its unit, or that very row, and never guesses a twin by model.
+  const without = src.slice(src.indexOf("function withoutRow("), src.indexOf("\n}\n", src.indexOf("function withoutRow(")));
+  assert.doesNotMatch(without, /equipment ===/);
 });
 
 // --- Linking a machine to the account's unit it is (Bar By The Wayside: the Linea "L" and the account's PB001708). ---
@@ -773,6 +775,47 @@ test("a serial typed by mistake that belongs to another kind of machine on the a
     // 2626066 is the Mazzer's serial: typed on the Linea, it is not that machine.
     assert.equal(await linkableSerialOwner(sql, { installId: id, equipmentId: linea, serial: "2626066" }), null);
     assert.equal(await linkableSerialOwner(sql, { installId: id, equipmentId: linea, serial: "2626066", model: LINEA }), null);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a save built on an older read keeps what a save the server took since changed, and adds its own edit", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Fast Cafe", [{ equipment: MAZZER, serial: "M1" }, { equipment: TB3, serial: "T1" }]);
+    await readInspection(sql, id);
+    const z = await stored(pg, id);
+    // Save A: a recipe on the TB3 and a Fetco added. The server took it.
+    await windowSave(sql, id, [...z.map((r) => (r.serial === "T1" ? { ...r, recipeId: 5 } : r)), { equipment: "Fetco CBS-51H", serial: "", powerVoltage: "" }], z);
+    // Save B was built on the read from before A (an older list): it only sets the Mazzer's plug.
+    await windowSave(sql, id, z.map((r) => (r.serial === "M1" ? { ...r, plug: "5-15P" } : r)), z);
+    assert.deepEqual((await stored(pg, id)).map((r) => [r.equipment, r.recipeId ?? null, r.plug ?? ""]), [
+      [MAZZER, null, "5-15P"],
+      [TB3, 5, ""],
+      ["Fetco CBS-51H", null, ""],
+    ]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Remove of one of two twin rows the window holds without ids leaves the other: the follow-up save's merge drops only the removed one", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Twin Rows Cafe", [{ equipment: TB3 }, { equipment: TB3 }]);
+    await readInspection(sql, id);
+    const windowRows = [
+      { equipment: TB3, serial: "", powerVoltage: "" },
+      { equipment: TB3, serial: "", powerVoltage: "" },
+    ];
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "" }, "Test", { owner: true });
+    // The window couldn't tell which copy it removed, so it sends both, on the list it opened with.
+    await windowSave(sql, id, windowRows, windowRows);
+    assert.deepEqual((await stored(pg, id)).map((r) => r.equipment), [TB3]);
+    assert.equal((await visit(pg, id)).length, 1);
   } finally {
     await pg.close();
   }
