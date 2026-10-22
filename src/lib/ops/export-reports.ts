@@ -7,7 +7,7 @@ import { isClosedCall } from "@/lib/ops/ticket-status";
 import { formatNowChicago, todayChicago, isInstalled } from "@/lib/ops/clock";
 import { woMatchKey } from "@/lib/ops/corrigo";
 import { catalogModels, findRecipeFor, listedEquipment } from "@/lib/ops/equipment";
-import { parseMachinesJson } from "@/lib/ops/machines";
+import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
 import { SETTING_FIELDS, settingsFrom } from "@/lib/ops/recipe-fields";
 import { loadTechs } from "@/lib/ops/roster";
 import { sameTech } from "@/lib/ops/tech-match";
@@ -17,11 +17,12 @@ import { loadRebuilds, sortRebuildsForExport } from "@/lib/ops/rebuilds";
 import type { Recipe } from "@/lib/ops/types";
 import { sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
 import { isoDay } from "@/lib/ops/iso";
-import { loadInspectionSummaries, loadInspectionUnits } from "@/lib/ops/inspection-api";
+import { catalogNames, loadInspectionSummaries, loadInspectionUnits } from "@/lib/ops/inspection-api";
+import { findDuplicateSerials } from "@/lib/ops/duplicate-serials";
 import { emptyInspection, photosCell, siteIsReady } from "@/lib/ops/pre-inspection";
 
 
-export const REPORT_TYPES = ["pending", "pms", "modules", "tlc", "installs", "rebuilds"] as const;
+export const REPORT_TYPES = ["pending", "pms", "modules", "tlc", "installs", "rebuilds", "serials"] as const;
 export type ReportType = (typeof REPORT_TYPES)[number];
 
 export const REPORT_LABELS: Record<ReportType, string> = {
@@ -31,6 +32,7 @@ export const REPORT_LABELS: Record<ReportType, string> = {
   tlc: "TLC & Factors",
   installs: "Install readiness",
   rebuilds: "Rebuilds",
+  serials: "Duplicate serials",
 };
 
 export const REPORT_SLUG: Record<ReportType, string> = {
@@ -40,7 +42,11 @@ export const REPORT_SLUG: Record<ReportType, string> = {
   tlc: "TLC-Factors",
   installs: "Install-readiness",
   rebuilds: "Rebuilds",
+  serials: "Duplicate-serials",
 };
+
+/** Reports that read only the Account filter (dates, tech, status and AK don't apply). */
+export const ACCOUNT_ONLY_REPORTS: readonly ReportType[] = ["serials"];
 
 export type ExportFilters = {
   dateFrom?: string | null;
@@ -861,6 +867,39 @@ async function buildRebuilds(
   };
 }
 
+/** Duplicate serials, live: account units, install lists, warehouse records and modules (duplicate-serials.ts). */
+export async function buildSerials(sql: Awaited<ReturnType<typeof getSql>>, filters: ExportFilters): Promise<ExportSheet[]> {
+  const [units, installs, assets, modules, catalog] = await Promise.all([
+    sql.query<{ id: number; customer: string; name: string | null; serial: string | null; install_date: unknown; locked_at: unknown }>(
+      "select id, customer, coalesce(nullif(equipment_name, ''), catalog_model) as name, serial, install_date, locked_at from account_equipment where coalesce(serial, '') <> '' order by id",
+    ),
+    sql.query<{ id: number; customer: string; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; complete: unknown; equip_status: string | null }>(
+      "select id, customer, equipment, serial, power_voltage, machines, complete, equip_status from installs where archived = false order by id",
+    ),
+    sql.query<{ id: number; model: string; serial: string | null; status: string; site: string | null; sold_to: string | null }>(
+      "select id, model, serial, status, site, sold_to from assets where coalesce(serial, '') <> '' order by id",
+    ),
+    sql.query<{ id: number; module_id: string | null; platform: string | null; module_type: string | null; status: string | null; assigned_customer: string | null }>(
+      "select id, module_id, platform, module_type, status, assigned_customer from modules where coalesce(module_id, '') <> '' order by id",
+    ),
+    catalogNames(sql),
+  ]);
+  return findDuplicateSerials(
+    {
+      units: units.map((u) => ({ id: Number(u.id), customer: u.customer, name: u.name ?? "", serial: u.serial, installDate: isoDay(u.install_date) || null, locked: u.locked_at != null })),
+      installs: installs.map((i) => ({
+        id: Number(i.id),
+        customer: i.customer,
+        installed: isInstalled({ complete: i.complete === true || String(i.complete) === "true", equipStatus: i.equip_status }),
+        rows: installMachines(i, catalog).machines.map((m) => ({ equipment: m.equipment, serial: m.serial })),
+      })),
+      assets: assets.map((a) => ({ id: Number(a.id), model: a.model, serial: a.serial, status: a.status, site: a.site, soldTo: a.sold_to })),
+      modules: modules.map((m) => ({ id: Number(m.id), moduleId: m.module_id ?? "", platform: m.platform, type: m.module_type, status: m.status, customer: m.assigned_customer })),
+    },
+    { customer: filters.customer },
+  );
+}
+
 export function fileNameFor(type: ReportType, date: string, format: "xlsx" | "csv"): string {
   return `KatzDesk-${REPORT_SLUG[type]}-${date}.${format}`;
 }
@@ -890,6 +929,7 @@ async function buildReport(type: ReportType, filters: ExportFilters): Promise<Bu
   else if (type === "modules") sheets = [await buildModules(sql, filters, inactive)];
   else if (type === "tlc") sheets = [await buildTlc(sql, filters, inactive)];
   else if (type === "rebuilds") sheets = [await buildRebuilds(sql, filters)];
+  else if (type === "serials") sheets = await buildSerials(sql, { customer: filters.customer });
   else {
     const inst = await buildInstalls(sql, filters, inactive);
     sheets = [inst.notReady, inst.ready];
@@ -904,7 +944,7 @@ async function buildReport(type: ReportType, filters: ExportFilters): Promise<Bu
     type,
     label: REPORT_LABELS[type],
     generated: generated.stamp,
-    filterSummary: filterSummary(filters, rowCount),
+    filterSummary: filterSummary(ACCOUNT_ONLY_REPORTS.includes(type) ? { customer: filters.customer } : filters, rowCount),
     filename: fileNameFor(type, generated.date, "xlsx"),
     sheets,
     counts,
@@ -952,7 +992,7 @@ function toCsv(report: BuiltReport): string {
     lines.push(esc(`${report.counts.notReady} not ready · ${report.counts.ready} ready`));
   }
   lines.push("");
-  if (report.type === "installs") {
+  if (report.sheets.length > 1) {
     for (const sheet of report.sheets) {
       lines.push(esc(sheet.name));
       lines.push(sheet.columns.map(esc).join(","));
