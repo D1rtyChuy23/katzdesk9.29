@@ -134,7 +134,9 @@ test("a completed La Marzocco PM stores the install-date interval and leaves a s
       model: "pb",
     });
     await recordCompletedRunbook(sql, pm, "user-1", [unit("acct:1", "2026-07-18"), unit("acct:2", "2026-07-18")], "12 month PM", new Date("2026-10-18T15:00:00Z"));
-    const rows = await pg.query("select unit_key, interval_mo, serial_key, options, updated_at::text as updated_at from pm_runbook_units order by unit_key");
+    // Read the saved time in UTC: plain ::text prints in the computer's time zone, so on Central time
+    // 2020-01-01 00:00 UTC came back as "2019-12-31 18:00:00-06" and the check below failed.
+    const rows = await pg.query("select unit_key, interval_mo, serial_key, options, (updated_at at time zone 'UTC')::text as updated_at from pm_runbook_units order by unit_key");
     const byKey = Object.fromEntries(rows.rows.map((r) => [r.unit_key, r]));
     assert.equal(byKey["acct:1"].interval_mo, "3");
     assert.equal(byKey["acct:1"].serial_key, "SN-A");
