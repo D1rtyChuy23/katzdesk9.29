@@ -1,8 +1,11 @@
 /**
- * The Coffee Equipment Request Form: which units belong on an install, and how they print.
+ * The Equipment Request Form: which units belong on an install, and how they print.
  * Pure. The print page and the equipment tab both use this.
  */
 import { serialKey } from "./account-equip.ts";
+import { ownershipLabel } from "./deal-board.ts";
+import { plugFaceCode } from "./plug-faces.ts";
+import { SETTING_FIELDS, type SettingName } from "./recipe-fields.ts";
 import { sameWarehouseModel } from "./warehouse-serial.ts";
 
 export type VisitExtra = { model: string; serial?: string | null; electrical?: string | null };
@@ -219,58 +222,132 @@ export function clearTypedDuplicates<T extends { serial: string }>(rows: T[], sa
   });
 }
 
+/** One line in a unit's Notes: a recipe prints its name in bold (title) and its settings after it. */
+export type FormNote = { title: string; text: string };
+
 export type FormUnit = {
   model: string;
   serial: string;
+  /** The note on the unit's pre-inspection. */
   notes: string;
   voltage: string;
   plug: string;
   /** From the model spec when the unit itself has no amps. */
   amps?: string;
+  /** Stored ownership: Sold, Loaned or Leased. Prints as Sold, Loan or Lease. */
+  ownership?: string;
+  /** The recipe the unit's equipment row shows, if it has one. */
+  recipe?: FormNote | null;
 };
 
 export type FormRow = {
+  /** The model, uppercased. */
   equipment: string;
-  notes: string;
+  /** Each unit's serial, uppercased. */
+  serials: string[];
   qty: number;
+  /** Sold, Loan or Lease. Blank until someone marks it. */
+  terms: string;
+  /** Voltage, amps and plug, uppercased. Different outlets are joined with " / ". */
   outlet: string;
+  /** NEMA codes that have a plug picture, e.g. "5-15". */
+  plugs: string[];
+  /** The pre-inspection note first, then the recipe. As typed, not uppercased. */
+  notes: FormNote[];
 };
 
 const up = (s: string) => s.trim().toUpperCase();
 
-/** Blank when there is nothing to print. Never "Not set" or "undefined". */
-export function formText(raw: string | null | undefined): string {
+/** Trimmed, and blank when there is nothing to print. Never "Not set" or "undefined". */
+export function formClean(raw: string | null | undefined): string {
   const s = String(raw ?? "").trim();
   if (!s || /^not set$/i.test(s) || /^undefined$/i.test(s) || /^null$/i.test(s)) return "";
-  return up(s);
+  return s;
 }
 
-/** One printed row per model. Serials sit on the equipment name. Outlet is the shared voltage and plug. */
+/** formClean, uppercased. */
+export function formText(raw: string | null | undefined): string {
+  return up(formClean(raw));
+}
+
+export type FormRecipe = Partial<Record<SettingName, string | null>> & { name?: string | null; notes?: string | null };
+
+const lines = (raw: string | null | undefined) =>
+  formClean(raw)
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+/**
+ * A recipe as the form prints it: the name the equipment row shows ("Standard" when it has none), then every setting
+ * that has a value as "Label: value", then the recipe's own notes ("Grind setting: 18 grams" lines live there).
+ * A setting typed on several lines is kept on one, with "; " between.
+ */
+export function recipeNote(recipe: FormRecipe | null | undefined): FormNote | null {
+  if (!recipe) return null;
+  const settings = SETTING_FIELDS.flatMap((f) => {
+    const value = lines(recipe[f.name]).join("; ");
+    return value ? [`${f.label}: ${value}`] : [];
+  });
+  return { title: formClean(recipe.name) || "Standard", text: [...settings, ...lines(recipe.notes)].join(" · ") };
+}
+
+/**
+ * One printed row per model and terms: two ITCBs, one sold and one loaned, are two rows. Outlet is the shared voltage
+ * and plug, and each plug with a picture is listed once.
+ */
 export function groupFormRows(units: FormUnit[]): FormRow[] {
-  const groups: { model: string; count: number; serials: string[]; notes: string[]; outlets: string[] }[] = [];
+  type Group = { model: string; terms: string; count: number; serials: string[]; notes: FormNote[]; outlets: string[]; plugs: string[] };
+  const groups: Group[] = [];
   for (const unit of units) {
     const model = formText(unit.model);
     if (!model) continue;
+    const terms = ownershipLabel(unit.ownership);
     const power = placePower(unit.voltage, unit.plug);
     const outlet = [formText(power.voltage), formText(unit.amps), formText(power.plug)].filter(Boolean).join(" · ");
-    let group = groups.find((g) => sameWarehouseModel(g.model, model));
+    let group = groups.find((g) => g.terms === terms && sameWarehouseModel(g.model, model));
     if (!group) {
-      group = { model, count: 0, serials: [], notes: [], outlets: [] };
+      group = { model, terms, count: 0, serials: [], notes: [], outlets: [], plugs: [] };
       groups.push(group);
     }
     group.count += 1;
     const serial = formText(unit.serial);
     if (serial && !group.serials.includes(serial)) group.serials.push(serial);
-    const notes = formText(unit.notes);
-    if (notes && !group.notes.includes(notes)) group.notes.push(notes);
+    const note = formClean(unit.notes);
+    const notes: FormNote[] = [...(note ? [{ title: "", text: note }] : []), ...(unit.recipe ? [unit.recipe] : [])];
+    for (const n of notes) {
+      if (!group.notes.some((g) => g.title === n.title && g.text === n.text)) group.notes.push(n);
+    }
     if (outlet && !group.outlets.includes(outlet)) group.outlets.push(outlet);
+    const face = plugFaceCode(power.plug);
+    if (face && !group.plugs.includes(face)) group.plugs.push(face);
   }
   return groups.map((g) => ({
-    equipment: g.serials.length ? `${g.model} · SN ${g.serials.join(", ")}` : g.model,
-    notes: g.notes.join(". "),
+    equipment: g.model,
+    serials: g.serials,
     qty: g.count,
+    terms: g.terms,
     outlet: g.outlets.join(" / "),
+    plugs: g.plugs,
+    notes: g.notes,
   }));
+}
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * "2026-10-20" prints as "Oct 20, 2026", or "Tue, Oct 20, 2026" with the weekday. Read from the date's own parts,
+ * so the computer's time zone can never move it a day. Blank when it is not a real date.
+ */
+export function formDate(raw: string | null | undefined, opts: { weekday?: boolean } = {}): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(raw ?? "").trim());
+  if (!m) return "";
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const at = new Date(Date.UTC(y, mo - 1, d));
+  if (y < 1900 || at.getUTCFullYear() !== y || at.getUTCMonth() !== mo - 1 || at.getUTCDate() !== d) return "";
+  const date = `${MONTHS[mo - 1]} ${d}, ${y}`;
+  return opts.weekday ? `${WEEKDAYS[at.getUTCDay()]}, ${date}` : date;
 }
 
 /** New account when this customer has no other install and no equipment that is not already on this visit. */
@@ -328,7 +405,7 @@ export function preInstallNotes(input: {
   docs: "yes" | "pending" | "blank";
 }): CheckNote[] {
   const notes = [
-    formText(input.inspector),
+    formClean(input.inspector),
     rollChecks(input.water),
     rollChecks(input.power),
     rollChecks(input.space),

@@ -5,6 +5,7 @@ import {
   applySerialInPlace,
   dedupeMachineSerials,
   foldVisitUnits,
+  formDate,
   groupFormRows,
   hasSerial,
   machinesBeforeSave,
@@ -12,9 +13,12 @@ import {
   looksLikeVoltage,
   parseAccountSerialNotice,
   placePower,
+  preInstallNotes,
+  recipeNote,
   rollChecks,
   visitUnitForRow,
 } from "../src/lib/ops/install-form.ts";
+import { plugFaceCode, plugImageSrc } from "../src/lib/ops/plug-faces.ts";
 
 test("a visit unit with its own serial is added, and a second pass does not add it again", () => {
   const start = [
@@ -59,7 +63,7 @@ test("voltage typed into the plug field moves, and a plug typed into voltage mov
   assert.equal(plug.plug, "5-15P");
 });
 
-test("the form groups by model, uppercases, and never prints Not set", () => {
+test("the form groups by model, uppercases the model and serial, keeps notes as typed, and never prints Not set", () => {
   const rows = groupFormRows([
     { model: "Bunn ITCB", serial: "ITCB138003", notes: "3oz portioned pack. 1 gallon", voltage: "220V", plug: "" },
     { model: "Bunn ITCB", serial: "", notes: "", voltage: "", plug: "" },
@@ -67,9 +71,115 @@ test("the form groups by model, uppercases, and never prints Not set", () => {
   ]);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].qty, 2);
-  assert.equal(rows[0].equipment, "BUNN ITCB · SN ITCB138003");
-  assert.equal(rows[0].notes, "3OZ PORTIONED PACK. 1 GALLON");
+  assert.equal(rows[0].equipment, "BUNN ITCB");
+  assert.deepEqual(rows[0].serials, ["ITCB138003"]);
+  assert.deepEqual(rows[0].notes, [{ title: "", text: "3oz portioned pack. 1 gallon" }]);
   assert.equal(rows[0].outlet, "220V");
+  assert.equal(rows[0].terms, "");
+  assert.deepEqual(rows[0].plugs, []);
+});
+
+test("terms print as Sold, Loan or Lease, and units of one model on different terms are separate rows", () => {
+  const unit = (serial, ownership) => ({ model: "Bunn ITCB", serial, notes: "", voltage: "220V", plug: "", ownership });
+  const rows = groupFormRows([unit("A1", "Sold"), unit("B2", "Loaned"), unit("C3", "Loaned"), unit("D4", "Leased"), unit("E5", undefined), unit("F6", "Owned")]);
+  assert.deepEqual(
+    rows.map((r) => [r.equipment, r.serials.join(","), r.qty, r.terms]),
+    [
+      ["BUNN ITCB", "A1", 1, "Sold"],
+      ["BUNN ITCB", "B2,C3", 2, "Loan"],
+      ["BUNN ITCB", "D4", 1, "Lease"],
+      ["BUNN ITCB", "E5,F6", 2, ""],
+    ],
+  );
+});
+
+test("a plug picture is found however the plug was typed, and only for codes we have a picture of", () => {
+  assert.equal(plugFaceCode("NEMA 5-15P"), "5-15");
+  assert.equal(plugFaceCode("5-15"), "5-15");
+  assert.equal(plugFaceCode("l6 20p"), "L6-20");
+  assert.equal(plugFaceCode("L6-30R"), "L6-30");
+  assert.equal(plugFaceCode("L1430"), "L14-30");
+  assert.equal(plugFaceCode("NEMA L6-30 twist-lock"), "L6-30");
+  assert.equal(plugFaceCode("Hardwired"), null);
+  assert.equal(plugFaceCode("120V"), null);
+  assert.equal(plugFaceCode("15-20P"), null);
+  assert.equal(plugFaceCode(""), null);
+  assert.equal(plugImageSrc("L6-30"), "/nema/L6-30P.png");
+  const rows = groupFormRows([
+    { model: "Fetco CBS-51H", serial: "F1", notes: "", voltage: "120V", plug: "5-15P" },
+    { model: "Fetco CBS-51H", serial: "F2", notes: "", voltage: "220V", plug: "L6-30P" },
+    { model: "Fetco CBS-51H", serial: "F3", notes: "", voltage: "", plug: "nema 5-15p" },
+  ]);
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0].plugs, ["5-15", "L6-30"]);
+  assert.equal(rows[0].outlet, "120V · 5-15P / 220V · L6-30P / NEMA 5-15P");
+  // A voltage typed into the plug box is a voltage: no picture.
+  assert.deepEqual(groupFormRows([{ model: "Bunn TB3", serial: "", notes: "", voltage: "", plug: "120v" }])[0].plugs, []);
+});
+
+test("a recipe prints its name, each setting as Label: value, then its own notes", () => {
+  assert.deepEqual(
+    recipeNote({
+      name: "Espresso",
+      coffee1: "18g in, 36g out\n28 sec",
+      milk: "Whole, 140F",
+      tea1: "  ",
+      notes: "Grind setting: 18 grams\nDose: 18g\n\nCustomer likes it strong",
+    }),
+    {
+      title: "Espresso",
+      text: "Coffee 1: 18g in, 36g out; 28 sec · Milk settings: Whole, 140F · Grind setting: 18 grams · Dose: 18g · Customer likes it strong",
+    },
+  );
+  assert.deepEqual(recipeNote({ name: null, coffee1: "1 gallon batch", notes: null }), { title: "Standard", text: "Coffee 1: 1 gallon batch" });
+  assert.deepEqual(recipeNote({ name: "House", notes: "Not set" }), { title: "House", text: "" });
+  assert.equal(recipeNote(null), null);
+});
+
+test("Notes list the pre-inspection note first, then the recipe, each once per row", () => {
+  const recipe = { title: "Espresso", text: "Grind setting: 18 grams" };
+  const rows = groupFormRows([
+    { model: "Mazzer Super Jolly", serial: "M1", notes: "Left of the sink", voltage: "120V", plug: "5-15P", recipe },
+    { model: "Mazzer Super Jolly", serial: "M2", notes: "Left of the sink", voltage: "120V", plug: "5-15P", recipe },
+    { model: "Bunn G9-2T", serial: "G1", notes: "", voltage: "", plug: "", recipe: null },
+  ]);
+  assert.deepEqual(rows[0].notes, [{ title: "", text: "Left of the sink" }, recipe]);
+  assert.deepEqual(rows[1].notes, []);
+});
+
+test("dates print from their own year, month and day, so no time zone moves them", () => {
+  const before = process.env.TZ;
+  try {
+    for (const tz of ["UTC", "America/Chicago", "Pacific/Pago_Pago", "Pacific/Kiritimati"]) {
+      process.env.TZ = tz;
+      assert.equal(formDate("2026-10-20", { weekday: true }), "Tue, Oct 20, 2026", tz);
+      assert.equal(formDate("2026-10-20"), "Oct 20, 2026", tz);
+      assert.equal(formDate("2026-01-01T00:00:00Z", { weekday: true }), "Thu, Jan 1, 2026", tz);
+      assert.equal(formDate("2026-12-31", { weekday: true }), "Thu, Dec 31, 2026", tz);
+    }
+  } finally {
+    if (before === undefined) delete process.env.TZ;
+    else process.env.TZ = before;
+  }
+  assert.equal(formDate("2028-02-29", { weekday: true }), "Tue, Feb 29, 2028");
+  assert.equal(formDate("2026-02-30"), "");
+  assert.equal(formDate("2026-13-01"), "");
+  assert.equal(formDate("10/20/2026"), "");
+  assert.equal(formDate(""), "");
+  assert.equal(formDate(null), "");
+});
+
+test("the inspector prints as typed, and checks print YES, NO or PENDING", () => {
+  const pre = preInstallNotes({ inspector: " Amanda Logg ", water: ["Pass"], power: ["Pass", "Fail"], space: ["Fail"], photoCount: 2, recipesReady: true, docs: "pending" });
+  const at = (label) => pre.find((p) => p.label === label)?.notes;
+  assert.equal(at("Account inspected by"), "Amanda Logg");
+  assert.equal(at("Cold water source confirmed"), "YES");
+  assert.equal(at("Power supply verified"), "PENDING");
+  assert.equal(at("Space clearance (H/W/D) checked"), "NO");
+  assert.equal(at("Pre-Inspection photos taken"), "YES");
+  assert.equal(at("Cleaning/Care sheets & recipe cards ready"), "YES");
+  assert.equal(at("Equipment sale/loan docs signed"), "PENDING");
+  assert.equal(pre.length, 10);
 });
 
 test("typing a serial updates that row and a second click does not add one", () => {
