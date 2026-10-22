@@ -6,6 +6,8 @@ import {
   addInspectionEquipment,
   addInspectionUnitToList,
   editInspectionEquipment,
+  findSerialOwner,
+  linkInspectionUnit,
   removeInspectionEquipment,
   addInspectionPhoto,
   copyInspectionNa,
@@ -20,6 +22,7 @@ import {
   type InspectionMachine,
   type InspectionPhoto,
   type InspectionView,
+  type SerialOwner,
 } from "@/lib/ops/inspection-api";
 import { formatPingTime } from "@/lib/ops/clock";
 import { sameCatalogModel } from "@/lib/ops/account-equip";
@@ -508,25 +511,49 @@ function EditMachine({
   const [model, setModel] = useState("");
   const [serial, setSerial] = useState("");
   const [electrical, setElectrical] = useState("");
+  /** The unit already holding the serial typed here, when it can be linked to this machine instead of refused. */
+  const [owner, setOwner] = useState<SerialOwner | null>(null);
   useEffect(() => {
     setModel(machine ? machine.name || machine.model : "");
     setSerial(machine?.serial ?? "");
     setElectrical(machine?.electrical ?? "");
+    setOwner(null);
   }, [machine]);
+  const saved = (view: InspectionView, message: string) => {
+    toast.success(message);
+    void qc.invalidateQueries({ queryKey: ["installs"] });
+    void qc.invalidateQueries({ queryKey: ["customers"] });
+    void qc.invalidateQueries({ queryKey: ["account-equipment"] });
+    void qc.invalidateQueries({ queryKey: ["unit-mismatches"] });
+    onSaved(view);
+    onClose();
+  };
   const save = useMutation({
     mutationFn: () =>
       editInspectionEquipment({
         data: { installId, equipmentId: machine!.equipmentId, model: model.trim(), serial: serial.trim() || null, electrical: electrical.trim() || null },
       }),
-    onSuccess: (view) => {
-      toast.success("Saved on the pre-inspection and the equipment list");
-      void qc.invalidateQueries({ queryKey: ["installs"] });
-      void qc.invalidateQueries({ queryKey: ["customers"] });
-      onSaved(view);
-      onClose();
+    onSuccess: (view) => saved(view, "Saved on the pre-inspection and the equipment list"),
+    onError: async (e) => {
+      const message = e instanceof Error ? e.message : "Could not save";
+      // The serial is already on a unit of this account (often a copy no tab shows): offer to link the two instead.
+      if (/already on/i.test(message) && machine && serial.trim()) {
+        const found = await findSerialOwner({ data: { installId, equipmentId: machine.equipmentId, serial: serial.trim() } }).catch(() => null);
+        if (found) {
+          setOwner(found);
+          return;
+        }
+      }
+      toast.error(message);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  const link = useMutation({
+    mutationFn: (to: SerialOwner) =>
+      linkInspectionUnit({ data: { installId, fromEquipmentId: machine!.equipmentId, toEquipmentId: to.equipmentId, addRow: true } }),
+    onSuccess: (view, to) => saved(view, `Linked: this machine is ${to.name} SN ${to.serial} now, with its checks and photos`),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not link them"),
+  });
+  const busy = save.isPending || link.isPending;
   return (
     <Dialog open={!!machine} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md" data-testid="edit-machine-dialog">
@@ -547,7 +574,16 @@ function EditMachine({
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
               <Label htmlFor={`edit-sn-${installId}`}>Serial</Label>
-              <Input id={`edit-sn-${installId}`} className="mt-1" value={serial} onChange={(e) => setSerial(e.target.value)} data-testid="edit-machine-serial" />
+              <Input
+                id={`edit-sn-${installId}`}
+                className="mt-1"
+                value={serial}
+                onChange={(e) => {
+                  setSerial(e.target.value);
+                  setOwner(null);
+                }}
+                data-testid="edit-machine-serial"
+              />
             </div>
             <div>
               <Label htmlFor={`edit-el-${installId}`}>Electrical</Label>
@@ -561,11 +597,27 @@ function EditMachine({
               />
             </div>
           </div>
+          {owner ? (
+            <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm" data-testid="edit-machine-link">
+              <p>
+                SN {owner.serial} is {owner.onVisit ? "another machine on this install" : "already on this account, not on this install"}:{" "}
+                <span className="font-medium">{owner.name}</span>
+                {owner.records > 1 ? ` (${owner.records} records with that serial)` : ""}.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                If it is this machine, link them. One unit is left: {owner.name} SN {owner.serial}, with this machine's checks and photos,
+                on both tabs.
+              </p>
+              <Button type="button" size="sm" className="mt-2" disabled={busy} onClick={() => link.mutate(owner)} data-testid="edit-machine-link-confirm">
+                {link.isPending ? "Linking…" : "Link them"}
+              </Button>
+            </div>
+          ) : null}
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={save.isPending}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
               Cancel
             </Button>
-            <Button type="submit" disabled={save.isPending} data-testid="edit-machine-save">
+            <Button type="submit" disabled={busy} data-testid="edit-machine-save">
               {save.isPending ? "Saving…" : "Save"}
             </Button>
           </div>

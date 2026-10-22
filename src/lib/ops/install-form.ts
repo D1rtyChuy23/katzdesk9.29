@@ -170,16 +170,12 @@ function pairRows(rows: VisitMachine[], against: VisitMachine[]): number[] {
 
 /**
  * Rows sent without their pre-inspection unit's id (a window opened before the ids were written) take the id of their
- * row as stored: the same row by id, contents or serial, or, when the lists are the same length, the row at the same
- * place (a model renamed in the window is still that row). A row that already has an id keeps it.
+ * row as stored: the same row by its contents or serial, always the same model. A row that only sits at the same place
+ * takes nothing: the stored row there may be another machine now (swapped on the Pre-inspection tab), and taking its
+ * id would rename that machine's unit. A row that already has an id keeps it.
  */
 export function adoptUnitIds<T extends VisitMachine>(rows: T[], stored: VisitMachine[]): T[] {
   const pair = pairRows(rows, stored);
-  if (rows.length === stored.length) {
-    rows.forEach((_, i) => {
-      if (pair[i]! < 0 && !pair.includes(i)) pair[i] = i;
-    });
-  }
   const taken = new Set(rows.map((r) => r.unitId).filter(Boolean));
   return rows.map((r, i) => {
     const id = pair[i]! >= 0 ? stored[pair[i]!]!.unitId : null;

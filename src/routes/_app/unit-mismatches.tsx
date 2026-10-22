@@ -18,8 +18,9 @@ function Page() {
       <header>
         <h1 className="font-display text-3xl font-medium tracking-tight">Equipment Mismatches</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Installs whose Equipment list and Pre-inspection don't list the same machines. Nothing here changes on its own: open the
-          install, and on its Equipment tab add each machine to the list or take it off the pre-inspection.
+          Installs whose Equipment list and Pre-inspection don't list the same machines, and machines with no serial or a short one
+          ("L") that a unit already on the account likely is. Nothing here changes on its own: open the install, and on its
+          Equipment tab add each machine to the list, take it off the pre-inspection, or link it to the unit it is.
         </p>
       </header>
 
@@ -79,6 +80,23 @@ function Page() {
                     <li key={`${m.equipment}-${i}`}>
                       {m.equipment}
                       <span className="text-muted-foreground">{m.serial ? ` · SN ${m.serial}` : " · No serial"}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {r.onAccount.length ? (
+              <div className="mt-2">
+                <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">On the account, likely a machine here</p>
+                <ul className="mt-1 grid gap-1 text-sm">
+                  {r.onAccount.map((a) => (
+                    <li key={`${a.name}-${a.serial}`}>
+                      {a.name}
+                      <span className="text-muted-foreground">
+                        {` · SN ${a.serial}`}
+                        {a.records > 1 ? ` · ${a.records} records on the account` : ""}
+                        {` · may be the ${a.machines.join(" or the ")}`}
+                      </span>
                     </li>
                   ))}
                 </ul>

@@ -1437,9 +1437,10 @@ type UpdateInstallInput = { id: number; customer?: string; equipment?: string | 
  * dropped (and its unit pruned), one removed came back, and a fixed serial went back to the old one.
  */
 function mergeStaleList(data: UpdateInstallInput, c: any, catalog: string[]): void {
-	if (data.machinesBase == null || data.machines == null) return;
+	if (data.machinesBase == null || data.machines === undefined) return;
 	const asText = (v: MachineSpec[] | string) => (typeof v === "string" ? v : JSON.stringify(v));
-	const sent = parseMachinesJson(asText(data.machines));
+	// The last row taken off sends no list at all: that is an empty list, and what the server gained since still stays.
+	const sent = data.machines == null ? [] : parseMachinesJson(asText(data.machines));
 	const base = parseMachinesJson(asText(data.machinesBase));
 	const stored = specsFromInstall(c.equipment, c.serial, c.power_voltage, c.machines, catalog);
 	const merged = machinesBeforeSave(sent, base, stored);

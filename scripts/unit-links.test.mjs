@@ -130,22 +130,23 @@ test("a model renamed on its row keeps its unit: no second unit, and the passed 
   }
 });
 
-test("a window opened before the rows had ids still keeps a renamed row on its unit", async () => {
+test("a window opened before the rows had ids: a renamed row takes no other machine's unit, and a passed machine keeps its own row", async () => {
   const { pg, sql } = await fresh();
   try {
     const id = await install(pg, "Old Window Cafe", [{ equipment: "Fetco CBS-51H" }, { equipment: G9, serial: "G9X" }]);
     const fetco = (await readInspection(sql, id)).machines.find((m) => m.name === "Fetco CBS-51H").equipmentId;
     await pass(pg, id, fetco);
-    // The window's rows carry no ids: it renames the first row and saves.
+    // The window's rows carry no ids: it shows a TB3 where the Fetco is (renamed there, or swapped since elsewhere).
     await save(pg, sql, id, [
       { equipment: "Bunn TB3", serial: "", powerVoltage: "" },
       { equipment: G9, serial: "G9X", powerVoltage: "" },
     ]);
-    assert.deepEqual((await stored(pg, id)).map((r) => [r.equipment, r.unitId === fetco]), [
-      ["Bunn TB3", true],
-      [G9, false],
-    ]);
-    assert.equal((await visit(pg, id)).length, 2);
+    const rows = await stored(pg, id);
+    assert.deepEqual(rows.map((r) => r.equipment), ["Bunn TB3", G9, "Fetco CBS-51H"]);
+    assert.notEqual(rows[0].unitId, fetco);
+    assert.equal(rows[2].unitId, fetco);
+    // The Fetco's unit is still a Fetco: a row only at the same place never renames another machine's unit.
+    assert.equal((await visit(pg, id)).find((u) => u.id === fetco).equipment_name, "Fetco CBS-51H");
   } finally {
     await pg.close();
   }
@@ -366,6 +367,292 @@ test("a field the window changed itself still wins, and two saves before the win
     assert.equal(rows.filter((r) => r.equipment === "Bunn TB3").length, 1);
     assert.equal(rows.find((r) => r.equipment === MAZZER).plug, "5-15P");
     assert.equal((await visit(pg, id)).filter((u) => u.equipment_name === "Bunn TB3").length, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+const { linkVisitUnit, linkableSerialOwner, removeInspectionUnit: takeOffVisit } = inspection;
+const { machinesBeforeSave } = await import("../src/lib/ops/install-form.ts");
+const TB3 = "Bunn TB3";
+
+/** A failed check with a note: something recorded on the unit, not a pass. */
+const record = (pg, id, equipmentId) =>
+  pg.query("insert into install_inspection_items (install_id, equipment_id, category, status, notes) values ($1, $2, 'water', 'Fail', 'leaks')", [id, equipmentId]);
+const ownerOnce = async (pg) => {
+  const has = (await pg.query("select 1 from desk_accounts where user_id = 'u-owner'")).rows.length;
+  if (!has) await pg.query("insert into desk_accounts (user_id, username, approved, is_admin) values ('u-owner', 'chuy', true, true)");
+};
+
+test("a read never moves a row to another unit: a check on the second of two plain TB3s leaves both rows on their own units", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Twin Cafe", [
+      { equipment: TB3, ownership: "Sold", recipeId: 1 },
+      { equipment: TB3, ownership: "Loaned", recipeId: 2 },
+    ]);
+    await readInspection(sql, id);
+    const opened = await stored(pg, id);
+    await record(pg, id, opened[1].unitId);
+    await readInspection(sql, id);
+    assert.deepEqual((await stored(pg, id)).map((r) => [r.ownership, r.unitId]), opened.map((r) => [r.ownership, r.unitId]));
+    // The window that opened before the check sets the Sold row's plug: it lands on the Sold row.
+    await ownerOnce(pg);
+    const next = opened.map((r, i) => (i === 0 ? { ...r, plug: "5-15P" } : r));
+    await windowSave(sql, id, machinesBeforeSave(next, opened, await stored(pg, id)), opened);
+    assert.deepEqual((await stored(pg, id)).map((r) => [r.ownership, r.recipeId, r.plug ?? ""]), [
+      ["Sold", 1, "5-15P"],
+      ["Loaned", 2, ""],
+    ]);
+    // Remove on the Sold row takes the Sold row off.
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "", unitId: opened[0].unitId }, "Test", { owner: true });
+    assert.deepEqual((await stored(pg, id)).map((r) => r.ownership), ["Loaned"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("an Equipment-tab Remove of the inspected one of two plain twins keeps its checks on the row that stays, and the window's save agrees", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    // Both TB3s were on the account before this install (imported): taking one off the visit leaves it on the account.
+    for (let i = 0; i < 2; i++) await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ('Acct Cafe', $1, $1)", [TB3]);
+    const id = await install(pg, "Acct Cafe", [{ equipment: TB3 }, { equipment: TB3 }]);
+    await readInspection(sql, id);
+    const opened = await stored(pg, id);
+    const [u1, u2] = opened.map((r) => r.unitId);
+    await record(pg, id, u1);
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "", unitId: u1 }, "Test", { owner: true });
+    // The window's own save follows in the same queue, with the list it opened on as its base.
+    await windowSave(sql, id, opened.slice(1), opened);
+    assert.deepEqual((await stored(pg, id)).map((r) => [r.equipment, r.unitId]), [[TB3, u2]]);
+    assert.deepEqual((await visit(pg, id)).map((u) => u.id), [u2]);
+    const items = (await pg.query("select equipment_id, status, notes from install_inspection_items where install_id = $1 and status <> 'Not inspected'", [id])).rows;
+    assert.deepEqual(items, [{ equipment_id: u2, status: "Fail", notes: "leaks" }]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a unit flagged on the pre-inspection only never takes over a row of its model, on a load or a save", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Flag Cafe", [{ equipment: TB3 }, { equipment: G9, serial: "G9X" }]);
+    await readInspection(sql, id);
+    const own = (await stored(pg, id))[0].unitId;
+    const off = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ('Flag Cafe', $1, $1) returning id", [TB3])).rows[0].id;
+    await pg.query("insert into install_inspection_units (install_id, equipment_id, note) values ($1, $2, 'old unit')", [id, off]);
+    await record(pg, id, own);
+    const view = await readInspection(sql, id);
+    assert.equal((await stored(pg, id))[0].unitId, own);
+    assert.deepEqual(view.machines.filter((m) => !m.onList).map((m) => m.equipmentId), [off]);
+    const rows = await stored(pg, id);
+    await windowSave(sql, id, rows, rows);
+    assert.equal((await stored(pg, id))[0].unitId, own);
+    assert.equal((await pg.query("select count(*)::int as n from install_inspection_items where install_id = $1 and equipment_id = $2 and status = 'Fail'", [id, own])).rows[0].n, 1);
+    assert.ok((await visit(pg, id)).some((u) => u.id === off), "the flagged unit waits for review");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("two saves before the window reads back: the second, sent with the first as its base, can put a field back", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Quick Cafe", [{ equipment: TB3, serial: "T1" }]);
+    await readInspection(sql, id);
+    const seen = await stored(pg, id);
+    const first = seen.map((r) => ({ ...r, recipeId: 5, plug: "L6-30P" }));
+    await windowSave(sql, id, first, seen);
+    await windowSave(sql, id, seen.map((r) => ({ ...r, recipeId: null, plug: "" })), first);
+    const [row] = await stored(pg, id);
+    assert.equal(row.recipeId ?? null, null);
+    assert.equal(row.plug ?? "", "");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("taking the last row off in a window keeps a machine added on the Pre-inspection since", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Last Cafe", [{ equipment: TB3, serial: "T1" }]);
+    await readInspection(sql, id);
+    const seen = await stored(pg, id);
+    await addMachineOntoInstall(sql, { installId: id, model: "Fetco CBS-51H", serial: "F1", electrical: "" }, "Tech", { owner: true });
+    const fetco = (await visit(pg, id)).find((u) => u.serial === "F1").id;
+    await record(pg, id, fetco);
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "T1", unitId: seen[0].unitId }, "Test", { owner: true });
+    await windowSave(sql, id, [], seen);
+    assert.deepEqual((await stored(pg, id)).map((r) => r.serial), ["F1"]);
+    assert.ok((await visit(pg, id)).some((u) => u.id === fetco));
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a window that opened before the ids, saved after a machine was swapped on the Pre-inspection, renames nothing", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Old Cafe", [{ equipment: MAZZER, serial: "M1" }, { equipment: TB3 }]);
+    await readInspection(sql, id);
+    const tb3 = (await stored(pg, id))[1].unitId;
+    await takeOffVisit(sql, { installId: id, equipmentId: tb3 }, "Tech", { owner: true });
+    await addMachineOntoInstall(sql, { installId: id, model: "Fetco CBS-51H", serial: "", electrical: "" }, "Tech", { owner: true });
+    const fetco = (await stored(pg, id))[1].unitId;
+    await record(pg, id, fetco);
+    // An old browser: no ids, no base.
+    const packed = serializeMachines([
+      { equipment: MAZZER, serial: "M1", powerVoltage: "", plug: "5-15P" },
+      { equipment: TB3, serial: "", powerVoltage: "" },
+    ]);
+    await api.updateInstallFor(tagged(sql), { id, ...packed }, { userId: "u-owner" });
+    // An old window's list can still drop a machine it never saw (as before ids); it never renames that machine's unit.
+    const unit = (await pg.query("select equipment_name from account_equipment where id = $1", [fetco])).rows[0];
+    assert.ok(!unit || unit.equipment_name === "Fetco CBS-51H", unit?.equipment_name);
+    assert.ok(!(await visit(pg, id)).some((u) => u.id === fetco && u.equipment_name !== "Fetco CBS-51H"));
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the install window's baseline follows every field and id, and moves to what it sent", () => {
+  const src = readFileSync(new URL("../src/components/desk/entity-sheets.tsx", import.meta.url), "utf8");
+  const start = src.indexOf("export function InstallSheet(");
+  const sheet = src.slice(start, src.indexOf("\nexport function ", start + 1));
+  assert.match(sheet, /const machineSig = JSON\.stringify\(row\?\.machines \?\? \[\]\);/);
+  assert.match(sheet, /\}, \[row\?\.id, hydratedId, machineSig\]\);/);
+  const persist = sheet.slice(sheet.indexOf("function persistMachines"), sheet.indexOf("function baseForSave"));
+  assert.match(persist, /const base = baseForSave\(\);\s*sentAhead\.current = true;\s*seenServer\.current = \{ id: row\.id, rows: next \};/);
+  assert.match(persist, /machinesBase: base,/);
+  const forSave = sheet.slice(sheet.indexOf("function listForSave"), sheet.indexOf("function persistMachines"));
+  assert.match(forSave, /const server = seen && sentAhead\.current \? seen : \(row\.machines \?\? \[\]\);/);
+});
+
+// --- Linking a machine to the account's unit it is (Bar By The Wayside: the Linea "L" and the account's PB001708). ---
+
+/** #135 as it is live: the Linea "L" passed on the pre-inspection only, and two records on the account with SN PB001708. */
+async function waysideWithCopies(pg, sql, copies = 2) {
+  const { id, linea } = await wayside(pg, sql);
+  const pb = [];
+  for (let i = 0; i < copies; i++) {
+    pb.push(
+      (
+        await pg.query(
+          `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Bar By The Wayside', $1, $1, 'PB001708', 'pb001708') returning id`,
+          [LINEA],
+        )
+      ).rows[0].id,
+    );
+  }
+  await pg.query("insert into install_inspection_photos (install_id, equipment_id, category, data_url) values ($1, $2, 'space', 'data:image/png;base64,AA')", [id, linea]);
+  return { id, linea, pb };
+}
+
+const accountUnits = async (pg, customer) =>
+  (await pg.query("select id, equipment_name, serial from account_equipment where lower(customer) = lower($1) order by id", [customer])).rows;
+
+test("the account's copies of PB001708 are offered for the Linea L, on the Equipment tab and in the review, and finding them changes nothing", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id, linea, pb } = await waysideWithCopies(pg, sql);
+    const before = await accountUnits(pg, "Bar By The Wayside");
+    const view = await readInspection(sql, id);
+    assert.deepEqual(view.accountMatches, [{ equipmentId: pb[0], name: LINEA, serial: "PB001708", records: 2, forUnits: [linea] }]);
+    const found = await findUnitMismatches(sql);
+    assert.deepEqual(found.map((f) => [f.installId, f.onAccount]), [[id, [{ name: LINEA, serial: "PB001708", records: 2, machines: [`${LINEA} SN L`] }]]]);
+    assert.deepEqual(await accountUnits(pg, "Bar By The Wayside"), before);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Edit on the Pre-inspection: PB001708 on the Linea L is refused as a copy, then linking makes one Linea PB001708 on both tabs", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id, linea, pb } = await waysideWithCopies(pg, sql);
+    const edit = { installId: id, equipmentId: linea, model: LINEA, serial: "PB001708", electrical: "208v" };
+    await assert.rejects(() => editInspectionUnit(sql, edit, "Tech", { owner: true }), /SN PB001708 is already on Bar By The Wayside/);
+    const owner = await linkableSerialOwner(sql, { installId: id, equipmentId: linea, serial: "PB001708" });
+    assert.deepEqual(owner, { equipmentId: pb[0], name: LINEA, serial: "PB001708", records: 2, onVisit: false });
+    const view = await linkVisitUnit(sql, { installId: id, fromEquipmentId: linea, toEquipmentId: owner.equipmentId, addRow: true }, "Tech", { owner: true });
+    const lin = view.machines.find((m) => m.name === LINEA);
+    assert.equal(lin.equipmentId, pb[0]);
+    assert.equal(lin.serial, "PB001708");
+    assert.equal(lin.overall, "Passed");
+    assert.equal(lin.photoCount, 1);
+    assert.ok(view.machines.every((m) => m.onList));
+    assert.deepEqual((await stored(pg, id)).at(-1), { equipment: LINEA, serial: "PB001708", powerVoltage: "208v", recipeId: null, unitId: pb[0] });
+    // One record of the machine on the account: the L and the second copy were merged into it.
+    assert.deepEqual((await accountUnits(pg, "Bar By The Wayside")).filter((u) => u.equipment_name === LINEA).map((u) => [u.id, u.serial]), [[pb[0], "PB001708"]]);
+    assert.deepEqual(await findUnitMismatches(sql), []);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("linking from the Equipment tab: the account's unit takes the visit's checks, and the review then shows it to add to the list", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id, linea, pb } = await waysideWithCopies(pg, sql, 1);
+    const view = await linkVisitUnit(sql, { installId: id, fromEquipmentId: linea, toEquipmentId: pb[0] }, "Tech", { owner: true });
+    assert.deepEqual(view.machines.filter((m) => !m.onList).map((m) => [m.equipmentId, m.serial, m.overall]), [[pb[0], "PB001708", "Passed"]]);
+    assert.deepEqual(view.accountMatches, []);
+    const added = await addUnitOntoList(sql, { installId: id, equipmentId: pb[0] }, "Tech");
+    assert.ok(added.machines.every((m) => m.onList));
+    assert.deepEqual(await findUnitMismatches(sql), []);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a unit another open install's pre-inspection has is not linked from here", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id, linea, pb } = await waysideWithCopies(pg, sql, 1);
+    const other = await install(pg, "Bar By The Wayside", [{ equipment: LINEA, serial: "PB001708" }]);
+    await readInspection(sql, other);
+    assert.ok((await visit(pg, other)).some((u) => u.id === pb[0]));
+    assert.equal(await linkableSerialOwner(sql, { installId: id, equipmentId: linea, serial: "PB001708" }), null);
+    assert.deepEqual((await readInspection(sql, id)).accountMatches, []);
+    await assert.rejects(
+      () => linkVisitUnit(sql, { installId: id, fromEquipmentId: linea, toEquipmentId: pb[0] }, "Tech", { owner: true }),
+      new RegExp(`on install #${other}'s pre-inspection`),
+    );
+  } finally {
+    await pg.close();
+  }
+});
+
+test("PB001708 typed on the Linea L's row: the row becomes the account's unit, the L waits on the pre-inspection, and Same machine links them", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const { id, linea, pb } = await waysideWithCopies(pg, sql, 1);
+    await addUnitOntoList(sql, { installId: id, equipmentId: linea }, "Tech");
+    const seen = await stored(pg, id);
+    await windowSave(sql, id, seen.map((r) => (r.unitId === linea ? { ...r, serial: "PB001708" } : r)), seen);
+    const rows = await stored(pg, id);
+    assert.equal(rows.length, 4, "no second Linea row");
+    assert.equal(rows.at(-1).unitId, pb[0]);
+    const view = await readInspection(sql, id);
+    const l = view.machines.find((m) => m.equipmentId === linea);
+    assert.equal(l.onList, false);
+    assert.deepEqual(l.sameAs, [{ equipmentId: pb[0], name: LINEA, serial: "PB001708" }]);
+    const linked = await linkVisitUnit(sql, { installId: id, fromEquipmentId: linea, toEquipmentId: pb[0] }, "Tech", { owner: true });
+    assert.deepEqual(linked.machines.map((m) => [m.name, m.serial, m.onList]), [
+      [MAZZER, "2626066", true],
+      [G9, "G900046833", true],
+      [ITCB, "ITCB138003", true],
+      [LINEA, "PB001708", true],
+    ]);
+    assert.equal(linked.machines.at(-1).overall, "Passed");
+    assert.equal((await stored(pg, id)).length, 4);
   } finally {
     await pg.close();
   }

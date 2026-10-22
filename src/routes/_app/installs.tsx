@@ -14,7 +14,7 @@ import {
 import { catalogModels, dropEquipment, listedEquipment, matchModel, piecesForInstall } from "@/lib/ops/equipment";
 import { mergeMachineSpecs, parseMachinesJson, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { formatShortDate, todayChicago, isInstalled, isOpenInstall, installedPatch } from "@/lib/ops/clock";
-import { canMarkInstalled, saveInspectionMeta } from "@/lib/ops/inspection-api";
+import { canMarkInstalled, removeInstallMachine, saveInspectionMeta } from "@/lib/ops/inspection-api";
 import { siteIsReady } from "@/lib/ops/pre-inspection";
 import { isOwnership, machineGlance, ownershipLabel, projectLabel } from "@/lib/ops/deal-board";
 import { OpenLink } from "@/components/desk/open-link";
@@ -565,7 +565,22 @@ function NewInstallDialog({
 function useRemoveEquip(install: Install, catalog: string[]) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (label: string) => {
+    mutationFn: async ({ label, nth }: { label: string; nth: number }) => {
+      // The Equipment tab's Remove: the machine's row comes off, and its unit off the pre-inspection (even one that
+      // passed; a locked one or an installed project is refused). Saving the list without the row instead left a passed
+      // unit on the pre-inspection alone, or put its row straight back.
+      const rows = install.machines ?? [];
+      const model = matchModel(label, catalog);
+      const same = rows.map((m, i) => (matchModel(m.equipment, catalog) === model ? i : -1)).filter((i) => i >= 0);
+      const index = same[nth] ?? same[0] ?? -1;
+      const row = index >= 0 ? rows[index] : undefined;
+      if (row) {
+        const done = await removeInstallMachine({
+          data: { installId: install.id, index, equipment: row.equipment, serial: row.serial, unitId: row.unitId ?? null },
+        });
+        if (done.removed) return;
+      }
+      // A list that is only typed text: the machine comes out of the text, as before.
       const nextEquip = dropEquipment(install.equipment, label, catalog);
       const names = listedEquipment(nextEquip, catalog);
       const packed = serializeMachines(mergeMachineSpecs(names, install.machines ?? []));
@@ -581,7 +596,7 @@ function useRemoveEquip(install: Install, catalog: string[]) {
         },
       });
     },
-    onMutate: async (label) => {
+    onMutate: async ({ label }) => {
       await qc.cancelQueries({ queryKey: ["installs"] });
       const prev = qc.getQueryData<Install[]>(["installs"]);
       const nextEquip = dropEquipment(install.equipment, label, catalog);
@@ -792,7 +807,12 @@ function InstallEquipChips({
               ?.recipeId ?? null
           }
           onOpen={onRecipe}
-          onRemove={() => remove.mutate(p.label)}
+          onRemove={() => {
+            if (!window.confirm(`Remove ${p.label} from this install? Its pre-inspection for this visit (checks and photos) comes off too.`)) return;
+            const model = matchModel(p.label, catalog);
+            const nth = pieces.slice(0, idx).filter((q) => matchModel(q.label, catalog) === model).length;
+            remove.mutate({ label: p.label, nth });
+          }}
         />
       ))}
     </div>

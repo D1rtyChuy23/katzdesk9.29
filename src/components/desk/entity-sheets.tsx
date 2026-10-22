@@ -376,7 +376,13 @@ export function InstallSheet({
   const skipToast = useRef(false);
   const specsRef = useRef(specs);
   specsRef.current = specs;
+  /**
+   * The list as this window knows the server has it: what the board last read, or what this window last sent (until the
+   * board's next read). An edit is told apart from the server's change against it, and a save sends it as its base.
+   */
   const seenServer = useRef<{ id: number; rows: MachineSpec[] } | null>(null);
+  /** This window sent a list the board hasn't read back yet: the board's row is older than what the server has. */
+  const sentAhead = useRef(false);
   const catalog = catalogModels([
     ...(directoryEquip.data ?? []).map((e) => e.name),
     ...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
@@ -391,25 +397,27 @@ export function InstallSheet({
     setSpecs(loaded.map((s) => ({ ...s })));
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
-  const serialSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}`).join("\n");
-  const machineSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}\t${m.powerVoltage}`).join("\n");
+  // Every field the merge compares, and each row's unit id: a change to any of them on the server reaches this window.
+  const machineSig = JSON.stringify(row?.machines ?? []);
   useEffect(() => {
     if (!row || hydratedId !== row.id) return;
     const server = row.machines ?? [];
     const seen = seenServer.current;
     if (!seen || seen.id !== row.id) {
       seenServer.current = { id: row.id, rows: server };
+      sentAhead.current = false;
       return;
     }
     const previous = seen.rows;
     seenServer.current = { id: row.id, rows: server };
+    sentAhead.current = false;
     loadedSpecs.current = machinesBeforeSave(loadedSpecs.current, previous, server);
     const next = machinesBeforeSave(specsRef.current, previous, server);
     setSpecs(next);
     setEquipPieces(next.map((s) => s.equipment));
     // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row?.id, hydratedId, serialSig, machineSig]);
+  }, [row?.id, hydratedId, machineSig]);
   /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
   const queue = { id: `install-sheet-${row?.id}` };
   const save = useMutation({
@@ -471,8 +479,10 @@ export function InstallSheet({
 
   function listForSave(next: MachineSpec[]): MachineSpec[] {
     if (!row) return dedupeMachineSerials(next);
-    const baseline = seenServer.current?.id === row.id ? seenServer.current.rows : specs;
-    return machinesBeforeSave(next, baseline, row.machines ?? []);
+    const seen = seenServer.current?.id === row.id ? seenServer.current.rows : null;
+    // Saved and not read back yet: the board's row is the older list, and nothing on it is newer than what was sent.
+    const server = seen && sentAhead.current ? seen : (row.machines ?? []);
+    return machinesBeforeSave(next, seen ?? specs, server);
   }
 
   function persistMachines(next: MachineSpec[]) {
@@ -482,19 +492,25 @@ export function InstallSheet({
     if (!row) return;
     const packed = serializeMachines(next);
     loadedSpecs.current = next;
+    const base = baseForSave();
+    sentAhead.current = true;
+    seenServer.current = { id: row.id, rows: next };
     save.mutate({
       id: row.id,
       equipment: packed.equipment,
       serial: packed.serial,
       powerVoltage: packed.powerVoltage,
       machines: packed.machines,
-      machinesBase: baseForSave(),
+      machinesBase: base,
     });
   }
 
-  /** The list as this window last saw it on the server: the save keeps whatever changed there since (another tab or window). */
+  /**
+   * The list as this window knows the server has it (what it last read, or last sent): the save keeps whatever changed
+   * there since (another tab or window), and a second save before the board reads back still counts as this window's.
+   */
   function baseForSave(): string {
-    return JSON.stringify(row?.machines ?? []);
+    return JSON.stringify(seenServer.current && seenServer.current.id === row?.id ? seenServer.current.rows : (row?.machines ?? []));
   }
 
   return (

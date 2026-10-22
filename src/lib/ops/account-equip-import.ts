@@ -699,11 +699,16 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   const lists = linked.flatMap((row) => {
     const { machines, typed } = installMachines(row, catalog);
     if (machines.some((m) => serialKey(m.serial) === key)) return [];
-    const at = machines.findIndex((m) =>
-      dropKey
-        ? serialKey(m.serial) === dropKey
-        : !serialKey(m.serial) && (sameCatalogModel(drop.catalog_model, m.equipment) || sameCatalogModel(drop.equipment_name, m.equipment)),
-    );
+    // The row that names the dropped unit by its id first; then by its serial, or a row of its model with none.
+    const named = machines.findIndex((m) => m.unitId === drop.id);
+    const at =
+      named >= 0
+        ? named
+        : machines.findIndex((m) =>
+            dropKey
+              ? serialKey(m.serial) === dropKey
+              : !serialKey(m.serial) && (sameCatalogModel(drop.catalog_model, m.equipment) || sameCatalogModel(drop.equipment_name, m.equipment)),
+          );
     if (at < 0) return [];
     // The row names the kept unit now, by its serial and by its id.
     machines[at] = { ...machines[at]!, serial, ...(machines[at]!.unitId === drop.id ? { unitId: keep.id } : {}) };
