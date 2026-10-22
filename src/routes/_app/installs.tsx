@@ -30,6 +30,7 @@ import { CustomerCombo, EquipmentMultiCombo } from "@/components/desk/directory-
 import { MachineFields } from "@/components/desk/machine-fields";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
+import { shownCount } from "@/lib/ops/load-problem";
 import { rowWos, withWoMatches } from "@/lib/ops/wo-search";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
@@ -119,6 +120,8 @@ function Page() {
   const notReadyN = allInstalls.filter((i) => isOpenInstall(i) && !siteIsReady(i.equipStatus, i.inspection?.overall)).length;
   const installedN = allInstalls.filter((i) => isInstalled(i)).length;
   const prepN = allInstalls.filter((i) => isOpenInstall(i)).length;
+  // Counts and "No installs" only once the list has loaded: a failed load shows the banner and "—", never a fake 0.
+  const loaded = data.isSuccess;
   const readyByEquip = tally(
     allInstalls
       .filter((i) => isOpenInstall(i) && siteIsReady(i.equipStatus, i.inspection?.overall))
@@ -245,10 +248,10 @@ function Page() {
       </header>
       {atRisk ? <p className="mt-3 text-sm text-muted-foreground">{atRisk} at risk in prep.</p> : null}
       {lane === "prep" ? (
-        <StatRow>
+        <StatRow loaded={loaded}>
           <StatCard
             label="Ready"
-            value={readyN}
+            value={shownCount(loaded, readyN)}
             hint="Equipment ready and pre-inspection passed"
             breakdown={readyByEquip}
             selected={slice === "ready"}
@@ -256,7 +259,7 @@ function Page() {
           />
           <StatCard
             label="Not Ready"
-            value={notReadyN}
+            value={shownCount(loaded, notReadyN)}
             hint="Prep, failed check, or not inspected"
             selected={slice === "not-ready"}
             onClick={() => setSlice((v) => (v === "not-ready" ? "all" : "not-ready"))}
@@ -266,10 +269,10 @@ function Page() {
       <ListToolbar data-testid="prep-installed-toggle">
         <ToolbarSearch value={q} onChange={setQ} placeholder="Search installs…" />
         <FilterChip selected={lane === "prep"} onClick={() => setLane("prep")}>
-          Prep ({prepN})
+          Prep ({shownCount(loaded, prepN)})
         </FilterChip>
         <FilterChip selected={lane === "installed"} onClick={() => setLane("installed")}>
-          Installed ({installedN})
+          Installed ({shownCount(loaded, installedN)})
         </FilterChip>
         <RepFilter value={repFilter} onChange={setRepFilter} extraNames={(data.data ?? []).map((i) => i.accountRep)} className={`${TOOLBAR_SELECT} w-44`} />
         <label className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-secondary px-3 text-sm">
@@ -316,7 +319,16 @@ function Page() {
             onToggleInspect={() => setInspectId((cur) => (cur === i.id ? null : i.id))}
           />
         ))}
-        {rows.length === 0 ? (
+        {rows.length === 0 && !loaded ? (
+          <p className="px-4 py-8 text-sm text-muted-foreground" data-testid="installs-not-loaded">
+            {data.isError
+              ? open
+                ? `Couldn't open install #${open}: the installs list didn't load.`
+                : "The installs list didn't load. See the message above."
+              : "Loading installs…"}
+          </p>
+        ) : null}
+        {rows.length === 0 && loaded ? (
           <div className="px-4 py-8">
             <p className="text-sm text-muted-foreground">
               {lane === "installed" ? "No installs marked installed." : "No installs in prep."}

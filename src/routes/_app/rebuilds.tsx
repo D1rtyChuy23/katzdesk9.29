@@ -20,6 +20,7 @@ import { useMyView } from "@/components/desk/my-view-bar";
 import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { Skeleton } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/rebuilds")({
   validateSearch: parseOpenSearch,
@@ -96,7 +97,7 @@ function Page() {
         </div>
       </header>
 
-      <StatRow>
+      <StatRow loaded={data.isSuccess}>
         <StatCard
           label="Overdue"
           value={overdue}
@@ -151,6 +152,8 @@ function Page() {
       <div className="mt-5">
         {data.isLoading ? (
           <Skeleton className="h-64 w-full" />
+        ) : data.isError ? (
+          <p className="text-sm text-muted-foreground">{notLoadedText(data, "rebuilds")}</p>
         ) : view === "board" ? (
           <RebuildBoard rows={filtered} canEdit={canEdit} onOpen={setSelected} />
         ) : (

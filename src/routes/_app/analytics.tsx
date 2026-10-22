@@ -17,6 +17,7 @@ import { OpenLink } from "@/components/desk/open-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/separator";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/analytics")({ component: Page });
 
@@ -137,7 +138,7 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
         </div>
       </header>
 
-      <StatRow>
+      <StatRow loaded={view.isSuccess}>
         {(data?.summary ?? ANALYTICS_TYPES.map((type) => ({ type, label: ANALYTICS_LABEL[type], total: 0, statuses: [] }))).map((s) => (
           <StatCard
             key={s.type}
@@ -262,7 +263,7 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
             </table>
           </div>
         ) : (
-          <p className="px-4 py-8 text-sm text-muted-foreground">No records in this range. Widen the dates, or clear a filter.</p>
+          <p className="px-4 py-8 text-sm text-muted-foreground">{notLoadedText(view, "analytics") ?? "No records in this range. Widen the dates, or clear a filter."}</p>
         )}
         {rows.length > shown ? (
           <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">
@@ -367,7 +368,7 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
         </div>
       </header>
 
-      <StatRow>
+      <StatRow loaded={view.isSuccess}>
         <StatCard label="Sell" value={t ? money(t.sell) : "…"} hint={t ? `${t.qty} invoiced · ${t.lines} line${t.lines === 1 ? "" : "s"}` : ""} />
         <StatCard label="Cost" value={t ? money(t.cost) : "…"} hint={t?.noCost ? `${t.noCost} line${t.noCost === 1 ? "" : "s"} with no cost` : "Every line has a cost"} />
         <StatCard label="Discount" value={t ? money(t.ourDiscount) : "…"} hint={d ? d.rule : ""} />
@@ -451,7 +452,7 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
             </table>
           </div>
         ) : (
-          <p className="px-4 py-8 text-sm text-muted-foreground">No parts on invoiced tickets in this range. A ticket counts once its Sales Order number is entered.</p>
+          <p className="px-4 py-8 text-sm text-muted-foreground">{notLoadedText(view, "parts profit") ?? "No parts on invoiced tickets in this range. A ticket counts once its Sales Order number is entered."}</p>
         )}
         {rows.length > shown ? (
           <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">

@@ -16,6 +16,7 @@ import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, sortDesk } from "@/lib/ops/sort";
 import { toast } from "sonner";
 import type { HandoffFeed } from "@/lib/ops/types";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/handoff")({ validateSearch: parseOpenSearch, component: Page });
 
@@ -171,8 +172,8 @@ function Page() {
         </div>
       </div>
 
-      {feed.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading the desk…</p>
+      {feed.isLoading || feed.isError ? (
+        <p className="text-sm text-muted-foreground">{feed.isError ? notLoadedText(feed, "handoff") : "Loading the desk…"}</p>
       ) : emptyMine ? (
         <section className="rounded-xl border border-border bg-card p-5">
           <p className="font-medium">Nothing of yours is waiting.</p>

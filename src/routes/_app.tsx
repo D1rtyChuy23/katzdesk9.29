@@ -7,6 +7,7 @@ import { authClient, signOut } from "@/lib/auth/client";
 import { claimInvite, getMyAccess } from "@/lib/ops/access";
 import { clearInviteToken, readInviteToken } from "@/lib/ops/invite-client";
 import { AppShell } from "@/components/desk/shell";
+import { LoadProblems } from "@/components/desk/load-problems";
 import { UsernameSetup } from "@/components/desk/username-setup";
 import { Button } from "@/components/ui/button";
 
@@ -216,6 +217,7 @@ function DeskLayout() {
   }
   return (
     <AppShell isAdmin={!!gate.isAdmin} role={gate.role}>
+      <LoadProblems />
       <Outlet />
     </AppShell>
   );

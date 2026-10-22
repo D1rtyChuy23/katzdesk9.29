@@ -24,6 +24,7 @@ import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-para
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Deal } from "@/lib/ops/types";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/pipeline")({
   validateSearch: parseOpenSearch,
@@ -156,7 +157,7 @@ function Page() {
         </div>
       </header>
 
-      <StatRow>
+      <StatRow loaded={data.isSuccess}>
         <StatCard
           label="Active Deals"
           value={active.length}
@@ -209,7 +210,7 @@ function Page() {
               renderLabel={(name) => <RepLink name={name} onPick={setRepPanel} className="max-sm:py-2.5" />}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">No live deals yet.</p>
+            <p className="text-sm text-muted-foreground">{notLoadedText(data, "deals") ?? "No live deals yet."}</p>
           )}
         </ChartCard>
         <ChartCard title="How Deals Move" lede="Good to order first, then Ordered. Ordered deals drop off step 1.">
@@ -219,7 +220,7 @@ function Page() {
           {sizeChart.length ? (
             <SimpleBars data={sizeChart} xKey="size" yKey="count" yLabel="Deals" horizontal />
           ) : (
-            <p className="text-sm text-muted-foreground">No live deals yet.</p>
+            <p className="text-sm text-muted-foreground">{notLoadedText(data, "deals") ?? "No live deals yet."}</p>
           )}
         </ChartCard>
       </section>
@@ -317,11 +318,12 @@ function Page() {
         ))}
         {rows.length === 0 ? (
           <p className="px-4 py-8 text-sm text-muted-foreground">
-            {view === "gto"
+            {notLoadedText(data, "deals") ??
+              (view === "gto"
               ? "No deals waiting on Good to order. Reps mark step 1; confirmed Ordered deals leave this list."
               : view === "ordered"
                 ? "No open deals confirmed as Ordered."
-                : "No deals in this view."}
+                : "No deals in this view.")}
           </p>
         ) : null}
       </div>

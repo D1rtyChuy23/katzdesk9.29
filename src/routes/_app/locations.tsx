@@ -118,7 +118,7 @@ function Page() {
         </div>
       </header>
 
-      <StatRow>
+      <StatRow loaded={data.isSuccess}>
         <StatCard
           label="On Site"
           value={deployedCount}

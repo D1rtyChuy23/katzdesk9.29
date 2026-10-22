@@ -41,6 +41,7 @@ import { SpecSheetView } from "@/components/desk/spec-sheet";
 import { SpecImport } from "@/components/desk/spec-import";
 import { TroubleshootPanel } from "@/components/desk/troubleshoot-panel";
 import { cn } from "@/lib/utils";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 type Tab = "library" | "training" | "admin";
 type Search = { open?: number; book?: number; tab?: Tab };
@@ -590,6 +591,8 @@ function Page() {
 
       {loading ? (
         <p className="mt-5 text-sm text-muted-foreground">Loading The Library…</p>
+      ) : data.isError || lib.isError ? (
+        <p className="mt-5 text-sm text-muted-foreground">{notLoadedText(data.isError ? data : lib, "Library")}</p>
       ) : makers.length === 0 ? (
         <p className="mt-5 rounded-xl border border-dashed border-border bg-card/60 px-5 py-6 text-center text-sm text-muted-foreground" data-testid="books-empty">
           {!books.length

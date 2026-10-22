@@ -25,6 +25,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { createPasswordResetLink } from "@/lib/ops/password-reset";
 import { KeyRound } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { notLoadedText } from "@/lib/ops/load-problem";
 
 
 export const Route = createFileRoute("/_app/access")({
@@ -287,7 +288,7 @@ function Page() {
             />
           ))}
           {pendingInvites.length === 0 ? (
-            <li className="px-4 py-6 text-sm text-muted-foreground">No pending invites.</li>
+            <li className="px-4 py-6 text-sm text-muted-foreground">{notLoadedText(invites, "invites") ?? "No pending invites."}</li>
           ) : null}
         </ul>
       </section>
@@ -373,7 +374,7 @@ function Page() {
             </li>
           ))}
           {pending.length === 0 ? (
-            <li className="px-4 py-6 text-sm text-muted-foreground">No one is waiting.</li>
+            <li className="px-4 py-6 text-sm text-muted-foreground">{notLoadedText(list, "accounts") ?? "No one is waiting."}</li>
           ) : null}
         </ul>
       </section>
