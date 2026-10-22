@@ -20,14 +20,22 @@ test("every La Marzocco definition parses and has steps", () => {
   }
 });
 
-test("Linea: one kit per visit and group count, never the earlier visits' kits", () => {
+test("Linea PB: loose parts by visit and group count (Katz Linea PB PM guide)", () => {
   const def = load("la-marzocco-linea");
-  assert.deepEqual(kits(def, { model: "pb", pm: "12", groups: "3" }), ["1x PB.12.3"]);
+  const pb = (over) => kits(def, { model: "pb", ...over });
+  assert.deepEqual(pb({ pm: "3", groups: "2" }), ["2x H.3.001", "2x F.3.040"]);
+  assert.deepEqual(pb({ pm: "6", groups: "3", gasket: "8s" }), ["3x H.3.007", "3x F.3.040", "2x B.1.001.02.K2"]);
+  assert.deepEqual(pb({ pm: "12", groups: "4", gasket: "9" }), ["4x H.3.002", "4x F.3.040", "2x B.1.001.02.K2", "1x B.2.025", "1x 1037", "3x L192"]);
+  assert.deepEqual(pb({ pm: "12", groups: "3" }).filter((k) => /^1x PB\./.test(k)), [], "PB.12.3 is a visit label, not a part");
+});
+
+test("Linea Classic and Classic S: one kit per visit and group count, never the earlier visits' kits", () => {
+  const def = load("la-marzocco-linea");
   assert.deepEqual(kits(def, { model: "classic-s", pm: "6", groups: "1" }), ["1x LCS.6.1"]);
   assert.deepEqual(kits(def, { model: "classic-s", pm: "3", groups: "4" }), ["1x LCS.3.4"]);
   assert.deepEqual(kits(def, { model: "classic", pm: "12", groups: "2", ctrl: "mp" }), ["1x LINEA.12.2", "2x SA600/K2"]);
   assert.deepEqual(kits(def, { model: "classic", pm: "6", groups: "2", ctrl: "mp" }), ["1x LINEA.6.2"]);
-  assert.deepEqual(kits(def, { model: "pb", pm: "6", groups: "1" }), [], "no 1-group PB kit");
+  assert.deepEqual(kits(def, { model: "pb", pm: "6", groups: "1" }), ["2x B.1.001.02.K2"], "no 1-group PB: only the per-machine parts");
 });
 
 test("Linea: flow meter checks only on AV, steam rebuild on the 6- and 12-month visits", () => {
@@ -38,6 +46,10 @@ test("Linea: flow meter checks only on AV, steam rebuild on the 6- and 12-month 
   assert.ok(!ids({ model: "pb", pm: "3" }).includes("li-st-rebuild"));
   assert.ok(ids({ model: "pb", pm: "6" }).includes("li-st-rebuild"));
   assert.ok(ids({ model: "pb", pm: "12" }).includes("li-br-psv"));
+  assert.ok(ids({ model: "pb", pm: "12" }).includes("li-pb-baskets"));
+  assert.ok(ids({ model: "pb", pm: "3" }).includes("li-pb-wands"));
+  assert.ok(!ids({ model: "classic-s", pm: "3" }).some((id) => id.startsWith("li-pb-")), "PB checks stay off the Classic S");
+  assert.ok(ids({ model: "pb", pm: "3", scales: "yes" }).includes("li-pb-pfweight"));
 });
 
 test("Strada and KB90: loose parts per group at 3/9 months, kits at 6 and 12", () => {
@@ -73,6 +85,7 @@ test("optional kits follow the visit, not a part that belongs to one interval", 
   const pb = (pm) => optionalKits(linea, { ...defaultConfig(linea), model: "pb", pm, groups: "3" });
   assert.deepEqual(pb("3"), []);
   assert.deepEqual(pb("6"), []);
+  assert.deepEqual(optionalKits(linea, { ...defaultConfig(linea), model: "classic-s", pm: "3", groups: "2" }), []);
   const classic = optionalKits(linea, { ...defaultConfig(linea), model: "classic", pm: "3", groups: "2", ctrl: "mp" });
   assert.equal(classic.find((k) => k.ev === "SA600/K2")?.q, 2);
   const gs3 = load("la-marzocco-gs3");

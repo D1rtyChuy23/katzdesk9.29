@@ -4,7 +4,7 @@
   "defaultStyleLast": true,
   "title": "Linea PM Runbook",
   "subtitle": "La Marzocco Linea Classic, Linea Classic S and Linea PB | preventive maintenance kits and steps",
-  "sources": "La Marzocco USA preventative maintenance checklists v2.1 (May 2026): 3/9-month, 6-month and 12-month. Kit numbers are per visit and group count. La Marzocco does not print kit contents on the checklists; where a kit note lists contents it comes from the checklist's replace list or LM's annual PM summary. Confirm kit numbers with La Marzocco USA before ordering.",
+  "sources": "La Marzocco USA preventative maintenance checklists v2.1 (May 2026): 3/9-month, 6-month and 12-month. Kit numbers are per visit and group count. La Marzocco does not print kit contents on the checklists; where a kit note lists contents it comes from the checklist's replace list or LM's annual PM summary. Confirm kit numbers with La Marzocco USA before ordering. Linea PB parts, quantities and extra checks: Katz Coffee Linea PB Preventive Maintenance Guide (Rev. Oct 2026).",
   "storageKey": "lm-linea-runbook-v1",
   "models": [
     {
@@ -78,6 +78,30 @@
       ]
     },
     {
+      "key": "gasket",
+      "label": "Group gasket",
+      "default": "8",
+      "when": {
+        "model": [
+          "pb"
+        ]
+      },
+      "choices": [
+        {
+          "val": "8",
+          "label": "8 mm (H.3.001)"
+        },
+        {
+          "val": "8s",
+          "label": "8 mm silicone (H.3.007)"
+        },
+        {
+          "val": "9",
+          "label": "9 mm (H.3.002)"
+        }
+      ]
+    },
+    {
       "key": "scales",
       "label": "Integrated scales (ABR)",
       "default": "no",
@@ -101,7 +125,22 @@
   "banners": [
     {
       "tone": "ok",
-      "text": "One kit per visit. The 3/9-month PM is the same visit at month 3 and month 9; the 6- and 12-month kits are complete for their visit, so earlier kits are not added."
+      "text": "One kit per visit. The 3/9-month PM is the same visit at month 3 and month 9; the 6- and 12-month kits are complete for their visit, so earlier kits are not added.",
+      "when": {
+        "model": [
+          "classic",
+          "classic-s"
+        ]
+      }
+    },
+    {
+      "when": {
+        "model": [
+          "pb"
+        ]
+      },
+      "tone": "ok",
+      "text": "Linea PB uses loose parts. Gaskets and screens every visit, one per group. Steam valve rebuild kits at 6 and 12 months, one per steam valve. Safety valve, vacuum breaker and 3 anti-suction valves at 12 months. PB.3.2, PB.12.3 and so on are La Marzocco's visit labels, not part numbers."
     },
     {
       "when": {
@@ -113,7 +152,7 @@
         ]
       },
       "tone": "bad",
-      "text": "Linea PB has no 1-group PM kit. Pick 2, 3 or 4 groups."
+      "text": "Linea PB comes in 2, 3 and 4 groups. Pick the group count."
     },
     {
       "when": {
@@ -596,177 +635,6 @@
       "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
     },
     {
-      "ev": "PB.3.2",
-      "name": "PM kit, 3/9-month PM, 2 group",
-      "module": "PM kit",
-      "interval": 3,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "3"
-        ],
-        "groups": [
-          "2"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens."
-    },
-    {
-      "ev": "PB.3.3",
-      "name": "PM kit, 3/9-month PM, 3 group",
-      "module": "PM kit",
-      "interval": 3,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "3"
-        ],
-        "groups": [
-          "3"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens."
-    },
-    {
-      "ev": "PB.3.4",
-      "name": "PM kit, 3/9-month PM, 4 group",
-      "module": "PM kit",
-      "interval": 3,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "3"
-        ],
-        "groups": [
-          "4"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens."
-    },
-    {
-      "ev": "PB.6.2",
-      "name": "PM kit, 6-month PM, 2 group",
-      "module": "PM kit",
-      "interval": 6,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "6"
-        ],
-        "groups": [
-          "2"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
-    },
-    {
-      "ev": "PB.6.3",
-      "name": "PM kit, 6-month PM, 3 group",
-      "module": "PM kit",
-      "interval": 6,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "6"
-        ],
-        "groups": [
-          "3"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
-    },
-    {
-      "ev": "PB.6.4",
-      "name": "PM kit, 6-month PM, 4 group",
-      "module": "PM kit",
-      "interval": 6,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "6"
-        ],
-        "groups": [
-          "4"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild."
-    },
-    {
-      "ev": "PB.12.2",
-      "name": "PM kit, 12-month PM, 2 group",
-      "module": "PM kit",
-      "interval": 12,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "12"
-        ],
-        "groups": [
-          "2"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
-    },
-    {
-      "ev": "PB.12.3",
-      "name": "PM kit, 12-month PM, 3 group",
-      "module": "PM kit",
-      "interval": 12,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "12"
-        ],
-        "groups": [
-          "3"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
-    },
-    {
-      "ev": "PB.12.4",
-      "name": "PM kit, 12-month PM, 4 group",
-      "module": "PM kit",
-      "interval": 12,
-      "qty": 1,
-      "when": {
-        "pm": [
-          "12"
-        ],
-        "groups": [
-          "4"
-        ],
-        "model": [
-          "pb"
-        ]
-      },
-      "note": "Checklist replace list: group gaskets and diffuser screens, steam valve rebuild, pressure safety valve, steam wand vacuum breakers, vacuum breaker."
-    },
-    {
       "ev": "SA600/K2",
       "name": "MP valve rebuild kit (non-conical valves)",
       "module": "Group heads",
@@ -789,6 +657,178 @@
         ]
       },
       "note": "One per group. Non-conical MP valves only. Due at 12 months; add it on an earlier visit if a valve needs it."
+    },
+    {
+      "ev": "H.3.001",
+      "name": "Group gasket 8 mm",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3,
+          "4": 4
+        }
+      },
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "gasket": [
+          "8"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "12"
+        ]
+      },
+      "note": "One per group."
+    },
+    {
+      "ev": "H.3.007",
+      "name": "Group gasket 8 mm silicone",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3,
+          "4": 4
+        }
+      },
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "gasket": [
+          "8s"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "12"
+        ]
+      },
+      "note": "One per group."
+    },
+    {
+      "ev": "H.3.002",
+      "name": "Group gasket 9 mm",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3,
+          "4": 4
+        }
+      },
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "gasket": [
+          "9"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "12"
+        ]
+      },
+      "note": "One per group."
+    },
+    {
+      "ev": "F.3.040",
+      "name": "Diffuser screen",
+      "module": "Group heads",
+      "interval": 3,
+      "qty": {
+        "by": "groups",
+        "map": {
+          "2": 2,
+          "3": 3,
+          "4": 4
+        }
+      },
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "pm": [
+          "3",
+          "6",
+          "12"
+        ]
+      },
+      "note": "One per group."
+    },
+    {
+      "ev": "B.1.001.02.K2",
+      "name": "Steam valve rebuild kit",
+      "module": "Steam",
+      "interval": 6,
+      "qty": 2,
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "pm": [
+          "6",
+          "12"
+        ]
+      },
+      "note": "One per steam valve; the Linea PB has 2."
+    },
+    {
+      "ev": "B.2.025",
+      "name": "Pressure safety valve 2.5 bar",
+      "module": "Boilers and pressure",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "pm": [
+          "12"
+        ]
+      }
+    },
+    {
+      "ev": "1037",
+      "name": "Vacuum breaker",
+      "module": "Boilers and pressure",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "pm": [
+          "12"
+        ]
+      }
+    },
+    {
+      "ev": "L192",
+      "name": "Anti-suction valve kit (steam wand vacuum breaker)",
+      "module": "Steam",
+      "interval": 12,
+      "qty": 3,
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "pm": [
+          "12"
+        ]
+      },
+      "note": "3 per machine."
     }
   ],
   "steps": [
@@ -807,7 +847,7 @@
       "items": [
         {
           "id": "li-gh-gaskets",
-          "text": "Replace the group gaskets and diffuser screens on every group (from the PM kit).",
+          "text": "Replace the group gaskets and diffuser screens on every group.",
           "when": {
             "model": [
               "classic-s",
@@ -876,6 +916,16 @@
           "ref": "LM 12-mo checklist"
         },
         {
+          "id": "li-pb-shots",
+          "text": "Test the shot volumes on every group.",
+          "ref": "Katz Linea PB PM guide",
+          "when": {
+            "model": [
+              "pb"
+            ]
+          }
+        },
+        {
           "id": "li-gh-flow",
           "text": "Record each group's flow rate: grams in 30 s, G1–G4.",
           "ref": "LM checklist"
@@ -909,6 +959,19 @@
             ]
           },
           "ref": "LM 12-mo checklist"
+        },
+        {
+          "id": "li-pb-baskets",
+          "text": "Inspect the portafilter baskets. Replace any that are damaged.",
+          "ref": "Katz Linea PB PM guide",
+          "when": {
+            "pm": [
+              "12"
+            ],
+            "model": [
+              "pb"
+            ]
+          }
         }
       ]
     },
@@ -929,6 +992,16 @@
           "id": "li-br-temp",
           "text": "Record the coffee boiler temperature (°F).",
           "ref": "LM checklist"
+        },
+        {
+          "id": "li-pb-steampress",
+          "text": "Record the steam boiler pressure (bar).",
+          "ref": "Katz Linea PB PM guide",
+          "when": {
+            "model": [
+              "pb"
+            ]
+          }
         },
         {
           "id": "li-br-pstat",
@@ -994,6 +1067,19 @@
     {
       "module": "Steam",
       "items": [
+        {
+          "id": "li-pb-wands",
+          "text": "Inspect the steam boiler pressure and the steam wands.",
+          "ref": "Katz Linea PB PM guide",
+          "when": {
+            "pm": [
+              "3"
+            ],
+            "model": [
+              "pb"
+            ]
+          }
+        },
         {
           "id": "li-st-rebuild",
           "text": "Rebuild the steam valves.",
@@ -1104,12 +1190,27 @@
           "id": "li-sc-cal",
           "text": "Confirm or calibrate the integrated scales with a 100 g weight.",
           "ref": "LM checklist"
+        },
+        {
+          "id": "li-pb-pfweight",
+          "text": "Confirm the portafilters weigh the same on every group. Record each weight.",
+          "ref": "Katz Linea PB PM guide"
         }
       ]
     },
     {
       "module": "Close out",
       "items": [
+        {
+          "id": "li-pb-leaks",
+          "text": "Before leaving: check every opened joint for leaks under pressure, backflush, discard the first shots, and brief the operator.",
+          "ref": "Katz Linea PB PM guide",
+          "when": {
+            "model": [
+              "pb"
+            ]
+          }
+        },
         {
           "id": "li-co-form",
           "text": "Fill in the La Marzocco checklist for this visit: serial, voltage, group count and every reading. Get the customer's signature.",
@@ -1182,7 +1283,7 @@
       ]
     },
     {
-      "title": "Kit numbers",
+      "title": "La Marzocco visit labels",
       "table": {
         "head": [
           "Model",
@@ -1213,6 +1314,97 @@
             "PB.3.<gr>",
             "PB.6.<gr>",
             "PB.12.<gr>"
+          ]
+        ]
+      },
+      "text": "La Marzocco names each visit by model, interval and group count (PB.12.3 is the 12-month PM on a 3-group Linea PB). They are labels, not part numbers. The Linea PB lists its loose parts instead."
+    },
+    {
+      "title": "Linea PB parts by visit",
+      "table": {
+        "head": [
+          "Part",
+          "What",
+          "3/9",
+          "6",
+          "12"
+        ],
+        "monoCols": [
+          0
+        ],
+        "rows": [
+          [
+            "H.3.001 / H.3.007 / H.3.002",
+            "Group gasket 8 mm / 8 mm silicone / 9 mm",
+            "1 per group",
+            "1 per group",
+            "1 per group"
+          ],
+          [
+            "F.3.040",
+            "Diffuser screen",
+            "1 per group",
+            "1 per group",
+            "1 per group"
+          ],
+          [
+            "B.1.001.02.K2",
+            "Steam valve rebuild kit",
+            "—",
+            "2",
+            "2"
+          ],
+          [
+            "B.2.025",
+            "Pressure safety valve 2.5 bar",
+            "—",
+            "—",
+            "1"
+          ],
+          [
+            "1037",
+            "Vacuum breaker",
+            "—",
+            "—",
+            "1"
+          ],
+          [
+            "L192",
+            "Anti-suction valve kit",
+            "—",
+            "—",
+            "3"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Linea PB time on site (Katz estimate)",
+      "table": {
+        "head": [
+          "Visit",
+          "2 group",
+          "3 group",
+          "4 group"
+        ],
+        "rows": [
+          [
+            "3/9-month",
+            "1 h 00",
+            "1 h 15",
+            "1 h 30"
+          ],
+          [
+            "6-month",
+            "1 h 30",
+            "1 h 45",
+            "2 h 00"
+          ],
+          [
+            "12-month",
+            "2 h 30",
+            "2 h 45",
+            "3 h 00"
           ]
         ]
       }
