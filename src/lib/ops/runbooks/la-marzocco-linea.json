@@ -108,6 +108,26 @@
       ]
     },
     {
+      "key": "vb",
+      "label": "Vacuum breaker style",
+      "default": "1037",
+      "when": {
+        "model": [
+          "pb"
+        ]
+      },
+      "choices": [
+        {
+          "val": "1037",
+          "label": "Newer style (LM1037)"
+        },
+        {
+          "val": "l190",
+          "label": "Earlier style (L190)"
+        }
+      ]
+    },
+    {
       "key": "scales",
       "label": "Integrated scales (ABR)",
       "default": "no",
@@ -147,6 +167,18 @@
       },
       "tone": "ok",
       "text": "Linea PB uses loose parts. Gaskets and screens every visit, one per group. Steam valve rebuild kits at 6 and 12 months, one per steam valve. Safety valve, vacuum breaker and 3 anti-suction valves at 12 months. PB.3.2, PB.12.3 and so on are La Marzocco's visit labels, not part numbers."
+    },
+    {
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "pm": [
+          "12"
+        ]
+      },
+      "tone": "warn",
+      "text": "Vacuum breaker: later Linea PB serials use the newer-style LM1037, earlier ones use L190. The serial number where it changed isn't confirmed yet, so check the vacuum breaker on the machine and set \"Vacuum breaker style\" before ordering."
     },
     {
       "when": {
@@ -806,7 +838,7 @@
     },
     {
       "ev": "1037",
-      "name": "Vacuum breaker",
+      "name": "Vacuum breaker, newer style",
       "module": "Boilers and pressure",
       "interval": 12,
       "qty": 1,
@@ -816,8 +848,31 @@
         ],
         "pm": [
           "12"
+        ],
+        "vb": [
+          "1037"
         ]
-      }
+      },
+      "note": "Fitted on later PB serials. Check the one on the machine before ordering."
+    },
+    {
+      "ev": "L190",
+      "name": "Vacuum breaker, earlier style",
+      "module": "Boilers and pressure",
+      "interval": 12,
+      "qty": 1,
+      "when": {
+        "model": [
+          "pb"
+        ],
+        "pm": [
+          "12"
+        ],
+        "vb": [
+          "l190"
+        ]
+      },
+      "note": "Fitted on earlier PB serials. Check the one on the machine before ordering."
     },
     {
       "ev": "L192",
@@ -1370,8 +1425,8 @@
             "1"
           ],
           [
-            "1037",
-            "Vacuum breaker",
+            "1037 / L190",
+            "Vacuum breaker: newer style (later serials) / earlier style",
             "—",
             "—",
             "1"

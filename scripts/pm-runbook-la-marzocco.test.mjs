@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
-import { visibleOptions, defaultConfig, kitList, optionalKits, optionsFromPiece, recommendInterval, startingOptions, stepList, unitModelPicked } from "../src/lib/ops/pm-runbook.ts";
+import { banners, visibleOptions, defaultConfig, kitList, optionalKits, optionsFromPiece, recommendInterval, startingOptions, stepList, unitModelPicked } from "../src/lib/ops/pm-runbook.ts";
 import { planUnits } from "../src/lib/ops/pm-runbook-units.ts";
 import { splitEquipment } from "../src/lib/ops/equipment.ts";
 import { matchLmGb5, matchLmGs3, matchLmKb90, matchLmLinea, matchLmStrada } from "../src/lib/ops/runbooks/la-marzocco-match.ts";
@@ -26,6 +26,9 @@ test("Linea PB: loose parts by visit and group count (Katz Linea PB PM guide)", 
   assert.deepEqual(pb({ pm: "3", groups: "2" }), ["2x H.3.001", "2x F.3.040"]);
   assert.deepEqual(pb({ pm: "6", groups: "3", gasket: "8s" }), ["3x H.3.007", "3x F.3.040", "2x B.1.001.02.K2"]);
   assert.deepEqual(pb({ pm: "12", groups: "4", gasket: "9" }), ["4x H.3.002", "4x F.3.040", "2x B.1.001.02.K2", "1x B.2.025", "1x 1037", "3x L192"]);
+  assert.deepEqual(pb({ pm: "12", groups: "2", vb: "l190" }), ["2x H.3.001", "2x F.3.040", "2x B.1.001.02.K2", "1x B.2.025", "1x L190", "3x L192"]);
+  assert.ok(banners(def, { ...defaultConfig(def), model: "pb", pm: "12" }).some((b) => /LM1037/.test(b.text)), "vacuum breaker style disclaimer");
+  assert.ok(!banners(def, { ...defaultConfig(def), model: "pb", pm: "6" }).some((b) => /LM1037/.test(b.text)));
   assert.deepEqual(pb({ pm: "12", groups: "3" }).filter((k) => /^1x PB\./.test(k)), [], "PB.12.3 is a visit label, not a part");
 });
 
