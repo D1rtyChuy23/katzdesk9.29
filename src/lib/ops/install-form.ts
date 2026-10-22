@@ -18,6 +18,8 @@ export type VisitMachine = {
   ownership?: string;
   water?: string;
   recipeId?: number | null;
+  /** The row's unit on the pre-inspection, once the server has matched them (MachineSpec.unitId). */
+  unitId?: number | null;
 };
 
 /** "120V", "220v", "208/240". A plug name does not match. */
@@ -140,13 +142,15 @@ const EDITABLE = ["serial", "powerVoltage", "plug", "ownership", "water", "recip
 const editedHere = (a: VisitMachine, b: VisitMachine) => EDITABLE.some((k) => String(a[k] ?? "").trim() !== String(b[k] ?? "").trim());
 
 /**
- * For each row, the index of its own row in `against` (or -1), one to one: an identical row first (serial, voltage, plug,
- * ownership, water, recipe), then the same serial, then a blank serial on either side.
+ * For each row, the index of its own row in `against` (or -1), one to one: the row with the same pre-inspection unit
+ * first, then an identical row (serial, voltage, plug, ownership, water, recipe), then the same serial, then a blank
+ * serial on either side.
  */
 function pairRows(rows: VisitMachine[], against: VisitMachine[]): number[] {
   const pair = rows.map(() => -1);
   const used = new Set<number>();
   const passes = [
+    (r: VisitMachine, a: VisitMachine) => !!r.unitId && r.unitId === a.unitId,
     (r: VisitMachine, a: VisitMachine) => sameWarehouseModel(r.equipment, a.equipment) && !editedHere(r, a),
     (r: VisitMachine, a: VisitMachine) => sameWarehouseModel(r.equipment, a.equipment) && serialKey(r.serial) === serialKey(a.serial),
     rowsMatch,
@@ -165,26 +169,71 @@ function pairRows(rows: VisitMachine[], against: VisitMachine[]): number[] {
 }
 
 /**
+ * Rows sent without their pre-inspection unit's id (a window opened before the ids were written) take the id of their
+ * row as stored: the same row by id, contents or serial, or, when the lists are the same length, the row at the same
+ * place (a model renamed in the window is still that row). A row that already has an id keeps it.
+ */
+export function adoptUnitIds<T extends VisitMachine>(rows: T[], stored: VisitMachine[]): T[] {
+  const pair = pairRows(rows, stored);
+  if (rows.length === stored.length) {
+    rows.forEach((_, i) => {
+      if (pair[i]! < 0 && !pair.includes(i)) pair[i] = i;
+    });
+  }
+  const taken = new Set(rows.map((r) => r.unitId).filter(Boolean));
+  return rows.map((r, i) => {
+    const id = pair[i]! >= 0 ? stored[pair[i]!]!.unitId : null;
+    if (r.unitId || !id || taken.has(id)) return r;
+    taken.add(id);
+    return { ...r, unitId: id };
+  });
+}
+
+/** The fields another tab or window can change on a row while this window is open. */
+const MERGED = ["equipment", ...EDITABLE] as const;
+
+/**
  * The form's rows brought up to date with the server's list. `previous` is the server's list as this window last saw it.
  * - A machine the server added since then (pre-inspection Add) is appended, unless it is a row this window added itself.
  * - A machine the server took off (pre-inspection Remove) goes, unless this window changed that row.
- * - A blank serial takes a serial the server wrote on that same row since then. A serial cleared here stays cleared.
+ * - Each field the server changed on a row since then (a serial or model fixed on the Pre-inspection tab, a serial a
+ *   warehouse pull wrote) takes the server's value, unless this window changed that field too: then this window's stays.
+ *   So a serial cleared here stays cleared, and a stale window never saves an old serial back over a newer one.
  * Rows are matched one to one, so two machines of one model with no serial stay two rows.
  */
 export function machinesBeforeSave<T extends VisitMachine>(editing: T[], previous: T[], server: T[]): T[] {
   const serverPrev = pairRows(server, previous);
   const editPrev = pairRows(editing, previous);
-  const prevSerials = new Set(previous.map((p) => serialKey(p.serial)).filter(Boolean));
-  const have = new Set(editing.map((r) => serialKey(r.serial)).filter(Boolean));
+  // Serials typed in this window (on a row it added, or a serial it changed): the server's copy never lands on another row.
+  const typed = new Set(
+    editing
+      .filter((r, i) => editPrev[i]! < 0 || serialKey(r.serial) !== serialKey(previous[editPrev[i]!]!.serial))
+      .map((r) => serialKey(r.serial))
+      .filter(Boolean),
+  );
+  const have = new Set<string>();
   const next: T[] = [];
   editing.forEach((r, i) => {
     const p = editPrev[i]!;
     const j = p < 0 ? -1 : serverPrev.indexOf(p);
-    if (p >= 0 && j < 0 && !editedHere(r, previous[p]!)) return;
-    const key = j < 0 ? "" : serialKey(server[j]!.serial);
-    const fill = !!key && !serialKey(r.serial) && !serialKey(previous[p]!.serial) && !prevSerials.has(key) && !have.has(key);
-    if (fill) have.add(key);
-    next.push(fill ? { ...r, serial: String(server[j]!.serial).trim() } : { ...r });
+    // Taken off on the server, and not changed here (a model renamed here counts as a change): it goes.
+    if (p >= 0 && j < 0 && !editedHere(r, previous[p]!) && sameWarehouseModel(r.equipment, previous[p]!.equipment)) return;
+    const row: T = { ...r };
+    if (j >= 0) {
+      const was = previous[p]!;
+      const now = server[j]!;
+      const text = (v: unknown) => String(v ?? "").trim();
+      for (const k of MERGED) {
+        if (text(r[k]) !== text(was[k]) || text(now[k]) === text(was[k])) continue;
+        if (k === "serial" && typed.has(serialKey(now.serial))) continue;
+        (row as VisitMachine)[k] = (typeof now[k] === "string" ? text(now[k]) : now[k]) as never;
+      }
+    }
+    const key = serialKey(row.serial);
+    if (key) have.add(key);
+    // The server's match of this row to its pre-inspection unit is the one that counts.
+    const unitId = (j >= 0 ? server[j]!.unitId : null) || r.unitId;
+    next.push(unitId ? { ...row, unitId } : row);
   });
   const added = server.filter((s, j) => serverPrev[j]! < 0 && String(s.equipment ?? "").trim() && !have.has(serialKey(s.serial)));
   const mine = editing.filter((_, i) => editPrev[i]! < 0);

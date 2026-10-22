@@ -305,6 +305,29 @@ test("two machines of one model with no serial are told apart by voltage and plu
   );
 });
 
+test("a serial or model fixed on the Pre-inspection tab shows in the open window, and the window's own edits stay", () => {
+  const L = { equipment: "La Marzocco Linea PB 3 Group AV", serial: "L", powerVoltage: "208V", unitId: 189 };
+  const M = { equipment: "Mazzer Super Jolly V Up Electronic", serial: "2626066", powerVoltage: "120V", unitId: 186 };
+  // Install 135: the partial serial "L" was fixed on the Pre-inspection tab. The window had not touched that row.
+  const fixed = machinesBeforeSave([M, L], [M, L], [M, { ...L, serial: "LPB3-50112" }]);
+  assert.deepEqual(fixed.map((r) => r.serial), ["2626066", "LPB3-50112"]);
+  // The model and electrical edited there too.
+  const renamed = machinesBeforeSave([M, L], [M, L], [M, { ...L, equipment: "La Marzocco Linea PB 2 Group AV", powerVoltage: "220V" }]);
+  assert.deepEqual(renamed.map((r) => `${r.equipment} ${r.powerVoltage}`), ["Mazzer Super Jolly V Up Electronic 120V", "La Marzocco Linea PB 2 Group AV 220V"]);
+  // A serial typed in this window wins over the server's, and only that field: the server's voltage still comes through.
+  const both = machinesBeforeSave([M, { ...L, serial: "LTYPED" }], [M, L], [M, { ...L, serial: "LPB3-50112", powerVoltage: "220V" }]);
+  assert.deepEqual(both.map((r) => `${r.serial} ${r.powerVoltage}`), ["2626066 120V", "LTYPED 220V"]);
+  // A serial moved from one unit's row to another's on the server moves in the window too.
+  const A = { ...row("Bunn TB3", "X1"), unitId: 1 };
+  const B = { ...row("Bunn TB3"), unitId: 2 };
+  assert.deepEqual(shown(machinesBeforeSave([A, B], [A, B], [{ ...A, serial: "" }, { ...B, serial: "X1" }])), ["Bunn TB3", "Bunn TB3 SN X1"]);
+  // A serial typed on another row here is never put on a second row by the server's copy.
+  assert.deepEqual(shown(machinesBeforeSave([row("Bunn TB3", "W9"), row("Fetco CBS-51H")], [row("Bunn TB3"), row("Fetco CBS-51H")], [row("Bunn TB3"), row("Fetco CBS-51H", "W9")])), [
+    "Bunn TB3 SN W9",
+    "Fetco CBS-51H",
+  ]);
+});
+
 test("account type and the already-on-this-account notice", () => {
   assert.equal(accountIsNew(0, 0), true);
   assert.equal(accountIsNew(1, 0), false);

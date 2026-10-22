@@ -43,6 +43,7 @@ import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerial
 import { isInstalled } from "@/lib/ops/install-status";
 import { useCanLock } from "./use-can-lock";
 import { removeInstallMachine } from "@/lib/ops/inspection-api";
+import { OffListBanner } from "@/components/desk/off-list-banner";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -440,7 +441,7 @@ export function InstallSheet({
   const canLock = useCanLock();
   const dropRow = useMutation({
     scope: queue,
-    mutationFn: (v: { installId: number; index: number; equipment: string; serial: string }) => removeInstallMachine({ data: v }),
+    mutationFn: (v: { installId: number; index: number; equipment: string; serial: string; unitId: number | null }) => removeInstallMachine({ data: v }),
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"),
   });
   const dropInstall = useMutation({
@@ -487,7 +488,13 @@ export function InstallSheet({
       serial: packed.serial,
       powerVoltage: packed.powerVoltage,
       machines: packed.machines,
+      machinesBase: baseForSave(),
     });
+  }
+
+  /** The list as this window last saw it on the server: the save keeps whatever changed there since (another tab or window). */
+  function baseForSave(): string {
+    return JSON.stringify(row?.machines ?? []);
   }
 
   return (
@@ -586,7 +593,7 @@ export function InstallSheet({
                         aviKatz: fd.get("aviKatz") === "on",
                         paymentStatus: String(fd.get("paymentStatus") || "") || null,
                         // Closing the window submits this form: an unchanged list is left as saved, typed serials and all.
-                        ...machineFields,
+                        ...(Object.keys(machineFields).length ? { ...machineFields, machinesBase: baseForSave() } : {}),
                       });
                     }}
                   >
@@ -689,6 +696,7 @@ export function InstallSheet({
                       toast.success("Attached to this install");
                     }}
                   />
+                  <OffListBanner installId={row.id} />
                   <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
                   <div className="grid gap-3 border-b border-border px-4 py-3">
                     <EquipmentMultiCombo
@@ -725,7 +733,7 @@ export function InstallSheet({
                         // The server takes the row off the list and its unit off the visit (even one that passed); the save
                         // follows in the same queue with the rest of the window's list. A refused remove saves nothing.
                         dropRow.mutate(
-                          { installId: row.id, index, equipment: spec.equipment, serial: spec.serial },
+                          { installId: row.id, index, equipment: spec.equipment, serial: spec.serial, unitId: spec.unitId ?? null },
                           { onSuccess: () => persistMachines(next) },
                         );
                       }}

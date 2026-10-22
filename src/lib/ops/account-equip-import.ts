@@ -705,7 +705,8 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
         : !serialKey(m.serial) && (sameCatalogModel(drop.catalog_model, m.equipment) || sameCatalogModel(drop.equipment_name, m.equipment)),
     );
     if (at < 0) return [];
-    machines[at] = { ...machines[at]!, serial };
+    // The row names the kept unit now, by its serial and by its id.
+    machines[at] = { ...machines[at]!, serial, ...(machines[at]!.unitId === drop.id ? { unitId: keep.id } : {}) };
     const packed = serializeMachines(machines);
     return [{ id: row.id, equipment: typed ? row.equipment : packed.equipment, machines: packed.machines, serial: packed.serial, power: packed.powerVoltage }];
   });

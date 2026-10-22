@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -35,7 +35,7 @@ import { rowWos, withWoMatches } from "@/lib/ops/wo-search";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
 import { ActionMenu, FilterChip, StatCard, StatRow } from "@/components/desk/desk-charts";
-import { CheckCircle2, ClipboardCheck, Clock, Plus, Trash2 } from "lucide-react";
+import { ArrowLeftRight, CheckCircle2, ClipboardCheck, Clock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Install, Recipe } from "@/lib/ops/types";
 import { ExportButton } from "@/components/desk/export-dialog";
@@ -240,6 +240,12 @@ function Page() {
           <ActionMenu label="Export">
             <ExportButton defaultType="installs" label="Export readiness" />
           </ActionMenu>
+          <Button asChild variant="outline">
+            <Link to="/unit-mismatches" data-testid="unit-mismatches-link" title="Installs whose Equipment list and Pre-inspection list different machines">
+              <ArrowLeftRight className="size-4" />
+              Equipment mismatches
+            </Link>
+          </Button>
           <Button onClick={() => setCreate(true)}>
             <Plus className="size-4" />
             New install
@@ -570,6 +576,8 @@ function useRemoveEquip(install: Install, catalog: string[]) {
           serial: packed.serial,
           powerVoltage: packed.powerVoltage,
           machines: packed.machines,
+          // The list this board last saw: anything changed on the install since (its window, the Pre-inspection) stays.
+          machinesBase: JSON.stringify(install.machines ?? []),
         },
       });
     },

@@ -23,6 +23,12 @@ export type MachineSpec = {
   confirmedAt?: string | null;
   /** Deal rows: the board project holding the machine now. Worked out on read, never stored. */
   boardId?: number | null;
+  /**
+   * Install rows: the id of this machine's unit on the pre-inspection (account_equipment). The server writes it when it
+   * matches the row to its unit; from then on the Equipment and Pre-inspection tabs follow each other by it, so a blank,
+   * partial or corrected serial, or a renamed model, does not lose the link.
+   */
+  unitId?: number | null;
 };
 
 /**
@@ -41,6 +47,8 @@ function extras(rec: Record<string, unknown>, keepBoard = false): Partial<Machin
   if (text(rec.uid)) out.uid = text(rec.uid);
   if (/^\d{4}-\d{2}-\d{2}/.test(text(rec.confirmedAt))) out.confirmedAt = text(rec.confirmedAt).slice(0, 10);
   if (keepBoard && typeof rec.boardId === "number" && Number.isFinite(rec.boardId)) out.boardId = rec.boardId;
+  const unitId = Number(rec.unitId);
+  if (Number.isInteger(unitId) && unitId > 0) out.unitId = unitId;
   return out;
 }
 

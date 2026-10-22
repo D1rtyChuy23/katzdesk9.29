@@ -34,6 +34,7 @@ import { Route as AppRunbookReadinessRouteImport } from './routes/_app/runbook-r
 import { Route as AppServiceRouteImport } from './routes/_app/service'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
+import { Route as AppUnitMismatchesRouteImport } from './routes/_app/unit-mismatches'
 import { Route as AppWarehouseRouteImport } from './routes/_app/warehouse'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiLibraryFileTokenRouteImport } from './routes/api/library-file/$token'
@@ -165,6 +166,11 @@ const AppTlcRoute = AppTlcRouteImport.update({
   path: '/tlc',
   getParentRoute: () => AppRoute,
 } as any)
+const AppUnitMismatchesRoute = AppUnitMismatchesRouteImport.update({
+  id: '/unit-mismatches',
+  path: '/unit-mismatches',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppWarehouseRoute = AppWarehouseRouteImport.update({
   id: '/warehouse',
   path: '/warehouse',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/service': typeof AppServiceRoute
   '/settings': typeof AppSettingsRoute
   '/tlc': typeof AppTlcRoute
+  '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
@@ -253,6 +260,7 @@ export interface FileRoutesByTo {
   '/service': typeof AppServiceRoute
   '/settings': typeof AppSettingsRoute
   '/tlc': typeof AppTlcRoute
+  '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
   '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/_app/service': typeof AppServiceRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/tlc': typeof AppTlcRoute
+  '/_app/unit-mismatches': typeof AppUnitMismatchesRoute
   '/_app/warehouse': typeof AppWarehouseRoute
   '/_app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/service'
     | '/settings'
     | '/tlc'
+    | '/unit-mismatches'
     | '/warehouse'
     | '/api/auth/$'
     | '/api/library-file/$token'
@@ -353,6 +363,7 @@ export interface FileRouteTypes {
     | '/service'
     | '/settings'
     | '/tlc'
+    | '/unit-mismatches'
     | '/warehouse'
     | '/'
     | '/api/auth/$'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/_app/service'
     | '/_app/settings'
     | '/_app/tlc'
+    | '/_app/unit-mismatches'
     | '/_app/warehouse'
     | '/_app/'
     | '/api/auth/$'
@@ -581,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTlcRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/unit-mismatches': {
+      id: '/_app/unit-mismatches'
+      path: '/unit-mismatches'
+      fullPath: '/unit-mismatches'
+      preLoaderRoute: typeof AppUnitMismatchesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/warehouse': {
       id: '/_app/warehouse'
       path: '/warehouse'
@@ -649,6 +668,7 @@ interface AppRouteChildren {
   AppServiceRoute: typeof AppServiceRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTlcRoute: typeof AppTlcRoute
+  AppUnitMismatchesRoute: typeof AppUnitMismatchesRoute
   AppWarehouseRoute: typeof AppWarehouseRoute
   AppIndexRoute: typeof AppIndexRoute
   AppInstallsInstallIdPrintRoute: typeof AppInstallsInstallIdPrintRoute
@@ -677,6 +697,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppServiceRoute: AppServiceRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTlcRoute: AppTlcRoute,
+  AppUnitMismatchesRoute: AppUnitMismatchesRoute,
   AppWarehouseRoute: AppWarehouseRoute,
   AppIndexRoute: AppIndexRoute,
   AppInstallsInstallIdPrintRoute: AppInstallsInstallIdPrintRoute,

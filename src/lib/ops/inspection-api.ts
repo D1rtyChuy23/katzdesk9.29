@@ -8,6 +8,7 @@ import { SERIAL_LINE, SUFFIX_ONLY, installMachines, serializeMachines, type Mach
 import { assertUnlocked, canLockEquipment, lockOwnerName } from "@/lib/ops/equipment-lock";
 import { isLocked, lockedBy, lockedMessage } from "@/lib/ops/equipment-lock-rules";
 import { readsAsModel } from "@/lib/ops/warehouse-serial";
+import { adoptUnitIds } from "@/lib/ops/install-form";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -106,6 +107,8 @@ export type InspectionMachine = {
   /** Locked by the owner: Remove is off until it is unlocked. */
   locked: boolean;
   lockedBy: string | null;
+  /** On the install's equipment list too. False flags a unit only the pre-inspection has, for review. */
+  onList: boolean;
 };
 
 /** An existing unit on the same account with pre-inspection results that can be copied. */
@@ -375,22 +378,101 @@ function ownUnit(piece: Piece, pieces: Piece[], linked: AcctUnit[], used: Set<nu
   );
 }
 
-/** Which linked unit each piece is: the matching the load uses, in its two passes. -1 when a piece has none. */
-function claimLinked(pieces: Piece[], linked: AcctUnit[], catalog: string[]): number[] {
-  const used = new Set<number>();
-  const ids = pieces.map((piece) => {
-    const hit = claimUnit(piece, [linked], used, catalog);
-    if (hit) used.add(hit.id);
-    return hit?.id ?? -1;
+/**
+ * The rows that name their unit outright: an exact serial first (typing another unit's serial makes the row that unit),
+ * then the unit the row already carries by id, so a blank, partial or corrected serial, or a renamed model, keeps the row
+ * on its own unit. Fills `hits` from `pools` in order, and answers which rows were claimed by their id.
+ */
+function claimNamed(pieces: Piece[], hits: (AcctUnit | undefined)[], pools: AcctUnit[][], used: Set<number>): boolean[] {
+  const byId = pieces.map(() => false);
+  pieces.forEach((piece, i) => {
+    const key = serialKey(piece.serial);
+    if (hits[i] || !key) return;
+    for (const pool of pools) {
+      const hit = pool.find((a) => !used.has(a.id) && a.serial_key === key);
+      if (!hit) continue;
+      hits[i] = hit;
+      used.add(hit.id);
+      return;
+    }
   });
   pieces.forEach((piece, i) => {
-    if (ids[i]! >= 0) return;
+    if (hits[i] || !piece.unitId) return;
+    for (const pool of pools) {
+      const hit = pool.find((a) => a.id === piece.unitId && !used.has(a.id));
+      if (!hit) continue;
+      hits[i] = hit;
+      used.add(hit.id);
+      byId[i] = true;
+      return;
+    }
+  });
+  return byId;
+}
+
+/**
+ * Twins: rows of one model and voltage with no serial, on units with no serial, can't be told apart. Among those rows
+ * and this model's units no row has, the units go in `priority` order (anything recorded first, then the oldest), so a
+ * save that drops one of the rows keeps the inspected unit and the empty twin goes, whichever row was taken off. A
+ * locked unit is never moved.
+ */
+function settleTwins(pieces: Piece[], hits: (AcctUnit | undefined)[], priority: AcctUnit[]): void {
+  const rank = new Set(priority.map((a) => a.id));
+  const volts = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
+  const plain = (i: number) => {
+    const hit = hits[i];
+    return !!hit && rank.has(hit.id) && !serialKey(pieces[i]!.serial) && !serialKey(hit.serial);
+  };
+  const done = new Set<number>();
+  for (let i = 0; i < pieces.length; i++) {
+    if (done.has(i) || !plain(i)) continue;
+    const model = hits[i]!.catalog_model;
+    const power = volts(pieces[i]!.powerVoltage);
+    const group = pieces
+      .map((_, j) => j)
+      .filter((j) => !done.has(j) && plain(j) && sameCatalogModel(hits[j]!.catalog_model, model) && volts(pieces[j]!.powerVoltage) === power);
+    for (const j of group) done.add(j);
+    if (group.some((j) => isLocked(hits[j]))) continue;
+    const taken = new Set(hits.filter((h): h is AcctUnit => !!h).map((h) => h.id));
+    const own = new Set(group.map((j) => hits[j]!.id));
+    const free = (a: AcctUnit) =>
+      !taken.has(a.id) && !isLocked(a) && !serialKey(a.serial) && sameCatalogModel(a.catalog_model, model) && (!power || !volts(a.electrical) || volts(a.electrical) === power);
+    const pool = priority.filter((a) => own.has(a.id) || free(a)).slice(0, group.length);
+    group.forEach((j, n) => {
+      hits[j] = pool[n]!;
+    });
+  }
+}
+
+/** Which linked unit each piece is: the matching the load uses (its id or exact serial, then by model). -1 when a piece has none. */
+function claimLinked(pieces: Piece[], linked: AcctUnit[], catalog: string[]): number[] {
+  const used = new Set<number>();
+  const hits: (AcctUnit | undefined)[] = pieces.map(() => undefined);
+  claimNamed(pieces, hits, [linked], used);
+  pieces.forEach((piece, i) => {
+    if (hits[i]) return;
+    const hit = claimUnit(piece, [linked], used, catalog);
+    if (!hit) return;
+    used.add(hit.id);
+    hits[i] = hit;
+  });
+  pieces.forEach((piece, i) => {
+    if (hits[i]) return;
     const other = claimEarlierName(piece, linked, used, catalog) ?? ownUnit(piece, pieces, linked, used);
     if (!other) return;
     used.add(other.id);
-    ids[i] = other.id;
+    hits[i] = other;
   });
-  return ids;
+  settleTwins(pieces, hits, linked);
+  return hits.map((h) => h?.id ?? -1);
+}
+
+/** The row a list had for this unit: the one that names it by id, else the one the load gives it. */
+function rowOfUnit(pieces: Piece[], linked: AcctUnit[], catalog: string[], equipmentId: number): Piece | null {
+  const named = pieces.find((p) => p.unitId === equipmentId);
+  if (named) return named;
+  const at = claimLinked(pieces, linked, catalog).indexOf(equipmentId);
+  return at >= 0 ? pieces[at]! : null;
 }
 
 /** Units with a check, note, photo or answer on this visit. */
@@ -568,7 +650,8 @@ function sameMachine(unit: AcctUnit, piece: Piece, catalog: string[]): boolean {
  * model was changed in this save renames its unit; otherwise the row shows its unit's serial, voltage and (when the
  * serial names another model) name. A load (`saved` false) only fills a blank serial or voltage on a row: it never
  * overwrites what a row says, so a window still holding the old list can't save an old serial back over the account's.
- * `before` is the list stored before a window save.
+ * `before` is the list stored before a window save. Every row is given its unit's id; a list that is only typed text
+ * (no stored rows) is not rewritten just for that.
  */
 async function mirrorList(
   sql: Sql,
@@ -578,15 +661,20 @@ async function mirrorList(
   catalog: string[],
   saved: boolean,
   before: Piece[] | null,
+  how: { byId: boolean[]; typed: boolean; adopted?: boolean },
 ): Promise<void> {
   const modelBefore = new Map((before ?? []).filter((p) => serialKey(p.serial)).map((p) => [serialKey(p.serial), p.equipment]));
+  const modelBeforeById = new Map((before ?? []).filter((p) => p.unitId).map((p) => [p.unitId!, p.equipment]));
   let changed = false;
+  let ids = !!how.adopted;
   for (const [i, piece] of pieces.entries()) {
     const unit = units[i];
     if (!unit) continue;
     const key = serialKey(piece.serial);
-    if (saved && key && unit.serial_key === key && !sameMachine(unit, piece, catalog)) {
-      const was = modelBefore.get(key);
+    // The row names this unit by its serial or by its id: a model that differs is a rename in this save, or the unit's.
+    const named = (!!key && unit.serial_key === key) || !!how.byId[i];
+    const was = !named ? undefined : how.byId[i] && modelBeforeById.has(unit.id) ? modelBeforeById.get(unit.id) : key ? modelBefore.get(key) : undefined;
+    if (saved && named && !sameMachine(unit, piece, catalog)) {
       if (was !== undefined && !sameCatalogModel(was, piece.equipment) && !isLocked(unit)) {
         unit.catalog_model = matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel || piece.equipment;
         unit.equipment_name = piece.equipment;
@@ -599,6 +687,10 @@ async function mirrorList(
         pieces[i] = { ...pieces[i]!, equipment: unit.equipment_name || unit.catalog_model };
         changed = true;
       }
+    } else if (saved && was !== undefined && was.trim() !== piece.equipment.trim() && unit.equipment_name !== piece.equipment && !isLocked(unit)) {
+      // The same machine, written another way in this save ("Linea PB" to its catalog name): the unit shows that name too.
+      unit.equipment_name = piece.equipment;
+      await sql.query("update account_equipment set equipment_name = $2, updated_at = now() where id = $1", [unit.id, unit.equipment_name]);
     }
     if (unit.serial_key && serialKey(pieces[i]!.serial) !== unit.serial_key && (saved || !key)) {
       pieces[i] = { ...pieces[i]!, serial: unit.serial ?? "" };
@@ -608,8 +700,14 @@ async function mirrorList(
       pieces[i] = { ...pieces[i]!, powerVoltage: unit.electrical.trim() };
       changed = true;
     }
+    if (pieces[i]!.unitId !== unit.id) {
+      pieces[i] = { ...pieces[i]!, unitId: unit.id };
+      ids = true;
+    }
   }
   if (changed) await writeList(sql, installId, pieces);
+  // Only the ids are new: the stored rows take them, and nothing else on the install changes (not its updated time).
+  else if (ids && !how.typed) await sql.query("update installs set machines = $2 where id = $1", [installId, serializeMachines(pieces).machines]);
 }
 
 /**
@@ -676,7 +774,11 @@ export async function syncInstallUnits(
   const row = install[0];
   if (!row) return;
   const catalog = await catalogNames(sql);
-  const pieces = piecesFrom(row, catalog);
+  const listed = installMachines({ ...row, machines: text(row.machines) || null }, catalog);
+  /** The list as stored before this save (prune only): what a row was before this save is read from it. */
+  const before = opts?.prune && opts.before ? piecesFrom(opts.before, catalog) : null;
+  // A window opened before the rows carried their unit ids sends them without: each takes its stored row's id.
+  const pieces = before ? adoptUnitIds(listed.machines, before) : listed.machines;
   /** A unit saved under the whole one-line list ("Linea / Swift / Axiom") before machines were split. */
   const combined = (a: AcctUnit) => listedEquipment(a.equipment_name, catalog).length > 1;
   const account = await sql.query<AcctUnit>(
@@ -697,15 +799,19 @@ export async function syncInstallUnits(
   const used = new Set<number>();
   const keep = new Set<number>();
   let first: number | null = null;
-  // First pass: every piece takes its unit by serial, then by model. Only then do the looser matches run, so one
-  // row never takes the unit another row names exactly.
-  const hits: (AcctUnit | undefined)[] = pieces.map((piece) => {
+  // First pass: every piece takes the unit it names (its exact serial, then its own unit id), then by model. Only then
+  // do the looser matches run, so one row never takes the unit another row names exactly.
+  const hits: (AcctUnit | undefined)[] = pieces.map(() => undefined);
+  const byId = claimNamed(pieces, hits, [linkedRows, account], used);
+  pieces.forEach((piece, i) => {
+    if (hits[i]) return;
     const hit = claimUnit(piece, [linkedRows, account], used, catalog);
-    if (hit) used.add(hit.id);
-    return hit;
+    if (!hit) return;
+    used.add(hit.id);
+    hits[i] = hit;
   });
   // Serials the list had before this save: a row whose serial is not among them was corrected in this save.
-  const beforeKeys = opts?.prune && opts.before ? new Set(piecesFrom(opts.before, catalog).map((p) => serialKey(p.serial)).filter(Boolean)) : null;
+  const beforeKeys = before ? new Set(before.map((p) => serialKey(p.serial)).filter(Boolean)) : null;
   for (const [i, piece] of pieces.entries()) {
     if (hits[i]) continue;
     let hit = claimEarlierName(piece, linkedRows, used, catalog);
@@ -749,6 +855,33 @@ export async function syncInstallUnits(
     if (hit) used.add(hit.id);
     hits[i] = hit;
   }
+  settleTwins(pieces, hits, linkedRows);
+  // A row that kept its unit by id, with a serial changed or cleared in this save: the unit takes the row's serial, so
+  // the mirror below doesn't put the old one back. The same rules as a corrected serial above: never a locked unit, and
+  // never a serial another unit holds.
+  if (before && beforeKeys) {
+    const was = new Map(before.filter((p) => p.unitId).map((p) => [p.unitId!, p]));
+    for (const [i, piece] of pieces.entries()) {
+      const unit = hits[i];
+      if (!unit || !byId[i] || isLocked(unit)) continue;
+      const key = serialKey(piece.serial);
+      if (key === (unit.serial_key ?? "")) continue;
+      const prev = was.get(unit.id);
+      const changedHere = prev ? serialKey(prev.serial) !== key : key ? !beforeKeys.has(key) : !!unit.serial_key && beforeKeys.has(unit.serial_key);
+      if (!changedHere) continue;
+      if (key) {
+        const clash = await sql.query("select 1 from account_equipment where serial_key = $1 and id <> $2 limit 1", [key, unit.id]);
+        if (clash[0]) continue;
+        await sql.query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [unit.id, piece.serial.trim(), key]);
+        unit.serial = piece.serial.trim();
+        unit.serial_key = key;
+      } else {
+        await sql.query("update account_equipment set serial = null, serial_key = null, updated_at = now() where id = $1", [unit.id]);
+        unit.serial = null;
+        unit.serial_key = null;
+      }
+    }
+  }
   const finalUnits: (AcctUnit | undefined)[] = [];
   for (const [i, piece] of pieces.entries()) {
     let hit = hits[i];
@@ -778,7 +911,9 @@ export async function syncInstallUnits(
     if (!first) first = id;
     await linkUnit(sql, installId, id);
   }
-  await mirrorList(sql, installId, pieces, finalUnits, catalog, !!opts?.prune, opts?.prune && opts.before ? piecesFrom(opts.before, catalog) : null);
+  // Ids taken from the stored rows above are not on the rows this save stored yet.
+  const adopted = pieces.some((p, i) => p.unitId !== listed.machines[i]?.unitId);
+  await mirrorList(sql, installId, pieces, finalUnits, catalog, !!opts?.prune, before, { byId, typed: listed.typed, adopted });
   if (first) {
     await sql.query(
       `update install_inspection_items set equipment_id = $1 where install_id = $2 and equipment_id is null`,
@@ -833,11 +968,17 @@ export async function syncInstallUnits(
     await dropUnusedUnit(sql, a.id, junk ? undefined : { madeBy: installId });
   }
   if (!opts?.prune) return;
+  /** Rows this save left out whose units stay on the visit: they come back, so the two tabs still list the same machines. */
+  const back: Piece[] = [];
   for (const id of linkedIds) {
     if (keep.has(id)) continue;
-    // A locked unit stays on the visit: only the owner takes it off.
-    if (isLocked(account.find((a) => a.id === id))) continue;
-    if (await unitPassed(sql, installId, id)) continue;
+    // A locked unit stays on the visit: only the owner takes it off. A unit that passed stays too; the Equipment tab's
+    // Remove (removeInstallRow) is how either comes off, and it takes the unit off first.
+    if (isLocked(account.find((a) => a.id === id)) || (await unitPassed(sql, installId, id))) {
+      const was = before ? rowOfUnit(before, linkedRows, catalog, id) : null;
+      if (was) back.push({ ...was, unitId: id });
+      continue;
+    }
     await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
@@ -845,6 +986,7 @@ export async function syncInstallUnits(
     // account before (imported, added by hand, from another visit) is only taken off this visit.
     await dropUnusedUnit(sql, id, { madeBy: installId });
   }
+  if (back.length) await writeList(sql, installId, [...pieces, ...back]);
 }
 
 async function ensureUnits(sql: Sql, installId: number): Promise<void> {
@@ -1028,6 +1170,10 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
   );
   if (!install[0]) return null;
   await ensureUnits(sql, installId);
+  // Which units the equipment list has a row for: a unit it doesn't is flagged for review, never added on a load.
+  const listRow = (await sql.query<ListRow>("select equipment, serial, power_voltage, machines from installs where id = $1", [installId]))[0];
+  const catalog = await catalogNames(sql);
+  const onList = new Set(listRow ? claimLinked(piecesFrom(listRow, catalog), await linkedUnits(sql, installId), catalog) : []);
   const [head, units, items, photos] = await Promise.all([
     sql.query<{
       inspector: string | null;
@@ -1111,6 +1257,7 @@ export async function readInspection(sql: Sql, installId: number): Promise<Inspe
       coreModel: u.core_model ?? null,
       locked: isLocked(u),
       lockedBy: isLocked(u) ? lockedBy(u) || "the owner" : null,
+      onList: onList.has(u.equipment_id),
       coreNeeded,
       core: {
         category: CORE_HOLE_CATEGORY,
@@ -1580,7 +1727,7 @@ export async function editInspectionUnit(
     "update account_equipment set catalog_model = $2, equipment_name = $3, serial = $4, serial_key = $5, electrical = $6, updated_at = now() where id = $1",
     [unit.id, catalogModel, equipment, serial || null, key, electrical || null],
   );
-  const piece = { equipment, serial, powerVoltage: electrical };
+  const piece = { equipment, serial, powerVoltage: electrical, unitId: unit.id };
   const next = at >= 0 ? pieces.map((p, i) => (i === at ? { ...p, ...piece } : p)) : [...pieces, piece];
   await writeList(sql, data.installId, next);
   await syncInstallUnits(sql, data.installId);
@@ -1612,6 +1759,8 @@ const removeRowInput = z.object({
   index: z.number().int().min(0),
   equipment: z.string(),
   serial: z.string().nullable().optional(),
+  /** The row's pre-inspection unit, when the window has it: the row that names it is the one taken off. */
+  unitId: z.number().int().positive().nullable().optional(),
 });
 
 /**
@@ -1639,7 +1788,8 @@ export async function removeInstallRow(
     serialKey(p.serial) === key &&
     (sameCatalogModel(p.equipment, data.equipment) || sameCatalogModel(matchModel(p.equipment, catalog), matchModel(data.equipment, catalog)));
   const fits = pieces.map((p, i) => (same(p) ? i : -1)).filter((i) => i >= 0);
-  const at = fits.includes(data.index) ? data.index : fits.length === 1 ? fits[0]! : -1;
+  const named = data.unitId ? pieces.findIndex((p) => p.unitId === data.unitId) : -1;
+  const at = named >= 0 ? named : fits.includes(data.index) ? data.index : fits.length === 1 ? fits[0]! : -1;
   if (at < 0) return { removed: null };
   const linked = await linkedUnits(sql, data.installId);
   const rest = pieces.filter((_, i) => i !== at);
@@ -1667,6 +1817,136 @@ export const removeInstallMachine = createServerFn({ method: "POST" })
     const sql = await ready();
     return removeInstallRow(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
   });
+
+const onListInput = z.object({
+  installId: z.number().int().positive(),
+  equipmentId: z.number().int().positive(),
+});
+
+/**
+ * Review: a unit only the pre-inspection has gets its row on the equipment list (its model, serial and voltage, and its
+ * id). Someone chooses this for each flagged unit; nothing adds the row on its own. An installed project is changed only
+ * by the owner.
+ */
+export async function addUnitOntoList(
+  sql: Sql,
+  data: z.infer<typeof onListInput>,
+  actor: string,
+  opts?: { owner?: boolean },
+): Promise<InspectionView> {
+  await requireInstall(sql, data.installId);
+  await requireUnit(sql, data.installId, data.equipmentId);
+  const row = (await sql.query<ListRow>("select equipment, serial, power_voltage, machines, complete from installs where id = $1", [data.installId]))[0]!;
+  if (isComplete(row) && !opts?.owner) throw new Error(INSTALLED_KEPT);
+  const unit = (
+    await sql.query<AcctUnit>("select id, catalog_model, equipment_name, serial, serial_key, electrical, locked_at, locked_by from account_equipment where id = $1", [
+      data.equipmentId,
+    ])
+  )[0];
+  if (!unit) throw new Error("That machine is not on this visit.");
+  const catalog = await catalogNames(sql);
+  const pieces = piecesFrom(row, catalog);
+  if (claimLinked(pieces, await linkedUnits(sql, data.installId), catalog).includes(unit.id)) {
+    throw new Error("That machine is already on the equipment list.");
+  }
+  const name = unit.equipment_name || unit.catalog_model;
+  await writeList(sql, data.installId, [...pieces, { equipment: name, serial: unit.serial ?? "", powerVoltage: unit.electrical ?? "", unitId: unit.id }]);
+  await syncInstallUnits(sql, data.installId);
+  await sql
+    .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+      data.installId,
+      actor,
+      `added ${name}${unit.serial ? ` (SN ${unit.serial})` : ""} to the equipment list from the pre-inspection`,
+    ])
+    .catch(() => undefined);
+  const view = await readInspection(sql, data.installId);
+  if (!view) throw new Error("Install not found");
+  return view;
+}
+
+export const addInspectionUnitToList = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof onListInput>) => onListInput.parse(d))
+  .handler(async ({ data, context }): Promise<InspectionView> => {
+    const sql = await ready();
+    return addUnitOntoList(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
+  });
+
+/** One install whose equipment list and pre-inspection disagree. */
+export type UnitMismatch = {
+  installId: number;
+  customer: string;
+  installed: boolean;
+  equipStatus: string | null;
+  /** Units on the pre-inspection with no row on the equipment list. */
+  onlyOnPreInspection: { equipmentId: number; name: string; serial: string | null; overall: InspectionOverall }[];
+  /** Rows on the equipment list with no unit on the pre-inspection yet. */
+  onlyOnList: { equipment: string; serial: string }[];
+};
+
+/**
+ * Every open (not archived) install whose equipment list and pre-inspection disagree, for review. Reads only: it matches
+ * rows to units the way a load does, but it never adds a row, makes a unit or links one.
+ */
+export async function findUnitMismatches(sql: Sql): Promise<UnitMismatch[]> {
+  const installs = await sql.query<ListRow & { id: number; customer: string; equip_status: string | null }>(
+    "select id, customer, equipment, serial, power_voltage, machines, complete, equip_status from installs where archived = false order by id",
+  );
+  if (!installs.length) return [];
+  const catalog = await catalogNames(sql);
+  const [units, items, photos] = await Promise.all([
+    sql.query<
+      AcctUnit & { install_id: number; visit_kind: string | null; core_needed: string | null; note: string | null; installed: unknown }
+    >(
+      `select u.install_id, a.id, a.catalog_model, a.equipment_name, a.serial, a.serial_key, a.electrical, a.locked_at, a.locked_by,
+              u.visit_kind, u.core_needed, u.note, (a.install_date is not null and coalesce(a.serial_key, '') <> '') as installed
+         from install_inspection_units u join account_equipment a on a.id = u.equipment_id
+        order by u.install_id, a.id`,
+    ),
+    sql.query<ItemRow>("select install_id, equipment_id, category, status, notes from install_inspection_items"),
+    sql.query<{ install_id: number; equipment_id: number | null }>("select distinct install_id, equipment_id from install_inspection_photos"),
+  ]);
+  const byInstall = new Map<number, typeof units>();
+  for (const u of units) byInstall.set(u.install_id, [...(byInstall.get(u.install_id) ?? []), u]);
+  const itemsOf = new Map<string, ItemRow[]>();
+  for (const i of items) itemsOf.set(`${i.install_id}:${i.equipment_id}`, [...(itemsOf.get(`${i.install_id}:${i.equipment_id}`) ?? []), i]);
+  const shot = new Set(photos.map((p) => `${p.install_id}:${p.equipment_id}`));
+  const out: UnitMismatch[] = [];
+  for (const row of installs) {
+    const linked = byInstall.get(row.id) ?? [];
+    const pieces = piecesFrom(row, catalog);
+    if (!linked.length && !pieces.length) continue;
+    const mine = (u: (typeof linked)[number]) => itemsOf.get(`${row.id}:${u.id}`) ?? [];
+    // The order a load claims them in: anything recorded first, then the oldest.
+    const recorded = (u: (typeof linked)[number]) =>
+      mine(u).some((i) => i.status !== "Not inspected" || !!(i.notes ?? "").trim()) ||
+      shot.has(`${row.id}:${u.id}`) ||
+      !!(u.note ?? "").trim() ||
+      !!(u.visit_kind ?? "").trim() ||
+      !!(u.core_needed ?? "").trim();
+    const priority = [...linked].sort((a, b) => Number(recorded(b)) - Number(recorded(a)) || a.id - b.id);
+    const claims = claimLinked(pieces, priority, catalog);
+    const onlyOnPreInspection = priority
+      .filter((u) => !claims.includes(u.id))
+      .sort((a, b) => a.id - b.id)
+      .map((u) => {
+        const coreNeeded = isCoreHoleAnswer(u.core_needed) ? u.core_needed : null;
+        const kind = unitKind(u.visit_kind, u.installed === true || String(u.installed) === "true");
+        const overall: InspectionOverall = isPreInspected(kind)
+          ? "Passed"
+          : inspectionOverall(mine(u).map((i) => ({ category: i.category, status: i.status })), coreNeeded, unitChecks(u));
+        return { equipmentId: u.id, name: u.equipment_name || u.catalog_model, serial: u.serial, overall };
+      });
+    const onlyOnList = pieces.filter((_, i) => claims[i]! < 0).map((p) => ({ equipment: p.equipment, serial: p.serial }));
+    if (!onlyOnPreInspection.length && !onlyOnList.length) continue;
+    out.push({ installId: row.id, customer: row.customer, installed: isComplete(row), equipStatus: row.equip_status, onlyOnPreInspection, onlyOnList });
+  }
+  return out;
+}
+
+export const listUnitMismatches = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .handler(async (): Promise<UnitMismatch[]> => findUnitMismatches(await ready()));
 
 const copyInput = z.object({
   installId: z.number().int().positive(),

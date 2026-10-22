@@ -4,6 +4,7 @@ import { Camera, ChevronLeft, ImagePlus, Images, Pencil, Trash2, Download } from
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
+  addInspectionUnitToList,
   editInspectionEquipment,
   removeInspectionEquipment,
   addInspectionPhoto,
@@ -211,6 +212,16 @@ function MachineList({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove it"),
   });
+  // Review: a unit only this pre-inspection has. Adding its row is someone's choice; a load never adds it.
+  const toList = useMutation({
+    mutationFn: (equipmentId: number) => addInspectionUnitToList({ data: { installId: view.installId, equipmentId } }),
+    onSuccess: (next) => {
+      toast.success("Added to the equipment list");
+      onSaved(next);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add it to the equipment list"),
+  });
+  const offList = view.machines.filter((m) => !m.onList).length;
   return (
     <div data-testid="machine-list">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
@@ -222,10 +233,17 @@ function MachineList({
       <p className="px-4 pt-1 text-xs text-muted-foreground">
         Pick the unit you are standing in front of. The others stay untouched.
       </p>
+      {offList ? (
+        <p className="mx-4 mt-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs" data-testid="off-list-note">
+          {offList === 1 ? "1 machine here is" : `${offList} machines here are`} not on the install's equipment list. Add each one there, or
+          remove it from the pre-inspection, so both tabs list the same machines.
+        </p>
+      ) : null}
       {view.machines.length ? (
         <ul className="mt-3 divide-y divide-border border-y border-border">
           {view.machines.map((m) => (
-            <li key={m.equipmentId} className="flex items-stretch">
+            <li key={m.equipmentId}>
+              <div className="flex items-stretch">
               <button
                 type="button"
                 data-testid={`inspect-machine-${m.equipmentId}`}
@@ -279,6 +297,26 @@ function MachineList({
               >
                 <Trash2 className="size-4" />
               </button>
+              </div>
+              {!m.onList ? (
+                <div
+                  className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-dashed border-warning/40 bg-warning/5 px-4 py-2 text-xs"
+                  data-testid={`off-list-${m.equipmentId}`}
+                >
+                  <span className="font-medium text-foreground">Not on the equipment list</span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="ml-auto"
+                    disabled={m.locked || toList.isPending}
+                    onClick={() => toList.mutate(m.equipmentId)}
+                    data-testid={`add-to-list-${m.equipmentId}`}
+                  >
+                    Add to the equipment list
+                  </Button>
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -317,10 +355,12 @@ function rememberAddedMachine(qc: ReturnType<typeof useQueryClient>, view: Inspe
       if (row.id !== view.installId) return row;
       const machines = appendServerMachines(
         row.machines ?? [],
-        view.machines.map((m) => ({
+        // Only units the list has: one flagged as only on the pre-inspection waits for someone to add it.
+        view.machines.filter((m) => m.onList).map((m) => ({
           equipment: m.name || m.model,
           serial: m.serial ?? "",
           powerVoltage: m.electrical ?? "",
+          unitId: m.equipmentId,
         })),
       );
       const packed = serializeMachines(machines);
