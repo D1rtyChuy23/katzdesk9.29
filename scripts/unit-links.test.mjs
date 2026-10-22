@@ -521,17 +521,23 @@ test("a window that opened before the ids, saved after a machine was swapped on 
   }
 });
 
-test("the install window's baseline follows every field and id, and moves to what it sent", () => {
+test("the install window's baseline follows every field and id; a save's base is worked out when it runs, and a failed save takes nothing", () => {
   const src = readFileSync(new URL("../src/components/desk/entity-sheets.tsx", import.meta.url), "utf8");
   const start = src.indexOf("export function InstallSheet(");
   const sheet = src.slice(start, src.indexOf("\nexport function ", start + 1));
   assert.match(sheet, /const machineSig = JSON\.stringify\(row\?\.machines \?\? \[\]\);/);
   assert.match(sheet, /\}, \[row\?\.id, hydratedId, machineSig\]\);/);
-  const persist = sheet.slice(sheet.indexOf("function persistMachines"), sheet.indexOf("function baseForSave"));
-  assert.match(persist, /const base = baseForSave\(\);\s*sentAhead\.current = true;\s*seenServer\.current = \{ id: row\.id, rows: next \};/);
-  assert.match(persist, /machinesBase: base,/);
+  // A read moves both baselines; a send moves what the window expects; the base is read in mutationFn, not when queued.
+  assert.match(sheet, /seenServer\.current = confirmed\.current = \{ id: row\.id, rows: server \};/);
+  const persist = sheet.slice(sheet.indexOf("function persistMachines"), sheet.indexOf("save.mutate", sheet.indexOf("function persistMachines")));
+  assert.match(persist, /sentAhead\.current = true;\s*seenServer\.current = \{ id: current\.id, rows: next \};/);
+  assert.doesNotMatch(persist, /machinesBase/);
+  const save = sheet.slice(sheet.indexOf("const save = useMutation("), sheet.indexOf("const canLock"));
+  assert.match(save, /const known = confirmed\.current\?\.id === d\.id \? confirmed\.current\.rows/);
+  assert.match(save, /if \(vars\.machines !== undefined\) confirmed\.current = \{ id: vars\.id, rows: sentRows\(vars\.machines\) \};/);
+  assert.match(save, /seenServer\.current = confirmed\.current;\s*sentAhead\.current = false;/);
   const forSave = sheet.slice(sheet.indexOf("function listForSave"), sheet.indexOf("function persistMachines"));
-  assert.match(forSave, /const server = seen && sentAhead\.current \? seen : \(row\.machines \?\? \[\]\);/);
+  assert.match(forSave, /const server = seen && sentAhead\.current \? seen : \(current\.machines \?\? \[\]\);/);
 });
 
 // --- Linking a machine to the account's unit it is (Bar By The Wayside: the Linea "L" and the account's PB001708). ---
@@ -653,6 +659,120 @@ test("PB001708 typed on the Linea L's row: the row becomes the account's unit, t
     ]);
     assert.equal(linked.machines.at(-1).overall, "Passed");
     assert.equal((await stored(pg, id)).length, 4);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Remove while a refresh lands: the save that follows is the window's list as it is then, based on what the server last took", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Race Cafe", [{ equipment: MAZZER, serial: "M1" }, { equipment: TB3 }]);
+    await readInspection(sql, id);
+    const opened = await stored(pg, id);
+    // The window adds a Fetco and saves; the server took it, so that list is the next save's base.
+    const added = [...opened, { equipment: "Fetco CBS-51H", serial: "", powerVoltage: "" }];
+    await windowSave(sql, id, added, opened);
+    // The board's refresh lands (the window's rows now carry the Fetco's id), then Remove on the TB3 runs.
+    const refreshed = await stored(pg, id);
+    await removeInstallRow(sql, { installId: id, index: 1, equipment: TB3, serial: "", unitId: opened[1].unitId }, "Test", { owner: true });
+    await windowSave(sql, id, refreshed.filter((r) => r.equipment !== TB3), refreshed);
+    assert.deepEqual((await stored(pg, id)).map((r) => r.equipment), [MAZZER, "Fetco CBS-51H"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a refused save takes nothing: the corrected save, based on what the server last had, keeps a machine added with it", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    await pg.query(
+      "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Other Cafe', 'Fetco CBS-51H', 'Fetco CBS-51H', 'F-OTHER', 'f-other')",
+    );
+    const id = await install(pg, "Refuse Cafe", [{ equipment: MAZZER, serial: "M1" }]);
+    await readInspection(sql, id);
+    const opened = await stored(pg, id);
+    const tried = [...opened, { equipment: TB3, serial: "", powerVoltage: "" }, { equipment: "Fetco CBS-51H", serial: "F-OTHER", powerVoltage: "" }];
+    await assert.rejects(() => windowSave(sql, id, tried, opened), /already on Other Cafe/);
+    await windowSave(sql, id, tried.map((r) => (r.serial === "F-OTHER" ? { ...r, serial: "" } : r)), opened);
+    assert.deepEqual((await stored(pg, id)).map((r) => r.equipment), [MAZZER, TB3, "Fetco CBS-51H"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the real serial typed over L on the Equipment tab keeps the checks recorded on L, and Same machine as moves them over", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await ownerOnce(pg);
+    const id = await install(pg, "Serial Cafe", [{ equipment: LINEA, serial: "L" }]);
+    await readInspection(sql, id);
+    const pb = (
+      await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Serial Cafe', $1, $1, 'PB001708', 'pb001708') returning id", [LINEA])
+    ).rows[0].id;
+    const seen = await stored(pg, id);
+    const l = seen[0].unitId;
+    await record(pg, id, l); // a failed check: recorded, not passed
+    await windowSave(sql, id, [{ ...seen[0], serial: "PB001708" }], seen);
+    assert.deepEqual((await stored(pg, id)).map((r) => [r.serial, r.unitId]), [["PB001708", pb]]);
+    const view = await readInspection(sql, id);
+    const flagged = view.machines.find((m) => m.equipmentId === l);
+    assert.equal(flagged.onList, false);
+    assert.deepEqual(flagged.sameAs.map((c) => c.equipmentId), [pb]);
+    await linkVisitUnit(sql, { installId: id, fromEquipmentId: l, toEquipmentId: pb }, "Tech", { owner: true });
+    const items = (await pg.query("select equipment_id, status from install_inspection_items where install_id = $1 and status <> 'Not inspected'", [id])).rows;
+    assert.deepEqual(items, [{ equipment_id: pb, status: "Fail" }]);
+    assert.deepEqual((await visit(pg, id)).map((u) => u.id), [pb]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a link that can't go through changes nothing: a locked machine, or a copy another open install has", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id, linea, pb } = await waysideWithCopies(pg, sql);
+    await pg.query("update account_equipment set locked_at = now(), locked_by = 'chuy' where id = $1", [linea]);
+    const before = await accountUnits(pg, "Bar By The Wayside");
+    await assert.rejects(() => linkVisitUnit(sql, { installId: id, fromEquipmentId: linea, toEquipmentId: pb[0] }, "Tech", { owner: true }), /locked/);
+    assert.deepEqual(await accountUnits(pg, "Bar By The Wayside"), before);
+    await pg.query("update account_equipment set locked_at = null, locked_by = null where id = $1", [linea]);
+    // The second copy is on another open install's pre-inspection.
+    const other = await install(pg, "Bar By The Wayside", [{ equipment: MAZZER, serial: "OTHER1" }]);
+    await pg.query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [other, pb[1]]);
+    await assert.rejects(
+      () => linkVisitUnit(sql, { installId: id, fromEquipmentId: linea, toEquipmentId: pb[0] }, "Tech", { owner: true }),
+      new RegExp(`install #${other}'s pre-inspection`),
+    );
+    assert.deepEqual(await accountUnits(pg, "Bar By The Wayside"), before);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("merging a copy of the serial carries its PM runbook ticks to the record that stays", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id, linea, pb } = await waysideWithCopies(pg, sql);
+    const pm = (await pg.query("insert into pm_jobs (customer, equipment, status) values ('Bar By The Wayside', $1, 'Scheduled') returning id", [LINEA])).rows[0].id;
+    await pg.query("insert into pm_runbook_checks (pm_job_id, unit_key, key) values ($1, $2, 'step:brew-grease')", [pm, `acct:${pb[1]}`]);
+    await linkVisitUnit(sql, { installId: id, fromEquipmentId: linea, toEquipmentId: pb[0] }, "Tech", { owner: true });
+    const ticks = (await pg.query("select unit_key, key from pm_runbook_checks where pm_job_id = $1", [pm])).rows;
+    assert.deepEqual(ticks, [{ unit_key: `acct:${pb[0]}`, key: "step:brew-grease" }]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a serial typed by mistake that belongs to another kind of machine on the account is not offered to link", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id, linea } = await waysideWithCopies(pg, sql, 0);
+    // 2626066 is the Mazzer's serial: typed on the Linea, it is not that machine.
+    assert.equal(await linkableSerialOwner(sql, { installId: id, equipmentId: linea, serial: "2626066" }), null);
+    assert.equal(await linkableSerialOwner(sql, { installId: id, equipmentId: linea, serial: "2626066", model: LINEA }), null);
   } finally {
     await pg.close();
   }

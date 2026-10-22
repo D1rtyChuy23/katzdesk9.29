@@ -1104,9 +1104,10 @@ export async function syncInstallUnits(
       if (was) back.push({ ...was, unitId: id });
       continue;
     }
-    // A unit no row named before this save (flagged as on the pre-inspection only) wasn't taken off by it: what was
-    // recorded on it stays for review (Add to this list, Same machine as …, Remove). Only an empty one goes.
-    if (!hadRow.has(id) && recorded.has(id)) continue;
+    // A unit no row named before this save (flagged as on the pre-inspection only), or one whose row now names another
+    // unit by that unit's serial ("L" typed over with PB001708), wasn't taken off by this save: what was recorded on it
+    // stays for review (Same machine as …, Add to this list, Remove). Only an empty one goes.
+    if ((!hadRow.has(id) || repointed.has(id)) && recorded.has(id)) continue;
     await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
@@ -2089,14 +2090,17 @@ export async function linkVisitUnit(
   }
   // The account's other records of that serial are copies of the same machine: one record is left.
   const copies = to.serial_key
-    ? await sql.query<{ id: number }>(
-        "select id from account_equipment where lower(customer) = lower($1) and serial_key = $2 and id <> all($3::int[]) order by id",
+    ? await sql.query<AcctUnit>(
+        `select id, catalog_model, equipment_name, serial, serial_key, electrical, locked_at, locked_by from account_equipment
+          where lower(customer) = lower($1) and serial_key = $2 and id <> all($3::int[]) order by id`,
         [install.customer, to.serial_key, [to.id, from.id]],
       )
     : [];
-  for (const id of [to.id, ...copies.map((c) => c.id)]) {
-    const elsewhere = await openVisitElsewhere(sql, id, data.installId);
-    if (elsewhere) throw new Error(`${unitLabel(to)} is on install #${elsewhere}'s pre-inspection. Take it off there first.`);
+  // Everything is checked before anything is merged, so a refusal changes nothing.
+  for (const u of [from, to, ...copies]) {
+    if (isLocked(u)) throw new Error(`${unitLabel(u)} is locked. ${lockedMessage(lockedBy(u), await lockOwnerName(sql))}`);
+    const elsewhere = await openVisitElsewhere(sql, u.id, data.installId);
+    if (elsewhere) throw new Error(`${unitLabel(u)} is on install #${elsewhere}'s pre-inspection. Take it off there first.`);
   }
   const { mergeEquipmentUnits } = await import("@/lib/ops/account-equip-import");
   for (const copy of copies) await mergeEquipmentUnits(sql, to.id, copy.id);
@@ -2132,6 +2136,8 @@ const ownerInput = z.object({
   installId: z.number().int().positive(),
   equipmentId: z.number().int().positive(),
   serial: z.string().trim().min(1).max(100),
+  /** The model picked in the Edit dialog, when it was changed there too. */
+  model: z.string().trim().max(200).optional(),
 });
 
 /** The unit a serial typed for a visit machine belongs to, when the two can be linked (linkVisitUnit). */
@@ -2157,6 +2163,17 @@ export async function linkableSerialOwner(sql: Sql, data: z.infer<typeof ownerIn
   );
   if (!owners.length) return null;
   if (owners.some((o) => o.customer.trim().toLowerCase() !== install.customer.trim().toLowerCase() || isLocked(o))) return null;
+  // Only the same model: a serial typed by mistake that belongs to another kind of machine is not offered.
+  const mine = (
+    await sql.query<{ catalog_model: string; equipment_name: string }>("select catalog_model, equipment_name from account_equipment where id = $1", [
+      data.equipmentId,
+    ])
+  )[0];
+  const typedModel = data.model?.trim();
+  const sameModel = (o: { catalog_model: string; equipment_name: string }) =>
+    (!!mine && sameUnitModel(modelOf({ id: 0, serial: null, ...mine }), modelOf({ id: 0, serial: null, ...o }))) ||
+    (!!typedModel && sameUnitModel({ catalogModel: typedModel, equipmentName: typedModel }, modelOf({ id: 0, serial: null, ...o })));
+  if (!owners.every(sameModel)) return null;
   for (const o of owners) if (await openVisitElsewhere(sql, o.id, data.installId)) return null;
   const onVisit = (o: (typeof owners)[number]) => o.on_visit === true || String(o.on_visit) === "true";
   const rep = owners.find(onVisit) ?? owners[0]!;

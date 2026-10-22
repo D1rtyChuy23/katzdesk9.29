@@ -538,7 +538,9 @@ function EditMachine({
       const message = e instanceof Error ? e.message : "Could not save";
       // The serial is already on a unit of this account (often a copy no tab shows): offer to link the two instead.
       if (/already on/i.test(message) && machine && serial.trim()) {
-        const found = await findSerialOwner({ data: { installId, equipmentId: machine.equipmentId, serial: serial.trim() } }).catch(() => null);
+        const found = await findSerialOwner({ data: { installId, equipmentId: machine.equipmentId, serial: serial.trim(), model: model.trim() } }).catch(
+          () => null,
+        );
         if (found) {
           setOwner(found);
           return;

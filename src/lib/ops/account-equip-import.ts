@@ -786,6 +786,23 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
     [keep.id, drop.id],
   );
   await sql.query("update pm_runbook_unit_links set account_equipment_id = $1 where account_equipment_id = $2", [keep.id, drop.id]);
+  // PM runbook rows a PM keyed by the dropped record ('acct:<id>'): its units, ticks and options follow to the kept
+  // record. Where the kept record has its own for that PM (or tick), the kept one stays.
+  const [keepKey, dropKey2] = [`acct:${keep.id}`, `acct:${drop.id}`];
+  await sql.query(
+    `update pm_runbook_units d set unit_key = $1 where d.unit_key = $2
+        and not exists (select 1 from pm_runbook_units k where k.pm_job_id = d.pm_job_id and k.unit_key = $1)`,
+    [keepKey, dropKey2],
+  );
+  await sql.query(
+    `update pm_runbook_checks d set unit_key = $1 where d.unit_key = $2
+        and not exists (select 1 from pm_runbook_checks k where k.pm_job_id = d.pm_job_id and k.key = d.key and k.unit_key = $1)`,
+    [keepKey, dropKey2],
+  );
+  await sql.query(
+    "update unit_runbook_options d set unit_key = $1 where d.unit_key = $2 and not exists (select 1 from unit_runbook_options k where k.unit_key = $1)",
+    [keepKey, dropKey2],
+  );
   await sql.query("delete from account_equipment where id = $1", [drop.id]);
   return { keepId: keep.id, serial };
 }
