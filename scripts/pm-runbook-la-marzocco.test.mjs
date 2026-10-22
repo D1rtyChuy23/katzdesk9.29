@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { parseRunbookDefinition } from "../src/lib/ops/pm-runbook-schema.ts";
-import { defaultConfig, kitList, optionalKits, optionsFromPiece, recommendInterval, startingOptions, stepList, unitModelPicked } from "../src/lib/ops/pm-runbook.ts";
+import { visibleOptions, defaultConfig, kitList, optionalKits, optionsFromPiece, recommendInterval, startingOptions, stepList, unitModelPicked } from "../src/lib/ops/pm-runbook.ts";
 import { planUnits } from "../src/lib/ops/pm-runbook-units.ts";
 import { splitEquipment } from "../src/lib/ops/equipment.ts";
 import { matchLmGb5, matchLmGs3, matchLmKb90, matchLmLinea, matchLmStrada } from "../src/lib/ops/runbooks/la-marzocco-match.ts";
@@ -50,6 +50,10 @@ test("Linea: flow meter checks only on AV, steam rebuild on the 6- and 12-month 
   assert.ok(ids({ model: "pb", pm: "3" }).includes("li-pb-wands"));
   assert.ok(!ids({ model: "classic-s", pm: "3" }).some((id) => id.startsWith("li-pb-")), "PB checks stay off the Classic S");
   assert.ok(ids({ model: "pb", pm: "3", scales: "yes" }).includes("li-pb-pfweight"));
+  const shown = (model) => visibleOptions(def, { ...defaultConfig(def), model }).map((o) => o.key);
+  assert.ok(!shown("pb").includes("ctrl"), "Linea PB is AV or ABR only: no brew control choice");
+  assert.ok(shown("classic").includes("ctrl") && shown("classic-s").includes("ctrl"));
+  assert.ok(!ids({ model: "pb", pm: "3", ctrl: "mp" }).includes("li-gh-mp"));
 });
 
 test("Strada and KB90: loose parts per group at 3/9 months, kits at 6 and 12", () => {

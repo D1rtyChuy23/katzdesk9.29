@@ -75,7 +75,13 @@
           "val": "mp",
           "label": "MP (paddle)"
         }
-      ]
+      ],
+      "when": {
+        "model": [
+          "classic",
+          "classic-s"
+        ]
+      }
     },
     {
       "key": "gasket",
@@ -157,8 +163,7 @@
     {
       "when": {
         "model": [
-          "classic-s",
-          "pb"
+          "classic-s"
         ],
         "ctrl": [
           "mp"
@@ -940,6 +945,9 @@
             ],
             "ctrl": [
               "mp"
+            ],
+            "model": [
+              "classic"
             ]
           },
           "ref": "LM checklist"
