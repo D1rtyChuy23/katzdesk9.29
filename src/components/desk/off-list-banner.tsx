@@ -11,6 +11,14 @@ import { Button } from "@/components/ui/button";
 
 const sn = (serial: string | null | undefined) => (serial?.trim() ? `SN ${serial.trim()}` : "No serial");
 
+// A review row: the machine, then its buttons beside it when both fit and on the line below when not. The name column
+// starts at 14rem, so on a phone the buttons move under it instead of squeezing the name to a letter a line.
+const ROW = "flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-border bg-card px-3 py-2";
+const NAME = "min-w-0 grow basis-56";
+const ACTIONS = "flex max-w-full flex-wrap gap-2";
+// A label longer than the card ("Same machine as La Marzocco Linea PB 3 Group AV · SN PB001708") wraps inside it.
+const ACTION = "h-auto min-h-8 py-1.5 text-balance whitespace-normal";
+
 /**
  * The Equipment tab's review of what the two tabs and the account don't agree on. A unit only the Pre-inspection has
  * is added to this list, taken off the pre-inspection, or linked to the machine it is; a unit on the account that is
@@ -71,46 +79,53 @@ export function OffListBanner({ installId }: { installId: number }) {
             {off.map((m) => {
               const label = `${m.name}${m.serial ? ` · SN ${m.serial}` : ""}`;
               return (
-                <li
-                  key={m.equipmentId}
-                  className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
-                  data-testid={`off-list-row-${m.equipmentId}`}
-                >
-                  <span className="min-w-0 flex-1">
+                <li key={m.equipmentId} className={ROW} data-testid={`off-list-row-${m.equipmentId}`}>
+                  <span className={NAME}>
                     <span className="block text-sm font-medium break-words">{m.name}</span>
                     <span className="block text-xs text-muted-foreground">
                       {[sn(m.serial), m.electrical || null, `Pre-inspection ${m.overall.toLowerCase()}`].filter(Boolean).join(" · ")}
                     </span>
                   </span>
-                  {m.sameAs.map((c) => (
+                  <div className={ACTIONS}>
+                    {m.sameAs.map((c) => (
+                      <Button
+                        key={c.equipmentId}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className={ACTION}
+                        disabled={m.locked || busy}
+                        onClick={() => askLink(m, c)}
+                        data-testid={`off-list-same-${m.equipmentId}-${c.equipmentId}`}
+                      >
+                        Same machine as {c.name} · {sn(c.serial)}
+                      </Button>
+                    ))}
                     <Button
-                      key={c.equipmentId}
+                      type="button"
+                      size="sm"
+                      className={ACTION}
+                      disabled={m.locked || busy}
+                      onClick={() => add.mutate(m.equipmentId)}
+                      data-testid={`off-list-add-${m.equipmentId}`}
+                    >
+                      Add to this list
+                    </Button>
+                    <Button
                       type="button"
                       size="sm"
                       variant="outline"
+                      className={ACTION}
                       disabled={m.locked || busy}
-                      onClick={() => askLink(m, c)}
-                      data-testid={`off-list-same-${m.equipmentId}-${c.equipmentId}`}
+                      onClick={() => {
+                        if (!window.confirm(`Take ${label} off the pre-inspection? Its checks and photos for this visit go with it.`)) return;
+                        drop.mutate(m.equipmentId);
+                      }}
+                      data-testid={`off-list-remove-${m.equipmentId}`}
                     >
-                      Same machine as {c.name} · {sn(c.serial)}
+                      Remove from pre-inspection
                     </Button>
-                  ))}
-                  <Button type="button" size="sm" disabled={m.locked || busy} onClick={() => add.mutate(m.equipmentId)} data-testid={`off-list-add-${m.equipmentId}`}>
-                    Add to this list
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={m.locked || busy}
-                    onClick={() => {
-                      if (!window.confirm(`Take ${label} off the pre-inspection? Its checks and photos for this visit go with it.`)) return;
-                      drop.mutate(m.equipmentId);
-                    }}
-                    data-testid={`off-list-remove-${m.equipmentId}`}
-                  >
-                    Remove from pre-inspection
-                  </Button>
+                  </div>
                 </li>
               );
             })}
@@ -127,33 +142,32 @@ export function OffListBanner({ installId }: { installId: number }) {
           </p>
           <ul className="mt-2 grid gap-2">
             {onAccount.map((a) => (
-              <li
-                key={a.equipmentId}
-                className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
-                data-testid={`account-match-${a.equipmentId}`}
-              >
-                <span className="min-w-0 flex-1">
+              <li key={a.equipmentId} className={ROW} data-testid={`account-match-${a.equipmentId}`}>
+                <span className={NAME}>
                   <span className="block text-sm font-medium break-words">{a.name}</span>
                   <span className="block text-xs text-muted-foreground">
                     {[sn(a.serial), a.records > 1 ? `${a.records} records on the account` : null].filter(Boolean).join(" · ")}
                   </span>
                 </span>
-                {a.forUnits.map((id) => {
-                  const unit = unitOf(id);
-                  if (!unit) return null;
-                  return (
-                    <Button
-                      key={id}
-                      type="button"
-                      size="sm"
-                      disabled={unit.locked || busy}
-                      onClick={() => askLink(unit, a)}
-                      data-testid={`account-link-${a.equipmentId}-${id}`}
-                    >
-                      It's the {unit.name} here ({sn(unit.serial)})
-                    </Button>
-                  );
-                })}
+                <div className={ACTIONS}>
+                  {a.forUnits.map((id) => {
+                    const unit = unitOf(id);
+                    if (!unit) return null;
+                    return (
+                      <Button
+                        key={id}
+                        type="button"
+                        size="sm"
+                        className={ACTION}
+                        disabled={unit.locked || busy}
+                        onClick={() => askLink(unit, a)}
+                        data-testid={`account-link-${a.equipmentId}-${id}`}
+                      >
+                        It's the {unit.name} here ({sn(unit.serial)})
+                      </Button>
+                    );
+                  })}
+                </div>
               </li>
             ))}
           </ul>
