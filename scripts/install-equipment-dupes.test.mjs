@@ -585,11 +585,13 @@ test("R5: every Remove keeps recipe, ownership, plug, water and the deal tie on 
       const id = (await pg.query("insert into installs (customer, equipment, machines) values ('Tie Cafe', 'Bunn TB3\nFetco 52H', $1) returning id", [JSON.stringify(rows)])).rows[0].id;
       const view = await readInspection(sql, id);
       const tb3 = view.machines.find((m) => m.name === "Bunn TB3").equipmentId;
+      const fetco = view.machines.find((m) => m.name === "Fetco 52H").equipmentId;
       if (how === "preinspection") await removeInspectionUnit(sql, { installId: id, equipmentId: tb3 }, "tester");
       else if (how === "account") await removeEquipmentUnit(sql, tb3);
       else await removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "" }, "tester");
       const after = machines.parseMachinesJson((await pg.query("select machines from installs where id = $1", [id])).rows[0].machines);
-      assert.deepEqual(after, [{ ...rows[1], recipeId: 9 }], how);
+      // The row that stays keeps its pre-inspection unit's id too.
+      assert.deepEqual(after, [{ ...rows[1], recipeId: 9, unitId: fetco }], how);
     } finally {
       await pg.close();
     }

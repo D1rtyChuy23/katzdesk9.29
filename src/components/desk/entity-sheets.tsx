@@ -43,6 +43,7 @@ import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerial
 import { isInstalled } from "@/lib/ops/install-status";
 import { useCanLock } from "./use-can-lock";
 import { removeInstallMachine } from "@/lib/ops/inspection-api";
+import { OffListBanner } from "@/components/desk/off-list-banner";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
 import { moneyExact } from "@/lib/ops/clock";
@@ -375,7 +376,24 @@ export function InstallSheet({
   const skipToast = useRef(false);
   const specsRef = useRef(specs);
   specsRef.current = specs;
+  /** The board's row as it is now: a save queued behind another reads it when it runs, not as it was when queued. */
+  const rowRef = useRef(row);
+  rowRef.current = row;
+  /**
+   * The list as this window expects the server has it: what the board last read, or what this window last sent (until
+   * the board reads it back, or, if the server refused it, the list that save was built on). An edit is told apart from
+   * the server's change against it.
+   */
   const seenServer = useRef<{ id: number; rows: MachineSpec[] } | null>(null);
+  /** This window sent a list the board hasn't read back yet: the board's row is older than what the server has. */
+  const sentAhead = useRef(false);
+  /** Saves of each install's list this window sent that haven't come back. A board read meanwhile may be older than them. */
+  const pending = useRef(new Map<number, number>());
+  /** A list a save sent that the server refused, and the list that save was built on: a later save built on it uses that. */
+  const refused = useRef(new Map<MachineSpec[], MachineSpec[]>());
+  /** A board read was set aside while a save was on its way: once the save is back, the board's row is read again. */
+  const skippedRead = useRef(false);
+  const [reread, setReread] = useState(0);
   const catalog = catalogModels([
     ...(directoryEquip.data ?? []).map((e) => e.name),
     ...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
@@ -390,32 +408,58 @@ export function InstallSheet({
     setSpecs(loaded.map((s) => ({ ...s })));
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
-  const serialSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}`).join("\n");
-  const machineSig = (row?.machines ?? []).map((m) => `${m.equipment}\t${m.serial}\t${m.powerVoltage}`).join("\n");
+  // Every field the merge compares, and each row's unit id: a change to any of them on the server reaches this window.
+  const machineSig = JSON.stringify(row?.machines ?? []);
   useEffect(() => {
     if (!row || hydratedId !== row.id) return;
     const server = row.machines ?? [];
     const seen = seenServer.current;
     if (!seen || seen.id !== row.id) {
       seenServer.current = { id: row.id, rows: server };
+      sentAhead.current = false;
       return;
+    }
+    // A read while this window's own save is on its way may be from before it: the read that save sets off follows.
+    if (pending.current.get(row.id)) {
+      // Unless nothing of this install's is on its way any more (a save that never settled): then the count was stale.
+      if (qc.isMutating({ predicate: (m) => m.options.scope?.id === `install-sheet-${row.id}` })) {
+        skippedRead.current = true;
+        return;
+      }
+      pending.current.delete(row.id);
     }
     const previous = seen.rows;
     seenServer.current = { id: row.id, rows: server };
+    sentAhead.current = false;
     loadedSpecs.current = machinesBeforeSave(loadedSpecs.current, previous, server);
     const next = machinesBeforeSave(specsRef.current, previous, server);
     setSpecs(next);
     setEquipPieces(next.map((s) => s.equipment));
     // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row?.id, hydratedId, serialSig, machineSig]);
+  }, [row?.id, hydratedId, machineSig, reread]);
   /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
   const queue = { id: `install-sheet-${row?.id}` };
+  const lookAgain = () => {
+    skippedRead.current = false;
+    setReread((n) => n + 1);
+  };
+  /** The list a save was built on, past any save before it that the server refused (that list was never stored). */
+  const baseOf = (list: MachineSpec[]) => {
+    let base = list;
+    for (let hop = refused.current.get(base); hop; hop = refused.current.get(base)) base = hop;
+    return base;
+  };
   const save = useMutation({
     scope: queue,
-    mutationFn: (d: Parameters<typeof updateInstall>[0]["data"]) => updateInstall({ data: d }),
+    mutationFn: (vars: SaveVars) => {
+      const { builtOn, sent, ...d } = vars;
+      void sent;
+      // The list this save's rows were built on goes with it: the server keeps whatever changed there since.
+      return updateInstall({ data: d.machines !== undefined && builtOn ? { ...d, machinesBase: JSON.stringify(baseOf(builtOn)) } : d });
+    },
     onSuccess: (saved, vars) => {
-      const keys = Object.keys(vars).filter((k) => k !== "id");
+      const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent");
       const machineOnly = keys.every((k) =>
         ["equipment", "serial", "powerVoltage", "machines"].includes(k),
       );
@@ -429,18 +473,38 @@ export function InstallSheet({
         );
       } else if (!machineOnly && !skipToast.current) toast.success("Saved");
       skipToast.current = false;
-      void qc.invalidateQueries({ queryKey: ["installs"] });
+      const refreshed = qc.invalidateQueries({ queryKey: ["installs"] });
+      // A read set aside meanwhile: look at the board's row again once this save's own read is in, even if it reads the
+      // same (not awaited, or the next save in the queue would wait for it).
+      if (skippedRead.current) void refreshed.then(lookAgain);
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+    onError: (e, vars) => {
+      if (skippedRead.current) lookAgain();
+      // Not stored: a later save built on this list is based on what this one was built on, and the window expects that.
+      if (vars.sent && vars.builtOn) {
+        refused.current.set(vars.sent, vars.builtOn);
+        if (seenServer.current?.id === vars.id && seenServer.current.rows === vars.sent) {
+          seenServer.current = { id: vars.id, rows: baseOf(vars.builtOn) };
+          sentAhead.current = false;
+        }
+      }
+      toast.error(e instanceof Error ? e.message : "Could not save");
+    },
+    onSettled: (_data, _error, vars) => {
+      if (!vars.sent) return;
+      const left = (pending.current.get(vars.id) ?? 1) - 1;
+      if (left > 0) pending.current.set(vars.id, left);
+      else pending.current.delete(vars.id);
+    },
   });
   const canLock = useCanLock();
   const dropRow = useMutation({
     scope: queue,
-    mutationFn: (v: { installId: number; index: number; equipment: string; serial: string }) => removeInstallMachine({ data: v }),
+    mutationFn: (v: { installId: number; index: number; equipment: string; serial: string; unitId: number | null }) => removeInstallMachine({ data: v }),
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"),
   });
   const dropInstall = useMutation({
@@ -468,25 +532,44 @@ export function InstallSheet({
     return null;
   };
 
+  /** The newest list this window knows the server has: the board's row, or what it sent if the board hasn't read that back. */
+  function knownServer(id: number): MachineSpec[] {
+    const seen = seenServer.current?.id === id ? seenServer.current.rows : null;
+    const current = rowRef.current?.id === id ? rowRef.current : null;
+    return seen && (sentAhead.current || !current) ? seen : (current?.machines ?? seen ?? []);
+  }
+
   function listForSave(next: MachineSpec[]): MachineSpec[] {
-    if (!row) return dedupeMachineSerials(next);
-    const baseline = seenServer.current?.id === row.id ? seenServer.current.rows : specs;
-    return machinesBeforeSave(next, baseline, row.machines ?? []);
+    const current = rowRef.current;
+    if (!current) return dedupeMachineSerials(next);
+    const seen = seenServer.current?.id === current.id ? seenServer.current.rows : null;
+    return machinesBeforeSave(next, seen ?? specsRef.current, knownServer(current.id));
+  }
+
+  /** A save of the list: counted until it comes back, and sent with the list its rows were built on. */
+  function listSend(id: number, rows: MachineSpec[]): { builtOn: MachineSpec[]; sent: MachineSpec[] } {
+    const builtOn = knownServer(id);
+    pending.current.set(id, (pending.current.get(id) ?? 0) + 1);
+    sentAhead.current = true;
+    seenServer.current = { id, rows };
+    return { builtOn, sent: rows };
   }
 
   function persistMachines(next: MachineSpec[]) {
+    const current = rowRef.current;
     next = listForSave(next);
     setSpecs(next);
     setEquipPieces(next.map((s) => s.equipment));
-    if (!row) return;
+    if (!current) return;
     const packed = serializeMachines(next);
     loadedSpecs.current = next;
     save.mutate({
-      id: row.id,
+      id: current.id,
       equipment: packed.equipment,
       serial: packed.serial,
       powerVoltage: packed.powerVoltage,
       machines: packed.machines,
+      ...listSend(current.id, next),
     });
   }
 
@@ -586,7 +669,7 @@ export function InstallSheet({
                         aviKatz: fd.get("aviKatz") === "on",
                         paymentStatus: String(fd.get("paymentStatus") || "") || null,
                         // Closing the window submits this form: an unchanged list is left as saved, typed serials and all.
-                        ...machineFields,
+                        ...(Object.keys(machineFields).length ? { ...machineFields, ...listSend(row.id, specs) } : {}),
                       });
                     }}
                   >
@@ -689,6 +772,7 @@ export function InstallSheet({
                       toast.success("Attached to this install");
                     }}
                   />
+                  <OffListBanner installId={row.id} />
                   <InstallTicket install={row} machines={specs} recipes={recs.data ?? []} />
                   <div className="grid gap-3 border-b border-border px-4 py-3">
                     <EquipmentMultiCombo
@@ -721,12 +805,12 @@ export function InstallSheet({
                           return;
                         }
                         if (!window.confirm(`Remove ${label} from this install?`)) return;
-                        const next = specs.filter((_, i) => i !== index);
                         // The server takes the row off the list and its unit off the visit (even one that passed); the save
-                        // follows in the same queue with the rest of the window's list. A refused remove saves nothing.
+                        // follows in the same queue with the rest of the window's list, as it is then (a refresh may have
+                        // brought a machine added elsewhere meanwhile). A refused remove saves nothing.
                         dropRow.mutate(
-                          { installId: row.id, index, equipment: spec.equipment, serial: spec.serial },
-                          { onSuccess: () => persistMachines(next) },
+                          { installId: row.id, index, equipment: spec.equipment, serial: spec.serial, unitId: spec.unitId ?? null },
+                          { onSuccess: () => persistMachines(withoutRow(specsRef.current, spec)) },
                         );
                       }}
                     />
@@ -757,6 +841,25 @@ export function InstallSheet({
     </Sheet>
   );
 }
+
+/**
+ * The window's rows without the one taken off: the row with its unit, else that very row. Not found (a refresh gave the
+ * rows new copies, or already took it off), nothing here is guessed: the save's merge on the server drops the row the
+ * Remove took off, and a twin of it stays.
+ */
+function withoutRow(rows: MachineSpec[], gone: MachineSpec): MachineSpec[] {
+  let at = gone.unitId ? rows.findIndex((r) => r.unitId === gone.unitId) : -1;
+  if (at < 0) at = rows.indexOf(gone);
+  return at < 0 ? rows : rows.filter((_, i) => i !== at);
+}
+
+/** A save from the install window: the install's fields, and for the machine list the list it was built on. */
+type SaveVars = Parameters<typeof updateInstall>[0]["data"] & {
+  /** The list this save's rows were built on: sent as its base, so the server keeps whatever changed there since. */
+  builtOn?: MachineSpec[];
+  /** The rows this save sends, as the window holds them: a later save may be built on them. */
+  sent?: MachineSpec[];
+};
 
 /** More than this many machines and the rows fold into one line with a count. */
 const DEAL_ROWS_OPEN = 3;

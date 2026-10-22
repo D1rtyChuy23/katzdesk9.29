@@ -48,6 +48,7 @@ import type {
 } from "./types";
 export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
+import { machinesBeforeSave } from "./install-form";
 import { backfillAssignedSerialsOnce } from "./serial-backfill";
 import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { assertUnlocked, canLockEquipment } from "./equipment-lock";
@@ -1425,7 +1426,31 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 	}
 	return withWorkOrders(sql, await withInspections(sql, applyMarks(installs, marks)));
 });
-type UpdateInstallInput = { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean };
+type UpdateInstallInput = { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean;
+	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
+	machinesBase?: MachineSpec[] | string | null };
+
+/**
+ * A window's list saved over a newer one: what the server's list gained since the window last saw it (a machine added or
+ * removed on the Pre-inspection tab, a serial or model fixed there, another window's save) is kept, unless this window
+ * changed the same row or field. Without it, a window left open saved its old list back: a machine added elsewhere was
+ * dropped (and its unit pruned), one removed came back, and a fixed serial went back to the old one.
+ */
+function mergeStaleList(data: UpdateInstallInput, c: any, catalog: string[]): void {
+	if (data.machinesBase == null || data.machines === undefined) return;
+	const asText = (v: MachineSpec[] | string) => (typeof v === "string" ? v : JSON.stringify(v));
+	// The last row taken off sends no list at all: that is an empty list, and what the server gained since still stays.
+	const sent = data.machines == null ? [] : parseMachinesJson(asText(data.machines));
+	const base = parseMachinesJson(asText(data.machinesBase));
+	const stored = specsFromInstall(c.equipment, c.serial, c.power_voltage, c.machines, catalog);
+	const merged = machinesBeforeSave(sent, base, stored);
+	if (JSON.stringify(merged) === JSON.stringify(sent)) return;
+	const packed = serializeMachines(merged);
+	data.machines = packed.machines;
+	data.equipment = packed.equipment;
+	data.serial = packed.serial;
+	data.powerVoltage = packed.powerVoltage;
+}
 export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: UpdateInstallInput) => d).handler(async ({ data, context }: any) => updateInstallFor(await ready(), data, context));
 export async function updateInstallFor(sql: any, data: UpdateInstallInput, context: { userId: string }): Promise<Install> {
 	const cur = await sql`select * from installs where id = ${data.id}`;
@@ -1454,6 +1479,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		}
 	}
 	const catalog = await loadEquipCatalog(sql);
+	mergeStaleList(data, c, catalog);
 	const machinesJson = data.machines === undefined ? c.machines : data.machines == null ? null : (() => {
 		const raw = typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
 		const parsed = parseMachinesJson(raw);

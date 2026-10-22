@@ -4,7 +4,10 @@ import { Camera, ChevronLeft, ImagePlus, Images, Pencil, Trash2, Download } from
 import { ZoomableImage } from "@/components/desk/image-lightbox";
 import {
   addInspectionEquipment,
+  addInspectionUnitToList,
   editInspectionEquipment,
+  findSerialOwner,
+  linkInspectionUnit,
   removeInspectionEquipment,
   addInspectionPhoto,
   copyInspectionNa,
@@ -19,6 +22,7 @@ import {
   type InspectionMachine,
   type InspectionPhoto,
   type InspectionView,
+  type SerialOwner,
 } from "@/lib/ops/inspection-api";
 import { formatPingTime } from "@/lib/ops/clock";
 import { sameCatalogModel } from "@/lib/ops/account-equip";
@@ -211,6 +215,16 @@ function MachineList({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove it"),
   });
+  // Review: a unit only this pre-inspection has. Adding its row is someone's choice; a load never adds it.
+  const toList = useMutation({
+    mutationFn: (equipmentId: number) => addInspectionUnitToList({ data: { installId: view.installId, equipmentId } }),
+    onSuccess: (next) => {
+      toast.success("Added to the equipment list");
+      onSaved(next);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add it to the equipment list"),
+  });
+  const offList = view.machines.filter((m) => !m.onList).length;
   return (
     <div data-testid="machine-list">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
@@ -222,10 +236,17 @@ function MachineList({
       <p className="px-4 pt-1 text-xs text-muted-foreground">
         Pick the unit you are standing in front of. The others stay untouched.
       </p>
+      {offList ? (
+        <p className="mx-4 mt-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs" data-testid="off-list-note">
+          {offList === 1 ? "1 machine here is" : `${offList} machines here are`} not on the install's equipment list. Add each one there, or
+          remove it from the pre-inspection, so both tabs list the same machines.
+        </p>
+      ) : null}
       {view.machines.length ? (
         <ul className="mt-3 divide-y divide-border border-y border-border">
           {view.machines.map((m) => (
-            <li key={m.equipmentId} className="flex items-stretch">
+            <li key={m.equipmentId}>
+              <div className="flex items-stretch">
               <button
                 type="button"
                 data-testid={`inspect-machine-${m.equipmentId}`}
@@ -279,6 +300,26 @@ function MachineList({
               >
                 <Trash2 className="size-4" />
               </button>
+              </div>
+              {!m.onList ? (
+                <div
+                  className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-dashed border-warning/40 bg-warning/5 px-4 py-2 text-xs"
+                  data-testid={`off-list-${m.equipmentId}`}
+                >
+                  <span className="font-medium text-foreground">Not on the equipment list</span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="ml-auto"
+                    disabled={m.locked || toList.isPending}
+                    onClick={() => toList.mutate(m.equipmentId)}
+                    data-testid={`add-to-list-${m.equipmentId}`}
+                  >
+                    Add to the equipment list
+                  </Button>
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -317,10 +358,12 @@ function rememberAddedMachine(qc: ReturnType<typeof useQueryClient>, view: Inspe
       if (row.id !== view.installId) return row;
       const machines = appendServerMachines(
         row.machines ?? [],
-        view.machines.map((m) => ({
+        // Only units the list has: one flagged as only on the pre-inspection waits for someone to add it.
+        view.machines.filter((m) => m.onList).map((m) => ({
           equipment: m.name || m.model,
           serial: m.serial ?? "",
           powerVoltage: m.electrical ?? "",
+          unitId: m.equipmentId,
         })),
       );
       const packed = serializeMachines(machines);
@@ -468,25 +511,51 @@ function EditMachine({
   const [model, setModel] = useState("");
   const [serial, setSerial] = useState("");
   const [electrical, setElectrical] = useState("");
+  /** The unit already holding the serial typed here, when it can be linked to this machine instead of refused. */
+  const [owner, setOwner] = useState<SerialOwner | null>(null);
   useEffect(() => {
     setModel(machine ? machine.name || machine.model : "");
     setSerial(machine?.serial ?? "");
     setElectrical(machine?.electrical ?? "");
+    setOwner(null);
   }, [machine]);
+  const saved = (view: InspectionView, message: string) => {
+    toast.success(message);
+    void qc.invalidateQueries({ queryKey: ["installs"] });
+    void qc.invalidateQueries({ queryKey: ["customers"] });
+    void qc.invalidateQueries({ queryKey: ["account-equipment"] });
+    void qc.invalidateQueries({ queryKey: ["unit-mismatches"] });
+    onSaved(view);
+    onClose();
+  };
   const save = useMutation({
     mutationFn: () =>
       editInspectionEquipment({
         data: { installId, equipmentId: machine!.equipmentId, model: model.trim(), serial: serial.trim() || null, electrical: electrical.trim() || null },
       }),
-    onSuccess: (view) => {
-      toast.success("Saved on the pre-inspection and the equipment list");
-      void qc.invalidateQueries({ queryKey: ["installs"] });
-      void qc.invalidateQueries({ queryKey: ["customers"] });
-      onSaved(view);
-      onClose();
+    onSuccess: (view) => saved(view, "Saved on the pre-inspection and the equipment list"),
+    onError: async (e) => {
+      const message = e instanceof Error ? e.message : "Could not save";
+      // The serial is already on a unit of this account (often a copy no tab shows): offer to link the two instead.
+      if (/already on/i.test(message) && machine && serial.trim()) {
+        const found = await findSerialOwner({ data: { installId, equipmentId: machine.equipmentId, serial: serial.trim(), model: model.trim() } }).catch(
+          () => null,
+        );
+        if (found) {
+          setOwner(found);
+          return;
+        }
+      }
+      toast.error(message);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  const link = useMutation({
+    mutationFn: (to: SerialOwner) =>
+      linkInspectionUnit({ data: { installId, fromEquipmentId: machine!.equipmentId, toEquipmentId: to.equipmentId, addRow: true } }),
+    onSuccess: (view, to) => saved(view, `Linked: this machine is ${to.name} SN ${to.serial} now, with its checks and photos`),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not link them"),
+  });
+  const busy = save.isPending || link.isPending;
   return (
     <Dialog open={!!machine} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md" data-testid="edit-machine-dialog">
@@ -507,7 +576,16 @@ function EditMachine({
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
               <Label htmlFor={`edit-sn-${installId}`}>Serial</Label>
-              <Input id={`edit-sn-${installId}`} className="mt-1" value={serial} onChange={(e) => setSerial(e.target.value)} data-testid="edit-machine-serial" />
+              <Input
+                id={`edit-sn-${installId}`}
+                className="mt-1"
+                value={serial}
+                onChange={(e) => {
+                  setSerial(e.target.value);
+                  setOwner(null);
+                }}
+                data-testid="edit-machine-serial"
+              />
             </div>
             <div>
               <Label htmlFor={`edit-el-${installId}`}>Electrical</Label>
@@ -521,11 +599,27 @@ function EditMachine({
               />
             </div>
           </div>
+          {owner ? (
+            <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm" data-testid="edit-machine-link">
+              <p>
+                SN {owner.serial} is {owner.onVisit ? "another machine on this install" : "already on this account, not on this install"}:{" "}
+                <span className="font-medium">{owner.name}</span>
+                {owner.records > 1 ? ` (${owner.records} records with that serial)` : ""}.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                If it is this machine, link them. One unit is left: {owner.name} SN {owner.serial}, with this machine's checks and photos,
+                on both tabs.
+              </p>
+              <Button type="button" size="sm" className="mt-2" disabled={busy} onClick={() => link.mutate(owner)} data-testid="edit-machine-link-confirm">
+                {link.isPending ? "Linking…" : "Link them"}
+              </Button>
+            </div>
+          ) : null}
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={save.isPending}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
               Cancel
             </Button>
-            <Button type="submit" disabled={save.isPending} data-testid="edit-machine-save">
+            <Button type="submit" disabled={busy} data-testid="edit-machine-save">
               {save.isPending ? "Saving…" : "Save"}
             </Button>
           </div>

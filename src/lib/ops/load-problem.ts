@@ -56,6 +56,7 @@ const NOUNS: Record<string, string> = {
   analytics: "analytics",
   planner: "the planner",
   "runbook-readiness": "runbook readiness",
+  "unit-mismatches": "the equipment mismatch review",
   "library-files": "the Library",
   "clean-names": "clean names",
   "address-report": "the address report",

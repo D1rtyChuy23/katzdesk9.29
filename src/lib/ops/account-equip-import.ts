@@ -699,13 +699,19 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   const lists = linked.flatMap((row) => {
     const { machines, typed } = installMachines(row, catalog);
     if (machines.some((m) => serialKey(m.serial) === key)) return [];
-    const at = machines.findIndex((m) =>
-      dropKey
-        ? serialKey(m.serial) === dropKey
-        : !serialKey(m.serial) && (sameCatalogModel(drop.catalog_model, m.equipment) || sameCatalogModel(drop.equipment_name, m.equipment)),
-    );
+    // The row that names the dropped unit by its id first; then by its serial, or a row of its model with none.
+    const named = machines.findIndex((m) => m.unitId === drop.id);
+    const at =
+      named >= 0
+        ? named
+        : machines.findIndex((m) =>
+            dropKey
+              ? serialKey(m.serial) === dropKey
+              : !serialKey(m.serial) && (sameCatalogModel(drop.catalog_model, m.equipment) || sameCatalogModel(drop.equipment_name, m.equipment)),
+          );
     if (at < 0) return [];
-    machines[at] = { ...machines[at]!, serial };
+    // The row names the kept unit now, by its serial and by its id.
+    machines[at] = { ...machines[at]!, serial, ...(machines[at]!.unitId === drop.id ? { unitId: keep.id } : {}) };
     const packed = serializeMachines(machines);
     return [{ id: row.id, equipment: typed ? row.equipment : packed.equipment, machines: packed.machines, serial: packed.serial, power: packed.powerVoltage }];
   });
@@ -780,6 +786,23 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
     [keep.id, drop.id],
   );
   await sql.query("update pm_runbook_unit_links set account_equipment_id = $1 where account_equipment_id = $2", [keep.id, drop.id]);
+  // PM runbook rows a PM keyed by the dropped record ('acct:<id>'): its units, ticks and options follow to the kept
+  // record. Where the kept record has its own for that PM (or tick), the kept one stays.
+  const [keepKey, dropKey2] = [`acct:${keep.id}`, `acct:${drop.id}`];
+  await sql.query(
+    `update pm_runbook_units d set unit_key = $1 where d.unit_key = $2
+        and not exists (select 1 from pm_runbook_units k where k.pm_job_id = d.pm_job_id and k.unit_key = $1)`,
+    [keepKey, dropKey2],
+  );
+  await sql.query(
+    `update pm_runbook_checks d set unit_key = $1 where d.unit_key = $2
+        and not exists (select 1 from pm_runbook_checks k where k.pm_job_id = d.pm_job_id and k.key = d.key and k.unit_key = $1)`,
+    [keepKey, dropKey2],
+  );
+  await sql.query(
+    "update unit_runbook_options d set unit_key = $1 where d.unit_key = $2 and not exists (select 1 from unit_runbook_options k where k.unit_key = $1)",
+    [keepKey, dropKey2],
+  );
   await sql.query("delete from account_equipment where id = $1", [drop.id]);
   return { keepId: keep.id, serial };
 }
