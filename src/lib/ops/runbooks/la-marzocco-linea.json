@@ -119,11 +119,11 @@
       "choices": [
         {
           "val": "1037",
-          "label": "Newer style (LM1037)"
+          "label": "LM1037 (serial PB019865 and after)"
         },
         {
           "val": "l190",
-          "label": "Earlier style (L190)"
+          "label": "L190 (before PB019865)"
         }
       ]
     },
@@ -178,7 +178,7 @@
         ]
       },
       "tone": "warn",
-      "text": "Vacuum breaker: later Linea PB serials use the newer-style LM1037, earlier ones use L190. The serial number where it changed isn't confirmed yet, so check the vacuum breaker on the machine and set \"Vacuum breaker style\" before ordering."
+      "text": "Vacuum breaker: Linea PB serial PB019865 and after use LM1037; earlier serials use L190. Set \"Vacuum breaker style\" from the serial number."
     },
     {
       "when": {
@@ -853,7 +853,7 @@
           "1037"
         ]
       },
-      "note": "Fitted on later PB serials. Check the one on the machine before ordering."
+      "note": "Linea PB serial PB019865 and after."
     },
     {
       "ev": "L190",
@@ -872,7 +872,7 @@
           "l190"
         ]
       },
-      "note": "Fitted on earlier PB serials. Check the one on the machine before ordering."
+      "note": "Linea PB serials before PB019865."
     },
     {
       "ev": "L192",
@@ -1426,7 +1426,7 @@
           ],
           [
             "1037 / L190",
-            "Vacuum breaker: newer style (later serials) / earlier style",
+            "Vacuum breaker: LM1037 from serial PB019865, L190 before",
             "—",
             "—",
             "1"
