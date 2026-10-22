@@ -526,8 +526,10 @@ test("the install window: its baseline follows every field and id, each save sen
   const start = src.indexOf("export function InstallSheet(");
   const sheet = src.slice(start, src.indexOf("\nexport function ", start + 1));
   assert.match(sheet, /const machineSig = JSON\.stringify\(row\?\.machines \?\? \[\]\);/);
-  assert.match(sheet, /\}, \[row\?\.id, hydratedId, machineSig\]\);/);
-  assert.match(sheet, /if \(pending\.current\.get\(row\.id\)\) return;/);
+  assert.match(sheet, /\}, \[row\?\.id, hydratedId, machineSig, reread\]\);/);
+  assert.match(sheet, /if \(pending\.current\.get\(row\.id\)\) \{\s*\/\/[^\n]*\n\s*if \(qc\.isMutating\(\{ predicate: \(m\) => m\.options\.scope\?\.id === `install-sheet-\$\{row\.id\}` \}\)\) \{\s*skippedRead\.current = true;\s*return;/);
+  // A read set aside is looked at again once the save is back.
+  assert.match(sheet, /if \(skippedRead\.current\) void refreshed\.then\(lookAgain\);/);
   const send = sheet.slice(sheet.indexOf("function listSend"), sheet.indexOf("function persistMachines"));
   assert.match(send, /const builtOn = knownServer\(id\);/);
   assert.match(send, /sentAhead\.current = true;\s*seenServer\.current = \{ id, rows \};\s*return \{ builtOn, sent: rows \};/);

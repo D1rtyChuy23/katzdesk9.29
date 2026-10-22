@@ -391,6 +391,9 @@ export function InstallSheet({
   const pending = useRef(new Map<number, number>());
   /** A list a save sent that the server refused, and the list that save was built on: a later save built on it uses that. */
   const refused = useRef(new Map<MachineSpec[], MachineSpec[]>());
+  /** A board read was set aside while a save was on its way: once the save is back, the board's row is read again. */
+  const skippedRead = useRef(false);
+  const [reread, setReread] = useState(0);
   const catalog = catalogModels([
     ...(directoryEquip.data ?? []).map((e) => e.name),
     ...(assets.data ?? []).filter((a) => a.kind === "equip").map((a) => a.model),
@@ -417,7 +420,14 @@ export function InstallSheet({
       return;
     }
     // A read while this window's own save is on its way may be from before it: the read that save sets off follows.
-    if (pending.current.get(row.id)) return;
+    if (pending.current.get(row.id)) {
+      // Unless nothing of this install's is on its way any more (a save that never settled): then the count was stale.
+      if (qc.isMutating({ predicate: (m) => m.options.scope?.id === `install-sheet-${row.id}` })) {
+        skippedRead.current = true;
+        return;
+      }
+      pending.current.delete(row.id);
+    }
     const previous = seen.rows;
     seenServer.current = { id: row.id, rows: server };
     sentAhead.current = false;
@@ -427,9 +437,13 @@ export function InstallSheet({
     setEquipPieces(next.map((s) => s.equipment));
     // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row?.id, hydratedId, machineSig]);
+  }, [row?.id, hydratedId, machineSig, reread]);
   /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
   const queue = { id: `install-sheet-${row?.id}` };
+  const lookAgain = () => {
+    skippedRead.current = false;
+    setReread((n) => n + 1);
+  };
   /** The list a save was built on, past any save before it that the server refused (that list was never stored). */
   const baseOf = (list: MachineSpec[]) => {
     let base = list;
@@ -459,13 +473,17 @@ export function InstallSheet({
         );
       } else if (!machineOnly && !skipToast.current) toast.success("Saved");
       skipToast.current = false;
-      void qc.invalidateQueries({ queryKey: ["installs"] });
+      const refreshed = qc.invalidateQueries({ queryKey: ["installs"] });
+      // A read set aside meanwhile: look at the board's row again once this save's own read is in, even if it reads the
+      // same (not awaited, or the next save in the queue would wait for it).
+      if (skippedRead.current) void refreshed.then(lookAgain);
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
     },
     onError: (e, vars) => {
+      if (skippedRead.current) lookAgain();
       // Not stored: a later save built on this list is based on what this one was built on, and the window expects that.
       if (vars.sent && vars.builtOn) {
         refused.current.set(vars.sent, vars.builtOn);
