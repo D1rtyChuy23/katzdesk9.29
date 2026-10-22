@@ -1,31 +1,5 @@
-/**
- * Plug images for the Plug cell, cut from the provided NEMA configurations chart
- * (public/nema/<code>P.png). Only codes we have a real image for get one — no generated art,
- * and a 120 V plug never borrows the L6 twist-lock image.
- */
-const NEMA_IMAGES = new Set([
-  "5-15",
-  "5-20",
-  "6-20",
-  "6-30",
-  "6-50",
-  "14-20",
-  "14-30",
-  "L5-15",
-  "L5-20",
-  "L6-20",
-  "L6-30",
-  "L14-20",
-  "L14-30",
-]);
-
-export function hasPlugFace(nema: string | null | undefined): boolean {
-  return !!nema && NEMA_IMAGES.has(nema);
-}
-
-export function plugImageSrc(nema: string): string {
-  return `/nema/${nema}P.png`;
-}
+/** Plug images for the Plug cell. The list of codes we have a picture for lives in plug-faces.ts. */
+import { hasPlugFace, plugImageSrc } from "@/lib/ops/plug-faces";
 
 /** Image + NEMA label for the Plug cell. Nothing for hardwire or a code we have no image for. */
 export function PlugPicture({ nema, label, note }: { nema: string; label: string; note?: string | null }) {
