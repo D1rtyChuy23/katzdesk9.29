@@ -156,6 +156,13 @@ export type Install = {
   trfIssued: boolean;
   /** New account or Update, picked on the Details tab. Null until someone picks one. */
   installType: "new" | "update" | null;
+  /**
+   * Who to ask for on site, typed on the Details tab. Null until someone types one: the Equipment Request Form then
+   * shows the pre-inspection's site contact.
+   */
+  siteContact: string | null;
+  /** The site contact's phone, typed on the Details tab. */
+  contactPhone: string | null;
   /** The customer's Account Number, when it has one. */
   accountNumber?: string | null;
   received: string | null;

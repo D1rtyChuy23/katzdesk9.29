@@ -49,7 +49,7 @@ import type {
 } from "./types";
 export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
-import { installTypeLabel, installTypeOf, machinesBeforeSave } from "./install-form";
+import { CONTACT_PHONE_MAX, SITE_CONTACT_MAX, contactText, installTypeLabel, installTypeOf, machinesBeforeSave } from "./install-form";
 import { backfillAssignedSerialsOnce } from "./serial-backfill";
 import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { assertUnlocked, canLockEquipment } from "./equipment-lock";
@@ -284,6 +284,8 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		complete: !!r.complete,
 		trfIssued: !!r.trf_issued,
 		installType: installTypeOf(r.install_type),
+		siteContact: r.site_contact ?? null,
+		contactPhone: r.contact_phone ?? null,
 		dealId: r.deal_id,
 		duplicateOf: r.duplicate_of ?? null,
 		updatedAt: String(r.updated_at),
@@ -1431,6 +1433,9 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 type UpdateInstallInput = { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean;
 	/** New account ("new") or Update ("update"), picked on the Details tab. Blank or null clears it. */
 	installType?: string | null;
+	/** Who to ask for on site, and their phone, typed on the Details tab. Blank or null clears them. */
+	siteContact?: string | null;
+	contactPhone?: string | null;
 	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
 	machinesBase?: MachineSpec[] | string | null };
 
@@ -1462,6 +1467,10 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const c = cur[0];
 	// Checked before anything is written: the Tech Request Form tick below saves on its own.
 	if (data.installType != null && data.installType !== "" && !installTypeOf(data.installType)) throw new Error("Install type is New account or Update.");
+	const siteContact = data.siteContact === undefined ? undefined : contactText(data.siteContact);
+	const contactPhone = data.contactPhone === undefined ? undefined : contactText(data.contactPhone);
+	if (siteContact && siteContact.length > SITE_CONTACT_MAX) throw new Error(`The site contact is too long: ${SITE_CONTACT_MAX} characters at most.`);
+	if (contactPhone && contactPhone.length > CONTACT_PHONE_MAX) throw new Error(`The contact phone is too long: ${CONTACT_PHONE_MAX} characters at most.`);
 	// The owner's lock on the customer: anyone else's change is refused, the same message as the equipment lock.
 	await assertCustomerChangeAllowed(sql, c, data.customer);
 	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
@@ -1532,6 +1541,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
         complete = ${complete},
         duplicate_of = ${data.duplicateOf === undefined ? c.duplicate_of : data.duplicateOf},
         install_type = ${installType},
+        site_contact = ${siteContact === undefined ? c.site_contact ?? null : siteContact},
+        contact_phone = ${contactPhone === undefined ? c.contact_phone ?? null : contactPhone},
         updated_at = now()
       where id = ${data.id}`;
 	const extra = summarize([
@@ -1541,6 +1552,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		changed("equipment", c.equipment, data.equipment === undefined ? c.equipment : data.equipment),
 		changed("account rep", c.account_rep, data.accountRep === undefined ? c.account_rep : data.accountRep),
 		changed("install type", installTypeLabel(installTypeOf(c.install_type)), installTypeLabel(installType)),
+		changed("site contact", c.site_contact, siteContact === undefined ? c.site_contact : siteContact),
+		changed("contact phone", c.contact_phone, contactPhone === undefined ? c.contact_phone : contactPhone),
 		data.duplicateOf === null && c.duplicate_of ? "cleared duplicate flag" : data.duplicateOf && data.duplicateOf !== c.duplicate_of ? `flagged duplicate of #${data.duplicateOf}` : null
 	]);
 	if (extra) await logActivity(sql, context.userId, "install", data.id, "updated", extra);

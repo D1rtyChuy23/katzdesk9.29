@@ -67,6 +67,7 @@ import { MachineFields } from "./machine-fields";
 import { InstallCustomerField, InstallWorkOrders, MergeInstall } from "./install-project-fields";
 import { InstallTicket } from "./install-ticket";
 import { InstallTypeField } from "./install-type-field";
+import { InstallContactFields } from "./install-contact-fields";
 import { SaveAllProvider, type SaveAll } from "./save-all";
 import { SaveBar } from "./save-bar";
 import { OpenLink } from "./open-link";
@@ -693,6 +694,8 @@ export function InstallSheet({
                         id: row.id,
                         customer: String(fd.get("customer") || row.customer),
                         installType: String(fd.get("installType") || "") || null,
+                        siteContact: String(fd.get("siteContact") || "") || null,
+                        contactPhone: String(fd.get("contactPhone") || "") || null,
                         equipStatus: String(fd.get("equipStatus") || "") || null,
                         installDate: String(fd.get("installDate") || "") || null,
                         technician: String(fd.get("technician") || "") || null,
@@ -724,6 +727,7 @@ export function InstallSheet({
                       <Label>Tech</Label>
                       <TechSelect name="technician" defaultValue={row.technician ?? ""} />
                     </div>
+                    <InstallContactFields installId={row.id} siteContact={row.siteContact} contactPhone={row.contactPhone} />
                     <div>
                       <Label>Site ready?</Label>
                       <SelectField name="reqsReady" className="mt-1" defaultValue={row.reqsReady ?? ""} allowEmpty>
