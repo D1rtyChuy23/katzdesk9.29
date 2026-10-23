@@ -426,6 +426,8 @@ export type CustomerRecord = DirectoryEntry & {
   removalFlag?: boolean;
   /** Account Number (text; leading zeros and dashes kept). Unique when filled in. */
   accountNumber?: string | null;
+  /** Marked Inactive by the NetSuite customer import: hidden from the default list, never deleted. */
+  inactive?: boolean;
 };
 
 
@@ -440,6 +442,15 @@ export type CustomerHistory = {
   repFlag?: string | null;
   /** ID number and address from the clean list. Null for anyone who is not an Admin. */
   cleanList?: { netsuiteId: string | null; address: string | null } | null;
+  /** From the NetSuite customer import. netsuiteId and billingAddress are null for anyone who is not an Admin. */
+  netsuite?: {
+    primaryContact: string | null;
+    phone: string | null;
+    email: string | null;
+    inactive: boolean;
+    netsuiteId: string | null;
+    billingAddress: string | null;
+  } | null;
   accountNumber?: string | null;
   /** The viewer may set the account number (Admin role or desk admin). */
   canEditAccountNumber?: boolean;

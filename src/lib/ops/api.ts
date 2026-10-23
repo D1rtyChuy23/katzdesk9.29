@@ -8,6 +8,7 @@ import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook, stampMachineParts } from "./pm-runbook-api";
 import { stackCustomerRefusal } from "./pm-stack";
+import { formatAddress } from "./netsuite-customers";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
 import { boardLocked, cleanTime, type BoardType } from "./day-board";
@@ -2330,6 +2331,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
          d.name_locked,
          d.removal_flag,
          d.account_number,
+         d.inactive,
          coalesce(svc.n, 0)::int as calls,
          coalesce(svc.p, 0)::int as pending_calls,
          coalesce(tlc.n, 0)::int as tlcs,
@@ -2412,7 +2414,8 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		noRep: isNoRep(r.account_rep),
 		nameLocked: r.name_locked === true,
 		removalFlag: r.removal_flag === true,
-		accountNumber: r.account_number ?? null
+		accountNumber: r.account_number ?? null,
+		inactive: r.inactive === true
 	}));
 });
 export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any): Promise<CustomerHistory | null> => {
@@ -2467,6 +2470,28 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		cleanList: (await canReviewNames(sql, context.userId))
 			? { netsuiteId: account.name_locked === true ? account.netsuite_id ?? null : null, address: account.name_locked === true ? account.address ?? null : null }
 			: null,
+		// From the NetSuite customer import. Contact details show to everyone; the NetSuite ID and billing address to an Admin.
+		netsuite: await (async () => {
+			const admin = await canReviewNames(sql, context.userId);
+			const text = (v: unknown) => (v == null || String(v).trim() === "" ? null : String(v).trim());
+			return {
+				primaryContact: text(account.primary_contact),
+				phone: text(account.phone),
+				email: text(account.email),
+				inactive: account.inactive === true,
+				netsuiteId: admin ? text(account.netsuite_id) : null,
+				billingAddress: admin
+					? formatAddress({
+							line1: text(account.billing_address1),
+							line2: text(account.billing_address2),
+							city: text(account.billing_city),
+							state: text(account.billing_state),
+							zip: text(account.billing_zip),
+							country: text(account.billing_country),
+						}) || null
+					: null,
+			};
+		})(),
 		jobs: applyMarks(attachJobSiblings(jobs.map((r) => mapJob(r, today))).filter((j) => !j.duplicateOf), marks),
 		pms: applyMarks(pms.map((r) => mapPm(r, today)), marks),
 		installs: await withWorkOrders(sql, await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks))),
@@ -2485,7 +2510,9 @@ function directoryTable(kind: any) {
 export const listDirectory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { kind: DirectoryKind }) => d).handler(async ({ data }): Promise<DirectoryEntry[]> => {
 	const sql = await ready();
 	const table = directoryTable(data.kind);
-	return await sql.query(`select id, name from ${table} where archived = false order by lower(name)`);
+	// Customers NetSuite marks Inactive aren't offered in pickers. A record that already names one keeps the name.
+	const inactive = data.kind === "customer" ? " and inactive = false" : "";
+	return await sql.query(`select id, name from ${table} where archived = false${inactive} order by lower(name)`);
 });
 /** The account's address (from the clean customer list), for tickets, PMs and installs. */
 export type CustomerLocation = { latitude: number; longitude: number; match: "exact" | "close" | "approx" | null; matchedAddress: string | null };

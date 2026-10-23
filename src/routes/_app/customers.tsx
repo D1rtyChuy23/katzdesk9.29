@@ -17,7 +17,9 @@ import { CustomerHistorySheet } from "@/components/desk/customer-sheet";
 import { RenameDialog } from "@/components/desk/rename-dialog";
 import { AccountEquipImportButton } from "@/components/desk/account-equip-import";
 import { SalesRepImportButton } from "@/components/desk/sales-rep-import";
-import { ImportMenu } from "@/components/desk/desk-charts";
+import { NetsuiteCustomerImportButton } from "@/components/desk/netsuite-customer-import";
+import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ChevronRight, Lock, Pencil, Plus, Trash2 } from "lucide-react";
 import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
@@ -41,6 +43,8 @@ function Page() {
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const list = useQuery({ queryKey: ["customers", "records"], queryFn: () => listCustomerRecords() });
   const [q, setQ] = useState("");
+  // Accounts NetSuite marks Inactive are hidden until Show Inactive is on. Nothing is deleted.
+  const [showInactive, setShowInactive] = useState(false);
   const [name, setName] = useState("");
   const { filterMine, matchMine, role } = useMyView();
   const [sort, setSort] = useDeskSort("customers", "alpha-asc");
@@ -94,8 +98,9 @@ function Page() {
   });
 
   const needle = q.trim().toLowerCase();
+  const inactiveCount = useMemo(() => (list.data ?? []).filter((c) => c.inactive).length, [list.data]);
   const rows = useMemo(() => {
-    const raw = list.data ?? [];
+    const raw = showInactive ? (list.data ?? []) : (list.data ?? []).filter((c) => !c.inactive);
     // Search by name or Account Number.
     const filtered = needle
       ? raw.filter((c) => c.name.toLowerCase().includes(needle) || (c.accountNumber ?? "").toLowerCase().includes(needle))
@@ -115,8 +120,8 @@ function Page() {
       });
     }
     return sortDesk(scoped, sort, { name: (c) => c.name, date: () => "" });
-  }, [list.data, needle, sort, filterMine, matchMine, role]);
-  const paged = useShowMore(rows, `${needle}|${sort}|${filterMine}`);
+  }, [list.data, needle, sort, filterMine, matchMine, role, showInactive]);
+  const paged = useShowMore(rows, `${needle}|${sort}|${filterMine}|${showInactive}`);
 
 
   function onAdd(e: FormEvent) {
@@ -152,6 +157,7 @@ function Page() {
         <div className="flex shrink-0 flex-wrap items-start gap-2">
           {/* One Import control: a list when there is more than one import, the single button otherwise. */}
           <ImportMenu>
+            {isAdminOrRole ? <NetsuiteCustomerImportButton /> : null}
             {isAdminOrRole ? <AccountNumberImportButton /> : null}
             {isAdminOrRole ? <GeocodeImportButton /> : null}
             {isAdminOrRole ? <SalesRepImportButton /> : null}
@@ -169,6 +175,11 @@ function Page() {
       <ListToolbar>
         <ToolbarSearch value={q} onChange={setQ} placeholder="Search customers…" />
         <SortSelect value={sort} onChange={setSort} options={[...SORT_ALPHA, ...SORT_ACCOUNT_NUMBER]} className="shrink-0 max-sm:w-full" />
+        {inactiveCount ? (
+          <FilterChip selected={showInactive} aria-pressed={showInactive} onClick={() => setShowInactive(!showInactive)} className="shrink-0" data-testid="show-inactive">
+            Show Inactive {inactiveCount.toLocaleString("en-US")}
+          </FilterChip>
+        ) : null}
       </ListToolbar>
 
       {canAdd ? (
@@ -216,6 +227,11 @@ function Page() {
                   ) : null}
                   {c.removalFlag ? (
                     <span className="ml-1.5 align-middle text-xs font-medium text-destructive" data-testid="flagged-review">Flagged For Review</span>
+                  ) : null}
+                  {c.inactive ? (
+                    <Badge size="tight" variant="warn" className="ml-1.5 align-middle" data-testid="customer-inactive">
+                      Inactive
+                    </Badge>
                   ) : null}
                 </p>
                 <AddressLine customer={c.name} />
