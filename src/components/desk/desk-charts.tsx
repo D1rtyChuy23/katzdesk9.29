@@ -431,10 +431,13 @@ const ActionMenuContext = createContext<ActionMenuState | null>(null);
  */
 export function ActionMenu({
   label = "More",
+  busyLabel = "Reading…",
   testId = "action-menu",
   children,
 }: {
   label?: string;
+  /** What the button says while a choice is still working ("Reading…" for an import, "Exporting…" for an export). */
+  busyLabel?: string;
   testId?: string;
   children: ReactNode;
 }) {
@@ -505,7 +508,7 @@ export function ActionMenu({
         className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium whitespace-nowrap hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         data-testid={`${testId}-button`}
       >
-        {busy ? "Reading…" : label}
+        {busy ? busyLabel : label}
       </button>
       <div
         ref={list}
