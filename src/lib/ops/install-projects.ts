@@ -163,8 +163,8 @@ export type MergeInstallsResult = {
 
 /**
  * Merge one install of an account into another (the same account: a strict name match): the drop's work orders (a
- * number the keeper has is skipped), the machine rows the keeper's list doesn't have, its notes, its deal, install date
- * and tech when the keeper has none, its recipes, warehouse units and rebuilds, its visit header (notes added), its
+ * number the keeper has is skipped), the machine rows the keeper's list doesn't have, its notes, its deal, install date,
+ * tech, install type, site contact and contact phone when the keeper has none, its recipes, warehouse units and rebuilds, its visit header (notes added), its
  * activity and Ping thread, and its visit units the keeper has no unit of the same model and serial for (with their
  * checks and photos). A drop unit whose twin is on the keeper gives the twin the checks and photos it has none of.
  * The rest stays on the drop, which is archived as a duplicate of the keeper. Nothing is deleted. Admins only.
@@ -286,6 +286,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
               deal_id = coalesce(k.deal_id, d.deal_id),
               install_date = coalesce(k.install_date, d.install_date),
               technician = coalesce(nullif(btrim(k.technician), ''), d.technician),
+              install_type = coalesce(k.install_type, d.install_type),
+              site_contact = coalesce(nullif(btrim(k.site_contact), ''), d.site_contact),
+              contact_phone = coalesce(nullif(btrim(k.contact_phone), ''), d.contact_phone),
               updated_at = now()
          from g join installs d on d.id = g.drop_id where k.id = g.keep_id
        returning k.id

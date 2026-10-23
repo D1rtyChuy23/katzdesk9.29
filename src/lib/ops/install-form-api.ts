@@ -38,9 +38,9 @@ async function ready() {
 export type InstallFormPayload = {
   id: number;
   customer: string;
-  /** The site contact on the pre-inspection. */
+  /** The site contact typed on the install's Details tab; until one is, the pre-inspection's. */
   siteContact: string;
-  /** The site contact's phone. Blank until the install window collects it. */
+  /** The site contact's phone, from the Details tab, or blank. */
   contactPhone: string;
   /** "Tue, Oct 20, 2026", or blank. */
   installDate: string;
@@ -165,9 +165,11 @@ export async function installFormFor(sql: Sql, installId: number): Promise<Insta
       serial: string | null;
       power_voltage: string | null;
       install_type: string | null;
+      site_contact: string | null;
+      contact_phone: string | null;
     }>(
       `select id, customer, install_date::text as install_date, completed_at::text as completed_at, account_rep, technician,
-              machines, equipment, serial, power_voltage, install_type
+              machines, equipment, serial, power_voltage, install_type, site_contact, contact_phone
          from installs where id = $1 and archived = false`,
       [installId],
     )
@@ -233,8 +235,8 @@ export async function installFormFor(sql: Sql, installId: number): Promise<Insta
   return {
     id: install.id,
     customer: formClean(customer),
-    siteContact: formClean(inspection?.siteContact),
-    contactPhone: "",
+    siteContact: formClean(install.site_contact) || formClean(inspection?.siteContact),
+    contactPhone: formClean(install.contact_phone),
     installDate: formDate(date, { weekday: true }),
     accountRep: formClean(install.account_rep),
     address: formClean(addressRow?.address),

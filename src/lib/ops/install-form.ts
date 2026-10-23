@@ -418,6 +418,18 @@ export function installTypeLabel(type: InstallType | null | undefined): string {
   return INSTALL_TYPES.find((t) => t.value === type)?.label ?? "";
 }
 
+/** The longest site contact and contact phone an install keeps (the Details fields stop there too). */
+export const SITE_CONTACT_MAX = 120;
+export const CONTACT_PHONE_MAX = 40;
+
+/** A site contact or contact phone as typed on the Details tab: spaces tidied, and blank as nothing. */
+export function contactText(raw: unknown): string | null {
+  const s = String(raw ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return s || null;
+}
+
 export type CheckNote = { label: string; notes: string };
 
 const PRE_LABELS = [
