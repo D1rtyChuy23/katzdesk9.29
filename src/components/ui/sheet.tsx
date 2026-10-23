@@ -70,7 +70,7 @@ export function SheetBody({ className, style, ...props }: React.ComponentProps<"
         "sheet-scroll min-h-0 flex-1 overflow-y-scroll overscroll-contain",
         className,
       )}
-      style={{ touchAction: "pan-y", ...style }}
+      style={{ touchAction: "pan-y pinch-zoom", ...style }}
       {...props}
     />
   );

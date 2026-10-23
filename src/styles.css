@@ -182,14 +182,26 @@ html[data-contrast="high"] :focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+/* Up and down only, but a pinch still works, so a page a phone zoomed into can be pinched back out. */
 .sheet-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 .sheet-panel {
   overscroll-behavior: none;
+}
+
+/* A phone zooms into a field whose text is under 16px when it is tapped, and the page stays zoomed and cut off
+   on the left. On a touch screen, field text is 16px, or 1rem when the Large type setting makes that bigger.
+   Outside a layer, so it wins over text-sm on the field. */
+@media (pointer: coarse) {
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"], [type="button"], [type="submit"], [type="reset"], [type="image"]),
+  select,
+  textarea {
+    font-size: max(16px, 1rem);
+  }
 }
 
 @layer components {

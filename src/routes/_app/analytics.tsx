@@ -180,7 +180,7 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
               setRange("custom");
               setDates((d) => ({ ...d, from: e.target.value }));
             }}
-            className="h-9 w-[8.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]"
+            className="h-9 w-[8.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem] pointer-coarse:w-auto"
             aria-label="From date"
             data-testid="analytics-from"
           />
@@ -195,7 +195,7 @@ function RecordsView({ switcher }: { switcher: ReactNode }) {
               setRange("custom");
               setDates((d) => ({ ...d, to: e.target.value }));
             }}
-            className="h-9 w-[9.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]"
+            className="h-9 w-[9.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem] pointer-coarse:w-auto"
             aria-label="To date"
             data-testid="analytics-to"
           />
@@ -393,11 +393,11 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
         <span className="flex shrink-0 items-center gap-2 max-sm:max-w-full max-sm:flex-wrap">
           <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
             From
-            <Input type="date" value={dates.from} max={dates.to || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, from: e.target.value })); }} className="h-9 w-[8.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]" aria-label="From date" />
+            <Input type="date" value={dates.from} max={dates.to || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, from: e.target.value })); }} className="h-9 w-[8.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem] pointer-coarse:w-auto" aria-label="From date" />
           </label>
           <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
             To
-            <Input type="date" value={dates.to} min={dates.from || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, to: e.target.value })); }} className="h-9 w-[9.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem]" aria-label="To date" />
+            <Input type="date" value={dates.to} min={dates.from || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, to: e.target.value })); }} className="h-9 w-[9.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem] pointer-coarse:w-auto" aria-label="To date" />
           </label>
         </span>
         <ToolbarNote>{rows.length} MPN{rows.length === 1 ? "" : "s"}</ToolbarNote>
