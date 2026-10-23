@@ -1,4 +1,7 @@
-@import "tailwindcss";
+/* Classes come from src/ only. Scanning the whole project also read the agents' docs (.claude/, .grok/), old build
+   output and other files, so a publish of Grok's workspace built a different stylesheet from a publish of the same
+   commit. */
+@import "tailwindcss" source("../src");
 @import "tw-animate-css";
 
 @custom-variant dark (&:where(.dark, .dark *));
