@@ -154,6 +154,8 @@ export type Install = {
   id: number;
   /** Sales ticks this once the Tech Request Form has been sent. Never ticked automatically. */
   trfIssued: boolean;
+  /** New account or Update, picked on the Details tab. Null until someone picks one. */
+  installType: "new" | "update" | null;
   /** The customer's Account Number, when it has one. */
   accountNumber?: string | null;
   received: string | null;

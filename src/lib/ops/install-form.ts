@@ -400,6 +400,24 @@ export function accountIsNew(priorInstalls: number, priorEquipment: number): boo
   return priorInstalls <= 0 && priorEquipment <= 0;
 }
 
+/** The install's type, picked on its Details tab: a new account, or an update to an account Katz already serves. */
+export type InstallType = "new" | "update";
+
+export const INSTALL_TYPES: { value: InstallType; label: string }[] = [
+  { value: "new", label: "New account" },
+  { value: "update", label: "Update" },
+];
+
+/** "new" or "update"; anything else means nobody has picked one. */
+export function installTypeOf(raw: unknown): InstallType | null {
+  return raw === "new" || raw === "update" ? raw : null;
+}
+
+/** "New account", "Update", or blank when not picked. */
+export function installTypeLabel(type: InstallType | null | undefined): string {
+  return INSTALL_TYPES.find((t) => t.value === type)?.label ?? "";
+}
+
 export type CheckNote = { label: string; notes: string };
 
 const PRE_LABELS = [

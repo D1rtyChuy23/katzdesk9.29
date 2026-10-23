@@ -49,7 +49,7 @@ import type {
 } from "./types";
 export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
-import { machinesBeforeSave } from "./install-form";
+import { installTypeLabel, installTypeOf, machinesBeforeSave } from "./install-form";
 import { backfillAssignedSerialsOnce } from "./serial-backfill";
 import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { assertUnlocked, canLockEquipment } from "./equipment-lock";
@@ -283,6 +283,7 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		serialNotice: r.serial_notice ?? null,
 		complete: !!r.complete,
 		trfIssued: !!r.trf_issued,
+		installType: installTypeOf(r.install_type),
 		dealId: r.deal_id,
 		duplicateOf: r.duplicate_of ?? null,
 		updatedAt: String(r.updated_at),
@@ -1428,6 +1429,8 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 	return withWorkOrders(sql, await withInspections(sql, applyMarks(installs, marks)));
 });
 type UpdateInstallInput = { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean;
+	/** New account ("new") or Update ("update"), picked on the Details tab. Blank or null clears it. */
+	installType?: string | null;
 	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
 	machinesBase?: MachineSpec[] | string | null };
 
@@ -1457,6 +1460,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const cur = await sql`select * from installs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Install not found");
 	const c = cur[0];
+	// Checked before anything is written: the Tech Request Form tick below saves on its own.
+	if (data.installType != null && data.installType !== "" && !installTypeOf(data.installType)) throw new Error("Install type is New account or Update.");
 	// The owner's lock on the customer: anyone else's change is refused, the same message as the equipment lock.
 	await assertCustomerChangeAllowed(sql, c, data.customer);
 	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
@@ -1469,6 +1474,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		await sql.query("update installs set trf_issued = $2, trf_issued_by = $3, trf_issued_at = case when $2 then now() else null end where id = $1", [data.id, !!data.trfIssued, data.trfIssued ? me.username || null : null]);
 		await logActivity(sql, context.userId, "install", data.id, "updated", data.trfIssued ? "Tech Request Form issued" : "Tech Request Form unmarked");
 	}
+	const installType = data.installType === undefined ? installTypeOf(c.install_type) : installTypeOf(data.installType);
 	const equipStatus = data.equipStatus === undefined ? c.equip_status : data.equipStatus;
 	const complete = data.complete === undefined ? data.equipStatus === undefined ? c.complete : isInstalled({ equipStatus }) : data.complete;
 	const wasInstalled = isInstalled({ complete: c.complete, equipStatus: c.equip_status });
@@ -1525,6 +1531,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
         machines = ${machinesJson},
         complete = ${complete},
         duplicate_of = ${data.duplicateOf === undefined ? c.duplicate_of : data.duplicateOf},
+        install_type = ${installType},
         updated_at = now()
       where id = ${data.id}`;
 	const extra = summarize([
@@ -1533,6 +1540,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		changed("technician", c.technician, data.technician === undefined ? c.technician : data.technician),
 		changed("equipment", c.equipment, data.equipment === undefined ? c.equipment : data.equipment),
 		changed("account rep", c.account_rep, data.accountRep === undefined ? c.account_rep : data.accountRep),
+		changed("install type", installTypeLabel(installTypeOf(c.install_type)), installTypeLabel(installType)),
 		data.duplicateOf === null && c.duplicate_of ? "cleared duplicate flag" : data.duplicateOf && data.duplicateOf !== c.duplicate_of ? `flagged duplicate of #${data.duplicateOf}` : null
 	]);
 	if (extra) await logActivity(sql, context.userId, "install", data.id, "updated", extra);

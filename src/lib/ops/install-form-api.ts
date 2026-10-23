@@ -15,12 +15,14 @@ import {
   formClean,
   formDate,
   groupFormRows,
+  installTypeOf,
   preInstallNotes,
   recipeNote,
   taskNotes,
   type CheckNote,
   type FormRow,
   type FormUnit,
+  type InstallType,
   type VisitMachine,
 } from "@/lib/ops/install-form";
 import { outletForModel, withSpecOutlet } from "@/lib/ops/spec-read";
@@ -44,7 +46,8 @@ export type InstallFormPayload = {
   installDate: string;
   accountRep: string;
   address: string;
-  accountType: "new" | "update";
+  /** The type picked on the Details tab; until one is picked, what the account's history suggests. */
+  accountType: InstallType;
   technician: string;
   /** Every Corrigo WO on the install, the primary first. */
   workOrders: string[];
@@ -128,6 +131,25 @@ const toRecipe = (r: RecipeRow): Recipe => ({
   updatedAt: r.updated_at,
 });
 
+/**
+ * What the account's history suggests while nobody has picked New account or Update: a new account when the customer
+ * has no other install and no equipment besides this visit's own units.
+ */
+export async function accountTypeGuess(sql: Sql, installId: number): Promise<InstallType> {
+  const row = (
+    await sql.query<{ installs: number; equipment: number }>(
+      `select (select count(*)::int from installs o
+                where o.archived = false and o.id <> i.id and lower(o.customer) = lower(i.customer)) as installs,
+              (select count(*)::int from account_equipment a
+                where lower(a.customer) = lower(i.customer)
+                  and a.id not in (select u.equipment_id from install_inspection_units u where u.install_id = i.id)) as equipment
+         from installs i where i.id = $1`,
+      [installId],
+    )
+  )[0];
+  return accountIsNew(Number(row?.installs ?? 0), Number(row?.equipment ?? 0)) ? "new" : "update";
+}
+
 /** Everything the printed Equipment Request Form shows for one install. */
 export async function installFormFor(sql: Sql, installId: number): Promise<InstallFormPayload> {
   const install = (
@@ -142,9 +164,10 @@ export async function installFormFor(sql: Sql, installId: number): Promise<Insta
       equipment: string | null;
       serial: string | null;
       power_voltage: string | null;
+      install_type: string | null;
     }>(
       `select id, customer, install_date::text as install_date, completed_at::text as completed_at, account_rep, technician,
-              machines, equipment, serial, power_voltage
+              machines, equipment, serial, power_voltage, install_type
          from installs where id = $1 and archived = false`,
       [installId],
     )
@@ -158,21 +181,8 @@ export async function installFormFor(sql: Sql, installId: number): Promise<Insta
     )
   )[0];
   const inspection = await readInspection(sql, install.id);
-  const priorInstalls = (
-    await sql.query<{ n: number }>(
-      "select count(*)::int as n from installs where archived = false and id <> $1 and lower(customer) = lower($2)",
-      [install.id, customer],
-    )
-  )[0]?.n ?? 0;
-  const linked = new Set((inspection?.machines ?? []).map((m) => m.equipmentId));
-  const priorEquipment = (
-    await sql.query<{ n: number }>(
-      `select count(*)::int as n from account_equipment
-        where lower(customer) = lower($1)
-          and id <> all($2::int[])`,
-      [customer, linked.size ? [...linked] : [0]],
-    )
-  )[0]?.n ?? 0;
+  // Read after the pre-inspection, which lists this visit's own units: those never make the account an update.
+  const accountType = installTypeOf(install.install_type) ?? (await accountTypeGuess(sql, install.id));
 
   const folded = await formMachines(sql, install, inspection);
   const picked = folded.rows.map((r) => r.recipeId).filter((id): id is number => !!id);
@@ -228,7 +238,7 @@ export async function installFormFor(sql: Sql, installId: number): Promise<Insta
     installDate: formDate(date, { weekday: true }),
     accountRep: formClean(install.account_rep),
     address: formClean(addressRow?.address),
-    accountType: accountIsNew(priorInstalls, priorEquipment) ? "new" : "update",
+    accountType,
     technician: formClean(install.technician),
     workOrders,
     inspector: formClean(inspection?.inspector),
@@ -248,6 +258,12 @@ export async function installFormFor(sql: Sql, installId: number): Promise<Insta
     corrigo: corrigoNotes({ serialsLogged: units.length > 0 && units.every((u) => !!u.serial.trim()), installDate: date }),
   };
 }
+
+/** For the Details tab's Install type: what the form shows until someone picks one. */
+export const getInstallTypeGuess = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .validator((d: { installId: number }) => z.object({ installId: z.number().int().positive() }).parse(d))
+  .handler(async ({ data }): Promise<{ guess: InstallType }> => ({ guess: await accountTypeGuess(await ready(), data.installId) }));
 
 export const getInstallForm = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])

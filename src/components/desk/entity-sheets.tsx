@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
 import { ModuleRecord } from "@/components/desk/module-record";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
   archiveDeal,
@@ -66,6 +66,9 @@ import { AkBadge } from "./ak-badge";
 import { MachineFields } from "./machine-fields";
 import { InstallCustomerField, InstallWorkOrders, MergeInstall } from "./install-project-fields";
 import { InstallTicket } from "./install-ticket";
+import { InstallTypeField } from "./install-type-field";
+import { SaveAllProvider, type SaveAll } from "./save-all";
+import { SaveBar } from "./save-bar";
 import { OpenLink } from "./open-link";
 import { PmStackHeader } from "./pm-stack-panel";
 import { isPmStack, pmStackQuery } from "./pm-stack-shared";
@@ -520,6 +523,37 @@ export function InstallSheet({
   });
   const [tab, setTab] = useState<InstallTab>("details");
   useEffect(() => setTab("details"), [row?.id]);
+  /**
+   * Save, on every tab but Ping. The Details form carries the install's fields and the Equipment tab's typed changes; a
+   * tab with edits of its own (the pre-inspection's site notes) registers them and they go first.
+   */
+  const flushers = useRef(new Set<() => void>());
+  const registerFlush = useCallback((flush: () => void) => {
+    flushers.current.add(flush);
+    return () => {
+      flushers.current.delete(flush);
+    };
+  }, []);
+  const [barHidden, setBarHidden] = useState(0);
+  const hideBar = useCallback(() => {
+    setBarHidden((n) => n + 1);
+    return () => setBarHidden((n) => n - 1);
+  }, []);
+  const flushParts = useCallback(() => {
+    // A field still focused stores on blur (a pre-inspection check's notes) before the rest goes.
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) active.blur();
+    for (const flush of [...flushers.current]) flush();
+  }, []);
+  const saveAll = useCallback(() => {
+    flushParts();
+    formRef.current?.requestSubmit();
+  }, [flushParts]);
+  const saveCtx = useMemo<SaveAll>(
+    () => ({ save: saveAll, pending: save.isPending, register: registerFlush, hideBar }),
+    [saveAll, save.isPending, registerFlush, hideBar],
+  );
+  const showSaveBar = tab !== "ping" && !(tab === "pre-inspection" && barHidden > 0);
   const comments = useQuery({
     queryKey: ["comments", "install", row?.id],
     queryFn: () => listComments({ data: { entityType: "install", entityId: row!.id } }),
@@ -586,7 +620,7 @@ export function InstallSheet({
     >
       <SheetContent className="sm:max-w-4xl">
         {row ? (
-          <>
+          <SaveAllProvider value={saveCtx}>
             <SheetHeader className="max-sm:py-3">
               <p className="text-xs tracking-wide text-muted-foreground uppercase">Install</p>
               <SheetTitle className="max-sm:text-lg">{row.customer}</SheetTitle>
@@ -648,6 +682,7 @@ export function InstallSheet({
                   <form
                     ref={formRef}
                     key={row.id}
+                    id={`install-details-${row.id}`}
                     className="grid gap-3 px-4 py-3 sm:grid-cols-2"
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -657,6 +692,7 @@ export function InstallSheet({
                       save.mutate({
                         id: row.id,
                         customer: String(fd.get("customer") || row.customer),
+                        installType: String(fd.get("installType") || "") || null,
                         equipStatus: String(fd.get("equipStatus") || "") || null,
                         installDate: String(fd.get("installDate") || "") || null,
                         technician: String(fd.get("technician") || "") || null,
@@ -674,6 +710,7 @@ export function InstallSheet({
                     }}
                   >
                     <InstallCustomerField row={row} value={customer || row.customer} onChange={setCustomer} />
+                    <InstallTypeField installId={row.id} value={row.installType} />
                     <div>
                       <Label>Equipment status</Label>
                       <SelectField name="equipStatus" className="mt-1" defaultValue={row.equipStatus ?? ""} allowEmpty>
@@ -738,7 +775,8 @@ export function InstallSheet({
                         else onClose();
                       }}
                     />
-                    <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2">
+                    {/* Save is in the bar along the bottom of the window, on every tab but Ping. */}
+                    <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
                       <Button
                         type="button"
                         size="sm"
@@ -751,7 +789,6 @@ export function InstallSheet({
                         <Trash2 className="size-3.5" />
                         Remove from list
                       </Button>
-                      <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
                     </div>
                   </form>
                 </Tabs.Content>
@@ -835,7 +872,8 @@ export function InstallSheet({
                 </Tabs.Content>
               </SheetTabs>
             </SheetBody>
-          </>
+            {showSaveBar ? <SaveBar form={`install-details-${row.id}`} onClick={flushParts} pending={save.isPending} testId="install-save-bar" /> : null}
+          </SaveAllProvider>
         ) : null}
       </SheetContent>
     </Sheet>
