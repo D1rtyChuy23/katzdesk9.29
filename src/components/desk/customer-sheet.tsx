@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { SheetTabs } from "./sheet-tabs";
 import { listAccountInvoices } from "@/lib/ops/invoice-api";
@@ -12,7 +12,7 @@ import { copyRecipe, getCustomerHistory, listDirectory, listRecipes, renameCusto
 
 import { getMyAccess } from "@/lib/ops/access";
 import { formatShortDate, money, isOpenInstall } from "@/lib/ops/clock";
-import type { Install, Recipe } from "@/lib/ops/types";
+import type { CustomerHistory, Install, Recipe } from "@/lib/ops/types";
 import { ComboField } from "@/components/ui/combo-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -257,6 +257,7 @@ export function CustomerHistorySheet({
                     </p>
                   )}
                   <AccountNumberField id={data.id} value={data.accountNumber ?? null} canEdit={!!data.canEditAccountNumber} />
+                  <NetsuiteDetails netsuite={data.netsuite ?? null} />
                   <AccountMarksForm id={data.id} aviKatz={data.aviKatz} accountRep={data.accountRep} />
                   <AssignedSalesReps reps={data.salesReps ?? []} />
                   {!data.accountRep && data.repFlag ? (
@@ -658,6 +659,53 @@ function AccountNumberField({ id, value, canEdit }: { id: number; value: string 
         <p className="mt-0.5 font-medium tabular" data-testid="account-number-value">{value ?? <span className="font-normal text-muted-foreground">None</span>}</p>
       )}
     </div>
+  );
+}
+
+/**
+ * From the NetSuite customer import: Inactive, the primary contact, phone and email for everyone, and for an Admin the
+ * NetSuite ID and billing address. Read-only here; the next import updates them. Nothing shows when it has nothing.
+ */
+function NetsuiteDetails({ netsuite }: { netsuite: CustomerHistory["netsuite"] }) {
+  if (!netsuite) return null;
+  const link = "text-primary underline-offset-4 hover:underline";
+  const rows: { label: string; value: ReactNode; testId: string }[] = [];
+  if (netsuite.primaryContact) rows.push({ label: "Primary contact", value: netsuite.primaryContact, testId: "ns-contact" });
+  if (netsuite.phone) {
+    // Dial the number itself; an extension ("x123") is left for the caller.
+    const dial = netsuite.phone.split(/\s*(?:x|ext\.?)\s*\d/i)[0]!.replace(/[^\d+]/g, "");
+    rows.push({ label: "Phone", value: dial ? <a href={`tel:${dial}`} className={link}>{netsuite.phone}</a> : netsuite.phone, testId: "ns-phone" });
+  }
+  if (netsuite.email) rows.push({ label: "Email", value: <a href={`mailto:${netsuite.email}`} className={cn(link, "break-all")}>{netsuite.email}</a>, testId: "ns-email" });
+  if (netsuite.netsuiteId) rows.push({ label: "NetSuite ID", value: <span className="tabular">{netsuite.netsuiteId}</span>, testId: "ns-id" });
+  if (netsuite.billingAddress) rows.push({ label: "Billing address", value: netsuite.billingAddress, testId: "ns-billing" });
+  if (!rows.length && !netsuite.inactive) return null;
+  return (
+    <section className="mt-3 rounded-xl border border-border px-3 py-2.5" data-testid="netsuite-details">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">From NetSuite</h3>
+        {netsuite.inactive ? (
+          <Badge size="tight" variant="warn" data-testid="netsuite-inactive">
+            Inactive
+          </Badge>
+        ) : null}
+      </div>
+      {netsuite.inactive ? (
+        <p className="mt-1 text-xs text-muted-foreground">Inactive in NetSuite, so it's hidden from the customer list and pickers. Nothing is deleted.</p>
+      ) : null}
+      {rows.length ? (
+        <dl className="mt-1 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_minmax(0,1fr)]">
+          {rows.map((r) => (
+            <div key={r.testId} className="contents">
+              <dt className="text-xs text-muted-foreground sm:pt-0.5">{r.label}</dt>
+              <dd className="min-w-0 break-words max-sm:mb-1" data-testid={r.testId}>
+                {r.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+    </section>
   );
 }
 
