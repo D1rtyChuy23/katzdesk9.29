@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { CheckCircle2, Printer } from "lucide-react";
+import { CheckCircle2, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { projectLabel, ticketLines, ticketOpen } from "@/lib/ops/deal-board";
 import { findRecipeFor, recipeLabel } from "@/lib/ops/equipment";
@@ -49,8 +49,8 @@ function PrintFormButton({ installId }: { installId: number }) {
       data-testid="install-ticket-print"
       onClick={() => void navigate({ to: "/installs/$installId/print", params: { installId: String(installId) } })}
     >
-      <Printer className="size-4" />
-      Print
+      <FileText className="size-4" />
+      Equipment Form
     </Button>
   );
 }

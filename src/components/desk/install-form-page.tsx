@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Printer } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 import { getInstallForm, type InstallFormPayload } from "@/lib/ops/install-form-api";
 import type { CheckNote, FormRow } from "@/lib/ops/install-form";
 import { plugImageSrc } from "@/lib/ops/plug-faces";
@@ -34,39 +34,108 @@ function useFontLoads(): number {
   return loads;
 }
 
+type PdfFile = { blob: Blob; name: string };
+
+/** The Katz Coffee mark from the band, as a PNG: a PDF can't take the SVG. Drawn tall enough to print sharp. */
+async function markPng(): Promise<Uint8Array> {
+  const img = new Image();
+  img.src = "/brand/katz-coffee-mark.svg";
+  await img.decode();
+  const h = 300;
+  const w = Math.round((h * (img.naturalWidth || 334)) / (img.naturalHeight || 177));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("This browser can't draw the logo");
+  ctx.drawImage(img, 0, 0, w, h);
+  const png = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!png) throw new Error("This browser can't draw the logo");
+  return new Uint8Array(await png.arrayBuffer());
+}
+
+/** The editable PDF of this form. pdf-lib loads only here, not with the rest of KatzDesk. */
+async function makeFormPdf(data: InstallFormPayload): Promise<PdfFile> {
+  const [{ buildInstallFormPdf, installFormPdfName }, logoPng] = await Promise.all([
+    import("@/lib/ops/install-form-pdf"),
+    // The band reads the same without the mark, so a logo that won't draw never stops the download.
+    markPng().catch(() => null),
+  ]);
+  const bytes = await buildInstallFormPdf(data, { logoPng });
+  return { blob: new Blob([bytes as Uint8Array<ArrayBuffer>], { type: "application/pdf" }), name: installFormPdfName(data) };
+}
+
+function saveFile({ blob, name }: PdfFile) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+/**
+ * The PDF is made as soon as the form loads, so Download saves it in the same tap: a phone only lets a tap save a file
+ * while it is still handling that tap.
+ */
+function useFormPdf(data: InstallFormPayload | undefined) {
+  const [file, setFile] = useState<PdfFile | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [tries, setTries] = useState(0);
+  useEffect(() => {
+    if (!data) return;
+    let live = true;
+    setFile(null);
+    setError(null);
+    makeFormPdf(data).then(
+      (made) => live && setFile(made),
+      (e: unknown) => live && setError(e instanceof Error ? e.message : "Could not make the PDF"),
+    );
+    return () => {
+      live = false;
+    };
+  }, [data, tries]);
+  return {
+    file,
+    error,
+    download: () => {
+      if (file) saveFile(file);
+      else if (error) setTries((n) => n + 1);
+    },
+  };
+}
+
 export function InstallFormPage({ installId }: { installId: number }) {
   const q = useQuery({
     queryKey: ["install-form", installId],
     queryFn: () => getInstallForm({ data: { installId } }),
   });
-  useEffect(() => {
-    if (!q.data) return;
-    let live = true;
-    let timer = 0;
-    // Print once the form's fonts are in, so page 1 has settled on how many blank rows fit.
-    const go = () => {
-      if (live) timer = window.setTimeout(() => window.print(), 400);
-    };
-    const fonts = typeof document === "undefined" ? undefined : document.fonts;
-    if (fonts) void fonts.ready.then(go, go);
-    else go();
-    return () => {
-      live = false;
-      window.clearTimeout(timer);
-    };
-  }, [q.data]);
+  // Nothing opens the print dialog on its own: Print and Download are the person's choice.
+  const pdf = useFormPdf(q.data);
+  const making = !!q.data && !pdf.file && !pdf.error;
 
   return (
     <div className="install-form-screen">
       <style>{FORM_CSS}</style>
       <div className="no-print kf-toolbar">
-        <Button type="button" size="sm" onClick={() => window.print()} disabled={!q.data}>
+        <Button type="button" size="sm" onClick={pdf.download} disabled={!q.data || making} data-testid="install-form-download">
+          <Download className="size-4" />
+          {making ? "Preparing PDF…" : pdf.error ? "Try The PDF Again" : "Download Editable PDF"}
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => window.print()} disabled={!q.data} data-testid="install-form-print">
           <Printer className="size-4" />
           Print
         </Button>
         <Link to="/installs" search={{ open: installId }} className="text-sm text-primary underline-offset-4 hover:underline">
           Back to the install
         </Link>
+        <p className="kf-tip" data-testid="install-form-download-note">
+          {pdf.error
+            ? `Could not make the PDF: ${pdf.error}`
+            : "The PDF opens in any PDF app on a phone, tablet or computer: change any box, tick Done, and add Tech notes to each section."}
+        </p>
       </div>
       {q.isLoading ? <p className="p-6 text-sm">Loading the form…</p> : null}
       {q.error ? <p className="p-6 text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not load the form"}</p> : null}
@@ -477,6 +546,7 @@ function CheckSection({ title, role, rows, testId, children }: { title: string; 
  */
 const FORM_CSS = `
 .kf-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding-bottom: 12px; }
+.kf-tip { flex-basis: 100%; margin: -4px 0 0; font-size: 12px; color: var(--color-muted-foreground); }
 .kf-stage { overflow-x: auto; padding: 4px 2px 24px; }
 #install-form { width: 816px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 .kf-sheet { width: 816px; min-height: ${PAGE_PX}px; box-sizing: border-box; display: flex; flex-direction: column; position: relative;

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, ChevronLeft, ImagePlus, Images, Pencil, Trash2, Download } from "lucide-react";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
+import { useFlushOnSave, useHideSaveBar, useSaveAll } from "@/components/desk/save-all";
+import { useLiftToasts } from "@/components/desk/toast-lift";
 import {
   addInspectionEquipment,
   addInspectionUnitToList,
@@ -144,6 +146,10 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
     first?.focus({ preventScroll: true });
   }, [jump]);
 
+  const openMachine = q.data?.machines.find((m) => m.equipmentId === equipmentId) ?? null;
+  // In the install window, a machine's own bar (Save, Next machine) stands in for the window's Save bar.
+  useHideSaveBar(!!openMachine);
+
   function refresh(view?: InspectionView) {
     if (view) qc.setQueryData(["inspection", installId], view);
     void qc.invalidateQueries({ queryKey: ["inspection", installId] });
@@ -165,7 +171,7 @@ export function PreInspectionPanel({ installId }: { installId: number }) {
   }
 
   const view = q.data;
-  const machine = view.machines.find((m) => m.equipmentId === equipmentId) ?? null;
+  const machine = openMachine;
 
   return (
     <section ref={sectionRef} data-testid="pre-inspection" className="relative scroll-mt-2">
@@ -638,8 +644,11 @@ function MetaForm({ view, onSaved }: { view: InspectionView; onSaved: (v: Inspec
   const reps = useQuery({ queryKey: ["reps"], queryFn: () => listReps() });
   const techs = useQuery({ queryKey: ["roster"], queryFn: () => listTechs() });
   const choices = inspectorChoices(reps.data?.reps ?? [], techs.data?.techs ?? [], inspector);
+  const saveAll = useSaveAll();
+  /** Typed in since the last save. Only then does the window's Save send these: never a copy someone else has since changed. */
+  const [touched, setTouched] = useState(false);
   const save = useMutation({
-    mutationFn: () =>
+    mutationFn: (_v: { quiet?: boolean } = {}) =>
       saveInspectionMeta({
         data: {
           installId: view.installId,
@@ -650,19 +659,25 @@ function MetaForm({ view, onSaved }: { view: InspectionView; onSaved: (v: Inspec
           overrideReason,
         },
       }),
-    onSuccess: (next) => {
-      toast.success("Site notes saved");
+    onSuccess: (next, v) => {
+      setTouched(false);
+      if (!v?.quiet) toast.success("Site notes saved");
       onSaved(next);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the site notes"),
+  });
+  // The install window's Save stores these too.
+  useFlushOnSave(() => {
+    if (touched && !save.isPending) save.mutate({ quiet: true });
   });
 
   return (
     <form
       className="grid gap-3 border-t border-border px-4 py-3 sm:grid-cols-2"
+      onInput={() => setTouched(true)}
       onSubmit={(e) => {
         e.preventDefault();
-        save.mutate();
+        save.mutate({});
       }}
     >
       <div>
@@ -707,11 +722,14 @@ function MetaForm({ view, onSaved }: { view: InspectionView; onSaved: (v: Inspec
           />
         </div>
       ) : null}
-      <div className="sm:col-span-2">
-        <Button type="submit" size="sm" variant="outline" disabled={save.isPending}>
-          {save.isPending ? "Saving…" : "Save site notes"}
-        </Button>
-      </div>
+      {/* In the install window, Save along the bottom stores these; elsewhere they keep their own button. */}
+      {saveAll ? null : (
+        <div className="sm:col-span-2">
+          <Button type="submit" size="sm" variant="outline" disabled={save.isPending}>
+            {save.isPending ? "Saving…" : "Save site notes"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }
@@ -745,6 +763,9 @@ function MachineDetail({
   });
   // Bumped when results are copied in, so each line shows what was copied instead of what was typed before.
   const [rev, setRev] = useState(0);
+  const saveAll = useSaveAll();
+  // Its Save / Next machine bar sits along the bottom: toasts show above it.
+  useLiftToasts();
   const form = showChecklist(machine.visitKind, machine.reqsSame);
 
   return (
@@ -813,8 +834,15 @@ function MachineDetail({
         <div className="pb-24" />
       )}
       <div className="sticky bottom-0 z-10 flex gap-2 border-t border-border bg-card px-3 py-3">
-        <Button type="button" className="h-12 flex-1 text-base" onClick={() => toast.success("Saved")}>
-          Save
+        {/* Checks save as they are picked; in the install window this Save stores the rest of the window too. */}
+        <Button
+          type="button"
+          className="h-12 flex-1 text-base"
+          disabled={saveAll?.pending}
+          onClick={() => (saveAll ? saveAll.save() : toast.success("Saved"))}
+          data-testid="inspection-save"
+        >
+          {saveAll?.pending ? "Saving…" : "Save"}
         </Button>
         <Button type="button" className="h-12 flex-1 text-base" variant="outline" onClick={onNext} data-testid="inspection-next">
           Next machine
@@ -841,13 +869,20 @@ function VisitChoice({
   const ids = { installId: view.installId, equipmentId: machine.equipmentId };
   const existing = machine.preInspected;
   const [note, setNote] = useState(machine.note ?? "");
+  /** Typed in since the last save: only then does the window's Save send it. */
+  const [touched, setTouched] = useState(false);
   const saveNote = useMutation({
-    mutationFn: (text: string) => saveInspectionUnitNote({ data: { ...ids, note: text.trim() || null } }),
-    onSuccess: (next) => {
-      toast.success("Note saved");
+    mutationFn: (v: { text: string; quiet?: boolean }) => saveInspectionUnitNote({ data: { ...ids, note: v.text.trim() || null } }),
+    onSuccess: (next, v) => {
+      setTouched(false);
+      if (!v.quiet) toast.success("Note saved");
       onSaved(next);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the note"),
+  });
+  // The install window's Save stores a note typed here and not saved yet.
+  useFlushOnSave(() => {
+    if (existing && touched && note.trim() !== (machine.note ?? "").trim() && !saveNote.isPending) saveNote.mutate({ text: note, quiet: true });
   });
   const kind = useMutation({
     mutationFn: (v: { kind: "new" | "existing" }) => setInspectionVisit({ data: { ...ids, ...v } }),
@@ -895,13 +930,16 @@ function VisitChoice({
           <Textarea
             id={`unit-note-${machine.equipmentId}`}
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(e) => {
+              setNote(e.target.value);
+              setTouched(true);
+            }}
             placeholder="Anything worth knowing about this unit"
             className="mt-1 min-h-20 text-base"
             maxLength={2000}
             data-testid="unit-note"
           />
-          <Button type="button" variant="outline" className="mt-2" disabled={saveNote.isPending || note.trim() === (machine.note ?? "")} onClick={() => saveNote.mutate(note)} data-testid="unit-note-save">
+          <Button type="button" variant="outline" className="mt-2" disabled={saveNote.isPending || note.trim() === (machine.note ?? "")} onClick={() => saveNote.mutate({ text: note })} data-testid="unit-note-save">
             Save Note
           </Button>
         </div>
