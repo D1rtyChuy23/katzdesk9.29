@@ -18,6 +18,8 @@ import { RenameDialog } from "@/components/desk/rename-dialog";
 import { AccountEquipImportButton } from "@/components/desk/account-equip-import";
 import { SalesRepImportButton } from "@/components/desk/sales-rep-import";
 import { NetsuiteCustomerImportButton } from "@/components/desk/netsuite-customer-import";
+import { CustomerExportMenu } from "@/components/desk/customer-export-menu";
+import { PossibleDuplicatesButton } from "@/components/desk/possible-duplicates";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -169,6 +171,9 @@ function Page() {
               }}
             />
           </ImportMenu>
+          {/* Admin only, and read-only: the whole list as a file, and the accounts an import added that may be repeats. */}
+          {isAdminOrRole ? <CustomerExportMenu /> : null}
+          {isAdminOrRole ? <PossibleDuplicatesButton onOpenAccount={openCustomer} /> : null}
         </div>
       </header>
 

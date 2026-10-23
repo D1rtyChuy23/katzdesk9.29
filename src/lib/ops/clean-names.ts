@@ -53,7 +53,7 @@ export function parentOf(name: string): string | null {
 
 const SUFFIXES = new Set(["inc", "llc", "ltd", "co", "corp", "corporation", "company", "pllc", "lp", "llp", "the", "dba"]);
 // Too common to link two names by themselves.
-const COMMON = new Set([
+export const COMMON = new Set([
   "and", "of", "at", "the", "coffee", "cafe", "caf", "house", "bar", "grill", "kitchen", "restaurant", "hotel",
   "church", "tx", "houston", "company", "shop", "bakery", "store", "market", "center", "club", "services", "service",
 ]);
@@ -73,7 +73,8 @@ const coreWords = (name: string) => wordsOf(name).filter((w) => !SUFFIXES.has(w)
 // Install matching also drops "Group": "Baldi Management Group Inc." is "Baldi Management".
 const LOOSE_SUFFIXES = new Set([...SUFFIXES, "group", "incorporated", "limited"]);
 
-const installCore = (name: string | null | undefined) => wordsOf(name ?? "").filter((w) => !LOOSE_SUFFIXES.has(w));
+/** A name's words without Inc / LLC / Group / Co / Corp / Company / The: "Baldi Management Group Inc." → baldi, management. */
+export const installCore = (name: string | null | undefined) => wordsOf(name ?? "").filter((w) => !LOOSE_SUFFIXES.has(w));
 
 /**
  * Install candidates only (never tickets or PMs): the same account when both names have the same core words —
