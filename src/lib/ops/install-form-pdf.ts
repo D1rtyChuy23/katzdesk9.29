@@ -23,7 +23,8 @@ import {
   type PDFPage,
 } from "pdf-lib";
 import type { InstallFormPayload } from "./install-form-api";
-import type { CheckNote, FormRow } from "./install-form";
+import { formDate, type CheckNote, type FormRow } from "./install-form.ts";
+import { entryKey, stampText } from "./install-form-entries.ts";
 
 /** Letter, in points (72 to the inch). */
 const PAGE_W = 612;
@@ -233,8 +234,8 @@ export async function buildInstallFormPdf(data: InstallFormPayload, opts: Instal
     rows: data.pre,
     after: (l) =>
       inlineFields(l, [
-        { label: "Verified by", name: "pre_verified_by", value: data.inspector, width: 190 },
-        { label: "Date", name: "pre_date", value: data.inspectedOn, width: 120 },
+        { label: "Verified by", name: "pre_verified_by", value: data.entries?.verifiedBy ?? data.inspector, width: 190 },
+        { label: "Date", name: "pre_date", value: formDate(data.entries?.verifiedOn) || data.inspectedOn, width: 120 },
       ]),
   });
   checkSection(L, { key: "tasks", title: "Installation tasks", role: "Tech on site", rows: data.tasks });
@@ -543,7 +544,16 @@ function techNotes(L: Layout, key: keyof typeof TECH_NOTE_FIELDS, section: strin
   label(page, L, "Tech notes", MARGIN, top - 7, C.bronze);
   const after = spacedWidth("TECH NOTES", L.fonts.bold, 6.8, 0.9);
   page.drawText(pdfSafeText(`· ${section}`, L.fonts.sans), { x: MARGIN + after + 5, y: top - 7, size: 7, font: L.fonts.sans, color: C.muted });
-  textField(L, TECH_NOTE_FIELDS[key], { tip: `Tech notes: ${section}`, x: MARGIN, y: top - 10 - h, w: CONTENT_W, h, size: 9.5, multiline: true });
+  textField(L, TECH_NOTE_FIELDS[key], {
+    tip: `Tech notes: ${section}`,
+    value: L.data.entries?.techNotes[key] ?? "",
+    x: MARGIN,
+    y: top - 10 - h,
+    w: CONTENT_W,
+    h,
+    size: 9.5,
+    multiline: true,
+  });
   L.y = top - 10 - h - 12;
 }
 
@@ -785,8 +795,10 @@ function checkSection(L: Layout, spec: CheckSpec) {
     const text = clip(pdfSafeText(row.label, fonts.sans), fonts.sans, 8.8, CK.xNotes - CK.xLabel - 10);
     page.drawText(text, { x: CK.xLabel, y: bottom + 6.2, size: 8.8, font: fonts.sans, color: C.ink });
     const n = i + 1;
-    textField(L, `${spec.key}_${n}_notes`, { tip: `${row.label}: notes`, value: checkValue(row.notes), x: CK.xNotes, y: bottom + 3, w: CK.wNotes, h: 13, size: 8.5, minSize: 6 });
-    checkBox(L, `${spec.key}_${n}_done`, `${row.label}: done`, CK.xDone + CK.wDone / 2 - 5.25, bottom + 4.25);
+    const key = entryKey(spec.key, row.label);
+    const note = L.data.entries?.notes[key] ?? checkValue(row.notes);
+    textField(L, `${spec.key}_${n}_notes`, { tip: `${row.label}: notes`, value: note, x: CK.xNotes, y: bottom + 3, w: CK.wNotes, h: 13, size: 8.5, minSize: 6 });
+    checkBox(L, `${spec.key}_${n}_done`, `${row.label}: done`, CK.xDone + CK.wDone / 2 - 5.25, bottom + 4.25, 10.5, !!L.data.entries?.done[key]);
     L.y = bottom;
   });
   if (spec.after) {
@@ -804,6 +816,7 @@ function signOff(L: Layout) {
   L.y -= 4;
   ensure(L, barH + cellH, kind);
   const { page, fonts, data } = L;
+  const entries = data.entries;
   const top = L.y;
   page.drawRectangle({ x: MARGIN, y: top - barH, width: CONTENT_W, height: barH, color: C.band });
   page.drawText("Sign-off", { x: MARGIN + 10, y: top - 13, size: 11.5, font: fonts.display, color: C.goldLight });
@@ -834,14 +847,26 @@ function signOff(L: Layout) {
     }
   };
   cell(MARGIN + 12, "Technician · Complete & sign", [
-    { name: "tech_name", label: "Name", value: data.technician, tip: "Technician name" },
-    { name: "tech_signature", label: "Signature (type your name)", value: "", signature: true, tip: "Technician signature: type your name" },
-    { name: "date_completed", label: "Date completed", value: data.completedOn, tip: "Date completed" },
+    { name: "tech_name", label: "Name", value: entries?.techName ?? data.technician, tip: "Technician name" },
+    {
+      name: "tech_signature",
+      label: "Signature (type your name)",
+      value: entries?.signed ? stampText(entries.signed) : "",
+      signature: true,
+      tip: "Technician signature: type your name",
+    },
+    { name: "date_completed", label: "Date completed", value: formDate(entries?.completedOn) || data.completedOn, tip: "Date completed" },
   ]);
   cell(MARGIN + half + 12, "Final approval · Owner", [
     { name: "owner_name", label: "Name", value: "Chuy", tip: "Owner name" },
-    { name: "owner_signature", label: "Signature (type your name)", value: "", signature: true, tip: "Owner approval: type your name" },
-    { name: "date_approved", label: "Date approved", value: "", tip: "Date approved" },
+    {
+      name: "owner_signature",
+      label: "Signature (type your name)",
+      value: entries?.approved ? stampText(entries.approved) : "",
+      signature: true,
+      tip: "Owner approval: type your name",
+    },
+    { name: "date_approved", label: "Date approved", value: formDate(entries?.approvedOn), tip: "Date approved" },
   ]);
   L.y = bodyTop - cellH - 8;
   techNotes(L, "signoff", "Sign-off", kind);

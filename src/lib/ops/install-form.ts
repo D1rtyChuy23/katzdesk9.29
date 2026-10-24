@@ -461,6 +461,9 @@ const CORRIGO_LABELS = [
   "Install date added",
 ] as const;
 
+/** The form's three checklists, line by line: what the tech ticks Done and notes on (install-form-entries). */
+export const CHECKLIST_LABELS = { pre: PRE_LABELS, tasks: TASK_LABELS, corrigo: CORRIGO_LABELS } as const;
+
 /** Pass -> YES, Fail -> NO, a mix -> PENDING. No answer stays blank. */
 export function rollChecks(statuses: string[]): string {
   const known = statuses.filter((s) => s === "Pass" || s === "Fail" || s === "N/A");
