@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { phoneSheetFocus } from "@/components/ui/sheet-focus";
 import { SaveBar } from "./save-bar";
 
 /** What the pop-up holds while the tech types: the saved entries as editable text. */
@@ -108,7 +109,7 @@ export function FillInFormButton({ data }: { data: InstallFormPayload }) {
         Fill In Form
       </Button>
       <Sheet open={open} onOpenChange={(o) => (o ? setOpen(true) : close())}>
-        <SheetContent className="sm:max-w-2xl" aria-describedby={undefined} data-testid="form-fill">
+        <SheetContent className="sm:max-w-2xl" aria-describedby={undefined} onOpenAutoFocus={phoneSheetFocus} data-testid="form-fill">
           {open ? <FillInPanel data={data} onDirty={setDirty} onClose={close} /> : null}
         </SheetContent>
       </Sheet>

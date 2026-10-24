@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { phoneSheetFocus } from "@/components/ui/sheet-focus";
 import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { CustomerCombo, EquipmentCombo } from "./directory-fields";
@@ -33,16 +34,6 @@ import { lastMoveLine, placeDraftError, unitPlaceLabel } from "@/lib/ops/unit-pl
 import { getMyAccess } from "@/lib/ops/access";
 import { reviewRackUnit, setShopTest } from "@/lib/ops/rack-stock";
 import { toast } from "sonner";
-
-/**
- * Phones: the first tabbable control in this window is the Shop test note, and focusing it on open pops up the
- * on-screen keyboard over half the window. Focus the window itself there instead. sm and up keep Radix's default.
- */
-function phoneSheetFocus(e: Event) {
-  if (!window.matchMedia("(width < 40rem)").matches) return;
-  e.preventDefault();
-  (e.currentTarget instanceof HTMLElement ? e.currentTarget : (e.target as HTMLElement | null))?.focus({ preventScroll: true });
-}
 
 export function AssetSheet({
   asset,
