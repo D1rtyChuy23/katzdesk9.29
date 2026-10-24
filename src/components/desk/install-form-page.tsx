@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 const SLOTS = 8;
 /** One Letter page, 11 in at 96 px to the inch. Each sheet is laid out at print size, on screen too. */
 const PAGE_PX = 1056;
+/** A sheet's width: 8.5 in at 96 px to the inch. */
+const SHEET_PX = 816;
 /** A serial this short was likely cut off when it was typed. */
 const SHORT_SERIAL = 4;
 
@@ -141,9 +143,52 @@ export function InstallFormPage({ installId }: { installId: number }) {
       {q.error ? <p className="p-6 text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not load the form"}</p> : null}
       {q.data ? (
         <div className="kf-stage">
-          <FormSheets data={q.data} />
+          <FitToWidth>
+            <FormSheets data={q.data} />
+          </FitToWidth>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * On a screen narrower than a sheet (a phone), the sheets are drawn smaller to fit its width, the way a PDF viewer opens
+ * a page, so a whole page shows at once and pinch zoom still reads the detail. Only the picture is scaled: the sheets
+ * keep their Letter layout, so what fits on page 1 is the same on every screen, and print is never scaled.
+ */
+function FitToWidth({ children }: { children: ReactNode }) {
+  const outer = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState({ scale: 1, height: 0 });
+  useLayoutEffect(() => {
+    const box = outer.current;
+    const sheets = inner.current;
+    if (!box || !sheets) return;
+    const measure = () => {
+      const scale = box.clientWidth > 0 ? Math.min(1, box.clientWidth / SHEET_PX) : 1;
+      const height = sheets.offsetHeight;
+      setFit((was) => (Math.abs(was.scale - scale) < 0.001 && was.height === height ? was : { scale, height }));
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    // The screen turning, and the sheets settling what fits on page 1, both change the size.
+    const watch = new ResizeObserver(measure);
+    watch.observe(box);
+    watch.observe(sheets);
+    return () => watch.disconnect();
+  }, []);
+  const scaled = fit.scale < 1;
+  return (
+    <div
+      ref={outer}
+      className="kf-fit"
+      data-scale={scaled ? fit.scale.toFixed(3) : undefined}
+      style={scaled ? { height: Math.ceil(fit.height * fit.scale), overflow: "hidden" } : undefined}
+    >
+      <div ref={inner} className="kf-fit-sheets" style={scaled ? { width: SHEET_PX, transform: `scale(${fit.scale})` } : undefined}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -179,20 +224,28 @@ function usePageFit(rows: FormRow[], fontLoads: number) {
     const end = foot.current;
     const sheet = body?.parentElement;
     if (!body || !end || !sheet) return;
-    const top = sheet.getBoundingClientRect().top;
-    const room = PAGE_PX - end.getBoundingClientRect().height;
-    const over = body.getBoundingClientRect().bottom - top > room;
+    // On a phone the sheets are drawn smaller (FitToWidth): measure in the sheet's own pixels, so what fits on page 1 is
+    // the same on every screen and in print.
+    const shown = sheet.getBoundingClientRect();
+    const k = sheet.offsetWidth > 0 && shown.width > 0 ? shown.width / sheet.offsetWidth : 1;
+    const px = (v: number) => v / k;
+    const top = shown.top;
+    const room = PAGE_PX - px(end.getBoundingClientRect().height);
+    const over = px(body.getBoundingClientRect().bottom - top) > room;
     const more = moreMain.current;
     const moreEnd = moreFoot.current;
     const moreSheet = more?.parentElement;
     const moreOver =
-      !!more && !!moreEnd && !!moreSheet && more.getBoundingClientRect().bottom - moreSheet.getBoundingClientRect().top > PAGE_PX - moreEnd.getBoundingClientRect().height;
+      !!more &&
+      !!moreEnd &&
+      !!moreSheet &&
+      px(more.getBoundingClientRect().bottom - moreSheet.getBoundingClientRect().top) > PAGE_PX - px(moreEnd.getBoundingClientRect().height);
     if (over && now.blank > 0) setFit({ ...now, blank: now.blank - 1 });
     // Tightening frees room, so the blank rows are offered again (and drop again if they still do not fit).
     else if (over && !now.compact) setFit({ ...now, blank: wanted, compact: true });
     else if (over && now.split > 1) {
       // The machines that end above the footer stay; at least one more moves each time, so this always settles.
-      const bottoms = [...body.querySelectorAll<HTMLElement>("[data-testid=install-form-row]")].map((r) => r.getBoundingClientRect().bottom - top);
+      const bottoms = [...body.querySelectorAll<HTMLElement>("[data-testid=install-form-row]")].map((r) => px(r.getBoundingClientRect().bottom - top));
       const fits = bottoms.filter((b) => b <= room).length;
       setFit({ ...now, split: Math.max(1, Math.min(now.split - 1, fits)) });
     } else if (!over && moreOver && now.extra > 0) setFit({ ...now, extra: now.extra - 1 });
@@ -542,12 +595,14 @@ function CheckSection({ title, role, rows, testId, children }: { title: string; 
 
 /**
  * Design A, "Badge band". Each sheet is a Letter page at 96 px to the inch: 816 x 1056. On screen the sheets sit on the
- * page like paper and scroll sideways on a phone. In print, only the form prints, edge to edge, one sheet per page.
+ * page like paper; on a screen narrower than a sheet they are drawn smaller to fit its width (FitToWidth). In print,
+ * only the form prints, edge to edge, one sheet per page, never scaled.
  */
 const FORM_CSS = `
 .kf-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding-bottom: 12px; }
 .kf-tip { flex-basis: 100%; margin: -4px 0 0; font-size: 12px; color: var(--color-muted-foreground); }
 .kf-stage { overflow-x: auto; padding: 4px 2px 24px; }
+.kf-fit-sheets { transform-origin: top left; }
 #install-form { width: 816px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 .kf-sheet { width: 816px; min-height: ${PAGE_PX}px; box-sizing: border-box; display: flex; flex-direction: column; position: relative;
   background: #ffffff; color: #1a1612; font-family: var(--font-sans); font-size: 14px; line-height: 1.3; text-align: left;
@@ -691,6 +746,9 @@ const FORM_CSS = `
   #install-form { display: block; width: 8.5in; margin: 0; }
   .kf-sheet { width: 8.5in; min-height: 11in; border: 0; box-shadow: none; break-after: page; }
   .kf-sheet:last-child { break-after: auto; }
+  /* A phone's fit-to-screen view never reaches the paper. */
+  .kf-fit { height: auto !important; overflow: visible !important; }
+  .kf-fit-sheets { width: auto !important; transform: none !important; }
 }
 /* An older browser without :has() hides the app around the form instead, the way this page always printed. */
 @supports not selector(:has(*)) {
