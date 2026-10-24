@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
+import { todayChicago } from "@/lib/ops/clock";
+import { canLockEquipment } from "@/lib/ops/equipment-lock";
+import { applyFormPatch, describeFormChange, readEntries, type FormEntries, type FormPatch } from "@/lib/ops/install-form-entries";
 import { findRecipeFor } from "@/lib/ops/equipment";
 import { catalogNames, readInspection, type InspectionView } from "@/lib/ops/inspection-api";
 import { loadInstallWos } from "@/lib/ops/install-work-orders";
@@ -60,6 +63,12 @@ export type InstallFormPayload = {
   pre: CheckNote[];
   tasks: CheckNote[];
   corrigo: CheckNote[];
+  /** What the tech filled in on the form in KatzDesk (Done ticks, notes, Tech notes, sign-off). */
+  entries?: FormEntries;
+  /** The person looking is the owner, who approves the form. */
+  canApprove?: boolean;
+  /** The person looking: their KatzDesk name, which a signature they make carries. */
+  viewer?: string;
 };
 
 /**
@@ -258,7 +267,62 @@ export async function installFormFor(sql: Sql, installId: number): Promise<Insta
     }),
     tasks: taskNotes(photoCount),
     corrigo: corrigoNotes({ serialsLogged: units.length > 0 && units.every((u) => !!u.serial.trim()), installDate: date }),
+    entries: (await readFormEntries(sql, install.id)).entries,
   };
+}
+
+/** The tech's entries on an install's form, and when they were last saved (null: never). */
+export async function readFormEntries(sql: Sql, installId: number): Promise<{ entries: FormEntries; seen: string | null }> {
+  const row = (
+    await sql.query<{ entries: unknown; seen: string }>(
+      "select entries, updated_at::text as seen from install_form_entries where install_id = $1",
+      [installId],
+    )
+  )[0];
+  return { entries: readEntries(row?.entries ?? null), seen: row?.seen ?? null };
+}
+
+/**
+ * One Save from Fill In Form: only what changed, merged onto what is saved now, so two people filling in at once keep
+ * each other's entries. Written only if nobody saved in between (else it reads again and merges again), and logged on
+ * the install's history. Signing stamps the signed-in person; approving is the owner's.
+ */
+export async function saveFormEntriesFor(
+  sql: Sql,
+  userId: string,
+  data: { installId: number; patch: FormPatch },
+  now: Date = new Date(),
+): Promise<FormEntries> {
+  const install = (await sql.query<{ id: number }>("select id from installs where id = $1 and archived = false", [data.installId]))[0];
+  if (!install) throw new Error("Install not found");
+  const name = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";
+  const actor = { name, owner: await canLockEquipment(sql, userId), now, today: todayChicago() };
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const { entries: cur, seen } = await readFormEntries(sql, data.installId);
+    const next = applyFormPatch(cur, data.patch, actor);
+    const change = describeFormChange(cur, next);
+    if (!change) return cur;
+    const json = JSON.stringify(next);
+    const wrote = seen
+      ? await sql.query<{ install_id: number }>(
+          `update install_form_entries set entries = $2::jsonb, updated_at = now(), updated_by = $3
+            where install_id = $1 and updated_at = $4::timestamptz returning install_id`,
+          [data.installId, json, name, seen],
+        )
+      : await sql.query<{ install_id: number }>(
+          `insert into install_form_entries (install_id, entries, updated_by) values ($1, $2::jsonb, $3)
+           on conflict (install_id) do nothing returning install_id`,
+          [data.installId, json, name],
+        );
+    if (!wrote[0]) continue;
+    await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+      data.installId,
+      name,
+      change,
+    ]);
+    return next;
+  }
+  throw new Error("Someone else is saving this form right now. Try again.");
 }
 
 /** For the Details tab's Install type: what the form shows until someone picks one. */
@@ -270,4 +334,31 @@ export const getInstallTypeGuess = createServerFn({ method: "GET" })
 export const getInstallForm = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: { installId: number }) => z.object({ installId: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }): Promise<InstallFormPayload> => installFormFor(await ready(), data.installId));
+  .handler(async ({ data, context }): Promise<InstallFormPayload> => {
+    const sql = await ready();
+    const viewer = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username;
+    return { ...(await installFormFor(sql, data.installId)), canApprove: await canLockEquipment(sql, context.userId), viewer };
+  });
+
+const entryText = z.string().max(4000).nullable();
+const formPatchInput = z.object({
+  installId: z.number().int().positive(),
+  patch: z.object({
+    done: z.record(z.string().max(120), z.boolean()).optional(),
+    notes: z.record(z.string().max(120), entryText).optional(),
+    techNotes: z.record(z.string().max(20), entryText).optional(),
+    verifiedBy: entryText.optional(),
+    verifiedOn: entryText.optional(),
+    techName: entryText.optional(),
+    completedOn: entryText.optional(),
+    approvedOn: entryText.optional(),
+    sign: z.boolean().optional(),
+    approve: z.boolean().optional(),
+  }),
+});
+
+/** Fill In Form's Save (and Sign / Approve): the tech's parts of the form only. */
+export const saveInstallFormEntries = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof formPatchInput>) => formPatchInput.parse(d))
+  .handler(async ({ data, context }): Promise<FormEntries> => saveFormEntriesFor(await ready(), context.userId, data as { installId: number; patch: FormPatch }));

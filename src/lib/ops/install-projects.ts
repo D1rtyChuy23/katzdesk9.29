@@ -164,7 +164,8 @@ export type MergeInstallsResult = {
 /**
  * Merge one install of an account into another (the same account: a strict name match): the drop's work orders (a
  * number the keeper has is skipped), the machine rows the keeper's list doesn't have, its notes, its deal, install date,
- * tech, install type, site contact and contact phone when the keeper has none, its recipes, warehouse units and rebuilds, its visit header (notes added), its
+ * tech, install type, site contact and contact phone when the keeper has none, its recipes, warehouse units and rebuilds,
+ * what a tech filled in on its Equipment Request Form (when the keeper's has nothing), its visit header (notes added), its
  * activity and Ping thread, and its visit units the keeper has no unit of the same model and serial for (with their
  * checks and photos). A drop unit whose twin is on the keeper gives the twin the checks and photos it has none of.
  * The rest stays on the drop, which is archived as a duplicate of the keeper. Nothing is deleted. Admins only.
@@ -298,6 +299,11 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        update assets a set install_id = g.keep_id, updated_at = now() from g where a.install_id = g.drop_id returning a.id
      ), rebuilds_moved as (
        update rebuilds r set install_id = g.keep_id from g where r.install_id = g.drop_id returning r.id
+     ), form_move as (
+       -- What a tech filled in on the drop's Equipment Request Form goes with it when the keeper's form has nothing.
+       update install_form_entries f set install_id = g.keep_id, updated_at = now()
+         from g where f.install_id = g.drop_id and not exists (select 1 from install_form_entries k where k.install_id = g.keep_id)
+       returning f.install_id
      ), head_move as (
        update install_inspections h set install_id = g.keep_id, updated_at = now()
          from g where h.install_id = g.drop_id and not exists (select 1 from install_inspections k where k.install_id = g.keep_id)
@@ -386,7 +392,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      select (select count(*)::int from g) as ok,
             (select count(*)::int from wo_move) + (select count(*)::int from wo_add) as wos,
             (select count(*)::int from keeper) + (select count(*)::int from recipes_moved) + (select count(*)::int from assets_moved)
-              + (select count(*)::int from rebuilds_moved) + (select count(*)::int from head_move) + (select count(*)::int from head_merge)
+              + (select count(*)::int from rebuilds_moved) + (select count(*)::int from form_move) + (select count(*)::int from head_move) + (select count(*)::int from head_merge)
               + (select count(*)::int from loose_photos) + (select count(*)::int from loose_items) + (select count(*)::int from twin_items)
               + (select count(*)::int from twin_photos) + (select count(*)::int from units) + (select count(*)::int from items)
               + (select count(*)::int from photos) + (select count(*)::int from acct) + (select count(*)::int from com)

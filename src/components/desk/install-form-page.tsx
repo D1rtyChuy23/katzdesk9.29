@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Download, Printer } from "lucide-react";
 import { getInstallForm, type InstallFormPayload } from "@/lib/ops/install-form-api";
-import type { CheckNote, FormRow } from "@/lib/ops/install-form";
+import { formDate, type CheckNote, type FormRow } from "@/lib/ops/install-form";
+import { TECH_NOTE_SECTIONS, entryKey, lineDone, stampText, type ChecklistKey, type FormEntries } from "@/lib/ops/install-form-entries";
 import { plugImageSrc } from "@/lib/ops/plug-faces";
 import { Button } from "@/components/ui/button";
+import { FillInFormButton } from "./install-form-fill";
 
 /** Rows on page 1, machines and blank write-in rows together. Blank rows drop when long notes need the room. */
 const SLOTS = 8;
@@ -122,7 +124,8 @@ export function InstallFormPage({ installId }: { installId: number }) {
     <div className="install-form-screen">
       <style>{FORM_CSS}</style>
       <div className="no-print kf-toolbar">
-        <Button type="button" size="sm" onClick={pdf.download} disabled={!q.data || making} data-testid="install-form-download">
+        {q.data ? <FillInFormButton data={q.data} /> : null}
+        <Button type="button" size="sm" variant="outline" onClick={pdf.download} disabled={!q.data || making} data-testid="install-form-download">
           <Download className="size-4" />
           {making ? "Preparing PDF…" : pdf.error ? "Try The PDF Again" : "Download Editable PDF"}
         </Button>
@@ -136,7 +139,7 @@ export function InstallFormPage({ installId }: { installId: number }) {
         <p className="kf-tip" data-testid="install-form-download-note">
           {pdf.error
             ? `Could not make the PDF: ${pdf.error}`
-            : "The PDF opens in any PDF app on a phone, tablet or computer: change any box, tick Done, and add Tech notes to each section."}
+            : "Fill In Form saves the Done ticks, notes, Tech notes and sign-off on this install, and Print and the PDF show them. The PDF also opens in any PDF app to fill in there."}
         </p>
       </div>
       {q.isLoading ? <p className="p-6 text-sm">Loading the form…</p> : null}
@@ -256,12 +259,19 @@ function usePageFit(rows: FormRow[], fontLoads: number) {
 
 function FormSheets({ data }: { data: InstallFormPayload }) {
   const fontLoads = useFontLoads();
+  const entries = data.entries;
+  const notes = entries?.techNotes ?? {};
+  // Tech notes print on a sheet of their own at the end, so they never push a fitted page past Letter.
+  const noted = TECH_NOTE_SECTIONS.filter((s) => !!notes[s.key]);
   const { main, foot, moreMain, moreFoot, blank, compact, split, extra } = usePageFit(data.rows, fontLoads);
+  const verifiedBy = entries?.verifiedBy || data.inspector;
+  const verifiedOn = formDate(entries?.verifiedOn) || data.inspectedOn;
   const units = data.rows.reduce((n, r) => n + r.qty, 0);
   const first = data.rows.slice(0, split);
   const rest = data.rows.slice(split);
   const restUnits = rest.reduce((n, r) => n + r.qty, 0);
-  const pages = rest.length ? 3 : 2;
+  const checklistPage = rest.length ? 3 : 2;
+  const pages = checklistPage + (noted.length ? 1 : 0);
   const footer = (page: number) => (
     <>
       <div className="kf-foot-rule" />
@@ -357,23 +367,50 @@ function FormSheets({ data }: { data: InstallFormPayload }) {
         </section>
       ) : null}
 
-      <section className="kf-sheet kf-p2" aria-label={`Page ${pages}, checklist and sign-off`}>
-        <Band kind="checklist" id={data.id} page={pages} pages={pages} />
+      <section className="kf-sheet kf-p2" aria-label={`Page ${checklistPage}, checklist and sign-off`}>
+        <Band kind="checklist" id={data.id} page={checklistPage} pages={pages} />
         <div className="kf-main">
-          <CheckSection title="Pre-installation checklist" role="Sales rep · Pre-inspection" rows={data.pre} testId="install-form-pre">
+          <CheckSection
+            title="Pre-installation checklist"
+            role="Sales rep · Pre-inspection"
+            list="pre"
+            rows={data.pre}
+            entries={entries}
+            testId="install-form-pre"
+          >
             <div className="kf-after">
               <span>
                 <span className="kf-label">Verified by</span>
-                {data.inspector ? <span className="kf-after-value">{data.inspector}</span> : <span className="kf-write kf-w160" />}
+                {verifiedBy ? (
+                  <span className="kf-after-value" data-testid="install-form-verified-by">
+                    {verifiedBy}
+                  </span>
+                ) : (
+                  <span className="kf-write kf-w160" />
+                )}
               </span>
               <span>
                 <span className="kf-label">Date</span>
-                {data.inspectedOn ? <span className="kf-after-value">{data.inspectedOn}</span> : <span className="kf-write kf-w120" />}
+                {verifiedOn ? <span className="kf-after-value">{verifiedOn}</span> : <span className="kf-write kf-w120" />}
               </span>
             </div>
           </CheckSection>
-          <CheckSection title="Installation tasks" role="Tech on site" rows={data.tasks} testId="install-form-tasks" />
-          <CheckSection title="Corrigo account update tasks" role="Tech or office" rows={data.corrigo} testId="install-form-corrigo">
+          <CheckSection
+            title="Installation tasks"
+            role="Tech on site"
+            list="tasks"
+            rows={data.tasks}
+            entries={entries}
+            testId="install-form-tasks"
+          />
+          <CheckSection
+            title="Corrigo account update tasks"
+            role="Tech or office"
+            list="corrigo"
+            rows={data.corrigo}
+            entries={entries}
+            testId="install-form-corrigo"
+          >
             <div className="kf-after kf-wos" data-testid="install-form-wos">
               <span className="kf-label">{data.workOrders.length > 1 ? "Corrigo work orders" : "Corrigo work order #"}</span>
               {data.workOrders.length ? (
@@ -394,23 +431,49 @@ function FormSheets({ data }: { data: InstallFormPayload }) {
               <span className="kf-sign-note">Signed electronically in KatzDesk</span>
             </div>
             <div className="kf-sign-grid">
-              <div className="kf-sign-cell">
+              <div className="kf-sign-cell" data-testid="install-form-tech-sign">
                 <span className="kf-label">Technician · Complete &amp; sign</span>
-                <span className="kf-sign-name">{data.technician || <span className="kf-write kf-w180" />}</span>
-                <span className="kf-stamp-empty">Not signed yet</span>
-                <span className="kf-sign-meta">Date completed: {data.completedOn || "—"}</span>
+                <span className="kf-sign-name">{entries?.techName || data.technician || <span className="kf-write kf-w180" />}</span>
+                {entries?.signed ? (
+                  <span className="kf-stamp-done">Signed · {stampText(entries.signed)}</span>
+                ) : (
+                  <span className="kf-stamp-empty">Not signed yet</span>
+                )}
+                <span className="kf-sign-meta">Date completed: {formDate(entries?.completedOn) || data.completedOn || "—"}</span>
               </div>
-              <div className="kf-sign-cell">
+              <div className="kf-sign-cell" data-testid="install-form-owner-sign">
                 <span className="kf-label">Final approval · Owner</span>
                 <span className="kf-sign-name">Chuy</span>
-                <span className="kf-stamp-empty">Waiting for approval</span>
-                <span className="kf-sign-meta">Approved after the technician signs</span>
+                {entries?.approved ? (
+                  <span className="kf-stamp-done">Approved · {stampText(entries.approved)}</span>
+                ) : (
+                  <span className="kf-stamp-empty">Waiting for approval</span>
+                )}
+                <span className="kf-sign-meta">
+                  {entries?.approved ? `Date approved: ${formDate(entries.approvedOn) || "—"}` : "Approved after the technician signs"}
+                </span>
               </div>
             </div>
           </section>
+
         </div>
-        <footer className="kf-foot">{footer(pages)}</footer>
+        <footer className="kf-foot">{footer(checklistPage)}</footer>
       </section>
+
+      {noted.length ? (
+        <section className="kf-sheet kf-p2" aria-label={`Page ${pages}, tech notes`} data-testid="install-form-technotes">
+          <Band kind="notes" id={data.id} page={pages} pages={pages} />
+          <div className="kf-main">
+            {noted.map((s) => (
+              <section key={s.key} className="kf-note-block" aria-label={`Tech notes: ${s.title}`} data-testid={`install-form-technotes-${s.key}`}>
+                <span className="kf-kicker">{s.title}</span>
+                <p className="kf-note-text">{notes[s.key]}</p>
+              </section>
+            ))}
+          </div>
+          <footer className="kf-foot">{footer(pages)}</footer>
+        </section>
+      ) : null}
     </article>
   );
 }
@@ -419,6 +482,7 @@ const BAND_TEXT = {
   request: { lead: "Service Department · Install Request", title: "Equipment Request Form" },
   continued: { lead: "Service Department · Install Request", title: "Equipment to Install, Continued" },
   checklist: { lead: "Come and fix it.", title: "Install Checklist & Sign-Off" },
+  notes: { lead: "Come and fix it.", title: "Tech Notes" },
 } as const;
 
 /** The dark badge band across the top of a sheet, with the gold double rule under it. Page 1 gets the tall band. */
@@ -566,7 +630,23 @@ function CheckValue({ value }: { value: string }) {
   return value ? <span className="kf-check-text">{value}</span> : null;
 }
 
-function CheckSection({ title, role, rows, testId, children }: { title: string; role: string; rows: CheckNote[]; testId: string; children?: ReactNode }) {
+function CheckSection({
+  title,
+  role,
+  list,
+  rows,
+  entries,
+  testId,
+  children,
+}: {
+  title: string;
+  role: string;
+  list: ChecklistKey;
+  rows: CheckNote[];
+  entries?: FormEntries;
+  testId: string;
+  children?: ReactNode;
+}) {
   return (
     <section className="kf-check" aria-label={title} data-testid={testId}>
       <div className="kf-check-grid kf-check-bar">
@@ -577,17 +657,20 @@ function CheckSection({ title, role, rows, testId, children }: { title: string; 
         <span className="kf-bar-label">Notes</span>
         <span className="kf-bar-label kf-center">Done</span>
       </div>
-      {rows.map((row) => (
-        <div key={row.label} className="kf-check-grid kf-check-row">
-          <span>{row.label}</span>
-          <span className="kf-check-notes">
-            <CheckValue value={row.notes} />
-          </span>
-          <span className="kf-done">
-            <span className="kf-box" />
-          </span>
-        </div>
-      ))}
+      {rows.map((row) => {
+        const done = lineDone(entries, list, row.label);
+        // The tech's note replaces what KatzDesk shows on the line.
+        const own = entries?.notes[entryKey(list, row.label)];
+        return (
+          <div key={row.label} className="kf-check-grid kf-check-row" data-testid="install-form-check" data-done={done || undefined}>
+            <span>{row.label}</span>
+            <span className="kf-check-notes">{own ? <span className="kf-check-text">{own}</span> : <CheckValue value={row.notes} />}</span>
+            <span className="kf-done">
+              <Box on={done} />
+            </span>
+          </div>
+        );
+      })}
       {children}
     </section>
   );
@@ -729,6 +812,9 @@ const FORM_CSS = `
 .kf-sign-cell + .kf-sign-cell { border-left: 1px solid #cfc6b8; }
 .kf-sign-name { display: block; min-height: 20px; font-size: 15px; font-weight: 700; }
 .kf-stamp-empty { display: flex; align-items: center; height: 40px; border: 1.5px dashed #8a8174; border-radius: 6px; padding: 0 12px; font-size: 13px; font-weight: 600; color: #5f584f; }
+.kf-stamp-done { display: flex; align-items: center; min-height: 40px; border: 1.5px solid #1f5a47; border-radius: 6px; padding: 4px 12px; font-size: 13px; font-weight: 700; color: #1f5a47; background: #eef4f1; overflow-wrap: anywhere; }
+.kf-note-block { border: 1px solid #cfc6b8; border-left: 4px solid #a8862a; padding: 10px 14px 12px; break-inside: avoid; }
+.kf-note-text { margin: 6px 0 0; font-size: 14px; font-weight: 500; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
 .kf-sign-meta { font-size: 12px; color: #5f584f; }
 
 .kf-foot { margin-top: auto; padding: 10px 48px 30px; }
