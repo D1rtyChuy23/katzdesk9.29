@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ClipboardPen } from "lucide-react";
 import { toast } from "sonner";
 import { saveInstallFormEntries, type InstallFormPayload } from "@/lib/ops/install-form-api";
-import type { CheckNote } from "@/lib/ops/install-form";
+import { formDate, type CheckNote } from "@/lib/ops/install-form";
 import {
   NAME_MAX,
   NOTE_MAX,
@@ -31,7 +31,6 @@ type Draft = {
   verifiedOn: string;
   techName: string;
   completedOn: string;
-  approvedOn: string;
 };
 
 function draftOf(e: FormEntries): Draft {
@@ -43,7 +42,6 @@ function draftOf(e: FormEntries): Draft {
     verifiedOn: e.verifiedOn ?? "",
     techName: e.techName ?? "",
     completedOn: e.completedOn ?? "",
-    approvedOn: e.approvedOn ?? "",
   };
 }
 
@@ -79,8 +77,6 @@ function patchOf(saved: FormEntries, d: Draft): FormPatch {
   if (techName !== undefined) p.techName = techName;
   const completedOn = scalar(saved.completedOn, d.completedOn);
   if (completedOn !== undefined) p.completedOn = completedOn;
-  const approvedOn = scalar(saved.approvedOn, d.approvedOn);
-  if (approvedOn !== undefined) p.approvedOn = approvedOn;
   return p;
 }
 
@@ -304,21 +300,16 @@ function FillInPanel({ data, onDirty, onClose }: { data: InstallFormPayload; onD
                       </Button>
                     ) : null}
                     {!saved.signed ? <p className="text-xs text-muted-foreground">The technician signs first.</p> : null}
-                    <div>
-                      <Label htmlFor="form-fill-approved-on">Date approved</Label>
-                      <Input
-                        id="form-fill-approved-on"
-                        type="date"
-                        className="mt-1"
-                        value={draft.approvedOn}
-                        disabled={!saved.approved}
-                        onChange={(e) => set((d) => ({ ...d, approvedOn: e.target.value }))}
-                      />
-                    </div>
+                    {!saved.approved ? <p className="text-xs text-muted-foreground">Date approved: the day you approve.</p> : null}
                   </>
                 ) : (
                   <p className="text-xs text-muted-foreground">Only the owner approves, after the technician signs.</p>
                 )}
+                {saved.approved ? (
+                  <p className="text-sm text-muted-foreground" data-testid="form-fill-approved-on">
+                    Date approved: {formDate(saved.approvedOn) || "—"}
+                  </p>
+                ) : null}
               </div>
             </div>
             {box("signoff")}

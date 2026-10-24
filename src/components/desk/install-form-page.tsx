@@ -257,13 +257,47 @@ function usePageFit(rows: FormRow[], fontLoads: number) {
   return { main, foot, moreMain, moreFoot, ...now };
 }
 
+/**
+ * Tech notes take as many sheets as they need: the boxes that end above a sheet's footer stay on it, and the rest start
+ * the next sheet. One box always stays, so this settles. Measured in the sheet's own pixels, like usePageFit.
+ */
+function useNoteSheets(parts: string[], fontLoads: number) {
+  const sheets = useRef<(HTMLElement | null)[]>([]);
+  const key = `${fontLoads}:${JSON.stringify(parts)}`;
+  const [fit, setFit] = useState<{ key: string; starts: number[] }>({ key, starts: [0] });
+  const starts = useMemo(() => (fit.key === key ? fit.starts : [0]), [fit, key]);
+  useLayoutEffect(() => {
+    for (let s = 0; s < starts.length; s += 1) {
+      const sheet = sheets.current[s];
+      const end = sheet?.querySelector<HTMLElement>(".kf-foot");
+      if (!sheet || !end) break;
+      const shown = sheet.getBoundingClientRect();
+      const k = sheet.offsetWidth > 0 && shown.width > 0 ? shown.width / sheet.offsetWidth : 1;
+      const room = PAGE_PX - end.getBoundingClientRect().height / k;
+      const bottoms = [...sheet.querySelectorAll<HTMLElement>(".kf-note-block")].map((b) => (b.getBoundingClientRect().bottom - shown.top) / k);
+      const fits = bottoms.filter((b) => b <= room).length;
+      if (bottoms.length > 1 && fits < bottoms.length) {
+        setFit({ key, starts: [...starts.slice(0, s + 1), starts[s] + Math.max(1, fits), ...starts.slice(s + 1)] });
+        return;
+      }
+    }
+    if (fit.key !== key) setFit({ key, starts });
+  }, [fit.key, key, starts]);
+  return { sheets, starts };
+}
+
 function FormSheets({ data }: { data: InstallFormPayload }) {
   const fontLoads = useFontLoads();
   const entries = data.entries;
   const notes = entries?.techNotes ?? {};
-  // Tech notes print on a sheet of their own at the end, so they never push a fitted page past Letter.
+  // Tech notes print on sheets of their own at the end, so they never push a fitted page past Letter.
   const noted = TECH_NOTE_SECTIONS.filter((s) => !!notes[s.key]);
   const { main, foot, moreMain, moreFoot, blank, compact, split, extra } = usePageFit(data.rows, fontLoads);
+  const noteFit = useNoteSheets(
+    noted.map((s) => `${s.key}:${notes[s.key]}`),
+    fontLoads,
+  );
+  const noteSheets = noted.length ? noteFit.starts.map((from, i) => noted.slice(from, noteFit.starts[i + 1] ?? noted.length)) : [];
   const verifiedBy = entries?.verifiedBy || data.inspector;
   const verifiedOn = formDate(entries?.verifiedOn) || data.inspectedOn;
   const units = data.rows.reduce((n, r) => n + r.qty, 0);
@@ -271,7 +305,7 @@ function FormSheets({ data }: { data: InstallFormPayload }) {
   const rest = data.rows.slice(split);
   const restUnits = rest.reduce((n, r) => n + r.qty, 0);
   const checklistPage = rest.length ? 3 : 2;
-  const pages = checklistPage + (noted.length ? 1 : 0);
+  const pages = checklistPage + noteSheets.length;
   const footer = (page: number) => (
     <>
       <div className="kf-foot-rule" />
@@ -455,25 +489,35 @@ function FormSheets({ data }: { data: InstallFormPayload }) {
               </div>
             </div>
           </section>
-
         </div>
         <footer className="kf-foot">{footer(checklistPage)}</footer>
       </section>
 
-      {noted.length ? (
-        <section className="kf-sheet kf-p2" aria-label={`Page ${pages}, tech notes`} data-testid="install-form-technotes">
-          <Band kind="notes" id={data.id} page={pages} pages={pages} />
-          <div className="kf-main">
-            {noted.map((s) => (
-              <section key={s.key} className="kf-note-block" aria-label={`Tech notes: ${s.title}`} data-testid={`install-form-technotes-${s.key}`}>
-                <span className="kf-kicker">{s.title}</span>
-                <p className="kf-note-text">{notes[s.key]}</p>
-              </section>
-            ))}
-          </div>
-          <footer className="kf-foot">{footer(pages)}</footer>
-        </section>
-      ) : null}
+      {noteSheets.map((group, i) => {
+        const page = checklistPage + 1 + i;
+        return (
+          <section
+            key={i}
+            ref={(el) => {
+              noteFit.sheets.current[i] = el;
+            }}
+            className="kf-sheet kf-p2"
+            aria-label={`Page ${page}, tech notes`}
+            data-testid="install-form-technotes"
+          >
+            <Band kind={i ? "notesMore" : "notes"} id={data.id} page={page} pages={pages} />
+            <div className="kf-main">
+              {group.map((s) => (
+                <section key={s.key} className="kf-note-block" aria-label={`Tech notes: ${s.title}`} data-testid={`install-form-technotes-${s.key}`}>
+                  <span className="kf-kicker">{s.title}</span>
+                  <p className="kf-note-text">{notes[s.key]}</p>
+                </section>
+              ))}
+            </div>
+            <footer className="kf-foot">{footer(page)}</footer>
+          </section>
+        );
+      })}
     </article>
   );
 }
@@ -483,7 +527,9 @@ const BAND_TEXT = {
   continued: { lead: "Service Department · Install Request", title: "Equipment to Install, Continued" },
   checklist: { lead: "Come and fix it.", title: "Install Checklist & Sign-Off" },
   notes: { lead: "Come and fix it.", title: "Tech Notes" },
+  notesMore: { lead: "Come and fix it.", title: "Tech Notes, Continued" },
 } as const;
+const MOTTO = "Come and fix it.";
 
 /** The dark badge band across the top of a sheet, with the gold double rule under it. Page 1 gets the tall band. */
 function Band({ kind, id, page, pages }: { kind: keyof typeof BAND_TEXT; id: number; page: number; pages: number }) {
@@ -495,7 +541,7 @@ function Band({ kind, id, page, pages }: { kind: keyof typeof BAND_TEXT; id: num
         <img className="kf-cloud" src="/brand/cloud.png" alt="" aria-hidden="true" />
         <img className="kf-logo" src="/brand/katz-coffee-mark.svg" alt="Katz Coffee" width={334} height={177} />
         <div className="kf-band-text">
-          <span className={kind === "checklist" ? "kf-motto" : "kf-eyebrow"}>{text.lead}</span>
+          <span className={text.lead === MOTTO ? "kf-motto" : "kf-eyebrow"}>{text.lead}</span>
           {tall ? <h1 className="kf-title">{text.title}</h1> : <h2 className="kf-title">{text.title}</h2>}
         </div>
         <div className="kf-badge">
