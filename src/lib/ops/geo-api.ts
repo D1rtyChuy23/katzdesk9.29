@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
-import { deskMiddleware, salesRepScope } from "@/lib/ops/access";
+import { deskMiddleware } from "@/lib/ops/access";
 import { todayChicago } from "@/lib/ops/clock";
 import { flagOn } from "@/lib/ops/flag";
 import { isoDayOrNull } from "@/lib/ops/iso";
@@ -60,8 +60,6 @@ export type AccountGeoData = {
   accounts: AccountGeo[];
   /** Every rep that appears on an account, plus the rep list, sorted: the legend and the color order. */
   reps: string[];
-  /** True when work counts were limited to this sales rep's own accounts (same rule as Tickets and PMs). */
-  scoped: boolean;
 };
 
 type Row = {
@@ -101,13 +99,13 @@ const quality = (v: string | null): PinQuality | null => (v === "exact" || v ===
  * Completed / Cancelled; installs not complete and not Installed. Jobs link to accounts by name (lower(name)), like
  * the Customers list. Out of network means the account is on the Out of Network page (a provider is assigned or one is
  * still needed): it is on the Out of Network accounts list (network_accounts), or a provider that is not archived is
- * assigned to it (customer_providers), both matched the same way by lower(customer). For a sales rep (not an admin),
- * work on accounts that are not theirs is counted as zero, the same scope the Tickets and PMs pages use; the accounts
- * themselves still show, as on the Customers list.
+ * assigned to it (customer_providers), both matched the same way by lower(customer). Every viewer, a sales rep
+ * included, gets the work counts on every account, so each Rep filter on the Map shows that rep's real numbers (the
+ * Tickets and PMs pages keep their own sales-rep scope).
  */
 export const listAccountGeo = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<AccountGeoData> => {
+  .handler(async (): Promise<AccountGeoData> => {
     const sql = await ready();
     const today = todayChicago();
     const rows = await sql.query<Row>(
@@ -163,7 +161,6 @@ export const listAccountGeo = createServerFn({ method: "GET" })
         order by lower(d.name), d.id`,
       [today, PM_DUE_DAYS],
     );
-    const scope = await salesRepScope(sql, context.userId);
     const seen = new Set<string>();
     const accounts: AccountGeo[] = [];
     for (const r of rows) {
@@ -172,8 +169,7 @@ export const listAccountGeo = createServerFn({ method: "GET" })
       const dup = seen.has(key);
       seen.add(key);
       const rep = canonicalRepName(r.account_rep);
-      const inScope = !scope || scope(r.account_rep);
-      const counts = !dup && inScope;
+      const counts = !dup;
       const lat = num(r.latitude);
       const lng = num(r.longitude);
       const point = isPoint({ lat, lng });
@@ -208,5 +204,5 @@ export const listAccountGeo = createServerFn({ method: "GET" })
     const reps = [...new Set([...DEFAULT_REPS.map((r) => r.name), ...accounts.map((a) => a.rep).filter((r): r is string => !!r)])].sort((a, b) =>
       a.localeCompare(b),
     );
-    return { today, dueDays: PM_DUE_DAYS, accounts, reps, scoped: !!scope };
+    return { today, dueDays: PM_DUE_DAYS, accounts, reps };
   });
