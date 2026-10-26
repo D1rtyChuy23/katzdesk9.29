@@ -13,6 +13,8 @@ import { copyRecipe, getCustomerHistory, listDirectory, listRecipes, renameCusto
 import { getMyAccess } from "@/lib/ops/access";
 import { formatShortDate, money, isOpenInstall } from "@/lib/ops/clock";
 import type { CustomerHistory, Install, Recipe } from "@/lib/ops/types";
+import { setAccountPin } from "@/lib/ops/account-pin-api";
+import { MANUAL_PIN_SOURCE, parsePinInput, pinText } from "@/lib/ops/account-pin";
 import { ComboField } from "@/components/ui/combo-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -270,6 +272,7 @@ export function CustomerHistorySheet({
                     </p>
                   )}
                   <AccountNumberField id={data.id} value={data.accountNumber ?? null} canEdit={!!data.canEditAccountNumber} />
+                  <AccountPinField id={data.id} pin={data.pin ?? null} canEdit={!!data.canEditPin} />
                   <NetsuiteDetails netsuite={data.netsuite ?? null} />
                   <AccountMarksForm id={data.id} aviKatz={data.aviKatz} accountRep={data.accountRep} />
                   <AssignedSalesReps reps={data.salesReps ?? []} />
@@ -671,6 +674,96 @@ function AccountNumberField({ id, value, canEdit }: { id: number; value: string 
       ) : (
         <p className="mt-0.5 font-medium tabular" data-testid="account-number-value">{value ?? <span className="font-normal text-muted-foreground">None</span>}</p>
       )}
+    </div>
+  );
+}
+
+/**
+ * Account Details → Map pin: where the account's pin is and where it came from, for everyone. An admin can enter the
+ * exact latitude and longitude (or paste both into the first box, as Google Maps copies them); it saves as
+ * "Manual (entered by user)" and moves the pin on the Map, Nearby and directions.
+ */
+function AccountPinField({ id, pin, canEdit }: { id: number; pin: CustomerHistory["pin"]; canEdit: boolean }) {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
+  const savedLat = pin?.latitude ?? null;
+  const savedLng = pin?.longitude ?? null;
+  useEffect(() => {
+    setEditing(false);
+    setLat(savedLat == null ? "" : String(savedLat));
+    setLng(savedLng == null ? "" : String(savedLng));
+  }, [id, savedLat, savedLng]);
+  const check = parsePinInput(lat, lng);
+  const save = useMutation({
+    mutationFn: () => setAccountPin({ data: { id, latitude: lat, longitude: lng } }),
+    onSuccess: (r) => {
+      toast.success(`Map pin saved: ${pinText(r.latitude, r.longitude)}`);
+      setEditing(false);
+      for (const key of [["customer-history"], ["account-geo"], ["account-addresses"], ["customer-address"], ["address-report"]]) {
+        void qc.invalidateQueries({ queryKey: key });
+      }
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the pin"),
+  });
+  return (
+    <div className="mt-3 rounded-xl border border-border px-3 py-2.5" data-testid="account-pin">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">Map pin</p>
+          {pin ? (
+            <>
+              <p className="mt-0.5 font-medium tabular" data-testid="account-pin-value">
+                {pinText(pin.latitude, pin.longitude)}
+              </p>
+              <p className="text-xs text-muted-foreground" data-testid="account-pin-source">
+                {pin.source}
+              </p>
+            </>
+          ) : (
+            <p className="mt-0.5 text-sm text-muted-foreground" data-testid="account-pin-value">
+              No pin yet
+            </p>
+          )}
+        </div>
+        {canEdit && !editing ? (
+          <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)} data-testid="account-pin-edit">
+            {pin ? "Edit pin" : "Add pin"}
+          </Button>
+        ) : null}
+      </div>
+      {canEdit && editing ? (
+        <form
+          className="mt-2 grid gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (check.ok) save.mutate();
+          }}
+        >
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div>
+              <Label htmlFor={`pin-lat-${id}`} className="text-xs">Latitude</Label>
+              <Input id={`pin-lat-${id}`} value={lat} onChange={(e) => setLat(e.target.value)} placeholder="29.911912" inputMode="decimal" autoComplete="off" className="mt-1 tabular" data-testid="account-pin-lat" />
+            </div>
+            <div>
+              <Label htmlFor={`pin-lng-${id}`} className="text-xs">Longitude</Label>
+              <Input id={`pin-lng-${id}`} value={lng} onChange={(e) => setLng(e.target.value)} placeholder="-95.724617" inputMode="decimal" autoComplete="off" className="mt-1 tabular" data-testid="account-pin-lng" />
+            </div>
+          </div>
+          <p className={cn("text-xs", check.ok ? "text-muted-foreground" : "text-warning")} data-testid="account-pin-check">
+            {check.ok ? `Saves as ${MANUAL_PIN_SOURCE}: ${pinText(check.lat, check.lng)}` : lat.trim() || lng.trim() ? check.reason : "Paste both from Google Maps into Latitude, or type each one."}
+          </p>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={!check.ok || save.isPending} data-testid="account-pin-save">
+              {save.isPending ? "Saving…" : "Save pin"}
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => setEditing(false)} disabled={save.isPending}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      ) : null}
     </div>
   );
 }

@@ -116,7 +116,7 @@ function LocationLine({ location }: { location: CustomerLocation }) {
   const point = { lat: location.latitude, lng: location.longitude };
   if (!isPoint(point)) return null;
   const { match } = location;
-  const label = match === "approx" ? "ZIP area pin (approximate)" : match === "close" ? "Map pin (close match, check it)" : "Map pin";
+  const label = location.manual ? "Map pin (entered by hand)" : match === "approx" ? "ZIP area pin (approximate)" : match === "close" ? "Map pin (close match, check it)" : "Map pin";
   const href = placeUrl({ point, quality: match });
   return (
     <p className="mt-0.5 pl-9 text-xs text-muted-foreground max-sm:mt-1.5" data-testid="customer-location">
@@ -128,8 +128,10 @@ function LocationLine({ location }: { location: CustomerLocation }) {
         title={
           match === "approx"
             ? "Only the ZIP code was found, so this pin is the middle of the ZIP area. It is never used for directions."
-            : location.matchedAddress
-              ? `Geocoded as ${location.matchedAddress}`
+            : location.manual
+              ? "Pin entered by hand on Account Details"
+              : location.matchedAddress
+                ? `Geocoded as ${location.matchedAddress}`
               : "Open the pin in Google Maps"
         }
         data-testid="customer-location-map"

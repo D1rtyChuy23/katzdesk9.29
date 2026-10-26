@@ -6,6 +6,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { isoDayOrNull } from "@/lib/ops/iso";
 import { canonicalRepName, isNoRep, DEFAULT_REPS } from "@/lib/ops/rep-match";
 import { cityFromAddress, isPoint, type PinQuality } from "@/lib/ops/geo";
+import { MANUAL_PIN_MATCH, pinQuality } from "@/lib/ops/account-pin";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -25,6 +26,8 @@ export type AccountGeo = {
   lng: number | null;
   /** exact / close: the street address was found. approx: only the ZIP code's center. */
   quality: PinQuality | null;
+  /** The pin was entered by hand on Account Details (it counts as exact). */
+  manual: boolean;
   /** The account's own address (typed), and the address the geocoder matched. */
   address: string | null;
   geocodeAddress: string | null;
@@ -91,7 +94,7 @@ const num = (v: unknown): number | null => {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 };
-const quality = (v: string | null): PinQuality | null => (v === "exact" || v === "close" || v === "approx" ? v : null);
+const quality = (v: string | null): PinQuality | null => pinQuality(v);
 
 /**
  * Every active account with its pin, rep and open work, in one query. Open means the same as everywhere else:
@@ -181,6 +184,7 @@ export const listAccountGeo = createServerFn({ method: "GET" })
         lat: point ? lat : null,
         lng: point ? lng : null,
         quality: point ? quality(r.geocode_match) : null,
+        manual: point && r.geocode_match === MANUAL_PIN_MATCH,
         address,
         geocodeAddress,
         city: cityFromAddress(address) ?? cityFromAddress(geocodeAddress),

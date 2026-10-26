@@ -559,8 +559,8 @@ function RemovedRow({
       <div className="min-w-0 flex-1 px-2 py-2.5">
         <p className="font-medium max-sm:break-words sm:truncate">{c.name}</p>
         <p className="text-xs text-muted-foreground">
-          Removed {formatPingTime(c.removedAt)}
-          {c.removedBy ? ` by ${c.removedBy}` : ""} · {countLabel(c.history, "record", "records")}
+          {c.removedAt ? `Removed ${formatPingTime(c.removedAt)}${c.removedBy ? ` by ${c.removedBy}` : ""}` : "Removed before Oct 26 (when and by whom weren't recorded)"}
+          {" · "}{countLabel(c.history, "record", "records")}
           {c.accountNumber ? ` · Account # ${c.accountNumber}` : ""}
         </p>
       </div>

@@ -5,6 +5,11 @@
  * Number. Customers → Removed lists what was removed, by whom and when, and Restore brings an account back.
  *
  * A merged account is archived too, but never marked removed, so it isn't listed under Removed.
+ *
+ * An account removed before Remove recorded who and when (before 2026-10-26) is archived with no removed_at. It is
+ * listed (and can be restored) when calls, PMs, installs, deals or equipment are still under its name: a merge moves
+ * all of those to the kept account, so a merged account has none and stays off the list, as does a startup merge
+ * ("… · merged N").
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -18,11 +23,30 @@ export type RemovedCustomer = {
   id: number;
   name: string;
   accountNumber: string | null;
-  removedAt: string;
+  /** Null for an account removed before Remove recorded the time (see `earlier`). */
+  removedAt: string | null;
   removedBy: string | null;
-  /** Calls, TLCs, PMs, installs and deals still under the name. */
+  /** Removed before 2026-10-26: when and by whom weren't recorded. */
+  earlier: boolean;
+  /** Calls, TLCs, PMs, installs, deals and equipment still under the name. */
   history: number;
 };
+
+/** History still under each account name (lower-case): calls, TLCs, PMs, installs, deals and account equipment. */
+const HISTORY_CTE = `h as (
+       select lower(customer) as k, count(*)::int as n from service_jobs where coalesce(customer, '') <> '' group by 1
+       union all
+       select lower(customer), count(*)::int from pm_jobs where coalesce(customer, '') <> '' group by 1
+       union all
+       select lower(customer), count(*)::int from installs where archived = false and coalesce(customer, '') <> '' group by 1
+       union all
+       select lower(customer), count(*)::int from deals where archived = false and coalesce(customer, '') <> '' group by 1
+       union all
+       select lower(customer), count(*)::int from account_equipment where coalesce(customer, '') <> '' group by 1
+     ), t as (select k, sum(n)::int as n from h group by k)`;
+
+/** Removed with Remove, or removed earlier (no stamp) and not a merge: history is still under its name. */
+const RESTORABLE = `d.archived = true and (d.removed_at is not null or (d.name not like '% · merged %' and coalesce(t.n, 0) > 0))`;
 
 export type RemoveResult = { removed: { id: number; name: string }[] };
 export type RestoreResult = { restored: { id: number; name: string }[]; skipped: { id: number; name: string; why: string }[] };
@@ -76,9 +100,10 @@ export async function restoreCustomersFor(sql: Sql, userId: string, idsRaw: numb
   if (!ids.length) return { restored: [], skipped: [] };
   if (ids.length > CUSTOMER_BATCH_MAX) throw new Error(`Restore at most ${CUSTOMER_BATCH_MAX.toLocaleString("en-US")} accounts at a time.`);
   const picks = await sql.query<{ id: number; name: string; account_number: string | null }>(
-    `select id, name, account_number from directory_customers
-      where id = any($1::int[]) and archived = true and removed_at is not null
-      order by lower(name), id`,
+    `with ${HISTORY_CTE}
+     select d.id, d.name, d.account_number from directory_customers d left join t on t.k = lower(d.name)
+      where d.id = any($1::int[]) and ${RESTORABLE}
+      order by lower(d.name), d.id`,
     [ids],
   );
   const numberKey = (v: string | null) => String(v ?? "").trim().toLowerCase();
@@ -119,7 +144,7 @@ export async function restoreCustomersFor(sql: Sql, userId: string, idsRaw: numb
     `with back as (
        update directory_customers
           set archived = false, removed_at = null, removed_by = null, updated_at = now()
-        where id = any($1::int[]) and archived = true and removed_at is not null
+        where id = any($1::int[]) and archived = true
         returning id, name
      ), log as (
        insert into activity (entity_type, entity_id, actor_name, action, detail)
@@ -132,30 +157,26 @@ export async function restoreCustomersFor(sql: Sql, userId: string, idsRaw: numb
   return { restored: rows.map((r) => ({ id: Number(r.id), name: String(r.name) })), skipped };
 }
 
-/** Accounts taken off the list with Remove, newest first, with how much history is still under each name. */
+/**
+ * Accounts taken off the list with Remove, newest first, then the ones removed earlier (A–Z), with how much history is
+ * still under each name.
+ */
 export async function listRemovedCustomersFor(sql: Sql): Promise<RemovedCustomer[]> {
   const rows = await sql.query<Record<string, unknown>>(
-    `with h as (
-       select lower(customer) as k, count(*)::int as n from service_jobs where coalesce(customer, '') <> '' group by 1
-       union all
-       select lower(customer), count(*)::int from pm_jobs where coalesce(customer, '') <> '' group by 1
-       union all
-       select lower(customer), count(*)::int from installs where archived = false and coalesce(customer, '') <> '' group by 1
-       union all
-       select lower(customer), count(*)::int from deals where archived = false and coalesce(customer, '') <> '' group by 1
-     ), t as (select k, sum(n)::int as n from h group by k)
+    `with ${HISTORY_CTE}
      select d.id, d.name, d.account_number, d.removed_at, d.removed_by, coalesce(t.n, 0)::int as history
        from directory_customers d
        left join t on t.k = lower(d.name)
-      where d.archived = true and d.removed_at is not null
-      order by d.removed_at desc, d.id desc`,
+      where ${RESTORABLE}
+      order by d.removed_at desc nulls last, case when d.removed_at is null then lower(d.name) end, d.id desc`,
   );
   return rows.map((r) => ({
     id: Number(r.id),
     name: String(r.name ?? ""),
     accountNumber: r.account_number == null || String(r.account_number).trim() === "" ? null : String(r.account_number),
-    removedAt: r.removed_at instanceof Date ? r.removed_at.toISOString() : String(r.removed_at ?? ""),
+    removedAt: r.removed_at == null ? null : r.removed_at instanceof Date ? r.removed_at.toISOString() : String(r.removed_at),
     removedBy: r.removed_by == null ? null : String(r.removed_by),
+    earlier: r.removed_at == null,
     history: Number(r.history ?? 0),
   }));
 }

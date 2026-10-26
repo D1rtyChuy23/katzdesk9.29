@@ -54,6 +54,7 @@ import { CONTACT_PHONE_MAX, SITE_CONTACT_MAX, contactText, installTypeLabel, ins
 import { backfillAssignedSerialsOnce } from "./serial-backfill";
 import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { assertUnlocked, canLockEquipment } from "./equipment-lock";
+import { MANUAL_PIN_MATCH, pinQuality, pinSourceLabel } from "./account-pin";
 import { LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "./equipment-lock-rules";
 import { boardRow, cleanMachine, confirmError, continuable, dropReleased, keepTies, lockConfirmed, placeRows, projectLabel, projectStatus, releasedUids } from "./deal-board";
 import { listedEquipment, matchModel, catalogModels, savedMachineName } from "./equipment";
@@ -2480,6 +2481,11 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		repFlag: account.rep_flag ?? null,
 		accountNumber: account.account_number ?? null,
 		canEditAccountNumber: await canReviewNames(sql, context.userId),
+		// The saved map pin and where it came from; only an admin edits it (Account Details → Map pin).
+		pin: account.latitude != null && account.longitude != null && account.latitude !== "" && account.longitude !== ""
+			? { latitude: Number(account.latitude), longitude: Number(account.longitude), source: pinSourceLabel(account.geocode_match), manual: account.geocode_match === MANUAL_PIN_MATCH }
+			: null,
+		canEditPin: (await sql.query("select is_admin from desk_accounts where user_id = $1", [context.userId])).some((r) => r.is_admin === true || r.is_admin === "true"),
 		salesReps: (await sql.query(
 			"select rep_name, role, contribution_pct, is_primary from customer_sales_reps where customer_id = $1 order by is_primary desc, lower(rep_name), id",
 			[account.id],
@@ -2537,7 +2543,14 @@ export const listDirectory = createServerFn({ method: "GET" }).middleware([deskM
 	return await sql.query(`select id, name from ${table} where archived = false${inactive} order by lower(name)`);
 });
 /** The account's address (from the clean customer list), for tickets, PMs and installs. */
-export type CustomerLocation = { latitude: number; longitude: number; match: "exact" | "close" | "approx" | null; matchedAddress: string | null };
+export type CustomerLocation = {
+	latitude: number;
+	longitude: number;
+	match: "exact" | "close" | "approx" | null;
+	matchedAddress: string | null;
+	/** Entered by hand on Account Details (counts as exact). */
+	manual?: boolean;
+};
 export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { name: string }) => d).handler(async ({ data }: any): Promise<{ address: string | null; location: CustomerLocation | null }> => {
 	const sql = await ready();
 	const name = String(data.name ?? "").trim();
@@ -2548,8 +2561,9 @@ export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([
 			? {
 					latitude: Number(row.latitude),
 					longitude: Number(row.longitude),
-					match: row.geocode_match === "exact" || row.geocode_match === "close" || row.geocode_match === "approx" ? row.geocode_match : null,
+					match: pinQuality(row.geocode_match),
 					matchedAddress: row.geocode_address ? String(row.geocode_address) : null,
+					manual: row.geocode_match === MANUAL_PIN_MATCH,
 				}
 			: null;
 	return { address: row?.address ? String(row.address) : null, location };
@@ -2590,7 +2604,7 @@ export const listAccountAddresses = createServerFn({ method: "GET" }).middleware
 		const latitude = coord(r.latitude);
 		const longitude = coord(r.longitude);
 		const pinned = latitude !== null && longitude !== null;
-		const match = r.geocode_match === "exact" || r.geocode_match === "close" || r.geocode_match === "approx" ? r.geocode_match : null;
+		const match = pinQuality(r.geocode_match);
 		out[key] = {
 			address: r.address ? String(r.address).trim() || null : null,
 			latitude: pinned ? latitude : null,

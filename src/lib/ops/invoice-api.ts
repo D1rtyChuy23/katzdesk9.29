@@ -8,6 +8,7 @@ import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount
 import { INVOICE_TARGETS, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
+import { pinQuality } from "@/lib/ops/account-pin";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -139,7 +140,7 @@ async function billTo(sql: Sql, ref: Ref): Promise<BillTo> {
     onList: !!acct,
     latitude: pinned ? latitude : null,
     longitude: pinned ? longitude : null,
-    geocodeMatch: pinned && (match === "exact" || match === "close" || match === "approx") ? match : null,
+    geocodeMatch: pinned ? pinQuality(match) : null,
   };
 }
 

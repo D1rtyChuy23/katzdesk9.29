@@ -942,7 +942,7 @@ function AccountCard({ account: a, type, onClose }: { account: AccountGeo; type:
 
       <p className={cn("mt-2 text-sm", !address && "text-muted-foreground")}>{address ?? "No address"}</p>
       <p className={cn("text-xs", a.quality === "close" ? "text-warning" : "text-muted-foreground")} data-testid="map-pin-quality">
-        {a.quality ? QUALITY_LABEL[a.quality] : point ? "Pin placed, match not recorded" : "No pin yet"}
+        {a.manual ? "Exact pin (entered by hand)" : a.quality ? QUALITY_LABEL[a.quality] : point ? "Pin placed, match not recorded" : "No pin yet"}
       </p>
 
       <ul className="mt-3 space-y-0.5 text-xs">
