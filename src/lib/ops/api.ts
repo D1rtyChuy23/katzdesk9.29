@@ -9,6 +9,7 @@ import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook, stampMachineParts } from "./pm-runbook-api";
 import { stackCustomerRefusal } from "./pm-stack";
 import { formatAddress } from "./netsuite-customers";
+import { removeCustomersFor } from "./customer-remove-api";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
 import { canonicalTechName, sameTech } from "./tech-match";
 import { boardLocked, cleanTime, type BoardType } from "./day-board";
@@ -2632,7 +2633,15 @@ export const addDirectoryEntry = createServerFn({ method: "POST" }).middleware([
 	}
 	const existing = await sql.query(`select id, name, archived from ${table} where lower(name) = $1 limit 1`, [name.toLowerCase()]);
 	if (existing[0]) {
-		if (existing[0].archived) await sql.query(`update ${table} set archived = false, updated_at = now() where id = $1`, [existing[0].id]);
+		// Adding a removed name brings that account back, off Customers → Removed.
+		if (existing[0].archived) {
+			await sql.query(
+				data.kind === "customer"
+					? `update directory_customers set archived = false, removed_at = null, removed_by = null, updated_at = now() where id = $1`
+					: `update ${table} set archived = false, updated_at = now() where id = $1`,
+				[existing[0].id],
+			);
+		}
 		return {
 			id: existing[0].id,
 			name: existing[0].name
@@ -2642,16 +2651,13 @@ export const addDirectoryEntry = createServerFn({ method: "POST" }).middleware([
 });
 export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind: DirectoryKind; id: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
-	if (data.kind === "customer") await requireAdmin(sql, context.userId, "Only an admin can add or remove customers.");
-	const table = directoryTable(data.kind);
 	if (data.kind === "customer") {
-		// An account with no Account Number is never removed: it is flagged for review instead.
-		const row = (await sql.query(`select account_number from directory_customers where id = $1`, [data.id]))[0];
-		if (row && !String(row.account_number ?? "").trim()) {
-			await sql.query(`update directory_customers set removal_flag = true, updated_at = now() where id = $1`, [data.id]);
-			return { ok: true, flagged: true };
-		}
+		// Any account can be removed, with or without an Account Number (Chuy, 2026-10-26). Nothing is deleted, and
+		// Customers → Removed can bring it back.
+		await removeCustomersFor(sql, context.userId, [Number(data.id)]);
+		return { ok: true, flagged: false };
 	}
+	const table = directoryTable(data.kind);
 	await sql.query(`update ${table} set archived = true, updated_at = now() where id = $1`, [data.id]);
 	return { ok: true, flagged: false };
 });

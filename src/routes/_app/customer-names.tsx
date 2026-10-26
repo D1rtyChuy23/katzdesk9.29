@@ -15,7 +15,7 @@ import {
   type NameHistory,
 } from "@/lib/ops/clean-names-api";
 import { listCustomerRecords } from "@/lib/ops/api";
-import { wordsOf } from "@/lib/ops/clean-names";
+import { cleanLineDone, wordsOf } from "@/lib/ops/clean-names";
 import type { CustomerRecord } from "@/lib/ops/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,17 +24,16 @@ import { FilterChip } from "@/components/desk/desk-charts";
 import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { formatPingTime } from "@/lib/ops/clock";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/customer-names")({ component: Page });
 
 /** Shown on the page so it is clear whether the live site has the latest Clean Names. */
-const CLEAN_NAMES_VERSION = "Oct 12 (4) · Search and sections in one row";
+const CLEAN_NAMES_VERSION = "Oct 26 · Decided lines leave their section";
 
 const SECTIONS: { id: CleanSection; label: string; hint: string }[] = [
   { id: "locked", label: "Approved And Locked", hint: "Exact matches applied from the clean list, and names you approved. Locked: Corrigo import and typing over the name do not change them. Unlock here to change one." },
   { id: "similar", label: "Needs Approval", hint: "Close but not exact: same words with Inc / LLC, a NetSuite parent, extra words such as a location, or a spelling difference. Nothing changes until you approve." },
-  { id: "no_match", label: "No Match", hint: "KatzDesk accounts with nothing like them on the clean list. Keep locks the KatzDesk name; Mark Removal only flags it." },
+  { id: "no_match", label: "No Match", hint: "KatzDesk accounts with nothing like them on the clean list. Keep locks the KatzDesk name; Mark Removal flags it, and Flagged For Review on Customers removes flagged accounts together." },
   { id: "walk_in", label: "Walk-In", hint: "Every Walk-In account, matched or not. Not locked until you approve." },
   { id: "cimbali", label: "Cimbali", hint: "Every Cimbali account, matched or not. Not locked until you approve." },
 ];
@@ -67,7 +66,8 @@ function Page() {
   const report = useQuery({ queryKey: ["clean-names"], queryFn: () => getCleanReport() });
   const [section, setSection] = useState<CleanSection>("similar");
   const [q, setQ] = useState("");
-  const [waitingOnly, setWaitingOnly] = useState(false);
+  // Decided lines leave their section (Chuy, 10/26); Show Done brings them back.
+  const [showDone, setShowDone] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const data = report.data;
 
@@ -114,16 +114,17 @@ function Page() {
   });
 
   const counts = useMemo(() => {
-    const c: Record<CleanSection, { all: number; waiting: number }> = {
-      locked: { all: 0, waiting: 0 },
-      similar: { all: 0, waiting: 0 },
-      no_match: { all: 0, waiting: 0 },
-      walk_in: { all: 0, waiting: 0 },
-      cimbali: { all: 0, waiting: 0 },
+    const c: Record<CleanSection, { all: number; todo: number; done: number }> = {
+      locked: { all: 0, todo: 0, done: 0 },
+      similar: { all: 0, todo: 0, done: 0 },
+      no_match: { all: 0, todo: 0, done: 0 },
+      walk_in: { all: 0, todo: 0, done: 0 },
+      cimbali: { all: 0, todo: 0, done: 0 },
     };
     for (const it of data?.items ?? []) {
       c[it.section].all += 1;
-      if (it.status === "pending") c[it.section].waiting += 1;
+      if (cleanLineDone(it)) c[it.section].done += 1;
+      else c[it.section].todo += 1;
     }
     return c;
   }, [data]);
@@ -134,15 +135,16 @@ function Page() {
       (data?.items ?? []).filter(
         (it) =>
           it.section === section &&
-          (!waitingOnly || it.status === "pending") &&
+          // Approved And Locked is the list of decided names itself, so it always shows them all.
+          (section === "locked" || showDone || !cleanLineDone(it)) &&
           (!needle || `${it.katzName ?? ""} ${it.cleanName ?? ""}`.toLowerCase().includes(needle)),
       ),
-    [data, section, needle, waitingOnly],
+    [data, section, needle, showDone],
   );
-  const paged = useShowMore(rows, `${section}|${needle}|${waitingOnly}`);
+  const paged = useShowMore(rows, `${section}|${needle}|${showDone}`);
   // History under each unlocked row, for the rows on screen.
   const historyNames = useMemo(
-    () => [...new Set(paged.visible.filter((it) => !isLocked(it)).map(nameInQuestion).filter((n): n is string => !!n))].sort(),
+    () => [...new Set(paged.visible.filter((it) => !isLocked(it) && !it.accountRemoved).map(nameInQuestion).filter((n): n is string => !!n))].sort(),
     [paged.visible],
   );
   const history = useQuery({
@@ -162,7 +164,8 @@ function Page() {
           <h1 className="font-display text-3xl font-medium tracking-tight">Clean Names</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Apply the clean customer list. Exact names are applied and locked; everything else waits here for you to
-            approve, skip, or mark for removal. Nothing is merged on its own and nothing is deleted.
+            approve, skip, or mark for removal. A line you decide leaves its section; Show Done brings decided lines back.
+            Nothing is merged on its own and nothing is deleted.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -241,17 +244,14 @@ function Page() {
             <div className="contents" role="group" aria-label="Report sections" data-testid="clean-sections">
               {SECTIONS.map((s) => (
                 <FilterChip key={s.id} selected={section === s.id} onClick={() => setSection(s.id)} data-testid={`clean-section-${s.id}`}>
-                  {s.label} {counts[s.id].all}
-                  {counts[s.id].waiting && s.id !== "locked" ? (
-                    // On a phone the waiting count only shows when it differs from the total.
-                    <span className={cn("ml-1 opacity-70", counts[s.id].waiting === counts[s.id].all && "max-sm:hidden")}>· {counts[s.id].waiting} waiting</span>
-                  ) : null}
+                  {/* A review section counts what is left to decide; Approved And Locked counts every name in it. */}
+                  {s.label} {s.id === "locked" ? counts[s.id].all : counts[s.id].todo}
                 </FilterChip>
               ))}
             </div>
-            {section !== "locked" ? (
-              <FilterChip selected={waitingOnly} onClick={() => setWaitingOnly(!waitingOnly)} data-testid="clean-waiting-only">
-                Waiting Only
+            {section !== "locked" && (counts[section].done > 0 || showDone) ? (
+              <FilterChip selected={showDone} aria-pressed={showDone} onClick={() => setShowDone(!showDone)} data-testid="clean-show-done">
+                Show Done {counts[section].done}
               </FilterChip>
             ) : null}
             <ToolbarNote>{rows.length} shown</ToolbarNote>
@@ -272,7 +272,11 @@ function Page() {
                 onChoose={(accountId) => decide.mutate({ id: it.id, action: "approve", accountId })}
               />
             ))}
-            {!rows.length ? <li className="px-4 py-6 text-sm text-muted-foreground">Nothing in this section.</li> : null}
+            {!rows.length ? (
+              <li className="px-4 py-6 text-sm text-muted-foreground" data-testid="clean-empty">
+                {section !== "locked" && !showDone && counts[section].done ? "Nothing left to decide in this section." : "Nothing in this section."}
+              </li>
+            ) : null}
             <ShowMoreButton remaining={paged.remaining} onClick={paged.showMore} label="names" as="li" />
           </ul>
         </>
@@ -338,6 +342,11 @@ function ReportRow({
           ) : null}
           {it.locked ? <Lock className="size-3.5 shrink-0 text-primary" aria-label="Name locked" /> : null}
           <Badge variant={st.variant} size="tight" data-testid="clean-status">{st.label}</Badge>
+          {it.accountRemoved ? (
+            <Badge variant="outline" size="tight" data-testid="clean-account-removed" title="This account is off the Customers list (removed or merged).">
+              Removed From Customers
+            </Badge>
+          ) : null}
         </div>
         {it.approved ? (
           <dl className="mt-1 grid gap-x-4 gap-y-0.5 text-xs sm:grid-cols-[auto_minmax(0,1fr)]" data-testid="clean-details">
@@ -357,9 +366,10 @@ function ReportRow({
           {it.mergesInto ? <span className="font-medium text-warning"> · Approving merges into “{it.mergesInto}”</span> : null}
           {it.decidedBy && it.status !== "pending" ? ` · ${it.decidedBy}` : ""}
         </p>
-        {canEdit && unlocked ? <HistoryBlock name={nameInQuestion(it)} history={history} loading={historyLoading} /> : null}
+        {canEdit && unlocked && !it.accountRemoved ? <HistoryBlock name={nameInQuestion(it)} history={history} loading={historyLoading} /> : null}
       </div>
-      {canEdit ? (
+      {/* A line whose account is off Customers has nothing to act on here; Restore on Customers brings it back. */}
+      {canEdit && !it.accountRemoved ? (
         <div className="flex flex-wrap gap-1.5 sm:justify-end">
           {unlocked ? (
             <Button

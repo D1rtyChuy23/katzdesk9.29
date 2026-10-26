@@ -1,6 +1,6 @@
 /**
- * Customers → Export and Customers → Possible Duplicates: both Admin-only and read-only. Nothing here writes to the
- * database.
+ * Customers → Export and Customers → Possible Duplicates: both Admin-only and read-only, except Not a Duplicate, which
+ * only records that a pair was checked (customer_dupe_dismissals) so it stops showing. No account is changed here.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -184,28 +184,77 @@ export async function loadDupeAccounts(sql: Query): Promise<DupeAccount[]> {
   }));
 }
 
+/** A pair marked Not a Duplicate: who checked it, and when. */
+export type DismissedPair = DupePair & { dismissedBy: string | null; dismissedAt: string };
+
 export type DupeReport = {
   runs: DupeRun[];
   run: DupeRun | null;
   /** Accounts the run added that are still on the list. */
   added: number;
+  /** Pairs still to check: the ones marked Not a Duplicate are in `dismissed` instead. */
   pairs: DupePair[];
   counts: Record<DupeLevel, number>;
+  dismissed: DismissedPair[];
 };
+
+/** The two account ids of a pair, lower first: how a dismissal is stored. */
+export const pairIds = (a: number, b: number): [number, number] => (a < b ? [a, b] : [b, a]);
 
 export async function possibleDuplicatesFor(sql: Query, runId?: number | null): Promise<DupeReport> {
   const runs = await dupeRuns(sql);
   const run = (runId ? runs.find((r) => r.id === runId) : runs[0]) ?? null;
-  const empty: DupeReport = { runs, run, added: 0, pairs: [], counts: { high: 0, medium: 0, low: 0 } };
+  const empty: DupeReport = { runs, run, added: 0, pairs: [], counts: { high: 0, medium: 0, low: 0 }, dismissed: [] };
   if (!run) return empty;
   const accounts = await loadDupeAccounts(sql);
   const onList = new Set(accounts.map((a) => a.id));
   const added = new Set((await accountsAddedByRun(sql, run.id)).filter((id) => onList.has(id)));
-  const pairs = findPossibleDuplicates(added, accounts);
+  const marks = new Map(
+    (
+      await sql.query<{ low_id: number; high_id: number; dismissed_by: string | null; dismissed_at: unknown }>(
+        "select low_id, high_id, dismissed_by, dismissed_at from customer_dupe_dismissals",
+      )
+    ).map((r) => [`${Number(r.low_id)}:${Number(r.high_id)}`, { dismissedBy: str(r.dismissed_by), dismissedAt: iso(r.dismissed_at) }]),
+  );
+  const pairs: DupePair[] = [];
+  const dismissed: DismissedPair[] = [];
+  for (const p of findPossibleDuplicates(added, accounts)) {
+    const mark = marks.get(pairIds(p.added.id, p.other.id).join(":"));
+    if (mark) dismissed.push({ ...p, ...mark });
+    else pairs.push(p);
+  }
   const counts = { high: 0, medium: 0, low: 0 };
   for (const p of pairs) counts[p.level] += 1;
-  return { runs, run, added: added.size, pairs, counts };
+  return { runs, run, added: added.size, pairs, counts, dismissed };
 }
+
+/** Not a Duplicate (dismissed: true) or Undo (false) on one pair. Neither account changes. */
+export async function setDupeDismissedFor(sql: Sql, userId: string, data: { aId: number; bId: number; dismissed: boolean }): Promise<void> {
+  await requireAdmin(sql, userId, "mark possible duplicates");
+  if (data.aId === data.bId) throw new Error("A pair needs two accounts.");
+  const [low, high] = pairIds(data.aId, data.bId);
+  if (!data.dismissed) {
+    await sql.query("delete from customer_dupe_dismissals where low_id = $1 and high_id = $2", [low, high]);
+    return;
+  }
+  const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";
+  const found = await sql.query<{ id: number }>("select id from directory_customers where id = any($1::int[]) and archived = false", [[low, high]]);
+  if (found.length < 2) throw new Error("One of these accounts is no longer on the list.");
+  await sql.query(
+    `insert into customer_dupe_dismissals (low_id, high_id, dismissed_by) values ($1, $2, $3)
+     on conflict (low_id, high_id) do nothing`,
+    [low, high, who],
+  );
+}
+
+export const setDuplicateDismissed = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { aId: number; bId: number; dismissed: boolean }) =>
+    z.object({ aId: z.number().int().positive(), bId: z.number().int().positive(), dismissed: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<void> => {
+    await setDupeDismissedFor(await ready(), context.userId, data);
+  });
 
 export const possibleDuplicates = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])

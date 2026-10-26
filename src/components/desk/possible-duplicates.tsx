@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { CopyCheck, Download } from "lucide-react";
-import { possibleDuplicates, type DupeRun } from "@/lib/ops/customer-review-api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CopyCheck, Download, Undo2, X } from "lucide-react";
+import { toast } from "sonner";
+import { possibleDuplicates, setDuplicateDismissed, type DismissedPair, type DupeRun } from "@/lib/ops/customer-review-api";
 import { DUPE_CSV_COLUMNS, DUPE_LEVELS, DUPE_LEVEL_LABEL, dupeCsvRows, type DupeAccount, type DupeLevel, type DupePair } from "@/lib/ops/customer-dupes";
 import { toCsv } from "@/lib/ops/customer-export";
 import { isWalkInName } from "@/lib/ops/clean-names";
@@ -32,14 +33,25 @@ function saveCsv(name: string, text: string) {
 }
 
 /**
- * Admin-only and read-only: Customers → Possible Duplicates. For each account a NetSuite import added, the accounts
- * that may be the same place, with the reasons, a High / Medium / Low rating and which one to keep (never a Walk-In).
- * There is no merge button here: Chuy merges by renaming the account he drops to the one he keeps.
+ * Admin-only: Customers → Possible Duplicates. For each account a NetSuite import added, the accounts that may be the
+ * same place, with the reasons, a High / Medium / Low rating and which one to keep (never a Walk-In). There is no merge
+ * button here: Chuy merges by renaming the account he drops to the one he keeps. Not a Duplicate hides a pair he has
+ * checked (Chuy, 10/26); Not Duplicates shows those again, with Undo. No account changes here.
  */
 export function PossibleDuplicatesButton({ onOpenAccount }: { onOpenAccount: (id: number) => void }) {
   const [open, setOpen] = useState(false);
   const [runId, setRunId] = useState<number | null>(null);
   const [level, setLevel] = useState<DupeLevel | "all">("all");
+  const [showDismissed, setShowDismissed] = useState(false);
+  const qc = useQueryClient();
+  const mark = useMutation({
+    mutationFn: (d: { aId: number; bId: number; dismissed: boolean }) => setDuplicateDismissed({ data: d }),
+    onSuccess: (_r, d) => {
+      toast.success(d.dismissed ? "Marked not a duplicate" : "Back on the list");
+      void qc.invalidateQueries({ queryKey: ["possible-duplicates"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
   const q = useQuery({
     queryKey: ["possible-duplicates", runId],
     queryFn: () => possibleDuplicates({ data: { runId } }),
@@ -47,8 +59,15 @@ export function PossibleDuplicatesButton({ onOpenAccount }: { onOpenAccount: (id
     enabled: open,
   });
   const report = q.data;
-  const shown = useMemo(() => (report?.pairs ?? []).filter((p) => level === "all" || p.level === level), [report, level]);
-  const paged = useShowMore(shown, `${report?.run?.id}|${level}`, 50);
+  const source: (DupePair | DismissedPair)[] = useMemo(() => (showDismissed ? (report?.dismissed ?? []) : (report?.pairs ?? [])), [report, showDismissed]);
+  const levelCounts = useMemo(() => {
+    const c: Record<DupeLevel, number> = { high: 0, medium: 0, low: 0 };
+    for (const p of source) c[p.level] += 1;
+    return c;
+  }, [source]);
+  const shown = useMemo(() => source.filter((p) => level === "all" || p.level === level), [source, level]);
+  const paged = useShowMore(shown, `${report?.run?.id}|${level}|${showDismissed}`, 50);
+  const dismissedCount = report?.dismissed.length ?? 0;
 
   function download() {
     if (!report?.run) return;
@@ -69,7 +88,7 @@ export function PossibleDuplicatesButton({ onOpenAccount }: { onOpenAccount: (id
             <DialogDescription>
               Each account a NetSuite import added, next to the accounts that may be the same place. Nothing here changes an
               account. To merge two, open the one you don’t keep and rename it to the one you keep: its calls, PMs and
-              installs move with it.
+              installs move with it. Not a Duplicate takes a pair you&rsquo;ve checked off this list.
             </DialogDescription>
             {q.isLoading ? <p className="text-sm text-muted-foreground">Comparing the accounts…</p> : null}
             {q.isError ? <p className="text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not compare the accounts."}</p> : null}
@@ -99,23 +118,36 @@ export function PossibleDuplicatesButton({ onOpenAccount }: { onOpenAccount: (id
                   <span className="text-muted-foreground" data-testid="dupes-summary">
                     {report.added.toLocaleString("en-US")} still on the list · {report.pairs.length.toLocaleString("en-US")}{" "}
                     {report.pairs.length === 1 ? "possible duplicate" : "possible duplicates"}
+                    {dismissedCount ? ` · ${dismissedCount.toLocaleString("en-US")} marked not ${dismissedCount === 1 ? "a duplicate" : "duplicates"}` : ""}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2" data-testid="dupes-levels">
                   <FilterChip selected={level === "all"} onClick={() => setLevel("all")}>
-                    All {report.pairs.length.toLocaleString("en-US")}
+                    All {source.length.toLocaleString("en-US")}
                   </FilterChip>
                   {DUPE_LEVELS.map((l) => (
                     <FilterChip key={l} selected={level === l} onClick={() => setLevel(l)} data-testid={`dupes-level-${l}`}>
-                      {DUPE_LEVEL_LABEL[l]} {report.counts[l].toLocaleString("en-US")}
+                      {DUPE_LEVEL_LABEL[l]} {levelCounts[l].toLocaleString("en-US")}
                     </FilterChip>
                   ))}
+                  {dismissedCount || showDismissed ? (
+                    <FilterChip
+                      selected={showDismissed}
+                      aria-pressed={showDismissed}
+                      onClick={() => setShowDismissed(!showDismissed)}
+                      data-testid="dupes-show-dismissed"
+                    >
+                      Not Duplicates {dismissedCount.toLocaleString("en-US")}
+                    </FilterChip>
+                  ) : null}
                 </div>
                 <ul className="space-y-2" data-testid="dupes-list">
                   {paged.visible.map((p) => (
                     <PairCard
                       key={`${p.added.id}-${p.other.id}`}
                       pair={p}
+                      busy={mark.isPending}
+                      onMark={(dismissed) => mark.mutate({ aId: p.added.id, bId: p.other.id, dismissed })}
                       onOpen={(id) => {
                         setOpen(false);
                         onOpenAccount(id);
@@ -123,7 +155,11 @@ export function PossibleDuplicatesButton({ onOpenAccount }: { onOpenAccount: (id
                     />
                   ))}
                   <ShowMoreButton as="li" remaining={paged.remaining} onClick={paged.showMore} label="pairs" />
-                  {!shown.length ? <li className="px-1 py-6 text-sm text-muted-foreground">Nothing here.</li> : null}
+                  {!shown.length ? (
+                    <li className="px-1 py-6 text-sm text-muted-foreground" data-testid="dupes-empty">
+                      {showDismissed ? "No pair is marked not a duplicate." : "Nothing here."}
+                    </li>
+                  ) : null}
                 </ul>
                 <p className="text-xs text-muted-foreground">
                   High: the same site address and one more sign. Medium: the same site address alone; a matching phone or
@@ -134,7 +170,7 @@ export function PossibleDuplicatesButton({ onOpenAccount }: { onOpenAccount: (id
             ) : null}
             <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-3">
               {report?.run ? (
-                <Button type="button" variant="outline" onClick={download} disabled={!shown.length} data-testid="dupes-download">
+                <Button type="button" variant="outline" onClick={download} disabled={!shown.length || showDismissed} data-testid="dupes-download">
                   <Download className="size-4" />
                   Download Report
                 </Button>
@@ -174,8 +210,19 @@ function AccountSide({ a, label, keep, onOpen }: { a: DupeAccount; label: string
   );
 }
 
-function PairCard({ pair, onOpen }: { pair: DupePair; onOpen: (id: number) => void }) {
+function PairCard({
+  pair,
+  onOpen,
+  onMark,
+  busy,
+}: {
+  pair: DupePair | DismissedPair;
+  onOpen: (id: number) => void;
+  onMark: (dismissed: boolean) => void;
+  busy: boolean;
+}) {
   const keepName = pair.keep ? (pair.keep.id === pair.added.id ? pair.added.name : pair.other.name) : null;
+  const dismissed = "dismissedAt" in pair ? pair : null;
   return (
     <li className="rounded-lg border border-border bg-card p-3" data-testid="dupes-pair" data-level={pair.level}>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -197,15 +244,33 @@ function PairCard({ pair, onOpen }: { pair: DupePair; onOpen: (id: number) => vo
           onOpen={onOpen}
         />
       </div>
-      <p className="mt-2 text-xs text-muted-foreground" data-testid="dupes-keep">
-        {keepName ? (
-          <>
-            If they are one place, keep <span className="font-medium text-foreground">{keepName}</span>: {pair.keep!.why}.
-          </>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 flex-1 basis-60 text-xs text-muted-foreground" data-testid="dupes-keep">
+          {dismissed ? (
+            <>
+              Marked not a duplicate{dismissed.dismissedBy ? ` by ${dismissed.dismissedBy}` : ""}
+              {dismissed.dismissedAt ? ` · ${when(dismissed.dismissedAt)}` : ""}.
+            </>
+          ) : keepName ? (
+            <>
+              If they are one place, keep <span className="font-medium text-foreground">{keepName}</span>: {pair.keep!.why}.
+            </>
+          ) : (
+            "Both are Walk-In accounts: neither is suggested to keep."
+          )}
+        </p>
+        {dismissed ? (
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onMark(false)} data-testid="dupes-undo">
+            <Undo2 className="size-3.5" />
+            Undo
+          </Button>
         ) : (
-          "Both are Walk-In accounts: neither is suggested to keep."
+          <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onMark(true)} data-testid="dupes-dismiss">
+            <X className="size-3.5" />
+            Not a Duplicate
+          </Button>
         )}
-      </p>
+      </div>
     </li>
   );
 }
