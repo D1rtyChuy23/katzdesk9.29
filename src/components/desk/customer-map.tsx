@@ -230,6 +230,8 @@ export function CustomerMap({
   const needle = useDeferredValue(q.trim().toLowerCase());
   const [colorBy, setColorBy] = useState<ColorBy>("rep");
   const [rep, setRep] = useState("");
+  /** Set once the viewer picks a rep themselves: from then on the Rep filter is theirs, whatever My View says. */
+  const repPicked = useRef(false);
   const [attention, setAttention] = useState(false);
   const [showApprox, setShowApprox] = useState(true);
   // Both until this viewer's saved choice is read (after mount, so the server render and the first client one match).
@@ -272,6 +274,17 @@ export function CustomerMap({
   const { accounts, byId, colorOf } = geo;
   const data = geo.data;
 
+  // My View never hides accounts on the Map. For a sales rep it only starts the Rep filter on their own name; All reps
+  // or another rep then shows exactly that rep's accounts, with the same counts everyone sees.
+  const mine = scoped ? (data?.reps.find((r) => matchMine(r)) ?? null) : null;
+  useEffect(() => {
+    if (!repPicked.current) setRep(mine ?? "");
+  }, [mine]);
+  const pickRep = (next: string) => {
+    repPicked.current = true;
+    setRep(next);
+  };
+
   // A refresh or Back with `?account=` selects that account without touching filters. A list click sets
   // `appliedAccount` first, so this does not move the list when the URL catches up.
   useEffect(() => {
@@ -287,6 +300,12 @@ export function CustomerMap({
     const a = byId.get(accountId);
     if (!a) return;
     appliedAccount.current = accountId;
+    // An account opened by link stays visible: a Rep filter that would hide it (My View's own-name start) steps back.
+    setRep((cur) => {
+      if (!cur || (cur === "__none__" ? !a.rep : a.rep === cur)) return cur;
+      repPicked.current = true;
+      return "";
+    });
     setProviderPick(null);
     setSelectedId(a.id);
     const p = pointOf(a);
@@ -341,13 +360,12 @@ export function CustomerMap({
   // Filters that decide which accounts are in play (the list and the pins). Color mode is not one of them.
   const filtered = useMemo(() => {
     return accounts.filter((a) => {
-      if (scoped && !(a.aviKatz || matchMine(a.rep))) return false;
       if (rep === "__none__" ? !!a.rep : rep && a.rep !== rep) return false;
       if (attention && !needsAttention(a)) return false;
       if (needle && !a.name.toLowerCase().includes(needle)) return false;
       return true;
     });
-  }, [accounts, scoped, matchMine, rep, attention, needle]);
+  }, [accounts, rep, attention, needle]);
 
   const counts = useMemo(() => {
     let pinned = 0;
@@ -463,7 +481,7 @@ export function CustomerMap({
     () => [...filtered].sort((a, b) => attentionRank(a) - attentionRank(b) || collator.compare(a.name, b.name) || a.id - b.id),
     [filtered],
   );
-  const filterKey = `${needle}|${rep}|${attention}|${scoped}`;
+  const filterKey = `${needle}|${rep}|${attention}`;
   const paged = useShowMore(list, filterKey, LIST_STEP);
   // Providers are listed A to Z (the server's order), one row per pinned location, whatever the ZIP toggle says.
   const providerPaged = useShowMore(providerMatches, `${show}|${needle}`, LIST_STEP);
@@ -570,7 +588,7 @@ export function CustomerMap({
         {/* The account filters do nothing to the service providers, so they step aside while only providers show. */}
         {showAccounts ? (
           <>
-            <RepFilter value={rep} onChange={setRep} extraNames={data.reps} className={TOOLBAR_SELECT} />
+            <RepFilter value={rep} onChange={pickRep} extraNames={data.reps} className={TOOLBAR_SELECT} />
             <FilterChip selected={attention} onClick={() => setAttention((v) => !v)} data-testid="map-attention">
               Needs Attention
             </FilterChip>
@@ -716,7 +734,7 @@ export function CustomerMap({
           {selectedProvider ? (
             <ProviderCard provider={selectedProvider} onClose={() => setProviderPick(null)} />
           ) : selected ? (
-            <AccountCard account={selected} scoped={data.scoped} type={colorBy === "type" ? accountType(selected) : null} onClose={closeAccount} />
+            <AccountCard account={selected} type={colorBy === "type" ? accountType(selected) : null} onClose={closeAccount} />
           ) : (
             <p className="border-b border-border px-4 py-3 text-xs text-muted-foreground">
               {listKind === "providers" ? "Tap a pin or a service provider below to see its details." : "Tap a pin or an account below to see its details."}
@@ -886,7 +904,7 @@ function ProviderRow({ provider: p, selected, onPick }: { provider: ProviderGeo;
 }
 
 /** The picked account: who, where, how good the pin is, what is open, and the two ways out. */
-function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGeo; scoped: boolean; type: AccountType | null; onClose: () => void }) {
+function AccountCard({ account: a, type, onClose }: { account: AccountGeo; type: AccountType | null; onClose: () => void }) {
   const fromMap = useFromHere("/customers");
   const point = pointOf(a);
   const address = shownAddress(a);
@@ -930,7 +948,6 @@ function AccountCard({ account: a, scoped, type, onClose }: { account: AccountGe
       <ul className="mt-3 space-y-0.5 text-xs">
         {lines.length ? lines.map((l, i) => <li key={i}>{l}</li>) : <li className="text-muted-foreground">No open work.</li>}
       </ul>
-      {scoped ? <p className="mt-1 text-[11px] text-muted-foreground">Work counts cover your own accounts only.</p> : null}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Button asChild size="sm" className="h-9 px-3">

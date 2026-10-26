@@ -128,13 +128,20 @@ export function TerritoryView({
   const mapBox = useRef<HTMLDivElement>(null);
   const appliedAccount = useRef<number | null>(null);
 
-  const inScope = useMemo(() => (scoped ? (a: AccountGeo) => a.aviKatz || matchMine(a.rep) : () => true), [scoped, matchMine]);
+  // Every rep's card and pins show for everyone. My View only starts a sales rep on their own card (highlighted on the
+  // map); Show All or another card shows the rest, as on the Accounts tab.
+  const picked = useRef(false);
+  const mine = scoped ? (data?.reps.find((r) => matchMine(r)) ?? null) : null;
+  useEffect(() => {
+    if (picked.current) return;
+    setShown(mine);
+    setFit((f) => ({ n: f.n + 1, points: null }));
+  }, [mine]);
 
-  // Rep cards follow My View like the Accounts tab.
   const cards = useMemo(() => {
     const byRep = new Map<string, AccountGeo[]>();
     for (const a of accounts) {
-      if (!a.rep || !inScope(a)) continue;
+      if (!a.rep) continue;
       const list = byRep.get(a.rep);
       if (list) list.push(a);
       else byRep.set(a.rep, [a]);
@@ -142,7 +149,7 @@ export function TerritoryView({
     const order = [...(data?.reps ?? [])];
     for (const r of byRep.keys()) if (!order.includes(r)) order.push(r);
     return order.filter((r) => byRep.has(r)).map((r) => repCard(r, colorOf(r), byRep.get(r)!));
-  }, [accounts, inScope, data?.reps, colorOf]);
+  }, [accounts, data?.reps, colorOf]);
 
   // No rep is a coverage gap: shown in full for everyone, whatever My View says.
   const noRep = useMemo(() => {
@@ -159,7 +166,6 @@ export function TerritoryView({
     const litPoints: LatLng[] = [];
     const counts = new Map<string, number>();
     for (const a of accounts) {
-      if (a.rep && !inScope(a)) continue;
       const p = pointOf(a);
       if (!p) continue;
       const approx = a.quality === "approx";
@@ -189,7 +195,7 @@ export function TerritoryView({
       if (counts.get("faded")) items.push({ key: "faded", label: "Everyone else", color: FADED, count: counts.get("faded") });
     }
     return { pins: out, legend: items, litPoints };
-  }, [accounts, inScope, colorOf, shown]);
+  }, [accounts, colorOf, shown]);
 
   const pinAccount = pinId != null ? geo.byId.get(pinId) ?? null : null;
 
@@ -235,6 +241,7 @@ export function TerritoryView({
 
   /** Light up one rep (or the accounts with no rep) and fit the map to them, or to `points` (one area) when given. */
   function showOnMap(rep: string, points?: LatLng[]) {
+    picked.current = true;
     setShown(rep);
     setPinId(null);
     setFit((f) => ({ n: f.n + 1, points: points?.length ? points : null }));
@@ -242,6 +249,7 @@ export function TerritoryView({
   }
 
   function showAll() {
+    picked.current = true;
     setShown(null);
     setFit((f) => ({ n: f.n + 1, points: null }));
   }
@@ -314,7 +322,7 @@ export function TerritoryView({
               const a = geo.byId.get(Number(pin.id));
               if (a) chooseAccount(a, false);
             }}
-            fitKey={`territory|${fit.n}|${shown ?? "all"}|${data.accounts.length}|${scoped}`}
+            fitKey={`territory|${fit.n}|${shown ?? "all"}|${data.accounts.length}`}
             fitTo={fit.points ?? (shown ? litPoints : null)}
             focus={focus}
             className="h-[45vh] min-h-72"
@@ -338,10 +346,8 @@ export function TerritoryView({
         </h2>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {cards.length
-            ? `${plural(cards.length, "rep")} with accounts${scoped ? " · your accounts only (My View)" : ""}.`
-            : scoped
-              ? "None of your accounts has a rep on the list yet."
-              : "No account is assigned to a rep yet. Every account is in the No rep section below."}
+            ? `${plural(cards.length, "rep")} with accounts.`
+            : "No account is assigned to a rep yet. Every account is in the No rep section below."}
         </p>
         {cards.length ? (
           <ul className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -362,7 +368,6 @@ export function TerritoryView({
             <p className="mt-0.5 max-w-2xl text-xs text-muted-foreground">
               {plural(noRep.total, "account")} with no rep · {noRep.pinned.toLocaleString("en-US")} on the map · {noRep.attention.toLocaleString("en-US")} need attention.
               {" "}Grouped into areas of pins within {AREA_MILES} mi of each other, with the rep who already has the most accounts close by.
-              {scoped ? " Shown in full, not just your accounts." : ""}
             </p>
           </div>
           {noRep.pinned ? (

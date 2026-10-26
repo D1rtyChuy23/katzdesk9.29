@@ -95,11 +95,6 @@ export function NearbyAccounts({ accountId, name }: { accountId: number; name: s
             {radius < 10 ? ". Try a wider radius." : "."}
           </p>
         )}
-        {geo.data?.scoped ? (
-          <p className="mt-2 text-xs text-muted-foreground" data-testid="nearby-scoped">
-            Open work shows only on accounts assigned to you.
-          </p>
-        ) : null}
         {workOnly && hidden > 0 ? (
           <p className="mt-2 text-xs text-muted-foreground" data-testid="nearby-hidden">
             {plural(hidden, shown.length ? "more account" : "account")} within {radius} mi {hidden === 1 ? "has" : "have"} no open work. Turn off With Work Only to see{" "}
