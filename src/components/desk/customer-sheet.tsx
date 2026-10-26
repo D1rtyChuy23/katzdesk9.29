@@ -28,7 +28,7 @@ import { NearbyAccounts } from "./nearby-accounts";
 import { RenameDialog } from "./rename-dialog";
 import type { RecipeDraft } from "./recipe-form";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, Lock, Pencil, Plus, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, Lock, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import { toast } from "sonner";
 import { RepSelect } from "./rep-select";
@@ -74,9 +74,12 @@ const FILTERS: { id: "all" | Exclude<HistoryKind, "recipe">; label: string }[] =
 export function CustomerHistorySheet({
   customerId,
   onClose,
+  onRemove,
 }: {
   customerId: number | null;
   onClose: () => void;
+  /** Admins: Remove in the window's header asks the page to remove this account (the page confirms it). */
+  onRemove?: (id: number) => void;
 }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -221,11 +224,21 @@ export function CustomerHistorySheet({
                 <AkBadge on={data?.aviKatz} />
               </SheetTitle>
 
-              {canRename && data && !data.nameLocked ? (
-                <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
-                  <Pencil className="size-3.5" />
-                  Edit
-                </Button>
+              {canRename && data && (!data.nameLocked || onRemove) ? (
+                <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                  {!data.nameLocked ? (
+                    <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
+                      <Pencil className="size-3.5" />
+                      Edit
+                    </Button>
+                  ) : null}
+                  {onRemove ? (
+                    <Button type="button" size="sm" variant="outline" onClick={() => onRemove(data.id)} data-testid="account-remove">
+                      <Trash2 className="size-3.5" />
+                      Remove
+                    </Button>
+                  ) : null}
+                </div>
               ) : null}
             </div>
             {data?.name ? <CustomerAddress customer={data.name} className="mt-0.5" /> : null}

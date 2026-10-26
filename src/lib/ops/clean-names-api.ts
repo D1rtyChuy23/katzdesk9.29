@@ -39,6 +39,8 @@ export type CleanReportItem = {
   note: string | null;
   locked: boolean;
   removalFlag: boolean;
+  /** The KatzDesk account on the line was removed from Customers (or merged into another): nothing left to decide. */
+  accountRemoved: boolean;
   decidedBy: string | null;
 };
 
@@ -97,7 +99,8 @@ function sectionOf(kind: string, status: string): CleanSection {
   return "similar";
 }
 
-async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
+/** The latest clean list's report, as the page shows it. */
+export async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
   const run = (
     await sql.query<{ id: number; filename: string | null; created_by: string | null; created_at: unknown; row_count: number }>(
       "select id, filename, created_by, created_at, row_count from customer_clean_runs order by id desc limit 1",
@@ -122,13 +125,14 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
     cur_name: string | null;
     name_locked: unknown;
     removal_flag: unknown;
+    acct_archived: unknown;
     acct_netsuite: string | null;
     acct_address: string | null;
     acct_rep: string | null;
     acct_rep_flag: string | null;
     acct_number: string | null;
   }>(
-    `select i.*, d.name as cur_name, d.name_locked, d.removal_flag,
+    `select i.*, d.name as cur_name, d.name_locked, d.removal_flag, d.archived as acct_archived,
             d.netsuite_id as acct_netsuite, d.address as acct_address, d.account_rep as acct_rep, d.rep_flag as acct_rep_flag,
             d.account_number as acct_number
        from customer_clean_items i
@@ -178,6 +182,7 @@ async function readReport(sql: Sql, canEdit: boolean): Promise<CleanReport> {
       note: r.note,
       locked: on(r.name_locked),
       removalFlag: on(r.removal_flag),
+      accountRemoved: r.customer_id != null && on(r.acct_archived),
       decidedBy: r.decided_by,
     };
     }),

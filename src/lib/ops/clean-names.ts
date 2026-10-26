@@ -338,3 +338,13 @@ export function resolveSalesRep(raw: string | null | undefined, roster: RosterRe
   if (hit) return { rep: tidy(hit.name), flag: null };
   return { rep: null, flag: `Sales rep “${name}” is not on the KatzDesk rep list` };
 }
+
+const DONE_STATUSES = new Set(["apply", "locked", "kept", "skipped", "removal"]);
+
+/**
+ * A Clean Names line with nothing left to decide: approved or kept (locked), being applied, skipped, flagged for
+ * removal, or its account removed from Customers. Done lines leave their section until Show Done is on (Chuy, 10/26).
+ */
+export function cleanLineDone(line: { status: string; accountRemoved?: boolean }): boolean {
+  return line.accountRemoved === true || DONE_STATUSES.has(line.status);
+}

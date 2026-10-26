@@ -241,6 +241,29 @@ test("conflicts: an ID on two accounts, a removed account's name, an Excel-round
   assert.equal(lineOf(lines, 6).status, "conflict");
 });
 
+test("a removed account found by its NetSuite ID or Account Number isn't added back under a new name (10/26)", () => {
+  const accounts = [
+    acct({ id: 1, name: "Old Shop", netsuiteId: "700", archived: true }),
+    acct({ id: 2, name: "Gone Grill", accountNumber: "00042", archived: true }),
+    acct({ id: 3, name: "Still Here", netsuiteId: "900" }),
+  ];
+  const lines = planNetsuiteCustomers(
+    read([
+      row({ id: "700", name: "Old Shop, LLC" }),
+      row({ id: "701", num: "00042", name: "Gone Grill & Bar" }),
+      row({ id: "900", name: "Still Here" }),
+      row({ id: "702", name: "Brand New Cafe" }),
+    ]),
+    accounts,
+  );
+  assert.equal(lineOf(lines, 2).status, "conflict");
+  assert.match(lineOf(lines, 2).reason, /“Old Shop”, removed from Customers, has NetSuite ID 700, so it isn't added back/);
+  assert.equal(lineOf(lines, 3).status, "conflict");
+  assert.match(lineOf(lines, 3).reason, /“Gone Grill”, removed from Customers, has account number 00042/);
+  assert.equal(lineOf(lines, 4).accountId, 3, "an account on the list still matches as before");
+  assert.equal(lineOf(lines, 5).status, "create", "a new account is still added");
+});
+
 test("the preview downloads as a CSV with the tick state, and a formula-like cell can't run", () => {
   const lines = planNetsuiteCustomers(read([row({ id: "1", name: "=HYPERLINK(\"x\")" }), row({ id: "2", name: "Plain, Inc." })]), []);
   const csv = netsuitePreviewCsv(lines, new Set([2]));

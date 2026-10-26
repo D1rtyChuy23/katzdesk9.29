@@ -258,20 +258,18 @@ async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: str
   return `${prefix}${String(seq).padStart(3, "0")}`;
 }
 
-async function ensureCustomer(sql: Awaited<ReturnType<typeof getSql>>, name: string) {
+/**
+ * A report row's account: added when KatzDesk has no account by that name. One removed from Customers (or merged into
+ * another) stays removed; the ticket still saves under the report's name (Chuy, 2026-10-26).
+ */
+export async function ensureCustomer(sql: Pick<Awaited<ReturnType<typeof getSql>>, "query">, name: string) {
   const trimmed = name.trim();
   if (!trimmed || isWalkIn(trimmed)) return;
   const found = await sql.query<{ id: number }>(
     `select id from directory_customers where lower(name) = lower($1) limit 1`,
     [trimmed],
   );
-  if (found[0]) {
-    await sql.query(
-      `update directory_customers set archived = false, updated_at = now() where id = $1`,
-      [found[0].id],
-    );
-    return;
-  }
+  if (found[0]) return;
   try {
     await sql.query(`insert into directory_customers (name) values ($1)`, [trimmed]);
   } catch {

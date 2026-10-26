@@ -322,10 +322,11 @@ export function planNetsuiteCustomers(rows: NsRow[], accounts: NsAccount[]): NsP
   }
   const byName = groupBy(active, (a) => nameKey(a.name));
   const byLoose = groupBy(active, (a) => looseKey(a.name));
-  const archivedByName = groupBy(
-    accounts.filter((a) => a.archived),
-    (a) => nameKey(a.name),
-  );
+  const archived = accounts.filter((a) => a.archived);
+  const archivedByName = groupBy(archived, (a) => nameKey(a.name));
+  // A removed account is found by its NetSuite ID and Account Number too, so it isn't added back under a new name.
+  const archivedById = groupBy(archived, (a) => tidy(a.netsuiteId ?? ""));
+  const archivedByNumber = groupBy(archived, (a) => accountNumberKey(a.accountNumber));
 
   const drafts = rows.map((r): Draft => {
     const id = tidy(r.internalId);
@@ -406,6 +407,14 @@ export function planNetsuiteCustomers(rows: NsRow[], accounts: NsAccount[]): NsP
     // No account: a new one, unless there's a reason not to.
     if (r.inactive === true) return { ...base, reason: "Inactive in NetSuite and not in KatzDesk, so it isn't added." };
     if (!name) return { ...base, reason: "No company name, so it can't be added." };
+    const removedById = id ? (archivedById.get(id) ?? []) : [];
+    if (removedById.length) {
+      return { ...base, status: "conflict", reason: `“${removedById[0]!.name}”, removed from Customers, has NetSuite ID ${id}, so it isn't added back. Restore it on Customers first if it's still a customer.` };
+    }
+    const removedByNumber = num ? (archivedByNumber.get(accountNumberKey(num)) ?? []) : [];
+    if (removedByNumber.length) {
+      return { ...base, status: "conflict", reason: `“${removedByNumber[0]!.name}”, removed from Customers, has account number ${num}, so it isn't added back. Restore it on Customers first if it's still a customer.` };
+    }
     const removed = archivedByName.get(nameKey(name)) ?? [];
     if (removed.length) return { ...base, status: "conflict", reason: `A removed account is named “${removed[0]!.name}”. Restore it on Customers first, or the names would clash.` };
     const close = byLoose.get(looseKey(name)) ?? [];
