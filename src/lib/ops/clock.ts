@@ -5,10 +5,9 @@ import { diffDays } from "./iso";
 export { isInstalled, isOpenInstall, installedPatch } from "./install-status";
 export { diffDays } from "./iso";
 
-export function todayChicago(): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(
-    new Date(),
-  );
+/** Today in Chicago as YYYY-MM-DD, or the Chicago day of the moment given. */
+export function todayChicago(at: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(at);
 }
 
 export function addDays(iso: string, days: number): string {

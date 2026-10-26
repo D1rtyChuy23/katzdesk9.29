@@ -296,7 +296,8 @@ export async function saveFormEntriesFor(
   const install = (await sql.query<{ id: number }>("select id from installs where id = $1 and archived = false", [data.installId]))[0];
   if (!install) throw new Error("Install not found");
   const name = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";
-  const actor = { name, owner: await canLockEquipment(sql, userId), now, today: todayChicago() };
+  // The stamp's time and the dates it fills in (Date completed, Date approved) come from the same moment.
+  const actor = { name, owner: await canLockEquipment(sql, userId), now, today: todayChicago(now) };
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const { entries: cur, seen } = await readFormEntries(sql, data.installId);
     const next = applyFormPatch(cur, data.patch, actor);
