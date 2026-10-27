@@ -30,6 +30,8 @@ export type DupeAccount = {
   inactive: boolean;
   /** Calls, TLCs, PMs, installs and deals on the account. */
   history: number;
+  /** Kept when a "Walk - In:" child account was renamed to its place. */
+  walkIn?: boolean;
 };
 
 export type DupeSign = "address" | "phone" | "email" | "name" | "similar" | "domain" | "street";
@@ -139,7 +141,7 @@ function prepare(a: DupeAccount): Prepared {
   const core = installCore(leaf);
   return {
     a,
-    walkIn: isWalkInName(a.name),
+    walkIn: isWalkInName(a.name) || a.walkIn === true,
     phone: phoneKey(a.phone),
     email,
     domain: email ? domainOf(email) : "",

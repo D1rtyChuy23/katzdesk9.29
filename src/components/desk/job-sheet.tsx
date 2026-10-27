@@ -1,5 +1,6 @@
 import { CustomerAddress } from "./customer-address";
 import { InvoiceButton } from "@/components/desk/invoice-window";
+import { JobWoHistory } from "@/components/desk/wo-history-account";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
@@ -386,6 +387,7 @@ export function JobSheet({
                 {tabbed ? null : (
                   <div className="mt-2">
                     <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
+                    <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                   </div>
                 )}
               </SheetHeader>
@@ -439,6 +441,7 @@ export function JobSheet({
                         <div className="mt-3">
                           <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
                         </div>
+                        <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                       </section>
                       <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
                       <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />

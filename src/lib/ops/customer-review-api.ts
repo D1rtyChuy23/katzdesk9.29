@@ -44,7 +44,7 @@ export async function loadExportAccounts(sql: Query): Promise<ExportAccount[]> {
      )
      select d.id, d.name, d.netsuite_id, d.account_number, d.address, d.billing_address1, d.billing_address2, d.billing_city,
             d.billing_state, d.billing_zip, d.billing_country, d.phone, d.email, d.account_rep, d.archived, d.inactive,
-            d.removal_flag, a.created_at as added_at, a.actor_name as added_by, a.detail as added_detail
+            d.removal_flag, d.walk_in, a.created_at as added_at, a.actor_name as added_by, a.detail as added_detail
        from directory_customers d
        left join added a on a.entity_id = d.id`,
   );
@@ -68,6 +68,7 @@ export async function loadExportAccounts(sql: Query): Promise<ExportAccount[]> {
     archived: r.archived === true,
     inactive: r.inactive === true,
     removalFlag: r.removal_flag === true,
+    walkIn: r.walk_in === true,
     added: r.added_at ? { at: iso(r.added_at), by: str(r.added_by), detail: str(r.added_detail) } : null,
   }));
 }
@@ -166,7 +167,7 @@ export async function loadDupeAccounts(sql: Query): Promise<DupeAccount[]> {
        union all
        select lower(customer), count(*)::int from deals where archived = false and coalesce(customer, '') <> '' group by 1
      ), t as (select k, sum(n)::int as n from h group by k)
-     select d.id, d.name, d.address, d.phone, d.email, d.netsuite_id, d.account_number, d.inactive, coalesce(t.n, 0)::int as history
+     select d.id, d.name, d.address, d.phone, d.email, d.netsuite_id, d.account_number, d.inactive, d.walk_in, coalesce(t.n, 0)::int as history
        from directory_customers d
        left join t on t.k = lower(d.name)
       where d.archived = false`,
@@ -180,6 +181,7 @@ export async function loadDupeAccounts(sql: Query): Promise<DupeAccount[]> {
     netsuiteId: str(r.netsuite_id),
     accountNumber: str(r.account_number),
     inactive: r.inactive === true,
+    walkIn: r.walk_in === true,
     history: Number(r.history ?? 0),
   }));
 }

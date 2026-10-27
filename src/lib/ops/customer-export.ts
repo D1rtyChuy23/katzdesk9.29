@@ -21,6 +21,8 @@ export type ExportAccount = {
   archived: boolean;
   inactive: boolean;
   removalFlag: boolean;
+  /** Kept when a "Walk - In:" child account was renamed to its place (Work Order History import). */
+  walkIn?: boolean;
   /** The account's "added" history line, when KatzDesk wrote one (the NetSuite import does). */
   added: { at: string; by: string | null; detail: string | null } | null;
 };
@@ -177,7 +179,7 @@ export function customerExportRows(accounts: ExportAccount[]): string[][] {
         text(a.rep),
         a.added ? chicagoStamp(a.added.at) : "",
         sourceOf(a.added),
-        yes(isWalkInName(a.name)),
+        yes(isWalkInName(a.name) || a.walkIn === true),
         yes(a.inactive),
         yes(a.archived),
         yes(a.removalFlag),
