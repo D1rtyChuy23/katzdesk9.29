@@ -68,7 +68,7 @@ import { InstallCustomerField, InstallWorkOrders, MergeInstall } from "./install
 import { InstallTicket } from "./install-ticket";
 import { InstallTypeField } from "./install-type-field";
 import { InstallContactFields } from "./install-contact-fields";
-import { SaveAllProvider, type SaveAll } from "./save-all";
+import { SaveAllProvider, type FlushOptions, type SaveAll } from "./save-all";
 import { SaveBar } from "./save-bar";
 import { OpenLink } from "./open-link";
 import { PmStackHeader } from "./pm-stack-panel";
@@ -485,6 +485,8 @@ export function InstallSheet({
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
+      // The Equipment Request Form reads the install: it shows what was just saved.
+      void qc.invalidateQueries({ queryKey: ["install-form", vars.id] });
     },
     onError: (e, vars) => {
       if (skippedRead.current) lookAgain();
@@ -528,9 +530,10 @@ export function InstallSheet({
    * Save, on every tab but Ping. The Details form carries the install's fields and the Equipment tab's typed changes; a
    * tab with edits of its own (the pre-inspection's site notes) registers them and they go first.
    */
-  const flushers = useRef(new Set<() => void>());
-  const registerFlush = useCallback((flush: () => void) => {
-    flushers.current.add(flush);
+  // Each part's flush, and whether it also runs when the window closes.
+  const flushers = useRef(new Map<() => void, boolean>());
+  const registerFlush = useCallback((flush: () => void, opts?: FlushOptions) => {
+    flushers.current.set(flush, !!opts?.onClose);
     return () => {
       flushers.current.delete(flush);
     };
@@ -544,15 +547,33 @@ export function InstallSheet({
     // A field still focused stores on blur (a pre-inspection check's notes) before the rest goes.
     const active = document.activeElement;
     if (active instanceof HTMLElement) active.blur();
-    for (const flush of [...flushers.current]) flush();
+    for (const flush of [...flushers.current.keys()]) flush();
+  }, []);
+  /** Closing stores the window's form, and the parts that keep typed work to store then too (a WO typed in Add WO). */
+  const flushOnClose = useCallback(() => {
+    for (const [flush, onClose] of [...flushers.current]) if (onClose) flush();
   }, []);
   const saveAll = useCallback(() => {
     flushParts();
     formRef.current?.requestSubmit();
   }, [flushParts]);
+  const saveAndWait = useCallback(async () => {
+    const since = Date.now();
+    saveAll();
+    // Every save the press started (they queue, one after another): done once nothing has been saving for 0.2 s.
+    let quiet = 0;
+    while (quiet < 2 && Date.now() - since < 15_000) {
+      await new Promise((r) => setTimeout(r, 100));
+      quiet = qc.isMutating() > 0 ? 0 : quiet + 1;
+    }
+    return !qc
+      .getMutationCache()
+      .getAll()
+      .some((m) => m.state.status === "error" && (m.state.submittedAt ?? 0) >= since);
+  }, [saveAll, qc]);
   const saveCtx = useMemo<SaveAll>(
-    () => ({ save: saveAll, pending: save.isPending, register: registerFlush, hideBar }),
-    [saveAll, save.isPending, registerFlush, hideBar],
+    () => ({ save: saveAll, saveAndWait, pending: save.isPending, register: registerFlush, hideBar }),
+    [saveAll, saveAndWait, save.isPending, registerFlush, hideBar],
   );
   const showSaveBar = tab !== "ping" && !(tab === "pre-inspection" && barHidden > 0);
   const comments = useQuery({
@@ -614,6 +635,7 @@ export function InstallSheet({
       onOpenChange={(o) => {
         if (!o) {
           skipToast.current = true;
+          flushOnClose();
           formRef.current?.requestSubmit();
           onClose();
         }

@@ -16,6 +16,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { CustomerCombo, LockedCustomer } from "./directory-fields";
 import { CustomerAddress } from "./customer-address";
 import { LockBadge } from "./lock-badge";
+import { useFlushOnSave } from "./save-all";
 import { useCanLock } from "./use-can-lock";
 
 function useInstallsChanged() {
@@ -26,6 +27,8 @@ function useInstallsChanged() {
     void qc.invalidateQueries({ queryKey: ["customer-history"] });
     void qc.invalidateQueries({ queryKey: ["customers"] });
     void qc.invalidateQueries({ queryKey: ["activity"] });
+    // The Equipment Request Form lists the install's Corrigo work orders.
+    void qc.invalidateQueries({ queryKey: ["install-form"] });
   };
 }
 
@@ -69,7 +72,11 @@ export function InstallCustomerField({ row, value, onChange }: { row: Install; v
   );
 }
 
-/** The project's Corrigo work orders: each with Corrigo's status and date, Add WO, and remove. */
+/**
+ * The project's Corrigo work orders: each with Corrigo's status and date, Add WO, and remove. A WO typed in Add WO and
+ * not added yet is added when the window saves (Save, closing it, or Equipment Form), so it reaches the Equipment
+ * Request Form too (Chuy, 10/27).
+ */
 export function InstallWorkOrders({ row }: { row: Install }) {
   const changed = useInstallsChanged();
   const [wo, setWo] = useState("");
@@ -91,6 +98,12 @@ export function InstallWorkOrders({ row }: { row: Install }) {
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that WO"),
   });
+  useFlushOnSave(
+    () => {
+      if (wo.trim() && !add.isPending) add.mutate();
+    },
+    { onClose: true },
+  );
   const list = row.workOrders ?? [];
   return (
     <div className="sm:col-span-2" data-testid="install-work-orders">
