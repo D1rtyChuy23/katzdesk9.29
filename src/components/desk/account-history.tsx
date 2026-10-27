@@ -10,7 +10,6 @@ import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { LockBadge, LockToggle } from "./lock-badge";
-import { UnitPlaceField } from "./unit-place-field";
 
 /**
  * Pieces of the account window that the ticket window shows too: the account's equipment list, one history row,
@@ -143,6 +142,11 @@ export function useAccountEquipment(customer: string | null | undefined) {
   });
 }
 
+/**
+ * Equipment On This Account, in the account window and the ticket window. These units are at the account, or are
+ * assigned to go there, so no location is picked here: a unit only moves when it comes back to the Katz HQ barn
+ * (Chuy, 10/27).
+ */
 export function AccountEquipmentList({
   rows,
   loading,
@@ -214,12 +218,6 @@ export function AccountEquipmentList({
                     .filter(Boolean)
                     .join(" · ")}
                 </p>
-                {row.serial ? (
-                  <div className="mt-2">
-                    {/* A unit locked on the account keeps its place; otherwise the barn record's own lock decides. */}
-                    <UnitPlaceField serial={row.serial} model={row.equipmentName || row.catalogModel} lockedBy={row.lockedBy || undefined} />
-                  </div>
-                ) : null}
                 {row.id ? (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {twins.map((twin) => (

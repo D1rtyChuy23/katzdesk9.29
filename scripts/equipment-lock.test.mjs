@@ -327,8 +327,9 @@ test("F1: a unit locked on the account can't get a place from anyone but the own
     // Every place change goes through the account lock: park, swap, add to a location, set by serial, the lookup.
     assert.equal((src.match(/await assertSerialUnlocked\(sql, /g) ?? []).length, 6);
     assert.match(src, /const acct = await accountLockOfSerial\(sql, data\.serial\);/);
+    // Equipment On This Account picks no place at all (Chuy, 10/27), so a unit locked there can't get one from it.
     const history = readFileSync(new URL("../src/components/desk/account-history.tsx", import.meta.url), "utf8");
-    assert.match(history, /<UnitPlaceField serial=\{row\.serial\} model=\{row\.equipmentName \|\| row\.catalogModel\} lockedBy=\{row\.lockedBy \|\| undefined\} \/>/);
+    assert.doesNotMatch(history, /UnitPlaceField|PlacePicker|setUnitPlace/);
   } finally {
     await pg.close();
   }
