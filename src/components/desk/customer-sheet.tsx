@@ -198,7 +198,8 @@ export function CustomerHistorySheet({
   const selectedPm = selected?.kind === "pm" ? data?.pms.find((p) => p.id === selected.id) ?? null : null;
   const selectedInstall = selected?.kind === "install" ? data?.installs.find((i) => i.id === selected.id) ?? null : null;
   const selectedDeal = selected?.kind === "deal" ? data?.deals.find((d) => d.id === selected.id) ?? null : null;
-  const canRename = !!me.data?.isAdmin;
+  // Rename / merge and Remove: a desk admin or the Admin role (same rule as the server).
+  const canRename = !!me.data?.isAdmin || me.data?.role === "admin";
   const pendingFocus = useMemo(() => pendingSchedules(data), [data]);
   const openInstalls = (data?.installs ?? []).filter((i) => isOpenInstall(i));
   const tabCount = (t: AccountTab): number | null => {

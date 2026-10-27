@@ -1,4 +1,5 @@
 import type { Sql } from "@/lib/db";
+import { requireNameReviewer } from "./access";
 import { catalogModels, listedEquipment, rewriteEquipmentName, samePiece } from "./equipment";
 import { parseMachinesJson, serializeMachines } from "./machines";
 
@@ -122,6 +123,15 @@ export async function renameOrMergeCustomer(
     id,
   ]);
   return { id, name: next, merged: false };
+}
+
+/**
+ * Rename or merge a customer for a person: a desk admin or anyone with the Admin role (Chuy, 2026-10-27). Sales,
+ * Service and Warehouse can't.
+ */
+export async function renameCustomerFor(sql: Sql, userId: string, id: number, name: string) {
+  await requireNameReviewer(sql, userId, "Only an admin can rename or merge customers.");
+  return renameOrMergeCustomer(sql, id, name);
 }
 
 export async function retargetEquipment(sql: Sql, fromRaw: string, toRaw: string): Promise<void> {
