@@ -463,6 +463,10 @@ export type CustomerHistory = {
   accountNumber?: string | null;
   /** The viewer may set the account number (Admin role or desk admin). */
   canEditAccountNumber?: boolean;
+  /** The saved map pin and its source ("Manual (entered by user)", "Geocoded (exact street match)", …). */
+  pin?: { latitude: number; longitude: number; source: string; manual: boolean } | null;
+  /** The viewer may enter the pin by hand (admin). */
+  canEditPin?: boolean;
   /** Sales reps NetSuite has on this account. Read-only. Primary Sales Rep is accountRep. */
   salesReps?: { name: string; role: string | null; pct: number | null; primary: boolean }[];
   jobs: ServiceJob[];
