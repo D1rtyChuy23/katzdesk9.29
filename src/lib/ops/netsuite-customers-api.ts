@@ -54,7 +54,7 @@ export async function loadNetsuiteAccounts(sql: Query): Promise<NsAccount[]> {
   const rows = await sql.query<Record<string, unknown>>(
     `select id, name, archived, updated_at::text as updated_at, netsuite_id, account_number, address,
             billing_address1, billing_address2, billing_city, billing_state, billing_zip, billing_country,
-            primary_contact, phone, email, inactive
+            primary_contact, phone, email, inactive, walk_in
        from directory_customers`,
   );
   return rows.map((r) => ({
@@ -77,6 +77,7 @@ export async function loadNetsuiteAccounts(sql: Query): Promise<NsAccount[]> {
     phone: str(r.phone),
     email: str(r.email),
     inactive: r.inactive === true,
+    walkIn: r.walk_in === true,
   }));
 }
 

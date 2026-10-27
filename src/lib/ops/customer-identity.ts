@@ -22,6 +22,7 @@ export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string)
       await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(customer_owned) = lower($2)`, [to, from]).catch(() => undefined);
       await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(sold_to) = lower($2)`, [to, from]).catch(() => undefined);
       await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
+      await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
     }
     return;
   }
@@ -73,6 +74,8 @@ export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string)
   await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(coalesce(customer_owned,'')) = lower($2)`, [to, from]).catch(() => undefined);
   await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(coalesce(sold_to,'')) = lower($2)`, [to, from]).catch(() => undefined);
   await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
+  // Work order history (QuickBooks) follows its account.
+  await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
 }
 
 export async function renameOrMergeCustomer(

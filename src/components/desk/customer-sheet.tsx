@@ -32,6 +32,7 @@ import { ChevronDown, ChevronRight, Lock, Pencil, Plus, Search, Trash2 } from "l
 import { previewSetting } from "@/lib/ops/recipe-fields";
 import { toast } from "sonner";
 import { RepSelect } from "./rep-select";
+import { AccountWoHistory } from "./wo-history-account";
 import { AkBadge } from "./ak-badge";
 import {
   AccountEquipmentList,
@@ -355,10 +356,12 @@ export function CustomerHistorySheet({
                     ))}
                   </ul>
                   {!visible.length ? <p className="mt-3 text-sm text-muted-foreground">Nothing on this account matches.</p> : null}
+                  <AccountWoHistory customer={data.name} mode="tickets" />
                 </Tabs.Content>
 
                 <Tabs.Content value="invoices" className="p-5 outline-none" data-testid="account-panel-invoices">
                   <AccountInvoices customer={data.name} />
+                  <AccountWoHistory customer={data.name} mode="invoices" />
                 </Tabs.Content>
 
                 <Tabs.Content value="pre-inspection" className="p-5 outline-none" data-testid="account-panel-pre-inspection">

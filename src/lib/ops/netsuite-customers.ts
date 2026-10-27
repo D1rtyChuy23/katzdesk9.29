@@ -51,6 +51,8 @@ export type NsAccount = {
   phone: string | null;
   email: string | null;
   inactive: boolean;
+  /** Kept when a "Walk - In:" child account was renamed to its place (Work Order History import). */
+  walkIn?: boolean;
 };
 
 export type NsField = "netsuiteId" | "accountNumber" | "address" | "billing" | "primaryContact" | "phone" | "email" | "inactive";
@@ -381,8 +383,9 @@ export function planNetsuiteCustomers(rows: NsRow[], accounts: NsAccount[]): NsP
     }
 
     if (acct) {
-      const matched = { ...base, accountId: acct.id, accountName: acct.name, matchedBy: by, walkIn: base.walkIn || isWalkInName(acct.name) };
-      if (isWalkInName(acct.name)) return { ...matched, reason: `Matches the Walk-In account “${acct.name}”. Walk-In accounts are never updated by this import.` };
+      const acctWalkIn = isWalkInName(acct.name) || acct.walkIn === true;
+      const matched = { ...base, accountId: acct.id, accountName: acct.name, matchedBy: by, walkIn: base.walkIn || acctWalkIn };
+      if (acctWalkIn) return { ...matched, reason: `Matches the Walk-In account “${acct.name}”. Walk-In accounts are never updated by this import.` };
       if (by !== "id" && id && tidy(acct.netsuiteId ?? "") && tidy(acct.netsuiteId ?? "") !== id) {
         return { ...matched, status: "conflict", reason: `“${acct.name}” has NetSuite ID ${acct.netsuiteId}, and this row is ${id}.` };
       }

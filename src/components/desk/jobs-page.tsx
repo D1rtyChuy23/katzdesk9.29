@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { WoHistoryImportButton } from "@/components/desk/wo-history-import";
 import { useBackTo } from "@/lib/ops/search-params";
 import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
@@ -148,6 +149,7 @@ export function JobsPage({
             {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ItemListImportButton /> : null}
             {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ImportPartsButton /> : null}
             {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <UpdatePricingButton /> : null}
+            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <WoHistoryImportButton /> : null}
           </ImportMenu>
           <ActionMenu label="Export">
             <BillingExportButton />
