@@ -4,10 +4,12 @@ import {
   addDirectoryEntry,
   archiveDirectoryEntry,
   listDirectory,
+  previewCustomerRename,
   renameCustomer,
   renameEquipment,
   type DirectoryKind,
 } from "@/lib/ops/api";
+import { renameConfirm, renameToast } from "@/lib/ops/customer-rename";
 import { getMyAccess } from "@/lib/ops/access";
 import { ComboField, MultiComboField, type ComboItem } from "@/components/ui/combo-field";
 import { Label } from "@/components/ui/input";
@@ -50,12 +52,12 @@ export function useDirectory(kind: DirectoryKind) {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
   const rename = useMutation({
-    mutationFn: (d: { id: number; name: string }) =>
+    mutationFn: (d: { id: number; name: string; confirmMerge?: number }) =>
       kind === "customer"
         ? renameCustomer({ data: d })
-        : renameEquipment({ data: d }),
+        : renameEquipment({ data: { id: d.id, name: d.name } }),
     onSuccess: (row) => {
-      toast.success(row.merged ? `Merged into “${row.name}”` : `Renamed to “${row.name}”`);
+      toast.success(renameToast(row));
       void qc.invalidateQueries({ queryKey: ["directory"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["jobs"] });
@@ -80,8 +82,13 @@ export function useDirectory(kind: DirectoryKind) {
     items: list.data ?? [],
     add: (name: string) => add.mutateAsync(name).then((row) => row.name),
     removeItem,
-    rename: (item: ComboItem, name: string) => rename.mutateAsync({ id: item.id, name }),
+    rename: (item: ComboItem, name: string, confirmMerge?: number) => rename.mutateAsync({ id: item.id, name, confirmMerge }),
     renamePending: rename.isPending,
+    // Customers: what a rename would do, so a merge is asked about first.
+    checkRename:
+      kind === "customer"
+        ? (item: ComboItem, name: string) => previewCustomerRename({ data: { id: item.id, name } }).then((plan) => renameConfirm(plan))
+        : undefined,
     canEdit: canAdd,
     canAdd,
     canManage,
@@ -265,13 +272,18 @@ function useRename(
         current={item?.name ?? ""}
         pending={dir.renamePending}
         onClose={() => setItem(null)}
-        onSave={(name) => {
+        check={item && dir.checkRename ? (name) => dir.checkRename!(item, name) : undefined}
+        onSave={(name, confirmMerge) => {
           if (!item) return;
           const from = item.name;
-          void dir.rename(item, name).then((row) => {
-            onMapped?.(from, row.name);
-            setItem(null);
-          });
+          void dir
+            .rename(item, name, confirmMerge)
+            .then((row) => {
+              onMapped?.(from, row.name);
+              setItem(null);
+            })
+            // The error is already a toast; the window stays open.
+            .catch(() => undefined);
         }}
       />
     ),

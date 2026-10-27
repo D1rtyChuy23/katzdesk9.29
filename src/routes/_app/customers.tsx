@@ -5,7 +5,8 @@ import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
 import { getMyAccess } from "@/lib/ops/access";
-import { addDirectoryEntry, listCustomerRecords, renameCustomer } from "@/lib/ops/api";
+import { addDirectoryEntry, listCustomerRecords, previewCustomerRename, renameCustomer } from "@/lib/ops/api";
+import { renameConfirm, renameToast } from "@/lib/ops/customer-rename";
 import { listRemovedCustomers, removeCustomers, restoreCustomers, type RemovedCustomer } from "@/lib/ops/customer-remove-api";
 import { formatPingTime } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
@@ -124,9 +125,9 @@ function Page() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not restore"),
   });
   const rename = useMutation({
-    mutationFn: (d: { id: number; name: string }) => renameCustomer({ data: d }),
+    mutationFn: (d: { id: number; name: string; confirmMerge?: number }) => renameCustomer({ data: d }),
     onSuccess: (row) => {
-      toast.success(row.merged ? `Merged into “${row.name}”` : `Renamed to “${row.name}”`);
+      toast.success(renameToast(row));
       setRenaming(null);
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["directory"] });
@@ -519,7 +520,8 @@ function Page() {
         current={renaming?.name ?? ""}
         pending={rename.isPending}
         onClose={() => setRenaming(null)}
-        onSave={(n) => renaming && rename.mutate({ id: renaming.id, name: n })}
+        check={renaming ? (n) => previewCustomerRename({ data: { id: renaming.id, name: n } }).then((plan) => renameConfirm(plan)) : undefined}
+        onSave={(n, confirmMerge) => renaming && rename.mutate({ id: renaming.id, name: n, confirmMerge })}
       />
     </div>
   );

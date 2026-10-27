@@ -71,7 +71,8 @@ import {
   siteLabel,
   slotId,
 } from "./warehouse";
-import { renameOrMergeEquipment, renameCustomerFor } from "./customer-identity";
+import { renameOrMergeEquipment, renameCustomerFor, previewCustomerRenameFor } from "./customer-identity";
+import type { RenamePlan, RenameResult } from "./customer-rename";
 import { lockedNameFor } from "./clean-names-api";
 import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
 import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, accountNumberFor } from "./reps";
@@ -2676,9 +2677,13 @@ export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middlewa
 	await sql.query(`update ${table} set archived = true, updated_at = now() where id = $1`, [data.id]);
 	return { ok: true, flagged: false };
 });
-export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data, context }: any) => {
-	// A desk admin or the Admin role (customer-identity.ts).
-	return renameCustomerFor(await ready(), context.userId, data.id, data.name);
+export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string; confirmMerge?: number | null }) => d).handler(async ({ data, context }: any): Promise<RenameResult> => {
+	// A desk admin or the Admin role. A merge needs confirmMerge: the account the rename window showed (customer-identity.ts).
+	return renameCustomerFor(await ready(), context.userId, data.id, data.name, { confirmMerge: data.confirmMerge ?? null });
+});
+/** The rename window asks this first: a plain rename, or a merge and what it would move (nothing is saved). */
+export const previewCustomerRename = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data, context }: any): Promise<RenamePlan> => {
+	return previewCustomerRenameFor(await ready(), context.userId, data.id, data.name);
 });
 export const renameEquipment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data }: any) => {
 	const sql = await ready();
