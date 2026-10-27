@@ -115,6 +115,8 @@ export function InstallFormPage({ installId }: { installId: number }) {
   const q = useQuery({
     queryKey: ["install-form", installId],
     queryFn: () => getInstallForm({ data: { installId } }),
+    // A form left open in a tab reads the install again on coming back to it: a WO added meanwhile shows (Chuy, 10/27).
+    refetchOnWindowFocus: "always",
   });
   // Nothing opens the print dialog on its own: Print and Download are the person's choice.
   const pdf = useFormPdf(q.data);

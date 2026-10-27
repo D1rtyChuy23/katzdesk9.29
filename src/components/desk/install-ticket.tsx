@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, FileText } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import type { MachineSpec } from "@/lib/ops/machines";
 import type { Install, Recipe } from "@/lib/ops/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useSaveAll } from "./save-all";
 
 /** The recipe a unit shows on its row: the one picked, else the one the account or the house already has for the model. */
 function recipeFor(recipes: Recipe[], install: Install, m: MachineSpec): Recipe | null {
@@ -34,12 +35,15 @@ function meta(install: Install): [string, string][] {
 }
 
 /**
- * The install ticket for a board project. It opens once the project is Ready (equipment Ready and the
- * pre-inspection passed) and is read from the project's own machine rows: Sold, Loan or Lease, recipe,
- * and configuration (volts, plug, water when the unit takes it). Nothing is typed here twice.
+ * Opens the Equipment Request Form. In the install window it saves the window first (the same as Save: the Details,
+ * a WO typed in Add WO, the Equipment tab's edits), so the form shows what was just typed. A save that fails keeps
+ * the window open with its message.
  */
 function PrintFormButton({ installId }: { installId: number }) {
   const navigate = useNavigate();
+  const saveAll = useSaveAll();
+  const [saving, setSaving] = useState(false);
+  const open = () => void navigate({ to: "/installs/$installId/print", params: { installId: String(installId) } });
   return (
     <Button
       type="button"
@@ -47,14 +51,26 @@ function PrintFormButton({ installId }: { installId: number }) {
       variant="outline"
       className="ml-auto"
       data-testid="install-ticket-print"
-      onClick={() => void navigate({ to: "/installs/$installId/print", params: { installId: String(installId) } })}
+      disabled={saving}
+      onClick={async () => {
+        if (!saveAll) return open();
+        setSaving(true);
+        const saved = await saveAll.saveAndWait();
+        setSaving(false);
+        if (saved) open();
+      }}
     >
       <FileText className="size-4" />
-      Equipment Form
+      {saving ? "Saving…" : "Equipment Form"}
     </Button>
   );
 }
 
+/**
+ * The install ticket for a board project. It opens once the project is Ready (equipment Ready and the
+ * pre-inspection passed) and is read from the project's own machine rows: Sold, Loan or Lease, recipe,
+ * and configuration (volts, plug, water when the unit takes it). Nothing is typed here twice.
+ */
 export function InstallTicket({ install, machines, recipes }: { install: Install; machines: MachineSpec[]; recipes: Recipe[] }) {
   const ready = ticketOpen(install.equipStatus, install.inspection?.overall) && !install.complete;
   const box = useRef<HTMLElement>(null);
