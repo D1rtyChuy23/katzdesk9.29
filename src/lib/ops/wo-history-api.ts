@@ -241,6 +241,7 @@ select (select count(*) from ins where job_id is null)::int as created,
        (select count(*) from ins where job_id is not null)::int as attached,
        (select count(*) from fill)::int as filled,
        (select count(*) from lined where kind <> 'discount')::int as lines,
+       (select count(*) from lined where kind = 'discount')::int as discount_lines,
        (select count(*) from lined where kind not in ('discount', 'labor', 'trip'))::int as part_lines,
        (select count(*) from lined l where l.kind not in ('discount', 'labor', 'trip') and exists (
           select 1 from billing_items b where lower(btrim(b.sku)) = lower(btrim(l.item_code))))::int as part_matched,
@@ -252,8 +253,10 @@ export type SaveBatchResult = {
   attached: number;
   /** Tickets whose blank Work Done or Completed date were filled. */
   filled: number;
-  /** Item lines saved (Discount lines become the invoice discount, not lines). */
+  /** Item lines saved: every QuickBooks line except Discount lines. */
   lines: number;
+  /** Discount lines saved. They're stored with their work order and added up into its invoice's one discount; the invoice doesn't list them as lines. */
+  discountLines: number;
   /** Lines that aren't labor or trip (parts, filters, equipment, fees). */
   partLines: number;
   /** Of those, the ones whose Item Code is a part # on the Parts list; the rest show as text. */
@@ -296,7 +299,7 @@ export async function saveBatch(
     }
     rows.push({ o, p, inv: historyInvoice(byRef.get(o.ref.toLowerCase()) ?? []) });
   });
-  if (!rows.length) return { created: 0, attached: 0, filled: 0, lines: 0, partLines: 0, partMatched: 0, notSaved, alreadySaved };
+  if (!rows.length) return { created: 0, attached: 0, filled: 0, lines: 0, discountLines: 0, partLines: 0, partMatched: 0, notSaved, alreadySaved };
   const col = <T>(f: (r: (typeof rows)[number]) => T) => rows.map(f);
   const lineRows = rows.flatMap((r) =>
     (byRef.get(r.o.ref.toLowerCase()) ?? []).map((l, i) => ({ ref: r.o.ref, sort: i, l, kind: LINE_KIND[l.lineType] ?? "other" })),
@@ -362,7 +365,7 @@ export async function saveBatch(
     );
     for (const r of rows) if (!saved.has(r.o.ref.toLowerCase())) notSaved.push({ ref: r.o.ref, why: `Ticket #${r.p.jobId} changed while saving. Read the files again to pick it up.` });
   }
-  return { created, attached, filled: Number(out.filled ?? 0), lines: Number(out.lines ?? 0), partLines: Number(out.part_lines ?? 0), partMatched: Number(out.part_matched ?? 0), notSaved, alreadySaved };
+  return { created, attached, filled: Number(out.filled ?? 0), lines: Number(out.lines ?? 0), discountLines: Number(out.discount_lines ?? 0), partLines: Number(out.part_lines ?? 0), partMatched: Number(out.part_matched ?? 0), notSaved, alreadySaved };
 }
 
 export async function finishRun(sql: Query, runId: number) {
@@ -376,7 +379,11 @@ export type WoHistoryRun = {
   counts: WoCounts | null;
   created: number;
   attached: number;
+  /** Every QuickBooks line the run saved, Discount lines included (the run's counter). */
   lines: number;
+  /** The run's saved lines split as the Step 3 report counts them: item lines, and Discount lines. Null once undone. */
+  itemLines: number | null;
+  discountLines: number | null;
   createdBy: string | null;
   createdAt: string;
   finishedAt: string | null;
@@ -388,8 +395,15 @@ export type WoHistoryRun = {
 
 export async function recentRuns(sql: Query, limit = 10): Promise<WoHistoryRun[]> {
   const rows = await sql.query<Record<string, unknown>>(
-    `select r.*, (select count(*) from wo_history h where h.run_id = r.id)::int as current
-       from wo_history_runs r order by r.created_at desc, r.id desc limit $1`,
+    `select r.*, (select count(*) from wo_history h where h.run_id = r.id)::int as current, c.item_lines, c.discount_lines
+       from wo_history_runs r
+       left join lateral (
+         select count(*) filter (where l.kind <> 'discount')::int as item_lines,
+                count(*) filter (where l.kind = 'discount')::int as discount_lines
+           from wo_history h join wo_history_lines l on l.history_id = h.id
+          where h.run_id = r.id
+       ) c on true
+      order by r.created_at desc, r.id desc limit $1`,
     [limit],
   );
   return rows.map((r) => ({
@@ -400,6 +414,8 @@ export async function recentRuns(sql: Query, limit = 10): Promise<WoHistoryRun[]
     created: Number(r.created ?? 0),
     attached: Number(r.attached ?? 0),
     lines: Number(r.lines ?? 0),
+    itemLines: r.undone_at ? null : Number(r.item_lines ?? 0),
+    discountLines: r.undone_at ? null : Number(r.discount_lines ?? 0),
     createdBy: str(r.created_by),
     createdAt: iso(r.created_at) ?? "",
     finishedAt: iso(r.finished_at),
