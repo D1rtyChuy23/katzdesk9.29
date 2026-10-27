@@ -349,6 +349,11 @@ test("saving: create, attach (blank fields only), location needed, removed untic
   );
   const sum = (k) => results.reduce((n, r) => n + r[k], 0);
   assert.deepEqual([sum("created"), sum("attached"), sum("filled"), sum("lines"), sum("partLines"), sum("partMatched")], [3, 1, 1, 5, 3, 1]);
+  assert.equal(sum("discountLines"), 1, "the Discount line is stored too, but isn't an item line");
+  // Past imports shows the same split as the Step 3 report; the run's counter is every line saved.
+  const run1 = (await api.recentRuns(sql)).find((r) => r.id === runId);
+  assert.deepEqual([run1.lines, run1.itemLines, run1.discountLines], [6, 5, 1]);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines")).rows[0].n, 6);
 
   const h = (await pg.query("select * from wo_history order by history_ref")).rows;
   assert.deepEqual(h.map((r) => [r.history_ref, r.customer, r.location_needed]), [
@@ -406,6 +411,11 @@ test("saving: create, attach (blank fields only), location needed, removed untic
   const runs = await api.recentRuns(sql);
   assert.equal(runs.find((r) => r.id === runId).undoneBy, "chuy");
   assert.equal(runs.find((r) => r.id === runId).created, 3);
+  assert.deepEqual(
+    [runs.find((r) => r.id === runId).lines, runs.find((r) => r.id === runId).itemLines, runs.find((r) => r.id === runId).discountLines],
+    [6, null, null],
+    "an undone run keeps its counter; the split is gone with its lines",
+  );
   await assert.rejects(
     api.saveBatch(sql, { runId, orders: read.orders, lines: read.lines, include: ["WO-1500"], seen: {}, who: "chuy" }),
     /was undone/,

@@ -56,7 +56,20 @@ const when = (iso: string) => new Date(iso).toLocaleString("en-US", { month: "sh
 type Step = "files" | "renames" | "preview" | "saving" | "done";
 type Report = SaveBatchResult & { batches: number; stopped: string | null; runId: number };
 
-const emptyReport = (runId: number): Report => ({ created: 0, attached: 0, filled: 0, lines: 0, partLines: 0, partMatched: 0, notSaved: [], alreadySaved: 0, batches: 0, stopped: null, runId });
+const emptyReport = (runId: number): Report => ({
+  created: 0,
+  attached: 0,
+  filled: 0,
+  lines: 0,
+  discountLines: 0,
+  partLines: 0,
+  partMatched: 0,
+  notSaved: [],
+  alreadySaved: 0,
+  batches: 0,
+  stopped: null,
+  runId,
+});
 
 /**
  * Admin-only: Tickets → Import → Work Order History. Two CSVs (work orders and their QuickBooks lines), read and
@@ -170,6 +183,7 @@ export function WoHistoryImportButton() {
           rep.attached += r.attached;
           rep.filled += r.filled;
           rep.lines += r.lines;
+          rep.discountLines += r.discountLines;
           rep.partLines += r.partLines;
           rep.partMatched += r.partMatched;
           rep.alreadySaved += r.alreadySaved;
@@ -494,7 +508,8 @@ function ReportCard({ report: r, onAgain, busy }: { report: Report; onAgain: () 
         <li>Created: {n(r.created)} history work orders</li>
         <li>Attached to existing tickets: {n(r.attached)} ({n(r.filled)} had a blank Work Done or Completed date filled)</li>
         <li>
-          Item lines saved: {n(r.lines)}. Of {n(r.partLines)} part, filter, equipment and fee lines, {n(r.partMatched)} match the Parts list and{" "}
+          Item lines saved: {n(r.lines)}, plus {plural(r.discountLines, "discount line")} (stored, and added up into each invoice's one discount;{" "}
+          {plural(r.lines + r.discountLines, "QuickBooks line")} in all). Of {n(r.partLines)} part, filter, equipment and fee lines, {n(r.partMatched)} match the Parts list and{" "}
           {n(r.partLines - r.partMatched)} are kept as text.
         </li>
         <li>Batches saved: {n(r.batches)}</li>
@@ -576,7 +591,10 @@ function Runs({ runs, busy, onUndo }: { runs: WoHistoryRun[]; busy: boolean; onU
         {runs.map((r) => (
           <li key={r.id} className="flex flex-wrap items-center gap-2 break-words">
             <span>
-              <span className="text-foreground">#{r.id} · {when(r.createdAt)}</span> · {r.createdBy ?? "Admin"}: created {n(r.created)}, attached {n(r.attached)}, {n(r.lines)} lines
+              <span className="text-foreground">#{r.id} · {when(r.createdAt)}</span> · {r.createdBy ?? "Admin"}: created {n(r.created)}, attached {n(r.attached)},{" "}
+              {r.itemLines != null && r.discountLines != null
+                ? `${plural(r.itemLines, "item line")} + ${plural(r.discountLines, "discount line")}`
+                : `${plural(r.lines, "QuickBooks line")} (discount lines included)`}
               {r.undoneAt ? ` · undone by ${r.undoneBy ?? "Admin"} ${when(r.undoneAt)}` : r.finishedAt ? "" : " · didn't finish"}
             </span>
             {!r.undoneAt ? (
