@@ -66,7 +66,8 @@ function Page() {
   const { filterMine, matchMine, role } = useMyView();
   const [sort, setSort] = useDeskSort("customers", "alpha-asc");
   const isAdmin = !!me.data?.isAdmin;
-  // Account numbers are set by the Admin role or a desk admin.
+  // The Admin role or a desk admin: imports, account numbers, and (since 2026-10-27) Remove, Restore, the Removed list and
+  // Rename / merge, so more than one person can run Customers.
   const isAdminOrRole = isAdmin || me.data?.role === "admin";
   const canAdd = isAdmin || me.data?.canAddCustomers !== false;
   const [renaming, setRenaming] = useState<{ id: number; name: string } | null>(null);
@@ -74,7 +75,7 @@ function Page() {
   const [picked, setPicked] = useState<number[]>([]);
   // The accounts waiting on the Remove confirmation.
   const [confirming, setConfirming] = useState<number[]>([]);
-  const removed = useQuery({ queryKey: ["customers", "removed"], queryFn: () => listRemovedCustomers(), enabled: isAdmin });
+  const removed = useQuery({ queryKey: ["customers", "removed"], queryFn: () => listRemovedCustomers(), enabled: isAdminOrRole });
 
   const add = useMutation({
     mutationFn: (n: string) => addDirectoryEntry({ data: { kind: "customer", name: n } }),
@@ -233,7 +234,7 @@ function Page() {
           : `${rows.length} ${view === "flagged" ? "flagged " : ""}${rows.length === 1 ? "account" : "accounts"}${needle ? ` matching “${q.trim()}”` : ""}`;
 
   return (
-    <div className={cn(isAdmin && picked.length > 0 && "pb-28")}>
+    <div className={cn(isAdminOrRole && picked.length > 0 && "pb-28")}>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Customers</h1>
@@ -281,7 +282,7 @@ function Page() {
             Flagged For Review {flaggedCount.toLocaleString("en-US")}
           </FilterChip>
         ) : null}
-        {isAdmin && (removedCount || view === "removed") ? (
+        {isAdminOrRole && (removedCount || view === "removed") ? (
           <FilterChip selected={view === "removed"} aria-pressed={view === "removed"} onClick={() => switchView("removed")} className="shrink-0" data-testid="show-removed">
             Removed {removedCount.toLocaleString("en-US")}
           </FilterChip>
@@ -315,7 +316,7 @@ function Page() {
         <p className="text-xs text-muted-foreground" data-testid="customers-count">
           {countLine}
         </p>
-        {isAdmin && narrowed && shownIds.length > 0 ? (
+        {isAdminOrRole && narrowed && shownIds.length > 0 ? (
           <Button
             type="button"
             size="sm"
@@ -359,7 +360,7 @@ function Page() {
             data-testid="customer-row"
             data-id={c.id}
           >
-            {isAdmin ? <Tick name={c.name} checked={picked.includes(c.id)} onChange={() => togglePick(c.id)} /> : null}
+            {isAdminOrRole ? <Tick name={c.name} checked={picked.includes(c.id)} onChange={() => togglePick(c.id)} /> : null}
             <div className="grid min-w-0 flex-1 grid-cols-1 items-center sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-2">
             <button
               type="button"
@@ -416,7 +417,7 @@ function Page() {
               </span>
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
             </button>
-            {isAdmin ? (
+            {isAdminOrRole ? (
               <div className="flex shrink-0 items-center gap-1 pr-1 max-sm:justify-end max-sm:gap-2 max-sm:pb-2">
                 <Button
                   type="button"
@@ -462,7 +463,7 @@ function Page() {
       </ul>
       )}
 
-      {isAdmin && picked.length ? (
+      {isAdminOrRole && picked.length ? (
         <div
           // Pinned to the bottom of the screen so it's reachable wherever the ticked accounts are.
           className="fixed inset-x-3 bottom-3 z-30 rounded-xl border border-primary/40 bg-card p-3 shadow-[var(--shadow-lift)] md:right-8 md:left-[17rem]"
@@ -503,7 +504,7 @@ function Page() {
       <CustomerHistorySheet
         customerId={selected}
         onClose={closeCustomer}
-        onRemove={isAdmin ? (id) => setConfirming([id]) : undefined}
+        onRemove={isAdminOrRole ? (id) => setConfirming([id]) : undefined}
       />
       <RemoveCustomersDialog
         accounts={confirmAccounts}

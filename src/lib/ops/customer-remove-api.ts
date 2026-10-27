@@ -6,6 +6,8 @@
  *
  * A merged account is archived too, but never marked removed, so it isn't listed under Removed.
  *
+ * Who: a desk admin or anyone with the Admin role (Chuy, 2026-10-27). Sales, Service and Warehouse can't.
+ *
  * An account removed before Remove recorded who and when (before 2026-10-26) is archived with no removed_at. It is
  * listed (and can be restored) when calls, PMs, installs, deals or equipment are still under its name: a merge moves
  * all of those to the kept account, so a merged account has none and stays off the list, as does a startup merge
@@ -14,7 +16,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware, requireAdmin } from "@/lib/ops/access";
+import { deskMiddleware, requireNameReviewer } from "@/lib/ops/access";
 
 /** One Remove or Restore takes at most this many accounts. */
 export const CUSTOMER_BATCH_MAX = 5000;
@@ -68,7 +70,7 @@ const cleanIds = (ids: number[]) => [...new Set(ids.filter((n) => Number.isInteg
  * are left as they are. A removal flag from the Clean Names review is cleared: the account is dealt with.
  */
 export async function removeCustomersFor(sql: Sql, userId: string, idsRaw: number[]): Promise<RemoveResult> {
-  await requireAdmin(sql, userId, "Only an admin can add or remove customers.");
+  await requireNameReviewer(sql, userId, "Only an admin can add or remove customers.");
   const ids = cleanIds(idsRaw);
   if (!ids.length) return { removed: [] };
   if (ids.length > CUSTOMER_BATCH_MAX) throw new Error(`Remove at most ${CUSTOMER_BATCH_MAX.toLocaleString("en-US")} accounts at a time.`);
@@ -95,7 +97,7 @@ export async function removeCustomersFor(sql: Sql, userId: string, idsRaw: numbe
  * its name or its Account Number (both must stay unique on the list).
  */
 export async function restoreCustomersFor(sql: Sql, userId: string, idsRaw: number[]): Promise<RestoreResult> {
-  await requireAdmin(sql, userId, "Only an admin can add or remove customers.");
+  await requireNameReviewer(sql, userId, "Only an admin can add or remove customers.");
   const ids = cleanIds(idsRaw);
   if (!ids.length) return { restored: [], skipped: [] };
   if (ids.length > CUSTOMER_BATCH_MAX) throw new Error(`Restore at most ${CUSTOMER_BATCH_MAX.toLocaleString("en-US")} accounts at a time.`);
@@ -193,10 +195,12 @@ export const restoreCustomers = createServerFn({ method: "POST" })
   .validator((d: { ids: number[] }) => idsInput.parse(d))
   .handler(async ({ data, context }): Promise<RestoreResult> => restoreCustomersFor(await ready(), context.userId, data.ids));
 
+/** The Removed list for a desk admin or the Admin role. */
+export async function listRemovedCustomersAs(sql: Sql, userId: string): Promise<RemovedCustomer[]> {
+  await requireNameReviewer(sql, userId, "Only an admin can see removed customers.");
+  return listRemovedCustomersFor(sql);
+}
+
 export const listRemovedCustomers = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<RemovedCustomer[]> => {
-    const sql = await ready();
-    await requireAdmin(sql, context.userId, "Only an admin can see removed customers.");
-    return listRemovedCustomersFor(sql);
-  });
+  .handler(async ({ context }): Promise<RemovedCustomer[]> => listRemovedCustomersAs(await ready(), context.userId));

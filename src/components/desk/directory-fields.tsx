@@ -19,7 +19,8 @@ export function useDirectory(kind: DirectoryKind) {
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const isAdmin = !!me.data?.isAdmin;
   const canAdd = kind === "equipment" || isAdmin || me.data?.canAddCustomers !== false;
-  const canManage = kind === "equipment" || isAdmin;
+  // Renaming or removing a customer from a picker: a desk admin or the Admin role (same rule as the server).
+  const canManage = kind === "equipment" || isAdmin || me.data?.role === "admin";
   const list = useQuery({
     queryKey: ["directory", kind],
     queryFn: () => listDirectory({ data: { kind } }),

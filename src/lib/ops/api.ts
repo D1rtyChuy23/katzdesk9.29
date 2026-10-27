@@ -3,7 +3,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql } from "@/lib/db";
-import { canReviewNames, deskMiddleware, requireAdmin, salesRepScope } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook, stampMachineParts } from "./pm-runbook-api";
@@ -71,7 +71,7 @@ import {
   siteLabel,
   slotId,
 } from "./warehouse";
-import { renameOrMergeEquipment, renameOrMergeCustomer } from "./customer-identity";
+import { renameOrMergeEquipment, renameCustomerFor } from "./customer-identity";
 import { lockedNameFor } from "./clean-names-api";
 import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
 import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, accountNumberFor } from "./reps";
@@ -2485,7 +2485,8 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		pin: account.latitude != null && account.longitude != null && account.latitude !== "" && account.longitude !== ""
 			? { latitude: Number(account.latitude), longitude: Number(account.longitude), source: pinSourceLabel(account.geocode_match), manual: account.geocode_match === MANUAL_PIN_MATCH }
 			: null,
-		canEditPin: (await sql.query("select is_admin from desk_accounts where user_id = $1", [context.userId])).some((r) => r.is_admin === true || r.is_admin === "true"),
+		// Same rule as setAccountPin: a desk admin or the Admin role.
+		canEditPin: await canReviewNames(sql, context.userId),
 		salesReps: (await sql.query(
 			"select rep_name, role, contribution_pct, is_primary from customer_sales_reps where customer_id = $1 order by is_primary desc, lower(rep_name), id",
 			[account.id],
@@ -2676,9 +2677,8 @@ export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middlewa
 	return { ok: true, flagged: false };
 });
 export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
-	await requireAdmin(sql, context.userId, "Only an admin can rename or merge customers.");
-	return renameOrMergeCustomer(sql, data.id, data.name);
+	// A desk admin or the Admin role (customer-identity.ts).
+	return renameCustomerFor(await ready(), context.userId, data.id, data.name);
 });
 export const renameEquipment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data }: any) => {
 	const sql = await ready();
