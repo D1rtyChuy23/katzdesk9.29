@@ -52,7 +52,7 @@ export function useDirectory(kind: DirectoryKind) {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
   const rename = useMutation({
-    mutationFn: (d: { id: number; name: string; confirmMerge?: number }) =>
+    mutationFn: (d: { id: number; name: string; confirmMerge?: string }) =>
       kind === "customer"
         ? renameCustomer({ data: d })
         : renameEquipment({ data: { id: d.id, name: d.name } }),
@@ -82,7 +82,7 @@ export function useDirectory(kind: DirectoryKind) {
     items: list.data ?? [],
     add: (name: string) => add.mutateAsync(name).then((row) => row.name),
     removeItem,
-    rename: (item: ComboItem, name: string, confirmMerge?: number) => rename.mutateAsync({ id: item.id, name, confirmMerge }),
+    rename: (item: ComboItem, name: string, confirmMerge?: string) => rename.mutateAsync({ id: item.id, name, confirmMerge }),
     renamePending: rename.isPending,
     // Customers: what a rename would do, so a merge is asked about first.
     checkRename:

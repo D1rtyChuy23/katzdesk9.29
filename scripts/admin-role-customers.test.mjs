@@ -105,8 +105,8 @@ test("the Admin role can rename and merge; other roles can't", async () => {
     const renamed = await renameCustomerFor(sql, "u-admin", child, "Test Bakery");
     assert.deepEqual([renamed.name, renamed.merged], ["Test Bakery", false]);
 
-    // A merge needs a yes for the account the rename window showed (customer-rename-merge.test.mjs).
-    const merged = await renameCustomerFor(sql, "u-admin", dupe, "Test Diner", { confirmMerge: keep });
+    // A merge needs a yes for the merge the rename window showed: kept > goes (customer-rename-merge.test.mjs).
+    const merged = await renameCustomerFor(sql, "u-admin", dupe, "Test Diner", { confirmMerge: `${keep}>${dupe}` });
     assert.deepEqual([merged.id, merged.name, merged.merged], [keep, "Test Diner", true]);
     assert.equal((await state(sql, dupe)).archived, true, "the merged account is off the list");
     assert.equal((await sql.query("select customer from service_jobs where call_id = 'SC-T1'"))[0].customer, "Test Diner", "its ticket moved");

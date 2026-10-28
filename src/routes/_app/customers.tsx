@@ -125,7 +125,7 @@ function Page() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not restore"),
   });
   const rename = useMutation({
-    mutationFn: (d: { id: number; name: string; confirmMerge?: number }) => renameCustomer({ data: d }),
+    mutationFn: (d: { id: number; name: string; confirmMerge?: string }) => renameCustomer({ data: d }),
     onSuccess: (row) => {
       toast.success(renameToast(row));
       setRenaming(null);

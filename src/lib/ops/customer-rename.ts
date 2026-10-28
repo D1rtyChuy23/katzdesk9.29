@@ -6,10 +6,11 @@
  * Which account is kept:
  * - The other account is off the list (removed, or merged earlier): the account being renamed is kept. It takes the
  *   name exactly as typed and keeps its own details; the old record only fills details it has blank.
- * - Both are on the list: the one whose name is typed is kept, as Possible Duplicates says ("rename the one you don't
- *   keep to the one you keep"). It takes the typed capitals unless its name is locked from the clean list, keeps its
- *   own details, and blanks are filled from the account that goes.
- * The account that goes is parked off the list as "… · merged <id>", never under Removed.
+ * - The other account is on the list: it is kept, as Possible Duplicates says ("rename the one you don't keep to the
+ *   one you keep"). It takes the typed capitals unless its name is locked from the clean list, keeps its own details,
+ *   and blanks are filled from the account that goes.
+ * A map pin is only copied with the address it goes with. The account that goes is parked off the list as
+ * "… · merged <id>", never under Removed.
  *
  * Pure: no server imports, so the rename window and the tests use it too.
  */
@@ -72,8 +73,14 @@ export type RenameResult = {
   filled?: string[];
 };
 
-/** What the rename window asks before a merge. `token` goes back with the save: the account the person agreed to merge with. */
-export type RenameConfirm = { title: string; lines: string[]; confirmLabel: string; token: number };
+/**
+ * What the rename window asks before a merge. `token` goes back with the save: which account is kept and which goes,
+ * so a yes never carries over to another account or the other direction.
+ */
+export type RenameConfirm = { title: string; lines: string[]; confirmLabel: string; token: string };
+
+/** The merge a person says yes to: "<kept id>><dropped id>". */
+export const mergeToken = (p: Pick<RenameMergePlan, "keptId" | "droppedId">): string => `${p.keptId}>${p.droppedId}`;
 
 const count = (n: number, one: string, many: string) => `${n.toLocaleString("en-US")} ${n === 1 ? one : many}`;
 
@@ -128,7 +135,7 @@ export function renameConfirm(plan: RenamePlan, day: (iso: string) => string = d
         ...(o.onRemovedList ? ["To bring the removed account back instead, choose Back, then use Restore under Removed."] : []),
       ],
       confirmLabel: "Merge",
-      token: o.id,
+      token: mergeToken(plan),
     };
   }
   const kept = plan.lockedName
@@ -149,7 +156,7 @@ export function renameConfirm(plan: RenamePlan, day: (iso: string) => string = d
       "This account comes off the list, and it won't be under Removed.",
     ],
     confirmLabel: "Merge",
-    token: o.id,
+    token: mergeToken(plan),
   };
 }
 

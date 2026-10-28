@@ -128,7 +128,7 @@ export function CustomerHistorySheet({
   }, [customerId, history.data?.name]);
 
   const rename = useMutation({
-    mutationFn: (d: { name: string; confirmMerge?: number }) => renameCustomer({ data: { id: customerId!, ...d } }),
+    mutationFn: (d: { name: string; confirmMerge?: string }) => renameCustomer({ data: { id: customerId!, ...d } }),
     onSuccess: (row) => {
       toast.success(renameToast(row));
       setEditing(false);

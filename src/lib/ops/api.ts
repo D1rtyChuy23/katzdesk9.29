@@ -2677,8 +2677,8 @@ export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middlewa
 	await sql.query(`update ${table} set archived = true, updated_at = now() where id = $1`, [data.id]);
 	return { ok: true, flagged: false };
 });
-export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string; confirmMerge?: number | null }) => d).handler(async ({ data, context }: any): Promise<RenameResult> => {
-	// A desk admin or the Admin role. A merge needs confirmMerge: the account the rename window showed (customer-identity.ts).
+export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string; confirmMerge?: string | null }) => d).handler(async ({ data, context }: any): Promise<RenameResult> => {
+	// A desk admin or the Admin role. A merge needs confirmMerge: the token of the merge question the window showed (customer-identity.ts).
 	return renameCustomerFor(await ready(), context.userId, data.id, data.name, { confirmMerge: data.confirmMerge ?? null });
 });
 /** The rename window asks this first: a plain rename, or a merge and what it would move (nothing is saved). */

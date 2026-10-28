@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ export function RenameDialog({
   pending?: boolean;
   onClose: () => void;
   /** `confirmed`: the token of the merge question the person said yes to. */
-  onSave: (next: string, confirmed?: number) => void;
+  onSave: (next: string, confirmed?: string) => void;
   /**
    * Asked before saving (customers): a merge question to show first, or null to save straight away. Nothing merges
    * without a yes here.
@@ -32,7 +32,11 @@ export function RenameDialog({
   const [checking, setChecking] = useState(false);
   const [asking, setAsking] = useState<{ next: string; confirm: RenameConfirm } | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
+  // Bumped when the window opens, closes, changes account or is cancelled: an answer to an older check is dropped, so
+  // a check never saves after Cancel or lands on another account's window.
+  const round = useRef(0);
   useEffect(() => {
+    round.current += 1;
     if (open) {
       setName(current);
       setAsking(null);
@@ -41,31 +45,41 @@ export function RenameDialog({
     }
   }, [open, current]);
 
+  function close() {
+    round.current += 1;
+    onClose();
+  }
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     const next = name.trim();
     if (!next || next === current || checking) return;
     setCheckError(null);
     if (check) {
+      const mine = ++round.current;
       setChecking(true);
+      let confirm: RenameConfirm | null;
       try {
-        const confirm = await check(next);
-        if (confirm) {
-          setAsking({ next, confirm });
-          return;
-        }
+        confirm = await check(next);
       } catch (err) {
-        setCheckError(err instanceof Error ? err.message : "Could not check the name.");
+        if (mine === round.current) {
+          setCheckError(err instanceof Error ? err.message : "Could not check the name.");
+          setChecking(false);
+        }
         return;
-      } finally {
-        setChecking(false);
+      }
+      if (mine !== round.current) return;
+      setChecking(false);
+      if (confirm) {
+        setAsking({ next, confirm });
+        return;
       }
     }
     onSave(next);
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={open} onOpenChange={(o) => !o && close()}>
       <DialogContent className="max-w-md" data-testid="rename-dialog">
         <DialogTitle className="pr-6">{asking ? asking.confirm.title : title}</DialogTitle>
         {asking ? (
@@ -97,6 +111,7 @@ export function RenameDialog({
                   setCheckError(null);
                 }}
                 aria-label={`New ${noun} name`}
+                disabled={checking}
                 autoFocus
               />
               {checkError ? (
@@ -105,7 +120,7 @@ export function RenameDialog({
                 </p>
               ) : null}
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="ghost" onClick={onClose}>
+                <Button type="button" variant="ghost" onClick={close}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={pending || checking || !name.trim() || name.trim() === current}>

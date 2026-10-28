@@ -1,13 +1,19 @@
 import type { Sql } from "@/lib/db";
 import { requireNameReviewer } from "./access";
-import type { RenameCounts, RenameMergePlan, RenamePlan, RenameResult } from "./customer-rename";
+import { mergeToken, type RenameCounts, type RenameMergePlan, type RenamePlan, type RenameResult } from "./customer-rename";
 import { catalogModels, listedEquipment, rewriteEquipmentName, samePiece } from "./equipment";
 import { flagOn } from "./flag";
 import { parseMachinesJson, serializeMachines } from "./machines";
 
+/** A recipe on `from` that `to` already has: same model and same recipe name (the recipes unique index). */
+const SAME_RECIPE = `lower(a.customer) = lower($1)
+       and lower(b.customer) = lower($2)
+       and lower(a.equipment_model) = lower(b.equipment_model)
+       and lower(coalesce(a.name, '')) = lower(coalesce(b.name, ''))`;
+
 /**
- * Links `to` already has (a provider, its network account, a recipe for the same model) are dropped from `from`, so
- * moving `from` onto `to` never doubles them: `to`'s links stay.
+ * Links `to` already has (a provider, its Out Of Network details, a recipe with the same model and name) are dropped
+ * from `from`, so moving `from` onto `to` never doubles them: `to`'s links stay. A recipe with another name moves.
  */
 async function dropLinksAlreadyOn(sql: Sql, from: string, to: string): Promise<void> {
   await sql.query(
@@ -30,9 +36,7 @@ async function dropLinksAlreadyOn(sql: Sql, from: string, to: string): Promise<v
   await sql.query(
     `delete from recipes a
      using recipes b
-     where lower(a.customer) = lower($1)
-       and lower(b.customer) = lower($2)
-       and lower(a.equipment_model) = lower(b.equipment_model)`,
+     where ${SAME_RECIPE}`,
     [from, to],
   ).catch(() => undefined);
 }
@@ -97,11 +101,16 @@ type AccountRow = Record<string, unknown> & { id: number; name: string };
 const BILLING = ["billing_address1", "billing_address2", "billing_city", "billing_state", "billing_zip", "billing_country"];
 const PIN = ["latitude", "longitude", "geocode_match", "geocode_address", "geocoded_at"];
 const filledIn = (r: AccountRow, col: string) => r[col] != null && String(r[col]).trim() !== "";
+const addressKey = (v: unknown) =>
+  String(v ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 
 /**
  * Details a merge copies onto the kept account from the one that goes, only where the kept account has none (Grok,
  * 2026-10-27: "Fill only blank fields from the old record"). An address block or a pin goes whole, so two places are
- * never mixed. Columns are fixed here, never from input.
+ * never mixed, and a pin only comes with the address it goes with. Columns are fixed here, never from input.
  */
 const FILLS: { label: string; cols: string[]; has: (r: AccountRow) => boolean }[] = [
   { label: "address", cols: ["address"], has: (r) => filledIn(r, "address") },
@@ -166,19 +175,38 @@ async function planFor(sql: Sql, id: number, nextRaw: string, opts?: { force?: b
     return { row, plan: { kind: "rename", id: row.id, from: row.name, name: next, caseOnly: row.name.toLowerCase() === next.toLowerCase() } };
   }
 
-  // An old account off the list never wins over the live one being renamed. Two on the list: the one whose name is
-  // typed is kept (Possible Duplicates: "rename the one you don't keep to the one you keep").
-  const keep = !flagOn(row.archived) && flagOn(other.archived) ? "renamed" : "existing";
+  // An old account off the list never wins over the one being renamed. One on the list is kept (Possible Duplicates:
+  // "rename the one you don't keep to the one you keep").
+  const keep = flagOn(other.archived) ? "renamed" : "existing";
   const kept = keep === "renamed" ? row : other;
   const dropped = keep === "renamed" ? other : row;
   const lockedName = keep === "existing" && flagOn(other.name_locked) && !opts?.force && other.name !== next;
   const name = lockedName ? other.name : next;
+  // How the question names each side.
+  const theirs = keep === "renamed" ? "The old account's" : "This account's";
+  const ours = keep === "renamed" ? "this account" : `“${other.name}”`;
+
+  if (flagOn(kept.archived) && filledIn(kept, "account_number")) {
+    // The kept account comes back on the list, where Account Numbers are unique.
+    const holder = (
+      await sql.query<{ name: string }>(
+        `select name from directory_customers
+          where archived = false and id <> all($1::int[]) and lower(btrim(account_number)) = lower(btrim($2)) limit 1`,
+        [[kept.id, dropped.id], String(kept.account_number)],
+      )
+    )[0];
+    if (holder) throw new Error(`“${kept.name}” would come back on the list, but its Account # ${String(kept.account_number).trim()} is on “${holder.name}” now.`);
+  }
 
   const filled: string[] = [];
   const notes: string[] = [];
   const cols: string[] = [];
   for (const f of FILLS) {
     if (f.has(kept) || !f.has(dropped)) continue;
+    if (f.label === "map pin" && filledIn(kept, "address") && addressKey(kept.address) !== addressKey(dropped.address)) {
+      notes.push(`${theirs} map pin isn't copied: it doesn't go with the address on ${ours}.`);
+      continue;
+    }
     if (f.label === "Account #") {
       // Account Numbers stay unique on the list.
       const holder = (
@@ -205,6 +233,21 @@ async function planFor(sql: Sql, id: number, nextRaw: string, opts?: { force?: b
   const repsOn = (x: number) => Number(reps.find((r) => Number(r.id) === x)?.n ?? 0);
   const moveReps = repsOn(kept.id) === 0 && repsOn(dropped.id) > 0;
   if (moveReps) filled.push("assigned sales reps");
+
+  // Links the kept account already has stay its own (dropLinksAlreadyOn); say what that leaves behind.
+  if (kept.name.toLowerCase() !== dropped.name.toLowerCase()) {
+    const count = async (text: string) =>
+      Number((await sql.query<{ n: number }>(text, [dropped.name, kept.name]).catch(() => [] as { n: number }[]))[0]?.n ?? 0);
+    if (await count("select count(*)::int as n from network_accounts a, network_accounts b where lower(a.customer) = lower($1) and lower(b.customer) = lower($2)")) {
+      notes.push(`${theirs} Out Of Network details aren't kept: ${ours} has its own.`);
+    }
+    const recipes = await count(`select count(*)::int as n from recipes a where exists (select 1 from recipes b where ${SAME_RECIPE})`);
+    if (recipes) {
+      notes.push(
+        `${recipes === 1 ? `1 recipe on ${keep === "renamed" ? "the old account" : "this account"} has` : `${recipes} recipes on ${keep === "renamed" ? "the old account" : "this account"} have`} the same model and name as one on ${ours}, so ${recipes === 1 ? "it isn't" : "they aren't"} kept.`,
+      );
+    }
+  }
 
   const moving = await recordsUnder(sql, dropped.name);
   const otherRecords = other === dropped ? moving : await recordsUnder(sql, other.name);
@@ -248,7 +291,12 @@ export async function planCustomerRename(sql: Sql, id: number, name: string, opt
  * account; where both have the same link, the kept account's stays.
  */
 export async function renameOrMergeCustomer(sql: Sql, id: number, nextRaw: string, opts?: { force?: boolean }): Promise<RenameResult> {
-  const { row, plan, merge } = await planFor(sql, id, nextRaw, opts);
+  return applyPlanned(sql, await planFor(sql, id, nextRaw, opts));
+}
+
+/** Does exactly what the plan says. Not one transaction: if it stops partway, renaming again finishes it. */
+async function applyPlanned(sql: Sql, { row, plan, merge }: Planned): Promise<RenameResult> {
+  const id = row.id;
   if (plan.kind === "same") return { id: row.id, name: row.name, merged: false };
   if (plan.kind === "rename") {
     await retargetCustomer(sql, row.name, plan.name);
@@ -289,25 +337,29 @@ export async function previewCustomerRenameFor(sql: Sql, userId: string, id: num
 
 /**
  * Rename or merge a customer for a person: a desk admin or anyone with the Admin role (Chuy, 2026-10-27). Sales,
- * Service and Warehouse can't. A merge is never silent: it needs `confirmMerge`, the id of the account the rename
- * window showed. Each change gets a history line on the accounts it touched.
+ * Service and Warehouse can't. A merge is never silent: it needs `confirmMerge`, the token of the merge question the
+ * rename window showed (which account is kept, which goes). The plan checked here is the one carried out. Each change
+ * gets a history line on the accounts it touched.
  */
 export async function renameCustomerFor(
   sql: Sql,
   userId: string,
   id: number,
   name: string,
-  opts?: { confirmMerge?: number | null },
+  opts?: { confirmMerge?: string | null },
 ): Promise<RenameResult> {
   await requireNameReviewer(sql, userId, "Only an admin can rename or merge customers.");
-  const { plan } = await planFor(sql, id, name);
-  if (plan.kind === "merge" && opts?.confirmMerge !== plan.other.id) {
+  const planned = await planFor(sql, id, name);
+  const { plan } = planned;
+  if (plan.kind === "merge" && opts?.confirmMerge !== mergeToken(plan)) {
     throw new Error(
-      `“${plan.other.name}” ${plan.other.archived ? "is an old account with that name" : "already has that name"}, so saving would merge the two. ` +
-        "Reload the page and rename again to see what would move before you say yes.",
+      opts?.confirmMerge
+        ? "These accounts changed since the merge question. Choose Back, then Save name again to see what would happen now."
+        : `“${plan.other.name}” ${plan.other.archived ? "is an old account with that name" : "already has that name"}, so saving would merge the two. ` +
+            "Reload the page and rename again to see what would move before you say yes.",
     );
   }
-  const res = await renameOrMergeCustomer(sql, id, name);
+  const res = await applyPlanned(sql, planned);
   if (plan.kind === "same") return res;
   const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";
   const log = (entityId: number, action: string, detail: string) =>
