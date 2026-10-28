@@ -35,6 +35,8 @@ export type BillingItem = {
   itemClass?: string | null;
   /** Marked to pull later. Does not change price or stock. */
   getLater?: boolean;
+  /** Old numbers merged into this part (10/28): searching one finds it. */
+  previousNumbers?: string[];
 };
 
 /** The two fixed-rate service items. Names match NetSuite exactly. */
@@ -92,7 +94,7 @@ export function normalizePartNo(raw: string | null | undefined): string {
  * Find NetSuite items for something typed on a ticket: a NetSuite SKU, a manufacturer number or words from
  * the description. Exact number matches come first. Never guesses between look-alikes — returns a short list.
  */
-export function searchItems<T extends Pick<BillingItem, "item" | "description" | "mfrPart">>(
+export function searchItems<T extends Pick<BillingItem, "item" | "description" | "mfrPart" | "previousNumbers">>(
   query: string,
   items: T[],
   limit = 12,
@@ -105,11 +107,15 @@ export function searchItems<T extends Pick<BillingItem, "item" | "description" |
   for (const it of items) {
     const sku = normalizePartNo(itemSku(it.item));
     const mfr = normalizePartNo(it.mfrPart);
+    const was = (it.previousNumbers ?? []).map(normalizePartNo).filter(Boolean);
     const name = it.item.toLowerCase();
     const desc = (it.description ?? "").toLowerCase();
     let score = 0;
     if (nq && (sku === nq || mfr === nq)) score = 100;
+    // An old number merged into this part finds it, just after a part that has the number now.
+    else if (nq && was.includes(nq)) score = 90;
     else if (nq.length >= 3 && (sku.startsWith(nq) || mfr.startsWith(nq))) score = 60;
+    else if (nq.length >= 3 && was.some((w) => w.startsWith(nq))) score = 55;
     else if (words.every((w) => name.includes(w) || desc.includes(w))) score = 30;
     if (score) scored.push({ item: it, score });
   }

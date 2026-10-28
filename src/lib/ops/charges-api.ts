@@ -1,5 +1,6 @@
 import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withDiscountRows, type Discount } from "./discount";
 import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
+import { textArray } from "./part-merges";
 import { loadDiscountRule } from "./part-pricing-api";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -66,6 +67,7 @@ type ItemRow = {
   mfr_part: string | null;
   item_class: string | null;
   get_later: boolean | null;
+  previous_numbers?: unknown;
 };
 
 function toItem(r: ItemRow): BillingItem {
@@ -78,6 +80,7 @@ function toItem(r: ItemRow): BillingItem {
     part: { id: Number(r.id), sku: r.sku, mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
     itemClass: r.item_class,
     getLater: !!r.get_later,
+    previousNumbers: textArray(r.previous_numbers),
   };
 }
 
@@ -85,25 +88,30 @@ function toItem(r: ItemRow): BillingItem {
 export const searchBillingItems = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { q: string }) => z.object({ q: z.string().max(120) }).parse(d))
-  .handler(async ({ data }): Promise<BillingItem[]> => {
-    const q = data.q.trim();
-    if (!q) return [];
-    const sql = await ready();
-    const nq = normalizePartNo(q);
-    const rows = await sql.query<ItemRow>(
-      `select id, sku, item, description, rate, kind, mfr_part, item_class, get_later, (image is not null) as has_image,
-                case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version
-         from billing_items
-        where active
-          and hidden_at is null
-          and (item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
-               or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
-                                 or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%')))
-        limit 300`,
-      [`%${q}%`, nq],
-    );
-    return searchItems(q, rows.map(toItem), 12);
-  });
+  .handler(async ({ data }): Promise<BillingItem[]> => searchBillingItemsFor(await ready(), data.q));
+
+/** The body of searchBillingItems: every part picker (tickets, quotes, invoices, PM machine parts) reads it. */
+export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string): Promise<BillingItem[]> {
+  const q = raw.trim();
+  if (!q) return [];
+  const nq = normalizePartNo(q);
+  const rows = await sql.query<ItemRow>(
+    `select id, sku, item, description, rate, kind, mfr_part, item_class, get_later, previous_numbers, (image is not null) as has_image,
+            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version
+       from billing_items
+      where active
+        and hidden_at is null
+        and (item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
+             or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
+                               or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%'))
+             -- An old number merged into a part finds that part (10/28).
+             or exists (select 1 from unnest(previous_numbers) pn
+                         where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))
+      limit 300`,
+    [`%${q}%`, nq],
+  );
+  return searchItems(q, rows.map(toItem), 12);
+}
 
 export type TicketCharges = {
   jobId: number;

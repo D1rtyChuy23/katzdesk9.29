@@ -10,6 +10,7 @@ import {
   chargesTotal,
   kindForItem,
   lineAmount,
+  normalizePartNo,
   type BillingItem,
   type ChargeLine,
   type PartRef,
@@ -323,6 +324,13 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   );
 }
 
+/** The old number (merged into this part) that the search found it by, if that is how it was found. */
+function wasNumber(it: BillingItem, term: string): string | null {
+  const q = normalizePartNo(term);
+  if (q.length < 3) return null;
+  return (it.previousNumbers ?? []).find((p) => normalizePartNo(p).startsWith(q)) ?? null;
+}
+
 /** Type a NetSuite item name, a manufacturer number or words from the description; pick one result. */
 export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: BillingItem) => void; id?: string }) {
   const [q, setQ] = useState("");
@@ -374,6 +382,12 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
                   <span className="block truncate text-xs text-muted-foreground" data-testid="part-result-number">
                     Part # <span className="font-medium text-foreground">{it.mfrPart || it.part?.sku || "not set"}</span>
                   </span>
+                  {/* Found by an old number merged into this part (10/28): say which, so the pick isn't a surprise. */}
+                  {wasNumber(it, term) ? (
+                    <span className="block truncate text-xs text-muted-foreground" data-testid="part-result-was">
+                      Was {wasNumber(it, term)}
+                    </span>
+                  ) : null}
                   <span className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
                     {it.itemClass ? <span data-testid="part-result-class">{it.itemClass}</span> : null}
                     {it.getLater ? (

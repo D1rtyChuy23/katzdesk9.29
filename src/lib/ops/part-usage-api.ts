@@ -61,29 +61,33 @@ async function ready(): Promise<Sql> {
  */
 export const PART_USES_CTE = `
 part_keys as (
-  -- A line names a part by its NetSuite item ("PARTS : EVER104120") or its SKU; the item wins.
+  -- A line names a part by its NetSuite item ("PARTS : EVER104120") or its SKU; the item wins. A part merged into
+  -- another (an import copy, or an old number) counts as that part (10/28); one that isn't merged wins a shared name.
   select distinct on (k) k, part_id from (
-    select lower(btrim(item)) as k, id as part_id, 1 as pref from billing_items where kind not in ('trip', 'labor')
+    select lower(btrim(item)) as k, coalesce(merged_into, id) as part_id, 1 as pref, merged_into is not null as merged, id
+      from billing_items where kind not in ('trip', 'labor')
     union all
-    select lower(btrim(sku)), id, 2 from billing_items where kind not in ('trip', 'labor')
+    select lower(btrim(sku)), coalesce(merged_into, id), 2, merged_into is not null, id from billing_items where kind not in ('trip', 'labor')
   ) x
   where k <> ''
-  order by k, pref, part_id
+  order by k, pref, merged, id
 ),
 sku_keys as (
-  select lower(btrim(sku)) as k, id as part_id from billing_items where kind not in ('trip', 'labor') and btrim(sku) <> ''
+  select lower(btrim(sku)) as k, coalesce(merged_into, id) as part_id from billing_items where kind not in ('trip', 'labor') and btrim(sku) <> ''
 ),
 tail_keys as (
   -- A WO part line names a part by its item after the last colon, in capitals with no spaces ("BUNN PARTS:BUNN40670.0005"
   -- is BUNN40670.0005): a part's own item after its last colon, else its SKU, as lineSku reads the line.
   select distinct on (k) k, part_id from (
-    select upper(regexp_replace(regexp_replace(item, '^.*:', ''), '\\s+', '', 'g')) as k, id as part_id, 1 as pref
+    select upper(regexp_replace(regexp_replace(item, '^.*:', ''), '\\s+', '', 'g')) as k, coalesce(merged_into, id) as part_id, 1 as pref,
+           merged_into is not null as merged, id
       from billing_items where kind not in ('trip', 'labor')
     union all
-    select upper(regexp_replace(sku, '\\s+', '', 'g')), id, 2 from billing_items where kind not in ('trip', 'labor')
+    select upper(regexp_replace(sku, '\\s+', '', 'g')), coalesce(merged_into, id), 2, merged_into is not null, id
+      from billing_items where kind not in ('trip', 'labor')
   ) x
   where k <> ''
-  order by k, pref, part_id
+  order by k, pref, merged, id
 ),
 uses_all as (
   -- 1. Service and TLC tickets: their Charges.
@@ -115,7 +119,7 @@ uses_all as (
      and not coalesce(r.archived, false) and not coalesce(d.archived, false)
   union all
   -- 3. Parts logged on a PM's machines. A PM billed on a ticket counts on that ticket.
-  select coalesce(b.id, pk.part_id), coalesce(sj.kind, 'pm'), coalesce(sj.id, p.id), null::int,
+  select coalesce(b.merged_into, b.id, pk.part_id), coalesce(sj.kind, 'pm'), coalesce(sj.id, p.id), null::int,
          case when sj.id is not null then sj.kind || ':' || sj.id else 'pm:' || p.id end,
          case when sj.id is not null then coalesce(sj.completed_at, sj.scheduled, sj.received)
               else coalesce(p.completed_at, (m.added_at at time zone 'America/Chicago')::date) end,
@@ -208,7 +212,8 @@ export async function loadPartUses(sql: Query, f: UseFilter = {}): Promise<PartU
               select id from billing_items
                where active and hidden_at is null and kind not in ('trip', 'labor')
                  and ($6::text = '' or coalesce(item_class, '') = $6::text)
-                 and ($7::text = '' or item ilike $8 or sku ilike $8 or description ilike $8 or mfr_part ilike $8)))
+                 and ($7::text = '' or item ilike $8 or sku ilike $8 or description ilike $8 or mfr_part ilike $8
+                      or exists (select 1 from unnest(previous_numbers) pn where pn ilike $8))))
       order by u.used_on desc nulls last, u.ticket_key`,
     [
       f.from ?? null,

@@ -42,7 +42,7 @@ function useRefresh() {
 const EXCEL = ".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel";
 
 /** File picker shared by the imports: Excel unless `accept` says otherwise (Bin Locations also takes CSV). */
-function PickFile({ busy, onFile, testId, label, accept = EXCEL }: { busy: boolean; onFile: (f: File) => void; testId: string; label: string; accept?: string }) {
+export function PickFile({ busy, onFile, testId, label, accept = EXCEL }: { busy: boolean; onFile: (f: File) => void; testId: string; label: string; accept?: string }) {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <>
@@ -69,7 +69,7 @@ function PickFile({ busy, onFile, testId, label, accept = EXCEL }: { busy: boole
 }
 
 /** The approval window's head: file name, row count, and the counts of what will change. */
-function ApprovalHead({ filename, rowCount, children }: { filename: string; rowCount: number; children: React.ReactNode }) {
+export function ApprovalHead({ filename, rowCount, children }: { filename: string; rowCount: number; children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-border bg-muted/40 p-3" data-testid="approval-head">
       <dl className="grid gap-2 text-sm sm:grid-cols-[8rem_1fr]">
@@ -91,7 +91,7 @@ function ApprovalHead({ filename, rowCount, children }: { filename: string; rowC
 }
 
 /** Approve (or Save) runs the import; Cancel closes the window and nothing is written. */
-function ApprovalButtons({
+export function ApprovalButtons({
   busy,
   canApprove,
   onApprove,
