@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Download, FileSpreadsheet, FileUp, Tags } from "lucide-react";
+import { Boxes, Download, FileSpreadsheet, FileUp, ImagePlus, Tags } from "lucide-react";
 import { toast } from "sonner";
 import { importPartBins, importPartPricing, importPartsNetsuite, partBinTemplate, type BinsPreview, type PartsPreview, type PricingPreview } from "@/lib/ops/part-pricing-api";
 import { PRICE_TARGET_LABEL, type PriceTarget } from "@/lib/ops/part-pricing";
 import { binText } from "@/lib/ops/part-bins";
+import { importPhotoResearch, type ResearchPreview } from "@/lib/ops/part-photo-research-api";
+import { RESEARCH_MAX_ROWS, type ResearchPlanStatus } from "@/lib/ops/part-photo-research";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -535,6 +537,179 @@ export function BinLocationsButton() {
                 verb="Save"
                 what={`${preview.update} Bin Location${preview.update === 1 ? "" : "s"}`}
               />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+const RESEARCH_STATUS: Record<ResearchPlanStatus, { label: string; tone: "success" | "warn" | "danger" | "outline" }> = {
+  add: { label: "Will Add", tone: "success" },
+  duplicate: { label: "Duplicate, skipped", tone: "outline" },
+  no_match: { label: "No match, skipped", tone: "danger" },
+  bad_url: { label: "Bad URL, skipped", tone: "danger" },
+  bad_status: { label: "Bad status, skipped", tone: "danger" },
+  no_key: { label: "No part number, skipped", tone: "danger" },
+};
+
+/** The counts, before Save and after it. */
+function ResearchCountBadges({ p }: { p: ResearchPreview }) {
+  return (
+    <>
+      <Badge variant="success" data-testid="research-count-add">
+        {p.applied ? "Added" : "Will Add"} {p.add}
+      </Badge>
+      <Badge variant="outline" data-testid="research-count-duplicate">
+        Duplicate, skipped {p.duplicate}
+      </Badge>
+      <Badge variant="danger" data-testid="research-count-nomatch">
+        No match, skipped {p.noMatch}
+      </Badge>
+      <Badge variant="danger" data-testid="research-count-badurl">
+        Bad URL, skipped {p.badUrl}
+      </Badge>
+      {p.badStatus ? (
+        <Badge variant="danger" data-testid="research-count-badstatus">
+          Bad status, skipped {p.badStatus}
+        </Badge>
+      ) : null}
+      {p.noKey ? (
+        <Badge variant="danger" data-testid="research-count-nokey">
+          No part number, skipped {p.noKey}
+        </Badge>
+      ) : null}
+    </>
+  );
+}
+
+const RESEARCH_FILES = ".csv,text/csv";
+
+/**
+ * Import Photo Research (CSV), Admin only: researched part photos (mpn_key, part_number, image_url, source_page,
+ * status, notes). The preview shows each row's part, whether it has a photo and research already, and what happens to
+ * it. Save adds the new research rows only; a part's photo still comes from Pull Confirmed Photos.
+ */
+export function ImportPhotoResearchButton() {
+  const refresh = useRefresh();
+  const [open, setOpen] = useState(false);
+  const [file, setFile] = useState<{ name: string; base64: string } | null>(null);
+  const [preview, setPreview] = useState<ResearchPreview | null>(null);
+  const close = () => {
+    setOpen(false);
+    setFile(null);
+    setPreview(null);
+  };
+  const read = useMutation({
+    mutationFn: async (f: File) => {
+      if (f.size > 3_000_000) throw new Error("That file is too large.");
+      const base64 = await fileToBase64(f);
+      return { f: { name: f.name, base64 }, p: await importPhotoResearch({ data: { filename: f.name, base64, apply: false } }) };
+    },
+    onSuccess: ({ f, p }) => {
+      setFile(f);
+      setPreview(p);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not read that file"),
+  });
+  const save = useMutation({
+    mutationFn: () => importPhotoResearch({ data: { filename: file!.name, base64: file!.base64, apply: true } }),
+    onSuccess: (r) => {
+      setPreview(r);
+      toast.success(`${r.add} photo research row${r.add === 1 ? "" : "s"} added`);
+      refresh();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the photo research"),
+  });
+  return (
+    <>
+      <ActionButton icon={ImagePlus} menuLabel="Import Photo Research (CSV)" onClick={() => setOpen(true)} data-testid="research-import-open">
+        Import Photo Research (CSV)
+      </ActionButton>
+      <Dialog open={open} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="sm:max-w-4xl" data-testid="research-import">
+          <DialogTitle>Import Photo Research</DialogTitle>
+          <DialogDescription>
+            A CSV with <span className="font-medium">mpn_key</span>, <span className="font-medium">part_number</span>, <span className="font-medium">image_url</span>,{" "}
+            <span className="font-medium">source_page</span>, <span className="font-medium">status</span> (confirmed or review) and{" "}
+            <span className="font-medium">notes</span>, up to {RESEARCH_MAX_ROWS} rows. The key is matched to a part's MPN or SKU with case and punctuation ignored. Only parts with no research
+            get a row (the first row for a part counts); research already on file is never changed, and no photo goes on a part here: Pull Confirmed
+            Photos does that.
+          </DialogDescription>
+          {!preview ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <PickFile busy={read.isPending} onFile={(f) => read.mutate(f)} testId="research-import-file" label="Pick The CSV File" accept={RESEARCH_FILES} />
+            </div>
+          ) : (
+            <>
+              <ApprovalHead filename={preview.filename} rowCount={preview.rowCount}>
+                <ResearchCountBadges p={preview} />
+              </ApprovalHead>
+              {preview.applied ? (
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3" data-testid="research-saved">
+                  <span className="mr-auto text-sm">
+                    Saved. {preview.add} row{preview.add === 1 ? "" : "s"} added; a confirmed one shows in Pull Confirmed Photos when its part has no photo.
+                  </span>
+                  <Button type="button" onClick={close} data-testid="research-done">
+                    Done
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-96 overflow-auto rounded-lg border border-border">
+                    <table className="w-full text-sm">
+                      <thead className="sticky top-0 bg-card text-left text-xs text-muted-foreground uppercase">
+                        <tr className="border-b border-border">
+                          <th className="px-3 py-2 font-medium">Line · Key</th>
+                          <th className="min-w-[13rem] px-2 py-2 font-medium">Part</th>
+                          <th className="px-2 py-2 font-medium">Photo</th>
+                          <th className="px-2 py-2 font-medium">Research</th>
+                          <th className="px-3 py-2 font-medium">Result</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {preview.lines.map((l) => (
+                          <tr key={l.line} className={cn("border-b border-border align-top last:border-b-0", l.status === "add" ? "" : "text-muted-foreground")} data-testid="research-line" data-status={l.status}>
+                            <td className="px-3 py-1.5">
+                              <span className="text-xs tabular">{l.line}</span> <span className="font-medium break-all text-foreground">{l.key || "—"}</span>
+                              <span className="block text-xs">{l.verdict || "no status"}</span>
+                            </td>
+                            <td className="px-2 py-1.5 text-xs">
+                              {l.part ? (
+                                <>
+                                  <span className="block font-medium break-words text-foreground">{l.part.description || "No NetSuite description"}</span>
+                                  <span className="block">
+                                    <span className="whitespace-nowrap">SKU {l.part.sku}</span> · <span className="whitespace-nowrap">Mfr # {l.part.mfrPart || "not set"}</span>
+                                  </span>
+                                </>
+                              ) : (
+                                "No match"
+                              )}
+                            </td>
+                            <td className="px-2 py-1.5 text-xs whitespace-nowrap">{l.part ? (l.hasPhoto ? "Has photo" : "No photo") : "—"}</td>
+                            <td className="px-2 py-1.5 text-xs whitespace-nowrap">{l.part ? (l.researched ? "On file" : "None") : "—"}</td>
+                            <td className="px-3 py-1.5">
+                              <Badge size="tight" variant={RESEARCH_STATUS[l.status].tone}>
+                                {RESEARCH_STATUS[l.status].label}
+                              </Badge>
+                              {l.reason ? <span className="mt-0.5 block text-xs">{l.reason}</span> : null}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <ApprovalButtons
+                    busy={save.isPending}
+                    canApprove={preview.add > 0}
+                    onApprove={() => save.mutate()}
+                    onCancel={close}
+                    verb="Save"
+                    what={`${preview.add} Row${preview.add === 1 ? "" : "s"}`}
+                  />
+                </>
+              )}
             </>
           )}
         </DialogContent>
