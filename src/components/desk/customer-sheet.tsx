@@ -8,7 +8,8 @@ import { CustomerAddress } from "@/components/desk/customer-address";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { setAccountNumber } from "@/lib/ops/account-numbers-api";
-import { copyRecipe, getCustomerHistory, listDirectory, listRecipes, renameCustomer, updateCustomerAccount } from "@/lib/ops/api";
+import { copyRecipe, getCustomerHistory, listDirectory, listRecipes, previewCustomerRename, renameCustomer, updateCustomerAccount } from "@/lib/ops/api";
+import { renameConfirm, renameToast } from "@/lib/ops/customer-rename";
 
 import { getMyAccess } from "@/lib/ops/access";
 import { formatShortDate, money, isOpenInstall } from "@/lib/ops/clock";
@@ -127,9 +128,9 @@ export function CustomerHistorySheet({
   }, [customerId, history.data?.name]);
 
   const rename = useMutation({
-    mutationFn: (n: string) => renameCustomer({ data: { id: customerId!, name: n } }),
+    mutationFn: (d: { name: string; confirmMerge?: string }) => renameCustomer({ data: { id: customerId!, ...d } }),
     onSuccess: (row) => {
-      toast.success(row.merged ? `Merged into “${row.name}”` : `Renamed to “${row.name}”`);
+      toast.success(renameToast(row));
       setEditing(false);
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
@@ -403,7 +404,8 @@ export function CustomerHistorySheet({
         current={data?.name ?? ""}
         pending={rename.isPending}
         onClose={() => setEditing(false)}
-        onSave={(n) => rename.mutate(n)}
+        check={customerId != null ? (n) => previewCustomerRename({ data: { id: customerId, name: n } }).then((plan) => renameConfirm(plan)) : undefined}
+        onSave={(n, confirmMerge) => rename.mutate({ name: n, confirmMerge })}
       />
     </>
   );
