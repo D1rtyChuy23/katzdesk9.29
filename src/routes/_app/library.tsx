@@ -285,7 +285,9 @@ function Page() {
   async function readSpecsFrom(file: LibraryFile) {
     try {
       const res = await runSpecReads({ data: { fileIds: [file.id], limit: 1 } });
-      toast.success(res.review ? `${file.name} is in Spec Review.` : res.unreadable ? "That sheet could not be read." : `${file.name} is queued.`);
+      const why = res.outcomes?.find((o) => o.fileId === file.id)?.error;
+      if (res.unreadable) toast.error(why ? `${file.name} could not be read: ${why}` : `${file.name} could not be read.`);
+      else toast.success(res.review ? `${file.name} is in Spec Review.` : `${file.name} is queued.`);
       await qc.invalidateQueries({ queryKey: ["spec-reads"] });
       await qc.invalidateQueries({ queryKey: ["spec-read-status"] });
       if (isAdmin) void navigate({ to: "/library", search: { tab: "admin", book: file.bookId ?? undefined } });
@@ -506,11 +508,15 @@ function Page() {
   const dropped = current ? removedCopies(current, books, files, hidden) : [];
   const copyTargets = current && isMainChip(current, books) ? variationsOf(current, books) : [];
   const mainName = mainChip ? modelLabel(mainChip.title, mainChip.manufacturer) : "";
-  const statusFor = (bookId: number): TileStatus | null =>
-    bookSpecStatus(
-      files.filter((f) => f.bookId === bookId && f.section === "spec").length,
-      (specStatus.data ?? []).filter((r) => r.bookId === bookId).map((r) => r.status),
+  // A manual read for its specs counts on the tile like a spec sheet once it has a read.
+  const statusFor = (bookId: number): TileStatus | null => {
+    const reads = (specStatus.data ?? []).filter((r) => r.bookId === bookId);
+    const readFiles = new Set(reads.map((r) => r.fileId));
+    return bookSpecStatus(
+      files.filter((f) => f.bookId === bookId && (f.section === "spec" || (f.section === "manuals" && readFiles.has(f.id)))).length,
+      reads.map((r) => r.status),
     );
+  };
   const setTab = (next: Tab) => void navigate({ to: "/library", search: { tab: next === "library" ? undefined : next, book: bookParam, open } });
   return (
     <div>
@@ -777,7 +783,7 @@ function Page() {
                             onRename={(file) => setFileRename({ file, name: file.name.replace(/\.[A-Za-z0-9]+$/, "") })}
                             extra={
                               <>
-                                {f.section === "spec" && isAdmin && f.mime === "application/pdf" ? (
+                                {(f.section === "spec" || f.section === "manuals") && isAdmin && f.mime === "application/pdf" ? (
                                   <Button type="button" size="sm" variant="outline" onClick={() => void readSpecsFrom(f)} data-testid="read-specs">
                                     <FileUp className="size-4" /> Read Specs
                                   </Button>

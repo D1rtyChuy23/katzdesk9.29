@@ -131,12 +131,12 @@ export const listSpecSheets = createServerFn({ method: "GET" })
 
 // ---------------- AI extraction ----------------
 
-const SYSTEM_PROMPT = `You read manufacturer spec sheets for commercial coffee, espresso, tea, water and food-service equipment and return STRICT JSON for a US service company.
+const SYSTEM_PROMPT = `You read manufacturer spec sheets, and the specification pages of manuals, for commercial coffee, espresso, tea, water and food-service equipment and return STRICT JSON for a US service company.
 
 Return ONE JSON object and nothing else, exactly this shape (omit or use null for anything not in the sheet; never invent values):
 {
-  "manufacturer": string,
-  "model": string,                      // model family/name without the manufacturer
+  "manufacturer": string,               // "" when the text doesn't name it
+  "model": string,                      // model family/name without the manufacturer; "" when the text doesn't name it
   "category": string|null,              // e.g. "Espresso Machine", "Grinder", "Brewer", "Water Filtration"
   "summary": string|null,               // one or two plain sentences
   "specs": [{"label": string, "value": string}],   // general specs: boilers, capacity, groups, hoppers, materials…
@@ -164,13 +164,19 @@ Rules:
 - Prefer imperial units: inches ("), pounds (lb), psi, °F, gallons. Convert metric when the sheet gives only metric (e.g. 800 mm → 31.5"). Keep at most one decimal.
 - Use US electrical terms: voltage like "208-240V" or "120V", amps like "30A", phase "1-phase" or "3-phase", plug as a NEMA type (e.g. "NEMA 6-30P") or "Hardwired".
 - If the sheet has a single configuration, return one config labelled "Standard".
-- Values are short strings. No markdown, no comments in the JSON.`;
+- Multi-column tables (a column per model, configuration, group count or voltage): keep each column's header with its values. Make one config per column, labelled with that column's header, and never mix values from different columns.
+- Pages may be marked [Page n]. A manual's other pages (operation, cleaning, parts lists) are not specs: take values only from what states them.
+- Every spec row needs a label. Values are short strings. No markdown, no comments in the JSON.`;
 
 type ExtractResult =
   | { ok: true; draft: SpecSheetDraft; removed: RemovedItem[]; usedRetry: boolean }
-  | { ok: false; reason: "no-key" | "no-text" | "rate-limit" | "failed"; message: string };
+  /** `detail` is what went wrong, for a read's "AI read failed: …". */
+  | { ok: false; reason: "no-key" | "no-text" | "rate-limit" | "failed"; message: string; detail?: string };
 
-export async function callXai(apiKey: string, messages: { role: string; content: string }[]): Promise<string> {
+/** A read sends a long sheet or a manual's spec pages: room for a reply with several configurations (10/28). */
+const READ_MAX_TOKENS = 8000;
+
+export async function callXai(apiKey: string, messages: { role: string; content: string }[], opts: { maxTokens?: number } = {}): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 90_000);
   try {
@@ -182,7 +188,7 @@ export async function callXai(apiKey: string, messages: { role: string; content:
         model: XAI_MODEL,
         messages,
         temperature: 0,
-        max_tokens: 4000,
+        max_tokens: opts.maxTokens ?? 4000,
         response_format: { type: "json_object" },
       }),
     });
@@ -203,26 +209,36 @@ const extractInput = z.object({
 });
 
 /** Text in, structured draft out. No rate limit — the caller decides how often this runs. */
-export async function extractSpecFromText(apiKey: string, text: string, fileName?: string): Promise<ExtractResult> {
+export async function extractSpecFromText(apiKey: string, text: string, fileName?: string, kind: "spec" | "manual" = "spec"): Promise<ExtractResult> {
+  const what = kind === "manual" ? "Manual (its pages most likely to hold specifications)" : "Spec sheet";
   const messages = [
     { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: `Spec sheet${fileName ? ` "${fileName}"` : ""} text:\n\n${text}` },
+    { role: "user", content: `${what}${fileName ? ` "${fileName}"` : ""} text:\n\n${text}` },
   ];
   try {
-    const first = await callXai(apiKey, messages);
+    const first = await callXai(apiKey, messages, { maxTokens: READ_MAX_TOKENS });
     let parsed = parseExtraction(first);
     let usedRetry = false;
     if (!parsed.ok) {
       usedRetry = true;
-      const second = await callXai(apiKey, [
-        ...messages,
-        { role: "assistant", content: first.slice(0, 8000) },
-        { role: "user", content: `That was not valid for the schema (${parsed.error}). Reply with only the corrected JSON object.` },
-      ]);
+      const second = await callXai(
+        apiKey,
+        [
+          ...messages,
+          { role: "assistant", content: first.slice(0, 8000) },
+          { role: "user", content: `That was not valid for the schema (${parsed.error}). Reply with only the corrected JSON object.` },
+        ],
+        { maxTokens: READ_MAX_TOKENS },
+      );
       parsed = parseExtraction(second);
     }
     if (!parsed.ok) {
-      return { ok: false, reason: "failed", message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.` };
+      return {
+        ok: false,
+        reason: "failed",
+        message: `The AI couldn't read this sheet cleanly (${parsed.error}). Fill in the form by hand instead.`,
+        detail: `the reply didn't fit the spec format (${parsed.error})`,
+      };
     }
     const filtered = filterNonUsa(parsed.data);
     if (!filtered.draft.configs.length) filtered.draft.configs.push({ label: "Standard", requirements: {} });
@@ -230,7 +246,7 @@ export async function extractSpecFromText(apiKey: string, text: string, fileName
     return { ok: true, draft, removed: filtered.removed, usedRetry };
   } catch (e) {
     const msg = e instanceof Error ? (e.name === "AbortError" ? "the AI took too long" : e.message) : "unknown error";
-    return { ok: false, reason: "failed", message: `Reading the sheet failed (${msg}). Fill in the form by hand instead.` };
+    return { ok: false, reason: "failed", message: `Reading the sheet failed (${msg}). Fill in the form by hand instead.`, detail: msg };
   }
 }
 
