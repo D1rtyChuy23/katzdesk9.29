@@ -23,7 +23,7 @@ import {
 } from "@/components/desk/part-controls";
 import { partMoney as money, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "@/components/desk/part-edits";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
-import { BinLocationsButton, ImportPartsButton, ImportPhotoResearchButton, UpdatePricingButton } from "@/components/desk/part-imports";
+import { BinLocationsButton, ImportPartsButton, ImportPhotoResearchButton, ImportWoPartLinesButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { notLoadedText } from "@/lib/ops/load-problem";
@@ -187,6 +187,7 @@ function Page() {
               {isAdmin ? <ImportPartsButton /> : null}
               {isAdmin ? <UpdatePricingButton /> : null}
               {isAdmin ? <ImportPhotoResearchButton /> : null}
+              {isAdmin ? <ImportWoPartLinesButton /> : null}
               <BinLocationsButton />
             </ImportMenu>
           </div>

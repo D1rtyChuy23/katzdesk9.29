@@ -1,15 +1,18 @@
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Download, FileSpreadsheet, FileUp, ImagePlus, Tags } from "lucide-react";
+import { Boxes, ClipboardList, Download, FileSpreadsheet, FileUp, ImagePlus, Tags } from "lucide-react";
 import { toast } from "sonner";
 import { importPartBins, importPartPricing, importPartsNetsuite, partBinTemplate, type BinsPreview, type PartsPreview, type PricingPreview } from "@/lib/ops/part-pricing-api";
 import { PRICE_TARGET_LABEL, type PriceTarget } from "@/lib/ops/part-pricing";
 import { binText } from "@/lib/ops/part-bins";
 import { importPhotoResearch, type ResearchPreview } from "@/lib/ops/part-photo-research-api";
 import { RESEARCH_MAX_ROWS, type ResearchPlanStatus } from "@/lib/ops/part-photo-research";
+import { importWoPartLines, type WoLinesPreview } from "@/lib/ops/wo-part-lines-api";
+import { LINE_SOURCE_LABEL, WO_LINES_MAX_ROWS, type WoLineStatus, type WoTicket } from "@/lib/ops/wo-part-lines";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { SelectField } from "@/components/ui/select-field";
 import { ActionButton } from "./desk-charts";
 import { downloadBase64 } from "./export-dialog";
 import { cn } from "@/lib/utils";
@@ -707,6 +710,257 @@ export function ImportPhotoResearchButton() {
                     onCancel={close}
                     verb="Save"
                     what={`${preview.add} Row${preview.add === 1 ? "" : "s"}`}
+                  />
+                </>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+const LINE_STATUS: Record<WoLineStatus, { label: string; tone: "success" | "warn" | "danger" | "outline" }> = {
+  add: { label: "Will Add", tone: "success" },
+  combined: { label: "Added to a line", tone: "outline" },
+  duplicate: { label: "Duplicate, skipped", tone: "outline" },
+  counted: { label: "Already counted, skipped", tone: "warn" },
+  no_part: { label: "No part match, skipped", tone: "danger" },
+  no_wo: { label: "No WO, skipped", tone: "danger" },
+  invalid: { label: "Can't read, skipped", tone: "danger" },
+};
+
+/** The counts, before Save and after it. */
+function WoLineCountBadges({ p }: { p: WoLinesPreview }) {
+  return (
+    <>
+      <Badge variant="success" data-testid="wolines-count-add">
+        {p.applied ? "Added" : "Will Add"} {p.add}
+      </Badge>
+      {p.noTicket ? (
+        <Badge variant="outline" data-testid="wolines-count-noticket">
+          On no ticket, saved by WO {p.noTicket}
+        </Badge>
+      ) : null}
+      <Badge variant="outline" data-testid="wolines-count-duplicate">
+        Duplicate, skipped {p.duplicate}
+      </Badge>
+      <Badge variant="danger" data-testid="wolines-count-nopart">
+        No part match, skipped {p.noPart}
+      </Badge>
+      <Badge variant="danger" data-testid="wolines-count-nowo">
+        No WO, skipped {p.noWo}
+      </Badge>
+      <Badge variant="warn" data-testid="wolines-count-counted">
+        Already counted, skipped {p.counted}
+      </Badge>
+      {p.combined ? (
+        <Badge variant="outline" data-testid="wolines-count-combined">
+          Added to a line {p.combined}
+        </Badge>
+      ) : null}
+      {p.invalid ? (
+        <Badge variant="danger" data-testid="wolines-count-invalid">
+          Can't read, skipped {p.invalid}
+        </Badge>
+      ) : null}
+    </>
+  );
+}
+
+const LINE_FILES = ".csv,text/csv";
+const FIRST_LINES = 300;
+const BOARD_NAME: Record<WoTicket["board"], string> = { service: "Ticket", tlc: "TLC", pm: "PM", install: "Install" };
+
+/**
+ * Import WO Part Lines (CSV), Admin only: the parts each work order used, as Corrigo or NetSuite lists them (wo,
+ * used_on, item, qty, source, source_ref). The preview shows each row's part, its ticket (or none: the line is still
+ * saved on its WO), its pieces and what happens to it. Save adds the new lines only; Parts usage counts them.
+ */
+export function ImportWoPartLinesButton() {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [file, setFile] = useState<{ name: string; base64: string } | null>(null);
+  const [preview, setPreview] = useState<WoLinesPreview | null>(null);
+  const [show, setShow] = useState<WoLineStatus | "no_ticket" | "">("");
+  const [all, setAll] = useState(false);
+  const close = () => {
+    setOpen(false);
+    setFile(null);
+    setPreview(null);
+    setShow("");
+    setAll(false);
+  };
+  const read = useMutation({
+    mutationFn: async (f: File) => {
+      if (f.size > 3_000_000) throw new Error("That file is too large.");
+      const base64 = await fileToBase64(f);
+      return { f: { name: f.name, base64 }, p: await importWoPartLines({ data: { filename: f.name, base64, apply: false } }) };
+    },
+    onSuccess: ({ f, p }) => {
+      setFile(f);
+      setPreview(p);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not read that file"),
+  });
+  const save = useMutation({
+    mutationFn: () => importWoPartLines({ data: { filename: file!.name, base64: file!.base64, apply: true } }),
+    onSuccess: (r) => {
+      setPreview(r);
+      setShow("");
+      toast.success(`${r.add} WO part line${r.add === 1 ? "" : "s"} added`);
+      for (const key of ["parts", "part-usage-counts", "part-usage", "part-usage-report"]) void qc.invalidateQueries({ queryKey: [key] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the WO part lines"),
+  });
+  const lines = (preview?.lines ?? []).filter((l) => (show === "no_ticket" ? l.status === "add" && !l.ticket : !show || l.status === show));
+  const shown = all ? lines : lines.slice(0, FIRST_LINES);
+  return (
+    <>
+      <ActionButton icon={ClipboardList} menuLabel="Import WO Part Lines (CSV)" onClick={() => setOpen(true)} data-testid="wolines-import-open">
+        Import WO Part Lines (CSV)
+      </ActionButton>
+      <Dialog open={open} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="sm:max-w-5xl" data-testid="wolines-import">
+          <DialogTitle>Import WO Part Lines</DialogTitle>
+          <DialogDescription>
+            A CSV with <span className="font-medium">wo</span>, <span className="font-medium">used_on</span>, <span className="font-medium">item</span>,{" "}
+            <span className="font-medium">qty</span>, <span className="font-medium">source</span> (corrigo or netsuite) and <span className="font-medium">source_ref</span>, up to{" "}
+            {WO_LINES_MAX_ROWS.toLocaleString("en-US")} rows. A line finds its part by the item after its last colon, and its ticket by the WO (one that came in up to 180
+            days before the line's day); with no ticket it is saved on its WO. A WO's part counts once: what Charges or QuickBooks already have, and NetSuite lines that
+            Corrigo has, are skipped. A blank qty counts as 1. Only Parts usage reads these lines; Charges, invoices and Pull don't change.
+          </DialogDescription>
+          {!preview ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <PickFile busy={read.isPending} onFile={(f) => read.mutate(f)} testId="wolines-import-file" label="Pick The CSV File" accept={LINE_FILES} />
+            </div>
+          ) : (
+            <>
+              <ApprovalHead filename={preview.filename} rowCount={preview.rowCount}>
+                <WoLineCountBadges p={preview} />
+              </ApprovalHead>
+              {preview.applied ? (
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3" data-testid="wolines-saved">
+                  <span className="mr-auto text-sm">
+                    Saved. {preview.add} line{preview.add === 1 ? "" : "s"} added; Parts usage counts {preview.add === 1 ? "it" : "them"} now.
+                  </span>
+                  <Button type="button" onClick={close} data-testid="wolines-done">
+                    Done
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <SelectField
+                      value={show}
+                      onChange={(e) => {
+                        setShow(e.target.value as WoLineStatus | "no_ticket" | "");
+                        setAll(false);
+                      }}
+                      aria-label="Show"
+                      className="h-9 w-auto"
+                      allowEmpty
+                      emptyLabel="All rows"
+                      data-testid="wolines-show"
+                    >
+                      <option value="add">Will add</option>
+                      <option value="no_ticket">Will add, on no ticket</option>
+                      {(["combined", "duplicate", "counted", "no_part", "no_wo", "invalid"] as const).map((s) => (
+                        <option key={s} value={s}>
+                          {LINE_STATUS[s].label}
+                        </option>
+                      ))}
+                    </SelectField>
+                    <span className="text-xs text-muted-foreground">
+                      {lines.length.toLocaleString("en-US")} row{lines.length === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <div className="max-h-96 overflow-auto rounded-lg border border-border">
+                    <table className="w-full text-sm">
+                      <thead className="sticky top-0 bg-card text-left text-xs text-muted-foreground uppercase">
+                        <tr className="border-b border-border">
+                          <th className="px-3 py-2 font-medium">Line · WO</th>
+                          <th className="min-w-[12rem] px-2 py-2 font-medium">Part</th>
+                          <th className="min-w-[10rem] px-2 py-2 font-medium">Ticket</th>
+                          <th className="px-2 py-2 text-right font-medium">Qty</th>
+                          <th className="px-3 py-2 font-medium">Result</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {shown.map((l) => (
+                          <tr
+                            key={l.line}
+                            className={cn("border-b border-border align-top last:border-b-0", l.status === "add" ? "" : "text-muted-foreground")}
+                            data-testid="wolines-line"
+                            data-status={l.status}
+                          >
+                            <td className="px-3 py-1.5">
+                              <span className="text-xs tabular">{l.line}</span> <span className="font-medium whitespace-nowrap text-foreground">{l.wo || l.woRaw || "—"}</span>
+                              <span className="block text-xs whitespace-nowrap">
+                                {l.usedOn ?? l.usedOnRaw ?? "no date"} · {l.source ? LINE_SOURCE_LABEL[l.source] : (l.sourceRaw ?? "no source")}
+                              </span>
+                            </td>
+                            <td className="px-2 py-1.5 text-xs">
+                              {l.part ? (
+                                <>
+                                  <span className="block font-medium break-words text-foreground">{l.part.description || l.part.item}</span>
+                                  <span className="block whitespace-nowrap">SKU {l.part.sku}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="block">No match</span>
+                                  <span className="block break-all">{l.item || "no item"}</span>
+                                </>
+                              )}
+                            </td>
+                            <td className="px-2 py-1.5 text-xs">
+                              {l.ticket ? (
+                                <>
+                                  <span className="block font-medium text-foreground">
+                                    {BOARD_NAME[l.ticket.board]} {l.ticket.label}
+                                  </span>
+                                  <span className="block truncate">{[l.ticket.customer, l.ticket.status].filter(Boolean).join(" · ")}</span>
+                                </>
+                              ) : l.status === "add" ? (
+                                "No ticket"
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                            <td className="px-2 py-1.5 text-right text-xs whitespace-nowrap tabular">
+                              {l.status === "add" ? (
+                                <span className="font-medium text-foreground">{l.total}</span>
+                              ) : l.qty != null ? (
+                                l.qty
+                              ) : (
+                                (l.qtyRaw ?? "—")
+                              )}
+                              {l.qtyBlank ? <span className="block text-[10px] text-warning">blank: 1</span> : null}
+                            </td>
+                            <td className="px-3 py-1.5">
+                              <Badge size="tight" variant={LINE_STATUS[l.status].tone}>
+                                {LINE_STATUS[l.status].label}
+                              </Badge>
+                              {l.reason ? <span className="mt-0.5 block text-xs">{l.reason}</span> : null}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {lines.length > shown.length ? (
+                    <Button type="button" size="sm" variant="outline" className="self-start" onClick={() => setAll(true)} data-testid="wolines-all">
+                      Show all {lines.length.toLocaleString("en-US")}
+                    </Button>
+                  ) : null}
+                  <ApprovalButtons
+                    busy={save.isPending}
+                    canApprove={preview.add > 0}
+                    onApprove={() => save.mutate()}
+                    onCancel={close}
+                    verb="Save"
+                    what={`${preview.add.toLocaleString("en-US")} Line${preview.add === 1 ? "" : "s"}`}
                   />
                 </>
               )}
