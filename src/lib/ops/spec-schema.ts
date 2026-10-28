@@ -23,6 +23,16 @@ const str = (max: number) =>
 
 export const kvSchema = z.object({ label: str(200).pipe(z.string().min(1)), value: str(2000) });
 
+/** Spec rows: a row with no label is dropped rather than failing the whole sheet (an AI read sends some). */
+const kvList = z.preprocess((v) => {
+  if (v === null || v === undefined) return [];
+  if (!Array.isArray(v)) return v;
+  return v.filter((row) => {
+    const label = row && typeof row === "object" ? (row as { label?: unknown }).label : undefined;
+    return (typeof label === "string" && label.trim() !== "") || typeof label === "number";
+  });
+}, z.array(kvSchema).max(200));
+
 export const powerSchema = z.object({
   voltage: text,
   amps: text,
@@ -46,7 +56,7 @@ export const requirementsSchema = z.object({
   water: section(waterSchema),
   drain: section(drainSchema),
   dimensions: section(dimensionsSchema),
-  other: list(kvSchema).optional(),
+  other: kvList.optional(),
 });
 
 export const mfrNotesSchema = z.object({
@@ -72,13 +82,16 @@ const imageField = z
   .nullable()
   .optional();
 
+/** Manufacturer and model may be missing or null (a manual page may not name them): "". */
+const identity = z.preprocess((v) => (v === null || v === undefined ? "" : typeof v === "number" ? String(v) : v), z.string().trim().max(200));
+
 /** What the AI must return, and what the review form edits. */
 export const specSheetSchema = z.object({
-  manufacturer: z.string().trim().max(200),
-  model: z.string().trim().max(200),
+  manufacturer: identity,
+  model: identity,
   category: text,
   summary: text,
-  specs: list(kvSchema),
+  specs: kvList,
   mfrNotes: z.preprocess((v) => v ?? {}, mfrNotesSchema),
   configs: list(configSchema),
   /** Counter core hole for utility lines: "yes" | "no"; undefined = not stated. */

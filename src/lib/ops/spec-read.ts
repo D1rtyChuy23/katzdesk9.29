@@ -69,26 +69,33 @@ export function blankSpecValues(): SpecValues {
 
 const clean = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 
-function findKv(rows: Kv[] | undefined, re: RegExp): string {
-  const hit = (rows ?? []).find((r) => re.test(r.label) && clean(r.value));
+function findKv(rows: Kv[] | undefined, re: RegExp, not?: RegExp): string {
+  const hit = (rows ?? []).find((r) => re.test(r.label) && !(not && not.test(r.label)) && clean(r.value));
   return hit ? clean(hit.value) : "";
 }
 
-/** Pull the review fields off a saved sheet (first configuration) and the model's MPN. */
-export function valuesFromParts(input: {
-  requirements?: Requirements | null;
-  specs?: Kv[] | null;
-  mpn?: string | null;
-}): SpecValues {
-  const req = input.requirements ?? {};
+const fold = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+type LabelField = Exclude<SpecFieldKey, "tank" | "brew" | "mpn">;
+
+/** The labels a spec row can carry a field under ("Voltage", "Amperage", "Net weight"), and labels that only look like it. */
+const LABEL_FIELDS: { key: LabelField; re: RegExp; not?: RegExp }[] = [
+  { key: "voltage", re: /\bvolt(?:age|s)?\b/i },
+  { key: "amps", re: /\b(?:amps?|amperage|current)\b/i },
+  { key: "phase", re: /\bphase\b/i },
+  { key: "plug", re: /\b(?:plug|cord|nema)\b/i },
+  { key: "waterInlet", re: /\b(?:water (?:inlet|connection|supply|line)|inlet)\b/i, not: /pressure|temp|flow/i },
+  { key: "drain", re: /\bdrain\b/i },
+  { key: "height", re: /\bheight\b/i },
+  { key: "width", re: /\bwidth\b/i },
+  { key: "depth", re: /\bdepth\b/i },
+  { key: "weight", re: /\bweight\b/i },
+];
+
+/** One configuration's own fields: power, water, drain and dimensions, and tank and brew from its rows. */
+function ownValues(req: Requirements, rows: Kv[]): Omit<SpecValues, "mpn"> {
   const power = req.power ?? {};
   const dims = req.dimensions ?? {};
-  const rows = [...(input.specs ?? []), ...(req.other ?? [])];
-  const tank = findKv(rows, TANK_RE);
-  const brew = findKv(
-    rows.filter((r) => !TANK_RE.test(r.label)),
-    BREW_RE,
-  );
   return {
     voltage: clean(power.voltage),
     amps: clean(power.amps),
@@ -100,10 +107,37 @@ export function valuesFromParts(input: {
     width: clean(dims.width),
     depth: clean(dims.depth),
     weight: clean(dims.weight),
-    tank,
-    brew,
-    mpn: clean(input.mpn) || findKv(rows, MPN_RE),
+    tank: findKv(rows, TANK_RE),
+    brew: findKv(
+      rows.filter((r) => !TANK_RE.test(r.label)),
+      BREW_RE,
+    ),
   };
+}
+
+/**
+ * Pull the review fields off a sheet (its first configuration) and the model's MPN. A field the configuration leaves
+ * blank is filled from a spec row (or one of its own other rows) with that field's label, then from the sheet's other
+ * configurations when every one of them that has it agrees. Different values in different configurations stay blank.
+ */
+export function valuesFromParts(input: {
+  requirements?: Requirements | null;
+  specs?: Kv[] | null;
+  mpn?: string | null;
+  /** The sheet's other configurations. */
+  others?: (Requirements | null | undefined)[] | null;
+}): SpecValues {
+  const req = input.requirements ?? {};
+  const rows = [...(input.specs ?? []), ...(req.other ?? [])];
+  const out: SpecValues = { ...ownValues(req, rows), mpn: clean(input.mpn) || findKv(rows, MPN_RE) };
+  for (const f of LABEL_FIELDS) if (!out[f.key]) out[f.key] = findKv(rows, f.re, f.not);
+  const others = (input.others ?? []).map((r) => ownValues(r ?? {}, r?.other ?? []));
+  for (const key of [...LABEL_FIELDS.map((f) => f.key), "tank", "brew"] as const) {
+    if (out[key]) continue;
+    const seen = others.map((o) => o[key]).filter(Boolean);
+    if (seen.length && seen.every((v) => fold(v) === fold(seen[0]!))) out[key] = seen[0]!;
+  }
+  return out;
 }
 
 export function valuesFromDraft(draft: SpecSheetDraft, mpn?: string | null): SpecValues {
@@ -112,10 +146,75 @@ export function valuesFromDraft(draft: SpecSheetDraft, mpn?: string | null): Spe
     requirements: config?.requirements,
     specs: draft.specs,
     mpn,
+    others: draft.configs.slice(1).map((c) => c.requirements),
   });
 }
 
-const fold = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+/** Most text a read sends the AI: the 60,000 characters the spec import has always allowed. */
+export const SPEC_TEXT_LIMIT = 60_000;
+
+/** Words that mark a page with specifications, and how much each counts. */
+const SPEC_WORDS: [RegExp, number][] = [
+  [/\btechnical data\b/gi, 6],
+  [/\bspecifications?\b/gi, 4],
+  [/\bdimensions?\b/gi, 3],
+  [/\bweight\b/gi, 3],
+  [/\bvolt(?:s|age)?\b|\b\d{2,3}\s?vac?\b/gi, 2],
+  [/\bamp(?:s|erage|eres?)?\b|\b\d+(?:\.\d+)?\s?a\b/gi, 2],
+  [/\bhz\b|\bhertz\b/gi, 2],
+  [/\bphase\b/gi, 2],
+];
+const ENGLISH = /\b(?:the|and|with|for|this|that|from|must|should|unit|machine|water|power|only|not)\b/gi;
+const OTHER_LANGUAGE = /\b(?:der|die|das|und|mit|nicht|ist|le|les|et|des|une|pour|est|el|los|las|para|con|il|di|che|della|een|het|van|och)\b/gi;
+
+const hits = (text: string, re: RegExp) => text.match(re)?.length ?? 0;
+
+/** How much a page reads like specifications: each word's hits (up to 5) times its weight. */
+export function specScore(text: string): number {
+  return SPEC_WORDS.reduce((n, [re, weight]) => n + Math.min(hits(text, re), 5) * weight, 0);
+}
+
+/** True when the page reads as English: at least as many English words as French, German, Spanish, Italian or Dutch ones. */
+export function isEnglishPage(text: string): boolean {
+  const en = hits(text, ENGLISH);
+  return en > 0 && en >= hits(text, OTHER_LANGUAGE);
+}
+
+export type DocPage = { page: number; text: string };
+
+/**
+ * The text a read sends the AI, each page marked "[Page n]". A document that fits in the limit goes whole. A longer
+ * one sends its first page (it names the machine), then the pages with the most spec words, English first, as many as
+ * fit, in page order.
+ */
+export function pickSpecPages(pages: DocPage[], limit = SPEC_TEXT_LIMIT): { text: string; used: number[]; total: number } {
+  const withText = pages.filter((p) => p.text.trim());
+  const block = (p: DocPage) => `[Page ${p.page}]\n${p.text.trim()}`;
+  const size = (p: DocPage) => block(p).length + 2;
+  let chosen: DocPage[];
+  if (withText.reduce((n, p) => n + size(p), 0) <= limit) chosen = withText;
+  else {
+    const scored = withText.map((p) => ({ p, score: specScore(p.text), english: isEnglishPage(p.text) }));
+    const ranked = [...scored].sort(
+      (a, b) => Number(b.score > 0) - Number(a.score > 0) || Number(b.english) - Number(a.english) || b.score - a.score || a.p.page - b.p.page,
+    );
+    const order = scored[0] ? [scored[0], ...ranked.filter((s) => s !== scored[0])] : ranked;
+    chosen = [];
+    let used = 0;
+    for (const s of order) {
+      if (used + size(s.p) > limit) continue;
+      chosen.push(s.p);
+      used += size(s.p);
+    }
+    // A single page longer than the limit: its start.
+    if (!chosen.length && ranked[0]) chosen = [{ page: ranked[0].p.page, text: ranked[0].p.text.slice(0, limit - 20) }];
+    chosen.sort((a, b) => a.page - b.page);
+  }
+  return { text: chosen.map(block).join("\n\n"), used: chosen.map((p) => p.page), total: withText.length };
+}
+
+/** Characters of text, not counting spaces and line breaks. */
+export const textChars = (pages: { text: string }[]) => pages.reduce((n, p) => n + p.text.replace(/\s/g, "").length, 0);
 
 /** Extracted fields that have a value, marked fill / same / conflict against the model. */
 export function diffSpec(current: SpecValues, extracted: SpecValues): FieldChange[] {

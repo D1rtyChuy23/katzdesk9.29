@@ -6,7 +6,7 @@ import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { keepOneCopy, queueFiles, queuedSheets } = await import("../src/lib/ops/spec-read-api.ts");
+const { keepOneCopy, queueFiles, queuedSheets, queueRereads, rereadCounts, tieAndQueue } = await import("../src/lib/ops/spec-read-api.ts");
 const { copiedManuals } = await import("../src/lib/ops/library-file-rules.ts");
 
 async function freshDb() {
@@ -104,4 +104,76 @@ test("keep one shows the kept copy again on a variation that had hidden it", asy
   await sql.query("insert into library_file_hidden (file_id, book_id) values ($1, $2)", [keep, twin]);
   assert.deepEqual(await keepOneCopy(sql, keep, [keep, own]), { removed: 1 });
   assert.equal((await sql.query("select 1 from library_file_hidden where file_id = $1 and book_id = $2", [keep, twin])).length, 0);
+});
+
+/* ------------------------------------------------------------------ 10/28: manuals are read too */
+
+async function fileOf(sql, bookId, section, name, mime = "application/pdf") {
+  return (
+    await sql.query(
+      "insert into library_files (section, name, mime, size, token, complete, book_id) values ($1, $2, $3, 10, gen_random_uuid()::text, true, $4) returning id",
+      [section, name, mime, bookId],
+    )
+  )[0].id;
+}
+
+test("the queue takes spec sheets and PDF manuals, not Word manuals or parts books", async () => {
+  const sql = await freshDb();
+  const bookId = await book(sql, "BUNN ICB", "BUNN");
+  const spec = await fileOf(sql, bookId, "spec", "Spec.pdf");
+  const manual = await fileOf(sql, bookId, "manuals", "Installation.pdf");
+  const word = await fileOf(sql, bookId, "manuals", "Notes.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  const parts = await fileOf(sql, bookId, "parts", "Parts.pdf");
+  await queueFiles(sql, null, false);
+  assert.deepEqual(await queuedIds(sql, null), [spec, manual]);
+  await queueFiles(sql, [word, parts], true);
+  assert.deepEqual(await queuedIds(sql, null), [spec, manual], "asking for them by id doesn't queue them either");
+});
+
+test("tie and read: a spec sheet takes the model's MPN; a manual is only queued, so it stays shared with the variations", async () => {
+  const sql = await freshDb();
+  const bookId = (await sql.query("insert into library_books (title, manufacturer, mpn) values ('BUNN ICB', 'BUNN', '39343.0000') returning id"))[0].id;
+  const spec = await fileOf(sql, bookId, "spec", "Spec.pdf");
+  const manual = await fileOf(sql, bookId, "manuals", "Installation.pdf");
+  const word = await fileOf(sql, bookId, "manuals", "Notes.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  await tieAndQueue(sql, spec);
+  await tieAndQueue(sql, manual);
+  const mpn = async (id) => (await sql.query("select mpn from library_files where id = $1", [id]))[0].mpn;
+  assert.equal(await mpn(spec), "39343.0000");
+  assert.equal(await mpn(manual), null);
+  assert.deepEqual(await statusOf(sql, [spec, manual]), ["queued", "queued"]);
+  await assert.rejects(() => tieAndQueue(sql, word), /not on a model/);
+});
+
+test("re-read: counts by where each read stands, and queueing the chosen ones again is the same twice", async () => {
+  const sql = await freshDb();
+  const bookId = await book(sql, "BUNN ICB", "BUNN");
+  const ids = {
+    never: await fileOf(sql, bookId, "spec", "A.pdf"),
+    queued: await fileOf(sql, bookId, "spec", "B.pdf"),
+    bad: await fileOf(sql, bookId, "spec", "C.pdf"),
+    review: await fileOf(sql, bookId, "spec", "D.pdf"),
+    done: await fileOf(sql, bookId, "spec", "E.pdf"),
+    manualBad: await fileOf(sql, bookId, "manuals", "M.pdf"),
+    manualNever: await fileOf(sql, bookId, "manuals", "N.pdf"),
+  };
+  await fileOf(sql, bookId, "manuals", "W.docx", "application/msword");
+  await fileOf(sql, null, "spec", "Unfiled.pdf");
+  const set = (id, status) => sql.query("insert into spec_reads (file_id, book_id, status) values ($1, $2, $3)", [id, bookId, status]);
+  await set(ids.queued, "queued");
+  await set(ids.bad, "unreadable");
+  await set(ids.review, "needs_review");
+  await set(ids.done, "read");
+  await set(ids.manualBad, "unreadable");
+  assert.deepEqual(await rereadCounts(sql), {
+    spec: { unreadable: 1, never: 2, needs_review: 1, read: 1 },
+    manuals: { unreadable: 1, never: 1, needs_review: 0, read: 0 },
+  });
+  const first = await queueRereads(sql, ["unreadable", "never"], ["spec", "manuals"]);
+  assert.deepEqual(first, [ids.never, ids.queued, ids.bad, ids.manualBad, ids.manualNever]);
+  assert.deepEqual(await statusOf(sql, first), Array(5).fill("queued"));
+  assert.deepEqual(await statusOf(sql, [ids.review, ids.done]), ["needs_review", "read"], "not chosen: left as they are");
+  assert.deepEqual(await queueRereads(sql, ["unreadable", "never"], ["spec", "manuals"]), [ids.never, ids.queued, ids.bad, ids.manualBad, ids.manualNever]);
+  assert.deepEqual(await queueRereads(sql, ["read"], ["manuals"]), []);
+  assert.deepEqual(await queueRereads(sql, ["read", "needs_review"], ["spec"]), [ids.review, ids.done]);
 });

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { emptyDraft } from "../src/lib/ops/spec-schema.ts";
+import { emptyDraft, parseExtraction } from "../src/lib/ops/spec-schema.ts";
 import { groupFormRows } from "../src/lib/ops/install-form.ts";
 import {
   adminSummary,
@@ -18,6 +18,11 @@ import {
   valuesFromParts,
   withSpecOutlet,
   blankSpecValues,
+  isEnglishPage,
+  pickSpecPages,
+  specScore,
+  textChars,
+  valuesFromDraft,
 } from "../src/lib/ops/spec-read.ts";
 
 test("a blank field is a fill, a different filled field is a conflict, and the same value is not a change to save", () => {
@@ -210,4 +215,105 @@ test("tiles, admin order, and the summary line", () => {
   assert.equal(adminSummary([{ id: "a", openCount: 0, noun: "cleanup" }]), "All clear.");
   assert.equal(clipRows([1, 2, 3, 4], false, 2).more, 2);
   assert.equal(clipRows([1, 2], true, 2).rows.length, 2);
+});
+
+/* ------------------------------------------------------------------ 10/28: reading manuals and long files */
+
+const filler = (n, seed) => `${seed} ` + "Clean the brew basket with warm water and a soft brush after each use. ".repeat(n);
+
+test("a short file goes to the AI whole, each page marked; blank pages are left out", () => {
+  const pick = pickSpecPages([
+    { page: 1, text: "ACME X1" },
+    { page: 2, text: "  " },
+    { page: 3, text: "Voltage 120 V" },
+  ]);
+  assert.equal(pick.text, "[Page 1]\nACME X1\n\n[Page 3]\nVoltage 120 V");
+  assert.deepEqual(pick.used, [1, 3]);
+  assert.equal(pick.total, 2);
+});
+
+test("a long file sends its first page, then the pages with spec words, English first, as many as fit, in page order", () => {
+  const pages = Array.from({ length: 30 }, (_, i) => ({ page: i + 1, text: filler(25, `Page ${i + 1}.`) }));
+  pages[0] = { page: 1, text: "ACME X1 Espresso Machine. Installation and Operation Manual for the machine." };
+  // The spec pages are as long as the others, so four pages fill the limit.
+  pages[16] = { page: 17, text: filler(22, "Technical data and specifications for the machine:") + " Voltage 208-240 V, 30 A, 60 Hz, 1 phase. Weight 120 lb." };
+  pages[21] = { page: 22, text: filler(23, "Specifications.") + " Voltage 120 V for the 1 group." };
+  pages[24] = { page: 25, text: "Technische Daten: Spannung 230 V, 50 Hz, und die Maschine ist mit der Leistung 3000 W. Gewicht 55 kg. ".repeat(17) };
+  // Room for the cover and the three spec pages, and not for one more page.
+  const room = [0, 16, 21, 24].reduce((n, i) => n + pages[i].text.length + 14, 0) + 100;
+  const pick = pickSpecPages(pages, room);
+  assert.deepEqual(pick.used, [1, 17, 22, 25], "the cover, the English spec pages, then the German one");
+  assert.match(pick.text, /^\[Page 1\]\nACME X1/);
+  assert.ok(pick.text.length <= room);
+  assert.equal(pick.total, 30);
+  // With room for one more page, the first English page without spec words comes next.
+  assert.deepEqual(pickSpecPages(pages, room + pages[1].text.length + 14).used, [1, 2, 17, 22, 25]);
+  // With room for only two spec pages: the English ones, not the German one.
+  assert.deepEqual(pickSpecPages(pages, room - pages[24].text.length).used, [1, 17, 22]);
+  // One page longer than the limit: its start.
+  const big = pickSpecPages([{ page: 4, text: "Voltage 120 V. " + "x".repeat(5000) }], 1000);
+  assert.deepEqual(big.used, [4]);
+  assert.ok(big.text.length <= 1000);
+});
+
+test("spec words and the page's language", () => {
+  assert.ok(specScore("Technical Data: 120 V, 15 A, 60 Hz, single phase. Weight 40 lb.") > specScore("Weight 40 lb."));
+  assert.equal(specScore("Clean the brew basket."), 0);
+  assert.equal(isEnglishPage("The machine must be installed with the water line."), true);
+  assert.equal(isEnglishPage("Die Maschine ist mit der Wasserleitung und dem Ablauf zu verbinden."), false);
+  assert.equal(isEnglishPage("La machine doit être installée et les tuyaux pour l'eau."), false);
+  assert.equal(textChars([{ text: " a b \n c " }]), 3);
+});
+
+test("a blank field fills from a spec row with its label, then from other configurations that agree", () => {
+  const values = valuesFromParts({
+    requirements: { power: { amps: "30A" }, dimensions: { height: "32 in" } },
+    specs: [
+      { label: "Rated voltage", value: "208-240V" },
+      { label: "Amperage", value: "40A" },
+      { label: "Water inlet pressure", value: "20-80 psi" },
+      { label: "Net weight", value: "120 lb" },
+    ],
+    others: [
+      { water: { inlet: '3/8" flare' }, power: { phase: "1-phase", amps: "40A" }, dimensions: { width: "30 in" } },
+      { water: { inlet: '3/8" flare' }, power: { phase: "1-phase", amps: "50A" }, dimensions: { width: "37 in" } },
+      null,
+    ],
+  });
+  assert.equal(values.voltage, "208-240V", "from the spec row");
+  assert.equal(values.amps, "30A", "a filled field is kept");
+  assert.equal(values.weight, "120 lb");
+  assert.equal(values.waterInlet, '3/8" flare', "not the pressure row: the other configurations agree");
+  assert.equal(values.phase, "1-phase");
+  assert.equal(values.width, "", "configurations that differ stay blank");
+  assert.equal(values.height, "32 in");
+  const draft = emptyDraft();
+  draft.configs = [
+    { label: "2 Group", requirements: { power: { voltage: "208V" } } },
+    { label: "3 Group", requirements: { power: { voltage: "208V", plug: "NEMA 6-50P" } } },
+  ];
+  assert.equal(valuesFromDraft(draft).plug, "NEMA 6-50P", "the draft's other configurations count too");
+});
+
+test("the AI's sheet may have no maker or model, and a spec row with no label is dropped, not a failure", () => {
+  const parsed = parseExtraction(
+    JSON.stringify({
+      manufacturer: null,
+      specs: [
+        { label: "", value: "orphan" },
+        { label: "Boilers", value: "2" },
+        { value: "no label" },
+        { label: 3, value: "groups" },
+      ],
+      configs: [{ label: "Standard", requirements: { other: [{ label: " ", value: "x" }, { label: "Tank", value: "2 gal" }] } }],
+    }),
+  );
+  assert.equal(parsed.ok, true, parsed.error);
+  assert.equal(parsed.data.manufacturer, "");
+  assert.equal(parsed.data.model, "");
+  assert.deepEqual(parsed.data.specs, [
+    { label: "Boilers", value: "2" },
+    { label: "3", value: "groups" },
+  ]);
+  assert.deepEqual(parsed.data.configs[0].requirements.other, [{ label: "Tank", value: "2 gal" }]);
 });

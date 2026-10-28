@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { approveExactSpecReads, approveSpecRead, runSpecReads, type SpecReadRow } from "@/lib/ops/spec-read-api";
 import { clipRows, handEntryForRow } from "@/lib/ops/spec-read";
+import { BulkRereadButton } from "./spec-bulk-reread";
 
 /** The review list. Nothing here is saved until Approve. */
 export function SpecReviewPanel({
@@ -68,8 +69,9 @@ export function SpecReviewPanel({
       <div className="flex flex-wrap gap-2">
         <Button type="button" variant="outline" disabled={busy} onClick={() => run.mutate(undefined)} data-testid="read-all-specs">
           {run.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-          {queued ? "Read next 15" : "Read All Spec Sheets"}
+          {queued ? "Read next 15" : "Read All Spec Sheets & Manuals"}
         </Button>
+        <BulkRereadButton disabled={busy} onChanged={onChanged} />
         <Button type="button" variant="outline" disabled={busy || exact === 0} onClick={() => approveAll.mutate()} data-testid="approve-all-exact">
           Approve all exact{exact ? ` (${exact})` : ""}
         </Button>
@@ -84,7 +86,10 @@ export function SpecReviewPanel({
             <li key={row.fileId} className="py-3" data-testid="spec-review-row">
               <p className="text-sm font-medium">
                 {row.bookTitle}
-                <span className="ml-2 text-xs font-normal text-muted-foreground">{row.fileName}</span>
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  {row.section === "manuals" ? "Manual · " : ""}
+                  {row.fileName}
+                </span>
               </p>
               {row.status === "unreadable" ? (
                 <div className="mt-1">

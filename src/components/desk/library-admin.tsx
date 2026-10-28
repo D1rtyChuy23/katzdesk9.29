@@ -241,7 +241,7 @@ export function LibraryAdmin({
     {
       id: "spec-review",
       title: "Spec Review",
-      hint: "Reads stored spec sheets and waits for approval. A filled field is not overwritten unless you pick Use new.",
+      hint: "Reads stored spec sheets and PDF manuals and waits for approval. A filled field is not overwritten unless you pick Use new.",
       noun: reviewOpen.length === 1 ? "spec review" : "spec reviews",
       openCount: reviewOpen.length,
       testId: "library-spec-review",
