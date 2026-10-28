@@ -46,6 +46,7 @@ export function PartWindow({
   canEditClass,
   onClose,
   onChanged,
+  onOpen,
 }: {
   id: number | null;
   initial?: PartRow | null;
@@ -54,6 +55,8 @@ export function PartWindow({
   canEditClass: boolean;
   onClose: () => void;
   onChanged: () => void;
+  /** Opens another part's window: the one a merged part went into. */
+  onOpen?: (id: number) => void;
 }) {
   // Keep the last part while the window slides closed, so it does not flash empty.
   const [shown, setShown] = useState<number | null>(id);
@@ -71,7 +74,7 @@ export function PartWindow({
     <Sheet open={id != null} onOpenChange={(o) => !o && onClose()}>
       <SheetContent aria-describedby={undefined} data-testid="part-window">
         {row ? (
-          <PartWindowView key={row.id} row={row} canEditMpn={canEditMpn} canEditBins={canEditBins} canEditClass={canEditClass} onChanged={onChanged} />
+          <PartWindowView key={row.id} row={row} canEditMpn={canEditMpn} canEditBins={canEditBins} canEditClass={canEditClass} onChanged={onChanged} onOpen={onOpen} />
         ) : (
           <>
             <SheetHeader>
@@ -103,12 +106,14 @@ function PartWindowView({
   canEditBins,
   canEditClass,
   onChanged,
+  onOpen,
 }: {
   row: PartRow;
   canEditMpn: boolean;
   canEditBins: boolean;
   canEditClass: boolean;
   onChanged: () => void;
+  onOpen?: (id: number) => void;
 }) {
   const photo = usePartPhoto(row, onChanged);
   const mpn = usePartMpnEdit(row, onChanged);
@@ -132,6 +137,20 @@ function PartWindowView({
         <p className="mt-0.5 text-sm break-words text-muted-foreground" data-testid="part-window-number">
           Part # <span className="font-medium text-foreground">{number}</span>
         </p>
+        {/* A row folded into another part (an import copy, or an old number): it stays hidden; that part is the one used. */}
+        {row.mergedInto ? (
+          <p className="mt-1 text-sm" data-testid="part-window-merged-into">
+            Merged into{" "}
+            {onOpen ? (
+              <button type="button" className="font-medium underline underline-offset-2" onClick={() => onOpen(row.mergedInto!.id)}>
+                {row.mergedInto.sku}
+              </button>
+            ) : (
+              <span className="font-medium">{row.mergedInto.sku}</span>
+            )}
+            . Its uses, PM machine parts and searches go to that part.
+          </p>
+        ) : null}
         {canEditMpn && !name.editing ? (
           <div className="mt-1 -ml-3">
             <PartNameEditButton row={row} edit={name} tid={T} />
@@ -184,6 +203,22 @@ function PartWindowView({
             <dd>
               <PartGetLater row={row} onChanged={onChanged} tid={T} />
             </dd>
+            {row.previousNumbers.length ? (
+              <>
+                <dt className="text-muted-foreground">Previously</dt>
+                <dd className="min-w-0 break-words" data-testid="part-window-previously">
+                  {row.previousNumbers.join(", ")}
+                </dd>
+              </>
+            ) : null}
+            {row.mergeNote ? (
+              <>
+                <dt className="text-muted-foreground">Note</dt>
+                <dd className="min-w-0 break-words whitespace-pre-line" data-testid="part-window-note">
+                  {row.mergeNote}
+                </dd>
+              </>
+            ) : null}
           </dl>
           <PartMpnForm row={row} edit={mpn} tid={T} className="mt-3" />
         </section>

@@ -177,7 +177,12 @@ export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }
     for (let i = head + 1; i < sheet.matrix.length; i++) {
       const r = sheet.matrix[i] ?? [];
       if (blankRow(r)) continue;
-      const mpn = (fromName ? cell(r, "name") : cell(r, "mpn")).replace(/\s+/g, " ");
+      const rawName = cell(r, "name");
+      // A NetSuite item export's Name is "PARTS : EVER104120" for an item with a parent: the part number (and SKU) is
+      // what follows the last " : ", and the rest is the parent. Read whole, it made about 2,450 copies of parts whose
+      // SKU and MPN were the full name (10/28); Clean Up Import Copies folds those.
+      const named = fromName ? splitItemName(rawName.replace(/\s+/g, " ")) : null;
+      const mpn = (named ? named.sku : cell(r, "mpn")).replace(/\s+/g, " ");
       const key = mpnKey(mpn);
       if (!key) {
         skipped += 1;
@@ -188,10 +193,8 @@ export function partRowsFromSheets(sheets: { name: string; matrix: unknown[][] }
         continue;
       }
       seen.add(key);
-      const rawName = cell(r, "name");
-      // Name is the part number: it is also the NetSuite item name, so it is the SKU as it stands.
       const split = rawName && !fromName ? splitItemName(rawName) : null;
-      const parent = cell(r, "parent") || split?.parent || null;
+      const parent = cell(r, "parent") || named?.parent || split?.parent || null;
       const rate = cell(r, "rate");
       const cost = cell(r, "cost");
       const cls = cell(r, "class").replace(/\s+/g, " ");
@@ -233,6 +236,8 @@ export type StoredPart = {
   hidden?: boolean;
   itemClass?: string | null;
   active?: boolean;
+  /** The SKU of the part this one was merged into (an import copy, or an old number): skipped like a hidden part. */
+  mergedIntoSku?: string | null;
 };
 
 export type PartPlanStatus = "new" | "update" | "same" | "shared_mpn" | "sku_taken" | "hidden" | "not_kept";
@@ -275,8 +280,11 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
   }
   return rows.map((row): PartPlanLine => {
     const key = mpnKey(row.mpn);
-    const hits = [...(mpns.get(key) ?? [])];
-    for (const p of bySkuKey.get(key) ?? []) if (!hits.some((h) => h.id === p.id)) hits.push(p);
+    const found = [...(mpns.get(key) ?? [])];
+    for (const p of bySkuKey.get(key) ?? []) if (!found.some((h) => h.id === p.id)) found.push(p);
+    // A part merged into another keeps its number (its keeper may have taken its MPN too): the keeper is the match.
+    const live = found.filter((p) => !p.mergedIntoSku);
+    const hits = live.length ? live : found;
     if (row.keep === false) {
       // A class outside the five: never added. A part already on the list is moved off the active list (MPN kept).
       const was = hits.length === 1 && !hits[0]!.hidden && hits[0]!.active !== false ? hits[0]! : null;
@@ -295,10 +303,12 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
     if (!hit) {
       const sku = row.sku ?? row.mpn;
       const taken = skus.get(sku.trim().toLowerCase());
+      if (taken?.mergedIntoSku) return { status: "hidden", row, partId: taken.id, changes: [], reason: `SKU ${sku} was merged into ${taken.mergedIntoSku}. Skipped.` };
       if (taken?.hidden) return { status: "hidden", row, partId: taken.id, changes: [], reason: `SKU ${sku} is hidden. Hidden, skipped.` };
       if (taken) return { status: "sku_taken", row, partId: null, changes: [], reason: `SKU ${sku} is already a part${taken.mpn ? ` with MPN ${taken.mpn}` : " with no MPN"}.` };
       return { status: "new", row, partId: null, changes: [`New part ${itemFullName(sku, row.parent)}`], reason: null };
     }
+    if (hit.mergedIntoSku) return { status: "hidden", row, partId: hit.id, changes: [], reason: `Merged into ${hit.mergedIntoSku}. Skipped: it stays hidden.` };
     if (hit.hidden) return { status: "hidden", row, partId: hit.id, changes: [], reason: "Hidden, skipped. This part stays hidden." };
     const changes: string[] = [];
     if (row.description != null && row.description !== (hit.description ?? "")) changes.push(`Description → ${row.description}`);

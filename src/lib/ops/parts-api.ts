@@ -15,6 +15,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
 import { PART_CLASSES, isPartClass, type PartClass } from "@/lib/ops/part-pricing";
 import { BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
+import { textArray } from "@/lib/ops/part-merges";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
 import { PART_USES_CTE } from "@/lib/ops/part-usage-api";
 import type { ChargeKind } from "@/lib/ops/charges";
@@ -79,6 +80,12 @@ export type PartRow = {
   binBin: string | null;
   binUpdatedAt: string | null;
   binUpdatedBy: string | null;
+  /** Old numbers merged into this part (10/28); searching one finds it. */
+  previousNumbers: string[];
+  /** Why parts were merged into this one, from the merge file. */
+  mergeNote: string | null;
+  /** Set when this row was folded into another part (an import copy, or an old number): that part. */
+  mergedInto: { id: number; sku: string } | null;
 };
 
 export type PhotoCandidate = { imageUrl: string; pageUrl: string | null; site: string | null; mpnShown: string | null; watermark?: boolean | null };
@@ -113,13 +120,18 @@ type Raw = {
   bin_bin: string | null;
   bin_updated_at: string | Date | null;
   bin_updated_by: string | null;
+  previous_numbers: unknown;
+  note: string | null;
+  merged_into: number | null;
+  merged_sku: string | null;
 };
 
 const COLS = `id, sku, item, description, mfr_part, rate, list_price, kind,
   (image is not null) as has_image,
   case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
   hidden_at, hidden_by, hidden_reason, item_class, get_later, get_later_by, photo_status, photo_source_url, photo_confirmed_by,
-  r_verdict, r_reason, r_image, r_candidates, bin_rack, bin_shelf, bin_bin, bin_updated_at, bin_updated_by`;
+  r_verdict, r_reason, r_image, r_candidates, bin_rack, bin_shelf, bin_bin, bin_updated_at, bin_updated_by,
+  previous_numbers, note, merged_into, (select mk.sku from billing_items mk where mk.id = billing_items.merged_into) as merged_sku`;
 
 /** The part's photo research, found by its part number (MPN, else SKU) with case, spaces and punctuation removed. */
 const FROM = `billing_items
@@ -174,6 +186,9 @@ const toRow = (r: Raw): PartRow => ({
   binBin: r.bin_bin,
   binUpdatedAt: whenHidden(r.bin_updated_at),
   binUpdatedBy: r.bin_updated_by,
+  previousNumbers: textArray(r.previous_numbers),
+  mergeNote: r.note?.trim() || null,
+  mergedInto: r.merged_into == null ? null : { id: Number(r.merged_into), sku: r.merged_sku ?? "" },
 });
 
 export type PartsPage = {
@@ -217,12 +232,13 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
   const like = `%${q}%`;
   // Trip and labor are services, not parts. Hidden parts leave the normal list; Show Hidden lists only those.
   // The search finds a part by its bin too (10/28): A-03-12 (or A 03 12, A/03/12) is Rack A, Shelf 03, Bin 12, and
-  // "Rack A" or "Shelf 03" finds every part there.
+  // "Rack A" or "Shelf 03" finds every part there. An old number merged into a part finds that part.
   const where = `${data.hidden ? "" : "active and "}kind not in ('trip', 'labor')
     and hidden_at is ${data.hidden ? "not null" : "null"}
     and ($1 = '' or item ilike $2 or sku ilike $2 or description ilike $2 or mfr_part ilike $2
          or concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $6
-         or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $2)
+         or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $2
+         or exists (select 1 from unnest(previous_numbers) pn where pn ilike $2))
     and (not $3 or image is null)
     and (not $4 or get_later)
     and ($5 = '' or coalesce(item_class, '') = $5)`;
@@ -638,24 +654,35 @@ export const hideParts = createServerFn({ method: "POST" })
     return { hidden: rows.length };
   });
 
-/** Put hidden parts back on the normal list. Admin and Sales. */
+/**
+ * Put hidden parts back on the normal list. Admin and Sales. A part merged into another (an import copy, or an old
+ * number) stays hidden: its uses and machine parts are on the part it went into.
+ */
 export const restoreParts = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { ids: number[] }) => z.object({ ids: z.array(z.number().int().positive()).min(1).max(100) }).parse(d))
-  .handler(async ({ data, context }): Promise<{ restored: number }> => {
-    const sql = await ready();
-    const who = await powers(sql, context.userId);
-    if (!who.canHide) throw new Error("Only Admin and Sales can restore a part.");
-    const rows = await sql.query<{ id: number }>(
-      `update billing_items
-          set hidden_at = null, hidden_by = null, hidden_reason = null, updated_at = now()
-        where id = any($1::int[]) and hidden_at is not null
-        returning id`,
+  .handler(async ({ data, context }): Promise<{ restored: number }> => restorePartsFor(await ready(), data, context.userId));
+
+/** The body of restoreParts. */
+export async function restorePartsFor(sql: Sql, data: { ids: number[] }, userId: string): Promise<{ restored: number }> {
+  const who = await powers(sql, userId);
+  if (!who.canHide) throw new Error("Only Admin and Sales can restore a part.");
+  const rows = await sql.query<{ id: number }>(
+    `update billing_items
+        set hidden_at = null, hidden_by = null, hidden_reason = null, updated_at = now()
+      where id = any($1::int[]) and hidden_at is not null and merged_into is null
+      returning id`,
+    [data.ids],
+  );
+  if (!rows.length) {
+    const merged = (await sql.query<{ sku: string }>(
+      "select k.sku from billing_items b join billing_items k on k.id = b.merged_into where b.id = any($1::int[]) limit 1",
       [data.ids],
-    );
-    if (!rows.length) throw new Error("Those parts are not hidden.");
-    return { restored: rows.length };
-  });
+    ))[0];
+    throw new Error(merged ? `That part was merged into ${merged.sku}. It stays hidden; use ${merged.sku}.` : "Those parts are not hidden.");
+  }
+  return { restored: rows.length };
+}
 
 /**
  * Delete a part that has never been used. Admin only. A part on any charge or quote line is refused:
@@ -674,6 +701,13 @@ export const removePart = createServerFn({ method: "POST" })
     ))[0];
     if (!part) throw new Error("That part is no longer on the list.");
     if (part.kind === "trip" || part.kind === "labor") throw new Error("Trip and labor stay on the list. They can only be hidden.");
+    // Merged rows are never deleted, and a part others were merged into keeps them.
+    const merge = (await sql.query<{ merged: boolean; kept: number }>(
+      "select (select merged_into is not null from billing_items where id = $1) as merged, (select count(*)::int from billing_items where merged_into = $1) as kept",
+      [data.id],
+    ))[0];
+    if (merge?.merged) throw new Error("This part was merged into another one. It stays, hidden.");
+    if (Number(merge?.kept ?? 0) > 0) throw new Error("Other parts were merged into this one. It can only be hidden.");
     const places = await partHistory(sql, part);
     if (places.length) throw new Error(historyError(places));
     const gone = await sql.query<{ id: number }>("delete from billing_items where id = $1 returning id", [data.id]);

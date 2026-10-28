@@ -28,6 +28,7 @@ import { partMoney as money, usePartBinEdit, usePartClassEdit, usePartMpnEdit, u
 import { MoveBinsDialog, SetClassPicker } from "@/components/desk/part-picks";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
 import { BinLocationsButton, ImportPartsButton, ImportPhotoResearchButton, ImportWoPartLinesButton, UpdatePricingButton } from "@/components/desk/part-imports";
+import { CleanUpImportCopiesButton, ImportPartMergesButton } from "@/components/desk/part-cleanup";
 import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { notLoadedText } from "@/lib/ops/load-problem";
@@ -203,6 +204,8 @@ function Page() {
               {isAdmin ? <UpdatePricingButton /> : null}
               {isAdmin ? <ImportPhotoResearchButton /> : null}
               {isAdmin ? <ImportWoPartLinesButton /> : null}
+              {isAdmin ? <CleanUpImportCopiesButton /> : null}
+              {isAdmin ? <ImportPartMergesButton /> : null}
               {canEditBins ? <BinLocationsButton /> : null}
             </ImportMenu>
           </div>
@@ -406,6 +409,7 @@ function Page() {
         canEditClass={canEditClass}
         onClose={closePart}
         onChanged={refresh}
+        onOpen={openPart}
       />
       {canEditBins ? (
         <MoveBinsDialog open={moving} ids={selected} parts={rows.filter((r) => picked.has(r.id))} onClose={() => setMoving(false)} onMoved={donePicking} />
@@ -539,6 +543,11 @@ function PartRowView({
               <span className="font-medium tracking-wide uppercase">Bin</span> {bin}
             </span>
           ) : null}
+          {row.previousNumbers.length ? (
+            <span className="text-muted-foreground" data-testid="part-previously">
+              <span className="font-medium tracking-wide uppercase">Was</span> {row.previousNumbers.join(", ")}
+            </span>
+          ) : null}
           <PartUsageLine totals={usage} loading={usageLoading} />
           <PartGetLater row={row} onChanged={onChanged} />
           <PartPhotoStatus row={row} photo={photo} />
@@ -551,6 +560,14 @@ function PartRowView({
             {row.hiddenAt ? ` on ${hiddenWhen(row.hiddenAt)}` : ""}
             {" · "}
             {row.hiddenReason || "No reason given"}
+            {row.mergedInto ? (
+              <>
+                {" · "}
+                <button type="button" className="font-medium text-foreground underline-offset-2 hover:underline" onClick={() => onOpen(row.mergedInto!.id)} data-testid="part-merged-into">
+                  Merged into {row.mergedInto.sku}
+                </button>
+              </>
+            ) : null}
           </p>
         ) : null}
 
@@ -589,7 +606,7 @@ function PartRowView({
           {canEditMpn ? <PartMpnEditButton row={row} edit={mpn} /> : null}
           {canEditMpn ? <PartNameEditButton row={row} edit={name} /> : null}
           {canEditBins ? <PartBinMoveButton row={row} edit={binEdit} /> : null}
-          {canHide && showHidden ? (
+          {canHide && showHidden && !row.mergedInto ? (
             <Button type="button" size="sm" variant="outline" disabled={restore.isPending} onClick={() => restore.mutate()} data-testid="part-restore">
               <RotateCcw className="size-4" />
               {restore.isPending ? "Restoring…" : "Restore"}

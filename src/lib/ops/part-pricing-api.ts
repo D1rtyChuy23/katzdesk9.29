@@ -60,8 +60,11 @@ function readSheets(base64: string, { datesAsText = false }: { datesAsText?: boo
 }
 
 async function storedParts(sql: Sql): Promise<StoredPart[]> {
-  const rows = await sql.query<{ id: number; sku: string; item: string; mfr_part: string | null; description: string | null; rate: string | null; cost: string | null; list_price: string | null; hidden: boolean; item_class: string | null; active: boolean }>(
-    "select id, sku, item, mfr_part, description, rate, cost, list_price, (hidden_at is not null) as hidden, item_class, active from billing_items",
+  const rows = await sql.query<{ id: number; sku: string; item: string; mfr_part: string | null; description: string | null; rate: string | null; cost: string | null; list_price: string | null; hidden: boolean; item_class: string | null; active: boolean; merged_sku: string | null }>(
+    `select b.id, b.sku, b.item, b.mfr_part, b.description, b.rate, b.cost, b.list_price, (b.hidden_at is not null) as hidden, b.item_class, b.active,
+            k.sku as merged_sku
+       from billing_items b
+       left join billing_items k on k.id = b.merged_into`,
   );
   const n = (v: string | null) => (v == null ? null : Number(v));
   return rows.map((r) => ({
@@ -76,6 +79,7 @@ async function storedParts(sql: Sql): Promise<StoredPart[]> {
     hidden: flagOn(r.hidden),
     itemClass: r.item_class,
     active: flagOn(r.active),
+    mergedIntoSku: r.merged_sku,
   }));
 }
 
