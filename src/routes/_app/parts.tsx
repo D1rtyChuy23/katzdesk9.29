@@ -27,13 +27,17 @@ import { BinLocationsButton, ImportPartsButton, UpdatePricingButton } from "@/co
 import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { notLoadedText } from "@/lib/ops/load-problem";
+import { getPartUsageCounts } from "@/lib/ops/part-usage-api";
+import type { UsageTotals } from "@/lib/ops/part-usage";
+import { PartUsageLine } from "@/components/desk/part-usage";
+import { PartUsageReport } from "@/components/desk/part-usage-report";
 
-/** `?part=<id>` opens that part's window, so a part can be linked. */
-type PartsSearch = { part?: number };
+/** `?part=<id>` opens that part's window, so a part can be linked; `?view=usage` shows the Usage report. */
+type PartsSearch = { part?: number; view?: "usage" };
 
 function parsePartsSearch(s: Record<string, unknown>): PartsSearch {
   const n = typeof s.part === "number" ? s.part : typeof s.part === "string" && s.part.trim() ? Number(s.part) : NaN;
-  return Number.isInteger(n) && n > 0 ? { part: n } : {};
+  return { ...(Number.isInteger(n) && n > 0 ? { part: n } : {}), ...(s.view === "usage" ? { view: "usage" as const } : {}) };
 }
 
 export const Route = createFileRoute("/_app/parts")({ validateSearch: parsePartsSearch, component: Page });
@@ -61,6 +65,7 @@ function Page() {
   const [showHidden, setShowHidden] = useState(false);
   const [getLater, setGetLater] = useState(false);
   const [itemClass, setItemClass] = useState("");
+  const [sort, setSort] = useState<"sku" | "used">("sku");
   const [offset, setOffset] = useState(0);
   const [extra, setExtra] = useState<PartRow[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
@@ -77,10 +82,23 @@ function Page() {
   }, [q]);
 
   const page = useQuery({
-    queryKey: ["parts", term, noPhoto, showHidden, getLater, itemClass, offset],
-    queryFn: () => listParts({ data: { q: term, noPhoto, hidden: showHidden, getLater, itemClass: itemClass || undefined, offset } }),
+    queryKey: ["parts", term, noPhoto, showHidden, getLater, itemClass, sort, offset],
+    queryFn: () => listParts({ data: { q: term, noPhoto, hidden: showHidden, getLater, itemClass: itemClass || undefined, sort, offset } }),
   });
   const rows = offset === 0 ? (page.data?.rows ?? []) : [...extra, ...(page.data?.rows ?? [])];
+  const usageView = search.view === "usage";
+  const setView = (v: "items" | "usage") =>
+    void navigate({ search: (s) => ({ ...s, view: v === "usage" ? ("usage" as const) : undefined }), replace: true, resetScroll: false });
+  // Each part's tickets and pieces, all time (Chuy, 10/28). Read after the list, so the list shows at once.
+  const ids = rows.map((r) => r.id);
+  const usage = useQuery({
+    queryKey: ["part-usage-counts", ids],
+    queryFn: () => getPartUsageCounts({ data: { ids } }),
+    enabled: ids.length > 0 && !usageView,
+    staleTime: 60_000,
+    // Show More reads the new parts too: the ones already shown keep their numbers meanwhile.
+    placeholderData: (prev) => prev,
+  });
   const total = page.data?.total ?? 0;
   const hiddenCount = page.data?.hiddenCount ?? 0;
   const canHide = !!page.data?.canHide;
@@ -92,6 +110,7 @@ function Page() {
     void qc.invalidateQueries({ queryKey: ["parts"] });
     void qc.invalidateQueries({ queryKey: ["billing-items"] });
     void qc.invalidateQueries({ queryKey: ["charges"] });
+    void qc.invalidateQueries({ queryKey: ["part-usage-counts"] });
   };
 
   const hideSelected = useMutation({
@@ -152,7 +171,7 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Parts</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            The NetSuite item list with each part's photo and MPN. Hide an obsolete part to take it off this list and the invoice picker. A ticket that already used it keeps the line.
+            The NetSuite item list with each part's photo and MPN, and how many tickets used it. Hide an obsolete part to take it off this list and the invoice picker. A ticket that already used it keeps the line.
           </p>
         </div>
         {/* Admin: Pull Confirmed Photos and every import. Sales: Bin Locations only, like a bin edit in the part's window. */}
@@ -173,135 +192,164 @@ function Page() {
         ) : null}
       </header>
 
-      <ListToolbar>
-        <ToolbarSearch value={q} onChange={setQ} placeholder="Search part number or name…" label="Search parts" testId="parts-search" />
-        <FilterChip
-          selected={noPhoto}
-          data-testid="parts-confirm-photo"
-          onClick={() => {
-            setNoPhoto(!noPhoto);
-            resetPaging();
-          }}
-        >
-          Confirm Photo
+      <div className="mt-4 flex flex-wrap gap-2" data-testid="parts-views">
+        <FilterChip selected={!usageView} onClick={() => setView("items")} data-testid="parts-view-items">
+          Items
         </FilterChip>
-        <FilterChip
-          selected={getLater}
-          data-testid="parts-get-later-filter"
-          onClick={() => {
-            setGetLater(!getLater);
-            resetPaging();
-          }}
-        >
-          Get Later · {(page.data?.getLaterCount ?? 0).toLocaleString()}
+        <FilterChip selected={usageView} onClick={() => setView("usage")} data-testid="parts-view-usage">
+          Usage report
         </FilterChip>
-        {page.data?.classes.length ? (
-          <ToolbarSelect
-            value={itemClass}
-            onChange={(e) => {
-              setItemClass(e.target.value);
-              resetPaging();
-            }}
-            allowEmpty
-            emptyLabel="All classes"
-            aria-label="Filter by class"
-            className="w-56"
-            data-testid="parts-class-filter"
-          >
-            {page.data.classes.map((c) => (
-              <option key={c} value={c}>
-                {c} · {(page.data?.classCounts?.[c] ?? 0).toLocaleString()}
-              </option>
+      </div>
+
+      {usageView ? (
+        <PartUsageReport classes={page.data?.classes ?? []} onOpen={openPart} />
+      ) : (
+        <>
+          <ListToolbar>
+            <ToolbarSearch value={q} onChange={setQ} placeholder="Search part number or name…" label="Search parts" testId="parts-search" />
+            <FilterChip
+              selected={noPhoto}
+              data-testid="parts-confirm-photo"
+              onClick={() => {
+                setNoPhoto(!noPhoto);
+                resetPaging();
+              }}
+            >
+              Confirm Photo
+            </FilterChip>
+            <FilterChip
+              selected={getLater}
+              data-testid="parts-get-later-filter"
+              onClick={() => {
+                setGetLater(!getLater);
+                resetPaging();
+              }}
+            >
+              Get Later · {(page.data?.getLaterCount ?? 0).toLocaleString()}
+            </FilterChip>
+            {page.data?.classes.length ? (
+              <ToolbarSelect
+                value={itemClass}
+                onChange={(e) => {
+                  setItemClass(e.target.value);
+                  resetPaging();
+                }}
+                allowEmpty
+                emptyLabel="All classes"
+                aria-label="Filter by class"
+                className="w-56"
+                data-testid="parts-class-filter"
+              >
+                {page.data.classes.map((c) => (
+                  <option key={c} value={c}>
+                    {c} · {(page.data?.classCounts?.[c] ?? 0).toLocaleString()}
+                  </option>
+                ))}
+              </ToolbarSelect>
+            ) : null}
+            <ToolbarSelect
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value === "used" ? "used" : "sku");
+                resetPaging();
+              }}
+              aria-label="Sort parts"
+              data-testid="parts-sort"
+            >
+              <option value="sku">Sort: Part #</option>
+              <option value="used">Sort: Most used</option>
+            </ToolbarSelect>
+            <FilterChip
+              selected={showHidden}
+              data-testid="parts-show-hidden"
+              onClick={() => {
+                setShowHidden(!showHidden);
+                setOffset(0);
+                setExtra([]);
+                setSelected([]);
+              }}
+            >
+              Show Hidden · {hiddenCount.toLocaleString()}
+            </FilterChip>
+            <ToolbarNote data-testid="parts-count">
+              {page.isLoading
+                ? "Loading…"
+                : showHidden
+                  ? `${total.toLocaleString()} hidden part${total === 1 ? "" : "s"}`
+                  : `${total.toLocaleString()} part${total === 1 ? "" : "s"} · ${(page.data?.withPhoto ?? 0).toLocaleString()} with a photo`}
+            </ToolbarNote>
+          </ListToolbar>
+
+          {canHide && !showHidden && selected.length ? (
+            <form
+              className="mt-3 flex flex-wrap items-center gap-2"
+              data-testid="parts-bulk-hide"
+              onSubmit={(e) => {
+                e.preventDefault();
+                hideSelected.mutate();
+              }}
+            >
+              <span className="text-sm text-muted-foreground">{selected.length} selected</span>
+              <Input
+                value={bulkReason}
+                onChange={(e) => setBulkReason(e.target.value)}
+                placeholder="Reason, optional"
+                aria-label="Reason for hiding the selected parts"
+                className="h-9 w-72"
+                data-testid="parts-bulk-reason"
+              />
+              <Button type="submit" size="sm" disabled={hideSelected.isPending}>
+                <EyeOff className="size-4" />
+                {hideSelected.isPending ? "Hiding…" : "Hide"}
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setSelected([])}>
+                Clear
+              </Button>
+            </form>
+          ) : null}
+
+          <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-card" data-testid="parts-list">
+            {rows.map((r) => (
+              <PartRowView
+                key={r.id}
+                row={r}
+                canEditMpn={!!page.data?.canEditMpn}
+                canHide={canHide}
+                canRemove={canRemove}
+                showHidden={showHidden}
+                selected={selected.includes(r.id)}
+                onToggle={toggle}
+                onChanged={refresh}
+                onOpen={openPart}
+                usage={usage.data?.[r.id]}
+                usageLoading={usage.data?.[r.id] === undefined && usage.isFetching}
+              />
             ))}
-          </ToolbarSelect>
-        ) : null}
-        <FilterChip
-          selected={showHidden}
-          data-testid="parts-show-hidden"
-          onClick={() => {
-            setShowHidden(!showHidden);
-            setOffset(0);
-            setExtra([]);
-            setSelected([]);
-          }}
-        >
-          Show Hidden · {hiddenCount.toLocaleString()}
-        </FilterChip>
-        <ToolbarNote data-testid="parts-count">
-          {page.isLoading
-            ? "Loading…"
-            : showHidden
-              ? `${total.toLocaleString()} hidden part${total === 1 ? "" : "s"}`
-              : `${total.toLocaleString()} part${total === 1 ? "" : "s"} · ${(page.data?.withPhoto ?? 0).toLocaleString()} with a photo`}
-        </ToolbarNote>
-      </ListToolbar>
+            {!rows.length && !page.isLoading ? (
+              <li className="px-4 py-6 text-sm text-muted-foreground">
+                {notLoadedText(page, "parts") ?? (showHidden ? "No hidden parts." : "No parts match. Import the NetSuite item list from the Service page first.")}
+              </li>
+            ) : null}
+          </ul>
 
-      {canHide && !showHidden && selected.length ? (
-        <form
-          className="mt-3 flex flex-wrap items-center gap-2"
-          data-testid="parts-bulk-hide"
-          onSubmit={(e) => {
-            e.preventDefault();
-            hideSelected.mutate();
-          }}
-        >
-          <span className="text-sm text-muted-foreground">{selected.length} selected</span>
-          <Input
-            value={bulkReason}
-            onChange={(e) => setBulkReason(e.target.value)}
-            placeholder="Reason, optional"
-            aria-label="Reason for hiding the selected parts"
-            className="h-9 w-72"
-            data-testid="parts-bulk-reason"
-          />
-          <Button type="submit" size="sm" disabled={hideSelected.isPending}>
-            <EyeOff className="size-4" />
-            {hideSelected.isPending ? "Hiding…" : "Hide"}
-          </Button>
-          <Button type="button" size="sm" variant="ghost" onClick={() => setSelected([])}>
-            Clear
-          </Button>
-        </form>
-      ) : null}
-
-      <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-card" data-testid="parts-list">
-        {rows.map((r) => (
-          <PartRowView
-            key={r.id}
-            row={r}
-            canEditMpn={!!page.data?.canEditMpn}
-            canHide={canHide}
-            canRemove={canRemove}
-            showHidden={showHidden}
-            selected={selected.includes(r.id)}
-            onToggle={toggle}
-            onChanged={refresh}
-            onOpen={openPart}
-          />
-        ))}
-        {!rows.length && !page.isLoading ? (
-          <li className="px-4 py-6 text-sm text-muted-foreground">
-            {notLoadedText(page, "parts") ?? (showHidden ? "No hidden parts." : "No parts match. Import the NetSuite item list from the Service page first.")}
-          </li>
-        ) : null}
-      </ul>
-
-      {rows.length < total ? (
-        <div className="mt-3 flex justify-center">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={page.isFetching}
-            onClick={() => {
-              setExtra(rows);
-              setOffset(rows.length);
-            }}
-          >
-            Show More
-          </Button>
-        </div>
-      ) : null}
+          {rows.length < total ? (
+            <div className="mt-3 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={page.isFetching}
+                onClick={() => {
+                  setExtra(rows);
+                  setOffset(rows.length);
+                }}
+              >
+                Show More
+              </Button>
+            </div>
+          ) : null}
+        </>
+      )}
 
       <PartWindow
         id={search.part ?? null}
@@ -324,6 +372,8 @@ function PartRowView({
   onToggle,
   onChanged,
   onOpen,
+  usage,
+  usageLoading,
 }: {
   row: PartRow;
   canEditMpn: boolean;
@@ -335,6 +385,9 @@ function PartRowView({
   onChanged: () => void;
   /** Opens the part's window. */
   onOpen: (id: number) => void;
+  /** Tickets and pieces, all time; undefined until read. */
+  usage: UsageTotals | undefined;
+  usageLoading: boolean;
 }) {
   const [hiding, setHiding] = useState(false);
   const [reason, setReason] = useState("");
@@ -421,6 +474,7 @@ function PartRowView({
               <span className="font-medium tracking-wide uppercase">Bin</span> {bin}
             </span>
           ) : null}
+          <PartUsageLine totals={usage} loading={usageLoading} />
           <PartGetLater row={row} onChanged={onChanged} />
           <PartPhotoStatus row={row} photo={photo} />
         </div>

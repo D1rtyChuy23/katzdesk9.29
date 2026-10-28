@@ -20,6 +20,7 @@ import {
   PartPhotoStatus,
 } from "./part-controls";
 import { partMoney, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "./part-edits";
+import { PartUsageSection } from "./part-usage";
 
 const T = "part-window";
 const heading = "text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase";
@@ -32,7 +33,8 @@ function shortDate(iso: string | null): string {
 
 /**
  * The part's own window on Parts. The NetSuite Description (the part's name) is the title; under it the part
- * number, then the details, the photo and its actions, Get Later, and the bin location (Rack, Shelf, Bin).
+ * number, then the details, the photo and its actions, Get Later, the bin location (Rack, Shelf, Bin), and its usage:
+ * every ticket that used it, counted by month, quarter or year.
  * `initial` is the row already on the list, shown at once while the part loads.
  */
 export function PartWindow({
@@ -185,6 +187,8 @@ function PartWindowView({ row, canEditMpn, onChanged }: { row: PartRow; canEditM
         </section>
 
         <BinSection row={row} canEdit={canEditMpn} onChanged={onChanged} />
+
+        <PartUsageSection partId={row.id} />
       </SheetBody>
     </>
   );
