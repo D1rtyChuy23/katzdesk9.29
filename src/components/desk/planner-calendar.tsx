@@ -29,11 +29,12 @@ export type CalType = "installs" | "pms" | "tlcs" | "services";
 
 const ALL_TYPES: CalType[] = ["installs", "pms", "tlcs", "services"];
 
-const TYPE_META: Record<CalType, { label: string; short: string; entity: "install" | "pm" | "tlc" | "service"; className: string }> = {
-  installs: { label: "Installs", short: "Install", entity: "install", className: "bg-primary/15 text-primary" },
-  pms: { label: "PMs", short: "PM", entity: "pm", className: "bg-secondary text-foreground" },
-  tlcs: { label: "TLCs", short: "TLC", entity: "tlc", className: "bg-warning/15 text-warning" },
-  services: { label: "Services", short: "Service", entity: "service", className: "bg-ink/10 text-ink max-sm:dark:bg-cream/12 max-sm:dark:text-cream" },
+// `tiny`: the label in a day of the Pending calendar on a phone, where a day is under 50 px wide.
+const TYPE_META: Record<CalType, { label: string; short: string; tiny: string; entity: "install" | "pm" | "tlc" | "service"; className: string }> = {
+  installs: { label: "Installs", short: "Install", tiny: "Inst", entity: "install", className: "bg-primary/15 text-primary" },
+  pms: { label: "PMs", short: "PM", tiny: "PM", entity: "pm", className: "bg-secondary text-foreground" },
+  tlcs: { label: "TLCs", short: "TLC", tiny: "TLC", entity: "tlc", className: "bg-warning/15 text-warning" },
+  services: { label: "Services", short: "Service", tiny: "Serv", entity: "service", className: "bg-ink/10 text-ink max-sm:dark:bg-cream/12 max-sm:dark:text-cream" },
 };
 
 export type CalItem = {
@@ -305,7 +306,7 @@ export function PlannerCalendar({
 
   return (
     <section
-      className={cn("min-w-0 rounded-xl border border-border bg-card", pop ? "p-3" : "p-4")}
+      className={cn("min-w-0 rounded-xl border border-border bg-card", pop ? "p-3 max-sm:p-2" : "p-4")}
       data-testid={pop ? "pending-calendar" : "planner-calendar"}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -372,8 +373,9 @@ export function PlannerCalendar({
       {!pop && visible.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground sm:hidden">Nothing pending this month.</p>
       ) : null}
+      {/* The Pending calendar on a phone: all seven days fit the screen's width; names and labels cut short in a day. */}
       <div className="mt-4 overflow-x-auto">
-        <div className={pop ? "min-w-[22rem]" : "sm:min-w-[44rem]"}>
+        <div className={pop ? "min-w-[22rem] max-sm:min-w-0" : "sm:min-w-[44rem]"}>
           <div className={cn("grid grid-cols-7 gap-1 text-[10px] tracking-wide text-muted-foreground uppercase", !pop && "max-sm:hidden")}>
             {WEEKDAYS.map((d) => (
               <span key={d} className="px-1">
@@ -409,7 +411,7 @@ export function PlannerCalendar({
                   }}
                   className={cn(
                     "rounded-md border border-transparent bg-secondary/40 p-1",
-                    pop ? "min-h-[4.5rem]" : "min-h-[6.5rem] max-sm:min-h-0 max-sm:p-2",
+                    pop ? "min-h-[4.5rem] min-w-0 max-sm:overflow-hidden max-sm:px-0.5" : "min-h-[6.5rem] max-sm:min-h-0 max-sm:p-2",
                     !pop && (!inMonth || (!dayItems.length && !isToday)) && "max-sm:hidden",
                     !inMonth && "opacity-40",
                     isToday && "border-primary/40 bg-primary/5",
@@ -467,20 +469,43 @@ export function PlannerCalendar({
                             className={cn(
                               "desk-lift block min-w-0 cursor-grab rounded-sm px-1 py-0.5 text-left active:cursor-grabbing",
                               !pop && "max-sm:py-1.5",
+                              pop && "max-sm:px-0.5",
                             )}
                           >
-                            <span className={cn("inline-block rounded px-1 text-[9px] font-medium tracking-wide uppercase", !pop && "max-sm:mr-1.5", meta.className)}>
-                              {meta.short}
+                            <span
+                              className={cn(
+                                "inline-block rounded px-1 text-[9px] font-medium tracking-wide uppercase",
+                                !pop && "max-sm:mr-1.5",
+                                pop && "max-w-full truncate align-top max-sm:px-0.5",
+                                meta.className,
+                              )}
+                            >
+                              {pop ? (
+                                <>
+                                  <span className="max-sm:hidden">{meta.short}</span>
+                                  <span className="sm:hidden">{meta.tiny}</span>
+                                </>
+                              ) : (
+                                meta.short
+                              )}
                             </span>
+                            {/* A phone's Pending calendar: the name on up to two lines, and no ticket or tech line. */}
                             <span
                               className={cn(
                                 "mt-0.5 block truncate text-[11px] font-medium leading-tight",
                                 !pop && "max-sm:mt-0 max-sm:inline max-sm:text-sm max-sm:break-words max-sm:whitespace-normal",
+                                pop && "max-sm:line-clamp-2 max-sm:break-words max-sm:whitespace-normal",
                               )}
                             >
                               {it.account}
                             </span>
-                            <span className={cn("block truncate text-[10px] text-muted-foreground", !pop && "max-sm:mt-0.5 max-sm:text-xs max-sm:break-words max-sm:whitespace-normal")}>
+                            <span
+                              className={cn(
+                                "block truncate text-[10px] text-muted-foreground",
+                                !pop && "max-sm:mt-0.5 max-sm:text-xs max-sm:break-words max-sm:whitespace-normal",
+                                pop && "max-sm:hidden",
+                              )}
+                            >
                               {[st, it.owner].filter(Boolean).join(" · ") || meta.label}
                             </span>
                           </div>
