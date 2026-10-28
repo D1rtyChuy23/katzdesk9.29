@@ -5,7 +5,11 @@
  * buckets, and the ranked report, so they can be checked without a database.
  */
 
-export const USAGE_TYPES = ["service", "tlc", "pm", "install", "rebuild", "deal", "quickbooks"] as const;
+/**
+ * A use's ticket type. A QuickBooks history work order, or a Corrigo or NetSuite WO part line, that isn't on a KatzDesk
+ * ticket has its source as its type.
+ */
+export const USAGE_TYPES = ["service", "tlc", "pm", "install", "rebuild", "deal", "quickbooks", "corrigo", "netsuite"] as const;
 export type UsageType = (typeof USAGE_TYPES)[number];
 
 export const USAGE_TYPE_LABEL: Record<UsageType, string> = {
@@ -16,7 +20,15 @@ export const USAGE_TYPE_LABEL: Record<UsageType, string> = {
   rebuild: "Rebuild",
   deal: "Pipeline",
   quickbooks: "QuickBooks",
+  corrigo: "Corrigo",
+  netsuite: "NetSuite",
 };
+
+/** Where a use was read from: KatzDesk itself, the QuickBooks history, or a WO part line from Corrigo or NetSuite. */
+export const USAGE_SOURCES = ["desk", "quickbooks", "corrigo", "netsuite"] as const;
+export type UsageSource = (typeof USAGE_SOURCES)[number];
+
+export const USAGE_SOURCE_LABEL: Record<UsageSource, string> = { desk: "KatzDesk", quickbooks: "QuickBooks", corrigo: "Corrigo", netsuite: "NetSuite" };
 
 export const USAGE_PERIODS = ["30d", "90d", "12m", "ytd", "last-year", "all"] as const;
 export type UsagePeriod = (typeof USAGE_PERIODS)[number];
@@ -46,15 +58,19 @@ export type PartUse = {
   /** "service:12", "pm:4", "qb:88": one per ticket, so a ticket is counted once. */
   ticketKey: string;
   type: UsageType;
-  /** The ticket, PM, install, rebuild or deal it opens; for QuickBooks history, the history work order. */
+  /**
+   * The ticket, PM, install, rebuild or deal it opens; for QuickBooks history, the history work order; for a WO part
+   * line on no ticket, the line.
+   */
   refId: number;
   /** The QuickBooks history work order, when the use came from one. */
   historyId: number | null;
   usedOn: string | null;
   customer: string | null;
-  /** Call ID and WO, the PM's or install's WO, the rebuild's title, or the history WO. */
+  /** Call ID and WO, the PM's or install's WO, the rebuild's title, or the history or WO part line's WO. */
   label: string | null;
   pieces: number;
+  source: UsageSource;
 };
 
 export type UsageTotals = { tickets: number; pieces: number; firstUsed: string | null; lastUsed: string | null };

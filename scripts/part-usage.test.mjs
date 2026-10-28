@@ -295,9 +295,11 @@ test("the Excel download: a Parts sheet with each period, a Tickets sheet with e
     assert.deepEqual(parts[1].slice(0, 7), [1, "VALVE1 part", "00123", "VALVE1", "Parts", 4, 8]);
     assert.equal(book.Sheets.Parts.C2.t, "s", "a part number keeps its leading zeros");
     const tickets = XLSX.utils.sheet_to_json(book.Sheets.Tickets, { header: 1, raw: true });
-    assert.deepEqual(tickets[0], ["Date", "Part Name", "Part # (MPN)", "SKU", "Type", "Ticket", "Account", "Pieces"]);
+    assert.deepEqual(tickets[0], ["Date", "Part Name", "Part # (MPN)", "SKU", "Type", "Source", "Ticket", "Account", "Pieces"]);
     assert.equal(tickets.length - 1, 9, "every use in the report: the hidden gasket's isn't");
-    assert.ok(tickets.some((r) => r[4] === "QuickBooks" && r[5] === "WO-1500"));
+    assert.ok(tickets.some((r) => r[4] === "QuickBooks" && r[5] === "QuickBooks" && r[6] === "WO-1500"));
+    assert.ok(tickets.some((r) => r[4] === "Service" && r[5] === "KatzDesk" && r[6] === "SC-1 · WO-0101"));
+    assert.ok(tickets.some((r) => r[4] === "TLC" && r[5] === "QuickBooks"), "QuickBooks history on ticket B: its type, from QuickBooks");
   } finally {
     await pg.close();
   }

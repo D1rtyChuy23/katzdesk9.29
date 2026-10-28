@@ -1,17 +1,20 @@
 /**
  * Part usage (Chuy, 10/28): which tickets used each part on the Parts list, read from what KatzDesk and QuickBooks
- * billed. Reading only: nothing here writes.
+ * billed and the WO part lines imported from Corrigo and NetSuite. Reading only: nothing here writes.
  *
  * A use is one ticket and one part. It comes from:
  *  1. a service or TLC ticket's Charges;
  *  2. the approved invoice of a PM, install, rebuild or deal;
  *  3. a part logged on a PM's machines (a PM billed on a ticket counts on that ticket);
- *  4. the QuickBooks history work orders (2024–2026); one attached to a KatzDesk ticket counts on that ticket.
+ *  4. the QuickBooks history work orders (2024–2026); one attached to a KatzDesk ticket counts on that ticket;
+ *  5. WO part lines (Parts → Import → Import WO Part Lines), Corrigo's before NetSuite's: one on a KatzDesk ticket
+ *     counts on that ticket, one on no ticket on its WO.
  * A ticket written up in more than one of these (logged on the PM and billed on its invoice, or billed in KatzDesk and
- * in QuickBooks) counts once, from the first in that order. A line names a part by its NetSuite item or SKU
- * (QuickBooks lines by SKU, as the history import matches them); trip and labor aren't parts. Duplicate and
- * cancelled tickets, and removed installs, rebuilds and deals, don't count. A QuickBooks line with no quantity is one
- * piece; one with a negative quantity takes pieces off its own ticket, and a ticket left at none doesn't count.
+ * in QuickBooks) counts once, from the first in that order; a WO's part that Corrigo lists doesn't count from NetSuite.
+ * A line names a part by its NetSuite item or SKU (QuickBooks lines by SKU, as the history import matches them; WO
+ * part lines by the item after its last colon); trip and labor aren't parts. Duplicate and cancelled tickets, and
+ * removed installs, rebuilds and deals, don't count. A QuickBooks line with no quantity is one piece; one with a
+ * negative quantity takes pieces off its own ticket, and a ticket left at none doesn't count.
  */
 import { createServerFn } from "@tanstack/react-start";
 import * as XLSX from "xlsx";
@@ -23,6 +26,8 @@ import {
   USAGE_GROUPS,
   USAGE_PERIODS,
   USAGE_SORTS,
+  USAGE_SOURCES,
+  USAGE_SOURCE_LABEL,
   USAGE_TYPES,
   USAGE_TYPE_LABEL,
   USAGE_PERIOD_LABEL,
@@ -36,6 +41,7 @@ import {
   type UsagePeriod,
   type UsageReportRow,
   type UsageSort,
+  type UsageSource,
   type UsageTotals,
   type UsageType,
 } from "@/lib/ops/part-usage";
@@ -50,7 +56,8 @@ async function ready(): Promise<Sql> {
 
 /**
  * The uses, one row per ticket and part, as `part_uses (part_id, ticket_key, type, ref_id, history_id, used_on,
- * customer, label, qty)`. A `with` list with no parameters, so another query can start with it.
+ * customer, label, qty, source)`. A `with` list with no parameters, so another query can start with it. `source` is
+ * desk (KatzDesk), quickbooks, corrigo or netsuite.
  */
 export const PART_USES_CTE = `
 part_keys as (
@@ -66,12 +73,24 @@ part_keys as (
 sku_keys as (
   select lower(btrim(sku)) as k, id as part_id from billing_items where kind not in ('trip', 'labor') and btrim(sku) <> ''
 ),
+tail_keys as (
+  -- A WO part line names a part by its item after the last colon, in capitals with no spaces ("BUNN PARTS:BUNN40670.0005"
+  -- is BUNN40670.0005): a part's own item after its last colon, else its SKU, as lineSku reads the line.
+  select distinct on (k) k, part_id from (
+    select upper(regexp_replace(regexp_replace(item, '^.*:', ''), '\\s+', '', 'g')) as k, id as part_id, 1 as pref
+      from billing_items where kind not in ('trip', 'labor')
+    union all
+    select upper(regexp_replace(sku, '\\s+', '', 'g')), id, 2 from billing_items where kind not in ('trip', 'labor')
+  ) x
+  where k <> ''
+  order by k, pref, part_id
+),
 uses_all as (
   -- 1. Service and TLC tickets: their Charges.
   select pk.part_id, j.kind as type, j.id as ref_id, null::int as history_id, j.kind || ':' || j.id as ticket_key,
          coalesce(j.completed_at, j.scheduled, j.received) as used_on, j.customer,
          nullif(concat_ws(' · ', nullif(btrim(j.call_id), ''), nullif(btrim(j.wo), '')), '') as label,
-         c.qty::numeric as qty, 1 as rank
+         c.qty::numeric as qty, 1 as rank, 'desk' as source
     from ticket_charges c
     join service_jobs j on j.id = c.job_id
     join part_keys pk on pk.k = lower(btrim(c.item))
@@ -82,7 +101,7 @@ uses_all as (
          coalesce(p.completed_at, ins.completed_at, ins.install_date, r.actual_complete, d.date_of_deal, (i.approved_at at time zone 'America/Chicago')::date),
          i.customer,
          coalesce(nullif(btrim(p.wo), ''), nullif(btrim(ins.wo), ''), nullif(btrim(r.title), ''), nullif(btrim(d.equipment), '')),
-         l.qty::numeric, 1
+         l.qty::numeric, 1, 'desk'
     from invoice_lines l
     join invoices i on i.id = l.invoice_id
     join part_keys pk on pk.k = lower(btrim(l.item))
@@ -103,7 +122,7 @@ uses_all as (
          p.customer,
          case when sj.id is not null then nullif(concat_ws(' · ', nullif(btrim(sj.call_id), ''), nullif(btrim(sj.wo), '')), '')
               else nullif(btrim(p.wo), '') end,
-         m.qty::numeric, 2
+         m.qty::numeric, 2, 'desk'
     from machine_parts m
     join pm_jobs p on p.id = m.pm_job_id
     left join service_jobs sj on sj.id = p.stacked_job_id
@@ -115,19 +134,43 @@ uses_all as (
   select sk.part_id, coalesce(sj.kind, 'quickbooks'), coalesce(sj.id, h.id), h.id,
          case when sj.id is not null then sj.kind || ':' || sj.id else 'qb:' || h.id end,
          coalesce(h.completed::date, h.invoice_date, l.invoice_date), h.customer, nullif(btrim(h.wo), ''),
-         coalesce(nullif(l.qty, 0), 1)::numeric, 3
+         coalesce(nullif(l.qty, 0), 1)::numeric, 3, 'quickbooks'
     from wo_history_lines l
     join wo_history h on h.id = l.history_id
     join sku_keys sk on sk.k = lower(btrim(l.item_code))
     left join service_jobs sj on sj.id = h.job_id
    where l.kind not in ('labor', 'trip', 'discount')
+  union all
+  -- 5. WO part lines, Corrigo's before NetSuite's. One on a KatzDesk ticket counts on that ticket (a PM billed on a
+  --    ticket, on that ticket; a merged duplicate, on the ticket it went into); one on no ticket counts on its WO.
+  --    NetSuite's line for a WO's part doesn't count when Corrigo has one.
+  select tk.part_id,
+         coalesce(t.kind, case when pl.pm_id is not null then 'pm' when pl.install_id is not null then 'install' end, pl.source),
+         coalesce(t.id, pl.pm_id, pl.install_id, pl.id), null::int,
+         case when t.id is not null then t.kind || ':' || t.id
+              when pl.pm_id is not null then 'pm:' || pl.pm_id
+              when pl.install_id is not null then 'install:' || pl.install_id
+              else 'wo:' || pl.wo end,
+         pl.used_on, coalesce(t.customer, pp.customer, ins.customer),
+         case when t.id is not null then nullif(concat_ws(' · ', nullif(btrim(t.call_id), ''), nullif(btrim(t.wo), '')), '') else pl.wo end,
+         pl.qty, case when pl.source = 'corrigo' then 4 else 5 end, pl.source
+    from ticket_part_lines pl
+    join tail_keys tk on tk.k = pl.sku
+    left join service_jobs j0 on j0.id = pl.job_id
+    left join pm_jobs pp on pp.id = pl.pm_id
+    left join installs ins on ins.id = pl.install_id
+    left join service_jobs t on t.id = coalesce(j0.duplicate_of, j0.id, pp.stacked_job_id)
+   where coalesce(t.status, '') <> 'Cancelled' and coalesce(pp.status, '') <> 'Cancelled'
+     and not coalesce(ins.archived, false) and ins.duplicate_of is null
+     and (pl.source = 'corrigo' or not exists (
+           select 1 from ticket_part_lines c where c.source = 'corrigo' and c.wo = pl.wo and c.sku = pl.sku))
 ),
 uses_best as (
   select u.*, min(u.rank) over (partition by u.ticket_key, u.part_id) as best from uses_all u
 ),
 part_uses as (
   select part_id, ticket_key, min(type) as type, min(ref_id) as ref_id, max(history_id) as history_id,
-         max(used_on) as used_on, max(customer) as customer, max(label) as label, sum(qty) as qty
+         max(used_on) as used_on, max(customer) as customer, max(label) as label, sum(qty) as qty, min(source) as source
     from uses_best
    where rank = best
    group by part_id, ticket_key
@@ -155,7 +198,7 @@ export async function loadPartUses(sql: Query, f: UseFilter = {}): Promise<PartU
   const q = (f.listed?.q ?? "").trim();
   const rows = await sql.query<Record<string, unknown>>(
     `with ${PART_USES_CTE}
-     select part_id, ticket_key, type, ref_id, history_id, used_on::text as used_on, customer, label, qty::float8 as qty
+     select part_id, ticket_key, type, ref_id, history_id, used_on::text as used_on, customer, label, qty::float8 as qty, source
        from part_uses u
       where ($1::date is null or u.used_on >= $1::date)
         and ($2::date is null or u.used_on <= $2::date)
@@ -188,6 +231,7 @@ export async function loadPartUses(sql: Query, f: UseFilter = {}): Promise<PartU
     customer: r.customer == null ? null : String(r.customer),
     label: r.label == null ? null : String(r.label),
     pieces: Math.round(num(r.qty) * 100) / 100,
+    source: (USAGE_SOURCES as readonly string[]).includes(String(r.source)) ? (String(r.source) as UsageSource) : "desk",
   }));
 }
 
@@ -303,10 +347,10 @@ export async function partUsageWorkbook(sql: Query, input: UsageReportInput, tod
     const p = parts.get(r.partId);
     return [i + 1, p?.description ?? p?.item ?? "", p?.mpn ?? "", p?.sku ?? "", p?.itemClass ?? "", r.tickets, r.pieces, r.firstUsed ?? "", r.lastUsed ?? "", ...r.byBucket, ...r.piecesByBucket];
   });
-  const useHead = ["Date", "Part Name", "Part # (MPN)", "SKU", "Type", "Ticket", "Account", "Pieces"];
+  const useHead = ["Date", "Part Name", "Part # (MPN)", "SKU", "Type", "Source", "Ticket", "Account", "Pieces"];
   const useRows = uses.map((u) => {
     const p = parts.get(u.partId);
-    return [u.usedOn ?? "", p?.description ?? p?.item ?? "", p?.mpn ?? "", p?.sku ?? "", typeText(u.type), u.label ?? "", u.customer ?? "", u.pieces];
+    return [u.usedOn ?? "", p?.description ?? p?.item ?? "", p?.mpn ?? "", p?.sku ?? "", typeText(u.type), USAGE_SOURCE_LABEL[u.source], u.label ?? "", u.customer ?? "", u.pieces];
   });
   const book = XLSX.utils.book_new();
   const text = (sheet: XLSX.WorkSheet, cols: number[], count: number) => {
@@ -328,7 +372,7 @@ export async function partUsageWorkbook(sql: Query, input: UsageReportInput, tod
   XLSX.utils.book_append_sheet(book, partsSheet, "Parts");
   const usesSheet = XLSX.utils.aoa_to_sheet([useHead, ...useRows]);
   text(usesSheet, [2, 3], useRows.length);
-  usesSheet["!cols"] = [{ wch: 12 }, { wch: 40 }, { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 28 }, { wch: 36 }, { wch: 8 }];
+  usesSheet["!cols"] = [{ wch: 12 }, { wch: 40 }, { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 12 }, { wch: 28 }, { wch: 36 }, { wch: 8 }];
   usesSheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: useRows.length, c: useHead.length - 1 } }) };
   XLSX.utils.book_append_sheet(book, usesSheet, "Tickets");
   const period = USAGE_PERIOD_LABEL[d.period].toLowerCase().replace(/\s+/g, "-");
