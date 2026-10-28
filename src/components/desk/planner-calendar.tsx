@@ -29,11 +29,12 @@ export type CalType = "installs" | "pms" | "tlcs" | "services";
 
 const ALL_TYPES: CalType[] = ["installs", "pms", "tlcs", "services"];
 
-const TYPE_META: Record<CalType, { label: string; short: string; entity: "install" | "pm" | "tlc" | "service"; className: string }> = {
-  installs: { label: "Installs", short: "Install", entity: "install", className: "bg-primary/15 text-primary" },
-  pms: { label: "PMs", short: "PM", entity: "pm", className: "bg-secondary text-foreground" },
-  tlcs: { label: "TLCs", short: "TLC", entity: "tlc", className: "bg-warning/15 text-warning" },
-  services: { label: "Services", short: "Service", entity: "service", className: "bg-ink/10 text-ink max-sm:dark:bg-cream/12 max-sm:dark:text-cream" },
+// `tiny`: the label in a day of the Pending calendar on a phone, where a day is under 50 px wide.
+const TYPE_META: Record<CalType, { label: string; short: string; tiny: string; entity: "install" | "pm" | "tlc" | "service"; className: string }> = {
+  installs: { label: "Installs", short: "Install", tiny: "Inst", entity: "install", className: "bg-primary/15 text-primary" },
+  pms: { label: "PMs", short: "PM", tiny: "PM", entity: "pm", className: "bg-secondary text-foreground" },
+  tlcs: { label: "TLCs", short: "TLC", tiny: "TLC", entity: "tlc", className: "bg-warning/15 text-warning" },
+  services: { label: "Services", short: "Service", tiny: "Serv", entity: "service", className: "bg-ink/10 text-ink max-sm:dark:bg-cream/12 max-sm:dark:text-cream" },
 };
 
 export type CalItem = {
@@ -479,17 +480,32 @@ export function PlannerCalendar({
                                 meta.className,
                               )}
                             >
-                              {meta.short}
+                              {pop ? (
+                                <>
+                                  <span className="max-sm:hidden">{meta.short}</span>
+                                  <span className="sm:hidden">{meta.tiny}</span>
+                                </>
+                              ) : (
+                                meta.short
+                              )}
                             </span>
+                            {/* A phone's Pending calendar: the name on up to two lines, and no ticket or tech line. */}
                             <span
                               className={cn(
                                 "mt-0.5 block truncate text-[11px] font-medium leading-tight",
                                 !pop && "max-sm:mt-0 max-sm:inline max-sm:text-sm max-sm:break-words max-sm:whitespace-normal",
+                                pop && "max-sm:line-clamp-2 max-sm:break-words max-sm:whitespace-normal",
                               )}
                             >
                               {it.account}
                             </span>
-                            <span className={cn("block truncate text-[10px] text-muted-foreground", !pop && "max-sm:mt-0.5 max-sm:text-xs max-sm:break-words max-sm:whitespace-normal")}>
+                            <span
+                              className={cn(
+                                "block truncate text-[10px] text-muted-foreground",
+                                !pop && "max-sm:mt-0.5 max-sm:text-xs max-sm:break-words max-sm:whitespace-normal",
+                                pop && "max-sm:hidden",
+                              )}
+                            >
                               {[st, it.owner].filter(Boolean).join(" · ") || meta.label}
                             </span>
                           </div>
