@@ -322,6 +322,9 @@ function Page() {
                     data-testid="parts-bulk-hide"
                     onSubmit={(e) => {
                       e.preventDefault();
+                      // Select All Shown makes a big Hide one click away, and Restore brings parts back one at a time.
+                      const n = selected.length;
+                      if (n > 25 && !window.confirm(`Hide ${n.toLocaleString()} parts? Each one comes back from Show Hidden with its own Restore.`)) return;
                       hideSelected.mutate();
                     }}
                   >
