@@ -3,7 +3,9 @@
  * Anyone with Desk access can add or replace a photo; only Admin and Sales change an MPN.
  * Hide is reversible and is not the `active` flag: the item import writes `active` and would undo a hide.
  * Remove is Admin only, and only when the part has never been on a charge or a quote.
- * The bin location (Rack, Shelf, Bin) is a part edit too: Admin and Sales.
+ * The bin location (Rack, Shelf, Bin) and the Class are Admin only for now (Chuy, 10/28): on the part's row, in its
+ * window, for several picked parts at once (Move Bin, Set Class), and the Bin Locations file. Everyone sees them, and
+ * the Parts search finds a part by its bin.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -11,8 +13,8 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
-import { PART_CLASSES } from "@/lib/ops/part-pricing";
-import { BIN_LABEL, BIN_MAX, BIN_PIECES, cleanBinValue } from "@/lib/ops/part-bins";
+import { PART_CLASSES, isPartClass, type PartClass } from "@/lib/ops/part-pricing";
+import { BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
 import { PART_USES_CTE } from "@/lib/ops/part-usage-api";
 import type { ChargeKind } from "@/lib/ops/charges";
@@ -23,7 +25,9 @@ async function ready(): Promise<Sql> {
   return getSql();
 }
 
-async function powers(sql: Sql, userId: string): Promise<{ canHide: boolean; canRemove: boolean; canEditMpn: boolean; name: string }> {
+type PartPowers = { canHide: boolean; canRemove: boolean; canEditMpn: boolean; canEditBins: boolean; canEditClass: boolean; name: string };
+
+async function powers(sql: Sql, userId: string): Promise<PartPowers> {
   const rows = await sql.query<{ is_admin: boolean; desk_role: string | null; username: string | null }>(
     "select is_admin, desk_role, username from desk_accounts where user_id = $1",
     [userId],
@@ -31,10 +35,15 @@ async function powers(sql: Sql, userId: string): Promise<{ canHide: boolean; can
   const role = rows[0]?.desk_role ?? null;
   const admin = flagOn(rows[0]?.is_admin) || role === "admin";
   const canHide = admin || role === "sales";
-  return { canHide, canRemove: admin, canEditMpn: canHide, name: rows[0]?.username?.trim() || "Desk" };
+  // The bin location and the Class are Admin only for now (Chuy, 10/28). The MPN, the part name and Hide stay Admin
+  // and Sales.
+  return { canHide, canRemove: admin, canEditMpn: canHide, canEditBins: admin, canEditClass: admin, name: rows[0]?.username?.trim() || "Desk" };
 }
 
-/** Who may do what on Parts (the Bin Locations import uses it). canEditMpn covers every part edit: MPN, part name, bin. */
+/**
+ * Who may do what on Parts (the Bin Locations import uses it). canEditMpn covers the MPN and the part name;
+ * canEditBins the bin location and canEditClass the Class (both Admin only).
+ */
 export const partPowers = powers;
 
 export type PartRow = {
@@ -178,6 +187,10 @@ export type PartsPage = {
   classes: string[];
   classCounts: Record<string, number>;
   canEditMpn: boolean;
+  /** Change a part's bin location: Admin only for now. */
+  canEditBins: boolean;
+  /** Change a part's Class: Admin only for now. */
+  canEditClass: boolean;
   canHide: boolean;
   canRemove: boolean;
 };
@@ -203,13 +216,17 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
   const q = (data.q ?? "").trim();
   const like = `%${q}%`;
   // Trip and labor are services, not parts. Hidden parts leave the normal list; Show Hidden lists only those.
+  // The search finds a part by its bin too (10/28): A-03-12 (or A 03 12, A/03/12) is Rack A, Shelf 03, Bin 12, and
+  // "Rack A" or "Shelf 03" finds every part there.
   const where = `${data.hidden ? "" : "active and "}kind not in ('trip', 'labor')
     and hidden_at is ${data.hidden ? "not null" : "null"}
-    and ($1 = '' or item ilike $2 or sku ilike $2 or description ilike $2 or mfr_part ilike $2)
+    and ($1 = '' or item ilike $2 or sku ilike $2 or description ilike $2 or mfr_part ilike $2
+         or concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $6
+         or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $2)
     and (not $3 or image is null)
     and (not $4 or get_later)
     and ($5 = '' or coalesce(item_class, '') = $5)`;
-  const args = [q, like, !!data.noPhoto, !!data.getLater, data.itemClass ?? ""];
+  const args = [q, like, !!data.noPhoto, !!data.getLater, data.itemClass ?? "", `%${binSearchCode(q)}%`];
   const used = data.sort === "used";
   const rows = await sql.query<Raw>(
     used
@@ -252,6 +269,8 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
     classes,
     classCounts,
     canEditMpn: who.canEditMpn,
+    canEditBins: who.canEditBins,
+    canEditClass: who.canEditClass,
     canHide: who.canHide,
     canRemove: who.canRemove,
   };
@@ -283,32 +302,169 @@ const binInput = z.object({
   bin: z.string().max(200).nullable(),
 });
 
+/** Rack, Shelf and Bin as stored: each trimmed, blank is null, none longer than BIN_MAX. */
+function binsTyped(data: { rack?: string | null; shelf?: string | null; bin?: string | null }): BinValues {
+  const next: BinValues = { rack: cleanBinValue(data.rack), shelf: cleanBinValue(data.shelf), bin: cleanBinValue(data.bin) };
+  for (const k of BIN_PIECES) {
+    if ((next[k]?.length ?? 0) > BIN_MAX) throw new Error(`${BIN_LABEL[k]} can be up to ${BIN_MAX} characters.`);
+  }
+  return next;
+}
+
 /**
- * The part's bin location: Rack, Shelf and Bin, each trimmed; blank clears that piece. Admin and Sales, like the
- * other part edits. Who changed it and when is kept with it (only when something actually changed).
+ * The part's bin location: Rack, Shelf and Bin, each trimmed; blank clears that piece. Admin only for now (Chuy,
+ * 10/28). Who changed it and when is kept with it (only when something actually changed).
  */
 export const setPartBin = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.input<typeof binInput>) => binInput.parse(d))
-  .handler(async ({ data, context }): Promise<PartRow> => {
-    const sql = await ready();
-    const who = await powers(sql, context.userId);
-    if (!who.canEditMpn) throw new Error("Only Admin and Sales can change a part's bin location.");
-    const next = { rack: cleanBinValue(data.rack), shelf: cleanBinValue(data.shelf), bin: cleanBinValue(data.bin) };
-    for (const k of BIN_PIECES) {
-      if ((next[k]?.length ?? 0) > BIN_MAX) throw new Error(`${BIN_LABEL[k]} can be up to ${BIN_MAX} characters.`);
-    }
-    const rows = await sql.query(
-      `update billing_items set
-          bin_updated_at = case when (bin_rack, bin_shelf, bin_bin) is distinct from ($2::text, $3::text, $4::text) then now() else bin_updated_at end,
-          bin_updated_by = case when (bin_rack, bin_shelf, bin_bin) is distinct from ($2::text, $3::text, $4::text) then $5 else bin_updated_by end,
-          bin_rack = $2, bin_shelf = $3, bin_bin = $4, updated_at = now()
-        where id = $1 returning id`,
-      [data.id, next.rack, next.shelf, next.bin, who.name],
-    );
-    if (!rows.length) throw new Error("That part is no longer on the list.");
-    return loadPart(sql, data.id);
-  });
+  .handler(async ({ data, context }): Promise<PartRow> => setPartBinFor(await ready(), data, context.userId));
+
+/** The body of setPartBin. */
+export async function setPartBinFor(sql: Sql, data: z.infer<typeof binInput>, userId: string): Promise<PartRow> {
+  const who = await powers(sql, userId);
+  if (!who.canEditBins) throw new Error("Only an Admin can change a part's bin location.");
+  const next = binsTyped(data);
+  const rows = await sql.query(
+    `update billing_items set
+        bin_updated_at = case when (bin_rack, bin_shelf, bin_bin) is distinct from ($2::text, $3::text, $4::text) then now() else bin_updated_at end,
+        bin_updated_by = case when (bin_rack, bin_shelf, bin_bin) is distinct from ($2::text, $3::text, $4::text) then $5 else bin_updated_by end,
+        bin_rack = $2, bin_shelf = $3, bin_bin = $4, updated_at = now()
+      where id = $1 returning id`,
+    [data.id, next.rack, next.shelf, next.bin, who.name],
+  );
+  if (!rows.length) throw new Error("That part is no longer on the list.");
+  return loadPart(sql, data.id);
+}
+
+const moveInput = z.object({
+  ids: z.array(z.number().int().positive()).min(1).max(PARTS_PICK_MAX),
+  rack: z.string().max(200).nullable().optional(),
+  shelf: z.string().max(200).nullable().optional(),
+  bin: z.string().max(200).nullable().optional(),
+});
+
+export type BinMoveResult = {
+  /** Parts whose bin changed. */
+  moved: number;
+  /** Parts already there: left exactly as they were. */
+  same: number;
+  /** Ids that are no longer parts (removed since they were picked). */
+  missing: number;
+};
+
+/**
+ * Move Bin for the parts picked on Parts (10/28): each piece typed goes on every part, and a blank piece keeps the
+ * part's own (binsAfterMove), so a Rack alone moves a whole shelf to another rack. Admin only for now. One
+ * statement, so every part moves or none does; a part already there keeps who changed it last.
+ */
+export const movePartBins = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof moveInput>) => moveInput.parse(d))
+  .handler(async ({ data, context }): Promise<BinMoveResult> => movePartBinsFor(await ready(), data, context.userId));
+
+/** The body of movePartBins. */
+export async function movePartBinsFor(sql: Sql, data: z.infer<typeof moveInput>, userId: string): Promise<BinMoveResult> {
+  const who = await powers(sql, userId);
+  if (!who.canEditBins) throw new Error("Only an Admin can change bin locations.");
+  const typed = binsTyped(data);
+  if (!typed.rack && !typed.shelf && !typed.bin) throw new Error("Type the Rack, Shelf or Bin these parts move to.");
+  const ids = [...new Set(data.ids)];
+  const r = (
+    await sql.query<{ found: number; moved: number }>(
+      `with picked as (
+         select id, bin_rack, bin_shelf, bin_bin from billing_items where id = any($1::int[]) and kind not in ('trip', 'labor')
+       ), moved as (
+         update billing_items b
+            set bin_rack = coalesce($2::text, p.bin_rack), bin_shelf = coalesce($3::text, p.bin_shelf), bin_bin = coalesce($4::text, p.bin_bin),
+                bin_updated_at = now(), bin_updated_by = $5, updated_at = now()
+           from picked p
+          where b.id = p.id
+            and (coalesce($2::text, p.bin_rack), coalesce($3::text, p.bin_shelf), coalesce($4::text, p.bin_bin)) is distinct from (p.bin_rack, p.bin_shelf, p.bin_bin)
+         returning b.id
+       )
+       select (select count(*)::int from picked) as found, (select count(*)::int from moved) as moved`,
+      [ids, typed.rack, typed.shelf, typed.bin, who.name],
+    )
+  )[0];
+  const found = Number(r?.found ?? 0);
+  const moved = Number(r?.moved ?? 0);
+  if (!found) throw new Error("Those parts are no longer on the list.");
+  return { moved, same: found - moved, missing: ids.length - found };
+}
+
+/** A Class as stored: one of the five, or null for none. Anything else is refused. */
+function classTyped(raw: string | null | undefined): PartClass | null {
+  const v = String(raw ?? "").trim();
+  if (!v) return null;
+  if (!isPartClass(v)) throw new Error(`The class must be one of ${PART_CLASSES.join(", ")}.`);
+  return v;
+}
+
+const classInput = z.object({ id: z.number().int().positive(), itemClass: z.string().max(120).nullable() });
+
+/**
+ * The part's Class: one of the five, or none. Admin only for now, like the bin (Chuy, 10/28). A NetSuite item
+ * import whose file gives a class still writes the file's class, and its preview lists that change before Save.
+ */
+export const setPartClass = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof classInput>) => classInput.parse(d))
+  .handler(async ({ data, context }): Promise<PartRow> => setPartClassFor(await ready(), data, context.userId));
+
+/** The body of setPartClass. */
+export async function setPartClassFor(sql: Sql, data: z.infer<typeof classInput>, userId: string): Promise<PartRow> {
+  if (!(await powers(sql, userId)).canEditClass) throw new Error("Only an Admin can change a part's class.");
+  const next = classTyped(data.itemClass);
+  const rows = await sql.query(
+    "update billing_items set item_class = $2, updated_at = now() where id = $1 and kind not in ('trip', 'labor') returning id",
+    [data.id, next],
+  );
+  if (!rows.length) throw new Error("That part is no longer on the list.");
+  return loadPart(sql, data.id);
+}
+
+const classesInput = z.object({ ids: z.array(z.number().int().positive()).min(1).max(PARTS_PICK_MAX), itemClass: z.string().max(120).nullable() });
+
+export type ClassSetResult = {
+  /** Parts whose class changed. */
+  changed: number;
+  /** Parts that already had it. */
+  same: number;
+  /** Ids that are no longer parts. */
+  missing: number;
+};
+
+/** Set Class for the parts picked on Parts (10/28). Admin only for now. One statement. */
+export const setPartsClass = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof classesInput>) => classesInput.parse(d))
+  .handler(async ({ data, context }): Promise<ClassSetResult> => setPartsClassFor(await ready(), data, context.userId));
+
+/** The body of setPartsClass. */
+export async function setPartsClassFor(sql: Sql, data: z.infer<typeof classesInput>, userId: string): Promise<ClassSetResult> {
+  if (!(await powers(sql, userId)).canEditClass) throw new Error("Only an Admin can change a part's class.");
+  const next = classTyped(data.itemClass);
+  const ids = [...new Set(data.ids)];
+  const r = (
+    await sql.query<{ found: number; changed: number }>(
+      `with picked as (
+         select id, item_class from billing_items where id = any($1::int[]) and kind not in ('trip', 'labor')
+       ), changed as (
+         update billing_items b set item_class = $2::text, updated_at = now()
+           from picked p
+          where b.id = p.id and p.item_class is distinct from $2::text
+         returning b.id
+       )
+       select (select count(*)::int from picked) as found, (select count(*)::int from changed) as changed`,
+      [ids, next],
+    )
+  )[0];
+  const found = Number(r?.found ?? 0);
+  const changed = Number(r?.changed ?? 0);
+  if (!found) throw new Error("Those parts are no longer on the list.");
+  return { changed, same: found - changed, missing: ids.length - found };
+}
 
 /** Add or replace the photo. The same photo shows on the invoice picker and on the invoice line. */
 export const setPartImage = createServerFn({ method: "POST" })
@@ -404,7 +560,8 @@ export const setPartMpn = createServerFn({ method: "POST" })
   });
 
 const idsInput = z.object({
-  ids: z.array(z.number().int().positive()).min(1).max(100),
+  // Select All Shown can pick every part on the list: up to PARTS_PICK_MAX at a time.
+  ids: z.array(z.number().int().positive()).min(1).max(PARTS_PICK_MAX),
   reason: z.string().max(200).optional(),
 });
 

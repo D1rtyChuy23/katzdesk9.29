@@ -3,12 +3,15 @@ import assert from "node:assert/strict";
 import {
   BIN_MAX,
   binRowsFromSheets,
+  binSearchCode,
   binTemplateCsv,
   binText,
+  binsAfterMove,
   binsToApply,
   cleanBinValue,
   looksLikeExcelDate,
   planBins,
+  sameBins,
   splitBinCode,
 } from "../src/lib/ops/part-bins.ts";
 
@@ -239,4 +242,25 @@ test("bin text and the template round trip", () => {
   assert.equal(read.rows[1].bin, "=SUM(A1)");
   const plan = planBins(read.rows, [stored[0], { ...stored[1], bin: "=SUM(A1)" }]);
   assert.deepEqual(plan.map((l) => l.status), ["same", "same"]);
+});
+
+test("Move Bin for several parts: a piece typed goes on every part, a blank piece keeps each part's own", () => {
+  const typed = (rack, shelf = null, bin = null) => ({ rack, shelf, bin });
+  // A Rack alone moves a whole shelf to another rack: each part keeps its shelf and bin.
+  assert.deepEqual(binsAfterMove({ rack: "A", shelf: "3", bin: "12" }, typed("B")), { rack: "B", shelf: "3", bin: "12" });
+  assert.deepEqual(binsAfterMove({ rack: "A", shelf: "3", bin: "7" }, typed("B")), { rack: "B", shelf: "3", bin: "7" });
+  // All three typed: every part goes to the same place, a part with no bin too.
+  assert.deepEqual(binsAfterMove({ rack: null, shelf: null, bin: null }, typed("C", "1", "4")), { rack: "C", shelf: "1", bin: "4" });
+  assert.deepEqual(binsAfterMove({ rack: "A", shelf: "3", bin: "12" }, typed(null, null, "Overflow")), { rack: "A", shelf: "3", bin: "Overflow" });
+  assert.equal(sameBins(binsAfterMove({ rack: "B", shelf: "3", bin: "12" }, typed("B")), { rack: "B", shelf: "3", bin: "12" }), true, "already there");
+  assert.equal(sameBins({ rack: "A", shelf: null, bin: "1" }, { rack: "A", shelf: "", bin: "1" }), false);
+});
+
+test("searching Parts by bin: A 03 12 and A/03/12 read as the code A-03-12; other searches are left alone", () => {
+  assert.equal(binSearchCode("A-03-12"), "A-03-12");
+  assert.equal(binSearchCode(" A 03 12 "), "A-03-12");
+  assert.equal(binSearchCode("A / 03 / 12"), "A-03-12");
+  assert.equal(binSearchCode("a-03"), "a-03");
+  assert.equal(binSearchCode("EVER104120"), "EVER104120");
+  assert.equal(binSearchCode(""), "");
 });

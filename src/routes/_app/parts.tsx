@@ -1,16 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, EyeOff, RotateCcw, Trash2 } from "lucide-react";
+import { Camera, EyeOff, MapPin, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { hideParts, listParts, removePart, restoreParts, setPartImage, type PartRow } from "@/lib/ops/parts-api";
-import { binText } from "@/lib/ops/part-bins";
+import { PARTS_PICK_MAX, binText } from "@/lib/ops/part-bins";
 import { treatResearchedPhoto } from "@/lib/part-photo-treatment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PartThumb } from "@/components/desk/part-thumb";
 import { PartWindow } from "@/components/desk/part-window";
 import {
+  PartBinForm,
+  PartBinMoveButton,
+  PartClassSelect,
   PartGetLater,
   PartMpnEditButton,
   PartMpnForm,
@@ -21,7 +24,8 @@ import {
   PartPhotoReview,
   PartPhotoStatus,
 } from "@/components/desk/part-controls";
-import { partMoney as money, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "@/components/desk/part-edits";
+import { partMoney as money, usePartBinEdit, usePartClassEdit, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "@/components/desk/part-edits";
+import { MoveBinsDialog, SetClassPicker } from "@/components/desk/part-picks";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
 import { BinLocationsButton, ImportPartsButton, ImportPhotoResearchButton, ImportWoPartLinesButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { getMyAccess } from "@/lib/ops/access";
@@ -70,6 +74,7 @@ function Page() {
   const [extra, setExtra] = useState<PartRow[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
   const [bulkReason, setBulkReason] = useState("");
+  const [moving, setMoving] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -103,6 +108,9 @@ function Page() {
   const hiddenCount = page.data?.hiddenCount ?? 0;
   const canHide = !!page.data?.canHide;
   const canRemove = !!page.data?.canRemove;
+  // The bin location and the Class: Admin only for now (Chuy, 10/28).
+  const canEditBins = !!page.data?.canEditBins;
+  const canEditClass = !!page.data?.canEditClass;
 
   const refresh = () => {
     setOffset(0);
@@ -125,6 +133,13 @@ function Page() {
   });
 
   const toggle = (id: number) => setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+  const picked = new Set(selected);
+  const selectAllShown = () => setSelected((cur) => [...new Set([...cur, ...rows.map((r) => r.id)])]);
+  const tooMany = selected.length > PARTS_PICK_MAX;
+  const donePicking = () => {
+    setSelected([]);
+    refresh();
+  };
   const resetPaging = () => {
     setOffset(0);
     setExtra([]);
@@ -174,8 +189,8 @@ function Page() {
             The NetSuite item list with each part's photo and MPN, and how many tickets used it. Hide an obsolete part to take it off this list and the invoice picker. A ticket that already used it keeps the line.
           </p>
         </div>
-        {/* Admin: Pull Confirmed Photos and every import. Sales: Bin Locations only, like a bin edit in the part's window. */}
-        {isAdmin || page.data?.canEditMpn ? (
+        {/* Admin: Pull Confirmed Photos and every import, Bin Locations included (bins are Admin only for now). */}
+        {isAdmin || canEditBins ? (
           <div className="flex shrink-0 flex-wrap gap-2">
             {isAdmin && page.data?.readyToPull ? (
               <Button type="button" size="sm" variant="outline" disabled={!!pulling} onClick={() => void pullConfirmed()} data-testid="parts-pull-confirmed">
@@ -188,7 +203,7 @@ function Page() {
               {isAdmin ? <UpdatePricingButton /> : null}
               {isAdmin ? <ImportPhotoResearchButton /> : null}
               {isAdmin ? <ImportWoPartLinesButton /> : null}
-              <BinLocationsButton />
+              {canEditBins ? <BinLocationsButton /> : null}
             </ImportMenu>
           </div>
         ) : null}
@@ -283,31 +298,56 @@ function Page() {
           </ListToolbar>
 
           {canHide && !showHidden && selected.length ? (
-            <form
-              className="mt-3 flex flex-wrap items-center gap-2"
-              data-testid="parts-bulk-hide"
-              onSubmit={(e) => {
-                e.preventDefault();
-                hideSelected.mutate();
-              }}
-            >
-              <span className="text-sm text-muted-foreground">{selected.length} selected</span>
-              <Input
-                value={bulkReason}
-                onChange={(e) => setBulkReason(e.target.value)}
-                placeholder="Reason, optional"
-                aria-label="Reason for hiding the selected parts"
-                className="h-9 w-72"
-                data-testid="parts-bulk-reason"
-              />
-              <Button type="submit" size="sm" disabled={hideSelected.isPending}>
-                <EyeOff className="size-4" />
-                {hideSelected.isPending ? "Hiding…" : "Hide"}
-              </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => setSelected([])}>
+            // What to do with the picked parts: Hide (Admin and Sales), Move Bin and Set Class (Admin).
+            <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="parts-bulk">
+              <span className="text-sm text-muted-foreground" data-testid="parts-selected-count">
+                {selected.length.toLocaleString()} selected
+              </span>
+              {rows.some((r) => !picked.has(r.id)) ? (
+                <Button type="button" size="sm" variant="ghost" onClick={selectAllShown} data-testid="parts-select-all">
+                  Select All Shown ({rows.length.toLocaleString()})
+                </Button>
+              ) : null}
+              <Button type="button" size="sm" variant="ghost" onClick={() => setSelected([])} data-testid="parts-select-clear">
                 Clear
               </Button>
-            </form>
+              {tooMany ? (
+                <span className="text-sm text-destructive" data-testid="parts-too-many">
+                  Pick up to {PARTS_PICK_MAX.toLocaleString()} parts at a time.
+                </span>
+              ) : (
+                <>
+                  <form
+                    className="flex flex-wrap items-center gap-2"
+                    data-testid="parts-bulk-hide"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      hideSelected.mutate();
+                    }}
+                  >
+                    <Input
+                      value={bulkReason}
+                      onChange={(e) => setBulkReason(e.target.value)}
+                      placeholder="Reason, optional"
+                      aria-label="Reason for hiding the selected parts"
+                      className="h-9 w-60"
+                      data-testid="parts-bulk-reason"
+                    />
+                    <Button type="submit" size="sm" disabled={hideSelected.isPending}>
+                      <EyeOff className="size-4" />
+                      {hideSelected.isPending ? "Hiding…" : "Hide"}
+                    </Button>
+                  </form>
+                  {canEditBins ? (
+                    <Button type="button" size="sm" variant="outline" onClick={() => setMoving(true)} data-testid="parts-bulk-move">
+                      <MapPin className="size-4" />
+                      Move Bin
+                    </Button>
+                  ) : null}
+                  {canEditClass ? <SetClassPicker ids={selected} onDone={donePicking} /> : null}
+                </>
+              )}
+            </div>
           ) : null}
 
           <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-card" data-testid="parts-list">
@@ -316,6 +356,8 @@ function Page() {
                 key={r.id}
                 row={r}
                 canEditMpn={!!page.data?.canEditMpn}
+                canEditBins={canEditBins}
+                canEditClass={canEditClass}
                 canHide={canHide}
                 canRemove={canRemove}
                 showHidden={showHidden}
@@ -357,9 +399,14 @@ function Page() {
         id={search.part ?? null}
         initial={rows.find((r) => r.id === search.part)}
         canEditMpn={!!page.data?.canEditMpn}
+        canEditBins={canEditBins}
+        canEditClass={canEditClass}
         onClose={closePart}
         onChanged={refresh}
       />
+      {canEditBins ? (
+        <MoveBinsDialog open={moving} ids={selected} parts={rows.filter((r) => picked.has(r.id))} onClose={() => setMoving(false)} onMoved={donePicking} />
+      ) : null}
     </div>
   );
 }
@@ -367,6 +414,8 @@ function Page() {
 function PartRowView({
   row,
   canEditMpn,
+  canEditBins,
+  canEditClass,
   canHide,
   canRemove,
   showHidden,
@@ -379,6 +428,10 @@ function PartRowView({
 }: {
   row: PartRow;
   canEditMpn: boolean;
+  /** Move Bin / Set Bin on the row: Admin only for now. */
+  canEditBins: boolean;
+  /** The Class as a pick list on the row: Admin only for now. */
+  canEditClass: boolean;
   canHide: boolean;
   canRemove: boolean;
   showHidden: boolean;
@@ -397,6 +450,8 @@ function PartRowView({
   const photo = usePartPhoto(row, onChanged);
   const mpn = usePartMpnEdit(row, onChanged);
   const name = usePartNameEdit(row, onChanged);
+  const binEdit = usePartBinEdit(row, onChanged);
+  const cls = usePartClassEdit(row, onChanged);
   const bin = binText({ rack: row.binRack, shelf: row.binShelf, bin: row.binBin });
   const hide = useMutation({
     mutationFn: () => hideParts({ data: { ids: [row.id], reason: reason.trim() || undefined } }),
@@ -466,7 +521,12 @@ function PartRowView({
           {row.listPrice != null ? <span data-testid="part-list-price"> · Mfr {money(row.listPrice)}</span> : null}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-          {row.itemClass ? (
+          {canEditClass ? (
+            <span className="flex items-center gap-1.5 text-muted-foreground" data-testid="part-class">
+              <span className="font-medium tracking-wide uppercase">Class</span>
+              <PartClassSelect row={row} edit={cls} className="h-7 px-1.5 text-xs" />
+            </span>
+          ) : row.itemClass ? (
             <span className="text-muted-foreground" data-testid="part-class">
               <span className="font-medium tracking-wide uppercase">Class</span> {row.itemClass}
             </span>
@@ -492,6 +552,7 @@ function PartRowView({
         ) : null}
 
         <PartMpnForm row={row} edit={mpn} />
+        <PartBinForm edit={binEdit} />
 
         {hiding ? (
           <form
@@ -524,6 +585,7 @@ function PartRowView({
           <PartPhotoButtons row={row} photo={photo} />
           {canEditMpn ? <PartMpnEditButton row={row} edit={mpn} /> : null}
           {canEditMpn ? <PartNameEditButton row={row} edit={name} /> : null}
+          {canEditBins ? <PartBinMoveButton row={row} edit={binEdit} /> : null}
           {canHide && showHidden ? (
             <Button type="button" size="sm" variant="outline" disabled={restore.isPending} onClick={() => restore.mutate()} data-testid="part-restore">
               <RotateCcw className="size-4" />

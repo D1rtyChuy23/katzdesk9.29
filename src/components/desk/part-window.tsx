@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { getPart, setPartBin, type PartRow } from "@/lib/ops/parts-api";
-import { BIN_LABEL, BIN_MAX, BIN_PIECES, binText, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
+import { useQuery } from "@tanstack/react-query";
+import { getPart, type PartRow } from "@/lib/ops/parts-api";
+import { binText } from "@/lib/ops/part-bins";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/separator";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { PartThumb } from "./part-thumb";
 import {
+  PartBinFields,
+  PartClassSelect,
   PartGetLater,
   PartMpnEditButton,
   PartMpnForm,
@@ -19,7 +19,7 @@ import {
   PartPhotoReview,
   PartPhotoStatus,
 } from "./part-controls";
-import { partMoney, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "./part-edits";
+import { partMoney, usePartBinEdit, usePartClassEdit, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "./part-edits";
 import { PartUsageSection } from "./part-usage";
 
 const T = "part-window";
@@ -35,18 +35,23 @@ function shortDate(iso: string | null): string {
  * The part's own window on Parts. The NetSuite Description (the part's name) is the title; under it the part
  * number, then the details, the photo and its actions, Get Later, the bin location (Rack, Shelf, Bin), and its usage:
  * every ticket that used it, counted by month, quarter or year.
- * `initial` is the row already on the list, shown at once while the part loads.
+ * `initial` is the row already on the list, shown at once while the part loads. The bin and the Class are changed
+ * here by an Admin (canEditBins, canEditClass); everyone else sees them.
  */
 export function PartWindow({
   id,
   initial,
   canEditMpn,
+  canEditBins,
+  canEditClass,
   onClose,
   onChanged,
 }: {
   id: number | null;
   initial?: PartRow | null;
   canEditMpn: boolean;
+  canEditBins: boolean;
+  canEditClass: boolean;
   onClose: () => void;
   onChanged: () => void;
 }) {
@@ -66,7 +71,7 @@ export function PartWindow({
     <Sheet open={id != null} onOpenChange={(o) => !o && onClose()}>
       <SheetContent aria-describedby={undefined} data-testid="part-window">
         {row ? (
-          <PartWindowView key={row.id} row={row} canEditMpn={canEditMpn} onChanged={onChanged} />
+          <PartWindowView key={row.id} row={row} canEditMpn={canEditMpn} canEditBins={canEditBins} canEditClass={canEditClass} onChanged={onChanged} />
         ) : (
           <>
             <SheetHeader>
@@ -92,10 +97,23 @@ export function PartWindow({
   );
 }
 
-function PartWindowView({ row, canEditMpn, onChanged }: { row: PartRow; canEditMpn: boolean; onChanged: () => void }) {
+function PartWindowView({
+  row,
+  canEditMpn,
+  canEditBins,
+  canEditClass,
+  onChanged,
+}: {
+  row: PartRow;
+  canEditMpn: boolean;
+  canEditBins: boolean;
+  canEditClass: boolean;
+  onChanged: () => void;
+}) {
   const photo = usePartPhoto(row, onChanged);
   const mpn = usePartMpnEdit(row, onChanged);
   const name = usePartNameEdit(row, onChanged);
+  const cls = usePartClassEdit(row, onChanged);
   const number = row.mpn ?? row.sku;
   return (
     <>
@@ -147,7 +165,13 @@ function PartWindowView({ row, canEditMpn, onChanged }: { row: PartRow; canEditM
               </>
             ) : null}
             <dt className="text-muted-foreground">Class</dt>
-            <dd data-testid="part-window-class">{row.itemClass ?? <span className="text-muted-foreground">Not set</span>}</dd>
+            <dd data-testid="part-window-class">
+              {canEditClass ? (
+                <PartClassSelect row={row} edit={cls} tid={T} className="-my-1 w-full max-w-56" />
+              ) : (
+                (row.itemClass ?? <span className="text-muted-foreground">Not set</span>)
+              )}
+            </dd>
             <dt className="text-muted-foreground">Price</dt>
             <dd className="tabular" data-testid="part-window-price">
               {row.rate != null ? partMoney(row.rate) : <span className="text-muted-foreground">Not set</span>}
@@ -186,7 +210,7 @@ function PartWindowView({ row, canEditMpn, onChanged }: { row: PartRow; canEditM
           <PartPhotoReview row={row} photo={photo} onChanged={onChanged} />
         </section>
 
-        <BinSection row={row} canEdit={canEditMpn} onChanged={onChanged} />
+        <BinSection row={row} canEdit={canEditBins} onChanged={onChanged} />
 
         <PartUsageSection partId={row.id} />
       </SheetBody>
@@ -194,23 +218,10 @@ function PartWindowView({ row, canEditMpn, onChanged }: { row: PartRow; canEditM
   );
 }
 
-const storedBins = (row: PartRow): BinValues => ({ rack: row.binRack, shelf: row.binShelf, bin: row.binBin });
-const asText = (v: BinValues) => ({ rack: v.rack ?? "", shelf: v.shelf ?? "", bin: v.bin ?? "" });
-
-/** Rack, Shelf and Bin. Admin and Sales change them (like the other part edits); everyone sees them. */
+/** Rack, Shelf and Bin. An Admin changes them (Admin only for now, Chuy 10/28); everyone sees them. */
 function BinSection({ row, canEdit, onChanged }: { row: PartRow; canEdit: boolean; onChanged: () => void }) {
-  const stored = storedBins(row);
-  const [draft, setDraft] = useState(() => asText(stored));
-  useEffect(() => setDraft(asText({ rack: row.binRack, shelf: row.binShelf, bin: row.binBin })), [row.binRack, row.binShelf, row.binBin]);
-  const dirty = BIN_PIECES.some((k) => cleanBinValue(draft[k]) !== stored[k]);
-  const save = useMutation({
-    mutationFn: () => setPartBin({ data: { id: row.id, rack: draft.rack, shelf: draft.shelf, bin: draft.bin } }),
-    onSuccess: (p) => {
-      toast.success(binText({ rack: p.binRack, shelf: p.binShelf, bin: p.binBin }) ? "Bin location saved" : "Bin location cleared");
-      onChanged();
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the bin location"),
-  });
+  const edit = usePartBinEdit(row, onChanged);
+  const stored = { rack: row.binRack, shelf: row.binShelf, bin: row.binBin };
   const changed = row.binUpdatedAt ? `Changed by ${row.binUpdatedBy || "Desk"} on ${shortDate(row.binUpdatedAt)}` : null;
   return (
     <section className="p-5" data-testid="part-window-bin">
@@ -220,41 +231,27 @@ function BinSection({ row, canEdit, onChanged }: { row: PartRow; canEdit: boolea
           className="mt-3"
           onSubmit={(e) => {
             e.preventDefault();
-            if (dirty) save.mutate();
+            if (edit.dirty) edit.save.mutate();
           }}
         >
-          <div className="grid grid-cols-3 gap-2">
-            {BIN_PIECES.map((k) => (
-              <label key={k} className="min-w-0 text-xs font-medium text-muted-foreground">
-                {BIN_LABEL[k]}
-                <Input
-                  value={draft[k]}
-                  onChange={(e) => setDraft((d) => ({ ...d, [k]: e.target.value }))}
-                  maxLength={BIN_MAX}
-                  autoComplete="off"
-                  className="mt-1 h-9 font-normal"
-                  data-testid={`part-bin-${k}`}
-                />
-              </label>
-            ))}
-          </div>
+          <PartBinFields edit={edit} tid={T} />
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button type="submit" size="sm" disabled={!dirty || save.isPending} data-testid="part-bin-save">
-              {save.isPending ? "Saving…" : "Save"}
+            <Button type="submit" size="sm" disabled={!edit.dirty || edit.save.isPending} data-testid={`${T}-bin-save`}>
+              {edit.save.isPending ? "Saving…" : "Save"}
             </Button>
-            {dirty ? (
-              <Button type="button" size="sm" variant="ghost" onClick={() => setDraft(asText(stored))}>
+            {edit.dirty ? (
+              <Button type="button" size="sm" variant="ghost" onClick={edit.cancel}>
                 Cancel
               </Button>
             ) : null}
-            <span className="text-xs text-muted-foreground" data-testid="part-bin-changed">
+            <span className="text-xs text-muted-foreground" data-testid={`${T}-bin-changed`}>
               {changed ?? "A blank box clears that piece."}
             </span>
           </div>
         </form>
       ) : (
         <>
-          <p className="mt-3 text-sm" data-testid="part-bin-text">
+          <p className="mt-3 text-sm" data-testid={`${T}-bin-text`}>
             {binText(stored) ?? <span className="text-muted-foreground">Not set</span>}
           </p>
           {changed ? <p className="mt-1 text-xs text-muted-foreground">{changed}</p> : null}
