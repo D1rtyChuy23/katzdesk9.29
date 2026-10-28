@@ -14,6 +14,7 @@ import { cleanMpn } from "@/lib/ops/mpn-rules";
 import { PART_CLASSES } from "@/lib/ops/part-pricing";
 import { BIN_LABEL, BIN_MAX, BIN_PIECES, cleanBinValue } from "@/lib/ops/part-bins";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
+import { PART_USES_CTE } from "@/lib/ops/part-usage-api";
 import type { ChargeKind } from "@/lib/ops/charges";
 
 async function ready(): Promise<Sql> {
@@ -181,69 +182,80 @@ export type PartsPage = {
   canRemove: boolean;
 };
 
+const listInput = z.object({
+  q: z.string().max(120).optional(),
+  noPhoto: z.boolean().optional(),
+  offset: z.number().int().min(0).max(100000).optional(),
+  hidden: z.boolean().optional(),
+  getLater: z.boolean().optional(),
+  itemClass: z.string().max(120).optional(),
+  /** "used": the parts on the most tickets first (all time), then the most pieces (Chuy, 10/28). */
+  sort: z.enum(["sku", "used"]).optional(),
+});
+
 export const listParts = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { q?: string; noPhoto?: boolean; offset?: number; hidden?: boolean; getLater?: boolean; itemClass?: string }) =>
-    z
-      .object({
-        q: z.string().max(120).optional(),
-        noPhoto: z.boolean().optional(),
-        offset: z.number().int().min(0).max(100000).optional(),
-        hidden: z.boolean().optional(),
-        getLater: z.boolean().optional(),
-        itemClass: z.string().max(120).optional(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data, context }): Promise<PartsPage> => {
-    const sql = await ready();
-    const q = (data.q ?? "").trim();
-    const like = `%${q}%`;
-    // Trip and labor are services, not parts. Hidden parts leave the normal list; Show Hidden lists only those.
-    const where = `${data.hidden ? "" : "active and "}kind not in ('trip', 'labor')
-      and hidden_at is ${data.hidden ? "not null" : "null"}
-      and ($1 = '' or item ilike $2 or sku ilike $2 or description ilike $2 or mfr_part ilike $2)
-      and (not $3 or image is null)
-      and (not $4 or get_later)
-      and ($5 = '' or coalesce(item_class, '') = $5)`;
-    const args = [q, like, !!data.noPhoto, !!data.getLater, data.itemClass ?? ""];
-    const rows = await sql.query<Raw>(
-      `select ${COLS} from ${FROM} where ${where} order by (image is null), lower(sku) limit 50 offset ${Number(data.offset ?? 0)}`,
-      args,
-    );
-    const counts = (await sql.query<{ total: number; with_photo: number }>(
-      `select count(*)::int as total, count(*) filter (where image is not null)::int as with_photo from billing_items where ${where}`,
-      args,
-    ))[0];
-    const hiddenCount = (await sql.query<{ n: number }>(
-      "select count(*)::int as n from billing_items where hidden_at is not null and kind not in ('trip', 'labor')",
-    ))[0];
-    const extra = (await sql.query<{ get_later: number; ready: number }>(
-      `select count(*) filter (where get_later)::int as get_later,
-              count(*) filter (where image is null and r_verdict = 'confirmed' and r_image is not null)::int as ready
-         from ${FROM} where active and hidden_at is null and kind not in ('trip', 'labor')`,
-    ))[0];
-    // Only the five classes are ever offered; counts are the active, visible parts in each.
-    const classRows = await sql.query<{ c: string; n: number }>(
-      "select item_class as c, count(*)::int as n from billing_items where active and hidden_at is null and kind not in ('trip', 'labor') and item_class is not null group by 1",
-    );
-    const classCounts: Record<string, number> = Object.fromEntries(PART_CLASSES.map((c) => [c, classRows.find((r) => r.c === c)?.n ?? 0]));
-    const classes: string[] = [...PART_CLASSES];
-    const who = await powers(sql, context.userId);
-    return {
-      rows: rows.map(toRow),
-      total: counts?.total ?? 0,
-      withPhoto: counts?.with_photo ?? 0,
-      hiddenCount: hiddenCount?.n ?? 0,
-      getLaterCount: extra?.get_later ?? 0,
-      readyToPull: extra?.ready ?? 0,
-      classes,
-      classCounts,
-      canEditMpn: who.canEditMpn,
-      canHide: who.canHide,
-      canRemove: who.canRemove,
-    };
-  });
+  .validator((d: z.input<typeof listInput>) => listInput.parse(d))
+  .handler(async ({ data, context }): Promise<PartsPage> => listPartsFor(await ready(), data, context.userId));
+
+/** One page of the Parts list (the body of listParts). */
+export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, userId: string): Promise<PartsPage> {
+  const q = (data.q ?? "").trim();
+  const like = `%${q}%`;
+  // Trip and labor are services, not parts. Hidden parts leave the normal list; Show Hidden lists only those.
+  const where = `${data.hidden ? "" : "active and "}kind not in ('trip', 'labor')
+    and hidden_at is ${data.hidden ? "not null" : "null"}
+    and ($1 = '' or item ilike $2 or sku ilike $2 or description ilike $2 or mfr_part ilike $2)
+    and (not $3 or image is null)
+    and (not $4 or get_later)
+    and ($5 = '' or coalesce(item_class, '') = $5)`;
+  const args = [q, like, !!data.noPhoto, !!data.getLater, data.itemClass ?? ""];
+  const used = data.sort === "used";
+  const rows = await sql.query<Raw>(
+    used
+      ? `with ${PART_USES_CTE}
+         select ${COLS} from ${FROM}
+           left join (select part_id, count(*)::int as tickets, sum(qty) as pieces from part_uses group by part_id) uc
+                  on uc.part_id = billing_items.id
+          where ${where}
+          order by coalesce(uc.tickets, 0) desc, coalesce(uc.pieces, 0) desc, lower(sku)
+          limit 50 offset ${Number(data.offset ?? 0)}`
+      : `select ${COLS} from ${FROM} where ${where} order by (image is null), lower(sku) limit 50 offset ${Number(data.offset ?? 0)}`,
+    args,
+  );
+  const counts = (await sql.query<{ total: number; with_photo: number }>(
+    `select count(*)::int as total, count(*) filter (where image is not null)::int as with_photo from billing_items where ${where}`,
+    args,
+  ))[0];
+  const hiddenCount = (await sql.query<{ n: number }>(
+    "select count(*)::int as n from billing_items where hidden_at is not null and kind not in ('trip', 'labor')",
+  ))[0];
+  const extra = (await sql.query<{ get_later: number; ready: number }>(
+    `select count(*) filter (where get_later)::int as get_later,
+            count(*) filter (where image is null and r_verdict = 'confirmed' and r_image is not null)::int as ready
+       from ${FROM} where active and hidden_at is null and kind not in ('trip', 'labor')`,
+  ))[0];
+  // Only the five classes are ever offered; counts are the active, visible parts in each.
+  const classRows = await sql.query<{ c: string; n: number }>(
+    "select item_class as c, count(*)::int as n from billing_items where active and hidden_at is null and kind not in ('trip', 'labor') and item_class is not null group by 1",
+  );
+  const classCounts: Record<string, number> = Object.fromEntries(PART_CLASSES.map((c) => [c, classRows.find((r) => r.c === c)?.n ?? 0]));
+  const classes: string[] = [...PART_CLASSES];
+  const who = await powers(sql, userId);
+  return {
+    rows: rows.map(toRow),
+    total: counts?.total ?? 0,
+    withPhoto: counts?.with_photo ?? 0,
+    hiddenCount: hiddenCount?.n ?? 0,
+    getLaterCount: extra?.get_later ?? 0,
+    readyToPull: extra?.ready ?? 0,
+    classes,
+    classCounts,
+    canEditMpn: who.canEditMpn,
+    canHide: who.canHide,
+    canRemove: who.canRemove,
+  };
+}
 
 async function findPart(sql: Sql, id: number): Promise<PartRow | null> {
   const r = (await sql.query<Raw>(`select ${COLS} from ${FROM} where id = $1`, [id]))[0];
