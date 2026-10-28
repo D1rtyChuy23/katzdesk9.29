@@ -1,7 +1,8 @@
 /**
- * Bin locations: where a part sits in the stockroom, as Rack, Shelf and Bin. Typed in the part's window, or read
- * from a Bin Locations file (CSV or Excel) and planned here before anything is written. The Bin Template is the
- * same columns, so a spreadsheet filled in from it imports straight back.
+ * Bin locations: where a part sits in the stockroom, as Rack, Shelf and Bin. Typed on the part's row or in its
+ * window, given to several parts at once with Move Bin, or read from a Bin Locations file (CSV or Excel) and planned
+ * here before anything is written. The Bin Template is the same columns, so a spreadsheet filled in from it imports
+ * straight back. Changing a bin is Admin only for now (Chuy, 10/28); everyone sees it.
  * Pure: no server imports, safe for node --test.
  */
 import { csvCell, splitItemName } from "./charges.ts";
@@ -31,6 +32,28 @@ export function binText(v: { rack?: string | null; shelf?: string | null; bin?: 
   if (!v) return null;
   const parts = BIN_PIECES.filter((k) => v[k]).map((k) => `${BIN_LABEL[k]} ${v[k]}`);
   return parts.length ? parts.join(" · ") : null;
+}
+
+export const sameBins = (a: BinValues, b: BinValues) => a.rack === b.rack && a.shelf === b.shelf && a.bin === b.bin;
+
+/** Most parts picked on Parts that one Move Bin, Set Class or Hide takes. */
+export const PARTS_PICK_MAX = 500;
+
+/**
+ * Move Bin for several parts at once (10/28): each piece typed goes on every part, and a blank piece keeps the
+ * part's own. A Rack alone moves a whole shelf's parts to another rack and keeps each part's shelf and bin.
+ * `typed` is already cleaned (blank is null).
+ */
+export function binsAfterMove(old: BinValues, typed: BinValues): BinValues {
+  return { rack: typed.rack ?? old.rack, shelf: typed.shelf ?? old.shelf, bin: typed.bin ?? old.bin };
+}
+
+/**
+ * The Parts search read as a bin code: "A 03 12" and "A/03/12" become A-03-12, the way the three pieces are joined
+ * for the search, so any of them finds the part in Rack A, Shelf 03, Bin 12.
+ */
+export function binSearchCode(q: string): string {
+  return q.trim().replace(/\s*[-/]\s*|\s+/g, "-");
 }
 
 /** "A-03-12" or "A/3/12": three letters-or-digits pieces split by dashes or slashes. Anything else is not a code. */
@@ -215,8 +238,6 @@ function uniqueParts<T extends { id: number }>(list: T[]): T[] {
   const seen = new Set<number>();
   return list.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
 }
-
-const sameBins = (a: BinValues, b: BinValues) => a.rack === b.rack && a.shelf === b.shelf && a.bin === b.bin;
 
 /**
  * What a Bin Locations file will do, row by row. A part is found the way the parts import finds one: the MPN with

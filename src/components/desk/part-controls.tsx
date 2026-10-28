@@ -1,18 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
-import { Camera, Pencil, Trash2 } from "lucide-react";
+import { Camera, MapPin, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { setPartGetLater, type PartRow } from "@/lib/ops/parts-api";
+import { BIN_LABEL, BIN_MAX, BIN_PIECES } from "@/lib/ops/part-bins";
+import { PART_CLASSES, isPartClass } from "@/lib/ops/part-pricing";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { PhotoReview } from "./photo-review";
-import type { PartMpnEdit, PartNameEdit, PartPhoto } from "./part-edits";
+import type { PartBinEdit, PartClassEdit, PartMpnEdit, PartNameEdit, PartPhoto } from "./part-edits";
 
 /*
- * The part edits shared by a row on Parts and the part's window: Get Later, the photo actions, the MPN and the part
- * name. One version of each, so the row and the window always behave the same. Test ids are `<tid>-…`: the row
- * keeps its own `part-…` ids and the window uses `part-window-…`. The state behind them is in part-edits.ts.
+ * The part edits shared by a row on Parts and the part's window: Get Later, the photo actions, the MPN, the part
+ * name, the bin location and the class. One version of each, so the row and the window always behave the same. Test
+ * ids are `<tid>-…`: the row keeps its own `part-…` ids and the window uses `part-window-…`. The state behind them is
+ * in part-edits.ts.
  */
 
 type Changed = () => void;
@@ -188,5 +191,105 @@ export function PartNameEditButton({ row, edit, tid = "part" }: { row: PartRow; 
       <Pencil className="size-4" />
       {row.description ? "Edit Part Name" : "Add Part Name"}
     </Button>
+  );
+}
+
+// ------------------------------------------------------------------------------------------ bin location
+
+/** Rack, Shelf and Bin boxes side by side (three across on a phone too: the pieces are short). */
+export function PartBinFields({ edit, tid = "part", autoFocus = false }: { edit: PartBinEdit; tid?: string; autoFocus?: boolean }) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {BIN_PIECES.map((k, i) => (
+        <label key={k} className="min-w-0 text-xs font-medium text-muted-foreground">
+          {BIN_LABEL[k]}
+          <Input
+            value={edit.draft[k]}
+            onChange={(e) => edit.setPiece(k, e.target.value)}
+            maxLength={BIN_MAX}
+            autoComplete="off"
+            autoFocus={autoFocus && i === 0}
+            className="mt-1 h-9 font-normal"
+            data-testid={`${tid}-bin-${k}`}
+          />
+        </label>
+      ))}
+    </div>
+  );
+}
+
+/** Move Bin on a row: the boxes open under the part with its bin now. Save writes all three; Esc cancels. */
+export function PartBinForm({ edit, tid = "part", className = "mt-2" }: { edit: PartBinEdit; tid?: string; className?: string }) {
+  if (!edit.editing) return null;
+  return (
+    <form
+      className={cn("max-w-md", className)}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (edit.dirty) edit.save.mutate();
+        else edit.cancel();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") edit.cancel();
+      }}
+      data-testid={`${tid}-bin-form`}
+    >
+      <PartBinFields edit={edit} tid={tid} autoFocus />
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Button type="submit" size="sm" disabled={!edit.dirty || edit.save.isPending} data-testid={`${tid}-bin-save`}>
+          {edit.save.isPending ? "Saving…" : "Save"}
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={edit.cancel}>
+          Cancel
+        </Button>
+        <span className="text-xs text-muted-foreground">A blank box clears that piece.</span>
+      </div>
+    </form>
+  );
+}
+
+export function PartBinMoveButton({ row, edit, tid = "part" }: { row: PartRow; edit: PartBinEdit; tid?: string }) {
+  if (edit.editing) return null;
+  const has = !!(row.binRack || row.binShelf || row.binBin);
+  return (
+    <Button type="button" size="sm" variant="ghost" onClick={() => edit.setEditing(true)} data-testid={`${tid}-bin-edit`}>
+      <MapPin className="size-4" />
+      {has ? "Move Bin" : "Set Bin"}
+    </Button>
+  );
+}
+
+// ------------------------------------------------------------------------------------------ class
+
+/**
+ * The Class as a pick list of the five; picking one saves it. A class from before the five were set (or from a file)
+ * is shown as it is until another is picked.
+ */
+export function PartClassSelect({ row, edit, tid = "part", className }: { row: PartRow; edit: PartClassEdit; tid?: string; className?: string }) {
+  const odd = edit.value && !isPartClass(edit.value) ? edit.value : null;
+  return (
+    <select
+      value={edit.value}
+      onChange={(e) => edit.pick(e.target.value)}
+      disabled={edit.save.isPending}
+      aria-label={`Class for ${row.item}`}
+      className={cn(
+        "h-8 rounded-md border border-input bg-card px-2 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60",
+        className,
+      )}
+      data-testid={`${tid}-class-select`}
+    >
+      <option value="">No class</option>
+      {odd ? (
+        <option value={odd} disabled>
+          {odd}
+        </option>
+      ) : null}
+      {PART_CLASSES.map((c) => (
+        <option key={c} value={c}>
+          {c}
+        </option>
+      ))}
+    </select>
   );
 }

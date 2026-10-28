@@ -324,70 +324,73 @@ const BIN_ORDER: Record<BinPlanStatus, number> = { update: 1, ambiguous: 2, unma
 /**
  * Bin Locations: a CSV or Excel file of part numbers and Rack / Shelf / Bin. With apply false nothing is written:
  * that is the preview. Save sends the file again; it is planned again against what is stored now and written in
- * one statement, so either every change lands or none does. Admin and Sales, like a bin edit in the part's window.
+ * one statement, so either every change lands or none does. Admin only for now (Chuy, 10/28), like every bin edit.
  */
 export const importPartBins = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.input<typeof binFileInput>) => binFileInput.parse(d))
-  .handler(async ({ data, context }): Promise<BinsPreview> => {
-    const sql = await ready();
-    const who = await partPowers(sql, context.userId);
-    if (!who.canEditMpn) throw new Error("Only Admin and Sales can change bin locations.");
-    const read = binRowsFromSheets(readSheets(data.base64, { datesAsText: true }));
-    if (!read.rows.length) throw new Error("No part numbers under the header.");
-    if (read.rows.length > 50_000) throw new Error("Up to 50,000 rows at a time.");
-    const plan = planBins(read.rows, await storedBinParts(sql));
-    const count = (st: BinPlanStatus) => plan.filter((l) => l.status === st).length;
-    const preview: BinsPreview = {
-      filename: data.filename,
-      rowCount: read.rows.length,
-      update: count("update"),
-      same: count("same"),
-      unmatched: count("unmatched"),
-      ambiguous: count("ambiguous"),
-      blank: count("blank"),
-      duplicates: count("duplicate"),
-      tooLong: count("too_long"),
-      dates: count("date"),
-      skipped: read.skipped,
-      applied: false,
-      lines: plan
-        .filter((l) => l.status !== "blank")
-        .sort((a, b) => BIN_ORDER[a.status] - BIN_ORDER[b.status] || a.line - b.line)
-        .slice(0, 500),
-    };
-    if (!data.apply) return preview;
+  .handler(async ({ data, context }): Promise<BinsPreview> => importPartBinsFor(await ready(), data, context.userId));
 
-    // The file's own values go in; a blank piece (null) keeps what is stored at the moment of writing, except on a
-    // whole-location row (s.whole), which writes all three pieces as they are.
-    const apply = binsToApply(plan);
-    const written = apply.length
-      ? await sql.query<{ id: number }>(
-          `update billing_items b
-              set bin_rack = case when s.whole then s.rack else coalesce(s.rack, b.bin_rack) end,
-                  bin_shelf = case when s.whole then s.shelf else coalesce(s.shelf, b.bin_shelf) end,
-                  bin_bin = case when s.whole then s.bin else coalesce(s.bin, b.bin_bin) end,
-                  bin_updated_at = now(), bin_updated_by = $6, updated_at = now()
-             from (select * from unnest($1::int[], $2::text[], $3::text[], $4::text[], $5::boolean[]) as u(id, rack, shelf, bin, whole)) s
-            where b.id = s.id and b.hidden_at is null
-              and (case when s.whole then s.rack else coalesce(s.rack, b.bin_rack) end,
-                   case when s.whole then s.shelf else coalesce(s.shelf, b.bin_shelf) end,
-                   case when s.whole then s.bin else coalesce(s.bin, b.bin_bin) end) is distinct from (b.bin_rack, b.bin_shelf, b.bin_bin)
-          returning b.id`,
-          [apply.map((l) => l.partId), apply.map((l) => l.file.rack), apply.map((l) => l.file.shelf), apply.map((l) => l.file.bin), apply.map((l) => l.whole), who.name],
-        )
-      : [];
-    return { ...preview, update: written.length, applied: true };
-  });
+/** The body of importPartBins. */
+export async function importPartBinsFor(sql: Sql, data: z.infer<typeof binFileInput>, userId: string): Promise<BinsPreview> {
+  const who = await partPowers(sql, userId);
+  if (!who.canEditBins) throw new Error("Only an Admin can change bin locations.");
+  const read = binRowsFromSheets(readSheets(data.base64, { datesAsText: true }));
+  if (!read.rows.length) throw new Error("No part numbers under the header.");
+  if (read.rows.length > 50_000) throw new Error("Up to 50,000 rows at a time.");
+  const plan = planBins(read.rows, await storedBinParts(sql));
+  const count = (st: BinPlanStatus) => plan.filter((l) => l.status === st).length;
+  const preview: BinsPreview = {
+    filename: data.filename,
+    rowCount: read.rows.length,
+    update: count("update"),
+    same: count("same"),
+    unmatched: count("unmatched"),
+    ambiguous: count("ambiguous"),
+    blank: count("blank"),
+    duplicates: count("duplicate"),
+    tooLong: count("too_long"),
+    dates: count("date"),
+    skipped: read.skipped,
+    applied: false,
+    lines: plan
+      .filter((l) => l.status !== "blank")
+      .sort((a, b) => BIN_ORDER[a.status] - BIN_ORDER[b.status] || a.line - b.line)
+      .slice(0, 500),
+  };
+  if (!data.apply) return preview;
+
+  // The file's own values go in; a blank piece (null) keeps what is stored at the moment of writing, except on a
+  // whole-location row (s.whole), which writes all three pieces as they are.
+  const apply = binsToApply(plan);
+  const written = apply.length
+    ? await sql.query<{ id: number }>(
+        `update billing_items b
+            set bin_rack = case when s.whole then s.rack else coalesce(s.rack, b.bin_rack) end,
+                bin_shelf = case when s.whole then s.shelf else coalesce(s.shelf, b.bin_shelf) end,
+                bin_bin = case when s.whole then s.bin else coalesce(s.bin, b.bin_bin) end,
+                bin_updated_at = now(), bin_updated_by = $6, updated_at = now()
+           from (select * from unnest($1::int[], $2::text[], $3::text[], $4::text[], $5::boolean[]) as u(id, rack, shelf, bin, whole)) s
+          where b.id = s.id and b.hidden_at is null
+            and (case when s.whole then s.rack else coalesce(s.rack, b.bin_rack) end,
+                 case when s.whole then s.shelf else coalesce(s.shelf, b.bin_shelf) end,
+                 case when s.whole then s.bin else coalesce(s.bin, b.bin_bin) end) is distinct from (b.bin_rack, b.bin_shelf, b.bin_bin)
+        returning b.id`,
+        [apply.map((l) => l.partId), apply.map((l) => l.file.rack), apply.map((l) => l.file.shelf), apply.map((l) => l.file.bin), apply.map((l) => l.whole), who.name],
+      )
+    : [];
+  return { ...preview, update: written.length, applied: true };
+}
 
 /**
  * The Bin Template: MPN, SKU, Description and the current Rack, Shelf and Bin of every part on the Parts list, up
- * to 50,000 by SKU (`more` says the list has more; the import still matches every part).
+ * to 50,000 by SKU (`more` says the list has more; the import still matches every part). Admin, like the import.
  */
 export const partBinTemplate = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .handler(async (): Promise<{ filename: string; base64: string; rows: number; more: boolean }> => {
+  .handler(async ({ context }): Promise<{ filename: string; base64: string; rows: number; more: boolean }> => {
     const sql = await ready();
+    if (!(await partPowers(sql, context.userId)).canEditBins) throw new Error("Only an Admin can download the Bin Template.");
     const all = await storedBinParts(sql, BIN_TEMPLATE_MAX + 1);
     const parts = all.slice(0, BIN_TEMPLATE_MAX);
     const csv = binTemplateCsv(parts);
