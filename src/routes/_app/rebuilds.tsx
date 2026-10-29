@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { createRebuild, listRebuilds, SHOP_ACCOUNT, type Rebuild } from "@/lib/ops/rebuilds";
 import { REBUILD_STATUSES } from "@/lib/ops/rebuild-model";
+import { sentence } from "@/lib/ops/warehouse-invoice";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
@@ -34,6 +35,8 @@ const FILTERS = [
   { id: "waiting", label: "Waiting" },
   { id: "no-date", label: "No date" },
   { id: "mine", label: "My rebuilds" },
+  // Invoices Warehouse saved for an Admin to approve; the chip shows only while there are some.
+  { id: "invoice", label: "Invoice waiting" },
 ] as const;
 
 function Page() {
@@ -49,6 +52,8 @@ function Page() {
   const [create, setCreate] = useState(false);
   const rows = data.data?.rows ?? [];
   const canEdit = !!data.data?.canEdit;
+  // Warehouse: its refurbs are for this account (Katz Coffee Service Dept.); null for everyone else.
+  const accountLock = data.data?.accountLock ?? null;
 
   const filtered = useMemo(() => {
     let list = rows;
@@ -60,6 +65,7 @@ function Page() {
     if (chip === "waiting") list = list.filter((r) => r.status === "Waiting");
     if (chip === "no-date") list = list.filter((r) => r.health === "no-date");
     if (chip === "mine") list = list.filter((r) => matchMine(r.owner));
+    if (chip === "invoice") list = list.filter((r) => r.invoice === "waiting");
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((r) =>
@@ -76,6 +82,8 @@ function Page() {
   const atRisk = rows.filter((r) => r.health === "at-risk").length;
   const waiting = rows.filter((r) => r.status === "Waiting").length;
   const noDate = rows.filter((r) => r.health === "no-date").length;
+  const invoiceWaiting = rows.filter((r) => r.invoice === "waiting").length;
+  const chips = FILTERS.filter((f) => f.id !== "invoice" || invoiceWaiting > 0 || chip === "invoice");
 
   return (
     <div>
@@ -87,7 +95,8 @@ function Page() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <ExportButton defaultType="rebuilds" />
+          {/* Export reaches every board's reports; Warehouse keeps to its refurbs. */}
+          {role === "warehouse" ? null : <ExportButton defaultType="rebuilds" />}
           {canEdit ? (
             <Button onClick={() => setCreate(true)}>
               <Plus className="size-4" />
@@ -133,9 +142,10 @@ function Page() {
 
       <ListToolbar>
         <ToolbarSearch value={q} onChange={setQ} placeholder="Search rebuilds…" label="Search project, account or serial" />
-        {FILTERS.map((f) => (
-          <FilterChip key={f.id} selected={chip === f.id} onClick={() => setChip(f.id)}>
+        {chips.map((f) => (
+          <FilterChip key={f.id} selected={chip === f.id} onClick={() => setChip(f.id)} data-testid={`rebuild-chip-${f.id}`}>
             {f.label}
+            {f.id === "invoice" ? ` · ${invoiceWaiting}` : ""}
           </FilterChip>
         ))}
         {/* Board or Timeline: how the same rows are laid out. */}
@@ -161,12 +171,18 @@ function Page() {
         )}
       </div>
 
-      <RebuildSheet row={selectedRow} canEdit={canEdit} onClose={() => {
+      <RebuildSheet
+        row={selectedRow}
+        canEdit={canEdit && !!selectedRow?.editable}
+        accountLock={accountLock}
+        onClose={() => {
           setSelected(null);
           back();
-        }} />
+        }}
+      />
       <CreateRebuildDialog
         open={create}
+        accountLock={accountLock}
         onOpenChange={setCreate}
         onCreated={(row) => {
           void qc.invalidateQueries({ queryKey: ["rebuilds"] });
@@ -181,10 +197,13 @@ function Page() {
 
 function CreateRebuildDialog({
   open,
+  accountLock,
   onOpenChange,
   onCreated,
 }: {
   open: boolean;
+  /** Warehouse: every new refurb is for this account (the server sets it too). */
+  accountLock: string | null;
   onOpenChange: (v: boolean) => void;
   onCreated: (row: Rebuild) => void;
 }) {
@@ -203,7 +222,7 @@ function CreateRebuildDialog({
       createRebuild({
         data: {
           title,
-          account: account || SHOP_ACCOUNT,
+          account: accountLock ?? (account || SHOP_ACCOUNT),
           equipment,
           owner,
           status,
@@ -241,12 +260,20 @@ function CreateRebuildDialog({
             <Label htmlFor="new-rb-title">Project name</Label>
             <Input id="new-rb-title" className="mt-1" value={title} onChange={(e) => setTitle(e.target.value)} required />
           </div>
-          <div>
-            <CustomerCombo label="Account" value={account} onChange={setAccount} />
-            <button type="button" className="mt-1 text-xs text-primary underline-offset-2 hover:underline max-sm:mt-2 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:text-sm" onClick={() => setAccount(SHOP_ACCOUNT)}>
-              Katz shop / stock
-            </button>
-          </div>
+          {accountLock ? (
+            <div data-testid="new-rebuild-account-locked">
+              <Label>Account</Label>
+              <p className="mt-1 text-sm font-medium">{accountLock}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Warehouse refurbs and their invoices are for {sentence(accountLock)}</p>
+            </div>
+          ) : (
+            <div>
+              <CustomerCombo label="Account" value={account} onChange={setAccount} />
+              <button type="button" className="mt-1 text-xs text-primary underline-offset-2 hover:underline max-sm:mt-2 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:text-sm" onClick={() => setAccount(SHOP_ACCOUNT)}>
+                Katz shop / stock
+              </button>
+            </div>
+          )}
           <EquipmentCombo label="Equipment" value={equipment} onChange={setEquipment} />
           <OwnerSelect value={owner} onChange={setOwner} />
           <div className="grid gap-3 sm:grid-cols-2">

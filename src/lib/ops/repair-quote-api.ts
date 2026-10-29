@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { deskMiddleware, isWarehouseOnly } from "@/lib/ops/access";
 import { cleanQty, cleanRate, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { QUOTE_STATUSES, quoteError, quoteLineKind, quoteForJob, quoteForRebuild, quoteLocked, quoteTotals, type QuoteCost, type QuoteLine, type QuoteStatus } from "@/lib/ops/repair-quote";
 
@@ -149,70 +149,73 @@ const lineSchema = z.object({
  * Save the quote's status, note and lines. The first save makes the quote and puts it on the ticket and on the
  * rebuild linked to it. A quote that is Approved or Declined keeps its lines until it is set back to Draft or Sent.
  */
+const saveSchema = z.object({ ...target, status: z.enum(QUOTE_STATUSES), note: z.string().max(2000), lines: z.array(lineSchema).max(200) });
+
 export const saveRepairQuote = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { jobId?: number | null; rebuildId?: number | null; status: QuoteStatus; note: string; lines: z.input<typeof lineSchema>[] }) =>
-    z.object({ ...target, status: z.enum(QUOTE_STATUSES), note: z.string().max(2000), lines: z.array(lineSchema).max(200) }).parse(d),
-  )
-  .handler(async ({ data, context }): Promise<RepairQuote> => {
-    const sql = await ready();
-    const t = await resolve(sql, data);
-    const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Desk";
-    const wasLocked = quoteLocked(t.quote?.status);
-    const staysLocked = wasLocked && quoteLocked(data.status);
-    // Checked before anything is written, so a bad line never leaves a half-saved quote.
-    const problem = staysLocked ? null : quoteError(data.lines);
-    if (problem) throw new Error(problem);
+  .validator((d: { jobId?: number | null; rebuildId?: number | null; status: QuoteStatus; note: string; lines: z.input<typeof lineSchema>[] }) => saveSchema.parse(d))
+  .handler(async ({ data, context }): Promise<RepairQuote> => saveRepairQuoteFor(await ready(), data, context.userId));
 
-    let quoteId = t.quote?.id ?? null;
-    if (quoteId == null) {
-      const made = await sql.query<{ id: number }>("insert into repair_quotes (job_id, rebuild_id, status, note, updated_by) values ($1, $2, $3, $4, $5) returning id", [
-        t.jobId,
-        t.rebuildId,
-        data.status,
-        data.note.trim() || null,
-        who,
-      ]);
-      quoteId = Number(made[0]!.id);
-    } else {
-      // A quote started on one side picks up the other once the two are linked, unless that side has its own.
-      await sql.query(
-        `update repair_quotes q set status = $2, note = $3, updated_by = $4, updated_at = now(),
-                job_id = coalesce(q.job_id, case when $5::int is not null and not exists (select 1 from repair_quotes o where o.job_id = $5 and o.id <> q.id) then $5 end),
-                rebuild_id = coalesce(q.rebuild_id, case when $6::int is not null and not exists (select 1 from repair_quotes o where o.rebuild_id = $6 and o.id <> q.id) then $6 end)
-          where q.id = $1`,
-        [quoteId, data.status, data.note.trim() || null, who, t.jobId, t.rebuildId],
-      );
-    }
+/** The body of saveRepairQuote. Warehouse doesn't change repair quotes: they are customers' estimates (Chuy, 10/29). */
+export async function saveRepairQuoteFor(sql: Sql, data: z.output<typeof saveSchema>, userId: string): Promise<RepairQuote> {
+  if (await isWarehouseOnly(sql, userId)) throw new Error("Warehouse doesn't change repair quotes. Ask an Admin or a tech.");
+  const t = await resolve(sql, data);
+  const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Desk";
+  const wasLocked = quoteLocked(t.quote?.status);
+  const staysLocked = wasLocked && quoteLocked(data.status);
+  // Checked before anything is written, so a bad line never leaves a half-saved quote.
+  const problem = staysLocked ? null : quoteError(data.lines);
+  if (problem) throw new Error(problem);
 
-    if (!staysLocked) {
-      const lines = data.lines.map((l) => ({ item: l.item.trim(), description: l.description.trim(), qty: cleanQty(l.qty)!, rate: cleanRate(l.rate)!, marked: l.kind ?? null }));
-      const known = lines.length
-        ? await sql.query<{ item: string; kind: ChargeKind }>("select item, kind from billing_items where lower(btrim(item)) = any($1::text[])", [lines.map((l) => l.item.toLowerCase())])
-        : [];
-      const kinds = new Map(known.map((k) => [k.item.trim().toLowerCase(), k.kind]));
-      // One statement: the old lines and the new ones change together or not at all.
-      await sql.query(
-        `with d as (delete from repair_quote_lines where quote_id = $1)
-         insert into repair_quote_lines (quote_id, item, description, qty, rate, kind, sort)
-         select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
-           from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
-                as t(item, description, qty, rate, kind, ord)`,
-        [quoteId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => quoteLineKind(l.item, l.marked, kinds.get(l.item.toLowerCase())))],
-      );
-    }
+  let quoteId = t.quote?.id ?? null;
+  if (quoteId == null) {
+    const made = await sql.query<{ id: number }>("insert into repair_quotes (job_id, rebuild_id, status, note, updated_by) values ($1, $2, $3, $4, $5) returning id", [
+      t.jobId,
+      t.rebuildId,
+      data.status,
+      data.note.trim() || null,
+      who,
+    ]);
+    quoteId = Number(made[0]!.id);
+  } else {
+    // A quote started on one side picks up the other once the two are linked, unless that side has its own.
+    await sql.query(
+      `update repair_quotes q set status = $2, note = $3, updated_by = $4, updated_at = now(),
+              job_id = coalesce(q.job_id, case when $5::int is not null and not exists (select 1 from repair_quotes o where o.job_id = $5 and o.id <> q.id) then $5 end),
+              rebuild_id = coalesce(q.rebuild_id, case when $6::int is not null and not exists (select 1 from repair_quotes o where o.rebuild_id = $6 and o.id <> q.id) then $6 end)
+        where q.id = $1`,
+      [quoteId, data.status, data.note.trim() || null, who, t.jobId, t.rebuildId],
+    );
+  }
 
-    const saved = await load(sql, data);
-    const detail = `repair quote: ${saved.status}, ${saved.lines.length} line${saved.lines.length === 1 ? "" : "s"}, $${saved.total.toFixed(2)}`;
-    const log = (type: string, id: number) =>
-      sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [type, id, who, detail]).catch(() => undefined);
-    if (saved.jobId != null) {
-      const kind = (await sql.query<{ kind: string }>("select kind from service_jobs where id = $1", [saved.jobId]))[0]?.kind ?? "service";
-      await log(kind, saved.jobId);
-    }
-    if (saved.rebuildId != null) await log("rebuild", saved.rebuildId);
-    return saved;
-  });
+  if (!staysLocked) {
+    const lines = data.lines.map((l) => ({ item: l.item.trim(), description: l.description.trim(), qty: cleanQty(l.qty)!, rate: cleanRate(l.rate)!, marked: l.kind ?? null }));
+    const known = lines.length
+      ? await sql.query<{ item: string; kind: ChargeKind }>("select item, kind from billing_items where lower(btrim(item)) = any($1::text[])", [lines.map((l) => l.item.toLowerCase())])
+      : [];
+    const kinds = new Map(known.map((k) => [k.item.trim().toLowerCase(), k.kind]));
+    // One statement: the old lines and the new ones change together or not at all.
+    await sql.query(
+      `with d as (delete from repair_quote_lines where quote_id = $1)
+       insert into repair_quote_lines (quote_id, item, description, qty, rate, kind, sort)
+       select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+         from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
+              as t(item, description, qty, rate, kind, ord)`,
+      [quoteId, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => quoteLineKind(l.item, l.marked, kinds.get(l.item.toLowerCase())))],
+    );
+  }
+
+  const saved = await load(sql, data);
+  const detail = `repair quote: ${saved.status}, ${saved.lines.length} line${saved.lines.length === 1 ? "" : "s"}, $${saved.total.toFixed(2)}`;
+  const log = (type: string, id: number) =>
+    sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [type, id, who, detail]).catch(() => undefined);
+  if (saved.jobId != null) {
+    const kind = (await sql.query<{ kind: string }>("select kind from service_jobs where id = $1", [saved.jobId]))[0]?.kind ?? "service";
+    await log(kind, saved.jobId);
+  }
+  if (saved.rebuildId != null) await log("rebuild", saved.rebuildId);
+  return saved;
+}
 
 /** Cost per rebuild, for the rebuild rows: parts, labor, total and status of the one quote each project uses. */
 export async function loadRebuildCosts(sql: Sql, rebuilds: { id: number; jobId: number | null }[]): Promise<Map<number, QuoteCost>> {

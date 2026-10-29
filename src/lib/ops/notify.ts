@@ -321,6 +321,32 @@ export async function notifyAdminsStockRequest(
   }
 }
 
+/**
+ * Tell everyone who approves invoices (the desk owner flag or the Admin role, approved) that Warehouse saved a refurb
+ * invoice for approval. The ping opens the rebuild. Never the person who saved it.
+ */
+export async function notifyAdminsInvoiceWaiting(
+  sql: Sql,
+  fromUserId: string,
+  invoice: { rebuildId: number; account: string; body: string },
+): Promise<void> {
+  await ensureTable(sql);
+  const who = (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [fromUserId]))[0]?.username || "Warehouse";
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; desk_role: string | null; approved: boolean }>(
+    "select user_id, is_admin, desk_role, approved from desk_accounts where user_id <> $1",
+    [fromUserId],
+  );
+  for (const admin of admins) {
+    const approver = flagOn(admin.is_admin) || String(admin.desk_role ?? "").trim().toLowerCase() === "admin";
+    if (!approver || !flagOn(admin.approved)) continue;
+    await sql.query(
+      `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
+       values ($1, $2, $3, $4, $5, 'rebuild', $6)`,
+      [admin.user_id, fromUserId, who, invoice.body, invoice.account, invoice.rebuildId],
+    );
+  }
+}
+
 function previewLine(body: string): string {
   const line = body
     .split(/\r?\n/)

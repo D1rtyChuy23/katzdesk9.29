@@ -193,7 +193,8 @@ export function RebuildPlanner({
           {canEdit ? (
             <ul className="mt-3 space-y-1 max-sm:space-y-0 max-sm:divide-y max-sm:divide-border">
               {list
-                .filter((r) => r.status !== "Completed")
+                // Warehouse dates only its refurbs.
+                .filter((r) => r.status !== "Completed" && r.editable)
                 .slice(0, 12)
                 .map((r) => (
                   <li key={`date-${r.id}`} className="flex flex-wrap items-center gap-2 text-xs max-sm:py-2">

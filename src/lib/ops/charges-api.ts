@@ -9,7 +9,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
-import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware, isWarehouseOnly, WAREHOUSE_BILLING_REFUSAL } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import {
   billingCsv,
@@ -357,10 +357,13 @@ export async function storeInvoicedProfit(sql: Sql, jobId: number, invoiced: boo
 export const getTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { jobId: number }) => z.object({ jobId: z.number().int().positive() }).parse(d))
-  .handler(async ({ data, context }): Promise<TicketCharges> => {
-    const sql = await ready();
-    return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
-  });
+  .handler(async ({ data, context }): Promise<TicketCharges> => getTicketChargesFor(await ready(), data.jobId, context.userId));
+
+/** The body of getTicketCharges. Warehouse doesn't read tickets' billing. */
+export async function getTicketChargesFor(sql: Sql, jobId: number, userId: string): Promise<TicketCharges> {
+  if (await isWarehouseOnly(sql, userId)) throw new Error(WAREHOUSE_BILLING_REFUSAL);
+  return loadCharges(sql, jobId, await canReviewNames(sql, userId));
+}
 
 const lineSchema = z.object({
   item: z.string().max(200),
@@ -468,6 +471,7 @@ export async function writeTicketCharges(
     unlocked?: { nsSo: string | null; billedAt: string | null };
   },
 ): Promise<void> {
+  if (await isWarehouseOnly(sql, userId)) throw new Error(WAREHOUSE_BILLING_REFUSAL);
   const merged = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
   if (merged?.duplicate_of) throw new Error(`This ticket was merged into #${merged.duplicate_of}. Add charges there.`);
   const cur = await loadCharges(sql, jobId);
@@ -625,6 +629,7 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
  * invoice is locked: its Sales Order changes only through an Admin's unlock.
  */
 export async function recordTicketSalesOrder(sql: Sql, jobId: number, userId: string, nsSo: string | null, billedAt: string | null = null): Promise<void> {
+  if (await isWarehouseOnly(sql, userId)) throw new Error(WAREHOUSE_BILLING_REFUSAL);
   const so = cleanSalesOrder(nsSo);
   const saved = await sql.query<{ id: number }>(
     `update service_jobs

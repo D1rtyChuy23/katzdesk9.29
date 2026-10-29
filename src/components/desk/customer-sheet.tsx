@@ -953,7 +953,10 @@ function AccountMarksForm({
 }
 
 
-/** The account's invoices: approved ones on any record, and tickets with charges not approved yet. Each opens the Invoice window. */
+/**
+ * The account's invoices: approved ones on any record, ones Warehouse saved for an Admin to approve, and tickets with
+ * charges not approved yet. Each opens the Invoice window.
+ */
 function AccountInvoices({ customer }: { customer: string }) {
   const q = useQuery({ queryKey: ["account-invoices", customer.toLowerCase()], queryFn: () => listAccountInvoices({ data: { customer } }) });
   const [open, setOpen] = useState<{ type: InvoiceTarget; id: number } | null>(null);
@@ -976,7 +979,11 @@ function AccountInvoices({ customer }: { customer: string }) {
                   <span className="block truncate font-medium">{r.title}</span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {r.status}
-                    {r.approvedAt ? ` · ${r.approvedBy ?? "Desk"} · ${formatShortDate(r.approvedAt.slice(0, 10))}` : ""}
+                    {r.approvedAt
+                      ? ` · ${r.approvedBy ?? "Desk"} · ${formatShortDate(r.approvedAt.slice(0, 10))}`
+                      : r.submittedAt
+                        ? ` · saved by ${r.submittedBy ?? "Warehouse"} · ${formatShortDate(r.submittedAt.slice(0, 10))}`
+                        : ""}
                   </span>
                 </span>
                 <span className="shrink-0 text-sm font-medium tabular">{money(r.total)}</span>

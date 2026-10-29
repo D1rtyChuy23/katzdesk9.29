@@ -36,6 +36,7 @@ import { OpenLink } from "./open-link";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { formatShortDate } from "@/lib/ops/clock";
+import { isShopAccount, sentence, warehouseInvoiceRefusal, warehouseMayEdit } from "@/lib/ops/warehouse-invoice";
 import { Trash2 } from "lucide-react";
 
 function HealthBadge({ health }: { health: Rebuild["health"] }) {
@@ -59,10 +60,13 @@ const KEEP_MOUNTED = "outline-none data-[state=inactive]:hidden";
 export function RebuildSheet({
   row,
   canEdit,
+  accountLock = null,
   onClose,
 }: {
   row: Rebuild | null;
   canEdit: boolean;
+  /** Warehouse: its refurbs are for this account (Katz Coffee Service Dept.), so the account can't be picked. */
+  accountLock?: string | null;
   onClose: () => void;
 }) {
   const qc = useQueryClient();
@@ -84,6 +88,29 @@ export function RebuildSheet({
   const [jobId, setJobId] = useState<number | null>(null);
   const [reuseNotice, setReuseNotice] = useState<string | null>(null);
 
+  // The form starts over only when the rebuild's own fields change on the server, not when the list refreshes for
+  // something else on the row (its invoice or quote), so unsaved edits stay put.
+  const formKey = row
+    ? JSON.stringify([
+        row.id,
+        row.title,
+        row.account,
+        row.equipment,
+        row.serial,
+        row.owner,
+        row.status,
+        row.reasonCode,
+        row.reasonDetail,
+        row.plannedStart,
+        row.targetComplete,
+        row.actualStart,
+        row.actualComplete,
+        row.priority,
+        row.notes,
+        row.installId,
+        row.jobId,
+      ])
+    : "";
   useEffect(() => {
     if (!row) return;
     setTitle(row.title);
@@ -102,7 +129,9 @@ export function RebuildSheet({
     setNotes(row.notes ?? "");
     setInstallId(row.installId);
     setJobId(row.jobId);
-  }, [row]);
+    // `row` is read through formKey, which holds every field set here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formKey]);
 
   const [tab, setTab] = useState<RebuildTab>("details");
   useEffect(() => setTab("details"), [row?.id]);
@@ -232,17 +261,40 @@ export function RebuildSheet({
                 <Label htmlFor="rb-title">Project name</Label>
                 <Input id="rb-title" className="mt-1" value={title} onChange={(e) => setTitle(e.target.value)} disabled={locked} required />
               </div>
-              <div>
-                <CustomerCombo label="Account" value={account} onChange={setAccount} />
-                <button
-                  type="button"
-                  className="mt-1 text-xs text-primary underline-offset-2 hover:underline max-sm:mt-2 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:text-sm"
-                  onClick={() => setAccount(SHOP_ACCOUNT)}
-                  disabled={locked}
-                >
-                  Katz shop / stock
-                </button>
-              </div>
+              {accountLock ? (
+                // Warehouse: the account isn't picked. A Katz shop / stock refurb can move to Katz Coffee Service Dept.
+                <div data-testid="rebuild-account-locked">
+                  <Label>Account</Label>
+                  <p className="mt-1 text-sm font-medium" data-testid="rebuild-account">
+                    {account}
+                  </p>
+                  {!locked && isShopAccount(account) ? (
+                    <button
+                      type="button"
+                      className="mt-1 text-xs text-primary underline-offset-2 hover:underline max-sm:mt-2 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:text-sm"
+                      onClick={() => setAccount(accountLock)}
+                      data-testid="rebuild-bill-service-dept"
+                    >
+                      Bill {accountLock}
+                    </button>
+                  ) : null}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {account !== row.account ? `Save to move this refurb to ${sentence(accountLock)}` : `Warehouse refurbs and their invoices are for ${sentence(accountLock)}`}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <CustomerCombo label="Account" value={account} onChange={setAccount} />
+                  <button
+                    type="button"
+                    className="mt-1 text-xs text-primary underline-offset-2 hover:underline max-sm:mt-2 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:text-sm"
+                    onClick={() => setAccount(SHOP_ACCOUNT)}
+                    disabled={locked}
+                  >
+                    Katz shop / stock
+                  </button>
+                </div>
+              )}
               <OwnerSelect value={owner} onChange={setOwner} />
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
@@ -368,7 +420,11 @@ export function RebuildSheet({
                     {save.isPending ? "Saving…" : "Save"}
                   </Button>
                 ) : (
-                  <p className="text-xs text-muted-foreground">Sales can view this rebuild. Bench status is service-owned.</p>
+                  <p className="text-xs text-muted-foreground" data-testid="rebuild-read-only">
+                    {accountLock
+                      ? `Warehouse can view this rebuild. It changes refurbs for ${accountLock} and ${SHOP_ACCOUNT} only.`
+                      : "Sales can view this rebuild. Bench status is service-owned."}
+                  </p>
                 )}
                 {canEdit ? (
                   <Button
@@ -426,12 +482,24 @@ export function RebuildSheet({
             <Tabs.Content value="invoices" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-invoices">
               <section className="border-b border-border p-5">
                 <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
-                <p className="mt-1 text-xs text-muted-foreground">Billing info for this rebuild.</p>
-                <div className="mt-3">
-                  <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} />
-                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {accountLock && warehouseMayEdit(row.account)
+                    ? `The parts this refurb used, billed to ${sentence(accountLock)} Save them for an Admin to approve.`
+                    : "Billing info for this rebuild."}
+                </p>
+                {accountLock && !warehouseMayEdit(row.account) ? (
+                  // A customer's rebuild: its invoice is an Admin's, and its billing stays closed to Warehouse.
+                  <p className="mt-3 text-sm text-muted-foreground" data-testid="rebuild-invoice-closed">
+                    {warehouseInvoiceRefusal(row.account)}
+                  </p>
+                ) : (
+                  <div className="mt-3">
+                    <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} />
+                  </div>
+                )}
               </section>
-              <RepairQuotePanel rebuildId={row.id} key={`quote-${row.id}`} />
+              {/* Repair quotes are customers' estimates: not Warehouse's (the server refuses its saves too). */}
+              {accountLock ? null : <RepairQuotePanel rebuildId={row.id} key={`quote-${row.id}`} />}
             </Tabs.Content>
             <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-ping">
               <div className="border-b border-border px-5 py-3">
