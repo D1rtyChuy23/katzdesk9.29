@@ -82,7 +82,7 @@ export type PartRow = {
   binUpdatedBy: string | null;
   /** Old numbers merged into this part (10/28); searching one finds it. */
   previousNumbers: string[];
-  /** Why parts were merged into this one, from the merge file. */
+  /** The part's note: why parts were merged into it (the merge file), and lines from Import Part Notes. */
   mergeNote: string | null;
   /** Set when this row was folded into another part (an import copy, or an old number): that part. */
   mergedInto: { id: number; sku: string } | null;
