@@ -37,6 +37,7 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
 import { Route as AppUnitMismatchesRouteImport } from './routes/_app/unit-mismatches'
 import { Route as AppWarehouseRouteImport } from './routes/_app/warehouse'
+import { Route as ApiAdminPartsExportRouteImport } from './routes/api/admin/parts-export'
 import { Route as ApiAdminTicketsInWindowRouteImport } from './routes/api/admin/tickets-in-window'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiLibraryFileTokenRouteImport } from './routes/api/library-file/$token'
@@ -183,6 +184,11 @@ const AppWarehouseRoute = AppWarehouseRouteImport.update({
   path: '/warehouse',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiAdminPartsExportRoute = ApiAdminPartsExportRouteImport.update({
+  id: '/api/admin/parts-export',
+  path: '/api/admin/parts-export',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminTicketsInWindowRoute = ApiAdminTicketsInWindowRouteImport.update({
   id: '/api/admin/tickets-in-window',
   path: '/api/admin/tickets-in-window',
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/tlc': typeof AppTlcRoute
   '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
+  '/api/admin/parts-export': typeof ApiAdminPartsExportRoute
   '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
   '/': typeof AppIndexRoute
+  '/api/admin/parts-export': typeof ApiAdminPartsExportRoute
   '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/_app/unit-mismatches': typeof AppUnitMismatchesRoute
   '/_app/warehouse': typeof AppWarehouseRoute
   '/_app/': typeof AppIndexRoute
+  '/api/admin/parts-export': typeof ApiAdminPartsExportRoute
   '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
@@ -352,6 +361,7 @@ export interface FileRouteTypes {
     | '/tlc'
     | '/unit-mismatches'
     | '/warehouse'
+    | '/api/admin/parts-export'
     | '/api/admin/tickets-in-window'
     | '/api/auth/$'
     | '/api/library-file/$token'
@@ -387,6 +397,7 @@ export interface FileRouteTypes {
     | '/unit-mismatches'
     | '/warehouse'
     | '/'
+    | '/api/admin/parts-export'
     | '/api/admin/tickets-in-window'
     | '/api/auth/$'
     | '/api/library-file/$token'
@@ -423,6 +434,7 @@ export interface FileRouteTypes {
     | '/_app/unit-mismatches'
     | '/_app/warehouse'
     | '/_app/'
+    | '/api/admin/parts-export'
     | '/api/admin/tickets-in-window'
     | '/api/auth/$'
     | '/api/library-file/$token'
@@ -434,6 +446,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiAdminPartsExportRoute: typeof ApiAdminPartsExportRoute
   ApiAdminTicketsInWindowRoute: typeof ApiAdminTicketsInWindowRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiLibraryFileTokenRoute: typeof ApiLibraryFileTokenRoute
@@ -639,6 +652,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWarehouseRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/admin/parts-export': {
+      id: '/api/admin/parts-export'
+      path: '/api/admin/parts-export'
+      fullPath: '/api/admin/parts-export'
+      preLoaderRoute: typeof ApiAdminPartsExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/tickets-in-window': {
       id: '/api/admin/tickets-in-window'
       path: '/api/admin/tickets-in-window'
@@ -749,6 +769,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiAdminPartsExportRoute: ApiAdminPartsExportRoute,
   ApiAdminTicketsInWindowRoute: ApiAdminTicketsInWindowRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiLibraryFileTokenRoute: ApiLibraryFileTokenRoute,
