@@ -52,17 +52,27 @@ type Ref = { type: InvoiceTarget; id: number; customer: string; title: string; r
 /** The record the invoice is for: its customer comes from the record itself, never asked for again. */
 async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise<Ref> {
   if (type === "service" || type === "tlc") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null }>(
-      "select customer, wo, call_id, kind, ns_so, duplicate_of from service_jobs where id = $1",
+    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; ns_invoice: string | null; ns_status: string | null }>(
+      `select j.customer, j.wo, j.call_id, j.kind, j.ns_so, j.duplicate_of, i.ns_invoice, i.status as ns_status
+         from service_jobs j
+         left join lateral (
+           select ns_invoice, status from ticket_invoices ti
+            where ti.job_id = j.id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
+            order by ti.invoice_date desc nulls last, ti.id desc
+            limit 1
+         ) i on true
+        where j.id = $1`,
       [id],
     ))[0];
     if (!r) throw new Error("That ticket is no longer on the list.");
     const kind: InvoiceTarget = r.kind === "tlc" ? "tlc" : "service";
     const locked = r.duplicate_of
       ? `This ticket was merged into #${r.duplicate_of}. Open that ticket to change its invoice.`
-      : r.ns_so
-        ? `This ticket is billed on ${r.ns_so}. Clear the Sales Order number on the ticket to change its invoice.`
-        : null;
+      : r.ns_invoice
+        ? `This ticket is invoiced in NetSuite on ${r.ns_invoice} (${r.ns_status}). Its charges are locked; an Admin can unlock them in the ticket's Charges.`
+        : r.ns_so
+          ? `This ticket is billed on ${r.ns_so}. Clear the Sales Order number on the ticket to change its invoice.`
+          : null;
     return {
       type: kind,
       id,

@@ -125,6 +125,10 @@ export type MergeMoney = {
   completedAt: string | null;
   /** PMs stacked on this ticket. Omitted by older callers; treated as none. */
   stackedPms?: { id: number; customer: string | null }[];
+  /** NetSuite invoices on this ticket (any status). Omitted by older callers; treated as none. */
+  invoices?: number;
+  /** The live (not Voided) NetSuite invoice that locks this ticket's charges, if any. */
+  liveInvoice?: string | null;
 };
 
 function salesOrder(nsSo: string | null): string | null {
@@ -184,6 +188,10 @@ function completedRefusal(keeper: MergeMoney, extra: MergeMoney): string | null 
 export function mergeMoneyRefusal(keeper: MergeMoney, extra: MergeMoney, mergedCustomer?: string | null): string | null {
   const extraSo = salesOrder(extra.nsSo);
   if (extraSo) return `Ticket #${extra.id} is billed on ${extraSo}. Merge the other ticket into it instead.`;
+  if ((extra.invoices ?? 0) > 0) return `Ticket #${extra.id} has NetSuite invoices. Merge the other ticket into it instead.`;
+  if (keeper.liveInvoice && extra.lines > 0) {
+    return `Ticket #${keeper.id} is invoiced on ${keeper.liveInvoice}, so its charges are locked. Don't merge charges into it.`;
+  }
   const keeperSo = salesOrder(keeper.nsSo);
   const extraPms = [...(extra.stackedPms ?? [])].sort((a, b) => a.id - b.id);
   if (keeperSo && extraPms[0]) {
@@ -220,6 +228,8 @@ type MoneyRow = {
   has_quote: boolean | string;
   completed_at: string | null;
   updated: string | null;
+  invoices?: number | string;
+  live_invoice?: string | null;
 };
 
 function toMoney(row: MoneyRow): MergeMoney {
@@ -234,8 +244,15 @@ function toMoney(row: MoneyRow): MergeMoney {
     discountKind: kind,
     discountValue: value != null && Number.isFinite(value) ? value : null,
     completedAt: row.completed_at || null,
+    invoices: Number(row.invoices ?? 0) || 0,
+    liveInvoice: row.live_invoice ?? null,
   };
 }
+
+/** SQL: the ticket (by its id column) has a NetSuite invoice that isn't Voided. */
+const LIVE_INVOICE = (jobCol: string) =>
+  `exists (select 1 from ticket_invoices ti where ti.job_id = ${jobCol}
+            and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void'))`;
 
 /** ns_so, po, discount, charge count, completed date, and whether a repair quote exists — both tickets, one select. */
 async function loadMergeMoney(
@@ -248,7 +265,11 @@ async function loadMergeMoney(
             to_char(j.completed_at, 'YYYY-MM-DD') as completed_at,
             j.updated_at::text as updated,
             (select count(*)::int from ticket_charges c where c.job_id = j.id) as lines,
-            exists (select 1 from repair_quotes q where q.job_id = j.id) as has_quote
+            exists (select 1 from repair_quotes q where q.job_id = j.id) as has_quote,
+            (select count(*)::int from ticket_invoices ti where ti.job_id = j.id) as invoices,
+            (select ti.ns_invoice from ticket_invoices ti
+              where ti.job_id = j.id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
+              order by ti.invoice_date desc nulls last, ti.id desc limit 1) as live_invoice
        from service_jobs j
       where j.id = any($1::int[])`,
     [[keeperId, extraId]],
@@ -322,6 +343,8 @@ export function mergeTicketsSql(): string {
   ), g as (
     select * from pair
      where nullif(btrim(extra_so), '') is null
+       and not exists (select 1 from ticket_invoices ti where ti.job_id = pair.extra_id)
+       and not (${LIVE_INVOICE("pair.keeper_id")} and extra_lines > 0)
        and not (nullif(btrim(keeper_so), '') is not null and extra_lines > 0)
        and not (keeper_quote and extra_quote)
        and not (
@@ -448,7 +471,8 @@ export function mergeTicketsSql(): string {
            scheduled = $15,
            received = $16,
            urgency = $17,
-           po = coalesce(nullif(btrim(k.po), ''), g.extra_po),
+           -- An invoiced keeper is locked: its P.O. stays as it is (10/28).
+           po = case when ${LIVE_INVOICE("k.id")} then k.po else coalesce(nullif(btrim(k.po), ''), g.extra_po) end,
            discount_kind = case when g.keeper_lines = 0 and g.keeper_dk is null and g.extra_lines > 0 then g.extra_dk else k.discount_kind end,
            discount_value = case when g.keeper_lines = 0 and g.keeper_dk is null and g.extra_lines > 0 then g.extra_dv else k.discount_value end,
            updated_at = now()

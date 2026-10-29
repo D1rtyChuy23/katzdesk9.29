@@ -41,18 +41,17 @@ test("labels", () => {
   assert.equal(discountLabel(null), "");
 });
 
-test("billing rows: one discount row after each discounted ticket, at minus the dollars off", async () => {
-  const { withDiscountRows } = await import("../src/lib/ops/discount.ts");
+test("billing rows: the discount is NetSuite's header discount on every row of its ticket, never a discount line", async () => {
+  const { withHeaderDiscount } = await import("../src/lib/ops/discount.ts");
   const rows = [
     { jobId: 1, item: "Service : TRIPCHARGE", description: "", qty: 1, rate: 150 },
     { jobId: 1, item: "Service : SERVICELABOR", description: "", qty: 2, rate: 150 },
     { jobId: 2, item: "Service : TRIPCHARGE", description: "", qty: 1, rate: 150 },
   ];
-  const out = withDiscountRows(rows, new Map([[1, { kind: "percent", value: 10 }]]));
-  assert.deepEqual(out.map((r) => [r.jobId, r.item, r.rate]), [
-    [1, "Service : TRIPCHARGE", 150],
-    [1, "Service : SERVICELABOR", 150],
-    [1, "Discount", -45],
-    [2, "Service : TRIPCHARGE", 150],
+  const out = withHeaderDiscount(rows, new Map([[1, { kind: "percent", value: 10 }]]));
+  assert.deepEqual(out.map((r) => [r.jobId, r.item, r.rate, r.discountItem, r.discountRate]), [
+    [1, "Service : TRIPCHARGE", 150, "CLDSERVICE", "-45.00"],
+    [1, "Service : SERVICELABOR", 150, "CLDSERVICE", "-45.00"],
+    [2, "Service : TRIPCHARGE", 150, "", ""],
   ]);
 });

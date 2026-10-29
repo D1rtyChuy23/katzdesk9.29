@@ -9,9 +9,11 @@ assert.match(exportSrc, /name: "Not ready"/);
 assert.match(exportSrc, /name: "Ready"/);
 
 const corrigo = readFileSync(new URL("../src/components/desk/corrigo-import.tsx", import.meta.url), "utf8");
-assert.ok(corrigo.includes("Add customer"), "import preview must offer Add customer");
+// 10/28 (Grok's billing request through Chuy): the import never adds an account. A row's account is matched by its
+// exact name; anything else is picked from the existing accounts in the preview, or the row is skipped.
+assert.ok(!corrigo.includes("Add customer"), "the import preview never offers Add customer");
 assert.ok(corrigo.includes("allowCreate={false}"), "must not auto-create from combo +");
-assert.ok(corrigo.includes("addDirectoryEntry"), "create only after Add");
+assert.ok(!corrigo.includes("addDirectoryEntry"), "the import never adds an account");
 
 const installs = readFileSync(new URL("../src/routes/_app/installs.tsx", import.meta.url), "utf8");
 assert.ok(installs.includes("Mark installed"));

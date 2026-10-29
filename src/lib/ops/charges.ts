@@ -152,11 +152,12 @@ export const BILLING_LABEL: Record<BillingState, string> = {
 };
 
 /**
- * Where a ticket is in billing. A Sales Order number means it is billed. Charges without one are ready.
- * No charges is flagged on purpose: a finished ticket with nothing on it is usually a missed bill.
+ * Where a ticket is in billing. A Sales Order number, or a NetSuite invoice that isn't Voided, means it is billed.
+ * Charges without either are ready. No charges is flagged on purpose: a finished ticket with nothing on it is usually
+ * a missed bill.
  */
-export function billingState(input: { lineCount: number; nsSo: string | null | undefined }): BillingState {
-  if ((input.nsSo ?? "").trim()) return "billed";
+export function billingState(input: { lineCount: number; nsSo: string | null | undefined; invoiced?: boolean }): BillingState {
+  if ((input.nsSo ?? "").trim() || input.invoiced) return "billed";
   return input.lineCount > 0 ? "ready" : "no-charges";
 }
 
@@ -398,8 +399,16 @@ export type BillingExportLine = {
   qty: number;
   rate: number;
   workDone: string;
+  /** NetSuite's header discount on every row of a discounted ticket: CLDSERVICE at minus the dollars. */
+  discountItem?: string;
+  discountRate?: string;
+  /** The ticket's Sales Order, its NetSuite invoices ("INV1 Open; INV2 Paid"), and where it bills from. */
+  so?: string;
+  invoices?: string;
+  location?: string;
 };
 
+/** The original columns stay first, in their places; the newer ones follow (nothing reads them by position). */
 export const BILLING_CSV_HEADER = [
   "WO",
   "PO",
@@ -415,6 +424,11 @@ export const BILLING_CSV_HEADER = [
   "Rate",
   "Amount",
   "Work Done",
+  "Discount Item",
+  "Discount Rate",
+  "SO",
+  "Invoices",
+  "Location",
 ];
 
 export function csvCell(v: string | number): string {
@@ -444,6 +458,11 @@ export function billingCsv(lines: BillingExportLine[]): string {
         l.rate.toFixed(2),
         lineAmount(l).toFixed(2),
         l.workDone,
+        l.discountItem ?? "",
+        l.discountRate ?? "",
+        l.so ?? "",
+        l.invoices ?? "",
+        l.location ?? "",
       ]
         .map(csvCell)
         .join(","),

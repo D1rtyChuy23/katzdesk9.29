@@ -1,5 +1,6 @@
 import { useLocation, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { parseBillingFilters, type BillingFilters } from "./billing-rules";
 
 /** `?open=` a record, and `from=` the page (path and search) that opened it, so closing the window goes back there. */
 export type OpenSearch = { open?: number; from?: string };
@@ -42,12 +43,42 @@ export function useBackTo(from: string | undefined): () => boolean {
   };
 }
 
-/** Tickets and TLC + Factor: `?open=`, plus `tab=ping` when a ping or note notification opened the ticket. */
-export type TicketSearch = OpenSearch & { tab?: "ping" };
+export type TicketView = "active" | "flagged" | "unassigned" | "complete" | "all";
+
+const TICKET_VIEWS: TicketView[] = ["active", "flagged", "unassigned", "complete", "all"];
+
+/**
+ * Tickets and TLC + Factor: `?open=`, plus `tab=ping` when a ping or note notification opened the ticket. The list's
+ * view, urgency and filters ride along too (10/28), so a filtered list can be bookmarked or sent. Active is the
+ * default view and is left out.
+ */
+export type TicketSearch = OpenSearch & { tab?: "ping"; view?: Exclude<TicketView, "active">; urgency?: string } & Omit<BillingFilters, "board">;
 
 export function parseTicketSearch(s: Record<string, unknown>): TicketSearch {
   const base = parseOpenSearch(s);
-  return s.tab === "ping" ? { ...base, tab: "ping" } : base;
+  const view = typeof s.view === "string" && s.view !== "active" && (TICKET_VIEWS as string[]).includes(s.view) ? (s.view as Exclude<TicketView, "active">) : undefined;
+  const urgency = typeof s.urgency === "string" && s.urgency.trim() && s.urgency.length <= 30 ? s.urgency.trim() : undefined;
+  // The board is the page itself here.
+  const { board: _board, ...filters } = parseBillingFilters(s);
+  void _board;
+  return {
+    ...base,
+    ...(s.tab === "ping" ? { tab: "ping" as const } : {}),
+    ...(view ? { view } : {}),
+    ...(urgency ? { urgency } : {}),
+    ...filters,
+  };
+}
+
+/** The search with one list change applied and every blank left out, so the address bar only carries what is set. */
+export function withTicketList(prev: TicketSearch, patch: Partial<TicketSearch>): TicketSearch {
+  const next: Record<string, unknown> = { ...prev, ...patch };
+  for (const k of Object.keys(next)) {
+    const v = next[k];
+    if (v === undefined || v === null || v === "" || v === false) delete next[k];
+  }
+  if (next.view === "active") delete next.view;
+  return next as TicketSearch;
 }
 
 /** Keep the open sheet in sync when search / pings / deep links change `?open=`. */

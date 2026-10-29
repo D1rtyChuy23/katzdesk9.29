@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { JobsPage } from "@/components/desk/jobs-page";
-import { parseTicketSearch } from "@/lib/ops/search-params";
+import { parseTicketSearch, withTicketList, type TicketSearch } from "@/lib/ops/search-params";
 
 export const Route = createFileRoute("/_app/tlc")({
   validateSearch: parseTicketSearch,
@@ -8,7 +8,9 @@ export const Route = createFileRoute("/_app/tlc")({
 });
 
 function Page() {
-  const { open, tab, from } = Route.useSearch();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/tlc" });
+  const { open, tab, from } = search;
   return (
     <JobsPage
       kind="tlc"
@@ -17,6 +19,10 @@ function Page() {
       initialOpen={open}
       initialTab={tab}
       from={from}
+      search={search}
+      onSearch={(patch: Partial<TicketSearch>) =>
+        void navigate({ search: (prev) => withTicketList(prev, patch), replace: true, resetScroll: false })
+      }
     />
   );
 }

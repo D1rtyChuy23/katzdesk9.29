@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Trash2 } from "lucide-react";
+import { Lock, LockOpen, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { getTicketCharges, saveTicketCharges, searchBillingItems, setTicketSalesOrder, type TicketCharges } from "@/lib/ops/charges-api";
+import { getTicketCharges, saveTicketCharges, saveUnlockedBilling, searchBillingItems, setTicketSalesOrder, type TicketCharges } from "@/lib/ops/charges-api";
+import { relockTicketBilling, unlockTicketBilling } from "@/lib/ops/ticket-billing-api";
+import { UNLOCK_MINUTES } from "@/lib/ops/billing-rules";
+import { formatPingTime, todayChicago } from "@/lib/ops/clock";
 import {
   BILLING_LABEL,
   LABOR_ITEM,
@@ -59,43 +62,103 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   const [lines, setLines] = useState<DraftLine[]>([]);
   const [po, setPo] = useState("");
   const [so, setSo] = useState("");
+  const [billedOn, setBilledOn] = useState("");
   const [dirty, setDirty] = useState(false);
   const [discKind, setDiscKind] = useState<DiscountKind>("percent");
   const [discValue, setDiscValue] = useState("");
+  const [asking, setAsking] = useState(false);
+  const [reason, setReason] = useState("");
 
   const c = charges.data;
+  // The charges last loaded into the form, and whether the form has edits: an unlock or a refresh that brings the same
+  // charges back keeps what is being typed (10/28 review: an Admin unlocking again lost their edits).
+  const loaded = useRef<string | null>(null);
+  const editing = useRef(false);
+  useEffect(() => {
+    editing.current = dirty;
+  }, [dirty]);
   useEffect(() => {
     if (!c || c.jobId !== jobId) return;
+    const same = JSON.stringify([jobId, c.lines.map((l) => [l.id, l.item, l.description, l.qty, l.rate]), c.po, c.nsSo, c.discount]);
+    if (same === loaded.current && editing.current) return;
+    loaded.current = same;
     setLines(c.lines.map(toDraft));
     setPo(c.po);
     setSo(c.nsSo ?? "");
+    setBilledOn("");
     setDiscKind(c.discount?.kind ?? "percent");
     setDiscValue(c.discount ? String(c.discount.value) : "");
     setDirty(false);
   }, [c, jobId]);
 
-  const after = (next: TicketCharges, message: string) => {
-    qc.setQueryData(["charges", jobId], next);
-    // The ticket's Invoice window reads these same lines.
+  const refreshAround = () => {
+    // The ticket's Invoice window reads these same lines; the invoices list and lists show the lock.
     void qc.invalidateQueries({ queryKey: ["invoice"] });
     void qc.invalidateQueries({ queryKey: ["activity"] });
     void qc.invalidateQueries({ queryKey: ["jobs"] });
     void qc.invalidateQueries({ queryKey: ["pm-bill", jobId] });
+    void qc.invalidateQueries({ queryKey: ["ticket-billing", jobId] });
+    void qc.invalidateQueries({ queryKey: ["billing-invoices"] });
+  };
+  const after = (next: TicketCharges, message: string) => {
+    qc.setQueryData(["charges", jobId], next);
+    refreshAround();
     toast.success(message);
   };
+  const discountInput = () => (discValue.trim() ? { kind: discKind, value: discValue } : null);
   const save = useMutation({
-    mutationFn: () => saveTicketCharges({ data: { jobId, po, lines, lineIds: (charges.data?.lines ?? []).map((l) => l.id), discount: discValue.trim() ? { kind: discKind, value: discValue } : null } }),
+    mutationFn: () => saveTicketCharges({ data: { jobId, po, lines, lineIds: (charges.data?.lines ?? []).map((l) => l.id), discount: discountInput() } }),
     onSuccess: (next) => after(next, "Charges saved"),
     onError: (e: Error) => toast.error(e.message),
   });
   const bill = useMutation({
-    mutationFn: (nsSo: string | null) => setTicketSalesOrder({ data: { jobId, nsSo } }),
+    mutationFn: (nsSo: string | null) => setTicketSalesOrder({ data: { jobId, nsSo, billedAt: nsSo && billedOn ? billedOn : null } }),
     onSuccess: (next) => after(next, next.nsSo ? "Marked billed" : "Sales Order cleared"),
+    onError: (e: Error) => toast.error(e.message),
+  });
+  // An Admin's unlock on an invoiced ticket: one save of everything, then it locks again.
+  const unlock = useMutation({
+    mutationFn: () => unlockTicketBilling({ data: { jobId, reason } }),
+    onSuccess: () => {
+      setAsking(false);
+      setReason("");
+      void qc.invalidateQueries({ queryKey: ["charges", jobId] });
+      refreshAround();
+      toast.success(`Unlocked for ${UNLOCK_MINUTES} minutes. Saving locks it again.`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const relock = useMutation({
+    mutationFn: () => relockTicketBilling({ data: { jobId } }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["charges", jobId] });
+      refreshAround();
+      toast.success("Locked again. Nothing was changed.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const saveUnlocked = useMutation({
+    mutationFn: () =>
+      saveUnlockedBilling({
+        data: {
+          jobId,
+          po,
+          lines,
+          lineIds: (charges.data?.lines ?? []).map((l) => l.id),
+          discount: discountInput(),
+          nsSo: so.trim() || null,
+          billedAt: billedOn || null,
+        },
+      }),
+    onSuccess: (next) => after(next, "Saved. The ticket is locked again."),
     onError: (e: Error) => toast.error(e.message),
   });
 
   if (!c) return null;
-  const billed = c.state === "billed";
+  // Only the Admin edits while it is unlocked; everyone else still sees it locked.
+  const unlocked = !!c.unlock && c.canUnlock;
+  // Locked: billed on a Sales Order (clear it to edit), or invoiced in NetSuite (an Admin unlocks it).
+  const billed = c.state === "billed" && !unlocked;
   // The discount is always worked out from the lines, never from a total that already has it taken off.
   const typedDiscount = cleanDiscount(discKind, discValue);
   const discount = "error" in typedDiscount ? null : typedDiscount.discount;
@@ -114,15 +177,85 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     <section className="border-b border-border p-5" data-testid="charges-panel">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Charges</h3>
-        <Badge size="tight" variant={billed ? "success" : c.state === "ready" ? "warn" : "outline"} data-testid="billing-state">
+        <Badge size="tight" variant={c.state === "billed" ? "success" : c.state === "ready" ? "warn" : "outline"} data-testid="billing-state">
           {BILLING_LABEL[c.state]}
-          {billed && c.nsSo ? ` · ${c.nsSo}` : ""}
+          {c.state === "billed" ? (c.nsSo ? ` · ${c.nsSo}` : c.invoiceLock ? ` · ${c.invoiceLock.invoice}` : "") : ""}
         </Badge>
+        {c.invoiceLock ? (
+          <Badge size="tight" variant={unlocked ? "warn" : "outline"} data-testid="charges-lock-badge">
+            {unlocked ? <LockOpen className="mr-1 size-3" /> : <Lock className="mr-1 size-3" />}
+            {unlocked ? "Unlocked" : "Locked"}
+          </Badge>
+        ) : null}
         <span className="ml-auto text-sm font-medium tabular" data-testid="charges-header-total">
           {totals.off ? <span className="mr-1.5 text-xs font-normal text-muted-foreground line-through">{money(totals.subtotal)}</span> : null}
           {money(total)}
         </span>
       </div>
+
+      {c.invoiceLock && !unlocked ? (
+        <div className="mt-3 rounded-lg border border-border bg-muted/50 p-3 text-sm" data-testid="charges-locked">
+          <p className="flex items-start gap-2">
+            <Lock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <span>
+              Invoiced in NetSuite on <span className="font-medium">{c.invoiceLock.invoice}</span> ({c.invoiceLock.status}). The charges, P.O.,
+              discount and Sales Order are locked for everyone.
+            </span>
+          </p>
+          {c.canUnlock ? (
+            asking ? (
+              <form
+                className="mt-3 space-y-2"
+                data-testid="charges-unlock-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  unlock.mutate();
+                }}
+              >
+                <Label htmlFor={`unlock-reason-${jobId}`}>Why do the charges need to change?</Label>
+                <Input
+                  id={`unlock-reason-${jobId}`}
+                  value={reason}
+                  autoComplete="off"
+                  placeholder="NetSuite credit memo CM123 changed the labor"
+                  onChange={(e) => setReason(e.target.value)}
+                  data-testid="charges-unlock-reason"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Your name, the time and this reason go on the ticket&apos;s history. It stays open {UNLOCK_MINUTES} minutes; saving locks it again.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="submit" size="sm" disabled={unlock.isPending || reason.trim().length < 3} data-testid="charges-unlock-confirm">
+                    {unlock.isPending ? "Unlocking…" : "Unlock"}
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setAsking(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => setAsking(true)} data-testid="charges-unlock">
+                <LockOpen className="size-4" />
+                Unlock To Edit
+              </Button>
+            )
+          ) : (
+            <p className="mt-2 text-xs text-muted-foreground">Only an Admin can unlock it.</p>
+          )}
+        </div>
+      ) : null}
+      {unlocked && c.unlock ? (
+        <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm" data-testid="charges-unlocked">
+          <p className="flex items-start gap-2">
+            <LockOpen className="mt-0.5 size-4 shrink-0 text-warning" />
+            <span>
+              Unlocked by <span className="font-medium">@{c.unlock.by ?? "Admin"}</span> {formatPingTime(c.unlock.at)}
+              {c.unlock.reason ? <> · “{c.unlock.reason}”</> : null}. Invoiced on {c.invoiceLock?.invoice}: change what NetSuite now says, then Save And
+              Lock.
+            </span>
+          </p>
+        </div>
+      ) : null}
 
       {lines.length ? (
         <ul className="mt-3 space-y-2">
@@ -306,19 +439,75 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
         <div>
           <Label htmlFor="charge-so">NetSuite Sales Order</Label>
           <div className="mt-1 flex gap-2">
-            <Input id="charge-so" value={so} placeholder="SO4345" autoComplete="off" onChange={(e) => setSo(e.target.value)} />
-            <Button type="button" size="sm" variant="outline" disabled={bill.isPending || so.trim() === (c.nsSo ?? "")} onClick={() => bill.mutate(so.trim() || null)}>
-              {so.trim() ? "Mark Billed" : "Clear"}
-            </Button>
+            <Input
+              id="charge-so"
+              value={so}
+              placeholder="SO4345"
+              autoComplete="off"
+              disabled={!!c.invoiceLock && !unlocked}
+              onChange={(e) => {
+                setSo(e.target.value);
+                if (unlocked) setDirty(true);
+              }}
+            />
+            {unlocked ? null : (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={bill.isPending || !!c.invoiceLock || so.trim() === (c.nsSo ?? "")}
+                onClick={() => bill.mutate(so.trim() || null)}
+                data-testid="charges-mark-billed"
+              >
+                {so.trim() ? "Mark Billed" : "Clear"}
+              </Button>
+            )}
           </div>
+          {!c.invoiceLock || unlocked ? (
+            <div className="mt-2 flex items-center gap-2">
+              <Label htmlFor={`charge-billed-on-${jobId}`} className="shrink-0 text-xs">
+                Billed on
+              </Label>
+              <Input
+                id={`charge-billed-on-${jobId}`}
+                type="date"
+                value={billedOn}
+                onChange={(e) => {
+                  setBilledOn(e.target.value);
+                  if (unlocked) setDirty(true);
+                }}
+                className="h-8 w-40"
+                data-testid="charges-billed-on"
+              />
+              <span className="text-xs text-muted-foreground">{c.billedAt ? `Now ${todayChicago(new Date(c.billedAt))}` : "Blank: today"}</span>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-end gap-2">
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
         {!lines.length && !billed ? <span className="mr-auto text-xs text-muted-foreground">A finished ticket with no charges is flagged for review.</span> : null}
-        <Button type="button" size="sm" disabled={billed || !dirty || save.isPending || "error" in typedDiscount} onClick={() => save.mutate()} data-testid="charges-save">
-          {save.isPending ? "Saving…" : "Save Charges"}
-        </Button>
+        {unlocked ? (
+          <>
+            <Button type="button" size="sm" variant="outline" disabled={relock.isPending || saveUnlocked.isPending} onClick={() => relock.mutate()} data-testid="charges-relock">
+              <Lock className="size-4" />
+              Lock Without Saving
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={!dirty || saveUnlocked.isPending || "error" in typedDiscount}
+              onClick={() => saveUnlocked.mutate()}
+              data-testid="charges-save-lock"
+            >
+              {saveUnlocked.isPending ? "Saving…" : "Save And Lock"}
+            </Button>
+          </>
+        ) : (
+          <Button type="button" size="sm" disabled={billed || !dirty || save.isPending || "error" in typedDiscount} onClick={() => save.mutate()} data-testid="charges-save">
+            {save.isPending ? "Saving…" : "Save Charges"}
+          </Button>
+        )}
       </div>
     </section>
   );

@@ -1,7 +1,10 @@
-import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withDiscountRows, type Discount } from "./discount";
+import { isWalkIn } from "./customer-key";
+import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withHeaderDiscount, type Discount } from "./discount";
 import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
 import { textArray } from "./part-merges";
 import { loadDiscountRule } from "./part-pricing-api";
+import { liveInvoices, lockingInvoice, locationWarning, unlockActive, warehouseForTech } from "./billing-rules";
+import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ, UNLOCKED_SQL, loadInvoices } from "./ticket-billing-api";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -136,6 +139,12 @@ export type TicketCharges = {
   profit: (LineProfitView | null)[] | null;
   /** Our Discount Rule as it reads now, for the Admin's view. */
   ruleLabel: string | null;
+  /** The NetSuite invoice (not Voided) that locks the charges, P.O., discount and Sales Order, or null. */
+  invoiceLock: { invoice: string; status: string } | null;
+  /** An Admin's open unlock: one save is allowed, then the ticket locks again. */
+  unlock: { by: string | null; at: string; reason: string | null } | null;
+  /** The caller is an Admin, so the lock can be opened. */
+  canUnlock: boolean;
 };
 
 export type LineProfitView = LineProfit & { mpn: string | null; listPrice: number | null; stored: boolean };
@@ -223,11 +232,24 @@ function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null): (
 }
 
 async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<TicketCharges> {
-  const job = (await sql.query<{ po: string | null; ns_so: string | null; billed_at: string | null; discount_kind: string | null; discount_value: string | null }>(
-    "select po, ns_so, billed_at, discount_kind, discount_value from service_jobs where id = $1",
+  const job = (await sql.query<{
+    po: string | null;
+    ns_so: string | null;
+    billed_at: string | null;
+    discount_kind: string | null;
+    discount_value: string | null;
+    billing_unlocked_at: unknown;
+    billing_unlocked_by: string | null;
+    billing_unlock_reason: string | null;
+  }>(
+    `select po, ns_so, billed_at, discount_kind, discount_value, billing_unlocked_at, billing_unlocked_by, billing_unlock_reason
+       from service_jobs where id = $1`,
     [jobId],
   ))[0];
   if (!job) throw new Error("That ticket is no longer on the list.");
+  const invoices = (await loadInvoices(sql, [jobId])).get(jobId) ?? [];
+  const lockedBy = lockingInvoice(invoices);
+  const unlockedAt = job.billing_unlocked_at instanceof Date ? job.billing_unlocked_at.toISOString() : job.billing_unlocked_at ? String(job.billing_unlocked_at) : null;
   const rows = await chargeRows(sql, jobId);
   const lines = rows.map((r) => ({
     id: Number(r.id),
@@ -247,13 +269,17 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
     jobId,
     po: job.po ?? "",
     nsSo: job.ns_so,
-    billedAt: job.billed_at,
+    // A timestamp comes back as a Date from both drivers: send text.
+    billedAt: (job.billed_at as unknown) instanceof Date ? (job.billed_at as unknown as Date).toISOString() : job.billed_at ? String(job.billed_at) : null,
     lines,
     discount,
     ...totals,
-    state: billingState({ lineCount: lines.length, nsSo: job.ns_so }),
+    state: billingState({ lineCount: lines.length, nsSo: job.ns_so, invoiced: liveInvoices(invoices).length > 0 }),
     profit: showCost ? profitFor(rows, totals.off, rule) : null,
     ruleLabel: showCost ? ruleLabel(rule) : null,
+    invoiceLock: lockedBy ? { invoice: lockedBy.invoice, status: lockedBy.status } : null,
+    unlock: lockedBy && unlockedAt && unlockActive(unlockedAt) ? { by: job.billing_unlocked_by, at: unlockedAt, reason: job.billing_unlock_reason } : null,
+    canUnlock: showCost,
   };
 }
 
@@ -265,7 +291,7 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
 export async function invoicedPartLines(sql: Sql, range: { from: string | null; to: string | null }): Promise<{ lines: (ProfitLine & { live: boolean })[] }> {
   const jobs = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
     `select j.id, j.discount_kind, j.discount_value from service_jobs j
-      where j.ns_so is not null and j.duplicate_of is null
+      where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")}) and j.duplicate_of is null
         and ($1::date is null or coalesce(j.billed_at::date, j.completed_at::date) >= $1::date)
         and ($2::date is null or coalesce(j.billed_at::date, j.completed_at::date) <= $2::date)
         and exists (select 1 from ticket_charges c where c.job_id = j.id)
@@ -305,7 +331,7 @@ export async function invoicedPartLines(sql: Sql, range: { from: string | null; 
  * the ticket discount and its margin, from the part and Our Discount Rule as they are now. Clearing the Sales
  * Order clears them, so a re-bill stores fresh ones.
  */
-async function storeInvoicedProfit(sql: Sql, jobId: number, invoiced: boolean) {
+export async function storeInvoicedProfit(sql: Sql, jobId: number, invoiced: boolean) {
   if (!invoiced) {
     await sql.query(
       "update ticket_charges set mpn = null, list_price = null, unit_cost = null, cost_source = null, our_discount = null, ticket_discount = null, margin = null, priced_at = null where job_id = $1",
@@ -359,6 +385,8 @@ export function replaceTicketChargesSql(): string {
         where s.id = $1
           and s.duplicate_of is null
           and nullif(btrim(s.ns_so), '') is null
+          and not ${LIVE_INVOICE_SQL("s.id")}
+          and ${UNCHANGED_SINCE_READ("s", "$1")}
           and ($7::boolean or coalesce((select array_agg(c.id order by c.id) from ticket_charges c where c.job_id = s.id), '{}') = $8::int[])
         for update
      ), d as (
@@ -379,6 +407,47 @@ export function replaceTicketChargesSql(): string {
 }
 
 /**
+ * The Admin's save on an unlocked, invoiced ticket: the same lines, P.O. and discount as replaceTicketChargesSql, plus
+ * the Sales Order ($13) and its billed date ($14, else kept when the SO is unchanged, else now). The Sales Order is
+ * kept, not cleared, so the lines change on a billed ticket. The unlock is cleared in the same statement, so saving
+ * locks the ticket again. Nothing is written when the unlock has run out.
+ */
+export function replaceUnlockedChargesSql(): string {
+  return `with j as (
+       select s.id
+         from service_jobs s
+        where s.id = $1
+          and s.duplicate_of is null
+          and ${UNLOCKED_SQL("s")}
+          and ($7::boolean or coalesce((select array_agg(c.id order by c.id) from ticket_charges c where c.job_id = s.id), '{}') = $8::int[])
+        for update
+     ), d as (
+       delete from ticket_charges c using j where c.job_id = j.id
+     ), ins as (
+       insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort)
+       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, nullif(btrim(t.source_key), ''), t.ord
+         from j
+         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $12::text[]) with ordinality
+              as t(item, description, qty, rate, kind, source_key, ord)
+       returning ticket_charges.id
+     )
+     update service_jobs s
+        set po = $9, discount_kind = $10, discount_value = $11,
+            ns_so = $13::text,
+            billed_at = case
+              when $13::text is null then null
+              when $14::date is not null then ($14::date)::timestamp at time zone 'America/Chicago'
+              when nullif(btrim(s.ns_so), '') is not distinct from $13::text then s.billed_at
+              else now()
+            end,
+            billing_unlocked_at = null, billing_unlocked_by = null, billing_unlock_reason = null,
+            updated_at = now()
+       from j
+      where s.id = j.id
+     returning s.id`;
+}
+
+/**
  * Replace a ticket's charge lines (and P.O. and discount when given). One path for the Charges panel and the
  * Invoice window, so both write the same lines the same way. A billed ticket is not changed.
  * po undefined keeps the stored P.O.; discount undefined keeps the stored discount, null clears it.
@@ -387,12 +456,29 @@ export async function writeTicketCharges(
   sql: Sql,
   jobId: number,
   userId: string,
-  input: { po?: string; lines: ChargeLinesInput; discount?: DiscountInput; lineIds?: number[] },
+  input: {
+    po?: string;
+    lines: ChargeLinesInput;
+    discount?: DiscountInput;
+    lineIds?: number[];
+    /**
+     * The Admin's save on an unlocked, invoiced ticket (the caller checks the Admin): the Sales Order and its billed
+     * date are saved with the lines, and the ticket locks again.
+     */
+    unlocked?: { nsSo: string | null; billedAt: string | null };
+  },
 ): Promise<void> {
   const merged = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
   if (merged?.duplicate_of) throw new Error(`This ticket was merged into #${merged.duplicate_of}. Add charges there.`);
   const cur = await loadCharges(sql, jobId);
-  if (cur.state === "billed") throw new Error(`This ticket is already billed on ${cur.nsSo}. Clear the Sales Order number to change the charges.`);
+  const unlocked = input.unlocked ?? null;
+  if (unlocked) {
+    if (!cur.invoiceLock) throw new Error("This ticket has no live NetSuite invoice, so it isn't locked. Save the charges as usual.");
+    if (!cur.unlock) throw new Error("The unlock ran out or was closed. Unlock the ticket again to save.");
+  } else {
+    if (cur.invoiceLock) throw new Error(invoiceLockError(cur.invoiceLock));
+    if (cur.state === "billed") throw new Error(`This ticket is already billed on ${cur.nsSo}. Clear the Sales Order number to change the charges.`);
+  }
   const problems = checkCharges(input.lines);
   if (problems.length) throw new Error(`Line ${problems[0].index + 1}: ${problems[0].message}`);
   // Left out = keep what is saved. Null or blank = no discount. Stored as the choice, never as a discounted total.
@@ -421,34 +507,48 @@ export async function writeTicketCharges(
   const po = input.po === undefined ? cur.po.trim() || null : input.po.trim() || null;
 
   // One statement: the ticket is locked, and the old lines, the new lines, and the P.O. change together or not at all.
-  const saved = await sql.query<{ id: number }>(replaceTicketChargesSql(), [
-      jobId,
-      lines.map((l) => l.item),
-      lines.map((l) => l.description),
-      lines.map((l) => l.qty),
-      lines.map((l) => l.rate),
-      lines.map((l) => l.kind),
-      !checkIds,
-      lineIds,
-      po,
-      typed.discount?.kind ?? null,
-      typed.discount?.value ?? null,
-      lines.map((l) => l.sourceKey),
-    ]);
+  const params = [
+    jobId,
+    lines.map((l) => l.item),
+    lines.map((l) => l.description),
+    lines.map((l) => l.qty),
+    lines.map((l) => l.rate),
+    lines.map((l) => l.kind),
+    !checkIds,
+    lineIds,
+    po,
+    typed.discount?.kind ?? null,
+    typed.discount?.value ?? null,
+    lines.map((l) => l.sourceKey),
+  ];
+  const so = unlocked ? cleanSalesOrder(unlocked.nsSo) : null;
+  const saved = unlocked
+    ? await sql.query<{ id: number }>(replaceUnlockedChargesSql(), [...params, so, unlocked.billedAt || null])
+    : await sql.query<{ id: number }>(replaceTicketChargesSql(), params);
   if (!saved[0]) {
     const row = (await sql.query<{ duplicate_of: number | null; ns_so: string | null }>("select duplicate_of, ns_so from service_jobs where id = $1", [jobId]))[0];
     if (row?.duplicate_of) throw new Error(`This ticket was merged into #${row.duplicate_of}. Add charges there.`);
-    const so = String(row?.ns_so ?? "").trim();
-    if (so) throw new Error(`This ticket is already billed on ${so}. Clear the Sales Order number to change the charges.`);
+    const now = await loadCharges(sql, jobId);
+    if (unlocked && !now.unlock) throw new Error("The unlock ran out or was closed. Unlock the ticket again to save.");
+    if (!unlocked && now.invoiceLock) throw new Error(invoiceLockError(now.invoiceLock));
+    const billedOn = String(row?.ns_so ?? "").trim();
+    if (!unlocked && billedOn) throw new Error(`This ticket is already billed on ${billedOn}. Clear the Sales Order number to change the charges.`);
     throw new Error("These charges changed since you opened them. Reload and try again.");
   }
   const after = applyDiscount(chargesTotal(lines), typed.discount);
+  const summary = `${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountLabel(typed.discount)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`;
   await logJob(
     sql,
     jobId,
     userId,
-    `charges: ${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountLabel(typed.discount)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`,
+    unlocked
+      ? `charges saved while unlocked (Admin): ${summary}${so ? ` · Sales Order ${so}` : " · no Sales Order"} · locked again`
+      : `charges: ${summary}`,
   );
+}
+
+function invoiceLockError(lock: { invoice: string; status: string }): string {
+  return `This ticket is invoiced on ${lock.invoice} (${lock.status}). Its charges, P.O., discount and Sales Order are locked. An Admin can unlock it.`;
 }
 
 /** A ticket's charges as the Invoice window reads them (no cost or margin). */
@@ -476,33 +576,96 @@ export const saveTicketCharges = createServerFn({ method: "POST" })
     return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
   });
 
-/** Record or clear the NetSuite Sales Order. Setting a number on a merged ticket is refused; clearing is allowed. */
-export async function recordTicketSalesOrder(sql: Sql, jobId: number, userId: string, nsSo: string | null): Promise<void> {
+/**
+ * The Admin's one save on an unlocked, invoiced ticket: lines, P.O., discount, Sales Order and its billed date
+ * together, in one statement, and the ticket locks again.
+ */
+export const saveUnlockedBilling = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator(
+    (d: {
+      jobId: number;
+      po: string;
+      lines: z.input<typeof lineSchema>[];
+      lineIds: number[];
+      discount?: { kind: string; value: string | number } | null;
+      nsSo: string | null;
+      billedAt?: string | null;
+    }) =>
+      z
+        .object({
+          jobId: z.number().int().positive(),
+          po: z.string().max(120),
+          lines: z.array(lineSchema).max(200),
+          lineIds: z.array(z.number().int().positive()).max(200),
+          discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),
+          nsSo: z.string().max(40).nullable(),
+          billedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+        })
+        .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<TicketCharges> => {
+    const sql = await ready();
+    if (!(await canReviewNames(sql, context.userId))) throw new Error("Only an Admin can save an unlocked ticket.");
+    await writeTicketCharges(sql, data.jobId, context.userId, {
+      po: data.po,
+      lines: data.lines,
+      lineIds: data.lineIds,
+      discount: data.discount,
+      unlocked: { nsSo: data.nsSo, billedAt: data.billedAt ?? null },
+    });
+    // Still billed (its invoice stands), so the new lines get their cost and margin stored like any billed ticket.
+    await storeInvoicedProfit(sql, data.jobId, true);
+    return loadCharges(sql, data.jobId, true);
+  });
+
+/**
+ * Record or clear the NetSuite Sales Order. Setting a number on a merged ticket is refused; clearing is allowed.
+ * billedAt (YYYY-MM-DD, the SO or invoice date) dates it; without one it is dated now. A ticket with a live NetSuite
+ * invoice is locked: its Sales Order changes only through an Admin's unlock.
+ */
+export async function recordTicketSalesOrder(sql: Sql, jobId: number, userId: string, nsSo: string | null, billedAt: string | null = null): Promise<void> {
   const so = cleanSalesOrder(nsSo);
   const saved = await sql.query<{ id: number }>(
-    `update service_jobs set ns_so = $2, billed_at = case when $2::text is null then null else now() end, updated_at = now()
+    `update service_jobs
+        set ns_so = $2,
+            billed_at = case when $2::text is null then null
+                             when $3::date is not null then ($3::date)::timestamp at time zone 'America/Chicago'
+                             else now() end,
+            updated_at = now()
       where id = $1 and ($2::text is null or duplicate_of is null)
+        and not ${LIVE_INVOICE_SQL("service_jobs.id")}
+        and ${UNCHANGED_SINCE_READ("service_jobs", "$1")}
       returning id`,
-    [jobId, so],
+    [jobId, so, billedAt || null],
   );
   if (!saved[0]) {
     const dup = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
-    if (dup?.duplicate_of) throw new Error(`This ticket was merged into #${dup.duplicate_of}. Enter the Sales Order there.`);
-    throw new Error("That ticket is no longer on the list.");
+    if (!dup) throw new Error("That ticket is no longer on the list.");
+    if (so && dup.duplicate_of) throw new Error(`This ticket was merged into #${dup.duplicate_of}. Enter the Sales Order there.`);
+    const lock = (await loadCharges(sql, jobId)).invoiceLock;
+    if (lock) throw new Error(invoiceLockError(lock));
+    throw new Error("The ticket changed while saving (another save or the Billing Backfill). Reload and try again.");
   }
-  await logJob(sql, jobId, userId, so ? `billed on ${so}` : "cleared Sales Order number");
+  await logJob(sql, jobId, userId, so ? `billed on ${so}${billedAt ? ` (dated ${billedAt})` : ""}` : "cleared Sales Order number");
   await storeInvoicedProfit(sql, jobId, !!so);
 }
 
 /** Record the NetSuite Sales Order the billing script made for this ticket. Blank clears it. */
 export const setTicketSalesOrder = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { jobId: number; nsSo: string | null }) =>
-    z.object({ jobId: z.number().int().positive(), nsSo: z.string().max(40).nullable() }).parse(d),
+  .validator((d: { jobId: number; nsSo: string | null; billedAt?: string | null }) =>
+    z
+      .object({
+        jobId: z.number().int().positive(),
+        nsSo: z.string().max(40).nullable(),
+        billedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<TicketCharges> => {
     const sql = await ready();
-    await recordTicketSalesOrder(sql, data.jobId, context.userId, data.nsSo);
+    await recordTicketSalesOrder(sql, data.jobId, context.userId, data.nsSo, data.billedAt ?? null);
     return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
   });
 
@@ -686,67 +849,89 @@ export type BillingExport = {
   csv: string;
   tickets: number;
   lines: number;
+  /** The tickets' totals after their discounts. */
   total: number;
-  /** Completed tickets in the window with nothing on them — usually a missed bill. */
-  noCharges: { id: number; wo: string | null; customer: string | null }[];
+  includeBilled: boolean;
+  /** Completed tickets in the window with nothing on them — usually a missed bill. Every one (the window pages them). */
+  noCharges: { id: number; kind: string; wo: string | null; customer: string | null; completed: string | null; technician: string | null }[];
+  /** Tickets in the file whose NetSuite location breaks the warehouse rule (Lance: San Antonio WH, Bill: Dallas WH). */
+  locationWarnings: { id: number; wo: string | null; customer: string | null; warning: string }[];
+  /** How many tickets in the file each warehouse rule sets the location for. */
+  locationRules: { location: string; tickets: number }[];
+  /** Tickets with charges left out of the file: on Walk-In or with no account, which is never a billing account. */
+  noAccount: { id: number; wo: string | null; customer: string | null; completed: string | null }[];
 };
 
 /**
- * Charges ready to hand to the billing script, as one CSV. Only tickets with a completed date in the window,
- * with charges, and not yet billed (unless includeBilled).
+ * Charges ready to hand to billing, as one CSV. Only tickets with a completed date in the window and charges. Not yet
+ * billed (no Sales Order and no live NetSuite invoice) unless includeBilled. The discount is NetSuite's header
+ * discount on every row (Discount Item CLDSERVICE, Discount Rate at minus the dollars), never a discount line. Each
+ * row also carries the ticket's SO, its NetSuite invoices, and the location it bills from (the location on its latest
+ * invoice, else Lance's San Antonio WH or Bill's Dallas WH).
  */
-export const exportBilling = createServerFn({ method: "POST" })
-  .middleware([deskMiddleware])
-  .validator((d: { from: string; to: string; includeBilled?: boolean }) =>
-    z
-      .object({
-        from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-        to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-        includeBilled: z.boolean().optional(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data }): Promise<BillingExport> => {
-    const sql = await ready();
-    const billed = data.includeBilled ? "" : "and j.ns_so is null";
-    const rows = await sql.query<{
-      id: number;
-      wo: string | null;
-      po: string | null;
-      customer: string | null;
-      technician: string | null;
-      completed_at: string | null;
-      work_done: string | null;
-      account_number: string | null;
-      netsuite_id: string | null;
-      item: string;
-      description: string | null;
-      qty: string;
-      rate: string;
-    }>(
-      `select j.id, j.wo, j.po, j.customer, j.technician, to_char(j.completed_at, 'YYYY-MM-DD') as completed_at, j.work_done,
-              dc.account_number, dc.netsuite_id, c.item, c.description, c.qty, c.rate
-         from service_jobs j
-         join ticket_charges c on c.job_id = j.id
-         left join directory_customers dc on dc.archived = false and lower(btrim(dc.name)) = lower(btrim(j.customer))
-        where j.duplicate_of is null
-          and j.completed_at between $1::date and $2::date
-          ${billed}
-        order by j.completed_at, j.id, c.sort, c.id`,
-      [data.from, data.to],
-    );
-    const ids = [...new Set(rows.map((r) => Number(r.id)))];
-    const discounts = new Map<number, Discount>();
-    if (ids.length) {
-      for (const d of await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
-        "select id, discount_kind, discount_value from service_jobs where id = any($1::int[]) and discount_kind is not null",
-        [ids],
-      )) {
-        if (isDiscountKind(d.discount_kind) && Number(d.discount_value) > 0) discounts.set(Number(d.id), { kind: d.discount_kind, value: Number(d.discount_value) });
-      }
+export async function exportBillingFor(sql: Sql, data: { from: string; to: string; includeBilled?: boolean }): Promise<BillingExport> {
+  const billed = data.includeBilled ? "" : `and nullif(btrim(j.ns_so), '') is null and not ${LIVE_INVOICE_SQL("j.id")}`;
+  const found = await sql.query<{
+    id: number;
+    wo: string | null;
+    po: string | null;
+    ns_so: string | null;
+    customer: string | null;
+    technician: string | null;
+    completed_at: string | null;
+    work_done: string | null;
+    account_number: string | null;
+    netsuite_id: string | null;
+    item: string;
+    description: string | null;
+    qty: string;
+    rate: string;
+  }>(
+    `select j.id, j.wo, j.po, j.ns_so, j.customer, j.technician, to_char(j.completed_at, 'YYYY-MM-DD') as completed_at, j.work_done,
+            dc.account_number, dc.netsuite_id, c.item, c.description, c.qty, c.rate
+       from service_jobs j
+       join ticket_charges c on c.job_id = j.id
+       left join directory_customers dc on dc.archived = false and lower(btrim(dc.name)) = lower(btrim(j.customer))
+      where j.duplicate_of is null
+        and j.completed_at between $1::date and $2::date
+        ${billed}
+      order by j.completed_at, j.id, c.sort, c.id`,
+    [data.from, data.to],
+  );
+  // Walk-In (or no account) is never a billing account: those tickets stay out of the file and are listed (10/28 review).
+  const noAccount = new Map<number, { id: number; wo: string | null; customer: string | null; completed: string | null }>();
+  const rows = found.filter((r) => {
+    if (r.customer?.trim() && !isWalkIn(r.customer)) return true;
+    const id = Number(r.id);
+    if (!noAccount.has(id)) noAccount.set(id, { id, wo: r.wo, customer: r.customer, completed: r.completed_at });
+    return false;
+  });
+  const ids = [...new Set(rows.map((r) => Number(r.id)))];
+  const discounts = new Map<number, Discount>();
+  if (ids.length) {
+    for (const d of await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
+      "select id, discount_kind, discount_value from service_jobs where id = any($1::int[]) and discount_kind is not null",
+      [ids],
+    )) {
+      if (isDiscountKind(d.discount_kind) && Number(d.discount_value) > 0) discounts.set(Number(d.id), { kind: d.discount_kind, value: Number(d.discount_value) });
     }
-    const lines: BillingExportLine[] = withDiscountRows(
-      rows.map((r) => ({
+  }
+  const invoices = await loadInvoices(sql, ids.length ? ids : [0]);
+  const byJob = new Map<number, { so: string; invoices: string; location: string; warning: string | null }>();
+  for (const r of rows) {
+    const id = Number(r.id);
+    if (byJob.has(id)) continue;
+    const mine = invoices.get(id) ?? [];
+    const recorded = [...liveInvoices(mine)].reverse().find((i) => i.location?.trim())?.location?.trim() ?? "";
+    byJob.set(id, {
+      so: r.ns_so?.trim() ?? "",
+      invoices: mine.map((i) => `${i.invoice} ${i.status}`).join("; "),
+      location: recorded || warehouseForTech(r.technician) || "",
+      warning: recorded ? locationWarning(r.technician, recorded) : null,
+    });
+  }
+  const lines: BillingExportLine[] = withHeaderDiscount(
+    rows.map((r) => ({
       jobId: Number(r.id),
       wo: r.wo ?? "",
       po: r.po ?? "",
@@ -760,23 +945,59 @@ export const exportBilling = createServerFn({ method: "POST" })
       qty: Number(r.qty),
       rate: Number(r.rate),
       workDone: r.work_done ?? "",
-      })),
-      discounts,
-    ).map(({ jobId: _job, ...l }) => l);
-    const none = await sql.query<{ id: number; wo: string | null; customer: string | null }>(
-      `select j.id, j.wo, j.customer
-         from service_jobs j
-        where j.duplicate_of is null and j.completed_at between $1::date and $2::date and j.ns_so is null
-          and not exists (select 1 from ticket_charges c where c.job_id = j.id)
-        order by j.completed_at, j.id
-        limit 200`,
-      [data.from, data.to],
-    );
-    return {
-      csv: billingCsv(lines),
-      tickets: new Set(rows.map((r) => r.id)).size,
-      lines: lines.length,
-      total: chargesTotal(lines),
-      noCharges: none,
-    };
+    })),
+    discounts,
+  ).map(({ jobId, discountLabel: _label, ...l }) => {
+    const j = byJob.get(jobId)!;
+    return { ...l, so: j.so, invoices: j.invoices, location: j.location };
   });
+  const none = await sql.query<{ id: number; kind: string; wo: string | null; customer: string | null; completed: string | null; technician: string | null }>(
+    `select j.id, j.kind, j.wo, j.customer, to_char(j.completed_at, 'YYYY-MM-DD') as completed, j.technician
+       from service_jobs j
+      where j.duplicate_of is null and j.completed_at between $1::date and $2::date
+        and nullif(btrim(j.ns_so), '') is null and not ${LIVE_INVOICE_SQL("j.id")}
+        and not exists (select 1 from ticket_charges c where c.job_id = j.id)
+      order by j.completed_at, j.id`,
+    [data.from, data.to],
+  );
+  const rules = new Map<string, number>();
+  for (const id of byJob.keys()) {
+    const tech = rows.find((r) => Number(r.id) === id)?.technician;
+    const rule = warehouseForTech(tech);
+    if (rule) rules.set(rule, (rules.get(rule) ?? 0) + 1);
+  }
+  // What will be billed: each ticket's lines after its discount.
+  const net = ids.reduce((sum, id) => {
+    const sub = chargesTotal(rows.filter((r) => Number(r.id) === id).map((r) => ({ qty: Number(r.qty), rate: Number(r.rate) })));
+    return sum + applyDiscount(sub, discounts.get(id)).total;
+  }, 0);
+  return {
+    csv: billingCsv(lines),
+    tickets: ids.length,
+    lines: lines.length,
+    total: round2(net),
+    includeBilled: !!data.includeBilled,
+    noCharges: none.map((r) => ({ ...r, id: Number(r.id) })),
+    locationWarnings: [...byJob]
+      .filter(([, j]) => j.warning)
+      .map(([id, j]) => {
+        const r = rows.find((x) => Number(x.id) === id)!;
+        return { id, wo: r.wo, customer: r.customer, warning: j.warning! };
+      }),
+    locationRules: [...rules].map(([location, tickets]) => ({ location, tickets })),
+    noAccount: [...noAccount.values()],
+  };
+}
+
+export const exportBilling = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { from: string; to: string; includeBilled?: boolean }) =>
+    z
+      .object({
+        from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        includeBilled: z.boolean().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<BillingExport> => exportBillingFor(await ready(), data));

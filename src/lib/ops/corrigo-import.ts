@@ -1,11 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "@/lib/ops/lookups";
 import { DEFAULT_PM_STYLE } from "@/lib/ops/pm-runbook";
 import { todayChicago } from "@/lib/ops/clock";
 import {
+  accountIndex,
   attachableHits,
   boardStatus,
   completedOnUpdate,
@@ -20,15 +21,21 @@ import {
   preferFileCustomerInstalls,
   installStatusFromCorrigo,
   resolvePreviewRow,
+  resolveRowAccount,
   settleInstallRows,
   withSiblingWos,
   woMatchKey,
+  type AccountIndex,
   type CorrigoBoard,
   type CorrigoHit,
   type CorrigoPreviewPart,
+  type CorrigoPreviewRow,
   type CorrigoRecord,
   type OpenInstall,
 } from "@/lib/ops/corrigo";
+import { stripServiceChannelId } from "@/lib/ops/billing-rules";
+import { nameKey } from "@/lib/ops/wo-history";
+import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ } from "@/lib/ops/ticket-billing-api";
 import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
 import { INSTALL_WOS_SQL, loadInstallWos, recordInstallWo } from "@/lib/ops/install-work-orders";
 import { customersStrictlyMatch } from "@/lib/ops/clean-names";
@@ -39,6 +46,8 @@ import { lockedNameFor } from "@/lib/ops/clean-names-api";
 export type CorrigoApplyResult = {
   updated: number;
   created: number;
+  /** Rows not written: no exact account to write them with (the import never adds one), or a ticket left on Walk-In. */
+  refused?: { wo: string; customer: string | null; reason: string }[];
   review: {
     id: number;
     wo: string;
@@ -91,11 +100,17 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     ns_so: string | null;
     has_charges: boolean;
     received: string | null;
+    po: string | null;
+    issue: string | null;
+    equipment: string | null;
+    invoiced: boolean;
+    corrigo_id: string | null;
   }>(
     `select id, wo, status, customer, kind, duplicate_of, done,
             to_char(completed_at, 'YYYY-MM-DD') as completed_at, ns_so,
             exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges,
-            ${receivedSql("service_jobs", "service_jobs.kind")}
+            ${receivedSql("service_jobs", "service_jobs.kind")},
+            po, issue, equipment, ${LIVE_INVOICE_SQL("service_jobs.id")} as invoiced, corrigo_id
        from service_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
@@ -148,6 +163,11 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       billedSo: r.ns_so,
       hasCharges: !!r.has_charges,
       received: r.received,
+      po: r.po,
+      issue: r.issue,
+      equipment: r.equipment,
+      invoiced: !!r.invoiced,
+      corrigoId: r.corrigo_id,
     })),
     ...pms.map((r) => ({
       board: "pm" as const,
@@ -259,22 +279,48 @@ async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: str
 }
 
 /**
- * A report row's account: added when KatzDesk has no account by that name. One removed from Customers (or merged into
- * another) stays removed; the ticket still saves under the report's name (Chuy, 2026-10-26).
+ * The account a name is, exactly (Grok's rule through Chuy, 10/28; it replaces adding an account for every new name):
+ * a locked clean-list name first, then a live account by its exact name (case and spacing aside). A ServiceChannel id
+ * at the end is dropped. Walk-In, a removed account and anything else: null. Never adds an account.
  */
-export async function ensureCustomer(sql: Pick<Awaited<ReturnType<typeof getSql>>, "query">, name: string) {
-  const trimmed = name.trim();
-  if (!trimmed || isWalkIn(trimmed)) return;
-  const found = await sql.query<{ id: number }>(
-    `select id from directory_customers where lower(name) = lower($1) limit 1`,
-    [trimmed],
+export async function accountNameFor(sql: Pick<Sql, "query">, raw: string | null | undefined): Promise<string | null> {
+  const name = stripServiceChannelId(raw);
+  if (!name || isWalkIn(name)) return null;
+  const locked = await lockedNameFor(sql as Sql, name);
+  if (locked) return locked;
+  const hit = await sql.query<{ name: string }>(
+    `select name from directory_customers
+      where archived = false and lower(regexp_replace(btrim(name), '\\s+', ' ', 'g')) = $1
+      order by id limit 1`,
+    [nameKey(name)],
   );
-  if (found[0]) return;
-  try {
-    await sql.query(`insert into directory_customers (name) values ($1)`, [trimmed]);
-  } catch {
-    /* unique race */
-  }
+  return hit[0]?.name ?? null;
+}
+
+/** Every account, for matching a file's names exactly. */
+async function loadAccountIndex(sql: Pick<Sql, "query">): Promise<AccountIndex> {
+  const rows = await sql.query<{ name: string; archived: boolean; name_locked: boolean }>(
+    "select name, archived, name_locked from directory_customers order by id",
+  );
+  return accountIndex(rows.map((r) => ({ name: r.name, archived: !!r.archived, locked: !!r.name_locked })));
+}
+
+/**
+ * The account each preview row is written with (exact names only), and the rows that need one picked. An install the
+ * row goes on keeps its own name; an update with no exact match keeps its ticket's account unless that is Walk-In.
+ */
+export function withAccounts(rows: CorrigoPreviewRow[], records: CorrigoRecord[], idx: AccountIndex): CorrigoPreviewRow[] {
+  const byKey = new Map(records.map((r) => [r.matchKey, r]));
+  return rows.map((row) => {
+    if (row.action === "skip") return row;
+    const rec = byKey.get(row.matchKey) ?? { customer: row.fileCustomer, serviceLocation: row.serviceLocation ?? null };
+    const acct = resolveRowAccount(rec, row.existingCustomer, idx);
+    // A new install's option names the account the file matched exactly.
+    const installOptions = row.installOptions?.map((o) => (o.id == null && !o.newFrom ? { ...o, customer: acct.name } : o)) ?? null;
+    const own = row.board === "install" && !!row.customer && (row.byAccount || (!!row.existingCustomer && row.customer === row.existingCustomer));
+    if (own) return { ...row, installOptions, account: { status: "kept" as const, name: row.customer, note: null }, needsReview: false };
+    return { ...row, installOptions, customer: acct.name, account: acct, needsReview: !acct.name };
+  });
 }
 
 async function logCorrigo(
@@ -320,6 +366,13 @@ const recordInput = z.object({
   po: z.string().nullable(),
   callType: z.string().nullable(),
   equipment: z.string().nullable().optional(),
+  serviceLocation: z.string().max(300).nullable().optional(),
+  contact: z.string().max(200).nullable().optional(),
+  phone: z.string().max(80).nullable().optional(),
+  createdAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  priority: z.string().max(60).nullable().optional(),
+  corrigoId: z.string().max(80).nullable().optional(),
+  total: z.number().nullable().optional(),
 });
 
 /**
@@ -336,12 +389,21 @@ export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]):
   const wrapped = deskHasWrapped(hits);
   const today = todayChicago();
   const index = indexHits(hits);
+  // Corrigo's own work order id, when the report has one, finds its ticket whatever the WO number.
+  const byCorrigoId = new Map(hits.filter((h) => h.corrigoId?.trim() && !h.duplicateOf).map((h) => [h.corrigoId!.trim(), h]));
   const { installs, catalog } = await loadOpenInstalls(sql);
+  const accounts = await loadAccountIndex(sql);
   // Rows are applied in order: a second row for one install adds its WO to the first row's.
-  const rows = settleInstallRows(
-    records.map((rec) =>
-      resolvePreviewRow(rec, index.get(rec.matchKey) ?? { unique: null, conflicts: [] }, { wrapped, today, installs, catalog }),
+  const rows = withAccounts(
+    settleInstallRows(
+      records.map((rec) => {
+        const byId = rec.corrigoId?.trim() ? byCorrigoId.get(rec.corrigoId.trim()) : undefined;
+        const match = byId ? { unique: byId, conflicts: [] } : (index.get(rec.matchKey) ?? { unique: null, conflicts: [] });
+        return resolvePreviewRow(rec, match, { wrapped, today, installs, catalog });
+      }),
     ),
+    records,
+    accounts,
   );
   const unmapped = [
     ...new Set(rows.map((r) => r.statusUnmapped).filter((s): s is string => !!s)),
@@ -357,10 +419,19 @@ export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]):
   };
 }
 
+/** The Corrigo import is Admin only (10/28): the preview and the write both check. */
+export async function requireCorrigoAdmin(sql: Sql, userId: string) {
+  if (!(await canReviewNames(sql, userId))) throw new Error("Only an Admin can import a Corrigo report.");
+}
+
 export const previewCorrigoImport = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof previewInput>) => previewInput.parse(d))
-  .handler(async ({ data }) => previewCorrigoRecords(await ready(), data.records));
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    await requireCorrigoAdmin(sql, context.userId);
+    return previewCorrigoRecords(sql, data.records);
+  });
 
 const applyRow = z.object({
   wo: z.string(),
@@ -399,6 +470,19 @@ const applyRow = z.object({
     .array(z.object({ board: z.enum(["service", "tlc", "pm", "install"]), id: z.number() }))
     .nullable()
     .optional(),
+  // 10/28: what else a row writes. Each is checked again here; the preview only shows it.
+  po: z.string().max(120).nullable().optional(),
+  poChange: z.object({ from: z.string().nullable(), to: z.string().max(120) }).nullable().optional(),
+  issueChange: z.object({ from: z.string().nullable(), to: z.string().max(20000) }).nullable().optional(),
+  equipmentChange: z.object({ from: z.string().nullable(), to: z.string().max(4000) }).nullable().optional(),
+  createdAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  serviceLocation: z.string().max(300).nullable().optional(),
+  contact: z.string().max(200).nullable().optional(),
+  phone: z.string().max(80).nullable().optional(),
+  corrigoId: z.string().max(80).nullable().optional(),
+  corrigoNet: z.number().nullable().optional(),
+  callTypeValue: z.string().max(60).nullable().optional(),
+  urgency: z.string().max(30).nullable().optional(),
 });
 
 const applyInput = z.object({
@@ -413,6 +497,7 @@ export async function applyCorrigoRows(
   let updated = 0;
   let created = 0;
   const review: CorrigoApplyResult["review"] = [];
+  const refused: NonNullable<CorrigoApplyResult["refused"]> = [];
   const heldPairs = new Map<string, HeldReview>();
   const holdKey = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
   const rememberHold = (keeperId: number, extraId: number, reason: string, perRowExtra: number) => {
@@ -490,17 +575,37 @@ export async function applyCorrigoRows(
       }
     }
     if (action === "create" || (action === "update" && !jobId)) {
-      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, today, row);
+      const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, row.createdAt || today, row);
       if (hit) {
         action = "update";
         jobId = hit.id;
         board = hit.board;
       }
     }
-    // A locked clean-list name wins over the spelling in the Corrigo file.
+    // Exact account names only, and never a new account (10/28). A locked clean-list name wins over the file's spelling.
     const typed = (row.customer ?? "").trim() || null;
-    const chosen = typed ? (await lockedNameFor(sql, typed)) ?? typed : null;
-    if (chosen) await ensureCustomer(sql, chosen);
+    // A new install in place of a picked one that is gone carries that install's name: the file's own account then.
+    const chosen =
+      (typed ? await accountNameFor(sql, typed) : null) ??
+      (action === "create" && board === "install" && picked ? await accountNameFor(sql, row.fileCustomer) : null);
+    if (action === "create" && !chosen) {
+      refused.push({
+        wo,
+        customer: typed,
+        reason: typed && !isWalkIn(typed) ? `No account is named "${typed}" (the import never adds one)` : "Walk-In is never an account: pick the real one",
+      });
+      continue;
+    }
+    /** An update keeps the ticket's own account when the row has no exact one, unless that would leave it on Walk-In. */
+    const accountFor = (current: string | null): string | null | undefined => {
+      if (chosen) return chosen;
+      // Walk-In first: a row that says Walk-In on a ticket that is on Walk-In is refused, never kept (10/28 review).
+      if (!current?.trim() || isWalkIn(current)) {
+        refused.push({ wo, customer: typed, reason: "The ticket is on Walk-In and the row has no account: pick the real one" });
+        return undefined;
+      }
+      return current;
+    };
 
     if (action === "update" && jobId) {
       if (board === "pm") {
@@ -525,16 +630,26 @@ export async function applyCorrigoRows(
         const reopened = corrigoReopens("pm", row.statusRaw, row.completedAt, cur[0].status, row.completedRaw);
         const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null, reopened);
         const completedAt = date.value;
-        const customer = chosen || cur[0].customer;
+        const customer = accountFor(cur[0].customer);
+        if (customer === undefined) continue;
         const done = CLOSED_PM.has(status);
         await sql.query(
           `update pm_jobs set
               technician = $2, completed_at = $3, work_done = $4, status = $5,
-              wo = $6, done = $7, customer = $8, updated_at = now()
+              wo = $6, done = $7, customer = $8,
+              service_location = coalesce($9, service_location), corrigo_id = coalesce($10, corrigo_id),
+              received = coalesce(received, $11::date),
+              updated_at = now()
             where id = $1`,
-          [jobId, technician, completedAt, workDone, status, keptWo, done, customer],
+          [jobId, technician, completedAt, workDone, status, keptWo, done, customer, row.serviceLocation ?? null, row.corrigoId ?? null, row.createdAt ?? null],
         );
-        await logCorrigo(sql, "pm", jobId, actor, `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}`);
+        await logCorrigo(
+          sql,
+          "pm",
+          jobId,
+          actor,
+          `Corrigo import · ${keptWo}${completedLog(date, cur[0].completed_at, row.completedAt)}${customerLog(cur[0].customer, customer)}`,
+        );
         updated += 1;
         maybeReview("pm", jobId, keptWo, customer, status, technician, done);
         continue;
@@ -572,7 +687,9 @@ export async function applyCorrigoRows(
         const date = next.date;
         const completedAt = next.completedAt;
         // A customer the owner locked stays as it is.
-        const customer = cur[0].customer_locked_at ? cur[0].customer : chosen || cur[0].customer;
+        const named = cur[0].customer_locked_at ? cur[0].customer : accountFor(cur[0].customer);
+        if (named === undefined) continue;
+        const customer = named ?? cur[0].customer;
         const complete = equipStatus === "Installed";
         // installs.wo stays the project's first WO.
         const primary = cur[0].wo?.trim() || keptWo;
@@ -640,26 +757,64 @@ export async function applyCorrigoRows(
       const reopened = corrigoReopens(jobBoard(cur[0].kind), row.statusRaw, row.completedAt, cur[0].status, row.completedRaw);
       const date = completedOnUpdate(row.completedAt, cur[0].completed_at, cur[0].ns_so, reopened);
       const completedAt = date.value;
-      const customer = chosen || cur[0].customer;
+      const customer = accountFor(cur[0].customer);
+      if (customer === undefined) continue;
       const done = CLOSED_CALL.has(status);
       const jobBoardKind = jobBoard(cur[0].kind);
-      await sql.query(
-        `update service_jobs set
-            technician = $2,
-            -- An SO saved since the read above keeps its billing date.
-            completed_at = case when nullif(btrim(ns_so), '') is null then $3::date else completed_at end,
-            work_done = $4, status = $5,
-            wo = $6, done = $7, customer = $8, updated_at = now()
-          where id = $1`,
-        [jobId, technician, completedAt, workDone, status, keptWo, done, customer],
-      );
+      // P.O., issue and equipment as Corrigo has them now (10/28). A ticket billed or invoiced since the preview keeps its P.O.
+      const saved = (
+        await sql.query<{ po_written: boolean }>(
+          `update service_jobs set
+              technician = $2,
+              -- An SO saved since the read above keeps its billing date.
+              completed_at = case when nullif(btrim(ns_so), '') is null then $3::date else completed_at end,
+              work_done = $4, status = $5,
+              wo = $6, done = $7, customer = $8,
+              po = case when $9::text is not null and nullif(btrim(ns_so), '') is null and not ${LIVE_INVOICE_SQL("service_jobs.id")}
+                          and ${UNCHANGED_SINCE_READ("service_jobs", "$1")} then $9::text else po end,
+              issue = coalesce($10::text, issue),
+              equipment = coalesce($11::text, equipment),
+              service_location = coalesce($12::text, service_location),
+              corrigo_id = coalesce($13::text, corrigo_id),
+              corrigo_net = coalesce($14::numeric, corrigo_net),
+              contact = coalesce(nullif(btrim(contact), ''), $15::text),
+              phone = coalesce(nullif(btrim(phone), ''), $16::text),
+              received = coalesce(received, $17::date),
+              updated_at = now()
+            where id = $1
+          returning ($9::text is not null and po is not distinct from $9::text) as po_written`,
+          [
+            jobId,
+            technician,
+            completedAt,
+            workDone,
+            status,
+            keptWo,
+            done,
+            customer,
+            row.poChange?.to ?? null,
+            row.issueChange?.to ?? null,
+            row.equipmentChange?.to ?? null,
+            row.serviceLocation ?? null,
+            row.corrigoId ?? null,
+            row.corrigoNet ?? null,
+            row.contact ?? null,
+            row.phone ?? null,
+            row.createdAt ?? null,
+          ],
+        )
+      )[0];
       await logCorrigo(
         sql,
         jobBoardKind,
         jobId,
         actor,
         (status !== cur[0].status ? `${cur[0].status} → ${status} · ${keptWo}` : `Corrigo import · ${keptWo}`) +
-          completedLog(date, cur[0].completed_at, row.completedAt),
+          completedLog(date, cur[0].completed_at, row.completedAt) +
+          customerLog(cur[0].customer, customer) +
+          (row.poChange && saved?.po_written ? ` · P.O. ${row.poChange.from || "none"} → ${row.poChange.to}` : "") +
+          (row.issueChange ? " · issue refreshed" : "") +
+          (row.equipmentChange ? " · equipment refreshed" : ""),
       );
       for (const extra of row.conflictIds ?? []) {
         if (wrapRepeat) break;
@@ -673,18 +828,19 @@ export async function applyCorrigoRows(
       updated += 1;
       maybeReview(jobBoardKind, jobId, keptWo, customer, status, technician, done);
     } else if (action === "create") {
-      const received = row.completedAt || todayChicago();
-      const customer = chosen;
+      // Corrigo's created date, or blank (the preview flags it): never the import day (10/28).
+      const received = row.createdAt || null;
+      const customer = chosen!;
 
       if (board === "pm") {
         const status = boardStatus("pm", row.statusRaw, row.completedAt, null).status;
         const done = CLOSED_PM.has(status);
         const inserted = await sql.query<{ id: number }>(
-          `insert into pm_jobs (customer, received, status, technician, wo, work_done, completed_at, style, done)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          `insert into pm_jobs (customer, received, status, technician, wo, work_done, completed_at, style, done, service_location, corrigo_id)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
            returning id`,
           [
-            customer || "Unknown",
+            customer,
             received,
             status,
             row.technician,
@@ -693,6 +849,8 @@ export async function applyCorrigoRows(
             row.completedAt,
             DEFAULT_PM_STYLE,
             done,
+            row.serviceLocation ?? null,
+            row.corrigoId ?? null,
           ],
         );
         const id = inserted[0]?.id;
@@ -720,7 +878,7 @@ export async function applyCorrigoRows(
            returning id`,
           [
             received,
-            customer || "Unknown",
+            customer,
             row.technician,
             wo,
             row.workDone,
@@ -742,12 +900,13 @@ export async function applyCorrigoRows(
       const kind = board === "tlc" ? "tlc" : "service";
       const status = boardStatus(board, row.statusRaw, row.completedAt, null).status;
       const done = CLOSED_CALL.has(status);
-      const callId = await nextCallId(sql, received);
+      const callId = await nextCallId(sql, received ?? todayChicago());
       const inserted = await sql.query<{ id: number }>(
         `insert into service_jobs
-           (kind, call_id, customer, issue, technician, status, wo, work_done, completed_at, received, call_type, urgency, done)
+           (kind, call_id, customer, issue, technician, status, wo, work_done, completed_at, received, call_type, urgency, done,
+            po, equipment, contact, phone, service_location, corrigo_id, corrigo_net)
          values
-           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'Normal', $12)
+           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
          returning id`,
         [
           kind,
@@ -760,8 +919,16 @@ export async function applyCorrigoRows(
           row.workDone,
           row.completedAt,
           received,
-          board === "tlc" ? "Field Service" : "Field Service",
+          row.callTypeValue || "Field Service",
+          row.urgency || "Normal",
           done,
+          row.po?.trim() || null,
+          row.equipmentChange?.to ?? null,
+          row.contact ?? null,
+          row.phone ?? null,
+          row.serviceLocation ?? null,
+          row.corrigoId ?? null,
+          row.corrigoNet ?? null,
         ],
       );
       const id = inserted[0]?.id;
@@ -794,10 +961,16 @@ export async function applyCorrigoRows(
     return {
       updated,
       created,
+      refused,
       review: attachHeldReview(review, [...heldPairs.values()], extras),
     };
   }
-  return { updated, created, review };
+  return { updated, created, refused, review };
+}
+
+/** " · customer A → B" when an update moves the ticket to another account. */
+function customerLog(before: string | null, after: string | null): string {
+  return after && nameKey(before) !== nameKey(after) ? ` · customer ${before || "none"} → ${after}` : "";
 }
 
 export const applyCorrigoImport = createServerFn({ method: "POST" })
@@ -805,6 +978,7 @@ export const applyCorrigoImport = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof applyInput>) => applyInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
+    await requireCorrigoAdmin(sql, context.userId);
     const actorRows = await sql.query<{ username: string }>(
       "select username from desk_accounts where user_id = $1",
       [context.userId],

@@ -11,7 +11,28 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
 const { chunkByBytes, mergeCorrigoPreviews, newInstallChoice, parseCorrigoMatrix, settleInstallRows } = await import("../src/lib/ops/corrigo.ts");
-const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
+const corrigoImport = await import("../src/lib/ops/corrigo-import.ts");
+const { applyCorrigoRows } = corrigoImport;
+
+/**
+ * These tests are about install projects, written before the import stopped adding accounts (10/28). The file's
+ * customers are made accounts first, as the import used to make them, so the rules under test are unchanged.
+ */
+async function seedFileAccounts(sql, records) {
+  for (const r of records) {
+    const name = String(r.customer ?? "").trim();
+    if (!name || /^walk\W*ins?$/i.test(name.replace(/\s+/g, ""))) continue;
+    await sql.query(
+      "insert into directory_customers (name) select $1::text where not exists (select 1 from directory_customers where lower(name) = lower($1::text))",
+      [name],
+    );
+  }
+}
+
+async function previewCorrigoRecords(sql, records) {
+  await seedFileAccounts(sql, records);
+  return corrigoImport.previewCorrigoRecords(sql, records);
+}
 const { addInstallWorkOrderFor } = await import("../src/lib/ops/install-work-orders.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
@@ -46,6 +67,8 @@ test("1: the first row's customer changed in the preview names the combined inst
     const { pg, sql } = await fresh();
     try {
       const records = file([["0901", "Work Started", "Starbucks", "Install", ""], ["0902", "Work Started", "Starbucks", "Install", ""]]);
+      // The name picked in the preview is an account: the picker lists accounts only (10/28).
+      await sql.query("insert into directory_customers (name) values ($1)", [name]);
       const parts = [];
       for (const chunk of chunkByBytes(records, 1_500_000, per)) parts.push(await previewCorrigoRecords(sql, chunk));
       const rows = confirm(settleInstallRows(mergeCorrigoPreviews(parts, { skipped: 0, columns: {}, missing: [] }).rows), { 901: name });
