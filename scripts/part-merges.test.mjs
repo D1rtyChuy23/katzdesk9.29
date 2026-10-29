@@ -100,7 +100,7 @@ test("numbers: the category comes off at the last ' : ', and case and spaces don
   assert.deepEqual(merges.textArray('{OLD1,"A, B","C\\"D"}'), ["OLD1", "A, B", 'C"D']);
   assert.deepEqual(merges.textArray(["X"]), ["X"]);
   assert.deepEqual(merges.textArray(null), []);
-  assert.equal(merges.noteAfter("Superseded", ["Superseded", " New kit  ", "", null]), "Superseded\nNew kit");
+  assert.deepEqual(merges.noteLinesToAdd(["Superseded", " New  kit  ", "", null, "New kit", "new kit"]), ["Superseded", "New kit", "new kit"]);
   assert.deepEqual(
     merges.previousNumbersAfter({ sku: "NEW1", mpn: "N-1", previousNumbers: ["OLD0"] }, [{ sku: "OLD1", mpn: "OLDM-1", previousNumbers: ["old0", "N1", "OLD-1"] }]),
     ["OLD0", "OLD1", "OLDM-1"],
@@ -378,6 +378,36 @@ test("Import Part Merges: Confirm fills only blanks, moves machine parts, copies
   const again = await importPartMergesFor(sql, { filename: "m.csv", base64: MERGE_FILE, apply: true }, "u-owner");
   assert.deepEqual(again.result, { merged: 0, keepers: 0, moved: 0, research: 0, repointed: 0 });
   assert.equal(JSON.stringify(await sql.query("select id, mfr_part, description, list_price, hidden_at, merged_into, previous_numbers, note from billing_items order by id")), snapshot);
+});
+
+test("Import Part Merges adds its note under the keeper's note as it is when written: a line saved meanwhile stays, one it has isn't added twice, its own text is kept", async () => {
+  const sql = await fresh();
+  const keep = await part(sql, "NEW9");
+  const keep2 = await part(sql, "NEW10");
+  const keep3 = await part(sql, "NEW12");
+  for (const sku of ["OLD9", "OLD10", "OLD11", "OLD12"]) await part(sql, sku);
+  await sql.query("update billing_items set note = $1 where id = $2", ["Typed  by hand\n", keep]);
+  await sql.query("update billing_items set note = $1 where id = $2", ["Fits Classe 9\r\nSuperseded by NEW10", keep2]);
+  await sql.query("update billing_items set note = $1 where id = $2", ["   ", keep3]);
+  const file = csv([
+    "old_sku,new_sku,note",
+    "OLD9,NEW9,Superseded by NEW9",
+    "OLD10,NEW10,Superseded  by NEW10",
+    "OLD11,NEW9,Superseded by NEW9",
+    "OLD12,NEW12,Superseded by NEW12",
+  ]);
+  // Import Part Notes saves a line on NEW9 after the merge read the notes and before it writes.
+  const racing = {
+    query: async (text, params) => {
+      if (/^\s*with pairs as/.test(text)) await sql.query("update billing_items set note = note || $1 where id = $2", ["Fits Classe 5 (source: made-up test)", keep]);
+      return sql.query(text, params);
+    },
+  };
+  const r = await importPartMergesFor(racing, { filename: "m.csv", base64: file, apply: true }, "u-owner");
+  assert.equal(r.result.merged, 4);
+  assert.equal((await row(sql, keep)).note, "Typed  by hand\nFits Classe 5 (source: made-up test)\nSuperseded by NEW9", "the line saved meanwhile stays, the merge's goes under it once");
+  assert.equal((await row(sql, keep2)).note, "Fits Classe 9\r\nSuperseded by NEW10", "a line it already has isn't added again");
+  assert.equal((await row(sql, keep3)).note, "Superseded by NEW12", "a note of only blank space is replaced");
 });
 
 test("Part B after Part A: a folded copy no longer makes a number ambiguous, and copies folded into an old part move to its keeper", async () => {

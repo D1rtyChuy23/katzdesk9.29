@@ -16,7 +16,7 @@ import {
   copyCounts,
   mergeCounts,
   mergeRowsFromSheets,
-  noteAfter,
+  noteLinesToAdd,
   planImportCopies,
   planPartMerges,
   previousNumbersAfter,
@@ -88,6 +88,27 @@ async function loadFacts(sql: Query): Promise<MergeFacts> {
 /** A part number as photo research keys it (normalizePartNo in SQL). */
 const KEY = (col: string) => `regexp_replace(upper(coalesce(${col}, '')), '[^A-Z0-9]+', '', 'g')`;
 const NO_BIN = (a: string) => `coalesce(nullif(btrim(${a}.bin_rack), ''), nullif(btrim(${a}.bin_shelf), ''), nullif(btrim(${a}.bin_bin), '')) is null`;
+
+/**
+ * SQL: the note with these lines (a jsonb array of text) added under it, only the ones it doesn't have yet (each line
+ * compared on one line, trimmed). It reads the note as it is when the row is written, not as it was planned, so a line
+ * saved a moment before (Import Part Notes) stays; the note's own text is never changed. A note that is only blank
+ * space is replaced.
+ */
+const NOTE_WITH_LINES = (note: string, adds: string) => `(
+  select case
+           when cardinality(x.lines) = 0 then ${note}
+           when nullif(btrim(regexp_replace(coalesce(${note}, ''), '\\s+', ' ', 'g')), '') is null then array_to_string(x.lines, E'\\n')
+           when ${note} ~ '[\\r\\n]$' then ${note} || array_to_string(x.lines, E'\\n')
+           else ${note} || E'\\n' || array_to_string(x.lines, E'\\n')
+         end
+    from (
+      select coalesce(array_agg(a.t order by a.i), '{}'::text[]) as lines
+        from jsonb_array_elements_text(${adds}) with ordinality as a(t, i)
+       where not (a.t = any (array(
+               select btrim(regexp_replace(s, '\\s+', ' ', 'g'))
+                 from regexp_split_to_table(coalesce(${note}, ''), '\\r\\n|\\r|\\n') as s)))
+    ) x)`;
 
 // ------------------------------------------------------------------------------------------ Part A: import copies
 
@@ -259,7 +280,8 @@ export type MergesPreview = {
 
 /**
  * Folds each old part into its keeper, in one statement. $1 old ids, $2 keeper ids, $3 notes, $4 file rows, $5 who,
- * $6 each keeper's previous numbers and note after the merge (worked out in part-merges.ts). Each pair is checked
+ * $6 each keeper's previous numbers after the merge and the note lines it adds (worked out in part-merges.ts; the
+ * lines go under the keeper's note as it is when written, see NOTE_WITH_LINES). Each pair is checked
  * again as it is written: the old part not merged, the keeper on the list and not merged. Rows already folded into an
  * old part (import copies) are pointed at its keeper, so merged_into never chains.
  */
@@ -301,10 +323,10 @@ with pairs as (
          bin_updated_by = case when ${NO_BIN("k")} and bn.id is not null then $5::text else k.bin_updated_by end,
          list_price = coalesce(k.list_price, s.list_price),
          previous_numbers = array(select e from jsonb_array_elements_text(n.numbers) with ordinality as t(e, i) order by i),
-         note = n.note,
+         note = ${NOTE_WITH_LINES("k.note", "n.adds")},
          updated_at = now()
     from src s
-    join jsonb_to_recordset($6::jsonb) as n(id int, numbers jsonb, note text) on n.id = s.keeper_id
+    join jsonb_to_recordset($6::jsonb) as n(id int, numbers jsonb, adds jsonb) on n.id = s.keeper_id
     left join billing_items ph on ph.id = s.photo_id
     left join billing_items bn on bn.id = s.bin_id
    where k.id = s.keeper_id
@@ -390,7 +412,7 @@ export async function importPartMergesFor(sql: Query, data: z.infer<typeof merge
     }
     const after = [...perKeeper].map(([id, k]) => {
       const keeper = byId.get(id)!;
-      return { id, numbers: previousNumbersAfter(keeper, k.olds), note: noteAfter(keeper.note, k.notes) };
+      return { id, numbers: previousNumbersAfter(keeper, k.olds), adds: noteLinesToAdd(k.notes) };
     });
     const r = (
       await sql.query<Record<string, unknown>>(APPLY_MERGES_SQL, [

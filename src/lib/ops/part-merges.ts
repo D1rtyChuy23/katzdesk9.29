@@ -545,15 +545,17 @@ export function previousNumbersAfter(keeper: Pick<MergePart, "sku" | "mpn" | "pr
   return out;
 }
 
-/** The keeper's note after a merge: what it had, then each new note from the file that it doesn't have yet. */
-export function noteAfter(note: string | null, added: (string | null)[]): string | null {
-  const lines = String(note ?? "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
+/**
+ * The lines a merge adds to its keeper's note: each note from the file on one line, in file order, none twice. The
+ * write adds the ones the keeper's note doesn't already have, under the note as it is at that moment
+ * (part-merges-api.ts), so a line saved in between (Import Part Notes) is never lost and the note's own text never
+ * changes (Grok, 10/29).
+ */
+export function noteLinesToAdd(added: (string | null)[]): string[] {
+  const out: string[] = [];
   for (const a of added) {
     const t = String(a ?? "").replace(/\s+/g, " ").trim();
-    if (t && !lines.includes(t)) lines.push(t);
+    if (t && !out.includes(t)) out.push(t);
   }
-  return lines.length ? lines.join("\n") : null;
+  return out;
 }
