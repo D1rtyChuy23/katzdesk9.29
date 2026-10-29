@@ -29,6 +29,7 @@ import { MoveBinsDialog, SetClassPicker } from "@/components/desk/part-picks";
 import { FilterChip, ImportMenu } from "@/components/desk/desk-charts";
 import { BinLocationsButton, ImportPartsButton, ImportPhotoResearchButton, ImportWoPartLinesButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { CleanUpImportCopiesButton, ImportPartMergesButton } from "@/components/desk/part-cleanup";
+import { ImportPartNotesButton } from "@/components/desk/part-notes-import";
 import { getMyAccess } from "@/lib/ops/access";
 import { ListToolbar, ToolbarNote, ToolbarSearch, ToolbarSelect } from "@/components/desk/list-toolbar";
 import { notLoadedText } from "@/lib/ops/load-problem";
@@ -209,6 +210,7 @@ function Page() {
               {isAdmin ? <ImportWoPartLinesButton /> : null}
               {isAdmin ? <CleanUpImportCopiesButton /> : null}
               {isAdmin ? <ImportPartMergesButton /> : null}
+              {isAdmin ? <ImportPartNotesButton /> : null}
               {canEditBins ? <BinLocationsButton /> : null}
             </ImportMenu>
           </div>
