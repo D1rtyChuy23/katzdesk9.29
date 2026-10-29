@@ -19,6 +19,7 @@ import { Route as AppCustomerNamesRouteImport } from './routes/_app/customer-nam
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
+import { Route as AppInvoicesRouteImport } from './routes/_app/invoices'
 import { Route as AppLibraryRouteImport } from './routes/_app/library'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppMapRouteImport } from './routes/_app/map'
@@ -36,6 +37,7 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
 import { Route as AppUnitMismatchesRouteImport } from './routes/_app/unit-mismatches'
 import { Route as AppWarehouseRouteImport } from './routes/_app/warehouse'
+import { Route as ApiAdminTicketsInWindowRouteImport } from './routes/api/admin/tickets-in-window'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiLibraryFileTokenRouteImport } from './routes/api/library-file/$token'
 import { Route as ApiPartImageIdRouteImport } from './routes/api/part-image/$id'
@@ -89,6 +91,11 @@ const AppHandoffRoute = AppHandoffRouteImport.update({
 const AppInstallsRoute = AppInstallsRouteImport.update({
   id: '/installs',
   path: '/installs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInvoicesRoute = AppInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLibraryRoute = AppLibraryRouteImport.update({
@@ -176,6 +183,11 @@ const AppWarehouseRoute = AppWarehouseRouteImport.update({
   path: '/warehouse',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiAdminTicketsInWindowRoute = ApiAdminTicketsInWindowRouteImport.update({
+  id: '/api/admin/tickets-in-window',
+  path: '/api/admin/tickets-in-window',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -213,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
+  '/invoices': typeof AppInvoicesRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
@@ -230,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/tlc': typeof AppTlcRoute
   '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
+  '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
@@ -245,6 +259,7 @@ export interface FileRoutesByTo {
   '/customers': typeof AppCustomersRoute
   '/handoff': typeof AppHandoffRoute
   '/installs': typeof AppInstallsRoute
+  '/invoices': typeof AppInvoicesRoute
   '/library': typeof AppLibraryRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
@@ -263,6 +278,7 @@ export interface FileRoutesByTo {
   '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
   '/': typeof AppIndexRoute
+  '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
@@ -280,6 +296,7 @@ export interface FileRoutesById {
   '/_app/customers': typeof AppCustomersRoute
   '/_app/handoff': typeof AppHandoffRoute
   '/_app/installs': typeof AppInstallsRoute
+  '/_app/invoices': typeof AppInvoicesRoute
   '/_app/library': typeof AppLibraryRoute
   '/_app/locations': typeof AppLocationsRoute
   '/_app/map': typeof AppMapRoute
@@ -298,6 +315,7 @@ export interface FileRoutesById {
   '/_app/unit-mismatches': typeof AppUnitMismatchesRoute
   '/_app/warehouse': typeof AppWarehouseRoute
   '/_app/': typeof AppIndexRoute
+  '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
@@ -316,6 +334,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
+    | '/invoices'
     | '/library'
     | '/locations'
     | '/map'
@@ -333,6 +352,7 @@ export interface FileRouteTypes {
     | '/tlc'
     | '/unit-mismatches'
     | '/warehouse'
+    | '/api/admin/tickets-in-window'
     | '/api/auth/$'
     | '/api/library-file/$token'
     | '/api/part-image/$id'
@@ -348,6 +368,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/handoff'
     | '/installs'
+    | '/invoices'
     | '/library'
     | '/locations'
     | '/map'
@@ -366,6 +387,7 @@ export interface FileRouteTypes {
     | '/unit-mismatches'
     | '/warehouse'
     | '/'
+    | '/api/admin/tickets-in-window'
     | '/api/auth/$'
     | '/api/library-file/$token'
     | '/api/part-image/$id'
@@ -382,6 +404,7 @@ export interface FileRouteTypes {
     | '/_app/customers'
     | '/_app/handoff'
     | '/_app/installs'
+    | '/_app/invoices'
     | '/_app/library'
     | '/_app/locations'
     | '/_app/map'
@@ -400,6 +423,7 @@ export interface FileRouteTypes {
     | '/_app/unit-mismatches'
     | '/_app/warehouse'
     | '/_app/'
+    | '/api/admin/tickets-in-window'
     | '/api/auth/$'
     | '/api/library-file/$token'
     | '/api/part-image/$id'
@@ -410,6 +434,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiAdminTicketsInWindowRoute: typeof ApiAdminTicketsInWindowRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiLibraryFileTokenRoute: typeof ApiLibraryFileTokenRoute
   ApiPartImageIdRoute: typeof ApiPartImageIdRoute
@@ -486,6 +511,13 @@ declare module '@tanstack/react-router' {
       path: '/installs'
       fullPath: '/installs'
       preLoaderRoute: typeof AppInstallsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/invoices': {
+      id: '/_app/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof AppInvoicesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/library': {
@@ -607,6 +639,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWarehouseRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/admin/tickets-in-window': {
+      id: '/api/admin/tickets-in-window'
+      path: '/api/admin/tickets-in-window'
+      fullPath: '/api/admin/tickets-in-window'
+      preLoaderRoute: typeof ApiAdminTicketsInWindowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -653,6 +692,7 @@ interface AppRouteChildren {
   AppCustomersRoute: typeof AppCustomersRoute
   AppHandoffRoute: typeof AppHandoffRoute
   AppInstallsRoute: typeof AppInstallsRoute
+  AppInvoicesRoute: typeof AppInvoicesRoute
   AppLibraryRoute: typeof AppLibraryRoute
   AppLocationsRoute: typeof AppLocationsRoute
   AppMapRoute: typeof AppMapRoute
@@ -682,6 +722,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCustomersRoute: AppCustomersRoute,
   AppHandoffRoute: AppHandoffRoute,
   AppInstallsRoute: AppInstallsRoute,
+  AppInvoicesRoute: AppInvoicesRoute,
   AppLibraryRoute: AppLibraryRoute,
   AppLocationsRoute: AppLocationsRoute,
   AppMapRoute: AppMapRoute,
@@ -708,6 +749,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiAdminTicketsInWindowRoute: ApiAdminTicketsInWindowRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiLibraryFileTokenRoute: ApiLibraryFileTokenRoute,
   ApiPartImageIdRoute: ApiPartImageIdRoute,

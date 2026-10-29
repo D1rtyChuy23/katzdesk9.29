@@ -39,19 +39,38 @@ test("C2: TextBox headers fail with the headers found, the expected names and th
   );
 });
 
-test("C2: the TextBox table maps Corrigo's CSV names (empty until Chuy supplies the mapping)", () => {
-  assert.deepEqual(corrigo.CORRIGO_TEXTBOX_HEADERS, {});
-  const aliases = { "textbox 12": "wo", "textbox 15": "status", "textbox 18": "completedAt" };
-  Object.assign(corrigo.CORRIGO_TEXTBOX_HEADERS, aliases);
-  try {
-    const out = parseCorrigoMatrix([["TextBox_12", "TextBox_15", "TextBox_18"], ["WO-0855", "Completed", "10/19/2026"]]);
-    assert.equal(out.records[0].canonicalWo, "WO-0855");
-    assert.equal(out.records[0].statusRaw, "Completed");
-    assert.equal(out.records[0].completedAt, "2026-10-19");
-    assert.deepEqual(out.columns, { wo: "TextBox_12", status: "TextBox_15", completedAt: "TextBox_18" });
-  } finally {
-    for (const k of Object.keys(aliases)) delete corrigo.CORRIGO_TEXTBOX_HEADERS[k];
-  }
+test("C2: the TextBox table maps Corrigo's two CSV reports; the label cells each row repeats are left out", () => {
+  // The location report (made-up rows): nine label cells, then the values.
+  const ids = [301666, 301667, 301669, 301670, 301671, 301672, 301673, 301674, 301675, 301678, 301679, 301680, 301681, 301682, 301683, 301684, 301685, 301686, 301687, 301688, 301689];
+  const labels = ["ST#", "Customer Display As Name", "Skill", "Primary Service Tech", "Service Location Name", "Service Location Street", "Service Location City", "Service Location State", "Service Location Zip"];
+  const loc = parseCorrigoMatrix([
+    ids.map((n) => `TextBox_${n}`),
+    [...labels, "WO-0901", "Walk - In", "Grinder:OTHER:Burrs", "", "Ryan Gloria", "Zz Rock - Katy BRSO-TX903", "1 Main St", "Katy", "TX", "77494", "Request", "Completed"],
+    [...labels, "WO-0902", "Zz Cafe", "Brewer:Leak", "", "Lance Oden", "Zz Cafe", "", "", "", "", "PM", "Waiting for Pickup"],
+  ]);
+  assert.deepEqual(
+    loc.records.map((r) => [r.canonicalWo, r.customer, r.issue, r.technician, r.serviceLocation, r.callType, r.statusRaw]),
+    [
+      ["WO-0901", "Walk - In", "Grinder:OTHER:Burrs", "Ryan Gloria", "Zz Rock - Katy BRSO-TX903", "Request", "Completed"],
+      ["WO-0902", "Zz Cafe", "Brewer:Leak", "Lance Oden", "Zz Cafe", "PM", "Waiting for Pickup"],
+    ],
+  );
+  assert.equal(loc.columns.wo, "TextBox_301678");
+  // The WO list: "P.O. # : <po>" in one cell is read when the P.O. value column is blank.
+  const list = parseCorrigoMatrix([
+    ["TextBox_295156", "TextBox_295159", "TextBox_295160", "TextBox_295134", "TextBox_295135", "TextBox_295136", "TextBox_295137", "TextBox_295138", "TextBox_295139", "TextBox_295140"],
+    ["P.O. # : 4455", "ST#", "Customer Display As Name", "WO-0903", "Zz Cafe", "Brewer:Leak", "Request", "Completed", "10/27/2026 3:05 PM", ""],
+    ["P.O. # : ", "ST#", "Customer Display As Name", "WO-0904", "Zz Cafe", "Espresso:PM", "PM", "Unassigned", "", "7788"],
+  ]);
+  assert.deepEqual(
+    list.records.map((r) => [r.canonicalWo, r.po, r.callType, r.statusRaw, r.completedAt]),
+    [
+      ["WO-0903", "4455", "Request", "Completed", "2026-10-27"],
+      ["WO-0904", "7788", "PM", "Unassigned", null],
+    ],
+  );
+  // Another report's TextBox ids still need adding: it fails with the headers found.
+  assert.throws(() => parseCorrigoMatrix([["TextBox_12", "TextBox_15"], ["WO-0855", "Completed"]]), /Headers found: TextBox_12, TextBox_15/);
 });
 
 test("C2: a header row below report title rows is found", () => {
@@ -213,6 +232,8 @@ test("C3: the status the preview shows is the status apply writes, on every boar
   await sql.query("insert into service_jobs (kind, call_id, customer, wo, status) values ('service', 'SC-1', 'Cafe', 'WO-0801', 'Dispatched')");
   await sql.query("insert into pm_jobs (customer, status, wo) values ('Cafe', 'Scheduled', 'WO-0802')");
   await sql.query("insert into installs (customer, equip_status, wo) values ('Cafe', 'Ready', 'WO-0803')");
+  // The import only writes to an account that exists (10/28).
+  await sql.query("insert into directory_customers (name) values ('Cafe')");
   const { records } = parseCorrigoMatrix([
     ["ST#", "Status", "Customer Name", "P.O. #"],
     ["801", "", "Cafe", ""],

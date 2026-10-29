@@ -36,6 +36,7 @@ import { Skeleton } from "@/components/ui/separator";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { ChargesPanel } from "./charges-panel";
+import { TicketBillingFlags, TicketInvoicesPanel } from "./ticket-invoices";
 import { RepairQuotePanel } from "./repair-quote-panel";
 import { CustomerCombo, EquipmentMultiCombo, LockedCustomer, useDirectory } from "./directory-fields";
 import { ProviderDispatchBlock } from "./provider-dispatch";
@@ -382,6 +383,7 @@ export function JobSheet({
                   <StatusBadge status={j.status} />
                   <FlagBadge flag={j.flag} />
                   <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} />
+                  <TicketBillingFlags jobId={j.id} key={`billing-flags-${j.id}`} />
                 </div>
                 {/* With tabs, the invoice is on the Invoicing tab. */}
                 {tabbed ? null : (
@@ -444,6 +446,7 @@ export function JobSheet({
                         <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                       </section>
                       <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                      <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
                       <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
                     </Tabs.Content>
 
@@ -488,6 +491,7 @@ export function JobSheet({
                   <>
                     {form}
                     <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                    <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
                     <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
                     <JobPulledUnits jobId={j.id} />
                     <Thread entityType={j.kind} entityId={j.id} />

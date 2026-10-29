@@ -13,7 +13,7 @@ process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
 const { removeCustomersFor, restoreCustomersFor, listRemovedCustomersFor } = await import("../src/lib/ops/customer-remove-api.ts");
 const { renameOrMergeCustomer } = await import("../src/lib/ops/customer-identity.ts");
-const { ensureCustomer, previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
+const { accountNameFor, previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
 const { parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
 const { readReport } = await import("../src/lib/ops/clean-names-api.ts");
 const { cleanLineDone } = await import("../src/lib/ops/clean-names.ts");
@@ -155,15 +155,12 @@ test("a Corrigo report never brings a removed account back; the ticket still sav
     const applied = await sql.query("select detail from activity where entity_id = $1 and action = 'corrigo'", [job.id]);
     assert.equal(applied.length, 1, "the row was applied to the ticket");
 
-    // A name KatzDesk doesn't have is still added; Walk-In and a name on the list change nothing.
-    await ensureCustomer(sql, "Brand New Cafe");
-    await ensureCustomer(sql, "Walk-In");
-    await ensureCustomer(sql, "cafe a");
+    // The import never adds an account (10/28): a name KatzDesk doesn't have, Walk-In and a removed name are no account.
+    assert.equal(await accountNameFor(sql, "Brand New Cafe"), null);
+    assert.equal(await accountNameFor(sql, "Walk-In"), null);
+    assert.equal(await accountNameFor(sql, "cafe a"), null, "removed accounts aren't matched");
     const names = (await sql.query("select name, archived from directory_customers order by id")).map((r) => [r.name, r.archived]);
-    assert.deepEqual(names, [
-      ["Cafe A", true],
-      ["Brand New Cafe", false],
-    ]);
+    assert.deepEqual(names, [["Cafe A", true]]);
   } finally {
     await pg.close();
   }

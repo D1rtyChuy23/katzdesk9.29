@@ -3,6 +3,8 @@
 import { customersLooselyMatch, customersStrictlyMatch } from "./clean-names.ts";
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { CLOSED_CALL, CLOSED_PM } from "./ticket-status.ts";
+import { stripServiceChannelId } from "./billing-rules.ts";
+import { nameKey } from "./wo-history.ts";
 
 export { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 
@@ -77,10 +79,72 @@ const HEADER_KEYS: Record<string, CorrigoCol> = {
   "asset name": "equipment",
   "equipment description": "equipment",
   "equipment package": "equipment",
+  // Free-text fields the import keeps (10/28): the service location, the site contact, Corrigo's own ids and dates.
+  "service location name": "serviceLocation",
+  "service location": "serviceLocation",
+  "location name": "serviceLocation",
+  "site name": "serviceLocation",
+  site: "serviceLocation",
+  contact: "contact",
+  "contact name": "contact",
+  "site contact": "contact",
+  caller: "contact",
+  requestor: "contact",
+  requester: "contact",
+  "requested by": "contact",
+  "contact phone": "phone",
+  "site phone": "phone",
+  "caller phone": "phone",
+  phone: "phone",
+  "phone number": "phone",
+  created: "createdAt",
+  "created date": "createdAt",
+  "date created": "createdAt",
+  "date time created": "createdAt",
+  "created on": "createdAt",
+  "created date time": "createdAt",
+  "date opened": "createdAt",
+  "date entered": "createdAt",
+  "request date": "createdAt",
+  "date requested": "createdAt",
+  "date time requested": "createdAt",
+  priority: "priority",
+  "wo priority": "priority",
+  "work order priority": "priority",
+  "work order id": "corrigoId",
+  "wo id": "corrigoId",
+  "corrigo id": "corrigoId",
+  "total invoice": "total",
+  "invoice total": "total",
+  "net total": "total",
+  "corrigo net": "total",
 };
 
-/** Corrigo's CSV export names columns TextBox_## (key: normalizeHeader). Empty until Chuy supplies the mapping. */
-export const CORRIGO_TEXTBOX_HEADERS: Record<string, CorrigoCol> = {};
+/**
+ * Corrigo's CSV export names columns TextBox_## (key: normalizeHeader), one set per report. Each data row also repeats
+ * the reports' label cells ("ST#", "Customer Display As Name"); those columns are left unmapped, so only values are read.
+ * Two reports are known (Grok, 10/28); another report's TextBox ids still need adding here.
+ */
+export const CORRIGO_TEXTBOX_HEADERS: Record<string, CorrigoCol> = {
+  // Location report (TextBox_3016xx): no completed date or P.O. in it.
+  "textbox 301678": "wo",
+  "textbox 301679": "customer",
+  "textbox 301680": "issue",
+  "textbox 301682": "technician",
+  "textbox 301683": "serviceLocation",
+  "textbox 301688": "callType",
+  "textbox 301689": "status",
+  // WO list (TextBox_2951xx).
+  "textbox 295134": "wo",
+  "textbox 295135": "customer",
+  "textbox 295136": "issue",
+  "textbox 295137": "callType",
+  "textbox 295138": "status",
+  "textbox 295139": "completedAt",
+  "textbox 295140": "po",
+  // "P.O. # : <po>" in one cell: read when the P.O. value column is blank.
+  "textbox 295156": "poLabeled",
+};
 
 export const COL_LABEL: Record<CorrigoCol, string> = {
   wo: "ST#",
@@ -91,8 +155,16 @@ export const COL_LABEL: Record<CorrigoCol, string> = {
   issue: "Problem Description",
   customer: "Customer Name",
   po: "P.O. #",
-  callType: "Call Type",
+  poLabeled: "P.O. # (labeled)",
+  callType: "Type",
   equipment: "Equipment",
+  serviceLocation: "Service Location Name",
+  contact: "Contact",
+  phone: "Phone",
+  createdAt: "Created",
+  priority: "Priority",
+  corrigoId: "Work Order ID",
+  total: "Total Invoice",
 };
 
 /** Without these every ticket keeps its status / completed date, so the preview warns when one is missing. */
@@ -109,8 +181,16 @@ export type CorrigoCol =
   | "issue"
   | "customer"
   | "po"
+  | "poLabeled"
   | "callType"
-  | "equipment";
+  | "equipment"
+  | "serviceLocation"
+  | "contact"
+  | "phone"
+  | "createdAt"
+  | "priority"
+  | "corrigoId"
+  | "total";
 
 export type CorrigoBoard = "service" | "tlc" | "pm" | "install";
 
@@ -130,6 +210,17 @@ export type CorrigoRecord = {
   callType: string | null;
   /** The machines on the row, from an Equipment / Asset column. */
   equipment?: string | null;
+  /** Corrigo's Service Location Name, as written (a ServiceChannel id may end it). */
+  serviceLocation?: string | null;
+  contact?: string | null;
+  phone?: string | null;
+  /** YYYY-MM-DD the work order was created in Corrigo: the ticket's received date. */
+  createdAt?: string | null;
+  priority?: string | null;
+  /** Corrigo's own work order id, when the report has one. */
+  corrigoId?: string | null;
+  /** Corrigo's net for the work order ("Total Invoice"). */
+  total?: number | null;
 };
 
 export type CorrigoHit = {
@@ -147,6 +238,12 @@ export type CorrigoHit = {
   /** NetSuite Sales Order (service tickets only). */
   billedSo?: string | null;
   hasCharges?: boolean;
+  /** Service and TLC tickets: what an update may refresh (shown old → new), and whether a NetSuite invoice locks it. */
+  po?: string | null;
+  issue?: string | null;
+  equipment?: string | null;
+  invoiced?: boolean;
+  corrigoId?: string | null;
   /** Installs only: every work order the install carries (the primary included), with Corrigo's status for each. */
   wos?: InstallWo[];
 };
@@ -231,7 +328,114 @@ export type CorrigoPreviewRow = {
   installNewFrom?: string | null;
   /** The machines the row names exactly (Equipment column, else the problem description), or null. */
   namedMachines?: string[] | null;
+  /** The file's P.O. #, and the ticket's now (service and TLC tickets). */
+  po?: string | null;
+  oldPo?: string | null;
+  /** The P.O. an update writes: null when it stays (blank in the file, the same, or the ticket is billed). */
+  poChange?: { from: string | null; to: string } | null;
+  poNote?: string | null;
+  /** Service and TLC updates: the issue and equipment the file refreshes (old → new). */
+  issueChange?: { from: string | null; to: string } | null;
+  equipmentChange?: { from: string | null; to: string } | null;
+  /** The work order's Corrigo created date: a new ticket's received date. A new ticket without one stays blank. */
+  createdAt?: string | null;
+  serviceLocation?: string | null;
+  contact?: string | null;
+  phone?: string | null;
+  corrigoId?: string | null;
+  /** Corrigo's net ("Total Invoice"). */
+  corrigoNet?: number | null;
+  /** A new service or TLC ticket's Type and urgency. */
+  callTypeValue?: string | null;
+  urgency?: string | null;
+  /** How Corrigo's Type (and priority) placed the row. */
+  typeNote?: string | null;
+  /** The account the row is written with and how it was found (exact name only; the import never adds one). */
+  account?: RowAccount | null;
+  /** No account to write with (none by that exact name, removed, or Walk-In): unticked until one is picked. */
+  needsReview?: boolean;
 };
+
+// ── Accounts: exact names only (Grok's rule through Chuy, 10/28) ─────────────────────────────────────────────────────
+
+export type AccountRow = { name: string; archived: boolean; locked: boolean };
+
+export type AccountIndex = {
+  /** Live accounts by exact name (case and spacing aside). */
+  active: Map<string, string>;
+  /** Removed accounts by exact name. */
+  removed: Map<string, string>;
+  /** Locked clean-list names by their letters and digits: a locked name wins over the file's spelling. */
+  locked: Map<string, string>;
+};
+
+export function accountIndex(rows: AccountRow[]): AccountIndex {
+  const idx: AccountIndex = { active: new Map(), removed: new Map(), locked: new Map() };
+  for (const r of rows) {
+    const k = nameKey(r.name);
+    if (!k) continue;
+    if (r.archived) {
+      if (!idx.removed.has(k)) idx.removed.set(k, r.name);
+      continue;
+    }
+    if (!idx.active.has(k)) idx.active.set(k, r.name);
+    const lk = normalizeCustomerKey(r.name);
+    if (r.locked && lk && !idx.locked.has(lk)) idx.locked.set(lk, r.name);
+  }
+  return idx;
+}
+
+/** The account a name is, exactly: a locked clean-list name first, then a live account. A ServiceChannel id at the end is dropped. */
+export function exactAccount(raw: string | null | undefined, idx: AccountIndex): { name: string; how: "exact" | "locked" } | { removed: string } | null {
+  const s = stripServiceChannelId(raw);
+  if (!s || isWalkIn(s)) return null;
+  const locked = idx.locked.get(normalizeCustomerKey(s));
+  if (locked) return { name: locked, how: "locked" };
+  const live = idx.active.get(nameKey(s));
+  if (live) return { name: live, how: "exact" };
+  const gone = idx.removed.get(nameKey(s));
+  return gone ? { removed: gone } : null;
+}
+
+export type RowAccount = {
+  status: "exact" | "locked" | "location" | "kept" | "none" | "removed" | "walkin";
+  name: string | null;
+  note: string | null;
+};
+
+/**
+ * The account a Corrigo row is written with. Walk-In is never one: its account comes from the Service Location Name.
+ * Nothing is matched loosely and no account is ever added: anything without an exact match needs review (an update
+ * keeps the ticket's own account, unless that is Walk-In too).
+ */
+export function resolveRowAccount(
+  rec: Pick<CorrigoRecord, "customer" | "serviceLocation">,
+  existingCustomer: string | null | undefined,
+  idx: AccountIndex,
+): RowAccount {
+  const existing = String(existingCustomer ?? "").trim();
+  const keep = existing && !isWalkIn(existing) ? existing : null;
+  const file = String(rec.customer ?? "").trim();
+  if (isWalkIn(file)) {
+    const loc = stripServiceChannelId(rec.serviceLocation);
+    const hit = loc ? exactAccount(loc, idx) : null;
+    if (hit && "name" in hit) return { status: "location", name: hit.name, note: `Walk-In: the account from its Service Location "${String(rec.serviceLocation).trim()}"` };
+    if (keep) return { status: "kept", name: keep, note: "Walk-In in Corrigo: the ticket keeps its account" };
+    return {
+      status: "walkin",
+      name: null,
+      note: loc ? `Walk-In, and no account is named "${loc}" (its Service Location). Pick one.` : "Walk-In, and the file has no Service Location Name. Pick an account.",
+    };
+  }
+  if (!file) return keep ? { status: "kept", name: keep, note: null } : { status: "none", name: null, note: "No customer in the file. Pick an account." };
+  const hit = exactAccount(file, idx);
+  if (hit && "name" in hit) return { status: hit.how, name: hit.name, note: hit.how === "locked" && hit.name !== file ? `Clean-list name for "${file}"` : null };
+  if (keep) {
+    return { status: "kept", name: keep, note: hit ? `"${hit.removed}" was removed from Customers: the ticket keeps ${keep}` : `No account named "${stripServiceChannelId(file)}": the ticket keeps ${keep}` };
+  }
+  if (hit) return { status: "removed", name: null, note: `"${hit.removed}" was removed from Customers. Restore it on Customers, or pick an account.` };
+  return { status: "none", name: null, note: `No account named "${stripServiceChannelId(file)}". Pick one (the import never adds accounts).` };
+}
 
 /**
  * An open install (not archived, not complete) the account's install rows may attach to. machines: read by
@@ -305,10 +509,16 @@ export function hitClosed(hit: Pick<CorrigoHit, "status" | "done">): boolean {
   return CLOSED_HIT.has(String(hit.status ?? "").trim().toLowerCase());
 }
 
-/** Came in within 365 days of the import (today), so it is from the current run of ST# numbers. */
+/**
+ * Came in within 365 days of the anchor, so it is from the same run of ST# numbers. The anchor is the row's Corrigo
+ * created date when the report has one, else the import day; either side counts, so an old report finds old tickets.
+ */
 function recentTicket(hit: CorrigoHit, today: string | null | undefined): boolean {
   if (!today || !hit.received) return false;
-  return hit.received >= new Date(Date.parse(today) - 365 * 86_400_000).toISOString().slice(0, 10);
+  const anchor = Date.parse(today);
+  const at = Date.parse(hit.received);
+  if (!Number.isFinite(anchor) || !Number.isFinite(at)) return false;
+  return Math.abs(at - anchor) <= 365 * 86_400_000;
 }
 
 /** After the wrap, a ticket from this cycle wins over an old-cycle copy of the same number. */
@@ -507,6 +717,54 @@ export function detectBoard(hints: {
   return "service";
 }
 
+/** Corrigo's Type column. PM and Request are Corrigo's own; "service" and "install" come from bot-made files. */
+export type CorrigoType = "pm" | "install" | "request";
+
+export function corrigoType(raw: string | null | undefined): { type: CorrigoType | null; known: boolean } {
+  const s = statusKey(String(raw ?? ""));
+  if (!s) return { type: null, known: true };
+  if (["pm", "preventive maintenance", "preventative maintenance", "pm request"].includes(s)) return { type: "pm", known: true };
+  if (["install", "installs", "installation"].includes(s)) return { type: "install", known: true };
+  if (["request", "service", "service request", "repair"].includes(s)) return { type: "request", known: true };
+  return { type: null, known: false };
+}
+
+/**
+ * The board a new row goes on. With a Type column, Type PM is a PM and Install is an install. A Request is service
+ * work: an install or a TLC / Factor visit by its P.O. or description (Corrigo has no Install type), never a PM by its
+ * words. Without a Type, the P.O., description and call type decide, as before.
+ */
+export function hintedBoard(rec: Pick<CorrigoRecord, "po" | "issue" | "callType">): { board: CorrigoBoard; note: string | null } {
+  const t = corrigoType(rec.callType);
+  if (t.type === "pm") return { board: "pm", note: null };
+  if (t.type === "install") return { board: "install", note: null };
+  if (t.type === "request") {
+    const b = detectBoard({ po: rec.po, issue: rec.issue, callType: null });
+    return b === "pm" ? { board: "service", note: "Type Request: a service ticket, though its description reads like a PM" } : { board: b, note: null };
+  }
+  const b = detectBoard({ po: rec.po, issue: rec.issue, callType: rec.callType });
+  return {
+    board: b,
+    note: t.known ? null : `Type "${String(rec.callType).trim()}" isn't PM or Request: ${boardLabel(b) ?? "a service ticket"} by its description`,
+  };
+}
+
+/** A new service or TLC ticket's Type: Corrigo's Request (or no Type) is Field Service; an Install is Installation. */
+export function callTypeFor(rec: Pick<CorrigoRecord, "callType">): string {
+  return corrigoType(rec.callType).type === "install" ? "Installation" : "Field Service";
+}
+
+/** Corrigo's priority as a ticket urgency: Urgent is High, Non Urgent is Normal. Anything else is Normal, with a note. */
+export function urgencyFor(raw: string | null | undefined): { urgency: string; note: string | null } {
+  const s = statusKey(String(raw ?? ""));
+  if (!s) return { urgency: "Normal", note: null };
+  if (s === "emergency" || s === "critical") return { urgency: "Emergency", note: null };
+  if (s === "urgent" || s === "high") return { urgency: "High", note: null };
+  if (s === "non urgent" || s === "nonurgent" || s === "normal" || s === "medium" || s === "routine") return { urgency: "Normal", note: null };
+  if (s === "low") return { urgency: "Low", note: null };
+  return { urgency: "Normal", note: `Priority "${String(raw).trim()}" is new: opens as Normal` };
+}
+
 export function boardLabel(board: CorrigoBoard): string | null {
   if (board === "tlc") return "TLC / Factor";
   if (board === "pm") return "PM";
@@ -596,6 +854,11 @@ function cell(row: string[], idx: number | undefined): string {
   return String(row[idx] ?? "").trim();
 }
 
+/** "P.O. # : 251100" → "251100"; the label alone is blank. */
+function unlabeledPo(raw: string): string {
+  return raw.replace(/^p\.?\s*o\.?\s*#?\s*:?/i, "").trim();
+}
+
 export type CorrigoParse = {
   skipped: number;
   records: CorrigoRecord[];
@@ -648,6 +911,7 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
       skipped += 1;
       continue;
     }
+    const total = cell(row, cols.total).replace(/[$,\s]/g, "");
     const rec: CorrigoRecord = {
       rawWo,
       matchKey,
@@ -659,9 +923,16 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
       statusRaw: cell(row, cols.status) || null,
       issue: cell(row, cols.issue) || null,
       customer: cell(row, cols.customer) || null,
-      po: cell(row, cols.po) || null,
+      po: cell(row, cols.po) || unlabeledPo(cell(row, cols.poLabeled)) || null,
       callType: cell(row, cols.callType) || null,
       equipment: cell(row, cols.equipment) || null,
+      serviceLocation: cell(row, cols.serviceLocation) || null,
+      contact: cell(row, cols.contact) || null,
+      phone: cell(row, cols.phone) || null,
+      createdAt: parseCompletedDate(cell(row, cols.createdAt)),
+      priority: cell(row, cols.priority) || null,
+      corrigoId: cell(row, cols.corrigoId) || null,
+      total: total && Number.isFinite(Number(total)) ? Number(total) : null,
     };
     const prev = byKey.get(matchKey);
     // Several lines for one ST# (cost lines, subtotals): a later non-blank cell wins; a blank never wipes one.
@@ -1005,7 +1276,8 @@ export function settleInstallRows<T extends CorrigoPreviewRow>(
     const create: InstallOption = own?.find((o) => o.id == null) ?? {
       id: null,
       label: NEW_INSTALL_LABEL,
-      customer: preferredImportCustomer(row.fileCustomer, null),
+      // The account the row was matched to exactly, once the preview has resolved it.
+      customer: row.account ? row.account.name : preferredImportCustomer(row.fileCustomer, null),
       summary: "",
       state: null,
       byEquipment: false,
@@ -1118,18 +1390,17 @@ export function resolvePreviewRow(
   } = {},
 ): CorrigoPreviewRow {
   const wrapped = !!opts.wrapped;
+  // The run of WO numbers is judged from Corrigo's created date when the report has one, else from today.
+  const today = rec.createdAt || opts.today;
   const group = [
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
-  const hinted = detectBoard({
-    po: rec.po,
-    issue: rec.issue,
-    callType: rec.callType,
-  });
+  const route = hintedBoard(rec);
+  const hinted = route.board;
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;
-  const woHit = pickKeeper(preferFileCustomerInstalls(attachableHits(pool, rec.customer, wrapped, opts.today, rec), rec.customer), hinted);
+  const woHit = pickKeeper(preferFileCustomerInstalls(attachableHits(pool, rec.customer, wrapped, today, rec), rec.customer), hinted);
   const pick = !woHit && hinted === "install" ? installCandidates(rec, opts.installs ?? [], opts.catalog ?? []) : null;
   const existing = woHit ?? pick?.choice ?? null;
   // After the wrap, a copy from the other cycle than the chosen ticket, or another customer's, is a different job.
@@ -1137,14 +1408,9 @@ export function resolvePreviewRow(
   const otherJob = (h: CorrigoHit) =>
     !!existing &&
     wrapped &&
-    (recentTicket(h, opts.today) !== recentTicket(existing, opts.today) || !customersCompatible(h.customer, existing.customer));
+    (recentTicket(h, today) !== recentTicket(existing, today) || !customersCompatible(h.customer, existing.customer));
   const extras = others.filter((h) => !otherJob(h));
-  const board = detectBoard({
-    po: rec.po,
-    issue: rec.issue,
-    callType: rec.callType,
-    existing: existing?.board ?? null,
-  });
+  const board = existing?.board ?? hinted;
   const oldStatus = existing?.status ?? null;
   const resolved = boardStatus(board, rec.statusRaw, rec.completedAt, oldStatus);
   const newStatus = resolved.status;
@@ -1164,7 +1430,7 @@ export function resolvePreviewRow(
   const n = woNumeric(rec.rawWo || rec.canonicalWo);
   const postWrapNumber = n != null && n < 5000;
   // This cycle's tickets with the number that the row doesn't go on and won't merge: named, and sent to For Review.
-  const strangers = wrapped ? others.filter((h) => recentTicket(h, opts.today) && (!existing || otherJob(h))) : [];
+  const strangers = wrapped ? others.filter((h) => recentTicket(h, today) && (!existing || otherJob(h))) : [];
   const shared = strangers.length
     ? `${rec.canonicalWo} is also on ${strangers.map((h) => `${h.board} #${h.id} (${h.customer || "no customer"})`).join(", ")}`
     : null;
@@ -1172,7 +1438,7 @@ export function resolvePreviewRow(
   const wrapRepeat =
     wrapped &&
     (strangers.length > 0 ||
-      (postWrapNumber && (existing ? !recentTicket(existing, opts.today) && others.length > 0 : group.length > 0)));
+      (postWrapNumber && (existing ? !recentTicket(existing, today) && others.length > 0 : group.length > 0)));
   const note = woHit ? matchNote(rec.rawWo, rec.canonicalWo, woHit.wo) : null;
 
   const row: CorrigoPreviewRow = {
@@ -1259,9 +1525,51 @@ export function resolvePreviewRow(
       woHit?.board === "install"
         ? { status: woHit.status, completedAt: woHit.completedAt ?? null, wos: woHit.wos ?? [] }
         : null,
+    ...ticketFields(rec, existing, board, route.note),
   };
   // An install's other work orders decide what this one does to its status.
   return settleInstallRows([row])[0]!;
+}
+
+const sameText = (a: string | null | undefined, b: string | null | undefined) =>
+  String(a ?? "").replace(/\s+/g, " ").trim() === String(b ?? "").replace(/\s+/g, " ").trim();
+
+/**
+ * What a row carries besides status and dates (10/28): the P.O., the issue and equipment an update refreshes (service and
+ * TLC tickets; PMs and installs keep their curated machines), Corrigo's location, contact, ids and net, and a new
+ * ticket's Type and urgency. A billed or invoiced ticket keeps its P.O.
+ */
+function ticketFields(rec: CorrigoRecord, existing: CorrigoHit | null, board: CorrigoBoard, typeNote: string | null): Partial<CorrigoPreviewRow> {
+  const ticket = board === "service" || board === "tlc";
+  const po = rec.po?.trim() || null;
+  const billed = !!existing?.billedSo?.trim() || !!existing?.invoiced;
+  let poChange: CorrigoPreviewRow["poChange"] = null;
+  let poNote: string | null = null;
+  if (ticket && po && existing && !sameText(po, existing.po)) {
+    if (billed) poNote = `P.O. kept (${existing.po || "none"}): the ticket is ${existing.invoiced ? "invoiced" : `billed on ${existing.billedSo}`}`;
+    else poChange = { from: existing.po?.trim() || null, to: po };
+  }
+  const refresh = (file: string | null | undefined, now: string | null | undefined) =>
+    ticket && existing && String(file ?? "").trim() && !sameText(file, now) ? { from: now?.trim() || null, to: String(file).trim() } : null;
+  const urgency = urgencyFor(rec.priority);
+  return {
+    po,
+    oldPo: existing?.po ?? null,
+    poChange,
+    poNote,
+    issueChange: refresh(rec.issue, existing?.issue),
+    // A new ticket takes the file's equipment as it is.
+    equipmentChange: existing ? refresh(rec.equipment, existing.equipment) : ticket && rec.equipment?.trim() ? { from: null, to: rec.equipment.trim() } : null,
+    createdAt: rec.createdAt ?? null,
+    serviceLocation: rec.serviceLocation?.trim() || null,
+    contact: rec.contact?.trim() || null,
+    phone: rec.phone?.trim() || null,
+    corrigoId: rec.corrigoId?.trim() || null,
+    corrigoNet: rec.total ?? null,
+    callTypeValue: ticket ? callTypeFor(rec) : null,
+    urgency: ticket ? urgency.urgency : null,
+    typeNote: [typeNote, ticket && !existing ? urgency.note : null].filter(Boolean).join(" · ") || null,
+  };
 }
 
 /** Prefer the original ticket on the hinted board. Never skip a match — extras get flagged. */

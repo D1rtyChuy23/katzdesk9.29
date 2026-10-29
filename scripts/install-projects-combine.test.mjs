@@ -11,7 +11,28 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
 const { chunkByBytes, mergeCorrigoPreviews, newInstallChoice, parseCorrigoMatrix, settleInstallRows } = await import("../src/lib/ops/corrigo.ts");
-const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
+const corrigoImport = await import("../src/lib/ops/corrigo-import.ts");
+const { applyCorrigoRows } = corrigoImport;
+
+/**
+ * These tests are about install projects, written before the import stopped adding accounts (10/28). The file's
+ * customers are made accounts first, as the import used to make them, so the rules under test are unchanged.
+ */
+async function seedFileAccounts(sql, records) {
+  for (const r of records) {
+    const name = String(r.customer ?? "").trim();
+    if (!name || /^walk\W*ins?$/i.test(name.replace(/\s+/g, ""))) continue;
+    await sql.query(
+      "insert into directory_customers (name) select $1::text where not exists (select 1 from directory_customers where lower(name) = lower($1::text))",
+      [name],
+    );
+  }
+}
+
+async function previewCorrigoRecords(sql, records) {
+  await seedFileAccounts(sql, records);
+  return corrigoImport.previewCorrigoRecords(sql, records);
+}
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -105,7 +126,10 @@ test("exactly different equipment, two accounts, or a Walk-In: each opens its ow
     assert.deepEqual(rows[1].installOptions.map((o) => o.label), ["Attach to the new install from WO-0901", "Create new install"]);
     assert.equal(rows[3].installOptions, null);
     const res = await applyCorrigoRows(sql, rows.map(lean), "Chuy");
-    assert.deepEqual([res.updated, res.created], [1, 5]);
+    // Walk-In is never an account (10/28): those two rows aren't written; the preview has them for review.
+    assert.deepEqual([res.updated, res.created], [1, 3]);
+    assert.deepEqual(res.refused.map((r) => r.wo), ["WO-0921", "WO-0922"]);
+    assert.ok(rows.filter((r) => r.fileWalkIn).every((r) => r.needsReview));
     const first = (await installs(sql)).find((i) => i.wo === "WO-0901");
     assert.deepEqual(await wosOf(sql, first.id), ["WO-0901:Work Started", "WO-0903:Work Started"]);
   } finally {

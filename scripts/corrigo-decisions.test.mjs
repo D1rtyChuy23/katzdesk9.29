@@ -11,7 +11,28 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const { descriptionNames, exactMachines, parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
 const { addDays, todayChicago } = await import("../src/lib/ops/clock.ts");
-const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
+const corrigoImport = await import("../src/lib/ops/corrigo-import.ts");
+const { applyCorrigoRows } = corrigoImport;
+
+/**
+ * These tests are about WO numbers, statuses and installs, written before the import stopped adding accounts (10/28).
+ * The file's customers are made accounts first, as the import used to make them, so the rules under test are unchanged.
+ */
+async function seedFileAccounts(sql, records) {
+  for (const r of records) {
+    const name = String(r.customer ?? "").trim();
+    if (!name || /^walk\W*ins?$/i.test(name.replace(/\s+/g, ""))) continue;
+    await sql.query(
+      "insert into directory_customers (name) select $1::text where not exists (select 1 from directory_customers where lower(name) = lower($1::text))",
+      [name],
+    );
+  }
+}
+
+async function previewCorrigoRecords(sql, records) {
+  await seedFileAccounts(sql, records);
+  return corrigoImport.previewCorrigoRecords(sql, records);
+}
 
 async function freshDb() {
   const pg = new PGlite();

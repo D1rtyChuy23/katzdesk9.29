@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { WoHistoryImportButton } from "@/components/desk/wo-history-import";
-import { useBackTo } from "@/lib/ops/search-params";
+import { useBackTo, type TicketSearch, type TicketView } from "@/lib/ops/search-params";
 import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
 import { AddressLine } from "@/components/desk/customer-address";
@@ -10,6 +10,7 @@ import { withWoMatches, woBoardName, woSearchKey } from "@/lib/ops/wo-search";
 import { OpenLink } from "./open-link";
 import { getMyAccess } from "@/lib/ops/access";
 import { BillingExportButton, ItemListImportButton } from "./billing-tools";
+import { BillingBackfillButton } from "./billing-backfill";
 import { URGENCIES, URGENCY_RANK } from "@/lib/ops/lookups";
 import { isClosedCall, isOpenCall } from "@/lib/ops/ticket-status";
 import { formatShortDate } from "@/lib/ops/clock";
@@ -19,10 +20,19 @@ import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-bad
 import { JobSheet, NewJobDialog } from "./job-sheet";
 import { CorrigoImportButton, CorrigoReviewList, type CorrigoReviewItem } from "./corrigo-import";
 import { SortSelect, useDeskSort } from "./sort-bar";
-import { ActionMenu, ImportMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
+import { ActionButton, ActionMenu, ImportMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
 import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
 import { Plus } from "lucide-react";
 import { ExportButton } from "./export-dialog";
+import { FileDown } from "lucide-react";
+import { listTicketBilling } from "@/lib/ops/billing-report-api";
+import { jobFilterRow, ticketsCsv, type TicketBillingRow } from "@/lib/ops/billing-report";
+import { matchesBillingFilters, type BillingFilters } from "@/lib/ops/billing-rules";
+import { todayChicago } from "@/lib/ops/clock";
+import { BillingFilterButton, BillingFilterPanel, type FilterPatch } from "./billing-filters";
+import { usePausedValue } from "./use-paused-value";
+import { DoubleBillBadge } from "./ticket-invoices";
+import { downloadCsv } from "./download-csv";
 import { ListToolbar, ToolbarSearch, ToolbarSelect, TOOLBAR_SELECT } from "./list-toolbar";
 import { TechFilter, TechName } from "./tech-select";
 import { sameTech } from "@/lib/ops/tech-match";
@@ -32,6 +42,11 @@ import { useMyView } from "./my-view-bar";
 import { notLoadedText } from "@/lib/ops/load-problem";
 
 
+/** The billing filters: an Admin's (10/28). */
+const BILLING_KEYS = ["so", "invoice", "invStatus", "double", "mismatch"] as const;
+/** The panel's filters, besides the search box. */
+const PANEL_KEYS = ["dateBy", "dateFrom", "dateTo", "status", "account", "tech", ...BILLING_KEYS] as const;
+
 export function JobsPage({
   kind,
   title,
@@ -39,6 +54,8 @@ export function JobsPage({
   initialOpen,
   from,
   initialTab,
+  search = {},
+  onSearch,
 }: {
   kind: "service" | "tlc";
   title: string;
@@ -48,18 +65,58 @@ export function JobsPage({
   from?: string;
   /** A ping or note notification opens its ticket on the Ping tab. */
   initialTab?: "ping";
+  /** The list's view, search and filters, from the address bar (10/28). */
+  search?: TicketSearch;
+  /** Change the list's view, search or filters in the address bar. */
+  onSearch?: (patch: Partial<TicketSearch>) => void;
 }) {
   const jobs = useQuery({
     queryKey: ["jobs", kind],
     queryFn: () => listJobs({ data: { kind } }),
   });
+  // Each ticket's Sales Order, NetSuite invoices and double-bill flag. Under "jobs" so an import refreshes it.
+  const billing = useQuery({
+    queryKey: ["jobs", "billing", kind],
+    queryFn: () => listTicketBilling({ data: { kind } }),
+  });
+  const billingById = useMemo(() => new Map((billing.data ?? []).map((b) => [b.id, b] as const)), [billing.data]);
   const { filterMine, matchMine, role } = useMyView();
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
-  const [q, setQ] = useState("");
+  const isAdmin = !!(me.data?.isAdmin || me.data?.role === "admin");
+  const setSearch = (patch: Partial<TicketSearch>) => onSearch?.(patch);
+  // The search box answers each key at once; the address bar catches up when typing pauses.
+  const [q, setQ] = usePausedValue(search.q ?? "", (v) => setSearch({ q: v.trim() ? v : undefined }));
 
-  const [tech, setTech] = useState("");
-  const [urgency, setUrgency] = useState("");
-  const [view, setView] = useState<"active" | "flagged" | "unassigned" | "complete" | "all">("active");
+  const tech = search.tech ?? "";
+  const setTech = (v: string) => setSearch({ tech: v || undefined });
+  const urgency = search.urgency ?? "";
+  const setUrgency = (v: string) => setSearch({ urgency: v || undefined });
+  const view: TicketView = search.view ?? "active";
+  const setView = (next: TicketView | ((v: TicketView) => TicketView)) =>
+    setSearch({ view: (typeof next === "function" ? next(view) : next) as TicketSearch["view"] });
+  // An Admin's billing filters apply; anyone else's address bar can't narrow by them.
+  const filters: BillingFilters = useMemo(() => {
+    const f: BillingFilters = {};
+    for (const k of PANEL_KEYS) {
+      if (k === "tech") continue;
+      if (!isAdmin && (BILLING_KEYS as readonly string[]).includes(k)) continue;
+      if (!isAdmin && k === "dateBy" && search.dateBy === "invoiced") continue;
+      const v = search[k];
+      if (v !== undefined) (f as Record<string, unknown>)[k] = v;
+    }
+    return f;
+  }, [search, isAdmin]);
+  const [filtersOpen, setFiltersOpen] = useState(() => PANEL_KEYS.some((k) => k !== "tech" && search[k] !== undefined));
+  const panelValue: BillingFilters = { ...filters, ...(search.tech ? { tech: search.tech } : {}), ...(search.q ? { q: search.q } : {}) };
+  /** Only the keys the change names: the address bar as it is then keeps the rest (two quick changes never clash). */
+  function applyPanel(change: FilterPatch) {
+    const patch: Partial<TicketSearch> = {};
+    for (const k of PANEL_KEYS) if (k in change) (patch as Record<string, unknown>)[k] = change[k];
+    // A date, status or billing filter looks past the open calls: Active would hide most of what it finds.
+    const narrows = PANEL_KEYS.some((k) => k !== "tech" && k !== "account" && k !== "dateBy" && change[k] !== undefined);
+    if (narrows && view === "active") patch.view = "all";
+    setSearch(patch);
+  }
   const [openId, setOpenId] = useState<number | null>(initialOpen ?? null);
   const back = useBackTo(from);
   const [openTab, setOpenTab] = useState<"ping" | undefined>(initialOpen != null ? initialTab : undefined);
@@ -95,6 +152,7 @@ export function JobsPage({
     if (tech) list = list.filter((j) => sameTech(j.technician, tech) || sameTech(j.secondaryTech, tech));
     list = mineByTechnician(list, { filterMine, role, matchMine });
     if (urgency) list = list.filter((j) => j.urgency === urgency);
+    if (Object.keys(filters).length) list = list.filter((j) => matchesBillingFilters(jobFilterRow(j, billingById.get(j.id)), filters));
 
     const needle = q.trim().toLowerCase();
     if (needle) {
@@ -114,7 +172,7 @@ export function JobsPage({
       flagRank: (j) => (j.flag ? j.flag.rank : 50) + (URGENCY_RANK[j.urgency] ?? 2) / 10,
       tech: (j) => j.technician,
     });
-  }, [jobs.data, q, tech, urgency, view, sort, filterMine, matchMine, role]);
+  }, [jobs.data, q, tech, urgency, view, sort, filterMine, matchMine, role, filters, billingById]);
 
   // The same WO on another board (PM, Install, the other ticket list): say where it is.
   const woKey = woSearchKey(q);
@@ -134,6 +192,12 @@ export function JobsPage({
   const activeJobs = allJobs.filter((j) => isOpenCall(j));
   const unassignedCount = activeJobs.filter((j) => !j.technician).length;
   const completeCount = liveJobs.filter((j) => isClosedCall(j)).length;
+  const doubleCount = liveJobs.filter((j) => billingById.get(j.id)?.doubleBill).length;
+  const statuses = useMemo(() => [...new Set((jobs.data ?? []).map((j) => j.status).filter(Boolean))], [jobs.data]);
+  const needsBilling = Object.keys(filters).some((k) => (BILLING_KEYS as readonly string[]).includes(k) || (k === "dateBy" && filters.dateBy === "invoiced"));
+  function exportList() {
+    downloadCsv(`${kind === "tlc" ? "tlc" : "tickets"}-${todayChicago()}.csv`, ticketsCsv(rows, isAdmin ? billingById : null));
+  }
 
   return (
     <div>
@@ -145,15 +209,20 @@ export function JobsPage({
         <div className="flex shrink-0 flex-wrap gap-2">
           {/* Imports live on Tickets only. More than one: the Import list. One: its own button. */}
           <ImportMenu>
-            {kind === "service" ? <CorrigoImportButton onImported={setReview} /> : null}
-            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ItemListImportButton /> : null}
-            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <ImportPartsButton /> : null}
-            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <UpdatePricingButton /> : null}
-            {kind === "service" && (me.data?.isAdmin || me.data?.role === "admin") ? <WoHistoryImportButton /> : null}
+            {/* Every import is Admin only (the Corrigo import too, 10/28). */}
+            {kind === "service" && isAdmin ? <CorrigoImportButton onImported={setReview} /> : null}
+            {kind === "service" && isAdmin ? <BillingBackfillButton /> : null}
+            {kind === "service" && isAdmin ? <ItemListImportButton /> : null}
+            {kind === "service" && isAdmin ? <ImportPartsButton /> : null}
+            {kind === "service" && isAdmin ? <UpdatePricingButton /> : null}
+            {kind === "service" && isAdmin ? <WoHistoryImportButton /> : null}
           </ImportMenu>
           <ActionMenu label="Export">
             <BillingExportButton />
             <ExportButton defaultType={kind === "tlc" ? "tlc" : "pending"} />
+            <ActionButton icon={FileDown} menuLabel={`This List (${rows.length}) As CSV`} onClick={exportList} disabled={!jobs.isSuccess} data-testid="tickets-export-csv">
+              Export This List
+            </ActionButton>
           </ActionMenu>
           <Button onClick={() => setCreate(true)}>
             <Plus className="size-4" />
@@ -193,6 +262,16 @@ export function JobsPage({
           selected={view === "complete"}
           onClick={() => setView((v) => toggleChip(v, "complete", "all"))}
         />
+        {isAdmin && doubleCount ? (
+          <StatCard
+            label="Double Bill?"
+            value={doubleCount}
+            tone="danger"
+            hint="Two or more invoices over the charges"
+            selected={!!search.double}
+            onClick={() => applyPanel({ double: search.double ? undefined : true })}
+          />
+        ) : null}
       </StatRow>
 
       {kind === "service" ? (
@@ -216,7 +295,14 @@ export function JobsPage({
           ))}
         </ToolbarSelect>
         <SortSelect value={sort} onChange={setSort} options={SORT_LIST} className="shrink-0 max-sm:w-full" />
+        <BillingFilterButton value={filters} open={filtersOpen} onToggle={() => setFiltersOpen((o) => !o)} />
       </ListToolbar>
+      {filtersOpen ? (
+        <BillingFilterPanel value={panelValue} onPatch={applyPanel} statuses={statuses} billing={isAdmin} />
+      ) : null}
+      {needsBilling && billing.isLoading ? (
+        <p className="mt-2 text-xs text-muted-foreground">Loading the billing to filter by…</p>
+      ) : null}
 
       {otherBoards.length ? (
         <ul className="mt-3 space-y-1 text-sm" data-testid="wo-other-boards">
@@ -247,13 +333,13 @@ export function JobsPage({
           <div className="px-4 py-8">
             <p className="text-sm text-muted-foreground">
               {notLoadedText(jobs, "tickets") ??
-                (q.trim() || tech || urgency
+                (q.trim() || tech || urgency || Object.keys(filters).length
                 ? "Nothing matches this search."
                 : view === "active"
                   ? "No open tickets."
                   : "Nothing in this view.")}
             </p>
-            {!q.trim() && !tech && !urgency && view === "active" ? (
+            {!q.trim() && !tech && !urgency && !Object.keys(filters).length && view === "active" ? (
               <Button type="button" size="sm" className="mt-3" onClick={() => setCreate(true)}>
                 <Plus className="size-4" />
                 New call
@@ -263,7 +349,7 @@ export function JobsPage({
         ) : (
           <ul>
             {rows.map((j) => (
-              <JobRow key={j.id} job={j} onOpen={() => openFromList(j.id)} />
+              <JobRow key={j.id} job={j} billing={billingById.get(j.id)} onOpen={() => openFromList(j.id)} />
             ))}
           </ul>
         )}
@@ -291,7 +377,7 @@ const HALF_ROW_ON_PHONE = "w-40 max-sm:w-auto max-sm:min-w-0 max-sm:grow max-sm:
  * One ticket. xl: a table row. Below xl the columns stack, except on a phone, where the chips, dates and tech
  * flow along one or two lines under the account so a row stays short.
  */
-function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
+function JobRow({ job, billing, onOpen }: { job: ServiceJob; billing?: TicketBillingRow; onOpen: () => void }) {
   return (
     <li>
       <button
@@ -321,6 +407,7 @@ function JobRow({ job, onOpen }: { job: ServiceJob; onOpen: () => void }) {
         <span className="flex flex-wrap gap-1 max-sm:contents">
           <DuplicateBadge duplicateOf={job.duplicateOf} siblingCount={job.siblings?.length ?? 0} />
           <FlagBadge flag={job.flag} />
+          <DoubleBillBadge on={billing?.doubleBill} />
           <span className="xl:hidden">
             <UrgencyBadge urgency={job.urgency} />
           </span>

@@ -3,11 +3,22 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Download, FileUp, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { exportBilling, importBillingItems, type BillingExport, type ItemImportPreview } from "@/lib/ops/charges-api";
+import { toCsv } from "@/lib/ops/billing-rules";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label } from "@/components/ui/input";
 import { ActionButton } from "./desk-charts";
+import { ShowMoreButton, useShowMore } from "./show-more";
+import { downloadCsv } from "./download-csv";
+
+/** The no-charges list as a CSV, every row (Export Billing's second download). */
+function noChargesCsv(rows: BillingExport["noCharges"]): string {
+  return toCsv(
+    ["Ticket", "Board", "WO", "Customer", "Completed", "Technician"],
+    rows.map((r) => [r.id, r.kind === "tlc" ? "TLC + Factor" : "Tickets", r.wo, r.customer, r.completed, r.technician]),
+  );
+}
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -193,32 +204,28 @@ function isoDay(d: Date) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-/** Charges ready for the billing script: completed tickets in a date range that have charges and no Sales Order yet. */
+/**
+ * Charges ready for billing: completed tickets in a date range that have charges and aren't billed yet (no Sales
+ * Order, no live NetSuite invoice), or every one with Include billed.
+ */
 export function BillingExportButton() {
   const today = new Date();
   const weekAgo = new Date(today.getTime() - 7 * 86400000);
   const [open, setOpen] = useState(false);
   const [from, setFrom] = useState(isoDay(weekAgo));
   const [to, setTo] = useState(isoDay(today));
+  const [includeBilled, setIncludeBilled] = useState(false);
   const [result, setResult] = useState<BillingExport | null>(null);
+  const missed = useShowMore(result?.noCharges ?? [], `${from}:${to}:${includeBilled}`, 25);
 
   const run = useMutation({
-    mutationFn: () => exportBilling({ data: { from, to } }),
+    mutationFn: () => exportBilling({ data: { from, to, includeBilled } }),
     onSuccess: (r) => setResult(r),
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not build the file"),
   });
 
   const download = () => {
-    if (!result) return;
-    const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `billing-${from}_${to}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    if (result) downloadCsv(`billing-${from}_${to}${result.includeBilled ? "-all" : ""}.csv`, result.csv);
   };
 
   return (
@@ -236,8 +243,9 @@ export function BillingExportButton() {
         <DialogContent className="sm:max-w-xl" data-testid="billing-export">
           <DialogTitle>Export Billing</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            One row per charge line for tickets completed in the range that have charges and no Sales Order yet. Hand the file to the billing
-            script, then enter each Sales Order number on its ticket.
+            One row per charge line for tickets completed in the range that have charges and aren&apos;t billed yet (no Sales Order, no live
+            NetSuite invoice). A discount rides on every row of its ticket as NetSuite&apos;s header discount (Discount Item CLDSERVICE, Discount
+            Rate at minus the dollars), never as a line. Each row also has the ticket&apos;s SO, invoices and billing location.
           </p>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -249,6 +257,16 @@ export function BillingExportButton() {
               <Input id="bill-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} className="mt-1" />
             </div>
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+              checked={includeBilled}
+              onChange={(e) => setIncludeBilled(e.target.checked)}
+              data-testid="billing-export-include-billed"
+            />
+            Include billed tickets (with their SO and invoices)
+          </label>
           <div className="flex justify-end">
             <Button type="button" size="sm" disabled={!from || !to || run.isPending} onClick={() => run.mutate()}>
               {run.isPending ? "Building…" : "Build File"}
@@ -259,20 +277,72 @@ export function BillingExportButton() {
               <p className="text-sm">
                 <span className="font-medium">{result.tickets}</span> ticket{result.tickets === 1 ? "" : "s"},{" "}
                 <span className="font-medium">{result.lines}</span> line{result.lines === 1 ? "" : "s"},{" "}
-                <span className="font-medium">{money(result.total)}</span>
+                <span className="font-medium">{money(result.total)}</span> after discounts
               </p>
-              {result.noCharges.length ? (
-                <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
+              {result.locationRules.length ? (
+                <p className="text-xs text-muted-foreground" data-testid="billing-export-locations">
+                  Location rule: {result.locationRules.map((r) => `${r.tickets} ticket${r.tickets === 1 ? "" : "s"} from ${r.location}`).join(", ")}{" "}
+                  (Lance Oden: San Antonio WH; Bill McKinley: Dallas WH).
+                </p>
+              ) : null}
+              {result.locationWarnings.length ? (
+                <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm" data-testid="billing-export-location-warnings">
                   <p className="font-medium">
-                    {result.noCharges.length} completed ticket{result.noCharges.length === 1 ? "" : "s"} with no charges
+                    {result.locationWarnings.length} ticket{result.locationWarnings.length === 1 ? "" : "s"} billed from the wrong location
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">Nothing was billed on these. Check whether a bill was missed.</p>
                   <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto text-xs">
-                    {result.noCharges.map((t) => (
-                      <li key={t.id}>
-                        {t.wo ?? `#${t.id}`} · {t.customer ?? "Untitled"}
+                    {result.locationWarnings.map((w) => (
+                      <li key={w.id}>
+                        {w.wo ?? `#${w.id}`} · {w.customer ?? "Untitled"} · {w.warning}
                       </li>
                     ))}
+                  </ul>
+                </div>
+              ) : null}
+              {result.noAccount.length ? (
+                <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm" data-testid="billing-export-no-account">
+                  <p className="font-medium">
+                    {result.noAccount.length} ticket{result.noAccount.length === 1 ? "" : "s"} on Walk-In or with no account left out
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">Walk-In is never a billing account. Give each one its real account, then build the file again.</p>
+                  <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto text-xs">
+                    {result.noAccount.map((t) => (
+                      <li key={t.id}>
+                        {t.wo ?? `#${t.id}`} · {t.customer?.trim() || "No account"}
+                        {t.completed ? ` · ${t.completed}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {result.noCharges.length ? (
+                <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm" data-testid="billing-export-no-charges">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">
+                      {result.noCharges.length} completed ticket{result.noCharges.length === 1 ? "" : "s"} with no charges
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="ml-auto h-7"
+                      onClick={() => downloadCsv(`no-charges-${from}_${to}.csv`, noChargesCsv(result.noCharges))}
+                      data-testid="billing-export-no-charges-csv"
+                    >
+                      <Download className="size-3.5" />
+                      CSV
+                    </Button>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">Nothing was billed on these. Check whether a bill was missed.</p>
+                  <ul className="mt-2 space-y-0.5 text-xs">
+                    {missed.visible.map((t) => (
+                      <li key={t.id}>
+                        {t.wo ?? `#${t.id}`} · {t.customer ?? "Untitled"}
+                        {t.completed ? ` · ${t.completed}` : ""}
+                        {t.technician ? ` · ${t.technician}` : ""}
+                      </li>
+                    ))}
+                    <ShowMoreButton as="li" remaining={missed.remaining} onClick={missed.showMore} label="tickets" />
                   </ul>
                 </div>
               ) : null}

@@ -88,6 +88,20 @@ test("stackRefusal names the first reason", () => {
   assert.equal(stackRefusal(basePm, baseTicket, 10, false), "Ticket #523 already carries 10 PMs.");
   assert.equal(stackRefusal(basePm, baseTicket, 0, true), "PM #32 already has its own approved invoice, so it stays billed there.");
   assert.equal(stackRefusal({ ...basePm, status: "Completed" }, { ...baseTicket, status: "Completed" }, 0, false), null);
+  // Invoiced in NetSuite (10/28): its charges are locked, so a PM put on it could never be billed there.
+  assert.equal(stackRefusal(basePm, { ...baseTicket, invoiced: "INV4402" }, 0, false), "Ticket #523 is invoiced in NetSuite (INV4402). Bill the PM on its own.");
+});
+
+test("a ticket invoiced in NetSuite takes no PM: it isn't offered, and stacking writes nothing", async () => {
+  const t = await ticket({ customer: "Zz Stack Invoiced", status: "Completed" });
+  const p = await pm({ customer: "Zz Stack Invoiced", status: "Completed" });
+  await pg.query("insert into ticket_invoices (job_id, ns_invoice, status, total) values ($1, 'INV4402', 'Open', 50)", [t]);
+  assert.ok(!(await listForPm(sql, p)).candidates.some((c) => c.jobId === t), "not offered");
+  assert.equal((await sql.query(stackPmSql(), [p, t, "Oliver"])).length, 0, "nothing written");
+  // A Voided invoice doesn't lock it.
+  await pg.query("update ticket_invoices set status = 'Voided' where job_id = $1", [t]);
+  assert.ok((await listForPm(sql, p)).candidates.some((c) => c.jobId === t));
+  assert.equal((await sql.query(stackPmSql(), [p, t, "Oliver"])).length, 1);
 });
 
 test("stacking a completed PM on a completed ticket writes both activity rows", async () => {

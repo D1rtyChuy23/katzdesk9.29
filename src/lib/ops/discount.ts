@@ -49,26 +49,25 @@ export function discountLabel(discount: Discount | null | undefined): string {
     : `${discount.value.toLocaleString("en-US", { style: "currency", currency: "USD" })} off`;
 }
 
-/** The item name a ticket discount is billed under. */
-export const DISCOUNT_ITEM = "Discount";
+/** NetSuite's header discount item. A ticket's discount is billed as this, never as a discount line. */
+export const HEADER_DISCOUNT_ITEM = "CLDSERVICE";
 
 /**
- * Billing rows with each ticket's discount as one more row after that ticket's lines: qty 1 at minus the dollars off.
- * Rows must arrive grouped by ticket. A ticket with no discount, or nothing to take it off, gets no extra row.
+ * Billing rows with each ticket's discount as NetSuite's header discount (Grok's rule through Chuy, 10/28): every row of
+ * a discounted ticket carries Discount Item CLDSERVICE and Discount Rate at minus the dollars off (a percent is turned
+ * into dollars). There is no discount line. Rows must arrive grouped by ticket.
  */
-export function withDiscountRows<T extends { jobId: number; item: string; description: string; qty: number; rate: number }>(
+export function withHeaderDiscount<T extends { jobId: number; qty: number; rate: number }>(
   rows: T[],
   discounts: Map<number, Discount>,
-): T[] {
-  const out: T[] = [];
-  rows.forEach((r, i) => {
-    out.push(r);
-    const last = i === rows.length - 1 || rows[i + 1].jobId !== r.jobId;
+): (T & { discountItem: string; discountRate: string; discountLabel: string })[] {
+  const subtotals = new Map<number, number>();
+  for (const r of rows) subtotals.set(r.jobId, (subtotals.get(r.jobId) ?? 0) + round2(r.qty * r.rate));
+  return rows.map((r) => {
     const d = discounts.get(r.jobId);
-    if (!last || !d) return;
-    const subtotal = rows.filter((x) => x.jobId === r.jobId).reduce((sum, x) => sum + round2(x.qty * x.rate), 0);
-    const { off } = applyDiscount(subtotal, d);
-    if (off > 0) out.push({ ...r, item: DISCOUNT_ITEM, description: discountLabel(d), qty: 1, rate: -off });
+    const { off } = applyDiscount(subtotals.get(r.jobId) ?? 0, d);
+    return off > 0 && d
+      ? { ...r, discountItem: HEADER_DISCOUNT_ITEM, discountRate: (-off).toFixed(2), discountLabel: discountLabel(d) }
+      : { ...r, discountItem: "", discountRate: "", discountLabel: "" };
   });
-  return out;
 }

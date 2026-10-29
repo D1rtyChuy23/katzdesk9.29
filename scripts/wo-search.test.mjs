@@ -128,6 +128,8 @@ test("a closed install the import created is on For Review, marked new, on the I
     ["ST#", "Operational Status", "Customer Name", "P.O. #", "Date/Time Completed"],
     ["0855", "Completed", "Cafe", "Install", "10/19/2026"],
   ]);
+  // The import only writes to an account that exists (10/28).
+  await sql.query("insert into directory_customers (name) values ('Cafe')");
   const preview = await previewCorrigoRecords(sql, records);
   const res = await applyCorrigoRows(sql, preview.rows, "Chuy");
   assert.equal(res.created, 1);

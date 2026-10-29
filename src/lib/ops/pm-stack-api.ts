@@ -9,6 +9,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { canWriteRunbook, type RunbookRole } from "@/lib/ops/pm-runbook";
 import { stackCustomerRefusal, stackPmSql, stackRefusal, unstackPmSql, type StackPm, type StackTicket } from "@/lib/ops/pm-stack";
+import { LIVE_INVOICE_SQL } from "@/lib/ops/billing-rules";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -32,8 +33,12 @@ async function loadStackPair(sql: Sql, pmId: number, jobId: number): Promise<{ p
     "select id, customer, status, stacked_job_id from pm_jobs where id = $1",
     [pmId],
   ))[0];
-  const ticket = (await sql.query<{ id: number; customer: string | null; status: string; ns_so: string | null; duplicate_of: number | null; phone_resolved: boolean; wo: string | null; call_id: string | null }>(
-    "select id, customer, status, ns_so, duplicate_of, phone_resolved, wo, call_id from service_jobs where id = $1",
+  const ticket = (await sql.query<{ id: number; customer: string | null; status: string; ns_so: string | null; duplicate_of: number | null; phone_resolved: boolean; wo: string | null; call_id: string | null; invoiced: string | null }>(
+    `select j.id, j.customer, j.status, j.ns_so, j.duplicate_of, j.phone_resolved, j.wo, j.call_id,
+            (select ti.ns_invoice from ticket_invoices ti
+              where ti.job_id = j.id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
+              order by ti.invoice_date desc nulls last, ti.id desc limit 1) as invoiced
+       from service_jobs j where j.id = $1`,
     [jobId],
   ))[0];
   if (!pm || !ticket) return null;
@@ -56,6 +61,7 @@ async function loadStackPair(sql: Sql, pmId: number, jobId: number): Promise<{ p
       phoneResolved: !!ticket.phone_resolved,
       wo: ticket.wo,
       callId: ticket.call_id,
+      invoiced: ticket.invoiced,
     },
     stackedCount: Number(count?.n ?? 0),
     pmInvoiceHasLines: flagOn(lines?.has),
@@ -157,6 +163,7 @@ export const listStackCandidates = createServerFn({ method: "POST" })
 const TICKET_WHERE = `
   and j.duplicate_of is null
   and nullif(btrim(j.ns_so), '') is null
+  and not ${LIVE_INVOICE_SQL("j.id")}
   and j.status not in ('Cancelled', 'Phone Resolved')
   and coalesce(j.phone_resolved, false) = false
   and regexp_replace(lower(coalesce(j.customer, '')), '[^a-z0-9]+', '', 'g') = $1

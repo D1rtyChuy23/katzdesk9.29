@@ -3,6 +3,7 @@
  * Safe for node --test. The customer key matches normalizeCustomerKey.
  */
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
+import { LIVE_INVOICE_SQL } from "./billing-rules.ts";
 
 export type StackPm = {
   id: number;
@@ -20,6 +21,8 @@ export type StackTicket = {
   phoneResolved: boolean;
   wo: string | null;
   callId: string | null;
+  /** The NetSuite invoice that locks the ticket (one that isn't Voided), or null. */
+  invoiced?: string | null;
 };
 
 const customerKeySql = (col: string) => `regexp_replace(lower(coalesce(${col}, '')), '[^a-z0-9]+', '', 'g')`;
@@ -33,6 +36,8 @@ export function stackRefusal(pm: StackPm, ticket: StackTicket, stackedCount: num
   }
   const so = String(ticket.nsSo ?? "").trim();
   if (so) return `Ticket #${ticket.id} is billed (${so}). Clear its Sales Order first.`;
+  // Invoiced in NetSuite: its charges are locked, so a PM put on it could never be billed there (10/28 review).
+  if (ticket.invoiced) return `Ticket #${ticket.id} is invoiced in NetSuite (${ticket.invoiced}). Bill the PM on its own.`;
   if (ticket.duplicateOf) return `Ticket #${ticket.id} was merged into #${ticket.duplicateOf}. Stack the PM there.`;
   if (pm.stackedJobId === ticket.id) return `PM #${pm.id} is already on this ticket.`;
   if (pm.stackedJobId != null) return `PM #${pm.id} is already on ticket #${pm.stackedJobId}. Unstack it first.`;
@@ -96,6 +101,7 @@ export function stackPmSql(): string {
           and ticket.status <> 'Phone Resolved'
           and coalesce(ticket.phone_resolved, false) = false
           and nullif(btrim(ticket.ns_so), '') is null
+          and not ${LIVE_INVOICE_SQL("ticket.id")}
           and ticket.duplicate_of is null
           and pm.stacked_job_id is null
           and ${pmKey} <> ''

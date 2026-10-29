@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { applyCorrigoImport, previewCorrigoImport } from "@/lib/ops/corrigo-import";
 import type { CorrigoApplyResult } from "@/lib/ops/corrigo-import";
@@ -13,8 +13,9 @@ import {
   type CorrigoPreviewRow,
 } from "@/lib/ops/corrigo";
 import { readCorrigoFile } from "@/lib/ops/corrigo-file";
+import { stripServiceChannelId } from "@/lib/ops/billing-rules";
+import { nameKey } from "@/lib/ops/wo-history";
 import { woBoardName } from "@/lib/ops/wo-search";
-import { addDirectoryEntry, updateCustomerAccount } from "@/lib/ops/api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,14 +23,11 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ComboField, type ComboItem } from "@/components/ui/combo-field";
-import { Input } from "@/components/ui/input";
+import { ComboField } from "@/components/ui/combo-field";
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
 import { OpenLink } from "@/components/desk/open-link";
 import { useDirectory } from "@/components/desk/directory-fields";
-import { RepSelect } from "@/components/desk/rep-select";
-import { AkBadge } from "@/components/desk/ak-badge";
 import { ActionButton } from "@/components/desk/desk-charts";
 
 export type CorrigoReviewItem = CorrigoApplyResult["review"][number];
@@ -80,7 +78,7 @@ export function CorrigoImportButton({
 
   const apply = useMutation({
     mutationFn: async (rows: CorrigoPreview["rows"]) => {
-      const out: CorrigoApplyResult = { updated: 0, created: 0, review: [] };
+      const out: CorrigoApplyResult = { updated: 0, created: 0, review: [], refused: [] };
       const seen = new Set<string>();
       for (const chunk of chunkByBytes(rows.filter((r) => r.action !== "skip"))) {
         let res: CorrigoApplyResult;
@@ -97,6 +95,7 @@ export function CorrigoImportButton({
         }
         out.updated += res.updated;
         out.created += res.created;
+        out.refused!.push(...(res.refused ?? []));
         // Each chunk re-checks held merges, so the same ticket can come back twice.
         for (const item of res.review) {
           const key = `${item.entityType}-${item.id}`;
@@ -111,6 +110,16 @@ export function CorrigoImportButton({
       toast.success(
         `Corrigo import saved · ${res.updated} updated · ${createdText(res)}${notMerged ? ` · ${notMerged} not merged` : ""}`,
       );
+      if (res.refused?.length) {
+        // Rows with no account to write them with: nothing was written for them.
+        toast.warning(
+          `${res.refused.length} row${res.refused.length === 1 ? "" : "s"} not written (no account): ${res.refused
+            .slice(0, 8)
+            .map((r) => r.wo)
+            .join(", ")}${res.refused.length > 8 ? ", …" : ""}. Import the file again after picking or restoring the accounts.`,
+          { duration: 15000 },
+        );
+      }
       setOpen(false);
       setPreview(null);
       onImported(res.review);
@@ -158,20 +167,12 @@ export function CorrigoImportButton({
       </ActionButton>
 
       <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : cancel())}>
-        <DialogContent
-          className="max-h-[90vh] max-w-5xl overflow-y-auto"
-          onPointerDownOutside={(e) => {
-            if (document.querySelector("[data-testid=add-customer-form]")) e.preventDefault();
-          }}
-          onInteractOutside={(e) => {
-            if (document.querySelector("[data-testid=add-customer-form]")) e.preventDefault();
-          }}
-        >
+        <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
           <DialogTitle>Corrigo Import</DialogTitle>
           <DialogDescription>
             {fileName ? `${fileName} · ` : ""}
-            Corrigo is the source of truth for service. Confirm before anything is written.
-            Notes and sales fields stay as they are. Unchecked rows are skipped.
+            Corrigo is the source of truth for service. Confirm before anything is written. Accounts are matched by their exact
+            name only and the import never adds one; Walk-In takes its Service Location&apos;s account. Unchecked rows are skipped.
           </DialogDescription>
           {preview ? (
             <PreviewBody
@@ -196,7 +197,6 @@ type RowDraft = {
   customer: string;
   /** The person picked the customer; until then it follows the install choice. */
   customerEdited: boolean;
-  keepWalkIn: boolean;
   /**
    * Install rows with a picker: the install the person chose (null = a new install). Not set: the preselection, which
    * can change as earlier rows change (a later row follows the first row's new install).
@@ -204,19 +204,29 @@ type RowDraft = {
   installChoice?: number | null;
 };
 
+/** A row with no account to write with starts unticked: it needs one picked (10/28). */
 function draftFor(row: CorrigoPreviewRow): RowDraft {
   const applicable = row.action === "update" || row.action === "create";
   return {
-    selected: applicable,
+    selected: applicable && !row.needsReview,
     customer: row.customer ?? "",
     customerEdited: false,
-    keepWalkIn: false,
   };
 }
 
 /** The customer a row imports with: the person's pick, else the one that goes with its install choice. */
 function customerOf(row: CorrigoPreviewRow, d: RowDraft): string {
-  return d.customerEdited || d.keepWalkIn ? d.customer : row.customer ?? "";
+  return d.customerEdited ? d.customer : row.customer ?? "";
+}
+
+/** A ticked row with no account (blank or Walk-In) can't be written. */
+const lacksAccount = (name: string) => !name.trim() || isWalkIn(name);
+
+/** Why a row is listed among the warnings at the top, or null. */
+function statusWarning(r: CorrigoPreviewRow, hasStatusColumn: boolean): string | null {
+  if (r.action === "skip") return null;
+  if (r.statusUnmapped) return r.statusUnmapped;
+  return hasStatusColumn && !r.statusRaw?.trim() && !r.completedAt ? "(blank)" : null;
 }
 
 function PreviewBody({
@@ -254,7 +264,7 @@ function PreviewBody({
         // A first row's customer as the person set it names the new install its followers go on.
         (r) => {
           const d = drafts[rowKey(r)];
-          return d && (d.customerEdited || d.keepWalkIn) ? customerOf(r, d) : undefined;
+          return d && d.customerEdited ? customerOf(r, d) : undefined;
         },
       ),
     [preview.rows, drafts],
@@ -275,18 +285,31 @@ function PreviewBody({
     if (selectAllRef.current) selectAllRef.current.indeterminate = someSelected;
   }, [someSelected]);
 
+  // Ticked rows with no account to write with: Confirm waits until each has one picked, or is unticked.
   const walkInBlocked = applicable.filter((r) => {
     const d = drafts[rowKey(r)];
-    if (!d?.selected) return false;
-    if (!r.fileWalkIn) return false;
-    if (d.keepWalkIn) return false;
-    const name = customerOf(r, d).trim();
-    return !name || isWalkIn(name);
+    return !!d?.selected && lacksAccount(customerOf(r, d));
   });
+  const [onlyWarnings, setOnlyWarnings] = useState(false);
+  const hasStatusColumn = !preview.missing.includes("status");
+  const statusCounts = new Map<string, number>();
+  for (const r of rows) {
+    const w = statusWarning(r, hasStatusColumn);
+    if (w) statusCounts.set(w, (statusCounts.get(w) ?? 0) + 1);
+  }
+  const reviewRows = applicable.filter((r) => r.needsReview);
+  // Rows still without an account, as the person has them now (a pick clears one).
+  const stillNeed = applicable.filter((r) => lacksAccount(customerOf(r, drafts[rowKey(r)] ?? draftFor(r))));
+  const fromLocation = applicable.filter((r) => r.account?.status === "location");
+  const noReceived = applicable.filter((r) => r.action === "create" && !r.createdAt);
+  const collisions = rows.filter((r) => r.action !== "skip" && (r.conflictIds?.length || r.wrapRepeat || r.shared));
+  const rowWarned = (r: CorrigoPreviewRow) =>
+    !!statusWarning(r, hasStatusColumn) || !!r.needsReview || !!r.conflictIds?.length || r.wrapRepeat || !!r.completedNote || !!r.poNote || (r.action === "create" && !r.createdAt);
+  const shownRows = onlyWarnings ? rows.filter(rowWarned) : rows;
 
   function patch(key: string, next: Partial<RowDraft>) {
     setDrafts((cur) => {
-      const prev = cur[key] ?? { selected: false, customer: "", customerEdited: false, keepWalkIn: false };
+      const prev = cur[key] ?? { selected: false, customer: "", customerEdited: false };
       return { ...cur, [key]: { ...prev, ...next } };
     });
   }
@@ -308,9 +331,9 @@ function PreviewBody({
       const d = drafts[rowKey(row)];
       const applicableRow = row.action === "update" || row.action === "create";
       // The picker's options stay here; the import re-reads the chosen install itself.
-      const lean = { ...row, installOptions: null, installState: null };
+      const lean = { ...row, installOptions: null, installState: null, account: null };
       if (!applicableRow || !d?.selected) return { ...lean, action: "skip" as const };
-      const customer = d.keepWalkIn ? "Walk-In" : customerOf(row, d).trim() || row.customer;
+      const customer = customerOf(row, d).trim() || row.customer;
       return { ...lean, customer };
     });
     onConfirm(out);
@@ -328,44 +351,69 @@ function PreviewBody({
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
           <span className="font-medium">{unchecked}</span> unchecked (will skip)
         </li>
-        <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-          {preview.missing.includes("status")
-            ? "No status column"
-            : preview.unmapped.length
-              ? `${preview.unmapped.length} unmapped status${preview.unmapped.length === 1 ? "" : "es"}`
-              : "No unmapped statuses"}
+        <li
+          className={`rounded-lg border px-3 py-2 ${stillNeed.length ? "border-warning/40 bg-warning/10" : "border-border bg-muted/40"}`}
+          data-testid="corrigo-need-account"
+        >
+          <span className="font-medium">{stillNeed.length}</span> need{stillNeed.length === 1 ? "s" : ""} an account picked
         </li>
       </ul>
-      {preview.wrapCount ? (
-        <p className="mt-3 text-xs text-muted-foreground">
-          {preview.wrapCount} ST#{preview.wrapCount === 1 ? "" : "s"} reused a number after WO-9999 or{" "}
-          {preview.wrapCount === 1 ? "shares" : "share"} it with another customer&apos;s ticket — those stay on For review so
-          nobody merges two different jobs
-          {preview.conflictCount
-            ? ` · ${preview.conflictCount} already on more than one ticket`
-            : ""}
-          {preview.skipped
-            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} without an ST# number`
-            : ""}
-          .
-        </p>
-      ) : preview.conflictCount ? (
-        <p className="mt-3 text-xs text-muted-foreground">
-          {preview.conflictCount} WO conflict{preview.conflictCount === 1 ? "" : "s"} already on more
-          than one ticket — import updates the original and flags the rest to merge
-          {preview.skipped
-            ? ` · ${preview.skipped} row${preview.skipped === 1 ? "" : "s"} without an ST# number`
-            : ""}
-          .
-        </p>
-      ) : preview.skipped ? (
-        <p className="mt-3 text-xs text-muted-foreground">
-          {preview.skipped} row{preview.skipped === 1 ? "" : "s"} without an ST# number.
-        </p>
-      ) : null}
+
+      <ul className="mt-3 space-y-1.5 text-xs" data-testid="corrigo-warnings">
+        {statusCounts.size ? (
+          <li className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2" data-testid="corrigo-status-warnings">
+            <span className="font-medium">Statuses KatzDesk doesn&apos;t map: </span>
+            {[...statusCounts].map(([st, n]) => `${st} (${n})`).join(", ")}. Those tickets keep their KatzDesk status; new ones open as
+            Open, Pending Scheduling or Not Ready, by board.
+          </li>
+        ) : null}
+        {reviewRows.length ? (
+          <li className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2" data-testid="corrigo-review-accounts">
+            <span className="font-medium">Needs review: </span>
+            {reviewRows.length === 1
+              ? "1 row has no account by that exact name, or is Walk-In with no Service Location that is an account. It starts unticked; pick an account to include it."
+              : `${reviewRows.length} rows have no account by that exact name, or are Walk-In with no Service Location that is an account. They start unticked; pick an account to include one.`}{" "}
+            The import never adds accounts.
+          </li>
+        ) : null}
+        {fromLocation.length ? (
+          <li className="rounded-lg border border-border bg-muted/40 px-3 py-2" data-testid="corrigo-from-location">
+            {fromLocation.length === 1
+              ? "1 Walk-In row takes its account from the Service Location Name."
+              : `${fromLocation.length} Walk-In rows take their account from the Service Location Name.`}
+          </li>
+        ) : null}
+        {noReceived.length ? (
+          <li className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2" data-testid="corrigo-no-received">
+            {noReceived.length === 1
+              ? "1 new ticket gets no received date: the file has no created date for it."
+              : `${noReceived.length} new tickets get no received date: the file has no created date for them.`}{" "}
+            Fill it on the ticket, or export the report with its Created column.
+          </li>
+        ) : null}
+        {collisions.length ? (
+          <li className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2" data-testid="corrigo-collisions">
+            <span className="font-medium">WO collisions ({collisions.length}): </span>
+            {collisions.slice(0, 12).map((r) => (
+              <span key={rowKey(r)} className="mt-0.5 block">
+                {r.canonicalWo}: {r.action === "update" ? `goes on ${r.boardLabel ?? "ticket"} #${r.jobId}` : "opens a new ticket"}
+                {r.conflictIds?.length ? ` · also on ${r.conflictIds.map((c) => `${c.board} #${c.id}`).join(", ")} (flagged to merge)` : ""}
+                {r.shared ? ` · ${r.shared}` : r.wrapRepeat ? " · the number was used again after WO-9999" : ""}
+              </span>
+            ))}
+            {collisions.length > 12 ? <span className="mt-0.5 block">and {collisions.length - 12} more (Warnings only lists them).</span> : null}
+          </li>
+        ) : null}
+        {preview.skipped ? (
+          <li className="px-1 text-muted-foreground">
+            {preview.skipped} row{preview.skipped === 1 ? "" : "s"} without an ST# number.
+          </li>
+        ) : null}
+      </ul>
       <p className="mt-3 text-xs text-muted-foreground" data-testid="corrigo-columns">
         Read from file:{" "}
         {(Object.keys(COL_LABEL) as (keyof typeof COL_LABEL)[])
+          .filter((c) => preview.columns[c] || ["wo", "status", "completedAt", "customer"].includes(c))
           .map((c) => `${COL_LABEL[c]} ← ${preview.columns[c] ?? "not found"}`)
           .join(" · ")}
       </p>
@@ -380,12 +428,6 @@ function PreviewBody({
           No completed-date column found. Completed dates on existing tickets will not change.
         </p>
       ) : null}
-      {preview.unmapped.length ? (
-        <p className="mt-3 text-xs text-muted-foreground">
-          Unmapped: {preview.unmapped.join(", ")}. Existing tickets keep their KatzDesk status;
-          new tickets open as Open, Pending Scheduling or Not Ready, by board.
-        </p>
-      ) : null}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button type="button" size="sm" variant="outline" onClick={() => setAll(true)}>
@@ -394,14 +436,21 @@ function PreviewBody({
         <Button type="button" size="sm" variant="outline" onClick={() => setAll(false)}>
           Deselect all
         </Button>
-        <p className="text-xs text-muted-foreground">
-          Uncheck any ticket you do not want to change. Walk-In rows need a real customer, or Keep
-          as Walk-In.
-        </p>
+        <label className="flex items-center gap-1.5 text-xs">
+          <input
+            type="checkbox"
+            className="size-4 accent-primary"
+            checked={onlyWarnings}
+            onChange={(e) => setOnlyWarnings(e.target.checked)}
+            data-testid="corrigo-only-warnings"
+          />
+          Warnings only
+        </label>
+        <p className="text-xs text-muted-foreground">Uncheck any ticket you do not want to change. A row with no account needs one picked.</p>
       </div>
 
-      <div className="mt-3 overflow-visible rounded-xl border border-border">
-        <table className="w-full min-w-[52rem] text-left text-sm">
+      <div className="mt-3 overflow-x-auto rounded-xl border border-border">
+        <table className="w-full min-w-[60rem] text-left text-sm">
           <thead className="sticky top-0 bg-card text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
             <tr>
               <th className="w-10 px-3 py-2">
@@ -420,27 +469,22 @@ function PreviewBody({
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2">Tech</th>
               <th className="px-3 py-2">Completed</th>
+              <th className="px-3 py-2">Also changes</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => {
+            {shownRows.map((r) => {
               const key = rowKey(r);
               const d = drafts[key] ?? draftFor(r);
               const customer = customerOf(r, d);
               const locked = r.action === "skip";
               const walkIn = r.fileWalkIn;
-              const needsCustomer =
-                !locked &&
-                d.selected &&
-                walkIn &&
-                !d.keepWalkIn &&
-                (!customer.trim() || isWalkIn(customer));
+              const needsCustomer = !locked && lacksAccount(customer);
               return (
                 <tr
                   key={key}
-                  className={`border-t border-border ${
-                    walkIn ? "bg-warning/10" : ""
-                  } ${locked ? "opacity-70" : ""}`}
+                  className={`border-t border-border ${needsCustomer ? "bg-warning/10" : ""} ${locked ? "opacity-70" : ""}`}
+                  data-testid="corrigo-row"
                 >
                   <td className="px-3 py-2 align-top">
                     <input
@@ -480,26 +524,20 @@ function PreviewBody({
                       </span>
                     ) : null}
                   </td>
-                  <td className="min-w-[16rem] px-3 py-2 align-top">
+                  <td className="min-w-[13rem] px-3 py-2 align-top">
                     {locked ? (
                       <span>{customer || r.customer || "—"}</span>
                     ) : (
                       <ImportCustomerPicker
-                        value={d.keepWalkIn ? "Walk-In" : customer}
-                        walkIn={walkIn}
-                        keepWalkIn={d.keepWalkIn}
+                        value={customer}
                         needsCustomer={needsCustomer}
                         existingCustomer={r.existingCustomer}
+                        note={d.customerEdited ? null : r.account?.note ?? null}
                         disabled={pending}
                         onChange={(next) =>
-                          patch(key, {
-                            customer: next,
-                            customerEdited: true,
-                            keepWalkIn: isWalkIn(next) ? d.keepWalkIn : false,
-                          })
+                          // Picking an account ticks the row; clearing it unticks it.
+                          patch(key, { customer: next, customerEdited: true, selected: !lacksAccount(next) })
                         }
-                        onKeepWalkIn={() => patch(key, { keepWalkIn: true, customer: "Walk-In", customerEdited: true })}
-                        onClearKeep={() => patch(key, { keepWalkIn: false, customer: "", customerEdited: true })}
                       />
                     )}
                     {!locked && r.installOptions?.length ? (
@@ -513,7 +551,10 @@ function PreviewBody({
                   <td className="px-3 py-2 align-top">
                     {r.oldStatus ? `${r.oldStatus} → ${r.newStatus}` : r.newStatus}
                     {r.statusNote ? (
-                      <span className={`mt-0.5 block text-[11px] ${r.statusUnmapped ? "text-warning" : "text-muted-foreground"}`}>
+                      <span
+                        className={`mt-0.5 block text-[11px] ${statusWarning(r, hasStatusColumn) ? "text-warning" : "text-muted-foreground"}`}
+                        data-testid="corrigo-status-note"
+                      >
                         {r.statusNote}
                       </span>
                     ) : null}
@@ -533,13 +574,16 @@ function PreviewBody({
                       <span className="mt-0.5 block max-w-[14rem] text-[11px] text-warning">{r.completedNote}</span>
                     ) : null}
                   </td>
+                  <td className="min-w-[14rem] max-w-[18rem] px-3 py-2 align-top text-[11px]" data-testid="corrigo-changes">
+                    <RowChanges r={r} />
+                  </td>
                 </tr>
               );
             })}
-            {preview.rows.length === 0 ? (
+            {preview.rows.length === 0 || (onlyWarnings && !shownRows.length) ? (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-muted-foreground">
-                  Nothing to import.
+                <td colSpan={7} className="px-3 py-6 text-muted-foreground">
+                  {preview.rows.length ? "No warnings." : "Nothing to import."}
                 </td>
               </tr>
             ) : null}
@@ -549,9 +593,9 @@ function PreviewBody({
 
       <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
         {walkInBlocked.length ? (
-          <p className="mr-auto max-w-md text-xs text-warning">
-            {walkInBlocked.length} Walk-In row{walkInBlocked.length === 1 ? "" : "s"} still need a
-            KatzDesk customer, or Keep as Walk-In.
+          <p className="mr-auto max-w-md text-xs text-warning" data-testid="corrigo-blocked">
+            {walkInBlocked.length} ticked row{walkInBlocked.length === 1 ? " has" : "s have"} no account. Pick one for each, or untick{" "}
+            {walkInBlocked.length === 1 ? "it" : "them"}.
           </p>
         ) : null}
         <Button type="button" variant="outline" disabled={pending} onClick={onCancel}>
@@ -566,6 +610,43 @@ function PreviewBody({
         </Button>
       </div>
     </div>
+  );
+}
+
+const clip = (s: string, n = 70) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
+
+/** What else a row writes, besides status and dates: shown so nothing changes unseen (10/28). */
+function RowChanges({ r }: { r: CorrigoPreviewRow }) {
+  if (r.action === "skip") return <span className="text-muted-foreground">—</span>;
+  const items: { text: string; warn?: boolean; title?: string }[] = [];
+  if (r.poChange) items.push({ text: `P.O. ${r.poChange.from || "none"} → ${r.poChange.to}` });
+  else if (r.action === "create" && r.po) items.push({ text: `P.O. ${r.po}` });
+  if (r.poNote) items.push({ text: r.poNote, warn: true });
+  if (r.issueChange) items.push({ text: `Issue → ${clip(r.issueChange.to)}`, title: `Was: ${r.issueChange.from ?? "blank"}\nNow: ${r.issueChange.to}` });
+  if (r.equipmentChange) items.push({ text: `Equipment ${r.equipmentChange.from ? `${clip(r.equipmentChange.from, 30)} ` : ""}→ ${clip(r.equipmentChange.to, 40)}` });
+  if (r.action === "update" && r.existingCustomer && r.customer && r.customer !== r.existingCustomer) {
+    items.push({ text: `Customer ${r.existingCustomer} → ${r.customer}` });
+  }
+  if (r.action === "create") {
+    items.push(r.createdAt ? { text: `Received ${r.createdAt}` } : { text: "No received date (none in the file)", warn: true });
+    if (r.callTypeValue) items.push({ text: `Type ${r.callTypeValue} · ${r.urgency ?? "Normal"}` });
+  }
+  if (r.typeNote) items.push({ text: r.typeNote, warn: true });
+  // The location is saved on every row; it is worth a line where it isn't the row's account (Walk-In, another site).
+  if (r.serviceLocation && nameKey(stripServiceChannelId(r.serviceLocation)) !== nameKey(r.customer)) {
+    items.push({ text: `Corrigo location ${clip(r.serviceLocation, 40)}`, title: r.serviceLocation });
+  }
+  if (r.contact) items.push({ text: `Contact ${r.contact}${r.phone ? ` · ${r.phone}` : ""}` });
+  if (r.corrigoNet != null) items.push({ text: `Corrigo net $${r.corrigoNet.toFixed(2)}` });
+  if (!items.length) return <span className="text-muted-foreground">—</span>;
+  return (
+    <ul className="space-y-0.5">
+      {items.map((it, i) => (
+        <li key={i} title={it.title} className={it.warn ? "text-warning" : "text-muted-foreground"}>
+          {it.text}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -614,184 +695,44 @@ function ImportInstallPicker({
 
 function ImportCustomerPicker({
   value,
-  walkIn,
-  keepWalkIn,
   needsCustomer,
   existingCustomer,
+  note,
   disabled,
   onChange,
-  onKeepWalkIn,
-  onClearKeep,
 }: {
   value: string;
-  walkIn: boolean;
-  keepWalkIn: boolean;
   needsCustomer: boolean;
   existingCustomer: string | null;
+  /** How the account was found: from the Service Location Name, the locked name, or why none matched. */
+  note: string | null;
   disabled?: boolean;
   onChange: (v: string) => void;
-  onKeepWalkIn: () => void;
-  onClearKeep: () => void;
 }) {
+  // Accounts only: the import never adds one (10/28). Walk-In is never an account.
   const dir = useDirectory("customer");
-  const qc = useQueryClient();
-  const items = useMemo(
-    () => dir.items.filter((i) => !isWalkIn(i.name)),
-    [dir.items],
-  );
-  const [adding, setAdding] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [rep, setRep] = useState("");
-  const [ak, setAk] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const known = items.some(
-    (i) => i.name.trim().toLowerCase() === value.trim().toLowerCase() && !isWalkIn(value),
-  );
-
-  function openAdd() {
-    const seed = keepWalkIn || isWalkIn(value) ? "" : value.trim();
-    setNewName(seed);
-    setRep("");
-    setAk(false);
-    setAdding(true);
-  }
-
-  async function confirmAdd(e: FormEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    const name = newName.trim();
-    if (!name) {
-      toast.error("Enter a customer name.");
-      return;
-    }
-    if (isWalkIn(name)) {
-      toast.error("Pick a real account name — Walk-In is not a KatzDesk customer.");
-      return;
-    }
-    setSaving(true);
-    try {
-      const row = await addDirectoryEntry({ data: { kind: "customer", name } });
-      if (rep || ak) {
-        await updateCustomerAccount({
-          data: { id: row.id, accountRep: rep || null, aviKatz: ak },
-        });
-      }
-      qc.setQueryData<ComboItem[]>(["directory", "customer"], (old) => {
-        const list = old ?? [];
-        if (list.some((i) => i.id === row.id || i.name.toLowerCase() === row.name.toLowerCase())) {
-          return list.map((i) => (i.id === row.id ? row : i));
-        }
-        return [...list, row].sort((a, b) => a.name.localeCompare(b.name));
-      });
-      void qc.invalidateQueries({ queryKey: ["directory", "customer"] });
-      void qc.invalidateQueries({ queryKey: ["customers"] });
-      onChange(row.name);
-      setAdding(false);
-      toast.success(`Added ${row.name}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not add customer");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  if (adding) {
-    return (
-      <form
-        className="min-w-[16rem] space-y-2 rounded-lg border border-border bg-muted/40 p-2"
-        data-testid="add-customer-form"
-        onSubmit={confirmAdd}
-      >
-        <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-          Add customer
-        </p>
-        <Input
-          required
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          placeholder="Customer name"
-          aria-label="New customer name"
-          disabled={saving || disabled}
-        />
-        <RepSelect label="Rep" value={rep} onChange={setRep} />
-        <label className="flex items-center gap-2 text-xs">
-          <input
-            type="checkbox"
-            className="size-4 accent-primary"
-            checked={ak}
-            disabled={saving || disabled}
-            onChange={(e) => setAk(e.target.checked)}
-          />
-          Avi Katz account (AK)
-          <AkBadge on={ak} />
-        </label>
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit" size="sm" disabled={saving || disabled || !newName.trim()}>
-            {saving ? "Adding…" : "Add"}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={saving}
-            onClick={() => setAdding(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    );
-  }
-
+  const items = useMemo(() => dir.items.filter((i) => !isWalkIn(i.name)), [dir.items]);
   return (
     <div className="min-w-0">
       <ComboField
-        value={keepWalkIn ? "Walk-In" : value}
+        value={lacksAccount(value) ? "" : value}
         onChange={onChange}
         items={items}
-        placeholder={walkIn && !keepWalkIn ? "Pick a customer…" : "Search customers…"}
+        placeholder={needsCustomer ? "Pick an account…" : "Search accounts…"}
         allowCreate={false}
-        disabled={disabled || keepWalkIn}
-        noun="customer"
-        emptyHint="No customer matches. Add customer to create an account, or search the list."
+        disabled={disabled}
+        noun="account"
+        emptyHint="No account matches. The import never adds accounts: add it under Customers first."
       />
       <div className="mt-1 flex flex-wrap items-center gap-2">
-        {dir.canAdd ? (
-          <button
-            type="button"
-            className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-            data-testid="add-customer"
-            disabled={disabled}
-            onClick={openAdd}
-          >
-            Add customer
-          </button>
-        ) : null}
-        {walkIn ? (
-          keepWalkIn ? (
-            <button
-              type="button"
-              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-              onClick={onClearKeep}
-            >
-              Choose a customer instead
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
-              onClick={onKeepWalkIn}
-            >
-              Keep as Walk-In
-            </button>
-          )
-        ) : null}
-        {existingCustomer && !isWalkIn(existingCustomer) ? (
+        {existingCustomer && !isWalkIn(existingCustomer) && existingCustomer !== value ? (
           <span className="text-xs text-muted-foreground">Now: {existingCustomer}</span>
-        ) : needsCustomer ? (
-          <span className="text-xs text-warning">Pick an account</span>
-        ) : !known && value.trim() && !keepWalkIn && !isWalkIn(value) ? (
-          <span className="text-xs text-warning">Not on the list — add this customer</span>
+        ) : null}
+        {needsCustomer ? <span className="text-xs text-warning">Pick an account</span> : null}
+        {note ? (
+          <span className={`text-[11px] ${needsCustomer ? "text-warning" : "text-muted-foreground"}`} data-testid="corrigo-account-note">
+            {note}
+          </span>
         ) : null}
       </div>
     </div>

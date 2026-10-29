@@ -23,6 +23,7 @@ import {
   Warehouse,
   Wrench,
   ListChecks,
+  Receipt,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
@@ -62,6 +63,7 @@ type DeskTo =
   | "/map"
   | "/network"
   | "/analytics"
+  | "/invoices"
   | "/settings"
   | "/access";
 
@@ -121,6 +123,11 @@ const NAV: { label: string; items: NavItem[] }[] = [
       { to: "/parts", label: "Parts", icon: Boxes },
       { to: "/locations", label: "Locations", icon: MapPin },
     ],
+  },
+  {
+    // Admin only (10/28): NetSuite invoices, Tickets In Window and Location Check.
+    label: "Billing",
+    items: [{ to: "/invoices", label: "Invoices", icon: Receipt }],
   },
   {
     label: "Reports",
@@ -216,7 +223,8 @@ function NavLinks({
   role?: DeskRole | null;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const groups = navForRole(role, isAdmin);
+  const admin = !!isAdmin || role === "admin";
+  const groups = navForRole(role, isAdmin).filter((g) => g.label !== "Billing" || admin);
   return (
     <nav className="flex flex-col gap-5" data-testid="side-nav">
       {groups.map((group) => (
