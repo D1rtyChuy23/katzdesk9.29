@@ -226,6 +226,18 @@ export const listParts = createServerFn({ method: "POST" })
   .validator((d: z.input<typeof listInput>) => listInput.parse(d))
   .handler(async ({ data, context }): Promise<PartsPage> => listPartsFor(await ready(), data, context.userId));
 
+/**
+ * SQL: the Parts search, by its placeholders: the typed text, `%text%`, and `%bin code%`. It finds a part by its part
+ * number, name, description or MPN, its bin (A-03-12, or "Rack A"), or an old number merged into it. Export CSV reads
+ * the same search (10/29).
+ */
+export function partSearchSql(q: string, like: string, binLike: string): string {
+  return `(${q} = '' or item ilike ${like} or sku ilike ${like} or description ilike ${like} or mfr_part ilike ${like}
+         or concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike ${binLike}
+         or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike ${like}
+         or exists (select 1 from unnest(previous_numbers) pn where pn ilike ${like}))`;
+}
+
 /** One page of the Parts list (the body of listParts). */
 export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, userId: string): Promise<PartsPage> {
   const q = (data.q ?? "").trim();
@@ -235,10 +247,7 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
   // "Rack A" or "Shelf 03" finds every part there. An old number merged into a part finds that part.
   const where = `${data.hidden ? "" : "active and "}kind not in ('trip', 'labor')
     and hidden_at is ${data.hidden ? "not null" : "null"}
-    and ($1 = '' or item ilike $2 or sku ilike $2 or description ilike $2 or mfr_part ilike $2
-         or concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $6
-         or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $2
-         or exists (select 1 from unnest(previous_numbers) pn where pn ilike $2))
+    and ${partSearchSql("$1", "$2", "$6")}
     and (not $3 or image is null)
     and (not $4 or get_later)
     and ($5 = '' or coalesce(item_class, '') = $5)`;

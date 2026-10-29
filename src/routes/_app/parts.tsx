@@ -36,6 +36,7 @@ import { getPartUsageCounts } from "@/lib/ops/part-usage-api";
 import type { UsageTotals } from "@/lib/ops/part-usage";
 import { PartUsageLine } from "@/components/desk/part-usage";
 import { PartUsageReport } from "@/components/desk/part-usage-report";
+import { PartsExportButton } from "@/components/desk/parts-export-button";
 
 /** `?part=<id>` opens that part's window, so a part can be linked; `?view=usage` shows the Usage report. */
 type PartsSearch = { part?: number; view?: "usage" };
@@ -190,9 +191,11 @@ function Page() {
             The NetSuite item list with each part's photo and MPN, and how many tickets used it. Hide an obsolete part to take it off this list and the invoice picker. A ticket that already used it keeps the line.
           </p>
         </div>
-        {/* Admin: Pull Confirmed Photos and every import, Bin Locations included (bins are Admin only for now). */}
+        {/* Admin: Pull Confirmed Photos, Export CSV and every import, Bin Locations included (bins are Admin only for now). */}
         {isAdmin || canEditBins ? (
-          <div className="flex shrink-0 flex-wrap gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {/* The parts list as a file (10/29): the whole list with the hidden parts, or Filtered only. */}
+            {isAdmin && !usageView ? <PartsExportButton itemClass={itemClass} q={term} /> : null}
             {isAdmin && page.data?.readyToPull ? (
               <Button type="button" size="sm" variant="outline" disabled={!!pulling} onClick={() => void pullConfirmed()} data-testid="parts-pull-confirmed">
                 <Camera className="size-4" />
