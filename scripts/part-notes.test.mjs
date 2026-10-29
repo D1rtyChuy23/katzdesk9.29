@@ -44,7 +44,7 @@ async function part(pg, sku, extra = {}) {
   ).rows[0].id;
 }
 
-const csv = (text, { bom = true } = {}) => Buffer.from(`${bom ? "﻿" : ""}${text}`, "utf8").toString("base64");
+const csv = (text, { bom = true } = {}) => Buffer.from(`${bom ? "\uFEFF" : ""}${text}`, "utf8").toString("base64");
 /** The window's two steps: the preview, then (apply) Confirm with the rows the preview showed as Add. */
 async function run(sql, base64, apply, userId = "u-owner", filename = "notes.csv", confirmWith = sql) {
   const p = await api.importPartNotesFor(sql, { filename, base64, apply: false }, userId);

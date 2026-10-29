@@ -11,6 +11,22 @@ import { blankRow, headerKey } from "./part-pricing.ts";
 
 /** Most rows one file takes. */
 export const NOTE_ROWS_MAX = 5000;
+/** Longest note an Admin can save in a part's window (Grok through Chuy, 10/29). */
+export const PART_NOTE_MAX = 10000;
+
+/**
+ * A note as an Admin typed it in the part's window: Windows line breaks made plain, spaces at the end of each line and
+ * blank lines at the start and end dropped; nothing else changes. Null when nothing is left (the note is cleared).
+ */
+export function cleanPartNote(raw: unknown): string | null {
+  const text = String(raw ?? "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((l) => l.replace(/[ \t]+$/, ""))
+    .join("\n")
+    .replace(/^\n+|\n+$/g, "");
+  return text.trim() ? text : null;
+}
 /** Longest note one row adds. */
 export const NOTE_MAX = 1000;
 

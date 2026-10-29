@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { clearPartImage, setPartBin, setPartClass, setPartDescription, setPartImage, setPartMpn, type PartRow } from "@/lib/ops/parts-api";
+import { clearPartImage, setPartBin, setPartClass, setPartDescription, setPartImage, setPartMpn, setPartNote, type PartRow } from "@/lib/ops/parts-api";
 import { BIN_PIECES, binText, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
+import { cleanPartNote } from "@/lib/ops/part-notes";
 import { treatPartPhoto, treatResearchedPhoto } from "@/lib/part-photo-treatment";
 
 /*
- * The state and saves behind the part edits on Parts (photo, MPN, part name, bin location, class), used by both the
+ * The state and saves behind the part edits on Parts (photo, MPN, part name, bin location, class, note), used by the
  * row and the part's window through the pieces in part-controls.tsx.
  */
 
@@ -91,6 +92,40 @@ export function usePartNameEdit(row: PartRow, onChanged: Changed) {
     setEditing(false);
   };
   return { editing, setEditing, value, setValue, save, cancel };
+}
+
+export type PartNoteEdit = ReturnType<typeof usePartNoteEdit>;
+
+/**
+ * The part's note, in its window. Admin only (Grok through Chuy, 10/29). The box starts with the note; Save sends the
+ * note as it was when the box opened, and the server refuses the save if an import added a line meanwhile, so that line
+ * is never overwritten. The typed text stays in the box then, to copy. Blank clears the note.
+ */
+export function usePartNoteEdit(row: PartRow, onChanged: Changed) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const [start, setStart] = useState<string | null>(null);
+  const open = () => {
+    setValue(row.mergeNote ?? "");
+    setStart(row.note);
+    setEditing(true);
+  };
+  const dirty = cleanPartNote(value) !== cleanPartNote(start);
+  const save = useMutation({
+    mutationFn: () => setPartNote({ data: { id: row.id, note: value, before: start } }),
+    onSuccess: (p) => {
+      setEditing(false);
+      toast.success(p.mergeNote ? "Note saved" : "Note cleared");
+      onChanged();
+    },
+    onError: (e) => {
+      toast.error(e instanceof Error ? e.message : "Could not save the note");
+      // Show what is stored now; the box keeps the typed text.
+      onChanged();
+    },
+  });
+  const cancel = () => setEditing(false);
+  return { editing, open, value, setValue, dirty, save, cancel };
 }
 
 export type PartBinEdit = ReturnType<typeof usePartBinEdit>;

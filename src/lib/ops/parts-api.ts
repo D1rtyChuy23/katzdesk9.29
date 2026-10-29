@@ -18,6 +18,7 @@ import { BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBin
 import { textArray } from "@/lib/ops/part-merges";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
 import { PART_USES_CTE } from "@/lib/ops/part-usage-api";
+import { PART_NOTE_MAX, cleanPartNote } from "@/lib/ops/part-notes";
 import type { ChargeKind } from "@/lib/ops/charges";
 
 async function ready(): Promise<Sql> {
@@ -26,7 +27,7 @@ async function ready(): Promise<Sql> {
   return getSql();
 }
 
-type PartPowers = { canHide: boolean; canRemove: boolean; canEditMpn: boolean; canEditBins: boolean; canEditClass: boolean; name: string };
+type PartPowers = { canHide: boolean; canRemove: boolean; canEditMpn: boolean; canEditBins: boolean; canEditClass: boolean; canEditNote: boolean; name: string };
 
 async function powers(sql: Sql, userId: string): Promise<PartPowers> {
   const rows = await sql.query<{ is_admin: boolean; desk_role: string | null; username: string | null }>(
@@ -38,12 +39,13 @@ async function powers(sql: Sql, userId: string): Promise<PartPowers> {
   const canHide = admin || role === "sales";
   // The bin location and the Class are Admin only for now (Chuy, 10/28). The MPN, the part name and Hide stay Admin
   // and Sales.
-  return { canHide, canRemove: admin, canEditMpn: canHide, canEditBins: admin, canEditClass: admin, name: rows[0]?.username?.trim() || "Desk" };
+  // The part's note (in its window) is Admin only too (Grok through Chuy, 10/29).
+  return { canHide, canRemove: admin, canEditMpn: canHide, canEditBins: admin, canEditClass: admin, canEditNote: admin, name: rows[0]?.username?.trim() || "Desk" };
 }
 
 /**
  * Who may do what on Parts (the Bin Locations import uses it). canEditMpn covers the MPN and the part name;
- * canEditBins the bin location and canEditClass the Class (both Admin only).
+ * canEditBins the bin location, canEditClass the Class and canEditNote the note (all three Admin only).
  */
 export const partPowers = powers;
 
@@ -82,8 +84,11 @@ export type PartRow = {
   binUpdatedBy: string | null;
   /** Old numbers merged into this part (10/28); searching one finds it. */
   previousNumbers: string[];
-  /** The part's note: why parts were merged into it (the merge file), and lines from Import Part Notes. */
+  /** The part's note, trimmed for showing: why parts were merged into it (the merge file), lines from Import Part Notes,
+   * and what an Admin typed in its window. */
   mergeNote: string | null;
+  /** The note exactly as stored. Saving an edit sends it back, so a line added meanwhile is never overwritten. */
+  note: string | null;
   /** Set when this row was folded into another part (an import copy, or an old number): that part. */
   mergedInto: { id: number; sku: string } | null;
 };
@@ -188,6 +193,7 @@ const toRow = (r: Raw): PartRow => ({
   binUpdatedBy: r.bin_updated_by,
   previousNumbers: textArray(r.previous_numbers),
   mergeNote: r.note?.trim() || null,
+  note: r.note,
   mergedInto: r.merged_into == null ? null : { id: Number(r.merged_into), sku: r.merged_sku ?? "" },
 });
 
@@ -206,6 +212,8 @@ export type PartsPage = {
   canEditBins: boolean;
   /** Change a part's Class: Admin only for now. */
   canEditClass: boolean;
+  /** Change a part's note in its window: Admin only. */
+  canEditNote: boolean;
   canHide: boolean;
   canRemove: boolean;
 };
@@ -296,6 +304,7 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
     canEditMpn: who.canEditMpn,
     canEditBins: who.canEditBins,
     canEditClass: who.canEditClass,
+    canEditNote: who.canEditNote,
     canHide: who.canHide,
     canRemove: who.canRemove,
   };
@@ -572,6 +581,48 @@ export const setPartDescription = createServerFn({ method: "POST" })
     if (!rows.length) throw new Error("That part is no longer on the list.");
     return loadPart(sql, data.id);
   });
+
+const noteInput = z.object({
+  id: z.number().int().positive(),
+  note: z.string().max(PART_NOTE_MAX * 2).nullable(),
+  /** The note exactly as stored when the editor opened (PartRow.note). */
+  before: z.string().max(200_000).nullable(),
+});
+
+/**
+ * The part's note, as an Admin types it in the part's window (Grok through Chuy, 10/29). Admin only; everyone else
+ * reads it. It writes the note and the part's updated time, nothing else, and only while the note still reads as it
+ * did when the editor opened: a line an import added meanwhile is never overwritten (the save is refused instead).
+ * Blank clears the note.
+ */
+export const setPartNote = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof noteInput>) => noteInput.parse(d))
+  .handler(async ({ data, context }): Promise<PartRow> => setPartNoteFor(await ready(), data, context.userId));
+
+/** The body of setPartNote. */
+export async function setPartNoteFor(sql: Sql, data: z.infer<typeof noteInput>, userId: string): Promise<PartRow> {
+  if (!(await powers(sql, userId)).canEditNote) throw new Error("Only an Admin can change a part's note.");
+  const next = cleanPartNote(data.note);
+  if (next && next.length > PART_NOTE_MAX) throw new Error(`A note can be up to ${PART_NOTE_MAX.toLocaleString("en-US")} characters.`);
+  const gone = async () => !(await sql.query("select 1 from billing_items where id = $1 and kind not in ('trip', 'labor')", [data.id])).length;
+  // The box holds the note it opened with (spaces aside): nothing to write, and the stored text keeps every character.
+  if (next === cleanPartNote(data.before)) {
+    if (await gone()) throw new Error("That part is no longer on the list.");
+    return loadPart(sql, data.id);
+  }
+  const rows = await sql.query(
+    `update billing_items set note = $2, updated_at = now()
+      where id = $1 and kind not in ('trip', 'labor') and note is not distinct from $3
+      returning id`,
+    [data.id, next, data.before],
+  );
+  if (!rows.length) {
+    if (await gone()) throw new Error("That part is no longer on the list.");
+    throw new Error("The note changed while you were editing it (an import may have added a line), so nothing was saved. Copy your text, then Cancel and edit the note again.");
+  }
+  return loadPart(sql, data.id);
+}
 
 /** Record the manufacturer part number for a part. Blank clears it. */
 export const setPartMpn = createServerFn({ method: "POST" })
