@@ -53,12 +53,15 @@ export function RebuildBoard({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
 
+  // Warehouse moves only its refurbs; every other card stays put for it.
+  const can = (r: Rebuild) => canEdit && r.editable;
+
   function dropOn(status: string) {
     if (!canEdit || dragId == null) return;
     const row = rows.find((r) => r.id === dragId);
     setDragId(null);
     setOverStatus(null);
-    if (!row || row.status === status) return;
+    if (!row || row.status === status || !can(row)) return;
     if (status === "Waiting" && !row.reasonCode) {
       toast.message("Waiting needs a reason delayed. Open the card to add one.");
       onOpen(row.id);
@@ -126,9 +129,9 @@ export function RebuildBoard({
                   cards.map((r) => (
                     <li key={r.id}>
                       <article
-                        draggable={canEdit}
+                        draggable={can(r)}
                         onDragStart={(e) => {
-                          if (!canEdit) return;
+                          if (!can(r)) return;
                           dragged.current = true;
                           e.dataTransfer.setData("text/plain", String(r.id));
                           e.dataTransfer.effectAllowed = "move";
@@ -148,7 +151,7 @@ export function RebuildBoard({
                         data-testid={`rebuild-card-${r.id}`}
                         className={cn(
                           "desk-flat w-full select-none rounded-lg border border-border bg-card p-3 text-left shadow-sm hover:border-primary/40",
-                          canEdit && "cursor-grab active:cursor-grabbing",
+                          can(r) && "cursor-grab active:cursor-grabbing",
                           r.health === "overdue" && "border-destructive/40",
                           r.health === "at-risk" && "border-warning/40",
                           r.health === "no-date" && "border-warning/30",
@@ -156,7 +159,7 @@ export function RebuildBoard({
                         )}
                       >
                         <div className="flex items-start gap-1.5">
-                          {canEdit ? (
+                          {can(r) ? (
                             <span className="mt-0.5 text-muted-foreground" aria-hidden>
                               <GripVertical className="size-4" />
                             </span>
@@ -167,7 +170,7 @@ export function RebuildBoard({
                               {r.equipment || "No equipment"} · {r.account}
                             </p>
                           </div>
-                          {canEdit ? (
+                          {can(r) ? (
                             <button
                               type="button"
                               className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive max-sm:-my-1 max-sm:-mr-1 max-sm:size-10"
@@ -190,6 +193,11 @@ export function RebuildBoard({
                           <HealthBadge health={r.health} />
                           {r.status === "Waiting" && r.reasonCode ? (
                             <Badge variant="warn">{r.reasonCode}</Badge>
+                          ) : null}
+                          {r.invoice === "waiting" ? (
+                            <Badge variant="warn" data-testid="rebuild-invoice-waiting">
+                              Invoice waiting
+                            </Badge>
                           ) : null}
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">

@@ -8,6 +8,7 @@ import { pathFor } from "./open-link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { formatPingTime } from "@/lib/ops/clock";
+import { isWaitingNotice } from "@/lib/ops/warehouse-invoice";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ function headline(n: DeskNotice): string {
   if (n.body.startsWith("Pending removal")) return "Pending removal";
   if (n.body.startsWith("Pending customer assign")) return "Pending assign";
   if (n.body.startsWith("Pending module return")) return "Pending return";
+  if (isWaitingNotice(n.body)) return "Invoice to approve";
   return "pinged you";
 }
 
@@ -98,7 +100,8 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
     if (unread > prevUnread.current) {
       const newest = rows.find((n) => !n.read);
       const review = newest?.body?.includes("Needs review");
-      toast.message(review ? "Rack needs review" : `${newest?.fromName ?? "Teammate"} pinged you`, {
+      const invoice = !!newest && isWaitingNotice(newest.body);
+      toast.message(review ? "Rack needs review" : invoice ? "Invoice to approve" : `${newest?.fromName ?? "Teammate"} pinged you`, {
         description: [newest?.customer, newest?.body, newest?.createdAt ? formatPingTime(newest.createdAt) : null]
           .filter(Boolean)
           .join(" · "),

@@ -5,10 +5,23 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { cleanQty, cleanRate, kindForItem, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { loadTicketCharges, writeTicketCharges } from "@/lib/ops/charges-api";
 import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount";
+import { flagOn } from "@/lib/ops/flag";
 import { INVOICE_TARGETS, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
+import { notifyAdminsInvoiceWaiting } from "@/lib/ops/notify";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 import { pinQuality } from "@/lib/ops/account-pin";
+import {
+  SERVICE_DEPT_KEYS,
+  invoicePowers,
+  invoiceState,
+  partsOnlyError,
+  waitingNotice,
+  warehouseMayEdit,
+  type InvoicePowers,
+  type InvoiceState,
+  type InvoiceViewer,
+} from "@/lib/ops/warehouse-invoice";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -29,23 +42,39 @@ export type InvoiceLine = {
   sourceKey?: string | null;
 };
 
-export type InvoiceView = InvoiceTotals & {
-  type: InvoiceTarget;
-  id: number;
-  /** "Service Ticket WO-123", "Install #45". */
-  title: string;
-  billTo: BillTo;
-  lines: InvoiceLine[];
-  discount: Discount | null;
-  approvedAt: string | null;
-  approvedBy: string | null;
-  /** The total when it was approved. A ticket's Charges can change after that; the window says so. */
-  approvedTotal: number | null;
-  /** Why the lines cannot change (a billed ticket), or null. */
-  locked: string | null;
-  /** Tickets: the lines are the ticket's Charges, so the Charges panel and this window show the same thing. */
-  sharedWithCharges: boolean;
-};
+export type InvoiceView = InvoiceTotals &
+  InvoicePowers & {
+    type: InvoiceTarget;
+    id: number;
+    /** "Service Ticket WO-123", "Install #45". */
+    title: string;
+    billTo: BillTo;
+    lines: InvoiceLine[];
+    discount: Discount | null;
+    approvedAt: string | null;
+    approvedBy: string | null;
+    /** The total when it was approved. A ticket's Charges can change after that; the window says so. */
+    approvedTotal: number | null;
+    /** Why the lines cannot change (a billed ticket), or null. */
+    locked: string | null;
+    /** Tickets: the lines are the ticket's Charges, so the Charges panel and this window show the same thing. */
+    sharedWithCharges: boolean;
+    /** none, waiting (Warehouse saved it for an Admin to approve) or approved. */
+    state: InvoiceState;
+    /** Who saved it for approval and when (Warehouse); kept after it is approved. */
+    submittedAt: string | null;
+    submittedBy: string | null;
+    /** The saved-for-approval stamp the window opened with. Approve sends it back, so a newer Warehouse save is never lost. */
+    version: string | null;
+  };
+
+/** Who is looking: an Admin (the desk owner flag or the Admin role), Warehouse (that role, not an Admin), or anyone else. */
+export async function invoiceViewer(sql: Sql, userId: string): Promise<InvoiceViewer & { name: string }> {
+  const r = (await sql.query<{ is_admin: unknown; desk_role: string | null; username: string | null }>("select is_admin, desk_role, username from desk_accounts where user_id = $1", [userId]))[0];
+  const role = String(r?.desk_role ?? "").trim().toLowerCase();
+  const admin = flagOn(r?.is_admin) || role === "admin";
+  return { admin, warehouse: !admin && role === "warehouse", name: r?.username || "Desk" };
+}
 
 type Ref = { type: InvoiceTarget; id: number; customer: string; title: string; recordRep: string | null; locked: string | null };
 
@@ -154,11 +183,32 @@ async function billTo(sql: Sql, ref: Ref): Promise<BillTo> {
   };
 }
 
-type HeadRow = { id: number; discount_kind: string | null; discount_value: string | null; total: string | null; approved_at: string | Date | null; approved_by: string | null };
+type HeadRow = {
+  id: number;
+  discount_kind: string | null;
+  discount_value: string | null;
+  total: string | null;
+  approved_at: string | Date | null;
+  approved_by: string | null;
+  submitted_at: string | Date | null;
+  submitted_by: string | null;
+  version: string | null;
+};
+
+/** The saved-for-approval stamp as text, to the microsecond, so the window can send back exactly what it opened. */
+const VERSION_OF = (col: string) => `(extract(epoch from ${col}) * 1000000)::bigint::text`;
 
 async function head(sql: Sql, type: InvoiceTarget, id: number): Promise<HeadRow | undefined> {
-  return (await sql.query<HeadRow>("select id, discount_kind, discount_value, total, approved_at, approved_by from invoices where entity_type = $1 and entity_id = $2", [type, id]))[0];
+  return (
+    await sql.query<HeadRow>(
+      `select id, discount_kind, discount_value, total, approved_at, approved_by, submitted_at, submitted_by, ${VERSION_OF("submitted_at")} as version
+         from invoices where entity_type = $1 and entity_id = $2`,
+      [type, id],
+    )
+  )[0];
 }
+
+const headState = (h: HeadRow | undefined): InvoiceState => invoiceState(h ? { approvedAt: h.approved_at, submittedAt: h.submitted_at } : null);
 
 const toDiscount = (kind: string | null, value: string | number | null): Discount | null =>
   isDiscountKind(kind) && Number(value) > 0 ? { kind, value: Number(value) } : null;
@@ -202,9 +252,15 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
   }));
 }
 
-async function readInvoice(sql: Sql, type: InvoiceTarget, id: number): Promise<InvoiceView> {
+const WAREHOUSE_REBUILDS_ONLY = "Warehouse opens rebuild invoices only.";
+
+async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: InvoiceViewer): Promise<InvoiceView> {
+  if (viewer.warehouse && type !== "rebuild") throw new Error(WAREHOUSE_REBUILDS_ONLY);
   const ref = await resolveRecord(sql, type, id);
   const h = await head(sql, ref.type, id);
+  const state = headState(h);
+  // Warehouse reads its refurbs' invoices only, never a customer's billing.
+  if (viewer.warehouse && !warehouseMayEdit(ref.customer)) throw new Error(invoicePowers(viewer, { type: ref.type, customer: ref.customer, state }).blocked ?? WAREHOUSE_REBUILDS_ONLY);
   let lines: InvoiceLine[];
   let discount: Discount | null;
   if (usesTicketCharges(ref.type)) {
@@ -228,16 +284,29 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number): Promise<I
     approvedTotal: h?.approved_at && h.total != null ? Number(h.total) : null,
     locked: ref.locked,
     sharedWithCharges: usesTicketCharges(ref.type),
+    state,
+    submittedAt: h?.submitted_at ? new Date(h.submitted_at).toISOString() : null,
+    submittedBy: h?.submitted_by ?? null,
+    version: h?.version ?? null,
+    ...invoicePowers(viewer, { type: ref.type, customer: ref.customer, state }),
   };
 }
 
 const targetInput = z.object({ type: z.enum(INVOICE_TARGETS), id: z.number().int().positive() });
 
-/** The invoice for one record: its billing info from the account, its lines, discount and total. Reading writes nothing. */
+/**
+ * The invoice for one record: its billing info from the account, its lines, discount and total, and what this person
+ * may do with it (approve, or save it for approval). Reading writes nothing.
+ */
 export const getInvoice = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { type: InvoiceTarget; id: number }) => targetInput.parse(d))
-  .handler(async ({ data }): Promise<InvoiceView> => readInvoice(await ready(), data.type, data.id));
+  .handler(async ({ data, context }): Promise<InvoiceView> => getInvoiceFor(await ready(), data, context.userId));
+
+/** The body of getInvoice. Warehouse reads rebuild invoices only. */
+export async function getInvoiceFor(sql: Sql, data: { type: InvoiceTarget; id: number }, userId: string): Promise<InvoiceView> {
+  return readInvoice(sql, data.type, data.id, await invoiceViewer(sql, userId));
+}
 
 const lineInput = z.object({
   item: z.string().max(200),
@@ -247,11 +316,24 @@ const lineInput = z.object({
   sourceKey: z.string().max(400).regex(/^(pmkit|mp):/).nullable().optional(),
 });
 
+const discountInput = z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable();
+
 const approveInput = targetInput.extend({
   lines: z.array(lineInput).max(200),
   lineIds: z.array(z.number().int().positive()).max(200),
-  discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable(),
+  discount: discountInput,
+  /** The saved-for-approval stamp the window opened with (InvoiceView.version); null when it had none. */
+  seen: z.string().max(40).nullable().optional(),
 });
+
+const saveInput = targetInput.extend({
+  lines: z.array(lineInput).max(200),
+  discount: discountInput,
+});
+
+const WAREHOUSE_SAVES = "An Admin approves warehouse invoices. Use Save for Approval.";
+const WAITING_FOR_ADMIN = "This invoice is waiting for an Admin to approve it.";
+const SAVED_SINCE_OPENED = "Warehouse saved changes to this invoice after you opened it, so nothing was approved. Look over the new lines, then approve.";
 
 /**
  * Approve a PM's own invoice only while it is not stacked. One statement: lock the PM, insert the header
@@ -295,115 +377,265 @@ export function approvePmInvoiceSql(): string {
      select inv.id, (select count(*) from lined)::int as lined from inv`;
 }
 
+/**
+ * Approve the invoice of an install, rebuild or deal: the header and its lines in one statement, so they change
+ * together or not at all. $12 is the saved-for-approval stamp the window opened with: when Warehouse saved the invoice
+ * (again) after that, nothing is written and no row comes back, so the approver sees the newer lines first.
+ */
+export function approveRecordInvoiceSql(): string {
+  return `with inv as (
+       insert into invoices (
+         entity_type, entity_id, customer, discount_kind, discount_value,
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at
+       )
+       values ($1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now())
+       on conflict (entity_type, entity_id) do update set
+         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
+         bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
+         approved_at = now(), updated_at = now()
+        where ${VERSION_OF("invoices.submitted_at")} is not distinct from $12::text
+       returning id
+     ),
+     cleared as (
+       delete from invoice_lines where invoice_id in (select id from inv) returning id
+     ),
+     lined as (
+       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
+       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+         from inv
+         join unnest($13::text[], $14::text[], $15::numeric[], $16::numeric[], $17::text[]) with ordinality
+              as t(item, description, qty, rate, kind, ord) on true
+        where (select count(*) from cleared) >= 0
+       returning id
+     )
+     select inv.id, (select count(*) from lined)::int as lined from inv`;
+}
+
+/**
+ * Warehouse's Save for Approval on a rebuild: the header (not approved, with who saved it and when) and its lines in one
+ * statement. It writes only while the rebuild is on the board and for Katz Coffee Service Dept. ($16, the account's
+ * letters and digits), and the invoice isn't approved, all read when it runs; otherwise no row comes back and nothing
+ * changes.
+ */
+export function saveForApprovalSql(): string {
+  return `with inv as (
+       insert into invoices (
+         entity_type, entity_id, customer, discount_kind, discount_value,
+         bill_name, bill_account, bill_address, bill_rep, total, submitted_by, submitted_at, updated_at
+       )
+       select 'rebuild', r.id, $2, $3, $4, $5, $6, $7, $8, $9, $10, now(), now()
+         from rebuilds r
+        where r.id = $1::int and coalesce(r.archived, false) = false
+          and regexp_replace(lower(coalesce(r.account, '')), '[^a-z0-9]+', '', 'g') = any($16::text[])
+       on conflict (entity_type, entity_id) do update set
+         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
+         bill_rep = excluded.bill_rep, total = excluded.total, submitted_by = excluded.submitted_by,
+         submitted_at = now(), updated_at = now()
+        where invoices.approved_at is null
+       returning id
+     ),
+     cleared as (
+       delete from invoice_lines where invoice_id in (select id from inv) returning id
+     ),
+     lined as (
+       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
+       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+         from inv
+         join unnest($11::text[], $12::text[], $13::numeric[], $14::numeric[], $15::text[]) with ordinality
+              as t(item, description, qty, rate, kind, ord) on true
+        where (select count(*) from cleared) >= 0
+       returning id
+     )
+     select inv.id, (select count(*) from lined)::int as lined from inv`;
+}
+
 const ACTIVITY_TYPE: Record<InvoiceTarget, string> = { service: "service", tlc: "tlc", pm: "pm", install: "install", rebuild: "rebuild", deal: "deal" };
+
+type CleanLine = { item: string; description: string; qty: number; rate: number; kind: ChargeKind };
+
+/** The lines of a PM, install, rebuild or deal invoice as saved: each one's kind from the item list, else from its name. */
+async function recordLines(sql: Sql, raw: z.output<typeof lineInput>[]): Promise<CleanLine[]> {
+  const items = raw.map((l) => l.item.trim());
+  const kinds = new Map<string, ChargeKind>();
+  if (items.length) {
+    for (const k of await sql.query<{ item: string; kind: ChargeKind }>("select item, kind from billing_items where lower(btrim(item)) = any($1::text[])", [items.map((i) => i.toLowerCase())])) {
+      kinds.set(k.item.trim().toLowerCase(), k.kind);
+    }
+  }
+  return raw.map((l, i) => ({
+    item: items[i]!,
+    description: l.description.trim(),
+    qty: cleanQty(l.qty)!,
+    rate: cleanRate(l.rate)!,
+    kind: kinds.get(items[i]!.toLowerCase()) ?? kindForItem(items[i]!),
+  }));
+}
+
+const lineArrays = (lines: CleanLine[]) => [lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)];
+
+const lineCount = (n: number) => `${n} line${n === 1 ? "" : "s"}`;
 
 /**
  * Approve: the lines, discount and total in the window are saved as this record's invoice, with the billing info as
  * it reads now. Ticket invoices are the ticket's Charges (same lines, same discount, same billing export).
- * Nothing is saved before this; Cancel in the window never calls it.
+ * Nothing is saved before this; Cancel in the window never calls it. Warehouse never approves (it saves for approval),
+ * and an invoice Warehouse saved for approval is approved by an Admin.
  */
 export const approveInvoice = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.input<typeof approveInput>) => approveInput.parse(d))
-  .handler(async ({ data, context }): Promise<InvoiceView> => {
-    const sql = await ready();
-    const ref = await resolveRecord(sql, data.type, data.id);
-    if (ref.locked) throw new Error(ref.locked);
-    const problem = invoiceError(data.lines);
-    if (problem) throw new Error(problem);
-    const typed = data.discount ? cleanDiscount(data.discount.kind, data.discount.value) : { discount: null };
-    if ("error" in typed) throw new Error(typed.error);
-    const who = (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Desk";
-    const bill = await billTo(sql, ref);
+  .handler(async ({ data, context }): Promise<InvoiceView> => approveInvoiceFor(await ready(), data, context.userId));
 
-    let lines: { item: string; description: string; qty: number; rate: number; kind: ChargeKind }[];
-    if (usesTicketCharges(ref.type)) {
-      // The ticket's own Charges: same write as the Charges panel, P.O. kept as it is.
-      await writeTicketCharges(sql, data.id, context.userId, { lines: data.lines, lineIds: data.lineIds, discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value } : null });
-      lines = (await loadTicketCharges(sql, data.id)).lines;
-    } else {
-      const items = data.lines.map((l) => l.item.trim());
-      const kinds = new Map<string, ChargeKind>();
-      if (items.length) {
-        for (const k of await sql.query<{ item: string; kind: ChargeKind }>("select item, kind from billing_items where lower(btrim(item)) = any($1::text[])", [items.map((i) => i.toLowerCase())])) {
-          kinds.set(k.item.trim().toLowerCase(), k.kind);
-        }
-      }
-      lines = data.lines.map((l, i) => ({
-        item: items[i]!,
-        description: l.description.trim(),
-        qty: cleanQty(l.qty)!,
-        rate: cleanRate(l.rate)!,
-        kind: kinds.get(items[i]!.toLowerCase()) ?? kindForItem(items[i]!),
-      }));
-    }
-    const totals = invoiceTotals(lines, typed.discount);
-    if (ref.type === "pm") {
-      const savedPm = await sql.query<{ id: number }>(approvePmInvoiceSql(), [
-        ref.type,
-        data.id,
-        ref.customer || null,
-        typed.discount?.kind ?? null,
-        typed.discount?.value ?? null,
-        bill.name,
-        bill.accountNumber,
-        bill.address,
-        bill.rep,
-        totals.total,
-        who,
-        lines.map((l) => l.item),
-        lines.map((l) => l.description),
-        lines.map((l) => l.qty),
-        lines.map((l) => l.rate),
-        lines.map((l) => l.kind),
-      ]);
-      if (!savedPm[0]) throw new Error((await pmInvoiceLock(sql, data.id)) ?? "This PM is billed on a ticket. Open the ticket's Invoicing tab.");
-    } else {
-      const saved = await sql.query<{ id: number }>(
-        `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now())
-         on conflict (entity_type, entity_id) do update set
-           customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
-           bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
-           total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()
-         returning id`,
-        [
-          ref.type,
-          data.id,
-          ref.customer || null,
-          // A ticket keeps its discount on the ticket, so it is never stored twice.
-          usesTicketCharges(ref.type) ? null : (typed.discount?.kind ?? null),
-          usesTicketCharges(ref.type) ? null : (typed.discount?.value ?? null),
-          bill.name,
-          bill.accountNumber,
-          bill.address,
-          bill.rep,
-          totals.total,
-          who,
-        ],
-      );
-      if (!usesTicketCharges(ref.type)) {
-        // One statement: the old lines and the new ones change together or not at all.
-        await sql.query(
-          `with d as (delete from invoice_lines where invoice_id = $1)
-           insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
-           select $1, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
-             from unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[]) with ordinality
-                  as t(item, description, qty, rate, kind, ord)`,
-          [saved[0]!.id, lines.map((l) => l.item), lines.map((l) => l.description), lines.map((l) => l.qty), lines.map((l) => l.rate), lines.map((l) => l.kind)],
-        );
-      }
-    }
-    await sql
-      .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [
-        ACTIVITY_TYPE[ref.type],
-        data.id,
-        who,
-        `invoice approved: ${lines.length} line${lines.length === 1 ? "" : "s"}, total $${totals.total.toFixed(2)}`,
+/** The body of approveInvoice. */
+export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveInput>, userId: string): Promise<InvoiceView> {
+  const viewer = await invoiceViewer(sql, userId);
+  if (viewer.warehouse) throw new Error(WAREHOUSE_SAVES);
+  const ref = await resolveRecord(sql, data.type, data.id);
+  if (ref.locked) throw new Error(ref.locked);
+  if (!viewer.admin && headState(await head(sql, ref.type, data.id)) === "waiting") throw new Error(WAITING_FOR_ADMIN);
+  const problem = invoiceError(data.lines);
+  if (problem) throw new Error(problem);
+  const typed = data.discount ? cleanDiscount(data.discount.kind, data.discount.value) : { discount: null };
+  if ("error" in typed) throw new Error(typed.error);
+  const who = viewer.name;
+  const bill = await billTo(sql, ref);
+
+  let lines: CleanLine[];
+  if (usesTicketCharges(ref.type)) {
+    // The ticket's own Charges: same write as the Charges panel, P.O. kept as it is.
+    await writeTicketCharges(sql, data.id, userId, { lines: data.lines, lineIds: data.lineIds, discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value } : null });
+    lines = (await loadTicketCharges(sql, data.id)).lines;
+  } else {
+    lines = await recordLines(sql, data.lines);
+  }
+  const totals = invoiceTotals(lines, typed.discount);
+  const billing = [bill.name, bill.accountNumber, bill.address, bill.rep, totals.total, who];
+  if (ref.type === "pm") {
+    const savedPm = await sql.query<{ id: number }>(approvePmInvoiceSql(), [
+      ref.type,
+      data.id,
+      ref.customer || null,
+      typed.discount?.kind ?? null,
+      typed.discount?.value ?? null,
+      ...billing,
+      ...lineArrays(lines),
+    ]);
+    if (!savedPm[0]) throw new Error((await pmInvoiceLock(sql, data.id)) ?? "This PM is billed on a ticket. Open the ticket's Invoicing tab.");
+  } else if (usesTicketCharges(ref.type)) {
+    // A ticket keeps its lines and discount on the ticket, so they are never stored twice.
+    await sql.query(
+      `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at)
+       values ($1, $2, $3, null, null, $4, $5, $6, $7, $8, $9, now(), now())
+       on conflict (entity_type, entity_id) do update set
+         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
+         total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()`,
+      [ref.type, data.id, ref.customer || null, ...billing],
+    );
+  } else {
+    const saved = await sql.query<{ id: number }>(approveRecordInvoiceSql(), [
+      ref.type,
+      data.id,
+      ref.customer || null,
+      typed.discount?.kind ?? null,
+      typed.discount?.value ?? null,
+      ...billing,
+      data.seen ?? null,
+      ...lineArrays(lines),
+    ]);
+    if (!saved[0]) throw new Error(SAVED_SINCE_OPENED);
+  }
+  await sql
+    .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [
+      ACTIVITY_TYPE[ref.type],
+      data.id,
+      who,
+      `invoice approved: ${lineCount(lines.length)}, total $${totals.total.toFixed(2)}`,
+    ])
+    .catch(() => undefined);
+  return readInvoice(sql, ref.type, data.id, viewer);
+}
+
+/**
+ * Save for Approval (Warehouse, Chuy 10/29): the parts a refurb used, on a rebuild for Katz Coffee Service Dept., saved
+ * as its invoice waiting for an Admin to approve. Parts only. Saving again replaces the lines until an Admin approves;
+ * after that it is the Admin's. The first save pings every Admin.
+ */
+export const saveInvoiceForApproval = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof saveInput>) => saveInput.parse(d))
+  .handler(async ({ data, context }): Promise<InvoiceView> => saveInvoiceForApprovalFor(await ready(), data, context.userId));
+
+/** The body of saveInvoiceForApproval. */
+export async function saveInvoiceForApprovalFor(sql: Sql, data: z.output<typeof saveInput>, userId: string): Promise<InvoiceView> {
+  const viewer = await invoiceViewer(sql, userId);
+  if (!viewer.warehouse) throw new Error("Save for Approval is the Warehouse step. Approve the invoice instead.");
+  if (data.type !== "rebuild") throw new Error("Warehouse invoices are for rebuilds.");
+  const ref = await resolveRecord(sql, "rebuild", data.id);
+  const before = headState(await head(sql, "rebuild", data.id));
+  const powers = invoicePowers(viewer, { type: ref.type, customer: ref.customer, state: before });
+  if (!powers.canSave) throw new Error(powers.blocked ?? "This invoice can't be saved for approval.");
+  if (!data.lines.length) throw new Error("Add the parts the refurb used, then save.");
+  const problem = invoiceError(data.lines);
+  if (problem) throw new Error(problem);
+  // The parts used, at their prices; an Admin adds any discount when approving.
+  if (data.discount) throw new Error("Warehouse invoices have no discount. An Admin can add one when approving.");
+  const lines = await recordLines(sql, data.lines);
+  const partsProblem = partsOnlyError(lines);
+  if (partsProblem) throw new Error(partsProblem);
+  // Every line is a part on the part list (shown, not hidden), never a typed name.
+  const listed = new Set(
+    (
+      await sql.query<{ item: string }>("select item from billing_items where lower(btrim(item)) = any($1::text[]) and kind = 'part' and active and hidden_at is null", [
+        lines.map((l) => l.item.toLowerCase()),
       ])
-      .catch(() => undefined);
-    return readInvoice(sql, ref.type, data.id);
-  });
+    ).map((r) => r.item.trim().toLowerCase()),
+  );
+  const offList = lines.findIndex((l) => !listed.has(l.item.toLowerCase()));
+  if (offList >= 0) throw new Error(`Line ${offList + 1}: Warehouse invoices take parts from the part list. Add it with Add a part.`);
+  const totals = invoiceTotals(lines, null);
+  const bill = await billTo(sql, ref);
+  const saved = await sql.query<{ id: number }>(saveForApprovalSql(), [
+    data.id,
+    ref.customer || null,
+    null,
+    null,
+    bill.name,
+    bill.accountNumber,
+    bill.address,
+    bill.rep,
+    totals.total,
+    viewer.name,
+    ...lineArrays(lines),
+    [...SERVICE_DEPT_KEYS],
+  ]);
+  if (!saved[0]) {
+    // The checks above passed but the write found something else: say which.
+    if (headState(await head(sql, "rebuild", data.id)) === "approved") {
+      throw new Error("This invoice was approved while you had it open, so nothing was saved. Ask an Admin to change it.");
+    }
+    const removed = (await sql.query<{ archived: boolean }>("select coalesce(archived, false) as archived from rebuilds where id = $1", [data.id]))[0]?.archived;
+    if (removed) throw new Error("This rebuild was removed from the board, so nothing was saved.");
+    throw new Error("This rebuild was moved off Katz Coffee Service Dept. while you had it open, so nothing was saved.");
+  }
+  await sql
+    .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('rebuild', $1, $2, 'updated', $3)", [
+      data.id,
+      viewer.name,
+      `invoice saved for approval: ${lineCount(lines.length)}, total $${totals.total.toFixed(2)}`,
+    ])
+    .catch(() => undefined);
+  if (before === "none") {
+    await notifyAdminsInvoiceWaiting(sql, userId, {
+      rebuildId: data.id,
+      account: bill.name,
+      body: waitingNotice(viewer.name, ref.title, bill.name, lines.length, totals.total),
+    }).catch(() => undefined);
+  }
+  return readInvoice(sql, "rebuild", data.id, viewer);
+}
 
 export type AccountInvoice = {
   type: InvoiceTarget;
@@ -412,64 +644,86 @@ export type AccountInvoice = {
   total: number;
   approvedAt: string | null;
   approvedBy: string | null;
-  /** "Approved", "Billed SO4401", or "Not approved" (a ticket with charges no one approved yet). */
+  /** Saved for approval by Warehouse: who and when. */
+  submittedAt: string | null;
+  submittedBy: string | null;
+  /** "Approved", "Billed SO4401", "Waiting for approval" (Warehouse saved it), or "Not approved" (a ticket with charges no one approved yet). */
   status: string;
 };
 
 /**
- * Every invoice on one account: approved invoices on any record, and tickets that have charges but no approval yet.
- * Read for the account's Invoices tab; each row opens the same Invoice window.
+ * Every invoice on one account: approved invoices on any record, invoices Warehouse saved for an Admin to approve, and
+ * tickets that have charges but no approval yet. Read for the account's Invoices tab; each row opens the same Invoice
+ * window.
  */
 export const listAccountInvoices = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { customer: string }) => z.object({ customer: z.string().max(300) }).parse(d))
-  .handler(async ({ data }): Promise<AccountInvoice[]> => {
-    const sql = await ready();
-    const name = data.customer.trim();
-    if (!name) return [];
-    const approved = await sql.query<{ entity_type: InvoiceTarget; entity_id: number; total: string | null; approved_at: string | Date | null; approved_by: string | null }>(
-      "select entity_type, entity_id, total, approved_at, approved_by from invoices where lower(btrim(customer)) = lower($1) and approved_at is not null order by approved_at desc",
-      [name],
-    );
-    const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; discount_kind: string | null; discount_value: string | null; amount: string }>(
-      `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.discount_kind, j.discount_value, sum(round(c.qty * c.rate, 2))::text as amount
-         from service_jobs j join ticket_charges c on c.job_id = j.id
-        where lower(btrim(j.customer)) = lower($1) and j.duplicate_of is null
-        group by j.id
-        order by j.id desc`,
-      [name],
-    );
-    const out: AccountInvoice[] = [];
-    const seen = new Set<string>();
-    for (const t of tickets) {
-      const type: InvoiceTarget = t.kind === "tlc" ? "tlc" : "service";
-      const head = approved.find((a) => a.entity_type === type && Number(a.entity_id) === Number(t.id));
-      const total = invoiceTotals([{ qty: 1, rate: Number(t.amount), kind: "part" }], toDiscount(t.discount_kind, t.discount_value)).total;
-      seen.add(`${type}-${t.id}`);
-      out.push({
-        type,
-        id: Number(t.id),
-        title: targetTitle(type, { id: Number(t.id), wo: t.wo, callId: t.call_id }),
-        total,
-        approvedAt: head?.approved_at ? new Date(head.approved_at).toISOString() : null,
-        approvedBy: head?.approved_by ?? null,
-        status: t.ns_so ? `Billed ${t.ns_so}` : head ? "Approved" : "Not approved",
-      });
-    }
-    for (const a of approved) {
-      const key = `${a.entity_type}-${a.entity_id}`;
-      if (seen.has(key)) continue;
-      const ref = await resolveRecord(sql, a.entity_type, Number(a.entity_id)).catch(() => null);
-      if (!ref) continue;
-      out.push({
-        type: ref.type,
-        id: Number(a.entity_id),
-        title: ref.title,
-        total: Number(a.total ?? 0),
-        approvedAt: a.approved_at ? new Date(a.approved_at).toISOString() : null,
-        approvedBy: a.approved_by,
-        status: "Approved",
-      });
-    }
-    return out;
-  });
+  .handler(async ({ data, context }): Promise<AccountInvoice[]> => listAccountInvoicesFor(await ready(), data.customer, context.userId));
+
+/** The body of listAccountInvoices. Warehouse doesn't read accounts' invoices. */
+export async function listAccountInvoicesFor(sql: Sql, customer: string, userId: string): Promise<AccountInvoice[]> {
+  if ((await invoiceViewer(sql, userId)).warehouse) throw new Error(WAREHOUSE_REBUILDS_ONLY);
+  const name = customer.trim();
+  if (!name) return [];
+  const approved = await sql.query<{
+    entity_type: InvoiceTarget;
+    entity_id: number;
+    total: string | null;
+    approved_at: string | Date | null;
+    approved_by: string | null;
+    submitted_at: string | Date | null;
+    submitted_by: string | null;
+  }>(
+    `select entity_type, entity_id, total, approved_at, approved_by, submitted_at, submitted_by
+       from invoices
+      where lower(btrim(customer)) = lower($1) and (approved_at is not null or submitted_at is not null)
+      order by coalesce(approved_at, submitted_at) desc`,
+    [name],
+  );
+  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; discount_kind: string | null; discount_value: string | null; amount: string }>(
+    `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.discount_kind, j.discount_value, sum(round(c.qty * c.rate, 2))::text as amount
+       from service_jobs j join ticket_charges c on c.job_id = j.id
+      where lower(btrim(j.customer)) = lower($1) and j.duplicate_of is null
+      group by j.id
+      order by j.id desc`,
+    [name],
+  );
+  const out: AccountInvoice[] = [];
+  const seen = new Set<string>();
+  for (const t of tickets) {
+    const type: InvoiceTarget = t.kind === "tlc" ? "tlc" : "service";
+    const head = approved.find((a) => a.entity_type === type && Number(a.entity_id) === Number(t.id) && a.approved_at);
+    const total = invoiceTotals([{ qty: 1, rate: Number(t.amount), kind: "part" }], toDiscount(t.discount_kind, t.discount_value)).total;
+    seen.add(`${type}-${t.id}`);
+    out.push({
+      type,
+      id: Number(t.id),
+      title: targetTitle(type, { id: Number(t.id), wo: t.wo, callId: t.call_id }),
+      total,
+      approvedAt: head?.approved_at ? new Date(head.approved_at).toISOString() : null,
+      approvedBy: head?.approved_by ?? null,
+      submittedAt: null,
+      submittedBy: null,
+      status: t.ns_so ? `Billed ${t.ns_so}` : head ? "Approved" : "Not approved",
+    });
+  }
+  for (const a of approved) {
+    const key = `${a.entity_type}-${a.entity_id}`;
+    if (seen.has(key)) continue;
+    const ref = await resolveRecord(sql, a.entity_type, Number(a.entity_id)).catch(() => null);
+    if (!ref) continue;
+    out.push({
+      type: ref.type,
+      id: Number(a.entity_id),
+      title: ref.title,
+      total: Number(a.total ?? 0),
+      approvedAt: a.approved_at ? new Date(a.approved_at).toISOString() : null,
+      approvedBy: a.approved_by,
+      submittedAt: a.submitted_at ? new Date(a.submitted_at).toISOString() : null,
+      submittedBy: a.submitted_by,
+      status: a.approved_at ? "Approved" : "Waiting for approval",
+    });
+  }
+  return out;
+}

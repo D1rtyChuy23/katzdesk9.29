@@ -606,6 +606,18 @@ export async function canReviewNames(sql: Sql, userId: string): Promise<boolean>
   return flagOn(row.is_admin) || String(row.desk_role ?? "").trim().toLowerCase() === "admin";
 }
 
+/**
+ * The Warehouse role, when the person isn't an Admin (the desk owner flag wins). Chuy, 10/29: Warehouse invoices only
+ * its refurbs for Katz Coffee Service Dept., on Rebuilds, so the ticket billing calls refuse it.
+ */
+export async function isWarehouseOnly(sql: Sql, userId: string): Promise<boolean> {
+  const row = (await sql.query<{ is_admin: unknown; desk_role: string | null }>("select is_admin, desk_role from desk_accounts where user_id = $1", [userId]))[0];
+  return !!row && !flagOn(row.is_admin) && String(row.desk_role ?? "").trim().toLowerCase() === "warehouse";
+}
+
+/** What the ticket billing calls say to Warehouse. */
+export const WAREHOUSE_BILLING_REFUSAL = "Warehouse invoices its refurbs only, on Rebuilds, billed to Katz Coffee Service Dept.";
+
 export async function requireNameReviewer(sql: Sql, userId: string, message?: string): Promise<void> {
   if (!(await canReviewNames(sql, userId))) {
     throw new Error(message ?? "Only an Admin can approve clean-list names.");

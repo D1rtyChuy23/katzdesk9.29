@@ -195,7 +195,11 @@ function NavGroup({
   );
 }
 
-const WAREHOUSE_OK = ["/warehouse", "/locations", "/modules", "/library"];
+/**
+ * The Warehouse role's pages, in menu order. Rebuilds and Parts (Chuy, 10/29): its refurbs and their invoices for
+ * Katz Coffee Service Dept., and parts look-up, photos and Get Later. Invoices (NetSuite billing) stays Admin only.
+ */
+const WAREHOUSE_OK: DeskTo[] = ["/warehouse", "/rebuilds", "/modules", "/library", "/parts", "/locations"];
 
 // A sales rep sees Service for awareness only (their own accounts): the lists, not the shop's rebuild bench or planner.
 const SALES_SERVICE = ["/service", "/pms", "/tlc"];
@@ -205,10 +209,11 @@ function navForRole(role: DeskRole | null | undefined, isAdmin?: boolean) {
     return NAV.map((g) => (g.label === "Service" ? { ...g, items: g.items.filter((item) => SALES_SERVICE.includes(item.to)) } : g));
   }
   if (role !== "warehouse") return NAV;
+  const items = NAV.flatMap((g) => g.items);
   return [
     {
       label: "Shop",
-      items: NAV.flatMap((g) => g.items).filter((item) => WAREHOUSE_OK.includes(item.to)),
+      items: WAREHOUSE_OK.flatMap((to) => items.filter((item) => item.to === to)),
     },
   ];
 }
