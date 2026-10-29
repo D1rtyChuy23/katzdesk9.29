@@ -412,6 +412,7 @@ function Page() {
         canEditMpn={!!page.data?.canEditMpn}
         canEditBins={canEditBins}
         canEditClass={canEditClass}
+        canEditNote={!!page.data?.canEditNote}
         onClose={closePart}
         onChanged={refresh}
         onOpen={openPart}

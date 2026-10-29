@@ -1,19 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
-import { Camera, MapPin, Pencil, Trash2 } from "lucide-react";
+import { Camera, MapPin, NotebookPen, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { setPartGetLater, type PartRow } from "@/lib/ops/parts-api";
 import { BIN_LABEL, BIN_MAX, BIN_PIECES } from "@/lib/ops/part-bins";
 import { PART_CLASSES, isPartClass } from "@/lib/ops/part-pricing";
+import { PART_NOTE_MAX, cleanPartNote } from "@/lib/ops/part-notes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { PhotoReview } from "./photo-review";
-import type { PartBinEdit, PartClassEdit, PartMpnEdit, PartNameEdit, PartPhoto } from "./part-edits";
+import type { PartBinEdit, PartClassEdit, PartMpnEdit, PartNameEdit, PartNoteEdit, PartPhoto } from "./part-edits";
 
 /*
  * The part edits shared by a row on Parts and the part's window: Get Later, the photo actions, the MPN, the part
- * name, the bin location and the class. One version of each, so the row and the window always behave the same. Test
+ * name, the bin location, the class and the note. One version of each, so the row and the window always behave the same. Test
  * ids are `<tid>-…`: the row keeps its own `part-…` ids and the window uses `part-window-…`. The state behind them is
  * in part-edits.ts.
  */
@@ -190,6 +191,56 @@ export function PartNameEditButton({ row, edit, tid = "part" }: { row: PartRow; 
     <Button type="button" size="sm" variant="ghost" onClick={() => edit.setEditing(true)} data-testid={`${tid}-description-edit`}>
       <Pencil className="size-4" />
       {row.description ? "Edit Part Name" : "Add Part Name"}
+    </Button>
+  );
+}
+
+// ------------------------------------------------------------------------------------------ note
+
+/** The note's box, Save and Cancel (Admin only). One line per note; a blank box clears it. */
+export function PartNoteForm({ row, edit, tid = "part", className = "mt-2" }: { row: PartRow; edit: PartNoteEdit; tid?: string; className?: string }) {
+  if (!edit.editing) return null;
+  const tooLong = (cleanPartNote(edit.value)?.length ?? 0) > PART_NOTE_MAX;
+  return (
+    <form
+      className={cn("grid gap-2", className)}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (edit.dirty && !tooLong) edit.save.mutate();
+      }}
+      data-testid={`${tid}-note-form`}
+    >
+      <Textarea
+        value={edit.value}
+        onChange={(e) => edit.setValue(e.target.value)}
+        aria-label={`Note for ${row.item}`}
+        placeholder="What it fits, where it goes, anything the next person should know"
+        rows={5}
+        autoFocus
+        className="min-h-28"
+        data-testid={`${tid}-note-input`}
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="submit" size="sm" disabled={!edit.dirty || tooLong || edit.save.isPending} data-testid={`${tid}-note-save`}>
+          {edit.save.isPending ? "Saving…" : "Save"}
+        </Button>
+        <Button type="button" size="sm" variant="ghost" disabled={edit.save.isPending} onClick={edit.cancel} data-testid={`${tid}-note-cancel`}>
+          Cancel
+        </Button>
+        <span className={cn("text-xs", tooLong ? "text-destructive" : "text-muted-foreground")}>
+          {tooLong ? `Up to ${PART_NOTE_MAX.toLocaleString("en-US")} characters.` : "One line per note. A blank box clears it."}
+        </span>
+      </div>
+    </form>
+  );
+}
+
+export function PartNoteEditButton({ row, edit, tid = "part" }: { row: PartRow; edit: PartNoteEdit; tid?: string }) {
+  if (edit.editing) return null;
+  return (
+    <Button type="button" size="sm" variant="ghost" onClick={edit.open} data-testid={`${tid}-note-edit`}>
+      <NotebookPen className="size-4" />
+      {row.mergeNote ? "Edit Note" : "Add Note"}
     </Button>
   );
 }

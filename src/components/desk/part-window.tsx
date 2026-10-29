@@ -14,12 +14,14 @@ import {
   PartMpnForm,
   PartNameEditButton,
   PartNameForm,
+  PartNoteEditButton,
+  PartNoteForm,
   PartPhotoButtons,
   PartPhotoFile,
   PartPhotoReview,
   PartPhotoStatus,
 } from "./part-controls";
-import { partMoney, usePartBinEdit, usePartClassEdit, usePartMpnEdit, usePartNameEdit, usePartPhoto } from "./part-edits";
+import { partMoney, usePartBinEdit, usePartClassEdit, usePartMpnEdit, usePartNameEdit, usePartNoteEdit, usePartPhoto } from "./part-edits";
 import { PartUsageSection } from "./part-usage";
 
 const T = "part-window";
@@ -35,8 +37,8 @@ function shortDate(iso: string | null): string {
  * The part's own window on Parts. The NetSuite Description (the part's name) is the title; under it the part
  * number, then the details, the photo and its actions, Get Later, the bin location (Rack, Shelf, Bin), and its usage:
  * every ticket that used it, counted by month, quarter or year.
- * `initial` is the row already on the list, shown at once while the part loads. The bin and the Class are changed
- * here by an Admin (canEditBins, canEditClass); everyone else sees them.
+ * `initial` is the row already on the list, shown at once while the part loads. The bin, the Class and the note are
+ * changed here by an Admin (canEditBins, canEditClass, canEditNote); everyone else sees them.
  */
 export function PartWindow({
   id,
@@ -44,6 +46,7 @@ export function PartWindow({
   canEditMpn,
   canEditBins,
   canEditClass,
+  canEditNote = false,
   onClose,
   onChanged,
   onOpen,
@@ -53,6 +56,8 @@ export function PartWindow({
   canEditMpn: boolean;
   canEditBins: boolean;
   canEditClass: boolean;
+  /** Edit the part's note: Admin only. */
+  canEditNote?: boolean;
   onClose: () => void;
   onChanged: () => void;
   /** Opens another part's window: the one a merged part went into. */
@@ -74,7 +79,16 @@ export function PartWindow({
     <Sheet open={id != null} onOpenChange={(o) => !o && onClose()}>
       <SheetContent aria-describedby={undefined} data-testid="part-window">
         {row ? (
-          <PartWindowView key={row.id} row={row} canEditMpn={canEditMpn} canEditBins={canEditBins} canEditClass={canEditClass} onChanged={onChanged} onOpen={onOpen} />
+          <PartWindowView
+            key={row.id}
+            row={row}
+            canEditMpn={canEditMpn}
+            canEditBins={canEditBins}
+            canEditClass={canEditClass}
+            canEditNote={canEditNote}
+            onChanged={onChanged}
+            onOpen={onOpen}
+          />
         ) : (
           <>
             <SheetHeader>
@@ -105,6 +119,7 @@ function PartWindowView({
   canEditMpn,
   canEditBins,
   canEditClass,
+  canEditNote,
   onChanged,
   onOpen,
 }: {
@@ -112,6 +127,7 @@ function PartWindowView({
   canEditMpn: boolean;
   canEditBins: boolean;
   canEditClass: boolean;
+  canEditNote: boolean;
   onChanged: () => void;
   onOpen?: (id: number) => void;
 }) {
@@ -119,6 +135,7 @@ function PartWindowView({
   const mpn = usePartMpnEdit(row, onChanged);
   const name = usePartNameEdit(row, onChanged);
   const cls = usePartClassEdit(row, onChanged);
+  const note = usePartNoteEdit(row, onChanged);
   const number = row.mpn ?? row.sku;
   return (
     <>
@@ -211,16 +228,31 @@ function PartWindowView({
                 </dd>
               </>
             ) : null}
-            {row.mergeNote ? (
+            {/* The note: merge notes, lines from Import Part Notes, and what an Admin types here. Everyone else reads it. */}
+            {row.mergeNote || canEditNote ? (
               <>
                 <dt className="text-muted-foreground">Note</dt>
-                <dd className="min-w-0 break-words whitespace-pre-line" data-testid="part-window-note">
-                  {row.mergeNote}
+                <dd className="min-w-0" data-testid="part-window-note-cell">
+                  {row.mergeNote ? (
+                    <p className="break-words whitespace-pre-line" data-testid="part-window-note">
+                      {row.mergeNote}
+                    </p>
+                  ) : (
+                    <span className="text-muted-foreground" data-testid="part-window-note-none">
+                      None
+                    </span>
+                  )}
+                  {canEditNote ? (
+                    <div className="-my-1 -ml-3">
+                      <PartNoteEditButton row={row} edit={note} tid={T} />
+                    </div>
+                  ) : null}
                 </dd>
               </>
             ) : null}
           </dl>
           <PartMpnForm row={row} edit={mpn} tid={T} className="mt-3" />
+          {canEditNote ? <PartNoteForm row={row} edit={note} tid={T} className="mt-3" /> : null}
         </section>
 
         <section className="border-b border-border p-5" data-testid="part-window-photo">
