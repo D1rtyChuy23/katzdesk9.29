@@ -201,13 +201,25 @@ type HeadRow = {
   po: string | null;
 };
 
-/** The saved-for-approval stamp as text, to the microsecond, so the window can send back exactly what it opened. */
-const VERSION_OF = (col: string) => `(extract(epoch from ${col}) * 1000000)::bigint::text`;
+/** A stamp as text, to the microsecond, so the window can send back exactly what it opened. */
+const STAMP_OF = (col: string) => `(extract(epoch from ${col}) * 1000000)::bigint::text`;
+
+/**
+ * The invoice a window opened, as text: its row, when it was approved and when it was saved for approval ("id:approved:
+ * saved"; null when there was no invoice). Approve writes only over that same invoice: a window opened on no invoice
+ * never writes over one put on the record since (Merge installs moves one onto the install kept, 10/30), and a window
+ * opened before another approval or a Warehouse save never writes over it.
+ */
+const VERSION_OF = (t: string) =>
+  `(${t}.id::text || ':' || coalesce(${STAMP_OF(`${t}.approved_at`)}, '') || ':' || coalesce(${STAMP_OF(`${t}.submitted_at`)}, ''))`;
+
+/** The saved-for-approval part of a version; an older window's version was only that stamp. */
+const savedPart = (version: string | null): string => (version == null ? "" : version.includes(":") ? (version.split(":")[2] ?? "") : version);
 
 async function head(sql: Sql, type: InvoiceTarget, id: number): Promise<HeadRow | undefined> {
   return (
     await sql.query<HeadRow>(
-      `select id, discount_kind, discount_value, total, approved_at, approved_by, submitted_at, submitted_by, ${VERSION_OF("submitted_at")} as version, po
+      `select id, discount_kind, discount_value, total, approved_at, approved_by, submitted_at, submitted_by, ${VERSION_OF("invoices")} as version, po
          from invoices where entity_type = $1 and entity_id = $2`,
       [type, id],
     )
@@ -331,8 +343,8 @@ const approveInput = targetInput.extend({
   lines: z.array(lineInput).max(200),
   lineIds: z.array(z.number().int().positive()).max(200),
   discount: discountInput,
-  /** The saved-for-approval stamp the window opened with (InvoiceView.version); null when it had none. */
-  seen: z.string().max(40).nullable().optional(),
+  /** The invoice the window opened (InvoiceView.version); null when there was none. */
+  seen: z.string().max(80).nullable().optional(),
   /** An install invoice's P.O. (10/30). Left out keeps the stored one; blank clears it. */
   po: z.string().max(400).nullable().optional(),
 });
@@ -347,6 +359,15 @@ const WAITING_FOR_ADMIN = "This invoice is waiting for an Admin to approve it.";
 const SAVED_SINCE_OPENED = "Warehouse saved changes to this invoice after you opened it, so nothing was approved. Look over the new lines, then approve.";
 /** An install's invoice gets lines saved for approval when a ticket is merged into the install (10/30). */
 const LINES_ADDED_SINCE_OPENED = "Lines were saved for approval on this invoice after you opened it (a ticket was merged into the install), so nothing was approved. Look over the new lines, then approve.";
+/** Approved again, or put on the record, after the window opened (Merge installs moves an install's invoice, 10/30). */
+const CHANGED_SINCE_OPENED = "This invoice was changed after you opened it, so nothing was approved. Look over it as it is now, then approve.";
+
+/** Why an Approve wrote nothing: the invoice is no longer the one the window opened. */
+async function changedSinceOpened(sql: Sql, type: InvoiceTarget, id: number, seen: string | null): Promise<string> {
+  const now = await head(sql, type, id);
+  if (now?.submitted_at && savedPart(now.version) !== savedPart(seen)) return type === "install" ? LINES_ADDED_SINCE_OPENED : SAVED_SINCE_OPENED;
+  return CHANGED_SINCE_OPENED;
+}
 
 /**
  * Approve a PM's own invoice only while it is not stacked. One statement: lock the PM, insert the header
@@ -392,9 +413,10 @@ export function approvePmInvoiceSql(): string {
 
 /**
  * Approve the invoice of an install, rebuild or deal: the header and its lines in one statement, so they change
- * together or not at all. $12 is the saved-for-approval stamp the window opened with: when Warehouse saved the invoice
- * (again) after that, nothing is written and no row comes back, so the approver sees the newer lines first. $18 is an
- * install invoice's P.O., written when $19 is true.
+ * together or not at all. $12 is the invoice the window opened (its version; null when there was none): when that
+ * invoice was approved or saved for approval again since, or an invoice was put on the record, or it left the record,
+ * nothing is written and no row comes back, so the approver sees it as it is first. $18 is an install invoice's P.O.,
+ * written when $19 is true.
  */
 export function approveRecordInvoiceSql(): string {
   return `with inv as (
@@ -402,7 +424,9 @@ export function approveRecordInvoiceSql(): string {
          entity_type, entity_id, customer, discount_kind, discount_value,
          bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po
        )
-       values ($1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(), case when $19::boolean then $18::text end)
+       select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(), case when $19::boolean then $18::text end
+        -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
+        where $12::text is null or exists (select 1 from invoices x where x.entity_type = $1 and x.entity_id = $2::int)
        on conflict (entity_type, entity_id) do update set
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
@@ -410,7 +434,7 @@ export function approveRecordInvoiceSql(): string {
          approved_at = now(), updated_at = now(),
          -- The P.O. the window sent ($19); one that sent none (another record type) leaves it.
          po = case when $19::boolean then $18::text else invoices.po end
-        where ${VERSION_OF("invoices.submitted_at")} is not distinct from $12::text
+        where ${VERSION_OF("invoices")} is not distinct from $12::text
        returning id
      ),
      cleared as (
@@ -567,7 +591,7 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       typedPo.po,
       poSent,
     ]);
-    if (!saved[0]) throw new Error(ref.type === "install" ? LINES_ADDED_SINCE_OPENED : SAVED_SINCE_OPENED);
+    if (!saved[0]) throw new Error(await changedSinceOpened(sql, ref.type, data.id, data.seen ?? null));
   }
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [

@@ -44,6 +44,11 @@ async function ticket(pg, fields = {}) {
 const charge = (pg, jobId) =>
   pg.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, 'Service : SERVICELABOR', 'labor', 2, 150, 'labor', 1)", [jobId]);
 const approve = (sql, id, extra = {}) => approveInvoiceFor(sql, { type: "install", id, lines: [LABOR], lineIds: [], discount: null, seen: null, ...extra }, "u-owner");
+// Approve as the window does: it sends the version of the invoice it opened.
+const approveOpened = async (sql, id, extra = {}) => approve(sql, id, { seen: (await getInvoiceFor(sql, { type: "install", id }, "u-owner")).version, ...extra });
+const CHANGED = "This invoice was changed after you opened it, so nothing was approved. Look over it as it is now, then approve.";
+const bothInvoices = (drop, keep) =>
+  `Install #${drop} and install #${keep} both have an invoice, and one install takes one invoice. Move #${drop}'s lines to #${keep}'s invoice by hand (take them off #${drop}'s and approve it), then merge.`;
 const mergeNow = async (sql, jobId, installId) => {
   const p = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId, installId });
   assert.equal(p.refusal, null, p.refusal ?? "");
@@ -70,11 +75,11 @@ test("the Invoice window: an install invoice's P.O. is approved with it, shown, 
   assert.equal((await one(pg, "select po from invoices where entity_type = 'install' and entity_id = $1", [id])).po, "PO-77");
   assert.match((await one(pg, "select detail from activity where entity_type = 'install' and entity_id = $1 order by id desc limit 1", [id])).detail, /· P\.O\. PO-77$/);
   // Approved again without one sent (an older window): it stays. Sent blank: cleared.
-  assert.equal((await approve(sql, id)).po, "PO-77");
-  assert.equal((await approve(sql, id, { po: "" })).po, null);
-  await assert.rejects(() => approve(sql, id, { po: "x".repeat(121) }), { message: "The P.O. is too long: 120 characters at most." });
+  assert.equal((await approveOpened(sql, id)).po, "PO-77");
+  assert.equal((await approveOpened(sql, id, { po: "" })).po, null);
+  await assert.rejects(() => approveOpened(sql, id, { po: "x".repeat(121) }), { message: "The P.O. is too long: 120 characters at most." });
   // The account's Invoices tab shows it, and a ticket's own P.O.
-  await approve(sql, id, { po: "PO-78" });
+  await approveOpened(sql, id, { po: "PO-78" });
   const jobId = await ticket(pg, { wo: "WO-4800", po: "PO-T1" });
   await charge(pg, jobId);
   const rows = await listAccountInvoicesFor(sql, CAFE, "u-owner");
@@ -90,6 +95,10 @@ test("the Invoice window: an install invoice's P.O. is approved with it, shown, 
   const rv = await approveInvoiceFor(sql, { type: "rebuild", id: rebuild, lines: [LABOR], lineIds: [], discount: null, seen: null, po: "PO-X" }, "u-owner");
   assert.deepEqual([rv.hasPo, rv.po], [false, null]);
   assert.equal((await one(pg, "select po from invoices where entity_type = 'rebuild'")).po, null);
+  const deal = Number((await one(pg, "insert into deals (customer) values ($1) returning id", [CAFE])).id);
+  const dv = await approveInvoiceFor(sql, { type: "deal", id: deal, lines: [LABOR], lineIds: [], discount: null, seen: null, po: "PO-Y" }, "u-owner");
+  assert.deepEqual([dv.hasPo, dv.po], [false, null]);
+  assert.equal((await one(pg, "select po from invoices where entity_type = 'deal'")).po, null);
 });
 
 test("a ticket merged into an install brings its P.O. onto the install's invoice; a different one is refused", async () => {
@@ -134,7 +143,7 @@ test("a ticket merged into an install brings its P.O. onto the install's invoice
   assert.equal((await one(pg, "select po from invoices where entity_type = 'install' and entity_id = $1", [d])).po, "PO-600");
 });
 
-test("Merge installs takes the dropped install's invoice, part lines and merged tickets to the one kept; both with an invoice is refused", async () => {
+test("Merge installs takes the dropped install's invoice, part lines and merged tickets to the one kept; both with an invoice waits for the lines to be moved", async () => {
   const { pg, sql } = await fresh();
   const keep = await install(pg, { wo: "WO-4810" });
   const drop = await install(pg, { wo: "WO-4811" });
@@ -154,17 +163,118 @@ test("Merge installs takes the dropped install's invoice, part lines and merged 
   assert.match((await one(pg, "select detail from activity where entity_type = 'install' and entity_id = $1 and action = 'merged' and detail like 'merged install #%'", [keep])).detail, / · its invoice/);
   assert.ok((await listAccountInvoicesFor(sql, CAFE, "u-owner")).some((r) => r.type === "install" && r.id === keep && r.po === "PO-700"));
 
-  // Both with an invoice: refused before anything is written.
+  // Both with an invoice: refused while the dropped one has lines, before anything is written.
   const other = await install(pg, { wo: "WO-4812" });
-  await pg.query("insert into invoices (entity_type, entity_id, customer, total, approved_by, approved_at) values ('install', $1, $2, 50, 'boss', now())", [other, CAFE]);
-  await assert.rejects(() => mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: other }), {
-    message: `Install #${other} and install #${keep} both have an invoice, and one install takes one invoice. Move the lines onto one of them by hand, then merge.`,
-  });
+  await approve(sql, other, { po: "PO-701" });
+  await assert.rejects(() => mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: other }), { message: bothInvoices(other, keep) });
   assert.equal((await one(pg, "select archived from installs where id = $1", [other])).archived, false);
+  // Its lines taken off (approved with none, as the message says): it merges, and its empty invoice stays on it.
+  await approveOpened(sql, other, { lines: [] });
+  const emptied = await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: other });
+  assert.equal(emptied.invoiceMoved, false);
+  assert.deepEqual(
+    (await pg.query("select v.entity_id, v.total::text as total, (select count(*)::int from invoice_lines l where l.invoice_id = v.id) as lines from invoices v where v.entity_type = 'install' order by v.entity_id")).rows.map(
+      (r) => [Number(r.entity_id), r.total, r.lines],
+    ),
+    [
+      [keep, "300.00", 1],
+      [other, "0.00", 0],
+    ],
+  );
+  assert.doesNotMatch((await one(pg, "select detail from activity where entity_type = 'install' and entity_id = $1 and detail like $2", [keep, `merged install #${other}%`])).detail, /its invoice/);
   // Neither has one: nothing to move.
   const [k2, d2] = [await install(pg, { wo: "WO-4813" }), await install(pg, { wo: "WO-4814" })];
   assert.deepEqual(
     (({ invoiceMoved, partLines }) => [invoiceMoved, partLines])(await mergeInstallsFor(sql, "u-owner", { keepId: k2, dropId: d2 })),
     [false, 0],
+  );
+});
+
+test("Merge installs moves an approved invoice as it is, on the kept install's spelling; a window opened before approves nothing over it", async () => {
+  const { pg, sql } = await fresh();
+  const keep = await install(pg, { wo: "WO-4820" });
+  // The same account written another way, which Merge installs allows.
+  const drop = await install(pg, { wo: "WO-4821", customer: "Test Sushi Bayfront" });
+  const second = { item: "Service : SERVICELABOR", description: "Second visit", qty: 0.25, rate: 150 };
+  const approved = await approve(sql, drop, { lines: [LABOR, second], po: "PO-D1" });
+  assert.deepEqual([approved.state, approved.total], ["approved", 337.5]);
+  // An Admin opens the kept install's Invoice window while it has no invoice.
+  const stale = await getInvoiceFor(sql, { type: "install", id: keep }, "u-owner");
+  assert.deepEqual([stale.state, stale.version], ["none", null]);
+
+  assert.equal((await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: drop })).invoiceMoved, true);
+  const moved = await getInvoiceFor(sql, { type: "install", id: keep }, "u-owner");
+  assert.deepEqual([moved.state, moved.approvedBy, moved.po, moved.total, moved.lines.length], ["approved", "boss", "PO-D1", 337.5, 2]);
+  // Listed on the kept install's account, under its spelling, and not under the other one.
+  assert.equal((await one(pg, "select customer from invoices where entity_type = 'install'")).customer, CAFE);
+  assert.deepEqual((await listAccountInvoicesFor(sql, CAFE, "u-owner")).map((r) => [r.type, r.id, r.po, r.status]), [["install", keep, "PO-D1", "Approved"]]);
+  assert.deepEqual(await listAccountInvoicesFor(sql, "Test Sushi Bayfront", "u-owner"), []);
+
+  // The window opened before the merge approves nothing over it: its lines, total and P.O. stay.
+  await assert.rejects(() => approve(sql, keep, { seen: stale.version, po: "" }), { message: CHANGED });
+  const after = await getInvoiceFor(sql, { type: "install", id: keep }, "u-owner");
+  assert.deepEqual([after.po, after.total, after.lines.length, after.version], ["PO-D1", 337.5, 2, moved.version]);
+  // A window on the dropped install can't approve: it is archived.
+  await assert.rejects(() => approve(sql, drop, { seen: approved.version }), { message: "That install is no longer on the list." });
+
+  // Two windows open on the same invoice: the first approval goes through; the second approves nothing over it.
+  const again = await approve(sql, keep, { seen: after.version, po: "PO-D2" });
+  assert.deepEqual([again.po, again.total], ["PO-D2", 300]);
+  await assert.rejects(() => approve(sql, keep, { seen: after.version, lines: [], po: "" }), { message: CHANGED });
+  assert.deepEqual(
+    (({ po, total }) => [po, total])(await getInvoiceFor(sql, { type: "install", id: keep }, "u-owner")),
+    ["PO-D2", 300],
+  );
+});
+
+test("a merge and an invoice saved at the same moment: the merge checks the invoices again as it writes, and an approval writes nothing on the archived install", async () => {
+  const { pg, sql } = await fresh();
+  // The database with `before` run just ahead of one statement (Merge installs' guarded one, after the reads that check
+  // the invoices, unless another is named); `fail` stands in for the error Postgres raises when it lands after the
+  // statement read them.
+  const meanwhile = (before, fail = null, statement = "with lk as (") => {
+    let fired = false;
+    const query = async (text, params) => {
+      if (!fired && text.includes(statement)) {
+        fired = true;
+        await before();
+        if (fail) throw fail;
+      }
+      return sql.query(text, params);
+    };
+    return Object.assign(async (strings, ...values) => sql(strings, ...values), { query });
+  };
+  const keep = await install(pg, { wo: "WO-4830" });
+  const drop = await install(pg, { wo: "WO-4831" });
+  const keeperInvoice = () => pg.query("insert into invoices (entity_type, entity_id, customer, total, approved_by, approved_at) values ('install', $1, $2, 50, 'ana', now())", [keep, CAFE]);
+  const noKeeperInvoice = () => pg.query("delete from invoices where entity_type = 'install' and entity_id = $1", [keep]);
+  const clash = new Error('duplicate key value violates unique constraint "invoices_entity_key"');
+  await approve(sql, drop);
+
+  // Saved before the statement read the invoices: its guard writes nothing, and says why.
+  await assert.rejects(() => mergeInstallsFor(meanwhile(keeperInvoice), "u-owner", { keepId: keep, dropId: drop }), { message: bothInvoices(drop, keep) });
+  assert.equal((await one(pg, "select archived from installs where id = $1", [drop])).archived, false);
+  assert.equal(Number((await one(pg, "select entity_id from invoices where entity_type = 'install' and total = 300")).entity_id), drop);
+  // Saved after it read them (the unique key stops the statement): the same reason.
+  await noKeeperInvoice();
+  await assert.rejects(() => mergeInstallsFor(meanwhile(keeperInvoice, clash), "u-owner", { keepId: keep, dropId: drop }), { message: bothInvoices(drop, keep) });
+  // With no lines on the dropped install's invoice it says to merge again, and merged again it goes ahead.
+  await noKeeperInvoice();
+  await approveOpened(sql, drop, { lines: [] });
+  await assert.rejects(() => mergeInstallsFor(meanwhile(keeperInvoice, clash), "u-owner", { keepId: keep, dropId: drop }), {
+    message: `An invoice was saved on install #${keep} while this merge ran, so nothing was merged. Merge again.`,
+  });
+  assert.equal((await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: drop })).invoiceMoved, false);
+  assert.equal((await one(pg, "select archived from installs where id = $1", [drop])).archived, true);
+
+  // A merge that lands between an approval's checks and its write, from a window on the dropped install: the invoice
+  // went to the install kept, and nothing is put on the archived one.
+  const [k3, d3] = [await install(pg, { wo: "WO-4832" }), await install(pg, { wo: "WO-4833" })];
+  const d3Invoice = await approve(sql, d3, { po: "PO-D3" });
+  const late = meanwhile(() => mergeInstallsFor(sql, "u-owner", { keepId: k3, dropId: d3 }), null, "with inv as (");
+  await assert.rejects(() => approve(late, d3, { seen: d3Invoice.version, lines: [] }), { message: CHANGED });
+  assert.deepEqual(
+    (await pg.query("select entity_id, po from invoices where entity_type = 'install' and entity_id = any($1::int[])", [[k3, d3]])).rows.map((r) => [Number(r.entity_id), r.po]),
+    [[k3, "PO-D3"]],
   );
 });

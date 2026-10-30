@@ -218,6 +218,17 @@ test("an Admin's approval never overwrites parts Warehouse saved after the windo
     await save(sql, other, [PUMP]);
     await assert.rejects(() => approve(sql, "rebuild", other, [GASKETS], "u-owner", early.version), /saved changes to this invoice after you opened it/);
     assert.equal((await head(pg, other)).approved_at, null);
+
+    // Two Admins open it after Warehouse's save: the first approval goes through; the second, from a window opened
+    // before it, writes nothing and says the invoice changed (Warehouse didn't save again).
+    const third = await rebuild(pg, "Test GS3 refurb", SD);
+    await save(sql, third, [GASKETS]);
+    const both = await view(sql, third, "u-owner");
+    await approve(sql, "rebuild", third, [GASKETS, VALVE], "u-owner", both.version);
+    await assert.rejects(() => approve(sql, "rebuild", third, [PUMP], "u-role", both.version), {
+      message: "This invoice was changed after you opened it, so nothing was approved. Look over it as it is now, then approve.",
+    });
+    assert.equal((await savedLines(pg, (await head(pg, third)).id)).length, 2);
   } finally {
     await pg.close();
   }
@@ -287,8 +298,8 @@ test("everyone else invoices as before: tickets, installs, PMs, deals and custom
     const install = Number((await pg.query("insert into installs (customer) values ('Bean Test Cafe') returning id")).rows[0].id);
     const inst = await approve(sql, "install", install, [VALVE, TRIP], "u-tech");
     assert.deepEqual([inst.state, inst.total, inst.lines.map((l) => l.kind)], ["approved", 230, ["part", "trip"]]);
-    // Approving again replaces the lines.
-    const inst2 = await approveInvoiceFor(sql, { type: "install", id: install, lines: [VALVE], lineIds: [], discount: { kind: "percent", value: "10" }, seen: null }, "u-tech");
+    // Approving again replaces the lines (the window sends the invoice it opened).
+    const inst2 = await approveInvoiceFor(sql, { type: "install", id: install, lines: [VALVE], lineIds: [], discount: { kind: "percent", value: "10" }, seen: inst.version }, "u-tech");
     assert.deepEqual([inst2.total, inst2.lines.length, inst2.discount], [72, 1, { kind: "percent", value: 10 }]);
 
     const pm = Number((await pg.query("insert into pm_jobs (customer, equipment, status) values ('Bean Test Cafe', 'Test Brewer', 'Scheduled') returning id")).rows[0].id);
