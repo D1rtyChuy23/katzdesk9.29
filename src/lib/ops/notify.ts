@@ -347,6 +347,31 @@ export async function notifyAdminsInvoiceWaiting(
   }
 }
 
+/**
+ * Tell every admin (the owner flag, as for Warehouse's rack and stock pings) that Warehouse pulled a unit onto one of
+ * its refurbs, and where it came from. The ping opens the rebuild. Never the person who pulled it.
+ */
+export async function notifyAdminsWarehousePull(
+  sql: Sql,
+  fromUserId: string,
+  pull: { rebuildId: number; account: string; body: string },
+): Promise<void> {
+  await ensureTable(sql);
+  const who = (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [fromUserId]))[0]?.username || "Warehouse";
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean }>(
+    "select user_id, is_admin, approved from desk_accounts where user_id <> $1",
+    [fromUserId],
+  );
+  for (const admin of admins) {
+    if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
+    await sql.query(
+      `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
+       values ($1, $2, $3, $4, $5, 'rebuild', $6)`,
+      [admin.user_id, fromUserId, who, pull.body, pull.account, pull.rebuildId],
+    );
+  }
+}
+
 function previewLine(body: string): string {
   const line = body
     .split(/\r?\n/)

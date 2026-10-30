@@ -1,6 +1,8 @@
 // Warehouse refurb invoices (Chuy, 2026-10-29): the Warehouse role records the parts a refurb used on the rebuild's
 // invoice, billed to Katz Coffee Service Dept. only, and saves it for an Admin to approve; an Admin approves it.
 // Warehouse changes only its refurbs (Katz Coffee Service Dept. or Katz shop / stock) and gets Rebuilds and Parts.
+// Later the same day: Warehouse pulls a unit onto its refurb from wherever it is, with no approval, and every Admin
+// hears where it came from; and Warehouse doesn't change part photos.
 // All data is made up; "Katz Coffee Service Dept." is Katz's own internal account, the one the feature bills.
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
@@ -12,6 +14,7 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
 const W = await import("../src/lib/ops/warehouse-invoice.ts");
+const P = await import("../src/lib/ops/warehouse-pull.ts");
 const { approveInvoiceFor, getInvoiceFor, listAccountInvoicesFor, saveForApprovalSql, saveInvoiceForApprovalFor } = await import("../src/lib/ops/invoice-api.ts");
 const { archiveRebuildFor, createRebuildFor, listRebuildsFor, pullRebuildSerialFor, updateRebuildFor } = await import("../src/lib/ops/rebuilds.ts");
 
@@ -348,31 +351,137 @@ test("Warehouse's rebuilds: new ones are for Katz Coffee Service Dept., a shop r
     assert.deepEqual(untouched, { account: "Bean Test Cafe", notes: null, status: "Queued", archived: false, serial: null });
     assert.equal((await updateRebuildFor(sql, { id: cust, notes: "Tech note" }, "u-tech")).notes, "Tech note");
 
-    // Its own refurbs: Warehouse removes them and pulls serials onto them, but only units that are no one else's.
+    // Its own refurbs: Warehouse removes them and pulls serials onto them (the pulls have their own test below).
     assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN1" }, "u-wh")).serial, "TESTSN1");
-    const unit = async (serial, soldTo) =>
-      Number((await pg.query("insert into assets (kind, model, serial, site, status, sold_to) values ('equip', 'Test espresso machine', $1, 'barn-back', $2, $3) returning id", [serial, soldTo ? "assigned" : "ready", soldTo])).rows[0].id);
-    const free = await unit("TESTSN-FREE", null);
-    const theirs = await unit("TESTSN-CUST", "Bean Test Cafe");
-    const unitRow = async (id) => (await pg.query("select status, sold_to, purpose from assets where id = $1", [id])).rows[0];
-    await assert.rejects(
-      () => pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-CUST", confirmReuse: true }, "u-wh"),
-      /^Error: Serial TESTSN-CUST is assigned to Bean Test Cafe\. Warehouse pulls only free units onto its refurbs; ask an Admin to move this one\.$/,
-    );
-    assert.deepEqual(await unitRow(theirs), { status: "assigned", sold_to: "Bean Test Cafe", purpose: null });
-    assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-FREE" }, "u-wh")).assetId, free);
-    assert.deepEqual(await unitRow(free), { status: "assigned", sold_to: SD, purpose: "In-house rebuild" });
-    // A unit waiting for an Admin's decision on a Warehouse request stays put too.
-    const held = await unit("TESTSN-HELD", null);
-    await pg.query("update assets set stock_hold = 'assign', stock_hold_customer = 'Bean Test Cafe' where id = $1", [held]);
-    await assert.rejects(
-      () => pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-HELD", confirmReuse: true }, "u-wh"),
-      /^Error: Serial TESTSN-HELD is waiting for an Admin to approve its assign to a customer, so it stays where it is\.$/,
-    );
-    assert.deepEqual(await unitRow(held), { status: "ready", sold_to: null, purpose: null });
-    // A tech still confirms a reuse, as before.
-    assert.equal((await pullRebuildSerialFor(sql, { id: cust, serial: "TESTSN-CUST", confirmReuse: true }, "u-tech")).assetId, theirs);
+    assert.equal((await pg.query("select serial_notice from rebuilds where id = $1", [sd])).rows[0].serial_notice, "Serial TESTSN1 not found in warehouse.");
     assert.deepEqual(await archiveRebuildFor(sql, { id: made.id }, "u-wh"), { ok: true });
+  } finally {
+    await pg.close();
+  }
+});
+
+test("where a pulled unit was, in the words of the confirm question and the Admins' ping", () => {
+  const u = (f) => ({ site: "barn-back", pallet: null, level: null, status: "ready", soldTo: null, purpose: null, installId: null, jobId: null, ...f });
+  assert.equal(P.unitWhere(u({ pallet: "B", level: 2 })), "Back · B-L2");
+  assert.equal(P.unitWhere(u({ site: "barn-front", pallet: "J", level: 4 })), "Front · J-L4");
+  assert.equal(P.unitWhere(u({ site: "san-antonio", status: "deployed" })), "San Antonio");
+  assert.equal(P.unitWhere(u({ site: "dallas", status: "deployed" })), "Dallas");
+  assert.equal(P.unitWhere(u({ site: "out-of-state", status: "deployed" })), "Out of State");
+  assert.equal(P.unitWhere(u({ site: "service-room", status: "deployed" })), "Service Room");
+  assert.equal(P.unitWhere(u({ site: "front-lobby", status: "deployed" })), "Lobby");
+  assert.equal(P.unitWhere(u({ site: "training", status: "deployed" })), "Training");
+  assert.equal(P.unitWhere(u({ site: "staging", status: "deployed" })), "Staging area");
+  assert.equal(P.unitWhere(u({ site: "other", status: "deployed", purpose: "Test show booth" })), "Test show booth");
+  assert.equal(P.unitWhere(u({ site: "dallas", status: "deployed", soldTo: "Bean Test Cafe" })), "Bean Test Cafe at Dallas");
+  assert.equal(P.unitWhere(u({ site: "account", status: "at-account", soldTo: "Bean Test Cafe" })), "Bean Test Cafe");
+  assert.equal(P.unitWhere(u({ site: "field", status: "assigned", soldTo: "Bean Test Cafe" })), "Bean Test Cafe");
+  assert.equal(P.unitWhere(u({ site: "field", status: "assigned", soldTo: "Bean Test Cafe", jobId: 7 })), "a ticket for Bean Test Cafe");
+  assert.equal(P.unitWhere(u({ site: "field", status: "assigned", soldTo: "Bean Test Cafe", installId: 3 })), "an install for Bean Test Cafe");
+  assert.equal(P.unitWhere(u({ site: "sold", status: "sold", soldTo: "Bean Test Cafe" })), "Bean Test Cafe (sold)");
+  assert.equal(P.unitWhere(u({ site: "removed", status: "removed" })), "removed stock");
+  const body = P.pullNotice("wade", { model: "Test brewer", serial: "TESTSN-9" }, "San Antonio", "Test refurb");
+  assert.equal(body, "Unit pulled for a refurb. wade pulled Test brewer SN TESTSN-9 from San Antonio onto Test refurb.");
+  assert.ok(P.isPullNotice(body));
+  assert.ok(!P.isPullNotice(W.waitingNotice("wade", "Test refurb", SD, 1, 10)) && !W.isWaitingNotice(body), "the bell tells the two pings apart");
+});
+
+test("Warehouse pulls a unit onto its refurb from wherever it is, with no approval, and every Admin hears where it came from", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const sd = await rebuild(pg, "Test Faema refurb", SD);
+    const shop = await rebuild(pg, "Test shop refurb", SHOP);
+    const cust = await rebuild(pg, "Test customer rebuild", "Bean Test Cafe");
+    const job = Number((await pg.query("insert into service_jobs (kind, call_id, customer) values ('service', 'SC-TEST-7', 'Bean Test Cafe') returning id")).rows[0].id);
+    const unit = async (serial, f = {}) => {
+      const v = { site: "barn-back", pallet: null, level: null, status: "ready", sold_to: null, job_id: null, purpose: null, ...f };
+      const row = await pg.query(
+        "insert into assets (kind, model, serial, site, pallet, level, status, sold_to, job_id, purpose) values ('equip', 'Test espresso machine', $1, $2, $3, $4, $5, $6, $7, $8) returning id",
+        [serial, v.site, v.pallet, v.level, v.status, v.sold_to, v.job_id, v.purpose],
+      );
+      return Number(row.rows[0].id);
+    };
+    const unitRow = async (id) => (await pg.query("select status, sold_to, purpose, site from assets where id = $1", [id])).rows[0];
+    const pull = (id, serial, userId = "u-wh", confirmReuse = undefined) => pullRebuildSerialFor(sql, { id, serial, confirmReuse }, userId);
+    const pinged = async () => (await pings(pg)).sort((a, b) => a.user_id.localeCompare(b.user_id));
+    const bodiesFor = async (userId) => (await pings(pg)).filter((p) => p.user_id === userId).map((p) => p.body);
+    const ping = (serial, from, refurb = "Test Faema refurb") => `Unit pulled for a refurb. wade pulled Test espresso machine SN ${serial} from ${from} onto ${refurb}.`;
+
+    // A free unit on a rack goes straight onto the refurb, and the Admins hear where it came from.
+    const rack = await unit("TESTSN-RACK", { pallet: "B", level: 2 });
+    const pulled = await pull(sd, "TESTSN-RACK");
+    assert.deepEqual([pulled.assetId, pulled.serial, pulled.equipment], [rack, "TESTSN-RACK", "Test espresso machine"]);
+    assert.equal(pulled.serialNotice, "Serial TESTSN-RACK pulled from warehouse · Test espresso machine · B-L2");
+    assert.deepEqual(await unitRow(rack), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "barn-back" });
+    const first = { from_name: "wade", body: ping("TESTSN-RACK", "Back · B-L2"), customer: SD, entity_type: "rebuild", entity_id: sd };
+    assert.deepEqual(await pinged(), [{ user_id: "u-owner", ...first }, { user_id: "u-wh-owner", ...first }], "the owner flag, approved: not the Admin role, not an unapproved account");
+    // The serial box pulls again when it loses focus: the same unit on the same refurb pings no one again.
+    await pull(sd, "TESTSN-RACK");
+    assert.equal((await pings(pg)).length, 2);
+
+    // On a customer's account: the same confirm a tech gets, then onto the refurb. Nothing waits for an Admin.
+    const theirs = await unit("TESTSN-CUST", { site: "account", status: "at-account", sold_to: "Bean Test Cafe" });
+    await assert.rejects(() => pull(sd, "TESTSN-CUST"), /^Error: Serial TESTSN-CUST is already assigned to Bean Test Cafe\. Confirm reuse or cancel\.$/);
+    assert.deepEqual(await unitRow(theirs), { status: "at-account", sold_to: "Bean Test Cafe", purpose: null, site: "account" }, "nothing moves before the confirm");
+    assert.equal((await pg.query("select serial_notice from rebuilds where id = $1", [sd])).rows[0].serial_notice, "Serial TESTSN-CUST is already assigned to Bean Test Cafe.");
+    assert.equal((await pings(pg)).length, 2, "no ping for a question");
+    const reused = await pull(sd, "TESTSN-CUST", "u-wh", true);
+    assert.equal(reused.serialNotice, "Serial TESTSN-CUST pulled from warehouse · Test espresso machine · On the account (was Bean Test Cafe)");
+    assert.deepEqual(await unitRow(theirs), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "account" });
+
+    // At one of our sites, on a ticket, or with a customer at another warehouse: the confirm and the ping say where.
+    const sa = await unit("TESTSN-SA", { site: "san-antonio", status: "deployed" });
+    await assert.rejects(() => pull(shop, "TESTSN-SA"), /^Error: Serial TESTSN-SA is already assigned to San Antonio\. Confirm reuse or cancel\.$/);
+    assert.equal((await pull(shop, "TESTSN-SA", "u-wh", true)).assetId, sa);
+    assert.deepEqual(await unitRow(sa), { status: "assigned", sold_to: SHOP, purpose: "In-house rebuild", site: "san-antonio" });
+    const onTicket = await unit("TESTSN-TICKET", { site: "field", status: "assigned", sold_to: "Bean Test Cafe", job_id: job });
+    await pg.query("update assets set locked_at = now(), locked_by = 'System (assigned)' where id = $1", [onTicket]);
+    await assert.rejects(() => pull(sd, "TESTSN-TICKET"), /^Error: Serial TESTSN-TICKET is already assigned to a ticket for Bean Test Cafe\. Confirm reuse or cancel\.$/);
+    assert.equal((await pull(sd, "TESTSN-TICKET", "u-wh", true)).assetId, onTicket, "an assignment's own lock moves with the unit");
+    const dfw = await unit("TESTSN-DFW", { site: "dallas", status: "deployed", sold_to: "Bean Test Cafe", purpose: "Dallas warehouse" });
+    assert.equal((await pull(sd, "TESTSN-DFW", "u-wh", true)).assetId, dfw);
+    assert.deepEqual(await bodiesFor("u-owner"), [
+      ping("TESTSN-RACK", "Back · B-L2"),
+      ping("TESTSN-CUST", "Bean Test Cafe"),
+      ping("TESTSN-SA", "San Antonio", "Test shop refurb"),
+      ping("TESTSN-TICKET", "a ticket for Bean Test Cafe"),
+      ping("TESTSN-DFW", "Bean Test Cafe at Dallas"),
+    ]);
+    assert.deepEqual((await pings(pg)).filter((p) => p.entity_id === shop).map((p) => p.customer), [SHOP, SHOP], "the ping names the refurb's account");
+
+    // Still put: a unit waiting for an Admin's decision on a Warehouse request, a sold unit, and one a person locked.
+    const held = await unit("TESTSN-HELD");
+    await pg.query("update assets set stock_hold = 'assign', stock_hold_customer = 'Bean Test Cafe' where id = $1", [held]);
+    await assert.rejects(() => pull(sd, "TESTSN-HELD", "u-wh", true), /^Error: Serial TESTSN-HELD is waiting for an Admin to approve its assign to a customer, so it stays where it is\.$/);
+    const sold = await unit("TESTSN-SOLD", { site: "sold", status: "sold", sold_to: "Bean Test Cafe" });
+    await pg.query("update assets set locked_at = now(), locked_by = 'System (sold)' where id = $1", [sold]);
+    await assert.rejects(() => pull(sd, "TESTSN-SOLD", "u-wh", true), /^Error: Locked by System \(sold\)\. Only .+ can unlock it\.$/);
+    const locked = await unit("TESTSN-LOCKED", { site: "training", status: "deployed" });
+    await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [locked]);
+    await assert.rejects(() => pull(sd, "TESTSN-LOCKED", "u-wh", true), /^Error: Locked by boss\./);
+    // The owner locked it on the customer's account (Customers → Equipment): it stays, as on the Warehouse page.
+    const onLockedAccount = await unit("TESTSN-ACCTLOCK", { site: "account", status: "at-account", sold_to: "Bean Test Cafe" });
+    await pg.query(
+      "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, locked_at, locked_by) values ('Bean Test Cafe', 'Test espresso machine', 'Test espresso machine', 'TESTSN-ACCTLOCK', 'testsn-acctlock', now(), 'boss')",
+    );
+    await assert.rejects(() => pull(sd, "TESTSN-ACCTLOCK", "u-wh", true), /^Error: Locked by boss\./);
+    assert.deepEqual(await unitRow(held), { status: "ready", sold_to: null, purpose: null, site: "barn-back" });
+    assert.deepEqual(await unitRow(sold), { status: "sold", sold_to: "Bean Test Cafe", purpose: null, site: "sold" });
+    assert.deepEqual(await unitRow(locked), { status: "deployed", sold_to: null, purpose: null, site: "training" });
+    assert.deepEqual(await unitRow(onLockedAccount), { status: "at-account", sold_to: "Bean Test Cafe", purpose: null, site: "account" });
+    assert.equal((await pg.query("select serial from rebuilds where id = $1", [sd])).rows[0].serial, "TESTSN-DFW", "the refurb keeps the unit it had");
+
+    // A customer's rebuild is still not Warehouse's to pull onto.
+    await assert.rejects(() => pull(cust, "TESTSN-HELD", "u-wh", true), /^Error: Warehouse changes refurbs for Katz Coffee Service Dept\. and Katz shop \/ stock only\./);
+
+    // Everyone else as before: a tech confirms a reuse, an Admin pulls, and neither pings anyone.
+    const pings0 = (await pings(pg)).length;
+    const other = await unit("TESTSN-TECH", { site: "account", status: "at-account", sold_to: "Other Test Cafe" });
+    await assert.rejects(() => pull(cust, "TESTSN-TECH", "u-tech"), /^Error: Serial TESTSN-TECH is already assigned to Other Test Cafe\. Confirm reuse or cancel\.$/);
+    assert.equal((await pull(cust, "TESTSN-TECH", "u-tech", true)).assetId, other);
+    assert.deepEqual(await unitRow(other), { status: "assigned", sold_to: "Bean Test Cafe", purpose: "In-house rebuild", site: "account" });
+    const adminUnit = await unit("TESTSN-ADMIN", { pallet: "C", level: 1 });
+    assert.equal((await pull(sd, "TESTSN-ADMIN", "u-owner")).assetId, adminUnit);
+    assert.equal((await pings(pg)).length, pings0, "only Warehouse's pulls ping");
   } finally {
     await pg.close();
   }
@@ -439,47 +548,82 @@ test("Warehouse's change never lands on a rebuild an Admin moved to a customer b
     assert.equal((await row()).archived, false);
     await back();
     const free = Number((await pg.query("insert into assets (kind, model, serial, site, status) values ('equip', 'Test espresso machine', 'TESTSN-RACE', 'barn-back', 'ready') returning id")).rows[0].id);
-    await assert.rejects(() => pullRebuildSerialFor(raceOn(/^\s*update assets set\s+status = 'assigned'/), { id: sd, serial: "TESTSN-RACE" }, "u-wh"), refusal);
+    const PULL = /^\s*with unit as \(/;
+    await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL), { id: sd, serial: "TESTSN-RACE" }, "u-wh"), refusal);
     assert.deepEqual((await pg.query("select status, sold_to from assets where id = $1", [free])).rows[0], { status: "ready", sold_to: null }, "the unit stays on the rack");
     await back();
-    // The unit is assigned to a customer between Warehouse's read and its write: it isn't pulled.
+    // The same for the serial notes Warehouse writes without pulling: a serial not found, and the confirm question.
+    await assert.rejects(() => pullRebuildSerialFor(raceOn(/update rebuilds set serial = \$2, asset_id = null, serial_notice = \$3/), { id: sd, serial: "TESTSN-NOWHERE" }, "u-wh"), refusal);
+    assert.equal((await row()).serial, null, "the customer's rebuild didn't take Warehouse's serial");
+    await back();
+    const out = Number((await pg.query("insert into assets (kind, model, serial, site, status) values ('equip', 'Test grinder', 'TESTSN-OUT', 'dallas', 'deployed') returning id")).rows[0].id);
+    await assert.rejects(() => pullRebuildSerialFor(raceOn(/update rebuilds set serial_notice = \$2/), { id: sd, serial: "TESTSN-OUT" }, "u-wh"), refusal);
+    assert.equal((await pg.query("select serial_notice from rebuilds where id = $1", [sd])).rows[0].serial_notice, null);
+    assert.deepEqual((await pg.query("select status, site, sold_to from assets where id = $1", [out])).rows[0], { status: "deployed", site: "dallas", sold_to: null });
+    await back();
+    // The unit is moved to a customer between Warehouse's read and its write (every move stamps the unit): it isn't pulled.
     const taken = Number((await pg.query("insert into assets (kind, model, serial, site, status) values ('equip', 'Test brewer', 'TESTSN-TAKEN', 'barn-back', 'ready') returning id")).rows[0].id);
-    const assignIt = () => pg.query("update assets set status = 'assigned', sold_to = 'Bean Test Cafe' where id = $1", [taken]);
-    await assert.rejects(
-      () => pullRebuildSerialFor(raceOn(/^\s*update assets set\s+status = 'assigned'/, assignIt), { id: sd, serial: "TESTSN-TAKEN" }, "u-wh"),
-      /^Error: Serial TESTSN-TAKEN was just assigned or put on hold by someone else, so it wasn't pulled\.$/,
-    );
-    assert.deepEqual((await pg.query("select status, sold_to, purpose from assets where id = $1", [taken])).rows[0], { status: "assigned", sold_to: "Bean Test Cafe", purpose: null });
+    const assignIt = () => pg.query("update assets set status = 'at-account', site = 'account', sold_to = 'Bean Test Cafe', updated_at = now() where id = $1", [taken]);
+    const missed = /^Error: Serial TESTSN-TAKEN was just moved or put on hold by someone else, so it wasn't pulled\. Pull it again\.$/;
+    await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL, assignIt), { id: sd, serial: "TESTSN-TAKEN" }, "u-wh"), missed);
+    assert.deepEqual((await pg.query("select status, sold_to, purpose from assets where id = $1", [taken])).rows[0], { status: "at-account", sold_to: "Bean Test Cafe", purpose: null });
     assert.equal((await row()).serial, null, "the refurb didn't take its serial");
+    // Or a hold is put on it meanwhile, even by a write that doesn't stamp it.
+    const holdIt = () => pg.query("update assets set stock_hold = 'remove' where id = $1", [free]);
+    await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL, holdIt), { id: sd, serial: "TESTSN-RACE" }, "u-wh"), /^Error: Serial TESTSN-RACE was just moved or put on hold by someone else/);
+    assert.deepEqual((await pg.query("select status, sold_to from assets where id = $1", [free])).rows[0], { status: "ready", sold_to: null });
+    await pg.query("update assets set stock_hold = null where id = $1", [free]);
+    assert.equal((await pings(pg)).length, 0, "a pull that didn't happen pings no one");
     // Without anything in between, the same changes go through.
     assert.equal((await updateRebuildFor(sql, { id: sd, notes: "Warehouse note" }, "u-wh")).notes, "Warehouse note");
     assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-RACE" }, "u-wh")).assetId, free);
+    assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-TAKEN", confirmReuse: true }, "u-wh")).assetId, taken);
+    assert.equal((await pings(pg)).length, 4, "two pulls, two Admins");
   } finally {
     await pg.close();
   }
 });
 
-test("Parts: Warehouse looks parts up, adds photos and uses Get Later like a tech; the Admin and Sales edits stay theirs", async () => {
-  const { listPartsFor } = await import("../src/lib/ops/parts-api.ts");
+test("Parts: Warehouse looks parts up and uses Get Later like a tech, but doesn't change photos; the Admin and Sales edits stay theirs", async () => {
+  const { clearPartImageFor, listPartsFor, setPartImageFor } = await import("../src/lib/ops/parts-api.ts");
   const { pg, sql } = await fresh();
   try {
     const flags = async (userId) => {
       const page = await listPartsFor(sql, {}, userId);
-      return { rows: page.rows.length, canHide: page.canHide, canEditMpn: page.canEditMpn, canEditBins: page.canEditBins, canEditClass: page.canEditClass, canEditNote: page.canEditNote };
+      const { canHide, canEditMpn, canEditBins, canEditClass, canEditNote, canEditPhoto } = page;
+      return { rows: page.rows.length, canHide, canEditMpn, canEditBins, canEditClass, canEditNote, canEditPhoto };
     };
     const tech = await flags("u-tech");
-    assert.deepEqual(await flags("u-wh"), tech);
-    assert.deepEqual(tech, { rows: 3, canHide: false, canEditMpn: false, canEditBins: false, canEditClass: false, canEditNote: false });
+    assert.deepEqual(tech, { rows: 3, canHide: false, canEditMpn: false, canEditBins: false, canEditClass: false, canEditNote: false, canEditPhoto: true });
+    assert.deepEqual(await flags("u-wh"), { ...tech, canEditPhoto: false });
+    assert.equal((await flags("u-sales")).canEditPhoto, true);
+    assert.equal((await flags("u-wh-owner")).canEditPhoto, true, "the desk owner flag with the Warehouse role is an Admin");
+
+    // The server refuses Warehouse's photo changes: add, replace, pull a researched photo, remove.
+    const part = Number((await pg.query("select id from billing_items where sku = 'TESTGASKET1'")).rows[0].id);
+    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4]).toString("base64");
+    const photo = async () => (await pg.query("select image is not null as has, photo_confirmed_by as by from billing_items where id = $1", [part])).rows[0];
+    const refusal = /^Error: Warehouse doesn't change part photos\. Ask an Admin or a tech\.$/;
+    await assert.rejects(() => setPartImageFor(sql, { id: part, base64: png }, "u-wh"), refusal);
+    await assert.rejects(() => setPartImageFor(sql, { id: part, base64: png, sourceUrl: "https://example.com/test-gasket.jpg" }, "u-wh"), refusal);
+    assert.deepEqual(await photo(), { has: false, by: null });
+    assert.equal((await setPartImageFor(sql, { id: part, base64: png }, "u-tech")).hasImage, true);
+    assert.deepEqual(await photo(), { has: true, by: "tess" });
+    await assert.rejects(() => setPartImageFor(sql, { id: part, base64: png }, "u-wh"), refusal);
+    await assert.rejects(() => clearPartImageFor(sql, { id: part }, "u-wh"), refusal);
+    assert.deepEqual(await photo(), { has: true, by: "tess" }, "Warehouse's Replace and Remove changed nothing");
+    assert.equal((await clearPartImageFor(sql, { id: part }, "u-wh-owner")).hasImage, false);
   } finally {
     await pg.close();
   }
-  // Photos and Get Later are anyone's on the Desk: their server calls check no role.
+  // Get Later stays anyone's on the Desk: its server call checks no role.
   const api = readFileSync(new URL("../src/lib/ops/parts-api.ts", import.meta.url), "utf8");
-  for (const fn of ["setPartImage", "setPartGetLater", "clearPartImage"]) {
-    const start = api.indexOf(`export const ${fn} = createServerFn`);
-    assert.ok(start >= 0, fn);
-    const body = api.slice(start, api.indexOf("\nexport ", start + 1));
-    assert.doesNotMatch(body, /\.(canHide|canRemove|canEditMpn|canEditBins|canEditClass|canEditNote)\b/, fn);
+  const start = api.indexOf("export const setPartGetLater = createServerFn");
+  assert.ok(start >= 0, "setPartGetLater");
+  const body = api.slice(start, api.indexOf("\nexport ", start + 1));
+  assert.doesNotMatch(body, /\.(canHide|canRemove|canEditMpn|canEditBins|canEditClass|canEditNote|canEditPhoto)\b/);
+  for (const fn of ["setPartImage", "clearPartImage"]) {
+    assert.match(api, new RegExp(`export const ${fn} = createServerFn\\(\\{ method: "POST" \\}\\)\\s+\\.middleware\\(\\[deskMiddleware\\]\\)[\\s\\S]{0,160}\\.handler\\(async \\(\\{ data, context \\}\\): Promise<PartRow> => ${fn}For\\(await ready\\(\\), data, context\\.userId\\)\\);`), fn);
   }
 });
 
@@ -516,4 +660,24 @@ test("the screens: Warehouse's menu adds Rebuilds and Parts, not Invoices; the w
   assert.match(api, /export const approveInvoice = createServerFn\(\{ method: "POST" \}\)\s+\.middleware\(\[deskMiddleware\]\)/);
   const bell = readFileSync(new URL("../src/components/desk/notify-bell.tsx", import.meta.url), "utf8");
   assert.match(bell, /if \(isWaitingNotice\(n\.body\)\) return "Invoice to approve";/);
+  assert.match(bell, /if \(isPullNotice\(n\.body\)\) return "Unit pulled";/);
+  assert.match(sheet, /\{accountLock \? \(\s*<p className="text-sm text-muted-foreground" data-testid="rebuild-pull-ping">/, "Warehouse's confirm says the Admins get a ping");
+  assert.match(sheet, /if \(\/already assigned\/i\.test\(msg\)\) setReuseNotice\(msg\);/, "every place a unit can be still opens the confirm");
+
+  // No photo changes for Warehouse on Parts: the row, the part's window, and the researched-photo buttons.
+  const parts = readFileSync(new URL("../src/routes/_app/parts.tsx", import.meta.url), "utf8");
+  assert.match(parts, /const canEditPhoto = !!page\.data\?\.canEditPhoto;/);
+  assert.match(parts, /<PartPhotoStatus row=\{row\} photo=\{photo\} canEdit=\{canEditPhoto\} \/>/);
+  assert.match(parts, /\{canEditPhoto \? <PartPhotoReview row=\{row\} photo=\{photo\} onChanged=\{onChanged\} \/> : null\}/);
+  assert.match(parts, /\{canEditPhoto \? <PartPhotoButtons row=\{row\} photo=\{photo\} \/> : null\}/);
+  assert.match(parts, /\{canEditPhoto \? <PartPhotoFile photo=\{photo\} \/> : null\}/);
+  assert.match(parts, /canEditPhoto=\{canEditPhoto\}\s+onClose=\{closePart\}/, "the part's window gets it too");
+  assert.match(parts, /\{isAdmin && page\.data\?\.readyToPull \? \(/, "Pull Confirmed Photos stays Admin only");
+  const win2 = readFileSync(new URL("../src/components/desk/part-window.tsx", import.meta.url), "utf8");
+  assert.match(win2, /<PartPhotoStatus row=\{row\} photo=\{photo\} tid=\{T\} canEdit=\{canEditPhoto\} \/>/);
+  assert.match(win2, /\{canEditPhoto \? \(\s*<div className="mt-3 flex flex-wrap items-center gap-2">\s*<PartPhotoButtons row=\{row\} photo=\{photo\} tid=\{T\} \/>\s*<PartPhotoFile photo=\{photo\} tid=\{T\} \/>/);
+  assert.match(win2, /\{canEditPhoto \? <PartPhotoReview row=\{row\} photo=\{photo\} onChanged=\{onChanged\} \/> : null\}/);
+  const controls = readFileSync(new URL("../src/components/desk/part-controls.tsx", import.meta.url), "utf8");
+  assert.match(controls, /\{canEdit && !row\.hasImage && row\.research\?\.verdict === "confirmed" && row\.research\.imageUrl \? \(/);
+  assert.match(controls, /\{canEdit && !row\.hasImage && row\.research\?\.verdict === "review" && row\.research\.candidates\.length \? \(/);
 });

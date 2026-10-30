@@ -1,6 +1,7 @@
 /**
  * Parts inventory: the NetSuite item list with its photo and MPN. The invoice picker reads the same photo.
- * Anyone with Desk access can add or replace a photo; only Admin and Sales change an MPN.
+ * Anyone with Desk access but Warehouse adds, replaces or removes a photo (Warehouse looks parts up and uses Get Later
+ * only: Chuy, 10/29); only Admin and Sales change an MPN.
  * Hide is reversible and is not the `active` flag: the item import writes `active` and would undo a hide.
  * Remove is Admin only, and only when the part has never been on a charge or a quote.
  * The bin location (Rack, Shelf, Bin) and the Class are Admin only for now (Chuy, 10/28): on the part's row, in its
@@ -27,7 +28,17 @@ async function ready(): Promise<Sql> {
   return getSql();
 }
 
-type PartPowers = { canHide: boolean; canRemove: boolean; canEditMpn: boolean; canEditBins: boolean; canEditClass: boolean; canEditNote: boolean; name: string };
+type PartPowers = {
+  canHide: boolean;
+  canRemove: boolean;
+  canEditMpn: boolean;
+  canEditBins: boolean;
+  canEditClass: boolean;
+  canEditNote: boolean;
+  /** Add, replace, remove or pull a part's photo: everyone but Warehouse (Chuy, 10/29). */
+  canEditPhoto: boolean;
+  name: string;
+};
 
 async function powers(sql: Sql, userId: string): Promise<PartPowers> {
   const rows = await sql.query<{ is_admin: boolean; desk_role: string | null; username: string | null }>(
@@ -40,12 +51,24 @@ async function powers(sql: Sql, userId: string): Promise<PartPowers> {
   // The bin location and the Class are Admin only for now (Chuy, 10/28). The MPN, the part name and Hide stay Admin
   // and Sales.
   // The part's note (in its window) is Admin only too (Grok through Chuy, 10/29).
-  return { canHide, canRemove: admin, canEditMpn: canHide, canEditBins: admin, canEditClass: admin, canEditNote: admin, name: rows[0]?.username?.trim() || "Desk" };
+  // Photos are everyone's but Warehouse's (Chuy, 10/29): the desk owner flag with the Warehouse role is an Admin.
+  const warehouse = !flagOn(rows[0]?.is_admin) && String(role ?? "").trim().toLowerCase() === "warehouse";
+  return {
+    canHide,
+    canRemove: admin,
+    canEditMpn: canHide,
+    canEditBins: admin,
+    canEditClass: admin,
+    canEditNote: admin,
+    canEditPhoto: !warehouse,
+    name: rows[0]?.username?.trim() || "Desk",
+  };
 }
 
 /**
  * Who may do what on Parts (the Bin Locations import uses it). canEditMpn covers the MPN and the part name;
- * canEditBins the bin location, canEditClass the Class and canEditNote the note (all three Admin only).
+ * canEditBins the bin location, canEditClass the Class and canEditNote the note (all three Admin only); canEditPhoto
+ * the photo (everyone but Warehouse).
  */
 export const partPowers = powers;
 
@@ -214,6 +237,8 @@ export type PartsPage = {
   canEditClass: boolean;
   /** Change a part's note in its window: Admin only. */
   canEditNote: boolean;
+  /** Add, replace, remove or pull a part's photo: everyone but Warehouse. */
+  canEditPhoto: boolean;
   canHide: boolean;
   canRemove: boolean;
 };
@@ -305,6 +330,7 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
     canEditBins: who.canEditBins,
     canEditClass: who.canEditClass,
     canEditNote: who.canEditNote,
+    canEditPhoto: who.canEditPhoto,
     canHide: who.canHide,
     canRemove: who.canRemove,
   };
@@ -500,44 +526,48 @@ export async function setPartsClassFor(sql: Sql, data: z.infer<typeof classesInp
   return { changed, same: found - changed, missing: ids.length - found };
 }
 
-/** Add or replace the photo. The same photo shows on the invoice picker and on the invoice line. */
+/** What Warehouse is told by the photo calls. */
+export const WAREHOUSE_PHOTO_REFUSAL = "Warehouse doesn't change part photos. Ask an Admin or a tech.";
+
+const imageInput = z.object({
+  id: z.number().int().positive(),
+  base64: z.string().min(8).max(Math.ceil((MAX_PART_IMAGE_BYTES * 4) / 3) + 16).regex(/^[A-Za-z0-9+/]+=*$/),
+  sourceUrl: z.string().max(2000).nullable().optional(),
+});
+
+/** Add or replace the photo. The same photo shows on the invoice picker and on the invoice line. Not Warehouse. */
 export const setPartImage = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number; base64: string; sourceUrl?: string | null }) =>
-    z
-      .object({
-        id: z.number().int().positive(),
-        base64: z.string().min(8).max(Math.ceil((MAX_PART_IMAGE_BYTES * 4) / 3) + 16).regex(/^[A-Za-z0-9+/]+=*$/),
-        sourceUrl: z.string().max(2000).nullable().optional(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data, context }): Promise<PartRow> => {
-    const sql = await ready();
-    const bytes = new Uint8Array(Buffer.from(data.base64, "base64"));
-    const problem = partImageError(bytes);
-    if (problem) throw new Error(problem);
-    const mime = sniffImage(bytes)!;
-    // A photo a person adds or picks is a confirmed photo; a researched one carries the address it came from.
-    if (data.sourceUrl) {
-      const known = await sql.query(
-        `select 1 from billing_items b join part_photo_research pr
-            on pr.mpn_key in (regexp_replace(upper(coalesce(b.mfr_part, '')), '[^A-Z0-9]+', '', 'g'), regexp_replace(upper(b.sku), '[^A-Z0-9]+', '', 'g'))
-          where b.id = $1 and (pr.image_url = $2 or pr.candidates @> jsonb_build_array(jsonb_build_object('imageUrl', $2::text)))`,
-        [data.id, data.sourceUrl],
-      );
-      if (!known.length) throw new Error("That photo is not one of this part's researched photos.");
-    }
-    const who = (await powers(sql, context.userId)).name;
-    const rows = await sql.query(
-      `update billing_items set image = decode($2, 'base64'), image_mime = $3, image_updated_at = now(),
-              photo_status = 'confirmed', photo_source_url = $4, photo_confirmed_by = $5, photo_confirmed_at = now()
-        where id = $1 returning id`,
-      [data.id, data.base64, mime, data.sourceUrl ?? null, who],
+  .validator((d: z.input<typeof imageInput>) => imageInput.parse(d))
+  .handler(async ({ data, context }): Promise<PartRow> => setPartImageFor(await ready(), data, context.userId));
+
+/** The body of setPartImage. */
+export async function setPartImageFor(sql: Sql, data: z.infer<typeof imageInput>, userId: string): Promise<PartRow> {
+  const me = await powers(sql, userId);
+  if (!me.canEditPhoto) throw new Error(WAREHOUSE_PHOTO_REFUSAL);
+  const bytes = new Uint8Array(Buffer.from(data.base64, "base64"));
+  const problem = partImageError(bytes);
+  if (problem) throw new Error(problem);
+  const mime = sniffImage(bytes)!;
+  // A photo a person adds or picks is a confirmed photo; a researched one carries the address it came from.
+  if (data.sourceUrl) {
+    const known = await sql.query(
+      `select 1 from billing_items b join part_photo_research pr
+          on pr.mpn_key in (regexp_replace(upper(coalesce(b.mfr_part, '')), '[^A-Z0-9]+', '', 'g'), regexp_replace(upper(b.sku), '[^A-Z0-9]+', '', 'g'))
+        where b.id = $1 and (pr.image_url = $2 or pr.candidates @> jsonb_build_array(jsonb_build_object('imageUrl', $2::text)))`,
+      [data.id, data.sourceUrl],
     );
-    if (!rows.length) throw new Error("That part is no longer on the list.");
-    return loadPart(sql, data.id);
-  });
+    if (!known.length) throw new Error("That photo is not one of this part's researched photos.");
+  }
+  const rows = await sql.query(
+    `update billing_items set image = decode($2, 'base64'), image_mime = $3, image_updated_at = now(),
+            photo_status = 'confirmed', photo_source_url = $4, photo_confirmed_by = $5, photo_confirmed_at = now()
+      where id = $1 returning id`,
+    [data.id, data.base64, mime, data.sourceUrl ?? null, me.name],
+  );
+  if (!rows.length) throw new Error("That part is no longer on the list.");
+  return loadPart(sql, data.id);
+}
 
 /** Get Later: mark a part to pull later. It does not change price or stock. Anyone on the Desk. */
 export const setPartGetLater = createServerFn({ method: "POST" })
@@ -554,17 +584,21 @@ export const setPartGetLater = createServerFn({ method: "POST" })
     return loadPart(sql, data.id);
   });
 
+/** Remove the photo. Not Warehouse. */
 export const clearPartImage = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }): Promise<PartRow> => {
-    const sql = await ready();
-    await sql.query(
-      "update billing_items set image = null, image_mime = null, image_updated_at = null, photo_status = null, photo_source_url = null, photo_confirmed_by = null, photo_confirmed_at = null where id = $1",
-      [data.id],
-    );
-    return loadPart(sql, data.id);
-  });
+  .validator((d: { id: number }) => partIdInput.parse(d))
+  .handler(async ({ data, context }): Promise<PartRow> => clearPartImageFor(await ready(), data, context.userId));
+
+/** The body of clearPartImage. */
+export async function clearPartImageFor(sql: Sql, data: { id: number }, userId: string): Promise<PartRow> {
+  if (!(await powers(sql, userId)).canEditPhoto) throw new Error(WAREHOUSE_PHOTO_REFUSAL);
+  await sql.query(
+    "update billing_items set image = null, image_mime = null, image_updated_at = null, photo_status = null, photo_source_url = null, photo_confirmed_by = null, photo_confirmed_at = null where id = $1",
+    [data.id],
+  );
+  return loadPart(sql, data.id);
+}
 
 /**
  * The part's description, as typed on Parts. Blank clears it. Only what someone types is stored; nothing is filled

@@ -471,6 +471,7 @@ export function RebuildSheet({
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Matching a warehouse serial attaches that unit. It does not create a second record.
+                  {accountLock && !locked ? " A unit from the barn, one of our sites or an account comes onto this refurb right away, and the Admins get a ping saying where it came from." : ""}
                 </p>
               </div>
               {canEdit ? (
@@ -520,6 +521,11 @@ export function RebuildSheet({
         <DialogContent>
           <DialogTitle>Serial Already Assigned</DialogTitle>
           <DialogDescription>{reuseNotice}</DialogDescription>
+          {accountLock ? (
+            <p className="text-sm text-muted-foreground" data-testid="rebuild-pull-ping">
+              Reusing it moves it onto this refurb now. The Admins get a ping saying where it came from.
+            </p>
+          ) : null}
           <div className="mt-4 flex gap-2">
             <Button
               type="button"
