@@ -24,8 +24,8 @@ const { planBackfill } = await import("../src/lib/ops/billing-backfill.ts");
 const { loadBackfillContext } = await import("../src/lib/ops/billing-backfill-api.ts");
 const { loadWindowRows } = await import("../src/lib/ops/billing-report-api.ts");
 const { formatLongDate, todayChicago, addDays } = await import("../src/lib/ops/clock.ts");
-const { notesAfterStaleSave } = await import("../src/lib/ops/stale-notes.ts");
 const { updateInstallFor } = await import("../src/lib/ops/api.ts");
+const { saveRepairQuoteFor } = await import("../src/lib/ops/repair-quote-api.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -149,7 +149,7 @@ test("rules: the same run of WO numbers, the installs a WO is on, the note and t
   assert.equal(stackRefusal({ id: 2, customer: CAFE, status: "Open", stackedJobId: null }, stackTicket, 0, false), "Ticket #3 was merged into install #7. A PM stacks on a ticket, not an install.");
 });
 
-test("a WO-0792-style case: the confirm names the install kept and what moves; the merge moves it, adds the note and hides the ticket", async () => {
+test("a ticket and an install with one WO: the confirm names the install kept and what moves; the merge moves it, adds the note and hides the ticket", async () => {
   const { pg, sql } = await fresh();
   const jobId = await ticket(pg);
   const installId = await install(pg);
@@ -162,9 +162,9 @@ test("a WO-0792-style case: the confirm names the install kept and what moves; t
   const unit = Number((await one(pg, "insert into assets (kind, model, serial, site, status, purpose, sold_to, job_id) values ('equip', 'Test Brewer', 'TB-1', 'field', 'assigned', 'Service', $1, $2) returning id", [CAFE, jobId])).id);
   const loaner = Number((await one(pg, "insert into assets (kind, model, serial, site, status, purpose, sold_to, job_id, customer_owned) values ('equip', 'Test Grinder', null, 'field', 'assigned', 'Customer-owned / service loaner', $1, $2, 'yes') returning id", [CAFE, jobId])).id);
   await pg.query("insert into ticket_part_lines (job_id, wo, item, sku, qty, used_on, source) values ($1, $2, 'PARTS : TESTGASKET', 'TESTGASKET', 1, '2026-10-20', 'corrigo')", [jobId, WO]);
+  // A part line still on the ticket merged into this one (a ticket merge leaves part lines where they are).
+  await pg.query("insert into ticket_part_lines (job_id, wo, item, sku, qty, used_on, source) values ($1, 'WO-4791', 'PARTS : TESTVALVE', 'TESTVALVE', 1, '2026-10-19', 'netsuite')", [kid]);
   const reb = Number((await one(pg, "insert into rebuilds (title, account, job_id) values ('Test brewer rebuild', $1, $2) returning id", [CAFE, jobId])).id);
-  const run = Number((await one(pg, "insert into wo_history_runs (filename) values ('test.xlsx') returning id")).id);
-  await pg.query("insert into wo_history (run_id, history_ref, wo, customer, job_id) values ($1, 'QB-1', $2, $3, $4)", [run, WO, CAFE, jobId]);
 
   // The ticket's panel offers the merge to an Admin only.
   const matches = await M.ticketInstallMatchesFor(sql, "u-owner", jobId);
@@ -188,14 +188,13 @@ test("a WO-0792-style case: the confirm names the install kept and what moves; t
     notes: 2,
     pings: 1,
     units: ["Test Brewer SN TB-1", "Test Grinder"],
-    partLines: 1,
+    partLines: 2,
     rebuilds: [`Test brewer rebuild (#${reb})`],
     mergedTickets: 1,
   });
   assert.deepEqual(p.stays, [
     "Its own record: hidden, never deleted, with its history",
     "A copy of its charge lines (only the install's invoice is billed)",
-    "1 QuickBooks history row",
   ]);
   assert.equal(p.note, `From ticket SC-202610-901 (${WO}), merged ${TODAY} by boss:\nIssue: 1 Test Way\nTech: Test Tech`);
   assert.deepEqual(p.warnings, []);
@@ -206,7 +205,7 @@ test("a WO-0792-style case: the confirm names the install kept and what moves; t
   }
 
   const r = await merge(sql, jobId, installId, p.stamps);
-  assert.deepEqual(r, { jobId, installId, chargeLines: 2, notes: 2, pings: 1, units: 2, partLines: 1, rebuilds: 1, mergedTickets: 1, mergedBy: "boss" });
+  assert.deepEqual(r, { jobId, installId, chargeLines: 2, notes: 2, pings: 1, units: 2, partLines: 2, rebuilds: 1, mergedTickets: 1, mergedBy: "boss" });
 
   // The ticket: hidden (its own duplicate), marked merged and done, its record kept as it was.
   const t = await one(pg, "select duplicate_of, merged_install_id, merged_install_by, merged_install_at, done, status, issue, wo, customer from service_jobs where id = $1", [jobId]);
@@ -238,12 +237,13 @@ test("a WO-0792-style case: the confirm names the install kept and what moves; t
     { id: unit, job_id: null, install_id: installId, purpose: "Install", sold_to: CAFE, status: "assigned" },
     { id: loaner, job_id: null, install_id: installId, purpose: "Customer-owned / loaner", sold_to: CAFE, status: "assigned" },
   ]);
-  assert.deepEqual((await pg.query("select job_id, install_id from ticket_part_lines")).rows, [{ job_id: null, install_id: installId }]);
+  assert.deepEqual((await pg.query("select job_id, install_id from ticket_part_lines order by id")).rows, [
+    { job_id: null, install_id: installId },
+    { job_id: null, install_id: installId },
+  ]);
   assert.deepEqual((await pg.query("select job_id, install_id from rebuilds")).rows, [{ job_id: null, install_id: installId }]);
-  // The QuickBooks history row stays with the ticket.
-  assert.equal(Number((await one(pg, "select job_id from wo_history")).job_id), jobId);
   // Logged on both records, each unit, and in the merge log.
-  const moved = " · moved 2 charge lines (waiting for approval), 2 Ping notes, 1 ping, 2 units, 1 part line, 1 rebuild, 1 ticket merged into it";
+  const moved = " · moved 2 charge lines (waiting for approval), 2 Ping notes, 1 ping, 2 units, 2 part lines, 1 rebuild, 1 ticket merged into it";
   assert.deepEqual((await pg.query("select entity_type, entity_id, actor_name, action, detail from activity where action = 'merged' order by id")).rows, [
     { entity_type: "install", entity_id: installId, actor_name: "boss", action: "merged", detail: `Merged ticket SC-202610-901 (${WO}) into this install${moved}` },
     { entity_type: "service", entity_id: jobId, actor_name: "boss", action: "merged", detail: `Merged into install #${installId} (${CAFE})${moved}` },
@@ -283,17 +283,22 @@ test("the note goes under the install's own notes; nothing linked moves nothing;
 });
 
 test("an install window opened before the merge keeps the merged ticket's note when it saves", async () => {
-  assert.equal(notesAfterStaleSave("A", "A", "B"), "B");
-  assert.equal(notesAfterStaleSave("A\n\nNOTE", "A", "A"), "A\n\nNOTE");
-  assert.equal(notesAfterStaleSave("A\r\n\r\nNOTE", "A", "A"), "A\r\n\r\nNOTE");
-  assert.equal(notesAfterStaleSave("A\n\nNOTE", "A", "A edited  "), "A edited\n\nNOTE");
-  assert.equal(notesAfterStaleSave("NOTE", null, "Typed"), "Typed\n\nNOTE");
-  assert.equal(notesAfterStaleSave("NOTE", null, null), "NOTE");
-  assert.equal(notesAfterStaleSave("NOTE", "", null), "NOTE");
-  assert.equal(notesAfterStaleSave("Rewritten elsewhere", "A", "A edited"), "A edited");
-  assert.equal(notesAfterStaleSave("A", "A", null), null);
-
   const { pg, sql } = await fresh();
+  const after = async (stored, base, sent) => (await one(pg, "select notes_after_stale_save($1, $2, $3) as v", [stored, base, sent])).v;
+  assert.equal(await after("A", "A", "B"), "B");
+  assert.equal(await after("A\n\nNOTE", "A", "A"), "A\n\nNOTE");
+  assert.equal(await after("A\r\n\r\nNOTE", "A", "A"), "A\r\n\r\nNOTE");
+  assert.equal(await after("A\n\nNOTE", "A", "A edited  "), "A edited\n\nNOTE");
+  assert.equal(await after("A\n\nNOTE", "A\r\n", "A edited"), "A edited\n\nNOTE");
+  // The merge trims what ends the notes before adding under them: a window that loaded them that way still matches.
+  assert.equal(await after("call first\n\nNOTE", "call first \n\n\n", "call first, gate code 9"), "call first, gate code 9\n\nNOTE");
+  assert.equal(await after("NOTE", null, "Typed"), "Typed\n\nNOTE");
+  assert.equal(await after("NOTE", null, null), "NOTE");
+  assert.equal(await after("NOTE", "", null), "NOTE");
+  assert.equal(await after("Rewritten elsewhere", "A", "A edited"), "A edited");
+  assert.equal(await after("A", "A", null), null);
+  assert.equal(await after("A\n\n", "A", "B"), "B");
+
   const jobId = await ticket(pg);
   const installId = await install(pg, { notes: "Install by 3rd party." });
   await mergeNow(sql, jobId, installId);
@@ -307,9 +312,37 @@ test("an install window opened before the merge keeps the merged ticket's note w
   await updateInstallFor(sql, { id: installId, notes: "Install by 3rd party. Badge at the desk.", notesBase: "Install by 3rd party." }, ctx);
   const kept = (await one(pg, "select notes from installs where id = $1", [installId])).notes;
   assert.equal(kept, `Install by 3rd party. Badge at the desk.\n\n${merged.slice("Install by 3rd party.\n\n".length)}`);
-  // A save that sends no base is stored as sent, as before.
+  // A save that sends no notes leaves them; one that sends no base is stored as sent, as before.
+  await updateInstallFor(sql, { id: installId, technician: "Other Tech" }, ctx);
+  assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, kept);
   await updateInstallFor(sql, { id: installId, notes: "Only this." }, ctx);
   assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, "Only this.");
+});
+
+test("a save that read the install before a merge committed still keeps the merged note: the notes are worked out on the row it writes", async () => {
+  const { pg, sql } = await fresh();
+  const jobId = await ticket(pg);
+  const installId = await install(pg, { notes: "Install by 3rd party." });
+  const p = await preview(sql, jobId, installId);
+  // The window's save reads the install, then the merge commits, then the save writes.
+  let raced = false;
+  const racing = Object.assign(
+    async (strings, ...values) => {
+      const text = strings.reduce((a, s, i) => `${a}$${i}${s}`);
+      if (!raced && /^\s*update installs set/.test(text)) {
+        raced = true;
+        await merge(sql, jobId, installId, p.stamps);
+      }
+      return sql.query(text, values);
+    },
+    { query: sql.query },
+  );
+  await updateInstallFor(racing, { id: installId, notes: "Install by 3rd party. Badge at the desk.", notesBase: "Install by 3rd party." }, { userId: "u-owner" });
+  assert.ok(raced);
+  assert.equal(
+    (await one(pg, "select notes from installs where id = $1", [installId])).notes,
+    `Install by 3rd party. Badge at the desk.\n\n${p.note}`,
+  );
 });
 
 test("refused, with the reason, and nothing written: the ticket's billing, the install, the WO, the account", async () => {
@@ -593,4 +626,60 @@ test("the hidden ticket stays out of the duplicate merge, billing backfill and t
   const rows = await loadWindowRows(sql, ["service"]);
   assert.equal(rows.find((r) => r.id === jobId).note, `Merged into install #${installId}`);
   assert.equal(rows.find((r) => r.id === later).note, null);
+});
+
+test("a ticket QuickBooks invoiced: refused while it has charges (they may be billed already); without them it merges and the history stays", async () => {
+  const { pg, sql } = await fresh();
+  const jobId = await ticket(pg);
+  const installId = await install(pg);
+  await charge(pg, jobId, "PARTS : TESTGASKET", 1, 12.5, "part", 1);
+  const run = Number((await one(pg, "insert into wo_history_runs (filename) values ('test.xlsx') returning id")).id);
+  await pg.query("insert into wo_history (run_id, history_ref, wo, customer, job_id) values ($1, 'QB-1', $2, $3, $4)", [run, WO, CAFE, jobId]);
+  assert.equal(
+    await refusalOf(sql, jobId, installId),
+    `SC-202610-901 (${WO}) has QuickBooks history, so its charges may be billed already. Take its charges off the ticket first, or keep the ticket.`,
+  );
+  await pg.query("delete from ticket_charges where job_id = $1", [jobId]);
+  const p = await preview(sql, jobId, installId);
+  assert.equal(p.refusal, null);
+  assert.deepEqual(p.stays, ["Its own record: hidden, never deleted, with its history", "1 QuickBooks history row"]);
+  await merge(sql, jobId, installId, p.stamps);
+  assert.equal(Number((await one(pg, "select job_id from wo_history")).job_id), jobId);
+});
+
+test("writes that come late to a merged ticket are refused: an import row merged meanwhile, a repair quote", async () => {
+  const { pg, sql } = await fresh();
+  const jobId = await ticket(pg);
+  const installId = await install(pg);
+  const file = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Primary Service Tech"], ["4792", "Completed", CAFE, "Second Tech"]]).records;
+  const rows = (await previewCorrigoRecords(sql, file)).rows;
+  assert.deepEqual(rows.map((r) => [r.board, r.jobId]), [["service", jobId]]);
+  const p = await preview(sql, jobId, installId);
+  // The import checks the ticket, then an Admin's merge commits, then the import writes the ticket.
+  let raced = false;
+  const racing = Object.assign((strings, ...values) => sql(strings, ...values), {
+    query: async (text, params) => {
+      if (!raced && /update service_jobs set\s+technician = \$2/.test(text)) {
+        raced = true;
+        await merge(sql, jobId, installId, p.stamps);
+      }
+      return sql.query(text, params);
+    },
+  });
+  const res = await applyCorrigoRows(racing, rows, "boss");
+  assert.ok(raced);
+  assert.deepEqual([res.updated, res.created], [0, 0]);
+  assert.deepEqual(res.refused, [{ wo: WO, customer: CAFE, reason: `Its ticket was merged into install #${installId} during the import: import the file again` }]);
+  const t = await one(pg, "select status, technician, done, merged_install_id from service_jobs where id = $1", [jobId]);
+  assert.deepEqual([t.status, t.technician, t.done, t.merged_install_id], ["Open", "Test Tech", true, installId]);
+  // Imported again, the row goes on the install.
+  const again = await applyCorrigoRows(sql, (await previewCorrigoRecords(sql, file)).rows, "boss");
+  assert.deepEqual([again.updated, again.created, again.refused], [1, 0, []]);
+  assert.equal((await one(pg, "select technician from installs where id = $1", [installId])).technician, "Second Tech");
+
+  await assert.rejects(
+    () => saveRepairQuoteFor(sql, { jobId, rebuildId: null, status: "Draft", note: "", lines: [] }, "u-owner"),
+    { message: `This ticket was merged into install #${installId}, so it takes no repair quote.` },
+  );
+  assert.equal(Number((await one(pg, "select count(*) from repair_quotes")).count), 0);
 });

@@ -839,7 +839,7 @@ export async function applyCorrigoRows(
               phone = coalesce(nullif(btrim(phone), ''), $16::text),
               received = coalesce(received, $17::date),
               updated_at = now()
-            where id = $1
+            where id = $1 and merged_install_id is null
           returning ($9::text is not null and po is not distinct from $9::text) as po_written`,
           [
             jobId,
@@ -862,6 +862,17 @@ export async function applyCorrigoRows(
           ],
         )
       )[0];
+      if (!saved) {
+        // Merged into an install after the check above (10/30): nothing went onto the hidden ticket. Importing the file
+        // again puts the row on the install.
+        const into = await mergedInstallTarget(sql, jobId);
+        refused.push({
+          wo,
+          customer: typed,
+          reason: into ? `Its ticket was merged into install #${into.installId} during the import: import the file again` : "The ticket is no longer on the list",
+        });
+        continue;
+      }
       await logCorrigo(
         sql,
         jobBoardKind,

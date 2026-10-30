@@ -497,6 +497,8 @@ export function InstallSheet({
     },
     onError: (e, vars) => {
       if (skippedRead.current) lookAgain();
+      // Not stored: the window's notes are still on top of what it sent this save on, unless a later save moved on.
+      if (vars.notesBase !== undefined && loadedNotes.current === vars.notes) loadedNotes.current = vars.notesBase;
       // Not stored: a later save built on this list is based on what this one was built on, and the window expects that.
       if (vars.sent && vars.builtOn) {
         refused.current.set(vars.sent, vars.builtOn);

@@ -207,7 +207,7 @@ function discountText(d: Discount): string {
   return d.kind === "percent" ? `${Number(d.value.toFixed(2))}%` : money(d.value);
 }
 
-/** "SC-202610-059 (WO-0792)": how the dialog and the refusals name the ticket. */
+/** "SC-202610-901 (WO-4792)": how the confirm and the refusals name the ticket. */
 export function ticketLabel(t: { call_id: string; wo: string | null; id: number }): string {
   const wo = String(t.wo ?? "").trim();
   const call = String(t.call_id ?? "").trim() || `Ticket #${t.id}`;
@@ -339,7 +339,8 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       `select
          (select count(*)::int from comments c where c.entity_type in ('service', 'tlc') and c.entity_id = $1) as notes,
          (select count(*)::int from desk_notifications n where n.entity_type in ('service', 'tlc') and n.entity_id = $1) as pings,
-         (select count(*)::int from ticket_part_lines p where p.job_id = $1) as part_lines,
+         (select count(*)::int from ticket_part_lines p
+           where p.job_id = $1 or p.job_id in (select s.id from service_jobs s where s.duplicate_of = $1 and s.id <> $1)) as part_lines,
          (select count(*)::int from service_jobs s where s.duplicate_of = $1 and s.id <> $1) as merged_tickets,
          (select count(*)::int from wo_history h where h.job_id = $1) as wo_history,
          exists (select 1 from repair_quotes q where q.job_id = $1) as has_quote,
@@ -375,6 +376,10 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     if (linked.ns_invoices) return `${label} has NetSuite invoices (${linked.ns_invoices}). An invoiced ticket stays as it is.`;
     if (linked.has_quote) return `${label} has a repair quote, and installs don't keep repair quotes. Finish or take off the quote first.`;
     if (linked.stacked_pms) return `PM #${linked.stacked_pms.split(",")[0]} is billed on ${label}. Unstack it first: installs don't carry PMs.`;
+    // QuickBooks invoiced this WO: its charges may be billed already, so they don't go on the install's invoice.
+    if (charges.length && linked.wo_history) {
+      return `${label} has QuickBooks history, so its charges may be billed already. Take its charges off the ticket first, or keep the ticket.`;
+    }
     if (charges.length && head?.approved_at) {
       return `${installName}'s invoice is already approved, so ${label}'s ${plural(charges.length, "charge line")} can't go on it. Add them to the install's invoice by hand and take them off the ticket, then merge.`;
     }
@@ -523,9 +528,11 @@ export function mergeTicketIntoInstallSql(): string {
      where a.job_id = ok.job_id
     returning a.id
   ), parts as (
+    -- Its WO part lines, and those of tickets merged into it before (a ticket merge leaves them where they were).
     update ticket_part_lines p set install_id = ok.install_id, job_id = null
       from ok
      where p.job_id = ok.job_id
+        or p.job_id in (select s.id from service_jobs s where s.duplicate_of = ok.job_id and s.id <> ok.job_id)
     returning p.id
   ), reb as (
     -- A rebuild already tied to an install keeps that install; it only leaves the ticket.

@@ -40,5 +40,30 @@ create table if not exists ticket_install_merges (
   note        text,
   moved       jsonb not null default '{}'::jsonb
 );
-create unique index if not exists ticket_install_merges_job_uidx on ticket_install_merges (job_id);
+create index if not exists ticket_install_merges_job_idx on ticket_install_merges (job_id);
 create index if not exists ticket_install_merges_install_idx on ticket_install_merges (install_id);
+
+-- An install window opened before the install's notes changed (a ticket merged into it adds its text under them) keeps
+-- what the server added, worked out on the row the save writes. The window that didn't touch the notes leaves them; one
+-- that did keeps its own text, then what was added after it, when the server only added to the end. Anything else is the
+-- window's, as before. Line breaks are compared as \n; trailing blanks don't count.
+create or replace function notes_after_stale_save(stored text, base text, sent text) returns text language sql immutable as $$
+  with v as (
+    select replace(replace(coalesce(stored, ''), E'\r\n', E'\n'), E'\r', E'\n') as s,
+           replace(replace(coalesce(base, ''), E'\r\n', E'\n'), E'\r', E'\n') as b,
+           replace(replace(coalesce(sent, ''), E'\r\n', E'\n'), E'\r', E'\n') as t
+  ), w as (
+    select s, b, t, rtrim(b, E' \t\n') as bt from v
+  ), x as (
+    select s, b, t, bt, ltrim(substr(s, length(bt) + 1), E' \t\n') as added, rtrim(t, E' \t\n') as own from w
+  )
+  select case
+           when s = b then sent
+           when t = b then stored
+           when left(s, length(bt)) <> bt then sent
+           when added = '' then sent
+           when own = '' then added
+           else own || E'\n\n' || added
+         end
+    from x
+$$;

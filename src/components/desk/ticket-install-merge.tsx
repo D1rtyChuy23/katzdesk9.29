@@ -112,7 +112,7 @@ function PreviewBody({ p }: { p: InstallMergePreview }) {
   const charges = m.chargeLines
     ? `${count(m.chargeLines, "line")}, ${money(m.chargeTotal)}: on the install's invoice, waiting for an Admin to approve${
         m.invoiceTotal !== m.chargeTotal ? ` (the invoice comes to ${money(m.invoiceTotal)})` : ""
-      }`
+      }. They bill with the install now, not in the tickets' billing export.`
     : "None";
   return (
     <div className="mt-4 space-y-4 text-sm">

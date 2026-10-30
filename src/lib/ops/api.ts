@@ -82,7 +82,6 @@ import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./i
 import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
 import { deliverPings } from "./notify";
-import { notesAfterStaleSave } from "./stale-notes";
 
 const INITIALS_TO_PRODUCER = Object.fromEntries(Object.entries(PRODUCER_INITIALS).map(([name, initials]) => [initials.toLowerCase(), name]));
 function salesName(owners: any) {
@@ -894,7 +893,7 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	}
 	if (next.status === "Phone Resolved") next.phone_resolved = true;
 	else if (data.status && next.status !== "Phone Resolved") next.phone_resolved = false;
-	await sql`
+	const written = await sql`
       update service_jobs set
         contact = ${next.contact},
         phone = ${next.phone},
@@ -915,7 +914,13 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
         done = ${next.done},
         urgency = ${next.urgency},
         updated_at = now()
-      where id = ${data.id}`;
+      where id = ${data.id} and merged_install_id is null
+      returning id`;
+	if (!written[0]) {
+		// Merged into an install after the read above (10/30): nothing is written onto the hidden ticket.
+		const now = (await sql`select merged_install_id from service_jobs where id = ${data.id}`)[0];
+		throw new Error(now?.merged_install_id ? `This ticket was merged into install #${now.merged_install_id}. Open the install to keep working.` : "Job not found");
+	}
 	if (data.status && data.status !== cur[0].status) await logActivity(sql, context.userId, cur[0].kind, data.id, "status", `${cur[0].status} → ${data.status}`);
 	const extra = summarize([
 		changed("customer", cur[0].customer, next.customer),
@@ -1447,7 +1452,7 @@ type UpdateInstallInput = { id: number; customer?: string; equipment?: string | 
 	contactPhone?: string | null;
 	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
 	machinesBase?: MachineSpec[] | string | null;
-	/** The notes as the saving window loaded them. With it, text the server gained since (a merged ticket's) is kept (notesAfterStaleSave). */
+	/** The notes as the saving window loaded them. With it, text the server added since (a merged ticket's) is kept (notes_after_stale_save). */
 	notesBase?: string | null };
 
 /**
@@ -1507,8 +1512,6 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	}
 	const catalog = await loadEquipCatalog(sql);
 	mergeStaleList(data, c, catalog);
-	// A window opened before a ticket was merged into this install (10/30) keeps the ticket's text under the notes.
-	if (data.notes !== undefined && data.notesBase !== undefined) data.notes = notesAfterStaleSave(c.notes ?? null, data.notesBase, data.notes);
 	const machinesJson = data.machines === undefined ? c.machines : data.machines == null ? null : (() => {
 		const raw = typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
 		const parsed = parseMachinesJson(raw);
@@ -1543,7 +1546,13 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
         technician = ${data.technician === undefined ? c.technician : data.technician},
         wo = ${data.wo === undefined ? c.wo : data.wo},
         reqs_ready = ${data.reqsReady === undefined ? c.reqs_ready : data.reqsReady},
-        notes = ${data.notes === undefined ? c.notes : data.notes},
+        -- Worked out on the row this writes: a save that sends no notes leaves them, and a window opened before a ticket
+        -- was merged into this install (10/30) keeps the ticket's text under them.
+        notes = case
+          when ${data.notes === undefined}::boolean then notes
+          when ${data.notesBase !== undefined}::boolean then notes_after_stale_save(notes, ${data.notesBase ?? null}::text, ${data.notes ?? null}::text)
+          else ${data.notes ?? null}::text
+        end,
         work_done = ${data.workDone === undefined ? c.work_done : data.workDone},
         completed_at = ${data.completedAt === undefined ? c.completed_at : data.completedAt},
         account_rep = ${data.accountRep === undefined ? c.account_rep : canonicalRepName(data.accountRep) ?? (data.accountRep || null)},
@@ -1663,6 +1672,11 @@ export const addComment = createServerFn({ method: "POST" }).middleware([deskMid
 	const sql = await ready();
 	const body = data.body.trim();
 	if (!body) throw new Error("Message is empty");
+	// A ticket merged into an install (10/30): its Ping notes are on the install now, and a new one goes there too.
+	if (data.entityType === "service" || data.entityType === "tlc") {
+		const into = (await sql.query("select merged_install_id from service_jobs where id = $1", [data.entityId]))[0]?.merged_install_id;
+		if (into) throw new Error(`This ticket was merged into install #${into}. Add the note on the install.`);
+	}
 	const authorName = (await sql.query("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Teammate";
 	const rows = await sql`
       insert into comments (entity_type, entity_id, author_id, author_name, body, ask_team)

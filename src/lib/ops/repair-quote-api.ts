@@ -160,6 +160,9 @@ export const saveRepairQuote = createServerFn({ method: "POST" })
 export async function saveRepairQuoteFor(sql: Sql, data: z.output<typeof saveSchema>, userId: string): Promise<RepairQuote> {
   if (await isWarehouseOnly(sql, userId)) throw new Error("Warehouse doesn't change repair quotes. Ask an Admin or a tech.");
   const t = await resolve(sql, data);
+  // A ticket merged into an install (10/30) is hidden; installs don't keep repair quotes.
+  const into = t.jobId == null ? null : (await sql.query<{ merged_install_id: number | null }>("select merged_install_id from service_jobs where id = $1", [t.jobId]))[0]?.merged_install_id;
+  if (into) throw new Error(`This ticket was merged into install #${into}, so it takes no repair quote.`);
   const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Desk";
   const wasLocked = quoteLocked(t.quote?.status);
   const staysLocked = wasLocked && quoteLocked(data.status);
