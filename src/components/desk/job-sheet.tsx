@@ -281,7 +281,7 @@ export function JobSheet({
     // The sheet drops its form at once, so closing it now saves nothing onto the hidden ticket.
     qc.setQueryData(["job", r.jobId], (old: ServiceJob | null | undefined) =>
       old
-        ? { ...old, duplicateOf: old.id, mergedInstallId: r.installId, mergedInstallAt: new Date().toISOString(), mergedInstallBy: r.mergedBy, done: true, siblings: [] }
+        ? { ...old, duplicateOf: old.id, mergedInstallId: r.installId, mergedInstallAt: new Date().toISOString(), mergedInstallBy: r.mergedBy, mergedBilledOn: r.billedOn, done: true, siblings: [] }
         : old,
     );
     for (const key of ["jobs", "job", "installs", "comments", "invoice", "account-invoices", "activity", "assets", "dashboard", "customer-history", "notifications", "ticket-install-matches"]) {

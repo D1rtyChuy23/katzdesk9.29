@@ -253,6 +253,11 @@ export type BackfillTicket = {
   duplicateOf: number | null;
   /** Merged into an install (10/30): its duplicateOf is its own id. */
   mergedInstallId?: number | null;
+  /**
+   * Merged into an install as billed on this Sales Order (10/30): its billing is still its own, so its NetSuite
+   * invoices are recorded here, and nothing else (its charges and Sales Order stay as they were merged).
+   */
+  billedOnInstall?: string | null;
   /** YYYY-MM-DD */
   received: string | null;
   completed: string | null;
@@ -395,15 +400,41 @@ const sameDiscount = (a: Discount | null, b: Discount | null) => (!a && !b) || (
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-/** The ticket a WO's rows go on, or why none. */
+const soKey = (so: string | null | undefined) => String(so ?? "").toUpperCase().replace(/\s+/g, "");
+/** An invoice row with no Sales Order, among the SOs a WO's rows name: it is billing too, on none of them. */
+const NO_SO = "no Sales Order";
+
+/**
+ * The ticket a WO's rows go on, or why none. `rowSos`: the Sales Orders the rows name. A ticket merged into an install
+ * as billed on its Sales Order (10/30) takes the rows on that SO, and only those: a live ticket never gets them, and
+ * rows on another SO (the install's own billing, say) never go on it.
+ */
 function pickTicket(
   key: string,
   ctx: BackfillContext,
   refDate: string | null,
+  rowSos: Set<string>,
 ): { ticket: BackfillTicket } | { reason: string } {
   const all = ctx.tickets.filter((t) => woMatchKey(t.wo ?? "") === key);
   const live = all.filter((t) => !t.duplicateOf);
+  const billed = all.filter((t) => t.billedOnInstall);
+  const mine = billed.filter((t) => rowSos.has(soKey(t.billedOnInstall)));
+  if (mine.length) {
+    const t = mine[0]!;
+    if (mine.length === 1 && rowSos.size === 1) return { ticket: t };
+    return {
+      reason: `The rows are on ${[...rowSos].join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Split the file by Sales Order, then run the Billing Backfill on each.`,
+    };
+  }
   if (!live.length) {
+    if (billed.length) {
+      const t = billed[0]!;
+      return {
+        reason: rowSos.size
+          ? `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}; these rows are on ${[...rowSos].join(", ")}. Skipped.`
+          : `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}, and these rows name no Sales Order. Skipped.`,
+      };
+    }
     if (all.length) {
       const intoInstall = all.find((t) => t.mergedInstallId)?.mergedInstallId;
       if (intoInstall) return { reason: `Merged into install #${intoInstall}. Billing Backfill covers service and TLC tickets.` };
@@ -440,7 +471,9 @@ export function planBackfill(read: Pick<BackfillRead, "lines" | "invoices">, ctx
 function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInvoiceRow[], ctx: BackfillContext): BackfillPlan {
   const wo = lineRows[0]?.wo ?? invoiceRows[0]?.wo ?? woCanonical(key);
   const invoiceDates = invoiceRows.map((i) => i.date).filter((d): d is string => !!d).sort();
-  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null);
+  // The Sales Orders the rows name; an invoice with none counts as its own (it is billing on none of them).
+  const rowSos = new Set([...invoiceRows.filter((i) => i.invoice).map((i) => soKey(i.so) || NO_SO), ...invoiceRows.map((i) => soKey(i.so)), ...lineRows.map((r) => soKey(r.sourceSo))].filter(Boolean));
+  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, rowSos);
   const empty: BackfillPlan = {
     key,
     wo,
@@ -466,8 +499,8 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
   }
   const warnings: string[] = [];
 
-  // Locked: already invoiced in KatzDesk. Only invoice records change.
-  const locked = t.invoices.some((i) => !isVoidedStatus(i.status));
+  // Locked: already invoiced in KatzDesk, or merged into an install as billed (10/30). Only invoice records change.
+  const locked = t.invoices.some((i) => !isVoidedStatus(i.status)) || !!t.billedOnInstall;
   const currentLines: BackfillChargeLine[] = t.lines.map((l) => ({ ...l, kind: kindForItem(l.item) }));
   const current = applyDiscount(chargesTotal(t.lines), t.discount);
 
@@ -617,7 +650,9 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
     : chargesChange || soChange || invoicesChange
       ? "write"
       : "same";
-  if (locked && (chargesChange || soChange)) {
+  if (t.billedOnInstall) {
+    warnings.push(`Merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}: only its NetSuite invoices are recorded; its charges and Sales Order stay as they are.`);
+  } else if (locked && (chargesChange || soChange)) {
     warnings.push(`Locked: invoiced already, so the charges${soChange ? " and Sales Order" : ""} stay as they are. An Admin can unlock the ticket to change them.`);
   }
   return {

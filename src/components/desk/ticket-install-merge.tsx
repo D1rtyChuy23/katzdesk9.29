@@ -65,8 +65,10 @@ export function MergedIntoInstallBanner({ job }: { job: ServiceJob }) {
       <p className="mt-1 text-xs text-muted-foreground">
         {[when ? `On ${when}` : null, job.mergedInstallBy ? `by ${job.mergedInstallBy}` : null].filter(Boolean).join(" ")}
         {when || job.mergedInstallBy ? ". " : ""}
-        Its charges, Ping notes, units, part lines and pings are on the install, and its text is under the install&apos;s notes. The ticket is kept as a
-        record and hidden from the lists.
+        {job.mergedBilledOn
+          ? `Its charges stay billed on ${job.mergedBilledOn} (the install lists them as billed); its Ping notes, units, part lines and pings are on the install, and its text is under the install's notes.`
+          : "Its charges, Ping notes, units, part lines and pings are on the install, and its text is under the install's notes."}{" "}
+        The ticket is kept as a record and hidden from the lists.
       </p>
       <div className="mt-2">
         <OpenLink entityType="install" id={job.mergedInstallId} className={LINK}>
@@ -109,11 +111,14 @@ function MoveRow({ label, value, testId }: { label: string; value: string; testI
 
 function PreviewBody({ p }: { p: InstallMergePreview }) {
   const m = p.moves;
-  const charges = m.chargeLines
-    ? `${count(m.chargeLines, "line")}, ${money(m.chargeTotal)}: on the install's invoice, waiting for an Admin to approve${
-        m.invoiceTotal !== m.chargeTotal ? ` (the invoice comes to ${money(m.invoiceTotal)})` : ""
-      }. They bill with the install now, not in the tickets' billing export.`
-    : "None";
+  // Billed on a Sales Order (10/30): the charges stay billed there and never go on the install's invoice.
+  const charges = m.billed
+    ? `${m.chargeLines ? `${count(m.chargeLines, "line")}, ${money(m.chargeTotal)}. ` : ""}${m.billed.text}`
+    : m.chargeLines
+      ? `${count(m.chargeLines, "line")}, ${money(m.chargeTotal)}: on the install's invoice, waiting for an Admin to approve${
+          m.invoiceTotal !== m.chargeTotal ? ` (the invoice comes to ${money(m.invoiceTotal)})` : ""
+        }. They bill with the install now, not in the tickets' billing export.`
+      : "None";
   return (
     <div className="mt-4 space-y-4 text-sm">
       <section>
@@ -192,9 +197,10 @@ export function InstallMergeDialog({
   });
   const p = preview.data;
   const merge = useMutation({
-    mutationFn: () => mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps } }),
+    // The Sales Order the confirm showed ('' when the charges go on the install's invoice): it merges only as shown.
+    mutationFn: () => mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "" } }),
     onSuccess: (r) => {
-      toast.success(`Merged into install #${r.installId}`);
+      toast.success(`Merged into install #${r.installId}${r.billedOn ? ` · its charges stay billed on ${r.billedOn}` : ""}`);
       onMerged(r);
     },
     onError: (e: Error) => {

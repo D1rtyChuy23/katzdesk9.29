@@ -20,6 +20,7 @@ import {
   type BackfillTicket,
 } from "@/lib/ops/billing-backfill";
 import { storeInvoicedProfit } from "@/lib/ops/charges-api";
+import { BILLED_ON_INSTALL_SO } from "@/lib/ops/merged-ticket";
 import { LIVE_INVOICE_SQL, loadInvoices } from "@/lib/ops/ticket-billing-api";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 
@@ -76,6 +77,7 @@ export async function loadBackfillContext(sql: Q, keys: string[]): Promise<Backf
     technician: string | null;
     duplicate_of: number | null;
     merged_install_id: number | null;
+    billed_on_install: string | null;
     received: string | null;
     completed: string | null;
     ns_so: string | null;
@@ -86,6 +88,7 @@ export async function loadBackfillContext(sql: Q, keys: string[]): Promise<Backf
     seen: string;
   }>(
     `select j.id, j.kind, j.wo, j.customer, j.technician, j.duplicate_of, j.merged_install_id,
+            ${BILLED_ON_INSTALL_SO("j.id")} as billed_on_install,
             to_char(j.received, 'YYYY-MM-DD') as received, to_char(j.completed_at, 'YYYY-MM-DD') as completed,
             j.ns_so, to_char(j.billed_at at time zone 'America/Chicago', 'YYYY-MM-DD') as billed_on,
             j.discount_kind, j.discount_value::text as discount_value, j.corrigo_net::text as corrigo_net, j.updated_at::text as seen
@@ -114,6 +117,7 @@ export async function loadBackfillContext(sql: Q, keys: string[]): Promise<Backf
       technician: r.technician,
       duplicateOf: r.duplicate_of ?? null,
       mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
+      billedOnInstall: r.billed_on_install?.trim() || null,
       received: r.received,
       completed: r.completed,
       so: r.ns_so?.trim() || null,
@@ -191,7 +195,7 @@ async function planFiles(sql: Q, files: BackfillFile[]): Promise<BackfillPreview
  * and a ticket planned unlocked still has no live invoice). Not locked: charges, discount, Sales Order and billed
  * date, then the invoices. Locked: the invoices only. Every ticket written gets a history line.
  */
-const APPLY_BACKFILL_SQL = `
+export const APPLY_BACKFILL_SQL = `
 with plan as (
   select * from jsonb_to_recordset($1::jsonb)
     as p(job_id int, seen text, locked boolean, write_charges boolean, dk text, dv numeric, set_so boolean, so text, billed_on date, log text)
@@ -200,7 +204,8 @@ with plan as (
     from service_jobs s
     join plan p on p.job_id = s.id
    where s.updated_at::text = p.seen
-     and s.duplicate_of is null
+     -- A ticket merged into an install as billed on its Sales Order takes its invoices only (10/30).
+     and (s.duplicate_of is null or (p.locked and ${BILLED_ON_INSTALL_SO("s.id")} is not null))
      and (p.locked or not ${LIVE_INVOICE_SQL("s.id")})
      for update of s
 ), ok as (

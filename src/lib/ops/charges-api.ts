@@ -34,7 +34,7 @@ import {
   type ChargeKind,
   type ChargeLine,
 } from "@/lib/ops/charges";
-import { mergedTicketRefusal, type MergedTicketRow } from "./merged-ticket";
+import { BILLED_ON_INSTALL_SO, mergedTicketRefusal, type MergedTicketRow } from "./merged-ticket";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -292,7 +292,10 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
 export async function invoicedPartLines(sql: Sql, range: { from: string | null; to: string | null }): Promise<{ lines: (ProfitLine & { live: boolean })[] }> {
   const jobs = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
     `select j.id, j.discount_kind, j.discount_value from service_jobs j
-      where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")}) and j.duplicate_of is null
+      where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")})
+        -- A ticket merged into an install as billed on its Sales Order (10/30) still counts, once: its lines never went
+        -- on the install's invoice.
+        and (j.duplicate_of is null or ${BILLED_ON_INSTALL_SO("j.id")} is not null)
         and ($1::date is null or coalesce(j.billed_at::date, j.completed_at::date) >= $1::date)
         and ($2::date is null or coalesce(j.billed_at::date, j.completed_at::date) <= $2::date)
         and exists (select 1 from ticket_charges c where c.job_id = j.id)
@@ -642,16 +645,24 @@ export async function recordTicketSalesOrder(sql: Sql, jobId: number, userId: st
                              else now() end,
             updated_at = now()
       where id = $1 and ($2::text is null or duplicate_of is null)
+        -- Merged into an install as billed on it (10/30): the Sales Order stays on the ticket.
+        and not ($2::text is null and ${BILLED_ON_INSTALL_SO("service_jobs.id")} is not null)
         and not ${LIVE_INVOICE_SQL("service_jobs.id")}
         and ${UNCHANGED_SINCE_READ("service_jobs", "$1")}
       returning id`,
     [jobId, so, billedAt || null],
   );
   if (!saved[0]) {
-    const dup = (await sql.query<MergedTicketRow>("select duplicate_of, merged_install_id from service_jobs where id = $1", [jobId]))[0];
+    const dup = (
+      await sql.query<MergedTicketRow & { billed_so: string | null }>(
+        `select duplicate_of, merged_install_id, ${BILLED_ON_INSTALL_SO("service_jobs.id")} as billed_so from service_jobs where id = $1`,
+        [jobId],
+      )
+    )[0];
     if (!dup) throw new Error("That ticket is no longer on the list.");
     const mergedSo = so ? mergedTicketRefusal(dup, "Enter the Sales Order there.") : null;
     if (mergedSo) throw new Error(mergedSo);
+    if (!so && dup.billed_so) throw new Error(`This ticket was merged into install #${dup.merged_install_id} as billed on ${dup.billed_so}, so its Sales Order stays.`);
     const lock = (await loadCharges(sql, jobId)).invoiceLock;
     if (lock) throw new Error(invoiceLockError(lock));
     throw new Error("The ticket changed while saving (another save or the Billing Backfill). Reload and try again.");

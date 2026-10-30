@@ -65,6 +65,41 @@ export function InvoiceButton({ type, id, className }: { type: InvoiceTarget; id
   );
 }
 
+/** A ticket merged into the install as billed on a Sales Order (10/30): its lines, its discount and what was billed. */
+function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
+  const amounts = b.lines.map((l) => Math.round(l.qty * l.rate * 100) / 100);
+  const off = Math.round((amounts.reduce((sum, a) => sum + a, 0) - b.total) * 100) / 100;
+  return (
+    <li data-testid="invoice-billed-ticket">
+      <p className="text-sm font-medium">
+        {b.ticket} · billed on {b.so}
+        {b.invoices ? ` (NetSuite ${b.invoices})` : ""} · {money(b.total)}
+      </p>
+      {b.lines.length ? (
+        <ul className="mt-1 space-y-0.5 text-sm text-muted-foreground">
+          {b.lines.map((l, i) => (
+            <li key={i} className="flex justify-between gap-3">
+              <span className="min-w-0">
+                {l.item}
+                {l.description && l.description !== l.item ? ` · ${l.description}` : ""} · {l.qty} × {money(l.rate)}
+              </span>
+              <span className="tabular shrink-0">{money(amounts[i]!)}</span>
+            </li>
+          ))}
+          {off > 0.004 ? (
+            <li className="flex justify-between gap-3" data-testid="invoice-billed-discount">
+              <span>Discount</span>
+              <span className="tabular shrink-0">−{money(off)}</span>
+            </li>
+          ) : null}
+        </ul>
+      ) : (
+        <p className="mt-1 text-sm text-muted-foreground">No charge lines were on the ticket.</p>
+      )}
+    </li>
+  );
+}
+
 /**
  * The Invoice window: billing info from the account, the lines (parts with description, MPN, photo, qty and price;
  * labor), one discount, the total. Lines are added and removed here. Approve saves it; Cancel saves nothing.
@@ -486,6 +521,19 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                 </div>
               </dl>
             </section>
+
+            {/* Tickets merged in as billed on a Sales Order (10/30): billed there, never on this invoice or its total. */}
+            {v.billedElsewhere.length ? (
+              <section className="rounded-lg border border-dashed border-border p-3" data-testid="invoice-billed">
+                <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Already billed (not on this invoice)</h3>
+                <ul className="mt-2 space-y-3">
+                  {v.billedElsewhere.map((b) => (
+                    <BilledTicket key={b.jobId} b={b} />
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">These charges were billed on the Sales Order shown and are not billed again.</p>
+              </section>
+            ) : null}
 
             <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
               <p className="mr-auto text-xs text-muted-foreground" data-testid="invoice-status">
