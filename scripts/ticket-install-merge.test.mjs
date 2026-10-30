@@ -378,9 +378,13 @@ test("another account's name for the same place: a Walk-In ticket merges, with a
   const { pg, sql } = await fresh();
   const jobId = await ticket(pg, { customer: "Walk-In" });
   const installId = await install(pg);
+  await pg.query("insert into assets (kind, model, serial, site, status, purpose, sold_to, job_id) values ('equip', 'Test Brewer', 'TB-2', 'field', 'assigned', 'Service', 'Walk-In', $1)", [jobId]);
   const p = await preview(sql, jobId, installId);
   assert.equal(p.refusal, null);
   assert.deepEqual(p.warnings, [`The ticket is on Walk-In; the install keeps ${CAFE}.`]);
+  await merge(sql, jobId, installId, p.stamps);
+  // The unit is at the install's account now.
+  assert.deepEqual(await one(pg, "select install_id, job_id, sold_to, purpose from assets"), { install_id: installId, job_id: null, sold_to: CAFE, purpose: "Install" });
 });
 
 test("the install's invoice: an approved one takes no charges, a waiting one takes more with a matching discount, 200 lines at most", async () => {
@@ -420,10 +424,13 @@ test("the install's invoice: an approved one takes no charges, a waiting one tak
     assert.equal(pc.refusal, `Install #${installId}'s invoice has a 10% discount that SC-202610-903 (${WO}) doesn't. Make them match first.`);
     const pb = await preview(sql, b, installId);
     assert.deepEqual([pb.refusal, pb.moves.chargeTotal, pb.moves.invoiceTotal], [null, 22.5, 157.5]);
+    const savedFirst = (await one(pg, "select submitted_at::text as at from invoices where entity_type = 'install'")).at;
     await tick();
     await merge(sql, b, installId, pb.stamps);
-    const h = await one(pg, "select id, total, submitted_by from invoices where entity_type = 'install'");
+    const h = await one(pg, "select id, total, submitted_by, submitted_at::text as at from invoices where entity_type = 'install'");
     assert.deepEqual([h.total, h.submitted_by], ["157.50", "boss"]);
+    // Saved for approval again: an Invoice window opened in between approves nothing until it reads the new lines.
+    assert.notEqual(h.at, savedFirst);
     assert.deepEqual((await pg.query("select item, sort from invoice_lines where invoice_id = $1 order by sort", [h.id])).rows, [
       { item: "Service : SERVICELABOR", sort: 1 },
       { item: "PARTS : TESTGASKET", sort: 2 },
