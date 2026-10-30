@@ -534,6 +534,9 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     const beansOwn = await unit("TESTSN-BEAN", { site: "field", status: "assigned", sold_to: "Bean Test Cafe", job_id: job });
     assert.equal((await pull(cust, "TESTSN-BEAN", "u-tech")).assetId, beansOwn, "the rebuild's own customer: no confirm");
     assert.deepEqual(await links(beansOwn), { install_id: null, job_id: job }, "and it stays on that customer's ticket");
+    const shopStock = await unit("TESTSN-SHOPSTOCK", { pallet: "E", level: 1, status: "assigned", sold_to: SHOP });
+    await assert.rejects(() => pull(sd, "TESTSN-SHOPSTOCK", "u-tech"), /^Error: Serial TESTSN-SHOPSTOCK is already assigned to Katz shop \/ stock at Back · E-L1\. Confirm reuse or cancel\.$/, "a tech still confirms a shop unit");
+    assert.equal((await pull(sd, "TESTSN-SHOPSTOCK", "u-tech", true)).assetId, shopStock);
     const adminUnit = await unit("TESTSN-ADMIN", { pallet: "C", level: 1 });
     assert.equal((await pull(sd, "TESTSN-ADMIN", "u-owner")).assetId, adminUnit);
     assert.equal((await pings(pg)).length, pings0, "only Warehouse's pulls ping");
