@@ -18,6 +18,8 @@ export type StackTicket = {
   status: string;
   nsSo: string | null;
   duplicateOf: number | null;
+  /** Merged into an install (10/30): its duplicateOf is its own id. */
+  mergedInstallId?: number | null;
   phoneResolved: boolean;
   wo: string | null;
   callId: string | null;
@@ -38,6 +40,7 @@ export function stackRefusal(pm: StackPm, ticket: StackTicket, stackedCount: num
   if (so) return `Ticket #${ticket.id} is billed (${so}). Clear its Sales Order first.`;
   // Invoiced in NetSuite: its charges are locked, so a PM put on it could never be billed there (10/28 review).
   if (ticket.invoiced) return `Ticket #${ticket.id} is invoiced in NetSuite (${ticket.invoiced}). Bill the PM on its own.`;
+  if (ticket.mergedInstallId) return `Ticket #${ticket.id} was merged into install #${ticket.mergedInstallId}. A PM stacks on a ticket, not an install.`;
   if (ticket.duplicateOf) return `Ticket #${ticket.id} was merged into #${ticket.duplicateOf}. Stack the PM there.`;
   if (pm.stackedJobId === ticket.id) return `PM #${pm.id} is already on this ticket.`;
   if (pm.stackedJobId != null) return `PM #${pm.id} is already on ticket #${pm.stackedJobId}. Unstack it first.`;

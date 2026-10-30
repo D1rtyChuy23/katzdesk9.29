@@ -26,12 +26,14 @@ export type ServiceDupRow = {
   urgency: string | null;
   done: boolean;
   duplicate_of: number | null;
+  /** Merged into an install (10/30): hidden, and never merged with another ticket. */
+  merged_install_id?: number | null;
 };
 
 const DUP_COLS = `
   id, kind, call_id, customer, contact, phone, equipment, issue, call_type,
   technician, wo, status, notes, work_done, completed_at, scheduled, received,
-  urgency, done, duplicate_of
+  urgency, done, duplicate_of, merged_install_id
 `;
 
 export function mergeNotes(keeper: string | null | undefined, extra: string | null | undefined): string | null {
@@ -564,6 +566,11 @@ export async function mergeServiceJobs(
   const keeper = await ultimateKeeper(sql, keeperId);
   const extra = await loadJob(sql, extraId);
   if (!keeper || !extra) return null;
+  // A ticket merged into an install is hidden and stays out of ticket merges (10/30).
+  if (extra.merged_install_id) return { refused: `Ticket #${extra.id} was merged into install #${extra.merged_install_id}.` };
+  if (keeper.merged_install_id) {
+    return { refused: `Ticket #${keeper.id} was merged into install #${keeper.merged_install_id}. Merge ticket #${extra.id} into that install instead.` };
+  }
   if (extra.id === keeper.id) return { keeperId: keeper.id, extraId };
   if (extra.duplicate_of === keeper.id) return { keeperId: keeper.id, extraId: extra.id };
   if (extra.duplicate_of) return { refused: `Ticket #${extra.id} was already merged into #${extra.duplicate_of}.` };
@@ -624,6 +631,7 @@ export async function tryMergeServiceDuplicate(
   const keeper = await ultimateKeeper(sql, keeperId);
   const extra = await loadJob(sql, extraId);
   if (!keeper || !extra || extra.id === keeper.id) return "skipped";
+  if (keeper.merged_install_id || extra.merged_install_id) return "skipped";
   if (extra.duplicate_of) {
     return extra.duplicate_of === keeper.id ? "merged" : "skipped";
   }

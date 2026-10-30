@@ -246,6 +246,11 @@ export type CorrigoHit = {
   corrigoId?: string | null;
   /** Installs only: every work order the install carries (the primary included), with Corrigo's status for each. */
   wos?: InstallWo[];
+  /**
+   * A ticket an Admin merged into an install whose install was archived since (10/30). The import writes nothing for
+   * its WO (a live install it went into is found as that install instead).
+   */
+  mergedInstallId?: number | null;
 };
 
 /** One work order on an install project, with the status Corrigo last gave it. */
@@ -1440,6 +1445,7 @@ export function resolvePreviewRow(
     (strangers.length > 0 ||
       (postWrapNumber && (existing ? !recentTicket(existing, today) && others.length > 0 : group.length > 0)));
   const note = woHit ? matchNote(rec.rawWo, rec.canonicalWo, woHit.wo) : null;
+  const archivedMerge = woHit?.mergedInstallId ? `merged into install #${woHit.mergedInstallId}, which was archived: not imported` : null;
 
   const row: CorrigoPreviewRow = {
     wo: rec.canonicalWo,
@@ -1449,6 +1455,7 @@ export function resolvePreviewRow(
     matchNote:
       [
         note,
+        archivedMerge,
         pick?.note,
         shared ?? (wrapRepeat ? wrapRepeatNote(rec.canonicalWo) : null),
       ]

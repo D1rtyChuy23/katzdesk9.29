@@ -82,6 +82,7 @@ import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./i
 import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
 import { deliverPings } from "./notify";
+import { notesAfterStaleSave } from "./stale-notes";
 
 const INITIALS_TO_PRODUCER = Object.fromEntries(Object.entries(PRODUCER_INITIALS).map(([name, initials]) => [initials.toLowerCase(), name]));
 function salesName(owners: any) {
@@ -217,6 +218,9 @@ function mapJob(r: any, today: any) {
 		updatedAt: String(r.updated_at),
 		urgency: r.urgency || "Normal",
 		duplicateOf: r.duplicate_of ?? null,
+		mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
+		mergedInstallAt: r.merged_install_at ? (r.merged_install_at instanceof Date ? r.merged_install_at.toISOString() : String(r.merged_install_at)) : null,
+		mergedInstallBy: r.merged_install_by ?? null,
 		siblings: [],
 		serialNotice: r.serial_notice ?? null,
 		aviKatz: false,
@@ -853,6 +857,8 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	const sql = await ready();
 	const cur = await sql`select * from service_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Job not found");
+	// A ticket merged into an install is hidden; its work is on the install now (10/30).
+	if (cur[0].merged_install_id) throw new Error(`This ticket was merged into install #${cur[0].merged_install_id}. Open the install to keep working.`);
 	if (data.customer !== undefined) {
 		const partners = await sql`select id, customer from pm_jobs where stacked_job_id = ${data.id}`;
 		const refusal = stackCustomerRefusal(cur[0].customer, data.customer, partners.map((p: { id: number; customer: string | null }) => ({ id: Number(p.id), customer: p.customer })), "ticket");
@@ -1440,7 +1446,9 @@ type UpdateInstallInput = { id: number; customer?: string; equipment?: string | 
 	siteContact?: string | null;
 	contactPhone?: string | null;
 	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
-	machinesBase?: MachineSpec[] | string | null };
+	machinesBase?: MachineSpec[] | string | null;
+	/** The notes as the saving window loaded them. With it, text the server gained since (a merged ticket's) is kept (notesAfterStaleSave). */
+	notesBase?: string | null };
 
 /**
  * A window's list saved over a newer one: what the server's list gained since the window last saw it (a machine added or
@@ -1499,6 +1507,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	}
 	const catalog = await loadEquipCatalog(sql);
 	mergeStaleList(data, c, catalog);
+	// A window opened before a ticket was merged into this install (10/30) keeps the ticket's text under the notes.
+	if (data.notes !== undefined && data.notesBase !== undefined) data.notes = notesAfterStaleSave(c.notes ?? null, data.notesBase, data.notes);
 	const machinesJson = data.machines === undefined ? c.machines : data.machines == null ? null : (() => {
 		const raw = typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
 		const parsed = parseMachinesJson(raw);

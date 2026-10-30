@@ -376,6 +376,8 @@ export function InstallSheet({
   const [hydratedId, setHydratedId] = useState<number | null>(null);
   /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
   const loadedSpecs = useRef<MachineSpec[]>([]);
+  /** The notes as the window loaded them, then as it last sent them: a save keeps what the server added since (10/30). */
+  const loadedNotes = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
   const specsRef = useRef(specs);
@@ -412,6 +414,11 @@ export function InstallSheet({
     setSpecs(loaded.map((s) => ({ ...s })));
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
+  // The Notes box shows the notes the window opened with until it closes; a read since doesn't change it.
+  useEffect(() => {
+    loadedNotes.current = row?.notes ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row?.id]);
   // Every field the merge compares, and each row's unit id: a change to any of them on the server reaches this window.
   const machineSig = JSON.stringify(row?.machines ?? []);
   useEffect(() => {
@@ -712,6 +719,9 @@ export function InstallSheet({
                       const fd = new FormData(e.currentTarget);
                       const machineFields = changedMachineFields(specs, loadedSpecs.current);
                       if (Object.keys(machineFields).length) loadedSpecs.current = specs;
+                      const notes = String(fd.get("notes") || "") || null;
+                      const notesBase = loadedNotes.current;
+                      loadedNotes.current = notes;
                       save.mutate({
                         id: row.id,
                         customer: String(fd.get("customer") || row.customer),
@@ -723,7 +733,8 @@ export function InstallSheet({
                         technician: String(fd.get("technician") || "") || null,
                         // WOs are added and removed on the Work orders list, which saves at once.
                         reqsReady: String(fd.get("reqsReady") || "") || null,
-                        notes: String(fd.get("notes") || "") || null,
+                        notes,
+                        notesBase,
                         workDone: String(fd.get("workDone") || "") || null,
                         completedAt: String(fd.get("completedAt") || "") || null,
                         accountRep: String(fd.get("accountRep") || "") || null,
