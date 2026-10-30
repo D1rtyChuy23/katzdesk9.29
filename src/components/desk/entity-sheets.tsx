@@ -376,8 +376,12 @@ export function InstallSheet({
   const [hydratedId, setHydratedId] = useState<number | null>(null);
   /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
   const loadedSpecs = useRef<MachineSpec[]>([]);
-  /** The notes as the window loaded them, then as it last sent them: a save keeps what the server added since (10/30). */
-  const loadedNotes = useRef<string | null>(null);
+  /**
+   * Each install's notes as this window knows the server has them: as it opened them, then as each save that went
+   * through sent them. A save sends that as its base when it runs, not when it was queued, so the server keeps what it
+   * added since (a ticket merged into the install, 10/30), and a save queued behind a refused one is based on what is stored.
+   */
+  const storedNotes = useRef(new Map<number, string | null>());
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
   const specsRef = useRef(specs);
@@ -416,7 +420,7 @@ export function InstallSheet({
   }, [row?.id, catalog.join("\n")]);
   // The Notes box shows the notes the window opened with until it closes; a read since doesn't change it.
   useEffect(() => {
-    loadedNotes.current = row?.notes ?? null;
+    if (row) storedNotes.current.set(row.id, row.notes ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id]);
   // Every field the merge compares, and each row's unit id: a change to any of them on the server reaches this window.
@@ -464,12 +468,16 @@ export function InstallSheet({
   const save = useMutation({
     scope: queue,
     mutationFn: (vars: SaveVars) => {
-      const { builtOn, sent, ...d } = vars;
+      const { builtOn, sent, ...rest } = vars;
       void sent;
+      // The notes this save's text was typed on go with it, read now: the server keeps what it added under them since.
+      const d = rest.notes !== undefined && storedNotes.current.has(rest.id) ? { ...rest, notesBase: storedNotes.current.get(rest.id) ?? null } : rest;
       // The list this save's rows were built on goes with it: the server keeps whatever changed there since.
       return updateInstall({ data: d.machines !== undefined && builtOn ? { ...d, machinesBase: JSON.stringify(baseOf(builtOn)) } : d });
     },
     onSuccess: (saved, vars) => {
+      // Stored: this window's next notes are typed on these.
+      if (vars.notes !== undefined) storedNotes.current.set(vars.id, vars.notes ?? null);
       const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent");
       const machineOnly = keys.every((k) =>
         ["equipment", "serial", "powerVoltage", "machines"].includes(k),
@@ -497,8 +505,6 @@ export function InstallSheet({
     },
     onError: (e, vars) => {
       if (skippedRead.current) lookAgain();
-      // Not stored: the window's notes are still on top of what it sent this save on, unless a later save moved on.
-      if (vars.notesBase !== undefined && loadedNotes.current === vars.notes) loadedNotes.current = vars.notesBase;
       // Not stored: a later save built on this list is based on what this one was built on, and the window expects that.
       if (vars.sent && vars.builtOn) {
         refused.current.set(vars.sent, vars.builtOn);
@@ -721,9 +727,6 @@ export function InstallSheet({
                       const fd = new FormData(e.currentTarget);
                       const machineFields = changedMachineFields(specs, loadedSpecs.current);
                       if (Object.keys(machineFields).length) loadedSpecs.current = specs;
-                      const notes = String(fd.get("notes") || "") || null;
-                      const notesBase = loadedNotes.current;
-                      loadedNotes.current = notes;
                       save.mutate({
                         id: row.id,
                         customer: String(fd.get("customer") || row.customer),
@@ -735,8 +738,8 @@ export function InstallSheet({
                         technician: String(fd.get("technician") || "") || null,
                         // WOs are added and removed on the Work orders list, which saves at once.
                         reqsReady: String(fd.get("reqsReady") || "") || null,
-                        notes,
-                        notesBase,
+                        // Sent with the notes the window knows are stored when the save runs (10/30).
+                        notes: String(fd.get("notes") || "") || null,
                         workDone: String(fd.get("workDone") || "") || null,
                         completedAt: String(fd.get("completedAt") || "") || null,
                         accountRep: String(fd.get("accountRep") || "") || null,

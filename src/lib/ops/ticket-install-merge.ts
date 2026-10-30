@@ -342,7 +342,8 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
          (select count(*)::int from ticket_part_lines p
            where p.job_id = $1 or p.job_id in (select s.id from service_jobs s where s.duplicate_of = $1 and s.id <> $1)) as part_lines,
          (select count(*)::int from service_jobs s where s.duplicate_of = $1 and s.id <> $1) as merged_tickets,
-         (select count(*)::int from wo_history h where h.job_id = $1) as wo_history,
+         (select count(*)::int from wo_history h
+           where h.job_id = $1 or h.job_id in (select s.id from service_jobs s where s.duplicate_of = $1 and s.id <> $1)) as wo_history,
          exists (select 1 from repair_quotes q where q.job_id = $1) as has_quote,
          (select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti where ti.job_id = $1) as ns_invoices,
          (select string_agg(p.id::text, ',' order by p.id) from pm_jobs p where p.stacked_job_id = $1) as stacked_pms,
@@ -480,6 +481,11 @@ export function mergeTicketIntoInstallSql(): string {
        and not (
          exists (select 1 from lk_head h where h.approved_at is not null)
          and exists (select 1 from ticket_charges c where c.job_id = j.id)
+       )
+       -- QuickBooks history (its own, or a ticket's merged into it), read the same way: its charges may be billed already.
+       and not (
+         exists (select 1 from ticket_charges c where c.job_id = j.id)
+         and ticket_has_quickbooks_history(j.id)
        )
   ), head as (
     -- The charges go on the install's invoice, waiting for an Admin to approve them; never onto an approved one. The
@@ -781,22 +787,36 @@ export async function listTicketInstallPairsFor(sql: Q, userId: string, kind: "s
 
 /**
  * The install a ticket was merged into, and the live one its work is on now: the install itself, or the install it
- * was merged into later. liveInstallId is null when that install was archived. Null for a ticket not merged into one.
+ * went into later (liveInstallIds). liveInstallId is null when that ends archived. Null for a ticket not merged into one.
  */
 export async function mergedInstallTarget(sql: Q, jobId: number): Promise<{ installId: number; liveInstallId: number | null } | null> {
-  const r = (
-    await sql.query<{ install_id: number; archived: boolean; keeper_id: number | null; keeper_archived: boolean | null }>(
-      `select i.id as install_id, i.archived, k.id as keeper_id, k.archived as keeper_archived
-         from service_jobs j
-         join installs i on i.id = j.merged_install_id
-         left join installs k on k.id = i.duplicate_of and i.archived
-        where j.id = $1`,
-      [jobId],
-    )
-  )[0];
-  if (!r) return null;
-  const live = !r.archived ? Number(r.install_id) : r.keeper_id != null && !r.keeper_archived ? Number(r.keeper_id) : null;
-  return { installId: Number(r.install_id), liveInstallId: live };
+  const r = (await sql.query<{ merged_install_id: number | null }>("select merged_install_id from service_jobs where id = $1", [jobId]))[0];
+  if (r?.merged_install_id == null) return null;
+  const installId = Number(r.merged_install_id);
+  return { installId, liveInstallId: (await liveInstallIds(sql, [installId])).get(installId) ?? null };
+}
+
+/**
+ * Each install's live one: itself, or, once it was merged into another, the install it went into, as many merges on as
+ * it takes (20 at most, so a loop ends). An install archived on its own, or whose chain ends archived, has none.
+ */
+export async function liveInstallIds(sql: Q, ids: number[]): Promise<Map<number, number>> {
+  if (!ids.length) return new Map();
+  const rows = await sql.query<{ start_id: number; id: number }>(
+    `with recursive hop as (
+       select i.id as start_id, i.id, i.archived, i.duplicate_of, 0 as depth
+         from installs i
+        where i.id = any($1::int[])
+       union all
+       select h.start_id, n.id, n.archived, n.duplicate_of, h.depth + 1
+         from hop h
+         join installs n on n.id = h.duplicate_of
+        where h.archived and h.depth < 20
+     )
+     select distinct on (start_id) start_id, id from hop where not archived order by start_id, depth`,
+    [ids],
+  );
+  return new Map(rows.map((r) => [Number(r.start_id), Number(r.id)]));
 }
 
 // ── Server functions ────────────────────────────────────────────────────────────────────────────────────────────────

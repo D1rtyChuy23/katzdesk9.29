@@ -42,7 +42,7 @@ import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { moveInstallUnits } from "@/lib/ops/install-projects";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
-import { mergedInstallTarget } from "@/lib/ops/ticket-install-merge";
+import { liveInstallIds, mergedInstallTarget } from "@/lib/ops/ticket-install-merge";
 
 export type CorrigoApplyResult = {
   updated: number;
@@ -152,20 +152,26 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       order by i.id asc`,
   );
   // A ticket an Admin merged into an install (10/30) is that install's: its WO and its Corrigo id find the install (or
-  // the install it was merged into since), never the hidden ticket. When that install was archived, the ticket stays a
-  // hit of its own, so the row goes on nothing and is refused (applyCorrigoRows) instead of opening a new ticket.
+  // the install it went into since, however many install merges on), never the hidden ticket. When that install was
+  // archived, the ticket stays a hit of its own, so the row goes on nothing and is refused (applyCorrigoRows) instead of
+  // opening a new ticket.
   const mergedIds = [...new Set(jobs.map((r) => r.merged_install_id).filter((id): id is number => id != null).map(Number))];
+  const live = await liveInstallIds(sql, mergedIds);
+  const liveIds = [...new Set(live.values())];
+  const liveRows = liveIds.length
+    ? await sql.query<{ id: number; customer: string; equip_status: string | null; complete: boolean; completed_at: string | null }>(
+        `select t.id, t.customer, t.equip_status, t.complete, to_char(t.completed_at, 'YYYY-MM-DD') as completed_at
+           from installs t
+          where t.id = any($1::int[]) and t.archived = false`,
+        [liveIds],
+      )
+    : [];
+  const liveById = new Map(liveRows.map((t) => [Number(t.id), t]));
   const targets = new Map(
-    (mergedIds.length
-      ? await sql.query<{ merged_id: number; id: number; customer: string; equip_status: string | null; complete: boolean; completed_at: string | null }>(
-          `select i.id as merged_id, t.id, t.customer, t.equip_status, t.complete, to_char(t.completed_at, 'YYYY-MM-DD') as completed_at
-             from installs i
-             join installs t on t.id = case when i.archived and i.duplicate_of is not null then i.duplicate_of else i.id end
-            where i.id = any($1::int[]) and t.archived = false`,
-          [mergedIds],
-        )
-      : []
-    ).map((t) => [Number(t.merged_id), t]),
+    [...live].flatMap(([mergedId, id]) => {
+      const t = liveById.get(id);
+      return t ? [[mergedId, t] as const] : [];
+    }),
   );
   const installWos = await loadInstallWos(sql, [...installs.map((r) => r.id), ...[...targets.values()].map((t) => Number(t.id))]);
   const intoInstall = (r: (typeof jobs)[number]) => (r.merged_install_id == null ? undefined : targets.get(Number(r.merged_install_id)));

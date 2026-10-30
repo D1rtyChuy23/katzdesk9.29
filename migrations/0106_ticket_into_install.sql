@@ -28,6 +28,16 @@ create or replace function ticket_keeps_its_billing(job int) returns boolean lan
       or exists (select 1 from pm_jobs p where p.stacked_job_id = job)
 $$;
 
+-- QuickBooks history on the ticket, or on a ticket merged into it before (a ticket merge moves the charges to the ticket
+-- kept and leaves the history where it was): its charges may be billed already. Read fresh, the same way.
+create or replace function ticket_has_quickbooks_history(job int) returns boolean language sql volatile as $$
+  select exists (
+    select 1 from wo_history h
+     where h.job_id = job
+        or h.job_id in (select s.id from service_jobs s where s.duplicate_of = job and s.id <> job)
+  )
+$$;
+
 -- One row per merge: who, when, the text added under the install's notes, and what moved, by id (the ticket's charge
 -- lines and the invoice lines they became, Ping notes, pings, units, part lines, rebuilds, and tickets merged into it
 -- before), so a merge can be traced or undone by hand.
@@ -45,8 +55,9 @@ create index if not exists ticket_install_merges_install_idx on ticket_install_m
 
 -- An install window opened before the install's notes changed (a ticket merged into it adds its text under them) keeps
 -- what the server added, worked out on the row the save writes. The window that didn't touch the notes leaves them; one
--- that did keeps its own text, then what was added after it, when the server only added to the end. Anything else is the
--- window's, as before. Line breaks are compared as \n; trailing blanks don't count.
+-- that did keeps its own text, then what was added under the notes it opened with, when the server only added lines at
+-- the end and the window doesn't have them already (saved twice, say). Anything else is the window's, as before: a
+-- change inside those notes, or on their last line. Line breaks are compared as \n; blanks at either end don't count.
 create or replace function notes_after_stale_save(stored text, base text, sent text) returns text language sql immutable as $$
   with v as (
     select replace(replace(coalesce(stored, ''), E'\r\n', E'\n'), E'\r', E'\n') as s,
@@ -55,15 +66,19 @@ create or replace function notes_after_stale_save(stored text, base text, sent t
   ), w as (
     select s, b, t, rtrim(b, E' \t\n') as bt from v
   ), x as (
-    select s, b, t, bt, ltrim(substr(s, length(bt) + 1), E' \t\n') as added, rtrim(t, E' \t\n') as own from w
+    select s, b, t, bt, substr(s, length(bt) + 1) as rest, rtrim(t, E' \t\n') as own from w
+  ), y as (
+    select s, b, t, bt, rest, own, btrim(rest, E' \t\n') as added from x
   )
   select case
-           when s = b then sent
-           when t = b then stored
-           when left(s, length(bt)) <> bt then sent
+           when s = b then sent                                  -- nothing changed on the server since the window read it
+           when t = b then stored                                -- the window didn't touch the notes
+           when left(s, length(bt)) <> bt then sent              -- changed inside the notes the window opened with
+           when bt <> '' and rest !~ E'^[ \t]*\n' then sent      -- changed on their last line, not added under it
            when added = '' then sent
            when own = '' then added
+           when position(E'\n' || added || E'\n' in E'\n' || own || E'\n') > 0 then sent  -- the window has those lines
            else own || E'\n\n' || added
          end
-    from x
+    from y
 $$;

@@ -997,8 +997,9 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 	time: z.string().nullable(),
 	technician: z.string().trim().max(80).nullable()
-}).parse(d)).handler(async ({ data, context }: any): Promise<{ ok: true; date: string; time: string | null; technician: string | null }> => {
-	const sql = await ready();
+}).parse(d)).handler(async ({ data, context }: any) => moveBoardBlockFor(await ready(), data, context));
+/** The body of moveBoardBlock. */
+export async function moveBoardBlockFor(sql: any, data: { type: BoardType; id: number; date: string; time: string | null; technician: string | null }, context: { userId: string }): Promise<{ ok: true; date: string; time: string | null; technician: string | null }> {
 	const time = data.time == null ? null : cleanTime(data.time);
 	if (data.time != null && !time) throw new Error("That is not a time of day.");
 	const tech = data.technician ? canonicalTechName(data.technician) ?? data.technician : null;
@@ -1006,9 +1007,19 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	const dateCol = data.type === "pm" ? "projected" : data.type === "install" ? "install_date" : "scheduled";
 	const cur = (await sql.query(`select * from ${table} where id = $1`, [data.id]))[0] as any;
 	if (!cur) throw new Error("That work is no longer on the Desk.");
+	// A ticket merged into an install (10/30) is planned on the install now: a board opened before the merge is refused.
+	const mergedInto = (id: unknown) => `This ticket was merged into install #${id}. Plan the install instead.`;
+	if (table === "service_jobs" && cur.merged_install_id) throw new Error(mergedInto(cur.merged_install_id));
 	const locked = data.type === "install" ? isInstalled({ complete: cur.complete, equipStatus: cur.equip_status }) : boardLocked({ status: cur.status, done: cur.done });
 	if (locked) throw new Error("Completed and cancelled work does not move.");
-	await sql.query(`update ${table} set ${dateCol} = $2, sched_time = $3, technician = $4, updated_at = now() where id = $1`, [data.id, data.date, time, tech]);
+	const moved = await sql.query(
+		`update ${table} set ${dateCol} = $2, sched_time = $3, technician = $4, updated_at = now() where id = $1${table === "service_jobs" ? " and merged_install_id is null" : ""} returning id`,
+		[data.id, data.date, time, tech]
+	);
+	if (!moved[0]) {
+		const into = table === "service_jobs" ? (await sql.query("select merged_install_id from service_jobs where id = $1", [data.id]))[0]?.merged_install_id : null;
+		throw new Error(into ? mergedInto(into) : "That work is no longer on the Desk.");
+	}
 	if (data.type === "install") await pingRepTechAssigned(sql, context.userId, { id: data.id, customer: String(cur.customer), before: cur.technician, after: tech, rep: cur.account_rep });
 	// The new primary cannot also be the ticket's secondary.
 	if (table === "service_jobs" && tech && sameTech(cur.technician2, tech)) await sql.query("update service_jobs set technician2 = null where id = $1", [data.id]);
@@ -1019,7 +1030,7 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	]);
 	if (extra) await logActivity(sql, context.userId, data.type === "service" || data.type === "tlc" ? cur.kind : data.type, data.id, "updated", extra);
 	return { ok: true, date: data.date, time, technician: tech };
-});
+}
 export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }: any): Promise<PmJob[]> => {
 	const sql = await ready();
 	const marks = await loadAccountMarks(sql);
@@ -2188,8 +2199,9 @@ export async function unassignAssetFromInstallFor(sql: any, data: { assetId: num
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 }
 export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => unassignAssetFromInstallFor(await ready(), data, context));
-export const assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; customer: string; jobId?: number | null }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+export const assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; customer: string; jobId?: number | null }) => d).handler(async ({ data, context }: any) => assignAssetToServiceFor(await ready(), data, context));
+/** Pull for service: the unit goes to the account, on its newest open ticket that isn't hidden (merged), if it has one. */
+export async function assignAssetToServiceFor(sql: any, data: { assetId: number; customer: string; jobId?: number | null }, context: { userId: string }) {
 	const customer = data.customer.trim();
 	if (!customer) throw new Error("Pick a customer");
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
@@ -2209,6 +2221,7 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
         where lower(customer) = lower(${name})
           and done = false
           and status not in ('Complete', 'Completed', 'Closed', 'Cancelled')
+          and duplicate_of is null
         order by updated_at desc
         limit 1`)[0];
 	const originSite = asset.origin_site ?? asset.site;
@@ -2242,7 +2255,7 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
 	await logActivity(sql, context.userId, "asset", data.assetId, "assigned-service", detail);
 	if (job) await logActivity(sql, context.userId, job.kind, job.id, "assigned-asset", detail);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
-});
+}
 export const unassignAssetFromService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];

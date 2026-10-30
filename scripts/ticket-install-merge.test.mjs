@@ -24,7 +24,7 @@ const { planBackfill } = await import("../src/lib/ops/billing-backfill.ts");
 const { loadBackfillContext } = await import("../src/lib/ops/billing-backfill-api.ts");
 const { loadWindowRows } = await import("../src/lib/ops/billing-report-api.ts");
 const { formatLongDate, todayChicago, addDays } = await import("../src/lib/ops/clock.ts");
-const { updateInstallFor } = await import("../src/lib/ops/api.ts");
+const { updateInstallFor, assignAssetToServiceFor, moveBoardBlockFor } = await import("../src/lib/ops/api.ts");
 const { saveRepairQuoteFor } = await import("../src/lib/ops/repair-quote-api.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
@@ -296,8 +296,23 @@ test("an install window opened before the merge keeps the merged ticket's note w
   assert.equal(await after("NOTE", null, null), "NOTE");
   assert.equal(await after("NOTE", "", null), "NOTE");
   assert.equal(await after("Rewritten elsewhere", "A", "A edited"), "A edited");
+  assert.equal(await after("Rewritten elsewhere", "A", "A"), "Rewritten elsewhere");
+  assert.equal(await after("B\nX", "A", "A2"), "A2");
+  // The window cleared its notes: what was added since, that it never showed, stays.
+  assert.equal(await after("A\n\nNOTE", "A", ""), "NOTE");
   assert.equal(await after("A", "A", null), null);
   assert.equal(await after("A\n\n", "A", "B"), "B");
+  // Saved twice, or by two windows: what the server has already is never added again.
+  assert.equal(await after("A\n\nmine", "A", "A\n\nmine"), "A\n\nmine");
+  assert.equal(await after("A\n\nmine\n", "A", "A\n\nmine"), "A\n\nmine");
+  assert.equal(await after("A\n\nNOTE", "A", "A, typed\n\nNOTE"), "A, typed\n\nNOTE");
+  // Only whole lines count as had: a line that is part of one of the window's is still added.
+  assert.equal(await after("A\nok", "A", "A\nlook"), "A\nlook\n\nok");
+  // Changed on the notes' last line rather than added under them: the window's, as before.
+  assert.equal(await after("Hello world", "Hello", "Hello there"), "Hello there");
+  assert.equal(await after("Hello  \n\nNOTE", "Hello", "Hello there"), "Hello there\n\nNOTE");
+  // The install had no notes: everything the server has was added.
+  assert.equal(await after("NOTE", "", "Typed"), "Typed\n\nNOTE");
 
   const jobId = await ticket(pg);
   const installId = await install(pg, { notes: "Install by 3rd party." });
@@ -495,6 +510,12 @@ test("the statement's own guards: stale stamps, a check that came true after the
   await pg.query("insert into ticket_invoices (job_id, ns_invoice, status) values ($1, 'INV-9', 'Open')", [jobId]);
   assert.deepEqual(await run(p.stamps), []);
   await pg.query("delete from ticket_invoices");
+  // QuickBooks history imported after the read, with charges on the ticket: they may be billed already.
+  const qbRun = Number((await one(pg, "insert into wo_history_runs (filename) values ('test.xlsx') returning id")).id);
+  await pg.query("insert into wo_history (run_id, history_ref, wo, customer, job_id) values ($1, 'QB-9', $2, $3, $4)", [qbRun, WO, CAFE, jobId]);
+  assert.deepEqual(await run(p.stamps), []);
+  await pg.query("delete from wo_history");
+  assert.equal(await snapshot(pg), before);
   // An invoice made for the install meanwhile (another merge, say) takes none of these lines: the confirm read none.
   await pg.query("insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at) values ('install', $1, $2, 80, 'ana', now())", [installId, CAFE]);
   const head = await one(pg, "select id::text || ':' || ':' || submitted_at::text as stamp from invoices");
@@ -601,7 +622,17 @@ test("after the install it went into is merged into another, the import follows 
   assert.deepEqual(followed.rows.map((r) => [r.action, r.board, r.jobId]), [["update", "install", keep]]);
   assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: keep });
 
-  await pg.query("update installs set archived = true where id = $1", [keep]);
+  // Merged on again: the import goes on to the install that's live now.
+  const last = await install(pg, { wo: "WO-4001" });
+  await pg.query("update installs set archived = true, duplicate_of = $2 where id = $1", [keep, last]);
+  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: last });
+  assert.deepEqual((await previewCorrigoRecords(sql, file)).rows.map((r) => [r.action, r.board, r.jobId]), [["update", "install", last]]);
+  // A loop of archived installs ends with none.
+  await pg.query("update installs set archived = true, duplicate_of = $2 where id = $1", [last, keep]);
+  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: null });
+  assert.deepEqual(await M.liveInstallIds(sql, [installId, keep, last]), new Map());
+  assert.deepEqual(await M.liveInstallIds(sql, [jobId + 100]), new Map());
+  await pg.query("update installs set duplicate_of = null where id in ($1, $2)", [keep, last]);
   assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: null });
   const gone = await previewCorrigoRecords(sql, file);
   assert.deepEqual(gone.rows.map((r) => [r.action, r.board, r.jobId]), [["update", "service", jobId]]);
@@ -652,6 +683,22 @@ test("a ticket QuickBooks invoiced: refused while it has charges (they may be bi
   assert.deepEqual(p.stays, ["Its own record and history", "1 QuickBooks history row"]);
   await merge(sql, jobId, installId, p.stamps);
   assert.equal(Number((await one(pg, "select job_id from wo_history")).job_id), jobId);
+
+  // History left on a ticket merged into this one before: a ticket merge moved its charges here and left the history.
+  const keeper = await ticket(pg, { call_id: "SC-202610-905", wo: "WO-4805" });
+  const kid = await ticket(pg, { call_id: "SC-202610-906", wo: "WO-4805", duplicate_of: keeper });
+  const other = await install(pg, { wo: "WO-4805" });
+  await charge(pg, keeper, "PARTS : TESTGASKET", 1, 12.5, "part", 1);
+  await pg.query("insert into wo_history (run_id, history_ref, wo, customer, job_id) values ($1, 'QB-2', 'WO-4805', $2, $3)", [run, CAFE, kid]);
+  assert.equal(
+    await refusalOf(sql, keeper, other),
+    "SC-202610-905 (WO-4805) has QuickBooks history, so its charges may be billed already. Take its charges off the ticket first, or keep the ticket.",
+  );
+  // The statement checks it too.
+  const before = await snapshot(pg);
+  const { stamps } = await preview(sql, keeper, other);
+  assert.deepEqual(await sql.query(M.mergeTicketIntoInstallSql(), [keeper, other, "boss", stamps.job, stamps.install, stamps.head, "note", 12.5, null, null]), []);
+  assert.equal(await snapshot(pg), before);
 });
 
 test("writes that come late to a merged ticket are refused: an import row merged meanwhile, a repair quote", async () => {
@@ -689,4 +736,49 @@ test("writes that come late to a merged ticket are refused: an import row merged
     { message: `This ticket was merged into install #${installId}, so it takes no repair quote.` },
   );
   assert.equal(Number((await one(pg, "select count(*) from repair_quotes")).count), 0);
+});
+
+test("after the merge: a unit pulled for the account goes on a live ticket, never a hidden one; the planner doesn't move the ticket", async () => {
+  const { pg, sql } = await fresh();
+  const ctx = { userId: "u-owner" };
+  const jobId = await ticket(pg);
+  const installId = await install(pg);
+  // A ticket merged into this one before: the merge to the install marks it too, and touches it last.
+  const kid = await ticket(pg, { call_id: "SC-202610-900", duplicate_of: jobId });
+  await mergeNow(sql, jobId, installId);
+  const shelf = async (serial) =>
+    Number((await one(pg, "insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Test Brewer', $1, 1, 'barn-back', 'A', 1, 1, 'ready') returning id", [serial])).id);
+  const first = await shelf("TB-31");
+  await assignAssetToServiceFor(sql, { assetId: first, customer: CAFE }, ctx);
+  assert.equal((await one(pg, "select job_id from assets where id = $1", [first])).job_id, null);
+  // A live open ticket for the account takes it, even with the hidden one touched later.
+  const live = await ticket(pg, { call_id: "SC-202610-907", wo: "WO-4810" });
+  await pg.query("update service_jobs set updated_at = now() + interval '1 hour' where id = $1", [kid]);
+  const second = await shelf("TB-32");
+  await assignAssetToServiceFor(sql, { assetId: second, customer: CAFE }, ctx);
+  assert.equal(Number((await one(pg, "select job_id from assets where id = $1", [second])).job_id), live);
+
+  // A planner opened before the merge: the drag is refused and nothing moves.
+  const drag = { type: "service", id: jobId, date: "2026-11-02", time: "09:00", technician: "Other Tech" };
+  await assert.rejects(() => moveBoardBlockFor(sql, drag, ctx), { message: `This ticket was merged into install #${installId}. Plan the install instead.` });
+  // The drag reads the ticket, then a merge commits, then the drag writes: still refused, nothing written.
+  const other = await ticket(pg, { call_id: "SC-202610-908", wo: "WO-4811" });
+  const otherInstall = await install(pg, { wo: "WO-4811" });
+  const p = await preview(sql, other, otherInstall);
+  let raced = false;
+  const racing = Object.assign((strings, ...values) => sql(strings, ...values), {
+    query: async (text, params) => {
+      if (!raced && /^update service_jobs set scheduled/.test(text)) {
+        raced = true;
+        await merge(sql, other, otherInstall, p.stamps);
+      }
+      return sql.query(text, params);
+    },
+  });
+  const before = await one(pg, "select scheduled, technician from service_jobs where id = $1", [other]);
+  await assert.rejects(() => moveBoardBlockFor(racing, { ...drag, id: other }, ctx), { message: `This ticket was merged into install #${otherInstall}. Plan the install instead.` });
+  assert.ok(raced);
+  assert.deepEqual(await one(pg, "select scheduled, technician from service_jobs where id = $1", [other]), before);
+  // A live ticket still moves.
+  assert.deepEqual(await moveBoardBlockFor(sql, { ...drag, id: live }, ctx), { ok: true, date: "2026-11-02", time: "09:00", technician: "Other Tech" });
 });
