@@ -165,6 +165,12 @@ test("only the NetSuite invoices that stand are its billing; an approved install
   const ownC = await getInvoiceFor(sql, { type: "install", id: ic }, "u-owner");
   assert.equal((await mergeShown(sql, c, ic, pc)).billedOn, ON);
   assert.deepEqual([(await getInvoiceFor(sql, { type: "install", id: ic }, "u-owner")).version], [ownC.version]);
+  // In the statement too: the install invoice's stamp it is given counts only for an unbilled ticket.
+  const d = await invoicedTicket(pg, { call_id: "SC-202610-905", wo: "WO-4833" });
+  const id = await install(pg, { wo: "WO-4833" });
+  const pd = await preview(sql, d, id);
+  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [d, id, "boss", pd.stamps.job, pd.stamps.install, "1:stale:stamp", "note", 0, null, null, null, "", 500, ON, INV]);
+  assert.equal(ran.length, 1);
   // Two that stand: both named.
   const b = await ticket(pg, { call_id: "SC-202610-902", wo: "WO-4830" });
   await invoice(pg, b, "INV-3");

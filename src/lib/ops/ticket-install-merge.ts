@@ -39,9 +39,12 @@ const ready = async (): Promise<Sql> => {
 
 export const ADMIN_ONLY = "Only an Admin can merge a ticket into an install.";
 export const CHANGED_SINCE_OPENED = "The ticket, the install or its invoice changed since this window opened, so nothing was merged. Look it over again, then merge.";
-/** A ticket billed on a Sales Order, merged from a window opened before billed tickets could merge (10/30). */
-export const RELOAD_FOR_BILLED = (so: string) =>
-  `This ticket is billed on ${so}, and this window is from before billed tickets could be merged, so nothing was merged. Reload the page, then merge.`;
+/**
+ * A billed ticket merged from a window opened before tickets billed like it could merge (10/30): on a Sales Order, or
+ * on NetSuite invoices with no SO. `on` is what it is billed on.
+ */
+export const RELOAD_FOR_BILLED = (on: string) =>
+  `This ticket is billed on ${on}, and this window is from before tickets billed like this could be merged, so nothing was merged. Reload the page, then merge.`;
 
 /** WO numbers start over after 9999: a ticket and an install WO that came in more than this far apart are two jobs. */
 const RUN_DAYS = 365;
