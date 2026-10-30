@@ -53,6 +53,9 @@ create table if not exists ticket_install_merges (
 create index if not exists ticket_install_merges_job_idx on ticket_install_merges (job_id);
 create index if not exists ticket_install_merges_install_idx on ticket_install_merges (install_id);
 
+-- The installs merged into one (or flagged as its possible duplicates), for the notes rule below to find them.
+create index if not exists installs_duplicate_of_idx on installs (duplicate_of) where duplicate_of is not null;
+
 -- Notes compared as text: line breaks as \n, blanks at either end left out, nothing as ''.
 create or replace function notes_plain(t text) returns text language sql immutable as $$
   select btrim(replace(replace(coalesce(t, ''), E'\r\n', E'\n'), E'\r', E'\n'), E' \t\n')
@@ -63,16 +66,21 @@ $$;
 -- window's text was typed on: as it opened them, then as its last save that went through sent them.
 -- The window didn't change the notes since its base: they stay as stored. It did: its text, as before (the last save
 -- wins), then each text a ticket merge added that the window never had: in the notes now, but neither in its base nor in
--- what it sends. Read fresh (volatile), so a merge that committed while this save waited for the row counts.
+-- what it sends. That counts tickets merged into installs merged into this one since (their notes came along). Read
+-- fresh (volatile), so a merge that committed while this save waited for the row counts.
 create or replace function notes_after_window_save(install int, stored text, base text, sent text) returns text language sql volatile as $$
-  with v as (
+  with recursive family (id, depth) as (
+    select install, 0
+    union all
+    select i.id, f.depth + 1 from installs i join family f on i.duplicate_of = f.id where i.archived and f.depth < 20
+  ), v as (
     select notes_plain(stored) as s,
            notes_plain(base) as b,
            notes_plain(sent) as t,
            rtrim(replace(replace(coalesce(sent, ''), E'\r\n', E'\n'), E'\r', E'\n'), E' \t\n') as own
   ), kept as (
     select string_agg(m.note, E'\n\n' order by m.merged_at, m.id) as added
-      from v, (select id, merged_at, notes_plain(note) as note from ticket_install_merges where install_id = install) m
+      from v, (select id, merged_at, notes_plain(note) as note from ticket_install_merges where install_id in (select id from family)) m
      where m.note <> '' and strpos(v.s, m.note) > 0 and strpos(v.b, m.note) = 0 and strpos(v.t, m.note) = 0
   )
   select case

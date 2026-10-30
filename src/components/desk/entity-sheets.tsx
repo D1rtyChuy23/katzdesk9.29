@@ -377,13 +377,17 @@ export function InstallSheet({
   /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
   const loadedSpecs = useRef<MachineSpec[]>([]);
   /**
-   * This opening's notes (10/30): the Notes box shows them as they were when the window opened, until it closes. Each
-   * save carries the slot and sends its base when it runs: the notes its text was typed on (as opened, then as this
-   * opening's last save that went through sent them). The server keeps a merged ticket's text the window never had, and
-   * notes the window didn't change.
+   * This opening's notes (10/30). The Notes box shows the board's notes until something is typed in it, then keeps what
+   * it shows until the window closes. Each save carries the slot and sends its base when it runs: the notes its text was
+   * typed on (as shown, then as this opening's last save that went through sent them). The server keeps a merged
+   * ticket's text the window never had, and notes the window didn't change.
    */
   const [notesSlot, setNotesSlot] = useState<NotesSlot | null>(null);
-  if ((row?.id ?? null) !== (notesSlot?.id ?? null)) setNotesSlot(row ? { id: row.id, shown: row.notes ?? "", base: row.notes ?? null } : null);
+  const notesSeq = useRef(0);
+  const seedNotes = (r: Install): NotesSlot => ({ id: r.id, shown: r.notes ?? "", base: r.notes ?? null, touched: false, seq: ++notesSeq.current });
+  if ((row?.id ?? null) !== (notesSlot?.id ?? null)) setNotesSlot(row ? seedNotes(row) : null);
+  // Untouched, a read with other notes shows them (a merge from this window, a read that came after it opened).
+  else if (row && notesSlot && !notesSlot.touched && (row.notes ?? "") !== notesSlot.shown) setNotesSlot(seedNotes(row));
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
   const specsRef = useRef(specs);
@@ -450,8 +454,13 @@ export function InstallSheet({
     // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, machineSig, reread]);
-  /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
-  const queue = { id: `install-sheet-${row?.id}` };
+  /**
+   * One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. Closed,
+   * it keeps the last install's name: react-query reads it live, and a save queued at close would otherwise wait for good.
+   */
+  const lastQueued = useRef<number | null>(null);
+  if (row) lastQueued.current = row.id;
+  const queue = { id: `install-sheet-${row?.id ?? lastQueued.current}` };
   const lookAgain = () => {
     skippedRead.current = false;
     setReread((n) => n + 1);
@@ -804,7 +813,15 @@ export function InstallSheet({
                     </div>
                     <div className="sm:col-span-2">
                       <Label>Notes</Label>
-                      <Textarea name="notes" className="mt-1" defaultValue={notesSlot?.id === row.id ? notesSlot.shown : (row.notes ?? "")} />
+                      <Textarea
+                        key={notesSlot?.id === row.id ? notesSlot.seq : "notes"}
+                        name="notes"
+                        className="mt-1"
+                        defaultValue={notesSlot?.id === row.id ? notesSlot.shown : (row.notes ?? "")}
+                        onInput={() => {
+                          if (notesSlot) notesSlot.touched = true;
+                        }}
+                      />
                     </div>
                     <InstallWorkOrders row={row} />
                     <MergeInstall
@@ -932,7 +949,7 @@ function withoutRow(rows: MachineSpec[], gone: MachineSpec): MachineSpec[] {
 }
 
 /** One opening's notes in the install window: what the box shows, and the base each save sends (10/30). */
-type NotesSlot = { id: number; shown: string; base: string | null };
+type NotesSlot = { id: number; shown: string; base: string | null; touched: boolean; seq: number };
 
 /** A save from the install window: the install's fields, and for the machine list the list it was built on. */
 type SaveVars = Parameters<typeof updateInstall>[0]["data"] & {

@@ -316,6 +316,15 @@ test("an install window opened before the merge keeps the merged ticket's note w
   assert.equal(await after("A, the note fixed", "A", "A edited"), "A edited");
   // Another install's merges don't count.
   assert.equal(await after(`A\n\n${ONE}`, "A", "A edited", other), "A edited");
+  // Read fresh: a save (or a merge) that waited for a lock sees what committed meanwhile. PGlite has one connection, so
+  // that was checked on a real Postgres; here the functions must stay volatile.
+  const kinds = await pg.query("select proname, provolatile from pg_proc where proname in ('notes_after_window_save', 'ticket_keeps_its_billing', 'ticket_has_quickbooks_history', 'notes_plain') order by proname");
+  assert.deepEqual(kinds.rows.map((r) => [r.proname, r.provolatile]), [
+    ["notes_after_window_save", "v"],
+    ["notes_plain", "i"],
+    ["ticket_has_quickbooks_history", "v"],
+    ["ticket_keeps_its_billing", "v"],
+  ]);
 
   const jobId = await ticket(pg);
   const installId = await install(pg, { notes: "Install by 3rd party." });
@@ -336,6 +345,17 @@ test("an install window opened before the merge keeps the merged ticket's note w
   assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, `Install by 3rd party. Badge at the desk.\nCall first.\n\n${note}`);
   await updateInstallFor(sql, { id: installId, notes: "Install by 3rd party. Badge at the desk.", notesBase: "Install by 3rd party. Badge at the desk.\nCall first." }, ctx);
   assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, kept);
+  // A ticket merged into an install that was then merged into this one: a window on this one opened before keeps the
+  // ticket's text. (The install merge's own "From install #…" line is the window's to keep: it now reads the board first.)
+  const keepK = await install(pg, { wo: "WO-4892", notes: "K old" });
+  const dropB = await install(pg, { wo: "WO-4893", notes: "B notes" });
+  const intoB = await ticket(pg, { call_id: "SC-202610-993", wo: "WO-4893" });
+  await mergeNow(sql, intoB, dropB);
+  const block = (await one(pg, "select note from ticket_install_merges where job_id = $1", [intoB])).note;
+  await mergeInstallsFor(sql, "u-owner", { keepId: keepK, dropId: dropB });
+  assert.ok((await one(pg, "select notes from installs where id = $1", [keepK])).notes.includes(block));
+  await updateInstallFor(sql, { id: keepK, notes: "K old\nGate code 9", notesBase: "K old" }, ctx);
+  assert.equal((await one(pg, "select notes from installs where id = $1", [keepK])).notes, `K old\nGate code 9\n\n${block}`);
   // A save that sends no notes leaves them; one that sends no base is stored as sent, as before.
   await updateInstallFor(sql, { id: installId, technician: "Other Tech" }, ctx);
   assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, kept);
@@ -794,4 +814,24 @@ test("after the merge: a unit pulled for the account goes on a live ticket, neve
   assert.deepEqual(await one(pg, "select scheduled, technician from service_jobs where id = $1", [other]), before);
   // A live ticket still moves.
   assert.deepEqual(await moveBoardBlockFor(sql, { ...drag, id: live }, ctx), { ok: true, date: "2026-11-02", time: "09:00", technician: "Other Tech" });
+});
+
+test("the install window: one notes slot per opening, its base sent when each save runs; Merge installs reads the board first", () => {
+  const src = readFileSync(new URL("../src/components/desk/entity-sheets.tsx", import.meta.url), "utf8");
+  const start = src.indexOf("export function InstallSheet(");
+  const sheet = src.slice(start, src.indexOf("\nexport function ", start + 1));
+  // A new slot for each opening, and again when the board's notes change while nothing is typed in the box.
+  assert.match(sheet, /if \(\(row\?\.id \?\? null\) !== \(notesSlot\?\.id \?\? null\)\) setNotesSlot\(row \? seedNotes\(row\) : null\);/);
+  assert.match(sheet, /else if \(row && notesSlot && !notesSlot\.touched && \(row\.notes \?\? ""\) !== notesSlot\.shown\) setNotesSlot\(seedNotes\(row\)\);/);
+  // The box shows the slot (a new slot, a new box) and marks it typed in.
+  assert.match(sheet, /key=\{notesSlot\?\.id === row\.id \? notesSlot\.seq : "notes"\}[\s\S]{0,160}defaultValue=\{notesSlot\?\.id === row\.id \? notesSlot\.shown : \(row\.notes \?\? ""\)\}[\s\S]{0,120}notesSlot\.touched = true/);
+  // Each save carries its own opening's slot. The base is read when the save runs, and moves on only when it goes through.
+  assert.match(sheet, /notesSlot: notesSlot\?\.id === row\.id \? notesSlot : undefined,/);
+  assert.match(sheet, /mutationFn: \(vars: SaveVars\) => \{[\s\S]*?notesSlot: slot[\s\S]*?notesBase: slot\.base[\s\S]*?return updateInstall\(/);
+  assert.match(sheet, /onSuccess: \(saved, vars\) => \{\s*\/\/[^\n]*\n\s*if \(vars\.notes !== undefined && vars\.notesSlot\) vars\.notesSlot\.base = vars\.notes \?\? null;/);
+  assert.doesNotMatch(sheet.slice(sheet.indexOf("onError: (e, vars) => {"), sheet.indexOf("onSettled:")), /notesSlot/);
+  // Closed, the queue keeps the last install's name, so a save queued at close still runs.
+  assert.match(sheet, /const queue = \{ id: `install-sheet-\$\{row\?\.id \?\? lastQueued\.current\}` \};/);
+  const fields = readFileSync(new URL("../src/components/desk/install-project-fields.tsx", import.meta.url), "utf8");
+  assert.match(fields, /await qc\.refetchQueries\(\{ queryKey: \["installs"\] \}\)[^\n]*\n\s*onMerged\(res\.keepId\);/);
 });
