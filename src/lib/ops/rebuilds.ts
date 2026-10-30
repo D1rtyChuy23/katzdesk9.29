@@ -736,19 +736,26 @@ async function findWarehouse(sql: Sql, serial: string): Promise<SerialHitLite | 
   };
 }
 
+const pullInput = z.object({
+  id: z.number(),
+  serial: z.string(),
+  confirmReuse: z.boolean().optional(),
+  /** The confirm question the person answered: asked again when the unit has moved since. */
+  asked: z.string().max(1000).optional(),
+});
+
 export const pullRebuildSerial = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number; serial: string; confirmReuse?: boolean }) =>
-    z.object({ id: z.number(), serial: z.string(), confirmReuse: z.boolean().optional() }).parse(d),
-  )
+  .validator((d: z.input<typeof pullInput>) => pullInput.parse(d))
   .handler(async ({ data, context }): Promise<Rebuild> => pullRebuildSerialFor(await readySql(), data, context.userId));
 
 /**
  * The body of pullRebuildSerial. Warehouse pulls serials onto its refurbs only, from wherever the unit is (Chuy,
  * 10/29): an account, an install or a ticket, or one of our places. No Admin approves it; every Admin gets a ping
- * saying where it came from. A unit waiting for an Admin's decision on a Warehouse request stays put.
+ * saying where it came from. A unit waiting for an Admin's decision on a Warehouse request stays put, and so does one
+ * the owner locked on a customer's account.
  */
-export async function pullRebuildSerialFor(sql: Sql, data: { id: number; serial: string; confirmReuse?: boolean }, userId: string): Promise<Rebuild> {
+export async function pullRebuildSerialFor(sql: Sql, data: z.infer<typeof pullInput>, userId: string): Promise<Rebuild> {
   const access = await requireEditor(sql, userId);
   const cur = (
     await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id])
@@ -783,57 +790,81 @@ export async function pullRebuildSerialFor(sql: Sql, data: { id: number; serial:
   if (isWarehouse(access) && hit.held) {
     throw new Error(`Serial ${hit.serial} is waiting for an Admin to approve its ${hit.held === "assign" ? "assign to a customer" : "removal"}, so it stays where it is.`);
   }
-  const where = unitWhere(hit.place);
-  if (!hit.available && !sameAccount && !data.confirmReuse) {
-    const notice = `Serial ${hit.serial} is already assigned to ${where}.`;
-    await noteOnly("serial_notice = $2", [notice]);
-    throw new Error(`${notice} Confirm reuse or cancel.`);
-  }
+  // Locks first, so nobody is asked to confirm a pull that would be refused anyway. A sold unit or one a person locked
+  // stays put; an assignment's own lock moves with the unit. Warehouse: a unit the owner locked on a customer's account
+  // stays there too, as on the Warehouse page.
   const { assertAssetUnlocked, assertSerialUnlocked } = await import("@/lib/ops/equipment-lock");
   await assertAssetUnlocked(sql, hit.assetId, { release: true });
-  // Warehouse: a unit the owner locked on a customer's account stays there, as on the Warehouse page.
   if (isWarehouse(access)) await assertSerialUnlocked(sql, hit.serial);
+  const where = unitWhere(hit.place);
+  const question = `Serial ${hit.serial} is already assigned to ${where}.`;
+  // Asked again when the answer was to a different question: the unit moved after the person was asked.
+  const askedElse = !!data.confirmReuse && data.asked != null && !data.asked.includes(question);
+  if (!hit.available && !sameAccount && (!data.confirmReuse || askedElse)) {
+    await noteOnly("serial_notice = $2", [question]);
+    throw new Error(`${question} Confirm reuse or cancel.`);
+  }
   const extra = !hit.available && hit.soldTo && !sameAccount ? ` (was ${hit.soldTo})` : "";
   const notice = `Serial ${hit.serial} pulled from warehouse · ${hit.model} · ${hit.location}${extra}`;
   const equipment = cur.equipment?.trim() ? cur.equipment : hit.model;
-  // One statement: the unit moves onto the refurb and the refurb takes its serial, or neither happens.
+  // One statement: the refurb row is held, then the unit moves onto it and it takes the serial, or nothing happens.
+  // A unit from another account leaves the install or ticket it was on, so neither offers to return it any more.
   const pulled = await sql.query<RebuildRow>(
-    `with unit as (
+    `with refurb as (
+       select id from rebuilds where id = $5 and ${ACCOUNT_STILL("account", "$4")} for update
+     ), unit as (
        update assets set
          status = 'assigned',
          sold_to = $2,
          purpose = 'In-house rebuild',
+         install_id = case when $10 then install_id else null end,
+         job_id = case when $10 then job_id else null end,
          locked_at = now(),
          locked_by = $3,
          updated_at = now()
        where id = $1
+         and exists (select 1 from refurb)
          and ($4::text[] is null or (
-               exists (select 1 from rebuilds r where r.id = $5 and ${ACCOUNT_STILL("r.account", "$4")})
-               -- Warehouse: on no hold, and just as it was read, so the Admins' ping says where it really came from.
-               and stock_hold is null
+               -- Warehouse: on no hold, just as it was read (so the Admins' ping says where it really came from), and
+               -- not locked on a customer's account meanwhile.
+               stock_hold is null
                and ${ASSET_STAMP} = $6
+               and not exists (select 1 from account_equipment ae where ae.serial_key = $11 and ae.locked_at is not null)
              ))
        returning id
      )
      update rebuilds set serial = $7, asset_id = $1, equipment = $8, serial_notice = $9, updated_at = now()
       where id = $5 and exists (select 1 from unit)
       returning *`,
-    [hit.assetId, cur.account, LOCKED_BY_ASSIGNED, keys, data.id, hit.stamp, hit.serial, equipment, notice],
+    [hit.assetId, cur.account, LOCKED_BY_ASSIGNED, keys, data.id, hit.stamp, hit.serial, equipment, notice, sameAccount, serialKey(hit.serial)],
   );
   const row = pulled[0];
   if (!row) {
     const now = (await sql.query<{ account: string }>("select account from rebuilds where id = $1", [data.id]))[0];
     if (!now) throw new Error("Rebuild not found");
     if (isWarehouse(access) && !warehouseMayEdit(now.account)) throw await movedRefusal(sql, data.id);
-    throw new Error(`Serial ${hit.serial} was just moved or put on hold by someone else, so it wasn't pulled. Pull it again.`);
+    if (!isWarehouse(access)) throw new Error(`Serial ${hit.serial} is no longer in the warehouse records, so it wasn't pulled.`);
+    throw new Error(`Serial ${hit.serial} was just moved, locked or put on hold by someone else, so it wasn't pulled. Pull it again.`);
   }
   await logActivity(sql, userId, data.id, "assigned-asset", notice);
-  // Warehouse's pull goes through on its own; every Admin hears where the unit came from (not again for a unit already on this refurb).
-  if (isWarehouse(access) && num(cur.asset_id) !== hit.assetId) {
+  // Warehouse's pull goes through on its own, and every Admin hears where the unit came from. A unit already on the
+  // refurb's account (on this refurb, or another of its refurbs) came from no one, so that one doesn't ping.
+  if (isWarehouse(access) && !sameAccount) {
+    const listed = (
+      await sql
+        .query<{ customer: string }>(
+          `select customer from account_equipment
+            where coalesce(nullif(serial_key, ''), lower(regexp_replace(coalesce(serial, ''), '[#[:space:]]', '', 'g'))) = $1
+              and lower(btrim(customer)) <> lower(btrim($2))
+            order by id limit 1`,
+          [serialKey(hit.serial), row.account],
+        )
+        .catch(() => [])
+    )[0]?.customer;
     await notifyAdminsWarehousePull(sql, userId, {
       rebuildId: data.id,
       account: row.account,
-      body: pullNotice(access.username, { model: hit.model, serial: hit.serial }, where, row.title),
+      body: pullNotice(access.username, { model: hit.model, serial: hit.serial }, where, row.title, listed ?? null),
     }).catch((e) => console.error("[rebuilds] the Admins' pull ping failed", e));
   }
   return mapRebuild(row, todayChicago());

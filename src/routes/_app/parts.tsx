@@ -115,7 +115,8 @@ function Page() {
   const canEditBins = !!page.data?.canEditBins;
   const canEditClass = !!page.data?.canEditClass;
   // Photos: everyone but Warehouse (Chuy, 10/29). Warehouse sees them and the Photo Confirmed / Confirm Photo badges.
-  const canEditPhoto = !!page.data?.canEditPhoto;
+  // Until the list answers (Show More, or a part's window opened from a link), the same rule from the person's access.
+  const canEditPhoto = page.data?.canEditPhoto ?? (!!me.data && !(me.data.role === "warehouse" && !me.data.isAdmin));
 
   const refresh = () => {
     setOffset(0);

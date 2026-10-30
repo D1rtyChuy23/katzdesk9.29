@@ -36,10 +36,14 @@ export function unitWhere(u: PulledUnit): string {
   return who ? `${who} at ${place}` : place;
 }
 
-/** The ping every Admin gets when Warehouse pulls a unit onto a refurb. The bell matches its first words. */
-export function pullNotice(who: string, unit: { model: string; serial: string }, from: string, refurb: string): string {
+/**
+ * The ping every Admin gets when Warehouse pulls a unit onto a refurb. The bell matches its first words. listedFor: a
+ * customer whose Equipment list still has the serial (the pull doesn't change it), so the Admin can take it off.
+ */
+export function pullNotice(who: string, unit: { model: string; serial: string }, from: string, refurb: string, listedFor: string | null = null): string {
   const model = unit.model.trim() || "A unit";
-  return `Unit pulled for a refurb. ${who} pulled ${model} SN ${unit.serial} from ${from} onto ${refurb}.`;
+  const listed = listedFor?.trim() ? ` Customers → ${listedFor.trim()} still lists it under Equipment.` : "";
+  return `Unit pulled for a refurb. ${who} pulled ${model} SN ${unit.serial} from ${from} onto ${refurb}.${listed}`;
 }
 
 /** True for the ping above. */

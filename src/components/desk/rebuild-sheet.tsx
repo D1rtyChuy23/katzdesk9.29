@@ -182,8 +182,9 @@ export function RebuildSheet({
   });
 
   const pull = useMutation({
-    mutationFn: (opts: { confirmReuse?: boolean }) =>
-      pullRebuildSerial({ data: { id: row!.id, serial, confirmReuse: opts.confirmReuse } }),
+    // A confirm sends the question it answers: the server asks again if the unit moved since.
+    mutationFn: (opts: { confirmReuse?: boolean; asked?: string }) =>
+      pullRebuildSerial({ data: { id: row!.id, serial, confirmReuse: opts.confirmReuse, asked: opts.asked } }),
     onSuccess: (next) => {
       setReuseNotice(null);
       setSerial(next.serial ?? "");
@@ -195,7 +196,10 @@ export function RebuildSheet({
     onError: (e) => {
       const msg = e instanceof Error ? e.message : "Could not check warehouse";
       if (/already assigned/i.test(msg)) setReuseNotice(msg);
-      else toast.error(msg);
+      else {
+        setReuseNotice(null);
+        toast.error(msg);
+      }
     },
   });
 
@@ -459,7 +463,7 @@ export function RebuildSheet({
                     value={serial}
                     onChange={(e) => setSerial(e.target.value)}
                     onBlur={() => {
-                      if (locked || !serial.trim()) return;
+                      if (locked || !serial.trim() || pull.isPending) return;
                       pull.mutate({});
                     }}
                     placeholder="Type a warehouse serial"
@@ -471,7 +475,7 @@ export function RebuildSheet({
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Matching a warehouse serial attaches that unit. It does not create a second record.
-                  {accountLock && !locked ? " A unit from the barn, one of our sites or an account comes onto this refurb right away, and the Admins get a ping saying where it came from." : ""}
+                  {accountLock && !locked ? " Warehouse pulls a unit from the barn, one of our sites or a customer's account with no Admin's approval, and the Admins get a ping saying where it came from." : ""}
                 </p>
               </div>
               {canEdit ? (
@@ -529,8 +533,9 @@ export function RebuildSheet({
           <div className="mt-4 flex gap-2">
             <Button
               type="button"
+              disabled={pull.isPending}
               onClick={() => {
-                pull.mutate({ confirmReuse: true });
+                pull.mutate({ confirmReuse: true, asked: reuseNotice ?? undefined });
               }}
             >
               Reuse on this rebuild
