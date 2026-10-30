@@ -428,8 +428,9 @@ export function approvePmInvoiceSql(): string {
  * together or not at all. $12 is the invoice the window opened (its version; null when there was none): when that
  * invoice was approved or saved for approval again since, or an invoice was put on the record, or it left the record,
  * nothing is written and no row comes back, so the approver sees it as it is first. An install's invoice is written only
- * while the install is on the board, read on its locked row: an Approve that meets Merge installs mid-way waits for it,
- * then writes nothing on the install it archived. $18 is an install invoice's P.O., written when $19 is true.
+ * when its row reads not archived; the row is locked against Merge installs and ticket merges (not against Remove), so
+ * an Approve that meets a Merge installs mid-way waits for it, then writes nothing on the install it archived. $18 is an
+ * install invoice's P.O., written when $19 is true.
  */
 export function approveRecordInvoiceSql(): string {
   return `with rec as (
