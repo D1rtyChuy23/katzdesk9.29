@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -181,23 +181,35 @@ export function RebuildSheet({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
 
+  // The serial the last pull asked for: an answer for an older one (the box changed while it ran) leaves the box alone.
+  const lastPull = useRef("");
   const pull = useMutation({
-    mutationFn: (opts: { confirmReuse?: boolean }) =>
-      pullRebuildSerial({ data: { id: row!.id, serial, confirmReuse: opts.confirmReuse } }),
-    onSuccess: (next) => {
+    // A confirm sends the question it answers: the server asks again if the unit moved since.
+    mutationFn: (opts: { serial: string; confirmReuse?: boolean; asked?: string }) =>
+      pullRebuildSerial({ data: { id: row!.id, serial: opts.serial, confirmReuse: opts.confirmReuse, asked: opts.asked } }),
+    onSuccess: (next, opts) => {
+      void qc.invalidateQueries({ queryKey: ["rebuilds"] });
+      void qc.invalidateQueries({ queryKey: ["assets"] });
+      if (opts.serial !== lastPull.current) return;
       setReuseNotice(null);
       setSerial(next.serial ?? "");
       setEquipment(next.equipment ?? equipment);
       toast.success(next.serialNotice || "Serial saved");
-      void qc.invalidateQueries({ queryKey: ["rebuilds"] });
-      void qc.invalidateQueries({ queryKey: ["assets"] });
     },
-    onError: (e) => {
+    onError: (e, opts) => {
+      if (opts.serial !== lastPull.current) return;
       const msg = e instanceof Error ? e.message : "Could not check warehouse";
       if (/already assigned/i.test(msg)) setReuseNotice(msg);
-      else toast.error(msg);
+      else {
+        setReuseNotice(null);
+        toast.error(msg);
+      }
     },
   });
+  const startPull = (opts: { confirmReuse?: boolean; asked?: string } = {}) => {
+    lastPull.current = serial.trim();
+    pull.mutate({ serial: lastPull.current, ...opts });
+  };
 
   const drop = useMutation({
     mutationFn: () => archiveRebuild({ data: { id: row!.id } }),
@@ -459,18 +471,20 @@ export function RebuildSheet({
                     value={serial}
                     onChange={(e) => setSerial(e.target.value)}
                     onBlur={() => {
-                      if (locked || !serial.trim()) return;
-                      pull.mutate({});
+                      // Not again for the serial already being pulled; a changed box pulls its own serial.
+                      if (locked || !serial.trim() || (pull.isPending && lastPull.current === serial.trim())) return;
+                      startPull();
                     }}
                     placeholder="Type a warehouse serial"
                     disabled={locked}
                   />
-                  <Button type="button" variant="outline" disabled={locked || pull.isPending} onClick={() => pull.mutate({})}>
+                  <Button type="button" variant="outline" disabled={locked || pull.isPending} onClick={() => startPull()}>
                     Pull
                   </Button>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Matching a warehouse serial attaches that unit. It does not create a second record.
+                  {accountLock && !locked ? " Warehouse pulls a unit from the barn, one of our sites or a customer's account with no Admin's approval, and the Admins get a ping saying where it came from." : ""}
                 </p>
               </div>
               {canEdit ? (
@@ -520,11 +534,17 @@ export function RebuildSheet({
         <DialogContent>
           <DialogTitle>Serial Already Assigned</DialogTitle>
           <DialogDescription>{reuseNotice}</DialogDescription>
+          {accountLock ? (
+            <p className="text-sm text-muted-foreground" data-testid="rebuild-pull-ping">
+              Reusing it moves it onto this refurb now. The Admins get a ping saying where it came from.
+            </p>
+          ) : null}
           <div className="mt-4 flex gap-2">
             <Button
               type="button"
+              disabled={pull.isPending}
               onClick={() => {
-                pull.mutate({ confirmReuse: true });
+                startPull({ confirmReuse: true, asked: reuseNotice ?? undefined });
               }}
             >
               Reuse on this rebuild

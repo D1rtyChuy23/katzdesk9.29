@@ -38,7 +38,8 @@ function shortDate(iso: string | null): string {
  * number, then the details, the photo and its actions, Get Later, the bin location (Rack, Shelf, Bin), and its usage:
  * every ticket that used it, counted by month, quarter or year.
  * `initial` is the row already on the list, shown at once while the part loads. The bin, the Class and the note are
- * changed here by an Admin (canEditBins, canEditClass, canEditNote); everyone else sees them.
+ * changed here by an Admin (canEditBins, canEditClass, canEditNote); everyone else sees them. The photo is changed by
+ * everyone but Warehouse (canEditPhoto).
  */
 export function PartWindow({
   id,
@@ -47,6 +48,7 @@ export function PartWindow({
   canEditBins,
   canEditClass,
   canEditNote = false,
+  canEditPhoto,
   onClose,
   onChanged,
   onOpen,
@@ -58,6 +60,8 @@ export function PartWindow({
   canEditClass: boolean;
   /** Edit the part's note: Admin only. */
   canEditNote?: boolean;
+  /** Add, replace, remove or pull the photo: everyone but Warehouse. */
+  canEditPhoto: boolean;
   onClose: () => void;
   onChanged: () => void;
   /** Opens another part's window: the one a merged part went into. */
@@ -86,6 +90,7 @@ export function PartWindow({
             canEditBins={canEditBins}
             canEditClass={canEditClass}
             canEditNote={canEditNote}
+            canEditPhoto={canEditPhoto}
             onChanged={onChanged}
             onOpen={onOpen}
           />
@@ -120,6 +125,7 @@ function PartWindowView({
   canEditBins,
   canEditClass,
   canEditNote,
+  canEditPhoto,
   onChanged,
   onOpen,
 }: {
@@ -128,6 +134,7 @@ function PartWindowView({
   canEditBins: boolean;
   canEditClass: boolean;
   canEditNote: boolean;
+  canEditPhoto: boolean;
   onChanged: () => void;
   onOpen?: (id: number) => void;
 }) {
@@ -266,15 +273,17 @@ function PartWindowView({
             />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <PartPhotoStatus row={row} photo={photo} tid={T} />
+                <PartPhotoStatus row={row} photo={photo} tid={T} canEdit={canEditPhoto} />
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <PartPhotoButtons row={row} photo={photo} tid={T} />
-                <PartPhotoFile photo={photo} tid={T} />
-              </div>
+              {canEditPhoto ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <PartPhotoButtons row={row} photo={photo} tid={T} />
+                  <PartPhotoFile photo={photo} tid={T} />
+                </div>
+              ) : null}
             </div>
           </div>
-          <PartPhotoReview row={row} photo={photo} onChanged={onChanged} />
+          {canEditPhoto ? <PartPhotoReview row={row} photo={photo} onChanged={onChanged} /> : null}
         </section>
 
         <BinSection row={row} canEdit={canEditBins} onChanged={onChanged} />

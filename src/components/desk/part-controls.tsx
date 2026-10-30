@@ -41,8 +41,11 @@ export function PartGetLater({ row, onChanged, tid = "part" }: { row: PartRow; o
 
 // ------------------------------------------------------------------------------------------ photo
 
-/** Photo Confirmed / Confirm Photo, and Pull Confirmed Photo or Review Photos when research found some. */
-export function PartPhotoStatus({ row, photo, tid = "part" }: { row: PartRow; photo: PartPhoto; tid?: string }) {
+/**
+ * Photo Confirmed / Confirm Photo, and Pull Confirmed Photo or Review Photos when research found some. canEdit false
+ * (Warehouse): the badges only.
+ */
+export function PartPhotoStatus({ row, photo, tid = "part", canEdit = true }: { row: PartRow; photo: PartPhoto; tid?: string; canEdit?: boolean }) {
   return (
     <>
       {row.hasImage && row.photoStatus === "confirmed" ? (
@@ -54,12 +57,12 @@ export function PartPhotoStatus({ row, photo, tid = "part" }: { row: PartRow; ph
           Confirm Photo
         </Badge>
       ) : null}
-      {!row.hasImage && row.research?.verdict === "confirmed" && row.research.imageUrl ? (
+      {canEdit && !row.hasImage && row.research?.verdict === "confirmed" && row.research.imageUrl ? (
         <Button type="button" size="sm" variant="outline" className="h-7" disabled={photo.pull.isPending} onClick={() => photo.pull.mutate()} data-testid={`${tid}-pull-confirmed`}>
           {photo.pull.isPending ? "Pulling…" : "Pull Confirmed Photo"}
         </Button>
       ) : null}
-      {!row.hasImage && row.research?.verdict === "review" && row.research.candidates.length ? (
+      {canEdit && !row.hasImage && row.research?.verdict === "review" && row.research.candidates.length ? (
         <Button type="button" size="sm" variant="outline" className="h-7" onClick={() => photo.setReviewing(true)} data-testid={`${tid}-review-photos`}>
           Review Photos ({row.research.candidates.length})
         </Button>

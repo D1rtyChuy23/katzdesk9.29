@@ -114,6 +114,9 @@ function Page() {
   // The bin location and the Class: Admin only for now (Chuy, 10/28).
   const canEditBins = !!page.data?.canEditBins;
   const canEditClass = !!page.data?.canEditClass;
+  // Photos: everyone but Warehouse (Chuy, 10/29). Warehouse sees them and the Photo Confirmed / Confirm Photo badges.
+  // Until the list answers (Show More, or a part's window opened from a link), the same rule from the person's access.
+  const canEditPhoto = page.data?.canEditPhoto ?? (!!me.data && !(me.data.role === "warehouse" && !me.data.isAdmin));
 
   const refresh = () => {
     setOffset(0);
@@ -369,6 +372,7 @@ function Page() {
                 canEditMpn={!!page.data?.canEditMpn}
                 canEditBins={canEditBins}
                 canEditClass={canEditClass}
+                canEditPhoto={canEditPhoto}
                 canHide={canHide}
                 canRemove={canRemove}
                 showHidden={showHidden}
@@ -413,6 +417,7 @@ function Page() {
         canEditBins={canEditBins}
         canEditClass={canEditClass}
         canEditNote={!!page.data?.canEditNote}
+        canEditPhoto={canEditPhoto}
         onClose={closePart}
         onChanged={refresh}
         onOpen={openPart}
@@ -429,6 +434,7 @@ function PartRowView({
   canEditMpn,
   canEditBins,
   canEditClass,
+  canEditPhoto,
   canHide,
   canRemove,
   showHidden,
@@ -445,6 +451,8 @@ function PartRowView({
   canEditBins: boolean;
   /** The Class as a pick list on the row: Admin only for now. */
   canEditClass: boolean;
+  /** Add, replace, remove or pull the photo: everyone but Warehouse. */
+  canEditPhoto: boolean;
   canHide: boolean;
   canRemove: boolean;
   showHidden: boolean;
@@ -556,9 +564,9 @@ function PartRowView({
           ) : null}
           <PartUsageLine totals={usage} loading={usageLoading} />
           <PartGetLater row={row} onChanged={onChanged} />
-          <PartPhotoStatus row={row} photo={photo} />
+          <PartPhotoStatus row={row} photo={photo} canEdit={canEditPhoto} />
         </div>
-        <PartPhotoReview row={row} photo={photo} onChanged={onChanged} />
+        {canEditPhoto ? <PartPhotoReview row={row} photo={photo} onChanged={onChanged} /> : null}
         <PartNameForm row={row} edit={name} />
         {showHidden ? (
           <p className="mt-1 text-xs text-muted-foreground" data-testid="part-hidden-meta">
@@ -608,7 +616,7 @@ function PartRowView({
         ) : null}
 
         <div className="mt-2 flex flex-wrap items-center gap-2 max-sm:clear-left">
-          <PartPhotoButtons row={row} photo={photo} />
+          {canEditPhoto ? <PartPhotoButtons row={row} photo={photo} /> : null}
           {canEditMpn ? <PartMpnEditButton row={row} edit={mpn} /> : null}
           {canEditMpn ? <PartNameEditButton row={row} edit={name} /> : null}
           {canEditBins ? <PartBinMoveButton row={row} edit={binEdit} /> : null}
@@ -641,7 +649,7 @@ function PartRowView({
               Remove Part
             </Button>
           ) : null}
-          <PartPhotoFile photo={photo} />
+          {canEditPhoto ? <PartPhotoFile photo={photo} /> : null}
         </div>
         {removeNote ? (
           <p className="mt-2 text-sm text-destructive" data-testid="part-remove-refused">
