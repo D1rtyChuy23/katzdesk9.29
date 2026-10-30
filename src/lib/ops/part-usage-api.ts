@@ -141,15 +141,23 @@ uses_all as (
     left join part_keys pk on m.billing_item_id is null and pk.k = lower(btrim(m.item))
    where m.removed_at is null and p.status <> 'Cancelled' and coalesce(b.id, pk.part_id) is not null
   union all
-  -- 4. QuickBooks history, matched by SKU. One attached to a KatzDesk ticket counts on that ticket.
-  select sk.part_id, coalesce(sj.kind, 'quickbooks'), coalesce(sj.id, h.id), h.id,
-         case when sj.id is not null then sj.kind || ':' || sj.id else 'qb:' || h.id end,
+  -- 4. QuickBooks history, matched by SKU. One attached to a KatzDesk ticket counts on that ticket (on its install,
+  --    like its charges, when the ticket was merged into one as billed: one use there, 10/30).
+  select sk.part_id,
+         case when bq.on_install then 'install' else coalesce(sj.kind, 'quickbooks') end,
+         case when bq.on_install then sj.merged_install_id else coalesce(sj.id, h.id) end,
+         h.id,
+         case when bq.on_install then 'install:' || sj.merged_install_id
+              when sj.id is not null then sj.kind || ':' || sj.id else 'qb:' || h.id end,
          coalesce(h.completed::date, h.invoice_date, l.invoice_date), h.customer, nullif(btrim(h.wo), ''),
          coalesce(nullif(l.qty, 0), 1)::numeric, 3, 'quickbooks'
     from wo_history_lines l
     join wo_history h on h.id = l.history_id
     join sku_keys sk on sk.k = lower(btrim(l.item_code))
     left join service_jobs sj on sj.id = h.job_id
+    left join lateral (
+      select coalesce(sj.merged_install_id is not null and ${BILLED_ON_INSTALL_SO("sj.id")} is not null, false) as on_install
+    ) bq on true
    where l.kind not in ('labor', 'trip', 'discount')
   union all
   -- 5. WO part lines, Corrigo's before NetSuite's. One on a KatzDesk ticket counts on that ticket (a PM billed on a

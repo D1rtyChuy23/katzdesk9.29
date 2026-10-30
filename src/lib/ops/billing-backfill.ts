@@ -400,18 +400,39 @@ const sameDiscount = (a: Discount | null, b: Discount | null) => (!a && !b) || (
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-/** The ticket a WO's rows go on, or why none. */
+const soKey = (so: string | null | undefined) => String(so ?? "").toUpperCase().replace(/\s+/g, "");
+
+/**
+ * The ticket a WO's rows go on, or why none. `rowSos`: the Sales Orders the rows name. A ticket merged into an install
+ * as billed on its Sales Order (10/30) takes the rows on that SO, and only those: a live ticket never gets them, and
+ * rows on another SO (the install's own billing, say) never go on it.
+ */
 function pickTicket(
   key: string,
   ctx: BackfillContext,
   refDate: string | null,
+  rowSos: Set<string>,
 ): { ticket: BackfillTicket } | { reason: string } {
   const all = ctx.tickets.filter((t) => woMatchKey(t.wo ?? "") === key);
   const live = all.filter((t) => !t.duplicateOf);
+  const billed = all.filter((t) => t.billedOnInstall);
+  const mine = billed.filter((t) => rowSos.has(soKey(t.billedOnInstall)));
+  if (mine.length) {
+    const t = mine[0]!;
+    if (mine.length === 1 && rowSos.size === 1) return { ticket: t };
+    return {
+      reason: `The rows are on ${[...rowSos].join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Record its invoices by hand, or split the file by Sales Order.`,
+    };
+  }
   if (!live.length) {
-    // Merged into an install as billed on its Sales Order (10/30): its invoices still come here.
-    const billed = all.filter((t) => t.billedOnInstall);
-    if (billed.length === 1) return { ticket: billed[0]! };
+    if (billed.length) {
+      const t = billed[0]!;
+      return {
+        reason: rowSos.size
+          ? `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}; these rows are on ${[...rowSos].join(", ")}. Skipped.`
+          : `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}, and these rows name no Sales Order. Skipped.`,
+      };
+    }
     if (all.length) {
       const intoInstall = all.find((t) => t.mergedInstallId)?.mergedInstallId;
       if (intoInstall) return { reason: `Merged into install #${intoInstall}. Billing Backfill covers service and TLC tickets.` };
@@ -448,7 +469,8 @@ export function planBackfill(read: Pick<BackfillRead, "lines" | "invoices">, ctx
 function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInvoiceRow[], ctx: BackfillContext): BackfillPlan {
   const wo = lineRows[0]?.wo ?? invoiceRows[0]?.wo ?? woCanonical(key);
   const invoiceDates = invoiceRows.map((i) => i.date).filter((d): d is string => !!d).sort();
-  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null);
+  const rowSos = new Set([...invoiceRows.map((i) => soKey(i.so)), ...lineRows.map((r) => soKey(r.sourceSo))].filter(Boolean));
+  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, rowSos);
   const empty: BackfillPlan = {
     key,
     wo,

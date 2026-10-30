@@ -195,7 +195,7 @@ async function planFiles(sql: Q, files: BackfillFile[]): Promise<BackfillPreview
  * and a ticket planned unlocked still has no live invoice). Not locked: charges, discount, Sales Order and billed
  * date, then the invoices. Locked: the invoices only. Every ticket written gets a history line.
  */
-const APPLY_BACKFILL_SQL = `
+export const APPLY_BACKFILL_SQL = `
 with plan as (
   select * from jsonb_to_recordset($1::jsonb)
     as p(job_id int, seen text, locked boolean, write_charges boolean, dk text, dv numeric, set_so boolean, so text, billed_on date, log text)

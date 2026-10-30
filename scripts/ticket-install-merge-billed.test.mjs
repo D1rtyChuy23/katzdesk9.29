@@ -17,7 +17,7 @@ const { approveInvoiceFor, getInvoiceFor, listAccountInvoicesFor } = await impor
 const { exportBillingFor, invoicedPartLines, recordTicketSalesOrder } = await import("../src/lib/ops/charges-api.ts");
 const { loadTicketBillingRows } = await import("../src/lib/ops/billing-report-api.ts");
 const { mergeInstallsFor } = await import("../src/lib/ops/install-projects.ts");
-const { previewBillingBackfillFor, applyBillingBackfillFor } = await import("../src/lib/ops/billing-backfill-api.ts");
+const { previewBillingBackfillFor, applyBillingBackfillFor, APPLY_BACKFILL_SQL } = await import("../src/lib/ops/billing-backfill-api.ts");
 const { loadPartUses } = await import("../src/lib/ops/part-usage-api.ts");
 const { todayChicago, addDays } = await import("../src/lib/ops/clock.ts");
 
@@ -253,6 +253,12 @@ test("a billed merge doesn't depend on the install's invoice, and names only Net
   assert.deepEqual([after.version, after.total], [own.version, 150]);
   assert.deepEqual(after.billedElsewhere.map((b) => [b.invoices, b.total]), [["INV-71", 500]]);
   assert.equal((await one(pg, "select moved->>'billedInvoices' as i from ticket_install_merges")).i, "INV-71");
+  // In the statement too: the invoice stamp it is given is checked for an unbilled ticket only.
+  const j2 = await billedTicket(pg, { call_id: "SC-202610-908", wo: "WO-4830" });
+  const i2 = await install(pg, { wo: "WO-4830" });
+  const p2 = await preview(sql, j2, i2);
+  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", p2.stamps.job, p2.stamps.install, "1:stale:stamp", "note", 0, null, null, null, SO, 500]);
+  assert.equal(ran.length, 1);
 });
 
 test("the Billing Backfill records a billed merged ticket's NetSuite invoices, and nothing else", async () => {
@@ -272,11 +278,30 @@ test("the Billing Backfill records a billed merged ticket's NetSuite invoices, a
   assert.deepEqual([plan.jobId, plan.status, plan.locked, plan.charges.next], [jobId, "invoices", true, null]);
   assert.ok(plan.warnings.includes(`Merged into install #${installId} as billed on ${SO}: only its NetSuite invoices are recorded; its charges and Sales Order stay as they are.`), plan.warnings.join(" | "));
   const before = await one(pg, "select ns_so, discount_kind, (select count(*)::int from ticket_charges c where c.job_id = j.id) as lines from service_jobs j where id = $1", [jobId]);
+  // The write itself takes invoices only for it: a plan that would write its charges or SO is refused whole (checked
+  // while it has no NetSuite invoice, which would refuse such a plan on its own).
+  const seen = (await one(pg, "select updated_at::text as u from service_jobs where id = $1", [jobId])).u;
+  const forced = [{ job_id: jobId, seen, locked: false, write_charges: true, dk: null, dv: null, set_so: true, so: "SO9999", billed_on: null, log: "x" }];
+  const r = (await pg.query(APPLY_BACKFILL_SQL, [JSON.stringify(forced), JSON.stringify([{ job_id: jobId, item: "X", description: "", qty: 1, rate: 1, kind: "part", ord: 1 }]), "[]", "boss"])).rows[0];
+  assert.equal(r.go, false);
+  assert.deepEqual(await one(pg, "select ns_so, discount_kind, (select count(*)::int from ticket_charges c where c.job_id = j.id) as lines from service_jobs j where id = $1", [jobId]), before);
   await applyBillingBackfillFor(sql, files, "u-owner", { hash: (await previewBillingBackfillFor(sql, files, "u-owner")).hash, skip: [] });
   // The invoice is recorded; the charges, discount and Sales Order are as they were; the install lists the invoice.
   assert.deepEqual((await pg.query("select ns_invoice, status from ticket_invoices where job_id = $1", [jobId])).rows, [{ ns_invoice: "INV9001", status: "Open" }]);
   assert.deepEqual(await one(pg, "select ns_so, discount_kind, (select count(*)::int from ticket_charges c where c.job_id = j.id) as lines from service_jobs j where id = $1", [jobId]), before);
   assert.deepEqual((await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner")).billedElsewhere.map((b) => [b.so, b.invoices, b.total]), [[SO, "INV9001", 500]]);
+  // Rows on another Sales Order (the install's own billing on the WO) never go on it, alone or with its own.
+  const otherSo = file("invoices.csv", [INVOICES_HEAD, [WO, "SO9500", "Billed", "INV9500", TODAY, "Open", "999", "999", "", ""]]);
+  const mixed = file("invoices.csv", [INVOICES_HEAD, [WO, SO, "Billed", "INV9002", TODAY, "Open", "10", "10", "", ""], [WO, "SO9500", "Billed", "INV9500", TODAY, "Open", "999", "999", "", ""]]);
+  const offSo = (await previewBillingBackfillFor(sql, [otherSo], "u-owner")).plans[0];
+  assert.deepEqual([offSo.status, offSo.jobId, offSo.reason], ["skip", null, `Ticket #${jobId} was merged into install #${installId} as billed on ${SO}; these rows are on SO9500. Skipped.`]);
+  const both = (await previewBillingBackfillFor(sql, [mixed], "u-owner")).plans[0];
+  assert.deepEqual([both.status, both.reason], ["skip", `The rows are on ${SO}, SO9500, and ticket #${jobId} was merged into install #${installId} as billed on ${SO}. Record its invoices by hand, or split the file by Sales Order.`]);
+  // A live ticket on the same WO: the rows on the merged ticket's SO still go to the merged ticket; others to the live one.
+  const live = await ticket(pg, { call_id: "SC-202610-907" });
+  assert.equal((await previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, [WO, SO, "Billed", "INV9003", TODAY, "Open", "10", "10", "", ""]])], "u-owner")).plans[0].jobId, jobId);
+  assert.equal((await previewBillingBackfillFor(sql, [otherSo], "u-owner")).plans[0].jobId, live);
+  assert.deepEqual((await pg.query("select ns_invoice from ticket_invoices where job_id = $1 order by id", [jobId])).rows.map((r) => r.ns_invoice), ["INV9001"]);
   // An unbilled ticket merged into an install is still skipped.
   const other = await ticket(pg, { call_id: "SC-202610-905", wo: "WO-4810" });
   const otherInstall = await install(pg, { wo: "WO-4810" });
@@ -303,6 +328,16 @@ test("Part Usage counts a billed merged ticket's parts once, on the install, ove
   const ib = await install(pg, { wo: "WO-4820" });
   await mergeShown(sql, b, ib, await preview(sql, b, ib));
   assert.deepEqual(await uses(), [[`install:${ia}`, "install", 2], [`install:${ib}`, "install", 3]]);
+  // One with QuickBooks history for the same part: its charges are the one use, before and after.
+  const c = await ticket(pg, { call_id: "SC-202610-909", wo: "WO-4840", ns_so: "SO9003" });
+  await charge(pg, c, "PARTS : TESTGASKET", 4, 12.5, "part", 1);
+  const run = Number((await one(pg, "insert into wo_history_runs (filename) values ('test.xlsx') returning id")).id);
+  const h = Number((await one(pg, "insert into wo_history (run_id, history_ref, wo, customer, completed, job_id) values ($1, 'QB-40', 'WO-4840', $2, $3, $4) returning id", [run, CAFE, TODAY, c])).id);
+  await pg.query("insert into wo_history_lines (history_id, line_type, kind, item_code, qty) values ($1, 'Item', 'part', 'TESTGASKET', 4)", [h]);
+  const ic = await install(pg, { wo: "WO-4840" });
+  assert.deepEqual((await uses()).filter((u) => u[0].endsWith(`:${c}`) || u[0] === `install:${ic}`), [[`service:${c}`, "service", 4]]);
+  await mergeShown(sql, c, ic, await preview(sql, c, ic));
+  assert.deepEqual((await uses()).filter((u) => u[0].endsWith(`:${c}`) || u[0] === `install:${ic}`), [[`install:${ic}`, "install", 4]]);
 });
 
 test("the confirm, the merge's toast and the install's Invoice window say it (source)", () => {

@@ -65,12 +65,6 @@ export function InvoiceButton({ type, id, className }: { type: InvoiceTarget; id
   );
 }
 
-/**
- * The Invoice window: billing info from the account, the lines (parts with description, MPN, photo, qty and price;
- * labor), one discount, the total. Lines are added and removed here. Approve saves it; Cancel saves nothing.
- * Warehouse (a refurb for Katz Coffee Service Dept.) adds parts only and saves them for approval instead; an invoice
- * waiting for approval is approved by an Admin. What this person may do comes with the invoice from the server.
- */
 /** A ticket merged into the install as billed on a Sales Order (10/30): its lines, its discount and what was billed. */
 function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
   const amounts = b.lines.map((l) => Math.round(l.qty * l.rate * 100) / 100);
@@ -106,6 +100,12 @@ function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
   );
 }
 
+/**
+ * The Invoice window: billing info from the account, the lines (parts with description, MPN, photo, qty and price;
+ * labor), one discount, the total. Lines are added and removed here. Approve saves it; Cancel saves nothing.
+ * Warehouse (a refurb for Katz Coffee Service Dept.) adds parts only and saves them for approval instead; an invoice
+ * waiting for approval is approved by an Admin. What this person may do comes with the invoice from the server.
+ */
 export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: number; onClose: () => void }) {
   const qc = useQueryClient();
   // Always read fresh when the window opens, so a cancelled draft never comes back.
