@@ -386,6 +386,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        insert into activity (entity_type, entity_id, actor_name, action, detail)
        select 'install', g.keep_id, $5, 'merged', $16 from g
        union all
+       -- liveInstallIds (ticket-install-merge.ts) reads this line to tell a merge from a removal: keep its wording.
        select 'install', g.drop_id, $5, 'merged', 'merged into install #' || g.keep_id::text from g
        returning id
      )

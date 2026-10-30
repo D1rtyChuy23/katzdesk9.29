@@ -798,7 +798,9 @@ export async function mergedInstallTarget(sql: Q, jobId: number): Promise<{ inst
 
 /**
  * Each install's live one: itself, or, once it was merged into another, the install it went into, as many merges on as
- * it takes (20 at most, so a loop ends). An install archived on its own, or whose chain ends archived, has none.
+ * it takes (20 at most, so a loop ends). Only through install merges: one removed while flagged as a possible duplicate
+ * keeps the flag in duplicate_of too, but its work went nowhere. Install merges log "merged into install #N" on the
+ * install they drop (mergeInstallsFor). An install removed, or whose chain ends removed, has none.
  */
 export async function liveInstallIds(sql: Q, ids: number[]): Promise<Map<number, number>> {
   if (!ids.length) return new Map();
@@ -812,6 +814,11 @@ export async function liveInstallIds(sql: Q, ids: number[]): Promise<Map<number,
          from hop h
          join installs n on n.id = h.duplicate_of
         where h.archived and h.depth < 20
+          and exists (
+            select 1 from activity a
+             where a.entity_type = 'install' and a.entity_id = h.id and a.action = 'merged'
+               and a.detail = 'merged into install #' || h.duplicate_of::text
+          )
      )
      select distinct on (start_id) start_id, id from hop where not archived order by start_id, depth`,
     [ids],

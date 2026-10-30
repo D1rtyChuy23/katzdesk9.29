@@ -1463,7 +1463,7 @@ type UpdateInstallInput = { id: number; customer?: string; equipment?: string | 
 	contactPhone?: string | null;
 	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
 	machinesBase?: MachineSpec[] | string | null;
-	/** The notes as the saving window loaded them. With it, text the server added since (a merged ticket's) is kept (notes_after_stale_save). */
+	/** The notes the saving window's text was typed on. With it, a merged ticket's text the window never had is kept, and unchanged notes stay as stored (notes_after_window_save). */
 	notesBase?: string | null };
 
 /**
@@ -1561,7 +1561,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
         -- was merged into this install (10/30) keeps the ticket's text under them.
         notes = case
           when ${data.notes === undefined}::boolean then notes
-          when ${data.notesBase !== undefined}::boolean then notes_after_stale_save(notes, ${data.notesBase ?? null}::text, ${data.notes ?? null}::text)
+          when ${data.notesBase !== undefined}::boolean
+            then notes_after_window_save(id, notes, ${data.notesBase ?? null}::text, ${data.notes ?? null}::text)
           else ${data.notes ?? null}::text
         end,
         work_done = ${data.workDone === undefined ? c.work_done : data.workDone},

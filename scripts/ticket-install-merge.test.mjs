@@ -26,6 +26,7 @@ const { loadWindowRows } = await import("../src/lib/ops/billing-report-api.ts");
 const { formatLongDate, todayChicago, addDays } = await import("../src/lib/ops/clock.ts");
 const { updateInstallFor, assignAssetToServiceFor, moveBoardBlockFor } = await import("../src/lib/ops/api.ts");
 const { saveRepairQuoteFor } = await import("../src/lib/ops/repair-quote-api.ts");
+const { mergeInstallsFor } = await import("../src/lib/ops/install-projects.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -284,35 +285,37 @@ test("the note goes under the install's own notes; nothing linked moves nothing;
 
 test("an install window opened before the merge keeps the merged ticket's note when it saves", async () => {
   const { pg, sql } = await fresh();
-  const after = async (stored, base, sent) => (await one(pg, "select notes_after_stale_save($1, $2, $3) as v", [stored, base, sent])).v;
-  assert.equal(await after("A", "A", "B"), "B");
-  assert.equal(await after("A\n\nNOTE", "A", "A"), "A\n\nNOTE");
-  assert.equal(await after("A\r\n\r\nNOTE", "A", "A"), "A\r\n\r\nNOTE");
-  assert.equal(await after("A\n\nNOTE", "A", "A edited  "), "A edited\n\nNOTE");
-  assert.equal(await after("A\n\nNOTE", "A\r\n", "A edited"), "A edited\n\nNOTE");
-  // The merge trims what ends the notes before adding under them: a window that loaded them that way still matches.
-  assert.equal(await after("call first\n\nNOTE", "call first \n\n\n", "call first, gate code 9"), "call first, gate code 9\n\nNOTE");
-  assert.equal(await after("NOTE", null, "Typed"), "Typed\n\nNOTE");
-  assert.equal(await after("NOTE", null, null), "NOTE");
-  assert.equal(await after("NOTE", "", null), "NOTE");
+  // The rule on its own, for an install two tickets were merged into.
+  const ruled = await install(pg, { wo: "WO-4890" });
+  const other = await install(pg, { wo: "WO-4891" });
+  const from = await ticket(pg, { call_id: "SC-202610-990", wo: "WO-4890" });
+  for (const note of ["NOTE one\nIssue: x", "NOTE two"]) {
+    await pg.query("insert into ticket_install_merges (job_id, install_id, merged_by, note) values ($1, $2, 'boss', $3)", [from, ruled, note]);
+  }
+  const after = async (stored, base, sent, id = ruled) => (await one(pg, "select notes_after_window_save($1, $2, $3, $4) as v", [id, stored, base, sent])).v;
+  const ONE = "NOTE one\nIssue: x";
+  // The window didn't change the notes: they stay as stored, whatever the server has.
+  assert.equal(await after(`A\n\n${ONE}`, "A", "A"), `A\n\n${ONE}`);
+  assert.equal(await after("Rewritten elsewhere", "A", "A  \r\n"), "Rewritten elsewhere");
+  assert.equal(await after("A", "", null), "A");
+  assert.equal(await after("A", null, ""), "A");
+  // It did: its text, then each merged text it never had, in the order merged.
+  assert.equal(await after(`A\n\n${ONE}`, "A", "A edited"), `A edited\n\n${ONE}`);
+  assert.equal(await after("A\r\n\r\nNOTE one\r\nIssue: x\r\n\r\nNOTE two", "A", "A edited  "), `A edited\n\n${ONE}\n\nNOTE two`);
+  assert.equal(await after(ONE, null, "Typed"), `Typed\n\n${ONE}`);
+  // ... one it has already (opened after that merge) isn't added twice; one it took out on purpose stays out.
+  assert.equal(await after(`A\n\n${ONE}\n\nNOTE two`, `A\n\n${ONE}`, `A edited\n\n${ONE}`), `A edited\n\n${ONE}\n\nNOTE two`);
+  assert.equal(await after(`A\n\n${ONE}`, `A\n\n${ONE}`, "A"), "A");
+  assert.equal(await after(`A\n\n${ONE}`, "A", `A\n\n${ONE}\nmore`), `A\n\n${ONE}\nmore`);
+  // ... it cleared its notes: what it never had stays.
+  assert.equal(await after(`A\n\n${ONE}`, "A", ""), ONE);
+  assert.equal(await after(`A\n\n${ONE}`, "A", null), ONE);
+  // Nothing merged since, or a merged text taken out of the notes since: the window's, as before (the last save wins).
   assert.equal(await after("Rewritten elsewhere", "A", "A edited"), "A edited");
-  assert.equal(await after("Rewritten elsewhere", "A", "A"), "Rewritten elsewhere");
-  assert.equal(await after("B\nX", "A", "A2"), "A2");
-  // The window cleared its notes: what was added since, that it never showed, stays.
-  assert.equal(await after("A\n\nNOTE", "A", ""), "NOTE");
   assert.equal(await after("A", "A", null), null);
-  assert.equal(await after("A\n\n", "A", "B"), "B");
-  // Saved twice, or by two windows: what the server has already is never added again.
-  assert.equal(await after("A\n\nmine", "A", "A\n\nmine"), "A\n\nmine");
-  assert.equal(await after("A\n\nmine\n", "A", "A\n\nmine"), "A\n\nmine");
-  assert.equal(await after("A\n\nNOTE", "A", "A, typed\n\nNOTE"), "A, typed\n\nNOTE");
-  // Only whole lines count as had: a line that is part of one of the window's is still added.
-  assert.equal(await after("A\nok", "A", "A\nlook"), "A\nlook\n\nok");
-  // Changed on the notes' last line rather than added under them: the window's, as before.
-  assert.equal(await after("Hello world", "Hello", "Hello there"), "Hello there");
-  assert.equal(await after("Hello  \n\nNOTE", "Hello", "Hello there"), "Hello there\n\nNOTE");
-  // The install had no notes: everything the server has was added.
-  assert.equal(await after("NOTE", "", "Typed"), "Typed\n\nNOTE");
+  assert.equal(await after("A, the note fixed", "A", "A edited"), "A edited");
+  // Another install's merges don't count.
+  assert.equal(await after(`A\n\n${ONE}`, "A", "A edited", other), "A edited");
 
   const jobId = await ticket(pg);
   const installId = await install(pg, { notes: "Install by 3rd party." });
@@ -327,6 +330,12 @@ test("an install window opened before the merge keeps the merged ticket's note w
   await updateInstallFor(sql, { id: installId, notes: "Install by 3rd party. Badge at the desk.", notesBase: "Install by 3rd party." }, ctx);
   const kept = (await one(pg, "select notes from installs where id = $1", [installId])).notes;
   assert.equal(kept, `Install by 3rd party. Badge at the desk.\n\n${merged.slice("Install by 3rd party.\n\n".length)}`);
+  // The same window saves again (its base is what it last sent): the note isn't added twice, and its own text can go back.
+  const note = merged.slice("Install by 3rd party.\n\n".length);
+  await updateInstallFor(sql, { id: installId, notes: "Install by 3rd party. Badge at the desk.\nCall first.", notesBase: "Install by 3rd party. Badge at the desk." }, ctx);
+  assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, `Install by 3rd party. Badge at the desk.\nCall first.\n\n${note}`);
+  await updateInstallFor(sql, { id: installId, notes: "Install by 3rd party. Badge at the desk.", notesBase: "Install by 3rd party. Badge at the desk.\nCall first." }, ctx);
+  assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, kept);
   // A save that sends no notes leaves them; one that sends no base is stored as sent, as before.
   await updateInstallFor(sql, { id: installId, technician: "Other Tech" }, ctx);
   assert.equal((await one(pg, "select notes from installs where id = $1", [installId])).notes, kept);
@@ -609,31 +618,35 @@ test("a later Corrigo import puts the ticket's WO on the install, whether matche
   assert.equal(Number((await one(pg, "select count(*) from service_jobs")).count), 1);
 });
 
-test("after the install it went into is merged into another, the import follows it; archived, the import writes nothing and says so", async () => {
+test("after the install it went into is merged into another, the import follows it; removed, the import writes nothing and says so", async () => {
   const { pg, sql } = await fresh();
   const jobId = await ticket(pg, { corrigo_id: "CG-1" });
   const installId = await install(pg);
   await mergeNow(sql, jobId, installId);
   const file = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Work Order Id"], ["4792", "Completed", CAFE, "CG-1"]]).records;
+  const matched = async () => (await previewCorrigoRecords(sql, file)).rows.map((r) => [r.action, r.board, r.jobId]);
 
+  // Merge installs: the import follows the install into the one kept, and on again.
   const keep = await install(pg, { wo: "WO-4000" });
-  await pg.query("update installs set archived = true, duplicate_of = $2 where id = $1", [installId, keep]);
-  const followed = await previewCorrigoRecords(sql, file);
-  assert.deepEqual(followed.rows.map((r) => [r.action, r.board, r.jobId]), [["update", "install", keep]]);
+  await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: installId });
+  assert.deepEqual(await matched(), [["update", "install", keep]]);
   assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: keep });
-
-  // Merged on again: the import goes on to the install that's live now.
   const last = await install(pg, { wo: "WO-4001" });
-  await pg.query("update installs set archived = true, duplicate_of = $2 where id = $1", [keep, last]);
+  await mergeInstallsFor(sql, "u-owner", { keepId: last, dropId: keep });
   assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: last });
-  assert.deepEqual((await previewCorrigoRecords(sql, file)).rows.map((r) => [r.action, r.board, r.jobId]), [["update", "install", last]]);
-  // A loop of archived installs ends with none.
-  await pg.query("update installs set archived = true, duplicate_of = $2 where id = $1", [last, keep]);
+  assert.deepEqual(await matched(), [["update", "install", last]]);
+
+  // A link no install merge made isn't followed: one removed while flagged as a possible duplicate keeps the flag.
+  const flagged = await install(pg, { wo: "WO-4002" });
+  await pg.query("update installs set duplicate_of = $2 where id = $1", [last, flagged]);
+  await pg.query("update installs set archived = true where id = $1", [last]);
   assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: null });
-  assert.deepEqual(await M.liveInstallIds(sql, [installId, keep, last]), new Map());
-  assert.deepEqual(await M.liveInstallIds(sql, [jobId + 100]), new Map());
-  await pg.query("update installs set duplicate_of = null where id in ($1, $2)", [keep, last]);
-  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: null });
+  // A loop ends, and an install that isn't there has none.
+  const [x, y] = [await install(pg, { wo: "WO-4003", archived: true }), await install(pg, { wo: "WO-4004", archived: true })];
+  await pg.query("update installs set duplicate_of = case id when $1 then $2 else $1 end where id in ($1, $2)", [x, y]);
+  await pg.query("insert into activity (entity_type, entity_id, action, detail) values ('install', $1::int, 'merged', 'merged into install #' || $2::text), ('install', $2::int, 'merged', 'merged into install #' || $1::text)", [x, y]);
+  assert.deepEqual(await M.liveInstallIds(sql, [x, jobId + 100]), new Map());
+
   const gone = await previewCorrigoRecords(sql, file);
   assert.deepEqual(gone.rows.map((r) => [r.action, r.board, r.jobId]), [["update", "service", jobId]]);
   assert.match(gone.rows[0].matchNote, new RegExp(`merged into install #${installId}, which was archived: not imported`));

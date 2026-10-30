@@ -377,11 +377,13 @@ export function InstallSheet({
   /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
   const loadedSpecs = useRef<MachineSpec[]>([]);
   /**
-   * Each install's notes as this window knows the server has them: as it opened them, then as each save that went
-   * through sent them. A save sends that as its base when it runs, not when it was queued, so the server keeps what it
-   * added since (a ticket merged into the install, 10/30), and a save queued behind a refused one is based on what is stored.
+   * This opening's notes (10/30): the Notes box shows them as they were when the window opened, until it closes. Each
+   * save carries the slot and sends its base when it runs: the notes its text was typed on (as opened, then as this
+   * opening's last save that went through sent them). The server keeps a merged ticket's text the window never had, and
+   * notes the window didn't change.
    */
-  const storedNotes = useRef(new Map<number, string | null>());
+  const [notesSlot, setNotesSlot] = useState<NotesSlot | null>(null);
+  if ((row?.id ?? null) !== (notesSlot?.id ?? null)) setNotesSlot(row ? { id: row.id, shown: row.notes ?? "", base: row.notes ?? null } : null);
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
   const specsRef = useRef(specs);
@@ -418,11 +420,6 @@ export function InstallSheet({
     setSpecs(loaded.map((s) => ({ ...s })));
     setHydratedId(row?.id ?? null);
   }, [row?.id, catalog.join("\n")]);
-  // The Notes box shows the notes the window opened with until it closes; a read since doesn't change it.
-  useEffect(() => {
-    if (row) storedNotes.current.set(row.id, row.notes ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row?.id]);
   // Every field the merge compares, and each row's unit id: a change to any of them on the server reaches this window.
   const machineSig = JSON.stringify(row?.machines ?? []);
   useEffect(() => {
@@ -468,17 +465,17 @@ export function InstallSheet({
   const save = useMutation({
     scope: queue,
     mutationFn: (vars: SaveVars) => {
-      const { builtOn, sent, ...rest } = vars;
+      const { builtOn, sent, notesSlot: slot, ...rest } = vars;
       void sent;
-      // The notes this save's text was typed on go with it, read now: the server keeps what it added under them since.
-      const d = rest.notes !== undefined && storedNotes.current.has(rest.id) ? { ...rest, notesBase: storedNotes.current.get(rest.id) ?? null } : rest;
+      // The notes this save's text was typed on go with it, read now: a save queued behind a failed one sends the base before it.
+      const d = rest.notes !== undefined && slot ? { ...rest, notesBase: slot.base } : rest;
       // The list this save's rows were built on goes with it: the server keeps whatever changed there since.
       return updateInstall({ data: d.machines !== undefined && builtOn ? { ...d, machinesBase: JSON.stringify(baseOf(builtOn)) } : d });
     },
     onSuccess: (saved, vars) => {
-      // Stored: this window's next notes are typed on these.
-      if (vars.notes !== undefined) storedNotes.current.set(vars.id, vars.notes ?? null);
-      const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent");
+      // Stored: this opening's next notes are typed on these.
+      if (vars.notes !== undefined && vars.notesSlot) vars.notesSlot.base = vars.notes ?? null;
+      const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent" && k !== "notesSlot");
       const machineOnly = keys.every((k) =>
         ["equipment", "serial", "powerVoltage", "machines"].includes(k),
       );
@@ -738,8 +735,9 @@ export function InstallSheet({
                         technician: String(fd.get("technician") || "") || null,
                         // WOs are added and removed on the Work orders list, which saves at once.
                         reqsReady: String(fd.get("reqsReady") || "") || null,
-                        // Sent with the notes the window knows are stored when the save runs (10/30).
+                        // Sent with this opening's base when the save runs (10/30).
                         notes: String(fd.get("notes") || "") || null,
+                        notesSlot: notesSlot?.id === row.id ? notesSlot : undefined,
                         workDone: String(fd.get("workDone") || "") || null,
                         completedAt: String(fd.get("completedAt") || "") || null,
                         accountRep: String(fd.get("accountRep") || "") || null,
@@ -806,7 +804,7 @@ export function InstallSheet({
                     </div>
                     <div className="sm:col-span-2">
                       <Label>Notes</Label>
-                      <Textarea name="notes" className="mt-1" defaultValue={row.notes ?? ""} />
+                      <Textarea name="notes" className="mt-1" defaultValue={notesSlot?.id === row.id ? notesSlot.shown : (row.notes ?? "")} />
                     </div>
                     <InstallWorkOrders row={row} />
                     <MergeInstall
@@ -933,8 +931,13 @@ function withoutRow(rows: MachineSpec[], gone: MachineSpec): MachineSpec[] {
   return at < 0 ? rows : rows.filter((_, i) => i !== at);
 }
 
+/** One opening's notes in the install window: what the box shows, and the base each save sends (10/30). */
+type NotesSlot = { id: number; shown: string; base: string | null };
+
 /** A save from the install window: the install's fields, and for the machine list the list it was built on. */
 type SaveVars = Parameters<typeof updateInstall>[0]["data"] & {
+  /** This opening's notes: the base is read from it when the save runs, and moves on when the save goes through. */
+  notesSlot?: NotesSlot;
   /** The list this save's rows were built on: sent as its base, so the server keeps whatever changed there since. */
   builtOn?: MachineSpec[];
   /** The rows this save sends, as the window holds them: a later save may be built on them. */

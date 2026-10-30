@@ -53,32 +53,33 @@ create table if not exists ticket_install_merges (
 create index if not exists ticket_install_merges_job_idx on ticket_install_merges (job_id);
 create index if not exists ticket_install_merges_install_idx on ticket_install_merges (install_id);
 
--- An install window opened before the install's notes changed (a ticket merged into it adds its text under them) keeps
--- what the server added, worked out on the row the save writes. The window that didn't touch the notes leaves them; one
--- that did keeps its own text, then what was added under the notes it opened with, when the server only added lines at
--- the end and the window doesn't have them already (saved twice, say). Anything else is the window's, as before: a
--- change inside those notes, or on their last line. Line breaks are compared as \n; blanks at either end don't count.
-create or replace function notes_after_stale_save(stored text, base text, sent text) returns text language sql immutable as $$
+-- Notes compared as text: line breaks as \n, blanks at either end left out, nothing as ''.
+create or replace function notes_plain(t text) returns text language sql immutable as $$
+  select btrim(replace(replace(coalesce(t, ''), E'\r\n', E'\n'), E'\r', E'\n'), E' \t\n')
+$$;
+
+-- An install window's save of its notes, worked out on the row it writes. A window opened before a ticket was merged into
+-- the install doesn't show the text the merge added under the notes, and its save must not drop it. base is the notes the
+-- window's text was typed on: as it opened them, then as its last save that went through sent them.
+-- The window didn't change the notes since its base: they stay as stored. It did: its text, as before (the last save
+-- wins), then each text a ticket merge added that the window never had: in the notes now, but neither in its base nor in
+-- what it sends. Read fresh (volatile), so a merge that committed while this save waited for the row counts.
+create or replace function notes_after_window_save(install int, stored text, base text, sent text) returns text language sql volatile as $$
   with v as (
-    select replace(replace(coalesce(stored, ''), E'\r\n', E'\n'), E'\r', E'\n') as s,
-           replace(replace(coalesce(base, ''), E'\r\n', E'\n'), E'\r', E'\n') as b,
-           replace(replace(coalesce(sent, ''), E'\r\n', E'\n'), E'\r', E'\n') as t
-  ), w as (
-    select s, b, t, rtrim(b, E' \t\n') as bt from v
-  ), x as (
-    select s, b, t, bt, substr(s, length(bt) + 1) as rest, rtrim(t, E' \t\n') as own from w
-  ), y as (
-    select s, b, t, bt, rest, own, btrim(rest, E' \t\n') as added from x
+    select notes_plain(stored) as s,
+           notes_plain(base) as b,
+           notes_plain(sent) as t,
+           rtrim(replace(replace(coalesce(sent, ''), E'\r\n', E'\n'), E'\r', E'\n'), E' \t\n') as own
+  ), kept as (
+    select string_agg(m.note, E'\n\n' order by m.merged_at, m.id) as added
+      from v, (select id, merged_at, notes_plain(note) as note from ticket_install_merges where install_id = install) m
+     where m.note <> '' and strpos(v.s, m.note) > 0 and strpos(v.b, m.note) = 0 and strpos(v.t, m.note) = 0
   )
   select case
-           when s = b then sent                                  -- nothing changed on the server since the window read it
-           when t = b then stored                                -- the window didn't touch the notes
-           when left(s, length(bt)) <> bt then sent              -- changed inside the notes the window opened with
-           when bt <> '' and rest !~ E'^[ \t]*\n' then sent      -- changed on their last line, not added under it
-           when added = '' then sent
-           when own = '' then added
-           when position(E'\n' || added || E'\n' in E'\n' || own || E'\n') > 0 then sent  -- the window has those lines
-           else own || E'\n\n' || added
+           when v.t = v.b then stored
+           when kept.added is null then sent
+           when v.own = '' then kept.added
+           else v.own || E'\n\n' || kept.added
          end
-    from y
+    from v, kept
 $$;
