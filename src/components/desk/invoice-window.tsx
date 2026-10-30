@@ -82,8 +82,8 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   /** An install invoice's P.O. (10/30), for NetSuite. */
   const [po, setPo] = useState("");
   const [dirty, setDirty] = useState(false);
-  // The invoice the lines below started from: its saved-for-approval stamp (Approve sends it, so an Admin never approves
-  // over parts Warehouse saved after the window opened) and where it stood.
+  // The invoice the lines below started from: its version (Approve sends it, so an Admin never approves over parts
+  // Warehouse saved, another approval, or an invoice a merge put on the record after the window opened) and where it stood.
   const [seen, setSeen] = useState<{ version: string | null; state: InvoiceView["state"] } | null>(null);
   const v = q.data;
 
@@ -162,11 +162,18 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
     draft.map((l) => ({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0, kind: l.kind })),
     discount,
   );
-  const problem = !draft.length
+  // An install invoice with lines on record may be approved with every line taken off: it comes to $0.00 (Merge installs
+  // asks for this when both installs have an invoice, 10/30). A confirm says so first.
+  const emptying = !draft.length && type === "install" && !!v?.canApprove && !!v?.lines.length;
+  const problem = !draft.length && !emptying
     ? v?.canSave
       ? "Add the parts the refurb used."
       : "Add a line to approve."
     : (invoiceError(draft) ?? (v?.partsOnly ? partsOnlyError(draft) : null) ?? ("error" in typed ? typed.error : null));
+  const approveNow = () => {
+    if (emptying && !window.confirm("Approve this invoice with no lines? It comes to $0.00, and the lines it had are taken off.")) return;
+    approve.mutate();
+  };
   const edit = (i: number, patch: Partial<Draft>) => {
     setLines((cur) => (cur ?? []).map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
     setDirty(true);
@@ -342,7 +349,9 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                   })}
                 </ul>
               ) : (
-                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">No lines yet. Add the parts and the labor.</p>
+                <p className="rounded-lg border border-dashed border-border px-3 py-4 text-sm text-muted-foreground" data-testid="invoice-no-lines">
+                  {emptying ? "Every line is taken off. Approve saves it that way, at $0.00, or add lines back." : "No lines yet. Add the parts and the labor."}
+                </p>
               )}
               {!locked ? (
                 <div className="mt-3 space-y-3" data-testid="invoice-add">
@@ -500,7 +509,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                   {save.isPending ? "Saving…" : "Save for Approval"}
                 </Button>
               ) : (
-                <Button type="button" onClick={() => approve.mutate()} disabled={busy || !!problem || !draft.length} data-testid="invoice-approve">
+                <Button type="button" onClick={approveNow} disabled={busy || !!problem || (!draft.length && !emptying)} data-testid="invoice-approve">
                   {approve.isPending ? "Approving…" : "Approve"}
                 </Button>
               )}

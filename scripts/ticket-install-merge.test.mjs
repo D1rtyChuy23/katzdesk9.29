@@ -595,7 +595,7 @@ test("after the merge: its Invoice window points at the install, charges and tic
   const lines = [{ item: "PARTS : TESTGASKET", description: "PARTS : TESTGASKET line", qty: 2, rate: 12.5 }];
   await assert.rejects(
     () => approveInvoiceFor(sql, { type: "install", id: installId, lines, lineIds: [], discount: null, seen: opened.version }, "u-owner"),
-    { message: "Lines were saved for approval on this invoice after you opened it (a ticket was merged into the install), so nothing was approved. Look over the new lines, then approve." },
+    { message: "Lines were saved for approval on this invoice after you opened it (a ticket or another install was merged into this one), so nothing was approved. Look over the new lines, then approve." },
   );
   const now = await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner");
   assert.deepEqual([now.state, now.total, now.submittedBy, now.lines.map((l) => [l.item, l.qty, l.rate])], ["waiting", 25, "boss", [["PARTS : TESTGASKET", 2, 12.5]]]);

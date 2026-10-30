@@ -48,7 +48,8 @@ const approve = (sql, id, extra = {}) => approveInvoiceFor(sql, { type: "install
 const approveOpened = async (sql, id, extra = {}) => approve(sql, id, { seen: (await getInvoiceFor(sql, { type: "install", id }, "u-owner")).version, ...extra });
 const CHANGED = "This invoice was changed after you opened it, so nothing was approved. Look over it as it is now, then approve.";
 const bothInvoices = (drop, keep) =>
-  `Install #${drop} and install #${keep} both have an invoice, and one install takes one invoice. Move #${drop}'s lines to #${keep}'s invoice by hand (take them off #${drop}'s and approve it), then merge.`;
+  `Install #${drop} and install #${keep} both have an invoice, and one install takes one invoice. Move #${drop}'s lines to #${keep}'s invoice by hand (take them all off #${drop}'s and approve it), then merge.`;
+const GONE = "That install is no longer on the list.";
 const mergeNow = async (sql, jobId, installId) => {
   const p = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId, installId });
   assert.equal(p.refusal, null, p.refusal ?? "");
@@ -215,7 +216,7 @@ test("Merge installs moves an approved invoice as it is, on the kept install's s
   const after = await getInvoiceFor(sql, { type: "install", id: keep }, "u-owner");
   assert.deepEqual([after.po, after.total, after.lines.length, after.version], ["PO-D1", 337.5, 2, moved.version]);
   // A window on the dropped install can't approve: it is archived.
-  await assert.rejects(() => approve(sql, drop, { seen: approved.version }), { message: "That install is no longer on the list." });
+  await assert.rejects(() => approve(sql, drop, { seen: approved.version }), { message: GONE });
 
   // Two windows open on the same invoice: the first approval goes through; the second approves nothing over it.
   const again = await approve(sql, keep, { seen: after.version, po: "PO-D2" });
@@ -271,10 +272,38 @@ test("a merge and an invoice saved at the same moment: the merge checks the invo
   // went to the install kept, and nothing is put on the archived one.
   const [k3, d3] = [await install(pg, { wo: "WO-4832" }), await install(pg, { wo: "WO-4833" })];
   const d3Invoice = await approve(sql, d3, { po: "PO-D3" });
-  const late = meanwhile(() => mergeInstallsFor(sql, "u-owner", { keepId: k3, dropId: d3 }), null, "with inv as (");
-  await assert.rejects(() => approve(late, d3, { seen: d3Invoice.version, lines: [] }), { message: CHANGED });
+  const late = meanwhile(() => mergeInstallsFor(sql, "u-owner", { keepId: k3, dropId: d3 }), null, "with rec as (");
+  await assert.rejects(() => approve(late, d3, { seen: d3Invoice.version, lines: [] }), { message: GONE });
   assert.deepEqual(
     (await pg.query("select entity_id, po from invoices where entity_type = 'install' and entity_id = any($1::int[])", [[k3, d3]])).rows.map((r) => [Number(r.entity_id), r.po]),
     [[k3, "PO-D3"]],
   );
+  // The same when the dropped install's emptied invoice stays on it (the one kept has its own): the window still
+  // matches it, and the archived install is what stops the write.
+  const [k4, d4] = [await install(pg, { wo: "WO-4834" }), await install(pg, { wo: "WO-4835" })];
+  await approve(sql, k4, { po: "PO-K4" });
+  await approve(sql, d4);
+  const emptied = await approveOpened(sql, d4, { lines: [] });
+  const late4 = meanwhile(() => mergeInstallsFor(sql, "u-owner", { keepId: k4, dropId: d4 }), null, "with rec as (");
+  await assert.rejects(() => approve(late4, d4, { seen: emptied.version, po: "PO-LATE" }), { message: GONE });
+  assert.deepEqual(
+    (await pg.query("select v.entity_id, v.po, (select count(*)::int from invoice_lines l where l.invoice_id = v.id) as lines from invoices v where v.entity_type = 'install' and v.entity_id = any($1::int[]) order by v.entity_id", [[k4, d4]])).rows.map((r) => [Number(r.entity_id), r.po, r.lines]),
+    [
+      [k4, "PO-K4", 1],
+      [d4, null, 0],
+    ],
+  );
+  assert.equal((await one(pg, "select count(*)::int as n from activity where entity_type = 'install' and entity_id = $1 and detail like '%PO-LATE%'", [d4])).n, 0);
+});
+
+test("the Invoice window approves an install invoice with every line taken off, after a confirm", () => {
+  const win = readFileSync(new URL("../src/components/desk/invoice-window.tsx", import.meta.url), "utf8");
+  // Only an install invoice with lines on record, for someone who may approve it; a new or other invoice still needs a line.
+  assert.match(win, /const emptying = !draft\.length && type === "install" && !!v\?\.canApprove && !!v\?\.lines\.length;/);
+  assert.match(win, /const problem = !draft\.length && !emptying\n/);
+  assert.match(win, /if \(emptying && !window\.confirm\("Approve this invoice with no lines\? It comes to \$0\.00, and the lines it had are taken off\."\)\) return;/);
+  assert.match(win, /onClick=\{approveNow\} disabled=\{busy \|\| !!problem \|\| \(!draft\.length && !emptying\)\} data-testid="invoice-approve"/);
+  assert.match(win, /\{emptying \? "Every line is taken off\. Approve saves it that way, at \$0\.00, or add lines back\." : "No lines yet\. Add the parts and the labor\."\}/);
+  // Warehouse's Save for Approval still needs a part.
+  assert.match(win, /onClick=\{\(\) => save\.mutate\(\)\} disabled=\{busy \|\| !!problem \|\| !draft\.length\} data-testid="invoice-save"/);
 });

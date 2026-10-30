@@ -64,7 +64,10 @@ export type InvoiceView = InvoiceTotals &
     /** Who saved it for approval and when (Warehouse); kept after it is approved. */
     submittedAt: string | null;
     submittedBy: string | null;
-    /** The saved-for-approval stamp the window opened with. Approve sends it back, so a newer Warehouse save is never lost. */
+    /**
+     * The invoice the window opened ("id:approved:saved"; null when there is none). Approve sends it back, so nothing
+     * newer is written over: another approval, a Warehouse save, or an invoice a merge put on the record.
+     */
     version: string | null;
     /** Install invoices carry the customer's P.O. for NetSuite (10/30); null on others (a ticket's is on the ticket). */
     hasPo: boolean;
@@ -357,13 +360,22 @@ const saveInput = targetInput.extend({
 const WAREHOUSE_SAVES = "An Admin approves warehouse invoices. Use Save for Approval.";
 const WAITING_FOR_ADMIN = "This invoice is waiting for an Admin to approve it.";
 const SAVED_SINCE_OPENED = "Warehouse saved changes to this invoice after you opened it, so nothing was approved. Look over the new lines, then approve.";
-/** An install's invoice gets lines saved for approval when a ticket is merged into the install (10/30). */
-const LINES_ADDED_SINCE_OPENED = "Lines were saved for approval on this invoice after you opened it (a ticket was merged into the install), so nothing was approved. Look over the new lines, then approve.";
+/**
+ * An install's invoice gets lines saved for approval when a ticket is merged into the install, or when Merge installs
+ * moves the invoice of an install a ticket was merged into (10/30).
+ */
+const LINES_ADDED_SINCE_OPENED = "Lines were saved for approval on this invoice after you opened it (a ticket or another install was merged into this one), so nothing was approved. Look over the new lines, then approve.";
 /** Approved again, or put on the record, after the window opened (Merge installs moves an install's invoice, 10/30). */
 const CHANGED_SINCE_OPENED = "This invoice was changed after you opened it, so nothing was approved. Look over it as it is now, then approve.";
 
-/** Why an Approve wrote nothing: the invoice is no longer the one the window opened. */
+/** Why an Approve wrote nothing: the record left the board meanwhile, or its invoice isn't the one the window opened. */
 async function changedSinceOpened(sql: Sql, type: InvoiceTarget, id: number, seen: string | null): Promise<string> {
+  // Archived meanwhile (Merge installs archives the install it drops): say so.
+  const gone = await resolveRecord(sql, type, id).then(
+    () => null,
+    (e: unknown) => (e instanceof Error ? e.message : String(e)),
+  );
+  if (gone) return gone;
   const now = await head(sql, type, id);
   if (now?.submitted_at && savedPart(now.version) !== savedPart(seen)) return type === "install" ? LINES_ADDED_SINCE_OPENED : SAVED_SINCE_OPENED;
   return CHANGED_SINCE_OPENED;
@@ -415,18 +427,22 @@ export function approvePmInvoiceSql(): string {
  * Approve the invoice of an install, rebuild or deal: the header and its lines in one statement, so they change
  * together or not at all. $12 is the invoice the window opened (its version; null when there was none): when that
  * invoice was approved or saved for approval again since, or an invoice was put on the record, or it left the record,
- * nothing is written and no row comes back, so the approver sees it as it is first. $18 is an install invoice's P.O.,
- * written when $19 is true.
+ * nothing is written and no row comes back, so the approver sees it as it is first. An install's invoice is written only
+ * while the install is on the board, read on its locked row: an Approve that meets Merge installs mid-way waits for it,
+ * then writes nothing on the install it archived. $18 is an install invoice's P.O., written when $19 is true.
  */
 export function approveRecordInvoiceSql(): string {
-  return `with inv as (
+  return `with rec as (
+       select i.id from installs i where $1::text = 'install' and i.id = $2::int and i.archived = false for key share
+     ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
          bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po
        )
        select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(), case when $19::boolean then $18::text end
-        -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
-        where $12::text is null or exists (select 1 from invoices x where x.entity_type = $1 and x.entity_id = $2::int)
+        where ($1::text <> 'install' or exists (select 1 from rec))
+          -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
+          and ($12::text is null or exists (select 1 from invoices x where x.entity_type = $1 and x.entity_id = $2::int))
        on conflict (entity_type, entity_id) do update set
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
