@@ -387,6 +387,7 @@ test("where a pulled unit was, in the words of the confirm question and the Admi
     "Unit pulled for a refurb. wade pulled Test brewer SN TESTSN-9 from Bean Test Cafe onto Test refurb. Customers → Bean Test Cafe still lists it under Equipment.",
   );
   assert.ok(!P.isPullNotice(W.waitingNotice("wade", "Test refurb", SD, 1, 10)) && !W.isWaitingNotice(body), "the bell tells the two pings apart");
+  assert.ok(!P.isPullNotice("Test tech pulled the old gasket; please reorder."), "a teammate's own ping that says pulled is just a ping");
 });
 
 test("Warehouse pulls a unit onto its refurb from wherever it is, with no approval, and every Admin hears where it came from", async () => {
