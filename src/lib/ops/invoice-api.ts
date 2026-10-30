@@ -8,7 +8,7 @@ import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount
 import { flagOn } from "@/lib/ops/flag";
 import { INVOICE_TARGETS, carriesPo, cleanPo, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { notifyAdminsInvoiceWaiting } from "@/lib/ops/notify";
-import { BILLED_ON_INSTALL_SO } from "@/lib/ops/merged-ticket";
+import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 import { pinQuality } from "@/lib/ops/account-pin";
@@ -74,8 +74,8 @@ export type InvoiceView = InvoiceTotals &
     hasPo: boolean;
     po: string | null;
     /**
-     * An install's tickets merged in as billed on a Sales Order (10/30): their charges, billed there. Shown on the
-     * install, never part of this invoice's lines or total. Empty on other invoices.
+     * An install's tickets merged in as billed (10/30): their charges, billed on a Sales Order or on NetSuite invoices.
+     * Shown on the install, never part of this invoice's lines or total. Empty on other invoices.
      */
     billedElsewhere: BilledCarryOver[];
   };
@@ -84,16 +84,28 @@ export type BilledCarryOver = {
   jobId: number;
   /** "SC-202610-901 (WO-4792)". */
   ticket: string;
-  so: string;
+  /** What it was billed on: its Sales Order, or with none "NetSuite invoice …" (10/30). */
+  on: string;
+  /** Its Sales Order; null when it was billed on NetSuite invoices alone. */
+  so: string | null;
+  /** Its NetSuite invoices that aren't Voided, as they are now. */
   invoices: string | null;
+  /** Billed on NetSuite invoices alone: the ones of those Voided in NetSuite since the merge, else null. */
+  voided: string | null;
   lines: { item: string; description: string; qty: number; rate: number; kind: ChargeKind }[];
   /** After the ticket's discount, as billed. */
   total: number;
 };
 
-/** The billed charges of the tickets merged into an install as billed on a Sales Order, from the merge log (10/30). */
+/** The billed charges of the tickets merged into an install as billed, from the merge log (10/30). */
 async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarryOver[]> {
-  const rows = await sql.query<{ job_id: number; call_id: string | null; wo: string | null; invoices: string | null; moved: { billedSo?: string; billedLines?: unknown; billedTotal?: unknown } }>(
+  const rows = await sql.query<{
+    job_id: number;
+    call_id: string | null;
+    wo: string | null;
+    invoices: string | null;
+    moved: { billedOn?: string; billedSo?: string; billedInvoices?: string | null; billedLines?: unknown; billedTotal?: unknown };
+  }>(
     // Tickets point at the install they went into, or the one Merge installs moved them to since. Their NetSuite
     // invoices are read as they are now (the Billing Backfill records ones that come after the merge).
     `select m.job_id, j.call_id, j.wo, m.moved,
@@ -101,19 +113,26 @@ async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarr
               where ti.job_id = m.job_id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) as invoices
        from ticket_install_merges m
        join service_jobs j on j.id = m.job_id
-      where j.merged_install_id = $1 and m.moved->>'billedSo' is not null
+      where j.merged_install_id = $1 and coalesce(m.moved->>'billedOn', m.moved->>'billedSo') is not null
       order by m.id`,
     [installId],
   );
+  const list = (s: string | null | undefined) => String(s ?? "").split(",").map((x) => x.trim()).filter(Boolean);
   return rows.map((r) => {
     const lines = Array.isArray(r.moved.billedLines) ? (r.moved.billedLines as { item?: unknown; description?: unknown; qty?: unknown; rate?: unknown; kind?: unknown }[]) : [];
     const wo = String(r.wo ?? "").trim();
     const call = String(r.call_id ?? "").trim() || `Ticket #${r.job_id}`;
+    const so = r.moved.billedSo ? String(r.moved.billedSo) : null;
+    // Billed on its NetSuite invoices alone: one Voided since leaves its charges billed on nothing; the window says so.
+    const live = new Set(list(r.invoices).map((x) => x.toUpperCase()));
+    const voided = so ? [] : list(r.moved.billedInvoices).filter((x) => !live.has(x.toUpperCase()));
     return {
       jobId: Number(r.job_id),
       ticket: wo ? `${call} (${wo})` : call,
-      so: String(r.moved.billedSo),
+      on: String(r.moved.billedOn ?? r.moved.billedSo),
+      so,
       invoices: r.invoices?.trim() || null,
+      voided: voided.length ? voided.join(", ") : null,
       lines: lines.map((l) => ({
         item: String(l.item ?? ""),
         description: String(l.description ?? ""),
@@ -139,9 +158,9 @@ type Ref = { type: InvoiceTarget; id: number; customer: string; title: string; r
 /** The record the invoice is for: its customer comes from the record itself, never asked for again. */
 async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise<Ref> {
   if (type === "service" || type === "tlc") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; ns_invoice: string | null; ns_status: string | null; billed_so: string | null }>(
+    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; ns_invoice: string | null; ns_status: string | null; billed_on: string | null }>(
       `select j.customer, j.wo, j.call_id, j.kind, j.ns_so, j.duplicate_of, j.merged_install_id, i.ns_invoice, i.status as ns_status,
-              ${BILLED_ON_INSTALL_SO("j.id")} as billed_so
+              ${BILLED_ON_INSTALL("j.id")} as billed_on
          from service_jobs j
          left join lateral (
            select ns_invoice, status from ticket_invoices ti
@@ -155,8 +174,8 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     if (!r) throw new Error("That ticket is no longer on the list.");
     const kind: InvoiceTarget = r.kind === "tlc" ? "tlc" : "service";
     const locked = r.merged_install_id
-      ? r.billed_so
-        ? `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_so} and stay billed there; the install lists them as billed.`
+      ? r.billed_on
+        ? `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on} and stay billed there; the install lists them as billed.`
         : `This ticket was merged into install #${r.merged_install_id}. Its charges are on the install's invoice.`
       : r.duplicate_of
       ? `This ticket was merged into #${r.duplicate_of}. Open that ticket to change its invoice.`
@@ -768,7 +787,8 @@ export type AccountInvoice = {
   submittedBy: string | null;
   /**
    * "Approved", "Billed SO4401", "Waiting for approval" (Warehouse saved it), "Not approved" (a ticket with charges no one
-   * approved yet), or "Billed SO4401 · merged into install #12" (a ticket merged into an install as billed, 10/30).
+   * approved yet), or "Billed SO4401 · merged into install #12" / "Billed on NetSuite invoice INV9 · merged into install
+   * #12" (a ticket merged into an install as billed, 10/30).
    */
   status: string;
   /** The customer's P.O.: a ticket's own, or an install invoice's (10/30). */
@@ -809,13 +829,13 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
       order by coalesce(v.approved_at, v.submitted_at) desc`,
     [name],
   );
-  // A ticket merged into an install as billed on a Sales Order (10/30) stays listed, as billed: its charges never went
-  // on the install's invoice, so this is the one place they show on the account.
-  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; amount: string; billed_so: string | null; merged_install_id: number | null }>(
+  // A ticket merged into an install as billed (10/30) stays listed, as billed: its charges never went on the install's
+  // invoice, so this is the one place they show on the account.
+  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; amount: string; billed_on: string | null; merged_install_id: number | null }>(
     `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.po, j.discount_kind, j.discount_value, sum(round(c.qty * c.rate, 2))::text as amount,
-            ${BILLED_ON_INSTALL_SO("j.id")} as billed_so, j.merged_install_id
+            ${BILLED_ON_INSTALL("j.id")} as billed_on, j.merged_install_id
        from service_jobs j join ticket_charges c on c.job_id = j.id
-      where lower(btrim(j.customer)) = lower($1) and (j.duplicate_of is null or ${BILLED_ON_INSTALL_SO("j.id")} is not null)
+      where lower(btrim(j.customer)) = lower($1) and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
       group by j.id
       order by j.id desc`,
     [name],
@@ -836,8 +856,8 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
       approvedBy: head?.approved_by ?? null,
       submittedAt: null,
       submittedBy: null,
-      status: t.billed_so
-        ? `Billed ${t.ns_so?.trim() || t.billed_so} · merged into install #${t.merged_install_id}`
+      status: t.billed_on
+        ? `${t.ns_so?.trim() ? `Billed ${t.ns_so.trim()}` : `Billed on ${t.billed_on}`} · merged into install #${t.merged_install_id}`
         : t.ns_so
           ? `Billed ${t.ns_so}`
           : head

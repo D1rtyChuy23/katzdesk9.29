@@ -22,7 +22,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { todayChicago } from "@/lib/ops/clock";
-import { BILLED_ON_INSTALL_SO } from "@/lib/ops/merged-ticket";
+import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import {
   USAGE_GROUPS,
   USAGE_PERIODS,
@@ -91,9 +91,9 @@ tail_keys as (
   order by k, pref, merged, id
 ),
 uses_all as (
-  -- 1. Service and TLC tickets: their Charges. A ticket merged into an install as billed on its Sales Order (10/30)
-  --    counts on that install: its charges never went on the install's invoice, and its WO part lines went to the
-  --    install (so the two are one use there).
+  -- 1. Service and TLC tickets: their Charges. A ticket merged into an install as billed (10/30), on its Sales Order
+  --    or its NetSuite invoices, counts on that install: its charges never went on the install's invoice, and its WO
+  --    part lines went to the install (so the two are one use there).
   select pk.part_id,
          case when j.duplicate_of is null then j.kind else 'install' end as type,
          case when j.duplicate_of is null then j.id else j.merged_install_id end as ref_id,
@@ -105,7 +105,7 @@ uses_all as (
     from ticket_charges c
     join service_jobs j on j.id = c.job_id
     join part_keys pk on pk.k = lower(btrim(c.item))
-   where (j.duplicate_of is null or ${BILLED_ON_INSTALL_SO("j.id")} is not null) and j.status <> 'Cancelled'
+   where (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null) and j.status <> 'Cancelled'
   union all
   -- 2. PMs, installs, rebuilds and deals: the lines of their approved invoice.
   select pk.part_id, i.entity_type, i.entity_id, null::int, i.entity_type || ':' || i.entity_id,
@@ -156,7 +156,7 @@ uses_all as (
     join sku_keys sk on sk.k = lower(btrim(l.item_code))
     left join service_jobs sj on sj.id = h.job_id
     left join lateral (
-      select coalesce(sj.merged_install_id is not null and ${BILLED_ON_INSTALL_SO("sj.id")} is not null, false) as on_install
+      select coalesce(sj.merged_install_id is not null and ${BILLED_ON_INSTALL("sj.id")} is not null, false) as on_install
     ) bq on true
    where l.kind not in ('labor', 'trip', 'discount')
   union all

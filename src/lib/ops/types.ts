@@ -46,7 +46,7 @@ export type ServiceJob = {
   mergedInstallId?: number | null;
   mergedInstallAt?: string | null;
   mergedInstallBy?: string | null;
-  /** Merged into an install as billed on this Sales Order (10/30): its charges stay billed there. */
+  /** Merged into an install as billed (10/30) on this Sales Order, or on "NetSuite invoice …": its charges stay billed there. */
   mergedBilledOn?: string | null;
   siblings: JobSibling[];
   serialNotice: string | null;

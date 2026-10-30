@@ -254,10 +254,13 @@ export type BackfillTicket = {
   /** Merged into an install (10/30): its duplicateOf is its own id. */
   mergedInstallId?: number | null;
   /**
-   * Merged into an install as billed on this Sales Order (10/30): its billing is still its own, so its NetSuite
-   * invoices are recorded here, and nothing else (its charges and Sales Order stay as they were merged).
+   * Merged into an install as billed (10/30): what on, its Sales Order or with none "NetSuite invoice …". Its billing is
+   * still its own, so its NetSuite invoices are recorded here, and nothing else (its charges and Sales Order stay as
+   * they were merged).
    */
   billedOnInstall?: string | null;
+  /** That Sales Order; null when it was merged as billed on NetSuite invoices alone (or not as billed). */
+  billedSoOnInstall?: string | null;
   /** YYYY-MM-DD */
   received: string | null;
   completed: string | null;
@@ -405,33 +408,55 @@ const soKey = (so: string | null | undefined) => String(so ?? "").toUpperCase().
 const NO_SO = "no Sales Order";
 
 /**
- * The ticket a WO's rows go on, or why none. `rowSos`: the Sales Orders the rows name. A ticket merged into an install
- * as billed on its Sales Order (10/30) takes the rows on that SO, and only those: a live ticket never gets them, and
- * rows on another SO (the install's own billing, say) never go on it.
+ * What a WO's rows are about: the Sales Orders they name (an invoice with none counts as NO_SO), the NetSuite invoices
+ * they name (invoice rows, and charges from an invoice), and whether any is about a Sales Order with no invoice (an SO
+ * not invoiced yet, or charges from one).
+ */
+type RowsAbout = { sos: Set<string>; invoices: Set<string>; soOnly: boolean };
+
+/**
+ * The ticket a WO's rows go on, or why none. A ticket merged into an install as billed (10/30) takes the rows on its
+ * billing, and only those: billed on a Sales Order, the rows on that SO; billed on NetSuite invoices with no SO, the
+ * rows on those invoices (their status, what's left to pay). A live ticket never gets them, and other rows (the
+ * install's own billing, say) never go on it.
  */
 function pickTicket(
   key: string,
   ctx: BackfillContext,
   refDate: string | null,
-  rowSos: Set<string>,
+  rows: RowsAbout,
 ): { ticket: BackfillTicket } | { reason: string } {
   const all = ctx.tickets.filter((t) => woMatchKey(t.wo ?? "") === key);
   const live = all.filter((t) => !t.duplicateOf);
   const billed = all.filter((t) => t.billedOnInstall);
-  const mine = billed.filter((t) => rowSos.has(soKey(t.billedOnInstall)));
+  const own = (t: BackfillTicket) => new Set(t.invoices.map((i) => soKey(i.invoice)));
+  const ownsAny = (t: BackfillTicket) => (t.billedSoOnInstall ? rows.sos.has(soKey(t.billedSoOnInstall)) : [...rows.invoices].some((i) => own(t).has(i)));
+  const ownsAll = (t: BackfillTicket) => (t.billedSoOnInstall ? rows.sos.size === 1 : !rows.soOnly && [...rows.invoices].every((i) => own(t).has(i)));
+  // What the rows name, for the reasons below.
+  const named = [...new Set([...rows.invoices, ...[...rows.sos].filter((s) => s !== NO_SO)])];
+  const mine = billed.filter(ownsAny);
   if (mine.length) {
     const t = mine[0]!;
-    if (mine.length === 1 && rowSos.size === 1) return { ticket: t };
+    if (mine.length === 1 && ownsAll(t)) return { ticket: t };
     return {
-      reason: `The rows are on ${[...rowSos].join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Split the file by Sales Order, then run the Billing Backfill on each.`,
+      reason: t.billedSoOnInstall
+        ? `The rows are on ${[...rows.sos].join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Split the file by Sales Order, then run the Billing Backfill on each.`
+        : `The rows are on ${named.join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Put the rows for ${[...rows.invoices].filter((i) => own(t).has(i)).join(", ")} in a file of their own, then run the Billing Backfill on each.`,
     };
   }
   if (!live.length) {
     if (billed.length) {
       const t = billed[0]!;
+      if (!t.billedSoOnInstall) {
+        return {
+          reason: named.length
+            ? `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}; these rows are on ${named.join(", ")}. Skipped.`
+            : `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}, and these rows name none of its invoices. Skipped.`,
+        };
+      }
       return {
-        reason: rowSos.size
-          ? `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}; these rows are on ${[...rowSos].join(", ")}. Skipped.`
+        reason: rows.sos.size
+          ? `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}; these rows are on ${[...rows.sos].join(", ")}. Skipped.`
           : `Ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}, and these rows name no Sales Order. Skipped.`,
       };
     }
@@ -471,9 +496,12 @@ export function planBackfill(read: Pick<BackfillRead, "lines" | "invoices">, ctx
 function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInvoiceRow[], ctx: BackfillContext): BackfillPlan {
   const wo = lineRows[0]?.wo ?? invoiceRows[0]?.wo ?? woCanonical(key);
   const invoiceDates = invoiceRows.map((i) => i.date).filter((d): d is string => !!d).sort();
-  // The Sales Orders the rows name; an invoice with none counts as its own (it is billing on none of them).
+  // The Sales Orders the rows name; an invoice with none counts as its own (it is billing on none of them). And the
+  // NetSuite invoices they name, for a ticket merged as billed on its invoices alone (10/30).
   const rowSos = new Set([...invoiceRows.filter((i) => i.invoice).map((i) => soKey(i.so) || NO_SO), ...invoiceRows.map((i) => soKey(i.so)), ...lineRows.map((r) => soKey(r.sourceSo))].filter(Boolean));
-  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, rowSos);
+  const rowInvoices = new Set([...invoiceRows.map((i) => soKey(i.invoice)), ...lineRows.map((r) => soKey(r.sourceInvoice))].filter(Boolean));
+  const rowSoOnly = invoiceRows.some((i) => !i.invoice && !!soKey(i.so)) || lineRows.some((r) => !soKey(r.sourceInvoice) && !!soKey(r.sourceSo));
+  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, { sos: rowSos, invoices: rowInvoices, soOnly: rowSoOnly });
   const empty: BackfillPlan = {
     key,
     wo,

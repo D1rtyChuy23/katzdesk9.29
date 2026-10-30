@@ -65,16 +65,24 @@ export function InvoiceButton({ type, id, className }: { type: InvoiceTarget; id
   );
 }
 
-/** A ticket merged into the install as billed on a Sales Order (10/30): its lines, its discount and what was billed. */
+/**
+ * A ticket merged into the install as billed (10/30), on a Sales Order or on NetSuite invoices: its lines, its discount
+ * and what was billed.
+ */
 function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
   const amounts = b.lines.map((l) => Math.round(l.qty * l.rate * 100) / 100);
   const off = Math.round((amounts.reduce((sum, a) => sum + a, 0) - b.total) * 100) / 100;
   return (
     <li data-testid="invoice-billed-ticket">
       <p className="text-sm font-medium">
-        {b.ticket} · billed on {b.so}
-        {b.invoices ? ` (NetSuite ${b.invoices})` : ""} · {money(b.total)}
+        {b.ticket} · billed on {b.on}
+        {b.so && b.invoices ? ` (NetSuite ${b.invoices})` : ""} · {money(b.total)}
       </p>
+      {b.voided ? (
+        <p className="mt-1 text-xs text-warning" data-testid="invoice-billed-voided">
+          NetSuite has {b.voided} as Voided now, so these charges may not be billed anywhere. Check them in NetSuite.
+        </p>
+      ) : null}
       {b.lines.length ? (
         <ul className="mt-1 space-y-0.5 text-sm text-muted-foreground">
           {b.lines.map((l, i) => (
@@ -522,7 +530,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
               </dl>
             </section>
 
-            {/* Tickets merged in as billed on a Sales Order (10/30): billed there, never on this invoice or its total. */}
+            {/* Tickets merged in as billed (10/30), on a Sales Order or NetSuite invoices: never on this invoice or its total. */}
             {v.billedElsewhere.length ? (
               <section className="rounded-lg border border-dashed border-border p-3" data-testid="invoice-billed">
                 <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Already billed (not on this invoice)</h3>
@@ -531,7 +539,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                     <BilledTicket key={b.jobId} b={b} />
                   ))}
                 </ul>
-                <p className="mt-2 text-xs text-muted-foreground">These charges were billed on the Sales Order shown and are not billed again.</p>
+                <p className="mt-2 text-xs text-muted-foreground">These charges were billed on the Sales Order or NetSuite invoice shown and are not billed again.</p>
               </section>
             ) : null}
 

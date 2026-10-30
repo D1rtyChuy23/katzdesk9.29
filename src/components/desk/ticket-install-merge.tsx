@@ -111,7 +111,8 @@ function MoveRow({ label, value, testId }: { label: string; value: string; testI
 
 function PreviewBody({ p }: { p: InstallMergePreview }) {
   const m = p.moves;
-  // Billed on a Sales Order (10/30): the charges stay billed there and never go on the install's invoice.
+  // Billed on a Sales Order, or with none on NetSuite invoices (10/30): the charges stay billed there and never go on
+  // the install's invoice.
   const charges = m.billed
     ? `${m.chargeLines ? `${count(m.chargeLines, "line")}, ${money(m.chargeTotal)}. ` : ""}${m.billed.text}`
     : m.chargeLines
@@ -197,8 +198,10 @@ export function InstallMergeDialog({
   });
   const p = preview.data;
   const merge = useMutation({
-    // The Sales Order the confirm showed ('' when the charges go on the install's invoice): it merges only as shown.
-    mutationFn: () => mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "" } }),
+    // The Sales Order the confirm showed and what the charges are billed on, the SO or NetSuite invoices ('' for each when
+    // they go on the install's invoice): it merges only as shown.
+    mutationFn: () =>
+      mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "", billedOn: p!.moves.billed?.on ?? "" } }),
     onSuccess: (r) => {
       toast.success(`Merged into install #${r.installId}${r.billedOn ? ` · its charges stay billed on ${r.billedOn}` : ""}`);
       onMerged(r);
