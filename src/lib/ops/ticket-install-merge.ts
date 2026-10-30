@@ -172,6 +172,7 @@ type HeadRow = {
   submitted_at: string | Date | null;
   discount_kind: string | null;
   discount_value: string | null;
+  po: string | null;
   stamp: string;
 };
 
@@ -272,6 +273,8 @@ export type InstallMergePreview = {
     rebuilds: string[];
     /** Tickets merged into this one before, which go with it. */
     mergedTickets: number;
+    /** The P.O. the install's invoice has once the charges are on it (the invoice's own, else the ticket's), or null. */
+    invoicePo: string | null;
   };
   /** What stays with the ticket. */
   stays: string[];
@@ -323,7 +326,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   ).map((c): MoneyLine => ({ qty: Number(c.qty), rate: Number(c.rate), kind: c.kind }));
   const head = (
     await sql.query<HeadRow>(
-      `select v.id, v.approved_at, v.approved_by, v.submitted_at, v.discount_kind, v.discount_value::text as discount_value,
+      `select v.id, v.approved_at, v.approved_by, v.submitted_at, v.discount_kind, v.discount_value::text as discount_value, v.po,
               coalesce(v.id::text, '') || ':' || coalesce(v.approved_at::text, '') || ':' || coalesce(v.submitted_at::text, '') as stamp
          from invoices v where v.entity_type = 'install' and v.entity_id = $1`,
       [installId],
@@ -361,6 +364,10 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   const headDiscount = head ? toDiscount(head.discount_kind, head.discount_value) : null;
   const headState: InstallMergePreview["install"]["invoice"] = !head ? "none" : head.approved_at ? "approved" : head.submitted_at ? "waiting" : "none";
   const after = charges.length ? invoiceDiscountAfter(ticketDiscount, headDiscount, headLines.length, { ticket: label, install: installName }) : { discount: headDiscount };
+  // One invoice takes one P.O. (10/30): the invoice's own, else the ticket's, which goes on it with the charges.
+  const ticketPo = t.po?.trim() || null;
+  const headPo = head?.po?.trim() || null;
+  const poClash = !!(charges.length && ticketPo && headPo && ticketPo.toLowerCase() !== headPo.toLowerCase());
 
   // The first reason wins.
   const refusal = ((): string | null => {
@@ -385,6 +392,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       return `${installName}'s invoice is already approved, so ${label}'s ${plural(charges.length, "charge line")} can't go on it. Add them to the install's invoice by hand and take them off the ticket, then merge.`;
     }
     if ("refusal" in after) return after.refusal;
+    if (poClash) return `${label} has P.O. ${ticketPo} and ${installName}'s invoice has P.O. ${headPo}. One invoice takes one P.O.: make them match first.`;
     if (headLines.length + charges.length > 200) return `Together that's more than 200 lines on ${installName}'s invoice.`;
     return null;
   })();
@@ -416,6 +424,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       partLines: Number(linked.part_lines) || 0,
       rebuilds: rebuilds.map((r) => (r.title?.trim() ? `${r.title.trim()} (#${r.id})` : `Rebuild #${r.id}`)),
       mergedTickets: Number(linked.merged_tickets) || 0,
+      invoicePo: charges.length ? (headPo ?? ticketPo) : null,
     },
     stays,
     note: installMergeNote(t, actor, todayChicago()),
@@ -444,7 +453,8 @@ const MOVED = `coalesce(' · moved ' || nullif(concat_ws(', ',
 /**
  * One statement: fold the ticket into the install, or write nothing. $1 ticket, $2 install, $3 who, $4 the ticket's
  * stamp, $5 the install's, $6 its invoice's ('' when it has none), all as the confirm read them; $7 the text added under
- * the install's notes; $8 the install invoice's total once the lines are on it, $9 and $10 its discount.
+ * the install's notes; $8 the install invoice's total once the lines are on it, $9 and $10 its discount; $11 the
+ * ticket's P.O., for an invoice that has none.
  *
  * Both rows and the install's invoice are locked, then checked as they are now: nothing is written when any of them
  * changed, the ticket is billed, invoiced, quoted, carries a PM or is already merged, or the install is archived,
@@ -490,13 +500,16 @@ export function mergeTicketIntoInstallSql(): string {
   ), head as (
     -- The charges go on the install's invoice, waiting for an Admin to approve them; never onto an approved one. The
     -- saved-for-approval stamp moves, so an Invoice window opened before this approves nothing until it reloads.
-    insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, total, submitted_by, submitted_at, updated_at)
-    select 'install', g.install_id, g.install_customer, $9::text, $10::numeric, $8::numeric, $3::text, now(), now()
+    -- The ticket's P.O. goes with the charges onto an invoice that has none (one that has one keeps it: the confirm
+    -- refused a different one).
+    insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, total, submitted_by, submitted_at, updated_at, po)
+    select 'install', g.install_id, g.install_customer, $9::text, $10::numeric, $8::numeric, $3::text, now(), now(), $11::text
       from g
      where g.charges > 0
     on conflict (entity_type, entity_id) do update
        set discount_kind = excluded.discount_kind, discount_value = excluded.discount_value, total = excluded.total,
-           submitted_by = excluded.submitted_by, submitted_at = excluded.submitted_at, updated_at = now()
+           submitted_by = excluded.submitted_by, submitted_at = excluded.submitted_at, updated_at = now(),
+           po = coalesce(nullif(btrim(invoices.po), ''), excluded.po)
      -- Only the invoice the confirm read: one approved, or saved again, or made since, takes nothing.
      where invoices.approved_at is null
        and coalesce(invoices.id::text, '') || ':' || coalesce(invoices.approved_at::text, '') || ':' || coalesce(invoices.submitted_at::text, '') = $6::text
@@ -577,6 +590,7 @@ export function mergeTicketIntoInstallSql(): string {
            jsonb_build_object(
              'charges', coalesce((select jsonb_agg(c.id order by c.id) from ticket_charges c where c.job_id = ok.job_id), '[]'::jsonb),
              'invoiceId', (select head.id from head),
+             'ticketPo', $11::text,
              'invoiceLines', coalesce((select jsonb_agg(x.id order by x.id) from lines x), '[]'::jsonb),
              'notes', coalesce((select jsonb_agg(x.id order by x.id) from com x), '[]'::jsonb),
              'pings', coalesce((select jsonb_agg(x.id order by x.id) from pings x), '[]'::jsonb),
@@ -675,6 +689,7 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
     plan.preview.moves.invoiceTotal,
     plan.discount?.kind ?? null,
     plan.discount?.value ?? null,
+    plan.ticket.po?.trim() || null,
   ]);
   const r = rows[0];
   if (!r) {

@@ -151,6 +151,28 @@ export function mergedMachineList(keeper: MachineSpec[], drop: MachineSpec[]): {
 
 const mergeInput = z.object({ keepId: z.number().int().positive(), dropId: z.number().int().positive() });
 
+/**
+ * The two installs' invoices for Merge installs (10/30), or null when they don't stop it. One install takes one
+ * invoice: the drop's moves to the keeper when the keeper has none. When both have one, the drop's must have no lines,
+ * and it stays on the drop; with lines, the merge is refused until they are moved by hand (the Invoice window approves
+ * an install invoice with every line taken off). Nothing is added to an invoice on its own: an approved one may be in
+ * NetSuite already.
+ */
+async function mergeInvoiceRefusal(sql: Sql, keepId: number, dropId: number): Promise<string | null> {
+  const heads = await sql.query<{ entity_id: number; lines: number }>(
+    `select v.entity_id, (select count(*) from invoice_lines l where l.invoice_id = v.id)::int as lines
+       from invoices v where v.entity_type = 'install' and v.entity_id = any($1::int[])`,
+    [[keepId, dropId]],
+  );
+  const keeperHas = heads.some((h) => Number(h.entity_id) === keepId);
+  const dropHead = heads.find((h) => Number(h.entity_id) === dropId);
+  if (!keeperHas || !dropHead || Number(dropHead.lines) === 0) return null;
+  return `Install #${dropId} and install #${keepId} both have an invoice, and one install takes one invoice. Move #${dropId}'s lines to #${keepId}'s invoice by hand (take them all off #${dropId}'s and approve it), then merge.`;
+}
+
+/** The unique key on invoices refused the move: the keeper's invoice was saved while the merge ran. */
+const invoiceKeyClash = (e: unknown): boolean => /invoices_entity_key/.test(e instanceof Error ? e.message : String(e));
+
 export type MergeInstallsResult = {
   keepId: number;
   dropId: number;
@@ -159,6 +181,10 @@ export type MergeInstallsResult = {
   units: number;
   unitsStayed: number;
   notes: boolean;
+  /** The drop's invoice went to the keeper (10/30). */
+  invoiceMoved: boolean;
+  /** WO part lines that went to the keeper. */
+  partLines: number;
 };
 
 /**
@@ -168,6 +194,8 @@ export type MergeInstallsResult = {
  * what a tech filled in on its Equipment Request Form (when the keeper's has nothing), its visit header (notes added), its
  * activity and Ping thread, and its visit units the keeper has no unit of the same model and serial for (with their
  * checks and photos). A drop unit whose twin is on the keeper gives the twin the checks and photos it has none of.
+ * Its invoice, its WO part lines, and the tickets merged into it go to the keeper too (10/30), so charges a ticket merge
+ * put on the drop's invoice are billed from the keeper (see mergeInvoiceRefusal for when both installs have an invoice).
  * The rest stays on the drop, which is archived as a duplicate of the keeper. Nothing is deleted. Admins only.
  */
 export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<typeof mergeInput>): Promise<MergeInstallsResult> {
@@ -202,6 +230,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     [dropId],
   );
   for (const a of assets) if (!/^System \(/.test(a.locked_by ?? "")) await assertUnlocked(sql, a);
+  // One install takes one invoice (10/30): the drop's goes to the keeper, unless the keeper has one of its own.
+  const invoiceRefusal = await mergeInvoiceRefusal(sql, keepId, dropId);
+  if (invoiceRefusal) throw new Error(invoiceRefusal);
   const actor = await actorName(sql, userId);
   const catalog = await catalogNames(sql);
 
@@ -248,14 +279,15 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   const unitIds = moving.map((u) => u.id);
   const recustomerIds = recustomer.map((u) => u.id);
   const keepPrimary = keep.wo?.trim() || newWos[0]?.wo || null;
+  // The keeper's history line; " · its invoice" goes in between when the statement moved it.
   const detail =
     `merged install #${drop.id}` +
     (newWos.length ? ` · ${newWos.map((w) => w.wo).join(", ")}` : "") +
-    ` · ${added.length} machine row${added.length === 1 ? "" : "s"}, ${unitIds.length} visit unit${unitIds.length === 1 ? "" : "s"} moved` +
-    (stayed ? ` · ${stayed} stayed on #${drop.id}` : "");
+    ` · ${added.length} machine row${added.length === 1 ? "" : "s"}, ${unitIds.length} visit unit${unitIds.length === 1 ? "" : "s"} moved`;
+  const detailEnd = stayed ? ` · ${stayed} stayed on #${drop.id}` : "";
 
   // One guarded statement: nothing is written when either install changed or was archived since the reads above.
-  const out = await sql.query<{ ok: number }>(
+  const out = await sql.query<{ ok: number; invoices_moved: number; part_lines: number }>(
     `with lk as (
        -- Both installs locked, in id order, then checked as they are now.
        select id, archived, updated_at::text as updated
@@ -265,6 +297,10 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
          from lk k join lk d on d.id = $2::int
         where k.id = $1::int and k.archived = false and d.archived = false
           and k.updated = $3 and d.updated = $4
+          -- Not both with an invoice, unless the drop's has no lines (as read now): one install takes one invoice.
+          and not (exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = $1::int)
+                   and exists (select 1 from invoices v join invoice_lines l on l.invoice_id = v.id
+                                where v.entity_type = 'install' and v.entity_id = $2::int))
      ), keeper_keys as (
        select w.match_key from install_work_orders w join g on w.install_id = g.keep_id
      ), wo_move as (
@@ -380,11 +416,25 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        update activity a set entity_id = g.keep_id from g where a.entity_type = 'install' and a.entity_id = g.drop_id returning a.id
      ), pings as (
        update desk_notifications n set entity_id = g.keep_id from g where n.entity_type = 'install' and n.entity_id = g.drop_id returning n.id
+     ), inv_move as (
+       -- Its invoice (lines, discount, P.O. and approval as they are) on the keeper's spelling of the account, so it is
+       -- billed from the install kept and listed on its Invoices tab. When the keeper has an invoice, the drop's has no
+       -- lines (the guard above) and stays on the drop.
+       update invoices v set entity_id = g.keep_id, customer = $15, updated_at = now()
+         from g
+        where v.entity_type = 'install' and v.entity_id = g.drop_id
+          and not exists (select 1 from invoices k where k.entity_type = 'install' and k.entity_id = g.keep_id)
+       returning v.id
+     ), parts_moved as (
+       update ticket_part_lines p set install_id = g.keep_id from g where p.install_id = g.drop_id returning p.id
+     ), tickets_moved as (
+       -- Tickets merged into the drop point at the keeper: their window opens it, and a later import finds it.
+       update service_jobs s set merged_install_id = g.keep_id, updated_at = now() from g where s.merged_install_id = g.drop_id returning s.id
      ), dropped as (
        update installs d set archived = true, duplicate_of = g.keep_id, updated_at = now() from g where d.id = g.drop_id returning d.id
      ), logged as (
        insert into activity (entity_type, entity_id, actor_name, action, detail)
-       select 'install', g.keep_id, $5, 'merged', $16 from g
+       select 'install', g.keep_id, $5, 'merged', $16 || case when exists (select 1 from inv_move) then ' · its invoice' else '' end || $19 from g
        union all
        -- liveInstallIds (ticket-install-merge.ts) reads this line to tell a merge from a removal: keep its wording.
        select 'install', g.drop_id, $5, 'merged', 'merged into install #' || g.keep_id::text from g
@@ -398,7 +448,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
               + (select count(*)::int from twin_photos) + (select count(*)::int from units) + (select count(*)::int from items)
               + (select count(*)::int from photos) + (select count(*)::int from acct) + (select count(*)::int from com)
               + (select count(*)::int from act) + (select count(*)::int from pings) + (select count(*)::int from dropped)
-              + (select count(*)::int from logged) as touched`,
+              + (select count(*)::int from logged) + (select count(*)::int from tickets_moved) as touched,
+            (select count(*)::int from inv_move) as invoices_moved,
+            (select count(*)::int from parts_moved) as part_lines`,
     [
       keepId,
       dropId,
@@ -419,9 +471,15 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
       detail,
       twins.map((t) => t.drop),
       twins.map((t) => t.keep),
+      detailEnd,
     ],
-  );
-  if (!out[0]?.ok) throw new Error("One of the installs changed since this window opened. Open it again and retry.");
+  ).catch(async (e: unknown) => {
+    // The keeper's invoice was saved while the statement ran, after it read the invoices: the drop's can't join it, and
+    // nothing was written.
+    if (invoiceKeyClash(e)) throw new Error((await mergeInvoiceRefusal(sql, keepId, dropId)) ?? `An invoice was saved on install #${keepId} while this merge ran, so nothing was merged. Merge again.`);
+    throw e;
+  });
+  if (!out[0]?.ok) throw new Error((await mergeInvoiceRefusal(sql, keepId, dropId)) ?? "One of the installs changed since this window opened. Open it again and retry.");
   // The keeper's visit reads its list again (the same load the window runs), without taking anything off.
   await syncInstallUnits(sql, keepId);
   return {
@@ -432,6 +490,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     units: unitIds.length,
     unitsStayed: stayed,
     notes: !!drop.notes?.trim(),
+    invoiceMoved: Number(out[0].invoices_moved) > 0,
+    partLines: Number(out[0].part_lines) || 0,
   };
 }
 

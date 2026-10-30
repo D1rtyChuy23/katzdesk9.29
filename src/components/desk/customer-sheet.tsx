@@ -979,6 +979,7 @@ function AccountInvoices({ customer }: { customer: string }) {
                   <span className="block truncate font-medium">{r.title}</span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {r.status}
+                    {r.po ? ` · P.O. ${r.po}` : ""}
                     {r.approvedAt
                       ? ` · ${r.approvedBy ?? "Desk"} · ${formatShortDate(r.approvedAt.slice(0, 10))}`
                       : r.submittedAt
