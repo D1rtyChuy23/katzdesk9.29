@@ -22,6 +22,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { todayChicago } from "@/lib/ops/clock";
+import { BILLED_ON_INSTALL_SO } from "@/lib/ops/merged-ticket";
 import {
   USAGE_GROUPS,
   USAGE_PERIODS,
@@ -90,15 +91,21 @@ tail_keys as (
   order by k, pref, merged, id
 ),
 uses_all as (
-  -- 1. Service and TLC tickets: their Charges.
-  select pk.part_id, j.kind as type, j.id as ref_id, null::int as history_id, j.kind || ':' || j.id as ticket_key,
+  -- 1. Service and TLC tickets: their Charges. A ticket merged into an install as billed on its Sales Order (10/30)
+  --    counts on that install: its charges never went on the install's invoice, and its WO part lines went to the
+  --    install (so the two are one use there).
+  select pk.part_id,
+         case when j.duplicate_of is null then j.kind else 'install' end as type,
+         case when j.duplicate_of is null then j.id else j.merged_install_id end as ref_id,
+         null::int as history_id,
+         case when j.duplicate_of is null then j.kind || ':' || j.id else 'install:' || j.merged_install_id end as ticket_key,
          coalesce(j.completed_at, j.scheduled, j.received) as used_on, j.customer,
          nullif(concat_ws(' · ', nullif(btrim(j.call_id), ''), nullif(btrim(j.wo), '')), '') as label,
          c.qty::numeric as qty, 1 as rank, 'desk' as source
     from ticket_charges c
     join service_jobs j on j.id = c.job_id
     join part_keys pk on pk.k = lower(btrim(c.item))
-   where j.duplicate_of is null and j.status <> 'Cancelled'
+   where (j.duplicate_of is null or ${BILLED_ON_INSTALL_SO("j.id")} is not null) and j.status <> 'Cancelled'
   union all
   -- 2. PMs, installs, rebuilds and deals: the lines of their approved invoice.
   select pk.part_id, i.entity_type, i.entity_id, null::int, i.entity_type || ':' || i.entity_id,

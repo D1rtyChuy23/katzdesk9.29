@@ -197,7 +197,8 @@ export function InstallMergeDialog({
   });
   const p = preview.data;
   const merge = useMutation({
-    mutationFn: () => mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps } }),
+    // The Sales Order the confirm showed ('' when the charges go on the install's invoice): it merges only as shown.
+    mutationFn: () => mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "" } }),
     onSuccess: (r) => {
       toast.success(`Merged into install #${r.installId}${r.billedOn ? ` · its charges stay billed on ${r.billedOn}` : ""}`);
       onMerged(r);

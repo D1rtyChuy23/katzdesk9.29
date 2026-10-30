@@ -38,6 +38,9 @@ const ready = async (): Promise<Sql> => {
 
 export const ADMIN_ONLY = "Only an Admin can merge a ticket into an install.";
 export const CHANGED_SINCE_OPENED = "The ticket, the install or its invoice changed since this window opened, so nothing was merged. Look it over again, then merge.";
+/** A ticket billed on a Sales Order, merged from a window opened before billed tickets could merge (10/30). */
+export const RELOAD_FOR_BILLED = (so: string) =>
+  `This ticket is billed on ${so}, and this window is from before billed tickets could be merged, so nothing was merged. Reload the page, then merge.`;
 
 /** WO numbers start over after 9999: a ticket and an install WO that came in more than this far apart are two jobs. */
 const RUN_DAYS = 365;
@@ -187,6 +190,8 @@ type Linked = {
   wo_history: number;
   has_quote: boolean;
   ns_invoices: string | null;
+  /** Its NetSuite invoices that aren't Voided: the ones a billed ticket names as its billing. */
+  live_ns_invoices: string | null;
   stacked_pms: string | null;
   ticket_approved_at: string | Date | null;
   ticket_approved_by: string | null;
@@ -299,11 +304,8 @@ export type InstallMergePreview = {
   note: string;
   warnings: string[];
   refusal: string | null;
-  /**
-   * Sent back with the merge: it goes ahead only on the ticket, install and invoice this window showed, and on the
-   * Sales Order it showed (so: '' for an unbilled ticket), so it merges as billed only when the confirm said so.
-   */
-  stamps: { job: string; install: string; head: string; so: string };
+  /** Sent back with the merge: it goes ahead only on the ticket, install and invoice this window showed. */
+  stamps: { job: string; install: string; head: string };
 };
 
 type Plan = {
@@ -369,6 +371,8 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
            where h.job_id = $1 or h.job_id in (select s.id from service_jobs s where s.duplicate_of = $1 and s.id <> $1)) as wo_history,
          exists (select 1 from repair_quotes q where q.job_id = $1) as has_quote,
          (select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti where ti.job_id = $1) as ns_invoices,
+         (select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti
+           where ti.job_id = $1 and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) as live_ns_invoices,
          (select string_agg(p.id::text, ',' order by p.id) from pm_jobs p where p.stacked_job_id = $1) as stacked_pms,
          (select v.approved_at from invoices v where v.entity_type in ('service', 'tlc') and v.entity_id = $1 order by v.id limit 1) as ticket_approved_at,
          (select v.approved_by from invoices v where v.entity_type in ('service', 'tlc') and v.entity_id = $1 order by v.id limit 1) as ticket_approved_by`,
@@ -387,7 +391,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   // about that invoice (approved, its discount or P.O., its size) stops the merge. Its NetSuite invoices are the same
   // billing. Unbilled, the charges go on the invoice as before.
   const billedSo = t.ns_so?.trim() || null;
-  const billed = billedSo ? { so: billedSo, invoices: linked.ns_invoices, text: billedCarryOver(billedSo, linked.ns_invoices) } : null;
+  const billed = billedSo ? { so: billedSo, invoices: linked.live_ns_invoices, text: billedCarryOver(billedSo, linked.live_ns_invoices) } : null;
   const toInvoice = billed ? [] : charges;
   const after = toInvoice.length ? invoiceDiscountAfter(ticketDiscount, headDiscount, headLines.length, { ticket: label, install: installName }) : { discount: headDiscount };
   // One invoice takes one P.O. (10/30): the invoice's own, else the ticket's, which goes on it with the charges.
@@ -458,7 +462,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     note: installMergeNote(t, actor, todayChicago(), billed),
     warnings,
     refusal,
-    stamps: { job: t.stamp, install: i.stamp, head: head?.stamp ?? "", so: billed?.so ?? "" },
+    stamps: { job: t.stamp, install: i.stamp, head: head?.stamp ?? "" },
   };
   return { preview, refusal, ticket: t, install: i, discount };
 }
@@ -517,7 +521,8 @@ export function mergeTicketIntoInstallSql(): string {
            case when $12::text = '' then (select count(*)::int from ticket_charges c where c.job_id = j.id) else 0 end as charges
       from lk_job j cross join lk_inst i
      where j.stamp = $4::text and i.stamp = $5::text
-       and coalesce((select h.stamp from lk_head h), '') = $6::text
+       -- The install's invoice as the confirm read it, for an unbilled ticket (a billed one puts nothing on it).
+       and ($12::text <> '' or coalesce((select h.stamp from lk_head h), '') = $6::text)
        and j.duplicate_of is null and j.merged_install_id is null and j.kind in ('service', 'tlc')
        -- The Sales Order as the confirm read it, on the locked row: one entered or cleared since stops the merge.
        and coalesce(nullif(btrim(j.ns_so), ''), '') = $12::text
@@ -633,7 +638,9 @@ export function mergeTicketIntoInstallSql(): string {
              -- Billed on a Sales Order: the SO, its NetSuite invoices, and a copy of the charges billed there, which
              -- the install's Invoice window lists as billed (they never go on its invoice).
              'billedSo', nullif($12::text, ''),
-             'billedInvoices', case when $12::text <> '' then (select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti where ti.job_id = ok.job_id) end,
+             'billedInvoices', case when $12::text <> '' then (
+               select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti
+                where ti.job_id = ok.job_id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) end,
              'billedLines', case when $12::text <> '' then coalesce((
                select jsonb_agg(jsonb_build_object('item', c.item, 'description', c.description, 'qty', c.qty, 'rate', c.rate, 'kind', c.kind) order by c.sort, c.id)
                  from ticket_charges c where c.job_id = ok.job_id), '[]'::jsonb) end,
@@ -695,8 +702,13 @@ export type TicketInstallMergeResult = {
 
 const target = z.object({ jobId: z.number().int().positive(), installId: z.number().int().positive() });
 const mergeInput = target.extend({
-  // so: added 10/30; a window opened before that sends none, and it only merged unbilled tickets.
-  stamps: z.object({ job: z.string().max(80), install: z.string().max(80), head: z.string().max(200), so: z.string().max(80).optional() }),
+  stamps: z.object({ job: z.string().max(80), install: z.string().max(80), head: z.string().max(200) }),
+  /**
+   * The Sales Order the confirm showed the charges billed on ('' when it showed them going on the install's invoice).
+   * Sent by the confirm from 10/30 on, outside the stamps, so a window from before that (which doesn't know billed
+   * tickets and would say their charges go on the invoice) sends none, and a billed ticket isn't merged from it.
+   */
+  billedSo: z.string().max(80).optional(),
 });
 
 /** The confirm's content: what is kept, what moves, what stays, the note, and why it can't go ahead. Admins only. */
@@ -717,7 +729,12 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
   const plan = await planMerge(sql, data.jobId, data.installId, actor);
   if (plan.refusal || !plan.preview || !plan.ticket || !plan.install) throw new Error(plan.refusal ?? "That ticket can't be merged.");
   const s = plan.preview.stamps;
-  if (s.job !== data.stamps.job || s.install !== data.stamps.install || s.head !== data.stamps.head || s.so !== (data.stamps.so ?? "")) throw new Error(CHANGED_SINCE_OPENED);
+  const so = plan.preview.moves.billed?.so ?? "";
+  // A window from before billed tickets could merge: it showed the charges going on the invoice. Reload, then merge.
+  if (so && data.billedSo === undefined) throw new Error(RELOAD_FOR_BILLED(so));
+  // The install's invoice matters only to an unbilled ticket: a billed one puts nothing on it.
+  const headChanged = !so && s.head !== data.stamps.head;
+  if (s.job !== data.stamps.job || s.install !== data.stamps.install || headChanged || so !== (data.billedSo ?? "")) throw new Error(CHANGED_SINCE_OPENED);
   const rows = await sql.query<{
     job_id: number;
     install_id: number;
@@ -740,7 +757,7 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
     plan.discount?.kind ?? null,
     plan.discount?.value ?? null,
     plan.ticket.po?.trim() || null,
-    s.so,
+    so,
     plan.preview.moves.billed ? plan.preview.moves.chargeTotal : null,
   ]);
   const r = rows[0];

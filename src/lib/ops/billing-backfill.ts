@@ -253,6 +253,11 @@ export type BackfillTicket = {
   duplicateOf: number | null;
   /** Merged into an install (10/30): its duplicateOf is its own id. */
   mergedInstallId?: number | null;
+  /**
+   * Merged into an install as billed on this Sales Order (10/30): its billing is still its own, so its NetSuite
+   * invoices are recorded here, and nothing else (its charges and Sales Order stay as they were merged).
+   */
+  billedOnInstall?: string | null;
   /** YYYY-MM-DD */
   received: string | null;
   completed: string | null;
@@ -404,6 +409,9 @@ function pickTicket(
   const all = ctx.tickets.filter((t) => woMatchKey(t.wo ?? "") === key);
   const live = all.filter((t) => !t.duplicateOf);
   if (!live.length) {
+    // Merged into an install as billed on its Sales Order (10/30): its invoices still come here.
+    const billed = all.filter((t) => t.billedOnInstall);
+    if (billed.length === 1) return { ticket: billed[0]! };
     if (all.length) {
       const intoInstall = all.find((t) => t.mergedInstallId)?.mergedInstallId;
       if (intoInstall) return { reason: `Merged into install #${intoInstall}. Billing Backfill covers service and TLC tickets.` };
@@ -466,8 +474,8 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
   }
   const warnings: string[] = [];
 
-  // Locked: already invoiced in KatzDesk. Only invoice records change.
-  const locked = t.invoices.some((i) => !isVoidedStatus(i.status));
+  // Locked: already invoiced in KatzDesk, or merged into an install as billed (10/30). Only invoice records change.
+  const locked = t.invoices.some((i) => !isVoidedStatus(i.status)) || !!t.billedOnInstall;
   const currentLines: BackfillChargeLine[] = t.lines.map((l) => ({ ...l, kind: kindForItem(l.item) }));
   const current = applyDiscount(chargesTotal(t.lines), t.discount);
 
@@ -617,7 +625,9 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
     : chargesChange || soChange || invoicesChange
       ? "write"
       : "same";
-  if (locked && (chargesChange || soChange)) {
+  if (t.billedOnInstall) {
+    warnings.push(`Merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}: only its NetSuite invoices are recorded; its charges and Sales Order stay as they are.`);
+  } else if (locked && (chargesChange || soChange)) {
     warnings.push(`Locked: invoiced already, so the charges${soChange ? " and Sales Order" : ""} stay as they are. An Admin can unlock the ticket to change them.`);
   }
   return {

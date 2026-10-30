@@ -93,9 +93,12 @@ export type BilledCarryOver = {
 
 /** The billed charges of the tickets merged into an install as billed on a Sales Order, from the merge log (10/30). */
 async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarryOver[]> {
-  const rows = await sql.query<{ job_id: number; call_id: string | null; wo: string | null; moved: { billedSo?: string; billedInvoices?: string | null; billedLines?: unknown; billedTotal?: unknown } }>(
-    // Tickets point at the install they went into, or the one Merge installs moved them to since.
-    `select m.job_id, j.call_id, j.wo, m.moved
+  const rows = await sql.query<{ job_id: number; call_id: string | null; wo: string | null; invoices: string | null; moved: { billedSo?: string; billedLines?: unknown; billedTotal?: unknown } }>(
+    // Tickets point at the install they went into, or the one Merge installs moved them to since. Their NetSuite
+    // invoices are read as they are now (the Billing Backfill records ones that come after the merge).
+    `select m.job_id, j.call_id, j.wo, m.moved,
+            (select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti
+              where ti.job_id = m.job_id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) as invoices
        from ticket_install_merges m
        join service_jobs j on j.id = m.job_id
       where j.merged_install_id = $1 and m.moved->>'billedSo' is not null
@@ -110,7 +113,7 @@ async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarr
       jobId: Number(r.job_id),
       ticket: wo ? `${call} (${wo})` : call,
       so: String(r.moved.billedSo),
-      invoices: r.moved.billedInvoices ? String(r.moved.billedInvoices) : null,
+      invoices: r.invoices?.trim() || null,
       lines: lines.map((l) => ({
         item: String(l.item ?? ""),
         description: String(l.description ?? ""),
