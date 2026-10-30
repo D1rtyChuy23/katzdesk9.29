@@ -401,6 +401,8 @@ const sameDiscount = (a: Discount | null, b: Discount | null) => (!a && !b) || (
 const money = (n: number) => `$${n.toFixed(2)}`;
 
 const soKey = (so: string | null | undefined) => String(so ?? "").toUpperCase().replace(/\s+/g, "");
+/** An invoice row with no Sales Order, among the SOs a WO's rows name: it is billing too, on none of them. */
+const NO_SO = "no Sales Order";
 
 /**
  * The ticket a WO's rows go on, or why none. `rowSos`: the Sales Orders the rows name. A ticket merged into an install
@@ -421,7 +423,7 @@ function pickTicket(
     const t = mine[0]!;
     if (mine.length === 1 && rowSos.size === 1) return { ticket: t };
     return {
-      reason: `The rows are on ${[...rowSos].join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Record its invoices by hand, or split the file by Sales Order.`,
+      reason: `The rows are on ${[...rowSos].join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Split the file by Sales Order, then run the Billing Backfill on each.`,
     };
   }
   if (!live.length) {
@@ -469,7 +471,8 @@ export function planBackfill(read: Pick<BackfillRead, "lines" | "invoices">, ctx
 function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInvoiceRow[], ctx: BackfillContext): BackfillPlan {
   const wo = lineRows[0]?.wo ?? invoiceRows[0]?.wo ?? woCanonical(key);
   const invoiceDates = invoiceRows.map((i) => i.date).filter((d): d is string => !!d).sort();
-  const rowSos = new Set([...invoiceRows.map((i) => soKey(i.so)), ...lineRows.map((r) => soKey(r.sourceSo))].filter(Boolean));
+  // The Sales Orders the rows name; an invoice with none counts as its own (it is billing on none of them).
+  const rowSos = new Set([...invoiceRows.filter((i) => i.invoice).map((i) => soKey(i.so) || NO_SO), ...invoiceRows.map((i) => soKey(i.so)), ...lineRows.map((r) => soKey(r.sourceSo))].filter(Boolean));
   const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, rowSos);
   const empty: BackfillPlan = {
     key,
