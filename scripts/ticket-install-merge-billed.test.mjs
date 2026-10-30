@@ -176,6 +176,13 @@ test("what the confirm showed is what merges: a Sales Order cleared or entered s
   const run = (so) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", billed.stamps.job, billed.stamps.install, billed.stamps.head, "note", 0, null, null, null, so, so ? 500 : null]);
   assert.deepEqual(await run(""), []);
   assert.deepEqual(await run("SO9002"), []);
+  // A repair quote or a stacked PM added after the read: still refused, read fresh in the statement.
+  await pg.query("insert into repair_quotes (job_id) values ($1)", [jobId]);
+  assert.deepEqual(await run(SO), []);
+  await pg.query("delete from repair_quotes");
+  const pm = Number((await one(pg, "insert into pm_jobs (customer, status, stacked_job_id) values ($1, 'Open', $2) returning id", [CAFE, jobId])).id);
+  assert.deepEqual(await run(SO), []);
+  await pg.query("update pm_jobs set stacked_job_id = null where id = $1", [pm]);
   assert.equal(await snapshot(pg), before);
   // Read again, billed: it merges.
   assert.equal((await merge(sql, jobId, installId, (await preview(sql, jobId, installId)).stamps)).billedOn, SO);
