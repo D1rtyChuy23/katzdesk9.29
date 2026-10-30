@@ -217,6 +217,9 @@ function mapJob(r: any, today: any) {
 		updatedAt: String(r.updated_at),
 		urgency: r.urgency || "Normal",
 		duplicateOf: r.duplicate_of ?? null,
+		mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
+		mergedInstallAt: r.merged_install_at ? (r.merged_install_at instanceof Date ? r.merged_install_at.toISOString() : String(r.merged_install_at)) : null,
+		mergedInstallBy: r.merged_install_by ?? null,
 		siblings: [],
 		serialNotice: r.serial_notice ?? null,
 		aviKatz: false,
@@ -853,6 +856,8 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	const sql = await ready();
 	const cur = await sql`select * from service_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Job not found");
+	// A ticket merged into an install is hidden; its work is on the install now (10/30).
+	if (cur[0].merged_install_id) throw new Error(`This ticket was merged into install #${cur[0].merged_install_id}. Open the install to keep working.`);
 	if (data.customer !== undefined) {
 		const partners = await sql`select id, customer from pm_jobs where stacked_job_id = ${data.id}`;
 		const refusal = stackCustomerRefusal(cur[0].customer, data.customer, partners.map((p: { id: number; customer: string | null }) => ({ id: Number(p.id), customer: p.customer })), "ticket");
@@ -888,7 +893,7 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 	}
 	if (next.status === "Phone Resolved") next.phone_resolved = true;
 	else if (data.status && next.status !== "Phone Resolved") next.phone_resolved = false;
-	await sql`
+	const written = await sql`
       update service_jobs set
         contact = ${next.contact},
         phone = ${next.phone},
@@ -909,7 +914,13 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
         done = ${next.done},
         urgency = ${next.urgency},
         updated_at = now()
-      where id = ${data.id}`;
+      where id = ${data.id} and merged_install_id is null
+      returning id`;
+	if (!written[0]) {
+		// Merged into an install after the read above (10/30): nothing is written onto the hidden ticket.
+		const now = (await sql`select merged_install_id from service_jobs where id = ${data.id}`)[0];
+		throw new Error(now?.merged_install_id ? `This ticket was merged into install #${now.merged_install_id}. Open the install to keep working.` : "Job not found");
+	}
 	if (data.status && data.status !== cur[0].status) await logActivity(sql, context.userId, cur[0].kind, data.id, "status", `${cur[0].status} → ${data.status}`);
 	const extra = summarize([
 		changed("customer", cur[0].customer, next.customer),
@@ -986,8 +997,9 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 	time: z.string().nullable(),
 	technician: z.string().trim().max(80).nullable()
-}).parse(d)).handler(async ({ data, context }: any): Promise<{ ok: true; date: string; time: string | null; technician: string | null }> => {
-	const sql = await ready();
+}).parse(d)).handler(async ({ data, context }: any) => moveBoardBlockFor(await ready(), data, context));
+/** The body of moveBoardBlock. */
+export async function moveBoardBlockFor(sql: any, data: { type: BoardType; id: number; date: string; time: string | null; technician: string | null }, context: { userId: string }): Promise<{ ok: true; date: string; time: string | null; technician: string | null }> {
 	const time = data.time == null ? null : cleanTime(data.time);
 	if (data.time != null && !time) throw new Error("That is not a time of day.");
 	const tech = data.technician ? canonicalTechName(data.technician) ?? data.technician : null;
@@ -995,9 +1007,19 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	const dateCol = data.type === "pm" ? "projected" : data.type === "install" ? "install_date" : "scheduled";
 	const cur = (await sql.query(`select * from ${table} where id = $1`, [data.id]))[0] as any;
 	if (!cur) throw new Error("That work is no longer on the Desk.");
+	// A ticket merged into an install (10/30) is planned on the install now: a board opened before the merge is refused.
+	const mergedInto = (id: unknown) => `This ticket was merged into install #${id}. Plan the install instead.`;
+	if (table === "service_jobs" && cur.merged_install_id) throw new Error(mergedInto(cur.merged_install_id));
 	const locked = data.type === "install" ? isInstalled({ complete: cur.complete, equipStatus: cur.equip_status }) : boardLocked({ status: cur.status, done: cur.done });
 	if (locked) throw new Error("Completed and cancelled work does not move.");
-	await sql.query(`update ${table} set ${dateCol} = $2, sched_time = $3, technician = $4, updated_at = now() where id = $1`, [data.id, data.date, time, tech]);
+	const moved = await sql.query(
+		`update ${table} set ${dateCol} = $2, sched_time = $3, technician = $4, updated_at = now() where id = $1${table === "service_jobs" ? " and merged_install_id is null" : ""} returning id`,
+		[data.id, data.date, time, tech]
+	);
+	if (!moved[0]) {
+		const into = table === "service_jobs" ? (await sql.query("select merged_install_id from service_jobs where id = $1", [data.id]))[0]?.merged_install_id : null;
+		throw new Error(into ? mergedInto(into) : "That work is no longer on the Desk.");
+	}
 	if (data.type === "install") await pingRepTechAssigned(sql, context.userId, { id: data.id, customer: String(cur.customer), before: cur.technician, after: tech, rep: cur.account_rep });
 	// The new primary cannot also be the ticket's secondary.
 	if (table === "service_jobs" && tech && sameTech(cur.technician2, tech)) await sql.query("update service_jobs set technician2 = null where id = $1", [data.id]);
@@ -1008,7 +1030,7 @@ export const moveBoardBlock = createServerFn({ method: "POST" }).middleware([des
 	]);
 	if (extra) await logActivity(sql, context.userId, data.type === "service" || data.type === "tlc" ? cur.kind : data.type, data.id, "updated", extra);
 	return { ok: true, date: data.date, time, technician: tech };
-});
+}
 export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }: any): Promise<PmJob[]> => {
 	const sql = await ready();
 	const marks = await loadAccountMarks(sql);
@@ -1440,7 +1462,9 @@ type UpdateInstallInput = { id: number; customer?: string; equipment?: string | 
 	siteContact?: string | null;
 	contactPhone?: string | null;
 	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
-	machinesBase?: MachineSpec[] | string | null };
+	machinesBase?: MachineSpec[] | string | null;
+	/** The notes the saving window's text was typed on. With it, a merged ticket's text the window never had is kept, and unchanged notes stay as stored (notes_after_window_save). */
+	notesBase?: string | null };
 
 /**
  * A window's list saved over a newer one: what the server's list gained since the window last saw it (a machine added or
@@ -1533,7 +1557,14 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
         technician = ${data.technician === undefined ? c.technician : data.technician},
         wo = ${data.wo === undefined ? c.wo : data.wo},
         reqs_ready = ${data.reqsReady === undefined ? c.reqs_ready : data.reqsReady},
-        notes = ${data.notes === undefined ? c.notes : data.notes},
+        -- Worked out on the row this writes: a save that sends no notes leaves them, and a window opened before a ticket
+        -- was merged into this install (10/30) keeps the ticket's text under them.
+        notes = case
+          when ${data.notes === undefined}::boolean then notes
+          when ${data.notesBase !== undefined}::boolean
+            then notes_after_window_save(id, notes, ${data.notesBase ?? null}::text, ${data.notes ?? null}::text)
+          else ${data.notes ?? null}::text
+        end,
         work_done = ${data.workDone === undefined ? c.work_done : data.workDone},
         completed_at = ${data.completedAt === undefined ? c.completed_at : data.completedAt},
         account_rep = ${data.accountRep === undefined ? c.account_rep : canonicalRepName(data.accountRep) ?? (data.accountRep || null)},
@@ -1653,6 +1684,11 @@ export const addComment = createServerFn({ method: "POST" }).middleware([deskMid
 	const sql = await ready();
 	const body = data.body.trim();
 	if (!body) throw new Error("Message is empty");
+	// A ticket merged into an install (10/30): its Ping notes are on the install now, and a new one goes there too.
+	if (data.entityType === "service" || data.entityType === "tlc") {
+		const into = (await sql.query("select merged_install_id from service_jobs where id = $1", [data.entityId]))[0]?.merged_install_id;
+		if (into) throw new Error(`This ticket was merged into install #${into}. Add the note on the install.`);
+	}
 	const authorName = (await sql.query("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Teammate";
 	const rows = await sql`
       insert into comments (entity_type, entity_id, author_id, author_name, body, ask_team)
@@ -2164,8 +2200,9 @@ export async function unassignAssetFromInstallFor(sql: any, data: { assetId: num
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 }
 export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => unassignAssetFromInstallFor(await ready(), data, context));
-export const assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; customer: string; jobId?: number | null }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+export const assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; customer: string; jobId?: number | null }) => d).handler(async ({ data, context }: any) => assignAssetToServiceFor(await ready(), data, context));
+/** Pull for service: the unit goes to the account, on its newest open ticket that isn't hidden (merged), if it has one. */
+export async function assignAssetToServiceFor(sql: any, data: { assetId: number; customer: string; jobId?: number | null }, context: { userId: string }) {
 	const customer = data.customer.trim();
 	if (!customer) throw new Error("Pick a customer");
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
@@ -2185,6 +2222,7 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
         where lower(customer) = lower(${name})
           and done = false
           and status not in ('Complete', 'Completed', 'Closed', 'Cancelled')
+          and duplicate_of is null
         order by updated_at desc
         limit 1`)[0];
 	const originSite = asset.origin_site ?? asset.site;
@@ -2218,7 +2256,7 @@ export const assignAssetToService = createServerFn({ method: "POST" }).middlewar
 	await logActivity(sql, context.userId, "asset", data.assetId, "assigned-service", detail);
 	if (job) await logActivity(sql, context.userId, job.kind, job.id, "assigned-asset", detail);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
-});
+}
 export const unassignAssetFromService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];

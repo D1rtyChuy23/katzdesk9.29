@@ -42,6 +42,7 @@ import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { moveInstallUnits } from "@/lib/ops/install-projects";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
+import { liveInstallIds, mergedInstallTarget } from "@/lib/ops/ticket-install-merge";
 
 export type CorrigoApplyResult = {
   updated: number;
@@ -105,12 +106,13 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     equipment: string | null;
     invoiced: boolean;
     corrigo_id: string | null;
+    merged_install_id: number | null;
   }>(
     `select id, wo, status, customer, kind, duplicate_of, done,
             to_char(completed_at, 'YYYY-MM-DD') as completed_at, ns_so,
             exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges,
             ${receivedSql("service_jobs", "service_jobs.kind")},
-            po, issue, equipment, ${LIVE_INVOICE_SQL("service_jobs.id")} as invoiced, corrigo_id
+            po, issue, equipment, ${LIVE_INVOICE_SQL("service_jobs.id")} as invoiced, corrigo_id, merged_install_id
        from service_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
@@ -149,9 +151,32 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       where i.archived = false
       order by i.id asc`,
   );
-  const installWos = await loadInstallWos(sql, installs.map((r) => r.id));
+  // A ticket an Admin merged into an install (10/30) is that install's: its WO and its Corrigo id find the install (or
+  // the install it went into since, however many install merges on), never the hidden ticket. When that install was
+  // archived, the ticket stays a hit of its own, so the row goes on nothing and is refused (applyCorrigoRows) instead of
+  // opening a new ticket.
+  const mergedIds = [...new Set(jobs.map((r) => r.merged_install_id).filter((id): id is number => id != null).map(Number))];
+  const live = await liveInstallIds(sql, mergedIds);
+  const liveIds = [...new Set(live.values())];
+  const liveRows = liveIds.length
+    ? await sql.query<{ id: number; customer: string; equip_status: string | null; complete: boolean; completed_at: string | null }>(
+        `select t.id, t.customer, t.equip_status, t.complete, to_char(t.completed_at, 'YYYY-MM-DD') as completed_at
+           from installs t
+          where t.id = any($1::int[]) and t.archived = false`,
+        [liveIds],
+      )
+    : [];
+  const liveById = new Map(liveRows.map((t) => [Number(t.id), t]));
+  const targets = new Map(
+    [...live].flatMap(([mergedId, id]) => {
+      const t = liveById.get(id);
+      return t ? [[mergedId, t] as const] : [];
+    }),
+  );
+  const installWos = await loadInstallWos(sql, [...installs.map((r) => r.id), ...[...targets.values()].map((t) => Number(t.id))]);
+  const intoInstall = (r: (typeof jobs)[number]) => (r.merged_install_id == null ? undefined : targets.get(Number(r.merged_install_id)));
   return [
-    ...jobs.map((r) => ({
+    ...jobs.filter((r) => !intoInstall(r)).map((r) => ({
       board: jobBoard(r.kind),
       id: r.id,
       status: r.status,
@@ -168,7 +193,28 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       equipment: r.equipment,
       invoiced: !!r.invoiced,
       corrigoId: r.corrigo_id,
+      mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
     })),
+    ...jobs.flatMap((r) => {
+      const t = intoInstall(r);
+      if (!t) return [];
+      const id = Number(t.id);
+      return [
+        {
+          board: "install" as const,
+          id,
+          status: t.complete ? "Installed" : t.equip_status || "Not Ready",
+          customer: t.customer,
+          wo: r.wo,
+          done: !!t.complete,
+          completedAt: t.completed_at,
+          // The day the ticket came in is its WO's day.
+          received: r.received,
+          wos: installWos.get(id) ?? [],
+          corrigoId: r.corrigo_id,
+        },
+      ];
+    }),
     ...pms.map((r) => ({
       board: "pm" as const,
       id: r.id,
@@ -582,6 +628,24 @@ export async function applyCorrigoRows(
         board = hit.board;
       }
     }
+    // A ticket an Admin merged into an install (10/30), from a preview read before the merge or one whose install was
+    // archived: the row goes on that install (or the one it was merged into since), never on the hidden ticket, and
+    // never opens a new one. An archived install takes nothing.
+    if (action === "update" && jobId && (board === "service" || board === "tlc")) {
+      const into = await mergedInstallTarget(sql, jobId);
+      if (into) {
+        if (into.liveInstallId == null) {
+          refused.push({
+            wo,
+            customer: (row.customer ?? "").trim() || null,
+            reason: `Its ticket was merged into install #${into.installId}, which was archived: nothing written`,
+          });
+          continue;
+        }
+        board = "install";
+        jobId = into.liveInstallId;
+      }
+    }
     // Exact account names only, and never a new account (10/28). A locked clean-list name wins over the file's spelling.
     const typed = (row.customer ?? "").trim() || null;
     // A new install in place of a picked one that is gone carries that install's name: the file's own account then.
@@ -781,7 +845,7 @@ export async function applyCorrigoRows(
               phone = coalesce(nullif(btrim(phone), ''), $16::text),
               received = coalesce(received, $17::date),
               updated_at = now()
-            where id = $1
+            where id = $1 and merged_install_id is null
           returning ($9::text is not null and po is not distinct from $9::text) as po_written`,
           [
             jobId,
@@ -804,6 +868,17 @@ export async function applyCorrigoRows(
           ],
         )
       )[0];
+      if (!saved) {
+        // Merged into an install after the check above (10/30): nothing went onto the hidden ticket. Importing the file
+        // again puts the row on the install.
+        const into = await mergedInstallTarget(sql, jobId);
+        refused.push({
+          wo,
+          customer: typed,
+          reason: into ? `Its ticket was merged into install #${into.installId} during the import: import the file again` : "The ticket is no longer on the list",
+        });
+        continue;
+      }
       await logCorrigo(
         sql,
         jobBoardKind,

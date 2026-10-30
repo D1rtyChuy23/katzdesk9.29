@@ -33,8 +33,8 @@ async function loadStackPair(sql: Sql, pmId: number, jobId: number): Promise<{ p
     "select id, customer, status, stacked_job_id from pm_jobs where id = $1",
     [pmId],
   ))[0];
-  const ticket = (await sql.query<{ id: number; customer: string | null; status: string; ns_so: string | null; duplicate_of: number | null; phone_resolved: boolean; wo: string | null; call_id: string | null; invoiced: string | null }>(
-    `select j.id, j.customer, j.status, j.ns_so, j.duplicate_of, j.phone_resolved, j.wo, j.call_id,
+  const ticket = (await sql.query<{ id: number; customer: string | null; status: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; phone_resolved: boolean; wo: string | null; call_id: string | null; invoiced: string | null }>(
+    `select j.id, j.customer, j.status, j.ns_so, j.duplicate_of, j.merged_install_id, j.phone_resolved, j.wo, j.call_id,
             (select ti.ns_invoice from ticket_invoices ti
               where ti.job_id = j.id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
               order by ti.invoice_date desc nulls last, ti.id desc limit 1) as invoiced
@@ -58,6 +58,7 @@ async function loadStackPair(sql: Sql, pmId: number, jobId: number): Promise<{ p
       status: ticket.status,
       nsSo: ticket.ns_so,
       duplicateOf: ticket.duplicate_of == null ? null : Number(ticket.duplicate_of),
+      mergedInstallId: ticket.merged_install_id == null ? null : Number(ticket.merged_install_id),
       phoneResolved: !!ticket.phone_resolved,
       wo: ticket.wo,
       callId: ticket.call_id,

@@ -34,6 +34,7 @@ import {
   type ChargeKind,
   type ChargeLine,
 } from "@/lib/ops/charges";
+import { mergedTicketRefusal, type MergedTicketRow } from "./merged-ticket";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -472,8 +473,9 @@ export async function writeTicketCharges(
   },
 ): Promise<void> {
   if (await isWarehouseOnly(sql, userId)) throw new Error(WAREHOUSE_BILLING_REFUSAL);
-  const merged = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
-  if (merged?.duplicate_of) throw new Error(`This ticket was merged into #${merged.duplicate_of}. Add charges there.`);
+  const merged = (await sql.query<MergedTicketRow>("select duplicate_of, merged_install_id from service_jobs where id = $1", [jobId]))[0];
+  const mergedRefusal = mergedTicketRefusal(merged, "Add charges there.");
+  if (mergedRefusal) throw new Error(mergedRefusal);
   const cur = await loadCharges(sql, jobId);
   const unlocked = input.unlocked ?? null;
   if (unlocked) {
@@ -530,8 +532,9 @@ export async function writeTicketCharges(
     ? await sql.query<{ id: number }>(replaceUnlockedChargesSql(), [...params, so, unlocked.billedAt || null])
     : await sql.query<{ id: number }>(replaceTicketChargesSql(), params);
   if (!saved[0]) {
-    const row = (await sql.query<{ duplicate_of: number | null; ns_so: string | null }>("select duplicate_of, ns_so from service_jobs where id = $1", [jobId]))[0];
-    if (row?.duplicate_of) throw new Error(`This ticket was merged into #${row.duplicate_of}. Add charges there.`);
+    const row = (await sql.query<MergedTicketRow & { ns_so: string | null }>("select duplicate_of, merged_install_id, ns_so from service_jobs where id = $1", [jobId]))[0];
+    const mergedNow = mergedTicketRefusal(row, "Add charges there.");
+    if (mergedNow) throw new Error(mergedNow);
     const now = await loadCharges(sql, jobId);
     if (unlocked && !now.unlock) throw new Error("The unlock ran out or was closed. Unlock the ticket again to save.");
     if (!unlocked && now.invoiceLock) throw new Error(invoiceLockError(now.invoiceLock));
@@ -645,9 +648,10 @@ export async function recordTicketSalesOrder(sql: Sql, jobId: number, userId: st
     [jobId, so, billedAt || null],
   );
   if (!saved[0]) {
-    const dup = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
+    const dup = (await sql.query<MergedTicketRow>("select duplicate_of, merged_install_id from service_jobs where id = $1", [jobId]))[0];
     if (!dup) throw new Error("That ticket is no longer on the list.");
-    if (so && dup.duplicate_of) throw new Error(`This ticket was merged into #${dup.duplicate_of}. Enter the Sales Order there.`);
+    const mergedSo = so ? mergedTicketRefusal(dup, "Enter the Sales Order there.") : null;
+    if (mergedSo) throw new Error(mergedSo);
     const lock = (await loadCharges(sql, jobId)).invoiceLock;
     if (lock) throw new Error(invoiceLockError(lock));
     throw new Error("The ticket changed while saving (another save or the Billing Backfill). Reload and try again.");

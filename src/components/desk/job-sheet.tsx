@@ -52,6 +52,8 @@ import { ModuleRecord } from "./module-record";
 import { PmSheet } from "./entity-sheets";
 import { TicketPmStack } from "./pm-stack-panel";
 import { isJobStack, jobStackQuery, openPmReminders } from "./pm-stack-shared";
+import { InstallMergeBanner, InstallMergeDialog, MergedIntoInstallBanner, MergedTicketSummary } from "./ticket-install-merge";
+import type { TicketInstallMergeResult } from "@/lib/ops/ticket-install-merge";
 
 /** The ticket's categories, one per tab, in this order. Only a ticket with a customer has tabs. */
 export type TicketTab = "ticket" | "equipment" | "invoicing" | "schedules" | "ping";
@@ -86,10 +88,13 @@ export function JobSheet({
   // Tab picked and PM opened on this ticket; both start over each time the window opens a ticket.
   const [tabPick, setTabPick] = useState<{ key: string; tab: TicketTab } | null>(null);
   const [pmPick, setPmPick] = useState<{ forId: number | null; pmId: number } | null>(null);
+  // The install whose Merge into install confirm is open (Admins, 10/30).
+  const [mergeInstall, setMergeInstall] = useState<number | null>(null);
   useEffect(() => {
     setViewId(id);
     setTabPick(null);
     setPmPick(null);
+    setMergeInstall(null);
   }, [id]);
   const activeId = viewId ?? id;
   // A picked tab belongs to one ticket (and the tab it was opened on). Only the ticket the window was opened with
@@ -127,6 +132,7 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["activity"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["ticket-install-matches"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -149,13 +155,15 @@ export function JobSheet({
     onError: (e: Error) => toast.error(e.message),
   });
   const j = job.data;
+  /** Merged into an install: no form or tabs, so closing it saves nothing (10/30). */
+  const mergedAway = !!j?.mergedInstallId;
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const pulledSerial =
     (assets.data ?? []).find((a) => a.jobId === activeId)?.serial ?? "";
 
   // With a customer the ticket is split into tabs. Another ticket opens on Ticket, unless a ping opened it.
   const customer = j?.customer?.trim() ?? "";
-  const tabbed = customer !== "";
+  const tabbed = customer !== "" && !mergedAway;
   const tabKey = tabKeyOf(activeId);
   const tab: TicketTab = tabPick?.key === tabKey ? tabPick.tab : activeId === id && initialTab ? initialTab : "ticket";
   const pickTab = (next: TicketTab) => setTabPick({ key: tabKey, tab: next });
@@ -229,6 +237,58 @@ export function JobSheet({
     </>
   ) : null;
 
+  /** What the form holds now, as the save sends it. */
+  function formPatch(el: HTMLFormElement, jobId: number): Parameters<typeof updateJob>[0]["data"] {
+    const fd = new FormData(el);
+    return {
+      id: jobId,
+      customer: String(fd.get("customer") ?? ""),
+      contact: String(fd.get("contact") || "") || null,
+      phone: String(fd.get("phone") || "") || null,
+      equipment: String(fd.get("equipment") || "") || null,
+      issue: String(fd.get("issue") || "") || null,
+      workDone: String(fd.get("workDone") || "") || null,
+      callType: String(fd.get("callType") || "") || null,
+      status: String(fd.get("status")),
+      technician: String(fd.get("technician") || "") || null,
+      secondaryTech: String(fd.get("secondaryTech") || "") || null,
+      wo: String(fd.get("wo") || "") || null,
+      scheduled: String(fd.get("scheduled") || "") || null,
+      received: String(fd.get("received") || "") || null,
+      completedAt: String(fd.get("completedAt") || "") || null,
+      notes: String(fd.get("notes") || "") || null,
+      urgency: String(fd.get("urgency") || "") || "Normal",
+    };
+  }
+
+  /** Merge into install: save what is typed first, so the confirm shows (and the merge moves) the ticket as it is now. */
+  async function openInstallMerge(installId: number) {
+    if (formRef.current && j) {
+      skipToast.current = true;
+      try {
+        await save.mutateAsync(formPatch(formRef.current, j.id));
+      } catch {
+        // The save's own error says why; nothing opens.
+        skipToast.current = false;
+        return;
+      }
+    }
+    setMergeInstall(installId);
+  }
+
+  function afterInstallMerge(r: TicketInstallMergeResult) {
+    setMergeInstall(null);
+    // The sheet drops its form at once, so closing it now saves nothing onto the hidden ticket.
+    qc.setQueryData(["job", r.jobId], (old: ServiceJob | null | undefined) =>
+      old
+        ? { ...old, duplicateOf: old.id, mergedInstallId: r.installId, mergedInstallAt: new Date().toISOString(), mergedInstallBy: r.mergedBy, done: true, siblings: [] }
+        : old,
+    );
+    for (const key of ["jobs", "job", "installs", "comments", "invoice", "account-invoices", "activity", "assets", "dashboard", "customer-history", "notifications", "ticket-install-matches"]) {
+      void qc.invalidateQueries({ queryKey: [key] });
+    }
+  }
+
   const form = j ? (
     <form
       ref={formRef}
@@ -236,26 +296,7 @@ export function JobSheet({
       className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
       onSubmit={(e) => {
         e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        save.mutate({
-          id: j.id,
-          customer: String(fd.get("customer") ?? ""),
-          contact: String(fd.get("contact") || "") || null,
-          phone: String(fd.get("phone") || "") || null,
-          equipment: String(fd.get("equipment") || "") || null,
-          issue: String(fd.get("issue") || "") || null,
-          workDone: String(fd.get("workDone") || "") || null,
-          callType: String(fd.get("callType") || "") || null,
-          status: String(fd.get("status")),
-          technician: String(fd.get("technician") || "") || null,
-          secondaryTech: String(fd.get("secondaryTech") || "") || null,
-          wo: String(fd.get("wo") || "") || null,
-          scheduled: String(fd.get("scheduled") || "") || null,
-          received: String(fd.get("received") || "") || null,
-          completedAt: String(fd.get("completedAt") || "") || null,
-          notes: String(fd.get("notes") || "") || null,
-          urgency: String(fd.get("urgency") || "") || "Normal",
-        });
+        save.mutate(formPatch(e.currentTarget, j.id));
       }}
     >
       <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockTicketCustomer} />
@@ -379,14 +420,19 @@ export function JobSheet({
                   {j.customer?.trim() ? j.customer : j.customer == null ? "Untitled Account" : <span className="sm:hidden">Untitled Account</span>}
                 </SheetTitle>
                 <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5 max-sm:mt-1">
-                  <UrgencyBadge urgency={j.urgency} />
-                  <StatusBadge status={j.status} />
-                  <FlagBadge flag={j.flag} />
-                  <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} />
-                  <TicketBillingFlags jobId={j.id} key={`billing-flags-${j.id}`} />
+                  {/* Merged into an install: the badge says where it went; its status is in the summary below. */}
+                  {mergedAway ? null : (
+                    <>
+                      <UrgencyBadge urgency={j.urgency} />
+                      <StatusBadge status={j.status} />
+                      <FlagBadge flag={j.flag} />
+                    </>
+                  )}
+                  <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} mergedInstallId={j.mergedInstallId} />
+                  {mergedAway ? null : <TicketBillingFlags jobId={j.id} key={`billing-flags-${j.id}`} />}
                 </div>
-                {/* With tabs, the invoice is on the Invoicing tab. */}
-                {tabbed ? null : (
+                {/* With tabs, the invoice is on the Invoicing tab. A ticket merged into an install has none of its own. */}
+                {tabbed || mergedAway ? null : (
                   <div className="mt-2">
                     <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
                     <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
@@ -394,107 +440,117 @@ export function JobSheet({
                 )}
               </SheetHeader>
               <SheetBody>
-                {openPmReminders(j.status, stackedPms).map((p) => (
-                  <p key={p.pmId} className="border-b border-border bg-warning/10 px-5 py-2 text-sm" data-testid="pm-still-open">
-                    PM #{p.pmId} on this ticket is still open. Complete it on its own sheet.
-                  </p>
-                ))}
-                <SerialNoticeBanner notice={j.serialNotice} />
-                <DuplicateBanner
-                  job={j}
-                  pending={merge.isPending}
-                  onOpen={(nextId) => showTicket(nextId)}
-                  onMergeIntoThis={(extraId) => merge.mutate({ keeperId: j.id, extraId })}
-                  onMergeThisInto={(keeperId) => merge.mutate({ keeperId, extraId: j.id })}
-                />
-                {tabbed ? (
-                  <SheetTabs
-                    value={tab}
-                    onValueChange={pickTab}
-                    tabs={TICKET_TABS.map((t) => ({ ...t, count: tabCount(t.id) }))}
-                    label="Ticket sections"
-                    testId="ticket"
-                  >
-                    <Tabs.Content value="ticket" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-ticket">
-                      {form}
-                    </Tabs.Content>
-
-                    <Tabs.Content
-                      value="equipment"
-                      forceMount={keepEquipment || undefined}
-                      className={KEEP_MOUNTED}
-                      data-testid="ticket-panel-equipment"
-                    >
-                      <div className="border-b border-border p-5">
-                        <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
-                      </div>
-                      <section className="border-b border-border p-5" data-testid="ticket-pull-from-barn">
-                        <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pull From Barn</h3>
-                        <div className="mt-3">{pullBlock}</div>
-                      </section>
-                      <JobPulledUnits jobId={j.id} />
-                      <AccountModules customer={customer} />
-                    </Tabs.Content>
-
-                    <Tabs.Content value="invoicing" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-invoicing">
-                      <section className="border-b border-border p-5" data-testid="ticket-invoice">
-                        <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
-                        <p className="mt-1 text-xs text-muted-foreground">Parts, labor, discount, total and billing info for this ticket.</p>
-                        <div className="mt-3">
-                          <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
-                        </div>
-                        <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
-                      </section>
-                      <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
-                      <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
-                      <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
-                    </Tabs.Content>
-
-                    <Tabs.Content value="schedules" className="p-5 outline-none" data-testid="ticket-panel-schedules">
-                      <TicketPmStack
-                        jobId={j.id}
-                        stacked={stackedPms}
-                        candidates={stackCandidates}
-                        canWrite={canStackWrite}
-                        onOpenPm={(pmId) => setPmPick({ forId: activeId, pmId })}
-                      />
-                      <section data-testid="ticket-schedules">
-                        <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pending TLC, Factor & PMs</h2>
-                        {directory.isLoading || history.isLoading ? (
-                          <Skeleton className="mt-2 h-24 w-full" />
-                        ) : accountId == null ? (
-                          <p className="mt-2 text-sm text-muted-foreground">{customer} is not on the customer list, so its schedules can’t be shown.</p>
-                        ) : schedules.length ? (
-                          <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
-                            {schedules.map((it) => (
-                              <HistoryRow
-                                key={`schedule-${it.key}`}
-                                item={it}
-                                onOpen={() => (it.kind === "pm" ? setPmPick({ forId: activeId, pmId: it.id }) : openTicket(it.id))}
-                              />
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="mt-2 text-sm text-muted-foreground">No open TLCs, Factor visits or PMs on this account.</p>
-                        )}
-                        <p className="mt-3 text-xs text-muted-foreground">
-                          A TLC or Factor visit opens in this window; a PM opens on top.
-                        </p>
-                      </section>
-                    </Tabs.Content>
-
-                    <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-ping">
-                      <Thread entityType={j.kind} entityId={j.id} />
-                    </Tabs.Content>
-                  </SheetTabs>
+                {mergedAway ? (
+                  <>
+                    <MergedIntoInstallBanner job={j} />
+                    <MergedTicketSummary job={j} />
+                  </>
                 ) : (
                   <>
-                    {form}
-                    <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
-                    <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
-                    <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
-                    <JobPulledUnits jobId={j.id} />
-                    <Thread entityType={j.kind} entityId={j.id} />
+                    {openPmReminders(j.status, stackedPms).map((p) => (
+                      <p key={p.pmId} className="border-b border-border bg-warning/10 px-5 py-2 text-sm" data-testid="pm-still-open">
+                        PM #{p.pmId} on this ticket is still open. Complete it on its own sheet.
+                      </p>
+                    ))}
+                    <SerialNoticeBanner notice={j.serialNotice} />
+                    <DuplicateBanner
+                      job={j}
+                      pending={merge.isPending}
+                      onOpen={(nextId) => showTicket(nextId)}
+                      onMergeIntoThis={(extraId) => merge.mutate({ keeperId: j.id, extraId })}
+                      onMergeThisInto={(keeperId) => merge.mutate({ keeperId, extraId: j.id })}
+                    />
+                    <InstallMergeBanner job={j} pending={save.isPending || mergeInstall != null} onMerge={(installId) => void openInstallMerge(installId)} />
+                    {tabbed ? (
+                      <SheetTabs
+                        value={tab}
+                        onValueChange={pickTab}
+                        tabs={TICKET_TABS.map((t) => ({ ...t, count: tabCount(t.id) }))}
+                        label="Ticket sections"
+                        testId="ticket"
+                      >
+                        <Tabs.Content value="ticket" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-ticket">
+                          {form}
+                        </Tabs.Content>
+
+                        <Tabs.Content
+                          value="equipment"
+                          forceMount={keepEquipment || undefined}
+                          className={KEEP_MOUNTED}
+                          data-testid="ticket-panel-equipment"
+                        >
+                          <div className="border-b border-border p-5">
+                            <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
+                          </div>
+                          <section className="border-b border-border p-5" data-testid="ticket-pull-from-barn">
+                            <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pull From Barn</h3>
+                            <div className="mt-3">{pullBlock}</div>
+                          </section>
+                          <JobPulledUnits jobId={j.id} />
+                          <AccountModules customer={customer} />
+                        </Tabs.Content>
+
+                        <Tabs.Content value="invoicing" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-invoicing">
+                          <section className="border-b border-border p-5" data-testid="ticket-invoice">
+                            <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
+                            <p className="mt-1 text-xs text-muted-foreground">Parts, labor, discount, total and billing info for this ticket.</p>
+                            <div className="mt-3">
+                              <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
+                            </div>
+                            <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
+                          </section>
+                          <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                          <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
+                          <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
+                        </Tabs.Content>
+
+                        <Tabs.Content value="schedules" className="p-5 outline-none" data-testid="ticket-panel-schedules">
+                          <TicketPmStack
+                            jobId={j.id}
+                            stacked={stackedPms}
+                            candidates={stackCandidates}
+                            canWrite={canStackWrite}
+                            onOpenPm={(pmId) => setPmPick({ forId: activeId, pmId })}
+                          />
+                          <section data-testid="ticket-schedules">
+                            <h2 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pending TLC, Factor & PMs</h2>
+                            {directory.isLoading || history.isLoading ? (
+                              <Skeleton className="mt-2 h-24 w-full" />
+                            ) : accountId == null ? (
+                              <p className="mt-2 text-sm text-muted-foreground">{customer} is not on the customer list, so its schedules can’t be shown.</p>
+                            ) : schedules.length ? (
+                              <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
+                                {schedules.map((it) => (
+                                  <HistoryRow
+                                    key={`schedule-${it.key}`}
+                                    item={it}
+                                    onOpen={() => (it.kind === "pm" ? setPmPick({ forId: activeId, pmId: it.id }) : openTicket(it.id))}
+                                  />
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="mt-2 text-sm text-muted-foreground">No open TLCs, Factor visits or PMs on this account.</p>
+                            )}
+                            <p className="mt-3 text-xs text-muted-foreground">
+                              A TLC or Factor visit opens in this window; a PM opens on top.
+                            </p>
+                          </section>
+                        </Tabs.Content>
+
+                        <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-ping">
+                          <Thread entityType={j.kind} entityId={j.id} />
+                        </Tabs.Content>
+                      </SheetTabs>
+                    ) : (
+                      <>
+                        {form}
+                        <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                        <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
+                        <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
+                        <JobPulledUnits jobId={j.id} />
+                        <Thread entityType={j.kind} entityId={j.id} />
+                      </>
+                    )}
                   </>
                 )}
               </SheetBody>
@@ -509,6 +565,9 @@ export function JobSheet({
         onClose={() => setPmPick(null)}
         lockCustomer={!!stackedPms.find((p) => p.pmId === openPm?.id && p.customerMatches)}
       />
+      {j && !mergedAway ? (
+        <InstallMergeDialog job={j} installId={mergeInstall} onClose={() => setMergeInstall(null)} onMerged={afterInstallMerge} />
+      ) : null}
     </>
   );
 }

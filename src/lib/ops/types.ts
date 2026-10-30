@@ -40,7 +40,12 @@ export type ServiceJob = {
   flag: ClockFlag | null;
   ageDays: number | null;
   urgency: string;
+  /** Merged into another ticket (its id), or into an install (the ticket's own id; mergedInstallId names the install). */
   duplicateOf: number | null;
+  /** The install an Admin merged this ticket into (10/30): the ticket is hidden and its work is on that install. */
+  mergedInstallId?: number | null;
+  mergedInstallAt?: string | null;
+  mergedInstallBy?: string | null;
   siblings: JobSibling[];
   serialNotice: string | null;
   aviKatz: boolean;

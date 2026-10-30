@@ -75,6 +75,7 @@ export async function loadBackfillContext(sql: Q, keys: string[]): Promise<Backf
     customer: string | null;
     technician: string | null;
     duplicate_of: number | null;
+    merged_install_id: number | null;
     received: string | null;
     completed: string | null;
     ns_so: string | null;
@@ -84,7 +85,7 @@ export async function loadBackfillContext(sql: Q, keys: string[]): Promise<Backf
     corrigo_net: string | null;
     seen: string;
   }>(
-    `select j.id, j.kind, j.wo, j.customer, j.technician, j.duplicate_of,
+    `select j.id, j.kind, j.wo, j.customer, j.technician, j.duplicate_of, j.merged_install_id,
             to_char(j.received, 'YYYY-MM-DD') as received, to_char(j.completed_at, 'YYYY-MM-DD') as completed,
             j.ns_so, to_char(j.billed_at at time zone 'America/Chicago', 'YYYY-MM-DD') as billed_on,
             j.discount_kind, j.discount_value::text as discount_value, j.corrigo_net::text as corrigo_net, j.updated_at::text as seen
@@ -112,6 +113,7 @@ export async function loadBackfillContext(sql: Q, keys: string[]): Promise<Backf
       customer: r.customer,
       technician: r.technician,
       duplicateOf: r.duplicate_of ?? null,
+      mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
       received: r.received,
       completed: r.completed,
       so: r.ns_so?.trim() || null,

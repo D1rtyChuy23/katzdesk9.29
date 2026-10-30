@@ -332,7 +332,8 @@ test("the Serial box's lookup waits in the install window's save queue, so a ser
   assert.match(field, /const pull = useMutation\(\{\s*scope: installId \? \{ id: `install-sheet-\$\{installId\}` \} : undefined,/);
   // The same queue as the sheet's save and dropUnit.
   const sheet = componentSource("../src/components/desk/entity-sheets.tsx", "InstallSheet");
-  assert.match(sheet, /const queue = \{ id: `install-sheet-\$\{row\?\.id\}` \};/);
+  // Closed, the queue keeps the last install's name (react-query reads it live), so a save queued at close still runs.
+  assert.match(sheet, /const queue = \{ id: `install-sheet-\$\{row\?\.id \?\? lastQueued\.current\}` \};/);
   assert.match(sheet, /installId=\{row\.id\}/);
 });
 

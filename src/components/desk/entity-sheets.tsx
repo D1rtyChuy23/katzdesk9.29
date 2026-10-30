@@ -376,6 +376,18 @@ export function InstallSheet({
   const [hydratedId, setHydratedId] = useState<number | null>(null);
   /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
   const loadedSpecs = useRef<MachineSpec[]>([]);
+  /**
+   * This opening's notes (10/30). The Notes box shows the board's notes until something is typed in it, then keeps what
+   * it shows until the window closes. Each save carries the slot and sends its base when it runs: the notes its text was
+   * typed on (as shown, then as this opening's last save that went through sent them). The server keeps a merged
+   * ticket's text the window never had, and notes the window didn't change.
+   */
+  const [notesSlot, setNotesSlot] = useState<NotesSlot | null>(null);
+  const notesSeq = useRef(0);
+  const seedNotes = (r: Install): NotesSlot => ({ id: r.id, shown: r.notes ?? "", base: r.notes ?? null, touched: false, seq: ++notesSeq.current });
+  if ((row?.id ?? null) !== (notesSlot?.id ?? null)) setNotesSlot(row ? seedNotes(row) : null);
+  // Untouched, a read with other notes shows them (a merge from this window, a read that came after it opened).
+  else if (row && notesSlot && !notesSlot.touched && (row.notes ?? "") !== notesSlot.shown) setNotesSlot(seedNotes(row));
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
   const specsRef = useRef(specs);
@@ -442,8 +454,13 @@ export function InstallSheet({
     // A pre-inspection add or remove shows up here. A row removed in this window stays removed. A close does not rewrite an unchanged list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id, hydratedId, machineSig, reread]);
-  /** One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. */
-  const queue = { id: `install-sheet-${row?.id}` };
+  /**
+   * One queue for this install's saves: an Equipment-tab Remove takes its unit off before the save's prune runs. Closed,
+   * it keeps the last install's name: react-query reads it live, and a save queued at close would otherwise wait for good.
+   */
+  const lastQueued = useRef<number | null>(null);
+  if (row) lastQueued.current = row.id;
+  const queue = { id: `install-sheet-${row?.id ?? lastQueued.current}` };
   const lookAgain = () => {
     skippedRead.current = false;
     setReread((n) => n + 1);
@@ -457,13 +474,17 @@ export function InstallSheet({
   const save = useMutation({
     scope: queue,
     mutationFn: (vars: SaveVars) => {
-      const { builtOn, sent, ...d } = vars;
+      const { builtOn, sent, notesSlot: slot, ...rest } = vars;
       void sent;
+      // The notes this save's text was typed on go with it, read now: a save queued behind a failed one sends the base before it.
+      const d = rest.notes !== undefined && slot ? { ...rest, notesBase: slot.base } : rest;
       // The list this save's rows were built on goes with it: the server keeps whatever changed there since.
       return updateInstall({ data: d.machines !== undefined && builtOn ? { ...d, machinesBase: JSON.stringify(baseOf(builtOn)) } : d });
     },
     onSuccess: (saved, vars) => {
-      const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent");
+      // Stored: this opening's next notes are typed on these.
+      if (vars.notes !== undefined && vars.notesSlot) vars.notesSlot.base = vars.notes ?? null;
+      const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent" && k !== "notesSlot");
       const machineOnly = keys.every((k) =>
         ["equipment", "serial", "powerVoltage", "machines"].includes(k),
       );
@@ -723,7 +744,9 @@ export function InstallSheet({
                         technician: String(fd.get("technician") || "") || null,
                         // WOs are added and removed on the Work orders list, which saves at once.
                         reqsReady: String(fd.get("reqsReady") || "") || null,
+                        // Sent with this opening's base when the save runs (10/30).
                         notes: String(fd.get("notes") || "") || null,
+                        notesSlot: notesSlot?.id === row.id ? notesSlot : undefined,
                         workDone: String(fd.get("workDone") || "") || null,
                         completedAt: String(fd.get("completedAt") || "") || null,
                         accountRep: String(fd.get("accountRep") || "") || null,
@@ -790,7 +813,15 @@ export function InstallSheet({
                     </div>
                     <div className="sm:col-span-2">
                       <Label>Notes</Label>
-                      <Textarea name="notes" className="mt-1" defaultValue={row.notes ?? ""} />
+                      <Textarea
+                        key={notesSlot?.id === row.id ? notesSlot.seq : "notes"}
+                        name="notes"
+                        className="mt-1"
+                        defaultValue={notesSlot?.id === row.id ? notesSlot.shown : (row.notes ?? "")}
+                        onInput={() => {
+                          if (notesSlot) notesSlot.touched = true;
+                        }}
+                      />
                     </div>
                     <InstallWorkOrders row={row} />
                     <MergeInstall
@@ -917,8 +948,13 @@ function withoutRow(rows: MachineSpec[], gone: MachineSpec): MachineSpec[] {
   return at < 0 ? rows : rows.filter((_, i) => i !== at);
 }
 
+/** One opening's notes in the install window: what the box shows, and the base each save sends (10/30). */
+type NotesSlot = { id: number; shown: string; base: string | null; touched: boolean; seq: number };
+
 /** A save from the install window: the install's fields, and for the machine list the list it was built on. */
 type SaveVars = Parameters<typeof updateInstall>[0]["data"] & {
+  /** This opening's notes: the base is read from it when the save runs, and moves on when the save goes through. */
+  notesSlot?: NotesSlot;
   /** The list this save's rows were built on: sent as its base, so the server keeps whatever changed there since. */
   builtOn?: MachineSpec[];
   /** The rows this save sends, as the window holds them: a later save may be built on them. */

@@ -20,10 +20,14 @@ export function UrgencyBadge({ urgency }: { urgency: string | null | undefined }
 export function DuplicateBadge({
   duplicateOf,
   siblingCount,
+  mergedInstallId,
 }: {
   duplicateOf?: number | null;
   siblingCount?: number;
+  /** Merged into an install (10/30). */
+  mergedInstallId?: number | null;
 }) {
+  if (mergedInstallId) return <Badge data-testid="merged-into-install-badge">Merged into install #{mergedInstallId}</Badge>;
   if (duplicateOf) return <Badge variant="warn">Merged duplicate</Badge>;
   if (siblingCount && siblingCount > 0) return <Badge variant="warn">Possible duplicate</Badge>;
   return null;

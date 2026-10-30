@@ -167,6 +167,7 @@ function useCanMerge(): boolean {
 
 /** "Merge into install #…": another install of this account keeps everything; this one is archived as its duplicate. */
 export function MergeInstall({ row, onMerged }: { row: Install; onMerged: (keepId: number) => void }) {
+  const qc = useQueryClient();
   const canMerge = useCanMerge();
   const changed = useInstallsChanged();
   const installs = useQuery({ queryKey: ["installs"], queryFn: () => listInstalls(), enabled: canMerge });
@@ -174,11 +175,13 @@ export function MergeInstall({ row, onMerged }: { row: Install; onMerged: (keepI
   const others = (installs.data ?? []).filter((i) => i.id !== row.id && customersStrictlyMatch(i.customer, row.customer));
   const merge = useMutation({
     mutationFn: (keep: number) => mergeInstalls({ data: { keepId: keep, dropId: row.id } }),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       toast.success(
         `Merged into install #${res.keepId} · ${res.workOrders} WO${res.workOrders === 1 ? "" : "s"}, ${res.machines} machine row${res.machines === 1 ? "" : "s"}, ${res.units} visit unit${res.units === 1 ? "" : "s"} moved`,
       );
       changed();
+      // The window opens the install kept next: read the board first, so it shows the notes the merge put together.
+      await qc.refetchQueries({ queryKey: ["installs"] }).catch(() => undefined);
       onMerged(res.keepId);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not merge"),

@@ -81,8 +81,8 @@ type Ref = { type: InvoiceTarget; id: number; customer: string; title: string; r
 /** The record the invoice is for: its customer comes from the record itself, never asked for again. */
 async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise<Ref> {
   if (type === "service" || type === "tlc") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; ns_invoice: string | null; ns_status: string | null }>(
-      `select j.customer, j.wo, j.call_id, j.kind, j.ns_so, j.duplicate_of, i.ns_invoice, i.status as ns_status
+    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; ns_invoice: string | null; ns_status: string | null }>(
+      `select j.customer, j.wo, j.call_id, j.kind, j.ns_so, j.duplicate_of, j.merged_install_id, i.ns_invoice, i.status as ns_status
          from service_jobs j
          left join lateral (
            select ns_invoice, status from ticket_invoices ti
@@ -95,7 +95,9 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     ))[0];
     if (!r) throw new Error("That ticket is no longer on the list.");
     const kind: InvoiceTarget = r.kind === "tlc" ? "tlc" : "service";
-    const locked = r.duplicate_of
+    const locked = r.merged_install_id
+      ? `This ticket was merged into install #${r.merged_install_id}. Its charges are on the install's invoice.`
+      : r.duplicate_of
       ? `This ticket was merged into #${r.duplicate_of}. Open that ticket to change its invoice.`
       : r.ns_invoice
         ? `This ticket is invoiced in NetSuite on ${r.ns_invoice} (${r.ns_status}). Its charges are locked; an Admin can unlock them in the ticket's Charges.`
@@ -334,6 +336,8 @@ const saveInput = targetInput.extend({
 const WAREHOUSE_SAVES = "An Admin approves warehouse invoices. Use Save for Approval.";
 const WAITING_FOR_ADMIN = "This invoice is waiting for an Admin to approve it.";
 const SAVED_SINCE_OPENED = "Warehouse saved changes to this invoice after you opened it, so nothing was approved. Look over the new lines, then approve.";
+/** An install's invoice gets lines saved for approval when a ticket is merged into the install (10/30). */
+const LINES_ADDED_SINCE_OPENED = "Lines were saved for approval on this invoice after you opened it (a ticket was merged into the install), so nothing was approved. Look over the new lines, then approve.";
 
 /**
  * Approve a PM's own invoice only while it is not stacked. One statement: lock the PM, insert the header
@@ -545,7 +549,7 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       data.seen ?? null,
       ...lineArrays(lines),
     ]);
-    if (!saved[0]) throw new Error(SAVED_SINCE_OPENED);
+    if (!saved[0]) throw new Error(ref.type === "install" ? LINES_ADDED_SINCE_OPENED : SAVED_SINCE_OPENED);
   }
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [
@@ -675,10 +679,13 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
     submitted_at: string | Date | null;
     submitted_by: string | null;
   }>(
+    // A merged ticket's own invoice is left out: its charges are on the ticket or install it was merged into (10/30).
     `select entity_type, entity_id, total, approved_at, approved_by, submitted_at, submitted_by
-       from invoices
-      where lower(btrim(customer)) = lower($1) and (approved_at is not null or submitted_at is not null)
-      order by coalesce(approved_at, submitted_at) desc`,
+       from invoices v
+      where lower(btrim(v.customer)) = lower($1) and (v.approved_at is not null or v.submitted_at is not null)
+        and not (v.entity_type in ('service', 'tlc')
+                 and exists (select 1 from service_jobs j where j.id = v.entity_id and j.duplicate_of is not null))
+      order by coalesce(v.approved_at, v.submitted_at) desc`,
     [name],
   );
   const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; discount_kind: string | null; discount_value: string | null; amount: string }>(

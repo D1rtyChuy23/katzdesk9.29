@@ -251,6 +251,8 @@ export type BackfillTicket = {
   customer: string | null;
   technician: string | null;
   duplicateOf: number | null;
+  /** Merged into an install (10/30): its duplicateOf is its own id. */
+  mergedInstallId?: number | null;
   /** YYYY-MM-DD */
   received: string | null;
   completed: string | null;
@@ -402,7 +404,11 @@ function pickTicket(
   const all = ctx.tickets.filter((t) => woMatchKey(t.wo ?? "") === key);
   const live = all.filter((t) => !t.duplicateOf);
   if (!live.length) {
-    if (all.length) return { reason: `Merged into #${all[0]!.duplicateOf}. Skipped: its billing goes on that ticket.` };
+    if (all.length) {
+      const intoInstall = all.find((t) => t.mergedInstallId)?.mergedInstallId;
+      if (intoInstall) return { reason: `Merged into install #${intoInstall}. Billing Backfill covers service and TLC tickets.` };
+      return { reason: `Merged into #${all[0]!.duplicateOf}. Skipped: its billing goes on that ticket.` };
+    }
     const boards = ctx.otherBoards.get(key);
     if (boards?.length) {
       return { reason: `The WO is on ${boards.map((b) => (b === "pm" ? "PMs" : "Installs")).join(" and ")}. Billing Backfill covers service and TLC tickets.` };

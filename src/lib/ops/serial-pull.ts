@@ -414,9 +414,11 @@ export const applySerialPull = createServerFn({ method: "POST" })
       customer = inst.customer;
     } else if (data.jobId) {
       const job = (
-        await sql.query<{ customer: string | null }>("select customer from service_jobs where id = $1", [data.jobId])
+        await sql.query<{ customer: string | null; merged_install_id: number | null }>("select customer, merged_install_id from service_jobs where id = $1", [data.jobId])
       )[0];
       if (!job) throw new Error("Ticket not found");
+      // A ticket merged into an install (10/30): its units are the install's now.
+      if (job.merged_install_id) throw new Error(`This ticket was merged into install #${job.merged_install_id}. Pull the serial onto the install.`);
       customer = job.customer ?? "";
     }
 

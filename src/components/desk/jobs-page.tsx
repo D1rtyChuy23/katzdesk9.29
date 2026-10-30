@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { JobSheet, NewJobDialog } from "./job-sheet";
 import { CorrigoImportButton, CorrigoReviewList, type CorrigoReviewItem } from "./corrigo-import";
+import { TicketInstallPairsPanel } from "./ticket-install-merge";
+import { useTicketInstallPairs } from "./ticket-install-queries";
 import { SortSelect, useDeskSort } from "./sort-bar";
 import { ActionButton, ActionMenu, ImportMenu, StatCard, StatRow, toggleChip } from "./desk-charts";
 import { SORT_LIST, equipmentCount, sortDesk } from "@/lib/ops/sort";
@@ -141,7 +143,7 @@ export function JobsPage({
       list = list.filter((j) => !j.duplicateOf && isOpenCall(j));
     }
     if (view === "flagged") {
-      list = list.filter((j) => j.flag || j.duplicateOf || (j.siblings?.length ?? 0) > 0);
+      list = list.filter(isFlagged);
     }
     if (view === "unassigned") {
       list = list.filter((j) => !j.duplicateOf && isOpenCall(j) && !j.technician);
@@ -185,9 +187,12 @@ export function JobsPage({
   const otherBoards = woKey ? (elsewhere.data ?? []).filter((h) => h.entityType !== kind) : [];
   const liveJobs = (jobs.data ?? []).filter((j) => !j.duplicateOf);
   const activeCount = liveJobs.filter((j) => isOpenCall(j)).length;
-  const flagCount = (jobs.data ?? []).filter(
-    (j) => j.flag || j.duplicateOf || (j.siblings?.length ?? 0) > 0,
-  ).length;
+  const flagCount = (jobs.data ?? []).filter(isFlagged).length;
+  // An Admin's tickets whose WO is on an install, to merge into it (10/30).
+  const installPairs = useTicketInstallPairs(kind, isAdmin);
+  const pairCount = installPairs.data?.pairs.length ?? 0;
+  const showPairs = isAdmin && !!installPairs.data && (pairCount > 0 || installPairs.data.merged.length > 0);
+  const [pairsOpen, setPairsOpen] = useState(false);
   const allJobs = liveJobs;
   const activeJobs = allJobs.filter((j) => isOpenCall(j));
   const unassignedCount = activeJobs.filter((j) => !j.technician).length;
@@ -262,6 +267,16 @@ export function JobsPage({
           selected={view === "complete"}
           onClick={() => setView((v) => toggleChip(v, "complete", "all"))}
         />
+        {showPairs ? (
+          <StatCard
+            label="On an Install"
+            value={pairCount}
+            tone={pairCount ? "warn" : undefined}
+            hint="Same WO as an install"
+            selected={pairsOpen}
+            onClick={() => setPairsOpen((o) => !o)}
+          />
+        ) : null}
         {isAdmin && doubleCount ? (
           <StatCard
             label="Double Bill?"
@@ -273,6 +288,10 @@ export function JobsPage({
           />
         ) : null}
       </StatRow>
+
+      {showPairs && pairsOpen ? (
+        <TicketInstallPairsPanel kind={kind} onOpenTicket={openFromList} onClose={() => setPairsOpen(false)} />
+      ) : null}
 
       {kind === "service" ? (
         <CorrigoReviewList
@@ -370,6 +389,12 @@ export function JobsPage({
   );
 }
 
+/** Flagged: the clock's flag, a merged duplicate or the same ST# on another ticket. A ticket merged into an install is done. */
+function isFlagged(j: ServiceJob): boolean {
+  if (j.mergedInstallId) return false;
+  return !!(j.flag || j.duplicateOf || (j.siblings?.length ?? 0) > 0);
+}
+
 /** Tech and urgency pick-lists: side by side, half the row each, on a phone; 160px from sm up. */
 const HALF_ROW_ON_PHONE = "w-40 max-sm:w-auto max-sm:min-w-0 max-sm:grow max-sm:basis-[calc(50%-0.25rem)]";
 
@@ -405,7 +430,7 @@ function JobRow({ job, billing, onOpen }: { job: ServiceJob; billing?: TicketBil
           ) : null}
         </span>
         <span className="flex flex-wrap gap-1 max-sm:contents">
-          <DuplicateBadge duplicateOf={job.duplicateOf} siblingCount={job.siblings?.length ?? 0} />
+          <DuplicateBadge duplicateOf={job.duplicateOf} siblingCount={job.siblings?.length ?? 0} mergedInstallId={job.mergedInstallId} />
           <FlagBadge flag={job.flag} />
           <DoubleBillBadge on={billing?.doubleBill} />
           <span className="xl:hidden">

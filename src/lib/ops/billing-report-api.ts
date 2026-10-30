@@ -162,14 +162,19 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
   const tickets = want.has("service") || want.has("tlc") || want.has("pm") ? await loadTicketBillingRows(sql, { merged: true }) : [];
   const byId = new Map(tickets.map((t) => [t.id, t]));
   const merged = new Map(
-    (await sql.query<{ id: number; duplicate_of: number | null }>("select id, duplicate_of from service_jobs where duplicate_of is not null")).map((r) => [
+    (
+      await sql.query<{ id: number; duplicate_of: number | null; merged_install_id: number | null }>(
+        "select id, duplicate_of, merged_install_id from service_jobs where duplicate_of is not null",
+      )
+    ).map((r) => [
       Number(r.id),
-      Number(r.duplicate_of),
+      // A ticket merged into an install (10/30) is hidden like a ticket merged into another.
+      r.merged_install_id != null ? `Merged into install #${r.merged_install_id}` : `Merged into ticket #${Number(r.duplicate_of)}`,
     ]),
   );
   for (const t of tickets) {
     if (!want.has(t.board)) continue;
-    const into = merged.get(t.id);
+    const note = merged.get(t.id) ?? null;
     rows.push({
       board: t.board,
       id: t.id,
@@ -183,7 +188,7 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
       invoices: t.invoices.map((i) => ({ invoice: i.invoice, status: i.status, date: i.date })),
       invoicedDates: t.invoicedDates,
       serviceLocation: t.serviceLocation,
-      note: into ? `Merged into ticket #${into}` : null,
+      note,
     });
   }
   if (want.has("pm")) {

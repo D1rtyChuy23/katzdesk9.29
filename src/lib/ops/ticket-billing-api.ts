@@ -26,6 +26,7 @@ import {
 } from "@/lib/ops/billing-rules";
 import { applyDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount";
 import { nameKey } from "@/lib/ops/wo-history";
+import { mergedTicketRefusal, type MergedTicketRow } from "@/lib/ops/merged-ticket";
 
 type Q = Pick<Sql, "query">;
 
@@ -321,9 +322,10 @@ export async function unlockTicketBillingFor(sql: Q, jobId: number, userId: stri
     [jobId, actor, reason],
   );
   if (!saved[0]) {
-    const row = (await sql.query<{ duplicate_of: number | null }>("select duplicate_of from service_jobs where id = $1", [jobId]))[0];
+    const row = (await sql.query<MergedTicketRow>("select duplicate_of, merged_install_id from service_jobs where id = $1", [jobId]))[0];
     if (!row) throw new Error("That ticket is no longer on the list.");
-    if (row.duplicate_of) throw new Error(`This ticket was merged into #${row.duplicate_of}.`);
+    const merged = mergedTicketRefusal(row);
+    if (merged) throw new Error(merged);
     throw new Error("This ticket has no live NetSuite invoice, so it isn't locked.");
   }
 }
