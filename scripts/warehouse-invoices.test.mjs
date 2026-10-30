@@ -435,6 +435,18 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     assert.equal(reused.serialNotice, "Serial TESTSN-CUST pulled from warehouse · Test espresso machine · On the account (was Bean Test Cafe)");
     assert.deepEqual(await unitRow(theirs), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "account" });
 
+    // A shop refurb moved to Katz Coffee Service Dept. keeps its unit: its two accounts are one house for Warehouse.
+    const shopUnit = await unit("TESTSN-SHOPUNIT", { pallet: "D", level: 3 });
+    const shop2 = await rebuild(pg, "Test second shop refurb", SHOP);
+    assert.equal((await pull(shop2, "TESTSN-SHOPUNIT")).assetId, shopUnit);
+    assert.equal((await unitRow(shopUnit)).sold_to, SHOP);
+    assert.equal((await updateRebuildFor(sql, { id: shop2, account: SD }, "u-wh")).account, SD);
+    const pingsBeforeMove = (await pings(pg)).length;
+    assert.equal((await pull(shop2, "TESTSN-SHOPUNIT")).assetId, shopUnit, "no confirm for its own unit");
+    assert.deepEqual(await unitRow(shopUnit), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "barn-back" });
+    assert.equal((await pings(pg)).length, pingsBeforeMove, "and no ping");
+    await pg.query("delete from desk_notifications where entity_id = $1", [shop2]);
+
     // At one of our sites, on a ticket, or with a customer at another warehouse: the confirm and the ping say where.
     const sa = await unit("TESTSN-SA", { site: "san-antonio", status: "deployed" });
     await assert.rejects(() => pull(shop, "TESTSN-SA"), /^Error: Serial TESTSN-SA is already assigned to San Antonio\. Confirm reuse or cancel\.$/);
@@ -721,8 +733,9 @@ test("the screens: Warehouse's menu adds Rebuilds and Parts, not Invoices; the w
   assert.match(bell, /if \(isPullNotice\(n\.body\)\) return "Unit pulled";/);
   assert.match(sheet, /\{accountLock \? \(\s*<p className="text-sm text-muted-foreground" data-testid="rebuild-pull-ping">/, "Warehouse's confirm says the Admins get a ping");
   assert.match(sheet, /if \(\/already assigned\/i\.test\(msg\)\) setReuseNotice\(msg\);/, "every place a unit can be still opens the confirm");
-  assert.match(sheet, /disabled=\{pull\.isPending\}\s+onClick=\{\(\) => \{\s+pull\.mutate\(\{ confirmReuse: true, asked: reuseNotice \?\? undefined \}\);/, "Reuse sends the question it answers, once");
-  assert.match(sheet, /pullRebuildSerial\(\{ data: \{ id: row!\.id, serial, confirmReuse: opts\.confirmReuse, asked: opts\.asked \} \}\)/);
+  assert.match(sheet, /disabled=\{pull\.isPending\}\s+onClick=\{\(\) => \{\s+startPull\(\{ confirmReuse: true, asked: reuseNotice \?\? undefined \}\);/, "Reuse sends the question it answers, once");
+  assert.match(sheet, /pullRebuildSerial\(\{ data: \{ id: row!\.id, serial: opts\.serial, confirmReuse: opts\.confirmReuse, asked: opts\.asked \} \}\)/);
+  assert.match(sheet, /if \(opts\.serial !== lastPull\.current\) return;\s+setReuseNotice\(null\);\s+setSerial\(next\.serial \?\? ""\);/, "an older pull's answer leaves a changed box alone");
 
   // No photo changes for Warehouse on Parts: the row, the part's window, and the researched-photo buttons.
   const parts = readFileSync(new URL("../src/routes/_app/parts.tsx", import.meta.url), "utf8");

@@ -706,7 +706,7 @@ async function findWarehouse(sql: Sql, serial: string): Promise<SerialHitLite | 
     stamp: string | null;
   }>(
     `select id, model, serial, status, site, pallet, level, sold_to, install_id, job_id, stock_hold, purpose, ${ASSET_STAMP} as stamp
-     from assets where serial is not null and btrim(serial) <> ''`,
+     from assets where serial is not null and btrim(serial) <> '' order by id`,
   );
   const hit = rows.find((r) => serialKey(r.serial) === key);
   if (!hit) return null;
@@ -741,7 +741,7 @@ const pullInput = z.object({
   serial: z.string(),
   confirmReuse: z.boolean().optional(),
   /** The confirm question the person answered: asked again when the unit has moved since. */
-  asked: z.string().max(1000).optional(),
+  asked: z.string().max(10000).optional(),
 });
 
 export const pullRebuildSerial = createServerFn({ method: "POST" })
@@ -786,7 +786,11 @@ export async function pullRebuildSerialFor(sql: Sql, data: z.infer<typeof pullIn
     const row = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0]!;
     return mapRebuild(row, todayChicago());
   }
-  const sameAccount = (hit.soldTo ?? "").trim().toLowerCase() === cur.account.trim().toLowerCase();
+  const sameAccount =
+    (hit.soldTo ?? "").trim().toLowerCase() === cur.account.trim().toLowerCase() ||
+    // Warehouse: its two refurb accounts are one house (a shop refurb moved to Katz Coffee Service Dept. keeps its
+    // unit), so a unit on either is already its own: no confirm, no ping.
+    (isWarehouse(access) && warehouseMayEdit(hit.soldTo) && warehouseMayEdit(cur.account));
   if (isWarehouse(access) && hit.held) {
     throw new Error(`Serial ${hit.serial} is waiting for an Admin to approve its ${hit.held === "assign" ? "assign to a customer" : "removal"}, so it stays where it is.`);
   }
