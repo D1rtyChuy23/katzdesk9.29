@@ -487,6 +487,35 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
               </dl>
             </section>
 
+            {/* Tickets merged in as billed on a Sales Order (10/30): billed there, never on this invoice or its total. */}
+            {v.billedElsewhere.length ? (
+              <section className="rounded-lg border border-dashed border-border p-3" data-testid="invoice-billed">
+                <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Already billed (not on this invoice)</h3>
+                <ul className="mt-2 space-y-3">
+                  {v.billedElsewhere.map((b) => (
+                    <li key={b.jobId} data-testid="invoice-billed-ticket">
+                      <p className="text-sm font-medium">
+                        {b.ticket} · billed on {b.so}
+                        {b.invoices ? ` (NetSuite ${b.invoices})` : ""} · {money(b.total)}
+                      </p>
+                      <ul className="mt-1 space-y-0.5 text-sm text-muted-foreground">
+                        {b.lines.map((l, i) => (
+                          <li key={i} className="flex justify-between gap-3">
+                            <span className="min-w-0">
+                              {l.item}
+                              {l.description && l.description !== l.item ? ` · ${l.description}` : ""} · {l.qty} × {money(l.rate)}
+                            </span>
+                            <span className="tabular shrink-0">{money(Math.round(l.qty * l.rate * 100) / 100)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">These charges were billed on the Sales Order shown and are not billed again.</p>
+              </section>
+            ) : null}
+
             <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
               <p className="mr-auto text-xs text-muted-foreground" data-testid="invoice-status">
                 {v.approvedAt

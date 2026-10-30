@@ -220,6 +220,8 @@ function mapJob(r: any, today: any) {
 		mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
 		mergedInstallAt: r.merged_install_at ? (r.merged_install_at instanceof Date ? r.merged_install_at.toISOString() : String(r.merged_install_at)) : null,
 		mergedInstallBy: r.merged_install_by ?? null,
+		// A ticket merged into an install with a Sales Order was merged as billed on it (10/30): no SO goes on after a merge.
+		mergedBilledOn: r.merged_install_id != null && String(r.ns_so ?? "").trim() ? String(r.ns_so).trim() : null,
 		siblings: [],
 		serialNotice: r.serial_notice ?? null,
 		aviKatz: false,

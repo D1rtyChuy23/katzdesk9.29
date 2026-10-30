@@ -6,6 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access";
+import { BILLED_ON_INSTALL_SO } from "@/lib/ops/merged-ticket";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { loadChargeNets, loadInvoices, summarizeBilling } from "@/lib/ops/ticket-billing-api";
 import { locationWarning, matchesBillingFilters, type BoardKey, type DateBy } from "@/lib/ops/billing-rules";
@@ -62,7 +63,9 @@ export async function loadTicketBillingRows(sql: Q, opts: { kind?: "service" | "
   const [jobs, nets, invoices] = await Promise.all([
     sql.query<JobRow>(
       `${JOB_SELECT}
-        where ($1::text is null or s.kind = $1) and ($2::boolean or s.duplicate_of is null)
+        where ($1::text is null or s.kind = $1)
+          -- A ticket merged into an install as billed on its Sales Order (10/30) stays: its billing is still its own.
+          and ($2::boolean or s.duplicate_of is null or ${BILLED_ON_INSTALL_SO("s.id")} is not null)
         order by s.completed_at desc nulls last, s.received desc nulls last, s.id desc`,
       [opts.kind ?? null, !!opts.merged],
     ),
