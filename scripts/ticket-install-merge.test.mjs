@@ -193,7 +193,7 @@ test("a ticket and an install with one WO: the confirm names the install kept an
     mergedTickets: 1,
   });
   assert.deepEqual(p.stays, [
-    "Its own record: hidden, never deleted, with its history",
+    "Its own record and history",
     "A copy of its charge lines (only the install's invoice is billed)",
   ]);
   assert.equal(p.note, `From ticket SC-202610-901 (${WO}), merged ${TODAY} by boss:\nIssue: 1 Test Way\nTech: Test Tech`);
@@ -642,7 +642,7 @@ test("a ticket QuickBooks invoiced: refused while it has charges (they may be bi
   await pg.query("delete from ticket_charges where job_id = $1", [jobId]);
   const p = await preview(sql, jobId, installId);
   assert.equal(p.refusal, null);
-  assert.deepEqual(p.stays, ["Its own record: hidden, never deleted, with its history", "1 QuickBooks history row"]);
+  assert.deepEqual(p.stays, ["Its own record and history", "1 QuickBooks history row"]);
   await merge(sql, jobId, installId, p.stamps);
   assert.equal(Number((await one(pg, "select job_id from wo_history")).job_id), jobId);
 });

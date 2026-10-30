@@ -397,7 +397,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   if (normalizeCustomerKey(t.customer) !== normalizeCustomerKey(i.customer)) {
     warnings.push(`The ticket is on ${t.customer?.trim() || "no customer"}; the install keeps ${i.customer.trim()}.`);
   }
-  const stays: string[] = ["Its own record: hidden, never deleted, with its history"];
+  const stays: string[] = ["Its own record and history"];
   if (charges.length) stays.push("A copy of its charge lines (only the install's invoice is billed)");
   if (linked.wo_history) stays.push(plural(linked.wo_history, "QuickBooks history row"));
 

@@ -420,9 +420,14 @@ export function JobSheet({
                   {j.customer?.trim() ? j.customer : j.customer == null ? "Untitled Account" : <span className="sm:hidden">Untitled Account</span>}
                 </SheetTitle>
                 <div className="mt-2 flex min-h-8 flex-wrap items-center gap-1.5 max-sm:mt-1">
-                  <UrgencyBadge urgency={j.urgency} />
-                  <StatusBadge status={j.status} />
-                  <FlagBadge flag={j.flag} />
+                  {/* Merged into an install: the badge says where it went; its status is in the summary below. */}
+                  {mergedAway ? null : (
+                    <>
+                      <UrgencyBadge urgency={j.urgency} />
+                      <StatusBadge status={j.status} />
+                      <FlagBadge flag={j.flag} />
+                    </>
+                  )}
                   <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} mergedInstallId={j.mergedInstallId} />
                   {mergedAway ? null : <TicketBillingFlags jobId={j.id} key={`billing-flags-${j.id}`} />}
                 </div>

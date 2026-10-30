@@ -144,7 +144,7 @@ function PreviewBody({ p }: { p: InstallMergePreview }) {
       </section>
       <section>
         <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Then the ticket</h3>
-        <p className="mt-1">Is marked merged and hidden from Tickets. Nothing is deleted.</p>
+        <p className="mt-1">Is marked merged and hidden from Tickets. Nothing is deleted; the ticket keeps:</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
           {p.stays.map((s) => (
             <li key={s}>{s}</li>
