@@ -177,7 +177,7 @@ export function MergeInstall({ row, onMerged }: { row: Install; onMerged: (keepI
     mutationFn: (keep: number) => mergeInstalls({ data: { keepId: keep, dropId: row.id } }),
     onSuccess: async (res) => {
       toast.success(
-        `Merged into install #${res.keepId} · ${res.workOrders} WO${res.workOrders === 1 ? "" : "s"}, ${res.machines} machine row${res.machines === 1 ? "" : "s"}, ${res.units} visit unit${res.units === 1 ? "" : "s"} moved`,
+        `Merged into install #${res.keepId} · ${res.workOrders} WO${res.workOrders === 1 ? "" : "s"}, ${res.machines} machine row${res.machines === 1 ? "" : "s"}, ${res.units} visit unit${res.units === 1 ? "" : "s"}${res.invoiceMoved ? ", its invoice" : ""}${res.partLines ? `, ${res.partLines} WO part line${res.partLines === 1 ? "" : "s"}` : ""} moved`,
       );
       changed();
       // The window opens the install kept next: read the board first, so it shows the notes the merge put together.
@@ -209,7 +209,7 @@ export function MergeInstall({ row, onMerged }: { row: Install; onMerged: (keepI
             const keep = others.find((i) => String(i.id) === keepId);
             if (!keep) return;
             const names = keep.customer === row.customer ? "" : ` (${row.customer} → ${keep.customer})`;
-            if (window.confirm(`Merge install #${row.id} into #${keep.id}${names}? Its WOs, machine rows, notes and new units move; this one is archived.`)) {
+            if (window.confirm(`Merge install #${row.id} into #${keep.id}${names}? Its WOs, machine rows, notes, new units and invoice move; this one is archived.`)) {
               merge.mutate(keep.id);
             }
           }}

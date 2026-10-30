@@ -192,6 +192,7 @@ test("a ticket and an install with one WO: the confirm names the install kept an
     partLines: 2,
     rebuilds: [`Test brewer rebuild (#${reb})`],
     mergedTickets: 1,
+    invoicePo: null,
   });
   assert.deepEqual(p.stays, [
     "Its own record and history",
@@ -253,7 +254,7 @@ test("a ticket and an install with one WO: the confirm names the install kept an
   ]);
   const log = await one(pg, "select job_id, install_id, merged_by, note, moved from ticket_install_merges");
   assert.deepEqual([log.job_id, log.install_id, log.merged_by, log.note], [jobId, installId, "boss", p.note]);
-  assert.deepEqual(Object.keys(log.moved).sort(), ["charges", "invoiceId", "invoiceLines", "notes", "partLines", "pings", "rebuilds", "tickets", "units"]);
+  assert.deepEqual(Object.keys(log.moved).sort(), ["charges", "invoiceId", "invoiceLines", "notes", "partLines", "pings", "rebuilds", "ticketPo", "tickets", "units"]);
   assert.deepEqual([log.moved.charges.length, log.moved.invoiceId, log.moved.invoiceLines.length, log.moved.units, log.moved.tickets], [2, h.id, 2, [unit, loaner], [kid]]);
 
   // Hidden: not a pair any more, listed as merged; not offered again; a second merge is refused.
@@ -523,7 +524,7 @@ test("the statement's own guards: stale stamps, a check that came true after the
   await charge(pg, jobId, "PARTS : TESTGASKET", 1, 12.5, "part", 1);
   const p = await preview(sql, jobId, installId);
   const run = (stamps, extra = {}) =>
-    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", stamps.job, stamps.install, stamps.head, p.note, extra.total ?? 12.5, null, null]);
+    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", stamps.job, stamps.install, stamps.head, p.note, extra.total ?? 12.5, null, null, null]);
   const before = await snapshot(pg);
   for (const bad of [{ ...p.stamps, job: "x" }, { ...p.stamps, install: "x" }, { ...p.stamps, head: "1:x:y" }]) {
     assert.deepEqual(await run(bad), []);
@@ -646,15 +647,18 @@ test("after the install it went into is merged into another, the import follows 
   const file = parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Work Order Id"], ["4792", "Completed", CAFE, "CG-1"]]).records;
   const matched = async () => (await previewCorrigoRecords(sql, file)).rows.map((r) => [r.action, r.board, r.jobId]);
 
-  // Merge installs: the import follows the install into the one kept, and on again.
+  // Merge installs: the ticket now points at the install kept (10/30), and the import follows it there, and on again.
   const keep = await install(pg, { wo: "WO-4000" });
   await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: installId });
   assert.deepEqual(await matched(), [["update", "install", keep]]);
-  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: keep });
+  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId: keep, liveInstallId: keep });
   const last = await install(pg, { wo: "WO-4001" });
   await mergeInstallsFor(sql, "u-owner", { keepId: last, dropId: keep });
-  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: last });
+  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId: last, liveInstallId: last });
   assert.deepEqual(await matched(), [["update", "install", last]]);
+  // A ticket merged before this release still points at the install it went into: that one is followed.
+  await pg.query("update service_jobs set merged_install_id = $2 where id = $1", [jobId, installId]);
+  assert.deepEqual(await M.mergedInstallTarget(sql, jobId), { installId, liveInstallId: last });
 
   // A link no install merge made isn't followed: one removed while flagged as a possible duplicate keeps the flag.
   const flagged = await install(pg, { wo: "WO-4002" });
@@ -730,7 +734,7 @@ test("a ticket QuickBooks invoiced: refused while it has charges (they may be bi
   // The statement checks it too.
   const before = await snapshot(pg);
   const { stamps } = await preview(sql, keeper, other);
-  assert.deepEqual(await sql.query(M.mergeTicketIntoInstallSql(), [keeper, other, "boss", stamps.job, stamps.install, stamps.head, "note", 12.5, null, null]), []);
+  assert.deepEqual(await sql.query(M.mergeTicketIntoInstallSql(), [keeper, other, "boss", stamps.job, stamps.install, stamps.head, "note", 12.5, null, null, null]), []);
   assert.equal(await snapshot(pg), before);
 });
 

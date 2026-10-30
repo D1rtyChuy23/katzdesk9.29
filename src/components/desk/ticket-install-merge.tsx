@@ -127,6 +127,7 @@ function PreviewBody({ p }: { p: InstallMergePreview }) {
         <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Moves to the install</h3>
         <ul className="mt-1 space-y-1" data-testid="install-merge-moves">
           <MoveRow label="Charges" value={charges} testId="install-merge-charges" />
+          {m.invoicePo ? <MoveRow label="P.O." value={`${m.invoicePo}, on the install's invoice`} testId="install-merge-po" /> : null}
           <MoveRow label="Notes" value={m.notes ? count(m.notes, "note") + " from its Ping tab" : "None"} />
           <MoveRow label="Equipment" value={m.units.length ? m.units.join(", ") : "No units pulled onto it"} />
           <MoveRow label="Part lines" value={m.partLines ? count(m.partLines, "WO part line") : "None"} />

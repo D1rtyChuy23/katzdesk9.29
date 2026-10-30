@@ -710,7 +710,8 @@ test("the screens: Warehouse's menu adds Rebuilds and Parts, not Invoices; the w
 
   const win = readFileSync(new URL("../src/components/desk/invoice-window.tsx", import.meta.url), "utf8");
   assert.match(win, /saveInvoiceForApproval\(\{ data: \{ type, id, lines: sentLines\(\), discount: sentDiscount\(\) \} \}\)/);
-  assert.match(win, /seen: seen\?\.version \?\? null \}/);
+  // An install invoice's P.O. goes with it (10/30).
+  assert.match(win, /seen: seen\?\.version \?\? null, \.\.\.\(v\?\.hasPo \? \{ po \} : \{\}\) \}/);
   assert.match(win, /if \(!v \|\| lines \|\| q\.isFetching\) return;[\s\S]*?setSeen\(\{ version: v\.version, state: v\.state \}\);/, "the stamp is the one the lines started from, read fresh");
   assert.match(win, /if \(seen && \(fresh\.version !== seen\.version \|\| fresh\.state !== seen\.state\)\) \{\s*setLines\(null\);/, "a refusal over a changed invoice reloads the lines");
   assert.match(win, /if \(res\.isError \|\| !res\.data\) \{\s*onClose\(\);\s*return;\s*\}/, "the window closes when the invoice can't be read any more");
