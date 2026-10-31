@@ -410,7 +410,7 @@ const NO_SO = "no Sales Order";
 /**
  * What a WO's rows are about: the Sales Orders they name (an invoice with none counts as NO_SO), the NetSuite invoices
  * they name (invoice rows, and charges from an invoice), whether any is about a Sales Order with no invoice (an SO not
- * invoiced yet, or charges from one), and the invoices that have a date, with it.
+ * invoiced yet, or charges from one), and the invoices that have a date and aren't Voided, with it.
  */
 type RowsAbout = { sos: Set<string>; invoices: Set<string>; soOnly: boolean; dated: { invoice: string; date: string }[] };
 
@@ -528,7 +528,11 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
   const rowSos = new Set([...invoiceRows.filter((i) => i.invoice).map((i) => soKey(i.so) || NO_SO), ...invoiceRows.map((i) => soKey(i.so)), ...lineRows.map((r) => soKey(r.sourceSo))].filter(Boolean));
   const rowInvoices = new Set([...invoiceRows.map((i) => soKey(i.invoice)), ...lineRows.map((r) => soKey(r.sourceInvoice))].filter(Boolean));
   const rowSoOnly = invoiceRows.some((i) => !i.invoice && !!soKey(i.so)) || lineRows.some((r) => !soKey(r.sourceInvoice) && !!soKey(r.sourceSo));
-  const dated = [...new Map(invoiceRows.filter((i) => i.invoice && i.date).map((i) => [i.invoice, { invoice: i.invoice, date: i.date! }])).values()];
+  // The invoices whose dates are checked against the ticket: those that stand. A Voided one bills nothing, so it can't
+  // leave a ticket billed in NetSuite and unbilled here.
+  const dated = [
+    ...new Map(invoiceRows.filter((i) => i.invoice && i.date && !isVoidedStatus(i.status)).map((i) => [i.invoice, { invoice: i.invoice, date: i.date! }])).values(),
+  ];
   const rows: RowsAbout = { sos: rowSos, invoices: rowInvoices, soOnly: rowSoOnly, dated };
   const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, rows);
   const empty: BackfillPlan = {
@@ -711,7 +715,7 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
   // in the file at all: their date can't be checked against the ticket (WO numbers started over in July 2026).
   if (!locked) {
     const datedSos = new Set(invoiceRows.filter((i) => i.invoice && i.date).map((i) => soKey(i.so)).filter(Boolean));
-    const so = soChange && !!nextSo && !datedSos.has(soKey(nextSo));
+    const so = soChange && !!nextSo && soKey(nextSo) !== soKey(t.so) && !datedSos.has(soKey(nextSo));
     const lines = chargesChange && !rows.dated.length;
     if (so || lines) {
       warnings.push(
