@@ -182,11 +182,11 @@ test("only the NetSuite invoices that stand are its billing; an approved install
 
 test("an invoice that doesn't fit the ticket isn't taken as its billing: dated far from it, or not its charges' total", async () => {
   const { pg, sql } = await fresh();
-  const refusal = async (fields, invoices, charges = [[LABOR_500.item, 1, 500, "labor"]]) => {
+  const refusal = async (fields, invoices, charges = [[LABOR_500.item, 1, 500, "labor"]], installFields = {}) => {
     const jobId = await ticket(pg, fields);
     for (const [i, c] of charges.entries()) await charge(pg, jobId, c[0], c[1], c[2], c[3], i + 1);
     for (const inv of invoices) await invoice(pg, jobId, ...inv);
-    const p = await preview(sql, jobId, await install(pg, { wo: fields.wo }));
+    const p = await preview(sql, jobId, await install(pg, { wo: fields.wo, ...installFields }));
     return p.refusal;
   };
   const done = addDays(TODAY, -2);
@@ -198,6 +198,11 @@ test("an invoice that doesn't fit the ticket isn't taken as its billing: dated f
   // A week before the ticket was done still fits (the Billing Backfill's window); eight days doesn't.
   assert.equal(await refusal({ call_id: "SC-202610-912", wo: "WO-4912", completed_at: done }, [["INV5001", "Open", 500, addDays(done, -7)]]), null);
   assert.match(await refusal({ call_id: "SC-202610-913", wo: "WO-4913", completed_at: done }, [["INV5002", "Open", 500, addDays(done, -8)]]), /too far from the ticket's/);
+  // A year after it still fits; more than that doesn't.
+  const old_ = addDays(TODAY, -400);
+  const then = { received: old_, completed_at: old_ };
+  assert.equal(await refusal({ call_id: "SC-202610-920", wo: "WO-4920", ...then }, [["INV5011", "Open", 500, addDays(old_, 365)]], undefined, then), null);
+  assert.match(await refusal({ call_id: "SC-202610-921", wo: "WO-4921", ...then }, [["INV5012", "Open", 500, addDays(old_, 366)]], undefined, then), /too far from the ticket's/);
   // The install's own invoice on the WO, say: its total isn't the ticket's charges.
   assert.equal(
     await refusal({ call_id: "SC-202610-914", wo: "WO-4914" }, [["INV5003", "Open", 18450]]),
