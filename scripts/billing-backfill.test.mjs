@@ -240,6 +240,33 @@ test("WO numbers started over: the ticket done within a year before the invoice 
   assert.equal(p.plans[0].jobId, now);
 });
 
+test("the only ticket with a WO number still has to fit the invoice's date (Chuy, 10/30): one far from it is another job's", async () => {
+  const sql = await fresh();
+  // Done 2026-09-10: an invoice from a week before it to a year after is its own; outside that, skipped with why.
+  const id = await ticket(sql, { wo: "WO-0551", received: "2026-09-01", completed: "2026-09-10" });
+  const plan = async (...rows) =>
+    (await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ...rows.map(([inv, date]) => ["WO-0551", "", "", inv, date, "Open", "10", "10", "", ""])])], "u-owner")).plans[0];
+  for (const date of ["2026-09-03", "2026-09-10", "2027-09-10", ""]) {
+    const p = await plan(["INV55", date]);
+    assert.deepEqual([p.jobId, p.status, p.reason], [id, "write", null], date || "no date");
+  }
+  const far = await plan(["INV56", "2026-03-02"]);
+  assert.deepEqual(
+    [far.jobId, far.status, far.reason],
+    [null, "skip", `INV56 (2026-03-02) is too far from ticket #${id} (2026-09-10), the only one with this WO, to be its billing: it may be another job with this WO number. Skipped.`],
+  );
+  assert.equal((await plan(["INV57", "2026-09-02"])).status, "skip", "eight days before");
+  assert.equal((await plan(["INV58", "2027-09-11"])).status, "skip", "a year and a day after");
+  // One that fits beside one that doesn't: the WO is skipped, naming the one that doesn't.
+  const mixed = await plan(["INV59", "2026-09-20"], ["INV50", "2025-12-01"]);
+  assert.deepEqual([mixed.status, mixed.reason], ["skip", `INV50 (2025-12-01) is too far from ticket #${id} (2026-09-10), the only one with this WO, to be its billing: it may be another job with this WO number. Skipped.`]);
+  // A ticket not done yet goes by the day it came in.
+  const open = await ticket(sql, { wo: "WO-0552", received: "2026-09-01" });
+  await sql.query("update service_jobs set completed_at = null where id = $1", [open]);
+  const p = await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-0552", "", "", "INV52", "2026-08-20", "Open", "10", "10", "", ""]])], "u-owner");
+  assert.match(p.plans[0].reason, new RegExp(`INV52 \\(2026-08-20\\) is too far from ticket #${open} \\(2026-09-01\\)`));
+});
+
 test("double bill and Corrigo's $0 net against NetSuite's $300 are flagged like for like", async () => {
   const sql = await fresh();
   await ticket(sql, { wo: "WO-0601" });

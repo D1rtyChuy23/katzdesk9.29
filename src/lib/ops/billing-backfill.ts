@@ -335,6 +335,17 @@ export type BackfillContext = {
 const CENT = 0.005;
 const daysBetween = (a: string, b: string) => Math.round((Date.parse(`${a}T12:00:00Z`) - Date.parse(`${b}T12:00:00Z`)) / 86_400_000);
 
+/**
+ * An invoice dated from a week before the ticket was done to a year after: one of that ticket's own. WO numbers started
+ * over in July 2026, so the same number on an invoice outside this window is another job's. Null when a date can't be
+ * read.
+ */
+export function invoiceFitsTicketDate(invoiceDate: string, ticketDate: string): boolean | null {
+  const days = daysBetween(invoiceDate, ticketDate);
+  if (!Number.isFinite(days)) return null;
+  return days >= -7 && days <= 365;
+}
+
 /** Line items that are never charges: subtotals and description-only rows. */
 const NOT_A_LINE = /^(subtotal|description|markup|group|endgroup)$/i;
 
@@ -409,10 +420,10 @@ const NO_SO = "no Sales Order";
 
 /**
  * What a WO's rows are about: the Sales Orders they name (an invoice with none counts as NO_SO), the NetSuite invoices
- * they name (invoice rows, and charges from an invoice), and whether any is about a Sales Order with no invoice (an SO
- * not invoiced yet, or charges from one).
+ * they name (invoice rows, and charges from an invoice), whether any is about a Sales Order with no invoice (an SO not
+ * invoiced yet, or charges from one), and the invoices that have a date, with it.
  */
-type RowsAbout = { sos: Set<string>; invoices: Set<string>; soOnly: boolean };
+type RowsAbout = { sos: Set<string>; invoices: Set<string>; soOnly: boolean; dated: { invoice: string; date: string }[] };
 
 /**
  * The ticket a WO's rows go on, or why none. A ticket merged into an install as billed (10/30) takes the rows on its
@@ -471,14 +482,24 @@ function pickTicket(
     }
     return { reason: "No ticket has this WO." };
   }
-  if (live.length === 1) return { ticket: live[0]! };
+  if (live.length === 1) {
+    // Even the only ticket with this WO number has to fit the invoices' dates (Chuy, 10/30): the numbers started over
+    // in July 2026, so an invoice dated well before it, or more than a year after, is another job's, not its billing.
+    const t = live[0]!;
+    const d = t.completed ?? t.received;
+    const far = d ? rows.dated.filter((r) => invoiceFitsTicketDate(r.date, d) === false) : [];
+    if (far.length) {
+      return {
+        reason: `${far.map((r) => `${r.invoice} (${r.date})`).join(", ")} ${far.length === 1 ? "is" : "are"} too far from ticket #${t.id} (${d}), the only one with this WO, to be its billing: ${far.length === 1 ? "it" : "they"} may be another job with this WO number. Skipped.`,
+      };
+    }
+    return { ticket: t };
+  }
   // WO numbers started over in July 2026: the ticket done within a year before the invoice is the one.
   if (refDate) {
     const near = live.filter((t) => {
       const d = t.completed ?? t.received;
-      if (!d) return false;
-      const days = daysBetween(refDate, d);
-      return days >= -7 && days <= 365;
+      return !!d && invoiceFitsTicketDate(refDate, d) === true;
     });
     if (near.length === 1) return { ticket: near[0]! };
   }
@@ -501,7 +522,8 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
   const rowSos = new Set([...invoiceRows.filter((i) => i.invoice).map((i) => soKey(i.so) || NO_SO), ...invoiceRows.map((i) => soKey(i.so)), ...lineRows.map((r) => soKey(r.sourceSo))].filter(Boolean));
   const rowInvoices = new Set([...invoiceRows.map((i) => soKey(i.invoice)), ...lineRows.map((r) => soKey(r.sourceInvoice))].filter(Boolean));
   const rowSoOnly = invoiceRows.some((i) => !i.invoice && !!soKey(i.so)) || lineRows.some((r) => !soKey(r.sourceInvoice) && !!soKey(r.sourceSo));
-  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, { sos: rowSos, invoices: rowInvoices, soOnly: rowSoOnly });
+  const dated = [...new Map(invoiceRows.filter((i) => i.invoice && i.date).map((i) => [i.invoice, { invoice: i.invoice, date: i.date! }])).values()];
+  const picked = pickTicket(key, ctx, invoiceDates[0] ?? null, { sos: rowSos, invoices: rowInvoices, soOnly: rowSoOnly, dated });
   const empty: BackfillPlan = {
     key,
     wo,
