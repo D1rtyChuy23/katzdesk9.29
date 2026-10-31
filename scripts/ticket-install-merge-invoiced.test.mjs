@@ -214,9 +214,9 @@ test("an invoice that doesn't fit the ticket isn't taken as its billing: dated f
   );
   assert.match(await refusal({ call_id: "SC-202610-916", wo: "WO-4916" }, [["INV5006", "Open", 500.01]]), /comes to \$500\.01 and its charges to \$500\.00/);
   assert.match(await refusal({ call_id: "SC-202610-917", wo: "WO-4917" }, [["INV5007", "Open", 500]], []), /comes to \$500\.00 and its charges to \$0\.00/);
-  // Its discount counts, and a Voided invoice beside it doesn't.
+  // Its discount counts, and a Voided invoice beside it doesn't, whatever its date.
   assert.equal(
-    await refusal({ call_id: "SC-202610-918", wo: "WO-4918", discount_kind: "amount", discount_value: 50 }, [["INV5008", "Voided", 500], ["INV5009", "Open", 450, done]]),
+    await refusal({ call_id: "SC-202610-918", wo: "WO-4918", discount_kind: "amount", discount_value: 50 }, [["INV5008", "Voided", 500, addDays(TODAY, -200)], ["INV5009", "Open", 450, done]]),
     null,
   );
   // A ticket billed on a Sales Order isn't held to this: its SO is its billing (PR #104).
