@@ -190,19 +190,23 @@ test("an invoice that doesn't fit the ticket isn't taken as its billing: dated f
     return p.refusal;
   };
   const done = addDays(TODAY, -2);
-  // Another job with this WO number (the numbers started over): an invoice from months before the ticket was done.
+  const cameIn = addDays(TODAY, -18);
+  const dates = { received: cameIn, completed_at: done };
+  // Another job with this WO number (the numbers started over): an invoice from months before the ticket came in.
   assert.equal(
-    await refusal({ call_id: "SC-202610-911", wo: "WO-4911", completed_at: done }, [["INV5000", "Paid In Full", 500, addDays(TODAY, -200)]]),
-    `SC-202610-911 (WO-4911)'s NetSuite invoice INV5000 is dated ${formatLongDate(addDays(TODAY, -200))}, too far from the ticket's ${formatLongDate(done)} to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`,
+    await refusal({ call_id: "SC-202610-911", wo: "WO-4911", ...dates }, [["INV5000", "Paid In Full", 500, addDays(TODAY, -200)]]),
+    `SC-202610-911 (WO-4911)'s NetSuite invoice INV5000 is dated ${formatLongDate(addDays(TODAY, -200))}, too far from the ticket (came in ${formatLongDate(cameIn)}, done ${formatLongDate(done)}) to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`,
   );
-  // A week before the ticket was done still fits (the Billing Backfill's window); eight days doesn't.
-  assert.equal(await refusal({ call_id: "SC-202610-912", wo: "WO-4912", completed_at: done }, [["INV5001", "Open", 500, addDays(done, -7)]]), null);
-  assert.match(await refusal({ call_id: "SC-202610-913", wo: "WO-4913", completed_at: done }, [["INV5002", "Open", 500, addDays(done, -8)]]), /too far from the ticket's/);
+  // A week before the ticket came in still fits (the Billing Backfill's window), and so does a day between; eight days
+  // before it came in doesn't.
+  assert.equal(await refusal({ call_id: "SC-202610-912", wo: "WO-4912", ...dates }, [["INV5001", "Open", 500, addDays(cameIn, -7)]]), null);
+  assert.equal(await refusal({ call_id: "SC-202610-923", wo: "WO-4923", ...dates }, [["INV5014", "Open", 500, addDays(done, -8)]]), null);
+  assert.match(await refusal({ call_id: "SC-202610-913", wo: "WO-4913", ...dates }, [["INV5002", "Open", 500, addDays(cameIn, -8)]]), /too far from the ticket/);
   // A year after it still fits; more than that doesn't.
   const old_ = addDays(TODAY, -400);
   const then = { received: old_, completed_at: old_ };
   assert.equal(await refusal({ call_id: "SC-202610-920", wo: "WO-4920", ...then }, [["INV5011", "Open", 500, addDays(old_, 365)]], undefined, then), null);
-  assert.match(await refusal({ call_id: "SC-202610-921", wo: "WO-4921", ...then }, [["INV5012", "Open", 500, addDays(old_, 366)]], undefined, then), /too far from the ticket's/);
+  assert.match(await refusal({ call_id: "SC-202610-921", wo: "WO-4921", ...then }, [["INV5012", "Open", 500, addDays(old_, 366)]], undefined, then), /too far from the ticket/);
   // The install's own invoice on the WO, say: its total isn't the ticket's charges.
   assert.equal(
     await refusal({ call_id: "SC-202610-914", wo: "WO-4914" }, [["INV5003", "Open", 18450]]),

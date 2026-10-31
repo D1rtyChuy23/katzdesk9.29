@@ -26,7 +26,7 @@ import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { isDiscountKind, type Discount } from "@/lib/ops/discount";
 import { invoiceTotals } from "@/lib/ops/invoice";
 import { isInstalled } from "@/lib/ops/install-status";
-import { chargesMismatch, liveInvoiceTotal } from "@/lib/ops/billing-rules";
+import { chargesMismatch, invoiceFitsTicket, liveInvoiceTotal } from "@/lib/ops/billing-rules";
 import { billedCarryOver, nsInvoicesLabel } from "@/lib/ops/merged-ticket";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 
@@ -57,15 +57,6 @@ export function sameWoRun(a: string | null | undefined, b: string | null | undef
   const db = Date.parse(b);
   if (!Number.isFinite(da) || !Number.isFinite(db)) return true;
   return Math.abs(da - db) <= RUN_DAYS * 86_400_000;
-}
-
-/**
- * A NetSuite invoice dated from a week before the ticket was done to a year after: the window the Billing Backfill uses
- * to tell which ticket a WO's invoice is for. One outside it is another job with that WO number, or not this ticket's.
- */
-export function invoiceFitsTicket(invoiceDate: string, ticketDate: string): boolean {
-  const days = Math.round((Date.parse(`${invoiceDate}T12:00:00Z`) - Date.parse(`${ticketDate}T12:00:00Z`)) / 86_400_000);
-  return !Number.isFinite(days) || (days >= -7 && days <= RUN_DAYS);
 }
 
 /** A stored WO's digits without leading zeros, the way the other WO lookups read them in SQL. */
@@ -453,10 +444,11 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     // the install's own invoice can come in on the WO: one dated too far from the ticket, or a total that isn't its
     // charges', keeps the ticket as it is.
     if (billed && !billed.so) {
-      const done = t.completed ?? t.came_in;
-      const far = done ? standing.find((s) => s.date && !invoiceFitsTicket(s.date, done)) : undefined;
+      // The Billing Backfill's window (billing-rules.ts): a week before it came in to a year after it was done.
+      const far = standing.find((s) => s.date && invoiceFitsTicket(s.date, t.came_in, t.completed) === false);
       if (far) {
-        return `${label}'s NetSuite invoice ${far.invoice} is dated ${formatLongDate(far.date!)}, too far from the ticket's ${formatLongDate(done!)} to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`;
+        const when = [t.came_in ? `came in ${formatLongDate(t.came_in)}` : null, t.completed ? `done ${formatLongDate(t.completed)}` : null].filter(Boolean).join(", ");
+        return `${label}'s NetSuite invoice ${far.invoice} is dated ${formatLongDate(far.date!)}, too far from the ticket (${when}) to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`;
       }
       const untotalled = standing.find((s) => s.total == null);
       if (untotalled) {

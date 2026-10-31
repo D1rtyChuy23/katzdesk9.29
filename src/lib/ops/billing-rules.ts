@@ -74,6 +74,25 @@ export function liveInvoiceTotal(invoices: Pick<InvoiceLite, "status" | "total">
 /** A cent either way is the same amount. */
 const CENT = 0.005;
 
+const dayNumber = (iso: string) => Date.parse(`${iso}T12:00:00Z`) / 86_400_000;
+
+/**
+ * Whether a NetSuite invoice can be a ticket's billing by its date: from a week before the ticket came in to a year
+ * after it was done (Chuy, 10/30). WO numbers started over in July 2026, so the same number on an invoice outside this
+ * is another job's. `cameIn` and `done` are YYYY-MM-DD; either stands in for the other when missing. Null when there's
+ * no date to go by or one can't be read.
+ */
+export function invoiceFitsTicket(invoiceDate: string, cameIn: string | null | undefined, done: string | null | undefined): boolean | null {
+  const start = cameIn || done;
+  const end = done || cameIn;
+  if (!start || !end) return null;
+  const inv = dayNumber(invoiceDate);
+  const from = dayNumber(start);
+  const to = dayNumber(end);
+  if (!Number.isFinite(inv) || !Number.isFinite(from) || !Number.isFinite(to)) return null;
+  return Math.round(inv - from) >= -7 && Math.round(inv - to) <= 365;
+}
+
 /** Two or more live invoices whose totals add up to more than the ticket's charges (after its discount). */
 export function possibleDoubleBill(invoices: Pick<InvoiceLite, "status" | "total">[], chargeNet: number): boolean {
   return liveInvoices(invoices).length >= 2 && liveInvoiceTotal(invoices) > round2(chargeNet) + CENT;
