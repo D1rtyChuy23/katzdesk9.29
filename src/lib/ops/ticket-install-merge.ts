@@ -458,9 +458,13 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       if (far) {
         return `${label}'s NetSuite invoice ${far.invoice} is dated ${formatLongDate(far.date!)}, too far from the ticket's ${formatLongDate(done!)} to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`;
       }
+      const untotalled = standing.find((s) => s.total == null);
+      if (untotalled) {
+        return `${label}'s NetSuite invoice ${untotalled.invoice} has no total in KatzDesk, so it can't be checked against the ticket's charges. Run the Billing Backfill with the invoices' totals, then merge.`;
+      }
       if (chargesMismatch(standing, chargeTotal)) {
         const one = standing.length === 1;
-        return `${label}'s ${billed.on} ${one ? "comes" : "come"} to ${money(liveInvoiceTotal(standing))} and its charges to ${money(chargeTotal)}, so ${one ? "it" : "they"} may not be this ticket's billing. An invoiced ticket stays as it is.`;
+        return `${label}'s ${billed.on} ${one ? "comes" : "come"} to ${money(liveInvoiceTotal(standing))} and its charges to ${money(chargeTotal)}, so ${one ? "it" : "they"} may not be this ticket's billing. If ${one ? "it is" : "they are"}, an Admin can unlock the ticket's Charges and make them match, then merge.`;
       }
     }
     if (linked.has_quote) return `${label} has a repair quote, and installs don't keep repair quotes. Finish or take off the quote first.`;

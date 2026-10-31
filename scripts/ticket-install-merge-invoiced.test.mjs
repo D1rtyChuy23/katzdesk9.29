@@ -206,14 +206,19 @@ test("an invoice that doesn't fit the ticket isn't taken as its billing: dated f
   // The install's own invoice on the WO, say: its total isn't the ticket's charges.
   assert.equal(
     await refusal({ call_id: "SC-202610-914", wo: "WO-4914" }, [["INV5003", "Open", 18450]]),
-    "SC-202610-914 (WO-4914)'s NetSuite invoice INV5003 comes to $18450.00 and its charges to $500.00, so it may not be this ticket's billing. An invoiced ticket stays as it is.",
+    "SC-202610-914 (WO-4914)'s NetSuite invoice INV5003 comes to $18450.00 and its charges to $500.00, so it may not be this ticket's billing. If it is, an Admin can unlock the ticket's Charges and make them match, then merge.",
   );
   assert.equal(
     await refusal({ call_id: "SC-202610-915", wo: "WO-4915" }, [["INV5004", "Open", 300], ["INV5005", "Open", 150]]),
-    "SC-202610-915 (WO-4915)'s NetSuite invoices INV5004, INV5005 come to $450.00 and its charges to $500.00, so they may not be this ticket's billing. An invoiced ticket stays as it is.",
+    "SC-202610-915 (WO-4915)'s NetSuite invoices INV5004, INV5005 come to $450.00 and its charges to $500.00, so they may not be this ticket's billing. If they are, an Admin can unlock the ticket's Charges and make them match, then merge.",
   );
   assert.match(await refusal({ call_id: "SC-202610-916", wo: "WO-4916" }, [["INV5006", "Open", 500.01]]), /comes to \$500\.01 and its charges to \$500\.00/);
   assert.match(await refusal({ call_id: "SC-202610-917", wo: "WO-4917" }, [["INV5007", "Open", 500]], []), /comes to \$500\.00 and its charges to \$0\.00/);
+  // No total recorded (a blank cell in the Backfill's file): it can't be checked, so it isn't taken as $0.00.
+  assert.equal(
+    await refusal({ call_id: "SC-202610-922", wo: "WO-4922" }, [["INV5013", "Open", null]]),
+    "SC-202610-922 (WO-4922)'s NetSuite invoice INV5013 has no total in KatzDesk, so it can't be checked against the ticket's charges. Run the Billing Backfill with the invoices' totals, then merge.",
+  );
   // Its discount counts, and a Voided invoice beside it doesn't, whatever its date.
   assert.equal(
     await refusal({ call_id: "SC-202610-918", wo: "WO-4918", discount_kind: "amount", discount_value: 50 }, [["INV5008", "Voided", 500, addDays(TODAY, -200)], ["INV5009", "Open", 450, done]]),
@@ -377,6 +382,28 @@ test("the Billing Backfill records the merged ticket's own invoices only, and th
   assert.deepEqual((await listAccountInvoicesFor(sql, CAFE, "u-owner")).map((x) => x.status), [`Billed on ${ON}, Voided now · merged into install #${installId}`]);
 });
 
+test("one of its invoices Voided since the merge, beside one that stands: every place names it", async () => {
+  const { pg, sql } = await fresh();
+  const jobId = await ticket(pg);
+  await charge(pg, jobId, LABOR_500.item, 1, 500, "labor", 1);
+  await invoice(pg, jobId, "INV1", "Open", 300);
+  await invoice(pg, jobId, "INV2", "Open", 200);
+  const installId = await install(pg);
+  await mergeShown(sql, jobId, installId, await preview(sql, jobId, installId));
+  const on = "NetSuite invoices INV1, INV2";
+  await pg.query("update ticket_invoices set status = 'Voided' where ns_invoice = 'INV1'");
+  assert.deepEqual((await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner")).billedElsewhere.map((b) => [b.on, b.invoices, b.voided]), [[on, "INV2", "INV1"]]);
+  assert.equal(
+    (await getInvoiceFor(sql, { type: "service", id: jobId }, "u-owner")).locked,
+    `This ticket was merged into install #${installId}. Its charges were billed on ${on}. NetSuite has INV1 as Voided now, so they may not all be billed. The install lists them.`,
+  );
+  assert.deepEqual((await listAccountInvoicesFor(sql, CAFE, "u-owner")).map((x) => x.status), [`Billed on ${on} (INV1 Voided now) · merged into install #${installId}`]);
+  // Both Voided: billed on nothing that stands.
+  await pg.query("update ticket_invoices set status = 'Voided' where ns_invoice = 'INV2'");
+  assert.deepEqual((await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner")).billedElsewhere.map((b) => [b.invoices, b.voided]), [[null, "INV1, INV2"]]);
+  assert.deepEqual((await listAccountInvoicesFor(sql, CAFE, "u-owner")).map((x) => x.status), [`Billed on ${on}, Voided now · merged into install #${installId}`]);
+});
+
 test("billing lists count it once: parts profit and the Invoices page as before, Part Usage on the install, Export Billing never", async () => {
   const { pg, sql } = await fresh();
   await pg.query("insert into billing_items (sku, item, kind, rate, cost) values ('TESTGASKET', 'PARTS : TESTGASKET', 'part', 12.5, 5)");
@@ -409,7 +436,7 @@ test("after the merge: no Sales Order goes on it, and Merge installs takes it to
 test("the confirm and the install's Invoice window say what it was billed on (source)", () => {
   const win = readFileSync(new URL("../src/components/desk/invoice-window.tsx", import.meta.url), "utf8");
   assert.ok(win.includes("{b.ticket} · billed on {b.on}\n        {b.so && b.invoices ? ` (NetSuite ${b.invoices})` : \"\"} · {money(b.total)}"));
-  assert.ok(win.includes("NetSuite has {b.voided} as Voided now, so these charges may not all be billed. Check them in NetSuite."));
+  assert.ok(win.includes('NetSuite has {b.voided} as Voided now, so these charges may not {b.invoices ? "all be billed" : "be billed anywhere"}. Check them in NetSuite.'));
   // The ticket's banner and the pairs list say billed charges stay billed.
   const confirm = readFileSync(new URL("../src/components/desk/ticket-install-merge.tsx", import.meta.url), "utf8");
   assert.ok(confirm.includes("part lines and pings go to the install, its charges too unless they&apos;re billed in NetSuite already, and the ticket is hidden."));

@@ -8,7 +8,7 @@ import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount
 import { flagOn } from "@/lib/ops/flag";
 import { INVOICE_TARGETS, carriesPo, cleanPo, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { notifyAdminsInvoiceWaiting } from "@/lib/ops/notify";
-import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
+import { BILLED_INVOICES_ON_INSTALL, BILLED_ON_INSTALL, STANDING_NS_INVOICES, voidedSinceMerge } from "@/lib/ops/merged-ticket";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 import { pinQuality } from "@/lib/ops/account-pin";
@@ -117,15 +117,13 @@ async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarr
       order by m.id`,
     [installId],
   );
-  const list = (s: string | null | undefined) => String(s ?? "").split(",").map((x) => x.trim()).filter(Boolean);
   return rows.map((r) => {
     const lines = Array.isArray(r.moved.billedLines) ? (r.moved.billedLines as { item?: unknown; description?: unknown; qty?: unknown; rate?: unknown; kind?: unknown }[]) : [];
     const wo = String(r.wo ?? "").trim();
     const call = String(r.call_id ?? "").trim() || `Ticket #${r.job_id}`;
     const so = r.moved.billedSo ? String(r.moved.billedSo) : null;
-    // Billed on its NetSuite invoices alone: one Voided since leaves its charges billed on nothing; the window says so.
-    const live = new Set(list(r.invoices).map((x) => x.toUpperCase()));
-    const voided = so ? [] : list(r.moved.billedInvoices).filter((x) => !live.has(x.toUpperCase()));
+    // Billed on its NetSuite invoices alone: one Voided since may leave its charges billed on nothing; the window says so.
+    const voided = so ? [] : voidedSinceMerge(r.moved.billedInvoices, r.invoices);
     return {
       jobId: Number(r.job_id),
       ticket: wo ? `${call} (${wo})` : call,
@@ -158,9 +156,9 @@ type Ref = { type: InvoiceTarget; id: number; customer: string; title: string; r
 /** The record the invoice is for: its customer comes from the record itself, never asked for again. */
 async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise<Ref> {
   if (type === "service" || type === "tlc") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; ns_invoice: string | null; ns_status: string | null; billed_on: string | null }>(
+    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; ns_invoice: string | null; ns_status: string | null; billed_on: string | null; billed_invoices: string | null; standing: string | null }>(
       `select j.customer, j.wo, j.call_id, j.kind, j.ns_so, j.duplicate_of, j.merged_install_id, i.ns_invoice, i.status as ns_status,
-              ${BILLED_ON_INSTALL("j.id")} as billed_on
+              ${BILLED_ON_INSTALL("j.id")} as billed_on, ${BILLED_INVOICES_ON_INSTALL("j.id")} as billed_invoices, ${STANDING_NS_INVOICES("j.id")} as standing
          from service_jobs j
          left join lateral (
            select ns_invoice, status from ticket_invoices ti
@@ -173,12 +171,14 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     ))[0];
     if (!r) throw new Error("That ticket is no longer on the list.");
     const kind: InvoiceTarget = r.kind === "tlc" ? "tlc" : "service";
-    // Billed on NetSuite invoices alone, all of them Voided since the merge: say so (its charges may be billed nowhere).
-    const voidedSince = !!r.billed_on && !r.ns_so?.trim() && !r.ns_invoice;
+    // Billed on NetSuite invoices alone, some Voided since the merge: say which (its charges may not all be billed).
+    const voided = r.billed_on && !r.ns_so?.trim() ? voidedSinceMerge(r.billed_invoices, r.standing) : [];
     const locked = r.merged_install_id
       ? r.billed_on
-        ? voidedSince
-          ? `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on}, which NetSuite has as Voided now, so they may not be billed anywhere. The install lists them.`
+        ? voided.length
+          ? r.standing
+            ? `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on}. NetSuite has ${voided.join(", ")} as Voided now, so they may not all be billed. The install lists them.`
+            : `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on}, which NetSuite has as Voided now, so they may not be billed anywhere. The install lists them.`
           : `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on} and stay billed there; the install lists them as billed.`
         : `This ticket was merged into install #${r.merged_install_id}. Its charges are on the install's invoice.`
       : r.duplicate_of
@@ -809,6 +809,13 @@ export const listAccountInvoices = createServerFn({ method: "POST" })
   .validator((d: { customer: string }) => z.object({ customer: z.string().max(300) }).parse(d))
   .handler(async ({ data, context }): Promise<AccountInvoice[]> => listAccountInvoicesFor(await ready(), data.customer, context.userId));
 
+/** A ticket merged as billed on NetSuite invoices alone: ", Voided now" (all), " (INV1 Voided now)" (some), or "". */
+function voidedNote(t: { billed_invoices: string | null; standing: string | null }): string {
+  const voided = voidedSinceMerge(t.billed_invoices, t.standing);
+  if (!voided.length) return "";
+  return t.standing ? ` (${voided.join(", ")} Voided now)` : ", Voided now";
+}
+
 /** The body of listAccountInvoices. Warehouse doesn't read accounts' invoices. */
 export async function listAccountInvoicesFor(sql: Sql, customer: string, userId: string): Promise<AccountInvoice[]> {
   if ((await invoiceViewer(sql, userId)).warehouse) throw new Error(WAREHOUSE_REBUILDS_ONLY);
@@ -835,11 +842,10 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
   );
   // A ticket merged into an install as billed (10/30) stays listed, as billed: its charges never went on the install's
   // invoice, so this is the one place they show on the account.
-  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; amount: string; billed_on: string | null; merged_install_id: number | null; live: boolean }>(
+  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; amount: string; billed_on: string | null; merged_install_id: number | null; billed_invoices: string | null; standing: string | null }>(
     `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.po, j.discount_kind, j.discount_value, sum(round(c.qty * c.rate, 2))::text as amount,
             ${BILLED_ON_INSTALL("j.id")} as billed_on, j.merged_install_id,
-            exists (select 1 from ticket_invoices ti
-                     where ti.job_id = j.id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) as live
+            ${BILLED_INVOICES_ON_INSTALL("j.id")} as billed_invoices, ${STANDING_NS_INVOICES("j.id")} as standing
        from service_jobs j join ticket_charges c on c.job_id = j.id
       where lower(btrim(j.customer)) = lower($1) and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
       group by j.id
@@ -863,7 +869,7 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
       submittedAt: null,
       submittedBy: null,
       status: t.billed_on
-        ? `${t.ns_so?.trim() ? `Billed ${t.ns_so.trim()}` : `Billed on ${t.billed_on}${t.live ? "" : ", Voided now"}`} · merged into install #${t.merged_install_id}`
+        ? `${t.ns_so?.trim() ? `Billed ${t.ns_so.trim()}` : `Billed on ${t.billed_on}${voidedNote(t)}`} · merged into install #${t.merged_install_id}`
         : t.ns_so
           ? `Billed ${t.ns_so}`
           : head

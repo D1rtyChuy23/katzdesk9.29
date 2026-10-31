@@ -80,7 +80,7 @@ function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
       </p>
       {b.voided ? (
         <p className="mt-1 text-xs text-warning" data-testid="invoice-billed-voided">
-          NetSuite has {b.voided} as Voided now, so these charges may not all be billed. Check them in NetSuite.
+          NetSuite has {b.voided} as Voided now, so these charges may not {b.invoices ? "all be billed" : "be billed anywhere"}. Check them in NetSuite.
         </p>
       ) : null}
       {b.lines.length ? (
