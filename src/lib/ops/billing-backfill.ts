@@ -425,7 +425,7 @@ function pickTicket(
   ctx: BackfillContext,
   refDate: string | null,
   rows: RowsAbout,
-): { ticket: BackfillTicket; alone?: boolean } | { reason: string } {
+): { ticket: BackfillTicket } | { reason: string } {
   const all = ctx.tickets.filter((t) => woMatchKey(t.wo ?? "") === key);
   const live = all.filter((t) => !t.duplicateOf);
   const billed = all.filter((t) => t.billedOnInstall);
@@ -488,12 +488,26 @@ function pickTicket(
         ` Take ${one ? "its" : "their"} rows out of the file, then run it again.`,
     };
   };
-  if (live.length === 1) return tooFar(live[0]!, true) ?? { ticket: live[0]!, alone: true };
-  // WO numbers started over in July 2026: the ticket the earliest invoice fits is the one, and every other invoice has
-  // to fit it too.
+  if (live.length === 1) return tooFar(live[0]!, true) ?? { ticket: live[0]! };
+  // WO numbers started over in July 2026: the ticket the earliest invoice fits is the one. Every other invoice has to
+  // be that ticket's alone: one that fits another ticket with this WO, instead or as well, can't be told apart, and
+  // putting it on this one would leave that one unbilled (Export Billing would take it again).
   if (refDate) {
     const near = live.filter((t) => invoiceFitsTicket(refDate, t.received, t.completed) === true);
-    if (near.length === 1) return tooFar(near[0]!, false) ?? { ticket: near[0]! };
+    if (near.length === 1) {
+      const t = near[0]!;
+      for (const r of rows.dated) {
+        const fits = live.filter((x) => invoiceFitsTicket(r.date, x.received, x.completed) === true);
+        const others = fits.filter((x) => x.id !== t.id).map((x) => `#${x.id}`);
+        if (!others.length) continue;
+        return {
+          reason: fits.some((x) => x.id === t.id)
+            ? `${r.invoice} (${r.date}) fits tickets #${t.id} and ${others.join(", ")} both, so the Backfill can't tell which one NetSuite billed. Skipped.`
+            : `${r.invoice} (${r.date}) fits ticket ${others.join(", ")}, not #${t.id}: put its rows in a file of their own and run that too.`,
+        };
+      }
+      return tooFar(t, false) ?? { ticket: t };
+    }
   }
   return { reason: `The WO is on ${live.length} tickets (${live.map((t) => `#${t.id}`).join(", ")}). Can't tell which one NetSuite billed.` };
 }
@@ -693,12 +707,21 @@ function planOne(key: string, lineRows: BackfillLine[], invoiceRows: BackfillInv
     : chargesChange || soChange || invoicesChange
       ? "write"
       : "same";
-  // The only ticket with this WO, getting a Sales Order or charges that no dated invoice in the file backs: their date
-  // can't be checked against it (WO numbers started over in July 2026).
-  if (picked.alone && !rows.dated.length && !locked && (soChange || chargesChange)) {
-    warnings.push(
-      `No dated invoice in the file backs ${soChange && chargesChange ? "this Sales Order and these charges" : soChange ? "this Sales Order" : "these charges"}, so ${soChange && chargesChange ? "their" : "its"} date can't be checked against the ticket. WO numbers started over in July 2026: make sure ${soChange && nextSo ? nextSo : "it"} is this ticket's.`,
-    );
+  // A Sales Order that no dated invoice in the file names (an open SO, or charges' SO), or charges with no dated invoice
+  // in the file at all: their date can't be checked against the ticket (WO numbers started over in July 2026).
+  if (!locked) {
+    const datedSos = new Set(invoiceRows.filter((i) => i.invoice && i.date).map((i) => soKey(i.so)).filter(Boolean));
+    const so = soChange && !!nextSo && !datedSos.has(soKey(nextSo));
+    const lines = chargesChange && !rows.dated.length;
+    if (so || lines) {
+      warnings.push(
+        so && lines
+          ? `No dated invoice in the file backs ${nextSo} or these charges, so their date can't be checked against the ticket. WO numbers started over in July 2026: make sure they're this ticket's.`
+          : so
+            ? `No dated invoice in the file backs ${nextSo}, so its date can't be checked against the ticket. WO numbers started over in July 2026: make sure it's this ticket's.`
+            : "No dated invoice in the file backs these charges, so their date can't be checked against the ticket. WO numbers started over in July 2026: make sure they're this ticket's.",
+      );
+    }
   }
   if (t.billedOnInstall) {
     warnings.push(`Merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}: only its NetSuite invoices are recorded; its charges and Sales Order stay as they are.`);
