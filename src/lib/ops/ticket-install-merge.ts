@@ -26,6 +26,7 @@ import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { isDiscountKind, type Discount } from "@/lib/ops/discount";
 import { invoiceTotals } from "@/lib/ops/invoice";
 import { isInstalled } from "@/lib/ops/install-status";
+import { chargesMismatch, liveInvoiceTotal } from "@/lib/ops/billing-rules";
 import { billedCarryOver, nsInvoicesLabel } from "@/lib/ops/merged-ticket";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 
@@ -56,6 +57,15 @@ export function sameWoRun(a: string | null | undefined, b: string | null | undef
   const db = Date.parse(b);
   if (!Number.isFinite(da) || !Number.isFinite(db)) return true;
   return Math.abs(da - db) <= RUN_DAYS * 86_400_000;
+}
+
+/**
+ * A NetSuite invoice dated from a week before the ticket was done to a year after: the window the Billing Backfill uses
+ * to tell which ticket a WO's invoice is for. One outside it is another job with that WO number, or not this ticket's.
+ */
+export function invoiceFitsTicket(invoiceDate: string, ticketDate: string): boolean {
+  const days = Math.round((Date.parse(`${invoiceDate}T12:00:00Z`) - Date.parse(`${ticketDate}T12:00:00Z`)) / 86_400_000);
+  return !Number.isFinite(days) || (days >= -7 && days <= RUN_DAYS);
 }
 
 /** A stored WO's digits without leading zeros, the way the other WO lookups read them in SQL. */
@@ -161,6 +171,7 @@ type TicketRow = {
   discount_value: string | null;
   received: string | null;
   came_in: string | null;
+  completed: string | null;
   stamp: string;
 };
 
@@ -207,6 +218,7 @@ const TICKET_COLS = `j.id, j.kind, j.call_id, j.wo, j.customer, j.status, j.dupl
   j.issue, j.equipment, j.work_done, j.notes, j.po, j.contact, j.phone, j.technician, j.technician2, j.ns_so,
   j.discount_kind, j.discount_value::text as discount_value,
   to_char(j.received, 'YYYY-MM-DD') as received, to_char(${TICKET_CAME_IN}, 'YYYY-MM-DD') as came_in,
+  to_char(j.completed_at, 'YYYY-MM-DD') as completed,
   j.updated_at::text as stamp`;
 
 async function loadTicket(sql: Q, jobId: number): Promise<TicketRow | null> {
@@ -385,6 +397,16 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       [jobId],
     )
   )[0]!;
+  // Its NetSuite invoices that aren't Voided, with their dates and totals: billed on them alone, they must fit it.
+  const standing = (
+    await sql.query<{ invoice: string; status: string; date: string | null; total: string | null }>(
+      `select ti.ns_invoice as invoice, ti.status, to_char(ti.invoice_date, 'YYYY-MM-DD') as date, ti.total::text as total
+         from ticket_invoices ti
+        where ti.job_id = $1 and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
+        order by ti.id`,
+      [jobId],
+    )
+  ).map((r) => ({ ...r, total: r.total == null ? null : Number(r.total) }));
   const units = await sql.query<{ model: string | null; serial: string | null }>("select model, serial from assets where job_id = $1 order by id", [jobId]);
   const rebuilds = await sql.query<{ id: number; title: string | null }>("select id, title from rebuilds where job_id = $1 order by id", [jobId]);
   const digits = woDigits(t.wo);
@@ -405,6 +427,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     ? { so: billedSo, invoices: liveInvoices, on: billedOn, text: billedCarryOver(billedOn, billedSo ? liveInvoices : null) }
     : null;
   const toInvoice = billed ? [] : charges;
+  const chargeTotal = invoiceTotals(charges, ticketDiscount).total;
   const after = toInvoice.length ? invoiceDiscountAfter(ticketDiscount, headDiscount, headLines.length, { ticket: label, install: installName }) : { discount: headDiscount };
   // One invoice takes one P.O. (10/30): the invoice's own, else the ticket's, which goes on it with the charges.
   const ticketPo = t.po?.trim() || null;
@@ -425,6 +448,21 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     // NetSuite invoices, all Voided, and no Sales Order: it isn't billed, but it was. Still refused (one that stands
     // carries over as billed).
     if (linked.ns_invoices && !billed) return `${label} has NetSuite invoices (${linked.ns_invoices}), all Voided. An invoiced ticket stays as it is.`;
+    // Billed on NetSuite invoices alone, they carry over only when they're this ticket's billing (Chuy, 10/30: "if it
+    // applies to the same work order"). A WO number can be another job's (the numbers started over in July 2026), and
+    // the install's own invoice can come in on the WO: one dated too far from the ticket, or a total that isn't its
+    // charges', keeps the ticket as it is.
+    if (billed && !billed.so) {
+      const done = t.completed ?? t.came_in;
+      const far = done ? standing.find((s) => s.date && !invoiceFitsTicket(s.date, done)) : undefined;
+      if (far) {
+        return `${label}'s NetSuite invoice ${far.invoice} is dated ${formatLongDate(far.date!)}, too far from the ticket's ${formatLongDate(done!)} to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`;
+      }
+      if (chargesMismatch(standing, chargeTotal)) {
+        const one = standing.length === 1;
+        return `${label}'s ${billed.on} ${one ? "comes" : "come"} to ${money(liveInvoiceTotal(standing))} and its charges to ${money(chargeTotal)}, so ${one ? "it" : "they"} may not be this ticket's billing. An invoiced ticket stays as it is.`;
+      }
+    }
     if (linked.has_quote) return `${label} has a repair quote, and installs don't keep repair quotes. Finish or take off the quote first.`;
     if (linked.stacked_pms) return `PM #${linked.stacked_pms.split(",")[0]} is billed on ${label}. Unstack it first: installs don't carry PMs.`;
     // QuickBooks invoiced this WO: its charges may be billed already, so they don't go on the install's invoice.
@@ -460,7 +498,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     install: { id: i.id, customer: i.customer, status: installStatusLabel(i), completedAt: i.completed_at, invoice: headState },
     moves: {
       chargeLines: charges.length,
-      chargeTotal: invoiceTotals(charges, ticketDiscount).total,
+      chargeTotal,
       invoiceTotal: invoiceTotals([...headLines, ...toInvoice], discount).total,
       notes: Number(linked.notes) || 0,
       pings: Number(linked.pings) || 0,

@@ -38,8 +38,8 @@ export function InstallMergeBanner({ job, pending, onMerge }: { job: ServiceJob;
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {m.customer} · {m.status}
-            {m.completedAt ? ` · completed ${formatLongDate(m.completedAt)}` : ""}. If this ticket is that install&apos;s work, merge it: its charges, notes,
-            units, part lines and pings go to the install, and the ticket is hidden.
+            {m.completedAt ? ` · completed ${formatLongDate(m.completedAt)}` : ""}. If this ticket is that install&apos;s work, merge it: its notes, units,
+            part lines and pings go to the install, its charges too unless they&apos;re billed in NetSuite already, and the ticket is hidden.
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => onMerge(m.installId)} data-testid="ticket-install-merge-open">
@@ -273,7 +273,8 @@ export function TicketInstallPairsPanel({
         <div className="min-w-0">
           <h2 className="text-sm font-medium">{kind === "tlc" ? "TLC visits" : "Tickets"} whose WO is on an install</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Open one to merge it into its install. Its charges, notes, units, part lines and pings move there, and the ticket is hidden.
+            Open one to merge it into its install. Its notes, units, part lines and pings move there, its charges too unless they&apos;re billed in
+            NetSuite already, and the ticket is hidden.
           </p>
         </div>
         <Button type="button" size="sm" variant="ghost" onClick={onClose}>

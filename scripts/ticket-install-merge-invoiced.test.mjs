@@ -19,7 +19,7 @@ const { loadTicketBillingRows } = await import("../src/lib/ops/billing-report-ap
 const { mergeInstallsFor } = await import("../src/lib/ops/install-projects.ts");
 const { previewBillingBackfillFor, applyBillingBackfillFor, APPLY_BACKFILL_SQL } = await import("../src/lib/ops/billing-backfill-api.ts");
 const { loadPartUses } = await import("../src/lib/ops/part-usage-api.ts");
-const { todayChicago, addDays } = await import("../src/lib/ops/clock.ts");
+const { todayChicago, addDays, formatLongDate } = await import("../src/lib/ops/clock.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -55,8 +55,8 @@ async function install(pg, fields = {}) {
 }
 const charge = (pg, jobId, item, qty, rate, kind, sort) =>
   pg.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, $2, $3, $4, $5, $6, $7)", [jobId, item, `${item} line`, qty, rate, kind, sort]);
-const invoice = (pg, jobId, ns, status = "Open") =>
-  pg.query("insert into ticket_invoices (job_id, ns_invoice, status, total, source) values ($1, $2, $3, 500, 'standalone')", [jobId, ns, status]);
+const invoice = (pg, jobId, ns, status = "Open", total = 500, date = null) =>
+  pg.query("insert into ticket_invoices (job_id, ns_invoice, status, total, invoice_date, source) values ($1, $2, $3, $4, $5, 'standalone')", [jobId, ns, status, total, date]);
 const preview = (sql, jobId, installId) => M.previewTicketInstallMergeFor(sql, "u-owner", { jobId, installId });
 // billedSo / billedOn: what the confirm showed; left out, as windows from before 10/30 (and 10/30 evening) send them.
 const merge = (sql, jobId, installId, stamps, billedSo, billedOn) =>
@@ -140,7 +140,7 @@ test("only the NetSuite invoices that stand are its billing; an approved install
   const a = await ticket(pg, { po: "PO-T1", discount_kind: "percent", discount_value: 10 });
   await charge(pg, a, "PARTS : TESTGASKET", 2, 12.5, "part", 1);
   await invoice(pg, a, "INV-1", "Voided");
-  await invoice(pg, a, "INV-2", "Paid In Full");
+  await invoice(pg, a, "INV-2", "Paid In Full", 22.5, addDays(TODAY, -1));
   const qbRun = Number((await one(pg, "insert into wo_history_runs (filename) values ('test.xlsx') returning id")).id);
   await pg.query("insert into wo_history (run_id, history_ref, wo, customer, job_id) values ($1, 'QB-9', $2, $3, $4)", [qbRun, WO, CAFE, a]);
   const ia = await install(pg);
@@ -173,10 +173,49 @@ test("only the NetSuite invoices that stand are its billing; an approved install
   assert.equal(ran.length, 1);
   // Two that stand: both named.
   const b = await ticket(pg, { call_id: "SC-202610-902", wo: "WO-4830" });
-  await invoice(pg, b, "INV-3");
-  await invoice(pg, b, "INV-4", "Paid In Full");
+  await charge(pg, b, LABOR_500.item, 1, 500, "labor", 1);
+  await invoice(pg, b, "INV-3", "Open", 300);
+  await invoice(pg, b, "INV-4", "Paid In Full", 200);
   const pb = await preview(sql, b, await install(pg, { wo: "WO-4830" }));
-  assert.deepEqual([pb.moves.billed.on, pb.stays[1]], ["NetSuite invoices INV-3, INV-4", "Its NetSuite invoices INV-3, INV-4"]);
+  assert.deepEqual([pb.refusal, pb.moves.billed.on, pb.stays[1]], [null, "NetSuite invoices INV-3, INV-4", "Its NetSuite invoices INV-3, INV-4"]);
+});
+
+test("an invoice that doesn't fit the ticket isn't taken as its billing: dated far from it, or not its charges' total", async () => {
+  const { pg, sql } = await fresh();
+  const refusal = async (fields, invoices, charges = [[LABOR_500.item, 1, 500, "labor"]]) => {
+    const jobId = await ticket(pg, fields);
+    for (const [i, c] of charges.entries()) await charge(pg, jobId, c[0], c[1], c[2], c[3], i + 1);
+    for (const inv of invoices) await invoice(pg, jobId, ...inv);
+    const p = await preview(sql, jobId, await install(pg, { wo: fields.wo }));
+    return p.refusal;
+  };
+  const done = addDays(TODAY, -2);
+  // Another job with this WO number (the numbers started over): an invoice from months before the ticket was done.
+  assert.equal(
+    await refusal({ call_id: "SC-202610-911", wo: "WO-4911", completed_at: done }, [["INV5000", "Paid In Full", 500, addDays(TODAY, -200)]]),
+    `SC-202610-911 (WO-4911)'s NetSuite invoice INV5000 is dated ${formatLongDate(addDays(TODAY, -200))}, too far from the ticket's ${formatLongDate(done)} to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`,
+  );
+  // A week before the ticket was done still fits (the Billing Backfill's window); eight days doesn't.
+  assert.equal(await refusal({ call_id: "SC-202610-912", wo: "WO-4912", completed_at: done }, [["INV5001", "Open", 500, addDays(done, -7)]]), null);
+  assert.match(await refusal({ call_id: "SC-202610-913", wo: "WO-4913", completed_at: done }, [["INV5002", "Open", 500, addDays(done, -8)]]), /too far from the ticket's/);
+  // The install's own invoice on the WO, say: its total isn't the ticket's charges.
+  assert.equal(
+    await refusal({ call_id: "SC-202610-914", wo: "WO-4914" }, [["INV5003", "Open", 18450]]),
+    "SC-202610-914 (WO-4914)'s NetSuite invoice INV5003 comes to $18450.00 and its charges to $500.00, so it may not be this ticket's billing. An invoiced ticket stays as it is.",
+  );
+  assert.equal(
+    await refusal({ call_id: "SC-202610-915", wo: "WO-4915" }, [["INV5004", "Open", 300], ["INV5005", "Open", 150]]),
+    "SC-202610-915 (WO-4915)'s NetSuite invoices INV5004, INV5005 come to $450.00 and its charges to $500.00, so they may not be this ticket's billing. An invoiced ticket stays as it is.",
+  );
+  assert.match(await refusal({ call_id: "SC-202610-916", wo: "WO-4916" }, [["INV5006", "Open", 500.01]]), /comes to \$500\.01 and its charges to \$500\.00/);
+  assert.match(await refusal({ call_id: "SC-202610-917", wo: "WO-4917" }, [["INV5007", "Open", 500]], []), /comes to \$500\.00 and its charges to \$0\.00/);
+  // Its discount counts, and a Voided invoice beside it doesn't.
+  assert.equal(
+    await refusal({ call_id: "SC-202610-918", wo: "WO-4918", discount_kind: "amount", discount_value: 50 }, [["INV5008", "Voided", 500], ["INV5009", "Open", 450, done]]),
+    null,
+  );
+  // A ticket billed on a Sales Order isn't held to this: its SO is its billing (PR #104).
+  assert.equal(await refusal({ call_id: "SC-202610-919", wo: "WO-4919", ns_so: "SO9001" }, [["INV5010", "Open", 18450, addDays(TODAY, -200)]]), null);
 });
 
 test("what the confirm showed is what merges: windows from before, and invoices recorded, voided or an SO entered since", async () => {
@@ -192,7 +231,7 @@ test("what the confirm showed is what merges: windows from before, and invoices 
   await assert.rejects(() => merge(sql, jobId, installId, p.stamps, "", ""), { message: M.CHANGED_SINCE_OPENED });
   await assert.rejects(() => merge(sql, jobId, installId, p.stamps, "", "NetSuite invoice INV9002"), { message: M.CHANGED_SINCE_OPENED });
   // Another invoice recorded since, straight on the table (the ticket's stamp didn't move): the confirm named one.
-  await invoice(pg, jobId, "INV9002");
+  await invoice(pg, jobId, "INV9002", "Open", 0);
   await assert.rejects(() => mergeShown(sql, jobId, installId, p), { message: M.CHANGED_SINCE_OPENED });
   await pg.query("delete from ticket_invoices where ns_invoice = 'INV9002'");
   // Its invoice Voided since: not billed now, so refused with the reason.
@@ -325,6 +364,12 @@ test("the Billing Backfill records the merged ticket's own invoices only, and th
   await apply(invoicesFile(invRow(INV, "Voided")));
   const iv = await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner");
   assert.deepEqual(iv.billedElsewhere.map((b) => [b.on, b.invoices, b.voided, b.total]), [[ON, null, INV, 500]]);
+  // The ticket's window and the account's Invoices tab say so too.
+  assert.equal(
+    (await getInvoiceFor(sql, { type: "service", id: jobId }, "u-owner")).locked,
+    `This ticket was merged into install #${installId}. Its charges were billed on ${ON}, which NetSuite has as Voided now, so they may not be billed anywhere. The install lists them.`,
+  );
+  assert.deepEqual((await listAccountInvoicesFor(sql, CAFE, "u-owner")).map((x) => x.status), [`Billed on ${ON}, Voided now · merged into install #${installId}`]);
 });
 
 test("billing lists count it once: parts profit and the Invoices page as before, Part Usage on the install, Export Billing never", async () => {
@@ -332,7 +377,7 @@ test("billing lists count it once: parts profit and the Invoices page as before,
   await pg.query("insert into billing_items (sku, item, kind, rate, cost) values ('TESTGASKET', 'PARTS : TESTGASKET', 'part', 12.5, 5)");
   const jobId = await ticket(pg);
   await charge(pg, jobId, "PARTS : TESTGASKET", 2, 12.5, "part", 1);
-  await invoice(pg, jobId, INV);
+  await invoice(pg, jobId, INV, "Open", 25);
   const installId = await install(pg);
   const parts = async () => (await invoicedPartLines(sql, RANGE)).lines.map((l) => [l.sku, l.qty]);
   const page = async () => (await loadTicketBillingRows(sql, { kind: "service" })).map((r) => r.id);
@@ -359,7 +404,11 @@ test("after the merge: no Sales Order goes on it, and Merge installs takes it to
 test("the confirm and the install's Invoice window say what it was billed on (source)", () => {
   const win = readFileSync(new URL("../src/components/desk/invoice-window.tsx", import.meta.url), "utf8");
   assert.ok(win.includes("{b.ticket} · billed on {b.on}\n        {b.so && b.invoices ? ` (NetSuite ${b.invoices})` : \"\"} · {money(b.total)}"));
-  assert.ok(win.includes("NetSuite has {b.voided} as Voided now, so these charges may not be billed anywhere. Check them in NetSuite."));
+  assert.ok(win.includes("NetSuite has {b.voided} as Voided now, so these charges may not all be billed. Check them in NetSuite."));
+  // The ticket's banner and the pairs list say billed charges stay billed.
+  const confirm = readFileSync(new URL("../src/components/desk/ticket-install-merge.tsx", import.meta.url), "utf8");
+  assert.ok(confirm.includes("part lines and pings go to the install, its charges too unless they&apos;re billed in NetSuite already, and the ticket is hidden."));
+  assert.ok(confirm.includes("Its notes, units, part lines and pings move there, its charges too unless they&apos;re billed in\n            NetSuite already, and the ticket is hidden."));
   const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
   assert.ok(api.includes("const rows = await sql.query(`select j.*, ${BILLED_ON_INSTALL(\"j.id\")} as merged_billed_on from service_jobs j where j.id = $1`, [data.id]);"));
 });

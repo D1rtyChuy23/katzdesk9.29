@@ -173,9 +173,13 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     ))[0];
     if (!r) throw new Error("That ticket is no longer on the list.");
     const kind: InvoiceTarget = r.kind === "tlc" ? "tlc" : "service";
+    // Billed on NetSuite invoices alone, all of them Voided since the merge: say so (its charges may be billed nowhere).
+    const voidedSince = !!r.billed_on && !r.ns_so?.trim() && !r.ns_invoice;
     const locked = r.merged_install_id
       ? r.billed_on
-        ? `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on} and stay billed there; the install lists them as billed.`
+        ? voidedSince
+          ? `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on}, which NetSuite has as Voided now, so they may not be billed anywhere. The install lists them.`
+          : `This ticket was merged into install #${r.merged_install_id}. Its charges were billed on ${r.billed_on} and stay billed there; the install lists them as billed.`
         : `This ticket was merged into install #${r.merged_install_id}. Its charges are on the install's invoice.`
       : r.duplicate_of
       ? `This ticket was merged into #${r.duplicate_of}. Open that ticket to change its invoice.`
@@ -831,9 +835,11 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
   );
   // A ticket merged into an install as billed (10/30) stays listed, as billed: its charges never went on the install's
   // invoice, so this is the one place they show on the account.
-  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; amount: string; billed_on: string | null; merged_install_id: number | null }>(
+  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; amount: string; billed_on: string | null; merged_install_id: number | null; live: boolean }>(
     `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.po, j.discount_kind, j.discount_value, sum(round(c.qty * c.rate, 2))::text as amount,
-            ${BILLED_ON_INSTALL("j.id")} as billed_on, j.merged_install_id
+            ${BILLED_ON_INSTALL("j.id")} as billed_on, j.merged_install_id,
+            exists (select 1 from ticket_invoices ti
+                     where ti.job_id = j.id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) as live
        from service_jobs j join ticket_charges c on c.job_id = j.id
       where lower(btrim(j.customer)) = lower($1) and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
       group by j.id
@@ -857,7 +863,7 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
       submittedAt: null,
       submittedBy: null,
       status: t.billed_on
-        ? `${t.ns_so?.trim() ? `Billed ${t.ns_so.trim()}` : `Billed on ${t.billed_on}`} · merged into install #${t.merged_install_id}`
+        ? `${t.ns_so?.trim() ? `Billed ${t.ns_so.trim()}` : `Billed on ${t.billed_on}${t.live ? "" : ", Voided now"}`} · merged into install #${t.merged_install_id}`
         : t.ns_so
           ? `Billed ${t.ns_so}`
           : head
