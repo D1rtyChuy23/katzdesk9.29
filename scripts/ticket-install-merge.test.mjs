@@ -255,9 +255,9 @@ test("a ticket and an install with one WO: the confirm names the install kept an
   ]);
   const log = await one(pg, "select job_id, install_id, merged_by, note, moved from ticket_install_merges");
   assert.deepEqual([log.job_id, log.install_id, log.merged_by, log.note], [jobId, installId, "boss", p.note]);
-  assert.deepEqual(Object.keys(log.moved).sort(), ["billedInvoices", "billedLines", "billedSo", "billedTotal", "charges", "invoiceId", "invoiceLines", "notes", "partLines", "pings", "rebuilds", "ticketPo", "tickets", "units"]);
+  assert.deepEqual(Object.keys(log.moved).sort(), ["billedInvoices", "billedLines", "billedOn", "billedSo", "billedTotal", "charges", "invoiceId", "invoiceLines", "notes", "partLines", "pings", "rebuilds", "ticketPo", "tickets", "units"]);
   // Not billed on a Sales Order: nothing billed is kept for the install to list.
-  assert.deepEqual([log.moved.billedSo, log.moved.billedLines, log.moved.billedTotal], [null, null, null]);
+  assert.deepEqual([log.moved.billedOn, log.moved.billedSo, log.moved.billedInvoices, log.moved.billedLines, log.moved.billedTotal], [null, null, null, null, null]);
   assert.deepEqual([log.moved.charges.length, log.moved.invoiceId, log.moved.invoiceLines.length, log.moved.units, log.moved.tickets], [2, h.id, 2, [unit, loaner], [kid]]);
 
   // Hidden: not a pair any more, listed as merged; not offered again; a second merge is refused.
@@ -405,7 +405,8 @@ test("refused, with the reason, and nothing written: the ticket's billing, the i
     ["another account", async (pg) => ({ installId: await install(pg, { customer: OTHER }) }), (c) => `SC-202610-901 (${WO}) is for ${CAFE} and Install #${c.installId} is for ${OTHER}. If they're the same place, fix the ticket's customer first.`],
     ["billed on a Sales Order, with a repair quote", async (pg) => { const jobId = await ticket(pg, { ns_so: "SO-1001" }); await pg.query("insert into repair_quotes (job_id) values ($1)", [jobId]); return { jobId }; }, () => `SC-202610-901 (${WO}) has a repair quote, and installs don't keep repair quotes. Finish or take off the quote first.`],
     ["billed on a Sales Order, with a stacked PM", async (pg) => { const jobId = await ticket(pg, { ns_so: "SO-1001" }); const pm = Number((await one(pg, "insert into pm_jobs (customer, status, stacked_job_id) values ($1, 'Open', $2) returning id", [CAFE, jobId])).id); return { jobId, pm }; }, (c) => `PM #${c.pm} is billed on SC-202610-901 (${WO}). Unstack it first: installs don't carry PMs.`],
-    ["NetSuite invoices", async (pg) => { const jobId = await ticket(pg); await pg.query("insert into ticket_invoices (job_id, ns_invoice, status) values ($1, 'INV-1', 'Paid In Full'), ($1, 'INV-2', 'Voided')", [jobId]); return { jobId }; }, () => `SC-202610-901 (${WO}) has NetSuite invoices (INV-1, INV-2). An invoiced ticket stays as it is.`],
+    // NetSuite invoices that stand carry over as billed (10/30, ticket-install-merge-invoiced.test.mjs); all Voided, no.
+    ["NetSuite invoices, all Voided", async (pg) => { const jobId = await ticket(pg); await pg.query("insert into ticket_invoices (job_id, ns_invoice, status) values ($1, 'INV-1', 'Voided'), ($1, 'INV-2', 'VOID')", [jobId]); return { jobId }; }, () => `SC-202610-901 (${WO}) has NetSuite invoices (INV-1, INV-2), all Voided. An invoiced ticket stays as it is.`],
     ["a repair quote", async (pg) => { const jobId = await ticket(pg); await pg.query("insert into repair_quotes (job_id) values ($1)", [jobId]); return { jobId }; }, () => `SC-202610-901 (${WO}) has a repair quote, and installs don't keep repair quotes. Finish or take off the quote first.`],
     ["a stacked PM", async (pg) => { const jobId = await ticket(pg); const pm = Number((await one(pg, "insert into pm_jobs (customer, status, stacked_job_id) values ($1, 'Open', $2) returning id", [CAFE, jobId])).id); return { jobId, pm }; }, (c) => `PM #${c.pm} is billed on SC-202610-901 (${WO}). Unstack it first: installs don't carry PMs.`],
   ];
@@ -528,7 +529,7 @@ test("the statement's own guards: stale stamps, a check that came true after the
   await charge(pg, jobId, "PARTS : TESTGASKET", 1, 12.5, "part", 1);
   const p = await preview(sql, jobId, installId);
   const run = (stamps, extra = {}) =>
-    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", stamps.job, stamps.install, stamps.head, p.note, extra.total ?? 12.5, null, null, null, extra.so ?? "", null]);
+    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", stamps.job, stamps.install, stamps.head, p.note, extra.total ?? 12.5, null, null, null, extra.so ?? "", null, extra.so ?? "", ""]);
   const before = await snapshot(pg);
   for (const bad of [{ ...p.stamps, job: "x" }, { ...p.stamps, install: "x" }, { ...p.stamps, head: "1:x:y" }]) {
     assert.deepEqual(await run(bad), []);
@@ -743,7 +744,7 @@ test("a ticket QuickBooks invoiced: refused while it has charges (they may be bi
   // The statement checks it too.
   const before = await snapshot(pg);
   const { stamps } = await preview(sql, keeper, other);
-  assert.deepEqual(await sql.query(M.mergeTicketIntoInstallSql(), [keeper, other, "boss", stamps.job, stamps.install, stamps.head, "note", 12.5, null, null, null, "", null]), []);
+  assert.deepEqual(await sql.query(M.mergeTicketIntoInstallSql(), [keeper, other, "boss", stamps.job, stamps.install, stamps.head, "note", 12.5, null, null, null, "", null, "", ""]), []);
   assert.equal(await snapshot(pg), before);
 });
 

@@ -56,9 +56,11 @@ const charge = (pg, jobId, item, qty, rate, kind, sort) =>
   pg.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, $2, $3, $4, $5, $6, $7)", [jobId, item, `${item} line`, qty, rate, kind, sort]);
 const preview = (sql, jobId, installId) => M.previewTicketInstallMergeFor(sql, "u-owner", { jobId, installId });
 // billedSo: the Sales Order the confirm showed ('' for none); left out, as a window from before 10/30 sends it.
-const merge = (sql, jobId, installId, stamps, billedSo) => M.mergeTicketIntoInstallFor(sql, "u-owner", { jobId, installId, stamps, ...(billedSo === undefined ? {} : { billedSo }) });
-/** Merge as the confirm `p` showed it. */
-const mergeShown = (sql, jobId, installId, p) => merge(sql, jobId, installId, p.stamps, p.moves.billed?.so ?? "");
+// billedOn: what it showed the charges billed on; left out, as a window from before 10/30 evening sends it.
+const merge = (sql, jobId, installId, stamps, billedSo, billedOn) =>
+  M.mergeTicketIntoInstallFor(sql, "u-owner", { jobId, installId, stamps, ...(billedSo === undefined ? {} : { billedSo }), ...(billedOn === undefined ? {} : { billedOn }) });
+/** Merge as the confirm `p` showed it, from this release's window. */
+const mergeShown = (sql, jobId, installId, p) => merge(sql, jobId, installId, p.stamps, p.moves.billed?.so ?? "", p.moves.billed?.on ?? "");
 /** The billed ticket of the first real case's shape: one $500.00 line, on a Sales Order. */
 async function billedTicket(pg, fields = {}) {
   const jobId = await ticket(pg, { ns_so: SO, ...fields });
@@ -87,7 +89,7 @@ test("a ticket billed on a Sales Order merges: its charges stay billed there, ne
   // The confirm says so, and nothing about the install's invoice applies.
   const p = await preview(sql, jobId, installId);
   assert.equal(p.refusal, null);
-  assert.deepEqual(p.moves.billed, { so: SO, invoices: null, text: BILLED });
+  assert.deepEqual(p.moves.billed, { so: SO, invoices: null, on: SO, text: BILLED });
   assert.deepEqual([p.moves.chargeLines, p.moves.chargeTotal, p.moves.invoiceTotal, p.moves.invoicePo], [1, 500, 0, null]);
   assert.deepEqual(p.stays, ["Its own record and history", `Its Sales Order ${SO}`, `Its charge lines, billed on ${SO} (the install lists them as billed)`]);
   // The Sales Order goes back from the confirm on its own, not in the stamps (an older window passes those along).
@@ -112,7 +114,7 @@ test("a ticket billed on a Sales Order merges: its charges stay billed there, ne
   // The install's Invoice window: its own invoice empty, the ticket's charges listed as billed on the SO.
   const iv = await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner");
   assert.deepEqual([iv.state, iv.lines.length, iv.total], ["none", 0, 0]);
-  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, so: SO, invoices: null, lines: [LABOR_500], total: 500 }]);
+  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, on: SO, so: SO, invoices: null, voided: null, lines: [LABOR_500], total: 500 }]);
   // The ticket's own window says where its charges are.
   assert.equal(
     (await getInvoiceFor(sql, { type: "service", id: jobId }, "u-owner")).locked,
@@ -147,7 +149,7 @@ test("billed, with a NetSuite invoice and QuickBooks history, onto an install wh
 
   const p = await preview(sql, jobId, installId);
   assert.equal(p.refusal, null);
-  assert.deepEqual(p.moves.billed, { so: SO, invoices: "INV-77", text: `Billed on ${SO} (NetSuite invoice INV-77): charges carry over as billed, not re-billed.` });
+  assert.deepEqual(p.moves.billed, { so: SO, invoices: "INV-77", on: SO, text: `Billed on ${SO} (NetSuite invoice INV-77): charges carry over as billed, not re-billed.` });
   // The ticket's $25.00 less its 10%; the install's invoice stays at $430.00 with its own P.O.; no "approve again" warning.
   assert.deepEqual([p.moves.chargeTotal, p.moves.invoiceTotal, p.moves.invoicePo, p.warnings], [22.5, 430, null, []]);
   await mergeShown(sql, jobId, installId, p);
@@ -182,7 +184,7 @@ test("what the confirm showed is what merges: a Sales Order cleared or entered s
     await assert.rejects(() => merge(sql, jobId, installId, p.stamps), { message: M.RELOAD_FOR_BILLED(SO) });
   }
   // The statement checks it too, on the locked row.
-  const run = (so) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", billed.stamps.job, billed.stamps.install, billed.stamps.head, "note", 0, null, null, null, so, so ? 500 : null]);
+  const run = (so) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", billed.stamps.job, billed.stamps.install, billed.stamps.head, "note", 0, null, null, null, so, so ? 500 : null, so, ""]);
   assert.deepEqual(await run(""), []);
   assert.deepEqual(await run("SO9002"), []);
   // A repair quote or a stacked PM added after the read: still refused, read fresh in the statement.
@@ -244,7 +246,7 @@ test("a billed merge doesn't depend on the install's invoice, and names only Net
   await pg.query("insert into ticket_invoices (job_id, ns_invoice, status) values ($1, 'INV-70', 'Voided'), ($1, 'INV-71', 'Open')", [jobId]);
   const installId = await install(pg);
   const p = await preview(sql, jobId, installId);
-  assert.deepEqual(p.moves.billed, { so: SO, invoices: "INV-71", text: `Billed on ${SO} (NetSuite invoice INV-71): charges carry over as billed, not re-billed.` });
+  assert.deepEqual(p.moves.billed, { so: SO, invoices: "INV-71", on: SO, text: `Billed on ${SO} (NetSuite invoice INV-71): charges carry over as billed, not re-billed.` });
   // The install's invoice approved after the confirm read it: nothing goes on it, so the merge still goes ahead.
   await approveInvoiceFor(sql, { type: "install", id: installId, lines: [{ item: "Service : SERVICELABOR", description: "Install labor", qty: 1, rate: 150 }], lineIds: [], discount: null, seen: null }, "u-owner");
   const own = await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner");
@@ -257,7 +259,7 @@ test("a billed merge doesn't depend on the install's invoice, and names only Net
   const j2 = await billedTicket(pg, { call_id: "SC-202610-908", wo: "WO-4830" });
   const i2 = await install(pg, { wo: "WO-4830" });
   const p2 = await preview(sql, j2, i2);
-  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", p2.stamps.job, p2.stamps.install, "1:stale:stamp", "note", 0, null, null, null, SO, 500]);
+  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", p2.stamps.job, p2.stamps.install, "1:stale:stamp", "note", 0, null, null, null, SO, 500, SO, ""]);
   assert.equal(ran.length, 1);
 });
 
@@ -351,15 +353,15 @@ test("the confirm, the merge's toast and the install's Invoice window say it (so
   const win = readFileSync(new URL("../src/components/desk/invoice-window.tsx", import.meta.url), "utf8");
   assert.ok(win.includes('{v.billedElsewhere.length ? (\n              <section className="rounded-lg border border-dashed border-border p-3" data-testid="invoice-billed">'));
   assert.ok(win.includes("Already billed (not on this invoice)"));
-  assert.ok(win.includes("These charges were billed on the Sales Order shown and are not billed again."));
+  assert.ok(win.includes("These charges were billed on the Sales Order or NetSuite invoice shown and are not billed again."));
   // The invoice's totals come from its own lines only.
   assert.ok(win.includes("const totals = invoiceTotals(\n    draft.map("));
   // The merged ticket's banner: billed on its SO, or its charges on the install.
   assert.ok(confirm.includes("{job.mergedBilledOn\n          ? `Its charges stay billed on ${job.mergedBilledOn} (the install lists them as billed);"));
   const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
-  assert.ok(api.includes('mergedBilledOn: r.merged_install_id != null && String(r.ns_so ?? "").trim() ? String(r.ns_so).trim() : null,'));
-  // The confirm sends the Sales Order it showed; the sheet shows the billed banner at once.
-  assert.ok(confirm.includes('mutationFn: () => mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "" } }),'));
+  assert.ok(api.includes('mergedBilledOn: r.merged_install_id != null ? String(r.merged_billed_on ?? "").trim() || String(r.ns_so ?? "").trim() || null : null,'));
+  // The confirm sends the Sales Order it showed and what it showed them billed on; the sheet shows the banner at once.
+  assert.ok(confirm.includes('mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "", billedOn: p!.moves.billed?.on ?? "" } }),'));
   const sheet = readFileSync(new URL("../src/components/desk/job-sheet.tsx", import.meta.url), "utf8");
   assert.ok(sheet.includes("mergedInstallBy: r.mergedBy, mergedBilledOn: r.billedOn, done: true"));
   // A billed ticket's discount, and one with no charge lines.

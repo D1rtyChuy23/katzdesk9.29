@@ -240,6 +240,114 @@ test("WO numbers started over: the ticket done within a year before the invoice 
   assert.equal(p.plans[0].jobId, now);
 });
 
+test("the only ticket with a WO number still has to fit the invoice's date (Chuy, 10/30): one far from it is another job's", async () => {
+  const sql = await fresh();
+  // Came in 2026-09-01, done 2026-09-10: an invoice from a week before it came in to a year after it was done is its
+  // own; outside that, skipped with why.
+  const id = await ticket(sql, { wo: "WO-0551", received: "2026-09-01", completed: "2026-09-10" });
+  const plan = async (...rows) =>
+    (await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ...rows.map(([inv, date]) => ["WO-0551", "", "", inv, date, "Open", "10", "10", "", ""])])], "u-owner")).plans[0];
+  for (const date of ["2026-08-25", "2026-09-02", "2026-09-10", "2027-09-10", ""]) {
+    const p = await plan(["INV55", date]);
+    assert.deepEqual([p.jobId, p.status, p.reason], [id, "write", null], date || "no date");
+  }
+  const far = await plan(["INV56", "2026-03-02"]);
+  assert.deepEqual(
+    [far.jobId, far.status, far.reason],
+    [
+      null,
+      "skip",
+      `INV56 (2026-03-02) is too far from ticket #${id} (came in 2026-09-01, done 2026-09-10), the only one with this WO, to be its billing: it may be another job with this WO number. Take its rows out of the file, then run it again.`,
+    ],
+  );
+  assert.equal((await plan(["INV57", "2026-08-24"])).status, "skip", "eight days before it came in");
+  assert.equal((await plan(["INV58", "2027-09-11"])).status, "skip", "a year and a day after it was done");
+  // One that fits beside one that doesn't: the WO is skipped, naming the one that doesn't.
+  const mixed = await plan(["INV59", "2026-09-20"], ["INV50", "2025-12-01"]);
+  assert.deepEqual([mixed.status, mixed.reason.slice(0, 31)], ["skip", "INV50 (2025-12-01) is too far f"]);
+  // One already on the ticket from an earlier run is named as such.
+  await sql.query("insert into ticket_invoices (job_id, ns_invoice, invoice_date, status, total, source) values ($1, 'INV50', '2025-12-01', 'Open', 10, 'standalone')", [id]);
+  assert.match((await plan(["INV50", "2025-12-01"])).reason, /INV50 is on the ticket already, from an earlier run: check it in NetSuite\. Take its rows out of the file, then run it again\.$/);
+  // A ticket not done yet goes by the day it came in.
+  const open = await ticket(sql, { wo: "WO-0552", received: "2026-09-01" });
+  await sql.query("update service_jobs set completed_at = null where id = $1", [open]);
+  const p = await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-0552", "", "", "INV52", "2026-08-20", "Open", "10", "10", "", ""]])], "u-owner");
+  assert.match(p.plans[0].reason, new RegExp(`INV52 \\(2026-08-20\\) is too far from ticket #${open} \\(came in 2026-09-01\\)`));
+});
+
+test("two tickets with one WO: every invoice has to be the picked ticket's alone; an SO or charges no dated invoice backs are flagged", async () => {
+  const sql = await fresh();
+  const old = await ticket(sql, { wo: "WO-0553", received: "2024-03-01", completed: "2024-03-05" });
+  const now = await ticket(sql, { wo: "WO-0553", received: "2026-09-01", completed: "2026-09-03" });
+  // The earliest invoice picks the 2024 ticket; the 2026 invoice is the other ticket's, so nothing goes on either.
+  const p = await api.previewBillingBackfillFor(
+    sql,
+    [file("invoices.csv", [INVOICES_HEAD, ["WO-0553", "", "", "INV53", "2024-03-10", "Paid In Full", "10", "0", "", ""], ["WO-0553", "", "", "INV54", "2026-09-20", "Open", "10", "10", "", ""]])],
+    "u-owner",
+  );
+  assert.deepEqual(
+    [p.plans[0].status, p.plans[0].reason],
+    ["skip", `INV54 (2026-09-20) fits ticket #${now}, not #${old}: put its rows in a file of their own and run that too.`],
+  );
+  // Two tickets in the same run of numbers: an invoice that fits both can't be told apart.
+  const a = await ticket(sql, { wo: "WO-0555", received: "2026-08-01", completed: "2026-08-05" });
+  const b = await ticket(sql, { wo: "WO-0555", received: "2026-09-20", completed: "2026-09-25" });
+  const same = await api.previewBillingBackfillFor(
+    sql,
+    [file("invoices.csv", [INVOICES_HEAD, ["WO-0555", "", "", "INV55A", "2026-08-10", "Open", "10", "10", "", ""], ["WO-0555", "", "", "INV55B", "2026-09-28", "Open", "10", "10", "", ""]])],
+    "u-owner",
+  );
+  assert.deepEqual([same.plans[0].status, same.plans[0].reason], ["skip", `INV55B (2026-09-28) fits tickets #${a} and #${b} both, so the Backfill can't tell which one NetSuite billed. Skipped.`]);
+  // A Voided invoice bills nothing: it doesn't stop the WO, and A's own goes on A.
+  const voided = await api.previewBillingBackfillFor(
+    sql,
+    [file("invoices.csv", [INVOICES_HEAD, ["WO-0555", "", "", "INV55A", "2026-08-10", "Open", "10", "10", "", ""], ["WO-0555", "", "", "INV55X", "2026-09-22", "Voided", "10", "0", "", ""]])],
+    "u-owner",
+  );
+  assert.deepEqual([voided.plans[0].jobId, voided.plans[0].status], [a, "write"]);
+  // An open Sales Order with no invoice yet has no date to check: it goes on the only ticket, with a warning.
+  const only = await ticket(sql, { wo: "WO-0554" });
+  const q = await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-0554", "SO5540", "Pending Billing", "", "", "", "", "", "", ""]])], "u-owner");
+  assert.deepEqual([q.plans[0].jobId, q.plans[0].status, q.plans[0].so.next], [only, "write", "SO5540"]);
+  const soWarning = "No dated invoice in the file backs SO5540, so its date can't be checked against the ticket. WO numbers started over in July 2026: make sure it's this ticket's.";
+  assert.ok(q.plans[0].warnings.includes(soWarning), q.plans[0].warnings.join(" | "));
+  // A dated invoice with no SO beside it doesn't back that SO either.
+  const mixed = await api.previewBillingBackfillFor(
+    sql,
+    [file("invoices.csv", [INVOICES_HEAD, ["WO-0554", "", "", "INV5541", "2026-09-12", "Open", "10", "10", "", ""], ["WO-0554", "SO5540", "Pending Billing", "", "", "", "", "", "", ""]])],
+    "u-owner",
+  );
+  assert.deepEqual([mixed.plans[0].so.next, mixed.plans[0].warnings.includes(soWarning)], ["SO5540", true]);
+  // A dated invoice on that SO backs it: no warning.
+  const r = await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-0554", "SO5540", "Billed", "INV5540", "2026-09-12", "Open", "10", "10", "", ""]])], "u-owner");
+  assert.ok(!r.plans[0].warnings.some((w) => w.startsWith("No dated invoice")), r.plans[0].warnings.join(" | "));
+  // The SO the ticket has already, with only its billed date changing: nothing new to check.
+  await sql.query("update service_jobs set ns_so = 'SO5540' where id = $1", [only]);
+  const same2 = await api.previewBillingBackfillFor(
+    sql,
+    [file("invoices.csv", [INVOICES_HEAD, ["WO-0554", "", "", "INV5542", "2026-09-12", "Open", "10", "10", "Yes", ""], ["WO-0554", "SO5540", "Pending Billing", "", "", "", "", "", "", ""]])],
+    "u-owner",
+  );
+  assert.ok(!same2.plans[0].warnings.some((w) => w.startsWith("No dated invoice")), same2.plans[0].warnings.join(" | "));
+  await sql.query("update service_jobs set ns_so = null where id = $1", [only]);
+  // A locked ticket (invoiced already) takes invoices only, so what the file says about its SO isn't flagged either.
+  const locked = await ticket(sql, { wo: "WO-0557" });
+  await sql.query("insert into ticket_invoices (job_id, ns_invoice, invoice_date, status, total, source) values ($1, 'INV5570', '2026-09-12', 'Open', 10, 'standalone')", [locked]);
+  const l = await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-0557", "SO5570", "Pending Billing", "", "", "", "", "", "", ""]])], "u-owner");
+  assert.deepEqual([l.plans[0].jobId, l.plans[0].locked], [locked, true]);
+  assert.ok(!l.plans[0].warnings.some((w) => w.startsWith("No dated invoice")), l.plans[0].warnings.join(" | "));
+  // Charges with no dated invoice in the file.
+  const lines = await api.previewBillingBackfillFor(
+    sql,
+    [file("charges.csv", [CHARGES_HEAD, ["WO-0554", "", "", "", "Zz Bean Cafe", "", "Service : SERVICELABOR", "Service", "Labor", "1", "80", "80", "", "", "80"]])],
+    "u-owner",
+  );
+  assert.ok(
+    lines.plans[0].warnings.includes("No dated invoice in the file backs these charges, so their date can't be checked against the ticket. WO numbers started over in July 2026: make sure they're this ticket's."),
+    lines.plans[0].warnings.join(" | "),
+  );
+});
+
 test("double bill and Corrigo's $0 net against NetSuite's $300 are flagged like for like", async () => {
   const sql = await fresh();
   await ticket(sql, { wo: "WO-0601" });

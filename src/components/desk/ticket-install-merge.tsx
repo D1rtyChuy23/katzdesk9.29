@@ -38,8 +38,8 @@ export function InstallMergeBanner({ job, pending, onMerge }: { job: ServiceJob;
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {m.customer} · {m.status}
-            {m.completedAt ? ` · completed ${formatLongDate(m.completedAt)}` : ""}. If this ticket is that install&apos;s work, merge it: its charges, notes,
-            units, part lines and pings go to the install, and the ticket is hidden.
+            {m.completedAt ? ` · completed ${formatLongDate(m.completedAt)}` : ""}. If this ticket is that install&apos;s work, merge it: its notes, units,
+            part lines and pings go to the install, its charges too unless they&apos;re billed in NetSuite already, and the ticket is hidden.
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => onMerge(m.installId)} data-testid="ticket-install-merge-open">
@@ -111,7 +111,8 @@ function MoveRow({ label, value, testId }: { label: string; value: string; testI
 
 function PreviewBody({ p }: { p: InstallMergePreview }) {
   const m = p.moves;
-  // Billed on a Sales Order (10/30): the charges stay billed there and never go on the install's invoice.
+  // Billed on a Sales Order, or with none on NetSuite invoices (10/30): the charges stay billed there and never go on
+  // the install's invoice.
   const charges = m.billed
     ? `${m.chargeLines ? `${count(m.chargeLines, "line")}, ${money(m.chargeTotal)}. ` : ""}${m.billed.text}`
     : m.chargeLines
@@ -197,8 +198,10 @@ export function InstallMergeDialog({
   });
   const p = preview.data;
   const merge = useMutation({
-    // The Sales Order the confirm showed ('' when the charges go on the install's invoice): it merges only as shown.
-    mutationFn: () => mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "" } }),
+    // The Sales Order the confirm showed and what the charges are billed on, the SO or NetSuite invoices ('' for each when
+    // they go on the install's invoice): it merges only as shown.
+    mutationFn: () =>
+      mergeTicketIntoInstall({ data: { jobId: job.id, installId: installId!, stamps: p!.stamps, billedSo: p!.moves.billed?.so ?? "", billedOn: p!.moves.billed?.on ?? "" } }),
     onSuccess: (r) => {
       toast.success(`Merged into install #${r.installId}${r.billedOn ? ` · its charges stay billed on ${r.billedOn}` : ""}`);
       onMerged(r);
@@ -270,7 +273,8 @@ export function TicketInstallPairsPanel({
         <div className="min-w-0">
           <h2 className="text-sm font-medium">{kind === "tlc" ? "TLC visits" : "Tickets"} whose WO is on an install</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Open one to merge it into its install. Its charges, notes, units, part lines and pings move there, and the ticket is hidden.
+            Open one to merge it into its install. Its notes, units, part lines and pings move there, its charges too unless they&apos;re billed in
+            NetSuite already, and the ticket is hidden.
           </p>
         </div>
         <Button type="button" size="sm" variant="ghost" onClick={onClose}>

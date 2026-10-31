@@ -77,6 +77,7 @@ import { lockedNameFor } from "./clean-names-api";
 import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
 import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, accountNumberFor } from "./reps";
 import { woMatchKey } from "./corrigo";
+import { BILLED_ON_INSTALL } from "./merged-ticket";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
@@ -220,8 +221,9 @@ function mapJob(r: any, today: any) {
 		mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
 		mergedInstallAt: r.merged_install_at ? (r.merged_install_at instanceof Date ? r.merged_install_at.toISOString() : String(r.merged_install_at)) : null,
 		mergedInstallBy: r.merged_install_by ?? null,
-		// A ticket merged into an install with a Sales Order was merged as billed on it (10/30): no SO goes on after a merge.
-		mergedBilledOn: r.merged_install_id != null && String(r.ns_so ?? "").trim() ? String(r.ns_so).trim() : null,
+		// A ticket merged into an install as billed (10/30): what on, from the merge log when read with it (getJob), else
+		// its Sales Order (no SO goes on after a merge). Billed on NetSuite invoices alone, only the log has it.
+		mergedBilledOn: r.merged_install_id != null ? String(r.merged_billed_on ?? "").trim() || String(r.ns_so ?? "").trim() || null : null,
 		siblings: [],
 		serialNotice: r.serial_notice ?? null,
 		aviKatz: false,
@@ -825,7 +827,8 @@ export const getJob = createServerFn({ method: "GET" }).middleware([deskMiddlewa
 	const sql = await ready();
 	const today = todayChicago();
 	const marks = await loadAccountMarks(sql);
-	const rows = await sql`select * from service_jobs where id = ${data.id}`;
+	// With what a ticket merged into an install as billed was billed on (10/30), for its banner.
+	const rows = await sql.query(`select j.*, ${BILLED_ON_INSTALL("j.id")} as merged_billed_on from service_jobs j where j.id = $1`, [data.id]);
 	if (!rows[0]) return null;
 	const scope = await salesRepScope(sql, context.userId);
 	if (scope && !scope(accountRepFor(marks, rows[0].customer ?? null))) return null;

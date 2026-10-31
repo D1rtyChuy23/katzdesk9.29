@@ -34,7 +34,7 @@ import {
   type ChargeKind,
   type ChargeLine,
 } from "@/lib/ops/charges";
-import { BILLED_ON_INSTALL_SO, mergedTicketRefusal, type MergedTicketRow } from "./merged-ticket";
+import { BILLED_ON_INSTALL, BILLED_ON_INSTALL_SO, mergedTicketRefusal, type MergedTicketRow } from "./merged-ticket";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -293,9 +293,9 @@ export async function invoicedPartLines(sql: Sql, range: { from: string | null; 
   const jobs = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
     `select j.id, j.discount_kind, j.discount_value from service_jobs j
       where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")})
-        -- A ticket merged into an install as billed on its Sales Order (10/30) still counts, once: its lines never went
-        -- on the install's invoice.
-        and (j.duplicate_of is null or ${BILLED_ON_INSTALL_SO("j.id")} is not null)
+        -- A ticket merged into an install as billed (10/30), on its Sales Order or its NetSuite invoices, still counts,
+        -- once: its lines never went on the install's invoice.
+        and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
         and ($1::date is null or coalesce(j.billed_at::date, j.completed_at::date) >= $1::date)
         and ($2::date is null or coalesce(j.billed_at::date, j.completed_at::date) <= $2::date)
         and exists (select 1 from ticket_charges c where c.job_id = j.id)

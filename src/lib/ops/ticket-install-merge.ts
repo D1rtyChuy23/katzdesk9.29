@@ -3,8 +3,9 @@
  * folded into that install by an Admin, after a confirm that names the install kept and what moves:
  *
  * - its charge lines go on the install's invoice, waiting for an Admin to approve them (the ticket keeps its copy). A
- *   ticket billed on a NetSuite Sales Order (Grok through Chuy, 10/30) keeps its charges billed there: they never go on
- *   the install's invoice, the install's Invoice window lists them as billed on that SO, and the merge log keeps them;
+ *   ticket billed on a NetSuite Sales Order (Grok through Chuy, 10/30), or with no SO on NetSuite invoices that aren't
+ *   Voided (Chuy, 10/30), keeps its charges billed there: they never go on the install's invoice, the install's Invoice
+ *   window lists them as billed on that SO or those invoices, and the merge log keeps them;
  * - its Ping notes and its pings, the units pulled onto it, its WO part lines and its rebuilds go to the install;
  * - its own text (issue, equipment, work done, notes, P.O., contact, tech) is added under the install's notes, which
  *   are never overwritten;
@@ -25,7 +26,8 @@ import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { isDiscountKind, type Discount } from "@/lib/ops/discount";
 import { invoiceTotals } from "@/lib/ops/invoice";
 import { isInstalled } from "@/lib/ops/install-status";
-import { billedCarryOver } from "@/lib/ops/merged-ticket";
+import { chargesMismatch, invoiceFitsTicket, liveInvoiceTotal } from "@/lib/ops/billing-rules";
+import { billedCarryOver, nsInvoicesLabel } from "@/lib/ops/merged-ticket";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 
 type Q = Pick<Sql, "query">;
@@ -38,9 +40,12 @@ const ready = async (): Promise<Sql> => {
 
 export const ADMIN_ONLY = "Only an Admin can merge a ticket into an install.";
 export const CHANGED_SINCE_OPENED = "The ticket, the install or its invoice changed since this window opened, so nothing was merged. Look it over again, then merge.";
-/** A ticket billed on a Sales Order, merged from a window opened before billed tickets could merge (10/30). */
-export const RELOAD_FOR_BILLED = (so: string) =>
-  `This ticket is billed on ${so}, and this window is from before billed tickets could be merged, so nothing was merged. Reload the page, then merge.`;
+/**
+ * A billed ticket merged from a window opened before tickets billed like it could merge (10/30): on a Sales Order, or
+ * on NetSuite invoices with no SO. `on` is what it is billed on.
+ */
+export const RELOAD_FOR_BILLED = (on: string) =>
+  `This ticket is billed on ${on}, and this window is from before tickets billed like this could be merged, so nothing was merged. Reload the page, then merge.`;
 
 /** WO numbers start over after 9999: a ticket and an install WO that came in more than this far apart are two jobs. */
 const RUN_DAYS = 365;
@@ -157,6 +162,7 @@ type TicketRow = {
   discount_value: string | null;
   received: string | null;
   came_in: string | null;
+  completed: string | null;
   stamp: string;
 };
 
@@ -203,6 +209,7 @@ const TICKET_COLS = `j.id, j.kind, j.call_id, j.wo, j.customer, j.status, j.dupl
   j.issue, j.equipment, j.work_done, j.notes, j.po, j.contact, j.phone, j.technician, j.technician2, j.ns_so,
   j.discount_kind, j.discount_value::text as discount_value,
   to_char(j.received, 'YYYY-MM-DD') as received, to_char(${TICKET_CAME_IN}, 'YYYY-MM-DD') as came_in,
+  to_char(j.completed_at, 'YYYY-MM-DD') as completed,
   j.updated_at::text as stamp`;
 
 async function loadTicket(sql: Q, jobId: number): Promise<TicketRow | null> {
@@ -229,14 +236,14 @@ const field = (label: string, value: string | null | undefined) => {
 };
 
 /**
- * The text added under the install's notes: the ticket's own words, never anything of the install's replaced. A ticket
- * billed on a Sales Order (10/30) ends with the SO and how its charges carry over.
+ * The text added under the install's notes: the ticket's own words, never anything of the install's replaced. A billed
+ * ticket (10/30) ends with what it was billed on (its SO, or its NetSuite invoices) and how its charges carry over.
  */
 export function installMergeNote(
   t: Pick<TicketRow, "id" | "call_id" | "wo" | "issue" | "equipment" | "work_done" | "notes" | "po" | "contact" | "phone" | "technician" | "technician2">,
   actor: string,
   today: string,
-  billed: { so: string; invoices: string | null } | null = null,
+  billed: { text: string } | null = null,
 ): string {
   const lines = [
     field("Issue", t.issue),
@@ -246,7 +253,7 @@ export function installMergeNote(
     field("P.O.", t.po),
     field("Contact", [t.contact, t.phone].map((s) => String(s ?? "").trim()).filter(Boolean).join(" · ")),
     field("Tech", [t.technician, t.technician2].map((s) => String(s ?? "").trim()).filter(Boolean).join(" + ")),
-    billed ? billedCarryOver(billed.so, billed.invoices) : null,
+    billed ? billed.text : null,
   ].filter((l): l is string => !!l);
   const head = `From ticket ${ticketLabel(t)}, merged ${formatLongDate(today)} by ${actor}${lines.length ? ":" : ". The ticket had nothing written on it."}`;
   return [head, ...lines].join("\n");
@@ -293,10 +300,12 @@ export type InstallMergePreview = {
     /** The P.O. the install's invoice has once the charges are on it (the invoice's own, else the ticket's), or null. */
     invoicePo: string | null;
     /**
-     * A ticket billed on a Sales Order (10/30): its charges stay billed there and never go on the install's invoice;
-     * the install lists them as billed. `text` is what the confirm says. Null for an unbilled ticket.
+     * A billed ticket (10/30): its charges stay billed in NetSuite and never go on the install's invoice; the install
+     * lists them as billed. `so`: its Sales Order, or null when it has none and is billed on NetSuite invoices alone.
+     * `invoices`: its NetSuite invoices that aren't Voided. `on`: what it is billed on, the SO or "NetSuite invoice …";
+     * the confirm sends it back. `text` is what the confirm says. Null for an unbilled ticket.
      */
-    billed: { so: string; invoices: string | null; text: string } | null;
+    billed: { so: string | null; invoices: string | null; on: string; text: string } | null;
   };
   /** What stays with the ticket. */
   stays: string[];
@@ -379,6 +388,16 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       [jobId],
     )
   )[0]!;
+  // Its NetSuite invoices that aren't Voided, with their dates and totals: billed on them alone, they must fit it.
+  const standing = (
+    await sql.query<{ invoice: string; status: string; date: string | null; total: string | null }>(
+      `select ti.ns_invoice as invoice, ti.status, to_char(ti.invoice_date, 'YYYY-MM-DD') as date, ti.total::text as total
+         from ticket_invoices ti
+        where ti.job_id = $1 and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
+        order by ti.id`,
+      [jobId],
+    )
+  ).map((r) => ({ ...r, total: r.total == null ? null : Number(r.total) }));
   const units = await sql.query<{ model: string | null; serial: string | null }>("select model, serial from assets where job_id = $1 order by id", [jobId]);
   const rebuilds = await sql.query<{ id: number; title: string | null }>("select id, title from rebuilds where job_id = $1 order by id", [jobId]);
   const digits = woDigits(t.wo);
@@ -389,10 +408,17 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   const headState: InstallMergePreview["install"]["invoice"] = !head ? "none" : head.approved_at ? "approved" : head.submitted_at ? "waiting" : "none";
   // Billed on a Sales Order (10/30): the charges stay billed there, so none go on the install's invoice and nothing
   // about that invoice (approved, its discount or P.O., its size) stops the merge. Its NetSuite invoices are the same
-  // billing. Unbilled, the charges go on the invoice as before.
+  // billing. With no SO, NetSuite invoices that aren't Voided are its billing the same way (Chuy, 10/30: they carry
+  // over when they're for the same WO, and they are: the Billing Backfill puts an invoice only on a ticket with its WO,
+  // and a ticket merges only into an install with that WO). Unbilled, the charges go on the invoice as before.
   const billedSo = t.ns_so?.trim() || null;
-  const billed = billedSo ? { so: billedSo, invoices: linked.live_ns_invoices, text: billedCarryOver(billedSo, linked.live_ns_invoices) } : null;
+  const liveInvoices = linked.live_ns_invoices?.trim() || null;
+  const billedOn = billedSo ?? (liveInvoices ? nsInvoicesLabel(liveInvoices) : null);
+  const billed = billedOn
+    ? { so: billedSo, invoices: liveInvoices, on: billedOn, text: billedCarryOver(billedOn, billedSo ? liveInvoices : null) }
+    : null;
   const toInvoice = billed ? [] : charges;
+  const chargeTotal = invoiceTotals(charges, ticketDiscount).total;
   const after = toInvoice.length ? invoiceDiscountAfter(ticketDiscount, headDiscount, headLines.length, { ticket: label, install: installName }) : { discount: headDiscount };
   // One invoice takes one P.O. (10/30): the invoice's own, else the ticket's, which goes on it with the charges.
   const ticketPo = t.po?.trim() || null;
@@ -410,8 +436,29 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     if (!customersCompatible(t.customer, i.customer)) {
       return `${label} is for ${t.customer?.trim()} and ${installName} is for ${i.customer.trim()}. If they're the same place, fix the ticket's customer first.`;
     }
-    // NetSuite invoices without a Sales Order on the ticket: still refused (a ticket billed on an SO carries them over).
-    if (linked.ns_invoices && !billed) return `${label} has NetSuite invoices (${linked.ns_invoices}). An invoiced ticket stays as it is.`;
+    // NetSuite invoices, all Voided, and no Sales Order: it isn't billed, but it was. Still refused (one that stands
+    // carries over as billed).
+    if (linked.ns_invoices && !billed) return `${label} has NetSuite invoices (${linked.ns_invoices}), all Voided. An invoiced ticket stays as it is.`;
+    // Billed on NetSuite invoices alone, they carry over only when they're this ticket's billing (Chuy, 10/30: "if it
+    // applies to the same work order"). A WO number can be another job's (the numbers started over in July 2026), and
+    // the install's own invoice can come in on the WO: one dated too far from the ticket, or a total that isn't its
+    // charges', keeps the ticket as it is.
+    if (billed && !billed.so) {
+      // The Billing Backfill's window (billing-rules.ts): a week before it came in to a year after it was done.
+      const far = standing.find((s) => s.date && invoiceFitsTicket(s.date, t.came_in, t.completed) === false);
+      if (far) {
+        const when = [t.came_in ? `came in ${formatLongDate(t.came_in)}` : null, t.completed ? `done ${formatLongDate(t.completed)}` : null].filter(Boolean).join(", ");
+        return `${label}'s NetSuite invoice ${far.invoice} is dated ${formatLongDate(far.date!)}, too far from the ticket (${when}) to be its billing: it may be another job with this WO number. An invoiced ticket stays as it is.`;
+      }
+      const untotalled = standing.find((s) => s.total == null);
+      if (untotalled) {
+        return `${label}'s NetSuite invoice ${untotalled.invoice} has no total in KatzDesk, so it can't be checked against the ticket's charges. Run the Billing Backfill with the invoices' totals, then merge.`;
+      }
+      if (chargesMismatch(standing, chargeTotal)) {
+        const one = standing.length === 1;
+        return `${label}'s ${billed.on} ${one ? "comes" : "come"} to ${money(liveInvoiceTotal(standing))} and its charges to ${money(chargeTotal)}, so ${one ? "it" : "they"} may not be this ticket's billing. If ${one ? "it is" : "they are"}, an Admin can unlock the ticket's Charges and make them match, then merge.`;
+      }
+    }
     if (linked.has_quote) return `${label} has a repair quote, and installs don't keep repair quotes. Finish or take off the quote first.`;
     if (linked.stacked_pms) return `PM #${linked.stacked_pms.split(",")[0]} is billed on ${label}. Unstack it first: installs don't carry PMs.`;
     // QuickBooks invoiced this WO: its charges may be billed already, so they don't go on the install's invoice.
@@ -437,8 +484,8 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     warnings.push(`The ticket is on ${t.customer?.trim() || "no customer"}; the install keeps ${i.customer.trim()}.`);
   }
   const stays: string[] = ["Its own record and history"];
-  if (billed) stays.push(`Its Sales Order ${billed.so}${billed.invoices ? ` and NetSuite ${billed.invoices.includes(",") ? "invoices" : "invoice"} ${billed.invoices}` : ""}`);
-  if (charges.length) stays.push(billed ? `Its charge lines, billed on ${billed.so} (the install lists them as billed)` : "A copy of its charge lines (only the install's invoice is billed)");
+  if (billed) stays.push(billed.so ? `Its Sales Order ${billed.so}${billed.invoices ? ` and ${nsInvoicesLabel(billed.invoices)}` : ""}` : `Its ${billed.on}`);
+  if (charges.length) stays.push(billed ? `Its charge lines, billed on ${billed.on} (the install lists them as billed)` : "A copy of its charge lines (only the install's invoice is billed)");
   if (linked.wo_history) stays.push(plural(linked.wo_history, "QuickBooks history row"));
 
   const discount = "discount" in after ? after.discount : null;
@@ -447,7 +494,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     install: { id: i.id, customer: i.customer, status: installStatusLabel(i), completedAt: i.completed_at, invoice: headState },
     moves: {
       chargeLines: charges.length,
-      chargeTotal: invoiceTotals(charges, ticketDiscount).total,
+      chargeTotal,
       invoiceTotal: invoiceTotals([...headLines, ...toInvoice], discount).total,
       notes: Number(linked.notes) || 0,
       pings: Number(linked.pings) || 0,
@@ -482,21 +529,23 @@ const MOVED = `coalesce(' · moved ' || nullif(concat_ws(', ',
     ${counted("reb", "rebuild", "rebuilds")},
     ${counted("kids", "ticket merged into it", "tickets merged into it")}), ''), ' · nothing else was on the ticket')`;
 
-/** A ticket billed on a Sales Order ($12): its charges stay billed there (10/30). */
-const BILLED = `case when $12::text <> '' then ' · its charges stay billed on ' || $12::text || ', not billed again' else '' end`;
+/** A billed ticket ($14, what it is billed on): its charges stay billed there (10/30). */
+const BILLED = `case when $14::text <> '' then ' · its charges stay billed on ' || $14::text || ', not billed again' else '' end`;
 
 /**
  * One statement: fold the ticket into the install, or write nothing. $1 ticket, $2 install, $3 who, $4 the ticket's
  * stamp, $5 the install's, $6 its invoice's ('' when it has none), all as the confirm read them; $7 the text added under
  * the install's notes; $8 the install invoice's total once the lines are on it, $9 and $10 its discount; $11 the
  * ticket's P.O., for an invoice that has none; $12 the Sales Order the ticket is billed on ('' when it isn't), as the
- * confirm read it; $13 its charges' total, billed there.
+ * confirm read it; $13 its charges' total, billed there; $14 what it is billed on ('' when unbilled): the SO, or with
+ * none "NetSuite invoice …" (10/30); $15 its NetSuite invoices that aren't Voided, as read ('' for none).
  *
  * Both rows and the install's invoice are locked, then checked as they are now: nothing is written when any of them
  * changed (its Sales Order too), the ticket is quoted, carries a PM or is already merged, or (unbilled) is invoiced in
  * NetSuite, or the install is archived or flagged as a duplicate, or its invoice is approved while an unbilled ticket
- * has charges. A ticket billed on a Sales Order (10/30) puts nothing on the install's invoice: its charges stay billed
- * there, and the merge log keeps a copy of them with the SO. Zero rows means nothing was written.
+ * has charges. A billed ticket (10/30) puts nothing on the install's invoice: its charges stay billed on its SO, or on
+ * its NetSuite invoices (which must still be the ones read), and the merge log keeps a copy of them with what they were
+ * billed on. Zero rows means nothing was written.
  */
 export function mergeTicketIntoInstallSql(): string {
   return `with lk_job as (
@@ -516,28 +565,33 @@ export function mergeTicketIntoInstallSql(): string {
      where v.entity_type = 'install' and v.entity_id = $2::int
        for update
   ), g as (
-    -- charges: the lines that go on the install's invoice (none for a ticket billed on a Sales Order).
+    -- charges: the lines that go on the install's invoice (none for a billed ticket).
     select j.id as job_id, j.kind, j.call_id, j.wo, i.id as install_id, i.customer as install_customer,
-           case when $12::text = '' then (select count(*)::int from ticket_charges c where c.job_id = j.id) else 0 end as charges
+           case when $14::text = '' then (select count(*)::int from ticket_charges c where c.job_id = j.id) else 0 end as charges
       from lk_job j cross join lk_inst i
      where j.stamp = $4::text and i.stamp = $5::text
        -- The install's invoice as the confirm read it, for an unbilled ticket (a billed one puts nothing on it).
-       and ($12::text <> '' or coalesce((select h.stamp from lk_head h), '') = $6::text)
+       and ($14::text <> '' or coalesce((select h.stamp from lk_head h), '') = $6::text)
        and j.duplicate_of is null and j.merged_install_id is null and j.kind in ('service', 'tlc')
        -- The Sales Order as the confirm read it, on the locked row: one entered or cleared since stops the merge.
        and coalesce(nullif(btrim(j.ns_so), ''), '') = $12::text
+       -- Billed on its SO, billed on NetSuite invoices with no SO, or unbilled: never anything else.
+       and ($12::text = '' or $14::text = $12::text)
+       and ($12::text <> '' or $14::text = '' or $15::text <> '')
+       -- Billed on NetSuite invoices alone: still those invoices, none Voided or added since, read fresh.
+       and ($12::text <> '' or $14::text = '' or coalesce(ticket_live_ns_invoices(j.id), '') = $15::text)
        and i.archived = false and i.duplicate_of is null
        -- Read with a fresh snapshot: a PM stacked (or an invoice or quote added) while this waited for the locks counts.
-       -- A ticket billed on a Sales Order carries its NetSuite invoices over with its charges.
-       and (case when $12::text = '' then not ticket_keeps_its_billing(j.id) else not ticket_has_quote_or_stacked_pm(j.id) end)
+       -- A billed ticket carries its NetSuite invoices over with its charges.
+       and (case when $14::text = '' then not ticket_keeps_its_billing(j.id) else not ticket_has_quote_or_stacked_pm(j.id) end)
        and not (
-         $12::text = ''
+         $14::text = ''
          and exists (select 1 from lk_head h where h.approved_at is not null)
          and exists (select 1 from ticket_charges c where c.job_id = j.id)
        )
        -- QuickBooks history (its own, or a ticket's merged into it), read the same way: its charges may be billed already.
        and not (
-         $12::text = ''
+         $14::text = ''
          and exists (select 1 from ticket_charges c where c.job_id = j.id)
          and ticket_has_quickbooks_history(j.id)
        )
@@ -635,16 +689,17 @@ export function mergeTicketIntoInstallSql(): string {
              'charges', coalesce((select jsonb_agg(c.id order by c.id) from ticket_charges c where c.job_id = ok.job_id), '[]'::jsonb),
              'invoiceId', (select head.id from head),
              'ticketPo', $11::text,
-             -- Billed on a Sales Order: the SO, its NetSuite invoices, and a copy of the charges billed there, which
-             -- the install's Invoice window lists as billed (they never go on its invoice).
+             -- Billed: what on (the SO, or with none its NetSuite invoices), the SO, its NetSuite invoices, and a copy of
+             -- the charges billed there, which the install's Invoice window lists as billed (never on its invoice).
+             'billedOn', nullif($14::text, ''),
              'billedSo', nullif($12::text, ''),
-             'billedInvoices', case when $12::text <> '' then (
+             'billedInvoices', case when $14::text = '' then null when $12::text = '' then $15::text else (
                select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti
                 where ti.job_id = ok.job_id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) end,
-             'billedLines', case when $12::text <> '' then coalesce((
+             'billedLines', case when $14::text <> '' then coalesce((
                select jsonb_agg(jsonb_build_object('item', c.item, 'description', c.description, 'qty', c.qty, 'rate', c.rate, 'kind', c.kind) order by c.sort, c.id)
                  from ticket_charges c where c.job_id = ok.job_id), '[]'::jsonb) end,
-             'billedTotal', case when $12::text <> '' then $13::numeric end,
+             'billedTotal', case when $14::text <> '' then $13::numeric end,
              'invoiceLines', coalesce((select jsonb_agg(x.id order by x.id) from lines x), '[]'::jsonb),
              'notes', coalesce((select jsonb_agg(x.id order by x.id) from com x), '[]'::jsonb),
              'pings', coalesce((select jsonb_agg(x.id order by x.id) from pings x), '[]'::jsonb),
@@ -696,7 +751,10 @@ export type TicketInstallMergeResult = {
   rebuilds: number;
   mergedTickets: number;
   mergedBy: string;
-  /** The Sales Order its charges stay billed on (10/30); null when they went on the install's invoice. */
+  /**
+   * What its charges stay billed on (10/30): the Sales Order, or with none "NetSuite invoice …"; null when they went on
+   * the install's invoice.
+   */
   billedOn: string | null;
 };
 
@@ -709,6 +767,12 @@ const mergeInput = target.extend({
    * tickets and would say their charges go on the invoice) sends none, and a billed ticket isn't merged from it.
    */
   billedSo: z.string().max(80).optional(),
+  /**
+   * What the confirm showed the charges billed on ('' when unbilled): the SO, or "NetSuite invoice …" for a ticket with
+   * none. Sent from 10/30 evening on: a window from before that refused such a ticket, so one that sends none doesn't
+   * merge it.
+   */
+  billedOn: z.string().max(2000).optional(),
 });
 
 /** The confirm's content: what is kept, what moves, what stays, the note, and why it can't go ahead. Admins only. */
@@ -729,12 +793,20 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
   const plan = await planMerge(sql, data.jobId, data.installId, actor);
   if (plan.refusal || !plan.preview || !plan.ticket || !plan.install) throw new Error(plan.refusal ?? "That ticket can't be merged.");
   const s = plan.preview.stamps;
-  const so = plan.preview.moves.billed?.so ?? "";
+  const billed = plan.preview.moves.billed;
+  const so = billed?.so ?? "";
+  const on = billed?.on ?? "";
   // A window from before billed tickets could merge: it showed the charges going on the invoice. Reload, then merge.
   if (so && data.billedSo === undefined) throw new Error(RELOAD_FOR_BILLED(so));
+  // The same for a ticket billed on NetSuite invoices with no SO: a window from before 10/30 evening refused it.
+  if (on && !so && data.billedOn === undefined) throw new Error(RELOAD_FOR_BILLED(on));
   // The install's invoice matters only to an unbilled ticket: a billed one puts nothing on it.
-  const headChanged = !so && s.head !== data.stamps.head;
-  if (s.job !== data.stamps.job || s.install !== data.stamps.install || headChanged || so !== (data.billedSo ?? "")) throw new Error(CHANGED_SINCE_OPENED);
+  const headChanged = !on && s.head !== data.stamps.head;
+  // What it is billed on, as the confirm showed it (a window from before 10/30 evening sends only the SO).
+  const shownOn = data.billedOn === undefined ? (data.billedSo ?? "") : data.billedOn;
+  if (s.job !== data.stamps.job || s.install !== data.stamps.install || headChanged || so !== (data.billedSo ?? "") || on !== shownOn) {
+    throw new Error(CHANGED_SINCE_OPENED);
+  }
   const rows = await sql.query<{
     job_id: number;
     install_id: number;
@@ -758,7 +830,9 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
     plan.discount?.value ?? null,
     plan.ticket.po?.trim() || null,
     so,
-    plan.preview.moves.billed ? plan.preview.moves.chargeTotal : null,
+    billed ? plan.preview.moves.chargeTotal : null,
+    on,
+    billed?.invoices ?? "",
   ]);
   const r = rows[0];
   if (!r) {
@@ -777,7 +851,7 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
     rebuilds: Number(r.rebuilds),
     mergedTickets: Number(r.merged_tickets),
     mergedBy: actor,
-    billedOn: plan.preview.moves.billed?.so ?? null,
+    billedOn: on || null,
   };
 }
 
