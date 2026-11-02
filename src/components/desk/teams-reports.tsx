@@ -19,7 +19,7 @@ import {
 
 const FEEDS: { value: string; label: string }[] = [
   { value: "service", label: "Service tracker" },
-  { value: "orders", label: "Purchase orders" },
+  { value: "orders", label: "Purchase orders (parts used each week)" },
   { value: "rep", label: "A rep's customers" },
   { value: "region", label: "A region" },
   { value: "leadership", label: "K Team counts" },
@@ -171,7 +171,7 @@ export function TeamsMorningPanel({ enabled }: { enabled: boolean }) {
               <SelectField value={form.target ?? "dfw"} onChange={(e) => setForm({ ...form, target: e.target.value })} aria-label="Region">
                 <option value="dfw">DFW</option>
                 <option value="sa-atx">SA/ATX</option>
-                <option value="other">Other (no tech yet)</option>
+                <option value="other">Other, with the get-ready list</option>
               </SelectField>
             ) : null}
             <Input

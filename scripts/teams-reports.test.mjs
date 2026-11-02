@@ -21,7 +21,6 @@ const empty = {
   when,
   attention: [],
   duplicateWo: [],
-  orders: [],
   calls: [],
   kpiScope: "Oct 1, 2026 to Oct 31, 2026 · 0 records",
   kpi: [],
@@ -71,7 +70,7 @@ test("Corey Russell dispatches drivers and his chat has no automatic note", () =
   const snap = {
     ...empty,
     attention: [{ label: "Open past 48 hrs", board: "Service", customer: "Blue Door", tech: "Cory Russell", ref: "SC-9" }],
-    orders: [{ callId: "SC-9", customer: "Blue Door", item: "Everpure", qty: "2", water: true }],
+    po: { from: "2026-10-10", to: "2026-10-16", parts: [{ maker: "Everpure", sku: "WFEV9999", label: "Test Cartridge", pieces: 2 }] },
     calls: [call({ tech: "Cory Russell", customer: "Tech Ticket" })],
   };
   const corey = draft("dm-cory", snap);
@@ -115,7 +114,7 @@ test("each chat gets only its own lines, and the text is what would be sent", ()
   const snap = {
     ...empty,
     attention: [{ label: "Open past 48 hrs", board: "Service", customer: "Blue Door", tech: "Ryan Gloria", ref: "SC-9" }],
-    orders: [{ callId: "SC-9", customer: "Blue Door", item: "Everpure", qty: "2", water: true }],
+    po: { from: "2026-10-10", to: "2026-10-16", parts: [{ maker: "Everpure", sku: "WFEV9999", label: "Test Cartridge", pieces: 2 }] },
     calls: [
       call({ rep: "Amanda Logg", region: "dfw", tech: "Ryan Gloria" }),
       call({ customer: "Night Owl", rep: "Sean Marshall", region: "sa-atx", tech: "", ref: "SC-2" }),
@@ -128,14 +127,18 @@ test("each chat gets only its own lines, and the text is what would be sent", ()
   assert.match(big.text, /Open past 48 hrs · Service · Blue Door · Ryan Gloria · SC-9/);
   assert.doesNotMatch(big.text, /Everpure|Amanda/);
   const po = draft("purchase-orders", snap);
-  assert.match(po.text, /Water filter · SC-9 · Blue Door · Everpure · qty 2/);
+  assert.match(po.text, /\nEverpure · 1 part, 2 pieces\n- WFEV9999 · Test Cartridge · 2$/);
   assert.match(po.text, /NetSuite/);
+  assert.doesNotMatch(po.text, /Blue Door|Night Owl/);
   assert.match(draft("rep-amanda", snap).text, /Blue Door/);
   assert.doesNotMatch(draft("rep-amanda", snap).text, /Night Owl/);
   assert.match(draft("dfw", snap).text, /Blue Door/);
   assert.match(draft("sa-atx", snap).text, /Night Owl/);
-  assert.match(draft("service-monkeys", snap).text, /Houston Cafe/);
-  assert.doesNotMatch(draft("service-monkeys", snap).text, /Blue Door/);
+  // The techs are all in Service Monkeys: each one's calls, in every region; then the calls outside DFW and SA/ATX
+  // with no tech.
+  assert.match(draft("service-monkeys", snap).text, /\n\nRyan Gloria · 1 open call\n- Blue Door · Open · 2026-10-18 · SC-1 · Grinder jammed · DFW\n\nNo tech yet\n- Houston Cafe/);
+  assert.doesNotMatch(draft("service-monkeys", snap).text, /Night Owl/);
+  assert.match(draft("dfw", snap).text, /Assigned so far \(Ryan Gloria 1\)\n- Ryan Gloria · Blue Door/);
   assert.match(draft("dm-ryan", snap).text, /Blue Door/);
   assert.equal(draft("dm-cory", snap).text, "");
   const k = draft("k-team", snap);
@@ -154,16 +157,29 @@ test("the clock minute is not part of the approved text", () => {
   assert.notEqual(changed.text, first.text);
 });
 
-test("the 17 chats that did not change send byte-for-byte the same text as before", () => {
-  // Captured from main f3089f5 (hard-coded chats) over one fixed snapshot.
+test("from the same snapshot, the chats whose notes did not change on 11/2 get byte-for-byte the same text", () => {
+  // Captured from main f3089f5 (hard-coded chats) over one fixed snapshot. On 11/2 the Purchase Order, rep and region
+  // notes changed on purpose (weekly report by maker; serviced, Pipeline and installs; who has each call and the
+  // get-ready list); the drafting of the service tracker, The K Team and the tech DMs did not. (The snapshot itself
+  // reads open calls as the Service board does now, in a fixed order, so a live tech DM can still read differently.)
   const before = JSON.parse(readFileSync(new URL("./fixtures/teams-drafts-before.json", import.meta.url), "utf8"));
-  const kept = TEAMS_CHATS.filter((c) => c.id !== "dm-cory");
-  assert.equal(kept.length, 17);
-  assert.deepEqual(kept.map((c) => c.id).sort(), Object.keys(before.drafts).filter((id) => id !== "dm-cory").sort());
+  const kept = TEAMS_CHATS.filter((c) => ["service", "leadership", "tech"].includes(c.feed));
+  assert.deepEqual(kept.map((c) => c.id), ["big-tymers", "k-team", "dm-ryan", "dm-josh", "dm-lance", "dm-oliver", "dm-charles"]);
   for (const chat of kept) {
     const now = draftTeamsChat(chat, before.snapshot);
     const old = before.drafts[chat.id];
     for (const key of ["name", "group", "kind", "about", "title", "text"]) assert.equal(now[key], old[key], `${chat.id} ${key}`);
+  }
+  const changed = TEAMS_CHATS.filter((c) => ["orders", "rep", "region"].includes(c.feed));
+  assert.equal(changed.length, 10);
+  for (const chat of changed) {
+    const now = draftTeamsChat(chat, before.snapshot);
+    const old = before.drafts[chat.id];
+    assert.equal(now.name, old.name, chat.id);
+    assert.notEqual(now.text, old.text, chat.id);
+    // DFW and SA/ATX keep their About; the others say what the note lists now.
+    if (chat.id === "dfw" || chat.id === "sa-atx") assert.equal(now.about, old.about, chat.id);
+    else assert.notEqual(now.about, old.about, chat.id);
   }
 });
 
@@ -220,6 +236,8 @@ test("a chat added for a person or region follows the same rules as the built-in
   assert.match(custom("tech", "Mike"), /Mike Shop/);
   assert.doesNotMatch(custom("tech", "Mike"), /Liz Shop/);
   assert.match(custom("region", "dfw"), /Mike Shop/);
-  assert.match(custom("region", "other"), /Tulsa/);
-  assert.doesNotMatch(custom("region", "other"), /Liz Shop/);
+  assert.doesNotMatch(custom("region", "dfw"), /Liz Shop|Tulsa/);
+  // Outside DFW and SA/ATX: who has each call, then the calls with no tech yet.
+  // Outside DFW and SA/ATX: each tech's calls in every region, then the calls there with no tech yet.
+  assert.match(custom("region", "other"), /\n\nJoshua Harper · 1 open call\n- Liz Shop · Open · 2026-10-18 · SC-1 · Grinder jammed\n\nMike Jones · 1 open call\n- Mike Shop · Open · 2026-10-18 · SC-1 · Grinder jammed · DFW\n\nNo tech yet\n- Tulsa/);
 });

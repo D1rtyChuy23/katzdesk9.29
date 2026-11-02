@@ -6,7 +6,8 @@
  *  1. a service or TLC ticket's Charges;
  *  2. the approved invoice of a PM, install, rebuild or deal;
  *  3. a part logged on a PM's machines (a PM billed on a ticket counts on that ticket);
- *  4. the QuickBooks history work orders (2024–2026); one attached to a KatzDesk ticket counts on that ticket;
+ *  4. the QuickBooks history work orders (2024–2026); one attached to a KatzDesk ticket counts on that ticket, or on
+ *     the ticket it was merged into (on its install, when merged into one as billed);
  *  5. WO part lines (Parts → Import → Import WO Part Lines), Corrigo's before NetSuite's: one on a KatzDesk ticket
  *     counts on that ticket, one on no ticket on its WO.
  * A ticket written up in more than one of these (logged on the PM and billed on its invoice, or billed in KatzDesk and
@@ -122,7 +123,9 @@ uses_all as (
     left join deals d on i.entity_type = 'deal' and d.id = i.entity_id
    where i.approved_at is not null and i.entity_type in ('pm', 'install', 'rebuild', 'deal')
      and coalesce(p.status, '') <> 'Cancelled'
-     and not coalesce(ins.archived, false) and ins.duplicate_of is null
+     -- An install flagged as a possible duplicate still counts (11/2): it's open on the Board, and its invoice was
+     -- approved. One merged into another is archived; its invoice went to the keeper.
+     and not coalesce(ins.archived, false)
      and not coalesce(r.archived, false) and not coalesce(d.archived, false)
   union all
   -- 3. Parts logged on a PM's machines. A PM billed on a ticket counts on that ticket.
@@ -141,8 +144,10 @@ uses_all as (
     left join part_keys pk on m.billing_item_id is null and pk.k = lower(btrim(m.item))
    where m.removed_at is null and p.status <> 'Cancelled' and coalesce(b.id, pk.part_id) is not null
   union all
-  -- 4. QuickBooks history, matched by SKU. One attached to a KatzDesk ticket counts on that ticket (on its install,
-  --    like its charges, when the ticket was merged into one as billed: one use there, 10/30).
+  -- 4. QuickBooks history, matched by SKU. One attached to a KatzDesk ticket counts on that ticket, or on the ticket
+  --    it was merged into, as its charges and WO part lines do (11/2). A ticket merged into an install as billed
+  --    counts on that install, like its charges: one use there (10/30). Merged into one not as billed, it stays on the
+  --    ticket, apart from the install's own invoice.
   select sk.part_id,
          case when bq.on_install then 'install' else coalesce(sj.kind, 'quickbooks') end,
          case when bq.on_install then sj.merged_install_id else coalesce(sj.id, h.id) end,
@@ -154,7 +159,9 @@ uses_all as (
     from wo_history_lines l
     join wo_history h on h.id = l.history_id
     join sku_keys sk on sk.k = lower(btrim(l.item_code))
-    left join service_jobs sj on sj.id = h.job_id
+    left join service_jobs sj0 on sj0.id = h.job_id
+    -- A ticket merged into another is read as that keeper, which carries any install it went into since.
+    left join service_jobs sj on sj.id = case when sj0.duplicate_of <> sj0.id then sj0.duplicate_of else sj0.id end
     left join lateral (
       select coalesce(sj.merged_install_id is not null and ${BILLED_ON_INSTALL("sj.id")} is not null, false) as on_install
     ) bq on true
@@ -180,7 +187,7 @@ uses_all as (
     left join installs ins on ins.id = pl.install_id
     left join service_jobs t on t.id = coalesce(j0.duplicate_of, j0.id, pp.stacked_job_id)
    where coalesce(t.status, '') <> 'Cancelled' and coalesce(pp.status, '') <> 'Cancelled'
-     and not coalesce(ins.archived, false) and ins.duplicate_of is null
+     and not coalesce(ins.archived, false)
      and (pl.source = 'corrigo' or not exists (
            select 1 from ticket_part_lines c where c.source = 'corrigo' and c.wo = pl.wo and c.sku = pl.sku))
 ),
