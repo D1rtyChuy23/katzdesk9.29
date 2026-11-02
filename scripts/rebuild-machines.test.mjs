@@ -461,6 +461,24 @@ test("a machine holds its unit only while the unit is still on its rebuild: wher
     await R.pullRebuildMachineFor(sql, { id: third, serial: "TESTSN-Y" }, "u-tech");
     await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: third, serial: "TESTSN-Y" }, "u-tech"), /^Error: Serial TESTSN-Y is on machine 2 of this rebuild already\.$/);
     assert.ok(y);
+    // A shop refurb's unit from before machines, billed to Katz Coffee Service Dept. by the site as it was (which left
+    // the unit on the shop account): the two refurb accounts are one house, so the refurb still has it and stocks it.
+    const house = await rebuild(pg, "Test billed refurb", SD);
+    const h = await unit(pg, "TESTSN-HOUSE", { status: "assigned", sold_to: SHOP, purpose: "In-house rebuild", pallet: "D", level: 1 });
+    await pg.query("insert into rebuild_machines (rebuild_id, model, serial, asset_id, pulled_at, migrated) values ($1, 'Test grinder', 'TESTSN-HOUSE', $2, now(), true)", [house, h]);
+    assert.equal((await list()).find((r) => r.id === house).machines[0].moved, null);
+    const doneHouse = await R.updateRebuildFor(sql, { id: house, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    assert.equal(doneHouse.stockNote, "1 machine went into stock at the Staging area, marked needs shop test.");
+    assert.equal((await unitRow(pg, h)).site, "staging");
+    // A unit removed from stock while on a refurb (the removal keeps its account and purpose): the refurb doesn't have
+    // it any more, so taking the machine off leaves it removed.
+    const gone = await unit(pg, "TESTSN-RM", { pallet: "D", level: 2 });
+    const rmRefurb = await rebuild(pg, "Test removed-unit refurb", SD);
+    const onGone = (await R.pullRebuildMachineFor(sql, { id: rmRefurb, serial: "TESTSN-RM" }, "u-wh")).machines[0];
+    await pg.query("update assets set status = 'removed', site = 'removed', pallet = null, level = null, line_no = null, updated_at = now() where id = $1", [gone]);
+    assert.equal((await list()).find((r) => r.id === rmRefurb).machines[0].moved, "Its unit isn't on this rebuild now: it's on removed stock.");
+    assert.equal((await R.removeRebuildMachineFor(sql, { id: rmRefurb, machineId: onGone.id }, "u-wh")).message, "SN TESTSN-RM was moved since it was pulled, so it stays where it is now.");
+    assert.equal((await unitRow(pg, gone)).status, "removed");
   } finally {
     await pg.close();
   }
@@ -805,7 +823,10 @@ test("the screens: the Equipment tab lists the machines, and the board and the s
   assert.match(sheet, /toast\.success\(next\.stockNote \? `Rebuild saved\. \$\{next\.stockNote\}` : "Rebuild saved"\);/);
   const board = readFileSync(new URL("../src/components/desk/rebuild-board.tsx", import.meta.url), "utf8");
   assert.match(board, /if \(next\.stockNote\) toast\.success\(next\.stockNote\);/);
+  const page = readFileSync(new URL("../src/routes/_app/rebuilds.tsx", import.meta.url), "utf8");
+  assert.match(page, /toast\.success\(row\.stockNote \? `Rebuild opened\. \$\{row\.stockNote\}` : "Rebuild opened"\);/, "a refurb made as Completed says what went into stock");
   const ui = readFileSync(new URL("../src/components/desk/rebuild-machines.tsx", import.meta.url), "utf8");
   assert.match(ui, /const editable = canEdit && !closed;/, "a closed rebuild's machines are read only");
+  assert.match(ui, /\{machine\.moved \? \(\s*<p className="mt-1 text-xs text-warning" data-testid="rebuild-machine-moved">\s*\{machine\.moved\}/, "a machine whose unit went elsewhere says where it is");
   assert.match(ui, /if \(fixed \|\| serial\.trim\(\) === \(m\.serial \?\? ""\) \|\| \(pull\.isPending && lastPull\.current\[String\(m\.id\)\] === serial\.trim\(\)\)\) return;/, "only a changed serial pulls on blur");
 });

@@ -234,7 +234,8 @@ function CreateRebuildDialog({
         },
       }),
     onSuccess: (row) => {
-      toast.success("Rebuild opened");
+      // A refurb made as Completed puts its machine in stock right away (11/2), and says so.
+      toast.success(row.stockNote ? `Rebuild opened. ${row.stockNote}` : "Rebuild opened");
       setTitle("");
       setEquipment("");
       setNotes("");
