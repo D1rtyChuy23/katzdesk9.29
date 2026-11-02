@@ -198,7 +198,7 @@ export async function poUses(sql: Sql): Promise<RankedUse[]> {
  * - a PM's machine parts not billed on the ticket it's billed on: they count once with the ticket's own charge for
  *   the part (only the charge, until they are billed there);
  * - a ticket merged into an install, not as billed: its charges count from the install's invoice once that is
- *   approved (and the install isn't flagged as a possible duplicate).
+ *   approved.
  */
 export async function waitingPieces(sql: Sql): Promise<Map<string, number>> {
   const rows = await sql.query<{ k: string; p: number; q: number }>(
@@ -219,8 +219,7 @@ export async function waitingPieces(sql: Sql): Promise<Map<string, number>> {
        join installs ins on ins.id = j.merged_install_id and not ins.archived
        join part_keys pk on pk.k = lower(btrim(c.item))
       where j.duplicate_of = j.id and j.status <> 'Cancelled' and ${BILLED_ON_INSTALL("j.id")} is null
-        and (ins.duplicate_of is not null
-             or not exists (select 1 from invoices i where i.entity_type = 'install' and i.entity_id = ins.id and i.approved_at is not null))
+        and not exists (select 1 from invoices i where i.entity_type = 'install' and i.entity_id = ins.id and i.approved_at is not null)
       group by 1, 2
       order by 1, 2`,
   );

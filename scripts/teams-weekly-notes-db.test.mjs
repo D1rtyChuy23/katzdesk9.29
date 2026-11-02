@@ -517,6 +517,7 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   const ids = {};
   for (const x of ["A", "B", "C", "D", "F", "G", "H", "J"]) ids[x] = await part(`ZZ${x}1`, `Bunn Zz Valve ${x}`);
   ids.E = await part("WFZZE", "Everpure Zz Cartridge E", "Water Filters");
+  ids.K = await part("WFZZK", "Everpure Zz Cartridge K", "Water Filters");
   const ticket = async (call) =>
     Number((await row("insert into service_jobs (kind, call_id, customer, status, done, received, completed_at) values ('service', $1, 'Zz Owl', 'Completed', true, '2026-11-01', '2026-11-04') returning id", [call])).id);
   const charge = async (jobId, x, n, sourceKey = null) =>
@@ -530,8 +531,8 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
     await q.query("update ticket_charges set job_id = $2 where job_id = $1", [extra, keeper]);
     await q.query("update service_jobs set duplicate_of = $2 where id = $1", [extra, keeper]);
   };
-  const intoInstall = async (jobId, x, n) => {
-    const ins = Number((await row("insert into installs (customer, install_date, machines) values ('Zz Owl', '2026-11-10', '[]') returning id")).id);
+  const intoInstall = async (jobId, x, n, flaggedAs = null) => {
+    const ins = Number((await row("insert into installs (customer, install_date, machines, duplicate_of) values ('Zz Owl', '2026-11-10', '[]', $1) returning id", [flaggedAs])).id);
     await q.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [jobId, ins]);
     const inv = Number((await row("insert into invoices (entity_type, entity_id, customer) values ('install', $1, 'Zz Owl') returning id", [ins])).id);
     const line = Number((await row("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort) values ($1, $2, '', $3, 10, 'part', 1) returning id", [inv, `PARTS : ZZ${x}1`, n])).id);
@@ -574,13 +575,18 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   await q.query("insert into machine_parts (pm_job_id, piece_key, machine_label, billing_item_id, item, qty, removed_at) values ($1, 'zz2', 'Zz Brewer', $2, 'x', 5, now())", [p6.pm, ids.F]);
   const t8 = await ticket("SC-11");
   const p8 = await pmWith("H", 2);
+  // K: a customer's second install, made by hand and so flagged as a possible duplicate; its invoice approved.
+  const first = Number((await row("insert into installs (customer, install_date, machines) values ('Zz Owl', '2026-10-01', '[]') returning id")).id);
+  const second = Number((await row("insert into installs (customer, install_date, machines, duplicate_of) values ('Zz Owl', '2026-11-04', '[]', $1) returning id", [first])).id);
+  const inv2 = Number((await row("insert into invoices (entity_type, entity_id, customer, approved_at, approved_by) values ('install', $1, 'Zz Owl', '2026-11-04T15:00:00Z', 'Chuy') returning id", [second])).id);
+  await q.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort) values ($1, 'PARTS : WFZZK', '', 3, 10, 'part', 1)", [inv2]);
 
   assert.equal(
     await po(NOW),
     [
       intro("Sat Oct 31", "Fri Nov 6", "Fri Nov 6 at 5:30 PM"),
       "Bunn · 8 parts, 21 pieces\n- ZZA1 · Zz Valve A · 4\n- ZZB1 · Zz Valve B · 3\n- ZZC1 · Zz Valve C · 3\n- ZZF1 · Zz Valve F · 3\n- ZZD1 · Zz Valve D · 2\n- ZZG1 · Zz Valve G · 2\n- ZZH1 · Zz Valve H · 2\n- ZZJ1 · Zz Valve J · 2",
-      "Everpure · 1 part, 3 pieces\n- WFZZE · Zz Cartridge E · 3",
+      "Everpure · 2 parts, 6 pieces\n- WFZZE · Zz Cartridge E · 3\n- WFZZK · Zz Cartridge K · 3",
     ].join("\n\n"),
   );
 
@@ -589,9 +595,9 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   await q.query("delete from ticket_charges where id = $1", [doubled]);
   await mergeTickets(e2, k2);
   await q.query("update ticket_charges set qty = 1 where job_id = $1", [k2]);
-  // H3: into an install; its copy on the install's invoice cut to 1, then approved. G: into an install whose invoice
-  // isn't approved yet.
-  const i3 = await intoInstall(t3, "C", 3);
+  // H3: into an install (flagged as a possible duplicate, which counts all the same); its copy on the install's
+  // invoice cut to 1, then approved. G: into an install whose invoice isn't approved yet.
+  const i3 = await intoInstall(t3, "C", 3, first);
   await q.query("update invoice_lines set qty = 1 where id = $1", [i3.line]);
   await approve(i3.inv);
   const i7 = await intoInstall(t7, "G", 2);

@@ -212,13 +212,14 @@ test("each ticket counts once per part, from KatzDesk before a logged part befor
   }
 });
 
-test("QuickBooks history on a merged ticket counts where the ticket went, once with what it has there", async () => {
+test("QuickBooks history on a merged ticket counts on the ticket it went into; an install flagged as a possible duplicate counts", async () => {
   const { pg, sql } = await fresh();
   try {
     const part = async (sku) =>
       (await pg.query("insert into billing_items (sku, item, description, kind, item_class) values ($1, $2, $3, 'part', 'Parts') returning id", [sku, `PARTS : ${sku}`, `${sku} part`])).rows[0].id;
     const valve = await part("VALVE9");
     const gasket = await part("GSK9");
+    const name = (id) => (id === valve ? "valve" : id === gasket ? "gasket" : String(id));
     const job = async (callId) =>
       (await pg.query("insert into service_jobs (kind, call_id, customer, status, completed_at) values ('service', $1, 'Alpha Cafe', 'Completed', '2026-10-12') returning id", [callId])).rows[0].id;
     const run = (await pg.query("insert into wo_history_runs (filename) values ('made-up.csv') returning id")).rows[0].id;
@@ -226,27 +227,40 @@ test("QuickBooks history on a merged ticket counts where the ticket went, once w
       const h = (await pg.query("insert into wo_history (run_id, history_ref, wo, customer, completed, job_id) values ($1, $2, $2, 'Alpha Cafe', '2026-10-12 09:00', $3) returning id", [run, ref, jobId])).rows[0].id;
       for (const [code, qty] of lines) await pg.query("insert into wo_history_lines (history_id, line_type, kind, item_code, qty) values ($1, 'Item', 'part', $2, $3)", [h, code, qty]);
     };
+    const install = async (dup = null) =>
+      (await pg.query("insert into installs (customer, completed_at, duplicate_of) values ('Alpha Cafe', '2026-10-20', $1) returning id", [dup])).rows[0].id;
+    const approvedInvoice = async (installId, item, qty) => {
+      const inv = (await pg.query("insert into invoices (entity_type, entity_id, customer, approved_at) values ('install', $1, 'Alpha Cafe', '2026-10-21T15:00:00Z') returning id", [installId])).rows[0].id;
+      await pg.query("insert into invoice_lines (invoice_id, item, qty, rate, kind) values ($1, $2, $3, 10, 'part')", [inv, item, qty]);
+    };
+    const of = async () => (await api.loadPartUses(sql)).map((u) => `${u.ticketKey}:${name(u.partId)}=${u.pieces}`).sort();
     // A duplicate ticket billed the valve in KatzDesk and QuickBooks (one use), and QuickBooks has a gasket on it too.
     const keeper = await job("SC-1");
     const extra = await job("SC-2");
     await pg.query("insert into ticket_charges (job_id, item, qty, rate, kind) values ($1, 'PARTS : VALVE9', 2, 10, 'part')", [extra]);
     await history("WO-1", extra, [["VALVE9", 2], ["GSK9", 1]]);
-    // A ticket merged into an install not as billed (it had no charges): its QuickBooks line and WO part line for the
-    // same gasket.
-    const install = (await pg.query("insert into installs (customer, completed_at) values ('Alpha Cafe', '2026-10-20') returning id")).rows[0].id;
-    const merged = await job("SC-3");
-    await history("WO-2", merged, [["GSK9", 3]]);
-    await pg.query("insert into ticket_part_lines (source, wo, item, sku, qty, used_on, job_id) values ('corrigo', 'WO-2', 'PARTS:GSK9', 'GSK9', 3, '2026-10-12', $1)", [merged]);
-    const of = async () =>
-      (await api.loadPartUses(sql)).map((u) => `${u.ticketKey}:${u.partId === valve ? "valve" : u.partId === gasket ? "gasket" : u.partId}=${u.pieces}`).sort();
-    assert.deepEqual(await of(), [`service:${extra}:gasket=1`, `service:${extra}:valve=2`, `service:${merged}:gasket=3`].sort());
-    // Merged as the app merges them: the charges go to the keeper; the QuickBooks rows stay attached to the tickets;
-    // a ticket's WO part lines go to the install it was merged into.
+    // An install with its own approved invoice for 2 gaskets, and an earlier visit's ticket with no charges whose
+    // QuickBooks history has 1 gasket: two jobs.
+    const first = await install();
+    await approvedInvoice(first, "PARTS : GSK9", 2);
+    const visit = await job("SC-3");
+    await history("WO-2", visit, [["GSK9", 1]]);
+    // A customer's second install, made by hand and so flagged as a possible duplicate of the first: still open, and
+    // its approved invoice and WO part line count.
+    const second = await install(first);
+    await approvedInvoice(second, "PARTS : VALVE9", 3);
+    await pg.query("insert into ticket_part_lines (source, wo, item, sku, qty, used_on, install_id) values ('corrigo', 'WO-3', 'PARTS:GSK9', 'GSK9', 4, '2026-10-20', $1)", [second]);
+    const before = [`install:${first}:gasket=2`, `install:${second}:gasket=4`, `install:${second}:valve=3`, `service:${visit}:gasket=1`];
+    assert.deepEqual(await of(), [...before, `service:${extra}:gasket=1`, `service:${extra}:valve=2`].sort());
+    // Merged as the app merges them: the charges go to the keeper, the QuickBooks rows stay attached to their tickets,
+    // and the visit's ticket goes into the install not as billed.
     await pg.query("update ticket_charges set job_id = $2 where job_id = $1", [extra, keeper]);
     await pg.query("update service_jobs set duplicate_of = $2 where id = $1", [extra, keeper]);
-    await pg.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [merged, install]);
-    await pg.query("update ticket_part_lines set install_id = $2, job_id = null where job_id = $1", [merged, install]);
-    assert.deepEqual(await of(), [`install:${install}:gasket=3`, `service:${keeper}:gasket=1`, `service:${keeper}:valve=2`].sort());
+    await pg.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [visit, first]);
+    assert.deepEqual(await of(), [...before, `service:${keeper}:gasket=1`, `service:${keeper}:valve=2`].sort());
+    // Merged into the first install for real, the second is archived: its invoice and lines went to the keeper.
+    await pg.query("update installs set archived = true where id = $1", [second]);
+    assert.deepEqual((await of()).filter((u) => u.startsWith(`install:${second}:`)), []);
   } finally {
     await pg.close();
   }
