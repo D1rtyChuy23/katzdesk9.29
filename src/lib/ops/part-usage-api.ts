@@ -160,7 +160,8 @@ uses_all as (
     join wo_history h on h.id = l.history_id
     join sku_keys sk on sk.k = lower(btrim(l.item_code))
     left join service_jobs sj0 on sj0.id = h.job_id
-    left join service_jobs sj on sj.id = case when sj0.merged_install_id is null and sj0.duplicate_of <> sj0.id then sj0.duplicate_of else sj0.id end
+    -- A ticket merged into another is read as that keeper, which carries any install it went into since.
+    left join service_jobs sj on sj.id = case when sj0.duplicate_of <> sj0.id then sj0.duplicate_of else sj0.id end
     left join lateral (
       select coalesce(sj.merged_install_id is not null and ${BILLED_ON_INSTALL("sj.id")} is not null, false) as on_install
     ) bq on true

@@ -258,6 +258,13 @@ test("QuickBooks history on a merged ticket counts on the ticket it went into; a
     await pg.query("update service_jobs set duplicate_of = $2 where id = $1", [extra, keeper]);
     await pg.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [visit, first]);
     assert.deepEqual(await of(), [...before, `service:${keeper}:gasket=1`, `service:${keeper}:valve=2`].sort());
+    // The keeper merged into an install as billed: its charges count there, and so does the QuickBooks history of the
+    // ticket merged into it before, once with them (the merge stamps that install on both tickets).
+    const third = await install();
+    await pg.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [keeper, third]);
+    await pg.query("update service_jobs set merged_install_id = $2 where duplicate_of = $1 and id <> $1", [keeper, third]);
+    await pg.query(`insert into ticket_install_merges (job_id, install_id, moved) values ($1, $2, '{"billedOn": "SO6266"}')`, [keeper, third]);
+    assert.deepEqual(await of(), [...before, `install:${third}:gasket=1`, `install:${third}:valve=2`].sort());
     // Merged into the first install for real, the second is archived: its invoice and lines went to the keeper.
     await pg.query("update installs set archived = true where id = $1", [second]);
     assert.deepEqual((await of()).filter((u) => u.startsWith(`install:${second}:`)), []);
