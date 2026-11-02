@@ -144,8 +144,10 @@ test("a refurb holds several machines; a new serial or taking one off puts its u
     assert.deepEqual((await R.listRebuildsFor(sql, "u-wh")).rows.find((r) => r.id === sd).machines.length, 4, "the board has them too");
     assert.deepEqual(await unitRow(pg, b), { status: "assigned", site: "field", pallet: null, level: null, sold_to: SD, purpose: "In-house rebuild", install_id: null, job_id: null, locked_by: "System (assigned)", shop_test: null });
 
-    // Machine 1 takes another serial: its old unit goes back on its rack slot, free again.
+    // Machine 1 takes another serial: its old unit goes back on its rack slot, free again. (Its own serial pulled again
+    // first, as the box does when it loses focus, changes nothing about where the unit came from.)
     const [m1, m2, m3] = rb.machines;
+    await R.pullRebuildMachineFor(sql, { id: sd, machineId: m1.id, serial: "TESTSN-A" }, "u-wh");
     rb = await R.pullRebuildMachineFor(sql, { id: sd, machineId: m1.id, serial: "TESTSN-C" }, "u-wh");
     assert.equal(rb.machines[0].assetId, c);
     assert.deepEqual(await unitRow(pg, a), { status: "ready", site: "barn-back", pallet: "B", level: 1, sold_to: null, purpose: null, install_id: null, job_id: null, locked_by: null, shop_test: null });
@@ -164,6 +166,16 @@ test("a refurb holds several machines; a new serial or taking one off puts its u
     assert.equal((await R.removeRebuildMachineFor(sql, { id: sd, machineId: m1.id }, "u-wh")).message, "SN TESTSN-C was moved since it was pulled, so it stays where it is now.");
     assert.equal((await unitRow(pg, c)).sold_to, "Bean Test Cafe");
     await pg.query("update assets set status = 'ready', sold_to = null, purpose = null, locked_at = null, locked_by = null where id = $1", [c]);
+    // Still on Katz Coffee Service Dept., but put on one of its installs since: it stays on that install.
+    const ours = Number((await pg.query("insert into installs (customer) values ($1) returning id", [SD])).rows[0].id);
+    const kept = await R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-C" }, "u-wh");
+    await pg.query("update assets set purpose = 'Install', install_id = $2 where id = $1", [c, ours]);
+    assert.equal(
+      (await R.removeRebuildMachineFor(sql, { id: sd, machineId: kept.machines.at(-1).id }, "u-wh")).message,
+      "SN TESTSN-C was moved since it was pulled, so it stays where it is now.",
+    );
+    assert.deepEqual([(await unitRow(pg, c)).install_id, (await unitRow(pg, c)).purpose], [ours, "Install"]);
+    await pg.query("update assets set status = 'ready', sold_to = null, purpose = null, install_id = null, locked_at = null, locked_by = null where id = $1", [c]);
 
     // A model changes; one unit on one open rebuild at a time.
     rb = await R.saveRebuildMachinesFor(sql, { id: sd, machines: [{ id: m3.id, model: "Test brewer XL" }] }, "u-wh");
@@ -182,6 +194,14 @@ test("a refurb holds several machines; a new serial or taking one off puts its u
     assert.deepEqual(left, { asset_id: null, notice: `Serial TESTSN-C moved to rebuild "Test shop refurb".` });
     await R.removeRebuildMachineFor(sql, { id: shop, machineId: taken.machines[0].id }, "u-wh");
     assert.deepEqual(await unitRow(pg, c), { status: "ready", site: "barn-back", pallet: "B", level: 2, sold_to: null, purpose: null, install_id: null, job_id: null, locked_by: null, shop_test: null }, "back on its rack slot");
+    // The same for a machine that was already on the rebuild: it takes the unit, and where it came from.
+    const old = await rebuild(pg, "Test old refurb", SD);
+    await R.pullRebuildMachineFor(sql, { id: old, serial: "TESTSN-C" }, "u-wh");
+    await pg.query("update rebuilds set status = 'Cancelled' where id = $1", [old]);
+    const waiting = (await R.saveRebuildMachinesFor(sql, { id: shop, machines: [{ model: "Test grinder" }] }, "u-wh")).machines.at(-1);
+    await R.pullRebuildMachineFor(sql, { id: shop, machineId: waiting.id, serial: "TESTSN-C", confirmReuse: true }, "u-wh");
+    await R.removeRebuildMachineFor(sql, { id: shop, machineId: waiting.id }, "u-wh");
+    assert.deepEqual([(await unitRow(pg, c)).status, (await unitRow(pg, c)).pallet], ["ready", "B"], "back on its rack slot again");
 
     // A cancelled rebuild's machines don't change, but they can come off; a completed one's can't.
     await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-A" }, "u-wh"), /^Error: This rebuild is Cancelled, so its machines can't change\. Set it back to In progress first\.$/);
