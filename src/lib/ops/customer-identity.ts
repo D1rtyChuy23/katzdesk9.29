@@ -57,7 +57,24 @@ async function setNameCase(sql: Sql, name: string): Promise<void> {
   await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(sold_to) = lower($1) and sold_to <> $1`, [name]).catch(() => undefined);
   await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]).catch(() => undefined);
   await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($1) and customer <> $1`, [name]).catch(() => undefined);
+  // Rebuilds, and each rebuild machine's record of whose its unit was and whom the pull put it on (11/2).
+  await sql.query(`update rebuilds set account = $1, updated_at = now() where lower(account) = lower($1) and account <> $1`, [name]).catch(() => undefined);
+  await sql.query(ORIGIN_NAMES, [name, name]).catch(() => undefined);
 }
+
+/**
+ * A rebuild machine's record of its unit before the pull names accounts (whose the unit was, and whom the pull put it
+ * on), so taking the machine off puts the unit back on the account under its new name. $1 the new name, $2 the old.
+ */
+const ORIGIN_NAMES = `
+  update rebuild_machines set
+         origin = origin
+           || case when lower(coalesce(origin->>'sold_to', '')) = lower($2) then jsonb_build_object('sold_to', $1::text) else '{}'::jsonb end
+           || case when lower(coalesce(origin->>'pulled_to', '')) = lower($2) then jsonb_build_object('pulled_to', $1::text) else '{}'::jsonb end,
+         updated_at = now()
+   where origin is not null
+     and ((lower(coalesce(origin->>'sold_to', '')) = lower($2) and origin->>'sold_to' is distinct from $1::text)
+          or (lower(coalesce(origin->>'pulled_to', '')) = lower($2) and origin->>'pulled_to' is distinct from $1::text))`;
 
 /** Every table that stores a customer as a name string (the join key). */
 export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string): Promise<void> {
@@ -94,6 +111,10 @@ export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string)
   await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
   // Work order history (QuickBooks) follows its account.
   await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
+  // So do rebuilds, and their machines' records of the units' accounts (11/2 review: a pulled unit goes back to its
+  // account under the new name, and stays on the rebuild that has it).
+  await sql.query(`update rebuilds set account = $1, updated_at = now() where lower(account) = lower($2)`, [to, from]).catch(() => undefined);
+  await sql.query(ORIGIN_NAMES, [to, from]).catch(() => undefined);
 }
 
 type AccountRow = Record<string, unknown> & { id: number; name: string };
@@ -137,6 +158,7 @@ async function recordsUnder(sql: Sql, name: string): Promise<RenameCounts> {
     deals: await n("select count(*)::int as n from deals where lower(customer) = lower($1) and archived = false"),
     equipment: await n("select count(*)::int as n from account_equipment where lower(customer) = lower($1)"),
     woHistory: await n("select count(*)::int as n from wo_history where lower(customer) = lower($1)"),
+    rebuilds: await n("select count(*)::int as n from rebuilds where lower(account) = lower($1) and not coalesce(archived, false)"),
   };
 }
 

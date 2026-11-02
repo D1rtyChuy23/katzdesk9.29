@@ -691,7 +691,7 @@ test("Warehouse's change never lands on a rebuild an Admin moved to a customer b
     const gone = Number((await pg.query("insert into assets (kind, model, serial, site, status) values ('equip', 'Test brewer', 'TESTSN-GONE', 'barn-back', 'ready') returning id")).rows[0].id);
     await assert.rejects(
       () => pullRebuildSerialFor(raceOn(PULL, () => pg.query("delete from assets where id = $1", [gone])), { id: sd, serial: "TESTSN-GONE" }, "u-tech"),
-      /^Error: Serial TESTSN-GONE is no longer in the warehouse records, or another rebuild took it, so it wasn't pulled\.$/,
+      /^Error: Serial TESTSN-GONE is no longer in the warehouse records, so it wasn't pulled\.$/,
     );
     assert.deepEqual(await machines(), [], "the refurb didn't take the serial of a unit that isn't there");
     assert.equal((await pings(pg)).length, 0, "a pull that didn't happen pings no one");
@@ -790,7 +790,8 @@ test("the screens: Warehouse's menu adds Rebuilds and Parts, not Invoices; the w
   assert.match(machinesUi, /if \(\/already assigned\/i\.test\(msg\)\) setReuse\(\{ machineId: o\.machineId, serial: o\.serial, model: o\.model, question: msg \}\);/, "every place a unit can be still opens the confirm");
   assert.match(machinesUi, /disabled=\{pull\.isPending\}\s+onClick=\{\(\) => \{\s+if \(reuse\) startPull\(reuse\.machineId, reuse\.serial, reuse\.model, \{ confirmReuse: true, asked: reuse\.question \}\);/, "Reuse sends the question it answers, once");
   assert.match(machinesUi, /pullRebuildMachine\(\{ data: \{ id: row\.id, machineId: o\.machineId, serial: o\.serial, model: o\.model \|\| null, confirmReuse: o\.confirmReuse, asked: o\.asked \} \}\)/);
-  assert.match(machinesUi, /if \(lastPull\.current\[key\] !== o\.serial\) return;\s+setReuse\(null\);/, "an older pull's answer leaves a changed box alone");
+  assert.match(machinesUi, /onSuccess: async \(next, o\) => \{\s+await refresh\(\);\s+const key = String\(o\.machineId \?\? "new"\);\s+if \(lastPull\.current\[key\] !== o\.serial\) return;\s+closeReuse\(o\.machineId\);/, "an older pull's answer leaves a changed box alone, and the list is read again before the edits go");
+  assert.match(machinesUi, /const closeReuse = \(machineId: number \| null\) => setReuse\(\(r\) => \(r && r\.machineId === machineId \? null : r\)\);/, "another machine's answer leaves this machine's confirm open");
 
   // No photo changes for Warehouse on Parts: the row, the part's window, and the researched-photo buttons.
   const parts = readFileSync(new URL("../src/routes/_app/parts.tsx", import.meta.url), "utf8");

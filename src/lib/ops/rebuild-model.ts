@@ -183,6 +183,8 @@ export type RebuildMachine = {
   notice: string | null;
   /** When completing the refurb put it in stock. */
   stockedAt: string | null;
+  /** Its unit went somewhere else since it was pulled: where it is now. Null while the unit is on this rebuild. */
+  moved?: string | null;
 };
 
 /** The place a completed refurb's machines go into stock: the Staging area (Chuy, 11/2). */

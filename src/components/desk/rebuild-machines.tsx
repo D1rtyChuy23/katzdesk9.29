@@ -19,7 +19,7 @@ import { Plus, Trash2 } from "lucide-react";
 /** A pull waiting for the person's answer: which machine (none for a new one), and the question asked. */
 type Reuse = { machineId: number | null; serial: string; model: string; question: string };
 
-/** What the server said for a machine's serial, colored as the serial notice banner is. */
+/** What the server said for a machine's serial, colored as the serial notice banner is, and where its unit is now. */
 function MachineNotice({ machine }: { machine: RebuildMachine }) {
   if (machine.stockedAt) {
     return (
@@ -28,12 +28,20 @@ function MachineNotice({ machine }: { machine: RebuildMachine }) {
       </p>
     );
   }
-  if (!machine.notice) return null;
-  const warn = /already assigned|isn't in the warehouse|not found|wasn't put in stock|moved to rebuild/i.test(machine.notice);
+  const warn = /already assigned|isn't in the warehouse|not found|wasn't (put|added)|moved to rebuild/i.test(machine.notice ?? "");
   return (
-    <p className={`mt-1 text-xs ${warn ? "text-warning" : "text-muted-foreground"}`} data-testid="rebuild-machine-notice">
-      {machine.notice}
-    </p>
+    <>
+      {machine.notice ? (
+        <p className={`mt-1 text-xs ${warn ? "text-warning" : "text-muted-foreground"}`} data-testid="rebuild-machine-notice">
+          {machine.notice}
+        </p>
+      ) : null}
+      {machine.moved ? (
+        <p className="mt-1 text-xs text-warning" data-testid="rebuild-machine-moved">
+          {machine.moved}
+        </p>
+      ) : null}
+    </>
   );
 }
 
@@ -50,39 +58,46 @@ export function RebuildMachines({ row, canEdit, warehouse }: { row: Rebuild; can
   const editable = canEdit && !closed;
   const refurb = warehouseMayEdit(row.account);
 
-  const refresh = () => {
-    void qc.invalidateQueries({ queryKey: ["rebuilds"] });
-    void qc.invalidateQueries({ queryKey: ["assets"] });
-    void qc.invalidateQueries({ queryKey: ["activity"] });
+  // The list is read again before an edit is let go, so the old serial or model never shows in between.
+  const refresh = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ["rebuilds"] }),
+      qc.invalidateQueries({ queryKey: ["assets"] }),
+      qc.invalidateQueries({ queryKey: ["activity"] }),
+    ]).catch(() => undefined);
+  /** Lets go of a machine's edits that went to the server, or of all its edits when `sent` is left out; one typed since stays. */
+  const forget = (id: number, sent?: { model?: string; serial?: string }) => {
+    const keep = (cur: string | undefined, was: string | undefined): cur is string => cur !== undefined && !!sent && (was === undefined || cur.trim() !== was);
+    setModels(({ [id]: m, ...rest }) => (keep(m, sent?.model) ? { ...rest, [id]: m } : rest));
+    setSerials(({ [id]: v, ...rest }) => (keep(v, sent?.serial) ? { ...rest, [id]: v } : rest));
   };
-  const forget = (id: number) => {
-    setModels(({ [id]: _m, ...rest }) => rest);
-    setSerials(({ [id]: _s, ...rest }) => rest);
-  };
+  /** Closes the confirm only when it is this machine's (another machine's answer leaves it open). */
+  const closeReuse = (machineId: number | null) => setReuse((r) => (r && r.machineId === machineId ? null : r));
 
   const pull = useMutation({
-    // A confirm sends the question it answers: the server asks again if the unit moved since.
+    // A confirm sends the question it answers: the server asks again if the unit moved since. The model goes along,
+    // so a model changed and not saved yet isn't lost.
     mutationFn: (o: { machineId: number | null; serial: string; model: string; confirmReuse?: boolean; asked?: string }) =>
       pullRebuildMachine({ data: { id: row.id, machineId: o.machineId, serial: o.serial, model: o.model || null, confirmReuse: o.confirmReuse, asked: o.asked } }),
-    onSuccess: (next, o) => {
-      refresh();
+    onSuccess: async (next, o) => {
+      await refresh();
       const key = String(o.machineId ?? "new");
       if (lastPull.current[key] !== o.serial) return;
-      setReuse(null);
+      closeReuse(o.machineId);
       if (o.machineId == null) setDraft(null);
-      else forget(o.machineId);
+      else forget(o.machineId, { model: o.model, serial: o.serial });
       const m = o.machineId == null ? next.machines[next.machines.length - 1] : next.machines.find((x) => x.id === o.machineId);
       toast.success(m?.notice || "Serial saved");
     },
     onError: (e, o) => {
+      void refresh();
       if (lastPull.current[String(o.machineId ?? "new")] !== o.serial) return;
       const msg = e instanceof Error ? e.message : "Could not check the warehouse";
       if (/already assigned/i.test(msg)) setReuse({ machineId: o.machineId, serial: o.serial, model: o.model, question: msg });
       else {
-        setReuse(null);
+        closeReuse(o.machineId);
         toast.error(msg);
       }
-      refresh();
     },
   });
   const startPull = (machineId: number | null, serial: string, model: string, opts: { confirmReuse?: boolean; asked?: string } = {}) => {
@@ -91,31 +106,30 @@ export function RebuildMachines({ row, canEdit, warehouse }: { row: Rebuild; can
   };
 
   const save = useMutation({
-    mutationFn: () =>
+    mutationFn: (sent: { models: Record<number, string>; draft: string | null }) =>
       saveRebuildMachines({
         data: {
           id: row.id,
-          machines: [
-            ...Object.entries(models).map(([id, model]) => ({ id: Number(id), model })),
-            ...(draft?.model.trim() && !draft.serial.trim() ? [{ id: null, model: draft.model }] : []),
-          ],
+          machines: [...Object.entries(sent.models).map(([id, model]) => ({ id: Number(id), model })), ...(sent.draft ? [{ id: null, model: sent.draft }] : [])],
         },
       }),
-    onSuccess: () => {
-      setModels({});
-      if (draft && !draft.serial.trim()) setDraft(null);
+    onSuccess: async (_next, sent) => {
+      await refresh();
+      for (const [id, model] of Object.entries(sent.models)) forget(Number(id), { model: model.trim() });
+      if (sent.draft) setDraft((d) => (d && d.model === sent.draft && !d.serial.trim() ? null : d));
       toast.success("Machines saved");
-      refresh();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save the machines"),
   });
 
   const remove = useMutation({
     mutationFn: (machineId: number) => removeRebuildMachine({ data: { id: row.id, machineId } }),
-    onSuccess: (out, machineId) => {
+    onSuccess: async (out, machineId) => {
+      await refresh();
+      // The machine is gone, so its edits go too.
       forget(machineId);
+      closeReuse(machineId);
       toast.success(out.message ? `Machine taken off. ${out.message}` : "Machine taken off");
-      refresh();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not take the machine off"),
   });
@@ -232,7 +246,12 @@ export function RebuildMachines({ row, canEdit, warehouse }: { row: Rebuild; can
               Add machine
             </Button>
           )}
-          <Button type="button" disabled={!dirty || save.isPending} onClick={() => save.mutate()} data-testid="rebuild-machines-save">
+          <Button
+            type="button"
+            disabled={!dirty || save.isPending}
+            onClick={() => save.mutate({ models: { ...models }, draft: draft?.model.trim() && !draft.serial.trim() ? draft.model : null })}
+            data-testid="rebuild-machines-save"
+          >
             {save.isPending ? "Saving…" : "Save"}
           </Button>
         </div>

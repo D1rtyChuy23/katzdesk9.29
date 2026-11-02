@@ -107,10 +107,23 @@ function typedBin(q: string): string {
 }
 
 /**
+ * Typed like a bin code: two pieces or more, split by a dash, a slash or a space ("A-03-12", "A 03", "E4/2"). One
+ * word alone isn't (11/2 review: "A" or "03" would match every part on that rack or shelf).
+ */
+export function looksLikeBinCode(q: string): boolean {
+  return /^[a-z0-9]+(?:\s*[-/]\s*|\s+)[a-z0-9]/i.test(q.trim());
+}
+
+/** A bin typed in words: "Rack A", "Shelf 03", "Rack A shelf 03". "bin" or "rack" alone finds parts by their name. */
+export function looksLikeBinWords(q: string): boolean {
+  return /^(rack|shelf|bin)\s+\S/i.test(q.trim());
+}
+
+/**
  * Find NetSuite items for something typed on a ticket: a NetSuite SKU, a manufacturer number, words from the
  * description, or the part's bin (11/2, as the Parts page finds it: A-03-12, A 03 12 or A/03/12, a bin's first pieces
- * like A-03 for a whole shelf, or Rack A). Exact number matches come first. Never guesses between look-alikes —
- * returns a short list.
+ * like A-03 for a whole shelf, or Rack A; a word alone like "bin" still finds parts by their words). Exact number
+ * matches come first. Never guesses between look-alikes — returns a short list.
  */
 export function searchItems<T extends Pick<BillingItem, "item" | "description" | "mfrPart" | "previousNumbers" | "bin">>(
   query: string,
@@ -133,19 +146,20 @@ export function searchItems<T extends Pick<BillingItem, "item" | "description" |
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
-    const typed = typedBin(q);
+    const typed = looksLikeBinCode(q) ? typedBin(q) : "";
+    const phrase = looksLikeBinWords(q) ? ` ${q.toLowerCase().replace(/\s+/g, " ").trim()} ` : "";
     let score = 0;
     if (nq && (sku === nq || mfr === nq)) score = 100;
     // An old number merged into this part finds it, just after a part that has the number now.
     else if (nq && was.includes(nq)) score = 90;
     // Its bin, typed whole.
-    else if (bin && typed === bin) score = 80;
+    else if (bin && typed && typed === bin) score = 80;
     else if (nq.length >= 3 && (sku.startsWith(nq) || mfr.startsWith(nq))) score = 60;
     else if (nq.length >= 3 && was.some((w) => w.startsWith(nq))) score = 55;
     // The first pieces of its bin: a rack and shelf (A-03) finds that shelf's parts.
-    else if (bin && typed.includes("-") && bin.startsWith(`${typed}-`)) score = 50;
-    // Its bin in words, typed whole: "Rack A", "Shelf 03".
-    else if (binWords && binWords.includes(q.toLowerCase().replace(/\s+/g, " "))) score = 40;
+    else if (bin && typed && bin.startsWith(`${typed}-`)) score = 50;
+    // Its bin in words, whole words in order: "Rack A", "Shelf 03" (not Rack AB).
+    else if (binWords && phrase && ` ${binWords} `.includes(phrase)) score = 40;
     else if (words.every((w) => name.includes(w) || desc.includes(w))) score = 30;
     if (score) scored.push({ item: it, score });
   }

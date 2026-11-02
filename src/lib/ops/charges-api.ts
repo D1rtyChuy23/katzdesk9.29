@@ -22,6 +22,8 @@ import {
   cleanSalesOrder,
   itemRowsFromSheets,
   kindForItem,
+  looksLikeBinCode,
+  looksLikeBinWords,
   normalizePartNo,
   priceChange,
   round2,
@@ -112,16 +114,20 @@ export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string
       where active
         and hidden_at is null
         and (item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
-             -- Its bin (11/2): A-03-12, A 03 12 or A/03/12, or Rack A, as the Parts page finds it.
-             or concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $3
-             or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1
+             -- Its bin (11/2): A-03-12, A 03 12 or A/03/12, or Rack A, as the Parts page finds it. Only for what is typed
+             -- like a bin, so "bin" alone finds the parts named bin rather than every part with one.
+             or ($3::text is not null and concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $3)
+             or ($4::boolean and concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1)
              or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
                                or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%'))
              -- An old number merged into a part finds that part (10/28).
              or exists (select 1 from unnest(previous_numbers) pn
                          where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))
+      -- Parts found by their name, number or words come before parts found by their bin alone, so a long list of one
+      -- doesn't crowd out the other.
+      order by (item ilike $1 or sku ilike $1 or description ilike $1 or coalesce(mfr_part, '') ilike $1) desc, lower(item)
       limit 300`,
-    [`%${q}%`, nq, `%${binSearchCode(q)}%`],
+    [`%${q}%`, nq, looksLikeBinCode(q) ? `%${binSearchCode(q)}%` : null, looksLikeBinWords(q)],
   );
   return searchItems(q, rows.map(toItem), 12);
 }

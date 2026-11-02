@@ -24,6 +24,8 @@ export type RenameCounts = {
   deals: number;
   equipment: number;
   woHistory: number;
+  /** Rebuilds on the board (11/2): they follow the account too. */
+  rebuilds?: number;
 };
 
 /** The account that already has the typed name. */
@@ -92,6 +94,7 @@ export function countsText(c: RenameCounts): string {
     c.pms ? count(c.pms, "PM", "PMs") : "",
     c.installs ? count(c.installs, "install", "installs") : "",
     c.deals ? count(c.deals, "deal", "deals") : "",
+    c.rebuilds ? count(c.rebuilds, "rebuild", "rebuilds") : "",
     c.equipment ? count(c.equipment, "piece of equipment", "pieces of equipment") : "",
     c.woHistory ? count(c.woHistory, "QuickBooks work order", "QuickBooks work orders") : "",
   ].filter(Boolean);
