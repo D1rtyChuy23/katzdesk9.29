@@ -26,8 +26,10 @@ update teams_chats set about = 'Each tech''s open calls, the calls outside DFW a
 -- The weekly Purchase Order report as each Friday 5 PM pulled it. The first look at the Teams chats after that time
 -- saves the week's pull, so Monday reads exactly what was pulled. `uses` is what this pull reported for each ticket
 -- and part ({k: ticket, p: part, q: pieces}, the change since the pulls before it), so the next pull reports only
--- what is new and nothing twice. `report` is the parts the note lists ({maker, sku, label, pieces}).
+-- what is new. `report` is the parts the note lists ({maker, sku, label, pieces}). `seq` keeps the pulls in one
+-- line: each is worked out against every pull before it, so two can't both be saved as the next one.
 create table if not exists teams_po_pulls (
+  seq        int not null unique,
   week_to    date primary key,
   week_from  date not null,
   pulled_at  timestamptz not null default now(),

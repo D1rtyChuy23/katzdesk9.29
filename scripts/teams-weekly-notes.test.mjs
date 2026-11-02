@@ -37,27 +37,47 @@ test("the hour is Chicago's, before and after daylight saving ends", () => {
   assert.equal(weekDayLabel("2026-10-30"), "Fri Oct 30");
 });
 
-test("a pull reports what is new since the pulls before it, and nothing twice", () => {
-  const u = (k, p, q) => ({ k, p, q });
-  const earlier = [u("service:1", 10, 2), u("service:2", 11, 1), u("pm:3", 12, 1), u("service:4", 99, 1)];
+test("a pull reports what is new since the pulls before it, and a use already reported never again", () => {
+  const u = (k, p, q, day = "2026-11-03") => ({ k, p, q, day });
+  const r = (k, p, q) => ({ k, p, q });
+  const win = { from: "2026-10-24", to: "2026-11-06" };
+  const earlier = [r("service:1", 10, 2), r("service:2", 11, 1), r("pm:3", 12, 1), r("service:4", 99, 1), r("service:6", 10, 2), r("service:7", 10, 3)];
   const now = [
     // Same as reported: nothing.
     u("service:1", 10, 2),
     // One more piece on the same ticket.
     u("service:2", 11, 2),
-    // A use entered late, or back-dated into a week already pulled: new.
-    u("service:5", 10, 3),
-    // pm:3's piece was taken off: -1 below.
-    // Part 99 was merged into 13 since: the same use, not a new one.
+    // Not reported yet, and back-dated into a week already pulled: new.
+    u("service:5", 10, 3, "2026-10-28"),
+    // Half a piece taken off.
+    u("pm:3", 12, 0.5),
+    // Part 99 was merged into 13 since: the same use.
     u("service:4", 13, 1),
+    // Reported, then its date moved past this Friday: still the same use.
+    u("service:6", 10, 2, "2026-11-18"),
+    // Not reported, dated next week or not at all: waits.
+    u("service:8", 10, 4, "2026-11-09"),
+    u("service:9", 10, 1, null),
+    // service:7 is gone: merged into install 5, whose invoice isn't approved yet.
   ];
-  assert.deepEqual(pullChanges(now, earlier, new Map([[99, 13]])), [u("pm:3", 12, -1), u("service:2", 11, 1), u("service:5", 10, 3)]);
-  // Without knowing the merge, part 13 would read new and part 99 taken off.
-  assert.deepEqual(pullChanges(now, earlier), [u("pm:3", 12, -1), u("service:2", 11, 1), u("service:4", 13, 1), u("service:4", 99, -1), u("service:5", 10, 3)]);
-  // Two pulls before: each one's change adds up.
-  assert.deepEqual(pullChanges([u("service:1", 10, 5)], [u("service:1", 10, 2), u("service:1", 10, 1)]), [u("service:1", 10, 2)]);
-  assert.deepEqual(pullChanges([u("service:1", 10, 0.1), u("service:1", 10, 0.2)], [u("service:1", 10, 0.3)]), []);
-  assert.deepEqual([...piecesByPart([u("a", 10, 2), u("b", 10, 1.5), u("c", 11, -1)]).entries()], [[10, 3.5], [11, -1]]);
+  const moved = (k) => (k === "service:7" ? "install:5" : k);
+  assert.deepEqual(pullChanges(now, earlier, win, moved, new Map([[99, 13]])), [r("pm:3", 12, -0.5), r("service:2", 11, 1), r("service:5", 10, 3)]);
+  // Once install 5's invoice is approved its use is the one service:7 reported: nothing new, whatever its date.
+  assert.deepEqual(pullChanges([u("install:5", 10, 3, "2026-11-20")], [r("service:7", 10, 3)], win, moved), []);
+  assert.deepEqual(pullChanges([u("install:5", 10, 4)], [r("service:7", 10, 3)], win, moved), [r("install:5", 10, 1)]);
+  // Not knowing where a ticket went, its new record would read new.
+  assert.deepEqual(pullChanges([u("install:5", 10, 3)], [r("service:7", 10, 3)], win), [r("install:5", 10, 3)]);
+  // Not knowing the part merge, part 13 would read new.
+  assert.deepEqual(pullChanges([u("service:4", 13, 1)], [r("service:4", 99, 1)], win), [r("service:4", 13, 1)]);
+  // Two pulls before add up; pieces are rounded to the cent.
+  assert.deepEqual(pullChanges([u("service:1", 10, 5)], [r("service:1", 10, 2), r("service:1", 10, 1)], win), [r("service:1", 10, 2)]);
+  assert.deepEqual(pullChanges([u("service:1", 10, 0.1), u("service:1", 10, 0.2)], [r("service:1", 10, 0.3)], win), []);
+  // The window's first and last days count; the days either side don't.
+  assert.deepEqual(
+    pullChanges([u("a", 1, 1, "2026-10-24"), u("b", 1, 1, "2026-11-06"), u("c", 1, 1, "2026-10-23"), u("d", 1, 1, "2026-11-07")], [], win),
+    [r("a", 1, 1), r("b", 1, 1)],
+  );
+  assert.deepEqual([...piecesByPart([r("a", 10, 2), r("b", 10, 1.5), r("c", 11, -1)]).entries()], [[10, 3.5], [11, -1]]);
   assert.equal(pulledLabel("2026-10-30T22:30:00Z"), "Fri Oct 30 at 5:30 PM");
   assert.equal(pulledLabel("2026-11-07T00:05:00Z"), "Fri Nov 6 at 6:05 PM");
   assert.equal(pulledLabel("not a time"), "");
@@ -170,7 +190,7 @@ const part = (maker, sku, label, pieces) => ({ maker, sku, label, pieces });
 // Pulled Fri Oct 30, 2026 at 5:30 PM in Chicago (CDT).
 const PULLED = "2026-10-30T22:30:00Z";
 const week = (parts) => ({ from: "2026-10-24", to: "2026-10-30", pulledAt: PULLED, parts });
-const INTRO = "Parts and water filters used, by manufacturer, for the week Sat Oct 24 to Fri Oct 30, and any entered late from earlier weeks. Pulled Fri Oct 30 at 5:30 PM for Monday morning; nothing is counted twice. Place the orders in NetSuite.";
+const INTRO = "Parts and water filters used, by manufacturer, in the week Sat Oct 24 to Fri Oct 30, and any used earlier but entered since the last report. Pulled Fri Oct 30 at 5:30 PM for Monday morning. Place the orders in NetSuite.";
 
 test("the Purchase Order note lists every part used that week under its maker, most pieces first and Other last", () => {
   const po = {

@@ -92,6 +92,8 @@ await charge(sc902, "EQUIPMENT : ZZEQUIP1", 1);
 await charge(sc902, "PARTS : ZZOLD1", 1);
 const tlc = await job("TL-1", "Zz Blue Door", { kind: "tlc", completed: "2026-11-05" });
 await charge(tlc, "ZZTAMP", 1);
+const sc930 = await job("SC-930", "Zz Blue Door", { completed: "2026-11-03" });
+await charge(sc930, "ZZTAMP", 4);
 const sc904 = await job("SC-904", "Zz Katy Cafe", { completed: "2026-11-07" });
 await charge(sc904, "ZZTAMP", 6);
 const cancelled = await job("SC-905", "Zz Blue Door", { status: "Cancelled", completed: "2026-11-05" });
@@ -232,9 +234,9 @@ await sql.query(
 
 const card = async (id, now = NOW) => (await chatCards(sql, now)).find((c) => c.id === id);
 const text = async (id, now = NOW) => (await card(id, now)).text;
-const pulls = async () => (await sql.query("select week_to::text, week_from::text, uses from teams_po_pulls order by week_to")).map((r) => ({ ...r, uses: r.uses }));
+const pulls = async () => sql.query("select seq, week_to::text, week_from::text, uses from teams_po_pulls order by week_to");
 const intro = (from, to, pulled) =>
-  `Parts and water filters used, by manufacturer, for the week ${from} to ${to}, and any entered late from earlier weeks. Pulled ${pulled} for Monday morning; nothing is counted twice. Place the orders in NetSuite.`;
+  `Parts and water filters used, by manufacturer, in the week ${from} to ${to}, and any used earlier but entered since the last report. Pulled ${pulled} for Monday morning. Place the orders in NetSuite.`;
 
 test("Purchase Order Requests: each Friday 5 PM pulls the week, by manufacturer, parts and water filters only", async () => {
   // Before 5 PM on Friday it is still the week before: the first pull ever covers that week alone.
@@ -251,8 +253,9 @@ test("Purchase Order Requests: each Friday 5 PM pulls the week, by manufacturer,
       // No description: Bunn from its NetSuite group.
       "Bunn · 1 part, 3 pieces\n- ZZBUNN1 · 3",
       "Everpure · 1 part, 1 piece\n- WFZZ1 · Zz Cartridge · 1",
-      // The TLC visit's tamper. Not the equipment, the cancelled ticket, last week's (pulled already) or next week's.
-      "Other · 1 part, 1 piece\n- ZZTAMP · Zz Tamper · 1",
+      // The TLC visit's tamper and SC-930's four. Not the equipment, the cancelled ticket, last week's (pulled already)
+      // or next week's.
+      "Other · 1 part, 5 pieces\n- ZZTAMP · Zz Tamper · 5",
     ].join("\n\n"),
   );
   const saved = await pulls();
@@ -265,7 +268,9 @@ test("Purchase Order Requests: each Friday 5 PM pulls the week, by manufacturer,
   );
   // Each pull keeps what it reported, ticket by ticket: equipment too, though the note doesn't list it.
   assert.deepEqual(saved[0].uses, [{ k: `service:${sc903}`, p: tamp, q: 5 }]);
+  // Not the equipment either: only the parts the note lists go into a pull.
   assert.equal(saved[1].uses.length, 6);
+  assert.deepEqual(saved.map((p) => p.seq), [1, 2]);
 });
 
 test("Sean's note: serviced since his last note, open calls, the Pipeline and installs", async () => {
@@ -386,7 +391,7 @@ test("drafting the notes writes nothing once the week is pulled", async () => {
   assert.match(await text("rep-sean"), /- Zz Katy Cafe · 2026-11-11 · Needs pre-inspection pictures\n/);
 });
 
-test("the next Friday's pull has only what is new: late, back-dated, moved, and taken off", async () => {
+test("the next Friday's pull has only what is new: late, back-dated, moved, merged, and taken off", async () => {
   const before = await card("purchase-orders");
   await approveChat(sql, "admin", "purchase-orders", before.text, NOW);
   // Monday reads Friday's pull, still approved, even with parts entered since.
@@ -396,8 +401,12 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, and 
   // Back-dated into a week already pulled.
   const late = await job("SC-920", "Zz Katy Cafe", { completed: "2026-10-29" });
   await charge(late, "WATER FILTERS : WFZZ1", 1);
-  // A reported ticket's date moves into the next week: not counted again.
-  await sql.query("update service_jobs set completed_at = '2026-11-09' where id = $1", [sc902]);
+  // A reported ticket's date moves past the next Friday: not taken off, and not counted again later.
+  await sql.query("update service_jobs set completed_at = '2026-11-18' where id = $1", [sc902]);
+  // A reported ticket merged into an install, its charges copied onto the install's invoice, not approved yet.
+  await sql.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [sc930, i1]);
+  const inv = (await one("insert into invoices (entity_type, entity_id, customer) values ('install', $1, 'Zz Blue Door') returning id", [i1])).id;
+  await sql.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort) values ($1, 'ZZTAMP', '', 4, 10, 'part', 1)", [inv]);
   // A reported piece taken off.
   await sql.query("update ticket_charges set qty = 1 where job_id = $1 and item = 'PARTS : ZZEV1'", [sc901]);
   const next = await card("purchase-orders", NEXT_FRIDAY);
@@ -414,5 +423,24 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, and 
   );
   // Looking again doesn't pull again.
   assert.equal((await card("purchase-orders", new Date("2026-11-16T14:00:00Z"))).text, next.text);
-  assert.equal((await pulls()).length, 3);
+  // The install's invoice is approved: SC-930's four are the ones reported already. The moved SC-902 isn't new either.
+  await sql.query("update invoices set approved_at = '2026-11-16T15:00:00Z', approved_by = 'Chuy' where id = $1", [inv]);
+  assert.equal(await text("purchase-orders", new Date("2026-11-20T23:30:00Z")), `${intro("Sat Nov 14", "Fri Nov 20", "Fri Nov 20 at 5:30 PM")}\n\nNone used that week.`);
+  // Nobody looks the week after. The next pull, a week later, has that week's parts too.
+  const sc940 = await job("SC-940", "Zz Katy Cafe", { completed: "2026-11-25" });
+  await charge(sc940, "ZZTAMP", 2);
+  const december = await text("purchase-orders", new Date("2026-12-04T23:30:00Z"));
+  assert.equal(december, `${intro("Sat Nov 28", "Fri Dec 4", "Fri Dec 4 at 5:30 PM")}\n\nOther · 1 part, 2 pieces\n- ZZTAMP · Zz Tamper · 2`);
+  // A look whose clock is behind (the skipped week's Friday evening) shows the newest pull and saves nothing older.
+  assert.equal(await text("purchase-orders", new Date("2026-11-27T23:30:00Z")), december);
+  assert.deepEqual(
+    (await pulls()).map((p) => [p.seq, p.week_to]),
+    [
+      [1, "2026-10-30"],
+      [2, "2026-11-06"],
+      [3, "2026-11-13"],
+      [4, "2026-11-20"],
+      [5, "2026-12-04"],
+    ],
+  );
 });

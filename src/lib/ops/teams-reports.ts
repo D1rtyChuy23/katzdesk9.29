@@ -20,7 +20,7 @@ import { machineNotesMissing, picturesNeeded, type PictureUnit } from "@/lib/ops
 import { parseMachinesJson, specsFromInstall } from "@/lib/ops/machines";
 import { profitByMpn, profitTotals } from "@/lib/ops/part-pricing";
 import { loadPartUses } from "@/lib/ops/part-usage-api";
-import { chicagoClock, countsForPo, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, type LedgerUse } from "@/lib/ops/po-report";
+import { chicagoClock, countsForPo, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, type CurrentUse, type LedgerUse } from "@/lib/ops/po-report";
 import { isPreInspected, unitKind } from "@/lib/ops/pre-inspection";
 import { accountRepFor, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
 import { isOpenCall } from "@/lib/ops/ticket-status";
@@ -92,73 +92,137 @@ const flat = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 const blankLast = (a: string, b: string) => (a === b ? 0 : !a ? 1 : !b ? -1 : a < b ? -1 : 1);
 
 
-/** A saved weekly pull, as the note shows it. */
-async function savedPull(sql: Sql, to: string): Promise<PoReport | null> {
-  const rows = await sql.query<{ week_from: string; week_to: string; pulled_at: string; report: unknown }>(
-    `select week_from::text, week_to::text, to_char(pulled_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as pulled_at, report
-       from teams_po_pulls where week_to = $1::date`,
-    [to],
+type PullRow = { seq: number; week_from: string; week_to: string; pulled_at: string; uses: unknown; report: unknown };
+
+const fromJson = <T,>(v: unknown): T[] => {
+  const list = typeof v === "string" ? JSON.parse(v) : v;
+  return Array.isArray(list) ? (list as T[]) : [];
+};
+
+const asReport = (r: PullRow): PoReport => ({ from: r.week_from.slice(0, 10), to: r.week_to.slice(0, 10), pulledAt: r.pulled_at, parts: fromJson<PoPart>(r.report) });
+
+/** Every saved pull, oldest first. */
+async function savedPulls(sql: Sql): Promise<PullRow[]> {
+  return sql.query<PullRow>(
+    `select seq, week_from::text, week_to::text, to_char(pulled_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as pulled_at, uses, report
+       from teams_po_pulls order by seq`,
   );
-  const hit = rows[0];
-  if (!hit) return null;
-  const report = (typeof hit.report === "string" ? JSON.parse(hit.report) : hit.report) as PoPart[];
-  return { from: hit.week_from.slice(0, 10), to: hit.week_to.slice(0, 10), pulledAt: hit.pulled_at, parts: Array.isArray(report) ? report : [] };
+}
+
+/**
+ * Where a reported use's ticket counts now, as Parts → Usage counts it: a ticket merged into an install is the
+ * install's, one merged into another ticket is that ticket's, a PM billed on a ticket is the ticket's, and an install
+ * merged into another (archived as its duplicate) is that one's.
+ */
+async function movedTickets(sql: Sql): Promise<(k: string) => string> {
+  const jobs = new Map(
+    (
+      await sql.query<{ id: number; kind: string; duplicate_of: number | null; merged_install_id: number | null }>(
+        "select id, kind, duplicate_of, merged_install_id from service_jobs where duplicate_of is not null or merged_install_id is not null",
+      )
+    ).map((r) => [Number(r.id), r]),
+  );
+  const stacked = new Map(
+    (await sql.query<{ id: number; stacked_job_id: number }>("select id, stacked_job_id from pm_jobs where stacked_job_id is not null")).map((r) => [
+      Number(r.id),
+      Number(r.stacked_job_id),
+    ]),
+  );
+  const installs = new Map(
+    (await sql.query<{ id: number; duplicate_of: number }>("select id, duplicate_of from installs where archived and duplicate_of is not null")).map((r) => [
+      Number(r.id),
+      Number(r.duplicate_of),
+    ]),
+  );
+  const keepers = [...new Set([...[...jobs.values()].map((j) => Number(j.duplicate_of)), ...stacked.values()].filter((id) => id > 0))];
+  const kinds = new Map(
+    keepers.length
+      ? (await sql.query<{ id: number; kind: string }>("select id, kind from service_jobs where id = any($1::int[])", [keepers])).map((r) => [Number(r.id), r.kind])
+      : [],
+  );
+  return (k: string) => {
+    let at = k;
+    for (let hop = 0; hop < 6; hop++) {
+      const [type, raw] = at.split(":");
+      const id = Number(raw);
+      let next: string | null = null;
+      if (type === "service" || type === "tlc") {
+        const j = jobs.get(id);
+        if (j?.merged_install_id) next = `install:${j.merged_install_id}`;
+        else if (j?.duplicate_of && Number(j.duplicate_of) !== id) next = `${kinds.get(Number(j.duplicate_of)) ?? type}:${j.duplicate_of}`;
+      } else if (type === "pm") {
+        const s = stacked.get(id);
+        if (s) next = `${kinds.get(s) ?? "service"}:${s}`;
+      } else if (type === "install") {
+        const d = installs.get(id);
+        if (d && d !== id) next = `install:${d}`;
+      }
+      if (!next || next === at) break;
+      at = next;
+    }
+    return at;
+  };
 }
 
 /**
  * The weekly Purchase Order report (Chuy, 11/2): the parts and water filters used, by manufacturer, as pulled once a
  * week. The first look after Friday 5 PM pulls that week and saves it, so Monday morning reads exactly what was pulled
  * and an approved report stays approved. Uses are counted the way Parts → Usage counts a part's uses (tickets,
- * approved invoices, PM machine parts and WO part lines, a merged part as the part it went into), dated through that
- * Friday. Each pull keeps what it reported for each ticket and part, so the next one has only what is new since: a use
- * entered late or back-dated, a use whose date moved, and pieces added or taken off a ticket are each counted once.
- * The first pull ever covers its own week; the next ones go back to that week's Saturday.
+ * approved invoices, PM machine parts and WO part lines, a merged part as the part it went into); only parts the note
+ * lists go into a pull. Each pull keeps what it reported for each ticket and part, so the next has only what's new
+ * (see pullChanges). The first pull ever covers its own week; the next ones go back to that week's Saturday.
+ * Pulls are kept in one line (`seq`): two looks at once save one pull, and a look whose clock is behind never saves
+ * a week older than one already pulled.
  */
 async function loadPoReport(sql: Sql, now: Date): Promise<PoReport> {
   const { date, hour } = chicagoClock(now);
   const week = poReportWeek(date, hour);
-  const saved = await savedPull(sql, week.to);
-  if (saved) return saved;
-  const earlier = await sql.query<{ week_from: string; uses: unknown }>(
-    "select week_from::text, uses from teams_po_pulls where week_to < $1::date order by week_to",
-    [week.to],
-  );
-  const start = earlier.length ? earlier.map((r) => r.week_from.slice(0, 10)).sort()[0]! : week.from;
-  const reported: LedgerUse[] = earlier.flatMap((r) => {
-    const list = (typeof r.uses === "string" ? JSON.parse(r.uses) : r.uses) as LedgerUse[];
-    return Array.isArray(list) ? list : [];
-  });
-  const merged = new Map(
-    (await sql.query<{ id: number; merged_into: number }>("select id, merged_into from billing_items where merged_into is not null")).map((r) => [
-      Number(r.id),
-      Number(r.merged_into),
-    ]),
-  );
-  const uses: LedgerUse[] = (await loadPartUses(sql, { from: start, to: week.to })).map((u) => ({ k: u.ticketKey, p: u.partId, q: u.pieces }));
-  const changes = pullChanges(uses, reported, merged);
-  const pieces = piecesByPart(changes);
-  const ids = [...pieces.keys()];
-  const rows = ids.length
-    ? await sql.query<{ id: number; sku: string; parent: string | null; item: string; description: string | null; item_class: string | null; kind: string }>(
-        "select id, sku, parent, item, description, item_class, kind from billing_items where id = any($1::int[]) order by id",
-        [ids],
-      )
-    : [];
-  const parts: PoPart[] = [];
-  for (const r of rows) {
-    const n = pieces.get(Number(r.id)) ?? 0;
-    if (!n || !countsForPo({ itemClass: r.item_class, kind: r.kind })) continue;
-    const maker = partMaker(r);
-    parts.push({ maker, sku: flat(r.sku), label: flat(partLabel(r, maker)), pieces: n });
+  let last: PoReport | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const pulls = await savedPulls(sql);
+    const own = pulls.find((r) => r.week_to.slice(0, 10) === week.to);
+    if (own) return asReport(own);
+    const newest = pulls.reduce<PullRow | null>((a, r) => (!a || r.week_to > a.week_to ? r : a), null);
+    // A week already pulled is newer than this clock's: show that one, and save nothing.
+    if (newest && newest.week_to.slice(0, 10) > week.to) return asReport(newest);
+    const start = pulls.length ? pulls.map((r) => r.week_from.slice(0, 10)).sort()[0]! : week.from;
+    const reported = pulls.flatMap((r) => fromJson<LedgerUse>(r.uses));
+    const merged = new Map(
+      (await sql.query<{ id: number; merged_into: number }>("select id, merged_into from billing_items where merged_into is not null")).map((r) => [
+        Number(r.id),
+        Number(r.merged_into),
+      ]),
+    );
+    const uses = await loadPartUses(sql, {});
+    const ids = [...new Set(uses.map((u) => u.partId))];
+    const rows = ids.length
+      ? await sql.query<{ id: number; sku: string; parent: string | null; item: string; description: string | null; item_class: string | null; kind: string }>(
+          "select id, sku, parent, item, description, item_class, kind from billing_items where id = any($1::int[]) order by id",
+          [ids],
+        )
+      : [];
+    const counted = new Map(rows.filter((r) => countsForPo({ itemClass: r.item_class, kind: r.kind })).map((r) => [Number(r.id), r]));
+    const current: CurrentUse[] = uses.filter((u) => counted.has(u.partId)).map((u) => ({ k: u.ticketKey, p: u.partId, q: u.pieces, day: u.usedOn }));
+    const changes = pullChanges(current, reported, { from: start, to: week.to }, await movedTickets(sql), merged);
+    const parts: PoPart[] = [];
+    for (const [id, n] of piecesByPart(changes)) {
+      const r = counted.get(id);
+      if (!r || !n) continue;
+      const maker = partMaker(r);
+      parts.push({ maker, sku: flat(r.sku), label: flat(partLabel(r, maker)), pieces: n });
+    }
+    last = { ...week, pulledAt: now.toISOString(), parts };
+    const seq = pulls.reduce((n, r) => Math.max(n, Number(r.seq)), 0) + 1;
+    // Saved only as the next in line, and only when no pull is this week's or newer.
+    await sql.query(
+      `insert into teams_po_pulls (seq, week_to, week_from, pulled_at, uses, report)
+       select $1, $2::date, $3::date, $4::timestamptz, $5::jsonb, $6::jsonb
+        where not exists (select 1 from teams_po_pulls where week_to >= $2::date)
+       on conflict do nothing`,
+      [seq, week.to, week.from, now.toISOString(), JSON.stringify(changes), JSON.stringify(parts)],
+    );
   }
-  // One pull per week: when two looks pull at once, the first saved is the week's.
-  await sql.query(
-    `insert into teams_po_pulls (week_to, week_from, pulled_at, uses, report)
-     values ($1::date, $2::date, $3::timestamptz, $4::jsonb, $5::jsonb)
-     on conflict (week_to) do nothing`,
-    [week.to, week.from, now.toISOString(), JSON.stringify(changes), JSON.stringify(parts)],
-  );
-  return (await savedPull(sql, week.to)) ?? { ...week, pulledAt: now.toISOString(), parts };
+  return last ?? { ...week, pulledAt: now.toISOString(), parts: [] };
 }
 
 /**

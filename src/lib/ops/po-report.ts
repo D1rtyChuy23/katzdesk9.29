@@ -2,7 +2,8 @@
  * The weekly Purchase Order report for Teams (Chuy, 11/2): the parts and water filters used in a week, grouped by
  * manufacturer, with a count for each, to know what to reorder. It is pulled on Friday evening and read on Monday
  * morning. Each pull keeps what it reported, so the next one lists only what is new: a part entered late or
- * back-dated is on the next report, and none is counted twice. Pure: no server imports, safe for node --test.
+ * back-dated is on the next report, and a use already reported isn't reported again. Pure: no server imports, safe
+ * for node --test.
  */
 
 /** The report's week ends on a Friday and turns over at this hour, Chicago time (5 PM). */
@@ -62,26 +63,57 @@ export type LedgerUse = { k: string; p: number; q: number };
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
+/** A use as it stands now: its ticket, part and pieces, and its day (the ticket's completed, scheduled or received day). */
+export type CurrentUse = LedgerUse & { day: string | null };
+
 /**
- * What a new pull reports: each ticket's pieces of each part now, less what earlier pulls reported for that ticket and
- * part. A use entered late or back-dated is new; one whose date moved is not counted again; a ticket whose pieces went
- * down gives a negative change. An earlier pull's part that has since been merged counts as the part it went into.
+ * What a new pull reports, against what the pulls before it reported (`earlier`).
+ * - A use reported before: the change in its pieces, whatever its day is now, so a moved date is never a new use and
+ *   pieces added or taken off later are counted once. One that is gone altogether is left as reported: it has moved
+ *   to a record that doesn't count yet (a ticket merged into an install whose invoice isn't approved), or was
+ *   cancelled or reclassed, and if it comes back it isn't new.
+ * - A use not reported yet: its pieces, when its day is in `window` (the ledger's first Saturday through this pull's
+ *   Friday). One dated later waits for its own week.
+ * `moved` says where an earlier use's ticket counts now (a merged ticket, a PM billed on a ticket, a merged install);
+ * `mergedInto`, the part a merged part went into.
  */
-export function pullChanges(now: LedgerUse[], earlier: LedgerUse[], mergedInto: ReadonlyMap<number, number> = new Map()): LedgerUse[] {
+export function pullChanges(
+  now: CurrentUse[],
+  earlier: LedgerUse[],
+  window: { from: string; to: string },
+  moved: (k: string) => string = (k) => k,
+  mergedInto: ReadonlyMap<number, number> = new Map(),
+): LedgerUse[] {
   const key = (k: string, p: number) => `${k}\u0000${p}`;
-  const sums = new Map<string, LedgerUse>();
-  const add = (k: string, p: number, q: number) => {
-    const at = key(k, p);
-    const hit = sums.get(at);
-    if (hit) hit.q += q;
-    else sums.set(at, { k, p, q });
-  };
-  for (const u of now) add(u.k, u.p, u.q);
-  for (const u of earlier) add(u.k, mergedInto.get(u.p) ?? u.p, -u.q);
-  return [...sums.values()]
-    .map((u) => ({ ...u, q: round2(u.q) }))
-    .filter((u) => u.q !== 0)
-    .sort((a, b) => a.k.localeCompare(b.k) || a.p - b.p);
+  const reported = new Map<string, LedgerUse>();
+  for (const u of earlier) {
+    const k = moved(u.k);
+    const p = mergedInto.get(u.p) ?? u.p;
+    const hit = reported.get(key(k, p));
+    if (hit) hit.q += u.q;
+    else reported.set(key(k, p), { k, p, q: u.q });
+  }
+  const current = new Map<string, CurrentUse>();
+  for (const u of now) {
+    const hit = current.get(key(u.k, u.p));
+    if (hit) {
+      hit.q += u.q;
+      if ((u.day ?? "") > (hit.day ?? "")) hit.day = u.day;
+    } else current.set(key(u.k, u.p), { ...u });
+  }
+  const out: LedgerUse[] = [];
+  for (const [at, r] of reported) {
+    const c = current.get(at);
+    if (!c) continue;
+    const q = round2(c.q - r.q);
+    if (q) out.push({ k: r.k, p: r.p, q });
+  }
+  for (const [at, c] of current) {
+    if (reported.has(at) || !c.day || c.day < window.from || c.day > window.to) continue;
+    const q = round2(c.q);
+    if (q) out.push({ k: c.k, p: c.p, q });
+  }
+  return out.sort((a, b) => (a.k < b.k ? -1 : a.k > b.k ? 1 : a.p - b.p));
 }
 
 /** Each part's pieces across a pull's changes. */

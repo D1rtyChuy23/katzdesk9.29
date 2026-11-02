@@ -259,7 +259,7 @@ const machineNames = (list: string[]) => [...new Set(list.map((m) => m.trim()).f
  */
 function poText(po: PoReport | undefined): string {
   const intro = po
-    ? `Parts and water filters used, by manufacturer, for the week ${weekDayLabel(po.from)} to ${weekDayLabel(po.to)}, and any entered late from earlier weeks. Pulled ${pulledLabel(po.pulledAt)} for Monday morning; nothing is counted twice. Place the orders in NetSuite.`
+    ? `Parts and water filters used, by manufacturer, in the week ${weekDayLabel(po.from)} to ${weekDayLabel(po.to)}, and any used earlier but entered since the last report. Pulled ${pulledLabel(po.pulledAt)} for Monday morning. Place the orders in NetSuite.`
     : "Parts and water filters used last week, by manufacturer.";
   const parts = po?.parts ?? [];
   const used = parts.filter((p) => p.pieces > 0);
