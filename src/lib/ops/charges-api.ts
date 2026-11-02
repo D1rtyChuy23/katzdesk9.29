@@ -101,6 +101,17 @@ export const searchBillingItems = createServerFn({ method: "POST" })
   .validator((d: { q: string }) => z.object({ q: z.string().max(120) }).parse(d))
   .handler(async ({ data }): Promise<BillingItem[]> => searchBillingItemsFor(await ready(), data.q));
 
+/**
+ * SQL: a part found by its name, number, words or an old number merged into it ($1 the text as ilike, $2 the number
+ * with letters and digits only).
+ */
+const PART_TEXT_MATCH = `(item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
+       or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
+                         or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%'))
+       -- An old number merged into a part finds that part (10/28).
+       or exists (select 1 from unnest(previous_numbers) pn
+                   where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))`;
+
 /** The body of searchBillingItems: every part picker (tickets, quotes, invoices, PM machine parts) reads it. */
 export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string): Promise<BillingItem[]> {
   const q = raw.trim();
@@ -113,19 +124,14 @@ export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string
        from billing_items
       where active
         and hidden_at is null
-        and (item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
+        and (${PART_TEXT_MATCH}
              -- Its bin (11/2): A-03-12, A 03 12 or A/03/12, or Rack A, as the Parts page finds it. Only for what is typed
              -- like a bin, so "bin" alone finds the parts named bin rather than every part with one.
              or ($3::text is not null and concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $3)
-             or ($4::boolean and concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1)
-             or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
-                               or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%'))
-             -- An old number merged into a part finds that part (10/28).
-             or exists (select 1 from unnest(previous_numbers) pn
-                         where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))
-      -- Parts found by their name, number or words come before parts found by their bin alone, so a long list of one
-      -- doesn't crowd out the other.
-      order by (item ilike $1 or sku ilike $1 or description ilike $1 or coalesce(mfr_part, '') ilike $1) desc, lower(item)
+             or ($4::boolean and concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1))
+      -- A part found by its name or number comes before the parts found by their bin alone, so a shelf of parts never
+      -- crowds an exact part number out of what is read.
+      order by coalesce(${PART_TEXT_MATCH}, false) desc, lower(item)
       limit 300`,
     [`%${q}%`, nq, looksLikeBinCode(q) ? `%${binSearchCode(q)}%` : null, looksLikeBinWords(q)],
   );

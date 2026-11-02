@@ -128,6 +128,13 @@ test("every part picker searches bins on the server too, and each result carries
     await pg.query("insert into billing_items (sku, parent, item, description, rate, kind) values ('TESTGB', 'PARTS', 'PARTS : TESTGB', 'Test grounds bin', 5, 'part')");
     assert.deepEqual(await skus("bin"), ["TESTBIN1", "TESTBIN2", "TESTBIN3", "TESTGB"]);
     assert.equal((await skus("Rack B")).length, 12, "a rack in words still finds its parts");
+    // A shelf with more parts than the server reads at once never crowds out a part whose number is what was typed.
+    await pg.query(
+      `insert into billing_items (sku, parent, item, description, rate, kind, bin_rack, bin_shelf, bin_bin)
+       select 'TESTSHELF' || n, 'PARTS', 'PARTS : TESTSHELF' || n, 'Test shelf filler', 5, 'part', 'D', '04', n::text from generate_series(1, 320) n`,
+    );
+    await pg.query("insert into billing_items (sku, parent, item, description, rate, kind) values ('D04', 'PARTS', 'PARTS : D04', 'Test exact number', 5, 'part')");
+    assert.equal((await skus("D-04"))[0], "D04", "the part number first, then that shelf's parts");
     const picker = readFileSync(new URL("../src/components/desk/charges-panel.tsx", import.meta.url), "utf8");
     assert.match(picker, /\{binText\(it\.bin\) \? <span data-testid="part-result-bin">\{binText\(it\.bin\)\}<\/span> : null\}/, "the picker shows the bin");
   } finally {
