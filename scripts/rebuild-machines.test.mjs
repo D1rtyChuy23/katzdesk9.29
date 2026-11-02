@@ -556,6 +556,12 @@ test("the owner's lock keeps a unit where it is: its machine stays on the refurb
       `2 machines went into stock at the Staging area, marked needs shop test. Test kettle SN TESTSN-L4 wasn't put in stock: its unit is locked by boss.${again}`,
     );
     assert.deepEqual([(await unitRow(pg, u)).site, (await unitRow(pg, v)).site], ["staging", "staging"]);
+    // A unit that went into stock from a refurb before, pulled onto another one and locked there: its note is the lock.
+    const sd3 = await rebuild(pg, "Test third refurb", SD);
+    await R.pullRebuildMachineFor(sql, { id: sd3, serial: "TESTSN-L1", confirmReuse: true }, "u-wh");
+    await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [u]);
+    const done3 = await R.updateRebuildFor(sql, { id: sd3, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    assert.equal(done3.stockNote, `Test grinder SN TESTSN-L1 wasn't put in stock: its unit is locked by boss.${again}`);
     // A unit whose serial is locked on an account while it is pulled keeps its machine too.
     const sd2 = await rebuild(pg, "Test second refurb", SD);
     const q = await unit(pg, "TESTSN-L5", { pallet: "B", level: 4 });
