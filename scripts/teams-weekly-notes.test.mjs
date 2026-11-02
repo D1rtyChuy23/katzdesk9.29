@@ -181,10 +181,10 @@ test("the Purchase Order note lists every part used that week under its maker, m
       part(OTHER_MAKER, "ZZOTHER1", "Zz Tamper", 9),
       part("Bunn", "BUNNZZ2", "ZZ GASKET", 1),
       part("Eversys", "EVERZZ1", "Zz O-Ring", 4),
-      part("Bunn", "BUNNZZ1", "ZZ SWITCH", 3),
+      part("Bunn", "BUNNZZ1", "ZZ SWITCH", 1),
       part("Eversys", "EVERZZ2", "Zz Thermostat", 1.5),
       part("Ditting", "DITZZ1", "Zz Burrs", 4),
-      part("Bunn", "BUNNZZ3", "ZZ VALVE", 1),
+      part("Bunn", "BUNNZZ3", "ZZ VALVE", 3),
     ],
   };
   assert.equal(
@@ -192,7 +192,8 @@ test("the Purchase Order note lists every part used that week under its maker, m
     [
       INTRO,
       "Eversys · 2 parts, 5.5 pieces\n- EVERZZ1 · Zz O-Ring · 4\n- EVERZZ2 · Zz Thermostat · 1.5",
-      "Bunn · 3 parts, 5 pieces\n- BUNNZZ1 · ZZ SWITCH · 3\n- BUNNZZ2 · ZZ GASKET · 1\n- BUNNZZ3 · ZZ VALVE · 1",
+      // Most pieces first, then by SKU.
+      "Bunn · 3 parts, 5 pieces\n- BUNNZZ3 · ZZ VALVE · 3\n- BUNNZZ1 · ZZ SWITCH · 1\n- BUNNZZ2 · ZZ GASKET · 1",
       "Ditting · 1 part, 4 pieces\n- DITZZ1 · Zz Burrs · 4",
       "Other · 1 part, 9 pieces\n- ZZOTHER1 · Zz Tamper · 9",
     ].join("\n\n"),
