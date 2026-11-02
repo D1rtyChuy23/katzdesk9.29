@@ -19,8 +19,9 @@ import { catalogNames, unitChecks } from "@/lib/ops/inspection-api";
 import { machineNotesMissing, picturesNeeded, type PictureUnit } from "@/lib/ops/install-needs";
 import { parseMachinesJson, specsFromInstall } from "@/lib/ops/machines";
 import { profitByMpn, profitTotals } from "@/lib/ops/part-pricing";
-import { loadPartUses } from "@/lib/ops/part-usage-api";
-import { chicagoClock, countsForPo, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, type CurrentUse, type LedgerUse } from "@/lib/ops/po-report";
+import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
+import { PART_USES_CTE } from "@/lib/ops/part-usage-api";
+import { chicagoClock, countsForPo, laterPieces, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, useKey, type CurrentUse, type LedgerUse, type RankedUse } from "@/lib/ops/po-report";
 import { isPreInspected, unitKind } from "@/lib/ops/pre-inspection";
 import { accountRepFor, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
 import { isOpenCall } from "@/lib/ops/ticket-status";
@@ -169,6 +170,69 @@ async function movedTickets(sql: Sql): Promise<(k: string) => string> {
 }
 
 /**
+ * The uses Parts → Usage counts, one per record and part (PART_USES_CTE, as loadPartUses reads them), each with the
+ * rank of what it was read from: 1 a ticket's charges or an approved invoice, 2 a PM's machine parts, 3 QuickBooks,
+ * 4 and 5 WO part lines.
+ */
+export async function poUses(sql: Sql): Promise<RankedUse[]> {
+  const rows = await sql.query<{ ticket_key: string; part_id: number; used_on: string | null; qty: number; rank: number }>(
+    `with ${PART_USES_CTE}
+     select ticket_key, part_id, max(used_on)::text as used_on, sum(qty)::float8 as qty, min(best)::int as rank
+       from uses_best
+      where rank = best
+      group by ticket_key, part_id
+     having sum(qty) > 0
+      order by ticket_key, part_id`,
+  );
+  return rows.map((r) => ({
+    k: String(r.ticket_key),
+    p: Number(r.part_id),
+    q: Math.round(Number(r.qty) * 100) / 100,
+    day: r.used_on ? String(r.used_on).slice(0, 10) : null,
+    rank: Number(r.rank),
+  }));
+}
+
+/**
+ * Pieces Parts → Usage doesn't count yet but will, by record and part (useKey):
+ * - a PM's machine parts not billed on the ticket it's billed on: they count once with the ticket's own charge for
+ *   the part (only the charge, until they are billed there);
+ * - a ticket merged into an install, not as billed: its charges count from the install's invoice once that is
+ *   approved (and the install isn't flagged as a possible duplicate).
+ */
+export async function waitingPieces(sql: Sql): Promise<Map<string, number>> {
+  const rows = await sql.query<{ k: string; p: number; q: number }>(
+    `with ${PART_USES_CTE}
+     select sj.kind || ':' || sj.id as k, coalesce(b.merged_into, b.id, pk.part_id) as p, sum(m.qty)::float8 as q
+       from machine_parts m
+       join pm_jobs pm on pm.id = m.pm_job_id
+       join service_jobs sj on sj.id = pm.stacked_job_id
+       left join billing_items b on b.id = m.billing_item_id and b.kind not in ('trip', 'labor')
+       left join part_keys pk on m.billing_item_id is null and pk.k = lower(btrim(m.item))
+      where m.removed_at is null and pm.status <> 'Cancelled' and coalesce(b.id, pk.part_id) is not null
+        and not exists (select 1 from ticket_charges c where c.source_key = 'mp:' || m.id::text)
+      group by 1, 2
+     union all
+     select 'install:' || ins.id, pk.part_id, sum(c.qty)::float8
+       from ticket_charges c
+       join service_jobs j on j.id = c.job_id
+       join installs ins on ins.id = j.merged_install_id and not ins.archived
+       join part_keys pk on pk.k = lower(btrim(c.item))
+      where j.duplicate_of = j.id and j.status <> 'Cancelled' and ${BILLED_ON_INSTALL("j.id")} is null
+        and (ins.duplicate_of is not null
+             or not exists (select 1 from invoices i where i.entity_type = 'install' and i.entity_id = ins.id and i.approved_at is not null))
+      group by 1, 2
+      order by 1, 2`,
+  );
+  const out = new Map<string, number>();
+  for (const r of rows) {
+    const at = useKey(String(r.k), Number(r.p));
+    out.set(at, (out.get(at) ?? 0) + Number(r.q));
+  }
+  return out;
+}
+
+/**
  * The weekly Purchase Order report (Chuy, 11/2): the parts and water filters used, by manufacturer, as pulled once a
  * week. The first look after Friday 5 PM pulls that week and saves it, so Monday morning reads exactly what was pulled
  * and an approved report stays approved. Uses are counted the way Parts → Usage counts a part's uses (tickets,
@@ -198,8 +262,8 @@ async function loadPoReport(sql: Sql, now: Date): Promise<PoReport> {
         Number(r.merged_into),
       ]),
     );
-    const uses = await loadPartUses(sql, {});
-    const ids = [...new Set([...uses.map((u) => u.partId), ...reported.map((u) => merged.get(u.p) ?? u.p)])];
+    const uses = await poUses(sql);
+    const ids = [...new Set([...uses.map((u) => u.p), ...reported.map((u) => merged.get(u.p) ?? u.p)])];
     const rows = ids.length
       ? await sql.query<{ id: number; sku: string; parent: string | null; item: string; description: string | null; item_class: string | null; kind: string }>(
           "select id, sku, parent, item, description, item_class, kind from billing_items where id = any($1::int[]) order by id",
@@ -207,8 +271,13 @@ async function loadPoReport(sql: Sql, now: Date): Promise<PoReport> {
         )
       : [];
     const counted = new Map(rows.filter((r) => countsForPo({ itemClass: r.item_class, kind: r.kind })).map((r) => [Number(r.id), r]));
-    const current: CurrentUse[] = uses.filter((u) => counted.has(u.partId)).map((u) => ({ k: u.ticketKey, p: u.partId, q: u.pieces, day: u.usedOn }));
-    const changes = pullChanges(current, reported, { from: start, to: week.to }, await movedTickets(sql), merged, (p) => counted.has(p));
+    const current: CurrentUse[] = uses.filter((u) => counted.has(u.p)).map((u) => ({ k: u.k, p: u.p, q: u.q, day: u.day }));
+    const changes = pullChanges(current, reported, { from: start, to: week.to }, {
+      moved: await movedTickets(sql),
+      mergedInto: merged,
+      counts: (p) => counted.has(p),
+      later: laterPieces(uses, await waitingPieces(sql)),
+    });
     const parts: PoPart[] = [];
     for (const [id, n] of piecesByPart(changes)) {
       const r = counted.get(id);

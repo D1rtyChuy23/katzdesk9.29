@@ -8,7 +8,9 @@ import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
-const { approveChat, chatCards } = await import("../src/lib/ops/teams-reports.ts");
+const { approveChat, chatCards, poUses, waitingPieces } = await import("../src/lib/ops/teams-reports.ts");
+const { loadPartUses } = await import("../src/lib/ops/part-usage-api.ts");
+const { useKey } = await import("../src/lib/ops/po-report.ts");
 
 const pg = new PGlite();
 const dir = new URL("../migrations/", import.meta.url);
@@ -472,6 +474,18 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
     await text("purchase-orders", new Date("2026-11-20T23:30:00Z")),
     `${intro("Sat Nov 14", "Fri Nov 20", "Fri Nov 20 at 5:30 PM")}\n\nBunn · 1 part, 1 piece\n- ZZBUNN1 · 1\n\nTaken off tickets after an earlier report\n- WFZZ1 · Zz Cartridge · -1`,
   );
+  // The pull keeps each move: the tamper off TL-1 and onto SC-904, the filter off SC-920 and its Bunn part on.
+  const bunn = Number((await one("select id from billing_items where sku = 'ZZBUNN1'")).id);
+  const filter = Number((await one("select id from billing_items where sku = 'WFZZ1'")).id);
+  assert.deepEqual(
+    (await pulls()).find((p) => p.week_to === "2026-11-20").uses,
+    [
+      { k: `service:${late}`, p: bunn, q: 1 },
+      { k: `service:${late}`, p: filter, q: -1 },
+      { k: `service:${sc904}`, p: tamp, q: 1 },
+      { k: `tlc:${tlc}`, p: tamp, q: -1 },
+    ].sort((a, b) => (a.k < b.k ? -1 : a.k > b.k ? 1 : a.p - b.p)),
+  );
   // Nobody looks the week after. The next pull, a week later, has that week's parts too.
   const sc940 = await job("SC-940", "Zz Katy Cafe", { completed: "2026-11-25" });
   await charge(sc940, "ZZTAMP", 2);
@@ -489,4 +503,134 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
       [5, "2026-12-04"],
     ],
   );
+});
+
+test("a correction on merged or stacked work is taken off; pieces waiting to show are held", async () => {
+  // A database of its own, with nothing but these. All made up.
+  const db = new PGlite();
+  for (const name of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) await db.exec(readFileSync(new URL(name, dir), "utf8"));
+  const q = { query: async (t, params) => (await db.query(t, params)).rows };
+  const row = async (t, params) => (await q.query(t, params))[0];
+  await q.query("insert into desk_accounts (user_id, username, approved, is_admin) values ('admin', 'Chuy', true, true)");
+  const part = async (sku, description, cls = "Parts") =>
+    Number((await row("insert into billing_items (sku, parent, item, description, kind, item_class, rate) values ($1, 'PARTS', $2, $3, 'part', $4, 10) returning id", [sku, `PARTS : ${sku}`, description, cls])).id);
+  const ids = {};
+  for (const x of ["A", "B", "C", "D", "F", "G", "H"]) ids[x] = await part(`ZZ${x}1`, `Bunn Zz Valve ${x}`);
+  ids.E = await part("WFZZE", "Everpure Zz Cartridge E", "Water Filters");
+  const ticket = async (call) =>
+    Number((await row("insert into service_jobs (kind, call_id, customer, status, done, received, completed_at) values ('service', $1, 'Zz Owl', 'Completed', true, '2026-11-01', '2026-11-04') returning id", [call])).id);
+  const charge = async (jobId, x, n, sourceKey = null) =>
+    Number((await row("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort, source_key) values ($1, $2, '', $3, 10, 'part', 1, $4) returning id", [jobId, `PARTS : ZZ${x}1`.replace("ZZE1", "WFZZE"), n, sourceKey])).id);
+  const pmWith = async (x, n) => {
+    const pm = Number((await row("insert into pm_jobs (customer, status, done, completed_at, wo) values ('Zz Owl', 'Completed', true, '2026-11-04', 'WO-1') returning id")).id);
+    const mp = Number((await row("insert into machine_parts (pm_job_id, piece_key, machine_label, billing_item_id, item, qty) values ($1, 'zz', 'Zz Brewer', $2, 'x', $3) returning id", [pm, ids[x], n])).id);
+    return { pm, mp };
+  };
+  const mergeTickets = async (extra, keeper) => {
+    await q.query("update ticket_charges set job_id = $2 where job_id = $1", [extra, keeper]);
+    await q.query("update service_jobs set duplicate_of = $2 where id = $1", [extra, keeper]);
+  };
+  const intoInstall = async (jobId, x, n) => {
+    const ins = Number((await row("insert into installs (customer, install_date, machines) values ('Zz Owl', '2026-11-10', '[]') returning id")).id);
+    await q.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [jobId, ins]);
+    const inv = Number((await row("insert into invoices (entity_type, entity_id, customer) values ('install', $1, 'Zz Owl') returning id", [ins])).id);
+    const line = Number((await row("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort) values ($1, $2, '', $3, 10, 'part', 1) returning id", [inv, `PARTS : ZZ${x}1`, n])).id);
+    return { ins, inv, line };
+  };
+  const approve = (inv) => q.query("update invoices set approved_at = '2026-11-10T18:00:00Z', approved_by = 'Chuy' where id = $1", [inv]);
+  const po = async (at) => (await chatCards(q, at)).find((c) => c.id === "purchase-orders").text;
+
+  // H1: one visit entered as two tickets, 2 valves on each. H2: a ticket merged into one with none of its part.
+  const k1 = await ticket("SC-1");
+  const e1 = await ticket("SC-2");
+  await charge(k1, "A", 2);
+  const doubled = await charge(e1, "A", 2);
+  const k2 = await ticket("SC-3");
+  const e2 = await ticket("SC-4");
+  await charge(e2, "B", 3);
+  // H3 and G: tickets merged into installs later, not as billed.
+  const t3 = await ticket("SC-5");
+  await charge(t3, "C", 3);
+  const t7 = await ticket("SC-6");
+  await charge(t7, "G", 2);
+  // H4: a ticket's charge and its QuickBooks line for the same part: one use.
+  const k4 = await ticket("SC-7");
+  const e4 = await ticket("SC-8");
+  await charge(e4, "D", 2);
+  await q.query("insert into wo_history_runs (filename) values ('zz.xlsx')");
+  const h = Number((await row("insert into wo_history (run_id, history_ref, wo, completed, customer, invoice_date, job_id) values (1, 'H1', 'WO-77', '2026-11-04', 'Zz Owl', '2026-11-04', $1) returning id", [e4])).id);
+  await q.query("insert into wo_history_lines (history_id, line_type, kind, item_code, qty) values ($1, 'Item', 'part', 'ZZD1', 2)", [h]);
+  // H5, S and T8: PMs with machine parts, billed on tickets later.
+  const t5 = await ticket("SC-9");
+  await charge(t5, "E", 1);
+  const p5 = await pmWith("E", 2);
+  const t6 = await ticket("SC-10");
+  await charge(t6, "F", 1);
+  const p6 = await pmWith("F", 2);
+  const t8 = await ticket("SC-11");
+  const p8 = await pmWith("H", 2);
+
+  assert.equal(
+    await po(NOW),
+    [
+      intro("Sat Oct 31", "Fri Nov 6", "Fri Nov 6 at 5:30 PM"),
+      "Bunn · 7 parts, 19 pieces\n- ZZA1 · Zz Valve A · 4\n- ZZB1 · Zz Valve B · 3\n- ZZC1 · Zz Valve C · 3\n- ZZF1 · Zz Valve F · 3\n- ZZD1 · Zz Valve D · 2\n- ZZG1 · Zz Valve G · 2\n- ZZH1 · Zz Valve H · 2",
+      "Everpure · 1 part, 3 pieces\n- WFZZE · Zz Cartridge E · 3",
+    ].join("\n\n"),
+  );
+
+  // H1: merged, and the doubled line deleted. H2: merged, and the moved line cut to 1.
+  await mergeTickets(e1, k1);
+  await q.query("delete from ticket_charges where id = $1", [doubled]);
+  await mergeTickets(e2, k2);
+  await q.query("update ticket_charges set qty = 1 where job_id = $1", [k2]);
+  // H3: into an install; its copy on the install's invoice cut to 1, then approved. G: into an install whose invoice
+  // isn't approved yet.
+  const i3 = await intoInstall(t3, "C", 3);
+  await q.query("update invoice_lines set qty = 1 where id = $1", [i3.line]);
+  await approve(i3.inv);
+  const i7 = await intoInstall(t7, "G", 2);
+  // H4: merged; its QuickBooks line stays on it, and counts on the ticket it went into, once with the charge.
+  await mergeTickets(e4, k4);
+  // H5: billed on its ticket, then cancelled. S: billed on its ticket, its parts not billed there yet. T8: billed on a
+  // ticket with none of its part, then its part cut to 1.
+  await q.query("update pm_jobs set stacked_job_id = $2 where id = $1", [p5.pm, t5]);
+  await q.query("update pm_jobs set status = 'Cancelled' where id = $1", [p5.pm]);
+  await q.query("update pm_jobs set stacked_job_id = $2 where id = $1", [p6.pm, t6]);
+  await q.query("update pm_jobs set stacked_job_id = $2 where id = $1", [p8.pm, t8]);
+  await q.query("update machine_parts set qty = 1 where id = $1", [p8.mp]);
+
+  // Parts → Usage: the QuickBooks line counts once, with the charge, on the ticket it went into.
+  const d = await loadPartUses(q, { partIds: [ids.D] });
+  assert.deepEqual(d.map((u) => [u.ticketKey, u.pieces]), [[`service:${k4}`, 2]]);
+  // The pull reads the same uses as Parts → Usage, with what each was read from.
+  const usage = (await loadPartUses(q, {})).map((u) => [u.ticketKey, u.partId, u.pieces, u.usedOn]).sort();
+  const ranked = await poUses(q);
+  assert.deepEqual(ranked.map((u) => [u.k, u.p, u.q, u.day]).sort(), usage);
+  assert.equal(ranked.find((u) => u.k === `service:${t6}`).rank, 1);
+  assert.equal(ranked.find((u) => u.k === `service:${t8}`).rank, 2);
+  // Waiting: S's two (its ticket's own charge counts alone till they're billed), T8's one (counted already), G's two.
+  assert.deepEqual(
+    [...(await waitingPieces(q)).entries()].sort(),
+    [
+      [useKey(`install:${i7.ins}`, ids.G), 2],
+      [useKey(`service:${t6}`, ids.F), 2],
+      [useKey(`service:${t8}`, ids.H), 1],
+    ].sort(),
+  );
+
+  assert.equal(
+    await po(NEXT_FRIDAY),
+    [
+      intro("Sat Nov 7", "Fri Nov 13", "Fri Nov 13 at 5:30 PM"),
+      // 2 used and 4 reported; 1 and 3; 1 approved and 3; the cancelled PM's 2; the 1 left of T8's PM's 2.
+      "Taken off tickets after an earlier report\n- WFZZE · Zz Cartridge E · -2\n- ZZA1 · Zz Valve A · -2\n- ZZB1 · Zz Valve B · -2\n- ZZC1 · Zz Valve C · -2\n- ZZH1 · Zz Valve H · -1",
+    ].join("\n\n"),
+  );
+
+  // S's parts billed on its ticket, and G's install invoice approved: they show now, and were reported already.
+  await charge(t6, "F", 2, `mp:${p6.mp}`);
+  await approve(i7.inv);
+  assert.deepEqual([...(await waitingPieces(q)).entries()], [[useKey(`service:${t8}`, ids.H), 1]]);
+  assert.equal(await po(new Date("2026-11-20T23:30:00Z")), `${intro("Sat Nov 14", "Fri Nov 20", "Fri Nov 20 at 5:30 PM")}\n\nNone used that week.`);
 });

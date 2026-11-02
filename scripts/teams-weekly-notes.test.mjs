@@ -2,7 +2,7 @@
 // sections, each region's assignments and the Service Monkeys get-ready list. The plain pieces. All data is made up.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chicagoClock, countsForPo, OTHER_MAKER, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, pulledLabel, weekDayLabel } from "../src/lib/ops/po-report.ts";
+import { chicagoClock, countsForPo, laterPieces, OTHER_MAKER, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, pulledLabel, useKey, weekDayLabel } from "../src/lib/ops/po-report.ts";
 import { planGetReady } from "../src/lib/ops/get-ready.ts";
 import { machineNotesMissing, picturesNeeded } from "../src/lib/ops/install-needs.ts";
 import { draftTeamsChat, teamsChat } from "../src/lib/ops/teams-message.ts";
@@ -58,13 +58,18 @@ test("a pull reports what is new since the pulls before it, and a use already re
     // Not reported, dated next week or not at all: waits.
     u("service:8", 10, 4, "2026-11-09"),
     u("service:9", 10, 1, null),
-    // service:7 is gone: merged into install 5, whose invoice isn't approved yet.
+    // service:7 is gone: merged into install 5, whose invoice isn't approved yet. Its three are waiting there.
   ];
   const moved = (k) => (k === "service:7" ? "install:5" : k);
-  assert.deepEqual(pullChanges(now, earlier, win, moved, new Map([[99, 13]])), [r("pm:3", 12, -0.5), r("service:2", 11, 1), r("service:5", 10, 3)]);
-  // Once install 5's invoice is approved its use is the one service:7 reported: nothing new, whatever its date.
-  assert.deepEqual(pullChanges([u("install:5", 10, 3, "2026-11-20")], [r("service:7", 10, 3)], win, moved), []);
-  assert.deepEqual(pullChanges([u("install:5", 10, 4)], [r("service:7", 10, 3)], win, moved), [r("install:5", 10, 1)]);
+  const waiting = new Map([[useKey("install:5", 10), 3]]);
+  assert.deepEqual(pullChanges(now, earlier, win, { moved, mergedInto: new Map([[99, 13]]), later: waiting }), [r("pm:3", 12, -0.5), r("service:2", 11, 1), r("service:5", 10, 3)]);
+  // Not waiting, the three would be taken off.
+  assert.deepEqual(pullChanges([], [r("service:7", 10, 3)], win, { moved }), [r("install:5", 10, -3)]);
+  // Once install 5's invoice is approved its use is the one service:7 reported: nothing new, whatever its date. More
+  // on it is new; fewer (its copy cut before it was approved) are taken off.
+  assert.deepEqual(pullChanges([u("install:5", 10, 3, "2026-11-20")], [r("service:7", 10, 3)], win, { moved }), []);
+  assert.deepEqual(pullChanges([u("install:5", 10, 4)], [r("service:7", 10, 3)], win, { moved }), [r("install:5", 10, 1)]);
+  assert.deepEqual(pullChanges([u("install:5", 10, 1)], [r("service:7", 10, 3)], win, { moved }), [r("install:5", 10, -2)]);
   // Not knowing where a ticket went, its new record would read new, and the old one taken off.
   assert.deepEqual(pullChanges([u("install:5", 10, 3)], [r("service:7", 10, 3)], win), [r("install:5", 10, 3), r("service:7", 10, -3)]);
   // Not knowing the part merge, part 13 would read new and part 99 taken off.
@@ -74,18 +79,55 @@ test("a pull reports what is new since the pulls before it, and a use already re
   // A charge moved to the right ticket: off one, on the other, nothing for the part.
   assert.deepEqual(pullChanges([u("service:2", 10, 2)], [r("service:1", 10, 2)], win), [r("service:1", 10, -2), r("service:2", 10, 2)]);
   // A part the note no longer counts (reclassed) is left as reported, and a new use of one isn't reported.
-  assert.deepEqual(pullChanges([], [r("service:1", 10, 2)], win, undefined, undefined, (p) => p !== 10), []);
-  assert.deepEqual(pullChanges([u("service:3", 10, 1), u("service:3", 11, 1)], [], win, undefined, undefined, (p) => p !== 10), [r("service:3", 11, 1)]);
-  // A PM billed on a ticket that has the same part: its parts count once with the ticket's own, so the ticket's
-  // pieces read less than both reported. That is held; only pieces below the ticket's own are taken off.
+  assert.deepEqual(pullChanges([], [r("service:1", 10, 2)], win, { counts: (p) => p !== 10 }), []);
+  assert.deepEqual(pullChanges([u("service:3", 10, 1), u("service:3", 11, 1)], [], win, { counts: (p) => p !== 10 }), [r("service:3", 11, 1)]);
+  // A ticket merged into another: what it reported is compared there in full. One visit entered as two tickets (2
+  // each, both reported), merged, and the doubled line deleted: two taken off.
+  const dup = (k) => (k === "service:2" ? "service:1" : k);
+  assert.deepEqual(pullChanges([u("service:1", 10, 2)], [r("service:1", 10, 2), r("service:2", 10, 2)], win, { moved: dup }), [r("service:1", 10, -2)]);
+  assert.deepEqual(pullChanges([u("service:1", 10, 4)], [r("service:1", 10, 2), r("service:2", 10, 2)], win, { moved: dup }), []);
+  // A PM billed on a ticket that has the same part: Parts → Usage counts the ticket's charge alone until the PM's two
+  // are billed there, so they're waiting: held, not taken off. Billed there, all three show.
   const stacked = (k) => (k === "pm:3" ? "service:1" : k);
-  assert.deepEqual(pullChanges([u("service:1", 10, 1)], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), []);
-  assert.deepEqual(pullChanges([u("service:1", 10, 3)], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), []);
-  assert.deepEqual(pullChanges([u("service:1", 10, 4)], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), [r("service:1", 10, 1)]);
-  assert.deepEqual(pullChanges([], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), [r("service:1", 10, -1)]);
-  // A use still on its own record stays there even when its ticket was merged (a QuickBooks line stays put).
+  const both = [r("service:1", 10, 1), r("pm:3", 10, 2)];
+  assert.deepEqual(pullChanges([u("service:1", 10, 1)], both, win, { moved: stacked, later: new Map([[useKey("service:1", 10), 3]]) }), []);
+  assert.deepEqual(pullChanges([u("service:1", 10, 3)], both, win, { moved: stacked }), []);
+  assert.deepEqual(pullChanges([u("service:1", 10, 4)], both, win, { moved: stacked }), [r("service:1", 10, 1)]);
+  // The ticket's own charge deleted: the PM's two count on it now, and one is taken off.
+  assert.deepEqual(pullChanges([u("service:1", 10, 2)], both, win, { moved: stacked, later: new Map([[useKey("service:1", 10), 2]]) }), [r("service:1", 10, -1)]);
+  // The PM cancelled: nothing waits, so its two are taken off; with the ticket's charge deleted too, all three.
+  assert.deepEqual(pullChanges([u("service:1", 10, 1)], both, win, { moved: stacked }), [r("service:1", 10, -2)]);
+  assert.deepEqual(pullChanges([], both, win, { moved: stacked }), [r("service:1", 10, -3)]);
+  // Waiting pieces only hold: none is reported before it shows, and they hold no more than they are.
+  const lat = (n) => ({ later: new Map([[useKey("service:1", 10), n]]) });
+  assert.deepEqual(pullChanges([u("service:1", 10, 1)], [r("service:1", 10, 1)], win, lat(5)), []);
+  assert.deepEqual(pullChanges([u("service:1", 10, 1)], [r("service:1", 10, 4)], win, lat(2)), [r("service:1", 10, -2)]);
+  assert.deepEqual(pullChanges([u("service:1", 10, 3)], [r("service:1", 10, 4)], win, lat(1)), [r("service:1", 10, -1)]);
+  // A use still on its own record stays there even when its record was merged.
   const merged = (k) => (k === "service:20" ? "service:21" : k);
-  assert.deepEqual(pullChanges([u("service:20", 10, 1, "2026-11-02"), u("service:21", 11, 2)], [r("service:20", 10, 1), r("service:20", 11, 2)], win, merged), []);
+  assert.deepEqual(pullChanges([u("service:20", 10, 1, "2026-11-02"), u("service:21", 11, 2)], [r("service:20", 10, 1), r("service:20", 11, 2)], win, { moved: merged }), []);
+  // What a record will show once its waiting pieces show: with its charges or approved invoice (rank 1) now, and in
+  // place of anything else it shows now (a PM's parts, QuickBooks, WO part lines).
+  const ranked = [
+    { k: "service:1", p: 10, q: 1, day: null, rank: 1 },
+    { k: "service:8", p: 10, q: 2, day: null, rank: 2 },
+    { k: "install:5", p: 10, q: 4, day: null, rank: 4 },
+  ];
+  const waits = new Map([
+    [useKey("service:1", 10), 2],
+    [useKey("service:8", 10), 2],
+    [useKey("install:5", 10), 3],
+    [useKey("install:6", 10), 1.5],
+  ]);
+  assert.deepEqual(
+    [...laterPieces(ranked, waits).entries()],
+    [
+      [useKey("service:1", 10), 3],
+      [useKey("service:8", 10), 2],
+      [useKey("install:5", 10), 3],
+      [useKey("install:6", 10), 1.5],
+    ],
+  );
   // Two pulls before add up; pieces are rounded to the cent.
   assert.deepEqual(pullChanges([u("service:1", 10, 5)], [r("service:1", 10, 2), r("service:1", 10, 1)], win), [r("service:1", 10, 2)]);
   assert.deepEqual(pullChanges([u("service:1", 10, 0.1), u("service:1", 10, 0.2)], [r("service:1", 10, 0.3)], win), []);

@@ -66,54 +66,66 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 /** A use as it stands now: its ticket, part and pieces, and its day (the ticket's completed, scheduled or received day). */
 export type CurrentUse = LedgerUse & { day: string | null };
 
+/** The key of one ticket's use of one part, as `PullContext.later` is keyed. */
+export const useKey = (k: string, p: number): string => `${k}\u0000${p}`;
+
+/** What a pull needs to know besides the uses: where merged records went, and what is waiting to show. */
+export type PullContext = {
+  /**
+   * Where a record's uses count now, when it no longer has them: a ticket merged into another or into an install, a
+   * PM billed on a ticket, an install merged into another.
+   */
+  moved?: (k: string) => string;
+  /** The part a merged part went into. */
+  mergedInto?: ReadonlyMap<number, number>;
+  /** The parts the note counts (parts and water filters). */
+  counts?: (p: number) => boolean;
+  /**
+   * The pieces a record will show for a part once what is waiting on it shows, keyed by `useKey`, for the records
+   * that have something waiting: a PM's machine parts not billed on its ticket yet, where the ticket's own charge for
+   * the part is counted instead; a merged ticket's charges on an install whose invoice isn't approved yet.
+   */
+  later?: ReadonlyMap<string, number>;
+};
+
 /**
  * What a new pull reports, against what the pulls before it reported (`earlier`).
  * - A use reported before is compared at its pieces now, whatever its day is now: a moved date is never a new use,
- *   pieces added later are counted once, and pieces taken off show as a negative change. One that is gone (a line
- *   deleted, the wrong part fixed, the ticket cancelled) is taken off.
- * - Where an earlier use's ticket no longer has it, `moved` says where its ticket counts now (a ticket merged into
- *   another or into an install, a PM billed on a ticket, an install merged into another), and the use is carried
- *   there. A carried use is held, not taken off, while that record has less: an install's invoice waiting for its
- *   approval, or a PM's machine parts counted once with the ticket's own charges. Only pieces below the record's own
- *   reported pieces are taken off.
+ *   and pieces added later are counted once.
+ * - Where an earlier use's record no longer has it, `moved` says where it counts now, and it is compared there. One
+ *   its record still has stays there, even when the record was merged.
+ * - Fewer pieces than reported are taken off (a line cut or deleted, the wrong part fixed, the ticket cancelled, a
+ *   duplicate's line deleted after a merge), except the pieces still waiting to show (`later`): those are held.
  * - A use not reported yet: its pieces, when its day is in `window` (the ledger's first Saturday through this pull's
  *   Friday). One dated later waits for its own week.
- * A part the note no longer counts (`counts`) is left as reported; `mergedInto` is the part a merged part went into.
+ * A part the note no longer counts is left as reported.
  */
-export function pullChanges(
-  now: CurrentUse[],
-  earlier: LedgerUse[],
-  window: { from: string; to: string },
-  moved: (k: string) => string = (k) => k,
-  mergedInto: ReadonlyMap<number, number> = new Map(),
-  counts: (p: number) => boolean = () => true,
-): LedgerUse[] {
-  const key = (k: string, p: number) => `${k}\u0000${p}`;
+export function pullChanges(now: CurrentUse[], earlier: LedgerUse[], window: { from: string; to: string }, ctx: PullContext = {}): LedgerUse[] {
+  const moved = ctx.moved ?? ((k: string) => k);
+  const counts = ctx.counts ?? (() => true);
   const current = new Map<string, CurrentUse>();
   for (const u of now) {
-    const hit = current.get(key(u.k, u.p));
+    const hit = current.get(useKey(u.k, u.p));
     if (hit) {
       hit.q += u.q;
       if ((u.day ?? "") > (hit.day ?? "")) hit.day = u.day;
-    } else current.set(key(u.k, u.p), { ...u });
+    } else current.set(useKey(u.k, u.p), { ...u });
   }
-  const reported = new Map<string, { k: string; p: number; own: number; held: number }>();
+  const reported = new Map<string, LedgerUse>();
   for (const u of earlier) {
-    const p = mergedInto.get(u.p) ?? u.p;
-    // A use still on its own record stays there (a QuickBooks line stays on a merged ticket); else it follows its ticket.
-    const to = current.has(key(u.k, p)) ? u.k : moved(u.k);
-    const at = key(to, p);
-    const hit = reported.get(at) ?? { k: to, p, own: 0, held: 0 };
-    if (to === u.k) hit.own += u.q;
-    else hit.held += u.q;
+    const p = ctx.mergedInto?.get(u.p) ?? u.p;
+    const to = current.has(useKey(u.k, p)) ? u.k : moved(u.k);
+    const at = useKey(to, p);
+    const hit = reported.get(at) ?? { k: to, p, q: 0 };
+    hit.q += u.q;
     reported.set(at, hit);
   }
   const out: LedgerUse[] = [];
   for (const [at, r] of reported) {
     if (!counts(r.p)) continue;
     const cur = current.get(at)?.q ?? 0;
-    const total = r.own + r.held;
-    const q = round2(cur >= total ? cur - total : Math.min(0, cur - r.own));
+    // Pieces taken off, except the ones that are only waiting to show.
+    const q = round2(cur >= r.q ? cur - r.q : Math.min(0, Math.max(cur, ctx.later?.get(at) ?? cur) - r.q));
     if (q) out.push({ k: r.k, p: r.p, q });
   }
   for (const [at, c] of current) {
@@ -122,6 +134,24 @@ export function pullChanges(
     if (q) out.push({ k: c.k, p: c.p, q });
   }
   return out.sort((a, b) => (a.k < b.k ? -1 : a.k > b.k ? 1 : a.p - b.p));
+}
+
+/** A use as Parts → Usage counts it, with the rank of what it was read from: 1 a ticket's charges or an approved invoice. */
+export type RankedUse = CurrentUse & { rank: number };
+
+/**
+ * What each record will show for a part once its waiting pieces show (pullChanges' `later`): the waiting pieces with
+ * its charges or approved invoice lines now. Pieces read from anything else (QuickBooks, WO part lines, a PM's
+ * machine parts) are replaced by them, as Parts → Usage counts a record's part from the first of those it has.
+ */
+export function laterPieces(uses: RankedUse[], waiting: ReadonlyMap<string, number>): Map<string, number> {
+  const now = new Map(uses.map((u) => [useKey(u.k, u.p), u]));
+  const out = new Map<string, number>();
+  for (const [at, q] of waiting) {
+    const u = now.get(at);
+    out.set(at, round2((u?.rank === 1 ? u.q : 0) + q));
+  }
+  return out;
 }
 
 /** Each part's pieces across a pull's changes. */

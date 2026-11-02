@@ -6,7 +6,8 @@
  *  1. a service or TLC ticket's Charges;
  *  2. the approved invoice of a PM, install, rebuild or deal;
  *  3. a part logged on a PM's machines (a PM billed on a ticket counts on that ticket);
- *  4. the QuickBooks history work orders (2024–2026); one attached to a KatzDesk ticket counts on that ticket;
+ *  4. the QuickBooks history work orders (2024–2026); one attached to a KatzDesk ticket counts on that ticket, or on
+ *     the ticket or install it was merged into;
  *  5. WO part lines (Parts → Import → Import WO Part Lines), Corrigo's before NetSuite's: one on a KatzDesk ticket
  *     counts on that ticket, one on no ticket on its WO.
  * A ticket written up in more than one of these (logged on the PM and billed on its invoice, or billed in KatzDesk and
@@ -141,8 +142,9 @@ uses_all as (
     left join part_keys pk on m.billing_item_id is null and pk.k = lower(btrim(m.item))
    where m.removed_at is null and p.status <> 'Cancelled' and coalesce(b.id, pk.part_id) is not null
   union all
-  -- 4. QuickBooks history, matched by SKU. One attached to a KatzDesk ticket counts on that ticket (on its install,
-  --    like its charges, when the ticket was merged into one as billed: one use there, 10/30).
+  -- 4. QuickBooks history, matched by SKU. One attached to a KatzDesk ticket counts on that ticket, or where the
+  --    ticket went: the ticket it was merged into, as its charges and WO part lines do (11/2), or the install it was
+  --    merged into, where its WO part lines went (as billed, its charges too: one use there, 10/30).
   select sk.part_id,
          case when bq.on_install then 'install' else coalesce(sj.kind, 'quickbooks') end,
          case when bq.on_install then sj.merged_install_id else coalesce(sj.id, h.id) end,
@@ -154,10 +156,9 @@ uses_all as (
     from wo_history_lines l
     join wo_history h on h.id = l.history_id
     join sku_keys sk on sk.k = lower(btrim(l.item_code))
-    left join service_jobs sj on sj.id = h.job_id
-    left join lateral (
-      select coalesce(sj.merged_install_id is not null and ${BILLED_ON_INSTALL("sj.id")} is not null, false) as on_install
-    ) bq on true
+    left join service_jobs sj0 on sj0.id = h.job_id
+    left join service_jobs sj on sj.id = case when sj0.merged_install_id is null and sj0.duplicate_of <> sj0.id then sj0.duplicate_of else sj0.id end
+    left join lateral (select sj.merged_install_id is not null as on_install) bq on true
    where l.kind not in ('labor', 'trip', 'discount')
   union all
   -- 5. WO part lines, Corrigo's before NetSuite's. One on a KatzDesk ticket counts on that ticket (a PM billed on a
