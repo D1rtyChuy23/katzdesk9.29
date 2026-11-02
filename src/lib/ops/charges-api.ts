@@ -2,6 +2,7 @@ import { isWalkIn } from "./customer-key";
 import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withHeaderDiscount, type Discount } from "./discount";
 import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
 import { textArray } from "./part-merges";
+import { binSearchCode } from "./part-bins";
 import { loadDiscountRule } from "./part-pricing-api";
 import { liveInvoices, lockingInvoice, locationWarning, unlockActive, warehouseForTech } from "./billing-rules";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ, UNLOCKED_SQL, loadInvoices } from "./ticket-billing-api";
@@ -72,6 +73,9 @@ type ItemRow = {
   item_class: string | null;
   get_later: boolean | null;
   previous_numbers?: unknown;
+  bin_rack?: string | null;
+  bin_shelf?: string | null;
+  bin_bin?: string | null;
 };
 
 function toItem(r: ItemRow): BillingItem {
@@ -85,6 +89,7 @@ function toItem(r: ItemRow): BillingItem {
     itemClass: r.item_class,
     getLater: !!r.get_later,
     previousNumbers: textArray(r.previous_numbers),
+    bin: r.bin_rack || r.bin_shelf || r.bin_bin ? { rack: r.bin_rack ?? null, shelf: r.bin_shelf ?? null, bin: r.bin_bin ?? null } : null,
   };
 }
 
@@ -101,18 +106,22 @@ export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string
   const nq = normalizePartNo(q);
   const rows = await sql.query<ItemRow>(
     `select id, sku, item, description, rate, kind, mfr_part, item_class, get_later, previous_numbers, (image is not null) as has_image,
-            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version
+            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
+            bin_rack, bin_shelf, bin_bin
        from billing_items
       where active
         and hidden_at is null
         and (item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
+             -- Its bin (11/2): A-03-12, A 03 12 or A/03/12, or Rack A, as the Parts page finds it.
+             or concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $3
+             or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1
              or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
                                or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%'))
              -- An old number merged into a part finds that part (10/28).
              or exists (select 1 from unnest(previous_numbers) pn
                          where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))
       limit 300`,
-    [`%${q}%`, nq],
+    [`%${q}%`, nq, `%${binSearchCode(q)}%`],
   );
   return searchItems(q, rows.map(toItem), 12);
 }

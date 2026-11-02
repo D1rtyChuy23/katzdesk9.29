@@ -168,3 +168,62 @@ export function priorityLabel(p: string | null | undefined): string {
   if (p === "committed-to-customer") return "Committed to customer";
   return "Normal";
 }
+
+/**
+ * One machine on a rebuild (Chuy, 11/2): Warehouse refurbishes several machines on one rebuild, each with its serial,
+ * or just one. When a refurb is completed, each one goes into stock at the Staging area.
+ */
+export type RebuildMachine = {
+  id: number;
+  model: string;
+  serial: string | null;
+  /** The warehouse unit pulled onto the rebuild for it, or the one that went into stock for it. */
+  assetId: number | null;
+  /** Where its unit came from, or why none was pulled. */
+  notice: string | null;
+  /** When completing the refurb put it in stock. */
+  stockedAt: string | null;
+};
+
+/** The place a completed refurb's machines go into stock: the Staging area (Chuy, 11/2). */
+export const REFURB_STOCK_PLACE = "Staging area";
+
+/** "Mazzer Super Jolly ×2, Bunn ITCB-DV": each model once, in the order they were added, with how many. */
+export function machinesLabel(list: Pick<RebuildMachine, "model">[]): string | null {
+  const seen = new Map<string, { name: string; n: number }>();
+  for (const m of list) {
+    const name = m.model.trim();
+    if (!name) continue;
+    const hit = seen.get(name.toLowerCase());
+    if (hit) hit.n += 1;
+    else seen.set(name.toLowerCase(), { name, n: 1 });
+  }
+  const out = [...seen.values()].map((m) => (m.n > 1 ? `${m.name} ×${m.n}` : m.name));
+  return out.length ? out.join(", ") : null;
+}
+
+/** The machines' serials in order: "SJ-1, SJ-2". */
+export function machineSerials(list: Pick<RebuildMachine, "serial">[]): string | null {
+  const out = list.map((m) => (m.serial ?? "").trim()).filter(Boolean);
+  return out.length ? out.join(", ") : null;
+}
+
+/**
+ * Why a refurb can't be completed yet, or null: every machine that isn't in stock and has no unit pulled needs its
+ * model, which is the model it goes into stock as.
+ */
+export function refurbCompleteRefusal(list: Pick<RebuildMachine, "model" | "serial" | "assetId" | "stockedAt">[]): string | null {
+  const at = list.findIndex((m) => !m.stockedAt && m.assetId == null && !m.model.trim());
+  if (at < 0) return null;
+  const serial = (list[at]!.serial ?? "").trim();
+  return `Machine ${at + 1}${serial ? ` (SN ${serial})` : ""} needs its model before this refurb is completed: it goes into stock as that model.`;
+}
+
+/** What completing a refurb did with its machines, as one line for the person who completed it. */
+export function stockedLine(stocked: number, left: string[]): string | null {
+  if (!stocked && !left.length) return null;
+  const head = stocked
+    ? `${stocked === 1 ? "1 machine" : `${stocked} machines`} went into stock at the ${REFURB_STOCK_PLACE}, marked needs shop test.`
+    : "";
+  return [head, ...left].filter(Boolean).join(" ");
+}

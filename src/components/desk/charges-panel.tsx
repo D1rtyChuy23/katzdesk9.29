@@ -19,6 +19,7 @@ import {
   type PartRef,
 } from "@/lib/ops/charges";
 import { tripDraftWarning } from "@/lib/ops/pm-bill";
+import { binText } from "@/lib/ops/part-bins";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -520,7 +521,7 @@ function wasNumber(it: BillingItem, term: string): string | null {
   return (it.previousNumbers ?? []).find((p) => normalizePartNo(p).startsWith(q)) ?? null;
 }
 
-/** Type a NetSuite item name, a manufacturer number or words from the description; pick one result. */
+/** Type a NetSuite item name, a manufacturer number, words from the description or a bin; pick one result. */
 export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: BillingItem) => void; id?: string }) {
   const [q, setQ] = useState("");
   const [term, setTerm] = useState("");
@@ -543,7 +544,7 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
           id={id}
           value={q}
           autoComplete="off"
-          placeholder="Part number or words…"
+          placeholder="Part number, words or bin…"
           onChange={(e) => setQ(e.target.value)}
           className="pl-8"
         />
@@ -579,6 +580,7 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
                   ) : null}
                   <span className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
                     {it.itemClass ? <span data-testid="part-result-class">{it.itemClass}</span> : null}
+                    {binText(it.bin) ? <span data-testid="part-result-bin">{binText(it.bin)}</span> : null}
                     {it.getLater ? (
                       <span className="font-semibold text-warning" data-testid="part-result-get-later">
                         Get Later

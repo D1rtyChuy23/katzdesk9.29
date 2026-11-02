@@ -10,12 +10,18 @@ import { loadAccountMarks, isAviKatz, accountRepFor } from "@/lib/ops/reps";
 import {
   CLOSED_REBUILD,
   HEALTH_RANK,
+  REFURB_STOCK_PLACE,
   SHOP_ACCOUNT,
   computeRebuildMetrics,
   isRebuildPriority,
   isRebuildStatus,
+  machineSerials,
+  machinesLabel,
+  refurbCompleteRefusal,
+  stockedLine,
   validateRebuild,
   type RebuildHealth,
+  type RebuildMachine,
   type RebuildMetrics,
   type RebuildPriority,
   type RebuildStatus,
@@ -34,7 +40,8 @@ import {
 } from "@/lib/ops/warehouse-invoice";
 import { pullNotice, unitWhere, type PulledUnit } from "@/lib/ops/warehouse-pull";
 import { notifyAdminsWarehousePull } from "@/lib/ops/notify";
-import { siteLabel, slotId } from "@/lib/ops/warehouse";
+import { SITE_PURPOSE, siteLabel, slotId } from "@/lib/ops/warehouse";
+import { HOUSE_STAGING } from "@/lib/ops/unit-place-rules";
 
 export {
   REBUILD_STATUSES,
@@ -48,15 +55,20 @@ export {
   priorityLabel,
 } from "@/lib/ops/rebuild-model";
 
-export type { RebuildHealth, RebuildMetrics, RebuildPriority, RebuildStatus, WaitingReason };
+export type { RebuildHealth, RebuildMachine, RebuildMetrics, RebuildPriority, RebuildStatus, WaitingReason };
 
 export type Rebuild = {
   id: number;
   title: string;
   account: string;
+  /** Its machines' models: "Mazzer Super Jolly ×2, Bunn ITCB-DV" (11/2). */
   equipment: string | null;
+  /** Its machines' serials: "SJ-1, SJ-2". */
   serial: string | null;
+  /** The first machine's warehouse unit. */
   assetId: number | null;
+  /** The machines on it, oldest first (11/2): Warehouse refurbishes several on one rebuild, or just one. */
+  machines: RebuildMachine[];
   owner: string | null;
   status: RebuildStatus;
   reasonCode: string | null;
@@ -87,6 +99,8 @@ export type Rebuild = {
   invoice: "approved" | "waiting" | null;
   /** Whether the person looking may change it (Warehouse: only refurbs for Katz Coffee Service Dept. or Katz shop / stock). */
   editable: boolean;
+  /** After a save that completed a refurb: what went into stock, and anything that couldn't. */
+  stockNote?: string | null;
 };
 
 export type RebuildLink = {
@@ -173,7 +187,48 @@ export async function ensureRebuilds(sql: Sql): Promise<void> {
   await sql.query("create index if not exists rebuilds_archived_idx on rebuilds (archived)");
 }
 
-export function mapRebuild(r: RebuildRow, today: string, accountRep: string | null = null, aviKatz = false): Rebuild {
+type MachineRow = {
+  id: number;
+  rebuild_id: number;
+  model: string;
+  serial: string | null;
+  asset_id: number | null;
+  notice: string | null;
+  origin: unknown;
+  stocked_at: string | Date | null;
+};
+
+function mapMachine(r: MachineRow): RebuildMachine {
+  return {
+    id: Number(r.id),
+    model: r.model ?? "",
+    serial: r.serial?.trim() || null,
+    assetId: num(r.asset_id),
+    notice: r.notice?.trim() || null,
+    stockedAt: r.stocked_at ? stamp(r.stocked_at) : null,
+  };
+}
+
+/** Each rebuild's machines, oldest first. */
+async function loadMachines(sql: Sql, ids: number[]): Promise<Map<number, RebuildMachine[]>> {
+  const out = new Map<number, RebuildMachine[]>();
+  if (!ids.length) return out;
+  const rows = await sql.query<MachineRow>("select * from rebuild_machines where rebuild_id = any($1::int[]) order by rebuild_id, id", [ids]);
+  for (const r of rows) {
+    const list = out.get(Number(r.rebuild_id)) ?? [];
+    list.push(mapMachine(r));
+    out.set(Number(r.rebuild_id), list);
+  }
+  return out;
+}
+
+/** One rebuild as the board has it, with its machines, after a write. */
+async function rebuildOut(sql: Sql, row: RebuildRow): Promise<Rebuild> {
+  const machines = (await loadMachines(sql, [Number(row.id)])).get(Number(row.id)) ?? [];
+  return mapRebuild(row, todayChicago(), null, false, machines);
+}
+
+export function mapRebuild(r: RebuildRow, today: string, accountRep: string | null = null, aviKatz = false, machines: RebuildMachine[] = []): Rebuild {
   const status = isRebuildStatus(r.status) ? r.status : "Queued";
   const priority = isRebuildPriority(r.priority) ? r.priority : "normal";
   const metrics = computeRebuildMetrics(
@@ -193,9 +248,11 @@ export function mapRebuild(r: RebuildRow, today: string, accountRep: string | nu
     id: Number(r.id),
     title: r.title,
     account: r.account,
-    equipment: r.equipment,
-    serial: r.serial,
-    assetId: num(r.asset_id),
+    // The machines are the rebuild's equipment now (11/2); the old one-machine columns were copied into them.
+    equipment: machinesLabel(machines),
+    serial: machineSerials(machines),
+    assetId: machines.find((m) => m.assetId != null)?.assetId ?? null,
+    machines,
     owner: r.owner,
     status,
     reasonCode: r.reason_code,
@@ -208,7 +265,7 @@ export function mapRebuild(r: RebuildRow, today: string, accountRep: string | nu
     notes: r.notes,
     installId: num(r.install_id),
     jobId: num(r.job_id),
-    serialNotice: r.serial_notice,
+    serialNotice: machines[0]?.notice ?? null,
     statusChangedAt: stamp(r.status_changed_at),
     createdAt: stamp(r.created_at),
     updatedAt: stamp(r.updated_at),
@@ -228,8 +285,9 @@ export async function loadRebuilds(sql: Sql, today = todayChicago()): Promise<Re
     "select * from rebuilds where coalesce(archived, false) = false order by id desc",
   );
   const marks = await loadAccountMarks(sql).catch(() => ({ rep: new Map<string, string>(), repLoose: new Map<string, string>(), ak: new Set<string>(), acct: new Map<string, string>() }));
+  const machines = await loadMachines(sql, rows.map((r) => Number(r.id)));
   const list = rows.map((r) =>
-    mapRebuild(r, today, accountRepFor(marks, r.account), isAviKatz(marks, r.account)),
+    mapRebuild(r, today, accountRepFor(marks, r.account), isAviKatz(marks, r.account), machines.get(Number(r.id)) ?? []),
   );
   // The cost on each row is read from the project's one repair quote. Never blocks the list.
   const costs = await loadRebuildCosts(sql, list).catch(() => new Map<number, QuoteCost>());
@@ -481,17 +539,22 @@ export async function createRebuildFor(sql: Sql, data: z.infer<typeof createSche
   });
   if (err) throw new Error(err);
   const waiting = status === "Waiting";
+  // The equipment picked is its first machine (11/2). A serial is pulled onto a machine afterwards, by its own rules.
   const rows = await sql.query<RebuildRow>(
-    `insert into rebuilds (
-       title, account, equipment, serial, owner, status, reason_code, reason_detail,
-       planned_start, target_complete, actual_start, priority, notes, install_id, job_id
-     ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-     returning *`,
+    `with made as (
+       insert into rebuilds (
+         title, account, equipment, serial, owner, status, reason_code, reason_detail,
+         planned_start, target_complete, actual_start, priority, notes, install_id, job_id
+       ) values ($1,$2,$3,null,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+       returning *
+     ), first as (
+       insert into rebuild_machines (rebuild_id, model) select id, equipment from made where equipment is not null returning id
+     )
+     select * from made`,
     [
       data.title.trim(),
       account,
       emptyToNull(data.equipment),
-      emptyToNull(data.serial),
       emptyToNull(data.owner),
       status,
       waiting ? emptyToNull(data.reasonCode) : null,
@@ -507,7 +570,7 @@ export async function createRebuildFor(sql: Sql, data: z.infer<typeof createSche
   );
   const row = rows[0]!;
   await logActivity(sql, userId, Number(row.id), "opened", `${row.title} · ${row.account}`);
-  return mapRebuild(row, todayChicago());
+  return rebuildOut(sql, row);
 }
 
 function changed(label: string, before: unknown, after: unknown): string | null {
@@ -561,6 +624,12 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     prevStatus: cur.status,
   });
   if (err) throw new Error(err);
+
+  // A refurb completed puts its machines in stock (11/2), so each one needs the model it goes in as.
+  if (nextStatus === "Completed" && cur.status !== "Completed" && warehouseMayEdit(nextAccount || SHOP_ACCOUNT)) {
+    const refusal = refurbCompleteRefusal((await loadMachines(sql, [data.id])).get(data.id) ?? []);
+    if (refusal) throw new Error(refusal);
+  }
 
   const leavingWaiting = cur.status === "Waiting" && nextStatus !== "Waiting";
   const reasonCode = nextStatus === "Waiting" ? nextReason : leavingWaiting ? null : nextReason;
@@ -638,12 +707,30 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     changed("actual complete", isoDay(cur.actual_complete), actualComplete),
   ].filter((x): x is string => !!x);
   const accountNote = changed("account", cur.account, row.account);
-  if (accountNote) parts.push(accountNote);
+  if (accountNote) {
+    parts.push(accountNote);
+    // Its pulled units go with it to the new account (a shop refurb billed to Katz Coffee Service Dept.), and so does
+    // each machine's record of whom the pull put the unit on.
+    await sql.query(
+      `with moved as (
+         update assets a set sold_to = $2, updated_at = now()
+           from rebuild_machines m
+          where m.rebuild_id = $1 and m.asset_id = a.id and m.stocked_at is null
+            and a.status = 'assigned' and a.purpose = 'In-house rebuild' and ${NAME_KEY("a.sold_to")} = ${NAME_KEY("$3")}
+         returning a.id
+       )
+       update rebuild_machines set origin = jsonb_set(origin, '{pulled_to}', to_jsonb($2::text)), updated_at = now()
+        where rebuild_id = $1 and origin is not null and ${NAME_KEY("origin->>'pulled_to'")} = ${NAME_KEY("$3")}`,
+      [data.id, row.account, cur.account],
+    );
+  }
   if (parts.length) {
     const action = statusChanged ? "status" : parts.some((p) => p.startsWith("reason") || p.startsWith("kept")) ? "reason" : "updated";
     await logActivity(sql, userId, data.id, action, parts.slice(0, 4).join(" · "));
   }
-  return mapRebuild(row, todayChicago());
+  // Completed just now, on a refurb: its machines go into stock at the Staging area.
+  const stockNote = row.status === "Completed" && cur.status !== "Completed" && warehouseMayEdit(row.account) ? await stockRefurbMachines(sql, row, userId) : null;
+  return { ...(await rebuildOut(sql, row)), stockNote };
 }
 
 export const archiveRebuild = createServerFn({ method: "POST" })
@@ -736,64 +823,208 @@ async function findWarehouse(sql: Sql, serial: string): Promise<SerialHitLite | 
   };
 }
 
+/** A machine's row on this rebuild, or null. */
+async function machineRow(sql: Sql, rebuildId: number, machineId: number): Promise<MachineRow | null> {
+  return (await sql.query<MachineRow>("select * from rebuild_machines where id = $1 and rebuild_id = $2", [machineId, rebuildId]))[0] ?? null;
+}
+
+/** A rebuild's machines change while it is open: a completed refurb's are in stock, and a cancelled one is over. */
+function requireOpen(cur: RebuildRow): void {
+  if (CLOSED_REBUILD.has(cur.status as RebuildStatus)) {
+    throw new Error(`This rebuild is ${cur.status}, so its machines can't change. Set it back to In progress first.`);
+  }
+}
+
+/** SQL: rebuild `id` is still open and, for Warehouse (`keys` not null), still one of its refurbs. */
+const OPEN_STILL = (id: string, keys: string) =>
+  `exists (select 1 from rebuilds r where r.id = ${id} and r.status not in ('Completed', 'Cancelled') and ${ACCOUNT_STILL("r.account", keys)})`;
+
+/** What a machine write that found its rebuild closed, or moved off Warehouse's refurbs, is told. */
+async function machineRefusal(sql: Sql, id: number): Promise<Error> {
+  const now = (await sql.query<{ account: string; status: string }>("select account, status from rebuilds where id = $1", [id]))[0];
+  if (!now) return new Error("Rebuild not found");
+  if (CLOSED_REBUILD.has(now.status as RebuildStatus)) return new Error(`This rebuild is ${now.status} now, so its machines can't change.`);
+  return new Error(warehouseEditRefusal(now.account) ?? "This rebuild changed while you had it open. Open it again.");
+}
+
+/** SQL: a name with letters and digits only, as the account rules match it. */
+const NAME_KEY = (col: string) => `regexp_replace(lower(coalesce(${col}, '')), '[^a-z0-9]+', '', 'g')`;
+
+const machinesInput = z.object({
+  id: z.number(),
+  /** The models: a machine's id with its model, or a new machine (no id) with its model. */
+  machines: z.array(z.object({ id: z.number().nullable().optional(), model: z.string().max(200) })).max(100),
+});
+
+export const saveRebuildMachines = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof machinesInput>) => machinesInput.parse(d))
+  .handler(async ({ data, context }): Promise<Rebuild> => saveRebuildMachinesFor(await readySql(), data, context.userId));
+
+/**
+ * The body of saveRebuildMachines: the machines' models, and new machines by model (Chuy, 11/2: Warehouse works on
+ * several machines at once, so a rebuild holds as many as it needs, or one). A blank new row is skipped. Machines in
+ * stock don't change; a closed rebuild's machines don't either.
+ */
+export async function saveRebuildMachinesFor(sql: Sql, data: z.infer<typeof machinesInput>, userId: string): Promise<Rebuild> {
+  const access = await requireEditor(sql, userId);
+  const cur = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0];
+  if (!cur) throw new Error("Rebuild not found");
+  requireRowEditor(access, cur.account);
+  requireOpen(cur);
+  const list = data.machines.map((m) => ({ id: m.id ?? null, model: m.model.trim() }));
+  const rows = await sql.query<{ ok: boolean; added: number; changed: number }>(
+    `with ok as (select ${OPEN_STILL("$1", "$3")} as ok),
+     changed as (
+       update rebuild_machines m set model = x.model, updated_at = now()
+         from jsonb_to_recordset($2::jsonb) as x(id int, model text)
+        where x.id is not null and m.id = x.id and m.rebuild_id = $1 and m.stocked_at is null
+          and m.model is distinct from x.model and (select ok from ok)
+       returning m.id
+     ),
+     added as (
+       insert into rebuild_machines (rebuild_id, model)
+       select $1, x.model from jsonb_to_recordset($2::jsonb) as x(id int, model text)
+        where x.id is null and x.model <> '' and (select ok from ok)
+       returning id
+     )
+     select (select ok from ok) as ok, (select count(*)::int from added) as added, (select count(*)::int from changed) as changed`,
+    [data.id, JSON.stringify(list), warehouseKeys(access)],
+  );
+  if (!rows[0]?.ok) throw await machineRefusal(sql, data.id);
+  const { added, changed: edited } = rows[0];
+  if (added || edited) {
+    await logActivity(sql, userId, data.id, "updated", [added ? `${added} machine${added === 1 ? "" : "s"} added` : "", edited ? `${edited} model${edited === 1 ? "" : "s"} changed` : ""].filter(Boolean).join(" · "));
+  }
+  const row = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0]!;
+  return rebuildOut(sql, row);
+}
+
+/**
+ * Puts a machine's unit back as it was before the pull: on its rack slot, account, install or ticket, with its lock.
+ * Only while the unit is still as the pull left it (on the refurb's account, In-house rebuild); a unit moved since
+ * stays where it is. SQL parameters: $1 the unit, $2 the machine's origin.
+ */
+const PUT_BACK = `
+  update assets a set status = o.status, sold_to = o.sold_to, purpose = o.purpose, install_id = o.install_id, job_id = o.job_id,
+         locked_at = o.locked_at, locked_by = o.locked_by, updated_at = now()
+    from jsonb_to_record($2::jsonb) as o(status text, sold_to text, purpose text, install_id int, job_id int,
+                                          locked_at timestamptz, locked_by text, pulled_to text)
+   where a.id = $1 and a.status = 'assigned' and a.purpose = 'In-house rebuild'
+     and ${NAME_KEY("a.sold_to")} = ${NAME_KEY("o.pulled_to")}
+  returning a.id`;
+
+/** What the person is told about a machine's unit when the machine is taken off or its serial changes. */
+function putBackLine(serial: string | null, origin: unknown, back: boolean): string | null {
+  const sn = serial?.trim() ? `SN ${serial.trim()}` : "Its unit";
+  if (back) return `${sn} is back where it was before it was pulled.`;
+  if (!origin) return `${sn} stays as it is (pulled before machines were kept); move it from the Warehouse page if it isn't on this refurb.`;
+  return `${sn} was moved since it was pulled, so it stays where it is now.`;
+}
+
 const pullInput = z.object({
   id: z.number(),
+  /** The machine to pull onto; none adds a machine for the serial. */
+  machineId: z.number().nullable().optional(),
   serial: z.string(),
+  /** A new machine's model, for a serial that isn't in the warehouse. */
+  model: z.string().max(200).nullable().optional(),
   confirmReuse: z.boolean().optional(),
   /** The confirm question the person answered: asked again when the unit has moved since. */
   asked: z.string().max(10000).optional(),
 });
 
-export const pullRebuildSerial = createServerFn({ method: "POST" })
+export const pullRebuildMachine = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.input<typeof pullInput>) => pullInput.parse(d))
-  .handler(async ({ data, context }): Promise<Rebuild> => pullRebuildSerialFor(await readySql(), data, context.userId));
+  .handler(async ({ data, context }): Promise<Rebuild> => pullRebuildMachineFor(await readySql(), data, context.userId));
 
 /**
- * The body of pullRebuildSerial. Warehouse pulls serials onto its refurbs only, from wherever the unit is (Chuy,
- * 10/29): an account, an install or a ticket, or one of our places. No Admin approves it; every Admin gets a ping
- * saying where it came from. A unit waiting for an Admin's decision on a Warehouse request stays put, and so does one
- * the owner locked on a customer's account.
+ * The body of pullRebuildMachine: a serial on one of the rebuild's machines (or a new one). A warehouse unit with that
+ * serial is pulled onto the rebuild, as the rebuild's one serial was before (Chuy, 10/29): Warehouse pulls onto its
+ * refurbs only, from wherever the unit is, with no Admin's approval, and every Admin gets a ping saying where it came
+ * from. A unit waiting for an Admin's decision on a Warehouse request stays put, and so does one the owner locked on a
+ * customer's account. A unit on another open rebuild's machines stays there. The machine keeps how the unit was, so
+ * taking it off puts the unit back; a machine's old unit is put back when it takes another serial.
  */
-export async function pullRebuildSerialFor(sql: Sql, data: z.infer<typeof pullInput>, userId: string): Promise<Rebuild> {
+export async function pullRebuildMachineFor(sql: Sql, data: z.infer<typeof pullInput>, userId: string): Promise<Rebuild> {
   const access = await requireEditor(sql, userId);
-  const cur = (
-    await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id])
-  )[0];
+  const cur = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0];
   if (!cur) throw new Error("Rebuild not found");
   requireRowEditor(access, cur.account);
-  // Warehouse's writes below land only while the rebuild is still one of its refurbs (the account is read as it writes).
+  requireOpen(cur);
+  const machine = data.machineId != null ? await machineRow(sql, data.id, data.machineId) : null;
+  if (data.machineId != null && !machine) throw new Error("That machine isn't on this rebuild any more. Open the rebuild again.");
+  if (machine?.stocked_at) throw new Error("That machine is in stock already, so it can't change.");
   const keys = warehouseKeys(access);
-  const noteOnly = async (set: string, params: unknown[]): Promise<void> => {
-    const rows = await sql.query<{ id: number }>(`update rebuilds set ${set}, updated_at = now() where id = $1 and ${ACCOUNT_STILL("account", `$${params.length + 2}`)} returning id`, [
-      data.id,
-      ...params,
-      keys,
-    ]);
-    if (!rows.length) throw await movedRefusal(sql, data.id);
-  };
+  const refurb = warehouseMayEdit(cur.account);
   const serial = data.serial.trim();
+  const model = (data.model ?? "").trim();
+  const reload = async (): Promise<Rebuild> => rebuildOut(sql, (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0]!);
+
+  /** The machine takes a serial no unit has (or none): its old unit is put back, and the notice says what's next. */
+  const keepSerial = async (notice: string | null): Promise<string | null> => {
+    const rows = await sql.query<{ id: number; old_asset: number | null; old_origin: unknown; old_serial: string | null; back: number }>(
+      `with mine as (
+         select id, asset_id, origin, serial from rebuild_machines
+          where id = $1 and rebuild_id = $2 and stocked_at is null and ${OPEN_STILL("$2", "$6")}
+          for update
+       ), back as (
+         ${PUT_BACK.replace("where a.id = $1", "where a.id = (select asset_id from mine)").replace("$2::jsonb", "(select origin from mine)")}
+       ), saved as (
+         update rebuild_machines set serial = $3, asset_id = null, origin = null, notice = $4,
+                model = case when model = '' then $5 else model end, updated_at = now()
+          where id = (select id from mine)
+         returning id
+       ), added as (
+         insert into rebuild_machines (rebuild_id, model, serial, notice)
+         select $2, $5, $3, $4 where $1::int is null and ${OPEN_STILL("$2", "$6")}
+         returning id
+       )
+       select coalesce((select id from saved), (select id from added)) as id, (select asset_id from mine) as old_asset,
+              (select origin from mine) as old_origin, (select serial from mine) as old_serial, (select count(*)::int from back) as back`,
+      [machine?.id ?? null, data.id, serial || null, notice, model, keys],
+    );
+    if (!rows[0]?.id) throw await machineRefusal(sql, data.id);
+    const r = rows[0];
+    return r.old_asset != null ? putBackLine(r.old_serial, r.old_origin, r.back > 0) : null;
+  };
+
   if (!serialKey(serial)) {
-    await noteOnly("serial = $2, serial_notice = $3", [serial || null, serial ? `Serial ${serial} not found in warehouse.` : null]);
-    const row = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0]!;
-    return mapRebuild(row, todayChicago());
+    if (!machine && !model) throw new Error("Type the machine's serial, or pick its model.");
+    await keepSerial(serial ? `Serial ${serial} isn't a serial a unit can have.` : null);
+    return reload();
   }
   const hit = await findWarehouse(sql, serial);
   if (!hit) {
-    const notice = `Serial ${serial} not found in warehouse.`;
-    await noteOnly("serial = $2, asset_id = null, serial_notice = $3", [serial, notice]);
-    await logActivity(sql, userId, data.id, "serial-miss", notice);
-    const row = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0]!;
-    return mapRebuild(row, todayChicago());
+    const notice = refurb
+      ? `Serial ${serial} isn't in the warehouse yet: it goes into stock when this refurb is completed.`
+      : `Serial ${serial} not found in warehouse.`;
+    const back = await keepSerial(notice);
+    await logActivity(sql, userId, data.id, "serial-miss", [notice, back].filter(Boolean).join(" "));
+    return reload();
   }
   const sameAccount =
     (hit.soldTo ?? "").trim().toLowerCase() === cur.account.trim().toLowerCase() ||
     // Warehouse: its two refurb accounts are one house (a shop refurb moved to Katz Coffee Service Dept. keeps its
     // unit), so a unit on either is already its own: no confirm, no ping.
     (isWarehouse(access) && warehouseMayEdit(hit.soldTo) && warehouseMayEdit(cur.account));
+  // The machine's own unit, still on the rebuild: nothing to pull (and how it was before the pull is kept). One that
+  // went somewhere else since is pulled again, with the confirm.
+  if (machine && num(machine.asset_id) === hit.assetId && hit.status === "assigned" && hit.place.purpose === "In-house rebuild" && sameAccount) return reload();
   if (isWarehouse(access) && hit.held) {
     throw new Error(`Serial ${hit.serial} is waiting for an Admin to approve its ${hit.held === "assign" ? "assign to a customer" : "removal"}, so it stays where it is.`);
   }
+  const elsewhere = (
+    await sql.query<{ title: string }>(
+      `select r.title from rebuild_machines m join rebuilds r on r.id = m.rebuild_id
+        where m.asset_id = $1 and m.stocked_at is null and m.id is distinct from $2::int
+          and not coalesce(r.archived, false) and r.status not in ('Completed', 'Cancelled')
+        order by m.id limit 1`,
+      [hit.assetId, machine?.id ?? null],
+    )
+  )[0];
+  if (elsewhere) throw new Error(`Serial ${hit.serial} is on rebuild "${elsewhere.title}" already. Take it off that rebuild's machines first.`);
   // Locks first, so nobody is asked to confirm a pull that would be refused anyway. A sold unit or one a person locked
   // stays put; an assignment's own lock moves with the unit. Warehouse: a unit the owner locked on a customer's account
   // stays there too, as on the Warehouse page.
@@ -805,17 +1036,32 @@ export async function pullRebuildSerialFor(sql: Sql, data: z.infer<typeof pullIn
   // Asked again when the answer was to a different question: the unit moved after the person was asked.
   const askedElse = !!data.confirmReuse && data.asked != null && !data.asked.includes(question);
   if (!hit.available && !sameAccount && (!data.confirmReuse || askedElse)) {
-    await noteOnly("serial_notice = $2", [question]);
+    if (machine) {
+      const noted = await sql.query<{ id: number }>(
+        `update rebuild_machines set notice = $3, updated_at = now() where id = $1 and rebuild_id = $2 and stocked_at is null and ${OPEN_STILL("$2", "$4")} returning id`,
+        [machine.id, data.id, question, keys],
+      );
+      if (!noted.length) throw await machineRefusal(sql, data.id);
+    }
     throw new Error(`${question} Confirm reuse or cancel.`);
   }
   const extra = !hit.available && hit.soldTo && !sameAccount ? ` (was ${hit.soldTo})` : "";
   const notice = `Serial ${hit.serial} pulled from warehouse · ${hit.model} · ${hit.location}${extra}`;
-  const equipment = cur.equipment?.trim() ? cur.equipment : hit.model;
-  // One statement: the refurb row is held, then the unit moves onto it and it takes the serial, or nothing happens.
-  // A unit from another account leaves the install or ticket it was on, so neither offers to return it any more.
-  const pulled = await sql.query<RebuildRow>(
+  // One statement: the rebuild and the machine are held, the unit moves onto the rebuild and the machine takes it (a
+  // new machine is added for it), or nothing happens. A unit from another account leaves the install or ticket it was
+  // on. A closed or removed rebuild's machine that still had the unit lets it go, and its record of how the unit was
+  // before is kept.
+  const pulled = await sql.query<{ id: number; old_asset: number | null; old_origin: unknown; old_serial: string | null }>(
     `with refurb as (
-       select id from rebuilds where id = $5 and ${ACCOUNT_STILL("account", "$4")} for update
+       select id from rebuilds where id = $5 and status not in ('Completed', 'Cancelled') and ${ACCOUNT_STILL("account", "$4")} for update
+     ), mine as (
+       select id, asset_id, origin, serial from rebuild_machines where id = $12::int and rebuild_id = $5 and stocked_at is null for update
+     ), prior as (
+       select status, sold_to, purpose, install_id, job_id, locked_at, locked_by, $2::text as pulled_to from assets where id = $1
+     ), was as (
+       select o.origin from rebuild_machines o
+        where o.asset_id = $1 and o.id is distinct from $12::int and o.stocked_at is null and o.origin is not null
+        order by o.id desc limit 1
      ), unit as (
        update assets set
          status = 'assigned',
@@ -828,6 +1074,11 @@ export async function pullRebuildSerialFor(sql: Sql, data: z.infer<typeof pullIn
          updated_at = now()
        where id = $1
          and exists (select 1 from refurb)
+         and ($12::int is null or exists (select 1 from mine))
+         and not exists (
+           select 1 from rebuild_machines o join rebuilds r on r.id = o.rebuild_id
+            where o.asset_id = $1 and o.stocked_at is null and o.id is distinct from $12::int
+              and not coalesce(r.archived, false) and r.status not in ('Completed', 'Cancelled'))
          and ($4::text[] is null or (
                -- Warehouse: on no hold, just as it was read (so the Admins' ping says where it really came from), and
                -- not locked on a customer's account meanwhile.
@@ -836,21 +1087,56 @@ export async function pullRebuildSerialFor(sql: Sql, data: z.infer<typeof pullIn
                and not exists (select 1 from account_equipment ae where ae.serial_key = $11 and ae.locked_at is not null)
              ))
        returning id
+     ), released as (
+       update rebuild_machines o set asset_id = null, notice = $13, updated_at = now()
+        where o.asset_id = $1 and o.id is distinct from $12::int and o.stocked_at is null and exists (select 1 from unit)
+       returning o.id
+     ), saved as (
+       update rebuild_machines set serial = $7, asset_id = $1, notice = $9, updated_at = now(),
+              model = case when model = '' then $8 else model end,
+              origin = coalesce((select origin || jsonb_build_object('pulled_to', $2::text) from was), (select to_jsonb(p) from prior p))
+        where id = $12::int and exists (select 1 from unit)
+       returning id
+     ), added as (
+       insert into rebuild_machines (rebuild_id, model, serial, asset_id, notice, origin)
+       select $5, $8, $7, $1, $9, coalesce((select origin || jsonb_build_object('pulled_to', $2::text) from was), (select to_jsonb(p) from prior p))
+        where $12::int is null and exists (select 1 from unit)
+       returning id
      )
-     update rebuilds set serial = $7, asset_id = $1, equipment = $8, serial_notice = $9, updated_at = now()
-      where id = $5 and exists (select 1 from unit)
-      returning *`,
-    [hit.assetId, cur.account, LOCKED_BY_ASSIGNED, keys, data.id, hit.stamp, hit.serial, equipment, notice, sameAccount, serialKey(hit.serial)],
+     select coalesce((select id from saved), (select id from added)) as id,
+            (select asset_id from mine) as old_asset, (select origin from mine) as old_origin, (select serial from mine) as old_serial`,
+    [
+      hit.assetId,
+      cur.account,
+      LOCKED_BY_ASSIGNED,
+      keys,
+      data.id,
+      hit.stamp,
+      hit.serial,
+      model || hit.model,
+      notice,
+      sameAccount,
+      serialKey(hit.serial),
+      machine?.id ?? null,
+      `Serial ${hit.serial} moved to rebuild "${cur.title}".`,
+    ],
   );
-  const row = pulled[0];
-  if (!row) {
-    const now = (await sql.query<{ account: string }>("select account from rebuilds where id = $1", [data.id]))[0];
+  if (!pulled[0]?.id) {
+    const now = (await sql.query<{ account: string; status: string }>("select account, status from rebuilds where id = $1", [data.id]))[0];
     if (!now) throw new Error("Rebuild not found");
-    if (isWarehouse(access) && !warehouseMayEdit(now.account)) throw await movedRefusal(sql, data.id);
-    if (!isWarehouse(access)) throw new Error(`Serial ${hit.serial} is no longer in the warehouse records, so it wasn't pulled.`);
-    throw new Error(`Serial ${hit.serial} was just moved, locked or put on hold by someone else, so it wasn't pulled. Pull it again.`);
+    if (CLOSED_REBUILD.has(now.status as RebuildStatus) || (isWarehouse(access) && !warehouseMayEdit(now.account))) throw await machineRefusal(sql, data.id);
+    if (machine && !(await machineRow(sql, data.id, machine.id))) throw new Error("That machine isn't on this rebuild any more. Open the rebuild again.");
+    if (!isWarehouse(access)) throw new Error(`Serial ${hit.serial} is no longer in the warehouse records, or another rebuild took it, so it wasn't pulled.`);
+    throw new Error(`Serial ${hit.serial} was just moved, locked, put on hold or taken by another rebuild, so it wasn't pulled. Pull it again.`);
   }
-  await logActivity(sql, userId, data.id, "assigned-asset", notice);
+  // The machine's old unit, if it had another one, goes back as it was.
+  const old = pulled[0];
+  let back: string | null = null;
+  if (old.old_asset != null && Number(old.old_asset) !== hit.assetId) {
+    const done = await sql.query<{ id: number }>(PUT_BACK, [old.old_asset, old.old_origin == null ? null : JSON.stringify(old.old_origin)]);
+    back = putBackLine(old.old_serial, old.old_origin, done.length > 0);
+  }
+  await logActivity(sql, userId, data.id, "assigned-asset", [notice, back].filter(Boolean).join(" "));
   // Warehouse's pull goes through on its own, and every Admin hears where the unit came from. A unit already on the
   // refurb's account (on this refurb, or another of its refurbs) came from no one, so that one doesn't ping.
   if (isWarehouse(access) && !sameAccount) {
@@ -861,17 +1147,156 @@ export async function pullRebuildSerialFor(sql: Sql, data: z.infer<typeof pullIn
             where coalesce(nullif(serial_key, ''), lower(regexp_replace(coalesce(serial, ''), '[#[:space:]]', '', 'g'))) = $1
               and lower(btrim(customer)) <> lower(btrim($2))
             order by id limit 1`,
-          [serialKey(hit.serial), row.account],
+          [serialKey(hit.serial), cur.account],
         )
         .catch(() => [])
     )[0]?.customer;
     await notifyAdminsWarehousePull(sql, userId, {
       rebuildId: data.id,
-      account: row.account,
-      body: pullNotice(access.username, { model: hit.model, serial: hit.serial }, where, row.title, listed ?? null),
+      account: cur.account,
+      body: pullNotice(access.username, { model: hit.model, serial: hit.serial }, where, cur.title, listed ?? null),
     }).catch((e) => console.error("[rebuilds] the Admins' pull ping failed", e));
   }
-  return mapRebuild(row, todayChicago());
+  return reload();
+}
+
+/** A serial on the rebuild's first machine (a new one when it has none), as the one serial a rebuild had before 11/2. */
+export async function pullRebuildSerialFor(
+  sql: Sql,
+  data: { id: number; serial: string; confirmReuse?: boolean; asked?: string },
+  userId: string,
+): Promise<Rebuild> {
+  const first = (await sql.query<{ id: number }>("select id from rebuild_machines where rebuild_id = $1 and stocked_at is null order by id limit 1", [data.id]))[0];
+  return pullRebuildMachineFor(sql, { ...data, machineId: first ? Number(first.id) : null }, userId);
+}
+
+const removeInput = z.object({ id: z.number(), machineId: z.number() });
+
+export const removeRebuildMachine = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.input<typeof removeInput>) => removeInput.parse(d))
+  .handler(async ({ data, context }): Promise<{ rebuild: Rebuild; message: string | null }> => removeRebuildMachineFor(await readySql(), data, context.userId));
+
+/**
+ * The body of removeRebuildMachine: the machine comes off the rebuild, and its unit goes back as it was before the
+ * pull, in the same statement (so nobody pulls it in between). A machine in stock stays. A cancelled rebuild's
+ * machines can still come off, to put their units back.
+ */
+export async function removeRebuildMachineFor(sql: Sql, data: z.infer<typeof removeInput>, userId: string): Promise<{ rebuild: Rebuild; message: string | null }> {
+  const access = await requireEditor(sql, userId);
+  const cur = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0];
+  if (!cur) throw new Error("Rebuild not found");
+  requireRowEditor(access, cur.account);
+  if (cur.status === "Completed") throw new Error("This rebuild is Completed, so its machines can't change. Set it back to In progress first.");
+  const machine = await machineRow(sql, data.id, data.machineId);
+  if (!machine) throw new Error("That machine isn't on this rebuild any more. Open the rebuild again.");
+  if (machine.stocked_at) throw new Error("That machine is in stock already, so it stays on the rebuild.");
+  const rows = await sql.query<{ id: number; model: string; serial: string | null; asset_id: number | null; origin: unknown; back: number }>(
+    `with gone as (
+       delete from rebuild_machines m
+        where m.id = $1 and m.rebuild_id = $2 and m.stocked_at is null
+          and exists (select 1 from rebuilds r where r.id = $2 and r.status <> 'Completed' and ${ACCOUNT_STILL("r.account", "$3")})
+       returning m.id, m.model, m.serial, m.asset_id, m.origin
+     ), back as (
+       ${PUT_BACK.replace("where a.id = $1", "where a.id = (select asset_id from gone)").replace("$2::jsonb", "(select origin from gone)")}
+     )
+     select g.id, g.model, g.serial, g.asset_id, g.origin, (select count(*)::int from back) as back from gone g`,
+    [data.machineId, data.id, warehouseKeys(access)],
+  );
+  const gone = rows[0];
+  if (!gone) {
+    if (!(await machineRow(sql, data.id, data.machineId))) throw new Error("That machine isn't on this rebuild any more. Open the rebuild again.");
+    throw await machineRefusal(sql, data.id);
+  }
+  const message = gone.asset_id != null ? putBackLine(gone.serial, gone.origin, gone.back > 0) : null;
+  const label = `${gone.model?.trim() || "Machine"}${gone.serial?.trim() ? ` SN ${gone.serial.trim()}` : ""}`;
+  await logActivity(sql, userId, data.id, "updated", [`removed machine ${label}`, message].filter(Boolean).join(" · "));
+  const row = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [data.id]))[0]!;
+  return { rebuild: await rebuildOut(sql, row), message };
+}
+
+/**
+ * A completed refurb's machines go into stock at the Staging area (Chuy, 11/2), marked needs shop test, with no Admin
+ * review. A machine's pulled unit moves there off the refurb; a machine whose serial is on the stock list with
+ * nobody's name on it moves that unit; any other machine is added to the stock list. A machine already in stock is
+ * left alone, and so is a unit someone moved since it was pulled. Returns a line for the person who completed it.
+ */
+async function stockRefurbMachines(sql: Sql, rebuild: RebuildRow, userId: string): Promise<string | null> {
+  const machines = await sql.query<MachineRow>("select * from rebuild_machines where rebuild_id = $1 and stocked_at is null order by id", [rebuild.id]);
+  if (!machines.length) return null;
+  const who = await deskUsername(sql, userId);
+  const now = new Date();
+  const when = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", dateStyle: "medium", timeStyle: "short" }).format(now);
+  const day = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", month: "short", day: "numeric", year: "numeric" }).format(now);
+  const inStock = `In stock at the ${REFURB_STOCK_PLACE} since ${day}, needs shop test.`;
+  const moveLine = `Moved from rebuild "${rebuild.title}" to ${REFURB_STOCK_PLACE} · ${who} · ${when}`;
+  const addLine = `Added to stock from rebuild "${rebuild.title}" at the ${REFURB_STOCK_PLACE} · ${who} · ${when}`;
+  const purpose = SITE_PURPOSE[HOUSE_STAGING] ?? REFURB_STOCK_PLACE;
+  const done: string[] = [];
+  const left: string[] = [];
+  for (const m of machines) {
+    const label = `${m.model?.trim() || "Machine"}${m.serial?.trim() ? ` SN ${m.serial.trim()}` : ""}`;
+    let assetId = num(m.asset_id);
+    const pulled = assetId != null;
+    if (!pulled && serialKey(m.serial ?? "")) {
+      const hit = await findWarehouse(sql, m.serial ?? "");
+      if (hit) assetId = hit.assetId;
+    }
+    if (assetId != null) {
+      // Its unit: pulled onto this refurb and still on it, or on the stock list with nobody's name on it.
+      const moved = await sql.query<{ id: number }>(
+        `with mine as (select id from rebuild_machines where id = $1 and stocked_at is null for update),
+         unit as (
+           update assets set status = 'deployed', site = $7, pallet = null, level = null, line_no = null, sold_to = null,
+                  purpose = $8, install_id = null, job_id = null, locked_at = null, locked_by = null,
+                  shop_test = 'needs-test', shop_test_note = null, shop_test_by = $4, shop_test_at = now(),
+                  notes = concat_ws(E'\\n', nullif(btrim(coalesce(notes, '')), ''), $5::text), updated_at = now()
+            where id = $2 and exists (select 1 from mine)
+              and (($9 and status = 'assigned' and purpose = 'In-house rebuild' and ${NAME_KEY("sold_to")} = any($3::text[]))
+                   or (not $9 and status in ('ready', 'deployed') and coalesce(btrim(sold_to), '') = '' and install_id is null
+                       and job_id is null and stock_hold is null and locked_at is null))
+           returning id
+         )
+         update rebuild_machines set asset_id = $2, stocked_at = now(), notice = $6, updated_at = now()
+          where id = $1 and exists (select 1 from unit)
+         returning id`,
+        [m.id, assetId, [...WAREHOUSE_ACCOUNT_KEYS], who, moveLine, inStock, HOUSE_STAGING, purpose, pulled],
+      );
+      if (moved.length) {
+        await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('asset', $1, $2, 'moved', $3)", [assetId, who, moveLine]);
+        done.push(label);
+        continue;
+      }
+      const place = (await sql.query<{ site: string; pallet: string | null; level: number | null; status: string; sold_to: string | null; purpose: string | null; install_id: number | null; job_id: number | null }>(
+        "select site, pallet, level, status, sold_to, purpose, install_id, job_id from assets where id = $1",
+        [assetId],
+      ))[0];
+      const why = place
+        ? `${label} wasn't put in stock: its unit is on ${unitWhere({ site: place.site, pallet: place.pallet, level: num(place.level), status: place.status, soldTo: place.sold_to, purpose: place.purpose, installId: num(place.install_id), jobId: num(place.job_id) })} now.`
+        : `${label} wasn't put in stock: its unit is no longer on the stock list.`;
+      left.push(why);
+      await sql.query("update rebuild_machines set notice = $2, updated_at = now() where id = $1 and stocked_at is null", [m.id, why]);
+      continue;
+    }
+    const made = await sql.query<{ asset_id: number }>(
+      `with mine as (select id from rebuild_machines where id = $1 and stocked_at is null for update),
+       unit as (
+         insert into assets (kind, model, serial, qty, site, status, purpose, shop_test, shop_test_by, shop_test_at, notes, updated_at)
+         select 'equip', $2, $3, 1, $7, 'deployed', $8, 'needs-test', $4, now(), $5, now() from mine
+         returning id
+       )
+       update rebuild_machines set asset_id = (select id from unit), stocked_at = now(), notice = $6, updated_at = now()
+        where id = $1 and exists (select 1 from unit)
+       returning asset_id`,
+      [m.id, m.model.trim(), m.serial?.trim() || null, who, addLine, inStock, HOUSE_STAGING, purpose],
+    );
+    if (made[0]) {
+      await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('asset', $1, $2, 'added', $3)", [made[0].asset_id, who, addLine]);
+      done.push(label);
+    }
+  }
+  if (done.length) await logActivity(sql, userId, Number(rebuild.id), "stocked", `Into stock at the ${REFURB_STOCK_PLACE}: ${done.join(", ")}`.slice(0, 500));
+  return stockedLine(done.length, left);
 }
 
 export async function seedRebuilds(sql: Sql): Promise<void> {
@@ -1098,15 +1523,21 @@ export async function seedRebuilds(sql: Sql): Promise<void> {
   for (const s of rows) {
     const created = add(s.createdDays);
     const changedAt = add(s.changedDays);
+    // Each sample's machine goes on its machine list too (11/2).
     await sql.query(
-      `insert into rebuilds (
-         title, account, equipment, serial, owner, status, reason_code, reason_detail,
-         planned_start, target_complete, actual_start, actual_complete, priority, notes,
-         status_changed_at, created_at, updated_at
-       ) values (
-         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,
-         $15::timestamptz, $16::timestamptz, now()
-       )`,
+      `with made as (
+         insert into rebuilds (
+           title, account, equipment, serial, owner, status, reason_code, reason_detail,
+           planned_start, target_complete, actual_start, actual_complete, priority, notes,
+           status_changed_at, created_at, updated_at
+         ) values (
+           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,
+           $15::timestamptz, $16::timestamptz, now()
+         )
+         returning id, equipment, serial
+       )
+       insert into rebuild_machines (rebuild_id, model, serial)
+       select id, coalesce(equipment, ''), serial from made where equipment is not null or serial is not null`,
       [
         s.title,
         s.account,
