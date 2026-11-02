@@ -533,6 +533,50 @@ test("the owner's lock keeps a unit where it is: its machine stays on the refurb
     assert.deepEqual((await pg.query("select serial, asset_id from rebuild_machines where id = $1", [m2.id])).rows[0], { serial: "TESTSN-L2", asset_id: v });
     // Its own serial again changes nothing, and is fine.
     await R.pullRebuildMachineFor(sql, { id: sd, machineId: m2.id, serial: "TESTSN-L2" }, "u-wh");
+    // A customer's unit is refused for the lock before anyone is asked to confirm taking it.
+    await unit(pg, "TESTSN-L7", { site: "account", status: "at-account", sold_to: "Bean Test Cafe" });
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, machineId: m2.id, serial: "TESTSN-L7" }, "u-wh"), refused("TESTSN-L2"));
+    // A lock that lands between the check and the write: the write itself leaves the machine as it was.
+    await pg.query("update assets set locked_at = null, locked_by = null where id = $1", [v]);
+    let lockedNow = false;
+    const lockOnWrite = Object.assign(async () => assert.fail("tagged query"), {
+      query: async (text, params) => {
+        if (!lockedNow && /^\s*with refurb as \(/.test(text)) {
+          lockedNow = true;
+          await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [v]);
+        }
+        return sql.query(text, params);
+      },
+    });
+    await assert.rejects(() => R.pullRebuildMachineFor(lockOnWrite, { id: sd, machineId: m2.id, serial: "TESTSN-L6" }, "u-wh"), refused("TESTSN-L2"));
+    assert.deepEqual((await pg.query("select serial, asset_id from rebuild_machines where id = $1", [m2.id])).rows[0], { serial: "TESTSN-L2", asset_id: v }, "still its unit");
+    assert.deepEqual([(await unitRow(pg, spare)).status, (await unitRow(pg, spare)).sold_to], ["ready", null], "the other unit stays on the rack");
+    // An Admin putting the refurb on a customer's account would hand the locked units to that customer: refused, and
+    // nothing moves. Billing a shop refurb to Katz Coffee Service Dept. is the same house, so that one is fine.
+    const onAccount = /^Error: SN TESTSN-L1 is locked by boss, so this rebuild stays on its account while it has it\. Only (boss|the owner) can unlock it\.$/;
+    await assert.rejects(() => R.updateRebuildFor(sql, { id: sd, account: "Bean Test Cafe" }, "u-owner"), onAccount);
+    assert.equal((await pg.query("select account from rebuilds where id = $1", [sd])).rows[0].account, SD);
+    assert.deepEqual([(await unitRow(pg, u)).sold_to, (await unitRow(pg, v)).sold_to], [SD, SD]);
+    let movedNow = false;
+    const lockOnMove = Object.assign(async () => assert.fail("tagged query"), {
+      query: async (text, params) => {
+        if (!movedNow && /^\s*update rebuilds set\s+title = \$2/.test(text)) {
+          movedNow = true;
+          await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [spare]);
+        }
+        return sql.query(text, params);
+      },
+    });
+    const sdFree = await rebuild(pg, "Test free refurb", SD);
+    await R.pullRebuildMachineFor(sql, { id: sdFree, serial: "TESTSN-L6" }, "u-wh");
+    await assert.rejects(() => R.updateRebuildFor(lockOnMove, { id: sdFree, account: "Bean Test Cafe" }, "u-owner"), /^Error: SN TESTSN-L6 is locked by boss, so this rebuild stays on its account while it has it/);
+    assert.deepEqual([(await pg.query("select account from rebuilds where id = $1", [sdFree])).rows[0].account, (await unitRow(pg, spare)).sold_to], [SD, SD], "checked in the write too");
+    await pg.query("update assets set locked_at = now(), locked_by = 'System (assigned)' where id = $1", [spare]);
+    const shopLocked = await rebuild(pg, "Test shop locked refurb", SHOP);
+    const shopUnit = await unit(pg, "TESTSN-L8", { pallet: "D", level: 5 });
+    await R.pullRebuildMachineFor(sql, { id: shopLocked, serial: "TESTSN-L8" }, "u-wh");
+    await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [shopUnit]);
+    assert.equal((await R.updateRebuildFor(sql, { id: shopLocked, account: SD }, "u-wh")).account, SD);
     // A serial typed before its unit was in the records; the unit turns up at Training since, and the owner locks that
     // serial on a customer's account.
     await R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-L4", model: "Test kettle" }, "u-wh");

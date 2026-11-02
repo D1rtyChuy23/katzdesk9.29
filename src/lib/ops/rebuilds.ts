@@ -872,6 +872,12 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     if (refusal) throw new Error(refusal);
   }
 
+  // A unit the owner locked stays on its account, so the rebuild holding it stays there too (11/2 review, round 3).
+  const nameKey = (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const accountMoves = nameKey(nextAccount) !== nameKey(cur.account) && !(warehouseMayEdit(nextAccount) && warehouseMayEdit(cur.account));
+  const accountLock = accountMoves ? await rebuildHeldLock(sql, data.id) : null;
+  if (accountLock) throw await lockedUnitRefusal(sql, accountLock, "this rebuild stays on its account while it has it");
+
   const leavingWaiting = cur.status === "Waiting" && nextStatus !== "Waiting";
   const reasonCode = nextStatus === "Waiting" ? nextReason : leavingWaiting ? null : nextReason;
   const reasonDetail = nextStatus === "Waiting" ? nextDetail : leavingWaiting ? null : nextDetail;
@@ -910,7 +916,7 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
        job_id = $15,
        status_changed_at = case when $16 then now() else status_changed_at end,
        updated_at = now()
-     where id = $1 and ${ACCOUNT_STILL("account", "$17")}
+     where id = $1 and ${ACCOUNT_STILL("account", "$17")} and not ${LOCKED_UNIT_MOVES("rebuilds", "$3::text")}
      returning *`,
     [
       data.id,
@@ -933,7 +939,12 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     ],
   );
   const row = rows[0];
-  if (!row) throw await movedRefusal(sql, data.id);
+  if (!row) {
+    const now = (await sql.query<{ account: string }>("select account from rebuilds where id = $1", [data.id]))[0];
+    const lock = now && accountMoves ? await rebuildHeldLock(sql, data.id) : null;
+    if (lock) throw await lockedUnitRefusal(sql, lock, "this rebuild stays on its account while it has it");
+    throw await movedRefusal(sql, data.id);
+  }
   const parts = [
     changed("status", cur.status, nextStatus),
     leavingWaiting && cur.reason_code ? `kept last reason in history · ${cur.reason_code}` : null,
@@ -1207,11 +1218,33 @@ async function heldLock(sql: Sql, machineId: number): Promise<{ serial: string |
  * A machine whose unit is locked keeps it (11/2 review): taking the machine off, or giving it another serial, would
  * leave the unit on the rebuild with no machine to bring it back or put it in stock.
  */
-async function lockedUnitRefusal(sql: Sql, lock: { serial: string | null; by: string | null }): Promise<Error> {
+async function lockedUnitRefusal(
+  sql: Sql,
+  lock: { serial: string | null; by: string | null },
+  stays = "it stays on this machine",
+): Promise<Error> {
   const { lockOwnerName } = await import("@/lib/ops/equipment-lock");
   const owner = (await lockOwnerName(sql).catch(() => null))?.trim() || "the owner";
   const sn = lock.serial?.trim() ? `SN ${lock.serial.trim()}` : "Its unit";
-  return new Error(`${sn} is locked by ${lock.by?.trim() || owner}, so it stays on this machine. Only ${owner} can unlock it.`);
+  return new Error(`${sn} is locked by ${lock.by?.trim() || owner}, so ${stays}. Only ${owner} can unlock it.`);
+}
+
+/**
+ * SQL: rebuild `r` (a rebuilds row) has a machine holding a locked unit, and `acct` is another account (11/2 review,
+ * round 3): an account change would hand that unit to the new account. The Warehouse's two refurb accounts are one.
+ */
+const LOCKED_UNIT_MOVES = (r: string, acct: string) =>
+  `(not ${SAME_ACCOUNT(`${r}.account`, acct)} and exists (
+     select 1 from rebuild_machines km where km.rebuild_id = ${r}.id and ${HELD_LOCKED("km")}))`;
+
+/** The first locked unit a rebuild's machines hold, or null: its serial and who locked it. */
+async function rebuildHeldLock(sql: Sql, rebuildId: number): Promise<{ serial: string | null; by: string | null } | null> {
+  const ids = await sql.query<{ id: number }>("select id from rebuild_machines where rebuild_id = $1 and asset_id is not null and stocked_at is null order by id", [rebuildId]);
+  for (const m of ids) {
+    const lock = await heldLock(sql, Number(m.id));
+    if (lock) return lock;
+  }
+  return null;
 }
 
 const pullInput = z.object({
