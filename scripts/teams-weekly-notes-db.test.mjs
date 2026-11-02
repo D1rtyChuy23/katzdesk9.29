@@ -94,6 +94,9 @@ const tlc = await job("TL-1", "Zz Blue Door", { kind: "tlc", completed: "2026-11
 await charge(tlc, "ZZTAMP", 1);
 const sc930 = await job("SC-930", "Zz Blue Door", { completed: "2026-11-03" });
 await charge(sc930, "ZZTAMP", 4);
+// Reported this week, then merged into another ticket.
+const sc931 = await job("SC-931", "Zz Katy Cafe", { completed: "2026-11-03" });
+await charge(sc931, "ZZTAMP", 3);
 const sc904 = await job("SC-904", "Zz Katy Cafe", { completed: "2026-11-07" });
 await charge(sc904, "ZZTAMP", 6);
 const cancelled = await job("SC-905", "Zz Blue Door", { status: "Cancelled", completed: "2026-11-05" });
@@ -126,6 +129,13 @@ await sql.query(
      ('Zz Katy Cafe', 'Cancelled', true, '2026-11-05', null, 'Josh', 'WO-952', null, null),
      ('Zz Katy Cafe', 'Scheduled', false, null, '2026-11-05', 'Josh', 'WO-953', null, null)`,
   [sc901],
+);
+
+// A PM's machine parts, reported this week; it is billed on a ticket later.
+const p5 = (await one("insert into pm_jobs (customer, status, done, completed_at, technician, wo) values ('Zz Katy Cafe', 'Completed', true, '2026-11-03', 'Josh', 'WO-960') returning id")).id;
+await sql.query(
+  "insert into machine_parts (pm_job_id, piece_key, machine_label, billing_item_id, item, qty) values ($1, 'zz-piece', 'Zz Grinder', $2, 'PARTS : ZZTAMP', 2)",
+  [p5, tamp],
 );
 
 // The Pipeline.
@@ -210,6 +220,12 @@ await sql.query("insert into install_inspections (install_id, override_reason) v
 const onSite = await unit(i7, "Zz Austin Brew", "Mazzer Super Jolly", { serial: "SJ-OLD", installed: "2025-01-10" });
 await sql.query("update installs set machines = $2 where id = $1", [i7, machines([{ equipment: "Mazzer Super Jolly", powerVoltage: "120V", plug: "5-15P", unitId: onSite }])]);
 
+// An install's approved invoice, reported this week; the install is merged into another one later.
+const i13 = await install("Zz Walk In", { machines: machines([{ equipment: "Bunn Axiom DV", ...full }]) });
+const i14 = await install("Zz Walk In", { machines: machines([{ equipment: "Bunn Axiom DV", ...full }]) });
+const inv13 = (await one("insert into invoices (entity_type, entity_id, customer, approved_at, approved_by) values ('install', $1, 'Zz Walk In', '2026-11-04T15:00:00Z', 'Chuy') returning id", [i13])).id;
+await sql.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort) values ($1, 'WATER FILTERS : WFZZ1', '', 2, 10, 'part', 1)", [inv13]);
+
 // The warehouse.
 await sql.query(
   `insert into assets (kind, model, serial, qty, site, pallet, level, status, install_id, sold_to, origin_site, origin_pallet, origin_level, shop_test, stock_hold, customer_owned) values
@@ -252,10 +268,11 @@ test("Purchase Order Requests: each Friday 5 PM pulls the week, by manufacturer,
       "Eversys · 1 part, 4 pieces\n- ZZEV1 · Zz Gasket · 4",
       // No description: Bunn from its NetSuite group.
       "Bunn · 1 part, 3 pieces\n- ZZBUNN1 · 3",
-      "Everpure · 1 part, 1 piece\n- WFZZ1 · Zz Cartridge · 1",
-      // The TLC visit's tamper and SC-930's four. Not the equipment, the cancelled ticket, last week's (pulled already)
-      // or next week's.
-      "Other · 1 part, 5 pieces\n- ZZTAMP · Zz Tamper · 5",
+      // SC-901's one and the install invoice's two.
+      "Everpure · 1 part, 3 pieces\n- WFZZ1 · Zz Cartridge · 3",
+      // The TLC visit's one, SC-930's four, SC-931's three and the PM's two. Not the equipment, the cancelled ticket,
+      // last week's (pulled already) or next week's.
+      "Other · 1 part, 10 pieces\n- ZZTAMP · Zz Tamper · 10",
     ].join("\n\n"),
   );
   const saved = await pulls();
@@ -269,7 +286,7 @@ test("Purchase Order Requests: each Friday 5 PM pulls the week, by manufacturer,
   // Each pull keeps what it reported, ticket by ticket: equipment too, though the note doesn't list it.
   assert.deepEqual(saved[0].uses, [{ k: `service:${sc903}`, p: tamp, q: 5 }]);
   // Not the equipment either: only the parts the note lists go into a pull.
-  assert.equal(saved[1].uses.length, 6);
+  assert.equal(saved[1].uses.length, 9);
   assert.deepEqual(saved.map((p) => p.seq), [1, 2]);
 });
 
@@ -407,6 +424,13 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
   await sql.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [sc930, i1]);
   const inv = (await one("insert into invoices (entity_type, entity_id, customer) values ('install', $1, 'Zz Blue Door') returning id", [i1])).id;
   await sql.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort) values ($1, 'ZZTAMP', '', 4, 10, 'part', 1)", [inv]);
+  // A reported ticket merged into another (its charges move to the keeper), a reported PM billed on a ticket, and an
+  // install with a reported invoice merged into another install.
+  await sql.query("update ticket_charges set job_id = $2 where job_id = $1", [sc931, sc903]);
+  await sql.query("update service_jobs set duplicate_of = $2 where id = $1", [sc931, sc903]);
+  await sql.query("update pm_jobs set stacked_job_id = $2 where id = $1", [p5, sc904]);
+  await sql.query("update installs set archived = true, duplicate_of = $2 where id = $1", [i13, i14]);
+  await sql.query("update invoices set entity_id = $2 where id = $1", [inv13, i14]);
   // A reported piece taken off.
   await sql.query("update ticket_charges set qty = 1 where job_id = $1 and item = 'PARTS : ZZEV1'", [sc901]);
   const next = await card("purchase-orders", NEXT_FRIDAY);
@@ -417,7 +441,9 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
       intro("Sat Nov 7", "Fri Nov 13", "Fri Nov 13 at 5:30 PM"),
       "Bunn · 1 part, 2 pieces\n- ZZBUNN1 · 2",
       "Everpure · 1 part, 1 piece\n- WFZZ1 · Zz Cartridge · 1",
-      "Other · 1 part, 6 pieces\n- ZZTAMP · Zz Tamper · 6",
+      // SC-904's six. The PM is billed on SC-904 now, so its two count as two of those six (Parts → Usage counts a
+      // ticket's parts once), and they were reported already: four are new.
+      "Other · 1 part, 4 pieces\n- ZZTAMP · Zz Tamper · 4",
       "Taken off tickets after an earlier report\n- ZZEV1 · Zz Gasket · -1",
     ].join("\n\n"),
   );
