@@ -16,7 +16,9 @@ process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 const W = await import("../src/lib/ops/warehouse-invoice.ts");
 const P = await import("../src/lib/ops/warehouse-pull.ts");
 const { approveInvoiceFor, getInvoiceFor, listAccountInvoicesFor, saveForApprovalSql, saveInvoiceForApprovalFor } = await import("../src/lib/ops/invoice-api.ts");
-const { archiveRebuildFor, createRebuildFor, listRebuildsFor, pullRebuildSerialFor, updateRebuildFor } = await import("../src/lib/ops/rebuilds.ts");
+const { archiveRebuildFor, createRebuildFor, listRebuildsFor, pullRebuildMachineFor, pullRebuildSerialFor, removeRebuildMachineFor, saveRebuildMachinesFor, updateRebuildFor } = await import(
+  "../src/lib/ops/rebuilds.ts"
+);
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -358,13 +360,17 @@ test("Warehouse's rebuilds: new ones are for Katz Coffee Service Dept., a shop r
     await assert.rejects(() => updateRebuildFor(sql, { id: cust, status: "Cancelled" }, "u-wh"), refusal);
     await assert.rejects(() => archiveRebuildFor(sql, { id: cust }, "u-wh"), refusal);
     await assert.rejects(() => pullRebuildSerialFor(sql, { id: cust, serial: "TESTSN1" }, "u-wh"), refusal);
-    const untouched = (await pg.query("select account, notes, status, archived, serial from rebuilds where id = $1", [cust])).rows[0];
-    assert.deepEqual(untouched, { account: "Bean Test Cafe", notes: null, status: "Queued", archived: false, serial: null });
+    const untouched = (await pg.query("select account, notes, status, archived from rebuilds where id = $1", [cust])).rows[0];
+    assert.deepEqual(untouched, { account: "Bean Test Cafe", notes: null, status: "Queued", archived: false });
+    assert.equal(Number((await pg.query("select count(*) from rebuild_machines where rebuild_id = $1", [cust])).rows[0].count), 0, "no machine was added to it");
     assert.equal((await updateRebuildFor(sql, { id: cust, notes: "Tech note" }, "u-tech")).notes, "Tech note");
 
     // Its own refurbs: Warehouse removes them and pulls serials onto them (the pulls have their own test below).
     assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN1" }, "u-wh")).serial, "TESTSN1");
-    assert.equal((await pg.query("select serial_notice from rebuilds where id = $1", [sd])).rows[0].serial_notice, "Serial TESTSN1 not found in warehouse.");
+    assert.equal(
+      (await pg.query("select notice from rebuild_machines where rebuild_id = $1", [sd])).rows[0].notice,
+      "Serial TESTSN1 isn't in the warehouse yet: it goes into stock when this refurb is completed.",
+    );
     assert.deepEqual(await archiveRebuildFor(sql, { id: made.id }, "u-wh"), { ok: true });
   } finally {
     await pg.close();
@@ -419,20 +425,28 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     };
     const unitRow = async (id) => (await pg.query("select status, sold_to, purpose, site from assets where id = $1", [id])).rows[0];
     const links = async (id) => (await pg.query("select install_id, job_id from assets where id = $1", [id])).rows[0];
-    const pull = (id, serial, userId = "u-wh", confirmReuse = undefined) => pullRebuildSerialFor(sql, { id, serial, confirmReuse }, userId);
+    // Each serial is its own machine on the refurb (11/2): pulled again onto the machine that has it, else onto a new one.
+    const machineOf = async (id, serial) =>
+      (await pg.query("select * from rebuild_machines where rebuild_id = $1 and upper(serial) = upper($2) order by id limit 1", [id, serial])).rows[0] ?? null;
+    const serialsOf = async (id) => (await pg.query("select serial from rebuild_machines where rebuild_id = $1 order by id", [id])).rows.map((r) => r.serial);
+    const pull = async (id, serial, userId = "u-wh", confirmReuse = undefined, asked = undefined) => {
+      const had = await machineOf(id, serial);
+      const rb = await pullRebuildMachineFor(sql, { id, machineId: had ? Number(had.id) : null, serial, confirmReuse, asked }, userId);
+      return rb.machines.find((m) => (m.serial ?? "").toUpperCase() === serial.toUpperCase()) ?? null;
+    };
     const pinged = async () => (await pings(pg)).sort((a, b) => a.user_id.localeCompare(b.user_id));
     const bodiesFor = async (userId) => (await pings(pg)).filter((p) => p.user_id === userId).map((p) => p.body);
     const ping = (serial, from, refurb = "Test Faema refurb") => `Unit pulled for a refurb. wade pulled Test espresso machine SN ${serial} from ${from} onto ${refurb}.`;
 
-    // A free unit on a rack goes straight onto the refurb, and the Admins hear where it came from.
+    // A free unit on a rack goes straight onto the refurb as a machine, and the Admins hear where it came from.
     const rack = await unit("TESTSN-RACK", { pallet: "B", level: 2 });
     const pulled = await pull(sd, "TESTSN-RACK");
-    assert.deepEqual([pulled.assetId, pulled.serial, pulled.equipment], [rack, "TESTSN-RACK", "Test espresso machine"]);
-    assert.equal(pulled.serialNotice, "Serial TESTSN-RACK pulled from warehouse · Test espresso machine · B-L2");
+    assert.deepEqual([pulled.assetId, pulled.serial, pulled.model], [rack, "TESTSN-RACK", "Test espresso machine"]);
+    assert.equal(pulled.notice, "Serial TESTSN-RACK pulled from warehouse · Test espresso machine · B-L2");
     assert.deepEqual(await unitRow(rack), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "barn-back" });
     const first = { from_name: "wade", body: ping("TESTSN-RACK", "Back · B-L2"), customer: SD, entity_type: "rebuild", entity_id: sd };
     assert.deepEqual(await pinged(), [{ user_id: "u-owner", ...first }, { user_id: "u-wh-owner", ...first }], "the owner flag, approved: not the Admin role, not an unapproved account");
-    // The serial box pulls again when it loses focus: the same unit on the same refurb pings no one again.
+    // The serial box pulls again when it loses focus: the same unit on the same machine pings no one again.
     await pull(sd, "TESTSN-RACK");
     assert.equal((await pings(pg)).length, 2);
 
@@ -441,11 +455,12 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Bean Test Cafe', 'Test espresso machine', 'Test espresso machine', 'TESTSN-CUST', 'testsn-cust')");
     await assert.rejects(() => pull(sd, "TESTSN-CUST"), /^Error: Serial TESTSN-CUST is already assigned to Bean Test Cafe\. Confirm reuse or cancel\.$/);
     assert.deepEqual(await unitRow(theirs), { status: "at-account", sold_to: "Bean Test Cafe", purpose: null, site: "account" }, "nothing moves before the confirm");
-    assert.equal((await pg.query("select serial_notice from rebuilds where id = $1", [sd])).rows[0].serial_notice, "Serial TESTSN-CUST is already assigned to Bean Test Cafe.");
+    assert.equal(await machineOf(sd, "TESTSN-CUST"), null, "and no machine is added before the answer");
     assert.equal((await pings(pg)).length, 2, "no ping for a question");
     const reused = await pull(sd, "TESTSN-CUST", "u-wh", true);
-    assert.equal(reused.serialNotice, "Serial TESTSN-CUST pulled from warehouse · Test espresso machine · On the account (was Bean Test Cafe)");
+    assert.equal(reused.notice, "Serial TESTSN-CUST pulled from warehouse · Test espresso machine · On the account (was Bean Test Cafe)");
     assert.deepEqual(await unitRow(theirs), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "account" });
+    assert.deepEqual(await serialsOf(sd), ["TESTSN-RACK", "TESTSN-CUST"], "two machines, each with its unit");
 
     // A shop refurb moved to Katz Coffee Service Dept. keeps its unit: its two accounts are one house for Warehouse.
     const shopUnit = await unit("TESTSN-SHOPUNIT", { pallet: "D", level: 3 });
@@ -453,6 +468,7 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     assert.equal((await pull(shop2, "TESTSN-SHOPUNIT")).assetId, shopUnit);
     assert.equal((await unitRow(shopUnit)).sold_to, SHOP);
     assert.equal((await updateRebuildFor(sql, { id: shop2, account: SD }, "u-wh")).account, SD);
+    assert.deepEqual(await unitRow(shopUnit), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "barn-back" }, "its unit moves with it");
     const pingsBeforeMove = (await pings(pg)).length;
     assert.equal((await pull(shop2, "TESTSN-SHOPUNIT")).assetId, shopUnit, "no confirm for its own unit");
     assert.deepEqual(await unitRow(shopUnit), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "barn-back" });
@@ -486,10 +502,11 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     const subjects = async (id) => [...new Set((await pings(pg)).filter((p) => p.entity_id === id).map((p) => p.customer))];
     assert.deepEqual([await subjects(sd), await subjects(shop)], [[SD], [SHOP]], "the ping names the refurb's account, not the unit's old one");
 
-    // The same unit again after it went somewhere else: asked again, and pinged again. After a serial that wasn't found,
-    // the unit still on this refurb's account comes back with no ping.
+    // The same unit again after it went somewhere else: asked again on its machine, and pinged again. Pulled again
+    // onto its machine while it's on the refurb, it comes back with no ping.
     await pg.query("update assets set sold_to = 'Bean Test Cafe', job_id = $2, site = 'field', updated_at = now() + interval '1 second' where id = $1", [rack, job]);
     await assert.rejects(() => pull(sd, "TESTSN-RACK"), /^Error: Serial TESTSN-RACK is already assigned to a ticket for Bean Test Cafe\. Confirm reuse or cancel\.$/);
+    assert.equal((await machineOf(sd, "TESTSN-RACK")).notice, "Serial TESTSN-RACK is already assigned to a ticket for Bean Test Cafe.", "the question is left on its machine");
     await pull(sd, "TESTSN-RACK", "u-wh", true);
     assert.equal((await bodiesFor("u-owner")).at(-1), ping("TESTSN-RACK", "a ticket for Bean Test Cafe"));
     await pull(sd, "TESTSN-NOWHERE");
@@ -503,9 +520,9 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     await assert.rejects(() => pull(sd, "TESTSN-MOVE"), (e) => e.message === askedSa);
     await pg.query("update assets set site = 'account', status = 'at-account', sold_to = 'Bean Test Cafe', updated_at = now() + interval '1 second' where id = $1", [mover]);
     const askedBean = "Serial TESTSN-MOVE is already assigned to Bean Test Cafe. Confirm reuse or cancel.";
-    await assert.rejects(() => pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-MOVE", confirmReuse: true, asked: askedSa }, "u-wh"), (e) => e.message === askedBean);
+    await assert.rejects(() => pull(sd, "TESTSN-MOVE", "u-wh", true, askedSa), (e) => e.message === askedBean);
     assert.equal((await unitRow(mover)).sold_to, "Bean Test Cafe", "not pulled on the old answer");
-    assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-MOVE", confirmReuse: true, asked: askedBean }, "u-wh")).assetId, mover);
+    assert.equal((await pull(sd, "TESTSN-MOVE", "u-wh", true, askedBean)).assetId, mover);
 
     // Still put: a unit waiting for an Admin's decision on a Warehouse request, a sold unit, and one a person locked.
     const held = await unit("TESTSN-HELD");
@@ -513,11 +530,9 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     await assert.rejects(() => pull(sd, "TESTSN-HELD", "u-wh", true), /^Error: Serial TESTSN-HELD is waiting for an Admin to approve its assign to a customer, so it stays where it is\.$/);
     const sold = await unit("TESTSN-SOLD", { site: "sold", status: "sold", sold_to: "Bean Test Cafe" });
     await pg.query("update assets set locked_at = now(), locked_by = 'System (sold)' where id = $1", [sold]);
-    const noticeNow = async () => (await pg.query("select serial_notice from rebuilds where id = $1", [sd])).rows[0].serial_notice;
-    const noticeBefore = await noticeNow();
+    const machinesBefore = await serialsOf(sd);
     await assert.rejects(() => pull(sd, "TESTSN-SOLD"), /^Error: Locked by System \(sold\)\. Only .+ can unlock it\.$/, "refused before any confirm");
     await assert.rejects(() => pull(sd, "TESTSN-SOLD", "u-wh", true), /^Error: Locked by System \(sold\)\. Only .+ can unlock it\.$/);
-    assert.equal(await noticeNow(), noticeBefore, "no question was left on the refurb");
     const locked = await unit("TESTSN-LOCKED", { site: "training", status: "deployed" });
     await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [locked]);
     await assert.rejects(() => pull(sd, "TESTSN-LOCKED", "u-wh", true), /^Error: Locked by boss\./);
@@ -532,7 +547,7 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     assert.deepEqual(await unitRow(sold), { status: "sold", sold_to: "Bean Test Cafe", purpose: null, site: "sold" });
     assert.deepEqual(await unitRow(locked), { status: "deployed", sold_to: null, purpose: null, site: "training" });
     assert.deepEqual(await unitRow(onLockedAccount), { status: "at-account", sold_to: "Bean Test Cafe", purpose: null, site: "account" });
-    assert.equal((await pg.query("select serial from rebuilds where id = $1", [sd])).rows[0].serial, "TESTSN-MOVE", "the refurb keeps the unit it had");
+    assert.deepEqual(await serialsOf(sd), machinesBefore, "no machine was added for a unit that stays put");
 
     // A customer's rebuild is still not Warehouse's to pull onto.
     await assert.rejects(() => pull(cust, "TESTSN-HELD", "u-wh", true), /^Error: Warehouse changes refurbs for Katz Coffee Service Dept\. and Katz shop \/ stock only\./);
@@ -609,10 +624,11 @@ test("Warehouse's change never lands on a rebuild an Admin moved to a customer b
     };
     const back = () => pg.query("update rebuilds set account = $2 where id = $1", [sd, SD]);
     const refusal = /^Error: Warehouse changes refurbs for Katz Coffee Service Dept\. and Katz shop \/ stock only\. This rebuild is for Bean Test Cafe; ask an Admin\.$/;
-    const row = async () => (await pg.query("select account, notes, archived, serial from rebuilds where id = $1", [sd])).rows[0];
+    const row = async () => (await pg.query("select account, notes, archived from rebuilds where id = $1", [sd])).rows[0];
+    const machines = async () => (await pg.query("select serial, asset_id, notice from rebuild_machines where rebuild_id = $1 order by id", [sd])).rows;
 
     await assert.rejects(() => updateRebuildFor(raceOn(/^\s*update rebuilds set\s+title = \$2/), { id: sd, notes: "Warehouse note" }, "u-wh"), refusal);
-    assert.deepEqual(await row(), { account: "Bean Test Cafe", notes: null, archived: false, serial: null }, "the Admin's move stands");
+    assert.deepEqual(await row(), { account: "Bean Test Cafe", notes: null, archived: false }, "the Admin's move stands");
     await back();
     await assert.rejects(() => archiveRebuildFor(raceOn(/update rebuilds set archived = true/), { id: sd }, "u-wh"), refusal);
     assert.equal((await row()).archived, false);
@@ -621,27 +637,37 @@ test("Warehouse's change never lands on a rebuild an Admin moved to a customer b
     const PULL = /^\s*with refurb as \(/;
     await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL), { id: sd, serial: "TESTSN-RACE" }, "u-wh"), refusal);
     assert.deepEqual((await pg.query("select status, sold_to from assets where id = $1", [free])).rows[0], { status: "ready", sold_to: null }, "the unit stays on the rack");
+    assert.deepEqual(await machines(), [], "and no machine was added");
     await back();
-    // The same for the serial notes Warehouse writes without pulling: a serial not found, and the confirm question.
-    await assert.rejects(() => pullRebuildSerialFor(raceOn(/update rebuilds set serial = \$2, asset_id = null, serial_notice = \$3/), { id: sd, serial: "TESTSN-NOWHERE" }, "u-wh"), refusal);
-    assert.equal((await row()).serial, null, "the customer's rebuild didn't take Warehouse's serial");
+    // The same for the machine notes Warehouse writes without pulling: a serial not found, a model, and the confirm question.
+    await assert.rejects(() => pullRebuildSerialFor(raceOn(/^\s*with mine as \(/), { id: sd, serial: "TESTSN-NOWHERE" }, "u-wh"), refusal);
+    assert.deepEqual(await machines(), [], "the customer's rebuild didn't take Warehouse's serial");
     await back();
+    await assert.rejects(() => saveRebuildMachinesFor(raceOn(/^\s*with ok as \(/), { id: sd, machines: [{ model: "Test grinder" }] }, "u-wh"), refusal);
+    assert.deepEqual(await machines(), [], "nor its machine");
+    await back();
+    const grinder = (await saveRebuildMachinesFor(sql, { id: sd, machines: [{ model: "Test grinder" }] }, "u-wh")).machines[0].id;
     const out = Number((await pg.query("insert into assets (kind, model, serial, site, status) values ('equip', 'Test grinder', 'TESTSN-OUT', 'dallas', 'deployed') returning id")).rows[0].id);
-    await assert.rejects(() => pullRebuildSerialFor(raceOn(/update rebuilds set serial_notice = \$2/), { id: sd, serial: "TESTSN-OUT" }, "u-wh"), refusal);
-    assert.equal((await pg.query("select serial_notice from rebuilds where id = $1", [sd])).rows[0].serial_notice, null);
+    await assert.rejects(() => pullRebuildMachineFor(raceOn(/update rebuild_machines set notice = \$3/), { id: sd, machineId: grinder, serial: "TESTSN-OUT" }, "u-wh"), refusal);
+    assert.deepEqual(await machines(), [{ serial: null, asset_id: null, notice: null }]);
     assert.deepEqual((await pg.query("select status, site, sold_to from assets where id = $1", [out])).rows[0], { status: "deployed", site: "dallas", sold_to: null });
     await back();
+    // Taking a machine off checks the account inside the delete too.
+    await assert.rejects(() => removeRebuildMachineFor(raceOn(/^\s*with gone as \(/), { id: sd, machineId: grinder }, "u-wh"), refusal);
+    assert.equal((await machines()).length, 1, "the machine stays");
+    await back();
+    await pg.query("delete from rebuild_machines where rebuild_id = $1", [sd]);
     // The unit is moved to a customer between Warehouse's read and its write (every move stamps the unit): it isn't pulled.
     // (The stamp is a second later: the test database's clock counts milliseconds only.)
     const taken = Number((await pg.query("insert into assets (kind, model, serial, site, status) values ('equip', 'Test brewer', 'TESTSN-TAKEN', 'barn-back', 'ready') returning id")).rows[0].id);
     const assignIt = () => pg.query("update assets set status = 'at-account', site = 'account', sold_to = 'Bean Test Cafe', updated_at = now() + interval '1 second' where id = $1", [taken]);
-    const missed = /^Error: Serial TESTSN-TAKEN was just moved, locked or put on hold by someone else, so it wasn't pulled\. Pull it again\.$/;
+    const missed = /^Error: Serial TESTSN-TAKEN was just moved, locked, put on hold or taken by another rebuild, so it wasn't pulled\. Pull it again\.$/;
     await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL, assignIt), { id: sd, serial: "TESTSN-TAKEN" }, "u-wh"), missed);
     assert.deepEqual((await pg.query("select status, sold_to, purpose from assets where id = $1", [taken])).rows[0], { status: "at-account", sold_to: "Bean Test Cafe", purpose: null });
-    assert.equal((await row()).serial, null, "the refurb didn't take its serial");
+    assert.deepEqual(await machines(), [], "the refurb didn't take its serial");
     // Or a hold is put on it meanwhile, even by a write that doesn't stamp it.
     const holdIt = () => pg.query("update assets set stock_hold = 'remove' where id = $1", [free]);
-    const raced = /^Error: Serial TESTSN-RACE was just moved, locked or put on hold by someone else/;
+    const raced = /^Error: Serial TESTSN-RACE was just moved, locked, put on hold or taken by another rebuild/;
     await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL, holdIt), { id: sd, serial: "TESTSN-RACE" }, "u-wh"), raced);
     assert.deepEqual((await pg.query("select status, sold_to from assets where id = $1", [free])).rows[0], { status: "ready", sold_to: null });
     await pg.query("update assets set stock_hold = null where id = $1", [free]);
@@ -651,18 +677,28 @@ test("Warehouse's change never lands on a rebuild an Admin moved to a customer b
     await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL, lockOnAccount), { id: sd, serial: "TESTSN-RACE" }, "u-wh"), raced);
     assert.deepEqual((await pg.query("select status, sold_to from assets where id = $1", [free])).rows[0], { status: "ready", sold_to: null });
     await pg.query("delete from account_equipment where serial_key = 'testsn-race'");
+    // Or another rebuild's machine takes it meanwhile.
+    const other = await rebuild(pg, "Test other refurb", SD);
+    const takeIt = async () => {
+      await pg.query("update assets set status = 'assigned', sold_to = $2, purpose = 'In-house rebuild' where id = $1", [free, SD]);
+      await pg.query("insert into rebuild_machines (rebuild_id, model, serial, asset_id) values ($1, 'Test espresso machine', 'TESTSN-RACE', $2)", [other, free]);
+    };
+    await assert.rejects(() => pullRebuildSerialFor(raceOn(PULL, takeIt), { id: sd, serial: "TESTSN-RACE" }, "u-wh"), raced);
+    assert.deepEqual(await machines(), [], "one unit, one open rebuild");
+    await pg.query("delete from rebuild_machines where rebuild_id = $1", [other]);
+    await pg.query("update assets set status = 'ready', sold_to = null, purpose = null where id = $1", [free]);
     // A tech's pull whose unit is gone from the records by the time it writes: nothing is pulled.
     const gone = Number((await pg.query("insert into assets (kind, model, serial, site, status) values ('equip', 'Test brewer', 'TESTSN-GONE', 'barn-back', 'ready') returning id")).rows[0].id);
     await assert.rejects(
       () => pullRebuildSerialFor(raceOn(PULL, () => pg.query("delete from assets where id = $1", [gone])), { id: sd, serial: "TESTSN-GONE" }, "u-tech"),
       /^Error: Serial TESTSN-GONE is no longer in the warehouse records, so it wasn't pulled\.$/,
     );
-    assert.equal((await row()).serial, null, "the refurb didn't take the serial of a unit that isn't there");
+    assert.deepEqual(await machines(), [], "the refurb didn't take the serial of a unit that isn't there");
     assert.equal((await pings(pg)).length, 0, "a pull that didn't happen pings no one");
     // Without anything in between, the same changes go through.
     assert.equal((await updateRebuildFor(sql, { id: sd, notes: "Warehouse note" }, "u-wh")).notes, "Warehouse note");
-    assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-RACE" }, "u-wh")).assetId, free);
-    assert.equal((await pullRebuildSerialFor(sql, { id: sd, serial: "TESTSN-TAKEN", confirmReuse: true }, "u-wh")).assetId, taken);
+    assert.equal((await pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-RACE" }, "u-wh")).machines[0].assetId, free);
+    assert.equal((await pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-TAKEN", confirmReuse: true }, "u-wh")).machines[1].assetId, taken);
     assert.equal((await pings(pg)).length, 4, "two pulls, two Admins");
   } finally {
     await pg.close();
@@ -747,11 +783,15 @@ test("the screens: Warehouse's menu adds Rebuilds and Parts, not Invoices; the w
   const bell = readFileSync(new URL("../src/components/desk/notify-bell.tsx", import.meta.url), "utf8");
   assert.match(bell, /if \(isWaitingNotice\(n\.body\)\) return "Invoice to approve";/);
   assert.match(bell, /if \(isPullNotice\(n\.body\)\) return "Unit pulled";/);
-  assert.match(sheet, /\{accountLock \? \(\s*<p className="text-sm text-muted-foreground" data-testid="rebuild-pull-ping">/, "Warehouse's confirm says the Admins get a ping");
-  assert.match(sheet, /if \(\/already assigned\/i\.test\(msg\)\) setReuseNotice\(msg\);/, "every place a unit can be still opens the confirm");
-  assert.match(sheet, /disabled=\{pull\.isPending\}\s+onClick=\{\(\) => \{\s+startPull\(\{ confirmReuse: true, asked: reuseNotice \?\? undefined \}\);/, "Reuse sends the question it answers, once");
-  assert.match(sheet, /pullRebuildSerial\(\{ data: \{ id: row!\.id, serial: opts\.serial, confirmReuse: opts\.confirmReuse, asked: opts\.asked \} \}\)/);
-  assert.match(sheet, /if \(opts\.serial !== lastPull\.current\) return;\s+setReuseNotice\(null\);\s+setSerial\(next\.serial \?\? ""\);/, "an older pull's answer leaves a changed box alone");
+  // The machines on the rebuild's Equipment tab (11/2).
+  assert.match(sheet, /<RebuildMachines row=\{row\} canEdit=\{!locked\} warehouse=\{!!accountLock\} key=\{`machines-\$\{row\.id\}`\} \/>/);
+  const machinesUi = readFileSync(new URL("../src/components/desk/rebuild-machines.tsx", import.meta.url), "utf8");
+  assert.match(machinesUi, /\{warehouse \? \(\s*<p className="text-sm text-muted-foreground" data-testid="rebuild-pull-ping">/, "Warehouse's confirm says the Admins get a ping");
+  assert.match(machinesUi, /if \(\/already assigned\/i\.test\(msg\)\) setReuse\(\{ machineId: o\.machineId, serial: o\.serial, model: o\.model, question: msg \}\);/, "every place a unit can be still opens the confirm");
+  assert.match(machinesUi, /disabled=\{pull\.isPending\}\s+onClick=\{\(\) => \{\s+if \(reuse\) startPull\(reuse\.machineId, reuse\.serial, reuse\.model, \{ confirmReuse: true, asked: reuse\.question \}\);/, "Reuse sends the question it answers, once");
+  assert.match(machinesUi, /pullRebuildMachine\(\{ data: \{ id: row\.id, machineId: o\.machineId, serial: o\.serial, model: o\.model \|\| null, confirmReuse: o\.confirmReuse, asked: o\.asked \} \}\)/);
+  assert.match(machinesUi, /onSuccess: async \(next, o\) => \{\s+await refresh\(\);\s+const key = String\(o\.machineId \?\? "new"\);\s+if \(lastPull\.current\[key\] !== o\.serial\) return;\s+closeReuse\(o\.machineId\);/, "an older pull's answer leaves a changed box alone, and the list is read again before the edits go");
+  assert.match(machinesUi, /const closeReuse = \(machineId: number \| null\) => setReuse\(\(r\) => \(r && r\.machineId === machineId \? null : r\)\);/, "another machine's answer leaves this machine's confirm open");
 
   // No photo changes for Warehouse on Parts: the row, the part's window, and the researched-photo buttons.
   const parts = readFileSync(new URL("../src/routes/_app/parts.tsx", import.meta.url), "utf8");

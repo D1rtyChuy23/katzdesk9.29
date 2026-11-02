@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listComments } from "@/lib/ops/api";
 import {
   listRebuildLinks,
-  pullRebuildSerial,
   SHOP_ACCOUNT,
   archiveRebuild,
   updateRebuild,
@@ -24,16 +23,15 @@ import { SelectField } from "@/components/ui/select-field";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SheetTabs } from "./sheet-tabs";
 import { Badge } from "@/components/ui/badge";
-import { CustomerCombo, EquipmentCombo } from "./directory-fields";
+import { CustomerCombo } from "./directory-fields";
 import { OwnerSelect } from "./owner-select";
-import { SerialNoticeBanner } from "./serial-notice";
 import { StatusBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { PingButton } from "./ping-button";
 import { RepairQuotePanel } from "./repair-quote-panel";
 import { costGlance, money } from "@/lib/ops/repair-quote";
 import { OpenLink } from "./open-link";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { RebuildMachines } from "./rebuild-machines";
 import { toast } from "sonner";
 import { formatShortDate } from "@/lib/ops/clock";
 import { isShopAccount, sentence, warehouseInvoiceRefusal, warehouseMayEdit } from "@/lib/ops/warehouse-invoice";
@@ -72,8 +70,6 @@ export function RebuildSheet({
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [account, setAccount] = useState(SHOP_ACCOUNT);
-  const [equipment, setEquipment] = useState("");
-  const [serial, setSerial] = useState("");
   const [owner, setOwner] = useState("");
   const [status, setStatus] = useState("Queued");
   const [reasonCode, setReasonCode] = useState("");
@@ -86,7 +82,6 @@ export function RebuildSheet({
   const [notes, setNotes] = useState("");
   const [installId, setInstallId] = useState<number | null>(null);
   const [jobId, setJobId] = useState<number | null>(null);
-  const [reuseNotice, setReuseNotice] = useState<string | null>(null);
 
   // The form starts over only when the rebuild's own fields change on the server, not when the list refreshes for
   // something else on the row (its invoice or quote), so unsaved edits stay put.
@@ -95,8 +90,6 @@ export function RebuildSheet({
         row.id,
         row.title,
         row.account,
-        row.equipment,
-        row.serial,
         row.owner,
         row.status,
         row.reasonCode,
@@ -115,8 +108,6 @@ export function RebuildSheet({
     if (!row) return;
     setTitle(row.title);
     setAccount(row.account);
-    setEquipment(row.equipment ?? "");
-    setSerial(row.serial ?? "");
     setOwner(row.owner ?? "");
     setStatus(row.status);
     setReasonCode(row.reasonCode ?? "");
@@ -154,8 +145,6 @@ export function RebuildSheet({
           id: row!.id,
           title,
           account,
-          equipment,
-          serial,
           owner,
           status,
           reasonCode,
@@ -170,8 +159,10 @@ export function RebuildSheet({
           jobId,
         },
       }),
-    onSuccess: () => {
-      toast.success("Rebuild saved");
+    onSuccess: (next) => {
+      // A refurb completed: its machines went into stock at the Staging area.
+      toast.success(next.stockNote ? `Rebuild saved. ${next.stockNote}` : "Rebuild saved");
+      if (next.stockNote) void qc.invalidateQueries({ queryKey: ["assets"] });
       void qc.invalidateQueries({ queryKey: ["rebuilds"] });
       // Linking or unlinking a ticket changes which quote this project shares.
       void qc.invalidateQueries({ queryKey: ["repair-quote"] });
@@ -180,36 +171,6 @@ export function RebuildSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
-
-  // The serial the last pull asked for: an answer for an older one (the box changed while it ran) leaves the box alone.
-  const lastPull = useRef("");
-  const pull = useMutation({
-    // A confirm sends the question it answers: the server asks again if the unit moved since.
-    mutationFn: (opts: { serial: string; confirmReuse?: boolean; asked?: string }) =>
-      pullRebuildSerial({ data: { id: row!.id, serial: opts.serial, confirmReuse: opts.confirmReuse, asked: opts.asked } }),
-    onSuccess: (next, opts) => {
-      void qc.invalidateQueries({ queryKey: ["rebuilds"] });
-      void qc.invalidateQueries({ queryKey: ["assets"] });
-      if (opts.serial !== lastPull.current) return;
-      setReuseNotice(null);
-      setSerial(next.serial ?? "");
-      setEquipment(next.equipment ?? equipment);
-      toast.success(next.serialNotice || "Serial saved");
-    },
-    onError: (e, opts) => {
-      if (opts.serial !== lastPull.current) return;
-      const msg = e instanceof Error ? e.message : "Could not check warehouse";
-      if (/already assigned/i.test(msg)) setReuseNotice(msg);
-      else {
-        setReuseNotice(null);
-        toast.error(msg);
-      }
-    },
-  });
-  const startPull = (opts: { confirmReuse?: boolean; asked?: string } = {}) => {
-    lastPull.current = serial.trim();
-    pull.mutate({ serial: lastPull.current, ...opts });
-  };
 
   const drop = useMutation({
     mutationFn: () => archiveRebuild({ data: { id: row!.id } }),
@@ -461,37 +422,7 @@ export function RebuildSheet({
             </form>
             </Tabs.Content>
             <Tabs.Content value="equipment" forceMount className={`space-y-4 px-5 py-4 ${KEEP_MOUNTED}`} data-testid="rebuild-panel-equipment">
-              <SerialNoticeBanner notice={row.serialNotice} />
-              <EquipmentCombo label="Equipment" value={equipment} onChange={setEquipment} />
-              <div>
-                <Label htmlFor="rb-serial">Serial</Label>
-                <div className="mt-1 flex gap-2">
-                  <Input
-                    id="rb-serial"
-                    value={serial}
-                    onChange={(e) => setSerial(e.target.value)}
-                    onBlur={() => {
-                      // Not again for the serial already being pulled; a changed box pulls its own serial.
-                      if (locked || !serial.trim() || (pull.isPending && lastPull.current === serial.trim())) return;
-                      startPull();
-                    }}
-                    placeholder="Type a warehouse serial"
-                    disabled={locked}
-                  />
-                  <Button type="button" variant="outline" disabled={locked || pull.isPending} onClick={() => startPull()}>
-                    Pull
-                  </Button>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Matching a warehouse serial attaches that unit. It does not create a second record.
-                  {accountLock && !locked ? " Warehouse pulls a unit from the barn, one of our sites or a customer's account with no Admin's approval, and the Admins get a ping saying where it came from." : ""}
-                </p>
-              </div>
-              {canEdit ? (
-                <Button type="button" disabled={save.isPending} onClick={() => save.mutate()}>
-                  {save.isPending ? "Saving…" : "Save"}
-                </Button>
-              ) : null}
+              <RebuildMachines row={row} canEdit={!locked} warehouse={!!accountLock} key={`machines-${row.id}`} />
             </Tabs.Content>
             <Tabs.Content value="invoices" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-invoices">
               <section className="border-b border-border p-5">
@@ -530,31 +461,6 @@ export function RebuildSheet({
           </SheetBody>
         </SheetContent>
       </Sheet>
-      <Dialog open={!!reuseNotice} onOpenChange={(v) => !v && setReuseNotice(null)}>
-        <DialogContent>
-          <DialogTitle>Serial Already Assigned</DialogTitle>
-          <DialogDescription>{reuseNotice}</DialogDescription>
-          {accountLock ? (
-            <p className="text-sm text-muted-foreground" data-testid="rebuild-pull-ping">
-              Reusing it moves it onto this refurb now. The Admins get a ping saying where it came from.
-            </p>
-          ) : null}
-          <div className="mt-4 flex gap-2">
-            <Button
-              type="button"
-              disabled={pull.isPending}
-              onClick={() => {
-                startPull({ confirmReuse: true, asked: reuseNotice ?? undefined });
-              }}
-            >
-              Reuse on this rebuild
-            </Button>
-            <Button type="button" variant="outline" onClick={() => setReuseNotice(null)}>
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

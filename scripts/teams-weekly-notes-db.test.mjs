@@ -10,7 +10,7 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const { approveChat, chatCards, poUses, waitingPieces } = await import("../src/lib/ops/teams-reports.ts");
 const { loadPartUses } = await import("../src/lib/ops/part-usage-api.ts");
-const { useKey } = await import("../src/lib/ops/po-report.ts");
+const { partUseKey } = await import("../src/lib/ops/po-report.ts");
 
 const pg = new PGlite();
 const dir = new URL("../migrations/", import.meta.url);
@@ -629,9 +629,9 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   assert.deepEqual(
     [...(await waitingPieces(q)).entries()].sort(),
     [
-      [useKey(`install:${i7.ins}`, ids.G), 2],
-      [useKey(`service:${t6}`, ids.F), 2],
-      [useKey(`service:${t8}`, ids.H), 1],
+      [partUseKey(`install:${i7.ins}`, ids.G), 2],
+      [partUseKey(`service:${t6}`, ids.F), 2],
+      [partUseKey(`service:${t8}`, ids.H), 1],
     ].sort(),
   );
 
@@ -647,6 +647,6 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   // S's parts billed on its ticket, and G's install invoice approved: they show now, and were reported already.
   await charge(t6, "F", 2, `mp:${p6.mp}`);
   await approve(i7.inv);
-  assert.deepEqual([...(await waitingPieces(q)).entries()], [[useKey(`service:${t8}`, ids.H), 1]]);
+  assert.deepEqual([...(await waitingPieces(q)).entries()], [[partUseKey(`service:${t8}`, ids.H), 1]]);
   assert.equal(await po(new Date("2026-11-20T23:30:00Z")), `${intro("Sat Nov 14", "Fri Nov 20", "Fri Nov 20 at 5:30 PM")}\n\nNone used that week.`);
 });

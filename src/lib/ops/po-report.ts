@@ -67,7 +67,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export type CurrentUse = LedgerUse & { day: string | null };
 
 /** The key of one ticket's use of one part, as `PullContext.later` is keyed. */
-export const useKey = (k: string, p: number): string => `${k}\u0000${p}`;
+export const partUseKey = (k: string, p: number): string => `${k}\u0000${p}`;
 
 /** What a pull needs to know besides the uses: where merged records went, and what is waiting to show. */
 export type PullContext = {
@@ -81,7 +81,7 @@ export type PullContext = {
   /** The parts the note counts (parts and water filters). */
   counts?: (p: number) => boolean;
   /**
-   * The pieces a record will show for a part once what is waiting on it shows, keyed by `useKey`, for the records
+   * The pieces a record will show for a part once what is waiting on it shows, keyed by `partUseKey`, for the records
    * that have something waiting: a PM's machine parts not billed on its ticket yet, where the ticket's own charge for
    * the part is counted instead; a merged ticket's charges on an install whose invoice isn't approved yet.
    */
@@ -105,17 +105,17 @@ export function pullChanges(now: CurrentUse[], earlier: LedgerUse[], window: { f
   const counts = ctx.counts ?? (() => true);
   const current = new Map<string, CurrentUse>();
   for (const u of now) {
-    const hit = current.get(useKey(u.k, u.p));
+    const hit = current.get(partUseKey(u.k, u.p));
     if (hit) {
       hit.q += u.q;
       if ((u.day ?? "") > (hit.day ?? "")) hit.day = u.day;
-    } else current.set(useKey(u.k, u.p), { ...u });
+    } else current.set(partUseKey(u.k, u.p), { ...u });
   }
   const reported = new Map<string, LedgerUse>();
   for (const u of earlier) {
     const p = ctx.mergedInto?.get(u.p) ?? u.p;
-    const to = current.has(useKey(u.k, p)) ? u.k : moved(u.k);
-    const at = useKey(to, p);
+    const to = current.has(partUseKey(u.k, p)) ? u.k : moved(u.k);
+    const at = partUseKey(to, p);
     const hit = reported.get(at) ?? { k: to, p, q: 0 };
     hit.q += u.q;
     reported.set(at, hit);
@@ -145,7 +145,7 @@ export type RankedUse = CurrentUse & { rank: number };
  * machine parts) are replaced by them, as Parts → Usage counts a record's part from the first of those it has.
  */
 export function laterPieces(uses: RankedUse[], waiting: ReadonlyMap<string, number>): Map<string, number> {
-  const now = new Map(uses.map((u) => [useKey(u.k, u.p), u]));
+  const now = new Map(uses.map((u) => [partUseKey(u.k, u.p), u]));
   const out = new Map<string, number>();
   for (const [at, q] of waiting) {
     const u = now.get(at);

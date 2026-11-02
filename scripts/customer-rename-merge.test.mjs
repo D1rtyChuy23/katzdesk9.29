@@ -138,7 +138,7 @@ test("the old record fills only what the live account has blank; an address bloc
     const plan = await previewCustomerRenameFor(sql, "u-admin", live, "Test Bakery - Main");
     assert.equal(plan.keep, "renamed");
     assert.deepEqual(plan.filled, ["map pin", "phone", "email", "Account #", "NetSuite ID", "parent account", "assigned sales reps"]);
-    assert.deepEqual(plan.moving, { calls: 2, tlcs: 0, pms: 1, installs: 0, deals: 0, equipment: 0, woHistory: 0 });
+    assert.deepEqual(plan.moving, { calls: 2, tlcs: 0, pms: 1, installs: 0, deals: 0, equipment: 0, woHistory: 0, rebuilds: 0 });
     assert.equal(plan.other.onRemovedList, true);
     const ask = renameConfirm(plan, () => "Oct 27, 2026");
     assert.equal(ask.title, "Merge the old account “Test Bakery - Main” into this one?");

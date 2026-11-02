@@ -2,6 +2,7 @@ import { isWalkIn } from "./customer-key";
 import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withHeaderDiscount, type Discount } from "./discount";
 import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
 import { textArray } from "./part-merges";
+import { binSearchCode } from "./part-bins";
 import { loadDiscountRule } from "./part-pricing-api";
 import { liveInvoices, lockingInvoice, locationWarning, unlockActive, warehouseForTech } from "./billing-rules";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ, UNLOCKED_SQL, loadInvoices } from "./ticket-billing-api";
@@ -21,6 +22,8 @@ import {
   cleanSalesOrder,
   itemRowsFromSheets,
   kindForItem,
+  looksLikeBinCode,
+  looksLikeBinWords,
   normalizePartNo,
   priceChange,
   round2,
@@ -72,6 +75,9 @@ type ItemRow = {
   item_class: string | null;
   get_later: boolean | null;
   previous_numbers?: unknown;
+  bin_rack?: string | null;
+  bin_shelf?: string | null;
+  bin_bin?: string | null;
 };
 
 function toItem(r: ItemRow): BillingItem {
@@ -85,6 +91,7 @@ function toItem(r: ItemRow): BillingItem {
     itemClass: r.item_class,
     getLater: !!r.get_later,
     previousNumbers: textArray(r.previous_numbers),
+    bin: r.bin_rack || r.bin_shelf || r.bin_bin ? { rack: r.bin_rack ?? null, shelf: r.bin_shelf ?? null, bin: r.bin_bin ?? null } : null,
   };
 }
 
@@ -94,6 +101,17 @@ export const searchBillingItems = createServerFn({ method: "POST" })
   .validator((d: { q: string }) => z.object({ q: z.string().max(120) }).parse(d))
   .handler(async ({ data }): Promise<BillingItem[]> => searchBillingItemsFor(await ready(), data.q));
 
+/**
+ * SQL: a part found by its name, number, words or an old number merged into it ($1 the text as ilike, $2 the number
+ * with letters and digits only).
+ */
+const PART_TEXT_MATCH = `(item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
+       or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
+                         or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%'))
+       -- An old number merged into a part finds that part (10/28).
+       or exists (select 1 from unnest(previous_numbers) pn
+                   where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))`;
+
 /** The body of searchBillingItems: every part picker (tickets, quotes, invoices, PM machine parts) reads it. */
 export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string): Promise<BillingItem[]> {
   const q = raw.trim();
@@ -101,18 +119,21 @@ export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string
   const nq = normalizePartNo(q);
   const rows = await sql.query<ItemRow>(
     `select id, sku, item, description, rate, kind, mfr_part, item_class, get_later, previous_numbers, (image is not null) as has_image,
-            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version
+            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
+            bin_rack, bin_shelf, bin_bin
        from billing_items
       where active
         and hidden_at is null
-        and (item ilike $1 or sku ilike $1 or description ilike $1 or mfr_part ilike $1
-             or ($2 <> '' and (regexp_replace(upper(item), '[^A-Z0-9]', '', 'g') like '%' || $2 || '%'
-                               or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') like $2 || '%'))
-             -- An old number merged into a part finds that part (10/28).
-             or exists (select 1 from unnest(previous_numbers) pn
-                         where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))
+        and (${PART_TEXT_MATCH}
+             -- Its bin (11/2): A-03-12, A 03 12 or A/03/12, or Rack A, as the Parts page finds it. Only for what is typed
+             -- like a bin, so "bin" alone finds the parts named bin rather than every part with one.
+             or ($3::text is not null and concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $3)
+             or ($4::boolean and concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1))
+      -- A part found by its name or number comes before the parts found by their bin alone, so a shelf of parts never
+      -- crowds an exact part number out of what is read.
+      order by coalesce(${PART_TEXT_MATCH}, false) desc, lower(item)
       limit 300`,
-    [`%${q}%`, nq],
+    [`%${q}%`, nq, looksLikeBinCode(q) ? `%${binSearchCode(q)}%` : null, looksLikeBinWords(q)],
   );
   return searchItems(q, rows.map(toItem), 12);
 }

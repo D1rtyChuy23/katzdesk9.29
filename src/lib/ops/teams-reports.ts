@@ -21,7 +21,7 @@ import { parseMachinesJson, specsFromInstall } from "@/lib/ops/machines";
 import { profitByMpn, profitTotals } from "@/lib/ops/part-pricing";
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { PART_USES_CTE } from "@/lib/ops/part-usage-api";
-import { chicagoClock, countsForPo, laterPieces, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, useKey, type CurrentUse, type LedgerUse, type RankedUse } from "@/lib/ops/po-report";
+import { chicagoClock, countsForPo, laterPieces, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, partUseKey, type CurrentUse, type LedgerUse, type RankedUse } from "@/lib/ops/po-report";
 import { isPreInspected, unitKind } from "@/lib/ops/pre-inspection";
 import { accountRepFor, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
 import { isOpenCall } from "@/lib/ops/ticket-status";
@@ -194,7 +194,7 @@ export async function poUses(sql: Sql): Promise<RankedUse[]> {
 }
 
 /**
- * Pieces Parts → Usage doesn't count yet but will, by record and part (useKey):
+ * Pieces Parts → Usage doesn't count yet but will, by record and part (partUseKey):
  * - a PM's machine parts not billed on the ticket it's billed on: they count once with the ticket's own charge for
  *   the part (only the charge, until they are billed there);
  * - a ticket merged into an install, not as billed: its charges count from the install's invoice once that is
@@ -225,7 +225,7 @@ export async function waitingPieces(sql: Sql): Promise<Map<string, number>> {
   );
   const out = new Map<string, number>();
   for (const r of rows) {
-    const at = useKey(String(r.k), Number(r.p));
+    const at = partUseKey(String(r.k), Number(r.p));
     out.set(at, (out.get(at) ?? 0) + Number(r.q));
   }
   return out;

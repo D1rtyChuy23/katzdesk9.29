@@ -36,9 +36,12 @@ export function RebuildBoard({
   const dragged = useRef(false);
   const save = useMutation({
     mutationFn: (d: { id: number; status: string }) => updateRebuild({ data: d }),
-    onSuccess: () => {
+    onSuccess: (next) => {
+      // A refurb dropped on Completed: its machines went into stock at the Staging area.
+      if (next.stockNote) toast.success(next.stockNote);
       void qc.invalidateQueries({ queryKey: ["rebuilds"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
+      if (next.stockNote) void qc.invalidateQueries({ queryKey: ["assets"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not move"),
   });
