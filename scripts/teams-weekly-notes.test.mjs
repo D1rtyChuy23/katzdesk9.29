@@ -65,10 +65,26 @@ test("a pull reports what is new since the pulls before it, and a use already re
   // Once install 5's invoice is approved its use is the one service:7 reported: nothing new, whatever its date.
   assert.deepEqual(pullChanges([u("install:5", 10, 3, "2026-11-20")], [r("service:7", 10, 3)], win, moved), []);
   assert.deepEqual(pullChanges([u("install:5", 10, 4)], [r("service:7", 10, 3)], win, moved), [r("install:5", 10, 1)]);
-  // Not knowing where a ticket went, its new record would read new.
-  assert.deepEqual(pullChanges([u("install:5", 10, 3)], [r("service:7", 10, 3)], win), [r("install:5", 10, 3)]);
-  // Not knowing the part merge, part 13 would read new.
-  assert.deepEqual(pullChanges([u("service:4", 13, 1)], [r("service:4", 99, 1)], win), [r("service:4", 13, 1)]);
+  // Not knowing where a ticket went, its new record would read new, and the old one taken off.
+  assert.deepEqual(pullChanges([u("install:5", 10, 3)], [r("service:7", 10, 3)], win), [r("install:5", 10, 3), r("service:7", 10, -3)]);
+  // Not knowing the part merge, part 13 would read new and part 99 taken off.
+  assert.deepEqual(pullChanges([u("service:4", 13, 1)], [r("service:4", 99, 1)], win), [r("service:4", 13, 1), r("service:4", 99, -1)]);
+  // A use gone with no merge to follow is taken off: a deleted line, a cancelled ticket, the wrong part fixed.
+  assert.deepEqual(pullChanges([u("service:1", 11, 2)], [r("service:1", 10, 2)], win), [r("service:1", 10, -2), r("service:1", 11, 2)]);
+  // A charge moved to the right ticket: off one, on the other, nothing for the part.
+  assert.deepEqual(pullChanges([u("service:2", 10, 2)], [r("service:1", 10, 2)], win), [r("service:1", 10, -2), r("service:2", 10, 2)]);
+  // A part the note no longer counts (reclassed) is left as reported.
+  assert.deepEqual(pullChanges([], [r("service:1", 10, 2)], win, undefined, undefined, (p) => p !== 10), []);
+  // A PM billed on a ticket that has the same part: its parts count once with the ticket's own, so the ticket's
+  // pieces read less than both reported. That is held; only pieces below the ticket's own are taken off.
+  const stacked = (k) => (k === "pm:3" ? "service:1" : k);
+  assert.deepEqual(pullChanges([u("service:1", 10, 1)], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), []);
+  assert.deepEqual(pullChanges([u("service:1", 10, 3)], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), []);
+  assert.deepEqual(pullChanges([u("service:1", 10, 4)], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), [r("service:1", 10, 1)]);
+  assert.deepEqual(pullChanges([], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), [r("service:1", 10, -1)]);
+  // A use still on its own record stays there even when its ticket was merged (a QuickBooks line stays put).
+  const merged = (k) => (k === "service:20" ? "service:21" : k);
+  assert.deepEqual(pullChanges([u("service:20", 10, 1, "2026-10-01"), u("service:21", 11, 2)], [r("service:20", 10, 1), r("service:20", 11, 2)], win, merged), []);
   // Two pulls before add up; pieces are rounded to the cent.
   assert.deepEqual(pullChanges([u("service:1", 10, 5)], [r("service:1", 10, 2), r("service:1", 10, 1)], win), [r("service:1", 10, 2)]);
   assert.deepEqual(pullChanges([u("service:1", 10, 0.1), u("service:1", 10, 0.2)], [r("service:1", 10, 0.3)], win), []);

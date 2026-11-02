@@ -451,7 +451,14 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
   assert.equal((await card("purchase-orders", new Date("2026-11-16T14:00:00Z"))).text, next.text);
   // The install's invoice is approved: SC-930's four are the ones reported already. The moved SC-902 isn't new either.
   await sql.query("update invoices set approved_at = '2026-11-16T15:00:00Z', approved_by = 'Chuy' where id = $1", [inv]);
-  assert.equal(await text("purchase-orders", new Date("2026-11-20T23:30:00Z")), `${intro("Sat Nov 14", "Fri Nov 20", "Fri Nov 20 at 5:30 PM")}\n\nNone used that week.`);
+  // The wrong part fixed on SC-920 (a water filter that was a Bunn part), and TL-1's tamper moved to the ticket it
+  // belonged on: off one, on the other, nothing for the tamper.
+  await sql.query("update ticket_charges set item = 'ZZBUNN1' where job_id = $1", [late]);
+  await sql.query("update ticket_charges set job_id = $2 where job_id = $1", [tlc, sc904]);
+  assert.equal(
+    await text("purchase-orders", new Date("2026-11-20T23:30:00Z")),
+    `${intro("Sat Nov 14", "Fri Nov 20", "Fri Nov 20 at 5:30 PM")}\n\nBunn · 1 part, 1 piece\n- ZZBUNN1 · 1\n\nTaken off tickets after an earlier report\n- WFZZ1 · Zz Cartridge · -1`,
+  );
   // Nobody looks the week after. The next pull, a week later, has that week's parts too.
   const sc940 = await job("SC-940", "Zz Katy Cafe", { completed: "2026-11-25" });
   await charge(sc940, "ZZTAMP", 2);

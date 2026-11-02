@@ -68,14 +68,17 @@ export type CurrentUse = LedgerUse & { day: string | null };
 
 /**
  * What a new pull reports, against what the pulls before it reported (`earlier`).
- * - A use reported before: the change in its pieces, whatever its day is now, so a moved date is never a new use and
- *   pieces added or taken off later are counted once. One that is gone altogether is left as reported: it has moved
- *   to a record that doesn't count yet (a ticket merged into an install whose invoice isn't approved), or was
- *   cancelled or reclassed, and if it comes back it isn't new.
+ * - A use reported before is compared at its pieces now, whatever its day is now: a moved date is never a new use,
+ *   pieces added later are counted once, and pieces taken off show as a negative change. One that is gone (a line
+ *   deleted, the wrong part fixed, the ticket cancelled) is taken off.
+ * - Where an earlier use's ticket no longer has it, `moved` says where its ticket counts now (a ticket merged into
+ *   another or into an install, a PM billed on a ticket, an install merged into another), and the use is carried
+ *   there. A carried use is held, not taken off, while that record has less: an install's invoice waiting for its
+ *   approval, or a PM's machine parts counted once with the ticket's own charges. Only pieces below the record's own
+ *   reported pieces are taken off.
  * - A use not reported yet: its pieces, when its day is in `window` (the ledger's first Saturday through this pull's
  *   Friday). One dated later waits for its own week.
- * `moved` says where an earlier use's ticket counts now (a merged ticket, a PM billed on a ticket, a merged install);
- * `mergedInto`, the part a merged part went into.
+ * A part the note no longer counts (`counts`) is left as reported; `mergedInto` is the part a merged part went into.
  */
 export function pullChanges(
   now: CurrentUse[],
@@ -83,16 +86,9 @@ export function pullChanges(
   window: { from: string; to: string },
   moved: (k: string) => string = (k) => k,
   mergedInto: ReadonlyMap<number, number> = new Map(),
+  counts: (p: number) => boolean = () => true,
 ): LedgerUse[] {
   const key = (k: string, p: number) => `${k}\u0000${p}`;
-  const reported = new Map<string, LedgerUse>();
-  for (const u of earlier) {
-    const k = moved(u.k);
-    const p = mergedInto.get(u.p) ?? u.p;
-    const hit = reported.get(key(k, p));
-    if (hit) hit.q += u.q;
-    else reported.set(key(k, p), { k, p, q: u.q });
-  }
   const current = new Map<string, CurrentUse>();
   for (const u of now) {
     const hit = current.get(key(u.k, u.p));
@@ -101,15 +97,27 @@ export function pullChanges(
       if ((u.day ?? "") > (hit.day ?? "")) hit.day = u.day;
     } else current.set(key(u.k, u.p), { ...u });
   }
+  const reported = new Map<string, { k: string; p: number; own: number; held: number }>();
+  for (const u of earlier) {
+    const p = mergedInto.get(u.p) ?? u.p;
+    // A use still on its own record stays there (a QuickBooks line stays on a merged ticket); else it follows its ticket.
+    const to = current.has(key(u.k, p)) ? u.k : moved(u.k);
+    const at = key(to, p);
+    const hit = reported.get(at) ?? { k: to, p, own: 0, held: 0 };
+    if (to === u.k) hit.own += u.q;
+    else hit.held += u.q;
+    reported.set(at, hit);
+  }
   const out: LedgerUse[] = [];
   for (const [at, r] of reported) {
-    const c = current.get(at);
-    if (!c) continue;
-    const q = round2(c.q - r.q);
+    if (!counts(r.p)) continue;
+    const cur = current.get(at)?.q ?? 0;
+    const total = r.own + r.held;
+    const q = round2(cur >= total ? cur - total : Math.min(0, cur - r.own));
     if (q) out.push({ k: r.k, p: r.p, q });
   }
   for (const [at, c] of current) {
-    if (reported.has(at) || !c.day || c.day < window.from || c.day > window.to) continue;
+    if (reported.has(at) || !counts(c.p) || !c.day || c.day < window.from || c.day > window.to) continue;
     const q = round2(c.q);
     if (q) out.push({ k: c.k, p: c.p, q });
   }

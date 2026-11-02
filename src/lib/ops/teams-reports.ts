@@ -92,21 +92,25 @@ const flat = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
 const blankLast = (a: string, b: string) => (a === b ? 0 : !a ? 1 : !b ? -1 : a < b ? -1 : 1);
 
 
-type PullRow = { seq: number; week_from: string; week_to: string; pulled_at: string; uses: unknown; report: unknown };
+type PullHead = { seq: number; week_from: string; week_to: string; pulled_at: string };
 
 const fromJson = <T,>(v: unknown): T[] => {
   const list = typeof v === "string" ? JSON.parse(v) : v;
   return Array.isArray(list) ? (list as T[]) : [];
 };
 
-const asReport = (r: PullRow): PoReport => ({ from: r.week_from.slice(0, 10), to: r.week_to.slice(0, 10), pulledAt: r.pulled_at, parts: fromJson<PoPart>(r.report) });
-
-/** Every saved pull, oldest first. */
-async function savedPulls(sql: Sql): Promise<PullRow[]> {
-  return sql.query<PullRow>(
-    `select seq, week_from::text, week_to::text, to_char(pulled_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as pulled_at, uses, report
+/** Every saved pull, oldest first: its week and when it was pulled. */
+async function savedPulls(sql: Sql): Promise<PullHead[]> {
+  return sql.query<PullHead>(
+    `select seq, week_from::text, week_to::text, to_char(pulled_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as pulled_at
        from teams_po_pulls order by seq`,
   );
+}
+
+/** A saved pull as the note shows it. */
+async function pullReport(sql: Sql, head: PullHead): Promise<PoReport> {
+  const rows = await sql.query<{ report: unknown }>("select report from teams_po_pulls where seq = $1", [head.seq]);
+  return { from: head.week_from.slice(0, 10), to: head.week_to.slice(0, 10), pulledAt: head.pulled_at, parts: fromJson<PoPart>(rows[0]?.report) };
 }
 
 /**
@@ -181,12 +185,13 @@ async function loadPoReport(sql: Sql, now: Date): Promise<PoReport> {
   for (let attempt = 0; attempt < 3; attempt++) {
     const pulls = await savedPulls(sql);
     const own = pulls.find((r) => r.week_to.slice(0, 10) === week.to);
-    if (own) return asReport(own);
-    const newest = pulls.reduce<PullRow | null>((a, r) => (!a || r.week_to > a.week_to ? r : a), null);
+    if (own) return pullReport(sql, own);
+    const newest = pulls.reduce<PullHead | null>((a, r) => (!a || r.week_to > a.week_to ? r : a), null);
     // A week already pulled is newer than this clock's: show that one, and save nothing.
-    if (newest && newest.week_to.slice(0, 10) > week.to) return asReport(newest);
+    if (newest && newest.week_to.slice(0, 10) > week.to) return pullReport(sql, newest);
     const start = pulls.length ? pulls.map((r) => r.week_from.slice(0, 10)).sort()[0]! : week.from;
-    const reported = pulls.flatMap((r) => fromJson<LedgerUse>(r.uses));
+    // What the pulls so far reported, read only when a new one is worked out.
+    const reported = (await sql.query<{ uses: unknown }>("select uses from teams_po_pulls order by seq")).flatMap((r) => fromJson<LedgerUse>(r.uses));
     const merged = new Map(
       (await sql.query<{ id: number; merged_into: number }>("select id, merged_into from billing_items where merged_into is not null")).map((r) => [
         Number(r.id),
@@ -194,7 +199,7 @@ async function loadPoReport(sql: Sql, now: Date): Promise<PoReport> {
       ]),
     );
     const uses = await loadPartUses(sql, {});
-    const ids = [...new Set(uses.map((u) => u.partId))];
+    const ids = [...new Set([...uses.map((u) => u.partId), ...reported.map((u) => merged.get(u.p) ?? u.p)])];
     const rows = ids.length
       ? await sql.query<{ id: number; sku: string; parent: string | null; item: string; description: string | null; item_class: string | null; kind: string }>(
           "select id, sku, parent, item, description, item_class, kind from billing_items where id = any($1::int[]) order by id",
@@ -203,7 +208,7 @@ async function loadPoReport(sql: Sql, now: Date): Promise<PoReport> {
       : [];
     const counted = new Map(rows.filter((r) => countsForPo({ itemClass: r.item_class, kind: r.kind })).map((r) => [Number(r.id), r]));
     const current: CurrentUse[] = uses.filter((u) => counted.has(u.partId)).map((u) => ({ k: u.ticketKey, p: u.partId, q: u.pieces, day: u.usedOn }));
-    const changes = pullChanges(current, reported, { from: start, to: week.to }, await movedTickets(sql), merged);
+    const changes = pullChanges(current, reported, { from: start, to: week.to }, await movedTickets(sql), merged, (p) => counted.has(p));
     const parts: PoPart[] = [];
     for (const [id, n] of piecesByPart(changes)) {
       const r = counted.get(id);
