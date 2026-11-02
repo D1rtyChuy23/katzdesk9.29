@@ -167,7 +167,7 @@ export function RebuildMachines({ row, canEdit, warehouse }: { row: Rebuild; can
                     data-testid="rebuild-machine-remove"
                     onClick={() => {
                       const what = `${m.model || "this machine"}${m.serial ? ` (SN ${m.serial})` : ""}`;
-                      if (!window.confirm(`Take ${what} off this rebuild?${m.assetId ? " Its unit goes back where it was before it was pulled." : ""}`)) return;
+                      if (!window.confirm(`Take ${what} off this rebuild?${m.assetId && !m.moved ? " Its unit goes back where it was before it was pulled." : ""}`)) return;
                       remove.mutate(m.id);
                     }}
                   >
@@ -194,13 +194,14 @@ export function RebuildMachines({ row, canEdit, warehouse }: { row: Rebuild; can
                       onBlur={() => {
                         // Only a changed serial pulls, and not again while that one is being pulled.
                         if (fixed || serial.trim() === (m.serial ?? "") || (pull.isPending && lastPull.current[String(m.id)] === serial.trim())) return;
-                        startPull(m.id, serial, model);
+                        // Only a model the person changed goes with the pull, so someone else's saved change stands.
+                        startPull(m.id, serial, models[m.id] ?? "");
                       }}
                       placeholder="Type the machine's serial"
                       disabled={fixed}
                     />
                     {fixed ? null : (
-                      <Button type="button" variant="outline" disabled={pull.isPending} onClick={() => startPull(m.id, serial, model)}>
+                      <Button type="button" variant="outline" disabled={pull.isPending} onClick={() => startPull(m.id, serial, models[m.id] ?? "")}>
                         Pull
                       </Button>
                     )}

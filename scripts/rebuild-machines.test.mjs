@@ -133,8 +133,9 @@ test("every part picker searches bins on the server too, and each result carries
       `insert into billing_items (sku, parent, item, description, rate, kind, bin_rack, bin_shelf, bin_bin)
        select 'TESTSHELF' || n, 'PARTS', 'PARTS : TESTSHELF' || n, 'Test shelf filler', 5, 'part', 'D', '04', n::text from generate_series(1, 320) n`,
     );
-    await pg.query("insert into billing_items (sku, parent, item, description, rate, kind) values ('D04', 'PARTS', 'PARTS : D04', 'Test exact number', 5, 'part')");
-    assert.equal((await skus("D-04"))[0], "D04", "the part number first, then that shelf's parts");
+    // (Its name sorts after the shelf's parts, so only reading number matches first keeps it.)
+    await pg.query("insert into billing_items (sku, parent, item, description, rate, kind, mfr_part) values ('ZZTEST1', 'PARTS', 'PARTS : ZZTEST1', 'Test exact number', 5, 'part', 'D-04')");
+    assert.equal((await skus("D-04"))[0], "ZZTEST1", "the part number first, then that shelf's parts");
     const picker = readFileSync(new URL("../src/components/desk/charges-panel.tsx", import.meta.url), "utf8");
     assert.match(picker, /\{binText\(it\.bin\) \? <span data-testid="part-result-bin">\{binText\(it\.bin\)\}<\/span> : null\}/, "the picker shows the bin");
   } finally {
@@ -220,6 +221,11 @@ test("a refurb holds several machines; a new serial or taking one off puts its u
     await pg.query("update rebuilds set status = 'Cancelled' where id = $1", [sd]);
     const taken = await R.pullRebuildMachineFor(sql, { id: shop, serial: "TESTSN-C", confirmReuse: true }, "u-wh");
     assert.equal(taken.machines[0].assetId, c);
+    assert.deepEqual(
+      (await pg.query("select origin->>'status' as status, origin->>'pulled_to' as pulled_to from rebuild_machines where id = $1", [taken.machines[0].id])).rows[0],
+      { status: "ready", pulled_to: SHOP },
+      "where the unit was before the first pull, with whom this pull put it on",
+    );
     const left = (await pg.query("select asset_id, notice from rebuild_machines where id = $1", [m3.id])).rows[0];
     assert.deepEqual(left, { asset_id: c, notice: "Serial TESTSN-C pulled from warehouse · Test grinder · B-L2" });
     const closedRow = (await R.listRebuildsFor(sql, "u-owner")).rows.find((r) => r.id === sd);
@@ -479,12 +485,24 @@ test("a machine holds its unit only while the unit is still on its rebuild: wher
     assert.equal((await list()).find((r) => r.id === rmRefurb).machines[0].moved, "Its unit isn't on this rebuild now: it's on removed stock.");
     assert.equal((await R.removeRebuildMachineFor(sql, { id: rmRefurb, machineId: onGone.id }, "u-wh")).message, "SN TESTSN-RM was moved since it was pulled, so it stays where it is now.");
     assert.equal((await unitRow(pg, gone)).status, "removed");
+    // A serial on a customer's open rebuild: Warehouse can't change that rebuild, so it is told who can.
+    const bean3 = await rebuild(pg, "Test customer rebuild 3", "Bean Test Cafe");
+    await R.pullRebuildMachineFor(sql, { id: bean3, serial: "TESTSN-CUST3", model: "Test grinder" }, "u-tech");
+    const tellsWho = /^Error: Serial TESTSN-CUST3 is on the customer rebuild "Test customer rebuild 3" already\. An Admin, or the tech on that rebuild, can take it off there\.$/;
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-CUST3", model: "Test grinder" }, "u-wh"), tellsWho);
+    await unit(pg, "TESTSN-CUST3", { pallet: "D", level: 3 });
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-CUST3" }, "u-wh"), tellsWho);
+    const beanUnit = await unit(pg, "TESTSN-CUST4", { pallet: "D", level: 4 });
+    await R.pullRebuildMachineFor(sql, { id: bean3, serial: "TESTSN-CUST4" }, "u-tech");
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-CUST4", confirmReuse: true }, "u-wh"), /^Error: Serial TESTSN-CUST4 is on the customer rebuild "Test customer rebuild 3" already\./);
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-CUST4", confirmReuse: true }, "u-tech"), /^Error: Serial TESTSN-CUST4 is on rebuild "Test customer rebuild 3" already\. Take it off that rebuild's machines first\.$/);
+    assert.ok(beanUnit);
   } finally {
     await pg.close();
   }
 });
 
-test("the owner's lock keeps a unit where it is: taking the machine off, a new serial, and completing the refurb leave it", async () => {
+test("the owner's lock keeps a unit where it is: its machine stays on the refurb, and completing it leaves the unit until it's unlocked", async () => {
   const { pg, sql } = await fresh();
   try {
     const sd = await rebuild(pg, "Test grinder refurbs", SD);
@@ -498,14 +516,22 @@ test("the owner's lock keeps a unit where it is: taking the machine off, a new s
       const r = await unitRow(pg, id);
       return { status: r.status, sold_to: r.sold_to, purpose: r.purpose, locked_by: r.locked_by };
     };
-    assert.equal((await R.removeRebuildMachineFor(sql, { id: sd, machineId: m1.id }, "u-wh")).message, "SN TESTSN-L1 is locked by boss, so it stays where it is.");
+    const count = async () => Number((await pg.query("select count(*) from rebuild_machines where rebuild_id = $1", [sd])).rows[0].count);
+    // Taking its machine off, another serial (in the warehouse or not) and a blank serial are refused, so the unit is
+    // never left on the refurb with no machine to bring it back or put it in stock.
+    const refused = (sn) => new RegExp(`^Error: SN ${sn} is locked by boss, so it stays on this machine\\. Only (boss|the owner) can unlock it\\.$`);
+    await assert.rejects(() => R.removeRebuildMachineFor(sql, { id: sd, machineId: m1.id }, "u-wh"), refused("TESTSN-L1"));
+    assert.equal(await count(), 2, "the machine stays");
     assert.deepEqual(await lockOf(u), locked);
-    await R.pullRebuildMachineFor(sql, { id: sd, machineId: m2.id, serial: "TESTSN-NOTHERE" }, "u-wh");
-    assert.deepEqual(await lockOf(v), locked, "a new serial on its machine leaves it too");
-    const w = await unit(pg, "TESTSN-L3", { pallet: "B", level: 3 });
-    await R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-L3" }, "u-wh");
-    await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [w]);
-    await R.saveRebuildMachinesFor(sql, { id: sd, machines: [{ id: m2.id, model: "Test brewer" }] }, "u-wh");
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, machineId: m2.id, serial: "TESTSN-NOTHERE" }, "u-wh"), refused("TESTSN-L2"));
+    const spare = await unit(pg, "TESTSN-L6", { pallet: "B", level: 5 });
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, machineId: m2.id, serial: "TESTSN-L6" }, "u-wh"), refused("TESTSN-L2"));
+    await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, machineId: m2.id, serial: "" }, "u-wh"), refused("TESTSN-L2"));
+    assert.deepEqual([(await unitRow(pg, spare)).status, (await unitRow(pg, spare)).sold_to], ["ready", null], "the other unit wasn't pulled");
+    assert.deepEqual(await lockOf(v), locked);
+    assert.deepEqual((await pg.query("select serial, asset_id from rebuild_machines where id = $1", [m2.id])).rows[0], { serial: "TESTSN-L2", asset_id: v });
+    // Its own serial again changes nothing, and is fine.
+    await R.pullRebuildMachineFor(sql, { id: sd, machineId: m2.id, serial: "TESTSN-L2" }, "u-wh");
     // A serial typed before its unit was in the records; the unit turns up at Training since, and the owner locks that
     // serial on a customer's account.
     await R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-L4", model: "Test kettle" }, "u-wh");
@@ -513,22 +539,46 @@ test("the owner's lock keeps a unit where it is: taking the machine off, a new s
     await pg.query(
       "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, locked_at, locked_by) values ('Bean Test Cafe', 'Test kettle', 'Test kettle', 'TESTSN-L4', 'testsn-l4', now(), 'boss')",
     );
-    const done = await R.updateRebuildFor(sql, { id: sd, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    const complete = () => R.updateRebuildFor(sql, { id: sd, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    const again = " Once it's unlocked, set the refurb back to In progress and complete it again.";
+    const done = await complete();
     assert.equal(
       done.stockNote,
-      "1 machine went into stock at the Staging area, marked needs shop test. Test grinder SN TESTSN-L3 wasn't put in stock: its unit is locked by boss. Test kettle SN TESTSN-L4 wasn't put in stock: its unit is locked by boss.",
+      `Test grinder SN TESTSN-L1 wasn't put in stock: its unit is locked by boss.${again} Test grinder SN TESTSN-L2 wasn't put in stock: its unit is locked by boss.${again} Test kettle SN TESTSN-L4 wasn't put in stock: its unit is locked by boss.${again}`,
     );
-    assert.deepEqual(await lockOf(w), locked, "the locked unit stays on the refurb");
+    assert.deepEqual([await lockOf(u), await lockOf(v)], [locked, locked], "the locked units stay on the refurb");
     assert.deepEqual([(await unitRow(pg, z)).site, (await unitRow(pg, z)).status], ["training", "deployed"], "the account-locked serial's unit stays at Training");
-    // A unit whose serial is locked on an account while it is pulled stays put when its machine comes off.
+    // Unlocked, the refurb set back to In progress and completed again: they go in.
+    await pg.query("update assets set locked_at = null, locked_by = null where id = any($1::int[])", [[u, v]]);
+    await R.updateRebuildFor(sql, { id: sd, status: "In progress" }, "u-wh");
+    assert.equal(
+      (await complete()).stockNote,
+      `2 machines went into stock at the Staging area, marked needs shop test. Test kettle SN TESTSN-L4 wasn't put in stock: its unit is locked by boss.${again}`,
+    );
+    assert.deepEqual([(await unitRow(pg, u)).site, (await unitRow(pg, v)).site], ["staging", "staging"]);
+    // A unit whose serial is locked on an account while it is pulled keeps its machine too.
     const sd2 = await rebuild(pg, "Test second refurb", SD);
     const q = await unit(pg, "TESTSN-L5", { pallet: "B", level: 4 });
     const onQ = (await R.pullRebuildMachineFor(sql, { id: sd2, serial: "TESTSN-L5" }, "u-wh")).machines[0];
     await pg.query(
       "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, locked_at, locked_by) values ('Bean Test Cafe', 'Test grinder', 'Test grinder', 'TESTSN-L5', 'testsn-l5', now(), 'boss')",
     );
-    assert.equal((await R.removeRebuildMachineFor(sql, { id: sd2, machineId: onQ.id }, "u-wh")).message, "SN TESTSN-L5 is locked by boss, so it stays where it is.");
+    await assert.rejects(() => R.removeRebuildMachineFor(sql, { id: sd2, machineId: onQ.id }, "u-wh"), refused("TESTSN-L5"));
     assert.equal((await unitRow(pg, q)).status, "assigned");
+    // A unit locked between the check and the write: the write itself leaves the machine.
+    await pg.query("delete from account_equipment where serial_key = 'testsn-l5'");
+    let done2 = false;
+    const lockMeanwhile = Object.assign(async () => assert.fail("tagged query"), {
+      query: async (text, params) => {
+        if (!done2 && /^\s*with gone as \(/.test(text)) {
+          done2 = true;
+          await pg.query("update assets set locked_at = now(), locked_by = 'boss' where id = $1", [q]);
+        }
+        return sql.query(text, params);
+      },
+    });
+    await assert.rejects(() => R.removeRebuildMachineFor(lockMeanwhile, { id: sd2, machineId: onQ.id }, "u-wh"), refused("TESTSN-L5"));
+    assert.equal(Number((await pg.query("select count(*) from rebuild_machines where id = $1", [onQ.id])).rows[0].count), 1);
   } finally {
     await pg.close();
   }
@@ -622,6 +672,21 @@ test("a pull keeps the model the person has, a serial is on one open machine at 
       /^Error: Serial TESTSN-M2 was just moved or taken by another rebuild, so it wasn't pulled\. Pull it again\.$/,
     );
     assert.deepEqual((await R.listRebuildsFor(sql, "u-tech")).rows.find((r) => r.id === third).machines, []);
+    // A pull onto a machine that doesn't go through leaves the machine's own unit on the rebuild, not put back.
+    const keep = await unit(pg, "TESTSN-M3", { pallet: "B", level: 3 });
+    const onKeep = (await R.pullRebuildMachineFor(sql, { id: third, serial: "TESTSN-M3" }, "u-tech")).machines[0];
+    const next = await unit(pg, "TESTSN-M4", { pallet: "B", level: 4 });
+    const moveNext = () => pg.query("update assets set site = 'dallas', status = 'deployed', updated_at = now() + interval '1 second' where id = $1", [next]);
+    await assert.rejects(() => R.pullRebuildMachineFor(raceOn(/^\s*with refurb as \(/, moveNext), { id: third, machineId: onKeep.id, serial: "TESTSN-M4" }, "u-tech"), /was just moved/);
+    assert.deepEqual([(await unitRow(pg, keep)).status, (await unitRow(pg, keep)).purpose, (await unitRow(pg, keep)).sold_to], ["assigned", "In-house rebuild", SD], "still on the rebuild");
+    assert.equal((await pg.query("select asset_id from rebuild_machines where id = $1", [onKeep.id])).rows[0].asset_id, keep);
+    // Two machines with the same typed serial from before the rule: each can still take its own serial again.
+    const twinA = await rebuild(pg, "Test twin A", SD);
+    const twinB = await rebuild(pg, "Test twin B", SD);
+    await pg.query("insert into rebuild_machines (rebuild_id, model, serial) values ($1, 'Test grinder', 'TESTSN-OLDTWIN'), ($2, 'Test grinder', 'TESTSN-OLDTWIN')", [twinA, twinB]);
+    const twinMachine = Number((await pg.query("select id from rebuild_machines where rebuild_id = $1", [twinA])).rows[0].id);
+    const own = await R.pullRebuildMachineFor(sql, { id: twinA, machineId: twinMachine, serial: "TESTSN-OLDTWIN" }, "u-wh");
+    assert.equal(own.machines[0].serial, "TESTSN-OLDTWIN");
   } finally {
     await pg.close();
   }
@@ -726,6 +791,47 @@ test("completing a refurb checks again as each machine goes in; a refurb made Co
     });
     await R.updateRebuildFor(racedMove, { id: shop, account: SD }, "u-wh");
     assert.equal((await unitRow(pg, s1)).sold_to, SHOP, "the unit didn't follow a move that was undone");
+
+    // A serial that turned up on a unit with a customer's name on it (kept at Training for them) stays theirs.
+    const sd5 = await rebuild(pg, "Test fifth refurb", SD);
+    await R.pullRebuildMachineFor(sql, { id: sd5, serial: "TESTSN-RESV", model: "Test grinder" }, "u-wh");
+    const resv = await unit(pg, "TESTSN-RESV", { site: "training", status: "deployed", purpose: "Training", sold_to: "Bean Test Cafe" });
+    const done5 = await R.updateRebuildFor(sql, { id: sd5, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    assert.equal(done5.stockNote, "Test grinder SN TESTSN-RESV wasn't put in stock: its unit is on Bean Test Cafe at Training now.");
+    assert.deepEqual([(await unitRow(pg, resv)).site, (await unitRow(pg, resv)).sold_to], ["training", "Bean Test Cafe"]);
+
+    // Set back to In progress between the completing save and its machines going in: nothing goes in.
+    const sd6 = await rebuild(pg, "Test sixth refurb", SD);
+    await R.saveRebuildMachinesFor(sql, { id: sd6, machines: [{ model: "Test kettle" }] }, "u-wh");
+    let reopened = false;
+    const reopenRace = Object.assign(async () => assert.fail("tagged query"), {
+      query: async (text, params) => {
+        if (!reopened && /^\s*with mine as \(select id from rebuild_machines/.test(text)) {
+          reopened = true;
+          await pg.query("update rebuilds set status = 'In progress' where id = $1", [sd6]);
+        }
+        return sql.query(text, params);
+      },
+    });
+    const before6 = await assets();
+    const out6 = await R.updateRebuildFor(reopenRace, { id: sd6, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    assert.equal(out6.stockNote, "Nothing went into stock: this rebuild changed while its machines were going in.");
+    assert.equal(await assets(), before6);
+
+    // A serial typed on a refurb that was cancelled, then typed and stocked by another refurb, racked and tested since:
+    // completing the first one later leaves that unit where it is.
+    const first = await rebuild(pg, "Test first serial refurb", SD);
+    await R.pullRebuildMachineFor(sql, { id: first, serial: "TESTSN-ONCE", model: "Test grinder" }, "u-wh");
+    await pg.query("update rebuilds set status = 'Cancelled' where id = $1", [first]);
+    const second = await rebuild(pg, "Test second serial refurb", SD);
+    await R.pullRebuildMachineFor(sql, { id: second, serial: "TESTSN-ONCE", model: "Test grinder" }, "u-wh");
+    await R.updateRebuildFor(sql, { id: second, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    const once = Number((await pg.query("select id from assets where serial = 'TESTSN-ONCE'")).rows[0].id);
+    await pg.query("update assets set status = 'ready', site = 'barn-back', pallet = 'C', level = 2, line_no = 1, purpose = null, shop_test = 'tested', updated_at = now() + interval '1 second' where id = $1", [once]);
+    await pg.query("update rebuilds set status = 'In progress' where id = $1", [first]);
+    const outFirst = await R.updateRebuildFor(sql, { id: first, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, "u-wh");
+    assert.equal(outFirst.stockNote, `Test grinder SN TESTSN-ONCE wasn't put in stock: its serial went into stock already from rebuild "Test second serial refurb".`);
+    assert.deepEqual([(await unitRow(pg, once)).site, (await unitRow(pg, once)).shop_test], ["barn-back", "tested"], "still on the rack, tested");
   } finally {
     await pg.close();
   }
@@ -786,6 +892,12 @@ test("migration 0111 empties a rebuild's one-machine columns once its machine ha
       0,
       "the old columns are empty",
     );
+    // Run again after the old site wrote one of them: it copies nothing twice and leaves what was written for the site
+    // to pick up (a machine it already has gets it then).
+    await pg.query("update rebuilds set serial = 'TESTSN-LATER', serial_notice = 'Test later pull' where id = $1", [first]);
+    await pg.exec(readFileSync(new URL("0111_rebuild_machines.sql", MIGRATIONS), "utf8"));
+    assert.equal(Number((await pg.query("select count(*) from rebuild_machines where rebuild_id = $1", [first])).rows[0].count), 1, "no second machine");
+    assert.equal((await pg.query("select serial from rebuilds where id = $1", [first])).rows[0].serial, "TESTSN-LATER", "kept for the site");
   } finally {
     await pg.close();
   }
@@ -828,5 +940,8 @@ test("the screens: the Equipment tab lists the machines, and the board and the s
   const ui = readFileSync(new URL("../src/components/desk/rebuild-machines.tsx", import.meta.url), "utf8");
   assert.match(ui, /const editable = canEdit && !closed;/, "a closed rebuild's machines are read only");
   assert.match(ui, /\{machine\.moved \? \(\s*<p className="mt-1 text-xs text-warning" data-testid="rebuild-machine-moved">\s*\{machine\.moved\}/, "a machine whose unit went elsewhere says where it is");
+  assert.equal((ui.match(/startPull\(m\.id, serial, models\[m\.id\] \?\? ""\)/g) ?? []).length, 2, "only a model the person changed goes with a pull");
+  assert.doesNotMatch(ui, /startPull\(m\.id, serial, model\)/);
+  assert.match(ui, /\$\{m\.assetId && !m\.moved \? " Its unit goes back where it was before it was pulled\." : ""\}/, "the confirm promises only for a unit still on the rebuild");
   assert.match(ui, /if \(fixed \|\| serial\.trim\(\) === \(m\.serial \?\? ""\) \|\| \(pull\.isPending && lastPull\.current\[String\(m\.id\)\] === serial\.trim\(\)\)\) return;/, "only a changed serial pulls on blur");
 });
