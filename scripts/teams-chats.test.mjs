@@ -75,7 +75,10 @@ test("an added chat gets its own id, shows on the board, and can be approved", a
   const card = (await chatCards(sql)).find((c) => c.id === added.id);
   assert.equal(card.name, "Sean's New Accounts");
   assert.equal(card.group, "Reps");
-  assert.equal(card.text, "Open service calls on your accounts.\n\nCalls\nNone.");
+  assert.match(
+    card.text,
+    /^Your accounts: the service we did, open calls, the Pipeline and installs\.\n\nServiced since \w{3} \w{3} \d{1,2}\nNone\.\n\nOpen service calls\nNone\.\n\nPipeline\nNone open\.\n\nInstalls\nNone open\.$/,
+  );
   assert.equal(card.approved, false);
   await assert.rejects(() => approveChat(sql, "rep", added.id, card.text), /^Error: Only an admin can approve a Teams note\.$/);
   const ok = await approveChat(sql, "admin", added.id, card.text);
