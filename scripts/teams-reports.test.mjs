@@ -157,10 +157,11 @@ test("the clock minute is not part of the approved text", () => {
   assert.notEqual(changed.text, first.text);
 });
 
-test("the chats whose notes did not change on 11/2 send byte-for-byte the same text as before", () => {
+test("from the same snapshot, the chats whose notes did not change on 11/2 get byte-for-byte the same text", () => {
   // Captured from main f3089f5 (hard-coded chats) over one fixed snapshot. On 11/2 the Purchase Order, rep and region
   // notes changed on purpose (weekly report by maker; serviced, Pipeline and installs; who has each call and the
-  // get-ready list); the service tracker, The K Team and the tech DMs did not.
+  // get-ready list); the drafting of the service tracker, The K Team and the tech DMs did not. (The snapshot itself
+  // reads open calls as the Service board does now, in a fixed order, so a live tech DM can still read differently.)
   const before = JSON.parse(readFileSync(new URL("./fixtures/teams-drafts-before.json", import.meta.url), "utf8"));
   const kept = TEAMS_CHATS.filter((c) => ["service", "leadership", "tech"].includes(c.feed));
   assert.deepEqual(kept.map((c) => c.id), ["big-tymers", "k-team", "dm-ryan", "dm-josh", "dm-lance", "dm-oliver", "dm-charles"]);
