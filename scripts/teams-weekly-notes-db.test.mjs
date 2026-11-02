@@ -48,6 +48,8 @@ await item("WFZZ1", "WATER FILTERS", "Everpure Zz Cartridge", { cls: "Water Filt
 await item("ZZEQUIP1", "EQUIPMENT", "Bunn Zz Brewer", { kind: "equipment", cls: "Equipment" });
 await item("ZZOLD1", "PARTS", "Eversys Zz Old Gasket", { merged: ev });
 const tamp = await item("ZZTAMP", "PARTS", "Zz Tamper");
+await item("ZZRAN1", "PARTS", "Rancilio Zz Valve");
+await item("ZZDJD1", "PARTS", "de Jong Duke Zz Motor");
 
 const job = async (call, customer, extra = {}) =>
   (
@@ -84,12 +86,16 @@ const sc901 = await job("SC-901", "Zz Blue Door", { completed: "2026-11-02", tec
 await charge(sc901, "PARTS : ZZEV1", 2);
 await charge(sc901, "WATER FILTERS : WFZZ1", 1);
 await charge(sc901, "Service : TRIPCHARGE", 1, "trip");
+// Reclassed out of Parts after it is reported, and back.
+await charge(sc901, "ZZRAN1", 1);
 const sc902 = await job("SC-902", "Zz Katy Cafe", { completed: "2026-11-06", tech: "Josh", wo: "WO-902", issue: "Leak" });
 await charge(sc902, "PARTS : ZZEV1", 1);
 await charge(sc902, "ZZBUNN1", 3);
 await charge(sc902, "EQUIPMENT : ZZEQUIP1", 1);
 // An old number merged into ZZEV1 counts as ZZEV1.
 await charge(sc902, "PARTS : ZZOLD1", 1);
+// Taken off after it is reported, and used nowhere else.
+await charge(sc902, "ZZDJD1", 1);
 const tlc = await job("TL-1", "Zz Blue Door", { kind: "tlc", completed: "2026-11-05" });
 await charge(tlc, "ZZTAMP", 1);
 const sc930 = await job("SC-930", "Zz Blue Door", { completed: "2026-11-03" });
@@ -270,6 +276,8 @@ test("Purchase Order Requests: each Friday 5 PM pulls the week, by manufacturer,
       "Bunn · 1 part, 3 pieces\n- ZZBUNN1 · 3",
       // SC-901's one and the install invoice's two.
       "Everpure · 1 part, 3 pieces\n- WFZZ1 · Zz Cartridge · 3",
+      "de Jong Duke · 1 part, 1 piece\n- ZZDJD1 · Zz Motor · 1",
+      "Rancilio · 1 part, 1 piece\n- ZZRAN1 · Zz Valve · 1",
       // The TLC visit's one, SC-930's four, SC-931's three and the PM's two. Not the equipment, the cancelled ticket,
       // last week's (pulled already) or next week's.
       "Other · 1 part, 10 pieces\n- ZZTAMP · Zz Tamper · 10",
@@ -286,7 +294,7 @@ test("Purchase Order Requests: each Friday 5 PM pulls the week, by manufacturer,
   // Each pull keeps what it reported, ticket by ticket: equipment too, though the note doesn't list it.
   assert.deepEqual(saved[0].uses, [{ k: `service:${sc903}`, p: tamp, q: 5 }]);
   // Not the equipment either: only the parts the note lists go into a pull.
-  assert.equal(saved[1].uses.length, 9);
+  assert.equal(saved[1].uses.length, 11);
   assert.deepEqual(saved.map((p) => p.seq), [1, 2]);
 });
 
@@ -431,8 +439,10 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
   await sql.query("update pm_jobs set stacked_job_id = $2 where id = $1", [p5, sc904]);
   await sql.query("update installs set archived = true, duplicate_of = $2 where id = $1", [i13, i14]);
   await sql.query("update invoices set entity_id = $2 where id = $1", [inv13, i14]);
-  // A reported piece taken off.
+  // A reported piece taken off, a reported part's only line deleted, and a reported part reclassed out of Parts.
   await sql.query("update ticket_charges set qty = 1 where job_id = $1 and item = 'PARTS : ZZEV1'", [sc901]);
+  await sql.query("delete from ticket_charges where job_id = $1 and item = 'ZZDJD1'", [sc902]);
+  await sql.query("update billing_items set item_class = 'Service' where sku = 'ZZRAN1'");
   const next = await card("purchase-orders", NEXT_FRIDAY);
   assert.equal(next.approved, false);
   assert.equal(
@@ -444,7 +454,8 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
       // SC-904's six. The PM is billed on SC-904 now, so its two count as two of those six (Parts → Usage counts a
       // ticket's parts once), and they were reported already: four are new.
       "Other · 1 part, 4 pieces\n- ZZTAMP · Zz Tamper · 4",
-      "Taken off tickets after an earlier report\n- ZZEV1 · Zz Gasket · -1",
+      // The reclassed valve isn't taken off: it wasn't taken off a ticket.
+      "Taken off tickets after an earlier report\n- ZZDJD1 · Zz Motor · -1\n- ZZEV1 · Zz Gasket · -1",
     ].join("\n\n"),
   );
   // Looking again doesn't pull again.
@@ -455,6 +466,8 @@ test("the next Friday's pull has only what is new: late, back-dated, moved, merg
   // belonged on: off one, on the other, nothing for the tamper.
   await sql.query("update ticket_charges set item = 'ZZBUNN1' where job_id = $1", [late]);
   await sql.query("update ticket_charges set job_id = $2 where job_id = $1", [tlc, sc904]);
+  // The valve is back in Parts: reported already, so not again.
+  await sql.query("update billing_items set item_class = 'Parts' where sku = 'ZZRAN1'");
   assert.equal(
     await text("purchase-orders", new Date("2026-11-20T23:30:00Z")),
     `${intro("Sat Nov 14", "Fri Nov 20", "Fri Nov 20 at 5:30 PM")}\n\nBunn · 1 part, 1 piece\n- ZZBUNN1 · 1\n\nTaken off tickets after an earlier report\n- WFZZ1 · Zz Cartridge · -1`,

@@ -73,8 +73,9 @@ test("a pull reports what is new since the pulls before it, and a use already re
   assert.deepEqual(pullChanges([u("service:1", 11, 2)], [r("service:1", 10, 2)], win), [r("service:1", 10, -2), r("service:1", 11, 2)]);
   // A charge moved to the right ticket: off one, on the other, nothing for the part.
   assert.deepEqual(pullChanges([u("service:2", 10, 2)], [r("service:1", 10, 2)], win), [r("service:1", 10, -2), r("service:2", 10, 2)]);
-  // A part the note no longer counts (reclassed) is left as reported.
+  // A part the note no longer counts (reclassed) is left as reported, and a new use of one isn't reported.
   assert.deepEqual(pullChanges([], [r("service:1", 10, 2)], win, undefined, undefined, (p) => p !== 10), []);
+  assert.deepEqual(pullChanges([u("service:3", 10, 1), u("service:3", 11, 1)], [], win, undefined, undefined, (p) => p !== 10), [r("service:3", 11, 1)]);
   // A PM billed on a ticket that has the same part: its parts count once with the ticket's own, so the ticket's
   // pieces read less than both reported. That is held; only pieces below the ticket's own are taken off.
   const stacked = (k) => (k === "pm:3" ? "service:1" : k);
@@ -84,7 +85,7 @@ test("a pull reports what is new since the pulls before it, and a use already re
   assert.deepEqual(pullChanges([], [r("service:1", 10, 1), r("pm:3", 10, 2)], win, stacked), [r("service:1", 10, -1)]);
   // A use still on its own record stays there even when its ticket was merged (a QuickBooks line stays put).
   const merged = (k) => (k === "service:20" ? "service:21" : k);
-  assert.deepEqual(pullChanges([u("service:20", 10, 1, "2026-10-01"), u("service:21", 11, 2)], [r("service:20", 10, 1), r("service:20", 11, 2)], win, merged), []);
+  assert.deepEqual(pullChanges([u("service:20", 10, 1, "2026-11-02"), u("service:21", 11, 2)], [r("service:20", 10, 1), r("service:20", 11, 2)], win, merged), []);
   // Two pulls before add up; pieces are rounded to the cent.
   assert.deepEqual(pullChanges([u("service:1", 10, 5)], [r("service:1", 10, 2), r("service:1", 10, 1)], win), [r("service:1", 10, 2)]);
   assert.deepEqual(pullChanges([u("service:1", 10, 0.1), u("service:1", 10, 0.2)], [r("service:1", 10, 0.3)], win), []);
