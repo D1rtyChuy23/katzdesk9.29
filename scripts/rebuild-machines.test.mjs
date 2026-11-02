@@ -239,6 +239,7 @@ test("a refurb holds several machines; a new serial or taking one off puts its u
     await pg.query("update rebuilds set status = 'Cancelled' where id = $1", [old]);
     const waiting = (await R.saveRebuildMachinesFor(sql, { id: shop, machines: [{ model: "Test grinder" }] }, "u-wh")).machines.at(-1);
     await R.pullRebuildMachineFor(sql, { id: shop, machineId: waiting.id, serial: "TESTSN-C", confirmReuse: true }, "u-wh");
+    assert.equal((await pg.query("select origin->>'pulled_to' as pulled_to from rebuild_machines where id = $1", [waiting.id])).rows[0].pulled_to, SHOP);
     await R.removeRebuildMachineFor(sql, { id: shop, machineId: waiting.id }, "u-wh");
     assert.deepEqual([(await unitRow(pg, c)).status, (await unitRow(pg, c)).pallet], ["ready", "B"], "back on its rack slot again");
 
