@@ -220,12 +220,15 @@ test("completing a refurb puts each machine in stock at the Staging area, needs 
     // A serial not in the warehouse when it was typed, added to the stock list since, with nobody's name on it.
     await R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-LATE", model: "Test grinder" }, "u-wh");
     const late = await unit(pg, "TESTSN-LATE", { site: "front-lobby", status: "deployed", purpose: "Lobby" });
+    // And one whose serial turned up since on a unit sold to a customer: that one isn't ours to move.
+    await R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-SOLDX", model: "Test grinder" }, "u-wh");
+    const soldX = await unit(pg, "TESTSN-SOLDX", { site: "sold", status: "sold", sold_to: "Bean Test Cafe" });
     // One machine's unit goes to a customer's install meanwhile: it isn't put in stock.
     await pg.query("update assets set sold_to = 'Bean Test Cafe', install_id = $2, purpose = 'Install', updated_at = now() where id = $1", [moving, install]);
     // A machine with no model and no unit stops the completion until it has one.
     const blank = (await R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-NOMODEL" }, "u-wh")).machines.at(-1);
     const complete = (userId = "u-wh") => R.updateRebuildFor(sql, { id: sd, status: "Completed", owner: "tess", targetComplete: "2026-11-20" }, userId);
-    await assert.rejects(() => complete(), /^Error: Machine 6 \(SN TESTSN-NOMODEL\) needs its model before this refurb is completed: it goes into stock as that model\.$/);
+    await assert.rejects(() => complete(), /^Error: Machine 7 \(SN TESTSN-NOMODEL\) needs its model before this refurb is completed: it goes into stock as that model\.$/);
     assert.equal((await pg.query("select status from rebuilds where id = $1", [sd])).rows[0].status, "Queued", "not completed");
     await R.saveRebuildMachinesFor(sql, { id: sd, machines: [{ id: blank.id, model: "Test mixer" }] }, "u-wh");
     const assetsBefore = Number((await pg.query("select count(*) from assets")).rows[0].count);
@@ -235,7 +238,7 @@ test("completing a refurb puts each machine in stock at the Staging area, needs 
     assert.equal(done.status, "Completed");
     assert.equal(
       done.stockNote,
-      "5 machines went into stock at the Staging area, marked needs shop test. Test grinder SN TESTSN-M wasn't put in stock: its unit is on an install for Bean Test Cafe now.",
+      "5 machines went into stock at the Staging area, marked needs shop test. Test grinder SN TESTSN-M wasn't put in stock: its unit is on an install for Bean Test Cafe now. Test grinder SN TESTSN-SOLDX wasn't put in stock: its unit is on Bean Test Cafe (sold) now.",
     );
     const staged = (await pg.query("select model, serial, status, site, pallet, level, sold_to, purpose, locked_by, shop_test, shop_test_by, review_status, notes from assets where site = 'staging' order by id")).rows;
     assert.deepEqual(
@@ -260,7 +263,8 @@ test("completing a refurb puts each machine in stock at the Staging area, needs 
     );
     assert.deepEqual((await unitRow(pg, moving)).install_id, install, "the unit on the install stays there");
     const machines = done.machines;
-    assert.deepEqual(machines.map((m) => !!m.stockedAt), [true, false, true, true, true, true]);
+    assert.deepEqual(machines.map((m) => !!m.stockedAt), [true, false, true, true, true, false, true]);
+    assert.deepEqual((await unitRow(pg, soldX)).status, "sold", "the sold unit stays sold");
     assert.match(machines[0].notice, /^In stock at the Staging area since [A-Z][a-z]{2} \d{1,2}, \d{4}, needs shop test\.$/);
     assert.equal(machines[1].notice, "Test grinder SN TESTSN-M wasn't put in stock: its unit is on an install for Bean Test Cafe now.");
     assert.equal(machines.find((m) => m.serial === "TESTSN-LATE").assetId, late, "the machine is linked to the unit that went in for it");
@@ -276,9 +280,9 @@ test("completing a refurb puts each machine in stock at the Staging area, needs 
     await R.updateRebuildFor(sql, { id: sd, status: "In progress" }, "u-wh");
     await pg.query("update assets set sold_to = $2, purpose = 'In-house rebuild', install_id = null where id = $1", [moving, SD]);
     const again = await complete();
-    assert.equal(again.stockNote, "1 machine went into stock at the Staging area, marked needs shop test.");
+    assert.equal(again.stockNote, "1 machine went into stock at the Staging area, marked needs shop test. Test grinder SN TESTSN-SOLDX wasn't put in stock: its unit is on Bean Test Cafe (sold) now.");
     assert.equal(Number((await pg.query("select count(*) from assets")).rows[0].count), assetsBefore + 3);
-    assert.deepEqual(again.machines.map((m) => !!m.stockedAt), [true, true, true, true, true, true]);
+    assert.deepEqual(again.machines.map((m) => !!m.stockedAt), [true, true, true, true, true, false, true]);
     await assert.rejects(() => R.pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-X" }, "u-wh"), /This rebuild is Completed/);
 
     // A customer's rebuild completed: its machine goes back to the customer, not into our stock.
