@@ -515,7 +515,7 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   const part = async (sku, description, cls = "Parts") =>
     Number((await row("insert into billing_items (sku, parent, item, description, kind, item_class, rate) values ($1, 'PARTS', $2, $3, 'part', $4, 10) returning id", [sku, `PARTS : ${sku}`, description, cls])).id);
   const ids = {};
-  for (const x of ["A", "B", "C", "D", "F", "G", "H"]) ids[x] = await part(`ZZ${x}1`, `Bunn Zz Valve ${x}`);
+  for (const x of ["A", "B", "C", "D", "F", "G", "H", "J"]) ids[x] = await part(`ZZ${x}1`, `Bunn Zz Valve ${x}`);
   ids.E = await part("WFZZE", "Everpure Zz Cartridge E", "Water Filters");
   const ticket = async (call) =>
     Number((await row("insert into service_jobs (kind, call_id, customer, status, done, received, completed_at) values ('service', $1, 'Zz Owl', 'Completed', true, '2026-11-01', '2026-11-04') returning id", [call])).id);
@@ -553,6 +553,9 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   await charge(t3, "C", 3);
   const t7 = await ticket("SC-6");
   await charge(t7, "G", 2);
+  // J: merged into an install as billed: its charges count there straight away.
+  const t9 = await ticket("SC-12");
+  await charge(t9, "J", 2);
   // H4: a ticket's charge and its QuickBooks line for the same part: one use.
   const k4 = await ticket("SC-7");
   const e4 = await ticket("SC-8");
@@ -567,6 +570,8 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   const t6 = await ticket("SC-10");
   await charge(t6, "F", 1);
   const p6 = await pmWith("F", 2);
+  // A part taken off that PM before: never used, so never waiting.
+  await q.query("insert into machine_parts (pm_job_id, piece_key, machine_label, billing_item_id, item, qty, removed_at) values ($1, 'zz2', 'Zz Brewer', $2, 'x', 5, now())", [p6.pm, ids.F]);
   const t8 = await ticket("SC-11");
   const p8 = await pmWith("H", 2);
 
@@ -574,7 +579,7 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
     await po(NOW),
     [
       intro("Sat Oct 31", "Fri Nov 6", "Fri Nov 6 at 5:30 PM"),
-      "Bunn · 7 parts, 19 pieces\n- ZZA1 · Zz Valve A · 4\n- ZZB1 · Zz Valve B · 3\n- ZZC1 · Zz Valve C · 3\n- ZZF1 · Zz Valve F · 3\n- ZZD1 · Zz Valve D · 2\n- ZZG1 · Zz Valve G · 2\n- ZZH1 · Zz Valve H · 2",
+      "Bunn · 8 parts, 21 pieces\n- ZZA1 · Zz Valve A · 4\n- ZZB1 · Zz Valve B · 3\n- ZZC1 · Zz Valve C · 3\n- ZZF1 · Zz Valve F · 3\n- ZZD1 · Zz Valve D · 2\n- ZZG1 · Zz Valve G · 2\n- ZZH1 · Zz Valve H · 2\n- ZZJ1 · Zz Valve J · 2",
       "Everpure · 1 part, 3 pieces\n- WFZZE · Zz Cartridge E · 3",
     ].join("\n\n"),
   );
@@ -590,6 +595,11 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
   await q.query("update invoice_lines set qty = 1 where id = $1", [i3.line]);
   await approve(i3.inv);
   const i7 = await intoInstall(t7, "G", 2);
+  const i9 = Number((await row("insert into installs (customer, install_date, machines) values ('Zz Owl', '2026-11-10', '[]') returning id")).id);
+  await q.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [t9, i9]);
+  await q.query(`insert into ticket_install_merges (job_id, install_id, moved) values ($1, $2, '{"billedOn": "SO6266"}')`, [t9, i9]);
+  // Its line cut to 1 there: one taken off.
+  await q.query("update ticket_charges set qty = 1 where job_id = $1", [t9]);
   // H4: merged; its QuickBooks line stays on it, and counts on the ticket it went into, once with the charge.
   await mergeTickets(e4, k4);
   // H5: billed on its ticket, then cancelled. S: billed on its ticket, its parts not billed there yet. T8: billed on a
@@ -623,8 +633,8 @@ test("a correction on merged or stacked work is taken off; pieces waiting to sho
     await po(NEXT_FRIDAY),
     [
       intro("Sat Nov 7", "Fri Nov 13", "Fri Nov 13 at 5:30 PM"),
-      // 2 used and 4 reported; 1 and 3; 1 approved and 3; the cancelled PM's 2; the 1 left of T8's PM's 2.
-      "Taken off tickets after an earlier report\n- WFZZE · Zz Cartridge E · -2\n- ZZA1 · Zz Valve A · -2\n- ZZB1 · Zz Valve B · -2\n- ZZC1 · Zz Valve C · -2\n- ZZH1 · Zz Valve H · -1",
+      // 2 used and 4 reported; 1 and 3; 1 approved and 3; the cancelled PM's 2; the 1 left of T8's PM's 2; J's cut.
+      "Taken off tickets after an earlier report\n- WFZZE · Zz Cartridge E · -2\n- ZZA1 · Zz Valve A · -2\n- ZZB1 · Zz Valve B · -2\n- ZZC1 · Zz Valve C · -2\n- ZZH1 · Zz Valve H · -1\n- ZZJ1 · Zz Valve J · -1",
     ].join("\n\n"),
   );
 
