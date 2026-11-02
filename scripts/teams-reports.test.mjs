@@ -134,8 +134,10 @@ test("each chat gets only its own lines, and the text is what would be sent", ()
   assert.doesNotMatch(draft("rep-amanda", snap).text, /Night Owl/);
   assert.match(draft("dfw", snap).text, /Blue Door/);
   assert.match(draft("sa-atx", snap).text, /Night Owl/);
-  assert.match(draft("service-monkeys", snap).text, /No tech yet\n- Houston Cafe/);
-  assert.doesNotMatch(draft("service-monkeys", snap).text, /Blue Door|Night Owl/);
+  // The techs are all in Service Monkeys: each one's calls, in every region; then the calls outside DFW and SA/ATX
+  // with no tech.
+  assert.match(draft("service-monkeys", snap).text, /\n\nRyan Gloria · 1 open call\n- Blue Door · Open · 2026-10-18 · SC-1 · Grinder jammed · DFW\n\nNo tech yet\n- Houston Cafe/);
+  assert.doesNotMatch(draft("service-monkeys", snap).text, /Night Owl/);
   assert.match(draft("dfw", snap).text, /Assigned so far \(Ryan Gloria 1\)\n- Ryan Gloria · Blue Door/);
   assert.match(draft("dm-ryan", snap).text, /Blue Door/);
   assert.equal(draft("dm-cory", snap).text, "");
@@ -235,7 +237,6 @@ test("a chat added for a person or region follows the same rules as the built-in
   assert.match(custom("region", "dfw"), /Mike Shop/);
   assert.doesNotMatch(custom("region", "dfw"), /Liz Shop|Tulsa/);
   // Outside DFW and SA/ATX: who has each call, then the calls with no tech yet.
-  assert.match(custom("region", "other"), /Assigned so far \(Josh 1\)\n- Josh · Liz Shop/);
-  assert.match(custom("region", "other"), /No tech yet\n- Tulsa/);
-  assert.doesNotMatch(custom("region", "other"), /Mike Shop/);
+  // Outside DFW and SA/ATX: each tech's calls in every region, then the calls there with no tech yet.
+  assert.match(custom("region", "other"), /\n\nJoshua Harper · 1 open call\n- Liz Shop · Open · 2026-10-18 · SC-1 · Grinder jammed\n\nMike Jones · 1 open call\n- Mike Shop · Open · 2026-10-18 · SC-1 · Grinder jammed · DFW\n\nNo tech yet\n- Tulsa/);
 });

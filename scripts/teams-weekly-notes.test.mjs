@@ -2,7 +2,7 @@
 // sections, each region's assignments and the Service Monkeys get-ready list. The plain pieces. All data is made up.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chicagoClock, countsForPo, OTHER_MAKER, partLabel, partMaker, poReportWeek, weekDayLabel } from "../src/lib/ops/po-report.ts";
+import { chicagoClock, countsForPo, OTHER_MAKER, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, pulledLabel, weekDayLabel } from "../src/lib/ops/po-report.ts";
 import { planGetReady } from "../src/lib/ops/get-ready.ts";
 import { machineNotesMissing, picturesNeeded } from "../src/lib/ops/install-needs.ts";
 import { draftTeamsChat, teamsChat } from "../src/lib/ops/teams-message.ts";
@@ -35,6 +35,32 @@ test("the hour is Chicago's, before and after daylight saving ends", () => {
   assert.deepEqual(chicagoClock(new Date("2026-11-07T06:00:00Z")), { date: "2026-11-07", hour: 0 });
   assert.equal(weekDayLabel("2026-10-24"), "Sat Oct 24");
   assert.equal(weekDayLabel("2026-10-30"), "Fri Oct 30");
+});
+
+test("a pull reports what is new since the pulls before it, and nothing twice", () => {
+  const u = (k, p, q) => ({ k, p, q });
+  const earlier = [u("service:1", 10, 2), u("service:2", 11, 1), u("pm:3", 12, 1), u("service:4", 99, 1)];
+  const now = [
+    // Same as reported: nothing.
+    u("service:1", 10, 2),
+    // One more piece on the same ticket.
+    u("service:2", 11, 2),
+    // A use entered late, or back-dated into a week already pulled: new.
+    u("service:5", 10, 3),
+    // pm:3's piece was taken off: -1 below.
+    // Part 99 was merged into 13 since: the same use, not a new one.
+    u("service:4", 13, 1),
+  ];
+  assert.deepEqual(pullChanges(now, earlier, new Map([[99, 13]])), [u("pm:3", 12, -1), u("service:2", 11, 1), u("service:5", 10, 3)]);
+  // Without knowing the merge, part 13 would read new and part 99 taken off.
+  assert.deepEqual(pullChanges(now, earlier), [u("pm:3", 12, -1), u("service:2", 11, 1), u("service:4", 13, 1), u("service:4", 99, -1), u("service:5", 10, 3)]);
+  // Two pulls before: each one's change adds up.
+  assert.deepEqual(pullChanges([u("service:1", 10, 5)], [u("service:1", 10, 2), u("service:1", 10, 1)]), [u("service:1", 10, 2)]);
+  assert.deepEqual(pullChanges([u("service:1", 10, 0.1), u("service:1", 10, 0.2)], [u("service:1", 10, 0.3)]), []);
+  assert.deepEqual([...piecesByPart([u("a", 10, 2), u("b", 10, 1.5), u("c", 11, -1)]).entries()], [[10, 3.5], [11, -1]]);
+  assert.equal(pulledLabel("2026-10-30T22:30:00Z"), "Fri Oct 30 at 5:30 PM");
+  assert.equal(pulledLabel("2026-11-07T00:05:00Z"), "Fri Nov 6 at 6:05 PM");
+  assert.equal(pulledLabel("not a time"), "");
 });
 
 /* ------------------------------------------------------------------ the maker */
@@ -141,11 +167,16 @@ const empty = {
 };
 const draft = (id, snap) => draftTeamsChat(teamsChat(id), { ...empty, ...snap }).text;
 const part = (maker, sku, label, pieces) => ({ maker, sku, label, pieces });
+// Pulled Fri Oct 30, 2026 at 5:30 PM in Chicago (CDT).
+const PULLED = "2026-10-30T22:30:00Z";
+const week = (parts) => ({ from: "2026-10-24", to: "2026-10-30", pulledAt: PULLED, parts });
+const INTRO = "Parts and water filters used, by manufacturer, for the week Sat Oct 24 to Fri Oct 30, and any entered late from earlier weeks. Pulled Fri Oct 30 at 5:30 PM for Monday morning; nothing is counted twice. Place the orders in NetSuite.";
 
 test("the Purchase Order note lists every part used that week under its maker, most pieces first and Other last", () => {
   const po = {
     from: "2026-10-24",
     to: "2026-10-30",
+    pulledAt: PULLED,
     parts: [
       part(OTHER_MAKER, "ZZOTHER1", "Zz Tamper", 9),
       part("Bunn", "BUNNZZ2", "ZZ GASKET", 1),
@@ -159,30 +190,33 @@ test("the Purchase Order note lists every part used that week under its maker, m
   assert.equal(
     draft("purchase-orders", { po }),
     [
-      "Parts and water filters used Sat Oct 24 to Fri Oct 30, by manufacturer, to know what to reorder. Pulled Friday at 5 PM for Monday morning. Place the orders in NetSuite.",
+      INTRO,
       "Eversys · 2 parts, 5.5 pieces\n- EVERZZ1 · Zz O-Ring · 4\n- EVERZZ2 · Zz Thermostat · 1.5",
       "Bunn · 3 parts, 5 pieces\n- BUNNZZ1 · ZZ SWITCH · 3\n- BUNNZZ2 · ZZ GASKET · 1\n- BUNNZZ3 · ZZ VALVE · 1",
       "Ditting · 1 part, 4 pieces\n- DITZZ1 · Zz Burrs · 4",
       "Other · 1 part, 9 pieces\n- ZZOTHER1 · Zz Tamper · 9",
     ].join("\n\n"),
   );
-  assert.equal(draft("purchase-orders", { po: { from: "2026-10-24", to: "2026-10-30", parts: [part("Bunn", "", "ZZ Kit", 1)] } }).split("\n\n")[1], "Bunn · 1 part, 1 piece\n- No SKU · ZZ Kit · 1");
-  assert.equal(draft("purchase-orders", { po: { from: "2026-10-24", to: "2026-10-30", parts: [part("Bunn", "BUNNZZ9", "", 2)] } }).split("\n\n")[1], "Bunn · 1 part, 2 pieces\n- BUNNZZ9 · 2");
+  assert.equal(draft("purchase-orders", { po: week([part("Bunn", "", "ZZ Kit", 1)]) }).split("\n\n")[1], "Bunn · 1 part, 1 piece\n- No SKU · ZZ Kit · 1");
+  assert.equal(draft("purchase-orders", { po: week([part("Bunn", "BUNNZZ9", "", 2)]) }).split("\n\n")[1], "Bunn · 1 part, 2 pieces\n- BUNNZZ9 · 2");
+  assert.equal(draft("purchase-orders", { po: week([]) }), `${INTRO}\n\nNone used that week.`);
+  // Pieces taken off tickets after an earlier report are listed last, on their own.
   assert.equal(
-    draft("purchase-orders", { po: { from: "2026-10-24", to: "2026-10-30", parts: [] } }),
-    "Parts and water filters used Sat Oct 24 to Fri Oct 30, by manufacturer, to know what to reorder. Pulled Friday at 5 PM for Monday morning. Place the orders in NetSuite.\n\nNone used that week.",
+    draft("purchase-orders", { po: week([part("Bunn", "BUNNZZ1", "ZZ SWITCH", 2), part("Eversys", "EVERZZ9", "Zz Probe", -1), part("Bunn", "BUNNZZ2", "ZZ GASKET", -2)]) }),
+    `${INTRO}\n\nBunn · 1 part, 2 pieces\n- BUNNZZ1 · ZZ SWITCH · 2\n\nTaken off tickets after an earlier report\n- BUNNZZ2 · ZZ GASKET · -2\n- EVERZZ9 · Zz Probe · -1`,
   );
+  assert.equal(draft("purchase-orders", { po: week([part("Bunn", "BUNNZZ2", "ZZ GASKET", -2)]) }), `${INTRO}\n\nTaken off tickets after an earlier report\n- BUNNZZ2 · ZZ GASKET · -2`);
 });
 
 test("a week too long for one note lists what fits and says how many more", () => {
   const parts = Array.from({ length: 400 }, (_, i) => part(i < 200 ? "Bunn" : "Fetco", `ZZ${String(i).padStart(4, "0")}`, `Zz part ${"x".repeat(60)} ${i}`, 1));
-  const text = draft("purchase-orders", { po: { from: "2026-10-24", to: "2026-10-30", parts } });
+  const text = draft("purchase-orders", { po: week(parts) });
   assert.ok(text.length <= 18_100, String(text.length));
   const listed = text.split("\n").filter((l) => l.startsWith("- ")).length;
   assert.ok(listed > 100 && listed < 400, String(listed));
   assert.ok(text.endsWith(`And ${400 - listed} more parts.`), text.slice(-60));
   // Every week that fits is listed whole.
-  const fits = draft("purchase-orders", { po: { from: "2026-10-24", to: "2026-10-30", parts: parts.slice(0, 120) } });
+  const fits = draft("purchase-orders", { po: week(parts.slice(0, 120)) });
   assert.equal(fits.split("\n").filter((l) => l.startsWith("- ")).length, 120);
   assert.doesNotMatch(fits, /more parts?\.$/);
 });
@@ -259,11 +293,13 @@ test("an install's needs name its machines and are cut only past 320 characters"
   assert.ok(cut.endsWith("…"));
 });
 
-test("each section of a rep's note shows eight lines and says how many more", () => {
-  const many = Array.from({ length: 11 }, (_, i) => install({ customer: `Zz ${String(i).padStart(2, "0")}`, rep: "Amanda Logg" }));
-  const text = draft("rep-amanda", { installs: many, servicedDefault: "2026-10-26" });
-  assert.match(text, /- Zz 07 · No install date · Power and water notes and pictures are in\nAnd 3 more\.$/);
-  assert.doesNotMatch(text, /Zz 08/);
+test("each section of a rep's note shows fifteen lines and says how many more", () => {
+  const many = Array.from({ length: 18 }, (_, i) => install({ customer: `Zz ${String(i).padStart(2, "0")}`, rep: "Amanda Logg" }));
+  const deals = Array.from({ length: 16 }, (_, i) => ({ customer: `Zz D${String(i).padStart(2, "0")}`, rep: "Amanda Logg", equipment: "Axiom", stage: "Good to order", eta: "" }));
+  const text = draft("rep-amanda", { installs: many, deals, servicedDefault: "2026-10-26" });
+  assert.match(text, /- Zz D14 · Axiom · Good to order\nAnd 1 more\.\n\nInstalls\n/);
+  assert.match(text, /- Zz 14 · No install date · Power and water notes and pictures are in\nAnd 3 more\.$/);
+  assert.doesNotMatch(text, /Zz 15|Zz D15/);
 });
 
 /* ------------------------------------------------------------------ the regions */
@@ -275,19 +311,25 @@ test("a region's note: who has each call so far, with each tech's count, then th
     call({ customer: "Zz C", region: "dfw", tech: "Brandon Chappell", tech2: "Bill McKinley", ref: "SC-3" }),
     call({ customer: "Zz D", region: "dfw", status: "Open", ref: "SC-4" }),
     call({ customer: "Zz Away", region: "sa-atx", tech: "Lance Oden", ref: "SC-5" }),
+    // Not on the roster: as typed. Fewer calls than Bill, so after him though its name sorts first.
+    call({ customer: "Zz E", region: "dfw", tech: "Aaron Zz", ref: "SC-6" }),
+    // "Bill" is Bill McKinley.
+    call({ customer: "Zz F", region: "dfw", tech: "Bill", when: "2026-11-05", ref: "SC-7" }),
+    // No date: after his dated calls.
+    call({ customer: "Zz 0", region: "dfw", tech: "Bill McKinley", ref: "SC-8" }),
   ];
   assert.equal(
     draft("dfw", { calls }),
     [
       "Open service calls in this region, and who has them.",
-      "Assigned so far (Bill McKinley 3, Brandon Chappell 1)\n- Bill McKinley · Zz A · Open · 2026-11-03 · SC-1 · Leak\n- Bill McKinley · Zz B · Open · 2026-11-04 · SC-2\n- Brandon Chappell & Bill McKinley · Zz C · Open · SC-3",
+      "Assigned so far (Bill McKinley 5, Aaron Zz 1, Brandon Chappell 1)\n- Aaron Zz · Zz E · Open · SC-6\n- Bill McKinley · Zz A · Open · 2026-11-03 · SC-1 · Leak\n- Bill McKinley · Zz B · Open · 2026-11-04 · SC-2\n- Bill McKinley · Zz F · Open · 2026-11-05 · SC-7\n- Bill McKinley · Zz 0 · Open · SC-8\n- Brandon Chappell & Bill McKinley · Zz C · Open · SC-3",
       "No tech yet\n- Zz D · Open · SC-4",
     ].join("\n\n"),
   );
   assert.equal(draft("sa-atx", { calls: [] }), "Open service calls in this region, and who has them.\n\nAssigned so far\nNone.\n\nNo tech yet\nNone.");
 });
 
-test("Service Monkeys: calls outside DFW and SA/ATX and who has them, then the get-ready list", () => {
+test("Service Monkeys: each tech's open calls everywhere, the calls there with no tech, then the get-ready list", () => {
   const getReady = [
     { date: "2026-11-04", time: "9a", customer: "Zz Blue", model: "Linea PB", serial: "ZZ-1", state: "pulled", where: "Back · A-L1", unitSerial: "ZZ-1", more: 0, needsTest: true },
     { date: "2026-11-04", time: "9a", customer: "Zz Blue", model: "Mythos One", serial: "", state: "to-pull", where: "Front · C-L2", unitSerial: "ZZ-7", more: 2, needsTest: false },
@@ -295,12 +337,21 @@ test("Service Monkeys: calls outside DFW and SA/ATX and who has them, then the g
     { date: "2026-11-06", time: "", customer: "Zz Owl", model: "ITCB", serial: "ZZ-9", state: "to-pull", where: "Back · B-L1", unitSerial: "ZZ-9", more: 0, needsTest: true },
     { date: "2026-11-06", time: "", customer: "Zz Owl", model: "Bunn G9", serial: "", state: "pulled", where: "", unitSerial: "ZZ-3", more: 0, needsTest: false },
   ];
-  const calls = [call({ customer: "Zz Houston", tech: "Ryan Gloria", ref: "SC-7" }), call({ customer: "Zz Katy", ref: "SC-8" }), call({ customer: "Zz Dallas", region: "dfw", ref: "SC-9" })];
+  const calls = [
+    call({ customer: "Zz Houston", tech: "Ryan Gloria", ref: "SC-7" }),
+    call({ customer: "Zz Katy", ref: "SC-8" }),
+    // No tech, in DFW: that chat's, not this one's.
+    call({ customer: "Zz Dallas", region: "dfw", ref: "SC-9" }),
+    // A tech's calls in DFW and SA/ATX are his too, tagged with the region; a call with two techs is under both.
+    call({ customer: "Zz Plano", region: "dfw", tech: "Josh", when: "2026-11-04", ref: "SC-10" }),
+    call({ customer: "Zz Austin", region: "sa-atx", tech: "Ryan Gloria", tech2: "Joshua Harper", when: "2026-11-03", ref: "SC-11", issue: "Leak" }),
+  ];
   assert.equal(
     draft("service-monkeys", { calls, getReady }),
     [
-      "Open calls outside Dallas–Fort Worth and San Antonio–Austin, and who has them. Then the equipment to get ready for installs this week and next.",
-      "Assigned so far (Ryan Gloria 1)\n- Ryan Gloria · Zz Houston · Open · SC-7",
+      "Each tech's open calls, the calls outside Dallas–Fort Worth and San Antonio–Austin that still need a tech, and the equipment to get ready for installs this week and next.",
+      "Joshua Harper · 2 open calls\n- Zz Plano · Open · 2026-11-04 · SC-10 · DFW\n- Zz Austin · Open · 2026-11-03 · SC-11 · Leak · SA/ATX",
+      "Ryan Gloria · 2 open calls\n- Zz Houston · Open · SC-7\n- Zz Austin · Open · 2026-11-03 · SC-11 · Leak · SA/ATX",
       "No tech yet\n- Zz Katy · Open · SC-8",
       [
         "Get ready: installs this week and next",
@@ -312,7 +363,10 @@ test("Service Monkeys: calls outside DFW and SA/ATX and who has them, then the g
       ].join("\n"),
     ].join("\n\n"),
   );
-  assert.match(draft("service-monkeys", {}), /Get ready: installs this week and next\nNo installs this week or next\.$/);
+  assert.equal(
+    draft("service-monkeys", {}),
+    "Each tech's open calls, the calls outside Dallas–Fort Worth and San Antonio–Austin that still need a tech, and the equipment to get ready for installs this week and next.\n\nAssigned so far\nNone.\n\nNo tech yet\nNone.\n\nGet ready: installs this week and next\nNo installs this week or next.",
+  );
   // The get-ready list shows 30 machines before "And N more."
   const long = Array.from({ length: 33 }, (_, i) => ({ ...getReady[2], customer: `Zz ${String(i).padStart(2, "0")}` }));
   const text = draft("service-monkeys", { getReady: long });
@@ -412,4 +466,38 @@ test("get ready: pulled units by serial, then by model; stock goes to one machin
   );
   assert.deepEqual(named.map((l) => [l.state, l.unitSerial]), [["to-pull", "IT-1"]]);
   assert.deepEqual(planGetReady([], stock, []), []);
+});
+
+test("get ready: a serial wins its unit whatever the order; the day's installs go by time", () => {
+  const unit = (id, model, serial, where, extra = {}) => ({ id, model, serial, where, tested: false, needsTest: false, ...extra });
+  const ins = (id, date, at, customer, machines, pulled = []) => ({ id, date, time: at, at, customer, machines, pulled });
+  // The earlier install has no serial; the later one has MY-2. MY-2 is the later one's, and the earlier one gets MY-1.
+  const stock = [unit(1, "Mythos One", "MY-2", "Front · C-L1"), unit(2, "Mythos One", "MY-1", "Front · C-L2")];
+  const lines = planGetReady(
+    [ins(7, "2026-11-05", "", "Zz Later", [{ model: "Mythos One", serial: "MY-2" }]), ins(6, "2026-11-04", "", "Zz Sooner", [{ model: "Mythos One", serial: "" }])],
+    stock,
+  );
+  assert.deepEqual(lines.map((l) => [l.customer, l.state, l.unitSerial]), [["Zz Sooner", "to-pull", "MY-1"], ["Zz Later", "to-pull", "MY-2"]]);
+  // Pulled units in either order: the serial's unit to its row, the other to the row with none.
+  for (const pulled of [[unit(11, "Linea PB", "LP-2", "Back · A-L2"), unit(10, "Linea PB", "LP-1", "Back · A-L1")], [unit(10, "Linea PB", "LP-1", "Back · A-L1"), unit(11, "Linea PB", "LP-2", "Back · A-L2")]]) {
+    const got = planGetReady([ins(1, "2026-11-04", "", "Zz Soon", [{ model: "Linea PB", serial: "" }, { model: "Linea PB", serial: "LP-2" }], pulled)], []);
+    assert.deepEqual(got.map((l) => [l.serial, l.unitSerial]), [["LP-1", "LP-1"], ["LP-2", "LP-2"]]);
+  }
+  // 8:00 before 10:00 before 1 PM before no time, on the same day.
+  const day = planGetReady(
+    [
+      ins(1, "2026-11-04", "13:00", "Zz A", [{ model: "Zz Machine", serial: "" }]),
+      ins(2, "2026-11-04", "", "Zz B", [{ model: "Zz Machine", serial: "" }]),
+      ins(3, "2026-11-04", "10:00", "Zz C", [{ model: "Zz Machine", serial: "" }]),
+      ins(4, "2026-11-04", "08:00", "Zz D", [{ model: "Zz Machine", serial: "" }]),
+    ],
+    [],
+  );
+  assert.deepEqual(day.map((l) => l.customer), ["Zz D", "Zz C", "Zz A", "Zz B"]);
+  // A stock row of two units serves two machines.
+  const two = planGetReady(
+    [ins(1, "2026-11-04", "", "Zz A", [{ model: "Mazzer Super Jolly", serial: "" }]), ins(2, "2026-11-05", "", "Zz B", [{ model: "Mazzer Super Jolly", serial: "" }])],
+    [unit(5, "Mazzer Super Jolly", "", "Back · B-L1"), unit(5, "Mazzer Super Jolly", "", "Back · B-L1")],
+  );
+  assert.deepEqual(two.map((l) => [l.state, l.more]), [["to-pull", 1], ["to-pull", 0]]);
 });

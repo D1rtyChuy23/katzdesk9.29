@@ -4,13 +4,15 @@
  */
 import { canonicalRepName } from "./rep-match.ts";
 import { canonicalTechName } from "./tech-match.ts";
-import { OTHER_MAKER, weekDayLabel } from "./po-report.ts";
+import { OTHER_MAKER, pulledLabel, weekDayLabel } from "./po-report.ts";
 import type { GetReadyLine } from "./get-ready.ts";
 
 const MAX_LINES = 8;
 const MAX_CHARS = 160;
 /** The get-ready list is what the techs pull, so it shows more than a usual section. */
 const MAX_GET_READY_LINES = 30;
+/** A rep's sections list what is still pending, so they show more than a usual section. */
+const MAX_REP_LINES = 15;
 /** An install's needs and a get-ready line name machines, so they may run longer before they are cut. */
 const MAX_LONG_CHARS = 320;
 /** The weekly Purchase Order report lists every part used; this keeps the note well under what an approval takes. */
@@ -42,7 +44,7 @@ export const TEAMS_CHATS: TeamsChat[] = [
   { id: "rep-iliana", name: "Iliana's Customers' Request", group: "Reps", kind: "group", about: "Iliana's accounts: service done, open calls, the Pipeline and installs.", feed: "rep", target: "Iliana" },
   { id: "dfw", name: "DFW Service Chat", group: "Regions", kind: "group", about: "Dallas and Fort Worth service with Bill and Shannon.", feed: "region", target: "dfw" },
   { id: "sa-atx", name: "SA/ATX", group: "Regions", kind: "group", about: "San Antonio and Austin service.", feed: "region", target: "sa-atx" },
-  { id: "service-monkeys", name: "Service Monkeys", group: "Regions", kind: "group", about: "Calls outside DFW and SA/ATX and who has them, and the equipment to get ready for installs.", feed: "region", target: "other" },
+  { id: "service-monkeys", name: "Service Monkeys", group: "Regions", kind: "group", about: "Each tech's open calls, the calls outside DFW and SA/ATX that need a tech, and the equipment to get ready for installs.", feed: "region", target: "other" },
   { id: "k-team", name: "The K Team", group: "Leadership", kind: "group", about: "This month's counts and the parts-profit total.", feed: "leadership", target: null },
   // The techs are all in Service Monkeys (Chuy, 11/2): he removes these five DMs with Remove on the Teams page. They
   // stay here because this list is the seed's, for a database with no chats yet.
@@ -140,10 +142,10 @@ export type OpenCall = {
 };
 export type AnalyticsCount = { label: string; total: number; top: string };
 
-/** One part on the weekly Purchase Order report: its pieces used that week. */
+/** One part on the weekly Purchase Order report: its pieces new since the last report (below 0: taken off since). */
 export type PoPart = { maker: string; sku: string; label: string; pieces: number };
-/** The week the report covers (Saturday to Friday) and the parts used in it. */
-export type PoReport = { from: string; to: string; parts: PoPart[] };
+/** The week the report covers (Saturday to Friday), when it was pulled, and its parts. */
+export type PoReport = { from: string; to: string; pulledAt: string; parts: PoPart[] };
 
 /** A service call or PM finished on an account. */
 export type ServicedLine = {
@@ -232,8 +234,17 @@ function callLine(c: OpenCall): string {
   return `${c.customer || "No account"} · ${c.status || "Open"}${when} · ${c.ref || "No number"}${issue}`;
 }
 
-/** "Ryan Gloria & Josh". */
-const techsOf = (c: OpenCall) => [c.tech, c.tech2].map((t) => t.trim()).filter(Boolean).join(" & ");
+/** ISO days or times in order, blanks last. */
+const blankLast = (a: string, b: string) => (a === b ? 0 : !a ? 1 : !b ? -1 : a < b ? -1 : 1);
+
+/** A tech by the roster name when there is one ("Josh" is Joshua Harper), else as typed. */
+const techName = (raw: string) => canonicalTechName(raw) ?? raw.trim();
+/** A call's techs by name, each once. */
+const techList = (c: OpenCall) => [...new Set([c.tech, c.tech2].filter((t) => t.trim()).map(techName))];
+/** "Ryan Gloria & Joshua Harper". */
+const techsOf = (c: OpenCall) => techList(c).join(" & ");
+
+const REGION_TAG: Record<ServiceRegion, string> = { dfw: "DFW", "sa-atx": "SA/ATX", other: "" };
 
 const pieces = (n: number) => String(Math.round(n * 100) / 100);
 const plural = (n: number, one: string, many: string) => `${pieces(n)} ${n === 1 ? one : many}`;
@@ -242,42 +253,48 @@ const plural = (n: number, one: string, many: string) => `${pieces(n)} ${n === 1
 const machineNames = (list: string[]) => [...new Set(list.map((m) => m.trim()).filter(Boolean))].join(", ");
 
 /**
- * The weekly Purchase Order report: one block per manufacturer, most pieces first and Other last, each part with the
- * pieces used. Every part is listed; only a week far past any real one would be cut short, and it says so.
+ * The weekly Purchase Order report as pulled: one block per manufacturer, most pieces first and Other last, each part
+ * with the pieces new since the last report; then any pieces taken off tickets since an earlier report. Every part is
+ * listed; only a week far past any real one would be cut short, and it says so.
  */
 function poText(po: PoReport | undefined): string {
   const intro = po
-    ? `Parts and water filters used ${weekDayLabel(po.from)} to ${weekDayLabel(po.to)}, by manufacturer, to know what to reorder. Pulled Friday at 5 PM for Monday morning. Place the orders in NetSuite.`
+    ? `Parts and water filters used, by manufacturer, for the week ${weekDayLabel(po.from)} to ${weekDayLabel(po.to)}, and any entered late from earlier weeks. Pulled ${pulledLabel(po.pulledAt)} for Monday morning; nothing is counted twice. Place the orders in NetSuite.`
     : "Parts and water filters used last week, by manufacturer.";
   const parts = po?.parts ?? [];
-  if (!parts.length) return `${intro}\n\nNone used that week.`;
+  const used = parts.filter((p) => p.pieces > 0);
+  const off = parts.filter((p) => p.pieces < 0).sort((a, b) => a.sku.localeCompare(b.sku) || a.label.localeCompare(b.label));
+  if (!used.length && !off.length) return `${intro}\n\nNone used that week.`;
   const makers = new Map<string, PoPart[]>();
-  for (const p of parts) makers.set(p.maker, [...(makers.get(p.maker) ?? []), p]);
+  for (const p of used) makers.set(p.maker, [...(makers.get(p.maker) ?? []), p]);
   const total = (list: PoPart[]) => list.reduce((n, p) => n + p.pieces, 0);
   const blocks = [...makers.entries()]
     .map(([maker, list]) => ({
-      maker,
+      head: maker,
       pieces: total(list),
+      other: maker === OTHER_MAKER,
       list: [...list].sort((a, b) => b.pieces - a.pieces || a.sku.localeCompare(b.sku) || a.label.localeCompare(b.label)),
     }))
-    .sort((a, b) => Number(a.maker === OTHER_MAKER) - Number(b.maker === OTHER_MAKER) || b.pieces - a.pieces || a.maker.localeCompare(b.maker));
-  let used = intro.length;
+    .sort((a, b) => Number(a.other) - Number(b.other) || b.pieces - a.pieces || a.head.localeCompare(b.head));
+  const partLine = (p: PoPart) => `- ${clipLine(`${p.sku || "No SKU"}${p.label ? ` · ${p.label}` : ""} · ${pieces(p.pieces)}`)}`;
+  const sections = blocks.map((b) => ({ head: `${b.head} · ${plural(b.list.length, "part", "parts")}, ${plural(b.pieces, "piece", "pieces")}`, list: b.list }));
+  if (off.length) sections.push({ head: "Taken off tickets after an earlier report", list: off });
+  let size = intro.length;
   let left = parts.length;
   const out: string[] = [intro];
-  for (const block of blocks) {
-    const head = `${block.maker} · ${plural(block.list.length, "part", "parts")}, ${plural(block.pieces, "piece", "pieces")}`;
+  for (const sec of sections) {
     const lines: string[] = [];
-    for (const p of block.list) {
-      const line = `- ${clipLine(`${p.sku || "No SKU"}${p.label ? ` · ${p.label}` : ""} · ${pieces(p.pieces)}`)}`;
-      if (used + head.length + line.length + 4 > PO_TEXT_BUDGET) break;
+    for (const p of sec.list) {
+      const line = partLine(p);
+      if (size + sec.head.length + line.length + 4 > PO_TEXT_BUDGET) break;
       lines.push(line);
-      used += line.length + 1;
+      size += line.length + 1;
     }
     if (!lines.length) break;
-    out.push([head, ...lines].join("\n"));
-    used += head.length + 2;
+    out.push([sec.head, ...lines].join("\n"));
+    size += sec.head.length + 2;
     left -= lines.length;
-    if (lines.length < block.list.length) break;
+    if (lines.length < sec.list.length) break;
   }
   if (left > 0) out.push(`And ${left} more ${left === 1 ? "part" : "parts"}.`);
   return out.join("\n\n");
@@ -317,9 +334,9 @@ function getReadyLine(g: GetReadyLine): string {
 function regionSections(calls: OpenCall[]): string[] {
   const assigned = calls
     .filter((c) => techsOf(c))
-    .sort((a, b) => techsOf(a).localeCompare(techsOf(b)) || (a.when || "~").localeCompare(b.when || "~") || a.customer.localeCompare(b.customer));
+    .sort((a, b) => techsOf(a).localeCompare(techsOf(b)) || blankLast(a.when, b.when) || a.customer.localeCompare(b.customer));
   const counts = new Map<string, number>();
-  for (const c of assigned) for (const t of [c.tech, c.tech2].map((x) => x.trim()).filter(Boolean)) counts.set(t, (counts.get(t) ?? 0) + 1);
+  for (const c of assigned) for (const t of techList(c)) counts.set(t, (counts.get(t) ?? 0) + 1);
   const tally = [...counts.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([t, n]) => `${t} ${n}`)
@@ -328,6 +345,20 @@ function regionSections(calls: OpenCall[]): string[] {
     section(`Assigned so far${tally ? ` (${tally})` : ""}`, assigned.map((c) => `${techsOf(c)} · ${callLine(c)}`), "None."),
     section("No tech yet", calls.filter((c) => !techsOf(c)).map(callLine), "None."),
   ];
+}
+
+/**
+ * The techs are all in Service Monkeys (Chuy, 11/2), so it lists what each one has assigned so far, in every region,
+ * as their own DMs did: one section per tech, a call with two techs under both.
+ */
+function techSections(calls: OpenCall[]): string[] {
+  const byTech = new Map<string, OpenCall[]>();
+  for (const c of calls) for (const t of techList(c)) byTech.set(t, [...(byTech.get(t) ?? []), c]);
+  const tagged = (c: OpenCall) => `${callLine(c)}${REGION_TAG[c.region] ? ` · ${REGION_TAG[c.region]}` : ""}`;
+  const sections = [...byTech.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([tech, list]) => section(`${tech} · ${list.length} open ${list.length === 1 ? "call" : "calls"}`, list.map(tagged), "None."));
+  return sections.length ? sections : [section("Assigned so far", [], "None.")];
 }
 
 export function draftTeamsChat(chat: TeamsChat, snap: TeamsSnapshot): TeamsDraft {
@@ -358,19 +389,19 @@ export function draftTeamsChat(chat: TeamsChat, snap: TeamsSnapshot): TeamsDraft
       .sort((a, b) => b.date.localeCompare(a.date) || a.customer.localeCompare(b.customer) || a.ref.localeCompare(b.ref));
     text = [
       "Your accounts: the service we did, open calls, the Pipeline and installs.",
-      section(since ? `Serviced since ${weekDayLabel(since)}` : "Serviced", serviced.map(servicedLine), "None."),
-      section("Open service calls", mine(snap.calls).map(callLine), "None."),
-      section("Pipeline", mine(snap.deals).map(dealLine), "None open."),
-      section("Installs", mine(snap.installs).map(installLine), "None open.", MAX_LINES, MAX_LONG_CHARS),
+      section(since ? `Serviced since ${weekDayLabel(since)}` : "Serviced", serviced.map(servicedLine), "None.", MAX_REP_LINES),
+      section("Open service calls", mine(snap.calls).map(callLine), "None.", MAX_REP_LINES),
+      section("Pipeline", mine(snap.deals).map(dealLine), "None open.", MAX_REP_LINES),
+      section("Installs", mine(snap.installs).map(installLine), "None open.", MAX_REP_LINES, MAX_LONG_CHARS),
     ].join("\n\n");
   } else if (chat.feed === "region" && target !== "other") {
     const mine = snap.calls.filter((c) => c.region === target);
     text = ["Open service calls in this region, and who has them.", ...regionSections(mine)].join("\n\n");
   } else if (chat.feed === "region") {
-    const mine = snap.calls.filter((c) => c.region === "other");
     text = [
-      "Open calls outside Dallas–Fort Worth and San Antonio–Austin, and who has them. Then the equipment to get ready for installs this week and next.",
-      ...regionSections(mine),
+      "Each tech's open calls, the calls outside Dallas–Fort Worth and San Antonio–Austin that still need a tech, and the equipment to get ready for installs this week and next.",
+      ...techSections(snap.calls),
+      section("No tech yet", snap.calls.filter((c) => c.region === "other" && !techsOf(c)).map(callLine), "None."),
       section("Get ready: installs this week and next", (snap.getReady ?? []).map(getReadyLine), "No installs this week or next.", MAX_GET_READY_LINES, MAX_LONG_CHARS),
     ].join("\n\n");
   } else if (chat.feed === "leadership") {

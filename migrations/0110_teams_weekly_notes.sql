@@ -1,6 +1,6 @@
 -- Teams notes (Chuy, 11/2). Purchase Order Requests is now the weekly report of parts and water filters used, by
 -- manufacturer. The rep chats add what was serviced on their accounts, the Pipeline and installs. Service Monkeys
--- lists who has each call and the equipment to get ready for installs.
+-- lists each tech's open calls and the equipment to get ready for installs.
 -- Each chat's About changes only where it still reads as seeded, so one an admin edited keeps its words.
 -- The five tech DMs are not removed here: Chuy removes them with Remove on the Teams page (deletes on production are
 -- his to press). Their approved notes stay in teams_drafts either way.
@@ -20,5 +20,17 @@ update teams_chats set about = 'Chelsea''s accounts: service done, open calls, t
 update teams_chats set about = 'Iliana''s accounts: service done, open calls, the Pipeline and installs.'
  where id = 'rep-iliana' and about = 'Iliana''s customer service calls.';
 
-update teams_chats set about = 'Calls outside DFW and SA/ATX and who has them, and the equipment to get ready for installs.'
+update teams_chats set about = 'Each tech''s open calls, the calls outside DFW and SA/ATX that need a tech, and the equipment to get ready for installs.'
  where id = 'service-monkeys' and about = 'Open calls outside DFW and SA/ATX that still need a tech.';
+
+-- The weekly Purchase Order report as each Friday 5 PM pulled it. The first look at the Teams chats after that time
+-- saves the week's pull, so Monday reads exactly what was pulled. `uses` is what this pull reported for each ticket
+-- and part ({k: ticket, p: part, q: pieces}, the change since the pulls before it), so the next pull reports only
+-- what is new and nothing twice. `report` is the parts the note lists ({maker, sku, label, pieces}).
+create table if not exists teams_po_pulls (
+  week_to    date primary key,
+  week_from  date not null,
+  pulled_at  timestamptz not null default now(),
+  uses       jsonb not null default '[]'::jsonb,
+  report     jsonb not null default '[]'::jsonb
+);

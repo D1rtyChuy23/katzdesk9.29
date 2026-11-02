@@ -1,7 +1,8 @@
 /**
  * The weekly Purchase Order report for Teams (Chuy, 11/2): the parts and water filters used in a week, grouped by
  * manufacturer, with a count for each, to know what to reorder. It is pulled on Friday evening and read on Monday
- * morning. Pure: no server imports, safe for node --test.
+ * morning. Each pull keeps what it reported, so the next one lists only what is new: a part entered late or
+ * back-dated is on the next report, and none is counted twice. Pure: no server imports, safe for node --test.
  */
 
 /** The report's week ends on a Friday and turns over at this hour, Chicago time (5 PM). */
@@ -29,8 +30,7 @@ export function chicagoClock(at: Date = new Date()): { date: string; hour: numbe
 
 /**
  * The week the report covers: Saturday through Friday, the latest one whose Friday 5 PM has come. From Friday 5 PM
- * until the next Friday 5 PM it is the same week, so Monday morning reads what Friday evening pulled. A part used on
- * a Friday is in that Friday's week whenever it is entered.
+ * until the next Friday 5 PM it is the same week, so Monday morning reads what Friday evening pulled.
  */
 export function poReportWeek(date: string, hour: number): { from: string; to: string } {
   const [y, m, d] = date.split("-").map(Number);
@@ -46,6 +46,49 @@ export function weekDayLabel(iso: string): string {
   return new Date(Date.UTC(y!, m! - 1, d!))
     .toLocaleDateString("en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" })
     .replace(",", "");
+}
+
+/** "Fri Nov 6 at 5:30 PM", Chicago time. */
+export function pulledLabel(iso: string): string {
+  const at = new Date(iso);
+  if (!Number.isFinite(at.getTime())) return "";
+  const day = at.toLocaleDateString("en-US", { timeZone: "America/Chicago", weekday: "short", month: "short", day: "numeric" }).replace(",", "");
+  const time = at.toLocaleTimeString("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit" });
+  return `${day} at ${time}`;
+}
+
+/** One ticket's use of one part (`k` the ticket, `p` the part), as a pull reports it: its pieces, or the change in them. */
+export type LedgerUse = { k: string; p: number; q: number };
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * What a new pull reports: each ticket's pieces of each part now, less what earlier pulls reported for that ticket and
+ * part. A use entered late or back-dated is new; one whose date moved is not counted again; a ticket whose pieces went
+ * down gives a negative change. An earlier pull's part that has since been merged counts as the part it went into.
+ */
+export function pullChanges(now: LedgerUse[], earlier: LedgerUse[], mergedInto: ReadonlyMap<number, number> = new Map()): LedgerUse[] {
+  const key = (k: string, p: number) => `${k}\u0000${p}`;
+  const sums = new Map<string, LedgerUse>();
+  const add = (k: string, p: number, q: number) => {
+    const at = key(k, p);
+    const hit = sums.get(at);
+    if (hit) hit.q += q;
+    else sums.set(at, { k, p, q });
+  };
+  for (const u of now) add(u.k, u.p, u.q);
+  for (const u of earlier) add(u.k, mergedInto.get(u.p) ?? u.p, -u.q);
+  return [...sums.values()]
+    .map((u) => ({ ...u, q: round2(u.q) }))
+    .filter((u) => u.q !== 0)
+    .sort((a, b) => a.k.localeCompare(b.k) || a.p - b.p);
+}
+
+/** Each part's pieces across a pull's changes. */
+export function piecesByPart(changes: LedgerUse[]): Map<number, number> {
+  const out = new Map<number, number>();
+  for (const u of changes) out.set(u.p, round2((out.get(u.p) ?? 0) + u.q));
+  return out;
 }
 
 /**

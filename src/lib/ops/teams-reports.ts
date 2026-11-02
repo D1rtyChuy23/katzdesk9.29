@@ -20,7 +20,7 @@ import { machineNotesMissing, picturesNeeded, type PictureUnit } from "@/lib/ops
 import { parseMachinesJson, specsFromInstall } from "@/lib/ops/machines";
 import { profitByMpn, profitTotals } from "@/lib/ops/part-pricing";
 import { loadPartUses } from "@/lib/ops/part-usage-api";
-import { chicagoClock, countsForPo, partLabel, partMaker, poReportWeek } from "@/lib/ops/po-report";
+import { chicagoClock, countsForPo, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, type LedgerUse } from "@/lib/ops/po-report";
 import { isPreInspected, unitKind } from "@/lib/ops/pre-inspection";
 import { accountRepFor, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
 import { isOpenCall } from "@/lib/ops/ticket-status";
@@ -88,33 +88,77 @@ function thisMonth(today: string): AnalyticsFilters {
 }
 
 const flat = (v: unknown) => String(v ?? "").replace(/\s+/g, " ").trim();
+/** ISO days or times in order, blanks last. */
+const blankLast = (a: string, b: string) => (a === b ? 0 : !a ? 1 : !b ? -1 : a < b ? -1 : 1);
+
+
+/** A saved weekly pull, as the note shows it. */
+async function savedPull(sql: Sql, to: string): Promise<PoReport | null> {
+  const rows = await sql.query<{ week_from: string; week_to: string; pulled_at: string; report: unknown }>(
+    `select week_from::text, week_to::text, to_char(pulled_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as pulled_at, report
+       from teams_po_pulls where week_to = $1::date`,
+    [to],
+  );
+  const hit = rows[0];
+  if (!hit) return null;
+  const report = (typeof hit.report === "string" ? JSON.parse(hit.report) : hit.report) as PoPart[];
+  return { from: hit.week_from.slice(0, 10), to: hit.week_to.slice(0, 10), pulledAt: hit.pulled_at, parts: Array.isArray(report) ? report : [] };
+}
 
 /**
- * The weekly Purchase Order report (Chuy, 11/2): the parts and water filters used in the week Friday evening pulled,
- * by manufacturer, counted the way Parts → Usage counts a part's uses (tickets, approved invoices, PM machine parts and
- * WO part lines, a merged part as the part it went into).
+ * The weekly Purchase Order report (Chuy, 11/2): the parts and water filters used, by manufacturer, as pulled once a
+ * week. The first look after Friday 5 PM pulls that week and saves it, so Monday morning reads exactly what was pulled
+ * and an approved report stays approved. Uses are counted the way Parts → Usage counts a part's uses (tickets,
+ * approved invoices, PM machine parts and WO part lines, a merged part as the part it went into), dated through that
+ * Friday. Each pull keeps what it reported for each ticket and part, so the next one has only what is new since: a use
+ * entered late or back-dated, a use whose date moved, and pieces added or taken off a ticket are each counted once.
+ * The first pull ever covers its own week; the next ones go back to that week's Saturday.
  */
 async function loadPoReport(sql: Sql, now: Date): Promise<PoReport> {
   const { date, hour } = chicagoClock(now);
-  const { from, to } = poReportWeek(date, hour);
-  const totals = new Map<number, number>();
-  for (const use of await loadPartUses(sql, { from, to })) totals.set(use.partId, (totals.get(use.partId) ?? 0) + use.pieces);
-  const ids = [...totals.keys()];
+  const week = poReportWeek(date, hour);
+  const saved = await savedPull(sql, week.to);
+  if (saved) return saved;
+  const earlier = await sql.query<{ week_from: string; uses: unknown }>(
+    "select week_from::text, uses from teams_po_pulls where week_to < $1::date order by week_to",
+    [week.to],
+  );
+  const start = earlier.length ? earlier.map((r) => r.week_from.slice(0, 10)).sort()[0]! : week.from;
+  const reported: LedgerUse[] = earlier.flatMap((r) => {
+    const list = (typeof r.uses === "string" ? JSON.parse(r.uses) : r.uses) as LedgerUse[];
+    return Array.isArray(list) ? list : [];
+  });
+  const merged = new Map(
+    (await sql.query<{ id: number; merged_into: number }>("select id, merged_into from billing_items where merged_into is not null")).map((r) => [
+      Number(r.id),
+      Number(r.merged_into),
+    ]),
+  );
+  const uses: LedgerUse[] = (await loadPartUses(sql, { from: start, to: week.to })).map((u) => ({ k: u.ticketKey, p: u.partId, q: u.pieces }));
+  const changes = pullChanges(uses, reported, merged);
+  const pieces = piecesByPart(changes);
+  const ids = [...pieces.keys()];
   const rows = ids.length
     ? await sql.query<{ id: number; sku: string; parent: string | null; item: string; description: string | null; item_class: string | null; kind: string }>(
-        "select id, sku, parent, item, description, item_class, kind from billing_items where id = any($1::int[])",
+        "select id, sku, parent, item, description, item_class, kind from billing_items where id = any($1::int[]) order by id",
         [ids],
       )
     : [];
   const parts: PoPart[] = [];
   for (const r of rows) {
-    if (!countsForPo({ itemClass: r.item_class, kind: r.kind })) continue;
-    const pieces = Math.round((totals.get(Number(r.id)) ?? 0) * 100) / 100;
-    if (!(pieces > 0)) continue;
+    const n = pieces.get(Number(r.id)) ?? 0;
+    if (!n || !countsForPo({ itemClass: r.item_class, kind: r.kind })) continue;
     const maker = partMaker(r);
-    parts.push({ maker, sku: flat(r.sku), label: flat(partLabel(r, maker)), pieces });
+    parts.push({ maker, sku: flat(r.sku), label: flat(partLabel(r, maker)), pieces: n });
   }
-  return { from, to, parts };
+  // One pull per week: when two looks pull at once, the first saved is the week's.
+  await sql.query(
+    `insert into teams_po_pulls (week_to, week_from, pulled_at, uses, report)
+     values ($1::date, $2::date, $3::timestamptz, $4::jsonb, $5::jsonb)
+     on conflict (week_to) do nothing`,
+    [week.to, week.from, now.toISOString(), JSON.stringify(changes), JSON.stringify(parts)],
+  );
+  return (await savedPull(sql, week.to)) ?? { ...week, pulledAt: now.toISOString(), parts };
 }
 
 /**
@@ -138,7 +182,11 @@ async function servicedWindows(sql: Sql, chats: TeamsChat[], today: string): Pro
   return { from, fallback, earliest };
 }
 
-/** Service calls (not TLC) and PMs finished from `from` through today. A PM billed on a ticket is that ticket's visit. */
+/**
+ * Service calls (not TLC) and PMs finished from `from` through today. A PM billed on a ticket is that ticket's visit.
+ * The day is the completed date when one was typed or imported; else the day its status was set to Completed (or
+ * Phone Resolved), from its history; else its scheduled (PM: projected) day, else the day it came in.
+ */
 async function loadServiced(sql: Sql, marks: AccountMarks, from: string, today: string): Promise<ServicedLine[]> {
   const jobs = await sql.query<{
     customer: string | null;
@@ -151,18 +199,37 @@ async function loadServiced(sql: Sql, marks: AccountMarks, from: string, today: 
     work_done: string | null;
     day: string;
   }>(
-    `select customer, status, technician, technician2, wo, call_id, issue, work_done, coalesce(completed_at, scheduled)::text as day
-       from service_jobs
-      where kind = 'service' and duplicate_of is null and coalesce(status, '') <> 'Cancelled'
-        and (done or status in ('Completed', 'Phone Resolved'))
-        and coalesce(completed_at, scheduled) between $1::date and $2::date`,
+    `select customer, status, technician, technician2, wo, call_id, issue, work_done, day::text as day
+       from (
+         select j.*, coalesce(
+                  j.completed_at,
+                  (select (a.created_at at time zone 'America/Chicago')::date from activity a
+                    where a.entity_type = j.kind and a.entity_id = j.id and a.action = 'status'
+                      and (position('→ Completed' in a.detail) > 0 or position('→ Phone Resolved' in a.detail) > 0)
+                    order by a.id desc limit 1),
+                  j.scheduled, j.received) as day
+           from service_jobs j
+          where j.kind = 'service' and j.duplicate_of is null and coalesce(j.status, '') <> 'Cancelled'
+            and (j.done or j.status in ('Completed', 'Phone Resolved'))
+       ) x
+      where day between $1::date and $2::date
+      order by id`,
     [from, today],
   );
   const pms = await sql.query<{ customer: string | null; technician: string | null; wo: string | null; work_done: string | null; day: string }>(
-    `select customer, technician, wo, work_done, coalesce(completed_at, projected)::text as day
-       from pm_jobs
-      where coalesce(status, '') <> 'Cancelled' and (done or status = 'Completed') and stacked_job_id is null
-        and coalesce(completed_at, projected) between $1::date and $2::date`,
+    `select customer, technician, wo, work_done, day::text as day
+       from (
+         select p.*, coalesce(
+                  p.completed_at,
+                  (select (a.created_at at time zone 'America/Chicago')::date from activity a
+                    where a.entity_type = 'pm' and a.entity_id = p.id and position('→ Completed' in coalesce(a.detail, '')) > 0
+                    order by a.id desc limit 1),
+                  p.projected, p.received) as day
+           from pm_jobs p
+          where coalesce(p.status, '') <> 'Cancelled' and (p.done or p.status = 'Completed') and p.stacked_job_id is null
+       ) x
+      where day between $1::date and $2::date
+      order by id`,
     [from, today],
   );
   const rep = (customer: string) => accountRepFor(marks, customer) || "";
@@ -231,11 +298,18 @@ type InstallRow = {
   complete: boolean;
 };
 
-/** Read only: what each install's pre-inspection still needs pictures for. */
-async function loadPictureNeeds(sql: Sql, rows: { id: number; machines: number }[]): Promise<Map<number, OpenInstall["pictures"]>> {
+/**
+ * Read only: what each install's pre-inspection still needs pictures for, and its units that are equipment already at
+ * the site (marked existing, or on the account with an install date and serial, and not marked new or replace).
+ */
+async function loadPictureNeeds(
+  sql: Sql,
+  rows: { id: number; machines: number }[],
+): Promise<{ pictures: Map<number, OpenInstall["pictures"]>; onSite: Map<number, Set<number>> }> {
   const ids = rows.map((r) => r.id);
   const out = new Map<number, OpenInstall["pictures"]>();
-  if (!ids.length) return out;
+  const onSite = new Map<number, Set<number>>();
+  if (!ids.length) return { pictures: out, onSite };
   const [units, items, photos, heads] = await Promise.all([
     sql.query<{ install_id: number; equipment_id: number; core_needed: string | null; visit_kind: string | null; catalog_model: string | null; equipment_name: string | null; installed: boolean }>(
       `select u.install_id, u.equipment_id, u.core_needed, u.visit_kind, a.catalog_model, a.equipment_name,
@@ -268,6 +342,7 @@ async function loadPictureNeeds(sql: Sql, rows: { id: number; machines: number }
   const overridden = new Set(heads.filter((h) => flat(h.override_reason)).map((h) => h.install_id));
   const byInstall = new Map<number, PictureUnit[]>();
   for (const u of units) {
+    if (u.visit_kind === "existing" || (!u.visit_kind && u.installed)) onSite.set(u.install_id, (onSite.get(u.install_id) ?? new Set()).add(Number(u.equipment_id)));
     const list = byInstall.get(u.install_id) ?? [];
     list.push({
       model: flat(u.catalog_model) || flat(u.equipment_name),
@@ -280,7 +355,7 @@ async function loadPictureNeeds(sql: Sql, rows: { id: number; machines: number }
     byInstall.set(u.install_id, list);
   }
   for (const r of rows) out.set(r.id, picturesNeeded(byInstall.get(r.id) ?? [], { hasMachines: r.machines > 0, overridden: overridden.has(r.id) }));
-  return out;
+  return { pictures: out, onSite };
 }
 
 /**
@@ -291,12 +366,13 @@ async function loadInstalls(sql: Sql, marks: AccountMarks, today: string): Promi
   const catalog = await catalogNames(sql);
   const rows = (
     await sql.query<InstallRow>(
+      // As the Board lists them: an install flagged "Possible duplicate" is still open there.
       `select id, customer, account_rep, install_date::text as install_date, sched_time, equipment, serial, power_voltage, machines, equip_status, complete
-         from installs where archived = false and duplicate_of is null`,
+         from installs where archived = false order by id`,
     )
   ).filter((r) => !isInstalled({ complete: flagOn(r.complete), equipStatus: r.equip_status }));
   const specs = new Map(rows.map((r) => [r.id, specsFromInstall(r.equipment, r.serial, r.power_voltage, r.machines, catalog)]));
-  const pictures = await loadPictureNeeds(sql, rows.map((r) => ({ id: r.id, machines: specs.get(r.id)?.length ?? 0 })));
+  const { pictures, onSite } = await loadPictureNeeds(sql, rows.map((r) => ({ id: r.id, machines: specs.get(r.id)?.length ?? 0 })));
   const open: OpenInstall[] = rows
     .map((r) => {
       const customer = flat(r.customer);
@@ -313,42 +389,46 @@ async function loadInstalls(sql: Sql, marks: AccountMarks, today: string): Promi
         pictures: pictures.get(r.id) ?? { needed: false, machines: [] },
       };
     })
-    .sort((a, b) => (a.date || "~").localeCompare(b.date || "~") || a.customer.localeCompare(b.customer));
+    .sort((a, b) => blankLast(a.date, b.date) || a.customer.localeCompare(b.customer));
 
   const last = weekBounds(today).nextEnd;
   const soon = rows.filter((r) => r.install_date && r.install_date.slice(0, 10) >= today && r.install_date.slice(0, 10) <= last);
   if (!soon.length) return { open, getReady: [] };
-  const pulledRows = await sql.query<{ id: number; install_id: number; model: string; serial: string | null; shop_test: string | null; origin_site: string | null; origin_pallet: string | null; origin_level: number | null }>(
-    `select id, install_id, model, serial, shop_test, origin_site, origin_pallet, origin_level from assets where install_id = any($1::int[]) order by id`,
+  const pulledRows = await sql.query<{ id: number; install_id: number; model: string; serial: string | null; qty: number | null; shop_test: string | null; origin_site: string | null; origin_pallet: string | null; origin_level: number | null }>(
+    `select id, install_id, model, serial, qty, shop_test, origin_site, origin_pallet, origin_level from assets where install_id = any($1::int[]) order by id`,
     [soon.map((r) => r.id)],
   );
-  const stockRows = await sql.query<{ id: number; model: string; serial: string | null; site: string; pallet: string | null; level: number | null; shop_test: string | null }>(
+  const stockRows = await sql.query<{ id: number; model: string; serial: string | null; qty: number | null; site: string; pallet: string | null; level: number | null; shop_test: string | null }>(
     // In the barn and free: ready, on no install, ticket or account, not held for approval, not a customer's own unit.
-    `select id, model, serial, site, pallet, level, shop_test from assets
+    `select id, model, serial, qty, site, pallet, level, shop_test from assets
       where kind in ('equip', 'dispenser') and status = 'ready' and site in ('barn-back', 'barn-front')
         and install_id is null and job_id is null and coalesce(btrim(sold_to), '') = '' and stock_hold is null
         and coalesce(btrim(customer_owned), '') = ''
       order by id`,
   );
-  const unit = (a: { id: number; model: string; serial: string | null; shop_test: string | null }, where: string): ReadyUnit => ({
-    id: Number(a.id),
-    model: flat(a.model),
-    serial: flat(a.serial),
-    where,
-    tested: a.shop_test === "tested",
-    needsTest: a.shop_test === "needs-test",
-  });
+  // A row with a quantity of 2 is two units, as the Warehouse's Ready Models totals count it.
+  const units = (a: { id: number; model: string; serial: string | null; qty: number | null; shop_test: string | null }, where: string): ReadyUnit[] =>
+    Array.from({ length: Math.max(1, Math.floor(Number(a.qty) || 1)) }, () => ({
+      id: Number(a.id),
+      model: flat(a.model),
+      serial: flat(a.serial),
+      where,
+      tested: a.shop_test === "tested",
+      needsTest: a.shop_test === "needs-test",
+    }));
   const installs: ReadyInstall[] = soon.map((r) => ({
     id: r.id,
     date: r.install_date!.slice(0, 10),
     time: timeLabel(cleanTime(r.sched_time)),
+    at: cleanTime(r.sched_time) ?? "",
     customer: flat(r.customer),
-    machines: (specs.get(r.id) ?? []).map((m) => ({ model: m.equipment, serial: m.serial })),
+    // Equipment already at the site has nothing to pull.
+    machines: (specs.get(r.id) ?? []).filter((m) => !(m.unitId && onSite.get(r.id)?.has(m.unitId))).map((m) => ({ model: m.equipment, serial: m.serial })),
     pulled: pulledRows
       .filter((a) => Number(a.install_id) === r.id)
-      .map((a) => unit(a, a.origin_site ? unitPlaceLabel({ site: a.origin_site, pallet: a.origin_pallet, level: a.origin_level }) : "")),
+      .flatMap((a) => units(a, a.origin_site ? unitPlaceLabel({ site: a.origin_site, pallet: a.origin_pallet, level: a.origin_level }) : "")),
   }));
-  const stock = stockRows.map((a) => unit(a, unitPlaceLabel({ site: a.site, pallet: a.pallet, level: a.level })));
+  const stock = stockRows.flatMap((a) => units(a, unitPlaceLabel({ site: a.site, pallet: a.pallet, level: a.level })));
   return { open, getReady: planGetReady(installs, stock, catalog) };
 }
 
@@ -381,7 +461,8 @@ async function loadSnapshot(sql: Sql, chats: TeamsChat[], now: Date = new Date()
   }>(
     `select id, kind, call_id, customer, status, technician, technician2, wo, issue, scheduled::text, received::text, done
        from service_jobs
-      where duplicate_of is null and done = false`,
+      where duplicate_of is null and done = false
+      order by id`,
   );
   const pms = await sql.query<{
     id: number;
@@ -392,7 +473,7 @@ async function loadSnapshot(sql: Sql, chats: TeamsChat[], now: Date = new Date()
     projected: string | null;
     done: boolean;
   }>(
-    `select id, customer, status, technician, wo, projected::text, done from pm_jobs where done = false`,
+    `select id, customer, status, technician, wo, projected::text, done from pm_jobs where done = false order by id`,
   );
 
   const attention: AttentionLine[] = [];
@@ -431,7 +512,8 @@ async function loadSnapshot(sql: Sql, chats: TeamsChat[], now: Date = new Date()
   const installs = await sql.query<{ id: number; customer: string | null; wo: string | null }>(
     // Every work order an open install project carries.
     `select i.id, i.customer, w.wo from installs i join ${INSTALL_WOS_SQL} w on w.install_id = i.id
-      where i.archived = false and i.complete = false and coalesce(btrim(w.wo), '') <> ''`,
+      where i.archived = false and i.complete = false and coalesce(btrim(w.wo), '') <> ''
+      order by i.id, w.wo`,
   );
   const duplicateWo = collapseDuplicateWorkOrders(
     [
@@ -464,7 +546,7 @@ async function loadSnapshot(sql: Sql, chats: TeamsChat[], now: Date = new Date()
         ref: j.wo?.trim() || j.call_id?.trim() || "",
       };
     })
-    .sort((a, b) => (a.when || "~").localeCompare(b.when || "~") || a.customer.localeCompare(b.customer) || a.ref.localeCompare(b.ref));
+    .sort((a, b) => blankLast(a.when, b.when) || a.customer.localeCompare(b.customer) || a.ref.localeCompare(b.ref));
 
   const windows = await servicedWindows(sql, chats, today);
   const { open, getReady } = await loadInstalls(sql, marks, today);
