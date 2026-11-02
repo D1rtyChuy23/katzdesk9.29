@@ -2,7 +2,7 @@
 // sections, each region's assignments and the Service Monkeys get-ready list. The plain pieces. All data is made up.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chicagoClock, countsForPo, laterPieces, OTHER_MAKER, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, pulledLabel, useKey, weekDayLabel } from "../src/lib/ops/po-report.ts";
+import { chicagoClock, countsForPo, laterPieces, OTHER_MAKER, partLabel, partMaker, piecesByPart, poReportWeek, pullChanges, pulledLabel, partUseKey, weekDayLabel } from "../src/lib/ops/po-report.ts";
 import { planGetReady } from "../src/lib/ops/get-ready.ts";
 import { machineNotesMissing, picturesNeeded } from "../src/lib/ops/install-needs.ts";
 import { draftTeamsChat, teamsChat } from "../src/lib/ops/teams-message.ts";
@@ -61,7 +61,7 @@ test("a pull reports what is new since the pulls before it, and a use already re
     // service:7 is gone: merged into install 5, whose invoice isn't approved yet. Its three are waiting there.
   ];
   const moved = (k) => (k === "service:7" ? "install:5" : k);
-  const waiting = new Map([[useKey("install:5", 10), 3]]);
+  const waiting = new Map([[partUseKey("install:5", 10), 3]]);
   assert.deepEqual(pullChanges(now, earlier, win, { moved, mergedInto: new Map([[99, 13]]), later: waiting }), [r("pm:3", 12, -0.5), r("service:2", 11, 1), r("service:5", 10, 3)]);
   // Not waiting, the three would be taken off.
   assert.deepEqual(pullChanges([], [r("service:7", 10, 3)], win, { moved }), [r("install:5", 10, -3)]);
@@ -90,16 +90,16 @@ test("a pull reports what is new since the pulls before it, and a use already re
   // are billed there, so they're waiting: held, not taken off. Billed there, all three show.
   const stacked = (k) => (k === "pm:3" ? "service:1" : k);
   const both = [r("service:1", 10, 1), r("pm:3", 10, 2)];
-  assert.deepEqual(pullChanges([u("service:1", 10, 1)], both, win, { moved: stacked, later: new Map([[useKey("service:1", 10), 3]]) }), []);
+  assert.deepEqual(pullChanges([u("service:1", 10, 1)], both, win, { moved: stacked, later: new Map([[partUseKey("service:1", 10), 3]]) }), []);
   assert.deepEqual(pullChanges([u("service:1", 10, 3)], both, win, { moved: stacked }), []);
   assert.deepEqual(pullChanges([u("service:1", 10, 4)], both, win, { moved: stacked }), [r("service:1", 10, 1)]);
   // The ticket's own charge deleted: the PM's two count on it now, and one is taken off.
-  assert.deepEqual(pullChanges([u("service:1", 10, 2)], both, win, { moved: stacked, later: new Map([[useKey("service:1", 10), 2]]) }), [r("service:1", 10, -1)]);
+  assert.deepEqual(pullChanges([u("service:1", 10, 2)], both, win, { moved: stacked, later: new Map([[partUseKey("service:1", 10), 2]]) }), [r("service:1", 10, -1)]);
   // The PM cancelled: nothing waits, so its two are taken off; with the ticket's charge deleted too, all three.
   assert.deepEqual(pullChanges([u("service:1", 10, 1)], both, win, { moved: stacked }), [r("service:1", 10, -2)]);
   assert.deepEqual(pullChanges([], both, win, { moved: stacked }), [r("service:1", 10, -3)]);
   // Waiting pieces only hold: none is reported before it shows, and they hold no more than they are.
-  const lat = (n) => ({ later: new Map([[useKey("service:1", 10), n]]) });
+  const lat = (n) => ({ later: new Map([[partUseKey("service:1", 10), n]]) });
   assert.deepEqual(pullChanges([u("service:1", 10, 1)], [r("service:1", 10, 1)], win, lat(5)), []);
   assert.deepEqual(pullChanges([u("service:1", 10, 1)], [r("service:1", 10, 4)], win, lat(2)), [r("service:1", 10, -2)]);
   assert.deepEqual(pullChanges([u("service:1", 10, 3)], [r("service:1", 10, 4)], win, lat(1)), [r("service:1", 10, -1)]);
@@ -114,18 +114,18 @@ test("a pull reports what is new since the pulls before it, and a use already re
     { k: "install:5", p: 10, q: 4, day: null, rank: 4 },
   ];
   const waits = new Map([
-    [useKey("service:1", 10), 2],
-    [useKey("service:8", 10), 2],
-    [useKey("install:5", 10), 3],
-    [useKey("install:6", 10), 1.5],
+    [partUseKey("service:1", 10), 2],
+    [partUseKey("service:8", 10), 2],
+    [partUseKey("install:5", 10), 3],
+    [partUseKey("install:6", 10), 1.5],
   ]);
   assert.deepEqual(
     [...laterPieces(ranked, waits).entries()],
     [
-      [useKey("service:1", 10), 3],
-      [useKey("service:8", 10), 2],
-      [useKey("install:5", 10), 3],
-      [useKey("install:6", 10), 1.5],
+      [partUseKey("service:1", 10), 3],
+      [partUseKey("service:8", 10), 2],
+      [partUseKey("install:5", 10), 3],
+      [partUseKey("install:6", 10), 1.5],
     ],
   );
   // Two pulls before add up; pieces are rounded to the cent.
