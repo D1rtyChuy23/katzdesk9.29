@@ -94,10 +94,12 @@ export function normalizePartNo(raw: string | null | undefined): string {
 
 /** A part's bin as the search reads it: "A-03-12", the pieces joined by dashes ("" when it has none). */
 function binCode(b: BillingItem["bin"]): string {
+  // A space or slash inside a piece is a dash too (11/3), as typedBin reads what was typed: "E4 3" is E4-3.
   return [b?.rack, b?.shelf, b?.bin]
     .map((x) => String(x ?? "").trim())
     .filter(Boolean)
     .join("-")
+    .replace(/\s*[-/]\s*|\s+/g, "-")
     .toUpperCase();
 }
 
@@ -107,8 +109,8 @@ function typedBin(q: string): string {
 }
 
 /**
- * Typed like a bin code: two pieces or more, split by a dash, a slash or a space ("A-03-12", "A 03", "E4/2"). One
- * word alone isn't (11/2 review: "A" or "03" would match every part on that rack or shelf).
+ * Typed like a whole bin code or its first pieces: two pieces or more, split by a dash, a slash or a space ("A-03-12",
+ * "A 03", "E4/2"). Any piece of a bin, a single one too ("205", "E4"), finds it after these (11/3, as Parts does).
  */
 export function looksLikeBinCode(q: string): boolean {
   return /^[a-z0-9]+(?:\s*[-/]\s*|\s+)[a-z0-9]/i.test(q.trim());
@@ -148,9 +150,9 @@ export function searchItems<T extends Pick<BillingItem, "item" | "description" |
       .toLowerCase();
     const typed = looksLikeBinCode(q) ? typedBin(q) : "";
     // Any piece of its bin, as the Parts page finds it (11/3): 03-12, E4 or 205, two characters at least; and its bin in
-    // words when what was typed has a digit ("E4 3" finds a bin stored as E4 3).
+    // words when what was typed has a digit and isn't "Rack 1"-style (that is the whole-word check above).
     const piece = typedBin(q).length >= 2 ? typedBin(q) : "";
-    const inWords = piece && /\d/.test(q) ? q.toLowerCase().replace(/\s+/g, " ").trim() : "";
+    const inWords = piece && /\d/.test(q) && !looksLikeBinWords(q) ? q.toLowerCase().replace(/\s+/g, " ").trim() : "";
     const phrase = looksLikeBinWords(q) ? ` ${q.toLowerCase().replace(/\s+/g, " ").trim()} ` : "";
     let score = 0;
     if (nq && (sku === nq || mfr === nq)) score = 100;
@@ -165,7 +167,9 @@ export function searchItems<T extends Pick<BillingItem, "item" | "description" |
     // Its bin in words, whole words in order: "Rack A", "Shelf 03" (not Rack AB).
     else if (binWords && phrase && ` ${binWords} `.includes(phrase)) score = 40;
     else if (words.every((w) => name.includes(w) || desc.includes(w))) score = 30;
-    // After every part found by its number or name: a shelf of parts never pushes those out of the list.
+    // After every part found by its number or name: a shelf of parts never pushes those out of the list. Whole pieces of
+    // the bin, or its end, before a piece found inside another ("14-1" puts G14-1 before G14-10).
+    else if (bin && piece && (`-${bin}-`.includes(`-${piece}-`) || bin.endsWith(piece))) score = 25;
     else if ((bin && piece && bin.includes(piece)) || (binWords && inWords && binWords.includes(inWords))) score = 20;
     if (score) scored.push({ item: it, score });
   }

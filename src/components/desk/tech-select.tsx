@@ -19,9 +19,16 @@ export function activeTechNames(techs?: DeskTech[] | null): string[] {
 }
 
 /** Every active tech's name, a rebuild-only one too: a name shown anywhere reads as active, not "(inactive)". */
-export function knownTechNames(techs?: DeskTech[] | null): string[] {
+function knownTechNames(techs?: DeskTech[] | null): string[] {
   if (techs?.length) return techs.filter((t) => t.active).map((t) => t.name);
   return [...DEFAULT_TECHS];
+}
+
+/** A name a service list holds but doesn't offer: "Pedro Jr. (rebuilds only)" for a tech on rebuilds only, else "(inactive)". */
+function offListLabel(name: string, techs?: DeskTech[] | null): string {
+  const known = (techs ?? []).find((t) => t.active && t.rebuildsOnly && sameTech(t.name, name));
+  if (known) return `${known.name} (rebuilds only)`;
+  return techLabel(name, new Set(activeTechNames(techs)));
 }
 
 export function TechName({ name }: { name?: string | null }) {
@@ -74,7 +81,7 @@ export function TechSelect({
     >
       {extras.map((n) => (
         <option key={`inactive-${n}`} value={n}>
-          {techLabel(n, new Set(active))}
+          {offListLabel(n, techs)}
         </option>
       ))}
       {active.map((n) => (
@@ -123,7 +130,7 @@ export function TechFilter({
       ))}
       {leftover.map((n) => (
         <option key={`in-${n}`} value={n}>
-          {n} (inactive)
+          {offListLabel(n, techs)}
         </option>
       ))}
     </SelectField>

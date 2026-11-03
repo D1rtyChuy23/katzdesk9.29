@@ -57,7 +57,7 @@ export async function ensureRoster(sql: Sql): Promise<void> {
   // Migration 0113 adds it to a roster made before; this covers one an older build made after 0113 ran.
   if (!rebuildsOnlyChecked.has(sql)) {
     const has = await sql.query<{ n: number }>(
-      "select count(*)::int as n from information_schema.columns where table_name = 'desk_techs' and column_name = 'rebuilds_only'",
+      "select count(*)::int as n from information_schema.columns where table_schema = current_schema() and table_name = 'desk_techs' and column_name = 'rebuilds_only'",
     );
     if (!has[0]?.n) await sql.query("alter table desk_techs add column if not exists rebuilds_only boolean not null default false");
     rebuildsOnlyChecked.add(sql);
@@ -302,8 +302,9 @@ export async function addTechFor(sql: Sql, data: { name: string; rebuildsOnly?: 
   if (!name) throw new Error("Enter a technician name.");
   if (name.length > 40) throw new Error("Keep the name under 40 characters.");
   const rebuildsOnly = !!data.rebuildsOnly;
+  // The same tech whatever its case or punctuation ("Pedro Jr" is "Pedro Jr.", as migration 0113 matches them).
   const found = await sql.query<{ id: number }>(
-    "select id from desk_techs where lower(name) = lower($1) limit 1",
+    "select id from desk_techs where regexp_replace(lower(name), '[^a-z0-9]', '', 'g') = regexp_replace(lower($1), '[^a-z0-9]', '', 'g') order by id limit 1",
     [name],
   );
   if (found[0]) {

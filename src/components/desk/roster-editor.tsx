@@ -97,6 +97,7 @@ export function RosterEditor() {
                   checked={t.rebuildsOnly}
                   disabled={scope.isPending}
                   onChange={(e) => scope.mutate({ id: t.id, rebuildsOnly: e.target.checked, name: t.name })}
+                  aria-label={`${t.name}: rebuilds only`}
                   data-testid="roster-rebuilds-only"
                 />
                 Rebuilds only
@@ -154,7 +155,9 @@ export function RosterEditor() {
           <ul className="mt-2 divide-y divide-border rounded-lg border border-border">
             {inactive.map((t) => (
               <li key={t.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
-                <span className="text-sm text-muted-foreground">{t.name} (inactive)</span>
+                <span className="text-sm text-muted-foreground">
+                  {t.name} (inactive{t.rebuildsOnly ? ", rebuilds only" : ""})
+                </span>
                 <Button
                   type="button"
                   size="sm"

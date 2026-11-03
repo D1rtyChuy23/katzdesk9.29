@@ -56,6 +56,12 @@ export function binSearchCode(q: string): string {
   return q.trim().replace(/\s*[-/]\s*|\s+/g, "-");
 }
 
+/**
+ * SQL: a part's stored bin as a code, read the same way as a typed one (11/3): its pieces joined by dashes, and a
+ * space or slash inside a piece made a dash too, so a bin stored as "E4 3" or "E4/3" is E4-3 to every search.
+ */
+export const BIN_CODE_SQL = "regexp_replace(concat_ws('-', bin_rack, bin_shelf, bin_bin), '\\s*[-/]\\s*|\\s+', '-', 'g')";
+
 /** "A-03-12" or "A/3/12": three letters-or-digits pieces split by dashes or slashes. Anything else is not a code. */
 export function splitBinCode(raw: string | null | undefined): BinValues | null {
   const m = /^([A-Za-z0-9]+)\s*[-/]\s*([A-Za-z0-9]+)\s*[-/]\s*([A-Za-z0-9]+)$/.exec(String(raw ?? "").trim());

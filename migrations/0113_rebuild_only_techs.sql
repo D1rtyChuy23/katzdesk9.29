@@ -10,7 +10,8 @@ begin
   if to_regclass('desk_techs') is null then
     return;
   end if;
-  -- Either of them already on the roster, under any spelling ("Pedro Jr", "pedro jr."): on rebuilds only, and active.
+  -- Either of them already on the roster, whatever its case or punctuation ("Pedro Jr", "pedro jr."): on rebuilds only,
+  -- and active.
   update desk_techs
      set rebuilds_only = true, active = true, updated_at = now()
    where regexp_replace(lower(name), '[^a-z0-9]', '', 'g') in ('pedrojr', 'pedrosr');

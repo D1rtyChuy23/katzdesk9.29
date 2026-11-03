@@ -56,6 +56,8 @@ test("a part picker finds a part by any piece of its bin, as Parts does: a bin n
   assert.deepEqual(found("03-12"), ["PARTS : TESTA1"]);
   assert.deepEqual(found("03 12"), ["PARTS : TESTA1"]);
   assert.deepEqual(found("12"), ["PARTS : TESTA1"]);
+  // Its bin in words, part of it, when there is a digit in it ("03 bin 12"), as the Parts page reads the words.
+  assert.deepEqual(found("03 bin 12"), ["PARTS : TESTA1"]);
   // Whole, as before: first, ahead of the parts whose bin only has it in it.
   assert.deepEqual(found("A-03-12"), ["PARTS : TESTA1"]);
   assert.deepEqual(found("E4-2"), ["PARTS : TESTE4"]);
@@ -73,6 +75,21 @@ test("a part picker finds a part by any piece of its bin, as Parts does: a bin n
   // Nothing in a bin, nothing found.
   assert.deepEqual(found("C-9-9"), []);
   assert.deepEqual(found("9"), [], "one character isn't searched");
+  // "Rack 1" is rack 1, whole words, not Rack 12 (11/2).
+  const racks = [it("PARTS : TESTR12", { rack: "12", shelf: null, bin: null }), it("PARTS : TESTR1", { rack: "1", shelf: "2", bin: null })];
+  assert.deepEqual(found("rack 1", racks), ["PARTS : TESTR1"]);
+  // Whole pieces, or the bin's end, before a piece found inside another: 14-1 puts G14-1 before G14-10.
+  // (The G14-10 part's name sorts first, so only the order of the matches puts the G14-1 part ahead.)
+  const gs = [it("PARTS : TESTGA", { rack: null, shelf: null, bin: "G14-10" }), it("PARTS : TESTGB", { rack: null, shelf: null, bin: "G14-1" })];
+  assert.deepEqual(found("14-1", gs), ["PARTS : TESTGB", "PARTS : TESTGA"]);
+  assert.deepEqual(found("G14-1", gs), ["PARTS : TESTGB", "PARTS : TESTGA"]);
+  assert.deepEqual(found("4-10", gs), ["PARTS : TESTGA"]);
+  // A bin stored with a slash, a space or in words is read as a code, the way a typed one is.
+  const stored = [it("PARTS : TESTSL", { rack: null, shelf: null, bin: "E4/2" }), it("PARTS : TESTSP", { rack: null, shelf: null, bin: "E4 3" }), it("PARTS : TESTOC", { rack: null, shelf: null, bin: "Overflow Cage" })];
+  assert.deepEqual(found("E4-2", stored), ["PARTS : TESTSL"]);
+  assert.deepEqual(found("e4 2", stored), ["PARTS : TESTSL"]);
+  assert.deepEqual(found("E4-3", stored), ["PARTS : TESTSP"]);
+  assert.deepEqual(found("overflow cage", stored), ["PARTS : TESTOC"]);
 });
 
 test("on the server, every part picker reads the same parts by bin as the Parts page does", async () => {
@@ -88,12 +105,41 @@ test("on the server, every part picker reads the same parts by bin as the Parts 
     );
     const picker = async (q) => (await searchBillingItemsFor(sql, q)).map((i) => i.part.sku).sort();
     const parts = async (q) => (await listPartsFor(sql, { q }, "u-owner")).rows.map((p) => p.sku).sort();
-    for (const q of ["205", "20", "E4", "E4-2", "e4 2", "E4 3", "A-03-12", "03-12", "03 12", "12", "A-03", "Rack A", "Bin 205"]) {
+    for (const q of ["205", "20", "E4", "E4-2", "e4 2", "E4 3", "A-03-12", "03-12", "03 12", "12", "A-03", "Rack A", "Bin 205", "03 bin 12"]) {
       const want = await parts(q);
       assert.ok(want.length, `the Parts page finds ${q}`);
       assert.deepEqual(await picker(q), want, q);
     }
     assert.deepEqual(await picker("C-9-9"), []);
+    // Stored with a slash or in words, found the same way on both (the Parts page reads the stored bin as a code too).
+    await pg.query(
+      `insert into billing_items (sku, parent, item, description, rate, kind, bin_bin) values
+         ('TESTSL', 'PARTS', 'PARTS : TESTSL', 'Test filter', 5, 'part', 'F7/2'),
+         ('TESTOC', 'PARTS', 'PARTS : TESTOC', 'Test hopper', 5, 'part', 'Overflow Cage')`,
+    );
+    for (const q of ["F7-2", "f7 2", "overflow cage", "Overflow-Cage"]) {
+      const want = await parts(q);
+      assert.ok(want.length, `the Parts page finds ${q}`);
+      assert.deepEqual(await picker(q), want, q);
+    }
+    // More parts found by a number made of the same digits than the server reads at once ("1-1" is also "11"): the
+    // bins are read on their own, so the part in bin E11-1 still shows.
+    await pg.query(
+      `insert into billing_items (sku, parent, item, description, rate, kind)
+       select 'TESTNUM11' || n, 'PARTS', 'PARTS : TESTNUM11' || n, 'Test lookalike', 5, 'part' from generate_series(1, 330) n`,
+    );
+    await pg.query("insert into billing_items (sku, parent, item, description, rate, kind, bin_bin) values ('TESTE111', 'PARTS', 'PARTS : TESTE111', 'Test dosing valve', 5, 'part', 'E11-1')");
+    assert.ok((await picker("1-1")).includes("TESTE111"), "the bin's part is read past 300 number matches");
+    // The part whose number is what was typed is read first among the name matches, past 330 others (its name sorts last).
+    await pg.query("insert into billing_items (sku, parent, item, description, rate, kind, mfr_part) values ('ZZTESTMFR11', 'PARTS', 'PARTS : ZZTESTMFR11', 'Test exact eleven', 5, 'part', '11')");
+    assert.equal((await searchBillingItemsFor(sql, "11"))[0].part.sku, "ZZTESTMFR11");
+    // And the bin typed whole is read first among the bins: past 320 parts in bins that only contain it.
+    await pg.query(
+      `insert into billing_items (sku, parent, item, description, rate, kind, bin_bin)
+       select 'TESTQ' || n, 'PARTS', 'PARTS : TESTQ' || n, 'Test Q filler', 5, 'part', 'Q4-1' from generate_series(1, 320) n`,
+    );
+    await pg.query("insert into billing_items (sku, parent, item, description, rate, kind, bin_bin) values ('ZZTESTX41', 'PARTS', 'PARTS : ZZTESTX41', 'Test exact one', 5, 'part', '4-1')");
+    assert.equal((await searchBillingItemsFor(sql, "4-1"))[0].part.sku, "ZZTESTX41");
     // With more binned parts than the server reads at once, "bin" alone still finds the parts named bin, and a shelf's
     // pieces never crowd out a part whose number has what was typed.
     await pg.query(
@@ -112,7 +158,10 @@ test("on the server, every part picker reads the same parts by bin as the Parts 
 
 test("the server reads a bin's pieces for whatever is typed, and its words when there is a digit", () => {
   const code = src("src/lib/ops/charges-api.ts");
-  assert.match(code, /\[`%\$\{q\}%`, nq, `%\$\{binSearchCode\(q\)\}%`, looksLikeBinWords\(q\) \|\| \/\\d\/\.test\(q\)\],/);
+  assert.match(code, /\[`%\$\{code\}%`, looksLikeBinWords\(q\) \|\| \/\\d\/\.test\(q\), `%\$\{q\}%`, code\],/);
+  // The stored bin read as a code: a space or slash in it is a dash, on the Parts page too.
+  assert.match(src("src/lib/ops/part-bins.ts"), /export const BIN_CODE_SQL = "regexp_replace\(concat_ws\('-', bin_rack, bin_shelf, bin_bin\), '\\\\s\*\[-\/\]\\\\s\*\|\\\\s\+', '-', 'g'\)";/);
+  assert.match(src("src/lib/ops/parts-api.ts"), /or \$\{BIN_CODE_SQL\} ilike \$\{binLike\}/);
   assert.match(src("src/components/desk/charges-panel.tsx"), /placeholder="Part number, words or bin…"/);
 });
 
@@ -182,6 +231,9 @@ test("a tech added on rebuilds only, or switched there and back: on rebuild Owne
     techs = await R.loadTechs(sql);
     assert.equal(techs.filter((t) => /shop tech/i.test(t.name)).length, 1);
     assert.equal(techs.find((t) => /shop tech/i.test(t.name)).rebuildsOnly, true);
+    // The same tech whatever its punctuation: no second row.
+    await R.addTechFor(sql, { name: "Test Shop Tech.", rebuildsOnly: true });
+    assert.equal((await R.loadTechs(sql)).filter((t) => /shop tech/i.test(t.name)).length, 1);
     await assert.rejects(() => R.setTechRebuildsOnlyFor(sql, { id: 99999, rebuildsOnly: true }), /Technician not found/);
     await assert.rejects(() => R.addTechFor(sql, { name: "   ", rebuildsOnly: true }), /Enter a technician name/);
   } finally {
@@ -206,6 +258,9 @@ test("service lists leave out rebuild-only techs; a rebuild's Owner list and eve
   assert.match(select, /export function activeTechNames\(techs\?: DeskTech\[\] \| null\): string\[\] \{\n\s+if \(techs\?\.length\) return serviceTechs\(techs\)\.map/);
   assert.match(select, /export function TechName[\s\S]{0,200}const active = knownTechNames\(roster\.data\?\.techs\);/);
   assert.match(select, /export function TechSelect[\s\S]{0,600}const active = activeTechNames\(techs\);/);
+  // A name a service list holds but doesn't offer: "(rebuilds only)" for a rebuild-only tech, not "(inactive)".
+  assert.match(select, /function offListLabel\(name: string, techs\?: DeskTech\[\] \| null\): string \{\n\s+const known = \(techs \?\? \[\]\)\.find\(\(t\) => t\.active && t\.rebuildsOnly && sameTech\(t\.name, name\)\);\n\s+if \(known\) return `\$\{known\.name\} \(rebuilds only\)`;/);
+  assert.equal((select.match(/\{offListLabel\(n, techs\)\}/g) ?? []).length, 2, "the ticket's select and the boards' filter");
   assert.match(src("src/components/desk/day-board.tsx"), /const names = serviceTechs\(roster\.data\?\.techs \?\? \[\]\)\.map\(\(t\) => t\.name\);/);
   assert.match(src("src/components/desk/route-planner.tsx"), /const rosterNames = useMemo\(\(\) => serviceTechs\(roster\.data\?\.techs \?\? \[\]\)\.map\(\(t\) => t\.name\), \[roster\.data\]\);/);
   assert.match(src("src/components/desk/pre-inspection-panel.tsx"), /inspectorChoices\(reps\.data\?\.reps \?\? \[\], serviceTechs\(techs\.data\?\.techs \?\? \[\]\), inspector\)/);
@@ -218,4 +273,7 @@ test("service lists leave out rebuild-only techs; a rebuild's Owner list and eve
   assert.match(editor, /mutationFn: \(\) => addTech\(\{ data: \{ name, rebuildsOnly \} \}\)/);
   assert.match(editor, /const refreshLists = \(\) => void qc\.invalidateQueries\(\{ queryKey: \["rebuild-owners"\] \}\);/);
   assert.equal((editor.match(/refreshLists\(\);/g) ?? []).length, 3);
+  assert.match(editor, /aria-label=\{`\$\{t\.name\}: rebuilds only`\}/);
+  assert.match(editor, /\{t\.name\} \(inactive\{t\.rebuildsOnly \? ", rebuilds only" : ""\}\)/);
+  assert.match(roster, /where table_schema = current_schema\(\) and table_name = 'desk_techs' and column_name = 'rebuilds_only'/);
 });
