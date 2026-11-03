@@ -602,9 +602,10 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 		service: svc.filter((j) => j.status === status).length,
 		tlc: tlc.filter((j) => j.status === status).length
 	}));
-	const { loadTechs } = await import("./roster");
+	const { loadTechs, serviceTechs } = await import("./roster");
 	const roster = await loadTechs(sql);
-	const activeNames = roster.filter((t) => t.active).map((t) => t.name);
+	// The service techs' load: not a rebuild-only tech (11/3).
+	const activeNames = serviceTechs(roster).map((t) => t.name);
 	const assigned = [...new Set(jobs.map((j) => j.technician).filter((n) => !!n))];
 	const techNames = [...activeNames];
 	for (const n of assigned) {

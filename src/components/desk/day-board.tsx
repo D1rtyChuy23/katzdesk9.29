@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { addDays, formatShortDate, todayChicago, weekBounds, WEEKDAYS } from "@/lib/ops/clock";
 import { moveBoardBlock } from "@/lib/ops/api";
-import { listTechs } from "@/lib/ops/roster";
+import { listTechs, serviceTechs } from "@/lib/ops/roster";
 import { canonicalTechName } from "@/lib/ops/tech-match";
 import { isClosedCall, isClosedPm } from "@/lib/ops/ticket-status";
 import { isInstalled } from "@/lib/ops/install-status";
@@ -151,9 +151,10 @@ export function DayBoard({
     [blocks, span, day, week.start, week.end],
   );
 
-  // Rows: no tech yet, then the active roster in its own order, then anyone else who has work in view.
+  // Rows: no tech yet, then the active roster in its own order (not a rebuild-only tech, 11/3), then anyone else who has
+  // work in view.
   const rows = useMemo(() => {
-    const names = (roster.data?.techs ?? []).filter((t) => t.active).map((t) => t.name);
+    const names = serviceTechs(roster.data?.techs ?? []).map((t) => t.name);
     const extra = [...new Set(shown.flatMap((b) => [techKey(b.tech), techKey(b.second)]))].filter((n) => n !== NO_TECH && !names.includes(n)).sort();
     return [NO_TECH, ...names, ...extra];
   }, [roster.data, shown]);

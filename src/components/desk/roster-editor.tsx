@@ -6,6 +6,7 @@ import {
   listTechs,
   setRosterAdmin,
   setTechActive,
+  setTechRebuildsOnly,
 } from "@/lib/ops/roster";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,21 +22,37 @@ export function RosterEditor() {
     enabled: !!roster.data?.canEdit && !roster.data?.ownerLocked,
   });
   const [name, setName] = useState("");
+  const [rebuildsOnly, setRebuildsOnly] = useState(false);
+  /** A rebuild's Owner list reads the roster too (11/3): it changes with it. */
+  const refreshLists = () => void qc.invalidateQueries({ queryKey: ["rebuild-owners"] });
 
   const add = useMutation({
-    mutationFn: () => addTech({ data: { name } }),
+    mutationFn: () => addTech({ data: { name, rebuildsOnly } }),
     onSuccess: (next) => {
       setName("");
+      setRebuildsOnly(false);
       qc.setQueryData(["roster"], next);
-      toast.success(`${name.trim()} is on the roster`);
+      refreshLists();
+      toast.success(rebuildsOnly ? `${name.trim()} is on the roster, for rebuilds only` : `${name.trim()} is on the roster`);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add"),
+  });
+  const scope = useMutation({
+    mutationFn: (p: { id: number; rebuildsOnly: boolean; name: string }) =>
+      setTechRebuildsOnly({ data: { id: p.id, rebuildsOnly: p.rebuildsOnly } }),
+    onSuccess: (next, p) => {
+      qc.setQueryData(["roster"], next);
+      refreshLists();
+      toast.success(p.rebuildsOnly ? `${p.name} shows on rebuilds only` : `${p.name} shows on every list`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not update"),
   });
   const toggle = useMutation({
     mutationFn: (p: { id: number; active: boolean; name: string }) =>
       setTechActive({ data: { id: p.id, active: p.active } }),
     onSuccess: (next, p) => {
       qc.setQueryData(["roster"], next);
+      refreshLists();
       toast.success(p.active ? `${p.name} is active` : `${p.name} removed from assign lists`);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not update"),
@@ -60,6 +77,7 @@ export function RosterEditor() {
       <p className="mt-0.5 text-xs text-muted-foreground">
         Only you can add or remove names. Tickets keep their current tech until you reassign them.
         Inactive names stay on history as “(inactive)” — they are not in assign lists.
+        A tech on Rebuilds only is on a rebuild&apos;s Owner list, not on service calls, TLCs, PMs or installs.
         {roster.data.ownerLocked
           ? " This lock stays on the desk owner account."
           : roster.data.rosterAdminUsername
@@ -69,17 +87,31 @@ export function RosterEditor() {
 
       <ul className="mt-4 divide-y divide-border rounded-lg border border-border">
         {active.map((t) => (
-          <li key={t.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+          <li key={t.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-3 py-2.5" data-testid="roster-tech">
             <span className="text-sm font-medium">{t.name}</span>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={toggle.isPending}
-              onClick={() => toggle.mutate({ id: t.id, active: false, name: t.name })}
-            >
-              Remove
-            </Button>
+            <span className="flex items-center gap-3">
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary max-sm:size-5"
+                  checked={t.rebuildsOnly}
+                  disabled={scope.isPending}
+                  onChange={(e) => scope.mutate({ id: t.id, rebuildsOnly: e.target.checked, name: t.name })}
+                  aria-label={`${t.name}: rebuilds only`}
+                  data-testid="roster-rebuilds-only"
+                />
+                Rebuilds only
+              </label>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={toggle.isPending}
+                onClick={() => toggle.mutate({ id: t.id, active: false, name: t.name })}
+              >
+                Remove
+              </Button>
+            </span>
           </li>
         ))}
       </ul>
@@ -99,6 +131,16 @@ export function RosterEditor() {
           className="max-w-xs"
           aria-label="New technician name"
         />
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            className="size-4 accent-primary max-sm:size-5"
+            checked={rebuildsOnly}
+            onChange={(e) => setRebuildsOnly(e.target.checked)}
+            data-testid="roster-add-rebuilds-only"
+          />
+          Rebuilds only
+        </label>
         <Button type="submit" disabled={add.isPending || !name.trim()}>
           Add
         </Button>
@@ -113,7 +155,9 @@ export function RosterEditor() {
           <ul className="mt-2 divide-y divide-border rounded-lg border border-border">
             {inactive.map((t) => (
               <li key={t.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
-                <span className="text-sm text-muted-foreground">{t.name} (inactive)</span>
+                <span className="text-sm text-muted-foreground">
+                  {t.name} (inactive{t.rebuildsOnly ? ", rebuilds only" : ""})
+                </span>
                 <Button
                   type="button"
                   size="sm"

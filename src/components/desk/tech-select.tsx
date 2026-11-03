@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ChangeEvent } from "react";
-import { listTechs, techLabel, type DeskTech } from "@/lib/ops/roster";
+import { listTechs, serviceTechs, techLabel, type DeskTech } from "@/lib/ops/roster";
 import { DEFAULT_TECHS, sameTech } from "@/lib/ops/tech-match";
 import { SelectField } from "@/components/ui/select-field";
 
@@ -12,15 +12,29 @@ export function useRoster() {
   });
 }
 
+/** The names a service call, TLC, PM or install can go to: active, and not on rebuilds only (11/3). */
 export function activeTechNames(techs?: DeskTech[] | null): string[] {
+  if (techs?.length) return serviceTechs(techs).map((t) => t.name);
+  return [...DEFAULT_TECHS];
+}
+
+/** Every active tech's name, a rebuild-only one too: a name shown anywhere reads as active, not "(inactive)". */
+function knownTechNames(techs?: DeskTech[] | null): string[] {
   if (techs?.length) return techs.filter((t) => t.active).map((t) => t.name);
   return [...DEFAULT_TECHS];
+}
+
+/** A name a service list holds but doesn't offer: "Pedro Jr. (rebuilds only)" for a tech on rebuilds only, else "(inactive)". */
+function offListLabel(name: string, techs?: DeskTech[] | null): string {
+  const known = (techs ?? []).find((t) => t.active && t.rebuildsOnly && sameTech(t.name, name));
+  if (known) return `${known.name} (rebuilds only)`;
+  return techLabel(name, new Set(activeTechNames(techs)));
 }
 
 export function TechName({ name }: { name?: string | null }) {
   const roster = useRoster();
   if (!name) return <>{"—"}</>;
-  const active = activeTechNames(roster.data?.techs);
+  const active = knownTechNames(roster.data?.techs);
   const match = active.find((n) => sameTech(n, name));
   if (match) return <>{match}</>;
   return (
@@ -67,7 +81,7 @@ export function TechSelect({
     >
       {extras.map((n) => (
         <option key={`inactive-${n}`} value={n}>
-          {techLabel(n, new Set(active))}
+          {offListLabel(n, techs)}
         </option>
       ))}
       {active.map((n) => (
@@ -116,7 +130,7 @@ export function TechFilter({
       ))}
       {leftover.map((n) => (
         <option key={`in-${n}`} value={n}>
-          {n} (inactive)
+          {offListLabel(n, techs)}
         </option>
       ))}
     </SelectField>

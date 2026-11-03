@@ -59,19 +59,24 @@ export function canonicalTechName(raw: string | null | undefined): string | null
   return ALIASES[k] ?? null;
 }
 
+/** A tech's name for comparing two spellings: periods don't count, so "Pedro Jr." is "Pedro Jr" (11/3). */
+function techKey(raw: string | null | undefined): string {
+  return normalizeName(raw).replace(/\./g, "").trim();
+}
+
 /** True when two technician strings are the same person (aliases included). */
 export function sameTech(
   a: string | null | undefined,
   b: string | null | undefined,
 ): boolean {
-  const na = normalizeName(a);
-  const nb = normalizeName(b);
+  const na = techKey(a);
+  const nb = techKey(b);
   if (!na || !nb) return false;
   if (na === nb) return true;
   const ca = canonicalTechName(a);
   const cb = canonicalTechName(b);
   if (ca && cb) return ca === cb;
-  if (ca && normalizeName(ca) === nb) return true;
-  if (cb && normalizeName(cb) === na) return true;
+  if (ca && techKey(ca) === nb) return true;
+  if (cb && techKey(cb) === na) return true;
   return false;
 }

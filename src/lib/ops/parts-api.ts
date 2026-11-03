@@ -15,7 +15,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
 import { PART_CLASSES, isPartClass, type PartClass } from "@/lib/ops/part-pricing";
-import { BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
+import { BIN_CODE_SQL, BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
 import { textArray } from "@/lib/ops/part-merges";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
 import { PART_USES_CTE } from "@/lib/ops/part-usage-api";
@@ -266,7 +266,7 @@ export const listParts = createServerFn({ method: "POST" })
  */
 export function partSearchSql(q: string, like: string, binLike: string): string {
   return `(${q} = '' or item ilike ${like} or sku ilike ${like} or description ilike ${like} or mfr_part ilike ${like}
-         or concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike ${binLike}
+         or ${BIN_CODE_SQL} ilike ${binLike}
          or concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike ${like}
          or exists (select 1 from unnest(previous_numbers) pn where pn ilike ${like}))`;
 }

@@ -2,7 +2,7 @@ import { isWalkIn } from "./customer-key";
 import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withHeaderDiscount, type Discount } from "./discount";
 import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
 import { textArray } from "./part-merges";
-import { binSearchCode } from "./part-bins";
+import { BIN_CODE_SQL, binSearchCode } from "./part-bins";
 import { loadDiscountRule } from "./part-pricing-api";
 import { liveInvoices, lockingInvoice, locationWarning, unlockActive, warehouseForTech } from "./billing-rules";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ, UNLOCKED_SQL, loadInvoices } from "./ticket-billing-api";
@@ -22,7 +22,6 @@ import {
   cleanSalesOrder,
   itemRowsFromSheets,
   kindForItem,
-  looksLikeBinCode,
   looksLikeBinWords,
   normalizePartNo,
   priceChange,
@@ -112,29 +111,43 @@ const PART_TEXT_MATCH = `(item ilike $1 or sku ilike $1 or description ilike $1 
        or exists (select 1 from unnest(previous_numbers) pn
                    where pn ilike $1 or ($2 <> '' and regexp_replace(upper(pn), '[^A-Z0-9]', '', 'g') like $2 || '%')))`;
 
+const ITEM_COLS = `id, sku, item, description, rate, kind, mfr_part, item_class, get_later, previous_numbers, (image is not null) as has_image,
+            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
+            bin_rack, bin_shelf, bin_bin`;
+
 /** The body of searchBillingItems: every part picker (tickets, quotes, invoices, PM machine parts) reads it. */
 export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string): Promise<BillingItem[]> {
   const q = raw.trim();
   if (!q) return [];
   const nq = normalizePartNo(q);
-  const rows = await sql.query<ItemRow>(
-    `select id, sku, item, description, rate, kind, mfr_part, item_class, get_later, previous_numbers, (image is not null) as has_image,
-            case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
-            bin_rack, bin_shelf, bin_bin
+  const code = binSearchCode(q);
+  // Its name, number, words or an old number: a part whose number is what was typed is read first.
+  const byText = await sql.query<ItemRow>(
+    `select ${ITEM_COLS}
        from billing_items
-      where active
-        and hidden_at is null
-        and (${PART_TEXT_MATCH}
-             -- Its bin (11/2): A-03-12, A 03 12 or A/03/12, or Rack A, as the Parts page finds it. Only for what is typed
-             -- like a bin, so "bin" alone finds the parts named bin rather than every part with one.
-             or ($3::text is not null and concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $3)
-             or ($4::boolean and concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1))
-      -- A part found by its name or number comes before the parts found by their bin alone, so a shelf of parts never
-      -- crowds an exact part number out of what is read.
-      order by coalesce(${PART_TEXT_MATCH}, false) desc, lower(item)
+      where active and hidden_at is null and ${PART_TEXT_MATCH}
+      order by ($2 <> '' and (regexp_replace(upper(sku), '[^A-Z0-9]', '', 'g') = $2
+                               or regexp_replace(upper(coalesce(mfr_part, '')), '[^A-Z0-9]', '', 'g') = $2)) desc,
+               lower(item)
       limit 300`,
-    [`%${q}%`, nq, looksLikeBinCode(q) ? `%${binSearchCode(q)}%` : null, looksLikeBinWords(q)],
+    [`%${q}%`, nq],
   );
+  // Its bin, the way the Parts page finds it (11/3): A-03-12, A 03 12 or A/03/12, any piece of it (03-12, E4, 205), or
+  // Rack A in words. The words are read only for "Rack A"-style text or text with a digit, so "bin" alone finds the
+  // parts named bin rather than every part with one. Read on its own, so a long list of name matches never leaves the
+  // bins out: the bin typed whole first, then the bins it starts, then any other.
+  const byBin = await sql.query<ItemRow>(
+    `select ${ITEM_COLS}
+       from billing_items
+      where active and hidden_at is null
+        and (${BIN_CODE_SQL} ilike $1
+             or ($2::boolean and concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $3))
+      order by (upper(${BIN_CODE_SQL}) = upper($4)) desc, (upper(${BIN_CODE_SQL}) like upper($4) || '-%') desc, lower(item)
+      limit 300`,
+    [`%${code}%`, looksLikeBinWords(q) || /\d/.test(q), `%${q}%`, code],
+  );
+  const seen = new Set<number>();
+  const rows = [...byText, ...byBin].filter((r) => (seen.has(Number(r.id)) ? false : (seen.add(Number(r.id)), true)));
   return searchItems(q, rows.map(toItem), 12);
 }
 
