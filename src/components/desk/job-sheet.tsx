@@ -289,6 +289,13 @@ export function JobSheet({
   /** The Invoice window: save what is typed first, so it opens on the ticket as it is now (its P.O. too, 11/2). */
   async function saveBeforeInvoice(): Promise<boolean> {
     if (!formRef.current || !j || mergedAway) return true;
+    const form = formRef.current;
+    // The same checks as Save (a half-typed date): shown on the Ticket tab, and the window stays shut.
+    if (!form.checkValidity()) {
+      pickTab("ticket");
+      window.setTimeout(() => form.reportValidity(), 50);
+      return false;
+    }
     skipToast.current = true;
     try {
       await save.mutateAsync(formPatch(formRef.current, j.id));

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PoFields } from "./po-fields";
-import { poFromForm } from "./po-form";
+import { holdSavedPo, poFromForm } from "./po-form";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
 import { ModuleRecord } from "@/components/desk/module-record";
@@ -190,9 +190,11 @@ export function PmSheet({
   const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updatePm>[0]["data"]) => updatePm({ data: d }),
-    onSuccess: (_saved, vars) => {
+    onSuccess: (saved, vars) => {
       if (!skipToast.current) toast.success("Saved");
       skipToast.current = false;
+      // The P.O.s as saved, at once, wherever this sheet was opened from (the lists read again below).
+      if (vars.po !== undefined || vars.vendorPo !== undefined) holdSavedPo(qc, "pm", saved);
       void qc.invalidateQueries({ queryKey: ["pms"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
@@ -232,6 +234,13 @@ export function PmSheet({
   /** The Invoice window: save what is typed first, so it opens on the PM as it is now (its P.O. too, 11/2). */
   const saveBeforeInvoice = async (): Promise<boolean> => {
     if (!formRef.current || !pm) return true;
+    const form = formRef.current;
+    // The same checks as Save (the customer, a half-typed date): shown on Details, and the window stays shut.
+    if (!form.checkValidity()) {
+      setTab("details");
+      window.setTimeout(() => form.reportValidity(), 50);
+      return false;
+    }
     skipToast.current = true;
     try {
       await save.mutateAsync(pmPatchOf(formRef.current, pm.id));
@@ -515,6 +524,8 @@ export function InstallSheet({
       return updateInstall({ data: d.machines !== undefined && builtOn ? { ...d, machinesBase: JSON.stringify(baseOf(builtOn)) } : d });
     },
     onSuccess: (saved, vars) => {
+      // The P.O.s as saved, at once, wherever this sheet was opened from (the lists read again below).
+      if (vars.po !== undefined || vars.vendorPo !== undefined) holdSavedPo(qc, "install", saved);
       // Stored: this opening's next notes are typed on these.
       if (vars.notes !== undefined && vars.notesSlot) vars.notesSlot.base = vars.notes ?? null;
       const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent" && k !== "notesSlot");
@@ -630,6 +641,16 @@ export function InstallSheet({
       .getAll()
       .some((m) => m.state.status === "error" && (m.state.submittedAt ?? 0) >= since);
   }, [saveAll, qc]);
+  /** The Invoice window: save what is typed first (its P.O. too, 11/2), with the same checks as Save, shown on Details. */
+  const saveInstallBeforeInvoice = async (): Promise<boolean> => {
+    const form = formRef.current;
+    if (form && !form.checkValidity()) {
+      setTab("details");
+      window.setTimeout(() => form.reportValidity(), 50);
+      return false;
+    }
+    return saveAndWait();
+  };
   const saveCtx = useMemo<SaveAll>(
     () => ({ save: saveAll, saveAndWait, pending: save.isPending, register: registerFlush, hideBar }),
     [saveAll, saveAndWait, save.isPending, registerFlush, hideBar],
@@ -957,7 +978,7 @@ export function InstallSheet({
                   <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                   <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this install.</p>
                   <div className="mt-3">
-                    <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveAndWait} />
+                    <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveInstallBeforeInvoice} />
                   </div>
                 </Tabs.Content>
 
@@ -1282,9 +1303,11 @@ export function DealSheet({
   const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateDeal>[0]["data"]) => updateDeal({ data: d }),
-    onSuccess: (_saved, vars) => {
+    onSuccess: (saved, vars) => {
       if (!skipToast.current) toast.success("Saved");
       skipToast.current = false;
+      // The P.O.s as saved, at once, wherever this sheet was opened from (the lists read again below).
+      if (vars.po !== undefined || vars.vendorPo !== undefined) holdSavedPo(qc, "deal", saved);
       void qc.invalidateQueries({ queryKey: ["deals"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
@@ -1325,6 +1348,8 @@ export function DealSheet({
   /** The Invoice window: save what is typed first, so it opens on the deal as it is now (its P.O. too, 11/2). */
   const saveDealBeforeInvoice = async (): Promise<boolean> => {
     if (!formRef.current || !deal) return true;
+    // The same checks as Save (the customer): shown on the form, and the window stays shut.
+    if (!formRef.current.reportValidity()) return false;
     skipToast.current = true;
     try {
       await save.mutateAsync(dealPatchOf(formRef.current, deal.id));

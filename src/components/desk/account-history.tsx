@@ -288,7 +288,8 @@ export function HistoryRow({ item, onOpen }: { item: HistoryItem; onOpen: () => 
         </span>
         <span className="min-w-0 flex-1 max-sm:order-last max-sm:basis-full">
           <span className="block font-medium">{item.title}</span>
-          <span className="block text-xs text-muted-foreground">
+          {/* A long P.O. with no spaces wraps instead of pushing the row wider than a phone. */}
+          <span className="block text-xs text-muted-foreground [overflow-wrap:anywhere]">
             {[item.subtitle, formatShortDate(item.date), item.technician].filter(Boolean).join(" · ")}
           </span>
         </span>

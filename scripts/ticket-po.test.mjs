@@ -25,6 +25,8 @@ const { loadTicketBillingRows } = await import("../src/lib/ops/billing-report-ap
 const { ticketFilterRow } = await import("../src/lib/ops/billing-report.ts");
 const { matchesBillingFilters } = await import("../src/lib/ops/billing-rules.ts");
 const { addDays, todayChicago } = await import("../src/lib/ops/clock.ts");
+const { QueryClient } = await import("@tanstack/react-query");
+const { holdSavedPo } = await import("../src/components/desk/po-form.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -124,6 +126,30 @@ test("a box on a Details tab follows its record until it is changed there, and t
   assert.deepEqual(locked, { key: "job-1", value: "PO-A", base: "PO-A" });
   assert.equal(P.syncPoBox(locked, "job-1", "PO-A", true), locked);
   assert.equal(P.poToSend(locked.value, locked.base), undefined);
+});
+
+test("after a Details save, the saved P.O.s go at once into every list its sheet may have been opened from", () => {
+  const qc = new QueryClient();
+  qc.setQueryData(["installs"], [{ id: 1, po: "OLD", vendorPo: null, customer: "A" }, { id: 2, po: "X", vendorPo: "Y" }]);
+  qc.setQueryData(["customer-history", 7], { jobs: [], pms: [], installs: [{ id: 1, po: "OLD", vendorPo: null }], deals: [] });
+  holdSavedPo(qc, "install", { id: 1, po: "NEW", vendorPo: "V" });
+  assert.deepEqual(qc.getQueryData(["installs"]), [{ id: 1, po: "NEW", vendorPo: "V", customer: "A" }, { id: 2, po: "X", vendorPo: "Y" }]);
+  assert.deepEqual(qc.getQueryData(["customer-history", 7]).installs, [{ id: 1, po: "NEW", vendorPo: "V" }]);
+  // A PM opened from its ticket reads its own cache.
+  qc.setQueryData(["pms"], [{ id: 3, po: null, vendorPo: null }]);
+  qc.setQueryData(["pm", 3], { id: 3, po: null, vendorPo: null });
+  holdSavedPo(qc, "pm", { id: 3, po: "PM-1", vendorPo: null });
+  assert.equal(qc.getQueryData(["pms"])[0].po, "PM-1");
+  assert.equal(qc.getQueryData(["pm", 3]).po, "PM-1");
+  // Nothing is made up where nothing was read, and another record's row is left alone.
+  holdSavedPo(qc, "deal", { id: 9, po: "D-1", vendorPo: null });
+  assert.equal(qc.getQueryData(["deals"]), undefined);
+  assert.deepEqual(qc.getQueryData(["customer-history", 7]).deals, []);
+  // The three sheets do it after a save that sent a P.O.
+  const sheets = src("src/components/desk/entity-sheets.tsx");
+  for (const kind of ["pm", "install", "deal"]) {
+    assert.ok(sheets.includes(`if (vars.po !== undefined || vars.vendorPo !== undefined) holdSavedPo(qc, "${kind}", saved);`), kind);
+  }
 });
 
 test("the card line, the board search and the top search's note", () => {
@@ -400,6 +426,10 @@ test("every invoice carries its record's Customer P.O., and Approve saves a P.O.
     await approve("install", i);
     assert.equal((await poOf(pg, "installs", i)).po, "IN-1");
     assert.equal((await one(pg, "select po from invoices where entity_type = 'install' and entity_id = $1", [i])).po, "IN-1");
+    const keepPm = await pm(pg, { po: "PM-KEEP" });
+    await approve("pm", keepPm);
+    assert.equal((await poOf(pg, "pm_jobs", keepPm)).po, "PM-KEEP");
+    assert.equal((await one(pg, "select po from invoices where entity_type = 'pm' and entity_id = $1", [keepPm])).po, "PM-KEEP");
     // Changed in the window: saved on the record, and the invoice keeps it as approved.
     for (const [type, table, id, po] of [["pm", "pm_jobs", p, "PM-9"], ["rebuild", "rebuilds", r, "RB-9"], ["deal", "deals", d, "DL-9"]]) {
       await approve(type, id, { po: ` ${po} ` });
@@ -532,6 +562,8 @@ test("merging two tickets: the keeper's Vendor P.O., else the extra's, and the h
     const e4 = await ticket(pg, { wo: "WO-7904", po: "PO-LATE" });
     await mergeServiceJobs(sql, k4, e4, "Chuy");
     assert.equal((await poOf(pg, "service_jobs", k4)).po, null);
+    // The keeper's history names the P.O. it didn't take.
+    assert.ok((await history(pg, "service", k4)).some((l) => / · extra P\.O\. PO-LATE/.test(l)));
     // An invoiced keeper's Vendor P.O. still fills (it's reference only); its Customer P.O. stays locked as before.
     const k3 = await ticket(pg, { wo: "WO-7903", po: null, vendor_po: null });
     await liveInvoice(pg, k3);
@@ -572,8 +604,9 @@ test("the top search finds every kind of ticket by either P.O., and says so", as
     await pg.query(`insert into "user" (id, name, email, "emailVerified") values ('u-rep', 'Riley Rep', 'riley@example.com', true)`);
     await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role, email) values ('u-rep', 'riley', true, false, 'sales', 'riley@example.com')");
     await pg.query("insert into directory_customers (name, account_rep) values ('Rep Test Cafe', 'Riley Rep'), ('Other Test Cafe', 'Someone Else')");
+    // More newer rebuilds of other accounts match than any one read would take (21; the first version read 20).
     const mine = await rebuild(pg, { title: "Rep grinder", account: "Rep Test Cafe", po: "PO-REPX-MINE" });
-    for (let k = 0; k < 8; k++) await rebuild(pg, { title: `Other ${k}`, account: "Other Test Cafe", po: `PO-REPX-OTHER-${k}` });
+    for (let k = 0; k < 21; k++) await rebuild(pg, { title: `Other ${k}`, account: "Other Test Cafe", po: `PO-REPX-OTHER-${k}` });
     const repHits = (await api.searchAllFor(sql, { q: "PO-REPX" }, { userId: "u-rep" })).filter((h) => h.entityType === "rebuild");
     assert.deepEqual(repHits.map((h) => h.id), [mine]);
     assert.equal((await find("PO-REPX")).filter((h) => h.entityType === "rebuild").length, 5);
@@ -645,7 +678,11 @@ test("a sheet that saves as it closes saves before its Invoice window opens, so 
   assert.match(job, /await save\.mutateAsync\(formPatch\(formRef\.current, j\.id\)\);\n\s+return true;/);
   const sheets = src("src/components/desk/entity-sheets.tsx");
   assert.ok(sheets.includes('<InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} beforeOpen={saveBeforeInvoice} />'));
-  assert.ok(sheets.includes('<InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveAndWait} />'));
+  assert.ok(sheets.includes('<InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveInstallBeforeInvoice} />'));
+  // Each runs the form's own checks first (a required customer, a half-typed date), as Save does.
+  assert.equal((sheets.match(/!form\.checkValidity\(\)/g) ?? []).length, 2);
+  assert.match(sheets, /if \(!formRef\.current\.reportValidity\(\)\) return false;/);
+  assert.match(job, /if \(!form\.checkValidity\(\)\) \{\n\s+pickTab\("ticket"\);/);
   assert.ok(sheets.includes('<InvoiceButton type="deal" id={deal.id} key={`invoice-deal-${deal.id}`} beforeOpen={saveDealBeforeInvoice} />'));
   assert.match(sheets, /await save\.mutateAsync\(pmPatchOf\(formRef\.current, pm\.id\)\);/);
   assert.match(sheets, /await save\.mutateAsync\(dealPatchOf\(formRef\.current, deal\.id\)\);/);

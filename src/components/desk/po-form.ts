@@ -1,5 +1,27 @@
 import { useEffect, useState } from "react";
+import type { QueryClient } from "@tanstack/react-query";
 import { poToSend, syncPoBox } from "@/lib/ops/ticket-po";
+
+type SavedPo = { id: number; po: string | null; vendorPo: string | null };
+const LIST_KEY = { pm: "pms", install: "installs", deal: "deals" } as const;
+
+/**
+ * After a PM's, install's or deal's Details save, its P.O.s as stored go at once into every list its sheet may have been
+ * opened from (its board, a PM opened from its ticket, an account's history): each box takes what was saved as its base
+ * right away, not only when those lists read again, so a P.O. approved in the Invoice window meanwhile isn't put back by
+ * the sheet's save on close (11/2).
+ */
+export function holdSavedPo(qc: QueryClient, kind: keyof typeof LIST_KEY, saved: SavedPo | null | undefined): void {
+  if (!saved) return;
+  const patch = <T,>(r: T): T =>
+    r && typeof r === "object" && (r as { id?: unknown }).id === saved.id ? { ...r, po: saved.po, vendorPo: saved.vendorPo } : r;
+  qc.setQueriesData({ queryKey: [LIST_KEY[kind]] }, (old: unknown) => (Array.isArray(old) ? old.map(patch) : old));
+  if (kind === "pm") qc.setQueryData(["pm", saved.id], (old: unknown) => patch(old));
+  qc.setQueriesData({ queryKey: ["customer-history"] }, (old: unknown) => {
+    const list = old && typeof old === "object" ? (old as Record<string, unknown>)[LIST_KEY[kind]] : null;
+    return Array.isArray(list) ? { ...(old as object), [LIST_KEY[kind]]: list.map(patch) } : old;
+  });
+}
 
 /**
  * What a Details form sends for its P.O. boxes (PoFields): each one only when it reads differently from its base, the

@@ -530,10 +530,14 @@ export function mergeTicketsSql(): string {
              || ' · moved ' || (select count(*)::text from chg) || ' charge line'
              || case when (select count(*) from chg) = 1 then '' else 's' end
              || case when (select count(*) from quo) > 0 then ' and the repair quote' else '' end
+             -- The extra's P.O. when the keeper didn't take it: it has another, or it is invoiced or billed on a Sales
+             -- Order and keeps its own, even a blank one (11/2).
              || case
-                  when nullif(btrim(g.keeper_po), '') is not null
-                   and nullif(btrim(g.extra_po), '') is not null
-                   and btrim(g.keeper_po) <> btrim(g.extra_po)
+                  when nullif(btrim(g.extra_po), '') is not null
+                   and coalesce(btrim(g.keeper_po), '') <> btrim(g.extra_po)
+                   and (nullif(btrim(g.keeper_po), '') is not null
+                        or ${LIVE_INVOICE("g.keeper_id")}
+                        or nullif(btrim(g.keeper_so), '') is not null)
                   then ' · extra P.O. ' || btrim(g.extra_po)
                   else ''
                 end
