@@ -74,13 +74,19 @@ export function poMatches(q: string, r: { po?: string | null; vendorPo?: string 
 
 /**
  * A board's rows for a search: rows whose Customer or Vendor P.O. is exactly what was typed come first, whatever the
- * view, status or filters (as a WO number does), then the rows the view already shows. Under 2 characters, or no exact
- * P.O., `shown` is returned as is.
+ * view, status or filters (as a WO number does), then the rows the view already shows. `more` adds a row's other
+ * numbers that work the same way (an install's sale: its deal's P.O. and Sale Invoice/SO #, 11/3). Under 2 characters,
+ * or no exact match, `shown` is returned as is.
  */
-export function withPoMatches<T extends { id: number; po?: string | null; vendorPo?: string | null }>(shown: T[], all: T[], q: string): T[] {
+export function withPoMatches<T extends { id: number; po?: string | null; vendorPo?: string | null }>(
+  shown: T[],
+  all: T[],
+  q: string,
+  more?: (row: T) => (string | null | undefined)[],
+): T[] {
   const key = q.trim().toLowerCase();
   if (key.length < 2) return shown;
-  const hits = all.filter((row) => [row.po, row.vendorPo].some((v) => String(v ?? "").trim().toLowerCase() === key));
+  const hits = all.filter((row) => [row.po, row.vendorPo, ...(more?.(row) ?? [])].some((v) => String(v ?? "").trim().toLowerCase() === key));
   if (!hits.length) return shown;
   const ids = new Set(hits.map((row) => row.id));
   return [...hits, ...shown.filter((row) => !ids.has(row.id))];
@@ -98,6 +104,26 @@ export function poSearchNote(q: string, r: { po?: string | null; vendor_po?: str
   const vendor = String(r.vendor_po ?? "").trim();
   if (vendor && vendor.toLowerCase().includes(needle)) return ` · Vendor P.O. ${vendor}`;
   return "";
+}
+
+/**
+ * An install's sale, from the deal it came from (Chuy, 11/3): "Sale Invoice/SO 12345 · Sale P.O. 4455", one of them,
+ * or null when the deal has neither. For reference only: the sale's P.O. is for the equipment sale, not the install
+ * visit, so it never becomes the install's Customer P.O.
+ */
+export function saleRefLine(sale: { invoice?: string | null; po?: string | null } | null | undefined): string | null {
+  if (!sale) return null;
+  const invoice = String(sale.invoice ?? "").trim();
+  const po = String(sale.po ?? "").trim();
+  const parts = [invoice ? `Sale Invoice/SO ${invoice}` : null, po ? `Sale P.O. ${po}` : null].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
+}
+
+/** The top search's note on an install found by its sale's P.O. (" · Sale P.O. 4455"), or "" (11/3). */
+export function salePoNote(q: string, salePo: string | null | undefined): string {
+  const needle = q.trim().toLowerCase();
+  const po = String(salePo ?? "").trim();
+  return needle && po && po.toLowerCase().includes(needle) ? ` · Sale P.O. ${po}` : "";
 }
 
 /**

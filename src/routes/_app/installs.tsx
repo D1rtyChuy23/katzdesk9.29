@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { withPoMatches } from "@/lib/ops/ticket-po";
+import { saleRefLine, withPoMatches } from "@/lib/ops/ticket-po";
 import { PoLine } from "@/components/desk/po-fields";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState, type ReactNode } from "react";
@@ -100,12 +100,13 @@ function Page() {
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((i) =>
-        [i.customer, i.equipment, ...rowWos(i), i.technician, i.serial, i.powerVoltage, i.po, i.vendorPo, ...(i.machines ?? []).flatMap((m) => [m.equipment, m.serial, m.powerVoltage])].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
+        // Its sale's numbers too, from the deal it came from (11/3).
+        [i.customer, i.equipment, ...rowWos(i), i.technician, i.serial, i.powerVoltage, i.po, i.vendorPo, i.sale?.po, i.sale?.invoice, ...(i.machines ?? []).flatMap((m) => [m.equipment, m.serial, m.powerVoltage])].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
-    // A WO number finds its install in either lane, and so does an exact P.O. (11/2).
+    // A WO number finds its install in either lane, and so does an exact P.O. (11/2), or its sale's P.O. or number (11/3).
     list = withWoMatches(list, data.data ?? [], q);
-    list = withPoMatches(list, data.data ?? [], q);
+    list = withPoMatches(list, data.data ?? [], q, (i) => [i.sale?.po, i.sale?.invoice]);
     return sortDesk(list, sort, {
       date: (i) => i.installDate ?? i.received,
       name: (i) => i.customer,
@@ -919,9 +920,17 @@ function InstallRow({
           </button>
           <PoLine po={i.po} vendorPo={i.vendorPo} className="sm:pl-20" />
           {i.dealId ? (
-            <OpenLink entityType="deal" id={i.dealId} className="mt-0.5 block w-fit text-xs text-copper hover:underline max-sm:py-2 sm:pl-20" title="Open the deal these machines came from">
-              From the deal
-            </OpenLink>
+            // With its sale, for reference (11/3): the deal's Sale Invoice/SO # and P.O.
+            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1 text-xs sm:pl-20" data-testid="install-sale">
+              <OpenLink entityType="deal" id={i.dealId} className="text-copper hover:underline max-sm:py-2" title="Open the deal these machines came from">
+                From the deal
+              </OpenLink>
+              {saleRefLine(i.sale) ? (
+                <span className="min-w-0 text-muted-foreground [overflow-wrap:anywhere]" data-testid="install-sale-line">
+                  · {saleRefLine(i.sale)}
+                </span>
+              ) : null}
+            </div>
           ) : null}
           {open ? <TrfCheck install={i} /> : null}
           {machineNotes(i)}

@@ -171,6 +171,13 @@ export type InstallWorkOrder = {
   addedAt: string | null;
 };
 
+/**
+ * An install's sale (Chuy, 11/3): the deal it came from, with that deal's Sale Invoice # or Sales Order # and its
+ * Customer P.O. The sale's P.O. is for the equipment sale, not the install visit, so it stays the deal's; the install
+ * fee is added to the sale, so the install shows it for reference.
+ */
+export type InstallSale = { dealId: number; invoice: string | null; po: string | null };
+
 export type Install = {
   id: number;
   /** Sales ticks this once the Tech Request Form has been sent. Never ticked automatically. */
@@ -218,6 +225,11 @@ export type Install = {
   serialNotice: string | null;
   complete: boolean;
   dealId: number | null;
+  /**
+   * The sale this install came from, for reference (11/3): its deal's Sale Invoice # or Sales Order # and P.O. Null
+   * when it came from no deal. Set by withSales on the Installs board, the account page and a saved install.
+   */
+  sale?: InstallSale | null;
   /** Set when the card came from a deal: which of that deal's board projects this is. */
   project?: { n: number; of: number } | null;
   duplicateOf: number | null;
