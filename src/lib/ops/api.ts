@@ -1515,28 +1515,31 @@ function uniquePendingHandoffs(deals: any) {
  * Exported for its tests.
  */
 export async function maybeHandoffInstall(sql: any, dealId: any, userId?: string | null): Promise<DealHandoff | null> {
-	const deal = (await sql`select * from deals where id = ${dealId}`)[0];
-	if (!deal || deal.archived) return null;
 	const hasOne = async () => (await sql`
     select id from installs where deal_id = ${dealId} and archived = false order by id limit 1`)[0];
+	// The claim returns the deal as it is now: a save just before it (a machine added, say) is what the handoff uses.
 	const won = await sql`
     update deals set handed_off = true, updated_at = now()
      where id = ${dealId} and archived = false and not handed_off and completion = 'complete'
-     returning id`;
-	const had = await hasOne();
-	if (had) return { kind: "had", installId: Number(had.id) };
+     returning *, updated_at::text as claimed_at`;
 	if (!won[0]) {
-		// Another handoff of it has the claim, or the deal was set back to open or removed meanwhile.
+		// Removed from the Pipeline, set back to open, or another handoff of it has the claim (or ran already).
 		const now = (await sql`select archived, completion from deals where id = ${dealId}`)[0];
 		if (!now || now.archived) return null;
-		return now.completion === "complete" ? { kind: "had", installId: null } : { kind: "open", installId: null };
+		if (now.completion !== "complete") return { kind: "open", installId: null };
+		const had = await hasOne();
+		return { kind: "had", installId: had ? Number(had.id) : null };
 	}
+	const had = await hasOne();
+	if (had) return { kind: "had", installId: Number(had.id) };
 	try {
-		return await linkOrMakeInstall(sql, deal, dealId, userId, hasOne);
+		return await linkOrMakeInstall(sql, won[0], dealId, userId, hasOne);
 	} catch (e) {
+		// Back on the Handoff page, while the claim is still this one's (nothing wrote the deal since) and no install has it.
 		await sql`
       update deals set handed_off = false, updated_at = now()
-       where id = ${dealId} and not exists (select 1 from installs where deal_id = ${dealId} and archived = false)`.catch(() => undefined);
+       where id = ${dealId} and updated_at = ${won[0].claimed_at}::timestamptz
+         and not exists (select 1 from installs where deal_id = ${dealId} and archived = false)`.catch(() => undefined);
 		throw e;
 	}
 }
@@ -1562,25 +1565,43 @@ async function linkOrMakeInstall(sql: any, deal: any, dealId: any, userId: strin
 		const now = await hasOne();
 		if (now) return { kind: "had", installId: Number(now.id) };
 	}
-	const initials = canonicalRepName(String(deal.producer ?? "")) ?? null;
-	// Every machine row on the deal goes to the install, so pre-inspection gets each unit with its serial and voltage.
-	const today = todayChicago();
-	const tied = parseMachinesJson(deal.machines ?? null).map((m) => ({ ...m, uid: m.uid || newMachineUid(), confirmedAt: m.confirmedAt ?? today }));
-	const packed = serializeMachines(tied.map((m) => boardRow(m, m.uid)));
-	// Made only while the deal still has no install (the Board may have just made one); its rows are tied after.
-	const made = await sql`
-    insert into installs (received, customer, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage, deal_review, deal_review_at)
-    select ${today}::date, ${deal.customer}::text, ${packed.equipment ?? deal.equipment ?? null}::text, ${initials}::text, ${deal.terms ?? null}::text,
-           ${dealId}::int, ${packed.machines}::text, ${packed.serial}::text, ${packed.powerVoltage}::text, 'made', now()
-     where not exists (select 1 from installs where deal_id = ${dealId}::int and archived = false)
-    returning id`;
-	if (!made[0]) {
-		const now = await hasOne();
-		return now ? { kind: "had", installId: Number(now.id) } : null;
+	// Made from the deal's rows as they are: one statement locks the deal, checks its machines are as read (else it reads
+	// them again), makes the install while the deal has none, and ties the deal's rows to it. A rep's save meanwhile
+	// isn't written over.
+	let cur = deal;
+	for (let tries = 0; tries < 3 && cur && !cur.archived; tries += 1) {
+		const initials = canonicalRepName(String(cur.producer ?? "")) ?? null;
+		// Every machine row on the deal goes to the install, so pre-inspection gets each unit with its serial and voltage.
+		const today = todayChicago();
+		const tied = parseMachinesJson(cur.machines ?? null).map((m) => ({ ...m, uid: m.uid || newMachineUid(), confirmedAt: m.confirmedAt ?? today }));
+		const packed = serializeMachines(tied.map((m) => boardRow(m, m.uid)));
+		const tiedRows = tied.length ? serializeMachines(tied).machines : (cur.machines ?? null);
+		const made = await sql`
+      with d as (
+        select id from deals
+         where id = ${dealId}::int and archived = false and machines is not distinct from ${cur.machines ?? null}::text
+         for update
+      ), ins as (
+        insert into installs (received, customer, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage, deal_review, deal_review_at)
+        select ${today}::date, ${cur.customer}::text, ${packed.equipment ?? cur.equipment ?? null}::text, ${initials}::text, ${cur.terms ?? null}::text,
+               ${dealId}::int, ${packed.machines}::text, ${packed.serial}::text, ${packed.powerVoltage}::text, 'made', now()
+          from d
+         where not exists (select 1 from installs where deal_id = ${dealId}::int and archived = false)
+        returning id
+      ), tie as (
+        update deals set machines = ${tiedRows}::text from ins where deals.id = ${dealId}::int returning deals.id
+      )
+      select (select id from ins) as id, (select count(*) from d)::int as as_read`;
+		if (made[0]?.id) {
+			if (userId) await logActivity(sql, userId, "install", made[0].id, "opened", `made for deal #${dealId} when it was marked complete; for an Admin to review`);
+			return { kind: "made", installId: Number(made[0].id) };
+		}
+		// The deal is as read but has an install now (the Board may have just made one); else it changed: read it again.
+		if (made[0]?.as_read) break;
+		cur = (await sql`select * from deals where id = ${dealId}`)[0];
 	}
-	if (tied.length) await sql`update deals set machines = ${serializeMachines(tied).machines} where id = ${dealId}`;
-	if (userId) await logActivity(sql, userId, "install", made[0].id, "opened", `made for deal #${dealId} when it was marked complete; for an Admin to review`);
-	return { kind: "made", installId: Number(made[0].id) };
+	const now = await hasOne();
+	return now ? { kind: "had", installId: Number(now.id) } : null;
 }
 /**
  * What a handoff did: an open install was linked, one was made, the deal had its install ("had"; null while another
@@ -1634,31 +1655,47 @@ export async function reviewDealLinkFor(sql: any, userId: string, data: { instal
 	const backOnHandoff = !!back[0] && !back[0].handed_off && !back[0].archived && back[0].completion === "complete";
 	// A unit the warehouse pulled for this install wrote its serial onto the deal's machines too. The unit stays with the
 	// install, so the deal's row of that model loses that serial (as a return to the barn clears it). A row of another
-	// model with the same serial isn't that unit. Written only as read; a save meanwhile gets a second try.
+	// model with the same serial isn't that unit. Written only as read, tried again on a save meanwhile; the deal's activity
+	// names each serial cleared (so one the rep typed can be put back), or that it couldn't be.
 	const units = await sql`select model, serial from assets where install_id = ${row.id} and coalesce(btrim(serial), '') <> '' order by id`;
+	const cleared: string[] = [];
+	let notCleared = false;
 	if (units.length) {
 		const catalog = await loadEquipCatalog(sql);
-		for (let tries = 0; tries < 2; tries += 1) {
+		notCleared = true;
+		for (let tries = 0; tries < 3; tries += 1) {
 			const cur = (await sql`select machines from deals where id = ${dealId}`)[0];
 			let rows = parseMachinesJson(cur?.machines ?? null);
-			let changed = false;
+			const these: string[] = [];
 			for (const u of units) {
 				const r = clearUnitSerial(rows, { model: String(u.model ?? ""), serial: u.serial }, catalog);
 				if (r.changed) {
 					rows = r.rows;
-					changed = true;
+					these.push(String(u.serial).trim());
 				}
 			}
-			if (!changed) break;
+			if (!these.length) {
+				notCleared = false;
+				break;
+			}
 			const packed = serializeMachines(rows);
 			const done = await sql`
         update deals set machines = ${packed.machines}, equipment = ${packed.equipment}, updated_at = now()
          where id = ${dealId} and machines is not distinct from ${cur?.machines ?? null} returning id`;
-			if (done[0]) break;
+			if (done[0]) {
+				cleared.push(...these);
+				notCleared = false;
+				break;
+			}
 		}
 	}
 	await logActivity(sql, userId, "install", row.id, "updated", `deal link removed: deal #${dealId}`);
-	await logActivity(sql, userId, "deal", dealId, "updated", backOnHandoff ? `unlinked from install #${row.id}; back on the Handoff page` : `unlinked from install #${row.id}`);
+	const serialNote = cleared.length
+		? `; serial ${cleared.join(", ")} cleared from its machines (the unit stays with install #${row.id})`
+		: notCleared
+			? `; check its machines: the serials of install #${row.id}'s units couldn't be cleared (the deal was being saved)`
+			: "";
+	await logActivity(sql, userId, "deal", dealId, "updated", `${backOnHandoff ? `unlinked from install #${row.id}; back on the Handoff page` : `unlinked from install #${row.id}`}${serialNote}`);
 	return { approved: false, kind, dealId, backOnHandoff };
 }
 

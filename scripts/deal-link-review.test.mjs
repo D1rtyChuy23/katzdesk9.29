@@ -472,6 +472,30 @@ test("one deal, one handoff: two saves completing it at once, two presses of Sen
     // Completed again, it hands off once.
     await complete(sql, d7);
     assert.equal((await installsOf(pg, d7)).length, 1);
+    // The rep saves the deal (a grinder added) while its handoff runs: the install is made from the deal as saved, both
+    // rows are tied, and the save isn't written over.
+    const d9 = await deal(pg, { customer: "Test Van", completion: "complete", machines: BREWER });
+    const grinderAdded = racing(sql, /select id, customer from installs\s+where archived = false and deal_id is null/, () =>
+      pg.query("update deals set machines = $2 where id = $1", [d9, JSON.stringify([...JSON.parse(BREWER), { equipment: "Test Grinder TG-2", serial: "", powerVoltage: "", ownership: "Sold" }])]),
+    );
+    const h9 = await api.maybeHandoffInstall(grinderAdded, d9, "u-owner");
+    assert.equal(h9.kind, "made");
+    assert.deepEqual(JSON.parse((await one(pg, "select machines from installs where id = $1", [h9.installId])).machines).map((m) => m.equipment), ["Test Brewer TB-1", "Test Grinder TG-2"]);
+    const d9rows = JSON.parse((await one(pg, "select machines from deals where id = $1", [d9])).machines);
+    assert.deepEqual(d9rows.map((m) => [m.equipment, !!m.uid]), [["Test Brewer TB-1", true], ["Test Grinder TG-2", true]]);
+    // A handoff that fails while another handoff of the deal holds the claim (the deal was set back to open and completed
+    // again meanwhile) leaves that claim alone.
+    const d10 = await deal(pg, { customer: "Test Wagon", completion: "complete" });
+    await install(pg, { customer: "Test Wagon" });
+    const otherClaim = wrap(async (text, params) => {
+      if (/^\s*update installs set deal_id = /.test(text)) {
+        await pg.query("update deals set handed_off = true, updated_at = now() + interval '1 second' where id = $1", [d10]);
+        throw new Error("made-up failure");
+      }
+      return sql.query(text, params);
+    });
+    await assert.rejects(api.maybeHandoffInstall(otherClaim, d10, "u-owner"), /made-up failure/);
+    assert.equal((await dealRow(pg, d10)).handed_off, true, "the other handoff's claim stands");
     // A handoff that fails before its install is made puts the deal back on the Handoff page.
     const d8 = await deal(pg, { customer: "Test Truck" });
     const broken = wrap(async (text, params) => {
@@ -524,6 +548,7 @@ test("Unlink clears the deal's copy of a pulled unit's serial, as a return to th
     await pg.query("update assets set status = 'sold', locked_by = 'System (sold)' where id = $1", [unit]);
     assert.equal((await api.reviewDealLinkFor(sql, "u-owner", { installId: open, approve: false })).backOnHandoff, true);
     assert.deepEqual(await dealSerial(d), [""], "the deal's copy is cleared");
+    assert.match((await one(pg, "select detail from activity where entity_type = 'deal' and entity_id = $1 order by id desc limit 1", [d])).detail, new RegExp(`^unlinked from install #${open}; back on the Handoff page; serial TB-77 cleared from its machines \\(the unit stays with install #${open}\\)$`));
     const kept = await one(pg, "select install_id, status, serial from assets where id = $1", [unit]);
     assert.deepEqual(kept, { install_id: open, status: "sold", serial: "TB-77" }, "the unit stays with the install");
     assert.match((await one(pg, "select machines from installs where id = $1", [open])).machines, /TB-77/);
@@ -568,6 +593,21 @@ test("Unlink clears the deal's copy of a pulled unit's serial, as a return to th
     }, 2);
     await api.reviewDealLinkFor(savedMeanwhile, "u-owner", { installId: stall, approve: false });
     assert.deepEqual(await dealSerial(d6), ["", "TG-TYPED"], "the serial cleared, and the save meanwhile kept");
+    // Saved again before every try: the serial stays, and the deal's activity says to check its machines.
+    const stall2 = await install(pg, { customer: "Test Stall 2" });
+    const d7 = await deal(pg, { customer: "Test Stall 2", machines: JSON.stringify([{ equipment: "Bunn TB3", serial: "", powerVoltage: "", ownership: "Sold" }]) });
+    await complete(sql, d7);
+    const unit4 = Number((await one(pg, "insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Bunn TB3', 'TB-44', 1, 'barn-back', 'A', 1, 4, 'ready') returning id")).id);
+    await api.assignAssetToInstallFor(sql, { assetId: unit4, installId: stall2 }, { userId: "u-owner" });
+    let reads = 0;
+    const busy = wrap(async (text, params) => {
+      const rows = await sql.query(text, params);
+      if (/^select machines from deals where id/.test(text) && ++reads > 1) await pg.query("update deals set notes = $2, machines = machines || ' ' where id = $1", [d7, `save ${reads}`]);
+      return rows;
+    });
+    await api.reviewDealLinkFor(busy, "u-owner", { installId: stall2, approve: false });
+    assert.deepEqual((await dealSerial(d7)).map((v) => v.trim()), ["TB-44"]);
+    assert.match((await one(pg, "select detail from activity where entity_type = 'deal' and entity_id = $1 order by id desc limit 1", [d7])).detail, /; check its machines: the serials of install #\d+'s units couldn't be cleared \(the deal was being saved\)$/);
     // A unit on the install whose serial isn't on the deal leaves the deal's rows as they are.
     const other = await install(pg, { customer: OTHER });
     const d2 = await deal(pg, { customer: OTHER, machines: JSON.stringify([{ equipment: "Test Brewer TB-1", serial: "TB1-9", powerVoltage: "", ownership: "Sold" }]) });
@@ -607,6 +647,11 @@ test("a made install merged into the account's install for the same job: the kep
     const sn = (serial, uid) => ({ equipment: "Test Brewer TB-1", serial, powerVoltage: "", ...(uid ? { uid } : {}) });
     assert.deepEqual(mergedMachineList([sn("S-1", "u-1")], [sn("S-1", "u-2")]).list.map((m) => [m.serial, m.uid]), [["S-1", "u-1"]]);
     assert.deepEqual(mergedMachineList([sn("", null), sn("", "u-1")], [sn("", "u-1")]).list.map((m) => m.uid ?? null), [null, "u-1"]);
+    // Each kind of match is tried for every dropped row first: a row with no serial doesn't take the row another serial
+    // matches, and the same machine twice on the dropped install is added once.
+    assert.deepEqual(mergedMachineList([sn("S-A", null), sn("", null)], [sn("", "U1"), sn("S-A", "U2")]).list.map((m) => [m.serial, m.uid ?? null]), [["S-A", "U2"], ["", "U1"]]);
+    assert.deepEqual(mergedMachineList([sn("", null)], [sn("S-9", "U"), sn("S-9", "U")]).list.map((m) => [m.serial, m.uid]), [["S-9", "U"]]);
+    assert.deepEqual(mergedMachineList([sn("S-1", null)], [sn("S-2", null), sn("S-2", null)]).list.map((m) => m.serial), ["S-1", "S-2"]);
     // The kept row's other blanks come from the dropped row; what it has stays.
     const kept = { equipment: "Test Brewer TB-1", serial: "SN-1", powerVoltage: "", plug: "5-15", ownership: "Leased" };
     const dropped = { equipment: "Test Brewer TB-1", serial: "", powerVoltage: "120", uid: "u-9", ownership: "Sold", plug: "5-20", water: "Line", recipeId: 7 };
@@ -711,8 +756,10 @@ test("the screens: the card's review, the Handoff page's list, the buttons, and 
   // on the deal's status read, and the handoff claiming the deal (it runs only while the deal isn't handed off; the save
   // that completes a deal puts it in line).
   assert.match(server, /with prev as \(select id, completion from deals where id = \$\{data\.id\} for update\)/);
-  assert.match(server, /update deals set handed_off = true, updated_at = now\(\)\s+where id = \$\{dealId\} and archived = false and not handed_off and completion = 'complete'\s+returning id/);
-  assert.match(server, /return now\.completion === "complete" \? \{ kind: "had", installId: null \} : \{ kind: "open", installId: null \};/);
+  assert.match(server, /update deals set handed_off = true, updated_at = now\(\)\s+where id = \$\{dealId\} and archived = false and not handed_off and completion = 'complete'\s+returning \*, updated_at::text as claimed_at/);
+  assert.match(server, /if \(now\.completion !== "complete"\) return \{ kind: "open", installId: null \};/);
+  // The install made in one statement that locks the deal and checks its machines are as read.
+  assert.match(server, /select id from deals\s+where id = \$\{dealId\}::int and archived = false and machines is not distinct from \$\{cur\.machines \?\? null\}::text\s+for update/);
   assert.match(server, /handed_off = case when \$\{completion === "complete"\}::boolean and prev\.completion is distinct from 'complete' then false else deals\.handed_off end,/);
   assert.match(server, /if \(completion === "complete" && wrote\[0\] && wrote\[0\]\.was !== "complete"\) await maybeHandoffInstall\(sql, data\.id, userId\);/);
   assert.match(server, /return \{ ok: true, handoff: await maybeHandoffInstall\(await ready\(\), data\.dealId, context\.userId\) \};/);

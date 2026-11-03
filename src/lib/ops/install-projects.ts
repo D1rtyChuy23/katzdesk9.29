@@ -126,37 +126,52 @@ const sameModel = (a: { catalog_model: string; equipment_name: string }, b: { ca
 
 /**
  * The keeper's machine list with the drop's rows it doesn't have added, each with all it carries. A drop row is the
- * keeper's row of the same model with the same tie to a deal row (11/3), else with the same serial, else where one of
- * the two has no serial, unless both are tied to two different deal rows: those are two machines. The keeper row takes
- * the drop row's serial, voltage, tie, Sold/Loan/Lease, plug, water and recipe where it has none. So an install made for
- * a deal, merged into the account's install for the same job, keeps its deal's machines on the Board.
+ * keeper's row of the same model with the same tie to a deal row (11/3), else with the same serial (the same machine,
+ * whatever the ties), else where one of the two has no serial, unless both are tied to two different deal rows: those
+ * are two machines. Each of the three is tried for every drop row before the next, so a row with no serial doesn't take
+ * the row another one's serial matches. The keeper row takes the drop row's serial, voltage, tie, Sold/Loan/Lease, plug,
+ * water and recipe where it has none. A drop row that's on the list already (its tie, or its model and serial) isn't
+ * added again. So an install made for a deal, merged into the account's install for the same job, keeps its deal's
+ * machines on the Board.
  */
 export function mergedMachineList(keeper: MachineSpec[], drop: MachineSpec[]): { list: MachineSpec[]; added: MachineSpec[] } {
   const list = keeper.map((m) => ({ ...m }));
   const used = new Set<number>();
-  const added: MachineSpec[] = [];
-  for (const row of drop) {
-    const key = serialKey(row.serial);
-    const fits = (m: MachineSpec, i: number) => !used.has(i) && sameCatalogModel(m.equipment, row.equipment);
-    let at = row.uid ? list.findIndex((m, i) => fits(m, i) && m.uid === row.uid) : -1;
-    if (at < 0) at = list.findIndex((m, i) => fits(m, i) && !!key && serialKey(m.serial) === key);
-    if (at < 0) at = list.findIndex((m, i) => fits(m, i) && (!key || !serialKey(m.serial)) && !(m.uid && row.uid && m.uid !== row.uid));
-    if (at < 0) {
-      list.push({ ...row });
-      used.add(list.length - 1);
-      added.push(row);
-      continue;
-    }
-    used.add(at);
-    const m = list[at]!;
-    if (!m.serial.trim() && row.serial.trim()) m.serial = row.serial;
-    if (!m.powerVoltage.trim() && row.powerVoltage.trim()) m.powerVoltage = row.powerVoltage;
-    if (!m.uid && row.uid) m.uid = row.uid;
-    if (!m.ownership && row.ownership) m.ownership = row.ownership;
-    if (!m.plug && row.plug) m.plug = row.plug;
-    if (!m.water && row.water) m.water = row.water;
-    if (m.recipeId == null && row.recipeId != null) m.recipeId = row.recipeId;
+  const placed = new Set<number>();
+  const passes: ((m: MachineSpec, row: MachineSpec) => boolean)[] = [
+    (m, row) => !!row.uid && m.uid === row.uid,
+    (m, row) => !!serialKey(row.serial) && serialKey(m.serial) === serialKey(row.serial),
+    (m, row) => (!serialKey(row.serial) || !serialKey(m.serial)) && !(m.uid && row.uid && m.uid !== row.uid),
+  ];
+  for (const pass of passes) {
+    drop.forEach((row, j) => {
+      if (placed.has(j)) return;
+      const at = list.findIndex((m, i) => !used.has(i) && sameCatalogModel(m.equipment, row.equipment) && pass(m, row));
+      if (at < 0) return;
+      placed.add(j);
+      used.add(at);
+      const m = list[at]!;
+      if (!m.serial.trim() && row.serial.trim()) m.serial = row.serial;
+      if (!m.powerVoltage.trim() && row.powerVoltage.trim()) m.powerVoltage = row.powerVoltage;
+      if (!m.uid && row.uid) m.uid = row.uid;
+      if (!m.ownership && row.ownership) m.ownership = row.ownership;
+      if (!m.plug && row.plug) m.plug = row.plug;
+      if (!m.water && row.water) m.water = row.water;
+      if (m.recipeId == null && row.recipeId != null) m.recipeId = row.recipeId;
+    });
   }
+  const added: MachineSpec[] = [];
+  drop.forEach((row, j) => {
+    if (placed.has(j)) return;
+    const key = serialKey(row.serial);
+    const already = list.some(
+      (m) => (!!row.uid && m.uid === row.uid) || (!!key && serialKey(m.serial) === key && sameCatalogModel(m.equipment, row.equipment)),
+    );
+    if (already) return;
+    list.push({ ...row });
+    used.add(list.length - 1);
+    added.push(row);
+  });
   return { list, added };
 }
 
