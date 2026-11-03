@@ -45,7 +45,7 @@ import {
 import { coreHoleForModels } from "@/lib/ops/spec-library";
 import { CORE_HOLE_NOTE } from "@/lib/ops/spec-copy";
 import { listReps } from "@/lib/ops/reps";
-import { listTechs } from "@/lib/ops/roster";
+import { listTechs, serviceTechs } from "@/lib/ops/roster";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -643,7 +643,8 @@ function MetaForm({ view, onSaved }: { view: InspectionView; onSaved: (v: Inspec
   const [overrideReason, setOverrideReason] = useState(view.overrideReason ?? "");
   const reps = useQuery({ queryKey: ["reps"], queryFn: () => listReps() });
   const techs = useQuery({ queryKey: ["roster"], queryFn: () => listTechs() });
-  const choices = inspectorChoices(reps.data?.reps ?? [], techs.data?.techs ?? [], inspector);
+  // Not a rebuild-only tech (11/3).
+  const choices = inspectorChoices(reps.data?.reps ?? [], serviceTechs(techs.data?.techs ?? []), inspector);
   const saveAll = useSaveAll();
   /** Typed in since the last save. Only then does the window's Save send these: never a copy someone else has since changed. */
   const [touched, setTouched] = useState(false);

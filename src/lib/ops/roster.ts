@@ -10,7 +10,17 @@ export type DeskTech = {
   name: string;
   active: boolean;
   sortOrder: number;
+  /**
+   * On rebuilds only (Chuy, 11/3: Pedro Jr. and Pedro Sr.): a rebuild's Owner list has this tech, and the lists for
+   * service calls, TLCs, PMs, installs, pre-inspections, the day board and the route planner don't.
+   */
+  rebuildsOnly: boolean;
 };
+
+/** The techs a service call, TLC, PM, install, pre-inspection, day board or route can go to: active, not rebuilds only. */
+export function serviceTechs<T extends { active: boolean; rebuildsOnly?: boolean }>(techs: T[]): T[] {
+  return techs.filter((t) => t.active && !t.rebuildsOnly);
+}
 
 export type RosterState = {
   techs: DeskTech[];
@@ -23,6 +33,9 @@ const DEFAULT_ROSTER: { name: string; active: boolean }[] = [
   ...DEFAULT_TECHS.map((name) => ({ name, active: true })),
   { name: "Elias", active: false },
 ];
+
+/** Each database handle checked for the rebuilds_only column: once per server (one handle), not on every read. */
+const rebuildsOnlyChecked = new WeakSet<object>();
 
 export async function ensureRoster(sql: Sql): Promise<void> {
   await sql.query(`
@@ -37,9 +50,18 @@ export async function ensureRoster(sql: Sql): Promise<void> {
       name text not null,
       active boolean not null default true,
       sort_order int not null default 0,
+      rebuilds_only boolean not null default false,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     )`);
+  // Migration 0113 adds it to a roster made before; this covers one an older build made after 0113 ran.
+  if (!rebuildsOnlyChecked.has(sql)) {
+    const has = await sql.query<{ n: number }>(
+      "select count(*)::int as n from information_schema.columns where table_name = 'desk_techs' and column_name = 'rebuilds_only'",
+    );
+    if (!has[0]?.n) await sql.query("alter table desk_techs add column if not exists rebuilds_only boolean not null default false");
+    rebuildsOnlyChecked.add(sql);
+  }
   try {
     await sql.query(
       "create unique index if not exists desk_techs_name_lower_uidx on desk_techs (lower(name))",
@@ -125,13 +147,15 @@ export async function loadTechs(sql: Sql): Promise<DeskTech[]> {
     name: string;
     active: boolean;
     sort_order: number;
-  }>("select id, name, active, sort_order from desk_techs order by sort_order, id");
+    rebuilds_only: boolean;
+  }>("select id, name, active, sort_order, rebuilds_only from desk_techs order by sort_order, id");
   if (!rows.length) {
     return DEFAULT_TECHS.map((name, i) => ({
       id: i + 1,
       name,
       active: true,
       sortOrder: (i + 1) * 10,
+      rebuildsOnly: false,
     }));
   }
   return rows.map((r) => ({
@@ -139,6 +163,7 @@ export async function loadTechs(sql: Sql): Promise<DeskTech[]> {
     name: r.name,
     active: flagOn(r.active),
     sortOrder: r.sort_order,
+    rebuildsOnly: flagOn(r.rebuilds_only),
   }));
 }
 
@@ -270,33 +295,65 @@ export const listRosterCandidates = createServerFn({ method: "GET" })
       .map((a) => ({ userId: a.user_id, username: a.username }));
   });
 
+/** The body of addTech: a new name, or one already on the roster made active again, on rebuilds only or everywhere. */
+export async function addTechFor(sql: Sql, data: { name: string; rebuildsOnly?: boolean }): Promise<void> {
+  await ensureRoster(sql);
+  const name = cleanTechName(data.name);
+  if (!name) throw new Error("Enter a technician name.");
+  if (name.length > 40) throw new Error("Keep the name under 40 characters.");
+  const rebuildsOnly = !!data.rebuildsOnly;
+  const found = await sql.query<{ id: number }>(
+    "select id from desk_techs where lower(name) = lower($1) limit 1",
+    [name],
+  );
+  if (found[0]) {
+    await sql.query(
+      "update desk_techs set active = true, name = $2, rebuilds_only = $3, updated_at = now() where id = $1",
+      [found[0].id, name, rebuildsOnly],
+    );
+  } else {
+    const max = await sql.query<{ n: number }>(
+      "select coalesce(max(sort_order), 0)::int as n from desk_techs",
+    );
+    await sql.query(`insert into desk_techs (name, active, sort_order, rebuilds_only) values ($1, true, $2, $3)`, [
+      name,
+      (max[0]?.n ?? 0) + 10,
+      rebuildsOnly,
+    ]);
+  }
+}
+
 export const addTech = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { name: string }) => z.object({ name: z.string().min(1) }).parse(d))
+  .validator((d: { name: string; rebuildsOnly?: boolean }) =>
+    z.object({ name: z.string().min(1), rebuildsOnly: z.boolean().optional() }).parse(d),
+  )
   .handler(async ({ context, data }): Promise<RosterState> => {
     const sql = await getSql();
     await requireRosterEditor(sql, context.userId);
-    const name = cleanTechName(data.name);
-    if (!name) throw new Error("Enter a technician name.");
-    if (name.length > 40) throw new Error("Keep the name under 40 characters.");
-    const found = await sql.query<{ id: number }>(
-      "select id from desk_techs where lower(name) = lower($1) limit 1",
-      [name],
-    );
-    if (found[0]) {
-      await sql.query(
-        "update desk_techs set active = true, name = $2, updated_at = now() where id = $1",
-        [found[0].id, name],
-      );
-    } else {
-      const max = await sql.query<{ n: number }>(
-        "select coalesce(max(sort_order), 0)::int as n from desk_techs",
-      );
-      await sql.query(`insert into desk_techs (name, active, sort_order) values ($1, true, $2)`, [
-        name,
-        (max[0]?.n ?? 0) + 10,
-      ]);
-    }
+    await addTechFor(sql, data);
+    return listTechs();
+  });
+
+/** The body of setTechRebuildsOnly: a tech on rebuilds only, or on every list again. */
+export async function setTechRebuildsOnlyFor(sql: Sql, data: { id: number; rebuildsOnly: boolean }): Promise<void> {
+  await ensureRoster(sql);
+  const rows = await sql.query<{ id: number }>(
+    "update desk_techs set rebuilds_only = $2, updated_at = now() where id = $1 returning id",
+    [data.id, data.rebuildsOnly],
+  );
+  if (!rows[0]) throw new Error("Technician not found.");
+}
+
+export const setTechRebuildsOnly = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number; rebuildsOnly: boolean }) =>
+    z.object({ id: z.number(), rebuildsOnly: z.boolean() }).parse(d),
+  )
+  .handler(async ({ context, data }): Promise<RosterState> => {
+    const sql = await getSql();
+    await requireRosterEditor(sql, context.userId);
+    await setTechRebuildsOnlyFor(sql, data);
     return listTechs();
   });
 

@@ -97,10 +97,11 @@ test("part search finds a part by its bin, the way Parts does; part numbers stil
   assert.deepEqual(found("shelf", list), ["PARTS : TESTSH"]);
   assert.deepEqual(found("ack", list), ["PARTS : TESTDR"]);
   assert.deepEqual(found("grounds bin", list), ["PARTS : TESTGB"]);
-  // Rack A is rack A, not rack AB; one piece alone ("A", "03") isn't a bin.
+  // Rack A is rack A, not rack AB. One character alone isn't searched as a bin (the pickers search from two, and two or
+  // more find any piece of a bin, as Parts does: picker-bins-rebuild-techs.test.mjs).
   const ab = [it("PARTS : TESTAB", { rack: "AB", shelf: "1", bin: "1" }), it("PARTS : TESTRA", { rack: "A", shelf: "1", bin: "1" }), it("PARTS : TESTONE", { rack: "A", shelf: null, bin: null })];
   assert.deepEqual(found("rack a", ab), ["PARTS : TESTONE", "PARTS : TESTRA"]);
-  assert.deepEqual(found("7", [it("PARTS : TESTSEVEN", { rack: "7", shelf: null, bin: null })]), [], "one piece alone isn't a bin");
+  assert.deepEqual(found("7", [it("PARTS : TESTSEVEN", { rack: "7", shelf: null, bin: null })]), [], "one character alone isn't a bin");
   assert.deepEqual(found("rack a shelf 1", ab), ["PARTS : TESTRA"]);
 });
 

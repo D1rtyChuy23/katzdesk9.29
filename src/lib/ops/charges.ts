@@ -147,6 +147,10 @@ export function searchItems<T extends Pick<BillingItem, "item" | "description" |
       .join(" ")
       .toLowerCase();
     const typed = looksLikeBinCode(q) ? typedBin(q) : "";
+    // Any piece of its bin, as the Parts page finds it (11/3): 03-12, E4 or 205, two characters at least; and its bin in
+    // words when what was typed has a digit ("E4 3" finds a bin stored as E4 3).
+    const piece = typedBin(q).length >= 2 ? typedBin(q) : "";
+    const inWords = piece && /\d/.test(q) ? q.toLowerCase().replace(/\s+/g, " ").trim() : "";
     const phrase = looksLikeBinWords(q) ? ` ${q.toLowerCase().replace(/\s+/g, " ").trim()} ` : "";
     let score = 0;
     if (nq && (sku === nq || mfr === nq)) score = 100;
@@ -161,6 +165,8 @@ export function searchItems<T extends Pick<BillingItem, "item" | "description" |
     // Its bin in words, whole words in order: "Rack A", "Shelf 03" (not Rack AB).
     else if (binWords && phrase && ` ${binWords} `.includes(phrase)) score = 40;
     else if (words.every((w) => name.includes(w) || desc.includes(w))) score = 30;
+    // After every part found by its number or name: a shelf of parts never pushes those out of the list.
+    else if ((bin && piece && bin.includes(piece)) || (binWords && inWords && binWords.includes(inWords))) score = 20;
     if (score) scored.push({ item: it, score });
   }
   return scored

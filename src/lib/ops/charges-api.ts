@@ -22,7 +22,6 @@ import {
   cleanSalesOrder,
   itemRowsFromSheets,
   kindForItem,
-  looksLikeBinCode,
   looksLikeBinWords,
   normalizePartNo,
   priceChange,
@@ -125,15 +124,16 @@ export async function searchBillingItemsFor(sql: Pick<Sql, "query">, raw: string
       where active
         and hidden_at is null
         and (${PART_TEXT_MATCH}
-             -- Its bin (11/2): A-03-12, A 03 12 or A/03/12, or Rack A, as the Parts page finds it. Only for what is typed
-             -- like a bin, so "bin" alone finds the parts named bin rather than every part with one.
+             -- Its bin, the way the Parts page finds it (11/3): A-03-12, A 03 12 or A/03/12, any piece of it (03-12, E4, 205),
+             -- or Rack A in words. The words are searched only for "Rack A"-style text or text with a digit in it, so "bin"
+             -- alone finds the parts named bin rather than every part with one.
              or ($3::text is not null and concat_ws('-', bin_rack, bin_shelf, bin_bin) ilike $3)
              or ($4::boolean and concat_ws(' ', 'rack ' || bin_rack, 'shelf ' || bin_shelf, 'bin ' || bin_bin) ilike $1))
       -- A part found by its name or number comes before the parts found by their bin alone, so a shelf of parts never
       -- crowds an exact part number out of what is read.
       order by coalesce(${PART_TEXT_MATCH}, false) desc, lower(item)
       limit 300`,
-    [`%${q}%`, nq, looksLikeBinCode(q) ? `%${binSearchCode(q)}%` : null, looksLikeBinWords(q)],
+    [`%${q}%`, nq, `%${binSearchCode(q)}%`, looksLikeBinWords(q) || /\d/.test(q)],
   );
   return searchItems(q, rows.map(toItem), 12);
 }

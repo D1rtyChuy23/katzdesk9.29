@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ChangeEvent } from "react";
-import { listTechs, techLabel, type DeskTech } from "@/lib/ops/roster";
+import { listTechs, serviceTechs, techLabel, type DeskTech } from "@/lib/ops/roster";
 import { DEFAULT_TECHS, sameTech } from "@/lib/ops/tech-match";
 import { SelectField } from "@/components/ui/select-field";
 
@@ -12,7 +12,14 @@ export function useRoster() {
   });
 }
 
+/** The names a service call, TLC, PM or install can go to: active, and not on rebuilds only (11/3). */
 export function activeTechNames(techs?: DeskTech[] | null): string[] {
+  if (techs?.length) return serviceTechs(techs).map((t) => t.name);
+  return [...DEFAULT_TECHS];
+}
+
+/** Every active tech's name, a rebuild-only one too: a name shown anywhere reads as active, not "(inactive)". */
+export function knownTechNames(techs?: DeskTech[] | null): string[] {
   if (techs?.length) return techs.filter((t) => t.active).map((t) => t.name);
   return [...DEFAULT_TECHS];
 }
@@ -20,7 +27,7 @@ export function activeTechNames(techs?: DeskTech[] | null): string[] {
 export function TechName({ name }: { name?: string | null }) {
   const roster = useRoster();
   if (!name) return <>{"—"}</>;
-  const active = activeTechNames(roster.data?.techs);
+  const active = knownTechNames(roster.data?.techs);
   const match = active.find((n) => sameTech(n, name));
   if (match) return <>{match}</>;
   return (

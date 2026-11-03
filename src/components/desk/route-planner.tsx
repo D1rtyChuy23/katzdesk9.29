@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { fromFor } from "@/lib/ops/search-params";
 import { ChevronLeft, ChevronRight, MapPin as MapPinIcon, Navigation, TriangleAlert } from "lucide-react";
 import { addDays, todayChicago } from "@/lib/ops/clock";
-import { listTechs } from "@/lib/ops/roster";
+import { listTechs, serviceTechs } from "@/lib/ops/roster";
 import { updateInstall, updateJob, updatePm } from "@/lib/ops/api";
 import { NO_REP_COLOR, type LatLng } from "@/lib/ops/geo";
 import { driveBetween, driveTableStamp, legsFromTable, pointKey, type DriveLeg } from "@/lib/ops/drive-route";
@@ -171,7 +171,8 @@ export function RoutePlanner({
   const start: RouteStart | null = startFrom === "shop" ? KATZ_SHOP : here ? { key: "here", label: "Current location", point: here } : null;
   const mapBox = useRef<HTMLDivElement>(null);
 
-  const rosterNames = useMemo(() => (roster.data?.techs ?? []).filter((t) => t.active).map((t) => t.name), [roster.data]);
+  // Not a rebuild-only tech (11/3): they don't run routes.
+  const rosterNames = useMemo(() => serviceTechs(roster.data?.techs ?? []).map((t) => t.name), [roster.data]);
   const dayStops = useMemo(() => collectDayStops({ installs, pms, services, tlcs }, day), [installs, pms, services, tlcs, day]);
   const { byName } = geo;
   const placed = useMemo(() => placeStops(dayStops, (customer) => byName.get(nameKey(customer))), [dayStops, byName]);
