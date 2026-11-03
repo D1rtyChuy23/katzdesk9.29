@@ -1,5 +1,6 @@
 import { Input, Label } from "@/components/ui/input";
-import { PO_MAX, poCardLine } from "@/lib/ops/ticket-po";
+import { PO_MAX, poCardLine, saleRefLine } from "@/lib/ops/ticket-po";
+import type { InstallSale } from "@/lib/ops/types";
 import { cn } from "@/lib/utils";
 import { useSyncedPo } from "./po-form";
 
@@ -75,5 +76,24 @@ export function PoLine({ po, vendorPo, className }: { po?: string | null; vendor
     <span className={cn("mt-0.5 block text-xs text-muted-foreground [overflow-wrap:anywhere]", className)} data-testid="card-po">
       {line}
     </span>
+  );
+}
+
+/**
+ * An install's sale on its Details (Chuy, 11/3), read only: the Sale Invoice # or Sales Order # and P.O. of the deal it
+ * came from, for reference. The sale's P.O. is for the equipment sale, not the install visit, so it stays on the deal
+ * and never goes on the install's invoice. Nothing when the install came from no deal.
+ */
+export function SaleRef({ sale }: { sale: InstallSale | null | undefined }) {
+  if (!sale) return null;
+  const line = saleRefLine(sale);
+  return (
+    <div className="sm:col-span-2" data-testid="install-sale-ref">
+      <p className="text-xs font-medium text-muted-foreground">Sale</p>
+      <p className="mt-1 text-sm [overflow-wrap:anywhere]" data-testid="install-sale-ref-line">
+        {line ?? "The deal has no Sale Invoice/SO # or P.O. yet."}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">From the deal these machines came from, for reference. Change them on the deal, in the Pipeline.</p>
+    </div>
   );
 }

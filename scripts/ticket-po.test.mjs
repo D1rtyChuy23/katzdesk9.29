@@ -725,7 +725,9 @@ test("every board's card shows the P.O.s, and every board's search finds them", 
   for (const [file, line] of cards) assert.ok(src(file).includes(line), file);
   // An account's history rows (and a ticket's Schedules) carry them too.
   const history = src("src/components/desk/account-history.tsx");
-  for (const r of ["j", "p", "i", "d"]) assert.ok(history.includes(`poCardLine(${r})].filter(Boolean).join(" · ")`), r);
+  for (const r of ["j", "p", "d"]) assert.ok(history.includes(`poCardLine(${r})].filter(Boolean).join(" · ")`), r);
+  // An install's row has its sale after its P.O.s (11/3, install-sale-ref.test.mjs).
+  assert.ok(history.includes('poCardLine(i), saleRefLine(i.sale)].filter(Boolean).join(" · ")'), "i");
   for (const [file, row] of [
     ["src/components/desk/jobs-page.tsx", "j"],
     ["src/routes/_app/pms.tsx", "p"],

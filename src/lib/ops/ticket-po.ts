@@ -74,31 +74,55 @@ export function poMatches(q: string, r: { po?: string | null; vendorPo?: string 
 
 /**
  * A board's rows for a search: rows whose Customer or Vendor P.O. is exactly what was typed come first, whatever the
- * view, status or filters (as a WO number does), then the rows the view already shows. Under 2 characters, or no exact
- * P.O., `shown` is returned as is.
+ * view, status or filters (as a WO number does), then the rows the view already shows. `more` adds a row's other
+ * numbers that work the same way (an install's sale: its deal's P.O. and Sale Invoice/SO #, 11/3). Under 2 characters,
+ * or no exact match, `shown` is returned as is.
  */
-export function withPoMatches<T extends { id: number; po?: string | null; vendorPo?: string | null }>(shown: T[], all: T[], q: string): T[] {
+export function withPoMatches<T extends { id: number; po?: string | null; vendorPo?: string | null }>(
+  shown: T[],
+  all: T[],
+  q: string,
+  more?: (row: T) => (string | null | undefined)[],
+): T[] {
   const key = q.trim().toLowerCase();
   if (key.length < 2) return shown;
-  const hits = all.filter((row) => [row.po, row.vendorPo].some((v) => String(v ?? "").trim().toLowerCase() === key));
+  const hits = all.filter((row) => [row.po, row.vendorPo, ...(more?.(row) ?? [])].some((v) => String(v ?? "").trim().toLowerCase() === key));
   if (!hits.length) return shown;
   const ids = new Set(hits.map((row) => row.id));
   return [...hits, ...shown.filter((row) => !ids.has(row.id))];
 }
 
 /**
- * The top search's note on a record found by its P.O. (" · P.O. 4455" or " · Vendor P.O. TLC-9"), so the result says
- * why it was found; "" when the text matched something else.
+ * The top search's note on a record found by one of its numbers (" · P.O. 4455"), so the result says why it was found:
+ * the number that is exactly what was typed, else the first, in the order given, that contains it; "" when none does
+ * (the text matched something else).
  */
-export function poSearchNote(q: string, r: { po?: string | null; vendor_po?: string | null }): string {
+export function numberNote(q: string, numbers: [label: string, value: string | null | undefined][]): string {
   const needle = q.trim().toLowerCase();
   if (!needle) return "";
-  const po = String(r.po ?? "").trim();
-  if (po && po.toLowerCase().includes(needle)) return ` · P.O. ${po}`;
-  const vendor = String(r.vendor_po ?? "").trim();
-  if (vendor && vendor.toLowerCase().includes(needle)) return ` · Vendor P.O. ${vendor}`;
-  return "";
+  const set = numbers.map(([label, v]) => [label, String(v ?? "").trim()] as const).filter(([, v]) => v);
+  const hit = set.find(([, v]) => v.toLowerCase() === needle) ?? set.find(([, v]) => v.toLowerCase().includes(needle));
+  return hit ? ` · ${hit[0]} ${hit[1]}` : "";
 }
+
+/** The top search's note on a record found by its P.O. (" · P.O. 4455" or " · Vendor P.O. TLC-9"), or "". */
+export function poSearchNote(q: string, r: { po?: string | null; vendor_po?: string | null }): string {
+  return numberNote(q, [["P.O.", r.po], ["Vendor P.O.", r.vendor_po]]);
+}
+
+/**
+ * An install's sale, from the deal it came from (Chuy, 11/3): "Sale Invoice/SO 12345 · Sale P.O. 4455", one of them,
+ * or null when the deal has neither. For reference only: the sale's P.O. is for the equipment sale, not the install
+ * visit, so it never becomes the install's Customer P.O.
+ */
+export function saleRefLine(sale: { invoice?: string | null; po?: string | null } | null | undefined): string | null {
+  if (!sale) return null;
+  const invoice = String(sale.invoice ?? "").trim();
+  const po = String(sale.po ?? "").trim();
+  const parts = [invoice ? `Sale Invoice/SO ${invoice}` : null, po ? `Sale P.O. ${po}` : null].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
+}
+
 
 /**
  * Why a ticket's Customer P.O. can't change on its Ticket tab, or null when it can. It went to NetSuite with the ticket's

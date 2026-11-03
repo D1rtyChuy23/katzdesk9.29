@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { poCardLine } from "@/lib/ops/ticket-po";
+import { poCardLine, saleRefLine } from "@/lib/ops/ticket-po";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { sameUnitModel } from "@/lib/ops/account-equip";
@@ -80,7 +80,8 @@ export function installItem(i: Install): HistoryItem {
     kind: "install",
     id: i.id,
     title: i.wo || "Install",
-    subtitle: [i.equipment, poCardLine(i)].filter(Boolean).join(" · "),
+    // Its sale too, from the deal it came from (11/3), so it matches up with the deal's row.
+    subtitle: [i.equipment, poCardLine(i), saleRefLine(i.sale)].filter(Boolean).join(" · "),
     status: i.equipStatus,
     date: i.installDate ?? i.received,
     technician: i.technician,

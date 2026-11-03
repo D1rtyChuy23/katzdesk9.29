@@ -80,9 +80,10 @@ import { woMatchKey } from "./corrigo";
 import { BILLED_ON_INSTALL } from "./merged-ticket";
 import { LIVE_INVOICE_SQL, lockingInvoice } from "./billing-rules";
 import { UNCHANGED_SINCE_READ, loadInvoices } from "./ticket-billing-api";
-import { poSearchNote, sentPo, ticketPoLock } from "./ticket-po";
+import { numberNote, poSearchNote, sentPo, ticketPoLock } from "./ticket-po";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
+import { withSales } from "./install-sale";
 import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
 import { deliverPings } from "./notify";
@@ -1537,7 +1538,8 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 		const same = installs.filter((x) => x.dealId === i.dealId);
 		i.project = { n: same.indexOf(i) + 1, of: same.length };
 	}
-	return withWorkOrders(sql, await withInspections(sql, applyMarks(installs, marks)));
+	// Each install's sale, from the deal it came from (11/3).
+	return withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks(installs, marks))));
 });
 type UpdateInstallInput = { id: number; customer?: string; equipment?: string | null; equipStatus?: string | null; installDate?: string | null; technician?: string | null; wo?: string | null; reqsReady?: string | null; notes?: string | null; accountRep?: string | null; paymentStatus?: string | null; serial?: string | null; powerVoltage?: string | null; machines?: MachineSpec[] | string | null; complete?: boolean; workDone?: string | null; completedAt?: string | null; duplicateOf?: number | null; aviKatz?: boolean; trfIssued?: boolean;
 	/** New account ("new") or Update ("update"), picked on the Details tab. Blank or null clears it. */
@@ -1704,7 +1706,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);
-	const saved = (await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks))))[0];
+	// With its sale (11/3), so a save hands back the whole install.
+	const saved = (await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks)))))[0];
 	return { ...saved, unitsMoved };
 }
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; technician?: string; serial?: string; powerVoltage?: string; machines?: MachineSpec[] | string | null }) => d).handler(async ({ data, context }: any) => {
@@ -1905,10 +1908,12 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 		subtitle: `${p.wo || p.equipment || "PM"} · ${p.status}${poSearchNote(q, p)}`,
 		status: p.status
 	});
+	// An install is found by its sale's P.O. and Sale Invoice/SO # too, from the deal it came from (11/3); not a removed one.
 	const ins = await sql.query(
-		`select i.id, i.customer, i.equip_status, i.complete, i.wo, i.po, i.vendor_po from installs i
+		`select i.id, i.customer, i.equip_status, i.complete, i.wo, i.po, i.vendor_po, d.po as sale_po, d.invoice as sale_invoice from installs i
+       left join deals d on d.id = i.deal_id and d.archived = false
       where i.archived = false and (i.customer ilike $1 or exists (select 1 from ${INSTALL_WOS_SQL} w where w.install_id = i.id and w.wo ilike $1)
-             or coalesce(i.po, '') ilike $1 or coalesce(i.vendor_po, '') ilike $1)
+             or coalesce(i.po, '') ilike $1 or coalesce(i.vendor_po, '') ilike $1 or coalesce(d.po, '') ilike $1 or coalesce(d.invoice, '') ilike $1)
       limit 5`,
 		[like]
 	);
@@ -1918,19 +1923,20 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 			entityType: "install",
 			id: i.id,
 			title: i.customer,
-			subtitle: `${i.wo || "Install"} · ${status}${poSearchNote(q, i)}`,
+			subtitle: `${i.wo || "Install"} · ${status}${numberNote(q, [["P.O.", i.po], ["Vendor P.O.", i.vendor_po], ["Sale P.O.", i.sale_po], ["Sale Invoice/SO", i.sale_invoice]])}`,
 			status
 		});
 	}
 	const deals = await sql`
-      select id, customer, producer, completion, po, vendor_po from deals
-      where archived = false and (customer ilike ${like} or coalesce(po, '') ilike ${like} or coalesce(vendor_po, '') ilike ${like})
+      select id, customer, producer, completion, po, vendor_po, invoice from deals
+      where archived = false and (customer ilike ${like} or coalesce(po, '') ilike ${like} or coalesce(vendor_po, '') ilike ${like} or coalesce(invoice, '') ilike ${like})
       limit 5`;
 	for (const d of deals) hits.push({
 		entityType: "deal",
 		id: d.id,
 		title: d.customer,
-		subtitle: `${d.producer ?? "Deal"}${poSearchNote(q, d)}`,
+		// Its Sale Invoice/SO # too (11/3), the number its installs show.
+		subtitle: `${d.producer ?? "Deal"}${numberNote(q, [["P.O.", d.po], ["Vendor P.O.", d.vendor_po], ["Sale Invoice/SO", d.invoice]])}`,
 		status: d.completion === "complete" ? "Complete" : d.completion === "fell" ? "Fell through" : "Open"
 	});
 	// Rebuilds by their P.O. (11/2), a sales rep's accounts only, like the tickets above: theirs are picked before the 5
@@ -2672,7 +2678,7 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		})(),
 		jobs: applyMarks(attachJobSiblings(jobs.map((r) => mapJob(r, today))).filter((j) => !j.duplicateOf), marks),
 		pms: applyMarks(pms.map((r) => mapPm(r, today)), marks),
-		installs: await withWorkOrders(sql, await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks))),
+		installs: await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks)))),
 		deals: await (async () => {
 			const projects = await loadBoardProjects(sql, catalog);
 			return deals.map((r) => attachBoard(mapDeal(r, marks), projects));

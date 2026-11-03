@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PoFields } from "./po-fields";
+import { PoFields, SaleRef } from "./po-fields";
 import { holdSavedPo, poFromForm } from "./po-form";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
@@ -834,6 +834,8 @@ export function InstallSheet({
                       <TechSelect name="technician" defaultValue={row.technician ?? ""} />
                     </div>
                     <PoFields idPrefix={`install-${row.id}`} po={row.po} vendorPo={row.vendorPo} />
+                    {/* Its sale, from the deal it came from, for reference (11/3). */}
+                    <SaleRef sale={row.sale} />
                     <InstallContactFields installId={row.id} siteContact={row.siteContact} contactPhone={row.contactPhone} />
                     <div>
                       <Label>Site ready?</Label>
