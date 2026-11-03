@@ -217,6 +217,19 @@ test("a save that read the deal before a handoff tied its rows doesn't untie the
     const installUid = JSON.parse((await one(pg, "select machines from installs where id = $1", [made.installId])).machines)[0].uid;
     const rows = JSON.parse((await one(pg, "select machines, notes from deals where id = $1", [d])).machines);
     assert.deepEqual(rows.map((m) => [m.equipment, m.uid ?? null]), [["Test Brewer TB-1", installUid], ["Test Grinder TG-2", null]], "the brewer tied again, the grinder added");
+    // A machine edit (rows only) read before the rep's save completed the deal: its retry keeps the deal complete, with
+    // its rep, and the handoff's tie.
+    const d4 = await deal(pg, { customer: "Test Shop 4", machines: BREWER, producer: "Rita" });
+    const completedMeanwhile = racing(sql, /^select \* from deals where id = \$\d+$/, async () => {
+      await api.updateDealFor(sql, { id: d4, completion: "complete" }, "u-owner");
+      await pg.query("update deals set producer = 'Test Rep B' where id = $1", [d4]);
+    });
+    await api.updateDealFor(completedMeanwhile, { id: d4, machines: [{ equipment: "Test Brewer TB-1", serial: "", powerVoltage: "120", ownership: "Sold" }] }, "u-rep");
+    const after4 = await one(pg, "select completion, producer, handed_off, machines from deals where id = $1", [d4]);
+    const [made4] = await installsOf(pg, d4);
+    assert.deepEqual([after4.completion, after4.producer, after4.handed_off], ["complete", "Test Rep B", true]);
+    assert.equal(JSON.parse(after4.machines)[0].uid, JSON.parse((await one(pg, "select machines from installs where id = $1", [made4.id])).machines)[0].uid);
+    assert.equal((await installsOf(pg, d4)).length, 1);
     // A save with no rows (notes, say) read before a warehouse pull wrote a unit onto the deal keeps the pull's row.
     const d3 = await deal(pg, { customer: "Test Shop 3", machines: BREWER });
     const shop3 = await install(pg, { customer: "Test Shop 3", deal_id: d3 });

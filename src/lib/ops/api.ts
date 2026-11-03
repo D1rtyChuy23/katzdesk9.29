@@ -1396,8 +1396,9 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 		if (!(await canLockEquipment(sql, userId))) throw new Error("Only the owner can take a confirmed machine off a deal.");
 	}
 	let c = cur[0];
-	const producer = data.producer === undefined ? c.producer : canonicalRepName(data.producer);
-	const completion = data.completion === undefined ? c.completion : data.completion;
+	// What the save didn't send is the deal's own, as it's read each time (a retry below reads it again).
+	let producer = data.producer === undefined ? c.producer : canonicalRepName(data.producer);
+	let completion = data.completion === undefined ? c.completion : data.completion;
 	// Every tie the owner ever released on this deal: a window opened before the release still sends that row.
 	const released = releasedUids(c.released_uids, release);
 	if (release.size) await sql`update deals set released_uids = ${JSON.stringify([...released])} where id = ${data.id}`;
@@ -1408,7 +1409,11 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 	// the window's rows tied again. A save that sends no rows leaves the stored ones as they are.
 	let wrote: any[] = [];
 	for (let tries = 0; tries < 3 && !wrote[0]; tries += 1) {
-		if (tries) c = (await sql`select * from deals where id = ${data.id}`)[0] ?? c;
+		if (tries) {
+			c = (await sql`select * from deals where id = ${data.id}`)[0] ?? c;
+			if (data.producer === undefined) producer = c.producer;
+			if (data.completion === undefined) completion = c.completion;
+		}
 		// The machine rows are the equipment list: equipment is kept as the joined models so lists and search still read it.
 		let machinesJson = c.machines ?? null;
 		let equipment = sentEquipment === undefined ? c.equipment : sentEquipment;
