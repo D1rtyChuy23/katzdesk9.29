@@ -141,6 +141,10 @@ test("after a Details save, the saved P.O.s go at once into every list its sheet
   holdSavedPo(qc, "pm", { id: 3, po: "PM-1", vendorPo: null });
   assert.equal(qc.getQueryData(["pms"])[0].po, "PM-1");
   assert.equal(qc.getQueryData(["pm", 3]).po, "PM-1");
+  // The rebuild board keeps its rows with what the viewer may do.
+  qc.setQueryData(["rebuilds"], { rows: [{ id: 5, po: "R-OLD", vendorPo: null }], canEdit: true, accountLock: null });
+  holdSavedPo(qc, "rebuild", { id: 5, po: "R-NEW", vendorPo: "R-V" });
+  assert.deepEqual(qc.getQueryData(["rebuilds"]), { rows: [{ id: 5, po: "R-NEW", vendorPo: "R-V" }], canEdit: true, accountLock: null });
   // Nothing is made up where nothing was read, and another record's row is left alone.
   holdSavedPo(qc, "deal", { id: 9, po: "D-1", vendorPo: null });
   assert.equal(qc.getQueryData(["deals"]), undefined);
@@ -150,6 +154,11 @@ test("after a Details save, the saved P.O.s go at once into every list its sheet
   for (const kind of ["pm", "install", "deal"]) {
     assert.ok(sheets.includes(`if (vars.po !== undefined || vars.vendorPo !== undefined) holdSavedPo(qc, "${kind}", saved);`), kind);
   }
+  // The rebuild sheet saves explicitly: it holds what each Save stored, and saves a changed P.O. before its Invoice window.
+  const rebuildSheet = src("src/components/desk/rebuild-sheet.tsx");
+  assert.match(rebuildSheet, /onSuccess: \(next\) => \{\n\s+\/\/ The P\.O\.s as saved, at once, so the boxes take them before the board reads again\.\n\s+holdSavedPo\(qc, "rebuild", next\);/);
+  assert.ok(rebuildSheet.includes("beforeOpen={savePoBeforeInvoice}"));
+  assert.match(rebuildSheet, /const saved = await updateRebuild\(\{ data: \{ id: row\.id, \.\.\.changed \} \}\);\n\s+holdSavedPo\(qc, "rebuild", saved\);/);
 });
 
 test("the card line, the board search and the top search's note", () => {

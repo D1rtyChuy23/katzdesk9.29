@@ -3,7 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { poToSend, syncPoBox } from "@/lib/ops/ticket-po";
 
 type SavedPo = { id: number; po: string | null; vendorPo: string | null };
-const LIST_KEY = { pm: "pms", install: "installs", deal: "deals" } as const;
+const LIST_KEY = { pm: "pms", install: "installs", deal: "deals", rebuild: "rebuilds" } as const;
 
 /**
  * After a PM's, install's or deal's Details save, its P.O.s as stored go at once into every list its sheet may have been
@@ -15,7 +15,12 @@ export function holdSavedPo(qc: QueryClient, kind: keyof typeof LIST_KEY, saved:
   if (!saved) return;
   const patch = <T,>(r: T): T =>
     r && typeof r === "object" && (r as { id?: unknown }).id === saved.id ? { ...r, po: saved.po, vendorPo: saved.vendorPo } : r;
-  qc.setQueriesData({ queryKey: [LIST_KEY[kind]] }, (old: unknown) => (Array.isArray(old) ? old.map(patch) : old));
+  qc.setQueriesData({ queryKey: [LIST_KEY[kind]] }, (old: unknown) => {
+    if (Array.isArray(old)) return old.map(patch);
+    // The rebuild board keeps its rows with what the viewer may do ({ rows, canEdit, accountLock }).
+    const rows = old && typeof old === "object" ? (old as { rows?: unknown }).rows : null;
+    return Array.isArray(rows) ? { ...(old as object), rows: rows.map(patch) } : old;
+  });
   if (kind === "pm") qc.setQueryData(["pm", saved.id], (old: unknown) => patch(old));
   qc.setQueriesData({ queryKey: ["customer-history"] }, (old: unknown) => {
     const list = old && typeof old === "object" ? (old as Record<string, unknown>)[LIST_KEY[kind]] : null;

@@ -36,7 +36,7 @@ import { toast } from "sonner";
 import { formatShortDate } from "@/lib/ops/clock";
 import { isShopAccount, sentence, warehouseInvoiceRefusal, warehouseMayEdit } from "@/lib/ops/warehouse-invoice";
 import { Trash2 } from "lucide-react";
-import { useSyncedPo } from "./po-form";
+import { holdSavedPo, useSyncedPo } from "./po-form";
 import { PO_MAX } from "@/lib/ops/ticket-po";
 
 function HealthBadge({ health }: { health: Rebuild["health"] }) {
@@ -168,6 +168,8 @@ export function RebuildSheet({
         },
       }),
     onSuccess: (next) => {
+      // The P.O.s as saved, at once, so the boxes take them before the board reads again.
+      holdSavedPo(qc, "rebuild", next);
       // A refurb completed: its machines went into stock at the Staging area.
       toast.success(next.stockNote ? `Rebuild saved. ${next.stockNote}` : "Rebuild saved");
       if (next.stockNote) void qc.invalidateQueries({ queryKey: ["assets"] });
@@ -182,6 +184,29 @@ export function RebuildSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+
+  /**
+   * The Invoice window: a P.O. changed here and not saved yet is saved first (only the P.O.s, 11/2), so the window opens
+   * on the rebuild's own and a P.O. approved there isn't put back by this sheet's next Save.
+   */
+  const savePoBeforeInvoice = async (): Promise<boolean> => {
+    if (!row || !canEdit) return true;
+    const changed = {
+      ...(po.toSend() !== undefined ? { po: po.toSend() } : {}),
+      ...(vendorPo.toSend() !== undefined ? { vendorPo: vendorPo.toSend() } : {}),
+    };
+    if (!Object.keys(changed).length) return true;
+    try {
+      const saved = await updateRebuild({ data: { id: row.id, ...changed } });
+      holdSavedPo(qc, "rebuild", saved);
+      void qc.invalidateQueries({ queryKey: ["rebuilds"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      return true;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save the P.O.");
+      return false;
+    }
+  };
 
   const drop = useMutation({
     mutationFn: () => archiveRebuild({ data: { id: row!.id } }),
@@ -462,7 +487,7 @@ export function RebuildSheet({
                   </p>
                 ) : (
                   <div className="mt-3">
-                    <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} />
+                    <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} beforeOpen={savePoBeforeInvoice} />
                   </div>
                 )}
               </section>
