@@ -83,7 +83,6 @@ import { UNCHANGED_SINCE_READ, loadInvoices } from "./ticket-billing-api";
 import { numberNote, poSearchNote, sentPo, ticketPoLock } from "./ticket-po";
 import { DEAL_MADE_NO_UNLINK, dealReviewOf, type DealReview } from "./deal-review";
 import { customersStrictlyMatch } from "./clean-names";
-import { serialKey } from "./account-equip";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { withSales } from "./install-sale";
@@ -1434,6 +1433,8 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
         -- Only a P.O. the save sent (11/2): one left out stays as the row has it now (the Invoice window may have just set it).
         po = case when ${po !== undefined}::boolean then ${po ?? null}::text else po end,
         vendor_po = case when ${vendorPo !== undefined}::boolean then ${vendorPo ?? null}::text else vendor_po end,
+        -- The save that completes it puts it in line for its handoff, which claims it (maybeHandoffInstall).
+        handed_off = case when ${completion === "complete"}::boolean and prev.completion is distinct from 'complete' then false else deals.handed_off end,
         updated_at = now()
       from prev
       where deals.id = prev.id
@@ -1508,21 +1509,22 @@ function uniquePendingHandoffs(deals: any) {
  * install with no deal is linked to it: the same account by customersStrictlyMatch (the rule install merges and the
  * import use), never a finished install, and never one an Admin unlinked from this deal. Else a new install is made
  * for it. Either way the install waits for an Admin's review (installs.deal_review: "linked" or "made").
- * claim (Send to installs): the deal is handed off only while it isn't yet, so of two presses at once one does it.
+ * The handoff claims the deal: it runs only while the deal isn't handed off yet (the save that completes a deal puts it
+ * in line), so of two at once (two presses of Send to installs, or one and a save completing the deal again) one runs.
  * Exported for its tests.
  */
-export async function maybeHandoffInstall(sql: any, dealId: any, userId?: string | null, opts: { claim?: boolean } = {}): Promise<DealHandoff | null> {
+export async function maybeHandoffInstall(sql: any, dealId: any, userId?: string | null): Promise<DealHandoff | null> {
 	const deal = (await sql`select * from deals where id = ${dealId}`)[0];
 	if (!deal || deal.archived) return null;
 	const hasOne = async () => (await sql`
     select id from installs where deal_id = ${dealId} and archived = false order by id limit 1`)[0];
 	const won = await sql`
     update deals set handed_off = true, updated_at = now()
-     where id = ${dealId} and archived = false and (${!opts.claim}::boolean or not handed_off)
+     where id = ${dealId} and archived = false and not handed_off
      returning id`;
 	const had = await hasOne();
 	if (had) return { kind: "had", installId: Number(had.id) };
-	if (!won[0]) return opts.claim ? { kind: "had", installId: null } : null;
+	if (!won[0]) return { kind: "had", installId: null };
 	const skip = new Set((Array.isArray(deal.unlinked_installs) ? deal.unlinked_installs : []).map(Number));
 	const open = await sql`
     select id, customer from installs
@@ -1596,10 +1598,6 @@ export async function reviewDealLinkFor(sql: any, userId: string, data: { instal
 	const tied = new Set(dealRows.map((m) => m.uid).filter(Boolean));
 	const held = parseMachinesJson(row.machines ?? null).filter((m) => m.uid && tied.has(m.uid));
 	if (held.length) throw new Error(`The deal's ${held.map((m) => m.equipment).join(", ")} ${held.length === 1 ? "was" : "were"} confirmed onto this install on the Board, so it stays linked. Approve the link, or take ${held.length === 1 ? "it" : "them"} off this install first.`);
-	// So do units the warehouse pulled for this install since: a pull writes the unit's serial onto the deal's machines too.
-	const dealSerials = new Set(dealRows.map((m) => serialKey(m.serial)).filter(Boolean));
-	const pulled = (await sql`select serial from assets where install_id = ${row.id} and coalesce(btrim(serial), '') <> '' order by id`).filter((a: any) => dealSerials.has(serialKey(a.serial)));
-	if (pulled.length) throw new Error(`Serial ${pulled.map((a: any) => String(a.serial).trim()).join(", ")}, pulled from the warehouse for this install, ${pulled.length === 1 ? "is" : "are"} on the deal's machines too, so it stays linked. Approve the link, or return ${pulled.length === 1 ? "that unit" : "those units"} to the barn first.`);
 	const done = await sql`
     update installs set deal_id = null, deal_review = null, deal_review_at = null, updated_at = now()
      where id = ${row.id} and deal_id = ${dealId} and deal_review = 'linked' and machines is not distinct from ${row.machines ?? null}
@@ -1614,6 +1612,10 @@ export async function reviewDealLinkFor(sql: any, userId: string, data: { instal
      returning handed_off, archived, completion`;
 	// Back on the Handoff page's completed deals: not handed off now, still on the Pipeline, and still complete.
 	const backOnHandoff = !!back[0] && !back[0].handed_off && !back[0].archived && back[0].completion === "complete";
+	// A unit the warehouse pulled for this install wrote its serial onto the deal's machines too. The unit stays with the
+	// install; the deal's copy is cleared, as a return to the barn clears it.
+	const units = await sql`select model, serial from assets where install_id = ${row.id} and coalesce(btrim(serial), '') <> '' order by id`;
+	for (const u of units) await stampWarehouseSerial(sql, "deals", dealId, { model: String(u.model ?? ""), serial: u.serial }, "clear", false);
 	await logActivity(sql, userId, "install", row.id, "updated", `deal link removed: deal #${dealId}`);
 	await logActivity(sql, userId, "deal", dealId, "updated", backOnHandoff ? `unlinked from install #${row.id}; back on the Handoff page` : `unlinked from install #${row.id}`);
 	return { approved: false, kind, dealId, backOnHandoff };
@@ -2144,7 +2146,7 @@ export const findWoTickets = createServerFn({ method: "GET" }).middleware([deskM
 	return findWoEverywhere(sql, key, await repCustomerScope(sql, context.userId));
 });
 export const handoffDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number }) => d).handler(async ({ data, context }: any) => {
-	return { ok: true, handoff: await maybeHandoffInstall(await ready(), data.dealId, context.userId, { claim: true }) };
+	return { ok: true, handoff: await maybeHandoffInstall(await ready(), data.dealId, context.userId) };
 });
 async function nextLine(sql: any, site: any, pallet: any, level: any, exceptId?: number) {
 	const letter = String(pallet).toUpperCase();

@@ -127,7 +127,9 @@ const sameModel = (a: { catalog_model: string; equipment_name: string }, b: { ca
 /**
  * The keeper's machine list with the drop's rows it doesn't have added, each with all it carries. A drop row is the
  * keeper's when it is the same model and the same serial, or one of the two has none (that keeper row takes the
- * drop row's serial and voltage when it has none).
+ * drop row's serial, voltage, tie to its deal row, Sold/Loan/Lease, plug, water and recipe where it has none). Two
+ * rows tied to two different deal rows are two machines (11/3): an install made for a deal, merged into the account's
+ * install for the same job, keeps its deal's machines on the Board.
  */
 export function mergedMachineList(keeper: MachineSpec[], drop: MachineSpec[]): { list: MachineSpec[]; added: MachineSpec[] } {
   const list = keeper.map((m) => ({ ...m }));
@@ -135,7 +137,8 @@ export function mergedMachineList(keeper: MachineSpec[], drop: MachineSpec[]): {
   const added: MachineSpec[] = [];
   for (const row of drop) {
     const key = serialKey(row.serial);
-    const fits = (m: MachineSpec, i: number) => !used.has(i) && sameCatalogModel(m.equipment, row.equipment);
+    const fits = (m: MachineSpec, i: number) =>
+      !used.has(i) && sameCatalogModel(m.equipment, row.equipment) && !(m.uid && row.uid && m.uid !== row.uid);
     let at = list.findIndex((m, i) => fits(m, i) && !!key && serialKey(m.serial) === key);
     if (at < 0) at = list.findIndex((m, i) => fits(m, i) && (!key || !serialKey(m.serial)));
     if (at < 0) {
@@ -148,6 +151,11 @@ export function mergedMachineList(keeper: MachineSpec[], drop: MachineSpec[]): {
     const m = list[at]!;
     if (!m.serial.trim() && row.serial.trim()) m.serial = row.serial;
     if (!m.powerVoltage.trim() && row.powerVoltage.trim()) m.powerVoltage = row.powerVoltage;
+    if (!m.uid && row.uid) m.uid = row.uid;
+    if (!m.ownership && row.ownership) m.ownership = row.ownership;
+    if (!m.plug && row.plug) m.plug = row.plug;
+    if (!m.water && row.water) m.water = row.water;
+    if (m.recipeId == null && row.recipeId != null) m.recipeId = row.recipeId;
   }
   return { list, added };
 }

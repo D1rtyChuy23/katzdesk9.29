@@ -277,19 +277,19 @@ test("Unlink: the install keeps its work with no deal, the deal is back on the H
     assert.equal((await dealRow(pg, d)).handed_off, false);
     assert.equal((await installsOf(pg, d)).length, 0);
     // Send to installs: the next open install, never the unlinked one.
-    assert.deepEqual(await api.maybeHandoffInstall(sql, d, "u-rep", { claim: true }), { kind: "linked", installId: spare });
+    assert.deepEqual(await api.maybeHandoffInstall(sql, d, "u-rep"), { kind: "linked", installId: spare });
     assert.equal((await row(pg, spare)).deal_review, "linked");
     assert.equal((await row(pg, wrong)).deal_id, null);
     // Unlinked again, with no other open install: one is made, and the unlinked ones stay as they are.
     await api.reviewDealLinkFor(sql, "u-owner", { installId: spare, approve: false });
     assert.deepEqual((await dealRow(pg, d)).unlinked_installs.map(Number), [wrong, spare]);
-    const made = await api.maybeHandoffInstall(sql, d, "u-rep", { claim: true });
+    const made = await api.maybeHandoffInstall(sql, d, "u-rep");
     assert.equal(made.kind, "made");
     assert.ok(![wrong, spare].includes(made.installId));
     assert.equal((await row(pg, wrong)).deal_id, null);
     assert.equal((await row(pg, spare)).deal_id, null);
     // The deal is on its install now: the button says so.
-    assert.deepEqual(await api.maybeHandoffInstall(sql, d, "u-rep", { claim: true }), { kind: "had", installId: made.installId });
+    assert.deepEqual(await api.maybeHandoffInstall(sql, d, "u-rep"), { kind: "had", installId: made.installId });
   } finally {
     await pg.close();
   }
@@ -458,9 +458,16 @@ test("one deal, one handoff: two saves completing it at once, two presses of Sen
     const behind = racing(sql, /select \* from deals where id = \$\d+$/, () => complete(sql, d2));
     await complete(behind, d2);
     assert.equal((await installsOf(pg, d2)).length, 1);
+    // A save completing the deal again while someone presses Send to installs on a page from before: one handoff.
+    const d6 = await deal(pg, { customer: "Test Cart", completion: "complete" });
+    await api.updateDealFor(sql, { id: d6, completion: "open" }, "u-rep");
+    const both = await Promise.all([complete(sql, d6), api.maybeHandoffInstall(sql, d6, "u-owner")]);
+    assert.equal((await installsOf(pg, d6)).length, 1);
+    assert.equal((await dealRow(pg, d6)).handed_off, true);
+    assert.ok(both[1] && ["had", "made"].includes(both[1].kind));
     // Two presses of Send to installs at once: one sends it, the other says it was sent.
     const d3 = await deal(pg, { customer: "Test Diner", completion: "complete" });
-    const results = await Promise.all([api.maybeHandoffInstall(sql, d3, "u-rep", { claim: true }), api.maybeHandoffInstall(sql, d3, "u-owner", { claim: true })]);
+    const results = await Promise.all([api.maybeHandoffInstall(sql, d3, "u-rep"), api.maybeHandoffInstall(sql, d3, "u-owner")]);
     assert.deepEqual(results.map((r) => r.kind).sort(), ["had", "made"]);
     assert.equal((await installsOf(pg, d3)).length, 1);
     // The same deal took the open install between the read and the link (another handoff of it): no second install,
@@ -486,7 +493,7 @@ test("one deal, one handoff: two saves completing it at once, two presses of Sen
   }
 });
 
-test("a unit the warehouse pulled for a linked install keeps it linked; returned to the barn, it unlinks", async () => {
+test("Unlink clears the deal's copy of a pulled unit's serial, as a return to the barn does; the unit stays with the install", async () => {
   const { pg, sql } = await fresh();
   try {
     const open = await install(pg);
@@ -495,28 +502,62 @@ test("a unit the warehouse pulled for a linked install keeps it linked; returned
     assert.equal((await row(pg, open)).deal_review, "linked");
     const unit = Number((await one(pg, "insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Bunn TB3', 'TB-77', 1, 'barn-back', 'A', 1, 1, 'ready') returning id")).id);
     await api.assignAssetToInstallFor(sql, { assetId: unit, installId: open }, { userId: "u-owner" });
-    assert.equal(JSON.parse((await one(pg, "select machines from deals where id = $1", [d])).machines)[0].serial, "TB-77", "the pull wrote the serial onto the deal");
-    await assert.rejects(
-      api.reviewDealLinkFor(sql, "u-owner", { installId: open, approve: false }),
-      /Serial TB-77, pulled from the warehouse for this install, is on the deal's machines too, so it stays linked\. Approve the link, or return that unit to the barn first\./,
-    );
-    assert.equal((await row(pg, open)).deal_id, d);
-    await api.unassignAssetFromInstallFor(sql, { assetId: unit, installId: open }, { userId: "u-owner" });
-    assert.equal(JSON.parse((await one(pg, "select machines from deals where id = $1", [d])).machines)[0].serial, "");
+    const dealSerial = async (id) => JSON.parse((await one(pg, "select machines from deals where id = $1", [id])).machines).map((m) => m.serial);
+    assert.deepEqual(await dealSerial(d), ["TB-77"], "the pull wrote the serial onto the deal");
+    // Marked sold at the install (it can't go back to the barn then): Unlink still works.
+    await pg.query("update assets set status = 'sold', locked_by = 'System (sold)' where id = $1", [unit]);
     assert.equal((await api.reviewDealLinkFor(sql, "u-owner", { installId: open, approve: false })).backOnHandoff, true);
-    // The serial typed on the deal's row another way (case, spaces) is the same serial.
+    assert.deepEqual(await dealSerial(d), [""], "the deal's copy is cleared");
+    const kept = await one(pg, "select install_id, status, serial from assets where id = $1", [unit]);
+    assert.deepEqual(kept, { install_id: open, status: "sold", serial: "TB-77" }, "the unit stays with the install");
+    assert.match((await one(pg, "select machines from installs where id = $1", [open])).machines, /TB-77/);
+    // Sent to installs again, the new install doesn't carry the serial.
+    const h = await api.maybeHandoffInstall(sql, d, "u-rep");
+    assert.equal(h.kind, "made");
+    assert.doesNotMatch(String((await one(pg, "select machines from installs where id = $1", [h.installId])).machines), /TB-77/);
+    // The serial typed on the deal's row another way (case, spaces) is the same serial: cleared too.
     const typed = await install(pg, { customer: "Test Shop" });
     const d3 = await deal(pg, { customer: "Test Shop", machines: JSON.stringify([{ equipment: "Bunn TB3", serial: " tb-88", powerVoltage: "120", ownership: "Sold" }]) });
     await complete(sql, d3);
     const unit2 = Number((await one(pg, "insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Bunn TB3', 'TB-88', 1, 'barn-back', 'A', 1, 2, 'ready') returning id")).id);
     await api.assignAssetToInstallFor(sql, { assetId: unit2, installId: typed }, { userId: "u-owner" });
-    await assert.rejects(api.reviewDealLinkFor(sql, "u-owner", { installId: typed, approve: false }), /Serial TB-88, pulled from the warehouse for this install, is on the deal's machines too/);
-    // A unit on the install whose serial isn't on the deal doesn't hold it.
+    await api.reviewDealLinkFor(sql, "u-owner", { installId: typed, approve: false });
+    assert.deepEqual(await dealSerial(d3), [""]);
+    // A unit on the install whose serial isn't on the deal leaves the deal's rows as they are.
     const other = await install(pg, { customer: OTHER });
-    const d2 = await deal(pg, { customer: OTHER, machines: BREWER });
+    const d2 = await deal(pg, { customer: OTHER, machines: JSON.stringify([{ equipment: "Test Brewer TB-1", serial: "TB1-9", powerVoltage: "", ownership: "Sold" }]) });
     await complete(sql, d2);
     await pg.query("insert into assets (kind, model, serial, qty, site, status, install_id) values ('equip', 'Test Grinder TG-2', 'TG-5', 1, 'field', 'assigned', $1)", [other]);
     assert.equal((await api.reviewDealLinkFor(sql, "u-owner", { installId: other, approve: false })).approved, false);
+    assert.deepEqual(await dealSerial(d2), ["TB1-9"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a made install merged into the account's install for the same job: the kept one takes the deal and its machine's tie", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const finished = await install(pg, { complete: true, equip_status: "Installed", equipment: "Test Brewer TB-1", machines: JSON.stringify([{ equipment: "Test Brewer TB-1", serial: "SN-1", powerVoltage: "120" }]) });
+    const d = await deal(pg, { machines: BREWER });
+    await complete(sql, d);
+    const [made] = await installsOf(pg, d);
+    assert.equal(made.deal_review, "made");
+    const { mergeInstallsFor } = await import("../src/lib/ops/install-projects.ts");
+    await mergeInstallsFor(sql, "u-owner", { keepId: finished, dropId: Number(made.id) });
+    const keeper = await one(pg, "select deal_id, machines from installs where id = $1", [finished]);
+    assert.equal(keeper.deal_id, d);
+    const uid = JSON.parse((await one(pg, "select machines from deals where id = $1", [d])).machines)[0].uid;
+    const rows = JSON.parse(keeper.machines);
+    assert.equal(rows.length, 1, "one brewer, not two");
+    assert.deepEqual([rows[0].serial, rows[0].uid, rows[0].ownership], ["SN-1", uid, "Sold"], "the kept row takes the tie and Sold/Loan/Lease");
+    // Two rows tied to two different deal rows are two machines, even of one model with no serials.
+    const { mergedMachineList } = await import("../src/lib/ops/install-projects.ts");
+    const spec = (uid) => ({ equipment: "Test Brewer TB-1", serial: "", powerVoltage: "", ...(uid ? { uid } : {}) });
+    assert.deepEqual(mergedMachineList([spec("u-1")], [spec("u-2")]).list.map((m) => m.uid), ["u-1", "u-2"]);
+    assert.deepEqual(mergedMachineList([spec("u-1")], [spec("u-1")]).list.map((m) => m.uid), ["u-1"]);
+    assert.deepEqual(mergedMachineList([spec(null)], [spec("u-2")]).list.map((m) => m.uid), ["u-2"]);
+    assert.deepEqual(mergedMachineList([spec("u-1")], [spec(null)]).list.map((m) => m.uid), ["u-1"]);
   } finally {
     await pg.close();
   }
@@ -610,12 +651,14 @@ test("the screens: the card's review, the Handoff page's list, the buttons, and 
   assert.match(review, /\{badge && why \? \(\s+<span className="basis-full text-xs text-muted-foreground" data-testid="deal-review-text">\s+\{dealReviewText\(kind\)\}/);
   const server = src("src/lib/ops/api.ts");
   // Guards whose effect needs two connections (real Postgres), which PGlite doesn't have: pinned here instead. The row lock
-  // on the deal's status read, and Send to installs handing a deal off only while it isn't yet (the claim).
+  // on the deal's status read, and the handoff claiming the deal (it runs only while the deal isn't handed off; the save
+  // that completes a deal puts it in line).
   assert.match(server, /with prev as \(select id, completion from deals where id = \$\{data\.id\} for update\)/);
-  assert.match(server, /where id = \$\{dealId\} and archived = false and \(\$\{!opts\.claim\}::boolean or not handed_off\)/);
-  assert.match(server, /if \(!won\[0\]\) return opts\.claim \? \{ kind: "had", installId: null \} : null;/);
+  assert.match(server, /update deals set handed_off = true, updated_at = now\(\)\s+where id = \$\{dealId\} and archived = false and not handed_off\s+returning id/);
+  assert.match(server, /if \(!won\[0\]\) return \{ kind: "had", installId: null \};/);
+  assert.match(server, /handed_off = case when \$\{completion === "complete"\}::boolean and prev\.completion is distinct from 'complete' then false else deals\.handed_off end,/);
   assert.match(server, /if \(completion === "complete" && wrote\[0\] && wrote\[0\]\.was !== "complete"\) await maybeHandoffInstall\(sql, data\.id, userId\);/);
-  assert.match(server, /return \{ ok: true, handoff: await maybeHandoffInstall\(await ready\(\), data\.dealId, context\.userId, \{ claim: true \}\) \};/);
+  assert.match(server, /return \{ ok: true, handoff: await maybeHandoffInstall\(await ready\(\), data\.dealId, context\.userId\) \};/);
   assert.match(server, /dealReviews: await loadDealReviews\(sql\)/);
   assert.match(server, /\.validator\(\(d: \{ installId: number; approve: boolean \}\) => z\.object\(\{ installId: z\.number\(\)\.int\(\), approve: z\.boolean\(\) \}\)\.parse\(d\)\)/);
 });
