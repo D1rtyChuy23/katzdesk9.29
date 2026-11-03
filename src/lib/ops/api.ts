@@ -52,7 +52,7 @@ export type { DirectoryKind };
 import { specsFromInstall, parseMachinesJson, serializeMachines, type MachineSpec } from "./machines";
 import { CONTACT_PHONE_MAX, SITE_CONTACT_MAX, contactText, installTypeLabel, installTypeOf, machinesBeforeSave } from "./install-form";
 import { backfillAssignedSerialsOnce } from "./serial-backfill";
-import { clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
+import { clearUnitSerial, clearWarehouseSerial, placeWarehouseSerial } from "./warehouse-serial";
 import { assertUnlocked, canLockEquipment } from "./equipment-lock";
 import { MANUAL_PIN_MATCH, pinQuality, pinSourceLabel } from "./account-pin";
 import { LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "./equipment-lock-rules";
@@ -1509,8 +1509,9 @@ function uniquePendingHandoffs(deals: any) {
  * install with no deal is linked to it: the same account by customersStrictlyMatch (the rule install merges and the
  * import use), never a finished install, and never one an Admin unlinked from this deal. Else a new install is made
  * for it. Either way the install waits for an Admin's review (installs.deal_review: "linked" or "made").
- * The handoff claims the deal: it runs only while the deal isn't handed off yet (the save that completes a deal puts it
- * in line), so of two at once (two presses of Send to installs, or one and a save completing the deal again) one runs.
+ * The handoff claims the deal: it runs only while the deal is complete and not handed off yet (the save that completes a
+ * deal puts it in line), so of two at once (two presses of Send to installs, or one from an old page and a save completing
+ * the deal again) one runs. One that fails before its install is made lets the deal go back on the Handoff page.
  * Exported for its tests.
  */
 export async function maybeHandoffInstall(sql: any, dealId: any, userId?: string | null): Promise<DealHandoff | null> {
@@ -1520,11 +1521,27 @@ export async function maybeHandoffInstall(sql: any, dealId: any, userId?: string
     select id from installs where deal_id = ${dealId} and archived = false order by id limit 1`)[0];
 	const won = await sql`
     update deals set handed_off = true, updated_at = now()
-     where id = ${dealId} and archived = false and not handed_off
+     where id = ${dealId} and archived = false and not handed_off and completion = 'complete'
      returning id`;
 	const had = await hasOne();
 	if (had) return { kind: "had", installId: Number(had.id) };
-	if (!won[0]) return { kind: "had", installId: null };
+	if (!won[0]) {
+		// Another handoff of it has the claim, or the deal was set back to open or removed meanwhile.
+		const now = (await sql`select archived, completion from deals where id = ${dealId}`)[0];
+		if (!now || now.archived) return null;
+		return now.completion === "complete" ? { kind: "had", installId: null } : { kind: "open", installId: null };
+	}
+	try {
+		return await linkOrMakeInstall(sql, deal, dealId, userId, hasOne);
+	} catch (e) {
+		await sql`
+      update deals set handed_off = false, updated_at = now()
+       where id = ${dealId} and not exists (select 1 from installs where deal_id = ${dealId} and archived = false)`.catch(() => undefined);
+		throw e;
+	}
+}
+/** The handoff after its claim: the account's newest open install with no deal, linked, else one made for the deal. */
+async function linkOrMakeInstall(sql: any, deal: any, dealId: any, userId: string | null | undefined, hasOne: () => Promise<any>): Promise<DealHandoff | null> {
 	const skip = new Set((Array.isArray(deal.unlinked_installs) ? deal.unlinked_installs : []).map(Number));
 	const open = await sql`
     select id, customer from installs
@@ -1565,8 +1582,11 @@ export async function maybeHandoffInstall(sql: any, dealId: any, userId?: string
 	if (userId) await logActivity(sql, userId, "install", made[0].id, "opened", `made for deal #${dealId} when it was marked complete; for an Admin to review`);
 	return { kind: "made", installId: Number(made[0].id) };
 }
-/** What a handoff did: an open install was linked, one was made, or the deal had its install ("had"; null while it's made). */
-export type DealHandoff = { kind: DealReview; installId: number } | { kind: "had"; installId: number | null };
+/**
+ * What a handoff did: an open install was linked, one was made, the deal had its install ("had"; null while another
+ * handoff makes it), or the deal isn't complete anymore ("open").
+ */
+export type DealHandoff = { kind: DealReview; installId: number } | { kind: "had" | "open"; installId: number | null };
 
 /**
  * The body of reviewDealLink: an Admin approves a completed deal's link to an install (the review clears), or unlinks
@@ -1613,9 +1633,30 @@ export async function reviewDealLinkFor(sql: any, userId: string, data: { instal
 	// Back on the Handoff page's completed deals: not handed off now, still on the Pipeline, and still complete.
 	const backOnHandoff = !!back[0] && !back[0].handed_off && !back[0].archived && back[0].completion === "complete";
 	// A unit the warehouse pulled for this install wrote its serial onto the deal's machines too. The unit stays with the
-	// install; the deal's copy is cleared, as a return to the barn clears it.
+	// install, so the deal's row of that model loses that serial (as a return to the barn clears it). A row of another
+	// model with the same serial isn't that unit. Written only as read; a save meanwhile gets a second try.
 	const units = await sql`select model, serial from assets where install_id = ${row.id} and coalesce(btrim(serial), '') <> '' order by id`;
-	for (const u of units) await stampWarehouseSerial(sql, "deals", dealId, { model: String(u.model ?? ""), serial: u.serial }, "clear", false);
+	if (units.length) {
+		const catalog = await loadEquipCatalog(sql);
+		for (let tries = 0; tries < 2; tries += 1) {
+			const cur = (await sql`select machines from deals where id = ${dealId}`)[0];
+			let rows = parseMachinesJson(cur?.machines ?? null);
+			let changed = false;
+			for (const u of units) {
+				const r = clearUnitSerial(rows, { model: String(u.model ?? ""), serial: u.serial }, catalog);
+				if (r.changed) {
+					rows = r.rows;
+					changed = true;
+				}
+			}
+			if (!changed) break;
+			const packed = serializeMachines(rows);
+			const done = await sql`
+        update deals set machines = ${packed.machines}, equipment = ${packed.equipment}, updated_at = now()
+         where id = ${dealId} and machines is not distinct from ${cur?.machines ?? null} returning id`;
+			if (done[0]) break;
+		}
+	}
 	await logActivity(sql, userId, "install", row.id, "updated", `deal link removed: deal #${dealId}`);
 	await logActivity(sql, userId, "deal", dealId, "updated", backOnHandoff ? `unlinked from install #${row.id}; back on the Handoff page` : `unlinked from install #${row.id}`);
 	return { approved: false, kind, dealId, backOnHandoff };

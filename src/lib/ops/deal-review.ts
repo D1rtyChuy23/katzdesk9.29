@@ -45,9 +45,10 @@ export function dealReviewToast(r: { approved: boolean; kind: DealReview; backOn
 }
 
 /** The Handoff page's toast after Send to installs. */
-export function handoffToast(h: { kind: "had" | DealReview; installId: number | null } | null | undefined): string {
+export function handoffToast(h: { kind: "had" | "open" | DealReview; installId: number | null } | null | undefined): string {
   if (!h) return "That deal isn't on the Pipeline anymore.";
   if (h.kind === "had") return "That deal was sent to installs already.";
+  if (h.kind === "open") return "That deal isn't complete anymore.";
   return h.kind === "linked"
     ? "Linked to the account's open install, for an Admin to review."
     : "Install made for the deal, for an Admin to review.";

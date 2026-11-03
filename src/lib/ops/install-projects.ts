@@ -126,10 +126,10 @@ const sameModel = (a: { catalog_model: string; equipment_name: string }, b: { ca
 
 /**
  * The keeper's machine list with the drop's rows it doesn't have added, each with all it carries. A drop row is the
- * keeper's when it is the same model and the same serial, or one of the two has none (that keeper row takes the
- * drop row's serial, voltage, tie to its deal row, Sold/Loan/Lease, plug, water and recipe where it has none). Two
- * rows tied to two different deal rows are two machines (11/3): an install made for a deal, merged into the account's
- * install for the same job, keeps its deal's machines on the Board.
+ * keeper's row of the same model with the same tie to a deal row (11/3), else with the same serial, else where one of
+ * the two has no serial, unless both are tied to two different deal rows: those are two machines. The keeper row takes
+ * the drop row's serial, voltage, tie, Sold/Loan/Lease, plug, water and recipe where it has none. So an install made for
+ * a deal, merged into the account's install for the same job, keeps its deal's machines on the Board.
  */
 export function mergedMachineList(keeper: MachineSpec[], drop: MachineSpec[]): { list: MachineSpec[]; added: MachineSpec[] } {
   const list = keeper.map((m) => ({ ...m }));
@@ -137,10 +137,10 @@ export function mergedMachineList(keeper: MachineSpec[], drop: MachineSpec[]): {
   const added: MachineSpec[] = [];
   for (const row of drop) {
     const key = serialKey(row.serial);
-    const fits = (m: MachineSpec, i: number) =>
-      !used.has(i) && sameCatalogModel(m.equipment, row.equipment) && !(m.uid && row.uid && m.uid !== row.uid);
-    let at = list.findIndex((m, i) => fits(m, i) && !!key && serialKey(m.serial) === key);
-    if (at < 0) at = list.findIndex((m, i) => fits(m, i) && (!key || !serialKey(m.serial)));
+    const fits = (m: MachineSpec, i: number) => !used.has(i) && sameCatalogModel(m.equipment, row.equipment);
+    let at = row.uid ? list.findIndex((m, i) => fits(m, i) && m.uid === row.uid) : -1;
+    if (at < 0) at = list.findIndex((m, i) => fits(m, i) && !!key && serialKey(m.serial) === key);
+    if (at < 0) at = list.findIndex((m, i) => fits(m, i) && (!key || !serialKey(m.serial)) && !(m.uid && row.uid && m.uid !== row.uid));
     if (at < 0) {
       list.push({ ...row });
       used.add(list.length - 1);
