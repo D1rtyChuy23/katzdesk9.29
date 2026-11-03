@@ -14,11 +14,14 @@ const textOrNull = (v: unknown): string | null => {
   return s || null;
 };
 
-/** Each install's sale: its deal's Sale Invoice/SO # and P.O., or null when it came from no deal (or the deal is gone). */
+/**
+ * Each install's sale: its deal's Sale Invoice/SO # and P.O., or null when it came from no deal, or the deal was removed
+ * from the Pipeline (archived): there is nothing left to open or change there.
+ */
 export async function withSales<T extends { dealId: number | null; sale?: InstallSale | null }>(sql: Sql, installs: T[]): Promise<T[]> {
   const ids = [...new Set(installs.map((i) => i.dealId).filter((id): id is number => id != null).map(Number))];
   const rows = ids.length
-    ? await sql.query<{ id: number; invoice: string | null; po: string | null }>("select id, invoice, po from deals where id = any($1::int[])", [ids])
+    ? await sql.query<{ id: number; invoice: string | null; po: string | null }>("select id, invoice, po from deals where id = any($1::int[]) and archived = false", [ids])
     : [];
   const byId = new Map(rows.map((r) => [Number(r.id), r]));
   for (const i of installs) {

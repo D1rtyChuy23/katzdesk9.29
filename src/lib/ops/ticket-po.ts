@@ -93,17 +93,21 @@ export function withPoMatches<T extends { id: number; po?: string | null; vendor
 }
 
 /**
- * The top search's note on a record found by its P.O. (" · P.O. 4455" or " · Vendor P.O. TLC-9"), so the result says
- * why it was found; "" when the text matched something else.
+ * The top search's note on a record found by one of its numbers (" · P.O. 4455"), so the result says why it was found:
+ * the number that is exactly what was typed, else the first, in the order given, that contains it; "" when none does
+ * (the text matched something else).
  */
-export function poSearchNote(q: string, r: { po?: string | null; vendor_po?: string | null }): string {
+export function numberNote(q: string, numbers: [label: string, value: string | null | undefined][]): string {
   const needle = q.trim().toLowerCase();
   if (!needle) return "";
-  const po = String(r.po ?? "").trim();
-  if (po && po.toLowerCase().includes(needle)) return ` · P.O. ${po}`;
-  const vendor = String(r.vendor_po ?? "").trim();
-  if (vendor && vendor.toLowerCase().includes(needle)) return ` · Vendor P.O. ${vendor}`;
-  return "";
+  const set = numbers.map(([label, v]) => [label, String(v ?? "").trim()] as const).filter(([, v]) => v);
+  const hit = set.find(([, v]) => v.toLowerCase() === needle) ?? set.find(([, v]) => v.toLowerCase().includes(needle));
+  return hit ? ` · ${hit[0]} ${hit[1]}` : "";
+}
+
+/** The top search's note on a record found by its P.O. (" · P.O. 4455" or " · Vendor P.O. TLC-9"), or "". */
+export function poSearchNote(q: string, r: { po?: string | null; vendor_po?: string | null }): string {
+  return numberNote(q, [["P.O.", r.po], ["Vendor P.O.", r.vendor_po]]);
 }
 
 /**
@@ -119,12 +123,6 @@ export function saleRefLine(sale: { invoice?: string | null; po?: string | null 
   return parts.length ? parts.join(" · ") : null;
 }
 
-/** The top search's note on an install found by its sale's P.O. (" · Sale P.O. 4455"), or "" (11/3). */
-export function salePoNote(q: string, salePo: string | null | undefined): string {
-  const needle = q.trim().toLowerCase();
-  const po = String(salePo ?? "").trim();
-  return needle && po && po.toLowerCase().includes(needle) ? ` · Sale P.O. ${po}` : "";
-}
 
 /**
  * Why a ticket's Customer P.O. can't change on its Ticket tab, or null when it can. It went to NetSuite with the ticket's

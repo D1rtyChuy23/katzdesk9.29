@@ -14,6 +14,8 @@ process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 const P = await import("../src/lib/ops/ticket-po.ts");
 const api = await import("../src/lib/ops/api.ts");
 const { withSales } = await import("../src/lib/ops/install-sale.ts");
+const { getInvoiceFor } = await import("../src/lib/ops/invoice-api.ts");
+const { mergeInstallsFor } = await import("../src/lib/ops/install-projects.ts");
 const { addDays, todayChicago, weekBounds } = await import("../src/lib/ops/clock.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
@@ -47,18 +49,26 @@ const readInstalls = async (sql) => {
   return (await sql`select * from installs order by id`).map((r) => api.mapInstall(r, today, weekBounds(today)));
 };
 
-test("an install's sale line and its top-search note: the deal's Sale Invoice/SO # and P.O., trimmed, blank as none", () => {
+test("an install's sale line, and the top search's note: the number typed exactly, else the first that has it", () => {
   assert.equal(P.saleRefLine({ invoice: " INV-500 ", po: " SALE-1 " }), "Sale Invoice/SO INV-500 · Sale P.O. SALE-1");
   assert.equal(P.saleRefLine({ invoice: "SO-77", po: null }), "Sale Invoice/SO SO-77");
   assert.equal(P.saleRefLine({ invoice: "  ", po: "4455" }), "Sale P.O. 4455");
   assert.equal(P.saleRefLine({ invoice: null, po: " " }), null);
   assert.equal(P.saleRefLine(null), null);
   assert.equal(P.saleRefLine(undefined), null);
-  assert.equal(P.salePoNote(" sale-1 ", " SALE-1 "), " · Sale P.O. SALE-1");
-  assert.equal(P.salePoNote("LE-", "SALE-1"), " · Sale P.O. SALE-1");
-  assert.equal(P.salePoNote("zz", "SALE-1"), "");
-  assert.equal(P.salePoNote("  ", "SALE-1"), "");
-  assert.equal(P.salePoNote("SALE", null), "");
+  const install = (r) => [["P.O.", r.po], ["Vendor P.O.", r.vendorPo], ["Sale P.O.", r.salePo], ["Sale Invoice/SO", r.saleInvoice]];
+  // The one typed exactly wins over an earlier one that only contains it.
+  assert.equal(P.numberNote("abc-123", install({ vendorPo: "ABC-123-V", salePo: "ABC-123" })), " · Sale P.O. ABC-123");
+  assert.equal(P.numberNote(" so-55501 ", install({ po: "SO-55501-X", saleInvoice: " SO-55501 " })), " · Sale Invoice/SO SO-55501");
+  // Else the first, in order, that contains it.
+  assert.equal(P.numberNote("abc", install({ po: "X-ABC", vendorPo: "ABC-1" })), " · P.O. X-ABC");
+  assert.equal(P.numberNote("LE-", install({ salePo: "SALE-1" })), " · Sale P.O. SALE-1");
+  assert.equal(P.numberNote("zz", install({ po: "ABC", salePo: "SALE-1" })), "");
+  assert.equal(P.numberNote("  ", install({ salePo: "SALE-1" })), "");
+  assert.equal(P.numberNote("SALE", install({})), "");
+  // A ticket's or a deal's note works the same way.
+  assert.equal(P.poSearchNote("445", { po: "4455", vendor_po: "445" }), " · Vendor P.O. 445");
+  assert.equal(P.poSearchNote("445", { po: "4455", vendor_po: "4459" }), " · P.O. 4455");
 });
 
 test("a board's exact match takes a row's other numbers too: an install found by its sale's P.O. or number in any view", () => {
@@ -102,10 +112,12 @@ test("each install's sale is its deal's Sale Invoice/SO # and P.O., read as they
     await api.updateDealFor(sql, { id: sold, po: "SALE-PO-2", invoice: "SO-600" }, "u-owner");
     rows = await withSales(sql, await readInstalls(sql));
     assert.deepEqual(byId(fromSale).sale, { dealId: sold, invoice: "SO-600", po: "SALE-PO-2" });
-    // An archived deal is still the sale its installs came from.
+    // A deal removed from the Pipeline is no sale: there is nothing left there to open or change.
     await pg.query("update deals set archived = true where id = $1", [sold]);
     rows = await withSales(sql, await readInstalls(sql));
-    assert.equal(byId(fromSale).sale?.po, "SALE-PO-2");
+    assert.equal(byId(fromSale).sale, null);
+    assert.equal(byId(second).sale, null);
+    assert.deepEqual(byId(fromBare).sale, { dealId: bare, invoice: null, po: null });
     // No installs, no read.
     assert.deepEqual(await withSales(sql, []), []);
   } finally {
@@ -127,7 +139,42 @@ test("an install's save hands back its sale, so the sheet keeps showing it", asy
   }
 });
 
-test("the top search finds an install by its sale's P.O. and says so; its own P.O. says so first", async () => {
+test("a deal handed off makes its install with none of the deal's P.O.s; the install shows the sale, and its invoice only its own P.O.", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const d = await deal(pg, { invoice: "SO-1001", po: "CUST-PO-77", vendor_po: "VEN-77" });
+    await api.updateDealFor(sql, { id: d, completion: "complete" }, "u-owner");
+    const made = await one(pg, "select id, po, vendor_po from installs where deal_id = $1", [d]);
+    assert.ok(made, "the handoff made an install");
+    assert.deepEqual({ po: made.po, vendor_po: made.vendor_po }, { po: null, vendor_po: null });
+    const rows = await withSales(sql, await readInstalls(sql));
+    assert.deepEqual(rows.find((r) => r.id === made.id).sale, { dealId: d, invoice: "SO-1001", po: "CUST-PO-77" });
+    // The install's invoice carries the install's own Customer P.O., never the sale's; the deal's carries the deal's.
+    assert.equal((await getInvoiceFor(sql, { type: "install", id: made.id }, "u-owner")).po, null);
+    await api.updateInstallFor(sql, { id: made.id, po: "INST-PO-1" }, { userId: "u-owner" });
+    assert.equal((await getInvoiceFor(sql, { type: "install", id: made.id }, "u-owner")).po, "INST-PO-1");
+    assert.equal((await getInvoiceFor(sql, { type: "deal", id: d }, "u-owner")).po, "CUST-PO-77");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Merge installs: the install kept takes the dropped one's deal when it has none, and shows that sale", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const d = await deal(pg, { invoice: "INV-9", po: "SALE-9" });
+    const keep = await install(pg);
+    const drop = await install(pg, { deal_id: d });
+    await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: drop });
+    const rows = await withSales(sql, await readInstalls(sql));
+    assert.deepEqual(rows.find((r) => r.id === keep).sale, { dealId: d, invoice: "INV-9", po: "SALE-9" });
+    assert.equal(rows.find((r) => r.id === keep).po, null);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the top search finds an install by its sale's P.O. or number and says so: the number typed exactly, else its own P.O. first", async () => {
   const { pg, sql } = await fresh();
   try {
     const sold = await deal(pg, { invoice: "INV-88", po: "SALE-PO-88" });
@@ -140,7 +187,10 @@ test("the top search finds an install by its sale's P.O. and says so; its own P.
     const ins = hits.filter((h) => h.entityType === "install");
     assert.deepEqual(ins.map((h) => h.id).sort((x, y) => x - y), [fromSale, ownToo].sort((x, y) => x - y));
     assert.match(ins.find((h) => h.id === fromSale).subtitle, / · Sale P\.O\. SALE-PO-88$/);
-    assert.match(ins.find((h) => h.id === ownToo).subtitle, / · P\.O\. SALE-PO-88-B$/);
+    // Typed exactly, the sale's P.O. is named, though the install's own P.O. contains it too.
+    assert.match(ins.find((h) => h.id === ownToo).subtitle, / · Sale P\.O\. SALE-PO-88$/);
+    // When both only contain what was typed, the install's own P.O. comes first.
+    assert.match((await find("po-88")).find((h) => h.entityType === "install" && h.id === ownToo).subtitle, / · P\.O\. SALE-PO-88-B$/);
     assert.ok(!ins.some((h) => h.id === archived || h.id === unrelated));
     // The deal itself is found by its P.O., as before.
     assert.ok(hits.some((h) => h.entityType === "deal" && h.id === sold && / · P\.O\. SALE-PO-88$/.test(h.subtitle)));
@@ -148,6 +198,16 @@ test("the top search finds an install by its sale's P.O. and says so; its own P.
     const byName = (await find("Roastery")).filter((h) => h.entityType === "install" && h.id === fromSale);
     assert.equal(byName.length, 1);
     assert.doesNotMatch(byName[0].subtitle, /P\.O\./);
+    // The Sale Invoice/SO # finds the install and the deal, and says so.
+    const bySale = await find("inv-88");
+    assert.match(bySale.find((h) => h.entityType === "install" && h.id === fromSale).subtitle, / · Sale Invoice\/SO INV-88$/);
+    assert.match(bySale.find((h) => h.entityType === "deal" && h.id === sold).subtitle, / · Sale Invoice\/SO INV-88$/);
+    // Typed exactly, the sale's P.O. is named over a Vendor P.O. that only contains it.
+    await pg.query("update installs set vendor_po = 'SALE-PO-88-V' where id = $1", [fromSale]);
+    assert.match((await find("SALE-PO-88")).find((h) => h.entityType === "install" && h.id === fromSale).subtitle, / · Sale P\.O\. SALE-PO-88$/);
+    // A deal removed from the Pipeline: its installs aren't found by its numbers any more.
+    await pg.query("update deals set archived = true where id = $1", [sold]);
+    assert.deepEqual((await find("INV-88")).filter((h) => h.entityType === "install"), []);
   } finally {
     await pg.close();
   }
@@ -158,10 +218,9 @@ test("the Installs board, the account page and a saved install read each install
   assert.match(code, /\n\t\/\/ Each install's sale, from the deal it came from \(11\/3\)\.\n\treturn withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(installs, marks\)\)\)\);\n\}\);/);
   assert.match(code, /\n\t\tinstalls: await withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(installs\.map\(\(r\) => mapInstall\(r, today, week, catalog\)\), marks\)\)\)\),\n/);
   assert.match(code, /const saved = \(await withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(\[mapInstall\(/);
-  // The top search's install block joins the install's deal and matches its P.O.
-  assert.match(code, /d\.po as sale_po from installs i\n\s+left join deals d on d\.id = i\.deal_id\n/);
-  assert.match(code, /or coalesce\(d\.po, ''\) ilike \$1\)\n\s+limit 5`/);
-  assert.match(code, /\$\{poSearchNote\(q, i\) \|\| salePoNote\(q, i\.sale_po\)\}/);
+  // The top search's install block joins the install's deal (not a removed one) and matches its P.O. and number.
+  assert.match(code, /d\.po as sale_po, d\.invoice as sale_invoice from installs i\n\s+left join deals d on d\.id = i\.deal_id and d\.archived = false\n/);
+  assert.match(code, /or coalesce\(d\.po, ''\) ilike \$1 or coalesce\(d\.invoice, ''\) ilike \$1\)\n\s+limit 5`/);
 });
 
 test("the install's card, Details and account row show its sale, and the Installs search finds it by the sale's numbers", () => {
@@ -169,11 +228,12 @@ test("the install's card, Details and account row show its sale, and the Install
   // The search box's text match and the exact match, in any lane.
   assert.match(board, /i\.po, i\.vendorPo, i\.sale\?\.po, i\.sale\?\.invoice, \.\.\.\(i\.machines/);
   assert.match(board, /list = withPoMatches\(list, data\.data \?\? \[\], q, \(i\) => \[i\.sale\?\.po, i\.sale\?\.invoice\]\);/);
-  // The card: "From the deal" stays the link to the deal, then the sale's numbers.
+  // The card: "From the deal", the link to the deal, then the sale's numbers, as one line; only while the deal is on the Pipeline.
   assert.match(
     board,
-    /\{i\.dealId \? \([\s\S]{0,200}<div [^>]*data-testid="install-sale">\s*<OpenLink entityType="deal" id=\{i\.dealId\}[^>]*>\s*From the deal\s*<\/OpenLink>\s*\{saleRefLine\(i\.sale\) \? \(\s*<span [^>]*data-testid="install-sale-line">\s*· \{saleRefLine\(i\.sale\)\}/,
+    /\{i\.sale \? \([\s\S]{0,300}<p className="[^"]*\[overflow-wrap:anywhere\][^"]*" data-testid="install-sale">\s*<OpenLink entityType="deal" id=\{i\.sale\.dealId\}[^>]*>\s*From the deal\s*<\/OpenLink>\s*\{saleRefLine\(i\.sale\) \? <span data-testid="install-sale-line"> · \{saleRefLine\(i\.sale\)\}<\/span> : null\}\s*<\/p>/,
   );
+  assert.doesNotMatch(board, /\{i\.dealId \? \(/);
   // The Details: a read-only box after the P.O. boxes.
   const sheets = src("src/components/desk/entity-sheets.tsx");
   assert.match(sheets, /<PoFields idPrefix=\{`install-\$\{row\.id\}`\} po=\{row\.po\} vendorPo=\{row\.vendorPo\} \/>\n\s+\{\/\* [^*]+\*\/\}\n\s+<SaleRef sale=\{row\.sale\} \/>/);
@@ -181,6 +241,7 @@ test("the install's card, Details and account row show its sale, and the Install
   const saleRef = fields.slice(fields.indexOf("export function SaleRef"));
   assert.match(saleRef, /^export function SaleRef\(\{ sale \}: \{ sale: InstallSale \| null \| undefined \}\) \{\n\s+if \(!sale\) return null;\n\s+const line = saleRefLine\(sale\);/);
   assert.match(saleRef, /\{line \?\? "The deal has no Sale Invoice\/SO # or P\.O\. yet\."\}/);
+  assert.match(saleRef, /Change them on the deal, in the Pipeline\./);
   // Read only: no box, so nothing of the sale's is ever sent with the install's save.
   assert.doesNotMatch(saleRef, /<Input|<input|name=/);
   // The account page's install row.

@@ -227,7 +227,8 @@ export type Install = {
   dealId: number | null;
   /**
    * The sale this install came from, for reference (11/3): its deal's Sale Invoice # or Sales Order # and P.O. Null
-   * when it came from no deal. Set by withSales on the Installs board, the account page and a saved install.
+   * when it came from no deal, or the deal was removed from the Pipeline. Set by withSales on the Installs board, the
+   * account page and a saved install.
    */
   sale?: InstallSale | null;
   /** Set when the card came from a deal: which of that deal's board projects this is. */

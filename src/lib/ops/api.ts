@@ -80,7 +80,7 @@ import { woMatchKey } from "./corrigo";
 import { BILLED_ON_INSTALL } from "./merged-ticket";
 import { LIVE_INVOICE_SQL, lockingInvoice } from "./billing-rules";
 import { UNCHANGED_SINCE_READ, loadInvoices } from "./ticket-billing-api";
-import { poSearchNote, salePoNote, sentPo, ticketPoLock } from "./ticket-po";
+import { numberNote, poSearchNote, sentPo, ticketPoLock } from "./ticket-po";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { withSales } from "./install-sale";
@@ -1706,7 +1706,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);
-	// With its sale (11/3): the sheet's saved install replaces the one the lists show.
+	// With its sale (11/3), so a save hands back the whole install.
 	const saved = (await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks)))))[0];
 	return { ...saved, unitsMoved };
 }
@@ -1908,12 +1908,12 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 		subtitle: `${p.wo || p.equipment || "PM"} · ${p.status}${poSearchNote(q, p)}`,
 		status: p.status
 	});
-	// An install is found by its sale's P.O. too, from the deal it came from (11/3).
+	// An install is found by its sale's P.O. and Sale Invoice/SO # too, from the deal it came from (11/3); not a removed one.
 	const ins = await sql.query(
-		`select i.id, i.customer, i.equip_status, i.complete, i.wo, i.po, i.vendor_po, d.po as sale_po from installs i
-       left join deals d on d.id = i.deal_id
+		`select i.id, i.customer, i.equip_status, i.complete, i.wo, i.po, i.vendor_po, d.po as sale_po, d.invoice as sale_invoice from installs i
+       left join deals d on d.id = i.deal_id and d.archived = false
       where i.archived = false and (i.customer ilike $1 or exists (select 1 from ${INSTALL_WOS_SQL} w where w.install_id = i.id and w.wo ilike $1)
-             or coalesce(i.po, '') ilike $1 or coalesce(i.vendor_po, '') ilike $1 or coalesce(d.po, '') ilike $1)
+             or coalesce(i.po, '') ilike $1 or coalesce(i.vendor_po, '') ilike $1 or coalesce(d.po, '') ilike $1 or coalesce(d.invoice, '') ilike $1)
       limit 5`,
 		[like]
 	);
@@ -1923,19 +1923,20 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 			entityType: "install",
 			id: i.id,
 			title: i.customer,
-			subtitle: `${i.wo || "Install"} · ${status}${poSearchNote(q, i) || salePoNote(q, i.sale_po)}`,
+			subtitle: `${i.wo || "Install"} · ${status}${numberNote(q, [["P.O.", i.po], ["Vendor P.O.", i.vendor_po], ["Sale P.O.", i.sale_po], ["Sale Invoice/SO", i.sale_invoice]])}`,
 			status
 		});
 	}
 	const deals = await sql`
-      select id, customer, producer, completion, po, vendor_po from deals
-      where archived = false and (customer ilike ${like} or coalesce(po, '') ilike ${like} or coalesce(vendor_po, '') ilike ${like})
+      select id, customer, producer, completion, po, vendor_po, invoice from deals
+      where archived = false and (customer ilike ${like} or coalesce(po, '') ilike ${like} or coalesce(vendor_po, '') ilike ${like} or coalesce(invoice, '') ilike ${like})
       limit 5`;
 	for (const d of deals) hits.push({
 		entityType: "deal",
 		id: d.id,
 		title: d.customer,
-		subtitle: `${d.producer ?? "Deal"}${poSearchNote(q, d)}`,
+		// Its Sale Invoice/SO # too (11/3), the number its installs show.
+		subtitle: `${d.producer ?? "Deal"}${numberNote(q, [["P.O.", d.po], ["Vendor P.O.", d.vendor_po], ["Sale Invoice/SO", d.invoice]])}`,
 		status: d.completion === "complete" ? "Complete" : d.completion === "fell" ? "Fell through" : "Open"
 	});
 	// Rebuilds by their P.O. (11/2), a sales rep's accounts only, like the tickets above: theirs are picked before the 5

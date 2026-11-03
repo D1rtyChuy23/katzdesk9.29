@@ -93,7 +93,7 @@ export function SaleRef({ sale }: { sale: InstallSale | null | undefined }) {
       <p className="mt-1 text-sm [overflow-wrap:anywhere]" data-testid="install-sale-ref-line">
         {line ?? "The deal has no Sale Invoice/SO # or P.O. yet."}
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">From the deal these machines came from, for reference. Change them on the deal.</p>
+      <p className="mt-1 text-xs text-muted-foreground">From the deal these machines came from, for reference. Change them on the deal, in the Pipeline.</p>
     </div>
   );
 }

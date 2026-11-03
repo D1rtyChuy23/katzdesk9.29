@@ -919,18 +919,15 @@ function InstallRow({
             ) : null}
           </button>
           <PoLine po={i.po} vendorPo={i.vendorPo} className="sm:pl-20" />
-          {i.dealId ? (
-            // With its sale, for reference (11/3): the deal's Sale Invoice/SO # and P.O.
-            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1 text-xs sm:pl-20" data-testid="install-sale">
-              <OpenLink entityType="deal" id={i.dealId} className="text-copper hover:underline max-sm:py-2" title="Open the deal these machines came from">
+          {i.sale ? (
+            // With its sale, for reference (11/3): the deal's Sale Invoice/SO # and P.O., as one line that wraps on a phone.
+            // Not for a deal removed from the Pipeline: there is nothing left to open.
+            <p className="mt-0.5 text-xs text-muted-foreground [overflow-wrap:anywhere] sm:pl-20" data-testid="install-sale">
+              <OpenLink entityType="deal" id={i.sale.dealId} className="text-copper hover:underline max-sm:py-2" title="Open the deal these machines came from">
                 From the deal
               </OpenLink>
-              {saleRefLine(i.sale) ? (
-                <span className="min-w-0 text-muted-foreground [overflow-wrap:anywhere]" data-testid="install-sale-line">
-                  · {saleRefLine(i.sale)}
-                </span>
-              ) : null}
-            </div>
+              {saleRefLine(i.sale) ? <span data-testid="install-sale-line"> · {saleRefLine(i.sale)}</span> : null}
+            </p>
           ) : null}
           {open ? <TrfCheck install={i} /> : null}
           {machineNotes(i)}
