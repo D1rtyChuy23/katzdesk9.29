@@ -524,10 +524,10 @@ export function InstallSheet({
       return updateInstall({ data: d.machines !== undefined && builtOn ? { ...d, machinesBase: JSON.stringify(baseOf(builtOn)) } : d });
     },
     onSuccess: (saved, vars) => {
-      // The P.O.s as saved, at once, wherever this sheet was opened from (the lists read again below).
-      if (vars.po !== undefined || vars.vendorPo !== undefined) holdSavedPo(qc, "install", saved);
       // Stored: this opening's next notes are typed on these.
       if (vars.notes !== undefined && vars.notesSlot) vars.notesSlot.base = vars.notes ?? null;
+      // The P.O.s as saved, at once, wherever this sheet was opened from (the lists read again below).
+      if (vars.po !== undefined || vars.vendorPo !== undefined) holdSavedPo(qc, "install", saved);
       const keys = Object.keys(vars).filter((k) => k !== "id" && k !== "builtOn" && k !== "sent" && k !== "notesSlot");
       const machineOnly = keys.every((k) =>
         ["equipment", "serial", "powerVoltage", "machines"].includes(k),
