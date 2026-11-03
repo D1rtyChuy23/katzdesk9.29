@@ -1598,8 +1598,9 @@ export async function reviewDealLinkFor(sql: any, userId: string, data: { instal
            handed_off = handed_off and exists (select 1 from installs where deal_id = ${dealId} and archived = false),
            updated_at = now()
      where id = ${dealId}
-     returning handed_off`;
-	const backOnHandoff = !!back[0] && !back[0].handed_off;
+     returning handed_off, archived`;
+	// Back on the Handoff page's completed deals: not handed off now, and still on the Pipeline.
+	const backOnHandoff = !!back[0] && !back[0].handed_off && !back[0].archived;
 	await logActivity(sql, userId, "install", row.id, "updated", `deal link removed: deal #${dealId}`);
 	await logActivity(sql, userId, "deal", dealId, "updated", backOnHandoff ? `unlinked from install #${row.id}; back on the Handoff page` : `unlinked from install #${row.id}`);
 	return { approved: false, kind, dealId, backOnHandoff };

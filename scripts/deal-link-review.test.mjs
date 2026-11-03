@@ -261,6 +261,13 @@ test("Unlink with another install still on the deal: the deal stays handed off",
     assert.equal((await dealRow(pg, d)).handed_off, true);
     assert.deepEqual((await installsOf(pg, d)).map((r) => Number(r.id)), [board]);
     assert.equal((await one(pg, "select detail from activity where entity_type = 'deal' and entity_id = $1 order by id desc limit 1", [d])).detail, `unlinked from install #${open}`);
+    // A deal removed from the Pipeline meanwhile isn't "back on the Handoff page".
+    const gone = await deal(pg, { customer: OTHER });
+    const spare = await install(pg, { customer: OTHER });
+    await complete(sql, gone);
+    await pg.query("update deals set archived = true where id = $1", [gone]);
+    assert.equal((await api.reviewDealLinkFor(sql, "u-owner", { installId: spare, approve: false })).backOnHandoff, false);
+    assert.equal((await row(pg, spare)).deal_id, null);
   } finally {
     await pg.close();
   }
