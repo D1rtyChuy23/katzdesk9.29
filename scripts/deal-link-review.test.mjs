@@ -217,6 +217,16 @@ test("a save that read the deal before a handoff tied its rows doesn't untie the
     const installUid = JSON.parse((await one(pg, "select machines from installs where id = $1", [made.installId])).machines)[0].uid;
     const rows = JSON.parse((await one(pg, "select machines, notes from deals where id = $1", [d])).machines);
     assert.deepEqual(rows.map((m) => [m.equipment, m.uid ?? null]), [["Test Brewer TB-1", installUid], ["Test Grinder TG-2", null]], "the brewer tied again, the grinder added");
+    // A save with no rows (notes, say) read before a warehouse pull wrote a unit onto the deal keeps the pull's row.
+    const d3 = await deal(pg, { customer: "Test Shop 3", machines: BREWER });
+    const shop3 = await install(pg, { customer: "Test Shop 3", deal_id: d3 });
+    const pulled = Number((await one(pg, "insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Bunn TB3', 'TB-31', 1, 'barn-back', 'B', 1, 1, 'ready') returning id")).id);
+    const pullMeanwhile = racing(sql, /^select \* from deals where id = \$\d+$/, () => api.assignAssetToInstallFor(sql, { assetId: pulled, installId: shop3 }, { userId: "u-owner" }));
+    await api.updateDealFor(pullMeanwhile, { id: d3, notes: "Pull noted" }, "u-rep");
+    const after3 = await one(pg, "select machines, equipment, notes from deals where id = $1", [d3]);
+    assert.deepEqual(JSON.parse(after3.machines).map((m) => [m.equipment, m.serial]), [["Test Brewer TB-1", ""], ["Bunn TB3", "TB-31"]]);
+    assert.match(after3.equipment, /Bunn TB3/);
+    assert.equal(after3.notes, "Pull noted");
     // A save with no rows (notes, say) read before the tie leaves the stored rows as they are.
     const d2 = await deal(pg, { customer: OTHER, completion: "complete", machines: BREWER });
     let made2 = null;
@@ -545,6 +555,14 @@ test("one deal, one handoff: two saves completing it at once, two presses of Sen
     assert.equal(h11.kind, "had", "the first handoff lost its claim");
     assert.equal((await installsOf(pg, d11)).length, 1);
     assert.equal(h11.installId, Number((await installsOf(pg, d11))[0].id));
+    // The same with an open install to link: the handoff whose claim was taken meanwhile doesn't link it.
+    const d13 = await deal(pg, { customer: "Test Kiosk 2", completion: "complete" });
+    const spot = await install(pg, { customer: "Test Kiosk 2" });
+    const taken = racing(sql, /select id, customer from installs\s+where archived = false and deal_id is null/, () =>
+      pg.query("update deals set handoff_claim = 'another-handoff' where id = $1", [d13]),
+    );
+    assert.deepEqual(await api.maybeHandoffInstall(taken, d13, "u-owner"), { kind: "had", installId: null });
+    assert.equal((await row(pg, spot)).deal_id, null, "left for the handoff that has the claim");
     // The deal kept changing while its install was made: the handoff stops, says so, and the deal is back on the Handoff page.
     const d12 = await deal(pg, { customer: "Test Cart 2", completion: "complete", machines: BREWER });
     let edits = 0;
