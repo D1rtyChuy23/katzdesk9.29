@@ -20,6 +20,7 @@ import { canMarkInstalled, removeInstallMachine, saveInspectionMeta } from "@/li
 import { siteIsReady } from "@/lib/ops/pre-inspection";
 import { isOwnership, machineGlance, ownershipLabel, projectLabel } from "@/lib/ops/deal-board";
 import { OpenLink } from "@/components/desk/open-link";
+import { DealLinkReview } from "@/components/desk/deal-link-review";
 import { InspectionBadge, PreInspectionPanel } from "@/components/desk/pre-inspection-panel";
 import { Button } from "@/components/ui/button";
 import { Label, Textarea } from "@/components/ui/input";
@@ -929,6 +930,8 @@ function InstallRow({
               {saleRefLine(i.sale) ? <span data-testid="install-sale-line"> · {saleRefLine(i.sale)}</span> : null}
             </p>
           ) : null}
+          {/* Linked to (or made for) its deal when the deal was marked complete: for an Admin's review (11/3). */}
+          {i.dealReview ? <DealLinkReview installId={i.id} kind={i.dealReview} className="mt-1 sm:pl-20" /> : null}
           {open ? <TrfCheck install={i} /> : null}
           {machineNotes(i)}
           <div className="sm:pl-20">

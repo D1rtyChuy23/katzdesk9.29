@@ -10,6 +10,9 @@ import { getMyAccess } from "@/lib/ops/access";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OpenLink } from "@/components/desk/open-link";
+import { DealLinkReview } from "@/components/desk/deal-link-review";
+import { dealReviewBadge, dealReviewText, handoffToast } from "@/lib/ops/deal-review";
+import { saleRefLine } from "@/lib/ops/ticket-po";
 import { PingButton } from "@/components/desk/ping-button";
 import { HandoffReply } from "@/components/desk/handoff-reply";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
@@ -81,17 +84,22 @@ function Page() {
   });
   const promote = useMutation({
     mutationFn: (dealId: number) => handoffDeal({ data: { dealId } }),
-    onSuccess: () => {
-      toast.success("Install row created");
+    onSuccess: (r) => {
+      // It links the account's open install or makes one (11/3), and says which.
+      toast.success(handoffToast(r.handoff));
       void qc.invalidateQueries({ queryKey: ["handoff"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
+      void qc.invalidateQueries({ queryKey: ["deals"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
     },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not send the deal to installs"),
   });
   const d = feed.data;
+  // Deal links wait for an Admin's review (11/3): an Admin's Mine has every one; anyone else's, their own deals'.
+  const reviewer = !!access.data?.approved && (!!access.data.isAdmin || access.data.role === "admin");
   const filtered = useMemo(
-    () => filterHandoff(d, user, access.data?.username ?? null, scope),
-    [d, user, access.data?.username, scope],
+    () => filterHandoff(d, user, access.data?.username ?? null, scope, reviewer),
+    [d, user, access.data?.username, scope, reviewer],
   );
   const sortedAsks = useMemo(
     () =>
@@ -110,14 +118,15 @@ function Page() {
     [filtered.recent, sort],
   );
   const mineCount = useMemo(() => {
-    const mine = filterHandoff(d, user, access.data?.username ?? null, "mine");
+    const mine = filterHandoff(d, user, access.data?.username ?? null, "mine", reviewer);
     const askIds = new Set(mine.asks.map((c) => c.id));
     return (
       mine.pendingHandoffs.length +
+      mine.dealReviews.length +
       mine.asks.length +
       mine.recent.filter((c) => !askIds.has(c.id)).length
     );
-  }, [d, user, access.data?.username]);
+  }, [d, user, access.data?.username, reviewer]);
 
   function setView(next: Scope) {
     setScope(next);
@@ -132,6 +141,7 @@ function Page() {
     scope === "mine" &&
     !!d &&
     !filtered.pendingHandoffs.length &&
+    !filtered.dealReviews.length &&
     !filtered.asks.length &&
     !filtered.recent.length;
 
@@ -211,6 +221,48 @@ function Page() {
                 </div>
                 <div className="mt-2">
                   <HandoffReply entityType="deal" entityId={p.dealId} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {filtered.dealReviews.length ? (
+        // Completed deals linked to an install, or with one made for them, when they were marked complete (11/3).
+        <section className="rounded-xl border border-border bg-card p-5" data-testid="deal-reviews">
+          <h2 className="font-display text-xl">Deal Links To Review</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            When a deal is marked complete, it's linked to the account's newest open install with no deal, or a new
+            install is made for it. An Admin approves each one.
+          </p>
+          <ul className="mt-3 divide-y divide-border">
+            {filtered.dealReviews.map((r) => (
+              <li key={r.installId} className="py-3" data-testid="deal-review-row">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="flex flex-wrap items-center gap-2">
+                      <OpenLink
+                        entityType="install"
+                        id={r.installId}
+                        className="font-medium underline-offset-2 hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center"
+                      >
+                        {r.customer}
+                      </OpenLink>
+                      <Badge variant="warn" size="tight">
+                        {dealReviewBadge(r.kind)}
+                      </Badge>
+                    </p>
+                    <p className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                      {[r.producer ?? "—", r.wo ? `WO ${r.wo}` : null, r.status, saleRefLine(r.sale)].filter(Boolean).join(" · ")}
+                      {" · "}
+                      <OpenLink entityType="deal" id={r.dealId} className="text-copper hover:underline max-sm:py-2">
+                        Open the deal
+                      </OpenLink>
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{dealReviewText(r.kind)}</p>
+                  </div>
+                  <DealLinkReview installId={r.installId} kind={r.kind} badge={false} />
                 </div>
               </li>
             ))}
@@ -352,10 +404,12 @@ function filterHandoff(
   user: { id: string; displayName: string | null; primaryEmail: string | null } | null,
   username: string | null,
   scope: Scope,
+  reviewer: boolean,
 ): HandoffFeed {
-  const empty: HandoffFeed = { asks: [], recent: [], pendingHandoffs: [] };
+  const empty: HandoffFeed = { asks: [], recent: [], pendingHandoffs: [], dealReviews: [] };
   if (!d) return empty;
-  if (scope === "all") return d;
+  const reviews = d.dealReviews ?? [];
+  if (scope === "all") return { ...d, dealReviews: reviews };
   const asUser = {
     displayName: [user?.displayName, username].filter(Boolean).join(" ") || user?.displayName || null,
     primaryEmail: user?.primaryEmail ?? null,
@@ -371,6 +425,7 @@ function filterHandoff(
     namesMatchUser(asUser, c.authorName, c.technician, c.producer, c.accountRep);
   return {
     pendingHandoffs: d.pendingHandoffs.filter((p) => namesMatchUser(asUser, p.producer)),
+    dealReviews: reviewer ? reviews : reviews.filter((r) => namesMatchUser(asUser, r.producer)),
     asks: d.asks.filter((c) => mine(c)),
     recent: d.recent.filter((c) => mine(c)),
   };

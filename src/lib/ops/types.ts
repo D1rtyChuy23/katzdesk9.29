@@ -231,6 +231,11 @@ export type Install = {
    * account page and a saved install.
    */
   sale?: InstallSale | null;
+  /**
+   * Its link to a completed deal, waiting for an Admin's review (11/3): "linked" (an open install of the account was
+   * linked when the deal was marked complete) or "made" (made for the deal then). Null once approved, or never.
+   */
+  dealReview?: "linked" | "made" | null;
   /** Set when the card came from a deal: which of that deal's board projects this is. */
   project?: { n: number; of: number } | null;
   duplicateOf: number | null;
@@ -383,6 +388,18 @@ export type HandoffFeed = {
   asks: (CommentPreview & { status: string | null } & HandoffOwners)[];
   recent: (CommentPreview & HandoffOwners)[];
   pendingHandoffs: Dashboard["pendingHandoffs"];
+  /** Completed deals' links to installs, waiting for an Admin's review (11/3), newest first. */
+  dealReviews: {
+    installId: number;
+    dealId: number;
+    customer: string;
+    wo: string | null;
+    status: string;
+    kind: "linked" | "made";
+    at: string | null;
+    sale: { invoice: string | null; po: string | null };
+    producer: string | null;
+  }[];
 };
 
 export type Asset = {
