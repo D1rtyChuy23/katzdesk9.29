@@ -39,15 +39,12 @@ async function fresh() {
   );
   return { pg, sql };
 }
-/** The same handle, with `action` run once right after the first query whose text matches `when` (a write racing in). */
-function racing(sql, when, action) {
-  let fired = false;
+/** The same handle, with `action` run once right after the nth query (the first by default) whose text matches `when`. */
+function racing(sql, when, action, nth = 1) {
+  let seen = 0;
   return wrap(async (text, params) => {
     const rows = await sql.query(text, params);
-    if (!fired && when.test(text)) {
-      fired = true;
-      await action();
-    }
+    if (when.test(text) && ++seen === nth) await action();
     return rows;
   });
 }
@@ -557,6 +554,20 @@ test("Unlink clears the deal's copy of a pulled unit's serial, as a return to th
     await complete(sql, d5);
     await api.reviewDealLinkFor(sql, "u-owner", { installId: booth, approve: false });
     assert.deepEqual(await dealSerial(d5), [""]);
+    // The deal saved between Unlink's read of its machines and its write: the write is tried again on the saved rows.
+    const stall = await install(pg, { customer: "Test Stall" });
+    const d6 = await deal(pg, { customer: "Test Stall", machines: JSON.stringify([{ equipment: "Bunn TB3", serial: "", powerVoltage: "", ownership: "Sold" }, { equipment: "Test Grinder TG-2", serial: "", powerVoltage: "", ownership: "Sold" }]) });
+    await complete(sql, d6);
+    const unit3 = Number((await one(pg, "insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Bunn TB3', 'TB-99', 1, 'barn-back', 'A', 1, 3, 'ready') returning id")).id);
+    await api.assignAssetToInstallFor(sql, { assetId: unit3, installId: stall }, { userId: "u-owner" });
+    assert.deepEqual(await dealSerial(d6), ["TB-99", ""]);
+    const savedMeanwhile = racing(sql, /select machines from deals where id/, async () => {
+      const rows = JSON.parse((await one(pg, "select machines from deals where id = $1", [d6])).machines);
+      rows[1].serial = "TG-TYPED";
+      await pg.query("update deals set machines = $2 where id = $1", [d6, JSON.stringify(rows)]);
+    }, 2);
+    await api.reviewDealLinkFor(savedMeanwhile, "u-owner", { installId: stall, approve: false });
+    assert.deepEqual(await dealSerial(d6), ["", "TG-TYPED"], "the serial cleared, and the save meanwhile kept");
     // A unit on the install whose serial isn't on the deal leaves the deal's rows as they are.
     const other = await install(pg, { customer: OTHER });
     const d2 = await deal(pg, { customer: OTHER, machines: JSON.stringify([{ equipment: "Test Brewer TB-1", serial: "TB1-9", powerVoltage: "", ownership: "Sold" }]) });
