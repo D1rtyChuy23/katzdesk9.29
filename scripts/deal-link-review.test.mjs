@@ -609,7 +609,11 @@ test("the screens: the card's review, the Handoff page's list, the buttons, and 
   assert.match(review, /aria-expanded=\{why\}/);
   assert.match(review, /\{badge && why \? \(\s+<span className="basis-full text-xs text-muted-foreground" data-testid="deal-review-text">\s+\{dealReviewText\(kind\)\}/);
   const server = src("src/lib/ops/api.ts");
+  // Guards whose effect needs two connections (real Postgres), which PGlite doesn't have: pinned here instead. The row lock
+  // on the deal's status read, and Send to installs handing a deal off only while it isn't yet (the claim).
   assert.match(server, /with prev as \(select id, completion from deals where id = \$\{data\.id\} for update\)/);
+  assert.match(server, /where id = \$\{dealId\} and archived = false and \(\$\{!opts\.claim\}::boolean or not handed_off\)/);
+  assert.match(server, /if \(!won\[0\]\) return opts\.claim \? \{ kind: "had", installId: null \} : null;/);
   assert.match(server, /if \(completion === "complete" && wrote\[0\] && wrote\[0\]\.was !== "complete"\) await maybeHandoffInstall\(sql, data\.id, userId\);/);
   assert.match(server, /return \{ ok: true, handoff: await maybeHandoffInstall\(await ready\(\), data\.dealId, context\.userId, \{ claim: true \}\) \};/);
   assert.match(server, /dealReviews: await loadDealReviews\(sql\)/);
