@@ -99,22 +99,25 @@ export async function findWoEverywhere(
 }
 
 /**
- * The top search's text matches on tickets/TLCs (newest 8) and PMs (5). With `inScope` (a sales rep's accounts),
- * other accounts' rows are left out before the 8 and 5 are taken, as findWoEverywhere, listJobs and listPms do.
+ * The top search's text matches on tickets/TLCs (newest 8) and PMs (5), by customer, number, issue, or either P.O.
+ * (11/2: the Customer P.O. and the Vendor P.O.). With `inScope` (a sales rep's accounts), other accounts' rows are left
+ * out before the 8 and 5 are taken, as findWoEverywhere, listJobs and listPms do.
  */
 export async function searchTicketText(
   sql: { query: <R = Record<string, unknown>>(text: string, params?: unknown[]) => Promise<R[]> },
   like: string,
   inScope?: ((customer: string | null) => boolean) | null,
 ) {
-  const jobs = await sql.query<{ id: number; kind: string; customer: string | null; call_id: string; status: string; wo: string | null }>(
-    `select id, kind, customer, call_id, status, wo from service_jobs
+  const jobs = await sql.query<{ id: number; kind: string; customer: string | null; call_id: string; status: string; wo: string | null; po: string | null; vendor_po: string | null }>(
+    `select id, kind, customer, call_id, status, wo, po, vendor_po from service_jobs
       where customer ilike $1 or call_id ilike $1 or coalesce(wo,'') ilike $1 or coalesce(issue,'') ilike $1
+         or coalesce(po,'') ilike $1 or coalesce(vendor_po,'') ilike $1
       order by received desc nulls last${inScope ? "" : " limit 8"}`,
     [like],
   );
-  const pms = await sql.query<{ id: number; customer: string; status: string; equipment: string | null; wo: string | null }>(
-    `select id, customer, status, equipment, wo from pm_jobs where customer ilike $1 or coalesce(wo,'') ilike $1${inScope ? "" : " limit 5"}`,
+  const pms = await sql.query<{ id: number; customer: string; status: string; equipment: string | null; wo: string | null; po: string | null; vendor_po: string | null }>(
+    `select id, customer, status, equipment, wo, po, vendor_po from pm_jobs
+      where customer ilike $1 or coalesce(wo,'') ilike $1 or coalesce(po,'') ilike $1 or coalesce(vendor_po,'') ilike $1${inScope ? "" : " limit 5"}`,
     [like],
   );
   const shown = (r: { customer: string | null }) => !inScope || inScope(r.customer);

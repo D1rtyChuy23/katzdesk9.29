@@ -24,8 +24,11 @@ export const TARGET_LABEL: Record<InvoiceTarget, string> = {
 /** Tickets keep their invoice in the ticket's own charge lines (the Charges panel); every other record has its own. */
 export const usesTicketCharges = (t: InvoiceTarget) => t === "service" || t === "tlc";
 
-/** Which invoices carry a P.O. of their own: an install's (10/30). A ticket's P.O. is on the ticket. */
-export const carriesPo = (t: InvoiceTarget): boolean => t === "install";
+/**
+ * Which invoices carry the customer's P.O.: every one (11/2), the record's own Customer P.O. from its Details. An
+ * install's came first (10/30); a ticket's is the ticket's P.O. on the NetSuite billing export.
+ */
+export const carriesPo = (t: InvoiceTarget): boolean => isInvoiceTarget(t);
 
 export const PO_MAX = 120;
 

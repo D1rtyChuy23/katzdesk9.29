@@ -56,9 +56,9 @@ const mergeNow = async (sql, jobId, installId) => {
   return { p, r: await M.mergeTicketIntoInstallFor(sql, "u-owner", { jobId, installId, stamps: p.stamps }) };
 };
 
-test("rules: an install's invoice carries a P.O.; trimmed, blank is none, 120 characters at most", () => {
-  assert.ok(carriesPo("install"));
-  for (const t of ["service", "tlc", "pm", "rebuild", "deal"]) assert.ok(!carriesPo(t), t);
+test("rules: every invoice carries a P.O. (an install's first, 10/30; every record's since 11/2); trimmed, blank is none, 120 characters at most", () => {
+  for (const t of ["install", "service", "tlc", "pm", "rebuild", "deal"]) assert.ok(carriesPo(t), t);
+  assert.ok(!carriesPo("nothing"));
   assert.deepEqual(cleanPo("  PO-77 "), { po: "PO-77" });
   assert.deepEqual(cleanPo("   "), { po: null });
   assert.deepEqual(cleanPo(null), { po: null });
@@ -91,47 +91,49 @@ test("the Invoice window: an install invoice's P.O. is approved with it, shown, 
       ["service", jobId, "PO-T1"],
     ],
   );
-  // Other invoices carry none of their own.
+  // Every record's invoice carries its P.O. since 11/2: one approved in the window is the record's own.
   const rebuild = Number((await one(pg, "insert into rebuilds (title, account) values ('R', $1) returning id", [CAFE])).id);
   const rv = await approveInvoiceFor(sql, { type: "rebuild", id: rebuild, lines: [LABOR], lineIds: [], discount: null, seen: null, po: "PO-X" }, "u-owner");
-  assert.deepEqual([rv.hasPo, rv.po], [false, null]);
-  assert.equal((await one(pg, "select po from invoices where entity_type = 'rebuild'")).po, null);
+  assert.deepEqual([rv.hasPo, rv.po], [true, "PO-X"]);
+  assert.equal((await one(pg, "select po from rebuilds where id = $1", [rebuild])).po, "PO-X");
   const deal = Number((await one(pg, "insert into deals (customer) values ($1) returning id", [CAFE])).id);
   const dv = await approveInvoiceFor(sql, { type: "deal", id: deal, lines: [LABOR], lineIds: [], discount: null, seen: null, po: "PO-Y" }, "u-owner");
-  assert.deepEqual([dv.hasPo, dv.po], [false, null]);
-  assert.equal((await one(pg, "select po from invoices where entity_type = 'deal'")).po, null);
+  assert.deepEqual([dv.hasPo, dv.po], [true, "PO-Y"]);
+  assert.equal((await one(pg, "select po from deals where id = $1", [deal])).po, "PO-Y");
 });
 
-test("a ticket merged into an install brings its P.O. onto the install's invoice; a different one is refused", async () => {
+test("a ticket merged into an install brings its P.O. onto the install, which its invoice carries; a different one is refused", async () => {
   const { pg, sql } = await fresh();
-  // A new invoice takes the ticket's P.O., and the confirm says so.
+  // An install with no P.O. takes the ticket's with its charges, and the confirm says so. Since 11/2 the P.O. is the
+  // install's own (its Details), and its invoice carries it.
   const a = await install(pg);
   const ta = await ticket(pg, { po: "PO-500" });
   await charge(pg, ta);
   const { p } = await mergeNow(sql, ta, a);
   assert.equal(p.moves.invoicePo, "PO-500");
-  assert.deepEqual(await one(pg, "select po, submitted_by from invoices where entity_type = 'install' and entity_id = $1", [a]), { po: "PO-500", submitted_by: "boss" });
+  assert.equal((await one(pg, "select po from installs where id = $1", [a])).po, "PO-500");
+  assert.equal((await one(pg, "select submitted_by from invoices where entity_type = 'install' and entity_id = $1", [a])).submitted_by, "boss");
   assert.equal((await getInvoiceFor(sql, { type: "install", id: a }, "u-owner")).po, "PO-500");
   assert.equal((await one(pg, "select moved->>'ticketPo' as po from ticket_install_merges where job_id = $1", [ta])).po, "PO-500");
 
-  // An invoice waiting with no P.O. takes it; one with the same P.O. keeps it.
+  // An invoice waiting, on an install with no P.O., takes it; an install with the same P.O. keeps its own.
   const b = await install(pg, { wo: "WO-4801" });
   await pg.query("insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at) values ('install', $1, $2, 0, 'ana', now())", [b, CAFE]);
   const tb = await ticket(pg, { call_id: "SC-202610-902", wo: "WO-4801", po: "PO-501" });
   await charge(pg, tb);
   await mergeNow(sql, tb, b);
-  assert.equal((await one(pg, "select po from invoices where entity_type = 'install' and entity_id = $1", [b])).po, "PO-501");
-  const c = await install(pg, { wo: "WO-4802" });
-  await pg.query("insert into invoices (entity_type, entity_id, customer, total, po) values ('install', $1, $2, 0, 'po-502')", [c, CAFE]);
+  assert.equal((await one(pg, "select po from installs where id = $1", [b])).po, "PO-501");
+  const c = await install(pg, { wo: "WO-4802", po: "po-502" });
+  await pg.query("insert into invoices (entity_type, entity_id, customer, total) values ('install', $1, $2, 0)", [c, CAFE]);
   const tc = await ticket(pg, { call_id: "SC-202610-903", wo: "WO-4802", po: "PO-502" });
   await charge(pg, tc);
   const kept = await mergeNow(sql, tc, c);
   assert.equal(kept.p.moves.invoicePo, "po-502");
-  assert.equal((await one(pg, "select po from invoices where entity_type = 'install' and entity_id = $1", [c])).po, "po-502");
+  assert.equal((await one(pg, "select po from installs where id = $1", [c])).po, "po-502");
 
   // A different P.O.: refused, nothing written. No charges: the invoice isn't touched, so there is nothing to clash.
-  const d = await install(pg, { wo: "WO-4803" });
-  await pg.query("insert into invoices (entity_type, entity_id, customer, total, po) values ('install', $1, $2, 0, 'PO-600')", [d, CAFE]);
+  const d = await install(pg, { wo: "WO-4803", po: "PO-600" });
+  await pg.query("insert into invoices (entity_type, entity_id, customer, total) values ('install', $1, $2, 0)", [d, CAFE]);
   const td = await ticket(pg, { call_id: "SC-202610-904", wo: "WO-4803", po: "PO-601" });
   await charge(pg, td);
   const refused = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId: td, installId: d });
@@ -141,7 +143,7 @@ test("a ticket merged into an install brings its P.O. onto the install's invoice
   await pg.query("delete from ticket_charges where job_id = $1", [td]);
   const free = await mergeNow(sql, td, d);
   assert.equal(free.p.moves.invoicePo, null);
-  assert.equal((await one(pg, "select po from invoices where entity_type = 'install' and entity_id = $1", [d])).po, "PO-600");
+  assert.equal((await one(pg, "select po from installs where id = $1", [d])).po, "PO-600");
 });
 
 test("Merge installs takes the dropped install's invoice, part lines and merged tickets to the one kept; both with an invoice waits for the lines to be moved", async () => {
@@ -169,8 +171,13 @@ test("Merge installs takes the dropped install's invoice, part lines and merged 
   await approve(sql, other, { po: "PO-701" });
   await assert.rejects(() => mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: other }), { message: bothInvoices(other, keep) });
   assert.equal((await one(pg, "select archived from installs where id = $1", [other])).archived, false);
-  // Its lines taken off (approved with none, as the message says): it merges, and its empty invoice stays on it.
+  // Its lines taken off (approved with none, as the message says): its P.O. is still another than the keeper's, and one
+  // install takes one P.O. (11/2), so it waits for that too. With its P.O. cleared it merges, and its empty invoice stays on it.
   await approveOpened(sql, other, { lines: [] });
+  await assert.rejects(() => mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: other }), {
+    message: `Install #${keep} has P.O. PO-700 and #${other} has P.O. PO-701. One install takes one P.O.: make them match first.`,
+  });
+  await approveOpened(sql, other, { lines: [], po: "" });
   const emptied = await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: other });
   assert.equal(emptied.invoiceMoved, false);
   assert.deepEqual(

@@ -59,7 +59,7 @@ export function GlobalSearch() {
             setOpen(false);
           }
         }}
-        placeholder="Search accounts, serials, WO…"
+        placeholder="Search accounts, serials, WO, P.O.…"
         className="h-10 w-full rounded-md border border-border bg-background pr-12 pl-9 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       />
       <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded-sm border border-border px-1.5 text-[10px] text-muted-foreground sm:block">

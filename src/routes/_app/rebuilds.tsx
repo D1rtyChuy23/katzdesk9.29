@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { withPoMatches } from "@/lib/ops/ticket-po";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -69,12 +70,13 @@ function Page() {
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((r) =>
-        [r.title, r.account, r.equipment, r.serial, r.owner, r.status, r.reasonCode]
+        [r.title, r.account, r.equipment, r.serial, r.owner, r.status, r.reasonCode, r.po, r.vendorPo]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
-    return list;
+    // An exact P.O. finds its rebuild whatever chip is picked (11/2).
+    return withPoMatches(list, rows, q);
   }, [rows, filterMine, role, matchMine, chip, q]);
 
   const selectedRow = rows.find((r) => r.id === selected) ?? null;

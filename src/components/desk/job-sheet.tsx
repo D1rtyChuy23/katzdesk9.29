@@ -54,6 +54,10 @@ import { TicketPmStack } from "./pm-stack-panel";
 import { isJobStack, jobStackQuery, openPmReminders } from "./pm-stack-shared";
 import { InstallMergeBanner, InstallMergeDialog, MergedIntoInstallBanner, MergedTicketSummary } from "./ticket-install-merge";
 import type { TicketInstallMergeResult } from "@/lib/ops/ticket-install-merge";
+import { getTicketCharges } from "@/lib/ops/charges-api";
+import { ticketPoLock } from "@/lib/ops/ticket-po";
+import { PoFields } from "./po-fields";
+import { poFromForm } from "./po-form";
 
 /** The ticket's categories, one per tab, in this order. Only a ticket with a customer has tabs. */
 export type TicketTab = "ticket" | "equipment" | "invoicing" | "schedules" | "ping";
@@ -121,11 +125,21 @@ export function JobSheet({
   const canStackWrite = isJobStack(pmStack.data) && pmStack.data.canWrite;
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof updateJob>[0]["data"]) => updateJob({ data: patch }),
-    onSuccess: (row) => {
-      if (!skipToast.current) toast.success("Saved");
+    onSuccess: (saved, patch) => {
+      // A Customer P.O. that couldn't change (the ticket was billed or invoiced meanwhile) says why, even on close.
+      const notice = saved?.notice ?? null;
+      if (notice) toast.warning(notice);
+      else if (!skipToast.current) toast.success("Saved");
       skipToast.current = false;
+      const row = saved ? (({ notice: _notice, ...rest }) => rest)(saved) : saved;
       // Keep the saved ticket in the cache, so reopening it right after closing shows (and re-saves) the new values.
       if (row) qc.setQueryData(["job", row.id], row);
+      // The ticket's Charges and Invoice window show its Customer P.O. too.
+      if (row && patch.po !== undefined) {
+        void qc.invalidateQueries({ queryKey: ["charges", row.id] });
+        void qc.invalidateQueries({ queryKey: ["invoice"] });
+        void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      }
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["job"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
@@ -157,6 +171,15 @@ export function JobSheet({
   const j = job.data;
   /** Merged into an install: no form or tabs, so closing it saves nothing (10/30). */
   const mergedAway = !!j?.mergedInstallId;
+  // The ticket's billing (the same read as its Charges): billed or invoiced in NetSuite, its Customer P.O. is locked here.
+  const billing = useQuery({
+    queryKey: ["charges", activeId],
+    queryFn: () => getTicketCharges({ data: { jobId: activeId! } }),
+    enabled: activeId != null && !!j && !mergedAway,
+  });
+  const poLock = j?.duplicateOf
+    ? `This ticket was merged into #${j.duplicateOf}, so its Customer P.O. is on that ticket.`
+    : ticketPoLock({ nsSo: billing.data?.nsSo, invoice: billing.data?.invoiceLock });
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const pulledSerial =
     (assets.data ?? []).find((a) => a.jobId === activeId)?.serial ?? "";
@@ -258,6 +281,8 @@ export function JobSheet({
       completedAt: String(fd.get("completedAt") || "") || null,
       notes: String(fd.get("notes") || "") || null,
       urgency: String(fd.get("urgency") || "") || "Normal",
+      // Each P.O. only when it was changed here (11/2): a sheet left open never puts an older one back.
+      ...poFromForm(el),
     };
   }
 
@@ -361,6 +386,7 @@ export function JobSheet({
       </div>
       <Field label="WO #" name="wo" defaultValue={j.wo ?? ""} />
       <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
+      <PoFields idPrefix={`job-${j.id}`} po={j.po} vendorPo={j.vendorPo} lock={poLock} customerNote="Goes on the invoice and the NetSuite billing export." />
       <Field label="Contact" name="contact" defaultValue={j.contact ?? ""} />
       <Field label="Phone" name="phone" defaultValue={j.phone ?? ""} />
       <div className="sm:col-span-2">

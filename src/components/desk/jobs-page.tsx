@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { withPoMatches } from "@/lib/ops/ticket-po";
+import { PoLine } from "./po-fields";
 import { WoHistoryImportButton } from "@/components/desk/wo-history-import";
 import { useBackTo, type TicketSearch, type TicketView } from "@/lib/ops/search-params";
 import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
@@ -159,13 +161,14 @@ export function JobsPage({
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((j) =>
-        [j.customer, j.callId, j.wo, j.issue, j.equipment, j.technician, j.secondaryTech]
+        [j.customer, j.callId, j.wo, j.issue, j.equipment, j.technician, j.secondaryTech, j.po, j.vendorPo]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
-    // A WO number finds its ticket in any status, view or filter.
+    // A WO number finds its ticket in any status, view or filter, and so does an exact P.O. (11/2).
     list = withWoMatches(list, jobs.data ?? [], q);
+    list = withPoMatches(list, jobs.data ?? [], q);
     return sortDesk(list, sort, {
       date: (j) => j.received ?? j.scheduled,
       name: (j) => j.customer,
@@ -428,6 +431,7 @@ function JobRow({ job, billing, onOpen }: { job: ServiceJob; billing?: TicketBil
               {job.equipment.replace(/\r?\n/g, " · ")}
             </span>
           ) : null}
+          <PoLine po={job.po} vendorPo={job.vendorPo} />
         </span>
         <span className="flex flex-wrap gap-1 max-sm:contents">
           <DuplicateBadge duplicateOf={job.duplicateOf} siblingCount={job.siblings?.length ?? 0} mergedInstallId={job.mergedInstallId} />

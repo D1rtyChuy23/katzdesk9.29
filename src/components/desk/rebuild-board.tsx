@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { PoLine } from "./po-fields";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GripVertical, Trash2 } from "lucide-react";
 import { archiveRebuild, HEALTH_LABEL, REBUILD_STATUSES, updateRebuild, type Rebuild } from "@/lib/ops/rebuilds";
@@ -172,6 +173,7 @@ export function RebuildBoard({
                             <p className="mt-0.5 truncate text-xs text-muted-foreground max-sm:break-words max-sm:whitespace-normal">
                               {r.equipment || "No equipment"} · {r.account}
                             </p>
+                            <PoLine po={r.po} vendorPo={r.vendorPo} className="truncate max-sm:break-words max-sm:whitespace-normal" />
                           </div>
                           {can(r) ? (
                             <button

@@ -131,7 +131,7 @@ function Page() {
 
         <Section title="Keyboard" hint="Press ? anywhere on the desk (except while typing)." icon={<Keyboard className="size-4" />}>
           <ul className="divide-y divide-border rounded-xl border border-border">
-            <Shortcut keys="⌘K" action="Search accounts, serials, WOs" />
+            <Shortcut keys="⌘K" action="Search accounts, serials, WOs, P.O.s" />
             <Shortcut keys="?" action="Open keyboard shortcuts" />
             <Shortcut keys="Esc" action="Close a sheet or dialog" />
           </ul>

@@ -53,6 +53,9 @@ export type TicketBillingRow = {
   locationWarnings: string[];
   /** Live invoice dates, else the billed date: what the "invoiced" date filter reads. */
   invoicedDates: string[];
+  /** The ticket's Customer P.O. and Vendor P.O. (11/2): the search finds a ticket by either. */
+  po?: string | null;
+  vendorPo?: string | null;
 };
 
 const live = (i: { status: string }) => invoiceStatusKey(i.status) !== "voided";
@@ -71,7 +74,7 @@ export function ticketFilterRow(r: TicketBillingRow): FilterRow {
     invoiceStatuses: r.invoices.map((i) => i.status),
     doubleBill: r.doubleBill,
     mismatch: r.mismatch,
-    words: [r.customer, r.wo, r.callId, r.so, r.technician, r.secondaryTech, ...r.invoices.flatMap((i) => [i.invoice, i.so])],
+    words: [r.customer, r.wo, r.callId, r.so, r.technician, r.secondaryTech, r.po ?? null, r.vendorPo ?? null, ...r.invoices.flatMap((i) => [i.invoice, i.so])],
   };
 }
 

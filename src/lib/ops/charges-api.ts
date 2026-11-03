@@ -590,11 +590,12 @@ export async function loadTicketCharges(sql: Sql, jobId: number): Promise<Ticket
 /** Replace the charge lines and P.O. on a ticket. A ticket that is already billed is not changed. */
 export const saveTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { jobId: number; po: string; lines: z.input<typeof lineSchema>[]; lineIds: number[]; discount?: { kind: string; value: string | number } | null }) =>
+  .validator((d: { jobId: number; po?: string; lines: z.input<typeof lineSchema>[]; lineIds: number[]; discount?: { kind: string; value: string | number } | null }) =>
     z
       .object({
         jobId: z.number().int().positive(),
-        po: z.string().max(120),
+        // The ticket's details send the P.O. now (11/2); left out, the stored one stays.
+        po: z.string().max(120).optional(),
         lines: z.array(lineSchema).max(200),
         lineIds: z.array(z.number().int().positive()).max(200),
         discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),
@@ -616,7 +617,7 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
   .validator(
     (d: {
       jobId: number;
-      po: string;
+      po?: string;
       lines: z.input<typeof lineSchema>[];
       lineIds: number[];
       discount?: { kind: string; value: string | number } | null;
@@ -626,7 +627,8 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
       z
         .object({
           jobId: z.number().int().positive(),
-          po: z.string().max(120),
+          // Sent only when the Admin changed it in the unlocked Charges (11/2); left out, the stored one stays.
+          po: z.string().max(120).optional(),
           lines: z.array(lineSchema).max(200),
           lineIds: z.array(z.number().int().positive()).max(200),
           discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),

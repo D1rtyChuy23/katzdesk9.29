@@ -536,7 +536,8 @@ async function buildModules(
   };
 }
 
-async function buildTlc(
+/** The TLC & Factors sheet. Exported for its tests. */
+export async function buildTlc(
   sql: Awaited<ReturnType<typeof getSql>>,
   filters: ExportFilters,
   inactive: Set<string>,
@@ -557,15 +558,17 @@ async function buildTlc(
     scheduled: string | null;
     done: boolean;
     notes: string | null;
+    po: string | null;
   }>(
-    `select wo, customer, status, technician, technician2, completed_at, issue, work_done, call_type, kind, received, scheduled, done, notes
+    `select wo, customer, status, technician, technician2, completed_at, issue, work_done, call_type, kind, received, scheduled, done, notes, po
        from service_jobs
       where duplicate_of is null
       order by customer, wo`,
   );
   let rows: string[][] = [];
   for (const j of jobs) {
-    const po = extractPo(j.issue, j.notes, j.work_done, j.call_type);
+    // The ticket's own Customer P.O. (11/2), else one written in its text.
+    const po = String(j.po ?? "").trim() || extractPo(j.issue, j.notes, j.work_done, j.call_type);
     if (j.kind !== "tlc" && !tlcBlob(j.issue, j.call_type, j.notes, j.work_done) && !/\b(tlc|factor)\b/i.test(po)) {
       continue;
     }

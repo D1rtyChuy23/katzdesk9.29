@@ -46,13 +46,15 @@ type JobRow = {
   corrigo_net: string | null;
   service_location: string | null;
   duplicate_of: number | null;
+  po: string | null;
+  vendor_po: string | null;
 };
 
 /** Dates as YYYY-MM-DD text, the billed date on Chicago's calendar. */
 const JOB_SELECT = `select s.id, s.kind, s.call_id, s.wo, s.customer, s.technician, s.technician2, s.status,
        to_char(s.received, 'YYYY-MM-DD') as received, to_char(s.completed_at, 'YYYY-MM-DD') as completed,
        s.ns_so, to_char(s.billed_at at time zone 'America/Chicago', 'YYYY-MM-DD') as billed_on,
-       s.corrigo_net::text as corrigo_net, s.service_location, s.duplicate_of
+       s.corrigo_net::text as corrigo_net, s.service_location, s.duplicate_of, s.po, s.vendor_po
   from service_jobs s`;
 
 /**
@@ -108,6 +110,8 @@ export async function loadTicketBillingRows(sql: Q, opts: { kind?: "service" | "
       serviceLocation: j.service_location,
       locationWarnings: [...new Set(list.map((i) => locationWarning(j.technician, i.location)).filter((w): w is string => !!w))],
       invoicedDates: sum.invoicedDates,
+      po: String(j.po ?? "").trim() || null,
+      vendorPo: String(j.vendor_po ?? "").trim() || null,
     };
   });
 }

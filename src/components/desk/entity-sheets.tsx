@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PoFields } from "./po-fields";
+import { poFromForm } from "./po-form";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
 import { ModuleRecord } from "@/components/desk/module-record";
@@ -188,7 +190,7 @@ export function PmSheet({
   const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updatePm>[0]["data"]) => updatePm({ data: d }),
-    onSuccess: () => {
+    onSuccess: (_saved, vars) => {
       if (!skipToast.current) toast.success("Saved");
       skipToast.current = false;
       void qc.invalidateQueries({ queryKey: ["pms"] });
@@ -197,6 +199,11 @@ export function PmSheet({
       void qc.invalidateQueries({ queryKey: ["customers"] });
       if (pm) void qc.invalidateQueries({ queryKey: ["pm-runbook", pm.id] });
       void qc.invalidateQueries({ queryKey: ["module-runbook"] });
+      // Its Customer P.O. shows on its invoice too.
+      if (vars.po !== undefined) {
+        void qc.invalidateQueries({ queryKey: ["invoice"] });
+        void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      }
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
@@ -274,6 +281,8 @@ export function PmSheet({
                         wo: String(fd.get("wo") || "") || null,
                         workDone: String(fd.get("workDone") || "") || null,
                         completedAt: String(fd.get("completedAt") || "") || null,
+                        // Each P.O. only when it was changed here (11/2).
+                        ...poFromForm(e.currentTarget),
                       });
                     }}
                   >
@@ -310,6 +319,12 @@ export function PmSheet({
                       <TechSelect name="technician" defaultValue={pm.technician ?? ""} />
                     </div>
                     <Field label="WO #" name="wo" defaultValue={pm.wo ?? ""} placeholder={stackedOn?.wo?.trim() || undefined} />
+                    <PoFields
+                      idPrefix={`pm-${pm.id}`}
+                      po={pm.po}
+                      vendorPo={pm.vendorPo}
+                      customerNote={pm.stackedJobId ? "This PM is billed on its ticket, so the ticket's Customer P.O. goes on the invoice." : "Goes on the invoice."}
+                    />
                     <Field label="Date completed" name="completedAt" type="date" defaultValue={pm.completedAt ?? ""} />
                     <div className="sm:col-span-2">
                       <Label htmlFor={`pm-work-${pm.id}`}>Description of work</Label>
@@ -508,6 +523,11 @@ export function InstallSheet({
       void qc.invalidateQueries({ queryKey: ["inspection", vars.id] });
       // The Equipment Request Form reads the install: it shows what was just saved.
       void qc.invalidateQueries({ queryKey: ["install-form", vars.id] });
+      // Its Customer P.O. shows on its invoice too (11/2).
+      if (vars.po !== undefined) {
+        void qc.invalidateQueries({ queryKey: ["invoice"] });
+        void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      }
     },
     onError: (e, vars) => {
       if (skippedRead.current) lookAgain();
@@ -754,6 +774,8 @@ export function InstallSheet({
                         paymentStatus: String(fd.get("paymentStatus") || "") || null,
                         // Closing the window submits this form: an unchanged list is left as saved, typed serials and all.
                         ...(Object.keys(machineFields).length ? { ...machineFields, ...listSend(row.id, specs) } : {}),
+                        // Each P.O. only when it was changed here (11/2): the Invoice window may have set it meanwhile.
+                        ...poFromForm(e.currentTarget),
                       });
                     }}
                   >
@@ -768,6 +790,7 @@ export function InstallSheet({
                       </SelectField>
                     </div>
                     <Field label="Install date" name="installDate" type="date" defaultValue={row.installDate ?? ""} />
+                    <PoFields idPrefix={`install-${row.id}`} po={row.po} vendorPo={row.vendorPo} />
                     <div>
                       <Label>Tech</Label>
                       <TechSelect name="technician" defaultValue={row.technician ?? ""} />
@@ -1241,7 +1264,7 @@ export function DealSheet({
   const skipToast = useRef(false);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updateDeal>[0]["data"]) => updateDeal({ data: d }),
-    onSuccess: () => {
+    onSuccess: (_saved, vars) => {
       if (!skipToast.current) toast.success("Saved");
       skipToast.current = false;
       void qc.invalidateQueries({ queryKey: ["deals"] });
@@ -1250,6 +1273,11 @@ export function DealSheet({
       void qc.invalidateQueries({ queryKey: ["handoff"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      // Its Customer P.O. shows on its invoice too (11/2).
+      if (vars.po !== undefined) {
+        void qc.invalidateQueries({ queryKey: ["invoice"] });
+        void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      }
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
@@ -1321,6 +1349,8 @@ export function DealSheet({
                   invoice: String(fd.get("invoice") || "") || null,
                   completion: String(fd.get("completion") || "") || null,
                   notes: String(fd.get("notes") || "") || null,
+                  // Each P.O. only when it was changed here (11/2).
+                  ...poFromForm(e.currentTarget),
                 });
               }}
             >
@@ -1360,6 +1390,7 @@ export function DealSheet({
               </div>
               <Field label="ETA" name="eta" defaultValue={deal.eta ?? ""} />
               <Field label="Sale Invoice # Or Sales Order #" name="invoice" defaultValue={deal.invoice ?? ""} />
+              <PoFields idPrefix={`deal-${deal.id}`} po={deal.po} vendorPo={deal.vendorPo} />
               <div>
                 <Label>Deal completion</Label>
                 <SelectField name="completion" className="mt-1" defaultValue={deal.completion ?? ""} allowEmpty emptyLabel="Still open">
