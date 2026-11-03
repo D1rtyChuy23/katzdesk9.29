@@ -176,8 +176,9 @@ export function RebuildSheet({
       void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
-      // Its Customer P.O. shows on its invoice too.
+      // Its Customer P.O. shows on its invoice and the account's Invoices tab too.
       void qc.invalidateQueries({ queryKey: ["invoice"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });

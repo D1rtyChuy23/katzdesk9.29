@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { poCardLine } from "@/lib/ops/ticket-po";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { sameUnitModel } from "@/lib/ops/account-equip";
@@ -47,7 +48,8 @@ export function jobItem(j: ServiceJob): HistoryItem {
     kind: j.kind,
     id: j.id,
     title: j.callId,
-    subtitle: [j.wo, j.issue].filter(Boolean).join(" · "),
+    // Its P.O.s too (11/2), so an account's tickets, PMs, installs and deals can be matched up by them.
+    subtitle: [j.wo, j.issue, poCardLine(j)].filter(Boolean).join(" · "),
     status: j.status,
     date: j.received ?? j.scheduled,
     technician: j.technician,
@@ -63,7 +65,7 @@ export function pmItem(p: PmJob): HistoryItem {
     kind: "pm",
     id: p.id,
     title: p.style || "Preventative maintenance",
-    subtitle: p.equipment ?? "",
+    subtitle: [p.equipment, poCardLine(p)].filter(Boolean).join(" · "),
     status: p.status,
     date: p.projected ?? p.received,
     technician: p.technician,
@@ -78,7 +80,7 @@ export function installItem(i: Install): HistoryItem {
     kind: "install",
     id: i.id,
     title: i.wo || "Install",
-    subtitle: i.equipment ?? "",
+    subtitle: [i.equipment, poCardLine(i)].filter(Boolean).join(" · "),
     status: i.equipStatus,
     date: i.installDate ?? i.received,
     technician: i.technician,
@@ -93,7 +95,7 @@ export function dealItem(d: Deal): HistoryItem {
     kind: "deal",
     id: d.id,
     title: d.equipment || "Deal",
-    subtitle: [d.producer, d.amount != null ? money(d.amount) : null].filter(Boolean).join(" · "),
+    subtitle: [d.producer, d.amount != null ? money(d.amount) : null, poCardLine(d)].filter(Boolean).join(" · "),
     status: d.completion,
     date: d.dateOfDeal,
     technician: d.producer,

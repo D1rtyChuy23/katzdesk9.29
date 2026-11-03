@@ -45,10 +45,12 @@ export type PoBoxState = { key: string | number | null; value: string; base: str
 /**
  * A P.O. box as the record's P.O. (`now`) comes in from the server (11/2). Not changed here: it shows the record's.
  * Changed here, and the record now has what was typed (this sheet's own save): nothing is left to send. Changed here to
- * something else: what was typed stays, and a save sends it. Another record starts it over. The same state comes back
- * when nothing changed.
+ * something else: what was typed stays, and a save sends it. Another record, or a box locked (a ticket billed or
+ * invoiced meanwhile), starts it over from the record's, so nothing refused is shown or sent later. The same state comes
+ * back when nothing changed.
  */
-export function syncPoBox(cur: PoBoxState, key: string | number | null, now: string): PoBoxState {
+export function syncPoBox(cur: PoBoxState, key: string | number | null, now: string, locked = false): PoBoxState {
+  if (locked) return cur.key === key && cur.value === now && cur.base === now ? cur : { key, value: now, base: now };
   if (cur.key !== key) return { key, value: now, base: now };
   if (cur.value.trim() === cur.base.trim()) return cur.value === now && cur.base === now ? cur : { key, value: now, base: now };
   if (cur.value.trim() === now.trim()) return cur.base === now ? cur : { key, value: cur.value, base: now };

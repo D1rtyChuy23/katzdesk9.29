@@ -475,8 +475,10 @@ export function mergeTicketsSql(): string {
            scheduled = $15,
            received = $16,
            urgency = $17,
-           -- An invoiced keeper is locked: its P.O. stays as it is (10/28).
-           po = case when ${LIVE_INVOICE("k.id")} then k.po else coalesce(nullif(btrim(k.po), ''), g.extra_po) end,
+           -- An invoiced keeper is locked: its P.O. stays as it is (10/28). So does one billed on a Sales Order: its P.O.
+           -- went to NetSuite with it (11/2).
+           po = case when ${LIVE_INVOICE("k.id")} or nullif(btrim(k.ns_so), '') is not null then k.po
+                     else coalesce(nullif(btrim(k.po), ''), g.extra_po) end,
            -- A Vendor P.O. is for reference only (11/2): the keeper's, else the extra's, invoiced or not.
            vendor_po = coalesce(nullif(btrim(k.vendor_po), ''), g.extra_vendor_po),
            discount_kind = case when g.keeper_lines = 0 and g.keeper_dk is null and g.extra_lines > 0 then g.extra_dk else k.discount_kind end,

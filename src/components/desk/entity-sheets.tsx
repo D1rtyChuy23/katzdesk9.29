@@ -199,6 +199,8 @@ export function PmSheet({
       void qc.invalidateQueries({ queryKey: ["customers"] });
       if (pm) void qc.invalidateQueries({ queryKey: ["pm-runbook", pm.id] });
       void qc.invalidateQueries({ queryKey: ["module-runbook"] });
+      // A PM opened from its ticket reads itself here.
+      if (pm) void qc.invalidateQueries({ queryKey: ["pm", pm.id] });
       // Its Customer P.O. shows on its invoice too.
       if (vars.po !== undefined) {
         void qc.invalidateQueries({ queryKey: ["invoice"] });
@@ -207,6 +209,38 @@ export function PmSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  /** What the PM's form holds now, as its save sends it. */
+  const pmPatchOf = (form: HTMLFormElement, id: number): Parameters<typeof updatePm>[0]["data"] => {
+    const fd = new FormData(form);
+    return {
+      id,
+      customer: String(fd.get("customer")),
+      equipment: String(fd.get("equipment") || "") || null,
+      style: String(fd.get("style") || "") || null,
+      projected: String(fd.get("projected") || "") || null,
+      partsStatus: String(fd.get("partsStatus") || "") || null,
+      status: String(fd.get("status")),
+      technician: String(fd.get("technician") || "") || null,
+      notes: String(fd.get("notes") || "") || null,
+      wo: String(fd.get("wo") || "") || null,
+      workDone: String(fd.get("workDone") || "") || null,
+      completedAt: String(fd.get("completedAt") || "") || null,
+      // Each P.O. only when it was changed here (11/2).
+      ...poFromForm(form),
+    };
+  };
+  /** The Invoice window: save what is typed first, so it opens on the PM as it is now (its P.O. too, 11/2). */
+  const saveBeforeInvoice = async (): Promise<boolean> => {
+    if (!formRef.current || !pm) return true;
+    skipToast.current = true;
+    try {
+      await save.mutateAsync(pmPatchOf(formRef.current, pm.id));
+      return true;
+    } catch {
+      skipToast.current = false;
+      return false;
+    }
+  };
   const [tab, setTab] = useState<PmTab>("details");
   useEffect(() => setTab("details"), [pm?.id]);
   const comments = useQuery({
@@ -267,23 +301,7 @@ export function PmSheet({
                     className="grid gap-3 p-5 sm:grid-cols-2"
                     onSubmit={(e) => {
                       e.preventDefault();
-                      const fd = new FormData(e.currentTarget);
-                      save.mutate({
-                        id: pm.id,
-                        customer: String(fd.get("customer")),
-                        equipment: String(fd.get("equipment") || "") || null,
-                        style: String(fd.get("style") || "") || null,
-                        projected: String(fd.get("projected") || "") || null,
-                        partsStatus: String(fd.get("partsStatus") || "") || null,
-                        status: String(fd.get("status")),
-                        technician: String(fd.get("technician") || "") || null,
-                        notes: String(fd.get("notes") || "") || null,
-                        wo: String(fd.get("wo") || "") || null,
-                        workDone: String(fd.get("workDone") || "") || null,
-                        completedAt: String(fd.get("completedAt") || "") || null,
-                        // Each P.O. only when it was changed here (11/2).
-                        ...poFromForm(e.currentTarget),
-                      });
+                      save.mutate(pmPatchOf(e.currentTarget, pm.id));
                     }}
                   >
                     <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockPmCustomer} />
@@ -352,7 +370,7 @@ export function PmSheet({
                   <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                   <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this PM.</p>
                   <div className="mt-3">
-                    <InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} />
+                    <InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} beforeOpen={saveBeforeInvoice} />
                   </div>
                 </Tabs.Content>
                 <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="pm-panel-ping">
@@ -939,7 +957,7 @@ export function InstallSheet({
                   <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                   <p className="mt-1 text-xs text-muted-foreground">Parts, labor, and billing info for this install.</p>
                   <div className="mt-3">
-                    <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} />
+                    <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveAndWait} />
                   </div>
                 </Tabs.Content>
 
@@ -1281,6 +1299,41 @@ export function DealSheet({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  /** What the deal's form holds now, as its save sends it. */
+  const dealPatchOf = (form: HTMLFormElement, id: number): Parameters<typeof updateDeal>[0]["data"] => {
+    const fd = new FormData(form);
+    const amountRaw = String(fd.get("amount") || "").replace(/[$,]/g, "").trim();
+    const amountNum = amountRaw ? Number(amountRaw) : NaN;
+    return {
+      id,
+      customer: String(fd.get("customer")),
+      producer: String(fd.get("producer") || "") || null,
+      aviKatz: fd.get("aviKatz") === "on",
+      machines: specs,
+      amount: Number.isFinite(amountNum) ? amountNum : null,
+      goodToOrder: fd.get("goodToOrder") === "on" || fd.get("ordered") === "on",
+      ordered: fd.get("ordered") === "on",
+      eta: String(fd.get("eta") || "") || null,
+      terms: String(fd.get("terms") || "") || null,
+      invoice: String(fd.get("invoice") || "") || null,
+      completion: String(fd.get("completion") || "") || null,
+      notes: String(fd.get("notes") || "") || null,
+      // Each P.O. only when it was changed here (11/2).
+      ...poFromForm(form),
+    };
+  };
+  /** The Invoice window: save what is typed first, so it opens on the deal as it is now (its P.O. too, 11/2). */
+  const saveDealBeforeInvoice = async (): Promise<boolean> => {
+    if (!formRef.current || !deal) return true;
+    skipToast.current = true;
+    try {
+      await save.mutateAsync(dealPatchOf(formRef.current, deal.id));
+      return true;
+    } catch {
+      skipToast.current = false;
+      return false;
+    }
+  };
   const dropDeal = useMutation({
     mutationFn: () => archiveDeal({ data: { id: deal!.id } }),
     onSuccess: () => {
@@ -1323,7 +1376,7 @@ export function DealSheet({
                 />
               </div>
               <div className="mt-2">
-                <InvoiceButton type="deal" id={deal.id} key={`invoice-deal-${deal.id}`} />
+                <InvoiceButton type="deal" id={deal.id} key={`invoice-deal-${deal.id}`} beforeOpen={saveDealBeforeInvoice} />
               </div>
             </SheetHeader>
             <SheetBody>
@@ -1332,26 +1385,7 @@ export function DealSheet({
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                const amountRaw = String(fd.get("amount") || "").replace(/[$,]/g, "").trim();
-                const amountNum = amountRaw ? Number(amountRaw) : NaN;
-                save.mutate({
-                  id: deal.id,
-                  customer: String(fd.get("customer")),
-                  producer: String(fd.get("producer") || "") || null,
-                  aviKatz: fd.get("aviKatz") === "on",
-                  machines: specs,
-                  amount: Number.isFinite(amountNum) ? amountNum : null,
-                  goodToOrder: fd.get("goodToOrder") === "on" || fd.get("ordered") === "on",
-                  ordered: fd.get("ordered") === "on",
-                  eta: String(fd.get("eta") || "") || null,
-                  terms: String(fd.get("terms") || "") || null,
-                  invoice: String(fd.get("invoice") || "") || null,
-                  completion: String(fd.get("completion") || "") || null,
-                  notes: String(fd.get("notes") || "") || null,
-                  // Each P.O. only when it was changed here (11/2).
-                  ...poFromForm(e.currentTarget),
-                });
+                save.mutate(dealPatchOf(e.currentTarget, deal.id));
               }}
             >
               <BoundCustomer recordKey={deal.id} defaultValue={deal.customer} required locked={lockCustomer} />

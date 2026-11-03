@@ -29,7 +29,7 @@ function poNote(type: InvoiceTarget, canApprove: boolean): string {
   const where = `the ${PO_RECORD[type]}'s details${ticket ? " and the NetSuite billing export" : ""}`;
   return canApprove
     ? `The customer's P.O. on this invoice: the same one as on ${where}. A change here is saved there when you approve.`
-    : `The customer's P.O. on this invoice, from ${where}. An Admin sets it when approving.`;
+    : `The customer's P.O. on this invoice, from ${where}.`;
 }
 const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
@@ -51,14 +51,45 @@ const toPin = (b: BillTo) => isPoint(billPin(b)) && canDriveTo(b.geocodeMatch);
  * page. Shows "Approved" once the record has an approved invoice, and "Waiting" while Warehouse's saved invoice waits
  * for an Admin.
  */
-export function InvoiceButton({ type, id, className }: { type: InvoiceTarget; id: number; className?: string }) {
+export function InvoiceButton({
+  type,
+  id,
+  className,
+  beforeOpen,
+}: {
+  type: InvoiceTarget;
+  id: number;
+  className?: string;
+  /**
+   * A sheet that saves as it closes stores what is typed first (11/2), so the window opens on the record as it is now and
+   * a P.O. changed in the window isn't put back by the sheet's own save afterwards. False keeps the window shut.
+   */
+  beforeOpen?: () => Promise<boolean>;
+}) {
   const [open, setOpen] = useState(false);
+  const [opening, setOpening] = useState(false);
   const q = useQuery({ queryKey: ["invoice", type, id], queryFn: () => getInvoice({ data: { type, id } }), staleTime: 30_000 });
   const approved = !!q.data?.approvedAt;
   const waiting = q.data?.state === "waiting";
   return (
     <>
-      <Button type="button" size="sm" variant="outline" className={cn("gap-1.5", className)} onClick={() => setOpen(true)} data-testid="invoice-open">
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className={cn("gap-1.5", className)}
+        disabled={opening}
+        onClick={async () => {
+          if (beforeOpen) {
+            setOpening(true);
+            const saved = await beforeOpen().catch(() => false);
+            setOpening(false);
+            if (!saved) return;
+          }
+          setOpen(true);
+        }}
+        data-testid="invoice-open"
+      >
         <Receipt className="size-4" />
         Invoice
         {approved ? (
@@ -170,6 +201,9 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
     void qc.invalidateQueries({ queryKey: ["installs"] });
     void qc.invalidateQueries({ queryKey: ["deals"] });
     if (usesTicketCharges(type)) void qc.invalidateQueries({ queryKey: ["job", id] });
+    // Sheets opened from an account, and a PM opened from its ticket, read these.
+    void qc.invalidateQueries({ queryKey: ["customer-history"] });
+    void qc.invalidateQueries({ queryKey: ["pm"] });
   };
   /**
    * After a refused Approve or Save: when the invoice changed under the window (Warehouse saved again, or it was

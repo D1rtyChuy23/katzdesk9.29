@@ -24,13 +24,14 @@ export function poFromForm(form: HTMLFormElement): { po?: string; vendorPo?: str
 /**
  * One P.O. box's state (11/2): it follows the record as the server has it until it is changed here, and a save sends it
  * only when it was changed (poToSend), so a sheet left open never puts back a P.O. set elsewhere since (the Invoice
- * window, a merge, an import). `key` is the record the box is for: another record starts it over.
+ * window, a merge, an import). `key` is the record the box is for: another record starts it over. A locked box (a ticket
+ * billed or invoiced meanwhile) drops what was typed and shows the record's, so nothing refused is shown or sent later.
  */
-export function useSyncedPo(server: string | null | undefined, key: string | number | null) {
+export function useSyncedPo(server: string | null | undefined, key: string | number | null, locked = false) {
   const now = server ?? "";
   const [box, setBox] = useState({ key, value: now, base: now });
-  useEffect(() => setBox((cur) => syncPoBox(cur, key, now)), [key, now]);
-  const mine = box.key === key;
+  useEffect(() => setBox((cur) => syncPoBox(cur, key, now, locked)), [key, now, locked]);
+  const mine = box.key === key && !locked;
   return {
     value: mine ? box.value : now,
     /** The record's P.O. as the box last took it: what a save compares the box with. */

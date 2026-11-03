@@ -61,6 +61,23 @@ const deal = (pg, f = {}) => insertRow(pg, "deals", { customer: CAFE, ...f });
 const rebuild = (pg, f = {}) => insertRow(pg, "rebuilds", { title: "Test grinder refurb", account: CAFE, ...f });
 const poOf = async (pg, table, id) => one(pg, `select po, vendor_po from ${table} where id = $1`, [id]);
 const history = async (pg, type, id) => (await pg.query("select detail from activity where entity_type = $1 and entity_id = $2 order by id", [type, id])).rows.map((r) => r.detail);
+/**
+ * A sql handle that runs `meanwhile` once, right after the first query whose text matches `after`: another person's
+ * write landing between a save's read and its write.
+ */
+function sqlWithInterleave(pg, after, meanwhile) {
+  let fired = false;
+  const query = async (text, params) => {
+    const rows = (await pg.query(text, params)).rows;
+    if (!fired && after.test(text)) {
+      fired = true;
+      await meanwhile();
+    }
+    return rows;
+  };
+  return Object.assign(async (strings, ...values) => query(strings.reduce((a, s, i) => `${a}$${i}${s}`), values), { query });
+}
+const sql0 = (pg) => sqlWithInterleave(pg, /^$/, async () => undefined);
 const liveInvoice = (pg, jobId, status = "Open") =>
   pg.query("insert into ticket_invoices (job_id, ns_invoice, ns_so, invoice_date, status, total, amount_remaining, source) values ($1, 'INV-PO-1', null, '2026-10-28', $2, 150, 150, 'standalone')", [jobId, status]);
 
@@ -102,6 +119,11 @@ test("a box on a Details tab follows its record until it is changed there, and t
   // Another record starts it over; nothing new keeps the same state (no render loop).
   assert.deepEqual(P.syncPoBox(typed, "job-2", "PO-Z"), { key: "job-2", value: "PO-Z", base: "PO-Z" });
   assert.equal(P.syncPoBox(opened, "job-1", "PO-A"), opened);
+  // Locked (billed or invoiced meanwhile): what was typed goes, and the box shows the record's, with nothing to send.
+  const locked = P.syncPoBox(typed, "job-1", "PO-A", true);
+  assert.deepEqual(locked, { key: "job-1", value: "PO-A", base: "PO-A" });
+  assert.equal(P.syncPoBox(locked, "job-1", "PO-A", true), locked);
+  assert.equal(P.poToSend(locked.value, locked.base), undefined);
 });
 
 test("the card line, the board search and the top search's note", () => {
@@ -139,6 +161,16 @@ test("a ticket's Customer P.O. is locked once it is billed or invoiced in NetSui
     P.ticketPoLock({ nsSo: null, invoice: { invoice: "INV-9", status: "Open" } }),
     "Invoiced in NetSuite on INV-9 (Open), so its Customer P.O. is locked. An Admin can unlock the ticket's Charges and change it there.",
   );
+});
+
+test("every board reads both P.O.s off its rows, trimmed, blank as none", () => {
+  const today = todayChicago();
+  const row = { id: 1, customer: CAFE, status: "Open", po: " 4455 ", vendor_po: "  " };
+  assert.deepEqual((({ po, vendorPo }) => ({ po, vendorPo }))(api.mapJob({ ...row, kind: "service", call_id: "SC-1" }, today)), { po: "4455", vendorPo: null });
+  assert.deepEqual((({ po, vendorPo }) => ({ po, vendorPo }))(api.mapPm({ ...row, vendor_po: "TLC-9" }, today)), { po: "4455", vendorPo: "TLC-9" });
+  const week = { start: today, end: today };
+  assert.deepEqual((({ po, vendorPo }) => ({ po, vendorPo }))(api.mapInstall({ ...row, po: null, vendor_po: " VEN-1 " }, today, week)), { po: null, vendorPo: "VEN-1" });
+  assert.deepEqual((({ po, vendorPo }) => ({ po, vendorPo }))(api.mapDeal({ ...row, machines: null }, null)), { po: "4455", vendorPo: null });
 });
 
 /* ------------------------------------------------------------------ migration 0112 */
@@ -292,6 +324,61 @@ test("a PM's, an install's, a deal's and a rebuild's Details save their P.O.s th
   }
 });
 
+test("a save that leaves a P.O. out keeps the one the record has as it writes, not the one it read (another person's change in between)", async () => {
+  const { pg } = await fresh();
+  try {
+    const t = await ticket(pg, { po: "OLD-T", vendor_po: "OLD-TV" });
+    const p = await pm(pg, { po: "OLD-P" });
+    const i = await install(pg, { po: "OLD-I" });
+    const d = await deal(pg, { po: "OLD-D" });
+    const r = await rebuild(pg, { po: "OLD-R" });
+    const between = (table, id, po) => async () => pg.query(`update ${table} set po = $2, updated_at = now() where id = $1`, [id, po]);
+    const firstRead = (table) => new RegExp(`^\\s*select \\* from ${table} where id = \\$1`);
+    await api.updateJobFor(sqlWithInterleave(pg, firstRead("service_jobs"), between("service_jobs", t, "NEW-T")), { id: t, notes: "x", vendorPo: "NEW-TV" }, "u-tech");
+    await api.updatePmFor(sqlWithInterleave(pg, firstRead("pm_jobs"), between("pm_jobs", p, "NEW-P")), { id: p, notes: "x" }, "u-tech");
+    await api.updateInstallFor(sqlWithInterleave(pg, firstRead("installs"), between("installs", i, "NEW-I")), { id: i, notes: "x" }, { userId: "u-tech" });
+    await api.updateDealFor(sqlWithInterleave(pg, firstRead("deals"), between("deals", d, "NEW-D")), { id: d, notes: "x" }, "u-owner");
+    await R.updateRebuildFor(sqlWithInterleave(pg, firstRead("rebuilds"), between("rebuilds", r, "NEW-R")), { id: r, notes: "x" }, "u-owner");
+    assert.deepEqual(await poOf(pg, "service_jobs", t), { po: "NEW-T", vendor_po: "NEW-TV" });
+    for (const [table, id, po] of [["pm_jobs", p, "NEW-P"], ["installs", i, "NEW-I"], ["deals", d, "NEW-D"], ["rebuilds", r, "NEW-R"]]) {
+      assert.equal((await poOf(pg, table, id)).po, po, table);
+    }
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the ticket's Charges, an Admin's unlocked save and an Approve that send no P.O. keep the ticket's as it is when they write", async () => {
+  const { pg } = await fresh();
+  try {
+    const chargesRead = /^\s*select po, ns_so, billed_at/;
+    const between = (id, po) => async () => pg.query("update service_jobs set po = $2, updated_at = now() where id = $1", [id, po]);
+    const a = await ticket(pg, { po: "OLD-A" });
+    await writeTicketCharges(sqlWithInterleave(pg, chargesRead, between(a, "NEW-A")), a, "u-tech", { lines: [LABOR], lineIds: [] });
+    assert.equal((await poOf(pg, "service_jobs", a)).po, "NEW-A");
+    const b = await ticket(pg, { po: "OLD-B" });
+    await approveInvoiceFor(sqlWithInterleave(pg, chargesRead, between(b, "NEW-B")), { type: "service", id: b, lines: [LABOR], lineIds: [], discount: null, seen: null }, "u-owner");
+    assert.equal((await poOf(pg, "service_jobs", b)).po, "NEW-B");
+    // An invoiced ticket an Admin unlocked: the save that leaves the P.O. out keeps it; one that sends it changes it.
+    const c = await ticket(pg, { po: "OLD-C" });
+    await liveInvoice(pg, c);
+    await pg.query("update service_jobs set billing_unlocked_at = now(), billing_unlocked_by = 'boss', billing_unlock_reason = 'Fix the lines' where id = $1", [c]);
+    await writeTicketCharges(sqlWithInterleave(pg, chargesRead, between(c, "NEW-C")), c, "u-owner", { lines: [LABOR], unlocked: { nsSo: null, billedAt: null } });
+    assert.equal((await poOf(pg, "service_jobs", c)).po, "NEW-C");
+    await pg.query("update service_jobs set billing_unlocked_at = now() where id = $1", [c]);
+    await writeTicketCharges(sql0(pg), c, "u-owner", { po: " FIX-C ", lines: [LABOR], unlocked: { nsSo: null, billedAt: null } });
+    assert.equal((await poOf(pg, "service_jobs", c)).po, "FIX-C");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a ticket's Customer P.O. write reads the row again before it writes: one that waited for a Billing Backfill writes nothing", () => {
+  // Postgres re-reads a row an UPDATE waited for, but not the invoices: the write goes only while the row is as the
+  // statement first saw it (the same guard as the Charges' save and the Corrigo import).
+  assert.match(src("src/lib/ops/api.ts"), /and not \$\{LIVE_INVOICE_SQL\("s\.id"\)\}\n\s+and \$\{UNCHANGED_SINCE_READ\("s", "\$1"\)\}\n\s+then \$3::text else s\.po end,/);
+});
+
 /* ------------------------------------------------------------------ the invoice */
 
 test("every invoice carries its record's Customer P.O., and Approve saves a P.O. changed in the window on the record", async () => {
@@ -440,6 +527,11 @@ test("merging two tickets: the keeper's Vendor P.O., else the extra's, and the h
     await mergeServiceJobs(sql, k2, e2, "Chuy");
     assert.equal((await poOf(pg, "service_jobs", k2)).vendor_po, "TLC-6");
     assert.ok((await history(pg, "service", k2)).some((l) => /extra Vendor P\.O\. TLC-7/.test(l)));
+    // A keeper billed on a Sales Order keeps its Customer P.O. too, even a blank one (it went to NetSuite as it was).
+    const k4 = await ticket(pg, { wo: "WO-7904", po: null, ns_so: "SO-7904" });
+    const e4 = await ticket(pg, { wo: "WO-7904", po: "PO-LATE" });
+    await mergeServiceJobs(sql, k4, e4, "Chuy");
+    assert.equal((await poOf(pg, "service_jobs", k4)).po, null);
     // An invoiced keeper's Vendor P.O. still fills (it's reference only); its Customer P.O. stays locked as before.
     const k3 = await ticket(pg, { wo: "WO-7903", po: null, vendor_po: null });
     await liveInvoice(pg, k3);
@@ -475,6 +567,16 @@ test("the top search finds every kind of ticket by either P.O., and says so", as
     assert.equal(hit(await find("rb-ec"), "rebuild", archived), undefined);
     // Found by something else: no note.
     assert.doesNotMatch(hit(await find("Uptown"), "tlc", t).subtitle, /P\.O\./);
+
+    // A sales rep sees only their accounts' rebuilds, and theirs are found even when others' match first.
+    await pg.query(`insert into "user" (id, name, email, "emailVerified") values ('u-rep', 'Riley Rep', 'riley@example.com', true)`);
+    await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role, email) values ('u-rep', 'riley', true, false, 'sales', 'riley@example.com')");
+    await pg.query("insert into directory_customers (name, account_rep) values ('Rep Test Cafe', 'Riley Rep'), ('Other Test Cafe', 'Someone Else')");
+    const mine = await rebuild(pg, { title: "Rep grinder", account: "Rep Test Cafe", po: "PO-REPX-MINE" });
+    for (let k = 0; k < 8; k++) await rebuild(pg, { title: `Other ${k}`, account: "Other Test Cafe", po: `PO-REPX-OTHER-${k}` });
+    const repHits = (await api.searchAllFor(sql, { q: "PO-REPX" }, { userId: "u-rep" })).filter((h) => h.entityType === "rebuild");
+    assert.deepEqual(repHits.map((h) => h.id), [mine]);
+    assert.equal((await find("PO-REPX")).filter((h) => h.entityType === "rebuild").length, 5);
   } finally {
     await pg.close();
   }
@@ -517,7 +619,11 @@ test("each Details tab has both P.O. boxes and sends a box only when it was chan
   assert.match(job, /ticketPoLock\(\{ nsSo: billing\.data\?\.nsSo, invoice: billing\.data\?\.invoiceLock \}\)/);
   assert.match(job, /if \(notice\) toast\.warning\(notice\);/);
   for (const prefix of ["pm-${pm.id}", "install-${row.id}", "deal-${deal.id}"]) assert.ok(sheets.includes("idPrefix={`" + prefix + "`}"), prefix);
-  assert.equal((sheets.match(/\.\.\.poFromForm\(e\.currentTarget\),/g) ?? []).length, 3);
+  // The install's form submit, and the PM's and the deal's patch builders (their saves before the Invoice window use them too).
+  assert.equal((sheets.match(/\.\.\.poFromForm\(e\.currentTarget\),/g) ?? []).length, 1);
+  assert.equal((sheets.match(/\.\.\.poFromForm\(form\),/g) ?? []).length, 2);
+  assert.match(sheets, /save\.mutate\(pmPatchOf\(e\.currentTarget, pm\.id\)\);/);
+  assert.match(sheets, /save\.mutate\(dealPatchOf\(e\.currentTarget, deal\.id\)\);/);
   assert.match(rebuildSheet, /const po = useSyncedPo\(row\?\.po, row\?\.id \?\? null\);/);
   assert.match(rebuildSheet, /\.\.\.\(po\.toSend\(\) !== undefined \? \{ po: po\.toSend\(\) \} : \{\}\),/);
   // The boxes read what each box was given: a box left as it was sends nothing.
@@ -527,12 +633,33 @@ test("each Details tab has both P.O. boxes and sends a box only when it was chan
   assert.match(form, /return poToSend\(el\.value, el\.getAttribute\("data-base"\) \?\? ""\);/);
   assert.match(form, /if \(!\(el instanceof HTMLInputElement\) \|\| el\.disabled\) return undefined;/);
   const fields = src("src/components/desk/po-fields.tsx");
-  assert.match(fields, /const customer = useSyncedPo\(po, idPrefix\);/);
+  assert.match(fields, /const vendor = useSyncedPo\(vendorPo, idPrefix\);/);
   assert.match(fields, /value=\{customer\.value\}\n\s+onChange=\{\(e\) => customer\.set\(e\.target\.value\)\}\n\s+data-base=\{customer\.base\}/);
+});
+
+test("a sheet that saves as it closes saves before its Invoice window opens, so a P.O. approved there isn't put back", () => {
+  const win = src("src/components/desk/invoice-window.tsx");
+  assert.match(win, /if \(beforeOpen\) \{\n\s+setOpening\(true\);\n\s+const saved = await beforeOpen\(\)\.catch\(\(\) => false\);\n\s+setOpening\(false\);\n\s+if \(!saved\) return;\n\s+\}\n\s+setOpen\(true\);/);
+  const job = src("src/components/desk/job-sheet.tsx");
+  assert.equal((job.match(/beforeOpen=\{saveBeforeInvoice\}/g) ?? []).length, 2);
+  assert.match(job, /await save\.mutateAsync\(formPatch\(formRef\.current, j\.id\)\);\n\s+return true;/);
+  const sheets = src("src/components/desk/entity-sheets.tsx");
+  assert.ok(sheets.includes('<InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} beforeOpen={saveBeforeInvoice} />'));
+  assert.ok(sheets.includes('<InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveAndWait} />'));
+  assert.ok(sheets.includes('<InvoiceButton type="deal" id={deal.id} key={`invoice-deal-${deal.id}`} beforeOpen={saveDealBeforeInvoice} />'));
+  assert.match(sheets, /await save\.mutateAsync\(pmPatchOf\(formRef\.current, pm\.id\)\);/);
+  assert.match(sheets, /await save\.mutateAsync\(dealPatchOf\(formRef\.current, deal\.id\)\);/);
+  // After an Approve, the sheets opened from an account and a PM opened from its ticket read the record again.
+  assert.match(win, /void qc\.invalidateQueries\(\{ queryKey: \["customer-history"\] \}\);\n\s+void qc\.invalidateQueries\(\{ queryKey: \["pm"\] \}\);/);
+  // A locked box shows the record's P.O. and holds nothing typed.
+  assert.match(src("src/components/desk/po-fields.tsx"), /const customer = useSyncedPo\(po, idPrefix, !!lock\);/);
 });
 
 test("the Charges show the ticket's P.O. and change it only in an Admin's unlocked save; the Invoice window sends one only when changed", () => {
   const charges = src("src/components/desk/charges-panel.tsx");
+  // A save starts the panel over from the server, the P.O. too, and the ticket's Details and the account's invoices read it again.
+  assert.match(charges, /loaded\.current = null;\n\s+setDirty\(false\);\n\s+setPoDirty\(false\);\n\s+qc\.setQueryData\(\["charges", jobId\], next\);/);
+  assert.match(charges, /void qc\.invalidateQueries\(\{ queryKey: \["job", jobId\] \}\);/);
   assert.match(charges, /saveTicketCharges\(\{ data: \{ jobId, lines, lineIds:/);
   assert.match(charges, /\.\.\.\(poDirty \? \{ po \} : \{\}\),/);
   assert.match(charges, /id="charge-po"\n\s+value=\{po\}\n\s+disabled=\{!unlocked\}/);
@@ -550,6 +677,9 @@ test("every board's card shows the P.O.s, and every board's search finds them", 
     ["src/routes/_app/pipeline.tsx", "<PoLine po={d.po} vendorPo={d.vendorPo} />"],
   ];
   for (const [file, line] of cards) assert.ok(src(file).includes(line), file);
+  // An account's history rows (and a ticket's Schedules) carry them too.
+  const history = src("src/components/desk/account-history.tsx");
+  for (const r of ["j", "p", "i", "d"]) assert.ok(history.includes(`poCardLine(${r})].filter(Boolean).join(" · ")`), r);
   for (const [file, row] of [
     ["src/components/desk/jobs-page.tsx", "j"],
     ["src/routes/_app/pms.tsx", "p"],

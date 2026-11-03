@@ -286,6 +286,20 @@ export function JobSheet({
     };
   }
 
+  /** The Invoice window: save what is typed first, so it opens on the ticket as it is now (its P.O. too, 11/2). */
+  async function saveBeforeInvoice(): Promise<boolean> {
+    if (!formRef.current || !j || mergedAway) return true;
+    skipToast.current = true;
+    try {
+      await save.mutateAsync(formPatch(formRef.current, j.id));
+      return true;
+    } catch {
+      // The save's own error says why; the window stays shut.
+      skipToast.current = false;
+      return false;
+    }
+  }
+
   /** Merge into install: save what is typed first, so the confirm shows (and the merge moves) the ticket as it is now. */
   async function openInstallMerge(installId: number) {
     if (formRef.current && j) {
@@ -460,7 +474,7 @@ export function JobSheet({
                 {/* With tabs, the invoice is on the Invoicing tab. A ticket merged into an install has none of its own. */}
                 {tabbed || mergedAway ? null : (
                   <div className="mt-2">
-                    <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
+                    <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} beforeOpen={saveBeforeInvoice} />
                     <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                   </div>
                 )}
@@ -521,7 +535,7 @@ export function JobSheet({
                             <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                             <p className="mt-1 text-xs text-muted-foreground">Parts, labor, discount, total and billing info for this ticket.</p>
                             <div className="mt-3">
-                              <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
+                              <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} beforeOpen={saveBeforeInvoice} />
                             </div>
                             <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                           </section>

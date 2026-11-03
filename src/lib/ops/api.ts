@@ -79,7 +79,7 @@ import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, account
 import { woMatchKey } from "./corrigo";
 import { BILLED_ON_INSTALL } from "./merged-ticket";
 import { LIVE_INVOICE_SQL, lockingInvoice } from "./billing-rules";
-import { loadInvoices } from "./ticket-billing-api";
+import { UNCHANGED_SINCE_READ, loadInvoices } from "./ticket-billing-api";
 import { poSearchNote, sentPo, ticketPoLock } from "./ticket-po";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
@@ -200,7 +200,8 @@ function attachJobSiblings(jobs: any) {
 }
 /** A P.O. as a record carries it: trimmed, blank as none (11/2). */
 const poText = (v: unknown): string | null => String(v ?? "").trim() || null;
-function mapJob(r: any, today: any) {
+/** A ticket row as the boards read it. Exported for its tests. */
+export function mapJob(r: any, today: any) {
 	const received = isoDate(r.received);
 	const scheduled = isoDate(r.scheduled);
 	return {
@@ -249,7 +250,8 @@ function mapJob(r: any, today: any) {
 		ageDays: received ? diffDays(received, today) : null
 	};
 }
-function mapPm(r: any, today: any) {
+/** A PM row as the boards read it. Exported for its tests. */
+export function mapPm(r: any, today: any) {
 	const projected = isoDate(r.projected);
 	return {
 		id: r.id,
@@ -279,7 +281,8 @@ function mapPm(r: any, today: any) {
 		stackedJobId: r.stacked_job_id == null ? null : Number(r.stacked_job_id)
 	};
 }
-function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
+/** An install row as the boards read it. Exported for its tests. */
+export function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 	const installDate = isoDate(r.install_date);
 	return {
 		id: r.id,
@@ -326,7 +329,8 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		noRep: isNoRep(r.account_rep)
 	};
 }
-function mapDeal(r: any, marks: any) {
+/** A deal row as the boards read it. Exported for its tests. */
+export function mapDeal(r: any, marks: any) {
 	const customer = String(r.customer);
 	// A deal with no rep of its own shows the rep saved on the customer account.
 	const producer = (String(r.producer ?? "").trim() ? r.producer : null) ?? (marks ? accountRepFor(marks, customer) : null);
@@ -977,12 +981,15 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
  * changes only while the ticket isn't billed on a Sales Order, invoiced in NetSuite (an Admin's unlock changes it in the
  * Charges), or merged into another ticket. The Vendor P.O. is for reference only, so it always changes. Returns why the
  * Customer P.O. stayed, or null.
+ * A write that waited for the ticket's row (the Billing Backfill adding its first NetSuite invoice, say) reads the row
+ * again but not the invoices, so it writes the Customer P.O. only while the row is as this statement first saw it.
  */
 async function writeJobPo(sql: any, jobId: number, userId: string, before: any, po: string | null | undefined, vendorPo: string | null | undefined): Promise<string | null> {
 	if (po === undefined && vendorPo === undefined) return null;
 	const row = (await sql.query(
 		`update service_jobs s
 		    set po = case when $2::boolean and s.duplicate_of is null and nullif(btrim(coalesce(s.ns_so, '')), '') is null and not ${LIVE_INVOICE_SQL("s.id")}
+		                       and ${UNCHANGED_SINCE_READ("s", "$1")}
 		                  then $3::text else s.po end,
 		        vendor_po = case when $4::boolean then $5::text else s.vendor_po end,
 		        updated_at = now()
@@ -1926,11 +1933,12 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 		subtitle: `${d.producer ?? "Deal"}${poSearchNote(q, d)}`,
 		status: d.completion === "complete" ? "Complete" : d.completion === "fell" ? "Fell through" : "Open"
 	});
-	// Rebuilds by their P.O. (11/2), a sales rep's accounts only, like the tickets above.
+	// Rebuilds by their P.O. (11/2), a sales rep's accounts only, like the tickets above: theirs are picked before the 5
+	// are taken.
 	const rebuilds = await sql.query(
 		`select id, title, account, status, po, vendor_po from rebuilds
       where coalesce(archived, false) = false and (coalesce(po, '') ilike $1 or coalesce(vendor_po, '') ilike $1)
-      order by id desc limit 20`,
+      order by id desc${inScope ? "" : " limit 5"}`,
 		[like]
 	);
 	for (const r of rebuilds.filter((r: { account: string | null }) => !inScope || inScope(r.account)).slice(0, 5)) hits.push({

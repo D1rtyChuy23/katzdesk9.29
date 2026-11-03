@@ -25,7 +25,7 @@ export function PoFields({
   /** What the Customer P.O. box says under it when it isn't locked. */
   customerNote?: string;
 }) {
-  const customer = useSyncedPo(po, idPrefix);
+  const customer = useSyncedPo(po, idPrefix, !!lock);
   const vendor = useSyncedPo(vendorPo, idPrefix);
   return (
     <>
@@ -70,8 +70,9 @@ export function PoFields({
 export function PoLine({ po, vendorPo, className }: { po?: string | null; vendorPo?: string | null; className?: string }) {
   const line = poCardLine({ po, vendorPo });
   if (!line) return null;
+  // A long P.O. with no spaces wraps instead of pushing the card wider than a phone.
   return (
-    <span className={cn("mt-0.5 block text-xs text-muted-foreground", className)} data-testid="card-po">
+    <span className={cn("mt-0.5 block text-xs text-muted-foreground [overflow-wrap:anywhere]", className)} data-testid="card-po">
       {line}
     </span>
   );

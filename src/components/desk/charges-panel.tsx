@@ -109,8 +109,15 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     void qc.invalidateQueries({ queryKey: ["pm-bill", jobId] });
     void qc.invalidateQueries({ queryKey: ["ticket-billing", jobId] });
     void qc.invalidateQueries({ queryKey: ["billing-invoices"] });
+    // The ticket's Details and the account's Invoices tab show its Customer P.O. (an Admin's unlocked save changes it).
+    void qc.invalidateQueries({ queryKey: ["job", jobId] });
+    void qc.invalidateQueries({ queryKey: ["account-invoices"] });
   };
   const after = (next: TicketCharges, message: string) => {
+    // Saved: the panel starts over from what the server has now, the P.O. too, even when the lines came back the same.
+    loaded.current = null;
+    setDirty(false);
+    setPoDirty(false);
     qc.setQueryData(["charges", jobId], next);
     refreshAround();
     toast.success(message);
