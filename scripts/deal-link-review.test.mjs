@@ -230,6 +230,12 @@ test("a save that read the deal before a handoff tied its rows doesn't untie the
     assert.deepEqual([after4.completion, after4.producer, after4.handed_off], ["complete", "Test Rep B", true]);
     assert.equal(JSON.parse(after4.machines)[0].uid, JSON.parse((await one(pg, "select machines from installs where id = $1", [made4.id])).machines)[0].uid);
     assert.equal((await installsOf(pg, d4)).length, 1);
+    // A save that sent its own status (the rep sets the deal back to open) keeps it on its retry.
+    const d5 = await deal(pg, { customer: "Test Shop 5", completion: "complete", machines: BREWER });
+    const sentMeanwhile = racing(sql, /^select \* from deals where id = \$\d+$/, () => api.maybeHandoffInstall(sql, d5, "u-owner"));
+    await api.updateDealFor(sentMeanwhile, { id: d5, completion: "open", machines: [{ equipment: "Test Brewer TB-1", serial: "", powerVoltage: "", ownership: "Sold" }] }, "u-rep");
+    assert.equal((await one(pg, "select completion from deals where id = $1", [d5])).completion, "open");
+    assert.equal((await installsOf(pg, d5)).length, 1);
     // A save with no rows (notes, say) read before a warehouse pull wrote a unit onto the deal keeps the pull's row.
     const d3 = await deal(pg, { customer: "Test Shop 3", machines: BREWER });
     const shop3 = await install(pg, { customer: "Test Shop 3", deal_id: d3 });
