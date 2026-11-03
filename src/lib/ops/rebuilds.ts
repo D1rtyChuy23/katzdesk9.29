@@ -42,6 +42,7 @@ import { pullNotice, unitWhere, type PulledUnit } from "@/lib/ops/warehouse-pull
 import { notifyAdminsWarehousePull } from "@/lib/ops/notify";
 import { SITE_PURPOSE, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { HOUSE_STAGING } from "@/lib/ops/unit-place-rules";
+import { sentPo } from "@/lib/ops/ticket-po";
 
 export {
   REBUILD_STATUSES,
@@ -79,6 +80,9 @@ export type Rebuild = {
   actualComplete: string | null;
   priority: RebuildPriority;
   notes: string | null;
+  /** The customer's P.O., which goes on the rebuild's invoice, and a vendor's, for reference only (11/2). */
+  po: string | null;
+  vendorPo: string | null;
   installId: number | null;
   jobId: number | null;
   serialNotice: string | null;
@@ -134,6 +138,8 @@ type RebuildRow = {
   created_at: string;
   updated_at: string;
   archived?: boolean;
+  po?: string | null;
+  vendor_po?: string | null;
 };
 
 async function readySql() {
@@ -498,6 +504,8 @@ export function mapRebuild(r: RebuildRow, today: string, accountRep: string | nu
     actualComplete: isoDay(r.actual_complete),
     priority,
     notes: r.notes,
+    po: String(r.po ?? "").trim() || null,
+    vendorPo: String(r.vendor_po ?? "").trim() || null,
     installId: num(r.install_id),
     jobId: num(r.job_id),
     serialNotice: machines.length ? (machines[0]?.notice ?? null) : r.serial_notice?.trim() || null,
@@ -642,6 +650,9 @@ const patchSchema = z.object({
   notes: z.string().nullable().optional(),
   installId: z.number().nullable().optional(),
   jobId: z.number().nullable().optional(),
+  /** Sent only when changed on the Details tab (11/2); left out keeps the stored one, blank clears it. */
+  po: z.string().max(400).nullable().optional(),
+  vendorPo: z.string().max(400).nullable().optional(),
 });
 
 export type RebuildList = {
@@ -832,6 +843,8 @@ export const updateRebuild = createServerFn({ method: "POST" })
  * can move a Katz shop / stock one to Katz Coffee Service Dept. but never put a rebuild on any other account.
  */
 export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchema>, userId: string): Promise<Rebuild> {
+  const po = sentPo(data.po, "Customer P.O.");
+  const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
   const access = await requireEditor(sql, userId);
   await ensureRebuilds(sql);
   // What the site before machines wrote on it becomes a machine first, so completing it stocks that too.
@@ -915,6 +928,9 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
        install_id = $14,
        job_id = $15,
        status_changed_at = case when $16 then now() else status_changed_at end,
+       -- Only a P.O. the save sent (11/2): one left out stays as the row has it now (the Invoice window may have just set it).
+       po = case when $18::boolean then $19::text else po end,
+       vendor_po = case when $20::boolean then $21::text else vendor_po end,
        updated_at = now()
      where id = $1 and ${ACCOUNT_STILL("account", "$17")} and not ${LOCKED_UNIT_MOVES("rebuilds", "$3::text")}
      returning *`,
@@ -936,6 +952,10 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
       data.jobId !== undefined ? data.jobId : cur.job_id,
       statusChanged,
       warehouseKeys(access),
+      po !== undefined,
+      po ?? null,
+      vendorPo !== undefined,
+      vendorPo ?? null,
     ],
   );
   const row = rows[0];
@@ -955,6 +975,8 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     changed("actual start", isoDay(cur.actual_start), actualStart),
     changed("actual complete", isoDay(cur.actual_complete), actualComplete),
   ].filter((x): x is string => !!x);
+  // The P.O.s get a line of their own, so four other changes never crowd them out of the history.
+  const poLine = [changed("Customer P.O.", cur.po ?? null, row.po ?? null), changed("Vendor P.O.", cur.vendor_po ?? null, row.vendor_po ?? null)].filter(Boolean).join(" · ");
   const accountNote = changed("account", cur.account, row.account);
   if (accountNote) {
     parts.push(accountNote);
@@ -979,6 +1001,7 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     const action = statusChanged ? "status" : parts.some((p) => p.startsWith("reason") || p.startsWith("kept")) ? "reason" : "updated";
     await logActivity(sql, userId, data.id, action, parts.slice(0, 4).join(" · "));
   }
+  if (poLine) await logActivity(sql, userId, data.id, "updated", poLine);
   // Completed just now, on a refurb: its machines go into stock at the Staging area.
   const stockNote = row.status === "Completed" && cur.status !== "Completed" && warehouseMayEdit(row.account) ? await stockRefurbMachines(sql, row, userId) : null;
   return { ...(await rebuildOut(sql, row)), stockNote };

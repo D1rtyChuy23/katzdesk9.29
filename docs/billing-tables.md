@@ -14,6 +14,8 @@ different questions and none of them copies another.
 - Service and TLC tickets only (`job_id` → `service_jobs`).
 - The rest of a ticket's billing is on the ticket row, not here: discount (`discount_kind`, `discount_value`), P.O.
   (`po`), Sales Order (`ns_so`) and the billed date (`billed_at`).
+- The Customer P.O. (`po`) is typed on the ticket's Details since 11/2 (migration `0112`); the Charges show it and change
+  it only in an Admin's unlocked save. `vendor_po` is a vendor's P.O. number, for reference only: never billed.
 - Cost columns (`mpn`, `list_price`, `unit_cost`, `our_discount`, `ticket_discount`, `margin`, `priced_at`) are filled
   when the ticket is billed, for Parts Profit.
 - The ticket's Invoice window shows these same lines (`sharedWithCharges`). Saving there saves here.
@@ -25,6 +27,9 @@ different questions and none of them copies another.
   total at that moment. Its lines stay in `ticket_charges`; `invoice_lines` is never written for a ticket, and the
   ticket's discount stays on the ticket (`invoices.discount_*` is null for tickets).
 - For PMs, installs, rebuilds and deals, `invoice_lines` holds the lines and `invoices.discount_*` the discount.
+- Every invoice carries its record's Customer P.O. (`po` on `service_jobs`, `pm_jobs`, `installs`, `rebuilds`, `deals`,
+  since 11/2), read live. A P.O. changed in the Invoice window is saved on the record when it is approved.
+  `invoices.po` keeps the P.O. a PM's, install's, rebuild's or deal's invoice was last approved with; nothing reads it.
 - `invoices.total` is a snapshot. A ticket's charges can change after Approve (while it isn't locked); the window
   says so.
 - None of this is NetSuite data. Export Billing doesn't read these tables.

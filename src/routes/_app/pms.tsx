@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { withPoMatches } from "@/lib/ops/ticket-po";
+import { PoLine } from "@/components/desk/po-fields";
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState } from "react";
@@ -50,10 +52,12 @@ function Page() {
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter((p) =>
-        [p.customer, p.equipment, p.style, p.technician, p.wo].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
+        [p.customer, p.equipment, p.style, p.technician, p.wo, p.po, p.vendorPo].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
     list = withWoMatches(list, pms.data ?? [], q);
+    // An exact P.O. finds its PM in any status or view, as a WO number does (11/2).
+    list = withPoMatches(list, pms.data ?? [], q);
     return sortDesk(list, sort, {
       date: (p) => p.projected ?? p.received,
       name: (p) => p.customer,
@@ -140,6 +144,7 @@ function Page() {
               <AkBadge on={p.aviKatz} className="ml-1 align-middle" />
               <AddressLine customer={p.customer} />
               <span className="mt-0.5 block text-xs text-muted-foreground">{p.equipment}</span>
+              <PoLine po={p.po} vendorPo={p.vendorPo} />
             </span>
             <span className="flex flex-wrap gap-1 max-sm:contents">
               <FlagBadge flag={p.flag} />

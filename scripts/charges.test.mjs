@@ -276,6 +276,8 @@ test("replaceTicketChargesSql twice with the same keyed lines keeps both keys", 
       null,
       null,
       ["mp:9", "pmkit:4:acct:1:K1"],
+      // The P.O. ($9, none here) is written: sent (11/2).
+      true,
     ]);
   await run();
   await run();

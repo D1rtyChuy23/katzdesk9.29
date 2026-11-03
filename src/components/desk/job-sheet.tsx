@@ -54,6 +54,10 @@ import { TicketPmStack } from "./pm-stack-panel";
 import { isJobStack, jobStackQuery, openPmReminders } from "./pm-stack-shared";
 import { InstallMergeBanner, InstallMergeDialog, MergedIntoInstallBanner, MergedTicketSummary } from "./ticket-install-merge";
 import type { TicketInstallMergeResult } from "@/lib/ops/ticket-install-merge";
+import { getTicketCharges } from "@/lib/ops/charges-api";
+import { ticketPoLock } from "@/lib/ops/ticket-po";
+import { PoFields } from "./po-fields";
+import { poFromForm } from "./po-form";
 
 /** The ticket's categories, one per tab, in this order. Only a ticket with a customer has tabs. */
 export type TicketTab = "ticket" | "equipment" | "invoicing" | "schedules" | "ping";
@@ -121,11 +125,21 @@ export function JobSheet({
   const canStackWrite = isJobStack(pmStack.data) && pmStack.data.canWrite;
   const save = useMutation({
     mutationFn: (patch: Parameters<typeof updateJob>[0]["data"]) => updateJob({ data: patch }),
-    onSuccess: (row) => {
-      if (!skipToast.current) toast.success("Saved");
+    onSuccess: (saved, patch) => {
+      // A Customer P.O. that couldn't change (the ticket was billed or invoiced meanwhile) says why, even on close.
+      const notice = saved?.notice ?? null;
+      if (notice) toast.warning(notice);
+      else if (!skipToast.current) toast.success("Saved");
       skipToast.current = false;
+      const row = saved ? (({ notice: _notice, ...rest }) => rest)(saved) : saved;
       // Keep the saved ticket in the cache, so reopening it right after closing shows (and re-saves) the new values.
       if (row) qc.setQueryData(["job", row.id], row);
+      // The ticket's Charges and Invoice window show its Customer P.O. too.
+      if (row && patch.po !== undefined) {
+        void qc.invalidateQueries({ queryKey: ["charges", row.id] });
+        void qc.invalidateQueries({ queryKey: ["invoice"] });
+        void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      }
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void qc.invalidateQueries({ queryKey: ["job"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
@@ -157,6 +171,15 @@ export function JobSheet({
   const j = job.data;
   /** Merged into an install: no form or tabs, so closing it saves nothing (10/30). */
   const mergedAway = !!j?.mergedInstallId;
+  // The ticket's billing (the same read as its Charges): billed or invoiced in NetSuite, its Customer P.O. is locked here.
+  const billing = useQuery({
+    queryKey: ["charges", activeId],
+    queryFn: () => getTicketCharges({ data: { jobId: activeId! } }),
+    enabled: activeId != null && !!j && !mergedAway,
+  });
+  const poLock = j?.duplicateOf
+    ? `This ticket was merged into #${j.duplicateOf}, so its Customer P.O. is on that ticket.`
+    : ticketPoLock({ nsSo: billing.data?.nsSo, invoice: billing.data?.invoiceLock });
   const assets = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const pulledSerial =
     (assets.data ?? []).find((a) => a.jobId === activeId)?.serial ?? "";
@@ -258,7 +281,30 @@ export function JobSheet({
       completedAt: String(fd.get("completedAt") || "") || null,
       notes: String(fd.get("notes") || "") || null,
       urgency: String(fd.get("urgency") || "") || "Normal",
+      // Each P.O. only when it was changed here (11/2): a sheet left open never puts an older one back.
+      ...poFromForm(el),
     };
+  }
+
+  /** The Invoice window: save what is typed first, so it opens on the ticket as it is now (its P.O. too, 11/2). */
+  async function saveBeforeInvoice(): Promise<boolean> {
+    if (!formRef.current || !j || mergedAway) return true;
+    const form = formRef.current;
+    // The same checks as Save (a half-typed date): shown on the Ticket tab, and the window stays shut.
+    if (!form.checkValidity()) {
+      pickTab("ticket");
+      window.setTimeout(() => form.reportValidity(), 50);
+      return false;
+    }
+    skipToast.current = true;
+    try {
+      await save.mutateAsync(formPatch(formRef.current, j.id));
+      return true;
+    } catch {
+      // The save's own error says why; the window stays shut.
+      skipToast.current = false;
+      return false;
+    }
   }
 
   /** Merge into install: save what is typed first, so the confirm shows (and the merge moves) the ticket as it is now. */
@@ -360,6 +406,7 @@ export function JobSheet({
         </SelectField>
       </div>
       <Field label="WO #" name="wo" defaultValue={j.wo ?? ""} />
+      <PoFields idPrefix={`job-${j.id}`} po={j.po} vendorPo={j.vendorPo} lock={poLock} customerNote="Goes on the invoice and the NetSuite billing export." />
       <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
       <Field label="Contact" name="contact" defaultValue={j.contact ?? ""} />
       <Field label="Phone" name="phone" defaultValue={j.phone ?? ""} />
@@ -434,7 +481,7 @@ export function JobSheet({
                 {/* With tabs, the invoice is on the Invoicing tab. A ticket merged into an install has none of its own. */}
                 {tabbed || mergedAway ? null : (
                   <div className="mt-2">
-                    <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
+                    <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} beforeOpen={saveBeforeInvoice} />
                     <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                   </div>
                 )}
@@ -495,7 +542,7 @@ export function JobSheet({
                             <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                             <p className="mt-1 text-xs text-muted-foreground">Parts, labor, discount, total and billing info for this ticket.</p>
                             <div className="mt-3">
-                              <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} />
+                              <InvoiceButton type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`invoice-${j.id}`} beforeOpen={saveBeforeInvoice} />
                             </div>
                             <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                           </section>

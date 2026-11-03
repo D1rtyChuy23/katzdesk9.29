@@ -405,6 +405,8 @@ export type DiscountInput = { kind: string; value: string | number } | null | un
  * One statement: lock the ticket, replace its charge lines, and write the P.O. and discount together.
  * source_key rides in $12. There is no unique index on it — the delete and the insert are one statement,
  * and a second save of the same keys must succeed. Duplicate keys are refused in checkCharges instead.
+ * The P.O. ($9) is written only when the save sent one ($13, 11/2): otherwise the ticket keeps the one it has as this
+ * runs, never one read before (its Details may have just changed it).
  */
 export function replaceTicketChargesSql(): string {
   return `with j as (
@@ -428,7 +430,7 @@ export function replaceTicketChargesSql(): string {
        returning ticket_charges.id
      )
      update service_jobs s
-        set po = $9, discount_kind = $10, discount_value = $11, updated_at = now()
+        set po = case when $13::boolean then $9 else s.po end, discount_kind = $10, discount_value = $11, updated_at = now()
        from j
       where s.id = j.id
      returning s.id`;
@@ -438,7 +440,7 @@ export function replaceTicketChargesSql(): string {
  * The Admin's save on an unlocked, invoiced ticket: the same lines, P.O. and discount as replaceTicketChargesSql, plus
  * the Sales Order ($13) and its billed date ($14, else kept when the SO is unchanged, else now). The Sales Order is
  * kept, not cleared, so the lines change on a billed ticket. The unlock is cleared in the same statement, so saving
- * locks the ticket again. Nothing is written when the unlock has run out.
+ * locks the ticket again. Nothing is written when the unlock has run out. The P.O. is written only when sent ($15).
  */
 export function replaceUnlockedChargesSql(): string {
   return `with j as (
@@ -460,7 +462,7 @@ export function replaceUnlockedChargesSql(): string {
        returning ticket_charges.id
      )
      update service_jobs s
-        set po = $9, discount_kind = $10, discount_value = $11,
+        set po = case when $15::boolean then $9 else s.po end, discount_kind = $10, discount_value = $11,
             ns_so = $13::text,
             billed_at = case
               when $13::text is null then null
@@ -534,7 +536,9 @@ export async function writeTicketCharges(
   }));
   const checkIds = input.lineIds != null;
   const lineIds = input.lineIds == null ? [] : [...input.lineIds].map(Number).sort((a, b) => a - b);
-  const po = input.po === undefined ? cur.po.trim() || null : input.po.trim() || null;
+  // Sent, the P.O. is written (blank clears it); left out, the statement keeps the one the ticket has as it runs (11/2).
+  const poSent = input.po !== undefined;
+  const po = input.po === undefined ? null : input.po.trim() || null;
 
   // One statement: the ticket is locked, and the old lines, the new lines, and the P.O. change together or not at all.
   const params = [
@@ -553,8 +557,8 @@ export async function writeTicketCharges(
   ];
   const so = unlocked ? cleanSalesOrder(unlocked.nsSo) : null;
   const saved = unlocked
-    ? await sql.query<{ id: number }>(replaceUnlockedChargesSql(), [...params, so, unlocked.billedAt || null])
-    : await sql.query<{ id: number }>(replaceTicketChargesSql(), params);
+    ? await sql.query<{ id: number }>(replaceUnlockedChargesSql(), [...params, so, unlocked.billedAt || null, poSent])
+    : await sql.query<{ id: number }>(replaceTicketChargesSql(), [...params, poSent]);
   if (!saved[0]) {
     const row = (await sql.query<MergedTicketRow & { ns_so: string | null }>("select duplicate_of, merged_install_id, ns_so from service_jobs where id = $1", [jobId]))[0];
     const mergedNow = mergedTicketRefusal(row, "Add charges there.");
@@ -590,11 +594,12 @@ export async function loadTicketCharges(sql: Sql, jobId: number): Promise<Ticket
 /** Replace the charge lines and P.O. on a ticket. A ticket that is already billed is not changed. */
 export const saveTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { jobId: number; po: string; lines: z.input<typeof lineSchema>[]; lineIds: number[]; discount?: { kind: string; value: string | number } | null }) =>
+  .validator((d: { jobId: number; po?: string; lines: z.input<typeof lineSchema>[]; lineIds: number[]; discount?: { kind: string; value: string | number } | null }) =>
     z
       .object({
         jobId: z.number().int().positive(),
-        po: z.string().max(120),
+        // The ticket's details send the P.O. now (11/2); left out, the stored one stays.
+        po: z.string().max(120).optional(),
         lines: z.array(lineSchema).max(200),
         lineIds: z.array(z.number().int().positive()).max(200),
         discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),
@@ -616,7 +621,7 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
   .validator(
     (d: {
       jobId: number;
-      po: string;
+      po?: string;
       lines: z.input<typeof lineSchema>[];
       lineIds: number[];
       discount?: { kind: string; value: string | number } | null;
@@ -626,7 +631,8 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
       z
         .object({
           jobId: z.number().int().positive(),
-          po: z.string().max(120),
+          // Sent only when the Admin changed it in the unlocked Charges (11/2); left out, the stored one stays.
+          po: z.string().max(120).optional(),
           lines: z.array(lineSchema).max(200),
           lineIds: z.array(z.number().int().positive()).max(200),
           discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),

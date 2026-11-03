@@ -20,6 +20,17 @@ import { PartThumb } from "./part-thumb";
 import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+const PO_RECORD: Record<InvoiceTarget, string> = { service: "ticket", tlc: "ticket", pm: "PM", install: "install", rebuild: "rebuild", deal: "deal" };
+
+/** What the window says under the Customer P.O. (11/2): it is the record's own, typed on its Details. */
+function poNote(type: InvoiceTarget, canApprove: boolean): string {
+  const ticket = type === "service" || type === "tlc";
+  const where = `the ${PO_RECORD[type]}'s details${ticket ? " and the NetSuite billing export" : ""}`;
+  return canApprove
+    ? `The customer's P.O. on this invoice: the same one as on ${where}. A change here is saved there when you approve.`
+    : `The customer's P.O. on this invoice, from ${where}.`;
+}
 const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 type Draft = { id?: number; item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null; sourceKey?: string | null };
@@ -40,14 +51,45 @@ const toPin = (b: BillTo) => isPoint(billPin(b)) && canDriveTo(b.geocodeMatch);
  * page. Shows "Approved" once the record has an approved invoice, and "Waiting" while Warehouse's saved invoice waits
  * for an Admin.
  */
-export function InvoiceButton({ type, id, className }: { type: InvoiceTarget; id: number; className?: string }) {
+export function InvoiceButton({
+  type,
+  id,
+  className,
+  beforeOpen,
+}: {
+  type: InvoiceTarget;
+  id: number;
+  className?: string;
+  /**
+   * A sheet that saves as it closes stores what is typed first (11/2), so the window opens on the record as it is now and
+   * a P.O. changed in the window isn't put back by the sheet's own save afterwards. False keeps the window shut.
+   */
+  beforeOpen?: () => Promise<boolean>;
+}) {
   const [open, setOpen] = useState(false);
+  const [opening, setOpening] = useState(false);
   const q = useQuery({ queryKey: ["invoice", type, id], queryFn: () => getInvoice({ data: { type, id } }), staleTime: 30_000 });
   const approved = !!q.data?.approvedAt;
   const waiting = q.data?.state === "waiting";
   return (
     <>
-      <Button type="button" size="sm" variant="outline" className={cn("gap-1.5", className)} onClick={() => setOpen(true)} data-testid="invoice-open">
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className={cn("gap-1.5", className)}
+        disabled={opening}
+        onClick={async () => {
+          if (beforeOpen) {
+            setOpening(true);
+            const saved = await beforeOpen().catch(() => false);
+            setOpening(false);
+            if (!saved) return;
+          }
+          setOpen(true);
+        }}
+        data-testid="invoice-open"
+      >
         <Receipt className="size-4" />
         Invoice
         {approved ? (
@@ -122,8 +164,9 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   const [loadedIds, setLoadedIds] = useState<number[]>([]);
   const [discKind, setDiscKind] = useState<DiscountKind>("percent");
   const [discValue, setDiscValue] = useState("");
-  /** An install invoice's P.O. (10/30), for NetSuite. */
+  /** The record's Customer P.O. (11/2), as the window opened it and as typed here: Approve sends it only when changed. */
   const [po, setPo] = useState("");
+  const [poOpened, setPoOpened] = useState("");
   const [dirty, setDirty] = useState(false);
   // The invoice the lines below started from: its version (Approve sends it, so an Admin never approves over parts
   // Warehouse saved, another approval, or an invoice a merge put on the record after the window opened) and where it stood.
@@ -138,6 +181,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
     setDiscKind(v.discount?.kind ?? "percent");
     setDiscValue(v.discount ? String(v.discount.value) : "");
     setPo(v.po ?? "");
+    setPoOpened(v.po ?? "");
     setSeen({ version: v.version, state: v.state });
   }, [v, lines, q.isFetching]);
 
@@ -151,8 +195,15 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
     void qc.invalidateQueries({ queryKey: ["jobs"] });
     void qc.invalidateQueries({ queryKey: ["activity"] });
     void qc.invalidateQueries({ queryKey: ["pm-bill", id] });
-    // The rebuild board's Invoice Waiting badge.
+    // The rebuild board's Invoice Waiting badge, and each board's P.O. on its cards (11/2).
     void qc.invalidateQueries({ queryKey: ["rebuilds"] });
+    void qc.invalidateQueries({ queryKey: ["pms"] });
+    void qc.invalidateQueries({ queryKey: ["installs"] });
+    void qc.invalidateQueries({ queryKey: ["deals"] });
+    if (usesTicketCharges(type)) void qc.invalidateQueries({ queryKey: ["job", id] });
+    // Sheets opened from an account, and a PM opened from its ticket, read these.
+    void qc.invalidateQueries({ queryKey: ["customer-history"] });
+    void qc.invalidateQueries({ queryKey: ["pm"] });
   };
   /**
    * After a refused Approve or Save: when the invoice changed under the window (Warehouse saved again, or it was
@@ -175,7 +226,8 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   const approve = useMutation({
     mutationFn: () =>
       approveInvoice({
-        data: { type, id, lines: sentLines(), lineIds: loadedIds, discount: sentDiscount(), seen: seen?.version ?? null, ...(v?.hasPo ? { po } : {}) },
+        // The P.O. only when it was changed here (11/2): one set on the record's Details since stays.
+        data: { type, id, lines: sentLines(), lineIds: loadedIds, discount: sentDiscount(), seen: seen?.version ?? null, ...(v?.hasPo && po.trim() !== poOpened.trim() ? { po } : {}) },
       }),
     onSuccess: (next) => {
       refreshAfter(next);
@@ -297,14 +349,15 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
 
             {v.hasPo ? (
               <section className="rounded-lg border border-border p-3" data-testid="invoice-po">
-                <Label htmlFor={`invoice-po-${type}-${id}`}>P.O.</Label>
+                <Label htmlFor={`invoice-po-${type}-${id}`}>Customer P.O.</Label>
                 <Input
                   id={`invoice-po-${type}-${id}`}
                   autoComplete="off"
                   maxLength={PO_MAX}
                   placeholder="None"
                   value={po}
-                  disabled={locked}
+                  // Only an approver sets it here; Warehouse's Save for Approval doesn't carry one.
+                  disabled={locked || !v.canApprove}
                   onChange={(e) => {
                     setPo(e.target.value);
                     setDirty(true);
@@ -312,7 +365,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                   className="mt-1 max-w-xs"
                   data-testid="invoice-po-value"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">The customer&apos;s P.O., for the invoice in NetSuite. A ticket merged into this install brings its own.</p>
+                <p className="mt-1 text-xs text-muted-foreground">{poNote(type, v.canApprove)}</p>
               </section>
             ) : null}
 

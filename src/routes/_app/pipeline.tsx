@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { withPoMatches } from "@/lib/ops/ticket-po";
+import { PoLine } from "@/components/desk/po-fields";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -123,11 +125,13 @@ function Page() {
 
     if (needle) {
       list = list.filter((d) =>
-        [d.customer, d.producer, d.equipment, d.invoice, d.terms]
+        [d.customer, d.producer, d.equipment, d.invoice, d.terms, d.po, d.vendorPo]
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(needle)),
       );
     }
+    // An exact P.O. finds its deal in any view (11/2).
+    list = withPoMatches(list, all, q);
     return sortDesk(list, sort, {
       date: (d) => d.dateOfDeal ?? d.updatedAt,
       name: (d) => d.customer,
@@ -390,6 +394,7 @@ function DealRow({ deal: d, onOpen, onRep }: { deal: Deal; onOpen: () => void; o
             {d.producer && !d.noRep ? <RepLink name={d.producer} onPick={onRep} className="max-sm:py-2.5" /> : <NoRepFlag show />} ·{" "}
             {d.equipment || "No equipment listed"}
           </span>
+          <PoLine po={d.po} vendorPo={d.vendorPo} />
           {d.machines.some((m) => m.boardId != null) ? (
             <span className="mt-0.5 block text-xs text-muted-foreground" data-testid="deal-on-board">
               {d.machines.filter((m) => m.boardId != null).length} of {d.machines.length} on the Board

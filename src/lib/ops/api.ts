@@ -78,6 +78,9 @@ import { canonicalRepName, isNoRep, PRODUCER_INITIALS } from "./rep-match";
 import { loadAccountMarks, upsertAccountMarks, isAviKatz, accountRepFor, accountNumberFor } from "./reps";
 import { woMatchKey } from "./corrigo";
 import { BILLED_ON_INSTALL } from "./merged-ticket";
+import { LIVE_INVOICE_SQL, lockingInvoice } from "./billing-rules";
+import { UNCHANGED_SINCE_READ, loadInvoices } from "./ticket-billing-api";
+import { poSearchNote, sentPo, ticketPoLock } from "./ticket-po";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
@@ -149,6 +152,11 @@ function summarize(parts: any) {
 	const hits = parts.filter((x: any) => !!x);
 	return hits.length ? hits.slice(0, 4).join(" · ") : null;
 }
+/** The history line for a record's P.O.s a save changed (11/2), when either changed. */
+async function logPoChange(sql: any, userId: any, entityType: string, id: number, before: { po?: unknown; vendor_po?: unknown }, after: { po: unknown; vendorPo: unknown }) {
+	const line = [changed("Customer P.O.", before.po, after.po), changed("Vendor P.O.", before.vendor_po, after.vendorPo)].filter(Boolean).join(" · ");
+	if (line) await logActivity(sql, userId, entityType, id, "updated", line);
+}
 async function loadEquipCatalog(sql: any) {
 	const dir = await sql`
     select name from directory_equipment where archived = false and coalesce(name, '') <> ''`;
@@ -190,7 +198,10 @@ function attachJobSiblings(jobs: any) {
 		};
 	});
 }
-function mapJob(r: any, today: any) {
+/** A P.O. as a record carries it: trimmed, blank as none (11/2). */
+const poText = (v: unknown): string | null => String(v ?? "").trim() || null;
+/** A ticket row as the boards read it. Exported for its tests. */
+export function mapJob(r: any, today: any) {
 	const received = isoDate(r.received);
 	const scheduled = isoDate(r.scheduled);
 	return {
@@ -209,6 +220,8 @@ function mapJob(r: any, today: any) {
 		technician: r.technician,
 		secondaryTech: r.technician2 ?? null,
 		wo: r.wo,
+		po: poText(r.po),
+		vendorPo: poText(r.vendor_po),
 		scheduled,
 		scheduledTime: cleanTime(r.sched_time),
 		notes: r.notes,
@@ -237,7 +250,8 @@ function mapJob(r: any, today: any) {
 		ageDays: received ? diffDays(received, today) : null
 	};
 }
-function mapPm(r: any, today: any) {
+/** A PM row as the boards read it. Exported for its tests. */
+export function mapPm(r: any, today: any) {
 	const projected = isoDate(r.projected);
 	return {
 		id: r.id,
@@ -252,6 +266,8 @@ function mapPm(r: any, today: any) {
 		technician: r.technician,
 		notes: r.notes,
 		wo: r.wo ?? null,
+		po: poText(r.po),
+		vendorPo: poText(r.vendor_po),
 		workDone: r.work_done ?? null,
 		completedAt: isoDate(r.completed_at),
 		done: !!r.done,
@@ -265,7 +281,8 @@ function mapPm(r: any, today: any) {
 		stackedJobId: r.stacked_job_id == null ? null : Number(r.stacked_job_id)
 	};
 }
-function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
+/** An install row as the boards read it. Exported for its tests. */
+export function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 	const installDate = isoDate(r.install_date);
 	return {
 		id: r.id,
@@ -277,6 +294,8 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		scheduledTime: cleanTime(r.sched_time),
 		technician: r.technician,
 		wo: r.wo,
+		po: poText(r.po),
+		vendorPo: poText(r.vendor_po),
 		// Filled by withWorkOrders.
 		workOrders: [],
 		customerLockedAt: r.customer_locked_at ? String(r.customer_locked_at instanceof Date ? r.customer_locked_at.toISOString() : r.customer_locked_at) : null,
@@ -310,7 +329,8 @@ function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		noRep: isNoRep(r.account_rep)
 	};
 }
-function mapDeal(r: any, marks: any) {
+/** A deal row as the boards read it. Exported for its tests. */
+export function mapDeal(r: any, marks: any) {
 	const customer = String(r.customer);
 	// A deal with no rep of its own shows the rep saved on the customer account.
 	const producer = (String(r.producer ?? "").trim() ? r.producer : null) ?? (marks ? accountRepFor(marks, customer) : null);
@@ -329,6 +349,8 @@ function mapDeal(r: any, marks: any) {
 		eta: r.eta ?? null,
 		terms: r.terms ?? null,
 		invoice: r.invoice ?? null,
+		po: poText(r.po),
+		vendorPo: poText(r.vendor_po),
 		completion: r.completion ?? null,
 		notes: r.notes ?? null,
 		handedOff: !!r.handed_off,
@@ -855,10 +877,25 @@ const jobPatch = z.object({
 	workDone: z.string().nullable().optional(),
 	completedAt: z.string().nullable().optional(),
 	done: z.boolean().optional(),
-	urgency: z.string().optional()
+	urgency: z.string().optional(),
+	/** Sent only when changed on the Ticket tab (11/2); left out keeps the stored one, blank clears it. */
+	po: z.string().max(400).nullable().optional(),
+	vendorPo: z.string().max(400).nullable().optional()
 });
 export const updateJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: z.infer<typeof jobPatch>) => jobPatch.parse(d)).handler(async ({ data, context }: any) => {
 	const sql = await ready();
+	const { notice } = await updateJobFor(sql, data, context.userId);
+	const job = await getJob({ data: { id: data.id } });
+	return job ? { ...job, notice } : job;
+});
+/**
+ * The body of updateJob. Its Customer and Vendor P.O. are written only when sent (11/2: the Ticket tab sends a box only
+ * when it was changed there). A ticket billed on a Sales Order, invoiced in NetSuite or merged into another keeps its
+ * Customer P.O.: everything else is saved, and the notice says why the P.O. stayed.
+ */
+export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, userId: string): Promise<{ notice: string | null }> {
+	const poWanted = sentPo(data.po, "Customer P.O.");
+	const vendorWanted = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from service_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Job not found");
 	// A ticket merged into an install is hidden; its work is on the install now (10/30).
@@ -926,7 +963,7 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 		const now = (await sql`select merged_install_id from service_jobs where id = ${data.id}`)[0];
 		throw new Error(now?.merged_install_id ? `This ticket was merged into install #${now.merged_install_id}. Open the install to keep working.` : "Job not found");
 	}
-	if (data.status && data.status !== cur[0].status) await logActivity(sql, context.userId, cur[0].kind, data.id, "status", `${cur[0].status} → ${data.status}`);
+	if (data.status && data.status !== cur[0].status) await logActivity(sql, userId, cur[0].kind, data.id, "status", `${cur[0].status} → ${data.status}`);
 	const extra = summarize([
 		changed("customer", cur[0].customer, next.customer),
 		changed("technician", cur[0].technician, next.technician),
@@ -936,9 +973,37 @@ export const updateJob = createServerFn({ method: "POST" }).middleware([deskMidd
 		changed("urgency", cur[0].urgency, next.urgency),
 		changed("scheduled", cur[0].scheduled, next.scheduled)
 	]);
-	if (extra) await logActivity(sql, context.userId, cur[0].kind, data.id, "updated", extra);
-	return getJob({ data: { id: data.id } });
-});
+	if (extra) await logActivity(sql, userId, cur[0].kind, data.id, "updated", extra);
+	return { notice: await writeJobPo(sql, data.id, userId, cur[0], poWanted, vendorWanted) };
+}
+/**
+ * A ticket's P.O.s, as the Ticket tab sent them, in one statement that reads the ticket as it is now: its Customer P.O.
+ * changes only while the ticket isn't billed on a Sales Order, invoiced in NetSuite (an Admin's unlock changes it in the
+ * Charges), or merged into another ticket. The Vendor P.O. is for reference only, so it always changes. Returns why the
+ * Customer P.O. stayed, or null.
+ * A write that waited for the ticket's row (the Billing Backfill adding its first NetSuite invoice, say) reads the row
+ * again but not the invoices, so it writes the Customer P.O. only while the row is as this statement first saw it.
+ */
+async function writeJobPo(sql: any, jobId: number, userId: string, before: any, po: string | null | undefined, vendorPo: string | null | undefined): Promise<string | null> {
+	if (po === undefined && vendorPo === undefined) return null;
+	const row = (await sql.query(
+		`update service_jobs s
+		    set po = case when $2::boolean and s.duplicate_of is null and nullif(btrim(coalesce(s.ns_so, '')), '') is null and not ${LIVE_INVOICE_SQL("s.id")}
+		                       and ${UNCHANGED_SINCE_READ("s", "$1")}
+		                  then $3::text else s.po end,
+		        vendor_po = case when $4::boolean then $5::text else s.vendor_po end,
+		        updated_at = now()
+		  where s.id = $1 and s.merged_install_id is null
+		  returning s.po, s.vendor_po, s.ns_so, s.duplicate_of`,
+		[jobId, po !== undefined, po ?? null, vendorPo !== undefined, vendorPo ?? null]
+	))[0];
+	if (!row) return null;
+	await logPoChange(sql, userId, before.kind, jobId, before, { po: row.po, vendorPo: row.vendor_po });
+	if (po === undefined || (row.po ?? null) === po) return null;
+	if (row.duplicate_of) return `This ticket was merged into #${row.duplicate_of}, so its Customer P.O. stays. The P.O. is on that ticket.`;
+	const invoices = (await loadInvoices(sql, [jobId])).get(jobId) ?? [];
+	return ticketPoLock({ nsSo: row.ns_so, invoice: lockingInvoice(invoices) }) ?? "Its Customer P.O. didn't change. Open the ticket again and retry.";
+}
 const mergeInput = z.object({ keeperId: z.number().int().positive(), extraId: z.number().int().positive() });
 export const mergeServiceTickets = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: z.input<typeof mergeInput>) => mergeInput.parse(d)).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
 	const sql = await ready();
@@ -1053,8 +1118,11 @@ export const getPm = createServerFn({ method: "GET" }).middleware([deskMiddlewar
 	if (scope && !scope(accountRepFor(marks, pm.customer ?? null))) return null;
 	return pm;
 });
-export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; style?: string | null; projected?: string | null; partsStatus?: string | null; status?: string; technician?: string | null; notes?: string | null; workDone?: string | null; completedAt?: string | null; done?: boolean; wo?: string | null }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; style?: string | null; projected?: string | null; partsStatus?: string | null; status?: string; technician?: string | null; notes?: string | null; workDone?: string | null; completedAt?: string | null; done?: boolean; wo?: string | null; po?: string | null; vendorPo?: string | null }) => d).handler(async ({ data, context }: any) => updatePmFor(await ready(), data, context.userId));
+/** The body of updatePm. Its P.O.s are written only when sent (11/2); left out, the stored ones stay. */
+export async function updatePmFor(sql: any, data: any, userId: string) {
+	const po = sentPo(data.po, "Customer P.O.");
+	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from pm_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("PM not found");
 	if (data.customer !== undefined && cur[0].stacked_job_id) {
@@ -1097,6 +1165,9 @@ export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddl
         technician = ${data.technician === undefined ? c.technician : data.technician},
         notes = ${data.notes === undefined ? c.notes : data.notes},
         wo = ${data.wo === undefined ? c.wo : data.wo},
+        -- Only a P.O. the save sent (11/2): one left out stays as the row has it now, not as it was read above.
+        po = case when ${po !== undefined}::boolean then ${po ?? null}::text else po end,
+        vendor_po = case when ${vendorPo !== undefined}::boolean then ${vendorPo ?? null}::text else vendor_po end,
         work_done = ${data.workDone === undefined ? c.work_done : data.workDone},
         completed_at = ${data.completedAt === undefined ? c.completed_at : data.completedAt},
         done = ${done},
@@ -1108,13 +1179,14 @@ export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddl
 		changed("technician", c.technician, data.technician === undefined ? c.technician : data.technician),
 		changed("equipment", c.equipment, data.equipment === undefined ? c.equipment : data.equipment)
 	]);
-	if (extra) await logActivity(sql, context.userId, "pm", data.id, "updated", extra);
+	if (extra) await logActivity(sql, userId, "pm", data.id, "updated", extra);
+	await logPoChange(sql, userId, "pm", data.id, c, { po: po === undefined ? c.po : po, vendorPo: vendorPo === undefined ? c.vendor_po : vendorPo });
 	if (completing && completionPlan) {
 		await stampMachineParts(sql, data.id, completionPlan.machines);
-		await recordCompletedRunbook(sql, data.id, context.userId, completionPlan.planned, data.style === undefined ? c.style : data.style);
+		await recordCompletedRunbook(sql, data.id, userId, completionPlan.planned, data.style === undefined ? c.style : data.style);
 	}
 	return mapPm((await sql`select * from pm_jobs where id = ${data.id}`)[0], todayChicago());
-});
+}
 export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; style?: string }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const rows = await sql`
@@ -1304,15 +1376,18 @@ export const listDeals = createServerFn({ method: "GET" }).middleware([deskMiddl
 	const projects = await loadBoardProjects(sql, await loadEquipCatalog(sql));
 	return (await sql`select * from deals where archived = false order by id`).map((r) => attachBoard(mapDeal(r, marks), projects));
 });
-export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; machines?: MachineSpec[] | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean; releaseUids?: string[] }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; machines?: MachineSpec[] | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean; releaseUids?: string[]; po?: string | null; vendorPo?: string | null }) => d).handler(async ({ data, context }: any) => updateDealFor(await ready(), data, context.userId));
+/** The body of updateDeal. Its P.O.s are written only when sent (11/2); left out, the stored ones stay. */
+export async function updateDealFor(sql: any, data: any, userId: string) {
+	const po = sentPo(data.po, "Customer P.O.");
+	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
 	// The owner may take a confirmed machine off the deal: its tie is released, so the stored row is not put back.
 	const release = new Set<string>(Array.isArray(data.releaseUids) ? data.releaseUids.filter((u: unknown) => typeof u === "string" && u) : []);
 	if (release.size) {
 		const { canLockEquipment } = await import("./equipment-lock");
-		if (!(await canLockEquipment(sql, context.userId))) throw new Error("Only the owner can take a confirmed machine off a deal.");
+		if (!(await canLockEquipment(sql, userId))) throw new Error("Only the owner can take a confirmed machine off a deal.");
 	}
 	const c = cur[0];
 	const producer = data.producer === undefined ? c.producer : canonicalRepName(data.producer);
@@ -1347,6 +1422,9 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
         invoice = ${data.invoice === undefined ? c.invoice : data.invoice},
         completion = ${completion},
         notes = ${data.notes === undefined ? c.notes : data.notes},
+        -- Only a P.O. the save sent (11/2): one left out stays as the row has it now (the Invoice window may have just set it).
+        po = case when ${po !== undefined}::boolean then ${po ?? null}::text else po end,
+        vendor_po = case when ${vendorPo !== undefined}::boolean then ${vendorPo ?? null}::text else vendor_po end,
         updated_at = now()
       where id = ${data.id}`;
 	if (completion === "complete") await maybeHandoffInstall(sql, data.id);
@@ -1354,8 +1432,8 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 	{
 		const { notifyDealOrderStep } = await import("@/lib/ops/notify");
 		const dealRef = { id: Number(c.id), customer: String(data.customer ?? c.customer), rep: producer ?? null };
-		if (data.goodToOrder === true && !c.good_to_order) await notifyDealOrderStep(sql, context.userId, dealRef, "gto");
-		if (data.ordered === true && !c.ordered) await notifyDealOrderStep(sql, context.userId, dealRef, "ordered");
+		if (data.goodToOrder === true && !c.good_to_order) await notifyDealOrderStep(sql, userId, dealRef, "gto");
+		if (data.ordered === true && !c.ordered) await notifyDealOrderStep(sql, userId, dealRef, "ordered");
 	}
 	const extra = summarize([
 		changed("status", c.completion, completion),
@@ -1363,7 +1441,8 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 		changed("producer", c.producer, producer),
 		changed("equipment", c.equipment, data.equipment === undefined ? c.equipment : data.equipment)
 	]);
-	if (extra) await logActivity(sql, context.userId, "deal", data.id, "updated", extra);
+	if (extra) await logActivity(sql, userId, "deal", data.id, "updated", extra);
+	await logPoChange(sql, userId, "deal", data.id, c, { po: po === undefined ? c.po : po, vendorPo: vendorPo === undefined ? c.vendor_po : vendorPo });
 	const customerName = String(data.customer ?? c.customer);
 	if (data.aviKatz !== undefined || data.producer !== undefined) await upsertAccountMarks(sql, customerName, {
 		aviKatz: data.aviKatz,
@@ -1371,7 +1450,7 @@ export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMid
 	});
 	const marks = await loadAccountMarks(sql);
 	return attachBoard(mapDeal((await sql`select * from deals where id = ${data.id}`)[0], marks), await loadBoardProjects(sql, await loadEquipCatalog(sql)));
-});
+}
 export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; producer?: string; equipment?: string; machines?: MachineSpec[]; amount?: number }) => d).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const producer = canonicalRepName(data.producer);
@@ -1469,7 +1548,10 @@ type UpdateInstallInput = { id: number; customer?: string; equipment?: string | 
 	/** The list as the saving window last saw it on the server. With it, what changed on the server since is kept (mergeStaleList). */
 	machinesBase?: MachineSpec[] | string | null;
 	/** The notes the saving window's text was typed on. With it, a merged ticket's text the window never had is kept, and unchanged notes stay as stored (notes_after_window_save). */
-	notesBase?: string | null };
+	notesBase?: string | null;
+	/** The customer's P.O., which goes on the install's invoice, and a vendor's, for reference (11/2). Sent only when changed on the Details tab. */
+	po?: string | null;
+	vendorPo?: string | null };
 
 /**
  * A window's list saved over a newer one: what the server's list gained since the window last saw it (a machine added or
@@ -1494,6 +1576,8 @@ function mergeStaleList(data: UpdateInstallInput, c: any, catalog: string[]): vo
 }
 export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: UpdateInstallInput) => d).handler(async ({ data, context }: any) => updateInstallFor(await ready(), data, context));
 export async function updateInstallFor(sql: any, data: UpdateInstallInput, context: { userId: string }): Promise<Install> {
+	const po = sentPo(data.po, "Customer P.O.");
+	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from installs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Install not found");
 	const c = cur[0];
@@ -1582,6 +1666,9 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
         install_type = ${installType},
         site_contact = ${siteContact === undefined ? c.site_contact ?? null : siteContact},
         contact_phone = ${contactPhone === undefined ? c.contact_phone ?? null : contactPhone},
+        -- Only a P.O. the save sent (11/2): one left out stays as the row has it now (the Invoice window may have just set it).
+        po = case when ${po !== undefined}::boolean then ${po ?? null}::text else po end,
+        vendor_po = case when ${vendorPo !== undefined}::boolean then ${vendorPo ?? null}::text else vendor_po end,
         updated_at = now()
       where id = ${data.id}`;
 	const extra = summarize([
@@ -1596,6 +1683,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		data.duplicateOf === null && c.duplicate_of ? "cleared duplicate flag" : data.duplicateOf && data.duplicateOf !== c.duplicate_of ? `flagged duplicate of #${data.duplicateOf}` : null
 	]);
 	if (extra) await logActivity(sql, context.userId, "install", data.id, "updated", extra);
+	await logPoChange(sql, context.userId, "install", data.id, c, { po: po === undefined ? c.po : po, vendorPo: vendorPo === undefined ? c.vendor_po : vendorPo });
 	// installs.wo is the project's first WO: its work-order row follows it.
 	if (data.wo !== undefined) await setPrimaryWo(sql, data.id, c.wo, data.wo, await deskUsername(sql, context.userId));
 	// The install's own account units go with it to the new customer (not a locked one, nor one on another visit).
@@ -1802,23 +1890,25 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 		status: w.status
 	});
 	const { jobs, pms } = await searchTicketText(sql, like, inScope);
+	// A record found by its P.O. says so (11/2): " · P.O. 4455".
 	for (const j of jobs) hits.push({
 		entityType: j.kind,
 		id: j.id,
 		title: j.customer ?? j.call_id,
-		subtitle: `${j.call_id}${j.wo ? " · " + j.wo : ""} · ${j.status}`,
+		subtitle: `${j.call_id}${j.wo ? " · " + j.wo : ""} · ${j.status}${poSearchNote(q, j)}`,
 		status: j.status
 	});
 	for (const p of pms) hits.push({
 		entityType: "pm",
 		id: p.id,
 		title: p.customer,
-		subtitle: `${p.wo || p.equipment || "PM"} · ${p.status}`,
+		subtitle: `${p.wo || p.equipment || "PM"} · ${p.status}${poSearchNote(q, p)}`,
 		status: p.status
 	});
 	const ins = await sql.query(
-		`select i.id, i.customer, i.equip_status, i.complete, i.wo from installs i
-      where i.archived = false and (i.customer ilike $1 or exists (select 1 from ${INSTALL_WOS_SQL} w where w.install_id = i.id and w.wo ilike $1))
+		`select i.id, i.customer, i.equip_status, i.complete, i.wo, i.po, i.vendor_po from installs i
+      where i.archived = false and (i.customer ilike $1 or exists (select 1 from ${INSTALL_WOS_SQL} w where w.install_id = i.id and w.wo ilike $1)
+             or coalesce(i.po, '') ilike $1 or coalesce(i.vendor_po, '') ilike $1)
       limit 5`,
 		[like]
 	);
@@ -1828,20 +1918,35 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 			entityType: "install",
 			id: i.id,
 			title: i.customer,
-			subtitle: `${i.wo || "Install"} · ${status}`,
+			subtitle: `${i.wo || "Install"} · ${status}${poSearchNote(q, i)}`,
 			status
 		});
 	}
 	const deals = await sql`
-      select id, customer, producer, completion from deals
-      where archived = false and customer ilike ${like}
+      select id, customer, producer, completion, po, vendor_po from deals
+      where archived = false and (customer ilike ${like} or coalesce(po, '') ilike ${like} or coalesce(vendor_po, '') ilike ${like})
       limit 5`;
 	for (const d of deals) hits.push({
 		entityType: "deal",
 		id: d.id,
 		title: d.customer,
-		subtitle: d.producer ?? "Deal",
+		subtitle: `${d.producer ?? "Deal"}${poSearchNote(q, d)}`,
 		status: d.completion === "complete" ? "Complete" : d.completion === "fell" ? "Fell through" : "Open"
+	});
+	// Rebuilds by their P.O. (11/2), a sales rep's accounts only, like the tickets above: theirs are picked before the 5
+	// are taken.
+	const rebuilds = await sql.query(
+		`select id, title, account, status, po, vendor_po from rebuilds
+      where coalesce(archived, false) = false and (coalesce(po, '') ilike $1 or coalesce(vendor_po, '') ilike $1)
+      order by id desc${inScope ? "" : " limit 5"}`,
+		[like]
+	);
+	for (const r of rebuilds.filter((r: { account: string | null }) => !inScope || inScope(r.account)).slice(0, 5)) hits.push({
+		entityType: "rebuild",
+		id: r.id,
+		title: r.title,
+		subtitle: `${r.account} · Rebuilds · ${r.status}${poSearchNote(q, r)}`,
+		status: r.status
 	});
 	const mods = await sql`
       select id, module_id, status, location from modules

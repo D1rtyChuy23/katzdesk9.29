@@ -61,7 +61,9 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   const qc = useQueryClient();
   const charges = useQuery({ queryKey: ["charges", jobId], queryFn: () => getTicketCharges({ data: { jobId } }) });
   const [lines, setLines] = useState<DraftLine[]>([]);
+  // The Customer P.O. is typed on the ticket's details (11/2); here it changes only in an Admin's unlocked save.
   const [po, setPo] = useState("");
+  const [poDirty, setPoDirty] = useState(false);
   const [so, setSo] = useState("");
   const [billedOn, setBilledOn] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -80,17 +82,24 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   }, [dirty]);
   useEffect(() => {
     if (!c || c.jobId !== jobId) return;
-    const same = JSON.stringify([jobId, c.lines.map((l) => [l.id, l.item, l.description, l.qty, l.rate]), c.po, c.nsSo, c.discount]);
+    // The P.O. isn't part of it: one changed on the ticket's details reloads only the P.O. (below), never typed lines.
+    const same = JSON.stringify([jobId, c.lines.map((l) => [l.id, l.item, l.description, l.qty, l.rate]), c.nsSo, c.discount]);
     if (same === loaded.current && editing.current) return;
     loaded.current = same;
     setLines(c.lines.map(toDraft));
     setPo(c.po);
+    setPoDirty(false);
     setSo(c.nsSo ?? "");
     setBilledOn("");
     setDiscKind(c.discount?.kind ?? "percent");
     setDiscValue(c.discount ? String(c.discount.value) : "");
     setDirty(false);
   }, [c, jobId]);
+  // The P.O. as the ticket has it now, unless it's being changed here (an Admin's unlock).
+  useEffect(() => {
+    if (!c || c.jobId !== jobId || poDirty) return;
+    setPo(c.po);
+  }, [c, jobId, poDirty]);
 
   const refreshAround = () => {
     // The ticket's Invoice window reads these same lines; the invoices list and lists show the lock.
@@ -100,15 +109,23 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     void qc.invalidateQueries({ queryKey: ["pm-bill", jobId] });
     void qc.invalidateQueries({ queryKey: ["ticket-billing", jobId] });
     void qc.invalidateQueries({ queryKey: ["billing-invoices"] });
+    // The ticket's Details and the account's Invoices tab show its Customer P.O. (an Admin's unlocked save changes it).
+    void qc.invalidateQueries({ queryKey: ["job", jobId] });
+    void qc.invalidateQueries({ queryKey: ["account-invoices"] });
   };
   const after = (next: TicketCharges, message: string) => {
+    // Saved: the panel starts over from what the server has now, the P.O. too, even when the lines came back the same.
+    loaded.current = null;
+    setDirty(false);
+    setPoDirty(false);
     qc.setQueryData(["charges", jobId], next);
     refreshAround();
     toast.success(message);
   };
   const discountInput = () => (discValue.trim() ? { kind: discKind, value: discValue } : null);
   const save = useMutation({
-    mutationFn: () => saveTicketCharges({ data: { jobId, po, lines, lineIds: (charges.data?.lines ?? []).map((l) => l.id), discount: discountInput() } }),
+    // No P.O.: it is the ticket's details' (11/2), so a save here never puts back an older one.
+    mutationFn: () => saveTicketCharges({ data: { jobId, lines, lineIds: (charges.data?.lines ?? []).map((l) => l.id), discount: discountInput() } }),
     onSuccess: (next) => after(next, "Charges saved"),
     onError: (e: Error) => toast.error(e.message),
   });
@@ -143,7 +160,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
       saveUnlockedBilling({
         data: {
           jobId,
-          po,
+          // Only a P.O. changed here goes with the unlocked save; otherwise the ticket keeps its own.
+          ...(poDirty ? { po } : {}),
           lines,
           lineIds: (charges.data?.lines ?? []).map((l) => l.id),
           discount: discountInput(),
@@ -424,18 +442,25 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="charge-po">P.O. #</Label>
+          <Label htmlFor="charge-po">Customer P.O.</Label>
+          {/* Typed on the ticket's details (11/2); an Admin's unlock changes it here, with the rest of the billing. */}
           <Input
             id="charge-po"
             value={po}
-            disabled={billed}
+            disabled={!unlocked}
             autoComplete="off"
             onChange={(e) => {
               setPo(e.target.value);
+              setPoDirty(true);
               setDirty(true);
             }}
             className="mt-1"
           />
+          {unlocked ? null : (
+            <p className="mt-1 text-xs text-muted-foreground" data-testid="charge-po-note">
+              {billed ? "Locked with the billing." : "From the ticket's details. Change it there."}
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="charge-so">NetSuite Sales Order</Label>

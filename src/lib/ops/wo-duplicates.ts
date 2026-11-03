@@ -307,7 +307,7 @@ const CHANGED_WHILE_MERGING = "Those tickets changed while merging. Try again.";
  */
 export function mergeTicketsSql(): string {
   return `with lk as (
-    select id, kind, ns_so, po, discount_kind, discount_value, call_id, wo, completed_at, duplicate_of,
+    select id, kind, ns_so, po, vendor_po, discount_kind, discount_value, call_id, wo, completed_at, duplicate_of,
            updated_at::text as updated
       from service_jobs
      where id = any(array[$1::int, $2::int])
@@ -322,6 +322,8 @@ export function mergeTicketsSql(): string {
       e.ns_so as extra_so,
       k.po as keeper_po,
       e.po as extra_po,
+      k.vendor_po as keeper_vendor_po,
+      e.vendor_po as extra_vendor_po,
       k.discount_kind as keeper_dk,
       k.discount_value as keeper_dv,
       e.discount_kind as extra_dk,
@@ -473,8 +475,12 @@ export function mergeTicketsSql(): string {
            scheduled = $15,
            received = $16,
            urgency = $17,
-           -- An invoiced keeper is locked: its P.O. stays as it is (10/28).
-           po = case when ${LIVE_INVOICE("k.id")} then k.po else coalesce(nullif(btrim(k.po), ''), g.extra_po) end,
+           -- An invoiced keeper is locked: its P.O. stays as it is (10/28). So does one billed on a Sales Order: its P.O.
+           -- went to NetSuite with it (11/2).
+           po = case when ${LIVE_INVOICE("k.id")} or nullif(btrim(k.ns_so), '') is not null then k.po
+                     else coalesce(nullif(btrim(k.po), ''), g.extra_po) end,
+           -- A Vendor P.O. is for reference only (11/2): the keeper's, else the extra's, invoiced or not.
+           vendor_po = coalesce(nullif(btrim(k.vendor_po), ''), g.extra_vendor_po),
            discount_kind = case when g.keeper_lines = 0 and g.keeper_dk is null and g.extra_lines > 0 then g.extra_dk else k.discount_kind end,
            discount_value = case when g.keeper_lines = 0 and g.keeper_dk is null and g.extra_lines > 0 then g.extra_dv else k.discount_value end,
            updated_at = now()
@@ -524,11 +530,22 @@ export function mergeTicketsSql(): string {
              || ' · moved ' || (select count(*)::text from chg) || ' charge line'
              || case when (select count(*) from chg) = 1 then '' else 's' end
              || case when (select count(*) from quo) > 0 then ' and the repair quote' else '' end
+             -- The extra's P.O. when the keeper didn't take it: it has another, or it is invoiced or billed on a Sales
+             -- Order and keeps its own, even a blank one (11/2).
              || case
-                  when nullif(btrim(g.keeper_po), '') is not null
-                   and nullif(btrim(g.extra_po), '') is not null
-                   and btrim(g.keeper_po) <> btrim(g.extra_po)
+                  when nullif(btrim(g.extra_po), '') is not null
+                   and coalesce(btrim(g.keeper_po), '') <> btrim(g.extra_po)
+                   and (nullif(btrim(g.keeper_po), '') is not null
+                        or ${LIVE_INVOICE("g.keeper_id")}
+                        or nullif(btrim(g.keeper_so), '') is not null)
                   then ' · extra P.O. ' || btrim(g.extra_po)
+                  else ''
+                end
+             || case
+                  when nullif(btrim(g.keeper_vendor_po), '') is not null
+                   and nullif(btrim(g.extra_vendor_po), '') is not null
+                   and btrim(g.keeper_vendor_po) <> btrim(g.extra_vendor_po)
+                  then ' · extra Vendor P.O. ' || btrim(g.extra_vendor_po)
                   else ''
                 end
       from g

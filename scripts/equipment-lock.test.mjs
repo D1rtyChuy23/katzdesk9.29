@@ -205,7 +205,9 @@ test("a confirmed deal machine the owner removes is not put back by the server",
   const held = new Set([...onBoard].filter((u) => !release.has(u)));
   assert.deepEqual(lockConfirmed(keepTies(incoming, kept), kept, held).map((m) => m.uid), ["u2"]);
   const src = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
-  assert.match(src, /if \(release\.size\) \{\s*const \{ canLockEquipment \} = await import\("\.\/equipment-lock"\);\s*if \(!\(await canLockEquipment\(sql, context\.userId\)\)\) throw/);
+  // updateDealFor (11/2) takes the caller's userId from updateDeal's context.
+  assert.match(src, /if \(release\.size\) \{\s*const \{ canLockEquipment \} = await import\("\.\/equipment-lock"\);\s*if \(!\(await canLockEquipment\(sql, userId\)\)\) throw/);
+  assert.match(src, /\.handler\(async \(\{ data, context \}: any\) => updateDealFor\(await ready\(\), data, context\.userId\)\);/);
   assert.match(src, /lockConfirmed\(keepTies\(incoming, kept\), kept, onBoard\)/);
   assert.equal(machines.serializeMachines(kept).equipment, "Fetco 52H");
 });

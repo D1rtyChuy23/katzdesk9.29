@@ -153,6 +153,7 @@ type TicketRow = {
   work_done: string | null;
   notes: string | null;
   po: string | null;
+  vendor_po: string | null;
   contact: string | null;
   phone: string | null;
   technician: string | null;
@@ -174,6 +175,9 @@ type InstallRow = {
   equip_status: string | null;
   complete: boolean;
   completed_at: string | null;
+  /** The install's Customer P.O., which its invoice carries (11/2), and its Vendor P.O. */
+  po: string | null;
+  vendor_po: string | null;
   stamp: string;
 };
 
@@ -184,7 +188,6 @@ type HeadRow = {
   submitted_at: string | Date | null;
   discount_kind: string | null;
   discount_value: string | null;
-  po: string | null;
   stamp: string;
 };
 
@@ -206,7 +209,7 @@ type Linked = {
 type MoneyLine = { qty: number; rate: number; kind: ChargeKind };
 
 const TICKET_COLS = `j.id, j.kind, j.call_id, j.wo, j.customer, j.status, j.duplicate_of, j.merged_install_id,
-  j.issue, j.equipment, j.work_done, j.notes, j.po, j.contact, j.phone, j.technician, j.technician2, j.ns_so,
+  j.issue, j.equipment, j.work_done, j.notes, j.po, j.vendor_po, j.contact, j.phone, j.technician, j.technician2, j.ns_so,
   j.discount_kind, j.discount_value::text as discount_value,
   to_char(j.received, 'YYYY-MM-DD') as received, to_char(${TICKET_CAME_IN}, 'YYYY-MM-DD') as came_in,
   to_char(j.completed_at, 'YYYY-MM-DD') as completed,
@@ -240,7 +243,7 @@ const field = (label: string, value: string | null | undefined) => {
  * ticket (10/30) ends with what it was billed on (its SO, or its NetSuite invoices) and how its charges carry over.
  */
 export function installMergeNote(
-  t: Pick<TicketRow, "id" | "call_id" | "wo" | "issue" | "equipment" | "work_done" | "notes" | "po" | "contact" | "phone" | "technician" | "technician2">,
+  t: Pick<TicketRow, "id" | "call_id" | "wo" | "issue" | "equipment" | "work_done" | "notes" | "po" | "contact" | "phone" | "technician" | "technician2"> & { vendor_po?: string | null },
   actor: string,
   today: string,
   billed: { text: string } | null = null,
@@ -251,6 +254,7 @@ export function installMergeNote(
     field("Work done", t.work_done),
     field("Notes", t.notes),
     field("P.O.", t.po),
+    field("Vendor P.O.", t.vendor_po),
     field("Contact", [t.contact, t.phone].map((s) => String(s ?? "").trim()).filter(Boolean).join(" · ")),
     field("Tech", [t.technician, t.technician2].map((s) => String(s ?? "").trim()).filter(Boolean).join(" + ")),
     billed ? billed.text : null,
@@ -339,7 +343,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   const i = (
     await sql.query<InstallRow>(
       `select i.id, i.customer, i.archived, i.duplicate_of, i.equip_status, i.complete, to_char(i.completed_at, 'YYYY-MM-DD') as completed_at,
-              i.updated_at::text as stamp
+              i.po, i.vendor_po, i.updated_at::text as stamp
          from installs i where i.id = $1`,
       [installId],
     )
@@ -357,7 +361,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   ).map((c): MoneyLine => ({ qty: Number(c.qty), rate: Number(c.rate), kind: c.kind }));
   const head = (
     await sql.query<HeadRow>(
-      `select v.id, v.approved_at, v.approved_by, v.submitted_at, v.discount_kind, v.discount_value::text as discount_value, v.po,
+      `select v.id, v.approved_at, v.approved_by, v.submitted_at, v.discount_kind, v.discount_value::text as discount_value,
               coalesce(v.id::text, '') || ':' || coalesce(v.approved_at::text, '') || ':' || coalesce(v.submitted_at::text, '') as stamp
          from invoices v where v.entity_type = 'install' and v.entity_id = $1`,
       [installId],
@@ -420,9 +424,10 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   const toInvoice = billed ? [] : charges;
   const chargeTotal = invoiceTotals(charges, ticketDiscount).total;
   const after = toInvoice.length ? invoiceDiscountAfter(ticketDiscount, headDiscount, headLines.length, { ticket: label, install: installName }) : { discount: headDiscount };
-  // One invoice takes one P.O. (10/30): the invoice's own, else the ticket's, which goes on it with the charges.
+  // One invoice takes one P.O. (10/30): the install's own (11/2: its Customer P.O., which its invoice carries), else the
+  // ticket's, which goes on the install with the charges.
   const ticketPo = t.po?.trim() || null;
-  const headPo = head?.po?.trim() || null;
+  const headPo = i.po?.trim() || null;
   const poClash = !!(toInvoice.length && ticketPo && headPo && ticketPo.toLowerCase() !== headPo.toLowerCase());
 
   // The first reason wins.
@@ -538,7 +543,8 @@ const BILLED = `case when $14::text <> '' then ' · its charges stay billed on '
  * the install's notes; $8 the install invoice's total once the lines are on it, $9 and $10 its discount; $11 the
  * ticket's P.O., for an invoice that has none; $12 the Sales Order the ticket is billed on ('' when it isn't), as the
  * confirm read it; $13 its charges' total, billed there; $14 what it is billed on ('' when unbilled): the SO, or with
- * none "NetSuite invoice …" (10/30); $15 its NetSuite invoices that aren't Voided, as read ('' for none).
+ * none "NetSuite invoice …" (10/30); $15 its NetSuite invoices that aren't Voided, as read ('' for none). The ticket's
+ * Vendor P.O. (11/2) is read from its locked row: it fills an install that has none.
  *
  * Both rows and the install's invoice are locked, then checked as they are now: nothing is written when any of them
  * changed (its Sales Order too), the ticket is quoted, carries a PM or is already merged, or (unbilled) is invoiced in
@@ -549,7 +555,7 @@ const BILLED = `case when $14::text <> '' then ' · its charges stay billed on '
  */
 export function mergeTicketIntoInstallSql(): string {
   return `with lk_job as (
-    select j.id, j.kind, j.call_id, j.wo, j.ns_so, j.duplicate_of, j.merged_install_id, j.updated_at::text as stamp
+    select j.id, j.kind, j.call_id, j.wo, j.ns_so, j.duplicate_of, j.merged_install_id, j.vendor_po, j.updated_at::text as stamp
       from service_jobs j
      where j.id = $1::int
        for update
@@ -566,7 +572,7 @@ export function mergeTicketIntoInstallSql(): string {
        for update
   ), g as (
     -- charges: the lines that go on the install's invoice (none for a billed ticket).
-    select j.id as job_id, j.kind, j.call_id, j.wo, i.id as install_id, i.customer as install_customer,
+    select j.id as job_id, j.kind, j.call_id, j.wo, i.id as install_id, i.customer as install_customer, j.vendor_po as job_vendor_po,
            case when $14::text = '' then (select count(*)::int from ticket_charges c where c.job_id = j.id) else 0 end as charges
       from lk_job j cross join lk_inst i
      where j.stamp = $4::text and i.stamp = $5::text
@@ -598,16 +604,14 @@ export function mergeTicketIntoInstallSql(): string {
   ), head as (
     -- The charges go on the install's invoice, waiting for an Admin to approve them; never onto an approved one. The
     -- saved-for-approval stamp moves, so an Invoice window opened before this approves nothing until it reloads.
-    -- The ticket's P.O. goes with the charges onto an invoice that has none (one that has one keeps it: the confirm
-    -- refused a different one).
-    insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, total, submitted_by, submitted_at, updated_at, po)
-    select 'install', g.install_id, g.install_customer, $9::text, $10::numeric, $8::numeric, $3::text, now(), now(), $11::text
+    -- The ticket's P.O. goes with the charges onto the install itself (inst, below), whose invoice carries it (11/2).
+    insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, total, submitted_by, submitted_at, updated_at)
+    select 'install', g.install_id, g.install_customer, $9::text, $10::numeric, $8::numeric, $3::text, now(), now()
       from g
      where g.charges > 0
     on conflict (entity_type, entity_id) do update
        set discount_kind = excluded.discount_kind, discount_value = excluded.discount_value, total = excluded.total,
-           submitted_by = excluded.submitted_by, submitted_at = excluded.submitted_at, updated_at = now(),
-           po = coalesce(nullif(btrim(invoices.po), ''), excluded.po)
+           submitted_by = excluded.submitted_by, submitted_at = excluded.submitted_at, updated_at = now()
      -- Only the invoice the confirm read: one approved, or saved again, or made since, takes nothing.
      where invoices.approved_at is null
        and coalesce(invoices.id::text, '') || ':' || coalesce(invoices.approved_at::text, '') || ':' || coalesce(invoices.submitted_at::text, '') = $6::text
@@ -664,6 +668,11 @@ export function mergeTicketIntoInstallSql(): string {
                      when nullif(btrim(i.notes, E' \\t\\r\\n'), '') is null then $7::text
                      else rtrim(i.notes, E' \\t\\r\\n') || E'\\n\\n' || $7::text
                    end,
+           -- The ticket's Customer P.O. goes with its charges onto an install that has none, and its invoice carries it
+           -- (one that has one keeps it: the confirm refused a different one). A billed ticket's stays with its billing.
+           po = case when exists (select 1 from head) then coalesce(nullif(btrim(i.po), ''), $11::text) else i.po end,
+           -- Its Vendor P.O. is for reference only: it fills an install that has none (the note keeps it either way).
+           vendor_po = coalesce(nullif(btrim(i.vendor_po), ''), nullif(btrim(ok.job_vendor_po), '')),
            updated_at = now()
       from ok
      where i.id = ok.install_id

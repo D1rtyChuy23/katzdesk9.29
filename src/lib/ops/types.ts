@@ -29,6 +29,10 @@ export type ServiceJob = {
   /** A second tech on the same ticket; null when there is only one. */
   secondaryTech: string | null;
   wo: string | null;
+  /** The customer's P.O., which goes on the invoice (11/2). */
+  po: string | null;
+  /** A vendor's P.O. number, for reference only (11/2). */
+  vendorPo: string | null;
   scheduled: string | null;
   /** Time of day on the scheduled date, "HH:MM"; null until someone sets one on the day board. */
   scheduledTime: string | null;
@@ -51,6 +55,8 @@ export type ServiceJob = {
   siblings: JobSibling[];
   serialNotice: string | null;
   aviKatz: boolean;
+  /** After a save only: why its Customer P.O. didn't change (billed or invoiced in NetSuite meanwhile), else null. */
+  notice?: string | null;
 };
 
 
@@ -67,6 +73,10 @@ export type PmJob = {
   technician: string | null;
   notes: string | null;
   wo: string | null;
+  /** The customer's P.O., which goes on the invoice (11/2). */
+  po: string | null;
+  /** A vendor's P.O. number, for reference only (11/2). */
+  vendorPo: string | null;
   workDone: string | null;
   completedAt: string | null;
   done: boolean;
@@ -134,6 +144,10 @@ export type Deal = {
   eta: string | null;
   terms: string | null;
   invoice: string | null;
+  /** The customer's P.O., which goes on the invoice (11/2). */
+  po: string | null;
+  /** A vendor's P.O. number, for reference only (11/2). */
+  vendorPo: string | null;
   completion: string | null;
   notes: string | null;
   handedOff: boolean;
@@ -182,6 +196,10 @@ export type Install = {
   technician: string | null;
   /** The project's first Corrigo WO. workOrders lists every WO it carries, this one first. */
   wo: string | null;
+  /** The customer's P.O., which goes on the invoice (11/2). */
+  po: string | null;
+  /** A vendor's P.O. number, for reference only (11/2). */
+  vendorPo: string | null;
   workOrders: InstallWorkOrder[];
   /** The owner locked the customer: nobody changes it until the owner unlocks it. */
   customerLockedAt: string | null;

@@ -103,6 +103,9 @@ type InstallRow = {
   received: string | null;
   customer_locked_at: unknown;
   customer_locked_by: string | null;
+  /** Its Customer P.O. (which its invoice carries) and Vendor P.O. (11/2). */
+  po: string | null;
+  vendor_po: string | null;
   updated: string;
 };
 
@@ -204,7 +207,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   if (keepId === dropId) throw new Error("Pick another install to merge into.");
   const rows = await sql.query<InstallRow>(
     `select id, customer, archived, equipment, serial, power_voltage, machines, notes, wo, deal_id, customer_locked_at, customer_locked_by,
-            to_char(received, 'YYYY-MM-DD') as received,
+            to_char(received, 'YYYY-MM-DD') as received, po, vendor_po,
             updated_at::text as updated
        from installs where id = any($1::int[])`,
     [[keepId, dropId]],
@@ -233,6 +236,13 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   // One install takes one invoice (10/30): the drop's goes to the keeper, unless the keeper has one of its own.
   const invoiceRefusal = await mergeInvoiceRefusal(sql, keepId, dropId);
   if (invoiceRefusal) throw new Error(invoiceRefusal);
+  // One install takes one Customer P.O. (11/2), which its invoice carries: the keeper's, else the drop's. Two different
+  // ones stop the merge. (Both rows are read again as they are when the merge writes: a P.O. changed since stops it.)
+  const keepPo = String(keep.po ?? "").trim();
+  const dropPo = String(drop.po ?? "").trim();
+  if (keepPo && dropPo && keepPo.toLowerCase() !== dropPo.toLowerCase()) {
+    throw new Error(`Install #${keep.id} has P.O. ${keepPo} and #${drop.id} has P.O. ${dropPo}. One install takes one P.O.: make them match first.`);
+  }
   const actor = await actorName(sql, userId);
   const catalog = await catalogNames(sql);
 
@@ -326,6 +336,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
               install_type = coalesce(k.install_type, d.install_type),
               site_contact = coalesce(nullif(btrim(k.site_contact), ''), d.site_contact),
               contact_phone = coalesce(nullif(btrim(k.contact_phone), ''), d.contact_phone),
+              -- The P.O.s (11/2): the keeper's, else the drop's (two different Customer P.O.s were refused above).
+              po = coalesce(nullif(btrim(k.po), ''), d.po),
+              vendor_po = coalesce(nullif(btrim(k.vendor_po), ''), d.vendor_po),
               updated_at = now()
          from g join installs d on d.id = g.drop_id where k.id = g.keep_id
        returning k.id
@@ -417,7 +430,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), pings as (
        update desk_notifications n set entity_id = g.keep_id from g where n.entity_type = 'install' and n.entity_id = g.drop_id returning n.id
      ), inv_move as (
-       -- Its invoice (lines, discount, P.O. and approval as they are) on the keeper's spelling of the account, so it is
+       -- Its invoice (lines, discount and approval as they are) on the keeper's spelling of the account, so it is
        -- billed from the install kept and listed on its Invoices tab. When the keeper has an invoice, the drop's has no
        -- lines (the guard above) and stays on the drop.
        update invoices v set entity_id = g.keep_id, customer = $15, updated_at = now()

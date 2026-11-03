@@ -36,6 +36,8 @@ import { toast } from "sonner";
 import { formatShortDate } from "@/lib/ops/clock";
 import { isShopAccount, sentence, warehouseInvoiceRefusal, warehouseMayEdit } from "@/lib/ops/warehouse-invoice";
 import { Trash2 } from "lucide-react";
+import { holdSavedPo, useSyncedPo } from "./po-form";
+import { PO_MAX } from "@/lib/ops/ticket-po";
 
 function HealthBadge({ health }: { health: Rebuild["health"] }) {
   const variant =
@@ -82,6 +84,9 @@ export function RebuildSheet({
   const [notes, setNotes] = useState("");
   const [installId, setInstallId] = useState<number | null>(null);
   const [jobId, setJobId] = useState<number | null>(null);
+  // The P.O.s (11/2) follow the rebuild on their own, so one set in the Invoice window never resets the rest of the form.
+  const po = useSyncedPo(row?.po, row?.id ?? null);
+  const vendorPo = useSyncedPo(row?.vendorPo, row?.id ?? null);
 
   // The form starts over only when the rebuild's own fields change on the server, not when the list refreshes for
   // something else on the row (its invoice or quote), so unsaved edits stay put.
@@ -157,9 +162,14 @@ export function RebuildSheet({
           notes,
           installId,
           jobId,
+          // Each P.O. only when it was changed here.
+          ...(po.toSend() !== undefined ? { po: po.toSend() } : {}),
+          ...(vendorPo.toSend() !== undefined ? { vendorPo: vendorPo.toSend() } : {}),
         },
       }),
     onSuccess: (next) => {
+      // The P.O.s as saved, at once, so the boxes take them before the board reads again.
+      holdSavedPo(qc, "rebuild", next);
       // A refurb completed: its machines went into stock at the Staging area.
       toast.success(next.stockNote ? `Rebuild saved. ${next.stockNote}` : "Rebuild saved");
       if (next.stockNote) void qc.invalidateQueries({ queryKey: ["assets"] });
@@ -168,9 +178,35 @@ export function RebuildSheet({
       void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
+      // Its Customer P.O. shows on its invoice and the account's Invoices tab too.
+      void qc.invalidateQueries({ queryKey: ["invoice"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+
+  /**
+   * The Invoice window: a P.O. changed here and not saved yet is saved first (only the P.O.s, 11/2), so the window opens
+   * on the rebuild's own and a P.O. approved there isn't put back by this sheet's next Save.
+   */
+  const savePoBeforeInvoice = async (): Promise<boolean> => {
+    if (!row || !canEdit) return true;
+    const changed = {
+      ...(po.toSend() !== undefined ? { po: po.toSend() } : {}),
+      ...(vendorPo.toSend() !== undefined ? { vendorPo: vendorPo.toSend() } : {}),
+    };
+    if (!Object.keys(changed).length) return true;
+    try {
+      const saved = await updateRebuild({ data: { id: row.id, ...changed } });
+      holdSavedPo(qc, "rebuild", saved);
+      void qc.invalidateQueries({ queryKey: ["rebuilds"] });
+      void qc.invalidateQueries({ queryKey: ["account-invoices"] });
+      return true;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save the P.O.");
+      return false;
+    }
+  };
 
   const drop = useMutation({
     mutationFn: () => archiveRebuild({ data: { id: row!.id } }),
@@ -342,6 +378,18 @@ export function RebuildSheet({
                   <Input id="rb-adone" type="date" className="mt-1" value={actualComplete} onChange={(e) => setActualComplete(e.target.value)} disabled={locked} />
                 </div>
               </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="rb-po">Customer P.O.</Label>
+                  <Input id="rb-po" className="mt-1" value={po.value} maxLength={PO_MAX} autoComplete="off" onChange={(e) => po.set(e.target.value)} disabled={locked} data-testid="po-customer" />
+                  <p className="mt-1 text-xs text-muted-foreground">Goes on the invoice.</p>
+                </div>
+                <div>
+                  <Label htmlFor="rb-vendor-po">Vendor P.O.</Label>
+                  <Input id="rb-vendor-po" className="mt-1" value={vendorPo.value} maxLength={PO_MAX} autoComplete="off" onChange={(e) => vendorPo.set(e.target.value)} disabled={locked} data-testid="po-vendor" />
+                  <p className="mt-1 text-xs text-muted-foreground">A vendor&apos;s P.O. number, for reference only.</p>
+                </div>
+              </div>
               <div>
                 <Label htmlFor="rb-link">Linked ticket / install</Label>
                 <SelectField
@@ -439,7 +487,7 @@ export function RebuildSheet({
                   </p>
                 ) : (
                   <div className="mt-3">
-                    <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} />
+                    <InvoiceButton type="rebuild" id={row.id} key={`invoice-rebuild-${row.id}`} beforeOpen={savePoBeforeInvoice} />
                   </div>
                 )}
               </section>

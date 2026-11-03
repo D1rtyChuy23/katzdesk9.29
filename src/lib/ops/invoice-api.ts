@@ -70,7 +70,10 @@ export type InvoiceView = InvoiceTotals &
      * newer is written over: another approval, a Warehouse save, or an invoice a merge put on the record.
      */
     version: string | null;
-    /** Install invoices carry the customer's P.O. for NetSuite (10/30); null on others (a ticket's is on the ticket). */
+    /**
+     * Every invoice carries the record's Customer P.O. (11/2): the one on its Details (a ticket's is on the NetSuite
+     * billing export too). Approve sends one only when it was changed in the window, and saves it on the record.
+     */
     hasPo: boolean;
     po: string | null;
     /**
@@ -151,13 +154,24 @@ export async function invoiceViewer(sql: Sql, userId: string): Promise<InvoiceVi
   return { admin, warehouse: !admin && role === "warehouse", name: r?.username || "Desk" };
 }
 
-type Ref = { type: InvoiceTarget; id: number; customer: string; title: string; recordRep: string | null; locked: string | null };
+type Ref = {
+  type: InvoiceTarget;
+  id: number;
+  customer: string;
+  title: string;
+  recordRep: string | null;
+  locked: string | null;
+  /** The record's Customer P.O. as it is now (11/2): what its invoice carries. */
+  po: string | null;
+};
+
+const poOf = (v: string | null | undefined): string | null => String(v ?? "").trim() || null;
 
 /** The record the invoice is for: its customer comes from the record itself, never asked for again. */
 async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise<Ref> {
   if (type === "service" || type === "tlc") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; ns_invoice: string | null; ns_status: string | null; billed_on: string | null; billed_invoices: string | null; standing: string | null }>(
-      `select j.customer, j.wo, j.call_id, j.kind, j.ns_so, j.duplicate_of, j.merged_install_id, i.ns_invoice, i.status as ns_status,
+    const r = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null; kind: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; ns_invoice: string | null; ns_status: string | null; billed_on: string | null; billed_invoices: string | null; standing: string | null; po: string | null }>(
+      `select j.customer, j.wo, j.call_id, j.kind, j.ns_so, j.duplicate_of, j.merged_install_id, i.ns_invoice, i.status as ns_status, j.po,
               ${BILLED_ON_INSTALL("j.id")} as billed_on, ${BILLED_INVOICES_ON_INSTALL("j.id")} as billed_invoices, ${STANDING_NS_INVOICES("j.id")} as standing
          from service_jobs j
          left join lateral (
@@ -195,11 +209,12 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
       title: targetTitle(kind, { id, wo: r.wo, callId: r.call_id }),
       recordRep: null,
       locked,
+      po: poOf(r.po),
     };
   }
   if (type === "pm") {
-    const r = (await sql.query<{ customer: string | null; wo: string | null; stacked_job_id: number | null; job_wo: string | null; call_id: string | null }>(
-      `select p.customer, p.wo, p.stacked_job_id, j.wo as job_wo, j.call_id
+    const r = (await sql.query<{ customer: string | null; wo: string | null; stacked_job_id: number | null; job_wo: string | null; call_id: string | null; po: string | null }>(
+      `select p.customer, p.wo, p.stacked_job_id, j.wo as job_wo, j.call_id, p.po
          from pm_jobs p
          left join service_jobs j on j.id = p.stacked_job_id
         where p.id = $1`,
@@ -207,21 +222,21 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     ))[0];
     if (!r) throw new Error("That PM is no longer on the list.");
     const locked = r.stacked_job_id == null ? null : stackedPmLock({ jobId: Number(r.stacked_job_id), wo: r.job_wo, callId: r.call_id });
-    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id, wo: r.wo }), recordRep: null, locked };
+    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id, wo: r.wo }), recordRep: null, locked, po: poOf(r.po) };
   }
   if (type === "install") {
-    const r = (await sql.query<{ customer: string | null; account_rep: string | null }>("select customer, account_rep from installs where id = $1 and archived = false", [id]))[0];
+    const r = (await sql.query<{ customer: string | null; account_rep: string | null; po: string | null }>("select customer, account_rep, po from installs where id = $1 and archived = false", [id]))[0];
     if (!r) throw new Error("That install is no longer on the list.");
-    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id }), recordRep: r.account_rep, locked: null };
+    return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id }), recordRep: r.account_rep, locked: null, po: poOf(r.po) };
   }
   if (type === "rebuild") {
-    const r = (await sql.query<{ account: string | null; title: string | null }>("select account, title from rebuilds where id = $1", [id]))[0];
+    const r = (await sql.query<{ account: string | null; title: string | null; po: string | null }>("select account, title, po from rebuilds where id = $1", [id]))[0];
     if (!r) throw new Error("That rebuild is no longer on the list.");
-    return { type, id, customer: (r.account ?? "").trim(), title: targetTitle(type, { id, title: r.title }), recordRep: null, locked: null };
+    return { type, id, customer: (r.account ?? "").trim(), title: targetTitle(type, { id, title: r.title }), recordRep: null, locked: null, po: poOf(r.po) };
   }
-  const r = (await sql.query<{ customer: string | null; producer: string | null }>("select customer, producer from deals where id = $1 and archived = false", [id]))[0];
+  const r = (await sql.query<{ customer: string | null; producer: string | null; po: string | null }>("select customer, producer, po from deals where id = $1 and archived = false", [id]))[0];
   if (!r) throw new Error("That deal is no longer on the list.");
-  return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id }), recordRep: r.producer, locked: null };
+  return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id }), recordRep: r.producer, locked: null, po: poOf(r.po) };
 }
 
 /** The lock sentence resolveRecord returns for a PM, or null when the PM bills on its own invoice. */
@@ -388,7 +403,7 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     submittedBy: h?.submitted_by ?? null,
     version: h?.version ?? null,
     hasPo: carriesPo(ref.type),
-    po: carriesPo(ref.type) ? (h?.po?.trim() || null) : null,
+    po: carriesPo(ref.type) ? ref.po : null,
     billedElsewhere: ref.type === "install" ? await billedCarryOvers(sql, id) : [],
     ...invoicePowers(viewer, { type: ref.type, customer: ref.customer, state }),
   };
@@ -427,7 +442,7 @@ const approveInput = targetInput.extend({
   discount: discountInput,
   /** The invoice the window opened (InvoiceView.version); null when there was none. */
   seen: z.string().max(80).nullable().optional(),
-  /** An install invoice's P.O. (10/30). Left out keeps the stored one; blank clears it. */
+  /** The record's Customer P.O. (11/2), sent only when it was changed in the window. Left out keeps the stored one; blank clears it. */
   po: z.string().max(400).nullable().optional(),
 });
 
@@ -476,16 +491,25 @@ export function approvePmInvoiceSql(): string {
      inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
-         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po
        )
-       select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now()
+       -- The P.O. it is approved with (11/2): the one the window changed ($18), else the PM's own.
+       select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(),
+              case when $18::boolean then $17::text else (select p.po from pm_jobs p where p.id = $2::int) end
          from open_pm
        on conflict (entity_type, entity_id) do update set
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
-         approved_at = now(), updated_at = now()
+         approved_at = now(), updated_at = now(), po = excluded.po
        returning id
+     ),
+     pm_po as (
+       -- A P.O. changed in the window is the PM's own from now on: its Details show the same one.
+       update pm_jobs p set po = $17::text, updated_at = now()
+         from inv
+        where p.id = $2::int and $18::boolean
+       returning p.id
      ),
      cleared as (
        delete from invoice_lines where invoice_id in (select id from inv) returning id
@@ -508,8 +532,9 @@ export function approvePmInvoiceSql(): string {
  * invoice was approved or saved for approval again since, or an invoice was put on the record, or it left the record,
  * nothing is written and no row comes back, so the approver sees it as it is first. An install's invoice is written only
  * when its row reads not archived; the row is locked against Merge installs and ticket merges (not against Remove), so
- * an Approve that meets a Merge installs mid-way waits for it, then writes nothing on the install it archived. $18 is an
- * install invoice's P.O., written when $19 is true.
+ * an Approve that meets a Merge installs mid-way waits for it, then writes nothing on the install it archived. $18 is the
+ * Customer P.O. the window changed, written on the record and the invoice when $19 is true; otherwise the invoice takes the
+ * record's own (11/2).
  */
 export function approveRecordInvoiceSql(): string {
   return `with rec as (
@@ -519,7 +544,14 @@ export function approveRecordInvoiceSql(): string {
          entity_type, entity_id, customer, discount_kind, discount_value,
          bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po
        )
-       select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(), case when $19::boolean then $18::text end
+       -- The P.O. it is approved with (11/2): the one the window changed ($19), else the record's own.
+       select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(),
+              case when $19::boolean then $18::text else (
+                case $1::text
+                  when 'install' then (select i.po from installs i where i.id = $2::int)
+                  when 'rebuild' then (select r.po from rebuilds r where r.id = $2::int)
+                  when 'deal' then (select d.po from deals d where d.id = $2::int)
+                end) end
         where ($1::text <> 'install' or exists (select 1 from rec))
           -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
           and ($12::text is null or exists (select 1 from invoices x where x.entity_type = $1 and x.entity_id = $2::int))
@@ -527,11 +559,20 @@ export function approveRecordInvoiceSql(): string {
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
-         approved_at = now(), updated_at = now(),
-         -- The P.O. the window sent ($19); one that sent none (another record type) leaves it.
-         po = case when $19::boolean then $18::text else invoices.po end
+         approved_at = now(), updated_at = now(), po = excluded.po
         where ${VERSION_OF("invoices")} is not distinct from $12::text
        returning id
+     ),
+     -- A P.O. changed in the window is the record's own from now on: its Details show the same one. Only once the
+     -- invoice is written.
+     install_po as (
+       update installs i set po = $18::text, updated_at = now() from inv where $1::text = 'install' and $19::boolean and i.id = $2::int returning i.id
+     ),
+     rebuild_po as (
+       update rebuilds r set po = $18::text, updated_at = now() from inv where $1::text = 'rebuild' and $19::boolean and r.id = $2::int returning r.id
+     ),
+     deal_po as (
+       update deals d set po = $18::text, updated_at = now() from inv where $1::text = 'deal' and $19::boolean and d.id = $2::int returning d.id
      ),
      cleared as (
        delete from invoice_lines where invoice_id in (select id from inv) returning id
@@ -635,7 +676,8 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
   if (problem) throw new Error(problem);
   const typed = data.discount ? cleanDiscount(data.discount.kind, data.discount.value) : { discount: null };
   if ("error" in typed) throw new Error(typed.error);
-  // An install invoice's P.O.: sent, it is saved (blank clears it); left out, the stored one stays.
+  // The record's Customer P.O. (11/2): sent only when changed in the window, it is saved on the record with the invoice
+  // (blank clears it); left out, the record's stays.
   const poSent = carriesPo(ref.type) && data.po !== undefined;
   const typedPo = poSent ? cleanPo(data.po) : { po: null };
   if ("error" in typedPo) throw new Error(typedPo.error);
@@ -644,8 +686,13 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
 
   let lines: CleanLine[];
   if (usesTicketCharges(ref.type)) {
-    // The ticket's own Charges: same write as the Charges panel, P.O. kept as it is.
-    await writeTicketCharges(sql, data.id, userId, { lines: data.lines, lineIds: data.lineIds, discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value } : null });
+    // The ticket's own Charges: same write as the Charges panel, with the P.O. when the window changed it.
+    await writeTicketCharges(sql, data.id, userId, {
+      lines: data.lines,
+      lineIds: data.lineIds,
+      discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value } : null,
+      ...(poSent ? { po: typedPo.po ?? "" } : {}),
+    });
     lines = (await loadTicketCharges(sql, data.id)).lines;
   } else {
     lines = await recordLines(sql, data.lines);
@@ -661,6 +708,8 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       typed.discount?.value ?? null,
       ...billing,
       ...lineArrays(lines),
+      typedPo.po,
+      poSent,
     ]);
     if (!savedPm[0]) throw new Error((await pmInvoiceLock(sql, data.id)) ?? "This PM is billed on a ticket. Open the ticket's Invoicing tab.");
   } else if (usesTicketCharges(ref.type)) {
@@ -795,7 +844,7 @@ export type AccountInvoice = {
    * #12" (a ticket merged into an install as billed, 10/30).
    */
   status: string;
-  /** The customer's P.O.: a ticket's own, or an install invoice's (10/30). */
+  /** The record's Customer P.O. (11/2): a ticket's own, or a PM's, install's, rebuild's or deal's. */
   po: string | null;
 };
 
@@ -893,7 +942,8 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
       submittedAt: a.submitted_at ? new Date(a.submitted_at).toISOString() : null,
       submittedBy: a.submitted_by,
       status: a.approved_at ? "Approved" : "Waiting for approval",
-      po: carriesPo(ref.type) ? (a.po?.trim() || null) : null,
+      // The record's Customer P.O. as it is now, as the Invoice window shows it (11/2).
+      po: carriesPo(ref.type) ? ref.po : null,
     });
   }
   return out;
