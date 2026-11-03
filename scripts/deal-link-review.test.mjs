@@ -198,6 +198,40 @@ test("an install already tied to the deal isn't flagged; two deals of one accoun
   }
 });
 
+test("a save that read the deal before a handoff tied its rows doesn't untie them", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    // The deal waits on the Handoff page; someone presses Send to installs while the rep's window saves its rows.
+    const d = await deal(pg, { completion: "complete", machines: BREWER });
+    let made = null;
+    const sendMeanwhile = racing(sql, /^select \* from deals where id = \$\d+$/, async () => {
+      made = await api.maybeHandoffInstall(sql, d, "u-owner");
+    });
+    // The window adds a grinder; it read the brewer before the handoff tied it.
+    const windowRows = [
+      { equipment: "Test Brewer TB-1", serial: "", powerVoltage: "120", ownership: "Sold" },
+      { equipment: "Test Grinder TG-2", serial: "", powerVoltage: "", ownership: "Sold" },
+    ];
+    await api.updateDealFor(sendMeanwhile, { id: d, machines: windowRows, notes: "Grinder added" }, "u-rep");
+    assert.equal(made.kind, "made");
+    const installUid = JSON.parse((await one(pg, "select machines from installs where id = $1", [made.installId])).machines)[0].uid;
+    const rows = JSON.parse((await one(pg, "select machines, notes from deals where id = $1", [d])).machines);
+    assert.deepEqual(rows.map((m) => [m.equipment, m.uid ?? null]), [["Test Brewer TB-1", installUid], ["Test Grinder TG-2", null]], "the brewer tied again, the grinder added");
+    // A save with no rows (notes, say) read before the tie leaves the stored rows as they are.
+    const d2 = await deal(pg, { customer: OTHER, completion: "complete", machines: BREWER });
+    let made2 = null;
+    const sendMeanwhile2 = racing(sql, /^select \* from deals where id = \$\d+$/, async () => {
+      made2 = await api.maybeHandoffInstall(sql, d2, "u-owner");
+    });
+    await api.updateDealFor(sendMeanwhile2, { id: d2, notes: "Called" }, "u-rep");
+    const uid2 = JSON.parse((await one(pg, "select machines from installs where id = $1", [made2.installId])).machines)[0].uid;
+    assert.equal(JSON.parse((await one(pg, "select machines from deals where id = $1", [d2])).machines)[0].uid, uid2);
+    assert.equal((await one(pg, "select notes from deals where id = $1", [d2])).notes, "Called");
+  } finally {
+    await pg.close();
+  }
+});
+
 test("a deal hands off on the save that completes it, not on each later save", async () => {
   const { pg, sql } = await fresh();
   try {
@@ -488,14 +522,40 @@ test("one deal, one handoff: two saves completing it at once, two presses of Sen
     const d10 = await deal(pg, { customer: "Test Wagon", completion: "complete" });
     await install(pg, { customer: "Test Wagon" });
     const otherClaim = wrap(async (text, params) => {
-      if (/^\s*update installs set deal_id = /.test(text)) {
-        await pg.query("update deals set handed_off = true, updated_at = now() + interval '1 second' where id = $1", [d10]);
+      if (/update installs set deal_id = /.test(text)) {
+        await pg.query("update deals set handed_off = true, handoff_claim = 'another-handoff' where id = $1", [d10]);
         throw new Error("made-up failure");
       }
       return sql.query(text, params);
     });
     await assert.rejects(api.maybeHandoffInstall(otherClaim, d10, "u-owner"), /made-up failure/);
-    assert.equal((await dealRow(pg, d10)).handed_off, true, "the other handoff's claim stands");
+    assert.deepEqual(
+      [(await dealRow(pg, d10)).handed_off, (await one(pg, "select handoff_claim from deals where id = $1", [d10])).handoff_claim],
+      [true, "another-handoff"],
+      "the other handoff's claim stands",
+    );
+    // Two handoffs past their claims at once (the deal set back to open and completed again during the first): only the
+    // later one, which has the claim, makes the install, even for a deal with no machine rows.
+    const d11 = await deal(pg, { customer: "Test Mobile", completion: "complete" });
+    const reclaimed = racing(sql, /select id, customer from installs\s+where archived = false and deal_id is null/, async () => {
+      await api.updateDealFor(sql, { id: d11, completion: "open" }, "u-rep");
+      await complete(sql, d11);
+    });
+    const h11 = await api.maybeHandoffInstall(reclaimed, d11, "u-owner");
+    assert.equal(h11.kind, "had", "the first handoff lost its claim");
+    assert.equal((await installsOf(pg, d11)).length, 1);
+    assert.equal(h11.installId, Number((await installsOf(pg, d11))[0].id));
+    // The deal kept changing while its install was made: the handoff stops, says so, and the deal is back on the Handoff page.
+    const d12 = await deal(pg, { customer: "Test Cart 2", completion: "complete", machines: BREWER });
+    let edits = 0;
+    const churning = wrap(async (text, params) => {
+      if (/with d as \(\s*select id from deals/.test(text) && /insert into installs/.test(text)) {
+        await pg.query("update deals set machines = $2 where id = $1", [d12, JSON.stringify([{ equipment: "Test Brewer TB-1", serial: `S-${++edits}`, powerVoltage: "", ownership: "Sold" }])]);
+      }
+      return sql.query(text, params);
+    });
+    await assert.rejects(api.maybeHandoffInstall(churning, d12, "u-owner"), /The deal kept changing while its install was made\. Send it to installs again from the Handoff page\./);
+    assert.deepEqual([(await dealRow(pg, d12)).handed_off, (await installsOf(pg, d12)).length], [false, 0]);
     // A handoff that fails before its install is made puts the deal back on the Handoff page.
     const d8 = await deal(pg, { customer: "Test Truck" });
     const broken = wrap(async (text, params) => {
@@ -755,11 +815,14 @@ test("the screens: the card's review, the Handoff page's list, the buttons, and 
   // Guards whose effect needs two connections (real Postgres), which PGlite doesn't have: pinned here instead. The row lock
   // on the deal's status read, and the handoff claiming the deal (it runs only while the deal isn't handed off; the save
   // that completes a deal puts it in line).
-  assert.match(server, /with prev as \(select id, completion from deals where id = \$\{data\.id\} for update\)/);
-  assert.match(server, /update deals set handed_off = true, updated_at = now\(\)\s+where id = \$\{dealId\} and archived = false and not handed_off and completion = 'complete'\s+returning \*, updated_at::text as claimed_at/);
+  assert.match(server, /update deals set handed_off = true, handoff_claim = \$\{claim\}, updated_at = now\(\)\s+where id = \$\{dealId\} and archived = false and not handed_off and completion = 'complete'\s+returning \*/);
+  assert.match(server, /with d as \(select id from deals where id = \$\{dealId\}::int and handoff_claim = \$\{claim\}::text for update\)/);
+  assert.match(server, /where id = \$\{dealId\} and handoff_claim = \$\{claim\}\s+and not exists/);
+  assert.match(server, /with prev as \(select id, completion, machines from deals where id = \$\{data\.id\} for update\)/);
+  assert.match(server, /where deals\.id = prev\.id and \(not \$\{sendsMachines\}::boolean or prev\.machines is not distinct from \$\{c\.machines \?\? null\}::text\)/);
   assert.match(server, /if \(now\.completion !== "complete"\) return \{ kind: "open", installId: null \};/);
   // The install made in one statement that locks the deal and checks its machines are as read.
-  assert.match(server, /select id from deals\s+where id = \$\{dealId\}::int and archived = false and machines is not distinct from \$\{cur\.machines \?\? null\}::text\s+for update/);
+  assert.match(server, /select id from deals\s+where id = \$\{dealId\}::int and archived = false and handoff_claim = \$\{claim\}::text\s+and machines is not distinct from \$\{cur\.machines \?\? null\}::text\s+for update/);
   assert.match(server, /handed_off = case when \$\{completion === "complete"\}::boolean and prev\.completion is distinct from 'complete' then false else deals\.handed_off end,/);
   assert.match(server, /if \(completion === "complete" && wrote\[0\] && wrote\[0\]\.was !== "complete"\) await maybeHandoffInstall\(sql, data\.id, userId\);/);
   assert.match(server, /return \{ ok: true, handoff: await maybeHandoffInstall\(await ready\(\), data\.dealId, context\.userId\) \};/);

@@ -10,3 +10,7 @@ alter table installs add column if not exists deal_review_at timestamptz;
 -- The installs an Admin unlinked from a deal: its next handoff (the Handoff page's button) skips them, so a wrong link
 -- isn't made again.
 alter table deals add column if not exists unlinked_installs int[] not null default '{}';
+
+-- The handoff that has the deal now: each handoff's claim sets its own token, and its writes go ahead only while the
+-- token is still its own, so of two handoffs of one deal at once only one links or makes an install.
+alter table deals add column if not exists handoff_claim text;
