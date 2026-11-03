@@ -404,12 +404,17 @@ test("each write checks the link is as it was read: a review or a machine that r
     const h = await api.maybeHandoffInstall(second, last, "u-rep");
     assert.equal(h.kind, "made");
     assert.equal((await row(pg, h.installId)).deal_review, "made");
-    // One finished meanwhile isn't linked either.
+    // One finished meanwhile isn't linked either, nor one removed from the list.
     const next = await deal(pg, { customer: OTHER });
     const closing = await install(pg, { customer: OTHER });
     const done = racing(sql, OPEN_INSTALLS, () => pg.query("update installs set complete = true where id = $1", [closing]));
     assert.equal((await api.maybeHandoffInstall(done, next, "u-rep")).kind, "made");
     assert.equal((await row(pg, closing)).deal_id, null);
+    const after = await deal(pg, { customer: OTHER });
+    const dropped = await install(pg, { customer: OTHER });
+    const removed = racing(sql, OPEN_INSTALLS, () => pg.query("update installs set archived = true where id = $1", [dropped]));
+    assert.equal((await api.maybeHandoffInstall(removed, after, "u-rep")).kind, "made");
+    assert.equal((await row(pg, dropped)).deal_id, null);
   } finally {
     await pg.close();
   }
@@ -458,12 +463,15 @@ test("one deal, one handoff: two saves completing it at once, two presses of Sen
     const results = await Promise.all([api.maybeHandoffInstall(sql, d3, "u-rep", { claim: true }), api.maybeHandoffInstall(sql, d3, "u-owner", { claim: true })]);
     assert.deepEqual(results.map((r) => r.kind).sort(), ["had", "made"]);
     assert.equal((await installsOf(pg, d3)).length, 1);
-    // The same deal took the open install between the read and the link (another handoff of it): no second install.
+    // The same deal took the open install between the read and the link (another handoff of it): no second install,
+    // and the account's other open install isn't linked to it as well.
+    const shopOther = await install(pg, { customer: "Test Shop" });
     const shop = await install(pg, { customer: "Test Shop" });
     const d4 = await deal(pg, { customer: "Test Shop" });
     const same = racing(sql, /select id, customer from installs\s+where archived = false and deal_id is null/, () => pg.query("update installs set deal_id = $2 where id = $1", [shop, d4]));
     assert.deepEqual(await api.maybeHandoffInstall(same, d4, "u-rep"), { kind: "had", installId: shop });
-    assert.equal((await installsOf(pg, d4)).length, 1);
+    assert.deepEqual((await installsOf(pg, d4)).map((r) => Number(r.id)), [shop]);
+    assert.equal((await row(pg, shopOther)).deal_id, null);
     // The Board made the deal's install just before one would be made: none is made, and the deal's rows aren't tied.
     const d5 = await deal(pg, { customer: "Test Kiosk", machines: BREWER });
     let board = null;
@@ -496,6 +504,13 @@ test("a unit the warehouse pulled for a linked install keeps it linked; returned
     await api.unassignAssetFromInstallFor(sql, { assetId: unit, installId: open }, { userId: "u-owner" });
     assert.equal(JSON.parse((await one(pg, "select machines from deals where id = $1", [d])).machines)[0].serial, "");
     assert.equal((await api.reviewDealLinkFor(sql, "u-owner", { installId: open, approve: false })).backOnHandoff, true);
+    // The serial typed on the deal's row another way (case, spaces) is the same serial.
+    const typed = await install(pg, { customer: "Test Shop" });
+    const d3 = await deal(pg, { customer: "Test Shop", machines: JSON.stringify([{ equipment: "Bunn TB3", serial: " tb-88", powerVoltage: "120", ownership: "Sold" }]) });
+    await complete(sql, d3);
+    const unit2 = Number((await one(pg, "insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Bunn TB3', 'TB-88', 1, 'barn-back', 'A', 1, 2, 'ready') returning id")).id);
+    await api.assignAssetToInstallFor(sql, { assetId: unit2, installId: typed }, { userId: "u-owner" });
+    await assert.rejects(api.reviewDealLinkFor(sql, "u-owner", { installId: typed, approve: false }), /Serial TB-88, pulled from the warehouse for this install, is on the deal's machines too/);
     // A unit on the install whose serial isn't on the deal doesn't hold it.
     const other = await install(pg, { customer: OTHER });
     const d2 = await deal(pg, { customer: OTHER, machines: BREWER });
