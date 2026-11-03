@@ -385,8 +385,8 @@ export function JobSheet({
         </SelectField>
       </div>
       <Field label="WO #" name="wo" defaultValue={j.wo ?? ""} />
-      <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
       <PoFields idPrefix={`job-${j.id}`} po={j.po} vendorPo={j.vendorPo} lock={poLock} customerNote="Goes on the invoice and the NetSuite billing export." />
+      <Field label="Received" name="received" type="date" defaultValue={j.received ?? ""} />
       <Field label="Contact" name="contact" defaultValue={j.contact ?? ""} />
       <Field label="Phone" name="phone" defaultValue={j.phone ?? ""} />
       <div className="sm:col-span-2">

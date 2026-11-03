@@ -790,11 +790,11 @@ export function InstallSheet({
                       </SelectField>
                     </div>
                     <Field label="Install date" name="installDate" type="date" defaultValue={row.installDate ?? ""} />
-                    <PoFields idPrefix={`install-${row.id}`} po={row.po} vendorPo={row.vendorPo} />
                     <div>
                       <Label>Tech</Label>
                       <TechSelect name="technician" defaultValue={row.technician ?? ""} />
                     </div>
+                    <PoFields idPrefix={`install-${row.id}`} po={row.po} vendorPo={row.vendorPo} />
                     <InstallContactFields installId={row.id} siteContact={row.siteContact} contactPhone={row.contactPhone} />
                     <div>
                       <Label>Site ready?</Label>

@@ -1,12 +1,13 @@
 import { Input, Label } from "@/components/ui/input";
 import { PO_MAX, poCardLine } from "@/lib/ops/ticket-po";
 import { cn } from "@/lib/utils";
+import { useSyncedPo } from "./po-form";
 
 /**
  * The Customer P.O. and Vendor P.O. boxes on every ticket's Details (Chuy, 11/2): service and TLC tickets, PMs, installs
- * and deals (a rebuild's Details keep their own state). Uncontrolled, like the forms they sit in; the form sends a box
- * only when it reads differently from what it was given (poFromForm, in po-form.ts), so a form that saves as it closes
- * never puts an older P.O. back.
+ * and deals (a rebuild's Details keep their own state). Each box keeps its own state (useSyncedPo) inside the form, and
+ * the form sends a box only when it was changed there (poFromForm), so a form that saves as it closes never puts an
+ * older P.O. back.
  */
 export function PoFields({
   idPrefix,
@@ -24,6 +25,8 @@ export function PoFields({
   /** What the Customer P.O. box says under it when it isn't locked. */
   customerNote?: string;
 }) {
+  const customer = useSyncedPo(po, idPrefix);
+  const vendor = useSyncedPo(vendorPo, idPrefix);
   return (
     <>
       <div>
@@ -31,7 +34,9 @@ export function PoFields({
         <Input
           id={`${idPrefix}-po`}
           name="po"
-          defaultValue={po ?? ""}
+          value={customer.value}
+          onChange={(e) => customer.set(e.target.value)}
+          data-base={customer.base}
           maxLength={PO_MAX}
           autoComplete="off"
           disabled={!!lock}
@@ -47,7 +52,9 @@ export function PoFields({
         <Input
           id={`${idPrefix}-vendor-po`}
           name="vendorPo"
-          defaultValue={vendorPo ?? ""}
+          value={vendor.value}
+          onChange={(e) => vendor.set(e.target.value)}
+          data-base={vendor.base}
           maxLength={PO_MAX}
           autoComplete="off"
           className="mt-1"

@@ -1,45 +1,42 @@
 import { useEffect, useState } from "react";
-import { poToSend } from "@/lib/ops/ticket-po";
+import { poToSend, syncPoBox } from "@/lib/ops/ticket-po";
 
 /**
- * What a Details form sends for its P.O. boxes: each one only when it reads differently from what the box was last given
- * (its defaultValue: what the record had when the form opened, or after a save). A locked box sends nothing.
+ * What a Details form sends for its P.O. boxes (PoFields): each one only when it reads differently from its base, the
+ * record's P.O. as the box last took it (data-base); a locked box sends nothing. The base is kept in state, not read
+ * from the input's defaultValue: React writes a box's starting value into the input, which counts as typed in it, so
+ * its defaultValue would move to a P.O. set elsewhere (the Invoice window) while the box still shows the older one.
  */
 export function poFromForm(form: HTMLFormElement): { po?: string; vendorPo?: string } {
   const out: { po?: string; vendorPo?: string } = {};
-  const box = (name: string): HTMLInputElement | null => {
+  const sent = (name: string): string | undefined => {
     const el = form.elements.namedItem(name);
-    return el instanceof HTMLInputElement && !el.disabled ? el : null;
+    if (!(el instanceof HTMLInputElement) || el.disabled) return undefined;
+    return poToSend(el.value, el.getAttribute("data-base") ?? "");
   };
-  const po = box("po");
-  const poSent = po ? poToSend(po.value, po.defaultValue) : undefined;
-  if (poSent !== undefined) out.po = poSent;
-  const vendor = box("vendorPo");
-  const vendorSent = vendor ? poToSend(vendor.value, vendor.defaultValue) : undefined;
-  if (vendorSent !== undefined) out.vendorPo = vendorSent;
+  const po = sent("po");
+  if (po !== undefined) out.po = po;
+  const vendorPo = sent("vendorPo");
+  if (vendorPo !== undefined) out.vendorPo = vendorPo;
   return out;
 }
 
 /**
- * A controlled P.O. box (the rebuild sheet keeps its fields in state): it follows the record as the server has it until
- * it is changed here, and sends only a change (poToSend), so Save never puts back a P.O. the Invoice window set since.
+ * One P.O. box's state (11/2): it follows the record as the server has it until it is changed here, and a save sends it
+ * only when it was changed (poToSend), so a sheet left open never puts back a P.O. set elsewhere since (the Invoice
+ * window, a merge, an import). `key` is the record the box is for: another record starts it over.
  */
-export function useSyncedPo(server: string | null | undefined, recordId: number | null) {
+export function useSyncedPo(server: string | null | undefined, key: string | number | null) {
   const now = server ?? "";
-  const [box, setBox] = useState({ id: recordId, value: now, base: now });
-  useEffect(() => {
-    setBox((cur) => {
-      if (cur.id !== recordId) return { id: recordId, value: now, base: now };
-      // Not changed here: it shows the record's. Changed here to what the record has now: nothing left to send.
-      if (cur.value.trim() === cur.base.trim()) return { id: recordId, value: now, base: now };
-      if (cur.value.trim() === now.trim()) return { id: recordId, value: cur.value, base: now };
-      return cur;
-    });
-  }, [recordId, now]);
+  const [box, setBox] = useState({ key, value: now, base: now });
+  useEffect(() => setBox((cur) => syncPoBox(cur, key, now)), [key, now]);
+  const mine = box.key === key;
   return {
-    value: box.id === recordId ? box.value : now,
-    set: (value: string) => setBox((cur) => ({ ...cur, value })),
+    value: mine ? box.value : now,
+    /** The record's P.O. as the box last took it: what a save compares the box with. */
+    base: mine ? box.base : now,
+    set: (value: string) => setBox((cur) => (cur.key === key ? { ...cur, value } : { key, value, base: now })),
     /** What a save sends: the box when it was changed here, else undefined. */
-    toSend: (): string | undefined => (box.id === recordId ? poToSend(box.value, box.base) : undefined),
+    toSend: (): string | undefined => (mine ? poToSend(box.value, box.base) : undefined),
   };
 }

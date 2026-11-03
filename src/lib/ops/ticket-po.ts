@@ -39,6 +39,22 @@ export function poToSend(now: unknown, base: unknown): string | undefined {
   return typed === String(base ?? "").trim() ? undefined : typed;
 }
 
+/** One P.O. box on a Details tab: the record it is for, what it shows, and the record's P.O. as the box last took it. */
+export type PoBoxState = { key: string | number | null; value: string; base: string };
+
+/**
+ * A P.O. box as the record's P.O. (`now`) comes in from the server (11/2). Not changed here: it shows the record's.
+ * Changed here, and the record now has what was typed (this sheet's own save): nothing is left to send. Changed here to
+ * something else: what was typed stays, and a save sends it. Another record starts it over. The same state comes back
+ * when nothing changed.
+ */
+export function syncPoBox(cur: PoBoxState, key: string | number | null, now: string): PoBoxState {
+  if (cur.key !== key) return { key, value: now, base: now };
+  if (cur.value.trim() === cur.base.trim()) return cur.value === now && cur.base === now ? cur : { key, value: now, base: now };
+  if (cur.value.trim() === now.trim()) return cur.base === now ? cur : { key, value: cur.value, base: now };
+  return cur;
+}
+
 /** The P.O.s for a card: "P.O. 4455 · Vendor P.O. TLC-889", one of them, or null when there are none. */
 export function poCardLine(r: { po?: string | null; vendorPo?: string | null }): string | null {
   const po = String(r.po ?? "").trim();

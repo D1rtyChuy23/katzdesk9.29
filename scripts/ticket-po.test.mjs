@@ -82,6 +82,28 @@ test("a P.O. box: trimmed, blank is none, 120 characters at most; sent only when
   assert.equal(P.poToSend("4455", ""), "4455");
 });
 
+test("a box on a Details tab follows its record until it is changed there, and then keeps what was typed", () => {
+  const opened = { key: "job-1", value: "PO-A", base: "PO-A" };
+  // Set elsewhere (the Invoice window) while the box was left alone: it shows the new one, and has nothing to send.
+  const moved = P.syncPoBox(opened, "job-1", "PO-B");
+  assert.deepEqual(moved, { key: "job-1", value: "PO-B", base: "PO-B" });
+  assert.equal(P.poToSend(moved.value, moved.base), undefined);
+  // Typed here, then set elsewhere to something else: what was typed stays and is sent.
+  const typed = { ...opened, value: "PO-T" };
+  const kept = P.syncPoBox(typed, "job-1", "PO-B");
+  assert.equal(kept, typed);
+  assert.equal(P.poToSend(kept.value, kept.base), "PO-T");
+  // Typed here and saved: the record has it now, so nothing is left to send.
+  const saved = P.syncPoBox(typed, "job-1", "PO-T");
+  assert.deepEqual(saved, { key: "job-1", value: "PO-T", base: "PO-T" });
+  assert.equal(P.poToSend(saved.value, saved.base), undefined);
+  // Emptied here and saved as blank.
+  assert.deepEqual(P.syncPoBox({ ...opened, value: " " }, "job-1", ""), { key: "job-1", value: " ", base: "" });
+  // Another record starts it over; nothing new keeps the same state (no render loop).
+  assert.deepEqual(P.syncPoBox(typed, "job-2", "PO-Z"), { key: "job-2", value: "PO-Z", base: "PO-Z" });
+  assert.equal(P.syncPoBox(opened, "job-1", "PO-A"), opened);
+});
+
 test("the card line, the board search and the top search's note", () => {
   assert.equal(P.poCardLine({ po: "4455", vendorPo: "TLC-889" }), "P.O. 4455 · Vendor P.O. TLC-889");
   assert.equal(P.poCardLine({ po: " ", vendorPo: "TLC-889" }), "Vendor P.O. TLC-889");
@@ -499,9 +521,14 @@ test("each Details tab has both P.O. boxes and sends a box only when it was chan
   assert.match(rebuildSheet, /const po = useSyncedPo\(row\?\.po, row\?\.id \?\? null\);/);
   assert.match(rebuildSheet, /\.\.\.\(po\.toSend\(\) !== undefined \? \{ po: po\.toSend\(\) \} : \{\}\),/);
   // The boxes read what each box was given: a box left as it was sends nothing.
+  // Each box keeps its base in state (React writes a box's starting value into the input, which counts as typed in it,
+  // so the input's own defaultValue can't tell what was typed here from what changed elsewhere).
   const form = src("src/components/desk/po-form.ts");
-  assert.match(form, /poToSend\(po\.value, po\.defaultValue\)/);
-  assert.match(form, /return el instanceof HTMLInputElement && !el\.disabled \? el : null;/);
+  assert.match(form, /return poToSend\(el\.value, el\.getAttribute\("data-base"\) \?\? ""\);/);
+  assert.match(form, /if \(!\(el instanceof HTMLInputElement\) \|\| el\.disabled\) return undefined;/);
+  const fields = src("src/components/desk/po-fields.tsx");
+  assert.match(fields, /const customer = useSyncedPo\(po, idPrefix\);/);
+  assert.match(fields, /value=\{customer\.value\}\n\s+onChange=\{\(e\) => customer\.set\(e\.target\.value\)\}\n\s+data-base=\{customer\.base\}/);
 });
 
 test("the Charges show the ticket's P.O. and change it only in an Admin's unlocked save; the Invoice window sends one only when changed", () => {
