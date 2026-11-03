@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getHandoff, handoffDeal, resolveComment, claimComment } from "@/lib/ops/api";
-import { namesMatchUser } from "@/lib/ops/lookups";
+import { filterHandoff, handoffMineCount, type HandoffScope } from "@/lib/ops/handoff-filter";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { getMyAccess } from "@/lib/ops/access";
 import { Badge } from "@/components/ui/badge";
@@ -18,12 +18,11 @@ import { HandoffReply } from "@/components/desk/handoff-reply";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_ALPHA, SORT_DATE, sortDesk } from "@/lib/ops/sort";
 import { toast } from "sonner";
-import type { HandoffFeed } from "@/lib/ops/types";
 import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/handoff")({ validateSearch: parseOpenSearch, component: Page });
 
-type Scope = "mine" | "all";
+type Scope = HandoffScope;
 
 function Page() {
   const qc = useQueryClient();
@@ -95,7 +94,7 @@ function Page() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not send the deal to installs"),
   });
   const d = feed.data;
-  // Deal links wait for an Admin's review (11/3): an Admin's Mine has every one; anyone else's, their own deals'.
+  // Deal links wait for an Admin's review (11/3): an Admin's Mine has every one; anyone else sees them under All.
   const reviewer = !!access.data?.approved && (!!access.data.isAdmin || access.data.role === "admin");
   const filtered = useMemo(
     () => filterHandoff(d, user, access.data?.username ?? null, scope, reviewer),
@@ -117,16 +116,10 @@ function Page() {
       }),
     [filtered.recent, sort],
   );
-  const mineCount = useMemo(() => {
-    const mine = filterHandoff(d, user, access.data?.username ?? null, "mine", reviewer);
-    const askIds = new Set(mine.asks.map((c) => c.id));
-    return (
-      mine.pendingHandoffs.length +
-      mine.dealReviews.length +
-      mine.asks.length +
-      mine.recent.filter((c) => !askIds.has(c.id)).length
-    );
-  }, [d, user, access.data?.username, reviewer]);
+  const mineCount = useMemo(
+    () => handoffMineCount(filterHandoff(d, user, access.data?.username ?? null, "mine", reviewer)),
+    [d, user, access.data?.username, reviewer],
+  );
 
   function setView(next: Scope) {
     setScope(next);
@@ -397,36 +390,4 @@ function Page() {
       )}
     </div>
   );
-}
-
-function filterHandoff(
-  d: HandoffFeed | undefined,
-  user: { id: string; displayName: string | null; primaryEmail: string | null } | null,
-  username: string | null,
-  scope: Scope,
-  reviewer: boolean,
-): HandoffFeed {
-  const empty: HandoffFeed = { asks: [], recent: [], pendingHandoffs: [], dealReviews: [] };
-  if (!d) return empty;
-  const reviews = d.dealReviews ?? [];
-  if (scope === "all") return { ...d, dealReviews: reviews };
-  const asUser = {
-    displayName: [user?.displayName, username].filter(Boolean).join(" ") || user?.displayName || null,
-    primaryEmail: user?.primaryEmail ?? null,
-  };
-  const mine = (c: {
-    authorId: string | null;
-    authorName: string | null;
-    technician?: string | null;
-    producer?: string | null;
-    accountRep?: string | null;
-  }) =>
-    (!!user?.id && c.authorId === user.id) ||
-    namesMatchUser(asUser, c.authorName, c.technician, c.producer, c.accountRep);
-  return {
-    pendingHandoffs: d.pendingHandoffs.filter((p) => namesMatchUser(asUser, p.producer)),
-    dealReviews: reviewer ? reviews : reviews.filter((r) => namesMatchUser(asUser, r.producer)),
-    asks: d.asks.filter((c) => mine(c)),
-    recent: d.recent.filter((c) => mine(c)),
-  };
 }
