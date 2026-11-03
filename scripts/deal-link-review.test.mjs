@@ -558,6 +558,14 @@ test("a made install merged into the account's install for the same job: the kep
     assert.deepEqual(mergedMachineList([spec("u-1")], [spec("u-1")]).list.map((m) => m.uid), ["u-1"]);
     assert.deepEqual(mergedMachineList([spec(null)], [spec("u-2")]).list.map((m) => m.uid), ["u-2"]);
     assert.deepEqual(mergedMachineList([spec("u-1")], [spec(null)]).list.map((m) => m.uid), ["u-1"]);
+    // The kept row's other blanks come from the dropped row; what it has stays.
+    const kept = { equipment: "Test Brewer TB-1", serial: "SN-1", powerVoltage: "", plug: "5-15", ownership: "Leased" };
+    const dropped = { equipment: "Test Brewer TB-1", serial: "", powerVoltage: "120", uid: "u-9", ownership: "Sold", plug: "5-20", water: "Line", recipeId: 7 };
+    const [m] = mergedMachineList([kept], [dropped]).list;
+    assert.deepEqual(
+      [m.serial, m.powerVoltage, m.uid, m.ownership, m.plug, m.water, m.recipeId],
+      ["SN-1", "120", "u-9", "Leased", "5-15", "Line", 7],
+    );
   } finally {
     await pg.close();
   }
