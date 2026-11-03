@@ -689,7 +689,7 @@ test("a sheet that saves as it closes saves before its Invoice window opens, so 
   assert.ok(sheets.includes('<InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} beforeOpen={saveBeforeInvoice} />'));
   assert.ok(sheets.includes('<InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveInstallBeforeInvoice} />'));
   // Each runs the form's own checks first (a required customer, a half-typed date), as Save does.
-  assert.equal((sheets.match(/!form\.checkValidity\(\)/g) ?? []).length, 2);
+  assert.equal((sheets.match(/if \((?:form && )?!form\.checkValidity\(\)\) \{\n\s+setTab\("details"\);\n\s+window\.setTimeout\(\(\) => form\.reportValidity\(\), 50\);\n\s+return false;/g) ?? []).length, 2);
   assert.match(sheets, /if \(!formRef\.current\.reportValidity\(\)\) return false;/);
   assert.match(job, /if \(!form\.checkValidity\(\)\) \{\n\s+pickTab\("ticket"\);/);
   assert.ok(sheets.includes('<InvoiceButton type="deal" id={deal.id} key={`invoice-deal-${deal.id}`} beforeOpen={saveDealBeforeInvoice} />'));
