@@ -114,6 +114,7 @@ test("names: the account, install and WO; the account and WO; what stands in for
   assert.doesNotThrow(() => encodeURIComponent(emoji));
   const wide = R.photoFileName(rec("job", { customer: "\u6771\u4eac".repeat(80), wo: "WO-".padEnd(90, "9") }), 100);
   assert.ok(new TextEncoder().encode(wide).length <= 255, wide);
+  assert.match(wide, / - WO-9{45} \(100\)\.jpg$/, "a long WO is cut to 48 bytes");
   assert.doesNotThrow(() => encodeURIComponent(wide));
   assert.equal(R.recordZipName(rec("install")), `${CAFE} - install - WO-7101.zip`);
   assert.equal(R.recordZipName(rec("job")), `${CAFE} - WO-7101.zip`);
@@ -179,6 +180,8 @@ function readZip(bytes) {
     assert.equal(v.getUint16(local + 26, true), nameLen);
     assert.equal(v.getUint16(local + 6, true), 0x0800, "UTF-8 names in the file's own header too");
     assert.equal(v.getUint16(local + 8, true), 0, "stored, in the file's own header");
+    assert.deepEqual([v.getUint32(local + 18, true), v.getUint32(local + 22, true)], [size, size], "the sizes in the file's own header");
+    assert.deepEqual([v.getUint16(local + 10, true), v.getUint16(local + 12, true)], [v.getUint16(at + 12, true), v.getUint16(at + 14, true)], "one date in both headers");
     assert.equal(dec.decode(bytes.subarray(local + 30, local + 30 + nameLen)), name);
     const data = bytes.subarray(local + 30 + nameLen, local + 30 + nameLen + size);
     assert.equal(zlibCrc(data), crc, "the checksum any unzip tool checks");
@@ -577,6 +580,9 @@ test("a photo's rep check reads the account's rep as the ticket list does, witho
   const { pg, sql } = await fresh();
   try {
     await pg.query("insert into directory_customers (name, account_rep) values ('Test Coco''s - Kingwood', 'Riley Rep'), ('Test Blank Rep', '')");
+    // Two accounts whose names differ only in punctuation, with different reps: each exact name finds its own rep, and
+    // a third spelling finds the first one listed, as the ticket list does.
+    await pg.query("insert into directory_customers (name, account_rep) values ('Test Twin Cafe', 'First Rep'), ('Test Twin, Cafe', 'Second Rep')");
     // A removed account's rep doesn't count, as in the ticket list.
     await pg.query("insert into directory_customers (name, account_rep, archived) values ('Test Gone Cafe', 'Riley Rep', true)");
     const seen = [];
@@ -585,10 +591,11 @@ test("a photo's rep check reads the account's rep as the ticket list does, witho
       return sql.query(text, params);
     });
     const marks = await loadAccountMarks(sql);
-    for (const name of [CAFE, ` ${CAFE.toUpperCase()} `, "Test Cocos Kingwood", "Test Blank Rep", "Test Gone Cafe", OTHER, "Nobody Here", null]) {
+    for (const name of [CAFE, ` ${CAFE.toUpperCase()} `, "Test Cocos Kingwood", "Test Blank Rep", "Test Gone Cafe", "Test Twin Cafe", "Test Twin, Cafe", "Test Twin - Cafe", OTHER, "Nobody Here", null]) {
       assert.equal(await accountRepOf(watched, name), accountRepFor(marks, name), String(name));
     }
     assert.ok(!seen.some((q) => /alter table/i.test(q)), "no ALTER TABLE on every photo");
+    assert.deepEqual([await accountRepOf(sql, "Test Twin Cafe"), await accountRepOf(sql, "Test Twin, Cafe"), await accountRepOf(sql, "Test Twin - Cafe")], ["First Rep", "Second Rep", "First Rep"]);
   } finally {
     await pg.close();
   }
