@@ -118,6 +118,7 @@ test("names: the account, install and WO; the account and WO; what stands in for
   assert.equal(R.recordZipName(rec("install")), `${CAFE} - install - WO-7101.zip`);
   assert.equal(R.recordZipName(rec("job")), `${CAFE} - WO-7101.zip`);
   assert.equal(R.accountZipName(CAFE), `${CAFE} - install photos.zip`);
+  assert.ok(new TextEncoder().encode(R.accountZipName("\u6771\u4eac".repeat(80))).length <= 255);
   // In one .zip each name once.
   assert.deepEqual(R.uniqueNames(["a.jpg", "A.jpg", "a.jpg", "b"]), ["a.jpg", "A [2].jpg", "a [3].jpg", "b"]);
   // Whoever added it, or an Admin.
@@ -572,13 +573,15 @@ test("a photo's rep check reads the account's rep as the ticket list does, witho
   const { pg, sql } = await fresh();
   try {
     await pg.query("insert into directory_customers (name, account_rep) values ('Test Coco''s - Kingwood', 'Riley Rep'), ('Test Blank Rep', '')");
+    // A removed account's rep doesn't count, as in the ticket list.
+    await pg.query("insert into directory_customers (name, account_rep, archived) values ('Test Gone Cafe', 'Riley Rep', true)");
     const seen = [];
     const watched = wrap(async (text, params) => {
       seen.push(text);
       return sql.query(text, params);
     });
     const marks = await loadAccountMarks(sql);
-    for (const name of [CAFE, ` ${CAFE.toUpperCase()} `, "Test Cocos Kingwood", "Test Blank Rep", OTHER, "Nobody Here", null]) {
+    for (const name of [CAFE, ` ${CAFE.toUpperCase()} `, "Test Cocos Kingwood", "Test Blank Rep", "Test Gone Cafe", OTHER, "Nobody Here", null]) {
       assert.equal(await accountRepOf(watched, name), accountRepFor(marks, name), String(name));
     }
     assert.ok(!seen.some((q) => /alter table/i.test(q)), "no ALTER TABLE on every photo");
@@ -641,6 +644,10 @@ test("the screens: a Photos tab on the install, ticket and PM windows and on the
   assert.match(panel, /if \(stopsUploads\(message\)\) \{/);
   assert.match(panel, /if \(message === PHOTO_ADDED_ELSEWHERE\) \{\n\s+added \+= 1;/);
   assert.match(panel, /toast\.message\("Photos are still being added\. Add these once they're done\."\);/);
+  // The Add menu closes on Escape or a tap elsewhere; a Remove that failed shows the list as it is now.
+  assert.match(panel, /if \(e\.key === "Escape"\) setOpen\(false\);/);
+  assert.match(panel, /if \(!boxRef\.current\?\.contains\(e\.target as Node\)\) setOpen\(false\);/);
+  assert.match(panel, /onError: \(e\) => \{\n\s+toast\.error\(e instanceof Error \? e\.message : "Couldn't remove the photo"\);\n\s+\/\/ It may be gone or moved already: the list as it is now\.\n\s+invalidatePhotos\(qc\);/);
   // The grid's previews load as they come near the screen.
   assert.match(panel, /imgClassName="size-full object-cover"\n\s+lazy\n/);
   assert.equal((src("src/components/desk/image-lightbox.tsx").match(/loading=\{lazy \? "lazy" : undefined\}/g) ?? []).length, 2);
