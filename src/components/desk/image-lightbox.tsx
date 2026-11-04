@@ -16,6 +16,8 @@ export function ZoomableImage({
   imgClassName,
   testId,
   download,
+  fullSrc,
+  downloadHref,
   onOpen,
   openLabel,
 }: {
@@ -28,6 +30,10 @@ export function ZoomableImage({
   testId?: string;
   /** File name to save as; adds a Download button to the enlarged view. */
   download?: string;
+  /** The picture the enlarged view shows, when the thumbnail is a smaller copy (a photo's preview). */
+  fullSrc?: string;
+  /** Where the Download button fetches from, when that isn't the picture's own address. */
+  downloadHref?: string;
   /** Click on the picture does this; the corner magnifier still enlarges it. */
   onOpen?: () => void;
   /** Read out for the picture when it opens something. */
@@ -86,7 +92,7 @@ export function ZoomableImage({
         >
           <DialogPrimitive.Title className="sr-only">{alt}</DialogPrimitive.Title>
           <img
-            src={src}
+            src={fullSrc ?? src}
             alt={alt}
             className="max-h-[calc(100dvh-7rem)] max-w-full rounded-lg bg-white object-contain shadow-2xl"
             data-testid="lightbox-image"
@@ -95,7 +101,7 @@ export function ZoomableImage({
             {label ? <span className="text-sm text-white/85">{label}</span> : null}
             {download ? (
               <a
-                href={src}
+                href={downloadHref ?? fullSrc ?? src}
                 download={download}
                 className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
                 data-testid="lightbox-download"

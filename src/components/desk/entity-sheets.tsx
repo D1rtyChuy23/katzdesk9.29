@@ -56,6 +56,8 @@ import { SelectField } from "@/components/ui/select-field";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SheetTabs } from "./sheet-tabs";
+import { RecordPhotosPanel } from "./photos-panel";
+import { useRecordPhotos, useSeenTab } from "./photo-queries";
 import { FlagBadge, StatusBadge } from "./flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { Thread } from "./thread";
@@ -155,24 +157,26 @@ function BoundEquipment({
 /** A panel that stays mounted while another tab is open, so unsaved edits stay and closing still saves. */
 const KEEP_MOUNTED = "outline-none data-[state=inactive]:hidden";
 
-type PmTab = "details" | "runbook" | "invoices" | "ping";
+type PmTab = "details" | "runbook" | "invoices" | "photos" | "ping";
 
 /** Same idea as the account window: one tab is one category. A PM opens on Details. */
 const PM_TABS: { id: PmTab; label: string }[] = [
   { id: "details", label: "Details" },
   { id: "runbook", label: "Runbook" },
   { id: "invoices", label: "Invoices" },
+  { id: "photos", label: "Photos" },
   { id: "ping", label: "Ping" },
 ];
 
-type InstallTab = "details" | "equipment" | "invoices" | "pre-inspection" | "ping";
+type InstallTab = "details" | "equipment" | "invoices" | "pre-inspection" | "photos" | "ping";
 
-/** The Board install, including one just created. Five categories, in this order. */
+/** The Board install, including one just created. Six categories, in this order. */
 const INSTALL_TABS: { id: InstallTab; label: string; short?: string }[] = [
   { id: "details", label: "Details" },
   { id: "equipment", label: "Equipment" },
   { id: "invoices", label: "Invoices" },
   { id: "pre-inspection", label: "Pre-Inspection", short: "Pre-Insp." },
+  { id: "photos", label: "Photos" },
   { id: "ping", label: "Ping" },
 ];
 
@@ -266,7 +270,11 @@ export function PmSheet({
   // unless the sheet was already told to lock it.
   const customersDiffer = !!stackedOn && !stackedOn.customerMatches;
   const lockPmCustomer = lockCustomer || (!customersDiffer && !!stackedOn);
-  const tabCount = (id: PmTab): number | null => (id === "ping" ? comments.data?.length || null : null);
+  // Photos (11/4): the tab's count, and the panel once the tab has been opened on this PM.
+  const photos = useRecordPhotos("pm", pm?.id, pm != null);
+  const photosSeen = useSeenTab(tab === "photos", pm?.id);
+  const tabCount = (id: PmTab): number | null =>
+    id === "ping" ? comments.data?.length || null : id === "photos" ? photos.data?.photos.length || null : null;
   return (
     <Sheet
       open={!!pm}
@@ -381,6 +389,9 @@ export function PmSheet({
                   <div className="mt-3">
                     <InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} beforeOpen={saveBeforeInvoice} />
                   </div>
+                </Tabs.Content>
+                <Tabs.Content value="photos" forceMount={photosSeen || undefined} className={KEEP_MOUNTED} data-testid="pm-panel-photos">
+                  <RecordPhotosPanel kind="pm" id={pm.id} key={`photos-pm-${pm.id}`} />
                 </Tabs.Content>
                 <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="pm-panel-ping">
                   <Thread entityType="pm" entityId={pm.id} />
@@ -655,15 +666,20 @@ export function InstallSheet({
     () => ({ save: saveAll, saveAndWait, pending: save.isPending, register: registerFlush, hideBar }),
     [saveAll, saveAndWait, save.isPending, registerFlush, hideBar],
   );
-  const showSaveBar = tab !== "ping" && !(tab === "pre-inspection" && barHidden > 0);
+  // Photos save as they're added, so that tab has no Save bar (like Ping).
+  const showSaveBar = tab !== "ping" && tab !== "photos" && !(tab === "pre-inspection" && barHidden > 0);
   const comments = useQuery({
     queryKey: ["comments", "install", row?.id],
     queryFn: () => listComments({ data: { entityType: "install", entityId: row!.id } }),
     enabled: row != null,
   });
+  // Photos (11/4): the tab's count, and the panel once the tab has been opened on this install.
+  const installPhotos = useRecordPhotos("install", row?.id, row != null);
+  const installPhotosSeen = useSeenTab(tab === "photos", row?.id);
   const tabCount = (id: InstallTab): number | null => {
     if (id === "equipment") return specs.length || null;
     if (id === "pre-inspection") return row?.inspection?.machineCount || null;
+    if (id === "photos") return installPhotos.data?.photos.length || null;
     if (id === "ping") return comments.data?.length || null;
     return null;
   };
@@ -986,6 +1002,10 @@ export function InstallSheet({
 
                 <Tabs.Content value="pre-inspection" forceMount className={KEEP_MOUNTED} data-testid="install-panel-pre-inspection">
                   <PreInspectionPanel installId={row.id} />
+                </Tabs.Content>
+
+                <Tabs.Content value="photos" forceMount={installPhotosSeen || undefined} className={KEEP_MOUNTED} data-testid="install-panel-photos">
+                  <RecordPhotosPanel kind="install" id={row.id} key={`photos-install-${row.id}`} />
                 </Tabs.Content>
 
                 <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="install-panel-ping">

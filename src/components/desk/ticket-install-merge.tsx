@@ -138,6 +138,9 @@ function PreviewBody({ p }: { p: InstallMergePreview }) {
           <MoveRow label="Equipment" value={m.units.length ? m.units.join(", ") : "No units pulled onto it"} />
           <MoveRow label="Part lines" value={m.partLines ? count(m.partLines, "WO part line") : "None"} />
           <MoveRow label="Pings" value={m.pings ? `${count(m.pings, "ping")} (they open the install)` : "None"} />
+          {m.photos ? (
+            <MoveRow label="Photos" value={`${count(m.photos, "photo")}, named as the install's (they show on the account's Photos tab too)`} testId="install-merge-photos" />
+          ) : null}
           {m.rebuilds.length ? <MoveRow label="Rebuilds" value={m.rebuilds.join(", ")} /> : null}
           {m.mergedTickets ? <MoveRow label="Tickets" value={`${count(m.mergedTickets, "ticket")} merged into this one before`} /> : null}
         </ul>
