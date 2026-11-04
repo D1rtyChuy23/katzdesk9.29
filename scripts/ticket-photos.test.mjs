@@ -146,6 +146,10 @@ test("names: the account, install and WO; the account and WO; what stands in for
   assert.equal(R.photoRequestAllowed(h({ "sec-fetch-site": "cross-site", "sec-fetch-mode": "navigate" }), "GET"), true);
   assert.equal(R.photoRequestAllowed(h({ "sec-fetch-site": "cross-site", "sec-fetch-mode": "no-cors" }), "GET"), false);
   assert.equal(R.photoRequestAllowed(h({ "sec-fetch-site": "same-site", "sec-fetch-mode": "cors" }), "GET"), false);
+  // Another site's page showing it inside an <object> or <embed> is a navigation too, and refused.
+  for (const dest of ["object", "embed"]) assert.equal(R.photoRequestAllowed(h({ "sec-fetch-site": "same-site", "sec-fetch-mode": "navigate", "sec-fetch-dest": dest }), "GET"), false, dest);
+  assert.equal(R.photoRequestAllowed(h({ "sec-fetch-site": "cross-site", "sec-fetch-mode": "navigate", "sec-fetch-dest": "document" }), "GET"), true);
+  assert.equal(R.photoRequestAllowed(h({ "sec-fetch-site": "cross-site", "sec-fetch-mode": "navigate" }), "POST"), false);
 });
 
 /** Reads a stored .zip back: its entries as its central directory lists them, each checked against its local header. */
@@ -481,8 +485,8 @@ test("the photo's address: signed in, approved and able to see its record; the p
     const ok = await call(get(photo.id, "", { "sec-fetch-site": "same-origin", "sec-fetch-mode": "no-cors" }), deps("u-tech2"));
     assert.equal(ok.status, 200);
     assert.equal(ok.headers.get("content-type"), "image/jpeg");
-    assert.equal(ok.headers.get("cache-control"), "private, max-age=86400");
-    assert.equal(ok.headers.get("vary"), "Cookie", "another sign-in on a shared tablet fetches it again");
+    assert.equal(ok.headers.get("cache-control"), "private, max-age=3600");
+    assert.equal(ok.headers.get("vary"), null, "the sign-in's cookie is reissued every few minutes: varying on it would refetch every photo");
     assert.equal(ok.headers.get("cross-origin-resource-policy"), "same-origin");
     assert.equal(ok.headers.get("x-content-type-options"), "nosniff");
     assert.equal(ok.headers.get("content-length"), "600");
@@ -646,6 +650,10 @@ test("the screens: a Photos tab on the install, ticket and PM windows and on the
   assert.match(panel, /toast\.message\("Photos are still being added\. Add these once they're done\."\);/);
   // The Add menu closes on Escape or a tap elsewhere; a Remove that failed shows the list as it is now.
   assert.match(panel, /if \(e\.key === "Escape"\) setOpen\(false\);/);
+  // Marked as a picker: Escape closes it, and the window stays (the window closes a picker first, by this mark).
+  assert.match(panel, /role="menu"\n\s+aria-label="Add photos"\n\s+data-combo-popover=""/);
+  assert.match(panel, /document\.addEventListener\("desk-close-combo", close\);/);
+  assert.match(panel, /ctx\.imageSmoothingQuality = "high";\n\s+ctx\.drawImage\(img, 0, 0, size\.width, size\.height\);/);
   assert.match(panel, /if \(!boxRef\.current\?\.contains\(e\.target as Node\)\) setOpen\(false\);/);
   assert.match(panel, /onError: \(e\) => \{\n\s+toast\.error\(e instanceof Error \? e\.message : "Couldn't remove the photo"\);\n\s+\/\/ It may be gone or moved already: the list as it is now\.\n\s+invalidatePhotos\(qc\);/);
   // The grid's previews load as they come near the screen.

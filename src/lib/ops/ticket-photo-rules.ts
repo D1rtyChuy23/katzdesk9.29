@@ -31,7 +31,7 @@ export const MAX_ID = 2147483647;
 /** The words the screens and the server share. */
 export const PHOTO_REMOVE_CONFIRM = "Remove this photo? It can't be put back.";
 export const PHOTO_REMOVE_REFUSED = "Only the person who added a photo, or an Admin, can remove it.";
-export const PHOTO_FULL = `This record has the most photos it takes (${PHOTOS_PER_RECORD}). Remove one to add another.`;
+export const PHOTO_FULL = `This record has ${PHOTOS_PER_RECORD} photos or more, the most it takes. Remove some to bring it under ${PHOTOS_PER_RECORD}, then add more.`;
 export const PHOTO_TOO_BIG = "That photo is too large to store. Try it again; the app shrinks each photo before it's sent.";
 export const PHOTO_NOT_JPEG = "That photo couldn't be read. Try it again, or take it with the camera.";
 /** The device couldn't spare the memory to shrink a photo (a phone with many photos picked at once). */
@@ -159,12 +159,14 @@ export function isJpeg(bytes: Uint8Array): boolean {
 
 /**
  * A photo is fetched by the desk's own pages, or opened straight from an address. Another site can't pull one in
- * (as an image, a script or a fetch), even with the person signed in. The same rule as Parts → Export CSV.
+ * (as an image, a script, a fetch, or a page inside an <object> or <embed>), even with the person signed in. The same
+ * rule as the sign-in's own guard (isolation.server.ts).
  */
 export function photoRequestAllowed(headers: { get(name: string): string | null }, method: string): boolean {
   const site = headers.get("sec-fetch-site");
   if (!site || site === "same-origin" || site === "none") return true;
-  return headers.get("sec-fetch-mode") === "navigate" && method === "GET";
+  const dest = headers.get("sec-fetch-dest");
+  return headers.get("sec-fetch-mode") === "navigate" && method === "GET" && dest !== "object" && dest !== "embed";
 }
 
 /** The photo's line under its picture: who added it and when (a date in Chicago time, like the rest of the desk). */

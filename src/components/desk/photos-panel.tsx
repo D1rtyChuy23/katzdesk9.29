@@ -74,9 +74,11 @@ async function jpegWithin(
       canvas.height = size.height;
       ctx = canvas.getContext("2d");
       if (!ctx) throw new Error(PHOTO_NO_MEMORY);
-      // A see-through PNG gets a white backing, as a JPEG has none.
+      // A see-through PNG gets a white backing, as a JPEG has none; the best smoothing keeps a serial plate's text clean.
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, size.width, size.height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, 0, 0, size.width, size.height);
       drawn = step.edge;
     }
@@ -236,18 +238,22 @@ function AddPhotos({ busy, onFiles }: { busy: string | null; onFiles: (files: Fi
   const boxRef = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
-  // The menu closes on Escape or a tap anywhere else.
+  // The menu closes on Escape (the window stays: it's marked as a picker, and the window closes the picker first) or a tap
+  // anywhere else.
   useEffect(() => {
     if (!open) return;
+    const close = () => setOpen(false);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
     const onDown = (e: PointerEvent) => {
       if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
     };
+    document.addEventListener("desk-close-combo", close);
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onDown);
     return () => {
+      document.removeEventListener("desk-close-combo", close);
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onDown);
     };
@@ -276,7 +282,12 @@ function AddPhotos({ busy, onFiles }: { busy: string | null; onFiles: (files: Fi
       </button>
       <p className="mt-1 hidden text-center text-[11px] text-muted-foreground sm:block">or drag photos from your computer onto this tab</p>
       {open ? (
-        <div role="menu" aria-label="Add photos" className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-popover shadow-[var(--shadow-lift)]">
+        <div
+          role="menu"
+          aria-label="Add photos"
+          data-combo-popover=""
+          className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-popover shadow-[var(--shadow-lift)]"
+        >
           <button type="button" role="menuitem" className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-muted" onClick={() => pick(cameraRef.current)} data-testid="photos-pick-camera">
             <Camera className="size-4 text-primary" />
             <span>

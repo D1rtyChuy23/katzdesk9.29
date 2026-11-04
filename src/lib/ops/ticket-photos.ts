@@ -337,8 +337,8 @@ function refuse(status: number, text: string): Response {
 
 /**
  * /api/ticket-photo/<id>: the photo for someone signed in and approved who can see its record. ?size=thumb sends the
- * preview; ?download=1 saves it under its name. A photo never changes, so the picture is kept in the browser's cache
- * for a day, for that sign-in; a download is fetched fresh, so it takes the record's name as it is now.
+ * preview; ?download=1 saves it under its name. A photo never changes, so the picture is kept in the browser's own cache
+ * for an hour; a download is fetched fresh, so it takes the record's name as it is now.
  */
 export async function ticketPhotoResponse(request: Request, deps: PhotoRouteDeps, photoId: string): Promise<Response> {
   if (!photoRequestAllowed(request.headers, request.method)) return refuse(403, "Cross-site request refused.");
@@ -378,9 +378,10 @@ export async function ticketPhotoResponse(request: Request, deps: PhotoRouteDeps
         "Content-Type": "image/jpeg",
         "Content-Length": String(bytes.length),
         "Content-Disposition": `${download ? "attachment" : "inline"}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(name)}`,
-        // Kept a day in this browser for this sign-in only (another sign-in on a shared tablet fetches it again).
-        "Cache-Control": download ? "private, no-store" : "private, max-age=86400",
-        Vary: "Cookie",
+        // Kept an hour in this browser only (not in a shared cache): a photo never changes, and an hour bounds how long
+        // a photo opened on a shared tablet stays there after its person signs out. (Vary: Cookie would refetch every few
+        // minutes: the sign-in's cookie is reissued that often.)
+        "Cache-Control": download ? "private, no-store" : "private, max-age=3600",
         // Only the desk's own pages can show it, in any browser.
         "Cross-Origin-Resource-Policy": "same-origin",
         "X-Content-Type-Options": "nosniff",
