@@ -442,6 +442,12 @@ test("a photo stored just before a merge locked its record still goes where the 
     const mergedMeanwhile = racing(sql, /^select username from desk_accounts/, () => mergeServiceJobs(sql, k2, e2, "boss"));
     await assert.rejects(add(mergedMeanwhile, "u-tech", "job", e2), { message: `This ticket was merged into #${k2}. Its photos are on that ticket.` });
     assert.equal((await one(pg, "select count(*)::int as c from ticket_photos where job_id in ($1, $2)", [k2, e2])).c, 0);
+    // Merged right after the photo was stored, before it was listed: it went with the ticket, and it counts as added.
+    const k3 = await job(pg, { wo: "WO-8813" });
+    const e3 = await job(pg, { wo: "WO-8813" });
+    const mergedAfter = racing(sql, /^with rec as \(/, () => mergeServiceJobs(sql, k3, e3, "boss"));
+    await assert.rejects(add(mergedAfter, "u-tech", "job", e3), { message: R.PHOTO_ADDED_ELSEWHERE });
+    assert.equal((await names(sql, "job", k3)).length, 1, "on the kept ticket");
     // The statements lock the record they add to, so a merge waits on them, or they on it (real Postgres; pinned here).
     const server = src("src/lib/ops/ticket-photos.ts");
     assert.match(server, /install: "select id from installs where id = \$1 and archived = false for share"/);
