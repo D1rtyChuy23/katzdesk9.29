@@ -20,15 +20,32 @@ export const THUMB_MAX_EDGE = 360;
  */
 export const PHOTO_MAX_BYTES = 480 * 1024;
 export const THUMB_MAX_BYTES = 32 * 1024;
-/** Photos on one record, at most. */
+/**
+ * Photos on one record, about at most: two added at the very same moment can each be the 100th, and a merge adds the
+ * two records' photos together (nothing is dropped).
+ */
 export const PHOTOS_PER_RECORD = 100;
+/** The largest id Postgres keeps (int4): a photo or record id past it is no such photo. */
+export const MAX_ID = 2147483647;
 
 /** The words the screens and the server share. */
 export const PHOTO_REMOVE_CONFIRM = "Remove this photo? It can't be put back.";
 export const PHOTO_REMOVE_REFUSED = "Only the person who added a photo, or an Admin, can remove it.";
-export const PHOTO_FULL = `This record has ${PHOTOS_PER_RECORD} photos, the most it can hold. Remove one to add another.`;
+export const PHOTO_FULL = `This record has the most photos it takes (${PHOTOS_PER_RECORD}). Remove one to add another.`;
 export const PHOTO_TOO_BIG = "That photo is too large to store. Try it again; the app shrinks each photo before it's sent.";
 export const PHOTO_NOT_JPEG = "That photo couldn't be read. Try it again, or take it with the camera.";
+/** The device couldn't spare the memory to shrink a photo (a phone with many photos picked at once). */
+export const PHOTO_NO_MEMORY = "This device ran out of memory for that photo. Add fewer photos at a time.";
+export const PHOTO_GONE = "That record isn't on the desk anymore.";
+/** Stored, but the record moved on before it could be listed (a merge just then): it counts as added. */
+export const PHOTO_ADDED_ELSEWHERE = "The photo was added. Open the record again to see it.";
+/** How the server's word that a ticket was merged starts: its photos are where it went. */
+export const PHOTO_MERGED_PREFIX = "This ticket was merged into";
+
+/** A refusal that holds for every photo after it (the record is full, gone or merged): the rest aren't tried. */
+export function stopsUploads(message: string): boolean {
+  return message === PHOTO_FULL || message === PHOTO_GONE || message.startsWith(PHOTO_MERGED_PREFIX);
+}
 
 /** A record as the names read it: its customer, its work order, and what stands in for a missing work order. */
 export type PhotoRecordName = {
@@ -39,9 +56,15 @@ export type PhotoRecordName = {
   fallback: string;
 };
 
-/** What a file name can't hold on Windows, macOS or a phone: replaced by a dash; spaces run together. */
+/**
+ * What a file name can't hold on Windows, macOS or a phone: control characters and half an emoji (a lone surrogate)
+ * go, / \\ : * ? " < > | become a dash, spaces run together, and there's no dot or space at the end.
+ */
 export function fileSafe(text: string): string {
-  const printable = Array.from(String(text ?? ""), (ch) => (ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127 ? " " : ch)).join("");
+  const printable = Array.from(String(text ?? ""), (ch) => {
+    const code = ch.codePointAt(0) ?? 0;
+    return code < 32 || code === 127 || (code >= 0xd800 && code <= 0xdfff) ? " " : ch;
+  }).join("");
   return printable
     .replace(/[\\/:*?"<>|]/g, "-")
     .replace(/\s+/g, " ")
@@ -49,12 +72,27 @@ export function fileSafe(text: string): string {
     .replace(/[. ]+$/, "");
 }
 
+/** The text cut to at most this many bytes (UTF-8), between whole characters: a file name holds 255 bytes. */
+export function cutToBytes(text: string, maxBytes: number): string {
+  const enc = new TextEncoder();
+  if (enc.encode(text).length <= maxBytes) return text;
+  let out = "";
+  let used = 0;
+  for (const ch of text) {
+    const size = enc.encode(ch).length;
+    if (used + size > maxBytes) break;
+    out += ch;
+    used += size;
+  }
+  return out.trimEnd();
+}
+
 /** The part of a name that says what the record is, before the photo's number. */
 export function photoBaseName(r: PhotoRecordName): string {
   const customer = fileSafe(String(r.customer ?? "")) || "Untitled Account";
-  const wo = fileSafe(String(r.wo ?? "")) || fileSafe(r.fallback);
-  // A long account name is cut so the WO and the number always stay on the end.
-  const head = customer.length > 90 ? customer.slice(0, 90).trimEnd() : customer;
+  const wo = cutToBytes(fileSafe(String(r.wo ?? "")) || fileSafe(r.fallback), 48);
+  // A long account name is cut so the WO and the number always stay on the end, inside a file name's 255 bytes.
+  const head = cutToBytes(customer, 120);
   return r.kind === "install" ? `${head} - install - ${wo}` : `${head} - ${wo}`;
 }
 
@@ -70,7 +108,7 @@ export function recordZipName(r: PhotoRecordName): string {
 
 /** Download all from the account's Photos tab: "Test Cafe - install photos.zip". */
 export function accountZipName(customer: string): string {
-  return `${fileSafe(customer) || "Untitled Account"} - install photos.zip`;
+  return `${cutToBytes(fileSafe(customer) || "Untitled Account", 120)} - install photos.zip`;
 }
 
 /** Each name once, for a .zip: a name already used gets " [2]", " [3]" … before its extension. */
@@ -98,6 +136,20 @@ export function fitWithin(width: number, height: number, maxEdge: number): { wid
   const h = Math.max(1, Math.round(height));
   const scale = Math.min(1, maxEdge / Math.max(w, h));
   return { width: Math.max(1, Math.round(w * scale)), height: Math.max(1, Math.round(h * scale)) };
+}
+
+/**
+ * How the browser shrinks a photo until it fits: at the largest size, lower quality step by step, then 80% smaller and
+ * again, down to about half. A preview takes the same steps from its own size.
+ */
+export function shrinkSteps(maxEdge: number): { edge: number; quality: number }[] {
+  const steps: { edge: number; quality: number }[] = [];
+  let edge = maxEdge;
+  for (let round = 0; round < 4; round += 1) {
+    for (const quality of [0.82, 0.74, 0.66, 0.58, 0.5]) steps.push({ edge, quality });
+    edge = Math.round(edge * 0.8);
+  }
+  return steps;
 }
 
 /** JPEG bytes start with FF D8 FF. */

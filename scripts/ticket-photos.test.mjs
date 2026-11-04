@@ -21,6 +21,7 @@ const { mergeServiceJobs } = await import("../src/lib/ops/wo-duplicates.ts");
 const { mergeInstallsFor } = await import("../src/lib/ops/install-projects.ts");
 const M = await import("../src/lib/ops/ticket-install-merge.ts");
 const { todayChicago, addDays } = await import("../src/lib/ops/clock.ts");
+const { accountRepFor, accountRepOf, loadAccountMarks } = await import("../src/lib/ops/reps.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -95,11 +96,25 @@ test("names: the account, install and WO; the account and WO; what stands in for
   // What a file name can't hold becomes a dash; tabs, line breaks and runs of spaces one space; no trailing dot.
   assert.equal(R.fileSafe('Test "Bean" / Bar: Co?'), "Test -Bean- - Bar- Co-");
   assert.equal(R.fileSafe("Test\tCafe\n  North..."), "Test Cafe North");
+  assert.equal(R.fileSafe("Test\u0001Cafe\u007f North"), "Test Cafe North", "control characters");
+  // Half an emoji (a lone surrogate) can't be in a name; a whole one can.
+  assert.equal(R.fileSafe("Test \ud83d Cafe \u2615"), "Test Cafe \u2615");
+  assert.equal(R.fileSafe("Test Cafe \ud83c\udf69"), "Test Cafe \ud83c\udf69");
+  assert.equal(R.cutToBytes("abc\ud83c\udf69def", 5), "abc", "never half a character");
+  assert.equal(R.cutToBytes("abc\ud83c\udf69def", 7), "abc\ud83c\udf69");
+  assert.equal(R.cutToBytes("short", 120), "short");
   assert.equal(R.photoFileName(rec("install", { wo: "WO/77" }), 1), `${CAFE} - install - WO-77 (1).jpg`);
   // A long account name is cut, so the WO and the number stay.
   const long = R.photoFileName(rec("install", { customer: "Test Very Long Account Name ".repeat(6) }), 12);
   assert.match(long, / - install - WO-7101 \(12\)\.jpg$/);
-  assert.ok(long.length < 140);
+  assert.ok(long.length < 200);
+  // Cut at an emoji: the name is still well formed (the address can send it), and a name of many-byte letters stays
+  // inside a file name's 255 bytes.
+  const emoji = R.photoFileName(rec("install", { customer: `${"Test Cafe ".repeat(11)}\ud83c\udf69\ud83c\udf69` }), 1);
+  assert.doesNotThrow(() => encodeURIComponent(emoji));
+  const wide = R.photoFileName(rec("job", { customer: "\u6771\u4eac".repeat(80), wo: "WO-".padEnd(90, "9") }), 100);
+  assert.ok(new TextEncoder().encode(wide).length <= 255, wide);
+  assert.doesNotThrow(() => encodeURIComponent(wide));
   assert.equal(R.recordZipName(rec("install")), `${CAFE} - install - WO-7101.zip`);
   assert.equal(R.recordZipName(rec("job")), `${CAFE} - WO-7101.zip`);
   assert.equal(R.accountZipName(CAFE), `${CAFE} - install photos.zip`);
@@ -157,6 +172,8 @@ function readZip(bytes) {
     assert.equal(v.getUint32(local, true), 0x04034b50);
     assert.equal(v.getUint32(local + 14, true), crc);
     assert.equal(v.getUint16(local + 26, true), nameLen);
+    assert.equal(v.getUint16(local + 6, true), 0x0800, "UTF-8 names in the file's own header too");
+    assert.equal(v.getUint16(local + 8, true), 0, "stored, in the file's own header");
     assert.equal(dec.decode(bytes.subarray(local + 30, local + 30 + nameLen)), name);
     const data = bytes.subarray(local + 30 + nameLen, local + 30 + nameLen + size);
     assert.equal(zlibCrc(data), crc, "the checksum any unzip tool checks");
@@ -392,12 +409,14 @@ test("a photo stored just before a merge locked its record still goes where the 
     await mergeServiceJobs(seenLate, keeper, extra, "boss");
     assert.equal((await one(pg, "select count(*)::int as c from ticket_photos where job_id = $1", [extra])).c, 0);
     assert.equal((await names(sql, "job", keeper)).length, 1);
+    assert.equal((await one(pg, "select detail from activity where entity_id = $1 and action = 'merged' order by id desc limit 1", [keeper])).detail, `1 photo added to #${extra} during the merge moved here too`);
     // Install into install.
     const keep = await install(pg);
     const drop = await install(pg);
     const lateDrop = racing(sql, /update installs d set archived = true, duplicate_of = g\.keep_id/, () => late("install_id", drop));
     assert.equal((await mergeInstallsFor(lateDrop, "u-owner", { keepId: keep, dropId: drop })).photos, 1);
     assert.equal((await names(sql, "install", keep)).length, 1);
+    assert.equal((await one(pg, "select detail from activity where entity_type = 'install' and entity_id = $1 and action = 'merged' order by id desc limit 1", [keep])).detail, `1 photo added to install #${drop} during the merge moved here too`);
     // Ticket into install.
     const target = await install(pg, { wo: "WO-4793", equip_status: "Installed", complete: true, completed_at: addDays(todayChicago(), -3) });
     const t = await job(pg, { wo: "WO-4793" });
@@ -406,6 +425,9 @@ test("a photo stored just before a merge locked its record still goes where the 
     assert.equal((await M.mergeTicketIntoInstallFor(lateTicket, "u-owner", { jobId: t, installId: target, stamps: preview.stamps })).photos, 1);
     assert.equal((await one(pg, "select count(*)::int as c from ticket_photos where job_id = $1", [t])).c, 0);
     assert.equal((await names(sql, "install", target)).length, 1);
+    const lateId = (await P.listRecordPhotosFor(sql, "u-owner", { kind: "install", id: target })).photos[0].id;
+    assert.deepEqual((await one(pg, "select moved from ticket_install_merges where job_id = $1", [t])).moved.photos, [lateId], "the merge's record names it");
+    assert.equal((await one(pg, "select detail from activity where entity_type = 'install' and entity_id = $1 and action = 'merged' order by id desc limit 1", [target])).detail, "1 photo added to the ticket during the merge moved here too");
     // Merged while a photo was on its way: the statement that stores it checks again, and it's refused with where to go.
     const k2 = await job(pg, { wo: "WO-8812" });
     const e2 = await job(pg, { wo: "WO-8812" });
@@ -449,7 +471,7 @@ test("the photo's address: signed in, approved and able to see its record; the p
     assert.deepEqual(await text(await call(get(photo.id), deps(null))), [401, "Sign in first."]);
     assert.equal((await call(get(photo.id), { ...deps("u-owner"), session: async () => { throw new Error("bad cookie"); } })).status, 401);
     assert.deepEqual(await text(await call(get(photo.id), deps("u-waiting"))), [403, "This account is waiting for approval."]);
-    for (const bad of ["abc", "0", "01", "12345678901"]) assert.equal((await call(get(bad), deps("u-owner"))).status, 404, bad);
+    for (const bad of ["abc", "0", "01", "12345678901", "2147483648", "9999999999"]) assert.equal((await call(get(bad), deps("u-owner"))).status, 404, bad);
     assert.equal((await call(get(999999), deps("u-owner"))).status, 404);
     // A sales rep: a PM on another rep's account isn't there; one on hers is.
     assert.equal((await call(get(otherPhoto.id), deps("u-rep"))).status, 404);
@@ -458,7 +480,9 @@ test("the photo's address: signed in, approved and able to see its record; the p
     const ok = await call(get(photo.id, "", { "sec-fetch-site": "same-origin", "sec-fetch-mode": "no-cors" }), deps("u-tech2"));
     assert.equal(ok.status, 200);
     assert.equal(ok.headers.get("content-type"), "image/jpeg");
-    assert.equal(ok.headers.get("cache-control"), "private, max-age=31536000, immutable");
+    assert.equal(ok.headers.get("cache-control"), "private, max-age=86400");
+    assert.equal(ok.headers.get("vary"), "Cookie", "another sign-in on a shared tablet fetches it again");
+    assert.equal(ok.headers.get("cross-origin-resource-policy"), "same-origin");
     assert.equal(ok.headers.get("x-content-type-options"), "nosniff");
     assert.equal(ok.headers.get("content-length"), "600");
     const name = "Test Café - Midtown - install - WO-7101 (1).jpg";
@@ -482,6 +506,82 @@ test("the photo's address: signed in, approved and able to see its record; the p
     } finally {
       console.error = logged;
     }
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the shrink's steps, what stops an upload, and Download all's pieces", () => {
+  const steps = R.shrinkSteps(2048);
+  assert.deepEqual(steps.slice(0, 6), [
+    { edge: 2048, quality: 0.82 }, { edge: 2048, quality: 0.74 }, { edge: 2048, quality: 0.66 }, { edge: 2048, quality: 0.58 }, { edge: 2048, quality: 0.5 }, { edge: 1638, quality: 0.82 },
+  ]);
+  assert.deepEqual([...new Set(steps.map((s) => s.edge))], [2048, 1638, 1310, 1048]);
+  assert.equal(steps.length, 20);
+  // What holds for every photo after it stops the rest; one photo's trouble doesn't.
+  for (const m of [R.PHOTO_FULL, R.PHOTO_GONE, "This ticket was merged into #12. Its photos are on that ticket.", "This ticket was merged into install #4. Its photos are on that install."]) assert.equal(R.stopsUploads(m), true, m);
+  for (const m of [R.PHOTO_TOO_BIG, R.PHOTO_NOT_JPEG, R.PHOTO_NO_MEMORY, R.PHOTO_ADDED_ELSEWHERE, "Failed to fetch"]) assert.equal(R.stopsUploads(m), false, m);
+  assert.equal(R.MAX_ID, 2 ** 31 - 1);
+  // The pieces are each file's header, the file itself (the same bytes, not a copy), and the directory.
+  const a = jpeg(1, 900);
+  const b = jpeg(2, 1200);
+  const parts = Z.zipParts([{ name: "a.jpg", data: a }, { name: "b.jpg", data: b }]);
+  assert.equal(parts.length, 5);
+  assert.equal(parts[1], a);
+  assert.equal(parts[3], b);
+  const fixed = new Date(2026, 10, 4, 8, 0, 0);
+  assert.ok(Buffer.concat(Z.zipParts([{ name: "a.jpg", data: a, date: fixed }])).equals(Buffer.from(Z.zipStore([{ name: "a.jpg", data: a, date: fixed }]))));
+});
+
+test("a TLC's removals log on the TLC; a rep removes her own photo; a ticket with no account isn't a rep's; a photo moved meanwhile isn't removed", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const tlc = await job(pg, { kind: "tlc", wo: "WO-8899" });
+    const p = await add(sql, "u-tech", "job", tlc);
+    await P.removeRecordPhotoFor(sql, "u-tech", { photoId: p.id });
+    assert.deepEqual(await one(pg, "select entity_type, entity_id from activity order by id desc limit 1"), { entity_type: "tlc", entity_id: tlc });
+    // Riley's own photo on her account's PM: she removes it.
+    const mine = await pm(pg, { wo: "WO-9909" });
+    const hers = await add(sql, "u-rep", "pm", mine);
+    assert.equal(hers.canRemove, true);
+    await P.removeRecordPhotoFor(sql, "u-rep", { photoId: hers.id });
+    assert.deepEqual(await names(sql, "pm", mine), []);
+    // A ticket with no account isn't on her accounts, as the ticket itself isn't.
+    const blank = await job(pg, { customer: null, wo: "WO-8898" });
+    await add(sql, "u-tech", "job", blank);
+    assert.equal(await names(sql, "job", blank, "u-rep"), null);
+    assert.deepEqual(await names(sql, "job", blank, "u-tech"), ["Untitled Account - WO-8898 (1).jpg"]);
+    // Merged into another ticket between Remove's read and its delete: the photo is the keeper's now, and stays.
+    const keeper = await job(pg, { wo: "WO-8897" });
+    const extra = await job(pg, { wo: "WO-8897" });
+    const moving = await add(sql, "u-tech", "job", extra);
+    const mergedMeanwhile = racing(sql, /select count\(\*\)::int as n from ticket_photos p, ticket_photos me/, () => mergeServiceJobs(sql, keeper, extra, "boss"));
+    await assert.rejects(P.removeRecordPhotoFor(mergedMeanwhile, "u-tech", { photoId: moving.id }), { message: "That photo was moved or removed meanwhile. Open the record again." });
+    assert.deepEqual((await P.listRecordPhotosFor(sql, "u-tech", { kind: "job", id: keeper })).photos.map((x) => x.id), [moving.id]);
+    // After a merge and a removal the names are in order again.
+    const k2 = await add(sql, "u-tech", "job", keeper);
+    const k3 = await add(sql, "u-tech", "job", keeper);
+    await P.removeRecordPhotoFor(sql, "u-tech", { photoId: k2.id });
+    assert.deepEqual((await P.listRecordPhotosFor(sql, "u-tech", { kind: "job", id: keeper })).photos.map((x) => [x.id, x.n]), [[moving.id, 1], [k3.id, 2]]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a photo's rep check reads the account's rep as the ticket list does, without the table setup", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await pg.query("insert into directory_customers (name, account_rep) values ('Test Coco''s - Kingwood', 'Riley Rep'), ('Test Blank Rep', '')");
+    const seen = [];
+    const watched = wrap(async (text, params) => {
+      seen.push(text);
+      return sql.query(text, params);
+    });
+    const marks = await loadAccountMarks(sql);
+    for (const name of [CAFE, ` ${CAFE.toUpperCase()} `, "Test Cocos Kingwood", "Test Blank Rep", OTHER, "Nobody Here", null]) {
+      assert.equal(await accountRepOf(watched, name), accountRepFor(marks, name), String(name));
+    }
+    assert.ok(!seen.some((q) => /alter table/i.test(q)), "no ALTER TABLE on every photo");
   } finally {
     await pg.close();
   }
@@ -528,9 +628,25 @@ test("the screens: a Photos tab on the install, ticket and PM windows and on the
   assert.match(panel, /type="file" accept="image\/\*" multiple/);
   assert.match(panel, /if \(window\.confirm\(PHOTO_REMOVE_CONFIRM\)\) remove\.mutate\(p\.id\);/);
   assert.match(panel, /\{onRemove && photo\.canRemove \? \(/);
-  assert.match(panel, /const full = await jpegWithin\(img, PHOTO_MAX_EDGE, PHOTO_MAX_BYTES\);/);
-  assert.match(panel, /const thumb = await jpegWithin\(img, THUMB_MAX_EDGE, THUMB_MAX_BYTES\);/);
-  assert.match(panel, /saveFile\(new Blob\(\[zipStore\(entries\)\], \{ type: "application\/zip" \}\), zipName\);/);
+  assert.match(panel, /const full = await jpegWithin\(img, canvas, PHOTO_MAX_EDGE, PHOTO_MAX_BYTES\);/);
+  assert.match(panel, /const thumb = await jpegWithin\(img, canvas, THUMB_MAX_EDGE, THUMB_MAX_BYTES\);/);
+  // One canvas per photo, emptied after, and the decoded photo let go (a phone adding many at once).
+  assert.match(panel, /\} finally \{\n\s+canvas\.width = 0;\n\s+canvas\.height = 0;\n\s+done\(\);/);
+  assert.match(panel, /img\.removeAttribute\("src"\);\n\s+URL\.revokeObjectURL\(url\);/);
+  assert.match(panel, /for \(const step of shrinkSteps\(maxEdge\)\)/);
+  assert.match(panel, /if \(!ctx\) throw new Error\(PHOTO_NO_MEMORY\);/);
+  assert.match(panel, /if \(!blob\) throw new Error\(PHOTO_NO_MEMORY\);/);
+  assert.match(panel, /saveFile\(new Blob\(zipParts\(entries\), \{ type: "application\/zip" \}\), zipName\);/);
+  // The upload loop stops on what the server says holds for the rest, and counts a photo stored as added.
+  assert.match(panel, /if \(stopsUploads\(message\)\) \{/);
+  assert.match(panel, /if \(message === PHOTO_ADDED_ELSEWHERE\) \{\n\s+added \+= 1;/);
+  assert.match(panel, /toast\.message\("Photos are still being added\. Add these once they're done\."\);/);
+  // The grid's previews load as they come near the screen.
+  assert.match(panel, /imgClassName="size-full object-cover"\n\s+lazy\n/);
+  assert.equal((src("src/components/desk/image-lightbox.tsx").match(/loading=\{lazy \? "lazy" : undefined\}/g) ?? []).length, 2);
+  // Merges refresh the photo lists.
+  assert.match(src("src/components/desk/install-project-fields.tsx"), /void qc\.invalidateQueries\(\{ queryKey: \["photos"\] \}\);/);
+  assert.equal((src("src/components/desk/job-sheet.tsx").match(/"photos"\]/g) ?? []).length, 2);
   assert.match(panel, /const names = uniqueNames\(photos\.map\(\(p\) => p\.name\)\);/);
   assert.match(panel, /href=\{photoSrc\(photo\.id, "download"\)\}\n\s+download=\{photo\.name\}/);
   assert.match(panel, /src=\{photoSrc\(photo\.id, "thumb"\)\}\n\s+fullSrc=\{photoSrc\(photo\.id\)\}/);

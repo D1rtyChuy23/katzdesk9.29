@@ -4,7 +4,7 @@
  * Pure: safe for node --test and the screens.
  */
 
-export type ZipEntry = { name: string; data: Uint8Array; date?: Date };
+export type ZipEntry = { name: string; data: Uint8Array<ArrayBuffer>; date?: Date };
 
 /** The most a .zip without the ZIP64 extension holds. */
 export const ZIP_MAX_ENTRIES = 65_535;
@@ -36,49 +36,56 @@ export function dosDateTime(date: Date): { time: number; date: number } {
   };
 }
 
-/** The .zip of these files, in this order. Throws when it would need ZIP64 (over 65,535 files or 4 GB). */
-export function zipStore(entries: ZipEntry[]): Uint8Array<ArrayBuffer> {
+/**
+ * The .zip of these files, in this order, as pieces: each file's header, the file itself (not copied), and the
+ * directory at the end. A Blob made of them is the .zip, so the photos aren't copied into one big buffer first (a phone
+ * downloading a big account's photos). Throws when it would need ZIP64 (over 65,535 files or 4 GB).
+ */
+export function zipParts(entries: ZipEntry[]): Uint8Array<ArrayBuffer>[] {
   if (entries.length > ZIP_MAX_ENTRIES) throw new Error("Too many files for one .zip.");
   const enc = new TextEncoder();
   const names = entries.map((e) => enc.encode(e.name));
-  let size = 22;
-  for (let i = 0; i < entries.length; i += 1) size += 30 + names[i]!.length + entries[i]!.data.length + 46 + names[i]!.length;
-  if (size > ZIP_MAX_BYTES) throw new Error("Too much for one .zip.");
-  const out = new Uint8Array(size);
-  const view = new DataView(out.buffer);
+  let total = 22;
+  for (let i = 0; i < entries.length; i += 1) total += 30 + names[i]!.length + entries[i]!.data.length + 46 + names[i]!.length;
+  if (total > ZIP_MAX_BYTES) throw new Error("Too much for one .zip.");
+  const parts: Uint8Array<ArrayBuffer>[] = [];
   const central: { offset: number; crc: number; when: { time: number; date: number } }[] = [];
-  let at = 0;
-  const u16 = (v: number) => {
-    view.setUint16(at, v, true);
-    at += 2;
-  };
-  const u32 = (v: number) => {
-    view.setUint32(at, v >>> 0, true);
-    at += 4;
-  };
+  let offset = 0;
   // UTF-8 names (bit 11), stored (method 0), version 2.0.
   entries.forEach((e, i) => {
     const name = names[i]!;
     const crc = crc32(e.data);
     const when = dosDateTime(e.date ?? new Date());
-    central.push({ offset: at, crc, when });
-    u32(0x04034b50);
-    u16(20);
-    u16(0x0800);
-    u16(0);
-    u16(when.time);
-    u16(when.date);
-    u32(crc);
-    u32(e.data.length);
-    u32(e.data.length);
-    u16(name.length);
-    u16(0);
-    out.set(name, at);
-    at += name.length;
-    out.set(e.data, at);
-    at += e.data.length;
+    const head = new Uint8Array(30 + name.length);
+    const v = new DataView(head.buffer);
+    v.setUint32(0, 0x04034b50, true);
+    v.setUint16(4, 20, true);
+    v.setUint16(6, 0x0800, true);
+    v.setUint16(8, 0, true);
+    v.setUint16(10, when.time, true);
+    v.setUint16(12, when.date, true);
+    v.setUint32(14, crc, true);
+    v.setUint32(18, e.data.length, true);
+    v.setUint32(22, e.data.length, true);
+    v.setUint16(26, name.length, true);
+    v.setUint16(28, 0, true);
+    head.set(name, 30);
+    central.push({ offset, crc, when });
+    parts.push(head, e.data);
+    offset += head.length + e.data.length;
   });
-  const dirStart = at;
+  const dirSize = names.reduce((n, name) => n + 46 + name.length, 0);
+  const tail = new Uint8Array(dirSize + 22);
+  const view = new DataView(tail.buffer);
+  let at = 0;
+  const u16 = (val: number) => {
+    view.setUint16(at, val, true);
+    at += 2;
+  };
+  const u32 = (val: number) => {
+    view.setUint32(at, val >>> 0, true);
+    at += 4;
+  };
   entries.forEach((e, i) => {
     const name = names[i]!;
     const c = central[i]!;
@@ -99,17 +106,29 @@ export function zipStore(entries: ZipEntry[]): Uint8Array<ArrayBuffer> {
     u16(0);
     u32(0);
     u32(c.offset);
-    out.set(name, at);
+    tail.set(name, at);
     at += name.length;
   });
-  const dirSize = at - dirStart;
   u32(0x06054b50);
   u16(0);
   u16(0);
   u16(entries.length);
   u16(entries.length);
   u32(dirSize);
-  u32(dirStart);
+  u32(offset);
   u16(0);
+  parts.push(tail);
+  return parts;
+}
+
+/** The same .zip in one piece. */
+export function zipStore(entries: ZipEntry[]): Uint8Array<ArrayBuffer> {
+  const parts = zipParts(entries);
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of parts) {
+    out.set(p, at);
+    at += p.length;
+  }
   return out;
 }

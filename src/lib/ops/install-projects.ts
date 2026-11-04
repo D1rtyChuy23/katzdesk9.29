@@ -526,6 +526,13 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   // A photo the drop took just before the merge locked it, which the statement didn't see: it goes to the keeper too
   // (the drop is archived now, so it takes no more).
   const latePhotos = await sql.query<{ id: number }>("update ticket_photos set install_id = $1 where install_id = $2 returning id", [keepId, dropId]);
+  if (latePhotos.length) {
+    await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'merged', $3)", [
+      keepId,
+      actor,
+      `${latePhotos.length === 1 ? "1 photo" : `${latePhotos.length} photos`} added to install #${dropId} during the merge moved here too`,
+    ]);
+  }
   // The keeper's visit reads its list again (the same load the window runs), without taking anything off.
   await syncInstallUnits(sql, keepId);
   return {

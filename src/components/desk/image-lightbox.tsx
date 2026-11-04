@@ -18,6 +18,7 @@ export function ZoomableImage({
   download,
   fullSrc,
   downloadHref,
+  lazy,
   onOpen,
   openLabel,
 }: {
@@ -34,6 +35,8 @@ export function ZoomableImage({
   fullSrc?: string;
   /** Where the Download button fetches from, when that isn't the picture's own address. */
   downloadHref?: string;
+  /** The thumbnail loads only near the screen (a grid of many photos). */
+  lazy?: boolean;
   /** Click on the picture does this; the corner magnifier still enlarges it. */
   onOpen?: () => void;
   /** Read out for the picture when it opens something. */
@@ -51,7 +54,7 @@ export function ZoomableImage({
             onClick={onOpen}
             data-testid={testId ? `${testId}-open` : undefined}
           >
-            <img src={src} alt={alt} className={imgClassName} />
+            <img src={src} alt={alt} className={imgClassName} loading={lazy ? "lazy" : undefined} decoding={lazy ? "async" : undefined} />
           </button>
           <DialogPrimitive.Trigger asChild>
             <button
@@ -72,7 +75,7 @@ export function ZoomableImage({
             aria-label={`Enlarge ${alt}`}
             data-testid={testId}
           >
-            <img src={src} alt={alt} className={imgClassName} />
+            <img src={src} alt={alt} className={imgClassName} loading={lazy ? "lazy" : undefined} decoding={lazy ? "async" : undefined} />
             <span className="pointer-events-none absolute right-2 bottom-2 grid size-7 place-items-center rounded-full bg-ink/70 text-cream opacity-80 transition-opacity group-hover:opacity-100">
               <ZoomIn className="size-4" />
             </span>

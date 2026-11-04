@@ -167,6 +167,8 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["account-invoices"] });
       void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      // The extra's photos are the keeper's now.
+      void qc.invalidateQueries({ queryKey: ["photos"] });
       if (row?.id && row.id !== activeId) showTicket(row.id);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -337,7 +339,7 @@ export function JobSheet({
         ? { ...old, duplicateOf: old.id, mergedInstallId: r.installId, mergedInstallAt: new Date().toISOString(), mergedInstallBy: r.mergedBy, mergedBilledOn: r.billedOn, done: true, siblings: [] }
         : old,
     );
-    for (const key of ["jobs", "job", "installs", "comments", "invoice", "account-invoices", "activity", "assets", "dashboard", "customer-history", "notifications", "ticket-install-matches"]) {
+    for (const key of ["jobs", "job", "installs", "comments", "invoice", "account-invoices", "activity", "assets", "dashboard", "customer-history", "notifications", "ticket-install-matches", "photos"]) {
       void qc.invalidateQueries({ queryKey: [key] });
     }
   }

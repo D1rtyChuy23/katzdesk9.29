@@ -512,7 +512,7 @@ export function mergeTicketsSql(): string {
      where a.job_id = g.extra_id
     returning a.id
   ), photos as (
-    -- Its photos (11/4) are the keeper's, after the keeper's own.
+    -- Its photos (11/4) are the keeper's, with the keeper's own in the order they were taken.
     update ticket_photos p
        set job_id = g.keeper_id
       from g
@@ -639,8 +639,16 @@ export async function mergeServiceJobs(
     return { refused: raced ?? CHANGED_WHILE_MERGING };
   }
   // A photo the extra took just before the merge locked it, which the statement didn't see: it goes to the keeper too
-  // (the extra is merged now, so it takes no more).
-  await sql.query("update ticket_photos set job_id = $1 where job_id = $2", [keeper.id, extra.id]);
+  // (the extra is merged now, so it takes no more), and the keeper's activity says so.
+  const late = await sql.query<{ id: number }>("update ticket_photos set job_id = $1 where job_id = $2 returning id", [keeper.id, extra.id]);
+  if (late.length) {
+    await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'merged', $4)", [
+      keeper.kind,
+      keeper.id,
+      actor,
+      `${late.length === 1 ? "1 photo" : `${late.length} photos`} added to #${extra.id} during the merge moved here too`,
+    ]);
+  }
   return { keeperId: keeper.id, extraId: extra.id };
 }
 

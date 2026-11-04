@@ -9,9 +9,12 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
-import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
+import { accountRepOf } from "@/lib/ops/reps";
 import {
+  MAX_ID,
+  PHOTO_ADDED_ELSEWHERE,
   PHOTO_FULL,
+  PHOTO_GONE,
   PHOTO_MAX_BYTES,
   PHOTO_MAX_EDGE,
   PHOTO_NOT_JPEG,
@@ -138,7 +141,8 @@ async function canSee(sql: Sql, userId: string, rec: PhotoRecord): Promise<boole
   if (rec.kind === "install") return true;
   const scope = await salesRepScope(sql, userId);
   if (!scope) return true;
-  return scope(accountRepFor(await loadAccountMarks(sql), rec.customer));
+  // The account's rep read on its own (no table setup), as this runs for every photo a rep's screen shows.
+  return scope(await accountRepOf(sql, rec.customer));
 }
 
 type PhotoRow = { id: number; width: number; height: number; bytes: number; added_by: string; added_by_name: string | null; added_at: string };
@@ -164,7 +168,7 @@ async function viewerOf(sql: Sql, userId: string) {
   return { userId, admin: await canReviewNames(sql, userId) };
 }
 
-const recordInput = z.object({ kind: z.enum(["install", "job", "pm"]), id: z.number().int().positive() });
+const recordInput = z.object({ kind: z.enum(["install", "job", "pm"]), id: z.number().int().positive().max(MAX_ID) });
 
 /** The record's photos, oldest first, or null when this person can't open the record. */
 export async function listRecordPhotosFor(sql: Sql, userId: string, data: z.infer<typeof recordInput>): Promise<RecordPhotos | null> {
@@ -195,7 +199,7 @@ const LOCK: Record<PhotoKind, string> = {
 /** Adds one photo (already shrunk by the browser) to the record, after its others. */
 export async function addRecordPhotoFor(sql: Sql, userId: string, data: z.infer<typeof addInput>): Promise<TicketPhoto> {
   const rec = await loadPhotoRecord(sql, data.kind, data.id);
-  if (!rec || !(await canSee(sql, userId, rec))) throw new Error("That record isn't on the desk anymore.");
+  if (!rec || !(await canSee(sql, userId, rec))) throw new Error(PHOTO_GONE);
   if (rec.closed) throw new Error(rec.closed);
   const photo = Buffer.from(data.photo, "base64");
   const thumb = Buffer.from(data.thumb, "base64");
@@ -214,17 +218,17 @@ export async function addRecordPhotoFor(sql: Sql, userId: string, data: z.infer<
   );
   if (!rows[0]) {
     const now = await loadPhotoRecord(sql, rec.kind, rec.id);
-    if (!now || now.gone) throw new Error("That record isn't on the desk anymore.");
+    if (!now || now.gone) throw new Error(PHOTO_GONE);
     if (now.closed) throw new Error(now.closed);
     throw new Error(PHOTO_FULL);
   }
   const listed = await listRecordPhotosFor(sql, userId, { kind: rec.kind, id: rec.id });
   const added = listed?.photos.find((p) => p.id === Number(rows[0]!.id));
-  if (!added) throw new Error("The photo was added. Open the record again to see it.");
+  if (!added) throw new Error(PHOTO_ADDED_ELSEWHERE);
   return added;
 }
 
-const removeInput = z.object({ photoId: z.number().int().positive() });
+const removeInput = z.object({ photoId: z.number().int().positive().max(MAX_ID) });
 
 /** Removes a photo: whoever added it, or an Admin. The record's activity names the photo and who added it. */
 export async function removeRecordPhotoFor(sql: Sql, userId: string, data: z.infer<typeof removeInput>): Promise<{ removed: true }> {
@@ -237,7 +241,7 @@ export async function removeRecordPhotoFor(sql: Sql, userId: string, data: z.inf
   if (!row) throw new Error("That photo was removed already.");
   const kind: PhotoKind = row.install_id ? "install" : row.job_id ? "job" : "pm";
   const rec = await loadPhotoRecord(sql, kind, Number(row.install_id ?? row.job_id ?? row.pm_id));
-  if (!rec || !(await canSee(sql, userId, rec))) throw new Error("That record isn't on the desk anymore.");
+  if (!rec || !(await canSee(sql, userId, rec))) throw new Error(PHOTO_GONE);
   if (!canRemovePhoto(await viewerOf(sql, userId), { addedBy: row.added_by })) throw new Error(PHOTO_REMOVE_REFUSED);
   // Its name as it reads now, for the activity line.
   const place = (
@@ -258,7 +262,7 @@ export async function removeRecordPhotoFor(sql: Sql, userId: string, data: z.inf
   return { removed: true };
 }
 
-const accountInput = z.object({ customerId: z.number().int().positive() });
+const accountInput = z.object({ customerId: z.number().int().positive().max(MAX_ID) });
 
 /**
  * The account's install photos for its Photos tab, by install, newest install first: the same installs its history
@@ -333,12 +337,12 @@ function refuse(status: number, text: string): Response {
 
 /**
  * /api/ticket-photo/<id>: the photo for someone signed in and approved who can see its record. ?size=thumb sends the
- * preview; ?download=1 saves it under its name. A photo never changes, so the picture is kept in the browser's cache;
- * a download is fetched fresh, so it takes the record's name as it is now.
+ * preview; ?download=1 saves it under its name. A photo never changes, so the picture is kept in the browser's cache
+ * for a day, for that sign-in; a download is fetched fresh, so it takes the record's name as it is now.
  */
 export async function ticketPhotoResponse(request: Request, deps: PhotoRouteDeps, photoId: string): Promise<Response> {
   if (!photoRequestAllowed(request.headers, request.method)) return refuse(403, "Cross-site request refused.");
-  if (!/^[1-9][0-9]{0,9}$/.test(photoId)) return refuse(404, "No such photo.");
+  if (!/^[1-9][0-9]{0,9}$/.test(photoId) || Number(photoId) > MAX_ID) return refuse(404, "No such photo.");
   const session = await deps.session(request.headers).catch(() => null);
   const userId = session?.user?.id;
   if (!userId) return refuse(401, "Sign in first.");
@@ -374,7 +378,11 @@ export async function ticketPhotoResponse(request: Request, deps: PhotoRouteDeps
         "Content-Type": "image/jpeg",
         "Content-Length": String(bytes.length),
         "Content-Disposition": `${download ? "attachment" : "inline"}; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(name)}`,
-        "Cache-Control": download ? "private, no-store" : "private, max-age=31536000, immutable",
+        // Kept a day in this browser for this sign-in only (another sign-in on a shared tablet fetches it again).
+        "Cache-Control": download ? "private, no-store" : "private, max-age=86400",
+        Vary: "Cookie",
+        // Only the desk's own pages can show it, in any browser.
+        "Cross-Origin-Resource-Policy": "same-origin",
         "X-Content-Type-Options": "nosniff",
         "X-Robots-Tag": "noindex",
       },

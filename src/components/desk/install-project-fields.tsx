@@ -29,6 +29,8 @@ function useInstallsChanged() {
     void qc.invalidateQueries({ queryKey: ["activity"] });
     // The Equipment Request Form lists the install's Corrigo work orders.
     void qc.invalidateQueries({ queryKey: ["install-form"] });
+    // A merge moves the dropped install's photos onto the one kept (and their names to its WO).
+    void qc.invalidateQueries({ queryKey: ["photos"] });
   };
 }
 

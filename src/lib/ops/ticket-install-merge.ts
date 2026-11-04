@@ -870,6 +870,19 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
   // A photo the ticket took just before the merge locked it, which the statement didn't see: it goes to the install too
   // (the ticket is merged now, so it takes no more).
   const late = await sql.query<{ id: number }>("update ticket_photos set install_id = $1, job_id = null where job_id = $2 returning id", [Number(r.install_id), Number(r.job_id)]);
+  if (late.length) {
+    // The merge's record and the install's activity name them too.
+    await sql.query(
+      `update ticket_install_merges set moved = jsonb_set(moved, '{photos}', coalesce(moved->'photos', '[]'::jsonb) || $3::jsonb)
+        where id = (select max(id) from ticket_install_merges where job_id = $1 and install_id = $2)`,
+      [Number(r.job_id), Number(r.install_id), JSON.stringify(late.map((x) => Number(x.id)))],
+    );
+    await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'merged', $3)", [
+      Number(r.install_id),
+      actor,
+      `${late.length === 1 ? "1 photo" : `${late.length} photos`} added to the ticket during the merge moved here too`,
+    ]);
+  }
   return {
     jobId: Number(r.job_id),
     installId: Number(r.install_id),

@@ -3,7 +3,7 @@
  * camera or the library (the browser shrinks each to about 2,000 px and under 0.5 MB first), tap one to see it large,
  * download one under its name, or Download all as a .zip. Whoever added a photo, or an Admin, can remove it.
  */
-import { useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, Download, ImagePlus, Images, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -15,8 +15,10 @@ import { formatLongDate } from "@/lib/ops/clock";
 import { addRecordPhoto, listAccountPhotos, removeRecordPhoto, type TicketPhoto } from "@/lib/ops/ticket-photos";
 import { photoSrc, useRecordPhotos } from "./photo-queries";
 import {
+  PHOTO_ADDED_ELSEWHERE,
   PHOTO_MAX_BYTES,
   PHOTO_MAX_EDGE,
+  PHOTO_NO_MEMORY,
   PHOTO_NOT_JPEG,
   PHOTO_REMOVE_CONFIRM,
   PHOTO_TOO_BIG,
@@ -24,10 +26,12 @@ import {
   THUMB_MAX_EDGE,
   fitWithin,
   photoByline,
+  shrinkSteps,
+  stopsUploads,
   uniqueNames,
   type PhotoKind,
 } from "@/lib/ops/ticket-photo-rules";
-import { zipStore } from "@/lib/ops/zip-store";
+import { zipParts } from "@/lib/ops/zip-store";
 
 // ── Shrinking a photo before it's sent ──────────────────────────────────────────────────────────────────────────────
 
@@ -35,34 +39,50 @@ async function loadPicture(file: File): Promise<{ img: HTMLImageElement; done: (
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.src = url;
+  // Frees the picture: the decoded photo, and its address.
+  const done = () => {
+    img.removeAttribute("src");
+    URL.revokeObjectURL(url);
+  };
   try {
     await img.decode();
   } catch {
-    URL.revokeObjectURL(url);
+    done();
     throw new Error(PHOTO_NOT_JPEG);
   }
-  return { img, done: () => URL.revokeObjectURL(url) };
+  return { img, done };
 }
 
-/** The picture as a JPEG no longer than maxEdge on its long side and no bigger than maxBytes: lower quality first, then smaller. */
-async function jpegWithin(img: HTMLImageElement, maxEdge: number, maxBytes: number): Promise<{ blob: Blob; width: number; height: number }> {
-  let edge = maxEdge;
-  for (let round = 0; round < 4; round += 1) {
-    const { width, height } = fitWithin(img.naturalWidth, img.naturalHeight, edge);
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error(PHOTO_NOT_JPEG);
-    // A see-through PNG gets a white backing, as a JPEG has none.
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, width, height);
-    ctx.drawImage(img, 0, 0, width, height);
-    for (const quality of [0.82, 0.74, 0.66, 0.58, 0.5]) {
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-      if (blob && blob.size <= maxBytes) return { blob, width, height };
+/**
+ * The picture as a JPEG no longer than maxEdge on its long side and no bigger than maxBytes (shrinkSteps: lower quality
+ * first, then smaller), drawn on the one canvas the photo uses. A phone short of memory gives no canvas or no JPEG: that
+ * says so, rather than "too large".
+ */
+async function jpegWithin(
+  img: HTMLImageElement,
+  canvas: HTMLCanvasElement,
+  maxEdge: number,
+  maxBytes: number,
+): Promise<{ blob: Blob; width: number; height: number }> {
+  let drawn = 0;
+  let ctx: CanvasRenderingContext2D | null = null;
+  let size = { width: 0, height: 0 };
+  for (const step of shrinkSteps(maxEdge)) {
+    if (step.edge !== drawn) {
+      size = fitWithin(img.naturalWidth, img.naturalHeight, step.edge);
+      canvas.width = size.width;
+      canvas.height = size.height;
+      ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error(PHOTO_NO_MEMORY);
+      // A see-through PNG gets a white backing, as a JPEG has none.
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, size.width, size.height);
+      ctx.drawImage(img, 0, 0, size.width, size.height);
+      drawn = step.edge;
     }
-    edge = Math.round(edge * 0.8);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", step.quality));
+    if (!blob) throw new Error(PHOTO_NO_MEMORY);
+    if (blob.size <= maxBytes) return { blob, ...size };
   }
   throw new Error(PHOTO_TOO_BIG);
 }
@@ -74,14 +94,20 @@ async function base64Of(blob: Blob): Promise<string> {
   return btoa(text);
 }
 
-/** A photo from the camera or the library, shrunk for storing, with its preview. */
+/**
+ * A photo from the camera or the library, shrunk for storing, with its preview. One canvas per photo, emptied after,
+ * and the decoded photo let go, so a phone adding many at once doesn't run out of memory partway.
+ */
 async function shrinkPhoto(file: File): Promise<{ photo: string; thumb: string; width: number; height: number }> {
   const { img, done } = await loadPicture(file);
+  const canvas = document.createElement("canvas");
   try {
-    const full = await jpegWithin(img, PHOTO_MAX_EDGE, PHOTO_MAX_BYTES);
-    const thumb = await jpegWithin(img, THUMB_MAX_EDGE, THUMB_MAX_BYTES);
+    const full = await jpegWithin(img, canvas, PHOTO_MAX_EDGE, PHOTO_MAX_BYTES);
+    const thumb = await jpegWithin(img, canvas, THUMB_MAX_EDGE, THUMB_MAX_BYTES);
     return { photo: await base64Of(full.blob), thumb: await base64Of(thumb.blob), width: full.width, height: full.height };
   } finally {
+    canvas.width = 0;
+    canvas.height = 0;
     done();
   }
 }
@@ -110,7 +136,8 @@ async function downloadAll(photos: TicketPhoto[], zipName: string, onProgress: (
     entries.push({ name: names[i]!, data: new Uint8Array(await res.arrayBuffer()), date: new Date(p.addedAt) });
     onProgress(i + 1);
   }
-  saveFile(new Blob([zipStore(entries)], { type: "application/zip" }), zipName);
+  // The pieces go into the Blob as they are: the photos aren't copied into one big buffer first.
+  saveFile(new Blob(zipParts(entries), { type: "application/zip" }), zipName);
 }
 
 function DownloadAllButton({ photos, zipName, testId }: { photos: TicketPhoto[]; zipName: string; testId: string }) {
@@ -155,6 +182,7 @@ function PhotoCard({ photo, onRemove, removing }: { photo: TicketPhoto; onRemove
         label={photo.name}
         className="aspect-[4/3] bg-muted"
         imgClassName="size-full object-cover"
+        lazy
         testId="photo-thumb"
       />
       <div className="px-2.5 pt-2 pb-1">
@@ -205,8 +233,25 @@ function PhotoGrid({ photos, onRemove, removing }: { photos: TicketPhoto[]; onRe
 
 function AddPhotos({ busy, onFiles }: { busy: string | null; onFiles: (files: File[]) => void }) {
   const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
+  // The menu closes on Escape or a tap anywhere else.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [open]);
   const pick = (input: HTMLInputElement | null) => {
     setOpen(false);
     input?.click();
@@ -216,7 +261,7 @@ function AddPhotos({ busy, onFiles }: { busy: string | null; onFiles: (files: Fi
     e.target.value = "";
   };
   return (
-    <div className="relative">
+    <div className="relative" ref={boxRef}>
       <button
         type="button"
         disabled={busy != null}
@@ -272,14 +317,23 @@ export function RecordPhotosPanel({ kind, id, className }: { kind: PhotoKind; id
       toast.success("Photo removed");
       invalidatePhotos(qc);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't remove the photo"),
+    onError: (e) => {
+      toast.error(e instanceof Error ? e.message : "Couldn't remove the photo");
+      // It may be gone or moved already: the list as it is now.
+      invalidatePhotos(qc);
+    },
   });
   const closed = q.data?.closed ?? null;
 
   async function onFiles(files: File[]) {
     const pictures = files.filter((f) => f.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name));
-    if (!pictures.length || busy != null || closed) return;
+    if (!pictures.length || closed) return;
+    if (busy != null) {
+      toast.message("Photos are still being added. Add these once they're done.");
+      return;
+    }
     let added = 0;
+    let untried = 0;
     const failed: string[] = [];
     for (let i = 0; i < pictures.length; i += 1) {
       setBusy(pictures.length === 1 ? "Adding the photo…" : `Adding ${i + 1} of ${pictures.length}…`);
@@ -288,15 +342,27 @@ export function RecordPhotosPanel({ kind, id, className }: { kind: PhotoKind; id
         await add.mutateAsync({ kind, id, ...shrunk });
         added += 1;
       } catch (e) {
-        failed.push(`${pictures[i]!.name}: ${e instanceof Error ? e.message : "couldn't be added"}`);
-        // The record is full or closed: the rest wouldn't go either.
-        if (e instanceof Error && /most it can hold|was merged into|isn't on the desk/.test(e.message)) break;
+        const message = e instanceof Error ? e.message : "couldn't be added";
+        if (message === PHOTO_ADDED_ELSEWHERE) {
+          added += 1;
+          continue;
+        }
+        failed.push(`${pictures[i]!.name}: ${message}`);
+        // The record is full, gone or merged: the rest wouldn't go either.
+        if (stopsUploads(message)) {
+          untried = pictures.length - i - 1;
+          break;
+        }
       }
     }
     setBusy(null);
     invalidatePhotos(qc);
     if (added) toast.success(added === 1 ? "Photo added" : `${added} photos added`);
-    if (failed.length) toast.error(failed.slice(0, 3).join("\n") + (failed.length > 3 ? `\n…and ${failed.length - 3} more` : ""));
+    if (failed.length) {
+      const more = failed.length > 3 ? `\n…and ${failed.length - 3} more` : "";
+      const left = untried ? `\n${untried === 1 ? "1 more photo wasn't" : `${untried} more photos weren't`} tried.` : "";
+      toast.error(failed.slice(0, 3).join("\n") + more + left);
+    }
   }
 
   const hasFiles = (e: DragEvent) => Array.from(e.dataTransfer.types).includes("Files");
