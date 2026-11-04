@@ -194,6 +194,8 @@ type HeadRow = {
 type Linked = {
   notes: number;
   pings: number;
+  /** Its photos (11/4). */
+  photos: number;
   part_lines: number;
   merged_tickets: number;
   wo_history: number;
@@ -296,6 +298,8 @@ export type InstallMergePreview = {
     invoiceTotal: number;
     notes: number;
     pings: number;
+    /** Its photos (11/4): the install's after the merge, so they show on the account's Photos tab too. */
+    photos: number;
     units: string[];
     partLines: number;
     rebuilds: string[];
@@ -377,6 +381,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       `select
          (select count(*)::int from comments c where c.entity_type in ('service', 'tlc') and c.entity_id = $1) as notes,
          (select count(*)::int from desk_notifications n where n.entity_type in ('service', 'tlc') and n.entity_id = $1) as pings,
+         (select count(*)::int from ticket_photos ph where ph.job_id = $1) as photos,
          (select count(*)::int from ticket_part_lines p
            where p.job_id = $1 or p.job_id in (select s.id from service_jobs s where s.duplicate_of = $1 and s.id <> $1)) as part_lines,
          (select count(*)::int from service_jobs s where s.duplicate_of = $1 and s.id <> $1) as merged_tickets,
@@ -503,6 +508,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
       invoiceTotal: invoiceTotals([...headLines, ...toInvoice], discount).total,
       notes: Number(linked.notes) || 0,
       pings: Number(linked.pings) || 0,
+      photos: Number(linked.photos) || 0,
       units: units.map(unitLabel),
       partLines: Number(linked.part_lines) || 0,
       rebuilds: rebuilds.map((r) => (r.title?.trim() ? `${r.title.trim()} (#${r.id})` : `Rebuild #${r.id}`)),
@@ -529,6 +535,7 @@ const MOVED = `coalesce(' · moved ' || nullif(concat_ws(', ',
     ${counted("lines", "charge line (waiting for approval)", "charge lines (waiting for approval)")},
     ${counted("com", "Ping note", "Ping notes")},
     ${counted("pings", "ping", "pings")},
+    ${counted("photos", "photo", "photos")},
     ${counted("units", "unit", "units")},
     ${counted("parts", "part line", "part lines")},
     ${counted("reb", "rebuild", "rebuilds")},
@@ -637,6 +644,12 @@ export function mergeTicketIntoInstallSql(): string {
       from ok
      where n.entity_type in ('service', 'tlc') and n.entity_id = ok.job_id
     returning n.id
+  ), photos as (
+    -- Its photos (11/4) are the install's now: they show on its Photos tab and the account's, named as install photos.
+    update ticket_photos p set install_id = ok.install_id, job_id = null
+      from ok
+     where p.job_id = ok.job_id
+    returning p.id
   ), units as (
     -- Units pulled onto the ticket are the install's now: the install lists them, and a service purpose becomes Install.
     update assets a
@@ -712,6 +725,7 @@ export function mergeTicketIntoInstallSql(): string {
              'invoiceLines', coalesce((select jsonb_agg(x.id order by x.id) from lines x), '[]'::jsonb),
              'notes', coalesce((select jsonb_agg(x.id order by x.id) from com x), '[]'::jsonb),
              'pings', coalesce((select jsonb_agg(x.id order by x.id) from pings x), '[]'::jsonb),
+             'photos', coalesce((select jsonb_agg(x.id order by x.id) from photos x), '[]'::jsonb),
              'units', coalesce((select jsonb_agg(x.id order by x.id) from units x), '[]'::jsonb),
              'partLines', coalesce((select jsonb_agg(x.id order by x.id) from parts x), '[]'::jsonb),
              'rebuilds', coalesce((select jsonb_agg(x.id order by x.id) from reb x), '[]'::jsonb),
@@ -738,6 +752,7 @@ export function mergeTicketIntoInstallSql(): string {
          (select count(*)::int from lines) as charge_lines,
          (select count(*)::int from com) as notes,
          (select count(*)::int from pings) as pings,
+         (select count(*)::int from photos) as photos,
          (select count(*)::int from units) as units,
          (select count(*)::int from parts) as part_lines,
          (select count(*)::int from reb) as rebuilds,
@@ -755,6 +770,8 @@ export type TicketInstallMergeResult = {
   chargeLines: number;
   notes: number;
   pings: number;
+  /** Photos that went to the install (11/4). */
+  photos: number;
   units: number;
   partLines: number;
   rebuilds: number;
@@ -822,6 +839,7 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
     charge_lines: number;
     notes: number;
     pings: number;
+    photos: number;
     units: number;
     part_lines: number;
     rebuilds: number;
@@ -849,12 +867,29 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
     const again = await planMerge(sql, data.jobId, data.installId, actor);
     throw new Error(again.refusal ?? CHANGED_SINCE_OPENED);
   }
+  // A photo the ticket took just before the merge locked it, which the statement didn't see: it goes to the install too
+  // (the ticket is merged now, so it takes no more).
+  const late = await sql.query<{ id: number }>("update ticket_photos set install_id = $1, job_id = null where job_id = $2 returning id", [Number(r.install_id), Number(r.job_id)]);
+  if (late.length) {
+    // The merge's record and the install's activity name them too.
+    await sql.query(
+      `update ticket_install_merges set moved = jsonb_set(moved, '{photos}', coalesce(moved->'photos', '[]'::jsonb) || $3::jsonb)
+        where id = (select max(id) from ticket_install_merges where job_id = $1 and install_id = $2)`,
+      [Number(r.job_id), Number(r.install_id), JSON.stringify(late.map((x) => Number(x.id)))],
+    );
+    await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'merged', $3)", [
+      Number(r.install_id),
+      actor,
+      `${late.length === 1 ? "1 photo" : `${late.length} photos`} added to the ticket during the merge moved here too`,
+    ]);
+  }
   return {
     jobId: Number(r.job_id),
     installId: Number(r.install_id),
     chargeLines: Number(r.charge_lines),
     notes: Number(r.notes),
     pings: Number(r.pings),
+    photos: Number(r.photos) + late.length,
     units: Number(r.units),
     partLines: Number(r.part_lines),
     rebuilds: Number(r.rebuilds),

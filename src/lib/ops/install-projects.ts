@@ -211,6 +211,8 @@ export type MergeInstallsResult = {
   invoiceMoved: boolean;
   /** WO part lines that went to the keeper. */
   partLines: number;
+  /** Photos that went to the keeper (11/4). */
+  photos: number;
 };
 
 /**
@@ -320,7 +322,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   const detailEnd = stayed ? ` · ${stayed} stayed on #${drop.id}` : "";
 
   // One guarded statement: nothing is written when either install changed or was archived since the reads above.
-  const out = await sql.query<{ ok: number; invoices_moved: number; part_lines: number }>(
+  const out = await sql.query<{ ok: number; invoices_moved: number; part_lines: number; photos: number }>(
     `with lk as (
        -- Both installs locked, in id order, then checked as they are now.
        select id, archived, updated_at::text as updated
@@ -463,6 +465,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        returning v.id
      ), parts_moved as (
        update ticket_part_lines p set install_id = g.keep_id from g where p.install_id = g.drop_id returning p.id
+     ), photos_moved as (
+       -- Its photos (11/4) are the keeper's: they show on its Photos tab and the account's, named by the keeper's WO.
+       update ticket_photos p set install_id = g.keep_id from g where p.install_id = g.drop_id returning p.id
      ), tickets_moved as (
        -- Tickets merged into the drop point at the keeper: their window opens it, and a later import finds it.
        update service_jobs s set merged_install_id = g.keep_id, updated_at = now() from g where s.merged_install_id = g.drop_id returning s.id
@@ -470,7 +475,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        update installs d set archived = true, duplicate_of = g.keep_id, updated_at = now() from g where d.id = g.drop_id returning d.id
      ), logged as (
        insert into activity (entity_type, entity_id, actor_name, action, detail)
-       select 'install', g.keep_id, $5, 'merged', $16 || case when exists (select 1 from inv_move) then ' · its invoice' else '' end || $19 from g
+       select 'install', g.keep_id, $5, 'merged', $16 || case when exists (select 1 from inv_move) then ' · its invoice' else '' end
+              || (select case count(*) when 0 then '' when 1 then ' · 1 photo' else ' · ' || count(*)::text || ' photos' end from photos_moved) || $19 from g
        union all
        -- liveInstallIds (ticket-install-merge.ts) reads this line to tell a merge from a removal: keep its wording.
        select 'install', g.drop_id, $5, 'merged', 'merged into install #' || g.keep_id::text from g
@@ -486,7 +492,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
               + (select count(*)::int from act) + (select count(*)::int from pings) + (select count(*)::int from dropped)
               + (select count(*)::int from logged) + (select count(*)::int from tickets_moved) as touched,
             (select count(*)::int from inv_move) as invoices_moved,
-            (select count(*)::int from parts_moved) as part_lines`,
+            (select count(*)::int from parts_moved) as part_lines,
+            (select count(*)::int from photos_moved) as photos`,
     [
       keepId,
       dropId,
@@ -516,6 +523,16 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     throw e;
   });
   if (!out[0]?.ok) throw new Error((await mergeInvoiceRefusal(sql, keepId, dropId)) ?? "One of the installs changed since this window opened. Open it again and retry.");
+  // A photo the drop took just before the merge locked it, which the statement didn't see: it goes to the keeper too
+  // (the drop is archived now, so it takes no more).
+  const latePhotos = await sql.query<{ id: number }>("update ticket_photos set install_id = $1 where install_id = $2 returning id", [keepId, dropId]);
+  if (latePhotos.length) {
+    await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'merged', $3)", [
+      keepId,
+      actor,
+      `${latePhotos.length === 1 ? "1 photo" : `${latePhotos.length} photos`} added to install #${dropId} during the merge moved here too`,
+    ]);
+  }
   // The keeper's visit reads its list again (the same load the window runs), without taking anything off.
   await syncInstallUnits(sql, keepId);
   return {
@@ -528,6 +545,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     notes: !!drop.notes?.trim(),
     invoiceMoved: Number(out[0].invoices_moved) > 0,
     partLines: Number(out[0].part_lines) || 0,
+    photos: (Number(out[0].photos) || 0) + latePhotos.length,
   };
 }
 

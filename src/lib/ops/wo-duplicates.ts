@@ -511,6 +511,13 @@ export function mergeTicketsSql(): string {
       from g
      where a.job_id = g.extra_id
     returning a.id
+  ), photos as (
+    -- Its photos (11/4) are the keeper's, with the keeper's own in the order they were taken.
+    update ticket_photos p
+       set job_id = g.keeper_id
+      from g
+     where p.job_id = g.extra_id
+    returning p.id
   ), dup as (
     update service_jobs s
        set duplicate_of = g.keeper_id, updated_at = now()
@@ -530,6 +537,7 @@ export function mergeTicketsSql(): string {
              || ' · moved ' || (select count(*)::text from chg) || ' charge line'
              || case when (select count(*) from chg) = 1 then '' else 's' end
              || case when (select count(*) from quo) > 0 then ' and the repair quote' else '' end
+             || (select case count(*) when 0 then '' when 1 then ' · 1 photo' else ' · ' || count(*)::text || ' photos' end from photos)
              -- The extra's P.O. when the keeper didn't take it: it has another, or it is invoiced or billed on a Sales
              -- Order and keeps its own, even a blank one (11/2).
              || case
@@ -563,6 +571,7 @@ export function mergeTicketsSql(): string {
          (select count(*)::int from act_move) as activity_moved,
          (select count(*)::int from pings) as notifications,
          (select count(*)::int from ast) as assets,
+         (select count(*)::int from photos) as photos,
          (select count(*)::int from dup) as duplicates,
          (select count(*)::int from merged) as noted,
          (select count(*)::int from pms) as pms_moved,
@@ -628,6 +637,17 @@ export async function mergeServiceJobs(
       ? mergeMoneyRefusal(again.keeper, again.extra, preferCustomer(keeper.customer, againExtra?.customer ?? extra.customer))
       : null;
     return { refused: raced ?? CHANGED_WHILE_MERGING };
+  }
+  // A photo the extra took just before the merge locked it, which the statement didn't see: it goes to the keeper too
+  // (the extra is merged now, so it takes no more), and the keeper's activity says so.
+  const late = await sql.query<{ id: number }>("update ticket_photos set job_id = $1 where job_id = $2 returning id", [keeper.id, extra.id]);
+  if (late.length) {
+    await sql.query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'merged', $4)", [
+      keeper.kind,
+      keeper.id,
+      actor,
+      `${late.length === 1 ? "1 photo" : `${late.length} photos`} added to #${extra.id} during the merge moved here too`,
+    ]);
   }
   return { keeperId: keeper.id, extraId: extra.id };
 }

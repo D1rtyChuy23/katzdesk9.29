@@ -47,6 +47,8 @@ import { TechSelect } from "./tech-select";
 import { SerialNoticeBanner, SerialPullField } from "./serial-notice";
 import { UnitPlaceField } from "./unit-place-field";
 import { SheetTabs } from "./sheet-tabs";
+import { RecordPhotosPanel } from "./photos-panel";
+import { useRecordPhotos, useSeenTab } from "./photo-queries";
 import { AccountEquipmentList, HistoryRow, pendingSchedules, useAccountEquipment } from "./account-history";
 import { ModuleRecord } from "./module-record";
 import { PmSheet } from "./entity-sheets";
@@ -60,13 +62,14 @@ import { PoFields } from "./po-fields";
 import { poFromForm } from "./po-form";
 
 /** The ticket's categories, one per tab, in this order. Only a ticket with a customer has tabs. */
-export type TicketTab = "ticket" | "equipment" | "invoicing" | "schedules" | "ping";
+export type TicketTab = "ticket" | "equipment" | "invoicing" | "schedules" | "photos" | "ping";
 
 const TICKET_TABS: { id: TicketTab; label: string }[] = [
   { id: "ticket", label: "Ticket" },
   { id: "equipment", label: "Equipment" },
   { id: "invoicing", label: "Invoicing" },
   { id: "schedules", label: "Schedules" },
+  { id: "photos", label: "Photos" },
   { id: "ping", label: "Ping" },
 ];
 
@@ -164,6 +167,8 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["account-invoices"] });
       void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
+      // The extra's photos are the keeper's now.
+      void qc.invalidateQueries({ queryKey: ["photos"] });
       if (row?.id && row.id !== activeId) showTicket(row.id);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -226,9 +231,13 @@ export function JobSheet({
     enabled: pmPick != null && pmPick.forId === activeId && !openPmFromHistory && (accountId == null || history.isFetched),
   });
   const openPm = openPmFromHistory ?? openPmFetch.data ?? null;
+  // Photos (11/4): the tab's count, and the panel once the tab has been opened on this ticket.
+  const photos = useRecordPhotos("job", j?.id, !!j && !mergedAway);
+  const photosSeen = useSeenTab(tab === "photos", j?.id);
   const tabCount = (t: TicketTab): number | null => {
     if (t === "equipment") return accountEquip.data?.length ?? null;
     if (t === "schedules") return schedules.length || null;
+    if (t === "photos") return photos.data?.photos.length || null;
     if (t === "ping") return comments.data?.length || null;
     return null;
   };
@@ -330,7 +339,7 @@ export function JobSheet({
         ? { ...old, duplicateOf: old.id, mergedInstallId: r.installId, mergedInstallAt: new Date().toISOString(), mergedInstallBy: r.mergedBy, mergedBilledOn: r.billedOn, done: true, siblings: [] }
         : old,
     );
-    for (const key of ["jobs", "job", "installs", "comments", "invoice", "account-invoices", "activity", "assets", "dashboard", "customer-history", "notifications", "ticket-install-matches"]) {
+    for (const key of ["jobs", "job", "installs", "comments", "invoice", "account-invoices", "activity", "assets", "dashboard", "customer-history", "notifications", "ticket-install-matches", "photos"]) {
       void qc.invalidateQueries({ queryKey: [key] });
     }
   }
@@ -584,6 +593,10 @@ export function JobSheet({
                           </section>
                         </Tabs.Content>
 
+                        <Tabs.Content value="photos" forceMount={photosSeen || undefined} className={KEEP_MOUNTED} data-testid="ticket-panel-photos">
+                          <RecordPhotosPanel kind="job" id={j.id} key={`photos-job-${j.id}`} />
+                        </Tabs.Content>
+
                         <Tabs.Content value="ping" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-ping">
                           <Thread entityType={j.kind} entityId={j.id} />
                         </Tabs.Content>
@@ -595,6 +608,7 @@ export function JobSheet({
                         <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
                         <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
                         <JobPulledUnits jobId={j.id} />
+                        <RecordPhotosPanel kind="job" id={j.id} key={`photos-job-${j.id}`} className="border-b border-border" />
                         <Thread entityType={j.kind} entityId={j.id} />
                       </>
                     )}

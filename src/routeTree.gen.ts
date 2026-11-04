@@ -43,6 +43,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiLibraryFileTokenRouteImport } from './routes/api/library-file/$token'
 import { Route as ApiPartImageIdRouteImport } from './routes/api/part-image/$id'
 import { Route as ApiPartPhotoSourceIdRouteImport } from './routes/api/part-photo-source/$id'
+import { Route as ApiTicketPhotoIdRouteImport } from './routes/api/ticket-photo/$id'
 import { Route as AppInstallsInstallIdPrintRouteImport } from './routes/_app/installs_.$installId.print'
 
 const AppRoute = AppRouteImport.update({
@@ -214,6 +215,11 @@ const ApiPartPhotoSourceIdRoute = ApiPartPhotoSourceIdRouteImport.update({
   path: '/api/part-photo-source/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTicketPhotoIdRoute = ApiTicketPhotoIdRouteImport.update({
+  id: '/api/ticket-photo/$id',
+  path: '/api/ticket-photo/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppInstallsInstallIdPrintRoute =
   AppInstallsInstallIdPrintRouteImport.update({
     id: '/installs_/$installId/print',
@@ -255,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
   '/api/part-photo-source/$id': typeof ApiPartPhotoSourceIdRoute
+  '/api/ticket-photo/$id': typeof ApiTicketPhotoIdRoute
   '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
 }
 export interface FileRoutesByTo {
@@ -291,6 +298,7 @@ export interface FileRoutesByTo {
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
   '/api/part-photo-source/$id': typeof ApiPartPhotoSourceIdRoute
+  '/api/ticket-photo/$id': typeof ApiTicketPhotoIdRoute
   '/installs/$installId/print': typeof AppInstallsInstallIdPrintRoute
 }
 export interface FileRoutesById {
@@ -329,6 +337,7 @@ export interface FileRoutesById {
   '/api/library-file/$token': typeof ApiLibraryFileTokenRoute
   '/api/part-image/$id': typeof ApiPartImageIdRoute
   '/api/part-photo-source/$id': typeof ApiPartPhotoSourceIdRoute
+  '/api/ticket-photo/$id': typeof ApiTicketPhotoIdRoute
   '/_app/installs_/$installId/print': typeof AppInstallsInstallIdPrintRoute
 }
 export interface FileRouteTypes {
@@ -367,6 +376,7 @@ export interface FileRouteTypes {
     | '/api/library-file/$token'
     | '/api/part-image/$id'
     | '/api/part-photo-source/$id'
+    | '/api/ticket-photo/$id'
     | '/installs/$installId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/api/library-file/$token'
     | '/api/part-image/$id'
     | '/api/part-photo-source/$id'
+    | '/api/ticket-photo/$id'
     | '/installs/$installId/print'
   id:
     | '__root__'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/api/library-file/$token'
     | '/api/part-image/$id'
     | '/api/part-photo-source/$id'
+    | '/api/ticket-photo/$id'
     | '/_app/installs_/$installId/print'
   fileRoutesById: FileRoutesById
 }
@@ -452,6 +464,7 @@ export interface RootRouteChildren {
   ApiLibraryFileTokenRoute: typeof ApiLibraryFileTokenRoute
   ApiPartImageIdRoute: typeof ApiPartImageIdRoute
   ApiPartPhotoSourceIdRoute: typeof ApiPartPhotoSourceIdRoute
+  ApiTicketPhotoIdRoute: typeof ApiTicketPhotoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -694,6 +707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPartPhotoSourceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ticket-photo/$id': {
+      id: '/api/ticket-photo/$id'
+      path: '/api/ticket-photo/$id'
+      fullPath: '/api/ticket-photo/$id'
+      preLoaderRoute: typeof ApiTicketPhotoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/installs_/$installId/print': {
       id: '/_app/installs_/$installId/print'
       path: '/installs/$installId/print'
@@ -775,6 +795,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLibraryFileTokenRoute: ApiLibraryFileTokenRoute,
   ApiPartImageIdRoute: ApiPartImageIdRoute,
   ApiPartPhotoSourceIdRoute: ApiPartPhotoSourceIdRoute,
+  ApiTicketPhotoIdRoute: ApiTicketPhotoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

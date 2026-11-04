@@ -191,6 +191,27 @@ export function customerKey(name: string | null | undefined): string {
   return (name ?? "").trim().toLowerCase();
 }
 
+/**
+ * The sales rep saved on one account, matched as accountRepFor matches it, read without the table setup
+ * loadAccountMarks runs first (its ALTER TABLE locks the table). For checks made on every request, such as a photo's
+ * address (11/4).
+ */
+export async function accountRepOf(sql: Sql, customer: string | null | undefined): Promise<string | null> {
+  const rows = await sql.query<{ name: string; account_rep: string | null }>(
+    "select name, account_rep from directory_customers where archived = false and account_rep is not null and account_rep <> ''",
+  );
+  const rep = new Map<string, string>();
+  const repLoose = new Map<string, string>();
+  for (const r of rows) {
+    const k = (r.name ?? "").trim().toLowerCase();
+    if (!k || !r.account_rep) continue;
+    rep.set(k, r.account_rep);
+    const loose = normalizeCustomerKey(r.name);
+    if (loose && !repLoose.has(loose)) repLoose.set(loose, r.account_rep);
+  }
+  return accountRepFor({ ak: new Set(), rep, repLoose, acct: new Map() }, customer);
+}
+
 /** The sales rep saved on a customer account, matching the name loosely. */
 export function accountRepFor(marks: AccountMarks, customer: string | null | undefined): string | null {
   return marks.rep.get(customerKey(customer)) ?? marks.repLoose.get(normalizeCustomerKey(customer)) ?? null;

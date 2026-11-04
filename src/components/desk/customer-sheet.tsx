@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { SheetTabs } from "./sheet-tabs";
+import { AccountPhotosPanel } from "./photos-panel";
+import { listAccountPhotos } from "@/lib/ops/ticket-photos";
 import { listAccountInvoices } from "@/lib/ops/invoice-api";
 import { InvoiceWindow } from "@/components/desk/invoice-window";
 import type { InvoiceTarget } from "@/lib/ops/invoice";
@@ -54,7 +56,7 @@ import {
 
 export type { HistoryKind };
 
-type AccountTab = "details" | "equipment" | "tickets" | "invoices" | "pre-inspection";
+type AccountTab = "details" | "equipment" | "tickets" | "invoices" | "pre-inspection" | "photos";
 
 /** The account's categories, one per tab, in this order. */
 const ACCOUNT_TABS: { id: AccountTab; label: string; short?: string }[] = [
@@ -62,8 +64,10 @@ const ACCOUNT_TABS: { id: AccountTab; label: string; short?: string }[] = [
   { id: "equipment", label: "Equipment" },
   { id: "tickets", label: "Tickets" },
   { id: "invoices", label: "Invoices" },
-  // "Pre-Insp." on phones under 375px, so five tabs with counts fit across.
+  // "Pre-Insp." on phones under 375px; the tabs scroll sideways there once Photos is added.
   { id: "pre-inspection", label: "Pre-Inspection", short: "Pre-Insp." },
+  // The account's install photos (Chuy, 11/4); a ticket's photos stay on the ticket.
+  { id: "photos", label: "Photos" },
 ];
 
 const FILTERS: { id: "all" | Exclude<HistoryKind, "recipe">; label: string }[] = [
@@ -116,6 +120,12 @@ export function CustomerHistorySheet({
   const [inspectId, setInspectId] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess(), enabled: customerId != null });
+  // The Photos tab's count: the account's install photos.
+  const accountPhotos = useQuery({
+    queryKey: ["photos", "account", customerId],
+    queryFn: () => listAccountPhotos({ data: { customerId: customerId! } }),
+    enabled: customerId != null,
+  });
 
   useEffect(() => {
     setSelectedKey(null);
@@ -207,6 +217,7 @@ export function CustomerHistorySheet({
     if (t === "equipment") return accountEquip.data?.length ?? null;
     if (t === "tickets") return counts.all || null;
     if (t === "pre-inspection") return openInstalls.reduce((n, i) => n + (i.inspection?.machineCount ?? 0), 0) || null;
+    if (t === "photos") return accountPhotos.data?.total || null;
     return null;
   };
 
@@ -287,7 +298,7 @@ export function CustomerHistorySheet({
                   <div className="mt-4">
                     <ProviderDispatchBlock customer={data.name} assignable />
                   </div>
-                  {/* Recipes are not a tab of their own: the account has the five tabs, and its recipes sit under Details. */}
+                  {/* Recipes are not a tab of their own: the account has its six tabs, and its recipes sit under Details. */}
                   <div className="mt-4" data-testid="account-recipes">
                   <CustomerRecipes
                     customer={data.name}
@@ -376,6 +387,10 @@ export function CustomerHistorySheet({
                     onOpen={(id) => setInspectId((cur) => (cur === id ? null : id))}
                     alwaysOpen
                   />
+                </Tabs.Content>
+
+                <Tabs.Content value="photos" className="p-5 outline-none" data-testid="account-panel-photos">
+                  <AccountPhotosPanel customerId={data.id} />
                 </Tabs.Content>
               </SheetTabs>
             ) : (

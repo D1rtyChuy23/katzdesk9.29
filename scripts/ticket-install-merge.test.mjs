@@ -188,6 +188,7 @@ test("a ticket and an install with one WO: the confirm names the install kept an
     invoiceTotal: 312.5,
     notes: 2,
     pings: 1,
+    photos: 0,
     units: ["Test Brewer SN TB-1", "Test Grinder"],
     partLines: 2,
     rebuilds: [`Test brewer rebuild (#${reb})`],
@@ -208,7 +209,7 @@ test("a ticket and an install with one WO: the confirm names the install kept an
   }
 
   const r = await merge(sql, jobId, installId, p.stamps);
-  assert.deepEqual(r, { jobId, installId, chargeLines: 2, notes: 2, pings: 1, units: 2, partLines: 2, rebuilds: 1, mergedTickets: 1, mergedBy: "boss", billedOn: null });
+  assert.deepEqual(r, { jobId, installId, chargeLines: 2, notes: 2, pings: 1, photos: 0, units: 2, partLines: 2, rebuilds: 1, mergedTickets: 1, mergedBy: "boss", billedOn: null });
 
   // The ticket: hidden (its own duplicate), marked merged and done, its record kept as it was.
   const t = await one(pg, "select duplicate_of, merged_install_id, merged_install_by, merged_install_at, done, status, issue, wo, customer from service_jobs where id = $1", [jobId]);
@@ -255,7 +256,7 @@ test("a ticket and an install with one WO: the confirm names the install kept an
   ]);
   const log = await one(pg, "select job_id, install_id, merged_by, note, moved from ticket_install_merges");
   assert.deepEqual([log.job_id, log.install_id, log.merged_by, log.note], [jobId, installId, "boss", p.note]);
-  assert.deepEqual(Object.keys(log.moved).sort(), ["billedInvoices", "billedLines", "billedOn", "billedSo", "billedTotal", "charges", "invoiceId", "invoiceLines", "notes", "partLines", "pings", "rebuilds", "ticketPo", "tickets", "units"]);
+  assert.deepEqual(Object.keys(log.moved).sort(), ["billedInvoices", "billedLines", "billedOn", "billedSo", "billedTotal", "charges", "invoiceId", "invoiceLines", "notes", "partLines", "photos", "pings", "rebuilds", "ticketPo", "tickets", "units"]);
   // Not billed on a Sales Order: nothing billed is kept for the install to list.
   assert.deepEqual([log.moved.billedOn, log.moved.billedSo, log.moved.billedInvoices, log.moved.billedLines, log.moved.billedTotal], [null, null, null, null, null]);
   assert.deepEqual([log.moved.charges.length, log.moved.invoiceId, log.moved.invoiceLines.length, log.moved.units, log.moved.tickets], [2, h.id, 2, [unit, loaner], [kid]]);

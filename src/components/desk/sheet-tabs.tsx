@@ -21,7 +21,8 @@ const PHONE_SCROLL_CUE =
  * The tab chrome of a sheet window (the account window and the ticket window): one tab per category, a tab list
  * that stays on top while the panel scrolls and scrolls sideways on a phone, an underline on the open tab, and an
  * optional count after a label. Panels are Radix `Tabs.Content` children. On a phone the tabs are tight (small padding,
- * a small gap before a count, 13px labels and 12px below 375px) so five tabs with counts fit across without scrolling.
+ * a small gap before a count, 13px labels and 12px below 375px) so five tabs with counts fit across without scrolling; with
+ * six (a window with Photos, 11/4) the list scrolls sideways, and the shadow at its edge says so.
  */
 export function SheetTabs<T extends string>({
   value,
