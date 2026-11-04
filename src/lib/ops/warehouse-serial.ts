@@ -85,6 +85,28 @@ export function clearWarehouseSerial<T extends { equipment: string; serial: stri
   return { rows: changed ? next : rows, changed };
 }
 
+/**
+ * Clear a unit's serial from the rows of its model only (11/3): Unlink clears the deal's copy of a unit that stays with
+ * the install. A row of another model with the same serial isn't that unit.
+ */
+export function clearUnitSerial<T extends { equipment: string; serial: string }>(
+  rows: T[],
+  unit: { model: string; serial: string | null | undefined },
+  catalog: string[] = [],
+): { rows: T[]; changed: boolean } {
+  const key = serialKey(unit.serial);
+  const model = String(unit.model ?? "").trim();
+  if (!key || !model) return { rows, changed: false };
+  let changed = false;
+  const next = rows.map((r) => {
+    if (serialKey(r.serial) !== key) return r;
+    if (!sameWarehouseModel(r.equipment, model) && !readsAsModel(r.equipment, model, catalog)) return r;
+    changed = true;
+    return { ...r, serial: "" };
+  });
+  return { rows: changed ? next : rows, changed };
+}
+
 /** Copy serials the server just stored onto blank rows the window already has. */
 export function absorbWarehouseSerials<T extends SerialMachine>(local: T[], server: T[]): T[] {
   const next = local.map((r) => ({ ...r }));

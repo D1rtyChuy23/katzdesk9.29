@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { clearWarehouseSerial, placeWarehouseSerial } from "../src/lib/ops/warehouse-serial.ts";
+import { clearUnitSerial, clearWarehouseSerial, placeWarehouseSerial } from "../src/lib/ops/warehouse-serial.ts";
 
 const g9 = (serial) => ({ equipment: "Bunn G9-2T HD", serial, powerVoltage: "" });
 const axiom = (serial) => ({ equipment: "Bunn Axiom Twin APS", serial, powerVoltage: "", plug: "kept" });
@@ -35,6 +35,21 @@ test("unassign clears only the serial that came from the unit", () => {
   assert.equal(rows[0].serial, "");
   assert.equal(rows[1].serial, "TYPED-BY-HAND");
   assert.equal(rows[2].serial, "AX-1");
+});
+
+test("Unlink's clear takes a unit's serial off the rows of its model only, the model under a longer name too", () => {
+  const rows = [
+    { equipment: 'Bunn ITCB-DV, 29" w/Flip Tray', serial: "IT-1", powerVoltage: "" },
+    g9("IT-1"),
+    { equipment: "Bunn ITCB", serial: "TYPED-BY-HAND", powerVoltage: "", plug: "kept" },
+  ];
+  const { rows: next, changed } = clearUnitSerial(rows, { model: "Bunn ITCB", serial: " it-1" });
+  assert.equal(changed, true);
+  assert.deepEqual(next.map((r) => r.serial), ["", "IT-1", "TYPED-BY-HAND"]);
+  assert.equal(next[2].plug, "kept");
+  // A unit with no serial, or none of its model's rows with its serial: the rows come back as they were.
+  assert.equal(clearUnitSerial(rows, { model: "Bunn ITCB", serial: " " }).rows, rows);
+  assert.equal(clearUnitSerial(rows, { model: "Mazzer Robur S", serial: "IT-1" }).changed, false);
 });
 
 test("a blank warehouse serial writes nothing", () => {
