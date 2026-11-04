@@ -210,6 +210,12 @@ test("an install's photos: added, listed and named in order; removing one renumb
     const act = await one(pg, "select entity_type, entity_id, actor_name, detail from activity where entity_type = 'install' order by id desc limit 1");
     assert.deepEqual(act, { entity_type: "install", entity_id: i, actor_name: "tess", detail: `photo removed: ${CAFE} - install - WO-7101 (1).jpg (added by tess)` });
     await assert.rejects(P.removeRecordPhotoFor(sql, "u-tech", { photoId: first.id }), { message: "That photo was removed already." });
+    // A photo in the middle is named by its place when it's removed.
+    const mid = await add(sql, "u-tech", "install", i, 4);
+    const last = await add(sql, "u-tech", "install", i, 5);
+    await P.removeRecordPhotoFor(sql, "u-owner", { photoId: mid.id });
+    assert.equal((await one(pg, "select detail from activity where entity_type = 'install' order by id desc limit 1")).detail, `photo removed: ${CAFE} - install - WO-7101 (2).jpg (added by tess)`);
+    await P.removeRecordPhotoFor(sql, "u-tech", { photoId: last.id });
     // An Admin removes anyone's.
     await P.removeRecordPhotoFor(sql, "u-admin", { photoId: second.id });
     assert.deepEqual(await names(sql, "install", i), []);
@@ -529,6 +535,8 @@ test("the screens: a Photos tab on the install, ticket and PM windows and on the
   assert.match(panel, /href=\{photoSrc\(photo\.id, "download"\)\}\n\s+download=\{photo\.name\}/);
   assert.match(panel, /src=\{photoSrc\(photo\.id, "thumb"\)\}\n\s+fullSrc=\{photoSrc\(photo\.id\)\}/);
   assert.match(src("src/components/desk/photo-queries.ts"), /return as === "thumb" \? `\/api\/ticket-photo\/\$\{id\}\?size=thumb` : as === "download" \? `\/api\/ticket-photo\/\$\{id\}\?download=1` : `\/api\/ticket-photo\/\$\{id\}`;/);
+  assert.match(panel, /const res = await fetch\(photoSrc\(p\.id\), \{ credentials: "same-origin" \}\);/, "Download all fetches each photo, not its preview");
+  assert.match(panel, /\{data\.groups\.length > 1 && g\.photos\.length > 1 \? \(/, "one install: the tab's Download all only");
   // The account's tab is for looking and downloading: its grids have no Remove.
   assert.match(panel, /<PhotoGrid photos=\{g\.photos\} \/>/);
   const lightbox = src("src/components/desk/image-lightbox.tsx");

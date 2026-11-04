@@ -398,7 +398,10 @@ export function AccountPhotosPanel({ customerId }: { customerId: number }) {
                   {[g.date ? formatLongDate(g.date) : null, g.status, g.equipment].filter(Boolean).map((v) => ` · ${v}`).join("")}
                 </span>
               </p>
-              {g.photos.length > 1 ? <DownloadAllButton photos={g.photos} zipName={g.zipName} testId="account-photos-group-download" /> : null}
+              {/* With one install, the tab's own Download all is the same .zip. */}
+              {data.groups.length > 1 && g.photos.length > 1 ? (
+                <DownloadAllButton photos={g.photos} zipName={g.zipName} testId="account-photos-group-download" />
+              ) : null}
             </div>
             <PhotoGrid photos={g.photos} />
           </section>
