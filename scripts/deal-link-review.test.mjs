@@ -256,6 +256,24 @@ test("a save that read the deal before a handoff tied its rows doesn't untie the
     const uid2 = JSON.parse((await one(pg, "select machines from installs where id = $1", [made2.installId])).machines)[0].uid;
     assert.equal(JSON.parse((await one(pg, "select machines from deals where id = $1", [d2])).machines)[0].uid, uid2);
     assert.equal((await one(pg, "select notes from deals where id = $1", [d2])).notes, "Called");
+    // The rows changed after every read: the save stops and says so, and writes nothing.
+    const d6 = await deal(pg, { customer: "Test Shop 6", machines: BREWER });
+    let edits = 0;
+    const keptChanging = wrap(async (text, params) => {
+      const rows = await sql.query(text, params);
+      if (/^select \* from deals where id = \$\d+$/.test(text)) {
+        await pg.query("update deals set machines = $2 where id = $1", [d6, JSON.stringify([{ equipment: "Test Brewer TB-1", serial: `TB1-${++edits}`, powerVoltage: "", ownership: "Sold" }])]);
+      }
+      return rows;
+    });
+    await assert.rejects(
+      api.updateDealFor(keptChanging, { id: d6, machines: [{ equipment: "Test Brewer TB-1", serial: "", powerVoltage: "208", ownership: "Sold" }], notes: "Never saved" }, "u-rep"),
+      /^Error: This deal's machines kept changing while it saved\. Open it again and save\.$/,
+    );
+    assert.equal(edits, 3, "read three times");
+    const after6 = await one(pg, "select machines, notes from deals where id = $1", [d6]);
+    assert.equal(after6.notes, null);
+    assert.equal(JSON.parse(after6.machines)[0].serial, "TB1-3", "the rows as the last change left them");
   } finally {
     await pg.close();
   }
@@ -757,6 +775,12 @@ test("a made install merged into the account's install for the same job: the kep
       [m.serial, m.powerVoltage, m.uid, m.ownership, m.plug, m.water, m.recipeId],
       ["SN-1", "120", "u-9", "Leased", "5-15", "Line", 7],
     );
+    // A blank plug is filled too. Two serials for one tie are one machine, and the kept install's serial stays.
+    const sameTie = mergedMachineList(
+      [{ equipment: "Test Brewer TB-1", serial: "SN-1", powerVoltage: "", uid: "u-3" }],
+      [{ equipment: "Test Brewer TB-1", serial: "SN-2", powerVoltage: "", uid: "u-3", plug: "5-20" }],
+    ).list;
+    assert.deepEqual(sameTie.map((r) => [r.serial, r.uid, r.plug]), [["SN-1", "u-3", "5-20"]]);
   } finally {
     await pg.close();
   }
