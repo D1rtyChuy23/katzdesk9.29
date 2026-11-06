@@ -50,6 +50,14 @@ side too: see "Installs and PMs" below.
   link was made keeps the rebuild even when none of its lines can be told apart there (its parts added by hand, or the
   Billing Backfill's NetSuite lines over them): `rebuilds.link_open` (`0120`). A link from before 11/6, or one made
   onto a bill already closed, can be undone. `rebuilds.link_lines` (`0119`) counts what the link moved.
+- Merges move a linked rebuild with its project:
+  - A ticket merged into an install takes the rebuild along. Merged as billed, the ticket keeps its charges, billed:
+    a rebuild linked while that ticket was open stays linked on the install, found by the merge log
+    (`ticket_install_merges.moved`: its id under `rebuilds`, with `billedOn` or `billedSo`).
+  - Onto a bill that's closed and took nothing of it, `link_open` goes back to none, so the rebuild can still be
+    unlinked: a ticket with no charges merged into an install whose invoice is approved, a WO duplicate with no charges
+    merged into a billed ticket, or Merge installs into one whose invoice is approved. Otherwise its lines or invoice
+    move with it, and `link_open` stays.
 - Link and Unlink mark the ticket or install changed (`updated_at`), so a Charges save, a merge, Merge installs or a
   Billing Backfill confirm that read it before stops and asks to look again.
 - `0118` also adds four functions: `invoice_version` (an invoice's "id:approved:saved" stamp), `rebuild_lines_on`

@@ -377,7 +377,15 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), assets_moved as (
        update assets a set install_id = g.keep_id, updated_at = now() from g where a.install_id = g.drop_id returning a.id
      ), rebuilds_moved as (
-       update rebuilds r set install_id = g.keep_id from g where r.install_id = g.drop_id returning r.id
+       -- A linked rebuild bills on the keeper now. A keeper with an approved invoice took no lines from the drop (one
+       -- install takes one invoice), so nothing of the rebuild went on a bill there: its link counts as made onto a
+       -- closed bill (rebuilds.link_open, 11/6) and can go. Otherwise its bill moved with it, and so does the link's.
+       update rebuilds r
+          set install_id = g.keep_id,
+              link_open = case when exists (select 1 from invoices v
+                                             where v.entity_type = 'install' and v.entity_id = g.keep_id and v.approved_at is not null)
+                               then null else r.link_open end
+         from g where r.install_id = g.drop_id returning r.id
      ), form_move as (
        -- What a tech filled in on the drop's Equipment Request Form goes with it when the keeper's form has nothing.
        update install_form_entries f set install_id = g.keep_id, updated_at = now()

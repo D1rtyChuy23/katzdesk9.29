@@ -290,12 +290,38 @@ async function linesElsewhere(sql: Sql, rebuildId: number, t: LinkTarget): Promi
   return v ? `${v.entity_type === "install" ? "install" : v.entity_type} #${v.entity_id}'s invoice` : null;
 }
 
+/** SQL: a ticket merged into an install as billed took rebuild `rb` along (the merge log's rebuilds and billedOn). */
+const BILLED_MERGE = (rb: string) =>
+  `(select m.id from ticket_install_merges m
+     where m.moved->'rebuilds' @> to_jsonb(${rb}) and coalesce(m.moved->>'billedOn', m.moved->>'billedSo') is not null
+     order by m.id desc limit 1)`;
+
+/** The billed ticket whose merge into an install brought this rebuild along, as a phrase, or null. */
+async function billedVia(sql: Sql, rebuildId: number): Promise<string | null> {
+  const m = (
+    await sql.query<{ id: number; call_id: string | null; job_id: number; billed_on: string | null }>(
+      `select m.id, m.job_id, j.call_id, coalesce(m.moved->>'billedOn', m.moved->>'billedSo') as billed_on
+         from ticket_install_merges m left join service_jobs j on j.id = m.job_id
+        where m.id = ${BILLED_MERGE("$1::int")}`,
+      [rebuildId],
+    )
+  )[0];
+  return m ? `ticket ${m.call_id?.trim() || `#${m.job_id}`} (billed on ${m.billed_on})` : null;
+}
+
 async function readCurrent(sql: Sql, r: RebuildRead): Promise<CurrentLink | null> {
   const t: LinkTarget | null = r.install_id != null ? { kind: "install", id: r.install_id } : r.job_id != null ? { kind: "job", id: r.job_id } : null;
   if (!t) return null;
   const project = await readProject(sql, t);
   if (!project) return null;
-  return { ...project, ...(await linesOn(sql, r.id, t)), moved: r.link_lines, linkedOpen: r.link_open, elsewhere: await linesElsewhere(sql, r.id, t) };
+  return {
+    ...project,
+    ...(await linesOn(sql, r.id, t)),
+    moved: r.link_lines,
+    linkedOpen: r.link_open,
+    billedVia: r.link_open && t.kind === "install" ? await billedVia(sql, r.id) : null,
+    elsewhere: await linesElsewhere(sql, r.id, t),
+  };
 }
 
 async function suggestionsFor(sql: Sql, account: string): Promise<{ target: LinkTarget; label: string }[]> {
@@ -347,7 +373,7 @@ async function viewOf(sql: Sql, st: LinkState, viewer: Viewer): Promise<RebuildL
   const hide = !!viewer.refusal;
   const current: CurrentLink | null =
     st.current && hide
-      ? { ...st.current, closed: null, po: null, discount: null, netsuite: null, stamp: "", lines: 0, total: 0, moved: 0, linkedOpen: false, elsewhere: null }
+      ? { ...st.current, closed: null, po: null, discount: null, netsuite: null, stamp: "", lines: 0, total: 0, moved: 0, linkedOpen: false, billedVia: null, elsewhere: null }
       : st.current;
   return {
     id: st.rebuild.id,
@@ -558,7 +584,7 @@ export function linkRebuildSql(): string {
        update rebuilds r
           set install_id = case when done.t = 'install' then done.target_id end,
               job_id = case when done.t = 'job' then done.target_id end,
-              account = done.account, po = done.po, link_lines = done.n, link_open = done.open, updated_at = now()
+              account = done.account, po = done.po, link_lines = done.n, link_open = case when done.open then true end, updated_at = now()
          from done
         where r.id = done.id
        returning r.id, r.account, done.old_account
@@ -592,7 +618,7 @@ export function linkRebuildSql(): string {
  */
 export function unlinkRebuildSql(): string {
   return `with rb as (
-       select r.id, r.account, r.po, r.install_id, r.job_id, coalesce(r.link_lines, 0) as link_lines, coalesce(r.link_open, false) as link_open
+       select r.id, r.account, r.po, r.install_id, r.job_id, coalesce(r.link_open, false) as link_open
          from rebuilds r
         where r.id = $1::int and coalesce(r.archived, false) = false
           and r.install_id is not distinct from $2::int and r.job_id is not distinct from $3::int
@@ -625,6 +651,8 @@ export function unlinkRebuildSql(): string {
                    and ($6::int = 0 or (oj.duplicate_of is null and oj.merged_install_id is null)))
                or ($6::int = 0 and not rb.link_open))
           and (ohead.id is null or ohead.approved_at is null or ($6::int = 0 and not rb.link_open))
+          -- A ticket merged into the install as billed brought it here while its link was open: it stays.
+          and not (rb.link_open and ${BILLED_MERGE("rb.id")} is not null)
      ), taken as (
        select t.* from ok cross join lateral take_rebuild_lines(ok.id, ok.job_id, ok.head_id) t
      ), back as (

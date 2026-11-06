@@ -409,8 +409,12 @@ export function mergeTicketsSql(): string {
      where q.job_id = g.extra_id
     returning q.id
   ), reb as (
+    -- A linked rebuild bills on the keeper now. Onto a billed keeper the extra brought no charges, so nothing of the
+    -- rebuild went on a bill there: its link counts as made onto a closed bill (rebuilds.link_open, 11/6) and can go.
     update rebuilds r
-       set job_id = g.keeper_id
+       set job_id = g.keeper_id,
+           link_open = case when nullif(btrim(g.keeper_so), '') is not null or coalesce(ticket_live_ns_invoices(g.keeper_id), '') <> ''
+                            then null else r.link_open end
       from g
      where r.job_id = g.extra_id
     returning r.id

@@ -199,7 +199,12 @@ test("what a link does, or why it can't: the rules alone", () => {
   assert.deepEqual(R.planLink(linked, null), {
     ok: true,
     steps: ["unlink"],
-    effects: ["Its 2 lines ($315.00) come off the ticket's charges and back onto its own invoice, approved by you.", `Its account (${CAFE}) and Customer P.O. stay as they are.`],
+    effects: [
+      "Its 2 lines ($315.00) come off the ticket's charges and back onto its own invoice, approved by you.",
+      // Parts put on the open ticket by hand carry no key: they stay and bill there (11/6 review, round 3).
+      "Any of its parts added on the ticket's charges by hand stay there and bill there. To bill them on its own invoice, take them off first.",
+      `Its account (${CAFE}) and Customer P.O. stay as they are.`,
+    ],
     lines: 2,
     total: 315,
   });
@@ -215,7 +220,11 @@ test("what a link does, or why it can't: the rules alone", () => {
   );
   const untouched = R.planLink({ ...linked, current: { ...current, lines: 0, moved: 0, linkedOpen: false, closed: "is billed on SO-T-2" } }, null);
   assert.equal(untouched.ok, true);
-  assert.equal(untouched.effects[1], "Service ticket SC-1 is billed on SO-T-2: any of its parts added there by hand stay billed there.");
+  assert.deepEqual(untouched.effects, [
+    "None of its lines are on WO-4321 (Service ticket SC-1)'s bill.",
+    "Service ticket SC-1 is billed on SO-T-2: any of its parts added there by hand stay billed there.",
+    `Its account (${CAFE}) and Customer P.O. stay as they are.`,
+  ]);
   const approvedInstall = { ...current, kind: "install", name: "Install #9", lines: 0, moved: 0, closed: "has an approved invoice" };
   assert.equal(R.planLink({ ...linked, current: approvedInstall }, null).refusal, "Install #9 has an approved invoice, and it was linked while that bill was open, so it stays linked: anything of it billed there stays billed.");
   assert.equal(R.planLink({ ...linked, current: { ...approvedInstall, linkedOpen: false } }, null).ok, true);
@@ -229,12 +238,31 @@ test("what a link does, or why it can't: the rules alone", () => {
   assert.deepEqual(relink.steps, ["unlink", "link"]);
   assert.deepEqual(relink.effects, [
     "It leaves WO-4321 (Service ticket SC-1): its 2 lines there come off the ticket's charges.",
+    "Any of its parts added on the ticket's charges by hand stay there and bill there. To bill them on WO-5001 (Install #9), move them there by hand.",
     "Its invoice's 2 lines ($315.00) go on the install's invoice, waiting for an Admin to approve it.",
   ]);
+  // A closed bill says nothing of hand-added parts on a move: the move is refused, or nothing of it went there.
+  assert.deepEqual(R.planLink({ ...linked, current: { ...current, lines: 0, moved: 0, linkedOpen: false, closed: "is billed on SO-T-5" } }, other).effects, [
+    "It leaves WO-4321 (Service ticket SC-1).",
+    "It has no invoice lines yet. Its parts and labor are billed on the install's invoice from now on.",
+  ]);
+  // It came to an install with a ticket merged in as billed: it stays, as on that ticket (11/6 review, round 3).
+  const viaMerge = { ...approvedInstall, closed: null, linkedOpen: true, billedVia: "ticket SC-9 (billed on SO-T-6)" };
+  assert.equal(R.planLink({ ...linked, current: viaMerge }, null).refusal, "This rebuild came here when ticket SC-9 (billed on SO-T-6) was merged in, so it stays linked: what was billed there stays billed.");
+  assert.equal(R.planLink({ ...linked, current: viaMerge }, t).refusal, "This rebuild came here when ticket SC-9 (billed on SO-T-6) was merged in, so it stays linked: what was billed there stays billed.");
+  assert.equal(R.planLink({ ...linked, current: { ...viaMerge, linkedOpen: false } }, null).ok, true, "a link made onto the billed ticket put nothing there");
+  assert.equal(R.planLink({ ...linked, current: { ...viaMerge, closed: "has an approved invoice" } }, null).refusal, "This rebuild came here when ticket SC-9 (billed on SO-T-6) was merged in, so it stays linked: what was billed there stays billed.");
   // A move to another WO checks the unlink first: lines billed on the old project stay there.
   assert.equal(
     R.planLink({ ...linked, current: { ...current, closed: "is billed on SO-T-4" } }, other).refusal,
     "Service ticket SC-1 is billed on SO-T-4, so this rebuild's 2 lines there stay billed, and it stays linked.",
+  );
+  // Its own lines can't go on a closed bill: Unlink, and Warehouse's saved invoice still needs an Admin after that.
+  const billedT = { ...t, closed: "is billed on SO-T-7" };
+  assert.equal(R.planLink({ ...linked, current: { ...current, lines: 0, moved: 0, linkedOpen: false, closed: "is billed on SO-T-7" }, own }, billedT).refusal, "Service ticket SC-1 is billed on SO-T-7, so this rebuild's 2 lines can't go on it. Unlink it to bill them on its own invoice.");
+  assert.equal(
+    R.planLink({ ...linked, current: { ...current, lines: 0, moved: 0, linkedOpen: false, closed: "is billed on SO-T-7" }, own: { ...own, state: "waiting", lines: 1, total: 45 } }, billedT).refusal,
+    "Service ticket SC-1 is billed on SO-T-7, so this rebuild's 1 line can't go on it. Unlink it, then approve its own invoice (it's waiting for an Admin) to bill it there.",
   );
   // Linked already, its own invoice is locked: the way out starts with Unlink (11/6 review).
   assert.equal(
@@ -418,6 +446,7 @@ test("the ticket's Charges keep the rebuild's lines as its own, and Unlink takes
   );
   assert.deepEqual(v.unlink.effects, [
     "Its 2 lines ($360.00) come off the ticket's charges and back onto its own invoice, approved by you.",
+    "Any of its parts added on the ticket's charges by hand stay there and bill there. To bill them on its own invoice, take them off first.",
     `Its account (${CAFE}) and Customer P.O. stay as they are.`,
   ]);
   const linkedStamp = await stamp();
@@ -533,6 +562,7 @@ test("moving to another WO: the lines leave the ticket and go on the install's i
   const g = await find(sql, rb, "5000");
   assert.deepEqual(g.candidates[0].plan.effects, [
     "It leaves WO-4321 (Service ticket SC-RBL-1): its 2 lines there come off the ticket's charges.",
+    `Any of its parts added on the ticket's charges by hand stay there and bill there. To bill them on WO-5000 (Install #${inst}), move them there by hand.`,
     "Customer P.O.: none → PO-I-1.",
     "Its invoice's 2 lines ($315.00) go on the install's invoice, waiting for an Admin to approve it.",
   ]);
@@ -793,6 +823,130 @@ test("merging the ticket into an install takes the rebuild's lines along, keys a
   assert.equal((await invoiceLines(sql, "install", inst)).length, 0);
 });
 
+test("a ticket merged into an install as billed keeps the rebuild linked there; a merge onto a closed bill that took nothing of it lets it go (11/6 review, round 3)", async () => {
+  const { sql } = await fresh();
+  const { mergeInstallsFor } = await import("../src/lib/ops/install-projects.ts");
+  const { mergeServiceJobs } = await import("../src/lib/ops/wo-duplicates.ts");
+  const flags = (rb) => one(sql, "select install_id, job_id, link_open from rebuilds where id = $1", [rb]);
+  const linkOn = async (rb, wo, target) => {
+    const f = await find(sql, rb, wo);
+    return linkTo(sql, f, f.candidates.find((c) => c.target.kind === target.kind && c.target.id === target.id));
+  };
+  const mergeIn = async (job, inst) => {
+    const p = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId: job, installId: inst });
+    assert.equal(p.refusal ?? null, null);
+    await M.mergeTicketIntoInstallFor(sql, "u-owner", { jobId: job, installId: inst, stamps: p.stamps, billedSo: p.moves.billed?.so ?? "", billedOn: p.moves.billed?.on ?? "" });
+  };
+  const installInvoice = (id, approved) =>
+    sql.query(
+      "insert into invoices (entity_type, entity_id, customer, total, approved_by, approved_at, submitted_by, submitted_at) values ('install', $1, $2, 0, $3, $4, 'wes', now() - interval '2 days')",
+      [id, CAFE, approved ? "chuy" : null, approved ? "2026-11-01T15:00:00Z" : null],
+    );
+  const HAND = "insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, 'TEST-BURR-64', 'Added by hand', 2, 45, 'part', 1)";
+
+  // Linked empty while the ticket was open; its parts went on the ticket's Charges by hand; the ticket was billed on its
+  // SO and merged into the install as billed. The ticket keeps those charges, billed, so the rebuild stays linked.
+  const job = await ticket(sql, { wo: "WO-9701", status: "In progress" });
+  const inst = await install(sql, { wo: "WO-9701" });
+  const rb = await rebuild(sql);
+  await linkOn(rb, "9701", { kind: "job", id: job });
+  await sql.query(HAND, [job]);
+  await sql.query("update service_jobs set ns_so = 'SO-MB-1', updated_at = now() where id = $1", [job]);
+  // Linked after the ticket was billed: nothing could go on it through the link.
+  const late = await rebuild(sql, { title: "Test late refurb" });
+  await linkOn(late, "9701", { kind: "job", id: job });
+  await mergeIn(job, inst);
+  assert.deepEqual(await flags(rb), { install_id: inst, job_id: null, link_open: true });
+  const v = await L.getRebuildLinkFor(sql, rb, "u-owner");
+  assert.equal(v.current.billedVia, "ticket SC-RBL-1 (billed on SO-MB-1)");
+  assert.equal(v.unlink.refusal, "This rebuild came here when ticket SC-RBL-1 (billed on SO-MB-1) was merged in, so it stays linked: what was billed there stays billed.");
+  await assert.rejects(unlink(sql, rb), { message: v.unlink.refusal });
+  // Warehouse sees where it bills, not what it was billed on.
+  assert.equal((await L.getRebuildLinkFor(sql, rb, "u-wh")).current.billedVia, null);
+  // A move to another WO starts with the unlink, so it is refused too.
+  const other = await ticket(sql, { wo: "WO-9702", status: "In progress" });
+  const g = await find(sql, rb, "9702");
+  assert.equal(g.candidates.find((c) => c.target.id === other).plan.refusal, v.unlink.refusal);
+  // Its own invoice stays locked: it bills on the install.
+  assert.match((await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner")).locked, /^This rebuild bills on WO-9701 \(Install #\d+\)/);
+  // The statement keeps it as well: every other check of it passes here.
+  const params = (x, i, w) => [x, i, null, "chuy", w.current.stamp, 0, w.own.version, null, null, null, null, "x", "y"];
+  assert.deepEqual(await sql.query(L.unlinkRebuildSql(), params(rb, inst, v)), []);
+  // The one linked after the bill closed goes.
+  assert.deepEqual(await flags(late), { install_id: inst, job_id: null, link_open: null });
+  const w = await L.getRebuildLinkFor(sql, late, "u-owner");
+  assert.deepEqual([w.current.billedVia, w.unlink.ok], [null, true]);
+  await unlink(sql, late);
+  // The same into an install whose invoice is approved: still the billed ticket's reason, and it stays linked.
+  const jobA = await ticket(sql, { wo: "WO-9711", status: "In progress" });
+  const instA = await install(sql, { wo: "WO-9711" });
+  await installInvoice(instA, true);
+  const rbA = await rebuild(sql, { title: "Test approved-install refurb" });
+  await linkOn(rbA, "9711", { kind: "job", id: jobA });
+  await sql.query(HAND, [jobA]);
+  await sql.query("update service_jobs set ns_so = 'SO-MB-2', updated_at = now() where id = $1", [jobA]);
+  await mergeIn(jobA, instA);
+  assert.deepEqual(await flags(rbA), { install_id: instA, job_id: null, link_open: true });
+  assert.equal((await L.getRebuildLinkFor(sql, rbA, "u-owner")).unlink.refusal, "This rebuild came here when ticket SC-RBL-3 (billed on SO-MB-2) was merged in, so it stays linked: what was billed there stays billed.");
+
+  // A ticket with no charges merged into an install whose invoice is approved: nothing of the rebuild went anywhere,
+  // so it can go (it would stay linked for good otherwise). Onto an open invoice, its link stays made while open.
+  for (const approved of [true, false]) {
+    const j2 = await ticket(sql, { wo: approved ? "WO-9801" : "WO-9811", status: "Scheduled" });
+    const i2 = await install(sql, { wo: approved ? "WO-9801" : "WO-9811" });
+    await installInvoice(i2, approved);
+    const r2 = await rebuild(sql, { title: `Test merged refurb ${approved}` });
+    await linkOn(r2, approved ? "9801" : "9811", { kind: "job", id: j2 });
+    await mergeIn(j2, i2);
+    assert.deepEqual(await flags(r2), { install_id: i2, job_id: null, link_open: approved ? null : true });
+    const x = await L.getRebuildLinkFor(sql, r2, "u-owner");
+    assert.equal(x.unlink.ok, true);
+    if (approved) assert.equal(x.unlink.effects[1], `Install #${i2} has an approved invoice: any of its parts added there by hand stay billed there.`);
+    else {
+      // Once that invoice is approved, it stays: its parts may be on it by hand.
+      await sql.query("update invoices set approved_by = 'chuy', approved_at = now() where entity_type = 'install' and entity_id = $1", [i2]);
+      assert.match((await L.getRebuildLinkFor(sql, r2, "u-owner")).unlink.refusal, /^Install #\d+ has an approved invoice, and it was linked while that bill was open, so it stays linked/);
+    }
+  }
+
+  // A WO duplicate with no charges merged into a keeper billed on its SO or a NetSuite invoice, the same; onto an open
+  // keeper, its link stays made while open.
+  for (const billed of ["so", "invoice", null]) {
+    const wo = `WO-99${billed === "so" ? "01" : billed === "invoice" ? "02" : "03"}`;
+    const keeper = await ticket(sql, { wo, status: "In progress", so: billed === "so" ? "SO-K-1" : null });
+    if (billed === "invoice") {
+      await sql.query("insert into ticket_invoices (job_id, ns_invoice, invoice_date, status, total, amount_remaining, source) values ($1, 'INV-K-1', '2026-10-22', 'Open', 90, 90, 'standalone')", [keeper]);
+    }
+    const extra = await ticket(sql, { wo, status: "In progress" });
+    const r3 = await rebuild(sql, { title: `Test duplicate refurb ${billed}` });
+    await linkOn(r3, wo.slice(3), { kind: "job", id: extra });
+    assert.equal((await flags(r3)).link_open, true);
+    const out = await mergeServiceJobs(sql, keeper, extra, "chuy");
+    assert.equal(out?.refused, undefined);
+    assert.deepEqual(await flags(r3), { install_id: null, job_id: keeper, link_open: billed ? null : true });
+    assert.equal((await L.getRebuildLinkFor(sql, r3, "u-owner")).unlink.ok, true);
+  }
+
+  // Merge installs into a keeper whose invoice is approved, the same; into one whose invoice is open, it stays made while open.
+  for (const approved of [true, false]) {
+    const keep = await install(sql, { wo: approved ? "WO-9601" : "WO-9611" });
+    const drop = await install(sql, { wo: approved ? "WO-9602" : "WO-9612" });
+    await installInvoice(keep, approved);
+    const r4 = await rebuild(sql, { title: `Test install-merge refurb ${approved}` });
+    await linkOn(r4, approved ? "9602" : "9612", { kind: "install", id: drop });
+    assert.equal((await flags(r4)).link_open, true);
+    await mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: drop });
+    assert.deepEqual(await flags(r4), { install_id: keep, job_id: null, link_open: approved ? null : true });
+    assert.equal((await L.getRebuildLinkFor(sql, r4, "u-owner")).unlink.ok, true);
+  }
+
+  // Had the first merge not been billed, nothing would keep its rebuild: the merge log is what does.
+  await sql.query("update ticket_install_merges set moved = moved - 'billedOn' - 'billedSo' where job_id = $1", [job]);
+  const u = await L.getRebuildLinkFor(sql, rb, "u-owner");
+  assert.deepEqual([u.current.billedVia, u.unlink.ok], [null, true]);
+  assert.equal((await sql.query(L.unlinkRebuildSql(), params(rb, inst, u))).length, 1);
+});
+
 test("the plain Save never changes the link, and a linked rebuild's account follows its project", async () => {
   const { sql } = await fresh();
   const rb = await rebuild(sql, { status: "Queued" });
@@ -869,7 +1023,7 @@ test("what its link put on the bill is kept: set on Link, back to none on Unlink
   const k = await find(sql, late, "4321");
   assert.equal(k.candidates[0].plan.effects.at(-1), "Service ticket SC-RBL-1 is billed on SO-T-11, so nothing more can be billed there.");
   await linkTo(sql, k, k.candidates[0]);
-  assert.deepEqual(await one(sql, "select link_lines, link_open from rebuilds where id = $1", [late]), { link_lines: 0, link_open: false });
+  assert.deepEqual(await one(sql, "select link_lines, link_open from rebuilds where id = $1", [late]), { link_lines: 0, link_open: null }, "none, as 0120 says");
   const w = await L.getRebuildLinkFor(sql, late, "u-owner");
   assert.equal(w.unlink.ok, true);
   assert.equal(w.unlink.effects[1], "Service ticket SC-RBL-1 is billed on SO-T-11: any of its parts added there by hand stay billed there.");
