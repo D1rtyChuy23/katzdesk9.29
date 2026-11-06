@@ -662,7 +662,9 @@ test("its held units follow it to the project's account, and a unit the owner lo
 test("the rebuild sheet: a WO box with Find instead of the old list, its account locked while linked, and Link saving the form first", () => {
   const sheet = src("src/components/desk/rebuild-sheet.tsx");
   assert.ok(!sheet.includes("listRebuildLinks"), "the old same-account list is gone");
-  assert.ok(!/installId,\s*\n\s*jobId,/.test(sheet), "the plain Save sends no link");
+  const saveCall = sheet.slice(sheet.indexOf("const save = useMutation({"), sheet.indexOf("onSuccess: (next) => {"));
+  assert.match(saveCall, /updateRebuild\(\{/);
+  assert.ok(!/installId|jobId/.test(saveCall), "the plain Save sends no link");
   assert.match(sheet, /<RebuildLinkField row=\{row\} canEdit=\{canEdit\} dirty=\{dirty\} saveFirst=\{saveFirst\} key=\{`link-\$\{row\.id\}`\} \/>/);
   assert.match(sheet, /\) : linkedTo \? \(\n\s+\/\/ Linked to a ticket or an install \(11\/6\), it bills there: its account is that project's\./);
   assert.match(sheet, /Follows \{linkedTo\}\. Unlink it below to change the account\./);
