@@ -1451,7 +1451,7 @@ test("its invoice on a Sales Order: Link asks, and yes keeps its lines on it, no
   // Its own Invoice window: locked, saying the lines stay on it, and billed as it was approved (not the ticket's account).
   const lock = "This rebuild bills on WO-4321 (Service ticket SC-RBL-1): its parts and labor go on the ticket's charges. Open the ticket to change them. Its own invoice's 2 lines stay on it: it's on a Sales Order in NetSuite.";
   const view = await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner");
-  assert.deepEqual([view.locked, view.lines.length, view.billTo.name, view.po, view.asApproved], [lock, 2, SHOP, "PO-OLD", true]);
+  assert.deepEqual([view.locked, view.lines.length, view.billTo.name, view.po, view.asApproved, view.salesOrderNote], [lock, 2, SHOP, "PO-OLD", true, null]);
   await assert.rejects(I.approveInvoiceFor(sql, { type: "rebuild", id: rb, lines: [{ item: "TEST-BURR-64", description: "", qty: 1, rate: 45 }], lineIds: [], discount: null, seen: view.version }, "u-owner"), { message: lock });
   // The ticket's list says where they bill; the old account's Invoices tab keeps it, with the P.O. it was approved with.
   assert.deepEqual(await L.listProjectRebuildsFor(sql, { type: "service", id: job }, "u-owner"), [
@@ -1473,9 +1473,20 @@ test("its invoice on a Sales Order: Link asks, and yes keeps its lines on it, no
   ]);
   await unlink(sql, rb);
   assert.equal((await L.getRebuildLinkFor(sql, rb, "u-owner")).own.onSalesOrder, true);
-  // Unlinked, its window opens again on the account as it is now: an approve would bill that one.
+  // Unlinked, its window opens again on the account as it is now (an approve would bill that one), and says what it was
+  // approved with and what approving it again does (11/6 review). The old account's tab keeps the P.O. it was approved with.
   const open = await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner");
   assert.deepEqual([open.locked, open.billTo.name, open.po, open.asApproved], [null, CAFE, "PO-T-1", false]);
+  assert.equal(
+    open.salesOrderNote,
+    "It's on a Sales Order in NetSuite, approved for Katz shop / stock, P.O. PO-OLD. Approving it again bills it as shown here, and it no longer counts as on its Sales Order: Link asks again.",
+  );
+  // Warehouse can't approve: it reads only what its refurb's invoice was approved with.
+  const sd = await rebuild(sql, { title: "Test SD refurb", account: "Katz Coffee Service Dept." });
+  const sdInv = await ownInvoice(sql, sd, [PARTS[0]], { customer: "Katz Coffee Service Dept." });
+  await sql.query("update invoices set on_sales_order_at = now(), on_sales_order_by = 'chuy', on_sales_order_version = invoice_version('rebuild', $1) where id = $2", [sd, sdInv]);
+  assert.equal((await I.getInvoiceFor(sql, { type: "rebuild", id: sd }, "u-wh")).salesOrderNote, "It's on a Sales Order in NetSuite, approved for Katz Coffee Service Dept. with no P.O.");
+  assert.deepEqual((await I.listAccountInvoicesFor(sql, SHOP, "u-owner")).map((x) => [x.id, x.po]), [[rb, "PO-OLD"]]);
 
   // Linked to another WO, its lines stay without asking. A "not yet" sent anyway is turned down.
   const inst = await install(sql, { wo: "WO-5000" });
@@ -1500,6 +1511,7 @@ test("its invoice on a Sales Order: Link asks, and yes keeps its lines on it, no
   await I.approveInvoiceFor(sql, { type: "rebuild", id: rb, lines: w.lines.map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate })), lineIds: [], discount: null, seen: w.version }, "u-owner");
   const h = await find(sql, rb, "5000");
   assert.deepEqual([h.own.onSalesOrder, h.candidates[0].plan.ok], [false, "ask"]);
+  assert.equal((await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner")).salesOrderNote, null);
   await linkTo(sql, h, h.candidates[0], "u-owner", "not");
   assert.equal((await invoiceLines(sql, "install", inst)).filter((l) => isRebuildLineKey(l.source_key, rb)).length, 2);
   assert.equal(await head(sql, "rebuild", rb), undefined, "its own invoice, and the note with it, is gone");
@@ -1688,6 +1700,39 @@ test("moving to another WO with its invoice on a Sales Order stops if that invoi
   assert.equal((await linkTo(sql, m, m.candidates[0], "u-owner", "on")).message, "Linked to WO-6202 (Service ticket SC-RBL-2). Its invoice's 2 lines stay on it: it's on a Sales Order.");
 });
 
+test("a move to another WO that someone else links in the middle stops there, and leaves their link as it is (11/6 review)", async () => {
+  const { sql } = await fresh();
+  const rb = await rebuild(sql);
+  await ownInvoice(sql, rb, PARTS);
+  const first = await ticket(sql, { wo: "WO-7101", status: "In progress" });
+  const second = await ticket(sql, { wo: "WO-7102", status: "In progress" });
+  const third = await ticket(sql, { wo: "WO-7103", status: "In progress" });
+  const f = await find(sql, rb, "7101");
+  await linkTo(sql, f, f.candidates[0], "u-owner", "not");
+  assert.equal((await charges(sql, first)).length, 2);
+  // Chuy moves it to WO-7102; right after his unlink, Dana links it to WO-7103 (not yet: its lines go there).
+  const g = await find(sql, rb, "7102");
+  assert.deepEqual(g.candidates[0].plan.steps, ["unlink", "link"]);
+  const dana = async () => {
+    const h = await find(sql, rb, "7103", "u-desk");
+    await linkTo(sql, h, h.candidates[0], "u-desk", "not");
+  };
+  const between = Object.assign(async (s, ...v) => sql(s, ...v), {
+    query: async (text, params) => {
+      const rows = await sql.query(text, params);
+      if (text === L.unlinkRebuildSql()) await dana();
+      return rows;
+    },
+  });
+  await assert.rejects(linkTo(between, g, g.candidates[0]), {
+    message: `Unlinked from WO-7101 (Service ticket SC-RBL-1). Its 2 lines ($315.00) are back on its own invoice. It wasn't linked to WO-7102 (Service ticket SC-RBL-2): ${CHANGED_LINK}`,
+  });
+  // Dana's link stands, with the lines: WO-7102 took nothing, and Unlink still works from WO-7103.
+  assert.equal((await RB.rebuildRowOut(sql, rb)).jobId, third);
+  assert.deepEqual([(await charges(sql, first)).length, (await charges(sql, second)).length, (await charges(sql, third)).filter((l) => isRebuildLineKey(l.source_key, rb)).length], [0, 0, 2]);
+  assert.equal((await L.getRebuildLinkFor(sql, rb, "u-owner")).unlink.ok, true);
+});
+
 test("Warehouse and Sales see where a rebuild bills, and nothing of its billing or its invoice", async () => {
   const { sql } = await fresh();
   const rb = await rebuild(sql);
@@ -1741,6 +1786,7 @@ test("the rebuild sheet: a WO box with Find instead of the old list, its account
   // Its Invoice window, on a Sales Order: billed and P.O.'d as approved, and says so.
   const win = src("src/components/desk/invoice-window.tsx");
   assert.match(win, /\{v\.asApproved \? "As approved, on its Sales Order" : "Filled from the account"\}/);
+  assert.match(win, /\{v\.salesOrderNote \? \(\n\s+<p className="rounded-lg border border-warning\/40 bg-warning\/10 px-3 py-2 text-sm" data-testid="invoice-so-note">\n\s+\{v\.salesOrderNote\}/);
   assert.match(win, /\{v\.asApproved \? "The customer's P\.O\. this invoice was approved with\. It's on a Sales Order in NetSuite\." : poNote\(type, v\.canApprove\)\}/);
   assert.match(sheet, /link\.data\?\.own\.onSalesOrder \? ` Its own invoice's \$\{lineCount\(link\.data\.own\.lines\)\} \$\{link\.data\.own\.lines === 1 \? "stays" : "stay"\} on it: it's on a Sales Order in NetSuite\.` : ""/);
   assert.match(src("src/components/desk/project-rebuilds.tsx"), /\{r\.onSalesOrder \? ` · its own invoice's \$\{lineCount\(r\.onSalesOrder\)\} \$\{r\.onSalesOrder === 1 \? "is" : "are"\} on a Sales Order` : ""\}/);

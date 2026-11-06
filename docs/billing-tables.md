@@ -64,7 +64,10 @@ side too: see "Installs and PMs" below.
   - Moving to another WO with its own invoice on a Sales Order is refused while its lines are on the old project: they
     would come back onto that invoice, next to the lines on its Sales Order, with nothing to tell them apart.
   - Linked, its own Invoice window shows the account and P.O. it was approved with (`invoices.customer` and `po`), not
-    the project's, and says its lines stay on it. The project's list of rebuilds billed there says so too.
+    the project's, and says its lines stay on it. The project's list of rebuilds billed there says so too. Unlinked, the
+    window shows what Approve would write now and says what it was approved with, and that approving again stops it
+    counting. The account's Invoices tab lists it with the P.O. it was approved with either way.
+  - Moving to another WO checks, between its unlink and its link, that no one linked it meanwhile (11/6 review).
 - Merges move a linked rebuild with its project:
   - A ticket merged into an install takes the rebuild along. Merged as billed, the ticket keeps its charges, billed:
     a rebuild linked while that ticket was open stays linked, wherever Merge installs takes it after. The merge marks

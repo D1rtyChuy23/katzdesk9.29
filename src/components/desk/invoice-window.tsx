@@ -374,6 +374,12 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
               </section>
             ) : null}
 
+            {/* Unlinked, an invoice on a Sales Order (11/6): what it was approved with, and what approving it again does. */}
+            {v.salesOrderNote ? (
+              <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm" data-testid="invoice-so-note">
+                {v.salesOrderNote}
+              </p>
+            ) : null}
             {v.locked ? (
               <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm" data-testid="invoice-locked">
                 {v.locked}

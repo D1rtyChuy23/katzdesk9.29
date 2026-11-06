@@ -86,6 +86,11 @@ export type InvoiceView = InvoiceTotals &
      */
     asApproved: boolean;
     /**
+     * An unlinked rebuild's own invoice on a Sales Order: what it was approved with, and what approving it again does
+     * (11/6 review). Null otherwise.
+     */
+    salesOrderNote: string | null;
+    /**
      * An install's tickets merged in as billed (10/30): their charges, billed on a Sales Order or on NetSuite invoices.
      * Shown on the install, never part of this invoice's lines or total. Empty on other invoices.
      */
@@ -173,9 +178,9 @@ type Ref = {
   /** The record's Customer P.O. as it is now (11/2): what its invoice carries. */
   po: string | null;
   /**
-   * A linked rebuild whose own invoice is on a Sales Order in NetSuite (0122, Chuy 11/6): the account and P.O. it was
-   * approved with. Its lines bill on that Sales Order, so the window shows them as billed, not the account the link
-   * gave the rebuild since. Null otherwise.
+   * A rebuild whose own invoice is on a Sales Order in NetSuite (0122, Chuy 11/6), as an Admin said at Link and
+   * unchanged since, linked or not: the account and P.O. it was approved with, which its Sales Order bills. Null
+   * otherwise.
    */
   billedAs?: { customer: string; po: string | null } | null;
 };
@@ -287,8 +292,8 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
               onSo,
             )
           : null;
-    // Locked, it can't be approved again: it shows as approved (an approve would bill the account as it is now).
-    const billedAs = locked && onSo ? { customer: (r.own_customer ?? "").trim(), po: poOf(r.own_po) } : null;
+    // What its Sales Order bills, linked or not (11/6 review): the window and the account's Invoices tab say so.
+    const billedAs = onSo ? { customer: (r.own_customer ?? "").trim(), po: poOf(r.own_po) } : null;
     return { type, id, customer: (r.account ?? "").trim(), title: targetTitle(type, { id, title: r.title }), recordRep: null, locked, po: poOf(r.po), billedAs };
   }
   const r = (await sql.query<{ customer: string | null; producer: string | null; po: string | null }>("select customer, producer, po from deals where id = $1 and archived = false", [id]))[0];
@@ -449,11 +454,16 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     lines = h ? await projectLines(sql, h.id) : [];
     discount = h ? toDiscount(h.discount_kind, h.discount_value) : null;
   }
+  const powers = invoicePowers(viewer, { type: ref.type, customer: ref.customer, state });
+  // On a Sales Order (0122): linked, the window is locked and shows it as approved. Unlinked, it shows what Approve
+  // writes now (the account and P.O. as they are), and says what it was approved with and what approving again does
+  // (11/6 review).
+  const asApproved = !!ref.billedAs && !!ref.locked;
   return {
     type: ref.type,
     id,
     title: ref.title,
-    billTo: await billTo(sql, ref.billedAs ? { ...ref, customer: ref.billedAs.customer } : ref),
+    billTo: await billTo(sql, asApproved ? { ...ref, customer: ref.billedAs!.customer } : ref),
     lines,
     discount,
     ...invoiceTotals(lines, discount),
@@ -467,11 +477,22 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     submittedBy: h?.submitted_by ?? null,
     version: h?.version ?? null,
     hasPo: carriesPo(ref.type),
-    po: carriesPo(ref.type) ? (ref.billedAs ? ref.billedAs.po : ref.po) : null,
-    asApproved: !!ref.billedAs,
+    po: carriesPo(ref.type) ? (asApproved ? ref.billedAs!.po : ref.po) : null,
+    asApproved,
+    salesOrderNote: ref.billedAs && !ref.locked ? salesOrderNote(ref.billedAs, powers.canApprove) : null,
     billedElsewhere: ref.type === "install" ? await billedCarryOvers(sql, id) : [],
-    ...invoicePowers(viewer, { type: ref.type, customer: ref.customer, state }),
+    ...powers,
   };
+}
+
+/**
+ * An unlinked rebuild's own invoice on a Sales Order (0122): what it was approved with, and, for someone who can
+ * approve, that approving again bills what the window shows and that it then stops counting as on its Sales Order.
+ */
+function salesOrderNote(as: { customer: string; po: string | null }, canApprove: boolean): string {
+  // "P.O." ends in a period already: the sentence ends with it.
+  const approved = `It's on a Sales Order in NetSuite, approved for ${as.customer || "no account"}${as.po ? `, P.O. ${as.po}.` : " with no P.O."}`;
+  return canApprove ? `${approved} Approving it again bills it as shown here, and it no longer counts as on its Sales Order: Link asks again.` : approved;
 }
 
 

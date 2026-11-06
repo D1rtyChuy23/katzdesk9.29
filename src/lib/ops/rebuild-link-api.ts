@@ -915,6 +915,9 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
     // project's bill, never on a Sales Order, so they move, unless its own invoice stays (then none came back).
     if (plan.steps.includes("unlink")) {
       st = (await readState(sql, data.id))!;
+      // Linked again by someone else since this unlinked it (11/6 review): its lines may be on that project now, and a
+      // link from here would leave them there. The link statement below expects it unlinked too.
+      if (st.current) throw new Error(`${message} It wasn't linked to ${projectLabel(project)}: ${CHANGED}`);
       const again = await planFor(sql, st, project, plan.keepOwn ? "on" : "not");
       if (!again.ok) throw new Error(`${message} It wasn't linked to ${projectLabel(project)}: ${again.refusal}`);
       // Staying on a Sales Order, its own invoice must still be the one the person answered for.
