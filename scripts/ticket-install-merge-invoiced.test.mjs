@@ -337,21 +337,23 @@ test("the Billing Backfill records the merged ticket's own invoices only, and th
   assert.deepEqual((await pg.query("select ns_invoice, status from ticket_invoices where job_id = $1", [jobId])).rows, [{ ns_invoice: INV, status: "Paid In Full" }]);
   assert.deepEqual(await one(pg, "select ns_so, discount_kind, (select count(*)::int from ticket_charges c where c.job_id = j.id) as lines from service_jobs j where id = $1", [jobId]), before);
 
-  // Another invoice (the install's own billing on the WO, say), alone or with its own, never goes on it; nor an SO.
-  const skip = async (f) => {
+  // Another invoice, or an SO, never goes on it: it is the install's own billing on the WO (11/5), and goes there.
+  const where = async (f) => {
     const x = await plan(f);
-    return [x.status, x.jobId, x.reason];
+    return [x.status, x.jobId, x.kind, x.recordId, x.reason];
   };
-  assert.deepEqual(await skip(invoicesFile(invRow("INV9500"))), ["skip", null, `Ticket #${jobId} was merged into install #${installId} as billed on ${ON}; these rows are on INV9500. Skipped.`]);
-  assert.deepEqual(await skip(invoicesFile(invRow(INV), invRow("INV9500"))), [
-    "skip",
-    null,
-    `The rows are on ${INV}, INV9500, and ticket #${jobId} was merged into install #${installId} as billed on ${ON}. Put the rows for ${INV} in a file of their own, then run the Billing Backfill on each.`,
-  ]);
+  assert.deepEqual(await where(invoicesFile(invRow("INV9500"))), ["write", null, "install", installId, null]);
   const soOnly = [WO, "SO9500", "Pending Billing", "", "", "", "", "", "", ""];
-  assert.deepEqual(await skip(invoicesFile(soOnly)), ["skip", null, `Ticket #${jobId} was merged into install #${installId} as billed on ${ON}; these rows are on SO9500. Skipped.`]);
-  assert.equal((await plan(invoicesFile(invRow(INV), soOnly))).status, "skip");
-  // Charges from another invoice, or from a Sales Order not invoiced yet, beside its own invoice: skipped too.
+  assert.deepEqual(await where(invoicesFile(soOnly)), ["write", null, "install", installId, null]);
+  // Beside a row of its own that NetSuite has changed since (Open in the file, Paid In Full on it), the WO waits: that
+  // row is the ticket's to take, in a file of its own.
+  const changed = `${INV} is ticket #${jobId}'s billing (merged into install #${installId} as billed), and NetSuite has changed it since. Put its rows in a file of their own and run that first, so it goes on the ticket; then run the rest.`;
+  assert.deepEqual(await where(invoicesFile(invRow(INV), invRow("INV9500"))), ["skip", null, "install", installId, changed]);
+  assert.deepEqual(await where(invoicesFile(invRow(INV), soOnly)), ["skip", null, "install", installId, changed]);
+  // As it is on the ticket, it is on the install's card already: the install takes its own beside it.
+  const beside = await plan(invoicesFile(invRow(INV, "Paid In Full"), invRow("INV9500")));
+  assert.deepEqual([beside.status, beside.kind, beside.invoices.map((i) => [i.invoice, i.change])], ["write", "install", [[INV, "elsewhere"], ["INV9500", "new"]]]);
+  // Charges from another invoice, or from a Sales Order not invoiced yet, beside its own invoice changed since: the WO waits too.
   const CHARGES_HEAD = ["WO", "Source invoice #", "Source SO #", "PO", "NetSuite customer", "Location", "Item", "Item type", "Description", "Qty", "Rate", "Amount", "Discount Item", "Discount Amount", "Record total (after discount)"];
   const chargesFrom = (inv, so) => file("charges.csv", [CHARGES_HEAD, [WO, inv, so, "", CAFE, "", "Service : SERVICELABOR", "Service", "Labor", "1", "80", "80", "", "", "80"]]);
   for (const [inv, so] of [["INV9500", ""], ["", "SO9500"]]) {
@@ -360,9 +362,16 @@ test("the Billing Backfill records the merged ticket's own invoices only, and th
   }
   // Its own invoice's charges with it are its own.
   assert.equal((await previewBillingBackfillFor(sql, [chargesFrom(INV, ""), invoicesFile(invRow(INV, "Paid In Full"))], "u-owner")).plans[0].jobId, jobId);
-  // A live ticket on the same WO: the other invoice goes to it; its own still go to the merged ticket.
+  // A live ticket on the same WO: the other invoice could be its or the install's (both carry the WO, and the dates fit
+  // both), so it is skipped and says why; its own still go to the merged ticket.
   const live = await ticket(pg, { call_id: "SC-202610-907" });
-  assert.equal((await plan(invoicesFile(invRow("INV9500")))).jobId, live);
+  assert.deepEqual(await where(invoicesFile(invRow("INV9500"))), [
+    "skip",
+    null,
+    null,
+    null,
+    `The WO is on ticket #${live}, install #${installId}, and the invoice date (${TODAY}) fits each of them, so the Backfill can't tell which one NetSuite billed. Skipped. If the ticket is the install's work, merge it into the install first (Merge into install), then run it again.`,
+  ]);
   assert.equal((await plan(invoicesFile(invRow(INV, "Paid In Full")))).jobId, jobId);
   await pg.query("delete from service_jobs where id = $1", [live]);
 
@@ -370,8 +379,8 @@ test("the Billing Backfill records the merged ticket's own invoices only, and th
   const seen = (await one(pg, "select updated_at::text as u from service_jobs where id = $1", [jobId])).u;
   const row = (locked) => [{ job_id: jobId, seen, locked, write_charges: !locked, dk: null, dv: null, set_so: !locked, so: locked ? null : "SO9999", billed_on: null, log: "x" }];
   await pg.query("begin");
-  assert.equal((await pg.query(APPLY_BACKFILL_SQL, [JSON.stringify(row(false)), "[]", "[]", "boss"])).rows[0].go, false);
-  assert.equal((await pg.query(APPLY_BACKFILL_SQL, [JSON.stringify(row(true)), "[]", "[]", "boss"])).rows[0].go, true);
+  assert.equal((await pg.query(APPLY_BACKFILL_SQL, [JSON.stringify(row(false)), "[]", "[]", "boss", "[]", "[]", "[]", "{}"])).rows[0].go, false);
+  assert.equal((await pg.query(APPLY_BACKFILL_SQL, [JSON.stringify(row(true)), "[]", "[]", "boss", "[]", "[]", "[]", "{}"])).rows[0].go, true);
   await pg.query("rollback");
 
   // Voided in NetSuite since the merge: recorded, and the install's Invoice window says its charges may be billed on nothing.

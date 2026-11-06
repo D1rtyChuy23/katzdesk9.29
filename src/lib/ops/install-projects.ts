@@ -213,6 +213,9 @@ export type MergeInstallsResult = {
   partLines: number;
   /** Photos that went to the keeper (11/4). */
   photos: number;
+  /** NetSuite's billing from the Billing Backfill that went to the keeper (11/5): its WOs' lines and SOs, its invoices. */
+  netsuiteWos: number;
+  netsuiteInvoices: number;
 };
 
 /**
@@ -224,6 +227,8 @@ export type MergeInstallsResult = {
  * checks and photos). A drop unit whose twin is on the keeper gives the twin the checks and photos it has none of.
  * Its invoice, its WO part lines, and the tickets merged into it go to the keeper too (10/30), so charges a ticket merge
  * put on the drop's invoice are billed from the keeper (see mergeInvoiceRefusal for when both installs have an invoice).
+ * NetSuite's billing the Billing Backfill put on it (11/5) goes with its WOs: each WO's lines and SO the keeper has none
+ * for, and each NetSuite invoice the keeper doesn't have.
  * The rest stays on the drop, which is archived as a duplicate of the keeper. Nothing is deleted. Admins only.
  */
 export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<typeof mergeInput>): Promise<MergeInstallsResult> {
@@ -322,7 +327,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   const detailEnd = stayed ? ` · ${stayed} stayed on #${drop.id}` : "";
 
   // One guarded statement: nothing is written when either install changed or was archived since the reads above.
-  const out = await sql.query<{ ok: number; invoices_moved: number; part_lines: number; photos: number }>(
+  const out = await sql.query<{ ok: number; invoices_moved: number; part_lines: number; photos: number; ns_wos: number; ns_invoices: number }>(
     `with lk as (
        -- Both installs locked, in id order, then checked as they are now.
        select id, archived, updated_at::text as updated
@@ -468,6 +473,21 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), photos_moved as (
        -- Its photos (11/4) are the keeper's: they show on its Photos tab and the account's, named by the keeper's WO.
        update ticket_photos p set install_id = g.keep_id from g where p.install_id = g.drop_id returning p.id
+     ), ns_wos_moved as (
+       -- NetSuite's billing on its WOs (the Billing Backfill, 11/5) goes with them: a WO the keeper has NetSuite's lines
+       -- and SO for keeps its own. The lines go with their WO's row.
+       update record_ns_billing b set install_id = g.keep_id, updated_at = now()
+         from g
+        where b.install_id = g.drop_id
+          and not exists (select 1 from record_ns_billing k where k.install_id = g.keep_id and k.wo_key = b.wo_key)
+       returning b.id
+     ), ns_invoices_moved as (
+       -- Its NetSuite invoices, each one the keeper doesn't have: the keeper's Invoices tab and the Invoices page count them.
+       update record_ns_invoices x set install_id = g.keep_id, updated_at = now()
+         from g
+        where x.install_id = g.drop_id
+          and not exists (select 1 from record_ns_invoices k where k.install_id = g.keep_id and lower(btrim(k.ns_invoice)) = lower(btrim(x.ns_invoice)))
+       returning x.id
      ), tickets_moved as (
        -- Tickets merged into the drop point at the keeper: their window opens it, and a later import finds it.
        update service_jobs s set merged_install_id = g.keep_id, updated_at = now() from g where s.merged_install_id = g.drop_id returning s.id
@@ -476,7 +496,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), logged as (
        insert into activity (entity_type, entity_id, actor_name, action, detail)
        select 'install', g.keep_id, $5, 'merged', $16 || case when exists (select 1 from inv_move) then ' · its invoice' else '' end
-              || (select case count(*) when 0 then '' when 1 then ' · 1 photo' else ' · ' || count(*)::text || ' photos' end from photos_moved) || $19 from g
+              || (select case count(*) when 0 then '' when 1 then ' · 1 photo' else ' · ' || count(*)::text || ' photos' end from photos_moved)
+              || case when exists (select 1 from ns_wos_moved) or exists (select 1 from ns_invoices_moved) then ' · its NetSuite billing' else '' end
+              || $19 from g
        union all
        -- liveInstallIds (ticket-install-merge.ts) reads this line to tell a merge from a removal: keep its wording.
        select 'install', g.drop_id, $5, 'merged', 'merged into install #' || g.keep_id::text from g
@@ -493,7 +515,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
               + (select count(*)::int from logged) + (select count(*)::int from tickets_moved) as touched,
             (select count(*)::int from inv_move) as invoices_moved,
             (select count(*)::int from parts_moved) as part_lines,
-            (select count(*)::int from photos_moved) as photos`,
+            (select count(*)::int from photos_moved) as photos,
+            (select count(*)::int from ns_wos_moved) as ns_wos,
+            (select count(*)::int from ns_invoices_moved) as ns_invoices`,
     [
       keepId,
       dropId,
@@ -546,6 +570,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     invoiceMoved: Number(out[0].invoices_moved) > 0,
     partLines: Number(out[0].part_lines) || 0,
     photos: (Number(out[0].photos) || 0) + latePhotos.length,
+    netsuiteWos: Number(out[0].ns_wos) || 0,
+    netsuiteInvoices: Number(out[0].ns_invoices) || 0,
   };
 }
 

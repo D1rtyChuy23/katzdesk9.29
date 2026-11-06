@@ -179,7 +179,7 @@ export function MergeInstall({ row, onMerged }: { row: Install; onMerged: (keepI
     mutationFn: (keep: number) => mergeInstalls({ data: { keepId: keep, dropId: row.id } }),
     onSuccess: async (res) => {
       toast.success(
-        `Merged into install #${res.keepId} · ${res.workOrders} WO${res.workOrders === 1 ? "" : "s"}, ${res.machines} machine row${res.machines === 1 ? "" : "s"}, ${res.units} visit unit${res.units === 1 ? "" : "s"}${res.invoiceMoved ? ", its invoice" : ""}${res.partLines ? `, ${res.partLines} WO part line${res.partLines === 1 ? "" : "s"}` : ""}${res.photos ? `, ${res.photos} photo${res.photos === 1 ? "" : "s"}` : ""} moved`,
+        `Merged into install #${res.keepId} · ${res.workOrders} WO${res.workOrders === 1 ? "" : "s"}, ${res.machines} machine row${res.machines === 1 ? "" : "s"}, ${res.units} visit unit${res.units === 1 ? "" : "s"}${res.invoiceMoved ? ", its invoice" : ""}${res.partLines ? `, ${res.partLines} WO part line${res.partLines === 1 ? "" : "s"}` : ""}${res.photos ? `, ${res.photos} photo${res.photos === 1 ? "" : "s"}` : ""}${res.netsuiteWos || res.netsuiteInvoices ? ", its NetSuite billing" : ""} moved`,
       );
       changed();
       // The window opens the install kept next: read the board first, so it shows the notes the merge put together.

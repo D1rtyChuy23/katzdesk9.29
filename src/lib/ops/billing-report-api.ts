@@ -9,7 +9,9 @@ import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access"
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { loadChargeNets, loadInvoices, summarizeBilling } from "@/lib/ops/ticket-billing-api";
-import { locationWarning, matchesBillingFilters, type BoardKey, type DateBy } from "@/lib/ops/billing-rules";
+import { loadRecordBillingRows, loadRecordBillings, type RecordBilling } from "@/lib/ops/record-billing-api";
+import { isVoidedStatus, locationWarning, matchesBillingFilters, type BoardKey, type DateBy } from "@/lib/ops/billing-rules";
+import { woMatchKey } from "@/lib/ops/corrigo";
 import {
   accountLocationCheck,
   windowFilterRow,
@@ -147,10 +149,18 @@ export const listTicketBilling = createServerFn({ method: "POST" })
 
 export type AdminReport<T> = { forbidden: true; rows: [] } | { forbidden: false; rows: T };
 
-/** The Invoices page: every service and TLC ticket with its billing (merged tickets left out). Admin only. */
+/** Completed newest first, then received newest first: the order the Invoices page lists every board in. */
+const byDone = (a: TicketBillingRow, b: TicketBillingRow) =>
+  (b.completed ?? "").localeCompare(a.completed ?? "") || (b.received ?? "").localeCompare(a.received ?? "") || b.id - a.id;
+
+/**
+ * The Invoices page: every service and TLC ticket (merged ones left out), and since 11/5 every install on the board and
+ * PM not stacked on a ticket, with its billing. Admin only.
+ */
 export async function invoicesReportFor(sql: Q, userId: string): Promise<AdminReport<TicketBillingRow[]>> {
   if (!(await canReviewNames(sql as Sql, userId))) return { forbidden: true, rows: [] };
-  return { forbidden: false, rows: await loadTicketBillingRows(sql) };
+  const [tickets, records] = await Promise.all([loadTicketBillingRows(sql), loadRecordBillingRows(sql)]);
+  return { forbidden: false, rows: [...tickets, ...records].sort(byDone) };
 }
 
 export const getInvoicesReport = createServerFn({ method: "POST" })
@@ -199,6 +209,9 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
       note,
     });
   }
+  // Installs' and unstacked PMs' own NetSuite billing (11/5): their SOs, invoices and invoiced dates.
+  const recordIds = async (table: "pm_jobs" | "installs") => (await sql.query<{ id: number }>(`select id from ${table}`)).map((r) => Number(r.id));
+  const recordBilling = await loadRecordBillings(sql, want.has("install") ? await recordIds("installs") : [], want.has("pm") ? await recordIds("pm_jobs") : []);
   if (want.has("pm")) {
     const pms = await sql.query<{
       id: number;
@@ -216,8 +229,10 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
          from pm_jobs order by completed_at desc nulls last, received desc nulls last, id desc`,
     );
     for (const p of pms) {
-      // A PM stacked on a ticket bills on that ticket: its SO and invoices are the ticket's.
+      // A PM stacked on a ticket bills on that ticket: its SO and invoices are the ticket's. Otherwise its own.
       const on = p.stacked_job_id ? byId.get(Number(p.stacked_job_id)) : undefined;
+      const own = p.stacked_job_id ? undefined : recordBilling.get(`pm:${Number(p.id)}`);
+      const billing = on ?? own;
       rows.push({
         board: "pm",
         id: Number(p.id),
@@ -227,9 +242,9 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
         status: p.status,
         received: p.received,
         completed: p.completed,
-        so: on?.so ?? null,
-        invoices: on ? on.invoices.map((i) => ({ invoice: i.invoice, status: i.status, date: i.date })) : [],
-        invoicedDates: on?.invoicedDates ?? [],
+        so: billing?.so ?? null,
+        invoices: billing ? billing.invoices.map((i) => ({ invoice: i.invoice, status: i.status, date: i.date })) : [],
+        invoicedDates: billing?.invoicedDates ?? [],
         serviceLocation: p.service_location,
         note: p.stacked_job_id ? `Billed on ticket #${p.stacked_job_id}` : null,
       });
@@ -259,11 +274,15 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
         where i.duplicate_of is null
         order by coalesce(w.completed_at, i.completed_at) desc nulls last, i.id desc, w.id`,
     );
+    // Each install's WO rows, by match key: a row shows its own WO's NetSuite billing.
+    const keysOf = new Map<number, Set<string>>();
+    for (const i of installs) keysOf.set(Number(i.id), (keysOf.get(Number(i.id)) ?? new Set<string>()).add(woMatchKey(i.wo ?? "")));
     for (const i of installs) {
       const notes = [
         Number(i.wo_count) > 1 ? `WO ${i.wo_index} of ${i.wo_count} on this install` : null,
         i.archived ? "Archived install" : null,
       ].filter(Boolean);
+      const own = installWoBilling(recordBilling.get(`install:${Number(i.id)}`), woMatchKey(i.wo ?? ""), keysOf.get(Number(i.id))!, Number(i.wo_index) === 1);
       rows.push({
         board: "install",
         id: Number(i.id),
@@ -273,15 +292,31 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
         status: i.status ?? "",
         received: i.received,
         completed: i.completed,
-        so: null,
-        invoices: [],
-        invoicedDates: [],
+        ...own,
         serviceLocation: null,
         note: notes.join(" · ") || null,
       });
     }
   }
   return rows;
+}
+
+/**
+ * An install's NetSuite billing on one of its WO rows (11/5 review): that WO's Sales Order and invoices, and when they
+ * were invoiced. An invoice with no WO, or under a WO no longer on the install, goes on its first row.
+ */
+function installWoBilling(own: RecordBilling | undefined, rowKey: string, keys: Set<string>, first: boolean): Pick<WindowRow, "so" | "invoices" | "invoicedDates"> {
+  if (!own) return { so: null, invoices: [], invoicedDates: [] };
+  const here = (k: string | null | undefined) => (k && keys.has(k) ? k === rowKey : first);
+  const invoices = own.invoiceRows.filter((x) => here(x.woKey));
+  const groups = own.groups.filter((g) => here(g.woKey));
+  const dates = invoices.filter((x) => !isVoidedStatus(x.status)).map((x) => x.date).filter((d): d is string => !!d);
+  const billed = groups.map((g) => g.billedOn).filter((d): d is string => !!d).sort()[0] ?? null;
+  return {
+    so: [...new Set(groups.map((g) => g.so).filter((s): s is string => !!s))].join(", ") || null,
+    invoices: invoices.map((x) => ({ invoice: x.invoice, status: x.status, date: x.date })),
+    invoicedDates: dates.length ? dates : billed ? [billed] : [],
+  };
 }
 
 /** The rows in the window: each board's received, completed or invoiced date (completed when not said) inside it. */
@@ -319,7 +354,8 @@ export const getTicketsInWindow = createServerFn({ method: "POST" })
 
 /**
  * Tickets and PMs whose Corrigo service location isn't their account (it names another account exactly, or no
- * account at all), and invoices billed from a warehouse the tech's rule doesn't allow.
+ * account at all), and NetSuite invoices (tickets', installs' and PMs') billed from a warehouse the tech's rule
+ * doesn't allow.
  */
 export async function loadLocationCheck(sql: Q): Promise<LocationCheckRow[]> {
   const accounts = new Map<string, string>();
@@ -353,11 +389,26 @@ export async function loadLocationCheck(sql: Q): Promise<LocationCheckRow[]> {
       note: check.note,
     });
   }
+  // Tickets' NetSuite invoices, and installs' (on the board) and unstacked PMs' from the Billing Backfill (11/5): the
+  // same records the Invoices page lists.
   const billed = await sql.query<{ board: string; id: number; wo: string | null; customer: string | null; technician: string | null; ns_invoice: string; location: string | null }>(
-    `select case when s.kind = 'tlc' then 'tlc' else 'service' end as board, s.id, s.wo, s.customer, s.technician, i.ns_invoice, i.location
-       from ticket_invoices i join service_jobs s on s.id = i.job_id
-      where nullif(btrim(i.location), '') is not null
-      order by s.id desc, i.id`,
+    `select board, id, wo, customer, technician, ns_invoice, location
+       from (
+         select case when s.kind = 'tlc' then 'tlc' else 'service' end as board, s.id, s.wo, s.customer, s.technician, i.ns_invoice, i.location, 0 as ord, i.id as row_id
+           from ticket_invoices i join service_jobs s on s.id = i.job_id
+          where nullif(btrim(i.location), '') is not null
+         union all
+         select 'install', n.id,
+                coalesce((select w.wo from install_work_orders w where w.install_id = n.id and w.match_key = x.wo_key order by w.id limit 1), n.wo),
+                n.customer, n.technician, x.ns_invoice, x.location, 1, x.id
+           from record_ns_invoices x join installs n on n.id = x.install_id
+          where nullif(btrim(x.location), '') is not null and n.archived = false and n.duplicate_of is null
+         union all
+         select 'pm', m.id, m.wo, m.customer, m.technician, x.ns_invoice, x.location, 2, x.id
+           from record_ns_invoices x join pm_jobs m on m.id = x.pm_id
+          where nullif(btrim(x.location), '') is not null and m.stacked_job_id is null
+       ) b
+      order by ord, id desc, row_id`,
   );
   for (const r of billed) {
     const warning = locationWarning(r.technician, r.location);

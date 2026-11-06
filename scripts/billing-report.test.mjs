@@ -178,7 +178,7 @@ test("the CSVs: the Invoices page per ticket, the Tickets list with billing only
   const rows = await api.loadTicketBillingRows(sql);
   const csv = report.invoicesCsv(rows);
   const [head, first] = csv.trim().split("\r\n");
-  assert.match(head, /^Board,Ticket,WO,Account,Tech,Status,Received,Completed,SO,Billed On,Invoices,Invoice Status,Invoice Dates,/);
+  assert.match(head, /^Board,Record,WO,Account,Tech,Status,Received,Completed,SO,Billed On,Invoices,Invoice Status,Invoice Dates,/);
   assert.match(first, /^Tickets,\d+,WO-\d+,"?'=HYPERLINK/, "a formula is never live in the sheet");
   assert.match(first, /,SO7001,,INV7001,Open,2026-10-16,150\.00,150\.00,25\.00,150\.00,,,$/);
 
