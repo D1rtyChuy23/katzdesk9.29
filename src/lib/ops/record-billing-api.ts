@@ -59,9 +59,21 @@ export async function loadRecordBillings(sql: Q, installIds: number[], pmIds: nu
   const [ns, own] = await Promise.all([loadRecordNsBilling(sql, installIds, pmIds), loadKatzDeskInvoiceNets(sql, installIds, pmIds)]);
   const out = new Map<string, RecordBilling>();
   const keys = [...installIds.map((id) => `install:${id}`), ...pmIds.map((id) => `pm:${id}`)];
+  // Grouped once: the Invoices page reads every install and PM.
+  const group = <T extends { record: string }>(rows: T[]) => {
+    const by = new Map<string, T[]>();
+    for (const r of rows) {
+      const list = by.get(r.record);
+      if (list) list.push(r);
+      else by.set(r.record, [r]);
+    }
+    return by;
+  };
+  const headersBy = group(ns.headers);
+  const invoicesBy = group(ns.invoices);
   for (const key of keys) {
-    const headers: RecordNsHeader[] = ns.headers.filter((h) => h.record === key);
-    const invoices = ns.invoices.filter((i) => i.record === key);
+    const headers = headersBy.get(key) ?? [];
+    const invoices = invoicesBy.get(key) ?? [];
     const katzdesk = own.get(key) ?? null;
     const nsLines = headers.reduce((s, h) => s + h.lines.length, 0);
     const nsNet = Math.round(headers.reduce((s, h) => s + h.net, 0) * 100) / 100;

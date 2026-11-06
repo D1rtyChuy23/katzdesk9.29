@@ -346,7 +346,8 @@ export async function loadRecordNsBilling(sql: Q, installIds: number[], pmIds: n
             b.discount_kind, b.discount_value::text as discount_value
        from record_ns_billing b
       where b.install_id = any($1::int[]) or b.pm_id = any($2::int[])
-      order by b.id`,
+      -- An install's WOs in their order (WO-0831 before WO-0855), whichever was written first.
+      order by b.record_key, length(b.wo_key), b.wo_key, b.id`,
     [installIds, pmIds],
   );
   const lines = heads.length

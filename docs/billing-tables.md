@@ -1,7 +1,8 @@
-# Billing tables: ticket_charges, invoices / invoice_lines, ticket_invoices
+# Billing tables: ticket_charges, invoices / invoice_lines, ticket_invoices, record_ns_*
 
 Written for Grok's billing request through Chuy (item 15, 2026-10-28). Three tables hold billing. They answer three
-different questions and none of them copies another.
+different questions and none of them copies another. Since 11/5 (Grok through Chuy), installs and PMs have NetSuite's
+side too: see "Installs and PMs" below.
 
 | Table | Answers | Rows | Written by | Read by |
 | --- | --- | --- | --- | --- |
@@ -57,9 +58,42 @@ different questions and none of them copies another.
 - **Billed**: a ticket with a Sales Order or a live invoice. Export Billing leaves billed tickets out unless "Include
   billed tickets" is ticked.
 
+## Installs and PMs: record_ns_billing, record_ns_charges, record_ns_invoices (`0116`, 11/5)
+
+What NetSuite billed an install or a PM, brought back by Billing Backfill (NetSuite), Admin only. Read-only in
+KatzDesk: nothing else writes these. Each row is on exactly one install (`install_id`) or one PM (`pm_id`);
+`record_key` ("install:12", "pm:7") is generated from them for the unique indexes and the backfill's upserts.
+
+| Table | Answers | Rows |
+| --- | --- | --- |
+| `record_ns_billing` | One WO's NetSuite billing on the record: Sales Order, billed date, header discount | One per record and WO (an install can carry several WOs) |
+| `record_ns_charges` | That WO's lines as NetSuite billed them (credits netted, as on tickets) | One per line |
+| `record_ns_invoices` | NetSuite's invoices on the record, as `ticket_invoices` holds a ticket's | One per record and invoice number; `wo_key` is the WO it came in on |
+| `billing_backfill_runs` | Each Write of the backfill: who, when, the files, the preview's counts, what was written | One per Write |
+
+- **Matched by WO** the same way as tickets (`woMatchKey`): an install by any of its WOs (`install_work_orders`, or its
+  own `wo`), a PM by its `wo`. A WO on more than one record (a ticket and an install, say) goes by the invoice dates
+  (`invoiceFitsTicket`), as two tickets with one WO always have; when they fit more than one, it is skipped and says
+  why. Skipped too: an install taken off the board or merged into another (its WOs went to the one kept), a PM stacked
+  on a ticket (it bills on that ticket), Walk-In.
+- **Not invoiced yet** (no live invoice on the record for that WO): the WO's lines, discount, SO and billed date, then
+  its invoices. **Invoiced already**: the invoices only (status, total, what's left), as on a locked ticket.
+- **KatzDesk's own invoice** for the install or PM (`invoices` / `invoice_lines`, the Invoice window) is never written
+  by the backfill. It is the record's charges for the checks when it has lines; otherwise NetSuite's lines are.
+  Mismatch = live invoices ≠ charges; possible double bill = two or more live invoices over the charges; both after
+  the header discount, no tax.
+- **Never billed again:** Export Billing reads `ticket_charges` only, so NetSuite's lines on installs and PMs never
+  reach it.
+- **On the card already:** an invoice already on the record (under any of its WOs) is refreshed where it is, never
+  added twice. A ticket merged into the install as billed (10/30) keeps its billing: its Sales Order, invoices and
+  lines in the files are listed as on the install's card already and not written there (a row of it that would change
+  the ticket stops the WO until it is run on its own). The same invoice on another record is written and warned about.
+- **Shown:** the install's and PM's Invoices tab (NetSuite section), the Invoices page (installs on the board, PMs not
+  stacked; an installed install counts as Completed), and Tickets In Window.
+
 ## What is not covered
 
-- NetSuite invoices for PMs, installs, rebuilds and deals: `ticket_invoices` is for service and TLC tickets only. A PM
-  stacked on a ticket bills on that ticket, so its invoice shows there. A table keyed by `(entity_type, entity_id)`
-  would be the way to add the others later.
+- NetSuite invoices for rebuilds and deals.
+- The Invoice window of an install or a PM isn't locked by a NetSuite invoice the way a ticket's charges are. The
+  NetSuite section sits beside it on the same tab.
 - Tax: none on these invoices (Chuy, 10/28). Total = lines + header discount.

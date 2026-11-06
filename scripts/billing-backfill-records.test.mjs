@@ -527,3 +527,71 @@ test("the screens: the install's and PM's Invoices tab, the Invoices page's boar
   assert.deepEqual(bf.BACKFILL_KIND_LABEL, { service: "Ticket", tlc: "TLC", install: "Install", pm: "PM" });
   assert.deepEqual(bf.BACKFILL_STATUS_LABEL, { write: "Will Write", invoices: "Will Write: Invoices Only", same: "Already There", skip: "Skipped" });
 });
+
+test("edges: the billed ticket's own install takes the WO's other rows; an empty own invoice isn't the charges; one install under two spellings of its WO", async () => {
+  const { sql } = await fresh();
+  const CAFE = "Test Edge Cafe";
+  // Two installs carry WO-6201; the billed ticket went into the second.
+  const first = await install(sql, { customer: CAFE, wo: "WO-6201" });
+  const second = await install(sql, { customer: CAFE, wo: "WO-6201" });
+  const t = await ticket(sql, { customer: CAFE, wo: "WO-6201", so: "SO6201" });
+  await sql.query("update service_jobs set duplicate_of = id, merged_install_id = $2 where id = $1", [t, second]);
+  await sql.query("insert into ticket_install_merges (job_id, install_id, moved) values ($1, $2, $3::jsonb)", [t, second, JSON.stringify({ billedOn: "SO6201", billedSo: "SO6201", billedTotal: 100 })]);
+  await sql.query("insert into ticket_invoices (job_id, ns_invoice, ns_so, invoice_date, status, total, amount_remaining, source) values ($1, 'INV6201', 'SO6201', '2026-10-20', 'Open', 100, 100, 'so')", [t]);
+  const mixed = [file("invoices.csv", [INVOICES_HEAD, invoice("WO-6201", "SO6201", "INV6201", "2026-10-20", "Open", 100), invoice("WO-6201", "SO6299", "INV6299", "2026-10-22", "Open", 40)])];
+  const p = (await preview(sql, mixed)).plans[0];
+  assert.deepEqual([p.kind, p.recordId, p.status], ["install", second, "write"], `not #${first}`);
+
+  // A PM with an invoice row in KatzDesk but no lines on it: NetSuite's lines are the charges.
+  const empty = await pm(sql, { customer: CAFE, wo: "WO-6202" });
+  await sql.query("insert into invoices (entity_type, entity_id, customer, total) values ('pm', $1, $2, 0)", [empty, CAFE]);
+  const f = [
+    file("charges.csv", [CHARGES_HEAD, charge("WO-6202", "INV6202", "SO6202", CAFE, "PM KITS : TESTKIT", 1, 120)]),
+    file("invoices.csv", [INVOICES_HEAD, invoice("WO-6202", "SO6202", "INV6202", "2026-10-21", "Open", 120)]),
+  ];
+  const q = (await preview(sql, f)).plans[0];
+  assert.deepEqual([q.amounts.kdSource, q.amounts.kd, q.amounts.nsMismatch], ["netsuite", 120, false]);
+
+  // An install whose own WO and WO row are spelled differently is one install, not two.
+  const spelled = await install(sql, { customer: CAFE, wo: "WO 6203" });
+  await sql.query("insert into install_work_orders (install_id, wo, match_key, source) values ($1, 'WO-6203', '6203', 'desk')", [spelled]);
+  const one6203 = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-6203", "", "INV6203", "2026-10-21", "Open", 5, 5, "")])])).plans[0];
+  assert.deepEqual([one6203.status, one6203.kind, one6203.recordId], ["write", "install", spelled]);
+
+  // A ticket and an install with one WO, the invoice dated far from both: it fits none of them.
+  const oldT = await ticket(sql, { customer: CAFE, wo: "WO-6204", received: "2025-01-02", completed: "2025-01-05" });
+  const newI = await install(sql, { customer: CAFE, wo: "WO-6204", received: "2026-10-01", completed: "2026-10-03" });
+  const far = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-6204", "", "INV6204", "2028-01-15", "Open", 5, 5, "")])])).plans[0];
+  assert.equal(far.reason, `The WO is on ticket #${oldT}, install #${newI}, and the invoice date (2028-01-15) fits none of them (by when each came in and was done). Skipped.`);
+});
+
+test("writes: a charges-only run keeps the WO's SO; one WO's lines replaced, the other's kept; the record touched; a merged install off the Invoices page", async () => {
+  const { sql } = await fresh();
+  const CAFE = "Test Rewrite Cafe";
+  const inst = await install(sql, { customer: CAFE, wo: "WO-6301" });
+  await sql.query("insert into install_work_orders (install_id, wo, match_key, source) values ($1, 'WO-6301', '6301', 'desk'), ($1, 'WO-6302', '6302', 'desk')", [inst]);
+  // Not invoiced yet: an SO with no invoice, and lines, for both WOs.
+  const first = [
+    file("charges.csv", [CHARGES_HEAD, charge("WO-6301", "", "SO6301", CAFE, "EQUIPMENT : TESTA", 1, 100), charge("WO-6302", "", "SO6302", CAFE, "EQUIPMENT : TESTB", 1, 200)]),
+    file("invoices.csv", [INVOICES_HEAD, ["WO-6301", "SO6301", "Pending Billing", "", "", "", "", "", "", ""], ["WO-6302", "SO6302", "Pending Billing", "", "", "", "", "", "", ""]]),
+  ];
+  const seen = (await one(sql, "select updated_at::text as u from installs where id = $1", [inst])).u;
+  await write(sql, first);
+  assert.notEqual((await one(sql, "select updated_at::text as u from installs where id = $1", [inst])).u, seen, "touched, so a save waiting on it sees the change");
+  // WO-6301's lines change (charges file only, no SO in it): its SO stays, WO-6302's lines stay.
+  const again = [file("charges.csv", [CHARGES_HEAD, [...charge("WO-6301", "", "", CAFE, "EQUIPMENT : TESTA", 3, 100)]])];
+  const p = (await preview(sql, again)).plans[0];
+  assert.deepEqual([p.status, p.so.change, p.charges.change], ["write", false, true]);
+  await write(sql, again);
+  const heads = await sql.query(
+    "select b.wo, b.ns_so, string_agg(c.qty::text || 'x' || c.item, ', ' order by c.id) as lines from record_ns_billing b left join record_ns_charges c on c.billing_id = b.id where b.install_id = $1 group by b.id order by b.wo",
+    [inst],
+  );
+  assert.deepEqual(heads.map((h) => [h.wo, h.ns_so, h.lines]), [["WO-6301", "SO6301", "3.00xEQUIPMENT : TESTA"], ["WO-6302", "SO6302", "1.00xEQUIPMENT : TESTB"]]);
+  // The Invoices page: SO, no invoice; a merged install isn't a row.
+  const dropped = await install(sql, { customer: CAFE, wo: "WO-6399", duplicateOf: inst });
+  const rows = (await report.invoicesReportFor(sql, "u-owner")).rows;
+  const r = rows.find((x) => x.board === "install" && x.id === inst);
+  assert.deepEqual([r.so, r.invoices.length, r.chargeNet], ["SO6301, SO6302", 0, 500]);
+  assert.equal(rows.some((x) => x.board === "install" && x.id === dropped), false);
+});
