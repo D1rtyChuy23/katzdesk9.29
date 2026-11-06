@@ -53,6 +53,18 @@ side too: see "Installs and PMs" below.
 - Only an open bill takes a link: a billed ticket, or an install whose invoice is approved, is refused even for a
   rebuild with nothing to move. Linked there, the rebuild could bill nowhere, and its parts could go on that bill by
   hand once it reopened, with nothing to tell them apart.
+- An approved invoice of the rebuild's own may be on a Sales Order in NetSuite already, so Link asks (Chuy, 11/6,
+  migration `0122`). Not yet: its lines move, as above. Yes: they stay on its own invoice, which bills on that Sales
+  Order, and only its later parts and labor go on the project. The answer is kept on the invoice
+  (`invoices.on_sales_order_at`, `_by`, and `_version`, its `invoice_version` then) and counts while the version is
+  the same (`rebuild_invoice_on_so`, read fresh): an approve or a save for approval after it changes the version, and
+  Link asks again. While it counts, Link keeps the lines without asking, and refuses to move them.
+  - A rebuild linked before 11/6, its own invoice still holding lines, gets the same question on its project: yes only
+    notes it.
+  - Moving to another WO with its own invoice on a Sales Order is refused while its lines are on the old project: they
+    would come back onto that invoice, next to the lines on its Sales Order, with nothing to tell them apart.
+  - Linked, its own Invoice window shows the account and P.O. it was approved with (`invoices.customer` and `po`), not
+    the project's, and says its lines stay on it. The project's list of rebuilds billed there says so too.
 - Merges move a linked rebuild with its project:
   - A ticket merged into an install takes the rebuild along. Merged as billed, the ticket keeps its charges, billed:
     a rebuild linked while that ticket was open stays linked, wherever Merge installs takes it after. The merge marks

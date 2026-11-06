@@ -27,6 +27,8 @@ export function ProjectRebuilds({ type, id, inset = false }: { type: "service" |
               <span className="text-xs text-muted-foreground">
                 {" "}
                 · {r.removed ? "off the board" : r.status} · {r.lines ? `${lineCount(r.lines)} (${money(r.total)}) on ${bill}` : "none of its lines here yet"}
+                {/* Its own invoice's lines on a Sales Order in NetSuite (11/6): they bill there, not here. */}
+                {r.onSalesOrder ? ` · its own invoice's ${lineCount(r.onSalesOrder)} ${r.onSalesOrder === 1 ? "is" : "are"} on a Sales Order` : ""}
               </span>
             </span>
             <OpenLink entityType="rebuild" id={r.id} className="text-xs text-primary hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center">

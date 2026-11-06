@@ -67,6 +67,12 @@ export type OwnInvoice = {
   lines: number;
   total: number;
   discount: Discount | null;
+  /**
+   * An Admin said at Link that it's on a Sales Order in NetSuite (Chuy, 11/6), and it hasn't been approved or saved
+   * since (rebuild_invoice_on_so, 0122): its lines stay on it, and only the rebuild's later parts and labor go on the
+   * project.
+   */
+  onSalesOrder: boolean;
 };
 
 export type LinkRebuild = {
@@ -78,10 +84,17 @@ export type LinkRebuild = {
   unitLock: string | null;
 };
 
-/** unlink: the lines come off the project it is linked to; link: its own invoice's lines go on the new one. */
-export type LinkStep = "unlink" | "link";
+/**
+ * unlink: the lines come off the project it is linked to; link: its own invoice's lines go on the new one (or stay on
+ * it, on a Sales Order); note: it's linked there already, and its own invoice is noted as on a Sales Order.
+ */
+export type LinkStep = "unlink" | "link" | "note";
 
-export type LinkPlan =
+/** The answer to Link's question about an approved invoice of its own (Chuy, 11/6): on a Sales Order in NetSuite yet. */
+export type SalesOrderAnswer = "on" | "not";
+
+/** What Link or Unlink does, or why it can't. */
+export type LinkDecision =
   | { ok: false; refusal: string }
   | {
       ok: true;
@@ -91,7 +104,20 @@ export type LinkPlan =
       /** The lines that go on the new project's bill (or back on its own invoice, unlinking). */
       lines: number;
       total: number;
+      /** Its own invoice's lines stay on it: it's on a Sales Order in NetSuite. */
+      keepOwn: boolean;
+      /** Link notes on its own invoice that it's on a Sales Order: the person just said so. */
+      noteOwn: boolean;
     };
+
+export type LinkPlan =
+  | LinkDecision
+  /**
+   * Its own invoice is approved, so it may be on a Sales Order in NetSuite already (Chuy, 11/6): Link asks first, and
+   * says what each answer does. Not yet: its lines move onto the project's bill. Yes: they stay on its own invoice.
+   * Asked only when one of them can link.
+   */
+  | { ok: "ask"; question: string; not: LinkDecision; on: LinkDecision };
 
 export const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 export const lineCount = (n: number) => `${n} line${n === 1 ? "" : "s"}`;
@@ -185,11 +211,12 @@ function unlinkEffects(r: LinkRebuild, c: CurrentLink): string[] {
   if (c.lines > 0) {
     const back = r.own.state === "waiting" ? "its own invoice, which waits for an Admin to approve it" : "its own invoice, approved by you";
     out.push(`Its ${lineCount(c.lines)} (${money(c.total)}) ${verb(c.lines, "come")} off ${billName(c)} and back onto ${back}.`);
+    if (r.own.onSalesOrder) out.push(`${c.lines === 1 ? "It isn't" : "They aren't"} on that invoice's Sales Order: bill ${c.lines === 1 ? "it" : "them"} on a new one.`);
   } else {
     out.push(`None of its lines are on ${projectLabel(c)}'s bill.`);
   }
   out.push(handAdded(c, "To bill them on its own invoice, take them off first."));
-  if (r.own.lines > 0) out.push(`Its own invoice keeps its ${lineCount(r.own.lines)}.`);
+  if (r.own.lines > 0) out.push(`Its own invoice keeps its ${lineCount(r.own.lines)}${r.own.onSalesOrder ? ", on its Sales Order" : ""}.`);
   out.push(`Its account (${r.account.trim() || "none"}) and Customer P.O. stay as they are.`);
   return out;
 }
@@ -224,7 +251,8 @@ function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, a
   return null;
 }
 
-function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] {
+/** The account and Customer P.O. it takes from the project, when they change. */
+function takesFrom(r: LinkRebuild, t: LinkProject): string[] {
   const out: string[] = [];
   const from = r.account.trim();
   const to = t.customer.trim();
@@ -232,11 +260,15 @@ function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] 
   const poFrom = String(r.po ?? "").trim();
   const poTo = String(t.po ?? "").trim();
   if (poFrom !== poTo) out.push(`Customer P.O.: ${poFrom || "none"} → ${poTo || `none (${t.name} has none)`}.`);
+  return out;
+}
+
+function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] {
+  const out = takesFrom(r, t);
   const where = t.kind === "install" ? "the install's invoice, waiting for an Admin to approve it" : billName(t);
   if (own.lines > 0) {
+    // An approved invoice of its own moves only once the person says it isn't on a Sales Order yet (Chuy, 11/6).
     out.push(`Its invoice's ${lineCount(own.lines)} (${money(own.total)}) ${verb(own.lines, "go")} on ${where}.`);
-    // An approved invoice of its own may have been billed in NetSuite by hand: KatzDesk can't tell.
-    if (own.state === "approved") out.push(`If its invoice was billed in NetSuite already, don't link it: ${projectLabel(t)} would bill it again.`);
     if (t.discount) {
       out.push(
         t.discount.kind === "percent"
@@ -251,33 +283,99 @@ function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] 
   return out;
 }
 
+/** "Its invoice's 2 lines ($315.00) stay on it: …": its own invoice, on a Sales Order, keeps them. */
+const staysOnSalesOrder = (own: OwnInvoice, lead = "Its invoice's") =>
+  `${lead} ${lineCount(own.lines)} (${money(own.total)}) ${verb(own.lines, "stay")} on it: it's on a Sales Order in NetSuite.`;
+
+/**
+ * Linking with its own invoice on a Sales Order: its lines stay there, so the bill takes nothing now. Only an open bill
+ * takes a link still: its later parts and labor go there.
+ */
+function keepRefusal(t: LinkProject, unitLock: string | null, accountMoves: boolean): string | null {
+  const bad = targetRefusal(t);
+  if (bad) return bad;
+  if (t.closed) return `${t.name} ${t.closed}, so nothing more can be billed there. Link it to an open ticket or install.`;
+  if (accountMoves && unitLock) return unitLock;
+  return null;
+}
+
+function keepEffects(r: LinkRebuild, t: LinkProject): string[] {
+  return [...takesFrom(r, t), staysOnSalesOrder(r.own), `Its parts and labor from now on are billed on ${billName(t)}.`];
+}
+
+/** Link asks about an approved invoice of its own with lines, unless an Admin already said it's on a Sales Order. */
+const asksSalesOrder = (own: OwnInvoice) => own.state === "approved" && own.lines > 0 && !own.onSalesOrder;
+
 /**
  * What linking the rebuild to `target` does, or why it can't; `target` null unlinks it. Linked elsewhere already, the
  * lines come off that project first (unlink, then link). Linked to `target` already, only its own invoice's lines move
  * (a rebuild linked before 11/6 kept its own invoice).
+ *
+ * An approved invoice of its own may be on a Sales Order in NetSuite already (Chuy, 11/6): with no `answer`, the plan
+ * asks ("ask"), with what each answer does. "not": its lines move, as above. "on": they stay on its own invoice, and the
+ * link takes only its later parts and labor. Once an Admin has said so, and the invoice hasn't changed since, they stay
+ * without asking.
  */
-export function planLink(r: LinkRebuild, target: LinkProject | null): LinkPlan {
+export function planLink(r: LinkRebuild, target: LinkProject | null, answer: SalesOrderAnswer | null = null): LinkPlan {
+  if (target && asksSalesOrder(r.own) && !answer) {
+    const not = decide(r, target, false);
+    const on = decide(r, target, true);
+    // Neither can link: there's nothing to ask.
+    if (!not.ok && !on.ok) return not;
+    return { ok: "ask", question: `Its invoice is approved (${lineCount(r.own.lines)}, ${money(r.own.total)}). Is it on a Sales Order in NetSuite yet?`, not, on };
+  }
+  const keep = !!target && r.own.state === "approved" && r.own.lines > 0 && (r.own.onSalesOrder || answer === "on");
+  return decide(r, target, keep);
+}
+
+/** What Unlink does, or why it can't (planLink with no project: it never asks). */
+export const planUnlink = (r: LinkRebuild): LinkDecision => decide(r, null, false);
+
+/** planLink with the question answered: `keep`, its own invoice's lines stay on it. */
+function decide(r: LinkRebuild, target: LinkProject | null, keep: boolean): LinkDecision {
   const c = r.current;
+  // Noted now, unless an Admin said so already.
+  const noteOwn = keep && !r.own.onSalesOrder;
+  const refuse = (refusal: string): LinkDecision => ({ ok: false, refusal });
+  const plan = (steps: LinkStep[], effects: string[], lines: number, total: number): LinkDecision => ({ ok: true, steps, effects, lines, total, keepOwn: keep, noteOwn });
   if (!target) {
     const no = unlinkRefusal(r);
-    if (no) return { ok: false, refusal: no };
-    return { ok: true, steps: ["unlink"], effects: unlinkEffects(r, c!), lines: c!.lines, total: c!.total };
+    if (no) return refuse(no);
+    return plan(["unlink"], unlinkEffects(r, c!), c!.lines, c!.total);
   }
   const accountMoves = normalizeCustomerKey(r.account) !== normalizeCustomerKey(target.customer);
   if (c && sameProject(c, target)) {
-    if (r.own.lines === 0) return { ok: false, refusal: `This rebuild is already linked to ${projectLabel(target)}.` };
+    if (r.own.lines === 0) return refuse(`This rebuild is already linked to ${projectLabel(target)}.`);
+    if (keep) {
+      if (!noteOwn) return refuse(`This rebuild is already linked to ${projectLabel(target)}. ${staysOnSalesOrder(r.own, "Its own invoice's")}`);
+      const bad = targetRefusal(target);
+      if (bad) return refuse(bad);
+      // Linked already: nothing moves, and its own invoice is noted as on a Sales Order.
+      return plan(["note"], [staysOnSalesOrder(r.own, "Its own invoice's"), `Nothing else changes: it stays linked to ${projectLabel(target)}.`], 0, 0);
+    }
     const no = linkRefusal(r.own, target, r.unitLock, accountMoves, true);
-    if (no) return { ok: false, refusal: no };
-    return { ok: true, steps: ["link"], effects: linkEffects(r, r.own, target), lines: r.own.lines, total: r.own.total };
+    if (no) return refuse(no);
+    return plan(["link"], linkEffects(r, r.own, target), r.own.lines, r.own.total);
   }
   if (!c) {
-    const no = linkRefusal(r.own, target, r.unitLock, accountMoves, false);
-    if (no) return { ok: false, refusal: no };
-    return { ok: true, steps: ["link"], effects: linkEffects(r, r.own, target), lines: r.own.lines, total: r.own.total };
+    const no = keep ? keepRefusal(target, r.unitLock, accountMoves) : linkRefusal(r.own, target, r.unitLock, accountMoves, false);
+    if (no) return refuse(no);
+    return keep ? plan(["link"], keepEffects(r, target), 0, 0) : plan(["link"], linkEffects(r, r.own, target), r.own.lines, r.own.total);
   }
   // Linked to another project: its lines there come back onto its own invoice first, then go on the new one.
   const out = unlinkRefusal(r);
-  if (out) return { ok: false, refusal: out };
+  if (out) return refuse(out);
+  if (keep) {
+    // They would come back onto its own invoice, next to the lines on its Sales Order: nothing tells them apart there.
+    if (c.lines > 0) {
+      return refuse(
+        `Its own invoice is on a Sales Order, so its ${lineCount(c.lines)} on ${projectLabel(c)} can't come back onto it on the way to ${projectLabel(target)}. Unlink it, bill ${c.lines === 1 ? "that line" : "those lines"} from its own invoice, then link it to ${projectLabel(target)}.`,
+      );
+    }
+    const no = keepRefusal(target, r.unitLock, accountMoves);
+    if (no) return refuse(no);
+    return plan(["unlink", "link"], [`It leaves ${projectLabel(c)}.`, handAdded(c, `To bill them on ${projectLabel(target)}, move them there by hand.`), ...keepEffects(r, target)], 0, 0);
+  }
   const after: OwnInvoice = {
     version: r.own.version,
     // Its own invoice takes the lines back approved, unless Warehouse's saved one is still waiting for an Admin.
@@ -285,26 +383,31 @@ export function planLink(r: LinkRebuild, target: LinkProject | null): LinkPlan {
     lines: r.own.lines + c.lines,
     total: Math.round((r.own.total + c.total) * 100) / 100,
     discount: r.own.discount,
+    onSalesOrder: false,
   };
   const no = linkRefusal(after, target, r.unitLock, accountMoves, true);
-  if (no) return { ok: false, refusal: no };
+  if (no) return refuse(no);
   const effects = [
     c.lines > 0 ? `It leaves ${projectLabel(c)}: its ${lineCount(c.lines)} there ${verb(c.lines, "come")} off ${billName(c)}.` : `It leaves ${projectLabel(c)}.`,
     handAdded(c, `To bill them on ${projectLabel(target)}, move them there by hand.`),
-    // The lines that come back were billed on the old project, never by hand in NetSuite: no warning for them.
-    ...linkEffects(r, r.own.lines > 0 ? after : { ...after, state: "none" }, target),
+    ...linkEffects(r, after, target),
   ];
-  return { ok: true, steps: ["unlink", "link"], effects, lines: after.lines, total: after.total };
+  return plan(["unlink", "link"], effects, after.lines, after.total);
 }
 
-/** The Invoice window's lock on a linked rebuild: where it bills. */
-export function rebuildBillsOnLock(p: { kind: LinkKind; name: string; wo: string | null }, ownLines: number): string {
+/**
+ * The Invoice window's lock on a linked rebuild: where it bills. `onSalesOrder`: an Admin said at Link that its own
+ * invoice is on a Sales Order (0122), so its lines stay on it.
+ */
+export function rebuildBillsOnLock(p: { kind: LinkKind; name: string; wo: string | null }, ownLines: number, onSalesOrder = false): string {
   const where = p.kind === "install" ? "its parts and labor go on the install's invoice" : "its parts and labor go on the ticket's charges";
   const open = p.kind === "install" ? "Open the install to change them." : "Open the ticket to change them.";
   const them = ownLines === 1 ? "it" : "them";
   const kept =
     ownLines > 0
-      ? ` Its own invoice still has ${lineCount(ownLines)} from before it was linked. Link on its Details can move ${them} onto ${projectLabel(p)}'s bill. To change ${them} first, or to bill ${them} on this invoice, Unlink it.`
+      ? onSalesOrder
+        ? ` Its own invoice's ${lineCount(ownLines)} ${verb(ownLines, "stay")} on it: it's on a Sales Order in NetSuite.`
+        : ` Its own invoice still has ${lineCount(ownLines)} from before it was linked. Link on its Details can move ${them} onto ${projectLabel(p)}'s bill. To change ${them} first, or to bill ${them} on this invoice, Unlink it.`
       : "";
   return `This rebuild bills on ${projectLabel(p)}: ${where}. ${open}${kept}`;
 }

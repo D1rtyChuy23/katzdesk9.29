@@ -21,11 +21,14 @@ import {
   lineCount,
   money,
   planLink,
+  planUnlink,
   projectLabel,
   type CurrentLink,
+  type LinkDecision,
   type LinkPlan,
   type LinkProject,
   type OwnInvoice,
+  type SalesOrderAnswer,
 } from "@/lib/ops/rebuild-link";
 
 async function ready(): Promise<Sql> {
@@ -51,7 +54,7 @@ export type RebuildLinkView = {
   /** The project it is linked to now, with this rebuild's lines on its bill; null when it isn't linked. */
   current: CurrentLink | null;
   /** What Unlink does, or why it can't; null when it isn't linked. */
-  unlink: LinkPlan | null;
+  unlink: LinkDecision | null;
   /** Open tickets and installs on its account, to pick without typing a WO (as the old list did). */
   suggestions: { target: LinkTarget; label: string }[];
 };
@@ -129,22 +132,24 @@ async function readRebuild(sql: Sql, id: number): Promise<RebuildRead | null> {
 
 async function readOwn(sql: Sql, id: number): Promise<OwnInvoice> {
   const h = (
-    await sql.query<{ version: string | null; approved: boolean; submitted: boolean; discount_kind: string | null; discount_value: string | null; n: number; total: string }>(
+    await sql.query<{ version: string | null; approved: boolean; submitted: boolean; discount_kind: string | null; discount_value: string | null; n: number; total: string; on_so: boolean }>(
       `select invoice_version('rebuild', v.entity_id) as version, v.approved_at is not null as approved, v.submitted_at is not null as submitted,
               v.discount_kind, v.discount_value::text as discount_value,
               (select count(*)::int from invoice_lines l where l.invoice_id = v.id) as n,
-              (select coalesce(sum(round(l.qty * l.rate, 2)), 0)::text from invoice_lines l where l.invoice_id = v.id) as total
+              (select coalesce(sum(round(l.qty * l.rate, 2)), 0)::text from invoice_lines l where l.invoice_id = v.id) as total,
+              rebuild_invoice_on_so(v.entity_id) as on_so
          from invoices v where v.entity_type = 'rebuild' and v.entity_id = $1`,
       [id],
     )
   )[0];
-  if (!h) return { version: null, state: "none", lines: 0, total: 0, discount: null };
+  if (!h) return { version: null, state: "none", lines: 0, total: 0, discount: null, onSalesOrder: false };
   return {
     version: h.version,
     state: h.approved ? "approved" : h.submitted ? "waiting" : "none",
     lines: num(h.n),
     total: Number(h.total),
     discount: toDiscount(h.discount_kind, h.discount_value),
+    onSalesOrder: h.on_so === true,
   };
 }
 
@@ -356,11 +361,14 @@ async function readState(sql: Sql, id: number): Promise<LinkState | null> {
   return { rebuild, own: await readOwn(sql, id), current: await readCurrent(sql, rebuild) };
 }
 
-/** The plan for one project, with the unit-lock rule read only when its account is another one. */
-async function planFor(sql: Sql, st: LinkState, project: LinkProject | null): Promise<LinkPlan> {
+/**
+ * The plan for one project, with the unit-lock rule read only when its account is another one. `answer`: whether its
+ * approved invoice is on a Sales Order in NetSuite yet, once the person said (Chuy, 11/6).
+ */
+async function planFor(sql: Sql, st: LinkState, project: LinkProject | null, answer: SalesOrderAnswer | null = null): Promise<LinkPlan> {
   const moves = project && normalizeCustomerKey(project.customer) !== normalizeCustomerKey(st.rebuild.account);
   const unitLock = moves ? await heldUnitLockSentence(sql, st.rebuild.id) : null;
-  return planLink({ account: st.rebuild.account, po: st.rebuild.po, current: st.current, own: st.own, unitLock }, project);
+  return planLink({ account: st.rebuild.account, po: st.rebuild.po, current: st.current, own: st.own, unitLock }, project, answer);
 }
 
 async function viewOf(sql: Sql, st: LinkState, viewer: Viewer): Promise<RebuildLinkView> {
@@ -378,9 +386,9 @@ async function viewOf(sql: Sql, st: LinkState, viewer: Viewer): Promise<RebuildL
     po: st.rebuild.po?.trim() || null,
     installId: st.rebuild.install_id,
     jobId: st.rebuild.job_id,
-    own: hide ? { version: null, state: "none", lines: 0, total: 0, discount: null } : st.own,
+    own: hide ? { version: null, state: "none", lines: 0, total: 0, discount: null, onSalesOrder: false } : st.own,
     current,
-    unlink: st.current && !refusal ? await planFor(sql, st, null) : null,
+    unlink: st.current && !refusal ? planUnlink({ account: st.rebuild.account, po: st.rebuild.po, current: st.current, own: st.own, unitLock: null }) : null,
     suggestions: refusal ? [] : await suggestionsFor(sql, st.rebuild.account),
   };
 }
@@ -475,7 +483,12 @@ const setInput = z.object({
   to: targetInput.nullable(),
   /** What the person saw: its own invoice's version, the linked project's stamp, the new project's stamp. */
   seen: z.object({ own: z.string().max(80).nullable(), current: z.string().max(80).nullable(), target: z.string().max(80).nullable() }),
+  /** Their answer when Link asked whether its approved invoice is on a Sales Order in NetSuite yet (Chuy, 11/6). */
+  salesOrder: z.enum(["on", "not"]).nullable().optional(),
 });
+
+/** A link sent without the answer to Link's question (the plan asks). */
+const ANSWER_FIRST = "Say whether this rebuild's invoice is on a Sales Order in NetSuite yet, then link.";
 
 export type RebuildLinkResult = { row: Rebuild; message: string };
 
@@ -489,6 +502,10 @@ export const setRebuildLink = createServerFn({ method: "POST" })
  * an Admin), it takes the project's account and Customer P.O., its held units follow the account, and both get a
  * history line. One statement: the rebuild, the project and the bill are locked and checked against what the person
  * saw, read fresh, so nothing written since is lost or billed twice.
+ *
+ * $11 (Chuy, 11/6): its own invoice is on a Sales Order in NetSuite, so its lines stay on it, approved, and the link
+ * takes nothing now. $12: the person just said so: it is noted on that invoice, at the version they saw ($7). Without
+ * $11, an invoice an Admin said is on a Sales Order, read fresh, moves nothing.
  */
 export function linkRebuildSql(): string {
   return `with rb as (
@@ -519,17 +536,25 @@ export function linkRebuildSql(): string {
        select v.id, v.approved_at, v.submitted_at, v.discount_value from invoices v join rb on v.entity_type = 'rebuild' and v.entity_id = rb.id
      ), own_lines as (
        select l.id, l.item, l.description, l.qty, l.rate, l.kind, l.sort from invoice_lines l join own on l.invoice_id = own.id
+     ), moving as (
+       -- The lines that go on the project's bill: none when they stay on its own invoice's Sales Order ($11).
+       select l.* from own_lines l where not $11::boolean
      ), ok as (
        select rb.id, rb.account as old_account, tgt.t, tgt.id as target_id, tgt.kind as target_kind, tgt.customer as account, tgt.po,
-              (select count(*)::int from own_lines) as n,
-              (select coalesce(sum(round(l.qty * l.rate, 2)), 0) from own_lines l) as amount
+              (select count(*)::int from moving) as n,
+              (select coalesce(sum(round(l.qty * l.rate, 2)), 0) from moving l) as amount
          from rb cross join tgt
         where regexp_replace(lower(tgt.customer), '[^a-z0-9]+', '', 'g') not in ('', 'walkin')
           -- Its own invoice as the person saw it, read fresh: an approve that committed while this waited counts.
           and invoice_version('rebuild', rb.id) is not distinct from $7::text
           -- Warehouse's saved invoice waits for an Admin; a discount can't ride along.
           and not exists (select 1 from own where own.approved_at is null and own.submitted_at is not null and exists (select 1 from own_lines))
-          and not exists (select 1 from own where coalesce(own.discount_value, 0) > 0 and exists (select 1 from own_lines))
+          and ($11::boolean or not exists (select 1 from own where coalesce(own.discount_value, 0) > 0 and exists (select 1 from own_lines)))
+          -- Staying on a Sales Order: its own invoice is approved, with lines (that version, checked fresh above).
+          and (not $11::boolean or (exists (select 1 from own where own.approved_at is not null) and exists (select 1 from own_lines)))
+          -- Moving: not an invoice an Admin said is on a Sales Order, read fresh (one said so while this waited).
+          and ($11::boolean or not rebuild_invoice_on_so(rb.id))
+          and (not $12::boolean or ($11::boolean and not rebuild_invoice_on_so(rb.id)))
           -- Only an open bill takes a link (11/6 review, round 5): a ticket not billed (its NetSuite invoices read
           -- fresh) ...
           and (tgt.t <> 'job' or (nullif(btrim(tgt.ns_so), '') is null and coalesce(ticket_live_ns_invoices(tgt.id), '') = ''))
@@ -542,7 +567,7 @@ export function linkRebuildSql(): string {
        insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort)
        select ok.target_id, l.item, l.description, l.qty, l.rate, l.kind, 'rb:' || ok.id::text || ':' || l.id::text,
               coalesce((select max(c.sort) from ticket_charges c where c.job_id = ok.target_id), 0) + row_number() over (order by l.sort, l.id)
-         from ok cross join own_lines l
+         from ok cross join moving l
         where ok.t = 'job'
        returning id
      ), head as (
@@ -563,7 +588,7 @@ export function linkRebuildSql(): string {
        select head.id, l.item, l.description, l.qty, l.rate, l.kind,
               coalesce((select max(x.sort) from invoice_lines x where x.invoice_id = head.id), 0) + row_number() over (order by l.sort, l.id),
               'rb:' || ok.id::text || ':' || l.id::text
-         from head cross join ok cross join own_lines l
+         from head cross join ok cross join moving l
        returning id
      ), done as (
        -- Every line landed: to_job always writes them; to_inst only when head did (an install's invoice approved after
@@ -571,7 +596,15 @@ export function linkRebuildSql(): string {
        -- own lines stay where they are and nothing is linked.
        select ok.* from ok where ok.n = (select count(*)::int from to_job) + (select count(*)::int from to_inst)
      ), own_gone as (
-       delete from invoices v using own, done where v.id = own.id returning v.id
+       -- On a Sales Order ($11), its own invoice stays, lines and all.
+       delete from invoices v using own, done where v.id = own.id and not $11::boolean returning v.id
+     ), noted as (
+       -- The person said it's on a Sales Order ($12): noted at the version they saw, which is the one there now (checked
+       -- fresh above, and this writes none of it). Only once it's linked.
+       update invoices v set on_sales_order_at = now(), on_sales_order_by = $6::text, on_sales_order_version = $7::text
+         from own, done
+        where v.id = own.id and $11::boolean and $12::boolean
+       returning v.id
      ), upd as (
        update rebuilds r
           set install_id = case when done.t = 'install' then done.target_id end,
@@ -599,8 +632,43 @@ export function linkRebuildSql(): string {
        returning id
      )
      select upd.id, upd.account, upd.old_account, (select count(*)::int from to_job) + (select count(*)::int from to_inst) as moved,
-            (select count(*)::int from act_rb) + (select count(*)::int from act_target) as notes
+            (select count(*)::int from act_rb) + (select count(*)::int from act_target) as notes, (select count(*)::int from noted) as noted
        from upd`;
+}
+
+/**
+ * Note that a linked rebuild's own invoice is on a Sales Order (Chuy, 11/6): linked before 11/6, its own invoice kept its
+ * lines, and the person says they're on a Sales Order, so Link never moves them. Checked on the locked rebuild against
+ * what the person saw: still linked there, its own invoice approved, with lines, at the version they saw (read fresh),
+ * and not noted already. Nothing else changes.
+ */
+export function noteRebuildSalesOrderSql(): string {
+  return `with rb as (
+       select r.id from rebuilds r
+        where r.id = $1::int and coalesce(r.archived, false) = false
+          and r.install_id is not distinct from $2::int and r.job_id is not distinct from $3::int
+          and (r.install_id is not null or r.job_id is not null)
+        for update
+     ), own as (
+       select v.id from invoices v join rb on v.entity_type = 'rebuild' and v.entity_id = rb.id
+     ), ok as (
+       select own.id from own cross join rb
+        where invoice_version('rebuild', rb.id) is not distinct from $5::text
+          -- Approved: the version's middle field is its approval.
+          and split_part($5::text, ':', 2) <> ''
+          and not rebuild_invoice_on_so(rb.id)
+          and exists (select 1 from invoice_lines l where l.invoice_id = own.id)
+     ), noted as (
+       update invoices v set on_sales_order_at = now(), on_sales_order_by = $4::text, on_sales_order_version = $5::text
+         from ok
+        where v.id = ok.id
+       returning v.id
+     ), act as (
+       insert into activity (entity_type, entity_id, actor_name, action, detail)
+       select 'rebuild', $1::int, $4::text, 'updated', $6::text from noted
+       returning id
+     )
+     select (select count(*)::int from noted) as noted, (select count(*)::int from act) as notes`;
 }
 
 /**
@@ -745,15 +813,19 @@ async function unlinkNow(sql: Sql, st: LinkState, who: string): Promise<{ moved:
   return { moved: num(out[0].moved), amount: Number(out[0].amount ?? 0) };
 }
 
-async function linkNow(sql: Sql, st: LinkState, target: LinkTarget, project: LinkProject, who: string): Promise<{ account: string; oldAccount: string; moved: number }> {
+type LinkGo = Extract<LinkDecision, { ok: true }>;
+
+async function linkNow(sql: Sql, st: LinkState, target: LinkTarget, project: LinkProject, who: string, plan: LinkGo): Promise<{ account: string; oldAccount: string; moved: number }> {
   const r = st.rebuild;
+  const own = `its invoice's ${lineCount(st.own.lines)} (${money(st.own.total)})`;
   const parts = [
     normalizeCustomerKey(r.account) !== normalizeCustomerKey(project.customer) ? `account ${r.account.trim() || "none"} → ${project.customer}` : null,
     (r.po?.trim() || "") !== (project.po ?? "") ? `Customer P.O. ${project.po ?? "cleared"}` : null,
-    st.own.lines > 0 ? `its invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) went on ${billName(project)}` : null,
+    st.own.lines > 0 ? (plan.keepOwn ? `${own} stayed on it: it's on a Sales Order` : `${own} went on ${billName(project)}`) : null,
   ].filter(Boolean);
   const where = project.kind === "install" ? "this install's invoice, waiting for an Admin to approve it" : "this ticket's charges";
-  const out = await sql.query<{ id: number; account: string; old_account: string; moved: number }>(linkRebuildSql(), [
+  const there = st.own.lines > 0 ? (plan.keepOwn ? ` · its own invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) are on a Sales Order` : ` · its ${lineCount(st.own.lines)} (${money(st.own.total)}) went on ${where}`) : "";
+  const out = await sql.query<{ id: number; account: string; old_account: string; moved: number; noted: number }>(linkRebuildSql(), [
     r.id,
     r.install_id,
     r.job_id,
@@ -763,12 +835,29 @@ async function linkNow(sql: Sql, st: LinkState, target: LinkTarget, project: Lin
     st.own.version,
     project.stamp,
     `Linked to ${projectLabel(project)}, ${project.customer}${parts.length ? ` · ${parts.join(" · ")}` : ""}`,
-    `${rebuildName(r)} linked${st.own.lines > 0 ? ` · its ${lineCount(st.own.lines)} (${money(st.own.total)}) went on ${where}` : ""}`,
+    `${rebuildName(r)} linked${there}`,
+    plan.keepOwn,
+    plan.noteOwn,
   ]).catch((e: unknown) => {
     throw isDeadlock(e) ? new Error(CHANGED) : e;
   });
   if (!out[0]) throw new Error(CHANGED);
   return { account: out[0].account, oldAccount: out[0].old_account, moved: num(out[0].moved) };
+}
+
+/** The note step: linked there already, its own invoice is on a Sales Order, so its lines stay on it. */
+async function noteNow(sql: Sql, st: LinkState, who: string): Promise<void> {
+  const out = await sql.query<{ noted: number }>(noteRebuildSalesOrderSql(), [
+    st.rebuild.id,
+    st.rebuild.install_id,
+    st.rebuild.job_id,
+    who,
+    st.own.version,
+    `Its invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) are on a Sales Order in NetSuite, so they stay on it`,
+  ]).catch((e: unknown) => {
+    throw isDeadlock(e) ? new Error(CHANGED) : e;
+  });
+  if (!num(out[0]?.noted)) throw new Error(CHANGED);
 }
 
 /**
@@ -788,11 +877,20 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
   if ((st.own.version ?? null) !== (data.seen.own ?? null)) throw new Error(changed);
   if ((st.current?.stamp ?? null) !== (data.seen.current ?? null)) throw new Error(changed);
   if (project && project.stamp !== (data.seen.target ?? null)) throw new Error(changed);
-  const plan = await planFor(sql, st, project);
+  const answer = data.to ? (data.salesOrder ?? null) : null;
+  // "Not yet", but an Admin has said since that its invoice is on a Sales Order (that changes no version): what they saw
+  // would move lines that are on it.
+  if (answer === "not" && st.own.onSalesOrder) throw new Error(changed);
+  const plan = await planFor(sql, st, project, answer);
   if (!plan.ok) throw new Error(plan.refusal);
+  if (plan.ok === "ask") throw new Error(ANSWER_FIRST);
 
   let message = "";
   const left = st.current;
+  if (plan.steps.includes("note")) {
+    await noteNow(sql, st, viewer.name);
+    message = `Noted: its invoice's ${lineCount(st.own.lines)} are on a Sales Order, so they stay on it.`;
+  }
   if (plan.steps.includes("unlink")) {
     // Moving to another WO, the unlink is its first step: if that stops, nothing was linked.
     const back = await unlinkNow(sql, st, viewer.name).catch((e: unknown) => {
@@ -804,15 +902,22 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
         : `Unlinked from ${projectLabel(left!)}.`;
   }
   if (plan.steps.includes("link") && project && data.to) {
-    // After an unlink its own invoice holds the lines that came back: read it again, as it is now.
+    let go = plan;
+    // After an unlink its own invoice holds the lines that came back: read it again, as it is now. Those were on the old
+    // project's bill, never on a Sales Order, so they move, unless its own invoice stays (then none came back).
     if (plan.steps.includes("unlink")) {
       st = (await readState(sql, data.id))!;
-      const again = await planFor(sql, st, project);
+      const again = await planFor(sql, st, project, plan.keepOwn ? "on" : "not");
       if (!again.ok) throw new Error(`${message} It wasn't linked to ${projectLabel(project)}: ${again.refusal}`);
+      // Staying on a Sales Order, its own invoice must still be the one the person answered for.
+      if (again.ok === "ask" || again.keepOwn !== plan.keepOwn || (plan.keepOwn && st.own.version !== (data.seen.own ?? null))) {
+        throw new Error(`${message} It wasn't linked to ${projectLabel(project)}: ${CHANGED}`);
+      }
+      go = again;
     }
     let linked: { account: string; oldAccount: string; moved: number };
     try {
-      linked = await linkNow(sql, st, data.to, project, viewer.name);
+      linked = await linkNow(sql, st, data.to, project, viewer.name, go);
     } catch (e) {
       if (message) throw new Error(`${message} It wasn't linked to ${projectLabel(project)}: ${e instanceof Error ? e.message : String(e)}`);
       throw e;
@@ -820,7 +925,9 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
     // Its held units follow it to the project's account.
     if (normalizeCustomerKey(linked.account) !== normalizeCustomerKey(linked.oldAccount)) await moveHeldUnits(sql, data.id, linked.account, linked.oldAccount);
     const moved = linked.moved > 0 ? ` Its ${lineCount(linked.moved)} went on ${billName(project)}.` : "";
-    message = left && plan.steps.includes("unlink") ? `Moved from ${projectLabel(left)} to ${projectLabel(project)}.${moved}` : `Linked to ${projectLabel(project)}.${moved}`;
+    const kept = go.keepOwn ? ` Its invoice's ${lineCount(st.own.lines)} stay on it: it's on a Sales Order.` : "";
+    message =
+      left && plan.steps.includes("unlink") ? `Moved from ${projectLabel(left)} to ${projectLabel(project)}.${moved}${kept}` : `Linked to ${projectLabel(project)}.${moved}${kept}`;
   }
   const row = await rebuildRowOut(sql, data.id);
   if (!row) throw new Error("That rebuild is no longer on the list.");
@@ -829,7 +936,16 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
 
 const projectInput = z.object({ type: z.enum(["service", "tlc", "install"]), id: z.number().int().positive() });
 
-export type ProjectRebuild = { id: number; title: string; status: string; removed: boolean; lines: number; total: number };
+export type ProjectRebuild = {
+  id: number;
+  title: string;
+  status: string;
+  removed: boolean;
+  lines: number;
+  total: number;
+  /** Its own invoice's lines, on a Sales Order in NetSuite (0122): they bill there, not here. 0 otherwise. */
+  onSalesOrder: number;
+};
 
 export const listProjectRebuilds = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -840,19 +956,24 @@ export const listProjectRebuilds = createServerFn({ method: "POST" })
 export async function listProjectRebuildsFor(sql: Sql, data: z.output<typeof projectInput>, userId: string): Promise<ProjectRebuild[]> {
   if (await isWarehouseOnly(sql, userId)) throw new Error(WAREHOUSE_BILLING_REFUSAL);
   const install = data.type === "install";
-  const rows = await sql.query<{ id: number; title: string; status: string; removed: boolean; n: number; total: string }>(
+  // Its own invoice's lines when they're on a Sales Order (0122).
+  const kept = `(select count(*)::int from invoices v join invoice_lines l on l.invoice_id = v.id
+                  where v.entity_type = 'rebuild' and v.entity_id = r.id and rebuild_invoice_on_so(r.id)) as kept`;
+  const rows = await sql.query<{ id: number; title: string; status: string; removed: boolean; n: number; total: string; kept: number }>(
     install
       ? `select r.id, r.title, r.status, coalesce(r.archived, false) as removed,
                 (select count(*)::int from invoices v join invoice_lines l on l.invoice_id = v.id
                   where v.entity_type = 'install' and v.entity_id = $1 and ${RB_KEY("l.source_key", "r.id")}) as n,
                 (select coalesce(sum(round(l.qty * l.rate, 2)), 0)::text from invoices v join invoice_lines l on l.invoice_id = v.id
-                  where v.entity_type = 'install' and v.entity_id = $1 and ${RB_KEY("l.source_key", "r.id")}) as total
+                  where v.entity_type = 'install' and v.entity_id = $1 and ${RB_KEY("l.source_key", "r.id")}) as total,
+                ${kept}
            from rebuilds r where r.install_id = $1 order by r.id`
       : `select r.id, r.title, r.status, coalesce(r.archived, false) as removed,
                 (select count(*)::int from ticket_charges c where c.job_id = $1 and ${RB_KEY("c.source_key", "r.id")}) as n,
-                (select coalesce(sum(round(c.qty * c.rate, 2)), 0)::text from ticket_charges c where c.job_id = $1 and ${RB_KEY("c.source_key", "r.id")}) as total
+                (select coalesce(sum(round(c.qty * c.rate, 2)), 0)::text from ticket_charges c where c.job_id = $1 and ${RB_KEY("c.source_key", "r.id")}) as total,
+                ${kept}
            from rebuilds r where r.job_id = $1 order by r.id`,
     [data.id],
   );
-  return rows.map((r) => ({ id: Number(r.id), title: r.title, status: r.status, removed: !!r.removed, lines: num(r.n), total: Number(r.total) }));
+  return rows.map((r) => ({ id: Number(r.id), title: r.title, status: r.status, removed: !!r.removed, lines: num(r.n), total: Number(r.total), onSalesOrder: num(r.kept) }));
 }
