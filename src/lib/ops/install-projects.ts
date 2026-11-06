@@ -38,11 +38,11 @@ export async function archiveInstallFor(sql: Sql, userId: string, installId: num
     await sql.query<{ id: number; customer: string; stamp: string }>("select id, customer, updated_at::text as stamp from installs where id = $1 and archived = false", [installId])
   )[0];
   if (!cur) throw new Error("Install not found");
-  // Held: Unlink refuses it (a billed ticket brought it, or the approved invoice holds it), so only Merge installs helps.
+  // Held: Unlink refuses it (a billed ticket brought it, or the approved invoice holds a link made while it was open),
+  // so only Merge installs helps. A link from before 11/6 put nothing on the invoice, so Unlink lets it go.
   const linked = await sql.query<{ id: number; title: string | null; held: boolean }>(
     `select r.id, r.title,
-            (r.link_billed_with is not null
-             or (v.approved_at is not null and (coalesce(r.link_open, false) or rebuild_lines_on(r.id, null, v.id) > 0))) as held
+            (r.link_billed_with is not null or (v.approved_at is not null and coalesce(r.link_open, false))) as held
        from rebuilds r left join invoices v on v.entity_type = 'install' and v.entity_id = r.install_id
       where r.install_id = $1 and coalesce(r.archived, false) = false
       order by r.id`,
