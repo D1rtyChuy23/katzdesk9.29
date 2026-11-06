@@ -826,6 +826,22 @@ test("unlinking leaves billed lines billed: a billed ticket, or a ticket merged 
   const w = await L.getRebuildLinkFor(sql, rb, "u-owner");
   assert.equal(w.current.elsewhere, "ticket SC-RBL-1 (billed on SO-T-8)");
   assert.equal(w.unlink.refusal, "Some of this rebuild's lines are on ticket SC-RBL-1 (billed on SO-T-8), so it stays linked.");
+  // The statement checks the same on its own (11/6 review, round 5): every other check of it passes here.
+  const elsewhere = (x, i, v) => [x, i, null, "chuy", v.current.stamp, 0, v.own.version, null, null, null, null, "x", "y"];
+  assert.deepEqual(await sql.query(L.unlinkRebuildSql(), elsewhere(rb, inst, w)), []);
+  // Its lines on another install's invoice, the same.
+  await sql.query("delete from ticket_charges where job_id = $1", [job]);
+  const other = await install(sql, { wo: "WO-5001" });
+  const inv = await idOf(sql, "insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at) values ('install', $1, $2, 90, 'wes', now()) returning id", [other, CAFE]);
+  await sql.query("insert into invoice_lines (invoice_id, item, qty, rate, kind, sort, source_key) values ($1, 'TEST-BURR-64', 2, 45, 'part', 1, $2)", [inv, `rb:${rb}:900`]);
+  const x = await L.getRebuildLinkFor(sql, rb, "u-owner");
+  assert.equal(x.unlink.refusal, `Some of this rebuild's lines are on install #${other}'s invoice, so it stays linked.`);
+  assert.deepEqual(await sql.query(L.unlinkRebuildSql(), elsewhere(rb, inst, x)), []);
+  // With none elsewhere, the statement lets it go: the two checks were what kept it.
+  await sql.query("delete from invoice_lines where invoice_id = $1", [inv]);
+  const y = await L.getRebuildLinkFor(sql, rb, "u-owner");
+  assert.equal(y.unlink.ok, true);
+  assert.equal((await sql.query(L.unlinkRebuildSql(), elsewhere(rb, inst, y))).length, 1);
 });
 
 test("merging the ticket into an install takes the rebuild's lines along, keys and all, so it bills on the install and unlinks from there", async () => {
