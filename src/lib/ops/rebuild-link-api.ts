@@ -18,6 +18,7 @@ import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { INSTALL_WOS_SQL, WO_KEY_SQL } from "@/lib/ops/wo-search";
 import {
   billName,
+  billedMergeSql,
   lineCount,
   money,
   planLink,
@@ -290,19 +291,13 @@ async function linesElsewhere(sql: Sql, rebuildId: number, t: LinkTarget): Promi
   return v ? `${v.entity_type === "install" ? "install" : v.entity_type} #${v.entity_id}'s invoice` : null;
 }
 
-/** SQL: a ticket merged into an install as billed took rebuild `rb` along (the merge log's rebuilds and billedOn). */
-const BILLED_MERGE = (rb: string) =>
-  `(select m.id from ticket_install_merges m
-     where m.moved->'rebuilds' @> to_jsonb(${rb}) and coalesce(m.moved->>'billedOn', m.moved->>'billedSo') is not null
-     order by m.id desc limit 1)`;
-
 /** The billed ticket whose merge into an install brought this rebuild along, as a phrase, or null. */
 async function billedVia(sql: Sql, rebuildId: number): Promise<string | null> {
   const m = (
     await sql.query<{ id: number; call_id: string | null; job_id: number; billed_on: string | null }>(
       `select m.id, m.job_id, j.call_id, coalesce(m.moved->>'billedOn', m.moved->>'billedSo') as billed_on
          from ticket_install_merges m left join service_jobs j on j.id = m.job_id
-        where m.id = ${BILLED_MERGE("$1::int")}`,
+        where m.id = ${billedMergeSql("$1::int")}`,
       [rebuildId],
     )
   )[0];
@@ -652,7 +647,7 @@ export function unlinkRebuildSql(): string {
                or ($6::int = 0 and not rb.link_open))
           and (ohead.id is null or ohead.approved_at is null or ($6::int = 0 and not rb.link_open))
           -- A ticket merged into the install as billed brought it here while its link was open: it stays.
-          and not (rb.link_open and ${BILLED_MERGE("rb.id")} is not null)
+          and not (rb.link_open and ${billedMergeSql("rb.id")} is not null)
      ), taken as (
        select t.* from ok cross join lateral take_rebuild_lines(ok.id, ok.job_id, ok.head_id) t
      ), back as (

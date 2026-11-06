@@ -887,7 +887,14 @@ test("a ticket merged into an install as billed keeps the rebuild linked there; 
   await sql.query("update service_jobs set ns_so = 'SO-MB-2', updated_at = now() where id = $1", [jobA]);
   await mergeIn(jobA, instA);
   assert.deepEqual(await flags(rbA), { install_id: instA, job_id: null, link_open: true });
-  assert.equal((await L.getRebuildLinkFor(sql, rbA, "u-owner")).unlink.refusal, "This rebuild came here when ticket SC-RBL-3 (billed on SO-MB-2) was merged in, so it stays linked: what was billed there stays billed.");
+  const keptA = "This rebuild came here when ticket SC-RBL-3 (billed on SO-MB-2) was merged in, so it stays linked: what was billed there stays billed.";
+  assert.equal((await L.getRebuildLinkFor(sql, rbA, "u-owner")).unlink.refusal, keptA);
+  // Merged on into another install whose invoice is approved: the billed ticket still keeps it.
+  const keepA = await install(sql, { wo: "WO-9712" });
+  await installInvoice(keepA, true);
+  await mergeInstallsFor(sql, "u-owner", { keepId: keepA, dropId: instA });
+  assert.deepEqual(await flags(rbA), { install_id: keepA, job_id: null, link_open: true });
+  assert.equal((await L.getRebuildLinkFor(sql, rbA, "u-owner")).unlink.refusal, keptA);
 
   // A ticket with no charges merged into an install whose invoice is approved: nothing of the rebuild went anywhere,
   // so it can go (it would stay linked for good otherwise). Onto an open invoice, its link stays made while open.
@@ -1029,6 +1036,14 @@ test("what its link put on the bill is kept: set on Link, back to none on Unlink
   assert.equal(w.unlink.effects[1], "Service ticket SC-RBL-1 is billed on SO-T-11: any of its parts added there by hand stay billed there.");
   await unlink(sql, late);
   assert.deepEqual(await one(sql, "select job_id, link_lines, link_open from rebuilds where id = $1", [late]), { job_id: null, link_lines: 0, link_open: null });
+  // The same for a ticket billed on a NetSuite invoice alone, with no SO.
+  const inv = await ticket(sql, { wo: "WO-4331" });
+  await sql.query("insert into ticket_invoices (job_id, ns_invoice, invoice_date, status, total, amount_remaining, source) values ($1, 'INV-T-12', '2026-10-22', 'Open', 90, 90, 'standalone')", [inv]);
+  const viaInv = await rebuild(sql, { title: "Test invoiced refurb" });
+  const n = await find(sql, viaInv, "4331");
+  await linkTo(sql, n, n.candidates[0]);
+  assert.deepEqual(await one(sql, "select link_lines, link_open from rebuilds where id = $1", [viaInv]), { link_lines: 0, link_open: null });
+  assert.equal((await L.getRebuildLinkFor(sql, viaInv, "u-owner")).unlink.ok, true);
   // The same for an install: its invoice approved since an empty link keeps it.
   const ins2 = await install(sql, { wo: "WO-5500" });
   const e2 = await rebuild(sql, { title: "Test install refurb" });

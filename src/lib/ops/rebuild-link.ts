@@ -100,6 +100,16 @@ const verb = (n: number, plural: "go" | "come" | "stay") => (n === 1 ? `${plural
 const sameProject = (a: { kind: LinkKind; id: number }, b: { kind: LinkKind; id: number }) =>
   a.id === b.id && (a.kind === "install") === (b.kind === "install");
 
+/**
+ * SQL: the latest merge of a ticket into an install as billed that took rebuild `rb` along (ticket_install_merges.moved:
+ * its id under rebuilds, with billedOn or billedSo), or null. The ticket keeps its charges, billed, so a rebuild linked
+ * while that ticket was open stays linked wherever it goes after (11/6 review, round 3).
+ */
+export const billedMergeSql = (rb: string) =>
+  `(select m.id from ticket_install_merges m
+     where m.moved->'rebuilds' @> to_jsonb(${rb}) and coalesce(m.moved->>'billedOn', m.moved->>'billedSo') is not null
+     order by m.id desc limit 1)`;
+
 /** Where a project's bill is: "the ticket's charges" or "the install's invoice". */
 export const billName = (p: { kind: LinkKind }) => (p.kind === "install" ? "the install's invoice" : "the ticket's charges");
 

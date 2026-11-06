@@ -56,8 +56,9 @@ side too: see "Installs and PMs" below.
     (`ticket_install_merges.moved`: its id under `rebuilds`, with `billedOn` or `billedSo`).
   - Onto a bill that's closed and took nothing of it, `link_open` goes back to none, so the rebuild can still be
     unlinked: a ticket with no charges merged into an install whose invoice is approved, a WO duplicate with no charges
-    merged into a billed ticket, or Merge installs into one whose invoice is approved. Otherwise its lines or invoice
-    move with it, and `link_open` stays.
+    merged into a billed ticket, or Merge installs into one whose invoice is approved (not a rebuild that came to the
+    install with a billed ticket: that ticket's billing still holds it). Otherwise its lines or invoice move with it,
+    and `link_open` stays.
 - Link and Unlink mark the ticket or install changed (`updated_at`), so a Charges save, a merge, Merge installs or a
   Billing Backfill confirm that read it before stops and asks to look again.
 - `0118` also adds four functions: `invoice_version` (an invoice's "id:approved:saved" stamp), `rebuild_lines_on`
