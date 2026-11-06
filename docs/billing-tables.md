@@ -46,10 +46,16 @@ side too: see "Installs and PMs" below.
   an install keep the key, so Unlink finds the lines wherever the link went.
 - Unlink takes them back onto the rebuild's own invoice, approved by whoever unlinked (Warehouse's saved one keeps
   waiting for an Admin). It is refused while they are billed: a ticket with a Sales Order or a live NetSuite invoice,
-  an install whose invoice is approved, or a ticket merged into an install as billed.
+  an install whose invoice is approved, or a ticket merged into an install as billed. A bill that closed after the
+  link was made keeps the rebuild even when none of its lines can be told apart there (its parts added by hand, or the
+  Billing Backfill's NetSuite lines over them): `rebuilds.link_open` (`0120`). A link from before 11/6, or one made
+  onto a bill already closed, can be undone. `rebuilds.link_lines` (`0119`) counts what the link moved.
+- Link and Unlink mark the ticket or install changed (`updated_at`), so a Charges save, a merge, Merge installs or a
+  Billing Backfill confirm that read it before stops and asks to look again.
 - `0118` also adds four functions: `invoice_version` (an invoice's "id:approved:saved" stamp), `rebuild_lines_on`
   and `take_rebuild_lines` (read fresh, so a write that committed while a link waited for its locks is seen), and
   `invoice_total` (the lines less the header discount, as `invoiceTotals` works it out).
+- `scripts/rebuild-link-races.mjs` runs each write against the ones it can meet, on a throwaway local Postgres.
 
 ## ticket_invoices: NetSuite's invoices (new)
 

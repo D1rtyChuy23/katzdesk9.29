@@ -43,6 +43,11 @@ export type CurrentLink = LinkProject & {
   total: number;
   /** How many lines its link put on this bill (rebuilds.link_lines): 0 for one linked before 11/6, or with nothing. */
   moved: number;
+  /**
+   * Its link was made while this bill was open (rebuilds.link_open): its parts and labor could go on it from then on,
+   * by hand too. False for a link made before 11/6, or onto a bill already closed.
+   */
+  linkedOpen: boolean;
   /** This rebuild's lines on another record's bill (a ticket merged into the install as billed keeps them), or null. */
   elsewhere: string | null;
 };
@@ -112,10 +117,13 @@ function unlinkRefusal(r: LinkRebuild): string | null {
   const c = r.current;
   if (!c) return "This rebuild isn't linked to a ticket or an install.";
   if (c.lines > 0 && c.closed) return `${c.name} ${c.closed}, so this rebuild's ${lineCount(c.lines)} there ${verb(c.lines, "stay")} billed, and it stays linked.`;
-  // A billed ticket its link put lines on keeps it even when none of them can be told apart: the Billing Backfill writes
-  // NetSuite's lines without the rebuild's keys. A link that put nothing there (one from before 11/6, say) can go.
-  if (c.closed && c.kind !== "install" && c.moved > 0) {
-    return `${c.name} ${c.closed}, and its link put ${lineCount(c.moved)} there, so it stays linked: what was billed there stays billed.`;
+  // A bill closed since the link was made keeps it even when none of its lines can be told apart: its parts may have gone
+  // on by hand, and the Billing Backfill writes NetSuite's lines without the rebuild's keys. A link from before 11/6, or
+  // one made onto a bill already closed, put nothing there through the link, and can go.
+  if (c.closed && c.linkedOpen) {
+    return c.moved > 0
+      ? `${c.name} ${c.closed}, and its link put ${lineCount(c.moved)} there, so it stays linked: what was billed there stays billed.`
+      : `${c.name} ${c.closed}, and it was linked while that bill was open, so it stays linked: anything of it billed there stays billed.`;
   }
   if (c.elsewhere) return `Some of this rebuild's lines are on ${c.elsewhere}, so it stays linked.`;
   return null;
@@ -142,6 +150,10 @@ function unlinkEffects(r: LinkRebuild, c: CurrentLink): string[] {
 function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, accountMoves: boolean, linked: boolean): string | null {
   const bad = targetRefusal(t);
   if (bad) return bad;
+  // A closed bill first: nothing done to its own invoice would let these lines go on it.
+  if (own.lines > 0 && t.closed) {
+    return `${t.name} ${t.closed}, so this rebuild's ${lineCount(own.lines)} can't go on it.${linked ? ` Unlink it to bill ${own.lines === 1 ? "it" : "them"} on its own invoice.` : ""}`;
+  }
   if (own.lines > 0 && own.state === "waiting") {
     return linked
       ? "This rebuild's own invoice is waiting for an Admin to approve it (Warehouse saved it). Unlink it, approve its invoice, then link it again."
@@ -151,7 +163,6 @@ function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, a
     const lead = `This rebuild's invoice has a discount (${discountLabel(own.discount)}), which can't go on ${projectLabel(t)}'s bill.`;
     return linked ? `${lead} Unlink it, take the discount off its invoice, then link it again.` : `${lead} Take it off the rebuild's invoice first.`;
   }
-  if (own.lines > 0 && t.closed) return `${t.name} ${t.closed}, so this rebuild's ${lineCount(own.lines)} can't go on it.`;
   if (accountMoves && unitLock) return unitLock;
   return null;
 }
@@ -234,9 +245,10 @@ export function planLink(r: LinkRebuild, target: LinkProject | null): LinkPlan {
 export function rebuildBillsOnLock(p: { kind: LinkKind; name: string; wo: string | null }, ownLines: number): string {
   const where = p.kind === "install" ? "its parts and labor go on the install's invoice" : "its parts and labor go on the ticket's charges";
   const open = p.kind === "install" ? "Open the install to change them." : "Open the ticket to change them.";
+  const them = ownLines === 1 ? "it" : "them";
   const kept =
     ownLines > 0
-      ? ` Its own invoice still has ${lineCount(ownLines)} from before it was linked: Link on its Details moves ${ownLines === 1 ? "it" : "them"} onto ${projectLabel(p)}'s bill. To change ${ownLines === 1 ? "it" : "them"} first, Unlink it.`
+      ? ` Its own invoice still has ${lineCount(ownLines)} from before it was linked. Link on its Details can move ${them} onto ${projectLabel(p)}'s bill. To change ${them} first, or to bill ${them} on this invoice, Unlink it.`
       : "";
   return `This rebuild bills on ${projectLabel(p)}: ${where}. ${open}${kept}`;
 }

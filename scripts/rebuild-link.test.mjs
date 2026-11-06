@@ -194,7 +194,7 @@ test("what a link does, or why it can't: the rules alone", () => {
   assert.equal(R.planLink({ ...r, account: CAFE, unitLock: "locked" }, t).ok, true);
 
   // Linked: Unlink brings the lines back, unless they are billed there or elsewhere.
-  const current = { ...t, lines: 2, total: 315, moved: 2, elsewhere: null };
+  const current = { ...t, lines: 2, total: 315, moved: 2, linkedOpen: true, elsewhere: null };
   const linked = { account: CAFE, po: "PO-77", current, own: { version: null, state: "none", lines: 0, total: 0, discount: null }, unitLock: null };
   assert.deepEqual(R.planLink(linked, null), {
     ok: true,
@@ -205,13 +205,20 @@ test("what a link does, or why it can't: the rules alone", () => {
   });
   assert.equal(R.planLink({ ...linked, current: { ...current, closed: "is billed on SO-T-2" } }, null).refusal, "Service ticket SC-1 is billed on SO-T-2, so this rebuild's 2 lines there stay billed, and it stays linked.");
   assert.equal(R.planLink({ ...linked, current: { ...current, lines: 1, total: 45, closed: "is billed on SO-T-2" } }, null).refusal, "Service ticket SC-1 is billed on SO-T-2, so this rebuild's 1 line there stays billed, and it stays linked.");
-  // A billed ticket its link put lines on keeps it even with none of them to be seen (NetSuite's lines may be there
-  // now); a link that put nothing there (one from before 11/6) can go, and says what stays billed.
+  // A bill closed since the link was made keeps it even with none of its lines to be seen (its parts may be there by
+  // hand, or NetSuite's lines over them, 11/6 review); a link from before 11/6, or one made onto a bill already
+  // closed, put nothing there through the link: it can go, and says what stays billed.
   assert.equal(R.planLink({ ...linked, current: { ...current, lines: 0, closed: "is billed on SO-T-2" } }, null).refusal, "Service ticket SC-1 is billed on SO-T-2, and its link put 2 lines there, so it stays linked: what was billed there stays billed.");
-  const untouched = R.planLink({ ...linked, current: { ...current, lines: 0, moved: 0, closed: "is billed on SO-T-2" } }, null);
+  assert.equal(
+    R.planLink({ ...linked, current: { ...current, lines: 0, moved: 0, closed: "is billed on SO-T-2" } }, null).refusal,
+    "Service ticket SC-1 is billed on SO-T-2, and it was linked while that bill was open, so it stays linked: anything of it billed there stays billed.",
+  );
+  const untouched = R.planLink({ ...linked, current: { ...current, lines: 0, moved: 0, linkedOpen: false, closed: "is billed on SO-T-2" } }, null);
   assert.equal(untouched.ok, true);
   assert.equal(untouched.effects[1], "Service ticket SC-1 is billed on SO-T-2: any of its parts added there by hand stay billed there.");
-  assert.equal(R.planLink({ ...linked, current: { ...current, kind: "install", name: "Install #9", lines: 0, closed: "has an approved invoice" } }, null).ok, true);
+  const approvedInstall = { ...current, kind: "install", name: "Install #9", lines: 0, moved: 0, closed: "has an approved invoice" };
+  assert.equal(R.planLink({ ...linked, current: approvedInstall }, null).refusal, "Install #9 has an approved invoice, and it was linked while that bill was open, so it stays linked: anything of it billed there stays billed.");
+  assert.equal(R.planLink({ ...linked, current: { ...approvedInstall, linkedOpen: false } }, null).ok, true);
   assert.equal(R.planLink({ ...linked, current: { ...current, elsewhere: "ticket SC-9 (billed on SO-T-3)" } }, null).refusal, "Some of this rebuild's lines are on ticket SC-9 (billed on SO-T-3), so it stays linked.");
   // Linking it again to the same project: only a rebuild linked before 11/6 still has its own lines to move.
   assert.equal(R.planLink(linked, t).refusal, "This rebuild is already linked to WO-4321 (Service ticket SC-1).");
@@ -245,7 +252,7 @@ test("what a link does, or why it can't: the rules alone", () => {
   assert.equal(R.rebuildBillsOnLock({ kind: "install", name: "Install #9", wo: "WO-5001" }, 0), "This rebuild bills on WO-5001 (Install #9): its parts and labor go on the install's invoice. Open the install to change them.");
   assert.equal(
     R.rebuildBillsOnLock({ kind: "service", name: "Service ticket SC-1", wo: null }, 1),
-    "This rebuild bills on Service ticket SC-1: its parts and labor go on the ticket's charges. Open the ticket to change them. Its own invoice still has 1 line from before it was linked: Link on its Details moves it onto Service ticket SC-1's bill. To change it first, Unlink it.",
+    "This rebuild bills on Service ticket SC-1: its parts and labor go on the ticket's charges. Open the ticket to change them. Its own invoice still has 1 line from before it was linked. Link on its Details can move it onto Service ticket SC-1's bill. To change it first, or to bill it on this invoice, Unlink it.",
   );
 });
 
@@ -840,17 +847,36 @@ test("what its link put on the bill is kept: set on Link, back to none on Unlink
   assert.equal(await moved(), 2, "the move to another WO counts what went there");
   await unlink(sql, rb);
   assert.equal(await moved(), 0);
-  // Linked with nothing to move: a ticket billed since lets it go, saying what stays billed.
+  // Linked with nothing to move while the ticket was open: its parts went on the ticket's Charges by hand, and the ticket
+  // was billed. It stays linked, so its own invoice never bills them again (11/6 review, round 2).
   const empty = await rebuild(sql, { title: "Test empty refurb" });
   const h = await find(sql, empty, "4321");
   await linkTo(sql, h, h.candidates[0]);
-  assert.equal(Number((await one(sql, "select link_lines from rebuilds where id = $1", [empty])).link_lines), 0);
+  assert.deepEqual(await one(sql, "select link_lines, link_open from rebuilds where id = $1", [empty]), { link_lines: 0, link_open: true });
+  await sql.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, 'TEST-BURR-64', 'Added by hand', 2, 45, 'part', 9)", [job]);
   await sql.query("update service_jobs set ns_so = 'SO-T-11', updated_at = now() where id = $1", [job]);
   const v = await L.getRebuildLinkFor(sql, empty, "u-owner");
-  assert.equal(v.unlink.ok, true);
-  assert.equal(v.unlink.effects[1], "Service ticket SC-RBL-1 is billed on SO-T-11: any of its parts added there by hand stay billed there.");
-  await unlink(sql, empty);
-  assert.deepEqual([(await RB.rebuildRowOut(sql, empty)).jobId, (await head(sql, "rebuild", empty)) ?? null], [null, null]);
+  assert.equal(v.unlink.refusal, "Service ticket SC-RBL-1 is billed on SO-T-11, and it was linked while that bill was open, so it stays linked: anything of it billed there stays billed.");
+  await assert.rejects(unlink(sql, empty), { message: v.unlink.refusal });
+  assert.deepEqual(await sql.query(L.unlinkRebuildSql(), [empty, null, job, "chuy", v.current.stamp, 0, null, null, null, null, null, "x", "y"]), [], "the statement keeps it too");
+  // Linked when the ticket was billed already: nothing could go on it through the link, so Unlink lets it go.
+  const late = await rebuild(sql, { title: "Test late refurb" });
+  const k = await find(sql, late, "4321");
+  assert.equal(k.candidates[0].plan.effects.at(-1), "Service ticket SC-RBL-1 is billed on SO-T-11, so nothing more can be billed there.");
+  await linkTo(sql, k, k.candidates[0]);
+  assert.deepEqual(await one(sql, "select link_lines, link_open from rebuilds where id = $1", [late]), { link_lines: 0, link_open: false });
+  const w = await L.getRebuildLinkFor(sql, late, "u-owner");
+  assert.equal(w.unlink.ok, true);
+  assert.equal(w.unlink.effects[1], "Service ticket SC-RBL-1 is billed on SO-T-11: any of its parts added there by hand stay billed there.");
+  await unlink(sql, late);
+  assert.deepEqual(await one(sql, "select job_id, link_lines, link_open from rebuilds where id = $1", [late]), { job_id: null, link_lines: 0, link_open: null });
+  // The same for an install: its invoice approved since an empty link keeps it.
+  const ins2 = await install(sql, { wo: "WO-5500" });
+  const e2 = await rebuild(sql, { title: "Test install refurb" });
+  const m = await find(sql, e2, "5500");
+  await linkTo(sql, m, m.candidates[0]);
+  await sql.query("insert into invoices (entity_type, entity_id, customer, total, approved_by, approved_at) values ('install', $1, $2, 90, 'chuy', now())", [ins2, CAFE]);
+  assert.match((await L.getRebuildLinkFor(sql, e2, "u-owner")).unlink.refusal, /^Install #\d+ has an approved invoice, and it was linked while that bill was open, so it stays linked/);
 });
 
 test("a rebuild linked before 11/6 kept its own invoice: its lock says how to move or change it, and Unlink is the way out, even from a billed ticket", async () => {
@@ -863,7 +889,7 @@ test("a rebuild linked before 11/6 kept its own invoice: its lock says how to mo
   const view = await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner");
   assert.equal(
     view.locked,
-    "This rebuild bills on WO-4321 (Service ticket SC-RBL-1): its parts and labor go on the ticket's charges. Open the ticket to change them. Its own invoice still has 2 lines from before it was linked: Link on its Details moves them onto WO-4321 (Service ticket SC-RBL-1)'s bill. To change them first, Unlink it.",
+    "This rebuild bills on WO-4321 (Service ticket SC-RBL-1): its parts and labor go on the ticket's charges. Open the ticket to change them. Its own invoice still has 2 lines from before it was linked. Link on its Details can move them onto WO-4321 (Service ticket SC-RBL-1)'s bill. To change them first, or to bill them on this invoice, Unlink it.",
   );
   assert.equal(view.lines.length, 2, "its lines show, read-only");
   const f = await find(sql, rb, "4321");

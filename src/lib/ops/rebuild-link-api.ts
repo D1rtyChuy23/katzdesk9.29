@@ -102,17 +102,25 @@ type RebuildRead = {
   job_id: number | null;
   archived: boolean;
   link_lines: number;
+  link_open: boolean;
 };
 
 async function readRebuild(sql: Sql, id: number): Promise<RebuildRead | null> {
   const r = (
     await sql.query<RebuildRead>(
-      "select id, title, account, po, install_id, job_id, coalesce(archived, false) as archived, coalesce(link_lines, 0) as link_lines from rebuilds where id = $1",
+      "select id, title, account, po, install_id, job_id, coalesce(archived, false) as archived, coalesce(link_lines, 0) as link_lines, coalesce(link_open, false) as link_open from rebuilds where id = $1",
       [id],
     )
   )[0];
   return r
-    ? { ...r, id: Number(r.id), install_id: r.install_id == null ? null : Number(r.install_id), job_id: r.job_id == null ? null : Number(r.job_id), link_lines: num(r.link_lines) }
+    ? {
+        ...r,
+        id: Number(r.id),
+        install_id: r.install_id == null ? null : Number(r.install_id),
+        job_id: r.job_id == null ? null : Number(r.job_id),
+        link_lines: num(r.link_lines),
+        link_open: r.link_open === true,
+      }
     : null;
 }
 
@@ -287,7 +295,7 @@ async function readCurrent(sql: Sql, r: RebuildRead): Promise<CurrentLink | null
   if (!t) return null;
   const project = await readProject(sql, t);
   if (!project) return null;
-  return { ...project, ...(await linesOn(sql, r.id, t)), moved: r.link_lines, elsewhere: await linesElsewhere(sql, r.id, t) };
+  return { ...project, ...(await linesOn(sql, r.id, t)), moved: r.link_lines, linkedOpen: r.link_open, elsewhere: await linesElsewhere(sql, r.id, t) };
 }
 
 async function suggestionsFor(sql: Sql, account: string): Promise<{ target: LinkTarget; label: string }[]> {
@@ -339,7 +347,7 @@ async function viewOf(sql: Sql, st: LinkState, viewer: Viewer): Promise<RebuildL
   const hide = !!viewer.refusal;
   const current: CurrentLink | null =
     st.current && hide
-      ? { ...st.current, closed: null, po: null, discount: null, netsuite: null, stamp: "", lines: 0, total: 0, moved: 0, elsewhere: null }
+      ? { ...st.current, closed: null, po: null, discount: null, netsuite: null, stamp: "", lines: 0, total: 0, moved: 0, linkedOpen: false, elsewhere: null }
       : st.current;
   return {
     id: st.rebuild.id,
@@ -492,7 +500,10 @@ export function linkRebuildSql(): string {
      ), ok as (
        select rb.id, rb.account as old_account, tgt.t, tgt.id as target_id, tgt.kind as target_kind, tgt.customer as account, tgt.po,
               (select count(*)::int from own_lines) as n,
-              (select coalesce(sum(round(l.qty * l.rate, 2)), 0) from own_lines l) as amount
+              (select coalesce(sum(round(l.qty * l.rate, 2)), 0) from own_lines l) as amount,
+              -- The bill open as it is linked: a ticket not billed, an install's invoice not approved.
+              case when tgt.t = 'job' then nullif(btrim(tgt.ns_so), '') is null and coalesce(ticket_live_ns_invoices(tgt.id), '') = ''
+                   else not exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = tgt.id and v.approved_at is not null) end as open
          from rb cross join tgt
         where regexp_replace(lower(tgt.customer), '[^a-z0-9]+', '', 'g') not in ('', 'walkin')
           -- Its own invoice as the person saw it, read fresh: an approve that committed while this waited counts.
@@ -547,7 +558,7 @@ export function linkRebuildSql(): string {
        update rebuilds r
           set install_id = case when done.t = 'install' then done.target_id end,
               job_id = case when done.t = 'job' then done.target_id end,
-              account = done.account, po = done.po, link_lines = done.n, updated_at = now()
+              account = done.account, po = done.po, link_lines = done.n, link_open = done.open, updated_at = now()
          from done
         where r.id = done.id
        returning r.id, r.account, done.old_account
@@ -581,7 +592,7 @@ export function linkRebuildSql(): string {
  */
 export function unlinkRebuildSql(): string {
   return `with rb as (
-       select r.id, r.account, r.po, r.install_id, r.job_id, coalesce(r.link_lines, 0) as link_lines
+       select r.id, r.account, r.po, r.install_id, r.job_id, coalesce(r.link_lines, 0) as link_lines, coalesce(r.link_open, false) as link_open
          from rebuilds r
         where r.id = $1::int and coalesce(r.archived, false) = false
           and r.install_id is not distinct from $2::int and r.job_id is not distinct from $3::int
@@ -607,13 +618,13 @@ export function unlinkRebuildSql(): string {
           -- Its lines there as the person saw them, counted fresh; its own invoice too.
           and rebuild_lines_on(rb.id, oj.id, ohead.id) = $6::int
           and invoice_version('rebuild', rb.id) is not distinct from $7::text
-          -- Lines come off only an open bill. A billed ticket keeps it too when its link put lines there, though none
-          -- can be told apart now (the Billing Backfill writes NetSuite's lines without the keys).
+          -- Lines come off only an open bill. A bill closed since the link was made keeps it too, though none of its lines
+          -- can be told apart there (parts added by hand; the Billing Backfill writes NetSuite's lines without the keys).
           and (oj.id is null
                or (nullif(btrim(oj.ns_so), '') is null and coalesce(ticket_live_ns_invoices(oj.id), '') = ''
                    and ($6::int = 0 or (oj.duplicate_of is null and oj.merged_install_id is null)))
-               or ($6::int = 0 and rb.link_lines = 0))
-          and ($6::int = 0 or ohead.id is null or ohead.approved_at is null)
+               or ($6::int = 0 and not rb.link_open))
+          and (ohead.id is null or ohead.approved_at is null or ($6::int = 0 and not rb.link_open))
      ), taken as (
        select t.* from ok cross join lateral take_rebuild_lines(ok.id, ok.job_id, ok.head_id) t
      ), back as (
@@ -652,7 +663,7 @@ export function unlinkRebuildSql(): string {
      ), upd as (
        -- back_head always writes (its update has no condition), so every line taken lands on its own invoice; this only
        -- keeps the link if that were ever not so.
-       update rebuilds r set install_id = null, job_id = null, link_lines = 0, updated_at = now()
+       update rebuilds r set install_id = null, job_id = null, link_lines = 0, link_open = null, updated_at = now()
          from ok
         where r.id = ok.id and (select n from back) = (select count(*)::int from back_lines)
        returning r.id
@@ -757,7 +768,10 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
   let message = "";
   const left = st.current;
   if (plan.steps.includes("unlink")) {
-    const back = await unlinkNow(sql, st, viewer.name);
+    // Moving to another WO, the unlink is its first step: if that stops, nothing was linked.
+    const back = await unlinkNow(sql, st, viewer.name).catch((e: unknown) => {
+      throw data.to && e instanceof Error && e.message === CHANGED_UNLINK ? new Error(CHANGED) : e;
+    });
     message =
       back.moved > 0
         ? `Unlinked from ${projectLabel(left!)}. Its ${lineCount(back.moved)} (${money(back.amount)}) are back on its own invoice.`
