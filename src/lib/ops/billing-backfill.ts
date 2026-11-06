@@ -554,9 +554,10 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
   const tag = (c: Candidate) => (ticketsOnly ? `#${candidateId(c)}` : candidateName(c));
   const fit = (date: string, c: Candidate) => invoiceFitsTicket(date, candidateDates(c).received, candidateDates(c).completed) === true;
   // Tickets among themselves go by the year's window, as since 10/30. Beside an install or a PM (11/5), two records in
-  // the year's window are told apart by how long after each was done the invoice is dated (none while it was being
-  // done): one at least CLOSER_BY_DAYS closer than the rest is the one. A new ticket and an old PM with one number go to
-  // the ticket, as before installs and PMs took billing; two jobs in the same weeks can't be told apart.
+  // the year's window are told apart by how long after each was done the invoice is dated (none for one dated while it
+  // was being done; from when it came in, for one not done yet): one at least CLOSER_BY_DAYS closer than the rest is the
+  // one. A new ticket and an old PM with one number go to the ticket, as before installs and PMs took billing; two jobs
+  // in the same weeks can't be told apart. A record the rows' billing is on already goes first (see choose).
   const belongs = (date: string): Candidate[] => {
     const loose = cands.filter((c) => fit(date, c));
     if (ticketsOnly || loose.length < 2) return loose;
@@ -569,9 +570,13 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
     const so = soKey("ticket" in c ? c.ticket.so : c.record.so);
     return (!!so && sos.has(so)) || candidateInvoices(c).some((i) => inv.has(soKey(i.invoice)));
   };
-  // An install or a PM with this WO's NetSuite billing already (from an earlier run), or a ticket merged into it as billed.
-  const billedHere = (r: BackfillRecord) =>
-    !!r.so || r.lines.length > 0 || !!r.discount || r.invoices.some((i) => i.woKey === key && !isVoidedStatus(i.status)) || billed.some((t) => t.mergedInstallId === r.id);
+  // An install or a PM with this WO's NetSuite billing already (from an earlier run), or a ticket merged into it as
+  // billed with this WO: what it has, for the reasons, or null.
+  const billedHere = (r: BackfillRecord): string | null => {
+    if (r.so || r.lines.length || r.discount || r.invoices.some((i) => i.woKey === key && !isVoidedStatus(i.status))) return "has NetSuite billing for it already";
+    const merged = billed.find((t) => t.mergedInstallId === r.id);
+    return merged ? `carries ticket #${merged.id}'s billing, merged in as billed` : null;
+  };
   // Every dated invoice in the rows has to fit the record they go on (Chuy, 10/30), even the only one with this WO
   // number: the numbers started over in July 2026, so an invoice dated well before it came in, or more than a year
   // after it was done, is another job's, not its billing.
@@ -598,6 +603,23 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
   const choose = (refDate: string | null, dated: (c: Candidate) => RowsAbout["dated"], inv: Set<string>, sos: Set<string>): Candidate | { reason: string } => {
     let noDateWhy: string | null = null;
     if (cands.length === 1) return tooFar(cands[0]!, dated(cands[0]!), true) ?? cands[0]!;
+    // A rerun beside an install or a PM (11/5 re-review): the record the rows' invoices or Sales Orders are recorded on
+    // already keeps the WO, whatever the dates say about the others. A new invoice in the rows dated to fit another
+    // record, and not it, stops the WO.
+    const anchored = ticketsOnly ? [] : cands.filter((c) => holds(c, inv, sos));
+    if (anchored.length === 1) {
+      const c = anchored[0]!;
+      const recorded = new Set(candidateInvoices(c).map((i) => soKey(i.invoice)));
+      for (const r of dated(c)) {
+        if (recorded.has(soKey(r.invoice))) continue;
+        const fits = belongs(r.date);
+        if (!fits.length || fits.includes(c)) continue;
+        return {
+          reason: `${r.invoice} (${r.date}) fits ${fits.map(candidateName).join(", ")}, not ${candidateName(c)}, where this WO's billing is already: put its rows in a file of their own and run that too.`,
+        };
+      }
+      return tooFar(c, dated(c), false) ?? c;
+    }
     // WO numbers started over in July 2026: the record the earliest invoice fits is the one. Every other invoice has to
     // be that record's alone: one that fits another record with this WO, instead or as well, can't be told apart, and
     // putting it on this one would leave that one unbilled (Export Billing would take a ticket again).
@@ -618,11 +640,9 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
         return tooFar(c, dated(c), false) ?? c;
       }
     } else if (!ticketsOnly) {
-      // No invoice date to go by. The record the rows' invoices or Sales Orders are on already is the one (a rerun).
-      // Otherwise the WO's one live ticket keeps it, as before installs and PMs took billing, unless an install or a PM
-      // has this WO's billing already (then it could be either: skipped). The plan says what else carries the WO.
-      const anchored = cands.filter((c) => holds(c, inv, sos));
-      if (anchored.length === 1) return anchored[0]!;
+      // No invoice date to go by, and no record the rows are recorded on (above). The WO's one live ticket keeps it, as
+      // before installs and PMs took billing, unless an install or a PM has this WO's billing already (then it could be
+      // either: skipped). The plan says what else carries the WO.
       const tickets = cands.filter((c) => "ticket" in c);
       const billedRecs = cands.filter((c) => "record" in c && billedHere(c.record));
       if (!anchored.length && tickets.length === 1 && !billedRecs.length) {
@@ -635,7 +655,7 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
       noDateWhy = anchored.length
         ? `the rows' invoices or Sales Orders are on ${anchored.map(candidateName).join(" and ")} already`
         : billedRecs.length
-          ? `${billedRecs.map(candidateName).join(" and ")} ${billedRecs.length === 1 ? "has" : "have"} NetSuite billing for it already`
+          ? billedRecs.map((c) => `${candidateName(c)} ${billedHere((c as { record: BackfillRecord }).record)}`).join("; ")
           : null;
     }
     if (ticketsOnly) return { reason: `The WO is on ${cands.length} tickets (${cands.map(tag).join(", ")}). Can't tell which one NetSuite billed.` };

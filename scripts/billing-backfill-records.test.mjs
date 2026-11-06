@@ -663,7 +663,7 @@ test("picks (11/5 review): beside a billed merged ticket's own rows, the install
   const alone = (await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "", "SO4009", CAFE, "EQUIPMENT : TESTX", 1, 50)])])).plans[0];
   assert.deepEqual(
     [alone.status, alone.reason],
-    ["skip", `The WO is on ticket #${t2}, install #${inst}, and the files have no invoice date to tell them apart (install #${inst} has NetSuite billing for it already). Skipped.`],
+    ["skip", `The WO is on ticket #${t2}, install #${inst}, and the files have no invoice date to tell them apart (install #${inst} carries ticket #${t1}'s billing, merged in as billed). Skipped.`],
   );
   await sql.query("delete from service_jobs where id = $1", [t2]);
   // The install the only record left, the invoice years off: too far, alone or beside the ticket's row.
@@ -963,4 +963,26 @@ test("no invoice date (11/5 re-review): the record a WO's billing is on already 
   const q = (await preview(sql, discOnly)).plans[0];
   assert.deepEqual([q.recordId, q.status, q.charges.next, q.charges.current.length], [pmId, "same", null, 1]);
   assert.ok(q.warnings.includes("No item lines for WO-7700 in the file, only a discount or lines that net to nothing: NetSuite's lines on the PM kept."), q.warnings.join(" | "));
+});
+
+test("a dated rerun (11/5 re-review): an invoice recorded on an install stays its, though a newer ticket with the WO is closer by the dates", async () => {
+  const { sql } = await fresh();
+  const CAFE = "Test Open Install Cafe";
+  // An install not done yet, from January; its invoice went on it in an earlier run, the only record with the WO then.
+  const inst = await install(sql, { customer: CAFE, wo: "WO-0820", received: "2026-01-10" });
+  await sql.query("update installs set completed_at = null, install_date = null, complete = false, equip_status = 'Ready' where id = $1", [inst]);
+  await write(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0820", "SO0820", "INV0820", "2026-10-20", "Open", 5000)])]);
+  // A live ticket with the WO now, done days before the invoice.
+  const t = await ticket(sql, { customer: CAFE, wo: "WO-0820", received: "2026-10-10", completed: "2026-10-14" });
+  const paid = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0820", "SO0820", "INV0820", "2026-10-20", "Paid In Full", 5000, 0)])])).plans[0];
+  assert.deepEqual([paid.kind, paid.recordId, paid.status, paid.invoices.map((i) => [i.invoice, i.change])], ["install", inst, "write", [["INV0820", "updated"]]], `not ticket #${t}`);
+  // A new invoice beside it, dated to fit the ticket and not the install: the WO stops.
+  const mixed = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0820", "SO0820", "INV0820", "2026-10-20", "Paid In Full", 5000, 0), invoice("WO-0820", "", "INV0830", "2026-10-16", "Open", 150, 150, "")])])).plans[0];
+  assert.deepEqual(
+    [mixed.status, mixed.reason],
+    ["skip", `INV0830 (2026-10-16) fits ticket #${t}, not install #${inst}, where this WO's billing is already: put its rows in a file of their own and run that too.`],
+  );
+  // On its own, that one is the ticket's.
+  const alone = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0820", "", "INV0830", "2026-10-16", "Open", 150, 150, "")])])).plans[0];
+  assert.deepEqual([alone.kind, alone.jobId], ["service", t]);
 });
