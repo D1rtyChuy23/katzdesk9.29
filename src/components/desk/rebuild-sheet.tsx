@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -72,6 +72,8 @@ export function RebuildSheet({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  /** A save Link or Unlink started (saveFirst), so its error can say nothing was linked. */
+  const linking = useRef(false);
   const [title, setTitle] = useState("");
   const [account, setAccount] = useState(SHOP_ACCOUNT);
   const [owner, setOwner] = useState("");
@@ -174,7 +176,11 @@ export function RebuildSheet({
       void qc.invalidateQueries({ queryKey: ["invoice"] });
       void qc.invalidateQueries({ queryKey: ["account-invoices"] });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+    onError: (e) => {
+      const why = e instanceof Error ? e.message : "Could not save";
+      // Link and Unlink save the form first: when that fails, nothing was linked either, and the toast says so.
+      toast.error(linking.current ? `Nothing was linked: your changes on Details didn't save. ${why}` : why);
+    },
   });
 
   /**
@@ -218,12 +224,15 @@ export function RebuildSheet({
       po.toSend() !== undefined ||
       vendorPo.toSend() !== undefined);
   const saveFirst = async (): Promise<boolean> => {
+    linking.current = true;
     try {
       await save.mutateAsync();
       return true;
     } catch {
       // The save's own error toast says why.
       return false;
+    } finally {
+      linking.current = false;
     }
   };
 
