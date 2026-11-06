@@ -659,8 +659,16 @@ test("picks (11/5 review): beside a billed merged ticket's own rows, the install
   assert.equal((await first([far])).reason, farReason);
   assert.equal((await first([own, far])).reason, farReason);
   // One that fits: the install takes it, and the ticket's counts as on its card.
-  const fits = await first([own, invoice("WO-4792", "SO4004", "INV4004", "2026-10-25", "Open", 300)]);
+  const fitsRows = [own, invoice("WO-4792", "SO4004", "INV4004", "2026-10-25", "Open", 300)];
+  const fits = await first(fitsRows);
   assert.deepEqual([fits.status, fits.kind, fits.recordId, fits.invoices.map((i) => [i.invoice, i.change])], ["write", "install", inst, [["INV4001", "elsewhere"], ["INV4004", "new"]]]);
+  // Written, then a live ticket with the WO again: the install's own rows, undated beside the merged ticket's, are
+  // recorded on it already, so they're its (a rerun).
+  await write(sql, [file("invoices.csv", [INVOICES_HEAD, ...fitsRows])]);
+  const t3 = await ticket(sql, { customer: CAFE, wo: "WO-4792", received: "2026-10-02", completed: "2026-10-16" });
+  const again = await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "INV4004", "SO4004", CAFE, "EQUIPMENT : TESTX", 1, 300)]), file("invoices.csv", [INVOICES_HEAD, own])]);
+  assert.deepEqual([again.plans[0].kind, again.plans[0].recordId, again.plans[0].reason], ["install", inst, null], `not ticket #${t3}`);
+  await sql.query("delete from service_jobs where id = $1", [t3]);
 
   // WO numbers started over in July 2026: an old PM and a new ticket with one number. An invoice days after the ticket
   // is the ticket's, though it's inside the PM's year too (11/5 review).
@@ -900,6 +908,9 @@ test("no invoice date (11/5 re-review): the record a WO's billing is on already 
   // A charges-only rerun naming INV6101 and SO6101: the install's, already there.
   const rerun = (await preview(sql, [file("charges.csv", charges)])).plans[0];
   assert.deepEqual([rerun.kind, rerun.recordId, rerun.status], ["install", inst, "same"], `not ticket #${t}`);
+  // Naming the invoice alone does it too.
+  const byInvoice = (await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-6101", "INV6101", "", CAFE, "EQUIPMENT : TESTBREWER", 1, 900)])])).plans[0];
+  assert.deepEqual([byInvoice.kind, byInvoice.recordId], ["install", inst]);
   // Charges naming nothing recorded, the install having this WO's NetSuite billing: could be either, skipped.
   const loose = (await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-6101", "", "", CAFE, "EQUIPMENT : TESTX", 1, 50)])])).plans[0];
   assert.deepEqual(
