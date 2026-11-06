@@ -26,8 +26,12 @@ const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
 const src = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
+// Tests run one at a time: the last test's database is closed when the next one starts, so a run doesn't hold them all.
+let last = null;
 async function fresh() {
+  if (last) await last.close().catch(() => {});
   const pg = new PGlite();
+  last = pg;
   for (const name of files) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
   await pg.query(
     `insert into desk_accounts (user_id, username, approved, is_admin, desk_role, email) values
@@ -404,6 +408,15 @@ test("one statement: a record changed since the preview stops it all; an invoice
   const lines = JSON.stringify([{ rtype: "pm", rid: plan.recordId, wo_key: plan.key, item: "X", description: "", qty: 1, rate: 1, kind: "part", ord: 1 }]);
   const run = (r) => sql.query(api.APPLY_BACKFILL_SQL, ["[]", "[]", "[]", "chuy", JSON.stringify([r]), lines, "[]", JSON.stringify({ files: "x", wos: 1, counts: {} })]);
   assert.equal((await run(row({ seen: "2000-01-01 00:00:00+00" })))[0].go, false, "stale");
+  const iplan = fresh1.plans.find((x) => x.wo === "WO-9995");
+  const irow = { ...row(), rtype: "install", rid: iplan.recordId, seen: iplan.seen, wo: iplan.wo, wo_key: iplan.key };
+  const ilines = JSON.stringify([{ rtype: "install", rid: iplan.recordId, wo_key: iplan.key, item: "X", description: "", qty: 1, rate: 1, kind: "part", ord: 1 }]);
+  const runInstall = (r) => sql.query(api.APPLY_BACKFILL_SQL, ["[]", "[]", "[]", "chuy", JSON.stringify([r]), ilines, "[]", JSON.stringify({ files: "x", wos: 1, counts: {} })]);
+  assert.equal((await runInstall({ ...irow, seen: "2000-01-01 00:00:00+00" }))[0].go, false, "an install changed since");
+  await sql.query("update installs set archived = true where id = $1", [iplan.recordId]);
+  const seenNow = (await one(sql, "select updated_at::text as u from installs where id = $1", [iplan.recordId])).u;
+  assert.equal((await runInstall({ ...irow, seen: seenNow }))[0].go, false, "an install taken off the board meanwhile");
+  await sql.query("update installs set archived = false where id = $1", [iplan.recordId]);
   await sql.query("update pm_jobs set stacked_job_id = $2 where id = $1", [plan.recordId, await ticket(sql, { wo: "WO-0001" })]);
   assert.equal((await run(row({ seen: (await one(sql, "select updated_at::text as u from pm_jobs where id = $1", [plan.recordId])).u })))[0].go, false, "stacked meanwhile");
   assert.deepEqual([(await one(sql, "select count(*)::int as n from record_ns_billing")).n, (await one(sql, "select count(*)::int as n from billing_backfill_runs")).n], [0, 0]);
@@ -658,6 +671,14 @@ test("picks (11/5 review): beside a billed merged ticket's own rows, the install
   const farReason = `INV4003 (2028-06-01) is too far from install #${inst} (came in 2026-10-01, done 2026-10-20), the only one with this WO, to be its billing: it may be another job with this WO number. Take its rows out of the file, then run it again.`;
   assert.equal((await first([far])).reason, farReason);
   assert.equal((await first([own, far])).reason, farReason);
+  // Rows beside the ticket's that fit another record with the WO, not the install: skipped, not written on that one.
+  const oldT = await ticket(sql, { customer: CAFE, wo: "WO-4792", received: "2025-03-01", completed: "2025-03-05" });
+  const elsewhere = await first([own, invoice("WO-4792", "SO4005", "INV4005", "2025-03-10", "Open", 75)]);
+  assert.deepEqual(
+    [elsewhere.status, elsewhere.reason],
+    ["skip", `The rows beside ticket #${t1}'s own billing fit ticket #${oldT}, not install #${inst} (where the ticket was merged as billed). Put ticket #${t1}'s rows in a file of their own, then run the Billing Backfill on each.`],
+  );
+  await sql.query("delete from service_jobs where id = $1", [oldT]);
   // One that fits: the install takes it, and the ticket's counts as on its card.
   const fitsRows = [own, invoice("WO-4792", "SO4004", "INV4004", "2026-10-25", "Open", 300)];
   const fits = await first(fitsRows);
@@ -710,6 +731,11 @@ test("a ticket merged into the install as billed (11/5 review): its recorded inv
   assert.deepEqual([p.status, p.kind, p.recordId, p.reason], ["write", "install", inst, null], "March's invoice is the ticket's: its date isn't checked against the install");
   assert.deepEqual(p.invoices.map((i) => [i.invoice, i.change]), [["INV5411", "elsewhere"], ["INV5499", "new"]]);
   assert.deepEqual([p.amounts.netsuite, p.so.next], [300, "SO5499"]);
+  // A live ticket from March with the WO too: March's invoice is the merged ticket's (carried), so its date doesn't pick
+  // the March ticket; the install's own October invoice does.
+  const march = await ticket(sql, { customer: CAFE, wo: "WO-5410", received: "2026-03-01", completed: "2026-03-03" });
+  assert.deepEqual(((x) => [x.status, x.kind, x.recordId])((await preview(sql, f)).plans[0]), ["write", "install", inst], `not ticket #${march}`);
+  await sql.query("delete from service_jobs where id = $1", [march]);
   // Every row the ticket's (its SO's invoice and its own): on the install's card already, even with a live ticket on
   // the WO now; nothing to write.
   const live = await ticket(sql, { customer: CAFE, wo: "WO-5410", received: "2026-10-02", completed: "2026-10-05" });
@@ -894,6 +920,8 @@ test("Location Check and an install's WO dates (11/5 review): its NetSuite invoi
   await sql.query("insert into install_work_orders (install_id, wo, match_key, source, received, completed_at) values ($1, 'WO-5803', '5803', 'desk', '2025-01-10', '2025-01-20'), ($1, 'WO-5804', '5804', 'desk', '2026-10-01', '2026-10-05')", [old]);
   const added = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-5804", "", "INV5804", "2026-10-12", "Open", 10, 10, "")])])).plans[0];
   assert.deepEqual([added.status, added.kind, added.recordId, added.reason], ["write", "install", old, null]);
+  const early = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-5804", "", "INV5805", "2026-09-01", "Open", 10, 10, "")])])).plans[0];
+  assert.equal(early.reason, `INV5805 (2026-09-01) is too far from install #${old} (came in 2026-10-01, done 2026-10-05), the only one with this WO, to be its billing: it may be another job with this WO number. Take its rows out of the file, then run it again.`);
 });
 
 test("no invoice date (11/5 re-review): the record a WO's billing is on already keeps it; a live ticket doesn't take an install's; a discount alone empties nothing", async () => {
