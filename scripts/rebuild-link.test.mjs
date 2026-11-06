@@ -901,6 +901,8 @@ test("a ticket merged into an install as billed keeps the rebuild linked, throug
   await mergeIn(job, inst);
   assert.deepEqual(await flags(rb), { install_id: inst, job_id: null, link_open: true });
   assert.equal(await billedWith(rb), job, "the merge says which billed ticket it came with (0121)");
+  // Its install has no invoice, yet Remove names only Merge installs: Unlink refuses the rebuild.
+  await assert.rejects(archiveInstallFor(sql, "u-owner", inst), { message: /Merge this install into the one to keep instead: it can't be unlinked\.$/ });
   const v = await L.getRebuildLinkFor(sql, rb, "u-owner");
   assert.equal(v.current.billedVia, "ticket SC-RBL-1 (billed on SO-MB-1)");
   assert.equal(v.unlink.refusal, "This rebuild came over with ticket SC-RBL-1 (billed on SO-MB-1) when that ticket was merged into an install, so it stays linked: what was billed there stays billed.");
@@ -1084,7 +1086,9 @@ test("a ticket merged into an install as billed keeps the rebuild linked, throug
   const offInst = await install(sql, { wo: "WO-9631" });
   const offRb = await rebuild(sql, { title: "Test off-board refurb" });
   await linkOn(offRb, "9631", { kind: "install", id: offInst });
-  await assert.rejects(archiveInstallFor(sql, "u-owner", offInst), { message: /^Rebuild #\d+ \(Test off-board refurb\) is linked to install #\d+ and bills there\./ });
+  await assert.rejects(archiveInstallFor(sql, "u-owner", offInst), {
+    message: `Rebuild #${offRb} (Test off-board refurb) is linked to install #${offInst} and bills there. Unlink it on the rebuild's Details first, or merge this install into the one to keep.`,
+  });
   await unlink(sql, offRb);
   // Changed after Remove read it (a link or a merge marks it changed): it removes nothing, and says so.
   const touching = Object.assign(async (...a) => sql(...a), {
