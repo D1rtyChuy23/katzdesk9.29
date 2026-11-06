@@ -260,6 +260,21 @@ async function strandedRebuildsRefusal(sql: Sql, keepId: number, dropId: number)
 /** The unique key on invoices refused the move: the keeper's invoice was saved while the merge ran. */
 const invoiceKeyClash = (e: unknown): boolean => /invoices_entity_key/.test(e instanceof Error ? e.message : String(e));
 
+/**
+ * Either install's invoice is not the one the merge read before its statement (saved, approved, made or gone since, 11/6
+ * review): say so, rather than that an install changed. Null when both are as read.
+ */
+async function invoiceChangedRefusal(sql: Sql, keepId: number, dropId: number, read: { keep: string; drop: string }): Promise<string | null> {
+  const now = (
+    await sql.query<{ keep: string; drop: string }>(
+      `select coalesce(invoice_version('install', $1::int), '') as keep, coalesce(invoice_version('install', $2::int), '') as drop`,
+      [keepId, dropId],
+    )
+  )[0];
+  if (!now || (now.keep === read.keep && now.drop === read.drop)) return null;
+  return `An invoice on install #${keepId} or #${dropId} changed while this merge ran, so nothing was merged. Merge again.`;
+}
+
 export type MergeInstallsResult = {
   keepId: number;
   dropId: number;
@@ -628,7 +643,10 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   });
   if (!out[0]?.ok) {
     throw new Error(
-      (await mergeInvoiceRefusal(sql, keepId, dropId)) ?? (await strandedRebuildsRefusal(sql, keepId, dropId)) ?? "One of the installs changed since this window opened. Open it again and retry.",
+      (await mergeInvoiceRefusal(sql, keepId, dropId)) ??
+        (await strandedRebuildsRefusal(sql, keepId, dropId)) ??
+        (await invoiceChangedRefusal(sql, keepId, dropId, versions)) ??
+        "One of the installs changed since this window opened. Open it again and retry.",
     );
   }
   // A photo the drop took just before the merge locked it, which the statement didn't see: it goes to the keeper too

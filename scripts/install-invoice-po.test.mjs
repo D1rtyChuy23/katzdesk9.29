@@ -303,9 +303,8 @@ test("a merge and an invoice saved at the same moment: the merge checks the invo
   assert.equal((await one(pg, "select count(*)::int as n from activity where entity_type = 'install' and entity_id = $1 and detail like '%PO-LATE%'", [d4])).n, 0);
 
   // Either invoice written after the merge read them, before its statement: the statement reads both again on its
-  // locked rows and writes nothing (11/6 review, round 7). Here the write changes no line, so only that check can stop
-  // it: an approval of the dropped install's emptied invoice, then one of the kept install's.
-  const CHANGED_MERGE = "One of the installs changed since this window opened. Open it again and retry.";
+  // locked rows and writes nothing (11/6 review, round 7), and says an invoice changed. Here the write changes no line,
+  // so only that check can stop it: an approval of the dropped install's emptied invoice, then one of the kept install's.
   for (const which of ["drop", "keep"]) {
     const [k5, d5] = [await install(pg, { wo: `WO-485${which === "drop" ? 0 : 2}` }), await install(pg, { wo: `WO-485${which === "drop" ? 1 : 3}` })];
     await approve(sql, k5);
@@ -313,7 +312,9 @@ test("a merge and an invoice saved at the same moment: the merge checks the invo
     await approveOpened(sql, d5, { lines: [] });
     const target = which === "drop" ? d5 : k5;
     const reapprove = () => pg.query("update invoices set approved_at = approved_at + interval '1 second' where entity_type = 'install' and entity_id = $1", [target]);
-    await assert.rejects(() => mergeInstallsFor(meanwhile(reapprove), "u-owner", { keepId: k5, dropId: d5 }), { message: CHANGED_MERGE });
+    await assert.rejects(() => mergeInstallsFor(meanwhile(reapprove), "u-owner", { keepId: k5, dropId: d5 }), {
+      message: `An invoice on install #${k5} or #${d5} changed while this merge ran, so nothing was merged. Merge again.`,
+    });
     assert.equal((await one(pg, "select archived from installs where id = $1", [d5])).archived, false, which);
     // Looked at again, it merges.
     assert.equal((await mergeInstallsFor(sql, "u-owner", { keepId: k5, dropId: d5 })).invoiceMoved, false);
