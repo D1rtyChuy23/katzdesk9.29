@@ -65,7 +65,9 @@ side too: see "Installs and PMs" below.
     would bill nowhere. Unlink it, or merge the install into the one to keep (the only way for a rebuild that Unlink
     refuses). Remove checks the install row as it read it, so a link or merge that commits while it waits stops it.
   - Merge installs reads both invoices' approval fresh, after its locks: an install's Approve doesn't touch the
-    install row the merge checks.
+    install row the merge checks. Since 11/6 (round 7) it also checks both invoices' versions there against what it
+    read before its statement, so its one-invoice rule can't miss a line that an Approve put on the drop's invoice
+    while the merge waited.
 - Link and Unlink mark the ticket or install changed (`updated_at`), so a Charges save, a merge, Merge installs or a
   Billing Backfill confirm that read it before stops and asks to look again.
 - `0118` also adds four functions: `invoice_version` (an invoice's "id:approved:saved" stamp), `rebuild_lines_on`
