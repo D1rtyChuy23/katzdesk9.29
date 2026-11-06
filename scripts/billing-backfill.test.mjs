@@ -407,3 +407,15 @@ test("a stale preview writes nothing: changed since the preview, or edited betwe
   assert.deepEqual(await invoicesOf(sql, id), []);
   await assert.rejects(() => api.applyBillingBackfillFor(sql, f, "u-owner", { hash: "0123456789abcdef", skip: [] }), /changed since the preview/);
 });
+
+test("one NetSuite invoice under two tickets' WOs in the files: both written, and both say so (11/5 review)", async () => {
+  const sql = await fresh();
+  const a = await ticket(sql, { wo: "WO-0621" });
+  const b = await ticket(sql, { wo: "WO-0622" });
+  const row = (wo) => [wo, "", "", "INV62", "2026-09-12", "Open", "10", "10", "", ""];
+  const p = await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, row("WO-0621"), row("WO-0622")])], "u-owner");
+  const by = Object.fromEntries(p.plans.map((x) => [x.wo, x]));
+  assert.deepEqual([by["WO-0621"].status, by["WO-0622"].status], ["write", "write"]);
+  assert.ok(by["WO-0621"].warnings.includes(`INV62 is in the files under WO-0622 (ticket #${b}) too. NetSuite billed both on one invoice, or a WO is wrong: check it in NetSuite.`), by["WO-0621"].warnings.join(" | "));
+  assert.ok(by["WO-0622"].warnings.includes(`INV62 is in the files under WO-0621 (ticket #${a}) too. NetSuite billed both on one invoice, or a WO is wrong: check it in NetSuite.`), by["WO-0622"].warnings.join(" | "));
+});

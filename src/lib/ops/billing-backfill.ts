@@ -522,8 +522,11 @@ function carriedBy(r: BackfillRecord, row: { invoice?: string | null; so?: strin
   );
 }
 
-/** An invoice is a record's billing by the closer reading when it is dated within this many days after it was done. */
-const CLOSE_DAYS = 45;
+/**
+ * Beside an install or a PM, of the records an invoice fits, one is its billing when it was done at least this many days
+ * closer to the invoice than any other (11/5 review): a new ticket and an old PM with one number, not two jobs weeks apart.
+ */
+const CLOSER_BY_DAYS = 45;
 
 const dayOf = (iso: string) => Date.parse(`${iso}T12:00:00Z`) / 86_400_000;
 
@@ -551,17 +554,24 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
   const tag = (c: Candidate) => (ticketsOnly ? `#${candidateId(c)}` : candidateName(c));
   const fit = (date: string, c: Candidate) => invoiceFitsTicket(date, candidateDates(c).received, candidateDates(c).completed) === true;
   // Tickets among themselves go by the year's window, as since 10/30. Beside an install or a PM (11/5), two records in
-  // the year's window are told apart by the closer one: dated within CLOSE_DAYS of when it was done. A new ticket and an
-  // old PM with one number go to the ticket, as before installs and PMs took billing.
+  // the year's window are told apart by how long after each was done the invoice is dated (none while it was being
+  // done): one at least CLOSER_BY_DAYS closer than the rest is the one. A new ticket and an old PM with one number go to
+  // the ticket, as before installs and PMs took billing; two jobs in the same weeks can't be told apart.
   const belongs = (date: string): Candidate[] => {
     const loose = cands.filter((c) => fit(date, c));
     if (ticketsOnly || loose.length < 2) return loose;
-    const close = loose.filter((c) => {
-      const end = candidateDates(c).completed || candidateDates(c).received;
-      return !!end && Math.round(dayOf(date) - dayOf(end)) <= CLOSE_DAYS;
-    });
-    return close.length ? close : loose;
+    const after = (c: Candidate) => Math.max(0, Math.round(dayOf(date) - dayOf((candidateDates(c).completed || candidateDates(c).received)!)));
+    const best = Math.min(...loose.map(after));
+    return loose.filter((c) => after(c) < best + CLOSER_BY_DAYS);
   };
+  // The rows' invoices and Sales Orders recorded on a record already: theirs, when nothing else tells (11/5 review).
+  const holds = (c: Candidate, inv: Set<string>, sos: Set<string>) => {
+    const so = soKey("ticket" in c ? c.ticket.so : c.record.so);
+    return (!!so && sos.has(so)) || candidateInvoices(c).some((i) => inv.has(soKey(i.invoice)));
+  };
+  // An install or a PM with this WO's NetSuite billing already (from an earlier run), or a ticket merged into it as billed.
+  const billedHere = (r: BackfillRecord) =>
+    !!r.so || r.lines.length > 0 || !!r.discount || r.invoices.some((i) => i.woKey === key && !isVoidedStatus(i.status)) || billed.some((t) => t.mergedInstallId === r.id);
   // Every dated invoice in the rows has to fit the record they go on (Chuy, 10/30), even the only one with this WO
   // number: the numbers started over in July 2026, so an invoice dated well before it came in, or more than a year
   // after it was done, is another job's, not its billing.
@@ -582,9 +592,11 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
   };
   /**
    * The one record the rows go on. `dated(c)`: the dated invoices that are c's to check (not a ticket's billing an
-   * install carries); `refDate`: the earliest invoice date among them.
+   * install carries); `refDate`: the earliest invoice date among them; `inv` and `sos`: the invoices and Sales Orders the
+   * rows name.
    */
-  const choose = (refDate: string | null, dated: (c: Candidate) => RowsAbout["dated"]): Candidate | { reason: string } => {
+  const choose = (refDate: string | null, dated: (c: Candidate) => RowsAbout["dated"], inv: Set<string>, sos: Set<string>): Candidate | { reason: string } => {
+    let noDateWhy: string | null = null;
     if (cands.length === 1) return tooFar(cands[0]!, dated(cands[0]!), true) ?? cands[0]!;
     // WO numbers started over in July 2026: the record the earliest invoice fits is the one. Every other invoice has to
     // be that record's alone: one that fits another record with this WO, instead or as well, can't be told apart, and
@@ -606,21 +618,30 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
         return tooFar(c, dated(c), false) ?? c;
       }
     } else if (!ticketsOnly) {
-      // No invoice date to go by: a WO's one live ticket keeps it, as before installs and PMs took billing, and the
-      // plan says what else carries the WO.
+      // No invoice date to go by. The record the rows' invoices or Sales Orders are on already is the one (a rerun).
+      // Otherwise the WO's one live ticket keeps it, as before installs and PMs took billing, unless an install or a PM
+      // has this WO's billing already (then it could be either: skipped). The plan says what else carries the WO.
+      const anchored = cands.filter((c) => holds(c, inv, sos));
+      if (anchored.length === 1) return anchored[0]!;
       const tickets = cands.filter((c) => "ticket" in c);
-      if (tickets.length === 1) {
+      const billedRecs = cands.filter((c) => "record" in c && billedHere(c.record));
+      if (!anchored.length && tickets.length === 1 && !billedRecs.length) {
         const others = cands.filter((c) => c !== tickets[0]).map(candidateName);
         return {
           ...tickets[0]!,
           warning: `${others.join(", ").replace(/^./, (s) => s.toUpperCase())} ${others.length === 1 ? "carries" : "carry"} this WO too. With no invoice date in the files to tell them apart, the ticket takes it, as before installs and PMs took billing: make sure it's the ticket's.`,
         };
       }
+      noDateWhy = anchored.length
+        ? `the rows' invoices or Sales Orders are on ${anchored.map(candidateName).join(" and ")} already`
+        : billedRecs.length
+          ? `${billedRecs.map(candidateName).join(" and ")} ${billedRecs.length === 1 ? "has" : "have"} NetSuite billing for it already`
+          : null;
     }
     if (ticketsOnly) return { reason: `The WO is on ${cands.length} tickets (${cands.map(tag).join(", ")}). Can't tell which one NetSuite billed.` };
     // A ticket and an install or a PM with one WO (11/5): say what the dates couldn't settle.
     const names = cands.map(candidateName).join(", ");
-    if (!refDate) return { reason: `The WO is on ${names}, and the files have no invoice date to tell them apart. Skipped.` };
+    if (!refDate) return { reason: `The WO is on ${names}, and the files have no invoice date to tell them apart${noDateWhy ? ` (${noDateWhy})` : ""}. Skipped.` };
     const fitting = belongs(refDate);
     // A ticket and an install of one account in the same weeks are likely one job: say how to make them one.
     const sameJob =
@@ -653,13 +674,18 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
       if (!restInvoices.length && !restLines.length) return { record: home };
       const rest = rows.dated.filter((d) => !carriedBy(home, { invoice: d.invoice }));
       const restRef = earliest(restInvoices);
+      const restInv = new Set([...restInvoices.map((i) => soKey(i.invoice)), ...restLines.map((r) => soKey(r.sourceInvoice))].filter(Boolean));
+      const restSos = new Set([...restInvoices.map((i) => soKey(i.so)), ...restLines.map((r) => soKey(r.sourceSo))].filter(Boolean));
       const others = cands.filter((c) => !("record" in c && c.record === home));
       if (!restRef && others.length) {
+        // Recorded on the install already (a rerun): its. Anywhere else, or nowhere: the dates have to tell.
+        const anchored = cands.filter((c) => holds(c, restInv, restSos));
+        if (anchored.length === 1 && "record" in anchored[0]! && anchored[0].record === home) return anchored[0]!;
         return {
-          reason: `The rows beside ticket #${t.id}'s own billing have no invoice date to tell install #${home.id} (where the ticket was merged as billed) from ${others.map(candidateName).join(", ")}. Put ticket #${t.id}'s rows in a file of their own, then run the Billing Backfill on each.`,
+          reason: `The rows beside ticket #${t.id}'s own billing have no invoice date to tell install #${home.id} (where the ticket was merged as billed) from ${others.map(candidateName).join(", ")}. Run them with their NetSuite invoices, so the invoice dates can tell, or merge the other ticket into the install if it's the same job. Skipped.`,
         };
       }
-      const c = choose(restRef, (x) => ownDated(x, rest));
+      const c = choose(restRef, (x) => ownDated(x, rest), restInv, restSos);
       if ("reason" in c) return c;
       if ("record" in c && c.record === home) return c;
       return {
@@ -701,7 +727,7 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
   }
   // The rows' own date: not a ticket's billing an install carries (its invoice dated when the ticket was billed).
   const notCarried = invoiceRows.filter((i) => !open.some((r) => carriedBy(r, i)));
-  return choose(earliest(notCarried.length ? notCarried : invoiceRows), (c) => ownDated(c, rows.dated));
+  return choose(earliest(notCarried.length ? notCarried : invoiceRows), (c) => ownDated(c, rows.dated), rows.invoices, new Set([...rows.sos].filter((s) => s !== NO_SO)));
 }
 
 /** Plan every WO in the files against the records as they are now. Saves nothing. */
@@ -933,6 +959,10 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     const built = chargeLinesFromNetSuite(lineRows);
     if (built.problem) {
       chargeNote = `Charges kept: ${built.problem}.`;
+      warnings.push(chargeNote);
+    } else if (rec && !built.lines.length) {
+      // Only a discount, or lines that net to nothing: no charges in the file for this WO (11/5 review).
+      chargeNote = `No item lines for ${wo} in the file, only a discount or lines that net to nothing: NetSuite's lines on the ${what} kept.`;
       warnings.push(chargeNote);
     } else {
       next = built.lines;

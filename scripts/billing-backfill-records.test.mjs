@@ -514,8 +514,11 @@ test("0116: one record per row, the WO's billing once, the discount's rule, the 
   assert.deepEqual([(await one(sql, "select count(*)::int as n from record_ns_billing where pm_id is not null")).n, (await one(sql, "select count(*)::int as n from record_ns_invoices where pm_id is not null")).n], [0, 0]);
   // It only creates: no statement changes or removes anything that exists.
   const statements = src("migrations/0116_install_pm_netsuite_billing.sql").replace(/--[^\n]*/g, "").split(";").map((s) => s.trim()).filter(Boolean);
-  assert.deepEqual([...new Set(statements.map((s) => s.split(/\s+/).slice(0, 2).join(" ").toLowerCase()))].sort(), ["create index", "create or", "create table", "create unique"]);
-  assert.deepEqual(statements.filter((s) => /^create or/i.test(s)).map((s) => s.split(/\s+/).slice(0, 5).join(" ")), ["create or replace function pm_netsuite_billed(pm"]);
+  assert.deepEqual([...new Set(statements.map((s) => s.split(/\s+/).slice(0, 2).join(" ").toLowerCase()))].sort(), ["create index", "create table", "create unique"]);
+  // The stacking guard is its own file (11/5 re-review): a database that ran 0116 before it was added gets it too.
+  const guard = src("migrations/0117_pm_netsuite_billed.sql").replace(/--[^\n]*/g, "").trim();
+  assert.match(guard, /^create or replace function pm_netsuite_billed\(pm int\) returns boolean language sql volatile as \$\$/);
+  assert.equal(guard.split("$$").length, 3, "one function, nothing else");
 });
 
 test("the screens: the install's and PM's Invoices tab, the Invoices page's boards, the backfill's record types, outcomes and past runs (source)", () => {
@@ -641,7 +644,13 @@ test("picks (11/5 review): beside a billed merged ticket's own rows, the install
   const undated = await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "", "SO4009", CAFE, "EQUIPMENT : TESTX", 1, 50)]), file("invoices.csv", [INVOICES_HEAD, own])]);
   assert.equal(
     undated.plans[0].reason,
-    `The rows beside ticket #${t1}'s own billing have no invoice date to tell install #${inst} (where the ticket was merged as billed) from ticket #${t2}. Put ticket #${t1}'s rows in a file of their own, then run the Billing Backfill on each.`,
+    `The rows beside ticket #${t1}'s own billing have no invoice date to tell install #${inst} (where the ticket was merged as billed) from ticket #${t2}. Run them with their NetSuite invoices, so the invoice dates can tell, or merge the other ticket into the install if it's the same job. Skipped.`,
+  );
+  // Those rows on their own: the install has this WO's billing (the merged ticket's), so the live ticket doesn't take them.
+  const alone = (await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "", "SO4009", CAFE, "EQUIPMENT : TESTX", 1, 50)])])).plans[0];
+  assert.deepEqual(
+    [alone.status, alone.reason],
+    ["skip", `The WO is on ticket #${t2}, install #${inst}, and the files have no invoice date to tell them apart (install #${inst} has NetSuite billing for it already). Skipped.`],
   );
   await sql.query("delete from service_jobs where id = $1", [t2]);
   // The install the only record left, the invoice years off: too far, alone or beside the ticket's row.
@@ -659,6 +668,14 @@ test("picks (11/5 review): beside a billed merged ticket's own rows, the install
   const newT = await ticket(sql, { customer: "Test New Ticket Cafe", wo: "WO-7501", received: "2026-10-05", completed: "2026-10-15" });
   const close = await first([invoice("WO-7501", "", "INV7501", "2026-10-20", "Open", 50, 50, "")]);
   assert.deepEqual([close.kind, close.jobId, close.status, close.warnings.filter((w) => /carries this WO/.test(w))], ["service", newT, "write", []], `not PM #${oldPm}`);
+  // Billed again 47 days after the ticket was done: still the ticket's (the PM is a year off), alone or with the first.
+  const oldPm2 = await pm(sql, { customer: "Test Old PM Cafe", wo: "WO-0612", received: "2025-11-03", completed: "2025-12-01" });
+  const newT2 = await ticket(sql, { customer: "Test New Ticket Cafe", wo: "WO-0612", received: "2026-10-05", completed: "2026-10-14" });
+  const firstBill = invoice("WO-0612", "SO0612", "INV0612", "2026-10-20", "Open", 150);
+  const rebill = invoice("WO-0612", "SO0613", "INV0613", "2026-11-30", "Open", 40);
+  for (const rows of [[firstBill], [rebill], [firstBill, rebill]]) {
+    assert.deepEqual(((x) => [x.kind, x.jobId, x.status])(await first(rows)), ["service", newT2, "write"], `${rows.map((r) => r[3]).join(" + ")}, not PM #${oldPm2}`);
+  }
   // Charges with no invoice date: the live ticket keeps the WO, as before installs and PMs took billing, and says so.
   const plain = (await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-7501", "", "", "Test New Ticket Cafe", "Service : TRIPCHARGE", 1, 50)])])).plans[0];
   assert.deepEqual([plain.kind, plain.jobId, plain.status], ["service", newT, "write"]);
@@ -858,6 +875,9 @@ test("Location Check and an install's WO dates (11/5 review): its NetSuite invoi
   ];
   await write(sql, f);
   // The charges' helper bills from Houston - WH: neither tech's warehouse.
+  // An install taken off the board isn't listed (as on the Invoices page).
+  const gone = await install(sql, { customer: "Test Gone Warehouse Cafe", wo: "WO-5809", tech: "Lance Oden", archived: true });
+  await sql.query("insert into record_ns_invoices (install_id, wo_key, ns_invoice, status, total, location) values ($1, '5809', 'INV5809', 'Open', 10, 'Houston - WH')", [gone]);
   const rows = (await report.locationCheckFor(sql, "u-owner")).rows.filter((r) => r.kind === "warehouse");
   assert.deepEqual(rows.map((r) => [r.board, r.id, r.wo, r.invoice, r.invoiceLocation]), [["install", inst, "WO-5801", "INV5801", "Houston - WH"], ["pm", p, "WO-5802", "INV5802", "Houston - WH"]]);
 
@@ -866,4 +886,42 @@ test("Location Check and an install's WO dates (11/5 review): its NetSuite invoi
   await sql.query("insert into install_work_orders (install_id, wo, match_key, source, received, completed_at) values ($1, 'WO-5803', '5803', 'desk', '2025-01-10', '2025-01-20'), ($1, 'WO-5804', '5804', 'desk', '2026-10-01', '2026-10-05')", [old]);
   const added = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-5804", "", "INV5804", "2026-10-12", "Open", 10, 10, "")])])).plans[0];
   assert.deepEqual([added.status, added.kind, added.recordId, added.reason], ["write", "install", old, null]);
+});
+
+test("no invoice date (11/5 re-review): the record a WO's billing is on already keeps it; a live ticket doesn't take an install's; a discount alone empties nothing", async () => {
+  const { sql } = await fresh();
+  const CAFE = "Test Probe Cafe";
+  const inst = await install(sql, { customer: CAFE, wo: "WO-6101", received: "2026-10-01", completed: "2026-10-20" });
+  const charges = [CHARGES_HEAD, charge("WO-6101", "INV6101", "SO6101", CAFE, "EQUIPMENT : TESTBREWER", 1, 900)];
+  await write(sql, [file("charges.csv", charges), file("invoices.csv", [INVOICES_HEAD, invoice("WO-6101", "SO6101", "INV6101", "2026-10-28", "Open", 900)])]);
+  // A live ticket with the WO afterwards, with a charge of its own.
+  const t = await ticket(sql, { customer: CAFE, wo: "WO-6101", received: "2026-11-02", completed: "2026-11-03" });
+  await sql.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, 'Service : SERVICELABOR', 'Labor', 1, 150, 'labor', 1)", [t]);
+  // A charges-only rerun naming INV6101 and SO6101: the install's, already there.
+  const rerun = (await preview(sql, [file("charges.csv", charges)])).plans[0];
+  assert.deepEqual([rerun.kind, rerun.recordId, rerun.status], ["install", inst, "same"], `not ticket #${t}`);
+  // Charges naming nothing recorded, the install having this WO's NetSuite billing: could be either, skipped.
+  const loose = (await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-6101", "", "", CAFE, "EQUIPMENT : TESTX", 1, 50)])])).plans[0];
+  assert.deepEqual(
+    [loose.status, loose.reason],
+    ["skip", `The WO is on ticket #${t}, install #${inst}, and the files have no invoice date to tell them apart (install #${inst} has NetSuite billing for it already). Skipped.`],
+  );
+  // Recorded on both: can't tell either.
+  await sql.query("update service_jobs set ns_so = 'SO6101' where id = $1", [t]);
+  assert.equal(
+    (await preview(sql, [file("charges.csv", charges)])).plans[0].reason,
+    `The WO is on ticket #${t}, install #${inst}, and the files have no invoice date to tell them apart (the rows' invoices or Sales Orders are on ticket #${t} and install #${inst} already). Skipped.`,
+  );
+  assert.deepEqual((await sql.query("select item from ticket_charges where job_id = $1", [t])).map((r) => r.item), ["Service : SERVICELABOR"]);
+
+  // A PM's WO with NetSuite lines; a later charges file lists only a discount for it: its lines stay.
+  const pmId = await pm(sql, { customer: "Test Disc Cafe", wo: "WO-7700" });
+  await write(sql, [
+    file("charges.csv", [CHARGES_HEAD, charge("WO-7700", "INV7700", "SO7700", "Test Disc Cafe", "PM KITS : A", 1, 300)]),
+    file("invoices.csv", [INVOICES_HEAD, invoice("WO-7700", "SO7700", "INV7700", "2026-10-25", "Open", 300)]),
+  ]);
+  const discOnly = [file("charges.csv", [CHARGES_HEAD, ["WO-7700", "INV7700", "SO7700", "", "Test Disc Cafe", "", "CLDSERVICE", "Discount", "Discount", "1", "-10", "-10", "CLDSERVICE", "", ""]])];
+  const q = (await preview(sql, discOnly)).plans[0];
+  assert.deepEqual([q.recordId, q.status, q.charges.next, q.charges.current.length], [pmId, "same", null, 1]);
+  assert.ok(q.warnings.includes("No item lines for WO-7700 in the file, only a discount or lines that net to nothing: NetSuite's lines on the PM kept."), q.warnings.join(" | "));
 });
