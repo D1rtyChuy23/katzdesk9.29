@@ -191,6 +191,8 @@ test("what a link does, or why it can't: the rules alone", () => {
     for (const answer of [null, "on", "not"]) assert.notEqual(R.planLink({ ...r, own: { ...own, state } }, t, answer).keepOwn, true, `${state} ${answer}`);
   }
   assert.equal(R.planLink({ ...r, own: { ...own, state: "none" } }, t).ok, true);
+  // Nor without lines: there's nothing to keep.
+  assert.deepEqual([R.planLink({ ...r, own: { ...own, lines: 0, total: 0 } }, t, "on").keepOwn, R.planLink({ ...r, own: { ...own, lines: 0, total: 0 } }, t, "on").steps], [false, ["link"]]);
   // An install's invoice takes them waiting for an Admin; a discount there and NetSuite billing are said.
   const inst = { ...t, kind: "install", name: "Install #9", wo: "WO-5001", discount: { kind: "percent", value: 10 }, netsuite: "INV-T-1" };
   const fresh = { ...own, state: "none" };
@@ -1516,6 +1518,18 @@ test("a rebuild linked before 11/6 with its own lines: yes only notes that they'
   await assert.rejects(linkTo(sql, f, f.candidates[0], "u-owner", "not"), { message: CHANGED_LINK });
   assert.deepEqual(await charges(sql, job), []);
   assert.equal((await notes(sql)).length, 1);
+
+  // Another linked before 11/6, moved to another WO with yes: it leaves the first ticket, nothing moves, and the answer
+  // is noted with the new link.
+  const other = await rebuild(sql, { title: "Test old refurb", account: CAFE });
+  await sql.query("update rebuilds set job_id = $2 where id = $1", [other, job]);
+  await ownInvoice(sql, other, [PARTS[0]], { customer: CAFE });
+  const next = await ticket(sql, { wo: "WO-4400", status: "In progress" });
+  const g = await find(sql, other, "4400");
+  assert.deepEqual([g.candidates[0].plan.ok, g.candidates[0].plan.on.steps, g.candidates[0].plan.on.noteOwn], ["ask", ["unlink", "link"], true]);
+  assert.equal((await linkTo(sql, g, g.candidates[0], "u-owner", "on")).message, "Moved from WO-4321 (Service ticket SC-RBL-1) to WO-4400 (Service ticket SC-RBL-2). Its invoice's 1 line stays on it: it's on a Sales Order.");
+  assert.deepEqual([(await RB.rebuildRowOut(sql, other)).jobId, (await charges(sql, next)).length, (await invoiceLines(sql, "rebuild", other)).length], [next, 0, 1]);
+  assert.equal((await one(sql, "select rebuild_invoice_on_so($1) as s", [other])).s, true);
 });
 
 test("every Sales Order check of the link and note statements holds on its own: an answer that no longer fits writes nothing", async () => {
@@ -1570,6 +1584,7 @@ test("every Sales Order check of the link and note statements holds on its own: 
   const legacy = await rebuild(sql, { account: CAFE });
   const legInv = await ownInvoice(sql, legacy, PARTS, { customer: CAFE });
   assert.equal(await note(legacy, job, await own(legacy)), 0, "not linked there");
+  assert.equal(await note(legacy, null, await own(legacy)), 0, "not linked at all");
   await sql.query("update rebuilds set job_id = $2 where id = $1", [legacy, job]);
   assert.equal(await note(legacy, job, `${legInv}:1:`), 0, "another version");
   await sql.query("update invoices set approved_at = null, approved_by = null, submitted_at = now(), submitted_by = 'wes' where id = $1", [legInv]);
@@ -1588,6 +1603,16 @@ test("every Sales Order check of the link and note statements holds on its own: 
   assert.equal(await note(legacy, job, await own(legacy)), 0, "noted already");
   assert.deepEqual(await noted(), [["rebuild", legacy, "chuy", "updated"]]);
   assert.equal((await one(sql, "select on_sales_order_version = invoice_version('rebuild', $2) as fresh from invoices where id = $1", [legInv, legacy])).fresh, true);
+  // The note counts only on an approved invoice with lines, however it got there.
+  const mark = (id) => sql.query("update invoices set on_sales_order_at = now(), on_sales_order_by = 'dana', on_sales_order_version = invoice_version('rebuild', $1) where entity_type = 'rebuild' and entity_id = $1", [id]);
+  const onSo = (id) => one(sql, "select rebuild_invoice_on_so($1) as s", [id]).then((r) => r.s);
+  const wait = await rebuild(sql, { account: "Katz Coffee Service Dept." });
+  await ownInvoice(sql, wait, [PARTS[0]], { state: "waiting", customer: "Katz Coffee Service Dept." });
+  await mark(wait);
+  const blank = await rebuild(sql);
+  await ownInvoice(sql, blank, []);
+  await mark(blank);
+  assert.deepEqual([await onSo(wait), await onSo(blank), await onSo(none)], [false, false, false]);
 });
 
 test("moving to another WO with its invoice on a Sales Order stops if that invoice changes between the unlink and the link", async () => {

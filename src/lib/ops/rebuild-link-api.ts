@@ -786,6 +786,9 @@ export function unlinkRebuildSql(): string {
        from upd`;
 }
 
+/** "is" for one line, "are" for more. */
+const isAre = (n: number) => (n === 1 ? "is" : "are");
+
 const rebuildName = (r: { id: number; title: string }) => `Rebuild #${r.id}${r.title?.trim() ? ` (${r.title.trim()})` : ""}`;
 
 async function unlinkNow(sql: Sql, st: LinkState, who: string): Promise<{ moved: number; amount: number }> {
@@ -824,7 +827,12 @@ async function linkNow(sql: Sql, st: LinkState, target: LinkTarget, project: Lin
     st.own.lines > 0 ? (plan.keepOwn ? `${own} stayed on it: it's on a Sales Order` : `${own} went on ${billName(project)}`) : null,
   ].filter(Boolean);
   const where = project.kind === "install" ? "this install's invoice, waiting for an Admin to approve it" : "this ticket's charges";
-  const there = st.own.lines > 0 ? (plan.keepOwn ? ` · its own invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) are on a Sales Order` : ` · its ${lineCount(st.own.lines)} (${money(st.own.total)}) went on ${where}`) : "";
+  const there =
+    st.own.lines > 0
+      ? plan.keepOwn
+        ? ` · its own invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) ${isAre(st.own.lines)} on a Sales Order`
+        : ` · its ${lineCount(st.own.lines)} (${money(st.own.total)}) went on ${where}`
+      : "";
   const out = await sql.query<{ id: number; account: string; old_account: string; moved: number; noted: number }>(linkRebuildSql(), [
     r.id,
     r.install_id,
@@ -853,7 +861,7 @@ async function noteNow(sql: Sql, st: LinkState, who: string): Promise<void> {
     st.rebuild.job_id,
     who,
     st.own.version,
-    `Its invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) are on a Sales Order in NetSuite, so they stay on it`,
+    `Its invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) ${isAre(st.own.lines)} on a Sales Order in NetSuite, so ${st.own.lines === 1 ? "it stays" : "they stay"} on it`,
   ]).catch((e: unknown) => {
     throw isDeadlock(e) ? new Error(CHANGED) : e;
   });
@@ -889,7 +897,7 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
   const left = st.current;
   if (plan.steps.includes("note")) {
     await noteNow(sql, st, viewer.name);
-    message = `Noted: its invoice's ${lineCount(st.own.lines)} are on a Sales Order, so they stay on it.`;
+    message = `Noted: its invoice's ${lineCount(st.own.lines)} ${isAre(st.own.lines)} on a Sales Order, so ${st.own.lines === 1 ? "it stays" : "they stay"} on it.`;
   }
   if (plan.steps.includes("unlink")) {
     // Moving to another WO, the unlink is its first step: if that stops, nothing was linked.
@@ -925,7 +933,7 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
     // Its held units follow it to the project's account.
     if (normalizeCustomerKey(linked.account) !== normalizeCustomerKey(linked.oldAccount)) await moveHeldUnits(sql, data.id, linked.account, linked.oldAccount);
     const moved = linked.moved > 0 ? ` Its ${lineCount(linked.moved)} went on ${billName(project)}.` : "";
-    const kept = go.keepOwn ? ` Its invoice's ${lineCount(st.own.lines)} stay on it: it's on a Sales Order.` : "";
+    const kept = go.keepOwn ? ` Its invoice's ${lineCount(st.own.lines)} ${st.own.lines === 1 ? "stays" : "stay"} on it: it's on a Sales Order.` : "";
     message =
       left && plan.steps.includes("unlink") ? `Moved from ${projectLabel(left)} to ${projectLabel(project)}.${moved}${kept}` : `Linked to ${projectLabel(project)}.${moved}${kept}`;
   }
