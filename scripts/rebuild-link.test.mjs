@@ -1451,7 +1451,7 @@ test("its invoice on a Sales Order: Link asks, and yes keeps its lines on it, no
   // Its own Invoice window: locked, saying the lines stay on it, and billed as it was approved (not the ticket's account).
   const lock = "This rebuild bills on WO-4321 (Service ticket SC-RBL-1): its parts and labor go on the ticket's charges. Open the ticket to change them. Its own invoice's 2 lines stay on it: it's on a Sales Order in NetSuite.";
   const view = await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner");
-  assert.deepEqual([view.locked, view.lines.length, view.billTo.name, view.po], [lock, 2, SHOP, "PO-OLD"]);
+  assert.deepEqual([view.locked, view.lines.length, view.billTo.name, view.po, view.asApproved], [lock, 2, SHOP, "PO-OLD", true]);
   await assert.rejects(I.approveInvoiceFor(sql, { type: "rebuild", id: rb, lines: [{ item: "TEST-BURR-64", description: "", qty: 1, rate: 45 }], lineIds: [], discount: null, seen: view.version }, "u-owner"), { message: lock });
   // The ticket's list says where they bill; the old account's Invoices tab keeps it, with the P.O. it was approved with.
   assert.deepEqual(await L.listProjectRebuildsFor(sql, { type: "service", id: job }, "u-owner"), [
@@ -1475,7 +1475,7 @@ test("its invoice on a Sales Order: Link asks, and yes keeps its lines on it, no
   assert.equal((await L.getRebuildLinkFor(sql, rb, "u-owner")).own.onSalesOrder, true);
   // Unlinked, its window opens again on the account as it is now: an approve would bill that one.
   const open = await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner");
-  assert.deepEqual([open.locked, open.billTo.name, open.po], [null, CAFE, "PO-T-1"]);
+  assert.deepEqual([open.locked, open.billTo.name, open.po, open.asApproved], [null, CAFE, "PO-T-1", false]);
 
   // Linked to another WO, its lines stay without asking. A "not yet" sent anyway is turned down.
   const inst = await install(sql, { wo: "WO-5000" });
@@ -1738,6 +1738,10 @@ test("the rebuild sheet: a WO box with Find instead of the old list, its account
   assert.match(field, /onGo=\{\(\) => go\.mutate\(\{ base: found, to: c, salesOrder: answer \}\)\}/);
   assert.match(field, /salesOrder: q\.salesOrder \?\? null,/);
   assert.equal(field.match(/setAnswers\(\{\}\);/g)?.length, 2, "on a new Find, and after a link");
+  // Its Invoice window, on a Sales Order: billed and P.O.'d as approved, and says so.
+  const win = src("src/components/desk/invoice-window.tsx");
+  assert.match(win, /\{v\.asApproved \? "As approved, on its Sales Order" : "Filled from the account"\}/);
+  assert.match(win, /\{v\.asApproved \? "The customer's P\.O\. this invoice was approved with\. It's on a Sales Order in NetSuite\." : poNote\(type, v\.canApprove\)\}/);
   assert.match(sheet, /link\.data\?\.own\.onSalesOrder \? ` Its own invoice's \$\{lineCount\(link\.data\.own\.lines\)\} \$\{link\.data\.own\.lines === 1 \? "stays" : "stay"\} on it: it's on a Sales Order in NetSuite\.` : ""/);
   assert.match(src("src/components/desk/project-rebuilds.tsx"), /\{r\.onSalesOrder \? ` · its own invoice's \$\{lineCount\(r\.onSalesOrder\)\} \$\{r\.onSalesOrder === 1 \? "is" : "are"\} on a Sales Order` : ""\}/);
   // The ticket (both layouts) and the install show the rebuilds billed there.

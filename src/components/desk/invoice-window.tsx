@@ -309,7 +309,10 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
             <section className="rounded-lg border border-border bg-muted/40 p-3" data-testid="invoice-bill-to">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Bill To</p>
-                <p className="text-[11px] text-muted-foreground">Filled from the account</p>
+                <p className="text-[11px] text-muted-foreground" data-testid="invoice-bill-source">
+                  {/* On a Sales Order (11/6): as it was approved, not the account the link gave the rebuild since. */}
+                  {v.asApproved ? "As approved, on its Sales Order" : "Filled from the account"}
+                </p>
               </div>
               <dl className="mt-1 grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm sm:grid-cols-[7.5rem_1fr] sm:gap-x-4">
                 <dt className="text-muted-foreground">Name</dt>
@@ -365,7 +368,9 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                   className="mt-1 max-w-xs"
                   data-testid="invoice-po-value"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">{poNote(type, v.canApprove)}</p>
+                <p className="mt-1 text-xs text-muted-foreground" data-testid="invoice-po-note">
+                  {v.asApproved ? "The customer's P.O. this invoice was approved with. It's on a Sales Order in NetSuite." : poNote(type, v.canApprove)}
+                </p>
               </section>
             ) : null}
 

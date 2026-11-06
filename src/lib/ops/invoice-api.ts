@@ -81,6 +81,11 @@ export type InvoiceView = InvoiceTotals &
     hasPo: boolean;
     po: string | null;
     /**
+     * A linked rebuild's own invoice on a Sales Order in NetSuite (0122, Chuy 11/6): its bill-to and P.O. are the ones it
+     * was approved with, not the account's and P.O. the link gave the rebuild since.
+     */
+    asApproved: boolean;
+    /**
      * An install's tickets merged in as billed (10/30): their charges, billed on a Sales Order or on NetSuite invoices.
      * Shown on the install, never part of this invoice's lines or total. Empty on other invoices.
      */
@@ -463,6 +468,7 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     version: h?.version ?? null,
     hasPo: carriesPo(ref.type),
     po: carriesPo(ref.type) ? (ref.billedAs ? ref.billedAs.po : ref.po) : null,
+    asApproved: !!ref.billedAs,
     billedElsewhere: ref.type === "install" ? await billedCarryOvers(sql, id) : [],
     ...invoicePowers(viewer, { type: ref.type, customer: ref.customer, state }),
   };
