@@ -411,6 +411,11 @@ test("the ticket's Charges keep the rebuild's lines as its own, and Unlink takes
   await assert.rejects(C.writeTicketCharges(sql, job, "u-owner", { lines: [], lineIds: [] }), { message: "These charges changed since you opened them. Reload and try again." });
 
   const v = await L.getRebuildLinkFor(sql, rb, "u-owner");
+  // An Unlink from a sheet that read the ticket before its last change: nothing, and it says unlinked, not linked.
+  await assert.rejects(
+    L.setRebuildLinkFor(sql, { id: rb, expect: { installId: null, jobId: job }, to: null, seen: { own: v.own.version, current: "1", target: null } }, "u-owner"),
+    { message: "This rebuild or its project changed since you looked, so nothing was unlinked. Look at it again, then unlink." },
+  );
   assert.deepEqual(v.unlink.effects, [
     "Its 2 lines ($360.00) come off the ticket's charges and back onto its own invoice, approved by you.",
     `Its account (${CAFE}) and Customer P.O. stay as they are.`,
