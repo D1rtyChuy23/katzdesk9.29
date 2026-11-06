@@ -324,6 +324,15 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     [dropId],
   );
   for (const a of assets) if (!/^System \(/.test(a.locked_by ?? "")) await assertUnlocked(sql, a);
+  // Both invoices as they are now ("id:approved:saved"; empty for none). The statement reads them again on its locked
+  // rows, so an Approve or any other write to either invoice that commits after this stops the merge, even one that
+  // commits while the merge waits for its locks (11/6 review, round 7).
+  const versions = (
+    await sql.query<{ keep: string; drop: string }>(
+      `select coalesce(invoice_version('install', $1::int), '') as keep, coalesce(invoice_version('install', $2::int), '') as drop`,
+      [keepId, dropId],
+    )
+  )[0];
   // One install takes one invoice (10/30): the drop's goes to the keeper, unless the keeper has one of its own.
   const invoiceRefusal = (await mergeInvoiceRefusal(sql, keepId, dropId)) ?? (await strandedRebuildsRefusal(sql, keepId, dropId));
   if (invoiceRefusal) throw new Error(invoiceRefusal);
@@ -398,7 +407,11 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
          from lk k join lk d on d.id = $2::int
         where k.id = $1::int and k.archived = false and d.archived = false
           and k.updated = $3 and d.updated = $4
-          -- Not both with an invoice, unless the drop's has no lines (as read now): one install takes one invoice.
+          -- Both invoices as read before this statement, read again here on the locked rows (fresh): a write to either one
+          -- that committed since, even while this waited for the locks, stops it. So the invoice checks here, which see
+          -- the invoices as this statement started, see them as they are (11/6 review, round 7).
+          and coalesce(invoice_version('install', k.id), '') = $20 and coalesce(invoice_version('install', d.id), '') = $21
+          -- Not both with an invoice, unless the drop's has no lines: one install takes one invoice.
           and not (exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = $1::int)
                    and exists (select 1 from invoices v join invoice_lines l on l.invoice_id = v.id
                                 where v.entity_type = 'install' and v.entity_id = $2::int))
@@ -604,6 +617,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
       twins.map((t) => t.drop),
       twins.map((t) => t.keep),
       detailEnd,
+      versions.keep,
+      versions.drop,
     ],
   ).catch(async (e: unknown) => {
     // The keeper's invoice was saved while the statement ran, after it read the invoices: the drop's can't join it, and

@@ -1,6 +1,6 @@
 // The rebuild WO link (11/6) against every write it can meet, both orders, the second waiting on the first's locks:
 // Approve, Warehouse's Save for Approval, a Charges save, an install's Approve, a second link, a ticket merged into an
-// install, Merge installs, a WO-duplicate merge, and Remove. Not part of `npm test`: it needs a real Postgres (PGlite has one
+// install, Merge installs, a WO-duplicate merge, and Remove; and Merge installs' own one-invoice check. Not part of `npm test`: it needs a real Postgres (PGlite has one
 // connection). Run it only against a throwaway local server, made-up data only:
 //
 //   KD_RACE_PG=postgres://postgres@127.0.0.1:55437 node --experimental-strip-types scripts/rebuild-link-races.mjs
@@ -390,6 +390,33 @@ for (const withInvoice of [false, true]) {
   check(
     "an Approve of the keeper's invoice, then Merge installs: the merge waits and merges nothing",
     appr.rows.length === 1 && waited && on === drop && dropOff === false && /couldn't bill there/.test(m),
+    { m },
+  );
+}
+
+// 18. Not the link's own: an Approve that puts a line on the drop's empty invoice holds its lock while Merge installs,
+// checked before, waits. One install takes one invoice, and the keeper has its own: the merge reads both invoices again
+// on its locked rows and refuses, rather than leave the line on the archived drop (11/6 review, round 7).
+{
+  const keep = await install();
+  const drop = await install();
+  const kInv = Number((await q("insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at) values ('install', $1, $2, 50, 'chuy', now()) returning id", [keep, CAFE]))[0].id);
+  await q("insert into invoice_lines (invoice_id, item, qty, rate, kind, sort) values ($1, 'TEST-K18', 1, 50, 'part', 1)", [kInv]);
+  await q("insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at) values ('install', $1, $2, 0, 'chuy', now())", [drop, CAFE]);
+  const a = new pg.Client(db);
+  await a.connect();
+  await a.query("begin");
+  const appr = await a.query(...approveArgs("install", drop, await ver("install", drop), [["TEST-D18", 1, 75]]));
+  const merging = P.mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: drop }).then(() => "merged", (e) => e.message);
+  await pause(500);
+  const waited = await waitingNow();
+  await a.query("commit");
+  await a.end();
+  const m = await merging;
+  const dropOff = (await q("select archived from installs where id = $1", [drop]))[0].archived;
+  check(
+    "an Approve puts a line on the drop's invoice, then Merge installs: the merge waits and merges nothing",
+    appr.rows.length === 1 && waited && dropOff === false && /both have an invoice/.test(m),
     { m },
   );
 }
