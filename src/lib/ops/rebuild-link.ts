@@ -41,6 +41,8 @@ export type LinkProject = {
 export type CurrentLink = LinkProject & {
   lines: number;
   total: number;
+  /** How many lines its link put on this bill (rebuilds.link_lines): 0 for one linked before 11/6, or with nothing. */
+  moved: number;
   /** This rebuild's lines on another record's bill (a ticket merged into the install as billed keeps them), or null. */
   elsewhere: string | null;
 };
@@ -81,6 +83,8 @@ export type LinkPlan =
 
 export const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 export const lineCount = (n: number) => `${n} line${n === 1 ? "" : "s"}`;
+/** The verb for that many lines: "goes"/"go", "comes"/"come", "stays"/"stay". */
+const verb = (n: number, plural: "go" | "come" | "stay") => (n === 1 ? `${plural}${plural === "go" ? "es" : "s"}` : plural);
 
 const sameProject = (a: { kind: LinkKind; id: number }, b: { kind: LinkKind; id: number }) =>
   a.id === b.id && (a.kind === "install") === (b.kind === "install");
@@ -103,14 +107,16 @@ function targetRefusal(t: LinkProject): string | null {
   return null;
 }
 
-/** Unlinking from the project it is on: why it can't, or null. `own` is its own invoice, which takes the lines back. */
+/** Unlinking from the project it is on: why it can't, or null. */
 function unlinkRefusal(r: LinkRebuild): string | null {
   const c = r.current;
   if (!c) return "This rebuild isn't linked to a ticket or an install.";
-  if (c.lines > 0 && c.closed) return `${c.name} ${c.closed}, so this rebuild's ${lineCount(c.lines)} there stay billed, and it stays linked.`;
-  // A billed ticket's charges may be NetSuite's lines now (the Billing Backfill writes them without the rebuild's
-  // keys), so what was billed there stays linked to it even when none of its lines can be told apart.
-  if (c.closed && c.kind !== "install") return `${c.name} ${c.closed}, so it stays linked: anything of this rebuild's billed there stays billed.`;
+  if (c.lines > 0 && c.closed) return `${c.name} ${c.closed}, so this rebuild's ${lineCount(c.lines)} there ${verb(c.lines, "stay")} billed, and it stays linked.`;
+  // A billed ticket its link put lines on keeps it even when none of them can be told apart: the Billing Backfill writes
+  // NetSuite's lines without the rebuild's keys. A link that put nothing there (one from before 11/6, say) can go.
+  if (c.closed && c.kind !== "install" && c.moved > 0) {
+    return `${c.name} ${c.closed}, and its link put ${lineCount(c.moved)} there, so it stays linked: what was billed there stays billed.`;
+  }
   if (c.elsewhere) return `Some of this rebuild's lines are on ${c.elsewhere}, so it stays linked.`;
   return null;
 }
@@ -119,24 +125,31 @@ function unlinkEffects(r: LinkRebuild, c: CurrentLink): string[] {
   const out: string[] = [];
   if (c.lines > 0) {
     const back = r.own.state === "waiting" ? "its own invoice, which waits for an Admin to approve it" : "its own invoice, approved by you";
-    out.push(`Its ${lineCount(c.lines)} (${money(c.total)}) come off ${billName(c)} and back onto ${back}.`);
+    out.push(`Its ${lineCount(c.lines)} (${money(c.total)}) ${verb(c.lines, "come")} off ${billName(c)} and back onto ${back}.`);
   } else {
     out.push(`None of its lines are on ${projectLabel(c)}'s bill.`);
+    if (c.closed) out.push(`${c.name} ${c.closed}: any of its parts added there by hand stay billed there.`);
   }
   if (r.own.lines > 0) out.push(`Its own invoice keeps its ${lineCount(r.own.lines)}.`);
   out.push(`Its account (${r.account.trim() || "none"}) and Customer P.O. stay as they are.`);
   return out;
 }
 
-/** Linking its own invoice onto `t`: why it can't, given what that invoice holds then. */
-function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, accountMoves: boolean): string | null {
+/**
+ * Linking its own invoice onto `t`: why it can't, given what that invoice holds then. `linked`: it is linked already,
+ * so its own invoice is locked, and the way out starts with Unlink.
+ */
+function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, accountMoves: boolean, linked: boolean): string | null {
   const bad = targetRefusal(t);
   if (bad) return bad;
   if (own.lines > 0 && own.state === "waiting") {
-    return "This rebuild's invoice is waiting for an Admin to approve it (Warehouse saved it). Approve it first, then link.";
+    return linked
+      ? "This rebuild's own invoice is waiting for an Admin to approve it (Warehouse saved it). Unlink it, approve its invoice, then link it again."
+      : "This rebuild's invoice is waiting for an Admin to approve it (Warehouse saved it). Approve it first, then link.";
   }
   if (own.lines > 0 && own.discount) {
-    return `This rebuild's invoice has a discount (${discountLabel(own.discount)}), which can't go on ${projectLabel(t)}'s bill. Take it off the rebuild's invoice first.`;
+    const lead = `This rebuild's invoice has a discount (${discountLabel(own.discount)}), which can't go on ${projectLabel(t)}'s bill.`;
+    return linked ? `${lead} Unlink it, take the discount off its invoice, then link it again.` : `${lead} Take it off the rebuild's invoice first.`;
   }
   if (own.lines > 0 && t.closed) return `${t.name} ${t.closed}, so this rebuild's ${lineCount(own.lines)} can't go on it.`;
   if (accountMoves && unitLock) return unitLock;
@@ -153,11 +166,19 @@ function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] 
   if (poFrom !== poTo) out.push(`Customer P.O.: ${poFrom || "none"} → ${poTo || `none (${t.name} has none)`}.`);
   const where = t.kind === "install" ? "the install's invoice, waiting for an Admin to approve it" : billName(t);
   if (own.lines > 0) {
-    out.push(`Its invoice's ${lineCount(own.lines)} (${money(own.total)}) go on ${where}.`);
-    if (t.discount) out.push(`${t.name}'s discount (${discountLabel(t.discount)}) applies to them there.`);
+    out.push(`Its invoice's ${lineCount(own.lines)} (${money(own.total)}) ${verb(own.lines, "go")} on ${where}.`);
+    // An approved invoice of its own may have been billed in NetSuite by hand: KatzDesk can't tell.
+    if (own.state === "approved") out.push(`If its invoice was billed in NetSuite already, don't link it: ${projectLabel(t)} would bill it again.`);
+    if (t.discount) {
+      out.push(
+        t.discount.kind === "percent"
+          ? `${t.name}'s discount (${discountLabel(t.discount)}) applies to them there.`
+          : `${t.name}'s discount (${discountLabel(t.discount)}) stays one discount on its whole bill.`,
+      );
+    }
     if (t.netsuite) out.push(`${t.name} is billed in NetSuite already (${t.netsuite}). NetSuite's invoice won't have these lines.`);
   } else if (t.closed) {
-    out.push(`${t.name} ${t.closed}, so nothing more can be billed there.${t.kind === "install" ? "" : " Once linked, it stays linked."}`);
+    out.push(`${t.name} ${t.closed}, so nothing more can be billed there.`);
   } else {
     out.push(`It has no invoice lines yet. Its parts and labor are billed on ${billName(t)} from now on.`);
   }
@@ -179,12 +200,12 @@ export function planLink(r: LinkRebuild, target: LinkProject | null): LinkPlan {
   const accountMoves = normalizeCustomerKey(r.account) !== normalizeCustomerKey(target.customer);
   if (c && sameProject(c, target)) {
     if (r.own.lines === 0) return { ok: false, refusal: `This rebuild is already linked to ${projectLabel(target)}.` };
-    const no = linkRefusal(r.own, target, r.unitLock, accountMoves);
+    const no = linkRefusal(r.own, target, r.unitLock, accountMoves, true);
     if (no) return { ok: false, refusal: no };
     return { ok: true, steps: ["link"], effects: linkEffects(r, r.own, target), lines: r.own.lines, total: r.own.total };
   }
   if (!c) {
-    const no = linkRefusal(r.own, target, r.unitLock, accountMoves);
+    const no = linkRefusal(r.own, target, r.unitLock, accountMoves, false);
     if (no) return { ok: false, refusal: no };
     return { ok: true, steps: ["link"], effects: linkEffects(r, r.own, target), lines: r.own.lines, total: r.own.total };
   }
@@ -199,11 +220,12 @@ export function planLink(r: LinkRebuild, target: LinkProject | null): LinkPlan {
     total: Math.round((r.own.total + c.total) * 100) / 100,
     discount: r.own.discount,
   };
-  const no = linkRefusal(after, target, r.unitLock, accountMoves);
+  const no = linkRefusal(after, target, r.unitLock, accountMoves, true);
   if (no) return { ok: false, refusal: no };
   const effects = [
-    c.lines > 0 ? `It leaves ${projectLabel(c)}: its ${lineCount(c.lines)} there come off ${billName(c)}.` : `It leaves ${projectLabel(c)}.`,
-    ...linkEffects(r, after, target),
+    c.lines > 0 ? `It leaves ${projectLabel(c)}: its ${lineCount(c.lines)} there ${verb(c.lines, "come")} off ${billName(c)}.` : `It leaves ${projectLabel(c)}.`,
+    // The lines that come back were billed on the old project, never by hand in NetSuite: no warning for them.
+    ...linkEffects(r, r.own.lines > 0 ? after : { ...after, state: "none" }, target),
   ];
   return { ok: true, steps: ["unlink", "link"], effects, lines: after.lines, total: after.total };
 }
@@ -214,13 +236,7 @@ export function rebuildBillsOnLock(p: { kind: LinkKind; name: string; wo: string
   const open = p.kind === "install" ? "Open the install to change them." : "Open the ticket to change them.";
   const kept =
     ownLines > 0
-      ? ` Its own invoice still has ${lineCount(ownLines)} from before it was linked: Link on its Details moves them onto ${projectLabel(p)}'s bill.`
+      ? ` Its own invoice still has ${lineCount(ownLines)} from before it was linked: Link on its Details moves ${ownLines === 1 ? "it" : "them"} onto ${projectLabel(p)}'s bill. To change ${ownLines === 1 ? "it" : "them"} first, Unlink it.`
       : "";
   return `This rebuild bills on ${projectLabel(p)}: ${where}. ${open}${kept}`;
-}
-
-/** A source key on a project's bill that is one of this rebuild's lines: rb:<rebuild>:<line>. */
-export function isRebuildLineKey(key: string | null | undefined, rebuildId: number): boolean {
-  const parts = String(key ?? "").split(":");
-  return parts[0] === "rb" && parts[1] === String(rebuildId);
 }

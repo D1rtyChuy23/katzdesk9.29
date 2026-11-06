@@ -907,6 +907,8 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     const now = (await sql.query<{ account: string }>("select account from rebuilds where id = $1", [data.id]))[0];
     const lock = now && accountMoves ? await rebuildHeldLock(sql, data.id) : null;
     if (lock) throw await lockedUnitRefusal(sql, lock, "this rebuild stays on its account while it has it");
+    // Only Warehouse's write checks the account; anyone else missed because it was linked or unlinked meanwhile.
+    if (!isWarehouse(access)) throw new Error(now ? "This rebuild was linked or unlinked while you had it open, so nothing was saved. Look it over, then save again." : "Rebuild not found");
     throw await movedRefusal(sql, data.id);
   }
   const parts = [

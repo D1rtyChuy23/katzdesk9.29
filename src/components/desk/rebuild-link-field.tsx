@@ -14,7 +14,7 @@ import {
 } from "@/lib/ops/rebuild-link-api";
 import { billName, lineCount, money, projectLabel, type LinkProject } from "@/lib/ops/rebuild-link";
 import type { Rebuild } from "@/lib/ops/rebuilds";
-import { rebuildLinkKey, useRebuildLink } from "./rebuild-link-query";
+import { useRebuildLink } from "./rebuild-link-query";
 
 
 const openType = (p: Pick<LinkProject, "kind">) => (p.kind === "install" ? "install" : p.kind);
@@ -59,8 +59,8 @@ export function RebuildLinkField({
   canEdit: boolean;
   /** The Details form has changes not saved yet. */
   dirty: boolean;
-  /** Saves the Details form; false when that failed (it says why). */
-  saveFirst: () => Promise<boolean>;
+  /** Saves the Details form before a link or an unlink; false when that failed (it says why). */
+  saveFirst: (action: "link" | "unlink") => Promise<boolean>;
 }) {
   const qc = useQueryClient();
   const view = useRebuildLink(row.id);
@@ -79,7 +79,7 @@ export function RebuildLinkField({
 
   const go = useMutation({
     mutationFn: async (q: { base: RebuildLinkView; to: LinkCandidate | null }) => {
-      if (dirty && !(await saveFirst())) return null;
+      if (dirty && !(await saveFirst(q.to ? "link" : "unlink"))) return null;
       return setRebuildLink({
         data: {
           id: row.id,
@@ -99,7 +99,8 @@ export function RebuildLinkField({
     },
     onError: (e: Error) => {
       toast.error(e.message);
-      void qc.invalidateQueries({ queryKey: rebuildLinkKey(row.id) });
+      // A move to another WO can stop after its unlink: everything reads again, so the sheet shows where it is now.
+      for (const key of ["rebuilds", "rebuild-link", "invoice", "charges", "project-rebuilds", "activity"]) void qc.invalidateQueries({ queryKey: [key] });
     },
   });
 

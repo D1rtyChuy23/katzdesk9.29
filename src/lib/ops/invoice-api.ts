@@ -576,8 +576,9 @@ export function approveRecordInvoiceSql(): string {
        select i.id from installs i where $1::text = 'install' and i.id = $2::int and i.archived = false for key share
      ), rb as (
        -- A rebuild linked to a ticket or an install bills there (11/6): checked on its locked row, so a Link that
-       -- committed while this waited stops it, and a Link waits for this to commit.
-       select r.id from rebuilds r where $1::text = 'rebuild' and r.id = $2::int and r.install_id is null and r.job_id is null for share
+       -- committed while this waited stops it, and a Link waits for this to commit. No key update, not share: this
+       -- statement may write the row's P.O. (rebuild_po), and two approves holding share locks would deadlock there.
+       select r.id from rebuilds r where $1::text = 'rebuild' and r.id = $2::int and r.install_id is null and r.job_id is null for no key update
      ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,

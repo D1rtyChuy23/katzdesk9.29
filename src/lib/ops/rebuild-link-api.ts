@@ -66,6 +66,13 @@ export type RebuildLinkFind = RebuildLinkView & {
 
 const WAREHOUSE_LINKS = "Warehouse doesn't link rebuilds to tickets or installs: their billing is an Admin's. Ask an Admin.";
 const CHANGED = "This rebuild or that project changed since you looked, so nothing was linked. Find the WO again.";
+const CHANGED_UNLINK = "This rebuild or its project changed since you looked, so nothing was unlinked. Look at it again, then unlink.";
+
+/** Two writes that lock the same rows in another order (a merge and a link): Postgres stops one; it changed meanwhile. */
+const isDeadlock = (e: unknown) => {
+  const x = e as { code?: unknown; message?: unknown } | null;
+  return x?.code === "40P01" || /deadlock detected/i.test(String(x?.message ?? ""));
+};
 
 type Viewer = { name: string; refusal: string | null };
 
@@ -86,16 +93,27 @@ const STAMP = (col: string) => `(extract(epoch from ${col}) * 1000000)::bigint::
 const toDiscount = (kind: string | null, value: string | null): Discount | null => (isDiscountKind(kind) && Number(value) > 0 ? { kind, value: Number(value) } : null);
 const num = (v: unknown) => (v == null ? 0 : Number(v));
 
-type RebuildRead = { id: number; title: string; account: string; po: string | null; install_id: number | null; job_id: number | null; archived: boolean };
+type RebuildRead = {
+  id: number;
+  title: string;
+  account: string;
+  po: string | null;
+  install_id: number | null;
+  job_id: number | null;
+  archived: boolean;
+  link_lines: number;
+};
 
 async function readRebuild(sql: Sql, id: number): Promise<RebuildRead | null> {
   const r = (
     await sql.query<RebuildRead>(
-      "select id, title, account, po, install_id, job_id, coalesce(archived, false) as archived from rebuilds where id = $1",
+      "select id, title, account, po, install_id, job_id, coalesce(archived, false) as archived, coalesce(link_lines, 0) as link_lines from rebuilds where id = $1",
       [id],
     )
   )[0];
-  return r ? { ...r, id: Number(r.id), install_id: r.install_id == null ? null : Number(r.install_id), job_id: r.job_id == null ? null : Number(r.job_id) } : null;
+  return r
+    ? { ...r, id: Number(r.id), install_id: r.install_id == null ? null : Number(r.install_id), job_id: r.job_id == null ? null : Number(r.job_id), link_lines: num(r.link_lines) }
+    : null;
 }
 
 async function readOwn(sql: Sql, id: number): Promise<OwnInvoice> {
@@ -180,6 +198,7 @@ async function readInstall(sql: Sql, installId: number, wo: string | null = null
       equip_status: string | null;
       complete: boolean | null;
       archived: boolean;
+      updated: string;
       version: string | null;
       approved: boolean | null;
       discount_kind: string | null;
@@ -187,7 +206,7 @@ async function readInstall(sql: Sql, installId: number, wo: string | null = null
       netsuite: string | null;
     }>(
       `select i.id, i.customer, i.po, i.wo, i.equip_status, i.complete, coalesce(i.archived, false) as archived,
-              invoice_version('install', i.id) as version, v.approved_at is not null as approved,
+              ${STAMP("i.updated_at")} as updated, invoice_version('install', i.id) as version, v.approved_at is not null as approved,
               v.discount_kind, v.discount_value::text as discount_value,
               (select string_agg(x.ns_invoice, ', ' order by x.id) from record_ns_invoices x
                 where x.install_id = i.id and lower(regexp_replace(x.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) as netsuite
@@ -211,7 +230,8 @@ async function readInstall(sql: Sql, installId: number, wo: string | null = null
     po: i.po?.trim() || null,
     discount: toDiscount(i.discount_kind, i.discount_value),
     netsuite: i.netsuite?.trim() || null,
-    stamp: i.version ?? "",
+    // The install as the person saw it (its account and P.O.) and its invoice: "row|invoice".
+    stamp: `${i.updated}|${i.version ?? ""}`,
   };
 }
 
@@ -267,7 +287,7 @@ async function readCurrent(sql: Sql, r: RebuildRead): Promise<CurrentLink | null
   if (!t) return null;
   const project = await readProject(sql, t);
   if (!project) return null;
-  return { ...project, ...(await linesOn(sql, r.id, t)), elsewhere: await linesElsewhere(sql, r.id, t) };
+  return { ...project, ...(await linesOn(sql, r.id, t)), moved: r.link_lines, elsewhere: await linesElsewhere(sql, r.id, t) };
 }
 
 async function suggestionsFor(sql: Sql, account: string): Promise<{ target: LinkTarget; label: string }[]> {
@@ -315,9 +335,12 @@ async function planFor(sql: Sql, st: LinkState, project: LinkProject | null): Pr
 
 async function viewOf(sql: Sql, st: LinkState, viewer: Viewer): Promise<RebuildLinkView> {
   const refusal = viewer.refusal ?? (st.rebuild.archived ? "This rebuild was removed from the board." : null);
-  // Warehouse never sees a customer's billing: no lines or totals of the project, and nothing to pick.
+  // Warehouse (and Sales) never see a customer's billing here: where it bills, and nothing of the bill or its invoice.
   const hide = !!viewer.refusal;
-  const current = st.current && hide ? { ...st.current, lines: 0, total: 0, elsewhere: null } : st.current;
+  const current: CurrentLink | null =
+    st.current && hide
+      ? { ...st.current, closed: null, po: null, discount: null, netsuite: null, stamp: "", lines: 0, total: 0, moved: 0, elsewhere: null }
+      : st.current;
   return {
     id: st.rebuild.id,
     refusal,
@@ -325,7 +348,7 @@ async function viewOf(sql: Sql, st: LinkState, viewer: Viewer): Promise<RebuildL
     po: st.rebuild.po?.trim() || null,
     installId: st.rebuild.install_id,
     jobId: st.rebuild.job_id,
-    own: st.own,
+    own: hide ? { version: null, state: "none", lines: 0, total: 0, discount: null } : st.own,
     current,
     unlink: st.current && !refusal ? await planFor(sql, st, null) : null,
     suggestions: refusal ? [] : await suggestionsFor(sql, st.rebuild.account),
@@ -452,10 +475,11 @@ export function linkRebuildSql(): string {
           and ${STAMP("j.updated_at")} = $8::text
         for update
      ), ti as (
-       -- The install row locked: approving its invoice, or merging into it, waits for this.
+       -- The install row locked, as the person saw it: approving its invoice, or merging it, waits for this.
        select i.id, btrim(coalesce(i.customer, '')) as customer, nullif(btrim(i.po), '') as po
          from installs i
         where $4::text = 'install' and i.id = $5::int and i.archived = false
+          and ${STAMP("i.updated_at")} = split_part($8::text, '|', 1)
         for update
      ), tgt as (
        select 'job'::text as t, tj.id, tj.kind, tj.customer, tj.po, tj.ns_so from tj
@@ -480,7 +504,7 @@ export function linkRebuildSql(): string {
           and (tgt.t <> 'job' or not exists (select 1 from own_lines)
                or (nullif(btrim(tgt.ns_so), '') is null and coalesce(ticket_live_ns_invoices(tgt.id), '') = ''))
           -- ... or an install's invoice as the person saw it (fresh), not approved.
-          and (tgt.t <> 'install' or (coalesce(invoice_version('install', tgt.id), '') = $8::text
+          and (tgt.t <> 'install' or (coalesce(invoice_version('install', tgt.id), '') = split_part($8::text, '|', 2)
                and (not exists (select 1 from own_lines)
                     or not exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = tgt.id and v.approved_at is not null))))
           -- A unit the owner locked keeps the rebuild on its account.
@@ -513,7 +537,9 @@ export function linkRebuildSql(): string {
          from head cross join ok cross join own_lines l
        returning id
      ), done as (
-       -- Every line landed (or there were none): only then is its own invoice gone and the rebuild linked.
+       -- Every line landed: to_job always writes them; to_inst only when head did (an install's invoice approved after
+       -- the checks above would take none). Only then is its own invoice gone and the rebuild linked; otherwise its
+       -- own lines stay where they are and nothing is linked.
        select ok.* from ok where ok.n = (select count(*)::int from to_job) + (select count(*)::int from to_inst)
      ), own_gone as (
        delete from invoices v using own, done where v.id = own.id returning v.id
@@ -521,7 +547,7 @@ export function linkRebuildSql(): string {
        update rebuilds r
           set install_id = case when done.t = 'install' then done.target_id end,
               job_id = case when done.t = 'job' then done.target_id end,
-              account = done.account, po = done.po, updated_at = now()
+              account = done.account, po = done.po, link_lines = done.n, updated_at = now()
          from done
         where r.id = done.id
        returning r.id, r.account, done.old_account
@@ -529,6 +555,11 @@ export function linkRebuildSql(): string {
        -- The ticket's charges changed: a Charges save or a merge that read it before this (and waited) stops.
        update service_jobs j set updated_at = now() from done join upd on upd.id = done.id where done.t = 'job' and j.id = done.target_id
        returning j.id
+     ), touch_install as (
+       -- So does Merge installs, which checks the install as it read it (11/6 review): it would leave the rebuild
+       -- linked to the install it archives.
+       update installs i set updated_at = now() from done join upd on upd.id = done.id where done.t = 'install' and i.id = done.target_id
+       returning i.id
      ), act_rb as (
        insert into activity (entity_type, entity_id, actor_name, action, detail)
        select 'rebuild', upd.id, $6::text, 'linked', $9::text from upd
@@ -550,9 +581,10 @@ export function linkRebuildSql(): string {
  */
 export function unlinkRebuildSql(): string {
   return `with rb as (
-       select r.id, r.account, r.po, r.install_id, r.job_id
+       select r.id, r.account, r.po, r.install_id, r.job_id, coalesce(r.link_lines, 0) as link_lines
          from rebuilds r
-        where r.id = $1::int and r.install_id is not distinct from $2::int and r.job_id is not distinct from $3::int
+        where r.id = $1::int and coalesce(r.archived, false) = false
+          and r.install_id is not distinct from $2::int and r.job_id is not distinct from $3::int
           and (r.install_id is not null or r.job_id is not null)
         for update
      ), oj as (
@@ -569,16 +601,18 @@ export function unlinkRebuildSql(): string {
          left join oj on true
          left join oi on true
          left join ohead on true
-        where (case when oi.id is not null then coalesce(invoice_version('install', oi.id), '') = $5::text
+        where (case when oi.id is not null then coalesce(invoice_version('install', oi.id), '') = split_part($5::text, '|', 2)
                     when oj.id is not null then ${STAMP("oj.updated_at")} = $5::text
                     else true end)
           -- Its lines there as the person saw them, counted fresh; its own invoice too.
           and rebuild_lines_on(rb.id, oj.id, ohead.id) = $6::int
           and invoice_version('rebuild', rb.id) is not distinct from $7::text
-          -- A billed ticket keeps it, its lines or not (the Billing Backfill may have written NetSuite's lines over
-          -- them); lines come off only an open bill.
-          and (oj.id is null or (nullif(btrim(oj.ns_so), '') is null and coalesce(ticket_live_ns_invoices(oj.id), '') = ''
-                                 and ($6::int = 0 or (oj.duplicate_of is null and oj.merged_install_id is null))))
+          -- Lines come off only an open bill. A billed ticket keeps it too when its link put lines there, though none
+          -- can be told apart now (the Billing Backfill writes NetSuite's lines without the keys).
+          and (oj.id is null
+               or (nullif(btrim(oj.ns_so), '') is null and coalesce(ticket_live_ns_invoices(oj.id), '') = ''
+                   and ($6::int = 0 or (oj.duplicate_of is null and oj.merged_install_id is null)))
+               or ($6::int = 0 and rb.link_lines = 0))
           and ($6::int = 0 or ohead.id is null or ohead.approved_at is null)
      ), taken as (
        select t.* from ok cross join lateral take_rebuild_lines(ok.id, ok.job_id, ok.head_id) t
@@ -616,7 +650,9 @@ export function unlinkRebuildSql(): string {
         where v.id = ok.head_id and back.n > 0
        returning v.id
      ), upd as (
-       update rebuilds r set install_id = null, job_id = null, updated_at = now()
+       -- back_head always writes (its update has no condition), so every line taken lands on its own invoice; this only
+       -- keeps the link if that were ever not so.
+       update rebuilds r set install_id = null, job_id = null, link_lines = 0, updated_at = now()
          from ok
         where r.id = ok.id and (select n from back) = (select count(*)::int from back_lines)
        returning r.id
@@ -625,6 +661,10 @@ export function unlinkRebuildSql(): string {
        -- rather than putting back the lines this took.
        update service_jobs j set updated_at = now() from ok join upd on upd.id = ok.id where j.id = ok.job_id
        returning j.id
+     ), touch_install as (
+       -- And Merge installs, which checks the install as it read it.
+       update installs i set updated_at = now() from ok join upd on upd.id = ok.id where i.id = ok.install_id
+       returning i.id
      ), act_rb as (
        insert into activity (entity_type, entity_id, actor_name, action, detail)
        select 'rebuild', upd.id, $4::text, 'unlinked', $12::text from upd
@@ -661,8 +701,10 @@ async function unlinkNow(sql: Sql, st: LinkState, who: string): Promise<{ moved:
     bill.rep,
     `Unlinked from ${projectLabel(c)}${lines}`,
     `${rebuildName(st.rebuild)} unlinked${c.lines > 0 ? ` · its ${lineCount(c.lines)} (${money(c.total)}) went back to the rebuild` : ""}`,
-  ]);
-  if (!out[0]) throw new Error(CHANGED);
+  ]).catch((e: unknown) => {
+    throw isDeadlock(e) ? new Error(CHANGED_UNLINK) : e;
+  });
+  if (!out[0]) throw new Error(CHANGED_UNLINK);
   return { moved: num(out[0].moved), amount: Number(out[0].amount ?? 0) };
 }
 
@@ -685,7 +727,9 @@ async function linkNow(sql: Sql, st: LinkState, target: LinkTarget, project: Lin
     project.stamp,
     `Linked to ${projectLabel(project)}, ${project.customer}${parts.length ? ` · ${parts.join(" · ")}` : ""}`,
     `${rebuildName(r)} linked${st.own.lines > 0 ? ` · its ${lineCount(st.own.lines)} (${money(st.own.total)}) went on ${where}` : ""}`,
-  ]);
+  ]).catch((e: unknown) => {
+    throw isDeadlock(e) ? new Error(CHANGED) : e;
+  });
   if (!out[0]) throw new Error(CHANGED);
   return { account: out[0].account, oldAccount: out[0].old_account, moved: num(out[0].moved) };
 }
@@ -700,12 +744,13 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
   let st = await readState(sql, data.id);
   if (!st) throw new Error("That rebuild is no longer on the list.");
   if (st.rebuild.archived) throw new Error("This rebuild was removed from the board.");
-  if (st.rebuild.install_id !== data.expect.installId || st.rebuild.job_id !== data.expect.jobId) throw new Error(CHANGED);
+  const changed = data.to ? CHANGED : CHANGED_UNLINK;
+  if (st.rebuild.install_id !== data.expect.installId || st.rebuild.job_id !== data.expect.jobId) throw new Error(changed);
   const project = data.to ? await readProject(sql, { kind: data.to.kind, id: data.to.id }, data.to.wo ?? null) : null;
   if (data.to && !project) throw new Error("That ticket or install is no longer there.");
-  if ((st.own.version ?? null) !== (data.seen.own ?? null)) throw new Error(CHANGED);
-  if ((st.current?.stamp ?? null) !== (data.seen.current ?? null)) throw new Error(CHANGED);
-  if (project && project.stamp !== (data.seen.target ?? null)) throw new Error(CHANGED);
+  if ((st.own.version ?? null) !== (data.seen.own ?? null)) throw new Error(changed);
+  if ((st.current?.stamp ?? null) !== (data.seen.current ?? null)) throw new Error(changed);
+  if (project && project.stamp !== (data.seen.target ?? null)) throw new Error(changed);
   const plan = await planFor(sql, st, project);
   if (!plan.ok) throw new Error(plan.refusal);
 

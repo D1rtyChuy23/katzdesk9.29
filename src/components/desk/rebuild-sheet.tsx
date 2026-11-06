@@ -72,8 +72,8 @@ export function RebuildSheet({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
-  /** A save Link or Unlink started (saveFirst), so its error can say nothing was linked. */
-  const linking = useRef(false);
+  /** A save Link or Unlink started (saveFirst), so its error can say nothing was linked or unlinked. */
+  const linking = useRef<"link" | "unlink" | null>(null);
   const [title, setTitle] = useState("");
   const [account, setAccount] = useState(SHOP_ACCOUNT);
   const [owner, setOwner] = useState("");
@@ -179,7 +179,7 @@ export function RebuildSheet({
     onError: (e) => {
       const why = e instanceof Error ? e.message : "Could not save";
       // Link and Unlink save the form first: when that fails, nothing was linked either, and the toast says so.
-      toast.error(linking.current ? `Nothing was linked: your changes on Details didn't save. ${why}` : why);
+      toast.error(linking.current ? `Nothing was ${linking.current}ed: your changes on Details didn't save. ${why}` : why);
     },
   });
 
@@ -223,8 +223,8 @@ export function RebuildSheet({
       notes !== (row.notes ?? "") ||
       po.toSend() !== undefined ||
       vendorPo.toSend() !== undefined);
-  const saveFirst = async (): Promise<boolean> => {
-    linking.current = true;
+  const saveFirst = async (action: "link" | "unlink"): Promise<boolean> => {
+    linking.current = action;
     try {
       await save.mutateAsync();
       return true;
@@ -232,7 +232,7 @@ export function RebuildSheet({
       // The save's own error toast says why.
       return false;
     } finally {
-      linking.current = false;
+      linking.current = null;
     }
   };
 
