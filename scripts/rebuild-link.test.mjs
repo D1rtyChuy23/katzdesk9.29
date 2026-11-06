@@ -1046,12 +1046,38 @@ test("a ticket merged into an install as billed keeps the rebuild linked, throug
     }
   }
 
+  // The keeper's invoice approved after Merge installs looked and before its statement ran: the statement reads the
+  // approval itself and refuses (11/6 review, round 6).
+  {
+    const keep = await install(sql, { wo: "WO-9641" });
+    const drop = await install(sql, { wo: "WO-9642" });
+    await installInvoice(keep, false);
+    const r5 = await rebuild(sql, { title: "Test raced install-merge refurb" });
+    await linkOn(r5, "9642", { kind: "install", id: drop });
+    const racing = Object.assign(async (...a) => sql(...a), {
+      query: async (text, params) => {
+        if (text.includes("rebuilds_moved as (")) await sql.query("update invoices set approved_by = 'chuy', approved_at = now() where entity_type = 'install' and entity_id = $1", [keep]);
+        return sql.query(text, params);
+      },
+    });
+    await assert.rejects(mergeInstallsFor(racing, "u-owner", { keepId: keep, dropId: drop }), { message: /^Rebuild #\d+ \(Test raced install-merge refurb\) is linked to install #\d+, and install #\d+'s invoice is approved, so it couldn't bill there\./ });
+    assert.deepEqual(await flags(r5), { install_id: drop, job_id: null, link_open: true });
+  }
+
   // Remove: an install with a rebuild linked is refused until it's unlinked; then it goes.
   const offInst = await install(sql, { wo: "WO-9631" });
   const offRb = await rebuild(sql, { title: "Test off-board refurb" });
   await linkOn(offRb, "9631", { kind: "install", id: offInst });
   await assert.rejects(archiveInstallFor(sql, "u-owner", offInst), { message: /^Rebuild #\d+ \(Test off-board refurb\) is linked to install #\d+ and bills there\./ });
   await unlink(sql, offRb);
+  // Changed after Remove read it (a link or a merge marks it changed): it removes nothing, and says so.
+  const touching = Object.assign(async (...a) => sql(...a), {
+    query: async (text, params) => {
+      if (text.includes("update installs set archived = true")) await sql.query("update installs set updated_at = now() + interval '1 second' where id = $1", [offInst]);
+      return sql.query(text, params);
+    },
+  });
+  await assert.rejects(archiveInstallFor(touching, "u-owner", offInst), { message: "This install changed while you removed it, so nothing was removed. Look at it again." });
   assert.deepEqual(await archiveInstallFor(sql, "u-owner", offInst), { ok: true });
   assert.deepEqual(await one(sql, "select archived from installs where id = $1", [offInst]), { archived: true });
   assert.equal((await one(sql, "select action, actor_name from activity where entity_type = 'install' and entity_id = $1 order by id desc limit 1", [offInst])).action, "removed");
