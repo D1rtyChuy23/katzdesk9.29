@@ -28,6 +28,7 @@ import { invoiceTotals } from "@/lib/ops/invoice";
 import { isInstalled } from "@/lib/ops/install-status";
 import { chargesMismatch, invoiceFitsTicket, liveInvoiceTotal } from "@/lib/ops/billing-rules";
 import { billedCarryOver, nsInvoicesLabel } from "@/lib/ops/merged-ticket";
+import { closedBillMergeRefusal, openLinkedRebuildsSql } from "@/lib/ops/rebuild-link";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 
 type Q = Pick<Sql, "query">;
@@ -409,6 +410,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   ).map((r) => ({ ...r, total: r.total == null ? null : Number(r.total) }));
   const units = await sql.query<{ model: string | null; serial: string | null }>("select model, serial from assets where job_id = $1 order by id", [jobId]);
   const rebuilds = await sql.query<{ id: number; title: string | null }>("select id, title from rebuilds where job_id = $1 order by id", [jobId]);
+  const openLinked = await sql.query<{ id: number; title: string | null }>(`${openLinkedRebuildsSql("r.job_id = $1::int")} order by r.id`, [jobId]);
   const digits = woDigits(t.wo);
   const matches = digits ? matchInstalls(t, await loadInstallWoRows(sql, [digits])) : [];
 
@@ -478,6 +480,8 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     if (toInvoice.length && head?.approved_at) {
       return `${installName}'s invoice is already approved, so ${label}'s ${plural(toInvoice.length, "charge line")} can't go on it. Add them to the install's invoice by hand and take them off the ticket, then merge.`;
     }
+    // Only an open bill takes a link (11/6 review, round 5): the approved invoice takes nothing of the ticket's.
+    if (!billed && head?.approved_at && openLinked.length) return closedBillMergeRefusal(openLinked, label, `${installName}'s invoice is approved`);
     if ("refusal" in after) return after.refusal;
     if (poClash) return `${label} has P.O. ${ticketPo} and ${installName}'s invoice has P.O. ${headPo}. One invoice takes one P.O.: make them match first.`;
     if (headLines.length + toInvoice.length > 200) return `Together that's more than 200 lines on ${installName}'s invoice.`;
@@ -602,6 +606,13 @@ export function mergeTicketIntoInstallSql(): string {
          and exists (select 1 from lk_head h where h.approved_at is not null)
          and exists (select 1 from ticket_charges c where c.job_id = j.id)
        )
+       -- Onto an approved invoice the ticket brings nothing, so a rebuild linked to it while open could bill nowhere
+       -- there: only an open bill takes a link (11/6 review, round 5).
+       and not (
+         $14::text = ''
+         and exists (select 1 from lk_head h where h.approved_at is not null)
+         and exists (${openLinkedRebuildsSql("r.job_id = j.id")})
+       )
        -- QuickBooks history (its own, or a ticket's merged into it), read the same way: its charges may be billed already.
        and not (
          $14::text = ''
@@ -673,11 +684,10 @@ export function mergeTicketIntoInstallSql(): string {
     returning p.id
   ), reb as (
     -- A rebuild already tied to an install keeps that install; it only leaves the ticket. Its link stays made "while
-    -- the bill was open" (rebuilds.link_open, 11/6) where its parts went: with a billed ticket, or with the charges onto
-    -- the install's invoice; onto an approved invoice with none, nothing of it went anywhere. A billed ticket keeps its
-    -- charges, billed, so one linked while that ticket was open stays linked: rebuilds.link_billed_with (11/6 review).
+    -- the bill was open" (rebuilds.link_open, 11/6): its parts went with a billed ticket, or with the charges onto the
+    -- install's invoice (never an approved one: g above). A billed ticket keeps its charges, billed, so one linked while
+    -- that ticket was open stays linked: rebuilds.link_billed_with (11/6 review).
     update rebuilds r set install_id = coalesce(r.install_id, ok.install_id), job_id = null,
-           link_open = case when $14::text <> '' or not exists (select 1 from lk_head h where h.approved_at is not null) then r.link_open end,
            link_billed_with = case when $14::text <> '' and coalesce(r.link_open, false) then ok.job_id else r.link_billed_with end,
            updated_at = now()
       from ok

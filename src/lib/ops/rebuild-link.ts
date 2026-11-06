@@ -45,8 +45,8 @@ export type CurrentLink = LinkProject & {
   moved: number;
   /**
    * Its link was made while this bill was open (rebuilds.link_open): its parts and labor could go on it from then on,
-   * by hand too. False for a link made before 11/6, or onto a bill already closed, or for one a merge moved onto a
-   * closed bill that took nothing of it.
+   * by hand too. Every link is, since only an open bill takes one (11/6 review, round 5); false for one made before
+   * 11/6 through the old list.
    */
   linkedOpen: boolean;
   /**
@@ -101,6 +101,30 @@ const verb = (n: number, plural: "go" | "come" | "stay") => (n === 1 ? `${plural
 const sameProject = (a: { kind: LinkKind; id: number }, b: { kind: LinkKind; id: number }) =>
   a.id === b.id && (a.kind === "install") === (b.kind === "install");
 
+/**
+ * SQL: rebuilds linked to a record (`where`, such as "r.job_id = $2::int") while its bill was open and not kept by a
+ * billed merge. A merge must not put them on a bill that's closed and takes nothing of theirs: only an open bill takes
+ * a link (11/6 review, round 5). One the merge would leave on its own closed bill stays put by that bill's rules.
+ */
+export const openLinkedRebuildsSql = (where: string) =>
+  `select r.id, r.title from rebuilds r
+    where ${where} and coalesce(r.archived, false) = false and coalesce(r.link_open, false) and r.link_billed_with is null`;
+
+const rebuildNames = (rebuilds: { id: number; title: string | null }[]) =>
+  rebuilds.map((r) => (r.title?.trim() ? `Rebuild #${r.id} (${r.title.trim()})` : `Rebuild #${r.id}`)).join(", ");
+
+/** A merge refused for those rebuilds: "Rebuild #5 is linked to ticket #12, and ticket #11 is billed, so it couldn't bill there. …" */
+export function closedBillMergeRefusal(rebuilds: { id: number; title: string | null }[], from: string, closed: string): string {
+  const one = rebuilds.length === 1;
+  return `${rebuildNames(rebuilds)} ${one ? "is" : "are"} linked to ${from}, and ${closed}, so ${one ? "it" : "they"} couldn't bill there. Unlink ${one ? "it on the rebuild's" : "them on their"} Details first, then merge.`;
+}
+
+/** Remove refused on an install that rebuilds are linked to: they bill there, and off the board they'd bill nowhere. */
+export function removeLinkedInstallRefusal(installId: number, rebuilds: { id: number; title: string | null }[]): string {
+  const one = rebuilds.length === 1;
+  return `${rebuildNames(rebuilds)} ${one ? "is" : "are"} linked to install #${installId} and ${one ? "bills" : "bill"} there. Unlink ${one ? "it on the rebuild's" : "them on their"} Details first, or merge this install into the one to keep.`;
+}
+
 /** Where a project's bill is: "the ticket's charges" or "the install's invoice". */
 export const billName = (p: { kind: LinkKind }) => (p.kind === "install" ? "the install's invoice" : "the ticket's charges");
 
@@ -128,8 +152,8 @@ function unlinkRefusal(r: LinkRebuild): string | null {
   // its parts may be billed with that ticket (11/6 review).
   if (c.billedVia) return `This rebuild came over with ${c.billedVia} when that ticket was merged into an install, so it stays linked: what was billed there stays billed.`;
   // A bill closed since the link was made keeps it even when none of its lines can be told apart: its parts may have gone
-  // on by hand, and the Billing Backfill writes NetSuite's lines without the rebuild's keys. A link from before 11/6, or
-  // one made onto a bill already closed, put nothing there through the link, and can go.
+  // on by hand, and the Billing Backfill writes NetSuite's lines without the rebuild's keys. A link from before 11/6 put
+  // nothing there through the link, and can go.
   if (c.closed && c.linkedOpen) {
     return c.moved > 0
       ? `${c.name} ${c.closed}, and its link put ${lineCount(c.moved)} there, so it stays linked: what was billed there stays billed.`
@@ -177,6 +201,9 @@ function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, a
     const way = own.state === "waiting" ? ` Unlink it, then approve its own invoice (it's waiting for an Admin) to bill ${them} there.` : ` Unlink it to bill ${them} on its own invoice.`;
     return `${t.name} ${t.closed}, so this rebuild's ${lineCount(own.lines)} can't go on it.${linked ? way : ""}`;
   }
+  // Only an open bill takes a link (11/6 review, round 5). Linked to a closed one, the rebuild could bill nowhere, and
+  // its parts could go on that bill by hand once it reopened, with nothing to tell them apart.
+  if (t.closed) return `${t.name} ${t.closed}, so nothing more can be billed there. Link it to an open ticket or install.`;
   if (own.lines > 0 && own.state === "waiting") {
     return linked
       ? "This rebuild's own invoice is waiting for an Admin to approve it (Warehouse saved it). Unlink it, approve its invoice, then link it again."
@@ -211,8 +238,6 @@ function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] 
       );
     }
     if (t.netsuite) out.push(`${t.name} is billed in NetSuite already (${t.netsuite}). NetSuite's invoice won't have these lines.`);
-  } else if (t.closed) {
-    out.push(`${t.name} ${t.closed}, so nothing more can be billed there.`);
   } else {
     out.push(`It has no invoice lines yet. Its parts and labor are billed on ${billName(t)} from now on.`);
   }

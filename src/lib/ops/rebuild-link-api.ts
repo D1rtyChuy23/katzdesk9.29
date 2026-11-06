@@ -522,10 +522,7 @@ export function linkRebuildSql(): string {
      ), ok as (
        select rb.id, rb.account as old_account, tgt.t, tgt.id as target_id, tgt.kind as target_kind, tgt.customer as account, tgt.po,
               (select count(*)::int from own_lines) as n,
-              (select coalesce(sum(round(l.qty * l.rate, 2)), 0) from own_lines l) as amount,
-              -- The bill open as it is linked: a ticket not billed, an install's invoice not approved.
-              case when tgt.t = 'job' then nullif(btrim(tgt.ns_so), '') is null and coalesce(ticket_live_ns_invoices(tgt.id), '') = ''
-                   else not exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = tgt.id and v.approved_at is not null) end as open
+              (select coalesce(sum(round(l.qty * l.rate, 2)), 0) from own_lines l) as amount
          from rb cross join tgt
         where regexp_replace(lower(tgt.customer), '[^a-z0-9]+', '', 'g') not in ('', 'walkin')
           -- Its own invoice as the person saw it, read fresh: an approve that committed while this waited counts.
@@ -533,13 +530,12 @@ export function linkRebuildSql(): string {
           -- Warehouse's saved invoice waits for an Admin; a discount can't ride along.
           and not exists (select 1 from own where own.approved_at is null and own.submitted_at is not null and exists (select 1 from own_lines))
           and not exists (select 1 from own where coalesce(own.discount_value, 0) > 0 and exists (select 1 from own_lines))
-          -- Lines go only on an open bill: a ticket not billed (its NetSuite invoices read fresh) ...
-          and (tgt.t <> 'job' or not exists (select 1 from own_lines)
-               or (nullif(btrim(tgt.ns_so), '') is null and coalesce(ticket_live_ns_invoices(tgt.id), '') = ''))
+          -- Only an open bill takes a link (11/6 review, round 5): a ticket not billed (its NetSuite invoices read
+          -- fresh) ...
+          and (tgt.t <> 'job' or (nullif(btrim(tgt.ns_so), '') is null and coalesce(ticket_live_ns_invoices(tgt.id), '') = ''))
           -- ... or an install's invoice as the person saw it (fresh), not approved.
           and (tgt.t <> 'install' or (coalesce(invoice_version('install', tgt.id), '') = split_part($8::text, '|', 2)
-               and (not exists (select 1 from own_lines)
-                    or not exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = tgt.id and v.approved_at is not null))))
+               and not exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = tgt.id and v.approved_at is not null)))
           -- A unit the owner locked keeps the rebuild on its account.
           and not ${lockedUnitMovesSql("rb", "tgt.customer")}
      ), to_job as (
@@ -580,7 +576,7 @@ export function linkRebuildSql(): string {
        update rebuilds r
           set install_id = case when done.t = 'install' then done.target_id end,
               job_id = case when done.t = 'job' then done.target_id end,
-              account = done.account, po = done.po, link_lines = done.n, link_open = case when done.open then true end, updated_at = now()
+              account = done.account, po = done.po, link_lines = done.n, link_open = true, updated_at = now()
          from done
         where r.id = done.id
        returning r.id, r.account, done.old_account
@@ -649,6 +645,12 @@ export function unlinkRebuildSql(): string {
           and (ohead.id is null or ohead.approved_at is null or ($6::int = 0 and not rb.link_open))
           -- A ticket merged into an install as billed brought it, linked while that ticket was open: it stays.
           and rb.link_billed_with is null
+          -- None of its lines on another bill, as the plan checks too (11/6 review): billed there, they stay there.
+          and not exists (select 1 from ticket_charges c join service_jobs j on j.id = c.job_id
+                            where ${RB_KEY("c.source_key", "rb.id")} and j.id is distinct from oj.id
+                              and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null))
+          and not exists (select 1 from invoice_lines l join invoices v on v.id = l.invoice_id
+                            where ${RB_KEY("l.source_key", "rb.id")} and not (v.entity_type = 'install' and v.entity_id = coalesce(oi.id, -1)))
      ), taken as (
        select t.* from ok cross join lateral take_rebuild_lines(ok.id, ok.job_id, ok.head_id) t
      ), back as (

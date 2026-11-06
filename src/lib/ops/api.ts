@@ -86,7 +86,7 @@ import { customersStrictlyMatch } from "./clean-names";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { withSales } from "./install-sale";
-import { assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
+import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
 import { deliverPings } from "./notify";
 
@@ -1984,13 +1984,8 @@ export const createInstall = createServerFn({ method: "POST" }).middleware([desk
 	return (await withWorkOrders(sql, [mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog)]))[0];
 });
 export const archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
-	const cur = await sql`
-      select id, customer from installs where id = ${data.id} and archived = false`;
-	if (!cur[0]) throw new Error("Install not found");
-	await sql`update installs set archived = true, updated_at = now() where id = ${data.id}`;
-	await logActivity(sql, context.userId, "install", data.id, "removed", cur[0].customer);
-	return { ok: true };
+	// A rebuild linked to it keeps it on the board (11/6 review, round 5): install-projects.ts.
+	return archiveInstallFor(await ready(), context.userId, Number(data.id));
 });
 export const listComments = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { entityType: string; entityId: number }) => d).handler(async ({ data }: any) => {
 	const sql = await ready();

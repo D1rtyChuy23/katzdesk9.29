@@ -48,17 +48,21 @@ side too: see "Installs and PMs" below.
   waiting for an Admin). It is refused while they are billed: a ticket with a Sales Order or a live NetSuite invoice,
   an install whose invoice is approved, or a ticket merged into an install as billed. A bill that closed after the
   link was made keeps the rebuild even when none of its lines can be told apart there (its parts added by hand, or the
-  Billing Backfill's NetSuite lines over them): `rebuilds.link_open` (`0120`). A link from before 11/6, or one made
-  onto a bill already closed, can be undone. `rebuilds.link_lines` (`0119`) counts what the link moved.
+  Billing Backfill's NetSuite lines over them): `rebuilds.link_open` (`0120`). A link from before 11/6 can be undone.
+  `rebuilds.link_lines` (`0119`) counts what the link moved.
+- Only an open bill takes a link: a billed ticket, or an install whose invoice is approved, is refused even for a
+  rebuild with nothing to move. Linked there, the rebuild could bill nowhere, and its parts could go on that bill by
+  hand once it reopened, with nothing to tell them apart.
 - Merges move a linked rebuild with its project:
   - A ticket merged into an install takes the rebuild along. Merged as billed, the ticket keeps its charges, billed:
     a rebuild linked while that ticket was open stays linked, wherever Merge installs takes it after. The merge marks
     it with the ticket's id in `rebuilds.link_billed_with` (`0121`), and Unlink is refused while that is set.
-  - Onto a bill that's closed and took nothing of it, `link_open` goes back to none, so the rebuild can still be
-    unlinked: a ticket with no charges merged into an install whose invoice is approved, a WO duplicate with no charges
-    merged into a billed ticket, or Merge installs into one whose invoice is approved (not a rebuild marked with a
-    billed ticket: that ticket's billing still holds it). Otherwise its lines or invoice move with it, and `link_open`
-    stays.
+  - A merge that would put a rebuild linked while open on a closed bill that takes nothing of it is refused until the
+    rebuild is unlinked: an unbilled ticket into an install whose invoice is approved, a WO duplicate into a billed
+    ticket, Merge installs into one whose invoice is approved. A rebuild marked by a billed ticket, or held on the
+    drop's own approved invoice, goes along as it is.
+  - Remove (taking an install off the board) is refused while a rebuild is linked to it: off the board, the rebuild
+    would bill nowhere. Unlink it, or merge the install into the one to keep.
 - Link and Unlink mark the ticket or install changed (`updated_at`), so a Charges save, a merge, Merge installs or a
   Billing Backfill confirm that read it before stops and asks to look again.
 - `0118` also adds four functions: `invoice_version` (an invoice's "id:approved:saved" stamp), `rebuild_lines_on`
