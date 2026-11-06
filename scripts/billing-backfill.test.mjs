@@ -419,3 +419,14 @@ test("one NetSuite invoice under two tickets' WOs in the files: both written, an
   assert.ok(by["WO-0621"].warnings.includes(`INV62 is in the files under WO-0622 (ticket #${b}) too. NetSuite billed both on one invoice, or a WO is wrong: check it in NetSuite.`), by["WO-0621"].warnings.join(" | "));
   assert.ok(by["WO-0622"].warnings.includes(`INV62 is in the files under WO-0621 (ticket #${a}) too. NetSuite billed both on one invoice, or a WO is wrong: check it in NetSuite.`), by["WO-0622"].warnings.join(" | "));
 });
+
+test("two tickets with one WO: an invoice already on one of them doesn't pick it (tickets as since 10/30)", async () => {
+  const sql = await fresh();
+  const a = await ticket(sql, { wo: "WO-0631", received: "2026-09-01", completed: "2026-09-05" });
+  const f = [file("invoices.csv", [INVOICES_HEAD, ["WO-0631", "", "", "INV631", "2026-09-12", "Open", "10", "10", "", ""]])];
+  const p1 = await api.previewBillingBackfillFor(sql, f, "u-owner");
+  await api.applyBillingBackfillFor(sql, f, "u-owner", { hash: p1.hash, skip: [] });
+  const b = await ticket(sql, { wo: "WO-0631", received: "2026-09-03", completed: "2026-09-08" });
+  const again = (await api.previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-0631", "", "", "INV631", "2026-09-12", "Paid In Full", "10", "0", "", ""]])], "u-owner")).plans[0];
+  assert.deepEqual([again.status, again.reason], ["skip", `The WO is on 2 tickets (#${a}, #${b}). Can't tell which one NetSuite billed.`]);
+});
