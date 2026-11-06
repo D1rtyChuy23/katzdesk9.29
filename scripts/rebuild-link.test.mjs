@@ -492,10 +492,16 @@ test("unlinked from an install whose invoice waits: the lines come back, and its
   const rb = await rebuild(sql, { account: CAFE });
   await ownInvoice(sql, rb, PARTS, { customer: CAFE });
   const inst = await install(sql, { wo: "WO-5000" });
+  const row = async () => (await one(sql, "select updated_at::text as t from installs where id = $1", [inst])).t;
+  const r0 = await row();
   const f = await find(sql, rb, "5000");
   await linkTo(sql, f, f.candidates[0]);
+  // Link and Unlink mark the install changed: Merge installs confirmed before either stops (11/6 review).
+  const r1 = await row();
+  assert.notEqual(r1, r0);
   const stamp = (await one(sql, "select invoice_version('install', $1) as v", [inst])).v;
   const out = await unlink(sql, rb, "u-desk");
+  assert.notEqual(await row(), r1);
   assert.equal(out.message, `Unlinked from WO-5000 (Install #${inst}). Its 2 lines ($315.00) are back on its own invoice.`);
   assert.deepEqual(await invoiceLines(sql, "install", inst), []);
   const h = await head(sql, "install", inst);
@@ -689,6 +695,10 @@ test("every check of the unlink statement holds on its own, and Warehouse's wait
   // A count or a stamp other than what was read: nothing.
   assert.deepEqual(await unlinkSql(rb, null, job, await STAMP(job), 1), [], "count");
   assert.deepEqual(await unlinkSql(rb, null, job, "1", 2), [], "stamp");
+  // Taken off the board after it was read: nothing (its lines would go to an invoice nobody looks at).
+  await sql.query("update rebuilds set archived = true where id = $1", [rb]);
+  assert.deepEqual(await unlinkSql(rb, null, job, await STAMP(job), 2), [], "off the board");
+  await sql.query("update rebuilds set archived = false where id = $1", [rb]);
   // As read, it unlinks, and the ticket's own charge stays.
   assert.equal((await unlinkSql(rb, null, job, await STAMP(job), 2)).length, 1);
   assert.deepEqual((await charges(sql, job)).map((l) => l.item), ["Service : TRIPCHARGE"]);
