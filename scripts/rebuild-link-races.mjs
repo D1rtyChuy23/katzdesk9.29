@@ -1,6 +1,6 @@
 // The rebuild WO link (11/6) against every write it can meet, both orders, the second waiting on the first's locks:
 // Approve, Warehouse's Save for Approval, a Charges save, an install's Approve, a second link, a ticket merged into an
-// install, Merge installs and a WO-duplicate merge. Not part of `npm test`: it needs a real Postgres (PGlite has one
+// install, Merge installs, a WO-duplicate merge, and Remove. Not part of `npm test`: it needs a real Postgres (PGlite has one
 // connection). Run it only against a throwaway local server, made-up data only:
 //
 //   KD_RACE_PG=postgres://postgres@127.0.0.1:55437 node --experimental-strip-types scripts/rebuild-link-races.mjs
@@ -324,6 +324,74 @@ for (const withInvoice of [false, true]) {
   const un = await unlinking;
   const onBills = (await lines("job", keeper)).length + (await lines("job", extra)).length + (await lines("rebuild", rb)).length;
   check("a WO-duplicate merge and an Unlink at once: one wins, the other says so, and the line is on one bill", (un.r || /changed since you looked/.test(un.e ?? "")) && onBills === 1, { merged, unlink: un });
+}
+
+// 15. A link onto an install holds its locks; Remove, checked before the link committed, waits on the install row,
+// then sees the install changed and removes nothing (11/6 review, round 6).
+{
+  const ins = await install();
+  const rb = await rebuild();
+  const a = new pg.Client(db);
+  await a.connect();
+  await a.query("begin");
+  const linked = await a.query(...linkArgs(rb, "install", ins, await ver("rebuild", rb), await installStamp(ins)));
+  const removing = P.archiveInstallFor(sql, "u-owner", ins).then(() => "removed", (e) => e.message);
+  await pause(400);
+  const waited = await waitingNow();
+  await a.query("commit");
+  await a.end();
+  const r = await removing;
+  const off = (await q("select archived from installs where id = $1", [ins]))[0].archived;
+  check("a link, then Remove: Remove waits and removes nothing", linked.rows.length === 1 && waited && off === false && /changed while you removed it/.test(r), { r });
+}
+// 16. A ticket merged into an install brings a linked rebuild while Remove waits: the same.
+{
+  const ins = await install("WO-8501");
+  const job = await ticket("WO-8501", CAFE, "Scheduled");
+  const rb = await rebuild();
+  assert.equal((await q(...linkArgs(rb, "job", job, await ver("rebuild", rb), await stampOf(job)))).length, 1);
+  const p = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId: job, installId: ins });
+  const a = new pg.Client(db);
+  await a.connect();
+  await a.query("begin");
+  const aq = async (t, prm) => (await a.query(t, prm)).rows;
+  const bound = Object.assign(async (s, ...vals) => aq(s.reduce((acc, x, i) => `${acc}$${i}${x}`), vals), { query: aq });
+  await M.mergeTicketIntoInstallFor(bound, "u-owner", { jobId: job, installId: ins, stamps: p.stamps, billedSo: "", billedOn: "" });
+  const removing = P.archiveInstallFor(sql, "u-owner", ins).then(() => "removed", (e) => e.message);
+  await pause(400);
+  const waited = await waitingNow();
+  await a.query("commit");
+  await a.end();
+  const r = await removing;
+  const off = (await q("select archived from installs where id = $1", [ins]))[0].archived;
+  const on = (await q("select install_id from rebuilds where id = $1", [rb]))[0].install_id;
+  check("a ticket merge brings a rebuild, then Remove: Remove waits and removes nothing", waited && off === false && on === ins && /changed while you removed it/.test(r), { r });
+}
+// 17. The keeper's invoice approved while Merge installs, checked before, waits: the merge reads the approval fresh and
+// refuses, so a rebuild linked to the drop isn't left on a bill that took nothing of it (11/6 review, round 6).
+{
+  const keep = await install();
+  const drop = await install();
+  const rb = await rebuild(CAFE);
+  await q("insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at) values ('install', $1, $2, 0, 'chuy', now() - interval '1 day')", [keep, CAFE]);
+  assert.equal((await q(...linkArgs(rb, "install", drop, await ver("rebuild", rb), await installStamp(drop)))).length, 1);
+  const a = new pg.Client(db);
+  await a.connect();
+  await a.query("begin");
+  const appr = await a.query(...approveArgs("install", keep, await ver("install", keep), [["TEST-BREWER", 1, 500]]));
+  const merging = P.mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: drop }).then(() => "merged", (e) => e.message);
+  await pause(500);
+  const waited = await waitingNow();
+  await a.query("commit");
+  await a.end();
+  const m = await merging;
+  const on = (await q("select install_id from rebuilds where id = $1", [rb]))[0].install_id;
+  const dropOff = (await q("select archived from installs where id = $1", [drop]))[0].archived;
+  check(
+    "an Approve of the keeper's invoice, then Merge installs: the merge waits and merges nothing",
+    appr.rows.length === 1 && waited && on === drop && dropOff === false && /couldn't bill there/.test(m),
+    { m },
+  );
 }
 
 await pool.end();

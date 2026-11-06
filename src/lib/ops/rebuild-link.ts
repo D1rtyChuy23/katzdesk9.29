@@ -119,10 +119,17 @@ export function closedBillMergeRefusal(rebuilds: { id: number; title: string | n
   return `${rebuildNames(rebuilds)} ${one ? "is" : "are"} linked to ${from}, and ${closed}, so ${one ? "it" : "they"} couldn't bill there. Unlink ${one ? "it on the rebuild's" : "them on their"} Details first, then merge.`;
 }
 
-/** Remove refused on an install that rebuilds are linked to: they bill there, and off the board they'd bill nowhere. */
-export function removeLinkedInstallRefusal(installId: number, rebuilds: { id: number; title: string | null }[]): string {
+/**
+ * Remove refused on an install that rebuilds are linked to: they bill there, and off the board they'd bill nowhere.
+ * `held`: one Unlink refuses (a billed ticket brought it, or the install's approved invoice holds it), so only Merge
+ * installs takes it off (11/6 review, round 6).
+ */
+export function removeLinkedInstallRefusal(installId: number, rebuilds: { id: number; title: string | null; held: boolean }[]): string {
   const one = rebuilds.length === 1;
-  return `${rebuildNames(rebuilds)} ${one ? "is" : "are"} linked to install #${installId} and ${one ? "bills" : "bill"} there. Unlink ${one ? "it on the rebuild's" : "them on their"} Details first, or merge this install into the one to keep.`;
+  const lead = `${rebuildNames(rebuilds)} ${one ? "is" : "are"} linked to install #${installId} and ${one ? "bills" : "bill"} there.`;
+  const held = rebuilds.filter((r) => r.held);
+  if (held.length) return `${lead} Merge this install into the one to keep instead: ${held.length === rebuilds.length && one ? "it" : rebuildNames(held)} can't be unlinked.`;
+  return `${lead} Unlink ${one ? "it on the rebuild's" : "them on their"} Details first, or merge this install into the one to keep.`;
 }
 
 /** Where a project's bill is: "the ticket's charges" or "the install's invoice". */

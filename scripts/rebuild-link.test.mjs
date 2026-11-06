@@ -285,6 +285,10 @@ test("what a link does, or why it can't: the rules alone", () => {
     R.planLink({ ...linked, own: { ...own, discount: { kind: "percent", value: 5 } } }, t).refusal,
     "This rebuild's invoice has a discount (5% off), which can't go on WO-4321 (Service ticket SC-1)'s bill. Unlink it, take the discount off its invoice, then link it again.",
   );
+  // Remove's refusal names what works: Unlink, or only Merge installs for a rebuild held there.
+  const two = [{ id: 1, title: "Test A", held: false }, { id: 2, title: "Test B", held: true }];
+  assert.equal(R.removeLinkedInstallRefusal(9, two), "Rebuild #1 (Test A), Rebuild #2 (Test B) are linked to install #9 and bill there. Merge this install into the one to keep instead: Rebuild #2 (Test B) can't be unlinked.");
+  assert.equal(R.removeLinkedInstallRefusal(9, [two[0]]), "Rebuild #1 (Test A) is linked to install #9 and bills there. Unlink it on the rebuild's Details first, or merge this install into the one to keep.");
   // The keys: the rebuild's id is its own colon-bounded field.
   assert.equal(isRebuildLineKey("rb:12:40", 12), true);
   assert.equal(isRebuildLineKey("rb:120:40", 12), false);
@@ -917,9 +921,9 @@ test("a ticket merged into an install as billed keeps the rebuild linked, throug
   const onKeep = await L.getRebuildLinkFor(sql, rbA, "u-owner");
   assert.equal(onKeep.unlink.refusal, keptA);
   assert.deepEqual(await sql.query(L.unlinkRebuildSql(), params(rbA, keepA, onKeep)), [], "the statement keeps it on the keeper too");
-  // Nor can its install be taken off the board: it bills there.
+  // Nor can its install be taken off the board: it bills there, and only Merge installs moves it (11/6 review, round 6).
   await assert.rejects(archiveInstallFor(sql, "u-owner", keepA), {
-    message: `Rebuild #${rbA} (Test approved-install refurb) is linked to install #${keepA} and bills there. Unlink it on the rebuild's Details first, or merge this install into the one to keep.`,
+    message: `Rebuild #${rbA} (Test approved-install refurb) is linked to install #${keepA} and bills there. Merge this install into the one to keep instead: it can't be unlinked.`,
   });
   assert.equal((await one(sql, "select archived from installs where id = $1", [keepA])).archived, false);
 
@@ -969,6 +973,7 @@ test("a ticket merged into an install as billed keeps the rebuild linked, throug
       const y = await L.getRebuildLinkFor(sql, r2, "u-owner");
       assert.match(y.unlink.refusal, /^Install #\d+ has an approved invoice, and it was linked while that bill was open, so it stays linked/);
       assert.deepEqual(await sql.query(L.unlinkRebuildSql(), params(r2, i2, y)), []);
+      await assert.rejects(archiveInstallFor(sql, "u-owner", i2), { message: /Merge this install into the one to keep instead: it can't be unlinked\.$/ });
     }
   }
 

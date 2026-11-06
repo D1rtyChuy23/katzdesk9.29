@@ -62,7 +62,10 @@ side too: see "Installs and PMs" below.
     ticket, Merge installs into one whose invoice is approved. A rebuild marked by a billed ticket, or held on the
     drop's own approved invoice, goes along as it is.
   - Remove (taking an install off the board) is refused while a rebuild is linked to it: off the board, the rebuild
-    would bill nowhere. Unlink it, or merge the install into the one to keep.
+    would bill nowhere. Unlink it, or merge the install into the one to keep (the only way for a rebuild that Unlink
+    refuses). Remove checks the install row as it read it, so a link or merge that commits while it waits stops it.
+  - Merge installs reads both invoices' approval fresh, after its locks: an install's Approve doesn't touch the
+    install row the merge checks.
 - Link and Unlink mark the ticket or install changed (`updated_at`), so a Charges save, a merge, Merge installs or a
   Billing Backfill confirm that read it before stops and asks to look again.
 - `0118` also adds four functions: `invoice_version` (an invoice's "id:approved:saved" stamp), `rebuild_lines_on`
