@@ -303,6 +303,8 @@ test("on the card already: an invoice on the install isn't added twice, and a me
   const paid = [file("invoices.csv", [INVOICES_HEAD, invoice("WO-8793", "SO8500", "INV8500", "2026-10-25", "Paid In Full", 999, 0)])];
   const q = (await preview(sql, paid)).plans[0];
   assert.deepEqual([q.kind, q.recordId, q.status, q.invoices.map((i) => [i.invoice, i.change])], ["install", inst, "write", [["INV8500", "updated"]]]);
+  // WO-8793 has no lines of its own: the install's charges are its other WO's NetSuite lines.
+  assert.deepEqual([q.amounts.kdSource, q.amounts.kd, q.amounts.nsMismatch], ["netsuite", 999, false]);
   await write(sql, paid);
   assert.deepEqual(await nsInvoices(sql, "install_id", inst), ["INV8500 Paid In Full 999.00 0.00 8792"], "still under the WO it came in on");
   assert.deepEqual((await preview(sql, paid)).plans.map((x) => x.status), ["same"]);
@@ -950,6 +952,14 @@ test("no invoice date (11/5 re-review): the record a WO's billing is on already 
   assert.deepEqual(
     [loose.status, loose.reason],
     ["skip", `The WO is on ticket #${t}, install #${inst}, and the files have no invoice date to tell them apart (install #${inst} has NetSuite billing for it already). Skipped.`],
+  );
+  // An install with only a Sales Order for its WO from an earlier run has that WO's billing too.
+  const soOnly = await install(sql, { customer: CAFE, wo: "WO-6102", received: "2026-10-01", completed: "2026-10-20" });
+  await write(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-6102", "SO6102", "Pending Billing", "", "", "", "", "", "", ""]])]);
+  const t2 = await ticket(sql, { customer: CAFE, wo: "WO-6102", received: "2026-11-02", completed: "2026-11-03" });
+  assert.equal(
+    (await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-6102", "", "", CAFE, "EQUIPMENT : TESTY", 1, 50)])])).plans[0].reason,
+    `The WO is on ticket #${t2}, install #${soOnly}, and the files have no invoice date to tell them apart (install #${soOnly} has NetSuite billing for it already). Skipped.`,
   );
   // Recorded on both: can't tell either.
   await sql.query("update service_jobs set ns_so = 'SO6101' where id = $1", [t]);
