@@ -697,6 +697,22 @@ test("picks (11/5 review): beside a billed merged ticket's own rows, the install
   const t3 = await ticket(sql, { customer: CAFE, wo: "WO-4792", received: "2026-10-02", completed: "2026-10-16" });
   const again = await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "INV4004", "SO4004", CAFE, "EQUIPMENT : TESTX", 1, 300)]), file("invoices.csv", [INVOICES_HEAD, own])]);
   assert.deepEqual([again.plans[0].kind, again.plans[0].recordId, again.plans[0].reason], ["install", inst, null], `not ticket #${t3}`);
+  // The invoice a line came from alone does it too (beside an open SO of the install's, so the rows aren't all the
+  // ticket's).
+  const byInvoice = await preview(sql, [
+    file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "INV4004", "", CAFE, "EQUIPMENT : TESTX", 1, 300)]),
+    file("invoices.csv", [INVOICES_HEAD, own, ["WO-4792", "SO4009", "Pending Billing", "", "", "", "", "", "", ""]]),
+  ]);
+  assert.deepEqual([byInvoice.plans[0].kind, byInvoice.plans[0].recordId, byInvoice.plans[0].reason], ["install", inst, null]);
+  // A line on the live ticket's own Sales Order, beside the merged ticket's: the live ticket's, in a run of its own.
+  await sql.query("update service_jobs set ns_so = 'SO4777' where id = $1", [t3]);
+  const theirs = await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "", "SO4777", CAFE, "Service : SERVICELABOR", 1, 150)]), file("invoices.csv", [INVOICES_HEAD, own])]);
+  assert.deepEqual(
+    [theirs.plans[0].status, theirs.plans[0].reason],
+    ["skip", `The rows beside ticket #${t1}'s own billing are ticket #${t3}'s (its invoices or Sales Order already). Put ticket #${t1}'s rows in a file of their own, then run the Billing Backfill on each.`],
+  );
+  // Run on its own, as said: the live ticket's.
+  assert.deepEqual(((x) => [x.kind, x.jobId])((await preview(sql, [file("charges.csv", [CHARGES_HEAD, charge("WO-4792", "", "SO4777", CAFE, "Service : SERVICELABOR", 1, 150)])])).plans[0]), ["service", t3]);
   await sql.query("delete from service_jobs where id = $1", [t3]);
 
   // WO numbers started over in July 2026: an old PM and a new ticket with one number. An invoice days after the ticket
@@ -1001,4 +1017,16 @@ test("a dated rerun (11/5 re-review): an invoice recorded on an install stays it
   // On its own, that one is the ticket's.
   const alone = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0820", "", "INV0830", "2026-10-16", "Open", 150, 150, "")])])).plans[0];
   assert.deepEqual([alone.kind, alone.jobId], ["service", t]);
+});
+
+test("the distance rule (11/5 re-review): an invoice dated while a long install was being done can't be told from a ticket done weeks before", async () => {
+  const { sql } = await fresh();
+  const CAFE = "Test Long Project Cafe";
+  const inst = await install(sql, { customer: CAFE, wo: "WO-0831", received: "2026-06-01", completed: "2026-11-01" });
+  const t = await ticket(sql, { customer: CAFE, wo: "WO-0831", received: "2026-06-15", completed: "2026-06-20" });
+  const deposit = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0831", "", "INV0831", "2026-07-01", "Open", 2000, 2000, "")])])).plans[0];
+  assert.deepEqual(
+    [deposit.status, deposit.reason],
+    ["skip", `The WO is on ticket #${t}, install #${inst}, and the invoice date (2026-07-01) fits each of them, so the Backfill can't tell which one NetSuite billed. Skipped. If the ticket is the install's work, merge it into the install first (Merge into install), then run it again.`],
+  );
 });

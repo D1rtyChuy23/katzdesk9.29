@@ -698,9 +698,15 @@ function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvo
       const restSos = new Set([...restInvoices.map((i) => soKey(i.so)), ...restLines.map((r) => soKey(r.sourceSo))].filter(Boolean));
       const others = cands.filter((c) => !("record" in c && c.record === home));
       if (!restRef && others.length) {
-        // Recorded on the install already (a rerun): its. Anywhere else, or nowhere: the dates have to tell.
+        // Recorded on the install already (a rerun): its. On another record: that one's, in a run of their own.
+        // Nowhere: the dates have to tell.
         const anchored = cands.filter((c) => holds(c, restInv, restSos));
         if (anchored.length === 1 && "record" in anchored[0]! && anchored[0].record === home) return anchored[0]!;
+        if (anchored.length === 1) {
+          return {
+            reason: `The rows beside ticket #${t.id}'s own billing are ${candidateName(anchored[0]!)}'s (its invoices or Sales Order already). Put ticket #${t.id}'s rows in a file of their own, then run the Billing Backfill on each.`,
+          };
+        }
         return {
           reason: `The rows beside ticket #${t.id}'s own billing have no invoice date to tell install #${home.id} (where the ticket was merged as billed) from ${others.map(candidateName).join(", ")}. Run them with their NetSuite invoices, so the invoice dates can tell, or merge the other ticket into the install if it's the same job. Skipped.`,
         };
