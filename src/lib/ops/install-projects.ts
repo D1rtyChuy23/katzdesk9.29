@@ -49,7 +49,7 @@ export async function archiveInstallFor(sql: Sql, userId: string, installId: num
     [installId],
   );
   if (linked.length) throw new Error(removeLinkedInstallRefusal(installId, linked));
-  // One statement, on the install as read above: Link, Unlink, both ticket merges and Merge installs all mark the
+  // One statement, on the install as read above: Link, Unlink, a ticket merged into it and Merge installs all mark the
   // install changed, so one that commits while this waits for the row stops it (11/6 review, round 6).
   const done = await sql.query<{ id: number }>(
     `update installs set archived = true, updated_at = now()
@@ -58,7 +58,11 @@ export async function archiveInstallFor(sql: Sql, userId: string, installId: num
     returning id`,
     [installId, cur.stamp],
   );
-  if (!done[0]) throw new Error("This install changed while you removed it, so nothing was removed. Look at it again.");
+  if (!done[0]) {
+    // Someone else's Remove got there first: it's off the board already (11/6 review, round 7).
+    const gone = (await sql.query<{ archived: boolean }>("select archived from installs where id = $1", [installId]))[0]?.archived;
+    throw new Error(gone ? "This install was removed already." : "This install changed while you removed it, so nothing was removed. Look at it again.");
+  }
   await log(sql, installId, await actorName(sql, userId), "removed", cur.customer);
   return { ok: true };
 }

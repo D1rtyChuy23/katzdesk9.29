@@ -1094,6 +1094,15 @@ test("a ticket merged into an install as billed keeps the rebuild linked, throug
     },
   });
   await assert.rejects(archiveInstallFor(touching, "u-owner", offInst), { message: "This install changed while you removed it, so nothing was removed. Look at it again." });
+  // Removed by someone else after Remove read it: it says so.
+  const beaten = Object.assign(async (...a) => sql(...a), {
+    query: async (text, params) => {
+      if (text.includes("update installs set archived = true")) await sql.query("update installs set archived = true, updated_at = now() + interval '2 seconds' where id = $1", [offInst]);
+      return sql.query(text, params);
+    },
+  });
+  await assert.rejects(archiveInstallFor(beaten, "u-owner", offInst), { message: "This install was removed already." });
+  await sql.query("update installs set archived = false where id = $1", [offInst]);
   assert.deepEqual(await archiveInstallFor(sql, "u-owner", offInst), { ok: true });
   assert.deepEqual(await one(sql, "select archived from installs where id = $1", [offInst]), { archived: true });
   assert.equal((await one(sql, "select action, actor_name from activity where entity_type = 'install' and entity_id = $1 order by id desc limit 1", [offInst])).action, "removed");
