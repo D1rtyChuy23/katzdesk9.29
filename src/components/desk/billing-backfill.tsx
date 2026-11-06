@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, FileUp, Receipt } from "lucide-react";
 import { toast } from "sonner";
-import { applyBillingBackfill, previewBillingBackfill, type BackfillFile, type BackfillPreview } from "@/lib/ops/billing-backfill-api";
-import { BACKFILL_STATUS_LABEL, type BackfillPlan, type BackfillStatus } from "@/lib/ops/billing-backfill";
+import { applyBillingBackfill, listBillingBackfillRuns, previewBillingBackfill, type BackfillFile, type BackfillPreview, type BackfillRun } from "@/lib/ops/billing-backfill-api";
+import { BACKFILL_KIND_LABEL, BACKFILL_STATUS_LABEL, type BackfillInvoicePlan, type BackfillPlan, type BackfillStatus } from "@/lib/ops/billing-backfill";
 import { chargesTotal } from "@/lib/ops/charges";
 import { discountLabel } from "@/lib/ops/discount";
 import { Badge } from "@/components/ui/badge";
@@ -17,10 +17,11 @@ import { InvoiceStatusBadge } from "./ticket-invoices";
 import { ShowMoreButton, useShowMore } from "./show-more";
 
 /*
- * Admin: Billing Backfill (NetSuite), on Tickets → Import (Grok's billing request through Chuy, 10/28). Drop the
- * charges file and/or the invoices file; the preview shows, per ticket, the charges now and from NetSuite, the Sales
- * Order, the invoices and the amount check. Nothing is written until Write; a ticket already invoiced only gets its
- * invoice records. The rules are in billing-backfill.ts.
+ * Admin: Billing Backfill (NetSuite), on Tickets → Import (Grok's billing request through Chuy, 10/28; installs and
+ * PMs since 11/5). Drop the charges file and/or the invoices file; the preview shows, per WO, what it goes on (ticket,
+ * TLC, install or PM), the charges now and from NetSuite, the Sales Order, each invoice (will write, already there or
+ * skipped, and why) and the amount check. Nothing is written until Write; a record already invoiced only gets its
+ * invoice records. Each Write is logged as a run. The rules are in billing-backfill.ts.
  */
 
 function fileToBase64(file: File): Promise<string> {
@@ -49,12 +50,23 @@ const STATUS_TONE: Record<BackfillStatus, "success" | "warn" | "outline" | "dang
 type Show = "changes" | "warnings" | "skip" | "same" | "all";
 
 const SHOW_LABEL: Record<Show, string> = {
-  changes: "With changes",
+  changes: "Will write",
   warnings: "With warnings",
   skip: "Skipped",
-  same: "No change",
+  same: "Already there",
   all: "Every WO",
 };
+
+const plural = (count: number, one: string, many = `${one}s`) => `${n(count)} ${count === 1 ? one : many}`;
+
+/** "3 tickets, 1 install and 2 PMs": what a run wrote. */
+function recordsText(a: { tickets: number; installs: number; pms: number }): string {
+  const parts = [a.tickets ? plural(a.tickets, "ticket") : null, a.installs ? plural(a.installs, "install") : null, a.pms ? plural(a.pms, "PM") : null].filter(
+    (s): s is string => !!s,
+  );
+  if (!parts.length) return "no records";
+  return parts.length === 1 ? parts[0]! : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
+}
 
 function shown(p: BackfillPlan, show: Show): boolean {
   if (show === "all") return true;
@@ -88,17 +100,30 @@ export function BillingBackfillButton() {
   const write = useMutation({
     mutationFn: () => applyBillingBackfill({ data: { files, hash: preview!.hash, skip: [...skip] } }),
     onSuccess: (r) => {
-      const a = r.applied ?? { tickets: 0, lines: 0, invoices: 0 };
-      toast.success(`Billing Backfill saved: ${n(a.tickets)} ticket${a.tickets === 1 ? "" : "s"}, ${n(a.lines)} charge line${a.lines === 1 ? "" : "s"}, ${n(a.invoices)} invoice${a.invoices === 1 ? "" : "s"}`);
+      const a = r.applied ?? { tickets: 0, installs: 0, pms: 0, lines: 0, invoices: 0 };
+      toast.success(`Billing Backfill saved: ${recordsText(a)}, ${plural(a.lines, "charge line")}, ${plural(a.invoices, "invoice")}`);
       setPreview(r);
       setSkip(new Set());
       setShow("all");
-      for (const key of ["jobs", "job", "charges", "ticket-billing", "billing-invoices", "tickets-window", "invoice", "activity", "parts-profit"]) {
+      for (const key of [
+        "jobs",
+        "job",
+        "charges",
+        "ticket-billing",
+        "record-billing",
+        "billing-invoices",
+        "tickets-window",
+        "invoice",
+        "activity",
+        "parts-profit",
+        "billing-backfill-runs",
+      ]) {
         void qc.invalidateQueries({ queryKey: [key] });
       }
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
+  const runs = useQuery({ queryKey: ["billing-backfill-runs"], queryFn: () => listBillingBackfillRuns(), enabled: open });
 
   const plans = useMemo(() => preview?.plans ?? [], [preview]);
   const list = useMemo(() => plans.filter((p) => shown(p, show)), [plans, show]);
@@ -121,9 +146,11 @@ export function BillingBackfillButton() {
         <DialogContent className="max-h-[92vh] max-w-6xl overflow-y-auto" data-testid="backfill">
           <DialogTitle>Billing Backfill (NetSuite)</DialogTitle>
           <DialogDescription>
-            Drop NetSuite&apos;s charges file, invoices file, or both (CSV or Excel), keyed by WO. A ticket not invoiced yet gets its charges
-            (credits netted, the discount as NetSuite&apos;s header discount), then its Sales Order and billed date, then its invoices. A ticket
-            already invoiced only gets its invoice records: number, status, total and amount remaining. Merged tickets and Walk-In are skipped.
+            Drop NetSuite&apos;s charges file, invoices file, or both (CSV or Excel), keyed by WO. Each WO goes on its ticket, TLC, install or
+            PM. One not invoiced yet gets its charges (credits netted, the discount as NetSuite&apos;s header discount), then its Sales Order and
+            billed date, then its invoices. One already invoiced only gets its invoice records: number, status, total and amount remaining. An
+            install&apos;s or a PM&apos;s charges are NetSuite&apos;s lines, kept as billed beside its own invoice, never in Export Billing. An
+            invoice on the record already is never added twice. Merged records, PMs stacked on a ticket and Walk-In are skipped.
           </DialogDescription>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" variant={preview ? "outline" : "default"} disabled={read.isPending || write.isPending} onClick={() => input.current?.click()}>
@@ -159,18 +186,32 @@ export function BillingBackfillButton() {
             <>
               <div className="mt-3 flex flex-wrap gap-1.5 text-sm" data-testid="backfill-counts">
                 <Badge variant="success">Will write {n(preview.counts.write)}</Badge>
-                <Badge variant="warn">Invoices only (locked) {n(preview.counts.invoices)}</Badge>
-                <Badge variant="outline">No change {n(preview.counts.same)}</Badge>
+                <Badge variant="warn">Will write: invoices only {n(preview.counts.invoices)}</Badge>
+                <Badge variant="outline">Already there {n(preview.counts.same)}</Badge>
                 {preview.counts.skip ? <Badge variant="danger">Skipped {n(preview.counts.skip)}</Badge> : null}
                 {preview.counts.doubleBill ? <Badge variant="danger">Possible double bills {n(preview.counts.doubleBill)}</Badge> : null}
                 {preview.counts.nsMismatch ? <Badge variant="warn">NetSuite ≠ charges {n(preview.counts.nsMismatch)}</Badge> : null}
                 {preview.counts.corrigoMismatch ? <Badge variant="warn">Corrigo ≠ NetSuite {n(preview.counts.corrigoMismatch)}</Badge> : null}
                 {preview.applied ? (
                   <Badge variant="ink" data-testid="backfill-applied">
-                    Saved: {n(preview.applied.tickets)} tickets · {n(preview.applied.lines)} lines · {n(preview.applied.invoices)} invoices
+                    Saved: {recordsText(preview.applied)} · {plural(preview.applied.lines, "line")} · {plural(preview.applied.invoices, "invoice")}
                   </Badge>
                 ) : null}
               </div>
+              {preview.counts.write + preview.counts.invoices ? (
+                <p className="mt-1.5 text-xs text-muted-foreground" data-testid="backfill-by-kind">
+                  Writes go on{" "}
+                  {[
+                    preview.counts.byKind.service ? plural(preview.counts.byKind.service, "ticket") : null,
+                    preview.counts.byKind.tlc ? plural(preview.counts.byKind.tlc, "TLC") : null,
+                    preview.counts.byKind.install ? plural(preview.counts.byKind.install, "install") : null,
+                    preview.counts.byKind.pm ? plural(preview.counts.byKind.pm, "PM") : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  .
+                </p>
+              ) : null}
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <SelectField value={show} onChange={(e) => setShow(e.target.value as Show)} className="h-9 w-48" aria-label="Show" data-testid="backfill-show">
                   {(Object.keys(SHOW_LABEL) as Show[]).map((s) => (
@@ -180,7 +221,7 @@ export function BillingBackfillButton() {
                   ))}
                 </SelectField>
                 <span className="text-xs text-muted-foreground">
-                  {n(list.length)} of {n(plans.length)} WOs. Untick a ticket to leave it out.
+                  {n(list.length)} of {n(plans.length)} WOs. Untick a WO to leave it out.
                 </span>
               </div>
               <div className="mt-3 overflow-x-auto rounded-xl border border-border">
@@ -188,7 +229,7 @@ export function BillingBackfillButton() {
                   <thead className="bg-card text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
                     <tr>
                       <th className="w-8 px-2 py-2" />
-                      <th className="px-3 py-2">WO · Ticket</th>
+                      <th className="px-3 py-2">WO · Record</th>
                       <th className="px-3 py-2">Charges (after discount)</th>
                       <th className="px-3 py-2">Sales Order</th>
                       <th className="px-3 py-2">Invoices</th>
@@ -232,12 +273,13 @@ export function BillingBackfillButton() {
                 </Button>
                 {preview.applied ? null : (
                   <Button type="button" disabled={write.isPending || !writable.length} onClick={() => write.mutate()} data-testid="backfill-write">
-                    {write.isPending ? "Writing…" : `Write ${n(writable.length)} Ticket${writable.length === 1 ? "" : "s"}`}
+                    {write.isPending ? "Writing…" : `Write ${n(writable.length)} WO${writable.length === 1 ? "" : "s"}`}
                   </Button>
                 )}
               </div>
             </>
           ) : null}
+          <PastRuns runs={runs.data} loading={runs.isLoading} />
         </DialogContent>
       </Dialog>
     </>
@@ -270,10 +312,15 @@ function PlanRow({ p, on, disabled, onToggle }: { p: BackfillPlan; on: boolean; 
           <Badge size="tight" variant={STATUS_TONE[p.status]} className="ml-1.5" data-testid="backfill-status">
             {BACKFILL_STATUS_LABEL[p.status]}
           </Badge>
-          {p.jobId ? (
-            <OpenLink entityType={p.kind ?? "service"} id={p.jobId} className="mt-0.5 block text-xs text-primary underline-offset-2 hover:underline">
-              #{p.jobId} · {p.customer || "no account"}
-            </OpenLink>
+          {p.kind && p.recordId ? (
+            <>
+              <Badge size="tight" variant="outline" className="ml-1" data-testid="backfill-kind">
+                {BACKFILL_KIND_LABEL[p.kind]}
+              </Badge>
+              <OpenLink entityType={p.kind} id={p.recordId} className="mt-0.5 block text-xs text-primary underline-offset-2 hover:underline">
+                {BACKFILL_KIND_LABEL[p.kind]} #{p.recordId} · {p.customer || "no account"}
+              </OpenLink>
+            </>
           ) : null}
           {p.reason ? <span className="mt-0.5 block max-w-xs text-xs text-destructive">{p.reason}</span> : null}
         </td>
@@ -320,9 +367,7 @@ function PlanRow({ p, on, disabled, onToggle }: { p: BackfillPlan; on: boolean; 
                 <span className="font-medium">{i.invoice}</span>
                 <InvoiceStatusBadge status={i.status} />
                 <span className="tabular">{money(i.total)}</span>
-                <span className={cn("text-[11px]", i.change === "same" ? "text-muted-foreground" : "font-medium text-primary")}>
-                  {i.change === "new" ? "new" : i.change === "updated" ? `was ${i.before?.status}${i.before?.remaining !== i.remaining ? `, ${money(i.before?.remaining)} left` : ""}` : "same"}
-                </span>
+                <InvoiceOutcome i={i} />
               </li>
             ))}
             {!p.invoices.length ? <li className="text-muted-foreground">—</li> : null}
@@ -331,7 +376,8 @@ function PlanRow({ p, on, disabled, onToggle }: { p: BackfillPlan; on: boolean; 
         <td className="px-3 py-2 text-xs">
           {p.status === "skip" ? null : (
             <span className="block tabular">
-              KD {money(p.amounts.kd)} · NS {money(p.amounts.netsuite)}
+              {p.amounts.kdSource === "katzdesk" ? "KatzDesk invoice" : p.amounts.kdSource === "netsuite" ? "NetSuite lines" : "KD"} {money(p.amounts.kd)} · NS{" "}
+              {money(p.amounts.netsuite)}
               {p.amounts.corrigo != null ? ` · Corrigo ${money(p.amounts.corrigo)}` : ""}
             </span>
           )}
@@ -348,7 +394,7 @@ function PlanRow({ p, on, disabled, onToggle }: { p: BackfillPlan; on: boolean; 
           <td />
           <td colSpan={5} className="px-3 py-2">
             <div className="grid gap-3 text-xs md:grid-cols-2">
-              <LineList title="On the ticket now" lines={p.charges.current} />
+              <LineList title={p.kind === "install" || p.kind === "pm" ? `NetSuite's lines on the ${p.kind === "pm" ? "PM" : "install"} now` : "On the ticket now"} lines={p.charges.current} />
               {p.charges.next ? <LineList title="From NetSuite" lines={p.charges.next} /> : null}
             </div>
           </td>
@@ -379,5 +425,58 @@ function LineList({ title, lines }: { title: string; lines: { item: string; desc
         {!lines.length ? <li className="text-muted-foreground">No lines</li> : null}
       </ul>
     </div>
+  );
+}
+
+/** One invoice's outcome: will write (new, or NetSuite's status since), already there, or skipped, and why. */
+function InvoiceOutcome({ i }: { i: BackfillInvoicePlan }) {
+  const text =
+    i.change === "new"
+      ? "will write · new"
+      : i.change === "updated"
+        ? `will write · was ${i.before?.status}${i.before?.remaining !== i.remaining ? `, ${money(i.before?.remaining)} left` : ""}`
+        : i.change === "skip"
+          ? "skipped"
+          : "already there";
+  return (
+    <span className={cn("text-[11px]", i.change === "new" || i.change === "updated" ? "font-medium text-primary" : i.change === "skip" ? "text-destructive" : "text-muted-foreground")} data-testid="backfill-invoice-outcome">
+      {text}
+      {i.note ? <span className="block max-w-xs font-normal text-muted-foreground">{i.note}</span> : null}
+    </span>
+  );
+}
+
+const when = (iso: string) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
+};
+
+/** The latest Writes: who, when, the files and what each wrote. */
+function PastRuns({ runs, loading }: { runs: BackfillRun[] | undefined; loading: boolean }) {
+  return (
+    <section className="mt-4 border-t border-border pt-3" data-testid="backfill-runs">
+      <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Past runs</h3>
+      {loading ? (
+        <p className="mt-1 text-xs text-muted-foreground">Loading…</p>
+      ) : !runs?.length ? (
+        <p className="mt-1 text-xs text-muted-foreground">No Writes yet.</p>
+      ) : (
+        <ul className="mt-1 space-y-0.5 text-xs">
+          {runs.slice(0, 5).map((r) => (
+            <li key={r.id} className="flex flex-wrap gap-x-2" data-testid="backfill-run">
+              <span className="font-medium">{when(r.at)}</span>
+              <span className="text-muted-foreground">{r.by ?? "Admin"}</span>
+              {r.files ? <span className="min-w-0 break-words text-muted-foreground">{r.files}</span> : null}
+              <span>
+                {r.wos != null ? `${plural(r.wos, "WO")} · ` : ""}
+                {r.written ? `wrote ${recordsText(r.written)}, ${plural(r.written.lines, "line")}, ${plural(r.written.invoices, "invoice")}` : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

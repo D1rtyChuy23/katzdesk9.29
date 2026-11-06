@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PoFields, SaleRef } from "./po-fields";
 import { holdSavedPo, poFromForm } from "./po-form";
 import { InvoiceButton } from "@/components/desk/invoice-window";
+import { RecordNetSuitePanel } from "@/components/desk/record-netsuite";
 import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
 import { ModuleRecord } from "@/components/desk/module-record";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -389,6 +390,7 @@ export function PmSheet({
                   <div className="mt-3">
                     <InvoiceButton type="pm" id={pm.id} key={`invoice-pm-${pm.id}`} beforeOpen={saveBeforeInvoice} />
                   </div>
+                  <RecordNetSuitePanel type="pm" id={pm.id} key={`netsuite-pm-${pm.id}`} />
                 </Tabs.Content>
                 <Tabs.Content value="photos" forceMount={photosSeen || undefined} className={KEEP_MOUNTED} data-testid="pm-panel-photos">
                   <RecordPhotosPanel kind="pm" id={pm.id} key={`photos-pm-${pm.id}`} />
@@ -998,6 +1000,7 @@ export function InstallSheet({
                   <div className="mt-3">
                     <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveInstallBeforeInvoice} />
                   </div>
+                  <RecordNetSuitePanel type="install" id={row.id} key={`netsuite-install-${row.id}`} />
                 </Tabs.Content>
 
                 <Tabs.Content value="pre-inspection" forceMount className={KEEP_MOUNTED} data-testid="install-panel-pre-inspection">

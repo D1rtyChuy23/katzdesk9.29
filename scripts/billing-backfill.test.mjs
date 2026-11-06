@@ -122,7 +122,7 @@ test("not invoiced yet: charges, then the SO and its billed date, then the invoi
   assert.equal(await (async () => (await sql.query("select count(*)::int as n from ticket_invoices"))[0].n)(), 0, "the preview writes nothing");
 
   const done = await api.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: [] });
-  assert.deepEqual(done.applied, { tickets: 1, lines: 4, invoices: 1 });
+  assert.deepEqual(done.applied, { tickets: 1, installs: 0, pms: 0, lines: 4, invoices: 1 });
   assert.deepEqual(await linesOf(sql, id), ["2.00x3.60 BUNN PARTS : ZZB1", "1.00x150.00 Service : TRIPCHARGE", "1.00x150.00 Service : SERVICELABOR", "1.00x142.86 WATER FILTERS : ZZW1"]);
   assert.deepEqual(await job(sql, id), { ns_so: "SO2001", discount_kind: "amount", dv: "307.20", billed_on: "2026-10-26" });
   assert.deepEqual(await invoicesOf(sql, id), ["INV2001 Open 142.86 142.86 so SO2001 Houston - WH"]);
@@ -168,7 +168,7 @@ test("already invoiced (locked): only the invoice records change; charges, disco
   assert.match(log, /invoices: INV3001 Open → Paid In Full \(\$0\.00 remaining\), INV3009 new \(Open \$40\.00\) · charges, P\.O\., discount and SO kept \(locked\)/);
 });
 
-test("NetSuite's status is never made up: a new invoice with no status is left out; one already here keeps its own", async () => {
+test("NetSuite's status is never made up: a new invoice with no status is listed as skipped and left out; one already here keeps its own", async () => {
   const sql = await fresh();
   const id = await ticket(sql, { wo: "WO-0302", so: "SO3002" });
   await sql.query("insert into ticket_invoices (job_id, ns_invoice, ns_so, invoice_date, status, total, amount_remaining, source) values ($1, 'INV3002', 'SO3002', '2026-09-21', 'Open', 150, 150, 'so')", [id]);
@@ -182,7 +182,7 @@ test("NetSuite's status is never made up: a new invoice with no status is left o
   ];
   const p = await api.previewBillingBackfillFor(sql, f, "u-owner");
   const plan = p.plans[0];
-  assert.deepEqual(plan.invoices.map((i) => [i.invoice, i.status, i.change]), [["INV3002", "Open", "updated"]]);
+  assert.deepEqual(plan.invoices.map((i) => [i.invoice, i.status, i.change, i.note]), [["INV3002", "Open", "updated", null], ["INV3003", "", "skip", "No Invoice Status in the file."]]);
   assert.ok(plan.warnings.some((w) => /INV3003 has no Invoice Status in the file, so it is left out/.test(w)), plan.warnings.join(" | "));
   await api.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: [] });
   assert.deepEqual(await invoicesOf(sql, id), ["INV3002 Open 150.00 0.00 so SO3002 -"]);
@@ -190,12 +190,12 @@ test("NetSuite's status is never made up: a new invoice with no status is left o
   assert.notEqual((await sql.query("select updated_at::text as u from service_jobs where id = $1", [id]))[0].u, seen);
 });
 
-test("skips: merged, Walk-In, a PM's WO, no ticket, two tickets; a cancelled SO is never set; untick leaves a ticket out", async () => {
+test("skips: merged, Walk-In, no record, two tickets; a PM's WO goes on the PM (11/5); a cancelled SO is never set; untick leaves a WO out", async () => {
   const sql = await fresh();
   const keeper = await ticket(sql, { wo: "WO-0401" });
   await ticket(sql, { wo: "WO-0402", duplicateOf: keeper });
   await ticket(sql, { wo: "WO-0403", customer: "Walk - In" });
-  await sql.query("insert into pm_jobs (customer, wo, status) values ('Zz Bean Cafe', 'WO-0404', 'Completed')");
+  const pm = Number((await sql.query("insert into pm_jobs (customer, wo, status) values ('Zz Bean Cafe', 'WO-0404', 'Completed') returning id"))[0].id);
   await ticket(sql, { wo: "WO-0406", completed: "2026-09-10" });
   await ticket(sql, { wo: "WO-0406", completed: "2026-09-12" });
   const cancelled = await ticket(sql, { wo: "WO-0407" });
@@ -218,15 +218,30 @@ test("skips: merged, Walk-In, a PM's WO, no ticket, two tickets; a cancelled SO 
   const by = Object.fromEntries(p.plans.map((x) => [x.wo, x]));
   assert.match(by["WO-0402"].reason, new RegExp(`Merged into #${keeper}`));
   assert.match(by["WO-0403"].reason, /Walk-In, which is never a billing account/);
-  assert.match(by["WO-0404"].reason, /on PMs\. Billing Backfill covers service and TLC tickets/);
-  assert.equal(by["WO-0405"].reason, "No ticket has this WO.");
+  assert.deepEqual([by["WO-0404"].status, by["WO-0404"].kind, by["WO-0404"].recordId, by["WO-0404"].reason], ["write", "pm", pm, null]);
+  assert.equal(by["WO-0405"].reason, "No ticket, install or PM has this WO.");
   assert.match(by["WO-0406"].reason, /on 2 tickets/);
   assert.equal(by["WO-0407"].status, "write");
   assert.equal(by["WO-0407"].so.next, null);
   assert.equal(by["WO-0407"].so.note, "Cancelled SO7 left off.");
-  assert.deepEqual(p.counts, { total: 7, write: 2, invoices: 0, same: 0, skip: 5, doubleBill: 0, nsMismatch: 2, corrigoMismatch: 0, warnings: 2 });
+  assert.deepEqual(p.counts, {
+    total: 7,
+    write: 3,
+    invoices: 0,
+    same: 0,
+    skip: 4,
+    doubleBill: 0,
+    nsMismatch: 3,
+    corrigoMismatch: 0,
+    warnings: 3,
+    byKind: { service: 2, tlc: 0, install: 0, pm: 1 },
+  });
   const done = await api.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: ["408"] });
-  assert.equal(done.applied.tickets, 1);
+  assert.deepEqual([done.applied.tickets, done.applied.pms], [1, 1]);
+  assert.deepEqual(
+    (await sql.query("select ns_invoice, status, wo_key from record_ns_invoices where pm_id = $1", [pm])).map((r) => [r.ns_invoice, r.status, r.wo_key]),
+    [["INV4", "Open", "404"]],
+  );
   assert.deepEqual(await invoicesOf(sql, cancelled), ["INV7 Open 10.00 10.00 standalone - -"]);
   assert.equal((await job(sql, cancelled)).ns_so, null);
   assert.deepEqual(await invoicesOf(sql, left), [], "unticked: left out");

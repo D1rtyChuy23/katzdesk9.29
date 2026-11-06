@@ -24,10 +24,13 @@ export type RowInvoice = {
   location: string | null;
 };
 
-/** One service or TLC ticket with its billing: a row on the Invoices page, and what the Tickets list filters read. */
+/**
+ * One record with its billing: a row on the Invoices page (service and TLC tickets; installs and PMs since 11/5), and
+ * what the Tickets list filters read (tickets only).
+ */
 export type TicketBillingRow = {
   id: number;
-  board: "service" | "tlc";
+  board: BoardKey;
   wo: string | null;
   callId: string;
   customer: string | null;
@@ -56,6 +59,11 @@ export type TicketBillingRow = {
   /** The ticket's Customer P.O. and Vendor P.O. (11/2): the search finds a ticket by either. */
   po?: string | null;
   vendorPo?: string | null;
+  /**
+   * An install's or a PM's charges (11/5): its own invoice in KatzDesk when it has lines, else NetSuite's lines the
+   * Billing Backfill brought back. Unset on tickets (their charges) and on a record with neither.
+   */
+  chargesFrom?: "katzdesk" | "netsuite";
 };
 
 const live = (i: { status: string }) => invoiceStatusKey(i.status) !== "voided";

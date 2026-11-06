@@ -9,6 +9,7 @@ import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access"
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { loadChargeNets, loadInvoices, summarizeBilling } from "@/lib/ops/ticket-billing-api";
+import { loadRecordBillingRows, loadRecordBillings } from "@/lib/ops/record-billing-api";
 import { locationWarning, matchesBillingFilters, type BoardKey, type DateBy } from "@/lib/ops/billing-rules";
 import {
   accountLocationCheck,
@@ -147,10 +148,18 @@ export const listTicketBilling = createServerFn({ method: "POST" })
 
 export type AdminReport<T> = { forbidden: true; rows: [] } | { forbidden: false; rows: T };
 
-/** The Invoices page: every service and TLC ticket with its billing (merged tickets left out). Admin only. */
+/** Completed newest first, then received newest first: the order the Invoices page lists every board in. */
+const byDone = (a: TicketBillingRow, b: TicketBillingRow) =>
+  (b.completed ?? "").localeCompare(a.completed ?? "") || (b.received ?? "").localeCompare(a.received ?? "") || b.id - a.id;
+
+/**
+ * The Invoices page: every service and TLC ticket (merged ones left out), and since 11/5 every install on the board and
+ * PM not stacked on a ticket, with its billing. Admin only.
+ */
 export async function invoicesReportFor(sql: Q, userId: string): Promise<AdminReport<TicketBillingRow[]>> {
   if (!(await canReviewNames(sql as Sql, userId))) return { forbidden: true, rows: [] };
-  return { forbidden: false, rows: await loadTicketBillingRows(sql) };
+  const [tickets, records] = await Promise.all([loadTicketBillingRows(sql), loadRecordBillingRows(sql)]);
+  return { forbidden: false, rows: [...tickets, ...records].sort(byDone) };
 }
 
 export const getInvoicesReport = createServerFn({ method: "POST" })
@@ -199,6 +208,9 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
       note,
     });
   }
+  // Installs' and unstacked PMs' own NetSuite billing (11/5): their SOs, invoices and invoiced dates.
+  const recordIds = async (table: "pm_jobs" | "installs") => (await sql.query<{ id: number }>(`select id from ${table}`)).map((r) => Number(r.id));
+  const recordBilling = await loadRecordBillings(sql, want.has("install") ? await recordIds("installs") : [], want.has("pm") ? await recordIds("pm_jobs") : []);
   if (want.has("pm")) {
     const pms = await sql.query<{
       id: number;
@@ -216,8 +228,10 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
          from pm_jobs order by completed_at desc nulls last, received desc nulls last, id desc`,
     );
     for (const p of pms) {
-      // A PM stacked on a ticket bills on that ticket: its SO and invoices are the ticket's.
+      // A PM stacked on a ticket bills on that ticket: its SO and invoices are the ticket's. Otherwise its own.
       const on = p.stacked_job_id ? byId.get(Number(p.stacked_job_id)) : undefined;
+      const own = p.stacked_job_id ? undefined : recordBilling.get(`pm:${Number(p.id)}`);
+      const billing = on ?? own;
       rows.push({
         board: "pm",
         id: Number(p.id),
@@ -227,9 +241,9 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
         status: p.status,
         received: p.received,
         completed: p.completed,
-        so: on?.so ?? null,
-        invoices: on ? on.invoices.map((i) => ({ invoice: i.invoice, status: i.status, date: i.date })) : [],
-        invoicedDates: on?.invoicedDates ?? [],
+        so: billing?.so ?? null,
+        invoices: billing ? billing.invoices.map((i) => ({ invoice: i.invoice, status: i.status, date: i.date })) : [],
+        invoicedDates: billing?.invoicedDates ?? [],
         serviceLocation: p.service_location,
         note: p.stacked_job_id ? `Billed on ticket #${p.stacked_job_id}` : null,
       });
@@ -264,6 +278,7 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
         Number(i.wo_count) > 1 ? `WO ${i.wo_index} of ${i.wo_count} on this install` : null,
         i.archived ? "Archived install" : null,
       ].filter(Boolean);
+      const own = recordBilling.get(`install:${Number(i.id)}`);
       rows.push({
         board: "install",
         id: Number(i.id),
@@ -273,9 +288,9 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
         status: i.status ?? "",
         received: i.received,
         completed: i.completed,
-        so: null,
-        invoices: [],
-        invoicedDates: [],
+        so: own?.so ?? null,
+        invoices: own ? own.invoices.map((x) => ({ invoice: x.invoice, status: x.status, date: x.date })) : [],
+        invoicedDates: own?.invoicedDates ?? [],
         serviceLocation: null,
         note: notes.join(" · ") || null,
       });

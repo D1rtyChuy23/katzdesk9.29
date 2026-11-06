@@ -181,15 +181,15 @@ function InvoicesView({ filters, onFilters }: { filters: BillingFilters; onFilte
         <BillingFilterButton value={filters} open={open} onToggle={() => setOpen((o) => !o)} />
         <ExportCsvButton testId="invoices-export-csv" disabled={!rows.length} onClick={() => downloadCsv(`invoices-${todayChicago()}.csv`, invoicesCsv(rows))} />
         <ToolbarNote data-testid="invoices-count">
-          {rows.length} of {all.length} tickets{counts.location ? ` · ${counts.location} with a location warning` : ""}
+          {rows.length} of {all.length} records{counts.location ? ` · ${counts.location} with a location warning` : ""}
         </ToolbarNote>
       </ListToolbar>
-      {open ? <BillingFilterPanel value={filters} onPatch={onFilters} statuses={statuses} boards={["service", "tlc"]} billing /> : null}
+      {open ? <BillingFilterPanel value={filters} onPatch={onFilters} statuses={statuses} boards={["service", "tlc", "pm", "install"]} billing /> : null}
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
         <table className="w-full min-w-[60rem] text-left text-sm" data-testid="invoices-table">
           <thead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
             <tr className="border-b border-border">
-              <th className="px-4 py-2">Ticket</th>
+              <th className="px-4 py-2">Record</th>
               <th className="px-3 py-2">Account</th>
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2">Sales Order</th>
@@ -214,7 +214,7 @@ function InvoicesView({ filters, onFilters }: { filters: BillingFilters; onFilte
             ) : !rows.length ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-muted-foreground">
-                  {all.length ? "Nothing matches these filters." : "No tickets yet."}
+                  {all.length ? "Nothing matches these filters." : "No tickets, installs or PMs yet."}
                 </td>
               </tr>
             ) : (
@@ -222,7 +222,7 @@ function InvoicesView({ filters, onFilters }: { filters: BillingFilters; onFilte
             )}
           </tbody>
         </table>
-        <ShowMoreButton remaining={page.remaining} onClick={page.showMore} label="tickets" />
+        <ShowMoreButton remaining={page.remaining} onClick={page.showMore} label="records" />
       </div>
     </section>
   );
@@ -287,6 +287,11 @@ function InvoiceRow({ r }: { r: TicketBillingRow }) {
       </td>
       <td className="px-3 py-2.5 text-right tabular whitespace-nowrap">
         {r.chargeLines ? money(r.chargeNet) : <span className="text-muted-foreground">No charges</span>}
+        {r.chargesFrom ? (
+          <span className="block text-[11px] text-muted-foreground" data-testid="invoices-charges-from">
+            {r.chargesFrom === "katzdesk" ? "its invoice in KatzDesk" : "NetSuite's lines"}
+          </span>
+        ) : null}
       </td>
       <td className="px-3 py-2.5 text-right tabular whitespace-nowrap">
         {r.invoices.length ? money(r.liveTotal) : <span className="text-muted-foreground">—</span>}

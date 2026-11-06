@@ -704,10 +704,14 @@ test("the hidden ticket stays out of the duplicate merge, billing backfill and t
   // That later ticket shows up as a pair to merge too.
   assert.deepEqual((await M.listTicketInstallPairsFor(sql, "u-owner", "service")).pairs.map((p) => p.jobId), [later]);
 
+  // The billing backfill never puts the WO's billing on the hidden ticket: the install it went into carries the WO, and
+  // takes it (11/5). The later ticket, a live one with the same number, makes the WO two records to tell apart.
   const ctx = await loadBackfillContext(sql, ["4792"]);
   const hidden = { ...ctx, tickets: ctx.tickets.filter((t) => t.id === jobId) };
-  const plan = planBackfill({ lines: [{ key: "4792", wo: WO }], invoices: [] }, hidden);
-  assert.equal(plan[0].reason, `Merged into install #${installId}. Billing Backfill covers service and TLC tickets.`);
+  const line = { file: "charges.csv", line: 2, key: "4792", wo: WO, item: "Service : SERVICELABOR", itemType: "Service", description: "Labor", qty: 1, rate: 150, amount: 150, discountItem: "", discountAmount: null, recordTotal: null, sourceInvoice: "", sourceSo: "", location: "", nsCustomer: "" };
+  const plan = planBackfill({ lines: [line], invoices: [] }, hidden);
+  assert.deepEqual([plan[0].kind, plan[0].recordId, plan[0].jobId, plan[0].status], ["install", installId, null, "write"]);
+  assert.match(planBackfill({ lines: [line], invoices: [] }, ctx)[0].reason, new RegExp(`The WO is on ticket #${later}, install #${installId}\\.`));
 
   const rows = await loadWindowRows(sql, ["service"]);
   assert.equal(rows.find((r) => r.id === jobId).note, `Merged into install #${installId}`);

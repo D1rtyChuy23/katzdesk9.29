@@ -284,7 +284,7 @@ test("the Billing Backfill records a billed merged ticket's NetSuite invoices, a
   // while it has no NetSuite invoice, which would refuse such a plan on its own).
   const seen = (await one(pg, "select updated_at::text as u from service_jobs where id = $1", [jobId])).u;
   const forced = [{ job_id: jobId, seen, locked: false, write_charges: true, dk: null, dv: null, set_so: true, so: "SO9999", billed_on: null, log: "x" }];
-  const r = (await pg.query(APPLY_BACKFILL_SQL, [JSON.stringify(forced), JSON.stringify([{ job_id: jobId, item: "X", description: "", qty: 1, rate: 1, kind: "part", ord: 1 }]), "[]", "boss"])).rows[0];
+  const r = (await pg.query(APPLY_BACKFILL_SQL, [JSON.stringify(forced), JSON.stringify([{ job_id: jobId, item: "X", description: "", qty: 1, rate: 1, kind: "part", ord: 1 }]), "[]", "boss", "[]", "[]", "[]", "{}"])).rows[0];
   assert.equal(r.go, false);
   assert.deepEqual(await one(pg, "select ns_so, discount_kind, (select count(*)::int from ticket_charges c where c.job_id = j.id) as lines from service_jobs j where id = $1", [jobId]), before);
   await applyBillingBackfillFor(sql, files, "u-owner", { hash: (await previewBillingBackfillFor(sql, files, "u-owner")).hash, skip: [] });
@@ -292,28 +292,46 @@ test("the Billing Backfill records a billed merged ticket's NetSuite invoices, a
   assert.deepEqual((await pg.query("select ns_invoice, status from ticket_invoices where job_id = $1", [jobId])).rows, [{ ns_invoice: "INV9001", status: "Open" }]);
   assert.deepEqual(await one(pg, "select ns_so, discount_kind, (select count(*)::int from ticket_charges c where c.job_id = j.id) as lines from service_jobs j where id = $1", [jobId]), before);
   assert.deepEqual((await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner")).billedElsewhere.map((b) => [b.so, b.invoices, b.total]), [[SO, "INV9001", 500]]);
-  // Rows on another Sales Order (the install's own billing on the WO) never go on it, alone or with its own.
+  // Rows on another Sales Order are the install's own billing on the WO (11/5): they go on the install, never on the
+  // ticket. Beside a row of the ticket's own that isn't on it yet, the WO waits: that row is the ticket's to take first.
   const otherSo = file("invoices.csv", [INVOICES_HEAD, [WO, "SO9500", "Billed", "INV9500", TODAY, "Open", "999", "999", "", ""]]);
   const mixed = file("invoices.csv", [INVOICES_HEAD, [WO, SO, "Billed", "INV9002", TODAY, "Open", "10", "10", "", ""], [WO, "SO9500", "Billed", "INV9500", TODAY, "Open", "999", "999", "", ""]]);
   const offSo = (await previewBillingBackfillFor(sql, [otherSo], "u-owner")).plans[0];
-  assert.deepEqual([offSo.status, offSo.jobId, offSo.reason], ["skip", null, `Ticket #${jobId} was merged into install #${installId} as billed on ${SO}; these rows are on SO9500. Skipped.`]);
+  assert.deepEqual([offSo.status, offSo.jobId, offSo.kind, offSo.recordId, offSo.reason], ["write", null, "install", installId, null]);
   const both = (await previewBillingBackfillFor(sql, [mixed], "u-owner")).plans[0];
-  assert.deepEqual([both.status, both.reason], ["skip", `The rows are on ${SO}, SO9500, and ticket #${jobId} was merged into install #${installId} as billed on ${SO}. Split the file by Sales Order, then run the Billing Backfill on each.`]);
+  assert.deepEqual(
+    [both.status, both.reason],
+    ["skip", `INV9002 is ticket #${jobId}'s billing (merged into install #${installId} as billed), and isn't on the ticket yet. Put its rows in a file of their own and run that first, so it goes on the ticket; then run the rest.`],
+  );
   // A NetSuite invoice with no Sales Order beside its own is billing on none of them: skipped the same way.
   const noSo = file("invoices.csv", [INVOICES_HEAD, [WO, SO, "Billed", "INV9004", TODAY, "Open", "10", "10", "", ""], [WO, "", "", "INV9600", TODAY, "Open", "80", "80", "", ""]]);
   const standalone = (await previewBillingBackfillFor(sql, [noSo], "u-owner")).plans[0];
-  assert.deepEqual([standalone.status, standalone.reason], ["skip", `The rows are on ${SO}, no Sales Order, and ticket #${jobId} was merged into install #${installId} as billed on ${SO}. Split the file by Sales Order, then run the Billing Backfill on each.`]);
-  // A live ticket on the same WO: the rows on the merged ticket's SO still go to the merged ticket; others to the live one.
+  assert.deepEqual(
+    [standalone.status, standalone.reason],
+    ["skip", `INV9004 is ticket #${jobId}'s billing (merged into install #${installId} as billed), and isn't on the ticket yet. Put its rows in a file of their own and run that first, so it goes on the ticket; then run the rest.`],
+  );
+  // Beside the ticket's own row as it is on the ticket already, the install takes its own: the ticket's counts as on its
+  // card (carried over), not written on the install and not counted twice.
+  const recorded = file("invoices.csv", [INVOICES_HEAD, [WO, SO, "Billed", "INV9001", TODAY, "Open", "500", "500", "Yes", ""], [WO, "SO9500", "Billed", "INV9500", TODAY, "Open", "999", "999", "", ""]]);
+  const carried = (await previewBillingBackfillFor(sql, [recorded], "u-owner")).plans[0];
+  assert.deepEqual([carried.status, carried.kind, carried.recordId], ["write", "install", installId]);
+  assert.deepEqual(carried.invoices.map((i) => [i.invoice, i.change]), [["INV9001", "elsewhere"], ["INV9500", "new"]]);
+  assert.equal(carried.amounts.netsuite, 999, "the ticket's invoice isn't counted on the install");
+  // A live ticket on the same WO: the rows on the merged ticket's SO still go to the merged ticket. Others could be the
+  // live ticket's or the install's (both carry the WO, and the dates fit both): skipped, saying why.
   const live = await ticket(pg, { call_id: "SC-202610-907" });
   assert.equal((await previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, [WO, SO, "Billed", "INV9003", TODAY, "Open", "10", "10", "", ""]])], "u-owner")).plans[0].jobId, jobId);
-  assert.equal((await previewBillingBackfillFor(sql, [otherSo], "u-owner")).plans[0].jobId, live);
+  assert.deepEqual(
+    (await previewBillingBackfillFor(sql, [otherSo], "u-owner")).plans.map((x) => [x.status, x.reason]),
+    [["skip", `The WO is on ticket #${live}, install #${installId}. Can't tell which one NetSuite billed: the invoice dates fit more than one, or there are none.`]],
+  );
   assert.deepEqual((await pg.query("select ns_invoice from ticket_invoices where job_id = $1 order by id", [jobId])).rows.map((r) => r.ns_invoice), ["INV9001"]);
-  // An unbilled ticket merged into an install is still skipped.
+  // An unbilled ticket merged into an install: its WO's billing goes on the install now (11/5).
   const other = await ticket(pg, { call_id: "SC-202610-905", wo: "WO-4810" });
   const otherInstall = await install(pg, { wo: "WO-4810" });
   await mergeShown(sql, other, otherInstall, await preview(sql, other, otherInstall));
-  const skipped = (await previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-4810", "SO9100", "Billed", "INV9100", TODAY, "Open", "50", "50", "Yes", ""]])], "u-owner")).plans[0];
-  assert.deepEqual([skipped.status, skipped.reason], ["skip", `Merged into install #${otherInstall}. Billing Backfill covers service and TLC tickets.`]);
+  const unbilled = (await previewBillingBackfillFor(sql, [file("invoices.csv", [INVOICES_HEAD, ["WO-4810", "SO9100", "Billed", "INV9100", TODAY, "Open", "50", "50", "Yes", ""]])], "u-owner")).plans[0];
+  assert.deepEqual([unbilled.status, unbilled.kind, unbilled.recordId, unbilled.reason], ["write", "install", otherInstall, null]);
 });
 
 test("Part Usage counts a billed merged ticket's parts once, on the install, over its WO part line", async () => {
