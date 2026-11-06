@@ -14,7 +14,6 @@ import { lockedMessage } from "@/lib/ops/equipment-lock-rules";
 import { catalogNames, syncInstallUnits } from "@/lib/ops/inspection-api";
 import { loadInstallWos } from "@/lib/ops/install-work-orders";
 import { installMachines, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
-import { billedMergeSql } from "@/lib/ops/rebuild-link";
 
 async function actorName(sql: Sql, userId: string): Promise<string> {
   return (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";
@@ -381,12 +380,12 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        -- A linked rebuild bills on the keeper now. A keeper with an approved invoice took no lines from the drop (one
        -- install takes one invoice), so nothing of the rebuild went on a bill there: its link counts as made onto a
        -- closed bill (rebuilds.link_open, 11/6) and can go. Otherwise its bill moved with it, and so does the link's.
-       -- One that came to the drop with a ticket merged in as billed keeps it: that ticket's billing still holds it.
+       -- One a ticket merged in as billed brought keeps it (and link_billed_with): that ticket's billing still holds it.
        update rebuilds r
           set install_id = g.keep_id,
               link_open = case when exists (select 1 from invoices v
                                              where v.entity_type = 'install' and v.entity_id = g.keep_id and v.approved_at is not null)
-                                    and ${billedMergeSql("r.id")} is null
+                                    and r.link_billed_with is null
                                then null else r.link_open end
          from g where r.install_id = g.drop_id returning r.id
      ), form_move as (

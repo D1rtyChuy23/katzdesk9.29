@@ -50,8 +50,9 @@ export type CurrentLink = LinkProject & {
    */
   linkedOpen: boolean;
   /**
-   * It came to this install with a ticket merged in as billed, while its link was open there: "ticket SC-1 (billed on
-   * SO-1)". What was billed with that ticket stays billed, so it stays linked. Null otherwise.
+   * It came to the install with a ticket merged in as billed, linked while that ticket was open (rebuilds.link_billed_with,
+   * 11/6): "ticket SC-1 (billed on SO-1)". What was billed with that ticket stays billed, so it stays linked, wherever
+   * Merge installs takes it. Null otherwise.
    */
   billedVia: string | null;
   /** This rebuild's lines on another record's bill (a ticket merged into the install as billed keeps them), or null. */
@@ -100,16 +101,6 @@ const verb = (n: number, plural: "go" | "come" | "stay") => (n === 1 ? `${plural
 const sameProject = (a: { kind: LinkKind; id: number }, b: { kind: LinkKind; id: number }) =>
   a.id === b.id && (a.kind === "install") === (b.kind === "install");
 
-/**
- * SQL: the latest merge of a ticket into an install as billed that took rebuild `rb` along (ticket_install_merges.moved:
- * its id under rebuilds, with billedOn or billedSo), or null. The ticket keeps its charges, billed, so a rebuild linked
- * while that ticket was open stays linked wherever it goes after (11/6 review, round 3).
- */
-export const billedMergeSql = (rb: string) =>
-  `(select m.id from ticket_install_merges m
-     where m.moved->'rebuilds' @> to_jsonb(${rb}) and coalesce(m.moved->>'billedOn', m.moved->>'billedSo') is not null
-     order by m.id desc limit 1)`;
-
 /** Where a project's bill is: "the ticket's charges" or "the install's invoice". */
 export const billName = (p: { kind: LinkKind }) => (p.kind === "install" ? "the install's invoice" : "the ticket's charges");
 
@@ -133,8 +124,9 @@ function unlinkRefusal(r: LinkRebuild): string | null {
   const c = r.current;
   if (!c) return "This rebuild isn't linked to a ticket or an install.";
   if (c.lines > 0 && c.closed) return `${c.name} ${c.closed}, so this rebuild's ${lineCount(c.lines)} there ${verb(c.lines, "stay")} billed, and it stays linked.`;
-  // A billed ticket merged into the install brought it here: its parts may be billed with that ticket (11/6 review).
-  if (c.linkedOpen && c.billedVia) return `This rebuild came here when ${c.billedVia} was merged in, so it stays linked: what was billed there stays billed.`;
+  // A ticket merged into an install as billed brought it, linked while that ticket was open (rebuilds.link_billed_with):
+  // its parts may be billed with that ticket (11/6 review).
+  if (c.billedVia) return `This rebuild came over with ${c.billedVia} when that ticket was merged into an install, so it stays linked: what was billed there stays billed.`;
   // A bill closed since the link was made keeps it even when none of its lines can be told apart: its parts may have gone
   // on by hand, and the Billing Backfill writes NetSuite's lines without the rebuild's keys. A link from before 11/6, or
   // one made onto a bill already closed, put nothing there through the link, and can go.
@@ -147,8 +139,15 @@ function unlinkRefusal(r: LinkRebuild): string | null {
   return null;
 }
 
-/** Parts put on an open bill by hand carry no rebuild key: they stay there, and bill there (11/6 review). */
-const handAdded = (c: CurrentLink) => `Any of its parts added on ${billName(c)} by hand stay there and bill there.`;
+/**
+ * Parts put on a bill by hand carry no rebuild key: they stay there (11/6 review). On an open bill they bill there, and
+ * `then` says how to bill them elsewhere; on a closed one they stay billed; a project off the board bills nothing more.
+ */
+function handAdded(c: CurrentLink, then: string): string {
+  if (c.closed) return `${c.name} ${c.closed}: any of its parts added there by hand stay billed there.`;
+  if (c.blocked) return `Any of its parts added on ${billName(c)} by hand stay there.`;
+  return `Any of its parts added on ${billName(c)} by hand stay there and bill there. ${then}`;
+}
 
 function unlinkEffects(r: LinkRebuild, c: CurrentLink): string[] {
   const out: string[] = [];
@@ -157,9 +156,8 @@ function unlinkEffects(r: LinkRebuild, c: CurrentLink): string[] {
     out.push(`Its ${lineCount(c.lines)} (${money(c.total)}) ${verb(c.lines, "come")} off ${billName(c)} and back onto ${back}.`);
   } else {
     out.push(`None of its lines are on ${projectLabel(c)}'s bill.`);
-    if (c.closed) out.push(`${c.name} ${c.closed}: any of its parts added there by hand stay billed there.`);
   }
-  if (!c.closed) out.push(`${handAdded(c)} To bill them on its own invoice, take them off first.`);
+  out.push(handAdded(c, "To bill them on its own invoice, take them off first."));
   if (r.own.lines > 0) out.push(`Its own invoice keeps its ${lineCount(r.own.lines)}.`);
   out.push(`Its account (${r.account.trim() || "none"}) and Customer P.O. stay as they are.`);
   return out;
@@ -260,7 +258,7 @@ export function planLink(r: LinkRebuild, target: LinkProject | null): LinkPlan {
   if (no) return { ok: false, refusal: no };
   const effects = [
     c.lines > 0 ? `It leaves ${projectLabel(c)}: its ${lineCount(c.lines)} there ${verb(c.lines, "come")} off ${billName(c)}.` : `It leaves ${projectLabel(c)}.`,
-    ...(c.closed ? [] : [`${handAdded(c)} To bill them on ${projectLabel(target)}, move them there by hand.`]),
+    handAdded(c, `To bill them on ${projectLabel(target)}, move them there by hand.`),
     // The lines that come back were billed on the old project, never by hand in NetSuite: no warning for them.
     ...linkEffects(r, r.own.lines > 0 ? after : { ...after, state: "none" }, target),
   ];

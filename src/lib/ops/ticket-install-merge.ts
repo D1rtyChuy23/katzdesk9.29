@@ -673,11 +673,12 @@ export function mergeTicketIntoInstallSql(): string {
     returning p.id
   ), reb as (
     -- A rebuild already tied to an install keeps that install; it only leaves the ticket. Its link stays made "while
-    -- the bill was open" (rebuilds.link_open, 11/6) where its parts went: with a billed ticket (the merge log keeps
-    -- it from being unlinked), or with the charges onto the install's invoice; onto an approved invoice with none,
-    -- nothing of it went anywhere.
+    -- the bill was open" (rebuilds.link_open, 11/6) where its parts went: with a billed ticket, or with the charges onto
+    -- the install's invoice; onto an approved invoice with none, nothing of it went anywhere. A billed ticket keeps its
+    -- charges, billed, so one linked while that ticket was open stays linked: rebuilds.link_billed_with (11/6 review).
     update rebuilds r set install_id = coalesce(r.install_id, ok.install_id), job_id = null,
            link_open = case when $14::text <> '' or not exists (select 1 from lk_head h where h.approved_at is not null) then r.link_open end,
+           link_billed_with = case when $14::text <> '' and coalesce(r.link_open, false) then ok.job_id else r.link_billed_with end,
            updated_at = now()
       from ok
      where r.job_id = ok.job_id
