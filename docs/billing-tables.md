@@ -6,8 +6,8 @@ side too: see "Installs and PMs" below.
 
 | Table | Answers | Rows | Written by | Read by |
 | --- | --- | --- | --- | --- |
-| `ticket_charges` | What will this service or TLC ticket bill? | One per charge line | Charges panel, the ticket's Invoice window, a PM stacked on the ticket, Billing Backfill (NetSuite) | Charges panel, Invoice window, Export Billing, Parts Profit, the double-bill and mismatch checks |
-| `invoices` + `invoice_lines` | Who approved the Invoice window, when, for how much, billed to whom? | One `invoices` row per record; lines only for PMs, installs, rebuilds, deals | The Invoice window's Approve (Cancel writes nothing) | The Invoice window, PM stacking, the address report |
+| `ticket_charges` | What will this service or TLC ticket bill? | One per charge line | Charges panel, the ticket's Invoice window, a PM stacked on the ticket, a rebuild linked to it (11/6), Billing Backfill (NetSuite) | Charges panel, Invoice window, Export Billing, Parts Profit, the double-bill and mismatch checks |
+| `invoices` + `invoice_lines` | Who approved the Invoice window, when, for how much, billed to whom? | One `invoices` row per record; lines only for PMs, installs, rebuilds, deals | The Invoice window's Approve (Cancel writes nothing), linking a rebuild (11/6) | The Invoice window, PM stacking, the address report |
 | `ticket_invoices` (new, `0103`) | What did NetSuite actually invoice for this ticket? | One per NetSuite invoice | Billing Backfill (NetSuite), Admin only | The ticket's NetSuite Invoices panel, the lock, Invoices page, Tickets list filters, Export Billing |
 
 ## ticket_charges: the ticket's own lines
@@ -34,6 +34,44 @@ side too: see "Installs and PMs" below.
 - `invoices.total` is a snapshot. A ticket's charges can change after Approve (while it isn't locked); the window
   says so.
 - None of this is NetSuite data. Export Billing doesn't read these tables.
+
+## A rebuild linked to a ticket or an install (11/6, migration `0118`)
+
+- A rebuild linked by WO (Linked ticket / install on its Details) bills on that project. Linking moves its own
+  invoice's lines onto the ticket's charges (`ticket_charges`) or the install's invoice (`invoice_lines`, saved for an
+  Admin to approve) and deletes its own invoice, so the lines are never billed twice. The rebuild takes the project's
+  account and Customer P.O.; its own Invoice window is locked while it is linked.
+- Each moved line carries `source_key = 'rb:<rebuild id>:<its old line id>'`: `ticket_charges.source_key` (since
+  `0092`) or `invoice_lines.source_key` (new in `0118`). The Charges panel, an install's Approve and a ticket merged into
+  an install keep the key, so Unlink finds the lines wherever the link went.
+- Unlink takes them back onto the rebuild's own invoice, approved by whoever unlinked (Warehouse's saved one keeps
+  waiting for an Admin). It is refused while they are billed: a ticket with a Sales Order or a live NetSuite invoice,
+  an install whose invoice is approved, or a ticket merged into an install as billed. A bill that closed after the
+  link was made keeps the rebuild even when none of its lines can be told apart there (its parts added by hand, or the
+  Billing Backfill's NetSuite lines over them): `rebuilds.link_open` (`0120`). A link from before 11/6 can be undone.
+  `rebuilds.link_lines` (`0119`) counts what the link moved.
+- Only an open bill takes a link: a billed ticket, or an install whose invoice is approved, is refused even for a
+  rebuild with nothing to move. Linked there, the rebuild could bill nowhere, and its parts could go on that bill by
+  hand once it reopened, with nothing to tell them apart.
+- Merges move a linked rebuild with its project:
+  - A ticket merged into an install takes the rebuild along. Merged as billed, the ticket keeps its charges, billed:
+    a rebuild linked while that ticket was open stays linked, wherever Merge installs takes it after. The merge marks
+    it with the ticket's id in `rebuilds.link_billed_with` (`0121`), and Unlink is refused while that is set.
+  - A merge that would put a rebuild linked while open on a closed bill that takes nothing of it is refused until the
+    rebuild is unlinked: an unbilled ticket into an install whose invoice is approved, a WO duplicate into a billed
+    ticket, Merge installs into one whose invoice is approved. A rebuild marked by a billed ticket, or held on the
+    drop's own approved invoice, goes along as it is.
+  - Remove (taking an install off the board) is refused while a rebuild is linked to it: off the board, the rebuild
+    would bill nowhere. Unlink it, or merge the install into the one to keep (the only way for a rebuild that Unlink
+    refuses). Remove checks the install row as it read it, so a link or merge that commits while it waits stops it.
+  - Merge installs reads both invoices' approval fresh, after its locks: an install's Approve doesn't touch the
+    install row the merge checks.
+- Link and Unlink mark the ticket or install changed (`updated_at`), so a Charges save, a merge, Merge installs or a
+  Billing Backfill confirm that read it before stops and asks to look again.
+- `0118` also adds four functions: `invoice_version` (an invoice's "id:approved:saved" stamp), `rebuild_lines_on`
+  and `take_rebuild_lines` (read fresh, so a write that committed while a link waited for its locks is seen), and
+  `invoice_total` (the lines less the header discount, as `invoiceTotals` works it out).
+- `scripts/rebuild-link-races.mjs` runs each write against the ones it can meet, on a throwaway local Postgres.
 
 ## ticket_invoices: NetSuite's invoices (new)
 

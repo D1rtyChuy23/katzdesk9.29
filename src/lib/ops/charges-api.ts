@@ -408,7 +408,8 @@ const lineSchema = z.object({
   description: z.string().max(500),
   qty: z.union([z.number(), z.string()]),
   rate: z.union([z.number(), z.string()]),
-  sourceKey: z.string().max(400).regex(/^(pmkit|mp):/).nullable().optional(),
+  // pmkit:/mp: a stacked PM's kit and parts; rb: a linked rebuild's lines (11/6), which Unlink takes back.
+  sourceKey: z.string().max(400).regex(/^(pmkit|mp|rb):/).nullable().optional(),
 });
 
 export type ChargeLinesInput = z.input<typeof lineSchema>[];

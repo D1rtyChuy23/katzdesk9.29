@@ -1,5 +1,6 @@
 import { customersCompatible, isWalkIn, woCanonical, woMatchKey } from "./corrigo";
 import { normalizeCustomerKey } from "./customer-key";
+import { closedBillMergeRefusal, openLinkedRebuildsSql } from "./rebuild-link";
 
 type SqlLike = {
   query<T = Record<string, unknown>>(text: string, params?: unknown[]): Promise<T[]>;
@@ -381,6 +382,12 @@ export function mergeTicketsSql(): string {
          and exists (select 1 from pm_jobs p where p.stacked_job_id = extra_id)
        )
        and (select count(*)::int from pm_jobs p where p.stacked_job_id in (keeper_id, extra_id)) <= 10
+       -- A billed keeper takes nothing of the extra's, so a rebuild linked to the extra while open could bill nowhere
+       -- there: only an open bill takes a link (11/6 review, round 5).
+       and not (
+         (nullif(btrim(keeper_so), '') is not null or ${LIVE_INVOICE("pair.keeper_id")})
+         and exists (${openLinkedRebuildsSql("r.job_id = pair.extra_id")})
+       )
        and not exists (
          select 1 from pm_jobs p
           where p.stacked_job_id in (keeper_id, extra_id)
@@ -581,6 +588,13 @@ export function mergeTicketsSql(): string {
 
 export type MergeOutcome = { keeperId: number; extraId: number } | { refused: string } | null;
 
+/** A billed keeper takes nothing of the extra's: rebuilds linked to the extra while open can't move onto it (11/6). */
+async function openLinkedRefusal(sql: SqlLike, keeperId: number, extraId: number, keeper: MergeMoney): Promise<string | null> {
+  if (!keeper.nsSo?.trim() && !keeper.liveInvoice) return null;
+  const linked = await sql.query<{ id: number; title: string | null }>(`${openLinkedRebuildsSql("r.job_id = $1::int")} order by r.id`, [extraId]);
+  return linked.length ? closedBillMergeRefusal(linked, `ticket #${extraId}`, `ticket #${keeperId} is billed`) : null;
+}
+
 /** Fold extra onto keeper. Notes are kept (appended if both have text). Charges, the quote, and the invoice move with it. */
 export async function mergeServiceJobs(
   sql: SqlLike,
@@ -606,6 +620,8 @@ export async function mergeServiceJobs(
   const mergedCustomer = preferCustomer(keeper.customer, extra.customer);
   const reason = mergeMoneyRefusal(money.keeper, money.extra, mergedCustomer);
   if (reason) return { refused: reason };
+  const linkedRefusal = await openLinkedRefusal(sql, keeper.id, extra.id, money.keeper);
+  if (linkedRefusal) return { refused: linkedRefusal };
 
   const next = mergeJobFields(keeper, extra);
   const rows = await sql.query<{ keeper_id: number }>(mergeTicketsSql(), [
@@ -636,7 +652,7 @@ export async function mergeServiceJobs(
     const raced = again
       ? mergeMoneyRefusal(again.keeper, again.extra, preferCustomer(keeper.customer, againExtra?.customer ?? extra.customer))
       : null;
-    return { refused: raced ?? CHANGED_WHILE_MERGING };
+    return { refused: raced ?? (again ? await openLinkedRefusal(sql, keeper.id, extra.id, again.keeper) : null) ?? CHANGED_WHILE_MERGING };
   }
   // A photo the extra took just before the merge locked it, which the statement didn't see: it goes to the keeper too
   // (the extra is merged now, so it takes no more), and the keeper's activity says so.

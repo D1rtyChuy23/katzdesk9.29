@@ -14,6 +14,7 @@ import { lockedMessage } from "@/lib/ops/equipment-lock-rules";
 import { catalogNames, syncInstallUnits } from "@/lib/ops/inspection-api";
 import { loadInstallWos } from "@/lib/ops/install-work-orders";
 import { installMachines, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
+import { closedBillMergeRefusal, openLinkedRebuildsSql, removeLinkedInstallRefusal } from "@/lib/ops/rebuild-link";
 
 async function actorName(sql: Sql, userId: string): Promise<string> {
   return (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";
@@ -26,6 +27,44 @@ async function log(sql: Sql, installId: number, actor: string, action: string, d
     action,
     detail,
   ]);
+}
+
+/**
+ * Remove: take an install off the board (archived; nothing is deleted). Refused while a rebuild is linked to it: the
+ * rebuild bills there, and off the board it would bill nowhere (11/6 review, round 5).
+ */
+export async function archiveInstallFor(sql: Sql, userId: string, installId: number): Promise<{ ok: true }> {
+  const cur = (
+    await sql.query<{ id: number; customer: string; stamp: string }>("select id, customer, updated_at::text as stamp from installs where id = $1 and archived = false", [installId])
+  )[0];
+  if (!cur) throw new Error("Install not found");
+  // Held: Unlink refuses it (a billed ticket brought it, or the approved invoice holds a link made while it was open),
+  // so only Merge installs helps. A link from before 11/6 put nothing on the invoice, so Unlink lets it go.
+  const linked = await sql.query<{ id: number; title: string | null; held: boolean }>(
+    `select r.id, r.title,
+            (r.link_billed_with is not null or (v.approved_at is not null and coalesce(r.link_open, false))) as held
+       from rebuilds r left join invoices v on v.entity_type = 'install' and v.entity_id = r.install_id
+      where r.install_id = $1 and coalesce(r.archived, false) = false
+      order by r.id`,
+    [installId],
+  );
+  if (linked.length) throw new Error(removeLinkedInstallRefusal(installId, linked));
+  // One statement, on the install as read above: Link, Unlink, a ticket merged into it and Merge installs all mark the
+  // install changed, so one that commits while this waits for the row stops it (11/6 review, round 6).
+  const done = await sql.query<{ id: number }>(
+    `update installs set archived = true, updated_at = now()
+      where id = $1 and archived = false and updated_at::text = $2
+        and not exists (select 1 from rebuilds r where r.install_id = $1 and coalesce(r.archived, false) = false)
+    returning id`,
+    [installId, cur.stamp],
+  );
+  if (!done[0]) {
+    // Someone else's Remove got there first: it's off the board already (11/6 review, round 7).
+    const gone = (await sql.query<{ archived: boolean }>("select archived from installs where id = $1", [installId]))[0]?.archived;
+    throw new Error(gone ? "This install was removed already." : "This install changed while you removed it, so nothing was removed. Look at it again.");
+  }
+  await log(sql, installId, await actorName(sql, userId), "removed", cur.customer);
+  return { ok: true };
 }
 
 const unitLabel = (u: { equipment_name: string | null; catalog_model: string | null; serial: string | null }) =>
@@ -196,6 +235,28 @@ async function mergeInvoiceRefusal(sql: Sql, keepId: number, dropId: number): Pr
   return `Install #${dropId} and install #${keepId} both have an invoice, and one install takes one invoice. Move #${dropId}'s lines to #${keepId}'s invoice by hand (take them all off #${dropId}'s and approve it), then merge.`;
 }
 
+/**
+ * SQL: the keeper's invoice is approved and the drop's isn't, so the keeper takes nothing of the drop's bill, and a
+ * rebuild linked to the drop while open could bill nowhere there (11/6 review, round 5). One linked to the drop whose
+ * own invoice is approved stays held where it is, so it may go with it. The approvals are read fresh
+ * (invoice_version: "id:approved:saved"), so an Approve that commits while the merge waits for its locks counts: it
+ * doesn't touch the install row the merge checks (11/6 review, round 6).
+ */
+const APPROVED_FRESH = (install: string) => `split_part(coalesce(invoice_version('install', ${install}), ''), ':', 2) <> ''`;
+/** In the merge statement, on the locked rows (k.id, d.id), so the fresh reads come after the locks. */
+const strandsRebuilds = (keep: string, drop: string) => `(
+  ${APPROVED_FRESH(keep)}
+  and not ${APPROVED_FRESH(drop)}
+  and exists (${openLinkedRebuildsSql(`r.install_id = ${drop}`)}))`;
+
+/** Rebuilds linked to the drop that the keeper's approved invoice can't take: why the merge is refused, or null. */
+async function strandedRebuildsRefusal(sql: Sql, keepId: number, dropId: number): Promise<string | null> {
+  const strands = (await sql.query<{ strands: boolean }>(`select ${strandsRebuilds("$1::int", "$2::int")} as strands`, [keepId, dropId]))[0]?.strands;
+  if (!strands) return null;
+  const linked = await sql.query<{ id: number; title: string | null }>(`${openLinkedRebuildsSql("r.install_id = $1::int")} order by r.id`, [dropId]);
+  return closedBillMergeRefusal(linked, `install #${dropId}`, `install #${keepId}'s invoice is approved`);
+}
+
 /** The unique key on invoices refused the move: the keeper's invoice was saved while the merge ran. */
 const invoiceKeyClash = (e: unknown): boolean => /invoices_entity_key/.test(e instanceof Error ? e.message : String(e));
 
@@ -264,7 +325,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   );
   for (const a of assets) if (!/^System \(/.test(a.locked_by ?? "")) await assertUnlocked(sql, a);
   // One install takes one invoice (10/30): the drop's goes to the keeper, unless the keeper has one of its own.
-  const invoiceRefusal = await mergeInvoiceRefusal(sql, keepId, dropId);
+  const invoiceRefusal = (await mergeInvoiceRefusal(sql, keepId, dropId)) ?? (await strandedRebuildsRefusal(sql, keepId, dropId));
   if (invoiceRefusal) throw new Error(invoiceRefusal);
   // One install takes one Customer P.O. (11/2), which its invoice carries: the keeper's, else the drop's. Two different
   // ones stop the merge. (Both rows are read again as they are when the merge writes: a P.O. changed since stops it.)
@@ -341,6 +402,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
           and not (exists (select 1 from invoices v where v.entity_type = 'install' and v.entity_id = $1::int)
                    and exists (select 1 from invoices v join invoice_lines l on l.invoice_id = v.id
                                 where v.entity_type = 'install' and v.entity_id = $2::int))
+          -- Nor a linked rebuild left on a closed bill that takes nothing of it (11/6 review, round 5).
+          and not ${strandsRebuilds("k.id", "d.id")}
      ), keeper_keys as (
        select w.match_key from install_work_orders w join g on w.install_id = g.keep_id
      ), wo_move as (
@@ -377,6 +440,8 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), assets_moved as (
        update assets a set install_id = g.keep_id, updated_at = now() from g where a.install_id = g.drop_id returning a.id
      ), rebuilds_moved as (
+       -- A linked rebuild bills on the keeper now, its link and its marks as they were (11/6): its bill moved with it,
+       -- or the keeper's is open, or it was held on the drop's closed bill and stays held (g above).
        update rebuilds r set install_id = g.keep_id from g where r.install_id = g.drop_id returning r.id
      ), form_move as (
        -- What a tech filled in on the drop's Equipment Request Form goes with it when the keeper's form has nothing.
@@ -546,7 +611,11 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
     if (invoiceKeyClash(e)) throw new Error((await mergeInvoiceRefusal(sql, keepId, dropId)) ?? `An invoice was saved on install #${keepId} while this merge ran, so nothing was merged. Merge again.`);
     throw e;
   });
-  if (!out[0]?.ok) throw new Error((await mergeInvoiceRefusal(sql, keepId, dropId)) ?? "One of the installs changed since this window opened. Open it again and retry.");
+  if (!out[0]?.ok) {
+    throw new Error(
+      (await mergeInvoiceRefusal(sql, keepId, dropId)) ?? (await strandedRebuildsRefusal(sql, keepId, dropId)) ?? "One of the installs changed since this window opened. Open it again and retry.",
+    );
+  }
   // A photo the drop took just before the merge locked it, which the statement didn't see: it goes to the keeper too
   // (the drop is archived now, so it takes no more).
   const latePhotos = await sql.query<{ id: number }>("update ticket_photos set install_id = $1 where install_id = $2 returning id", [keepId, dropId]);

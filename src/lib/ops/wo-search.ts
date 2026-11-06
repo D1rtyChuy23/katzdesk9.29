@@ -54,7 +54,7 @@ export const INSTALL_WOS_SQL = `(select install_id, wo from install_work_orders
    union select id as install_id, btrim(wo) as wo from installs where coalesce(btrim(wo), '') <> '')`;
 
 /** SQL: the digits of a stored WO with leading zeros dropped — the same key as woMatchKey for WO-#### values. */
-const WO_KEY_SQL = (col: string) => `ltrim(regexp_replace(coalesce(${col}, ''), '[^0-9]', '', 'g'), '0')`;
+export const WO_KEY_SQL = (col: string) => `ltrim(regexp_replace(coalesce(${col}, ''), '[^0-9]', '', 'g'), '0')`;
 
 /**
  * Every ticket carrying this WO key: service, TLC, PM and install boards, open or closed. With `inScope` (a sales

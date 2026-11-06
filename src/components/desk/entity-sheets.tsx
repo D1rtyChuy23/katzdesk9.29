@@ -3,6 +3,7 @@ import { PoFields, SaleRef } from "./po-fields";
 import { holdSavedPo, poFromForm } from "./po-form";
 import { InvoiceButton } from "@/components/desk/invoice-window";
 import { RecordNetSuitePanel } from "@/components/desk/record-netsuite";
+import { ProjectRebuilds } from "@/components/desk/project-rebuilds";
 import { SpecOutletLine } from "@/components/desk/spec-outlet-line";
 import { ModuleRecord } from "@/components/desk/module-record";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -1001,6 +1002,7 @@ export function InstallSheet({
                     <InvoiceButton type="install" id={row.id} key={`invoice-install-${row.id}`} beforeOpen={saveInstallBeforeInvoice} />
                   </div>
                   <RecordNetSuitePanel type="install" id={row.id} key={`netsuite-install-${row.id}`} />
+                  <ProjectRebuilds type="install" id={row.id} inset key={`rebuilds-install-${row.id}`} />
                 </Tabs.Content>
 
                 <Tabs.Content value="pre-inspection" forceMount className={KEEP_MOUNTED} data-testid="install-panel-pre-inspection">

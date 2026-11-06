@@ -107,13 +107,6 @@ export type Rebuild = {
   stockNote?: string | null;
 };
 
-export type RebuildLink = {
-  kind: "install" | "service" | "tlc";
-  id: number;
-  label: string;
-  customer: string;
-};
-
 type RebuildRow = {
   id: number;
   title: string;
@@ -648,8 +641,6 @@ const patchSchema = z.object({
   actualComplete: z.string().nullable().optional(),
   priority: z.string().optional(),
   notes: z.string().nullable().optional(),
-  installId: z.number().nullable().optional(),
-  jobId: z.number().nullable().optional(),
   /** Sent only when changed on the Details tab (11/2); left out keeps the stored one, blank clears it. */
   po: z.string().max(400).nullable().optional(),
   vendorPo: z.string().max(400).nullable().optional(),
@@ -692,59 +683,6 @@ export const listRebuildOwners = createServerFn({ method: "GET" })
     return out;
   });
 
-export const listRebuildLinks = createServerFn({ method: "GET" })
-  .middleware([deskMiddleware])
-  .validator((d: { account?: string | null }) => d)
-  .handler(async ({ data }): Promise<RebuildLink[]> => {
-    const sql = await readySql();
-    const account = (data.account ?? "").trim();
-    const out: RebuildLink[] = [];
-    const inst = account
-      ? await sql.query<{ id: number; customer: string; equipment: string | null; wo: string | null }>(
-          `select id, customer, equipment, wo from installs
-           where archived = false and complete = false
-             and ($1 = '' or lower(customer) = lower($1))
-           order by id desc limit 40`,
-          [account],
-        )
-      : await sql.query<{ id: number; customer: string; equipment: string | null; wo: string | null }>(
-          `select id, customer, equipment, wo from installs
-           where archived = false and complete = false
-           order by id desc limit 40`,
-        );
-    for (const r of inst) {
-      out.push({
-        kind: "install",
-        id: Number(r.id),
-        customer: r.customer,
-        label: `Install · ${r.customer}${r.equipment ? " · " + r.equipment : ""}${r.wo ? " · " + r.wo : ""}`,
-      });
-    }
-    const jobs = account
-      ? await sql.query<{ id: number; kind: string; customer: string | null; call_id: string; wo: string | null }>(
-          `select id, kind, customer, call_id, wo from service_jobs
-           where status not in ('Completed', 'Cancelled', 'Phone Resolved') and done = false
-             and ($1 = '' or lower(coalesce(customer,'')) = lower($1))
-           order by id desc limit 40`,
-          [account],
-        )
-      : await sql.query<{ id: number; kind: string; customer: string | null; call_id: string; wo: string | null }>(
-          `select id, kind, customer, call_id, wo from service_jobs
-           where status not in ('Completed', 'Cancelled', 'Phone Resolved') and done = false
-           order by id desc limit 40`,
-        );
-    for (const r of jobs) {
-      const kind = r.kind === "tlc" ? "tlc" : "service";
-      out.push({
-        kind,
-        id: Number(r.id),
-        customer: r.customer ?? "",
-        label: `${kind === "tlc" ? "TLC" : "Service"} · ${r.customer ?? "Untitled"}${r.wo ? " · " + r.wo : " · " + r.call_id}`,
-      });
-    }
-    return out;
-  });
-
 const createSchema = z.object({
   title: z.string().min(1),
   account: z.string().min(1),
@@ -759,8 +697,6 @@ const createSchema = z.object({
   actualStart: z.string().nullable().optional(),
   priority: z.string().optional(),
   notes: z.string().nullable().optional(),
-  installId: z.number().nullable().optional(),
-  jobId: z.number().nullable().optional(),
 });
 
 export const createRebuild = createServerFn({ method: "POST" })
@@ -792,8 +728,8 @@ export async function createRebuildFor(sql: Sql, data: z.infer<typeof createSche
     `with made as (
        insert into rebuilds (
          title, account, owner, status, reason_code, reason_detail,
-         planned_start, target_complete, actual_start, priority, notes, install_id, job_id
-       ) values ($1,$2,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+         planned_start, target_complete, actual_start, priority, notes
+       ) values ($1,$2,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        returning *
      ), first as (
        insert into rebuild_machines (rebuild_id, model) select id, $3::text from made where $3::text is not null returning id
@@ -812,8 +748,6 @@ export async function createRebuildFor(sql: Sql, data: z.infer<typeof createSche
       isoDay(data.actualStart) || (status === "In progress" ? todayChicago() : null),
       isRebuildPriority(data.priority) ? data.priority : "normal",
       emptyToNull(data.notes),
-      data.installId ?? null,
-      data.jobId ?? null,
     ],
   );
   const row = rows[0]!;
@@ -890,6 +824,16 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
   const accountMoves = nameKey(nextAccount) !== nameKey(cur.account) && !(warehouseMayEdit(nextAccount) && warehouseMayEdit(cur.account));
   const accountLock = accountMoves ? await rebuildHeldLock(sql, data.id) : null;
   if (accountLock) throw await lockedUnitRefusal(sql, accountLock, "this rebuild stays on its account while it has it");
+  // Linked to a ticket or an install (11/6), it bills there, so its account is that project's: a save never moves it
+  // elsewhere (a sheet opened before the link would put the old one back). Unlink it first.
+  if (accountMoves && (cur.install_id != null || cur.job_id != null)) {
+    const project = await linkedProjectAccount(sql, cur);
+    if (!project || nameKey(project.customer) !== nameKey(nextAccount)) {
+      throw new Error(
+        `This rebuild is linked to ${project?.label ?? "a ticket or an install"}, so its account follows that one's${project?.customer ? ` (${project.customer})` : ""}. Unlink it on Details to change the account.`,
+      );
+    }
+  }
 
   const leavingWaiting = cur.status === "Waiting" && nextStatus !== "Waiting";
   const reasonCode = nextStatus === "Waiting" ? nextReason : leavingWaiting ? null : nextReason;
@@ -925,14 +869,14 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
        actual_complete = $11,
        priority = $12,
        notes = $13,
-       install_id = $14,
-       job_id = $15,
        status_changed_at = case when $16 then now() else status_changed_at end,
        -- Only a P.O. the save sent (11/2): one left out stays as the row has it now (the Invoice window may have just set it).
        po = case when $18::boolean then $19::text else po end,
        vendor_po = case when $20::boolean then $21::text else vendor_po end,
        updated_at = now()
      where id = $1 and ${ACCOUNT_STILL("account", "$17")} and not ${LOCKED_UNIT_MOVES("rebuilds", "$3::text")}
+       -- Still linked as read: Link and Unlink (rebuild-link-api.ts) are its own writes, never undone by a save.
+       and install_id is not distinct from $14::int and job_id is not distinct from $15::int
      returning *`,
     [
       data.id,
@@ -948,8 +892,8 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
       actualComplete,
       priority,
       data.notes !== undefined ? emptyToNull(data.notes) : cur.notes,
-      data.installId !== undefined ? data.installId : cur.install_id,
-      data.jobId !== undefined ? data.jobId : cur.job_id,
+      cur.install_id,
+      cur.job_id,
       statusChanged,
       warehouseKeys(access),
       po !== undefined,
@@ -963,6 +907,8 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
     const now = (await sql.query<{ account: string }>("select account from rebuilds where id = $1", [data.id]))[0];
     const lock = now && accountMoves ? await rebuildHeldLock(sql, data.id) : null;
     if (lock) throw await lockedUnitRefusal(sql, lock, "this rebuild stays on its account while it has it");
+    // Only Warehouse's write checks the account; anyone else missed because it was linked or unlinked meanwhile.
+    if (!isWarehouse(access)) throw new Error(now ? "This rebuild was linked or unlinked while you had it open, so nothing was saved. Look it over, then save again." : "Rebuild not found");
     throw await movedRefusal(sql, data.id);
   }
   const parts = [
@@ -980,22 +926,7 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
   const accountNote = changed("account", cur.account, row.account);
   if (accountNote) {
     parts.push(accountNote);
-    // Its pulled units go with it to the new account (a shop refurb billed to Katz Coffee Service Dept.), and so does
-    // each machine's record of whom the pull put the unit on: only units its machines still hold on the old account,
-    // and only while the rebuild is still on the new one (an Admin's change since stands).
-    await sql.query(
-      `with moved as (
-         update assets a set sold_to = $2, updated_at = now()
-           from rebuild_machines m
-          where m.rebuild_id = $1 and m.asset_id = a.id and ${HOLDS("m", "$3::text")}
-            and exists (select 1 from rebuilds r where r.id = $1 and r.account = $2)
-         returning a.id
-       )
-       update rebuild_machines set origin = jsonb_set(origin, '{pulled_to}', to_jsonb($2::text)), updated_at = now()
-        where rebuild_id = $1 and origin is not null and ${NAME_KEY("origin->>'pulled_to'")} = ${NAME_KEY("$3")}
-          and exists (select 1 from rebuilds r where r.id = $1 and r.account = $2)`,
-      [data.id, row.account, cur.account],
-    );
+    await moveHeldUnits(sql, data.id, row.account, cur.account);
   }
   if (parts.length) {
     const action = statusChanged ? "status" : parts.some((p) => p.startsWith("reason") || p.startsWith("kept")) ? "reason" : "updated";
@@ -1005,6 +936,58 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
   // Completed just now, on a refurb: its machines go into stock at the Staging area.
   const stockNote = row.status === "Completed" && cur.status !== "Completed" && warehouseMayEdit(row.account) ? await stockRefurbMachines(sql, row, userId) : null;
   return { ...(await rebuildOut(sql, row)), stockNote };
+}
+
+/**
+ * Its pulled units go with the rebuild to its new account (a shop refurb billed to Katz Coffee Service Dept., or a
+ * rebuild linked to a customer's ticket or install), and so does each machine's record of whom the pull put the unit
+ * on: only units its machines still hold on the old account, and only while the rebuild is still on the new one (an
+ * Admin's change since stands).
+ */
+export async function moveHeldUnits(sql: Sql, rebuildId: number, account: string, previous: string): Promise<void> {
+  await sql.query(
+    `with moved as (
+       update assets a set sold_to = $2, updated_at = now()
+         from rebuild_machines m
+        where m.rebuild_id = $1 and m.asset_id = a.id and ${HOLDS("m", "$3::text")}
+          and exists (select 1 from rebuilds r where r.id = $1 and r.account = $2)
+       returning a.id
+     )
+     update rebuild_machines set origin = jsonb_set(origin, '{pulled_to}', to_jsonb($2::text)), updated_at = now()
+      where rebuild_id = $1 and origin is not null and ${NAME_KEY("origin->>'pulled_to'")} = ${NAME_KEY("$3")}
+        and exists (select 1 from rebuilds r where r.id = $1 and r.account = $2)`,
+    [rebuildId, account, previous],
+  );
+}
+
+/** The account of the ticket or install a rebuild is linked to, and how to name it; null when it is gone. */
+async function linkedProjectAccount(sql: Sql, r: { install_id: number | null; job_id: number | null }): Promise<{ customer: string; label: string } | null> {
+  if (r.install_id != null) {
+    const i = (await sql.query<{ customer: string | null; wo: string | null }>("select customer, wo from installs where id = $1", [r.install_id]))[0];
+    return i ? { customer: String(i.customer ?? "").trim(), label: `install #${r.install_id}${i.wo?.trim() ? ` (${i.wo.trim()})` : ""}` } : null;
+  }
+  const j = (await sql.query<{ customer: string | null; wo: string | null; call_id: string | null }>("select customer, wo, call_id from service_jobs where id = $1", [r.job_id]))[0];
+  return j ? { customer: String(j.customer ?? "").trim(), label: `ticket ${j.call_id?.trim() || `#${r.job_id}`}${j.wo?.trim() ? ` (${j.wo.trim()})` : ""}` } : null;
+}
+
+/** For Link (rebuild-link-api.ts): who may link a rebuild, the row as the board maps it, and the unit-lock rules. */
+export async function requireRebuildEditor(sql: Sql, userId: string): Promise<{ warehouse: boolean; username: string }> {
+  const access = await requireEditor(sql, userId);
+  return { warehouse: isWarehouse(access), username: access.username };
+}
+
+export async function rebuildRowOut(sql: Sql, id: number): Promise<Rebuild | null> {
+  const row = (await sql.query<RebuildRow>("select * from rebuilds where id = $1", [id]))[0];
+  return row ? rebuildOut(sql, row) : null;
+}
+
+/** SQL: rebuild `r` (id and account) holds a unit the owner locked, and `acct` is another account. */
+export const lockedUnitMovesSql = (r: string, acct: string) => LOCKED_UNIT_MOVES(r, acct);
+
+/** The sentence a locked unit gives when the rebuild's account would change, or null when none of its units is locked. */
+export async function heldUnitLockSentence(sql: Sql, rebuildId: number): Promise<string | null> {
+  const lock = await rebuildHeldLock(sql, rebuildId);
+  return lock ? (await lockedUnitRefusal(sql, lock, "this rebuild stays on its account while it has it")).message : null;
 }
 
 export const archiveRebuild = createServerFn({ method: "POST" })
