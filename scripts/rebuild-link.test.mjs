@@ -566,7 +566,18 @@ test("moving to another WO: the lines leave the ticket and go on the install's i
     "Customer P.O.: none → PO-I-1.",
     "Its invoice's 2 lines ($315.00) go on the install's invoice, waiting for an Admin to approve it.",
   ]);
-  const out = await linkTo(sql, g, g.candidates[0]);
+  // The ticket changes after the move read it and before its unlink writes: nothing moves, and it says nothing was
+  // linked (not "unlinked": the move is what was asked).
+  const racing = Object.assign(async (...a) => sql(...a), {
+    query: async (text, params) => {
+      if (text.includes("take_rebuild_lines(")) await sql.query("update service_jobs set updated_at = now() + interval '1 second' where id = $1", [job]);
+      return sql.query(text, params);
+    },
+  });
+  await assert.rejects(linkTo(racing, g, g.candidates[0]), { message: "This rebuild or that project changed since you looked, so nothing was linked. Find the WO again." });
+  assert.equal((await charges(sql, job)).length, 2, "still on the ticket");
+  const g2 = await find(sql, rb, "5000");
+  const out = await linkTo(sql, g2, g2.candidates[0]);
   assert.equal(out.message, `Moved from WO-4321 (Service ticket SC-RBL-1) to WO-5000 (Install #${inst}). Its 2 lines went on the install's invoice.`);
   assert.deepEqual([out.row.jobId, out.row.installId, out.row.po], [null, inst, "PO-I-1"]);
   assert.deepEqual(await charges(sql, job), []);
