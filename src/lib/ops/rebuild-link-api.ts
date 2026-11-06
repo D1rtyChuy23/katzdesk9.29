@@ -906,7 +906,7 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
     });
     message =
       back.moved > 0
-        ? `Unlinked from ${projectLabel(left!)}. Its ${lineCount(back.moved)} (${money(back.amount)}) are back on its own invoice.`
+        ? `Unlinked from ${projectLabel(left!)}. Its ${lineCount(back.moved)} (${money(back.amount)}) ${isAre(back.moved)} back on its own invoice.`
         : `Unlinked from ${projectLabel(left!)}.`;
   }
   if (plan.steps.includes("link") && project && data.to) {

@@ -488,7 +488,10 @@ export function RebuildSheet({
                 <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
                 <p className="mt-1 text-xs text-muted-foreground" data-testid="rebuild-invoice-note">
                   {linked
-                    ? `It bills on ${projectLabel(linked)}: its parts and labor go on ${billName(linked)}${link.data?.refusal ? "." : linked.lines > 0 ? ` (${lineCount(linked.lines)}, ${money(linked.total)} now).` : "."}`
+                    ? `It bills on ${projectLabel(linked)}: its parts and labor go on ${billName(linked)}${link.data?.refusal ? "." : linked.lines > 0 ? ` (${lineCount(linked.lines)}, ${money(linked.total)} now).` : "."}${
+                        // Its own invoice on a Sales Order (11/6) keeps its lines; hidden from Warehouse and Sales, as all its billing is.
+                        link.data?.own.onSalesOrder ? ` Its own invoice's ${lineCount(link.data.own.lines)} ${link.data.own.lines === 1 ? "stays" : "stay"} on it: it's on a Sales Order in NetSuite.` : ""
+                      }`
                     : accountLock && warehouseMayEdit(row.account)
                       ? `The parts this refurb used, billed to ${sentence(accountLock)} Save them for an Admin to approve.`
                       : "Billing info for this rebuild."}

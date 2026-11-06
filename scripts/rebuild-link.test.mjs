@@ -382,6 +382,13 @@ test("what a link does, or why it can't: the rules alone", () => {
     noteOwn: true,
   });
   assert.equal(R.planLink({ ...leaving, own: { ...own, onSalesOrder: true } }, other).noteOwn, false);
+  // The new project still has to take a link: open, with a real account, and the unit lock holds.
+  assert.equal(
+    R.planLink(leaving, { ...other, closed: "has an approved invoice" }, "on").refusal,
+    "Install #9 has an approved invoice, so nothing more can be billed there. Link it to an open ticket or install.",
+  );
+  assert.equal(R.planLink(leaving, { ...other, customer: "Walk - In" }, "on").refusal, "Install #9 is on Walk-In, which is never a billing account. Give it the real account first.");
+  assert.equal(R.planLink({ ...leaving, unitLock: "SN T-2 is locked by chuy." }, { ...other, customer: "Test Other Cafe" }, "on").refusal, "SN T-2 is locked by chuy.");
   assert.equal(
     R.planLink({ ...linked, own: { ...own, onSalesOrder: true } }, other).refusal,
     "Its own invoice is on a Sales Order, so its 2 lines on WO-4321 (Service ticket SC-1) can't come back onto it on the way to WO-5001 (Install #9). Unlink it, bill those lines from its own invoice, then link it to WO-5001 (Install #9).",
@@ -1479,6 +1486,13 @@ test("its invoice on a Sales Order: Link asks, and yes keeps its lines on it, no
   assert.equal(await head(sql, "install", inst), undefined, "the install's invoice takes nothing now");
   assert.equal((await invoiceLines(sql, "rebuild", rb)).length, 2);
   assert.equal((await one(sql, "select on_sales_order_by from invoices where id = $1", [ownId])).on_sales_order_by, "chuy", "the first answer stays");
+  assert.equal(
+    (await I.getInvoiceFor(sql, { type: "rebuild", id: rb }, "u-owner")).locked,
+    `This rebuild bills on WO-5000 (Install #${inst}): its parts and labor go on the install's invoice. Open the install to change them. Its own invoice's 2 lines stay on it: it's on a Sales Order in NetSuite.`,
+  );
+  assert.deepEqual(await L.listProjectRebuildsFor(sql, { type: "install", id: inst }, "u-owner"), [
+    { id: rb, title: "Test grinder refurb", status: "In progress", removed: false, lines: 0, total: 0, onSalesOrder: 2 },
+  ]);
 
   // Approved again (unlinked first), the note no longer counts: Link asks again, and not yet moves them.
   await unlink(sql, rb);
@@ -1499,11 +1513,14 @@ test("a rebuild linked before 11/6 with its own lines: yes only notes that they'
   await ownInvoice(sql, rb, PARTS, { customer: CAFE });
   const f = await find(sql, rb, "4321");
   assert.deepEqual([f.candidates[0].plan.ok, f.candidates[0].plan.on.steps, f.candidates[0].plan.not.steps], ["ask", ["note"], ["link"]]);
+  // Not noted yet, the ticket's list doesn't call them on a Sales Order.
+  assert.equal((await L.listProjectRebuildsFor(sql, { type: "service", id: job }, "u-owner"))[0].onSalesOrder, 0);
   const out = await linkTo(sql, f, f.candidates[0], "u-owner", "on");
   assert.equal(out.message, "Noted: its invoice's 2 lines are on a Sales Order, so they stay on it.");
   assert.deepEqual(await charges(sql, job), []);
   assert.equal((await invoiceLines(sql, "rebuild", rb)).length, 2);
   assert.equal((await one(sql, "select rebuild_invoice_on_so($1) as s", [rb])).s, true);
+  assert.equal((await L.listProjectRebuildsFor(sql, { type: "service", id: job }, "u-owner"))[0].onSalesOrder, 2);
   // The rebuild row is as it was; only its history says so.
   assert.deepEqual(await one(sql, "select job_id, link_lines, link_open from rebuilds where id = $1", [rb]), { job_id: job, link_lines: 0, link_open: null });
   assert.deepEqual((await notes(sql)).map((n) => [n.entity_type, n.entity_id, n.actor_name, n.action, n.detail]), [
@@ -1650,6 +1667,21 @@ test("moving to another WO with its invoice on a Sales Order stops if that invoi
   });
   assert.equal((await one(sql, "select rebuild_invoice_on_so($1) as s", [rb])).s, false, "nothing noted on what changed");
   assert.deepEqual(await charges(sql, second), []);
+  // A not-yet move that meets a note between its unlink and its link (on the lines that came back) stops too, rather
+  // than keep lines the person said aren't on a Sales Order, or move ones an Admin says are.
+  const moving = await rebuild(sql, { title: "Test moving refurb" });
+  await ownInvoice(sql, moving, [PARTS[0]]);
+  const n = await find(sql, moving, "6201");
+  await linkTo(sql, n, n.candidates[0], "u-owner", "not");
+  await ownInvoice(sql, moving, [PARTS[1]]);
+  const noteBack = () =>
+    sql.query("update invoices set on_sales_order_at = now(), on_sales_order_by = 'dana', on_sales_order_version = invoice_version('rebuild', $1) where entity_type = 'rebuild' and entity_id = $1", [moving]);
+  const p = await find(sql, moving, "6202");
+  assert.equal(p.candidates[0].plan.ok, "ask");
+  await assert.rejects(linkTo(around(L.unlinkRebuildSql(), noteBack), p, p.candidates[0], "u-owner", "not"), {
+    message: `Unlinked from WO-6201 (Service ticket SC-RBL-1). Its 1 line ($90.00) is back on its own invoice. It wasn't linked to WO-6202 (Service ticket SC-RBL-2): ${CHANGED_LINK}`,
+  });
+  assert.deepEqual(await charges(sql, second), []);
   // Nothing in between: it moves, its lines staying on its own invoice.
   const m = await find(sql, rb, "6202");
   assert.equal(m.candidates[0].plan.ok, "ask", "approved since its note, it asks again");
@@ -1706,6 +1738,7 @@ test("the rebuild sheet: a WO box with Find instead of the old list, its account
   assert.match(field, /onGo=\{\(\) => go\.mutate\(\{ base: found, to: c, salesOrder: answer \}\)\}/);
   assert.match(field, /salesOrder: q\.salesOrder \?\? null,/);
   assert.equal(field.match(/setAnswers\(\{\}\);/g)?.length, 2, "on a new Find, and after a link");
+  assert.match(sheet, /link\.data\?\.own\.onSalesOrder \? ` Its own invoice's \$\{lineCount\(link\.data\.own\.lines\)\} \$\{link\.data\.own\.lines === 1 \? "stays" : "stay"\} on it: it's on a Sales Order in NetSuite\.` : ""/);
   assert.match(src("src/components/desk/project-rebuilds.tsx"), /\{r\.onSalesOrder \? ` · its own invoice's \$\{lineCount\(r\.onSalesOrder\)\} \$\{r\.onSalesOrder === 1 \? "is" : "are"\} on a Sales Order` : ""\}/);
   // The ticket (both layouts) and the install show the rebuilds billed there.
   const job = src("src/components/desk/job-sheet.tsx");

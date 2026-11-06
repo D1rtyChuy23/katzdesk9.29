@@ -272,8 +272,10 @@ export function RebuildLinkField({
                     {c.plan.ok === "ask" ? (
                       // Its invoice is approved, so it may be on a Sales Order already: the person says, then sees what Link does.
                       <div className="mt-2" data-testid="rebuild-link-ask">
-                        <p className="text-xs font-medium">{c.plan.question}</p>
-                        <div className="mt-1.5 flex flex-wrap gap-2">
+                        <p className="text-xs font-medium" id={`rb-so-${key}`}>
+                          {c.plan.question}
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap gap-2" role="group" aria-labelledby={`rb-so-${key}`}>
                           {(["not", "on"] as const).map((a) => (
                             <Button
                               key={a}
