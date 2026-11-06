@@ -1017,6 +1017,9 @@ test("a dated rerun (11/5 re-review): an invoice recorded on an install stays it
   // On its own, that one is the ticket's.
   const alone = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0820", "", "INV0830", "2026-10-16", "Open", 150, 150, "")])])).plans[0];
   assert.deepEqual([alone.kind, alone.jobId], ["service", t]);
+  // A new invoice beside it dated years off: too far from the install, as for any WO.
+  const far = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-0820", "SO0820", "INV0820", "2026-10-20", "Paid In Full", 5000, 0), invoice("WO-0820", "", "INV0899", "2028-06-01", "Open", 10, 10, "")])])).plans[0];
+  assert.equal(far.reason, `INV0899 (2028-06-01) is too far from install #${inst} (came in 2026-01-10) to be its billing: it may be another job with this WO number. Take its rows out of the file, then run it again.`);
 });
 
 test("the distance rule (11/5 re-review): an invoice dated while a long install was being done can't be told from a ticket done weeks before", async () => {
