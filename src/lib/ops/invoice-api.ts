@@ -486,13 +486,15 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
 }
 
 /**
- * An unlinked rebuild's own invoice on a Sales Order (0122): what it was approved with, and, for someone who can
- * approve, that approving again bills what the window shows and that it then stops counting as on its Sales Order.
+ * An unlinked rebuild's own invoice on a Sales Order (0122): for someone who can approve, what it was approved with, and
+ * that approving again bills what the window shows and that it then stops counting as on its Sales Order. Warehouse,
+ * who can't, reads only that it's on one: never a customer's billing (11/6 review, round 2).
  */
 function salesOrderNote(as: { customer: string; po: string | null }, canApprove: boolean): string {
+  if (!canApprove) return "It's on a Sales Order in NetSuite.";
   // "P.O." ends in a period already: the sentence ends with it.
   const approved = `It's on a Sales Order in NetSuite, approved for ${as.customer || "no account"}${as.po ? `, P.O. ${as.po}.` : " with no P.O."}`;
-  return canApprove ? `${approved} Approving it again bills it as shown here, and it no longer counts as on its Sales Order: Link asks again.` : approved;
+  return `${approved} Approving it again bills it as shown here, and it no longer counts as on its Sales Order: Link asks again.`;
 }
 
 

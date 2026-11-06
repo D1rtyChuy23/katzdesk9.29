@@ -1481,11 +1481,15 @@ test("its invoice on a Sales Order: Link asks, and yes keeps its lines on it, no
     open.salesOrderNote,
     "It's on a Sales Order in NetSuite, approved for Katz shop / stock, P.O. PO-OLD. Approving it again bills it as shown here, and it no longer counts as on its Sales Order: Link asks again.",
   );
-  // Warehouse can't approve: it reads only what its refurb's invoice was approved with.
+  // Warehouse can't approve, and reads no customer's billing: only that it's on one, even for a customer's refurb moved
+  // to Service Dept. since (11/6 review, round 2). An Admin reads what it was approved with.
   const sd = await rebuild(sql, { title: "Test SD refurb", account: "Katz Coffee Service Dept." });
-  const sdInv = await ownInvoice(sql, sd, [PARTS[0]], { customer: "Katz Coffee Service Dept." });
-  await sql.query("update invoices set on_sales_order_at = now(), on_sales_order_by = 'chuy', on_sales_order_version = invoice_version('rebuild', $1) where id = $2", [sd, sdInv]);
-  assert.equal((await I.getInvoiceFor(sql, { type: "rebuild", id: sd }, "u-wh")).salesOrderNote, "It's on a Sales Order in NetSuite, approved for Katz Coffee Service Dept. with no P.O.");
+  const sdInv = await ownInvoice(sql, sd, [PARTS[0]], { customer: CAFE });
+  await sql.query("update invoices set po = 'PO-C-9', on_sales_order_at = now(), on_sales_order_by = 'chuy', on_sales_order_version = invoice_version('rebuild', $1) where id = $2", [sd, sdInv]);
+  assert.equal((await I.getInvoiceFor(sql, { type: "rebuild", id: sd }, "u-wh")).salesOrderNote, "It's on a Sales Order in NetSuite.");
+  assert.match((await I.getInvoiceFor(sql, { type: "rebuild", id: sd }, "u-owner")).salesOrderNote, new RegExp(`^It's on a Sales Order in NetSuite, approved for ${CAFE}, P\\.O\\. PO-C-9\\. Approving it again`));
+  await sql.query("update invoices set po = null, customer = null where id = $1", [sdInv]);
+  assert.match((await I.getInvoiceFor(sql, { type: "rebuild", id: sd }, "u-owner")).salesOrderNote, /^It's on a Sales Order in NetSuite, approved for no account with no P\.O\. Approving it again/);
   assert.deepEqual((await I.listAccountInvoicesFor(sql, SHOP, "u-owner")).map((x) => [x.id, x.po]), [[rb, "PO-OLD"]]);
 
   // Linked to another WO, its lines stay without asking. A "not yet" sent anyway is turned down.
@@ -1725,7 +1729,7 @@ test("a move to another WO that someone else links in the middle stops there, an
     },
   });
   await assert.rejects(linkTo(between, g, g.candidates[0]), {
-    message: `Unlinked from WO-7101 (Service ticket SC-RBL-1). Its 2 lines ($315.00) are back on its own invoice. It wasn't linked to WO-7102 (Service ticket SC-RBL-2): ${CHANGED_LINK}`,
+    message: "Unlinked from WO-7101 (Service ticket SC-RBL-1), but it was linked to WO-7103 (Service ticket SC-RBL-3) meanwhile, so it wasn't linked to WO-7102 (Service ticket SC-RBL-2).",
   });
   // Dana's link stands, with the lines: WO-7102 took nothing, and Unlink still works from WO-7103.
   assert.equal((await RB.rebuildRowOut(sql, rb)).jobId, third);

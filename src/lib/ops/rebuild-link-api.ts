@@ -917,7 +917,10 @@ export async function setRebuildLinkFor(sql: Sql, data: z.output<typeof setInput
       st = (await readState(sql, data.id))!;
       // Linked again by someone else since this unlinked it (11/6 review): its lines may be on that project now, and a
       // link from here would leave them there. The link statement below expects it unlinked too.
-      if (st.current) throw new Error(`${message} It wasn't linked to ${projectLabel(project)}: ${CHANGED}`);
+      if (st.current) {
+        // Its lines may have gone with that link: say where it is, not where they came back to (11/6 review, round 2).
+        throw new Error(`Unlinked from ${projectLabel(left!)}, but it was linked to ${projectLabel(st.current)} meanwhile, so it wasn't linked to ${projectLabel(project)}.`);
+      }
       const again = await planFor(sql, st, project, plan.keepOwn ? "on" : "not");
       if (!again.ok) throw new Error(`${message} It wasn't linked to ${projectLabel(project)}: ${again.refusal}`);
       // Staying on a Sales Order, its own invoice must still be the one the person answered for.
