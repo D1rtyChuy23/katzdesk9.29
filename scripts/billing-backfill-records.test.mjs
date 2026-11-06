@@ -556,7 +556,8 @@ test("the screens: the install's and PM's Invoices tab, the Invoices page's boar
   assert.match(page, /<InvoiceRow key=\{`\$\{r\.board\}:\$\{r\.id\}`\} r=\{r\} \/>/);
   assert.doesNotMatch(page, /key=\{r\.id\}/);
   const dialog = src("src/components/desk/billing-backfill.tsx");
-  assert.match(dialog, /BACKFILL_KIND_LABEL\[p\.kind\]/);
+  assert.match(dialog, /data-testid="backfill-kind">\s*\{BACKFILL_KIND_LABEL\[p\.kind\]\}\s*<\/Badge>/);
+  assert.match(dialog, /\{BACKFILL_KIND_LABEL\[p\.kind\]\} #\{p\.recordId\}/);
   assert.match(dialog, /<InvoiceOutcome i=\{i\} \/>/);
   assert.match(dialog, /"already there"/);
   assert.match(dialog, /<PastRuns runs=\{runs\.data\}/);
@@ -597,6 +598,11 @@ test("edges: the billed ticket's own install takes the WO's other rows; an empty
   const one6203 = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-6203", "", "INV6203", "2026-10-21", "Open", 5, 5, "")])])).plans[0];
   assert.deepEqual([one6203.status, one6203.kind, one6203.recordId], ["write", "install", spelled]);
 
+  // A ticket and an install of two accounts in the same weeks: skipped, without the hint to merge them.
+  const twoA = await ticket(sql, { customer: "Test Account One", wo: "WO-6205", received: "2026-10-01", completed: "2026-10-05" });
+  const twoB = await install(sql, { customer: "Test Account Two", wo: "WO-6205", received: "2026-10-01", completed: "2026-10-06" });
+  const two = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-6205", "", "INV6205", "2026-10-15", "Open", 5, 5, "")])])).plans[0];
+  assert.equal(two.reason, `The WO is on ticket #${twoA}, install #${twoB}, and the invoice date (2026-10-15) fits each of them, so the Backfill can't tell which one NetSuite billed. Skipped.`);
   // A ticket and an install with one WO, the invoice dated far from both: it fits none of them.
   const oldT = await ticket(sql, { customer: CAFE, wo: "WO-6204", received: "2025-01-02", completed: "2025-01-05" });
   const newI = await install(sql, { customer: CAFE, wo: "WO-6204", received: "2026-10-01", completed: "2026-10-03" });
