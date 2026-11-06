@@ -377,7 +377,7 @@ test("skips and picks: a stacked PM, an install off the board, a merged install'
   assert.deepEqual(got("WO-7403"), ["write", "install", kept, null], `not #${dropped}`);
   assert.deepEqual(got("WO-7404"), ["skip", "install", walkIn, "The install is on Walk-In, which is never a billing account. Give it the real account first."]);
   assert.deepEqual(got("WO-7405"), ["write", "install", fresh2026, null]);
-  assert.deepEqual(got("WO-7406"), ["skip", null, null, `The WO is on ticket #${t2}, PM #${p2}. Can't tell which one NetSuite billed: the invoice dates fit more than one, or there are none.`]);
+  assert.deepEqual(got("WO-7406"), ["skip", null, null, `The WO is on ticket #${t2}, PM #${p2}, and the invoice date (2026-10-25) fits each of them, so the Backfill can't tell which one NetSuite billed. Skipped.`]);
   assert.deepEqual(got("WO-7407"), ["skip", null, null, "No ticket, install or PM has this WO."]);
   // The old invoice under that number is the old ticket's.
   const before = (await preview(sql, [file("invoices.csv", [INVOICES_HEAD, invoice("WO-7405", "", "INV7000", "2025-02-15", "Paid In Full", 10, 0, "")])])).plans[0];
@@ -514,6 +514,9 @@ test("the screens: the install's and PM's Invoices tab, the Invoices page's boar
   assert.match(page, /boards=\{\["service", "tlc", "pm", "install"\]\}/);
   assert.match(page, /\{rows\.length\} of \{all\.length\} records/);
   assert.match(page, /its invoice in KatzDesk/);
+  // A ticket, an install and a PM can share an id: each row's key is its board and id.
+  assert.match(page, /<InvoiceRow key=\{`\$\{r\.board\}:\$\{r\.id\}`\} r=\{r\} \/>/);
+  assert.doesNotMatch(page, /key=\{r\.id\}/);
   const dialog = src("src/components/desk/billing-backfill.tsx");
   assert.match(dialog, /BACKFILL_KIND_LABEL\[p\.kind\]/);
   assert.match(dialog, /<InvoiceOutcome i=\{i\} \/>/);

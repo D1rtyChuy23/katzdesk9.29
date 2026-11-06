@@ -218,7 +218,8 @@ function InvoicesView({ filters, onFilters }: { filters: BillingFilters; onFilte
                 </td>
               </tr>
             ) : (
-              page.visible.map((r) => <InvoiceRow key={r.id} r={r} />)
+              // A ticket, an install and a PM can share an id: the board makes each row's key its own (11/5).
+              page.visible.map((r) => <InvoiceRow key={`${r.board}:${r.id}`} r={r} />)
             )}
           </tbody>
         </table>

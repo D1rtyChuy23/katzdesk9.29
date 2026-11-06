@@ -40,7 +40,7 @@ export function RecordNetSuitePanel({ type, id }: { type: RecordType; id: number
         <p className="mt-2 text-sm text-muted-foreground" data-testid="record-netsuite-stacked">
           This PM is stacked on ticket #{b.stackedOn} and bills on it: its NetSuite invoices are on that ticket.
         </p>
-      ) : !b.invoices.length && !b.groups.length ? (
+      ) : !b.invoices.length && !b.groups.some((g) => g.lines.length || g.discount) ? (
         <p className="mt-2 text-sm text-muted-foreground">
           No NetSuite invoices on this {what}. They come in with Billing Backfill (Admin, Tickets → Import).
         </p>
@@ -70,9 +70,12 @@ export function RecordNetSuitePanel({ type, id }: { type: RecordType; id: number
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">No NetSuite invoices on this {what} yet.</p>
           )}
-          {b.groups.map((g) => (
-            <BilledLines key={g.wo} g={g} />
-          ))}
+          {/* A WO with an SO and no lines brought back shows its SO on its invoices only. */}
+          {b.groups
+            .filter((g) => g.lines.length || g.discount)
+            .map((g) => (
+              <BilledLines key={g.wo} g={g} />
+            ))}
           <RecordChecks b={b} what={what} />
         </>
       )}

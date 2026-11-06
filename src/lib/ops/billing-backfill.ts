@@ -624,7 +624,15 @@ function pickTarget(key: string, ctx: BackfillContext, refDate: string | null, r
     }
   }
   if (ticketsOnly) return { reason: `The WO is on ${cands.length} tickets (${cands.map(tag).join(", ")}). Can't tell which one NetSuite billed.` };
-  return { reason: `The WO is on ${cands.map(candidateName).join(", ")}. Can't tell which one NetSuite billed: the invoice dates fit more than one, or there are none.` };
+  // A ticket and an install or a PM with one WO (11/5): say what the dates couldn't settle.
+  const names = cands.map(candidateName).join(", ");
+  if (!refDate) return { reason: `The WO is on ${names}, and the files have no invoice date to tell them apart. Skipped.` };
+  const fitting = cands.filter((c) => invoiceFitsTicket(refDate, candidateDates(c).received, candidateDates(c).completed) === true);
+  return {
+    reason: fitting.length
+      ? `The WO is on ${names}, and the invoice date (${refDate}) fits ${fitting.length === cands.length ? "each of them" : fitting.map(candidateName).join(" and ")}, so the Backfill can't tell which one NetSuite billed. Skipped.`
+      : `The WO is on ${names}, and the invoice date (${refDate}) fits none of them (by when each came in and was done). Skipped.`,
+  };
 }
 
 /** Plan every WO in the files against the records as they are now. Saves nothing. */

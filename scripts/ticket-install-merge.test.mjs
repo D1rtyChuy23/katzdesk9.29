@@ -711,7 +711,7 @@ test("the hidden ticket stays out of the duplicate merge, billing backfill and t
   const line = { file: "charges.csv", line: 2, key: "4792", wo: WO, item: "Service : SERVICELABOR", itemType: "Service", description: "Labor", qty: 1, rate: 150, amount: 150, discountItem: "", discountAmount: null, recordTotal: null, sourceInvoice: "", sourceSo: "", location: "", nsCustomer: "" };
   const plan = planBackfill({ lines: [line], invoices: [] }, hidden);
   assert.deepEqual([plan[0].kind, plan[0].recordId, plan[0].jobId, plan[0].status], ["install", installId, null, "write"]);
-  assert.match(planBackfill({ lines: [line], invoices: [] }, ctx)[0].reason, new RegExp(`The WO is on ticket #${later}, install #${installId}\\.`));
+  assert.match(planBackfill({ lines: [line], invoices: [] }, ctx)[0].reason, new RegExp(`^The WO is on ticket #${later}, install #${installId}, and the files have no invoice date to tell them apart\\. Skipped\\.$`));
 
   const rows = await loadWindowRows(sql, ["service"]);
   assert.equal(rows.find((r) => r.id === jobId).note, `Merged into install #${installId}`);
