@@ -1,5 +1,6 @@
 import { CustomerAddress } from "./customer-address";
 import { InvoiceButton } from "@/components/desk/invoice-window";
+import { ProjectRebuilds } from "@/components/desk/project-rebuilds";
 import { JobWoHistory } from "@/components/desk/wo-history-account";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -556,6 +557,7 @@ export function JobSheet({
                             <JobWoHistory jobId={j.id} key={`wo-history-${j.id}`} />
                           </section>
                           <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                          <ProjectRebuilds type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`rebuilds-${j.id}`} />
                           <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
                           <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
                         </Tabs.Content>
@@ -605,6 +607,7 @@ export function JobSheet({
                       <>
                         {form}
                         <ChargesPanel jobId={j.id} key={`charges-${j.id}`} />
+                        <ProjectRebuilds type={j.kind === "tlc" ? "tlc" : "service"} id={j.id} key={`rebuilds-${j.id}`} />
                         <TicketInvoicesPanel jobId={j.id} key={`ns-invoices-${j.id}`} />
                         <RepairQuotePanel jobId={j.id} key={`quote-${j.id}`} />
                         <JobPulledUnits jobId={j.id} />

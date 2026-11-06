@@ -627,9 +627,12 @@ export function mergeTicketIntoInstallSql(): string {
     select g.* from g where g.charges = 0 or exists (select 1 from head)
   ), lines as (
     -- A copy of each charge line, after the invoice's own lines. The ticket keeps its lines; it is hidden and never billed.
-    insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
+    -- Each keeps its source key: a linked rebuild's lines (rb:, 11/6) go with the rebuild to the install, so Unlink
+    -- still finds them there.
+    insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, source_key)
     select head.id, c.item, c.description, c.qty, c.rate, c.kind,
-           coalesce((select max(l.sort) from invoice_lines l where l.invoice_id = head.id), 0) + row_number() over (order by c.sort, c.id)
+           coalesce((select max(l.sort) from invoice_lines l where l.invoice_id = head.id), 0) + row_number() over (order by c.sort, c.id),
+           c.source_key
       from head
       cross join ok
       join ticket_charges c on c.job_id = ok.job_id

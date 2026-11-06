@@ -4,7 +4,6 @@ import { InvoiceButton } from "@/components/desk/invoice-window";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listComments } from "@/lib/ops/api";
 import {
-  listRebuildLinks,
   SHOP_ACCOUNT,
   archiveRebuild,
   updateRebuild,
@@ -30,8 +29,11 @@ import { Thread } from "./thread";
 import { PingButton } from "./ping-button";
 import { RepairQuotePanel } from "./repair-quote-panel";
 import { costGlance, money } from "@/lib/ops/repair-quote";
-import { OpenLink } from "./open-link";
 import { RebuildMachines } from "./rebuild-machines";
+import { RebuildLinkField } from "./rebuild-link-field";
+import { useRebuildLink } from "./rebuild-link-query";
+import { billName, lineCount, projectLabel } from "@/lib/ops/rebuild-link";
+import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { toast } from "sonner";
 import { formatShortDate } from "@/lib/ops/clock";
 import { isShopAccount, sentence, warehouseInvoiceRefusal, warehouseMayEdit } from "@/lib/ops/warehouse-invoice";
@@ -82,8 +84,6 @@ export function RebuildSheet({
   const [actualComplete, setActualComplete] = useState("");
   const [priority, setPriority] = useState("normal");
   const [notes, setNotes] = useState("");
-  const [installId, setInstallId] = useState<number | null>(null);
-  const [jobId, setJobId] = useState<number | null>(null);
   // The P.O.s (11/2) follow the rebuild on their own, so one set in the Invoice window never resets the rest of the form.
   const po = useSyncedPo(row?.po, row?.id ?? null);
   const vendorPo = useSyncedPo(row?.vendorPo, row?.id ?? null);
@@ -123,8 +123,6 @@ export function RebuildSheet({
     setActualComplete(row.actualComplete ?? "");
     setPriority(row.priority);
     setNotes(row.notes ?? "");
-    setInstallId(row.installId);
-    setJobId(row.jobId);
     // `row` is read through formKey, which holds every field set here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formKey]);
@@ -137,11 +135,8 @@ export function RebuildSheet({
     enabled: !!row,
   });
 
-  const links = useQuery({
-    queryKey: ["rebuild-links", account],
-    queryFn: () => listRebuildLinks({ data: { account } }),
-    enabled: !!row,
-  });
+  // What it is linked to (11/6): a ticket or an install it bills on, found by WO.
+  const link = useRebuildLink(row?.id ?? 0, !!row);
 
   const save = useMutation({
     mutationFn: () =>
@@ -160,8 +155,6 @@ export function RebuildSheet({
           actualComplete: actualComplete || null,
           priority,
           notes,
-          installId,
-          jobId,
           // Each P.O. only when it was changed here.
           ...(po.toSend() !== undefined ? { po: po.toSend() } : {}),
           ...(vendorPo.toSend() !== undefined ? { vendorPo: vendorPo.toSend() } : {}),
@@ -174,7 +167,6 @@ export function RebuildSheet({
       toast.success(next.stockNote ? `Rebuild saved. ${next.stockNote}` : "Rebuild saved");
       if (next.stockNote) void qc.invalidateQueries({ queryKey: ["assets"] });
       void qc.invalidateQueries({ queryKey: ["rebuilds"] });
-      // Linking or unlinking a ticket changes which quote this project shares.
       void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
       void qc.invalidateQueries({ queryKey: ["activity"] });
@@ -208,6 +200,33 @@ export function RebuildSheet({
     }
   };
 
+  /** Changes on Details not saved yet: Link and Unlink save them first, so the form starting over loses nothing. */
+  const dirty =
+    !!row &&
+    (title !== row.title ||
+      account !== row.account ||
+      owner !== (row.owner ?? "") ||
+      status !== row.status ||
+      reasonCode !== (row.reasonCode ?? "") ||
+      reasonDetail !== (row.reasonDetail ?? "") ||
+      plannedStart !== (row.plannedStart ?? "") ||
+      targetComplete !== (row.targetComplete ?? "") ||
+      actualStart !== (row.actualStart ?? "") ||
+      actualComplete !== (row.actualComplete ?? "") ||
+      priority !== row.priority ||
+      notes !== (row.notes ?? "") ||
+      po.toSend() !== undefined ||
+      vendorPo.toSend() !== undefined);
+  const saveFirst = async (): Promise<boolean> => {
+    try {
+      await save.mutateAsync();
+      return true;
+    } catch {
+      // The save's own error toast says why.
+      return false;
+    }
+  };
+
   const drop = useMutation({
     mutationFn: () => archiveRebuild({ data: { id: row!.id } }),
     onSuccess: () => {
@@ -223,6 +242,8 @@ export function RebuildSheet({
   if (!row) return null;
   const waiting = status === "Waiting";
   const locked = !canEdit;
+  const linked = link.data?.id === row.id ? link.data.current : null;
+  const linkedTo = row.installId != null || row.jobId != null ? (linked ? projectLabel(linked) : row.installId != null ? `install #${row.installId}` : "its ticket") : null;
 
   return (
     <>
@@ -290,6 +311,26 @@ export function RebuildSheet({
                   <p className="mt-1 text-xs text-muted-foreground">
                     {account !== row.account ? `Save to move this refurb to ${sentence(accountLock)}` : `Warehouse refurbs and their invoices are for ${sentence(accountLock)}`}
                   </p>
+                </div>
+              ) : linkedTo ? (
+                // Linked to a ticket or an install (11/6), it bills there: its account is that project's.
+                <div data-testid="rebuild-account-linked">
+                  <Label>Account</Label>
+                  <p className="mt-1 text-sm font-medium" data-testid="rebuild-account">
+                    {account}
+                  </p>
+                  {/* The project's account changed since the link (its customer was edited): take it again. */}
+                  {!locked && linked && normalizeCustomerKey(linked.customer) !== normalizeCustomerKey(account) && linked.customer ? (
+                    <button
+                      type="button"
+                      className="mt-1 text-xs text-primary underline-offset-2 hover:underline max-sm:mt-2 max-sm:inline-flex max-sm:min-h-10 max-sm:items-center max-sm:text-sm"
+                      onClick={() => setAccount(linked.customer)}
+                      data-testid="rebuild-account-follow"
+                    >
+                      Use {linked.customer}
+                    </button>
+                  ) : null}
+                  <p className="mt-1 text-xs text-muted-foreground">Follows {linkedTo}. Unlink it below to change the account.</p>
                 </div>
               ) : (
                 <div>
@@ -390,46 +431,7 @@ export function RebuildSheet({
                   <p className="mt-1 text-xs text-muted-foreground">A vendor&apos;s P.O. number, for reference only.</p>
                 </div>
               </div>
-              <div>
-                <Label htmlFor="rb-link">Linked ticket / install</Label>
-                <SelectField
-                  id="rb-link"
-                  className="mt-1"
-                  value={installId ? `install:${installId}` : jobId ? `job:${jobId}` : ""}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v.startsWith("install:")) {
-                      setInstallId(Number(v.slice(8)));
-                      setJobId(null);
-                    } else if (v.startsWith("job:")) {
-                      setJobId(Number(v.slice(4)));
-                      setInstallId(null);
-                    } else {
-                      setInstallId(null);
-                      setJobId(null);
-                    }
-                  }}
-                  allowEmpty
-                  emptyLabel="Not linked — this is its own project"
-                  disabled={locked}
-                >
-                  {(links.data ?? []).map((l) => (
-                    <option key={`${l.kind}-${l.id}`} value={l.kind === "install" ? `install:${l.id}` : `job:${l.id}`}>
-                      {l.label}
-                    </option>
-                  ))}
-                </SelectField>
-                {installId ? (
-                  <OpenLink entityType="install" id={installId} className="mt-1 inline-block text-xs text-primary hover:underline">
-                    Open linked install
-                  </OpenLink>
-                ) : null}
-                {jobId ? (
-                  <OpenLink entityType="service" id={jobId} className="mt-1 inline-block text-xs text-primary hover:underline">
-                    Open linked ticket
-                  </OpenLink>
-                ) : null}
-              </div>
+              <RebuildLinkField row={row} canEdit={canEdit} dirty={dirty} saveFirst={saveFirst} key={`link-${row.id}`} />
               <div>
                 <Label htmlFor="rb-notes">Notes</Label>
                 <Textarea id="rb-notes" className="mt-1" value={notes} onChange={(e) => setNotes(e.target.value)} disabled={locked} />
@@ -475,10 +477,12 @@ export function RebuildSheet({
             <Tabs.Content value="invoices" forceMount className={KEEP_MOUNTED} data-testid="rebuild-panel-invoices">
               <section className="border-b border-border p-5">
                 <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Invoice</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {accountLock && warehouseMayEdit(row.account)
-                    ? `The parts this refurb used, billed to ${sentence(accountLock)} Save them for an Admin to approve.`
-                    : "Billing info for this rebuild."}
+                <p className="mt-1 text-xs text-muted-foreground" data-testid="rebuild-invoice-note">
+                  {linked
+                    ? `It bills on ${projectLabel(linked)}: its parts and labor go on ${billName(linked)}${link.data?.refusal ? "." : linked.lines > 0 ? ` (${lineCount(linked.lines)}, ${money(linked.total)} now).` : "."}`
+                    : accountLock && warehouseMayEdit(row.account)
+                      ? `The parts this refurb used, billed to ${sentence(accountLock)} Save them for an Admin to approve.`
+                      : "Billing info for this rebuild."}
                 </p>
                 {accountLock && !warehouseMayEdit(row.account) ? (
                   // A customer's rebuild: its invoice is an Admin's, and its billing stays closed to Warehouse.

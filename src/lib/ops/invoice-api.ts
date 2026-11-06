@@ -8,6 +8,7 @@ import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount
 import { flagOn } from "@/lib/ops/flag";
 import { INVOICE_TARGETS, carriesPo, cleanPo, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { notifyAdminsInvoiceWaiting } from "@/lib/ops/notify";
+import { rebuildBillsOnLock } from "@/lib/ops/rebuild-link";
 import { BILLED_INVOICES_ON_INSTALL, BILLED_ON_INSTALL, STANDING_NS_INVOICES, voidedSinceMerge } from "@/lib/ops/merged-ticket";
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
@@ -39,7 +40,10 @@ export type InvoiceLine = {
   kind: ChargeKind;
   /** The part on the item list, for its photo and MPN. Null for labor and for an item that is not on the list. */
   part: PartRef | null;
-  /** Copied from a stacked PM. Ticket invoices only; a PM's own invoice lines do not carry one. */
+  /**
+   * Copied from a stacked PM (tickets), or a linked rebuild's line on its project's bill (rb:<rebuild>:<line>, 11/6),
+   * which Unlink takes back. A PM's or rebuild's own invoice lines carry none.
+   */
   sourceKey?: string | null;
 };
 
@@ -230,9 +234,29 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
     return { type, id, customer: (r.customer ?? "").trim(), title: targetTitle(type, { id }), recordRep: r.account_rep, locked: null, po: poOf(r.po) };
   }
   if (type === "rebuild") {
-    const r = (await sql.query<{ account: string | null; title: string | null; po: string | null }>("select account, title, po from rebuilds where id = $1", [id]))[0];
+    const r = (
+      await sql.query<{ account: string | null; title: string | null; po: string | null; install_id: number | null; job_id: number | null; job_kind: string | null; job_wo: string | null; call_id: string | null; install_wo: string | null; own_lines: number }>(
+        `select r.account, r.title, r.po, r.install_id, r.job_id, j.kind as job_kind, j.wo as job_wo, j.call_id, i.wo as install_wo,
+                (select count(*)::int from invoices v join invoice_lines l on l.invoice_id = v.id where v.entity_type = 'rebuild' and v.entity_id = r.id) as own_lines
+           from rebuilds r
+           left join service_jobs j on j.id = r.job_id
+           left join installs i on i.id = r.install_id
+          where r.id = $1`,
+        [id],
+      )
+    )[0];
     if (!r) throw new Error("That rebuild is no longer on the list.");
-    return { type, id, customer: (r.account ?? "").trim(), title: targetTitle(type, { id, title: r.title }), recordRep: null, locked: null, po: poOf(r.po) };
+    // Linked to a ticket or an install (11/6), it bills there: its own invoice takes nothing until it is unlinked.
+    const locked =
+      r.install_id != null
+        ? rebuildBillsOnLock({ kind: "install", name: `Install #${r.install_id}`, wo: r.install_wo?.trim() || null }, Number(r.own_lines))
+        : r.job_id != null
+          ? rebuildBillsOnLock(
+              { kind: r.job_kind === "tlc" ? "tlc" : "service", name: `${r.job_kind === "tlc" ? "TLC" : "Service"} ticket ${r.call_id?.trim() || `#${r.job_id}`}`, wo: r.job_wo?.trim() || null },
+              Number(r.own_lines),
+            )
+          : null;
+    return { type, id, customer: (r.account ?? "").trim(), title: targetTitle(type, { id, title: r.title }), recordRep: null, locked, po: poOf(r.po) };
   }
   const r = (await sql.query<{ customer: string | null; producer: string | null; po: string | null }>("select customer, producer, po from deals where id = $1 and archived = false", [id]))[0];
   if (!r) throw new Error("That deal is no longer on the list.");
@@ -242,6 +266,11 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
 /** The lock sentence resolveRecord returns for a PM, or null when the PM bills on its own invoice. */
 export async function pmInvoiceLock(sql: Sql, pmId: number): Promise<string | null> {
   return (await resolveRecord(sql, "pm", pmId)).locked;
+}
+
+/** A rebuild's billing info as an approve stores it, for Unlink (rebuild-link-api.ts), which approves its invoice. */
+export async function rebuildBillTo(sql: Sql, rebuildId: number): Promise<BillTo> {
+  return billTo(sql, await resolveRecord(sql, "rebuild", rebuildId));
 }
 
 /** Billing info from the account: name, account number, address, rep (the account's rep, else the record's). */
@@ -335,13 +364,14 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
     qty: string;
     rate: string;
     kind: ChargeKind;
+    source_key: string | null;
     pid: number | null;
     sku: string | null;
     mfr_part: string | null;
     has_image: boolean | null;
     image_version: string | null;
   }>(
-    `select l.id, l.item, l.description, l.qty, l.rate, l.kind,
+    `select l.id, l.item, l.description, l.qty, l.rate, l.kind, l.source_key,
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
             case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version
        from invoice_lines l
@@ -363,6 +393,7 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
     rate: Number(r.rate),
     kind: r.kind,
     part: r.pid == null ? null : { id: Number(r.pid), sku: r.sku ?? "", mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
+    sourceKey: r.source_key ?? null,
   }));
 }
 
@@ -431,7 +462,7 @@ const lineInput = z.object({
   description: z.string().max(500),
   qty: z.union([z.number(), z.string().max(20)]),
   rate: z.union([z.number(), z.string().max(20)]),
-  sourceKey: z.string().max(400).regex(/^(pmkit|mp):/).nullable().optional(),
+  sourceKey: z.string().max(400).regex(/^(pmkit|mp|rb):/).nullable().optional(),
 });
 
 const discountInput = z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable();
@@ -455,10 +486,10 @@ const WAREHOUSE_SAVES = "An Admin approves warehouse invoices. Use Save for Appr
 const WAITING_FOR_ADMIN = "This invoice is waiting for an Admin to approve it.";
 const SAVED_SINCE_OPENED = "Warehouse saved changes to this invoice after you opened it, so nothing was approved. Look over the new lines, then approve.";
 /**
- * An install's invoice gets lines saved for approval when a ticket is merged into the install, or when Merge installs
- * moves the invoice of an install a ticket was merged into (10/30).
+ * An install's invoice gets lines saved for approval when a ticket is merged into the install, when Merge installs
+ * moves the invoice of an install a ticket was merged into (10/30), and when a rebuild is linked or unlinked (11/6).
  */
-const LINES_ADDED_SINCE_OPENED = "Lines were saved for approval on this invoice after you opened it (a ticket or another install was merged into this one), so nothing was approved. Look over the new lines, then approve.";
+const LINES_ADDED_SINCE_OPENED = "Lines were saved for approval on this invoice after you opened it (a ticket or another install was merged into this one, or a rebuild was linked to it or unlinked), so nothing was approved. Look over the new lines, then approve.";
 /** Approved again, or put on the record, after the window opened (Merge installs moves an install's invoice, 10/30). */
 const CHANGED_SINCE_OPENED = "This invoice was changed after you opened it, so nothing was approved. Look over it as it is now, then approve.";
 
@@ -470,6 +501,10 @@ async function changedSinceOpened(sql: Sql, type: InvoiceTarget, id: number, see
     (e: unknown) => (e instanceof Error ? e.message : String(e)),
   );
   if (gone) return gone;
+  if (type === "rebuild") {
+    const locked = (await resolveRecord(sql, type, id)).locked;
+    if (locked) return locked;
+  }
   const now = await head(sql, type, id);
   if (now?.submitted_at && savedPart(now.version) !== savedPart(seen)) return type === "install" ? LINES_ADDED_SINCE_OPENED : SAVED_SINCE_OPENED;
   return CHANGED_SINCE_OPENED;
@@ -539,6 +574,10 @@ export function approvePmInvoiceSql(): string {
 export function approveRecordInvoiceSql(): string {
   return `with rec as (
        select i.id from installs i where $1::text = 'install' and i.id = $2::int and i.archived = false for key share
+     ), rb as (
+       -- A rebuild linked to a ticket or an install bills there (11/6): checked on its locked row, so a Link that
+       -- committed while this waited stops it, and a Link waits for this to commit.
+       select r.id from rebuilds r where $1::text = 'rebuild' and r.id = $2::int and r.install_id is null and r.job_id is null for share
      ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
@@ -553,6 +592,7 @@ export function approveRecordInvoiceSql(): string {
                   when 'deal' then (select d.po from deals d where d.id = $2::int)
                 end) end
         where ($1::text <> 'install' or exists (select 1 from rec))
+          and ($1::text <> 'rebuild' or exists (select 1 from rb))
           -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
           and ($12::text is null or exists (select 1 from invoices x where x.entity_type = $1 and x.entity_id = $2::int))
        on conflict (entity_type, entity_id) do update set
@@ -578,11 +618,12 @@ export function approveRecordInvoiceSql(): string {
        delete from invoice_lines where invoice_id in (select id from inv) returning id
      ),
      lined as (
-       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
-       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+       -- A linked rebuild's lines on an install keep their rb: key ($20, 11/6), so Unlink still finds them.
+       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, source_key)
+       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord, nullif(btrim(t.source_key), '')
          from inv
-         join unnest($13::text[], $14::text[], $15::numeric[], $16::numeric[], $17::text[]) with ordinality
-              as t(item, description, qty, rate, kind, ord) on true
+         join unnest($13::text[], $14::text[], $15::numeric[], $16::numeric[], $17::text[], $20::text[]) with ordinality
+              as t(item, description, qty, rate, kind, source_key, ord) on true
         where (select count(*) from cleared) >= 0
        returning id
      )
@@ -596,15 +637,20 @@ export function approveRecordInvoiceSql(): string {
  * changes.
  */
 export function saveForApprovalSql(): string {
-  return `with inv as (
+  return `with rb as (
+       -- Locked and checked as it is now: linked to a ticket or an install (11/6), a rebuild bills there.
+       select r.id from rebuilds r
+        where r.id = $1::int and coalesce(r.archived, false) = false
+          and regexp_replace(lower(coalesce(r.account, '')), '[^a-z0-9]+', '', 'g') = any($16::text[])
+          and r.install_id is null and r.job_id is null
+        for share
+     ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
          bill_name, bill_account, bill_address, bill_rep, total, submitted_by, submitted_at, updated_at
        )
        select 'rebuild', r.id, $2, $3, $4, $5, $6, $7, $8, $9, $10, now(), now()
-         from rebuilds r
-        where r.id = $1::int and coalesce(r.archived, false) = false
-          and regexp_replace(lower(coalesce(r.account, '')), '[^a-z0-9]+', '', 'g') = any($16::text[])
+         from rb r
        on conflict (entity_type, entity_id) do update set
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
@@ -630,7 +676,7 @@ export function saveForApprovalSql(): string {
 
 const ACTIVITY_TYPE: Record<InvoiceTarget, string> = { service: "service", tlc: "tlc", pm: "pm", install: "install", rebuild: "rebuild", deal: "deal" };
 
-type CleanLine = { item: string; description: string; qty: number; rate: number; kind: ChargeKind };
+type CleanLine = { item: string; description: string; qty: number; rate: number; kind: ChargeKind; sourceKey?: string | null };
 
 /** The lines of a PM, install, rebuild or deal invoice as saved: each one's kind from the item list, else from its name. */
 async function recordLines(sql: Sql, raw: z.output<typeof lineInput>[]): Promise<CleanLine[]> {
@@ -647,6 +693,7 @@ async function recordLines(sql: Sql, raw: z.output<typeof lineInput>[]): Promise
     qty: cleanQty(l.qty)!,
     rate: cleanRate(l.rate)!,
     kind: kinds.get(items[i]!.toLowerCase()) ?? kindForItem(items[i]!),
+    sourceKey: String(l.sourceKey ?? "").trim() || null,
   }));
 }
 
@@ -735,6 +782,8 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       ...lineArrays(lines),
       typedPo.po,
       poSent,
+      // A linked rebuild's lines on an install keep their key (11/6); other invoices' lines carry none.
+      lines.map((l) => (ref.type === "install" ? (l.sourceKey ?? null) : null)),
     ]);
     if (!saved[0]) throw new Error(await changedSinceOpened(sql, ref.type, data.id, data.seen ?? null));
   }
@@ -765,6 +814,8 @@ export async function saveInvoiceForApprovalFor(sql: Sql, data: z.output<typeof 
   if (!viewer.warehouse) throw new Error("Save for Approval is the Warehouse step. Approve the invoice instead.");
   if (data.type !== "rebuild") throw new Error("Warehouse invoices are for rebuilds.");
   const ref = await resolveRecord(sql, "rebuild", data.id);
+  // Linked to a ticket or an install, it bills there (11/6).
+  if (ref.locked) throw new Error(ref.locked);
   const before = headState(await head(sql, "rebuild", data.id));
   const powers = invoicePowers(viewer, { type: ref.type, customer: ref.customer, state: before });
   if (!powers.canSave) throw new Error(powers.blocked ?? "This invoice can't be saved for approval.");
@@ -809,6 +860,8 @@ export async function saveInvoiceForApprovalFor(sql: Sql, data: z.output<typeof 
     }
     const removed = (await sql.query<{ archived: boolean }>("select coalesce(archived, false) as archived from rebuilds where id = $1", [data.id]))[0]?.archived;
     if (removed) throw new Error("This rebuild was removed from the board, so nothing was saved.");
+    const linked = (await resolveRecord(sql, "rebuild", data.id)).locked;
+    if (linked) throw new Error(`Nothing was saved. ${linked}`);
     throw new Error("This rebuild was moved off Katz Coffee Service Dept. while you had it open, so nothing was saved.");
   }
   await sql
