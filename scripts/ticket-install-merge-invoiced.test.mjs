@@ -370,7 +370,7 @@ test("the Billing Backfill records the merged ticket's own invoices only, and th
     null,
     null,
     null,
-    `The WO is on ticket #${live}, install #${installId}, and the invoice date (${TODAY}) fits each of them, so the Backfill can't tell which one NetSuite billed. Skipped.`,
+    `The WO is on ticket #${live}, install #${installId}, and the invoice date (${TODAY}) fits each of them, so the Backfill can't tell which one NetSuite billed. Skipped. If the ticket is the install's work, merge it into the install first (Merge into install), then run it again.`,
   ]);
   assert.equal((await plan(invoicesFile(invRow(INV, "Paid In Full")))).jobId, jobId);
   await pg.query("delete from service_jobs where id = $1", [live]);

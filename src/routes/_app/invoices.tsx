@@ -38,11 +38,12 @@ import { downloadCsv } from "@/components/desk/download-csv";
 
 /**
  * Invoices (Admin, Grok's billing request through Chuy, 2026-10-28). Three views of the same billing:
- * - Invoices: every service and TLC ticket with its Sales Order and NetSuite invoices, the checks, and a CSV;
+ * - Invoices: every service and TLC ticket, install on the board and PM not stacked (11/5) with its Sales Order and
+ *   NetSuite invoices, the checks, and a CSV;
  * - Tickets In Window: every work order on Tickets, TLC, PMs and Installs received, completed or invoiced in a window
  *   (also as JSON for an Admin at /api/admin/tickets-in-window);
  * - Location Check: Corrigo service locations that aren't the ticket's account, and invoices billed from the wrong
- *   warehouse for the tech.
+ *   warehouse for the tech (tickets', installs' and PMs').
  * Read-only. The filters live in the address bar.
  */
 type Tab = "invoices" | "window" | "location";
@@ -95,8 +96,9 @@ function Page() {
       <header>
         <h1 className="font-display text-3xl font-medium tracking-tight">Invoices</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          What each ticket billed in NetSuite: its Sales Order, invoices and checks. Read-only; invoices come in through
-          Billing Backfill (NetSuite) on Tickets. Filters stay in the address bar, so a filtered list can be bookmarked.
+          What each ticket, install and PM billed in NetSuite: its Sales Order, invoices and checks. Read-only; invoices come
+          in through Billing Backfill (NetSuite) on Tickets. Filters stay in the address bar, so a filtered list can be
+          bookmarked.
         </p>
       </header>
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Views" data-testid="invoices-tabs">
@@ -167,7 +169,7 @@ function InvoicesView({ filters, onFilters }: { filters: BillingFilters; onFilte
           label="Completed, No SO"
           value={counts.noSo}
           tone={counts.noSo ? "warn" : undefined}
-          hint="Not billed yet"
+          hint="No SO or NetSuite invoice in KatzDesk yet"
           selected={is({ so: "no", invoice: "no", status: "Completed" })}
           onClick={chip({ so: "no", invoice: "no", status: "Completed" })}
         />

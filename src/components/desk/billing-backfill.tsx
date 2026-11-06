@@ -147,10 +147,11 @@ export function BillingBackfillButton() {
           <DialogTitle>Billing Backfill (NetSuite)</DialogTitle>
           <DialogDescription>
             Drop NetSuite&apos;s charges file, invoices file, or both (CSV or Excel), keyed by WO. Each WO goes on its ticket, TLC, install or
-            PM. One not invoiced yet gets its charges (credits netted, the discount as NetSuite&apos;s header discount), then its Sales Order and
-            billed date, then its invoices. One already invoiced only gets its invoice records: number, status, total and amount remaining. An
-            install&apos;s or a PM&apos;s charges are NetSuite&apos;s lines, kept as billed beside its own invoice, never in Export Billing. An
-            invoice on the record already is never added twice. Merged records, PMs stacked on a ticket and Walk-In are skipped.
+            PM. A ticket not invoiced yet gets its charges (credits netted, the discount as NetSuite&apos;s header discount), then its Sales
+            Order and billed date, then its invoices; one already invoiced only gets its invoice records: number, status, total and amount
+            remaining. An install or a PM gets NetSuite&apos;s lines for the WO, its Sales Order and its invoices on every run: they are kept as
+            billed beside its own invoice, never in Export Billing. An invoice on the record already is never added twice. Merged records,
+            PMs stacked on a ticket and Walk-In are skipped.
           </DialogDescription>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" variant={preview ? "outline" : "default"} disabled={read.isPending || write.isPending} onClick={() => input.current?.click()}>
@@ -376,7 +377,10 @@ function PlanRow({ p, on, disabled, onToggle }: { p: BackfillPlan; on: boolean; 
         <td className="px-3 py-2 text-xs">
           {p.status === "skip" ? null : (
             <span className="block tabular">
-              {p.amounts.kdSource === "katzdesk" ? "KatzDesk invoice" : p.amounts.kdSource === "netsuite" ? "NetSuite lines" : "KD"} {money(p.amounts.kd)} · NS{" "}
+              {p.amounts.kdSource === "none"
+                ? "No charges to check"
+                : `${p.amounts.kdSource === "katzdesk" ? "KatzDesk invoice" : p.amounts.kdSource === "netsuite" ? "NetSuite lines" : "KD"} ${money(p.amounts.kd)}`}{" "}
+              · NS{" "}
               {money(p.amounts.netsuite)}
               {p.amounts.corrigo != null ? ` · Corrigo ${money(p.amounts.corrigo)}` : ""}
             </span>

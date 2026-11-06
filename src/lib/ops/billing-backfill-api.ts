@@ -164,9 +164,6 @@ export async function loadBackfillContext(sql: Q, keys: string[], invoiceKeys: s
 /** SQL: a NetSuite invoice number the way the backfill compares them (soKey): upper case, no spaces. */
 const INVOICE_KEY = (col: string) => `upper(regexp_replace(${col}, '\\s+', '', 'g'))`;
 
-/** SQL: the invoice row (alias) isn't Voided. */
-const LIVE_ROW = (alias: string) => `lower(regexp_replace(${alias}.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')`;
-
 /** Where each of these NetSuite invoices is recorded already: tickets, installs and PMs. */
 async function loadRecordedAt(sql: Q, invoiceKeys: string[]): Promise<Map<string, { kind: BackfillKind; id: number }[]>> {
   const out = new Map<string, { kind: BackfillKind; id: number }[]>();
@@ -274,7 +271,7 @@ export async function loadBackfillRecords(sql: Q, keys: string[]): Promise<Backf
       technician: r.technician,
       received: r.received,
       completed: r.completed,
-      blocked: r.stacked_job_id ? `PM #${r.id} is stacked on ticket #${r.stacked_job_id} and bills on it: its NetSuite invoices go on that ticket.` : null,
+      blocked: r.stacked_job_id ? `PM #${r.id} is stacked on ticket #${r.stacked_job_id} and bills on it: its billing is the ticket's.` : null,
       seen: r.seen,
     });
   }
@@ -295,6 +292,7 @@ export async function loadBackfillRecords(sql: Q, keys: string[]): Promise<Backf
       lines: here?.lines ?? [],
       invoices: billing.invoices.filter((i) => i.record === rk).map(({ record: _r, ...i }) => i),
       otherNet: Math.round(mine.filter((h) => h !== here).reduce((s, h) => s + h.net, 0) * 100) / 100,
+      nsWos: mine.map((h) => ({ woKey: h.woKey, net: h.net, charges: h.lines.length > 0 || !!h.discount })),
       katzdesk: own.get(rk) ?? null,
       carried: b.kind === "install" ? (carried.get(b.id) ?? []) : [],
     };
@@ -539,7 +537,6 @@ with plan as (
     join rplan p on p.rtype = 'install' and p.rid = i.id
    where i.updated_at::text = p.seen
      and i.archived = false and i.duplicate_of is null
-     and (p.locked or not exists (select 1 from record_ns_invoices x where x.install_id = i.id and x.wo_key = p.wo_key and ${LIVE_ROW("x")}))
      for update of i
 ), rp as (
   select m.id
@@ -547,7 +544,6 @@ with plan as (
     join rplan p on p.rtype = 'pm' and p.rid = m.id
    where m.updated_at::text = p.seen
      and m.stacked_job_id is null
-     and (p.locked or not exists (select 1 from record_ns_invoices x where x.pm_id = m.id and x.wo_key = p.wo_key and ${LIVE_ROW("x")}))
      for update of m
 ), ok as (
   select (select count(*) from j) = (select count(*) from plan)

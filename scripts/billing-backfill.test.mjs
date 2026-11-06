@@ -196,8 +196,8 @@ test("skips: merged, Walk-In, no record, two tickets; a PM's WO goes on the PM (
   await ticket(sql, { wo: "WO-0402", duplicateOf: keeper });
   await ticket(sql, { wo: "WO-0403", customer: "Walk - In" });
   const pm = Number((await sql.query("insert into pm_jobs (customer, wo, status) values ('Zz Bean Cafe', 'WO-0404', 'Completed') returning id"))[0].id);
-  await ticket(sql, { wo: "WO-0406", completed: "2026-09-10" });
-  await ticket(sql, { wo: "WO-0406", completed: "2026-09-12" });
+  const twinA = await ticket(sql, { wo: "WO-0406", completed: "2026-09-10" });
+  const twinB = await ticket(sql, { wo: "WO-0406", completed: "2026-09-12" });
   const cancelled = await ticket(sql, { wo: "WO-0407" });
   const left = await ticket(sql, { wo: "WO-0408" });
   const row = (wo, inv, so = "", status = "Open", soStatus = "Billed") => [wo, so, so ? soStatus : "", inv, inv ? "2026-10-02" : "", inv ? status : "(no invoice yet)", inv ? "10" : "", inv ? "10" : "", inv ? "Yes" : "", ""];
@@ -219,6 +219,10 @@ test("skips: merged, Walk-In, no record, two tickets; a PM's WO goes on the PM (
   assert.match(by["WO-0402"].reason, new RegExp(`Merged into #${keeper}`));
   assert.match(by["WO-0403"].reason, /Walk-In, which is never a billing account/);
   assert.deepEqual([by["WO-0404"].status, by["WO-0404"].kind, by["WO-0404"].recordId, by["WO-0404"].reason], ["write", "pm", pm, null]);
+  // No charges on the PM in KatzDesk or from NetSuite: nothing to check its invoice against (11/5 review).
+  assert.deepEqual([by["WO-0404"].amounts.kdSource, by["WO-0404"].amounts.nsMismatch, by["WO-0404"].warnings], ["none", false, []]);
+  // Two tickets with one WO, as before installs and PMs took billing.
+  assert.equal(by["WO-0406"].reason, `The WO is on 2 tickets (#${twinA}, #${twinB}). Can't tell which one NetSuite billed.`);
   assert.equal(by["WO-0405"].reason, "No ticket, install or PM has this WO.");
   assert.match(by["WO-0406"].reason, /on 2 tickets/);
   assert.equal(by["WO-0407"].status, "write");
@@ -231,9 +235,9 @@ test("skips: merged, Walk-In, no record, two tickets; a PM's WO goes on the PM (
     same: 0,
     skip: 4,
     doubleBill: 0,
-    nsMismatch: 3,
+    nsMismatch: 2,
     corrigoMismatch: 0,
-    warnings: 3,
+    warnings: 2,
     byKind: { service: 2, tlc: 0, install: 0, pm: 1 },
   });
   const done = await api.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: ["408"] });

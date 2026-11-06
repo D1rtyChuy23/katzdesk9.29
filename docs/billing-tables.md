@@ -72,24 +72,35 @@ KatzDesk: nothing else writes these. Each row is on exactly one install (`instal
 | `billing_backfill_runs` | Each Write of the backfill: who, when, the files, the preview's counts, what was written | One per Write |
 
 - **Matched by WO** the same way as tickets (`woMatchKey`): an install by any of its WOs (`install_work_orders`, or its
-  own `wo`), a PM by its `wo`. A WO on more than one record (a ticket and an install, say) goes by the invoice dates
-  (`invoiceFitsTicket`), as two tickets with one WO always have; when they fit more than one, it is skipped and says
-  why. Skipped too: an install taken off the board or merged into another (its WOs went to the one kept), a PM stacked
-  on a ticket (it bills on that ticket), Walk-In.
-- **Not invoiced yet** (no live invoice on the record for that WO): the WO's lines, discount, SO and billed date, then
-  its invoices. **Invoiced already**: the invoices only (status, total, what's left), as on a locked ticket.
+  own `wo`), a PM by its `wo`. A WO on more than one record goes by the invoice dates (`invoiceFitsTicket`: from a
+  week before it came in to a year after it was done), as two tickets with one WO always have. Beside an install or a
+  PM, two records that both fit are told apart by the closer one: an invoice within 45 days of when a record was done
+  is that record's (WO numbers started over in July 2026, so a new ticket and an old PM can share one). Still a tie:
+  skipped, saying why; a ticket and an install of one account get "merge it into the install first". No invoice date
+  at all: the WO's one live ticket keeps it, as before 11/5, with a warning naming the install or PM that has it too.
+  Skipped too: an install taken off the board or merged into another (its WOs went to the one kept), a PM stacked on a
+  ticket (it bills on that ticket), Walk-In.
+- **Every run that has them** writes the WO's lines, discount, SO and billed date, and its invoices: NetSuite's billing
+  on an install or a PM is never locked the way a ticket's charges are, since it's NetSuite's as it stands and never
+  exported. A file with only invoices leaves the lines alone; the billed date is the first the WO was billed on.
 - **KatzDesk's own invoice** for the install or PM (`invoices` / `invoice_lines`, the Invoice window) is never written
   by the backfill. It is the record's charges for the checks when it has lines; otherwise NetSuite's lines are.
   Mismatch = live invoices ≠ charges; possible double bill = two or more live invoices over the charges; both after
-  the header discount, no tax.
+  the header discount, no tax, and both the record's (all its WOs together). A record with no lines either way has
+  nothing to check against: no mismatch, no double bill.
 - **Never billed again:** Export Billing reads `ticket_charges` only, so NetSuite's lines on installs and PMs never
   reach it.
 - **On the card already:** an invoice already on the record (under any of its WOs) is refreshed where it is, never
   added twice. A ticket merged into the install as billed (10/30) keeps its billing: its Sales Order, invoices and
   lines in the files are listed as on the install's card already and not written there (a row of it that would change
-  the ticket stops the WO until it is run on its own). The same invoice on another record is written and warned about.
+  the ticket stops the WO until it is run on its own). The same invoice on another record, or under another record's
+  WO in the same files, is written on both and warned about on both.
+- **Merge installs** takes NetSuite's billing along with the WOs: each WO's lines and SO the kept install has none for,
+  and each NetSuite invoice it doesn't have. A PM billed in NetSuite (a live invoice, an SO or lines) can't be stacked
+  on a ticket: `pm_netsuite_billed` guards the stack.
 - **Shown:** the install's and PM's Invoices tab (NetSuite section), the Invoices page (installs on the board, PMs not
-  stacked; an installed install counts as Completed), and Tickets In Window.
+  stacked; an installed install counts as Completed), Tickets In Window (each install WO row with its own WO's SO and
+  invoices), and Location Check's warehouse rule.
 
 ## What is not covered
 

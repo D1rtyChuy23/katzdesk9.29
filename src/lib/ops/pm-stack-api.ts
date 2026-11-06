@@ -28,7 +28,11 @@ async function requireWriter(sql: Sql, userId: string): Promise<string> {
   return r?.username || "Teammate";
 }
 
-async function loadStackPair(sql: Sql, pmId: number, jobId: number): Promise<{ pm: StackPm; ticket: StackTicket; stackedCount: number; pmInvoiceHasLines: boolean } | null> {
+async function loadStackPair(
+  sql: Sql,
+  pmId: number,
+  jobId: number,
+): Promise<{ pm: StackPm; ticket: StackTicket; stackedCount: number; pmInvoiceHasLines: boolean; pmNetSuite: string | null } | null> {
   const pm = (await sql.query<{ id: number; customer: string | null; status: string; stacked_job_id: number | null }>(
     "select id, customer, status, stacked_job_id from pm_jobs where id = $1",
     [pmId],
@@ -50,6 +54,18 @@ async function loadStackPair(sql: Sql, pmId: number, jobId: number): Promise<{ p
      ) as has`,
     [pmId],
   ))[0];
+  // Billed in NetSuite on its own (the Billing Backfill, 11/5): its latest live invoice, else its Sales Order, else its lines.
+  const ns = (await sql.query<{ billed: string | null }>(
+    `select coalesce(
+       (select x.ns_invoice from record_ns_invoices x
+         where x.pm_id = $1 and lower(regexp_replace(x.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
+         order by x.invoice_date desc nulls last, x.id desc limit 1),
+       (select btrim(b.ns_so) from record_ns_billing b where b.pm_id = $1 and nullif(btrim(b.ns_so), '') is not null order by b.id desc limit 1),
+       (select 'lines from the Billing Backfill' from record_ns_billing b
+         where b.pm_id = $1 and exists (select 1 from record_ns_charges c where c.billing_id = b.id) limit 1)
+     ) as billed`,
+    [pmId],
+  ))[0];
   return {
     pm: { id: Number(pm.id), customer: pm.customer, status: pm.status, stackedJobId: pm.stacked_job_id == null ? null : Number(pm.stacked_job_id) },
     ticket: {
@@ -66,6 +82,7 @@ async function loadStackPair(sql: Sql, pmId: number, jobId: number): Promise<{ p
     },
     stackedCount: Number(count?.n ?? 0),
     pmInvoiceHasLines: flagOn(lines?.has),
+    pmNetSuite: ns?.billed ?? null,
   };
 }
 
@@ -81,7 +98,7 @@ export const stackPmOnTicket = createServerFn({ method: "POST" })
     if (!saved[0]) {
       const pair = await loadStackPair(sql, data.pmId, data.jobId);
       if (!pair) throw new Error("That PM or ticket is no longer on the list.");
-      throw new Error(stackRefusal(pair.pm, pair.ticket, pair.stackedCount, pair.pmInvoiceHasLines) ?? "That PM could not be stacked.");
+      throw new Error(stackRefusal(pair.pm, pair.ticket, pair.stackedCount, pair.pmInvoiceHasLines, pair.pmNetSuite) ?? "That PM could not be stacked.");
     }
     return { ok: true as const };
   });
@@ -233,6 +250,8 @@ export async function listForJob(sql: Sql, jobId: number) {
               join invoice_lines l on l.invoice_id = i.id
              where i.entity_type = 'pm' and i.entity_id = p.id
             )
+            -- Billed in NetSuite on its own (the Billing Backfill, 11/5).
+            and not pm_netsuite_billed(p.id)
           order by coalesce(p.completed_at, p.projected, p.received) desc nulls last, p.id desc
           limit 20`,
         [key],

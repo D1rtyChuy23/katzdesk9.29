@@ -124,7 +124,8 @@ export function invoicesCsv(rows: TicketBillingRow[]): string {
   return toCsv(
     [
       "Board",
-      "Ticket",
+      // A ticket's, an install's or a PM's id (11/5): the board says which.
+      "Record",
       "WO",
       "Account",
       "Tech",

@@ -38,7 +38,7 @@ export function RecordNetSuitePanel({ type, id }: { type: RecordType; id: number
         <p className="mt-2 text-sm text-muted-foreground">{billing.isError ? "Couldn't load NetSuite's billing." : "Loading…"}</p>
       ) : b.stackedOn ? (
         <p className="mt-2 text-sm text-muted-foreground" data-testid="record-netsuite-stacked">
-          This PM is stacked on ticket #{b.stackedOn} and bills on it: its NetSuite invoices are on that ticket.
+          This PM is stacked on ticket #{b.stackedOn} and bills on it, so the Billing Backfill leaves its WO alone.
         </p>
       ) : !b.invoices.length && !b.groups.some((g) => g.lines.length || g.discount) ? (
         <p className="mt-2 text-sm text-muted-foreground">
@@ -74,7 +74,7 @@ export function RecordNetSuitePanel({ type, id }: { type: RecordType; id: number
           {b.groups
             .filter((g) => g.lines.length || g.discount)
             .map((g) => (
-              <BilledLines key={g.wo} g={g} />
+              <BilledLines key={g.woKey} g={g} />
             ))}
           <RecordChecks b={b} what={what} />
         </>
@@ -132,6 +132,14 @@ function RecordChecks({ b, what }: { b: RecordBillingView; what: string }) {
   else if (b.mismatch) lines.push({ tone: "warn", text: `NetSuite's live invoices (${money(b.liveTotal)}) don't match ${charges}.` });
   for (const w of b.locationWarnings) lines.push({ tone: "warn", text: w });
   if (!lines.length) {
+    // No lines in KatzDesk and none from NetSuite: nothing to check the invoices against.
+    if (b.chargeSource === "none") {
+      return live ? (
+        <p className="mt-2 text-xs text-muted-foreground" data-testid="record-netsuite-checks-none">
+          No charges on this {what} to check the invoices against: no invoice in KatzDesk with lines, and no lines from NetSuite.
+        </p>
+      ) : null;
+    }
     return live ? (
       <p className="mt-2 text-xs text-muted-foreground" data-testid="record-netsuite-checks-ok">
         The live invoices match {charges}.

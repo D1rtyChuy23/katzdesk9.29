@@ -6,14 +6,15 @@
  *   are that invoice's lines after its discount when it has any; otherwise NetSuite's lines the Backfill brought back
  *   (after NetSuite's header discount). No tax on either.
  * - Live invoices (not Voided) are what NetSuite billed. A mismatch is live invoices ≠ charges; a possible double bill
- *   is two or more live invoices over the charges, as on tickets.
+ *   is two or more live invoices over the charges, as on tickets. A record with neither kind of lines has nothing to
+ *   check against: no mismatch, no double bill.
  * - A PM stacked on a ticket bills on that ticket: its billing is the ticket's, so it isn't listed here.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware, salesRepScope } from "@/lib/ops/access";
-import { loadKatzDeskInvoiceNets, loadRecordNsBilling, type RecordNsHeader, type RecordNsInvoice } from "@/lib/ops/billing-backfill-api";
+import { loadKatzDeskInvoiceNets, loadRecordNsBilling, type RecordNsInvoice } from "@/lib/ops/billing-backfill-api";
 import { locationWarning } from "@/lib/ops/billing-rules";
 import type { TicketBillingRow } from "@/lib/ops/billing-report";
 import { summarizeBilling, type BillingSummary } from "@/lib/ops/ticket-billing-api";
@@ -34,6 +35,8 @@ export type RecordType = "install" | "pm";
 /** One WO's NetSuite billing on the record, as the panel shows it. */
 export type RecordNsGroup = {
   wo: string;
+  /** woMatchKey of the WO. */
+  woKey: string;
   so: string | null;
   billedOn: string | null;
   discount: Discount | null;
@@ -85,7 +88,9 @@ export async function loadRecordBillings(sql: Q, installIds: number[], pmIds: nu
     const sum = summarizeBilling({ ns_so: so, billed_at: billed }, { lines, subtotal: net, off: 0, net, discount: null }, invoices);
     out.set(key, {
       ...sum,
-      groups: headers.map((h) => ({ wo: h.wo, so: h.so, billedOn: h.billedOn, discount: h.discount, lines: h.lines, subtotal: h.subtotal, off: h.off, net: h.net })),
+      // No lines in KatzDesk and none from NetSuite: nothing to check the invoices against (11/5 review).
+      ...(chargeSource === "none" ? { doubleBill: false, mismatch: false } : {}),
+      groups: headers.map((h) => ({ wo: h.wo, woKey: h.woKey, so: h.so, billedOn: h.billedOn, discount: h.discount, lines: h.lines, subtotal: h.subtotal, off: h.off, net: h.net })),
       invoiceRows: invoices.map(({ record: _r, ...i }) => ({ ...i, wo: headers.find((h) => h.woKey === i.woKey)?.wo ?? null })),
       katzdesk,
       chargeSource,

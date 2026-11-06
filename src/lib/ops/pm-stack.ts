@@ -29,8 +29,11 @@ export type StackTicket = {
 
 const customerKeySql = (col: string) => `regexp_replace(lower(coalesce(${col}, '')), '[^a-z0-9]+', '', 'g')`;
 
-/** Why this PM cannot stack on this ticket. The first reason wins. A completed PM can stack. */
-export function stackRefusal(pm: StackPm, ticket: StackTicket, stackedCount: number, pmInvoiceHasLines: boolean): string | null {
+/**
+ * Why this PM cannot stack on this ticket. The first reason wins. A completed PM can stack. `pmNetSuite`: what the PM
+ * is billed on in NetSuite, from the Billing Backfill (a live invoice, else its Sales Order), when it is (11/5).
+ */
+export function stackRefusal(pm: StackPm, ticket: StackTicket, stackedCount: number, pmInvoiceHasLines: boolean, pmNetSuite: string | null = null): string | null {
   if (pm.status === "Cancelled") return `PM #${pm.id} is cancelled.`;
   if (ticket.status === "Cancelled") return `Ticket #${ticket.id} is cancelled.`;
   if (ticket.status === "Phone Resolved" || ticket.phoneResolved) {
@@ -54,6 +57,7 @@ export function stackRefusal(pm: StackPm, ticket: StackTicket, stackedCount: num
   }
   if (stackedCount >= 10) return `Ticket #${ticket.id} already carries 10 PMs.`;
   if (pmInvoiceHasLines) return `PM #${pm.id} already has its own approved invoice, so it stays billed there.`;
+  if (pmNetSuite) return `PM #${pm.id} is billed in NetSuite (${pmNetSuite}), so it bills on its own.`;
   return null;
 }
 
@@ -116,6 +120,8 @@ export function stackPmSql(): string {
           -- A volatile function reads with a fresh snapshot, so an own-invoice approve that committed while this
           -- statement waited for the PM lock is seen (a plain subquery here would use the statement's old snapshot).
           and not pm_own_invoice_has_lines(pm.id)
+          -- Billed in NetSuite on its own (the Billing Backfill, 11/5): the ticket would bill it again.
+          and not pm_netsuite_billed(pm.id)
      ), upd as (
        update pm_jobs p
           set stacked_job_id = ok.job_id, updated_at = now()

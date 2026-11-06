@@ -324,6 +324,8 @@ export type BackfillRecord = {
   invoices: (StoredNsInvoice & { woKey: string | null })[];
   /** The record's other WOs' NetSuite charges, after their discounts. */
   otherNet: number;
+  /** Each of the record's WOs with NetSuite billing from earlier runs: its net after its discount, and whether it has lines or a discount. */
+  nsWos?: { woKey: string; net: number; charges: boolean }[];
   /** KatzDesk's own invoice (the Invoice window), when it has lines: how many, and the total after its discount. */
   katzdesk: { lines: number; net: number } | null;
   /** An install's tickets merged in as billed: their billing is on the install's card already. */
@@ -394,11 +396,12 @@ export type BackfillPlan = {
   invoices: BackfillInvoicePlan[];
   /**
    * kd: what KatzDesk says the record bills. A ticket's charges; an install's or a PM's own invoice (the Invoice
-   * window) when it has lines, else NetSuite's charges on it (kdSource).
+   * window) when it has lines, else NetSuite's charges on it (kdSource). An install or a PM with neither has nothing to
+   * check its invoices against ("none"): no mismatch, no double bill.
    */
   amounts: {
     kd: number;
-    kdSource: "charges" | "katzdesk" | "netsuite";
+    kdSource: "charges" | "katzdesk" | "netsuite" | "none";
     netsuite: number;
     corrigo: number | null;
     doubleBill: boolean;
@@ -499,8 +502,8 @@ const NO_SO = "no Sales Order";
  */
 type RowsAbout = { sos: Set<string>; invoices: Set<string>; soOnly: boolean; dated: { invoice: string; date: string }[] };
 
-/** What a WO's billing can go on. */
-type Candidate = { ticket: BackfillTicket } | { record: BackfillRecord };
+/** What a WO's billing can go on; `warning`, for the plan, when it was picked without an invoice date to go by. */
+type Candidate = ({ ticket: BackfillTicket } | { record: BackfillRecord }) & { warning?: string };
 
 const candidateId = (c: Candidate) => ("ticket" in c ? c.ticket.id : c.record.id);
 const candidateDates = (c: Candidate) => ("ticket" in c ? c.ticket : c.record);
@@ -519,14 +522,20 @@ function carriedBy(r: BackfillRecord, row: { invoice?: string | null; so?: strin
   );
 }
 
+/** An invoice is a record's billing by the closer reading when it is dated within this many days after it was done. */
+const CLOSE_DAYS = 45;
+
+const dayOf = (iso: string) => Date.parse(`${iso}T12:00:00Z`) / 86_400_000;
+
 /**
  * Where a WO's rows go, or why nowhere. A ticket merged into an install as billed (10/30) takes the rows on its
  * billing, and only those: billed on a Sales Order, the rows on that SO; billed on NetSuite invoices with no SO, the
- * rows on those invoices (their status, what's left to pay). Since 11/5 the install it went into takes the WO's other
- * rows, its own billing, with the ticket's counted as on its card already. Otherwise the WO's live tickets, installs
- * and PMs are the candidates; WO numbers started over in July 2026, so the invoice dates pick among them.
+ * rows on those invoices (their status, what's left to pay). Otherwise the WO's live tickets, installs and PMs (11/5)
+ * are the candidates; WO numbers started over in July 2026, so the invoice dates pick among them. The WO's other rows
+ * beside a billed merged ticket's go through the same checks: the install the ticket went into takes them only when it
+ * is the record they fit.
  */
-function pickTarget(key: string, ctx: BackfillContext, refDate: string | null, rows: RowsAbout): Candidate | { reason: string } {
+function pickTarget(key: string, ctx: BackfillContext, invoiceRows: BackfillInvoiceRow[], lineRows: BackfillLine[], rows: RowsAbout): Candidate | { reason: string } {
   const all = ctx.tickets.filter((t) => woMatchKey(t.wo ?? "") === key);
   const live = all.filter((t) => !t.duplicateOf);
   const billed = all.filter((t) => t.billedOnInstall);
@@ -537,21 +546,132 @@ function pickTarget(key: string, ctx: BackfillContext, refDate: string | null, r
   const ownsAll = (t: BackfillTicket) => (t.billedSoOnInstall ? rows.sos.size === 1 : !rows.soOnly && [...rows.invoices].every((i) => own(t).has(i)));
   // What the rows name, for the reasons below.
   const named = [...new Set([...rows.invoices, ...[...rows.sos].filter((s) => s !== NO_SO)])];
+  const cands: Candidate[] = [...live.map((t) => ({ ticket: t })), ...open.map((r) => ({ record: r }))];
+  const ticketsOnly = cands.every((c) => "ticket" in c);
+  const tag = (c: Candidate) => (ticketsOnly ? `#${candidateId(c)}` : candidateName(c));
+  const fit = (date: string, c: Candidate) => invoiceFitsTicket(date, candidateDates(c).received, candidateDates(c).completed) === true;
+  // Tickets among themselves go by the year's window, as since 10/30. Beside an install or a PM (11/5), two records in
+  // the year's window are told apart by the closer one: dated within CLOSE_DAYS of when it was done. A new ticket and an
+  // old PM with one number go to the ticket, as before installs and PMs took billing.
+  const belongs = (date: string): Candidate[] => {
+    const loose = cands.filter((c) => fit(date, c));
+    if (ticketsOnly || loose.length < 2) return loose;
+    const close = loose.filter((c) => {
+      const end = candidateDates(c).completed || candidateDates(c).received;
+      return !!end && Math.round(dayOf(date) - dayOf(end)) <= CLOSE_DAYS;
+    });
+    return close.length ? close : loose;
+  };
+  // Every dated invoice in the rows has to fit the record they go on (Chuy, 10/30), even the only one with this WO
+  // number: the numbers started over in July 2026, so an invoice dated well before it came in, or more than a year
+  // after it was done, is another job's, not its billing.
+  const tooFar = (c: Candidate, dated: RowsAbout["dated"], only: boolean): { reason: string } | null => {
+    const d = candidateDates(c);
+    const far = dated.filter((r) => invoiceFitsTicket(r.date, d.received, d.completed) === false);
+    if (!far.length) return null;
+    const one = far.length === 1;
+    const when = [d.received ? `came in ${d.received}` : null, d.completed ? `done ${d.completed}` : null].filter(Boolean).join(", ");
+    const already = far.filter((r) => candidateInvoices(c).some((i) => soKey(i.invoice) === soKey(r.invoice)));
+    return {
+      reason:
+        `${far.map((r) => `${r.invoice} (${r.date})`).join(", ")} ${one ? "is" : "are"} too far from ${candidateName(c)} (${when})` +
+        `${only ? ", the only one with this WO," : ""} to be its billing: ${one ? "it" : "they"} may be another job with this WO number.` +
+        (already.length ? ` ${already.map((r) => r.invoice).join(", ")} ${already.length === 1 ? "is" : "are"} on the ${"ticket" in c ? "ticket" : c.record.kind === "install" ? "install" : "PM"} already, from an earlier run: check ${already.length === 1 ? "it" : "them"} in NetSuite.` : "") +
+        ` Take ${one ? "its" : "their"} rows out of the file, then run it again.`,
+    };
+  };
+  /**
+   * The one record the rows go on. `dated(c)`: the dated invoices that are c's to check (not a ticket's billing an
+   * install carries); `refDate`: the earliest invoice date among them.
+   */
+  const choose = (refDate: string | null, dated: (c: Candidate) => RowsAbout["dated"]): Candidate | { reason: string } => {
+    if (cands.length === 1) return tooFar(cands[0]!, dated(cands[0]!), true) ?? cands[0]!;
+    // WO numbers started over in July 2026: the record the earliest invoice fits is the one. Every other invoice has to
+    // be that record's alone: one that fits another record with this WO, instead or as well, can't be told apart, and
+    // putting it on this one would leave that one unbilled (Export Billing would take a ticket again).
+    if (refDate) {
+      const near = belongs(refDate);
+      if (near.length === 1) {
+        const c = near[0]!;
+        for (const r of dated(c)) {
+          const fits = belongs(r.date);
+          const others = fits.filter((x) => x !== c).map(tag);
+          if (!others.length) continue;
+          return {
+            reason: fits.includes(c)
+              ? `${r.invoice} (${r.date}) fits ${ticketsOnly ? "tickets " : ""}${tag(c)} and ${others.join(", ")} both, so the Backfill can't tell which one NetSuite billed. Skipped.`
+              : `${r.invoice} (${r.date}) fits ${ticketsOnly ? "ticket " : ""}${others.join(", ")}, not ${tag(c)}: put its rows in a file of their own and run that too.`,
+          };
+        }
+        return tooFar(c, dated(c), false) ?? c;
+      }
+    } else if (!ticketsOnly) {
+      // No invoice date to go by: a WO's one live ticket keeps it, as before installs and PMs took billing, and the
+      // plan says what else carries the WO.
+      const tickets = cands.filter((c) => "ticket" in c);
+      if (tickets.length === 1) {
+        const others = cands.filter((c) => c !== tickets[0]).map(candidateName);
+        return {
+          ...tickets[0]!,
+          warning: `${others.join(", ").replace(/^./, (s) => s.toUpperCase())} ${others.length === 1 ? "carries" : "carry"} this WO too. With no invoice date in the files to tell them apart, the ticket takes it, as before installs and PMs took billing: make sure it's the ticket's.`,
+        };
+      }
+    }
+    if (ticketsOnly) return { reason: `The WO is on ${cands.length} tickets (${cands.map(tag).join(", ")}). Can't tell which one NetSuite billed.` };
+    // A ticket and an install or a PM with one WO (11/5): say what the dates couldn't settle.
+    const names = cands.map(candidateName).join(", ");
+    if (!refDate) return { reason: `The WO is on ${names}, and the files have no invoice date to tell them apart. Skipped.` };
+    const fitting = belongs(refDate);
+    // A ticket and an install of one account in the same weeks are likely one job: say how to make them one.
+    const sameJob =
+      fitting.some((c) => "ticket" in c) &&
+      fitting.some((c) => "record" in c && c.record.kind === "install") &&
+      new Set(fitting.map((c) => nameKey(("ticket" in c ? c.ticket : c.record).customer))).size === 1;
+    return {
+      reason: fitting.length
+        ? `The WO is on ${names}, and the invoice date (${refDate}) fits ${fitting.length === cands.length ? "each of them" : fitting.map(candidateName).join(" and ")}, so the Backfill can't tell which one NetSuite billed. Skipped.` +
+          (sameJob ? " If the ticket is the install's work, merge it into the install first (Merge into install), then run it again." : "")
+        : `The WO is on ${names}, and the invoice date (${refDate}) fits none of them (by when each came in and was done). Skipped.`,
+    };
+  };
+  // A ticket's billing an install carries is the ticket's: its dates aren't the install's to check.
+  const ownDated = (c: Candidate, dated: RowsAbout["dated"]) => ("record" in c ? dated.filter((d) => !carriedBy(c.record, { invoice: d.invoice })) : dated);
+  const earliest = (list: BackfillInvoiceRow[]) => list.map((i) => i.date).filter((d): d is string => !!d).sort()[0] ?? null;
+
   const mine = billed.filter(ownsAny);
   if (mine.length) {
     const t = mine[0]!;
     if (mine.length === 1 && ownsAll(t)) return { ticket: t };
-    // The other rows are the install's own billing when the install the ticket is on carries the WO: it takes them,
-    // and the ticket's rows count as on its card (planned there; a row that would change the ticket stops the WO).
+    // The rows beside the ticket's own are the WO's own billing: the install the ticket went into takes them when it
+    // carries the WO and they are its by the same checks as any WO's (the ticket's rows then count as on its card).
     const home = mine.length === 1 ? open.find((r) => r.kind === "install" && r.id === t.mergedInstallId) : undefined;
-    if (home) return { record: home };
+    if (home) {
+      const restInvoices = invoiceRows.filter((i) => !carriedBy(home, i));
+      const restLines = lineRows.filter((r) => !carriedBy(home, { invoice: r.sourceInvoice, so: r.sourceSo }));
+      // Every row is the ticket's: they are on the install's card already (the plan lists them, and stops the WO if
+      // one would change the ticket).
+      if (!restInvoices.length && !restLines.length) return { record: home };
+      const rest = rows.dated.filter((d) => !carriedBy(home, { invoice: d.invoice }));
+      const restRef = earliest(restInvoices);
+      const others = cands.filter((c) => !("record" in c && c.record === home));
+      if (!restRef && others.length) {
+        return {
+          reason: `The rows beside ticket #${t.id}'s own billing have no invoice date to tell install #${home.id} (where the ticket was merged as billed) from ${others.map(candidateName).join(", ")}. Put ticket #${t.id}'s rows in a file of their own, then run the Billing Backfill on each.`,
+        };
+      }
+      const c = choose(restRef, (x) => ownDated(x, rest));
+      if ("reason" in c) return c;
+      if ("record" in c && c.record === home) return c;
+      return {
+        reason: `The rows beside ticket #${t.id}'s own billing fit ${candidateName(c)}, not install #${home.id} (where the ticket was merged as billed). Put ticket #${t.id}'s rows in a file of their own, then run the Billing Backfill on each.`,
+      };
+    }
     return {
       reason: t.billedSoOnInstall
         ? `The rows are on ${[...rows.sos].join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Split the file by Sales Order, then run the Billing Backfill on each.`
         : `The rows are on ${named.join(", ")}, and ticket #${t.id} was merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}. Put the rows for ${[...rows.invoices].filter((i) => own(t).has(i)).join(", ")} in a file of their own, then run the Billing Backfill on each.`,
     };
   }
-  const cands: Candidate[] = [...live.map((t) => ({ ticket: t })), ...open.map((r) => ({ record: r }))];
   if (!cands.length) {
     if (billed.length) {
       const t = billed[0]!;
@@ -579,60 +699,9 @@ function pickTarget(key: string, ctx: BackfillContext, refDate: string | null, r
     if (recs.length) return { reason: `${[...new Set(recs.map((r) => r.blocked))].join(" ")} Skipped.` };
     return { reason: "No ticket, install or PM has this WO." };
   }
-  // A ticket's billing the install carries is the ticket's: its dates aren't the install's to check.
-  const datedFor = (c: Candidate) => ("record" in c ? rows.dated.filter((d) => !carriedBy(c.record, { invoice: d.invoice })) : rows.dated);
-  // Every dated invoice in the rows has to fit the record they go on (Chuy, 10/30), even the only one with this WO
-  // number: the numbers started over in July 2026, so an invoice dated well before it came in, or more than a year
-  // after it was done, is another job's, not its billing.
-  const tooFar = (c: Candidate, only: boolean): { reason: string } | null => {
-    const d = candidateDates(c);
-    const far = datedFor(c).filter((r) => invoiceFitsTicket(r.date, d.received, d.completed) === false);
-    if (!far.length) return null;
-    const one = far.length === 1;
-    const when = [d.received ? `came in ${d.received}` : null, d.completed ? `done ${d.completed}` : null].filter(Boolean).join(", ");
-    const already = far.filter((r) => candidateInvoices(c).some((i) => soKey(i.invoice) === soKey(r.invoice)));
-    return {
-      reason:
-        `${far.map((r) => `${r.invoice} (${r.date})`).join(", ")} ${one ? "is" : "are"} too far from ${candidateName(c)} (${when})` +
-        `${only ? ", the only one with this WO," : ""} to be its billing: ${one ? "it" : "they"} may be another job with this WO number.` +
-        (already.length ? ` ${already.map((r) => r.invoice).join(", ")} ${already.length === 1 ? "is" : "are"} on the ${"ticket" in c ? "ticket" : c.record.kind === "install" ? "install" : "PM"} already, from an earlier run: check ${already.length === 1 ? "it" : "them"} in NetSuite.` : "") +
-        ` Take ${one ? "its" : "their"} rows out of the file, then run it again.`,
-    };
-  };
-  if (cands.length === 1) return tooFar(cands[0]!, true) ?? cands[0]!;
-  // WO numbers started over in July 2026: the record the earliest invoice fits is the one. Every other invoice has to
-  // be that record's alone: one that fits another record with this WO, instead or as well, can't be told apart, and
-  // putting it on this one would leave that one unbilled (Export Billing would take a ticket again).
-  const ticketsOnly = cands.every((c) => "ticket" in c);
-  const tag = (c: Candidate) => (ticketsOnly ? `#${candidateId(c)}` : candidateName(c));
-  if (refDate) {
-    const fit = (date: string, c: Candidate) => invoiceFitsTicket(date, candidateDates(c).received, candidateDates(c).completed) === true;
-    const near = cands.filter((c) => fit(refDate, c));
-    if (near.length === 1) {
-      const c = near[0]!;
-      for (const r of datedFor(c)) {
-        const fits = cands.filter((x) => fit(r.date, x));
-        const others = fits.filter((x) => x !== c).map(tag);
-        if (!others.length) continue;
-        return {
-          reason: fits.includes(c)
-            ? `${r.invoice} (${r.date}) fits ${ticketsOnly ? "tickets " : ""}${tag(c)} and ${others.join(", ")} both, so the Backfill can't tell which one NetSuite billed. Skipped.`
-            : `${r.invoice} (${r.date}) fits ${ticketsOnly ? "ticket " : ""}${others.join(", ")}, not ${tag(c)}: put its rows in a file of their own and run that too.`,
-        };
-      }
-      return tooFar(c, false) ?? c;
-    }
-  }
-  if (ticketsOnly) return { reason: `The WO is on ${cands.length} tickets (${cands.map(tag).join(", ")}). Can't tell which one NetSuite billed.` };
-  // A ticket and an install or a PM with one WO (11/5): say what the dates couldn't settle.
-  const names = cands.map(candidateName).join(", ");
-  if (!refDate) return { reason: `The WO is on ${names}, and the files have no invoice date to tell them apart. Skipped.` };
-  const fitting = cands.filter((c) => invoiceFitsTicket(refDate, candidateDates(c).received, candidateDates(c).completed) === true);
-  return {
-    reason: fitting.length
-      ? `The WO is on ${names}, and the invoice date (${refDate}) fits ${fitting.length === cands.length ? "each of them" : fitting.map(candidateName).join(" and ")}, so the Backfill can't tell which one NetSuite billed. Skipped.`
-      : `The WO is on ${names}, and the invoice date (${refDate}) fits none of them (by when each came in and was done). Skipped.`,
-  };
+  // The rows' own date: not a ticket's billing an install carries (its invoice dated when the ticket was billed).
+  const notCarried = invoiceRows.filter((i) => !open.some((r) => carriedBy(r, i)));
+  return choose(earliest(notCarried.length ? notCarried : invoiceRows), (c) => ownDated(c, rows.dated));
 }
 
 /** Plan every WO in the files against the records as they are now. Saves nothing. */
@@ -644,7 +713,7 @@ export function planBackfill(read: Pick<BackfillRead, "lines" | "invoices">, ctx
   // An install carrying two of the files' WOs gets one plan per WO. One NetSuite invoice in both would be written
   // twice on it: the later WO waits for a run of its own.
   const claimed = new Map<string, string>();
-  return plans.map((p) => {
+  const out = plans.map((p) => {
     if (p.status === "skip" || p.recordId == null || p.jobId != null) return p;
     const mine = p.invoices.filter(writesInvoice).map((i) => `${p.kind}:${p.recordId}|${soKey(i.invoice)}`);
     const twice = mine.map((k) => [k, claimed.get(k)] as const).find(([, wo]) => wo);
@@ -654,6 +723,111 @@ export function planBackfill(read: Pick<BackfillRead, "lines" | "invoices">, ctx
     }
     for (const k of mine) claimed.set(k, p.wo);
     return p;
+  });
+  return recordChecks(sharedInvoices(out, ctx), ctx);
+}
+
+const planTarget = (p: BackfillPlan) => (p.jobId != null ? `ticket:${p.jobId}` : `${p.kind}:${p.recordId}`);
+const planName = (p: BackfillPlan) => (p.jobId != null ? `ticket #${p.jobId}` : p.kind === "install" ? `install #${p.recordId}` : `PM #${p.recordId}`);
+/** A recorded-at entry is this plan's record (a ticket's are recorded as service or TLC). */
+const isPlanTarget = (x: { kind: BackfillKind; id: number }, p: BackfillPlan) =>
+  p.jobId != null ? x.id === p.jobId && (x.kind === "service" || x.kind === "tlc") : x.id === p.recordId && x.kind === p.kind;
+
+/**
+ * One NetSuite invoice under the WOs of two records in the files (11/5 review): written on each, as when it is on
+ * another record already, and said on both. An invoice both have already is said by the recorded-at warning.
+ */
+function sharedInvoices(plans: BackfillPlan[], ctx: BackfillContext): BackfillPlan[] {
+  const by = new Map<string, { text: string; plans: BackfillPlan[] }>();
+  for (const p of plans) {
+    if (p.status === "skip") continue;
+    for (const i of p.invoices) {
+      if (!writesInvoice(i) && i.change !== "same") continue;
+      const k = soKey(i.invoice);
+      const e = by.get(k) ?? { text: i.invoice, plans: [] };
+      if (!e.plans.includes(p)) e.plans.push(p);
+      by.set(k, e);
+    }
+  }
+  const more = new Map<BackfillPlan, string[]>();
+  for (const [k, e] of by) {
+    for (const p of e.plans) {
+      const said = (ctx.recordedAt?.get(k) ?? []).filter((x) => !isPlanTarget(x, p));
+      const others = e.plans.filter((q) => planTarget(q) !== planTarget(p) && !said.some((x) => isPlanTarget(x, q)));
+      if (!others.length) continue;
+      more.set(p, [
+        ...(more.get(p) ?? []),
+        `${e.text} is in the files under ${others.map((q) => `${q.wo} (${planName(q)})`).join(", ")} too. NetSuite billed both on one invoice, or a WO is wrong: check it in NetSuite.`,
+      ]);
+    }
+  }
+  return plans.map((p) => (more.has(p) ? { ...p, warnings: [...p.warnings, ...more.get(p)!] } : p));
+}
+
+/** The mismatch or double-bill warning for a plan's amounts (none when they agree, or there's nothing to check). */
+function amountWarning(a: BackfillPlan["amounts"], what: string): string | null {
+  const kdWords = a.kdSource === "katzdesk" ? `the ${what}'s own invoice in KatzDesk` : "the charges";
+  if (a.doubleBill) return `Possible double bill: live invoices add up to ${money(a.netsuite)}, ${kdWords} to ${money(a.kd)}.`;
+  if (a.nsMismatch) return `NetSuite's live invoices (${money(a.netsuite)}) don't match ${kdWords} (${money(a.kd)}).`;
+  return null;
+}
+const isAmountWarning = (w: string) => w.startsWith("Possible double bill: ") || w.startsWith("NetSuite's live invoices (");
+
+/** NetSuite's charges on a record's WOs other than `keys` (from earlier runs): there are some. */
+function chargesBeyond(rec: BackfillRecord, keys: Set<string>): boolean {
+  return rec.nsWos ? rec.nsWos.some((w) => !keys.has(w.woKey) && w.charges) : rec.otherNet !== 0;
+}
+
+/**
+ * An install with several of the files' WOs gets one plan per WO, and each counted its own WO's new invoices and
+ * charges only. Its checks are the install's (11/5 review): all its invoices and all its charges, after the run.
+ */
+function recordChecks(plans: BackfillPlan[], ctx: BackfillContext): BackfillPlan[] {
+  const groups = new Map<string, BackfillPlan[]>();
+  for (const p of plans) {
+    if (p.status === "skip" || p.jobId != null || p.recordId == null) continue;
+    groups.set(planTarget(p), [...(groups.get(planTarget(p)) ?? []), p]);
+  }
+  const redone = new Map<BackfillPlan, BackfillPlan["amounts"]>();
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    const first = list[0]!;
+    const rec = (ctx.records ?? []).find((r) => r.kind === first.kind && r.id === first.recordId && r.woKey === first.key);
+    if (!rec) continue;
+    const keys = new Set(list.map((p) => p.key));
+    // The record's invoices after the run: the ones on it the files don't list, and each file invoice once.
+    const listed = new Set(list.flatMap((p) => p.invoices.map((i) => soKey(i.invoice))));
+    const counted = new Map<string, { status: string; total: number | null }>();
+    for (const p of list) for (const i of p.invoices) if (writesInvoice(i) || i.change === "same") counted.set(soKey(i.invoice), { status: i.status, total: i.total });
+    const after = [...rec.invoices.filter((i) => !listed.has(soKey(i.invoice))).map((i) => ({ status: i.status, total: i.total })), ...counted.values()];
+    // Its charges after the run: the files' WOs as planned, its other WOs as they are.
+    const outside = round2(rec.otherNet - list.slice(1).reduce((s, p) => s + p.charges.currentNet, 0));
+    const nsNet = round2(outside + list.reduce((s, p) => s + (p.charges.nextNet ?? p.charges.currentNet), 0));
+    const hasNs = list.some((p) => (p.charges.next ?? p.charges.current).length > 0 || !!p.charges.nextDiscount) || chargesBeyond(rec, keys);
+    const kdSource = rec.katzdesk ? "katzdesk" : hasNs ? "netsuite" : "none";
+    const kd = rec.katzdesk?.net ?? nsNet;
+    const netsuite = liveInvoiceTotal(after);
+    const hasLive = after.some((i) => !isVoidedStatus(i.status));
+    for (const p of list) {
+      redone.set(p, {
+        ...p.amounts,
+        kd,
+        kdSource,
+        netsuite,
+        doubleBill: kdSource !== "none" && possibleDoubleBill(after, kd),
+        nsMismatch: kdSource !== "none" && hasLive && Math.abs(netsuite - kd) > CENT,
+      });
+    }
+  }
+  return plans.map((p) => {
+    const amounts = redone.get(p);
+    if (!amounts) return p;
+    const what = p.kind === "install" ? "install" : "PM";
+    const w = amountWarning(amounts, what);
+    const at = p.warnings.findIndex(isAmountWarning);
+    const warnings = p.warnings.filter((x) => !isAmountWarning(x));
+    if (w) warnings.splice(at < 0 ? warnings.length : at, 0, w);
+    return { ...p, amounts, warnings };
   });
 }
 
@@ -667,7 +841,6 @@ const SAME_INVOICE = (before: StoredNsInvoice, plan: Pick<BackfillInvoicePlan, "
 
 function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillInvoiceRow[], ctx: BackfillContext): BackfillPlan {
   const wo = lineRowsIn[0]?.wo ?? invoiceRows[0]?.wo ?? woCanonical(key);
-  const invoiceDates = invoiceRows.map((i) => i.date).filter((d): d is string => !!d).sort();
   // The Sales Orders the rows name; an invoice with none counts as its own (it is billing on none of them). And the
   // NetSuite invoices they name, for a ticket merged as billed on its invoices alone (10/30).
   const rowSos = new Set([...invoiceRows.filter((i) => i.invoice).map((i) => soKey(i.so) || NO_SO), ...invoiceRows.map((i) => soKey(i.so)), ...lineRowsIn.map((r) => soKey(r.sourceSo))].filter(Boolean));
@@ -679,7 +852,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     ...new Map(invoiceRows.filter((i) => i.invoice && i.date && !isVoidedStatus(i.status)).map((i) => [i.invoice, { invoice: i.invoice, date: i.date! }])).values(),
   ];
   const rows: RowsAbout = { sos: rowSos, invoices: rowInvoices, soOnly: rowSoOnly, dated };
-  const picked = pickTarget(key, ctx, invoiceDates[0] ?? null, rows);
+  const picked = pickTarget(key, ctx, invoiceRows, lineRowsIn, rows);
   const empty: BackfillPlan = {
     key,
     wo,
@@ -717,7 +890,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
   if (!target.customer?.trim() || isWalkIn(target.customer)) {
     return { ...base, reason: `The ${what} is on Walk-In, which is never a billing account. Give it the real account first.` };
   }
-  const warnings: string[] = [];
+  const warnings: string[] = picked.warning ? [picked.warning] : [];
 
   // An install's tickets merged in as billed: their rows are their billing, on the install's card already. Their
   // charge lines stay off the install; their invoices are listed as on the card. One that would change the ticket (an
@@ -745,11 +918,10 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     lineRows = kept;
   }
 
-  // Locked: already invoiced in KatzDesk, or merged into an install as billed (10/30). Only invoice records change.
-  // An install or a PM: a live invoice on it for this WO (each WO of an install is billed on its own).
-  const locked = t
-    ? t.invoices.some((i) => !isVoidedStatus(i.status)) || !!t.billedOnInstall
-    : rec!.invoices.some((i) => i.woKey === key && !isVoidedStatus(i.status));
+  // Locked: a ticket invoiced already in KatzDesk, or merged into an install as billed (10/30). Only invoice records
+  // change. An install's or a PM's NetSuite lines and Sales Order are NetSuite's billing as it stands, kept beside its
+  // own invoice and never exported: every run that has them refreshes them (11/5 review).
+  const locked = t ? t.invoices.some((i) => !isVoidedStatus(i.status)) || !!t.billedOnInstall : false;
   const currentLines: BackfillChargeLine[] = target.lines.map((l) => ({ ...l, kind: kindForItem(l.item) }));
   const current = applyDiscount(chargesTotal(target.lines), target.discount);
 
@@ -808,7 +980,12 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     [...liveRows].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "")).find((i) => i.so)?.so ||
     soOnly.at(-1)?.so ||
     null;
-  const billedOn = sourceRow?.date ?? [...liveRows].map((i) => i.date).filter((d): d is string => !!d).sort()[0] ?? null;
+  // An install's or a PM's: the first it was billed on for this WO, the invoices on it already included (a later file
+  // with a later invoice alone doesn't move it).
+  const listedHere = new Set(invoiceRows.map((i) => soKey(i.invoice)).filter(Boolean));
+  const storedLive = rec ? rec.invoices.filter((i) => i.woKey === key && !listedHere.has(soKey(i.invoice)) && !isVoidedStatus(i.status)) : [];
+  const billedOn =
+    sourceRow?.date ?? [...liveRows.map((i) => i.date), ...storedLive.map((i) => i.date)].filter((d): d is string => !!d).sort()[0] ?? (rec ? target.billedOn : null);
   const cancelled = ownRows.filter((i) => !i.invoice && i.so && /cancel/i.test(i.soStatus)).map((i) => i.so);
   let soNote: string | null = cancelled.length ? `Cancelled ${cancelled.join(", ")} left off.` : null;
   if (nextSo && target.so && nextSo !== target.so) soNote = [`NetSuite says ${nextSo}; the ${what} has ${target.so}.`, soNote].filter(Boolean).join(" ");
@@ -876,9 +1053,9 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     };
     if (before) plan.change = SAME_INVOICE(before, plan) ? "same" : "updated";
     invoices.push(plan);
-    // The same NetSuite invoice on another record already: written here too, and said, since one of the two is likely
-    // wrong (or NetSuite billed both WOs on one invoice).
-    if (plan.change === "new") {
+    // The same NetSuite invoice on another record already: written here too (or kept), and said, since one of the two is
+    // likely wrong (or NetSuite billed both WOs on one invoice).
+    {
       const there = (ctx.recordedAt?.get(soKey(r.invoice)) ?? []).filter((x) => !(x.id === target.id && (x.kind === kind || (t && (x.kind === "service" || x.kind === "tlc")))));
       if (there.length) {
         warnings.push(
@@ -909,21 +1086,28 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
   ];
   const nsCharges = locked || nextNet == null ? current.total : nextNet;
   const kd = t ? nsCharges : (rec!.katzdesk?.net ?? round2(rec!.otherNet + nsCharges));
+  // An install or a PM with no lines of its own in KatzDesk and none from NetSuite has nothing to check against.
+  const kdSource: BackfillPlan["amounts"]["kdSource"] = t
+    ? "charges"
+    : rec!.katzdesk
+      ? "katzdesk"
+      : (next ?? target.lines).length > 0 || !!(next ? nextDiscount : target.discount) || chargesBeyond(rec!, new Set([key]))
+        ? "netsuite"
+        : "none";
   const netsuite = liveInvoiceTotal(after);
   const corrigo = t ? (invoiceRows.map((i) => i.corrigoNet).find((v): v is number => v != null) ?? t.corrigoNet) : null;
   const hasLive = after.some((i) => !isVoidedStatus(i.status));
   const amounts = {
     kd,
-    kdSource: base.amounts.kdSource,
+    kdSource,
     netsuite,
     corrigo,
-    doubleBill: possibleDoubleBill(after, kd),
-    nsMismatch: hasLive && Math.abs(netsuite - kd) > CENT,
+    doubleBill: kdSource !== "none" && possibleDoubleBill(after, kd),
+    nsMismatch: kdSource !== "none" && hasLive && Math.abs(netsuite - kd) > CENT,
     corrigoMismatch: corrigo != null && hasLive && Math.abs(corrigo - netsuite) > CENT,
   };
-  const kdWords = amounts.kdSource === "katzdesk" ? `the ${what}'s own invoice in KatzDesk` : "the charges";
-  if (amounts.doubleBill) warnings.push(`Possible double bill: live invoices add up to ${money(netsuite)}, ${kdWords} to ${money(kd)}.`);
-  else if (amounts.nsMismatch) warnings.push(`NetSuite's live invoices (${money(netsuite)}) don't match ${kdWords} (${money(kd)}).`);
+  const amountWarn = amountWarning(amounts, what);
+  if (amountWarn) warnings.push(amountWarn);
   if (amounts.corrigoMismatch) {
     warnings.push(
       corrigo === 0
@@ -959,11 +1143,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
   if (t?.billedOnInstall) {
     warnings.push(`Merged into install #${t.mergedInstallId} as billed on ${t.billedOnInstall}: only its NetSuite invoices are recorded; its charges and Sales Order stay as they are.`);
   } else if (locked && (chargesChange || soChange)) {
-    warnings.push(
-      t
-        ? `Locked: invoiced already, so the charges${soChange ? " and Sales Order" : ""} stay as they are. An Admin can unlock the ticket to change them.`
-        : `Invoiced already (${wo}), so NetSuite's charges${soChange ? " and Sales Order" : ""} on the ${what} stay as they are.`,
-    );
+    warnings.push(`Locked: invoiced already, so the charges${soChange ? " and Sales Order" : ""} stay as they are. An Admin can unlock the ticket to change them.`);
   }
   return {
     ...base,
@@ -1052,6 +1232,6 @@ export function backfillLogLine(p: BackfillPlan): string {
         .join(", ")}`,
     );
   }
-  if (p.locked) parts.push(record ? `invoiced already: NetSuite's charges and SO for ${p.wo} kept` : "charges, P.O., discount and SO kept (locked)");
+  if (p.locked) parts.push("charges, P.O., discount and SO kept (locked)");
   return `Billing Backfill (NetSuite): ${parts.join(" · ") || "no change"}`;
 }

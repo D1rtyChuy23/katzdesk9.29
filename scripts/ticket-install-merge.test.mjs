@@ -705,13 +705,19 @@ test("the hidden ticket stays out of the duplicate merge, billing backfill and t
   assert.deepEqual((await M.listTicketInstallPairsFor(sql, "u-owner", "service")).pairs.map((p) => p.jobId), [later]);
 
   // The billing backfill never puts the WO's billing on the hidden ticket: the install it went into carries the WO, and
-  // takes it (11/5). The later ticket, a live one with the same number, makes the WO two records to tell apart.
+  // takes it (11/5). With the later ticket, a live one with the same number, and no invoice date to tell them apart,
+  // the live ticket keeps the WO as before installs and PMs took billing, and the plan says the install carries it too.
   const ctx = await loadBackfillContext(sql, ["4792"]);
   const hidden = { ...ctx, tickets: ctx.tickets.filter((t) => t.id === jobId) };
   const line = { file: "charges.csv", line: 2, key: "4792", wo: WO, item: "Service : SERVICELABOR", itemType: "Service", description: "Labor", qty: 1, rate: 150, amount: 150, discountItem: "", discountAmount: null, recordTotal: null, sourceInvoice: "", sourceSo: "", location: "", nsCustomer: "" };
   const plan = planBackfill({ lines: [line], invoices: [] }, hidden);
   assert.deepEqual([plan[0].kind, plan[0].recordId, plan[0].jobId, plan[0].status], ["install", installId, null, "write"]);
-  assert.match(planBackfill({ lines: [line], invoices: [] }, ctx)[0].reason, new RegExp(`^The WO is on ticket #${later}, install #${installId}, and the files have no invoice date to tell them apart\\. Skipped\\.$`));
+  const both = planBackfill({ lines: [line], invoices: [] }, ctx)[0];
+  assert.deepEqual([both.kind, both.jobId, both.status, both.reason], ["service", later, "write", null]);
+  assert.ok(
+    both.warnings.includes(`Install #${installId} carries this WO too. With no invoice date in the files to tell them apart, the ticket takes it, as before installs and PMs took billing: make sure it's the ticket's.`),
+    both.warnings.join(" | "),
+  );
 
   const rows = await loadWindowRows(sql, ["service"]);
   assert.equal(rows.find((r) => r.id === jobId).note, `Merged into install #${installId}`);
