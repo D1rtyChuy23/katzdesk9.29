@@ -55,3 +55,53 @@ test("billing rows: the discount is NetSuite's header discount on every row of i
     [2, "Service : TRIPCHARGE", 150, "", ""],
   ]);
 });
+
+// Chosen lines (Chuy, 11/7): one discount, taken off only the lines picked for it.
+const D = await import("../src/lib/ops/discount.ts");
+const A = { qty: 2, rate: 45, discountChosen: true };
+const B = { qty: 1.5, rate: 150, discountChosen: false };
+const pct = { kind: "percent", value: 10, scope: "chosen" };
+
+test("a chosen-lines discount comes off the ticked lines only (11/7)", () => {
+  assert.deepEqual(D.billTotals([A, B], pct), { subtotal: 315, off: 9, total: 306 });
+  assert.deepEqual(D.billTotals([A, B], { kind: "amount", value: 100, scope: "chosen" }), { subtotal: 315, off: 90, total: 225 });
+  assert.deepEqual(D.billTotals([A, B], { kind: "percent", value: 10 }), { subtotal: 315, off: 31.5, total: 283.5 });
+  // Nothing ticked: nothing comes off, and it can't be saved that way.
+  const none = [{ ...A, discountChosen: false }, B];
+  assert.equal(D.billTotals(none, pct).off, 0);
+  assert.equal(D.chosenDiscountError(none, pct), "Tick the lines the discount comes off, or make it Whole bill.");
+  assert.equal(D.chosenDiscountError([], pct), null);
+  assert.equal(D.chosenDiscountError(none, { kind: "percent", value: 10 }), null);
+  // The base is what the lines that take it add up to, and never more than the subtotal.
+  assert.equal(D.applyDiscount(315, pct, 90).off, 9);
+  assert.equal(D.applyDiscount(315, pct, 400).off, 31.5);
+  assert.equal(D.applyDiscount(315, { kind: "percent", value: 10 }).total, 283.5);
+  assert.equal(D.takesDiscount(B, { kind: "percent", value: 10 }), true);
+  assert.equal(D.takesDiscount(B, pct), false);
+  assert.equal(D.takesDiscount(A, null), false);
+  assert.equal(D.discountOffLabel({ kind: "percent", value: 10 }, [A, B]), "10% off");
+  assert.equal(D.discountOffLabel(pct, [A, B]), "10% off 1 of 2 lines");
+  assert.equal(D.discountOffLabel({ kind: "amount", value: 20, scope: "chosen" }, [A]), "$20.00 off 1 of 1 line");
+  assert.equal(D.discountOffLabel(null, [A]), "");
+});
+
+test("typed and stored discounts say Whole bill or Chosen lines (11/7)", () => {
+  assert.deepEqual(D.cleanDiscount("percent", "10", "chosen"), { discount: { kind: "percent", value: 10, scope: "chosen" } });
+  assert.deepEqual(D.cleanDiscount("percent", "10", "all"), { discount: { kind: "percent", value: 10 } });
+  assert.deepEqual(D.cleanDiscount("percent", "10", "bogus"), { error: "Pick Whole bill or Chosen lines." });
+  assert.deepEqual(D.cleanDiscount("percent", "", "chosen"), { discount: null });
+  assert.deepEqual(D.discountFromRow("percent", "10.00", "chosen"), { kind: "percent", value: 10, scope: "chosen" });
+  assert.deepEqual(D.discountFromRow("amount", "5", "all"), { kind: "amount", value: 5 });
+  assert.equal(D.discountFromRow(null, null, "chosen"), null);
+  assert.equal(D.discountFromRow("percent", "0", "all"), null);
+  // The same base in SQL: the lines that take it, each rounded to the cent.
+  assert.equal(D.DISCOUNT_BASE_SQL("c", "j.discount_scope"), "coalesce(sum(round(c.qty * c.rate, 2)) filter (where j.discount_scope = 'all' or c.discount_chosen), 0)");
+});
+
+test("billing rows: a chosen-lines ticket's header discount is the dollars off its ticked lines (11/7)", () => {
+  const rows = D.withHeaderDiscount([{ jobId: 1, ...A }, { jobId: 1, ...B }], new Map([[1, pct]]));
+  assert.deepEqual(rows.map((r) => [r.discountItem, r.discountRate, r.discountLabel]), [
+    ["CLDSERVICE", "-9.00", "10% off"],
+    ["CLDSERVICE", "-9.00", "10% off"],
+  ]);
+});

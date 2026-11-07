@@ -12,6 +12,8 @@ export type ChargeLine = {
   kind: ChargeKind;
   /** Which PM kit or machine part this line was copied from. A hand-typed line has none. */
   sourceKey?: string | null;
+  /** Ticked for the bill's discount (11/7): read only when the discount is on Chosen lines. */
+  discountChosen?: boolean;
 };
 
 /** Where a part's photo and MPN come from: the inventory record. The picker and the invoice line read the same one. */
