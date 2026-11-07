@@ -20,6 +20,7 @@ import {
   billName,
   lineCount,
   money,
+  ownAmount,
   planLink,
   planUnlink,
   projectLabel,
@@ -820,7 +821,8 @@ type LinkGo = Extract<LinkDecision, { ok: true }>;
 
 async function linkNow(sql: Sql, st: LinkState, target: LinkTarget, project: LinkProject, who: string, plan: LinkGo): Promise<{ account: string; oldAccount: string; moved: number }> {
   const r = st.rebuild;
-  const own = `its invoice's ${lineCount(st.own.lines)} (${money(st.own.total)})`;
+  // As billed: a discounted invoice's lines are kept, never moved (11/7).
+  const own = `its invoice's ${lineCount(st.own.lines)} (${ownAmount(st.own)})`;
   const parts = [
     normalizeCustomerKey(r.account) !== normalizeCustomerKey(project.customer) ? `account ${r.account.trim() || "none"} → ${project.customer}` : null,
     (r.po?.trim() || "") !== (project.po ?? "") ? `Customer P.O. ${project.po ?? "cleared"}` : null,
@@ -830,7 +832,7 @@ async function linkNow(sql: Sql, st: LinkState, target: LinkTarget, project: Lin
   const there =
     st.own.lines > 0
       ? plan.keepOwn
-        ? ` · its own invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) ${isAre(st.own.lines)} on a Sales Order`
+        ? ` · its own invoice's ${lineCount(st.own.lines)} (${ownAmount(st.own)}) ${isAre(st.own.lines)} on a Sales Order`
         : ` · its ${lineCount(st.own.lines)} (${money(st.own.total)}) went on ${where}`
       : "";
   const out = await sql.query<{ id: number; account: string; old_account: string; moved: number; noted: number }>(linkRebuildSql(), [
@@ -861,7 +863,7 @@ async function noteNow(sql: Sql, st: LinkState, who: string): Promise<void> {
     st.rebuild.job_id,
     who,
     st.own.version,
-    `Its invoice's ${lineCount(st.own.lines)} (${money(st.own.total)}) ${isAre(st.own.lines)} on a Sales Order in NetSuite, so ${st.own.lines === 1 ? "it stays" : "they stay"} on it`,
+    `Its invoice's ${lineCount(st.own.lines)} (${ownAmount(st.own)}) ${isAre(st.own.lines)} on a Sales Order in NetSuite, so ${st.own.lines === 1 ? "it stays" : "they stay"} on it`,
   ]).catch((e: unknown) => {
     throw isDeadlock(e) ? new Error(CHANGED) : e;
   });

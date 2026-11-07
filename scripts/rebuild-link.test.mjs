@@ -237,6 +237,16 @@ test("what a link does, or why it can't: the rules alone", () => {
   assert.deepEqual([discounted.on.ok, discounted.on.keepOwn], [true, true]);
   // The same refusal with "not yet" sent as the answer.
   assert.deepEqual(R.planLink(withDiscount, t, "not"), discounted.not);
+  // A discounted invoice reads as billed (11/7): what its lines add up to, and what it bills after the discount.
+  assert.equal(discounted.question, "Its invoice is approved (2 lines, $315.00 before its $20.00 discount, $295.00 billed). Is it on a Sales Order in NetSuite yet?");
+  assert.equal(discounted.on.effects[2], "Its invoice's 2 lines ($315.00 before its $20.00 discount, $295.00 billed) stay on it: it's on a Sales Order in NetSuite.");
+  assert.equal(R.ownAmount({ total: 315, discount: null }), "$315.00");
+  assert.equal(R.ownAmount({ total: 7918.7, discount: { kind: "percent", value: 100 } }), "$7,918.70 before its 100% discount, $0.00 billed");
+  assert.equal(R.ownAmount({ total: 45, discount: { kind: "percent", value: 10 } }), "$45.00 before its 10% discount, $40.50 billed");
+  assert.equal(R.ownAmount({ total: 100, discount: { kind: "percent", value: 12.5 } }), "$100.00 before its 12.5% discount, $87.50 billed");
+  // An amount off can't take it below zero; with nothing to take off, there's no discount to speak of.
+  assert.equal(R.ownAmount({ total: 15, discount: { kind: "amount", value: 20 } }), "$15.00 before its $20.00 discount, $0.00 billed");
+  assert.equal(R.ownAmount({ total: 0, discount: { kind: "percent", value: 100 } }), "$0.00");
   // No hint where Yes isn't on offer. Not approved: Link doesn't ask.
   const noHint =
     "This rebuild's invoice has a discount ($20.00 off). WO-4321 (Service ticket SC-1)'s bill can't carry it, so its lines would bill there without it. If the discount shouldn't apply, take it off the rebuild's invoice first.";
@@ -1417,6 +1427,7 @@ test("a rebuild linked before 11/6 kept its own invoice: its lock says how to mo
     "This rebuild's invoice has a discount (10% off). WO-4321 (Service ticket SC-RBL-1)'s bill can't carry it, so its lines would bill there without it. If its invoice is on a Sales Order, answer Yes instead. Otherwise unlink it, take the discount off its invoice, then link it again.",
   );
   assert.deepEqual(f.candidates[0].plan.on.steps, ["note"]);
+  assert.equal(f.candidates[0].plan.on.effects[0], "Its own invoice's 2 lines ($315.00 before its 10% discount, $283.50 billed) stay on it: it's on a Sales Order in NetSuite.");
   // The ticket was billed since: its link put nothing there, so Unlink still works, and keeps its own lines.
   await sql.query("update service_jobs set ns_so = 'SO-T-12', updated_at = now() where id = $1", [job]);
   const v = await L.getRebuildLinkFor(sql, rb, "u-owner");
@@ -1765,6 +1776,34 @@ test("a move to another WO that someone else links in the middle stops there, an
   assert.equal((await RB.rebuildRowOut(sql, rb)).jobId, third);
   assert.deepEqual([(await charges(sql, first)).length, (await charges(sql, second)).length, (await charges(sql, third)).filter((l) => isRebuildLineKey(l.source_key, rb)).length], [0, 0, 2]);
   assert.equal((await L.getRebuildLinkFor(sql, rb, "u-owner")).unlink.ok, true);
+});
+
+test("a discounted invoice reads as billed: what its lines add up to, and what it bills after its discount (11/7)", async () => {
+  const { sql } = await fresh();
+  const rb = await rebuild(sql, { title: "Test used parts" });
+  await ownInvoice(sql, rb, PARTS, { discount: { kind: "percent", value: 100 } });
+  const job = await ticket(sql, { wo: "WO-4321", status: "In progress" });
+  const f = await find(sql, rb, "4321");
+  const plan = f.candidates[0].plan;
+  assert.equal(plan.question, "Its invoice is approved (2 lines, $315.00 before its 100% discount, $0.00 billed). Is it on a Sales Order in NetSuite yet?");
+  assert.equal(plan.on.effects.find((e) => e.startsWith("Its invoice's")), "Its invoice's 2 lines ($315.00 before its 100% discount, $0.00 billed) stay on it: it's on a Sales Order in NetSuite.");
+  await linkTo(sql, f, f.candidates[0], "u-owner", "on");
+  assert.deepEqual((await notes(sql)).map((n) => [n.entity_type, n.detail]), [
+    ["rebuild", `Linked to WO-4321 (Service ticket SC-RBL-1), ${CAFE} · account ${SHOP} → ${CAFE} · its invoice's 2 lines ($315.00 before its 100% discount, $0.00 billed) stayed on it: it's on a Sales Order`],
+    ["service", "Rebuild #1 (Test used parts) linked · its own invoice's 2 lines ($315.00 before its 100% discount, $0.00 billed) are on a Sales Order"],
+  ]);
+  assert.deepEqual(await charges(sql, job), []);
+  assert.equal(
+    (await find(sql, rb, "4321")).candidates[0].plan.refusal,
+    "This rebuild is already linked to WO-4321 (Service ticket SC-RBL-1). Its own invoice's 2 lines ($315.00 before its 100% discount, $0.00 billed) stay on it: it's on a Sales Order in NetSuite.",
+  );
+  // Linked before 11/6 with a discount: its note says so the same way.
+  const old = await rebuild(sql, { title: "Test old used parts", account: CAFE });
+  await sql.query("update rebuilds set job_id = $2 where id = $1", [old, job]);
+  await ownInvoice(sql, old, [PARTS[0]], { customer: CAFE, discount: { kind: "percent", value: 10 } });
+  const g = await find(sql, old, "4321");
+  assert.equal((await linkTo(sql, g, g.candidates[0], "u-owner", "on")).message, "Noted: its invoice's 1 line is on a Sales Order, so it stays on it.");
+  assert.equal((await notes(sql)).at(-1).detail, "Its invoice's 1 line ($90.00 before its 10% discount, $81.00 billed) is on a Sales Order in NetSuite, so it stays on it");
 });
 
 test("Warehouse and Sales see where a rebuild bills, and nothing of its billing or its invoice", async () => {
