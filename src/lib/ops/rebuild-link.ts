@@ -223,9 +223,10 @@ function unlinkEffects(r: LinkRebuild, c: CurrentLink): string[] {
 
 /**
  * Linking its own invoice onto `t`: why it can't, given what that invoice holds then. `linked`: it is linked already,
- * so its own invoice is locked, and the way out starts with Unlink.
+ * so its own invoice is locked, and the way out starts with Unlink. `orYes`: Link asks whether its invoice is on a
+ * Sales Order, and Yes can link, so a refusal may point there (11/7).
  */
-function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, accountMoves: boolean, linked: boolean): string | null {
+function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, accountMoves: boolean, linked: boolean, orYes = false): string | null {
   const bad = targetRefusal(t);
   if (bad) return bad;
   // A closed bill first: nothing done to its own invoice would let these lines go on it.
@@ -244,8 +245,14 @@ function linkRefusal(own: OwnInvoice, t: LinkProject, unitLock: string | null, a
       : "This rebuild's invoice is waiting for an Admin to approve it (Warehouse saved it). Approve it first, then link.";
   }
   if (own.lines > 0 && own.discount) {
-    const lead = `This rebuild's invoice has a discount (${discountLabel(own.discount)}), which can't go on ${projectLabel(t)}'s bill.`;
-    return linked ? `${lead} Unlink it, take the discount off its invoice, then link it again.` : `${lead} Take it off the rebuild's invoice first.`;
+    // The project's bill has one discount for all of it: moved there, these lines would lose theirs (Chuy, 11/7: the
+    // wording only; what is refused is unchanged).
+    const lead = `This rebuild's invoice has a discount (${discountLabel(own.discount)}). ${projectLabel(t)}'s bill can't carry it, so its lines would bill there without it.`;
+    // On a Sales Order, Yes keeps the lines on its own invoice, discount and all: said only when Yes can link.
+    const yes = orYes ? " If its invoice is on a Sales Order, answer Yes instead." : "";
+    return linked
+      ? `${lead}${yes} ${orYes ? "Otherwise unlink" : "Unlink"} it, take the discount off its invoice, then link it again.`
+      : `${lead}${yes} If the discount shouldn't apply, take it off the rebuild's invoice first.`;
   }
   if (accountMoves && unitLock) return unitLock;
   return null;
@@ -317,9 +324,11 @@ const asksSalesOrder = (own: OwnInvoice) => own.state === "approved" && own.line
  * without asking.
  */
 export function planLink(r: LinkRebuild, target: LinkProject | null, answer: SalesOrderAnswer | null = null): LinkPlan {
-  if (target && asksSalesOrder(r.own) && !answer) {
-    const not = decide(r, target, false);
+  if (target && asksSalesOrder(r.own)) {
     const on = decide(r, target, true);
+    // Not yet points to Yes only when Yes can link (11/7). The same with the answer given, so both read alike.
+    const not = decide(r, target, false, on.ok);
+    if (answer) return answer === "on" ? on : not;
     // Neither can link: there's nothing to ask.
     if (!not.ok && !on.ok) return not;
     return { ok: "ask", question: `Its invoice is approved (${lineCount(r.own.lines)}, ${money(r.own.total)}). Is it on a Sales Order in NetSuite yet?`, not, on };
@@ -331,8 +340,8 @@ export function planLink(r: LinkRebuild, target: LinkProject | null, answer: Sal
 /** What Unlink does, or why it can't (planLink with no project: it never asks). */
 export const planUnlink = (r: LinkRebuild): LinkDecision => decide(r, null, false);
 
-/** planLink with the question answered: `keep`, its own invoice's lines stay on it. */
-function decide(r: LinkRebuild, target: LinkProject | null, keep: boolean): LinkDecision {
+/** planLink with the question answered: `keep`, its own invoice's lines stay on it. `orYes`: see linkRefusal. */
+function decide(r: LinkRebuild, target: LinkProject | null, keep: boolean, orYes = false): LinkDecision {
   const c = r.current;
   // Noted now, unless an Admin said so already.
   const noteOwn = keep && !r.own.onSalesOrder;
@@ -353,12 +362,12 @@ function decide(r: LinkRebuild, target: LinkProject | null, keep: boolean): Link
       // Linked already: nothing moves, and its own invoice is noted as on a Sales Order.
       return plan(["note"], [staysOnSalesOrder(r.own, "Its own invoice's"), `Nothing else changes: it stays linked to ${projectLabel(target)}.`], 0, 0);
     }
-    const no = linkRefusal(r.own, target, r.unitLock, accountMoves, true);
+    const no = linkRefusal(r.own, target, r.unitLock, accountMoves, true, orYes);
     if (no) return refuse(no);
     return plan(["link"], linkEffects(r, r.own, target), r.own.lines, r.own.total);
   }
   if (!c) {
-    const no = keep ? keepRefusal(target, r.unitLock, accountMoves) : linkRefusal(r.own, target, r.unitLock, accountMoves, false);
+    const no = keep ? keepRefusal(target, r.unitLock, accountMoves) : linkRefusal(r.own, target, r.unitLock, accountMoves, false, orYes);
     if (no) return refuse(no);
     return keep ? plan(["link"], keepEffects(r, target), 0, 0) : plan(["link"], linkEffects(r, r.own, target), r.own.lines, r.own.total);
   }
@@ -385,7 +394,7 @@ function decide(r: LinkRebuild, target: LinkProject | null, keep: boolean): Link
     discount: r.own.discount,
     onSalesOrder: false,
   };
-  const no = linkRefusal(after, target, r.unitLock, accountMoves, true);
+  const no = linkRefusal(after, target, r.unitLock, accountMoves, true, orYes);
   if (no) return refuse(no);
   const effects = [
     c.lines > 0 ? `It leaves ${projectLabel(c)}: its ${lineCount(c.lines)} there ${verb(c.lines, "come")} off ${billName(c)}.` : `It leaves ${projectLabel(c)}.`,

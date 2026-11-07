@@ -225,14 +225,25 @@ test("what a link does, or why it can't: the rules alone", () => {
   assert.equal(R.planLink(r, { ...t, blocked: "Service ticket SC-1 is cancelled." }).refusal, "Service ticket SC-1 is cancelled.");
   assert.equal(R.planLink(r, { ...t, blocked: "Service ticket SC-1 is cancelled." }, "on").refusal, "Service ticket SC-1 is cancelled.");
   assert.equal(R.planLink({ ...r, own: { ...own, state: "waiting" } }, t).refusal, "This rebuild's invoice is waiting for an Admin to approve it (Warehouse saved it). Approve it first, then link.");
-  // A discount can't ride along; on a Sales Order, it stays on its own invoice with the lines.
-  const discounted = R.planLink({ ...r, own: { ...own, discount: { kind: "amount", value: 20 } } }, t);
+  // A discount can't ride along; on a Sales Order, it stays on its own invoice with the lines. Not yet says why, and
+  // points to Yes, which can link here (11/7).
+  const withDiscount = { ...r, own: { ...own, discount: { kind: "amount", value: 20 } } };
+  const discounted = R.planLink(withDiscount, t);
   assert.equal(discounted.ok, "ask");
   assert.equal(
     discounted.not.refusal,
-    "This rebuild's invoice has a discount ($20.00 off), which can't go on WO-4321 (Service ticket SC-1)'s bill. Take it off the rebuild's invoice first.",
+    "This rebuild's invoice has a discount ($20.00 off). WO-4321 (Service ticket SC-1)'s bill can't carry it, so its lines would bill there without it. If its invoice is on a Sales Order, answer Yes instead. If the discount shouldn't apply, take it off the rebuild's invoice first.",
   );
   assert.deepEqual([discounted.on.ok, discounted.on.keepOwn], [true, true]);
+  // The same refusal with "not yet" sent as the answer.
+  assert.deepEqual(R.planLink(withDiscount, t, "not"), discounted.not);
+  // No hint where Yes isn't on offer. Not approved: Link doesn't ask.
+  const noHint =
+    "This rebuild's invoice has a discount ($20.00 off). WO-4321 (Service ticket SC-1)'s bill can't carry it, so its lines would bill there without it. If the discount shouldn't apply, take it off the rebuild's invoice first.";
+  for (const answer of [null, "not", "on"]) assert.equal(R.planLink({ ...withDiscount, own: { ...withDiscount.own, state: "none" } }, t, answer).refusal, noHint, `not approved, ${answer}`);
+  // Yes can't link either (a locked unit, the account moving): no question, and no hint.
+  assert.equal(R.planLink({ ...withDiscount, unitLock: "SN T-1 is locked by chuy." }, t).refusal, noHint);
+  assert.equal(R.planLink({ ...withDiscount, unitLock: "SN T-1 is locked by chuy." }, t, "not").refusal, noHint);
   // The unit lock holds either way: the account moves either way.
   assert.equal(R.planLink({ ...r, unitLock: "SN T-1 is locked by chuy, so this rebuild stays on its account while it has it." }, t).refusal, "SN T-1 is locked by chuy, so this rebuild stays on its account while it has it.");
   assert.equal(R.planLink({ ...r, unitLock: "SN T-1 is locked by chuy." }, t, "on").refusal, "SN T-1 is locked by chuy.");
@@ -362,8 +373,21 @@ test("what a link does, or why it can't: the rules alone", () => {
   );
   assert.equal(
     R.planLink({ ...linked, own: { ...own, discount: { kind: "percent", value: 5 } } }, t, "not").refusal,
-    "This rebuild's invoice has a discount (5% off), which can't go on WO-4321 (Service ticket SC-1)'s bill. Unlink it, take the discount off its invoice, then link it again.",
+    "This rebuild's invoice has a discount (5% off). WO-4321 (Service ticket SC-1)'s bill can't carry it, so its lines would bill there without it. If its invoice is on a Sales Order, answer Yes instead. Otherwise unlink it, take the discount off its invoice, then link it again.",
   );
+  // Moving to another WO: with nothing on the old project, Yes can link, so the hint. With its lines there, Yes can't
+  // (they'd come back next to the lines on its Sales Order), so neither answer can: no question, and no hint.
+  const moveDiscount = { kind: "percent", value: 5 };
+  const offered = R.planLink({ ...linked, current: { ...current, lines: 0, total: 0, moved: 0 }, own: { ...own, discount: moveDiscount } }, other);
+  assert.deepEqual([offered.ok, offered.on.ok], ["ask", true]);
+  assert.equal(
+    offered.not.refusal,
+    "This rebuild's invoice has a discount (5% off). WO-5001 (Install #9)'s bill can't carry it, so its lines would bill there without it. If its invoice is on a Sales Order, answer Yes instead. Otherwise unlink it, take the discount off its invoice, then link it again.",
+  );
+  assert.deepEqual(R.planLink({ ...linked, own: { ...own, discount: moveDiscount } }, other), {
+    ok: false,
+    refusal: "This rebuild's invoice has a discount (5% off). WO-5001 (Install #9)'s bill can't carry it, so its lines would bill there without it. Unlink it, take the discount off its invoice, then link it again.",
+  });
   // Moving to another WO with its own invoice on a Sales Order: nothing comes back from the old project, so its own
   // lines stay put. Lines that would come back can't sit next to the ones on its Sales Order.
   const leaving = { ...linked, current: { ...current, lines: 0, total: 0, moved: 0 }, own };
@@ -776,7 +800,10 @@ test("refused, saying why: a billed or cancelled or merged ticket, Walk-In, Ware
   const drb = await rebuild(sql, { title: "Test refurb discount" });
   await ownInvoice(sql, drb, [PARTS[0]], { discount: { kind: "percent", value: 15 } });
   const dplan = (await find(sql, drb, "1005")).candidates[0].plan;
-  assert.equal(dplan.not.refusal, "This rebuild's invoice has a discount (15% off), which can't go on WO-1005 (Service ticket SC-RBL-5)'s bill. Take it off the rebuild's invoice first.");
+  assert.equal(
+    dplan.not.refusal,
+    "This rebuild's invoice has a discount (15% off). WO-1005 (Service ticket SC-RBL-5)'s bill can't carry it, so its lines would bill there without it. If its invoice is on a Sales Order, answer Yes instead. If the discount shouldn't apply, take it off the rebuild's invoice first.",
+  );
   // On a Sales Order, the discount stays on its own invoice with the lines.
   assert.equal(dplan.on.ok, true);
   const df = await find(sql, drb, "1005");
@@ -1385,7 +1412,10 @@ test("a rebuild linked before 11/6 kept its own invoice: its lock says how to mo
   assert.equal(view.lines.length, 2, "its lines show, read-only");
   const f = await find(sql, rb, "4321");
   // Approved, its lines may be on a Sales Order (11/6): not yet, the discount can't move; yes only notes it.
-  assert.equal(f.candidates[0].plan.not.refusal, "This rebuild's invoice has a discount (10% off), which can't go on WO-4321 (Service ticket SC-RBL-1)'s bill. Unlink it, take the discount off its invoice, then link it again.");
+  assert.equal(
+    f.candidates[0].plan.not.refusal,
+    "This rebuild's invoice has a discount (10% off). WO-4321 (Service ticket SC-RBL-1)'s bill can't carry it, so its lines would bill there without it. If its invoice is on a Sales Order, answer Yes instead. Otherwise unlink it, take the discount off its invoice, then link it again.",
+  );
   assert.deepEqual(f.candidates[0].plan.on.steps, ["note"]);
   // The ticket was billed since: its link put nothing there, so Unlink still works, and keeps its own lines.
   await sql.query("update service_jobs set ns_so = 'SO-T-12', updated_at = now() where id = $1", [job]);
