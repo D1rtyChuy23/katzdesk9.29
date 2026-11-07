@@ -5,7 +5,7 @@
  * node --test.
  */
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
-import { discountLabel, type Discount } from "./discount.ts";
+import { applyDiscount, discountLabel, type Discount } from "./discount.ts";
 
 export type LinkKind = "install" | "service" | "tlc";
 
@@ -290,9 +290,20 @@ function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] 
   return out;
 }
 
+/**
+ * Its own invoice's amount as a person reads it: what its lines add up to, and with a discount what it bills (Chuy,
+ * 11/7: a 100% one bills $0.00, not its lines' total). "$315.00", or "$315.00 before its 100% discount, $0.00 billed".
+ */
+export function ownAmount(own: Pick<OwnInvoice, "total" | "discount">): string {
+  const { off, total } = applyDiscount(own.total, own.discount);
+  if (!own.discount || off <= 0) return money(own.total);
+  const what = own.discount.kind === "percent" ? `${Number(own.discount.value.toFixed(2))}%` : money(own.discount.value);
+  return `${money(own.total)} before its ${what} discount, ${money(total)} billed`;
+}
+
 /** "Its invoice's 2 lines ($315.00) stay on it: …": its own invoice, on a Sales Order, keeps them. */
 const staysOnSalesOrder = (own: OwnInvoice, lead = "Its invoice's") =>
-  `${lead} ${lineCount(own.lines)} (${money(own.total)}) ${verb(own.lines, "stay")} on it: it's on a Sales Order in NetSuite.`;
+  `${lead} ${lineCount(own.lines)} (${ownAmount(own)}) ${verb(own.lines, "stay")} on it: it's on a Sales Order in NetSuite.`;
 
 /**
  * Linking with its own invoice on a Sales Order: its lines stay there, so the bill takes nothing now. Only an open bill
@@ -331,7 +342,7 @@ export function planLink(r: LinkRebuild, target: LinkProject | null, answer: Sal
     if (answer) return answer === "on" ? on : not;
     // Neither can link: there's nothing to ask.
     if (!not.ok && !on.ok) return not;
-    return { ok: "ask", question: `Its invoice is approved (${lineCount(r.own.lines)}, ${money(r.own.total)}). Is it on a Sales Order in NetSuite yet?`, not, on };
+    return { ok: "ask", question: `Its invoice is approved (${lineCount(r.own.lines)}, ${ownAmount(r.own)}). Is it on a Sales Order in NetSuite yet?`, not, on };
   }
   const keep = !!target && r.own.state === "approved" && r.own.lines > 0 && (r.own.onSalesOrder || answer === "on");
   return decide(r, target, keep);
